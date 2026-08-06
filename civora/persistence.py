@@ -8,19 +8,39 @@ from hashlib import sha256
 from pathlib import Path
 from typing import Callable, Optional
 
+from .locking import ProcessFileLock
+
 
 class AtomicJsonStoreError(RuntimeError):
     pass
 
 
 class AtomicJsonStore:
-    def __init__(self, path: Path, *, schema_version: int, validator: Optional[Callable[[dict], None]] = None):
+    def __init__(
+        self,
+        path: Path,
+        *,
+        schema_version: int,
+        validator: Optional[Callable[[dict], None]] = None,
+        lock_timeout: float = 10.0,
+        stale_lock_after: float = 300.0,
+    ):
         self.path = path
         self.backup_path = path.with_suffix(path.suffix + ".bak")
+        self.lock_path = path.with_suffix(path.suffix + ".lock")
         self.schema_version = schema_version
         self.validator = validator
+        self.lock_timeout = lock_timeout
+        self.stale_lock_after = stale_lock_after
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.recovered_from_backup = False
+
+    def _lock(self) -> ProcessFileLock:
+        return ProcessFileLock(
+            self.lock_path,
+            timeout=self.lock_timeout,
+            stale_after=self.stale_lock_after,
+        )
 
     @staticmethod
     def checksum(payload: dict) -> str:
@@ -62,7 +82,7 @@ class AtomicJsonStore:
                 pass
             raise
 
-    def load(self, default: dict) -> dict:
+    def _load_unlocked(self, default: dict) -> dict:
         self.recovered_from_backup = False
         if not self.path.exists() and not self.backup_path.exists():
             return copy.deepcopy(default)
@@ -79,13 +99,18 @@ class AtomicJsonStore:
             self.recovered_from_backup = True
             return payload
 
+    def load(self, default: dict) -> dict:
+        with self._lock():
+            return self._load_unlocked(default)
+
     def save(self, payload: dict) -> dict:
-        committed = copy.deepcopy(payload)
-        committed["schema_version"] = self.schema_version
-        committed["checksum"] = self.checksum(committed)
-        self.validate(committed)
-        if self.path.exists():
-            current = self.read_validated(self.path)
-            self._atomic_write(self.backup_path, current)
-        self._atomic_write(self.path, committed)
-        return committed
+        with self._lock():
+            committed = copy.deepcopy(payload)
+            committed["schema_version"] = self.schema_version
+            committed["checksum"] = self.checksum(committed)
+            self.validate(committed)
+            if self.path.exists():
+                current = self.read_validated(self.path)
+                self._atomic_write(self.backup_path, current)
+            self._atomic_write(self.path, committed)
+            return committed
