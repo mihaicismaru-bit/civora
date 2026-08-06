@@ -99,18 +99,39 @@ class AtomicJsonStore:
             self.recovered_from_backup = True
             return payload
 
+    def _save_unlocked(self, payload: dict) -> dict:
+        committed = copy.deepcopy(payload)
+        committed["schema_version"] = self.schema_version
+        committed["checksum"] = self.checksum(committed)
+        self.validate(committed)
+        if self.path.exists():
+            current = self.read_validated(self.path)
+            self._atomic_write(self.backup_path, current)
+        self._atomic_write(self.path, committed)
+        return committed
+
     def load(self, default: dict) -> dict:
         with self._lock():
             return self._load_unlocked(default)
 
     def save(self, payload: dict) -> dict:
         with self._lock():
-            committed = copy.deepcopy(payload)
-            committed["schema_version"] = self.schema_version
-            committed["checksum"] = self.checksum(committed)
-            self.validate(committed)
-            if self.path.exists():
-                current = self.read_validated(self.path)
-                self._atomic_write(self.backup_path, current)
-            self._atomic_write(self.path, committed)
-            return committed
+            return self._save_unlocked(payload)
+
+    def update(self, default: dict, mutator: Callable[[dict], None]) -> dict:
+        """Atomically load, mutate and persist one store generation.
+
+        The mutator runs while the cross-process lock is held. It receives a deep
+        copy of the current logical payload (without relying on caller-cached
+        state). If it raises, nothing is written. The returned value is the
+        checksum-protected committed generation.
+        """
+        if not callable(mutator):
+            raise TypeError("mutator must be callable")
+        with self._lock():
+            current = self._load_unlocked(default)
+            working = copy.deepcopy(current)
+            working.pop("schema_version", None)
+            working.pop("checksum", None)
+            mutator(working)
+            return self._save_unlocked(working)
