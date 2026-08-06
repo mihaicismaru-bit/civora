@@ -32,10 +32,10 @@ class TransactionRecord:
 class TransactionJournal:
     """Durable write-ahead journal for recoverable multi-store operations.
 
-    The journal intentionally provides at-least-once replay semantics. Recovery
-    handlers therefore MUST be idempotent. A transaction is persisted as
-    ``prepared`` before external state is changed and is moved to ``committed``
-    only after the coordinated operation succeeds.
+    The journal provides at-least-once replay semantics. Recovery handlers MUST
+    therefore be idempotent. Every state transition is performed through one
+    lock-scoped read-modify-write operation so concurrent journal instances do
+    not overwrite one another's records.
     """
 
     SCHEMA_VERSION = 1
@@ -89,11 +89,13 @@ class TransactionJournal:
         self.records = payload.get("records", {})
         self.recovered_from_backup = self.store.recovered_from_backup
 
-    def save(self) -> None:
+    def _atomic_mutate(self, mutator: Callable[[dict], None]) -> None:
         try:
-            self.store.save({"records": self.records})
+            committed = self.store.update({"records": {}}, mutator)
         except AtomicJsonStoreError as exc:
             raise TransactionJournalError(str(exc)) from exc
+        self.records = committed.get("records", {})
+        self.recovered_from_backup = self.store.recovered_from_backup
 
     def prepare(self, operation: str, payload: dict, *, tx_id: Optional[str] = None) -> str:
         if not isinstance(operation, str) or not operation.strip():
@@ -101,40 +103,39 @@ class TransactionJournal:
         if not isinstance(payload, dict):
             raise TransactionJournalError("payload must be an object")
         tx_id = tx_id or str(uuid.uuid4())
-        if tx_id in self.records:
-            raise TransactionJournalError(f"transaction already exists: {tx_id}")
         now = _utc_now()
-        self.records[tx_id] = {
-            "id": tx_id,
-            "operation": operation,
-            "payload": payload,
-            "status": "prepared",
-            "created_at": now,
-            "updated_at": now,
-            "recovery_attempts": 0,
-            "last_error": None,
-        }
-        try:
-            self.save()
-        except Exception:
-            self.records.pop(tx_id, None)
-            raise
+
+        def mutate(state: dict) -> None:
+            records = state.setdefault("records", {})
+            if tx_id in records:
+                raise TransactionJournalError(f"transaction already exists: {tx_id}")
+            records[tx_id] = {
+                "id": tx_id,
+                "operation": operation,
+                "payload": payload,
+                "status": "prepared",
+                "created_at": now,
+                "updated_at": now,
+                "recovery_attempts": 0,
+                "last_error": None,
+            }
+
+        self._atomic_mutate(mutate)
         return tx_id
 
     def _transition(self, tx_id: str, status: str, *, last_error: Optional[str] = None) -> None:
         if status not in self.VALID_STATES:
             raise TransactionJournalError(f"invalid transaction state: {status}")
-        if tx_id not in self.records:
-            raise TransactionJournalError(f"unknown transaction: {tx_id}")
-        previous = dict(self.records[tx_id])
-        self.records[tx_id]["status"] = status
-        self.records[tx_id]["updated_at"] = _utc_now()
-        self.records[tx_id]["last_error"] = last_error
-        try:
-            self.save()
-        except Exception:
-            self.records[tx_id] = previous
-            raise
+
+        def mutate(state: dict) -> None:
+            records = state.setdefault("records", {})
+            if tx_id not in records:
+                raise TransactionJournalError(f"unknown transaction: {tx_id}")
+            records[tx_id]["status"] = status
+            records[tx_id]["updated_at"] = _utc_now()
+            records[tx_id]["last_error"] = last_error
+
+        self._atomic_mutate(mutate)
 
     def commit(self, tx_id: str) -> None:
         self._transition(tx_id, "committed")
@@ -143,13 +144,29 @@ class TransactionJournal:
         self._transition(tx_id, "aborted", last_error=reason)
 
     def prepared(self) -> List[dict]:
+        self.load()
         return [dict(record) for record in self.records.values() if record.get("status") == "prepared"]
+
+    def _record_recovery_failure(self, tx_id: str, error: str) -> None:
+        def mutate(state: dict) -> None:
+            records = state.setdefault("records", {})
+            if tx_id not in records:
+                raise TransactionJournalError(f"unknown transaction: {tx_id}")
+            record = records[tx_id]
+            if record.get("status") != "prepared":
+                return
+            record["recovery_attempts"] = int(record.get("recovery_attempts", 0)) + 1
+            record["updated_at"] = _utc_now()
+            record["last_error"] = error
+
+        self._atomic_mutate(mutate)
 
     def recover(self, handler: Callable[[dict], None]) -> List[str]:
         """Replay prepared records and commit successful recoveries.
 
-        Failed recoveries remain prepared and persist their attempt count/error,
-        making subsequent recovery deterministic and observable.
+        Failed recoveries remain prepared and persist their attempt count/error.
+        A competing process may commit a transaction first; commit remains safe
+        because state transitions are serialized by the store lock.
         """
         recovered: List[str] = []
         for record in list(self.prepared()):
@@ -157,15 +174,7 @@ class TransactionJournal:
             try:
                 handler(dict(record))
             except Exception as exc:
-                previous = dict(self.records[tx_id])
-                self.records[tx_id]["recovery_attempts"] = previous.get("recovery_attempts", 0) + 1
-                self.records[tx_id]["updated_at"] = _utc_now()
-                self.records[tx_id]["last_error"] = str(exc)
-                try:
-                    self.save()
-                except Exception:
-                    self.records[tx_id] = previous
-                    raise
+                self._record_recovery_failure(tx_id, str(exc))
                 continue
             self.commit(tx_id)
             recovered.append(tx_id)
