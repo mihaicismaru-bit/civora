@@ -6,6 +6,7 @@ from tempfile import TemporaryDirectory
 from civora.models import Source, Signal, FactKernel, StoryObject, StoryState
 from civora.registry import SourceRegistry, SourceRegistryError
 from civora.ingestion import SignalStore, SignalStoreError
+from civora.persistence import AtomicJsonStore
 from civora.review import ReviewQueue, ReviewQueueError
 from civora.orchestrator import Orchestrator
 
@@ -61,6 +62,12 @@ class RegistryIngestionTests(unittest.TestCase):
             self.assertEqual(len(result.duplicate_ids), 1)
             self.assertEqual(len(result.rejected), 1)
 
+    def test_signal_store_uses_common_atomic_json_store(self):
+        with TemporaryDirectory() as td:
+            store = SignalStore(Path(td) / "signals.json")
+            self.assertIsInstance(store.store, AtomicJsonStore)
+            self.assertEqual(store.store.schema_version, SignalStore.SCHEMA_VERSION)
+
     def test_signal_store_payload_has_valid_checksum(self):
         with TemporaryDirectory() as td:
             path = Path(td) / "signals.json"
@@ -115,6 +122,20 @@ class RegistryIngestionTests(unittest.TestCase):
                 "schema_version": 2,
                 "signals": {},
                 "fingerprints": {"fp": "missing"},
+            }
+            payload["checksum"] = SignalStore._checksum(payload)
+            path.write_text(json.dumps(payload), encoding="utf-8")
+            with self.assertRaises(SignalStoreError):
+                SignalStore(path)
+
+    def test_signal_record_key_must_match_embedded_id(self):
+        with TemporaryDirectory() as td:
+            path = Path(td) / "signals.json"
+            signal = Signal("Titlu", "Rezumat", ["Vâlcea"], ["s1"], .5, .5, .5, .5, .5)
+            payload = {
+                "schema_version": 2,
+                "signals": {"wrong-id": signal.__dict__},
+                "fingerprints": {},
             }
             payload["checksum"] = SignalStore._checksum(payload)
             path.write_text(json.dumps(payload), encoding="utf-8")
