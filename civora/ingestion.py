@@ -1,15 +1,14 @@
 from __future__ import annotations
-from dataclasses import dataclass, asdict
+
+import copy
+import re
+from dataclasses import asdict, dataclass
 from hashlib import sha256
 from pathlib import Path
 from typing import Dict, Iterable, List
-import copy
-import json
-import os
-import re
-import tempfile
 
 from .models import Signal
+from .persistence import AtomicJsonStore, AtomicJsonStoreError
 
 
 def _normalize_text(value: str) -> str:
@@ -37,124 +36,74 @@ class SignalStoreError(RuntimeError):
 
 
 class SignalStore:
-    """Crash-safe persistent signal store with semantic deduplication.
-
-    Every committed payload contains a checksum. Writes use fsync plus atomic
-    replacement, while the previous valid generation is retained as a backup.
-    A corrupt primary file is restored from the backup; if neither generation
-    validates, startup fails closed instead of silently losing evidence.
-    """
+    """Atomic, checksum-protected signal store with semantic deduplication."""
 
     SCHEMA_VERSION = 2
 
     def __init__(self, path: Path):
         self.path = path
-        self.backup_path = path.with_suffix(path.suffix + ".bak")
-        self.path.parent.mkdir(parents=True, exist_ok=True)
         self.records: Dict[str, dict] = {}
         self.fingerprints: Dict[str, str] = {}
+        self.store = AtomicJsonStore(
+            path,
+            schema_version=self.SCHEMA_VERSION,
+            validator=self._validate_payload,
+        )
         self.recovered_from_backup = False
         self.load()
 
     @staticmethod
     def _checksum(payload: dict) -> str:
-        basis = copy.deepcopy(payload)
-        basis.pop("checksum", None)
-        encoded = json.dumps(
-            basis,
-            ensure_ascii=False,
-            sort_keys=True,
-            separators=(",", ":"),
-        ).encode("utf-8")
-        return sha256(encoded).hexdigest()
-
-    @classmethod
-    def _validate_payload(cls, payload: dict) -> None:
-        if payload.get("schema_version") != cls.SCHEMA_VERSION:
-            raise SignalStoreError("unsupported signal-store schema")
-        if not isinstance(payload.get("signals"), dict):
-            raise SignalStoreError("signal records must be an object")
-        if not isinstance(payload.get("fingerprints"), dict):
-            raise SignalStoreError("fingerprint index must be an object")
-        if payload.get("checksum") != cls._checksum(payload):
-            raise SignalStoreError("signal-store checksum mismatch")
-
-        signal_ids = set(payload["signals"])
-        for fingerprint, signal_id in payload["fingerprints"].items():
-            if not isinstance(fingerprint, str) or not isinstance(signal_id, str):
-                raise SignalStoreError("invalid fingerprint index entry")
-            if signal_id not in signal_ids:
-                raise SignalStoreError("fingerprint references an unknown signal")
-
-    @classmethod
-    def _read_validated(cls, path: Path) -> dict:
-        try:
-            payload = json.loads(path.read_text(encoding="utf-8"))
-        except Exception as exc:
-            raise SignalStoreError(f"cannot read signal store: {path.name}") from exc
-        cls._validate_payload(payload)
-        return payload
+        """Compatibility helper retained for validation tests and tooling."""
+        return AtomicJsonStore.checksum(payload)
 
     @staticmethod
-    def _atomic_write(path: Path, payload: dict) -> None:
-        fd, temporary = tempfile.mkstemp(
-            prefix=path.name + ".",
-            suffix=".tmp",
-            dir=path.parent,
-        )
-        try:
-            with os.fdopen(fd, "w", encoding="utf-8") as stream:
-                json.dump(payload, stream, ensure_ascii=False, indent=2, sort_keys=True)
-                stream.write("\n")
-                stream.flush()
-                os.fsync(stream.fileno())
-            os.replace(temporary, path)
-        except Exception:
+    def _validate_payload(payload: dict) -> None:
+        signals = payload.get("signals")
+        fingerprints = payload.get("fingerprints")
+        if not isinstance(signals, dict):
+            raise AtomicJsonStoreError("signal records must be an object")
+        if not isinstance(fingerprints, dict):
+            raise AtomicJsonStoreError("fingerprint index must be an object")
+
+        signal_ids = set(signals)
+        for signal_id, item in signals.items():
+            if not isinstance(signal_id, str) or not signal_id:
+                raise AtomicJsonStoreError("signal id must be a non-empty string")
+            if not isinstance(item, dict) or item.get("id") != signal_id:
+                raise AtomicJsonStoreError("signal record id does not match its key")
             try:
-                os.unlink(temporary)
-            except FileNotFoundError:
-                pass
-            raise
+                Signal(**item)
+            except Exception as exc:
+                raise AtomicJsonStoreError("signal record is invalid") from exc
+
+        for fingerprint, signal_id in fingerprints.items():
+            if not isinstance(fingerprint, str) or not fingerprint:
+                raise AtomicJsonStoreError("invalid fingerprint key")
+            if not isinstance(signal_id, str) or signal_id not in signal_ids:
+                raise AtomicJsonStoreError("fingerprint references an unknown signal")
 
     def load(self) -> None:
         self.records = {}
         self.fingerprints = {}
-        self.recovered_from_backup = False
-
-        if not self.path.exists() and not self.backup_path.exists():
-            return
-
+        default = {"signals": {}, "fingerprints": {}}
         try:
-            payload = self._read_validated(self.path)
-        except SignalStoreError as primary_error:
-            if not self.backup_path.exists():
-                raise primary_error
-            try:
-                payload = self._read_validated(self.backup_path)
-            except SignalStoreError as backup_error:
-                raise SignalStoreError(
-                    "primary and backup signal-store generations are invalid"
-                ) from backup_error
-            self._atomic_write(self.path, payload)
-            self.recovered_from_backup = True
-
-        self.records = payload["signals"]
-        self.fingerprints = payload["fingerprints"]
+            payload = self.store.load(default)
+        except AtomicJsonStoreError as exc:
+            raise SignalStoreError(str(exc)) from exc
+        self.recovered_from_backup = self.store.recovered_from_backup
+        self.records = payload.get("signals", {})
+        self.fingerprints = payload.get("fingerprints", {})
 
     def save(self) -> None:
         payload = {
-            "schema_version": self.SCHEMA_VERSION,
             "signals": self.records,
             "fingerprints": self.fingerprints,
         }
-        payload["checksum"] = self._checksum(payload)
-        self._validate_payload(payload)
-
-        if self.path.exists():
-            current = self._read_validated(self.path)
-            self._atomic_write(self.backup_path, current)
-
-        self._atomic_write(self.path, payload)
+        try:
+            self.store.save(payload)
+        except AtomicJsonStoreError as exc:
+            raise SignalStoreError(str(exc)) from exc
 
     def ingest(self, raw_items: Iterable[dict]) -> IngestResult:
         accepted: List[Signal] = []
