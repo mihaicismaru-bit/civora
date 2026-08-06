@@ -1,10 +1,11 @@
+import json
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from civora.models import Source, Signal, FactKernel, StoryObject, StoryState
 from civora.registry import SourceRegistry
-from civora.ingestion import SignalStore
+from civora.ingestion import SignalStore, SignalStoreError
 from civora.review import ReviewQueue
 from civora.orchestrator import Orchestrator
 
@@ -33,6 +34,67 @@ class RegistryIngestionTests(unittest.TestCase):
             self.assertEqual(len(result.accepted), 1)
             self.assertEqual(len(result.duplicate_ids), 1)
             self.assertEqual(len(result.rejected), 1)
+
+    def test_signal_store_payload_has_valid_checksum(self):
+        with TemporaryDirectory() as td:
+            path = Path(td) / "signals.json"
+            store = SignalStore(path)
+            store.ingest([{
+                "title": "Alertă meteo",
+                "summary": "Cod galben temporar.",
+                "geography": ["Vâlcea"],
+                "source_ids": ["s1"],
+            }])
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual(payload["schema_version"], 2)
+            self.assertEqual(payload["checksum"], SignalStore._checksum(payload))
+
+    def test_corrupt_primary_recovers_from_valid_backup(self):
+        with TemporaryDirectory() as td:
+            path = Path(td) / "signals.json"
+            store = SignalStore(path)
+            first = {
+                "title": "Prima știre",
+                "summary": "Prima versiune.",
+                "geography": ["Vâlcea"],
+                "source_ids": ["s1"],
+            }
+            second = {
+                "title": "A doua știre",
+                "summary": "A doua versiune.",
+                "geography": ["Brezoi"],
+                "source_ids": ["s2"],
+            }
+            store.ingest([first])
+            store.ingest([second])
+            path.write_text("{corrupt", encoding="utf-8")
+
+            recovered = SignalStore(path)
+            self.assertTrue(recovered.recovered_from_backup)
+            self.assertEqual(len(recovered.records), 1)
+            self.assertEqual(next(iter(recovered.records.values()))["title"], "Prima știre")
+
+    def test_corrupt_primary_and_backup_fail_closed(self):
+        with TemporaryDirectory() as td:
+            path = Path(td) / "signals.json"
+            backup = path.with_suffix(path.suffix + ".bak")
+            path.write_text("{}", encoding="utf-8")
+            backup.write_text("{}", encoding="utf-8")
+            with self.assertRaises(SignalStoreError):
+                SignalStore(path)
+
+    def test_fingerprint_index_must_reference_existing_signal(self):
+        with TemporaryDirectory() as td:
+            path = Path(td) / "signals.json"
+            payload = {
+                "schema_version": 2,
+                "signals": {},
+                "fingerprints": {"fp": "missing"},
+            }
+            payload["checksum"] = SignalStore._checksum(payload)
+            path.write_text(json.dumps(payload), encoding="utf-8")
+            with self.assertRaises(SignalStoreError):
+                SignalStore(path)
 
     def test_blocked_story_enters_review_queue(self):
         with TemporaryDirectory() as td:
