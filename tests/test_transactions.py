@@ -1,4 +1,3 @@
-import json
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -57,6 +56,21 @@ class TransactionJournalTests(unittest.TestCase):
             with self.assertRaises(TransactionJournalError):
                 journal.prepare("op", {}, tx_id="fixed")
 
+    def test_stale_instances_do_not_lose_each_others_prepared_records(self):
+        with TemporaryDirectory() as td:
+            path = Path(td) / "transactions.json"
+            first_writer = TransactionJournal(path)
+            stale_writer = TransactionJournal(path)
+
+            first_id = first_writer.prepare("first", {"n": 1})
+            second_id = stale_writer.prepare("second", {"n": 2})
+
+            final = TransactionJournal(path)
+            self.assertIn(first_id, final.records)
+            self.assertIn(second_id, final.records)
+            self.assertEqual(final.records[first_id]["status"], "prepared")
+            self.assertEqual(final.records[second_id]["status"], "prepared")
+
     def test_backup_recovery_is_inherited_from_atomic_store(self):
         with TemporaryDirectory() as td:
             path = Path(td) / "transactions.json"
@@ -70,8 +84,6 @@ class TransactionJournalTests(unittest.TestCase):
             recovered = TransactionJournal(path)
             self.assertTrue(recovered.recovered_from_backup)
             self.assertIn(first, recovered.records)
-            # Backup is the previous valid generation. The newest write may be lost,
-            # but the journal fails back to a checksum-valid state rather than accepting corruption.
             self.assertNotEqual(recovered.records.get(second, {}).get("status"), "committed")
 
 
