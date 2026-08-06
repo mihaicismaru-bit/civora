@@ -1,0 +1,38 @@
+{
+  "checkpoint": "0038",
+  "status": "CODE_COMPLETE_CI_PENDING",
+  "artifacts": [
+    {
+      "path": "civora/transactions.py",
+      "purpose": "durable write-ahead transaction journal with replay and recovery diagnostics"
+    },
+    {
+      "path": "civora/persistence.py",
+      "purpose": "atomic cross-process read-modify-write primitive"
+    },
+    {
+      "path": "tests/test_transactions.py",
+      "purpose": "transaction persistence, replay, failure and stale-writer regression coverage"
+    },
+    {
+      "path": "docs/checkpoints/0038-transaction-journal-and-rmw-atomicity.md",
+      "purpose": "checkpoint manifest and acceptance state"
+    }
+  ],
+  "gates": {
+    "durable_prepare": "PASS_IMPLEMENTATION_REVIEW",
+    "terminal_states": "PASS_IMPLEMENTATION_REVIEW",
+    "replay_contract": "PASS_IMPLEMENTATION_REVIEW",
+    "failed_recovery_observability": "PASS_IMPLEMENTATION_REVIEW",
+    "atomic_read_modify_write": "PASS_IMPLEMENTATION_REVIEW",
+    "stale_writer_regression_test": "ADDED_PENDING_EXECUTION",
+    "full_ci": "PENDING",
+    "windows_native": "PENDING"
+  },
+  "blockers": [
+    "GitHub Actions has not emitted a workflow run for the current head",
+    "local execution environment cannot resolve github.com for repository clone",
+    "SourceRegistry, ReviewQueue and SignalStore still use cached component state for some mutations"
+  ],
+  "next_action": "Migrate SourceRegistry, ReviewQueue and SignalStore mutations to AtomicJsonStore.update and add stale-writer regression tests before integrating story-to-review transaction replay."
+}
