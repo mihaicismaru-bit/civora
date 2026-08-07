@@ -48,17 +48,20 @@ class SourceRegistry:
             except Exception as exc:
                 raise AtomicJsonStoreError("source registry entry is invalid") from exc
 
-    def load(self) -> None:
+    def _sync_from_payload(self, payload: dict) -> None:
         self._sources = {}
+        for item in payload.get("sources", []):
+            source = Source(**item)
+            self._sources[source.id] = source
+
+    def load(self) -> None:
         default = {"sources": []}
         try:
             payload = self.store.load(default)
         except AtomicJsonStoreError as exc:
             raise SourceRegistryError(str(exc)) from exc
         self.recovered_from_backup = self.store.recovered_from_backup
-        for item in payload.get("sources", []):
-            source = Source(**item)
-            self._sources[source.id] = source
+        self._sync_from_payload(payload)
 
     def save(self) -> None:
         payload = {
@@ -68,21 +71,25 @@ class SourceRegistry:
             ]
         }
         try:
-            self.store.save(payload)
+            committed = self.store.save(payload)
         except AtomicJsonStoreError as exc:
             raise SourceRegistryError(str(exc)) from exc
+        self._sync_from_payload(committed)
 
     def upsert(self, source: Source) -> Source:
-        previous = self._sources.get(source.id)
-        self._sources[source.id] = source
+        default = {"sources": []}
+
+        def mutate(payload: dict) -> None:
+            by_id = {item["id"]: item for item in payload.get("sources", [])}
+            by_id[source.id] = asdict(source)
+            payload["sources"] = [by_id[key] for key in sorted(by_id)]
+
         try:
-            self.save()
-        except Exception:
-            if previous is None:
-                self._sources.pop(source.id, None)
-            else:
-                self._sources[source.id] = previous
-            raise
+            committed = self.store.update(default, mutate)
+        except AtomicJsonStoreError as exc:
+            raise SourceRegistryError(str(exc)) from exc
+        self.recovered_from_backup = self.store.recovered_from_backup
+        self._sync_from_payload(committed)
         return source
 
     def get(self, source_id: str) -> Optional[Source]:
