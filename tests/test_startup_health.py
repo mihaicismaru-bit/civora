@@ -3,8 +3,10 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from civora.health import RuntimeHealthReport
+from civora.ingestion import SignalStore
 from civora.orchestrator import Orchestrator, OrchestratorError
 from civora.recovery import RecoveryEventLedger
+from civora.registry import SourceRegistry
 from civora.review import ReviewQueue
 from civora.transactions import TransactionJournal
 
@@ -119,6 +121,76 @@ class StartupHealthGateTests(unittest.TestCase):
 
             orchestrator.startup_health_gate()
             self.assertEqual(len(RecoveryEventLedger(ledger_path).all()), 1)
+
+    def test_default_startup_health_includes_source_registry_and_signal_store(self):
+        with TemporaryDirectory() as td:
+            root = Path(td)
+            orchestrator = Orchestrator(root)
+
+            report = orchestrator.startup_health_gate()
+            component_names = {component.name for component in report.components}
+
+            self.assertEqual(report.status, "healthy")
+            self.assertIn("source_registry", component_names)
+            self.assertIn("signal_store", component_names)
+
+    def test_default_source_registry_corruption_blocks_startup(self):
+        with TemporaryDirectory() as td:
+            root = Path(td)
+            sources = root / "sources.json"
+            backup = sources.with_suffix(sources.suffix + ".bak")
+            sources.write_text("{corrupt-primary", encoding="utf-8")
+            backup.write_text("{corrupt-backup", encoding="utf-8")
+
+            orchestrator = Orchestrator(root)
+            with self.assertRaisesRegex(OrchestratorError, "durable runtime state is corrupt"):
+                orchestrator.startup_health_gate()
+
+    def test_default_signal_store_backup_recovery_participates_in_startup_health(self):
+        with TemporaryDirectory() as td:
+            root = Path(td)
+            signals = root / "signals.json"
+            store = SignalStore(signals)
+            store.store.save({"signals": {}, "fingerprints": {}})
+            store.store.save({"signals": {}, "fingerprints": {}})
+            signals.write_text("{corrupt-primary", encoding="utf-8")
+
+            report = Orchestrator(root).startup_health_gate()
+            signal_component = next(
+                component for component in report.components if component.name == "signal_store"
+            )
+
+            self.assertIn(report.status, {"healthy", "recovered_from_backup"})
+            self.assertIn(signal_component.status, {"healthy", "recovered_from_backup"})
+            events = RecoveryEventLedger(root / "recovery_events.json").all()
+            self.assertTrue(
+                any(
+                    event["component"] == "signal_store"
+                    and event["event_type"] == "recovery"
+                    for event in events
+                )
+            )
+
+    def test_explicit_source_and_signal_paths_are_respected(self):
+        with TemporaryDirectory() as td:
+            root = Path(td)
+            durable = root / "durable"
+            durable.mkdir()
+            source_path = durable / "registry.json"
+            signal_path = durable / "ingestion.json"
+            SourceRegistry(source_path)
+            SignalStore(signal_path)
+
+            orchestrator = Orchestrator(
+                root / "runtime",
+                source_registry_path=source_path,
+                signal_store_path=signal_path,
+            )
+            report = orchestrator.startup_health_gate()
+            details = {component.name: component.details for component in report.components}
+
+            self.assertEqual(details["source_registry"]["path"], str(source_path))
+            self.assertEqual(details["signal_store"]["path"], str(signal_path))
 
 
 if __name__ == "__main__":
