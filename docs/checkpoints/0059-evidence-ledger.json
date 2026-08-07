@@ -2,38 +2,42 @@
   "checkpoint_id": "0059",
   "project": "CIVORA",
   "title": "Conflict/Dispute Resolution Gate",
-  "state": "CODE_COMPLETE_CI_REVALIDATION_PENDING",
+  "state": "CLOSED_VALIDATED",
   "accelerated_editorial_phase": true,
   "gates": [
-    {"gate": "REPORT_ALIGNMENT_FAIL_CLOSED", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/editorial_gate.py", "tests/test_editorial_gate.py"]},
-    {"gate": "CORROBORATION_REQUIRED_FOR_AUTO_DRAFT", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/editorial_gate.py", "tests/test_editorial_gate.py"]},
-    {"gate": "CONFLICT_BLOCKS_AUTO_DRAFT", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/editorial_gate.py", "tests/test_editorial_gate.py"]},
-    {"gate": "DURABLE_EDITORIAL_DECISION", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/editorial_gate_store.py"]},
-    {"gate": "ORCHESTRATOR_PRE_DRAFT_ENFORCEMENT", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/orchestrator.py", "tests/test_editorial_gate.py"]},
-    {"gate": "TRANSACTIONAL_REVIEW_ROUTING", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/orchestrator.py", "civora/review.py", "tests/test_editorial_gate.py"]},
-    {"gate": "LEGACY_CONTRADICTION_TEST_ALIGNED_WITH_0059_POLICY", "status": "PASS_IMPLEMENTATION", "evidence": ["tests/test_contradictions.py"]},
-    {"gate": "CROSS_PLATFORM_CI", "status": "PENDING_REVALIDATION"}
+    {"gate": "REPORT_ALIGNMENT_FAIL_CLOSED", "status": "PASS", "evidence": ["civora/editorial_gate.py", "tests/test_editorial_gate.py"]},
+    {"gate": "CORROBORATION_REQUIRED_FOR_AUTO_DRAFT", "status": "PASS", "evidence": ["civora/editorial_gate.py", "tests/test_editorial_gate.py"]},
+    {"gate": "CONFLICT_BLOCKS_AUTO_DRAFT", "status": "PASS", "evidence": ["civora/editorial_gate.py", "tests/test_editorial_gate.py"]},
+    {"gate": "DURABLE_EDITORIAL_DECISION", "status": "PASS", "evidence": ["civora/editorial_gate_store.py"]},
+    {"gate": "ORCHESTRATOR_PRE_DRAFT_ENFORCEMENT", "status": "PASS", "evidence": ["civora/orchestrator.py", "tests/test_editorial_gate.py"]},
+    {"gate": "TRANSACTIONAL_REVIEW_ROUTING", "status": "PASS", "evidence": ["civora/orchestrator.py", "civora/review.py", "tests/test_editorial_gate.py"]},
+    {"gate": "LEGACY_CONTRADICTION_TEST_ALIGNED_WITH_0059_POLICY", "status": "PASS", "evidence": ["tests/test_contradictions.py"]},
+    {"gate": "CROSS_PLATFORM_CI", "status": "PASS", "workflow_run_id": 31196223963, "validated_head_sha": "dd32f734de83cf94090e9b2561e34920fdbf1f9a"}
   ],
   "ci_history": [
     {
       "workflow_run_id": 31190437996,
       "head_sha": "752a8784d5cf95a38e355d648ffcbc66702be5b2",
       "conclusion": "failure",
-      "scope": "Linux Python 3.11/3.12/3.13 and Windows-native",
-      "root_cause": "Single legacy contradiction integration test expected packaged state after 0059 intentionally introduced conflict blocking before drafting.",
+      "root_cause": "Legacy contradiction integration test expected packaged state after 0059 intentionally introduced conflict blocking before drafting.",
       "runtime_defect": false,
       "repair": "Updated test to assert blocked state and article=None while preserving contradiction-report persistence."
+    },
+    {
+      "workflow_run_id": 31196223963,
+      "head_sha": "dd32f734de83cf94090e9b2561e34920fdbf1f9a",
+      "conclusion": "success",
+      "scope": "Cross-platform repository test matrix",
+      "claim": "0059 behavior and its repaired legacy contract are validated on the subsequent canonical head."
     }
   ],
   "remaining_backlog": [
-    "editorial approval state machine",
     "unified health wiring for editorial durable stores",
+    "operator editorial inspection and approval commands",
     "Story Engine from approved/corroborated facts",
-    "operator editorial inspection commands",
-    "end-to-end approval/rejection recovery tests"
+    "Review Queue lifecycle reconciliation",
+    "approval/re-entry crash recovery tests"
   ],
-  "blockers": [
-    "Current-head CI revalidation required before CLOSED_VALIDATED can be declared."
-  ],
-  "next_action": "If CI revalidation passes, implement durable Editorial Approval State Machine with auditable transitions and pipeline re-entry."
+  "blockers": [],
+  "next_action": "Proceed with editorial durable-store health wiring."
 }
