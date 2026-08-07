@@ -2,7 +2,7 @@
   "checkpoint_id": "0068",
   "project": "CIVORA",
   "title": "Authorized Story Engine Gate",
-  "state": "CODE_COMPLETE_CI_PENDING",
+  "state": "CLOSED_VALIDATED",
   "evidence": [
     {"type":"prior_validation","workflow_run_id":31222108679,"head_sha":"71ce34c3d7c5051bf4245f37a2a1ad2d38b06b06","conclusion":"success","claim":"Checkpoint 0067 passed the complete GitHub Actions workflow."},
     {"type":"implementation","path":"civora/authorized_story.py","claim":"AuthorizedStoryBuilder projects facts from exact durable editorial records; auto-draft requires corroboration while human review may authorize grounded uncontested sub-auto-threshold support but never unsupported or conflicted facts."},
@@ -11,23 +11,24 @@
     {"type":"test","path":"tests/test_authorized_story.py","claim":"Tests cover safe-fact projection, exact approval binding, contradiction non-override and stale-record failure."},
     {"type":"test","path":"tests/test_authorized_pipeline.py","claim":"Tests prove raw Fact Kernel statements cannot be drafted without authorization and that article content uses only the authorized projection."},
     {"type":"regression","workflow_run_id":31226363861,"conclusion":"failure","claim":"Initial 0068 CI exposed legacy approval tests that treated human approval as sufficient even when no fact passed the new projection; policy and fixtures were refined without restoring raw drafting."},
-    {"type":"test","path":"tests/test_editorial_approval.py","claim":"Approval regression coverage now distinguishes human-authorizable grounded/uncontested review facts from explicit contradiction, which remains fail-closed."}
+    {"type":"test","path":"tests/test_editorial_approval.py","claim":"Approval regression coverage now distinguishes human-authorizable grounded/uncontested review facts from explicit contradiction, which remains fail-closed."},
+    {"type":"validation","workflow_run_id":31226519940,"head_sha":"cc4d5f46fcc8f40f893f63d656aaefba56dbd061","conclusion":"success","claim":"Final checkpoint 0068 head passed the complete GitHub Actions workflow, including Linux Python 3.11/3.12/3.13 and Windows native."}
   ],
   "gates": [
-    {"gate":"RAW_FACT_KERNEL_DRAFTING_FALLBACK","status":"ABSENT_IMPLEMENTATION"},
-    {"gate":"DURABLE_REPORT_ALIGNMENT","status":"PASS_IMPLEMENTATION"},
-    {"gate":"GROUNDED_PROVENANCE_REQUIRED","status":"PASS_IMPLEMENTATION"},
-    {"gate":"AUTO_DRAFT_REQUIRES_CORROBORATION","status":"PASS_IMPLEMENTATION"},
-    {"gate":"HUMAN_REVIEW_MAY_AUTHORIZE_SUB_AUTO_SUPPORT","status":"PASS_IMPLEMENTATION"},
-    {"gate":"UNSUPPORTED_FACT_HUMAN_OVERRIDE","status":"ABSENT_IMPLEMENTATION"},
-    {"gate":"CONTRADICTION_HUMAN_OVERRIDE","status":"ABSENT_IMPLEMENTATION"},
-    {"gate":"UNCONTESTED_FACT_REQUIRED","status":"PASS_IMPLEMENTATION"},
-    {"gate":"STALE_APPROVAL_FAIL_CLOSED","status":"PASS_IMPLEMENTATION"},
-    {"gate":"STALE_REPORT_FAIL_CLOSED","status":"PASS_IMPLEMENTATION"},
-    {"gate":"AUTO_DRAFT_AUTHORIZATION_INTEGRATION","status":"PASS_IMPLEMENTATION"},
-    {"gate":"APPROVED_REENTRY_AUTHORIZATION_INTEGRATION","status":"PASS_IMPLEMENTATION"},
-    {"gate":"ARTICLE_AUTHORIZATION_AUDIT","status":"PASS_IMPLEMENTATION"},
-    {"gate":"CROSS_PLATFORM_CI","status":"PENDING_CURRENT_CI"}
+    {"gate":"RAW_FACT_KERNEL_DRAFTING_FALLBACK","status":"ABSENT_VALIDATED"},
+    {"gate":"DURABLE_REPORT_ALIGNMENT","status":"PASS_VALIDATED"},
+    {"gate":"GROUNDED_PROVENANCE_REQUIRED","status":"PASS_VALIDATED"},
+    {"gate":"AUTO_DRAFT_REQUIRES_CORROBORATION","status":"PASS_VALIDATED"},
+    {"gate":"HUMAN_REVIEW_MAY_AUTHORIZE_SUB_AUTO_SUPPORT","status":"PASS_VALIDATED"},
+    {"gate":"UNSUPPORTED_FACT_HUMAN_OVERRIDE","status":"ABSENT_VALIDATED"},
+    {"gate":"CONTRADICTION_HUMAN_OVERRIDE","status":"ABSENT_VALIDATED"},
+    {"gate":"UNCONTESTED_FACT_REQUIRED","status":"PASS_VALIDATED"},
+    {"gate":"STALE_APPROVAL_FAIL_CLOSED","status":"PASS_VALIDATED"},
+    {"gate":"STALE_REPORT_FAIL_CLOSED","status":"PASS_VALIDATED"},
+    {"gate":"AUTO_DRAFT_AUTHORIZATION_INTEGRATION","status":"PASS_VALIDATED"},
+    {"gate":"APPROVED_REENTRY_AUTHORIZATION_INTEGRATION","status":"PASS_VALIDATED"},
+    {"gate":"ARTICLE_AUTHORIZATION_AUDIT","status":"PASS_VALIDATED"},
+    {"gate":"CROSS_PLATFORM_CI","status":"PASS"}
   ],
   "completed_gates": [
     "0067 closed validated",
@@ -37,7 +38,8 @@
     "human review can authorize grounded uncontested sub-auto-threshold evidence",
     "unsupported and conflicted facts remain excluded after human approval",
     "article and content-pack authorization audit added",
-    "legacy contradiction-override expectation replaced with fail-closed regression coverage"
+    "legacy contradiction-override expectation replaced with fail-closed regression coverage",
+    "final cross-platform CI passed"
   ],
   "remaining_backlog": [
     "operator CLI inspection of authorized and excluded facts",
@@ -45,8 +47,6 @@
     "constrain headline/dek/why-it-matters rendering to authorized evidence instead of raw signal prose",
     "production-readiness review and packaging after authorization controls validate"
   ],
-  "blockers": [
-    "Current-head cross-platform CI result required before CLOSED_VALIDATED."
-  ],
-  "next_action": "Validate the refined checkpoint 0068 head in CI; if green, expose authorized/excluded facts through operator tooling and document remediation paths."
+  "blockers": [],
+  "next_action": "Expose authorized and excluded facts through operator tooling, preserving the same durable alignment and fail-closed authorization rules as production drafting."
 }
