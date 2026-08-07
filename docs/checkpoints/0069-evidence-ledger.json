@@ -1,0 +1,41 @@
+{
+  "checkpoint_id": "0069",
+  "project": "CIVORA",
+  "title": "Authorized Fact Operator Inspection",
+  "state": "CODE_COMPLETE_CI_PENDING",
+  "evidence": [
+    {"type":"prior_validation","workflow_run_id":31226519940,"head_sha":"cc4d5f46fcc8f40f893f63d656aaefba56dbd061","conclusion":"success","claim":"Checkpoint 0068 passed the complete cross-platform GitHub Actions workflow."},
+    {"type":"implementation","path":"civora/cli.py","claim":"Adds read-only authorized-story operator command using the same AuthorizedStoryBuilder as production drafting."},
+    {"type":"test","path":"tests/test_authorized_cli.py","claim":"Covers exact authorized/excluded fact visibility and fail-closed behavior for an incomplete durable editorial chain."},
+    {"type":"documentation","path":"docs/checkpoints/0069-authorized-fact-operator-inspection.md","claim":"Documents operator command, safety properties, completed gates, backlog and next action."}
+  ],
+  "gates": [
+    {"gate":"PRODUCTION_AUTHORIZATION_BUILDER_REUSED","status":"PASS_IMPLEMENTATION"},
+    {"gate":"AUTHORIZED_FACT_VISIBILITY","status":"PASS_IMPLEMENTATION"},
+    {"gate":"EXCLUDED_FACT_VISIBILITY","status":"PASS_IMPLEMENTATION"},
+    {"gate":"EXCLUSION_REASON_VISIBILITY","status":"PASS_IMPLEMENTATION"},
+    {"gate":"AUTHORIZATION_BINDING_VISIBILITY","status":"PASS_IMPLEMENTATION"},
+    {"gate":"MACHINE_READABLE_JSON","status":"PASS_IMPLEMENTATION"},
+    {"gate":"READ_ONLY_OPERATOR_SURFACE","status":"PASS_IMPLEMENTATION"},
+    {"gate":"INCOMPLETE_CHAIN_FAIL_CLOSED","status":"PASS_IMPLEMENTATION"},
+    {"gate":"CROSS_PLATFORM_CI","status":"PENDING_CURRENT_CI"}
+  ],
+  "completed_gates": [
+    "0068 closed validated",
+    "authorized-story CLI command implemented",
+    "production authorization builder reused without policy duplication",
+    "authorized and excluded facts exposed with exact reasons",
+    "authorization decision and semantic-hash binding exposed",
+    "incomplete durable state fails closed",
+    "operator surface remains read-only"
+  ],
+  "remaining_backlog": [
+    "operator remediation and recovery runbooks for editorial consistency and authorization failures",
+    "constrain headline/dek/why-it-matters rendering to authorized evidence instead of raw signal prose",
+    "production-readiness review covering crash recovery, editorial safety, health, packaging and operations"
+  ],
+  "blockers": [
+    "Current-head cross-platform CI result required before CLOSED_VALIDATED."
+  ],
+  "next_action": "If current-head CI passes, close 0069 and implement evidence-constrained rendering for headline, dek and why-it-matters so every reader-visible factual surface derives from authorized evidence."
+}
