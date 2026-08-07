@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Dict, Optional
 
+from .authorized_story import AuthorizedStoryBuilder, AuthorizedStoryError
 from .checkpoints import StoryCheckpointStore
 from .editorial_approval import EditorialApprovalStore
 from .editorial_consistency import EditorialConsistencyInspector
@@ -61,6 +62,7 @@ class Orchestrator:
         self.editorial_approval_store = editorial_approval_store or EditorialApprovalStore(
             self.state_dir / "editorial_approval.json"
         )
+        self.authorized_story_builder = AuthorizedStoryBuilder()
         if self.review_queue is not None and self.transaction_journal is None:
             self.transaction_journal = TransactionJournal(self.state_dir / "transactions.json")
 
@@ -141,9 +143,6 @@ class Orchestrator:
         if initial.status == "corrupt":
             raise OrchestratorError("startup blocked: durable runtime state is corrupt")
 
-        # Prepared cross-store transactions are allowed to exist at the initial
-        # inspection boundary because replay is the repair mechanism. After
-        # reconciliation and replay, approval, queue and journal must agree.
         self.reconcile_resolution_audit()
         self.recover_pending_transactions()
 
@@ -170,6 +169,26 @@ class Orchestrator:
         tx_id = self.transaction_journal.prepare(self.STORY_TO_REVIEW, payload)
         self.review_queue.enqueue_payload(story.id, payload["story"], reason)
         self.transaction_journal.commit(tx_id)
+
+    def _build_authorized_projection(
+        self,
+        *,
+        kernel_record: dict,
+        reconciliation_report: dict,
+        contradiction_report: dict,
+        editorial_decision: dict,
+        approval: Optional[dict] = None,
+    ) -> dict:
+        try:
+            return self.authorized_story_builder.build(
+                kernel_record=kernel_record,
+                reconciliation_report=reconciliation_report,
+                contradiction_report=contradiction_report,
+                editorial_decision=editorial_decision,
+                approval=approval,
+            )
+        except AuthorizedStoryError as exc:
+            raise OrchestratorError(f"draft authorization failed: {exc}") from exc
 
     def run(self, story: StoryObject, source_map: Dict[str, Source]) -> StoryObject:
         self.startup_health_gate()
@@ -198,7 +217,13 @@ class Orchestrator:
             self._enqueue_blocked_story(story, reason)
             return story
 
-        generate_article(story)
+        authorization = self._build_authorized_projection(
+            kernel_record=kernel_record,
+            reconciliation_report=reconciliation_report,
+            contradiction_report=contradiction_report,
+            editorial_decision=editorial_decision,
+        )
+        generate_article(story, authorization)
         self.save_checkpoint(story, "drafted")
         generate_content_pack(story)
         self.save_checkpoint(story, "packaged")
@@ -226,14 +251,27 @@ class Orchestrator:
         if editorial_decision.get("kernel_semantic_hash") != approval.get("kernel_semantic_hash"):
             raise OrchestratorError("approval is stale for the current editorial gate decision")
 
+        reconciliation_report = self.fact_reconciliation_store.load_story(story.id)
+        contradiction_report = self.fact_contradiction_store.load_story(story.id)
+        if reconciliation_report is None or contradiction_report is None:
+            raise OrchestratorError("approval re-entry requires current durable editorial reports")
+
         if self.review_queue is not None:
             queue_item = self.review_queue.get(story.id)
             if queue_item is None or queue_item.get("status") != "approved":
                 raise OrchestratorError("review queue is not reconciled with editorial approval")
 
+        authorization = self._build_authorized_projection(
+            kernel_record=kernel_record,
+            reconciliation_report=reconciliation_report,
+            contradiction_report=contradiction_report,
+            editorial_decision=editorial_decision,
+            approval=approval,
+        )
+
         story.state = StoryState.READY
         self.save_checkpoint(story, "editorial_approved")
-        generate_article(story)
+        generate_article(story, authorization)
         self.save_checkpoint(story, "drafted")
         generate_content_pack(story)
         self.save_checkpoint(story, "packaged")
