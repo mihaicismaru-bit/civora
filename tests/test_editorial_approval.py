@@ -14,7 +14,6 @@ from civora.models import (
     StoryState,
 )
 from civora.orchestrator import Orchestrator, OrchestratorError
-from civora.review import ReviewQueue
 
 
 class EditorialApprovalTests(unittest.TestCase):
@@ -64,6 +63,29 @@ class EditorialApprovalTests(unittest.TestCase):
         )
         story = StoryObject(signal=signal, fact_kernel=kernel)
         return story, {s1.id: s1, s2.id: s2, s3.id: s3}
+
+    def weak_support_story(self):
+        source = Source("A", "official", ["Valcea"], .95, .95, .95, .95, .95, .05)
+        fact = "Restrictia temporara este in vigoare."
+        signal = Signal(
+            title="Restrictie temporara",
+            summary="Traficul local necesita o ruta alternativa.",
+            geography=["Valcea"],
+            source_ids=[source.id],
+            public_interest=.8,
+            impact=.8,
+            novelty=.5,
+            utility=.8,
+            factual_risk=.2,
+        )
+        kernel = FactKernel(
+            confirmed_facts=[fact],
+            uncertain_claims=[],
+            affected_groups=["soferi"],
+            next_expected_event=None,
+            evidence=[Evidence(source.id, fact, confidence=.95)],
+        )
+        return StoryObject(signal=signal, fact_kernel=kernel), {source.id: source}
 
     def test_review_decision_creates_idempotent_pending_case(self):
         with TemporaryDirectory() as td:
@@ -125,8 +147,8 @@ class EditorialApprovalTests(unittest.TestCase):
             self.assertIsNotNone(case)
             self.assertEqual(case["state"], "pending")
 
-    def test_approval_allows_controlled_pipeline_reentry(self):
-        story, sources = self.disputed_story()
+    def test_approval_allows_controlled_pipeline_reentry_for_grounded_uncontested_review_fact(self):
+        story, sources = self.weak_support_story()
         with TemporaryDirectory() as td:
             root = Path(td)
             orchestrator = Orchestrator(root)
@@ -137,15 +159,31 @@ class EditorialApprovalTests(unittest.TestCase):
                 case["case_id"],
                 action="approved",
                 actor="editor-1",
-                reason="manual verification resolved publication risk",
+                reason="manual verification completed",
             )
             result = orchestrator.resume_after_approval(story)
             self.assertEqual(result.state, StoryState.PACKAGED)
-            self.assertIsNotNone(result.article)
+            self.assertEqual(result.article["authorization"]["authorization_mode"], "human_approved")
             self.assertIsNotNone(result.content_pack)
 
-    def test_reentry_fails_without_approval(self):
+    def test_approval_cannot_override_explicitly_disputed_fact(self):
         story, sources = self.disputed_story()
+        with TemporaryDirectory() as td:
+            root = Path(td)
+            orchestrator = Orchestrator(root)
+            orchestrator.run(story, sources)
+            case = orchestrator.editorial_approval_store.load_story(story.id)
+            orchestrator.editorial_approval_store.decide(
+                case["case_id"],
+                action="approved",
+                actor="editor-1",
+                reason="manual review requested publication",
+            )
+            with self.assertRaisesRegex(OrchestratorError, "no confirmed facts are authorized"):
+                orchestrator.resume_after_approval(story)
+
+    def test_reentry_fails_without_approval(self):
+        story, sources = self.weak_support_story()
         with TemporaryDirectory() as td:
             root = Path(td)
             orchestrator = Orchestrator(root)
