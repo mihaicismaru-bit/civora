@@ -68,8 +68,8 @@ class OperationalCliTests(unittest.TestCase):
             self.assertEqual(resolution["resolution_history"][-1]["actor"], "operator-test")
 
             with (state_dir / "recovery_events.json").open("r", encoding="utf-8") as handle:
-                envelope = json.load(handle)
-            events = envelope["payload"]["events"]
+                store_payload = json.load(handle)
+            events = store_payload["events"]
             resolution_events = [event for event in events if event["event_type"] == "resolution"]
             self.assertEqual(len(resolution_events), 1)
             self.assertEqual(resolution_events[0]["details"]["transaction_id"], tx_id)
