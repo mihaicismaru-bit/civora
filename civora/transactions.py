@@ -39,12 +39,13 @@ class TransactionJournal:
 
     Recovery is bounded. After ``max_recovery_attempts`` failed replays a
     transaction is moved durably to ``dead_letter`` and is no longer retried
-    automatically. This prevents a permanently unrecoverable operation from
-    creating an infinite startup recovery loop.
+    automatically. Dead letters can leave that state only through an explicit,
+    audited resolution: ``requeue`` or ``abort``.
     """
 
     SCHEMA_VERSION = 1
     VALID_STATES = {"prepared", "committed", "aborted", "dead_letter"}
+    VALID_RESOLUTION_ACTIONS = {"requeue", "abort"}
     DEFAULT_MAX_RECOVERY_ATTEMPTS = 3
 
     def __init__(self, path: Path, *, max_recovery_attempts: int = DEFAULT_MAX_RECOVERY_ATTEMPTS):
@@ -53,11 +54,7 @@ class TransactionJournal:
         self.path = path
         self.max_recovery_attempts = max_recovery_attempts
         self.records: Dict[str, dict] = {}
-        self.store = AtomicJsonStore(
-            path,
-            schema_version=self.SCHEMA_VERSION,
-            validator=self._validate_payload,
-        )
+        self.store = AtomicJsonStore(path, schema_version=self.SCHEMA_VERSION, validator=self._validate_payload)
         self.recovered_from_backup = False
         self.load()
 
@@ -69,9 +66,7 @@ class TransactionJournal:
         for tx_id, record in records.items():
             if not isinstance(tx_id, str) or not tx_id:
                 raise AtomicJsonStoreError("transaction journal has invalid transaction id")
-            if not isinstance(record, dict):
-                raise AtomicJsonStoreError("transaction record must be an object")
-            if record.get("id") != tx_id:
+            if not isinstance(record, dict) or record.get("id") != tx_id:
                 raise AtomicJsonStoreError("transaction record id mismatch")
             if not isinstance(record.get("operation"), str) or not record["operation"]:
                 raise AtomicJsonStoreError("transaction record is missing operation")
@@ -89,6 +84,17 @@ class TransactionJournal:
             last_error = record.get("last_error")
             if last_error is not None and not isinstance(last_error, str):
                 raise AtomicJsonStoreError("transaction last_error must be a string or null")
+            history = record.get("resolution_history", [])
+            if not isinstance(history, list):
+                raise AtomicJsonStoreError("transaction resolution_history must be a list")
+            for entry in history:
+                if not isinstance(entry, dict):
+                    raise AtomicJsonStoreError("transaction resolution history entry must be an object")
+                if entry.get("action") not in cls.VALID_RESOLUTION_ACTIONS:
+                    raise AtomicJsonStoreError("transaction resolution history has invalid action")
+                for field in ("timestamp", "actor", "reason"):
+                    if not isinstance(entry.get(field), str) or not entry[field]:
+                        raise AtomicJsonStoreError(f"transaction resolution history requires {field}")
 
     def load(self) -> None:
         try:
@@ -127,6 +133,7 @@ class TransactionJournal:
                 "updated_at": now,
                 "recovery_attempts": 0,
                 "last_error": None,
+                "resolution_history": [],
             }
 
         self._atomic_mutate(mutate)
@@ -152,6 +159,46 @@ class TransactionJournal:
     def abort(self, tx_id: str, reason: Optional[str] = None) -> None:
         self._transition(tx_id, "aborted", last_error=reason)
 
+    def resolve_dead_letter(self, tx_id: str, action: str, *, actor: str, reason: str) -> dict:
+        """Explicitly resolve one dead letter and persist an immutable audit entry.
+
+        ``requeue`` returns the record to ``prepared`` and resets the automatic
+        recovery budget. ``abort`` terminates it. The operation is rejected for
+        non-dead-letter transactions and requires non-empty actor/reason values.
+        """
+        if action not in self.VALID_RESOLUTION_ACTIONS:
+            raise TransactionJournalError(f"invalid dead-letter resolution action: {action}")
+        if not isinstance(actor, str) or not actor.strip():
+            raise TransactionJournalError("dead-letter resolution actor is required")
+        if not isinstance(reason, str) or not reason.strip():
+            raise TransactionJournalError("dead-letter resolution reason is required")
+        timestamp = _utc_now()
+
+        def mutate(state: dict) -> None:
+            records = state.setdefault("records", {})
+            if tx_id not in records:
+                raise TransactionJournalError(f"unknown transaction: {tx_id}")
+            record = records[tx_id]
+            if record.get("status") != "dead_letter":
+                raise TransactionJournalError("only dead-letter transactions can be explicitly resolved")
+            record.setdefault("resolution_history", []).append({
+                "timestamp": timestamp,
+                "action": action,
+                "actor": actor.strip(),
+                "reason": reason.strip(),
+            })
+            record["updated_at"] = timestamp
+            if action == "requeue":
+                record["status"] = "prepared"
+                record["recovery_attempts"] = 0
+                record["last_error"] = None
+            else:
+                record["status"] = "aborted"
+                record["last_error"] = reason.strip()
+
+        self._atomic_mutate(mutate)
+        return dict(self.records[tx_id])
+
     def prepared(self) -> List[dict]:
         self.load()
         return [dict(record) for record in self.records.values() if record.get("status") == "prepared"]
@@ -161,7 +208,6 @@ class TransactionJournal:
         return [dict(record) for record in self.records.values() if record.get("status") == "dead_letter"]
 
     def _record_recovery_failure(self, tx_id: str, error: str) -> bool:
-        """Persist one failed replay and return True if it was dead-lettered."""
         dead_lettered = False
 
         def mutate(state: dict) -> None:
@@ -184,14 +230,6 @@ class TransactionJournal:
         return dead_lettered
 
     def recover(self, handler: Callable[[dict], None]) -> List[str]:
-        """Replay prepared records and commit successful recoveries.
-
-        Failed recoveries persist their attempt count/error. Once the configured
-        attempt bound is reached, the transaction is moved to ``dead_letter``
-        and excluded from future automatic replay. A competing process may
-        commit a transaction first; state transitions remain serialized by the
-        store lock.
-        """
         recovered: List[str] = []
         for record in list(self.prepared()):
             tx_id = record["id"]
