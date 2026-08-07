@@ -8,6 +8,7 @@ from typing import Callable, List, Optional
 
 from .checkpoints import StoryCheckpointError, StoryCheckpointStore
 from .editorial_approval import EditorialApprovalError, EditorialApprovalStore
+from .editorial_consistency import EditorialConsistencyInspector
 from .editorial_gate_store import EditorialGateStore, EditorialGateStoreError
 from .fact_contradictions import FactContradictionStore, FactContradictionStoreError
 from .fact_kernel import FactKernelStore, FactKernelStoreError
@@ -54,7 +55,8 @@ class UnifiedHealthInspector:
     Editorial stores are part of the same startup integrity boundary as the core
     runtime stores. Pending review/approval work is normal editorial state and
     does not by itself degrade runtime health; malformed or unrecoverable durable
-    editorial state does.
+    editorial state does. Cross-store approval/review/transaction consistency is
+    also exposed as an explicit component whenever all three paths are configured.
     """
 
     _SEVERITY = {
@@ -199,6 +201,42 @@ class UnifiedHealthInspector:
         if component.details.get("prepared_count", 0) > 0:
             return ComponentHealth(component.name, "pending_transaction", component.details)
         return component
+
+    def _probe_editorial_consistency(self) -> ComponentHealth:
+        assert self.editorial_approval_path is not None
+        assert self.review_queue_path is not None
+        assert self.transaction_journal_path is not None
+        try:
+            status = EditorialConsistencyInspector(
+                self.editorial_approval_path,
+                self.review_queue_path,
+                self.transaction_journal_path,
+            ).inspect()
+        except (EditorialApprovalError, ReviewQueueError, TransactionJournalError) as exc:
+            return ComponentHealth(
+                name="editorial_consistency",
+                status="corrupt",
+                details={"error": str(exc)},
+            )
+        except Exception as exc:
+            return ComponentHealth(
+                name="editorial_consistency",
+                status="degraded",
+                details={"error": str(exc)},
+            )
+
+        component_status = status.get("status", "degraded")
+        if component_status not in {"healthy", "pending_transaction", "degraded"}:
+            component_status = "degraded"
+        details = {key: value for key, value in status.items() if key != "status"}
+        details.update(
+            {
+                "approval_path": str(self.editorial_approval_path),
+                "review_queue_path": str(self.review_queue_path),
+                "transaction_journal_path": str(self.transaction_journal_path),
+            }
+        )
+        return ComponentHealth("editorial_consistency", component_status, details)
 
     def _probe_checkpoints(self, directory: Path) -> ComponentHealth:
         directory.mkdir(parents=True, exist_ok=True)
@@ -351,6 +389,12 @@ class UnifiedHealthInspector:
                     (EditorialApprovalError,),
                 )
             )
+        if (
+            self.editorial_approval_path is not None
+            and self.review_queue_path is not None
+            and self.transaction_journal_path is not None
+        ):
+            components.append(self._probe_editorial_consistency())
         if self.recovery_event_ledger_path is not None:
             components.append(
                 self._probe_store(
