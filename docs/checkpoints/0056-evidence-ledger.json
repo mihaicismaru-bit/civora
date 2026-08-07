@@ -1,0 +1,64 @@
+{
+  "checkpoint_id": "0056",
+  "project": "CIVORA",
+  "title": "Durable Fact Kernel",
+  "state": "CODE_COMPLETE_CI_PENDING",
+  "accelerated_editorial_phase": true,
+  "gates": [
+    {
+      "gate": "DURABLE_FACT_KERNEL_STORE",
+      "status": "PASS_IMPLEMENTATION",
+      "evidence": ["civora/fact_kernel.py"]
+    },
+    {
+      "gate": "DETERMINISTIC_FACT_EVIDENCE_IDENTITY",
+      "status": "PASS_IMPLEMENTATION",
+      "evidence": ["civora/fact_kernel.py", "tests/test_fact_kernel.py"]
+    },
+    {
+      "gate": "PROVENANCE_LINK_VALIDATION",
+      "status": "PASS_IMPLEMENTATION",
+      "evidence": ["tests/test_fact_kernel.py"]
+    },
+    {
+      "gate": "SEMANTIC_REVISION_IDEMPOTENCE",
+      "status": "PASS_IMPLEMENTATION",
+      "evidence": ["tests/test_fact_kernel.py"]
+    },
+    {
+      "gate": "FACT_KERNEL_BACKUP_RECOVERY",
+      "status": "PASS_IMPLEMENTATION",
+      "evidence": ["civora/persistence.py", "tests/test_fact_kernel.py"]
+    },
+    {
+      "gate": "FACT_KERNEL_FAIL_CLOSED_CORRUPTION",
+      "status": "PASS_IMPLEMENTATION",
+      "evidence": ["tests/test_fact_kernel.py"]
+    },
+    {
+      "gate": "ORCHESTRATOR_FACT_KERNEL_WIRING",
+      "status": "PASS_IMPLEMENTATION",
+      "evidence": ["civora/orchestrator.py", "tests/test_fact_kernel_orchestrator.py"]
+    },
+    {
+      "gate": "PYTHON_3_11_3_13_CI",
+      "status": "PENDING_CURRENT_HEAD_CI"
+    },
+    {
+      "gate": "WINDOWS_NATIVE_CI",
+      "status": "PENDING_CURRENT_HEAD_CI"
+    }
+  ],
+  "remaining_backlog": [
+    "deterministic claim/evidence reconciliation",
+    "contradiction and dispute representation",
+    "source-independence aware confidence scoring",
+    "Fact Kernel health wiring in unified startup report",
+    "editorial approval state machine",
+    "Story Engine generation from reconciled facts"
+  ],
+  "blockers": [
+    "Final checkpoint validation awaits GitHub Actions for the current head."
+  ],
+  "next_action": "Build deterministic claim/evidence reconciliation on the durable Fact Kernel."
+}
