@@ -23,6 +23,11 @@ def _paths(state_dir: Path) -> dict[str, Path]:
         "review": state_dir / "review_queue.json",
         "transactions": state_dir / "transactions.json",
         "recovery": state_dir / "recovery_events.json",
+        "fact_kernel": state_dir / "fact_kernels.json",
+        "fact_reconciliation": state_dir / "fact_reconciliation.json",
+        "fact_contradictions": state_dir / "fact_contradictions.json",
+        "editorial_gate": state_dir / "editorial_gate.json",
+        "editorial_approval": state_dir / "editorial_approval.json",
     }
 
 
@@ -39,6 +44,11 @@ def _health(state_dir: Path, output: TextIO) -> int:
         review_queue_path=paths["review"],
         transaction_journal_path=paths["transactions"],
         checkpoint_dir=state_dir,
+        fact_kernel_path=paths["fact_kernel"],
+        fact_reconciliation_path=paths["fact_reconciliation"],
+        fact_contradiction_path=paths["fact_contradictions"],
+        editorial_gate_path=paths["editorial_gate"],
+        editorial_approval_path=paths["editorial_approval"],
         recovery_event_ledger_path=paths["recovery"],
     )
     report = inspector.inspect()
@@ -127,7 +137,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    subparsers.add_parser("health", help="inspect durable runtime health")
+    subparsers.add_parser("health", help="inspect durable runtime and editorial health")
     subparsers.add_parser("dead-letters", help="list dead-letter transactions")
 
     resolve = subparsers.add_parser("resolve-dead-letter", help="explicitly resolve one dead letter")
