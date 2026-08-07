@@ -8,6 +8,7 @@ from typing import Callable, List, Optional
 
 from .checkpoints import StoryCheckpointError, StoryCheckpointStore
 from .ingestion import SignalStore, SignalStoreError
+from .recovery import RecoveryEventLedger, RecoveryEventLedgerError
 from .registry import SourceRegistry, SourceRegistryError
 from .review import ReviewQueue, ReviewQueueError
 from .transactions import TransactionJournal, TransactionJournalError
@@ -45,6 +46,10 @@ class UnifiedHealthInspector:
     inspection may repair a corrupt primary generation from a valid backup, and
     that recovery is surfaced as ``recovered_from_backup`` rather than hidden.
     Corrupt state is never rewritten when no valid backup exists.
+
+    When a recovery-event ledger is configured, every non-healthy component
+    observation is durably appended after the report is assembled. This turns
+    recovery/degradation detection into an auditable operational trail.
     """
 
     _SEVERITY = {
@@ -66,12 +71,14 @@ class UnifiedHealthInspector:
         review_queue_path: Optional[Path] = None,
         transaction_journal_path: Optional[Path] = None,
         checkpoint_dir: Optional[Path] = None,
+        recovery_event_ledger_path: Optional[Path] = None,
     ):
         self.source_registry_path = source_registry_path
         self.signal_store_path = signal_store_path
         self.review_queue_path = review_queue_path
         self.transaction_journal_path = transaction_journal_path
         self.checkpoint_dir = checkpoint_dir
+        self.recovery_event_ledger_path = recovery_event_ledger_path
 
     @classmethod
     def _overall_status(cls, components: List[ComponentHealth]) -> str:
@@ -178,6 +185,33 @@ class UnifiedHealthInspector:
             return ComponentHealth("story_checkpoints", "recovered_from_backup", details)
         return ComponentHealth("story_checkpoints", "healthy", details)
 
+    @staticmethod
+    def _event_type_for(status: str) -> str:
+        return {
+            "recovered_from_backup": "recovery",
+            "pending_transaction": "pending_transaction",
+            "corrupt": "corruption",
+            "degraded": "degradation",
+        }.get(status, "degradation")
+
+    def _record_events(self, report: RuntimeHealthReport) -> None:
+        if self.recovery_event_ledger_path is None:
+            return
+        try:
+            ledger = RecoveryEventLedger(self.recovery_event_ledger_path)
+        except RecoveryEventLedgerError:
+            return
+        for component in report.components:
+            if component.name == "recovery_event_ledger" or component.status == "healthy":
+                continue
+            ledger.append(
+                component=component.name,
+                event_type=self._event_type_for(component.status),
+                status=component.status,
+                details=component.details,
+                timestamp=report.generated_at,
+            )
+
     def inspect(self) -> RuntimeHealthReport:
         components: List[ComponentHealth] = []
 
@@ -221,9 +255,21 @@ class UnifiedHealthInspector:
             components.append(self._probe_transactions(self.transaction_journal_path))
         if self.checkpoint_dir is not None:
             components.append(self._probe_checkpoints(self.checkpoint_dir))
+        if self.recovery_event_ledger_path is not None:
+            components.append(
+                self._probe_store(
+                    "recovery_event_ledger",
+                    self.recovery_event_ledger_path,
+                    RecoveryEventLedger,
+                    (RecoveryEventLedgerError,),
+                    lambda ledger: {"event_count": len(ledger.events)},
+                )
+            )
 
-        return RuntimeHealthReport(
+        report = RuntimeHealthReport(
             status=self._overall_status(components),
             generated_at=_utc_now(),
             components=components,
         )
+        self._record_events(report)
+        return report
