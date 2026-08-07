@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import copy
 import re
 from dataclasses import asdict, dataclass
 from hashlib import sha256
@@ -83,17 +82,18 @@ class SignalStore:
             if not isinstance(signal_id, str) or signal_id not in signal_ids:
                 raise AtomicJsonStoreError("fingerprint references an unknown signal")
 
+    def _sync_from_payload(self, payload: dict) -> None:
+        self.records = payload.get("signals", {})
+        self.fingerprints = payload.get("fingerprints", {})
+
     def load(self) -> None:
-        self.records = {}
-        self.fingerprints = {}
         default = {"signals": {}, "fingerprints": {}}
         try:
             payload = self.store.load(default)
         except AtomicJsonStoreError as exc:
             raise SignalStoreError(str(exc)) from exc
         self.recovered_from_backup = self.store.recovered_from_backup
-        self.records = payload.get("signals", {})
-        self.fingerprints = payload.get("fingerprints", {})
+        self._sync_from_payload(payload)
 
     def save(self) -> None:
         payload = {
@@ -101,52 +101,58 @@ class SignalStore:
             "fingerprints": self.fingerprints,
         }
         try:
-            self.store.save(payload)
+            committed = self.store.save(payload)
         except AtomicJsonStoreError as exc:
             raise SignalStoreError(str(exc)) from exc
+        self._sync_from_payload(committed)
 
     def ingest(self, raw_items: Iterable[dict]) -> IngestResult:
+        raw_items = list(raw_items)
         accepted: List[Signal] = []
         duplicate_ids: List[str] = []
         rejected: List[Dict[str, str]] = []
 
-        original_records = copy.deepcopy(self.records)
-        original_fingerprints = copy.deepcopy(self.fingerprints)
+        def mutate(payload: dict) -> None:
+            signals = payload.setdefault("signals", {})
+            fingerprints = payload.setdefault("fingerprints", {})
 
-        for raw in raw_items:
-            try:
-                required = ["title", "summary", "geography", "source_ids"]
-                missing = [key for key in required if not raw.get(key)]
-                if missing:
-                    raise ValueError(f"missing required fields: {', '.join(missing)}")
+            for raw in raw_items:
+                try:
+                    required = ["title", "summary", "geography", "source_ids"]
+                    missing = [key for key in required if not raw.get(key)]
+                    if missing:
+                        raise ValueError(f"missing required fields: {', '.join(missing)}")
 
-                fp = signal_fingerprint(raw["title"], raw["summary"], raw["geography"])
-                if fp in self.fingerprints:
-                    duplicate_ids.append(self.fingerprints[fp])
-                    continue
+                    fp = signal_fingerprint(raw["title"], raw["summary"], raw["geography"])
+                    if fp in fingerprints:
+                        duplicate_ids.append(fingerprints[fp])
+                        continue
 
-                signal = Signal(
-                    title=raw["title"],
-                    summary=raw["summary"],
-                    geography=list(raw["geography"]),
-                    source_ids=list(raw["source_ids"]),
-                    public_interest=float(raw.get("public_interest", 0.5)),
-                    impact=float(raw.get("impact", 0.5)),
-                    novelty=float(raw.get("novelty", 0.5)),
-                    utility=float(raw.get("utility", 0.5)),
-                    factual_risk=float(raw.get("factual_risk", 0.5)),
-                )
-                self.records[signal.id] = asdict(signal)
-                self.fingerprints[fp] = signal.id
-                accepted.append(signal)
-            except Exception as exc:
-                rejected.append({"item": repr(raw), "reason": str(exc)})
+                    signal = Signal(
+                        title=raw["title"],
+                        summary=raw["summary"],
+                        geography=list(raw["geography"]),
+                        source_ids=list(raw["source_ids"]),
+                        public_interest=float(raw.get("public_interest", 0.5)),
+                        impact=float(raw.get("impact", 0.5)),
+                        novelty=float(raw.get("novelty", 0.5)),
+                        utility=float(raw.get("utility", 0.5)),
+                        factual_risk=float(raw.get("factual_risk", 0.5)),
+                    )
+                    signals[signal.id] = asdict(signal)
+                    fingerprints[fp] = signal.id
+                    accepted.append(signal)
+                except Exception as exc:
+                    rejected.append({"item": repr(raw), "reason": str(exc)})
 
         try:
-            self.save()
-        except Exception:
-            self.records = original_records
-            self.fingerprints = original_fingerprints
-            raise
+            committed = self.store.update(
+                {"signals": {}, "fingerprints": {}},
+                mutate,
+            )
+        except AtomicJsonStoreError as exc:
+            raise SignalStoreError(str(exc)) from exc
 
+        self.recovered_from_backup = self.store.recovered_from_backup
+        self._sync_from_payload(committed)
         return IngestResult(accepted, duplicate_ids, rejected)
