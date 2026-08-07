@@ -4,7 +4,7 @@ from pathlib import Path
 
 from .editorial_approval import EditorialApprovalError, EditorialApprovalStore
 from .review import ReviewQueue, ReviewQueueError
-from .transactions import TransactionJournal, TransactionJournalError
+from .transactions import TransactionJournal
 
 
 class EditorialResolutionError(RuntimeError):
@@ -15,9 +15,9 @@ class EditorialResolutionCoordinator:
     """Crash-recoverable coordinator for approval-store and Review Queue resolution.
 
     The transaction journal is written first. Approval is the authoritative
-    operator decision; Review Queue state is then reconciled idempotently. A
-    crash after approval but before queue resolution leaves a prepared journal
-    record that can safely be replayed at startup.
+    operator decision; Review Queue state is then reconciled idempotently when
+    that queue was active for the case. A crash after approval but before queue
+    resolution leaves a prepared journal record that can safely be replayed.
     """
 
     OPERATION = "editorial_review_resolution"
@@ -47,6 +47,8 @@ class EditorialResolutionCoordinator:
                 raise EditorialResolutionError(f"resolution payload {key} is invalid")
         if payload["action"] not in EditorialApprovalStore.FINAL_STATES:
             raise EditorialResolutionError("resolution payload action is invalid")
+        if not isinstance(payload.get("review_queue_required"), bool):
+            raise EditorialResolutionError("resolution payload review_queue_required is invalid")
 
     def replay_payload(self, payload: dict) -> dict:
         """Idempotently finish one prepared editorial resolution transaction."""
@@ -67,12 +69,14 @@ class EditorialResolutionCoordinator:
         elif case.get("state") != payload["action"]:
             raise EditorialResolutionError("approval case resolved differently")
 
-        queue_item = self.review_queue.resolve(
-            payload["story_id"],
-            action=payload["action"],
-            actor=payload["actor"],
-            reason=payload["reason"],
-        )
+        queue_item = None
+        if payload["review_queue_required"]:
+            queue_item = self.review_queue.resolve(
+                payload["story_id"],
+                action=payload["action"],
+                actor=payload["actor"],
+                reason=payload["reason"],
+            )
         return {"case": case, "review_queue_item": queue_item}
 
     def decide(self, case_id: str, *, action: str, actor: str, reason: str) -> dict:
@@ -81,12 +85,19 @@ class EditorialResolutionCoordinator:
             raise EditorialResolutionError("unknown approval case")
         if case.get("state") != "pending":
             raise EditorialResolutionError("approval case is already resolved")
+
+        queue_item = self.review_queue.get(case["story_id"])
+        queue_required = queue_item is not None or self.review_queue.path.exists()
+        if queue_required and queue_item is None:
+            raise EditorialResolutionError("review queue is active but story item is missing")
+
         payload = {
             "case_id": case_id,
             "story_id": case["story_id"],
             "action": action,
             "actor": actor.strip(),
             "reason": reason.strip(),
+            "review_queue_required": queue_required,
         }
         self._validate_payload(payload)
         tx_id = self.transaction_journal.prepare(self.OPERATION, payload)
