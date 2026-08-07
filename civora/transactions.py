@@ -36,13 +36,22 @@ class TransactionJournal:
     therefore be idempotent. Every state transition is performed through one
     lock-scoped read-modify-write operation so concurrent journal instances do
     not overwrite one another's records.
+
+    Recovery is bounded. After ``max_recovery_attempts`` failed replays a
+    transaction is moved durably to ``dead_letter`` and is no longer retried
+    automatically. This prevents a permanently unrecoverable operation from
+    creating an infinite startup recovery loop.
     """
 
     SCHEMA_VERSION = 1
-    VALID_STATES = {"prepared", "committed", "aborted"}
+    VALID_STATES = {"prepared", "committed", "aborted", "dead_letter"}
+    DEFAULT_MAX_RECOVERY_ATTEMPTS = 3
 
-    def __init__(self, path: Path):
+    def __init__(self, path: Path, *, max_recovery_attempts: int = DEFAULT_MAX_RECOVERY_ATTEMPTS):
+        if not isinstance(max_recovery_attempts, int) or max_recovery_attempts < 1:
+            raise TransactionJournalError("max_recovery_attempts must be a positive integer")
         self.path = path
+        self.max_recovery_attempts = max_recovery_attempts
         self.records: Dict[str, dict] = {}
         self.store = AtomicJsonStore(
             path,
@@ -147,26 +156,41 @@ class TransactionJournal:
         self.load()
         return [dict(record) for record in self.records.values() if record.get("status") == "prepared"]
 
-    def _record_recovery_failure(self, tx_id: str, error: str) -> None:
+    def dead_letters(self) -> List[dict]:
+        self.load()
+        return [dict(record) for record in self.records.values() if record.get("status") == "dead_letter"]
+
+    def _record_recovery_failure(self, tx_id: str, error: str) -> bool:
+        """Persist one failed replay and return True if it was dead-lettered."""
+        dead_lettered = False
+
         def mutate(state: dict) -> None:
+            nonlocal dead_lettered
             records = state.setdefault("records", {})
             if tx_id not in records:
                 raise TransactionJournalError(f"unknown transaction: {tx_id}")
             record = records[tx_id]
             if record.get("status") != "prepared":
                 return
-            record["recovery_attempts"] = int(record.get("recovery_attempts", 0)) + 1
+            attempts = int(record.get("recovery_attempts", 0)) + 1
+            record["recovery_attempts"] = attempts
             record["updated_at"] = _utc_now()
             record["last_error"] = error
+            if attempts >= self.max_recovery_attempts:
+                record["status"] = "dead_letter"
+                dead_lettered = True
 
         self._atomic_mutate(mutate)
+        return dead_lettered
 
     def recover(self, handler: Callable[[dict], None]) -> List[str]:
         """Replay prepared records and commit successful recoveries.
 
-        Failed recoveries remain prepared and persist their attempt count/error.
-        A competing process may commit a transaction first; commit remains safe
-        because state transitions are serialized by the store lock.
+        Failed recoveries persist their attempt count/error. Once the configured
+        attempt bound is reached, the transaction is moved to ``dead_letter``
+        and excluded from future automatic replay. A competing process may
+        commit a transaction first; state transitions remain serialized by the
+        store lock.
         """
         recovered: List[str] = []
         for record in list(self.prepared()):
