@@ -2,63 +2,30 @@
   "checkpoint_id": "0056",
   "project": "CIVORA",
   "title": "Durable Fact Kernel",
-  "state": "CODE_COMPLETE_CI_PENDING",
+  "state": "CLOSED_VALIDATED",
   "accelerated_editorial_phase": true,
+  "validation": {
+    "workflow_run_id": 31184984178,
+    "head_sha": "872ce2799906eb05e0500f576a1deb00d49dd2ea",
+    "conclusion": "success"
+  },
   "gates": [
-    {
-      "gate": "DURABLE_FACT_KERNEL_STORE",
-      "status": "PASS_IMPLEMENTATION",
-      "evidence": ["civora/fact_kernel.py"]
-    },
-    {
-      "gate": "DETERMINISTIC_FACT_EVIDENCE_IDENTITY",
-      "status": "PASS_IMPLEMENTATION",
-      "evidence": ["civora/fact_kernel.py", "tests/test_fact_kernel.py"]
-    },
-    {
-      "gate": "PROVENANCE_LINK_VALIDATION",
-      "status": "PASS_IMPLEMENTATION",
-      "evidence": ["tests/test_fact_kernel.py"]
-    },
-    {
-      "gate": "SEMANTIC_REVISION_IDEMPOTENCE",
-      "status": "PASS_IMPLEMENTATION",
-      "evidence": ["tests/test_fact_kernel.py"]
-    },
-    {
-      "gate": "FACT_KERNEL_BACKUP_RECOVERY",
-      "status": "PASS_IMPLEMENTATION",
-      "evidence": ["civora/persistence.py", "tests/test_fact_kernel.py"]
-    },
-    {
-      "gate": "FACT_KERNEL_FAIL_CLOSED_CORRUPTION",
-      "status": "PASS_IMPLEMENTATION",
-      "evidence": ["tests/test_fact_kernel.py"]
-    },
-    {
-      "gate": "ORCHESTRATOR_FACT_KERNEL_WIRING",
-      "status": "PASS_IMPLEMENTATION",
-      "evidence": ["civora/orchestrator.py", "tests/test_fact_kernel_orchestrator.py"]
-    },
-    {
-      "gate": "PYTHON_3_11_3_13_CI",
-      "status": "PENDING_CURRENT_HEAD_CI"
-    },
-    {
-      "gate": "WINDOWS_NATIVE_CI",
-      "status": "PENDING_CURRENT_HEAD_CI"
-    }
+    {"gate": "DURABLE_FACT_KERNEL_STORE", "status": "PASS", "evidence": ["civora/fact_kernel.py"]},
+    {"gate": "DETERMINISTIC_FACT_EVIDENCE_IDENTITY", "status": "PASS", "evidence": ["civora/fact_kernel.py", "tests/test_fact_kernel.py"]},
+    {"gate": "PROVENANCE_LINK_VALIDATION", "status": "PASS", "evidence": ["tests/test_fact_kernel.py"]},
+    {"gate": "SEMANTIC_REVISION_IDEMPOTENCE", "status": "PASS", "evidence": ["tests/test_fact_kernel.py"]},
+    {"gate": "FACT_KERNEL_BACKUP_RECOVERY", "status": "PASS", "evidence": ["civora/persistence.py", "tests/test_fact_kernel.py"]},
+    {"gate": "FACT_KERNEL_FAIL_CLOSED_CORRUPTION", "status": "PASS", "evidence": ["tests/test_fact_kernel.py"]},
+    {"gate": "ORCHESTRATOR_FACT_KERNEL_WIRING", "status": "PASS", "evidence": ["civora/orchestrator.py", "tests/test_fact_kernel_orchestrator.py"]},
+    {"gate": "CROSS_PLATFORM_CI", "status": "PASS", "evidence": ["workflow:31184984178"]}
   ],
   "remaining_backlog": [
-    "deterministic claim/evidence reconciliation",
+    "claim/evidence reconciliation",
     "contradiction and dispute representation",
-    "source-independence aware confidence scoring",
     "Fact Kernel health wiring in unified startup report",
     "editorial approval state machine",
     "Story Engine generation from reconciled facts"
   ],
-  "blockers": [
-    "Final checkpoint validation awaits GitHub Actions for the current head."
-  ],
-  "next_action": "Build deterministic claim/evidence reconciliation on the durable Fact Kernel."
+  "blockers": [],
+  "next_action": "Continue accelerated editorial development on claim/evidence reconciliation."
 }
