@@ -20,7 +20,10 @@ class ReviewQueue:
     safely repair a crash between approval-store and queue-store writes.
     """
 
-    SCHEMA_VERSION = 3
+    # Keep schema 2 for backward compatibility with existing durable queues.
+    # The added history field is optional on read and terminal status vocabulary
+    # is a backward-compatible extension interpreted only by the new runtime.
+    SCHEMA_VERSION = 2
     FINAL_STATUSES = {"approved", "rejected", "revision_required"}
     ALLOWED_STATUSES = {"pending", *FINAL_STATUSES}
 
@@ -99,7 +102,7 @@ class ReviewQueue:
             items = payload.setdefault("items", {})
             existing = items.get(story_id)
             if existing is not None:
-                # Transaction replay must not reset a resolved item to pending.
+                # Transaction replay must never reset a resolved item to pending.
                 return
             now = utc_now()
             items[story_id] = {
@@ -107,13 +110,7 @@ class ReviewQueue:
                 "reason": reason,
                 "status": "pending",
                 "history": [
-                    {
-                        "from": None,
-                        "to": "pending",
-                        "at": now,
-                        "actor": "system",
-                        "reason": reason,
-                    }
+                    {"from": None, "to": "pending", "at": now, "actor": "system", "reason": reason}
                 ],
             }
 
@@ -149,13 +146,7 @@ class ReviewQueue:
             now = utc_now()
             item["status"] = action
             item.setdefault("history", []).append(
-                {
-                    "from": "pending",
-                    "to": action,
-                    "at": now,
-                    "actor": actor,
-                    "reason": reason,
-                }
+                {"from": "pending", "to": action, "at": now, "actor": actor, "reason": reason}
             )
             captured["item"] = copy.deepcopy(item)
 
