@@ -82,6 +82,11 @@ class Orchestrator:
                 review_queue_path=getattr(self.review_queue, "path", None),
                 transaction_journal_path=getattr(self.transaction_journal, "path", None),
                 checkpoint_dir=self.checkpoint_store.state_dir,
+                fact_kernel_path=self.fact_kernel_store.path,
+                fact_reconciliation_path=self.fact_reconciliation_store.path,
+                fact_contradiction_path=self.fact_contradiction_store.path,
+                editorial_gate_path=self.editorial_gate_store.path,
+                editorial_approval_path=self.editorial_approval_store.path,
                 recovery_event_ledger_path=self.recovery_ledger.path,
             )
         self.health_inspector = health_inspector
