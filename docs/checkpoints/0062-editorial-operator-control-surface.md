@@ -1,65 +1,42 @@
 # CIVORA Checkpoint 0062 — Editorial Operator Control Surface
 
-Status: CODE_COMPLETE_CI_PENDING
+Status: CLOSED_VALIDATED
 
 ## Objective
 
 Expose the durable editorial decision chain and approval state machine through auditable CLI commands so operators do not need to edit persistence files directly.
 
-## Implementation
+## Result
 
-Added read-only commands:
+The operator surface provides read-only inspection of the current Fact Kernel, reconciliation report, contradiction report, editorial gate decision and approval case, plus deterministic approval-case listing/filtering and audited approval decisions requiring actor and reason.
 
-- `civora --state-dir <path> editorial-story <story-id>`
-- `civora --state-dir <path> approval-cases [--state pending|approved|rejected|revision_required]`
-- `civora --state-dir <path> approval-case <case-id>`
+## Validation
 
-`editorial-story` returns the current Fact Kernel, reconciliation report, contradiction report, editorial gate decision and approval case for a story in one machine-readable JSON object.
-
-Added audited mutation:
-
-- `civora --state-dir <path> decide-approval <case-id> --action approved|rejected|revision_required --actor <actor> --reason <reason>`
-
-The command delegates to `EditorialApprovalStore.decide`; it does not bypass state-machine validation. Resolved cases remain terminal and cannot be silently overwritten.
-
-`EditorialApprovalStore.list_cases()` provides deterministic case listing with optional state filtering.
-
-## Validation added
-
-`tests/test_cli.py` covers:
-
-- pending approval listing/filtering;
-- approval case inspection;
-- approval decision with actor/reason audit;
-- terminal-case protection against a second decision;
-- aggregated editorial story inspection;
-- unknown editorial story fail-closed behavior.
+GitHub Actions run `31205214004` completed successfully for head `df9ee66518016351ea218b90700f50434d4db883`, closing the cross-platform validation gate for checkpoint 0062.
 
 ## Gates
 
-- CHECKPOINT_0061_CROSS_PLATFORM_CI: PASS
-- EDITORIAL_STORY_INSPECTION: PASS_IMPLEMENTATION
-- APPROVAL_CASE_LISTING: PASS_IMPLEMENTATION
-- APPROVAL_STATE_FILTERING: PASS_IMPLEMENTATION
-- APPROVAL_CASE_DETAIL: PASS_IMPLEMENTATION
-- AUDITED_APPROVAL_DECISION: PASS_IMPLEMENTATION
-- TERMINAL_CASE_IMMUTABILITY: PASS_IMPLEMENTATION
+- EDITORIAL_STORY_INSPECTION: PASS_VALIDATED
+- APPROVAL_CASE_LISTING: PASS_VALIDATED
+- APPROVAL_STATE_FILTERING: PASS_VALIDATED
+- APPROVAL_CASE_DETAIL: PASS_VALIDATED
+- AUDITED_APPROVAL_DECISION: PASS_VALIDATED
+- TERMINAL_CASE_IMMUTABILITY: PASS_VALIDATED
 - DIRECT_DURABLE_FILE_EDIT_REQUIRED: ABSENT
-- MACHINE_READABLE_OUTPUT: PASS_IMPLEMENTATION
-- CROSS_PLATFORM_CI: PENDING
+- MACHINE_READABLE_OUTPUT: PASS_VALIDATED
+- CROSS_PLATFORM_CI: PASS
 
 ## Remaining backlog
 
-1. Validate checkpoint 0062 in the cross-platform CI matrix.
-2. Reconcile Review Queue lifecycle after approved/rejected/revision-required outcomes.
-3. Add crash/recovery tests across approval transition and approved pipeline re-entry.
-4. Build the Story Engine constrained to authorized/corroborated facts.
-5. Add operator runbooks after lifecycle commands stabilize.
+1. Reconcile Review Queue lifecycle after approved/rejected/revision-required outcomes.
+2. Add crash/recovery tests across approval transition and approved pipeline re-entry.
+3. Build the Story Engine constrained to authorized/corroborated facts.
+4. Add operator runbooks after lifecycle commands stabilize.
 
 ## Blockers
 
-Current-head CI is required before `CLOSED_VALIDATED` can be declared.
+None.
 
 ## Next action
 
-If CI is green, implement Review Queue lifecycle reconciliation so approval state and queue state cannot diverge. If CI fails, repair the regression before feature expansion.
+Implement crash-recoverable Review Queue lifecycle reconciliation.
