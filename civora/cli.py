@@ -75,6 +75,48 @@ def _resolve_dead_letter(
     return EXIT_OK
 
 
+def _recovery_events(
+    state_dir: Path,
+    output: TextIO,
+    *,
+    component: Optional[str] = None,
+    event_type: Optional[str] = None,
+    status: Optional[str] = None,
+    limit: Optional[int] = None,
+) -> int:
+    ledger = RecoveryEventLedger(_paths(state_dir)["recovery"])
+    events = ledger.all()
+    if component is not None:
+        events = [event for event in events if event.get("component") == component]
+    if event_type is not None:
+        events = [event for event in events if event.get("event_type") == event_type]
+    if status is not None:
+        events = [event for event in events if event.get("status") == status]
+    if limit is not None:
+        events = events[-limit:]
+    _emit({"count": len(events), "events": events}, output)
+    return EXIT_OK
+
+
+def _transaction_detail(state_dir: Path, tx_id: str, output: TextIO) -> int:
+    journal = TransactionJournal(_paths(state_dir)["transactions"])
+    journal.load()
+    record = journal.records.get(tx_id)
+    if record is None:
+        raise TransactionJournalError(f"unknown transaction: {tx_id}")
+    _emit({"transaction": dict(record)}, output)
+    return EXIT_OK
+
+
+def _resolution_audit(state_dir: Path, output: TextIO) -> int:
+    paths = _paths(state_dir)
+    journal = TransactionJournal(paths["transactions"])
+    ledger = RecoveryEventLedger(paths["recovery"])
+    status = journal.resolution_audit_status(ledger)
+    _emit(status, output)
+    return EXIT_OK if status["consistent"] else EXIT_UNHEALTHY
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="civora", description="CIVORA operational control surface")
     parser.add_argument(
@@ -93,6 +135,20 @@ def build_parser() -> argparse.ArgumentParser:
     resolve.add_argument("--action", choices=["requeue", "abort"], required=True)
     resolve.add_argument("--actor", required=True)
     resolve.add_argument("--reason", required=True)
+
+    recovery = subparsers.add_parser("recovery-events", help="inspect durable recovery/audit events")
+    recovery.add_argument("--component")
+    recovery.add_argument("--event-type", choices=sorted(RecoveryEventLedger.EVENT_TYPES))
+    recovery.add_argument("--status")
+    recovery.add_argument("--limit", type=int)
+
+    transaction = subparsers.add_parser("transaction", help="inspect one transaction record")
+    transaction.add_argument("transaction_id")
+
+    subparsers.add_parser(
+        "resolution-audit",
+        help="compare transaction resolution history with the global recovery ledger",
+    )
     return parser
 
 
@@ -116,6 +172,21 @@ def main(argv: Optional[Sequence[str]] = None, *, output: Optional[TextIO] = Non
                 args.reason,
                 output,
             )
+        if args.command == "recovery-events":
+            if args.limit is not None and args.limit < 1:
+                raise ValueError("--limit must be a positive integer")
+            return _recovery_events(
+                state_dir,
+                output,
+                component=args.component,
+                event_type=args.event_type,
+                status=args.status,
+                limit=args.limit,
+            )
+        if args.command == "transaction":
+            return _transaction_detail(state_dir, args.transaction_id, output)
+        if args.command == "resolution-audit":
+            return _resolution_audit(state_dir, output)
     except (TransactionJournalError, RecoveryEventLedgerError, OSError, ValueError) as exc:
         _emit({"error": str(exc), "command": args.command}, output)
         return EXIT_ERROR
