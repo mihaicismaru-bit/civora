@@ -1,0 +1,43 @@
+{
+  "checkpoint": "0042",
+  "title": "Unified Recovery & Health Report",
+  "status": "CODE_COMPLETE_CI_PENDING",
+  "artifacts": [
+    {
+      "path": "civora/health.py",
+      "purpose": "Runtime-wide recovery-aware health aggregation"
+    },
+    {
+      "path": "tests/test_health.py",
+      "purpose": "Automated coverage for healthy, recovered, pending, degraded/corrupt reporting and serialization"
+    },
+    {
+      "path": "docs/checkpoints/0042-unified-recovery-health-report.md",
+      "purpose": "Checkpoint manifest and implementation record"
+    }
+  ],
+  "gates": {
+    "UNIFIED_RUNTIME_HEALTH_VIEW": "PASS_IMPLEMENTATION_REVIEW",
+    "COMPONENT_HEALTH_CLASSIFICATION": "PASS_IMPLEMENTATION_REVIEW",
+    "RECOVERY_VISIBILITY": "PASS_IMPLEMENTATION_REVIEW",
+    "PENDING_TRANSACTION_DEGRADATION": "PASS_IMPLEMENTATION_REVIEW",
+    "FAIL_CLOSED_CORRUPTION_REPORTING": "PASS_IMPLEMENTATION_REVIEW",
+    "HEALTH_REPORT_SERIALIZATION": "PASS_IMPLEMENTATION_REVIEW",
+    "AUTOMATED_TEST_EXECUTION": "PENDING_CI",
+    "WINDOWS_NATIVE_VALIDATION": "PENDING"
+  },
+  "remaining_backlog": [
+    "Durable append-only recovery event ledger",
+    "Orchestrator startup integration and stable health command",
+    "Multiprocess integration tests for story-to-review transactions",
+    "Bounded retry and dead-letter/escalation policy",
+    "Fact Kernel and claim/evidence aggregation",
+    "Editorial approval state machine",
+    "Publication adapters after runtime recovery gates close"
+  ],
+  "blockers": [
+    "Native Windows validation requires a Windows runner",
+    "Latest-head CI must complete before checkpoint closure"
+  ],
+  "next_action": "Add a durable append-only recovery event ledger and wire UnifiedHealthInspector into orchestrator startup."
+}
