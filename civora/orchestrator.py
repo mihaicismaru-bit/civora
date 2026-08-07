@@ -7,8 +7,9 @@ from .checkpoints import StoryCheckpointStore
 from .health import RuntimeHealthReport, UnifiedHealthInspector
 from .models import Source, StoryObject
 from .pipeline import generate_article, generate_content_pack, verify_story
+from .recovery import RecoveryEventLedger
 from .review import ReviewQueue
-from .transactions import TransactionJournal
+from .transactions import TransactionJournal, TransactionJournalError
 
 
 class OrchestratorError(RuntimeError):
@@ -26,6 +27,7 @@ class Orchestrator:
         transaction_journal: Optional[TransactionJournal] = None,
         checkpoint_store: Optional[StoryCheckpointStore] = None,
         health_inspector: Optional[UnifiedHealthInspector] = None,
+        recovery_ledger: Optional[RecoveryEventLedger] = None,
     ):
         self.state_dir = state_dir
         self.state_dir.mkdir(parents=True, exist_ok=True)
@@ -35,12 +37,15 @@ class Orchestrator:
         if self.review_queue is not None and self.transaction_journal is None:
             self.transaction_journal = TransactionJournal(self.state_dir / "transactions.json")
 
+        self.recovery_ledger = recovery_ledger or RecoveryEventLedger(
+            self.state_dir / "recovery_events.json"
+        )
         if health_inspector is None:
             health_inspector = UnifiedHealthInspector(
                 review_queue_path=getattr(self.review_queue, "path", None),
                 transaction_journal_path=getattr(self.transaction_journal, "path", None),
                 checkpoint_dir=self.checkpoint_store.state_dir,
-                recovery_event_ledger_path=self.state_dir / "recovery_events.json",
+                recovery_event_ledger_path=self.recovery_ledger.path,
             )
         self.health_inspector = health_inspector
 
@@ -64,18 +69,35 @@ class Orchestrator:
             return []
         return self.transaction_journal.recover(self._replay_transaction)
 
-    def startup_health_gate(self) -> RuntimeHealthReport:
-        """Validate durable runtime state before accepting new work.
+    def reconcile_resolution_audit(self) -> list[str]:
+        """Repair missing global audit events from durable transaction history.
 
-        Startup is fail-closed on corruption. Pending transactions are replayed
-        before work is accepted, then the runtime is inspected again. New work
-        is allowed only when the final state is healthy or recovered from a
-        valid backup.
+        Resolution history in the transaction journal is the source of truth for
+        operator dead-letter decisions. Mirroring is idempotent, so this method
+        is safe on every startup and repairs a crash between the journal write
+        and the independent recovery-event-ledger append.
+        """
+        if self.transaction_journal is None:
+            return []
+        try:
+            return self.transaction_journal.mirror_resolution_events(self.recovery_ledger)
+        except TransactionJournalError as exc:
+            raise OrchestratorError("startup blocked: resolution audit reconciliation failed") from exc
+
+    def startup_health_gate(self) -> RuntimeHealthReport:
+        """Validate and reconcile durable runtime state before accepting new work.
+
+        Startup is fail-closed on corruption. Missing global dead-letter
+        resolution audit is reconciled from durable transaction history before
+        pending transactions are replayed. The runtime is then inspected again
+        and new work is allowed only when the final state is healthy or was
+        recovered from a valid backup.
         """
         initial = self.health_inspector.inspect()
         if initial.status == "corrupt":
             raise OrchestratorError("startup blocked: durable runtime state is corrupt")
 
+        self.reconcile_resolution_audit()
         self.recover_pending_transactions()
 
         final = self.health_inspector.inspect()
