@@ -2,23 +2,24 @@
   "checkpoint_id": "0067",
   "project": "CIVORA",
   "title": "Editorial Consistency Health and Resume CLI",
-  "state": "CODE_COMPLETE_CI_PENDING",
+  "state": "CLOSED_VALIDATED",
   "evidence": [
     {"type":"prior_validation","workflow_run_id":31218351939,"head_sha":"222e59561f8094f8366dec28921a246f6d25eb72","conclusion":"success","claim":"Checkpoint 0066 passed complete GitHub Actions validation."},
     {"type":"implementation","path":"civora/health.py","claim":"UnifiedHealthInspector exposes cross-store Approval/Review Queue/Transaction Journal consistency as an explicit health component."},
     {"type":"implementation","path":"civora/cli.py","claim":"Operator CLI exposes editorial-consistency and restart-safe resume-approved commands with JSON output and fail-closed errors."},
-    {"type":"test","path":"tests/test_editorial_cli_control.py","claim":"Tests cover degraded health on cross-store mismatch, machine-readable consistency CLI, and restart-safe approved resume through CLI."}
+    {"type":"test","path":"tests/test_editorial_cli_control.py","claim":"Tests cover degraded health on cross-store mismatch, machine-readable consistency CLI, and restart-safe approved resume through CLI."},
+    {"type":"validation","workflow_run_id":31222108679,"head_sha":"71ce34c3d7c5051bf4245f37a2a1ad2d38b06b06","conclusion":"success","claim":"Checkpoint 0067 passed the complete GitHub Actions test workflow."}
   ],
   "gates": [
-    {"gate":"CROSS_STORE_CONSISTENCY_IN_UNIFIED_HEALTH","status":"PASS_IMPLEMENTATION"},
-    {"gate":"UNRECOVERABLE_MISMATCH_DEGRADES_HEALTH","status":"PASS_IMPLEMENTATION"},
-    {"gate":"RECOVERABLE_MISMATCH_VISIBLE_AS_PENDING_TRANSACTION","status":"PASS_IMPLEMENTATION"},
-    {"gate":"MACHINE_READABLE_CONSISTENCY_CLI","status":"PASS_IMPLEMENTATION"},
-    {"gate":"RESTART_SAFE_APPROVED_RESUME_CLI","status":"PASS_IMPLEMENTATION"},
-    {"gate":"CLI_REUSES_PRODUCTION_RECOVERY_PATH","status":"PASS_IMPLEMENTATION"},
-    {"gate":"INVALID_RESUME_FAIL_CLOSED","status":"PASS_IMPLEMENTATION"},
-    {"gate":"OPERATOR_JSON_OUTPUT","status":"PASS_IMPLEMENTATION"},
-    {"gate":"CROSS_PLATFORM_CI","status":"PENDING_CURRENT_CI"}
+    {"gate":"CROSS_STORE_CONSISTENCY_IN_UNIFIED_HEALTH","status":"PASS_VALIDATED"},
+    {"gate":"UNRECOVERABLE_MISMATCH_DEGRADES_HEALTH","status":"PASS_VALIDATED"},
+    {"gate":"RECOVERABLE_MISMATCH_VISIBLE_AS_PENDING_TRANSACTION","status":"PASS_VALIDATED"},
+    {"gate":"MACHINE_READABLE_CONSISTENCY_CLI","status":"PASS_VALIDATED"},
+    {"gate":"RESTART_SAFE_APPROVED_RESUME_CLI","status":"PASS_VALIDATED"},
+    {"gate":"CLI_REUSES_PRODUCTION_RECOVERY_PATH","status":"PASS_VALIDATED"},
+    {"gate":"INVALID_RESUME_FAIL_CLOSED","status":"PASS_VALIDATED"},
+    {"gate":"OPERATOR_JSON_OUTPUT","status":"PASS_VALIDATED"},
+    {"gate":"CROSS_PLATFORM_CI","status":"PASS_VALIDATED"}
   ],
   "completed_gates": [
     "0066 closed validated",
@@ -26,7 +27,7 @@
     "machine-readable consistency inspection exposed through CLI",
     "restart-safe approved-story resume exposed through CLI",
     "CLI path reuses production startup recovery and approval re-entry logic",
-    "regression tests added"
+    "complete GitHub Actions validation passed"
   ],
   "remaining_backlog": [
     "Story Engine constrained strictly to authorized/corroborated facts",
@@ -34,6 +35,6 @@
     "explicit recovery guidance for recoverable vs unrecoverable editorial consistency states",
     "production packaging/readiness review after Story Engine authorization is enforced"
   ],
-  "blockers": ["Current-head cross-platform CI result required before CLOSED_VALIDATED."],
-  "next_action": "Validate checkpoint 0067 in CI; if green, implement the authorized Story Engine gate so drafting consumes only facts allowed by the editorial decision path and supported by durable reconciliation evidence."
+  "blockers": [],
+  "next_action": "Implement the authorized Story Engine gate so drafting consumes only grounded, corroborated and uncontested facts bound to the current editorial authorization path."
 }
