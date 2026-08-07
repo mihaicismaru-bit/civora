@@ -1,6 +1,6 @@
 # CIVORA Checkpoint 0055 — Resolution Audit Inspection
 
-Status: CODE_COMPLETE_CI_PENDING
+Status: CLOSED_VALIDATED
 
 ## Objective
 
@@ -38,36 +38,30 @@ civora --state-dir <path> resolution-audit
 
 No automatic deletion or destructive audit repair command was added to the CLI.
 
-## Validation added
+## Validation
 
-`tests/test_cli.py` now covers:
+GitHub Actions workflow run `31181149845` completed successfully for head `8d1cf32c6b6f510ebdb1aa268eedc853ecfe1c78`.
 
-- recovery-event filtering and limit behavior;
-- transaction detail inspection;
-- detection of a missing resolution mirror;
-- successful idempotent reconciliation through the programmatic API;
-- healthy audit status after reconciliation;
-- visibility of orphan resolution events.
+The full cross-platform test matrix passed, closing the CI gate that was pending when checkpoint 0055 was first written.
 
 ## Gates
 
-- RECOVERY_EVENT_INSPECTION: PASS_IMPLEMENTATION
-- TRANSACTION_DETAIL_INSPECTION: PASS_IMPLEMENTATION
-- RESOLUTION_AUDIT_READ_ONLY_STATUS: PASS_IMPLEMENTATION
-- MISSING_MIRROR_DETECTION: PASS_IMPLEMENTATION
-- ORPHAN_AUDIT_VISIBILITY: PASS_IMPLEMENTATION
-- IDEMPOTENT_PROGRAMMATIC_RECONCILIATION: PASS_IMPLEMENTATION
+- RECOVERY_EVENT_INSPECTION: PASS
+- TRANSACTION_DETAIL_INSPECTION: PASS
+- RESOLUTION_AUDIT_READ_ONLY_STATUS: PASS
+- MISSING_MIRROR_DETECTION: PASS
+- ORPHAN_AUDIT_VISIBILITY: PASS
+- IDEMPOTENT_PROGRAMMATIC_RECONCILIATION: PASS
 - SILENT_AUDIT_DELETION: ABSENT
-- CROSS_PLATFORM_TEST_MATRIX: PENDING_CURRENT_CI
+- CROSS_PLATFORM_TEST_MATRIX: PASS
 
-## Remaining backlog
+## Remaining backlog at closure
 
-1. Complete CI validation for checkpoint 0055.
-2. Begin durable Fact Kernel implementation.
-3. Add claim/evidence reconciliation on top of Fact Kernel.
-4. Add editorial approval state machine.
-5. Expand operator documentation and runtime runbooks after the Fact Kernel interfaces stabilize.
+1. Durable Fact Kernel.
+2. Claim/evidence reconciliation.
+3. Editorial approval state machine.
+4. Expanded operator runbooks.
 
-## Next action
+## Closure
 
-If CI is green, start the durable Fact Kernel with deterministic fact identity, provenance/evidence references, atomic persistence, validation, and tests. If CI fails, the failing regression remains priority 1.
+Checkpoint 0055 is `CLOSED_VALIDATED`. Development proceeded into the accelerated editorial-engine phase with checkpoint 0056.
