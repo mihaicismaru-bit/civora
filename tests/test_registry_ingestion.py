@@ -47,6 +47,19 @@ class RegistryIngestionTests(unittest.TestCase):
             with self.assertRaises(SourceRegistryError):
                 SourceRegistry(path)
 
+    def test_registry_upsert_preserves_concurrent_writer_changes(self):
+        with TemporaryDirectory() as td:
+            path = Path(td) / "sources.json"
+            first_writer = SourceRegistry(path)
+            stale_writer = SourceRegistry(path)
+            first = Source("ISU", "official", ["Vâlcea"], .98, .95, .95, .90, .95, .05)
+            second = Source("Primărie", "official", ["Brezoi"], .95, .90, .90, .85, .90, .08)
+            first_writer.upsert(first)
+            stale_writer.upsert(second)
+            reloaded = SourceRegistry(path)
+            self.assertIsNotNone(reloaded.get(first.id))
+            self.assertIsNotNone(reloaded.get(second.id))
+
     def test_ingestion_deduplicates_and_rejects_invalid(self):
         with TemporaryDirectory() as td:
             store = SignalStore(Path(td) / "signals.json")
@@ -61,6 +74,27 @@ class RegistryIngestionTests(unittest.TestCase):
             self.assertEqual(len(result.accepted), 1)
             self.assertEqual(len(result.duplicate_ids), 1)
             self.assertEqual(len(result.rejected), 1)
+
+    def test_signal_store_preserves_concurrent_writer_changes(self):
+        with TemporaryDirectory() as td:
+            path = Path(td) / "signals.json"
+            first_writer = SignalStore(path)
+            stale_writer = SignalStore(path)
+            first_writer.ingest([{
+                "title": "Prima știre",
+                "summary": "Prima versiune.",
+                "geography": ["Vâlcea"],
+                "source_ids": ["s1"],
+            }])
+            stale_writer.ingest([{
+                "title": "A doua știre",
+                "summary": "A doua versiune.",
+                "geography": ["Brezoi"],
+                "source_ids": ["s2"],
+            }])
+            reloaded = SignalStore(path)
+            self.assertEqual(len(reloaded.records), 2)
+            self.assertEqual(len(reloaded.fingerprints), 2)
 
     def test_signal_store_uses_common_atomic_json_store(self):
         with TemporaryDirectory() as td:
@@ -156,6 +190,21 @@ class RegistryIngestionTests(unittest.TestCase):
             payload = json.loads(queue_path.read_text(encoding="utf-8"))
             self.assertEqual(payload["schema_version"], 2)
             self.assertIn("checksum", payload)
+
+    def test_review_queue_preserves_concurrent_writer_changes(self):
+        with TemporaryDirectory() as td:
+            path = Path(td) / "review.json"
+            first_writer = ReviewQueue(path)
+            stale_writer = ReviewQueue(path)
+            source = Source("Anonim", "social", ["Vâlcea"], .1, .1, .5, .2, .1, .9)
+            signal = Signal("Zvon", "Afirmație.", ["Vâlcea"], [source.id], .7, .7, .8, .2, .95)
+            kernel = FactKernel([], ["Afirmația"], [], None, [])
+            first = StoryObject(signal=signal, fact_kernel=kernel)
+            second = StoryObject(signal=signal, fact_kernel=kernel)
+            first_writer.enqueue(first, "first")
+            stale_writer.enqueue(second, "second")
+            reloaded = ReviewQueue(path)
+            self.assertEqual(len(reloaded.pending()), 2)
 
     def test_review_queue_recovers_from_backup(self):
         with TemporaryDirectory() as td:
