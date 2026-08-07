@@ -1,0 +1,27 @@
+{
+  "checkpoint_id": "0059",
+  "project": "CIVORA",
+  "title": "Conflict/Dispute Resolution Gate",
+  "state": "CODE_COMPLETE_CI_PENDING",
+  "accelerated_editorial_phase": true,
+  "gates": [
+    {"gate": "REPORT_ALIGNMENT_FAIL_CLOSED", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/editorial_gate.py", "tests/test_editorial_gate.py"]},
+    {"gate": "CORROBORATION_REQUIRED_FOR_AUTO_DRAFT", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/editorial_gate.py", "tests/test_editorial_gate.py"]},
+    {"gate": "CONFLICT_BLOCKS_AUTO_DRAFT", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/editorial_gate.py", "tests/test_editorial_gate.py"]},
+    {"gate": "DURABLE_EDITORIAL_DECISION", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/editorial_gate_store.py"]},
+    {"gate": "ORCHESTRATOR_PRE_DRAFT_ENFORCEMENT", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/orchestrator.py", "tests/test_editorial_gate.py"]},
+    {"gate": "TRANSACTIONAL_REVIEW_ROUTING", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/orchestrator.py", "civora/review.py", "tests/test_editorial_gate.py"]},
+    {"gate": "CROSS_PLATFORM_CI", "status": "PENDING_CURRENT_HEAD_CI"}
+  ],
+  "remaining_backlog": [
+    "editorial approval state machine",
+    "unified health wiring for editorial durable stores",
+    "Story Engine from approved/corroborated facts",
+    "operator editorial inspection commands",
+    "end-to-end approval/rejection recovery tests"
+  ],
+  "blockers": [
+    "Current-head CI result required before CLOSED_VALIDATED can be declared."
+  ],
+  "next_action": "If CI passes, implement durable Editorial Approval State Machine with auditable transitions and pipeline re-entry."
+}
