@@ -1,0 +1,30 @@
+{
+  "checkpoint": "0043",
+  "title": "Recovery Event Ledger",
+  "status": "CODE_COMPLETE_CI_PENDING",
+  "artifacts": [
+    "civora/recovery.py",
+    "civora/health.py",
+    "tests/test_recovery.py",
+    "tests/test_health.py",
+    "docs/checkpoints/0043-recovery-event-ledger.md"
+  ],
+  "completed_gates": {
+    "DURABLE_RECOVERY_EVENT_LEDGER": "PASS_IMPLEMENTATION_REVIEW",
+    "APPEND_ONLY_COMPONENT_API": "PASS_IMPLEMENTATION_REVIEW",
+    "ATOMIC_EVENT_APPEND": "PASS_IMPLEMENTATION_REVIEW",
+    "STALE_WRITER_EVENT_PRESERVATION": "TEST_ADDED",
+    "HEALTH_TO_AUDIT_INTEGRATION": "PASS_IMPLEMENTATION_REVIEW",
+    "LEDGER_FAIL_CLOSED": "PASS_IMPLEMENTATION_REVIEW"
+  },
+  "pending_gates": {
+    "PYTHON_3_11_3_13_CI": "PENDING_CURRENT_HEAD",
+    "WINDOWS_NATIVE": "PENDING",
+    "ORCHESTRATOR_STARTUP_HEALTH_GATE": "NEXT"
+  },
+  "blockers": [
+    "Native Windows validation requires a Windows runner.",
+    "Orchestrator startup does not yet enforce health-based fail-closed/recovery policy."
+  ],
+  "next_action": "Integrate UnifiedHealthInspector into orchestrator startup, fail closed on corruption, recover prepared transactions, persist recovery observations, and re-inspect before processing new work."
+}
