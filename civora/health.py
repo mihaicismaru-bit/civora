@@ -7,6 +7,11 @@ import re
 from typing import Callable, List, Optional
 
 from .checkpoints import StoryCheckpointError, StoryCheckpointStore
+from .editorial_approval import EditorialApprovalError, EditorialApprovalStore
+from .editorial_gate_store import EditorialGateStore, EditorialGateStoreError
+from .fact_contradictions import FactContradictionStore, FactContradictionStoreError
+from .fact_kernel import FactKernelStore, FactKernelStoreError
+from .fact_reconciliation import FactReconciliationStore, FactReconciliationStoreError
 from .ingestion import SignalStore, SignalStoreError
 from .recovery import RecoveryEventLedger, RecoveryEventLedgerError
 from .registry import SourceRegistry, SourceRegistryError
@@ -42,15 +47,14 @@ class RuntimeHealthReport:
 class UnifiedHealthInspector:
     """Build one recovery-aware health view over CIVORA durable state.
 
-    Probes intentionally instantiate the production stores. This means a health
-    inspection may repair a corrupt primary generation from a valid backup, and
-    that recovery is surfaced as ``recovered_from_backup`` rather than hidden.
-    Corrupt state is never rewritten when no valid backup exists.
+    Probes intentionally instantiate production stores. Health inspection can
+    therefore repair a corrupt primary generation from a valid backup and report
+    that recovery explicitly. Unrecoverable corruption is surfaced fail-closed.
 
-    When a recovery-event ledger is configured, component-health transitions are
-    durably recorded after the report is assembled. Repeated observations of the
-    same state are coalesced by the ledger, while transitions back to healthy are
-    retained so later recurrences remain auditable.
+    Editorial stores are part of the same startup integrity boundary as the core
+    runtime stores. Pending review/approval work is normal editorial state and
+    does not by itself degrade runtime health; malformed or unrecoverable durable
+    editorial state does.
     """
 
     _SEVERITY = {
@@ -61,7 +65,7 @@ class UnifiedHealthInspector:
         "corrupt": 3,
     }
     _CHECKPOINT_RE = re.compile(
-        r"^(?P<story_id>.+)_v(?P<version>\d+)_(?P<label>signal|verified|drafted|packaged)\.json$"
+        r"^(?P<story_id>.+)_v(?P<version>\d+)_(?P<label>signal|verified|editorial_review|editorial_approved|drafted|packaged)\.json$"
     )
 
     def __init__(
@@ -73,6 +77,11 @@ class UnifiedHealthInspector:
         transaction_journal_path: Optional[Path] = None,
         checkpoint_dir: Optional[Path] = None,
         recovery_event_ledger_path: Optional[Path] = None,
+        fact_kernel_path: Optional[Path] = None,
+        fact_reconciliation_path: Optional[Path] = None,
+        fact_contradiction_path: Optional[Path] = None,
+        editorial_gate_path: Optional[Path] = None,
+        editorial_approval_path: Optional[Path] = None,
     ):
         self.source_registry_path = source_registry_path
         self.signal_store_path = signal_store_path
@@ -80,6 +89,11 @@ class UnifiedHealthInspector:
         self.transaction_journal_path = transaction_journal_path
         self.checkpoint_dir = checkpoint_dir
         self.recovery_event_ledger_path = recovery_event_ledger_path
+        self.fact_kernel_path = fact_kernel_path
+        self.fact_reconciliation_path = fact_reconciliation_path
+        self.fact_contradiction_path = fact_contradiction_path
+        self.editorial_gate_path = editorial_gate_path
+        self.editorial_approval_path = editorial_approval_path
 
     @classmethod
     def _overall_status(cls, components: List[ComponentHealth]) -> str:
@@ -128,6 +142,40 @@ class UnifiedHealthInspector:
             details=payload,
         )
 
+    @staticmethod
+    def _probe_domain_store(
+        name: str,
+        path: Path,
+        factory: Callable[[Path], object],
+        expected_errors: tuple[type[Exception], ...],
+    ) -> ComponentHealth:
+        """Probe a durable domain store through its public health contract."""
+        try:
+            instance = factory(path)
+            health = instance.health()
+        except expected_errors as exc:
+            return ComponentHealth(
+                name=name,
+                status="corrupt",
+                details={"path": str(path), "error": str(exc)},
+            )
+        except Exception as exc:
+            return ComponentHealth(
+                name=name,
+                status="degraded",
+                details={"path": str(path), "error": str(exc)},
+            )
+
+        status = health.get("status", "corrupt")
+        if status not in {"healthy", "recovered_from_backup", "corrupt"}:
+            status = "corrupt"
+        details = {"path": str(path), **{key: value for key, value in health.items() if key != "status"}}
+        if status == "corrupt" and "error" not in details:
+            messages = details.get("details") or []
+            if messages:
+                details["error"] = messages[0]
+        return ComponentHealth(name=name, status=status, details=details)
+
     def _probe_transactions(self, path: Path) -> ComponentHealth:
         component = self._probe_store(
             "transaction_journal",
@@ -147,17 +195,9 @@ class UnifiedHealthInspector:
         if component.status in {"corrupt", "degraded"}:
             return component
         if component.details.get("dead_letter_count", 0) > 0:
-            return ComponentHealth(
-                name=component.name,
-                status="degraded",
-                details=component.details,
-            )
+            return ComponentHealth(component.name, "degraded", component.details)
         if component.details.get("prepared_count", 0) > 0:
-            return ComponentHealth(
-                name=component.name,
-                status="pending_transaction",
-                details=component.details,
-            )
+            return ComponentHealth(component.name, "pending_transaction", component.details)
         return component
 
     def _probe_checkpoints(self, directory: Path) -> ComponentHealth:
@@ -266,6 +306,51 @@ class UnifiedHealthInspector:
             components.append(self._probe_transactions(self.transaction_journal_path))
         if self.checkpoint_dir is not None:
             components.append(self._probe_checkpoints(self.checkpoint_dir))
+        if self.fact_kernel_path is not None:
+            components.append(
+                self._probe_domain_store(
+                    "fact_kernel",
+                    self.fact_kernel_path,
+                    FactKernelStore,
+                    (FactKernelStoreError,),
+                )
+            )
+        if self.fact_reconciliation_path is not None:
+            components.append(
+                self._probe_domain_store(
+                    "fact_reconciliation",
+                    self.fact_reconciliation_path,
+                    FactReconciliationStore,
+                    (FactReconciliationStoreError,),
+                )
+            )
+        if self.fact_contradiction_path is not None:
+            components.append(
+                self._probe_domain_store(
+                    "fact_contradictions",
+                    self.fact_contradiction_path,
+                    FactContradictionStore,
+                    (FactContradictionStoreError,),
+                )
+            )
+        if self.editorial_gate_path is not None:
+            components.append(
+                self._probe_domain_store(
+                    "editorial_gate",
+                    self.editorial_gate_path,
+                    EditorialGateStore,
+                    (EditorialGateStoreError,),
+                )
+            )
+        if self.editorial_approval_path is not None:
+            components.append(
+                self._probe_domain_store(
+                    "editorial_approval",
+                    self.editorial_approval_path,
+                    EditorialApprovalStore,
+                    (EditorialApprovalError,),
+                )
+            )
         if self.recovery_event_ledger_path is not None:
             components.append(
                 self._probe_store(
