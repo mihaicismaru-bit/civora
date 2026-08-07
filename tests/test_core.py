@@ -5,6 +5,7 @@ from tempfile import TemporaryDirectory
 from civora.models import Source, Signal, Evidence, FactKernel, StoryObject, StoryState
 from civora.orchestrator import Orchestrator
 
+
 class CivoraCoreTests(unittest.TestCase):
     def make_story(self):
         s1 = Source("Primărie", "official", ["Râmnicu Vâlcea"], 0.95, 0.90, 0.80, 0.85, 0.90, 0.10)
@@ -27,16 +28,24 @@ class CivoraCoreTests(unittest.TestCase):
             next_expected_event="Ridicarea restricției după finalizarea lucrărilor.",
             evidence=evidence
         )
-        return StoryObject(signal=signal, fact_kernel=kernel), {s1.id:s1, s2.id:s2}
+        return StoryObject(signal=signal, fact_kernel=kernel), {s1.id: s1, s2.id: s2}
 
     def test_end_to_end_pipeline(self):
         story, sources = self.make_story()
         with TemporaryDirectory() as td:
-            result = Orchestrator(Path(td)).run(story, sources)
+            root = Path(td)
+            result = Orchestrator(root).run(story, sources)
             self.assertEqual(result.state, StoryState.PACKAGED)
             self.assertGreaterEqual(result.trust_score, 70)
             self.assertIn("facebook", result.content_pack)
-            self.assertEqual(len(list(Path(td).glob("*.json"))), 4)
+
+            checkpoint_files = list(root.glob(f"{story.id}_v{story.version}_*.json"))
+            self.assertEqual(len(checkpoint_files), 4)
+            self.assertEqual(
+                {path.stem.rsplit("_", 1)[-1] for path in checkpoint_files},
+                {"signal", "verified", "drafted", "packaged"},
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
