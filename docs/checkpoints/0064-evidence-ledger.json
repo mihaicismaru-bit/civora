@@ -1,0 +1,51 @@
+{
+  "checkpoint_id": "0064",
+  "project": "CIVORA",
+  "title": "Windows Lock Contention Hardening",
+  "state": "CODE_COMPLETE_CI_PENDING",
+  "evidence": [
+    {
+      "type": "failure_evidence",
+      "workflow_run_id": 31210341407,
+      "head_sha": "217cb4e9f9ea7dc618bcd84ba0949536a3e1846f",
+      "claim": "Linux Python 3.11/3.12/3.13 passed; Windows native failed in multiprocess Review Queue locking with PermissionError during exclusive lock creation."
+    },
+    {
+      "type": "implementation",
+      "path": "civora/locking.py",
+      "claim": "PermissionError is classified as contention only when the lock path exists; otherwise genuine permission failure propagates fail-closed."
+    },
+    {
+      "type": "test",
+      "path": "tests/test_locking.py",
+      "claim": "Deterministic tests cover Windows-style access-denied contention and genuine permission failure propagation."
+    },
+    {
+      "type": "regression_test",
+      "path": "tests/test_multiprocess_recovery.py",
+      "claim": "Existing native multiprocess Review Queue writer test remains the production-level regression gate."
+    }
+  ],
+  "gates": [
+    {"gate": "WINDOWS_PERMISSION_RACE_CLASSIFICATION", "status": "PASS_IMPLEMENTATION"},
+    {"gate": "GENUINE_PERMISSION_FAILURE_FAIL_CLOSED", "status": "PASS_IMPLEMENTATION"},
+    {"gate": "BOUNDED_LOCK_CONTENTION", "status": "PASS_IMPLEMENTATION"},
+    {"gate": "MULTIPROCESS_REVIEW_QUEUE_REGRESSION", "status": "PENDING_CURRENT_CI"},
+    {"gate": "CROSS_PLATFORM_CI", "status": "PENDING_CURRENT_CI"}
+  ],
+  "completed_gates": [
+    "Windows access-denied exclusive-create race classified without masking unrelated permission failures",
+    "bounded contention path shared with FileExistsError",
+    "deterministic regression tests added"
+  ],
+  "remaining_backlog": [
+    "approval/Review Queue/transaction consistency inspection and health wiring",
+    "crash/recovery validation through approved pipeline re-entry",
+    "Story Engine constrained to authorized/corroborated facts",
+    "operator runbooks"
+  ],
+  "blockers": [
+    "Current-head cross-platform CI result required before CLOSED_VALIDATED."
+  ],
+  "next_action": "Validate repaired head in CI; if green, implement approval/Review Queue/transaction consistency inspection and fail-closed health wiring."
+}
