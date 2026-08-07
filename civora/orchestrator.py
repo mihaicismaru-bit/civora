@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Dict, Optional
 
 from .checkpoints import StoryCheckpointStore
+from .health import RuntimeHealthReport, UnifiedHealthInspector
 from .models import Source, StoryObject
 from .pipeline import generate_article, generate_content_pack, verify_story
 from .review import ReviewQueue
@@ -16,6 +17,7 @@ class OrchestratorError(RuntimeError):
 
 class Orchestrator:
     STORY_TO_REVIEW = "story_to_review"
+    STARTUP_ALLOWED = {"healthy", "recovered_from_backup"}
 
     def __init__(
         self,
@@ -23,6 +25,7 @@ class Orchestrator:
         review_queue: Optional[ReviewQueue] = None,
         transaction_journal: Optional[TransactionJournal] = None,
         checkpoint_store: Optional[StoryCheckpointStore] = None,
+        health_inspector: Optional[UnifiedHealthInspector] = None,
     ):
         self.state_dir = state_dir
         self.state_dir.mkdir(parents=True, exist_ok=True)
@@ -31,6 +34,15 @@ class Orchestrator:
         self.checkpoint_store = checkpoint_store or StoryCheckpointStore(self.state_dir)
         if self.review_queue is not None and self.transaction_journal is None:
             self.transaction_journal = TransactionJournal(self.state_dir / "transactions.json")
+
+        if health_inspector is None:
+            health_inspector = UnifiedHealthInspector(
+                review_queue_path=getattr(self.review_queue, "path", None),
+                transaction_journal_path=getattr(self.transaction_journal, "path", None),
+                checkpoint_dir=self.checkpoint_store.state_dir,
+                recovery_event_ledger_path=self.state_dir / "recovery_events.json",
+            )
+        self.health_inspector = health_inspector
 
     def save_checkpoint(self, story: StoryObject, label: str) -> Path:
         return self.checkpoint_store.save(story, label)
@@ -52,6 +64,27 @@ class Orchestrator:
             return []
         return self.transaction_journal.recover(self._replay_transaction)
 
+    def startup_health_gate(self) -> RuntimeHealthReport:
+        """Validate durable runtime state before accepting new work.
+
+        Startup is fail-closed on corruption. Pending transactions are replayed
+        before work is accepted, then the runtime is inspected again. New work
+        is allowed only when the final state is healthy or recovered from a
+        valid backup.
+        """
+        initial = self.health_inspector.inspect()
+        if initial.status == "corrupt":
+            raise OrchestratorError("startup blocked: durable runtime state is corrupt")
+
+        self.recover_pending_transactions()
+
+        final = self.health_inspector.inspect()
+        if final.status not in self.STARTUP_ALLOWED:
+            raise OrchestratorError(
+                f"startup blocked: runtime health remains {final.status} after recovery"
+            )
+        return final
+
     def _enqueue_blocked_story(self, story: StoryObject, reason: str) -> None:
         if self.review_queue is None:
             return
@@ -68,7 +101,7 @@ class Orchestrator:
         self.transaction_journal.commit(tx_id)
 
     def run(self, story: StoryObject, source_map: Dict[str, Source]) -> StoryObject:
-        self.recover_pending_transactions()
+        self.startup_health_gate()
         self.save_checkpoint(story, "signal")
         verify_story(story, source_map)
         self.save_checkpoint(story, "verified")
