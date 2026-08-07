@@ -21,11 +21,13 @@ class RecoveryEventLedger:
 
     Existing events are never edited or removed through this API. Appends use the
     common AtomicJsonStore read-modify-write primitive so concurrent writers do
-    not lose previously committed events.
+    not lose previously committed events. Callers may supply a stable ``event_id``
+    to make cross-store reconciliation idempotent: replaying an identical event
+    is a no-op, while reusing an id for different content fails closed.
     """
 
     SCHEMA_VERSION = 1
-    EVENT_TYPES = {"recovery", "degradation", "corruption", "pending_transaction"}
+    EVENT_TYPES = {"recovery", "degradation", "corruption", "pending_transaction", "resolution"}
 
     def __init__(
         self,
@@ -83,20 +85,35 @@ class RecoveryEventLedger:
         status: str,
         details: Optional[dict] = None,
         timestamp: Optional[str] = None,
+        event_id: Optional[str] = None,
     ) -> dict:
         if event_type not in self.EVENT_TYPES:
             raise RecoveryEventLedgerError(f"unsupported recovery event type: {event_type}")
         event = {
-            "id": str(uuid4()),
+            "id": event_id or str(uuid4()),
             "timestamp": timestamp or _utc_now(),
             "component": component,
             "event_type": event_type,
             "status": status,
             "details": dict(details or {}),
         }
+        if not isinstance(event["id"], str) or not event["id"].strip():
+            raise RecoveryEventLedgerError("recovery event id must be a non-empty string")
+
+        existing: Optional[dict] = None
 
         def mutate(payload: dict) -> None:
+            nonlocal existing
             events = payload.setdefault("events", [])
+            for current in events:
+                if current.get("id") != event["id"]:
+                    continue
+                existing = dict(current)
+                if current != event:
+                    raise RecoveryEventLedgerError(
+                        f"recovery event id already exists with different content: {event['id']}"
+                    )
+                return
             events.append(event)
 
         try:
@@ -105,7 +122,7 @@ class RecoveryEventLedger:
             raise RecoveryEventLedgerError("cannot append recovery event") from exc
         self.events = list(committed["events"])
         self.recovered_from_backup = self.store.recovered_from_backup
-        return dict(event)
+        return dict(existing or event)
 
     def all(self) -> list[dict]:
         try:
