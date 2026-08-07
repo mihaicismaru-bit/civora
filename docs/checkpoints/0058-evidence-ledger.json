@@ -2,18 +2,18 @@
   "checkpoint_id": "0058",
   "project": "CIVORA",
   "title": "Explicit Contradiction Engine",
-  "state": "CODE_COMPLETE_CI_PENDING",
+  "state": "CLOSED_VALIDATED",
   "accelerated_editorial_phase": true,
   "gates": [
-    {"gate": "EXPLICIT_EVIDENCE_POLARITY", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/models.py", "civora/contradictions.py"]},
-    {"gate": "NO_LEXICAL_NEGATION_HEURISTIC", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/contradictions.py"]},
-    {"gate": "INDEPENDENT_SOURCE_CONTRADICTION_SCORING", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/contradictions.py", "tests/test_contradictions.py"]},
-    {"gate": "DISPUTED_OUTCOME", "status": "PASS_IMPLEMENTATION", "evidence": ["tests/test_contradictions.py"]},
-    {"gate": "CONTRADICTED_OUTCOME", "status": "PASS_IMPLEMENTATION", "evidence": ["tests/test_contradictions.py"]},
-    {"gate": "INVALID_RELATION_FAIL_CLOSED", "status": "PASS_IMPLEMENTATION", "evidence": ["tests/test_contradictions.py"]},
-    {"gate": "DURABLE_CONTRADICTION_REPORT", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/fact_contradictions.py", "tests/test_contradictions.py"]},
-    {"gate": "ORCHESTRATOR_CONTRADICTION_WIRING", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/orchestrator.py", "tests/test_contradictions.py"]},
-    {"gate": "CROSS_PLATFORM_CI", "status": "PENDING_CURRENT_HEAD_CI"}
+    {"gate": "EXPLICIT_EVIDENCE_POLARITY", "status": "PASS", "evidence": ["civora/models.py", "civora/contradictions.py"]},
+    {"gate": "NO_LEXICAL_NEGATION_HEURISTIC", "status": "PASS", "evidence": ["civora/contradictions.py"]},
+    {"gate": "INDEPENDENT_SOURCE_CONTRADICTION_SCORING", "status": "PASS", "evidence": ["civora/contradictions.py", "tests/test_contradictions.py"]},
+    {"gate": "DISPUTED_OUTCOME", "status": "PASS", "evidence": ["tests/test_contradictions.py"]},
+    {"gate": "CONTRADICTED_OUTCOME", "status": "PASS", "evidence": ["tests/test_contradictions.py"]},
+    {"gate": "INVALID_RELATION_FAIL_CLOSED", "status": "PASS", "evidence": ["tests/test_contradictions.py"]},
+    {"gate": "DURABLE_CONTRADICTION_REPORT", "status": "PASS", "evidence": ["civora/fact_contradictions.py", "tests/test_contradictions.py"]},
+    {"gate": "ORCHESTRATOR_CONTRADICTION_WIRING", "status": "PASS", "evidence": ["civora/orchestrator.py", "tests/test_contradictions.py"]},
+    {"gate": "CROSS_PLATFORM_CI", "status": "PASS", "workflow_run_id": 31186209714, "head_sha": "027e0fe22b7052dec5a1ad859981f0cccf460bf4"}
   ],
   "remaining_backlog": [
     "conflict/dispute resolution gate combining reconciliation and contradiction reports",
@@ -22,8 +22,6 @@
     "Story Engine generation from approved reconciled facts",
     "operator inspection commands for editorial evidence/conflict state"
   ],
-  "blockers": [
-    "Current-head CI result required before CLOSED_VALIDATED can be declared."
-  ],
+  "blockers": [],
   "next_action": "Implement deterministic conflict/dispute resolution and enforce it before article drafting."
 }
