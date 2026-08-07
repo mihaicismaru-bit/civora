@@ -6,15 +6,20 @@ from pathlib import Path
 from typing import Optional, Sequence, TextIO
 import sys
 
+from .checkpoints import StoryCheckpointError
 from .editorial_approval import EditorialApprovalError, EditorialApprovalStore
+from .editorial_consistency import EditorialConsistencyInspector
 from .editorial_gate_store import EditorialGateStore, EditorialGateStoreError
 from .editorial_resolution import EditorialResolutionCoordinator, EditorialResolutionError
 from .fact_contradictions import FactContradictionStore, FactContradictionStoreError
 from .fact_kernel import FactKernelStore, FactKernelStoreError
 from .fact_reconciliation import FactReconciliationStore, FactReconciliationStoreError
 from .health import UnifiedHealthInspector
+from .orchestrator import OrchestratorError
 from .recovery import RecoveryEventLedger, RecoveryEventLedgerError
+from .resume import resume_approved_story
 from .review import ReviewQueueError
+from .story_codec import StoryCodecError
 from .transactions import TransactionJournal, TransactionJournalError
 
 EXIT_OK = 0
@@ -109,6 +114,15 @@ def _resolution_audit(state_dir: Path, output: TextIO) -> int:
     return EXIT_OK if status["consistent"] else EXIT_UNHEALTHY
 
 
+def _editorial_consistency(state_dir: Path, output: TextIO) -> int:
+    paths = _paths(state_dir)
+    status = EditorialConsistencyInspector(
+        paths["editorial_approval"], paths["review"], paths["transactions"]
+    ).inspect()
+    _emit(status, output)
+    return EXIT_OK if status["status"] == "healthy" else EXIT_UNHEALTHY
+
+
 def _editorial_story(state_dir: Path, story_id: str, output: TextIO) -> int:
     paths = _paths(state_dir)
     kernel = FactKernelStore(paths["fact_kernel"]).load_story(story_id)
@@ -145,6 +159,14 @@ def _decide_approval(state_dir: Path, case_id: str, action: str, actor: str, rea
     return EXIT_OK
 
 
+def _resume_approved(state_dir: Path, story_id: str, version: int, output: TextIO) -> int:
+    if version < 1:
+        raise ValueError("--version must be a positive integer")
+    story = resume_approved_story(state_dir, story_id, version)
+    _emit({"story": story.to_dict(), "resumed": True}, output)
+    return EXIT_OK
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="civora", description="CIVORA operational control surface")
     parser.add_argument("--state-dir", type=Path, default=Path("state"),
@@ -168,6 +190,7 @@ def build_parser() -> argparse.ArgumentParser:
     transaction = subparsers.add_parser("transaction", help="inspect one transaction record")
     transaction.add_argument("transaction_id")
     subparsers.add_parser("resolution-audit", help="compare transaction resolution history with global recovery ledger")
+    subparsers.add_parser("editorial-consistency", help="inspect Approval/Review Queue/Transaction Journal consistency")
 
     editorial_story = subparsers.add_parser("editorial-story", help="inspect durable editorial evidence and decision chain")
     editorial_story.add_argument("story_id")
@@ -180,6 +203,9 @@ def build_parser() -> argparse.ArgumentParser:
     decide_approval.add_argument("--action", choices=sorted(EditorialApprovalStore.FINAL_STATES), required=True)
     decide_approval.add_argument("--actor", required=True)
     decide_approval.add_argument("--reason", required=True)
+    resume = subparsers.add_parser("resume-approved", help="restart-safely resume an approved story from durable state")
+    resume.add_argument("story_id")
+    resume.add_argument("--version", type=int, default=1)
     return parser
 
 
@@ -199,14 +225,18 @@ def main(argv: Optional[Sequence[str]] = None, *, output: Optional[TextIO] = Non
                                     status=args.status, limit=args.limit)
         if args.command == "transaction": return _transaction_detail(state_dir, args.transaction_id, output)
         if args.command == "resolution-audit": return _resolution_audit(state_dir, output)
+        if args.command == "editorial-consistency": return _editorial_consistency(state_dir, output)
         if args.command == "editorial-story": return _editorial_story(state_dir, args.story_id, output)
         if args.command == "approval-cases": return _approval_cases(state_dir, output, state=args.state)
         if args.command == "approval-case": return _approval_case(state_dir, args.case_id, output)
         if args.command == "decide-approval":
             return _decide_approval(state_dir, args.case_id, args.action, args.actor, args.reason, output)
+        if args.command == "resume-approved":
+            return _resume_approved(state_dir, args.story_id, args.version, output)
     except (TransactionJournalError, RecoveryEventLedgerError, FactKernelStoreError,
             FactReconciliationStoreError, FactContradictionStoreError, EditorialGateStoreError,
-            EditorialApprovalError, EditorialResolutionError, ReviewQueueError, OSError, ValueError) as exc:
+            EditorialApprovalError, EditorialResolutionError, ReviewQueueError, StoryCheckpointError,
+            StoryCodecError, OrchestratorError, OSError, ValueError) as exc:
         _emit({"error": str(exc), "command": args.command}, output)
         return EXIT_ERROR
     _emit({"error": f"unsupported command: {args.command}"}, output)
