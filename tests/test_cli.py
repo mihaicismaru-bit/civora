@@ -7,6 +7,7 @@ from tempfile import TemporaryDirectory
 import unittest
 
 from civora.cli import EXIT_ERROR, EXIT_OK, EXIT_UNHEALTHY, main
+from civora.editorial_approval import EditorialApprovalStore
 from civora.recovery import RecoveryEventLedger
 from civora.transactions import TransactionJournal
 
@@ -202,6 +203,108 @@ class OperationalCliTests(unittest.TestCase):
             self.assertEqual(code, EXIT_UNHEALTHY)
             self.assertEqual(payload["missing_event_ids"], [])
             self.assertEqual(payload["orphan_event_ids"], ["tx-resolution:orphan"])
+
+    @staticmethod
+    def _review_decision(story_id: str = "story-editorial") -> dict:
+        return {
+            "decision_id": "decision-1",
+            "story_id": story_id,
+            "kernel_semantic_hash": "a" * 64,
+            "decision": "review",
+        }
+
+    def test_approval_cases_can_be_listed_filtered_and_inspected(self) -> None:
+        with TemporaryDirectory() as tmp:
+            store = EditorialApprovalStore(Path(tmp) / "editorial_approval.json")
+            case = store.ensure_pending(self._review_decision())
+
+            listed = StringIO()
+            code = main(
+                ["--state-dir", tmp, "approval-cases", "--state", "pending"],
+                output=listed,
+            )
+            payload = json.loads(listed.getvalue())
+            self.assertEqual(code, EXIT_OK)
+            self.assertEqual(payload["count"], 1)
+            self.assertEqual(payload["cases"][0]["case_id"], case["case_id"])
+
+            detail = StringIO()
+            code = main(
+                ["--state-dir", tmp, "approval-case", case["case_id"]],
+                output=detail,
+            )
+            self.assertEqual(code, EXIT_OK)
+            self.assertEqual(json.loads(detail.getvalue())["case"]["state"], "pending")
+
+    def test_decide_approval_is_audited_and_terminal(self) -> None:
+        with TemporaryDirectory() as tmp:
+            store = EditorialApprovalStore(Path(tmp) / "editorial_approval.json")
+            case = store.ensure_pending(self._review_decision())
+            output = StringIO()
+            code = main(
+                [
+                    "--state-dir",
+                    tmp,
+                    "decide-approval",
+                    case["case_id"],
+                    "--action",
+                    "approved",
+                    "--actor",
+                    "editor-1",
+                    "--reason",
+                    "supporting evidence verified",
+                ],
+                output=output,
+            )
+            resolved = json.loads(output.getvalue())["case"]
+            self.assertEqual(code, EXIT_OK)
+            self.assertEqual(resolved["state"], "approved")
+            self.assertEqual(resolved["history"][-1]["actor"], "editor-1")
+            self.assertEqual(resolved["history"][-1]["reason"], "supporting evidence verified")
+
+            second = StringIO()
+            code = main(
+                [
+                    "--state-dir",
+                    tmp,
+                    "decide-approval",
+                    case["case_id"],
+                    "--action",
+                    "rejected",
+                    "--actor",
+                    "editor-2",
+                    "--reason",
+                    "changed mind",
+                ],
+                output=second,
+            )
+            self.assertEqual(code, EXIT_ERROR)
+            self.assertIn("already resolved", json.loads(second.getvalue())["error"])
+
+    def test_editorial_story_exposes_current_decision_chain(self) -> None:
+        with TemporaryDirectory() as tmp:
+            store = EditorialApprovalStore(Path(tmp) / "editorial_approval.json")
+            store.ensure_pending(self._review_decision("story-chain"))
+            output = StringIO()
+            code = main(
+                ["--state-dir", tmp, "editorial-story", "story-chain"],
+                output=output,
+            )
+            payload = json.loads(output.getvalue())
+            self.assertEqual(code, EXIT_OK)
+            self.assertEqual(payload["story_id"], "story-chain")
+            self.assertIsNone(payload["fact_kernel"])
+            self.assertEqual(payload["approval_case"]["state"], "pending")
+
+    def test_editorial_story_unknown_returns_operational_error(self) -> None:
+        with TemporaryDirectory() as tmp:
+            output = StringIO()
+            code = main(
+                ["--state-dir", tmp, "editorial-story", "missing"],
+                output=output,
+            )
+            self.assertEqual(code, EXIT_ERROR)
+            self.assertIn("unknown editorial story", json.loads(output.getvalue())["error"])
 
 
 if __name__ == "__main__":
