@@ -142,6 +142,12 @@ class ProcessFileLock:
         except OSError:
             return False
 
+    def _wait_for_contention(self, deadline: float) -> None:
+        self._break_abandoned_lock()
+        if time.monotonic() >= deadline:
+            raise LockTimeoutError(f"timed out acquiring lock: {self.path.name}")
+        time.sleep(self.poll_interval)
+
     def acquire(self) -> "ProcessFileLock":
         deadline = time.monotonic() + self.timeout
         owner = LockOwner(
@@ -163,10 +169,15 @@ class ProcessFileLock:
                 self.owner = owner
                 return self
             except FileExistsError:
-                self._break_abandoned_lock()
-                if time.monotonic() >= deadline:
-                    raise LockTimeoutError(f"timed out acquiring lock: {self.path.name}")
-                time.sleep(self.poll_interval)
+                self._wait_for_contention(deadline)
+            except PermissionError:
+                # Windows may report ERROR_ACCESS_DENIED while another process
+                # owns/creates the exclusive lock file. Treat it as contention
+                # only when the lock path actually exists; otherwise preserve a
+                # genuine directory/file permission failure.
+                if not self.path.exists():
+                    raise
+                self._wait_for_contention(deadline)
 
     def release(self) -> None:
         if self.owner is None:
