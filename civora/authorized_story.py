@@ -11,7 +11,12 @@ class AuthorizedStoryError(RuntimeError):
 @dataclass(frozen=True)
 class AuthorizedStoryPolicy:
     require_grounded_provenance: bool = True
-    require_corroborated_facts: bool = True
+    require_corroborated_facts_for_auto: bool = True
+    allow_human_review_support_statuses: tuple[str, ...] = (
+        "corroborated",
+        "single_source",
+        "weakly_supported",
+    )
     require_uncontested_facts: bool = True
     allow_candidate_uncertain_claims: bool = True
 
@@ -19,11 +24,11 @@ class AuthorizedStoryPolicy:
 class AuthorizedStoryBuilder:
     """Project durable editorial state into the only facts drafting may consume.
 
-    The builder never infers or rewrites facts. It aligns the immutable Fact
-    Kernel revision with reconciliation, contradiction and editorial-decision
-    records, then emits only records that satisfy the configured production
-    policy. A human approval authorizes the *story decision*; it does not turn
-    weak, unsupported or contradicted facts into confirmed facts.
+    Automatic drafting requires corroboration. A human-approved review may
+    authorize a grounded and uncontested fact whose support is below the
+    automatic threshold, but it can never authorize an unsupported, unlinked,
+    disputed, contradicted or unresolved fact. The builder does not infer or
+    rewrite facts.
     """
 
     def __init__(self, policy: AuthorizedStoryPolicy | None = None):
@@ -116,10 +121,17 @@ class AuthorizedStoryBuilder:
                 fact.get("provenance_status") != "grounded" or not fact.get("evidence_ids")
             ):
                 reasons.append("provenance_not_grounded")
+
             if rec is None:
                 reasons.append("missing_reconciliation_assessment")
-            elif self.policy.require_corroborated_facts and rec.get("status") != "corroborated":
-                reasons.append("fact_not_corroborated")
+            else:
+                status = rec.get("status")
+                if authorization_mode == "auto_draft":
+                    if self.policy.require_corroborated_facts_for_auto and status != "corroborated":
+                        reasons.append("fact_not_corroborated")
+                elif status not in self.policy.allow_human_review_support_statuses:
+                    reasons.append("fact_support_not_human_authorizable")
+
             if con is None:
                 reasons.append("missing_contradiction_assessment")
             elif self.policy.require_uncontested_facts and con.get("status") != "uncontested":
@@ -142,6 +154,7 @@ class AuthorizedStoryBuilder:
                     "confidence": rec.get("confidence"),
                     "independent_source_count": rec.get("independent_source_count"),
                     "source_ids": list(rec.get("source_ids", [])),
+                    "reconciliation_status": rec.get("status"),
                     "contradiction_status": con.get("status"),
                 }
             )
@@ -184,7 +197,8 @@ class AuthorizedStoryBuilder:
             "excluded_facts": excluded_facts,
             "policy": {
                 "require_grounded_provenance": self.policy.require_grounded_provenance,
-                "require_corroborated_facts": self.policy.require_corroborated_facts,
+                "require_corroborated_facts_for_auto": self.policy.require_corroborated_facts_for_auto,
+                "allow_human_review_support_statuses": list(self.policy.allow_human_review_support_statuses),
                 "require_uncontested_facts": self.policy.require_uncontested_facts,
                 "allow_candidate_uncertain_claims": self.policy.allow_candidate_uncertain_claims,
             },
