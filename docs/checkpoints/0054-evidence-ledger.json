@@ -1,0 +1,52 @@
+{
+  "checkpoint": "0054",
+  "title": "Operational Control Surface",
+  "status": "CODE_COMPLETE_CI_PENDING",
+  "evidence": [
+    {
+      "type": "ci",
+      "subject": "checkpoint_0053_windows_native_lock_recovery",
+      "run_id": 31173385030,
+      "conclusion": "success",
+      "head_sha": "d1848d6d2873da8aa6ef2aef4668ae5933c08d70"
+    },
+    {
+      "type": "implementation",
+      "path": "civora/cli.py",
+      "capabilities": [
+        "health",
+        "dead-letters",
+        "resolve-dead-letter"
+      ]
+    },
+    {
+      "type": "packaging",
+      "path": "pyproject.toml",
+      "capability": "civora console entry point"
+    },
+    {
+      "type": "tests",
+      "path": "tests/test_cli.py",
+      "coverage": [
+        "healthy runtime inspection",
+        "unhealthy health exit code",
+        "dead-letter listing",
+        "audited dead-letter requeue",
+        "unknown transaction error handling"
+      ]
+    }
+  ],
+  "completed_gates": [
+    "WINDOWS_NATIVE_LOCK_RECOVERY",
+    "CROSS_PLATFORM_PERSISTENCE_RECOVERY"
+  ],
+  "pending_gates": [
+    "OPERATOR_HEALTH_COMMAND_CI",
+    "OPERATOR_DEAD_LETTER_LIST_CI",
+    "AUDITED_DEAD_LETTER_RESOLUTION_COMMAND_CI",
+    "LINUX_PYTHON_3_11_3_12_3_13_CURRENT_HEAD",
+    "WINDOWS_NATIVE_CURRENT_HEAD"
+  ],
+  "blockers": [],
+  "next_action": "Validate the operational command surface in CI; if green, add recovery-audit inspection and safe startup reconciliation tooling before beginning the durable Fact Kernel."
+}
