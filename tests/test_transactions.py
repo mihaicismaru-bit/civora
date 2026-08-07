@@ -2,6 +2,8 @@ import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+from civora.orchestrator import Orchestrator
+from civora.review import ReviewQueue
 from civora.transactions import TransactionJournal, TransactionJournalError
 
 
@@ -85,6 +87,48 @@ class TransactionJournalTests(unittest.TestCase):
             self.assertTrue(recovered.recovered_from_backup)
             self.assertIn(first, recovered.records)
             self.assertNotEqual(recovered.records.get(second, {}).get("status"), "committed")
+
+    def test_story_to_review_recovery_after_crash_before_queue_write(self):
+        with TemporaryDirectory() as td:
+            root = Path(td)
+            queue = ReviewQueue(root / "review.json")
+            journal = TransactionJournal(root / "transactions.json")
+            story_payload = {"id": "story-1", "state": "blocked"}
+            tx_id = journal.prepare(
+                Orchestrator.STORY_TO_REVIEW,
+                {
+                    "story_id": "story-1",
+                    "story": story_payload,
+                    "reason": "trust_score_below_threshold",
+                },
+            )
+
+            recovered = Orchestrator(root / "state", queue, TransactionJournal(root / "transactions.json")).recover_pending_transactions()
+
+            self.assertEqual(recovered, [tx_id])
+            self.assertEqual(len(queue.pending()), 1)
+            final = TransactionJournal(root / "transactions.json")
+            self.assertEqual(final.records[tx_id]["status"], "committed")
+
+    def test_story_to_review_recovery_is_idempotent_after_queue_write(self):
+        with TemporaryDirectory() as td:
+            root = Path(td)
+            queue = ReviewQueue(root / "review.json")
+            journal = TransactionJournal(root / "transactions.json")
+            story_payload = {"id": "story-2", "state": "blocked"}
+            reason = "trust_score_below_threshold"
+            tx_id = journal.prepare(
+                Orchestrator.STORY_TO_REVIEW,
+                {"story_id": "story-2", "story": story_payload, "reason": reason},
+            )
+            queue.enqueue_payload("story-2", story_payload, reason)
+
+            recovered = Orchestrator(root / "state", queue, TransactionJournal(root / "transactions.json")).recover_pending_transactions()
+
+            self.assertEqual(recovered, [tx_id])
+            self.assertEqual(len(ReviewQueue(root / "review.json").pending()), 1)
+            final = TransactionJournal(root / "transactions.json")
+            self.assertEqual(final.records[tx_id]["status"], "committed")
 
 
 if __name__ == "__main__":
