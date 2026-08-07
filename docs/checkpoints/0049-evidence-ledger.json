@@ -1,0 +1,57 @@
+{
+  "checkpoint": "0049",
+  "title": "Health Event Coalescing",
+  "status": "CODE_COMPLETE_CI_PENDING",
+  "canonical_branch": "agent/import-core-runtime-v0-2",
+  "evidence": [
+    {
+      "type": "implementation",
+      "path": "civora/recovery.py",
+      "claim": "RecoveryEventLedger.observe_health atomically coalesces repeated identical health observations while preserving healthy transitions and materially changed state."
+    },
+    {
+      "type": "integration",
+      "path": "civora/health.py",
+      "claim": "UnifiedHealthInspector now records component health through state-aware coalescing instead of unconditional append for every non-healthy inspection."
+    },
+    {
+      "type": "test",
+      "path": "tests/test_recovery.py",
+      "claim": "Unit coverage verifies duplicate suppression, silent initial healthy state, healthy-transition markers, recurrence visibility, and changed-detail preservation."
+    },
+    {
+      "type": "test",
+      "path": "tests/test_health.py",
+      "claim": "Inspector integration coverage verifies repeated startup-style inspections do not grow the ledger and that recovered then recurring faults remain auditable."
+    }
+  ],
+  "completed_gates": [
+    "HEALTH_EVENT_ATOMIC_COALESCING",
+    "REPEATED_STARTUP_LEDGER_GROWTH_BOUND",
+    "HEALTHY_TRANSITION_AUDIT",
+    "FAULT_RECURRENCE_VISIBILITY",
+    "MATERIAL_DETAIL_CHANGE_VISIBILITY",
+    "CONCURRENT_COALESCING_DESIGN"
+  ],
+  "tests_added": [
+    "REPEATED_HEALTH_OBSERVATION_COALESCING",
+    "INITIAL_HEALTHY_SILENCE",
+    "PROBLEM_HEALTHY_PROBLEM_TRANSITION",
+    "MATERIAL_DETAIL_CHANGE_EVENT",
+    "INSPECTOR_REPEATED_RUN_COALESCING"
+  ],
+  "pending_gates": [
+    "PYTHON_3_11_3_12_3_13_CURRENT_HEAD",
+    "WINDOWS_NATIVE"
+  ],
+  "remaining_backlog": [
+    "multiprocess end-to-end crash/recovery tests",
+    "Source Registry and Signal Store default startup health wiring",
+    "Windows-native validation",
+    "Fact Kernel and claim-evidence reconciliation"
+  ],
+  "blockers": [
+    "Current branch-head CI result is pending."
+  ],
+  "next_action": "Add multiprocess end-to-end crash/recovery tests across transaction journal, review queue, recovery ledger, and startup health gate."
+}
