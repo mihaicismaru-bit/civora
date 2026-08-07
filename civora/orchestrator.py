@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Dict, Optional
 
 from .checkpoints import StoryCheckpointStore
+from .fact_contradictions import FactContradictionStore
 from .fact_kernel import FactKernelStore
 from .fact_reconciliation import FactReconciliationStore
 from .health import RuntimeHealthReport, UnifiedHealthInspector
@@ -30,6 +31,7 @@ class Orchestrator:
         checkpoint_store: Optional[StoryCheckpointStore] = None,
         fact_kernel_store: Optional[FactKernelStore] = None,
         fact_reconciliation_store: Optional[FactReconciliationStore] = None,
+        fact_contradiction_store: Optional[FactContradictionStore] = None,
         health_inspector: Optional[UnifiedHealthInspector] = None,
         recovery_ledger: Optional[RecoveryEventLedger] = None,
         source_registry_path: Optional[Path] = None,
@@ -47,6 +49,12 @@ class Orchestrator:
             fact_reconciliation_store
             or FactReconciliationStore(
                 self.state_dir / "fact_reconciliation.json"
+            )
+        )
+        self.fact_contradiction_store = (
+            fact_contradiction_store
+            or FactContradictionStore(
+                self.state_dir / "fact_contradictions.json"
             )
         )
         if self.review_queue is not None and self.transaction_journal is None:
@@ -89,13 +97,7 @@ class Orchestrator:
         return self.transaction_journal.recover(self._replay_transaction)
 
     def reconcile_resolution_audit(self) -> list[str]:
-        """Repair missing global audit events from durable transaction history.
-
-        Resolution history in the transaction journal is the source of truth for
-        operator dead-letter decisions. Mirroring is idempotent, so this method
-        is safe on every startup and repairs a crash between the journal write
-        and the independent recovery-event-ledger append.
-        """
+        """Repair missing global audit events from durable transaction history."""
         if self.transaction_journal is None:
             return []
         try:
@@ -104,14 +106,7 @@ class Orchestrator:
             raise OrchestratorError("startup blocked: resolution audit reconciliation failed") from exc
 
     def startup_health_gate(self) -> RuntimeHealthReport:
-        """Validate and reconcile durable runtime state before accepting new work.
-
-        Startup is fail-closed on corruption. Missing global dead-letter
-        resolution audit is reconciled from durable transaction history before
-        pending transactions are replayed. The runtime is then inspected again
-        and new work is allowed only when the final state is healthy or was
-        recovered from a valid backup.
-        """
+        """Validate and reconcile durable runtime state before accepting new work."""
         initial = self.health_inspector.inspect()
         if initial.status == "corrupt":
             raise OrchestratorError("startup blocked: durable runtime state is corrupt")
@@ -148,6 +143,10 @@ class Orchestrator:
         self.save_checkpoint(story, "verified")
         kernel_record = self.fact_kernel_store.persist_story(story)
         self.fact_reconciliation_store.persist_kernel(kernel_record)
+        self.fact_contradiction_store.persist_kernel(
+            kernel_record,
+            story.fact_kernel.evidence_relations,
+        )
         if story.state.value == "blocked":
             self._enqueue_blocked_story(story, "trust_score_below_threshold")
             return story
