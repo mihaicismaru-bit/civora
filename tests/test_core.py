@@ -17,12 +17,13 @@ class CivoraCoreTests(unittest.TestCase):
             source_ids=[s1.id, s2.id],
             public_interest=0.90, impact=0.80, novelty=0.55, utility=0.95, factual_risk=0.10
         )
+        confirmed = "Circulația va fi restricționată temporar în zona centrală."
         evidence = [
-            Evidence(s1.id, "Restricția a fost anunțată oficial.", confidence=0.95),
-            Evidence(s2.id, "Măsura este confirmată operațional.", confidence=0.90),
+            Evidence(s1.id, confirmed, confidence=0.95),
+            Evidence(s2.id, confirmed, confidence=0.90),
         ]
         kernel = FactKernel(
-            confirmed_facts=["Circulația va fi restricționată temporar în zona centrală."],
+            confirmed_facts=[confirmed],
             uncertain_claims=[],
             affected_groups=["șoferi", "transport public"],
             next_expected_event="Ridicarea restricției după finalizarea lucrărilor.",
@@ -45,6 +46,10 @@ class CivoraCoreTests(unittest.TestCase):
                 {path.stem.rsplit("_", 1)[-1] for path in checkpoint_files},
                 {"signal", "verified", "drafted", "packaged"},
             )
+
+            decision = Orchestrator(root).editorial_gate_store.load_story(story.id)
+            self.assertEqual(decision["decision"], "auto_draft")
+            self.assertEqual(decision["reasons"], [])
 
 
 if __name__ == "__main__":
