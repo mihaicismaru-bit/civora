@@ -1,6 +1,6 @@
 # CIVORA Checkpoint 0068 — Authorized Story Engine Gate
 
-Status: CODE_COMPLETE_CI_PENDING
+Status: CLOSED_VALIDATED
 
 ## Objective
 
@@ -22,7 +22,7 @@ Candidate uncertain claims may be surfaced only when explicitly `candidate_corro
 
 ### Pipeline enforcement
 
-`generate_article()` now requires an explicit authorization projection. There is no fallback to `story.fact_kernel.confirmed_facts` or raw uncertain claims.
+`generate_article()` requires an explicit authorization projection. There is no fallback to `story.fact_kernel.confirmed_facts` or raw uncertain claims.
 
 The generated article records an authorization audit with Fact Kernel identity/revision/hash, editorial decision ID, authorization mode and exact authorized fact IDs. Content-pack audit also carries the editorial decision ID and semantic hash.
 
@@ -30,26 +30,28 @@ The generated article records an authorization audit with Fact Kernel identity/r
 
 Both production drafting paths use the same `AuthorizedStoryBuilder`: automatic drafting after `auto_draft`, and restart-safe re-entry after an exact approved review case. Approval re-entry reloads the current durable reconciliation and contradiction reports before constructing the projection. Stale or missing records fail closed.
 
-## Validation added
+## Validation
 
 `tests/test_authorized_story.py` covers safe projection, exact approval binding, non-promotion of a disputed fact and stale-record failure. `tests/test_authorized_pipeline.py` proves raw Fact Kernel statements cannot be drafted without authorization. Existing approval/restart tests remain active; the approved-reentry fixture is aligned to a grounded, uncontested review fact rather than treating human approval as an override of an explicit contradiction.
 
+GitHub Actions run `31226519940` passed the final checkpoint head `cc4d5f46fcc8f40f893f63d656aaefba56dbd061` across Linux Python 3.11, 3.12 and 3.13 plus Windows native.
+
 ## Gates
 
-- RAW_FACT_KERNEL_DRAFTING_FALLBACK: ABSENT
-- DURABLE_REPORT_ALIGNMENT: PASS_IMPLEMENTATION
-- GROUNDED_PROVENANCE_REQUIRED: PASS_IMPLEMENTATION
-- AUTO_DRAFT_REQUIRES_CORROBORATION: PASS_IMPLEMENTATION
-- HUMAN_REVIEW_MAY_AUTHORIZE_SUB_AUTO_SUPPORT: PASS_IMPLEMENTATION
-- UNSUPPORTED_FACT_HUMAN_OVERRIDE: ABSENT
-- CONTRADICTION_HUMAN_OVERRIDE: ABSENT
-- UNCONTESTED_FACT_REQUIRED: PASS_IMPLEMENTATION
-- STALE_APPROVAL_FAIL_CLOSED: PASS_IMPLEMENTATION
-- STALE_REPORT_FAIL_CLOSED: PASS_IMPLEMENTATION
-- AUTO_DRAFT_AUTHORIZATION_INTEGRATION: PASS_IMPLEMENTATION
-- APPROVED_REENTRY_AUTHORIZATION_INTEGRATION: PASS_IMPLEMENTATION
-- ARTICLE_AUTHORIZATION_AUDIT: PASS_IMPLEMENTATION
-- CROSS_PLATFORM_CI: PENDING_CURRENT_CI
+- RAW_FACT_KERNEL_DRAFTING_FALLBACK: ABSENT_VALIDATED
+- DURABLE_REPORT_ALIGNMENT: PASS_VALIDATED
+- GROUNDED_PROVENANCE_REQUIRED: PASS_VALIDATED
+- AUTO_DRAFT_REQUIRES_CORROBORATION: PASS_VALIDATED
+- HUMAN_REVIEW_MAY_AUTHORIZE_SUB_AUTO_SUPPORT: PASS_VALIDATED
+- UNSUPPORTED_FACT_HUMAN_OVERRIDE: ABSENT_VALIDATED
+- CONTRADICTION_HUMAN_OVERRIDE: ABSENT_VALIDATED
+- UNCONTESTED_FACT_REQUIRED: PASS_VALIDATED
+- STALE_APPROVAL_FAIL_CLOSED: PASS_VALIDATED
+- STALE_REPORT_FAIL_CLOSED: PASS_VALIDATED
+- AUTO_DRAFT_AUTHORIZATION_INTEGRATION: PASS_VALIDATED
+- APPROVED_REENTRY_AUTHORIZATION_INTEGRATION: PASS_VALIDATED
+- ARTICLE_AUTHORIZATION_AUDIT: PASS_VALIDATED
+- CROSS_PLATFORM_CI: PASS
 
 ## Remaining backlog
 
@@ -60,8 +62,8 @@ Both production drafting paths use the same `AuthorizedStoryBuilder`: automatic 
 
 ## Blockers
 
-Current-head cross-platform CI result is required before `CLOSED_VALIDATED` can be declared.
+None for checkpoint 0068.
 
 ## Next action
 
-Validate checkpoint 0068 in CI. If green, expose the authorized fact projection through operator tooling and add remediation/runbook guidance; if CI finds an obsolete contradiction-override contract, align that contract to the fail-closed authorization policy rather than restoring an unsafe bypass.
+Expose the authorized fact projection through operator tooling, preserving the same fail-closed authorization rules used by production drafting.
