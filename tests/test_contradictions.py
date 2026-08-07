@@ -131,7 +131,7 @@ class ContradictionTests(unittest.TestCase):
             with self.assertRaises(FactContradictionStoreError):
                 FactContradictionStore(root / "contradictions.json").persist_kernel(kernel, [bad])
 
-    def test_orchestrator_persists_contradiction_report(self):
+    def test_orchestrator_persists_contradiction_report_and_blocks_conflict_before_drafting(self):
         story, sources = self.make_story()
         with TemporaryDirectory() as td:
             root = Path(td)
@@ -139,7 +139,8 @@ class ContradictionTests(unittest.TestCase):
             report = FactContradictionStore(root / "fact_contradictions.json").load_story(story.id)
             self.assertIsNotNone(report)
             self.assertEqual(report["result"]["gate"], "conflict_review")
-            self.assertEqual(result.state.value, "packaged")
+            self.assertEqual(result.state.value, "blocked")
+            self.assertIsNone(result.article)
 
 
 if __name__ == "__main__":
