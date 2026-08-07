@@ -27,6 +27,27 @@ class ProcessFileLockTests(unittest.TestCase):
                     ProcessFileLock(path, timeout=0.02, poll_interval=0.005).acquire()
             self.assertFalse(path.exists())
 
+    def test_permission_error_with_existing_lock_is_treated_as_contention(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "store.lock"
+            path.write_text(json.dumps({
+                "token": "active",
+                "pid": os.getpid(),
+                "hostname": socket.gethostname(),
+                "acquired_at": time.time(),
+            }), encoding="utf-8")
+            with patch("civora.locking.os.open", side_effect=PermissionError(13, "denied")):
+                with self.assertRaises(LockTimeoutError):
+                    ProcessFileLock(path, timeout=0.01, poll_interval=0.002).acquire()
+            self.assertTrue(path.exists())
+
+    def test_permission_error_without_lock_path_is_not_masked(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "store.lock"
+            with patch("civora.locking.os.open", side_effect=PermissionError(13, "denied")):
+                with self.assertRaises(PermissionError):
+                    ProcessFileLock(path, timeout=0.01, poll_interval=0.002).acquire()
+
     def test_abandoned_same_host_lock_is_recovered(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "store.lock"
