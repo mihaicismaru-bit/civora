@@ -22,6 +22,10 @@ class StoryState(str, Enum):
     PACKAGED = "packaged"
     BLOCKED = "blocked"
 
+class EvidencePolarity(str, Enum):
+    SUPPORT = "support"
+    CONTRADICT = "contradict"
+
 @dataclass
 class Evidence:
     source_id: str
@@ -29,6 +33,20 @@ class Evidence:
     url: Optional[str] = None
     captured_at: str = field(default_factory=utc_now)
     confidence: float = 0.5
+
+@dataclass(frozen=True)
+class EvidenceRelation:
+    """Explicit relation between one evidence item and a target statement.
+
+    Relations are deliberately supplied explicitly rather than inferred from
+    negation words or fuzzy semantic similarity. ``source_id`` +
+    ``evidence_claim`` identifies the evidence record; ``target_statement``
+    identifies a confirmed fact or uncertain claim in the same Fact Kernel.
+    """
+    target_statement: str
+    source_id: str
+    evidence_claim: str
+    polarity: EvidencePolarity = EvidencePolarity.SUPPORT
 
 @dataclass
 class Source:
@@ -65,6 +83,7 @@ class FactKernel:
     next_expected_event: Optional[str]
     evidence: List[Evidence]
     verification_status: VerificationStatus = VerificationStatus.UNVERIFIED
+    evidence_relations: List[EvidenceRelation] = field(default_factory=list)
 
 @dataclass
 class StoryObject:
@@ -86,4 +105,8 @@ class StoryObject:
         data = asdict(self)
         data["state"] = self.state.value
         data["fact_kernel"]["verification_status"] = self.fact_kernel.verification_status.value
+        for relation in data["fact_kernel"].get("evidence_relations", []):
+            polarity = relation.get("polarity")
+            if isinstance(polarity, EvidencePolarity):
+                relation["polarity"] = polarity.value
         return data
