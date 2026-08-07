@@ -226,6 +226,55 @@ class TransactionJournal:
             self.mirror_resolution_events(recovery_ledger, tx_id=tx_id)
         return dict(self.records[tx_id])
 
+    def _expected_resolution_event_ids(self) -> set[str]:
+        self.load()
+        expected: set[str] = set()
+        for tx_id, record in self.records.items():
+            for entry in record.get("resolution_history", []):
+                expected.add(
+                    entry.get("event_id")
+                    or self._resolution_event_id(tx_id, entry["timestamp"], entry["action"])
+                )
+        return expected
+
+    def resolution_audit_status(self, recovery_ledger: RecoveryEventLedger) -> dict:
+        """Compare transaction resolution history with the global recovery ledger.
+
+        This method is read-only. It exposes both missing mirror events and
+        resolution events that exist in the global ledger without a matching
+        durable transaction-history entry, allowing operators to distinguish a
+        repairable crash gap from a potentially inconsistent audit trail.
+        """
+        expected = self._expected_resolution_event_ids()
+        ledger_events = recovery_ledger.all()
+        actual = {
+            event["id"]
+            for event in ledger_events
+            if event.get("component") == "transaction_journal"
+            and event.get("event_type") == "resolution"
+        }
+        missing = sorted(expected - actual)
+        orphaned = sorted(actual - expected)
+        return {
+            "consistent": not missing and not orphaned,
+            "expected_count": len(expected),
+            "mirrored_count": len(expected & actual),
+            "missing_event_ids": missing,
+            "orphan_event_ids": orphaned,
+        }
+
+    def reconcile_resolution_audit(self, recovery_ledger: RecoveryEventLedger) -> dict:
+        """Idempotently repair missing resolution mirrors and report final status.
+
+        Orphan events are never deleted automatically. They remain visible in the
+        returned status because silent audit deletion would destroy evidence.
+        """
+        before = self.resolution_audit_status(recovery_ledger)
+        if before["missing_event_ids"]:
+            self.mirror_resolution_events(recovery_ledger)
+        after = self.resolution_audit_status(recovery_ledger)
+        return {"before": before, "after": after}
+
     def mirror_resolution_events(
         self,
         recovery_ledger: RecoveryEventLedger,
