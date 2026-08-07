@@ -1,10 +1,10 @@
 # CIVORA Checkpoint 0059 — Conflict/Dispute Resolution Gate
 
-Status: CODE_COMPLETE_CI_PENDING
+Status: CODE_COMPLETE_CI_REVALIDATION_PENDING
 
 ## Objective
 
-Make editorial reasoning enforceable. Reconciliation and contradiction reports must now determine whether a story may be drafted automatically or must be routed to review.
+Make editorial reasoning enforceable. Reconciliation and contradiction reports must determine whether a story may be drafted automatically or must be routed to review.
 
 ## Implementation
 
@@ -39,6 +39,20 @@ If the gate returns `review`, CIVORA sets the story to `BLOCKED`, saves an `edit
 
 The existing end-to-end fixture was strengthened so its confirmed fact is independently corroborated by two explicit evidence records and therefore legitimately passes the new production gate.
 
+## CI regression discovered and repaired
+
+GitHub Actions run `31190437996` executed the full Linux Python 3.11/3.12/3.13 matrix and Windows-native suite. All jobs reached the test stage and failed on the same single legacy assertion in `tests/test_contradictions.py`.
+
+The failing test asserted that an explicitly disputed story should finish `packaged`. That expectation was valid before checkpoint 0059, but contradicted the new production invariant introduced by this checkpoint: a conflict must be blocked before drafting.
+
+The regression was in the test contract, not runtime behavior. The test has been updated to assert the intended invariant:
+
+- contradiction report is persisted with `conflict_review`;
+- story state is `blocked`;
+- `article` remains `None`.
+
+This fix is now awaiting cross-platform CI revalidation on the new head.
+
 ## Gates
 
 - REPORT_ALIGNMENT_FAIL_CLOSED: PASS_IMPLEMENTATION
@@ -50,7 +64,8 @@ The existing end-to-end fixture was strengthened so its confirmed fact is indepe
 - DURABLE_EDITORIAL_DECISION: PASS_IMPLEMENTATION
 - ORCHESTRATOR_PRE_DRAFT_ENFORCEMENT: PASS_IMPLEMENTATION
 - TRANSACTIONAL_REVIEW_ROUTING: PASS_IMPLEMENTATION
-- CROSS_PLATFORM_TEST_MATRIX: PENDING_CURRENT_HEAD_CI
+- LEGACY_CONTRADICTION_TEST_ALIGNED_WITH_0059_POLICY: PASS_IMPLEMENTATION
+- CROSS_PLATFORM_TEST_MATRIX: PENDING_REVALIDATION
 
 ## Remaining backlog
 
@@ -62,8 +77,8 @@ The existing end-to-end fixture was strengthened so its confirmed fact is indepe
 
 ## Blockers
 
-Current-head CI must pass before checkpoint 0059 can be declared CLOSED_VALIDATED.
+Current-head cross-platform CI must pass before checkpoint 0059 can be declared CLOSED_VALIDATED.
 
 ## Next action
 
-If CI is green, implement checkpoint 0060: durable Editorial Approval State Machine with explicit pending/approved/rejected/revision-required transitions and auditable operator decisions.
+If revalidation is green, implement checkpoint 0060: durable Editorial Approval State Machine with explicit pending/approved/rejected/revision-required transitions and auditable operator decisions.
