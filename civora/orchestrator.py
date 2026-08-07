@@ -5,6 +5,7 @@ from typing import Dict, Optional
 
 from .checkpoints import StoryCheckpointStore
 from .fact_kernel import FactKernelStore
+from .fact_reconciliation import FactReconciliationStore
 from .health import RuntimeHealthReport, UnifiedHealthInspector
 from .models import Source, StoryObject
 from .pipeline import generate_article, generate_content_pack, verify_story
@@ -28,6 +29,7 @@ class Orchestrator:
         transaction_journal: Optional[TransactionJournal] = None,
         checkpoint_store: Optional[StoryCheckpointStore] = None,
         fact_kernel_store: Optional[FactKernelStore] = None,
+        fact_reconciliation_store: Optional[FactReconciliationStore] = None,
         health_inspector: Optional[UnifiedHealthInspector] = None,
         recovery_ledger: Optional[RecoveryEventLedger] = None,
         source_registry_path: Optional[Path] = None,
@@ -40,6 +42,12 @@ class Orchestrator:
         self.checkpoint_store = checkpoint_store or StoryCheckpointStore(self.state_dir)
         self.fact_kernel_store = fact_kernel_store or FactKernelStore(
             self.state_dir / "fact_kernels.json"
+        )
+        self.fact_reconciliation_store = (
+            fact_reconciliation_store
+            or FactReconciliationStore(
+                self.state_dir / "fact_reconciliation.json"
+            )
         )
         if self.review_queue is not None and self.transaction_journal is None:
             self.transaction_journal = TransactionJournal(self.state_dir / "transactions.json")
@@ -138,7 +146,8 @@ class Orchestrator:
         self.save_checkpoint(story, "signal")
         verify_story(story, source_map)
         self.save_checkpoint(story, "verified")
-        self.fact_kernel_store.persist_story(story)
+        kernel_record = self.fact_kernel_store.persist_story(story)
+        self.fact_reconciliation_store.persist_kernel(kernel_record)
         if story.state.value == "blocked":
             self._enqueue_blocked_story(story, "trust_score_below_threshold")
             return story
