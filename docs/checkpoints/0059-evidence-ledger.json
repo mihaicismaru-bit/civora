@@ -2,7 +2,7 @@
   "checkpoint_id": "0059",
   "project": "CIVORA",
   "title": "Conflict/Dispute Resolution Gate",
-  "state": "CODE_COMPLETE_CI_PENDING",
+  "state": "CODE_COMPLETE_CI_REVALIDATION_PENDING",
   "accelerated_editorial_phase": true,
   "gates": [
     {"gate": "REPORT_ALIGNMENT_FAIL_CLOSED", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/editorial_gate.py", "tests/test_editorial_gate.py"]},
@@ -11,7 +11,19 @@
     {"gate": "DURABLE_EDITORIAL_DECISION", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/editorial_gate_store.py"]},
     {"gate": "ORCHESTRATOR_PRE_DRAFT_ENFORCEMENT", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/orchestrator.py", "tests/test_editorial_gate.py"]},
     {"gate": "TRANSACTIONAL_REVIEW_ROUTING", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/orchestrator.py", "civora/review.py", "tests/test_editorial_gate.py"]},
-    {"gate": "CROSS_PLATFORM_CI", "status": "PENDING_CURRENT_HEAD_CI"}
+    {"gate": "LEGACY_CONTRADICTION_TEST_ALIGNED_WITH_0059_POLICY", "status": "PASS_IMPLEMENTATION", "evidence": ["tests/test_contradictions.py"]},
+    {"gate": "CROSS_PLATFORM_CI", "status": "PENDING_REVALIDATION"}
+  ],
+  "ci_history": [
+    {
+      "workflow_run_id": 31190437996,
+      "head_sha": "752a8784d5cf95a38e355d648ffcbc66702be5b2",
+      "conclusion": "failure",
+      "scope": "Linux Python 3.11/3.12/3.13 and Windows-native",
+      "root_cause": "Single legacy contradiction integration test expected packaged state after 0059 intentionally introduced conflict blocking before drafting.",
+      "runtime_defect": false,
+      "repair": "Updated test to assert blocked state and article=None while preserving contradiction-report persistence."
+    }
   ],
   "remaining_backlog": [
     "editorial approval state machine",
@@ -21,7 +33,7 @@
     "end-to-end approval/rejection recovery tests"
   ],
   "blockers": [
-    "Current-head CI result required before CLOSED_VALIDATED can be declared."
+    "Current-head CI revalidation required before CLOSED_VALIDATED can be declared."
   ],
-  "next_action": "If CI passes, implement durable Editorial Approval State Machine with auditable transitions and pipeline re-entry."
+  "next_action": "If CI revalidation passes, implement durable Editorial Approval State Machine with auditable transitions and pipeline re-entry."
 }
