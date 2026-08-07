@@ -1,0 +1,50 @@
+{
+  "checkpoint": "0055",
+  "title": "Resolution Audit Inspection",
+  "status": "CODE_COMPLETE_CI_PENDING",
+  "canonical_branch": "agent/import-core-runtime-v0-2",
+  "evidence": [
+    {
+      "type": "implementation",
+      "path": "civora/transactions.py",
+      "claim": "TransactionJournal exposes read-only resolution audit status and idempotent programmatic reconciliation without deleting orphan audit evidence."
+    },
+    {
+      "type": "implementation",
+      "path": "civora/cli.py",
+      "claim": "Operational CLI exposes recovery event inspection, transaction detail inspection, and read-only resolution audit consistency checks."
+    },
+    {
+      "type": "test",
+      "path": "tests/test_cli.py",
+      "claim": "Tests cover event filtering, transaction detail inspection, missing mirror detection, reconciliation, and orphan-event visibility."
+    },
+    {
+      "type": "prior_validation",
+      "workflow_run_id": 31176231424,
+      "head_sha": "6a6fea24a52f31ccc48c4d4cf9dc8aa22c38248f",
+      "conclusion": "success",
+      "claim": "Checkpoint 0054 baseline passed the GitHub Actions matrix before checkpoint 0055 changes."
+    }
+  ],
+  "gates": {
+    "RECOVERY_EVENT_INSPECTION": "PASS_IMPLEMENTATION",
+    "TRANSACTION_DETAIL_INSPECTION": "PASS_IMPLEMENTATION",
+    "RESOLUTION_AUDIT_READ_ONLY_STATUS": "PASS_IMPLEMENTATION",
+    "MISSING_MIRROR_DETECTION": "PASS_IMPLEMENTATION",
+    "ORPHAN_AUDIT_VISIBILITY": "PASS_IMPLEMENTATION",
+    "IDEMPOTENT_PROGRAMMATIC_RECONCILIATION": "PASS_IMPLEMENTATION",
+    "SILENT_AUDIT_DELETION": "ABSENT",
+    "CROSS_PLATFORM_TEST_MATRIX": "PENDING_CURRENT_CI"
+  },
+  "blockers": [
+    "Current-head CI result is required before CLOSED_VALIDATED can be declared."
+  ],
+  "remaining_backlog": [
+    "Durable Fact Kernel",
+    "Claim/evidence reconciliation",
+    "Editorial approval state machine",
+    "Expanded operator runbooks"
+  ],
+  "next_action": "Validate current head in CI; if green, begin durable Fact Kernel implementation."
+}
