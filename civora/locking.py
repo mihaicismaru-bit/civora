@@ -48,9 +48,54 @@ class ProcessFileLock:
         self.path.parent.mkdir(parents=True, exist_ok=True)
 
     @staticmethod
+    def _pid_alive_windows(pid: int) -> bool:
+        """Return process liveness using Win32 handles instead of POSIX signals.
+
+        ``os.kill(pid, 0)`` is not a reliable existence probe on Windows. A failed
+        OpenProcess with ERROR_INVALID_PARAMETER means the PID does not exist;
+        access-denied is treated conservatively as alive because the process may
+        exist but be protected. When a handle is available, STILL_ACTIVE confirms
+        liveness.
+        """
+        import ctypes
+        from ctypes import wintypes
+
+        PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+        ERROR_ACCESS_DENIED = 5
+        ERROR_INVALID_PARAMETER = 87
+        STILL_ACTIVE = 259
+
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        kernel32.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+        kernel32.OpenProcess.restype = wintypes.HANDLE
+        kernel32.GetExitCodeProcess.argtypes = [wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD)]
+        kernel32.GetExitCodeProcess.restype = wintypes.BOOL
+        kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
+        kernel32.CloseHandle.restype = wintypes.BOOL
+
+        handle = kernel32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, pid)
+        if not handle:
+            error = ctypes.get_last_error()
+            if error == ERROR_INVALID_PARAMETER:
+                return False
+            if error == ERROR_ACCESS_DENIED:
+                return True
+            return True
+
+        try:
+            exit_code = wintypes.DWORD()
+            if not kernel32.GetExitCodeProcess(handle, ctypes.byref(exit_code)):
+                return True
+            return exit_code.value == STILL_ACTIVE
+        finally:
+            kernel32.CloseHandle(handle)
+
+    @staticmethod
     def _pid_alive(pid: int) -> bool:
         if pid <= 0:
             return False
+        if os.name == "nt":
+            return ProcessFileLock._pid_alive_windows(pid)
         try:
             os.kill(pid, 0)
         except ProcessLookupError:
