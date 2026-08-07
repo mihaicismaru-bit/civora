@@ -1,0 +1,44 @@
+{
+  "checkpoint_id": "0061",
+  "project": "CIVORA",
+  "title": "Editorial Durable-Store Health Wiring",
+  "state": "CODE_COMPLETE_CI_PENDING",
+  "accelerated_editorial_phase": true,
+  "prior_validation": {
+    "workflow_run_id": 31196223963,
+    "head_sha": "dd32f734de83cf94090e9b2561e34920fdbf1f9a",
+    "conclusion": "success",
+    "closes": ["0059", "0060"]
+  },
+  "gates": [
+    {"gate": "FACT_KERNEL_HEALTH_WIRING", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/health.py", "tests/test_editorial_health.py"]},
+    {"gate": "RECONCILIATION_HEALTH_WIRING", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/health.py", "tests/test_editorial_health.py"]},
+    {"gate": "CONTRADICTION_HEALTH_WIRING", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/health.py", "tests/test_editorial_health.py"]},
+    {"gate": "EDITORIAL_GATE_HEALTH_WIRING", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/health.py", "tests/test_editorial_health.py"]},
+    {"gate": "APPROVAL_HEALTH_WIRING", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/health.py", "tests/test_editorial_health.py"]},
+    {"gate": "ORCHESTRATOR_STARTUP_FAIL_CLOSED", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/orchestrator.py", "tests/test_editorial_health.py"]},
+    {"gate": "CLI_HEALTH_PARITY", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/cli.py", "tests/test_editorial_health.py"]},
+    {"gate": "EDITORIAL_CHECKPOINT_DISCOVERY", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/health.py"]},
+    {"gate": "EDITORIAL_PENDING_IS_NOT_RUNTIME_FAILURE", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/health.py", "tests/test_editorial_health.py"]},
+    {"gate": "CROSS_PLATFORM_CI", "status": "PENDING_CURRENT_HEAD_CI"}
+  ],
+  "completed_gates": [
+    "0059 conflict/dispute resolution gate validated",
+    "0060 editorial approval state machine validated",
+    "all editorial durable stores included in unified health",
+    "operator health and startup health aligned",
+    "unrecoverable editorial corruption blocks startup",
+    "backup recovery remains visible and auditable"
+  ],
+  "remaining_backlog": [
+    "editorial operator CLI for cases, decisions, evidence and conflicts",
+    "Review Queue lifecycle reconciliation after approval/rejection/revision-required",
+    "crash/recovery tests across approval transition and pipeline re-entry",
+    "Story Engine constrained to authorized/corroborated facts",
+    "operator runbooks after editorial CLI stabilizes"
+  ],
+  "blockers": [
+    "Current-head cross-platform CI is required before checkpoint 0061 can be CLOSED_VALIDATED."
+  ],
+  "next_action": "If CI passes, implement the auditable editorial operator control surface; if CI fails, repair that regression before feature expansion."
+}
