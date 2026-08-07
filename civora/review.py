@@ -44,35 +44,42 @@ class ReviewQueue:
             if item.get("status") not in {"pending", "approved", "rejected"}:
                 raise AtomicJsonStoreError("review queue item has invalid status")
 
+    def _sync_from_payload(self, payload: dict) -> None:
+        self.items = payload.get("items", {})
+
     def load(self) -> None:
         try:
             payload = self.store.load({"items": {}})
         except AtomicJsonStoreError as exc:
             raise ReviewQueueError(str(exc)) from exc
-        self.items = payload.get("items", {})
+        self._sync_from_payload(payload)
         self.recovered_from_backup = self.store.recovered_from_backup
 
     def save(self) -> None:
         try:
-            self.store.save({"items": self.items})
+            committed = self.store.save({"items": self.items})
         except AtomicJsonStoreError as exc:
             raise ReviewQueueError(str(exc)) from exc
+        self._sync_from_payload(committed)
 
     def enqueue(self, story: StoryObject, reason: str) -> None:
-        previous = self.items.get(story.id)
-        self.items[story.id] = {
-            "story": story.to_dict(),
-            "reason": reason,
-            "status": "pending",
-        }
+        if not reason:
+            raise ReviewQueueError("review reason must be non-empty")
+
+        def mutate(payload: dict) -> None:
+            items = payload.setdefault("items", {})
+            items[story.id] = {
+                "story": story.to_dict(),
+                "reason": reason,
+                "status": "pending",
+            }
+
         try:
-            self.save()
-        except Exception:
-            if previous is None:
-                self.items.pop(story.id, None)
-            else:
-                self.items[story.id] = previous
-            raise
+            committed = self.store.update({"items": {}}, mutate)
+        except AtomicJsonStoreError as exc:
+            raise ReviewQueueError(str(exc)) from exc
+        self.recovered_from_backup = self.store.recovered_from_backup
+        self._sync_from_payload(committed)
 
     def pending(self) -> List[dict]:
         return [item for item in self.items.values() if item.get("status") == "pending"]
