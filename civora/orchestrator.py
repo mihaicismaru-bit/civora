@@ -4,8 +4,9 @@ from pathlib import Path
 from typing import Dict, Optional
 
 from .checkpoints import StoryCheckpointStore
-from .editorial_approval import EditorialApprovalError, EditorialApprovalStore
+from .editorial_approval import EditorialApprovalStore
 from .editorial_gate_store import EditorialGateStore
+from .editorial_resolution import EditorialResolutionCoordinator, EditorialResolutionError
 from .fact_contradictions import FactContradictionStore
 from .fact_kernel import FactKernelStore
 from .fact_reconciliation import FactReconciliationStore
@@ -46,20 +47,12 @@ class Orchestrator:
         self.review_queue = review_queue
         self.transaction_journal = transaction_journal
         self.checkpoint_store = checkpoint_store or StoryCheckpointStore(self.state_dir)
-        self.fact_kernel_store = fact_kernel_store or FactKernelStore(
-            self.state_dir / "fact_kernels.json"
+        self.fact_kernel_store = fact_kernel_store or FactKernelStore(self.state_dir / "fact_kernels.json")
+        self.fact_reconciliation_store = fact_reconciliation_store or FactReconciliationStore(
+            self.state_dir / "fact_reconciliation.json"
         )
-        self.fact_reconciliation_store = (
-            fact_reconciliation_store
-            or FactReconciliationStore(
-                self.state_dir / "fact_reconciliation.json"
-            )
-        )
-        self.fact_contradiction_store = (
-            fact_contradiction_store
-            or FactContradictionStore(
-                self.state_dir / "fact_contradictions.json"
-            )
+        self.fact_contradiction_store = fact_contradiction_store or FactContradictionStore(
+            self.state_dir / "fact_contradictions.json"
         )
         self.editorial_gate_store = editorial_gate_store or EditorialGateStore(
             self.state_dir / "editorial_gate.json"
@@ -72,9 +65,7 @@ class Orchestrator:
 
         self.source_registry_path = source_registry_path or self.state_dir / "sources.json"
         self.signal_store_path = signal_store_path or self.state_dir / "signals.json"
-        self.recovery_ledger = recovery_ledger or RecoveryEventLedger(
-            self.state_dir / "recovery_events.json"
-        )
+        self.recovery_ledger = recovery_ledger or RecoveryEventLedger(self.state_dir / "recovery_events.json")
         if health_inspector is None:
             health_inspector = UnifiedHealthInspector(
                 source_registry_path=self.source_registry_path,
@@ -94,17 +85,32 @@ class Orchestrator:
     def save_checkpoint(self, story: StoryObject, label: str) -> Path:
         return self.checkpoint_store.save(story, label)
 
-    def _replay_transaction(self, record: dict) -> None:
-        if record.get("operation") != self.STORY_TO_REVIEW:
-            raise OrchestratorError(f"unsupported transaction operation: {record.get('operation')}")
-        if self.review_queue is None:
-            raise OrchestratorError("review queue is unavailable for transaction replay")
+    def _editorial_resolution_coordinator(self) -> EditorialResolutionCoordinator:
+        if self.review_queue is None or self.transaction_journal is None:
+            raise OrchestratorError("editorial resolution requires review queue and transaction journal")
+        return EditorialResolutionCoordinator(
+            self.editorial_approval_store,
+            self.review_queue,
+            self.transaction_journal,
+        )
 
-        payload = record.get("payload", {})
-        story_id = payload.get("story_id")
-        story_payload = payload.get("story")
-        reason = payload.get("reason")
-        self.review_queue.enqueue_payload(story_id, story_payload, reason)
+    def _replay_transaction(self, record: dict) -> None:
+        operation = record.get("operation")
+        if operation == self.STORY_TO_REVIEW:
+            if self.review_queue is None:
+                raise OrchestratorError("review queue is unavailable for transaction replay")
+            payload = record.get("payload", {})
+            self.review_queue.enqueue_payload(
+                payload.get("story_id"), payload.get("story"), payload.get("reason")
+            )
+            return
+        if operation == EditorialResolutionCoordinator.OPERATION:
+            try:
+                self._editorial_resolution_coordinator().replay_transaction(record)
+            except EditorialResolutionError as exc:
+                raise OrchestratorError(str(exc)) from exc
+            return
+        raise OrchestratorError(f"unsupported transaction operation: {operation}")
 
     def recover_pending_transactions(self) -> list[str]:
         if self.transaction_journal is None:
@@ -112,7 +118,6 @@ class Orchestrator:
         return self.transaction_journal.recover(self._replay_transaction)
 
     def reconcile_resolution_audit(self) -> list[str]:
-        """Repair missing global audit events from durable transaction history."""
         if self.transaction_journal is None:
             return []
         try:
@@ -121,14 +126,11 @@ class Orchestrator:
             raise OrchestratorError("startup blocked: resolution audit reconciliation failed") from exc
 
     def startup_health_gate(self) -> RuntimeHealthReport:
-        """Validate and reconcile durable runtime state before accepting new work."""
         initial = self.health_inspector.inspect()
         if initial.status == "corrupt":
             raise OrchestratorError("startup blocked: durable runtime state is corrupt")
-
         self.reconcile_resolution_audit()
         self.recover_pending_transactions()
-
         final = self.health_inspector.inspect()
         if final.status not in self.STARTUP_ALLOWED:
             raise OrchestratorError(
@@ -141,12 +143,7 @@ class Orchestrator:
             return
         if self.transaction_journal is None:
             raise OrchestratorError("transaction journal is required when review queue is configured")
-
-        payload = {
-            "story_id": story.id,
-            "story": story.to_dict(),
-            "reason": reason,
-        }
+        payload = {"story_id": story.id, "story": story.to_dict(), "reason": reason}
         tx_id = self.transaction_journal.prepare(self.STORY_TO_REVIEW, payload)
         self.review_queue.enqueue_payload(story.id, payload["story"], reason)
         self.transaction_journal.commit(tx_id)
@@ -160,12 +157,10 @@ class Orchestrator:
         kernel_record = self.fact_kernel_store.persist_story(story)
         reconciliation_report = self.fact_reconciliation_store.persist_kernel(kernel_record)
         contradiction_report = self.fact_contradiction_store.persist_kernel(
-            kernel_record,
-            story.fact_kernel.evidence_relations,
+            kernel_record, story.fact_kernel.evidence_relations
         )
         editorial_decision = self.editorial_gate_store.persist_reports(
-            reconciliation_report,
-            contradiction_report,
+            reconciliation_report, contradiction_report
         )
 
         if story.state == StoryState.BLOCKED:
@@ -187,12 +182,6 @@ class Orchestrator:
         return story
 
     def resume_after_approval(self, story: StoryObject) -> StoryObject:
-        """Resume a gate-blocked story only after an auditable exact-decision approval.
-
-        The approval must reference the current editorial gate decision and the
-        current durable Fact Kernel semantic hash. This prevents a stale operator
-        approval from authorizing changed facts or a newly evaluated story.
-        """
         self.startup_health_gate()
         if story.state != StoryState.BLOCKED:
             raise OrchestratorError("approval re-entry requires a blocked story")
@@ -200,10 +189,7 @@ class Orchestrator:
         editorial_decision = self.editorial_gate_store.load_story(story.id)
         if editorial_decision is None or editorial_decision.get("decision") != "review":
             raise OrchestratorError("approval re-entry requires a current review gate decision")
-
-        approval = self.editorial_approval_store.load_gate_decision(
-            editorial_decision["decision_id"]
-        )
+        approval = self.editorial_approval_store.load_gate_decision(editorial_decision["decision_id"])
         if approval is None or approval.get("state") != "approved":
             raise OrchestratorError("story has no approved editorial review case")
         if approval.get("story_id") != story.id:
@@ -216,6 +202,11 @@ class Orchestrator:
             raise OrchestratorError("approval is stale for the current Fact Kernel")
         if editorial_decision.get("kernel_semantic_hash") != approval.get("kernel_semantic_hash"):
             raise OrchestratorError("approval is stale for the current editorial gate decision")
+
+        if self.review_queue is not None:
+            queue_item = self.review_queue.get(story.id)
+            if queue_item is None or queue_item.get("status") != "approved":
+                raise OrchestratorError("review queue is not reconciled with editorial approval")
 
         story.state = StoryState.READY
         self.save_checkpoint(story, "editorial_approved")
