@@ -1,6 +1,6 @@
 # CIVORA Checkpoint 0066 — Restart-Safe Approved Re-entry
 
-Status: CODE_COMPLETE_CI_PENDING
+Status: CLOSED_VALIDATED
 
 ## Objective
 
@@ -13,20 +13,22 @@ Close the process-restart gap in editorial approval re-entry. Prior behavior cou
 - Re-entry loads the durable `editorial_review` checkpoint, constructs fresh Review Queue and Transaction Journal instances, creates a fresh Orchestrator, runs startup recovery/consistency gates, and only then invokes the existing approval re-entry path.
 - Existing stale-approval, semantic-hash, approval-state and Review Queue invariants remain authoritative.
 
-## Validation added
+## Validation
 
-`tests/test_restart_resume.py` simulates a crash window after the approval store is updated but before Review Queue and transaction commit are completed. A fresh process-equivalent resume path must replay the prepared transaction, reconcile the queue, pass startup health, rehydrate the story, and reach `PACKAGED` with durable `editorial_approved` and `packaged` checkpoints.
+`tests/test_restart_resume.py` simulates a crash window after the approval store is updated but before Review Queue and transaction commit are completed. A fresh process-equivalent resume path replays the prepared transaction, reconciles the queue, passes startup health, rehydrates the story, and reaches `PACKAGED` with durable `editorial_approved` and `packaged` checkpoints.
+
+GitHub Actions run `31218351939` completed successfully for head `222e59561f8094f8366dec28921a246f6d25eb72`, closing the cross-platform validation gate.
 
 ## Gates
 
-- DURABLE_STORY_REHYDRATION: PASS_IMPLEMENTATION
-- FAIL_CLOSED_CODEC: PASS_IMPLEMENTATION
-- FRESH_ORCHESTRATOR_RESTART_PATH: PASS_IMPLEMENTATION
-- PREPARED_APPROVAL_REPLAY_BEFORE_REENTRY: PASS_IMPLEMENTATION
-- CROSS_STORE_CONSISTENCY_BEFORE_REENTRY: PASS_IMPLEMENTATION
-- APPROVED_TO_PACKAGED_RESTART_PATH: PASS_IMPLEMENTATION
-- DURABLE_POST_REENTRY_CHECKPOINTS: PASS_IMPLEMENTATION
-- CROSS_PLATFORM_CI: PENDING_CURRENT_CI
+- DURABLE_STORY_REHYDRATION: PASS
+- FAIL_CLOSED_CODEC: PASS
+- FRESH_ORCHESTRATOR_RESTART_PATH: PASS
+- PREPARED_APPROVAL_REPLAY_BEFORE_REENTRY: PASS
+- CROSS_STORE_CONSISTENCY_BEFORE_REENTRY: PASS
+- APPROVED_TO_PACKAGED_RESTART_PATH: PASS
+- DURABLE_POST_REENTRY_CHECKPOINTS: PASS
+- CROSS_PLATFORM_CI: PASS
 
 ## Remaining backlog
 
@@ -37,4 +39,4 @@ Close the process-restart gap in editorial approval re-entry. Prior behavior cou
 
 ## Next action
 
-Validate checkpoint 0066 in cross-platform CI. If green, wire cross-store consistency into the unified health output and expose the restart-safe approved re-entry through the operator CLI.
+Proceed to checkpoint 0067: expose cross-store consistency through unified health and operator CLI, and expose restart-safe approved re-entry as a machine-readable operator command.
