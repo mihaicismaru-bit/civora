@@ -38,6 +38,7 @@ class UnifiedHealthInspectorTests(unittest.TestCase):
                     "recovery_event_ledger",
                 ],
             )
+            self.assertEqual(RecoveryEventLedger(root / "recovery-events.json").all(), [])
 
     def test_prepared_transaction_degrades_runtime_health(self):
         with TemporaryDirectory() as td:
@@ -139,6 +140,50 @@ class UnifiedHealthInspectorTests(unittest.TestCase):
             self.assertEqual(len(recorded), 1)
             self.assertEqual(recorded[0]["event_type"], "pending_transaction")
             self.assertEqual(recorded[0]["status"], "pending_transaction")
+
+    def test_repeated_inspection_does_not_duplicate_same_problem(self):
+        with TemporaryDirectory() as td:
+            root = Path(td)
+            transactions = root / "transactions.json"
+            events = root / "recovery-events.json"
+            TransactionJournal(transactions).prepare("story_to_review", {"story_id": "s-1"})
+            inspector = UnifiedHealthInspector(
+                transaction_journal_path=transactions,
+                recovery_event_ledger_path=events,
+            )
+
+            inspector.inspect()
+            inspector.inspect()
+            inspector.inspect()
+
+            recorded = RecoveryEventLedger(events).all()
+            self.assertEqual(len(recorded), 1)
+            self.assertEqual(recorded[0]["status"], "pending_transaction")
+
+    def test_healthy_transition_is_recorded_then_same_problem_can_recur(self):
+        with TemporaryDirectory() as td:
+            root = Path(td)
+            transactions = root / "transactions.json"
+            events = root / "recovery-events.json"
+            journal = TransactionJournal(transactions)
+            tx = journal.prepare("story_to_review", {"story_id": "s-1"})
+            inspector = UnifiedHealthInspector(
+                transaction_journal_path=transactions,
+                recovery_event_ledger_path=events,
+            )
+
+            inspector.inspect()
+            journal.commit(tx["id"])
+            inspector.inspect()
+            journal.prepare("story_to_review", {"story_id": "s-2"})
+            inspector.inspect()
+
+            recorded = RecoveryEventLedger(events).all()
+            self.assertEqual(
+                [event["status"] for event in recorded],
+                ["pending_transaction", "healthy", "pending_transaction"],
+            )
+            self.assertEqual(recorded[1]["event_type"], "health_transition")
 
 
 if __name__ == "__main__":
