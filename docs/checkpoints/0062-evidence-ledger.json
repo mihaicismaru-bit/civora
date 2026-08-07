@@ -1,0 +1,42 @@
+{
+  "checkpoint_id": "0062",
+  "project": "CIVORA",
+  "title": "Editorial Operator Control Surface",
+  "state": "CODE_COMPLETE_CI_PENDING",
+  "accelerated_editorial_phase": true,
+  "prior_validation": {
+    "checkpoint": "0061",
+    "workflow_run_id": 31200348374,
+    "head_sha": "12b16b11f512b5885e954d5a829fb9d712838e1a",
+    "conclusion": "success"
+  },
+  "gates": [
+    {"gate": "EDITORIAL_STORY_INSPECTION", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/cli.py", "tests/test_cli.py"]},
+    {"gate": "APPROVAL_CASE_LISTING", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/editorial_approval.py", "civora/cli.py", "tests/test_cli.py"]},
+    {"gate": "APPROVAL_STATE_FILTERING", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/editorial_approval.py", "tests/test_cli.py"]},
+    {"gate": "APPROVAL_CASE_DETAIL", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/cli.py", "tests/test_cli.py"]},
+    {"gate": "AUDITED_APPROVAL_DECISION", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/editorial_approval.py", "civora/cli.py", "tests/test_cli.py"]},
+    {"gate": "TERMINAL_CASE_IMMUTABILITY", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/editorial_approval.py", "tests/test_cli.py"]},
+    {"gate": "DIRECT_DURABLE_FILE_EDIT_REQUIRED", "status": "ABSENT"},
+    {"gate": "MACHINE_READABLE_OUTPUT", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/cli.py"]},
+    {"gate": "CROSS_PLATFORM_CI", "status": "PENDING_CURRENT_HEAD_CI"}
+  ],
+  "completed_gates": [
+    "0061 editorial health wiring validated cross-platform",
+    "editorial evidence/decision chain inspectable through CLI",
+    "approval cases listable and filterable",
+    "approval decisions require actor and reason",
+    "resolved approval cases remain immutable",
+    "no direct durable-state file editing required for approval decisions"
+  ],
+  "remaining_backlog": [
+    "Review Queue lifecycle reconciliation after approval/rejection/revision-required",
+    "crash/recovery tests across approval transition and pipeline re-entry",
+    "Story Engine constrained to authorized/corroborated facts",
+    "operator runbooks after lifecycle commands stabilize"
+  ],
+  "blockers": [
+    "Current-head cross-platform CI is required before checkpoint 0062 can be CLOSED_VALIDATED."
+  ],
+  "next_action": "If CI passes, implement Review Queue lifecycle reconciliation; if CI fails, repair the regression first."
+}
