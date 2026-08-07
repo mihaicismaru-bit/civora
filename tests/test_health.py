@@ -166,14 +166,14 @@ class UnifiedHealthInspectorTests(unittest.TestCase):
             transactions = root / "transactions.json"
             events = root / "recovery-events.json"
             journal = TransactionJournal(transactions)
-            tx = journal.prepare("story_to_review", {"story_id": "s-1"})
+            tx_id = journal.prepare("story_to_review", {"story_id": "s-1"})
             inspector = UnifiedHealthInspector(
                 transaction_journal_path=transactions,
                 recovery_event_ledger_path=events,
             )
 
             inspector.inspect()
-            journal.commit(tx["id"])
+            journal.commit(tx_id)
             inspector.inspect()
             journal.prepare("story_to_review", {"story_id": "s-2"})
             inspector.inspect()
