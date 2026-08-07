@@ -28,6 +28,8 @@ class Orchestrator:
         checkpoint_store: Optional[StoryCheckpointStore] = None,
         health_inspector: Optional[UnifiedHealthInspector] = None,
         recovery_ledger: Optional[RecoveryEventLedger] = None,
+        source_registry_path: Optional[Path] = None,
+        signal_store_path: Optional[Path] = None,
     ):
         self.state_dir = state_dir
         self.state_dir.mkdir(parents=True, exist_ok=True)
@@ -37,11 +39,15 @@ class Orchestrator:
         if self.review_queue is not None and self.transaction_journal is None:
             self.transaction_journal = TransactionJournal(self.state_dir / "transactions.json")
 
+        self.source_registry_path = source_registry_path or self.state_dir / "sources.json"
+        self.signal_store_path = signal_store_path or self.state_dir / "signals.json"
         self.recovery_ledger = recovery_ledger or RecoveryEventLedger(
             self.state_dir / "recovery_events.json"
         )
         if health_inspector is None:
             health_inspector = UnifiedHealthInspector(
+                source_registry_path=self.source_registry_path,
+                signal_store_path=self.signal_store_path,
                 review_queue_path=getattr(self.review_queue, "path", None),
                 transaction_journal_path=getattr(self.transaction_journal, "path", None),
                 checkpoint_dir=self.checkpoint_store.state_dir,
