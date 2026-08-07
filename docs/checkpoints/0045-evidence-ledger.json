@@ -1,0 +1,50 @@
+{
+  "checkpoint": "0045",
+  "title": "Bounded Recovery and Dead-Letter Transactions",
+  "status": "CODE_COMPLETE_CI_PENDING",
+  "branch": "agent/import-core-runtime-v0-2",
+  "evidence": [
+    {
+      "artifact": "civora/transactions.py",
+      "claim": "TransactionJournal supports bounded recovery, durable dead_letter state, persistent attempt counts and replay suppression."
+    },
+    {
+      "artifact": "civora/health.py",
+      "claim": "UnifiedHealthInspector exposes dead_letter_count and degrades runtime health when dead-letter transactions exist."
+    },
+    {
+      "artifact": "tests/test_transactions.py",
+      "claim": "Tests cover retry bound enforcement, durable dead-letter state, replay suppression and invalid retry configuration."
+    },
+    {
+      "artifact": "tests/test_health.py",
+      "claim": "Tests cover dead-letter visibility and degraded transaction-journal health."
+    },
+    {
+      "artifact": "docs/checkpoints/0045-bounded-recovery-dead-letter.md",
+      "claim": "Checkpoint records completed gates, backlog, blockers and next action."
+    }
+  ],
+  "gates": {
+    "BOUNDED_TRANSACTION_RECOVERY": "PASS_IMPLEMENTATION_REVIEW",
+    "DURABLE_DEAD_LETTER_STATE": "PASS_IMPLEMENTATION_REVIEW",
+    "DEAD_LETTER_REPLAY_SUPPRESSION": "PASS_IMPLEMENTATION_REVIEW",
+    "DEAD_LETTER_HEALTH_VISIBILITY": "PASS_IMPLEMENTATION_REVIEW",
+    "FAIL_CLOSED_STARTUP_ON_DEAD_LETTER": "INHERITED_FROM_STARTUP_HEALTH_GATE",
+    "PYTHON_3_11_3_12_3_13_CI": "PENDING_CURRENT_HEAD",
+    "WINDOWS_NATIVE_VALIDATION": "PENDING"
+  },
+  "remaining_backlog": [
+    "Audited dead-letter resolution and requeue workflow",
+    "Recovery event deduplication/coalescing",
+    "Multiprocess end-to-end crash/recovery tests",
+    "Default Source Registry and Signal Store startup health wiring",
+    "Windows-native validation",
+    "Fact Kernel and claim/evidence reconciliation"
+  ],
+  "blockers": [
+    "GitHub Actions validation pending for the current head",
+    "Windows-native validation not yet recorded"
+  ],
+  "next_action": "Implement audited dead-letter resolution with explicit requeue and abort transitions and integrate those actions with recovery audit evidence."
+}
