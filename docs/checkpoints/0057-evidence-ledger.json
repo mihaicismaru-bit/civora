@@ -2,67 +2,31 @@
   "checkpoint_id": "0057",
   "project": "CIVORA",
   "title": "Claim / Evidence Reconciliation",
-  "state": "CODE_COMPLETE_CI_PENDING",
+  "state": "CLOSED_VALIDATED",
   "accelerated_editorial_phase": true,
+  "validation": {
+    "workflow_run_id": 31184984178,
+    "head_sha": "872ce2799906eb05e0500f576a1deb00d49dd2ea",
+    "conclusion": "success"
+  },
   "gates": [
-    {
-      "gate": "INDEPENDENT_SOURCE_SUPPORT_AGGREGATION",
-      "status": "PASS_IMPLEMENTATION",
-      "evidence": ["civora/reconciliation.py", "tests/test_reconciliation.py"]
-    },
-    {
-      "gate": "FALSE_CORROBORATION_PREVENTION",
-      "status": "PASS_IMPLEMENTATION",
-      "evidence": ["tests/test_reconciliation.py"]
-    },
-    {
-      "gate": "DETERMINISTIC_SUPPORT_CONFIDENCE",
-      "status": "PASS_IMPLEMENTATION",
-      "evidence": ["civora/reconciliation.py"]
-    },
-    {
-      "gate": "UNSUPPORTED_FACT_VISIBILITY",
-      "status": "PASS_IMPLEMENTATION",
-      "evidence": ["tests/test_reconciliation.py", "tests/test_fact_reconciliation.py"]
-    },
-    {
-      "gate": "UNCERTAIN_CLAIM_NON_MUTATING_CANDIDATE_STATUS",
-      "status": "PASS_IMPLEMENTATION",
-      "evidence": ["tests/test_reconciliation.py"]
-    },
-    {
-      "gate": "DURABLE_RECONCILIATION_STORE",
-      "status": "PASS_IMPLEMENTATION",
-      "evidence": ["civora/fact_reconciliation.py", "tests/test_fact_reconciliation.py"]
-    },
-    {
-      "gate": "RECONCILIATION_IDEMPOTENCE",
-      "status": "PASS_IMPLEMENTATION",
-      "evidence": ["tests/test_fact_reconciliation.py"]
-    },
-    {
-      "gate": "ORCHESTRATOR_RECONCILIATION_WIRING",
-      "status": "PASS_IMPLEMENTATION",
-      "evidence": ["civora/orchestrator.py"]
-    },
-    {
-      "gate": "PYTHON_3_11_3_13_CI",
-      "status": "PENDING_CURRENT_HEAD_CI"
-    },
-    {
-      "gate": "WINDOWS_NATIVE_CI",
-      "status": "PENDING_CURRENT_HEAD_CI"
-    }
+    {"gate": "INDEPENDENT_SOURCE_SUPPORT_AGGREGATION", "status": "PASS", "evidence": ["civora/reconciliation.py", "tests/test_reconciliation.py"]},
+    {"gate": "FALSE_CORROBORATION_PREVENTION", "status": "PASS", "evidence": ["tests/test_reconciliation.py"]},
+    {"gate": "DETERMINISTIC_SUPPORT_CONFIDENCE", "status": "PASS", "evidence": ["civora/reconciliation.py"]},
+    {"gate": "UNSUPPORTED_FACT_VISIBILITY", "status": "PASS", "evidence": ["tests/test_reconciliation.py", "tests/test_fact_reconciliation.py"]},
+    {"gate": "UNCERTAIN_CLAIM_NON_MUTATING_CANDIDATE_STATUS", "status": "PASS", "evidence": ["tests/test_reconciliation.py"]},
+    {"gate": "DURABLE_RECONCILIATION_STORE", "status": "PASS", "evidence": ["civora/fact_reconciliation.py", "tests/test_fact_reconciliation.py"]},
+    {"gate": "RECONCILIATION_IDEMPOTENCE", "status": "PASS", "evidence": ["tests/test_fact_reconciliation.py"]},
+    {"gate": "ORCHESTRATOR_RECONCILIATION_WIRING", "status": "PASS", "evidence": ["civora/orchestrator.py"]},
+    {"gate": "CROSS_PLATFORM_CI", "status": "PASS", "evidence": ["workflow:31184984178"]}
   ],
   "remaining_backlog": [
-    "explicit claim polarity and contradiction assertions",
-    "durable conflict clusters and disputed outcomes",
-    "Fact Kernel and reconciliation health wiring",
+    "explicit contradiction assertions",
+    "durable conflict outcomes",
+    "Fact Kernel/reconciliation health wiring",
     "editorial approval state machine",
     "Story Engine generation from reconciled fact records"
   ],
-  "blockers": [
-    "Final checkpoint validation awaits GitHub Actions for the current head."
-  ],
-  "next_action": "Add explicit polarity and contradiction clusters without lexical-negation heuristics."
+  "blockers": [],
+  "next_action": "Implement explicit polarity and contradiction analysis without lexical-negation heuristics."
 }
