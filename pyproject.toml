@@ -8,6 +8,9 @@ version = "0.1.0"
 description = "Deterministic core runtime for CIVORA"
 requires-python = ">=3.10"
 
+[project.scripts]
+civora = "civora.cli:entrypoint"
+
 [tool.setuptools.packages.find]
 include = ["civora*"]
 exclude = ["schemas*", "tests*", "docs*"]
