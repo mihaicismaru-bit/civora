@@ -2,11 +2,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from hashlib import sha256
 from pathlib import Path
 from typing import Callable, Dict, List, Optional
 import uuid
 
 from .persistence import AtomicJsonStore, AtomicJsonStoreError
+from .recovery import RecoveryEventLedger, RecoveryEventLedgerError
 
 
 def _utc_now() -> str:
@@ -95,6 +97,9 @@ class TransactionJournal:
                 for field in ("timestamp", "actor", "reason"):
                     if not isinstance(entry.get(field), str) or not entry[field]:
                         raise AtomicJsonStoreError(f"transaction resolution history requires {field}")
+                event_id = entry.get("event_id")
+                if event_id is not None and (not isinstance(event_id, str) or not event_id):
+                    raise AtomicJsonStoreError("transaction resolution event_id must be a non-empty string")
 
     def load(self) -> None:
         try:
@@ -159,12 +164,30 @@ class TransactionJournal:
     def abort(self, tx_id: str, reason: Optional[str] = None) -> None:
         self._transition(tx_id, "aborted", last_error=reason)
 
-    def resolve_dead_letter(self, tx_id: str, action: str, *, actor: str, reason: str) -> dict:
+    @staticmethod
+    def _resolution_event_id(tx_id: str, timestamp: str, action: str) -> str:
+        digest = sha256(f"{tx_id}|{timestamp}|{action}".encode("utf-8")).hexdigest()
+        return f"tx-resolution:{digest}"
+
+    def resolve_dead_letter(
+        self,
+        tx_id: str,
+        action: str,
+        *,
+        actor: str,
+        reason: str,
+        recovery_ledger: Optional[RecoveryEventLedger] = None,
+    ) -> dict:
         """Explicitly resolve one dead letter and persist an immutable audit entry.
 
         ``requeue`` returns the record to ``prepared`` and resets the automatic
         recovery budget. ``abort`` terminates it. The operation is rejected for
         non-dead-letter transactions and requires non-empty actor/reason values.
+
+        When a recovery ledger is supplied, the durable resolution history is
+        reconciled into the global ledger after the transaction mutation. The
+        mirror is idempotent, so a later reconciliation can safely repair a crash
+        between the two independent stores.
         """
         if action not in self.VALID_RESOLUTION_ACTIONS:
             raise TransactionJournalError(f"invalid dead-letter resolution action: {action}")
@@ -173,6 +196,7 @@ class TransactionJournal:
         if not isinstance(reason, str) or not reason.strip():
             raise TransactionJournalError("dead-letter resolution reason is required")
         timestamp = _utc_now()
+        event_id = self._resolution_event_id(tx_id, timestamp, action)
 
         def mutate(state: dict) -> None:
             records = state.setdefault("records", {})
@@ -186,6 +210,7 @@ class TransactionJournal:
                 "action": action,
                 "actor": actor.strip(),
                 "reason": reason.strip(),
+                "event_id": event_id,
             })
             record["updated_at"] = timestamp
             if action == "requeue":
@@ -197,7 +222,58 @@ class TransactionJournal:
                 record["last_error"] = reason.strip()
 
         self._atomic_mutate(mutate)
+        if recovery_ledger is not None:
+            self.mirror_resolution_events(recovery_ledger, tx_id=tx_id)
         return dict(self.records[tx_id])
+
+    def mirror_resolution_events(
+        self,
+        recovery_ledger: RecoveryEventLedger,
+        *,
+        tx_id: Optional[str] = None,
+    ) -> List[str]:
+        """Idempotently reconcile durable resolution history into global audit.
+
+        This is deliberately a reconciliation operation rather than a one-shot
+        callback. If the process crashes after the journal mutation but before
+        the ledger append, invoking this method on restart reconstructs the
+        missing global audit event without duplicating already mirrored events.
+        """
+        self.load()
+        mirrored: List[str] = []
+        records = self.records.items()
+        if tx_id is not None:
+            record = self.records.get(tx_id)
+            if record is None:
+                raise TransactionJournalError(f"unknown transaction: {tx_id}")
+            records = [(tx_id, record)]
+
+        for current_tx_id, record in records:
+            for entry in record.get("resolution_history", []):
+                event_id = entry.get("event_id") or self._resolution_event_id(
+                    current_tx_id, entry["timestamp"], entry["action"]
+                )
+                try:
+                    recovery_ledger.append(
+                        component="transaction_journal",
+                        event_type="resolution",
+                        status=entry["action"],
+                        event_id=event_id,
+                        timestamp=entry["timestamp"],
+                        details={
+                            "transaction_id": current_tx_id,
+                            "operation": record["operation"],
+                            "action": entry["action"],
+                            "actor": entry["actor"],
+                            "reason": entry["reason"],
+                        },
+                    )
+                except RecoveryEventLedgerError as exc:
+                    raise TransactionJournalError(
+                        f"cannot mirror dead-letter resolution event: {event_id}"
+                    ) from exc
+                mirrored.append(event_id)
+        return mirrored
 
     def prepared(self) -> List[dict]:
         self.load()
