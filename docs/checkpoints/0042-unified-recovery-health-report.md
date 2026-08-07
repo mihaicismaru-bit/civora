@@ -1,6 +1,6 @@
 # CIVORA Checkpoint 0042 — Unified Recovery & Health Report
 
-Status: CODE_COMPLETE_CI_PENDING
+Status: CLOSED_VALIDATED
 
 ## Objective
 
@@ -30,15 +30,19 @@ Create one runtime-level health view across CIVORA durable state so recovery, co
 - unrecoverable corruption;
 - plain-dict serialization of the report.
 
+GitHub Actions run `31140192038` completed successfully for the implementation/evidence head across Python 3.11, 3.12 and 3.13. Package installation and the full unit-test command passed in every matrix job.
+
 ## Gates
 
-- UNIFIED_RUNTIME_HEALTH_VIEW: PASS_IMPLEMENTATION_REVIEW
-- COMPONENT_HEALTH_CLASSIFICATION: PASS_IMPLEMENTATION_REVIEW
-- RECOVERY_VISIBILITY: PASS_IMPLEMENTATION_REVIEW
-- PENDING_TRANSACTION_DEGRADATION: PASS_IMPLEMENTATION_REVIEW
-- FAIL_CLOSED_CORRUPTION_REPORTING: PASS_IMPLEMENTATION_REVIEW
-- HEALTH_REPORT_SERIALIZATION: PASS_IMPLEMENTATION_REVIEW
-- AUTOMATED_TEST_EXECUTION: PENDING_CI
+- UNIFIED_RUNTIME_HEALTH_VIEW: PASS
+- COMPONENT_HEALTH_CLASSIFICATION: PASS
+- RECOVERY_VISIBILITY: PASS
+- PENDING_TRANSACTION_DEGRADATION: PASS
+- FAIL_CLOSED_CORRUPTION_REPORTING: PASS
+- HEALTH_REPORT_SERIALIZATION: PASS
+- AUTOMATED_TEST_EXECUTION_PYTHON_3_11: PASS
+- AUTOMATED_TEST_EXECUTION_PYTHON_3_12: PASS
+- AUTOMATED_TEST_EXECUTION_PYTHON_3_13: PASS
 - WINDOWS_NATIVE_VALIDATION: PENDING
 
 ## Remaining priority backlog
@@ -53,7 +57,6 @@ Create one runtime-level health view across CIVORA durable state so recovery, co
 ## Blockers
 
 - Native Windows behavior still requires a Windows runner.
-- Current checkpoint remains CI-pending until the Python 3.11–3.13 workflow completes for the latest head.
 
 ## Next action
 
