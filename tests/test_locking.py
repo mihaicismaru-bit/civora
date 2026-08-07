@@ -12,6 +12,12 @@ from civora.persistence import AtomicJsonStore
 
 
 class ProcessFileLockTests(unittest.TestCase):
+    def test_current_process_is_reported_alive(self):
+        self.assertTrue(ProcessFileLock._pid_alive(os.getpid()))
+
+    def test_impossible_process_is_reported_dead(self):
+        self.assertFalse(ProcessFileLock._pid_alive(99999999))
+
     def test_exclusive_acquisition_and_release(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "store.lock"
