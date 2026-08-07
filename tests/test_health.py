@@ -49,6 +49,24 @@ class UnifiedHealthInspectorTests(unittest.TestCase):
             self.assertEqual(report.status, "degraded")
             self.assertEqual(report.components[0].status, "pending_transaction")
             self.assertEqual(report.components[0].details["prepared_count"], 1)
+            self.assertEqual(report.components[0].details["dead_letter_count"], 0)
+
+    def test_dead_letter_transaction_degrades_runtime_health(self):
+        with TemporaryDirectory() as td:
+            path = Path(td) / "transactions.json"
+            journal = TransactionJournal(path, max_recovery_attempts=1)
+            journal.prepare("story_to_review", {"story_id": "s-dead"})
+
+            def fail(_record):
+                raise RuntimeError("permanent failure")
+
+            journal.recover(fail)
+            report = UnifiedHealthInspector(transaction_journal_path=path).inspect()
+
+            self.assertEqual(report.status, "degraded")
+            self.assertEqual(report.components[0].status, "degraded")
+            self.assertEqual(report.components[0].details["prepared_count"], 0)
+            self.assertEqual(report.components[0].details["dead_letter_count"], 1)
 
     def test_valid_backup_recovery_is_visible_in_report(self):
         with TemporaryDirectory() as td:
