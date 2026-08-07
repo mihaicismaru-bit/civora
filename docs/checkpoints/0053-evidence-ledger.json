@@ -1,0 +1,59 @@
+{
+  "checkpoint": "0053",
+  "title": "Windows-Native Lock Recovery",
+  "status": "CODE_COMPLETE_CI_PENDING",
+  "evidence": [
+    {
+      "type": "github_actions_run",
+      "run_id": 31172987298,
+      "result": "failure",
+      "summary": "Linux Python 3.11/3.12/3.13 passed; Windows-native failed one abandoned same-host lock recovery test."
+    },
+    {
+      "type": "github_actions_job",
+      "job_id": 92848709283,
+      "name": "windows-native",
+      "result": "failure",
+      "root_cause": "ProcessFileLock._pid_alive used os.kill(pid, 0); on Windows the impossible PID was not classified as dead, preventing stale same-host lock reclamation."
+    },
+    {
+      "type": "implementation_commit",
+      "sha": "ce1379ba513a36a772a2de5e25757ee82043b4a6",
+      "artifact": "civora/locking.py",
+      "claim": "Added Windows-native PID liveness detection using OpenProcess/GetExitCodeProcess while preserving conservative fail-safe behavior."
+    },
+    {
+      "type": "test_commit",
+      "sha": "f60936a47a74f216a704724220d1af0c37bdd630",
+      "artifact": "tests/test_locking.py",
+      "claim": "Added explicit tests for current-process liveness and impossible-PID death detection."
+    },
+    {
+      "type": "existing_windows_evidence",
+      "claim": "Checkpoint-0050 multiprocess crash/recovery, queue-writer and transaction-writer tests all passed on Windows before the unrelated abandoned-lock test failed."
+    }
+  ],
+  "gates": {
+    "LINUX_PYTHON_3_11_PRE_FIX_HEAD": "PASS",
+    "LINUX_PYTHON_3_12_PRE_FIX_HEAD": "PASS",
+    "LINUX_PYTHON_3_13_PRE_FIX_HEAD": "PASS",
+    "WINDOWS_PACKAGE_INSTALL_PRE_FIX_HEAD": "PASS",
+    "WINDOWS_MULTIPROCESS_RECOVERY_PRE_FIX_HEAD": "PASS",
+    "WINDOWS_ABANDONED_LOCK_ROOT_CAUSE": "CONFIRMED",
+    "WINDOWS_NATIVE_PID_LIVENESS_IMPLEMENTATION": "PASS_IMPLEMENTATION_REVIEW",
+    "PORTABLE_PID_LIVENESS_TESTS": "ADDED",
+    "WINDOWS_FULL_SUITE_CURRENT_HEAD": "PENDING_CURRENT_CI",
+    "LINUX_MATRIX_CURRENT_HEAD": "PENDING_CURRENT_CI"
+  },
+  "remaining_backlog": [
+    "Close Windows-native persistence and locking validation after current-head CI passes.",
+    "Implement operational CLI/command surface for unified health inspection, recovery audit and dead-letter resolution.",
+    "Implement durable Fact Kernel with source/evidence provenance and temporal validity.",
+    "Implement claim/evidence reconciliation and contradiction handling.",
+    "Define editorial approval state machine over verified fact sets."
+  ],
+  "blockers": [
+    "No implementation blocker; current-head validation is waiting for GitHub Actions."
+  ],
+  "next_action": "If CI passes, close the platform persistence/recovery gate and implement the operational health/dead-letter command surface; otherwise repair the next platform-specific defect before advancing."
+}
