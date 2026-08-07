@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from typing import Dict, Optional
 
+from .checkpoints import StoryCheckpointStore
 from .models import Source, StoryObject
 from .pipeline import generate_article, generate_content_pack, verify_story
 from .review import ReviewQueue
@@ -22,19 +22,18 @@ class Orchestrator:
         state_dir: Path,
         review_queue: Optional[ReviewQueue] = None,
         transaction_journal: Optional[TransactionJournal] = None,
+        checkpoint_store: Optional[StoryCheckpointStore] = None,
     ):
         self.state_dir = state_dir
         self.state_dir.mkdir(parents=True, exist_ok=True)
         self.review_queue = review_queue
         self.transaction_journal = transaction_journal
+        self.checkpoint_store = checkpoint_store or StoryCheckpointStore(self.state_dir)
         if self.review_queue is not None and self.transaction_journal is None:
             self.transaction_journal = TransactionJournal(self.state_dir / "transactions.json")
 
     def save_checkpoint(self, story: StoryObject, label: str) -> Path:
-        payload = {"label": label, "story": story.to_dict()}
-        path = self.state_dir / f"{story.id}_v{story.version}_{label}.json"
-        path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-        return path
+        return self.checkpoint_store.save(story, label)
 
     def _replay_transaction(self, record: dict) -> None:
         if record.get("operation") != self.STORY_TO_REVIEW:
