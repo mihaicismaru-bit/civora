@@ -47,9 +47,10 @@ class UnifiedHealthInspector:
     that recovery is surfaced as ``recovered_from_backup`` rather than hidden.
     Corrupt state is never rewritten when no valid backup exists.
 
-    When a recovery-event ledger is configured, every non-healthy component
-    observation is durably appended after the report is assembled. This turns
-    recovery/degradation detection into an auditable operational trail.
+    When a recovery-event ledger is configured, component-health transitions are
+    durably recorded after the report is assembled. Repeated observations of the
+    same state are coalesced by the ledger, while transitions back to healthy are
+    retained so later recurrences remain auditable.
     """
 
     _SEVERITY = {
@@ -201,6 +202,7 @@ class UnifiedHealthInspector:
             "pending_transaction": "pending_transaction",
             "corrupt": "corruption",
             "degraded": "degradation",
+            "healthy": "health_transition",
         }.get(status, "degradation")
 
     def _record_events(self, report: RuntimeHealthReport) -> None:
@@ -211,9 +213,9 @@ class UnifiedHealthInspector:
         except RecoveryEventLedgerError:
             return
         for component in report.components:
-            if component.name == "recovery_event_ledger" or component.status == "healthy":
+            if component.name == "recovery_event_ledger":
                 continue
-            ledger.append(
+            ledger.observe_health(
                 component=component.name,
                 event_type=self._event_type_for(component.status),
                 status=component.status,
