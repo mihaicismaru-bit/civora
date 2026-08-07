@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Dict, Optional
 
 from .checkpoints import StoryCheckpointStore
+from .editorial_approval import EditorialApprovalError, EditorialApprovalStore
 from .editorial_gate_store import EditorialGateStore
 from .fact_contradictions import FactContradictionStore
 from .fact_kernel import FactKernelStore
@@ -34,6 +35,7 @@ class Orchestrator:
         fact_reconciliation_store: Optional[FactReconciliationStore] = None,
         fact_contradiction_store: Optional[FactContradictionStore] = None,
         editorial_gate_store: Optional[EditorialGateStore] = None,
+        editorial_approval_store: Optional[EditorialApprovalStore] = None,
         health_inspector: Optional[UnifiedHealthInspector] = None,
         recovery_ledger: Optional[RecoveryEventLedger] = None,
         source_registry_path: Optional[Path] = None,
@@ -61,6 +63,9 @@ class Orchestrator:
         )
         self.editorial_gate_store = editorial_gate_store or EditorialGateStore(
             self.state_dir / "editorial_gate.json"
+        )
+        self.editorial_approval_store = editorial_approval_store or EditorialApprovalStore(
+            self.state_dir / "editorial_approval.json"
         )
         if self.review_queue is not None and self.transaction_journal is None:
             self.transaction_journal = TransactionJournal(self.state_dir / "transactions.json")
@@ -163,12 +168,52 @@ class Orchestrator:
             return story
 
         if editorial_decision["decision"] != "auto_draft":
+            self.editorial_approval_store.ensure_pending(editorial_decision)
             story.state = StoryState.BLOCKED
             self.save_checkpoint(story, "editorial_review")
             reason = "editorial_gate:" + ",".join(editorial_decision["reasons"])
             self._enqueue_blocked_story(story, reason)
             return story
 
+        generate_article(story)
+        self.save_checkpoint(story, "drafted")
+        generate_content_pack(story)
+        self.save_checkpoint(story, "packaged")
+        return story
+
+    def resume_after_approval(self, story: StoryObject) -> StoryObject:
+        """Resume a gate-blocked story only after an auditable exact-decision approval.
+
+        The approval must reference the current editorial gate decision and the
+        current durable Fact Kernel semantic hash. This prevents a stale operator
+        approval from authorizing changed facts or a newly evaluated story.
+        """
+        self.startup_health_gate()
+        if story.state != StoryState.BLOCKED:
+            raise OrchestratorError("approval re-entry requires a blocked story")
+
+        editorial_decision = self.editorial_gate_store.load_story(story.id)
+        if editorial_decision is None or editorial_decision.get("decision") != "review":
+            raise OrchestratorError("approval re-entry requires a current review gate decision")
+
+        approval = self.editorial_approval_store.load_gate_decision(
+            editorial_decision["decision_id"]
+        )
+        if approval is None or approval.get("state") != "approved":
+            raise OrchestratorError("story has no approved editorial review case")
+        if approval.get("story_id") != story.id:
+            raise OrchestratorError("approval story mismatch")
+
+        kernel_record = self.fact_kernel_store.load_story(story.id)
+        if kernel_record is None:
+            raise OrchestratorError("approval re-entry requires a durable Fact Kernel")
+        if kernel_record.get("semantic_hash") != approval.get("kernel_semantic_hash"):
+            raise OrchestratorError("approval is stale for the current Fact Kernel")
+        if editorial_decision.get("kernel_semantic_hash") != approval.get("kernel_semantic_hash"):
+            raise OrchestratorError("approval is stale for the current editorial gate decision")
+
+        story.state = StoryState.READY
+        self.save_checkpoint(story, "editorial_approved")
         generate_article(story)
         self.save_checkpoint(story, "drafted")
         generate_content_pack(story)
