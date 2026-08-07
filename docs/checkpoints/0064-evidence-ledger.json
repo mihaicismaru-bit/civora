@@ -2,7 +2,7 @@
   "checkpoint_id": "0064",
   "project": "CIVORA",
   "title": "Windows Lock Contention Hardening",
-  "state": "CODE_COMPLETE_CI_PENDING",
+  "state": "CLOSED_VALIDATED",
   "evidence": [
     {
       "type": "failure_evidence",
@@ -23,20 +23,29 @@
     {
       "type": "regression_test",
       "path": "tests/test_multiprocess_recovery.py",
-      "claim": "Existing native multiprocess Review Queue writer test remains the production-level regression gate."
+      "claim": "Native multiprocess Review Queue writer test remains the production-level regression gate."
+    },
+    {
+      "type": "ci_validation",
+      "workflow_run_id": 31210681384,
+      "head_sha": "3649493da7440b5b4b229e11c8841f756dc3ad6e",
+      "conclusion": "success",
+      "claim": "Full GitHub Actions matrix, including Windows native, passed on the repaired checkpoint head."
     }
   ],
   "gates": [
-    {"gate": "WINDOWS_PERMISSION_RACE_CLASSIFICATION", "status": "PASS_IMPLEMENTATION"},
-    {"gate": "GENUINE_PERMISSION_FAILURE_FAIL_CLOSED", "status": "PASS_IMPLEMENTATION"},
-    {"gate": "BOUNDED_LOCK_CONTENTION", "status": "PASS_IMPLEMENTATION"},
-    {"gate": "MULTIPROCESS_REVIEW_QUEUE_REGRESSION", "status": "PENDING_CURRENT_CI"},
-    {"gate": "CROSS_PLATFORM_CI", "status": "PENDING_CURRENT_CI"}
+    {"gate": "WINDOWS_PERMISSION_RACE_CLASSIFICATION", "status": "PASS"},
+    {"gate": "GENUINE_PERMISSION_FAILURE_FAIL_CLOSED", "status": "PASS"},
+    {"gate": "BOUNDED_LOCK_CONTENTION", "status": "PASS"},
+    {"gate": "MULTIPROCESS_REVIEW_QUEUE_REGRESSION", "status": "PASS_CI"},
+    {"gate": "CROSS_PLATFORM_CI", "status": "PASS_CI"}
   ],
   "completed_gates": [
     "Windows access-denied exclusive-create race classified without masking unrelated permission failures",
     "bounded contention path shared with FileExistsError",
-    "deterministic regression tests added"
+    "deterministic regression tests added",
+    "native multiprocess Review Queue regression passed",
+    "cross-platform CI passed"
   ],
   "remaining_backlog": [
     "approval/Review Queue/transaction consistency inspection and health wiring",
@@ -44,8 +53,6 @@
     "Story Engine constrained to authorized/corroborated facts",
     "operator runbooks"
   ],
-  "blockers": [
-    "Current-head cross-platform CI result required before CLOSED_VALIDATED."
-  ],
-  "next_action": "Validate repaired head in CI; if green, implement approval/Review Queue/transaction consistency inspection and fail-closed health wiring."
+  "blockers": [],
+  "next_action": "Implement approval/Review Queue/transaction cross-store consistency inspection and fail-closed startup wiring."
 }
