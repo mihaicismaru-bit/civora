@@ -8,13 +8,14 @@ import sys
 
 from .editorial_approval import EditorialApprovalError, EditorialApprovalStore
 from .editorial_gate_store import EditorialGateStore, EditorialGateStoreError
+from .editorial_resolution import EditorialResolutionCoordinator, EditorialResolutionError
 from .fact_contradictions import FactContradictionStore, FactContradictionStoreError
 from .fact_kernel import FactKernelStore, FactKernelStoreError
 from .fact_reconciliation import FactReconciliationStore, FactReconciliationStoreError
 from .health import UnifiedHealthInspector
 from .recovery import RecoveryEventLedger, RecoveryEventLedgerError
+from .review import ReviewQueueError
 from .transactions import TransactionJournal, TransactionJournalError
-
 
 EXIT_OK = 0
 EXIT_UNHEALTHY = 2
@@ -44,12 +45,9 @@ def _emit(payload: object, output: TextIO) -> None:
 def _health(state_dir: Path, output: TextIO) -> int:
     paths = _paths(state_dir)
     inspector = UnifiedHealthInspector(
-        source_registry_path=paths["sources"],
-        signal_store_path=paths["signals"],
-        review_queue_path=paths["review"],
-        transaction_journal_path=paths["transactions"],
-        checkpoint_dir=state_dir,
-        fact_kernel_path=paths["fact_kernel"],
+        source_registry_path=paths["sources"], signal_store_path=paths["signals"],
+        review_queue_path=paths["review"], transaction_journal_path=paths["transactions"],
+        checkpoint_dir=state_dir, fact_kernel_path=paths["fact_kernel"],
         fact_reconciliation_path=paths["fact_reconciliation"],
         fact_contradiction_path=paths["fact_contradictions"],
         editorial_gate_path=paths["editorial_gate"],
@@ -62,45 +60,24 @@ def _health(state_dir: Path, output: TextIO) -> int:
 
 
 def _list_dead_letters(state_dir: Path, output: TextIO) -> int:
-    journal = TransactionJournal(_paths(state_dir)["transactions"])
-    records = journal.dead_letters()
+    records = TransactionJournal(_paths(state_dir)["transactions"]).dead_letters()
     _emit({"count": len(records), "dead_letters": records}, output)
     return EXIT_OK
 
 
-def _resolve_dead_letter(
-    state_dir: Path,
-    tx_id: str,
-    action: str,
-    actor: str,
-    reason: str,
-    output: TextIO,
-) -> int:
+def _resolve_dead_letter(state_dir: Path, tx_id: str, action: str, actor: str, reason: str, output: TextIO) -> int:
     paths = _paths(state_dir)
-    journal = TransactionJournal(paths["transactions"])
-    ledger = RecoveryEventLedger(paths["recovery"])
-    record = journal.resolve_dead_letter(
-        tx_id,
-        action,
-        actor=actor,
-        reason=reason,
-        recovery_ledger=ledger,
+    record = TransactionJournal(paths["transactions"]).resolve_dead_letter(
+        tx_id, action, actor=actor, reason=reason, recovery_ledger=RecoveryEventLedger(paths["recovery"])
     )
     _emit({"resolved": record}, output)
     return EXIT_OK
 
 
-def _recovery_events(
-    state_dir: Path,
-    output: TextIO,
-    *,
-    component: Optional[str] = None,
-    event_type: Optional[str] = None,
-    status: Optional[str] = None,
-    limit: Optional[int] = None,
-) -> int:
-    ledger = RecoveryEventLedger(_paths(state_dir)["recovery"])
-    events = ledger.all()
+def _recovery_events(state_dir: Path, output: TextIO, *, component: Optional[str] = None,
+                     event_type: Optional[str] = None, status: Optional[str] = None,
+                     limit: Optional[int] = None) -> int:
+    events = RecoveryEventLedger(_paths(state_dir)["recovery"]).all()
     if component is not None:
         events = [event for event in events if event.get("component") == component]
     if event_type is not None:
@@ -125,9 +102,9 @@ def _transaction_detail(state_dir: Path, tx_id: str, output: TextIO) -> int:
 
 def _resolution_audit(state_dir: Path, output: TextIO) -> int:
     paths = _paths(state_dir)
-    journal = TransactionJournal(paths["transactions"])
-    ledger = RecoveryEventLedger(paths["recovery"])
-    status = journal.resolution_audit_status(ledger)
+    status = TransactionJournal(paths["transactions"]).resolution_audit_status(
+        RecoveryEventLedger(paths["recovery"])
+    )
     _emit(status, output)
     return EXIT_OK if status["consistent"] else EXIT_UNHEALTHY
 
@@ -139,63 +116,40 @@ def _editorial_story(state_dir: Path, story_id: str, output: TextIO) -> int:
     contradictions = FactContradictionStore(paths["fact_contradictions"]).load_story(story_id)
     gate = EditorialGateStore(paths["editorial_gate"]).load_story(story_id)
     approval = EditorialApprovalStore(paths["editorial_approval"]).load_story(story_id)
-    found = any(item is not None for item in (kernel, reconciliation, contradictions, gate, approval))
-    if not found:
+    if not any(item is not None for item in (kernel, reconciliation, contradictions, gate, approval)):
         raise ValueError(f"unknown editorial story: {story_id}")
-    _emit(
-        {
-            "story_id": story_id,
-            "fact_kernel": kernel,
-            "reconciliation": reconciliation,
-            "contradictions": contradictions,
-            "editorial_gate": gate,
-            "approval_case": approval,
-        },
-        output,
-    )
+    _emit({"story_id": story_id, "fact_kernel": kernel, "reconciliation": reconciliation,
+           "contradictions": contradictions, "editorial_gate": gate, "approval_case": approval}, output)
     return EXIT_OK
 
 
 def _approval_cases(state_dir: Path, output: TextIO, *, state: Optional[str] = None) -> int:
-    store = EditorialApprovalStore(_paths(state_dir)["editorial_approval"])
-    records = store.list_cases(state=state)
+    records = EditorialApprovalStore(_paths(state_dir)["editorial_approval"]).list_cases(state=state)
     _emit({"count": len(records), "cases": records}, output)
     return EXIT_OK
 
 
 def _approval_case(state_dir: Path, case_id: str, output: TextIO) -> int:
-    store = EditorialApprovalStore(_paths(state_dir)["editorial_approval"])
-    record = store.load_case(case_id)
+    record = EditorialApprovalStore(_paths(state_dir)["editorial_approval"]).load_case(case_id)
     if record is None:
         raise EditorialApprovalError("unknown approval case")
     _emit({"case": record}, output)
     return EXIT_OK
 
 
-def _decide_approval(
-    state_dir: Path,
-    case_id: str,
-    action: str,
-    actor: str,
-    reason: str,
-    output: TextIO,
-) -> int:
-    store = EditorialApprovalStore(_paths(state_dir)["editorial_approval"])
-    record = store.decide(case_id, action=action, actor=actor, reason=reason)
-    _emit({"case": record}, output)
+def _decide_approval(state_dir: Path, case_id: str, action: str, actor: str, reason: str, output: TextIO) -> int:
+    result = EditorialResolutionCoordinator.from_state_dir(state_dir).decide(
+        case_id, action=action, actor=actor, reason=reason
+    )
+    _emit(result, output)
     return EXIT_OK
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="civora", description="CIVORA operational control surface")
-    parser.add_argument(
-        "--state-dir",
-        type=Path,
-        default=Path("state"),
-        help="CIVORA durable state directory (default: ./state)",
-    )
+    parser.add_argument("--state-dir", type=Path, default=Path("state"),
+                        help="CIVORA durable state directory (default: ./state)")
     subparsers = parser.add_subparsers(dest="command", required=True)
-
     subparsers.add_parser("health", help="inspect durable runtime and editorial health")
     subparsers.add_parser("dead-letters", help="list dead-letter transactions")
 
@@ -213,43 +167,17 @@ def build_parser() -> argparse.ArgumentParser:
 
     transaction = subparsers.add_parser("transaction", help="inspect one transaction record")
     transaction.add_argument("transaction_id")
+    subparsers.add_parser("resolution-audit", help="compare transaction resolution history with global recovery ledger")
 
-    subparsers.add_parser(
-        "resolution-audit",
-        help="compare transaction resolution history with the global recovery ledger",
-    )
-
-    editorial_story = subparsers.add_parser(
-        "editorial-story",
-        help="inspect the durable editorial evidence and decision chain for one story",
-    )
+    editorial_story = subparsers.add_parser("editorial-story", help="inspect durable editorial evidence and decision chain")
     editorial_story.add_argument("story_id")
-
-    approval_cases = subparsers.add_parser(
-        "approval-cases",
-        help="list editorial approval cases",
-    )
-    approval_cases.add_argument(
-        "--state",
-        choices=sorted(EditorialApprovalStore.ALLOWED_STATES),
-    )
-
-    approval_case = subparsers.add_parser(
-        "approval-case",
-        help="inspect one editorial approval case",
-    )
+    approval_cases = subparsers.add_parser("approval-cases", help="list editorial approval cases")
+    approval_cases.add_argument("--state", choices=sorted(EditorialApprovalStore.ALLOWED_STATES))
+    approval_case = subparsers.add_parser("approval-case", help="inspect one editorial approval case")
     approval_case.add_argument("case_id")
-
-    decide_approval = subparsers.add_parser(
-        "decide-approval",
-        help="auditably resolve one pending editorial approval case",
-    )
+    decide_approval = subparsers.add_parser("decide-approval", help="transactionally resolve approval and Review Queue")
     decide_approval.add_argument("case_id")
-    decide_approval.add_argument(
-        "--action",
-        choices=sorted(EditorialApprovalStore.FINAL_STATES),
-        required=True,
-    )
+    decide_approval.add_argument("--action", choices=sorted(EditorialApprovalStore.FINAL_STATES), required=True)
     decide_approval.add_argument("--actor", required=True)
     decide_approval.add_argument("--reason", required=True)
     return parser
@@ -260,65 +188,27 @@ def main(argv: Optional[Sequence[str]] = None, *, output: Optional[TextIO] = Non
     args = build_parser().parse_args(argv)
     state_dir: Path = args.state_dir
     state_dir.mkdir(parents=True, exist_ok=True)
-
     try:
-        if args.command == "health":
-            return _health(state_dir, output)
-        if args.command == "dead-letters":
-            return _list_dead_letters(state_dir, output)
+        if args.command == "health": return _health(state_dir, output)
+        if args.command == "dead-letters": return _list_dead_letters(state_dir, output)
         if args.command == "resolve-dead-letter":
-            return _resolve_dead_letter(
-                state_dir,
-                args.transaction_id,
-                args.action,
-                args.actor,
-                args.reason,
-                output,
-            )
+            return _resolve_dead_letter(state_dir, args.transaction_id, args.action, args.actor, args.reason, output)
         if args.command == "recovery-events":
-            if args.limit is not None and args.limit < 1:
-                raise ValueError("--limit must be a positive integer")
-            return _recovery_events(
-                state_dir,
-                output,
-                component=args.component,
-                event_type=args.event_type,
-                status=args.status,
-                limit=args.limit,
-            )
-        if args.command == "transaction":
-            return _transaction_detail(state_dir, args.transaction_id, output)
-        if args.command == "resolution-audit":
-            return _resolution_audit(state_dir, output)
-        if args.command == "editorial-story":
-            return _editorial_story(state_dir, args.story_id, output)
-        if args.command == "approval-cases":
-            return _approval_cases(state_dir, output, state=args.state)
-        if args.command == "approval-case":
-            return _approval_case(state_dir, args.case_id, output)
+            if args.limit is not None and args.limit < 1: raise ValueError("--limit must be a positive integer")
+            return _recovery_events(state_dir, output, component=args.component, event_type=args.event_type,
+                                    status=args.status, limit=args.limit)
+        if args.command == "transaction": return _transaction_detail(state_dir, args.transaction_id, output)
+        if args.command == "resolution-audit": return _resolution_audit(state_dir, output)
+        if args.command == "editorial-story": return _editorial_story(state_dir, args.story_id, output)
+        if args.command == "approval-cases": return _approval_cases(state_dir, output, state=args.state)
+        if args.command == "approval-case": return _approval_case(state_dir, args.case_id, output)
         if args.command == "decide-approval":
-            return _decide_approval(
-                state_dir,
-                args.case_id,
-                args.action,
-                args.actor,
-                args.reason,
-                output,
-            )
-    except (
-        TransactionJournalError,
-        RecoveryEventLedgerError,
-        FactKernelStoreError,
-        FactReconciliationStoreError,
-        FactContradictionStoreError,
-        EditorialGateStoreError,
-        EditorialApprovalError,
-        OSError,
-        ValueError,
-    ) as exc:
+            return _decide_approval(state_dir, args.case_id, args.action, args.actor, args.reason, output)
+    except (TransactionJournalError, RecoveryEventLedgerError, FactKernelStoreError,
+            FactReconciliationStoreError, FactContradictionStoreError, EditorialGateStoreError,
+            EditorialApprovalError, EditorialResolutionError, ReviewQueueError, OSError, ValueError) as exc:
         _emit({"error": str(exc), "command": args.command}, output)
         return EXIT_ERROR
-
     _emit({"error": f"unsupported command: {args.command}"}, output)
     return EXIT_ERROR
 
