@@ -4,11 +4,12 @@ from pathlib import Path
 from typing import Dict, Optional
 
 from .checkpoints import StoryCheckpointStore
+from .editorial_gate_store import EditorialGateStore
 from .fact_contradictions import FactContradictionStore
 from .fact_kernel import FactKernelStore
 from .fact_reconciliation import FactReconciliationStore
 from .health import RuntimeHealthReport, UnifiedHealthInspector
-from .models import Source, StoryObject
+from .models import Source, StoryObject, StoryState
 from .pipeline import generate_article, generate_content_pack, verify_story
 from .recovery import RecoveryEventLedger
 from .review import ReviewQueue
@@ -32,6 +33,7 @@ class Orchestrator:
         fact_kernel_store: Optional[FactKernelStore] = None,
         fact_reconciliation_store: Optional[FactReconciliationStore] = None,
         fact_contradiction_store: Optional[FactContradictionStore] = None,
+        editorial_gate_store: Optional[EditorialGateStore] = None,
         health_inspector: Optional[UnifiedHealthInspector] = None,
         recovery_ledger: Optional[RecoveryEventLedger] = None,
         source_registry_path: Optional[Path] = None,
@@ -56,6 +58,9 @@ class Orchestrator:
             or FactContradictionStore(
                 self.state_dir / "fact_contradictions.json"
             )
+        )
+        self.editorial_gate_store = editorial_gate_store or EditorialGateStore(
+            self.state_dir / "editorial_gate.json"
         )
         if self.review_queue is not None and self.transaction_journal is None:
             self.transaction_journal = TransactionJournal(self.state_dir / "transactions.json")
@@ -141,15 +146,29 @@ class Orchestrator:
         self.save_checkpoint(story, "signal")
         verify_story(story, source_map)
         self.save_checkpoint(story, "verified")
+
         kernel_record = self.fact_kernel_store.persist_story(story)
-        self.fact_reconciliation_store.persist_kernel(kernel_record)
-        self.fact_contradiction_store.persist_kernel(
+        reconciliation_report = self.fact_reconciliation_store.persist_kernel(kernel_record)
+        contradiction_report = self.fact_contradiction_store.persist_kernel(
             kernel_record,
             story.fact_kernel.evidence_relations,
         )
-        if story.state.value == "blocked":
+        editorial_decision = self.editorial_gate_store.persist_reports(
+            reconciliation_report,
+            contradiction_report,
+        )
+
+        if story.state == StoryState.BLOCKED:
             self._enqueue_blocked_story(story, "trust_score_below_threshold")
             return story
+
+        if editorial_decision["decision"] != "auto_draft":
+            story.state = StoryState.BLOCKED
+            self.save_checkpoint(story, "editorial_review")
+            reason = "editorial_gate:" + ",".join(editorial_decision["reasons"])
+            self._enqueue_blocked_story(story, reason)
+            return story
+
         generate_article(story)
         self.save_checkpoint(story, "drafted")
         generate_content_pack(story)
