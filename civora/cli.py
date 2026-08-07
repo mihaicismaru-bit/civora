@@ -6,6 +6,11 @@ from pathlib import Path
 from typing import Optional, Sequence, TextIO
 import sys
 
+from .editorial_approval import EditorialApprovalError, EditorialApprovalStore
+from .editorial_gate_store import EditorialGateStore, EditorialGateStoreError
+from .fact_contradictions import FactContradictionStore, FactContradictionStoreError
+from .fact_kernel import FactKernelStore, FactKernelStoreError
+from .fact_reconciliation import FactReconciliationStore, FactReconciliationStoreError
 from .health import UnifiedHealthInspector
 from .recovery import RecoveryEventLedger, RecoveryEventLedgerError
 from .transactions import TransactionJournal, TransactionJournalError
@@ -127,6 +132,60 @@ def _resolution_audit(state_dir: Path, output: TextIO) -> int:
     return EXIT_OK if status["consistent"] else EXIT_UNHEALTHY
 
 
+def _editorial_story(state_dir: Path, story_id: str, output: TextIO) -> int:
+    paths = _paths(state_dir)
+    kernel = FactKernelStore(paths["fact_kernel"]).load_story(story_id)
+    reconciliation = FactReconciliationStore(paths["fact_reconciliation"]).load_story(story_id)
+    contradictions = FactContradictionStore(paths["fact_contradictions"]).load_story(story_id)
+    gate = EditorialGateStore(paths["editorial_gate"]).load_story(story_id)
+    approval = EditorialApprovalStore(paths["editorial_approval"]).load_story(story_id)
+    found = any(item is not None for item in (kernel, reconciliation, contradictions, gate, approval))
+    if not found:
+        raise ValueError(f"unknown editorial story: {story_id}")
+    _emit(
+        {
+            "story_id": story_id,
+            "fact_kernel": kernel,
+            "reconciliation": reconciliation,
+            "contradictions": contradictions,
+            "editorial_gate": gate,
+            "approval_case": approval,
+        },
+        output,
+    )
+    return EXIT_OK
+
+
+def _approval_cases(state_dir: Path, output: TextIO, *, state: Optional[str] = None) -> int:
+    store = EditorialApprovalStore(_paths(state_dir)["editorial_approval"])
+    records = store.list_cases(state=state)
+    _emit({"count": len(records), "cases": records}, output)
+    return EXIT_OK
+
+
+def _approval_case(state_dir: Path, case_id: str, output: TextIO) -> int:
+    store = EditorialApprovalStore(_paths(state_dir)["editorial_approval"])
+    record = store.load_case(case_id)
+    if record is None:
+        raise EditorialApprovalError("unknown approval case")
+    _emit({"case": record}, output)
+    return EXIT_OK
+
+
+def _decide_approval(
+    state_dir: Path,
+    case_id: str,
+    action: str,
+    actor: str,
+    reason: str,
+    output: TextIO,
+) -> int:
+    store = EditorialApprovalStore(_paths(state_dir)["editorial_approval"])
+    record = store.decide(case_id, action=action, actor=actor, reason=reason)
+    _emit({"case": record}, output)
+    return EXIT_OK
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="civora", description="CIVORA operational control surface")
     parser.add_argument(
@@ -159,6 +218,40 @@ def build_parser() -> argparse.ArgumentParser:
         "resolution-audit",
         help="compare transaction resolution history with the global recovery ledger",
     )
+
+    editorial_story = subparsers.add_parser(
+        "editorial-story",
+        help="inspect the durable editorial evidence and decision chain for one story",
+    )
+    editorial_story.add_argument("story_id")
+
+    approval_cases = subparsers.add_parser(
+        "approval-cases",
+        help="list editorial approval cases",
+    )
+    approval_cases.add_argument(
+        "--state",
+        choices=sorted(EditorialApprovalStore.ALLOWED_STATES),
+    )
+
+    approval_case = subparsers.add_parser(
+        "approval-case",
+        help="inspect one editorial approval case",
+    )
+    approval_case.add_argument("case_id")
+
+    decide_approval = subparsers.add_parser(
+        "decide-approval",
+        help="auditably resolve one pending editorial approval case",
+    )
+    decide_approval.add_argument("case_id")
+    decide_approval.add_argument(
+        "--action",
+        choices=sorted(EditorialApprovalStore.FINAL_STATES),
+        required=True,
+    )
+    decide_approval.add_argument("--actor", required=True)
+    decide_approval.add_argument("--reason", required=True)
     return parser
 
 
@@ -197,7 +290,32 @@ def main(argv: Optional[Sequence[str]] = None, *, output: Optional[TextIO] = Non
             return _transaction_detail(state_dir, args.transaction_id, output)
         if args.command == "resolution-audit":
             return _resolution_audit(state_dir, output)
-    except (TransactionJournalError, RecoveryEventLedgerError, OSError, ValueError) as exc:
+        if args.command == "editorial-story":
+            return _editorial_story(state_dir, args.story_id, output)
+        if args.command == "approval-cases":
+            return _approval_cases(state_dir, output, state=args.state)
+        if args.command == "approval-case":
+            return _approval_case(state_dir, args.case_id, output)
+        if args.command == "decide-approval":
+            return _decide_approval(
+                state_dir,
+                args.case_id,
+                args.action,
+                args.actor,
+                args.reason,
+                output,
+            )
+    except (
+        TransactionJournalError,
+        RecoveryEventLedgerError,
+        FactKernelStoreError,
+        FactReconciliationStoreError,
+        FactContradictionStoreError,
+        EditorialGateStoreError,
+        EditorialApprovalError,
+        OSError,
+        ValueError,
+    ) as exc:
         _emit({"error": str(exc), "command": args.command}, output)
         return EXIT_ERROR
 
