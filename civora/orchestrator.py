@@ -5,6 +5,7 @@ from typing import Dict, Optional
 
 from .checkpoints import StoryCheckpointStore
 from .editorial_approval import EditorialApprovalStore
+from .editorial_consistency import EditorialConsistencyInspector
 from .editorial_gate_store import EditorialGateStore
 from .editorial_resolution import EditorialResolutionCoordinator, EditorialResolutionError
 from .fact_contradictions import FactContradictionStore
@@ -94,6 +95,16 @@ class Orchestrator:
             self.transaction_journal,
         )
 
+    def _editorial_consistency_status(self) -> Optional[dict]:
+        if self.review_queue is None or self.transaction_journal is None:
+            return None
+        inspector = EditorialConsistencyInspector(
+            self.editorial_approval_store.path,
+            self.review_queue.path,
+            self.transaction_journal.path,
+        )
+        return inspector.inspect()
+
     def _replay_transaction(self, record: dict) -> None:
         operation = record.get("operation")
         if operation == self.STORY_TO_REVIEW:
@@ -129,8 +140,20 @@ class Orchestrator:
         initial = self.health_inspector.inspect()
         if initial.status == "corrupt":
             raise OrchestratorError("startup blocked: durable runtime state is corrupt")
+
+        # Prepared cross-store transactions are allowed to exist at the initial
+        # inspection boundary because replay is the repair mechanism. After
+        # reconciliation and replay, approval, queue and journal must agree.
         self.reconcile_resolution_audit()
         self.recover_pending_transactions()
+
+        consistency = self._editorial_consistency_status()
+        if consistency is not None and consistency.get("status") != "healthy":
+            raise OrchestratorError(
+                "startup blocked: editorial durable stores are inconsistent "
+                f"({consistency.get('status')})"
+            )
+
         final = self.health_inspector.inspect()
         if final.status not in self.STARTUP_ALLOWED:
             raise OrchestratorError(
