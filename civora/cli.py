@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Optional, Sequence, TextIO
 import sys
 
+from .authorized_story import AuthorizedStoryBuilder, AuthorizedStoryError
 from .checkpoints import StoryCheckpointError
 from .editorial_approval import EditorialApprovalError, EditorialApprovalStore
 from .editorial_consistency import EditorialConsistencyInspector
@@ -137,6 +138,47 @@ def _editorial_story(state_dir: Path, story_id: str, output: TextIO) -> int:
     return EXIT_OK
 
 
+def _authorized_story(state_dir: Path, story_id: str, output: TextIO) -> int:
+    paths = _paths(state_dir)
+    kernel = FactKernelStore(paths["fact_kernel"]).load_story(story_id)
+    reconciliation = FactReconciliationStore(paths["fact_reconciliation"]).load_story(story_id)
+    contradictions = FactContradictionStore(paths["fact_contradictions"]).load_story(story_id)
+    gate = EditorialGateStore(paths["editorial_gate"]).load_story(story_id)
+    approval = EditorialApprovalStore(paths["editorial_approval"]).load_story(story_id)
+    missing = [
+        name for name, record in (
+            ("fact_kernel", kernel),
+            ("reconciliation", reconciliation),
+            ("contradictions", contradictions),
+            ("editorial_gate", gate),
+        ) if record is None
+    ]
+    if missing:
+        raise AuthorizedStoryError(
+            f"authorization projection unavailable for {story_id}: missing {', '.join(missing)}"
+        )
+    projection = AuthorizedStoryBuilder().build(
+        kernel_record=kernel,
+        reconciliation_report=reconciliation,
+        contradiction_report=contradictions,
+        editorial_decision=gate,
+        approval=approval,
+    )
+    _emit({
+        "story_id": story_id,
+        "authorization_mode": projection["authorization_mode"],
+        "editorial_decision_id": projection["editorial_decision_id"],
+        "kernel_semantic_hash": projection["kernel_semantic_hash"],
+        "authorized_fact_count": len(projection["authorized_facts"]),
+        "excluded_fact_count": len(projection["excluded_facts"]),
+        "authorized_facts": projection["authorized_facts"],
+        "excluded_facts": projection["excluded_facts"],
+        "authorized_uncertain_claims": projection["authorized_uncertain_claims"],
+        "policy": projection["policy"],
+    }, output)
+    return EXIT_OK
+
+
 def _approval_cases(state_dir: Path, output: TextIO, *, state: Optional[str] = None) -> int:
     records = EditorialApprovalStore(_paths(state_dir)["editorial_approval"]).list_cases(state=state)
     _emit({"count": len(records), "cases": records}, output)
@@ -194,6 +236,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     editorial_story = subparsers.add_parser("editorial-story", help="inspect durable editorial evidence and decision chain")
     editorial_story.add_argument("story_id")
+    authorized_story = subparsers.add_parser(
+        "authorized-story",
+        help="inspect the exact facts drafting is authorized to consume and exclusion reasons",
+    )
+    authorized_story.add_argument("story_id")
     approval_cases = subparsers.add_parser("approval-cases", help="list editorial approval cases")
     approval_cases.add_argument("--state", choices=sorted(EditorialApprovalStore.ALLOWED_STATES))
     approval_case = subparsers.add_parser("approval-case", help="inspect one editorial approval case")
@@ -227,13 +274,14 @@ def main(argv: Optional[Sequence[str]] = None, *, output: Optional[TextIO] = Non
         if args.command == "resolution-audit": return _resolution_audit(state_dir, output)
         if args.command == "editorial-consistency": return _editorial_consistency(state_dir, output)
         if args.command == "editorial-story": return _editorial_story(state_dir, args.story_id, output)
+        if args.command == "authorized-story": return _authorized_story(state_dir, args.story_id, output)
         if args.command == "approval-cases": return _approval_cases(state_dir, output, state=args.state)
         if args.command == "approval-case": return _approval_case(state_dir, args.case_id, output)
         if args.command == "decide-approval":
             return _decide_approval(state_dir, args.case_id, args.action, args.actor, args.reason, output)
         if args.command == "resume-approved":
             return _resume_approved(state_dir, args.story_id, args.version, output)
-    except (TransactionJournalError, RecoveryEventLedgerError, FactKernelStoreError,
+    except (AuthorizedStoryError, TransactionJournalError, RecoveryEventLedgerError, FactKernelStoreError,
             FactReconciliationStoreError, FactContradictionStoreError, EditorialGateStoreError,
             EditorialApprovalError, EditorialResolutionError, ReviewQueueError, StoryCheckpointError,
             StoryCodecError, OrchestratorError, OSError, ValueError) as exc:
