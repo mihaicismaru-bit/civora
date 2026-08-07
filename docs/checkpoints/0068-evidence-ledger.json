@@ -5,19 +5,23 @@
   "state": "CODE_COMPLETE_CI_PENDING",
   "evidence": [
     {"type":"prior_validation","workflow_run_id":31222108679,"head_sha":"71ce34c3d7c5051bf4245f37a2a1ad2d38b06b06","conclusion":"success","claim":"Checkpoint 0067 passed the complete GitHub Actions workflow."},
-    {"type":"implementation","path":"civora/authorized_story.py","claim":"AuthorizedStoryBuilder projects only grounded, corroborated and uncontested facts aligned to the exact current durable editorial records."},
+    {"type":"implementation","path":"civora/authorized_story.py","claim":"AuthorizedStoryBuilder projects facts from exact durable editorial records; auto-draft requires corroboration while human review may authorize grounded uncontested sub-auto-threshold support but never unsupported or conflicted facts."},
     {"type":"implementation","path":"civora/pipeline.py","claim":"Article drafting requires an explicit authorized fact projection and has no raw Fact Kernel fallback."},
     {"type":"integration","path":"civora/orchestrator.py","claim":"Both auto-draft and approved re-entry paths build the same fail-closed authorized projection before article generation."},
-    {"type":"test","path":"tests/test_authorized_story.py","claim":"Tests cover safe-fact projection, exact approval binding, non-promotion of weak/disputed facts and stale-record failure."},
-    {"type":"test","path":"tests/test_authorized_pipeline.py","claim":"Tests prove raw Fact Kernel statements cannot be drafted without authorization and that the article uses only the authorized projection."}
+    {"type":"test","path":"tests/test_authorized_story.py","claim":"Tests cover safe-fact projection, exact approval binding, contradiction non-override and stale-record failure."},
+    {"type":"test","path":"tests/test_authorized_pipeline.py","claim":"Tests prove raw Fact Kernel statements cannot be drafted without authorization and that article content uses only the authorized projection."},
+    {"type":"regression","workflow_run_id":31226363861,"conclusion":"failure","claim":"Initial 0068 CI exposed legacy approval tests that treated human approval as sufficient even when no fact passed the new projection; policy and fixtures were refined without restoring raw drafting."},
+    {"type":"test","path":"tests/test_editorial_approval.py","claim":"Approval regression coverage now distinguishes human-authorizable grounded/uncontested review facts from explicit contradiction, which remains fail-closed."}
   ],
   "gates": [
     {"gate":"RAW_FACT_KERNEL_DRAFTING_FALLBACK","status":"ABSENT_IMPLEMENTATION"},
     {"gate":"DURABLE_REPORT_ALIGNMENT","status":"PASS_IMPLEMENTATION"},
     {"gate":"GROUNDED_PROVENANCE_REQUIRED","status":"PASS_IMPLEMENTATION"},
-    {"gate":"CORROBORATED_FACT_REQUIRED","status":"PASS_IMPLEMENTATION"},
+    {"gate":"AUTO_DRAFT_REQUIRES_CORROBORATION","status":"PASS_IMPLEMENTATION"},
+    {"gate":"HUMAN_REVIEW_MAY_AUTHORIZE_SUB_AUTO_SUPPORT","status":"PASS_IMPLEMENTATION"},
+    {"gate":"UNSUPPORTED_FACT_HUMAN_OVERRIDE","status":"ABSENT_IMPLEMENTATION"},
+    {"gate":"CONTRADICTION_HUMAN_OVERRIDE","status":"ABSENT_IMPLEMENTATION"},
     {"gate":"UNCONTESTED_FACT_REQUIRED","status":"PASS_IMPLEMENTATION"},
-    {"gate":"HUMAN_APPROVAL_DOES_NOT_PROMOTE_UNSAFE_FACTS","status":"PASS_IMPLEMENTATION"},
     {"gate":"STALE_APPROVAL_FAIL_CLOSED","status":"PASS_IMPLEMENTATION"},
     {"gate":"STALE_REPORT_FAIL_CLOSED","status":"PASS_IMPLEMENTATION"},
     {"gate":"AUTO_DRAFT_AUTHORIZATION_INTEGRATION","status":"PASS_IMPLEMENTATION"},
@@ -30,9 +34,10 @@
     "authorized factual projection implemented",
     "raw Fact Kernel drafting fallback removed",
     "auto-draft and human-approved re-entry use the same authorization builder",
-    "unsafe facts remain excluded even after human approval",
+    "human review can authorize grounded uncontested sub-auto-threshold evidence",
+    "unsupported and conflicted facts remain excluded after human approval",
     "article and content-pack authorization audit added",
-    "targeted regression tests added"
+    "legacy contradiction-override expectation replaced with fail-closed regression coverage"
   ],
   "remaining_backlog": [
     "operator CLI inspection of authorized and excluded facts",
@@ -43,5 +48,5 @@
   "blockers": [
     "Current-head cross-platform CI result required before CLOSED_VALIDATED."
   ],
-  "next_action": "Validate checkpoint 0068 in CI; if green, expose authorized/excluded facts through operator tooling and document remediation paths."
+  "next_action": "Validate the refined checkpoint 0068 head in CI; if green, expose authorized/excluded facts through operator tooling and document remediation paths."
 }
