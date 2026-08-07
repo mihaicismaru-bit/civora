@@ -3,6 +3,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from civora.health import UnifiedHealthInspector
+from civora.recovery import RecoveryEventLedger
 from civora.registry import SourceRegistry
 from civora.transactions import TransactionJournal
 
@@ -22,6 +23,7 @@ class UnifiedHealthInspectorTests(unittest.TestCase):
                 review_queue_path=root / "review.json",
                 transaction_journal_path=root / "transactions.json",
                 checkpoint_dir=root / "checkpoints",
+                recovery_event_ledger_path=root / "recovery-events.json",
             ).inspect()
 
             self.assertEqual(report.status, "healthy")
@@ -33,6 +35,7 @@ class UnifiedHealthInspectorTests(unittest.TestCase):
                     "review_queue",
                     "transaction_journal",
                     "story_checkpoints",
+                    "recovery_event_ledger",
                 ],
             )
 
@@ -80,6 +83,44 @@ class UnifiedHealthInspectorTests(unittest.TestCase):
             self.assertEqual(payload["status"], "healthy")
             self.assertIsInstance(payload["components"], list)
             self.assertIn("generated_at", payload)
+
+    def test_recovery_is_appended_to_event_ledger(self):
+        with TemporaryDirectory() as td:
+            root = Path(td)
+            sources = root / "sources.json"
+            events = root / "recovery-events.json"
+            registry = SourceRegistry(sources)
+            registry.store.save({"sources": []})
+            registry.store.save({"sources": []})
+            sources.write_text("{not-json", encoding="utf-8")
+
+            report = UnifiedHealthInspector(
+                source_registry_path=sources,
+                recovery_event_ledger_path=events,
+            ).inspect()
+
+            self.assertEqual(report.status, "recovered_from_backup")
+            recorded = RecoveryEventLedger(events).all()
+            self.assertEqual(len(recorded), 1)
+            self.assertEqual(recorded[0]["component"], "source_registry")
+            self.assertEqual(recorded[0]["event_type"], "recovery")
+
+    def test_pending_transaction_is_appended_to_event_ledger(self):
+        with TemporaryDirectory() as td:
+            root = Path(td)
+            transactions = root / "transactions.json"
+            events = root / "recovery-events.json"
+            TransactionJournal(transactions).prepare("story_to_review", {"story_id": "s-1"})
+
+            UnifiedHealthInspector(
+                transaction_journal_path=transactions,
+                recovery_event_ledger_path=events,
+            ).inspect()
+
+            recorded = RecoveryEventLedger(events).all()
+            self.assertEqual(len(recorded), 1)
+            self.assertEqual(recorded[0]["event_type"], "pending_transaction")
+            self.assertEqual(recorded[0]["status"], "pending_transaction")
 
 
 if __name__ == "__main__":
