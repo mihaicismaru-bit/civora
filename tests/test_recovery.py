@@ -21,6 +21,45 @@ class RecoveryEventLedgerTests(unittest.TestCase):
             self.assertEqual(len(reloaded.all()), 1)
             self.assertEqual(reloaded.all()[0]["id"], event["id"])
 
+    def test_stable_event_id_makes_identical_append_idempotent(self):
+        with TemporaryDirectory() as td:
+            path = Path(td) / "recovery-events.json"
+            ledger = RecoveryEventLedger(path)
+            kwargs = {
+                "component": "transaction_journal",
+                "event_type": "resolution",
+                "status": "requeue",
+                "details": {"transaction_id": "tx-1"},
+                "timestamp": "2026-08-07T06:00:00+00:00",
+                "event_id": "tx-resolution:stable",
+            }
+            first = ledger.append(**kwargs)
+            second = RecoveryEventLedger(path).append(**kwargs)
+            self.assertEqual(first, second)
+            self.assertEqual(len(RecoveryEventLedger(path).all()), 1)
+
+    def test_stable_event_id_rejects_conflicting_content(self):
+        with TemporaryDirectory() as td:
+            path = Path(td) / "recovery-events.json"
+            ledger = RecoveryEventLedger(path)
+            ledger.append(
+                component="transaction_journal",
+                event_type="resolution",
+                status="requeue",
+                details={"transaction_id": "tx-1"},
+                timestamp="2026-08-07T06:00:00+00:00",
+                event_id="tx-resolution:stable",
+            )
+            with self.assertRaises(RecoveryEventLedgerError):
+                RecoveryEventLedger(path).append(
+                    component="transaction_journal",
+                    event_type="resolution",
+                    status="abort",
+                    details={"transaction_id": "tx-1"},
+                    timestamp="2026-08-07T06:00:00+00:00",
+                    event_id="tx-resolution:stable",
+                )
+
     def test_stale_writers_do_not_lose_events(self):
         with TemporaryDirectory() as td:
             path = Path(td) / "recovery-events.json"
