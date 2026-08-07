@@ -2,57 +2,26 @@
   "checkpoint_id": "0065",
   "project": "CIVORA",
   "title": "Editorial Cross-Store Consistency Gate",
-  "state": "CODE_COMPLETE_CI_PENDING",
+  "state": "CLOSED_VALIDATED",
   "evidence": [
-    {
-      "type": "prior_validation",
-      "workflow_run_id": 31210681384,
-      "head_sha": "3649493da7440b5b4b229e11c8841f756dc3ad6e",
-      "conclusion": "success",
-      "claim": "Checkpoint 0064 passed the complete cross-platform GitHub Actions matrix, including Windows native."
-    },
-    {
-      "type": "implementation",
-      "path": "civora/editorial_consistency.py",
-      "claim": "Read-only inspector enforces approval/Review Queue/transaction lifecycle invariants and distinguishes exact prepared-transaction crash windows from unrecoverable divergence."
-    },
-    {
-      "type": "integration",
-      "path": "civora/orchestrator.py",
-      "claim": "Startup replays prepared transactions before requiring healthy editorial cross-store consistency; remaining divergence blocks new work fail-closed."
-    },
-    {
-      "type": "test",
-      "path": "tests/test_editorial_consistency.py",
-      "claim": "Tests cover healthy aligned state, recoverable prepared divergence, degraded committed divergence, startup repair, and startup fail-closed behavior."
-    }
+    {"type":"prior_validation","workflow_run_id":31210681384,"head_sha":"3649493da7440b5b4b229e11c8841f756dc3ad6e","conclusion":"success","claim":"Checkpoint 0064 passed the complete cross-platform GitHub Actions matrix, including Windows native."},
+    {"type":"implementation","path":"civora/editorial_consistency.py","claim":"Read-only inspector enforces approval/Review Queue/transaction lifecycle invariants and distinguishes exact prepared-transaction crash windows from unrecoverable divergence."},
+    {"type":"integration","path":"civora/orchestrator.py","claim":"Startup replays prepared transactions before requiring healthy editorial cross-store consistency; remaining divergence blocks new work fail-closed."},
+    {"type":"test","path":"tests/test_editorial_consistency.py","claim":"Tests cover healthy aligned state, recoverable prepared divergence, degraded committed divergence, startup repair, and startup fail-closed behavior."},
+    {"type":"validation","workflow_run_id":31214225633,"head_sha":"ecc9bb2f69281d4367ab3fdf2e16a98abbb847fb","conclusion":"success","claim":"Checkpoint 0065 passed the complete GitHub Actions validation run."}
   ],
   "gates": [
-    {"gate": "APPROVAL_QUEUE_STATE_INVARIANT", "status": "PASS_IMPLEMENTATION"},
-    {"gate": "EXACT_PREPARED_TRANSACTION_RECOVERABILITY", "status": "PASS_IMPLEMENTATION"},
-    {"gate": "COMMITTED_TRANSACTION_REFLECTION", "status": "PASS_IMPLEMENTATION"},
-    {"gate": "READ_ONLY_CONSISTENCY_INSPECTION", "status": "PASS_IMPLEMENTATION"},
-    {"gate": "STARTUP_REPLAY_BEFORE_CONSISTENCY_GATE", "status": "PASS_IMPLEMENTATION"},
-    {"gate": "POST_RECOVERY_FAIL_CLOSED", "status": "PASS_IMPLEMENTATION"},
-    {"gate": "REGRESSION_TESTS", "status": "PASS_IMPLEMENTATION"},
-    {"gate": "CROSS_PLATFORM_CI", "status": "PENDING_CURRENT_CI"}
+    {"gate":"APPROVAL_QUEUE_STATE_INVARIANT","status":"PASS"},
+    {"gate":"EXACT_PREPARED_TRANSACTION_RECOVERABILITY","status":"PASS"},
+    {"gate":"COMMITTED_TRANSACTION_REFLECTION","status":"PASS"},
+    {"gate":"READ_ONLY_CONSISTENCY_INSPECTION","status":"PASS"},
+    {"gate":"STARTUP_REPLAY_BEFORE_CONSISTENCY_GATE","status":"PASS"},
+    {"gate":"POST_RECOVERY_FAIL_CLOSED","status":"PASS"},
+    {"gate":"REGRESSION_TESTS","status":"PASS"},
+    {"gate":"CROSS_PLATFORM_CI","status":"PASS"}
   ],
-  "completed_gates": [
-    "0064 closed validated after full cross-platform CI",
-    "approval/Review Queue state invariant implemented",
-    "prepared crash window explicitly classified as recoverable",
-    "committed divergence classified as degraded",
-    "startup repairs before enforcing consistency",
-    "post-recovery divergence blocks startup"
-  ],
-  "remaining_backlog": [
-    "unified health/CLI visibility for editorial cross-store consistency",
-    "crash/recovery validation through approved pipeline re-entry",
-    "Story Engine constrained to authorized/corroborated facts",
-    "operator remediation runbooks"
-  ],
-  "blockers": [
-    "Current-head cross-platform CI result required before CLOSED_VALIDATED."
-  ],
-  "next_action": "Validate current head in CI; if green, wire editorial consistency into unified health/CLI and then expand approved re-entry crash/recovery validation."
+  "completed_gates": ["0064 closed validated after full cross-platform CI","approval/Review Queue state invariant implemented","prepared crash window explicitly classified as recoverable","committed divergence classified as degraded","startup repairs before enforcing consistency","post-recovery divergence blocks startup","0065 full CI validation passed"],
+  "remaining_backlog": ["unified health/CLI visibility for editorial cross-store consistency","crash/recovery validation through approved pipeline re-entry","Story Engine constrained to authorized/corroborated facts","operator remediation runbooks"],
+  "blockers": [],
+  "next_action": "Wire editorial cross-store consistency into unified health/CLI, then validate approved re-entry crash recovery end-to-end."
 }
