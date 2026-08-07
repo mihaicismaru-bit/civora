@@ -1,7 +1,10 @@
 import unittest
+from io import StringIO
+import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+from civora.cli import EXIT_OK, main
 from civora.fact_kernel import FactKernelStore
 from civora.health import UnifiedHealthInspector
 from civora.orchestrator import Orchestrator, OrchestratorError
@@ -23,6 +26,16 @@ class EditorialHealthTests(unittest.TestCase):
             names = {component.name for component in report.components}
 
             self.assertEqual(report.status, "healthy")
+            self.assertTrue(self.EDITORIAL_COMPONENTS.issubset(names))
+
+    def test_cli_health_includes_all_editorial_stores(self):
+        with TemporaryDirectory() as td:
+            output = StringIO()
+            code = main(["--state-dir", td, "health"], output=output)
+            payload = json.loads(output.getvalue())
+            names = {component["name"] for component in payload["components"]}
+
+            self.assertEqual(code, EXIT_OK)
             self.assertTrue(self.EDITORIAL_COMPONENTS.issubset(names))
 
     def test_empty_editorial_stores_are_healthy(self):
@@ -80,7 +93,6 @@ class EditorialHealthTests(unittest.TestCase):
     def test_pending_editorial_approval_is_not_runtime_degradation(self):
         with TemporaryDirectory() as td:
             root = Path(td)
-            # A pending approval is editorial work, not durable-state corruption.
             from civora.editorial_approval import EditorialApprovalStore
 
             store = EditorialApprovalStore(root / "editorial_approval.json")
