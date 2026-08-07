@@ -1,0 +1,68 @@
+{
+  "checkpoint_id": "0057",
+  "project": "CIVORA",
+  "title": "Claim / Evidence Reconciliation",
+  "state": "CODE_COMPLETE_CI_PENDING",
+  "accelerated_editorial_phase": true,
+  "gates": [
+    {
+      "gate": "INDEPENDENT_SOURCE_SUPPORT_AGGREGATION",
+      "status": "PASS_IMPLEMENTATION",
+      "evidence": ["civora/reconciliation.py", "tests/test_reconciliation.py"]
+    },
+    {
+      "gate": "FALSE_CORROBORATION_PREVENTION",
+      "status": "PASS_IMPLEMENTATION",
+      "evidence": ["tests/test_reconciliation.py"]
+    },
+    {
+      "gate": "DETERMINISTIC_SUPPORT_CONFIDENCE",
+      "status": "PASS_IMPLEMENTATION",
+      "evidence": ["civora/reconciliation.py"]
+    },
+    {
+      "gate": "UNSUPPORTED_FACT_VISIBILITY",
+      "status": "PASS_IMPLEMENTATION",
+      "evidence": ["tests/test_reconciliation.py", "tests/test_fact_reconciliation.py"]
+    },
+    {
+      "gate": "UNCERTAIN_CLAIM_NON_MUTATING_CANDIDATE_STATUS",
+      "status": "PASS_IMPLEMENTATION",
+      "evidence": ["tests/test_reconciliation.py"]
+    },
+    {
+      "gate": "DURABLE_RECONCILIATION_STORE",
+      "status": "PASS_IMPLEMENTATION",
+      "evidence": ["civora/fact_reconciliation.py", "tests/test_fact_reconciliation.py"]
+    },
+    {
+      "gate": "RECONCILIATION_IDEMPOTENCE",
+      "status": "PASS_IMPLEMENTATION",
+      "evidence": ["tests/test_fact_reconciliation.py"]
+    },
+    {
+      "gate": "ORCHESTRATOR_RECONCILIATION_WIRING",
+      "status": "PASS_IMPLEMENTATION",
+      "evidence": ["civora/orchestrator.py"]
+    },
+    {
+      "gate": "PYTHON_3_11_3_13_CI",
+      "status": "PENDING_CURRENT_HEAD_CI"
+    },
+    {
+      "gate": "WINDOWS_NATIVE_CI",
+      "status": "PENDING_CURRENT_HEAD_CI"
+    }
+  ],
+  "remaining_backlog": [
+    "explicit claim polarity and contradiction assertions",
+    "durable conflict clusters and disputed outcomes",
+    "Fact Kernel and reconciliation health wiring",
+    "editorial approval state machine",
+    "Story Engine generation from reconciled fact records"
+  ],
+  "blockers": [
+    "Final checkpoint validation awaits GitHub Actions for the current head."
+  ],
+  "next_action": "Add explicit polarity and contradiction clusters without lexical-negation heuristics."
+}
