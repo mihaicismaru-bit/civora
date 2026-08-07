@@ -4,7 +4,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 import re
-from typing import Callable, Dict, List, Optional
+from typing import Callable, List, Optional
 
 from .checkpoints import StoryCheckpointError, StoryCheckpointStore
 from .ingestion import SignalStore, SignalStoreError
@@ -102,8 +102,18 @@ class UnifiedHealthInspector:
                 status="corrupt",
                 details={"path": str(path), "error": str(exc)},
             )
+        except Exception as exc:
+            return ComponentHealth(
+                name=name,
+                status="degraded",
+                details={"path": str(path), "error": str(exc)},
+            )
         recovered = bool(getattr(instance, "recovered_from_backup", False))
-        payload = {"path": str(path), **details(instance)}
+        payload = {
+            "path": str(path),
+            "recovered_from_backup": recovered,
+            **details(instance),
+        }
         return ComponentHealth(
             name=name,
             status="recovered_from_backup" if recovered else "healthy",
@@ -123,7 +133,7 @@ class UnifiedHealthInspector:
                 ),
             },
         )
-        if component.status == "corrupt" or component.status == "recovered_from_backup":
+        if component.status in {"corrupt", "degraded"}:
             return component
         if component.details.get("prepared_count", 0) > 0:
             return ComponentHealth(
@@ -152,6 +162,8 @@ class UnifiedHealthInspector:
                 if store.recovered_from_backup(story_id, version, label):
                     recovered += 1
             except StoryCheckpointError as exc:
+                errors.append({"file": path.name, "error": str(exc)})
+            except Exception as exc:
                 errors.append({"file": path.name, "error": str(exc)})
 
         details = {
