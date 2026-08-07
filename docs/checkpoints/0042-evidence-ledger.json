@@ -1,7 +1,7 @@
 {
   "checkpoint": "0042",
   "title": "Unified Recovery & Health Report",
-  "status": "CODE_COMPLETE_CI_PENDING",
+  "status": "CLOSED_VALIDATED",
   "artifacts": [
     {
       "path": "civora/health.py",
@@ -16,14 +16,22 @@
       "purpose": "Checkpoint manifest and implementation record"
     }
   ],
+  "validation": {
+    "github_actions_run_id": 31140192038,
+    "python_3_11": "PASS",
+    "python_3_12": "PASS",
+    "python_3_13": "PASS"
+  },
   "gates": {
-    "UNIFIED_RUNTIME_HEALTH_VIEW": "PASS_IMPLEMENTATION_REVIEW",
-    "COMPONENT_HEALTH_CLASSIFICATION": "PASS_IMPLEMENTATION_REVIEW",
-    "RECOVERY_VISIBILITY": "PASS_IMPLEMENTATION_REVIEW",
-    "PENDING_TRANSACTION_DEGRADATION": "PASS_IMPLEMENTATION_REVIEW",
-    "FAIL_CLOSED_CORRUPTION_REPORTING": "PASS_IMPLEMENTATION_REVIEW",
-    "HEALTH_REPORT_SERIALIZATION": "PASS_IMPLEMENTATION_REVIEW",
-    "AUTOMATED_TEST_EXECUTION": "PENDING_CI",
+    "UNIFIED_RUNTIME_HEALTH_VIEW": "PASS",
+    "COMPONENT_HEALTH_CLASSIFICATION": "PASS",
+    "RECOVERY_VISIBILITY": "PASS",
+    "PENDING_TRANSACTION_DEGRADATION": "PASS",
+    "FAIL_CLOSED_CORRUPTION_REPORTING": "PASS",
+    "HEALTH_REPORT_SERIALIZATION": "PASS",
+    "AUTOMATED_TEST_EXECUTION_PYTHON_3_11": "PASS",
+    "AUTOMATED_TEST_EXECUTION_PYTHON_3_12": "PASS",
+    "AUTOMATED_TEST_EXECUTION_PYTHON_3_13": "PASS",
     "WINDOWS_NATIVE_VALIDATION": "PENDING"
   },
   "remaining_backlog": [
@@ -36,8 +44,7 @@
     "Publication adapters after runtime recovery gates close"
   ],
   "blockers": [
-    "Native Windows validation requires a Windows runner",
-    "Latest-head CI must complete before checkpoint closure"
+    "Native Windows validation requires a Windows runner"
   ],
   "next_action": "Add a durable append-only recovery event ledger and wire UnifiedHealthInspector into orchestrator startup."
 }
