@@ -1,6 +1,6 @@
 # CIVORA Checkpoint 0067 — Editorial Consistency Health and Resume CLI
 
-Status: CODE_COMPLETE_CI_PENDING
+Status: CLOSED_VALIDATED
 
 ## Objective
 
@@ -10,80 +10,45 @@ Close the operator-observability and restart-control gap left after checkpoint 0
 
 ### Unified health consistency component
 
-`UnifiedHealthInspector` now emits an `editorial_consistency` component whenever Editorial Approval, Review Queue and Transaction Journal paths are configured.
+`UnifiedHealthInspector` emits an `editorial_consistency` component whenever Editorial Approval, Review Queue and Transaction Journal paths are configured. The production `EditorialConsistencyInspector` exposes approval cases, editorial resolution transactions, recoverable crash windows and unrecoverable mismatches.
 
-The component is produced by the production `EditorialConsistencyInspector` and exposes:
-
-- approval case count;
-- editorial resolution transaction count;
-- unrecoverable mismatch count and details;
-- recoverable crash-window mismatch count and details;
-- exact durable-store paths involved in the invariant.
-
-Status mapping is conservative:
-
-- `healthy` — stores agree;
-- `pending_transaction` — mismatch is exactly covered by a prepared editorial resolution transaction;
-- `degraded` — mismatch is not recoverable from an exact prepared transaction;
-- durable-store corruption remains fail-closed through the existing health error paths.
-
-Because `pending_transaction` and `degraded` have unhealthy severity, the `civora health` command returns the existing unhealthy exit code until consistency is restored.
+Status mapping is conservative: `healthy` for agreement, `pending_transaction` for an exact prepared-transaction crash window, and `degraded` for mismatches that cannot be repaired from durable transaction evidence. Durable-store corruption remains fail-closed.
 
 ### Editorial consistency CLI
 
-Added:
-
-```text
-civora --state-dir <path> editorial-consistency
-```
-
-The command exposes the same machine-readable consistency report directly and returns a non-zero unhealthy exit code whenever the state is not `healthy`.
+`civora --state-dir <path> editorial-consistency` exposes the same machine-readable report directly and returns a non-zero unhealthy exit code whenever the state is not healthy.
 
 ### Restart-safe approved resume CLI
 
-Added:
+`civora --state-dir <path> resume-approved <story-id> [--version N]` delegates to the production restart-safe recovery path: durable checkpoint rehydration, fresh queue/journal/orchestrator objects, transaction replay, consistency validation, exact approval binding and resume to drafting/packaging.
 
-```text
-civora --state-dir <path> resume-approved <story-id> [--version N]
-```
+## Validation
 
-The command delegates to the existing restart-safe `resume_approved_story()` path. It therefore reloads the durable `editorial_review` checkpoint, reconstructs fresh queue/journal/orchestrator objects, performs startup transaction replay and cross-store validation, verifies the exact approval binding, then resumes drafting/packaging. The command emits the resulting `StoryObject` as JSON.
-
-Invalid versions, unknown/corrupt checkpoints, stale approvals and failed startup invariants return an operational error rather than bypassing the state machine.
-
-## Validation added
-
-`tests/test_editorial_cli_control.py` covers:
-
-- unified health exposes `editorial_consistency` and becomes degraded for an approval case with no Review Queue item;
-- `editorial-consistency` emits a machine-readable healthy report for an empty consistent state;
-- `resume-approved` recovers a prepared approval-resolution crash window after restart and reaches `PACKAGED` while committing the transaction and synchronizing Review Queue.
-
-Existing restart/recovery and cross-store consistency tests remain active as regression coverage.
+`tests/test_editorial_cli_control.py`, restart/recovery tests and cross-store consistency tests remain active. GitHub Actions workflow run `31222108679` completed successfully for head `71ce34c3d7c5051bf4245f37a2a1ad2d38b06b06`.
 
 ## Gates
 
-- CROSS_STORE_CONSISTENCY_IN_UNIFIED_HEALTH: PASS_IMPLEMENTATION
-- UNRECOVERABLE_MISMATCH_DEGRADES_HEALTH: PASS_IMPLEMENTATION
-- RECOVERABLE_MISMATCH_VISIBLE_AS_PENDING_TRANSACTION: PASS_IMPLEMENTATION
-- MACHINE_READABLE_CONSISTENCY_CLI: PASS_IMPLEMENTATION
-- RESTART_SAFE_APPROVED_RESUME_CLI: PASS_IMPLEMENTATION
-- CLI_REUSES_PRODUCTION_RECOVERY_PATH: PASS_IMPLEMENTATION
-- INVALID_RESUME_FAIL_CLOSED: PASS_IMPLEMENTATION
-- OPERATOR_JSON_OUTPUT: PASS_IMPLEMENTATION
-- CROSS_PLATFORM_CI: PENDING_CURRENT_CI
+- CROSS_STORE_CONSISTENCY_IN_UNIFIED_HEALTH: PASS_VALIDATED
+- UNRECOVERABLE_MISMATCH_DEGRADES_HEALTH: PASS_VALIDATED
+- RECOVERABLE_MISMATCH_VISIBLE_AS_PENDING_TRANSACTION: PASS_VALIDATED
+- MACHINE_READABLE_CONSISTENCY_CLI: PASS_VALIDATED
+- RESTART_SAFE_APPROVED_RESUME_CLI: PASS_VALIDATED
+- CLI_REUSES_PRODUCTION_RECOVERY_PATH: PASS_VALIDATED
+- INVALID_RESUME_FAIL_CLOSED: PASS_VALIDATED
+- OPERATOR_JSON_OUTPUT: PASS_VALIDATED
+- CROSS_PLATFORM_CI: PASS_VALIDATED
 
 ## Remaining backlog
 
 1. Story Engine constrained strictly to authorized/corroborated facts.
 2. Operator remediation and recovery runbooks for consistency failures.
-3. Explicit CLI recovery guidance for recoverable vs unrecoverable editorial consistency states.
+3. Explicit recovery guidance for recoverable vs unrecoverable editorial consistency states.
 4. Production packaging/readiness review after Story Engine authorization is enforced.
 
 ## Blockers
 
-Current-head cross-platform CI is required before checkpoint 0067 can be declared `CLOSED_VALIDATED`.
+None.
 
 ## Next action
 
-Validate checkpoint 0067 in CI. If green, begin the authorized Story Engine gate so article generation can consume only facts that are both allowed by the editorial decision path and supported by the durable fact/reconciliation records.
+Implement the authorized Story Engine gate so article generation consumes only facts that are grounded, corroborated, uncontested and bound to the current editorial authorization path.
