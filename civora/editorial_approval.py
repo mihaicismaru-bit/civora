@@ -214,6 +214,21 @@ class EditorialApprovalStore:
             return None
         return copy.deepcopy(payload["cases"][case_id])
 
+    def list_cases(self, *, state: Optional[str] = None) -> list[dict]:
+        if state is not None and state not in self.ALLOWED_STATES:
+            raise EditorialApprovalError("invalid approval case state filter")
+        try:
+            payload = self.store.load(self.default_payload())
+        except AtomicJsonStoreError as exc:
+            raise EditorialApprovalError("approval load failed") from exc
+        records = [
+            copy.deepcopy(record)
+            for record in payload["cases"].values()
+            if state is None or record.get("state") == state
+        ]
+        records.sort(key=lambda record: (record.get("created_at", ""), record.get("case_id", "")))
+        return records
+
     def health(self) -> dict:
         try:
             payload = self.store.load(self.default_payload())
