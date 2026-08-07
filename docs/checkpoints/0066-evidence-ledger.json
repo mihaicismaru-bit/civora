@@ -1,0 +1,26 @@
+{
+  "checkpoint_id": "0066",
+  "project": "CIVORA",
+  "title": "Restart-Safe Approved Re-entry",
+  "state": "CODE_COMPLETE_CI_PENDING",
+  "evidence": [
+    {"type":"prior_validation","workflow_run_id":31214225633,"head_sha":"ecc9bb2f69281d4367ab3fdf2e16a98abbb847fb","conclusion":"success","claim":"Checkpoint 0065 passed the complete GitHub Actions validation run."},
+    {"type":"implementation","path":"civora/story_codec.py","claim":"Explicit fail-closed StoryObject decoder rehydrates durable editorial-review checkpoints."},
+    {"type":"implementation","path":"civora/resume.py","claim":"Fresh-process approved re-entry reconstructs queue/journal/orchestrator state from disk before resuming."},
+    {"type":"test","path":"tests/test_restart_resume.py","claim":"Crash window after approval-store mutation but before queue/journal completion is replayed after restart and reaches PACKAGED."}
+  ],
+  "gates": [
+    {"gate":"DURABLE_STORY_REHYDRATION","status":"PASS_IMPLEMENTATION"},
+    {"gate":"FAIL_CLOSED_CODEC","status":"PASS_IMPLEMENTATION"},
+    {"gate":"FRESH_ORCHESTRATOR_RESTART_PATH","status":"PASS_IMPLEMENTATION"},
+    {"gate":"PREPARED_APPROVAL_REPLAY_BEFORE_REENTRY","status":"PASS_IMPLEMENTATION"},
+    {"gate":"CROSS_STORE_CONSISTENCY_BEFORE_REENTRY","status":"PASS_IMPLEMENTATION"},
+    {"gate":"APPROVED_TO_PACKAGED_RESTART_PATH","status":"PASS_IMPLEMENTATION"},
+    {"gate":"DURABLE_POST_REENTRY_CHECKPOINTS","status":"PASS_IMPLEMENTATION"},
+    {"gate":"CROSS_PLATFORM_CI","status":"PENDING_CURRENT_CI"}
+  ],
+  "completed_gates": ["0065 closed validated","durable story rehydration implemented","fresh-process approval re-entry implemented","prepared editorial transaction replay covered by restart test","post-recovery packaging and checkpoint persistence covered"],
+  "remaining_backlog": ["unified health/CLI visibility for editorial cross-store consistency","operator CLI command for durable approved-story resume","Story Engine constrained to authorized/corroborated facts","operator remediation and recovery runbooks"],
+  "blockers": ["Current-head cross-platform CI result required before CLOSED_VALIDATED."],
+  "next_action": "Validate current head in CI; if green, wire editorial cross-store consistency into unified health output and expose restart-safe approved re-entry through CLI."
+}
