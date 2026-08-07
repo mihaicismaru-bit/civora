@@ -138,10 +138,19 @@ class UnifiedHealthInspector:
                 "prepared_count": len(
                     [record for record in journal.records.values() if record.get("status") == "prepared"]
                 ),
+                "dead_letter_count": len(
+                    [record for record in journal.records.values() if record.get("status") == "dead_letter"]
+                ),
             },
         )
         if component.status in {"corrupt", "degraded"}:
             return component
+        if component.details.get("dead_letter_count", 0) > 0:
+            return ComponentHealth(
+                name=component.name,
+                status="degraded",
+                details=component.details,
+            )
         if component.details.get("prepared_count", 0) > 0:
             return ComponentHealth(
                 name=component.name,
