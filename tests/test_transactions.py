@@ -51,6 +51,36 @@ class TransactionJournalTests(unittest.TestCase):
             self.assertEqual(record["recovery_attempts"], 1)
             self.assertIn("simulated crash recovery failure", record["last_error"])
 
+    def test_recovery_is_bounded_and_moves_transaction_to_dead_letter(self):
+        with TemporaryDirectory() as td:
+            path = Path(td) / "transactions.json"
+            journal = TransactionJournal(path, max_recovery_attempts=3)
+            tx_id = journal.prepare("story_to_review", {"story_id": "s-dead"})
+            calls = []
+
+            def fail(record):
+                calls.append(record["id"])
+                raise RuntimeError("permanent failure")
+
+            for _ in range(3):
+                TransactionJournal(path, max_recovery_attempts=3).recover(fail)
+
+            final = TransactionJournal(path, max_recovery_attempts=3)
+            record = final.records[tx_id]
+            self.assertEqual(record["status"], "dead_letter")
+            self.assertEqual(record["recovery_attempts"], 3)
+            self.assertIn("permanent failure", record["last_error"])
+            self.assertEqual([item["id"] for item in final.dead_letters()], [tx_id])
+
+            TransactionJournal(path, max_recovery_attempts=3).recover(fail)
+            self.assertEqual(len(calls), 3)
+
+    def test_invalid_recovery_attempt_bound_is_rejected(self):
+        with TemporaryDirectory() as td:
+            path = Path(td) / "transactions.json"
+            with self.assertRaises(TransactionJournalError):
+                TransactionJournal(path, max_recovery_attempts=0)
+
     def test_duplicate_transaction_id_is_rejected(self):
         with TemporaryDirectory() as td:
             journal = TransactionJournal(Path(td) / "transactions.json")
