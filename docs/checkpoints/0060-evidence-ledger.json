@@ -1,0 +1,30 @@
+{
+  "checkpoint_id": "0060",
+  "project": "CIVORA",
+  "title": "Editorial Approval State Machine",
+  "state": "CODE_COMPLETE_CI_PENDING",
+  "accelerated_editorial_phase": true,
+  "gates": [
+    {"gate": "DURABLE_APPROVAL_CASE", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/editorial_approval.py", "tests/test_editorial_approval.py"]},
+    {"gate": "EXACT_GATE_DECISION_BINDING", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/editorial_approval.py"]},
+    {"gate": "FACT_KERNEL_HASH_BINDING", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/editorial_approval.py", "civora/orchestrator.py"]},
+    {"gate": "AUDITED_OPERATOR_TRANSITION", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/editorial_approval.py", "tests/test_editorial_approval.py"]},
+    {"gate": "TERMINAL_DECISION_IMMUTABILITY", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/editorial_approval.py", "tests/test_editorial_approval.py"]},
+    {"gate": "STALE_APPROVAL_FAIL_CLOSED", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/orchestrator.py"]},
+    {"gate": "ORCHESTRATOR_PENDING_CASE_CREATION", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/orchestrator.py", "tests/test_editorial_approval.py"]},
+    {"gate": "APPROVED_PIPELINE_REENTRY", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/orchestrator.py", "tests/test_editorial_approval.py"]},
+    {"gate": "UNAPPROVED_REENTRY_BLOCKED", "status": "PASS_IMPLEMENTATION", "evidence": ["civora/orchestrator.py", "tests/test_editorial_approval.py"]},
+    {"gate": "CROSS_PLATFORM_CI", "status": "PENDING_CURRENT_HEAD_CI"}
+  ],
+  "remaining_backlog": [
+    "unified health wiring for editorial durable stores",
+    "operator CLI for editorial approval cases and decisions",
+    "Story Engine from approved/corroborated facts",
+    "Review Queue lifecycle reconciliation after approval/rejection",
+    "crash/recovery tests across approval transitions and re-entry"
+  ],
+  "blockers": [
+    "Current-head cross-platform CI required before CLOSED_VALIDATED can be declared."
+  ],
+  "next_action": "If CI passes, wire all editorial durable stores into fail-closed startup health before Story Engine implementation."
+}
