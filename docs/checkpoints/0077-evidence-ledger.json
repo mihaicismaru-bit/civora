@@ -1,0 +1,45 @@
+{
+  "checkpoint_id": "0077",
+  "project": "CIVORA",
+  "title": "Final Version Lock + Release Manifest",
+  "state": "CODE_COMPLETE_FINAL_CI_PENDING",
+  "canonical_branch": "agent/import-core-runtime-v0-2",
+  "evidence": [
+    {"type":"prior_validation","workflow_run_id":31236694328,"head_sha":"37c4c312ef4e979d07b9567d8dadc17703cb6725","conclusion":"success","claim":"Expanded RC CI passed Python 3.10-3.13, Windows, package smoke and release preflight."},
+    {"type":"version_lock","path":"pyproject.toml","claim":"Package version is locked to 1.0.0."},
+    {"type":"version_lock","path":"civora/__init__.py","claim":"Runtime version is locked to 1.0.0."},
+    {"type":"release_documentation","path":"CHANGELOG.md","claim":"Version 1.0.0 release entry is finalized and dated 2026-08-08."},
+    {"type":"release_manifest","path":"docs/release/v1.0-release-manifest.json","claim":"Canonical v1.0 release content, validation requirements, safety invariants and exact-head binding policy are defined."},
+    {"type":"governance","claim":"No irreversible merge/tag/release action is authorized by this checkpoint."}
+  ],
+  "gates": [
+    {"gate":"PACKAGE_VERSION_1_0_0","status":"PASS_IMPLEMENTATION"},
+    {"gate":"RUNTIME_VERSION_1_0_0","status":"PASS_IMPLEMENTATION"},
+    {"gate":"VERSION_SYNC_CONTRACT","status":"PASS_IMPLEMENTATION"},
+    {"gate":"CHANGELOG_1_0_0","status":"PASS_IMPLEMENTATION"},
+    {"gate":"RELEASE_MANIFEST","status":"PASS_IMPLEMENTATION"},
+    {"gate":"RELEASE_CHECKLIST_ADVANCED","status":"PASS_IMPLEMENTATION"},
+    {"gate":"PR_REMAINS_DRAFT","status":"PASS"},
+    {"gate":"FINAL_EXACT_HEAD_CI","status":"PENDING_CURRENT_CI"},
+    {"gate":"HUMAN_RELEASE_APPROVAL","status":"BLOCKED_BY_POLICY"}
+  ],
+  "completed_gates": [
+    "0073 closed validated",
+    "0075 closed validated",
+    "0076 closed validated",
+    "version metadata locked to 1.0.0",
+    "changelog finalized",
+    "release manifest created",
+    "release checklist advanced to final-head validation"
+  ],
+  "remaining_backlog": [
+    "final full CI on the exact current 1.0.0 head",
+    "record successful exact-head CI binding",
+    "explicit human approval before PR ready/merge/tag/release"
+  ],
+  "blockers": [
+    "Final exact-head CI is required for technical RELEASE_READY state.",
+    "Irreversible release operations require explicit human approval."
+  ],
+  "next_action": "If final current-head CI passes, mark 0077 RELEASE_READY_TECHNICAL and update the release checklist/evidence binding; do not merge or tag without explicit human approval."
+}
