@@ -6,6 +6,9 @@
   "canonical_pr": 1,
   "package": "civora-core-runtime",
   "python": ">=3.10",
+  "validated_runtime_head": "0054c36b3aa5a1b5b702ff2e7af243c5a44e74f2",
+  "validated_runtime_workflow_run_id": 31242822301,
+  "validated_runtime_workflow_conclusion": "success",
   "required_validation": [
     "Linux Python 3.10",
     "Linux Python 3.11",
@@ -35,7 +38,7 @@
     "docs/runbooks/operator-remediation.md",
     "tools/release_preflight.py"
   ],
-  "head_binding_policy": "The authoritative release head is the exact Git commit on which the final required GitHub Actions workflow succeeds. This manifest is part of that head and does not embed a self-referential commit SHA.",
-  "release_state": "FINAL_CI_PENDING",
+  "head_binding_policy": "The runtime payload is bound to the exact successful workflow head recorded as validated_runtime_head. This manifest is then committed as metadata-only closure and that closure head must pass the unchanged complete workflow. On that success RELEASE_READY_TECHNICAL becomes true by policy without another repository mutation, preventing an infinite self-referential SHA-binding loop.",
+  "release_state": "RELEASE_METADATA_CLOSURE_CI_PENDING",
   "irreversible_actions_authorized": false
 }
