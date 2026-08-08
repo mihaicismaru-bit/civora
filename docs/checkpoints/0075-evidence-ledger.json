@@ -1,0 +1,33 @@
+{
+  "checkpoint_id": "0075",
+  "project": "CIVORA",
+  "title": "Release Blocker Remediation",
+  "state": "CODE_COMPLETE_CI_PENDING",
+  "canonical_branch": "agent/import-core-runtime-v0-2",
+  "evidence": [
+    {"type":"audit","path":"docs/checkpoints/0074-production-readiness-audit.md","claim":"Audit identified Python support, built-distribution validation and stale release metadata as release blockers R1-R3."},
+    {"type":"ci","path":".github/workflows/test.yml","claim":"Linux matrix now validates Python 3.10-3.13, Windows-native validation remains, and package-smoke builds/installs the wheel and executes installed entrypoints."},
+    {"type":"documentation","path":"README.md","claim":"README now describes current v1.0 release-closure state and implemented runtime/editorial capabilities."},
+    {"type":"documentation","path":"docs/CANONICAL_IMPORT.md","claim":"Initial v0.2 import record is clearly marked historical provenance rather than current state."},
+    {"type":"test","path":"tests/test_release_metadata.py","claim":"Version synchronization, Python lower-bound declaration and README baseline are protected by regression tests."}
+  ],
+  "gates": [
+    {"gate":"PYTHON_3_10_LOWER_BOUND_CI","status":"PASS_IMPLEMENTATION"},
+    {"gate":"PYTHON_3_11_3_13_CI_PRESERVED","status":"PASS_IMPLEMENTATION"},
+    {"gate":"WINDOWS_NATIVE_CI_PRESERVED","status":"PASS_IMPLEMENTATION"},
+    {"gate":"SDIST_WHEEL_BUILD","status":"PASS_IMPLEMENTATION"},
+    {"gate":"CLEAN_WHEEL_INSTALL","status":"PASS_IMPLEMENTATION"},
+    {"gate":"INSTALLED_CLI_SMOKE","status":"PASS_IMPLEMENTATION"},
+    {"gate":"README_CURRENT_BASELINE","status":"PASS_IMPLEMENTATION"},
+    {"gate":"IMPORT_PROVENANCE_CLARIFIED","status":"PASS_IMPLEMENTATION"},
+    {"gate":"VERSION_METADATA_SYNC_CONTRACT","status":"PASS_IMPLEMENTATION"},
+    {"gate":"CROSS_PLATFORM_AND_PACKAGE_CI","status":"PENDING_CURRENT_CI"}
+  ],
+  "remaining_release_blockers": [
+    "R4 release governance: RC manifest/changelog, final v1.0 version lock, exact-head validation, explicit human approval before merge/tag/release"
+  ],
+  "blockers": [
+    "Current-head expanded CI must pass, including Python 3.10 and package-smoke, before 0075 can close."
+  ],
+  "next_action": "Run checkpoint 0076 Release Candidate Preflight after expanded CI passes; immediately repair any Python 3.10 or packaging regression if CI fails."
+}
