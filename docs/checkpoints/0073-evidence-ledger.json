@@ -1,0 +1,44 @@
+{
+  "checkpoint_id": "0073",
+  "project": "CIVORA",
+  "title": "Operator Remediation Runbooks",
+  "state": "CODE_COMPLETE_CI_PENDING",
+  "canonical_branch": "agent/import-core-runtime-v0-2",
+  "evidence": [
+    {"type":"prior_validation","workflow_run_id":31236264030,"head_sha":"ed9506526bda9ed93587ef3faf850346c4520458","conclusion":"success","claim":"Checkpoint 0072 passed the cross-platform GitHub Actions workflow."},
+    {"type":"documentation","path":"docs/runbooks/operator-remediation.md","claim":"Canonical operator runbook defines deterministic evidence-preserving procedures for remediation classifications, backup recovery, dead letters and editorial approval/re-entry."},
+    {"type":"test","path":"tests/test_runbook_contract.py","claim":"Contract tests verify that documented primary CLI commands and exit-code semantics remain registered."},
+    {"type":"safety","claim":"Runbook forbids direct durable-store editing, synthetic repair records and unvalidated external backup promotion."}
+  ],
+  "gates": [
+    {"gate":"CANONICAL_OPERATOR_RUNBOOK","status":"PASS_IMPLEMENTATION"},
+    {"gate":"REMEDIATION_DECISION_TREE","status":"PASS_IMPLEMENTATION"},
+    {"gate":"EVIDENCE_PRESERVATION_RULES","status":"PASS_IMPLEMENTATION"},
+    {"gate":"PREPARED_ONLY_AUTOMATIC_RECOVERY","status":"PASS_IMPLEMENTATION"},
+    {"gate":"INTERNAL_BACKUP_RECOVERY_PROCEDURE","status":"PASS_IMPLEMENTATION"},
+    {"gate":"EXTERNAL_BACKUP_VALIDATION_PROCEDURE","status":"PASS_IMPLEMENTATION"},
+    {"gate":"DEAD_LETTER_AUDITED_PROCEDURE","status":"PASS_IMPLEMENTATION"},
+    {"gate":"EDITORIAL_APPROVAL_REENTRY_PROCEDURE","status":"PASS_IMPLEMENTATION"},
+    {"gate":"CLI_DOCUMENTATION_CONTRACT_TEST","status":"PASS_IMPLEMENTATION"},
+    {"gate":"CROSS_PLATFORM_CI","status":"PENDING_CURRENT_CI"}
+  ],
+  "completed_gates": [
+    "0072 closed validated",
+    "operator remediation runbook added",
+    "automatic versus manual recovery decision tree documented",
+    "internal and external backup paths separated",
+    "dead-letter and approval commands bound to audited existing transitions",
+    "runbook/CLI drift contract tests added"
+  ],
+  "remaining_backlog": [
+    "production-readiness audit",
+    "remediation of release-blocking findings",
+    "release-candidate full regression and preflight",
+    "version lock, release manifest, changelog and CIVORA v1.0 closure",
+    "optional evidence-preserving style layer deferred until after v1.0"
+  ],
+  "blockers": [
+    "Current-head cross-platform CI result required before CLOSED_VALIDATED."
+  ],
+  "next_action": "Execute checkpoint 0074 Production Readiness Audit and prioritize any release-blocking finding over new feature work."
+}
