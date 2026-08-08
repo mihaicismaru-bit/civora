@@ -5,11 +5,14 @@
   "state": "CODE_COMPLETE_FINAL_CI_PENDING",
   "canonical_branch": "agent/import-core-runtime-v0-2",
   "evidence": [
-    {"type":"prior_validation","workflow_run_id":31236694328,"head_sha":"37c4c312ef4e979d07b9567d8dadc17703cb6725","conclusion":"success","claim":"Expanded RC CI passed Python 3.10-3.13, Windows, package smoke and release preflight."},
+    {"type":"prior_validation","workflow_run_id":31236694328,"head_sha":"37c4c312ef4e979d07b9567d8dadc17703cb6725","conclusion":"success","claim":"Expanded RC CI passed Python 3.10-3.13, Windows, package smoke and release preflight before final version lock."},
     {"type":"version_lock","path":"pyproject.toml","claim":"Package version is locked to 1.0.0."},
     {"type":"version_lock","path":"civora/__init__.py","claim":"Runtime version is locked to 1.0.0."},
     {"type":"release_documentation","path":"CHANGELOG.md","claim":"Version 1.0.0 release entry is finalized and dated 2026-08-08."},
     {"type":"release_manifest","path":"docs/release/v1.0-release-manifest.json","claim":"Canonical v1.0 release content, validation requirements, safety invariants and exact-head binding policy are defined."},
+    {"type":"final_ci_failure","workflow_run_id":31238403476,"head_sha":"83374de3809a2a01dfd4e65ebb882fefdd15050f","conclusion":"failure","claim":"All unit-test, Windows-native and package-smoke jobs passed; only release-preflight failed because it still required an Unreleased changelog section after the final 1.0.0 version lock."},
+    {"type":"remediation","path":"tools/release_preflight.py","claim":"Preflight now validates that CHANGELOG contains a section matching the actual declared package version and includes the release manifest among mandatory release files."},
+    {"type":"regression_test","path":"tests/test_release_metadata.py","claim":"Release metadata tests now enforce that CHANGELOG contains the declared package version, preventing recurrence of the pre-lock/post-lock invariant mismatch."},
     {"type":"governance","claim":"No irreversible merge/tag/release action is authorized by this checkpoint."}
   ],
   "gates": [
@@ -19,6 +22,7 @@
     {"gate":"CHANGELOG_1_0_0","status":"PASS_IMPLEMENTATION"},
     {"gate":"RELEASE_MANIFEST","status":"PASS_IMPLEMENTATION"},
     {"gate":"RELEASE_CHECKLIST_ADVANCED","status":"PASS_IMPLEMENTATION"},
+    {"gate":"FINAL_PREFLIGHT_POST_LOCK_CONTRACT","status":"PASS_IMPLEMENTATION"},
     {"gate":"PR_REMAINS_DRAFT","status":"PASS"},
     {"gate":"FINAL_EXACT_HEAD_CI","status":"PENDING_CURRENT_CI"},
     {"gate":"HUMAN_RELEASE_APPROVAL","status":"BLOCKED_BY_POLICY"}
@@ -30,10 +34,12 @@
     "version metadata locked to 1.0.0",
     "changelog finalized",
     "release manifest created",
-    "release checklist advanced to final-head validation"
+    "first final-head CI analyzed: all runtime/package jobs passed and preflight-only policy drift isolated",
+    "post-version-lock preflight policy corrected",
+    "regression contract added for declared-version changelog binding"
   ],
   "remaining_backlog": [
-    "final full CI on the exact current 1.0.0 head",
+    "final full CI on the exact current remediated 1.0.0 head",
     "record successful exact-head CI binding",
     "explicit human approval before PR ready/merge/tag/release"
   ],
@@ -41,5 +47,5 @@
     "Final exact-head CI is required for technical RELEASE_READY state.",
     "Irreversible release operations require explicit human approval."
   ],
-  "next_action": "If final current-head CI passes, mark 0077 RELEASE_READY_TECHNICAL and update the release checklist/evidence binding; do not merge or tag without explicit human approval."
+  "next_action": "Validate the current remediated head in full CI. If it passes, mark 0077 RELEASE_READY_TECHNICAL and update the release checklist/evidence binding; do not merge or tag without explicit human approval."
 }
