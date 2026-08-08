@@ -2,7 +2,7 @@
   "checkpoint_id": "0071",
   "project": "CIVORA",
   "title": "Editorial Remediation Control Plane",
-  "state": "CODE_COMPLETE_CI_PENDING",
+  "state": "CLOSED_VALIDATED",
   "evidence": [
     {"type":"prior_validation","workflow_run_id":31231792007,"head_sha":"fec4ce13fb7cf1bd881003b42a84ad5f732bf6d3","conclusion":"success","claim":"Checkpoint 0070 passed the complete cross-platform GitHub Actions workflow."},
     {"type":"implementation","path":"civora/editorial_remediation.py","claim":"Adds deterministic read-only remediation classification and safety-bound operator actions."},
@@ -10,17 +10,18 @@
     {"type":"packaging","path":"pyproject.toml","claim":"Exposes civora-remediation as an installed operator command."},
     {"type":"test","path":"tests/test_editorial_remediation.py","claim":"Covers no-action, exact-prepared recovery, committed divergence and mixed-report dominance."},
     {"type":"test","path":"tests/test_remediation_cli.py","claim":"Exercises real durable stores and CLI JSON/exit-code behavior across healthy, recoverable and fail-closed states."},
-    {"type":"documentation","path":"docs/checkpoints/0071-editorial-remediation-control-plane.md","claim":"Documents remediation policy, safety properties, gates, backlog, blockers and next action."}
+    {"type":"documentation","path":"docs/checkpoints/0071-editorial-remediation-control-plane.md","claim":"Documents remediation policy, safety properties, gates, backlog, blockers and next action."},
+    {"type":"ci_validation","workflow_run_id":31234264345,"head_sha":"94906be7c1c19c32dcdddf265591866115b6b967","conclusion":"success","claim":"Checkpoint 0071 passed the complete cross-platform GitHub Actions workflow."}
   ],
   "gates": [
-    {"gate":"MACHINE_READABLE_REMEDIATION_CLASSIFICATION","status":"PASS_IMPLEMENTATION"},
-    {"gate":"EXACT_PREPARED_ONLY_AUTO_RECOVERY","status":"PASS_IMPLEMENTATION"},
-    {"gate":"COMMITTED_DIVERGENCE_FAIL_CLOSED","status":"PASS_IMPLEMENTATION"},
-    {"gate":"READ_ONLY_OPERATOR_SURFACE","status":"PASS_IMPLEMENTATION"},
-    {"gate":"IDENTIFIER_BOUND_INSPECTION_GUIDANCE","status":"PASS_IMPLEMENTATION"},
-    {"gate":"OPERATOR_EXIT_CODE_SIGNALING","status":"PASS_IMPLEMENTATION"},
-    {"gate":"REGRESSION_TESTS","status":"PASS_IMPLEMENTATION"},
-    {"gate":"CROSS_PLATFORM_CI","status":"PENDING_CURRENT_CI"}
+    {"gate":"MACHINE_READABLE_REMEDIATION_CLASSIFICATION","status":"PASS"},
+    {"gate":"EXACT_PREPARED_ONLY_AUTO_RECOVERY","status":"PASS"},
+    {"gate":"COMMITTED_DIVERGENCE_FAIL_CLOSED","status":"PASS"},
+    {"gate":"READ_ONLY_OPERATOR_SURFACE","status":"PASS"},
+    {"gate":"IDENTIFIER_BOUND_INSPECTION_GUIDANCE","status":"PASS"},
+    {"gate":"OPERATOR_EXIT_CODE_SIGNALING","status":"PASS"},
+    {"gate":"REGRESSION_TESTS","status":"PASS"},
+    {"gate":"CROSS_PLATFORM_CI","status":"PASS"}
   ],
   "completed_gates": [
     "0070 closed validated",
@@ -29,7 +30,8 @@
     "committed divergence remains fail-closed",
     "operator inspection guidance is identifier-bound and read-only",
     "standalone remediation command exposed through package metadata",
-    "planner and CLI regression tests added"
+    "planner and CLI regression tests added",
+    "cross-platform CI passed on Linux Python 3.11/3.12/3.13 and Windows native"
   ],
   "remaining_backlog": [
     "integrate remediation summary into primary civora health/editorial-consistency output without policy duplication",
@@ -37,8 +39,6 @@
     "optional evidence-preserving style rewrite layer",
     "production-readiness review across crash recovery, durable health, editorial safety, packaging, operations, security assumptions and release gates"
   ],
-  "blockers": [
-    "Current-head cross-platform CI result required before CLOSED_VALIDATED."
-  ],
-  "next_action": "If current-head CI passes, close 0071 and integrate the same remediation plan into unified health so monitoring receives actionable editorial-state guidance from the primary endpoint."
+  "blockers": [],
+  "next_action": "Integrate the existing remediation planner into primary health and editorial-consistency output so monitoring receives actionable guidance without a duplicate recovery policy."
 }
