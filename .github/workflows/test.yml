@@ -67,3 +67,13 @@ jobs:
           .release-smoke/bin/python -c "import civora; print(civora.__version__)"
           .release-smoke/bin/civora --help
           .release-smoke/bin/civora-remediation --help
+
+  release-preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run deterministic release preflight
+        run: python tools/release_preflight.py
