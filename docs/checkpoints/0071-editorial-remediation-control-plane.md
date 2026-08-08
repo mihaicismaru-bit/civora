@@ -1,6 +1,6 @@
 # CIVORA Checkpoint 0071 — Editorial Remediation Control Plane
 
-Status: CODE_COMPLETE_CI_PENDING
+Status: CLOSED_VALIDATED
 
 ## Objective
 
@@ -35,24 +35,26 @@ The command emits JSON containing both the raw editorial consistency report and 
 - Manual remediation guidance instructs inspection rather than synthesis or overwrite of durable state.
 - Existing startup replay remains the only automatic mutation path for recoverable editorial resolution transactions.
 
-## Validation added
+## Validation
 
 `tests/test_editorial_remediation.py` covers healthy, prepared-recoverable, committed-divergent and mixed reports.
 
 `tests/test_remediation_cli.py` exercises the real durable stores and verifies JSON/exit-code behavior for healthy state, a prepared crash window and committed divergence.
 
+GitHub Actions run `31234264345` completed successfully on head `94906be7c1c19c32dcdddf265591866115b6b967`, covering Linux Python 3.11/3.12/3.13 and Windows native.
+
 ## Gates
 
-- MACHINE_READABLE_REMEDIATION_CLASSIFICATION: PASS_IMPLEMENTATION
-- EXACT_PREPARED_ONLY_AUTO_RECOVERY: PASS_IMPLEMENTATION
-- COMMITTED_DIVERGENCE_FAIL_CLOSED: PASS_IMPLEMENTATION
-- READ_ONLY_OPERATOR_SURFACE: PASS_IMPLEMENTATION
-- IDENTIFIER_BOUND_INSPECTION_GUIDANCE: PASS_IMPLEMENTATION
-- OPERATOR_EXIT_CODE_SIGNALING: PASS_IMPLEMENTATION
-- REGRESSION_TESTS: PASS_IMPLEMENTATION
-- CROSS_PLATFORM_CI: PENDING_CURRENT_CI
+- MACHINE_READABLE_REMEDIATION_CLASSIFICATION: PASS
+- EXACT_PREPARED_ONLY_AUTO_RECOVERY: PASS
+- COMMITTED_DIVERGENCE_FAIL_CLOSED: PASS
+- READ_ONLY_OPERATOR_SURFACE: PASS
+- IDENTIFIER_BOUND_INSPECTION_GUIDANCE: PASS
+- OPERATOR_EXIT_CODE_SIGNALING: PASS
+- REGRESSION_TESTS: PASS
+- CROSS_PLATFORM_CI: PASS
 
-## Remaining backlog
+## Remaining backlog after closure
 
 1. Integrate remediation summary directly into the primary `civora health`/`civora editorial-consistency` output without duplicating policy.
 2. Add operator runbook examples for backup restore and evidence-preserving manual repair procedures.
@@ -61,8 +63,8 @@ The command emits JSON containing both the raw editorial consistency report and 
 
 ## Blockers
 
-Current-head cross-platform CI result is required before this checkpoint can be declared `CLOSED_VALIDATED`.
+None.
 
 ## Next action
 
-If CI passes, close 0071 and integrate the same remediation plan into unified health so monitoring systems receive actionable editorial-state guidance from the primary operational endpoint.
+Implement checkpoint 0072 by making the canonical consistency report carry the same remediation plan, allowing unified health and primary CLI monitoring to expose actionable guidance without a second policy implementation.
