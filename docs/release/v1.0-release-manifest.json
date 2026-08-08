@@ -6,8 +6,8 @@
   "canonical_pr": 1,
   "package": "civora-core-runtime",
   "python": ">=3.10",
-  "validated_runtime_head": "0054c36b3aa5a1b5b702ff2e7af243c5a44e74f2",
-  "validated_runtime_workflow_run_id": 31242822301,
+  "validated_runtime_head": "f65daa29b3ac4255653d39dd36f016c7ed2bda3b",
+  "validated_runtime_workflow_run_id": 31256476768,
   "validated_runtime_workflow_conclusion": "success",
   "required_validation": [
     "Linux Python 3.10",
@@ -27,6 +27,8 @@
     "manual or committed editorial divergence fails closed",
     "automatic editorial recovery is limited to exact prepared transaction replay",
     "durable-state recovery requires validated backup semantics",
+    "Windows errno-only EACCES lock contention is retried only with a strict bounded fallback",
+    "persistent or unknown permission failures remain fail-fast",
     "merge, tag and release require explicit human approval"
   ],
   "release_artifacts": [
