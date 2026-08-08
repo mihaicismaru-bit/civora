@@ -18,6 +18,7 @@ REQUIRED_FILES = [
     "docs/checkpoints/0074-production-readiness-audit.md",
     "docs/checkpoints/0075-release-blocker-remediation.md",
     "docs/release/v1.0-release-checklist.md",
+    "docs/release/v1.0-release-manifest.json",
 ]
 
 FORBIDDEN_RELEASE_FILENAMES = {
@@ -66,6 +67,7 @@ def tracked_tree_forbidden_files() -> list[str]:
 
 def main() -> int:
     checks: list[dict] = []
+    project_version: str | None = None
 
     def record(name: str, passed: bool, detail: str) -> None:
         checks.append({"check": name, "status": "pass" if passed else "fail", "detail": detail})
@@ -106,8 +108,15 @@ def main() -> int:
            "README must describe the current release-closure baseline")
 
     changelog = read("CHANGELOG.md") if (ROOT / "CHANGELOG.md").is_file() else ""
-    record("changelog_unreleased", "## [Unreleased]" in changelog,
-           "CHANGELOG must contain an Unreleased section before final version lock")
+    if project_version:
+        release_heading = rf'^## \[{re.escape(project_version)}\](?:\s+-\s+\d{{4}}-\d{{2}}-\d{{2}})?\s*$'
+        record(
+            "changelog_release_version",
+            bool(re.search(release_heading, changelog, re.MULTILINE)),
+            f"CHANGELOG must contain a release section for declared version {project_version}",
+        )
+    else:
+        record("changelog_release_version", False, "project version unavailable")
 
     forbidden = tracked_tree_forbidden_files()
     record("no_durable_state_in_release_tree", not forbidden,
