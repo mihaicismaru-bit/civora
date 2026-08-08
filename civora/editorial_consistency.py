@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from .editorial_approval import EditorialApprovalStore
+from .editorial_remediation import EditorialRemediationPlanner
 from .editorial_resolution import EditorialResolutionCoordinator
 from .review import ReviewQueue
 from .transactions import TransactionJournal
@@ -21,6 +22,11 @@ class EditorialConsistencyInspector:
     ``editorial_review_resolution`` transaction exactly covers that case/story
     and targets the authoritative terminal state. Committed transactions must
     already agree with both durable stores.
+
+    Every returned report also contains the canonical read-only remediation plan.
+    This keeps ``civora health``, ``editorial-consistency`` and the standalone
+    remediation surface on one recovery policy instead of duplicating decision
+    logic at the operator boundary.
     """
 
     def __init__(
@@ -167,7 +173,8 @@ class EditorialConsistencyInspector:
             status = "pending_transaction"
         else:
             status = "healthy"
-        return {
+
+        report = {
             "status": status,
             "case_count": len(cases),
             "resolution_transaction_count": len(transactions),
@@ -176,3 +183,5 @@ class EditorialConsistencyInspector:
             "mismatches": mismatches,
             "recoverable_mismatches": recoverable,
         }
+        report["remediation"] = EditorialRemediationPlanner().plan(report)
+        return report
