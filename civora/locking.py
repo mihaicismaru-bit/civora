@@ -108,17 +108,25 @@ class ProcessFileLock:
 
     @staticmethod
     def _is_windows_lock_contention_error(exc: PermissionError) -> bool:
-        """Recognize transient Win32 lock-file sharing/access races.
-
-        Windows can return ERROR_ACCESS_DENIED while another process is creating
-        or deleting the exclusive lock file. By the time the losing process checks
-        ``Path.exists()``, the winning process may already have removed the file.
-        Only known Win32 contention codes are retried when the path has vanished;
-        generic permission failures still propagate immediately.
-        """
+        """Recognize explicit transient Win32 lock-file sharing/access races."""
         if os.name != "nt":
             return False
         return getattr(exc, "winerror", None) in {5, 32, 33}
+
+    @staticmethod
+    def _is_ambiguous_windows_eacces(exc: PermissionError) -> bool:
+        """Recognize the errno-only Windows EACCES race conservatively.
+
+        CPython can occasionally surface an exclusive-create contention as plain
+        ``PermissionError(errno=13)`` without a Win32 error code. Because the same
+        shape can also represent a real ACL failure, callers must retry it only a
+        small bounded number of times and then re-raise the original error.
+        """
+        return (
+            os.name == "nt"
+            and getattr(exc, "winerror", None) is None
+            and getattr(exc, "errno", None) == 13
+        )
 
     def _read_owner(self) -> Optional[LockOwner]:
         try:
@@ -171,6 +179,8 @@ class ProcessFileLock:
             acquired_at=time.time(),
         )
         encoded = json.dumps(owner.__dict__, sort_keys=True).encode("utf-8")
+        ambiguous_eacces_retries = 0
+        max_ambiguous_eacces_retries = 2
 
         while True:
             try:
@@ -185,14 +195,25 @@ class ProcessFileLock:
             except FileExistsError:
                 self._wait_for_contention(deadline)
             except PermissionError as exc:
-                # Windows can report ERROR_ACCESS_DENIED/SHARING_VIOLATION during
-                # an exclusive-create race. The peer may remove the lock before
-                # this process observes Path.exists(), so known Win32 contention
-                # codes are still retried. Unknown/generic permission failures
-                # remain fail-fast when no lock path exists.
-                if not self.path.exists() and not self._is_windows_lock_contention_error(exc):
-                    raise
-                self._wait_for_contention(deadline)
+                # Windows may report ERROR_ACCESS_DENIED/SHARING_VIOLATION during
+                # exclusive-create contention. Some CPython/Windows combinations
+                # expose only errno=EACCES (13), with no ``winerror``. Explicit
+                # Win32 contention follows the normal contention wait. Ambiguous
+                # errno-only EACCES is retried at most twice so a real permission
+                # problem still fails fast instead of being masked until timeout.
+                if self.path.exists() or self._is_windows_lock_contention_error(exc):
+                    self._wait_for_contention(deadline)
+                    continue
+                if (
+                    self._is_ambiguous_windows_eacces(exc)
+                    and ambiguous_eacces_retries < max_ambiguous_eacces_retries
+                ):
+                    ambiguous_eacces_retries += 1
+                    if time.monotonic() >= deadline:
+                        raise
+                    time.sleep(self.poll_interval)
+                    continue
+                raise
 
     def release(self) -> None:
         if self.owner is None:
