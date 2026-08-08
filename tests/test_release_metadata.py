@@ -14,7 +14,10 @@ class ReleaseMetadataTests(unittest.TestCase):
 
     def test_declared_python_lower_bound_is_explicit(self):
         pyproject = Path("pyproject.toml").read_text(encoding="utf-8")
-        self.assertRegex(pyproject, r'^requires-python\s*=\s*">=3\.10"', re.MULTILINE)
+        self.assertIsNotNone(
+            re.search(r'^requires-python\s*=\s*">=3\.10"', pyproject, re.MULTILINE),
+            "declared Python lower bound must remain explicit until release policy changes",
+        )
 
     def test_readme_declares_release_closure_mode(self):
         readme = Path("README.md").read_text(encoding="utf-8")
