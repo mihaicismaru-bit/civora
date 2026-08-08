@@ -1,2 +1,2 @@
-"""CIVORA Core Runtime v0.1."""
-__version__ = "0.1.0"
+"""CIVORA Core Runtime v1.0."""
+__version__ = "1.0.0"
