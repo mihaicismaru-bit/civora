@@ -106,6 +106,20 @@ class ProcessFileLock:
             return True
         return True
 
+    @staticmethod
+    def _is_windows_lock_contention_error(exc: PermissionError) -> bool:
+        """Recognize transient Win32 lock-file sharing/access races.
+
+        Windows can return ERROR_ACCESS_DENIED while another process is creating
+        or deleting the exclusive lock file. By the time the losing process checks
+        ``Path.exists()``, the winning process may already have removed the file.
+        Only known Win32 contention codes are retried when the path has vanished;
+        generic permission failures still propagate immediately.
+        """
+        if os.name != "nt":
+            return False
+        return getattr(exc, "winerror", None) in {5, 32, 33}
+
     def _read_owner(self) -> Optional[LockOwner]:
         try:
             payload = json.loads(self.path.read_text(encoding="utf-8"))
@@ -170,12 +184,13 @@ class ProcessFileLock:
                 return self
             except FileExistsError:
                 self._wait_for_contention(deadline)
-            except PermissionError:
-                # Windows may report ERROR_ACCESS_DENIED while another process
-                # owns/creates the exclusive lock file. Treat it as contention
-                # only when the lock path actually exists; otherwise preserve a
-                # genuine directory/file permission failure.
-                if not self.path.exists():
+            except PermissionError as exc:
+                # Windows can report ERROR_ACCESS_DENIED/SHARING_VIOLATION during
+                # an exclusive-create race. The peer may remove the lock before
+                # this process observes Path.exists(), so known Win32 contention
+                # codes are still retried. Unknown/generic permission failures
+                # remain fail-fast when no lock path exists.
+                if not self.path.exists() and not self._is_windows_lock_contention_error(exc):
                     raise
                 self._wait_for_contention(deadline)
 
