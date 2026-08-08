@@ -1,0 +1,41 @@
+{
+  "project": "CIVORA Core / Editorial Runtime",
+  "release": "1.0.0",
+  "release_date": "2026-08-08",
+  "canonical_branch": "agent/import-core-runtime-v0-2",
+  "canonical_pr": 1,
+  "package": "civora-core-runtime",
+  "python": ">=3.10",
+  "required_validation": [
+    "Linux Python 3.10",
+    "Linux Python 3.11",
+    "Linux Python 3.12",
+    "Linux Python 3.13",
+    "Windows native Python 3.12",
+    "sdist and wheel build",
+    "clean wheel installation",
+    "installed civora CLI smoke",
+    "installed civora-remediation CLI smoke",
+    "deterministic release preflight"
+  ],
+  "safety_invariants": [
+    "reader-visible drafting consumes authorized evidence only",
+    "unsupported, unresolved, disputed or contradicted facts remain blocked",
+    "manual or committed editorial divergence fails closed",
+    "automatic editorial recovery is limited to exact prepared transaction replay",
+    "durable-state recovery requires validated backup semantics",
+    "merge, tag and release require explicit human approval"
+  ],
+  "release_artifacts": [
+    "pyproject.toml",
+    "civora/__init__.py",
+    "CHANGELOG.md",
+    "README.md",
+    "docs/release/v1.0-release-checklist.md",
+    "docs/runbooks/operator-remediation.md",
+    "tools/release_preflight.py"
+  ],
+  "head_binding_policy": "The authoritative release head is the exact Git commit on which the final required GitHub Actions workflow succeeds. This manifest is part of that head and does not embed a self-referential commit SHA.",
+  "release_state": "FINAL_CI_PENDING",
+  "irreversible_actions_authorized": false
+}
