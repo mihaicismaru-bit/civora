@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import Dict
+from .evidence_rendering import EvidenceConstrainedRenderer, EvidenceRenderingError
 from .models import Source, StoryObject, StoryState, VerificationStatus
 from .scoring import source_score, opportunity_score, trust_score, viral_score
 
@@ -31,9 +32,10 @@ def verify_story(story: StoryObject, source_map: Dict[str, Source]) -> StoryObje
 def generate_article(story: StoryObject, authorization: dict) -> StoryObject:
     """Draft only from an explicit AuthorizedStoryBuilder projection.
 
-    The pipeline intentionally has no fallback to ``FactKernel.confirmed_facts``.
-    Callers must supply a projection bound to the current story/editorial
-    decision, which prevents raw or stale facts from bypassing durable gates.
+    The pipeline intentionally has no fallback to ``FactKernel.confirmed_facts``
+    or reader-visible ``Signal`` prose. Callers must supply a projection bound
+    to the current story/editorial decision; every factual reader-facing field
+    is then rendered from that authorized projection.
     """
     if story.state != StoryState.READY:
         raise PipelineError("Story must be READY before drafting.")
@@ -57,15 +59,22 @@ def generate_article(story: StoryObject, authorization: dict) -> StoryObject:
         if isinstance(item, dict) and item.get("statement")
     ]
 
-    lead = confirmed_statements[0]
+    try:
+        rendering = EvidenceConstrainedRenderer().render(authorization)
+    except EvidenceRenderingError as exc:
+        raise PipelineError(f"Evidence-constrained rendering failed: {exc}") from exc
+
     story.article = {
-        "headline": story.signal.title,
-        "dek": story.signal.summary,
-        "lead": lead,
+        "headline": rendering["headline"],
+        "dek": rendering["dek"],
+        "lead": confirmed_statements[0],
         "confirmed_facts": confirmed_statements,
         "what_is_uncertain": uncertain_statements,
-        "why_it_matters": story.signal.summary,
-        "next": story.fact_kernel.next_expected_event,
+        "why_it_matters": rendering["why_it_matters"],
+        # Raw FactKernel.next_expected_event is deliberately not reader-visible.
+        # A future evidence-preserving workflow may enable `next` only from an
+        # explicitly authorized projection.
+        "next": rendering["next"],
         "verification_status": story.fact_kernel.verification_status.value,
         "trust_score": story.trust_score,
         "authorization": {
@@ -75,6 +84,11 @@ def generate_article(story: StoryObject, authorization: dict) -> StoryObject:
             "editorial_decision_id": authorization.get("editorial_decision_id"),
             "authorization_mode": authorization.get("authorization_mode"),
             "authorized_fact_ids": [item.get("fact_id") for item in facts],
+        },
+        "rendering": {
+            "source": rendering["rendering_source"],
+            "authorized_fact_ids": rendering["authorized_fact_ids"],
+            "authorized_uncertain_claim_ids": rendering["authorized_uncertain_claim_ids"],
         },
     }
     story.state = StoryState.DRAFTED
@@ -101,6 +115,7 @@ def generate_content_pack(story: StoryObject) -> StoryObject:
             "viral_score": story.viral_score,
             "editorial_decision_id": story.article.get("authorization", {}).get("editorial_decision_id"),
             "kernel_semantic_hash": story.article.get("authorization", {}).get("kernel_semantic_hash"),
+            "rendering_source": story.article.get("rendering", {}).get("source"),
         }
     }
     story.state = StoryState.PACKAGED
