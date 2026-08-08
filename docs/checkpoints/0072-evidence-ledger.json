@@ -1,0 +1,41 @@
+{
+  "checkpoint_id": "0072",
+  "project": "CIVORA",
+  "title": "Actionable Unified Health",
+  "state": "CODE_COMPLETE_CI_PENDING",
+  "evidence": [
+    {"type":"prior_validation","workflow_run_id":31234264345,"head_sha":"94906be7c1c19c32dcdddf265591866115b6b967","conclusion":"success","claim":"Checkpoint 0071 passed the complete cross-platform GitHub Actions workflow."},
+    {"type":"implementation","path":"civora/editorial_consistency.py","claim":"Canonical consistency reports now include the existing EditorialRemediationPlanner output, making remediation visible to all consumers without a duplicate policy."},
+    {"type":"integration","path":"civora/health.py","claim":"Unified health already propagates all editorial consistency report fields into component details, so the canonical remediation object is now exposed by primary health without a new mutation path."},
+    {"type":"integration","path":"civora/cli.py","claim":"Primary health and editorial-consistency commands consume the same consistency report and therefore expose identical remediation policy output."},
+    {"type":"test","path":"tests/test_health_remediation.py","claim":"Covers healthy, prepared-recoverable and committed-divergent health guidance plus both primary CLI surfaces."},
+    {"type":"documentation","path":"docs/checkpoints/0072-actionable-unified-health.md","claim":"Documents the single-policy integration, safety properties, gates, backlog, blocker and next action."}
+  ],
+  "gates": [
+    {"gate":"SINGLE_REMEDIATION_POLICY","status":"PASS_IMPLEMENTATION"},
+    {"gate":"UNIFIED_HEALTH_REMEDIATION_VISIBILITY","status":"PASS_IMPLEMENTATION"},
+    {"gate":"PRIMARY_CONSISTENCY_REMEDIATION_VISIBILITY","status":"PASS_IMPLEMENTATION"},
+    {"gate":"PREPARED_ONLY_AUTO_RECOVERY_GUIDANCE","status":"PASS_IMPLEMENTATION"},
+    {"gate":"COMMITTED_DIVERGENCE_FAIL_CLOSED","status":"PASS_IMPLEMENTATION"},
+    {"gate":"MACHINE_READABLE_OPERATOR_OUTPUT","status":"PASS_IMPLEMENTATION"},
+    {"gate":"REGRESSION_TESTS","status":"PASS_IMPLEMENTATION"},
+    {"gate":"CROSS_PLATFORM_CI","status":"PENDING_CURRENT_CI"}
+  ],
+  "completed_gates": [
+    "0071 closed validated",
+    "canonical consistency report enriched with remediation plan",
+    "unified health now exposes remediation through existing component detail propagation",
+    "primary editorial-consistency output exposes the same remediation plan",
+    "no second recovery policy or repair mutation path introduced",
+    "healthy, recoverable and committed-divergent regression cases added"
+  ],
+  "remaining_backlog": [
+    "operator runbooks for evidence-preserving manual investigation, backup restore and verified repair",
+    "production-readiness review across crash recovery, durable health, editorial safety, operator UX, packaging, security assumptions and release gates",
+    "optional evidence-preserving style rewrite layer after production safety closure"
+  ],
+  "blockers": [
+    "Current-head cross-platform CI result required before CLOSED_VALIDATED."
+  ],
+  "next_action": "If current-head CI passes, close 0072 and implement operator remediation runbooks with deterministic evidence-preserving recovery and manual-repair decision trees."
+}
