@@ -2,16 +2,18 @@
   "checkpoint_id": "0077",
   "project": "CIVORA",
   "title": "Final Version Lock + Release Manifest",
-  "state": "RELEASE_METADATA_CLOSURE_CI_PENDING",
+  "state": "RELEASE_READY_TECHNICAL",
   "canonical_branch": "agent/import-core-runtime-v0-2",
   "validated_runtime_head": "0054c36b3aa5a1b5b702ff2e7af243c5a44e74f2",
   "validated_runtime_workflow_run_id": 31242822301,
+  "validated_metadata_closure_head": "3ddba255878bb42c42b135cf285eae788f949dc6",
+  "validated_metadata_closure_workflow_run_id": 31245360008,
   "evidence": [
     {"type":"prior_validation","workflow_run_id":31236694328,"head_sha":"37c4c312ef4e979d07b9567d8dadc17703cb6725","conclusion":"success","claim":"Expanded RC CI passed Python 3.10-3.13, Windows, package smoke and release preflight before final version lock."},
     {"type":"version_lock","path":"pyproject.toml","claim":"Package version is locked to 1.0.0."},
     {"type":"version_lock","path":"civora/__init__.py","claim":"Runtime version is locked to 1.0.0."},
     {"type":"release_documentation","path":"CHANGELOG.md","claim":"Version 1.0.0 release entry is finalized and dated 2026-08-08."},
-    {"type":"release_manifest","path":"docs/release/v1.0-release-manifest.json","claim":"Canonical v1.0 release content, validation requirements, safety invariants and non-self-referential release binding policy are defined."},
+    {"type":"release_manifest","path":"docs/release/v1.0-release-manifest.json","claim":"Canonical v1.0 release content, validation requirements, safety invariants and release binding policy are defined."},
     {"type":"final_ci_failure","workflow_run_id":31238403476,"head_sha":"83374de3809a2a01dfd4e65ebb882fefdd15050f","conclusion":"failure","claim":"All unit-test, Windows-native and package-smoke jobs passed; only release-preflight failed because it still required an Unreleased changelog section after final 1.0.0 version lock."},
     {"type":"remediation","path":"tools/release_preflight.py","claim":"Preflight validates that CHANGELOG contains a section matching the actual declared package version and includes the release manifest among mandatory release files."},
     {"type":"regression_test","path":"tests/test_release_metadata.py","claim":"Release metadata tests enforce that CHANGELOG contains the declared package version."},
@@ -19,8 +21,9 @@
     {"type":"windows_lock_remediation","path":"civora/locking.py","claim":"ProcessFileLock recognizes only known Win32 lock-contention codes (5, 32, 33) as retryable when the lock path disappears between os.open failure and existence inspection; generic permission failures remain fail-fast."},
     {"type":"regression_test","path":"tests/test_windows_lock_race.py","claim":"Regression coverage verifies retry of a disappearing-lock contention race and preserves fail-fast behavior for unknown permission errors."},
     {"type":"final_runtime_validation","workflow_run_id":31242822301,"head_sha":"0054c36b3aa5a1b5b702ff2e7af243c5a44e74f2","conclusion":"success","claim":"The complete release workflow passed on the exact Windows-race-remediated 1.0.0 runtime head."},
-    {"type":"binding_policy","claim":"This checkpoint records the validated runtime head in a metadata-only closure commit. The resulting metadata closure head must pass the same full workflow, after which no further repository mutation is required to determine RELEASE_READY_TECHNICAL."},
-    {"type":"governance","claim":"No irreversible merge, tag or release action is authorized by this checkpoint."}
+    {"type":"metadata_closure_validation","workflow_run_id":31245360008,"head_sha":"3ddba255878bb42c42b135cf285eae788f949dc6","conclusion":"success","claim":"The complete unchanged release workflow passed on the metadata-only closure head, satisfying the final deterministic technical release gate."},
+    {"type":"binding_policy","claim":"Successful runtime-head and metadata-closure-head workflows jointly establish RELEASE_READY_TECHNICAL. This ledger update is an attestation of already-completed validation and does not modify runtime, package, workflow, test, schema or release payload content."},
+    {"type":"governance","claim":"No irreversible merge, tag or release action is authorized by this checkpoint. Those operations require explicit human approval."}
   ],
   "gates": [
     {"gate":"PACKAGE_VERSION_1_0_0","status":"PASS"},
@@ -32,7 +35,8 @@
     {"gate":"WINDOWS_DISAPPEARING_LOCK_RACE","status":"PASS"},
     {"gate":"GENERIC_PERMISSION_FAIL_FAST","status":"PASS"},
     {"gate":"FINAL_RUNTIME_HEAD_CI","status":"PASS","workflow_run_id":31242822301,"head_sha":"0054c36b3aa5a1b5b702ff2e7af243c5a44e74f2"},
-    {"gate":"RELEASE_METADATA_CLOSURE_CI","status":"PENDING_CURRENT_CI"},
+    {"gate":"RELEASE_METADATA_CLOSURE_CI","status":"PASS","workflow_run_id":31245360008,"head_sha":"3ddba255878bb42c42b135cf285eae788f949dc6"},
+    {"gate":"RELEASE_READY_TECHNICAL","status":"PASS"},
     {"gate":"PR_REMAINS_DRAFT","status":"PASS"},
     {"gate":"HUMAN_RELEASE_APPROVAL","status":"BLOCKED_BY_POLICY"}
   ],
@@ -45,15 +49,15 @@
     "release manifest created",
     "post-version-lock preflight contract corrected",
     "Windows disappearing-lock race remediated without weakening permission failure handling",
-    "full cross-platform release workflow passed on exact runtime head 0054c36b3aa5a1b5b702ff2e7af243c5a44e74f2"
+    "full cross-platform release workflow passed on exact runtime head 0054c36b3aa5a1b5b702ff2e7af243c5a44e74f2",
+    "full cross-platform release workflow passed on metadata-only closure head 3ddba255878bb42c42b135cf285eae788f949dc6",
+    "CIVORA Core v1.0 is RELEASE_READY_TECHNICAL"
   ],
   "remaining_backlog": [
-    "full CI on the metadata-only closure head created by recording the successful runtime-head binding",
-    "explicit human approval before PR ready/merge/tag/release"
+    "explicit human approval before marking PR ready, merging to main, tagging v1.0.0 or publishing a GitHub release"
   ],
   "blockers": [
-    "Metadata-only closure head must pass the complete workflow before RELEASE_READY_TECHNICAL is deterministically true.",
     "Irreversible release operations require explicit human approval."
   ],
-  "next_action": "Validate the metadata-only closure head in full CI. If it passes, treat checkpoint 0077 as RELEASE_READY_TECHNICAL without another repository mutation; keep PR draft and do not merge, tag or release without explicit human approval."
+  "next_action": "Await explicit human approval. After approval, mark PR ready, merge the validated v1.0 integration branch to main using an approved merge method, verify post-merge status, then create tag/release v1.0.0 only if explicitly authorized."
 }
