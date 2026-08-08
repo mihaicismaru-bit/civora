@@ -2,24 +2,25 @@
   "checkpoint_id": "0070",
   "project": "CIVORA",
   "title": "Evidence-Constrained Reader Rendering",
-  "state": "CODE_COMPLETE_CI_PENDING",
+  "state": "CLOSED_VALIDATED",
   "evidence": [
     {"type":"prior_validation","workflow_run_id":31228762852,"head_sha":"a6add143a7a507801930c65b4a3a48cca8ba8a54","conclusion":"success","claim":"Checkpoint 0069 passed the complete cross-platform GitHub Actions workflow."},
     {"type":"implementation","path":"civora/evidence_rendering.py","claim":"Adds conservative reader-visible rendering that accepts only AuthorizedStoryBuilder projections."},
     {"type":"integration","path":"civora/pipeline.py","claim":"Headline, dek, why-it-matters and content-pack surfaces no longer consume raw signal title/summary; raw next-event prose is suppressed."},
     {"type":"test","path":"tests/test_authorized_pipeline.py","claim":"Covers raw-prose non-leakage, evidence-constrained packaging and malformed-projection fail-closed behavior."},
-    {"type":"documentation","path":"docs/checkpoints/0070-evidence-constrained-reader-rendering.md","claim":"Documents rendering policy, safety properties, gates, backlog, blockers and next action."}
+    {"type":"documentation","path":"docs/checkpoints/0070-evidence-constrained-reader-rendering.md","claim":"Documents rendering policy, safety properties, gates, backlog, blockers and next action."},
+    {"type":"ci_validation","workflow_run_id":31231792007,"head_sha":"fec4ce13fb7cf1bd881003b42a84ad5f732bf6d3","conclusion":"success","claim":"Checkpoint 0070 passed the complete cross-platform GitHub Actions workflow."}
   ],
   "gates": [
-    {"gate":"RAW_SIGNAL_HEADLINE_FALLBACK_ABSENT","status":"PASS_IMPLEMENTATION"},
-    {"gate":"RAW_SIGNAL_DEK_FALLBACK_ABSENT","status":"PASS_IMPLEMENTATION"},
-    {"gate":"RAW_SIGNAL_WHY_IT_MATTERS_FALLBACK_ABSENT","status":"PASS_IMPLEMENTATION"},
-    {"gate":"RAW_NEXT_EVENT_PUBLICATION_ABSENT","status":"PASS_IMPLEMENTATION"},
-    {"gate":"AUTHORIZED_RENDERER_INTEGRATION","status":"PASS_IMPLEMENTATION"},
-    {"gate":"CONTENT_PACK_PROPAGATION","status":"PASS_IMPLEMENTATION"},
-    {"gate":"RENDERING_AUDIT_BINDING","status":"PASS_IMPLEMENTATION"},
-    {"gate":"MALFORMED_PROJECTION_FAIL_CLOSED","status":"PASS_IMPLEMENTATION"},
-    {"gate":"CROSS_PLATFORM_CI","status":"PENDING_CURRENT_CI"}
+    {"gate":"RAW_SIGNAL_HEADLINE_FALLBACK_ABSENT","status":"PASS"},
+    {"gate":"RAW_SIGNAL_DEK_FALLBACK_ABSENT","status":"PASS"},
+    {"gate":"RAW_SIGNAL_WHY_IT_MATTERS_FALLBACK_ABSENT","status":"PASS"},
+    {"gate":"RAW_NEXT_EVENT_PUBLICATION_ABSENT","status":"PASS"},
+    {"gate":"AUTHORIZED_RENDERER_INTEGRATION","status":"PASS"},
+    {"gate":"CONTENT_PACK_PROPAGATION","status":"PASS"},
+    {"gate":"RENDERING_AUDIT_BINDING","status":"PASS"},
+    {"gate":"MALFORMED_PROJECTION_FAIL_CLOSED","status":"PASS"},
+    {"gate":"CROSS_PLATFORM_CI","status":"PASS"}
   ],
   "completed_gates": [
     "0069 closed validated",
@@ -29,15 +30,14 @@
     "content pack inherits constrained surfaces",
     "rendering audit records authorized projection provenance",
     "malformed projections fail closed",
-    "regression tests extended for raw-prose non-leakage"
+    "regression tests extended for raw-prose non-leakage",
+    "cross-platform CI passed"
   ],
   "remaining_backlog": [
     "operator remediation and recovery runbooks for editorial consistency, approval and authorization failures",
     "optional evidence-preserving style rewrite layer for natural headlines without factual-policy weakening",
     "production-readiness review covering crash recovery, health, editorial safety, packaging, operations and release gates"
   ],
-  "blockers": [
-    "Current-head cross-platform CI result required before CLOSED_VALIDATED."
-  ],
-  "next_action": "If current-head CI passes, close 0070 and implement operator remediation/recovery runbooks with machine-readable guidance for degraded editorial states."
+  "blockers": [],
+  "next_action": "Implement operator remediation/recovery guidance with machine-readable classification for degraded editorial states."
 }
