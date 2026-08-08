@@ -1,0 +1,44 @@
+{
+  "checkpoint_id": "0074",
+  "project": "CIVORA",
+  "title": "Production Readiness Audit",
+  "state": "AUDIT_COMPLETE_REMEDIATION_REQUIRED",
+  "canonical_branch": "agent/import-core-runtime-v0-2",
+  "evidence": [
+    {"type":"repository","claim":"Canonical PR remains open/draft; branch is ahead of main and not yet released."},
+    {"type":"packaging","path":"pyproject.toml","claim":"Package declares version 0.1.0 and Python >=3.10."},
+    {"type":"ci","path":".github/workflows/test.yml","claim":"CI validates Python 3.11-3.13 on Linux and Python 3.12 on Windows using editable install; no built-wheel validation is present."},
+    {"type":"documentation","path":"README.md","claim":"README still describes the repository as the initial v0.2 import and is stale relative to current canonical implementation."},
+    {"type":"version","path":"civora/__init__.py","claim":"Runtime version remains 0.1.0 and must be synchronized at release."},
+    {"type":"security_assumption","claim":"Repository visibility is public; code search found no obvious TODO/FIXME or token/password/secret patterns, but no dedicated security scanner gate exists."},
+    {"type":"audit_report","path":"docs/checkpoints/0074-production-readiness-audit.md","claim":"Release blocker severity, warnings and deterministic remediation order are documented."}
+  ],
+  "gates": [
+    {"gate":"DURABLE_PERSISTENCE_RECOVERY","status":"PASS"},
+    {"gate":"CROSS_PROCESS_LOCKING","status":"PASS"},
+    {"gate":"CROSS_PLATFORM_RUNTIME_TESTS","status":"PASS_BASELINE"},
+    {"gate":"TRANSACTION_AND_DEAD_LETTER_AUDIT","status":"PASS"},
+    {"gate":"EDITORIAL_FACTUAL_SAFETY","status":"PASS"},
+    {"gate":"AUTHORIZED_RENDERING_ONLY","status":"PASS"},
+    {"gate":"OPERATOR_REMEDIATION_GUIDANCE","status":"PASS"},
+    {"gate":"OPERATOR_RUNBOOK","status":"CODE_COMPLETE_CI_PENDING_0073"},
+    {"gate":"PYTHON_SUPPORT_BOUNDARY","status":"FAIL_RELEASE_BLOCKER"},
+    {"gate":"BUILT_DISTRIBUTION_VALIDATION","status":"FAIL_RELEASE_BLOCKER"},
+    {"gate":"RELEASE_METADATA_CURRENT","status":"FAIL_RELEASE_BLOCKER"},
+    {"gate":"RELEASE_MANIFEST_CHANGELOG","status":"NOT_YET_CREATED"},
+    {"gate":"FINAL_RC_PREFLIGHT","status":"NOT_YET_RUN"},
+    {"gate":"HUMAN_RELEASE_APPROVAL","status":"REQUIRED_LATER"}
+  ],
+  "release_blockers": [
+    "R1 declared Python >=3.10 but CI does not validate 3.10",
+    "R2 CI does not build/install/smoke-test distribution artifacts",
+    "R3 release metadata and README are stale",
+    "R4 release manifest/changelog/final version and human-approved merge/tag are not yet complete"
+  ],
+  "warnings": [
+    "repository is public",
+    "GitHub Actions are tag-pinned rather than immutable SHA-pinned",
+    "no dedicated static/security scanner gate"
+  ],
+  "next_action": "Execute checkpoint 0075 Release Blocker Remediation for R1-R3; leave irreversible release governance R4 for final validated release approval."
+}
