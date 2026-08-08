@@ -2,33 +2,24 @@
   "checkpoint_id": "0076",
   "project": "CIVORA",
   "title": "Release Candidate Preflight",
-  "state": "CODE_COMPLETE_CI_PENDING",
+  "state": "CLOSED_VALIDATED",
   "canonical_branch": "agent/import-core-runtime-v0-2",
-  "evidence": [
-    {"type":"implementation","path":"tools/release_preflight.py","claim":"Stdlib-only executable preflight validates release files, metadata sync, CI support boundaries, packaging gates and absence of known runtime-state filenames."},
-    {"type":"release_documentation","path":"CHANGELOG.md","claim":"Canonical v1 release changelog exists with an Unreleased section pending final version lock."},
-    {"type":"release_documentation","path":"docs/release/v1.0-release-checklist.md","claim":"Technical, metadata, security/operations and governance release gates are explicitly tracked."},
-    {"type":"ci","path":".github/workflows/test.yml","claim":"Workflow includes independent release-preflight job in addition to Python 3.10-3.13, Windows-native and built-distribution smoke validation."},
-    {"type":"safety","claim":"Preflight is read-only and does not merge, tag, publish or mutate CIVORA durable runtime state."}
-  ],
+  "validation": {"workflow_run_id":31236694328,"head_sha":"37c4c312ef4e979d07b9567d8dadc17703cb6725","conclusion":"success"},
   "gates": [
-    {"gate":"EXECUTABLE_RELEASE_PREFLIGHT","status":"PASS_IMPLEMENTATION"},
-    {"gate":"REQUIRED_RELEASE_FILE_GATE","status":"PASS_IMPLEMENTATION"},
-    {"gate":"VERSION_SYNC_GATE","status":"PASS_IMPLEMENTATION"},
-    {"gate":"PYTHON_SUPPORT_GATE","status":"PASS_IMPLEMENTATION"},
-    {"gate":"WINDOWS_CI_PRESENCE_GATE","status":"PASS_IMPLEMENTATION"},
-    {"gate":"BUILT_DISTRIBUTION_GATE","status":"PASS_IMPLEMENTATION"},
-    {"gate":"INSTALLED_ENTRYPOINT_GATE","status":"PASS_IMPLEMENTATION"},
-    {"gate":"CHANGELOG_GATE","status":"PASS_IMPLEMENTATION"},
-    {"gate":"DURABLE_STATE_EXCLUSION_GATE","status":"PASS_IMPLEMENTATION"},
-    {"gate":"RELEASE_CHECKLIST_CREATED","status":"PASS_IMPLEMENTATION"},
-    {"gate":"CI_PREFLIGHT_JOB","status":"PASS_IMPLEMENTATION"},
-    {"gate":"EXPANDED_CROSS_PLATFORM_RC_CI","status":"PENDING_CURRENT_CI"}
+    {"gate":"EXECUTABLE_RELEASE_PREFLIGHT","status":"PASS"},
+    {"gate":"REQUIRED_RELEASE_FILE_GATE","status":"PASS"},
+    {"gate":"VERSION_SYNC_GATE","status":"PASS"},
+    {"gate":"PYTHON_SUPPORT_GATE","status":"PASS"},
+    {"gate":"WINDOWS_CI_PRESENCE_GATE","status":"PASS"},
+    {"gate":"BUILT_DISTRIBUTION_GATE","status":"PASS"},
+    {"gate":"INSTALLED_ENTRYPOINT_GATE","status":"PASS"},
+    {"gate":"CHANGELOG_GATE","status":"PASS"},
+    {"gate":"DURABLE_STATE_EXCLUSION_GATE","status":"PASS"},
+    {"gate":"RELEASE_CHECKLIST_CREATED","status":"PASS"},
+    {"gate":"CI_PREFLIGHT_JOB","status":"PASS"},
+    {"gate":"EXPANDED_CROSS_PLATFORM_RC_CI","status":"PASS"}
   ],
-  "remaining_release_blockers": [
-    "expanded RC CI must pass on the current head",
-    "final 1.0.0 version lock and exact release manifest not yet committed",
-    "explicit human approval required before irreversible merge/tag/release"
-  ],
-  "next_action": "If expanded CI passes, close 0073/0075/0076 and prepare checkpoint 0077 Final Version Lock + Release Manifest; otherwise repair the failing release gate first."
+  "remaining_release_blockers": ["final 1.0.0 head must pass CI", "explicit human approval required before irreversible merge/tag/release"],
+  "blockers": [],
+  "next_action": "Execute checkpoint 0077 Final Version Lock + Release Manifest and validate the exact resulting head."
 }
