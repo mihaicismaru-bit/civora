@@ -2,7 +2,7 @@
 
 All notable CIVORA Core / Editorial Runtime changes are documented here for release closure.
 
-## [Unreleased]
+## [1.0.0] - 2026-08-08
 
 ### Added
 
@@ -23,13 +23,14 @@ All notable CIVORA Core / Editorial Runtime changes are documented here for rele
 - Machine-readable editorial remediation guidance and operator remediation runbook.
 - Cross-platform CI on Linux and Windows.
 - Release-closure validation for Python 3.10-3.13 and built wheel/sdist smoke testing.
+- Deterministic release-candidate preflight and release checklist.
 
 ### Changed
 
 - GitHub is the canonical persistence and version-control layer for CIVORA development.
 - Reader-visible rendering no longer falls back to raw signal prose.
 - Editorial drafting is blocked by unsupported, unresolved, disputed or contradicted facts.
-- README and canonical import documentation now distinguish current release state from historical repository bootstrap provenance.
+- README and canonical import documentation distinguish current release state from historical repository bootstrap provenance.
 
 ### Safety
 
