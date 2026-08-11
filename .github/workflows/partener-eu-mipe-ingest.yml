@@ -1,0 +1,43 @@
+name: PARTENER.EU MIPE Ingestion
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'partener-eu/ingest/mipe_ingest.py'
+      - '.github/workflows/partener-eu-mipe-ingest.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: partener-eu-mipe-ingest
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Run fail-closed MIPE ingestion
+        run: python partener-eu/ingest/mipe_ingest.py
+
+      - name: Persist verified feed and health state
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add partener-eu/web/mipe-news.js partener-eu/ingest/state/mipe_state.json
+          if git diff --cached --quiet; then
+            echo 'No MIPE feed changes.'
+            exit 0
+          fi
+          git commit -m 'Ingest verified MIPE updates'
+          git pull --rebase origin main
+          git push origin HEAD:main
