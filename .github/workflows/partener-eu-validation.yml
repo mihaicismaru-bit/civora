@@ -33,6 +33,8 @@ jobs:
           python partener-eu/ops/p10_validate.py
           echo "exit_code=$?" >> "$GITHUB_OUTPUT"
           exit 0
+      - name: Persist source hash resolution tasks
+        run: python partener-eu/ops/p10_resolution_tasks.py
       - name: Public deployment health
         run: python partener-eu/ops/check_public_site.py
       - name: Persist validation ledger
