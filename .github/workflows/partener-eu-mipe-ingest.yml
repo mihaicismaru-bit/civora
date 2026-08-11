@@ -8,6 +8,7 @@ on:
     branches: [main]
     paths:
       - 'partener-eu/ingest/mipe_ingest.py'
+      - 'partener-eu/ingest/mipe_ingest_ipv4.py'
       - '.github/workflows/partener-eu-mipe-ingest.yml'
 
 permissions:
@@ -26,8 +27,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Run fail-closed MIPE ingestion
-        run: python partener-eu/ingest/mipe_ingest.py
+      - name: Run fail-closed MIPE ingestion over IPv4
+        run: python partener-eu/ingest/mipe_ingest_ipv4.py
 
       - name: Persist verified feed and health state
         run: |
