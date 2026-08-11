@@ -1,0 +1,13 @@
+{
+  "version": "1.0",
+  "policy": "External/social signals may create discovery and resolution tasks but may not overwrite material official funding facts.",
+  "adapters": [
+    {"id":"PUBLIC_WEB_DISCOVERY","status":"READY","auth":"NONE","role":"source discovery and corroboration"},
+    {"id":"RSS_SITEMAP_DISCOVERY","status":"READY","auth":"NONE","role":"source discovery"},
+    {"id":"FACEBOOK_PUBLIC","status":"AUTH_OR_ACCESS_DEPENDENT","role":"alternative signal only","promotion_to_official_fact":false},
+    {"id":"LINKEDIN_PUBLIC","status":"AUTH_OR_ACCESS_DEPENDENT","role":"people/policy and alternative signal only","promotion_to_official_fact":false},
+    {"id":"REDDIT_PUBLIC","status":"AUTH_OR_RATE_LIMIT_DEPENDENT","role":"alternative signal only","promotion_to_official_fact":false}
+  ],
+  "discovery_result": "No installable Facebook/LinkedIn/Reddit plugin was available in the connected plugin catalog at P10 start.",
+  "fail_closed": true
+}
