@@ -8,6 +8,14 @@ permissions:
   pages: write
   id-token: write
   issues: read
+
+# Share the exact Pages deployment lock with the automatic web deploy.
+# This prevents two independent workflows from trying to create a Pages
+# deployment for different commits at the same time.
+concurrency:
+  group: partener-eu-pages
+  cancel-in-progress: false
+
 jobs:
   deploy:
     if: startsWith(github.event.issue.title, '[PARTENER-GO-LIVE]') || github.event_name == 'workflow_dispatch'
@@ -17,6 +25,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - name: Inspect Pages and attempt custom domain
         id: pagesapi
         env:
@@ -145,4 +155,11 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add partener-eu/deployment/go-live-result.json
           git commit -m 'Record PARTENER.EU go-live result' || exit 0
-          git push
+          # Validation ledger commits may land while this job is running.
+          # Rebase the audit-only commit on current main and retry once; never
+          # overwrite or force-push canonical history.
+          if ! git push; then
+            git fetch origin main
+            git rebase origin/main
+            git push
+          fi
