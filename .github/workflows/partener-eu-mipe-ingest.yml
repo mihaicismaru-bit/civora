@@ -52,6 +52,26 @@ jobs:
             echo "browser=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Probe official MIPE A-record route with TLS SNI preserved
+        if: steps.health.outputs.browser == 'true'
+        id: directroute
+        shell: bash
+        run: |
+          set +e
+          IP=193.151.29.8
+          URL='https://mfe.gov.ro/pdds/despre-program-programare/'
+          CODE=$(curl --http1.1 --resolve "mfe.gov.ro:443:${IP}" -L -sS -o /tmp/mipe-probe.html -w '%{http_code}' --connect-timeout 8 --max-time 25 "$URL")
+          RC=$?
+          SIZE=$(wc -c </tmp/mipe-probe.html 2>/dev/null || echo 0)
+          echo "curl_rc=$RC code=$CODE bytes=$SIZE ip=$IP"
+          if [ "$RC" = "0" ] && [ "$CODE" -ge 200 ] 2>/dev/null && [ "$CODE" -lt 400 ] 2>/dev/null && [ "$SIZE" -gt 500 ]; then
+            echo "force_ip=$IP" >> "$GITHUB_OUTPUT"
+            echo "MIPE_FORCE_IP=$IP" >> "$GITHUB_ENV"
+          else
+            echo "force_ip=" >> "$GITHUB_OUTPUT"
+          fi
+          exit 0
+
       - name: Install browser fallback
         if: steps.health.outputs.browser == 'true'
         run: |
