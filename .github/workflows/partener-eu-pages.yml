@@ -7,7 +7,7 @@ on:
       - '.github/workflows/partener-eu-pages.yml'
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 concurrency:
@@ -28,3 +28,23 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Record deployment
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          mkdir -p partener-eu/deployment
+          python - <<'PY'
+          import json, os, datetime
+          with open('partener-eu/deployment/latest.json','w',encoding='utf-8') as f:
+              json.dump({
+                  'status':'LIVE',
+                  'page_url':os.environ['PAGE_URL'],
+                  'deployed_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                  'git_sha':os.environ.get('GITHUB_SHA')
+              },f,indent=2)
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add partener-eu/deployment/latest.json
+          git diff --cached --quiet || git commit -m 'Record PARTENER.EU Pages deployment'
+          git push
