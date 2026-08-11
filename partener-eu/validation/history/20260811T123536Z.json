@@ -1,0 +1,270 @@
+{
+  "checkpoint": "PARTENER-EU-CIVORA-P10-0017",
+  "run_started": "2026-08-11T12:35:36Z",
+  "live": true,
+  "state_recovered_from_checkpoint": false,
+  "frontend_checks": [
+    {
+      "name": "file:index.html",
+      "pass": true
+    },
+    {
+      "name": "file:app.js",
+      "pass": true
+    },
+    {
+      "name": "file:data.js",
+      "pass": true
+    },
+    {
+      "name": "file:styles.css",
+      "pass": true
+    },
+    {
+      "name": "ui:Funding Explorer",
+      "pass": true
+    },
+    {
+      "name": "ui:What Changed",
+      "pass": true
+    },
+    {
+      "name": "ui:Ask PARTENER.EU",
+      "pass": true
+    },
+    {
+      "name": "ui:Consultant mode",
+      "pass": true
+    },
+    {
+      "name": "ui:Pot aplica?",
+      "pass": true
+    },
+    {
+      "name": "ui:provenien",
+      "pass": true
+    }
+  ],
+  "sources": [
+    {
+      "id": "SRC-MYSMIS-CALLS",
+      "tier": "T1",
+      "criticality": "CRITICAL",
+      "name": "MySMIS 2021-2027 — Apeluri validate",
+      "url": "https://resurse.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027",
+      "markers_any": [
+        "Apeluri validate 2021-2027",
+        "Finanțări programe 2021 - 2027",
+        "APELURI"
+      ],
+      "observed_at": "2026-08-11T12:35:36Z",
+      "ok": true,
+      "http_status": 200,
+      "final_url": "https://resurse.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027",
+      "bytes": 119090,
+      "sha256": "9e91ec5180fd1fcab4395c948b698997746b101d46109e23a867d03b3a57a2af",
+      "markers_found": [
+        "Apeluri validate 2021-2027",
+        "Finanțări programe 2021 - 2027",
+        "APELURI"
+      ],
+      "etag": null,
+      "last_modified": null,
+      "error": null,
+      "markers_ok": true,
+      "change_detected": false,
+      "resolution_task_required": false,
+      "consecutive_failures": 0,
+      "health": "PASS"
+    },
+    {
+      "id": "SRC-AFIR-ENERGY-2026",
+      "tier": "T1",
+      "criticality": "HIGH",
+      "name": "AFIR — Energie 2026",
+      "url": "https://www.afir.ro/comunicate/deschiderea-sesiunii-pentru-investitiile-in-producerea-energiei-electrice-din-surse-regenerabile/",
+      "markers_any": [
+        "energiei electrice",
+        "surse regenerabile",
+        "14 august 2026"
+      ],
+      "observed_at": "2026-08-11T12:35:36Z",
+      "ok": true,
+      "http_status": 200,
+      "final_url": "https://www.afir.ro/comunicate/deschiderea-sesiunii-pentru-investitiile-in-producerea-energiei-electrice-din-surse-regenerabile/",
+      "bytes": 112371,
+      "sha256": "04a21f0b2f71c36428e02fb2acfecde0f7c7b3758326dcf348f29763f5570777",
+      "markers_found": [
+        "energiei electrice",
+        "surse regenerabile",
+        "14 august 2026"
+      ],
+      "etag": null,
+      "last_modified": null,
+      "error": null,
+      "markers_ok": true,
+      "change_detected": false,
+      "resolution_task_required": false,
+      "consecutive_failures": 0,
+      "health": "PASS"
+    },
+    {
+      "id": "SRC-PR-CENTRU-DIGITAL-2",
+      "tier": "T1",
+      "criticality": "HIGH",
+      "name": "ADR Centru — Întreprinderi digitale Apel 2",
+      "url": "https://www.regiocentru.ro/actiuni/2-2-intreprinderi-digitale-pentru-o-economie-avansata-apel-2/",
+      "markers_any": [
+        "Întreprinderi digitale",
+        "Apel 2",
+        "consultare"
+      ],
+      "observed_at": "2026-08-11T12:35:36Z",
+      "ok": true,
+      "http_status": 200,
+      "final_url": "https://www.regiocentru.ro/actiuni/2-2-intreprinderi-digitale-pentru-o-economie-avansata-apel-2/",
+      "bytes": 231395,
+      "sha256": "009974ffb43eacef1953cbcc283e697f6330e507d6ae64825a9eff30fc74ea48",
+      "markers_found": [
+        "Întreprinderi digitale",
+        "Apel 2",
+        "consultare"
+      ],
+      "etag": null,
+      "last_modified": null,
+      "error": null,
+      "markers_ok": true,
+      "change_detected": false,
+      "resolution_task_required": false,
+      "consecutive_failures": 0,
+      "health": "PASS"
+    },
+    {
+      "id": "SRC-PR-CENTRU-ACTIUNI",
+      "tier": "T1",
+      "criticality": "MEDIUM",
+      "name": "ADR Centru — Acțiuni",
+      "url": "https://www.regiocentru.ro/actiuni/",
+      "markers_any": [
+        "Acțiuni",
+        "Programul Regiunea Centru"
+      ],
+      "observed_at": "2026-08-11T12:35:36Z",
+      "ok": true,
+      "http_status": 200,
+      "final_url": "https://www.regiocentru.ro/actiuni/",
+      "bytes": 561165,
+      "sha256": "37267544c8ebaaf854ba507f656690d8c723ea7e01a4f58061fddc846bd06cc4",
+      "markers_found": [
+        "Programul Regiunea Centru"
+      ],
+      "etag": null,
+      "last_modified": null,
+      "error": null,
+      "markers_ok": true,
+      "change_detected": false,
+      "resolution_task_required": false,
+      "consecutive_failures": 0,
+      "health": "PASS"
+    },
+    {
+      "id": "SRC-OIRBI-PIDS",
+      "tier": "T1B",
+      "criticality": "MEDIUM",
+      "name": "OIR București-Ilfov — PIDS",
+      "url": "https://www.oirbi.ro/pids-2021-2027/",
+      "markers_any": [
+        "PIDS",
+        "Incluziune",
+        "Demnitate"
+      ],
+      "observed_at": "2026-08-11T12:35:36Z",
+      "ok": true,
+      "http_status": 200,
+      "final_url": "https://www.oirbi.ro/pids-2021-2027/",
+      "bytes": 127159,
+      "sha256": "8bcc08dd26a93a7f510c717d6a8c6300e33cffcebd41380fe7d54430ad2a0e31",
+      "markers_found": [
+        "PIDS",
+        "Incluziune",
+        "Demnitate"
+      ],
+      "etag": null,
+      "last_modified": null,
+      "error": null,
+      "markers_ok": true,
+      "change_detected": false,
+      "resolution_task_required": false,
+      "consecutive_failures": 0,
+      "health": "PASS"
+    },
+    {
+      "id": "SRC-OIRVEST-PEO",
+      "tier": "T1B",
+      "criticality": "MEDIUM",
+      "name": "OIR PECU Vest — Ghiduri PEO",
+      "url": "https://oirvest.ro/ghiduri-peo/",
+      "markers_any": [
+        "PEO",
+        "Educație",
+        "Ocupare"
+      ],
+      "observed_at": "2026-08-11T12:35:36Z",
+      "ok": true,
+      "http_status": 200,
+      "final_url": "https://oirvest.ro/ghiduri-peo/",
+      "bytes": 118627,
+      "sha256": "22ed8c69beb01044b004a490af465e75ff4b617e67e2d2dafea706b67f89594d",
+      "markers_found": [
+        "PEO",
+        "Educație",
+        "Ocupare"
+      ],
+      "etag": null,
+      "last_modified": null,
+      "error": null,
+      "markers_ok": true,
+      "change_detected": false,
+      "resolution_task_required": false,
+      "consecutive_failures": 0,
+      "health": "PASS"
+    },
+    {
+      "id": "SRC-LEGISLATIE",
+      "tier": "T1",
+      "criticality": "HIGH",
+      "name": "Portal Legislativ",
+      "url": "https://legislatie.just.ro/",
+      "markers_any": [
+        "Portal Legislativ",
+        "legisla"
+      ],
+      "observed_at": "2026-08-11T12:35:36Z",
+      "ok": false,
+      "http_status": null,
+      "final_url": null,
+      "bytes": 0,
+      "sha256": null,
+      "markers_found": [],
+      "etag": null,
+      "last_modified": null,
+      "error": "RemoteDisconnected: Remote end closed connection without response",
+      "markers_ok": false,
+      "change_detected": false,
+      "resolution_task_required": false,
+      "consecutive_failures": 1,
+      "health": "DEGRADED"
+    }
+  ],
+  "summary": {
+    "frontend_pass": 10,
+    "frontend_total": 10,
+    "source_pass": 6,
+    "source_degraded": 1,
+    "source_fail": 0,
+    "change_detected": 0,
+    "critical_fail": false
+  },
+  "civora_v1": "NOT_CLOSED",
+  "production_day_count_rule": ">=30 distinct UTC dates with qualifying runs before closure"
+}
