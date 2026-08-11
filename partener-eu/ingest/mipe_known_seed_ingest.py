@@ -51,32 +51,37 @@ def persist(st,fresh,run):
 
 def main():
     seeds=json.loads(SEEDS.read_text(encoding='utf-8')).get('items',[])
-    st=load_state();fresh=[];fail=[];verified=0
+    st=load_state();fresh=[];fail=[];verified=0;host_timeouts=0;probed=0
     with sync_playwright() as pw:
         browser=pw.chromium.launch(headless=True,args=['--disable-dev-shm-usage','--no-sandbox'])
         ctx=browser.new_context(locale='ro-RO',user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36')
         for seed in seeds:
-            url=seed['url']; page=ctx.new_page()
+            if host_timeouts >= 2:
+                break
+            url=seed['url']; page=ctx.new_page();probed+=1
             try:
-                resp=page.goto(url,wait_until='domcontentloaded',timeout=20000)
+                resp=page.goto(url,wait_until='domcontentloaded',timeout=7000)
                 status=resp.status if resp else 0
                 if status and status>=400: raise RuntimeError(f'HTTP {status}')
                 if not page.url.startswith('https://mfe.gov.ro/'): raise RuntimeError('redirected outside canonical MIPE host')
-                title=clean(page.locator('h1').first.text_content(timeout=1500) if page.locator('h1').count() else page.title()) or seed.get('titleHint','')
-                body=clean(page.locator('body').inner_text(timeout=5000))
+                title=clean(page.locator('h1').first.text_content(timeout=1200) if page.locator('h1').count() else page.title()) or seed.get('titleHint','')
+                body=clean(page.locator('body').inner_text(timeout=3500))
                 if len(body)<80: raise RuntimeError('insufficient official page content')
-                verified+=1
+                verified+=1;host_timeouts=0
                 hay=(title+' '+body[:4000]).lower()
                 if sum(1 for k in KW if k in hay)<2: continue
                 d=pdate(body) or now().date(); summary=body[:900]
                 fp=hashlib.sha256((url+'\n'+title).encode()).hexdigest()[:20]
                 fresh.append({'id':fp,'title':title[:360],'url':url,'date':d.isoformat(),'dateLabel':label(d),'summary':summary,'tag':seed.get('programme','MIPE'),'kind':kind(title+' '+body[:1200]),'tier':'T1','source':'MIPE','observedAt':now().isoformat(),'discovery':'mapped-canonical-seed+verified-fetch'})
             except Exception as e:
-                fail.append({'url':url,'error':f'{type(e).__name__}: {e}'})
+                msg=f'{type(e).__name__}: {e}'
+                if 'Timeout' in msg or 'ERR_CONNECTION' in msg or 'net::' in msg:
+                    host_timeouts+=1
+                fail.append({'url':url,'error':msg})
             finally: page.close()
         browser.close()
     uniq={x['url']:x for x in fresh}
-    run={'observedAt':now().isoformat(),'mappedSeedCount':len(seeds),'verifiedFetches':verified,'parsedRelevantCount':len(uniq),'seedFailures':fail[:20]}
+    run={'observedAt':now().isoformat(),'mappedSeedCount':len(seeds),'probedSeedCount':probed,'verifiedFetches':verified,'parsedRelevantCount':len(uniq),'hostFastFail':host_timeouts>=2,'seedFailures':fail[:20]}
     persist(st,list(uniq.values()),run)
     print(json.dumps(run,ensure_ascii=False,indent=2))
 if __name__=='__main__':main()
