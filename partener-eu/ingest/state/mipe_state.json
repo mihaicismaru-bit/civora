@@ -1,13 +1,19 @@
 {
   "status": "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
   "lastRun": {
-    "observedAt": "2026-08-11T17:38:03.436392+00:00",
+    "observedAt": "2026-08-11T17:56:43.570267+00:00",
     "status": "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
     "roots": [
       {
-        "root": "https://mfe.gov.ro/",
+        "root": "https://mfe.gov.ro/pdds/despre-program-programare/",
         "ok": false,
         "error": "curl: (28) Failed to connect to mfe.gov.ro port 443 after 8001 ms: Timeout was reached",
+        "transport": "curl-ipv4-tls-verified"
+      },
+      {
+        "root": "https://mfe.gov.ro/",
+        "ok": false,
+        "error": "curl: (28) Failed to connect to mfe.gov.ro port 443 after 8002 ms: Timeout was reached",
         "transport": "curl-ipv4-tls-verified"
       },
       {
@@ -55,6 +61,33 @@
           "root": "https://mfe.gov.ro/",
           "ok": false,
           "error": "curl: (28) Failed to connect to mfe.gov.ro port 443 after 8001 ms: Timeout was reached",
+          "transport": "curl-ipv4-tls-verified"
+        },
+        {
+          "root": "https://www.fonduri-ue.gov.ro/",
+          "ok": false,
+          "error": "curl: (60) SSL certificate problem: unable to get local issuer certificate\nMore details here: https://curl.se/docs/sslcerts.html\n\ncurl failed to verify the legitimacy of the server and therefore could not\nestablish a secure connection to it. To learn more about this situation and\nhow to fix it, please visit the web page mentioned above.",
+          "transport": "curl-ipv4-tls-verified"
+        }
+      ],
+      "candidateCount": 0,
+      "parsedRelevantCount": 0,
+      "publishedItemCount": 0
+    },
+    {
+      "observedAt": "2026-08-11T17:56:43.570267+00:00",
+      "status": "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
+      "roots": [
+        {
+          "root": "https://mfe.gov.ro/pdds/despre-program-programare/",
+          "ok": false,
+          "error": "curl: (28) Failed to connect to mfe.gov.ro port 443 after 8001 ms: Timeout was reached",
+          "transport": "curl-ipv4-tls-verified"
+        },
+        {
+          "root": "https://mfe.gov.ro/",
+          "ok": false,
+          "error": "curl: (28) Failed to connect to mfe.gov.ro port 443 after 8002 ms: Timeout was reached",
           "transport": "curl-ipv4-tls-verified"
         },
         {
