@@ -1,7 +1,7 @@
 {
   "status": "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
   "lastRun": {
-    "observedAt": "2026-08-11T23:52:30.445294+00:00",
+    "observedAt": "2026-08-11T23:55:45.272924+00:00",
     "roots": [
       {
         "root": "https://mfe.gov.ro/pdds/despre-program-programare/",
@@ -14,10 +14,22 @@
         "ok": false,
         "transport": "playwright-chromium",
         "error": "TimeoutError: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://mfe.gov.ro/\", waiting until \"domcontentloaded\"\n"
+      },
+      {
+        "root": "https://mfe.gov.ro/ghiduri_peos/",
+        "ok": false,
+        "transport": "playwright-chromium",
+        "error": "TimeoutError: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://mfe.gov.ro/ghiduri_peos/\", waiting until \"domcontentloaded\"\n"
+      },
+      {
+        "root": "https://mfe.gov.ro/ghiduri_pids/",
+        "ok": false,
+        "transport": "playwright-chromium",
+        "error": "TimeoutError: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://mfe.gov.ro/ghiduri_pids/\", waiting until \"domcontentloaded\"\n"
       }
     ],
     "sourceAvailable": false,
-    "candidateCount": 2,
+    "candidateCount": 4,
     "parsedRelevantCount": 0,
     "browserFailures": [
       {
@@ -27,6 +39,14 @@
       {
         "url": "https://mfe.gov.ro/",
         "error": "TimeoutError: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://mfe.gov.ro/\", waiting until \"domcontentloaded\"\n"
+      },
+      {
+        "url": "https://mfe.gov.ro/ghiduri_peos/",
+        "error": "TimeoutError: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://mfe.gov.ro/ghiduri_peos/\", waiting until \"domcontentloaded\"\n"
+      },
+      {
+        "url": "https://mfe.gov.ro/ghiduri_pids/",
+        "error": "TimeoutError: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://mfe.gov.ro/ghiduri_pids/\", waiting until \"domcontentloaded\"\n"
       }
     ],
     "transport": "playwright-chromium",
@@ -404,6 +424,87 @@
         {
           "url": "https://mfe.gov.ro/",
           "error": "TimeoutError: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://mfe.gov.ro/\", waiting until \"domcontentloaded\"\n"
+        }
+      ],
+      "transport": "playwright-chromium",
+      "forcedIp": null,
+      "status": "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
+      "publishedItemCount": 0
+    },
+    {
+      "observedAt": "2026-08-11T23:53:10.532226+00:00",
+      "status": "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
+      "roots": [
+        {
+          "root": "https://mfe.gov.ro/pdds/despre-program-programare/",
+          "ok": false,
+          "error": "curl: (28) Failed to connect to mfe.gov.ro port 443 after 8002 ms: Timeout was reached",
+          "transport": "curl-ipv4-tls-verified"
+        },
+        {
+          "root": "https://mfe.gov.ro/",
+          "ok": false,
+          "error": "curl: (28) Failed to connect to mfe.gov.ro port 443 after 8002 ms: Timeout was reached",
+          "transport": "curl-ipv4-tls-verified"
+        },
+        {
+          "root": "https://www.fonduri-ue.gov.ro/",
+          "ok": false,
+          "error": "curl: (60) SSL certificate problem: unable to get local issuer certificate\nMore details here: https://curl.se/docs/sslcerts.html\n\ncurl failed to verify the legitimacy of the server and therefore could not\nestablish a secure connection to it. To learn more about this situation and\nhow to fix it, please visit the web page mentioned above.",
+          "transport": "curl-ipv4-tls-verified"
+        }
+      ],
+      "candidateCount": 0,
+      "parsedRelevantCount": 0,
+      "publishedItemCount": 0
+    },
+    {
+      "observedAt": "2026-08-11T23:55:45.272924+00:00",
+      "roots": [
+        {
+          "root": "https://mfe.gov.ro/pdds/despre-program-programare/",
+          "ok": false,
+          "transport": "playwright-chromium",
+          "error": "TimeoutError: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://mfe.gov.ro/pdds/despre-program-programare/\", waiting until \"domcontentloaded\"\n"
+        },
+        {
+          "root": "https://mfe.gov.ro/",
+          "ok": false,
+          "transport": "playwright-chromium",
+          "error": "TimeoutError: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://mfe.gov.ro/\", waiting until \"domcontentloaded\"\n"
+        },
+        {
+          "root": "https://mfe.gov.ro/ghiduri_peos/",
+          "ok": false,
+          "transport": "playwright-chromium",
+          "error": "TimeoutError: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://mfe.gov.ro/ghiduri_peos/\", waiting until \"domcontentloaded\"\n"
+        },
+        {
+          "root": "https://mfe.gov.ro/ghiduri_pids/",
+          "ok": false,
+          "transport": "playwright-chromium",
+          "error": "TimeoutError: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://mfe.gov.ro/ghiduri_pids/\", waiting until \"domcontentloaded\"\n"
+        }
+      ],
+      "sourceAvailable": false,
+      "candidateCount": 4,
+      "parsedRelevantCount": 0,
+      "browserFailures": [
+        {
+          "url": "https://mfe.gov.ro/pdds/despre-program-programare/",
+          "error": "TimeoutError: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://mfe.gov.ro/pdds/despre-program-programare/\", waiting until \"domcontentloaded\"\n"
+        },
+        {
+          "url": "https://mfe.gov.ro/",
+          "error": "TimeoutError: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://mfe.gov.ro/\", waiting until \"domcontentloaded\"\n"
+        },
+        {
+          "url": "https://mfe.gov.ro/ghiduri_peos/",
+          "error": "TimeoutError: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://mfe.gov.ro/ghiduri_peos/\", waiting until \"domcontentloaded\"\n"
+        },
+        {
+          "url": "https://mfe.gov.ro/ghiduri_pids/",
+          "error": "TimeoutError: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://mfe.gov.ro/ghiduri_pids/\", waiting until \"domcontentloaded\"\n"
         }
       ],
       "transport": "playwright-chromium",
