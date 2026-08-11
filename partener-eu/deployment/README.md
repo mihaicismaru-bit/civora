@@ -1,0 +1,1 @@
+Go-live endpoint deployment is triggered by the PARTENER.EU Go Live workflow and recorded in go-live-result.json when the workflow completes.
