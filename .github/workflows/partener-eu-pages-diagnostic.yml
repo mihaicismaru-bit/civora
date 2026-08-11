@@ -1,0 +1,50 @@
+name: PARTENER.EU Pages Diagnostic
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/partener-eu-pages-diagnostic.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Inspect Pages API
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p partener-eu/deployment
+          code=$(curl -sS -o /tmp/pages.json -w '%{http_code}' \
+            -H 'Accept: application/vnd.github+json' \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H 'X-GitHub-Api-Version: 2026-03-10' \
+            https://api.github.com/repos/${GITHUB_REPOSITORY}/pages || true)
+          python - "$code" <<'PY'
+          import json,sys,datetime
+          code=sys.argv[1]
+          try:
+              body=json.load(open('/tmp/pages.json',encoding='utf-8'))
+          except Exception:
+              body={}
+          out={
+              'http_status':int(code) if code.isdigit() else None,
+              'pages_exists':code=='200',
+              'status':body.get('status'),
+              'html_url':body.get('html_url'),
+              'cname':body.get('cname'),
+              'https_enforced':body.get('https_enforced'),
+              'protected_domain_state':body.get('protected_domain_state'),
+              'observed_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),
+              'api_message':body.get('message')
+          }
+          json.dump(out,open('partener-eu/deployment/pages-diagnostic.json','w',encoding='utf-8'),indent=2)
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add partener-eu/deployment/pages-diagnostic.json
+          git commit -m 'Record PARTENER.EU Pages diagnostic' || exit 0
+          git push
