@@ -29,6 +29,8 @@ jobs:
           python partener-eu/ops/p10_validate.py
           echo "exit_code=$?" >> "$GITHUB_OUTPUT"
           exit 0
+      - name: Public deployment health
+        run: python partener-eu/ops/check_public_site.py
       - name: Persist validation ledger
         shell: bash
         run: |
