@@ -1,6 +1,54 @@
 {
-  "status": "BOOTSTRAP",
-  "lastRun": null,
+  "status": "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
+  "lastRun": {
+    "observedAt": "2026-08-11T17:35:43.641054+00:00",
+    "status": "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
+    "roots": [
+      {
+        "root": "https://mfe.gov.ro/",
+        "ok": false,
+        "error": "URLError: <urlopen error [Errno 101] Network is unreachable>"
+      },
+      {
+        "root": "https://www.fonduri-ue.gov.ro/",
+        "ok": false,
+        "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1000)>"
+      },
+      {
+        "root": "https://www.fonduri-ue.ro/",
+        "ok": false,
+        "error": "HTTPError: HTTP Error 403: Forbidden"
+      }
+    ],
+    "candidateCount": 0,
+    "parsedRelevantCount": 0,
+    "publishedItemCount": 0
+  },
   "items": [],
-  "runs": []
+  "runs": [
+    {
+      "observedAt": "2026-08-11T17:35:43.641054+00:00",
+      "status": "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
+      "roots": [
+        {
+          "root": "https://mfe.gov.ro/",
+          "ok": false,
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>"
+        },
+        {
+          "root": "https://www.fonduri-ue.gov.ro/",
+          "ok": false,
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1000)>"
+        },
+        {
+          "root": "https://www.fonduri-ue.ro/",
+          "ok": false,
+          "error": "HTTPError: HTTP Error 403: Forbidden"
+        }
+      ],
+      "candidateCount": 0,
+      "parsedRelevantCount": 0,
+      "publishedItemCount": 0
+    }
+  ]
 }

@@ -1,3 +1,3 @@
 window.PARTENER_DATA=window.PARTENER_DATA||{};
-window.PARTENER_DATA.mipeIngestion={status:"BOOTSTRAP",asOf:null,source:"MIPE official web properties",roots:[],itemCount:0};
+window.PARTENER_DATA.mipeIngestion={"status":"SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED","asOf":"2026-08-11T17:35:43.641054+00:00","source":"MIPE official web properties","roots":[{"root":"https://mfe.gov.ro/","ok":false,"error":"URLError: <urlopen error [Errno 101] Network is unreachable>"},{"root":"https://www.fonduri-ue.gov.ro/","ok":false,"error":"URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1000)>"},{"root":"https://www.fonduri-ue.ro/","ok":false,"error":"HTTPError: HTTP Error 403: Forbidden"}],"itemCount":0};
 window.PARTENER_DATA.mipeNews=[];
