@@ -2,10 +2,11 @@
 import datetime as dt
 import hashlib
 import json
+import os
 import re
 import urllib.parse
 from pathlib import Path
-from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
+from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[2]
 STATE = ROOT / 'partener-eu/ingest/state/mipe_state.json'
@@ -17,6 +18,7 @@ KW = ['fonduri','finanț','finant','apel','ghid','program','proiect','investi','
 EX = ['post vacant','concurs recrutare','declarație de avere','declaratie de avere','achiziție publică','achizitie publica','anunț de angajare','anunt de angajare']
 MON=['ian','feb','mar','apr','mai','iun','iul','aug','sept','oct','nov','dec']
 MAX_PAGES=55
+FORCE_IP = os.environ.get('MIPE_FORCE_IP','').strip()
 
 def now(): return dt.datetime.now(dt.timezone.utc)
 def clean(s): return re.sub(r'\s+',' ',str(s or '')).strip()
@@ -71,19 +73,24 @@ def persist(st, fresh, run):
     runs=(st.get('runs') or [])[-29:]+[run]
     obj={'status':status,'lastRun':run,'items':items,'runs':runs}
     STATE.write_text(json.dumps(obj,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-    meta={'status':status,'asOf':run['observedAt'],'source':'MIPE official web properties','roots':run.get('roots',[]),'itemCount':len(items),'transport':'playwright-chromium'}
+    meta={'status':status,'asOf':run['observedAt'],'source':'MIPE official web properties','roots':run.get('roots',[]),'itemCount':len(items),'transport':run.get('transport','playwright-chromium')}
     OUT.write_text('window.PARTENER_DATA=window.PARTENER_DATA||{};\nwindow.PARTENER_DATA.mipeIngestion='+json.dumps(meta,ensure_ascii=False,separators=(',',':'))+';\nwindow.PARTENER_DATA.mipeNews='+json.dumps(items,ensure_ascii=False,separators=(',',':'))+';\n',encoding='utf-8')
     print(json.dumps(run,ensure_ascii=False,indent=2))
 
 def main():
     st=load_state(); fresh=[]; seen=set(); queue=[(SEED,0),(ROOT_URL,0)]; roots=[]; source_available=False; failures=[]
     with sync_playwright() as pw:
-        browser=pw.chromium.launch(headless=True,args=['--disable-dev-shm-usage','--no-sandbox'])
+        args=['--disable-dev-shm-usage','--no-sandbox']
+        transport='playwright-chromium'
+        if FORCE_IP:
+            # Resolve the official hostname to its public A record while preserving URL, Host and TLS SNI.
+            args.append(f'--host-resolver-rules=MAP mfe.gov.ro {FORCE_IP},MAP www.mfe.gov.ro {FORCE_IP},EXCLUDE localhost')
+            transport=f'playwright-chromium-resolve:{FORCE_IP}'
+        browser=pw.chromium.launch(headless=True,args=args)
         context=browser.new_context(user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36',locale='ro-RO',ignore_https_errors=False)
         while queue and len(seen)<MAX_PAGES:
             url,depth=queue.pop(0); url=norm(url)
             if not url or url in seen: continue
-            # PDDS discovery is strictly scoped below the explicit seed; homepage is only for broader MIPE discovery.
             if depth>0 and '/pdds/' not in url and url!=ROOT_URL: continue
             seen.add(url); page=context.new_page()
             try:
@@ -102,7 +109,7 @@ def main():
                 if score(title,body,final)>=2 and final!=ROOT_URL:
                     d=pdate(body) or now().date(); summary=clean(desc or body[:900])[:900]
                     fp=hashlib.sha256((final+'\n'+title).encode()).hexdigest()[:20]
-                    fresh.append({'id':fp,'title':title[:360],'url':final,'date':d.isoformat(),'dateLabel':label(d),'summary':summary,'tag':tag(final+' '+title+' '+summary),'kind':kind(title),'tier':'T1','source':'MIPE','observedAt':now().isoformat(),'discovery':'playwright-browser'})
+                    fresh.append({'id':fp,'title':title[:360],'url':final,'date':d.isoformat(),'dateLabel':label(d),'summary':summary,'tag':tag(final+' '+title+' '+summary),'kind':kind(title),'tier':'T1','source':'MIPE','observedAt':now().isoformat(),'discovery':transport})
                 if depth<2:
                     links=page.locator('a[href]').evaluate_all("els => els.map(a => ({href:a.href,text:(a.innerText||'').trim()}))")
                     for z in links:
@@ -112,15 +119,13 @@ def main():
                         if '/pdds/' in final:
                             if up.path.startswith('/pdds/') and not re.search(r'\.(pdf|docx?|xlsx?|zip|jpg|jpeg|png|gif|svg)(\?|$)',u,re.I): queue.append((u,depth+1))
                         elif final==ROOT_URL and score(clean(z.get('text')),'',u)>0 and not re.search(r'\.(pdf|docx?|xlsx?|zip|jpg|jpeg|png|gif|svg)(\?|$)',u,re.I): queue.append((u,1))
-                if url in (SEED,ROOT_URL): roots.append({'root':url,'ok':True,'transport':'playwright-chromium','status':status})
+                if url in (SEED,ROOT_URL): roots.append({'root':url,'ok':True,'transport':transport,'status':status})
             except Exception as e:
                 failures.append({'url':url,'error':f'{type(e).__name__}: {e}'})
-                if url in (SEED,ROOT_URL): roots.append({'root':url,'ok':False,'transport':'playwright-chromium','error':f'{type(e).__name__}: {e}'})
+                if url in (SEED,ROOT_URL): roots.append({'root':url,'ok':False,'transport':transport,'error':f'{type(e).__name__}: {e}'})
             finally: page.close()
         browser.close()
-    # De-duplicate by canonical official URL; browser output itself is the provenance, never a mirror.
-    uniq={}
-    for x in fresh: uniq[x['url']]=x
-    run={'observedAt':now().isoformat(),'roots':roots,'sourceAvailable':source_available,'candidateCount':len(seen),'parsedRelevantCount':len(uniq),'browserFailures':failures[:12]}
+    uniq={x['url']:x for x in fresh}
+    run={'observedAt':now().isoformat(),'roots':roots,'sourceAvailable':source_available,'candidateCount':len(seen),'parsedRelevantCount':len(uniq),'browserFailures':failures[:12],'transport':transport,'forcedIp':FORCE_IP or None}
     persist(st,list(uniq.values()),run)
 if __name__=='__main__': main()
