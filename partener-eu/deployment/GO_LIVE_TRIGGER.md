@@ -1,0 +1,1 @@
+PARTENER.EU go-live workflow is configured. The actual deploy trigger is a GitHub issue event; this file records the activation checkpoint.
