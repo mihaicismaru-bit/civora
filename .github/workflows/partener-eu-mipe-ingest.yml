@@ -9,6 +9,7 @@ on:
     paths:
       - 'partener-eu/ingest/mipe_ingest.py'
       - 'partener-eu/ingest/mipe_ingest_ipv4.py'
+      - 'partener-eu/ingest/mipe_pdds_ingest.py'
       - '.github/workflows/partener-eu-mipe-ingest.yml'
 
 permissions:
@@ -27,8 +28,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Run fail-closed MIPE ingestion over IPv4
-        run: python partener-eu/ingest/mipe_ingest_ipv4.py
+      - name: Run fail-closed MIPE ingestion with explicit PDDS seed
+        run: python partener-eu/ingest/mipe_pdds_ingest.py
 
       - name: Persist verified feed and health state
         run: |
