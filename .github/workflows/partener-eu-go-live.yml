@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - name: Inspect or enable Pages
+      - name: Inspect Pages and attempt custom domain
         id: pagesapi
         env:
           GH_TOKEN: ${{ github.token }}
@@ -39,6 +39,13 @@ jobs:
           else
             echo "create=not_needed" >> "$GITHUB_OUTPUT"
           fi
+          cname=$(curl -sS -o /tmp/pages-cname.json -w '%{http_code}' -X PUT \
+            -H 'Accept: application/vnd.github+json' \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H 'X-GitHub-Api-Version: 2026-03-10' \
+            https://api.github.com/repos/${GITHUB_REPOSITORY}/pages \
+            -d '{"cname":"partener.eu","build_type":"workflow"}' || true)
+          echo "cname=$cname" >> "$GITHUB_OUTPUT"
       - id: configure
         continue-on-error: true
         uses: actions/configure-pages@v5
@@ -51,12 +58,40 @@ jobs:
         id: deployment
         continue-on-error: true
         uses: actions/deploy-pages@v4
+      - name: Inspect final Pages state
+        id: finalapi
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          code=$(curl -sS -o /tmp/pages-final.json -w '%{http_code}' \
+            -H 'Accept: application/vnd.github+json' \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H 'X-GitHub-Api-Version: 2026-03-10' \
+            https://api.github.com/repos/${GITHUB_REPOSITORY}/pages || true)
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          python - <<'PY'
+          import json, os
+          try:
+              d=json.load(open('/tmp/pages-final.json'))
+          except Exception:
+              d={}
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:
+              f.write('html_url='+str(d.get('html_url') or '')+'\n')
+              f.write('cname='+str(d.get('cname') or '')+'\n')
+              f.write('https_enforced='+str(d.get('https_enforced') or '')+'\n')
+          PY
       - name: Record go-live result
         if: always()
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
           BEFORE_CODE: ${{ steps.pagesapi.outputs.before }}
           CREATE_CODE: ${{ steps.pagesapi.outputs.create }}
+          CNAME_CODE: ${{ steps.pagesapi.outputs.cname }}
+          FINAL_CODE: ${{ steps.finalapi.outputs.code }}
+          FINAL_URL: ${{ steps.finalapi.outputs.html_url }}
+          FINAL_CNAME: ${{ steps.finalapi.outputs.cname }}
+          HTTPS_ENFORCED: ${{ steps.finalapi.outputs.https_enforced }}
           CONFIGURE_OUTCOME: ${{ steps.configure.outcome }}
           UPLOAD_OUTCOME: ${{ steps.upload.outcome }}
           DEPLOY_OUTCOME: ${{ steps.deployment.outcome }}
@@ -70,6 +105,11 @@ jobs:
             'page_url':os.getenv('PAGE_URL') or None,
             'pages_get_before':os.getenv('BEFORE_CODE'),
             'pages_create_attempt':os.getenv('CREATE_CODE'),
+            'custom_domain_attempt':os.getenv('CNAME_CODE'),
+            'pages_final_get':os.getenv('FINAL_CODE'),
+            'pages_final_url':os.getenv('FINAL_URL') or None,
+            'pages_final_cname':os.getenv('FINAL_CNAME') or None,
+            'https_enforced':os.getenv('HTTPS_ENFORCED') or None,
             'configure_outcome':os.getenv('CONFIGURE_OUTCOME'),
             'upload_outcome':os.getenv('UPLOAD_OUTCOME'),
             'deploy_outcome':os.getenv('DEPLOY_OUTCOME'),
