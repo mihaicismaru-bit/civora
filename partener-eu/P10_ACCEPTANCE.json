@@ -1,18 +1,26 @@
 {
-  "checkpoint": "PARTENER-EU-CIVORA-P10-0017",
+  "checkpoint": "PARTENER-EU-CIVORA-P10-0018",
   "phase": "P10 Production Validation",
-  "status": "VALIDATION_STARTED_NOT_CLOSED",
+  "status": "VALIDATION_RUNNING_NOT_CLOSED",
   "requirements": {
-    "public_deployment": "PENDING_GITHUB_PAGES_ENABLEMENT_AND_WORKFLOW",
-    "scheduled_validation": "WORKFLOW_DEFINED_6_HOURLY",
-    "source_monitoring": "IMPLEMENTED",
+    "public_deployment": "PENDING_VERIFICATION",
+    "scheduled_validation": "ACTIVE_6_HOURLY_GITHUB_ACTIONS_PLUS_HOURLY_PARTENER_AUTO_PLUS",
+    "source_monitoring": "LIVE_AND_PERSISTING",
     "source_change_fail_closed": "IMPLEMENTED",
-    "persistent_validation_ledger": "IMPLEMENTED",
-    "atomic_state_and_recovery": "IMPLEMENTED",
-    "frontend_regression": "IMPLEMENTED",
+    "persistent_validation_ledger": "LIVE",
+    "atomic_state_and_recovery": "PASS",
+    "frontend_regression": "10/10_PASS_ON_FIRST_LIVE_RUN",
     "minimum_distinct_days": 30,
-    "current_qualifying_days": 0
+    "current_qualifying_days": 1
   },
-  "closure_rule": "P10 and CIVORA v1.0 may close only after >=30 distinct days of qualifying production validation plus successful deployment, recovery and autonomous-update evidence.",
-  "social_integrations": "Actual Facebook/LinkedIn/Reddit authentication remains external-credential work; core validation does not fabricate access."
+  "first_live_run": {
+    "utc": "2026-08-11T12:35:36Z",
+    "source_pass": 6,
+    "source_degraded": 1,
+    "source_fail": 0,
+    "critical_fail": false,
+    "degraded_source": "Portal Legislativ — RemoteDisconnected on first observation"
+  },
+  "closure_rule": "P10 and CIVORA v1.0 may close only after >=30 distinct days of qualifying production validation plus verified public deployment, recovery and autonomous-update evidence.",
+  "social_integrations": "Facebook/LinkedIn/Reddit remain authentication/access dependent; no installable connector was found and access is not fabricated."
 }
