@@ -1,0 +1,70 @@
+name: PARTENER.EU MIPE Romania Collector
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '7,37 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: partener-eu-mipe-ro-runner
+  cancel-in-progress: false
+
+jobs:
+  ingest-ro:
+    # Register a trusted self-hosted runner on a Romanian network with label: mipe-ro
+    runs-on: [self-hosted, mipe-ro]
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Install browser runtime
+        shell: bash
+        run: |
+          python -m pip install --disable-pip-version-check playwright
+          python -m playwright install chromium
+
+      - name: Collect official MIPE pages from Romanian egress
+        shell: bash
+        run: |
+          unset MIPE_FORCE_IP || true
+          python partener-eu/ingest/mipe_browser_ingest.py
+
+      - name: Enforce official-source gate
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, sys
+          p='partener-eu/ingest/state/mipe_state.json'
+          d=json.load(open(p,encoding='utf-8'))
+          run=d.get('lastRun') or {}
+          bad=[x for x in d.get('items',[]) if not (x.get('url','').startswith('https://mfe.gov.ro/') or x.get('url','').startswith('https://www.mfe.gov.ro/'))]
+          if bad:
+              print('Non-official URLs rejected:', [x.get('url') for x in bad])
+              sys.exit(2)
+          print(json.dumps({'status':d.get('status'),'sourceAvailable':run.get('sourceAvailable'),'items':len(d.get('items',[]))},ensure_ascii=False))
+          PY
+
+      - name: Persist verified MIPE feed
+        shell: bash
+        run: |
+          set -e
+          cp partener-eu/web/mipe-news.js /tmp/mipe-news.js
+          cp partener-eu/ingest/state/mipe_state.json /tmp/mipe_state.json
+          git fetch origin main
+          git reset --hard origin/main
+          cp /tmp/mipe-news.js partener-eu/web/mipe-news.js
+          cp /tmp/mipe_state.json partener-eu/ingest/state/mipe_state.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add partener-eu/web/mipe-news.js partener-eu/ingest/state/mipe_state.json
+          if git diff --cached --quiet; then
+            echo 'No verified MIPE changes.'
+            exit 0
+          fi
+          git commit -m 'Ingest verified MIPE updates from Romanian collector'
+          git push origin HEAD:main
