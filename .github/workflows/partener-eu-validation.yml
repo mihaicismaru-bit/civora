@@ -5,6 +5,7 @@ on:
     paths:
       - 'partener-eu/**'
       - '.github/workflows/partener-eu-validation.yml'
+      - '!partener-eu/validation/**'
   workflow_dispatch:
   schedule:
     - cron: '17 */6 * * *'
