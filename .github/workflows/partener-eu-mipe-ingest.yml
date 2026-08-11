@@ -60,9 +60,10 @@ jobs:
           set +e
           IP=193.151.29.8
           URL='https://mfe.gov.ro/pdds/despre-program-programare/'
+          rm -f /tmp/mipe-probe.html
           CODE=$(curl --http1.1 --resolve "mfe.gov.ro:443:${IP}" -L -sS -o /tmp/mipe-probe.html -w '%{http_code}' --connect-timeout 8 --max-time 25 "$URL")
           RC=$?
-          SIZE=$(wc -c </tmp/mipe-probe.html 2>/dev/null || echo 0)
+          SIZE=$(test -f /tmp/mipe-probe.html && wc -c </tmp/mipe-probe.html || echo 0)
           echo "curl_rc=$RC code=$CODE bytes=$SIZE ip=$IP"
           if [ "$RC" = "0" ] && [ "$CODE" -ge 200 ] 2>/dev/null && [ "$CODE" -lt 400 ] 2>/dev/null && [ "$SIZE" -gt 500 ]; then
             echo "force_ip=$IP" >> "$GITHUB_OUTPUT"
@@ -82,8 +83,16 @@ jobs:
         if: steps.health.outputs.browser == 'true'
         run: python partener-eu/ingest/mipe_browser_ingest.py
 
-      - name: Persist verified feed and health state
+      - name: Persist verified feed and health state without stale-checkout conflicts
+        shell: bash
         run: |
+          set -e
+          cp partener-eu/web/mipe-news.js /tmp/mipe-news.js
+          cp partener-eu/ingest/state/mipe_state.json /tmp/mipe_state.json
+          git fetch origin main
+          git reset --hard origin/main
+          cp /tmp/mipe-news.js partener-eu/web/mipe-news.js
+          cp /tmp/mipe_state.json partener-eu/ingest/state/mipe_state.json
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add partener-eu/web/mipe-news.js partener-eu/ingest/state/mipe_state.json
@@ -92,5 +101,4 @@ jobs:
             exit 0
           fi
           git commit -m 'Ingest verified MIPE updates'
-          git pull --rebase origin main
           git push origin HEAD:main
