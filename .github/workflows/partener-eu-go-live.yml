@@ -1,0 +1,85 @@
+name: PARTENER.EU Go Live
+on:
+  issues:
+    types: [opened]
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+  issues: read
+jobs:
+  deploy:
+    if: startsWith(github.event.issue.title, '[PARTENER-GO-LIVE]') || github.event_name == 'workflow_dispatch'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Inspect or enable Pages
+        id: pagesapi
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          code=$(curl -sS -o /tmp/pages-before.json -w '%{http_code}' \
+            -H 'Accept: application/vnd.github+json' \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H 'X-GitHub-Api-Version: 2026-03-10' \
+            https://api.github.com/repos/${GITHUB_REPOSITORY}/pages || true)
+          echo "before=$code" >> "$GITHUB_OUTPUT"
+          if [ "$code" = "404" ]; then
+            create=$(curl -sS -o /tmp/pages-create.json -w '%{http_code}' -X POST \
+              -H 'Accept: application/vnd.github+json' \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H 'X-GitHub-Api-Version: 2026-03-10' \
+              https://api.github.com/repos/${GITHUB_REPOSITORY}/pages \
+              -d '{"build_type":"workflow"}' || true)
+            echo "create=$create" >> "$GITHUB_OUTPUT"
+          else
+            echo "create=not_needed" >> "$GITHUB_OUTPUT"
+          fi
+      - id: configure
+        continue-on-error: true
+        uses: actions/configure-pages@v5
+      - id: upload
+        continue-on-error: true
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: partener-eu/web
+      - name: Deploy Pages
+        id: deployment
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+      - name: Record go-live result
+        if: always()
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+          BEFORE_CODE: ${{ steps.pagesapi.outputs.before }}
+          CREATE_CODE: ${{ steps.pagesapi.outputs.create }}
+          CONFIGURE_OUTCOME: ${{ steps.configure.outcome }}
+          UPLOAD_OUTCOME: ${{ steps.upload.outcome }}
+          DEPLOY_OUTCOME: ${{ steps.deployment.outcome }}
+        run: |
+          mkdir -p partener-eu/deployment
+          python - <<'PY'
+          import json, os, datetime
+          ok=os.getenv('DEPLOY_OUTCOME')=='success' and bool(os.getenv('PAGE_URL'))
+          out={
+            'status':'LIVE_ENDPOINT_READY' if ok else 'BLOCKED',
+            'page_url':os.getenv('PAGE_URL') or None,
+            'pages_get_before':os.getenv('BEFORE_CODE'),
+            'pages_create_attempt':os.getenv('CREATE_CODE'),
+            'configure_outcome':os.getenv('CONFIGURE_OUTCOME'),
+            'upload_outcome':os.getenv('UPLOAD_OUTCOME'),
+            'deploy_outcome':os.getenv('DEPLOY_OUTCOME'),
+            'observed_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            'trigger':'issue'
+          }
+          json.dump(out,open('partener-eu/deployment/go-live-result.json','w',encoding='utf-8'),indent=2)
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add partener-eu/deployment/go-live-result.json
+          git commit -m 'Record PARTENER.EU go-live result' || exit 0
+          git push
