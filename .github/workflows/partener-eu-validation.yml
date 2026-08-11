@@ -10,6 +10,9 @@ on:
   schedule:
     - cron: '17 */6 * * *'
       timezone: 'Europe/Bucharest'
+concurrency:
+  group: partener-eu-production-validation
+  cancel-in-progress: true
 permissions:
   contents: write
 jobs:
@@ -40,7 +43,8 @@ jobs:
           git add partener-eu/validation
           if ! git diff --cached --quiet; then
             git commit -m "PARTENER.EU validation ledger $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-            git push
+            git pull --rebase origin main
+            git push origin HEAD:main
           fi
       - name: Enforce fail-closed health
         if: steps.validate.outputs.exit_code != '0'
