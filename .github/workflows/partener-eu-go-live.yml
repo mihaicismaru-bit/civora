@@ -28,17 +28,7 @@ jobs:
             -H 'X-GitHub-Api-Version: 2026-03-10' \
             https://api.github.com/repos/${GITHUB_REPOSITORY}/pages || true)
           echo "before=$code" >> "$GITHUB_OUTPUT"
-          if [ "$code" = "404" ]; then
-            create=$(curl -sS -o /tmp/pages-create.json -w '%{http_code}' -X POST \
-              -H 'Accept: application/vnd.github+json' \
-              -H "Authorization: Bearer $GH_TOKEN" \
-              -H 'X-GitHub-Api-Version: 2026-03-10' \
-              https://api.github.com/repos/${GITHUB_REPOSITORY}/pages \
-              -d '{"build_type":"workflow"}' || true)
-            echo "create=$create" >> "$GITHUB_OUTPUT"
-          else
-            echo "create=not_needed" >> "$GITHUB_OUTPUT"
-          fi
+          echo "create=not_needed" >> "$GITHUB_OUTPUT"
           cname=$(curl -sS -o /tmp/pages-cname.json -w '%{http_code}' -X PUT \
             -H 'Accept: application/vnd.github+json' \
             -H "Authorization: Bearer $GH_TOKEN" \
@@ -72,14 +62,44 @@ jobs:
           echo "code=$code" >> "$GITHUB_OUTPUT"
           python - <<'PY'
           import json, os
-          try:
-              d=json.load(open('/tmp/pages-final.json'))
-          except Exception:
-              d={}
+          try: d=json.load(open('/tmp/pages-final.json'))
+          except Exception: d={}
           with open(os.environ['GITHUB_OUTPUT'],'a') as f:
               f.write('html_url='+str(d.get('html_url') or '')+'\n')
               f.write('cname='+str(d.get('cname') or '')+'\n')
               f.write('https_enforced='+str(d.get('https_enforced') or '')+'\n')
+          PY
+      - name: Verify live DNS and HTTP
+        id: livecheck
+        if: always()
+        run: |
+          python - <<'PY'
+          import json, urllib.request, ssl
+          def dns(name, rtype):
+              try:
+                  with urllib.request.urlopen(f'https://dns.google/resolve?name={name}&type={rtype}', timeout=15) as r:
+                      d=json.load(r)
+                  return [a.get('data') for a in d.get('Answer',[]) if a.get('data')]
+              except Exception as e:
+                  return [f'ERROR:{type(e).__name__}:{e}']
+          def http(url):
+              try:
+                  req=urllib.request.Request(url, headers={'User-Agent':'PARTENER-EU-livecheck/1.0'})
+                  with urllib.request.urlopen(req, timeout=20, context=ssl.create_default_context()) as r:
+                      body=r.read(120000).decode('utf-8','ignore')
+                      return {'ok':True,'status':r.status,'final_url':r.geturl(),'title_new':('Funding Explorer' in body or 'PARTENER.EU' in body),'wordpress':('wp-content' in body or 'WordPress' in body)}
+              except Exception as e:
+                  return {'ok':False,'error':f'{type(e).__name__}:{e}'}
+          out={
+            'apex_a':dns('partener.eu','A'),
+            'www_cname':dns('www.partener.eu','CNAME'),
+            'mx':dns('partener.eu','MX'),
+            'mail_a':dns('mail.partener.eu','A'),
+            'http_apex':http('http://partener.eu/'),
+            'https_apex':http('https://partener.eu/'),
+            'https_www':http('https://www.partener.eu/')
+          }
+          json.dump(out,open('/tmp/livecheck.json','w'),indent=2)
           PY
       - name: Record go-live result
         if: always()
@@ -99,6 +119,8 @@ jobs:
           mkdir -p partener-eu/deployment
           python - <<'PY'
           import json, os, datetime
+          try: live=json.load(open('/tmp/livecheck.json'))
+          except Exception: live={}
           ok=os.getenv('DEPLOY_OUTCOME')=='success' and bool(os.getenv('PAGE_URL'))
           out={
             'status':'LIVE_ENDPOINT_READY' if ok else 'BLOCKED',
@@ -113,6 +135,7 @@ jobs:
             'configure_outcome':os.getenv('CONFIGURE_OUTCOME'),
             'upload_outcome':os.getenv('UPLOAD_OUTCOME'),
             'deploy_outcome':os.getenv('DEPLOY_OUTCOME'),
+            'live_check':live,
             'observed_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),
             'trigger':'issue'
           }
