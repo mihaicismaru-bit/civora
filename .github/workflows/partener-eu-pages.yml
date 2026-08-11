@@ -21,30 +21,43 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v4
+      - id: configure
+        continue-on-error: true
+        uses: actions/configure-pages@v5
+      - id: upload
+        continue-on-error: true
+        uses: actions/upload-pages-artifact@v4
         with:
           path: partener-eu/web
       - name: Deploy
         id: deployment
+        continue-on-error: true
         uses: actions/deploy-pages@v4
-      - name: Record deployment
+      - name: Record deployment status
+        if: always()
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+          CONFIGURE_OUTCOME: ${{ steps.configure.outcome }}
+          UPLOAD_OUTCOME: ${{ steps.upload.outcome }}
+          DEPLOY_OUTCOME: ${{ steps.deployment.outcome }}
         run: |
           mkdir -p partener-eu/deployment
           python - <<'PY'
           import json, os, datetime
+          ok = os.environ.get('DEPLOY_OUTCOME') == 'success' and bool(os.environ.get('PAGE_URL'))
           with open('partener-eu/deployment/latest.json','w',encoding='utf-8') as f:
               json.dump({
-                  'status':'LIVE',
-                  'page_url':os.environ['PAGE_URL'],
-                  'deployed_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                  'status':'LIVE' if ok else 'BLOCKED',
+                  'page_url':os.environ.get('PAGE_URL') or None,
+                  'configure_outcome':os.environ.get('CONFIGURE_OUTCOME'),
+                  'upload_outcome':os.environ.get('UPLOAD_OUTCOME'),
+                  'deploy_outcome':os.environ.get('DEPLOY_OUTCOME'),
+                  'observed_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),
                   'git_sha':os.environ.get('GITHUB_SHA')
               },f,indent=2)
           PY
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add partener-eu/deployment/latest.json
-          git diff --cached --quiet || git commit -m 'Record PARTENER.EU Pages deployment'
+          git diff --cached --quiet || git commit -m 'Record PARTENER.EU Pages deployment status'
           git push
