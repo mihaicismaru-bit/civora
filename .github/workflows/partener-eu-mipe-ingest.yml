@@ -11,6 +11,8 @@ on:
       - 'partener-eu/ingest/mipe_ingest_ipv4.py'
       - 'partener-eu/ingest/mipe_pdds_ingest.py'
       - 'partener-eu/ingest/mipe_browser_ingest.py'
+      - 'partener-eu/ingest/mipe_known_seed_ingest.py'
+      - 'partener-eu/ingest/state/mipe_known_canonical_seeds.json'
       - '.github/workflows/partener-eu-mipe-ingest.yml'
 
 permissions:
@@ -23,7 +25,7 @@ concurrency:
 jobs:
   ingest:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v6
         with:
@@ -79,8 +81,24 @@ jobs:
           python -m pip install --disable-pip-version-check playwright
           python -m playwright install --with-deps chromium
 
-      - name: Force official MIPE extraction in real browser
+      - name: Probe mapped canonical MIPE guide pages individually
         if: steps.health.outputs.browser == 'true'
+        run: python partener-eu/ingest/mipe_known_seed_ingest.py
+
+      - name: Re-evaluate source health after mapped seeds
+        if: steps.health.outputs.browser == 'true'
+        id: mappedhealth
+        shell: bash
+        run: |
+          STATUS=$(python - <<'PY'
+          import json
+          print(json.load(open('partener-eu/ingest/state/mipe_state.json',encoding='utf-8')).get('status',''))
+          PY
+          )
+          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+
+      - name: Force official MIPE extraction in real browser
+        if: steps.health.outputs.browser == 'true' && steps.mappedhealth.outputs.status == 'SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED'
         run: python partener-eu/ingest/mipe_browser_ingest.py
 
       - name: Persist verified feed and health state without stale-checkout conflicts
