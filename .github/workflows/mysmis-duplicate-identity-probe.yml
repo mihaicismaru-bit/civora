@@ -7,7 +7,7 @@ on:
     paths: ['.github/workflows/mysmis-duplicate-identity-probe.yml']
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   inspect:
@@ -15,18 +15,21 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - run: |
           python -m pip install --disable-pip-version-check playwright
           python -m playwright install --with-deps chromium
-      - name: Render complete registry and print duplicate natural identities
+      - name: Render complete registry and persist duplicate identity report
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
           import asyncio, collections, json, sys
+          from pathlib import Path
           sys.path.insert(0, 'partener-eu/ingest')
           from mipe_ingest_v2 import MYSMIS_REGISTRY_URL, parse_registry_html
           from playwright.async_api import async_playwright
@@ -45,15 +48,12 @@ jobs:
                   for index, row in enumerate(parsed['rows']):
                       groups[row['id']].append({'ordinal': index + 1, **row})
                   duplicates = {key: rows for key, rows in groups.items() if len(rows) > 1}
-                  exact_duplicate_groups = 0
-                  conflicting_groups = 0
-                  for rows in duplicates.values():
+                  exact, conflicting = [], []
+                  for key, rows in duplicates.items():
                       normalized = [{k: v for k, v in row.items() if k not in {'ordinal', 'id'}} for row in rows]
-                      if all(value == normalized[0] for value in normalized[1:]):
-                          exact_duplicate_groups += 1
-                      else:
-                          conflicting_groups += 1
-                  print(json.dumps({
+                      target = exact if all(value == normalized[0] for value in normalized[1:]) else conflicting
+                      target.append({'baseId': key, 'rows': rows})
+                  report = {
                       'httpStatus': response.status if response else 0,
                       'rows': len(parsed['rows']),
                       'total': parsed['total'],
@@ -61,10 +61,18 @@ jobs:
                       'uniqueIds': len(groups),
                       'duplicateGroups': len(duplicates),
                       'duplicateRows': sum(len(rows) for rows in duplicates.values()),
-                      'exactDuplicateGroups': exact_duplicate_groups,
-                      'conflictingGroups': conflicting_groups,
-                      'groups': list(duplicates.values())[:100],
-                  }, ensure_ascii=False, indent=2))
+                      'exactDuplicateGroups': len(exact),
+                      'conflictingGroups': len(conflicting),
+                      'exactGroups': exact[:20],
+                      'conflictingGroupsDetail': conflicting[:50],
+                  }
+                  Path('partener-eu/ingest/state/mysmis_duplicate_probe.json').write_text(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+                  print(json.dumps({k: v for k, v in report.items() if k not in {'exactGroups', 'conflictingGroupsDetail'}}, ensure_ascii=False, indent=2))
                   await browser.close()
           asyncio.run(main())
           PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add partener-eu/ingest/state/mysmis_duplicate_probe.json
+          git commit -m 'Record MySMIS duplicate identity diagnostic'
+          git push origin HEAD:agent/mipe-resilient-ingestion-v2
