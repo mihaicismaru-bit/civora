@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "checkpoint": "P11-I01",
+  "status": "PASS",
+  "accepted_at": "2026-08-12",
+  "evidence": {
+    "contract": "partener-eu/p11/opportunity_contract.py",
+    "tests": "partener-eu/p11/test_opportunity_contract.py",
+    "test_command": "python -m unittest partener-eu/p11/test_opportunity_contract.py",
+    "tests_passed": 6,
+    "tests_failed": 0
+  },
+  "policy_assertions": {
+    "open_requires_authoritative_status_evidence": true,
+    "open_requires_authoritative_deadline_evidence": true,
+    "t2_cannot_authorize_material_publication": true,
+    "unresolved_semantics_cannot_promote_material_facts": true,
+    "changesets_cannot_auto_publish_material_facts": true,
+    "orphan_changesets_and_resolution_tasks_rejected": true
+  },
+  "corpus": {
+    "public_baseline": 5,
+    "canonicalized_in_this_increment": 0,
+    "target": 25
+  },
+  "publication_effect": "NONE"
+}

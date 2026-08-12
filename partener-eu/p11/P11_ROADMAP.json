@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0",
+  "phase": "P11_OPPORTUNITY_INTELLIGENCE_ENGINE",
+  "status": "IN_PROGRESS",
+  "baseline": {
+    "validated_at": "2026-08-12",
+    "public_opportunity_count": 5,
+    "target_opportunity_count": 25,
+    "note": "Repository inspection found five canonical calls in web/data.js; the earlier three-call baseline is superseded."
+  },
+  "increments": [
+    {
+      "id": "P11-I01",
+      "title": "Executable canonical contract and semantic publication gate",
+      "status": "IMPLEMENTED_ON_DEDICATED_BRANCH",
+      "scope": ["Opportunity", "Evidence", "ChangeSet", "ResolutionTask"],
+      "non_overlap": ["No source ingestion", "No resolution execution", "No public corpus mutation"]
+    },
+    {
+      "id": "P11-I02",
+      "title": "Normalize the five existing public opportunities into the canonical bundle",
+      "status": "NEXT"
+    },
+    {
+      "id": "P11-I03",
+      "title": "Candidate staging ledger and deterministic identity/deduplication",
+      "status": "PLANNED"
+    },
+    {
+      "id": "P11-I04",
+      "title": "Expand validated corpus to 25 real opportunities in evidence-backed batches",
+      "status": "PLANNED"
+    },
+    {
+      "id": "P11-I05",
+      "title": "P11 acceptance, recovery, public projection and closure",
+      "status": "PLANNED"
+    }
+  ],
+  "closure_criteria": {
+    "unique_real_opportunities": 25,
+    "all_material_facts_authoritatively_supported": true,
+    "automatic_material_fact_updates": 0,
+    "orphan_entities": 0,
+    "quality_gate": "PASS",
+    "public_projection_fail_closed": true
+  }
+}
