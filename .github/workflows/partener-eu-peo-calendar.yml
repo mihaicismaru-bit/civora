@@ -29,25 +29,26 @@ jobs:
       - name: Install spreadsheet parser
         run: python -m pip install --disable-pip-version-check openpyxl
 
-      - name: Ingest and version official PEO calendar
+      - name: Ingest and version official PEO calendar candidate
         run: python partener-eu/ingest/peo_calendar_ingest.py
 
-      - name: Persist calendar feed conflict-safe
+      - name: Persist candidate state conflict-safe without auto-promoting material facts
         shell: bash
         run: |
           set -e
-          cp partener-eu/web/peo-calendar.js /tmp/peo-calendar.js
+          # During P10, scheduled hash changes are persisted only as candidate
+          # state. The existing public feed stays unchanged until the resolution
+          # task is closed with authoritative evidence and provenance.
           cp partener-eu/ingest/state/peo_calendar_state.json /tmp/peo_calendar_state.json
           git fetch origin main
           git reset --hard origin/main
-          cp /tmp/peo-calendar.js partener-eu/web/peo-calendar.js
           cp /tmp/peo_calendar_state.json partener-eu/ingest/state/peo_calendar_state.json
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add partener-eu/web/peo-calendar.js partener-eu/ingest/state/peo_calendar_state.json
+          git add partener-eu/ingest/state/peo_calendar_state.json
           if git diff --cached --quiet; then
-            echo 'No PEO calendar changes.'
+            echo 'No PEO calendar candidate-state changes.'
             exit 0
           fi
-          git commit -m 'Ingest PEO calendar version'
+          git commit -m 'Stage PEO calendar candidate state fail-closed'
           git push origin HEAD:main
