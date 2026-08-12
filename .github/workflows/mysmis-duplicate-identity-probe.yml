@@ -1,0 +1,70 @@
+name: MySMIS Duplicate Identity Probe
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/mipe-resilient-ingestion-v2]
+    paths: ['.github/workflows/mysmis-duplicate-identity-probe.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: |
+          python -m pip install --disable-pip-version-check playwright
+          python -m playwright install --with-deps chromium
+      - name: Render complete registry and print duplicate natural identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import asyncio, collections, json, sys
+          sys.path.insert(0, 'partener-eu/ingest')
+          from mipe_ingest_v2 import MYSMIS_REGISTRY_URL, parse_registry_html
+          from playwright.async_api import async_playwright
+
+          async def main():
+              async with async_playwright() as p:
+                  browser = await p.chromium.launch(headless=True)
+                  context = await browser.new_context(locale='ro-RO', timezone_id='Europe/Bucharest', ignore_https_errors=False)
+                  page = await context.new_page()
+                  response = await page.goto(MYSMIS_REGISTRY_URL, wait_until='domcontentloaded', timeout=45000)
+                  await page.wait_for_selector('#APELURI_row_select', timeout=20000)
+                  await page.select_option('#APELURI_row_select', '100000')
+                  await page.wait_for_function("document.querySelectorAll('#APELURI_data_panel table tbody tr').length >= 800", timeout=30000)
+                  parsed = parse_registry_html((await page.content()).encode('utf-8'))
+                  groups = collections.defaultdict(list)
+                  for index, row in enumerate(parsed['rows']):
+                      groups[row['id']].append({'ordinal': index + 1, **row})
+                  duplicates = {key: rows for key, rows in groups.items() if len(rows) > 1}
+                  exact_duplicate_groups = 0
+                  conflicting_groups = 0
+                  for rows in duplicates.values():
+                      normalized = [{k: v for k, v in row.items() if k not in {'ordinal', 'id'}} for row in rows]
+                      if all(value == normalized[0] for value in normalized[1:]):
+                          exact_duplicate_groups += 1
+                      else:
+                          conflicting_groups += 1
+                  print(json.dumps({
+                      'httpStatus': response.status if response else 0,
+                      'rows': len(parsed['rows']),
+                      'total': parsed['total'],
+                      'complete': parsed['complete'],
+                      'uniqueIds': len(groups),
+                      'duplicateGroups': len(duplicates),
+                      'duplicateRows': sum(len(rows) for rows in duplicates.values()),
+                      'exactDuplicateGroups': exact_duplicate_groups,
+                      'conflictingGroups': conflicting_groups,
+                      'groups': list(duplicates.values())[:100],
+                  }, ensure_ascii=False, indent=2))
+                  await browser.close()
+          asyncio.run(main())
+          PY
