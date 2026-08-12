@@ -15,9 +15,9 @@
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-08-12T09:55:45Z",
-    "source_pass": 4,
-    "source_degraded": 2,
+    "utc": "2026-08-12T09:56:26Z",
+    "source_pass": 6,
+    "source_degraded": 0,
     "source_fail": 1,
     "source_quarantined": 1,
     "critical_fail": false,
@@ -26,14 +26,14 @@
     "quarantined_source": "SRC-LEGISLATIE — Portal Legislativ; dependent material facts blocked fail-closed"
   },
   "deployment_evidence": {
-    "utc": "2026-08-12T09:55:58Z",
+    "utc": "2026-08-12T09:56:49Z",
     "status": "DEGRADED",
     "public_content_verified": true,
     "https_verified": false,
     "http_content_verified": true,
     "content_origin": "custom_http",
     "http_status": 200,
-    "final_url": "http://partener.eu/?p10_probe=20260812T095558Z",
+    "final_url": "http://partener.eu/?p10_probe=20260812T095649Z",
     "title": "PARTENER.EU — Finanțări europene",
     "required_markers_present": true,
     "critical_assets_ok": true,
@@ -53,7 +53,7 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260812T095558Z",
+        "final_url": "http://partener.eu/?p10_probe=20260812T095649Z",
         "content_verified": true,
         "marker_ok": true,
         "critical_assets_ok": true,
@@ -63,7 +63,7 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260812T095558Z",
+        "final_url": "http://partener.eu/?p10_probe=20260812T095649Z",
         "content_verified": true,
         "marker_ok": true,
         "critical_assets_ok": true,
@@ -111,16 +111,16 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-08-12T09:55:57Z",
-    "validation_run_started": "2026-08-12T09:55:45Z",
+    "utc": "2026-08-12T09:56:49Z",
+    "validation_run_started": "2026-08-12T09:56:26Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "120ef23ae094224e40afdd9274d0a5cde2b412c4b50fa90fa619a04ac5132fa5",
-      "history_sha256": "120ef23ae094224e40afdd9274d0a5cde2b412c4b50fa90fa619a04ac5132fa5",
-      "history_path": "validation/history/20260812T095545Z.json",
+      "latest_sha256": "cbdc284c3c72a5e70d2884282d18be39c7aa26b6a2b485f74e8cc5b7010ba180",
+      "history_sha256": "cbdc284c3c72a5e70d2884282d18be39c7aa26b6a2b485f74e8cc5b7010ba180",
+      "history_path": "validation/history/20260812T095626Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "e05a265cf1c2140c90c72477bdd679af6982827a0a39df6c90edbfafc9caed1c",
-      "checkpoint_sha256": "e05a265cf1c2140c90c72477bdd679af6982827a0a39df6c90edbfafc9caed1c",
+      "source_state_sha256": "fc378c8d82a447609d6b228798d07993f45b79a864c7fe4a3f010b5c854b504d",
+      "checkpoint_sha256": "fc378c8d82a447609d6b228798d07993f45b79a864c7fe4a3f010b5c854b504d",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
@@ -128,7 +128,7 @@
     },
     "source_registry": {
       "observed_at": "2026-08-12T09:50:27.343775Z",
-      "age_seconds": 330,
+      "age_seconds": 381,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
@@ -164,13 +164,13 @@
       "fail_closed": true
     },
     "afir": {
-      "observed_at": "2026-08-12T08:51:30.702569+00:00",
+      "observed_at": "2026-08-12T09:56:07.882225+00:00",
       "status": "PASS",
-      "item_count": 52,
-      "error_count": 28,
-      "hash_change_candidates": 21,
+      "item_count": 31,
+      "error_count": 35,
+      "hash_change_candidates": 0,
       "material_signal_candidates": 0,
-      "resolution_task_required": true,
+      "resolution_task_required": false,
       "resolution_task_present_fail_closed": true,
       "material_facts_auto_promoted": false
     },
@@ -252,7 +252,7 @@
       "integrity_pass": true,
       "registry_health": "DEGRADED",
       "registry_hash_changes": 0,
-      "afir_hash_changes": 21,
+      "afir_hash_changes": 0,
       "peo_calendar_changes": 6,
       "mipe_health": "DEGRADED_FAIL_CLOSED",
       "autonomous_orchestration_configured": true,
