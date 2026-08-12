@@ -10,7 +10,7 @@
     applicant:['Furnizori FPC publici și privați autorizați','Furnizori acreditați de servicii specializate pentru ocupare','Confederații sindicale și patronale','Federații sindicale/patronale','Asociații profesionale sectoriale și structuri asociative sectoriale eligibile','Institute/centre de formare și cercetare'],
     applicantKeys:['training_provider','employment_service_provider','trade_union_confederation','employer_confederation','sectoral_association','training_research_institute'],
     objectiveKeys:['critical_technologies','adult_training','workplace_training'],
-    open:'29 mai 2026, 16:00', close:'28 august 2026, 16:00', consultation:'2–27 aprilie 2026',
+    open:'29 mai 2026, 16:00', close:'30 septembrie 2026, 16:00', consultation:'2–27 aprilie 2026',
     budget:'92 mil. EUR', grant:'100% din cheltuielile eligibile', cofinancing:'0%',
     summary:'Apel competitiv PEO pentru dezvoltarea competențelor adulților în tehnologiile critice STEP. Ghidul final și lansarea MySMIS sunt confirmate prin OIR PECU Nord-Vest; consultarea a produs modificări importante privind cofinanțarea, aria geografică, grupul țintă și grila de evaluare.',
     eligibility:['Grup țintă: persoane angajate și/sau șomeri cu vârsta peste 29 de ani','Proiectele pot viza toate regiunile sau minimum două regiuni, în funcție de intervenții și nevoi','Legătura directă dintre competențele dezvoltate și tehnologiile critice STEP trebuie demonstrată','În cazul solicitantului unic, acesta trebuie să fie furnizor FPC autorizat; parteneriatele trebuie să includă cel puțin un furnizor de formare profesională'],
@@ -30,7 +30,8 @@
       {date:'2 apr 2026',kind:'CONSULTATION_OPENED',before:'—',after:'Ghid lansat în consultare'},
       {date:'27 apr 2026',kind:'CONSULTATION_CLOSED',before:'Consultare deschisă',after:'Perioada de observații închisă'},
       {date:'29 mai 2026',kind:'CALL_OPENED',before:'Consultare',after:'Ghid final publicat; MySMIS deschis la 16:00'},
-      {date:'29 mai 2026',kind:'GUIDE_UPDATED_AFTER_CONSULTATION',before:'Draft',after:'Cofinanțare 0%; reguli geografice și de grup țintă clarificate; grilă revizuită'}
+      {date:'29 mai 2026',kind:'GUIDE_UPDATED_AFTER_CONSULTATION',before:'Draft',after:'Cofinanțare 0%; reguli geografice și de grup țintă clarificate; grilă revizuită'},
+      {date:'27 iul 2026',kind:'DEADLINE_EXTENDED',before:'28 aug 2026, 16:00',after:'30 sept 2026, 16:00'}
     ]
   };
   if(existing) Object.assign(existing,call); else D.calls.unshift(call);
