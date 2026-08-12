@@ -1,0 +1,77 @@
+name: MIPE Browser Surface Diagnostic
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - agent/mipe-resilient-ingestion-v2
+    paths:
+      - '.github/workflows/mipe-browser-surface-diagnostic.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Install Playwright Chromium
+        run: |
+          python -m pip install --disable-pip-version-check playwright
+          python -m playwright install --with-deps chromium
+      - name: Navigate official MIPE properties with normal browser security
+        shell: bash
+        run: |
+          cat > /tmp/probe.py <<'PY'
+          import asyncio, hashlib, json
+          from playwright.async_api import async_playwright
+
+          URLS = [
+            'https://www.fonduri-ue.ro/',
+            'https://fonduri-ue.ro/',
+            'https://www.fonduri-ue.ro/anunturi-am-oi',
+            'https://www.fonduri-ue.ro/anunturi-am-oi/details/6/1765/anun%C5%A3-privind-selec%C5%A3ia-partenerilor-relevan%C5%A3i-pentru-comitetul-de-monitorizare-a-programului-dezvoltare-durabil%C4%83-2021-2027',
+            'https://fonduri-ue.gov.ro/',
+            'http://fonduri-ue.gov.ro/',
+            'https://mfe.gov.ro/pdds/despre-program-programare/',
+          ]
+
+          async def main():
+            async with async_playwright() as p:
+              browser = await p.chromium.launch(headless=True)
+              context = await browser.new_context(
+                locale='ro-RO',
+                timezone_id='Europe/Bucharest',
+                viewport={'width': 1365, 'height': 900},
+                ignore_https_errors=False,
+              )
+              page = await context.new_page()
+              out=[]
+              for url in URLS:
+                row={'url':url}
+                try:
+                  response=await page.goto(url, wait_until='domcontentloaded', timeout=30000)
+                  await page.wait_for_timeout(12000)
+                  body=await page.content()
+                  text=(await page.locator('body').inner_text(timeout=5000))[:4000]
+                  canonical=await page.locator('link[rel="canonical"]').first.get_attribute('href') if await page.locator('link[rel="canonical"]').count() else None
+                  row.update({
+                    'ok': bool(response and 200 <= response.status < 400),
+                    'status': response.status if response else None,
+                    'finalUrl': page.url,
+                    'title': await page.title(),
+                    'canonical': canonical,
+                    'bytes': len(body.encode('utf-8')),
+                    'sha256': hashlib.sha256(body.encode('utf-8')).hexdigest(),
+                    'challenge': any(x in (body+' '+text).lower() for x in ('cf-chl-', 'just a moment', 'performing security verification', 'verify you are human')),
+                    'textSample': ' '.join(text.split())[:700],
+                  })
+                except Exception as exc:
+                  row.update({'ok':False,'error':f'{type(exc).__name__}: {exc}','finalUrl':page.url})
+                out.append(row)
+              print(json.dumps(out, ensure_ascii=False, indent=2))
+              await browser.close()
+          asyncio.run(main())
+          PY
+          python /tmp/probe.py
