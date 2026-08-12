@@ -2,6 +2,12 @@ name: PARTENER.EU Verified Source Registry
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'partener-eu/ingest/source_registry.json'
+      - 'partener-eu/ingest/source_registry_probe.py'
+      - '.github/workflows/partener-eu-source-registry.yml'
   schedule:
     - cron: '23 */2 * * *'
 
