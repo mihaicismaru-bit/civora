@@ -26,6 +26,8 @@ jobs:
           python-version: '3.12'
       - name: Recovery regression
         run: python partener-eu/ops/test_recovery.py
+      - name: Frontpage render-loop regression
+        run: python partener-eu/ops/test_frontend_regression.py
       - name: Live source + frontend validation
         id: validate
         shell: bash
