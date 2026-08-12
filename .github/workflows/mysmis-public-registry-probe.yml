@@ -1,0 +1,86 @@
+name: MySMIS Public Registry Probe
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - agent/mipe-resilient-ingestion-v2
+    paths:
+      - '.github/workflows/mysmis-public-registry-probe.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Inspect official MySMIS public financing registry
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL='https://reporting.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027'
+          curl -L --compressed -sS --connect-timeout 8 --max-time 35 \
+            -A 'PARTENER.EU-CIVORA-MySMIS-Probe/1.0 (+https://partener.eu)' \
+            -D /tmp/mysmis.headers -o /tmp/mysmis.html "$URL"
+          echo '=== RESPONSE HEADERS ==='
+          cat /tmp/mysmis.headers
+          echo '=== FILE ==='
+          wc -c /tmp/mysmis.html
+          sha256sum /tmp/mysmis.html
+          python - <<'PY'
+          import html
+          import json
+          import re
+          from pathlib import Path
+          from urllib.parse import urljoin
+
+          base='https://reporting.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027'
+          raw=Path('/tmp/mysmis.html').read_text(encoding='utf-8',errors='replace')
+          print('=== PAGE SIGNALS ===')
+          signals={
+            'bytes':len(raw.encode('utf-8')),
+            'contains_907':'1 - 50 of 907' in raw,
+            'contains_apeluri_validate':'Apeluri validate' in raw,
+            'contains_program_dezvoltare_durabila':'Program Dezvoltare Durabilă' in raw or 'Program Dezvoltare Durabila' in raw,
+          }
+          print(json.dumps(signals,ensure_ascii=False,indent=2))
+
+          hrefs=[]
+          for value in re.findall(r'''(?:href|src)\s*=\s*["']([^"']+)["']''',raw,re.I):
+            full=urljoin(base,html.unescape(value))
+            if any(k in full.lower() for k in ('csv','xlsx','xls','export','download','interactive','report','ajax','wwv_flow','apex')):
+              hrefs.append(full)
+          print('=== EXPORT/AJAX URL CANDIDATES ===')
+          print(json.dumps(sorted(set(hrefs))[:250],ensure_ascii=False,indent=2))
+
+          patterns={
+            'app_id':[r'APP_ID[^0-9]{0,20}(\d+)',r'pFlowId\s*[:=]\s*["\']?(\d+)'],
+            'page_id':[r'APP_PAGE_ID[^0-9]{0,20}(\d+)',r'pFlowStepId\s*[:=]\s*["\']?(\d+)'],
+            'session':[r'APP_SESSION[^0-9]{0,20}(\d+)',r'pInstance\s*[:=]\s*["\']?(\d+)'],
+            'region_static_id':[r'data-region-id=["\']([^"\']+)',r'ajaxIdentifier["\']?\s*[:=]\s*["\']([^"\']+)'],
+          }
+          extracted={}
+          for key,pats in patterns.items():
+            vals=[]
+            for pat in pats:
+              vals.extend(re.findall(pat,raw,re.I))
+            extracted[key]=sorted(set(vals))[:100]
+          print('=== APEX IDENTIFIERS ===')
+          print(json.dumps(extracted,ensure_ascii=False,indent=2))
+
+          print('=== CONTEXT AROUND EXPORT TEXT ===')
+          for needle in ('Export date','1 - 50 of','Apeluri validate','Program Dezvoltare Durabil'):
+            idx=raw.find(needle)
+            print(f'--- {needle!r} at {idx} ---')
+            if idx>=0:
+              print(re.sub(r'\s+',' ',raw[max(0,idx-1200):idx+2500])[:5000])
+
+          print('=== INLINE APEX CONFIG FRAGMENTS ===')
+          fragments=[]
+          for m in re.finditer(r'(?:apex\.|wwv_flow|interactiveReport|widget\.report|ajaxIdentifier)',raw,re.I):
+            fragments.append(re.sub(r'\s+',' ',raw[max(0,m.start()-400):m.start()+1200]))
+            if len(fragments)>=30: break
+          print(json.dumps(fragments,ensure_ascii=False,indent=2))
+          PY
