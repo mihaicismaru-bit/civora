@@ -34,32 +34,45 @@ jobs:
         run: |
           python - <<'PY'
           import json, sys
+          from pathlib import Path
           p='partener-eu/ingest/state/source_registry_health.json'
           d=json.load(open(p, encoding='utf-8'))
           bad=[]
+          missing=[]
           for x in d.get('sources', []):
               if x.get('semantic_hash_changed') and x.get('material_fact_use') and x.get('publish_material_fact_update') is not False:
                   bad.append(x.get('id'))
-          if bad:
-              print('FAIL: material hash changes are not fail-closed:', bad)
+              if x.get('resolution_task_required'):
+                  tp=Path('partener-eu/validation/resolution-tasks') / f"{x.get('id')}.json"
+                  if not tp.exists():
+                      missing.append(x.get('id'))
+          if bad or missing:
+              print('FAIL fail-closed:', {'unsafe': bad, 'missing_tasks': missing})
               sys.exit(2)
           print(json.dumps(d.get('summary', {}), ensure_ascii=False))
           PY
 
-      - name: Persist source health ledger conflict-safe
+      - name: Persist source health ledger and resolution tasks conflict-safe
         shell: bash
         run: |
           set -e
           cp partener-eu/ingest/state/source_registry_health.json /tmp/source_registry_health.json
+          rm -rf /tmp/source-resolution-tasks
+          mkdir -p /tmp/source-resolution-tasks
+          if [ -d partener-eu/validation/resolution-tasks ]; then
+            cp -a partener-eu/validation/resolution-tasks/. /tmp/source-resolution-tasks/
+          fi
           git fetch origin main
           git reset --hard origin/main
           cp /tmp/source_registry_health.json partener-eu/ingest/state/source_registry_health.json
+          mkdir -p partener-eu/validation/resolution-tasks
+          cp -a /tmp/source-resolution-tasks/. partener-eu/validation/resolution-tasks/ || true
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add partener-eu/ingest/state/source_registry_health.json
+          git add partener-eu/ingest/state/source_registry_health.json partener-eu/validation/resolution-tasks
           if git diff --cached --quiet; then
-            echo 'No source-registry health changes.'
+            echo 'No source-registry health or resolution-task changes.'
             exit 0
           fi
-          git commit -m 'Persist verified source registry health'
+          git commit -m 'Persist verified source registry health and resolution tasks'
           git push origin HEAD:main
