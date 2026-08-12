@@ -138,16 +138,17 @@ def maintain_registry_tasks() -> tuple[list[str], list[str]]:
 def maintain_afir_task() -> list[str]:
     corpus = load_json(INGEST_STATE / "afir_corpus.json", {}) or {}
     changed = [x for x in (corpus.get("items") or []) if x.get("changedFromPrevious")]
-    if not changed:
-        return []
+    access_dependencies = corpus.get("accessDependencies") or []
     source_id = "SRC-AFIR-CORPUS"
     existing = load_json(TASKS / f"{source_id}.json", {}) or {}
+    if not changed and not access_dependencies and not existing:
+        return []
     write_task(source_id, {
         "source_name": "AFIR — corpus oficial de pagini și documente",
         "source_url": "https://www.afir.ro/",
         "source_tier": "T1",
         "criticality": "HIGH",
-        "candidate_fingerprint": candidate_fingerprint(changed),
+        "candidate_fingerprint": candidate_fingerprint(changed) if changed else existing.get("candidate_fingerprint"),
         "previous_candidate_fingerprint": existing.get("candidate_fingerprint"),
         "candidate_count": len(changed),
         "material_signal_count": sum(bool(x.get("materialChangeCandidate")) for x in changed),
@@ -161,6 +162,9 @@ def maintain_afir_task() -> list[str]:
             }
             for x in changed[:100]
         ],
+        "auth_dependency_count": len(access_dependencies),
+        "auth_dependencies": access_dependencies[:100],
+        "technical_classification": "AUTH_REDIRECTS_EXCLUDED_FROM_CHANGE_CANDIDATES" if access_dependencies else None,
         "first_observed_at": existing.get("first_observed_at") or corpus.get("generatedAt"),
         "last_observed_at": corpus.get("generatedAt") or nowz(),
         "corpus_policy": corpus.get("policy") or {},
