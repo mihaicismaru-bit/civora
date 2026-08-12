@@ -22,4 +22,11 @@ assert not afir_ingest.is_auth_dependency(
     "Informații AFIR",
     "Comunicate și informații publice",
 )
+
+dependency = afir_ingest.auth_link_dependency(
+    "/umbraco/surface/authentication/LogIn?redirectUrl=%2Ffinantare%2F",
+    "https://www.afir.ro/info-la-zi/",
+)
+assert dependency and dependency["status"] == "AUTH_OR_ACCESS_DEPENDENT"
+assert dependency["materialFactAction"] == "NONE"
 print("PASS AFIR auth-boundary regression")
