@@ -110,21 +110,36 @@ jobs:
       - name: Persist verified feed, discovery map and health state without stale-checkout conflicts
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
           cp partener-eu/web/mipe-news.js /tmp/mipe-news.js
           cp partener-eu/ingest/state/mipe_state.json /tmp/mipe_state.json
           cp partener-eu/ingest/state/mipe_known_canonical_seeds.json /tmp/mipe_known_canonical_seeds.json
-          git fetch origin main
-          git reset --hard origin/main
-          cp /tmp/mipe-news.js partener-eu/web/mipe-news.js
-          cp /tmp/mipe_state.json partener-eu/ingest/state/mipe_state.json
-          cp /tmp/mipe_known_canonical_seeds.json partener-eu/ingest/state/mipe_known_canonical_seeds.json
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add partener-eu/web/mipe-news.js partener-eu/ingest/state/mipe_state.json partener-eu/ingest/state/mipe_known_canonical_seeds.json
-          if git diff --cached --quiet; then
-            echo 'No MIPE feed or discovery-map changes.'
-            exit 0
-          fi
-          git commit -m 'Ingest verified MIPE updates and canonical discoveries'
-          git push origin HEAD:main
+
+          for attempt in 1 2 3 4 5; do
+            echo "Persistence attempt ${attempt}/5"
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/mipe-news.js partener-eu/web/mipe-news.js
+            cp /tmp/mipe_state.json partener-eu/ingest/state/mipe_state.json
+            cp /tmp/mipe_known_canonical_seeds.json partener-eu/ingest/state/mipe_known_canonical_seeds.json
+            git add partener-eu/web/mipe-news.js partener-eu/ingest/state/mipe_state.json partener-eu/ingest/state/mipe_known_canonical_seeds.json
+
+            if git diff --cached --quiet; then
+              echo 'No MIPE feed or discovery-map changes.'
+              exit 0
+            fi
+
+            git commit -m 'Ingest verified MIPE updates and canonical discoveries'
+            if git push origin HEAD:main; then
+              echo 'MIPE outputs persisted to main.'
+              exit 0
+            fi
+
+            echo 'main advanced during push; rebuilding the output-only commit on the new tip.'
+            sleep $((attempt * 2))
+          done
+
+          echo 'Unable to persist MIPE outputs after five conflict-safe attempts.' >&2
+          exit 1
