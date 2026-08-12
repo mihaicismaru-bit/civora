@@ -59,6 +59,11 @@ jobs:
         continue-on-error: true
         run: python partener-eu/ops/test_p10_policy_regression.py
 
+      - name: AFIR authentication-boundary regression
+        id: afir_policy
+        continue-on-error: true
+        run: python partener-eu/ops/test_afir_ingest_policy.py
+
       - name: Live source and frontend validation
         id: validate
         shell: bash
@@ -129,6 +134,7 @@ jobs:
           RECOVERY_OUTCOME: ${{ steps.recovery.outcome }}
           FRONTEND_OUTCOME: ${{ steps.frontend.outcome }}
           POLICY_OUTCOME: ${{ steps.policy.outcome }}
+          AFIR_POLICY_OUTCOME: ${{ steps.afir_policy.outcome }}
           VALIDATE_CODE: ${{ steps.validate.outputs.exit_code }}
           RESOLUTION_CODE: ${{ steps.resolution.outputs.exit_code }}
           INTEGRITY_CODE: ${{ steps.integrity.outputs.exit_code }}
@@ -136,7 +142,7 @@ jobs:
           ACCEPTANCE_CODE: ${{ steps.acceptance.outputs.exit_code }}
         run: |
           FAIL=0
-          for OUTCOME in "$RECOVERY_OUTCOME" "$FRONTEND_OUTCOME" "$POLICY_OUTCOME"; do
+          for OUTCOME in "$RECOVERY_OUTCOME" "$FRONTEND_OUTCOME" "$POLICY_OUTCOME" "$AFIR_POLICY_OUTCOME"; do
             if [ "$OUTCOME" != "success" ]; then FAIL=2; fi
           done
           for CODE in "$VALIDATE_CODE" "$RESOLUTION_CODE" "$INTEGRITY_CODE" "$DEPLOYMENT_CODE" "$ACCEPTANCE_CODE"; do
