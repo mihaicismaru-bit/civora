@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0",
+  "updated_at": "2026-08-12T12:32:54Z",
+  "policy": "Resolve only material fact classes demonstrated by current T1/T1B semantic evidence; omit all other material facts.",
+  "cases": [
+    {
+      "priority": 1,
+      "opportunity_id": "PEO-STEP-LLL-ADULTI-2026",
+      "resolution_file": "resolutions/step_lll_resolution.json",
+      "state": "RESOLVED_STATUS_AND_DEADLINE",
+      "resolved_fact_classes": [
+        "status",
+        "deadline"
+      ],
+      "unresolved_fact_classes": [
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ],
+      "next_review_trigger": "Official corrigendum, suspension, cancellation, closure, or current-registry semantic change"
+    },
+    {
+      "priority": 2,
+      "opportunity_id": "afir-energy-2026",
+      "resolution_file": "opportunity_bundle.json",
+      "state": "PARTIALLY_RESOLVED_ELIGIBILITY_OPEN",
+      "resolved_fact_classes": [
+        "budget",
+        "grant",
+        "beneficiaries",
+        "scoring"
+      ],
+      "unresolved_fact_classes": [
+        "eligibility"
+      ],
+      "next_review_trigger": "Complete lossless normalization of cumulative Guide V7 eligibility rules or an official clarification/corrigendum"
+    },
+    {
+      "priority": 3,
+      "opportunity_id": "pr-centru-digital-2",
+      "resolution_file": "resolutions/pr_centru_digital2_resolution.json",
+      "state": "IN_REVIEW_TEMPORAL_CONTRADICTION",
+      "unresolved_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ],
+      "contradiction": "The official page still says 'In consultare', but the same page closes consultation on 2026-05-20 and exposes no final submission window as of 2026-08-12.",
+      "next_review_trigger": "Final guide, explicit MySMIS submission window, corrected current status, suspension or cancellation notice"
+    }
+  ]
+}

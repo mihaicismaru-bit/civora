@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "resolution_id": "RES-PR-CENTRU-DIGITAL2-20260812",
+  "resolved_at": "2026-08-12T12:32:54Z",
+  "policy": {
+    "automatic_material_fact_update_allowed": false,
+    "resolution_rule": "An expired consultation window and a still-present consultation label do not establish a current consultation or an OPEN call. A final guide and explicit submission window are required."
+  },
+  "contradiction": {
+    "official_page_label": "In consultare",
+    "official_consultation_window": {
+      "opens": "2026-04-28",
+      "closes": "2026-05-20"
+    },
+    "observed_as_of": "2026-08-12T12:32:54Z",
+    "semantic_result": "TEMPORALLY_STALE_STATUS_LABEL_NO_FINAL_LAUNCH_EVIDENCE"
+  },
+  "evidence": [
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-PR-CENTRU-DIGITAL2-CURRENT-PAGE-20260812",
+      "source_tier": "T1",
+      "source_owner": "ADR Centru — AM Programul Regiunea Centru",
+      "source_url": "https://www.regiocentru.ro/actiuni/2-2-intreprinderi-digitale-pentru-o-economie-avansata-apel-2/",
+      "observed_at": "2026-08-12T12:32:54Z",
+      "semantic_sha256": "295bb718f5b938547dc8ff50a912b1bee9f37ef9772395c730d38e1c23df8f7b",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "semantic_assertion": "The current official action page still labels the case 'In consultare' while also stating that consultation ran only from 2026-04-28 through 2026-05-20; no final submission window is present.",
+      "temporal_role": "CURRENT_PAGE_WITH_EXPIRED_HISTORICAL_WINDOW",
+      "retrieval_state": "DIRECT_OFFICIAL_PAGE_VERIFIED"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-PR-CENTRU-DIGITAL2-CONSULTATION-PACKAGE-20260428",
+      "source_tier": "T1",
+      "source_owner": "ADR Centru — AM Programul Regiunea Centru",
+      "source_url": "https://www.regiocentru.ro/wp-content/uploads/2026/04/Ghidul-solicitantului-%E2%80%93-consultare-publica-1.pdf",
+      "linked_attachments": [
+        "https://www.regiocentru.ro/wp-content/uploads/2026/04/Fisa-de-prezentare-ghid-2.pdf",
+        "https://www.regiocentru.ro/wp-content/uploads/2026/04/Centralizator-intrebari-si-raspunsuri-1-1.pdf"
+      ],
+      "observed_at": "2026-08-12T12:32:54Z",
+      "semantic_sha256": "a7e90268f3ff0476e573678580523a5ca44b393bd446fc2195e41208165ff055",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "semantic_assertion": "The official 74-page guide, four-page presentation sheet and twelve-page Q&A are explicitly consultation-stage documents. They expose draft values and conditions but cannot authorize current final material facts.",
+      "temporal_role": "HISTORICAL_CONSULTATION_PACKAGE",
+      "retrieval_state": "DIRECT_OFFICIAL_ATTACHMENTS_VERIFIED"
+    }
+  ],
+  "opportunities": [
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "pr-centru-digital-2",
+      "title": "Întreprinderi digitale pentru o economie avansată — Apel 2",
+      "programme": "Programul Regiunea Centru",
+      "code": "Acțiunea 2.2 — Apel 2",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-PR-CENTRU-DIGITAL2-CURRENT-PAGE-20260812",
+        "EV-PR-CENTRU-DIGITAL2-CONSULTATION-PACKAGE-20260428"
+      ],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {
+        "status": {
+          "value": "UNKNOWN",
+          "reason": "Official page label is temporally stale and no final launch evidence was found."
+        },
+        "deadline": "UNKNOWN_NO_FINAL_SUBMISSION_WINDOW",
+        "budget": {
+          "amount_eur": 14113032,
+          "document_phase": "CONSULTATION_ONLY"
+        },
+        "grant": {
+          "minimum_eur": 15000,
+          "maximum_eur": 200000,
+          "document_phase": "CONSULTATION_ONLY"
+        },
+        "eligibility": "CONSULTATION_DRAFT_ONLY — commercial companies qualifying as micro, small or medium enterprises, subject to cumulative final-guide conditions",
+        "scoring": "UNKNOWN_UNTIL_FINAL_GUIDE_AND_FINAL_GRID",
+        "beneficiaries": "CONSULTATION_DRAFT_ONLY — microenterprises and small/medium enterprises"
+      }
+    }
+  ],
+  "changesets": [],
+  "resolution_tasks": [
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-PR-CENTRU-DIGITAL-2-MATERIAL",
+      "opportunity_id": "pr-centru-digital-2",
+      "status": "IN_REVIEW",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ],
+      "resolution_evidence_refs": [
+        "EV-PR-CENTRU-DIGITAL2-CURRENT-PAGE-20260812",
+        "EV-PR-CENTRU-DIGITAL2-CONSULTATION-PACKAGE-20260428"
+      ],
+      "resolution_note": "Keep every material fact blocked until ADR Centru publishes a final guide and an explicit submission window, or corrects the current status label."
+    }
+  ]
+}
