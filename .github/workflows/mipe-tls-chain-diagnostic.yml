@@ -1,0 +1,49 @@
+name: MIPE TLS Chain Diagnostic
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - agent/mipe-resilient-ingestion-v2
+    paths:
+      - '.github/workflows/mipe-tls-chain-diagnostic.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Inspect certificate identity, chain and official structured endpoints
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p /tmp/mipe-tls
+          echo | openssl s_client -connect www.fonduri-ue.gov.ro:443 -servername www.fonduri-ue.gov.ro -showcerts 2>/tmp/mipe-tls/sclient.err > /tmp/mipe-tls/sclient.out || true
+          awk '/BEGIN CERTIFICATE/{n++;f=sprintf("\/tmp\/mipe-tls\/cert-%02d.pem",n)} f{print > f} /END CERTIFICATE/{close(f);f=""}' /tmp/mipe-tls/sclient.out
+          echo '=== S_CLIENT STDERR ==='
+          cat /tmp/mipe-tls/sclient.err
+          for cert in /tmp/mipe-tls/cert-*.pem; do
+            [ -f "$cert" ] || continue
+            echo "=== CERT $cert ==="
+            openssl x509 -in "$cert" -noout -subject -issuer -serial -dates -fingerprint -sha256 -ext subjectAltName -ext authorityInfoAccess || true
+          done
+          echo '=== HOSTNAME CHECK ==='
+          openssl x509 -in /tmp/mipe-tls/cert-01.pem -noout -checkhost www.fonduri-ue.gov.ro || true
+          openssl x509 -in /tmp/mipe-tls/cert-01.pem -noout -checkhost fonduri-ue.gov.ro || true
+          openssl x509 -in /tmp/mipe-tls/cert-01.pem -noout -checkhost www.fonduri-ue.ro || true
+          echo '=== INSECURE DIAGNOSTIC HEADERS ONLY (NEVER PUBLICATION) ==='
+          for url in \
+            https://www.fonduri-ue.gov.ro/ \
+            https://www.fonduri-ue.gov.ro/robots.txt \
+            https://www.fonduri-ue.gov.ro/sitemap.xml \
+            https://www.fonduri-ue.gov.ro/wp-json/ \
+            https://fonduri-ue.gov.ro/ \
+            https://www.fonduri-ue.ro/robots.txt \
+            https://www.fonduri-ue.ro/sitemap.xml \
+            https://www.fonduri-ue.ro/wp-json/; do
+            echo "--- $url"
+            curl -k -I -L --http1.1 --connect-timeout 5 --max-time 15 -A 'PARTENER.EU-CIVORA-Diagnostic/2.0' "$url" 2>&1 | tail -n 25 || true
+          done
