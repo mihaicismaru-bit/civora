@@ -167,6 +167,7 @@ def main() -> int:
     afir_corpus = load(INGEST_STATE / "afir_corpus.json", {}) or {}
     afir_changed = [x for x in (afir_corpus.get("items") or []) if x.get("changedFromPrevious")]
     afir_material = [x for x in afir_changed if x.get("materialChangeCandidate")]
+    afir_auth_dependencies = afir_corpus.get("accessDependencies") or []
     afir_task_required = bool(afir_changed)
     afir_task_ok = not afir_task_required or task_is_fail_closed(TASKS / "SRC-AFIR-CORPUS.json")
     afir_auto_promoted = bool((afir_corpus.get("policy") or {}).get("materialFactsAutoPromoted"))
@@ -265,6 +266,8 @@ def main() -> int:
             "error_count": afir_state.get("errorCount", len(afir_corpus.get("errors") or [])),
             "hash_change_candidates": len(afir_changed),
             "material_signal_candidates": len(afir_material),
+            "auth_dependency_count": len(afir_auth_dependencies),
+            "auth_dependencies": afir_auth_dependencies[:100],
             "resolution_task_required": afir_task_required,
             "resolution_task_present_fail_closed": afir_task_ok,
             "material_facts_auto_promoted": afir_auto_promoted,
