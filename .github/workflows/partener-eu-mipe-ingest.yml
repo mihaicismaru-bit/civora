@@ -1,129 +1,211 @@
-name: PARTENER.EU MIPE Ingestion
+name: PARTENER.EU MIPE Ingestion v2
 
 on:
   workflow_dispatch:
+    inputs:
+      browser:
+        description: 'Run the verified Playwright collector and build a complete MySMIS registry snapshot'
+        required: false
+        default: true
+        type: boolean
   schedule:
     - cron: '17 * * * *'
+    - cron: '47 */6 * * *'
   push:
-    branches: [main]
+    branches:
+      - main
+      - agent/mipe-resilient-ingestion-v2
     paths:
-      - 'partener-eu/ingest/mipe_ingest.py'
-      - 'partener-eu/ingest/mipe_ingest_ipv4.py'
-      - 'partener-eu/ingest/mipe_pdds_ingest.py'
-      - 'partener-eu/ingest/mipe_browser_ingest.py'
-      - 'partener-eu/ingest/mipe_known_seed_ingest.py'
-      - 'partener-eu/ingest/mipe_discovery_ingest.py'
+      - 'partener-eu/ingest/mipe_core_v2.py'
+      - 'partener-eu/ingest/mipe_ingest_v2.py'
+      - 'partener-eu/ingest/tests/test_mipe_v2.py'
       - 'partener-eu/ingest/state/mipe_known_canonical_seeds.json'
       - 'partener-eu/ingest/state/mipe_discovery_sources.json'
+      - 'partener-eu/ingest/state/pdds_webindex_seeds.json'
       - '.github/workflows/partener-eu-mipe-ingest.yml'
 
 permissions:
   contents: write
 
 concurrency:
-  group: partener-eu-mipe-ingest
+  group: partener-eu-mipe-ingest-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  ingest:
+  validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Compile and test fail-closed policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            partener-eu/ingest/mipe_core_v2.py \
+            partener-eu/ingest/mipe_ingest_v2.py
+          python -m unittest discover -s partener-eu/ingest/tests -v
+
+  ingest:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
 
-      - name: Discover canonical MIPE URLs from official institutional sources
-        run: python partener-eu/ingest/mipe_discovery_ingest.py
+      - name: Select transport escalation mode
+        id: mode
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          SCHEDULE_EXPR: ${{ github.event.schedule }}
+          INPUT_BROWSER: ${{ inputs.browser }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          browser=false
+          if [[ "$EVENT_NAME" == "workflow_dispatch" && "$INPUT_BROWSER" != "false" ]]; then
+            browser=true
+          elif [[ "$SCHEDULE_EXPR" == "47 */6 * * *" ]]; then
+            browser=true
+          elif [[ "$REF_NAME" == "agent/mipe-resilient-ingestion-v2" ]]; then
+            browser=true
+          fi
+          echo "browser=$browser" | tee -a "$GITHUB_OUTPUT"
 
-      - name: Run fail-closed MIPE ingestion with explicit PDDS seed
-        run: python partener-eu/ingest/mipe_pdds_ingest.py
-
-      - name: Determine whether browser escalation is required
-        id: health
+      - name: Install strict browser transport
+        if: steps.mode.outputs.browser == 'true'
         shell: bash
         run: |
-          STATUS=$(python - <<'PY'
-          import json
-          p='partener-eu/ingest/state/mipe_state.json'
-          try:
-              print(json.load(open(p,encoding='utf-8')).get('status',''))
-          except Exception:
-              print('SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED')
-          PY
-          )
-          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
-          if [ "$STATUS" = "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED" ]; then
-            echo "browser=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "browser=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Probe official MIPE A-record route with TLS SNI preserved
-        if: steps.health.outputs.browser == 'true'
-        id: directroute
-        shell: bash
-        run: |
-          set +e
-          IP=193.151.29.8
-          URL='https://mfe.gov.ro/pdds/despre-program-programare/'
-          rm -f /tmp/mipe-probe.html
-          CODE=$(curl --http1.1 --resolve "mfe.gov.ro:443:${IP}" -L -sS -o /tmp/mipe-probe.html -w '%{http_code}' --connect-timeout 8 --max-time 25 "$URL")
-          RC=$?
-          SIZE=$(test -f /tmp/mipe-probe.html && wc -c </tmp/mipe-probe.html || echo 0)
-          echo "curl_rc=$RC code=$CODE bytes=$SIZE ip=$IP"
-          if [ "$RC" = "0" ] && [ "$CODE" -ge 200 ] 2>/dev/null && [ "$CODE" -lt 400 ] 2>/dev/null && [ "$SIZE" -gt 500 ]; then
-            echo "force_ip=$IP" >> "$GITHUB_OUTPUT"
-            echo "MIPE_FORCE_IP=$IP" >> "$GITHUB_ENV"
-          else
-            echo "force_ip=" >> "$GITHUB_OUTPUT"
-          fi
-          exit 0
-
-      - name: Install browser fallback
-        if: steps.health.outputs.browser == 'true'
-        run: |
+          set -euo pipefail
           python -m pip install --disable-pip-version-check playwright
           python -m playwright install --with-deps chromium
 
-      - name: Probe mapped canonical MIPE guide pages individually
-        if: steps.health.outputs.browser == 'true'
-        run: python partener-eu/ingest/mipe_known_seed_ingest.py
-
-      - name: Re-evaluate source health after mapped seeds
-        if: steps.health.outputs.browser == 'true'
-        id: mappedhealth
+      - name: Capture last-known-good feed hash
+        id: before
         shell: bash
         run: |
-          STATUS=$(python - <<'PY'
+          set -euo pipefail
+          sha256sum partener-eu/web/mipe-news.js | awk '{print "feed_sha=" $1}' | tee -a "$GITHUB_OUTPUT"
+
+      - name: Run verified official-source ingestion
+        shell: bash
+        env:
+          MIPE_RELAY_HMAC_KEY: ${{ secrets.MIPE_RELAY_HMAC_KEY }}
+        run: |
+          set -euo pipefail
+          args=()
+          if [[ "${{ steps.mode.outputs.browser }}" == "true" ]]; then
+            args+=(--browser)
+          fi
+          python partener-eu/ingest/mipe_ingest_v2.py "${args[@]}" | tee /tmp/mipe-v2-run.json
+
+      - name: Verify publication gates and fail-closed persistence
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ steps.before.outputs.feed_sha }}
+          BROWSER_ENABLED: ${{ steps.mode.outputs.browser }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib
           import json
-          print(json.load(open('partener-eu/ingest/state/mipe_state.json',encoding='utf-8')).get('status',''))
+          import os
+          import pathlib
+          import sys
+
+          sys.path.insert(0, 'partener-eu/ingest')
+          from mipe_core_v2 import PRIORITY_PDDS_SEED, parse_feed_js, validate_item
+
+          health_path = pathlib.Path('partener-eu/ingest/state/mipe_health.json')
+          feed_path = pathlib.Path('partener-eu/web/mipe-news.js')
+          health = json.loads(health_path.read_text(encoding='utf-8'))
+          feed_text = feed_path.read_text(encoding='utf-8')
+          meta, items = parse_feed_js(feed_text)
+          assert health['prioritySeed'] == PRIORITY_PDDS_SEED
+          assert health['status'] in {
+              'OK_NEW_VERIFIED_ITEMS',
+              'OK_NO_NEW_RELEVANT_ITEMS',
+              'PARTIAL_SOURCE_FAILURE_NEW_VERIFIED_ITEMS',
+              'PARTIAL_SOURCE_FAILURE_LAST_KNOWN_GOOD_PRESERVED',
+              'SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED',
+          }
+          for item in items:
+              assert validate_item(item), (item.get('url'), item.get('title'))
+              if item.get('status') == 'OPEN':
+                  assert item.get('kind') == 'CALL_OPENED'
+          registry = health.get('registry') or {}
+          if registry.get('complete'):
+              assert int(registry.get('visibleRows') or 0) == int(registry.get('totalRows') or 0)
+          if health['status'] == 'SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED':
+              after = hashlib.sha256(feed_path.read_bytes()).hexdigest()
+              assert after == os.environ['BEFORE_SHA'], 'last-known-good feed changed during total source failure'
+          if os.environ.get('REF_NAME') == 'agent/mipe-resilient-ingestion-v2' and os.environ.get('BROWSER_ENABLED') == 'true':
+              assert registry.get('available') is True, registry
+              assert registry.get('complete') is True, registry
+              assert int(registry.get('visibleRows') or 0) >= 800, registry
+          print(json.dumps({
+              'status': health['status'],
+              'prioritySeedAvailable': health['prioritySeedAvailable'],
+              'registry': registry,
+              'feedItemCount': len(items),
+              'feedMetadataStatus': meta.get('status'),
+          }, ensure_ascii=False, indent=2))
           PY
-          )
-          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
 
-      - name: Force official MIPE extraction in real browser
-        if: steps.health.outputs.browser == 'true' && steps.mappedhealth.outputs.status == 'SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED'
-        run: python partener-eu/ingest/mipe_browser_ingest.py
-
-      - name: Persist verified feed, discovery map and health state without stale-checkout conflicts
+      - name: Persist verified outputs conflict-safely
+        if: github.ref == 'refs/heads/main'
         shell: bash
         run: |
-          set -e
-          cp partener-eu/web/mipe-news.js /tmp/mipe-news.js
-          cp partener-eu/ingest/state/mipe_state.json /tmp/mipe_state.json
-          cp partener-eu/ingest/state/mipe_known_canonical_seeds.json /tmp/mipe_known_canonical_seeds.json
-          git fetch origin main
-          git reset --hard origin/main
-          cp /tmp/mipe-news.js partener-eu/web/mipe-news.js
-          cp /tmp/mipe_state.json partener-eu/ingest/state/mipe_state.json
-          cp /tmp/mipe_known_canonical_seeds.json partener-eu/ingest/state/mipe_known_canonical_seeds.json
+          set -euo pipefail
+          mkdir -p /tmp/mipe-v2-output
+          files=(
+            partener-eu/web/mipe-news.js
+            partener-eu/ingest/state/mipe_state_v2.json
+            partener-eu/ingest/state/mipe_health.json
+            partener-eu/ingest/state/mipe_discovered_urls.json
+          )
+          for file in "${files[@]}"; do
+            if [[ -f "$file" ]]; then
+              mkdir -p "/tmp/mipe-v2-output/$(dirname "$file")"
+              cp "$file" "/tmp/mipe-v2-output/$file"
+            fi
+          done
+
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add partener-eu/web/mipe-news.js partener-eu/ingest/state/mipe_state.json partener-eu/ingest/state/mipe_known_canonical_seeds.json
-          if git diff --cached --quiet; then
-            echo 'No MIPE feed or discovery-map changes.'
-            exit 0
-          fi
-          git commit -m 'Ingest verified MIPE updates and canonical discoveries'
-          git push origin HEAD:main
+          for attempt in 1 2 3 4 5; do
+            echo "Persistence attempt ${attempt}/5"
+            git fetch origin main
+            git reset --hard origin/main
+            add=()
+            for file in "${files[@]}"; do
+              if [[ -f "/tmp/mipe-v2-output/$file" ]]; then
+                mkdir -p "$(dirname "$file")"
+                cp "/tmp/mipe-v2-output/$file" "$file"
+                add+=("$file")
+              fi
+            done
+            git add "${add[@]}"
+            if git diff --cached --quiet; then
+              echo 'No material MIPE output changes.'
+              exit 0
+            fi
+            git commit -m 'Ingest verified MIPE and MySMIS updates'
+            if git push origin HEAD:main; then
+              echo 'Verified MIPE outputs persisted to main.'
+              exit 0
+            fi
+            sleep $((attempt * 2))
+          done
+          echo 'Unable to persist verified MIPE outputs after five attempts.' >&2
+          exit 1
