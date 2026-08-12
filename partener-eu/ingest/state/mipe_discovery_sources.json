@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "policy": "Discovery sources may reveal canonical MIPE URLs. Facts are publishable as MIPE only after the canonical official URL is verified.",
+  "sources": [
+    {"url":"https://mfe.gov.ro/pdds/despre-program-programare/","role":"T1_PRIORITY_SEED","scope":"PDDS"},
+    {"url":"https://mfe.gov.ro/ghiduri_peos/","role":"T1_TAXONOMY_ROOT","scope":"PEO"},
+    {"url":"https://mfe.gov.ro/ghiduri_pids/","role":"T1_TAXONOMY_ROOT","scope":"PoIDS"},
+    {"url":"https://mfe.gov.ro/","role":"T1_ROOT","scope":"MIPE"},
+    {"url":"https://generatormachete.mfe.gov.ro/","role":"T1_AUXILIARY_OFFICIAL","scope":"MIPE visibility resources"},
+    {"url":"https://oirvest.ro/peo-2021-2027/","role":"T2_OFFICIAL_DISCOVERY_ONLY","scope":"PEO canonical MIPE links"},
+    {"url":"https://oirvest.ro/poids-2021-2027/","role":"T2_OFFICIAL_DISCOVERY_ONLY","scope":"PoIDS canonical MIPE links"},
+    {"url":"https://www.oirbi.ro/peo-2021-2027/","role":"T2_OFFICIAL_DISCOVERY_ONLY","scope":"PEO programme documents and MIPE references"}
+  ]
+}
