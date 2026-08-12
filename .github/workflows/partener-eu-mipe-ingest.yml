@@ -12,7 +12,9 @@ on:
       - 'partener-eu/ingest/mipe_pdds_ingest.py'
       - 'partener-eu/ingest/mipe_browser_ingest.py'
       - 'partener-eu/ingest/mipe_known_seed_ingest.py'
+      - 'partener-eu/ingest/mipe_discovery_ingest.py'
       - 'partener-eu/ingest/state/mipe_known_canonical_seeds.json'
+      - 'partener-eu/ingest/state/mipe_discovery_sources.json'
       - '.github/workflows/partener-eu-mipe-ingest.yml'
 
 permissions:
@@ -30,6 +32,9 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+
+      - name: Discover canonical MIPE URLs from official institutional sources
+        run: python partener-eu/ingest/mipe_discovery_ingest.py
 
       - name: Run fail-closed MIPE ingestion with explicit PDDS seed
         run: python partener-eu/ingest/mipe_pdds_ingest.py
@@ -101,24 +106,24 @@ jobs:
         if: steps.health.outputs.browser == 'true' && steps.mappedhealth.outputs.status == 'SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED'
         run: python partener-eu/ingest/mipe_browser_ingest.py
 
-      - name: Persist verified feed and health state without stale-checkout conflicts
+      - name: Persist verified feed, discovery map and health state without stale-checkout conflicts
         shell: bash
         run: |
           set -e
           cp partener-eu/web/mipe-news.js /tmp/mipe-news.js
           cp partener-eu/ingest/state/mipe_state.json /tmp/mipe_state.json
+          cp partener-eu/ingest/state/mipe_known_canonical_seeds.json /tmp/mipe_known_canonical_seeds.json
           git fetch origin main
           git reset --hard origin/main
           cp /tmp/mipe-news.js partener-eu/web/mipe-news.js
           cp /tmp/mipe_state.json partener-eu/ingest/state/mipe_state.json
+          cp /tmp/mipe_known_canonical_seeds.json partener-eu/ingest/state/mipe_known_canonical_seeds.json
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add partener-eu/web/mipe-news.js partener-eu/ingest/state/mipe_state.json
+          git add partener-eu/web/mipe-news.js partener-eu/ingest/state/mipe_state.json partener-eu/ingest/state/mipe_known_canonical_seeds.json
           if git diff --cached --quiet; then
-            echo 'No MIPE feed changes.'
+            echo 'No MIPE feed or discovery-map changes.'
             exit 0
           fi
-          git commit -m 'Ingest verified MIPE updates'
+          git commit -m 'Ingest verified MIPE updates and canonical discoveries'
           git push origin HEAD:main
-
-# manual trigger: 2026-08-12T03:06:00+03:00
