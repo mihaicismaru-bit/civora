@@ -27,7 +27,7 @@ class CanonicalCorpusTests(unittest.TestCase):
         self.assertEqual(len(canonical), len(set(canonical)))
 
     def test_bundle_passes_contract(self):
-        self.assertEqual(validate_bundle(self.bundle), {"opportunities": 21, "evidence": 21, "changesets": 0, "resolution_tasks": 21})
+        self.assertEqual(validate_bundle(self.bundle), {"opportunities": 25, "evidence": 25, "changesets": 0, "resolution_tasks": 25})
 
     def test_normalization_has_no_publication_effect(self):
         self.assertTrue(all(x["publication_state"] == "REVIEW_REQUIRED" for x in self.bundle["opportunities"]))
@@ -55,9 +55,14 @@ class CanonicalCorpusTests(unittest.TestCase):
             self.assertFalse(batch["automatic_material_fact_update_allowed"])
             self.assertEqual(batch["material_fact_action"], "NONE")
 
-    def test_batches_are_disjoint_and_fixed_size(self):
-        self.assertTrue(all(len(batch["opportunity_ids"]) == 5 for batch in self.batches))
+    def test_batches_are_disjoint_and_target_sized(self):
+        self.assertEqual([len(batch["opportunity_ids"]) for batch in self.batches], [5, 5, 5, 4])
         self.assertEqual(len(self.admitted_ids), len(set(self.admitted_ids)))
+
+    def test_canonical_target_is_exactly_met(self):
+        self.assertEqual(len(self.bundle["opportunities"]), 25)
+        self.assertEqual(len(self.bundle["opportunities"]), len(self.bundle["evidence"]))
+        self.assertEqual(len(self.bundle["opportunities"]), len(self.bundle["resolution_tasks"]))
 
 
 if __name__ == "__main__":

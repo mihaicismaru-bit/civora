@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "phase": "P11_OPPORTUNITY_INTELLIGENCE_ENGINE",
-  "status": "IN_PROGRESS",
+  "status": "TARGET_CORPUS_COMPLETE_AWAITING_SEMANTIC_RESOLUTION",
   "baseline": {
     "validated_at": "2026-08-12",
     "public_opportunity_count": 6,
@@ -44,15 +44,16 @@
     {
       "id": "P11-I04",
       "title": "Expand validated corpus to 25 real opportunities in evidence-backed batches",
-      "status": "IN_PROGRESS_BATCH_03_ACCEPTED_ON_DEDICATED_BRANCH",
+      "status": "COMPLETED_TARGET_25_ON_DEDICATED_BRANCH",
       "result": {
-        "canonical_opportunities": 21,
+        "canonical_opportunities": 25,
         "admitted_in_batch_01": 5,
         "admitted_in_batch_02": 5,
         "admitted_in_batch_03": 5,
-        "remaining_to_target": 4,
-        "evidence_records": 21,
-        "open_resolution_tasks": 21,
+        "admitted_in_batch_04": 4,
+        "remaining_to_target": 0,
+        "evidence_records": 25,
+        "open_resolution_tasks": 25,
         "publishable_records": 0,
         "public_mutations": 0,
         "admission_policy": "Imported facts remain candidates backed by UNRESOLVED evidence and open ResolutionTasks"
@@ -61,7 +62,8 @@
     {
       "id": "P11-I05",
       "title": "P11 acceptance, recovery, public projection and closure",
-      "status": "PLANNED"
+      "status": "NEXT",
+      "semantic_resolution_dependency": "Open ResolutionTasks must be resolved by the Opportunity Resolution workflow before P11 closure"
     }
   ],
   "closure_criteria": {
@@ -72,5 +74,11 @@
     "quality_gate": "PASS",
     "public_projection_fail_closed": true
   },
-  "current_progress": {"canonical_opportunities": 21, "target": 25, "remaining": 4}
+  "closure_assessment": {
+    "numeric_target_met": true,
+    "all_material_facts_authoritatively_supported": false,
+    "overall_p11_closure_met": false,
+    "reason": "The 25 canonical identities are complete, but material candidates remain fail-closed behind open ResolutionTasks"
+  },
+  "current_progress": {"canonical_opportunities": 25, "target": 25, "remaining": 0}
 }

@@ -8,6 +8,13 @@ import re
 from opportunity_contract import MATERIAL_FACT_CLASSES, validate_bundle
 
 ROOT = pathlib.Path(__file__).resolve().parent
+EXPECTED_BATCH_SIZES = {
+    "P11-I04-B01": 5,
+    "P11-I04-B02": 5,
+    "P11-I04-B03": 5,
+    "P11-I04-B04": 4,
+}
+TARGET_CANONICAL_OPPORTUNITIES = 25
 
 
 def main() -> int:
@@ -15,12 +22,15 @@ def main() -> int:
     validate_bundle(bundle)
     batches = [json.loads(path.read_text(encoding="utf-8")) for path in sorted(ROOT.glob("admission_batch_*.json"))]
     ids = [opportunity_id for batch in batches for opportunity_id in batch["opportunity_ids"]]
+    if {batch["batch_id"] for batch in batches} != set(EXPECTED_BATCH_SIZES):
+        raise SystemExit("admission manifest set must exactly cover P11-I04-B01 through P11-I04-B04")
     if len(ids) != len(set(ids)):
         raise SystemExit("opportunity IDs must be unique across admission batches")
     for batch in batches:
         batch_ids = batch["opportunity_ids"]
-        if len(batch_ids) != 5 or len(set(batch_ids)) != len(batch_ids):
-            raise SystemExit(f"{batch['batch_id']} must contain exactly five unique opportunity IDs")
+        expected_size = EXPECTED_BATCH_SIZES[batch["batch_id"]]
+        if len(batch_ids) != expected_size or len(set(batch_ids)) != len(batch_ids):
+            raise SystemExit(f"{batch['batch_id']} must contain exactly {expected_size} unique opportunity IDs")
         if batch.get("publication_allowed") is not False or batch.get("automatic_material_fact_update_allowed") is not False:
             raise SystemExit(f"{batch['batch_id']} admission must be fail-closed")
         for artifact in batch.get("source_artifacts") or []:
@@ -28,6 +38,8 @@ def main() -> int:
                 raise SystemExit("source artifact must have a path and pinned Git blob SHA")
 
     opportunities = {row["opportunity_id"]: row for row in bundle["opportunities"]}
+    if len(opportunities) != TARGET_CANONICAL_OPPORTUNITIES:
+        raise SystemExit(f"canonical corpus must contain exactly {TARGET_CANONICAL_OPPORTUNITIES} opportunities")
     evidence = {row["evidence_id"]: row for row in bundle["evidence"]}
     open_blocks = {
         row["opportunity_id"]: set(row["blocked_fact_classes"])
