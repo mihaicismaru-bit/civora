@@ -1,0 +1,87 @@
+{
+  "version": "1.0.0",
+  "policy": {
+    "fail_closed": true,
+    "stronger_source_wins": true,
+    "preserve_conflicts": true,
+    "material_fields_require_provenance": true
+  },
+  "providers": [
+    {
+      "id": "ANAF_PUBLIC_COMPANY",
+      "label": "ANAF — informații publice contribuabil",
+      "tier": "A",
+      "confidence": 0.98,
+      "status": "READY_WHEN_ENDPOINT_CONFIGURED",
+      "endpoint_env": "PARTENER_ANAF_ENTITY_ENDPOINT",
+      "official_url": "https://www.anaf.ro/",
+      "timeout_seconds": 8,
+      "mapping": {
+        "name": "name",
+        "legalName": "legalName",
+        "address": "address",
+        "county": "county",
+        "locality": "locality",
+        "vatStatus": "vatStatus",
+        "fiscalStatus": "fiscalStatus"
+      }
+    },
+    {
+      "id": "MF_OPEN_DATA",
+      "label": "Ministerul Finanțelor — date publice contribuabili / situații financiare",
+      "tier": "A",
+      "confidence": 0.96,
+      "status": "READY_WHEN_ENDPOINT_CONFIGURED",
+      "endpoint_env": "PARTENER_MF_ENTITY_ENDPOINT",
+      "official_url": "https://data.gov.ro/organization/mfp",
+      "timeout_seconds": 10,
+      "mapping": {
+        "name": "name",
+        "legalName": "legalName",
+        "address": "address",
+        "county": "county",
+        "locality": "locality",
+        "caen": "caen",
+        "financials": "financials",
+        "employees": "employees"
+      }
+    },
+    {
+      "id": "PUBLIC_INSTITUTION_REGISTRY",
+      "label": "Registru public instituții / site instituțional oficial",
+      "tier": "A",
+      "confidence": 0.97,
+      "status": "READY_WHEN_ENDPOINT_CONFIGURED",
+      "endpoint_env": "PARTENER_PUBLIC_INSTITUTION_ENDPOINT",
+      "official_url": "https://data.gov.ro/",
+      "timeout_seconds": 8,
+      "mapping": {
+        "name": "name",
+        "legalName": "legalName",
+        "institutionType": "institutionType",
+        "address": "address",
+        "county": "county",
+        "locality": "locality",
+        "region": "region"
+      }
+    },
+    {
+      "id": "ONRC_ENRICHMENT",
+      "label": "ONRC — Registrul Comerțului",
+      "tier": "A",
+      "confidence": 0.99,
+      "status": "OPTIONAL_AUTH_OR_SERVICE_DEPENDENT",
+      "endpoint_env": "PARTENER_ONRC_ENTITY_ENDPOINT",
+      "official_url": "https://www.onrc.ro/",
+      "timeout_seconds": 8,
+      "mapping": {
+        "name": "name",
+        "legalName": "legalName",
+        "registrationNumber": "registrationNumber",
+        "legalForm": "legalForm",
+        "registeredOffice": "registeredOffice",
+        "caen": "caen"
+      }
+    }
+  ]
+}
