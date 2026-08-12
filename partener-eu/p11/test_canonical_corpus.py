@@ -16,17 +16,18 @@ class CanonicalCorpusTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.bundle = json.loads((ROOT / "opportunity_bundle.json").read_text(encoding="utf-8"))
-        cls.batch = json.loads((ROOT / "admission_batch_01.json").read_text(encoding="utf-8"))
+        cls.batches = [json.loads(path.read_text(encoding="utf-8")) for path in sorted(ROOT.glob("admission_batch_*.json"))]
+        cls.admitted_ids = [opportunity_id for batch in cls.batches for opportunity_id in batch["opportunity_ids"]]
 
     def test_all_public_records_are_normalized_once(self):
         canonical = [x["opportunity_id"] for x in self.bundle["opportunities"]]
         public = public_opportunity_ids(self.bundle)
         self.assertEqual(canonical[: len(public)], public)
-        self.assertEqual(canonical[len(public) :], self.batch["opportunity_ids"])
+        self.assertEqual(canonical[len(public) :], self.admitted_ids)
         self.assertEqual(len(canonical), len(set(canonical)))
 
     def test_bundle_passes_contract(self):
-        self.assertEqual(validate_bundle(self.bundle), {"opportunities": 11, "evidence": 11, "changesets": 0, "resolution_tasks": 11})
+        self.assertEqual(validate_bundle(self.bundle), {"opportunities": 16, "evidence": 16, "changesets": 0, "resolution_tasks": 16})
 
     def test_normalization_has_no_publication_effect(self):
         self.assertTrue(all(x["publication_state"] == "REVIEW_REQUIRED" for x in self.bundle["opportunities"]))
@@ -41,7 +42,7 @@ class CanonicalCorpusTests(unittest.TestCase):
     def test_admitted_batch_is_semantically_unresolved(self):
         opportunities = {x["opportunity_id"]: x for x in self.bundle["opportunities"]}
         evidence = {x["evidence_id"]: x for x in self.bundle["evidence"]}
-        for opportunity_id in self.batch["opportunity_ids"]:
+        for opportunity_id in self.admitted_ids:
             item = opportunities[opportunity_id]
             self.assertEqual(item["status"], "DISCOVERED")
             self.assertEqual(item["material_facts"], {})
@@ -49,9 +50,14 @@ class CanonicalCorpusTests(unittest.TestCase):
             self.assertTrue(all(evidence[ref]["supports_fact_classes"] == [] for ref in item["evidence_refs"]))
 
     def test_admitted_batch_has_no_publication_authority(self):
-        self.assertFalse(self.batch["publication_allowed"])
-        self.assertFalse(self.batch["automatic_material_fact_update_allowed"])
-        self.assertEqual(self.batch["material_fact_action"], "NONE")
+        for batch in self.batches:
+            self.assertFalse(batch["publication_allowed"])
+            self.assertFalse(batch["automatic_material_fact_update_allowed"])
+            self.assertEqual(batch["material_fact_action"], "NONE")
+
+    def test_batches_are_disjoint_and_fixed_size(self):
+        self.assertTrue(all(len(batch["opportunity_ids"]) == 5 for batch in self.batches))
+        self.assertEqual(len(self.admitted_ids), len(set(self.admitted_ids)))
 
 
 if __name__ == "__main__":

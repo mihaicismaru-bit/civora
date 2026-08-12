@@ -10,7 +10,13 @@ from opportunity_contract import validate_bundle
 ROOT = pathlib.Path(__file__).resolve().parent
 PUBLIC_DATA = ROOT.parent / "web" / "data.js"
 BUNDLE = ROOT / "opportunity_bundle.json"
-ADMISSION_BATCH = ROOT / "admission_batch_01.json"
+
+
+def admitted_opportunity_ids() -> list[str]:
+    result: list[str] = []
+    for path in sorted(ROOT.glob("admission_batch_*.json")):
+        result.extend(json.loads(path.read_text(encoding="utf-8"))["opportunity_ids"])
+    return result
 
 
 def public_opportunity_ids(bundle: dict | None = None) -> list[str]:
@@ -28,7 +34,7 @@ def main() -> int:
     counts = validate_bundle(bundle)
     public_ids = public_opportunity_ids(bundle)
     canonical_ids = [x["opportunity_id"] for x in bundle["opportunities"]]
-    admitted_ids = json.loads(ADMISSION_BATCH.read_text(encoding="utf-8"))["opportunity_ids"]
+    admitted_ids = admitted_opportunity_ids()
     if canonical_ids[: len(public_ids)] != public_ids:
         raise SystemExit(f"canonical/public identity prefix mismatch: {canonical_ids!r} != {public_ids!r}")
     if canonical_ids[len(public_ids) :] != admitted_ids:

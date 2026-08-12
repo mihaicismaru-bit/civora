@@ -12,16 +12,20 @@ ROOT = pathlib.Path(__file__).resolve().parent
 
 def main() -> int:
     bundle = json.loads((ROOT / "opportunity_bundle.json").read_text(encoding="utf-8"))
-    batch = json.loads((ROOT / "admission_batch_01.json").read_text(encoding="utf-8"))
     validate_bundle(bundle)
-    ids = batch["opportunity_ids"]
-    if len(ids) != 5 or len(set(ids)) != len(ids):
-        raise SystemExit("batch 01 must contain exactly five unique opportunity IDs")
-    if batch.get("publication_allowed") is not False or batch.get("automatic_material_fact_update_allowed") is not False:
-        raise SystemExit("batch admission must be fail-closed")
-    for artifact in batch.get("source_artifacts") or []:
-        if not artifact.get("path") or not re.fullmatch(r"[0-9a-f]{40}", artifact.get("blob_sha", "")):
-            raise SystemExit("source artifact must have a path and pinned Git blob SHA")
+    batches = [json.loads(path.read_text(encoding="utf-8")) for path in sorted(ROOT.glob("admission_batch_*.json"))]
+    ids = [opportunity_id for batch in batches for opportunity_id in batch["opportunity_ids"]]
+    if len(ids) != len(set(ids)):
+        raise SystemExit("opportunity IDs must be unique across admission batches")
+    for batch in batches:
+        batch_ids = batch["opportunity_ids"]
+        if len(batch_ids) != 5 or len(set(batch_ids)) != len(batch_ids):
+            raise SystemExit(f"{batch['batch_id']} must contain exactly five unique opportunity IDs")
+        if batch.get("publication_allowed") is not False or batch.get("automatic_material_fact_update_allowed") is not False:
+            raise SystemExit(f"{batch['batch_id']} admission must be fail-closed")
+        for artifact in batch.get("source_artifacts") or []:
+            if not artifact.get("path") or not re.fullmatch(r"[0-9a-f]{40}", artifact.get("blob_sha", "")):
+                raise SystemExit("source artifact must have a path and pinned Git blob SHA")
 
     opportunities = {row["opportunity_id"]: row for row in bundle["opportunities"]}
     evidence = {row["evidence_id"]: row for row in bundle["evidence"]}
@@ -44,7 +48,7 @@ def main() -> int:
         candidates = set((item.get("candidate_material_facts") or {}).keys())
         if candidates != MATERIAL_FACT_CLASSES or not candidates <= open_blocks.get(opportunity_id, set()):
             raise SystemExit(f"admitted candidate facts are not fully blocked: {opportunity_id}")
-    print(json.dumps({"batch_id": batch["batch_id"], "admitted": len(ids), "publishable": 0, "material_fact_action": "NONE"}, indent=2))
+    print(json.dumps({"batches": [batch["batch_id"] for batch in batches], "admitted": len(ids), "publishable": 0, "material_fact_action": "NONE"}, indent=2))
     return 0
 
 

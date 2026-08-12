@@ -1,13 +1,13 @@
 {
   "schema_version": "1.0",
-  "checkpoint": "P11-I04-B01",
+  "checkpoint": "P11-I04-B02",
   "status": "PASS",
   "accepted_at": "2026-08-12",
   "evidence": {
     "contract": "partener-eu/p11/opportunity_contract.py",
     "tests": "partener-eu/p11/test_opportunity_contract.py",
     "test_command": "python -m unittest discover -s partener-eu/p11 -p 'test_*.py' && python partener-eu/p11/validate_corpus.py && python partener-eu/p11/validate_admission_batch.py && python partener-eu/p11/build_staging_ledger.py",
-    "tests_passed": 19,
+    "tests_passed": 20,
     "tests_failed": 0
   },
   "policy_assertions": {
@@ -20,6 +20,7 @@
     "candidate_facts_require_open_resolution_blocks": true,
     "canonical_prefix_matches_static_public_records": true,
     "admission_suffix_matches_pinned_batch_manifest": true,
+    "admission_batches_are_disjoint": true,
     "admitted_evidence_remains_semantically_unresolved": true,
     "admitted_material_facts_are_fully_blocked": true,
     "candidate_identity_is_deterministic": true,
@@ -28,20 +29,20 @@
   },
   "corpus": {
     "public_baseline": 6,
-    "canonicalized_total": 11,
+    "canonicalized_total": 16,
     "admitted_in_this_increment": 5,
     "publishable_after_normalization": 0,
-    "open_resolution_tasks": 11,
+    "open_resolution_tasks": 16,
     "target": 25
   },
   "staging": {
-    "input_occurrences": 11,
-    "unique_candidates": 11,
-    "canonical_matches": 11,
+    "input_occurrences": 16,
+    "unique_candidates": 16,
+    "canonical_matches": 16,
     "new_candidates": 0,
     "ambiguous_review": 0,
     "published": 0
   },
-  "source_artifact_manifest": "partener-eu/p11/admission_batch_01.json",
+  "source_artifact_manifests": ["partener-eu/p11/admission_batch_01.json", "partener-eu/p11/admission_batch_02.json"],
   "publication_effect": "NONE"
 }
