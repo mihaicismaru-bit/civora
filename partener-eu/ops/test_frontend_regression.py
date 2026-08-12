@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""Deterministic P10 guard for the public frontpage freeze incident.
+"""Deterministic P10 guard for the public frontpage freeze/blank-page incidents.
 
-This test is intentionally narrow: it prevents reintroduction of the two script
-patterns that caused the 2026-08-12 main-thread render loop while keeping the
-runtime dependency-free.
+The public page must have a visible HTML fallback, render its critical app path
+before progressive enhancements, and never reintroduce the global observer loop.
 """
 from pathlib import Path
 
@@ -14,25 +13,42 @@ public_copy = (WEB / "public-product-copy-v1.js").read_text(encoding="utf-8")
 
 errors = []
 
-# PR #23 module remains in the repository for auditability but must not be
-# loaded publicly until it has browser-level performance acceptance evidence.
+# Experimental UX/copy layers remain in the repository for auditability but
+# must not gate or mutate the production first paint until browser acceptance.
 if 'src="public-ux-optimization-v1.js' in index:
     errors.append("public-ux-optimization-v1.js is loaded by public index")
 if 'href="public-ux-optimization-v1.css' in index:
     errors.append("public-ux-optimization-v1.css is loaded by public index")
+if 'src="public-product-copy-v1.js' in index:
+    errors.append("public-product-copy-v1.js is loaded by public index")
 
-# The copy-polish layer previously observed characterData globally while also
-# mutating text nodes, creating a self-triggering microtask loop. Keep it finite.
+# Never allow a fully blank document while JavaScript is unavailable, delayed,
+# cached inconsistently, or fails before app bootstrap.
+if 'id="boot-fallback"' not in index:
+    errors.append("visible boot fallback missing")
+if "Găsește finanțarea potrivită" not in index:
+    errors.append("boot fallback has no meaningful visible content")
+
+# Critical path is deliberately tiny: canonical data then renderer. Every
+# enhancement must execute only after app.js has had a chance to paint.
+data_pos = index.find('src="data.js')
+app_pos = index.find('src="app.js')
+if data_pos < 0 or app_pos < 0 or data_pos > app_pos:
+    errors.append("critical boot order must be data.js then app.js")
+for script in [
+    "step-lll.js", "peo-calendar.js", "consultant-workspace-v2.js",
+    "news-v1-ui.js", "people-policy-v1.js", "mff-2028-2034.js"
+]:
+    pos = index.find(f'src="{script}')
+    if pos >= 0 and pos < app_pos:
+        errors.append(f"enhancement {script} gates app.js first paint")
+
+# The quarantined copy-polish implementation must remain finite even while it
+# is disconnected from production.
 if "new MutationObserver" in public_copy:
     errors.append("public-product-copy-v1.js contains a global MutationObserver")
 if "characterData:true" in public_copy.replace(" ", ""):
     errors.append("public-product-copy-v1.js observes characterData")
-
-# Copy layer must still execute at least once and expose its diagnostic version.
-if "polish();" not in public_copy:
-    errors.append("public copy polish pass missing")
-if "PARTENER_PUBLIC_COPY" not in public_copy:
-    errors.append("public copy diagnostic export missing")
 
 if errors:
     raise SystemExit("FAIL frontend regression guard: " + "; ".join(errors))
