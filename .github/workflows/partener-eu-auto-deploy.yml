@@ -1,10 +1,15 @@
 name: PARTENER.EU Auto Deploy
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
       - 'partener-eu/web/**'
+  workflow_run:
+    workflows:
+      - 'PARTENER.EU MIPE Ingestion'
+    types: [completed]
 
 permissions:
   contents: read
@@ -17,12 +22,17 @@ concurrency:
 
 jobs:
   deploy:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          # workflow_run events must deploy the canonical state produced on main,
+          # not the workflow definition commit or a stale triggering checkout.
+          ref: main
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
