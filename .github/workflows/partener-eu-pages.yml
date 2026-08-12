@@ -1,4 +1,5 @@
 name: PARTENER.EU Pages
+
 on:
   push:
     branches: [main]
@@ -6,13 +7,16 @@ on:
       - 'partener-eu/web/**'
       - '.github/workflows/partener-eu-pages.yml'
   workflow_dispatch:
+
 permissions:
   contents: write
   pages: write
   id-token: write
+
 concurrency:
   group: pages
   cancel-in-progress: true
+
 jobs:
   deploy:
     environment:
@@ -21,19 +25,102 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
       - id: configure
         continue-on-error: true
         uses: actions/configure-pages@v5
+
       - id: upload
         continue-on-error: true
         uses: actions/upload-pages-artifact@v4
         with:
           path: partener-eu/web
+
       - name: Deploy
         id: deployment
         continue-on-error: true
         uses: actions/deploy-pages@v4
-      - name: Record deployment status
+
+      - name: Attempt and verify HTTPS enforcement
+        id: https_control
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          python - <<'PY'
+          import json, os, pathlib, urllib.error, urllib.request
+
+          api = f"https://api.github.com/repos/{os.environ['REPOSITORY']}/pages"
+          token = os.environ.get('GH_TOKEN', '')
+          headers = {
+              'Accept': 'application/vnd.github+json',
+              'Authorization': f'Bearer {token}',
+              'X-GitHub-Api-Version': '2022-11-28',
+              'User-Agent': 'PARTENER.EU-CIVORA-P10-Pages-Control/1.0',
+          }
+
+          def call(method='GET', payload=None):
+              body = None if payload is None else json.dumps(payload).encode('utf-8')
+              req = urllib.request.Request(api, data=body, headers=headers, method=method)
+              try:
+                  with urllib.request.urlopen(req, timeout=30) as r:
+                      raw = r.read().decode('utf-8', 'replace')
+                      return getattr(r, 'status', 200), json.loads(raw) if raw else {}
+              except urllib.error.HTTPError as e:
+                  raw = e.read().decode('utf-8', 'replace')
+                  try:
+                      parsed = json.loads(raw) if raw else {}
+                  except Exception:
+                      parsed = {'message': raw[:1000]}
+                  return e.code, parsed
+              except Exception as e:
+                  return None, {'message': f'{type(e).__name__}: {e}'}
+
+          before_code, before = call()
+          before_enforced = bool((before or {}).get('https_enforced'))
+          attempted = not before_enforced
+          attempt_code = None
+          attempt = None
+          if attempted:
+              attempt_code, attempt = call('PUT', {'https_enforced': True})
+          after_code, after = call()
+          after_enforced = bool((after or {}).get('https_enforced'))
+
+          dependency = None
+          if not after_enforced:
+              if attempt_code == 403:
+                  dependency = 'REPOSITORY_ADMINISTRATION_PERMISSION_REQUIRED'
+              elif attempt_code == 422:
+                  dependency = 'VALID_CERTIFICATE_OR_DNS_CONFIGURATION_NOT_READY'
+              elif attempt_code is None:
+                  dependency = 'PAGES_SETTINGS_API_UNAVAILABLE'
+              else:
+                  dependency = 'PAGES_HTTPS_ENFORCEMENT_PENDING'
+
+          result = {
+              'settings_api_url': api,
+              'before_http_status': before_code,
+              'before_https_enforced': before_enforced,
+              'attempted': attempted,
+              'attempt_http_status': attempt_code,
+              'attempt_response': attempt,
+              'after_http_status': after_code,
+              'after_https_enforced': after_enforced,
+              'cname': (after or before or {}).get('cname'),
+              'html_url': (after or before or {}).get('html_url'),
+              'external_dependency': dependency,
+          }
+          pathlib.Path('/tmp/partener-pages-https.json').write_text(
+              json.dumps(result, ensure_ascii=False, indent=2) + '\n', encoding='utf-8'
+          )
+          print(json.dumps(result, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Record deployment and HTTPS-control status
         if: always()
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
@@ -43,21 +130,49 @@ jobs:
         run: |
           mkdir -p partener-eu/deployment
           python - <<'PY'
-          import json, os, datetime
+          import datetime, json, os, pathlib
+
+          control_path = pathlib.Path('/tmp/partener-pages-https.json')
+          try:
+              https_control = json.loads(control_path.read_text(encoding='utf-8'))
+          except Exception as e:
+              https_control = {
+                  'after_https_enforced': False,
+                  'external_dependency': 'HTTPS_CONTROL_EVIDENCE_UNAVAILABLE',
+                  'error': f'{type(e).__name__}: {e}',
+              }
+
           ok = os.environ.get('DEPLOY_OUTCOME') == 'success' and bool(os.environ.get('PAGE_URL'))
-          with open('partener-eu/deployment/latest.json','w',encoding='utf-8') as f:
-              json.dump({
-                  'status':'LIVE' if ok else 'BLOCKED',
-                  'page_url':os.environ.get('PAGE_URL') or None,
-                  'configure_outcome':os.environ.get('CONFIGURE_OUTCOME'),
-                  'upload_outcome':os.environ.get('UPLOAD_OUTCOME'),
-                  'deploy_outcome':os.environ.get('DEPLOY_OUTCOME'),
-                  'observed_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),
-                  'git_sha':os.environ.get('GITHUB_SHA')
-              },f,indent=2)
+          payload = {
+              'status': 'LIVE' if ok else 'BLOCKED',
+              'page_url': os.environ.get('PAGE_URL') or None,
+              'configure_outcome': os.environ.get('CONFIGURE_OUTCOME'),
+              'upload_outcome': os.environ.get('UPLOAD_OUTCOME'),
+              'deploy_outcome': os.environ.get('DEPLOY_OUTCOME'),
+              'observed_at': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+              'git_sha': os.environ.get('GITHUB_SHA'),
+              'https_control': https_control,
+          }
+          pathlib.Path('partener-eu/deployment/latest.json').write_text(
+              json.dumps(payload, ensure_ascii=False, indent=2) + '\n', encoding='utf-8'
+          )
           PY
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add partener-eu/deployment/latest.json
-          git diff --cached --quiet || git commit -m 'Record PARTENER.EU Pages deployment status'
-          git push
+          if ! git diff --cached --quiet; then
+            git commit -m 'Record PARTENER.EU Pages deployment and HTTPS status'
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+
+      - name: Enforce deployment result after evidence persistence
+        if: always()
+        env:
+          CONFIGURE_OUTCOME: ${{ steps.configure.outcome }}
+          UPLOAD_OUTCOME: ${{ steps.upload.outcome }}
+          DEPLOY_OUTCOME: ${{ steps.deployment.outcome }}
+        run: |
+          test "$CONFIGURE_OUTCOME" = success
+          test "$UPLOAD_OUTCOME" = success
+          test "$DEPLOY_OUTCOME" = success
