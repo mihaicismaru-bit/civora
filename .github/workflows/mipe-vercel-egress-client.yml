@@ -1,0 +1,36 @@
+name: MIPE Vercel Egress Client
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - agent/mipe-resilient-ingestion-v2
+    paths:
+      - '.github/workflows/mipe-vercel-egress-client.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Query Frankfurt relay diagnostics
+        shell: bash
+        run: |
+          set -uo pipefail
+          BASES=(
+            'https://partener-mipe-egress-6azkj2q86-mihaicismaru-6634s-projects.vercel.app'
+            'https://partener-mipe-egress-fra-mihaicismaru-6634s-projects.vercel.app'
+          )
+          for base in "${BASES[@]}"; do
+            for target in seed root old govold dwh generator; do
+              echo "=== ${base}/api/probe?target=${target} ==="
+              curl --silent --show-error --location --connect-timeout 8 --max-time 35 \
+                --dump-header /tmp/headers --write-out '\nCLIENT code=%{http_code} final=%{url_effective} ip=%{remote_ip} tls=%{ssl_verify_result}\n' \
+                "${base}/api/probe?target=${target}" || true
+              tail -n 25 /tmp/headers 2>/dev/null || true
+              echo
+            done
+          done
