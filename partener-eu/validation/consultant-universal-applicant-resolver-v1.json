@@ -1,0 +1,34 @@
+{
+  "module": "Consultant / Universal Applicant Resolver v1",
+  "version": "1.0.0",
+  "acceptance": [
+    {
+      "id": "UAR-UAT-BREZOI-001",
+      "input": {"cui": "2541894"},
+      "expected": {
+        "name": "Primăria Orașului Brezoi",
+        "type": "municipality",
+        "entityClass": "UAT",
+        "county": "Vâlcea",
+        "region": "Sud-Vest Oltenia",
+        "locality": "Brezoi"
+      },
+      "source": "https://primariabrezoi.ro/contact.html",
+      "sourceTier": "A",
+      "status": "PASS_BY_FIXTURE"
+    },
+    {
+      "id": "UAR-COMPANY-GENERIC-001",
+      "input": {"cui": "<valid-company-cui>"},
+      "expected": "resolve through PARTENER_ENTITY_API_URL provider chain and populate Consultant form",
+      "status": "READY_FOR_PROVIDER_CONNECTION"
+    }
+  ],
+  "rules": [
+    "CUI/CIF is the primary identifier.",
+    "Entity type is inferred, not requested when resolvable.",
+    "Verified public sources carry provenance and checkedAt.",
+    "Unknown entities fail closed and preserve the entered CUI.",
+    "The same interface supports COMPANY, UAT, PUBLIC_INSTITUTION, NGO, EDUCATION, HEALTH and ADI-like applicants."
+  ]
+}
