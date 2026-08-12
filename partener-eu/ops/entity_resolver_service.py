@@ -86,7 +86,8 @@ def normalize(provider: Dict[str, Any], cui: str, raw: Dict[str, Any]) -> Option
 
 
 def resolve_provider(provider: Dict[str, Any], cui: str) -> Optional[Dict[str, Any]]:
-    if provider.get("status") != "READY":
+    status = provider.get("status", "DISABLED")
+    if status in {"DISABLED", "OPTIONAL_AUTH_OR_SERVICE_DEPENDENT"}:
         return None
     endpoint_env = provider.get("endpoint_env")
     endpoint = os.getenv(endpoint_env, "") if endpoint_env else provider.get("endpoint", "")
@@ -149,7 +150,7 @@ def resolve(cui_raw: str) -> Dict[str, Any]:
             records.append(item)
     profile = classify_entity(merge_records(records))
     if not profile:
-        return {"ok": False, "cui": cui, "status": "UNRESOLVED", "reason": "no_ready_provider_returned_data", "checkedAt": now_iso()}
+        return {"ok": False, "cui": cui, "status": "UNRESOLVED", "reason": "no_configured_provider_returned_data", "checkedAt": now_iso()}
     return {"ok": True, **profile}
 
 
