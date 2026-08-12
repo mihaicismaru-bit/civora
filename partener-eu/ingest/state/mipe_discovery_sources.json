@@ -1,10 +1,16 @@
 {
-  "version": 1,
-  "policy": "Discovery sources may reveal canonical MIPE URLs. Facts are publishable as MIPE only after the canonical official URL is verified.",
+  "version": 2,
+  "policy": "Discovery sources may reveal canonical MIPE URLs. Facts are publishable as MIPE only after the canonical official URL is verified. Search-index discoveries are URL seeds only and never evidence for publication.",
   "sources": [
     {"url":"https://mfe.gov.ro/pdds/despre-program-programare/","role":"T1_PRIORITY_SEED","scope":"PDDS"},
+    {"url":"https://mfe.gov.ro/pdds/noutati/","role":"T1_CANONICAL_PENDING_FETCH","scope":"PDDS news"},
+    {"url":"https://mfe.gov.ro/pdds/ghiduri/","role":"T1_CANONICAL_PENDING_FETCH","scope":"PDDS guides"},
     {"url":"https://mfe.gov.ro/ghiduri_peos/","role":"T1_TAXONOMY_ROOT","scope":"PEO"},
     {"url":"https://mfe.gov.ro/ghiduri_pids/","role":"T1_TAXONOMY_ROOT","scope":"PoIDS"},
+    {"url":"https://mfe.gov.ro/ghiduri-ms/","role":"T1_CANONICAL_PENDING_FETCH","scope":"Programul Sanatate guides"},
+    {"url":"https://mfe.gov.ro/minister/perioade-de-programare/perioada-2021-2027/autoritatea-de-management-pentru-programul-sanatate/noutati/","role":"T1_CANONICAL_PENDING_FETCH","scope":"Programul Sanatate news"},
+    {"url":"https://mfe.gov.ro/calendar-apeluri-de-finantare","role":"T1_CANONICAL_PENDING_FETCH","scope":"MIPE calls calendar"},
+    {"url":"https://mfe.gov.ro/tichet-unic/","role":"T1_CANONICAL_PENDING_FETCH","scope":"MIPE helpdesk policy"},
     {"url":"https://mfe.gov.ro/","role":"T1_ROOT","scope":"MIPE"},
     {"url":"https://generatormachete.mfe.gov.ro/","role":"T1_AUXILIARY_OFFICIAL","scope":"MIPE visibility resources"},
     {"url":"https://oirvest.ro/peo-2021-2027/","role":"T2_OFFICIAL_DISCOVERY_ONLY","scope":"PEO canonical MIPE links"},
