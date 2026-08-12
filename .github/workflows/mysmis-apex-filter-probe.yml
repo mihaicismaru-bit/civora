@@ -1,0 +1,52 @@
+name: MySMIS APEX Filter Probe
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/mipe-resilient-ingestion-v2]
+    paths: ['.github/workflows/mysmis-apex-filter-probe.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Probe friendly-URL filters and inspect APEX report configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://reporting.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027'
+          python - <<'PY'
+          import html, json, re, subprocess, tempfile, urllib.parse
+          base='https://reporting.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027'
+          queries=[
+            {},
+            {'IR_STARE_APEL':'DESCHIS'},
+            {'IRC_STARE_APEL':'DESCHIS'},
+            {'IR_ROWFILTER':'DESCHIS'},
+            {'IRC_ROWFILTER':'DESCHIS'},
+            {'IR[APELURI]_STARE_APEL':'DESCHIS'},
+            {'IR[APELURI]_ROWFILTER':'DESCHIS'},
+            {'p200_rows':'1000'},
+            {'APELURI_rows':'1000'},
+          ]
+          for params in queries:
+            url=base+('?' + urllib.parse.urlencode(params) if params else '')
+            with tempfile.NamedTemporaryFile() as f:
+              p=subprocess.run(['curl','-sS','-L','--compressed','--connect-timeout','8','--max-time','35','-A','PARTENER.EU-CIVORA-MySMIS-Probe/2.0','-o',f.name,'-w','%{http_code}\t%{url_effective}\t%{size_download}',url],capture_output=True,text=True)
+              raw=open(f.name,'rb').read().decode('utf-8','replace')
+            text=re.sub(r'<[^>]+>',' ',raw)
+            text=html.unescape(re.sub(r'\s+',' ',text))
+            range_m=re.search(r'\b(\d+)\s*-\s*(\d+)\s+of\s+(\d+)\b',text,re.I)
+            states={s:len(re.findall(r'>\s*'+s+r'\s*<',raw,re.I)) for s in ('DESCHIS','FINALIZAT','IN PREGATIRE','IN PREGĂTIRE')}
+            print(json.dumps({'params':params,'curl':p.stdout.strip(),'rc':p.returncode,'range':range_m.groups() if range_m else None,'states':states,'tr':len(re.findall(r'<tr\b',raw,re.I))},ensure_ascii=False))
+            if not params:
+              print('=== APEX CONFIG EXCERPTS ===')
+              for pattern in (r'apex\.region\.create.{0,2500}',r'interactiveReport.{0,2500}',r'ajaxIdentifier.{0,1000}',r'APELURI.{0,2000}',r'B160137058328874434.{0,2500}'):
+                for m in re.finditer(pattern,raw,re.I|re.S):
+                  print(re.sub(r'\s+',' ',m.group(0))[:3000])
+                  break
+          PY
