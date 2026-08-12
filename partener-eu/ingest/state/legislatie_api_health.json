@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "id": "SRC-LEGISLATIE-API",
+  "tier": "T1",
+  "name": "Portal Legislativ — API SOAP oficial fără credențiale",
+  "observed_at": "2026-08-12T10:05:12Z",
+  "status": "DEGRADED_SOAP_TOKEN_UNAVAILABLE",
+  "selected_endpoint": "http://legislatie.just.ro/apiws/FreeWebService.svc",
+  "semantic_sha256": "bfb4d1d9ed0a54b84301092311d503389534331deb6802c39bc5e8f3fb22f8d8",
+  "last_success_at": null,
+  "last_known_good_preserved": false,
+  "probes": [
+    {
+      "endpoint": "https://legislatie.just.ro/apiws/FreeWebService.svc",
+      "landing": {
+        "ok": false,
+        "http_status": null,
+        "final_url": null,
+        "bytes": 0,
+        "body_sha256": null,
+        "markers_found": [],
+        "transport": "urllib-get",
+        "error": "Remote end closed connection without response"
+      },
+      "token_probe": {
+        "ok": false,
+        "token_received": false,
+        "token_length": 0,
+        "token_sha256": null,
+        "xml_valid": false,
+        "http_status": null,
+        "final_url": null,
+        "response_bytes": 0,
+        "transport": "curl-ipv4-soap",
+        "error": "curl: (52) Empty reply from server\n"
+      },
+      "attempts": [
+        {
+          "transport": "urllib-soap",
+          "ok": false,
+          "http_status": null,
+          "error": "Remote end closed connection without response"
+        },
+        {
+          "transport": "curl-ipv4-soap",
+          "ok": false,
+          "http_status": null,
+          "error": "curl: (52) Empty reply from server\n"
+        }
+      ],
+      "ok": false,
+      "degraded": false
+    },
+    {
+      "endpoint": "http://legislatie.just.ro/apiws/FreeWebService.svc",
+      "landing": {
+        "ok": true,
+        "http_status": 200,
+        "final_url": "http://legislatie.just.ro/apiws/FreeWebService.svc",
+        "bytes": 3045,
+        "body_sha256": "87fc0924923577478c224afd68c48df8cd4a3d0ee35f75431d4d1a70d210575d",
+        "markers_found": [
+          "FreeWebService",
+          "Service"
+        ],
+        "transport": "urllib-get",
+        "error": null
+      },
+      "token_probe": {
+        "token_received": false,
+        "token_length": 0,
+        "token_sha256": null,
+        "xml_valid": false,
+        "error": "no element found: line 1, column 0",
+        "ok": false,
+        "http_status": null,
+        "final_url": "http://legislatie.just.ro/apiws/FreeWebService.svc",
+        "response_bytes": 0,
+        "transport": "curl-ipv4-soap"
+      },
+      "attempts": [
+        {
+          "transport": "urllib-soap",
+          "ok": false,
+          "http_status": 404,
+          "error": "HTTP Error 404: Not Found"
+        },
+        {
+          "transport": "curl-ipv4-soap",
+          "ok": false,
+          "http_status": null,
+          "error": "no element found: line 1, column 0"
+        }
+      ],
+      "ok": false,
+      "degraded": true
+    }
+  ],
+  "policy": {
+    "credentials_required": false,
+    "temporary_token_persisted": false,
+    "temporary_token_logged": false,
+    "material_facts_auto_promoted": false,
+    "use": "transport-health-and-source-capability-evidence-only",
+    "hash_change_action": "RESOLUTION_TASK_ONLY"
+  }
+}
