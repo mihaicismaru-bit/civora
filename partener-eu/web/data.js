@@ -1,5 +1,5 @@
 window.PARTENER_DATA = {
-  asOf: '2026-08-11T14:34:00+03:00',
+  asOf: '2026-08-12T14:50:00+03:00',
   calls: [
     {
       id:'afir-energy-2026', programme:'AFIR / Fondul pentru Modernizare', code:'Schema ENERGIE 2026',
@@ -12,6 +12,25 @@ window.PARTENER_DATA = {
       activities:['Panouri fotovoltaice','Sisteme de stocare asociate','Echipamente și lucrări aferente capacității eligibile'], costs:['Echipamente pentru producerea energiei','Stocare eligibilă conform ghidului','Lucrări și instalații eligibile conform ghidului'], documents:['Cerere de finanțare v1.0/2026','Documente solicitant','Documentația tehnică solicitată de ghid'], scoring:['Eligibilitate și selecție conform Ghidului Schemei de Energie'], indicators:['Capacitate nouă instalată (MW)','Energie regenerabilă pentru autoconsum'], risks:['Încadrare sectorială incorectă','Documentație tehnică incompletă','Nerespectarea plafoanelor/MW'],
       sourceFacts:[{label:'AFIR — Deschiderea sesiunii, 15.06.2026', url:'https://www.afir.ro/comunicate/deschiderea-sesiunii-pentru-investitiile-in-producerea-energiei-electrice-din-surse-regenerabile/', tier:'T1'},{label:'AFIR — Ghid / buget 265 mil. EUR, 09.06.2026', url:'https://www.afir.ro/comunicate/265-de-milioane-de-euro-pentru-investitii-in-producerea-energiei-electrice/', tier:'T1'}],
       changes:[{date:'15 iun 2026', kind:'CALL_OPENED', before:'Ghid publicat', after:'Sesiune deschisă până la 14 aug 2026'},{date:'9 iun 2026', kind:'GUIDE_PUBLISHED', before:'—', after:'Ghid aprobat; buget 265 mil. EUR'}]
+    },
+    {
+      id:'pr-ne-energy-residential-towns-2026', programme:'Programul Regional Nord-Est', code:'PR/NE/2026/3/RSO2.1/1',
+      title:'Eficiență energetică pentru clădiri rezidențiale multifamiliale — orașe',
+      status:'EXPECTED', category:'Energie / clădiri', region:'Nord-Est',
+      applicant:['Orașe din Regiunea Nord-Est — forma exactă și parteneriatele se verifică în ghid'],
+      applicantKeys:['municipality_town'], objectiveKeys:['energy_efficiency','residential_buildings'],
+      open:'17 august 2026, 12:00', close:'16 octombrie 2026, 12:00',
+      budget:'8.400.195 EUR', grant:'Conform ghidului final', cofinancing:'Conform ghidului final',
+      summary:'Apel publicat pentru renovarea energetică a clădirilor rezidențiale multifamiliale din orașele Regiunii Nord-Est. La data actualizării este URMEAZĂ: depunerea începe la 17 august 2026, ora 12:00.',
+      eligibility:['Solicitantul și teritoriul trebuie să respecte Ghidul Solicitantului','Imobilele și intervențiile eligibile trebuie verificate în documentația oficială','PARTENER.EU nu simplifică automat condițiile tehnice ale renovării energetice'],
+      activities:['Lucrări de creștere a eficienței energetice pentru clădiri rezidențiale multifamiliale','Măsuri conexe numai în limitele ghidului final'],
+      costs:['Conform Ghidului Solicitantului și anexelor publicate'],
+      documents:['Ghidul Solicitantului pentru apelul PR/NE/2026/3/RSO2.1/1','Anexele și eventualele corrigenda ale apelului'],
+      scoring:['Conform grilei oficiale; criteriile nu sunt rezumate până la extragerea completă'],
+      indicators:['Conform ghidului final'],
+      risks:['Confundarea publicării apelului cu deschiderea ferestrei MySMIS','Încadrarea unei clădiri fără verificarea condițiilor tehnice și juridice','Folosirea unei versiuni vechi a anexelor'],
+      sourceFacts:[{label:'Portalul guvernamental Oportunități UE — fișa apelului PR Nord-Est',url:'https://oportunitati-ue.gov.ro/apel/apel-pr-ne-2026-3-rso2-1-1-eficienta-energetica-cladiri-rezidentiale-orase-august-2026/',tier:'T1'}],
+      changes:[{date:'12 aug 2026',kind:'GUIDE_PUBLISHED',before:'Apel neafișat în produs',after:'Publicat; depunere 17 aug–16 oct 2026'}]
     },
     {
       id:'pr-centru-digital-2', programme:'Programul Regiunea Centru', code:'Acțiunea 2.2 — Apel 2', title:'Întreprinderi digitale pentru o economie avansată — Apel 2', status:'PUBLIC_CONSULTATION', category:'Digitalizare', region:'Centru', applicant:['Microîntreprinderi','Întreprinderi mici','Întreprinderi mijlocii'], applicantKeys:['microenterprise','small_enterprise','medium_enterprise'], objectiveKeys:['digitalization'], open:'—', close:'—', consultation:'28 aprilie – 20 mai 2026', budget:'14,113 mil. EUR', grant:'15.000–200.000 EUR', cofinancing:'min. 10%', summary:'Sprijin pentru digitalizarea IMM-urilor din Regiunea Centru. Starea oficială observată rămâne consultare publică.', eligibility:['IMM din Regiunea Centru','CAEN eligibil — necesită verificarea anexei autoritative','Condiții de minimis și sănătate financiară'], activities:['Digitalizarea proceselor','Software / ERP / automatizare','Investiții digitale eligibile conform ghidului'], costs:['Cheltuieli eligibile conform ghidului în consultare'], documents:['Documente conform ghidului în consultare'], scoring:['Prag ETF observat: 50 puncte','Mecanism de selecție conform ghidului'], indicators:['Indicatori de digitalizare conform ghidului'], risks:['Apelul nu este confirmat OPEN','CAEN neconfirmat fără Anexa 3','Condiții de minimis'], sourceFacts:[{label:'ADR Centru — pagina acțiunii 2.2 Apel 2',url:'https://www.regiocentru.ro/actiuni/2-2-intreprinderi-digitale-pentru-o-economie-avansata-apel-2/',tier:'T1'}], changes:[{date:'28 apr 2026',kind:'CONSULTATION_OPENED',before:'—',after:'Consultare publică până la 20 mai 2026'}]
