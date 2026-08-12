@@ -1,0 +1,48 @@
+name: MySMIS APEX Column Probe
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/mipe-resilient-ingestion-v2]
+    paths: ['.github/workflows/mysmis-apex-column-probe.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Inspect column metadata and exact equality filters
+        shell: bash
+        run: |
+          python - <<'PY'
+          import html,json,re,subprocess,tempfile,urllib.parse
+          base='https://reporting.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027'
+          def fetch(params):
+            u=base+('?' + urllib.parse.urlencode(params) if params else '')
+            p=subprocess.run(['curl','-sS','-L','--compressed','--max-time','30','-A','PARTENER.EU-CIVORA-MySMIS-Probe/2.1',u],capture_output=True)
+            return u,p.stdout.decode('utf-8','replace')
+          _,raw=fetch({})
+          print('=== TH ===')
+          for m in re.finditer(r'<th\b[^>]*>.*?</th>',raw,re.I|re.S):
+            x=re.sub(r'\s+',' ',m.group(0))
+            if any(k in html.unescape(x).lower() for k in ('program','apel','stare','buget')): print(x[:2500])
+          print('=== STARE_APEL CONTEXT ===')
+          for needle in ('STARE_APEL','stare_apel','C436134685626279341','APELURI",'):
+            m=re.search(re.escape(needle),raw,re.I)
+            if m: print(needle, re.sub(r'\s+',' ',raw[max(0,m.start()-1200):m.start()+2500])[:4000])
+          tests=[]
+          for key in (
+            'IREQ_STARE_APEL','IR[APELURI]EQ_STARE_APEL','IR[APELURI]_STARE_APEL',
+            'IREQ_C436134685626279341','IR[APELURI]EQ_C436134685626279341',
+            'IR_STARE_APEL','IRC_STARE_APEL','IRLIKE_STARE_APEL'
+          ):
+            u,r=fetch({key:'DESCHIS'})
+            text=html.unescape(re.sub(r'\s+',' ',re.sub(r'<[^>]+>',' ',r)))
+            rg=re.search(r'\b(\d+)\s*-\s*(\d+)\s+of\s+(\d+)\b',text,re.I)
+            tests.append({'key':key,'range':rg.groups() if rg else None,'deschis':len(re.findall(r'>\s*DESCHIS\s*<',r,re.I)),'finalizat':len(re.findall(r'>\s*FINALIZAT\s*<',r,re.I)),'bytes':len(r)})
+          print('=== FILTER TESTS ===')
+          print(json.dumps(tests,ensure_ascii=False,indent=2))
+          PY
