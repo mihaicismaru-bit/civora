@@ -1,0 +1,59 @@
+name: PARTENER.EU MIPE Transport Probe
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/partener-eu-mipe-transport-probe.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 6
+    steps:
+      - name: Probe official MIPE endpoints
+        shell: python
+        run: |
+          import hashlib, json, platform, ssl, time, urllib.request
+
+          urls = [
+              'https://mfe.gov.ro/',
+              'https://mfe.gov.ro/ghiduri_peos/',
+              'https://mfe.gov.ro/ghiduri_peos/step-lll-competente-pentru-viitor-formare-la-locul-de-munca-si-educatia-adultilor-in-tehnologiile-critice-adulti/',
+              'https://mfe.gov.ro/peos/calendar-lansari-apeluri/',
+          ]
+          out = {'runner': platform.platform(), 'results': []}
+          ctx = ssl.create_default_context()
+          for url in urls:
+              row = {'url': url}
+              started = time.time()
+              try:
+                  req = urllib.request.Request(url, headers={
+                      'User-Agent': 'Mozilla/5.0 CIVORA-PARTENER-EU/1.0 (+production-validation)'
+                  })
+                  with urllib.request.urlopen(req, timeout=12, context=ctx) as r:
+                      body = r.read(2_000_000)
+                      row.update({
+                          'ok': 200 <= r.status < 400,
+                          'status': r.status,
+                          'finalUrl': r.geturl(),
+                          'contentType': r.headers.get('content-type'),
+                          'bytes': len(body),
+                          'sha256': hashlib.sha256(body).hexdigest(),
+                      })
+              except Exception as e:
+                  row.update({'ok': False, 'error': f'{type(e).__name__}: {e}'})
+              row['elapsedMs'] = round((time.time() - started) * 1000)
+              out['results'].append(row)
+          print(json.dumps(out, ensure_ascii=False, indent=2))
+
+          # Diagnostic only: never convert this probe into facts or publication.
+          # A successful endpoint proves transport availability, not authoritative extraction.
