@@ -15,9 +15,9 @@
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-08-12T11:34:54Z",
-    "source_pass": 6,
-    "source_degraded": 0,
+    "utc": "2026-08-12T11:55:52Z",
+    "source_pass": 3,
+    "source_degraded": 3,
     "source_fail": 1,
     "source_quarantined": 1,
     "critical_fail": false,
@@ -26,14 +26,14 @@
     "quarantined_source": "SRC-LEGISLATIE — Portal Legislativ; dependent material facts blocked fail-closed"
   },
   "deployment_evidence": {
-    "utc": "2026-08-12T11:35:23Z",
+    "utc": "2026-08-12T11:56:04Z",
     "status": "PASS",
     "public_content_verified": true,
     "https_verified": true,
     "http_content_verified": true,
     "content_origin": "custom_https",
     "http_status": 200,
-    "final_url": "https://partener.eu/?p10_probe=20260812T113523Z",
+    "final_url": "https://partener.eu/?p10_probe=20260812T115604Z",
     "title": "PARTENER.EU — Finanțări europene",
     "required_markers_present": true,
     "critical_assets_ok": true,
@@ -43,7 +43,7 @@
       {
         "id": "custom_https",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260812T113523Z",
+        "final_url": "https://partener.eu/?p10_probe=20260812T115604Z",
         "content_verified": true,
         "marker_ok": true,
         "critical_assets_ok": true,
@@ -53,7 +53,7 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260812T113523Z",
+        "final_url": "http://partener.eu/?p10_probe=20260812T115604Z",
         "content_verified": true,
         "marker_ok": true,
         "critical_assets_ok": true,
@@ -63,7 +63,7 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260812T113523Z",
+        "final_url": "http://partener.eu/?p10_probe=20260812T115604Z",
         "content_verified": true,
         "marker_ok": true,
         "critical_assets_ok": true,
@@ -111,16 +111,16 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-08-12T11:35:23Z",
-    "validation_run_started": "2026-08-12T11:34:54Z",
+    "utc": "2026-08-12T11:56:04Z",
+    "validation_run_started": "2026-08-12T11:55:52Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "5dcc9f884e3a264ae272d552a5f64eb29169e01a51644c9f636ac6d02f9141e2",
-      "history_sha256": "5dcc9f884e3a264ae272d552a5f64eb29169e01a51644c9f636ac6d02f9141e2",
-      "history_path": "validation/history/20260812T113454Z.json",
+      "latest_sha256": "248569ec8ae1c4805c6233220d1d40a705e331c5d3c171678eff2843fd43a600",
+      "history_sha256": "248569ec8ae1c4805c6233220d1d40a705e331c5d3c171678eff2843fd43a600",
+      "history_path": "validation/history/20260812T115552Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "7a9158afaca84f0320507704a0e2e195451bfe680ea486cf774b8be7a73f4dbb",
-      "checkpoint_sha256": "7a9158afaca84f0320507704a0e2e195451bfe680ea486cf774b8be7a73f4dbb",
+      "source_state_sha256": "d4355af9fbc86da863c78a4530580b40fdc70d07c992977a3c08272b77dbdcf7",
+      "checkpoint_sha256": "d4355af9fbc86da863c78a4530580b40fdc70d07c992977a3c08272b77dbdcf7",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
@@ -128,7 +128,7 @@
     },
     "source_registry": {
       "observed_at": "2026-08-12T09:50:27.343775Z",
-      "age_seconds": 6295,
+      "age_seconds": 7537,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
