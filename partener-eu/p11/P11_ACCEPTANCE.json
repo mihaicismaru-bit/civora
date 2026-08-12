@@ -1,13 +1,13 @@
 {
   "schema_version": "1.0",
-  "checkpoint": "P11-I01",
+  "checkpoint": "P11-I02",
   "status": "PASS",
   "accepted_at": "2026-08-12",
   "evidence": {
     "contract": "partener-eu/p11/opportunity_contract.py",
     "tests": "partener-eu/p11/test_opportunity_contract.py",
-    "test_command": "python -m unittest partener-eu/p11/test_opportunity_contract.py",
-    "tests_passed": 6,
+    "test_command": "python -m unittest discover -s partener-eu/p11 -p 'test_*.py' && python partener-eu/p11/validate_corpus.py",
+    "tests_passed": 10,
     "tests_failed": 0
   },
   "policy_assertions": {
@@ -16,11 +16,15 @@
     "t2_cannot_authorize_material_publication": true,
     "unresolved_semantics_cannot_promote_material_facts": true,
     "changesets_cannot_auto_publish_material_facts": true,
-    "orphan_changesets_and_resolution_tasks_rejected": true
+    "orphan_changesets_and_resolution_tasks_rejected": true,
+    "candidate_facts_require_open_resolution_blocks": true,
+    "canonical_ids_match_public_source_records": true
   },
   "corpus": {
     "public_baseline": 5,
-    "canonicalized_in_this_increment": 0,
+    "canonicalized_in_this_increment": 5,
+    "publishable_after_normalization": 0,
+    "open_resolution_tasks": 5,
     "target": 25
   },
   "publication_effect": "NONE"

@@ -24,4 +24,6 @@ jobs:
         with:
           python-version: '3.12'
       - name: Canonical contract and fail-closed policy regression
-        run: python -m unittest partener-eu/p11/test_opportunity_contract.py
+        run: python -m unittest discover -s partener-eu/p11 -p 'test_*.py'
+      - name: Canonical corpus identity and publication gate
+        run: python partener-eu/p11/validate_corpus.py

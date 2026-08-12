@@ -75,10 +75,21 @@ def validate_opportunity(item: Mapping[str, Any], evidence: EvidenceIndex) -> No
 
     fact_evidence = item.get("fact_evidence") or {}
     _require(isinstance(fact_evidence, Mapping), f"fact_evidence must be an object: {opportunity_id}")
+    material_facts = item.get("material_facts") or {}
+    _require(isinstance(material_facts, Mapping), f"material_facts must be an object: {opportunity_id}")
+    _require(set(material_facts) <= MATERIAL_FACT_CLASSES, f"unknown material fact: {opportunity_id}")
+    for fact_class in material_facts:
+        _require(fact_class in fact_evidence, f"material fact lacks evidence mapping for {fact_class}: {opportunity_id}")
     for fact_class, refs in fact_evidence.items():
         _require(fact_class in MATERIAL_FACT_CLASSES, f"unknown material fact class: {fact_class}")
         _require(isinstance(refs, list) and refs, f"empty evidence refs for {fact_class}: {opportunity_id}")
         _require(any(evidence.supports(ref, fact_class) for ref in refs), f"no authoritative semantic evidence for {fact_class}: {opportunity_id}")
+
+    candidate_facts = item.get("candidate_material_facts") or {}
+    _require(isinstance(candidate_facts, Mapping), f"candidate_material_facts must be an object: {opportunity_id}")
+    _require(set(candidate_facts) <= MATERIAL_FACT_CLASSES, f"unknown candidate material fact: {opportunity_id}")
+    if candidate_facts:
+        _require(item.get("publication_state") != "PUBLISHABLE", f"unresolved candidates cannot be publishable: {opportunity_id}")
 
     if item.get("publication_state") == "PUBLISHABLE":
         _require(item.get("automatic_material_fact_update_allowed") is False, f"material auto-update must be false: {opportunity_id}")
@@ -133,9 +144,16 @@ def validate_bundle(bundle: Mapping[str, Any]) -> dict[str, int]:
     for item in changesets:
         validate_changeset(item, evidence)
         _require(item["opportunity_id"] in ids, f"orphan ChangeSet: {item.get('changeset_id')}")
+    blocked_by_opportunity: dict[str, set[str]] = {}
     for item in tasks:
         validate_resolution_task(item)
         _require(item["opportunity_id"] in ids, f"orphan ResolutionTask: {item.get('resolution_task_id')}")
+        if item.get("status") in {"OPEN", "IN_REVIEW"}:
+            blocked_by_opportunity.setdefault(item["opportunity_id"], set()).update(item["blocked_fact_classes"])
+    for item in opportunities:
+        candidate_classes = set((item.get("candidate_material_facts") or {}).keys())
+        missing_blocks = candidate_classes - blocked_by_opportunity.get(item["opportunity_id"], set())
+        _require(not missing_blocks, f"candidate facts lack open ResolutionTask: {item['opportunity_id']} {sorted(missing_blocks)}")
     return {
         "opportunities": len(opportunities),
         "evidence": len(evidence_rows),

@@ -1,0 +1,149 @@
+{
+  "schema_version": "1.0",
+  "bundle_id": "PARTENER-EU-P11-CANONICAL-0001",
+  "as_of": "2026-08-12T10:34:55Z",
+  "source_snapshot": {
+    "repository": "mihaicismaru-bit/civora",
+    "public_data_path": "partener-eu/web/data.js",
+    "public_data_ref": "main",
+    "expected_public_ids": ["afir-energy-2026", "pr-centru-digital-2", "pr-centru-clusters-122", "pids-supported-decision", "peo-step-edu-adulti"],
+    "normalization_effect": "NONE_ON_PUBLICATION"
+  },
+  "evidence": [
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-SRC-AFIR-ENERGY-2026",
+      "source_id": "SRC-AFIR-ENERGY-2026",
+      "source_tier": "T1",
+      "source_url": "https://www.afir.ro/comunicate/deschiderea-sesiunii-pentru-investitiile-in-producerea-energiei-electrice-din-surse-regenerabile/",
+      "observed_at": "2026-08-12T10:34:55Z",
+      "semantic_sha256": "bc5077d09f5be74c04ad7151ea80b783da3c5fcc275eec6e76de979ecae72c1c",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": ["status", "deadline"]
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-SRC-PR-CENTRU-DIGITAL-2",
+      "source_id": "SRC-PR-CENTRU-DIGITAL-2",
+      "source_tier": "T1",
+      "source_url": "https://www.regiocentru.ro/actiuni/2-2-intreprinderi-digitale-pentru-o-economie-avansata-apel-2/",
+      "observed_at": "2026-08-12T10:34:55Z",
+      "semantic_sha256": "82536ee60202beb0f1ee25fab18cbff64adf45ea7065379f035b5f2c2b9838a6",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": ["status"]
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-SRC-PR-CENTRU-ACTIUNI",
+      "source_id": "SRC-PR-CENTRU-ACTIUNI",
+      "source_tier": "T1",
+      "source_url": "https://www.regiocentru.ro/actiuni/",
+      "observed_at": "2026-08-12T10:34:55Z",
+      "semantic_sha256": "b540e635d05c053a753888f0979b8a9092ea5761fab733f8943587af7f0d6dde",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": ["status", "deadline"]
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-SRC-OIRBI-PIDS",
+      "source_id": "SRC-OIRBI-PIDS",
+      "source_tier": "T1B",
+      "source_url": "https://www.oirbi.ro/pids-2021-2027/",
+      "observed_at": "2026-08-12T10:34:55Z",
+      "semantic_sha256": "f0bf324310dd42730b675e8bb37454a8877ca6ca54d793fb47ffbdc1b879eaa3",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": ["status", "deadline"]
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-SRC-OIRVEST-PEO",
+      "source_id": "SRC-OIRVEST-PEO",
+      "source_tier": "T1B",
+      "source_url": "https://oirvest.ro/ghiduri-peo/",
+      "observed_at": "2026-08-12T10:34:55Z",
+      "semantic_sha256": "808012988357e68835f1359b7bb8eff296e07666afbbc044c69bd235d0636bc9",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": ["status"]
+    }
+  ],
+  "opportunities": [
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "afir-energy-2026",
+      "title": "Investiții în producerea energiei electrice din surse regenerabile pentru autoconsum",
+      "programme": "AFIR / Fondul pentru Modernizare",
+      "code": "Schema ENERGIE 2026",
+      "status": "OPEN",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": ["EV-SRC-AFIR-ENERGY-2026"],
+      "material_facts": {"status": "OPEN", "deadline": {"opens": "15 iunie 2026", "closes": "14 august 2026"}},
+      "fact_evidence": {"status": ["EV-SRC-AFIR-ENERGY-2026"], "deadline": ["EV-SRC-AFIR-ENERGY-2026"]},
+      "candidate_material_facts": {"budget": "265 mil. EUR", "grant": "100% nerambursabil în limitele/MW", "eligibility": "Imported legacy applicant and condition lists", "scoring": "Conform Ghidului Schemei de Energie", "beneficiaries": "Întreprinderi agricole; industria alimentară"}
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "pr-centru-digital-2",
+      "title": "Întreprinderi digitale pentru o economie avansată — Apel 2",
+      "programme": "Programul Regiunea Centru",
+      "code": "Acțiunea 2.2 — Apel 2",
+      "status": "PUBLIC_CONSULTATION",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": ["EV-SRC-PR-CENTRU-DIGITAL-2"],
+      "material_facts": {"status": "PUBLIC_CONSULTATION"},
+      "fact_evidence": {"status": ["EV-SRC-PR-CENTRU-DIGITAL-2"]},
+      "candidate_material_facts": {"deadline": "Consultare 28 aprilie – 20 mai 2026", "budget": "14,113 mil. EUR", "grant": "15.000–200.000 EUR", "eligibility": "IMM din Regiunea Centru; CAEN de verificat", "scoring": "Prag ETF observat: 50 puncte", "beneficiaries": "Microîntreprinderi și IMM"}
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "pr-centru-clusters-122",
+      "title": "Clustere inovative",
+      "programme": "Programul Regiunea Centru",
+      "code": "1.2.2",
+      "status": "OPEN",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": ["EV-SRC-PR-CENTRU-ACTIUNI"],
+      "material_facts": {"status": "OPEN", "deadline": {"opens": "6 iulie 2026, 12:00", "closes": "6 noiembrie 2026, 12:00"}},
+      "fact_evidence": {"status": ["EV-SRC-PR-CENTRU-ACTIUNI"], "deadline": ["EV-SRC-PR-CENTRU-ACTIUNI"]},
+      "candidate_material_facts": {"budget": "Vezi ghid", "grant": "Vezi ghid", "eligibility": "Clustere / organizații eligibile conform ghidului", "scoring": "Conform ghidului", "beneficiaries": "Clustere"}
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "pids-supported-decision",
+      "title": "Servicii de asistență și suport în luarea deciziei",
+      "programme": "PIDS",
+      "code": "P07 / ESO4.11 / 7.2 C1",
+      "status": "OPEN",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": ["EV-SRC-OIRBI-PIDS"],
+      "material_facts": {"status": "OPEN", "deadline": {"opens": "30 iunie 2026, 16:00", "closes": "28 august 2026, 16:00"}},
+      "fact_evidence": {"status": ["EV-SRC-OIRBI-PIDS"], "deadline": ["EV-SRC-OIRBI-PIDS"]},
+      "candidate_material_facts": {"budget": "11,804 mil. EUR", "grant": "Conform ghidului", "eligibility": "Lider restricționat instituțional; parteneri conform ghidului", "scoring": "Necompetitiv — condiții specifice", "beneficiaries": "Minister / parteneri instituționali eligibili"}
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "peo-step-edu-adulti",
+      "title": "STEP-EDU — Competențe pentru viitor în tehnologii critice — Adulți",
+      "programme": "PEO / STEP",
+      "code": "P11 / ESO4.7 / 11.g.1",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": ["EV-SRC-OIRVEST-PEO"],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {"status": "EXPECTED", "deadline": "Consultare 20 martie – 10 aprilie 2026; lansare neconfirmată", "budget": "120 mil. EUR", "grant": "Neconfirmat final", "eligibility": "Universități publice/private, de verificat în ghid final", "scoring": "Necunoscut până la ghid final", "beneficiaries": "Universități publice/private"}
+    }
+  ],
+  "changesets": [],
+  "resolution_tasks": [
+    {"schema_version": "1.0", "resolution_task_id": "RT-AFIR-ENERGY-2026-MATERIAL", "opportunity_id": "afir-energy-2026", "status": "OPEN", "automatic_material_fact_update_allowed": false, "blocked_fact_classes": ["budget", "grant", "eligibility", "scoring", "beneficiaries"]},
+    {"schema_version": "1.0", "resolution_task_id": "RT-PR-CENTRU-DIGITAL-2-MATERIAL", "opportunity_id": "pr-centru-digital-2", "status": "OPEN", "automatic_material_fact_update_allowed": false, "blocked_fact_classes": ["deadline", "budget", "grant", "eligibility", "scoring", "beneficiaries"]},
+    {"schema_version": "1.0", "resolution_task_id": "RT-PR-CENTRU-CLUSTERS-122-MATERIAL", "opportunity_id": "pr-centru-clusters-122", "status": "OPEN", "automatic_material_fact_update_allowed": false, "blocked_fact_classes": ["budget", "grant", "eligibility", "scoring", "beneficiaries"]},
+    {"schema_version": "1.0", "resolution_task_id": "RT-PIDS-SUPPORTED-DECISION-MATERIAL", "opportunity_id": "pids-supported-decision", "status": "OPEN", "automatic_material_fact_update_allowed": false, "blocked_fact_classes": ["budget", "grant", "eligibility", "scoring", "beneficiaries"]},
+    {"schema_version": "1.0", "resolution_task_id": "RT-PEO-STEP-EDU-ADULTI-MATERIAL", "opportunity_id": "peo-step-edu-adulti", "status": "OPEN", "automatic_material_fact_update_allowed": false, "blocked_fact_classes": ["status", "deadline", "budget", "grant", "eligibility", "scoring", "beneficiaries"]}
+  ]
+}
