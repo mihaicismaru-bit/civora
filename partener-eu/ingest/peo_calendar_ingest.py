@@ -6,186 +6,102 @@ import re
 import urllib.request
 from io import BytesIO
 from pathlib import Path
-
 from openpyxl import load_workbook
 
-ROOT = Path(__file__).resolve().parents[2]
-STATE = ROOT / 'partener-eu/ingest/state/peo_calendar_state.json'
-OUT = ROOT / 'partener-eu/web/peo-calendar.js'
+ROOT=Path(__file__).resolve().parents[2]
+STATE=ROOT/'partener-eu/ingest/state/peo_calendar_state.json'
+OUT=ROOT/'partener-eu/web/peo-calendar.js'
+MIPE_CONTAINER='https://mfe.gov.ro/peos/calendar-lansari-apeluri/'
+OIR_XLSX='https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx'
+MIPE_CM_2026='https://mfe.gov.ro/wp-content/uploads/2026/05/ce7339fe643b3ee00e250662c1aa10b3-2.pdf'
+UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36'
 
-MIPE_CONTAINER = 'https://mfe.gov.ro/peos/calendar-lansari-apeluri/'
-OIR_PROGRAM_PAGE = 'https://oirvest.ro/program-peo-programul-educatie-si-ocupare/'
-OIR_XLSX = 'https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx'
-MIPE_CM_2026 = 'https://mfe.gov.ro/wp-content/uploads/2026/05/ce7339fe643b3ee00e250662c1aa10b3-2.pdf'
-
-UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36'
-
-
-def now():
-    return dt.datetime.now(dt.timezone.utc)
-
-
+def now(): return dt.datetime.now(dt.timezone.utc)
 def clean(v):
-    if v is None:
-        return ''
-    if isinstance(v, (dt.date, dt.datetime)):
-        return v.isoformat()
-    return re.sub(r'\s+', ' ', str(v)).strip()
-
-
+    if v is None:return ''
+    if isinstance(v,(dt.date,dt.datetime)):return v.isoformat()
+    return re.sub(r'\s+',' ',str(v)).strip()
+def norm(s):
+    s=clean(s).lower().translate(str.maketrans('ăâîșşțţ','aaisstt'))
+    return re.sub(r'[^a-z0-9]+',' ',s).strip()
 def fetch(url):
-    req = urllib.request.Request(url, headers={'User-Agent': UA, 'Accept': '*/*'})
-    with urllib.request.urlopen(req, timeout=25) as r:
-        data = r.read()
-        return data, getattr(r, 'status', 200), r.headers.get('Content-Type', '')
-
-
-def norm_header(s):
-    s = clean(s).lower()
-    table = str.maketrans('ăâîșşțţ', 'aaisstt')
-    s = s.translate(table)
-    return re.sub(r'[^a-z0-9]+', ' ', s).strip()
-
-
+    req=urllib.request.Request(url,headers={'User-Agent':UA,'Accept':'*/*'})
+    with urllib.request.urlopen(req,timeout=25) as r:return r.read(),getattr(r,'status',200),r.headers.get('Content-Type','')
 def header_score(row):
-    text = ' | '.join(norm_header(x) for x in row)
-    keys = ['apel', 'prioritate', 'actiune', 'alocare', 'buget', 'lansare', 'data', 'perioada', 'solicitant']
-    return sum(1 for k in keys if k in text)
-
-
+    t=' | '.join(norm(x) for x in row)
+    return sum(1 for k in ['program','apel','buget','solicitant','deschidere','inchidere'] if k in t)
 def find_header(rows):
-    best = (0, 0)
-    for i, row in enumerate(rows[:40]):
-        s = header_score(row)
-        if s > best[1]:
-            best = (i, s)
-    return best[0] if best[1] >= 2 else 0
-
-
-def classify_columns(headers):
-    out = {}
-    for i, h in enumerate(headers):
-        n = norm_header(h)
-        if not n:
-            continue
-        if 'prioritat' in n and 'prioritate' not in out: out['priority'] = i
-        elif ('denumire' in n and 'apel' in n) or n == 'apel' or 'titlu apel' in n: out['title'] = i
-        elif 'actiune' in n and 'action' not in out: out['action'] = i
-        elif ('alocare' in n or 'buget' in n) and 'budget' not in out: out['budget'] = i
-        elif ('data' in n and 'lans' in n) or ('lansare' in n and 'launch' not in out): out['launch'] = i
-        elif ('tip' in n and 'apel' in n) and 'callType' not in out: out['callType'] = i
-        elif ('solicitant' in n or 'beneficiar' in n) and 'applicants' not in out: out['applicants'] = i
-        elif ('observ' in n or 'mentiuni' in n) and 'notes' not in out: out['notes'] = i
+    scored=[(header_score(r),i) for i,r in enumerate(rows[:40])]
+    score,i=max(scored) if scored else (0,0)
+    return i if score>=3 else 0
+def classify(headers):
+    out={}
+    for i,h in enumerate(headers):
+        n=norm(h)
+        if n=='program' or (n.startswith('program ') and 'autoritate' not in n):out.setdefault('programme',i)
+        elif 'denumire apel' in n or 'titlu apel' in n or n=='apel':out.setdefault('title',i)
+        elif n=='domeniu' or 'prioritat' in n:out.setdefault('priority',i)
+        elif ('buget total apel' in n or 'alocare' in n) and 'budget' not in out:out['budget']=i
+        elif 'solicitant' in n or 'beneficiar eligibil' in n:out.setdefault('applicants',i)
+        elif 'tip apel' in n:out.setdefault('callType',i)
+        elif 'estimata deschidere' in n or ('data' in n and 'deschidere' in n):out.setdefault('launch',i)
+        elif 'estimata inchidere' in n or ('data' in n and 'inchidere' in n):out.setdefault('close',i)
+        elif 'obiectivele apelului' in n:out.setdefault('objective',i)
+        elif 'zona geografica' in n:out.setdefault('region',i)
+        elif 'sursa de finantare' in n or 'tip fond' in n:out.setdefault('fund',i)
+        elif 'observ' in n or 'mentiuni' in n:out.setdefault('notes',i)
     return out
-
-
-def cell(row, idx):
-    if idx is None or idx >= len(row): return ''
-    return clean(row[idx])
-
-
-def parse_workbook(blob):
-    wb = load_workbook(BytesIO(blob), data_only=True, read_only=True)
-    diagnostics = []
-    items = []
+def cell(row,idx):return clean(row[idx]) if idx is not None and idx<len(row) else ''
+def is_peo(program):
+    n=norm(program)
+    return bool(re.search(r'(^| )peo( |$)',n) or ('educatie' in n and 'ocupare' in n))
+def parse(blob):
+    wb=load_workbook(BytesIO(blob),data_only=True,read_only=True)
+    items=[];diag=[]
     for ws in wb.worksheets:
-        rows = [list(r) for r in ws.iter_rows(values_only=True)]
-        if not rows: continue
-        hi = find_header(rows)
-        headers = [clean(x) for x in rows[hi]]
-        cols = classify_columns(headers)
-        diagnostics.append({'sheet': ws.title, 'rows': len(rows), 'cols': len(headers), 'headerRow': hi + 1, 'headers': headers[:30], 'mapped': cols})
-        if 'title' not in cols:
-            continue
-        for rn, row in enumerate(rows[hi+1:], start=hi+2):
-            title = cell(row, cols.get('title'))
-            if len(title) < 5:
-                continue
-            text = ' '.join(clean(x) for x in row)
-            if not re.search(r'[A-Za-zĂÂÎȘȚăâîșț]', title):
-                continue
-            raw_launch = cell(row, cols.get('launch'))
-            status = 'PLANNED'
-            if any(x in text.lower() for x in ['lansat', 'lansată', 'lansata']): status = 'MATERIALIZED_HINT'
-            key = hashlib.sha256((ws.title+'|'+title+'|'+cell(row, cols.get('priority'))).encode('utf-8')).hexdigest()[:18]
-            items.append({
-                'id': key,
-                'programme': 'PEO',
-                'priority': cell(row, cols.get('priority')),
-                'action': cell(row, cols.get('action')),
-                'title': title,
-                'budget': cell(row, cols.get('budget')),
-                'plannedLaunch': raw_launch,
-                'callType': cell(row, cols.get('callType')),
-                'applicants': cell(row, cols.get('applicants')),
-                'notes': cell(row, cols.get('notes')),
-                'calendarStatus': status,
-                'materialization': 'NOT_YET_VERIFIED',
-                'sourceSheet': ws.title,
-                'sourceRow': rn,
-            })
-    return items, diagnostics
-
-
+        rows=[list(r) for r in ws.iter_rows(values_only=True)]
+        if not rows:continue
+        hi=find_header(rows);headers=[clean(x) for x in rows[hi]];cols=classify(headers)
+        stats={'sheet':ws.title,'rows':len(rows),'headerRow':hi+1,'mapped':cols,'peoRows':0}
+        diag.append(stats)
+        if 'title' not in cols or 'programme' not in cols:continue
+        for rn,row in enumerate(rows[hi+1:],start=hi+2):
+            program=cell(row,cols.get('programme'))
+            if not is_peo(program):continue
+            title=cell(row,cols.get('title'))
+            if len(title)<5:continue
+            stats['peoRows']+=1
+            priority=cell(row,cols.get('priority'))
+            launch=cell(row,cols.get('launch'));close=cell(row,cols.get('close'))
+            key=hashlib.sha256((program+'|'+title+'|'+priority).encode('utf-8')).hexdigest()[:18]
+            items.append({'id':key,'programme':'PEO','programmeRaw':program,'priority':priority,'title':title,'objective':cell(row,cols.get('objective')),'region':cell(row,cols.get('region')),'budget':cell(row,cols.get('budget')),'fund':cell(row,cols.get('fund')),'plannedLaunch':launch,'plannedClose':close,'callType':cell(row,cols.get('callType')),'applicants':cell(row,cols.get('applicants')),'notes':cell(row,cols.get('notes')),'calendarStatus':'PLANNED','materialization':'NOT_YET_VERIFIED','sourceSheet':ws.title,'sourceRow':rn})
+    return items,diag
 def load_state():
-    try: return json.loads(STATE.read_text(encoding='utf-8'))
-    except: return {'versions': [], 'items': []}
-
-
+    try:return json.loads(STATE.read_text(encoding='utf-8'))
+    except:return {'versions':[],'items':[]}
 def main():
-    observed = now().isoformat()
-    prev = load_state()
+    observed=now().isoformat();prev=load_state()
     try:
-        blob, code, ctype = fetch(OIR_XLSX)
-        if len(blob) < 1000: raise RuntimeError('downloaded workbook too small')
-        sha = hashlib.sha256(blob).hexdigest()
-        items, diag = parse_workbook(blob)
-        if not items: raise RuntimeError('workbook parsed but no calendar items found')
-        old_by_id = {x.get('id'):x for x in prev.get('items', [])}
-        changes=[]
+        blob,code,ctype=fetch(OIR_XLSX)
+        if len(blob)<1000:raise RuntimeError('downloaded workbook too small')
+        sha=hashlib.sha256(blob).hexdigest();items,diag=parse(blob)
+        if not items:raise RuntimeError('no PEO rows found in consolidated workbook')
+        old={x.get('id'):x for x in prev.get('items',[]) if x.get('programme')=='PEO'};changes=[]
         for x in items:
-            old=old_by_id.get(x['id'])
-            if not old:
-                changes.append({'kind':'CALENDAR_ITEM_ADDED','id':x['id'],'title':x['title']})
-                continue
-            for f in ['plannedLaunch','budget','priority','callType','notes']:
-                if clean(old.get(f)) != clean(x.get(f)):
-                    changes.append({'kind':'CALENDAR_ITEM_CHANGED','id':x['id'],'title':x['title'],'field':f,'before':old.get(f,''),'after':x.get(f,'')})
+            p=old.get(x['id'])
+            if not p:changes.append({'kind':'CALENDAR_ITEM_ADDED','id':x['id'],'title':x['title']});continue
+            for f in ['plannedLaunch','plannedClose','budget','priority','callType','applicants']:
+                if clean(p.get(f))!=clean(x.get(f)):changes.append({'kind':'CALENDAR_ITEM_CHANGED','id':x['id'],'title':x['title'],'field':f,'before':p.get(f,''),'after':x.get(f,'')})
         version={'observedAt':observed,'sha256':sha,'bytes':len(blob),'itemCount':len(items),'changes':len(changes),'source':OIR_XLSX}
-        versions=(prev.get('versions') or [])
-        if not versions or versions[-1].get('sha256') != sha:
-            versions=(versions+[version])[-30:]
-        state={
-            'status':'OK_OFFICIAL_OIR_COPY',
-            'lastRun':version,
-            'canonicalContainer':MIPE_CONTAINER,
-            'supportingOfficialReference':MIPE_CM_2026,
-            'retrievalSource':OIR_XLSX,
-            'retrievalSourceClass':'OFFICIAL_INSTITUTIONAL_COPY_OIR_PECU_VEST',
-            'directMipeVerified':False,
-            'items':items,
-            'changes':changes[:200],
-            'diagnostics':diag,
-            'versions':versions,
-        }
-        STATE.parent.mkdir(parents=True, exist_ok=True)
-        STATE.write_text(json.dumps(state,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-        payload={
-            'status':state['status'],'asOf':observed,'programme':'PEO','title':'Calendar estimativ consolidat al lansărilor de apeluri de proiecte',
-            'canonicalContainer':MIPE_CONTAINER,'retrievalSource':OIR_XLSX,'retrievalSourceClass':state['retrievalSourceClass'],
-            'directMipeVerified':False,'versionSha256':sha,'itemCount':len(items),'changeCount':len(changes),
-            'items':items,'changes':changes[:100]
-        }
+        versions=prev.get('versions') or []
+        # reset contaminated diagnostic history from first prototype if it did not contain PEO-only data
+        if prev.get('lastRun',{}).get('itemCount',0)>100:versions=[]
+        if not versions or versions[-1].get('sha256')!=sha:versions=(versions+[version])[-30:]
+        state={'status':'OK_OFFICIAL_OIR_COPY','lastRun':version,'canonicalContainer':MIPE_CONTAINER,'supportingOfficialReference':MIPE_CM_2026,'retrievalSource':OIR_XLSX,'retrievalSourceClass':'OFFICIAL_INSTITUTIONAL_COPY_OIR_PECU_VEST','directMipeVerified':False,'items':items,'changes':changes[:200],'diagnostics':diag,'versions':versions}
+        STATE.parent.mkdir(parents=True,exist_ok=True);STATE.write_text(json.dumps(state,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+        payload={'status':state['status'],'asOf':observed,'programme':'PEO','title':'Calendar estimativ consolidat al lansărilor de apeluri de proiecte — PEO','canonicalContainer':MIPE_CONTAINER,'retrievalSource':OIR_XLSX,'retrievalSourceClass':state['retrievalSourceClass'],'directMipeVerified':False,'versionSha256':sha,'itemCount':len(items),'changeCount':len(changes),'items':items,'changes':changes[:100]}
         OUT.write_text('window.PARTENER_DATA=window.PARTENER_DATA||{};\nwindow.PARTENER_DATA.peoCalendar='+json.dumps(payload,ensure_ascii=False,separators=(',',':'))+';\n',encoding='utf-8')
         print(json.dumps({'status':state['status'],'sha256':sha,'itemCount':len(items),'changeCount':len(changes),'diagnostics':diag},ensure_ascii=False,indent=2))
     except Exception as e:
-        # fail closed: preserve last known good calendar and record failure separately
-        fail={'observedAt':observed,'error':f'{type(e).__name__}: {e}','source':OIR_XLSX}
-        prev['lastFailure']=fail
-        prev['status']='SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED'
-        STATE.parent.mkdir(parents=True, exist_ok=True)
-        STATE.write_text(json.dumps(prev,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-        print(json.dumps({'status':prev['status'],'failure':fail},ensure_ascii=False,indent=2))
-
-if __name__=='__main__':
-    main()
+        fail={'observedAt':observed,'error':f'{type(e).__name__}: {e}','source':OIR_XLSX};prev['lastFailure']=fail;prev['status']='SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED';STATE.write_text(json.dumps(prev,ensure_ascii=False,indent=2)+'\n',encoding='utf-8');print(json.dumps({'status':prev['status'],'failure':fail},ensure_ascii=False,indent=2))
+if __name__=='__main__':main()
