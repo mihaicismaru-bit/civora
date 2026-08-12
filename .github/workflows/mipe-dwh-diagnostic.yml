@@ -1,0 +1,67 @@
+name: MIPE DWH Diagnostic
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - agent/mipe-resilient-ingestion-v2
+    paths:
+      - '.github/workflows/mipe-dwh-diagnostic.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Fetch official MySMIS public financing report with verified TLS
+        shell: bash
+        run: |
+          set -uo pipefail
+          URL='https://dwh4smis.fonduri-ue.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027'
+          rm -f /tmp/dwh.body /tmp/dwh.headers /tmp/dwh.cookies
+          curl --fail --show-error --silent --location --compressed --http1.1 \
+            --connect-timeout 8 --max-time 45 \
+            --cookie-jar /tmp/dwh.cookies --cookie /tmp/dwh.cookies \
+            --user-agent 'PARTENER.EU-CIVORA-MIPE-Ingest/2.0 (+https://partener.eu)' \
+            --header 'Accept: text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8' \
+            --dump-header /tmp/dwh.headers --output /tmp/dwh.body \
+            --write-out 'code=%{http_code} final=%{url_effective} type=%{content_type} ip=%{remote_ip} tls=%{ssl_verify_result} bytes=%{size_download}\n' \
+            "$URL"
+          echo '=== HEADERS ==='
+          tail -n 80 /tmp/dwh.headers
+          echo '=== BODY METRICS ==='
+          wc -c /tmp/dwh.body
+          sha256sum /tmp/dwh.body
+          python - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+          import json,re
+          class P(HTMLParser):
+            def __init__(self): super().__init__(convert_charrefs=True); self.tags=[]; self.text=[]; self.links=[]; self.current=None
+            def handle_starttag(self,t,a):
+              d=dict(a)
+              if t in ('table','th','td','script','form','input','a'): self.tags.append((t,d))
+              if t=='a': self.current=d.get('href'); self.buf=[]
+            def handle_data(self,d):
+              if d.strip():
+                self.text.append(d.strip())
+                if self.current is not None:self.buf.append(d.strip())
+            def handle_endtag(self,t):
+              if t=='a' and self.current is not None:
+                self.links.append((self.current,' '.join(self.buf)));self.current=None;self.buf=[]
+          raw=Path('/tmp/dwh.body').read_text(encoding='utf-8',errors='replace')
+          p=P();p.feed(raw)
+          print(json.dumps({
+            'challenge': any(x in raw.lower() for x in ('cf-chl-', 'just a moment', 'verify you are human')),
+            'tables': sum(1 for t,_ in p.tags if t=='table'),
+            'cells': sum(1 for t,_ in p.tags if t in ('th','td')),
+            'forms': sum(1 for t,_ in p.tags if t=='form'),
+            'scripts': sum(1 for t,_ in p.tags if t=='script'),
+            'apexMarkers': sorted(set(re.findall(r'(?i)(?:p_flow_id|p_flow_step_id|p_instance|apex\.region|interactiveReport|interactiveGrid)',raw)))[:50],
+            'textSample': ' '.join(p.text)[:3000],
+            'links': p.links[:80]
+          },ensure_ascii=False,indent=2))
+          PY
