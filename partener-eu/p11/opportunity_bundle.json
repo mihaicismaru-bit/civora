@@ -6,7 +6,7 @@
     "repository": "mihaicismaru-bit/civora",
     "public_data_path": "partener-eu/web/data.js",
     "public_data_ref": "main",
-    "expected_public_ids": ["afir-energy-2026", "pr-centru-digital-2", "pr-centru-clusters-122", "pids-supported-decision", "peo-step-edu-adulti"],
+    "expected_public_ids": ["afir-energy-2026", "pr-ne-energy-residential-towns-2026", "pr-centru-digital-2", "pr-centru-clusters-122", "pids-supported-decision", "peo-step-edu-adulti"],
     "normalization_effect": "NONE_ON_PUBLICATION"
   },
   "evidence": [
@@ -31,6 +31,18 @@
       "semantic_sha256": "82536ee60202beb0f1ee25fab18cbff64adf45ea7065379f035b5f2c2b9838a6",
       "semantic_verdict": "VERIFIED",
       "supports_fact_classes": ["status"]
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-IMPORT-PR-NE-ENERGY-RESIDENTIAL-TOWNS-2026",
+      "source_id": "IMPORT-WEB-DATA-7B0AC0C4",
+      "source_tier": "T1",
+      "source_url": "https://oportunitati-ue.gov.ro/apel/apel-pr-ne-2026-3-rso2-1-1-eficienta-energetica-cladiri-rezidentiale-orase-august-2026/",
+      "observed_at": "2026-08-12T11:55:44Z",
+      "semantic_sha256": "42c78340f25f9850165813d8ea1da16314ab5113effdc0041aec6856ea2cd433",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "evidence_basis": "Imported public record identity snapshot from commit 7b0ac0c4; authoritative page semantics not re-resolved by P11"
     },
     {
       "schema_version": "1.0",
@@ -80,6 +92,20 @@
       "material_facts": {"status": "OPEN", "deadline": {"opens": "15 iunie 2026", "closes": "14 august 2026"}},
       "fact_evidence": {"status": ["EV-SRC-AFIR-ENERGY-2026"], "deadline": ["EV-SRC-AFIR-ENERGY-2026"]},
       "candidate_material_facts": {"budget": "265 mil. EUR", "grant": "100% nerambursabil în limitele/MW", "eligibility": "Imported legacy applicant and condition lists", "scoring": "Conform Ghidului Schemei de Energie", "beneficiaries": "Întreprinderi agricole; industria alimentară"}
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "pr-ne-energy-residential-towns-2026",
+      "title": "Eficiență energetică pentru clădiri rezidențiale multifamiliale — orașe",
+      "programme": "Programul Regional Nord-Est",
+      "code": "PR/NE/2026/3/RSO2.1/1",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": ["EV-IMPORT-PR-NE-ENERGY-RESIDENTIAL-TOWNS-2026"],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {"status": "EXPECTED", "deadline": {"opens": "17 august 2026, 12:00", "closes": "16 octombrie 2026, 12:00"}, "budget": "8.400.195 EUR", "grant": "Conform ghidului final", "eligibility": "Orașe din Regiunea Nord-Est; condițiile exacte necesită rezoluție", "scoring": "Conform grilei oficiale; neextras", "beneficiaries": "Orașe din Regiunea Nord-Est"}
     },
     {
       "schema_version": "1.0",
@@ -141,6 +167,7 @@
   "changesets": [],
   "resolution_tasks": [
     {"schema_version": "1.0", "resolution_task_id": "RT-AFIR-ENERGY-2026-MATERIAL", "opportunity_id": "afir-energy-2026", "status": "OPEN", "automatic_material_fact_update_allowed": false, "blocked_fact_classes": ["budget", "grant", "eligibility", "scoring", "beneficiaries"]},
+    {"schema_version": "1.0", "resolution_task_id": "RT-PR-NE-ENERGY-RESIDENTIAL-TOWNS-2026-MATERIAL", "opportunity_id": "pr-ne-energy-residential-towns-2026", "status": "OPEN", "automatic_material_fact_update_allowed": false, "blocked_fact_classes": ["status", "deadline", "budget", "grant", "eligibility", "scoring", "beneficiaries"]},
     {"schema_version": "1.0", "resolution_task_id": "RT-PR-CENTRU-DIGITAL-2-MATERIAL", "opportunity_id": "pr-centru-digital-2", "status": "OPEN", "automatic_material_fact_update_allowed": false, "blocked_fact_classes": ["deadline", "budget", "grant", "eligibility", "scoring", "beneficiaries"]},
     {"schema_version": "1.0", "resolution_task_id": "RT-PR-CENTRU-CLUSTERS-122-MATERIAL", "opportunity_id": "pr-centru-clusters-122", "status": "OPEN", "automatic_material_fact_update_allowed": false, "blocked_fact_classes": ["budget", "grant", "eligibility", "scoring", "beneficiaries"]},
     {"schema_version": "1.0", "resolution_task_id": "RT-PIDS-SUPPORTED-DECISION-MATERIAL", "opportunity_id": "pids-supported-decision", "status": "OPEN", "automatic_material_fact_update_allowed": false, "blocked_fact_classes": ["budget", "grant", "eligibility", "scoring", "beneficiaries"]},

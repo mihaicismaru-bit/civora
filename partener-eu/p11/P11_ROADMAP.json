@@ -4,9 +4,9 @@
   "status": "IN_PROGRESS",
   "baseline": {
     "validated_at": "2026-08-12",
-    "public_opportunity_count": 5,
+    "public_opportunity_count": 6,
     "target_opportunity_count": 25,
-    "note": "Repository inspection found five canonical calls in web/data.js; the earlier three-call baseline is superseded."
+    "note": "Repository inspection found five calls at I01; a sixth public call landed concurrently before I03 and was normalized fail-closed. The earlier three-call baseline is superseded."
   },
   "increments": [
     {
@@ -35,9 +35,9 @@
       "result": {
         "identity_keys": ["canonical source URL", "programme + code", "programme + title"],
         "dispositions": ["CANONICAL_MATCH", "NEW_CANDIDATE", "AMBIGUOUS_REVIEW"],
-        "input_occurrences": 5,
-        "unique_candidates": 5,
-        "canonical_matches": 5,
+        "input_occurrences": 6,
+        "unique_candidates": 6,
+        "canonical_matches": 6,
         "published": 0
       }
     },

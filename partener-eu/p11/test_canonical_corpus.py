@@ -17,13 +17,13 @@ class CanonicalCorpusTests(unittest.TestCase):
     def setUpClass(cls):
         cls.bundle = json.loads((ROOT / "opportunity_bundle.json").read_text(encoding="utf-8"))
 
-    def test_all_five_public_records_are_normalized_once(self):
+    def test_all_public_records_are_normalized_once(self):
         canonical = [x["opportunity_id"] for x in self.bundle["opportunities"]]
         self.assertEqual(canonical, public_opportunity_ids())
-        self.assertEqual(len(set(canonical)), 5)
+        self.assertEqual(len(set(canonical)), 6)
 
     def test_bundle_passes_contract(self):
-        self.assertEqual(validate_bundle(self.bundle), {"opportunities": 5, "evidence": 5, "changesets": 0, "resolution_tasks": 5})
+        self.assertEqual(validate_bundle(self.bundle), {"opportunities": 6, "evidence": 6, "changesets": 0, "resolution_tasks": 6})
 
     def test_normalization_has_no_publication_effect(self):
         self.assertTrue(all(x["publication_state"] == "REVIEW_REQUIRED" for x in self.bundle["opportunities"]))
