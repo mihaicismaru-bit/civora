@@ -1,13 +1,36 @@
 #!/usr/bin/env python3
+import json
 import re
 import urllib.parse
+from pathlib import Path
 import mipe_ingest_ipv4 as base
 
 PDDS_SEED = 'https://mfe.gov.ro/pdds/despre-program-programare/'
+WEBINDEX_SEEDS = Path(__file__).resolve().parent / 'state' / 'pdds_webindex_seeds.json'
 
 # Prioritize the explicit official PDDS programme tree supplied by the operator.
 if PDDS_SEED not in base.ROOTS:
     base.ROOTS.insert(0, PDDS_SEED)
+
+# When the main PDDS seed is unreachable from the runner, probe only canonical
+# PDDS URLs previously discovered through a web index. Discovery is not
+# verification: these roots still must be fetched successfully from mfe.gov.ro
+# before any item can be published.
+try:
+    seed_data = json.loads(WEBINDEX_SEEDS.read_text(encoding='utf-8'))
+    fallback_urls = []
+    for item in seed_data.get('items', []):
+        url = str(item.get('url') or '').strip()
+        p = urllib.parse.urlparse(url)
+        if p.scheme == 'https' and p.hostname == 'mfe.gov.ro' and p.path.startswith('/pdds/'):
+            fallback_urls.append(url)
+    insert_at = 1 if base.ROOTS and base.ROOTS[0] == PDDS_SEED else 0
+    for url in reversed(fallback_urls):
+        if url not in base.ROOTS:
+            base.ROOTS.insert(insert_at, url)
+except Exception:
+    fallback_urls = []
+
 for kw in ['pdds', 'dezvoltare durabilă', 'dezvoltare durabila', 'programare', 'prioritate', 'priorități', 'prioritati']:
     if kw not in base.KW:
         base.KW.append(kw)
@@ -62,6 +85,7 @@ def scoped_pdds_discover(root):
             break
     out.extend(second_hop)
     health['pddsSeed'] = PDDS_SEED
+    health['pddsWebIndexSeedCount'] = len(fallback_urls)
     health['pddsSecondHopCount'] = len(second_hop)
     return out, health
 
