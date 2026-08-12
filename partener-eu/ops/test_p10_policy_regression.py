@@ -13,6 +13,7 @@ monitor = (PARTENER / "ops" / "p10_monitor_integrity.py").read_text(encoding="ut
 deployment = (PARTENER / "ops" / "check_public_site.py").read_text(encoding="utf-8")
 acceptance = (PARTENER / "ops" / "p10_acceptance_sync.py").read_text(encoding="utf-8")
 recovery = (PARTENER / "ops" / "test_recovery.py").read_text(encoding="utf-8")
+afir = (PARTENER / "ingest" / "afir_ingest.py").read_text(encoding="utf-8")
 
 errors = []
 
@@ -27,6 +28,7 @@ for marker in [
     "PARTENER.EU MFF 2028-2034 Monitor",
     "PARTENER.EU Pages",
     "p10_monitor_integrity.py",
+    "test_afir_ingest_policy.py",
 ]:
     if marker not in validation:
         errors.append(f"production validation orchestration missing: {marker}")
@@ -83,6 +85,10 @@ for marker in [
 ]:
     if marker not in acceptance:
         errors.append(f"P10 acceptance closure guard missing: {marker}")
+
+for marker in ["AUTH_OR_ACCESS_DEPENDENT", "accessDependencies", "AUTH_PATH_MARKERS", "no access was fabricated"]:
+    if marker not in afir:
+        errors.append(f"AFIR authentication boundary missing: {marker}")
 
 for marker in ["recover_state", "corrupt_state_checkpoint_recovery"]:
     if marker not in recovery:
