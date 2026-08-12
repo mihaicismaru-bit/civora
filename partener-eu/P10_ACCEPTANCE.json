@@ -15,7 +15,7 @@
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-08-12T12:57:30Z",
+    "utc": "2026-08-12T14:38:24Z",
     "source_pass": 6,
     "source_degraded": 0,
     "source_fail": 1,
@@ -26,14 +26,14 @@
     "quarantined_source": "SRC-LEGISLATIE — Portal Legislativ; dependent material facts blocked fail-closed"
   },
   "deployment_evidence": {
-    "utc": "2026-08-12T12:57:51Z",
+    "utc": "2026-08-12T14:38:50Z",
     "status": "PASS",
     "public_content_verified": true,
     "https_verified": true,
     "http_content_verified": true,
     "content_origin": "custom_https",
     "http_status": 200,
-    "final_url": "https://partener.eu/?p10_probe=20260812T125751Z",
+    "final_url": "https://partener.eu/?p10_probe=20260812T143850Z",
     "title": "PARTENER.EU — Finanțări europene",
     "required_markers_present": true,
     "critical_assets_ok": true,
@@ -43,7 +43,7 @@
       {
         "id": "custom_https",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260812T125751Z",
+        "final_url": "https://partener.eu/?p10_probe=20260812T143850Z",
         "content_verified": true,
         "marker_ok": true,
         "critical_assets_ok": true,
@@ -53,7 +53,7 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260812T125751Z",
+        "final_url": "http://partener.eu/?p10_probe=20260812T143850Z",
         "content_verified": true,
         "marker_ok": true,
         "critical_assets_ok": true,
@@ -63,7 +63,7 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260812T125751Z",
+        "final_url": "http://partener.eu/?p10_probe=20260812T143850Z",
         "content_verified": true,
         "marker_ok": true,
         "critical_assets_ok": true,
@@ -111,40 +111,40 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-08-12T12:57:51Z",
-    "validation_run_started": "2026-08-12T12:57:30Z",
+    "utc": "2026-08-12T14:38:50Z",
+    "validation_run_started": "2026-08-12T14:38:24Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "0b31c6f0e495f533a83c99332004e56e76af69f3d9f69b6ca4555732ace38a18",
-      "history_sha256": "0b31c6f0e495f533a83c99332004e56e76af69f3d9f69b6ca4555732ace38a18",
-      "history_path": "validation/history/20260812T125730Z.json",
+      "latest_sha256": "c1ee28ef4d2561647ba598a76d399fcb2953b1ce8be741535d0cae2812fb37ca",
+      "history_sha256": "c1ee28ef4d2561647ba598a76d399fcb2953b1ce8be741535d0cae2812fb37ca",
+      "history_path": "validation/history/20260812T143824Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "86f5081d74c2737c07e8bfb04dd19e086b17f269bc0f22498fa24eb6264ad97b",
-      "checkpoint_sha256": "86f5081d74c2737c07e8bfb04dd19e086b17f269bc0f22498fa24eb6264ad97b",
+      "source_state_sha256": "70e6757ef28ffe738d0f8db1d2dfd2a1e3f42315c317e92b08df7569d2a87a8c",
+      "checkpoint_sha256": "70e6757ef28ffe738d0f8db1d2dfd2a1e3f42315c317e92b08df7569d2a87a8c",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
       "recovery_state_integrity": "PASS"
     },
     "source_registry": {
-      "observed_at": "2026-08-12T09:50:27.343775Z",
-      "age_seconds": 11244,
+      "observed_at": "2026-08-12T14:35:04.797795Z",
+      "age_seconds": 225,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
       "summary": {
         "total": 18,
-        "pass": 11,
-        "degraded": 7,
-        "fail": 0,
-        "quarantined": 0,
+        "pass": 15,
+        "degraded": 0,
+        "fail": 3,
+        "quarantined": 3,
         "resolution_tasks_required": 0
       },
       "tier_counts": {
         "T1": {
           "total": 4,
-          "pass": 1,
-          "degraded": 3,
+          "pass": 4,
+          "degraded": 0,
           "fail": 0,
           "quarantined": 0,
           "hash_changes": 0
@@ -152,9 +152,9 @@
         "T1B": {
           "total": 11,
           "pass": 9,
-          "degraded": 2,
-          "fail": 0,
-          "quarantined": 0,
+          "degraded": 0,
+          "fail": 2,
+          "quarantined": 2,
           "hash_changes": 0
         }
       },
@@ -375,7 +375,7 @@
     },
     "peo_calendar": {
       "observed_at": "2026-08-12T09:49:07.284356+00:00",
-      "status": "OK_OFFICIAL_OIR_COPY",
+      "status": "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
       "source": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
       "source_class": "OFFICIAL_INSTITUTIONAL_COPY_OIR_PECU_VEST",
       "canonical_container": "https://mfe.gov.ro/peos/calendar-lansari-apeluri/",
@@ -388,7 +388,7 @@
       "publication_policy": "candidate-state-only; web material facts are not auto-promoted on scheduled hash changes"
     },
     "mipe": {
-      "observed_at": "2026-08-12T12:57:18.424122+00:00",
+      "observed_at": "2026-08-12T14:37:55.712028+00:00",
       "status": "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
       "source_available": false,
       "candidate_count": 4,
