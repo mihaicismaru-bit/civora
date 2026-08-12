@@ -8,6 +8,8 @@ STATE = VALIDATION / "source_state.json"
 LATEST = VALIDATION / "latest.json"
 HISTORY = VALIDATION / "history"
 CHECKPOINT = VALIDATION / "source_state.checkpoint.json"
+MIN_SEMANTIC_CHARS = 256
+MIN_HTML_BYTES_FOR_LOW_INFO = 4096
 
 
 def nowz(): return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z')
@@ -60,6 +62,23 @@ def make_observation(src, body, code, final, response_headers, method, attempts)
     sem=semantic_text(body).encode('utf-8')
     return {'ok':200<=code<400,'http_status':code,'final_url':final,'bytes':len(body),'raw_sha256':sha(body),'semantic_sha256':sha(sem),'semantic_chars':len(sem),'markers_found':markers,'etag':response_headers.get('ETag'),'last_modified':response_headers.get('Last-Modified'),'fetch_method':method,'attempts':attempts,'error':None}
 
+def observation_content_quality(obs):
+    """Reject successful HTTP responses that are clearly low-information HTML shells.
+
+    Several official sites occasionally return a normal-sized HTML framework with
+    only a few dozen visible characters. Treating that shell as authoritative
+    content creates identical semantic hashes across unrelated sources and can
+    manufacture false change candidates. Such responses remain observable but
+    may not advance the semantic-change confirmation counter.
+    """
+    if not obs.get('ok'):
+        return False, None
+    semantic_chars=int(obs.get('semantic_chars') or 0)
+    body_bytes=int(obs.get('bytes') or 0)
+    if body_bytes >= MIN_HTML_BYTES_FOR_LOW_INFO and semantic_chars < MIN_SEMANTIC_CHARS:
+        return False, 'LOW_INFORMATION_HTML_SHELL'
+    return True, None
+
 def fetch_source(src, timeout=35, attempts=3):
     headers={'User-Agent':'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/151 Safari/537.36 PARTENER.EU-CIVORA-P10/1.2','Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8','Accept-Language':'ro-RO,ro;q=0.9,en;q=0.7','Cache-Control':'no-cache','Connection':'close'}
     last=None
@@ -99,22 +118,24 @@ def run(live=True):
         if live: obs=fetch_source(src)
         else: obs={'ok':True,'http_status':0,'final_url':src['url'],'bytes':0,'raw_sha256':'OFFLINE','semantic_sha256':prev.get('semantic_sha256') or 'OFFLINE_SMOKE','semantic_chars':0,'markers_found':['OFFLINE_SMOKE'],'etag':None,'last_modified':None,'fetch_method':'offline-smoke','attempts':0,'error':None}
         failures=0 if obs['ok'] else int(prev.get('consecutive_failures',0))+1
-        candidate,change,pending,pending_count=evaluate_change(prev,obs.get('semantic_sha256'))
+        content_quality_ok,quality_issue=observation_content_quality(obs)
+        observed_semantic=obs.get('semantic_sha256') if content_quality_ok else None
+        candidate,change,pending,pending_count=evaluate_change(prev,observed_semantic)
         markers_ok=bool(obs.get('markers_found')) if src.get('markers_any') else True
-        if obs['ok'] and markers_ok: health='PASS'
+        if obs['ok'] and content_quality_ok and markers_ok: health='PASS'
         elif obs['ok']: health='DEGRADED'
         elif failures<3: health='DEGRADED'
         else: health='FAIL'
         quarantined=health=='FAIL'
         if quarantined and src.get('criticality')=='CRITICAL': critical_fail=True
-        result={**src,'observed_at':started,**obs,'markers_ok':markers_ok,'change_candidate':candidate,'change_detected':change,'resolution_task_required':change,'confirmation_observations':pending_count,'consecutive_failures':failures,'health':health,'quarantined':quarantined,'dependent_material_facts_publishable':not quarantined}
+        result={**src,'observed_at':started,**obs,'markers_ok':markers_ok,'content_quality_ok':content_quality_ok,'quality_issue':quality_issue,'change_candidate':candidate,'change_detected':change,'resolution_task_required':change,'confirmation_observations':pending_count,'consecutive_failures':failures,'health':health,'quarantined':quarantined,'dependent_material_facts_publishable':(not quarantined and content_quality_ok)}
         results.append(result)
         current_sem=prev.get('semantic_sha256')
-        if obs.get('semantic_sha256') and not current_sem: current_sem=obs['semantic_sha256']
-        elif change: current_sem=obs['semantic_sha256']; pending=None; pending_count=0
-        state['sources'][src['id']]={'raw_sha256':obs.get('raw_sha256') or prev.get('raw_sha256'),'semantic_sha256':current_sem,'pending_semantic_sha256':pending,'pending_count':pending_count,'last_success':started if obs['ok'] else prev.get('last_success'),'last_observed':started,'consecutive_failures':failures,'health':health,'quarantined':quarantined,'final_url':obs.get('final_url') or prev.get('final_url')}
+        if observed_semantic and not current_sem: current_sem=observed_semantic
+        elif change: current_sem=observed_semantic; pending=None; pending_count=0
+        state['sources'][src['id']]={'raw_sha256':obs.get('raw_sha256') if content_quality_ok else prev.get('raw_sha256'),'semantic_sha256':current_sem,'pending_semantic_sha256':pending,'pending_count':pending_count,'last_success':started if (obs['ok'] and content_quality_ok) else prev.get('last_success'),'last_observed':started,'consecutive_failures':failures,'health':health,'quarantined':quarantined,'final_url':obs.get('final_url') or prev.get('final_url')}
     state['last_run']=started; state['schema_version']=3
-    report={'checkpoint':'PARTENER-EU-CIVORA-P10-0020','run_started':started,'live':live,'state_recovered_from_checkpoint':recovered,'frontend_checks':frontend,'sources':results,'summary':{'frontend_pass':sum(x['pass'] for x in frontend),'frontend_total':len(frontend),'source_pass':sum(x['health']=='PASS' for x in results),'source_degraded':sum(x['health']=='DEGRADED' for x in results),'source_fail':sum(x['health']=='FAIL' for x in results),'source_quarantined':sum(x['quarantined'] for x in results),'change_candidates':sum(x['change_candidate'] for x in results),'change_detected':sum(x['change_detected'] for x in results),'critical_fail':critical_fail},'change_policy':'semantic fingerprint + two consecutive identical observations before resolution task','source_failure_policy':'failed non-CRITICAL source is quarantined and blocks dependent material facts; CRITICAL source failure stops global qualifying run','civora_v1':'NOT_CLOSED','production_day_count_rule':'>=30 distinct UTC dates with qualifying runs before closure'}
+    report={'checkpoint':'PARTENER-EU-CIVORA-P10-0020','run_started':started,'live':live,'state_recovered_from_checkpoint':recovered,'frontend_checks':frontend,'sources':results,'summary':{'frontend_pass':sum(x['pass'] for x in frontend),'frontend_total':len(frontend),'source_pass':sum(x['health']=='PASS' for x in results),'source_degraded':sum(x['health']=='DEGRADED' for x in results),'source_fail':sum(x['health']=='FAIL' for x in results),'source_quarantined':sum(x['quarantined'] for x in results),'change_candidates':sum(x['change_candidate'] for x in results),'change_detected':sum(x['change_detected'] for x in results),'low_information_sources':sum(not x.get('content_quality_ok',True) and x.get('quality_issue')=='LOW_INFORMATION_HTML_SHELL' for x in results),'critical_fail':critical_fail},'change_policy':'semantic fingerprint + two consecutive identical high-information observations before resolution task; low-information HTML shells are suppressed fail-closed','source_failure_policy':'failed non-CRITICAL source is quarantined and blocks dependent material facts; low-information shells also block dependent material facts until a high-information observation returns; CRITICAL source failure stops global qualifying run','civora_v1':'NOT_CLOSED','production_day_count_rule':'>=30 distinct UTC dates with qualifying runs before closure'}
     atomic_json(CHECKPOINT,state); atomic_json(STATE,state); atomic_json(LATEST,report)
     HISTORY.mkdir(parents=True,exist_ok=True); stamp=started.replace(':','').replace('-',''); atomic_json(HISTORY/(stamp+'.json'),report)
     frontend_fail=not all(x['pass'] for x in frontend)
