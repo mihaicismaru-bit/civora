@@ -18,6 +18,7 @@ on:
     paths:
       - 'partener-eu/ingest/mipe_core_v2.py'
       - 'partener-eu/ingest/mipe_ingest_v2.py'
+      - 'partener-eu/ingest/mipe_ingest_v2_runner.py'
       - 'partener-eu/ingest/tests/test_mipe_v2.py'
       - 'partener-eu/ingest/state/mipe_known_canonical_seeds.json'
       - 'partener-eu/ingest/state/mipe_discovery_sources.json'
@@ -46,7 +47,8 @@ jobs:
           set -euo pipefail
           python -m py_compile \
             partener-eu/ingest/mipe_core_v2.py \
-            partener-eu/ingest/mipe_ingest_v2.py
+            partener-eu/ingest/mipe_ingest_v2.py \
+            partener-eu/ingest/mipe_ingest_v2_runner.py
           python -m unittest discover -s partener-eu/ingest/tests -v
 
   ingest:
@@ -106,7 +108,7 @@ jobs:
           if [[ "${{ steps.mode.outputs.browser }}" == "true" ]]; then
             args+=(--browser)
           fi
-          python partener-eu/ingest/mipe_ingest_v2.py "${args[@]}" | tee /tmp/mipe-v2-run.json
+          python partener-eu/ingest/mipe_ingest_v2_runner.py "${args[@]}" | tee /tmp/mipe-v2-run.json
 
       - name: Verify publication gates and fail-closed persistence
         shell: bash
