@@ -1,0 +1,58 @@
+name: MIPE v2 Bootstrap
+
+on:
+  push:
+    branches: [agent/mipe-resilient-ingestion-v2]
+    paths: ['.github/workflows/mipe-v2-bootstrap.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Materialize and validate reviewed MIPE v2 sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import base64, io, tarfile
+          from pathlib import Path
+
+          root = Path('.').resolve()
+          encoded = ''.join(path.read_text(encoding='ascii') for path in sorted(Path('.github/mipe-bootstrap').glob('chunk-*.txt')))
+          with tarfile.open(fileobj=io.BytesIO(base64.b64decode(encoded)), mode='r:gz') as bundle:
+              for member in bundle.getmembers():
+                  target = (root / member.name).resolve()
+                  if root not in target.parents:
+                      raise RuntimeError(f'unsafe archive member: {member.name}')
+              bundle.extractall(root, filter='data')
+
+          obsolete = [
+              'mipe-browser-surface-diagnostic.yml', 'mipe-dwh-diagnostic.yml',
+              'mipe-hosted-egress-matrix.yml', 'mipe-route-diagnostic-v2.yml',
+              'mipe-tls-chain-diagnostic.yml', 'mipe-vercel-egress-client.yml',
+              'mysmis-public-registry-probe.yml', 'mysmis-apex-filter-probe.yml',
+              'mysmis-apex-column-probe.yml', 'mysmis-full-export-probe.yml',
+              'mipe-v2-bootstrap.yml',
+          ]
+          for name in obsolete:
+              (Path('.github/workflows') / name).unlink(missing_ok=True)
+          for path in Path('.github/mipe-bootstrap').glob('*'):
+              path.unlink()
+          Path('.github/mipe-bootstrap').rmdir()
+          PY
+          python -m py_compile partener-eu/ingest/mipe_core_v2.py partener-eu/ingest/mipe_ingest_v2.py
+          python -m unittest discover -s partener-eu/ingest/tests -v
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git diff --cached --stat
+          git commit -m 'Implement resilient MIPE ingestion v2'
+          git push origin HEAD:agent/mipe-resilient-ingestion-v2
