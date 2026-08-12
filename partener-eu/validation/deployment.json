@@ -1,17 +1,150 @@
 {
-  "url": "https://mihaicismaru-bit.github.io/civora/",
-  "observed_at": "2026-08-12T09:35:38Z",
+  "schema_version": "1.3",
+  "observed_at": "2026-08-12T09:48:23Z",
   "status": "DEGRADED",
+  "public_content_verified": true,
+  "https_verified": false,
+  "http_content_verified": true,
+  "https_closure_gate": "PENDING_VALID_CERTIFICATE_DNS_AND_HTTPS_CONTENT",
+  "content_origin": "custom_http",
+  "old_origin_detected": false,
+  "endpoints": [
+    {
+      "id": "custom_https",
+      "url": "https://partener.eu/",
+      "requested_url": "https://partener.eu/?p10_probe=20260812T094823Z",
+      "ok": false,
+      "content_verified": false,
+      "http_status": null,
+      "final_url": null,
+      "final_scheme": null,
+      "content_type": null,
+      "bytes": 0,
+      "body_sha256": null,
+      "title": null,
+      "markers": {
+        "brand": false,
+        "boot_fallback": false,
+        "hero": false,
+        "critical_data_ref": false,
+        "critical_app_ref": false
+      },
+      "marker_ok": false,
+      "legacy_origin_detected": false,
+      "critical_assets_ok": false,
+      "assets": {},
+      "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'partener.eu'. (_ssl.c:1010)>"
+    },
+    {
+      "id": "custom_http",
+      "url": "http://partener.eu/",
+      "requested_url": "http://partener.eu/?p10_probe=20260812T094823Z",
+      "ok": true,
+      "content_verified": true,
+      "http_status": 200,
+      "final_url": "http://partener.eu/?p10_probe=20260812T094823Z",
+      "final_scheme": "http",
+      "content_type": "text/html; charset=utf-8",
+      "bytes": 3563,
+      "body_sha256": "5b20f61f6504d92f6a05688b9b58f670e6096bee26cc9a67f2572c87ae247755",
+      "title": "PARTENER.EU — Finanțări europene",
+      "markers": {
+        "brand": true,
+        "boot_fallback": true,
+        "hero": true,
+        "critical_data_ref": true,
+        "critical_app_ref": true
+      },
+      "marker_ok": true,
+      "legacy_origin_detected": false,
+      "critical_assets_ok": true,
+      "assets": {
+        "data.js": {
+          "url": "http://partener.eu/data.js?v=20260812-1115",
+          "ok": true,
+          "http_status": 200,
+          "final_url": "http://partener.eu/data.js?v=20260812-1115",
+          "bytes": 7925,
+          "sha256": "52e965da7aee10840ed8fcb11ff06665548c1bf5095d66b8e56a716182a7d182",
+          "error": null,
+          "expected_marker_found": true
+        },
+        "app.js": {
+          "url": "http://partener.eu/app.js?v=20260812-1115",
+          "ok": true,
+          "http_status": 200,
+          "final_url": "http://partener.eu/app.js?v=20260812-1115",
+          "bytes": 13294,
+          "sha256": "8b2c9c2faa3ac0070db823f2ce3e75326243561d66e80c43bacf29224c0ff9ee",
+          "error": null,
+          "expected_marker_found": true
+        }
+      },
+      "error": null
+    },
+    {
+      "id": "pages_origin",
+      "url": "https://mihaicismaru-bit.github.io/civora/",
+      "requested_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260812T094823Z",
+      "ok": true,
+      "content_verified": true,
+      "http_status": 200,
+      "final_url": "http://partener.eu/?p10_probe=20260812T094823Z",
+      "final_scheme": "http",
+      "content_type": "text/html; charset=utf-8",
+      "bytes": 3563,
+      "body_sha256": "5b20f61f6504d92f6a05688b9b58f670e6096bee26cc9a67f2572c87ae247755",
+      "title": "PARTENER.EU — Finanțări europene",
+      "markers": {
+        "brand": true,
+        "boot_fallback": true,
+        "hero": true,
+        "critical_data_ref": true,
+        "critical_app_ref": true
+      },
+      "marker_ok": true,
+      "legacy_origin_detected": false,
+      "critical_assets_ok": true,
+      "assets": {
+        "data.js": {
+          "url": "http://partener.eu/data.js?v=20260812-1115",
+          "ok": true,
+          "http_status": 200,
+          "final_url": "http://partener.eu/data.js?v=20260812-1115",
+          "bytes": 7925,
+          "sha256": "52e965da7aee10840ed8fcb11ff06665548c1bf5095d66b8e56a716182a7d182",
+          "error": null,
+          "expected_marker_found": true
+        },
+        "app.js": {
+          "url": "http://partener.eu/app.js?v=20260812-1115",
+          "ok": true,
+          "http_status": 200,
+          "final_url": "http://partener.eu/app.js?v=20260812-1115",
+          "bytes": 13294,
+          "sha256": "8b2c9c2faa3ac0070db823f2ce3e75326243561d66e80c43bacf29224c0ff9ee",
+          "error": null,
+          "expected_marker_found": true
+        }
+      },
+      "error": null
+    }
+  ],
+  "url": "http://partener.eu/",
   "http_status": 200,
-  "marker_ok": false,
+  "marker_ok": true,
   "markers": {
-    "PARTENER.EU": true,
-    "Funding Intelligence": false
+    "brand": true,
+    "boot_fallback": true,
+    "hero": true,
+    "critical_data_ref": true,
+    "critical_app_ref": true
   },
-  "final_url": "http://partener.eu/",
+  "final_url": "http://partener.eu/?p10_probe=20260812T094823Z",
   "content_type": "text/html; charset=utf-8",
   "bytes": 3563,
   "body_sha256": "5b20f61f6504d92f6a05688b9b58f670e6096bee26cc9a67f2572c87ae247755",
   "title": "PARTENER.EU — Finanțări europene",
+  "critical_assets_ok": true,
   "error": null
 }
