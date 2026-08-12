@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot}',"'":'&#39;'}[c]));
 function openConsultant(){const b=document.querySelector('.modebtn');if(b){b.click();return true}return false}
 function addTrust(){
  const hero=document.querySelector('.hero');if(!hero||document.querySelector('.peTrust'))return;
@@ -18,16 +18,17 @@ function addEntry(){
 function enhanceResolver(){
  const cui=document.getElementById('cwCui');if(!cui||document.querySelector('.peEntitySummary'))return;
  const info=document.createElement('div');info.className='peEntitySummary';info.innerHTML='<b>Identificare automată</b> · completează CUI/CIF-ul pentru a prelua datele publice disponibile și a construi profilul de eligibilitate.';
- const host=cui.parentElement;host.appendChild(info);
+ cui.parentElement.appendChild(info);
 }
 function resolved(e){
  const d=e.detail||{};const info=document.querySelector('.peEntitySummary');if(!info)return;
  const facts=[['Tip',d.entityClass||d.type],['Județ',d.county],['Regiune',d.region]].filter(x=>x[1]);
  info.innerHTML=`<b>${esc(d.name||d.legalName||'Beneficiar identificat')}</b><div class="peResolvedFacts">${facts.map(([k,v])=>`<span><small>${esc(k)}</small><b>${esc(v)}</b></span>`).join('')}</div>`;
 }
-function polish(){addTrust();addEntry();enhanceResolver()}
+function modeLabel(){const b=document.querySelector('.modebtn');if(!b)return;if(b.textContent.trim()==='Public site')b.dataset.pePublic='1';else delete b.dataset.pePublic}
+function polish(){addTrust();addEntry();enhanceResolver();modeLabel()}
 window.addEventListener('partener:entity-resolved',resolved);
-let pending=false;new MutationObserver(()=>{if(pending)return;pending=true;queueMicrotask(()=>{pending=false;polish()})}).observe(document.documentElement,{childList:true,subtree:true});
+let pending=false;new MutationObserver(()=>{if(pending)return;pending=true;queueMicrotask(()=>{pending=false;polish()})}).observe(document.documentElement,{childList:true,subtree:true,characterData:true});
 polish();
-window.PARTENER_PUBLIC_UX={version:'1.0.0',polish,openConsultant};
+window.PARTENER_PUBLIC_UX={version:'1.0.1',polish,openConsultant};
 })();
