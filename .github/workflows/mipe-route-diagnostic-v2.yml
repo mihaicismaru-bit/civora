@@ -1,0 +1,164 @@
+name: MIPE Route Diagnostic v2
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - agent/mipe-resilient-ingestion-v2
+    paths:
+      - '.github/workflows/mipe-route-diagnostic-v2.yml'
+      - 'partener-eu/ingest/**'
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Probe DNS, TLS, structured MIPE surfaces and PARTENER.EU WordPress routes
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          import pathlib
+          import socket
+          import subprocess
+          import tempfile
+          import time
+          import urllib.parse
+          import urllib.request
+
+          UA = 'PARTENER.EU-CIVORA-MIPE-Diagnostic/2.0 (+https://partener.eu)'
+          HOSTS = ['mfe.gov.ro', 'www.mfe.gov.ro', 'fonduri-ue.gov.ro', 'www.fonduri-ue.gov.ro', 'partener.eu']
+          ENDPOINTS = [
+              'https://mfe.gov.ro/pdds/despre-program-programare/',
+              'https://mfe.gov.ro/',
+              'http://mfe.gov.ro/',
+              'https://www.mfe.gov.ro/',
+              'https://mfe.gov.ro/wp-json/',
+              'https://mfe.gov.ro/?rest_route=/',
+              'https://mfe.gov.ro/wp-json/wp/v2/types',
+              'https://mfe.gov.ro/wp-json/wp/v2/posts?per_page=1&_fields=link,date,modified,title',
+              'https://mfe.gov.ro/wp-json/wp/v2/pages?per_page=1&_fields=link,date,modified,title',
+              'https://mfe.gov.ro/wp-json/wp/v2/media?per_page=1&orderby=modified&order=desc&_fields=link,date,modified,title,source_url',
+              'https://mfe.gov.ro/wp-sitemap.xml',
+              'https://mfe.gov.ro/sitemap.xml',
+              'https://mfe.gov.ro/feed/',
+              'https://www.fonduri-ue.gov.ro/',
+              'https://fonduri-ue.gov.ro/',
+              'https://www.fonduri-ue.ro/',
+              'https://partener.eu/wp-json/',
+          ]
+
+          def doh(host, record_type):
+              url = 'https://dns.google/resolve?' + urllib.parse.urlencode({'name': host, 'type': record_type})
+              try:
+                  req = urllib.request.Request(url, headers={'User-Agent': UA, 'Accept': 'application/dns-json'})
+                  with urllib.request.urlopen(req, timeout=12) as r:
+                      obj = json.load(r)
+                  return [a.get('data') for a in obj.get('Answer', []) if a.get('type') in (1, 28) and a.get('data')]
+              except Exception as exc:
+                  return [f'ERROR:{type(exc).__name__}:{exc}']
+
+          dns = {}
+          for host in HOSTS:
+              row = {'socket': [], 'A': doh(host, 'A'), 'AAAA': doh(host, 'AAAA')}
+              try:
+                  row['socket'] = sorted({x[4][0] for x in socket.getaddrinfo(host, 443, type=socket.SOCK_STREAM)})
+              except Exception as exc:
+                  row['socket_error'] = f'{type(exc).__name__}: {exc}'
+              dns[host] = row
+          print('=== DNS ===')
+          print(json.dumps(dns, ensure_ascii=False, indent=2))
+
+          def curl_probe(url, family=None, resolve_ip=None):
+              parsed = urllib.parse.urlsplit(url)
+              with tempfile.TemporaryDirectory() as td:
+                  body = pathlib.Path(td) / 'body.bin'
+                  headers = pathlib.Path(td) / 'headers.txt'
+                  cmd = [
+                      'curl', '--silent', '--show-error', '--location', '--compressed',
+                      '--connect-timeout', '5', '--max-time', '14', '--http1.1',
+                      '--user-agent', UA, '--output', str(body), '--dump-header', str(headers),
+                      '--write-out', '%{http_code}\t%{url_effective}\t%{content_type}\t%{remote_ip}\t%{ssl_verify_result}\t%{time_connect}\t%{time_total}',
+                  ]
+                  if family == 4:
+                      cmd.append('--ipv4')
+                  elif family == 6:
+                      cmd.append('--ipv6')
+                  if resolve_ip and parsed.scheme == 'https':
+                      target = f'{parsed.hostname}:443:{resolve_ip}'
+                      if ':' in resolve_ip:
+                          target = f'{parsed.hostname}:443:[{resolve_ip}]'
+                      cmd += ['--resolve', target]
+                  cmd.append(url)
+                  started = time.time()
+                  proc = subprocess.run(cmd, capture_output=True)
+                  data = body.read_bytes() if body.exists() else b''
+                  head = headers.read_text(encoding='utf-8', errors='replace')[-1800:] if headers.exists() else ''
+                  fields = proc.stdout.decode('utf-8', 'replace').strip().split('\t')
+                  return {
+                      'url': url,
+                      'family': family,
+                      'resolveIp': resolve_ip,
+                      'rc': proc.returncode,
+                      'error': proc.stderr.decode('utf-8', 'replace').strip()[:1000] or None,
+                      'httpCode': fields[0] if len(fields) > 0 else None,
+                      'finalUrl': fields[1] if len(fields) > 1 else None,
+                      'contentType': fields[2] if len(fields) > 2 else None,
+                      'remoteIp': fields[3] if len(fields) > 3 else None,
+                      'sslVerifyResult': fields[4] if len(fields) > 4 else None,
+                      'connectSeconds': fields[5] if len(fields) > 5 else None,
+                      'totalSeconds': fields[6] if len(fields) > 6 else None,
+                      'bytes': len(data),
+                      'sha256': hashlib.sha256(data).hexdigest() if data else None,
+                      'sample': data[:260].decode('utf-8', 'replace').replace('\n', ' ') if data else None,
+                      'responseHeadersTail': head,
+                      'elapsedMs': round((time.time() - started) * 1000),
+                  }
+
+          results = []
+          for url in ENDPOINTS:
+              results.append(curl_probe(url, family=4))
+              if urllib.parse.urlsplit(url).hostname == 'mfe.gov.ro' and url.startswith('https://'):
+                  results.append(curl_probe(url, family=6))
+
+          # Try every live DNS address with TLS hostname/SNI retained. This replaces the old hard-coded route.
+          seed = 'https://mfe.gov.ro/pdds/despre-program-programare/'
+          addresses = []
+          for value in dns.get('mfe.gov.ro', {}).get('A', []) + dns.get('mfe.gov.ro', {}).get('AAAA', []):
+              if not value.startswith('ERROR:'):
+                  addresses.append(value)
+          for address in sorted(set(addresses)):
+              results.append(curl_probe(seed, family=6 if ':' in address else 4, resolve_ip=address))
+
+          print('=== HTTP TRANSPORT ===')
+          print(json.dumps(results, ensure_ascii=False, indent=2))
+
+          print('=== TLS fonduri-ue.gov.ro ===')
+          try:
+              tls = subprocess.run(
+                  ['openssl', 's_client', '-connect', 'www.fonduri-ue.gov.ro:443', '-servername', 'www.fonduri-ue.gov.ro', '-showcerts', '-verify_return_error', '-brief'],
+                  input=b'', capture_output=True, timeout=18,
+              )
+              print(json.dumps({'rc': tls.returncode, 'stdout': tls.stdout.decode('utf-8', 'replace')[-5000:], 'stderr': tls.stderr.decode('utf-8', 'replace')[-5000:]}, ensure_ascii=False, indent=2))
+          except Exception as exc:
+              print(json.dumps({'error': f'{type(exc).__name__}: {exc}'}, ensure_ascii=False))
+
+          print('=== PARTENER.EU WORDPRESS ROUTES ===')
+          try:
+              req = urllib.request.Request('https://partener.eu/wp-json/', headers={'User-Agent': UA, 'Accept': 'application/json'})
+              with urllib.request.urlopen(req, timeout=20) as r:
+                  wp = json.load(r)
+              routes = sorted((wp.get('routes') or {}).keys())
+              interesting = [x for x in routes if any(k in x.lower() for k in ('mipe', 'civora', 'partener', 'local', 'news', 'ingest', 'fetch', 'proxy', 'remote'))]
+              print(json.dumps({'name': wp.get('name'), 'url': wp.get('url'), 'namespaces': wp.get('namespaces'), 'routeCount': len(routes), 'interestingRoutes': interesting, 'allNonCoreRoutes': [x for x in routes if not x.startswith(('/wp/', '/oembed/', '/batch/'))][:300]}, ensure_ascii=False, indent=2))
+          except Exception as exc:
+              print(json.dumps({'error': f'{type(exc).__name__}: {exc}'}, ensure_ascii=False, indent=2))
+          PY
