@@ -1,6 +1,6 @@
 {
-  "schema_version": "1.0",
-  "observed_at": "2026-08-12T05:09:21.250935Z",
+  "schema_version": "1.1",
+  "observed_at": "2026-08-12T05:10:10.253797Z",
   "policy": "health-and-hash-only-no-material-fact-autoupdate",
   "sources": [
     {
@@ -9,12 +9,18 @@
       "class": "authoritative_call_registry",
       "url": "https://resurse.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027",
       "material_fact_use": true,
-      "ok": false,
-      "health": "FAIL",
-      "error": "TimeoutError: The read operation timed out",
+      "ok": true,
+      "http_status": 200,
+      "final_url": "https://resurse.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027",
+      "content_type": "text/html;charset=utf-8",
+      "bytes": 119087,
+      "raw_sha256": "3eee275471ab835e99a70eca0e99317c2f5862049c004da1b45222ba90ca938c",
+      "semantic_sha256": "f193cece98d993c2335e972a1575380eb272e174de626b6ce5f2a0b9d065bb6c",
+      "semantic_bytes": 13424,
       "semantic_hash_changed": false,
       "resolution_task_required": false,
-      "publish_material_fact_update": false
+      "publish_material_fact_update": null,
+      "health": "PASS"
     },
     {
       "id": "SRC-OIRBI-PEO",
@@ -26,8 +32,8 @@
       "http_status": 200,
       "final_url": "https://www.oirbi.ro/peo-2021-2027/",
       "content_type": "text/html; charset=UTF-8",
-      "bytes": 130386,
-      "raw_sha256": "6d28a06acd50864c95aae08389b5545fe36b71ed6cf54de70b8c704cb542def3",
+      "bytes": 130375,
+      "raw_sha256": "f063bfa8ae3a2362916c3260404b0d8ab5ce06a4cdffda125c7cabb084217975",
       "semantic_sha256": "8225c515dcaae23c1db005550d022999bc714f5ecfc0a06296797512b1aefe95",
       "semantic_bytes": 12538,
       "semantic_hash_changed": false,
@@ -46,7 +52,7 @@
       "final_url": "https://www.oirbi.ro/pids-2021-2027/",
       "content_type": "text/html; charset=UTF-8",
       "bytes": 127137,
-      "raw_sha256": "5e9be8a55b3b072fb7346c86c39277a33aae5055269de7864ae6fbac0c969da0",
+      "raw_sha256": "c37c7db298752d787b36521445e8cb3576434224cf39d4bc36abb0ad17a53d4b",
       "semantic_sha256": "8f2952191a32acd37bd9d4fa2fd331795a1d8e3b4aa41be14e975b23683531c1",
       "semantic_bytes": 12162,
       "semantic_hash_changed": false,
@@ -186,7 +192,7 @@
       "final_url": "https://fed.mai.gov.ro/in/apeluri/",
       "content_type": "text/html; charset=UTF-8",
       "bytes": 150646,
-      "raw_sha256": "51b81f02cebf1d89a1c1c8d8f002d1e74cd4ab6528268218a318fc72873534d3",
+      "raw_sha256": "faa380e47aa7aeb2cb52f62f56e1b1316fb1912207c2b11f1cbdeabfdf1696a7",
       "semantic_sha256": "70fa9b3048f20b5f5f47a580d02b7f3a00fda8b9ab71d75036f20d3341e6958c",
       "semantic_bytes": 8644,
       "semantic_hash_changed": false,
@@ -205,7 +211,7 @@
       "final_url": "https://fed.mai.gov.ro/fed-2021-2027/ghidul-general/",
       "content_type": "text/html; charset=UTF-8",
       "bytes": 104381,
-      "raw_sha256": "de738e433b8497f0b9ac0b6410cea2adcbdba867803777227b20291d4b1f3f72",
+      "raw_sha256": "c6295ad9f9d6032bde60a21f2439cc7416e86a4680facb4d7701489846feea8a",
       "semantic_sha256": "51c45d783b8a1e155511c60885ac56b8fadac188027c9ea2ef5a189077aa9287",
       "semantic_bytes": 8844,
       "semantic_hash_changed": false,
@@ -224,7 +230,7 @@
       "final_url": "https://fed.mai.gov.ro/despre/lansare-apeluri/",
       "content_type": "text/html; charset=UTF-8",
       "bytes": 85010,
-      "raw_sha256": "e1ad7dd7294a99a309e74572dda3215716175affc5558282ee781487a75f7cb3",
+      "raw_sha256": "f6f34b3cc194d05abc22c39e7dd73dd16c38abfdd6f7ce2f6ff50b931039e2d3",
       "semantic_sha256": "3e696d67ed3523a116300c9f3019dda1df5d69bcd036c07b0a13ba00ec6ef22d",
       "semantic_bytes": 2585,
       "semantic_hash_changed": false,
@@ -267,8 +273,8 @@
   ],
   "summary": {
     "total": 15,
-    "pass": 11,
-    "fail": 4,
+    "pass": 12,
+    "fail": 3,
     "resolution_tasks_required": 0
   }
 }
