@@ -1,13 +1,48 @@
 {
-  "version": "1.0",
-  "policy": "External/social signals may create discovery and resolution tasks but may not overwrite material official funding facts.",
+  "version": "1.1",
+  "policy": "External or authenticated signals may create discovery and resolution tasks but may not overwrite material official funding facts.",
   "adapters": [
-    {"id":"PUBLIC_WEB_DISCOVERY","status":"READY","auth":"NONE","role":"source discovery and corroboration"},
-    {"id":"RSS_SITEMAP_DISCOVERY","status":"READY","auth":"NONE","role":"source discovery"},
-    {"id":"FACEBOOK_PUBLIC","status":"AUTH_OR_ACCESS_DEPENDENT","role":"alternative signal only","promotion_to_official_fact":false},
-    {"id":"LINKEDIN_PUBLIC","status":"AUTH_OR_ACCESS_DEPENDENT","role":"people/policy and alternative signal only","promotion_to_official_fact":false},
-    {"id":"REDDIT_PUBLIC","status":"AUTH_OR_RATE_LIMIT_DEPENDENT","role":"alternative signal only","promotion_to_official_fact":false}
+    {
+      "id": "PUBLIC_WEB_DISCOVERY",
+      "status": "READY",
+      "auth": "NONE",
+      "role": "source discovery and corroboration"
+    },
+    {
+      "id": "RSS_SITEMAP_DISCOVERY",
+      "status": "READY",
+      "auth": "NONE",
+      "role": "source discovery"
+    },
+    {
+      "id": "AFIR_AUTHENTICATED_ROUTES",
+      "status": "AUTH_OR_ACCESS_DEPENDENT",
+      "auth": "EXTERNAL_AFIR_SESSION",
+      "role": "technical boundary only; public AFIR discovery continues without credentials",
+      "promotion_to_official_fact": false
+    },
+    {
+      "id": "FACEBOOK_PUBLIC",
+      "status": "AUTH_OR_ACCESS_DEPENDENT",
+      "auth": "EXTERNAL_PLATFORM_ACCESS",
+      "role": "alternative signal only",
+      "promotion_to_official_fact": false
+    },
+    {
+      "id": "LINKEDIN_PUBLIC",
+      "status": "AUTH_OR_ACCESS_DEPENDENT",
+      "auth": "EXTERNAL_PLATFORM_ACCESS",
+      "role": "people/policy and alternative signal only",
+      "promotion_to_official_fact": false
+    },
+    {
+      "id": "REDDIT_PUBLIC",
+      "status": "AUTH_OR_RATE_LIMIT_DEPENDENT",
+      "auth": "EXTERNAL_PLATFORM_ACCESS_OR_RATE_LIMIT",
+      "role": "alternative signal only",
+      "promotion_to_official_fact": false
+    }
   ],
-  "discovery_result": "No installable Facebook/LinkedIn/Reddit plugin was available in the connected plugin catalog at P10 start.",
+  "discovery_result": "Public web and RSS/sitemap discovery are integrated without credentials. AFIR authenticated routes and Facebook/LinkedIn/Reddit remain exact external access dependencies; no access is fabricated.",
   "fail_closed": true
 }
