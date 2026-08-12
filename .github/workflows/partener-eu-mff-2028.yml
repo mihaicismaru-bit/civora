@@ -1,0 +1,46 @@
+name: PARTENER.EU MFF 2028-2034 Monitor
+
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+  push:
+    paths:
+      - 'partener-eu/ingest/mff_2028_source_registry.json'
+      - 'partener-eu/ingest/mff_2028_probe.py'
+
+permissions:
+  contents: write
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Probe verified 2028-2034 sources
+        run: python partener-eu/ingest/mff_2028_probe.py
+      - name: Persist MFF 2028-2034 health ledger
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "civora-bot"
+          git config user.email "actions@users.noreply.github.com"
+          FILE=partener-eu/ingest/state/mff_2028_health.json
+          cp "$FILE" /tmp/mff_2028_health.json
+          git fetch origin main
+          git reset --hard origin/main
+          mkdir -p partener-eu/ingest/state
+          cp /tmp/mff_2028_health.json "$FILE"
+          git add "$FILE"
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Persist MFF 2028-2034 source health"
+          for n in 1 2 3; do
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            sleep $((n*3))
+          done
+          exit 1
