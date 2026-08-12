@@ -27,7 +27,7 @@ class CanonicalCorpusTests(unittest.TestCase):
         self.assertEqual(len(canonical), len(set(canonical)))
 
     def test_bundle_passes_contract(self):
-        self.assertEqual(validate_bundle(self.bundle), {"opportunities": 16, "evidence": 16, "changesets": 0, "resolution_tasks": 16})
+        self.assertEqual(validate_bundle(self.bundle), {"opportunities": 21, "evidence": 21, "changesets": 0, "resolution_tasks": 21})
 
     def test_normalization_has_no_publication_effect(self):
         self.assertTrue(all(x["publication_state"] == "REVIEW_REQUIRED" for x in self.bundle["opportunities"]))
