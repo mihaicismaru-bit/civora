@@ -15,7 +15,7 @@
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-08-12T20:03:20Z",
+    "utc": "2026-08-12T20:03:58Z",
     "source_pass": 6,
     "source_degraded": 0,
     "source_fail": 1,
@@ -26,14 +26,14 @@
     "quarantined_source": "SRC-LEGISLATIE — Portal Legislativ; dependent material facts blocked fail-closed"
   },
   "deployment_evidence": {
-    "utc": "2026-08-12T20:03:45Z",
+    "utc": "2026-08-12T20:04:19Z",
     "status": "PASS",
     "public_content_verified": true,
     "https_verified": true,
     "http_content_verified": true,
     "content_origin": "custom_https",
     "http_status": 200,
-    "final_url": "https://partener.eu/?p10_probe=20260812T200345Z",
+    "final_url": "https://partener.eu/?p10_probe=20260812T200419Z",
     "title": "PARTENER.EU — Finanțări europene",
     "required_markers_present": true,
     "critical_assets_ok": true,
@@ -43,7 +43,7 @@
       {
         "id": "custom_https",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260812T200345Z",
+        "final_url": "https://partener.eu/?p10_probe=20260812T200419Z",
         "content_verified": true,
         "marker_ok": true,
         "critical_assets_ok": true,
@@ -53,7 +53,7 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260812T200345Z",
+        "final_url": "http://partener.eu/?p10_probe=20260812T200419Z",
         "content_verified": true,
         "marker_ok": true,
         "critical_assets_ok": true,
@@ -63,7 +63,7 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260812T200345Z",
+        "final_url": "http://partener.eu/?p10_probe=20260812T200419Z",
         "content_verified": true,
         "marker_ok": true,
         "critical_assets_ok": true,
@@ -111,16 +111,16 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-08-12T20:03:44Z",
-    "validation_run_started": "2026-08-12T20:03:20Z",
+    "utc": "2026-08-12T20:04:19Z",
+    "validation_run_started": "2026-08-12T20:03:58Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "55db0058b06cb6856f834c0e4f3f5b992e2c86a03a249c3a8aad86a71c8877ce",
-      "history_sha256": "55db0058b06cb6856f834c0e4f3f5b992e2c86a03a249c3a8aad86a71c8877ce",
-      "history_path": "validation/history/20260812T200320Z.json",
+      "latest_sha256": "49e6203e429186db380907f13011121150c165e4f523d9d881692b8ccabed25a",
+      "history_sha256": "49e6203e429186db380907f13011121150c165e4f523d9d881692b8ccabed25a",
+      "history_path": "validation/history/20260812T200358Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "a345528d6e031c69087732c8c07e7860c4d485d4c0b0314dae7ca2da1edc7f74",
-      "checkpoint_sha256": "a345528d6e031c69087732c8c07e7860c4d485d4c0b0314dae7ca2da1edc7f74",
+      "source_state_sha256": "c320b5596c3cf0831e6d0b5614351af90ea583b738514d8542fb490381922043",
+      "checkpoint_sha256": "c320b5596c3cf0831e6d0b5614351af90ea583b738514d8542fb490381922043",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
@@ -128,7 +128,7 @@
     },
     "source_registry": {
       "observed_at": "2026-08-12T20:02:26.756618Z",
-      "age_seconds": 78,
+      "age_seconds": 112,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
@@ -164,12 +164,12 @@
       "fail_closed": true
     },
     "afir": {
-      "observed_at": "2026-08-12T15:43:10.140428+00:00",
+      "observed_at": "2026-08-12T20:03:45.437651+00:00",
       "status": "PASS",
       "item_count": 31,
       "error_count": 35,
-      "hash_change_candidates": 27,
-      "material_signal_candidates": 27,
+      "hash_change_candidates": 0,
+      "material_signal_candidates": 0,
       "auth_dependency_count": 28,
       "auth_dependencies": [
         {
@@ -369,7 +369,7 @@
           "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
         }
       ],
-      "resolution_task_required": true,
+      "resolution_task_required": false,
       "resolution_task_present_fail_closed": true,
       "material_facts_auto_promoted": false
     },
@@ -456,7 +456,7 @@
       "integrity_pass": true,
       "registry_health": "DEGRADED",
       "registry_hash_changes": 0,
-      "afir_hash_changes": 27,
+      "afir_hash_changes": 0,
       "peo_calendar_changes": 6,
       "mipe_health": "DEGRADED_FAIL_CLOSED",
       "autonomous_orchestration_configured": true,
