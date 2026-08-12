@@ -4,7 +4,6 @@ const exact=new Map([
  ['What Changed','Actualizări'],
  ['Ask PARTENER.EU','Întreabă PARTENER.EU'],
  ['Consultant mode','Consultant'],
- ['Public site','Site public'],
  ['Apeluri deschise în pilot','Apeluri deschise'],
  ['watch / consultare','în monitorizare'],
  ['facts demo cu provenance','date cu surse verificate'],
@@ -57,11 +56,11 @@ function polish(){
  const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
  const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);nodes.forEach(cleanNode);
  document.querySelectorAll('.navlink').forEach(b=>{if(b.textContent.trim()==='What Changed')b.textContent='Actualizări';if(b.textContent.trim()==='Ask PARTENER.EU')b.textContent='Întreabă PARTENER.EU';});
- document.querySelectorAll('.modebtn').forEach(b=>{if(b.textContent.trim()==='Consultant mode')b.textContent='Consultant';if(b.textContent.trim()==='Public site')b.textContent='Site public';});
+ document.querySelectorAll('.modebtn').forEach(b=>{if(b.textContent.trim()==='Consultant mode')b.textContent='Consultant';});
 }
 let scheduled=false;
 const schedule=()=>{if(scheduled)return;scheduled=true;queueMicrotask(()=>{scheduled=false;polish();});};
 new MutationObserver(schedule).observe(document.documentElement,{childList:true,subtree:true,characterData:true});
 polish();
-window.PARTENER_PUBLIC_COPY={version:'1.0.0',polish};
+window.PARTENER_PUBLIC_COPY={version:'1.0.1',polish};
 })();
