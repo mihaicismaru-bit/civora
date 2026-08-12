@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "observed_at": "2026-08-12T07:06:27.306144Z",
+  "policy": "health-hash-stage-only-no-auto-adoption",
+  "sources": [
+    {
+      "id": "SRC-EU-MFF-TIMELINE",
+      "tier": "T1",
+      "class": "official_legislative_timeline",
+      "stage": null,
+      "url": "https://www.consilium.europa.eu/en/policies/the-eu-s-long-term-budget-2028-2034/timeline-eu-long-term-budget-2028-2034/",
+      "ok": false,
+      "health": "FAIL",
+      "error": "HTTPError: HTTP Error 403: Forbidden",
+      "semantic_hash_changed": false,
+      "review_required": false,
+      "auto_promote_legislative_stage": false
+    },
+    {
+      "id": "SRC-EU-MFF-NRPP",
+      "tier": "T1",
+      "class": "official_council_position",
+      "stage": "COUNCIL_POSITION",
+      "url": "https://www.consilium.europa.eu/ro/press/press-releases/2026/06/16/mff-2028-2034-council-backs-simpler-and-more-efficient-financing-for-key-eu-priorities/",
+      "ok": false,
+      "health": "FAIL",
+      "error": "HTTPError: HTTP Error 403: Forbidden",
+      "semantic_hash_changed": false,
+      "review_required": false,
+      "auto_promote_legislative_stage": false
+    },
+    {
+      "id": "SRC-EU-MFF-COHESION",
+      "tier": "T1",
+      "class": "official_council_position",
+      "stage": "COUNCIL_POSITION",
+      "url": "https://www.consilium.europa.eu/en/press/press-releases/2026/06/29/mff-2028-2034-council-backs-simpler-and-more-efficient-rules-for-cohesion-funds/",
+      "ok": false,
+      "health": "FAIL",
+      "error": "HTTPError: HTTP Error 403: Forbidden",
+      "semantic_hash_changed": false,
+      "review_required": false,
+      "auto_promote_legislative_stage": false
+    },
+    {
+      "id": "SRC-EU-MFF-PERFORMANCE",
+      "tier": "T1",
+      "class": "official_council_position",
+      "stage": "COUNCIL_POSITION",
+      "url": "https://www.consilium.europa.eu/ro/press/press-releases/2026/06/26/mff-2028-2034-council-agrees-partial-position-on-new-framework-to-monitor-and-evaluate-the-eu-budget/",
+      "ok": false,
+      "health": "FAIL",
+      "error": "HTTPError: HTTP Error 403: Forbidden",
+      "semantic_hash_changed": false,
+      "review_required": false,
+      "auto_promote_legislative_stage": false
+    },
+    {
+      "id": "SRC-EU-MFF-ECF",
+      "tier": "T1",
+      "class": "official_council_position",
+      "stage": "COUNCIL_POSITION",
+      "url": "https://www.consilium.europa.eu/en/press/press-releases/2026/06/16/mff-2028-2034-council-agrees-its-position-on-new-and-innovative-fund-to-boost-eu-s-competitiveness/",
+      "ok": false,
+      "health": "FAIL",
+      "error": "HTTPError: HTTP Error 403: Forbidden",
+      "semantic_hash_changed": false,
+      "review_required": false,
+      "auto_promote_legislative_stage": false
+    },
+    {
+      "id": "SRC-EU-MFF-MIGRATION-SECURITY",
+      "tier": "T1",
+      "class": "official_council_position",
+      "stage": "COUNCIL_POSITION",
+      "url": "https://www.consilium.europa.eu/ro/press/press-releases/2026/07/15/mff-2028-2034-council-agrees-negotiating-position-on-eu-support-for-migration-border-management-and-internal-security/",
+      "ok": false,
+      "health": "FAIL",
+      "error": "HTTPError: HTTP Error 403: Forbidden",
+      "semantic_hash_changed": false,
+      "review_required": false,
+      "auto_promote_legislative_stage": false
+    },
+    {
+      "id": "SRC-EU-MFF-COMMISSION",
+      "tier": "T1",
+      "class": "official_commission_proposal_context",
+      "stage": "COMMISSION_PROPOSAL",
+      "url": "https://digital-strategy.ec.europa.eu/en/news/ambitious-budget-stronger-europe-2028-2034",
+      "ok": true,
+      "http_status": 200,
+      "final_url": "https://digital-strategy.ec.europa.eu/en/news/ambitious-budget-stronger-europe-2028-2034",
+      "bytes": 48532,
+      "semantic_sha256": "375c2dda7c6f9f612cfe6a3b91b0f5bda030af44fd0e28b8b5478baf68739b79",
+      "semantic_hash_changed": false,
+      "review_required": false,
+      "auto_promote_legislative_stage": false,
+      "health": "PASS"
+    },
+    {
+      "id": "SRC-RO-MAI-EU-2028",
+      "tier": "T1",
+      "class": "romania_sectoral_preparation",
+      "stage": "ROMANIA_PREPARATION",
+      "url": "https://fed.mai.gov.ro/in/eu-2028-2034/",
+      "ok": true,
+      "http_status": 200,
+      "final_url": "https://fed.mai.gov.ro/in/eu-2028-2034/",
+      "bytes": 129060,
+      "semantic_sha256": "8442f595858c92f2cd907b268b9954bc96f0d5e3526b756bda0d0764e46f7e76",
+      "semantic_hash_changed": false,
+      "review_required": false,
+      "auto_promote_legislative_stage": false,
+      "health": "PASS"
+    }
+  ],
+  "summary": {
+    "total": 8,
+    "pass": 2,
+    "fail": 6,
+    "review_required": 0
+  }
+}
