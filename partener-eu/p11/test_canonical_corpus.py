@@ -23,15 +23,25 @@ class CanonicalCorpusTests(unittest.TestCase):
         self.assertEqual(len(set(canonical)), 6)
 
     def test_bundle_passes_contract(self):
-        self.assertEqual(validate_bundle(self.bundle), {"opportunities": 6, "evidence": 6, "changesets": 0, "resolution_tasks": 6})
+        self.assertEqual(validate_bundle(self.bundle), {"opportunities": 6, "evidence": 10, "changesets": 1, "resolution_tasks": 6})
 
-    def test_normalization_has_no_publication_effect(self):
+    def test_expired_regional_consultation_remains_fail_closed(self):
+        opportunity = next(x for x in self.bundle["opportunities"] if x["opportunity_id"] == "pr-centru-digital-2")
+        self.assertEqual(opportunity["status"], "DISCOVERED")
+        self.assertEqual(opportunity["material_facts"], {})
+        self.assertEqual(opportunity["candidate_material_facts"]["status"]["value"], "UNKNOWN")
+        task = next(x for x in self.bundle["resolution_tasks"] if x["opportunity_id"] == "pr-centru-digital-2")
+        self.assertEqual(task["status"], "IN_REVIEW")
+        self.assertIn("status", task["blocked_fact_classes"])
+
+    def test_resolutions_have_no_automatic_publication_effect(self):
         self.assertTrue(all(x["publication_state"] == "REVIEW_REQUIRED" for x in self.bundle["opportunities"]))
-        self.assertEqual(self.bundle["changesets"], [])
+        self.assertTrue(all(x["automatic_publish_allowed"] is False for x in self.bundle["changesets"]))
 
     def test_candidate_fact_without_resolution_block_is_rejected(self):
         bundle = json.loads(json.dumps(self.bundle))
-        bundle["resolution_tasks"][0]["blocked_fact_classes"].remove("budget")
+        task = next(x for x in bundle["resolution_tasks"] if len(x["blocked_fact_classes"]) > 1)
+        task["blocked_fact_classes"].remove(task["blocked_fact_classes"][0])
         with self.assertRaisesRegex(ContractViolation, "candidate facts lack open ResolutionTask"):
             validate_bundle(bundle)
 

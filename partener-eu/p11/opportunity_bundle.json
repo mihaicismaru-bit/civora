@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "bundle_id": "PARTENER-EU-P11-CANONICAL-0001",
-  "as_of": "2026-08-12T10:34:55Z",
+  "as_of": "2026-08-12T12:32:54Z",
   "source_snapshot": {
     "repository": "mihaicismaru-bit/civora",
     "public_data_path": "partener-eu/web/data.js",
@@ -23,14 +23,80 @@
     },
     {
       "schema_version": "1.0",
+      "evidence_id": "EV-AFIR-ENERGY-2026-SESSION-CURRENT",
+      "source_id": "SRC-AFIR-ENERGY-2026",
+      "source_tier": "T1",
+      "source_owner": "Agenția pentru Finanțarea Investițiilor Rurale",
+      "source_url": "https://www.afir.ro/info-la-zi/sesiune-depunere-proiecte-schema-de-energie/",
+      "observed_at": "2026-08-12T11:30:30Z",
+      "semantic_sha256": "43aaf2ec2f40cf7c25e7c87fe1629c60525225a957ce4b463831ba294b207470",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": ["status", "deadline", "budget", "grant"],
+      "temporal_role": "CURRENT_SESSION_PAGE",
+      "semantic_assertion": "AFIR explicitly states that the third Schema Energie session runs from 2026-06-15 through 2026-08-14, accepts online submissions throughout the session, remains open until the deadline even if requests exceed the allocation, has a EUR 265,000,000 allocation, and provides 100% aid within the stated EUR/MW ceilings."
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-AFIR-ENERGY-2026-GUIDE-V7",
+      "source_id": "SRC-AFIR-ENERGY-2026",
+      "source_tier": "T1",
+      "source_owner": "Agenția pentru Finanțarea Investițiilor Rurale",
+      "source_url": "https://www.afir.ro/domenii-de-interventie/detalii-si-anexe-schema-energie/",
+      "primary_attachment_url": "https://www.afir.ro/media/hkfp4w0v/ghidul-solicitantului-schem%C4%83-energie-autoconsum-v7-iunie-2026.pdf",
+      "primary_attachment_title": "Ghidul Solicitantului Schemă Energie Autoconsum V7 - iunie 2026",
+      "primary_attachment_pages": [9, 10, 13, 14, 32, 33, 51, 52],
+      "primary_attachment_sha256": "3526cabe388c8ce9d9f91a22fa9e4dee4acdfe18e620f86725b85f870a951090",
+      "observed_at": "2026-08-12T11:30:30Z",
+      "semantic_sha256": "cd77112da4a04c87a42f459750ca3d1d7ce385cf1f10c4ae2907b7cc03e9f2e7",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": ["budget", "grant", "eligibility", "scoring", "beneficiaries"],
+      "temporal_role": "CURRENT_APPLICABLE_GUIDE",
+      "semantic_assertion": "AFIR Guide V7, annexed to MADR Order 180/2026, defines the 2026 session allocation, state-aid intensity and ceilings, eligible beneficiary classes, cumulative eligibility rules, and the complete 100-point competitive scoring grid."
+    },
+    {
+      "schema_version": "1.0",
       "evidence_id": "EV-SRC-PR-CENTRU-DIGITAL-2",
       "source_id": "SRC-PR-CENTRU-DIGITAL-2",
       "source_tier": "T1",
       "source_url": "https://www.regiocentru.ro/actiuni/2-2-intreprinderi-digitale-pentru-o-economie-avansata-apel-2/",
       "observed_at": "2026-08-12T10:34:55Z",
       "semantic_sha256": "82536ee60202beb0f1ee25fab18cbff64adf45ea7065379f035b5f2c2b9838a6",
-      "semantic_verdict": "VERIFIED",
-      "supports_fact_classes": ["status"]
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "superseded_by": "EV-PR-CENTRU-DIGITAL2-CURRENT-PAGE-20260812",
+      "resolution_note": "The marker was reclassified because the same official page's consultation window expired on 2026-05-20 without final launch evidence."
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-PR-CENTRU-DIGITAL2-CURRENT-PAGE-20260812",
+      "source_id": "SRC-PR-CENTRU-DIGITAL-2",
+      "source_tier": "T1",
+      "source_owner": "ADR Centru — AM Programul Regiunea Centru",
+      "source_url": "https://www.regiocentru.ro/actiuni/2-2-intreprinderi-digitale-pentru-o-economie-avansata-apel-2/",
+      "observed_at": "2026-08-12T12:32:54Z",
+      "semantic_sha256": "295bb718f5b938547dc8ff50a912b1bee9f37ef9772395c730d38e1c23df8f7b",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "temporal_role": "CURRENT_PAGE_WITH_EXPIRED_HISTORICAL_WINDOW",
+      "semantic_assertion": "The current official action page still labels the case 'In consultare' while also stating that consultation ran only from 2026-04-28 through 2026-05-20; no final submission window is present."
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-PR-CENTRU-DIGITAL2-CONSULTATION-PACKAGE-20260428",
+      "source_id": "SRC-PR-CENTRU-DIGITAL-2",
+      "source_tier": "T1",
+      "source_owner": "ADR Centru — AM Programul Regiunea Centru",
+      "source_url": "https://www.regiocentru.ro/wp-content/uploads/2026/04/Ghidul-solicitantului-%E2%80%93-consultare-publica-1.pdf",
+      "linked_attachments": [
+        "https://www.regiocentru.ro/wp-content/uploads/2026/04/Fisa-de-prezentare-ghid-2.pdf",
+        "https://www.regiocentru.ro/wp-content/uploads/2026/04/Centralizator-intrebari-si-raspunsuri-1-1.pdf"
+      ],
+      "observed_at": "2026-08-12T12:32:54Z",
+      "semantic_sha256": "a7e90268f3ff0476e573678580523a5ca44b393bd446fc2195e41208165ff055",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "temporal_role": "HISTORICAL_CONSULTATION_PACKAGE",
+      "semantic_assertion": "The official guide, presentation sheet and Q&A are explicitly consultation-stage documents. They expose draft values and conditions but cannot authorize current final material facts."
     },
     {
       "schema_version": "1.0",
@@ -88,10 +154,37 @@
       "status": "OPEN",
       "publication_state": "REVIEW_REQUIRED",
       "automatic_material_fact_update_allowed": false,
-      "evidence_refs": ["EV-SRC-AFIR-ENERGY-2026"],
-      "material_facts": {"status": "OPEN", "deadline": {"opens": "15 iunie 2026", "closes": "14 august 2026"}},
-      "fact_evidence": {"status": ["EV-SRC-AFIR-ENERGY-2026"], "deadline": ["EV-SRC-AFIR-ENERGY-2026"]},
-      "candidate_material_facts": {"budget": "265 mil. EUR", "grant": "100% nerambursabil în limitele/MW", "eligibility": "Imported legacy applicant and condition lists", "scoring": "Conform Ghidului Schemei de Energie", "beneficiaries": "Întreprinderi agricole; industria alimentară"}
+      "evidence_refs": ["EV-SRC-AFIR-ENERGY-2026", "EV-AFIR-ENERGY-2026-SESSION-CURRENT", "EV-AFIR-ENERGY-2026-GUIDE-V7"],
+      "material_facts": {
+        "status": "OPEN",
+        "deadline": {"opens": "15 iunie 2026", "closes": "14 august 2026", "time_of_day": "UNKNOWN"},
+        "budget": {"session_total_eur": 265000000, "solar_capacity_le_1mw_eur": 145000000, "solar_capacity_gt_1mw_eur": 120000000},
+        "grant": {"eligible_cost_intensity_percent": 100, "cap_eur_per_mw_le_1mw": 650000, "cap_eur_per_mw_gt_1mw": 550000, "cap_eur_per_beneficiary": 20000000, "payment_form": "reimbursement in RON"},
+        "beneficiaries": [
+          "Legally constituted agricultural-sector enterprises, including PFA, II, IF, agricultural cooperatives/cooperative companies holding physical production or agri-food processing assets, and agricultural companies",
+          "Legally constituted food-industry enterprises, including PFA, II and IF, registered with ONRC",
+          "Land-improvement organizations or federations (OUAI/FOUAI) constituted under Law 138/2004"
+        ],
+        "scoring": {
+          "maximum_points": 100,
+          "criteria": [
+            {"id": "C1", "maximum_points": 70, "basis": "requested state aid per installed production MW; lowest eligible value receives 70 and highest receives 0, with linear interpolation"},
+            {"id": "C2", "maximum_points": 10, "basis": "self-consumption: >90%-100%=10; >80%-90%=5; 70%-80%=0"},
+            {"id": "C3", "maximum_points": 10, "basis": "integrated storage able to store nominal production for at least 12 minutes"},
+            {"id": "C4", "maximum_points": 10, "basis": "activity: OUAI=10; CAEN 01=7; CAEN 10=5; CAEN 11=2"}
+          ],
+          "tie_breaker": "eligible project value in EUR, ascending"
+        }
+      },
+      "fact_evidence": {
+        "status": ["EV-SRC-AFIR-ENERGY-2026", "EV-AFIR-ENERGY-2026-SESSION-CURRENT"],
+        "deadline": ["EV-SRC-AFIR-ENERGY-2026", "EV-AFIR-ENERGY-2026-SESSION-CURRENT"],
+        "budget": ["EV-AFIR-ENERGY-2026-SESSION-CURRENT", "EV-AFIR-ENERGY-2026-GUIDE-V7"],
+        "grant": ["EV-AFIR-ENERGY-2026-SESSION-CURRENT", "EV-AFIR-ENERGY-2026-GUIDE-V7"],
+        "beneficiaries": ["EV-AFIR-ENERGY-2026-GUIDE-V7"],
+        "scoring": ["EV-AFIR-ENERGY-2026-GUIDE-V7"]
+      },
+      "candidate_material_facts": {"eligibility": "UNKNOWN_PENDING_FULL_CUMULATIVE_RULE_NORMALIZATION"}
     },
     {
       "schema_version": "1.0",
@@ -113,13 +206,21 @@
       "title": "Întreprinderi digitale pentru o economie avansată — Apel 2",
       "programme": "Programul Regiunea Centru",
       "code": "Acțiunea 2.2 — Apel 2",
-      "status": "PUBLIC_CONSULTATION",
+      "status": "DISCOVERED",
       "publication_state": "REVIEW_REQUIRED",
       "automatic_material_fact_update_allowed": false,
-      "evidence_refs": ["EV-SRC-PR-CENTRU-DIGITAL-2"],
-      "material_facts": {"status": "PUBLIC_CONSULTATION"},
-      "fact_evidence": {"status": ["EV-SRC-PR-CENTRU-DIGITAL-2"]},
-      "candidate_material_facts": {"deadline": "Consultare 28 aprilie – 20 mai 2026", "budget": "14,113 mil. EUR", "grant": "15.000–200.000 EUR", "eligibility": "IMM din Regiunea Centru; CAEN de verificat", "scoring": "Prag ETF observat: 50 puncte", "beneficiaries": "Microîntreprinderi și IMM"}
+      "evidence_refs": ["EV-SRC-PR-CENTRU-DIGITAL-2", "EV-PR-CENTRU-DIGITAL2-CURRENT-PAGE-20260812", "EV-PR-CENTRU-DIGITAL2-CONSULTATION-PACKAGE-20260428"],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {
+        "status": {"value": "UNKNOWN", "reason": "Official page label is temporally stale and no final launch evidence was found."},
+        "deadline": "UNKNOWN_NO_FINAL_SUBMISSION_WINDOW",
+        "budget": {"amount_eur": 14113032, "document_phase": "CONSULTATION_ONLY"},
+        "grant": {"minimum_eur": 15000, "maximum_eur": 200000, "document_phase": "CONSULTATION_ONLY"},
+        "eligibility": "CONSULTATION_DRAFT_ONLY — commercial companies qualifying as micro, small or medium enterprises, subject to cumulative final-guide conditions",
+        "scoring": "UNKNOWN_UNTIL_FINAL_GUIDE_AND_FINAL_GRID",
+        "beneficiaries": "CONSULTATION_DRAFT_ONLY — microenterprises and small/medium enterprises"
+      }
     },
     {
       "schema_version": "1.0",
@@ -164,11 +265,25 @@
       "candidate_material_facts": {"status": "EXPECTED", "deadline": "Consultare 20 martie – 10 aprilie 2026; lansare neconfirmată", "budget": "120 mil. EUR", "grant": "Neconfirmat final", "eligibility": "Universități publice/private, de verificat în ghid final", "scoring": "Necunoscut până la ghid final", "beneficiaries": "Universități publice/private"}
     }
   ],
-  "changesets": [],
+  "changesets": [
+    {
+      "schema_version": "1.0",
+      "changeset_id": "CS-AFIR-ENERGY-2026-MATERIAL-20260812",
+      "opportunity_id": "afir-energy-2026",
+      "automatic_publish_allowed": false,
+      "resolution_state": "VERIFIED",
+      "changes": [
+        {"fact_class": "budget", "before": "265 mil. EUR", "after": {"session_total_eur": 265000000, "solar_capacity_le_1mw_eur": 145000000, "solar_capacity_gt_1mw_eur": 120000000}, "evidence_refs": ["EV-AFIR-ENERGY-2026-SESSION-CURRENT", "EV-AFIR-ENERGY-2026-GUIDE-V7"]},
+        {"fact_class": "grant", "before": "100% nerambursabil în limitele/MW", "after": {"eligible_cost_intensity_percent": 100, "cap_eur_per_mw_le_1mw": 650000, "cap_eur_per_mw_gt_1mw": 550000, "cap_eur_per_beneficiary": 20000000}, "evidence_refs": ["EV-AFIR-ENERGY-2026-SESSION-CURRENT", "EV-AFIR-ENERGY-2026-GUIDE-V7"]},
+        {"fact_class": "beneficiaries", "before": "Întreprinderi agricole; industria alimentară", "after": "Agricultural-sector enterprises; food-industry enterprises; OUAI/FOUAI, subject to the exact legal forms in Guide V7 page 9", "evidence_refs": ["EV-AFIR-ENERGY-2026-GUIDE-V7"]},
+        {"fact_class": "scoring", "before": "Conform Ghidului Schemei de Energie", "after": "100-point competitive grid: C1 aid/MW 70; C2 self-consumption 10; C3 storage 10; C4 activity 10; ascending eligible project value tie-breaker", "evidence_refs": ["EV-AFIR-ENERGY-2026-GUIDE-V7"]}
+      ]
+    }
+  ],
   "resolution_tasks": [
-    {"schema_version": "1.0", "resolution_task_id": "RT-AFIR-ENERGY-2026-MATERIAL", "opportunity_id": "afir-energy-2026", "status": "OPEN", "automatic_material_fact_update_allowed": false, "blocked_fact_classes": ["budget", "grant", "eligibility", "scoring", "beneficiaries"]},
+    {"schema_version": "1.0", "resolution_task_id": "RT-AFIR-ENERGY-2026-MATERIAL", "opportunity_id": "afir-energy-2026", "status": "IN_REVIEW", "automatic_material_fact_update_allowed": false, "blocked_fact_classes": ["eligibility"], "resolution_evidence_refs": ["EV-AFIR-ENERGY-2026-SESSION-CURRENT", "EV-AFIR-ENERGY-2026-GUIDE-V7"], "resolution_note": "Budget, grant, beneficiary classes and scoring are resolved from the current AFIR session page and Guide V7. Eligibility remains UNKNOWN until all cumulative applicant, investment and expenditure conditions are normalized without loss."},
     {"schema_version": "1.0", "resolution_task_id": "RT-PR-NE-ENERGY-RESIDENTIAL-TOWNS-2026-MATERIAL", "opportunity_id": "pr-ne-energy-residential-towns-2026", "status": "OPEN", "automatic_material_fact_update_allowed": false, "blocked_fact_classes": ["status", "deadline", "budget", "grant", "eligibility", "scoring", "beneficiaries"]},
-    {"schema_version": "1.0", "resolution_task_id": "RT-PR-CENTRU-DIGITAL-2-MATERIAL", "opportunity_id": "pr-centru-digital-2", "status": "OPEN", "automatic_material_fact_update_allowed": false, "blocked_fact_classes": ["deadline", "budget", "grant", "eligibility", "scoring", "beneficiaries"]},
+    {"schema_version": "1.0", "resolution_task_id": "RT-PR-CENTRU-DIGITAL-2-MATERIAL", "opportunity_id": "pr-centru-digital-2", "status": "IN_REVIEW", "automatic_material_fact_update_allowed": false, "blocked_fact_classes": ["status", "deadline", "budget", "grant", "eligibility", "scoring", "beneficiaries"], "resolution_evidence_refs": ["EV-PR-CENTRU-DIGITAL2-CURRENT-PAGE-20260812", "EV-PR-CENTRU-DIGITAL2-CONSULTATION-PACKAGE-20260428"], "resolution_note": "Official page label is temporally stale after the 2026-05-20 consultation close. Keep every material fact blocked until ADR Centru publishes a final guide and an explicit submission window, or corrects the current status label."},
     {"schema_version": "1.0", "resolution_task_id": "RT-PR-CENTRU-CLUSTERS-122-MATERIAL", "opportunity_id": "pr-centru-clusters-122", "status": "OPEN", "automatic_material_fact_update_allowed": false, "blocked_fact_classes": ["budget", "grant", "eligibility", "scoring", "beneficiaries"]},
     {"schema_version": "1.0", "resolution_task_id": "RT-PIDS-SUPPORTED-DECISION-MATERIAL", "opportunity_id": "pids-supported-decision", "status": "OPEN", "automatic_material_fact_update_allowed": false, "blocked_fact_classes": ["budget", "grant", "eligibility", "scoring", "beneficiaries"]},
     {"schema_version": "1.0", "resolution_task_id": "RT-PEO-STEP-EDU-ADULTI-MATERIAL", "opportunity_id": "peo-step-edu-adulti", "status": "OPEN", "automatic_material_fact_update_allowed": false, "blocked_fact_classes": ["status", "deadline", "budget", "grant", "eligibility", "scoring", "beneficiaries"]}
