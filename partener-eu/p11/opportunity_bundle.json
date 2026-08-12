@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "bundle_id": "PARTENER-EU-P11-CANONICAL-0001",
-  "as_of": "2026-08-12T10:34:55Z",
+  "as_of": "2026-08-12T13:12:33Z",
   "source_snapshot": {
     "repository": "mihaicismaru-bit/civora",
     "public_data_path": "partener-eu/web/data.js",
@@ -76,6 +76,66 @@
       "semantic_sha256": "808012988357e68835f1359b7bb8eff296e07666afbbc044c69bd235d0636bc9",
       "semantic_verdict": "VERIFIED",
       "supports_fact_classes": ["status"]
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-IMPORT-PR-CENTRU-PARCURI-RIS",
+      "source_id": "IMPORT-CORPUS-BATCH-02-EC5D136A",
+      "source_tier": "T1",
+      "source_url": "https://www.adrcentru.ro/comunicare/lansare-apel-de-finantare-pentru-parcuri-industriale-in-domenii-ris-programul-regiunea-centru-2021-2027/",
+      "observed_at": "2026-08-12T13:12:33Z",
+      "semantic_sha256": "7dc4d2b9e599c3536f0fcf71978218a1c0ca66c09ea3da122e927510306a03e8",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "evidence_basis": "Imported identity and candidate-fact snapshot from pinned repository artifact; authoritative page semantics not re-resolved by P11"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-IMPORT-PR-CENTRU-URBAN-81",
+      "source_id": "IMPORT-CORPUS-BATCH-01-EC5D136A",
+      "source_tier": "T1",
+      "source_url": "https://www.regiocentru.ro/actiuni/8-1dezvoltare-urbana-integrata-prin-regenerarea-spatiilor-publice-punerea-in-valoare-a-patrimoniului-infrastructurii-culturale-si-a-potentialului-turistic-din-municipiile-regiunii-centru-a/",
+      "observed_at": "2026-08-12T13:12:33Z",
+      "semantic_sha256": "48be752ef05df7c0425436bfc754fa83c4b5bb33f541c916842780fc14430a30",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "evidence_basis": "Imported identity and candidate-fact snapshot from pinned repository artifact; authoritative page semantics not re-resolved by P11"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-IMPORT-PEO-UNIVERSITATI-DESCHISE",
+      "source_id": "IMPORT-CORPUS-BATCH-01-EC5D136A",
+      "source_tier": "T1B",
+      "source_url": "https://oirvest.ro/peo-lansare-ghidul-solicitantului-conditii-specifice-universitati-deschise-apel-de-proiecte-competitiv-finantat-din-prioritatea-7-cresterea-calitatii-ofertei-de-educatie-si-fo/",
+      "observed_at": "2026-08-12T13:12:33Z",
+      "semantic_sha256": "cb7ff3f6ced4afd48efa49f05c9e16d2aefc8746378d03fb1c5fb6d316dd30b6",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "evidence_basis": "Imported identity and candidate-fact snapshot from pinned repository artifact; authoritative page semantics not re-resolved by P11"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-IMPORT-PEO-STEP-VET",
+      "source_id": "IMPORT-CORPUS-BATCH-01-EC5D136A",
+      "source_tier": "T1B",
+      "source_url": "https://oirvest.ro/peo-consultare-publica-ghidul-solicitantului-conditii-specifice-step-vet-formare-profesionala-la-locul-de-munca-pentru-elevii-din-invatamantul-profesional-si-tehnic-in-tehnologii-crit/",
+      "observed_at": "2026-08-12T13:12:33Z",
+      "semantic_sha256": "91ebb64ff40f3e72242361eb5de269a50b7a54235a39a69ecad194dd609300fe",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "evidence_basis": "Imported identity and candidate-fact snapshot from pinned repository artifact; authoritative page semantics not re-resolved by P11"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-IMPORT-PIDS-TRAFIC-PERSOANE",
+      "source_id": "IMPORT-CORPUS-BATCH-01-EC5D136A",
+      "source_tier": "T1B",
+      "source_url": "https://oirvest.ro/poids-lansare-ghiduri-in-consultare-publica-in-data-de-13-07-2026/",
+      "observed_at": "2026-08-12T13:12:33Z",
+      "semantic_sha256": "c3d9ee7accb5497c387ede719eeba043e968a4c309c591336a1af68f4c32fe79",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "evidence_basis": "Imported identity and candidate-fact snapshot from pinned repository artifact; authoritative page semantics not re-resolved by P11"
     }
   ],
   "opportunities": [
@@ -162,6 +222,76 @@
       "material_facts": {},
       "fact_evidence": {},
       "candidate_material_facts": {"status": "EXPECTED", "deadline": "Consultare 20 martie – 10 aprilie 2026; lansare neconfirmată", "budget": "120 mil. EUR", "grant": "Neconfirmat final", "eligibility": "Universități publice/private, de verificat în ghid final", "scoring": "Necunoscut până la ghid final", "beneficiaries": "Universități publice/private"}
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "pr-centru-parcuri-ris",
+      "title": "Parcuri industriale în domenii RIS",
+      "programme": "Programul Regiunea Centru",
+      "code": "1.5.2",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": ["EV-IMPORT-PR-CENTRU-PARCURI-RIS"],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {"status": "OPEN", "deadline": {"opens": "20 iulie 2026, 10:00", "closes": "20 octombrie 2026, 10:00"}, "budget": "10,856 mil. EUR", "grant": "Conform ghidului", "eligibility": "Condiții importate din corpus; necesită verificare semantică", "scoring": "Conform ghidului", "beneficiaries": "Entități eligibile conform ghidului"}
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "pr-centru-urban-81",
+      "title": "Dezvoltare urbană integrată: regenerare, patrimoniu, cultură și turism — municipii",
+      "programme": "Programul Regiunea Centru",
+      "code": "8.1 / PRC/1204",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": ["EV-IMPORT-PR-CENTRU-URBAN-81"],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {"status": "EXPECTED", "deadline": {"opens": "20 august 2026, 12:00", "closes": "20 noiembrie 2026, 12:00"}, "budget": "22,678 mil. EUR", "grant": "Conform ghidului", "eligibility": "Municipii din Regiunea Centru; condițiile exacte necesită rezoluție", "scoring": "Conform grilei oficiale; neextras", "beneficiaries": "Municipii din Regiunea Centru"}
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "peo-universitati-deschise",
+      "title": "Universități deschise",
+      "programme": "PEO",
+      "code": "P7 — Universități deschise",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": ["EV-IMPORT-PEO-UNIVERSITATI-DESCHISE"],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {"status": "EXPECTED", "deadline": "Consultare 16 iulie – 5 august 2026; lansare neconfirmată", "budget": "Necunoscut până la verificarea ghidului", "grant": "Necunoscut până la verificarea ghidului", "eligibility": "Condiții importate din corpus; necesită verificare semantică", "scoring": "Conform grilei oficiale; neextras", "beneficiaries": "Instituții de învățământ superior conform ghidului"}
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "peo-step-vet",
+      "title": "STEP-VET — Formare profesională la locul de muncă pentru elevii din învățământul profesional și tehnic în tehnologii critice",
+      "programme": "PEO / STEP",
+      "code": "P12 — STEP-VET",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": ["EV-IMPORT-PEO-STEP-VET"],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {"status": "EXPECTED", "deadline": "Consultare 13 iulie – 3 august 2026; lansare neconfirmată", "budget": "Necunoscut până la verificarea ghidului", "grant": "Necunoscut până la verificarea ghidului", "eligibility": "Condiții importate din corpus; necesită verificare semantică", "scoring": "Conform grilei oficiale; neextras", "beneficiaries": "Entități eligibile conform ghidului"}
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "pids-trafic-persoane",
+      "title": "Servicii integrate pentru victimele traficului de persoane",
+      "programme": "PoIDS",
+      "code": "P08 — trafic de persoane",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": ["EV-IMPORT-PIDS-TRAFIC-PERSOANE"],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {"status": "EXPECTED", "deadline": "Consultare 13 iulie – 3 august 2026; lansare neconfirmată", "budget": "Necunoscut până la verificarea ghidului", "grant": "Necunoscut până la verificarea ghidului", "eligibility": "Condiții importate din corpus; necesită verificare semantică", "scoring": "Conform grilei oficiale; neextras", "beneficiaries": "Entități eligibile conform ghidului"}
     }
   ],
   "changesets": [],
@@ -171,6 +301,11 @@
     {"schema_version": "1.0", "resolution_task_id": "RT-PR-CENTRU-DIGITAL-2-MATERIAL", "opportunity_id": "pr-centru-digital-2", "status": "OPEN", "automatic_material_fact_update_allowed": false, "blocked_fact_classes": ["deadline", "budget", "grant", "eligibility", "scoring", "beneficiaries"]},
     {"schema_version": "1.0", "resolution_task_id": "RT-PR-CENTRU-CLUSTERS-122-MATERIAL", "opportunity_id": "pr-centru-clusters-122", "status": "OPEN", "automatic_material_fact_update_allowed": false, "blocked_fact_classes": ["budget", "grant", "eligibility", "scoring", "beneficiaries"]},
     {"schema_version": "1.0", "resolution_task_id": "RT-PIDS-SUPPORTED-DECISION-MATERIAL", "opportunity_id": "pids-supported-decision", "status": "OPEN", "automatic_material_fact_update_allowed": false, "blocked_fact_classes": ["budget", "grant", "eligibility", "scoring", "beneficiaries"]},
-    {"schema_version": "1.0", "resolution_task_id": "RT-PEO-STEP-EDU-ADULTI-MATERIAL", "opportunity_id": "peo-step-edu-adulti", "status": "OPEN", "automatic_material_fact_update_allowed": false, "blocked_fact_classes": ["status", "deadline", "budget", "grant", "eligibility", "scoring", "beneficiaries"]}
+    {"schema_version": "1.0", "resolution_task_id": "RT-PEO-STEP-EDU-ADULTI-MATERIAL", "opportunity_id": "peo-step-edu-adulti", "status": "OPEN", "automatic_material_fact_update_allowed": false, "blocked_fact_classes": ["status", "deadline", "budget", "grant", "eligibility", "scoring", "beneficiaries"]},
+    {"schema_version": "1.0", "resolution_task_id": "RT-PR-CENTRU-PARCURI-RIS-MATERIAL", "opportunity_id": "pr-centru-parcuri-ris", "status": "OPEN", "automatic_material_fact_update_allowed": false, "blocked_fact_classes": ["status", "deadline", "budget", "grant", "eligibility", "scoring", "beneficiaries"]},
+    {"schema_version": "1.0", "resolution_task_id": "RT-PR-CENTRU-URBAN-81-MATERIAL", "opportunity_id": "pr-centru-urban-81", "status": "OPEN", "automatic_material_fact_update_allowed": false, "blocked_fact_classes": ["status", "deadline", "budget", "grant", "eligibility", "scoring", "beneficiaries"]},
+    {"schema_version": "1.0", "resolution_task_id": "RT-PEO-UNIVERSITATI-DESCHISE-MATERIAL", "opportunity_id": "peo-universitati-deschise", "status": "OPEN", "automatic_material_fact_update_allowed": false, "blocked_fact_classes": ["status", "deadline", "budget", "grant", "eligibility", "scoring", "beneficiaries"]},
+    {"schema_version": "1.0", "resolution_task_id": "RT-PEO-STEP-VET-MATERIAL", "opportunity_id": "peo-step-vet", "status": "OPEN", "automatic_material_fact_update_allowed": false, "blocked_fact_classes": ["status", "deadline", "budget", "grant", "eligibility", "scoring", "beneficiaries"]},
+    {"schema_version": "1.0", "resolution_task_id": "RT-PIDS-TRAFIC-PERSOANE-MATERIAL", "opportunity_id": "pids-trafic-persoane", "status": "OPEN", "automatic_material_fact_update_allowed": false, "blocked_fact_classes": ["status", "deadline", "budget", "grant", "eligibility", "scoring", "beneficiaries"]}
   ]
 }

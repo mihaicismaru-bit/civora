@@ -10,6 +10,7 @@ from opportunity_contract import validate_bundle
 ROOT = pathlib.Path(__file__).resolve().parent
 PUBLIC_DATA = ROOT.parent / "web" / "data.js"
 BUNDLE = ROOT / "opportunity_bundle.json"
+ADMISSION_BATCH = ROOT / "admission_batch_01.json"
 
 
 def public_opportunity_ids(bundle: dict | None = None) -> list[str]:
@@ -27,11 +28,14 @@ def main() -> int:
     counts = validate_bundle(bundle)
     public_ids = public_opportunity_ids(bundle)
     canonical_ids = [x["opportunity_id"] for x in bundle["opportunities"]]
-    if canonical_ids != public_ids:
-        raise SystemExit(f"canonical/public identity mismatch: {canonical_ids!r} != {public_ids!r}")
+    admitted_ids = json.loads(ADMISSION_BATCH.read_text(encoding="utf-8"))["opportunity_ids"]
+    if canonical_ids[: len(public_ids)] != public_ids:
+        raise SystemExit(f"canonical/public identity prefix mismatch: {canonical_ids!r} != {public_ids!r}")
+    if canonical_ids[len(public_ids) :] != admitted_ids:
+        raise SystemExit(f"canonical/admission suffix mismatch: {canonical_ids!r} != {admitted_ids!r}")
     if any(x["publication_state"] == "PUBLISHABLE" for x in bundle["opportunities"]):
         raise SystemExit("I02 must not promote normalized records to PUBLISHABLE")
-    print(json.dumps({**counts, "public_identity_match": True, "publishable": 0}, indent=2))
+    print(json.dumps({**counts, "static_public_identity_match": True, "admitted_batch_count": len(admitted_ids), "publishable": 0}, indent=2))
     return 0
 
 
