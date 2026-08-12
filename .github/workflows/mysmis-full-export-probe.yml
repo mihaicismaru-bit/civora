@@ -1,0 +1,60 @@
+name: MySMIS Full Export Probe
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/mipe-resilient-ingestion-v2]
+    paths: ['.github/workflows/mysmis-full-export-probe.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: |
+          python -m pip install --disable-pip-version-check playwright
+          python -m playwright install --with-deps chromium
+      - name: Select maximum rows and invoke official export
+        shell: bash
+        run: |
+          python - <<'PY'
+          import asyncio,hashlib,json,mimetypes,os,re
+          from pathlib import Path
+          from playwright.async_api import async_playwright
+          URL='https://reporting.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027'
+          async def main():
+            async with async_playwright() as p:
+              b=await p.chromium.launch(headless=True)
+              c=await b.new_context(locale='ro-RO',ignore_https_errors=False,accept_downloads=True)
+              page=await c.new_page()
+              await page.goto(URL,wait_until='domcontentloaded',timeout=45000)
+              await page.wait_for_selector('#APELURI_row_select',timeout=20000)
+              options=await page.locator('#APELURI_row_select option').evaluate_all("els=>els.map(e=>({value:e.value,text:e.textContent,selected:e.selected}))")
+              print('OPTIONS',json.dumps(options,ensure_ascii=False))
+              numeric=sorted([int(x['value']) for x in options if str(x['value']).isdigit()])
+              if numeric:
+                target=str(numeric[-1])
+                await page.select_option('#APELURI_row_select',target)
+                await page.wait_for_timeout(5000)
+                rows=await page.locator('#APELURI_data_panel table tbody tr').count()
+                body=await page.content()
+                rg=re.search(r'\b(\d+)\s*-\s*(\d+)\s+of\s+(\d+)\b',re.sub(r'<[^>]+>',' ',body),re.I)
+                print('AFTER_SELECT',json.dumps({'target':target,'rows':rows,'range':rg.groups() if rg else None,'bytes':len(body)},ensure_ascii=False))
+              try:
+                async with page.expect_download(timeout=30000) as info:
+                  await page.click('#B160137058328874434')
+                dl=await info.value
+                path=await dl.path()
+                data=Path(path).read_bytes()
+                print('DOWNLOAD',json.dumps({'suggested':dl.suggested_filename,'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest(),'magic':data[:32].hex()},ensure_ascii=False))
+              except Exception as e:
+                print('DOWNLOAD_ERROR',type(e).__name__,str(e))
+              await b.close()
+          asyncio.run(main())
+          PY
