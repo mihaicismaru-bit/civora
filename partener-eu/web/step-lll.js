@@ -1,57 +1,37 @@
 (function(){
   const D=window.PARTENER_DATA;
   if(!D||!Array.isArray(D.calls)) return;
-  D.asOf='2026-08-12T08:35:00+03:00';
-  if(D.calls.some(c=>c.id==='peo-step-lll-adulti')) return;
-  D.calls.unshift({
-    id:'peo-step-lll-adulti',
-    programme:'PEO / STEP',
-    code:'P11 STEP — STEP-LLL',
+  D.asOf='2026-08-12T08:50:00+03:00';
+  const existing=D.calls.find(c=>c.id==='peo-step-lll-adulti');
+  const call={
+    id:'peo-step-lll-adulti', programme:'PEO / STEP', code:'P11 STEP / Acțiunea 11.g.1',
     title:'STEP-LLL — Competențe pentru viitor: formare la locul de muncă și educația adulților în tehnologiile critice — Adulți',
-    status:'PUBLIC_CONSULTATION',
-    category:'Formare / tehnologii critice',
-    region:'România',
-    applicant:['De confirmat din ghidul final / documentele autoritative complete'],
-    applicantKeys:[],
+    status:'OPEN', category:'Formare / tehnologii critice', region:'România',
+    applicant:['Furnizori FPC publici și privați autorizați','Furnizori acreditați de servicii specializate pentru ocupare','Confederații sindicale și patronale','Federații sindicale/patronale','Asociații profesionale sectoriale și structuri asociative sectoriale eligibile','Institute/centre de formare și cercetare'],
+    applicantKeys:['training_provider','employment_service_provider','trade_union_confederation','employer_confederation','sectoral_association','training_research_institute'],
     objectiveKeys:['critical_technologies','adult_training','workplace_training'],
-    open:'Neconfirmat — apelul nu este tratat ca lansat',
-    close:'Neconfirmat',
-    consultation:'2 aprilie – 27 aprilie 2026 (închisă)',
-    budget:'Neconfirmat autoritativ în corpusul curent',
-    grant:'Neconfirmat autoritativ în corpusul curent',
-    cofinancing:'Neconfirmat autoritativ în corpusul curent',
-    summary:'Ghidul Solicitantului Condiții Specifice STEP-LLL a fost lansat în consultare publică la 2 aprilie 2026 în Programul Educație și Ocupare, Prioritatea P11 STEP — Tehnologii strategice pentru Europa. Termenul oficial pentru observații a fost 27 aprilie 2026. PARTENER.EU nu promovează apelul la OPEN până la identificarea unei evidențe autoritative de lansare și a ghidului final.',
-    eligibility:[
-      'Eligibilitatea solicitantului nu este promovată ca fapt material până la verificarea ghidului final / anexelor autoritative.',
-      'Obiectul confirmat este formarea la locul de muncă și educația adulților în tehnologii critice.',
-      'Încadrarea exactă a solicitanților, partenerilor și grupului țintă rămâne de rezolvat din documentația oficială completă.'
-    ],
-    activities:[
-      'Formare la locul de muncă în tehnologii critice — confirmat la nivelul titlului oficial al ghidului.',
-      'Educația adulților în tehnologii critice — confirmat la nivelul titlului oficial al ghidului.',
-      'Activitățile și limitele detaliate rămân nepromovate până la parsarea documentației autoritative.'
-    ],
-    costs:['Categorii de cost: neconfirmate autoritativ în corpusul curent.'],
-    documents:[
-      'Ghidul Solicitantului Condiții Specifice — versiunea lansată în consultare publică la 02.04.2026.',
-      'Anexele ghidului — referite de sursa oficială OIR către MIPE; ingestia directă MIPE este încă blocată de transport.',
-      'Ghid final / ordin de aprobare / eventuale corrigenda — de identificat și verificat înainte de actualizarea faptelor materiale.'
-    ],
-    scoring:['Praguri, criterii și grilă de evaluare: neconfirmate autoritativ în corpusul curent.'],
-    indicators:['Indicatorii specifici: neconfirmați autoritativ în corpusul curent.'],
-    risks:[
-      'Consultarea publică nu înseamnă apel lansat.',
-      'Nu trebuie transferate automat în versiunea finală condițiile dintr-un draft de ghid.',
-      'Orice buget, deadline, eligibilitate sau scoring trebuie reconciliate cu ghidul final / MySMIS / MIPE înainte de publicare ca fapt.'
-    ],
+    open:'29 mai 2026, 16:00', close:'28 august 2026, 16:00', consultation:'2–27 aprilie 2026',
+    budget:'92 mil. EUR', grant:'100% din cheltuielile eligibile', cofinancing:'0%',
+    summary:'Apel competitiv PEO pentru dezvoltarea competențelor adulților în tehnologiile critice STEP. Ghidul final și lansarea MySMIS sunt confirmate prin OIR PECU Nord-Vest; consultarea a produs modificări importante privind cofinanțarea, aria geografică, grupul țintă și grila de evaluare.',
+    eligibility:['Grup țintă: persoane angajate și/sau șomeri cu vârsta peste 29 de ani','Proiectele pot viza toate regiunile sau minimum două regiuni, în funcție de intervenții și nevoi','Legătura directă dintre competențele dezvoltate și tehnologiile critice STEP trebuie demonstrată','În cazul solicitantului unic, acesta trebuie să fie furnizor FPC autorizat; parteneriatele trebuie să includă cel puțin un furnizor de formare profesională'],
+    activities:['A1 — informare și consiliere profesională pentru șomeri, activitate relevantă/opțională','A2.1 — formare profesională pentru angajați și șomeri în tehnologii critice STEP','A2.2 — formare profesională la locul de muncă exclusiv pentru angajați','A3 — schimb de bune practici, mentorat profesional, colaborări și transfer de know-how'],
+    costs:['Bugetul trebuie fundamentat în raport cu activitățile și rezultatele','7.974 EUR/participant este reper de dimensionare, nu cost standard','Subvenția pentru anumite programe de instruire este reglementată distinct în ghid'],
+    documents:['Ghidul Solicitantului Condiții Specifice — forma finală','Anexele finale STEP-LLL','Lista de răspunsuri la consultarea publică — 69 poziții / 52 pagini'],
+    scoring:['Criteriul privind depășirea țintei EECO01 a fost eliminat','Criteriul distinct privind centrele de excelență a fost eliminat/reformulat','Experiența furnizorului de formare trebuie demonstrată prin activități și documente concrete, nu prin simpla calitate formală de partener'],
+    indicators:['EECO01 — participanți adulți; ținta apelului actualizată la 11.538 persoane','Reper financiar pentru dimensionare: 7.974 EUR/participant'],
+    risks:['Corelarea insuficientă cu Anexa 7 — tehnologii critice STEP','Experiență STEP insuficient documentată a furnizorului de formare','Confuzia dintre programe de formare și activități generale de diseminare/workshop','Buget necorelat realist cu grupul țintă și rezultatele'],
     dossierUrl:'step-lll-dossier.html',
     sourceFacts:[
-      {label:'OIR PECU Regiunea Vest — anunț oficial STEP-LLL, 02.04.2026',url:'https://oirvest.ro/ghidul-solicitantului-conditii-specifice-step-lll-competente-pentru-viitor-formare-la-locul-de-munca-si-educatia-adultilor-in-tehnologiile-critice-adulti-lansa/',tier:'T1B'},
-      {label:'MIPE — pagina ghidului STEP-LLL (referită de OIR; fetch direct pending)',url:'https://mfe.gov.ro/ghiduri_peos/step-lll-competente-pentru-viitor-formare-la-locul-de-munca-si-educatia-adultilor-in-tehnologiile-critice-adulti/',tier:'T1-pending-direct-verification'}
+      {label:'OIR PECU Nord-Vest — ghid final și fereastră MySMIS',url:'https://www.runv.ro/anunturi.html',tier:'T1B'},
+      {label:'MIPE — pagina oficială STEP-LLL',url:'https://mfe.gov.ro/ghiduri_peos/step-lll-competente-pentru-viitor-formare-la-locul-de-munca-si-educatia-adultilor-in-tehnologiile-critice-adulti/',tier:'T1'},
+      {label:'Lista de răspunsuri STEP-LLL — copie accesibilă a documentului MIPE',url:'https://fonduri-structurale-media.s3.eu-central-1.amazonaws.com/PEO_Lista_de_raspunsuri_formare_adulti_6490fe2e68.pdf',tier:'T2-mirror-of-official-document'}
     ],
     changes:[
-      {date:'2 apr 2026',kind:'CONSULTATION_OPENED',before:'—',after:'Ghid STEP-LLL lansat în consultare publică'},
-      {date:'27 apr 2026',kind:'CONSULTATION_CLOSED',before:'Consultare deschisă',after:'Termenul pentru observații a expirat; lansarea apelului rămâne neconfirmată'}
+      {date:'2 apr 2026',kind:'CONSULTATION_OPENED',before:'—',after:'Ghid lansat în consultare'},
+      {date:'27 apr 2026',kind:'CONSULTATION_CLOSED',before:'Consultare deschisă',after:'Perioada de observații închisă'},
+      {date:'29 mai 2026',kind:'CALL_OPENED',before:'Consultare',after:'Ghid final publicat; MySMIS deschis la 16:00'},
+      {date:'29 mai 2026',kind:'GUIDE_UPDATED_AFTER_CONSULTATION',before:'Draft',after:'Cofinanțare 0%; reguli geografice și de grup țintă clarificate; grilă revizuită'}
     ]
-  });
+  };
+  if(existing) Object.assign(existing,call); else D.calls.unshift(call);
 })();
