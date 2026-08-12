@@ -4,44 +4,63 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="PARTENER.EU — informații și analiză pentru finanțări europene în România" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>PARTENER.EU — Finanțări europene</title>
-  <link rel="stylesheet" href="styles.css?v=20260812-0949" />
-  <link rel="stylesheet" href="radar-sv-oltenia.css?v=20260812-0754" />
-  <link rel="stylesheet" href="regional-radars.css?v=20260812-0754" />
-  <link rel="stylesheet" href="news-v1.css?v=20260812-0754" />
-  <link rel="stylesheet" href="people-policy-v1.css?v=20260812-0754" />
-  <link rel="stylesheet" href="dr14-story.css?v=20260812-0754" />
-  <link rel="stylesheet" href="alma-story.css?v=20260812-0754" />
-  <link rel="stylesheet" href="step-lll-story.css?v=20260812-0840" />
-  <link rel="stylesheet" href="peo-calendar.css?v=20260812-0754" />
-  <link rel="stylesheet" href="consultant-workspace-v2.css?v=20260812-0754" />
+  <link rel="stylesheet" href="styles.css?v=20260812-1115" />
+  <link rel="stylesheet" href="radar-sv-oltenia.css?v=20260812-1115" />
+  <link rel="stylesheet" href="regional-radars.css?v=20260812-1115" />
+  <link rel="stylesheet" href="news-v1.css?v=20260812-1115" />
+  <link rel="stylesheet" href="people-policy-v1.css?v=20260812-1115" />
+  <link rel="stylesheet" href="dr14-story.css?v=20260812-1115" />
+  <link rel="stylesheet" href="alma-story.css?v=20260812-1115" />
+  <link rel="stylesheet" href="step-lll-story.css?v=20260812-1115" />
+  <link rel="stylesheet" href="peo-calendar.css?v=20260812-1115" />
+  <link rel="stylesheet" href="consultant-workspace-v2.css?v=20260812-1115" />
 </head>
 <body>
-  <div id="app"></div>
-  <script src="data.js?v=20260812-0835"></script>
-  <script src="step-lll.js?v=20260812-0835"></script>
-  <script src="corpus-batch-01.js?v=20260812-0754"></script>
-  <script src="corpus-batch-02.js?v=20260812-0754"></script>
-  <script src="corpus-radar-sv-oltenia.js?v=20260812-0754"></script>
-  <script src="corpus-alma.js?v=20260812-0754"></script>
-  <script src="corpus-regional-radars-batch-01.js?v=20260812-0754"></script>
-  <script src="peo-calendar.js?v=20260812-0754"></script>
-  <script src="app.js?v=20260812-0835"></script>
-  <script src="consultant-workspace-v2.js?v=20260812-0754"></script>
-  <script src="universal-applicant-resolver-v1.js?v=20260812-0921"></script>
-  <script src="radar-sv-oltenia-ui.js?v=20260812-0754"></script>
-  <script src="regional-radars.js?v=20260812-0754"></script>
-  <script src="mipe-news.js?v=20260812-0312"></script>
-  <script src="mipe-news-adapter.js?v=20260812-0312"></script>
-  <script src="news-v1-ui.js?v=20260812-0312"></script>
-  <script src="mipe-news-cleanup.js?v=20260812-0312"></script>
-  <script src="peo-calendar-ui.js?v=20260812-0754"></script>
-  <script src="people-policy-v1.js?v=20260812-0754"></script>
-  <script src="dr14-story.js?v=20260812-0754"></script>
-  <script src="alma-story.js?v=20260812-0754"></script>
-  <script src="step-lll-story.js?v=20260812-0840"></script>
-  <script src="step-lll-qa-story.js?v=20260812-0850"></script>
-  <script src="mff-2028-2034.js?v=20260812-0949"></script>
-  <script src="public-product-copy-v1.js?v=20260812-1021"></script>
+  <div id="app">
+    <div class="shell" id="boot-fallback">
+      <div class="topbar"><div class="nav"><div class="brand">PARTENER<span>.EU</span></div></div></div>
+      <main class="main">
+        <section class="hero">
+          <div>
+            <div class="eyebrow">Finanțări europene · România</div>
+            <h1>Găsește finanțarea potrivită. Înțelege condițiile. Acționează la timp.</h1>
+            <p>PARTENER.EU încarcă informațiile verificate despre oportunități de finanțare.</p>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Critical boot path: render the public shell before any enhancement module. -->
+  <script src="data.js?v=20260812-1115"></script>
+  <script src="app.js?v=20260812-1115"></script>
+
+  <!-- Progressive enhancements: none of these is allowed to gate first paint. -->
+  <script defer src="step-lll.js?v=20260812-1115"></script>
+  <script defer src="corpus-batch-01.js?v=20260812-1115"></script>
+  <script defer src="corpus-batch-02.js?v=20260812-1115"></script>
+  <script defer src="corpus-radar-sv-oltenia.js?v=20260812-1115"></script>
+  <script defer src="corpus-alma.js?v=20260812-1115"></script>
+  <script defer src="corpus-regional-radars-batch-01.js?v=20260812-1115"></script>
+  <script defer src="peo-calendar.js?v=20260812-1115"></script>
+  <script defer src="consultant-workspace-v2.js?v=20260812-1115"></script>
+  <script defer src="universal-applicant-resolver-v1.js?v=20260812-1115"></script>
+  <script defer src="radar-sv-oltenia-ui.js?v=20260812-1115"></script>
+  <script defer src="regional-radars.js?v=20260812-1115"></script>
+  <script defer src="mipe-news.js?v=20260812-1115"></script>
+  <script defer src="mipe-news-adapter.js?v=20260812-1115"></script>
+  <script defer src="news-v1-ui.js?v=20260812-1115"></script>
+  <script defer src="mipe-news-cleanup.js?v=20260812-1115"></script>
+  <script defer src="peo-calendar-ui.js?v=20260812-1115"></script>
+  <script defer src="people-policy-v1.js?v=20260812-1115"></script>
+  <script defer src="dr14-story.js?v=20260812-1115"></script>
+  <script defer src="alma-story.js?v=20260812-1115"></script>
+  <script defer src="step-lll-story.js?v=20260812-1115"></script>
+  <script defer src="step-lll-qa-story.js?v=20260812-1115"></script>
+  <script defer src="mff-2028-2034.js?v=20260812-1115"></script>
 </body>
 </html>
