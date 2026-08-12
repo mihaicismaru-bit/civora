@@ -1,4 +1,5 @@
 name: PARTENER.EU Production Validation
+
 on:
   push:
     branches: [main]
@@ -11,38 +12,105 @@ on:
   schedule:
     - cron: '17 */6 * * *'
       timezone: 'Europe/Bucharest'
+  # GITHUB_TOKEN commits made by autonomous ingestion workflows do not emit a
+  # downstream push workflow. Validate again after every completed no-credential
+  # source/adapter monitor so its persistent state is included in P10 evidence.
+  workflow_run:
+    workflows:
+      - 'PARTENER.EU MIPE Ingestion'
+      - 'PARTENER.EU AFIR Ingestion'
+      - 'PARTENER.EU Verified Source Registry'
+      - 'PARTENER.EU PEO Calendar'
+      - 'PARTENER.EU MFF 2028-2034 Monitor'
+      - 'PARTENER.EU Pages'
+    types: [completed]
+    branches: [main]
+
 concurrency:
   group: partener-eu-production-validation
   cancel-in-progress: true
+
 permissions:
   contents: write
+
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
+
       - name: Recovery regression
+        id: recovery
+        continue-on-error: true
         run: python partener-eu/ops/test_recovery.py
-      - name: Frontpage render-loop regression
+
+      - name: Frontpage freeze and nonblank regression
+        id: frontend
+        continue-on-error: true
         run: python partener-eu/ops/test_frontend_regression.py
-      - name: Live source + frontend validation
+
+      - name: P10 orchestration and fail-closed policy regression
+        id: policy
+        continue-on-error: true
+        run: python partener-eu/ops/test_p10_policy_regression.py
+
+      - name: Live source and frontend validation
         id: validate
         shell: bash
         run: |
           set +e
           python partener-eu/ops/p10_validate.py
-          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+          CODE=$?
+          echo "exit_code=$CODE" >> "$GITHUB_OUTPUT"
           exit 0
+
       - name: Persist source hash resolution tasks
-        run: python partener-eu/ops/p10_resolution_tasks.py
-      - name: Public deployment health
-        run: python partener-eu/ops/check_public_site.py
+        id: resolution
+        shell: bash
+        run: |
+          set +e
+          python partener-eu/ops/p10_resolution_tasks.py
+          CODE=$?
+          echo "exit_code=$CODE" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Aggregate T1/T1B and monitor integrity evidence
+        id: integrity
+        shell: bash
+        run: |
+          set +e
+          python partener-eu/ops/p10_monitor_integrity.py
+          CODE=$?
+          echo "exit_code=$CODE" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Verify public document and critical boot assets
+        id: deployment
+        shell: bash
+        run: |
+          set +e
+          python partener-eu/ops/check_public_site.py
+          CODE=$?
+          echo "exit_code=$CODE" >> "$GITHUB_OUTPUT"
+          exit 0
+
       - name: Synchronize P10 acceptance ledger
-        run: python partener-eu/ops/p10_acceptance_sync.py
+        id: acceptance
+        shell: bash
+        run: |
+          set +e
+          python partener-eu/ops/p10_acceptance_sync.py
+          CODE=$?
+          echo "exit_code=$CODE" >> "$GITHUB_OUTPUT"
+          exit 0
+
       - name: Persist validation ledger
+        if: always()
         shell: bash
         run: |
           git config user.name "civora-validation-bot"
@@ -53,6 +121,25 @@ jobs:
             git pull --rebase origin main
             git push origin HEAD:main
           fi
-      - name: Enforce fail-closed health
-        if: steps.validate.outputs.exit_code != '0'
-        run: exit ${{ steps.validate.outputs.exit_code }}
+
+      - name: Enforce fail-closed health after evidence persistence
+        if: always()
+        shell: bash
+        env:
+          RECOVERY_OUTCOME: ${{ steps.recovery.outcome }}
+          FRONTEND_OUTCOME: ${{ steps.frontend.outcome }}
+          POLICY_OUTCOME: ${{ steps.policy.outcome }}
+          VALIDATE_CODE: ${{ steps.validate.outputs.exit_code }}
+          RESOLUTION_CODE: ${{ steps.resolution.outputs.exit_code }}
+          INTEGRITY_CODE: ${{ steps.integrity.outputs.exit_code }}
+          DEPLOYMENT_CODE: ${{ steps.deployment.outputs.exit_code }}
+          ACCEPTANCE_CODE: ${{ steps.acceptance.outputs.exit_code }}
+        run: |
+          FAIL=0
+          for OUTCOME in "$RECOVERY_OUTCOME" "$FRONTEND_OUTCOME" "$POLICY_OUTCOME"; do
+            if [ "$OUTCOME" != "success" ]; then FAIL=2; fi
+          done
+          for CODE in "$VALIDATE_CODE" "$RESOLUTION_CODE" "$INTEGRITY_CODE" "$DEPLOYMENT_CODE" "$ACCEPTANCE_CODE"; do
+            if [ "${CODE:-2}" != "0" ]; then FAIL=2; fi
+          done
+          exit "$FAIL"
