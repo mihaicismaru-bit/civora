@@ -131,6 +131,24 @@ def is_auth_dependency(requested_url, final_url, title="", text=""):
     )
 
 
+def auth_link_dependency(href, base):
+    """Return a normalized dependency record for an AFIR authentication link."""
+    absolute = urllib.parse.urljoin(base, href or "")
+    parsed = urllib.parse.urlparse(absolute)
+    if parsed.scheme not in ("http", "https") or (parsed.hostname or "").lower() not in HOSTS:
+        return None
+    path = (parsed.path or "").lower()
+    if not any(marker in path for marker in AUTH_PATH_MARKERS):
+        return None
+    return {
+        "requestedUrl": absolute,
+        "sourcePage": base,
+        "status": "AUTH_OR_ACCESS_DEPENDENT",
+        "materialFactAction": "NONE",
+        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated.",
+    }
+
+
 def doc_text(data, url):
     """Best-effort text for OpenXML; PDFs are fingerprinted and parsed when pypdf is available."""
     low = urllib.parse.urlparse(url).path.lower()
@@ -168,6 +186,7 @@ def main():
     items = []
     errors = []
     access_dependencies = []
+    access_dependency_urls = set()
     max_pages = 80
 
     while queue and len(seen) < max_pages:
@@ -204,6 +223,13 @@ def main():
                 })
                 continue
             for href, label in links:
+                dependency = auth_link_dependency(href, url)
+                if dependency:
+                    dep_url = dependency["requestedUrl"]
+                    if dep_url not in access_dependency_urls:
+                        access_dependency_urls.add(dep_url)
+                        access_dependencies.append(dependency)
+                    continue
                 u = norm(href, url)
                 if not u:
                     continue
