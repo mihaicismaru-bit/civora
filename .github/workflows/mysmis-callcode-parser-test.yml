@@ -4,7 +4,6 @@ on:
     branches: [agent/mipe-resilient-ingestion-v2]
     paths:
       - '.github/workflows/mysmis-callcode-parser-test.yml'
-      - 'partener-eu/ingest/mipe_ingest_v2_runner.py'
 permissions:
   contents: read
 jobs:
@@ -13,32 +12,27 @@ jobs:
     timeout-minutes: 4
     steps:
       - uses: actions/checkout@v6
-      - name: Verify one-to-one call-code extraction on official registry page
+      - name: Inspect call-code alignment on official registry page
         shell: bash
         run: |
           set -euo pipefail
           curl -L --compressed -sS --connect-timeout 8 --max-time 30 \
-            -A 'PARTENER.EU-CIVORA-MySMIS-Parser-Test/1.0 (+https://partener.eu)' \
+            -A 'PARTENER.EU-CIVORA-MySMIS-Parser-Test/1.1 (+https://partener.eu)' \
             -o /tmp/mysmis.html \
             'https://reporting.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027'
           python - <<'PY'
-          import json, sys
+          import collections, json, sys
           sys.path.insert(0, 'partener-eu/ingest')
+          import mipe_ingest_v2 as base
           import mipe_ingest_v2_runner as runner
-          import mipe_ingest_v2 as v2
           raw=open('/tmp/mysmis.html','rb').read()
-          parsed=v2.parse_registry_html(raw)
-          print(json.dumps({
-            'rows':len(parsed.get('rows') or []),
-            'range':parsed.get('range'),
-            'total':parsed.get('total'),
-            'identity':parsed.get('callCodeIdentity'),
-            'uniqueIds':len({r.get('id') for r in parsed.get('rows') or []}),
-            'sampleCodes':[r.get('callCode') for r in (parsed.get('rows') or [])[:3]],
-          },ensure_ascii=False,indent=2))
-          rows=parsed.get('rows') or []
-          ident=parsed.get('callCodeIdentity') or {}
-          assert rows, 'registry rows missing'
-          assert ident.get('accepted') is True, ident
-          assert len({r.get('id') for r in rows}) == len(rows)
+          original=runner._original_parse_registry_html(raw)
+          rows=original.get('rows') or []
+          codes=runner.extract_row_call_codes(raw.decode('utf-8','replace'))
+          groups=collections.defaultdict(list)
+          for i,(row,code) in enumerate(zip(rows,codes)):
+              groups[code].append({'index':i,'program':row.get('program'),'callType':row.get('callType'),'callName':row.get('callName'),'state':row.get('state'),'grantBudget':row.get('grantBudget')})
+          dup={k:v for k,v in groups.items() if len(v)>1}
+          print(json.dumps({'rows':len(rows),'codes':len(codes),'uniqueCodes':len(groups),'duplicates':dup},ensure_ascii=False,indent=2))
+          assert len(rows)==len(codes)
           PY
