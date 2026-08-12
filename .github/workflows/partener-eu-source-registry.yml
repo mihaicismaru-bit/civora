@@ -1,0 +1,59 @@
+name: PARTENER.EU Verified Source Registry
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 */2 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: partener-eu-source-registry
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Probe classified official sources without changing facts
+        run: python partener-eu/ingest/source_registry_probe.py
+
+      - name: Validate fail-closed policy
+        run: |
+          python - <<'PY'
+          import json, sys
+          p='partener-eu/ingest/state/source_registry_health.json'
+          d=json.load(open(p, encoding='utf-8'))
+          bad=[]
+          for x in d.get('sources', []):
+              if x.get('semantic_hash_changed') and x.get('material_fact_use') and x.get('publish_material_fact_update') is not False:
+                  bad.append(x.get('id'))
+          if bad:
+              print('FAIL: material hash changes are not fail-closed:', bad)
+              sys.exit(2)
+          print(json.dumps(d.get('summary', {}), ensure_ascii=False))
+          PY
+
+      - name: Persist source health ledger conflict-safe
+        shell: bash
+        run: |
+          set -e
+          cp partener-eu/ingest/state/source_registry_health.json /tmp/source_registry_health.json
+          git fetch origin main
+          git reset --hard origin/main
+          cp /tmp/source_registry_health.json partener-eu/ingest/state/source_registry_health.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add partener-eu/ingest/state/source_registry_health.json
+          if git diff --cached --quiet; then
+            echo 'No source-registry health changes.'
+            exit 0
+          fi
+          git commit -m 'Persist verified source registry health'
+          git push origin HEAD:main
