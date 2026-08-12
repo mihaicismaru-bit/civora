@@ -1,0 +1,160 @@
+{
+  "schema_version": "1.0",
+  "updated_utc": "2026-08-12",
+  "policy": {
+    "T1": "Authoritative official system or managing authority source. May support material facts when the exact source/evidence is captured and current.",
+    "T1B": "Official delegated/subordinate/intermediate-body source. May support material facts within delegated scope when provenance is explicit; prefer T1 corroboration for conflicts.",
+    "T2": "Official public-sector secondary source. Corroboration/discovery by default; do not override T1/T1B material facts.",
+    "T3": "Discovery-only source such as search indexes or non-authoritative aggregators. Never authoritative for material facts.",
+    "material_fact_change_rule": "A semantic/hash change never auto-updates deadline, eligibility, budget, scoring, beneficiaries or other material facts. Create or maintain a resolution task until authoritative evidence is re-established.",
+    "conflict_rule": "T1 > T1B > T2 > T3. A lower-tier source may raise a conflict but never silently overwrite a higher-tier material fact.",
+    "origin_rule": "Official attachments linked by a verified T1/T1B page retain the page provenance chain and are hashed independently."
+  },
+  "sources": [
+    {
+      "id": "SRC-MYSMIS-CALLS",
+      "tier": "T1",
+      "class": "authoritative_call_registry",
+      "owner": "MySMIS2021 / MIPE ecosystem",
+      "url": "https://resurse.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027",
+      "programmes": ["2021-2027"],
+      "extract": ["call_id", "call_name", "status", "programme", "budget", "project_counts"],
+      "material_fact_use": true,
+      "credentials_required": false
+    },
+    {
+      "id": "SRC-OIRBI-PEO",
+      "tier": "T1B",
+      "class": "official_intermediate_body",
+      "owner": "OIR PECU Bucuresti-Ilfov",
+      "url": "https://www.oirbi.ro/peo-2021-2027/",
+      "programmes": ["PEO"],
+      "extract": ["programme_versions", "decisions", "official_documents", "MIPE-linked_attachments"],
+      "material_fact_use": true,
+      "credentials_required": false
+    },
+    {
+      "id": "SRC-OIRBI-PIDS",
+      "tier": "T1B",
+      "class": "official_intermediate_body",
+      "owner": "OIR PECU Bucuresti-Ilfov",
+      "url": "https://www.oirbi.ro/pids-2021-2027/",
+      "programmes": ["PoIDS"],
+      "extract": ["programme_versions", "decisions", "official_documents", "MIPE-linked_attachments"],
+      "material_fact_use": true,
+      "credentials_required": false
+    },
+    {
+      "id": "SRC-OIRVEST-PEO-GUIDES",
+      "tier": "T1B",
+      "class": "official_intermediate_body_guides",
+      "owner": "OIR PECU Regiunea Vest",
+      "url": "https://oirvest.ro/ghiduri-peo/",
+      "programmes": ["PEO"],
+      "extract": ["guides", "corrigenda", "methodologies", "indicator_documents", "attachments"],
+      "material_fact_use": true,
+      "credentials_required": false
+    },
+    {
+      "id": "SRC-OIRVEST-PEO-MANUALS",
+      "tier": "T1B",
+      "class": "official_intermediate_body_implementation",
+      "owner": "OIR PECU Regiunea Vest",
+      "url": "https://oirvest.ro/manualul-beneficiarului-instructiuni-peo/",
+      "programmes": ["PEO", "PoIDS"],
+      "extract": ["beneficiary_manuals", "instructions", "implementation_guidance", "attachments"],
+      "material_fact_use": true,
+      "credentials_required": false
+    },
+    {
+      "id": "SRC-OIRVEST-PEO",
+      "tier": "T1B",
+      "class": "official_intermediate_body",
+      "owner": "OIR PECU Regiunea Vest",
+      "url": "https://oirvest.ro/peo-2021-2027/",
+      "programmes": ["PEO"],
+      "extract": ["programme_documents", "monitoring_documents", "announcements", "attachments"],
+      "material_fact_use": true,
+      "credentials_required": false
+    },
+    {
+      "id": "SRC-OIRCENTRU-PEO",
+      "tier": "T1B",
+      "class": "official_intermediate_body",
+      "owner": "OIR PECU Regiunea Centru",
+      "url": "https://oircentru.ro/peo-2021-2027/",
+      "programmes": ["PEO"],
+      "extract": ["programme_documents", "decisions", "attachments"],
+      "material_fact_use": true,
+      "credentials_required": false
+    },
+    {
+      "id": "SRC-OIRNE-PEO",
+      "tier": "T1B",
+      "class": "official_intermediate_body",
+      "owner": "OIR PECU Regiunea Nord-Est",
+      "url": "https://www.fsenordest.ro/contact_program.html",
+      "programmes": ["PEO", "PoIDS"],
+      "extract": ["programme_documents", "announcements", "technical_assistance"],
+      "material_fact_use": true,
+      "credentials_required": false
+    },
+    {
+      "id": "SRC-OI-RESEARCH-POCIDIF",
+      "tier": "T1B",
+      "class": "official_intermediate_body",
+      "owner": "Organism Intermediar pentru Cercetare / Autoritatea Nationala pentru Cercetare",
+      "url": "https://www.poc.mcid.gov.ro/ro/articol/4382/2021-2027-pocidif-2021-2027",
+      "programmes": ["PoCIDIF"],
+      "extract": ["launched_calls", "guides", "corrigenda", "beneficiary_manuals", "instructions"],
+      "material_fact_use": true,
+      "credentials_required": false
+    },
+    {
+      "id": "SRC-OI-RESEARCH-HEALTH",
+      "tier": "T1B",
+      "class": "official_intermediate_body",
+      "owner": "Organism Intermediar pentru Cercetare / Autoritatea Nationala pentru Cercetare",
+      "url": "https://www.poc.research.gov.ro/ro/articol/4427/2021-2027-pos-2021-2027",
+      "programmes": ["Programul Sanatate"],
+      "extract": ["launched_calls", "guides", "corrigenda", "beneficiary_manuals"],
+      "material_fact_use": true,
+      "credentials_required": false
+    },
+    {
+      "id": "SRC-MAI-FED-CALLS",
+      "tier": "T1",
+      "class": "managing_authority_call_registry",
+      "owner": "Ministerul Afacerilor Interne / Autoritatea de Management Afaceri Interne",
+      "url": "https://fed.mai.gov.ro/in/apeluri/",
+      "programmes": ["FAMI", "FSI", "IMFV"],
+      "extract": ["call_calendars", "launched_calls", "guides", "deadlines", "budgets"],
+      "material_fact_use": true,
+      "credentials_required": false
+    },
+    {
+      "id": "SRC-PREFECTURA-TM-FUNDING",
+      "tier": "T2",
+      "class": "official_public_sector_aggregator",
+      "owner": "Institutia Prefectului Timis",
+      "url": "https://tm.prefectura.mai.gov.ro/informatii-de-interes-public/apeluri-de-finantare-deschise-si-viitoare/",
+      "programmes": ["multiple"],
+      "extract": ["discovery_links", "cross_checks"],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "note": "Useful for discovery/corroboration only; material facts must resolve to the linked official programme/guide source."
+    },
+    {
+      "id": "SRC-OLD-FONDURI-UE",
+      "tier": "T2",
+      "class": "official_legacy_registry",
+      "owner": "Fonduri UE legacy reporting",
+      "url": "https://b.fonduri-ue.ro/ords/f?p=110:10",
+      "programmes": ["legacy"],
+      "extract": ["legacy_call_history", "discovery_links"],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "note": "The service itself points 2021-2027 users to MySMIS resources; do not use as current authority for 2021-2027."
+    }
+  ]
+}
