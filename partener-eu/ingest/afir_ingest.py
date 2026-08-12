@@ -4,7 +4,8 @@
 Discovers and fingerprints public AFIR pages and attached documents. It does NOT
 promote deadline, budget, eligibility or scoring changes into material facts.
 Those changes remain resolution candidates until authoritative evidence is
-reviewed by the existing P10 resolution path.
+reviewed by the existing P10 resolution path. Authentication redirects are
+recorded as external access dependencies and never treated as official changes.
 """
 import datetime as dt
 import hashlib
@@ -31,11 +32,22 @@ SEEDS = [
     "https://www.afir.ro/comunicare/utile/dezbatere-publica/",
     "https://www.afir.ro/finantare/",
 ]
-UA = "PARTENER.EU-CIVORA-AFIR-Ingest/1.0 (+https://partener.eu)"
+UA = "PARTENER.EU-CIVORA-AFIR-Ingest/1.1 (+https://partener.eu)"
 DOC_EXT = (".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ods", ".zip")
 MATERIAL_TERMS = (
     "termen", "deadline", "eligibil", "buget", "alocare", "punctaj",
     "scoring", "prag de calitate", "criterii de selectie", "criterii de selecție",
+)
+AUTH_PATH_MARKERS = (
+    "/umbraco/surface/authentication/",
+    "/account/login",
+    "/signin",
+    "/sign-in",
+)
+AUTH_TEXT_MARKERS = (
+    "we can't sign you in",
+    "you need to sign in",
+    "authentication required",
 )
 
 
@@ -48,6 +60,9 @@ def norm(url, base=None):
         url = urllib.parse.urljoin(base, url)
     p = urllib.parse.urlparse(url)
     if p.scheme not in ("http", "https") or (p.hostname or "").lower() not in HOSTS:
+        return None
+    path = (p.path or "/").lower()
+    if any(marker in path for marker in AUTH_PATH_MARKERS):
         return None
     return urllib.parse.urlunparse(("https", p.netloc.lower(), p.path or "/", "", p.query, ""))
 
@@ -92,13 +107,28 @@ class Parser(HTMLParser):
         if not s:
             return
         self.text.append(s)
-        if self._tag == "title": self.title.append(s)
-        if self._tag == "h1": self.h1.append(s)
-        if self._href is not None: self._a.append(s)
+        if self._tag == "title":
+            self.title.append(s)
+        if self._tag == "h1":
+            self.h1.append(s)
+        if self._href is not None:
+            self._a.append(s)
 
 
 def clean(s):
     return re.sub(r"\s+", " ", html.unescape(s or "")).strip()
+
+
+def is_auth_dependency(requested_url, final_url, title="", text=""):
+    parsed = urllib.parse.urlparse(final_url or requested_url)
+    path = (parsed.path or "").lower()
+    query = urllib.parse.parse_qs(parsed.query)
+    sample = (title + " " + text[:5000]).lower()
+    return (
+        any(marker in path for marker in AUTH_PATH_MARKERS)
+        or any(key.lower() in {"redirecturl", "returnurl"} for key in query)
+        or any(marker in sample for marker in AUTH_TEXT_MARKERS)
+    )
 
 
 def doc_text(data, url):
@@ -137,6 +167,7 @@ def main():
     seen = set()
     items = []
     errors = []
+    access_dependencies = []
     max_pages = 80
 
     while queue and len(seen) < max_pages:
@@ -158,10 +189,20 @@ def main():
         text = ""
         links = []
         if not is_doc:
-            p = Parser(); p.feed(data.decode("utf-8", "replace"))
+            p = Parser()
+            p.feed(data.decode("utf-8", "replace"))
             title = clean(" ".join(p.h1) or " ".join(p.title))
             text = clean(" ".join(p.text))[:500000]
             links = p.links
+            if is_auth_dependency(url, r.get("url"), title, text):
+                access_dependencies.append({
+                    "requestedUrl": url,
+                    "finalUrl": r.get("url"),
+                    "status": "AUTH_OR_ACCESS_DEPENDENT",
+                    "materialFactAction": "NONE",
+                    "reason": "AFIR redirected the public route to an authentication surface; no access was fabricated.",
+                })
+                continue
             for href, label in links:
                 u = norm(href, url)
                 if not u:
@@ -179,8 +220,13 @@ def main():
         changed = bool(oldrow.get("sha256") and oldrow.get("sha256") != sha)
         material_signal = changed and any(k in (text[:150000] + " " + title).lower() for k in MATERIAL_TERMS)
         items.append({
-            "url": url, "title": title[:500], "contentType": ct, "bytes": len(data),
-            "sha256": sha, "textExtracted": bool(text), "textChars": len(text),
+            "url": url,
+            "title": title[:500],
+            "contentType": ct,
+            "bytes": len(data),
+            "sha256": sha,
+            "textExtracted": bool(text),
+            "textChars": len(text),
             "changedFromPrevious": changed,
             "materialChangeCandidate": material_signal,
             "materialFactAction": "RESOLUTION_TASK_ONLY" if material_signal else "NONE",
@@ -188,19 +234,35 @@ def main():
 
     status = "PASS" if len(items) >= 3 else "DEGRADED" if items else "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED"
     payload = {
-        "schemaVersion": 1, "source": "AFIR", "officialHosts": sorted(HOSTS),
-        "generatedAt": now(), "status": status, "seedCount": len(SEEDS),
-        "items": sorted(items, key=lambda x: x["url"]), "errors": errors[:30],
-        "policy": {"failClosed": True, "materialFactsAutoPromoted": False,
-                   "materialChanges": "resolution-task-only"},
+        "schemaVersion": 2,
+        "source": "AFIR",
+        "officialHosts": sorted(HOSTS),
+        "generatedAt": now(),
+        "status": status,
+        "seedCount": len(SEEDS),
+        "items": sorted(items, key=lambda x: x["url"]),
+        "errors": errors[:30],
+        "accessDependencies": access_dependencies[:100],
+        "policy": {
+            "failClosed": True,
+            "materialFactsAutoPromoted": False,
+            "materialChanges": "resolution-task-only",
+            "authenticatedRoutes": "external-dependency-only-no-fabricated-access",
+        },
     }
     CORPUS.parent.mkdir(parents=True, exist_ok=True)
     CORPUS.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    state = {"source": "AFIR", "checkedAt": payload["generatedAt"], "status": status,
-             "itemCount": len(items), "errorCount": len(errors),
-             "changeCandidates": sum(1 for x in items if x["changedFromPrevious"]),
-             "materialResolutionCandidates": sum(1 for x in items if x["materialChangeCandidate"]),
-             "failClosed": True}
+    state = {
+        "source": "AFIR",
+        "checkedAt": payload["generatedAt"],
+        "status": status,
+        "itemCount": len(items),
+        "errorCount": len(errors),
+        "authDependencyCount": len(access_dependencies),
+        "changeCandidates": sum(1 for x in items if x["changedFromPrevious"]),
+        "materialResolutionCandidates": sum(1 for x in items if x["materialChangeCandidate"]),
+        "failClosed": True,
+    }
     STATE.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(state, ensure_ascii=False))
     return 0
