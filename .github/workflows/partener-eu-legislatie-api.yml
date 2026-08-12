@@ -1,0 +1,56 @@
+name: PARTENER.EU Portal Legislativ API
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '47 */6 * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'partener-eu/ingest/legislatie_api_probe.py'
+      - 'partener-eu/ops/test_legislatie_api_policy.py'
+      - '.github/workflows/partener-eu-legislatie-api.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: partener-eu-legislatie-api
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Token handling regression
+        run: python partener-eu/ops/test_legislatie_api_policy.py
+
+      - name: Probe official SOAP service without credentials
+        run: python partener-eu/ingest/legislatie_api_probe.py
+
+      - name: Persist health evidence conflict-safe
+        shell: bash
+        run: |
+          set -e
+          cp partener-eu/ingest/state/legislatie_api_health.json /tmp/legislatie_api_health.json
+          git fetch origin main
+          git reset --hard origin/main
+          cp /tmp/legislatie_api_health.json partener-eu/ingest/state/legislatie_api_health.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add partener-eu/ingest/state/legislatie_api_health.json
+          if git diff --cached --quiet; then
+            echo 'No Portal Legislativ API health-state changes.'
+            exit 0
+          fi
+          git commit -m 'Record Portal Legislativ API health state'
+          git push origin HEAD:main
