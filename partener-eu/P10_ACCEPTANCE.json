@@ -15,7 +15,7 @@
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-08-12T09:50:12Z",
+    "utc": "2026-08-12T09:51:30Z",
     "source_pass": 6,
     "source_degraded": 0,
     "source_fail": 1,
@@ -26,14 +26,14 @@
     "quarantined_source": "SRC-LEGISLATIE — Portal Legislativ; dependent material facts blocked fail-closed"
   },
   "deployment_evidence": {
-    "utc": "2026-08-12T09:50:34Z",
+    "utc": "2026-08-12T09:51:52Z",
     "status": "DEGRADED",
     "public_content_verified": true,
     "https_verified": false,
     "http_content_verified": true,
     "content_origin": "custom_http",
     "http_status": 200,
-    "final_url": "http://partener.eu/?p10_probe=20260812T095034Z",
+    "final_url": "http://partener.eu/?p10_probe=20260812T095152Z",
     "title": "PARTENER.EU — Finanțări europene",
     "required_markers_present": true,
     "critical_assets_ok": true,
@@ -53,7 +53,7 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260812T095034Z",
+        "final_url": "http://partener.eu/?p10_probe=20260812T095152Z",
         "content_verified": true,
         "marker_ok": true,
         "critical_assets_ok": true,
@@ -63,7 +63,7 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260812T095034Z",
+        "final_url": "http://partener.eu/?p10_probe=20260812T095152Z",
         "content_verified": true,
         "marker_ok": true,
         "critical_assets_ok": true,
@@ -111,40 +111,40 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-08-12T09:50:34Z",
-    "validation_run_started": "2026-08-12T09:50:12Z",
+    "utc": "2026-08-12T09:51:52Z",
+    "validation_run_started": "2026-08-12T09:51:30Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "e2c946b01904cda57f464a09e1fad51a11886eaaaa44f4987374d7a2f966f139",
-      "history_sha256": "e2c946b01904cda57f464a09e1fad51a11886eaaaa44f4987374d7a2f966f139",
-      "history_path": "validation/history/20260812T095012Z.json",
+      "latest_sha256": "142190ef1e4547813bebb45282115f73607ce4370ae633efa7fd8607ef898694",
+      "history_sha256": "142190ef1e4547813bebb45282115f73607ce4370ae633efa7fd8607ef898694",
+      "history_path": "validation/history/20260812T095130Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "74f83caa78c5c30d6fb0d3e42d5c6d86bc441614a72baffd93018e7a4fb328f6",
-      "checkpoint_sha256": "74f83caa78c5c30d6fb0d3e42d5c6d86bc441614a72baffd93018e7a4fb328f6",
+      "source_state_sha256": "87a8bb67f0a7e6bd6e3e919b7e4836cb3937395da45d96c4ca098c58d0c68d63",
+      "checkpoint_sha256": "87a8bb67f0a7e6bd6e3e919b7e4836cb3937395da45d96c4ca098c58d0c68d63",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
       "recovery_state_integrity": "PASS"
     },
     "source_registry": {
-      "observed_at": "2026-08-12T05:28:19.166739Z",
-      "age_seconds": 15734,
+      "observed_at": "2026-08-12T09:50:27.343775Z",
+      "age_seconds": 84,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
       "summary": {
         "total": 18,
-        "pass": 15,
-        "degraded": 3,
+        "pass": 11,
+        "degraded": 7,
         "fail": 0,
         "quarantined": 0,
-        "resolution_tasks_required": 8
+        "resolution_tasks_required": 0
       },
       "tier_counts": {
         "T1": {
           "total": 4,
-          "pass": 4,
-          "degraded": 0,
+          "pass": 1,
+          "degraded": 3,
           "fail": 0,
           "quarantined": 0,
           "hash_changes": 0
@@ -155,19 +155,10 @@
           "degraded": 2,
           "fail": 0,
           "quarantined": 0,
-          "hash_changes": 8
+          "hash_changes": 0
         }
       },
-      "changed_source_ids": [
-        "SRC-OIRBI-PEO",
-        "SRC-OIRBI-PIDS",
-        "SRC-OIRVEST-PEO-GUIDES",
-        "SRC-OIRVEST-PEO-MANUALS",
-        "SRC-OIRVEST-PEO",
-        "SRC-OIRCENTRU-PEO",
-        "SRC-OIRNE-PEO",
-        "SRC-ADRCENTRU-PTJ-CONSULT"
-      ],
+      "changed_source_ids": [],
       "missing_resolution_tasks": [],
       "unsafe_material_updates": [],
       "fail_closed": true
@@ -260,7 +251,7 @@
     "summary": {
       "integrity_pass": true,
       "registry_health": "DEGRADED",
-      "registry_hash_changes": 8,
+      "registry_hash_changes": 0,
       "afir_hash_changes": 21,
       "peo_calendar_changes": 6,
       "mipe_health": "DEGRADED_FAIL_CLOSED",
