@@ -1,0 +1,174 @@
+{
+  "schema_version": "1.0",
+  "checkpoint": "PARTENER-EU-CIVORA-P10-0020",
+  "observed_at": "2026-08-12T09:50:34Z",
+  "validation_run_started": "2026-08-12T09:50:12Z",
+  "integrity": {
+    "latest_history_equal": true,
+    "latest_sha256": "e2c946b01904cda57f464a09e1fad51a11886eaaaa44f4987374d7a2f966f139",
+    "history_sha256": "e2c946b01904cda57f464a09e1fad51a11886eaaaa44f4987374d7a2f966f139",
+    "history_path": "validation/history/20260812T095012Z.json",
+    "source_state_checkpoint_equal": true,
+    "source_state_sha256": "74f83caa78c5c30d6fb0d3e42d5c6d86bc441614a72baffd93018e7a4fb328f6",
+    "checkpoint_sha256": "74f83caa78c5c30d6fb0d3e42d5c6d86bc441614a72baffd93018e7a4fb328f6",
+    "frontend_regression_pass": true,
+    "frontend_pass": 10,
+    "frontend_total": 10,
+    "recovery_state_integrity": "PASS"
+  },
+  "source_registry": {
+    "observed_at": "2026-08-12T05:28:19.166739Z",
+    "age_seconds": 15734,
+    "stale_after_seconds": 28800,
+    "stale": false,
+    "health": "DEGRADED",
+    "summary": {
+      "total": 18,
+      "pass": 15,
+      "degraded": 3,
+      "fail": 0,
+      "quarantined": 0,
+      "resolution_tasks_required": 8
+    },
+    "tier_counts": {
+      "T1": {
+        "total": 4,
+        "pass": 4,
+        "degraded": 0,
+        "fail": 0,
+        "quarantined": 0,
+        "hash_changes": 0
+      },
+      "T1B": {
+        "total": 11,
+        "pass": 9,
+        "degraded": 2,
+        "fail": 0,
+        "quarantined": 0,
+        "hash_changes": 8
+      }
+    },
+    "changed_source_ids": [
+      "SRC-OIRBI-PEO",
+      "SRC-OIRBI-PIDS",
+      "SRC-OIRVEST-PEO-GUIDES",
+      "SRC-OIRVEST-PEO-MANUALS",
+      "SRC-OIRVEST-PEO",
+      "SRC-OIRCENTRU-PEO",
+      "SRC-OIRNE-PEO",
+      "SRC-ADRCENTRU-PTJ-CONSULT"
+    ],
+    "missing_resolution_tasks": [],
+    "unsafe_material_updates": [],
+    "fail_closed": true
+  },
+  "afir": {
+    "observed_at": "2026-08-12T08:51:30.702569+00:00",
+    "status": "PASS",
+    "item_count": 52,
+    "error_count": 28,
+    "hash_change_candidates": 21,
+    "material_signal_candidates": 0,
+    "resolution_task_required": true,
+    "resolution_task_present_fail_closed": true,
+    "material_facts_auto_promoted": false
+  },
+  "peo_calendar": {
+    "observed_at": "2026-08-12T09:49:07.284356+00:00",
+    "status": "OK_OFFICIAL_OIR_COPY",
+    "source": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+    "source_class": "OFFICIAL_INSTITUTIONAL_COPY_OIR_PECU_VEST",
+    "canonical_container": "https://mfe.gov.ro/peos/calendar-lansari-apeluri/",
+    "direct_mipe_verified": false,
+    "sha256": "8e34dc9fa8417b65adf530d15f740f8725c7fd9d1916bdb57ed08e8fa31dc97c",
+    "item_count": 30,
+    "change_count": 6,
+    "resolution_task_required": true,
+    "resolution_task_present_fail_closed": true,
+    "publication_policy": "candidate-state-only; web material facts are not auto-promoted on scheduled hash changes"
+  },
+  "mipe": {
+    "observed_at": "2026-08-12T09:42:27.283758+00:00",
+    "status": "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
+    "source_available": false,
+    "candidate_count": 4,
+    "parsed_relevant_count": 0,
+    "published_item_count": 0,
+    "last_known_good_preserved": true,
+    "health": "DEGRADED_FAIL_CLOSED"
+  },
+  "mff_2028_2034": {
+    "observed_at": "2026-08-12T07:06:27.306144Z",
+    "summary": {
+      "total": 8,
+      "pass": 2,
+      "fail": 6,
+      "review_required": 0
+    },
+    "hash_changed_source_ids": [],
+    "unsafe_auto_promotions": [],
+    "fail_closed": true
+  },
+  "autonomous_orchestration": {
+    "scheduled_validation_configured": true,
+    "workflow_run_integration_configured": true,
+    "monitored_workflows": [
+      "PARTENER.EU MIPE Ingestion",
+      "PARTENER.EU AFIR Ingestion",
+      "PARTENER.EU Verified Source Registry",
+      "PARTENER.EU PEO Calendar",
+      "PARTENER.EU MFF 2028-2034 Monitor",
+      "PARTENER.EU Pages"
+    ],
+    "peo_candidate_state_only": true,
+    "evidence_status": "CONFIGURED_AND_COLLECTING; NOT_SUFFICIENT_FOR_CLOSURE_BEFORE_30_DISTINCT_UTC_DAYS"
+  },
+  "integrations": {
+    "ready_without_credentials": [
+      "PUBLIC_WEB_DISCOVERY",
+      "RSS_SITEMAP_DISCOVERY"
+    ],
+    "external_auth_dependencies": [
+      {
+        "id": "FACEBOOK_PUBLIC",
+        "status": "AUTH_OR_ACCESS_DEPENDENT",
+        "auth": null
+      },
+      {
+        "id": "LINKEDIN_PUBLIC",
+        "status": "AUTH_OR_ACCESS_DEPENDENT",
+        "auth": null
+      },
+      {
+        "id": "REDDIT_PUBLIC",
+        "status": "AUTH_OR_RATE_LIMIT_DEPENDENT",
+        "auth": null
+      }
+    ],
+    "fabricated_access": false
+  },
+  "policy": {
+    "material_fact_autoupdate_allowed": false,
+    "hash_change_action": "RESOLUTION_TASK_ONLY",
+    "blocked_fact_classes": [
+      "deadline",
+      "eligibility",
+      "budget",
+      "scoring",
+      "beneficiaries",
+      "material_call_status",
+      "other_material_facts"
+    ]
+  },
+  "summary": {
+    "integrity_pass": true,
+    "registry_health": "DEGRADED",
+    "registry_hash_changes": 8,
+    "afir_hash_changes": 21,
+    "peo_calendar_changes": 6,
+    "mipe_health": "DEGRADED_FAIL_CLOSED",
+    "autonomous_orchestration_configured": true,
+    "policy_errors": [],
+    "critical_policy_fail": false
+  }
+}
