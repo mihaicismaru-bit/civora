@@ -4,33 +4,94 @@
   "status": "VALIDATION_RUNNING_NOT_CLOSED",
   "requirements": {
     "public_deployment": "VERIFIED_HTTP_CONTENT_HTTPS_PENDING",
-    "scheduled_validation": "ACTIVE_6_HOURLY_GITHUB_ACTIONS_PLUS_HOURLY_PARTENER_AUTO_PLUS",
+    "scheduled_validation": "ACTIVE_6_HOURLY_PLUS_WORKFLOW_RUN_MONITOR_TRIGGERS",
     "source_monitoring": "LIVE_AND_PERSISTING",
     "source_change_fail_closed": "IMPLEMENTED",
     "persistent_validation_ledger": "LIVE",
     "atomic_state_and_recovery": "PASS",
     "frontend_regression": "10/10_PASS_LATEST",
     "minimum_distinct_days": 30,
-    "current_qualifying_days": 2
+    "current_qualifying_days": 2,
+    "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-08-12T09:48:00Z",
+    "utc": "2026-08-12T09:49:04Z",
     "source_pass": 6,
     "source_degraded": 0,
     "source_fail": 1,
     "source_quarantined": 1,
     "critical_fail": false,
+    "frontend_pass": 10,
+    "frontend_total": 10,
     "quarantined_source": "SRC-LEGISLATIE — Portal Legislativ; dependent material facts blocked fail-closed"
   },
   "deployment_evidence": {
-    "utc": "2026-08-12T09:48:23Z",
+    "utc": "2026-08-12T09:49:26Z",
     "status": "DEGRADED",
+    "public_content_verified": true,
+    "https_verified": false,
+    "http_content_verified": true,
+    "content_origin": "custom_http",
     "http_status": 200,
-    "final_url": "http://partener.eu/?p10_probe=20260812T094823Z",
+    "final_url": "http://partener.eu/?p10_probe=20260812T094926Z",
     "title": "PARTENER.EU — Finanțări europene",
     "required_markers_present": true,
-    "https_closure_gate": "PENDING_VALID_CERTIFICATE_AND_HTTPS_VERIFICATION"
+    "critical_assets_ok": true,
+    "old_origin_detected": false,
+    "https_closure_gate": "PENDING_VALID_CERTIFICATE_DNS_AND_HTTPS_CONTENT",
+    "endpoints": [
+      {
+        "id": "custom_https",
+        "http_status": null,
+        "final_url": null,
+        "content_verified": false,
+        "marker_ok": false,
+        "critical_assets_ok": false,
+        "legacy_origin_detected": false,
+        "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'partener.eu'. (_ssl.c:1010)>"
+      },
+      {
+        "id": "custom_http",
+        "http_status": 200,
+        "final_url": "http://partener.eu/?p10_probe=20260812T094926Z",
+        "content_verified": true,
+        "marker_ok": true,
+        "critical_assets_ok": true,
+        "legacy_origin_detected": false,
+        "error": null
+      },
+      {
+        "id": "pages_origin",
+        "http_status": 200,
+        "final_url": "http://partener.eu/?p10_probe=20260812T094926Z",
+        "content_verified": true,
+        "marker_ok": true,
+        "critical_assets_ok": true,
+        "legacy_origin_detected": false,
+        "error": null
+      }
+    ],
+    "pages_workflow": {
+      "status": "LIVE",
+      "page_url": "http://partener.eu/",
+      "git_sha": "fee400e3e437a0d5f353ba95ad1b1d012f6016ef",
+      "observed_at": "2026-08-12T08:12:46.471905+00:00",
+      "configure_outcome": "success",
+      "upload_outcome": "success",
+      "deploy_outcome": "success",
+      "https_control": null
+    },
+    "error": null
   },
-  "closure_rule": "P10 and CIVORA v1.0 may close only after >=30 distinct UTC dates with qualifying production validation plus fully verified public deployment including HTTPS, recovery and autonomous-update evidence.",
-  "social_integrations": "Facebook/LinkedIn/Reddit and other authenticated systems remain external authentication/access dependencies; no access is fabricated."
+  "closure_rule": "P10 and CIVORA v1.0 may close only after >=30 distinct UTC dates with qualifying production validation plus fully verified public HTTPS deployment, recovery/state-integrity evidence, and sufficient autonomous-update evidence.",
+  "social_integrations": "Facebook/LinkedIn/Reddit and other authenticated systems remain external authentication/access dependencies; no access is fabricated.",
+  "closure_evaluation": {
+    "eligible": false,
+    "minimum_distinct_days_pass": false,
+    "public_https_deployment_pass": false,
+    "recovery_state_integrity_pass": true,
+    "autonomous_update_evidence_pass": false,
+    "p10_closed": false,
+    "civora_v1_production_baseline_closed": false
+  }
 }
