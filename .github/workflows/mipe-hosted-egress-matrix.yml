@@ -1,0 +1,46 @@
+name: MIPE Hosted Egress Matrix
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - agent/mipe-resilient-ingestion-v2
+    paths:
+      - '.github/workflows/mipe-hosted-egress-matrix.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, windows-2025, macos-13, macos-14]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 5
+    steps:
+      - name: Probe official MIPE endpoints with verified TLS
+        shell: python
+        run: |
+          import json, ssl, time, urllib.request
+          urls = [
+              'https://mfe.gov.ro/pdds/despre-program-programare/',
+              'https://mfe.gov.ro/wp-sitemap.xml',
+              'https://mfe.gov.ro/wp-json/',
+              'https://generatormachete.mfe.gov.ro/',
+              'https://www.fonduri-ue.ro/',
+              'https://dwh4smis.fonduri-ue.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027',
+          ]
+          ctx = ssl.create_default_context()
+          results=[]
+          for url in urls:
+              started=time.time()
+              try:
+                  req=urllib.request.Request(url,headers={'User-Agent':'PARTENER.EU-CIVORA-MIPE-Diagnostic/2.0','Accept':'text/html,application/json,application/xml;q=0.9,*/*;q=0.7'})
+                  with urllib.request.urlopen(req,timeout=18,context=ctx) as r:
+                      body=r.read(2048)
+                      results.append({'url':url,'ok':200 <= r.status < 400,'status':r.status,'finalUrl':r.url,'contentType':r.headers.get('content-type'),'sample':' '.join(body.decode('utf-8','replace').split())[:220],'elapsedMs':round((time.time()-started)*1000)})
+              except Exception as exc:
+                  results.append({'url':url,'ok':False,'error':f'{type(exc).__name__}: {exc}','elapsedMs':round((time.time()-started)*1000)})
+          print(json.dumps({'runner':'${{ matrix.runner }}','results':results},ensure_ascii=False,indent=2))
