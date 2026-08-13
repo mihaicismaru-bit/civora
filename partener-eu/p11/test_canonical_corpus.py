@@ -29,11 +29,11 @@ class CanonicalCorpusTests(unittest.TestCase):
     def test_bundle_passes_contract(self):
         counts = validate_bundle(self.bundle)
         self.assertEqual(counts["opportunities"], 26)
-        self.assertEqual(counts["changesets"], 1)
+        self.assertEqual(counts["changesets"], 2)
 
     def test_normalization_has_no_publication_effect(self):
         publishable = [x["opportunity_id"] for x in self.bundle["opportunities"] if x["publication_state"] == "PUBLISHABLE"]
-        self.assertEqual(publishable, ["PEO-STEP-LLL-ADULTI-2026"])
+        self.assertEqual(publishable, ["afir-energy-2026", "PEO-STEP-LLL-ADULTI-2026"])
         self.assertTrue(all(x.get("automatic_material_fact_update_allowed") is False for x in self.bundle["opportunities"]))
 
     def test_candidate_fact_without_resolution_block_is_rejected(self):
