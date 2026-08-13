@@ -2,8 +2,11 @@ name: PARTENER.EU MIPE Romania Collector
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '7,37 * * * *'
+
+# This collector is an optional Romanian-egress fallback. Keep it manual until
+# a trusted self-hosted runner carrying the `mipe-ro` label is online; otherwise
+# scheduled jobs remain queued indefinitely and obscure the healthy GitHub-hosted
+# MIPE ingestion workflow.
 
 permissions:
   contents: write
