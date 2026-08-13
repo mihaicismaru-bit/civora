@@ -15,7 +15,7 @@
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-08-13T22:11:43Z",
+    "utc": "2026-08-13T22:27:41Z",
     "source_pass": 6,
     "source_degraded": 0,
     "source_fail": 1,
@@ -26,7 +26,7 @@
     "quarantined_source": "SRC-LEGISLATIE — Portal Legislativ; dependent material facts blocked fail-closed"
   },
   "deployment_evidence": {
-    "utc": "2026-08-13T22:12:06Z",
+    "utc": "2026-08-13T22:28:03Z",
     "status": "DEGRADED",
     "public_content_verified": true,
     "https_verified": true,
@@ -36,7 +36,7 @@
     "http_content_verified": true,
     "content_origin": "custom_https",
     "http_status": 200,
-    "final_url": "https://partener.eu/?p10_probe=20260813T221206Z",
+    "final_url": "https://partener.eu/?p10_probe=20260813T222803Z",
     "title": "PARTENER.EU — Finanțări europene",
     "required_markers_present": true,
     "critical_assets_ok": true,
@@ -46,7 +46,7 @@
       {
         "id": "custom_https",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260813T221206Z",
+        "final_url": "https://partener.eu/?p10_probe=20260813T222803Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -57,7 +57,7 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260813T221206Z",
+        "final_url": "http://partener.eu/?p10_probe=20260813T222803Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -68,12 +68,12 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260813T221206Z",
+        "final_url": "http://partener.eu/?p10_probe=20260813T222803Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260813T221206Z",
-            "to_url": "http://partener.eu/?p10_probe=20260813T221206Z"
+            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260813T222803Z",
+            "to_url": "http://partener.eu/?p10_probe=20260813T222803Z"
           }
         ],
         "content_verified": true,
@@ -123,40 +123,40 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-08-13T22:12:06Z",
-    "validation_run_started": "2026-08-13T22:11:43Z",
+    "utc": "2026-08-13T22:28:03Z",
+    "validation_run_started": "2026-08-13T22:27:41Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "c52a3da5786694032f1e7f37da6865574e001014c93775320f4a67f701f0c2e6",
-      "history_sha256": "c52a3da5786694032f1e7f37da6865574e001014c93775320f4a67f701f0c2e6",
-      "history_path": "validation/history/20260813T221143Z.json",
+      "latest_sha256": "e15f022a9f3d012eead8351e119cb8612a30420f9db62e262008548d0eb69288",
+      "history_sha256": "e15f022a9f3d012eead8351e119cb8612a30420f9db62e262008548d0eb69288",
+      "history_path": "validation/history/20260813T222741Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "4b449d967d83b2f1ced642da1fa0bd6f4626c4a9e235ae76707cd82e12ebeec2",
-      "checkpoint_sha256": "4b449d967d83b2f1ced642da1fa0bd6f4626c4a9e235ae76707cd82e12ebeec2",
+      "source_state_sha256": "212d171a1e4ed701ca34aad506c12cc9ba59ff13b094860156f6c93d0dce3bab",
+      "checkpoint_sha256": "212d171a1e4ed701ca34aad506c12cc9ba59ff13b094860156f6c93d0dce3bab",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
       "recovery_state_integrity": "PASS"
     },
     "source_registry": {
-      "observed_at": "2026-08-13T19:47:16.168241Z",
-      "age_seconds": 8690,
+      "observed_at": "2026-08-13T22:26:49.763443Z",
+      "age_seconds": 73,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
       "summary": {
         "total": 18,
-        "pass": 11,
-        "degraded": 4,
+        "pass": 15,
+        "degraded": 0,
         "fail": 3,
         "quarantined": 3,
-        "resolution_tasks_required": 1
+        "resolution_tasks_required": 0
       },
       "tier_counts": {
         "T1": {
           "total": 4,
-          "pass": 1,
-          "degraded": 3,
+          "pass": 4,
+          "degraded": 0,
           "fail": 0,
           "quarantined": 0,
           "hash_changes": 0
@@ -167,12 +167,10 @@
           "degraded": 0,
           "fail": 2,
           "quarantined": 2,
-          "hash_changes": 1
+          "hash_changes": 0
         }
       },
-      "changed_source_ids": [
-        "SRC-OIRCENTRU-PEO"
-      ],
+      "changed_source_ids": [],
       "missing_resolution_tasks": [],
       "unsafe_material_updates": [],
       "fail_closed": true
@@ -469,7 +467,7 @@
     "summary": {
       "integrity_pass": true,
       "registry_health": "DEGRADED",
-      "registry_hash_changes": 1,
+      "registry_hash_changes": 0,
       "afir_hash_changes": 0,
       "peo_calendar_changes": 6,
       "mipe_health": "DEGRADED_FAIL_CLOSED",
