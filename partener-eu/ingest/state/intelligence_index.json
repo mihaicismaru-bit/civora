@@ -1,0 +1,3609 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-13T05:03:21Z",
+  "readiness": "DEGRADED_FAIL_CLOSED",
+  "policy": {
+    "purpose": "unified-search-and-evidence-index",
+    "materialFactsAutopromoted": false,
+    "planningSignalsAreCalls": false,
+    "hashChangesAutoPublish": false,
+    "tierPrecedence": [
+      "T1",
+      "T1B",
+      "T2",
+      "T3"
+    ]
+  },
+  "sources": [
+    {
+      "id": "AFIR_CORPUS",
+      "tier": "T1",
+      "domains": [
+        "AGRICULTURE_RURAL"
+      ],
+      "programmes": [
+        "PS_PAC_2023_2027"
+      ],
+      "sourceFamilies": [
+        "AFIR"
+      ],
+      "dependencyScopes": [
+        "AFIR_PS_PAC"
+      ],
+      "status": "PASS",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": {
+        "status": "STALE",
+        "ageHours": 6.62,
+        "maxAgeHours": 4
+      },
+      "itemCount": 31,
+      "failClosed": true
+    },
+    {
+      "id": "PEO_CALENDAR",
+      "tier": "T1B",
+      "domains": [
+        "EMPLOYMENT_EDUCATION",
+        "PLANNING_CALENDAR"
+      ],
+      "programmes": [
+        "PEO"
+      ],
+      "sourceFamilies": [
+        "CALENDARS"
+      ],
+      "dependencyScopes": [
+        "PEO_PLANNING_SIGNALS"
+      ],
+      "status": "OK_OFFICIAL_OIR_COPY",
+      "observedAt": "2026-08-12T22:07:09.576032+00:00",
+      "freshness": {
+        "status": "CURRENT",
+        "ageHours": 6.94,
+        "maxAgeHours": 8
+      },
+      "itemCount": 30,
+      "canonicalContainer": "https://mfe.gov.ro/peos/calendar-lansari-apeluri",
+      "retrievalSource": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+      "directMipeVerified": false,
+      "failClosed": true
+    },
+    {
+      "id": "MIPE_CORPUS",
+      "tier": "T1",
+      "domains": [
+        "COHESION_CROSS_PROGRAMME"
+      ],
+      "programmes": [
+        "MIPE_MANAGED_PROGRAMMES"
+      ],
+      "sourceFamilies": [
+        "MIPE"
+      ],
+      "dependencyScopes": [
+        "MIPE_MANAGED_PROGRAMMES"
+      ],
+      "status": "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
+      "observedAt": "2026-08-12T23:28:09.815014+00:00",
+      "freshness": {
+        "status": "STALE",
+        "ageHours": 5.59,
+        "maxAgeHours": 4
+      },
+      "itemCount": 0,
+      "sourceAvailable": false,
+      "lastKnownGoodPreserved": true,
+      "failClosed": true
+    },
+    {
+      "id": "VERIFIED_SOURCE_REGISTRY",
+      "tier": "MIXED_T1_T1B_T2",
+      "domains": [
+        "MULTI_PROGRAMME_SOURCE_HEALTH"
+      ],
+      "programmes": [
+        "MULTIPLE"
+      ],
+      "sourceFamilies": [],
+      "dependencyScopes": [
+        "REGISTERED_SOURCE_DEPENDENCIES"
+      ],
+      "status": "DEGRADED",
+      "observedAt": "2026-08-12T22:26:00.198456Z",
+      "freshness": {
+        "status": "STALE",
+        "ageHours": 6.62,
+        "maxAgeHours": 6
+      },
+      "itemCount": 18,
+      "resolutionTasksRequired": 0,
+      "failClosed": true
+    }
+  ],
+  "records": [
+    {
+      "id": "afir-1f3964f9b9ebfdc0dd3a6afa",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_PAGE",
+      "title": "ARHIVA anunțurilor de primire a proiectelor aferente perioadei 2023 – 2027 - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/instrumente/sesiuni/arhiva-anunturilor-de-primire-a-proiectelor-aferente-perioadei-2023-2027",
+      "fingerprint": "cc1715e8efa66c9ebd568ec400655db744bbfb46fe89326535728e6a5a3ef67f",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": true,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/instrumente/sesiuni/arhiva-anunturilor-de-primire-a-proiectelor-aferente-perioadei-2023-2027",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-d440d24323aeb3c467db1600",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_PAGE",
+      "title": "Au fost publicate Ghidul și Anexele aferente DR-18 - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/info-la-zi/au-fost-publicate-ghidul-si-anexele-aferente-dr-18",
+      "fingerprint": "da4017ad8ebb156562abc49c5734009bb5619a14d00f68c1290874127ed2c8b8",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": true,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/info-la-zi/au-fost-publicate-ghidul-si-anexele-aferente-dr-18",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-2cd5e27d15c23e64443481c3",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_PAGE",
+      "title": "Contor fonduri disponibile - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/finantare/contor-fonduri-disponibile",
+      "fingerprint": "de56cb8605ec0fad859e828723aab9ecea0f59480eaa3c7b97373309113831cc",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": true,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/finantare/contor-fonduri-disponibile",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-5ac597ebb669721318cdf29b",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_PAGE",
+      "title": "Detalii, mențiuni și informații derulare sesiuni depunere proiecte - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/instrumente/sesiuni/detalii-mentiuni-si-informatii-derulare-sesiuni-depunere-proiecte",
+      "fingerprint": "25b8ed9cd724a1aac9380e55e988643fbcc2295ecea48dcd16358c78195d02e8",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": true,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/instrumente/sesiuni/detalii-mentiuni-si-informatii-derulare-sesiuni-depunere-proiecte",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-0904912d5ef8f509b15c5b5a",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_PAGE",
+      "title": "Dezbatere publică - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/comunicare/utile/dezbatere-publica",
+      "fingerprint": "015878cfcaa9c55e848686ff367bf654a57704857b5ab6a7598aa9201a9f3d50",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": true,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/comunicare/utile/dezbatere-publica",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-6dc14da495c457afc8c421e3",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_PAGE",
+      "title": "Etape accesare fonduri europene - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/finantare/etape-accesare-fonduri-europene",
+      "fingerprint": "c30fc1a23ed51a6c0856d402682caee3629fed14a9d1d2ccda6de47c5db413b0",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": true,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/finantare/etape-accesare-fonduri-europene",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-63cd6a9121a3a2f95e30e682",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_PAGE",
+      "title": "Exploatații agricole - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/finantare/finantare-in-agricultura/exploatatii-agricole",
+      "fingerprint": "a37dd9999971a83b631e209cfe4e89051cd1da95d2d2c478da74e09c9aa625a0",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": true,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/finantare/finantare-in-agricultura/exploatatii-agricole",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-a1dd578e7bdee66430c358fb",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_PAGE",
+      "title": "Exploatații forestiere - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/finantare/finantare-in-mediul-rural/exploatatii-forestiere",
+      "fingerprint": "92f322b7d8599c6cd225a367711c69ee9c9a6707324b2d725f8da23033c1680f",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": true,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/finantare/finantare-in-mediul-rural/exploatatii-forestiere",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-c546c0d3ce9d3efa1ae52f82",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_PAGE",
+      "title": "Firme de consultanță - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/instrumente/nomenclator/firme-de-consultanta",
+      "fingerprint": "415b6c47775e0910d878fa07f676891600e432794a678cc71c71cbbf89207545",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": true,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/instrumente/nomenclator/firme-de-consultanta",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-69d6f10cc6a883f49c8ac5f1",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_PAGE",
+      "title": "Grupuri de Producători - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/finantare/finantare-in-agricultura/grupuri-de-producatori",
+      "fingerprint": "2c29d7f1d59cc29213c1cc7751b09ba284b2af7f3d76917d57cf39d665d4640e",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": true,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/finantare/finantare-in-agricultura/grupuri-de-producatori",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-863d0bf55f9fb8c3a49a0a75",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_PAGE",
+      "title": "INVESTALIM - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/finantare/finantare-in-agricultura/investalim",
+      "fingerprint": "c7bed20e1901b866150a0983d0c75d0d7f2dd2c835281601c81ba660a4688647",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": true,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/finantare/finantare-in-agricultura/investalim",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-25c64b211d40d6215272ee46",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_PAGE",
+      "title": "Info la zi",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/info-la-zi",
+      "fingerprint": "c8e2ef7adbdb68e7c22988bbe8ae53ee7c7e79ec262f8a1678c485162defb42b",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": true,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/info-la-zi",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-ccd63518ea68fac29d12d243",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_PAGE",
+      "title": "LEADER - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/finantare/leader",
+      "fingerprint": "cc168a8cf606697dead5bee6b29f0324c506d3c600827761d7a3457aed327cf1",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": true,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/finantare/leader",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-5d4d38a0f6beb635cca33a3a",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_PAGE",
+      "title": "Licee agricole - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/finantare/finantare-in-mediul-rural/licee-agricole",
+      "fingerprint": "31b9fe99c12adfc170aa42b87eff2e498ba6d0090d0710041c4e109a01d27b84",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": true,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/finantare/finantare-in-mediul-rural/licee-agricole",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-a9a736f243d06a598668b48d",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_PAGE",
+      "title": "Mediu și Climă - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/finantare/finantare-in-mediul-rural/mediu-si-clima",
+      "fingerprint": "b86a7f68409a60ba00286ea5844887714561e8eb1186cf78ee4070ce379d790d",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": true,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/finantare/finantare-in-mediul-rural/mediu-si-clima",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-966ef41e9f2e026d7175dd37",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_PAGE",
+      "title": "Măsuri atipice sM 19.2 - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/finantare/masuri-atipice-sm-192",
+      "fingerprint": "8abdf463d900ff5a4cfe4f02edcc14812195bb86fd9d8956762e99965742a11a",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": true,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/finantare/masuri-atipice-sm-192",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-49fbefee4ddef01494af7066",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_PAGE",
+      "title": "Măsuri de sprijin - sM17.1 - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/finantare/masuri-de-sprijin-sm171",
+      "fingerprint": "5e3c728129d82ce4806ccecd1a4aa3608bbed4d05bd2083a899d549213405a51",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": true,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/finantare/masuri-de-sprijin-sm171",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-cbe91103cbea96e19aeb3d3d",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_PAGE",
+      "title": "Pomicultură - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/finantare/finantare-in-agricultura/pomicultura",
+      "fingerprint": "8fa145d9385c79029ce0cfc37294547a070c246e3d9d0d6ce980cdeee3fd289f",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": true,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/finantare/finantare-in-agricultura/pomicultura",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-972b403f9f3d8a86dfaccbae",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_PAGE",
+      "title": "Proceduri alte Programe de finanțare - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/instrumente/instrumente-de-lucru/proceduri-alte-programe-de-finantare",
+      "fingerprint": "71720b3ecd03c474d2067b50d5a2e4d1e4836c93646a04602dbf0a7cf82b9bdc",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": true,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/instrumente/instrumente-de-lucru/proceduri-alte-programe-de-finantare",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-0a986bf34330bff581c6db4a",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_PAGE",
+      "title": "Procesare agricolă - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/finantare/finantare-in-agricultura/procesare-agricola",
+      "fingerprint": "e601939c4b9ff5285e05d7f42e5a5c9a7f9417b9e655ed33529c93170d52ab61",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": true,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/finantare/finantare-in-agricultura/procesare-agricola",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-6070ea8e4d91ba31037fb042",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_PAGE",
+      "title": "Publicarea Ghidului și Anexelor aferente DR-14 - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/info-la-zi/publicarea-ghidului-si-anexelor-aferente-dr-14",
+      "fingerprint": "1f50b9cfee611a331bfc2af1aca4cfd81f6aada69de4bf0b5115df47a014daa2",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": true,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/info-la-zi/publicarea-ghidului-si-anexelor-aferente-dr-14",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-169914c1c0f75dca94639061",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_PAGE",
+      "title": "Schema de Energie - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/finantare/finantare-in-agricultura/schema-de-energie",
+      "fingerprint": "7abf7787a93fcc1e5e4595a049da040171abc9558f22966d3dbaa522b3f1f629",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": true,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/finantare/finantare-in-agricultura/schema-de-energie",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-2677324ae4c8c263a196e15a",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_PAGE",
+      "title": "Sesiune depunere proiecte Schema de Energie - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/info-la-zi/sesiune-depunere-proiecte-schema-de-energie",
+      "fingerprint": "7ddd1661262c925ff5046d9a314ec232e60c73b67d7f71c065fa2e32e9084066",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": true,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/info-la-zi/sesiune-depunere-proiecte-schema-de-energie",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-cd95b689eb2bd4ed01ba56df",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_PAGE",
+      "title": "Sesiuni primire proiecte - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/instrumente/sesiuni/sesiuni-primire-proiecte",
+      "fingerprint": "045b64131cc4a78724e4bd3de4dd2d203833fd16ab50b40f3bd671b1ab11c095",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": true,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/instrumente/sesiuni/sesiuni-primire-proiecte",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-7919f0f887ac64d52416b1ef",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_PAGE",
+      "title": "Tipizate și Formulare alte Programe de finanțare - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/instrumente/instrumente-de-lucru/tipizate-si-formulare-alte-programe-de-finantare",
+      "fingerprint": "668646585500b44ceadf15a6863e97a6ddf102cc65abc456eaaa59e03f99dd91",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": true,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/instrumente/instrumente-de-lucru/tipizate-si-formulare-alte-programe-de-finantare",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-aba7f7a6d4bbbfddaba1fd62",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_PAGE",
+      "title": "Transfer de cunoștințe - DR37 - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/finantare/transfer-de-cunostinte-dr37",
+      "fingerprint": "a63b75a43c21838e0832e8190327c7e9a75415e4866f112b7dc375dda412389b",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": true,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/finantare/transfer-de-cunostinte-dr37",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-2f31c2eadcac5da3c584f441",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_PAGE",
+      "title": "Utilitate publică - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/finantare/finantare-in-mediul-rural/utilitate-publica",
+      "fingerprint": "ed50989b2e6e5c85cb174b282771c997d8f80b61040c20b985f048978b154385",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": true,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/finantare/finantare-in-mediul-rural/utilitate-publica",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-38b04ec8e0d6e5684a59bdc5",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_DOCUMENT",
+      "title": "anunt_sistemit_roboti_ipmultiplu_2024.pdf",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/media/l1jmemyy/anunt_sistemit_roboti_ipmultiplu_2024.pdf",
+      "fingerprint": "b342f609a712f263ffb84b47ff1821e3955e6f798268e9730db34e84deb58e62",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": true,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/media/l1jmemyy/anunt_sistemit_roboti_ipmultiplu_2024.pdf",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-2113a61b2654387eedd58fd4",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_DOCUMENT",
+      "title": "arhiva-sesiuni-pndr-2014-2020.rar",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/media/w5laydwz/arhiva-sesiuni-pndr-2014-2020.rar",
+      "fingerprint": "247d2daa9cda3f8bf6621cdf79219ca9697641d5469e01c7ec3421e4074f7897",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": false,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/media/w5laydwz/arhiva-sesiuni-pndr-2014-2020.rar",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-7362b6c0dfadbf53a3162688",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_DOCUMENT",
+      "title": "nota_clarificare_semnatura_digitala_2024.pdf",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/media/zdtnunui/nota_clarificare_semnatura_digitala_2024.pdf",
+      "fingerprint": "604b6eed39275f4c3519f49e28da3aea7fb995bab5193a5379e42027189acfd6",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": true,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/media/zdtnunui/nota_clarificare_semnatura_digitala_2024.pdf",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "afir-8f9a8e78b0ee68e7b33e133a",
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_DOCUMENT",
+      "title": "omadr-407-din-29092023-rof-selectie-si-contestatiiplusanexa-1-si-2.pdf",
+      "programme": "AFIR / PS PAC 2023-2027",
+      "canonicalUrl": "https://afir.ro/media/chzfgbec/omadr-407-din-29092023-rof-selectie-si-contestatiiplusanexa-1-si-2.pdf",
+      "fingerprint": "90fe1da267c323993d874bb3b809ef0365676421c904860f6437a3371c249b05",
+      "observedAt": "2026-08-12T22:26:16.087956+00:00",
+      "freshness": "STALE",
+      "textExtracted": false,
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialChangeCandidate": false,
+      "materialFactAction": "NO_AUTO_PROMOTION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://afir.ro/media/chzfgbec/omadr-407-din-29092023-rof-selectie-si-contestatiiplusanexa-1-si-2.pdf",
+          "tier": "T1",
+          "label": "AFIR"
+        }
+      ]
+    },
+    {
+      "id": "peo-calendar-6ea055a828114cde1e89ec89",
+      "sourceId": "PEO_CALENDAR",
+      "sourceTier": "T1B",
+      "recordType": "PLANNED_CALL",
+      "title": "Asigurarea unui sprijin financiar suplimentar față de grantul Erasmus+ pentru instituțiile acreditate, în scopul satisfacerii cererii de mobilitate internațională (sprijinirea mobilității internaționale Erasmus+ pentru ÎPT)",
+      "programme": "PEO",
+      "priority": "Educatie",
+      "region": "LDR+MDR",
+      "plannedLaunch": "2025-09-01T00:00:00",
+      "plannedClose": "2025-10-31T00:00:00",
+      "applicantsSignal": "Agenția Națională pentru Programe Comunitare în Domeniul Educației și Formării Profesionale (ANPCDEFP)",
+      "budgetSignal": "13639706",
+      "observedAt": "2026-08-12T22:07:09.576032+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "PLANNING_ONLY",
+      "materialization": "NOT_YET_VERIFIED",
+      "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+          "tier": "T1B",
+          "label": "OIR PECU Vest — copie instituțională"
+        }
+      ]
+    },
+    {
+      "id": "peo-calendar-8346f11f63b16129b8822d0a",
+      "sourceId": "PEO_CALENDAR",
+      "sourceTier": "T1B",
+      "recordType": "PLANNED_CALL",
+      "title": "Conturi personale de învățare – Inovare prin formare (ILA)",
+      "programme": "PEO",
+      "priority": "Educatie",
+      "region": "LDR+MDR",
+      "plannedLaunch": "2025-08-01T00:00:00",
+      "plannedClose": "2025-09-30T00:00:00",
+      "applicantsSignal": "MMSS",
+      "budgetSignal": "15000000",
+      "observedAt": "2026-08-12T22:07:09.576032+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "PLANNING_ONLY",
+      "materialization": "NOT_YET_VERIFIED",
+      "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+          "tier": "T1B",
+          "label": "OIR PECU Vest — copie instituțională"
+        }
+      ]
+    },
+    {
+      "id": "peo-calendar-4f0a0e378459c972c258baf1",
+      "sourceId": "PEO_CALENDAR",
+      "sourceTier": "T1B",
+      "recordType": "PLANNED_CALL",
+      "title": "Crearea universtăților deschise",
+      "programme": "PEO",
+      "priority": "Educatie",
+      "region": "LDR+MDR",
+      "plannedLaunch": "2025-10-01T00:00:00",
+      "plannedClose": "2025-12-31T00:00:00",
+      "applicantsSignal": "Institutii de invatamant acreditate",
+      "budgetSignal": "54719829",
+      "observedAt": "2026-08-12T22:07:09.576032+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "PLANNING_ONLY",
+      "materialization": "NOT_YET_VERIFIED",
+      "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+          "tier": "T1B",
+          "label": "OIR PECU Vest — copie instituțională"
+        }
+      ]
+    },
+    {
+      "id": "peo-calendar-6321825a8d0933bd9ce4098b",
+      "sourceId": "PEO_CALENDAR",
+      "sourceTier": "T1B",
+      "recordType": "PLANNED_CALL",
+      "title": "Creșterea calității și a validității proceselor de predare-învățare-evaluare în ÎPT",
+      "programme": "PEO",
+      "priority": "Educatie",
+      "region": "LDR",
+      "plannedLaunch": "2025-11-01T00:00:00",
+      "plannedClose": "2025-12-31T00:00:00",
+      "applicantsSignal": "Ministerul Educatiei/CNDIPT",
+      "budgetSignal": "7058825",
+      "observedAt": "2026-08-12T22:07:09.576032+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "PLANNING_ONLY",
+      "materialization": "NOT_YET_VERIFIED",
+      "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+          "tier": "T1B",
+          "label": "OIR PECU Vest — copie instituțională"
+        }
+      ]
+    },
+    {
+      "id": "peo-calendar-3bf6a8e648f85b9d4179735c",
+      "sourceId": "PEO_CALENDAR",
+      "sourceTier": "T1B",
+      "recordType": "PLANNED_CALL",
+      "title": "Dezvoltarea capacității Comisiilor județene pentru autorizarea furnizorilor de formare profesională (intervenție strategică)",
+      "programme": "PEO",
+      "priority": "Educatie",
+      "region": "LDR+MDR",
+      "plannedLaunch": "2025-10-01T00:00:00",
+      "plannedClose": "2025-11-30T00:00:00",
+      "applicantsSignal": "MMSS",
+      "budgetSignal": "7400239",
+      "observedAt": "2026-08-12T22:07:09.576032+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "PLANNING_ONLY",
+      "materialization": "NOT_YET_VERIFIED",
+      "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+          "tier": "T1B",
+          "label": "OIR PECU Vest — copie instituțională"
+        }
+      ]
+    },
+    {
+      "id": "peo-calendar-9bfb07f9d7e8b639bda6b433",
+      "sourceId": "PEO_CALENDAR",
+      "sourceTier": "T1B",
+      "recordType": "PLANNED_CALL",
+      "title": "Dezvoltarea potențialului tinerilor prin tehnologii STEP (Ocuparea forței de muncă în rândul tinerilor)",
+      "programme": "PEO",
+      "priority": "Educatie",
+      "region": "LDR+MDR",
+      "plannedLaunch": "2025-09-01T00:00:00",
+      "plannedClose": "2025-11-30T00:00:00",
+      "applicantsSignal": "furnizori de formare universități",
+      "budgetSignal": "144611114",
+      "observedAt": "2026-08-12T22:07:09.576032+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "PLANNING_ONLY",
+      "materialization": "NOT_YET_VERIFIED",
+      "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+          "tier": "T1B",
+          "label": "OIR PECU Vest — copie instituțională"
+        }
+      ]
+    },
+    {
+      "id": "peo-calendar-0046bfa721592383951effc3",
+      "sourceId": "PEO_CALENDAR",
+      "sourceTier": "T1B",
+      "recordType": "PLANNED_CALL",
+      "title": "Dezvoltarea si testarea de instrumente inovative de evaluare a competențelor dobândite în sistem nonformal și informal pentru facilitarea mobilității în ocupare sau formare profesională, inclusiv prin realizarea și testarea de instrumente digitale, la nivel sectorial. Sunt incluse și servicii de management al carierei oferite înainte de derularea proceselor de evaluare a competentelor.",
+      "programme": "PEO",
+      "priority": "Educatie",
+      "region": "LDR+MDR",
+      "plannedLaunch": "2025-10-01T00:00:00",
+      "plannedClose": "2025-12-31T00:00:00",
+      "applicantsSignal": "centre de evaluare a competențelor în parteneriat cu SPO/ONG/instituții care lucrează cu grupuri țintă specifice, organizații culturale publice și private)",
+      "budgetSignal": "5100000",
+      "observedAt": "2026-08-12T22:07:09.576032+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "PLANNING_ONLY",
+      "materialization": "NOT_YET_VERIFIED",
+      "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+          "tier": "T1B",
+          "label": "OIR PECU Vest — copie instituțională"
+        }
+      ]
+    },
+    {
+      "id": "peo-calendar-386d254d88588bb5cf16f180",
+      "sourceId": "PEO_CALENDAR",
+      "sourceTier": "T1B",
+      "recordType": "PLANNED_CALL",
+      "title": "Dezvoltarea sistemului de asigurare a calității în formarea profesională a adulților",
+      "programme": "PEO",
+      "priority": "Educatie",
+      "region": "LDR",
+      "plannedLaunch": "2025-10-01T00:00:00",
+      "plannedClose": "2025-11-30T00:00:00",
+      "applicantsSignal": "MMSS și cele 42 de Comisii de Autorizare Județene",
+      "budgetSignal": "10117647",
+      "observedAt": "2026-08-12T22:07:09.576032+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "PLANNING_ONLY",
+      "materialization": "NOT_YET_VERIFIED",
+      "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+          "tier": "T1B",
+          "label": "OIR PECU Vest — copie instituțională"
+        }
+      ]
+    },
+    {
+      "id": "peo-calendar-46ecc1681c29280822182604",
+      "sourceId": "PEO_CALENDAR",
+      "sourceTier": "T1B",
+      "recordType": "PLANNED_CALL",
+      "title": "Dezvoltarea întreprinderilor sociale de inserție pentru susținerea tinerilor",
+      "programme": "PEO",
+      "priority": "Capital uman pentru piața muncii",
+      "region": "LDR+MDR",
+      "plannedLaunch": "2025-09-01T00:00:00",
+      "plannedClose": "2025-11-30T00:00:00",
+      "applicantsSignal": "entitățile Serviciului Public de Ocupare, structuri/entități specializate în furnizarea de servicii pentru tineri/ instituții de învățământ superior ce oferă servicii de educație, formare profesională, dezvoltare de competențe transversale, de consiliere/ coaching/ mentorat/ tutorat pentru tineri.",
+      "budgetSignal": "59323118",
+      "observedAt": "2026-08-12T22:07:09.576032+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "PLANNING_ONLY",
+      "materialization": "NOT_YET_VERIFIED",
+      "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+          "tier": "T1B",
+          "label": "OIR PECU Vest — copie instituțională"
+        }
+      ]
+    },
+    {
+      "id": "peo-calendar-2c38c69dceaa95ddf8890655",
+      "sourceId": "PEO_CALENDAR",
+      "sourceTier": "T1B",
+      "recordType": "PLANNED_CALL",
+      "title": "Dezvoltarea și extinderea serviciilor de consiliere (CJRAE/CMBRAE, inclusiv formarea personalului din centrele de consiliere, diriginți), pentru îmbunătățirea accesului informat la programe de educație și formare profesională",
+      "programme": "PEO",
+      "priority": "Educatie",
+      "region": "LDR+MDR",
+      "plannedLaunch": "2025-10-01T00:00:00",
+      "plannedClose": "2025-12-31T00:00:00",
+      "applicantsSignal": "Ministerul Educatiei/CNDIPT/ISJ/ Institutii de invatamant acreditate/CJRAE/CMBRAE",
+      "budgetSignal": "6319853",
+      "observedAt": "2026-08-12T22:07:09.576032+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "PLANNING_ONLY",
+      "materialization": "NOT_YET_VERIFIED",
+      "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+          "tier": "T1B",
+          "label": "OIR PECU Vest — copie instituțională"
+        }
+      ]
+    },
+    {
+      "id": "peo-calendar-cda6db3711581de2efa1c24b",
+      "sourceId": "PEO_CALENDAR",
+      "sourceTier": "T1B",
+      "recordType": "PLANNED_CALL",
+      "title": "Educație incluzivă de calitate pentru copiii din învățământul primar",
+      "programme": "PEO",
+      "priority": "Educatie",
+      "region": "LDR+MDR",
+      "plannedLaunch": "2025-08-01T00:00:00",
+      "plannedClose": "2025-10-31T00:00:00",
+      "applicantsSignal": "ISJ/ISMB",
+      "budgetSignal": "235349042.4705882",
+      "observedAt": "2026-08-12T22:07:09.576032+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "PLANNING_ONLY",
+      "materialization": "NOT_YET_VERIFIED",
+      "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+          "tier": "T1B",
+          "label": "OIR PECU Vest — copie instituțională"
+        }
+      ]
+    },
+    {
+      "id": "peo-calendar-9a07cf94ddfa621844bdeced",
+      "sourceId": "PEO_CALENDAR",
+      "sourceTier": "T1B",
+      "recordType": "PLANNED_CALL",
+      "title": "Finanțarea de intervenții integrate în zone cu deficit de forță de muncă și migrație sezonieră",
+      "programme": "PEO",
+      "priority": "Capital uman pentru piața muncii",
+      "region": "LDR",
+      "plannedLaunch": "2025-08-01T00:00:00",
+      "plannedClose": "2025-10-31T00:00:00",
+      "applicantsSignal": "Serviciul Public de Ocupare (ANOFM/AJOFM) in parteneriat cu UAT urile, cu partenerii sociali și cu alte părți interesate",
+      "budgetSignal": "30352941",
+      "observedAt": "2026-08-12T22:07:09.576032+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "PLANNING_ONLY",
+      "materialization": "NOT_YET_VERIFIED",
+      "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+          "tier": "T1B",
+          "label": "OIR PECU Vest — copie instituțională"
+        }
+      ]
+    },
+    {
+      "id": "peo-calendar-a39bb574fa4f3ae95e975aa5",
+      "sourceId": "PEO_CALENDAR",
+      "sourceTier": "T1B",
+      "recordType": "PLANNED_CALL",
+      "title": "Flexibilizarea și diversificarea oportunităților de formare și dezvoltare a competențelor cheie ale elevilor",
+      "programme": "PEO",
+      "priority": "Educatie",
+      "region": "LDR+MDR",
+      "plannedLaunch": "2025-09-01T00:00:00",
+      "plannedClose": "2025-10-31T00:00:00",
+      "applicantsSignal": "Ministerul Educației/ISJ/CJRAE/Centrele de orientare si consiliere/Institutii de invatamant acreditate",
+      "budgetSignal": "80275736",
+      "observedAt": "2026-08-12T22:07:09.576032+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "PLANNING_ONLY",
+      "materialization": "NOT_YET_VERIFIED",
+      "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+          "tier": "T1B",
+          "label": "OIR PECU Vest — copie instituțională"
+        }
+      ]
+    },
+    {
+      "id": "peo-calendar-efdac3b01d2d713f53949f5a",
+      "sourceId": "PEO_CALENDAR",
+      "sourceTier": "T1B",
+      "recordType": "PLANNED_CALL",
+      "title": "Formarea continuă a formatorilor/instructorilor/coordonatorilor de ucenicie din formarea profesională continuă",
+      "programme": "PEO",
+      "priority": "Educatie",
+      "region": "LDR+MDR",
+      "plannedLaunch": "2025-10-01T00:00:00",
+      "plannedClose": "2025-12-31T00:00:00",
+      "applicantsSignal": "angajatori/furnizori de formare profesionala/furnizori de orientare și consiliere profesionala/centre de evaluare a competențelor",
+      "budgetSignal": "13879000",
+      "observedAt": "2026-08-12T22:07:09.576032+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "PLANNING_ONLY",
+      "materialization": "NOT_YET_VERIFIED",
+      "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+          "tier": "T1B",
+          "label": "OIR PECU Vest — copie instituțională"
+        }
+      ]
+    },
+    {
+      "id": "peo-calendar-08e0997d5cf6f273dc9b8968",
+      "sourceId": "PEO_CALENDAR",
+      "sourceTier": "T1B",
+      "recordType": "PLANNED_CALL",
+      "title": "Formarea profesională inițială continuă a profesorilor din educația timpurie",
+      "programme": "PEO",
+      "priority": "Educatie",
+      "region": "LDR",
+      "plannedLaunch": "2025-08-01T00:00:00",
+      "plannedClose": "2025-10-31T00:00:00",
+      "applicantsSignal": "APL/Instituții de învățământ preuniversitar din rețeaua națională publică sau privată/Furnizori privați autorizați de servicii de educație antepreșcolar și preșcolar",
+      "budgetSignal": "36880000",
+      "observedAt": "2026-08-12T22:07:09.576032+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "PLANNING_ONLY",
+      "materialization": "NOT_YET_VERIFIED",
+      "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+          "tier": "T1B",
+          "label": "OIR PECU Vest — copie instituțională"
+        }
+      ]
+    },
+    {
+      "id": "peo-calendar-fd9fc862a19debe31aa48100",
+      "sourceId": "PEO_CALENDAR",
+      "sourceTier": "T1B",
+      "recordType": "PLANNED_CALL",
+      "title": "Furnizarea de către angajatori, inclusiv clustere de angajatori, de programe de formare pentru progresul în carieră al angajaților defavorizați (supuși riscului disponibilizării, angajați parttime, angajați supuși sărăciei în muncă, angajați care și-au reluat activitatea după o perioadă de inactivitate, femei care și-au reluat activitatea după cel puțin un an de concediu maternal etc.), inclusiv formare colaborativă",
+      "programme": "PEO",
+      "priority": "Educatie",
+      "region": "LDR+MDR",
+      "plannedLaunch": "2025-10-01T00:00:00",
+      "plannedClose": "2025-12-01T00:00:00",
+      "applicantsSignal": "angajatori",
+      "budgetSignal": "50411765",
+      "observedAt": "2026-08-12T22:07:09.576032+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "PLANNING_ONLY",
+      "materialization": "NOT_YET_VERIFIED",
+      "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+          "tier": "T1B",
+          "label": "OIR PECU Vest — copie instituțională"
+        }
+      ]
+    },
+    {
+      "id": "peo-calendar-489aec5f321923208574e80d",
+      "sourceId": "PEO_CALENDAR",
+      "sourceTier": "T1B",
+      "recordType": "PLANNED_CALL",
+      "title": "Instrumente financiare - Sprijin acordat sectorului de economie socială pentru dezvoltare /inovare /scalare/extindere de întreprinderi sociale și întreprinderi sociale de inserție",
+      "programme": "PEO",
+      "priority": "Capital uman pentru piața muncii",
+      "region": "LDR",
+      "plannedLaunch": "2025-08-01T00:00:00",
+      "plannedClose": "2025-09-01T00:00:00",
+      "applicantsSignal": "FNCGIMM",
+      "budgetSignal": "99411765",
+      "observedAt": "2026-08-12T22:07:09.576032+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "PLANNING_ONLY",
+      "materialization": "NOT_YET_VERIFIED",
+      "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+          "tier": "T1B",
+          "label": "OIR PECU Vest — copie instituțională"
+        }
+      ]
+    },
+    {
+      "id": "peo-calendar-a862632e770f587f1f77d941",
+      "sourceId": "PEO_CALENDAR",
+      "sourceTier": "T1B",
+      "recordType": "PLANNED_CALL",
+      "title": "Mentorat didactic Formarea continuă a cadrelor didactice pentru integrarea elevilor cu nevoi speciale, în special pentru unitățile de învățământ dezavantajate, rurale și izolate.",
+      "programme": "PEO",
+      "priority": "Educatie",
+      "region": "LDR+MDR",
+      "plannedLaunch": "2025-09-01T00:00:00",
+      "plannedClose": "2025-10-31T00:00:00",
+      "applicantsSignal": "Ministerul Educației/ISJ/CCD/Instituții de învățământ preuniversitar din rețeaua națională publică sau privată",
+      "budgetSignal": "16852941",
+      "observedAt": "2026-08-12T22:07:09.576032+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "PLANNING_ONLY",
+      "materialization": "NOT_YET_VERIFIED",
+      "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+          "tier": "T1B",
+          "label": "OIR PECU Vest — copie instituțională"
+        }
+      ]
+    },
+    {
+      "id": "peo-calendar-bb4f619891d4c575343b3e78",
+      "sourceId": "PEO_CALENDAR",
+      "sourceTier": "T1B",
+      "recordType": "PLANNED_CALL",
+      "title": "Măsuri de sprijin pentru adaptarea la schimbare a angajaților și angajatorilor și sprijinirea tranzițiilor pe piața muncii",
+      "programme": "PEO",
+      "priority": "Capital uman pentru piața muncii",
+      "region": "LDR",
+      "plannedLaunch": "2025-10-01T00:00:00",
+      "plannedClose": "2025-12-31T00:00:00",
+      "applicantsSignal": "Furnizori autorizați de stimulare a ocupării forței de muncă/Organizații sindicale si patronale",
+      "budgetSignal": "41470588",
+      "observedAt": "2026-08-12T22:07:09.576032+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "PLANNING_ONLY",
+      "materialization": "NOT_YET_VERIFIED",
+      "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+          "tier": "T1B",
+          "label": "OIR PECU Vest — copie instituțională"
+        }
+      ]
+    },
+    {
+      "id": "peo-calendar-a04093f7c809cedc10478e42",
+      "sourceId": "PEO_CALENDAR",
+      "sourceTier": "T1B",
+      "recordType": "PLANNED_CALL",
+      "title": "Pregătirea şi furnizarea ofertei de servicii de formare/ocupare pentru tineri, inclusiv pentru tineri NEET, prin pachete integrate de măsuri active personalizate în funcție de profilul tinerilor - ALMA",
+      "programme": "PEO",
+      "priority": "Capital uman pentru piața muncii",
+      "region": "LDR+MDR",
+      "plannedLaunch": "2025-08-01T00:00:00",
+      "plannedClose": "2025-10-30T00:00:00",
+      "applicantsSignal": "entitățile Serviciului Public de Ocupare, structuri/entități specializate în furnizarea de servicii pentru tineri/ instituții de învățământ superior ce oferă servicii de educație, formare profesională, dezvoltare de competențe transversale, de consiliere/ coaching/ mentorat/ tutorat pentru tineri",
+      "budgetSignal": "25492648",
+      "observedAt": "2026-08-12T22:07:09.576032+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "PLANNING_ONLY",
+      "materialization": "NOT_YET_VERIFIED",
+      "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+          "tier": "T1B",
+          "label": "OIR PECU Vest — copie instituțională"
+        }
+      ]
+    },
+    {
+      "id": "peo-calendar-953b8d3c1a173562eb65ae81",
+      "sourceId": "PEO_CALENDAR",
+      "sourceTier": "T1B",
+      "recordType": "PLANNED_CALL",
+      "title": "Programul național „A doua șansă” (ADS)",
+      "programme": "PEO",
+      "priority": "Educatie",
+      "region": "LDR+MDR",
+      "plannedLaunch": "2025-08-01T00:00:00",
+      "plannedClose": "2025-09-30T00:00:00",
+      "applicantsSignal": "Ministerul Educației/ISJ/CCD/Instituții de învățământ preuniversitar din rețeaua națională publică sau privată",
+      "budgetSignal": "40705882",
+      "observedAt": "2026-08-12T22:07:09.576032+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "PLANNING_ONLY",
+      "materialization": "NOT_YET_VERIFIED",
+      "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+          "tier": "T1B",
+          "label": "OIR PECU Vest — copie instituțională"
+        }
+      ]
+    },
+    {
+      "id": "peo-calendar-906630fc0746634f7949156b",
+      "sourceId": "PEO_CALENDAR",
+      "sourceTier": "T1B",
+      "recordType": "PLANNED_CALL",
+      "title": "STEP – Tehnologii strategice pentru Europa",
+      "programme": "PEO",
+      "priority": "Educatie",
+      "region": "LDR+MDR",
+      "plannedLaunch": "2025-09-01T00:00:00",
+      "plannedClose": "2025-11-30T00:00:00",
+      "applicantsSignal": "furnizori de formare universități",
+      "budgetSignal": "428022050",
+      "observedAt": "2026-08-12T22:07:09.576032+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "PLANNING_ONLY",
+      "materialization": "NOT_YET_VERIFIED",
+      "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+          "tier": "T1B",
+          "label": "OIR PECU Vest — copie instituțională"
+        }
+      ]
+    },
+    {
+      "id": "peo-calendar-eac31ed4129f94ae9a287216",
+      "sourceId": "PEO_CALENDAR",
+      "sourceTier": "T1B",
+      "recordType": "PLANNED_CALL",
+      "title": "Sprijin acordat angajatorilor/ consorțiilor de angajatori pentru amenajarea unor spații destinate supravegherii și îngrijirii copiilor cu vârstă preșcolară (0-6 ani) sau pentru crearea de parteneriate cu entități specializate care oferă servicii de îngrijire copii",
+      "programme": "PEO",
+      "priority": "Capital uman pentru piața muncii",
+      "region": "LDR",
+      "plannedLaunch": "2025-10-01T00:00:00",
+      "plannedClose": "2025-12-31T00:00:00",
+      "applicantsSignal": "Furnizori autorizați de stimulare a ocupării forței de muncă/Organizații sindicale si patronale",
+      "budgetSignal": "30000000",
+      "observedAt": "2026-08-12T22:07:09.576032+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "PLANNING_ONLY",
+      "materialization": "NOT_YET_VERIFIED",
+      "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+          "tier": "T1B",
+          "label": "OIR PECU Vest — copie instituțională"
+        }
+      ]
+    },
+    {
+      "id": "peo-calendar-a39ead22d5f6e5f814686869",
+      "sourceId": "PEO_CALENDAR",
+      "sourceTier": "T1B",
+      "recordType": "PLANNED_CALL",
+      "title": "Sprijin pentru ocuparea în întreprinderi sociale de inserție și formarea competențelor de baza pentru inserția socio-profesională a lucrătorilor cu dizabilități/defavorizați",
+      "programme": "PEO",
+      "priority": "Capital uman pentru piața muncii",
+      "region": "LDR",
+      "plannedLaunch": "2025-10-01T00:00:00",
+      "plannedClose": "2025-12-31T00:00:00",
+      "applicantsSignal": "entități de economie socială de inserție, structuri specializate în adresarea nevoilor pe care le au întreprinderile sociale, precum și parteneri sociali",
+      "budgetSignal": "21844485",
+      "observedAt": "2026-08-12T22:07:09.576032+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "PLANNING_ONLY",
+      "materialization": "NOT_YET_VERIFIED",
+      "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+          "tier": "T1B",
+          "label": "OIR PECU Vest — copie instituțională"
+        }
+      ]
+    },
+    {
+      "id": "peo-calendar-504a2f7257b3042dc7e104e5",
+      "sourceId": "PEO_CALENDAR",
+      "sourceTier": "T1B",
+      "recordType": "PLANNED_CALL",
+      "title": "Sprijinirea dezvoltării școlilor pentru susținerea si recunoașterea excelentei în IPT",
+      "programme": "PEO",
+      "priority": "Educatie",
+      "region": "LDR+MDR",
+      "plannedLaunch": "2025-11-01T00:00:00",
+      "plannedClose": "2025-12-31T00:00:00",
+      "applicantsSignal": "Ministerul Educatiei/CNDIPT/ISJ/ Institutii de invatamant acreditate",
+      "budgetSignal": "6026838",
+      "observedAt": "2026-08-12T22:07:09.576032+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "PLANNING_ONLY",
+      "materialization": "NOT_YET_VERIFIED",
+      "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+          "tier": "T1B",
+          "label": "OIR PECU Vest — copie instituțională"
+        }
+      ]
+    },
+    {
+      "id": "peo-calendar-b099144697b98c7e0e370a1f",
+      "sourceId": "PEO_CALENDAR",
+      "sourceTier": "T1B",
+      "recordType": "PLANNED_CALL",
+      "title": "Sprijinirea mobilității internaționale Erasmus+ pentru educația adulților prin asigurarea unui sprijin financiar suplimentar față de grantul Erasmus+ pentru instituțiile cu acreditare, cu scopul satisfacerii cererii de mobilitate internațională",
+      "programme": "PEO",
+      "priority": "Educatie",
+      "region": "LDR+MDR",
+      "plannedLaunch": "2025-09-01T00:00:00",
+      "plannedClose": "2025-10-31T00:00:00",
+      "applicantsSignal": "Agenția Națională pentru Programe Comunitare în Domeniul Educației și Formării Profesionale (ANPCDEFP)",
+      "budgetSignal": "18639706",
+      "observedAt": "2026-08-12T22:07:09.576032+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "PLANNING_ONLY",
+      "materialization": "NOT_YET_VERIFIED",
+      "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+          "tier": "T1B",
+          "label": "OIR PECU Vest — copie instituțională"
+        }
+      ]
+    },
+    {
+      "id": "peo-calendar-c3d136f16c2ceb4fda08444e",
+      "sourceId": "PEO_CALENDAR",
+      "sourceTier": "T1B",
+      "recordType": "PLANNED_CALL",
+      "title": "Sprijinirea sportivilor aflați la final de carieră pentru dobândirea de competențe în vederea reintegrării pe piața muncii",
+      "programme": "PEO",
+      "priority": "Educatie",
+      "region": "LDR+MDR",
+      "plannedLaunch": "2025-09-01T00:00:00",
+      "plannedClose": "2025-11-30T00:00:00",
+      "applicantsSignal": "Federatiile sportive afiliate COSR/Ministerul Tineretului si Sportului",
+      "budgetSignal": "6135233",
+      "observedAt": "2026-08-12T22:07:09.576032+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "PLANNING_ONLY",
+      "materialization": "NOT_YET_VERIFIED",
+      "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+          "tier": "T1B",
+          "label": "OIR PECU Vest — copie instituțională"
+        }
+      ]
+    },
+    {
+      "id": "peo-calendar-a1d5ee6fc97da9328487ec6e",
+      "sourceId": "PEO_CALENDAR",
+      "sourceTier": "T1B",
+      "recordType": "PLANNED_CALL",
+      "title": "Înființarea comitetelor sectoriale",
+      "programme": "PEO",
+      "priority": "Capital uman pentru piața muncii",
+      "region": "LDR+MDR",
+      "plannedLaunch": "2025-10-01T00:00:00",
+      "plannedClose": "2025-12-31T00:00:00",
+      "applicantsSignal": "Organizații sindicale și patronale reprezentative",
+      "budgetSignal": "11183897",
+      "observedAt": "2026-08-12T22:07:09.576032+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "PLANNING_ONLY",
+      "materialization": "NOT_YET_VERIFIED",
+      "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+          "tier": "T1B",
+          "label": "OIR PECU Vest — copie instituțională"
+        }
+      ]
+    }
+  ],
+  "dataPlane": {
+    "contractId": "PARTENER-EU-P10.1-DATA-PLANE",
+    "contractVersion": "1.0",
+    "contract": {
+      "status": "PASS",
+      "corpora": {
+        "AFIR_CORPUS": {
+          "status": "PASS",
+          "stateFile": "afir_corpus.json",
+          "missingRootFields": [],
+          "invalidItemCount": 0,
+          "invalidItemSamples": [],
+          "errors": []
+        },
+        "PEO_CALENDAR": {
+          "status": "PASS",
+          "stateFile": "peo_calendar_state.json",
+          "missingRootFields": [],
+          "invalidItemCount": 0,
+          "invalidItemSamples": [],
+          "errors": []
+        },
+        "MIPE_CORPUS": {
+          "status": "PASS",
+          "stateFile": "mipe_state.json",
+          "missingRootFields": [],
+          "invalidItemCount": 0,
+          "invalidItemSamples": [],
+          "errors": []
+        },
+        "VERIFIED_SOURCE_REGISTRY": {
+          "status": "PASS",
+          "stateFile": "source_registry_health.json",
+          "missingRootFields": [],
+          "invalidItemCount": 0,
+          "invalidItemSamples": [],
+          "errors": []
+        }
+      },
+      "errors": []
+    },
+    "freshness": {
+      "status": "DEGRADED",
+      "current": 1,
+      "total": 22,
+      "slaBreaches": [
+        "AFIR_CORPUS",
+        "MIPE_CORPUS",
+        "SRC-ADRCENTRU-FUNDING-CATALOG",
+        "SRC-ADRCENTRU-PTJ-CONSULT",
+        "SRC-ADRVEST-PTJ-ACTIVE",
+        "SRC-MAI-FED-CALENDAR-INDEX",
+        "SRC-MAI-FED-CALLS",
+        "SRC-MAI-FED-GENERAL-GUIDE",
+        "SRC-MYSMIS-CALLS",
+        "SRC-OI-RESEARCH-HEALTH",
+        "SRC-OI-RESEARCH-POCIDIF",
+        "SRC-OIRBI-PEO",
+        "SRC-OIRBI-PIDS",
+        "SRC-OIRCENTRU-PEO",
+        "SRC-OIRNE-PEO",
+        "SRC-OIRVEST-PEO",
+        "SRC-OIRVEST-PEO-GUIDES",
+        "SRC-OIRVEST-PEO-MANUALS",
+        "SRC-OLD-FONDURI-UE",
+        "SRC-PREFECTURA-TM-FUNDING",
+        "VERIFIED_SOURCE_REGISTRY"
+      ],
+      "sources": [
+        {
+          "sourceId": "AFIR_CORPUS",
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 4
+        },
+        {
+          "sourceId": "MIPE_CORPUS",
+          "status": "STALE",
+          "ageHours": 5.59,
+          "maxAgeHours": 4
+        },
+        {
+          "sourceId": "PEO_CALENDAR",
+          "status": "CURRENT",
+          "ageHours": 6.94,
+          "maxAgeHours": 8
+        },
+        {
+          "sourceId": "SRC-ADRCENTRU-FUNDING-CATALOG",
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        {
+          "sourceId": "SRC-ADRCENTRU-PTJ-CONSULT",
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        {
+          "sourceId": "SRC-ADRVEST-PTJ-ACTIVE",
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        {
+          "sourceId": "SRC-MAI-FED-CALENDAR-INDEX",
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        {
+          "sourceId": "SRC-MAI-FED-CALLS",
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        {
+          "sourceId": "SRC-MAI-FED-GENERAL-GUIDE",
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        {
+          "sourceId": "SRC-MYSMIS-CALLS",
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        {
+          "sourceId": "SRC-OI-RESEARCH-HEALTH",
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        {
+          "sourceId": "SRC-OI-RESEARCH-POCIDIF",
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        {
+          "sourceId": "SRC-OIRBI-PEO",
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        {
+          "sourceId": "SRC-OIRBI-PIDS",
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        {
+          "sourceId": "SRC-OIRCENTRU-PEO",
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        {
+          "sourceId": "SRC-OIRNE-PEO",
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        {
+          "sourceId": "SRC-OIRVEST-PEO",
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        {
+          "sourceId": "SRC-OIRVEST-PEO-GUIDES",
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        {
+          "sourceId": "SRC-OIRVEST-PEO-MANUALS",
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        {
+          "sourceId": "SRC-OLD-FONDURI-UE",
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        {
+          "sourceId": "SRC-PREFECTURA-TM-FUNDING",
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        {
+          "sourceId": "VERIFIED_SOURCE_REGISTRY",
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        }
+      ]
+    },
+    "coverage": {
+      "status": "PASS",
+      "classifiedSourceCount": 22,
+      "sourceCount": 22,
+      "byTier": {
+        "MIXED_T1_T1B_T2": 1,
+        "T1": 6,
+        "T1B": 12,
+        "T2": 3
+      },
+      "byDomain": {
+        "AGRICULTURE_RURAL": 1,
+        "COHESION_CROSS_PROGRAMME": 2,
+        "EMPLOYMENT_EDUCATION": 7,
+        "HEALTH": 1,
+        "HOME_AFFAIRS": 3,
+        "INTERMEDIATE_DELEGATED": 12,
+        "JUST_TRANSITION": 2,
+        "LEGACY": 1,
+        "MULTI_PROGRAMME_DISCOVERY": 2,
+        "MULTI_PROGRAMME_SOURCE_HEALTH": 1,
+        "PLANNING_CALENDAR": 2,
+        "RESEARCH_DIGITAL": 1,
+        "SOCIAL_INCLUSION": 3
+      },
+      "requiredFamilies": [
+        {
+          "family": "MIPE",
+          "status": "PRESENT_DEGRADED",
+          "sourceIds": [
+            "MIPE_CORPUS"
+          ],
+          "availableSourceIds": []
+        },
+        {
+          "family": "MYSMIS",
+          "status": "PRESENT_DEGRADED",
+          "sourceIds": [
+            "SRC-MYSMIS-CALLS"
+          ],
+          "availableSourceIds": []
+        },
+        {
+          "family": "AFIR",
+          "status": "PRESENT_DEGRADED",
+          "sourceIds": [
+            "AFIR_CORPUS"
+          ],
+          "availableSourceIds": []
+        },
+        {
+          "family": "OI_ADR",
+          "status": "PRESENT_DEGRADED",
+          "sourceIds": [
+            "SRC-ADRCENTRU-FUNDING-CATALOG",
+            "SRC-ADRCENTRU-PTJ-CONSULT",
+            "SRC-ADRVEST-PTJ-ACTIVE",
+            "SRC-OI-RESEARCH-HEALTH",
+            "SRC-OI-RESEARCH-POCIDIF",
+            "SRC-OIRBI-PEO",
+            "SRC-OIRBI-PIDS",
+            "SRC-OIRCENTRU-PEO",
+            "SRC-OIRNE-PEO",
+            "SRC-OIRVEST-PEO",
+            "SRC-OIRVEST-PEO-GUIDES",
+            "SRC-OIRVEST-PEO-MANUALS"
+          ],
+          "availableSourceIds": []
+        },
+        {
+          "family": "CALENDARS",
+          "status": "PRESENT_AVAILABLE",
+          "sourceIds": [
+            "PEO_CALENDAR",
+            "SRC-MAI-FED-CALENDAR-INDEX"
+          ],
+          "availableSourceIds": [
+            "PEO_CALENDAR"
+          ]
+        }
+      ],
+      "missingRequiredFamilies": [],
+      "unclassifiedSourceIds": []
+    },
+    "sourceInventory": [
+      {
+        "id": "AFIR_CORPUS",
+        "tier": "T1",
+        "domains": [
+          "AGRICULTURE_RURAL"
+        ],
+        "programmes": [
+          "PS_PAC_2023_2027"
+        ],
+        "sourceFamilies": [
+          "AFIR"
+        ],
+        "dependencyScopes": [
+          "AFIR_PS_PAC"
+        ],
+        "status": "PASS",
+        "observedAt": "2026-08-12T22:26:16.087956+00:00",
+        "freshness": {
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 4
+        },
+        "itemCount": 31,
+        "failClosed": true,
+        "kind": "CORPUS",
+        "contract": {
+          "status": "PASS",
+          "stateFile": "afir_corpus.json",
+          "missingRootFields": [],
+          "invalidItemCount": 0,
+          "invalidItemSamples": [],
+          "errors": []
+        },
+        "materialFactUse": true,
+        "planningOnly": false,
+        "lastKnownGoodPreserved": true,
+        "resolutionTaskRequired": false
+      },
+      {
+        "id": "MIPE_CORPUS",
+        "tier": "T1",
+        "domains": [
+          "COHESION_CROSS_PROGRAMME"
+        ],
+        "programmes": [
+          "MIPE_MANAGED_PROGRAMMES"
+        ],
+        "sourceFamilies": [
+          "MIPE"
+        ],
+        "dependencyScopes": [
+          "MIPE_MANAGED_PROGRAMMES"
+        ],
+        "status": "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
+        "observedAt": "2026-08-12T23:28:09.815014+00:00",
+        "freshness": {
+          "status": "STALE",
+          "ageHours": 5.59,
+          "maxAgeHours": 4
+        },
+        "itemCount": 0,
+        "sourceAvailable": false,
+        "lastKnownGoodPreserved": true,
+        "failClosed": true,
+        "kind": "CORPUS",
+        "contract": {
+          "status": "PASS",
+          "stateFile": "mipe_state.json",
+          "missingRootFields": [],
+          "invalidItemCount": 0,
+          "invalidItemSamples": [],
+          "errors": []
+        },
+        "materialFactUse": true,
+        "planningOnly": false,
+        "resolutionTaskRequired": false
+      },
+      {
+        "id": "PEO_CALENDAR",
+        "tier": "T1B",
+        "domains": [
+          "EMPLOYMENT_EDUCATION",
+          "PLANNING_CALENDAR"
+        ],
+        "programmes": [
+          "PEO"
+        ],
+        "sourceFamilies": [
+          "CALENDARS"
+        ],
+        "dependencyScopes": [
+          "PEO_PLANNING_SIGNALS"
+        ],
+        "status": "OK_OFFICIAL_OIR_COPY",
+        "observedAt": "2026-08-12T22:07:09.576032+00:00",
+        "freshness": {
+          "status": "CURRENT",
+          "ageHours": 6.94,
+          "maxAgeHours": 8
+        },
+        "itemCount": 30,
+        "canonicalContainer": "https://mfe.gov.ro/peos/calendar-lansari-apeluri",
+        "retrievalSource": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
+        "directMipeVerified": false,
+        "failClosed": true,
+        "kind": "CORPUS",
+        "contract": {
+          "status": "PASS",
+          "stateFile": "peo_calendar_state.json",
+          "missingRootFields": [],
+          "invalidItemCount": 0,
+          "invalidItemSamples": [],
+          "errors": []
+        },
+        "materialFactUse": false,
+        "planningOnly": true,
+        "lastKnownGoodPreserved": true,
+        "resolutionTaskRequired": false
+      },
+      {
+        "id": "SRC-ADRCENTRU-FUNDING-CATALOG",
+        "kind": "REGISTERED_OFFICIAL_SOURCE",
+        "tier": "T2",
+        "domains": [
+          "INTERMEDIATE_DELEGATED",
+          "MULTI_PROGRAMME_DISCOVERY"
+        ],
+        "programmes": [
+          "multiple"
+        ],
+        "sourceFamilies": [
+          "OI_ADR"
+        ],
+        "dependencyScopes": [
+          "multiple"
+        ],
+        "sourceClass": "official_regional_funding_catalog",
+        "owner": "ADR Centru",
+        "canonicalUrl": "https://adrcentru.ro/csf/catalogul-surselor-de-finantare-iulie-2026",
+        "status": "PASS",
+        "observedAt": "2026-08-12T22:26:00.198456Z",
+        "freshness": {
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        "materialFactUse": false,
+        "planningOnly": false,
+        "resolutionTaskRequired": false,
+        "lastKnownGoodPreserved": true,
+        "contract": {
+          "status": "PASS",
+          "errors": []
+        }
+      },
+      {
+        "id": "SRC-ADRCENTRU-PTJ-CONSULT",
+        "kind": "REGISTERED_OFFICIAL_SOURCE",
+        "tier": "T1B",
+        "domains": [
+          "INTERMEDIATE_DELEGATED",
+          "JUST_TRANSITION"
+        ],
+        "programmes": [
+          "PTJ",
+          "PDDTJ"
+        ],
+        "sourceFamilies": [
+          "OI_ADR"
+        ],
+        "dependencyScopes": [
+          "PTJ",
+          "PDDTJ"
+        ],
+        "sourceClass": "official_intermediate_body_consultation_index",
+        "owner": "ADR Centru / OI Programul Tranzitie Justa",
+        "canonicalUrl": "https://adrcentru.ro/category/ptj-centru/ptj-implementare/ptj-ghiduri-consultare",
+        "status": "PASS",
+        "observedAt": "2026-08-12T22:26:00.198456Z",
+        "freshness": {
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        "materialFactUse": true,
+        "planningOnly": false,
+        "resolutionTaskRequired": false,
+        "lastKnownGoodPreserved": true,
+        "contract": {
+          "status": "PASS",
+          "errors": []
+        }
+      },
+      {
+        "id": "SRC-ADRVEST-PTJ-ACTIVE",
+        "kind": "REGISTERED_OFFICIAL_SOURCE",
+        "tier": "T1B",
+        "domains": [
+          "INTERMEDIATE_DELEGATED",
+          "JUST_TRANSITION"
+        ],
+        "programmes": [
+          "PTJ",
+          "PDDTJ"
+        ],
+        "sourceFamilies": [
+          "OI_ADR"
+        ],
+        "dependencyScopes": [
+          "PTJ",
+          "PDDTJ"
+        ],
+        "sourceClass": "official_intermediate_body_active_guides",
+        "owner": "ADR Vest / OI Programul Tranzitie Justa",
+        "canonicalUrl": "https://adrvest.ro/programul-tranzitie-justa-ghiduri-de-finantare-active",
+        "status": "PASS",
+        "observedAt": "2026-08-12T22:26:00.198456Z",
+        "freshness": {
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        "materialFactUse": true,
+        "planningOnly": false,
+        "resolutionTaskRequired": false,
+        "lastKnownGoodPreserved": true,
+        "contract": {
+          "status": "PASS",
+          "errors": []
+        }
+      },
+      {
+        "id": "SRC-MAI-FED-CALENDAR-INDEX",
+        "kind": "REGISTERED_OFFICIAL_SOURCE",
+        "tier": "T1",
+        "domains": [
+          "HOME_AFFAIRS",
+          "PLANNING_CALENDAR"
+        ],
+        "programmes": [
+          "FAMI",
+          "FSI",
+          "IMFV"
+        ],
+        "sourceFamilies": [
+          "CALENDARS"
+        ],
+        "dependencyScopes": [
+          "FAMI",
+          "FSI",
+          "IMFV"
+        ],
+        "sourceClass": "managing_authority_calendar_index",
+        "owner": "Ministerul Afacerilor Interne / Autoritatea de Management Afaceri Interne",
+        "canonicalUrl": "https://fed.mai.gov.ro/despre/lansare-apeluri",
+        "status": "PASS",
+        "observedAt": "2026-08-12T22:26:00.198456Z",
+        "freshness": {
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        "materialFactUse": true,
+        "planningOnly": true,
+        "resolutionTaskRequired": false,
+        "lastKnownGoodPreserved": true,
+        "contract": {
+          "status": "PASS",
+          "errors": []
+        }
+      },
+      {
+        "id": "SRC-MAI-FED-CALLS",
+        "kind": "REGISTERED_OFFICIAL_SOURCE",
+        "tier": "T1",
+        "domains": [
+          "HOME_AFFAIRS"
+        ],
+        "programmes": [
+          "FAMI",
+          "FSI",
+          "IMFV"
+        ],
+        "sourceFamilies": [],
+        "dependencyScopes": [
+          "FAMI",
+          "FSI",
+          "IMFV"
+        ],
+        "sourceClass": "managing_authority_call_registry",
+        "owner": "Ministerul Afacerilor Interne / Autoritatea de Management Afaceri Interne",
+        "canonicalUrl": "https://fed.mai.gov.ro/in/apeluri",
+        "status": "PASS",
+        "observedAt": "2026-08-12T22:26:00.198456Z",
+        "freshness": {
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        "materialFactUse": true,
+        "planningOnly": false,
+        "resolutionTaskRequired": false,
+        "lastKnownGoodPreserved": true,
+        "contract": {
+          "status": "PASS",
+          "errors": []
+        }
+      },
+      {
+        "id": "SRC-MAI-FED-GENERAL-GUIDE",
+        "kind": "REGISTERED_OFFICIAL_SOURCE",
+        "tier": "T1",
+        "domains": [
+          "HOME_AFFAIRS"
+        ],
+        "programmes": [
+          "FAMI",
+          "FSI",
+          "IMFV"
+        ],
+        "sourceFamilies": [],
+        "dependencyScopes": [
+          "FAMI",
+          "FSI",
+          "IMFV"
+        ],
+        "sourceClass": "managing_authority_general_guide",
+        "owner": "Ministerul Afacerilor Interne / Autoritatea de Management Afaceri Interne",
+        "canonicalUrl": "https://fed.mai.gov.ro/fed-2021-2027/ghidul-general",
+        "status": "PASS",
+        "observedAt": "2026-08-12T22:26:00.198456Z",
+        "freshness": {
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        "materialFactUse": true,
+        "planningOnly": false,
+        "resolutionTaskRequired": false,
+        "lastKnownGoodPreserved": true,
+        "contract": {
+          "status": "PASS",
+          "errors": []
+        }
+      },
+      {
+        "id": "SRC-MYSMIS-CALLS",
+        "kind": "REGISTERED_OFFICIAL_SOURCE",
+        "tier": "T1",
+        "domains": [
+          "COHESION_CROSS_PROGRAMME"
+        ],
+        "programmes": [
+          "2021-2027"
+        ],
+        "sourceFamilies": [
+          "MYSMIS"
+        ],
+        "dependencyScopes": [
+          "2021-2027"
+        ],
+        "sourceClass": "authoritative_call_registry",
+        "owner": "MySMIS2021 / MIPE ecosystem",
+        "canonicalUrl": "https://resurse.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027",
+        "status": "PASS",
+        "observedAt": "2026-08-12T22:26:00.198456Z",
+        "freshness": {
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        "materialFactUse": true,
+        "planningOnly": false,
+        "resolutionTaskRequired": false,
+        "lastKnownGoodPreserved": true,
+        "contract": {
+          "status": "PASS",
+          "errors": []
+        }
+      },
+      {
+        "id": "SRC-OI-RESEARCH-HEALTH",
+        "kind": "REGISTERED_OFFICIAL_SOURCE",
+        "tier": "T1B",
+        "domains": [
+          "HEALTH",
+          "INTERMEDIATE_DELEGATED"
+        ],
+        "programmes": [
+          "Programul Sanatate"
+        ],
+        "sourceFamilies": [
+          "OI_ADR"
+        ],
+        "dependencyScopes": [
+          "Programul Sanatate"
+        ],
+        "sourceClass": "official_intermediate_body",
+        "owner": "Organism Intermediar pentru Cercetare / Autoritatea Nationala pentru Cercetare",
+        "canonicalUrl": "https://poc.research.gov.ro/ro/articol/4427/2021-2027-pos-2021-2027",
+        "status": "FAIL",
+        "observedAt": "2026-08-12T22:26:00.198456Z",
+        "freshness": {
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        "materialFactUse": true,
+        "planningOnly": false,
+        "resolutionTaskRequired": false,
+        "lastKnownGoodPreserved": false,
+        "contract": {
+          "status": "PASS",
+          "errors": []
+        }
+      },
+      {
+        "id": "SRC-OI-RESEARCH-POCIDIF",
+        "kind": "REGISTERED_OFFICIAL_SOURCE",
+        "tier": "T1B",
+        "domains": [
+          "INTERMEDIATE_DELEGATED",
+          "RESEARCH_DIGITAL"
+        ],
+        "programmes": [
+          "PoCIDIF"
+        ],
+        "sourceFamilies": [
+          "OI_ADR"
+        ],
+        "dependencyScopes": [
+          "PoCIDIF"
+        ],
+        "sourceClass": "official_intermediate_body",
+        "owner": "Organism Intermediar pentru Cercetare / Autoritatea Nationala pentru Cercetare",
+        "canonicalUrl": "https://poc.research.gov.ro/ro/articol/4382/2021-2027-pocidif-2021-2027",
+        "status": "FAIL",
+        "observedAt": "2026-08-12T22:26:00.198456Z",
+        "freshness": {
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        "materialFactUse": true,
+        "planningOnly": false,
+        "resolutionTaskRequired": false,
+        "lastKnownGoodPreserved": false,
+        "contract": {
+          "status": "PASS",
+          "errors": []
+        }
+      },
+      {
+        "id": "SRC-OIRBI-PEO",
+        "kind": "REGISTERED_OFFICIAL_SOURCE",
+        "tier": "T1B",
+        "domains": [
+          "EMPLOYMENT_EDUCATION",
+          "INTERMEDIATE_DELEGATED"
+        ],
+        "programmes": [
+          "PEO"
+        ],
+        "sourceFamilies": [
+          "OI_ADR"
+        ],
+        "dependencyScopes": [
+          "PEO"
+        ],
+        "sourceClass": "official_intermediate_body",
+        "owner": "OIR PECU Bucuresti-Ilfov",
+        "canonicalUrl": "https://oirbi.ro/peo-2021-2027",
+        "status": "PASS",
+        "observedAt": "2026-08-12T22:26:00.198456Z",
+        "freshness": {
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        "materialFactUse": true,
+        "planningOnly": false,
+        "resolutionTaskRequired": false,
+        "lastKnownGoodPreserved": true,
+        "contract": {
+          "status": "PASS",
+          "errors": []
+        }
+      },
+      {
+        "id": "SRC-OIRBI-PIDS",
+        "kind": "REGISTERED_OFFICIAL_SOURCE",
+        "tier": "T1B",
+        "domains": [
+          "INTERMEDIATE_DELEGATED",
+          "SOCIAL_INCLUSION"
+        ],
+        "programmes": [
+          "PoIDS"
+        ],
+        "sourceFamilies": [
+          "OI_ADR"
+        ],
+        "dependencyScopes": [
+          "PoIDS"
+        ],
+        "sourceClass": "official_intermediate_body",
+        "owner": "OIR PECU Bucuresti-Ilfov",
+        "canonicalUrl": "https://oirbi.ro/pids-2021-2027",
+        "status": "PASS",
+        "observedAt": "2026-08-12T22:26:00.198456Z",
+        "freshness": {
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        "materialFactUse": true,
+        "planningOnly": false,
+        "resolutionTaskRequired": false,
+        "lastKnownGoodPreserved": true,
+        "contract": {
+          "status": "PASS",
+          "errors": []
+        }
+      },
+      {
+        "id": "SRC-OIRCENTRU-PEO",
+        "kind": "REGISTERED_OFFICIAL_SOURCE",
+        "tier": "T1B",
+        "domains": [
+          "EMPLOYMENT_EDUCATION",
+          "INTERMEDIATE_DELEGATED"
+        ],
+        "programmes": [
+          "PEO"
+        ],
+        "sourceFamilies": [
+          "OI_ADR"
+        ],
+        "dependencyScopes": [
+          "PEO"
+        ],
+        "sourceClass": "official_intermediate_body",
+        "owner": "OIR PECU Regiunea Centru",
+        "canonicalUrl": "https://oircentru.ro/peo-2021-2027",
+        "status": "PASS",
+        "observedAt": "2026-08-12T22:26:00.198456Z",
+        "freshness": {
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        "materialFactUse": true,
+        "planningOnly": false,
+        "resolutionTaskRequired": false,
+        "lastKnownGoodPreserved": true,
+        "contract": {
+          "status": "PASS",
+          "errors": []
+        }
+      },
+      {
+        "id": "SRC-OIRNE-PEO",
+        "kind": "REGISTERED_OFFICIAL_SOURCE",
+        "tier": "T1B",
+        "domains": [
+          "EMPLOYMENT_EDUCATION",
+          "INTERMEDIATE_DELEGATED",
+          "SOCIAL_INCLUSION"
+        ],
+        "programmes": [
+          "PEO",
+          "PoIDS"
+        ],
+        "sourceFamilies": [
+          "OI_ADR"
+        ],
+        "dependencyScopes": [
+          "PEO",
+          "PoIDS"
+        ],
+        "sourceClass": "official_intermediate_body",
+        "owner": "OIR PECU Regiunea Nord-Est",
+        "canonicalUrl": "https://fsenordest.ro/contact_program.html",
+        "status": "PASS",
+        "observedAt": "2026-08-12T22:26:00.198456Z",
+        "freshness": {
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        "materialFactUse": true,
+        "planningOnly": false,
+        "resolutionTaskRequired": false,
+        "lastKnownGoodPreserved": true,
+        "contract": {
+          "status": "PASS",
+          "errors": []
+        }
+      },
+      {
+        "id": "SRC-OIRVEST-PEO",
+        "kind": "REGISTERED_OFFICIAL_SOURCE",
+        "tier": "T1B",
+        "domains": [
+          "EMPLOYMENT_EDUCATION",
+          "INTERMEDIATE_DELEGATED"
+        ],
+        "programmes": [
+          "PEO"
+        ],
+        "sourceFamilies": [
+          "OI_ADR"
+        ],
+        "dependencyScopes": [
+          "PEO"
+        ],
+        "sourceClass": "official_intermediate_body",
+        "owner": "OIR PECU Regiunea Vest",
+        "canonicalUrl": "https://oirvest.ro/peo-2021-2027",
+        "status": "PASS",
+        "observedAt": "2026-08-12T22:26:00.198456Z",
+        "freshness": {
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        "materialFactUse": true,
+        "planningOnly": false,
+        "resolutionTaskRequired": false,
+        "lastKnownGoodPreserved": true,
+        "contract": {
+          "status": "PASS",
+          "errors": []
+        }
+      },
+      {
+        "id": "SRC-OIRVEST-PEO-GUIDES",
+        "kind": "REGISTERED_OFFICIAL_SOURCE",
+        "tier": "T1B",
+        "domains": [
+          "EMPLOYMENT_EDUCATION",
+          "INTERMEDIATE_DELEGATED"
+        ],
+        "programmes": [
+          "PEO"
+        ],
+        "sourceFamilies": [
+          "OI_ADR"
+        ],
+        "dependencyScopes": [
+          "PEO"
+        ],
+        "sourceClass": "official_intermediate_body_guides",
+        "owner": "OIR PECU Regiunea Vest",
+        "canonicalUrl": "https://oirvest.ro/ghiduri-peo",
+        "status": "PASS",
+        "observedAt": "2026-08-12T22:26:00.198456Z",
+        "freshness": {
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        "materialFactUse": true,
+        "planningOnly": false,
+        "resolutionTaskRequired": false,
+        "lastKnownGoodPreserved": true,
+        "contract": {
+          "status": "PASS",
+          "errors": []
+        }
+      },
+      {
+        "id": "SRC-OIRVEST-PEO-MANUALS",
+        "kind": "REGISTERED_OFFICIAL_SOURCE",
+        "tier": "T1B",
+        "domains": [
+          "EMPLOYMENT_EDUCATION",
+          "INTERMEDIATE_DELEGATED",
+          "SOCIAL_INCLUSION"
+        ],
+        "programmes": [
+          "PEO",
+          "PoIDS"
+        ],
+        "sourceFamilies": [
+          "OI_ADR"
+        ],
+        "dependencyScopes": [
+          "PEO",
+          "PoIDS"
+        ],
+        "sourceClass": "official_intermediate_body_implementation",
+        "owner": "OIR PECU Regiunea Vest",
+        "canonicalUrl": "https://oirvest.ro/manualul-beneficiarului-instructiuni-peo",
+        "status": "PASS",
+        "observedAt": "2026-08-12T22:26:00.198456Z",
+        "freshness": {
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        "materialFactUse": true,
+        "planningOnly": false,
+        "resolutionTaskRequired": false,
+        "lastKnownGoodPreserved": true,
+        "contract": {
+          "status": "PASS",
+          "errors": []
+        }
+      },
+      {
+        "id": "SRC-OLD-FONDURI-UE",
+        "kind": "REGISTERED_OFFICIAL_SOURCE",
+        "tier": "T2",
+        "domains": [
+          "LEGACY"
+        ],
+        "programmes": [
+          "legacy"
+        ],
+        "sourceFamilies": [],
+        "dependencyScopes": [
+          "legacy"
+        ],
+        "sourceClass": "official_legacy_registry",
+        "owner": "Fonduri UE legacy reporting",
+        "canonicalUrl": "https://b.fonduri-ue.ro/ords/f?p=110:10",
+        "status": "FAIL",
+        "observedAt": "2026-08-12T22:26:00.198456Z",
+        "freshness": {
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        "materialFactUse": false,
+        "planningOnly": false,
+        "resolutionTaskRequired": false,
+        "lastKnownGoodPreserved": false,
+        "contract": {
+          "status": "PASS",
+          "errors": []
+        }
+      },
+      {
+        "id": "SRC-PREFECTURA-TM-FUNDING",
+        "kind": "REGISTERED_OFFICIAL_SOURCE",
+        "tier": "T2",
+        "domains": [
+          "MULTI_PROGRAMME_DISCOVERY"
+        ],
+        "programmes": [
+          "multiple"
+        ],
+        "sourceFamilies": [],
+        "dependencyScopes": [
+          "multiple"
+        ],
+        "sourceClass": "official_public_sector_aggregator",
+        "owner": "Institutia Prefectului Timis",
+        "canonicalUrl": "https://tm.prefectura.mai.gov.ro/informatii-de-interes-public/apeluri-de-finantare-deschise-si-viitoare",
+        "status": "PASS",
+        "observedAt": "2026-08-12T22:26:00.198456Z",
+        "freshness": {
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        "materialFactUse": false,
+        "planningOnly": false,
+        "resolutionTaskRequired": false,
+        "lastKnownGoodPreserved": true,
+        "contract": {
+          "status": "PASS",
+          "errors": []
+        }
+      },
+      {
+        "id": "VERIFIED_SOURCE_REGISTRY",
+        "tier": "MIXED_T1_T1B_T2",
+        "domains": [
+          "MULTI_PROGRAMME_SOURCE_HEALTH"
+        ],
+        "programmes": [
+          "MULTIPLE"
+        ],
+        "sourceFamilies": [],
+        "dependencyScopes": [
+          "REGISTERED_SOURCE_DEPENDENCIES"
+        ],
+        "status": "DEGRADED",
+        "observedAt": "2026-08-12T22:26:00.198456Z",
+        "freshness": {
+          "status": "STALE",
+          "ageHours": 6.62,
+          "maxAgeHours": 6
+        },
+        "itemCount": 18,
+        "resolutionTasksRequired": 0,
+        "failClosed": true,
+        "kind": "CORPUS",
+        "contract": {
+          "status": "PASS",
+          "stateFile": "source_registry_health.json",
+          "missingRootFields": [],
+          "invalidItemCount": 0,
+          "invalidItemSamples": [],
+          "errors": []
+        },
+        "materialFactUse": false,
+        "planningOnly": false,
+        "lastKnownGoodPreserved": true,
+        "resolutionTaskRequired": false
+      }
+    ],
+    "dependencyIsolation": {
+      "policy": "SOURCE_INCIDENTS_BLOCK_ONLY_DEPENDENT_FACT_SCOPES",
+      "globalStop": false,
+      "blockedSourceIds": [
+        "AFIR_CORPUS",
+        "MIPE_CORPUS",
+        "SRC-ADRCENTRU-FUNDING-CATALOG",
+        "SRC-ADRCENTRU-PTJ-CONSULT",
+        "SRC-ADRVEST-PTJ-ACTIVE",
+        "SRC-MAI-FED-CALENDAR-INDEX",
+        "SRC-MAI-FED-CALLS",
+        "SRC-MAI-FED-GENERAL-GUIDE",
+        "SRC-MYSMIS-CALLS",
+        "SRC-OI-RESEARCH-HEALTH",
+        "SRC-OI-RESEARCH-POCIDIF",
+        "SRC-OIRBI-PEO",
+        "SRC-OIRBI-PIDS",
+        "SRC-OIRCENTRU-PEO",
+        "SRC-OIRNE-PEO",
+        "SRC-OIRVEST-PEO",
+        "SRC-OIRVEST-PEO-GUIDES",
+        "SRC-OIRVEST-PEO-MANUALS",
+        "SRC-OLD-FONDURI-UE",
+        "SRC-PREFECTURA-TM-FUNDING",
+        "VERIFIED_SOURCE_REGISTRY"
+      ],
+      "unrelatedSourcesRemainUsable": true,
+      "gates": [
+        {
+          "sourceId": "AFIR_CORPUS",
+          "availability": "STALE_LAST_KNOWN_GOOD",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
+          "affectedScopes": [
+            "AFIR_PS_PAC"
+          ],
+          "blockingReasons": [
+            "STALE_LAST_KNOWN_GOOD"
+          ],
+          "lastKnownGoodPreserved": true,
+          "blocksUnrelatedSources": false,
+          "publishMaterialFacts": false
+        },
+        {
+          "sourceId": "MIPE_CORPUS",
+          "availability": "UNAVAILABLE_LAST_KNOWN_GOOD",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
+          "affectedScopes": [
+            "MIPE_MANAGED_PROGRAMMES"
+          ],
+          "blockingReasons": [
+            "UNAVAILABLE_LAST_KNOWN_GOOD"
+          ],
+          "lastKnownGoodPreserved": true,
+          "blocksUnrelatedSources": false,
+          "publishMaterialFacts": false
+        },
+        {
+          "sourceId": "PEO_CALENDAR",
+          "availability": "AVAILABLE",
+          "materialFactGate": "PLANNING_ONLY",
+          "affectedScopes": [
+            "PEO_PLANNING_SIGNALS"
+          ],
+          "blockingReasons": [],
+          "lastKnownGoodPreserved": true,
+          "blocksUnrelatedSources": false,
+          "publishMaterialFacts": false
+        },
+        {
+          "sourceId": "SRC-ADRCENTRU-FUNDING-CATALOG",
+          "availability": "STALE_LAST_KNOWN_GOOD",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
+          "affectedScopes": [
+            "multiple"
+          ],
+          "blockingReasons": [
+            "STALE_LAST_KNOWN_GOOD"
+          ],
+          "lastKnownGoodPreserved": true,
+          "blocksUnrelatedSources": false,
+          "publishMaterialFacts": false
+        },
+        {
+          "sourceId": "SRC-ADRCENTRU-PTJ-CONSULT",
+          "availability": "STALE_LAST_KNOWN_GOOD",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
+          "affectedScopes": [
+            "PTJ",
+            "PDDTJ"
+          ],
+          "blockingReasons": [
+            "STALE_LAST_KNOWN_GOOD"
+          ],
+          "lastKnownGoodPreserved": true,
+          "blocksUnrelatedSources": false,
+          "publishMaterialFacts": false
+        },
+        {
+          "sourceId": "SRC-ADRVEST-PTJ-ACTIVE",
+          "availability": "STALE_LAST_KNOWN_GOOD",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
+          "affectedScopes": [
+            "PTJ",
+            "PDDTJ"
+          ],
+          "blockingReasons": [
+            "STALE_LAST_KNOWN_GOOD"
+          ],
+          "lastKnownGoodPreserved": true,
+          "blocksUnrelatedSources": false,
+          "publishMaterialFacts": false
+        },
+        {
+          "sourceId": "SRC-MAI-FED-CALENDAR-INDEX",
+          "availability": "STALE_LAST_KNOWN_GOOD",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
+          "affectedScopes": [
+            "FAMI",
+            "FSI",
+            "IMFV"
+          ],
+          "blockingReasons": [
+            "STALE_LAST_KNOWN_GOOD"
+          ],
+          "lastKnownGoodPreserved": true,
+          "blocksUnrelatedSources": false,
+          "publishMaterialFacts": false
+        },
+        {
+          "sourceId": "SRC-MAI-FED-CALLS",
+          "availability": "STALE_LAST_KNOWN_GOOD",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
+          "affectedScopes": [
+            "FAMI",
+            "FSI",
+            "IMFV"
+          ],
+          "blockingReasons": [
+            "STALE_LAST_KNOWN_GOOD"
+          ],
+          "lastKnownGoodPreserved": true,
+          "blocksUnrelatedSources": false,
+          "publishMaterialFacts": false
+        },
+        {
+          "sourceId": "SRC-MAI-FED-GENERAL-GUIDE",
+          "availability": "STALE_LAST_KNOWN_GOOD",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
+          "affectedScopes": [
+            "FAMI",
+            "FSI",
+            "IMFV"
+          ],
+          "blockingReasons": [
+            "STALE_LAST_KNOWN_GOOD"
+          ],
+          "lastKnownGoodPreserved": true,
+          "blocksUnrelatedSources": false,
+          "publishMaterialFacts": false
+        },
+        {
+          "sourceId": "SRC-MYSMIS-CALLS",
+          "availability": "STALE_LAST_KNOWN_GOOD",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
+          "affectedScopes": [
+            "2021-2027"
+          ],
+          "blockingReasons": [
+            "STALE_LAST_KNOWN_GOOD"
+          ],
+          "lastKnownGoodPreserved": true,
+          "blocksUnrelatedSources": false,
+          "publishMaterialFacts": false
+        },
+        {
+          "sourceId": "SRC-OI-RESEARCH-HEALTH",
+          "availability": "STALE_LAST_KNOWN_GOOD",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
+          "affectedScopes": [
+            "Programul Sanatate"
+          ],
+          "blockingReasons": [
+            "STALE_LAST_KNOWN_GOOD"
+          ],
+          "lastKnownGoodPreserved": false,
+          "blocksUnrelatedSources": false,
+          "publishMaterialFacts": false
+        },
+        {
+          "sourceId": "SRC-OI-RESEARCH-POCIDIF",
+          "availability": "STALE_LAST_KNOWN_GOOD",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
+          "affectedScopes": [
+            "PoCIDIF"
+          ],
+          "blockingReasons": [
+            "STALE_LAST_KNOWN_GOOD"
+          ],
+          "lastKnownGoodPreserved": false,
+          "blocksUnrelatedSources": false,
+          "publishMaterialFacts": false
+        },
+        {
+          "sourceId": "SRC-OIRBI-PEO",
+          "availability": "STALE_LAST_KNOWN_GOOD",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
+          "affectedScopes": [
+            "PEO"
+          ],
+          "blockingReasons": [
+            "STALE_LAST_KNOWN_GOOD"
+          ],
+          "lastKnownGoodPreserved": true,
+          "blocksUnrelatedSources": false,
+          "publishMaterialFacts": false
+        },
+        {
+          "sourceId": "SRC-OIRBI-PIDS",
+          "availability": "STALE_LAST_KNOWN_GOOD",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
+          "affectedScopes": [
+            "PoIDS"
+          ],
+          "blockingReasons": [
+            "STALE_LAST_KNOWN_GOOD"
+          ],
+          "lastKnownGoodPreserved": true,
+          "blocksUnrelatedSources": false,
+          "publishMaterialFacts": false
+        },
+        {
+          "sourceId": "SRC-OIRCENTRU-PEO",
+          "availability": "STALE_LAST_KNOWN_GOOD",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
+          "affectedScopes": [
+            "PEO"
+          ],
+          "blockingReasons": [
+            "STALE_LAST_KNOWN_GOOD"
+          ],
+          "lastKnownGoodPreserved": true,
+          "blocksUnrelatedSources": false,
+          "publishMaterialFacts": false
+        },
+        {
+          "sourceId": "SRC-OIRNE-PEO",
+          "availability": "STALE_LAST_KNOWN_GOOD",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
+          "affectedScopes": [
+            "PEO",
+            "PoIDS"
+          ],
+          "blockingReasons": [
+            "STALE_LAST_KNOWN_GOOD"
+          ],
+          "lastKnownGoodPreserved": true,
+          "blocksUnrelatedSources": false,
+          "publishMaterialFacts": false
+        },
+        {
+          "sourceId": "SRC-OIRVEST-PEO",
+          "availability": "STALE_LAST_KNOWN_GOOD",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
+          "affectedScopes": [
+            "PEO"
+          ],
+          "blockingReasons": [
+            "STALE_LAST_KNOWN_GOOD"
+          ],
+          "lastKnownGoodPreserved": true,
+          "blocksUnrelatedSources": false,
+          "publishMaterialFacts": false
+        },
+        {
+          "sourceId": "SRC-OIRVEST-PEO-GUIDES",
+          "availability": "STALE_LAST_KNOWN_GOOD",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
+          "affectedScopes": [
+            "PEO"
+          ],
+          "blockingReasons": [
+            "STALE_LAST_KNOWN_GOOD"
+          ],
+          "lastKnownGoodPreserved": true,
+          "blocksUnrelatedSources": false,
+          "publishMaterialFacts": false
+        },
+        {
+          "sourceId": "SRC-OIRVEST-PEO-MANUALS",
+          "availability": "STALE_LAST_KNOWN_GOOD",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
+          "affectedScopes": [
+            "PEO",
+            "PoIDS"
+          ],
+          "blockingReasons": [
+            "STALE_LAST_KNOWN_GOOD"
+          ],
+          "lastKnownGoodPreserved": true,
+          "blocksUnrelatedSources": false,
+          "publishMaterialFacts": false
+        },
+        {
+          "sourceId": "SRC-OLD-FONDURI-UE",
+          "availability": "STALE_LAST_KNOWN_GOOD",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
+          "affectedScopes": [
+            "legacy"
+          ],
+          "blockingReasons": [
+            "STALE_LAST_KNOWN_GOOD"
+          ],
+          "lastKnownGoodPreserved": false,
+          "blocksUnrelatedSources": false,
+          "publishMaterialFacts": false
+        },
+        {
+          "sourceId": "SRC-PREFECTURA-TM-FUNDING",
+          "availability": "STALE_LAST_KNOWN_GOOD",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
+          "affectedScopes": [
+            "multiple"
+          ],
+          "blockingReasons": [
+            "STALE_LAST_KNOWN_GOOD"
+          ],
+          "lastKnownGoodPreserved": true,
+          "blocksUnrelatedSources": false,
+          "publishMaterialFacts": false
+        },
+        {
+          "sourceId": "VERIFIED_SOURCE_REGISTRY",
+          "availability": "STALE_LAST_KNOWN_GOOD",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
+          "affectedScopes": [
+            "REGISTERED_SOURCE_DEPENDENCIES"
+          ],
+          "blockingReasons": [
+            "STALE_LAST_KNOWN_GOOD"
+          ],
+          "lastKnownGoodPreserved": true,
+          "blocksUnrelatedSources": false,
+          "publishMaterialFacts": false
+        }
+      ]
+    },
+    "replay": {
+      "status": "PASS",
+      "algorithm": "sha256-canonical-json",
+      "referenceTime": "2026-08-13T05:03:21Z",
+      "inputDigest": "2931fefb607886df34cdc1cd4da5c7491d93214bf0a351fa34eb40f1216315f4",
+      "outputDigest": "c4e7d90baeff6f0398e339160e4e1e421c10d561190318ddd9bbf34fce74ef72",
+      "firstPassDigest": "bc57a313befee1c1fbd748c2103f7fb2abaef0e7dbc186507e6397935b474680",
+      "secondPassDigest": "bc57a313befee1c1fbd748c2103f7fb2abaef0e7dbc186507e6397935b474680",
+      "byteEquivalent": true
+    }
+  },
+  "summary": {
+    "sourceCount": 22,
+    "corpusCount": 4,
+    "recordCount": 59,
+    "duplicatesRemoved": 2,
+    "recordTypes": {
+      "OFFICIAL_DOCUMENT": 4,
+      "OFFICIAL_PAGE": 27,
+      "PLANNED_CALL": 28
+    },
+    "programmes": {
+      "AFIR / PS PAC 2023-2027": 31,
+      "PEO": 28
+    },
+    "staleOrUnknownSources": [
+      "AFIR_CORPUS",
+      "MIPE_CORPUS",
+      "SRC-ADRCENTRU-FUNDING-CATALOG",
+      "SRC-ADRCENTRU-PTJ-CONSULT",
+      "SRC-ADRVEST-PTJ-ACTIVE",
+      "SRC-MAI-FED-CALENDAR-INDEX",
+      "SRC-MAI-FED-CALLS",
+      "SRC-MAI-FED-GENERAL-GUIDE",
+      "SRC-MYSMIS-CALLS",
+      "SRC-OI-RESEARCH-HEALTH",
+      "SRC-OI-RESEARCH-POCIDIF",
+      "SRC-OIRBI-PEO",
+      "SRC-OIRBI-PIDS",
+      "SRC-OIRCENTRU-PEO",
+      "SRC-OIRNE-PEO",
+      "SRC-OIRVEST-PEO",
+      "SRC-OIRVEST-PEO-GUIDES",
+      "SRC-OIRVEST-PEO-MANUALS",
+      "SRC-OLD-FONDURI-UE",
+      "SRC-PREFECTURA-TM-FUNDING",
+      "VERIFIED_SOURCE_REGISTRY"
+    ],
+    "unavailableT1Sources": [
+      "AFIR_CORPUS",
+      "MIPE_CORPUS",
+      "SRC-MAI-FED-CALENDAR-INDEX",
+      "SRC-MAI-FED-CALLS",
+      "SRC-MAI-FED-GENERAL-GUIDE",
+      "SRC-MYSMIS-CALLS"
+    ],
+    "resolutionTasksRequired": 0,
+    "materialFactsAutopromoted": 0
+  },
+  "contract": {
+    "status": "PASS",
+    "errors": []
+  }
+}

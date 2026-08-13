@@ -29,19 +29,32 @@ if 'id="boot-fallback"' not in index:
 if "Găsește finanțarea potrivită" not in index:
     errors.append("boot fallback has no meaningful visible content")
 
-# Critical path is deliberately tiny: canonical data then renderer. Every
+# Critical path is deliberately bounded: static data, the verified STEP record,
+# the generated P11 projection and its adapter, then the renderer. Every visual
 # enhancement must execute only after app.js has had a chance to paint.
 data_pos = index.find('src="data.js')
+step_pos = index.find('src="step-lll.js')
+p11_data_pos = index.find('src="p11-public-data.js')
+p11_adapter_pos = index.find('src="p11-public-adapter.js')
 app_pos = index.find('src="app.js')
-if data_pos < 0 or app_pos < 0 or data_pos > app_pos:
-    errors.append("critical boot order must be data.js then app.js")
+if min(data_pos, step_pos, p11_data_pos, p11_adapter_pos, app_pos) < 0 or not (
+    data_pos < step_pos < p11_data_pos < p11_adapter_pos < app_pos
+):
+    errors.append("critical boot order must be data, STEP, P11 projection, adapter, app")
 for script in [
-    "step-lll.js", "peo-calendar.js", "consultant-workspace-v2.js",
+    "peo-calendar.js", "consultant-workspace-v2.js",
     "news-v1-ui.js", "people-policy-v1.js", "mff-2028-2034.js"
 ]:
     pos = index.find(f'src="{script}')
     if pos >= 0 and pos < app_pos:
         errors.append(f"enhancement {script} gates app.js first paint")
+
+active_app = (WEB / "app.js").read_text(encoding="utf-8").casefold()
+for stale_public_label in ("pilot", "facts demo", "corpusul canonic demo", "apeluri deschise în pilot"):
+    if stale_public_label in active_app:
+        errors.append(f"development label remains in active public app: {stale_public_label}")
+if "apeluri deschise verificate" not in active_app:
+    errors.append("verified open-call metric is missing")
 
 # The quarantined copy-polish implementation must remain finite even while it
 # is disconnected from production.

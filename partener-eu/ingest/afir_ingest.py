@@ -11,8 +11,10 @@ import datetime as dt
 import hashlib
 import html
 import json
+import os
 import re
 import ssl
+import tempfile
 import urllib.parse
 import urllib.request
 import zipfile
@@ -179,8 +181,70 @@ def previous():
         return {"items": []}
 
 
+def atomic_json(path, value):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temporary = tempfile.mkstemp(prefix=path.name + ".", dir=path.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as stream:
+            json.dump(value, stream, ensure_ascii=False, indent=2)
+            stream.write("\n")
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+
+
+def build_payload(prior, observed_at, discovered_items, errors, access_dependencies=None):
+    access_dependencies = list(access_dependencies or [])
+    run_status = "PASS" if len(discovered_items) >= 3 else "DEGRADED" if discovered_items else "SOURCE_UNAVAILABLE"
+    last_run = {
+        "observedAt": observed_at,
+        "status": run_status,
+        "discoveredItemCount": len(discovered_items),
+        "errorCount": len(errors),
+    }
+    policy = {
+        "failClosed": True,
+        "materialFactsAutoPromoted": False,
+        "materialChanges": "resolution-task-only",
+        "authenticatedRoutes": "external-dependency-only-no-fabricated-access",
+        "sourceFailure": "preserve-last-known-good-and-block-dependent-facts-only",
+    }
+    if run_status != "PASS" and prior.get("items"):
+        payload = dict(prior)
+        payload.update({
+            "schemaVersion": 2,
+            "source": "AFIR",
+            "officialHosts": sorted(HOSTS),
+            "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
+            "lastRun": last_run,
+            "lastSuccessfulAt": prior.get("generatedAt") or prior.get("lastSuccessfulAt"),
+            "errors": errors[:30],
+            "accessDependencies": access_dependencies[:100],
+            "policy": policy,
+        })
+        return payload
+    return {
+        "schemaVersion": 2,
+        "source": "AFIR",
+        "officialHosts": sorted(HOSTS),
+        "generatedAt": observed_at,
+        "lastSuccessfulAt": observed_at if run_status == "PASS" else None,
+        "lastRun": last_run,
+        "status": run_status,
+        "seedCount": len(SEEDS),
+        "items": sorted(discovered_items, key=lambda x: x["url"]),
+        "errors": errors[:30],
+        "accessDependencies": access_dependencies[:100],
+        "policy": policy,
+    }
+
+
 def main():
-    old = {x.get("url"): x for x in previous().get("items", [])}
+    prior = previous()
+    old = {x.get("url"): x for x in prior.get("items", [])}
     queue = list(SEEDS)
     seen = set()
     items = []
@@ -258,38 +322,18 @@ def main():
             "materialFactAction": "RESOLUTION_TASK_ONLY" if material_signal else "NONE",
         })
 
-    status = "PASS" if len(items) >= 3 else "DEGRADED" if items else "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED"
-    payload = {
-        "schemaVersion": 2,
-        "source": "AFIR",
-        "officialHosts": sorted(HOSTS),
-        "generatedAt": now(),
-        "status": status,
-        "seedCount": len(SEEDS),
-        "items": sorted(items, key=lambda x: x["url"]),
-        "errors": errors[:30],
-        "accessDependencies": access_dependencies[:100],
-        "policy": {
-            "failClosed": True,
-            "materialFactsAutoPromoted": False,
-            "materialChanges": "resolution-task-only",
-            "authenticatedRoutes": "external-dependency-only-no-fabricated-access",
-        },
-    }
-    CORPUS.parent.mkdir(parents=True, exist_ok=True)
-    CORPUS.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    state = {
-        "source": "AFIR",
-        "checkedAt": payload["generatedAt"],
-        "status": status,
-        "itemCount": len(items),
-        "errorCount": len(errors),
-        "authDependencyCount": len(access_dependencies),
-        "changeCandidates": sum(1 for x in items if x["changedFromPrevious"]),
-        "materialResolutionCandidates": sum(1 for x in items if x["materialChangeCandidate"]),
-        "failClosed": True,
-    }
-    STATE.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    observed_at = now()
+    payload = build_payload(prior, observed_at, items, errors, access_dependencies)
+    atomic_json(CORPUS, payload)
+    state = {"source": "AFIR", "checkedAt": observed_at, "status": payload["status"],
+             "itemCount": len(payload["items"]), "discoveredItemCount": len(items), "errorCount": len(errors),
+             "authDependencyCount": len(access_dependencies),
+             "changeCandidates": sum(1 for x in items if x["changedFromPrevious"]),
+             "materialResolutionCandidates": sum(1 for x in items if x["materialChangeCandidate"]),
+             "lastSuccessfulAt": payload.get("lastSuccessfulAt") or payload.get("generatedAt"),
+             "lastKnownGoodPreserved": payload["status"] == "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
+             "failClosed": True}
+    atomic_json(STATE, state)
     print(json.dumps(state, ensure_ascii=False))
     return 0
 

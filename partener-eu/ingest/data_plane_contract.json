@@ -1,0 +1,179 @@
+{
+  "schemaVersion": "1.0",
+  "contractId": "PARTENER-EU-P10.1-DATA-PLANE",
+  "policy": {
+    "lastKnownGood": "PRESERVE_AND_BLOCK_DEPENDENT_FACTS_ONLY",
+    "materialFacts": "RECONCILIATION_REQUIRED_NO_AUTO_PROMOTION",
+    "replay": "SAME_INPUT_AND_REFERENCE_MUST_PRODUCE_IDENTICAL_CANONICAL_JSON",
+    "tierPrecedence": [
+      "T1",
+      "T1B",
+      "T2",
+      "T3"
+    ]
+  },
+  "corpora": {
+    "AFIR_CORPUS": {
+      "stateFile": "afir_corpus.json",
+      "tier": "T1",
+      "domains": [
+        "AGRICULTURE_RURAL"
+      ],
+      "programmes": [
+        "PS_PAC_2023_2027"
+      ],
+      "sourceFamilies": [
+        "AFIR"
+      ],
+      "freshnessSlaHours": 4,
+      "dependencyScopes": [
+        "AFIR_PS_PAC"
+      ],
+      "requiredRootFields": [
+        "schemaVersion",
+        "status",
+        "generatedAt",
+        "items",
+        "policy"
+      ],
+      "requiredItemFields": [
+        "url",
+        "title",
+        "sha256",
+        "materialChangeCandidate",
+        "materialFactAction"
+      ]
+    },
+    "PEO_CALENDAR": {
+      "stateFile": "peo_calendar_state.json",
+      "tier": "T1B",
+      "domains": [
+        "EMPLOYMENT_EDUCATION",
+        "PLANNING_CALENDAR"
+      ],
+      "programmes": [
+        "PEO"
+      ],
+      "sourceFamilies": [
+        "CALENDARS"
+      ],
+      "freshnessSlaHours": 8,
+      "dependencyScopes": [
+        "PEO_PLANNING_SIGNALS"
+      ],
+      "requiredRootFields": [
+        "status",
+        "lastRun",
+        "canonicalContainer",
+        "retrievalSource",
+        "items"
+      ],
+      "requiredItemFields": [
+        "id",
+        "programme",
+        "title",
+        "plannedLaunch",
+        "plannedClose",
+        "materialization"
+      ]
+    },
+    "MIPE_CORPUS": {
+      "stateFile": "mipe_state.json",
+      "tier": "T1",
+      "domains": [
+        "COHESION_CROSS_PROGRAMME"
+      ],
+      "programmes": [
+        "MIPE_MANAGED_PROGRAMMES"
+      ],
+      "sourceFamilies": [
+        "MIPE"
+      ],
+      "freshnessSlaHours": 4,
+      "dependencyScopes": [
+        "MIPE_MANAGED_PROGRAMMES"
+      ],
+      "requiredRootFields": [
+        "status",
+        "lastRun",
+        "items"
+      ],
+      "requiredItemFields": [
+        "title"
+      ]
+    },
+    "VERIFIED_SOURCE_REGISTRY": {
+      "stateFile": "source_registry_health.json",
+      "tier": "MIXED_T1_T1B_T2",
+      "domains": [
+        "MULTI_PROGRAMME_SOURCE_HEALTH"
+      ],
+      "programmes": [
+        "MULTIPLE"
+      ],
+      "sourceFamilies": [],
+      "freshnessSlaHours": 6,
+      "dependencyScopes": [
+        "REGISTERED_SOURCE_DEPENDENCIES"
+      ],
+      "requiredRootFields": [
+        "schema_version",
+        "observed_at",
+        "summary",
+        "sources"
+      ],
+      "requiredItemFields": [
+        "id",
+        "tier",
+        "health",
+        "semantic_hash_changed",
+        "resolution_task_required"
+      ]
+    }
+  },
+  "requiredSourceFamilies": [
+    "MIPE",
+    "MYSMIS",
+    "AFIR",
+    "OI_ADR",
+    "CALENDARS"
+  ],
+  "programmeDomains": {
+    "2021-2027": [
+      "COHESION_CROSS_PROGRAMME"
+    ],
+    "PEO": [
+      "EMPLOYMENT_EDUCATION"
+    ],
+    "PoIDS": [
+      "SOCIAL_INCLUSION"
+    ],
+    "PoCIDIF": [
+      "RESEARCH_DIGITAL"
+    ],
+    "Programul Sanatate": [
+      "HEALTH"
+    ],
+    "FAMI": [
+      "HOME_AFFAIRS"
+    ],
+    "FSI": [
+      "HOME_AFFAIRS"
+    ],
+    "IMFV": [
+      "HOME_AFFAIRS"
+    ],
+    "PTJ": [
+      "JUST_TRANSITION"
+    ],
+    "PDDTJ": [
+      "JUST_TRANSITION"
+    ],
+    "multiple": [
+      "MULTI_PROGRAMME_DISCOVERY"
+    ],
+    "legacy": [
+      "LEGACY"
+    ]
+  }
+}

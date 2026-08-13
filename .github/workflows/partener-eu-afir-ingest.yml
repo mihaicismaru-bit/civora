@@ -42,9 +42,10 @@ jobs:
           git reset --hard origin/main
           cp /tmp/afir_state.json partener-eu/ingest/state/afir_state.json
           cp /tmp/afir_corpus.json partener-eu/ingest/state/afir_corpus.json
+          python partener-eu/ingest/intelligence_index.py
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add partener-eu/ingest/state/afir_state.json partener-eu/ingest/state/afir_corpus.json
+          git add partener-eu/ingest/state/afir_state.json partener-eu/ingest/state/afir_corpus.json partener-eu/ingest/state/intelligence_index.json
           if git diff --cached --quiet; then
             echo 'No AFIR corpus/state changes.'
             exit 0

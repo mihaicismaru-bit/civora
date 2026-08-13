@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "phase": "P11_OPPORTUNITY_INTELLIGENCE_ENGINE",
+  "status": "PRODUCTION_PROJECTION_ACTIVE_CONTINUOUS_RESOLUTION",
+  "baseline": {
+    "validated_at": "2026-08-12",
+    "public_opportunity_count": 6,
+    "target_opportunity_count": 25,
+    "note": "Repository inspection found five calls at I01; a sixth public call landed concurrently before I03 and was normalized fail-closed. The earlier three-call baseline is superseded."
+  },
+  "increments": [
+    {
+      "id": "P11-I01",
+      "title": "Executable canonical contract and semantic publication gate",
+      "status": "COMPLETED",
+      "scope": ["Opportunity", "Evidence", "ChangeSet", "ResolutionTask"],
+      "non_overlap": ["No source ingestion", "No resolution execution", "No public corpus mutation"]
+    },
+    {
+      "id": "P11-I02",
+      "title": "Normalize the five existing public opportunities into the canonical bundle",
+      "status": "COMPLETED",
+      "result": {
+        "canonical_opportunities": 5,
+        "evidence_records": 5,
+        "open_resolution_tasks": 5,
+        "publishable_records": 0,
+        "public_mutations": 0
+      }
+    },
+    {
+      "id": "P11-I03",
+      "title": "Candidate staging ledger and deterministic identity/deduplication",
+      "status": "COMPLETED",
+      "result": {
+        "identity_keys": ["canonical source URL", "programme + code", "programme + title"],
+        "dispositions": ["CANONICAL_MATCH", "NEW_CANDIDATE", "AMBIGUOUS_REVIEW"],
+        "input_occurrences": 6,
+        "unique_candidates": 6,
+        "canonical_matches": 6,
+        "published": 0
+      }
+    },
+    {
+      "id": "P11-I04",
+      "title": "Expand validated corpus to 25 real opportunities in evidence-backed batches",
+      "status": "COMPLETED_TARGET_25",
+      "result": {
+        "canonical_opportunities": 25,
+        "admitted_in_batch_01": 5,
+        "admitted_in_batch_02": 5,
+        "admitted_in_batch_03": 5,
+        "admitted_in_batch_04": 4,
+        "remaining_to_target": 0,
+        "evidence_records": 25,
+        "open_resolution_tasks": 25,
+        "publishable_records": 0,
+        "public_mutations": 0,
+        "admission_policy": "Imported facts remain candidates backed by UNRESOLVED evidence and open ResolutionTasks"
+      }
+    },
+    {
+      "id": "P11-I05",
+      "title": "P11 acceptance, recovery, public projection and closure",
+      "status": "IN_PROGRESS",
+      "result": {
+        "canonical_opportunities": 26,
+        "evidence_records": 32,
+        "publishable_records": 1,
+        "public_projection": "FAIL_CLOSED",
+        "unified_quality_gate": "16/16 PASS"
+      },
+      "semantic_resolution_dependency": "Open ResolutionTasks must be resolved by the Opportunity Resolution workflow before P11 closure"
+    }
+  ],
+  "closure_criteria": {
+    "unique_real_opportunities": 25,
+    "all_material_facts_authoritatively_supported": true,
+    "automatic_material_fact_updates": 0,
+    "orphan_entities": 0,
+    "quality_gate": "PASS",
+    "public_projection_fail_closed": true
+  },
+  "closure_assessment": {
+    "numeric_target_met": true,
+    "all_material_facts_authoritatively_supported": false,
+    "overall_p11_closure_met": false,
+    "reason": "The corpus and public projection are operational; 25 unresolved or partially resolved records remain fail-closed behind ResolutionTasks"
+  },
+  "current_progress": {"canonical_opportunities": 26, "target": 25, "remaining": 0, "publishable": 1, "open_or_in_review_resolution_tasks": 25}
+}
