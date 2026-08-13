@@ -6,7 +6,7 @@ Actualizat: 13 august 2026
 
 - site public funcțional și monitorizat;
 - P10.1 Data Plane implementat: contract, acoperire, prospețime, replay și izolare pe sursă;
-- P11 integrat: 26 oportunități canonice, 33 dovezi, 26 taskuri de rezoluție;
+- P11 integrat: 26 oportunități canonice, 35 dovezi, 26 taskuri de rezoluție;
 - STEP-LLL și AFIR Energie 2026 sunt publicabile pe baza faptelor materiale demonstrate; restul câmpurilor rămân blocate când nu sunt demonstrate;
 - frontend conectat la P11: 4 apeluri OPEN cu statut și termen verificate, 26 oportunități monitorizate;
 - quality gate local: 16/16 PASS;

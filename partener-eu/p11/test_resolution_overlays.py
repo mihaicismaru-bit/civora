@@ -36,6 +36,10 @@ class ResolutionOverlayTests(unittest.TestCase):
         regional = next(row for row in merged["opportunities"] if row["opportunity_id"] == "pr-centru-digital-2")
         self.assertEqual(regional["status"], "DISCOVERED")
         self.assertEqual(regional["material_facts"], {})
+        self.assertEqual(regional["candidate_material_facts"]["deadline"]["planning_only"]["opens"], "November 2026")
+        regional_task = next(row for row in merged["resolution_tasks"] if row["resolution_task_id"] == "RT-PR-CENTRU-DIGITAL-2-MATERIAL")
+        self.assertEqual(regional_task["status"], "IN_REVIEW")
+        self.assertEqual(set(regional_task["blocked_fact_classes"]), {"status", "deadline", "budget", "grant", "eligibility", "scoring", "beneficiaries"})
 
     def test_replay_is_deterministic(self):
         base = mod.load(ROOT / "opportunity_bundle.json")
