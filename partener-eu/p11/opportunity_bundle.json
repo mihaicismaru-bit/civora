@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "bundle_id": "PARTENER-EU-P11-CANONICAL-0001",
-  "as_of": "2026-08-13T15:29:12Z",
+  "as_of": "2026-08-13T16:25:40Z",
   "source_snapshot": {
     "repository": "mihaicismaru-bit/civora",
     "public_data_path": "partener-eu/web/data.js",
@@ -818,6 +818,36 @@
       "semantic_verdict": "UNRESOLVED",
       "supports_fact_classes": [],
       "semantic_assertion": "The official OIR Vest notice dated 2026-07-16 states that comments on the Universități deschise guide were accepted through 2026-08-05 and links the MIPE guide page. The elapsed consultation-comment deadline is not a project-submission deadline and proves none of the seven publishable material fact classes.",
+      "temporal_role": "HISTORICAL_PUBLIC_CONSULTATION_NOTICE",
+      "retrieval_state": "OFFICIAL_OIR_PAGE_SEMANTICALLY_VERIFIED; MIPE_GUIDE_PAGE_CURRENTLY_BLOCKED_FOR_DIRECT_RETRIEVAL"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-PIDS-TRAFIC-PERSOANE-OIR-NV-CONSULTATION-20260813",
+      "source_tier": "T1B",
+      "source_owner": "Organismul Intermediar Regional pentru Programe Europene Capital Uman — Regiunea Nord-Vest",
+      "source_url": "https://www.runv.ro/anunturi.html",
+      "primary_attachment_url": "https://mfe.gov.ro/wp-content/uploads/2026/07/091b52ba866022b4defd0da428ad3e35.zip",
+      "observed_at": "2026-08-13T16:25:40Z",
+      "semantic_sha256": "557eebefcb91c9b6208ebab8b12bb46ec4c4cd292fdeb35237921cfd21e573cc",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "semantic_assertion": "The official OIR Nord-Vest announcement dated 2026-07-14 states that AM PoIDS launched the Servicii integrate pentru victimele traficului de persoane guide in public consultation, identifies competitive call P08, RSO4.3, ESO4.11 and Action 8.2, and links the MIPE consultation ZIP. It establishes consultation identity only; it does not establish a final guide, current submission window, OPEN status, budget, grant, cumulative eligibility, scoring or beneficiaries.",
+      "temporal_role": "HISTORICAL_PUBLIC_CONSULTATION_NOTICE",
+      "retrieval_state": "OFFICIAL_OIR_PAGE_SEMANTICALLY_VERIFIED; LINKED_MIPE_ZIP_HTTP_403_WAF_NOT_HASH_PINNED"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-PIDS-TRAFIC-PERSOANE-OIR-VEST-CONSULTATION-20260813",
+      "source_tier": "T1B",
+      "source_owner": "Organismul Intermediar Regional pentru Programe Europene Capital Uman — Regiunea Vest",
+      "source_url": "https://oirvest.ro/poids-lansare-ghiduri-in-consultare-publica-in-data-de-13-07-2026/",
+      "official_mipe_guide_url": "https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-servicii-integrate-pentru-victimele-traficului-de-persoane/",
+      "observed_at": "2026-08-13T16:25:40Z",
+      "semantic_sha256": "83769d3fca7172edadbf3a1f8d1f1991e3784221a107769488bab87e25270c56",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "semantic_assertion": "The official OIR Vest notice dated 2026-07-13 states that the Servicii integrate pentru victimele traficului de persoane guide was launched in public consultation, identifies it as a competitive P08 call, accepts comments through 2026-08-03 and links the MIPE guide page. The elapsed consultation-comment deadline is not a project-submission deadline and proves none of the seven publishable material fact classes.",
       "temporal_role": "HISTORICAL_PUBLIC_CONSULTATION_NOTICE",
       "retrieval_state": "OFFICIAL_OIR_PAGE_SEMANTICALLY_VERIFIED; MIPE_GUIDE_PAGE_CURRENTLY_BLOCKED_FOR_DIRECT_RETRIEVAL"
     }
@@ -1771,18 +1801,41 @@
       "publication_state": "REVIEW_REQUIRED",
       "automatic_material_fact_update_allowed": false,
       "evidence_refs": [
-        "EV-IMPORT-PIDS-TRAFIC-PERSOANE"
+        "EV-IMPORT-PIDS-TRAFIC-PERSOANE",
+        "EV-PIDS-TRAFIC-PERSOANE-OIR-NV-CONSULTATION-20260813",
+        "EV-PIDS-TRAFIC-PERSOANE-OIR-VEST-CONSULTATION-20260813"
       ],
       "material_facts": {},
       "fact_evidence": {},
       "candidate_material_facts": {
-        "status": "EXPECTED",
-        "deadline": "Consultare 13 iulie – 3 august 2026; lansare neconfirmată",
-        "budget": "Necunoscut până la verificarea ghidului",
-        "grant": "Necunoscut până la verificarea ghidului",
-        "eligibility": "Condiții importate din corpus; necesită verificare semantică",
-        "scoring": "Conform grilei oficiale; neextras",
-        "beneficiaries": "Entități eligibile conform ghidului"
+        "status": {
+          "value": "UNKNOWN",
+          "reason": "The official notices establish public consultation only; no final launch, explicit current submission state or cancellation was verified."
+        },
+        "deadline": {
+          "value": "UNKNOWN",
+          "reason": "2026-08-03 is the consultation-comment deadline, not a project-submission deadline."
+        },
+        "budget": {
+          "value": "UNKNOWN",
+          "reason": "The final guide package could not be retrieved, hash-pinned and semantically reviewed."
+        },
+        "grant": {
+          "value": "UNKNOWN",
+          "reason": "No authoritative final project-level grant, value limits or co-financing rules were verified."
+        },
+        "eligibility": {
+          "value": "UNKNOWN",
+          "reason": "The cumulative final applicant, partner, activity and exclusion rules were not verified from an accessible final package."
+        },
+        "scoring": {
+          "value": "UNKNOWN",
+          "reason": "No final evaluation grid, thresholds or tie-breakers were retrieved and hash-pinned."
+        },
+        "beneficiaries": {
+          "value": "UNKNOWN",
+          "reason": "The consultation title and summaries do not establish the complete final applicant, partner and target-group rules."
+        }
       }
     },
     {
@@ -2662,7 +2715,7 @@
       "schema_version": "1.0",
       "resolution_task_id": "RT-PIDS-TRAFIC-PERSOANE-MATERIAL",
       "opportunity_id": "pids-trafic-persoane",
-      "status": "OPEN",
+      "status": "IN_REVIEW",
       "automatic_material_fact_update_allowed": false,
       "blocked_fact_classes": [
         "status",
@@ -2672,7 +2725,12 @@
         "eligibility",
         "scoring",
         "beneficiaries"
-      ]
+      ],
+      "resolution_evidence_refs": [
+        "EV-PIDS-TRAFIC-PERSOANE-OIR-NV-CONSULTATION-20260813",
+        "EV-PIDS-TRAFIC-PERSOANE-OIR-VEST-CONSULTATION-20260813"
+      ],
+      "resolution_note": "All seven classes remain UNKNOWN. Re-review only when MIPE publishes an accessible hash-pinnable final Servicii integrate pentru victimele traficului de persoane package plus an explicit MySMIS submission window, an authoritative final launch notice, or a cancellation notice."
     },
     {
       "schema_version": "1.0",
@@ -2925,6 +2983,7 @@
       "RES-PEO-STEP-VET-20260813",
       "RES-PEO-UNIVERSITATI-DESCHISE-20260813",
       "RES-PIDS-SUPPORTED-DECISION-20260813",
+      "RES-PIDS-TRAFIC-PERSOANE-20260813",
       "RES-PR-CENTRU-CLUSTERS-122-20260813",
       "RES-PR-CENTRU-DIGITAL2-20260812",
       "RES-PR-CENTRU-DIGITAL2-20260813-V2",
