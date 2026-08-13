@@ -13,6 +13,7 @@ import tempfile
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 BUNDLE = ROOT / "p11" / "opportunity_bundle.json"
 OUTPUT = ROOT / "web" / "p11-public-data.js"
+ACTIVE_RESOLUTION_STATES = {"OPEN", "IN_REVIEW"}
 
 
 def atomic_text(path: pathlib.Path, value: str) -> None:
@@ -59,8 +60,42 @@ def assert_artifact_current(path: pathlib.Path, expected: str) -> None:
         )
 
 
+def publication_decision(opportunity: dict, verified_fact_classes: list[str], tasks: list[dict]) -> dict:
+    active_tasks = [task for task in tasks if task.get("status") in ACTIVE_RESOLUTION_STATES]
+    material_fact_classes = set((opportunity.get("material_facts") or {}).keys())
+    unverified_fact_classes = material_fact_classes - set(verified_fact_classes)
+    blocked_fact_classes = set(unverified_fact_classes)
+    for task in active_tasks:
+        blocked_fact_classes.update(task.get("blocked_fact_classes") or [])
+
+    state = opportunity.get("publication_state")
+    allowed = state == "PUBLISHABLE" and not active_tasks and not unverified_fact_classes
+    if allowed:
+        reason_codes = ["PUBLICATION_STATE_PUBLISHABLE", "VERIFIED_FACTS_ONLY"]
+    else:
+        reason_codes = []
+        if state != "PUBLISHABLE":
+            reason_codes.append(f"PUBLICATION_STATE_{state or 'MISSING'}")
+        if active_tasks:
+            reason_codes.append("ACTIVE_RESOLUTION_TASK")
+        if unverified_fact_classes:
+            reason_codes.append("UNVERIFIED_MATERIAL_FACTS")
+        if not reason_codes:
+            reason_codes.append("FAIL_CLOSED_DEFAULT")
+
+    return {
+        "decision": "ALLOW_VERIFIED_FACTS" if allowed else "BLOCK_MATERIAL_FACTS",
+        "reasonCodes": reason_codes,
+        "blockedFactClasses": sorted(blocked_fact_classes),
+        "activeResolutionTaskCount": len(active_tasks),
+    }
+
+
 def build(bundle: dict) -> dict:
     evidence = {row["evidence_id"]: row for row in bundle["evidence"]}
+    tasks_by_opportunity: dict[str, list[dict]] = {}
+    for task in bundle.get("resolution_tasks") or []:
+        tasks_by_opportunity.setdefault(task["opportunity_id"], []).append(task)
     projected = []
     for opportunity in bundle["opportunities"]:
         fact_evidence = opportunity.get("fact_evidence") or {}
@@ -73,6 +108,11 @@ def build(bundle: dict) -> dict:
                 for ref in refs
             )
         )
+        decision = publication_decision(
+            opportunity,
+            verified_fact_classes,
+            tasks_by_opportunity.get(opportunity["opportunity_id"], []),
+        )
         projected.append({
             "id": opportunity["opportunity_id"],
             "title": opportunity["title"],
@@ -80,16 +120,22 @@ def build(bundle: dict) -> dict:
             "code": opportunity.get("code"),
             "status": opportunity["status"],
             "publicationState": opportunity["publication_state"],
-            "materialFacts": opportunity.get("material_facts") or {},
+            "materialFacts": (
+                opportunity.get("material_facts") or {}
+                if decision["decision"] == "ALLOW_VERIFIED_FACTS"
+                else {}
+            ),
             "verifiedFactClasses": verified_fact_classes,
             "evidenceCount": len(opportunity.get("evidence_refs") or []),
+            "publicationDecision": decision,
         })
     return {
-        "schemaVersion": 1,
+        "schemaVersion": 2,
         "asOf": bundle.get("as_of"),
         "policy": {
             "unverifiedMaterialFactsVisible": False,
             "automaticPublication": False,
+            "decisionReasonsVisible": True,
         },
         "summary": {
             "opportunityCount": len(projected),
