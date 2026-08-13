@@ -1,6 +1,6 @@
 # PARTENER.EU — roadmap de producție
 
-Actualizat: 13 august 2026
+Actualizat: 14 august 2026
 
 ## Stare curentă
 
@@ -27,10 +27,10 @@ Actualizat: 13 august 2026
 
 ## Ultimul increment validat
 
-- P11-R02 — validare post-merge a stării rezultate în `main`;
-- workflow-ul P11 rulează la PR, la orice schimbare P11 integrată în `main` și manual;
-- schimbările directe ale porții unificate `ops/quality_gate.py` intră explicit în trigger;
-- un test de contract împiedică eliminarea accidentală a replay-urilor fail-closed sau a triggerului post-merge;
+- P11-R03 — decizii explicabile și apărare fail-closed în proiecția publică;
+- fiecare oportunitate expune determinist `ALLOW_VERIFIED_FACTS` sau `BLOCK_MATERIAL_FACTS`, împreună cu motivele și clasele de fapte blocate;
+- orice task de rezoluție activ blochează faptele materiale chiar dacă starea canonică ar fi inconsistentă;
+- orice fapt material fără evidență semantică T1/T1B verificată este eliminat la proiecție;
 - corpusul rămâne la 26 oportunități, șase publicabile și 20 taskuri deschise sau în review.
 
 ## Reguli de închidere

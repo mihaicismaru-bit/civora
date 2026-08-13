@@ -18,9 +18,17 @@ def main() -> None:
     step = next(row for row in projection["opportunities"] if row["id"] == "PEO-STEP-LLL-ADULTI-2026")
     assert step["status"] == "OPEN"
     assert {"status", "deadline"} <= set(step["verifiedFactClasses"])
+    assert step["publicationDecision"] == {
+        "decision": "ALLOW_VERIFIED_FACTS",
+        "reasonCodes": ["PUBLICATION_STATE_PUBLISHABLE", "VERIFIED_FACTS_ONLY"],
+        "blockedFactClasses": [],
+        "activeResolutionTaskCount": 0,
+    }
     regional = next(row for row in projection["opportunities"] if row["id"] == "pr-centru-digital-2")
     assert regional["status"] == "DISCOVERED"
     assert regional["materialFacts"] == {}
+    assert regional["publicationDecision"]["decision"] == "BLOCK_MATERIAL_FACTS"
+    assert "ACTIVE_RESOLUTION_TASK" in regional["publicationDecision"]["reasonCodes"]
     north_east = next(
         row for row in projection["opportunities"]
         if row["id"] == "pr-ne-energy-residential-towns-2026"
@@ -58,6 +66,10 @@ def main() -> None:
     assert step_edu["publicationState"] == "QUARANTINED"
     assert step_edu["materialFacts"] == {}
     assert step_edu["verifiedFactClasses"] == []
+    assert step_edu["publicationDecision"]["decision"] == "BLOCK_MATERIAL_FACTS"
+    assert "PUBLICATION_STATE_QUARANTINED" in step_edu["publicationDecision"]["reasonCodes"]
+    assert projection["schemaVersion"] == 2
+    assert projection["policy"]["decisionReasonsVisible"] is True
     print("PASS P11 public projection")
 
 
