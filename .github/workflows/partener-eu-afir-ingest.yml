@@ -35,20 +35,27 @@ jobs:
       - name: Persist AFIR corpus and health state conflict-safe
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
           cp partener-eu/ingest/state/afir_state.json /tmp/afir_state.json
           cp partener-eu/ingest/state/afir_corpus.json /tmp/afir_corpus.json
-          git fetch origin main
-          git reset --hard origin/main
-          cp /tmp/afir_state.json partener-eu/ingest/state/afir_state.json
-          cp /tmp/afir_corpus.json partener-eu/ingest/state/afir_corpus.json
-          python partener-eu/ingest/intelligence_index.py
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add partener-eu/ingest/state/afir_state.json partener-eu/ingest/state/afir_corpus.json partener-eu/ingest/state/intelligence_index.json
-          if git diff --cached --quiet; then
-            echo 'No AFIR corpus/state changes.'
-            exit 0
-          fi
-          git commit -m 'Validate official AFIR corpus'
-          git push origin HEAD:main
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/afir_state.json partener-eu/ingest/state/afir_state.json
+            cp /tmp/afir_corpus.json partener-eu/ingest/state/afir_corpus.json
+            python partener-eu/ingest/intelligence_index.py
+            git add partener-eu/ingest/state/afir_state.json partener-eu/ingest/state/afir_corpus.json partener-eu/ingest/state/intelligence_index.json
+            if git diff --cached --quiet; then
+              echo 'No AFIR corpus/state changes.'
+              exit 0
+            fi
+            git commit -m 'Validate official AFIR corpus'
+            if git push origin HEAD:main; then exit 0; fi
+            echo "main advanced during AFIR persistence; retrying ${attempt}/5."
+            sleep $((attempt * 2))
+          done
+          echo 'Unable to persist AFIR outputs after five attempts.' >&2
+          exit 1

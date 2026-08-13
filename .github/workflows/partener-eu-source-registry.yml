@@ -55,25 +55,32 @@ jobs:
       - name: Persist source health ledger and resolution tasks conflict-safe
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
           cp partener-eu/ingest/state/source_registry_health.json /tmp/source_registry_health.json
           rm -rf /tmp/source-resolution-tasks
           mkdir -p /tmp/source-resolution-tasks
           if [ -d partener-eu/validation/resolution-tasks ]; then
             cp -a partener-eu/validation/resolution-tasks/. /tmp/source-resolution-tasks/
           fi
-          git fetch origin main
-          git reset --hard origin/main
-          cp /tmp/source_registry_health.json partener-eu/ingest/state/source_registry_health.json
-          mkdir -p partener-eu/validation/resolution-tasks
-          cp -a /tmp/source-resolution-tasks/. partener-eu/validation/resolution-tasks/ || true
-          python partener-eu/ingest/intelligence_index.py
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add partener-eu/ingest/state/source_registry_health.json partener-eu/ingest/state/intelligence_index.json partener-eu/validation/resolution-tasks
-          if git diff --cached --quiet; then
-            echo 'No source-registry health or resolution-task changes.'
-            exit 0
-          fi
-          git commit -m 'Persist verified source registry health and resolution tasks'
-          git push origin HEAD:main
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/source_registry_health.json partener-eu/ingest/state/source_registry_health.json
+            mkdir -p partener-eu/validation/resolution-tasks
+            cp -a /tmp/source-resolution-tasks/. partener-eu/validation/resolution-tasks/ || true
+            python partener-eu/ingest/intelligence_index.py
+            git add partener-eu/ingest/state/source_registry_health.json partener-eu/ingest/state/intelligence_index.json partener-eu/validation/resolution-tasks
+            if git diff --cached --quiet; then
+              echo 'No source-registry health or resolution-task changes.'
+              exit 0
+            fi
+            git commit -m 'Persist verified source registry health and resolution tasks'
+            if git push origin HEAD:main; then exit 0; fi
+            echo "main advanced during source-registry persistence; retrying ${attempt}/5."
+            sleep $((attempt * 2))
+          done
+          echo 'Unable to persist source-registry outputs after five attempts.' >&2
+          exit 1
