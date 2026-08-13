@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "bundle_id": "PARTENER-EU-P11-CANONICAL-0001",
-  "as_of": "2026-08-13T11:26:15Z",
+  "as_of": "2026-08-13T12:28:02Z",
   "source_snapshot": {
     "repository": "mihaicismaru-bit/civora",
     "public_data_path": "partener-eu/web/data.js",
@@ -677,6 +677,48 @@
       "semantic_assertion": "The hash-pinned consolidated package consistently identifies STEP-LLL under Action 11.g.1. It contradicts every candidate class attached to STEP-EDU: identity/status and dates, EUR 92,000,000 rather than EUR 120,000,000, 100% grant, cumulative applicant and partner rules where universities are partners rather than the sole applicant class, and a 100-point grid with a 70-point quality threshold. These facts cannot be copied to the unresolved candidate alias.",
       "temporal_role": "CURRENT_CONSOLIDATED_FINAL_PACKAGE_FOR_COLLIDING_CANONICAL_IDENTITY",
       "retrieval_state": "PRIMARY_ATTACHMENT_HASH_VERIFIED_AND_SEMANTICALLY_REVIEWED"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-PR-CENTRU-PARCURI-RIS-CURRENT-PAGE-20260813",
+      "source_tier": "T1",
+      "source_owner": "ADR Centru — AM Programul Regiunea Centru",
+      "source_url": "https://www.regiocentru.ro/actiuni/1-5-2-parcuri-industriale-in-domenii-ris/",
+      "observed_at": "2026-08-13T12:28:02Z",
+      "semantic_sha256": "397790a7c2acb9e1c485211de025ec6ed128541c2163600b82bf96cb5239dfaa",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "semantic_assertion": "The current official action page identifies MySMIS call PRC/1058/PRC_P1/OP1/RSO1.3/PRC_A37, labels it active, states a 2026-07-20 10:00 through 2026-10-20 10:00 submission window and EUR 10,855,626 budget, and lists the final guide, annexes and approval decision. Its deadline conflicts with the official opening notice.",
+      "temporal_role": "CURRENT_OFFICIAL_ACTION_PAGE_WITH_CONFLICTING_DEADLINE",
+      "retrieval_state": "OFFICIAL_PAGE_INDEXED_SEMANTICS_VERIFIED; DIRECT_ATTACHMENT_FETCH_BLOCKED_BY_ACTIVE_ANTI_BOT_CHALLENGE"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-PR-CENTRU-PARCURI-RIS-OPENING-NOTICE-20260722",
+      "source_tier": "T1",
+      "source_owner": "ADR Centru — AM Programul Regiunea Centru",
+      "source_url": "https://www.regiocentru.ro/deschidere-depunere-cereri-de-finantare-pentru-parcuri-industriale-prin-programul-regiunea-centru-2021-2027/",
+      "observed_at": "2026-08-13T12:28:02Z",
+      "semantic_sha256": "00e3a75d35b5a7d505aa1d0ec6b35d129176cd5418c0bc06b6a81e3a5a01e2c0",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "semantic_assertion": "The official opening notice published on 2026-07-22 says applicants can submit to the competitive call from 2026-07-20 through 2026-10-02 10:00. This conflicts with the 2026-10-20 deadline on the current official action page.",
+      "temporal_role": "OFFICIAL_OPENING_NOTICE_WITH_CONFLICTING_DEADLINE",
+      "retrieval_state": "OFFICIAL_PAGE_INDEXED_SEMANTICS_VERIFIED; DIRECT_FETCH_BLOCKED_BY_ACTIVE_ANTI_BOT_CHALLENGE"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-PR-CENTRU-PARCURI-RIS-LAUNCH-NOTICE-20260618",
+      "source_tier": "T1",
+      "source_owner": "ADR Centru — AM Programul Regiunea Centru",
+      "source_url": "https://www.regiocentru.ro/lansare-apel-de-finantare-pentru-parcuri-industriale-in-domenii-ris-programul-regiunea-centru-2021-2027/",
+      "observed_at": "2026-08-13T12:28:02Z",
+      "semantic_sha256": "26e7f6132717cdc719533f35b8b7dcf1712d307612d956f1e77e9b56d211ee51",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "semantic_assertion": "The official launch notice gives EUR 10,855,626 total allocation, split into EUR 9,227,282 ERDF and EUR 1,628,344 state budget, and identifies individual industrial-park administrators or partnerships between the administrator and founder(s) as eligible applicants. The unavailable final guide package prevents cumulative eligibility, grant and scoring verification.",
+      "temporal_role": "OFFICIAL_LAUNCH_NOTICE_WITH_PARTIAL_MATERIAL_FACTS",
+      "retrieval_state": "DIRECT_OFFICIAL_PAGE_SEMANTICALLY_VERIFIED"
     }
   ],
   "opportunities": [
@@ -1353,26 +1395,50 @@
       "opportunity_id": "pr-centru-parcuri-ris",
       "title": "Parcuri industriale în domenii RIS",
       "programme": "Programul Regiunea Centru",
-      "code": "1.5.2",
+      "code": "1.5.2 / PRC/1058/PRC_P1/OP1/RSO1.3/PRC_A37",
       "status": "DISCOVERED",
       "publication_state": "REVIEW_REQUIRED",
       "automatic_material_fact_update_allowed": false,
       "evidence_refs": [
-        "EV-IMPORT-PR-CENTRU-PARCURI-RIS"
+        "EV-IMPORT-PR-CENTRU-PARCURI-RIS",
+        "EV-PR-CENTRU-PARCURI-RIS-CURRENT-PAGE-20260813",
+        "EV-PR-CENTRU-PARCURI-RIS-OPENING-NOTICE-20260722",
+        "EV-PR-CENTRU-PARCURI-RIS-LAUNCH-NOTICE-20260618"
       ],
       "material_facts": {},
       "fact_evidence": {},
       "candidate_material_facts": {
-        "status": "OPEN",
-        "deadline": {
-          "opens": "20 iulie 2026, 10:00",
-          "closes": "20 octombrie 2026, 10:00"
+        "status": {
+          "value": "UNKNOWN",
+          "reason": "The official pages indicate active submission, but P11 cannot publish OPEN while the controlling deadline is contradictory and lacks a verified final package."
         },
-        "budget": "10,856 mil. EUR",
-        "grant": "Conform ghidului",
-        "eligibility": "Condiții importate din corpus; necesită verificare semantică",
-        "scoring": "Conform ghidului",
-        "beneficiaries": "Entități eligibile conform ghidului"
+        "deadline": {
+          "value": "UNKNOWN_CONFLICTING_OFFICIAL_DEADLINES",
+          "official_candidates": [
+            "2026-10-20T10:00:00+03:00",
+            "2026-10-02T10:00:00+03:00"
+          ]
+        },
+        "budget": {
+          "value": "UNKNOWN_UNTIL_FINAL_PACKAGE_VERIFIED",
+          "official_page_candidate_eur": 10855626
+        },
+        "grant": {
+          "value": "UNKNOWN",
+          "reason": "The official launch notice establishes non-reimbursable public funding but not the complete project-level grant and intensity rules."
+        },
+        "eligibility": {
+          "value": "UNKNOWN",
+          "reason": "Applicant categories are stated, but the cumulative final-guide eligibility rules and exceptions could not be verified from the protected attachments."
+        },
+        "scoring": {
+          "value": "UNKNOWN",
+          "reason": "The final evaluation grid and thresholds could not be retrieved and hash-pinned."
+        },
+        "beneficiaries": {
+          "value": "UNKNOWN_UNTIL_FINAL_PACKAGE_VERIFIED",
+          "official_page_candidate": "Industrial-park administrators, individually or in partnership with park founder(s)"
+        }
       }
     },
     {
@@ -2201,7 +2267,7 @@
       "schema_version": "1.0",
       "resolution_task_id": "RT-PR-CENTRU-PARCURI-RIS-MATERIAL",
       "opportunity_id": "pr-centru-parcuri-ris",
-      "status": "OPEN",
+      "status": "IN_REVIEW",
       "automatic_material_fact_update_allowed": false,
       "blocked_fact_classes": [
         "status",
@@ -2211,7 +2277,13 @@
         "eligibility",
         "scoring",
         "beneficiaries"
-      ]
+      ],
+      "resolution_evidence_refs": [
+        "EV-PR-CENTRU-PARCURI-RIS-CURRENT-PAGE-20260813",
+        "EV-PR-CENTRU-PARCURI-RIS-OPENING-NOTICE-20260722",
+        "EV-PR-CENTRU-PARCURI-RIS-LAUNCH-NOTICE-20260618"
+      ],
+      "resolution_note": "The current action page says 2026-10-20 while the official opening notice says 2026-10-02. Keep all material facts UNKNOWN and the task IN_REVIEW until the final guide/annex package is retrieved and hash-verified or ADR Centru explicitly corrects the deadline."
     },
     {
       "schema_version": "1.0",
@@ -2529,6 +2601,7 @@
       "RES-PR-CENTRU-CLUSTERS-122-20260813",
       "RES-PR-CENTRU-DIGITAL2-20260812",
       "RES-PR-CENTRU-DIGITAL2-20260813-V2",
+      "RES-PR-CENTRU-PARCURI-RIS-20260813",
       "RES-PR-NE-ENERGY-RESIDENTIAL-TOWNS-20260813",
       "RES-PEO-STEP-LLL-20260812"
     ]

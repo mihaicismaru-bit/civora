@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "updated_at": "2026-08-13T11:26:15Z",
+  "updated_at": "2026-08-13T12:28:02Z",
   "policy": "Resolve only material fact classes demonstrated by current T1/T1B semantic evidence; omit all other material facts.",
   "cases": [
     {
@@ -120,6 +120,23 @@
       ],
       "contradiction": "The candidate STEP-EDU record uses P11/ESO4.7/11.g.1, but current MIPE evidence maps that identity to the separately canonicalized STEP-LLL call. Candidate dates, EUR 120 million budget and university-only applicant scope conflict with the consolidated STEP-LLL guide; no distinct final STEP-EDU guide exists in the consulted official sources.",
       "next_review_trigger": "A distinct official STEP-EDU page/final guide with an unambiguous call identifier, or authoritative identity evidence permitting formal reject/merge without duplicating STEP-LLL"
+    },
+    {
+      "priority": 8,
+      "opportunity_id": "pr-centru-parcuri-ris",
+      "resolution_file": "resolutions/pr_centru_parcuri_ris_resolution.json",
+      "state": "IN_REVIEW_CONFLICTING_OFFICIAL_SUBMISSION_DEADLINES",
+      "unresolved_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ],
+      "contradiction": "The current official action page states 20 October 2026 at 10:00, while the official opening notice published on 22 July states 2 October 2026 at 10:00. The final guide package is listed but its attachments are presently protected by an anti-bot challenge and could not be hash-pinned.",
+      "next_review_trigger": "Direct retrieval of the final guide and annex package, an explicit ADR Centru deadline correction, corrigendum, suspension, closure or cancellation notice"
     }
   ]
 }
