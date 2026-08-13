@@ -32,12 +32,15 @@ class ProjectionExplainabilityTests(unittest.TestCase):
         }
 
     def build(self, opportunity=None, tasks=None, evidence=None):
+        return self.build_projection(opportunity, tasks, evidence)["opportunities"][0]
+
+    def build_projection(self, opportunity=None, tasks=None, evidence=None):
         return projection.build({
             "as_of": "2026-08-14T00:00:00Z",
             "opportunities": [opportunity or self.opportunity],
             "evidence": [evidence or self.evidence],
             "resolution_tasks": tasks or [],
-        })["opportunities"][0]
+        })
 
     def test_verified_publishable_facts_are_allowed_with_reasons(self):
         row = self.build()
@@ -68,6 +71,46 @@ class ProjectionExplainabilityTests(unittest.TestCase):
         self.assertEqual(row["publicationDecision"]["decision"], "BLOCK_MATERIAL_FACTS")
         self.assertIn("UNVERIFIED_MATERIAL_FACTS", row["publicationDecision"]["reasonCodes"])
         self.assertEqual(row["publicationDecision"]["blockedFactClasses"], ["budget"])
+
+    def test_summary_counts_effective_decisions_not_declared_state(self):
+        task = {
+            "opportunity_id": "test-call",
+            "status": "OPEN",
+            "blocked_fact_classes": ["status"],
+        }
+        result = self.build_projection(tasks=[task])
+        self.assertEqual(result["summary"]["publishableCount"], 0)
+        self.assertEqual(result["summary"]["reviewCount"], 1)
+        self.assertEqual(result["summary"]["decisionCounts"], {
+            "ALLOW_VERIFIED_FACTS": 0,
+            "BLOCK_MATERIAL_FACTS": 1,
+        })
+
+    def test_blocked_record_cannot_inflate_open_verified_count(self):
+        opportunity = copy.deepcopy(self.opportunity)
+        opportunity["material_facts"]["deadline"] = {"closes_at": "2026-08-31T12:00:00+03:00"}
+        opportunity["fact_evidence"]["deadline"] = ["EV-1"]
+        evidence = copy.deepcopy(self.evidence)
+        evidence["supports_fact_classes"] = ["status", "deadline"]
+        task = {
+            "opportunity_id": "test-call",
+            "status": "IN_REVIEW",
+            "blocked_fact_classes": ["deadline"],
+        }
+        result = self.build_projection(opportunity, [task], evidence)
+        self.assertEqual(result["summary"]["openVerifiedCount"], 0)
+
+    def test_block_reason_counts_are_deterministic_and_block_only(self):
+        task = {
+            "opportunity_id": "test-call",
+            "status": "IN_REVIEW",
+            "blocked_fact_classes": ["status"],
+        }
+        result = self.build_projection(tasks=[task])
+        self.assertEqual(result["summary"]["blockReasonCounts"], {
+            "ACTIVE_RESOLUTION_TASK": 1,
+        })
+        self.assertTrue(result["policy"]["summaryDerivedFromEffectiveDecisions"])
 
 
 if __name__ == "__main__":
