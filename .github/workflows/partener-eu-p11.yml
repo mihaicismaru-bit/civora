@@ -1,15 +1,22 @@
 name: PARTENER.EU P11 Quality Gate
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'partener-eu/p11/**'
+      - 'partener-eu/ops/quality_gate.py'
+      - '.github/workflows/partener-eu-p11.yml'
   pull_request:
     branches: [main]
     paths:
       - 'partener-eu/p11/**'
+      - 'partener-eu/ops/quality_gate.py'
       - '.github/workflows/partener-eu-p11.yml'
   workflow_dispatch:
 
 concurrency:
-  group: partener-eu-p11-${{ github.ref }}
+  group: partener-eu-p11-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:

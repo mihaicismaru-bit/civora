@@ -48,6 +48,18 @@
         "artifact_drift_scope": ["resolution overlays", "public projection"]
       },
       "semantic_resolution_dependency": "Open ResolutionTasks must be resolved by the Opportunity Resolution workflow before P11 closure"
+    },
+    {
+      "id": "P11-R02",
+      "title": "Post-merge validation and quality-gate trigger coverage",
+      "status": "COMPLETED",
+      "result": {
+        "trigger_scope": ["pull_request", "push_main", "workflow_dispatch"],
+        "quality_gate_source_is_watched": true,
+        "required_fail_closed_replays_are_regression_tested": true,
+        "corpus_mutations": 0,
+        "publication_effect": "NONE"
+      }
     }
   ],
   "closure_criteria": {
