@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "updated_at": "2026-08-13T06:28:39Z",
+  "updated_at": "2026-08-13T08:30:24Z",
   "policy": "Resolve only material fact classes demonstrated by current T1/T1B semantic evidence; omit all other material facts.",
   "cases": [
     {
@@ -52,6 +52,23 @@
       ],
       "contradiction": "The current official page still says 'In consultare' for the expired 2026-04-28 to 2026-05-20 window, while the official July 2026 indicative calendar now plans opening in November 2026 and closing in December 2026; neither source supplies a final guide or final submission window.",
       "next_review_trigger": "Final guide, explicit MySMIS submission window, corrected current status, suspension or cancellation notice"
+    },
+    {
+      "priority": 4,
+      "opportunity_id": "pr-ne-energy-residential-towns-2026",
+      "resolution_file": "resolutions/pr_ne_energy_residential_towns_2026_resolution.json",
+      "state": "RESOLVED_ALL_MATERIAL_FACT_CLASSES_EXPECTED",
+      "resolved_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ],
+      "unresolved_fact_classes": [],
+      "next_review_trigger": "Explicit active marker at or after 2026-08-17T12:00:00+03:00, corrigendum, suspension, closure or cancellation"
     }
   ]
 }

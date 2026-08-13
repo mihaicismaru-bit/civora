@@ -21,6 +21,15 @@ def main() -> None:
     regional = next(row for row in projection["opportunities"] if row["id"] == "pr-centru-digital-2")
     assert regional["status"] == "DISCOVERED"
     assert regional["materialFacts"] == {}
+    north_east = next(
+        row for row in projection["opportunities"]
+        if row["id"] == "pr-ne-energy-residential-towns-2026"
+    )
+    assert north_east["status"] == "EXPECTED"
+    assert north_east["publicationState"] == "PUBLISHABLE"
+    assert set(north_east["verifiedFactClasses"]) == {
+        "status", "deadline", "budget", "grant", "eligibility", "scoring", "beneficiaries"
+    }
     print("PASS P11 public projection")
 
 
