@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "updated_at": "2026-08-12T12:32:54Z",
+  "updated_at": "2026-08-13T05:30:55Z",
   "policy": "Resolve only material fact classes demonstrated by current T1/T1B semantic evidence; omit all other material facts.",
   "cases": [
     {
@@ -24,18 +24,17 @@
     {
       "priority": 2,
       "opportunity_id": "afir-energy-2026",
-      "resolution_file": "resolutions/afir_energy_resolution.json",
-      "state": "PARTIALLY_RESOLVED_ELIGIBILITY_OPEN",
+      "resolution_file": "resolutions/afir_energy_v2_resolution.json",
+      "state": "RESOLVED_ALL_MATERIAL_FACT_CLASSES",
       "resolved_fact_classes": [
         "budget",
         "grant",
         "beneficiaries",
-        "scoring"
-      ],
-      "unresolved_fact_classes": [
+        "scoring",
         "eligibility"
       ],
-      "next_review_trigger": "Complete lossless normalization of cumulative Guide V7 eligibility rules or an official clarification/corrigendum"
+      "unresolved_fact_classes": [],
+      "next_review_trigger": "Official clarification, corrigendum, suspension, closure, cancellation or Guide revision"
     },
     {
       "priority": 3,

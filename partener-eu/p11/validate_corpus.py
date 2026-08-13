@@ -12,6 +12,18 @@ PUBLIC_DATA = ROOT.parent / "web" / "data.js"
 BUNDLE = ROOT / "opportunity_bundle.json"
 
 
+def explicitly_resolved_publishable_ids() -> set[str]:
+    result: set[str] = set()
+    for path in sorted((ROOT / "resolutions").glob("*_resolution.json")):
+        resolution = json.loads(path.read_text(encoding="utf-8"))
+        result.update(
+            item["opportunity_id"]
+            for item in resolution.get("opportunities", [])
+            if item.get("publication_state") == "PUBLISHABLE"
+        )
+    return result
+
+
 def admitted_opportunity_ids() -> list[str]:
     result: list[str] = []
     for path in sorted(ROOT.glob("admission_batch_*.json")):
@@ -42,7 +54,8 @@ def main() -> int:
         raise SystemExit(f"canonical/admission suffix mismatch: {canonical_ids!r} != {admitted_ids!r}")
     resolved_ids = canonical_ids[admitted_end:]
     publishable = [x["opportunity_id"] for x in bundle["opportunities"] if x["publication_state"] == "PUBLISHABLE"]
-    if set(publishable) - set(resolved_ids):
+    publication_authority = set(resolved_ids) | explicitly_resolved_publishable_ids()
+    if set(publishable) - publication_authority:
         raise SystemExit("only explicit resolution overlays may promote PUBLISHABLE opportunities")
     print(json.dumps({**counts, "static_public_identity_match": True, "admitted_batch_count": len(admitted_ids), "resolved_additions": resolved_ids, "publishable": len(publishable)}, indent=2))
     return 0
