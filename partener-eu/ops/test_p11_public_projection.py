@@ -30,6 +30,14 @@ def main() -> None:
     assert set(north_east["verifiedFactClasses"]) == {
         "status", "deadline", "budget", "grant", "eligibility", "scoring", "beneficiaries"
     }
+    clusters = next(
+        row for row in projection["opportunities"]
+        if row["id"] == "pr-centru-clusters-122"
+    )
+    assert clusters["status"] == "OPEN"
+    assert clusters["publicationState"] == "PUBLISHABLE"
+    assert clusters["materialFacts"]["budget"]["total_eur"] == 11664904
+    assert clusters["materialFacts"]["grant"]["maximum_eur"] == 3500000
     print("PASS P11 public projection")
 
 
