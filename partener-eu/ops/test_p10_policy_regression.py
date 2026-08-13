@@ -34,6 +34,12 @@ for marker in [
     if marker not in validation:
         errors.append(f"production validation orchestration missing: {marker}")
 
+# Validation runs write the same ledger and checkpoint files. They must be
+# serialized instead of cancelling an active writer; cancellation can overlap
+# long enough for two runs to commit and then conflict during pull --rebase.
+if "cancel-in-progress: false" not in validation:
+    errors.append("production validation ledger writers are not serialized")
+
 # Scheduled PEO calendar changes are candidate evidence only during P10. The
 # workflow may persist state but must not update the public JS feed automatically.
 if "git add partener-eu/web/peo-calendar.js" in peo_workflow:
