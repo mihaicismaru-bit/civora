@@ -34,7 +34,31 @@ REQUIRED_MARKERS = {
     "critical_app_ref": 'src="app.js',
 }
 LEGACY_MARKERS = ("wp-content/", "wp-includes/", "wordpress.org", "wp-json")
-UA = "PARTENER.EU-CIVORA-P10-Deployment-Probe/1.3"
+UA = "PARTENER.EU-CIVORA-P10-Deployment-Probe/1.4"
+
+
+class RedirectAudit(urllib.request.HTTPRedirectHandler):
+    """Follow redirects while retaining enough evidence to audit transport."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.chain: list[dict[str, Any]] = []
+
+    def redirect_request(
+        self,
+        req: urllib.request.Request,
+        fp: Any,
+        code: int,
+        msg: str,
+        headers: Any,
+        newurl: str,
+    ) -> urllib.request.Request | None:
+        self.chain.append({
+            "http_status": code,
+            "from_url": req.full_url,
+            "to_url": newurl,
+        })
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
 def atomic(path: pathlib.Path, obj: Any) -> None:
@@ -67,7 +91,7 @@ def cache_bust(url: str, stamp: str) -> str:
     return urllib.parse.urlunsplit((p.scheme, p.netloc, p.path, urllib.parse.urlencode(q), p.fragment))
 
 
-def request(url: str, limit: int = 1_000_000) -> tuple[bytes, int, str, dict[str, str]]:
+def request(url: str, limit: int = 1_000_000) -> tuple[bytes, int, str, dict[str, str], list[dict[str, Any]]]:
     req = urllib.request.Request(
         url,
         headers={
@@ -80,9 +104,11 @@ def request(url: str, limit: int = 1_000_000) -> tuple[bytes, int, str, dict[str
         },
     )
     context = ssl.create_default_context()
-    with urllib.request.urlopen(req, timeout=30, context=context) as r:
+    redirect_audit = RedirectAudit()
+    opener = urllib.request.build_opener(urllib.request.HTTPSHandler(context=context), redirect_audit)
+    with opener.open(req, timeout=30) as r:
         body = r.read(limit)
-        return body, getattr(r, "status", 200), r.geturl(), dict(r.headers.items())
+        return body, getattr(r, "status", 200), r.geturl(), dict(r.headers.items()), redirect_audit.chain
 
 
 def extract_asset(text: str, name: str, base: str) -> str | None:
@@ -98,7 +124,7 @@ def probe_asset(url: str | None, expected: tuple[str, ...]) -> dict[str, Any]:
         result["error"] = "asset reference missing"
         return result
     try:
-        body, code, final, _ = request(url, 600_000)
+        body, code, final, _, _ = request(url, 600_000)
         text = body.decode("utf-8", "ignore")
         result.update({
             "http_status": code,
@@ -123,6 +149,7 @@ def probe(endpoint_id: str, url: str, stamp: str) -> dict[str, Any]:
         "http_status": None,
         "final_url": None,
         "final_scheme": None,
+        "redirect_chain": [],
         "content_type": None,
         "bytes": 0,
         "body_sha256": None,
@@ -135,12 +162,13 @@ def probe(endpoint_id: str, url: str, stamp: str) -> dict[str, Any]:
         "error": None,
     }
     try:
-        body, code, final, headers = request(result["requested_url"])
+        body, code, final, headers, redirect_chain = request(result["requested_url"])
         text = body.decode("utf-8", "ignore")
         result.update({
             "http_status": code,
             "final_url": final,
             "final_scheme": urllib.parse.urlsplit(final).scheme.lower(),
+            "redirect_chain": redirect_chain,
             "content_type": headers.get("Content-Type") or headers.get("content-type"),
             "bytes": len(body),
             "body_sha256": hashlib.sha256(body).hexdigest(),
@@ -171,6 +199,51 @@ def probe(endpoint_id: str, url: str, stamp: str) -> dict[str, Any]:
     return result
 
 
+def has_https_downgrade(endpoint: dict[str, Any]) -> bool:
+    """Return true when an HTTPS request is redirected onto cleartext HTTP."""
+    for hop in endpoint.get("redirect_chain") or []:
+        source_scheme = urllib.parse.urlsplit(str(hop.get("from_url") or "")).scheme.lower()
+        target_scheme = urllib.parse.urlsplit(str(hop.get("to_url") or "")).scheme.lower()
+        if source_scheme == "https" and target_scheme == "http":
+            return True
+    requested_scheme = urllib.parse.urlsplit(str(endpoint.get("requested_url") or endpoint.get("url") or "")).scheme.lower()
+    return requested_scheme == "https" and endpoint.get("final_scheme") == "http"
+
+
+def assess_transport(by_id: dict[str, dict[str, Any]]) -> dict[str, bool]:
+    """Evaluate the complete HTTPS closure contract, not only one 200 response."""
+    https = by_id["custom_https"]
+    http = by_id["custom_http"]
+    pages = by_id["pages_origin"]
+
+    custom_https_verified = bool(
+        https.get("content_verified")
+        and https.get("final_scheme") == "https"
+        and not https.get("error")
+        and not has_https_downgrade(https)
+    )
+    http_redirects_to_https = bool(
+        http.get("redirect_chain")
+        and http.get("content_verified")
+        and http.get("final_scheme") == "https"
+        and not has_https_downgrade(http)
+    )
+    pages_https_preserved = bool(
+        pages.get("content_verified")
+        and pages.get("final_scheme") == "https"
+        and not has_https_downgrade(pages)
+    )
+    secure_transport_verified = bool(
+        custom_https_verified and http_redirects_to_https and pages_https_preserved
+    )
+    return {
+        "custom_https_verified": custom_https_verified,
+        "http_redirects_to_https": http_redirects_to_https,
+        "pages_https_preserved": pages_https_preserved,
+        "secure_transport_verified": secure_transport_verified,
+    }
+
+
 def main() -> int:
     observed_at = nowz()
     stamp = observed_at.replace(":", "").replace("-", "")
@@ -179,17 +252,15 @@ def main() -> int:
     https = by_id["custom_https"]
     http = by_id["custom_http"]
     pages = by_id["pages_origin"]
+    transport = assess_transport(by_id)
 
     public_content_verified = any(x.get("content_verified") for x in endpoints)
-    https_verified = bool(
-        https.get("content_verified")
-        and https.get("final_scheme") == "https"
-        and not https.get("error")
-    )
+    https_verified = transport["custom_https_verified"]
+    secure_transport_verified = transport["secure_transport_verified"]
     http_content_verified = bool(http.get("content_verified") or pages.get("content_verified"))
     old_origin_detected = any(x.get("legacy_origin_detected") for x in endpoints)
 
-    if https_verified:
+    if secure_transport_verified:
         status = "PASS"
     elif public_content_verified:
         status = "DEGRADED"
@@ -198,13 +269,16 @@ def main() -> int:
 
     best = next((x for x in (https, http, pages) if x.get("content_verified")), https)
     obs = {
-        "schema_version": "1.3",
+        "schema_version": "1.4",
         "observed_at": observed_at,
         "status": status,
         "public_content_verified": public_content_verified,
         "https_verified": https_verified,
+        "secure_transport_verified": secure_transport_verified,
+        "http_redirects_to_https": transport["http_redirects_to_https"],
+        "pages_https_preserved": transport["pages_https_preserved"],
         "http_content_verified": http_content_verified,
-        "https_closure_gate": "PASS" if https_verified else "PENDING_VALID_CERTIFICATE_DNS_AND_HTTPS_CONTENT",
+        "https_closure_gate": "PASS" if secure_transport_verified else "PENDING_HTTPS_ENFORCEMENT_AND_SECURE_REDIRECTS",
         "content_origin": best.get("id") if public_content_verified else None,
         "old_origin_detected": old_origin_detected,
         "endpoints": endpoints,

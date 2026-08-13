@@ -42,7 +42,7 @@ def static_frontend_checks():
     checks=[]
     for name in required: checks.append({'name':f'file:{name}','pass':name in files and files[name].stat().st_size>100})
     text = ''.join(p.read_text(encoding='utf-8', errors='ignore') for p in files.values())
-    for marker in ['Funding Explorer','What Changed','Ask PARTENER.EU','Consultant mode','Pot aplica?','provenien']:
+    for marker in ['Explorer finanțări','Modificări','Întreabă PARTENER.EU','Spațiu consultant','Pot aplica?','Sursa oficială']:
         checks.append({'name':f'ui:{marker}','pass':marker.lower() in text.lower()})
     return checks
 

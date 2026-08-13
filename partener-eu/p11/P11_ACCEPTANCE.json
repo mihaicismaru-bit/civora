@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0",
+  "checkpoint": "P11-PRODUCTION-CONSOLIDATION-V1",
+  "status": "PASS",
+  "accepted_at": "2026-08-12",
+  "evidence": {
+    "contract": "partener-eu/p11/opportunity_contract.py",
+    "tests": "partener-eu/p11/test_opportunity_contract.py",
+    "test_command": "python -m unittest discover -s partener-eu/p11 -p 'test_*.py' && python partener-eu/p11/validate_corpus.py && python partener-eu/p11/validate_admission_batch.py && python partener-eu/p11/build_staging_ledger.py",
+    "tests_passed": 23,
+    "tests_failed": 0
+  },
+  "policy_assertions": {
+    "open_requires_authoritative_status_evidence": true,
+    "open_requires_authoritative_deadline_evidence": true,
+    "t2_cannot_authorize_material_publication": true,
+    "unresolved_semantics_cannot_promote_material_facts": true,
+    "changesets_cannot_auto_publish_material_facts": true,
+    "orphan_changesets_and_resolution_tasks_rejected": true,
+    "candidate_facts_require_open_resolution_blocks": true,
+    "canonical_prefix_matches_static_public_records": true,
+    "admission_suffix_matches_pinned_batch_manifest": true,
+    "admission_batches_are_disjoint": true,
+    "admitted_evidence_remains_semantically_unresolved": true,
+    "admitted_material_facts_are_fully_blocked": true,
+    "canonical_target_minimum_is_met": true,
+    "terminal_batch_size_is_explicitly_gated": true,
+    "candidate_identity_is_deterministic": true,
+    "input_order_does_not_change_ledger_hash": true,
+    "new_and_ambiguous_candidates_cannot_publish": true
+  },
+  "corpus": {
+    "public_baseline": 6,
+    "canonicalized_total": 26,
+    "admitted_in_this_increment": 4,
+    "evidence_records": 32,
+    "publishable_after_resolution": 1,
+    "open_or_in_review_resolution_tasks": 25,
+    "target": 25,
+    "numeric_target_met": true,
+    "p11_closure_met": false
+  },
+  "staging": {
+    "input_occurrences": 25,
+    "unique_candidates": 25,
+    "canonical_matches": 25,
+    "new_candidates": 0,
+    "ambiguous_review": 0,
+    "published": 0
+  },
+  "source_artifact_manifests": ["partener-eu/p11/admission_batch_01.json", "partener-eu/p11/admission_batch_02.json", "partener-eu/p11/admission_batch_03.json", "partener-eu/p11/admission_batch_04.json"],
+  "semantic_resolution_dependency": "25 OPEN/IN_REVIEW ResolutionTasks remain owned by the Opportunity Resolution workflow",
+  "publication_effect": "ONE_VERIFIED_PUBLIC_PROJECTION"
+}

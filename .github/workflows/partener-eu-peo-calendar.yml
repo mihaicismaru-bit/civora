@@ -43,9 +43,10 @@ jobs:
           git fetch origin main
           git reset --hard origin/main
           cp /tmp/peo_calendar_state.json partener-eu/ingest/state/peo_calendar_state.json
+          python partener-eu/ingest/intelligence_index.py
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add partener-eu/ingest/state/peo_calendar_state.json
+          git add partener-eu/ingest/state/peo_calendar_state.json partener-eu/ingest/state/intelligence_index.json
           if git diff --cached --quiet; then
             echo 'No PEO calendar candidate-state changes.'
             exit 0

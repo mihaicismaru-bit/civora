@@ -124,7 +124,8 @@ jobs:
             cp /tmp/mipe-news.js partener-eu/web/mipe-news.js
             cp /tmp/mipe_state.json partener-eu/ingest/state/mipe_state.json
             cp /tmp/mipe_known_canonical_seeds.json partener-eu/ingest/state/mipe_known_canonical_seeds.json
-            git add partener-eu/web/mipe-news.js partener-eu/ingest/state/mipe_state.json partener-eu/ingest/state/mipe_known_canonical_seeds.json
+            python partener-eu/ingest/intelligence_index.py
+            git add partener-eu/web/mipe-news.js partener-eu/ingest/state/mipe_state.json partener-eu/ingest/state/mipe_known_canonical_seeds.json partener-eu/ingest/state/intelligence_index.json
 
             if git diff --cached --quiet; then
               echo 'No MIPE feed or discovery-map changes.'

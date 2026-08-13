@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "resolution_id": "RES-AFIR-ENERGY-20260812",
+  "resolved_at": "2026-08-12T11:30:30Z",
+  "policy": {
+    "automatic_material_fact_update_allowed": false,
+    "resolution_rule": "Only values explicitly demonstrated by the current AFIR session page and Guide V7 are admitted; cumulative eligibility remains unresolved."
+  },
+  "evidence": [
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-AFIR-ENERGY-2026-SESSION-CURRENT",
+      "source_tier": "T1",
+      "source_owner": "Agenția pentru Finanțarea Investițiilor Rurale",
+      "source_url": "https://www.afir.ro/info-la-zi/sesiune-depunere-proiecte-schema-de-energie/",
+      "observed_at": "2026-08-12T11:30:30Z",
+      "semantic_sha256": "43aaf2ec2f40cf7c25e7c87fe1629c60525225a957ce4b463831ba294b207470",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": ["status", "deadline", "budget", "grant"],
+      "semantic_assertion": "AFIR explicitly states that the third energy session runs from 15 June through 14 August 2026, has a EUR 265 million allocation and provides 100% aid within the stated EUR/MW ceilings."
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-AFIR-ENERGY-2026-GUIDE-V7",
+      "source_tier": "T1",
+      "source_owner": "Agenția pentru Finanțarea Investițiilor Rurale",
+      "source_url": "https://www.afir.ro/domenii-de-interventie/detalii-si-anexe-schema-energie/",
+      "primary_attachment_url": "https://www.afir.ro/media/hkfp4w0v/ghidul-solicitantului-schem%C4%83-energie-autoconsum-v7-iunie-2026.pdf",
+      "primary_attachment_sha256": "3526cabe388c8ce9d9f91a22fa9e4dee4acdfe18e620f86725b85f870a951090",
+      "observed_at": "2026-08-12T11:30:30Z",
+      "semantic_sha256": "cd77112da4a04c87a42f459750ca3d1d7ce385cf1f10c4ae2907b7cc03e9f2e7",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": ["budget", "grant", "eligibility", "scoring", "beneficiaries"],
+      "semantic_assertion": "Guide V7 defines the allocation, aid intensity and ceilings, beneficiary classes, cumulative eligibility rules and complete 100-point scoring grid."
+    }
+  ],
+  "opportunities": [
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "afir-energy-2026",
+      "title": "Investiții în producerea energiei electrice din surse regenerabile pentru autoconsum",
+      "programme": "AFIR / Fondul pentru Modernizare",
+      "code": "Schema ENERGIE 2026",
+      "status": "OPEN",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": ["EV-SRC-AFIR-ENERGY-2026", "EV-AFIR-ENERGY-2026-SESSION-CURRENT", "EV-AFIR-ENERGY-2026-GUIDE-V7"],
+      "material_facts": {
+        "status": "OPEN",
+        "deadline": {"opens": "15 iunie 2026", "closes": "14 august 2026", "time_of_day": "UNKNOWN"},
+        "budget": {"session_total_eur": 265000000, "solar_capacity_le_1mw_eur": 145000000, "solar_capacity_gt_1mw_eur": 120000000},
+        "grant": {"eligible_cost_intensity_percent": 100, "cap_eur_per_mw_le_1mw": 650000, "cap_eur_per_mw_gt_1mw": 550000, "cap_eur_per_beneficiary": 20000000},
+        "beneficiaries": [
+          "Întreprinderi legal constituite din sectorul agricol, în formele prevăzute de Ghidul V7",
+          "Întreprinderi legal constituite din industria alimentară, în formele prevăzute de Ghidul V7",
+          "OUAI/FOUAI constituite conform Legii 138/2004"
+        ],
+        "scoring": {
+          "maximum_points": 100,
+          "criteria": [
+            {"id": "C1", "maximum_points": 70, "basis": "ajutor solicitat/MW"},
+            {"id": "C2", "maximum_points": 10, "basis": "procent autoconsum"},
+            {"id": "C3", "maximum_points": 10, "basis": "stocare integrată"},
+            {"id": "C4", "maximum_points": 10, "basis": "activitatea solicitantului"}
+          ],
+          "tie_breaker": "valoarea eligibilă a proiectului în EUR, crescător"
+        }
+      },
+      "fact_evidence": {
+        "status": ["EV-SRC-AFIR-ENERGY-2026", "EV-AFIR-ENERGY-2026-SESSION-CURRENT"],
+        "deadline": ["EV-SRC-AFIR-ENERGY-2026", "EV-AFIR-ENERGY-2026-SESSION-CURRENT"],
+        "budget": ["EV-AFIR-ENERGY-2026-SESSION-CURRENT", "EV-AFIR-ENERGY-2026-GUIDE-V7"],
+        "grant": ["EV-AFIR-ENERGY-2026-SESSION-CURRENT", "EV-AFIR-ENERGY-2026-GUIDE-V7"],
+        "beneficiaries": ["EV-AFIR-ENERGY-2026-GUIDE-V7"],
+        "scoring": ["EV-AFIR-ENERGY-2026-GUIDE-V7"]
+      },
+      "candidate_material_facts": {"eligibility": "UNKNOWN_PENDING_FULL_CUMULATIVE_RULE_NORMALIZATION"}
+    }
+  ],
+  "changesets": [],
+  "resolution_tasks": [
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-AFIR-ENERGY-2026-MATERIAL",
+      "opportunity_id": "afir-energy-2026",
+      "status": "IN_REVIEW",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": ["eligibility"],
+      "resolution_evidence_refs": ["EV-AFIR-ENERGY-2026-SESSION-CURRENT", "EV-AFIR-ENERGY-2026-GUIDE-V7"],
+      "resolution_note": "Budget, grant, beneficiary classes and scoring are resolved. Eligibility remains UNKNOWN until every cumulative condition is normalized without loss."
+    }
+  ]
+}

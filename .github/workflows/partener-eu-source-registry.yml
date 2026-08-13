@@ -67,9 +67,10 @@ jobs:
           cp /tmp/source_registry_health.json partener-eu/ingest/state/source_registry_health.json
           mkdir -p partener-eu/validation/resolution-tasks
           cp -a /tmp/source-resolution-tasks/. partener-eu/validation/resolution-tasks/ || true
+          python partener-eu/ingest/intelligence_index.py
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add partener-eu/ingest/state/source_registry_health.json partener-eu/validation/resolution-tasks
+          git add partener-eu/ingest/state/source_registry_health.json partener-eu/ingest/state/intelligence_index.json partener-eu/validation/resolution-tasks
           if git diff --cached --quiet; then
             echo 'No source-registry health or resolution-task changes.'
             exit 0

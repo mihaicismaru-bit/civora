@@ -44,6 +44,17 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Regenerate canonical data products
+        run: |
+          python partener-eu/ingest/intelligence_index.py
+          python partener-eu/p11/apply_resolutions.py
+          python partener-eu/p11/build_public_projection.py
+
+      - name: Unified product quality gate
+        id: quality
+        continue-on-error: true
+        run: python partener-eu/ops/quality_gate.py
+
       - name: Recovery regression
         id: recovery
         continue-on-error: true
@@ -63,6 +74,11 @@ jobs:
         id: afir_policy
         continue-on-error: true
         run: python partener-eu/ops/test_afir_ingest_policy.py
+
+      - name: Public HTTPS transport gate regression
+        id: public_transport
+        continue-on-error: true
+        run: python partener-eu/ops/test_public_site_transport.py
 
       - name: Live source and frontend validation
         id: validate
@@ -120,7 +136,7 @@ jobs:
         run: |
           git config user.name "civora-validation-bot"
           git config user.email "civora-validation-bot@users.noreply.github.com"
-          git add partener-eu/validation partener-eu/P10_ACCEPTANCE.json
+          git add partener-eu/validation partener-eu/P10_ACCEPTANCE.json partener-eu/ingest/state/intelligence_index.json partener-eu/p11/opportunity_bundle.json partener-eu/web/p11-public-data.js
           if ! git diff --cached --quiet; then
             git commit -m "PARTENER.EU validation ledger $(date -u +%Y-%m-%dT%H:%M:%SZ)"
             git pull --rebase origin main
@@ -135,6 +151,8 @@ jobs:
           FRONTEND_OUTCOME: ${{ steps.frontend.outcome }}
           POLICY_OUTCOME: ${{ steps.policy.outcome }}
           AFIR_POLICY_OUTCOME: ${{ steps.afir_policy.outcome }}
+          PUBLIC_TRANSPORT_OUTCOME: ${{ steps.public_transport.outcome }}
+          QUALITY_OUTCOME: ${{ steps.quality.outcome }}
           VALIDATE_CODE: ${{ steps.validate.outputs.exit_code }}
           RESOLUTION_CODE: ${{ steps.resolution.outputs.exit_code }}
           INTEGRITY_CODE: ${{ steps.integrity.outputs.exit_code }}
@@ -142,7 +160,7 @@ jobs:
           ACCEPTANCE_CODE: ${{ steps.acceptance.outputs.exit_code }}
         run: |
           FAIL=0
-          for OUTCOME in "$RECOVERY_OUTCOME" "$FRONTEND_OUTCOME" "$POLICY_OUTCOME" "$AFIR_POLICY_OUTCOME"; do
+          for OUTCOME in "$RECOVERY_OUTCOME" "$FRONTEND_OUTCOME" "$POLICY_OUTCOME" "$AFIR_POLICY_OUTCOME" "$PUBLIC_TRANSPORT_OUTCOME" "$QUALITY_OUTCOME"; do
             if [ "$OUTCOME" != "success" ]; then FAIL=2; fi
           done
           for CODE in "$VALIDATE_CODE" "$RESOLUTION_CODE" "$INTEGRITY_CODE" "$DEPLOYMENT_CODE" "$ACCEPTANCE_CODE"; do

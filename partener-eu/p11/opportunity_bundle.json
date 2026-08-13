@@ -1,0 +1,1672 @@
+{
+  "schema_version": "1.0",
+  "bundle_id": "PARTENER-EU-P11-CANONICAL-0001",
+  "as_of": "2026-08-12T15:11:23Z",
+  "source_snapshot": {
+    "repository": "mihaicismaru-bit/civora",
+    "public_data_path": "partener-eu/web/data.js",
+    "public_data_ref": "main",
+    "expected_public_ids": [
+      "afir-energy-2026",
+      "pr-ne-energy-residential-towns-2026",
+      "pr-centru-digital-2",
+      "pr-centru-clusters-122",
+      "pids-supported-decision",
+      "peo-step-edu-adulti"
+    ],
+    "normalization_effect": "NONE_ON_PUBLICATION"
+  },
+  "evidence": [
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-SRC-AFIR-ENERGY-2026",
+      "source_id": "SRC-AFIR-ENERGY-2026",
+      "source_tier": "T1",
+      "source_url": "https://www.afir.ro/comunicate/deschiderea-sesiunii-pentru-investitiile-in-producerea-energiei-electrice-din-surse-regenerabile/",
+      "observed_at": "2026-08-12T10:34:55Z",
+      "semantic_sha256": "bc5077d09f5be74c04ad7151ea80b783da3c5fcc275eec6e76de979ecae72c1c",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": [
+        "status",
+        "deadline"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-SRC-PR-CENTRU-DIGITAL-2",
+      "source_id": "SRC-PR-CENTRU-DIGITAL-2",
+      "source_tier": "T1",
+      "source_url": "https://www.regiocentru.ro/actiuni/2-2-intreprinderi-digitale-pentru-o-economie-avansata-apel-2/",
+      "observed_at": "2026-08-12T10:34:55Z",
+      "semantic_sha256": "82536ee60202beb0f1ee25fab18cbff64adf45ea7065379f035b5f2c2b9838a6",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": [
+        "status"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-IMPORT-PR-NE-ENERGY-RESIDENTIAL-TOWNS-2026",
+      "source_id": "IMPORT-WEB-DATA-7B0AC0C4",
+      "source_tier": "T1",
+      "source_url": "https://oportunitati-ue.gov.ro/apel/apel-pr-ne-2026-3-rso2-1-1-eficienta-energetica-cladiri-rezidentiale-orase-august-2026/",
+      "observed_at": "2026-08-12T11:55:44Z",
+      "semantic_sha256": "42c78340f25f9850165813d8ea1da16314ab5113effdc0041aec6856ea2cd433",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "evidence_basis": "Imported public record identity snapshot from commit 7b0ac0c4; authoritative page semantics not re-resolved by P11"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-SRC-PR-CENTRU-ACTIUNI",
+      "source_id": "SRC-PR-CENTRU-ACTIUNI",
+      "source_tier": "T1",
+      "source_url": "https://www.regiocentru.ro/actiuni/",
+      "observed_at": "2026-08-12T10:34:55Z",
+      "semantic_sha256": "b540e635d05c053a753888f0979b8a9092ea5761fab733f8943587af7f0d6dde",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": [
+        "status",
+        "deadline"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-SRC-OIRBI-PIDS",
+      "source_id": "SRC-OIRBI-PIDS",
+      "source_tier": "T1B",
+      "source_url": "https://www.oirbi.ro/pids-2021-2027/",
+      "observed_at": "2026-08-12T10:34:55Z",
+      "semantic_sha256": "f0bf324310dd42730b675e8bb37454a8877ca6ca54d793fb47ffbdc1b879eaa3",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": [
+        "status",
+        "deadline"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-SRC-OIRVEST-PEO",
+      "source_id": "SRC-OIRVEST-PEO",
+      "source_tier": "T1B",
+      "source_url": "https://oirvest.ro/ghiduri-peo/",
+      "observed_at": "2026-08-12T10:34:55Z",
+      "semantic_sha256": "808012988357e68835f1359b7bb8eff296e07666afbbc044c69bd235d0636bc9",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": [
+        "status"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-IMPORT-PR-CENTRU-PARCURI-RIS",
+      "source_id": "IMPORT-CORPUS-BATCH-02-EC5D136A",
+      "source_tier": "T1",
+      "source_url": "https://www.adrcentru.ro/comunicare/lansare-apel-de-finantare-pentru-parcuri-industriale-in-domenii-ris-programul-regiunea-centru-2021-2027/",
+      "observed_at": "2026-08-12T13:12:33Z",
+      "semantic_sha256": "7dc4d2b9e599c3536f0fcf71978218a1c0ca66c09ea3da122e927510306a03e8",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "evidence_basis": "Imported identity and candidate-fact snapshot from pinned repository artifact; authoritative page semantics not re-resolved by P11"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-IMPORT-PR-CENTRU-URBAN-81",
+      "source_id": "IMPORT-CORPUS-BATCH-01-EC5D136A",
+      "source_tier": "T1",
+      "source_url": "https://www.regiocentru.ro/actiuni/8-1dezvoltare-urbana-integrata-prin-regenerarea-spatiilor-publice-punerea-in-valoare-a-patrimoniului-infrastructurii-culturale-si-a-potentialului-turistic-din-municipiile-regiunii-centru-a/",
+      "observed_at": "2026-08-12T13:12:33Z",
+      "semantic_sha256": "48be752ef05df7c0425436bfc754fa83c4b5bb33f541c916842780fc14430a30",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "evidence_basis": "Imported identity and candidate-fact snapshot from pinned repository artifact; authoritative page semantics not re-resolved by P11"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-IMPORT-PEO-UNIVERSITATI-DESCHISE",
+      "source_id": "IMPORT-CORPUS-BATCH-01-EC5D136A",
+      "source_tier": "T1B",
+      "source_url": "https://oirvest.ro/peo-lansare-ghidul-solicitantului-conditii-specifice-universitati-deschise-apel-de-proiecte-competitiv-finantat-din-prioritatea-7-cresterea-calitatii-ofertei-de-educatie-si-fo/",
+      "observed_at": "2026-08-12T13:12:33Z",
+      "semantic_sha256": "cb7ff3f6ced4afd48efa49f05c9e16d2aefc8746378d03fb1c5fb6d316dd30b6",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "evidence_basis": "Imported identity and candidate-fact snapshot from pinned repository artifact; authoritative page semantics not re-resolved by P11"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-IMPORT-PEO-STEP-VET",
+      "source_id": "IMPORT-CORPUS-BATCH-01-EC5D136A",
+      "source_tier": "T1B",
+      "source_url": "https://oirvest.ro/peo-consultare-publica-ghidul-solicitantului-conditii-specifice-step-vet-formare-profesionala-la-locul-de-munca-pentru-elevii-din-invatamantul-profesional-si-tehnic-in-tehnologii-crit/",
+      "observed_at": "2026-08-12T13:12:33Z",
+      "semantic_sha256": "91ebb64ff40f3e72242361eb5de269a50b7a54235a39a69ecad194dd609300fe",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "evidence_basis": "Imported identity and candidate-fact snapshot from pinned repository artifact; authoritative page semantics not re-resolved by P11"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-IMPORT-PIDS-TRAFIC-PERSOANE",
+      "source_id": "IMPORT-CORPUS-BATCH-01-EC5D136A",
+      "source_tier": "T1B",
+      "source_url": "https://oirvest.ro/poids-lansare-ghiduri-in-consultare-publica-in-data-de-13-07-2026/",
+      "observed_at": "2026-08-12T13:12:33Z",
+      "semantic_sha256": "c3d9ee7accb5497c387ede719eeba043e968a4c309c591336a1af68f4c32fe79",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "evidence_basis": "Imported identity and candidate-fact snapshot from pinned repository artifact; authoritative page semantics not re-resolved by P11"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-IMPORT-PR-CENTRU-TABERE-72",
+      "source_id": "IMPORT-CORPUS-BATCH-02-EC5D136A",
+      "source_tier": "T1",
+      "source_url": "https://www.adrcentru.ro/comunicare/lansare-apel-de-finantare-pentru-modernizarea-taberelor-scolare-programul-regiunea-centru-2021-2027/",
+      "observed_at": "2026-08-12T14:08:28Z",
+      "semantic_sha256": "307dc53cefedb4773cc2c1edec47137a8915fe789f21d45e603f79d2058b9fe4",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "evidence_basis": "Imported identity and candidate-fact snapshot from pinned repository artifact; authoritative page semantics not re-resolved by P11"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-IMPORT-PRSE-21B-ELENA-PUBLIC",
+      "source_id": "IMPORT-CORPUS-BATCH-02-EC5D136A",
+      "source_tier": "T1",
+      "source_url": "https://regiosudest.ro/ghiduri/prioritatea-2/apeluri-active/apel-lansat-2-1-b-cresterii-eficientei-energetice-a-cladirilor-publice-04-06-2026",
+      "observed_at": "2026-08-12T14:08:28Z",
+      "semantic_sha256": "77a71db37553e2f2a7fce608c3ce81cea7a09629262b9b46a82cfea79b1da0c0",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "evidence_basis": "Imported identity and candidate-fact snapshot from pinned repository artifact; authoritative page semantics not re-resolved by P11"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-IMPORT-PRSE-52-EDUCATIE",
+      "source_id": "IMPORT-CORPUS-BATCH-02-EC5D136A",
+      "source_tier": "T1",
+      "source_url": "https://regiosudest.ro/ghiduri/prioritatea-5/apeluri-active/lansare-apel-5-2-dezvoltarea-infrastructurii-educationale-la-nivelul-invatamantului-primar-si-secundar",
+      "observed_at": "2026-08-12T14:08:28Z",
+      "semantic_sha256": "eeea09eee8082d2fb76da678b977bf429e7eb50a22c0e02a8f9d98a69e70999b",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "evidence_basis": "Imported identity and candidate-fact snapshot from pinned repository artifact; authoritative page semantics not re-resolved by P11"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-IMPORT-PRSE-62-TURISM-NONURBAN",
+      "source_id": "IMPORT-CORPUS-BATCH-02-EC5D136A",
+      "source_tier": "T1",
+      "source_url": "https://regiosudest.ro/ghiduri/prioritatea-6/apeluri-active/corrigendum-ul-nr-3-actiunea-6-2-valorificarea-potentialului-turistic-in-zone-non-urbane-apel-prse-6-6-2-1-2025-05-06-2026",
+      "observed_at": "2026-08-12T14:08:28Z",
+      "semantic_sha256": "d78ac6a6c6a0ea08a0cc28afe32f3ada37864bfd12b2a2e99ebc5da2459a11a9",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "evidence_basis": "Imported identity and candidate-fact snapshot from pinned repository artifact; authoritative page semantics not re-resolved by P11"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-IMPORT-PRSE-61-URBAN",
+      "source_id": "IMPORT-CORPUS-BATCH-02-EC5D136A",
+      "source_tier": "T1",
+      "source_url": "https://regiosudest.ro/ghiduri/prioritatea-6/apeluri-active/corrigendum-ul-nr-3-cu-privire-la-ghidul-solicitantului-pentru-actiunea-6-1-dezvoltare-urbana-integrata",
+      "observed_at": "2026-08-12T14:08:28Z",
+      "semantic_sha256": "e586f7e0f4cd1b325972118476c1ac36fd683dab23651d3727003aa793abf63b",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "evidence_basis": "Imported identity and candidate-fact snapshot from pinned repository artifact; authoritative page semantics not re-resolved by P11"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-IMPORT-PRSE-41-DRUMURI-2",
+      "source_id": "IMPORT-CORPUS-BATCH-02-EC5D136A",
+      "source_tier": "T1",
+      "source_url": "https://regiosudest.ro/ghiduri/prioritatea-4/apeluri-active/corrigendum-nr-4-apel-4-1-drumuri-judetene-apel-nr-2-09-06-2026",
+      "observed_at": "2026-08-12T15:11:23Z",
+      "semantic_sha256": "7b429220e4a1ce7e3aadcffc0037cac460cfb58ddba84fdff5766035bc35dc5d",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "evidence_basis": "Imported identity and candidate-fact snapshot from pinned repository artifact; authoritative page semantics not re-resolved by P11"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-IMPORT-PRSE-16-A1-MICRO-ITI",
+      "source_id": "IMPORT-CORPUS-BATCH-02-EC5D136A",
+      "source_tier": "T1",
+      "source_url": "https://regiosudest.ro/ghiduri/prioritatea-1/apeluri-in-consultare/apel-in-consultare-actiunea-1-6-stimularea-activitatilor-inovatoare-si-cresterea-competitivitatii-imm-urilor-operatiunea-a-1-cresterea-competitivitatii-microintreprinderilor-apel-dedicat-arealului-iti-delta-dunarii",
+      "observed_at": "2026-08-12T15:11:23Z",
+      "semantic_sha256": "3bad542610fb0cca7ea99d8589c687b2df601dcb5f657dc400db7f89d9575956",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "evidence_basis": "Imported identity and candidate-fact snapshot from pinned repository artifact; authoritative page semantics not re-resolved by P11"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-IMPORT-PRSE-15-PARCURI-INDUSTRIALE",
+      "source_id": "IMPORT-CORPUS-BATCH-02-EC5D136A",
+      "source_tier": "T1",
+      "source_url": "https://regiosudest.ro/ghiduri/prioritatea-1/apeluri-in-consultare/actiunea-1-5-sprijinirea-companiilor-prin-intermediul-infrastructurilor-suport-de-afaceri-parcuri-industriale",
+      "observed_at": "2026-08-12T15:11:23Z",
+      "semantic_sha256": "44e76b91a19c9d161f280d6af836fbbff2538164f538b2e048b29a0b8dd2c45c",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "evidence_basis": "Imported identity and candidate-fact snapshot from pinned repository artifact; authoritative page semantics not re-resolved by P11"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-IMPORT-PRSE-22-SEISMIC-ELENA",
+      "source_id": "IMPORT-CORPUS-BATCH-02-EC5D136A",
+      "source_tier": "T1",
+      "source_url": "https://regiosudest.ro/ghiduri/prioritatea-2/apeluri-in-consultare/apel-in-consultare-actiunea-2-2-consolidarea-cladirilor-publice-prin-instrumentul-elena",
+      "observed_at": "2026-08-12T15:11:23Z",
+      "semantic_sha256": "114043202b630cdca5989953878e0806eaaedac7c629c3b1de90a188e7d1d036",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "evidence_basis": "Imported identity and candidate-fact snapshot from pinned repository artifact; authoritative page semantics not re-resolved by P11"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-IMPORT-PRSE-61-ITI-DELTA",
+      "source_id": "IMPORT-CORPUS-BATCH-02-EC5D136A",
+      "source_tier": "T1",
+      "source_url": "https://www.adrse.ro/ADR/Anunturi",
+      "observed_at": "2026-08-12T15:11:23Z",
+      "semantic_sha256": "cee252bfa8a4174f1931927f7e3d40b3806393d396fe225c61788ff73efdf957",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "evidence_basis": "Imported identity and candidate-fact snapshot from pinned repository artifact; authoritative page semantics not re-resolved by P11"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-IMPORT-PR-CENTRU-VERDE-ALBASTRA",
+      "source_id": "IMPORT-CORPUS-BATCH-01-EC5D136A",
+      "source_tier": "T1",
+      "source_url": "https://www.regiocentru.ro/apeluri-lansate/",
+      "observed_at": "2026-08-12T16:09:43Z",
+      "semantic_sha256": "1b3802a206e967150643f468922a95f677f96f65bff447bb125aa8a86af77d42",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "evidence_basis": "Imported identity and candidate-fact snapshot from pinned repository artifact; authoritative page semantics not re-resolved by P11"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-IMPORT-PTJ-VEST-PARCURI",
+      "source_id": "IMPORT-CORPUS-BATCH-01-EC5D136A",
+      "source_tier": "T1",
+      "source_url": "https://adrvest.ro/programul-tranzitie-justa-ghiduri-de-finantare-active/",
+      "observed_at": "2026-08-12T16:09:43Z",
+      "semantic_sha256": "8b81d316f398b29109e2c8db27eb856ad3ca3580a7612b2d87ee63e5eedeef7f",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "evidence_basis": "Imported identity and candidate-fact snapshot from pinned repository artifact; authoritative page semantics not re-resolved by P11"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-IMPORT-PRSM-REGENERARE-MUNICIPII",
+      "source_id": "IMPORT-CORPUS-BATCH-01-EC5D136A",
+      "source_tier": "T1",
+      "source_url": "https://2021-2027.adrmuntenia.ro/prelungirea-termenelor-de-depunere-pentru-apelurile-dedicate-regenerarii-si-mobi/article/655",
+      "observed_at": "2026-08-12T16:09:43Z",
+      "semantic_sha256": "01742543db94cf353a71d80fbd8226dd75b5fc67c7037091750890962b4ee8ea",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "evidence_basis": "Imported identity and candidate-fact snapshot from pinned repository artifact; authoritative page semantics not re-resolved by P11"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-IMPORT-PR-SV-TURISM-RURAL-2",
+      "source_id": "IMPORT-CORPUS-BATCH-02-EC5D136A",
+      "source_tier": "T1",
+      "source_url": "https://pr2021-2027.adroltenia.ro/news.php?id=478",
+      "observed_at": "2026-08-12T16:09:43Z",
+      "semantic_sha256": "a1a0e6b367bab14288027749292521d0f53ef7e550f840e4c225b726ea3bdb08",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "evidence_basis": "Imported identity and candidate-fact snapshot from pinned repository artifact; authoritative page semantics not re-resolved by P11"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-PR-CENTRU-DIGITAL2-CURRENT-PAGE-20260812",
+      "source_tier": "T1",
+      "source_owner": "ADR Centru — AM Programul Regiunea Centru",
+      "source_url": "https://www.regiocentru.ro/actiuni/2-2-intreprinderi-digitale-pentru-o-economie-avansata-apel-2/",
+      "observed_at": "2026-08-12T12:32:54Z",
+      "semantic_sha256": "295bb718f5b938547dc8ff50a912b1bee9f37ef9772395c730d38e1c23df8f7b",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "semantic_assertion": "The current official action page still labels the case 'In consultare' while also stating that consultation ran only from 2026-04-28 through 2026-05-20; no final submission window is present.",
+      "temporal_role": "CURRENT_PAGE_WITH_EXPIRED_HISTORICAL_WINDOW",
+      "retrieval_state": "DIRECT_OFFICIAL_PAGE_VERIFIED"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-PR-CENTRU-DIGITAL2-CONSULTATION-PACKAGE-20260428",
+      "source_tier": "T1",
+      "source_owner": "ADR Centru — AM Programul Regiunea Centru",
+      "source_url": "https://www.regiocentru.ro/wp-content/uploads/2026/04/Ghidul-solicitantului-%E2%80%93-consultare-publica-1.pdf",
+      "linked_attachments": [
+        "https://www.regiocentru.ro/wp-content/uploads/2026/04/Fisa-de-prezentare-ghid-2.pdf",
+        "https://www.regiocentru.ro/wp-content/uploads/2026/04/Centralizator-intrebari-si-raspunsuri-1-1.pdf"
+      ],
+      "observed_at": "2026-08-12T12:32:54Z",
+      "semantic_sha256": "a7e90268f3ff0476e573678580523a5ca44b393bd446fc2195e41208165ff055",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "semantic_assertion": "The official 74-page guide, four-page presentation sheet and twelve-page Q&A are explicitly consultation-stage documents. They expose draft values and conditions but cannot authorize current final material facts.",
+      "temporal_role": "HISTORICAL_CONSULTATION_PACKAGE",
+      "retrieval_state": "DIRECT_OFFICIAL_ATTACHMENTS_VERIFIED"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-STEP-LLL-OIRNV-20260727-CORRIGENDUM",
+      "source_tier": "T1B",
+      "source_owner": "OIR PECU Nord-Vest",
+      "source_url": "https://www.runv.ro/anunturi.html",
+      "linked_primary_attachment_url": "https://mfe.gov.ro/wp-content/uploads/2026/07/1678d03c7e876e0c7d010e3242f14d86.pdf",
+      "observed_at": "2026-08-12T10:32:00Z",
+      "semantic_sha256": "0fef2c53de9f3cec154308ec3998717c77a2fb12429af49b163100f04618b633",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": [
+        "status",
+        "deadline"
+      ],
+      "semantic_assertion": "The official intermediate body republishes the MIPE corrigendum and explicitly states that STEP-LLL is extended until 2026-09-30 16:00 Europe/Bucharest.",
+      "temporal_role": "CURRENT_CORRIGENDUM",
+      "retrieval_state": "DIRECT_PAGE_VERIFIED_ATTACHMENT_LINKED"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-STEP-LLL-OIRNV-20260602-LAUNCH",
+      "source_tier": "T1B",
+      "source_owner": "OIR PECU Nord-Vest",
+      "source_url": "https://www.runv.ro/anunturi.html",
+      "observed_at": "2026-08-12T10:32:00Z",
+      "semantic_sha256": "f5c52829eee6f8691fec4f0bcdcc44aa850dd9f45b2f3b20c5d6f35bea09d397",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": [
+        "status"
+      ],
+      "semantic_assertion": "The official intermediate body republishes the MIPE launch and states that MySMIS opened on 2026-05-29 16:00; the original 2026-08-28 deadline is superseded.",
+      "temporal_role": "HISTORICAL_LAUNCH",
+      "retrieval_state": "DIRECT_PAGE_VERIFIED_PRIMARY_PACKAGE_LINKED"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-STEP-LLL-OEU-20260812-CURRENT",
+      "source_tier": "T1",
+      "source_owner": "Portalul național Oportunități UE",
+      "source_url": "https://oportunitati-ue.gov.ro/apel/step-lll-competente-pentru-viitor-formare-la-locul-de-munca-si-educatia-adultilor-in-tehnologiile-critice-adulti/",
+      "observed_at": "2026-08-12T10:31:00Z",
+      "semantic_sha256": "ad147e7ea64b59f8cf3a362c900466eacd2d5568f9ec91df278c1870e3466c7a",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": [
+        "status",
+        "deadline"
+      ],
+      "semantic_assertion": "The current government opportunity record explicitly marks the financing active and gives the submission window 2026-05-29 16:00 through 2026-09-30 16:00 Europe/Bucharest.",
+      "temporal_role": "CURRENT_CALL_REGISTRY",
+      "retrieval_state": "CURRENT_OFFICIAL_INDEX_RECORD"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-AFIR-ENERGY-2026-SESSION-CURRENT",
+      "source_tier": "T1",
+      "source_owner": "Agenția pentru Finanțarea Investițiilor Rurale",
+      "source_url": "https://www.afir.ro/info-la-zi/sesiune-depunere-proiecte-schema-de-energie/",
+      "observed_at": "2026-08-12T11:30:30Z",
+      "semantic_sha256": "43aaf2ec2f40cf7c25e7c87fe1629c60525225a957ce4b463831ba294b207470",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant"
+      ],
+      "semantic_assertion": "AFIR explicitly states that the third energy session runs from 15 June through 14 August 2026, has a EUR 265 million allocation and provides 100% aid within the stated EUR/MW ceilings."
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-AFIR-ENERGY-2026-GUIDE-V7",
+      "source_tier": "T1",
+      "source_owner": "Agenția pentru Finanțarea Investițiilor Rurale",
+      "source_url": "https://www.afir.ro/domenii-de-interventie/detalii-si-anexe-schema-energie/",
+      "primary_attachment_url": "https://www.afir.ro/media/hkfp4w0v/ghidul-solicitantului-schem%C4%83-energie-autoconsum-v7-iunie-2026.pdf",
+      "primary_attachment_sha256": "3526cabe388c8ce9d9f91a22fa9e4dee4acdfe18e620f86725b85f870a951090",
+      "observed_at": "2026-08-12T11:30:30Z",
+      "semantic_sha256": "cd77112da4a04c87a42f459750ca3d1d7ce385cf1f10c4ae2907b7cc03e9f2e7",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": [
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ],
+      "semantic_assertion": "Guide V7 defines the allocation, aid intensity and ceilings, beneficiary classes, cumulative eligibility rules and complete 100-point scoring grid."
+    }
+  ],
+  "opportunities": [
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "afir-energy-2026",
+      "title": "Investiții în producerea energiei electrice din surse regenerabile pentru autoconsum",
+      "programme": "AFIR / Fondul pentru Modernizare",
+      "code": "Schema ENERGIE 2026",
+      "status": "OPEN",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-SRC-AFIR-ENERGY-2026",
+        "EV-AFIR-ENERGY-2026-SESSION-CURRENT",
+        "EV-AFIR-ENERGY-2026-GUIDE-V7"
+      ],
+      "material_facts": {
+        "status": "OPEN",
+        "deadline": {
+          "opens": "15 iunie 2026",
+          "closes": "14 august 2026",
+          "time_of_day": "UNKNOWN"
+        },
+        "budget": {
+          "session_total_eur": 265000000,
+          "solar_capacity_le_1mw_eur": 145000000,
+          "solar_capacity_gt_1mw_eur": 120000000
+        },
+        "grant": {
+          "eligible_cost_intensity_percent": 100,
+          "cap_eur_per_mw_le_1mw": 650000,
+          "cap_eur_per_mw_gt_1mw": 550000,
+          "cap_eur_per_beneficiary": 20000000
+        },
+        "beneficiaries": [
+          "Întreprinderi legal constituite din sectorul agricol, în formele prevăzute de Ghidul V7",
+          "Întreprinderi legal constituite din industria alimentară, în formele prevăzute de Ghidul V7",
+          "OUAI/FOUAI constituite conform Legii 138/2004"
+        ],
+        "scoring": {
+          "maximum_points": 100,
+          "criteria": [
+            {
+              "id": "C1",
+              "maximum_points": 70,
+              "basis": "ajutor solicitat/MW"
+            },
+            {
+              "id": "C2",
+              "maximum_points": 10,
+              "basis": "procent autoconsum"
+            },
+            {
+              "id": "C3",
+              "maximum_points": 10,
+              "basis": "stocare integrată"
+            },
+            {
+              "id": "C4",
+              "maximum_points": 10,
+              "basis": "activitatea solicitantului"
+            }
+          ],
+          "tie_breaker": "valoarea eligibilă a proiectului în EUR, crescător"
+        }
+      },
+      "fact_evidence": {
+        "status": [
+          "EV-SRC-AFIR-ENERGY-2026",
+          "EV-AFIR-ENERGY-2026-SESSION-CURRENT"
+        ],
+        "deadline": [
+          "EV-SRC-AFIR-ENERGY-2026",
+          "EV-AFIR-ENERGY-2026-SESSION-CURRENT"
+        ],
+        "budget": [
+          "EV-AFIR-ENERGY-2026-SESSION-CURRENT",
+          "EV-AFIR-ENERGY-2026-GUIDE-V7"
+        ],
+        "grant": [
+          "EV-AFIR-ENERGY-2026-SESSION-CURRENT",
+          "EV-AFIR-ENERGY-2026-GUIDE-V7"
+        ],
+        "beneficiaries": [
+          "EV-AFIR-ENERGY-2026-GUIDE-V7"
+        ],
+        "scoring": [
+          "EV-AFIR-ENERGY-2026-GUIDE-V7"
+        ]
+      },
+      "candidate_material_facts": {
+        "eligibility": "UNKNOWN_PENDING_FULL_CUMULATIVE_RULE_NORMALIZATION"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "pr-ne-energy-residential-towns-2026",
+      "title": "Eficiență energetică pentru clădiri rezidențiale multifamiliale — orașe",
+      "programme": "Programul Regional Nord-Est",
+      "code": "PR/NE/2026/3/RSO2.1/1",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-IMPORT-PR-NE-ENERGY-RESIDENTIAL-TOWNS-2026"
+      ],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {
+        "status": "EXPECTED",
+        "deadline": {
+          "opens": "17 august 2026, 12:00",
+          "closes": "16 octombrie 2026, 12:00"
+        },
+        "budget": "8.400.195 EUR",
+        "grant": "Conform ghidului final",
+        "eligibility": "Orașe din Regiunea Nord-Est; condițiile exacte necesită rezoluție",
+        "scoring": "Conform grilei oficiale; neextras",
+        "beneficiaries": "Orașe din Regiunea Nord-Est"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "pr-centru-digital-2",
+      "title": "Întreprinderi digitale pentru o economie avansată — Apel 2",
+      "programme": "Programul Regiunea Centru",
+      "code": "Acțiunea 2.2 — Apel 2",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-PR-CENTRU-DIGITAL2-CURRENT-PAGE-20260812",
+        "EV-PR-CENTRU-DIGITAL2-CONSULTATION-PACKAGE-20260428"
+      ],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {
+        "status": {
+          "value": "UNKNOWN",
+          "reason": "Official page label is temporally stale and no final launch evidence was found."
+        },
+        "deadline": "UNKNOWN_NO_FINAL_SUBMISSION_WINDOW",
+        "budget": {
+          "amount_eur": 14113032,
+          "document_phase": "CONSULTATION_ONLY"
+        },
+        "grant": {
+          "minimum_eur": 15000,
+          "maximum_eur": 200000,
+          "document_phase": "CONSULTATION_ONLY"
+        },
+        "eligibility": "CONSULTATION_DRAFT_ONLY — commercial companies qualifying as micro, small or medium enterprises, subject to cumulative final-guide conditions",
+        "scoring": "UNKNOWN_UNTIL_FINAL_GUIDE_AND_FINAL_GRID",
+        "beneficiaries": "CONSULTATION_DRAFT_ONLY — microenterprises and small/medium enterprises"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "pr-centru-clusters-122",
+      "title": "Clustere inovative",
+      "programme": "Programul Regiunea Centru",
+      "code": "1.2.2",
+      "status": "OPEN",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-SRC-PR-CENTRU-ACTIUNI"
+      ],
+      "material_facts": {
+        "status": "OPEN",
+        "deadline": {
+          "opens": "6 iulie 2026, 12:00",
+          "closes": "6 noiembrie 2026, 12:00"
+        }
+      },
+      "fact_evidence": {
+        "status": [
+          "EV-SRC-PR-CENTRU-ACTIUNI"
+        ],
+        "deadline": [
+          "EV-SRC-PR-CENTRU-ACTIUNI"
+        ]
+      },
+      "candidate_material_facts": {
+        "budget": "Vezi ghid",
+        "grant": "Vezi ghid",
+        "eligibility": "Clustere / organizații eligibile conform ghidului",
+        "scoring": "Conform ghidului",
+        "beneficiaries": "Clustere"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "pids-supported-decision",
+      "title": "Servicii de asistență și suport în luarea deciziei",
+      "programme": "PIDS",
+      "code": "P07 / ESO4.11 / 7.2 C1",
+      "status": "OPEN",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-SRC-OIRBI-PIDS"
+      ],
+      "material_facts": {
+        "status": "OPEN",
+        "deadline": {
+          "opens": "30 iunie 2026, 16:00",
+          "closes": "28 august 2026, 16:00"
+        }
+      },
+      "fact_evidence": {
+        "status": [
+          "EV-SRC-OIRBI-PIDS"
+        ],
+        "deadline": [
+          "EV-SRC-OIRBI-PIDS"
+        ]
+      },
+      "candidate_material_facts": {
+        "budget": "11,804 mil. EUR",
+        "grant": "Conform ghidului",
+        "eligibility": "Lider restricționat instituțional; parteneri conform ghidului",
+        "scoring": "Necompetitiv — condiții specifice",
+        "beneficiaries": "Minister / parteneri instituționali eligibili"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "peo-step-edu-adulti",
+      "title": "STEP-EDU — Competențe pentru viitor în tehnologii critice — Adulți",
+      "programme": "PEO / STEP",
+      "code": "P11 / ESO4.7 / 11.g.1",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-SRC-OIRVEST-PEO"
+      ],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {
+        "status": "EXPECTED",
+        "deadline": "Consultare 20 martie – 10 aprilie 2026; lansare neconfirmată",
+        "budget": "120 mil. EUR",
+        "grant": "Neconfirmat final",
+        "eligibility": "Universități publice/private, de verificat în ghid final",
+        "scoring": "Necunoscut până la ghid final",
+        "beneficiaries": "Universități publice/private"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "pr-centru-parcuri-ris",
+      "title": "Parcuri industriale în domenii RIS",
+      "programme": "Programul Regiunea Centru",
+      "code": "1.5.2",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-IMPORT-PR-CENTRU-PARCURI-RIS"
+      ],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {
+        "status": "OPEN",
+        "deadline": {
+          "opens": "20 iulie 2026, 10:00",
+          "closes": "20 octombrie 2026, 10:00"
+        },
+        "budget": "10,856 mil. EUR",
+        "grant": "Conform ghidului",
+        "eligibility": "Condiții importate din corpus; necesită verificare semantică",
+        "scoring": "Conform ghidului",
+        "beneficiaries": "Entități eligibile conform ghidului"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "pr-centru-urban-81",
+      "title": "Dezvoltare urbană integrată: regenerare, patrimoniu, cultură și turism — municipii",
+      "programme": "Programul Regiunea Centru",
+      "code": "8.1 / PRC/1204",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-IMPORT-PR-CENTRU-URBAN-81"
+      ],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {
+        "status": "EXPECTED",
+        "deadline": {
+          "opens": "20 august 2026, 12:00",
+          "closes": "20 noiembrie 2026, 12:00"
+        },
+        "budget": "22,678 mil. EUR",
+        "grant": "Conform ghidului",
+        "eligibility": "Municipii din Regiunea Centru; condițiile exacte necesită rezoluție",
+        "scoring": "Conform grilei oficiale; neextras",
+        "beneficiaries": "Municipii din Regiunea Centru"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "peo-universitati-deschise",
+      "title": "Universități deschise",
+      "programme": "PEO",
+      "code": "P7 — Universități deschise",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-IMPORT-PEO-UNIVERSITATI-DESCHISE"
+      ],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {
+        "status": "EXPECTED",
+        "deadline": "Consultare 16 iulie – 5 august 2026; lansare neconfirmată",
+        "budget": "Necunoscut până la verificarea ghidului",
+        "grant": "Necunoscut până la verificarea ghidului",
+        "eligibility": "Condiții importate din corpus; necesită verificare semantică",
+        "scoring": "Conform grilei oficiale; neextras",
+        "beneficiaries": "Instituții de învățământ superior conform ghidului"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "peo-step-vet",
+      "title": "STEP-VET — Formare profesională la locul de muncă pentru elevii din învățământul profesional și tehnic în tehnologii critice",
+      "programme": "PEO / STEP",
+      "code": "P12 — STEP-VET",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-IMPORT-PEO-STEP-VET"
+      ],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {
+        "status": "EXPECTED",
+        "deadline": "Consultare 13 iulie – 3 august 2026; lansare neconfirmată",
+        "budget": "Necunoscut până la verificarea ghidului",
+        "grant": "Necunoscut până la verificarea ghidului",
+        "eligibility": "Condiții importate din corpus; necesită verificare semantică",
+        "scoring": "Conform grilei oficiale; neextras",
+        "beneficiaries": "Entități eligibile conform ghidului"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "pids-trafic-persoane",
+      "title": "Servicii integrate pentru victimele traficului de persoane",
+      "programme": "PoIDS",
+      "code": "P08 — trafic de persoane",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-IMPORT-PIDS-TRAFIC-PERSOANE"
+      ],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {
+        "status": "EXPECTED",
+        "deadline": "Consultare 13 iulie – 3 august 2026; lansare neconfirmată",
+        "budget": "Necunoscut până la verificarea ghidului",
+        "grant": "Necunoscut până la verificarea ghidului",
+        "eligibility": "Condiții importate din corpus; necesită verificare semantică",
+        "scoring": "Conform grilei oficiale; neextras",
+        "beneficiaries": "Entități eligibile conform ghidului"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "pr-centru-tabere-72",
+      "title": "Modernizarea taberelor școlare / centrelor de agrement pentru tineret",
+      "programme": "Programul Regiunea Centru",
+      "code": "7.2",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-IMPORT-PR-CENTRU-TABERE-72"
+      ],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {
+        "status": "OPEN",
+        "deadline": {
+          "opens": "26 martie 2026",
+          "closes": "26 august 2026"
+        },
+        "budget": "8,062 mil. EUR",
+        "grant": "Conform ghidului",
+        "eligibility": "Entități publice eligibile conform ghidului",
+        "scoring": "Conform grilei oficiale; neextras",
+        "beneficiaries": "Entități publice eligibile conform ghidului"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "prse-21b-elena-public",
+      "title": "Eficiență energetică a clădirilor publice — proiecte pregătite prin ELENA",
+      "programme": "Programul Regional Sud-Est",
+      "code": "PRSE/2.1/B/2/2026",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-IMPORT-PRSE-21B-ELENA-PUBLIC"
+      ],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {
+        "status": "OPEN",
+        "deadline": {
+          "opens": "30 iunie 2026, 10:00",
+          "closes": "30 decembrie 2026, 14:00"
+        },
+        "budget": "44,504 mil. EUR",
+        "grant": "Minim 150.000 EUR",
+        "eligibility": "Entitate publică eligibilă cu Acord de Parteneriat ELENA SEEE-PB",
+        "scoring": "Apel necompetitiv; condiții conform ghidului",
+        "beneficiaries": "UAT, instituții publice și parteneriate eligibile"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "prse-52-educatie",
+      "title": "Dezvoltarea infrastructurii educaționale — învățământ primar și secundar",
+      "programme": "Programul Regional Sud-Est",
+      "code": "PRSE/5.2/1/2026",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-IMPORT-PRSE-52-EDUCATIE"
+      ],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {
+        "status": "OPEN",
+        "deadline": {
+          "opens": "30 iunie 2026, 10:00",
+          "closes": "30 decembrie 2026, 14:00"
+        },
+        "budget": "40 mil. EUR",
+        "grant": "Maximum 2 mil. EUR",
+        "eligibility": "UAT, instituții publice și unități de învățământ eligibile",
+        "scoring": "Prag de excelență importat: 70 puncte",
+        "beneficiaries": "Entități publice eligibile din Sud-Est, în afara ITI Delta Dunării"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "prse-62-turism-nonurban",
+      "title": "Valorificarea potențialului turistic în zone non-urbane",
+      "programme": "Programul Regional Sud-Est",
+      "code": "PRSE/6/6.2/1/2025",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-IMPORT-PRSE-62-TURISM-NONURBAN"
+      ],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {
+        "status": "OPEN",
+        "deadline": {
+          "opens": "Deschis",
+          "closes": "31 august 2026"
+        },
+        "budget": "Conform ghidului",
+        "grant": "Conform ghidului",
+        "eligibility": "Proiecte prioritizate prin mecanismul teritorial",
+        "scoring": "Apel necompetitiv; condiții conform ghidului",
+        "beneficiaries": "Entități publice aferente proiectelor prioritizate"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "prse-61-urban",
+      "title": "Dezvoltare urbană integrată — regenerare, patrimoniu și turism",
+      "programme": "Programul Regional Sud-Est",
+      "code": "PRSE/6.1/1.1/2025",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-IMPORT-PRSE-61-URBAN"
+      ],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {
+        "status": "OPEN",
+        "deadline": {
+          "opens": "Deschis",
+          "closes": "31 august 2026, 16:00"
+        },
+        "budget": "Conform ghidului",
+        "grant": "Conform ghidului",
+        "eligibility": "Proiecte prioritizate conform mecanismului programului",
+        "scoring": "Apel necompetitiv; condiții conform ghidului",
+        "beneficiaries": "Municipii și entități eligibile conform ghidului"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "prse-41-drumuri-2",
+      "title": "Reabilitarea și modernizarea drumurilor județene pentru conectivitate TEN-T — Apel 2",
+      "programme": "Programul Regional Sud-Est",
+      "code": "PRSE/4.1/2/2025",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-IMPORT-PRSE-41-DRUMURI-2"
+      ],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {
+        "status": "OPEN",
+        "deadline": {
+          "opens": "Deschis",
+          "closes": "30 septembrie 2026, 16:00"
+        },
+        "budget": "Conform ghidului",
+        "grant": "Conform ghidului",
+        "eligibility": "Entități publice eligibile conform ghidului",
+        "scoring": "Conform grilei oficiale; neextras",
+        "beneficiaries": "Consilii județene și entități publice eligibile"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "prse-16-a1-micro-iti",
+      "title": "Creșterea competitivității microîntreprinderilor — ITI Delta Dunării",
+      "programme": "Programul Regional Sud-Est",
+      "code": "Acțiunea 1.6 / A.1 — ITI Delta Dunării",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-IMPORT-PRSE-16-A1-MICRO-ITI"
+      ],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {
+        "status": "EXPECTED",
+        "deadline": "Consultare 30 ianuarie – 27 februarie 2026; lansare neconfirmată",
+        "budget": "4,818 mil. EUR",
+        "grant": "20.000–200.000 EUR",
+        "eligibility": "Microîntreprindere eligibilă din ITI Delta Dunării; condițiile finale necesită rezoluție",
+        "scoring": "Conform grilei oficiale; neextras",
+        "beneficiaries": "Microîntreprinderi"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "prse-15-parcuri-industriale",
+      "title": "Infrastructuri suport de afaceri — parcuri industriale",
+      "programme": "Programul Regional Sud-Est",
+      "code": "PRSE/1.5/A/1/2026",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-IMPORT-PRSE-15-PARCURI-INDUSTRIALE"
+      ],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {
+        "status": "EXPECTED",
+        "deadline": "Consultare 23 ianuarie – 28 februarie 2026; lansare neconfirmată",
+        "budget": "48 mil. EUR",
+        "grant": "500.000–8.000.000 EUR",
+        "eligibility": "Fondator sau administrator de parc industrial eligibil",
+        "scoring": "Conform grilei oficiale; neextras",
+        "beneficiaries": "Fondatori, administratori și parteneriate eligibile"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "prse-22-seismic-elena",
+      "title": "Consolidarea seismică a clădirilor publice — proiecte pregătite prin ELENA",
+      "programme": "Programul Regional Sud-Est",
+      "code": "Acțiunea 2.2 — ELENA",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-IMPORT-PRSE-22-SEISMIC-ELENA"
+      ],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {
+        "status": "EXPECTED",
+        "deadline": "Consultare 30 mai – 22 iunie 2026; lansare neconfirmată",
+        "budget": "30 mil. EUR",
+        "grant": "Conform ghidului",
+        "eligibility": "Entități publice cu Acord de Parteneriat ELENA SEEE-PB",
+        "scoring": "Conform grilei oficiale; neextras",
+        "beneficiaries": "UAT, instituții publice și parteneriate eligibile"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "prse-61-iti-delta",
+      "title": "Dezvoltare urbană integrată în ITI Delta Dunării — Tulcea și orașele ITI",
+      "programme": "Programul Regional Sud-Est",
+      "code": "PRSE/6.1 ITI / 2026",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-IMPORT-PRSE-61-ITI-DELTA"
+      ],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {
+        "status": "EXPECTED",
+        "deadline": "Consultare 16 iulie – 6 august 2026; lansare neconfirmată",
+        "budget": "Conform ghidului",
+        "grant": "Conform ghidului",
+        "eligibility": "Municipiul Tulcea și orașele ITI; condițiile finale necesită rezoluție",
+        "scoring": "Conform grilei oficiale; neextras",
+        "beneficiaries": "Municipiul Tulcea și orașe din ITI Delta Dunării"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "pr-centru-verde-albastra",
+      "title": "Investiții în infrastructură verde și albastră în mediul urban regional — municipii",
+      "programme": "Programul Regiunea Centru",
+      "code": "3.3",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-IMPORT-PR-CENTRU-VERDE-ALBASTRA"
+      ],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {
+        "status": "OPEN",
+        "deadline": {
+          "opens": "30 iulie 2026, 10:00",
+          "closes": "30 octombrie 2026, 10:00"
+        },
+        "budget": "Vezi ghid",
+        "grant": "Vezi ghid",
+        "eligibility": "Municipii și parteneriate eligibile; condițiile exacte necesită rezoluție",
+        "scoring": "Conform grilei oficiale; neextras",
+        "beneficiaries": "Municipii și parteneriate eligibile"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "ptj-vest-parcuri",
+      "title": "Parcuri industriale și tehnologice",
+      "programme": "Programul Tranziție Justă — Vest",
+      "code": "PTJ — Parcuri industriale și tehnologice",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-IMPORT-PTJ-VEST-PARCURI"
+      ],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {
+        "status": "OPEN",
+        "deadline": {
+          "opens": "28 ianuarie 2026, 16:00",
+          "closes": "28 septembrie 2026, 14:00"
+        },
+        "budget": "Vezi ghid",
+        "grant": "Vezi ghid",
+        "eligibility": "Solicitanți eligibili conform ghidului PTJ; necesită rezoluție",
+        "scoring": "Conform grilei oficiale; neextras",
+        "beneficiaries": "Solicitanți eligibili conform ghidului PTJ"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "prsm-regenerare-municipii",
+      "title": "Regenerare urbană pentru municipii reședință de județ și zonele urbane funcționale",
+      "programme": "Programul Regional Sud-Muntenia",
+      "code": "PRSM/385 / P6 / RSO5.1",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-IMPORT-PRSM-REGENERARE-MUNICIPII"
+      ],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {
+        "status": "OPEN",
+        "deadline": {
+          "opens": "Deschis",
+          "closes": "8 ianuarie 2027, 14:00"
+        },
+        "budget": "Vezi ghid",
+        "grant": "Vezi ghid",
+        "eligibility": "Municipii reședință de județ și structuri eligibile; condițiile exacte necesită rezoluție",
+        "scoring": "Conform grilei oficiale; neextras",
+        "beneficiaries": "Municipii reședință de județ și structuri eligibile"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "pr-sv-turism-rural-2",
+      "title": "Sprijin pentru dezvoltarea turismului în mediul rural — Apel 2",
+      "programme": "Programul Regional Sud-Vest Oltenia",
+      "code": "Turism rural — Apel 2",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-IMPORT-PR-SV-TURISM-RURAL-2"
+      ],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {
+        "status": "EXPECTED",
+        "deadline": "Consultare 6–28 iulie 2026; lansare neconfirmată",
+        "budget": "5,882 mil. EUR",
+        "grant": "Vezi ghid",
+        "eligibility": "Stațiuni turistice rurale și entități publice eligibile; condițiile finale necesită rezoluție",
+        "scoring": "Conform grilei oficiale; neextras",
+        "beneficiaries": "Stațiuni turistice rurale și entități publice eligibile"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "PEO-STEP-LLL-ADULTI-2026",
+      "title": "STEP-LLL — Competențe pentru viitor: formare la locul de muncă și educația adulților în tehnologiile critice — Adulți",
+      "programme": "Programul Educație și Ocupare 2021-2027",
+      "priority": "P11 STEP — Tehnologii strategice pentru Europa",
+      "action": "11.g.1",
+      "status": "OPEN",
+      "opens_at": "2026-05-29T16:00:00+03:00",
+      "deadline_at": "2026-09-30T16:00:00+03:00",
+      "publication_state": "PUBLISHABLE",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-STEP-LLL-OIRNV-20260727-CORRIGENDUM",
+        "EV-STEP-LLL-OIRNV-20260602-LAUNCH",
+        "EV-STEP-LLL-OEU-20260812-CURRENT"
+      ],
+      "fact_evidence": {
+        "status": [
+          "EV-STEP-LLL-OIRNV-20260727-CORRIGENDUM",
+          "EV-STEP-LLL-OEU-20260812-CURRENT"
+        ],
+        "deadline": [
+          "EV-STEP-LLL-OIRNV-20260727-CORRIGENDUM",
+          "EV-STEP-LLL-OEU-20260812-CURRENT"
+        ]
+      }
+    }
+  ],
+  "changesets": [
+    {
+      "schema_version": "1.0",
+      "changeset_id": "CS-PEO-STEP-LLL-20260812",
+      "opportunity_id": "PEO-STEP-LLL-ADULTI-2026",
+      "automatic_publish_allowed": false,
+      "resolution_state": "VERIFIED",
+      "changes": [
+        {
+          "fact_class": "status",
+          "before": "CONFLICT: PUBLIC_CONSULTATION | OPEN",
+          "after": "OPEN",
+          "evidence_refs": [
+            "EV-STEP-LLL-OIRNV-20260727-CORRIGENDUM",
+            "EV-STEP-LLL-OEU-20260812-CURRENT"
+          ]
+        },
+        {
+          "fact_class": "deadline",
+          "before": "2026-08-28T16:00:00+03:00",
+          "after": "2026-09-30T16:00:00+03:00",
+          "evidence_refs": [
+            "EV-STEP-LLL-OIRNV-20260727-CORRIGENDUM",
+            "EV-STEP-LLL-OEU-20260812-CURRENT"
+          ]
+        }
+      ]
+    }
+  ],
+  "resolution_tasks": [
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-AFIR-ENERGY-2026-MATERIAL",
+      "opportunity_id": "afir-energy-2026",
+      "status": "IN_REVIEW",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": [
+        "eligibility"
+      ],
+      "resolution_evidence_refs": [
+        "EV-AFIR-ENERGY-2026-SESSION-CURRENT",
+        "EV-AFIR-ENERGY-2026-GUIDE-V7"
+      ],
+      "resolution_note": "Budget, grant, beneficiary classes and scoring are resolved. Eligibility remains UNKNOWN until every cumulative condition is normalized without loss."
+    },
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-PR-NE-ENERGY-RESIDENTIAL-TOWNS-2026-MATERIAL",
+      "opportunity_id": "pr-ne-energy-residential-towns-2026",
+      "status": "OPEN",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-PR-CENTRU-DIGITAL-2-MATERIAL",
+      "opportunity_id": "pr-centru-digital-2",
+      "status": "IN_REVIEW",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ],
+      "resolution_evidence_refs": [
+        "EV-PR-CENTRU-DIGITAL2-CURRENT-PAGE-20260812",
+        "EV-PR-CENTRU-DIGITAL2-CONSULTATION-PACKAGE-20260428"
+      ],
+      "resolution_note": "Keep every material fact blocked until ADR Centru publishes a final guide and an explicit submission window, or corrects the current status label."
+    },
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-PR-CENTRU-CLUSTERS-122-MATERIAL",
+      "opportunity_id": "pr-centru-clusters-122",
+      "status": "OPEN",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": [
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-PIDS-SUPPORTED-DECISION-MATERIAL",
+      "opportunity_id": "pids-supported-decision",
+      "status": "OPEN",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": [
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-PEO-STEP-EDU-ADULTI-MATERIAL",
+      "opportunity_id": "peo-step-edu-adulti",
+      "status": "OPEN",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-PR-CENTRU-PARCURI-RIS-MATERIAL",
+      "opportunity_id": "pr-centru-parcuri-ris",
+      "status": "OPEN",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-PR-CENTRU-URBAN-81-MATERIAL",
+      "opportunity_id": "pr-centru-urban-81",
+      "status": "OPEN",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-PEO-UNIVERSITATI-DESCHISE-MATERIAL",
+      "opportunity_id": "peo-universitati-deschise",
+      "status": "OPEN",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-PEO-STEP-VET-MATERIAL",
+      "opportunity_id": "peo-step-vet",
+      "status": "OPEN",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-PIDS-TRAFIC-PERSOANE-MATERIAL",
+      "opportunity_id": "pids-trafic-persoane",
+      "status": "OPEN",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-PR-CENTRU-TABERE-72-MATERIAL",
+      "opportunity_id": "pr-centru-tabere-72",
+      "status": "OPEN",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-PRSE-21B-ELENA-PUBLIC-MATERIAL",
+      "opportunity_id": "prse-21b-elena-public",
+      "status": "OPEN",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-PRSE-52-EDUCATIE-MATERIAL",
+      "opportunity_id": "prse-52-educatie",
+      "status": "OPEN",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-PRSE-62-TURISM-NONURBAN-MATERIAL",
+      "opportunity_id": "prse-62-turism-nonurban",
+      "status": "OPEN",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-PRSE-61-URBAN-MATERIAL",
+      "opportunity_id": "prse-61-urban",
+      "status": "OPEN",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-PRSE-41-DRUMURI-2-MATERIAL",
+      "opportunity_id": "prse-41-drumuri-2",
+      "status": "OPEN",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-PRSE-16-A1-MICRO-ITI-MATERIAL",
+      "opportunity_id": "prse-16-a1-micro-iti",
+      "status": "OPEN",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-PRSE-15-PARCURI-INDUSTRIALE-MATERIAL",
+      "opportunity_id": "prse-15-parcuri-industriale",
+      "status": "OPEN",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-PRSE-22-SEISMIC-ELENA-MATERIAL",
+      "opportunity_id": "prse-22-seismic-elena",
+      "status": "OPEN",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-PRSE-61-ITI-DELTA-MATERIAL",
+      "opportunity_id": "prse-61-iti-delta",
+      "status": "OPEN",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-PR-CENTRU-VERDE-ALBASTRA-MATERIAL",
+      "opportunity_id": "pr-centru-verde-albastra",
+      "status": "OPEN",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-PTJ-VEST-PARCURI-MATERIAL",
+      "opportunity_id": "ptj-vest-parcuri",
+      "status": "OPEN",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-PRSM-REGENERARE-MUNICIPII-MATERIAL",
+      "opportunity_id": "prsm-regenerare-municipii",
+      "status": "OPEN",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-PR-SV-TURISM-RURAL-2-MATERIAL",
+      "opportunity_id": "pr-sv-turism-rural-2",
+      "status": "OPEN",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-PEO-STEP-LLL-LIFECYCLE-20260812",
+      "opportunity_id": "PEO-STEP-LLL-ADULTI-2026",
+      "status": "RESOLVED",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": [
+        "status",
+        "deadline"
+      ],
+      "resolution_evidence_refs": [
+        "EV-STEP-LLL-OIRNV-20260727-CORRIGENDUM",
+        "EV-STEP-LLL-OEU-20260812-CURRENT"
+      ],
+      "resolution_note": "The consultation marker is historical. The final call opened on 2026-05-29 and the original deadline was superseded by the 2026-07-24 corrigendum."
+    }
+  ],
+  "resolution_application": {
+    "mode": "EXPLICIT_VERIFIED_OVERLAY",
+    "automatic_publication": false,
+    "applied_resolution_ids": [
+      "RES-AFIR-ENERGY-20260812",
+      "RES-PR-CENTRU-DIGITAL2-20260812",
+      "RES-PEO-STEP-LLL-20260812"
+    ]
+  }
+}
