@@ -19,8 +19,10 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
-  cancel-in-progress: true
+  # All workflows that call actions/deploy-pages must share this lock. GitHub
+  # rejects a second deployment while the first is still in progress.
+  group: partener-eu-pages
+  cancel-in-progress: false
 
 jobs:
   deploy:
