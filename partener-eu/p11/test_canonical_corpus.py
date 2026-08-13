@@ -29,11 +29,14 @@ class CanonicalCorpusTests(unittest.TestCase):
     def test_bundle_passes_contract(self):
         counts = validate_bundle(self.bundle)
         self.assertEqual(counts["opportunities"], 26)
-        self.assertEqual(counts["changesets"], 2)
+        self.assertEqual(counts["changesets"], 3)
 
     def test_normalization_has_no_publication_effect(self):
         publishable = [x["opportunity_id"] for x in self.bundle["opportunities"] if x["publication_state"] == "PUBLISHABLE"]
-        self.assertEqual(publishable, ["afir-energy-2026", "PEO-STEP-LLL-ADULTI-2026"])
+        self.assertEqual(
+            publishable,
+            ["afir-energy-2026", "pr-ne-energy-residential-towns-2026", "PEO-STEP-LLL-ADULTI-2026"],
+        )
         self.assertTrue(all(x.get("automatic_material_fact_update_allowed") is False for x in self.bundle["opportunities"]))
 
     def test_candidate_fact_without_resolution_block_is_rejected(self):
@@ -58,7 +61,8 @@ class CanonicalCorpusTests(unittest.TestCase):
     def test_admitted_batch_is_semantically_unresolved(self):
         opportunities = {x["opportunity_id"]: x for x in self.bundle["opportunities"]}
         evidence = {x["evidence_id"]: x for x in self.bundle["evidence"]}
-        for opportunity_id in self.admitted_ids:
+        resolved_admissions = {"pr-ne-energy-residential-towns-2026"}
+        for opportunity_id in set(self.admitted_ids) - resolved_admissions:
             item = opportunities[opportunity_id]
             self.assertEqual(item["status"], "DISCOVERED")
             self.assertEqual(item["material_facts"], {})
