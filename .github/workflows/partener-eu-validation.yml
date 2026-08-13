@@ -42,6 +42,10 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          # workflow_run events retain the upstream workflow's head SHA even
+          # while this job waits for the serialized ledger writer. Always
+          # start from the latest canonical main before generating evidence.
+          ref: main
           fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
