@@ -9,7 +9,7 @@ Actualizat: 13 august 2026
 - P11 integrat: 26 oportunități canonice, 33 dovezi, 26 taskuri de rezoluție;
 - STEP-LLL și AFIR Energie 2026 sunt publicabile pe baza faptelor materiale demonstrate; restul câmpurilor rămân blocate când nu sunt demonstrate;
 - frontend conectat la P11: 4 apeluri OPEN cu statut și termen verificate, 26 oportunități monitorizate;
-- quality gate local: 16/16 PASS;
+- quality gate local: 18/18 PASS, inclusiv replay semantic fără scriere pentru rezoluții și proiecția publică;
 - transportul securizat strict rămâne PENDING până când HTTP și originul Pages păstrează HTTPS;
 - P10 rămâne deschis până la 30 de zile distincte de validare eligibilă.
 
@@ -24,6 +24,14 @@ Actualizat: 13 august 2026
 7. P14: știri, fișe de apel și rezumate de ghid generate din fapte verificate.
 8. P15: email, WordPress și rețele sociale numai după autorizare.
 9. P16: pilot operațional complet, 30 de zile validate și CIVORA v1.0.
+
+## Ultimul increment validat
+
+- P11-R01 — poartă deterministă de drift pentru artefactele derivate;
+- `apply_resolutions.py --check` recalculează overlay-urile și oprește CI dacă bundle-ul canonic diferă semantic;
+- `build_public_projection.py --check` recalculează proiecția și oprește CI dacă payloadul public diferă semantic;
+- verificările sunt read-only, raportează hash-uri canonice la abatere și nu schimbă autoritatea de publicare;
+- corpusul rămâne la 26 oportunități, două publicabile și 24 taskuri deschise sau în review.
 
 ## Reguli de închidere
 

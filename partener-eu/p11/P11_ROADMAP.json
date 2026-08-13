@@ -68,7 +68,9 @@
         "evidence_records": 33,
         "publishable_records": 2,
         "public_projection": "FAIL_CLOSED",
-        "unified_quality_gate": "16/16 PASS"
+        "unified_quality_gate": "18/18 PASS",
+        "artifact_drift_gate": "SEMANTIC_READ_ONLY_REPLAY",
+        "artifact_drift_scope": ["resolution overlays", "public projection"]
       },
       "semantic_resolution_dependency": "Open ResolutionTasks must be resolved by the Opportunity Resolution workflow before P11 closure"
     }

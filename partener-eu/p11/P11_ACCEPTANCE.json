@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "checkpoint": "P11-PRODUCTION-CONSOLIDATION-V1",
   "status": "PASS",
-  "accepted_at": "2026-08-12",
+  "accepted_at": "2026-08-13",
   "evidence": {
     "contract": "partener-eu/p11/opportunity_contract.py",
     "tests": "partener-eu/p11/test_opportunity_contract.py",
-    "test_command": "python -m unittest discover -s partener-eu/p11 -p 'test_*.py' && python partener-eu/p11/validate_corpus.py && python partener-eu/p11/validate_admission_batch.py && python partener-eu/p11/build_staging_ledger.py",
-    "tests_passed": 23,
+    "test_command": "python partener-eu/p11/apply_resolutions.py --check && python partener-eu/p11/build_public_projection.py --check && python -m unittest discover -s partener-eu/p11 -p 'test_*.py' && python partener-eu/ops/quality_gate.py",
+    "tests_passed": 25,
     "tests_failed": 0
   },
   "policy_assertions": {
@@ -27,7 +27,11 @@
     "terminal_batch_size_is_explicitly_gated": true,
     "candidate_identity_is_deterministic": true,
     "input_order_does_not_change_ledger_hash": true,
-    "new_and_ambiguous_candidates_cannot_publish": true
+    "new_and_ambiguous_candidates_cannot_publish": true,
+    "resolution_artifact_semantic_drift_rejected": true,
+    "public_projection_semantic_drift_rejected": true,
+    "artifact_drift_checks_are_read_only": true,
+    "unified_quality_gate": "18/18 PASS"
   },
   "corpus": {
     "public_baseline": 6,

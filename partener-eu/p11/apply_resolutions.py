@@ -9,6 +9,7 @@ the object level. Nothing is published automatically by this operation.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import pathlib
@@ -40,6 +41,23 @@ def atomic(path: pathlib.Path, value: dict[str, Any]) -> None:
     finally:
         if os.path.exists(temporary):
             os.unlink(temporary)
+
+
+def serialize(value: dict[str, Any]) -> str:
+    return json.dumps(value, ensure_ascii=False, indent=2) + "\n"
+
+
+def digest(value: str) -> str:
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def assert_artifact_current(path: pathlib.Path, expected: dict[str, Any]) -> None:
+    actual = load(path)
+    if actual != expected:
+        raise ValueError(
+            f"resolution artifact drift: {path} "
+            f"actual_sha256={digest(serialize(actual))} expected_sha256={digest(serialize(expected))}"
+        )
 
 
 def keyed(rows: list[dict[str, Any]], field: str) -> dict[str, dict[str, Any]]:
@@ -105,13 +123,16 @@ def main() -> int:
     paths = sorted(args.resolution_dir.glob("*_resolution.json"))
     resolutions = [load(path) for path in paths]
     merged = apply(load(args.bundle), resolutions)
-    if not args.check:
+    if args.check:
+        assert_artifact_current(args.bundle, merged)
+    else:
         atomic(args.bundle, merged)
     print(json.dumps({
         "opportunities": len(merged["opportunities"]),
         "resolutions": len(resolutions),
         "resolved_tasks": sum(1 for row in merged["resolution_tasks"] if row["status"] == "RESOLVED"),
         "publication_effect": "NONE",
+        "mode": "CHECK" if args.check else "WRITE",
     }, ensure_ascii=False))
     return 0
 

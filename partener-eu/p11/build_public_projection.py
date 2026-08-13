@@ -2,6 +2,8 @@
 """Build the fail-closed browser projection from the canonical P11 bundle."""
 from __future__ import annotations
 
+import argparse
+import hashlib
 import json
 import os
 import pathlib
@@ -24,6 +26,37 @@ def atomic_text(path: pathlib.Path, value: str) -> None:
     finally:
         if os.path.exists(temporary):
             os.unlink(temporary)
+
+
+def digest(value: str) -> str:
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def render(projection: dict) -> str:
+    return "window.PARTENER_P11=" + json.dumps(projection, ensure_ascii=False, separators=(",", ":")) + ";\n"
+
+
+def parse_payload(value: str) -> dict:
+    prefix = "window.PARTENER_P11="
+    stripped = value.strip()
+    if not stripped.startswith(prefix) or not stripped.endswith(";"):
+        raise ValueError("public projection wrapper is invalid")
+    parsed = json.loads(stripped[len(prefix):-1])
+    if not isinstance(parsed, dict):
+        raise ValueError("public projection object required")
+    return parsed
+
+
+def assert_artifact_current(path: pathlib.Path, expected: str) -> None:
+    actual = path.read_text(encoding="utf-8")
+    expected_projection = parse_payload(expected)
+    actual_projection = parse_payload(actual)
+    if actual_projection != expected_projection:
+        raise ValueError(
+            f"public projection drift: {path} "
+            f"actual_sha256={digest(render(actual_projection))} "
+            f"expected_sha256={digest(render(expected_projection))}"
+        )
 
 
 def build(bundle: dict) -> dict:
@@ -72,11 +105,17 @@ def build(bundle: dict) -> dict:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--check", action="store_true")
+    args = parser.parse_args()
     bundle = json.loads(BUNDLE.read_text(encoding="utf-8"))
     projection = build(bundle)
-    payload = "window.PARTENER_P11=" + json.dumps(projection, ensure_ascii=False, separators=(",", ":")) + ";\n"
-    atomic_text(OUTPUT, payload)
-    print(json.dumps(projection["summary"], ensure_ascii=False))
+    payload = render(projection)
+    if args.check:
+        assert_artifact_current(OUTPUT, payload)
+    else:
+        atomic_text(OUTPUT, payload)
+    print(json.dumps({**projection["summary"], "mode": "CHECK" if args.check else "WRITE"}, ensure_ascii=False))
     return 0
 
 
