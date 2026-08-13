@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "updated_at": "2026-08-13T09:27:02Z",
+  "updated_at": "2026-08-13T10:25:30Z",
   "policy": "Resolve only material fact classes demonstrated by current T1/T1B semantic evidence; omit all other material facts.",
   "cases": [
     {
@@ -86,6 +86,23 @@
       ],
       "unresolved_fact_classes": [],
       "next_review_trigger": "Official clarification, corrigendum, suspension, closure, cancellation or guide revision"
+    },
+    {
+      "priority": 6,
+      "opportunity_id": "pids-supported-decision",
+      "resolution_file": "resolutions/pids_supported_decision_resolution.json",
+      "state": "RESOLVED_ALL_MATERIAL_FACT_CLASSES",
+      "resolved_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ],
+      "unresolved_fact_classes": [],
+      "next_review_trigger": "Official clarification, corrigendum, suspension, closure, cancellation, specific-guide revision or general-guide revision"
     }
   ]
 }

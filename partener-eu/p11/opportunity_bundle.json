@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "bundle_id": "PARTENER-EU-P11-CANONICAL-0001",
-  "as_of": "2026-08-13T09:27:02Z",
+  "as_of": "2026-08-13T10:25:30Z",
   "source_snapshot": {
     "repository": "mihaicismaru-bit/civora",
     "public_data_path": "partener-eu/web/data.js",
@@ -582,6 +582,68 @@
       "semantic_assertion": "Corrigendum 1 of the final guide and its official annex package establish the EUR 11,664,904 allocation; EUR 300,000–3,500,000 grant; aid intensities; eligible cluster-management applicants and member-SME partnerships; cumulative applicant, partnership, location, project and activity conditions; and the 100-point competitive grid with a 60-point quality threshold, three eliminatory zero-score subcriteria and ordered tie-breakers. The official FAQ confirms that the cluster itself must have at least one full fiscal year of uninterrupted activity.",
       "temporal_role": "CURRENT_FINAL_GUIDE_CORRIGENDUM_AND_ANNEXES",
       "retrieval_state": "PRIMARY_ATTACHMENTS_HASH_VERIFIED_AND_SEMANTICALLY_REVIEWED"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-PIDS-SUPPORTED-DECISION-CURRENT-20260813",
+      "source_tier": "T1",
+      "source_owner": "Ministerul Investițiilor și Proiectelor Europene — Autoritatea de Management PIDS",
+      "source_url": "https://mfe.gov.ro/ghiduri_pids/servicii-de-asistenta-si-suport-in-luarea-deciziei-pentru-persoane-fara-sau-cu-capacitate-restransa-de-exercitiu/",
+      "observed_at": "2026-08-13T10:25:30Z",
+      "semantic_sha256": "246d30319427f500a71ca7d88bf7ef0e7080c281c102a45bbc2a8ede4823155b",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "beneficiaries"
+      ],
+      "semantic_assertion": "The current official MIPE call page explicitly marks the call 'Deschis', states that MySMIS2021/MySMIS2021+ is open from 2026-06-30 16:00 through 2026-08-28 16:00, gives a EUR 11,804,343 call value and names the Ministry of Labour, Family, Youth and Social Solidarity as eligible applicant. OPEN is supported semantically and not inferred from the dates.",
+      "temporal_role": "CURRENT_ACTIVE_CALL_REGISTRY",
+      "retrieval_state": "OFFICIAL_PAGE_SEMANTICALLY_VERIFIED"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-PIDS-SUPPORTED-DECISION-FINAL-PACKAGE-20260813",
+      "source_tier": "T1",
+      "source_owner": "Ministerul Investițiilor și Proiectelor Europene — Autoritatea de Management PIDS",
+      "source_url": "https://mfe.gov.ro/ghiduri_pids/servicii-de-asistenta-si-suport-in-luarea-deciziei-pentru-persoane-fara-sau-cu-capacitate-restransa-de-exercitiu/",
+      "primary_attachment_url": "https://mfe.gov.ro/wp-content/uploads/2026/06/0c65ef5b7b09aeac6c4c664d15f69d3e.7z",
+      "primary_attachment_sha256": "82a9f11e9759209b95285e27b591853a9d68965357bdd5149520bb5c92cd5d69",
+      "specific_guide_sha256": "0c47e95910c6483ada474f90ad75be3dca2a97650c685e14be2bac65e17cf836",
+      "approval_order_sha256": "18cee166c25ed0b68b3a38b907ee5e2060a96c6e7d596ff71201d1a778398565",
+      "administrative_grid_sha256": "b229a41d417757f00c37b8610223890f00e1641ffe991cb2ceec3b9a196b6a7e",
+      "scoring_grid_sha256": "bd33a8d47ab0bc895f733c8d6d645945b58e2e73c1d860a1454af4a835e8d25a",
+      "observed_at": "2026-08-13T10:25:30Z",
+      "semantic_sha256": "90d8e7e3533c8983f0e3a288be2e60ead59ad677d9b0b0e73b507595bd1f8b86",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": [
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ],
+      "semantic_assertion": "The final guide approved on 2026-06-24 and published on 2026-06-25 establishes a noncompetitive FSE+ grant, the EUR 11,804,343 allocation, the project-value ceiling, a mandatory Ministry-led partnership with the disability-rights authority and relevant NGOs, cumulative general and specific eligibility, a 36-month duration, and a 100-point qualitative grid with a 70-point overall threshold plus 21/21/21/7 criterion thresholds. A zero subcriterion score is expressly non-eliminatory.",
+      "temporal_role": "CURRENT_FINAL_GUIDE_AND_ANNEX_PACKAGE",
+      "retrieval_state": "PRIMARY_ATTACHMENT_HASH_VERIFIED_AND_SEMANTICALLY_REVIEWED"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-PIDS-GENERAL-CONDITIONS-CURRENT-20260813",
+      "source_tier": "T1",
+      "source_owner": "Ministerul Investițiilor și Proiectelor Europene — Autoritatea de Management PIDS",
+      "source_url": "https://mfe.gov.ro/programul-incluziune-si-demnitate-sociala-pids-2021-2027-ghidul-solicitantului-conditii-generale/",
+      "observed_at": "2026-08-13T10:25:30Z",
+      "semantic_sha256": "b45fad5c866d7e7e6f4a5143a3362eff05447b2798d4666f8fa5ba717c5cd4a2",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": [
+        "grant",
+        "eligibility"
+      ],
+      "semantic_assertion": "The current official General Guide incorporated by sections 3.4, 5.1.1, 5.4 and 5.5 of the specific guide supplies the cumulative legal-entity, activity, capacity and exclusion rules and the P7 FSE+ entity-category cofinancing rates in tables 5 and 6. The specific guide prevails where it sets different conditions.",
+      "temporal_role": "CURRENT_INCORPORATED_GENERAL_CONDITIONS",
+      "retrieval_state": "OFFICIAL_CONSOLIDATED_GUIDE_SEMANTICALLY_VERIFIED"
     }
   ],
   "opportunities": [
@@ -1064,32 +1126,139 @@
       "programme": "PIDS",
       "code": "P07 / ESO4.11 / 7.2 C1",
       "status": "OPEN",
-      "publication_state": "REVIEW_REQUIRED",
+      "publication_state": "PUBLISHABLE",
       "automatic_material_fact_update_allowed": false,
       "evidence_refs": [
-        "EV-SRC-OIRBI-PIDS"
+        "EV-SRC-OIRBI-PIDS",
+        "EV-PIDS-SUPPORTED-DECISION-CURRENT-20260813",
+        "EV-PIDS-SUPPORTED-DECISION-FINAL-PACKAGE-20260813",
+        "EV-PIDS-GENERAL-CONDITIONS-CURRENT-20260813"
       ],
       "material_facts": {
         "status": "OPEN",
         "deadline": {
-          "opens": "30 iunie 2026, 16:00",
-          "closes": "28 august 2026, 16:00"
+          "opens_at": "2026-06-30T16:00:00+03:00",
+          "closes_at": "2026-08-28T16:00:00+03:00",
+          "submission_system": "MySMIS2021/SMIS2021+"
+        },
+        "budget": {
+          "total_eur": 11804343,
+          "fse_plus_eur": 8592019,
+          "national_contribution_eur": 3212324,
+          "geographic_allocation_method": {
+            "less_developed_regions_percent": 72.86,
+            "developed_region_percent": 27.14
+          },
+          "inforeuro_rate_ron_per_eur": 5.2481,
+          "inforeuro_month": "2026-06"
+        },
+        "grant": {
+          "form": "grant nerambursabil",
+          "maximum_total_project_value_eur": 11804343,
+          "project_budget_currency": "RON",
+          "cofinancing_rule": "Contribuția proprie minimă se calculează separat pentru bugetul gestionat de fiecare membru, după categoria entității și tipul regiunii, conform tabelelor 5 și 6 din Condițiile Generale PIDS; contribuțiile membrilor se însumează la nivelul parteneriatului.",
+          "p7_fse_plus_minimum_own_contribution_percent": {
+            "public_own_revenue_or_local_budget_entity": {
+              "less_developed_regions": 2,
+              "developed_region": 2
+            },
+            "state_budget_credit_authorizer_or_fully_budgeted_subordinate_entity": {
+              "less_developed_regions": 20,
+              "developed_region": 60
+            },
+            "private_nonprofit_legal_entity": {
+              "less_developed_regions": 0,
+              "developed_region": 0
+            }
+          }
+        },
+        "beneficiaries": {
+          "eligible_applicant": "Ministerul Muncii, Familiei, Tineretului și Solidarității Sociale",
+          "mandatory_institutional_partner": "Autoritatea Națională pentru Protecția Drepturilor Persoanelor cu Dizabilități",
+          "eligible_nongovernmental_partners": "Organizații neguvernamentale cu expertiză relevantă în drepturile persoanelor cu dizabilități, incluziune socială, implementarea CDPD, servicii de sprijin în luarea deciziilor, advocacy ori asistență juridică/socială pentru persoane vulnerabile",
+          "target_scope": "Mecanism național de sprijin pentru persoane fără sau cu capacitate restrânsă de exercițiu, pilotat în opt județe"
+        },
+        "eligibility": {
+          "cumulative": true,
+          "applicant_and_partnership": [
+            "Ministerul Muncii, Familiei, Tineretului și Solidarității Sociale este liderul eligibil și proiectul se implementează obligatoriu în parteneriat.",
+            "Autoritatea Națională pentru Protecția Drepturilor Persoanelor cu Dizabilități este partener instituțional obligatoriu; sunt eligibile și ONG-uri cu expertiza relevantă definită de ghid.",
+            "Sunt admiși numai parteneri individuali, nu consorții, asociații de parteneri ori grupuri de societăți; alegerea partenerilor aparține liderului.",
+            "Rolurile, resursele, activitățile și bugetul fiecărui membru se detaliază în cerere și fiecare membru contribuie financiar pentru propriul buget; selecția partenerilor privați respectă procedura PIDS aplicabilă."
+          ],
+          "general_conditions": [
+            "Solicitantul este persoană juridică legal constituită în România și se încadrează în categoria specifică; partenerii sunt persoane juridice, au activități relevante în obiectul de activitate și participă la cel puțin o activitate care contribuie direct la indicatori.",
+            "Solicitantul și partenerii respectă cumulativ tabelul 2 și nu se află în situațiile de excludere din tabelul 3 al Condițiilor Generale PIDS, inclusiv insolvență/faliment, condamnări ori abateri profesionale grave, datorii peste pragurile admise, fraudă/corupție, conflict de interese sau declarații false.",
+            "Capacitatea financiară se verifică la nivelul întregului parteneriat pentru entitățile private; instituțiile publice sunt exceptate de la această evaluare, iar bugetul lor eligibil corespunde activităților asumate."
+          ],
+          "project_and_activity_conditions": [
+            "Proiectul are acoperire națională și dezvoltă și pilotează mecanismul de sprijin în luarea deciziilor, incluzând cadrul legislativ, modelul de serviciu, formarea, rețeaua de reprezentanți personali, pilotarea, instrumentele juridice și operaționale, coordonarea, informarea și evaluarea.",
+            "Activitățile de bază reprezintă minimum 50% din bugetul eligibil al proiectului.",
+            "Valoarea totală nu depășește EUR 11,804,343; bugetul este exprimat numai în lei la cursul Inforeuro din iunie 2026, EUR 1 = RON 5.2481.",
+            "Implementarea durează maximum 36 de luni și nu poate depăși 31 decembrie 2029."
+          ]
+        },
+        "scoring": {
+          "competitive": false,
+          "selection_mechanism": "două faze: validarea fișei/ideii de proiect, apoi cererea de finanțare fără schimbarea elementelor esențiale validate",
+          "maximum_points": 100,
+          "minimum_total_points": 70,
+          "criteria": [
+            {
+              "name": "Relevanță",
+              "maximum_points": 30,
+              "minimum_points": 21
+            },
+            {
+              "name": "Eficacitate",
+              "maximum_points": 30,
+              "minimum_points": 21
+            },
+            {
+              "name": "Eficiență",
+              "maximum_points": 30,
+              "minimum_points": 21
+            },
+            {
+              "name": "Sustenabilitate",
+              "maximum_points": 10,
+              "minimum_points": 7
+            }
+          ],
+          "zero_score_subcriterion_eliminatory": false,
+          "intermediate_score_rule": "Sunt permise numai punctaje intermediare întregi, fără zecimale.",
+          "selection_rule": "Finanțarea este posibilă numai cu minimum 70 de puncte total și cu pragul minim respectat pentru fiecare dintre cele patru criterii."
         }
       },
       "fact_evidence": {
         "status": [
-          "EV-SRC-OIRBI-PIDS"
+          "EV-SRC-OIRBI-PIDS",
+          "EV-PIDS-SUPPORTED-DECISION-CURRENT-20260813"
         ],
         "deadline": [
-          "EV-SRC-OIRBI-PIDS"
+          "EV-SRC-OIRBI-PIDS",
+          "EV-PIDS-SUPPORTED-DECISION-CURRENT-20260813",
+          "EV-PIDS-SUPPORTED-DECISION-FINAL-PACKAGE-20260813"
+        ],
+        "budget": [
+          "EV-PIDS-SUPPORTED-DECISION-CURRENT-20260813",
+          "EV-PIDS-SUPPORTED-DECISION-FINAL-PACKAGE-20260813"
+        ],
+        "grant": [
+          "EV-PIDS-SUPPORTED-DECISION-FINAL-PACKAGE-20260813",
+          "EV-PIDS-GENERAL-CONDITIONS-CURRENT-20260813"
+        ],
+        "eligibility": [
+          "EV-PIDS-SUPPORTED-DECISION-FINAL-PACKAGE-20260813",
+          "EV-PIDS-GENERAL-CONDITIONS-CURRENT-20260813"
+        ],
+        "scoring": [
+          "EV-PIDS-SUPPORTED-DECISION-FINAL-PACKAGE-20260813"
+        ],
+        "beneficiaries": [
+          "EV-PIDS-SUPPORTED-DECISION-CURRENT-20260813",
+          "EV-PIDS-SUPPORTED-DECISION-FINAL-PACKAGE-20260813"
         ]
-      },
-      "candidate_material_facts": {
-        "budget": "11,804 mil. EUR",
-        "grant": "Conform ghidului",
-        "eligibility": "Lider restricționat instituțional; parteneri conform ghidului",
-        "scoring": "Necompetitiv — condiții specifice",
-        "beneficiaries": "Minister / parteneri instituționali eligibili"
       }
     },
     {
@@ -1792,6 +1961,59 @@
           ]
         }
       ]
+    },
+    {
+      "schema_version": "1.0",
+      "changeset_id": "CS-PIDS-SUPPORTED-DECISION-20260813",
+      "opportunity_id": "pids-supported-decision",
+      "automatic_publish_allowed": false,
+      "resolution_state": "VERIFIED",
+      "changes": [
+        {
+          "fact_class": "budget",
+          "before": "11,804 mil. EUR",
+          "after": "EUR 11,804,343 total; EUR 8,592,019 FSE+; EUR 3,212,324 national contribution",
+          "evidence_refs": [
+            "EV-PIDS-SUPPORTED-DECISION-CURRENT-20260813",
+            "EV-PIDS-SUPPORTED-DECISION-FINAL-PACKAGE-20260813"
+          ]
+        },
+        {
+          "fact_class": "grant",
+          "before": "Conform ghidului",
+          "after": "Non-repayable grant; project total capped by the EUR 11,804,343 call allocation; entity- and region-specific P7 FSE+ cofinancing",
+          "evidence_refs": [
+            "EV-PIDS-SUPPORTED-DECISION-FINAL-PACKAGE-20260813",
+            "EV-PIDS-GENERAL-CONDITIONS-CURRENT-20260813"
+          ]
+        },
+        {
+          "fact_class": "eligibility",
+          "before": "Lider restricționat instituțional; parteneri conform ghidului",
+          "after": "Verified cumulative Ministry-led mandatory partnership, general entity/exclusion/capacity rules and specific project/activity conditions",
+          "evidence_refs": [
+            "EV-PIDS-SUPPORTED-DECISION-FINAL-PACKAGE-20260813",
+            "EV-PIDS-GENERAL-CONDITIONS-CURRENT-20260813"
+          ]
+        },
+        {
+          "fact_class": "scoring",
+          "before": "Necompetitiv — condiții specifice",
+          "after": "Two-stage noncompetitive selection; 100 points; minimum 70 overall and 21/21/21/7 per criterion; zero subcriterion is not eliminatory",
+          "evidence_refs": [
+            "EV-PIDS-SUPPORTED-DECISION-FINAL-PACKAGE-20260813"
+          ]
+        },
+        {
+          "fact_class": "beneficiaries",
+          "before": "Minister / parteneri instituționali eligibili",
+          "after": "Ministry applicant and leader; mandatory disability-rights authority; relevant NGO partners; national supported-decision target scope",
+          "evidence_refs": [
+            "EV-PIDS-SUPPORTED-DECISION-CURRENT-20260813",
+            "EV-PIDS-SUPPORTED-DECISION-FINAL-PACKAGE-20260813"
+          ]
+        }
+      ]
     }
   ],
   "resolution_tasks": [
@@ -1875,7 +2097,7 @@
       "schema_version": "1.0",
       "resolution_task_id": "RT-PIDS-SUPPORTED-DECISION-MATERIAL",
       "opportunity_id": "pids-supported-decision",
-      "status": "OPEN",
+      "status": "RESOLVED",
       "automatic_material_fact_update_allowed": false,
       "blocked_fact_classes": [
         "budget",
@@ -1883,7 +2105,13 @@
         "eligibility",
         "scoring",
         "beneficiaries"
-      ]
+      ],
+      "resolution_evidence_refs": [
+        "EV-PIDS-SUPPORTED-DECISION-CURRENT-20260813",
+        "EV-PIDS-SUPPORTED-DECISION-FINAL-PACKAGE-20260813",
+        "EV-PIDS-GENERAL-CONDITIONS-CURRENT-20260813"
+      ],
+      "resolution_note": "The current MIPE page semantically asserts OPEN and the MySMIS window. The final hash-pinned guide package plus the incorporated current General Guide demonstrate every previously blocked class; no candidate material fact remains."
     },
     {
       "schema_version": "1.0",
@@ -2228,6 +2456,7 @@
     "applied_resolution_ids": [
       "RES-AFIR-ENERGY-20260812",
       "RES-AFIR-ENERGY-20260813-V2",
+      "RES-PIDS-SUPPORTED-DECISION-20260813",
       "RES-PR-CENTRU-CLUSTERS-122-20260813",
       "RES-PR-CENTRU-DIGITAL2-20260812",
       "RES-PR-CENTRU-DIGITAL2-20260813-V2",
