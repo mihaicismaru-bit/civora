@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "updated_at": "2026-08-13T12:28:02Z",
+  "updated_at": "2026-08-13T13:30:04Z",
   "policy": "Resolve only material fact classes demonstrated by current T1/T1B semantic evidence; omit all other material facts.",
   "cases": [
     {
@@ -137,6 +137,23 @@
       ],
       "contradiction": "The current official action page states 20 October 2026 at 10:00, while the official opening notice published on 22 July states 2 October 2026 at 10:00. The final guide package is listed but its attachments are presently protected by an anti-bot challenge and could not be hash-pinned.",
       "next_review_trigger": "Direct retrieval of the final guide and annex package, an explicit ADR Centru deadline correction, corrigendum, suspension, closure or cancellation notice"
+    },
+    {
+      "priority": 9,
+      "opportunity_id": "peo-step-vet",
+      "resolution_file": "resolutions/peo_step_vet_resolution.json",
+      "state": "IN_REVIEW_CONSULTATION_CLOSED_FINAL_PACKAGE_UNAVAILABLE",
+      "unresolved_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ],
+      "blocker": "Official OIR notices establish only the 13/14 July through 3 August 2026 public consultation. The linked MIPE ZIP returned HTTP 503 and could not be hash-pinned or semantically reviewed; no explicit final launch or current submission window was verified.",
+      "next_review_trigger": "Accessible hash-pinnable final STEP-VET guide and annex package plus an explicit MySMIS submission window, authoritative final launch, cancellation or suspension notice"
     }
   ]
 }
