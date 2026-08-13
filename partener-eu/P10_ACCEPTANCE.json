@@ -11,11 +11,11 @@
     "atomic_state_and_recovery": "PASS",
     "frontend_regression": "10/10_PASS_LATEST",
     "minimum_distinct_days": 30,
-    "current_qualifying_days": 2,
+    "current_qualifying_days": 3,
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-08-12T23:33:37Z",
+    "utc": "2026-08-13T01:32:49Z",
     "source_pass": 6,
     "source_degraded": 0,
     "source_fail": 1,
@@ -26,14 +26,14 @@
     "quarantined_source": "SRC-LEGISLATIE — Portal Legislativ; dependent material facts blocked fail-closed"
   },
   "deployment_evidence": {
-    "utc": "2026-08-12T23:34:01Z",
+    "utc": "2026-08-13T01:33:14Z",
     "status": "PASS",
     "public_content_verified": true,
     "https_verified": true,
     "http_content_verified": true,
     "content_origin": "custom_https",
     "http_status": 200,
-    "final_url": "https://partener.eu/?p10_probe=20260812T233401Z",
+    "final_url": "https://partener.eu/?p10_probe=20260813T013314Z",
     "title": "PARTENER.EU — Finanțări europene",
     "required_markers_present": true,
     "critical_assets_ok": true,
@@ -43,7 +43,7 @@
       {
         "id": "custom_https",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260812T233401Z",
+        "final_url": "https://partener.eu/?p10_probe=20260813T013314Z",
         "content_verified": true,
         "marker_ok": true,
         "critical_assets_ok": true,
@@ -53,7 +53,7 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260812T233401Z",
+        "final_url": "http://partener.eu/?p10_probe=20260813T013314Z",
         "content_verified": true,
         "marker_ok": true,
         "critical_assets_ok": true,
@@ -63,7 +63,7 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260812T233401Z",
+        "final_url": "http://partener.eu/?p10_probe=20260813T013314Z",
         "content_verified": true,
         "marker_ok": true,
         "critical_assets_ok": true,
@@ -74,8 +74,8 @@
     "pages_workflow": {
       "status": "LIVE",
       "page_url": "http://partener.eu/",
-      "git_sha": "83e9048c5c503969e7647a3c7e09e9472cccd4fa",
-      "observed_at": "2026-08-12T23:33:23.704484+00:00",
+      "git_sha": "1150ddce26aea199a92f01341654ec58b8db3c39",
+      "observed_at": "2026-08-13T01:32:32.349394+00:00",
       "configure_outcome": "success",
       "upload_outcome": "success",
       "deploy_outcome": "success",
@@ -111,16 +111,16 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-08-12T23:34:00Z",
-    "validation_run_started": "2026-08-12T23:33:37Z",
+    "utc": "2026-08-13T01:33:14Z",
+    "validation_run_started": "2026-08-13T01:32:49Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "4420d846fe1371eb77a03fdfef676933093ca1c49d571f4b5167956a2747afb7",
-      "history_sha256": "4420d846fe1371eb77a03fdfef676933093ca1c49d571f4b5167956a2747afb7",
-      "history_path": "validation/history/20260812T233337Z.json",
+      "latest_sha256": "e05c7d237c04a828aded838a8b895d9f61815fd13be275baa4b2ae809fe3afa2",
+      "history_sha256": "e05c7d237c04a828aded838a8b895d9f61815fd13be275baa4b2ae809fe3afa2",
+      "history_path": "validation/history/20260813T013249Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "f4c3a3c6499b6d51b9eda69a41e01434a1f6a8760e6af19351a774bf11f2c753",
-      "checkpoint_sha256": "f4c3a3c6499b6d51b9eda69a41e01434a1f6a8760e6af19351a774bf11f2c753",
+      "source_state_sha256": "af07af563f63ea154a7c7412fb6ef7a46864764fad0e8eaf633210bdbfd1c80a",
+      "checkpoint_sha256": "af07af563f63ea154a7c7412fb6ef7a46864764fad0e8eaf633210bdbfd1c80a",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
@@ -128,7 +128,7 @@
     },
     "source_registry": {
       "observed_at": "2026-08-12T22:26:00.198456Z",
-      "age_seconds": 4080,
+      "age_seconds": 11234,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
