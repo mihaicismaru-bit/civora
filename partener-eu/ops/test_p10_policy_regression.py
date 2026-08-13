@@ -39,6 +39,8 @@ for marker in [
 # long enough for two runs to commit and then conflict during pull --rebase.
 if "cancel-in-progress: false" not in validation:
     errors.append("production validation ledger writers are not serialized")
+if "ref: main" not in validation:
+    errors.append("queued production validation can check out a stale workflow event SHA")
 
 # Scheduled PEO calendar changes are candidate evidence only during P10. The
 # workflow may persist state but must not update the public JS feed automatically.
