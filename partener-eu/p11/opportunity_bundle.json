@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "bundle_id": "PARTENER-EU-P11-CANONICAL-0001",
-  "as_of": "2026-08-13T08:30:24Z",
+  "as_of": "2026-08-13T09:27:02Z",
   "source_snapshot": {
     "repository": "mihaicismaru-bit/civora",
     "public_data_path": "partener-eu/web/data.js",
@@ -536,6 +536,52 @@
       "semantic_assertion": "The official final package dated 2026-08-12 and its scoring annex demonstrate all remaining material classes: EUR 8,400,195 allocation; grant between EUR 200,000 and EUR 1,000,000 with 98% programme support and at least 2% applicant contribution; UAT Orașe in Nord-Est as applicants; cumulative applicant, project, building and activity eligibility rules; and the 100-point competitive grid with 40 points per component and 60 points per project thresholds.",
       "temporal_role": "CURRENT_FINAL_GUIDE_AND_ANNEXES",
       "retrieval_state": "PRIMARY_ZIP_HASH_VERIFIED_GUIDE_AND_SCORING_ANNEX_SEMANTICALLY_REVIEWED"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-PR-CENTRU-CLUSTERS-122-ACTIVE-20260813",
+      "source_tier": "T1",
+      "source_owner": "ADR Centru — Autoritatea de Management pentru Programul Regiunea Centru",
+      "source_url": "https://www.regiocentru.ro/actiuni/clustere-inovative-1-2-2/",
+      "submission_notice_url": "https://www.regiocentru.ro/se-pot-depune-cereri-de-finantare-proiectelor-pentru-clustere-inovative-prin-programul-regiunea-centru-2021-2027/",
+      "observed_at": "2026-08-13T09:27:02Z",
+      "semantic_sha256": "e591932cbf931b92f6ad2f7b6a9393599989b4997627ae32ba16b10683216285",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": [
+        "status",
+        "deadline"
+      ],
+      "semantic_assertion": "The official action page marks the call active and the official 2026-07-07 notice explicitly says that applications can be submitted in MySMIS from 2026-07-06 12:00 through 2026-11-06 12:00. OPEN is therefore supported by a current semantic marker, not inferred from the dates.",
+      "temporal_role": "CURRENT_ACTIVE_CALL_AND_SUBMISSION_NOTICE",
+      "retrieval_state": "OFFICIAL_PAGE_AND_NOTICE_SEMANTICALLY_VERIFIED"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-PR-CENTRU-CLUSTERS-122-FINAL-PACKAGE-20260813",
+      "source_tier": "T1",
+      "source_owner": "ADR Centru — Autoritatea de Management pentru Programul Regiunea Centru",
+      "source_url": "https://www.regiocentru.ro/actiuni/clustere-inovative-1-2-2/",
+      "primary_attachment_url": "https://www.regiocentru.ro/wp-content/uploads/2026/06/Ghidul-solicitantului-Corrigendum-1-%E2%80%93-Interventia-1.2.2.pdf",
+      "primary_attachment_sha256": "57b926705bc8d27447a48be4bbfad86a7fc6e804cec2f0fb9f10f31d67e39521",
+      "annex_package_url": "https://www.regiocentru.ro/wp-content/uploads/2026/06/Anexe-Ghidul-solicitantului-Interventia-1.2.2.zip",
+      "annex_package_sha256": "1a3e24182edba973eecd452abda15df72490a9b0635816b0ea3caa7be894e602",
+      "administrative_grid_sha256": "4e3344027d5130e27d210b7349d3d18a6c7ccfb056615c0e1d7dcd3ab428d695",
+      "scoring_grid_sha256": "f272e750c1702180876c540184bfc6555dd573cffcc96be9bd520b0b872c6943",
+      "faq_url": "https://www.regiocentru.ro/wp-content/uploads/2026/06/Intrebare-frecventa-Ghid-1.2.2-_-eligibilitate-cluster-fara-vechime.pdf",
+      "faq_sha256": "5298d17da62a76ee66e7604f0b47d2b0297f65889ab1e15e930aa0d2110f2b7e",
+      "observed_at": "2026-08-13T09:27:02Z",
+      "semantic_sha256": "31c2f06e421c63eb05723299624ccbdd017278a2897f085ba29f3a4a1bf862c6",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": [
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ],
+      "semantic_assertion": "Corrigendum 1 of the final guide and its official annex package establish the EUR 11,664,904 allocation; EUR 300,000–3,500,000 grant; aid intensities; eligible cluster-management applicants and member-SME partnerships; cumulative applicant, partnership, location, project and activity conditions; and the 100-point competitive grid with a 60-point quality threshold, three eliminatory zero-score subcriteria and ordered tie-breakers. The official FAQ confirms that the cluster itself must have at least one full fiscal year of uninterrupted activity.",
+      "temporal_role": "CURRENT_FINAL_GUIDE_CORRIGENDUM_AND_ANNEXES",
+      "retrieval_state": "PRIMARY_ATTACHMENTS_HASH_VERIFIED_AND_SEMANTICALLY_REVIEWED"
     }
   ],
   "opportunities": [
@@ -901,34 +947,114 @@
       "opportunity_id": "pr-centru-clusters-122",
       "title": "Clustere inovative",
       "programme": "Programul Regiunea Centru",
-      "code": "1.2.2",
+      "code": "PRC/1056/PRC_P1/OP1/RSO1.1/PRC_A4",
       "status": "OPEN",
-      "publication_state": "REVIEW_REQUIRED",
+      "publication_state": "PUBLISHABLE",
       "automatic_material_fact_update_allowed": false,
       "evidence_refs": [
-        "EV-SRC-PR-CENTRU-ACTIUNI"
+        "EV-SRC-PR-CENTRU-ACTIUNI",
+        "EV-PR-CENTRU-CLUSTERS-122-ACTIVE-20260813",
+        "EV-PR-CENTRU-CLUSTERS-122-FINAL-PACKAGE-20260813"
       ],
       "material_facts": {
         "status": "OPEN",
         "deadline": {
-          "opens": "6 iulie 2026, 12:00",
-          "closes": "6 noiembrie 2026, 12:00"
+          "opens_at": "2026-07-06T12:00:00+03:00",
+          "closes_at": "2026-11-06T12:00:00+02:00",
+          "submission_system": "MySMIS2021/SMIS2021+"
+        },
+        "budget": {
+          "total_eur": 11664904,
+          "fedr_eur": 9915168,
+          "state_budget_eur": 1749736,
+          "inforeuro_rate_ron_per_eur": 5.2481,
+          "inforeuro_month": "2026-06"
+        },
+        "grant": {
+          "form": "grant",
+          "minimum_eur": 300000,
+          "maximum_eur": 3500000,
+          "cluster_investment_aid_maximum_percent": 65,
+          "sme_innovation_consulting_and_support_maximum_percent": 100,
+          "sme_innovation_consulting_and_support_cap_eur_per_three_years": 220000,
+          "de_minimis_maximum_percent": 100,
+          "de_minimis_cap_eur_per_three_years": 300000
+        },
+        "beneficiaries": [
+          "Entități juridice care reprezintă, administrează și exploatează un cluster de inovare, constituite ca asociație/fundație conform OG 26/2000 sau ca întreprindere conform Legii 31/1990",
+          "Parteneriate conduse de entitatea de management a clusterului, cu maximum cinci microîntreprinderi, întreprinderi mici sau întreprinderi mijlocii membre ale clusterului"
+        ],
+        "eligibility": {
+          "cumulative": true,
+          "applicant_scope": {
+            "individual_applicant": "Entitatea de management a clusterului, cu personalitate juridică; poate fi ONG, IMM sau întreprindere mare și trebuie să fie proprietar și/sau operator desemnat al clusterului.",
+            "partnership": "Entitatea de management este lider obligatoriu; sunt admiși maximum cinci parteneri, exclusiv microîntreprinderi, întreprinderi mici sau mijlocii membre ale clusterului.",
+            "excluded": "Filialele, agențiile, reprezentanțele și alte unități fără personalitate juridică nu sunt eligibile; întreprinderile mari pot participa numai ca solicitant individual sau lider dacă sunt desemnate entitate de management."
+          },
+          "applicant_conditions": [
+            "Clusterul, cu sau fără personalitate juridică, și entitatea de management/partenerii aplicabili trebuie să aibă cel puțin un an fiscal integral de activitate neîntreruptă; pentru o depunere în 2026, înființarea trebuie să fie cel târziu la 3 ianuarie 2025.",
+            "Entitatea de management și partenerii trebuie să fie înregistrați în Regiunea Centru cel târziu la prima plată; clusterul trebuie să includă până la depunere cel puțin un membru UAT, o instituție sau unitate de cercetare, un IMM și un ONG din regiune.",
+            "Investiția și activitățile se încadrează într-un sector de specializare inteligentă RIS3 Centru; partenerii IMM au la depunere clasa CAEN eligibilă, iar codul CAEN 72 este autorizat la locul de implementare conform regulilor ghidului.",
+            "Solicitantul, partenerii și reprezentanții legali nu se află în situațiile de excludere, dificultate, insolvență, recuperare a ajutorului, conflict de interese sau neconformitate fiscală prevăzute de ghid și Declarația unică.",
+            "Solicitantul deține dreptul eligibil asupra terenului/clădirii, asigură contribuția proprie și costurile neeligibile și păstrează statutul de entitate de management pe durata de durabilitate."
+          ],
+          "partnership_conditions": [
+            "Acordul de parteneriat identifică liderul, drepturile și obligațiile, bugetul, activitățile, cofinanțarea și indicatorii fiecărui membru; partenerii nu pot fi furnizori pentru ceilalți membri în același proiect.",
+            "Minimum 50% din valoarea nerambursabilă este alocată liderului; activele corporale și necorporale nu depășesc 50% din valoarea nerambursabilă alocată fiecărui partener IMM."
+          ],
+          "project_and_activity_conditions": [
+            "Zona de implementare este Regiunea Centru — Alba, Brașov, Covasna, Harghita, Mureș sau Sibiu — urban sau rural.",
+            "Sunt eligibile activitățile clusterului de inovare, infrastructurile de cercetare-inovare, activele corporale/necorporale, serviciile de consultanță și sprijinire a inovării și activitățile de inovare ale IMM-urilor, în limitele ghidului.",
+            "Ajutorul are efect stimulativ: cererea se depune înainte de demararea investiției; nu există dublă finanțare pentru aceleași costuri sau activități.",
+            "Valoarea nerambursabilă se încadrează între 300.000 și 3.500.000 EUR, iar implementarea se finalizează cel târziu la 31 decembrie 2029.",
+            "Proiectul respectă DNSH, principiile orizontale, condițiile de ajutor de stat/de minimis, drepturile asupra imobilelor și criteriile tehnice și financiare din ghid și anexele sale."
+          ]
+        },
+        "scoring": {
+          "competitive": true,
+          "maximum_points": 100,
+          "minimum_quality_points": 60,
+          "number_of_criteria": 5,
+          "zero_score_eliminatory_subcriteria": [
+            "2.1.1",
+            "2.3",
+            "3.3"
+          ],
+          "ranking": "ordine descrescătoare a punctajului, în limita alocării",
+          "tie_breakers": [
+            "punctajul criteriului 1",
+            "punctajul criteriului 2",
+            "punctajul criteriului 4",
+            "punctajul criteriului 3",
+            "ordinea depunerii proiectelor"
+          ],
+          "excellence_threshold": null
         }
       },
       "fact_evidence": {
         "status": [
-          "EV-SRC-PR-CENTRU-ACTIUNI"
+          "EV-SRC-PR-CENTRU-ACTIUNI",
+          "EV-PR-CENTRU-CLUSTERS-122-ACTIVE-20260813"
         ],
         "deadline": [
-          "EV-SRC-PR-CENTRU-ACTIUNI"
+          "EV-SRC-PR-CENTRU-ACTIUNI",
+          "EV-PR-CENTRU-CLUSTERS-122-ACTIVE-20260813"
+        ],
+        "budget": [
+          "EV-PR-CENTRU-CLUSTERS-122-FINAL-PACKAGE-20260813"
+        ],
+        "grant": [
+          "EV-PR-CENTRU-CLUSTERS-122-FINAL-PACKAGE-20260813"
+        ],
+        "eligibility": [
+          "EV-PR-CENTRU-CLUSTERS-122-FINAL-PACKAGE-20260813"
+        ],
+        "scoring": [
+          "EV-PR-CENTRU-CLUSTERS-122-FINAL-PACKAGE-20260813"
+        ],
+        "beneficiaries": [
+          "EV-PR-CENTRU-CLUSTERS-122-FINAL-PACKAGE-20260813"
         ]
-      },
-      "candidate_material_facts": {
-        "budget": "Vezi ghid",
-        "grant": "Vezi ghid",
-        "eligibility": "Clustere / organizații eligibile conform ghidului",
-        "scoring": "Conform ghidului",
-        "beneficiaries": "Clustere"
       }
     },
     {
@@ -1617,6 +1743,55 @@
           ]
         }
       ]
+    },
+    {
+      "schema_version": "1.0",
+      "changeset_id": "CS-PR-CENTRU-CLUSTERS-122-20260813",
+      "opportunity_id": "pr-centru-clusters-122",
+      "automatic_publish_allowed": false,
+      "resolution_state": "VERIFIED",
+      "changes": [
+        {
+          "fact_class": "budget",
+          "before": "Vezi ghid",
+          "after": "EUR 11,664,904 total; EUR 9,915,168 FEDR; EUR 1,749,736 state budget",
+          "evidence_refs": [
+            "EV-PR-CENTRU-CLUSTERS-122-FINAL-PACKAGE-20260813"
+          ]
+        },
+        {
+          "fact_class": "grant",
+          "before": "Vezi ghid",
+          "after": "EUR 300,000–3,500,000; aid intensities structured by aid type",
+          "evidence_refs": [
+            "EV-PR-CENTRU-CLUSTERS-122-FINAL-PACKAGE-20260813"
+          ]
+        },
+        {
+          "fact_class": "eligibility",
+          "before": "Clustere / organizații eligibile conform ghidului",
+          "after": "Verified cumulative applicant, partnership, location, project, activity and state-aid conditions from Corrigendum 1 and the official FAQ",
+          "evidence_refs": [
+            "EV-PR-CENTRU-CLUSTERS-122-FINAL-PACKAGE-20260813"
+          ]
+        },
+        {
+          "fact_class": "scoring",
+          "before": "Conform ghidului",
+          "after": "100-point competitive grid; 60-point quality threshold; eliminatory zero-score subcriteria 2.1.1, 2.3 and 3.3; ordered tie-breakers",
+          "evidence_refs": [
+            "EV-PR-CENTRU-CLUSTERS-122-FINAL-PACKAGE-20260813"
+          ]
+        },
+        {
+          "fact_class": "beneficiaries",
+          "before": "Clustere",
+          "after": "Eligible cluster-management entities individually or as leaders with up to five member SMEs",
+          "evidence_refs": [
+            "EV-PR-CENTRU-CLUSTERS-122-FINAL-PACKAGE-20260813"
+          ]
+        }
+      ]
     }
   ],
   "resolution_tasks": [
@@ -1681,7 +1856,7 @@
       "schema_version": "1.0",
       "resolution_task_id": "RT-PR-CENTRU-CLUSTERS-122-MATERIAL",
       "opportunity_id": "pr-centru-clusters-122",
-      "status": "OPEN",
+      "status": "RESOLVED",
       "automatic_material_fact_update_allowed": false,
       "blocked_fact_classes": [
         "budget",
@@ -1689,7 +1864,12 @@
         "eligibility",
         "scoring",
         "beneficiaries"
-      ]
+      ],
+      "resolution_evidence_refs": [
+        "EV-PR-CENTRU-CLUSTERS-122-ACTIVE-20260813",
+        "EV-PR-CENTRU-CLUSTERS-122-FINAL-PACKAGE-20260813"
+      ],
+      "resolution_note": "The current official registry and submission notice support OPEN independently of dates. Corrigendum 1, the hash-pinned annex package and official FAQ demonstrate every previously blocked material class; no candidate material fact remains."
     },
     {
       "schema_version": "1.0",
@@ -2048,6 +2228,7 @@
     "applied_resolution_ids": [
       "RES-AFIR-ENERGY-20260812",
       "RES-AFIR-ENERGY-20260813-V2",
+      "RES-PR-CENTRU-CLUSTERS-122-20260813",
       "RES-PR-CENTRU-DIGITAL2-20260812",
       "RES-PR-CENTRU-DIGITAL2-20260813-V2",
       "RES-PR-NE-ENERGY-RESIDENTIAL-TOWNS-20260813",
