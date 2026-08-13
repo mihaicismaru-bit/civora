@@ -24,9 +24,9 @@ jobs:
         with:
           python-version: '3.12'
       - name: Apply verified resolution overlays
-        run: python partener-eu/p11/apply_resolutions.py
+        run: python partener-eu/p11/apply_resolutions.py --check
       - name: Build public fail-closed projection
-        run: python partener-eu/p11/build_public_projection.py
+        run: python partener-eu/p11/build_public_projection.py --check
       - name: Canonical contract and fail-closed policy regression
         run: python -m unittest discover -s partener-eu/p11 -p 'test_*.py'
       - name: Canonical corpus identity and publication gate
