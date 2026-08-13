@@ -50,6 +50,14 @@ def main() -> None:
     assert set(pids["verifiedFactClasses"]) == {
         "status", "deadline", "budget", "grant", "eligibility", "scoring", "beneficiaries"
     }
+    step_edu = next(
+        row for row in projection["opportunities"]
+        if row["id"] == "peo-step-edu-adulti"
+    )
+    assert step_edu["status"] == "DISCOVERED"
+    assert step_edu["publicationState"] == "QUARANTINED"
+    assert step_edu["materialFacts"] == {}
+    assert step_edu["verifiedFactClasses"] == []
     print("PASS P11 public projection")
 
 

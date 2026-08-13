@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "bundle_id": "PARTENER-EU-P11-CANONICAL-0001",
-  "as_of": "2026-08-13T10:25:30Z",
+  "as_of": "2026-08-13T11:26:15Z",
   "source_snapshot": {
     "repository": "mihaicismaru-bit/civora",
     "public_data_path": "partener-eu/web/data.js",
@@ -644,6 +644,39 @@
       "semantic_assertion": "The current official General Guide incorporated by sections 3.4, 5.1.1, 5.4 and 5.5 of the specific guide supplies the cumulative legal-entity, activity, capacity and exclusion rules and the P7 FSE+ entity-category cofinancing rates in tables 5 and 6. The specific guide prevails where it sets different conditions.",
       "temporal_role": "CURRENT_INCORPORATED_GENERAL_CONDITIONS",
       "retrieval_state": "OFFICIAL_CONSOLIDATED_GUIDE_SEMANTICALLY_VERIFIED"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-PEO-STEP-EDU-IDENTITY-CONTRADICTION-20260813",
+      "source_tier": "T1",
+      "source_owner": "Ministerul Investițiilor și Proiectelor Europene — Autoritatea de Management PEO",
+      "source_url": "https://mfe.gov.ro/ghiduri_peos/step-lll-competente-pentru-viitor-formare-la-locul-de-munca-si-educatia-adultilor-in-tehnologiile-critice-adulti/",
+      "observed_at": "2026-08-13T11:26:15Z",
+      "semantic_sha256": "15bb7153b7b623601ad8b817d5d715e6b94cfc7878da67f308713c402af126d5",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "semantic_assertion": "The current official MIPE page maps Priority P11 and Action 11.g.1 to STEP-LLL, not STEP-EDU; it records consultation from 2026-04-02 through 2026-04-27, a EUR 92,000,000 call, the 2026-05-29 final guide and the 2026-08-13 consolidated guide. It supplies no distinct official STEP-EDU identity matching the candidate record.",
+      "temporal_role": "CURRENT_OFFICIAL_CALL_PAGE_WITH_IDENTITY_COLLISION",
+      "retrieval_state": "OFFICIAL_PAGE_SEMANTICALLY_VERIFIED"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-PEO-STEP-LLL-CONSOLIDATED-PACKAGE-20260813",
+      "source_tier": "T1",
+      "source_owner": "Ministerul Investițiilor și Proiectelor Europene — Autoritatea de Management PEO",
+      "source_url": "https://mfe.gov.ro/ghiduri_peos/step-lll-competente-pentru-viitor-formare-la-locul-de-munca-si-educatia-adultilor-in-tehnologiile-critice-adulti/",
+      "primary_attachment_url": "https://mfe.gov.ro/wp-content/uploads/2026/08/8d05374378497f808ae1535b84671949.7z",
+      "primary_attachment_sha256": "8d91281672421c6ca2809ce2ca71e8b1b7d0e0a628e1f86cd7367dd377a76959",
+      "consolidated_guide_sha256": "93316b7ae271efd4d6ba82128a047b8ab03b5b4cff45d272c4fe4e6fbce1864c",
+      "preliminary_grid_sha256": "51d500f8419a41d5765922597b6a75959954b06c7cb997b65a3276ead9fd71ce",
+      "qualitative_grid_sha256": "e5507c46b6229764ad8202b151ee944596b6121565f0380fece68da1c0a0d359",
+      "observed_at": "2026-08-13T11:26:15Z",
+      "semantic_sha256": "93316b7ae271efd4d6ba82128a047b8ab03b5b4cff45d272c4fe4e6fbce1864c",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "semantic_assertion": "The hash-pinned consolidated package consistently identifies STEP-LLL under Action 11.g.1. It contradicts every candidate class attached to STEP-EDU: identity/status and dates, EUR 92,000,000 rather than EUR 120,000,000, 100% grant, cumulative applicant and partner rules where universities are partners rather than the sole applicant class, and a 100-point grid with a 70-point quality threshold. These facts cannot be copied to the unresolved candidate alias.",
+      "temporal_role": "CURRENT_CONSOLIDATED_FINAL_PACKAGE_FOR_COLLIDING_CANONICAL_IDENTITY",
+      "retrieval_state": "PRIMARY_ATTACHMENT_HASH_VERIFIED_AND_SEMANTICALLY_REVIEWED"
     }
   ],
   "opportunities": [
@@ -1268,21 +1301,51 @@
       "programme": "PEO / STEP",
       "code": "P11 / ESO4.7 / 11.g.1",
       "status": "DISCOVERED",
-      "publication_state": "REVIEW_REQUIRED",
+      "publication_state": "QUARANTINED",
       "automatic_material_fact_update_allowed": false,
       "evidence_refs": [
-        "EV-SRC-OIRVEST-PEO"
+        "EV-SRC-OIRVEST-PEO",
+        "EV-PEO-STEP-EDU-IDENTITY-CONTRADICTION-20260813",
+        "EV-PEO-STEP-LLL-CONSOLIDATED-PACKAGE-20260813"
       ],
       "material_facts": {},
       "fact_evidence": {},
       "candidate_material_facts": {
-        "status": "EXPECTED",
-        "deadline": "Consultare 20 martie – 10 aprilie 2026; lansare neconfirmată",
-        "budget": "120 mil. EUR",
-        "grant": "Neconfirmat final",
-        "eligibility": "Universități publice/private, de verificat în ghid final",
-        "scoring": "Necunoscut până la ghid final",
-        "beneficiaries": "Universități publice/private"
+        "status": {
+          "value": "UNKNOWN",
+          "reason": "No official primary source establishes STEP-EDU as a distinct call; the same P11/11.g.1 identity is officially assigned to STEP-LLL."
+        },
+        "deadline": {
+          "value": "UNKNOWN",
+          "reason": "The candidate consultation window conflicts with the official STEP-LLL window and cannot be treated as a submission period."
+        },
+        "budget": {
+          "value": "UNKNOWN",
+          "rejected_candidate_eur": 120000000,
+          "reason": "The only current final package located for P11/11.g.1 states EUR 92,000,000 for STEP-LLL; transfer to STEP-EDU is prohibited."
+        },
+        "grant": {
+          "value": "UNKNOWN",
+          "reason": "No final guide tied to the STEP-EDU identity was found."
+        },
+        "eligibility": {
+          "value": "UNKNOWN",
+          "reason": "The candidate's university-only framing conflicts with the official STEP-LLL applicant/partner split; no distinct STEP-EDU guide resolves the collision."
+        },
+        "scoring": {
+          "value": "UNKNOWN",
+          "reason": "The STEP-LLL grid cannot be attributed to an unresolved STEP-EDU alias."
+        },
+        "beneficiaries": {
+          "value": "UNKNOWN",
+          "reason": "Universities are eligible partners in STEP-LLL, not the sole applicant class; no official STEP-EDU beneficiary rule is available."
+        }
+      },
+      "identity_review": {
+        "state": "POSSIBLE_DUPLICATE_OR_CONFLATED_CANDIDATE",
+        "collides_with_opportunity_id": "PEO-STEP-LLL-ADULTI-2026",
+        "merge_or_reject_allowed": false,
+        "reason": "The official evidence proves a collision but does not independently prove that no separate STEP-EDU call can ever be published."
       }
     },
     {
@@ -2117,7 +2180,7 @@
       "schema_version": "1.0",
       "resolution_task_id": "RT-PEO-STEP-EDU-ADULTI-MATERIAL",
       "opportunity_id": "peo-step-edu-adulti",
-      "status": "OPEN",
+      "status": "IN_REVIEW",
       "automatic_material_fact_update_allowed": false,
       "blocked_fact_classes": [
         "status",
@@ -2127,7 +2190,12 @@
         "eligibility",
         "scoring",
         "beneficiaries"
-      ]
+      ],
+      "resolution_evidence_refs": [
+        "EV-PEO-STEP-EDU-IDENTITY-CONTRADICTION-20260813",
+        "EV-PEO-STEP-LLL-CONSOLIDATED-PACKAGE-20260813"
+      ],
+      "resolution_note": "All seven classes remain UNKNOWN. Resolve only when MIPE publishes a distinct STEP-EDU page/final guide with an unambiguous call identifier, or when authoritative identity evidence permits the candidate to be formally rejected or merged without duplicating STEP-LLL."
     },
     {
       "schema_version": "1.0",
@@ -2456,6 +2524,7 @@
     "applied_resolution_ids": [
       "RES-AFIR-ENERGY-20260812",
       "RES-AFIR-ENERGY-20260813-V2",
+      "RES-PEO-STEP-EDU-ADULTI-20260813",
       "RES-PIDS-SUPPORTED-DECISION-20260813",
       "RES-PR-CENTRU-CLUSTERS-122-20260813",
       "RES-PR-CENTRU-DIGITAL2-20260812",
