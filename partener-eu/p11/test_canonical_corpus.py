@@ -29,13 +29,13 @@ class CanonicalCorpusTests(unittest.TestCase):
     def test_bundle_passes_contract(self):
         counts = validate_bundle(self.bundle)
         self.assertEqual(counts["opportunities"], 26)
-        self.assertEqual(counts["changesets"], 4)
+        self.assertEqual(counts["changesets"], 5)
 
     def test_normalization_has_no_publication_effect(self):
         publishable = [x["opportunity_id"] for x in self.bundle["opportunities"] if x["publication_state"] == "PUBLISHABLE"]
         self.assertEqual(
             publishable,
-            ["afir-energy-2026", "pr-ne-energy-residential-towns-2026", "pr-centru-clusters-122", "PEO-STEP-LLL-ADULTI-2026"],
+            ["afir-energy-2026", "pr-ne-energy-residential-towns-2026", "pr-centru-clusters-122", "pids-supported-decision", "PEO-STEP-LLL-ADULTI-2026"],
         )
         self.assertTrue(all(x.get("automatic_material_fact_update_allowed") is False for x in self.bundle["opportunities"]))
 
