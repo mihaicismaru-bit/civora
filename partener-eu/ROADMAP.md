@@ -6,7 +6,7 @@ Actualizat: 13 august 2026
 
 - site public funcțional și monitorizat;
 - P10.1 Data Plane implementat: contract, acoperire, prospețime, replay și izolare pe sursă;
-- P11 integrat: 26 oportunități canonice, 42 dovezi, 26 taskuri de rezoluție;
+- P11 integrat: 26 oportunități canonice, 44 dovezi, 26 taskuri de rezoluție;
 - STEP-LLL, AFIR Energie 2026, Clustere inovative 1.2.2, PIDS – Servicii de asistență și suport în luarea deciziei și apelul rezidențial Nord-Est sunt publicabile pe baza faptelor materiale demonstrate; restul câmpurilor rămân blocate când nu sunt demonstrate;
 - frontend conectat la P11: 4 apeluri OPEN și un apel EXPECTED cu fapte materiale verificate, 26 oportunități monitorizate;
 - quality gate local: 18/18 PASS, inclusiv replay semantic fără scriere pentru rezoluții și proiecția publică;
