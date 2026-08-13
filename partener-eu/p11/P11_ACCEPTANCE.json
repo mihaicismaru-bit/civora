@@ -7,7 +7,7 @@
     "contract": "partener-eu/p11/opportunity_contract.py",
     "tests": "partener-eu/p11/test_opportunity_contract.py",
     "test_command": "python partener-eu/p11/apply_resolutions.py --check && python partener-eu/p11/build_public_projection.py --check && python -m unittest discover -s partener-eu/p11 -p 'test_*.py' && python partener-eu/ops/quality_gate.py",
-    "tests_passed": 25,
+    "tests_passed": 28,
     "tests_failed": 0
   },
   "policy_assertions": {
@@ -31,6 +31,10 @@
     "resolution_artifact_semantic_drift_rejected": true,
     "public_projection_semantic_drift_rejected": true,
     "artifact_drift_checks_are_read_only": true,
+    "post_merge_main_validation_enabled": true,
+    "quality_gate_source_changes_trigger_validation": true,
+    "ci_trigger_contract_is_regression_tested": true,
+    "quality_gate_trigger_scope": ["pull_request", "push_main", "workflow_dispatch"],
     "unified_quality_gate": "18/18 PASS"
   },
   "corpus": {

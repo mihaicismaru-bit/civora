@@ -27,10 +27,10 @@ Actualizat: 13 august 2026
 
 ## Ultimul increment validat
 
-- P11-R01 — poartă deterministă de drift pentru artefactele derivate;
-- `apply_resolutions.py --check` recalculează overlay-urile și oprește CI dacă bundle-ul canonic diferă semantic;
-- `build_public_projection.py --check` recalculează proiecția și oprește CI dacă payloadul public diferă semantic;
-- verificările sunt read-only, raportează hash-uri canonice la abatere și nu schimbă autoritatea de publicare;
+- P11-R02 — validare post-merge a stării rezultate în `main`;
+- workflow-ul P11 rulează la PR, la orice schimbare P11 integrată în `main` și manual;
+- schimbările directe ale porții unificate `ops/quality_gate.py` intră explicit în trigger;
+- un test de contract împiedică eliminarea accidentală a replay-urilor fail-closed sau a triggerului post-merge;
 - corpusul rămâne la 26 oportunități, șase publicabile și 20 taskuri deschise sau în review.
 
 ## Reguli de închidere
