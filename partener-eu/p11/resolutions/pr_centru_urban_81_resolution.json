@@ -1,0 +1,264 @@
+{
+  "schema_version": "1.0",
+  "resolution_id": "RES-PR-CENTRU-URBAN-81-20260813",
+  "resolved_at": "2026-08-13T14:29:33Z",
+  "policy": {
+    "material_fact_scope": [
+      "status",
+      "deadline",
+      "budget",
+      "grant",
+      "eligibility",
+      "scoring",
+      "beneficiaries"
+    ],
+    "automatic_material_fact_update_allowed": false,
+    "resolution_rule": "The final guide and explicit launch semantics establish an EXPECTED call before the submission opening instant. OPEN is not inferred from a future date or from the generic action-registry label 'Activ'. Material facts are admitted only where the current official action page and final guide semantically demonstrate them."
+  },
+  "evidence": [
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-PR-CENTRU-URBAN-81-LAUNCH-20260813",
+      "source_tier": "T1",
+      "source_owner": "ADR Centru — Autoritatea de Management pentru Programul Regiunea Centru",
+      "source_url": "https://www.regiocentru.ro/lansarea-apelului-competitiv-aferent-actiunii-8-1-dezvoltare-urbana-integrata-prin-regenerarea-spatiilor-publice-punerea-in-valoare-a-patrimoniului-infrastructurii-culturale-si-a-potentialului-tur/",
+      "current_registry_url": "https://www.regiocentru.ro/actiuni/8-1dezvoltare-urbana-integrata-prin-regenerarea-spatiilor-publice-punerea-in-valoare-a-patrimoniului-infrastructurii-culturale-si-a-potentialului-turistic-din-municipiile-regiunii-centru-a/",
+      "observed_at": "2026-08-13T14:29:33Z",
+      "semantic_sha256": "d5c851dbde104630f25bb07e257770b957854e44a9055591b51833ea16efb778",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": [
+        "status",
+        "deadline"
+      ],
+      "semantic_assertion": "The official 2026-07-20 launch notice says submission will open one month after launch, while the final guide and current action page set the MySMIS window to 2026-08-20 12:00 through 2026-11-20 12:00. Observed on 2026-08-13, applications cannot yet be submitted; EXPECTED is supported semantically and OPEN is not inferred from the generic registry label Activ or from dates alone.",
+      "temporal_role": "CURRENT_FINAL_LAUNCH_BEFORE_SUBMISSION_OPENING",
+      "retrieval_state": "OFFICIAL_LAUNCH_NOTICE_AND_CURRENT_ACTION_PAGE_SEMANTICALLY_VERIFIED"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-PR-CENTRU-URBAN-81-FINAL-GUIDE-20260813",
+      "source_tier": "T1",
+      "source_owner": "ADR Centru — Autoritatea de Management pentru Programul Regiunea Centru",
+      "source_url": "https://www.regiocentru.ro/actiuni/8-1dezvoltare-urbana-integrata-prin-regenerarea-spatiilor-publice-punerea-in-valoare-a-patrimoniului-infrastructurii-culturale-si-a-potentialului-turistic-din-municipiile-regiunii-centru-a/",
+      "primary_attachment_url": "https://www.regiocentru.ro/wp-content/uploads/2026/04/Ghidul-solicitantului-Actiunea-8.1-Apel-competitiv.pdf",
+      "approval_decision_url": "https://www.regiocentru.ro/wp-content/uploads/2026/04/Decizia-de-aprobare-a-Ghidului-Solicitantului-Actiunea-8.1-Apel-competitiv.pdf",
+      "observed_at": "2026-08-13T14:29:33Z",
+      "semantic_sha256": "63bfc9b22452b6cf8357c5aef5a14c4609f554a93e1f2f70daeb6e8945ea29bf",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ],
+      "semantic_assertion": "The official final guide demonstrates EUR 22,677,762 total allocation, grant support, EUR 500,000–7,500,000 eligible project value, maximum 98% programme cofinancing and at least 2% applicant contribution; eligible municipality applicants and municipality-led partnerships; cumulative applicant, partner, location, SIDU, project and activity conditions; and competitive scoring with a 50-point quality threshold, 85-point excellence threshold, six criteria families and ordered tie-breakers.",
+      "temporal_role": "CURRENT_FINAL_GUIDE",
+      "retrieval_state": "OFFICIAL_94_PAGE_FINAL_PDF_SEMANTICALLY_REVIEWED; DIRECT_BYTE_FETCH_BLOCKED_BY_ACTIVE_ANTI_BOT_CHALLENGE"
+    }
+  ],
+  "opportunities": [
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "pr-centru-urban-81",
+      "title": "Dezvoltare urbană integrată: regenerare, patrimoniu, cultură și turism — municipii",
+      "programme": "Programul Regiunea Centru",
+      "code": "PRC/1204/PRC_P8/OP5/RSO5.1/PRC_A44",
+      "status": "EXPECTED",
+      "publication_state": "PUBLISHABLE",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-IMPORT-PR-CENTRU-URBAN-81",
+        "EV-PR-CENTRU-URBAN-81-LAUNCH-20260813",
+        "EV-PR-CENTRU-URBAN-81-FINAL-GUIDE-20260813"
+      ],
+      "material_facts": {
+        "status": "EXPECTED",
+        "deadline": {
+          "opens_at": "2026-08-20T12:00:00+03:00",
+          "closes_at": "2026-11-20T12:00:00+02:00",
+          "submission_system": "MySMIS2021/SMIS2021+"
+        },
+        "budget": {
+          "total_eur": 22677762,
+          "pr_centru_allocation_eur": 1406525,
+          "overcontracting_eur": 21271237,
+          "inforeuro_rate_ron_per_eur": 5.2418,
+          "inforeuro_month": "2026-07"
+        },
+        "grant": {
+          "form": "grant",
+          "minimum_eligible_project_eur": 500000,
+          "maximum_eligible_project_eur": 7500000,
+          "programme_contribution_maximum_percent": 98,
+          "fedr_maximum_percent": 85,
+          "state_budget_maximum_percent": 13,
+          "applicant_minimum_contribution_percent": 2,
+          "profit_generating_projects": "The applicant or partnership members adjust their contribution according to estimated profit."
+        },
+        "beneficiaries": [
+          "Unități administrativ-teritoriale — municipii din Regiunea Centru",
+          "Parteneriate conduse obligatoriu de o unitate administrativ-teritorială — municipiu, cu parteneri eligibili conform ghidului"
+        ],
+        "eligibility": {
+          "cumulative": true,
+          "applicant_scope": {
+            "individual_applicant": "Unitate administrativ-teritorială — municipiu.",
+            "partnership": "Liderul este obligatoriu UAT municipiu; nu există o limită numerică a partenerilor.",
+            "eligible_partners": [
+              "UAT județ",
+              "UAT orașe, municipii sau comune din zona funcțională urbană ori zona metropolitană relevantă",
+              "Unități de cult recunoscute, proprietare ale infrastructurii vizate",
+              "ONG-uri constituite conform OG 26/2000, inclusiv filiale recunoscute ale asociațiilor și fundațiilor internaționale",
+              "Instituții publice cu personalitate juridică aflate în subordinea autorităților administrației publice locale din Regiunea Centru"
+            ]
+          },
+          "applicant_and_partnership_conditions": [
+            "Solicitantul, partenerii și reprezentanții legali nu se află în situațiile de excludere prevăzute de ghid și îndeplinesc cumulativ condițiile pe durata evaluării, contractării, implementării și durabilității.",
+            "Unitatea de cult parteneră deține în proprietate infrastructura proiectului; un ONG partener care deține drepturi asupra unui monument istoric A/B are minimum 12 luni de activitate în protejarea monumentelor.",
+            "UAT din ZUF/ZM partenere au făcut parte din zona de studiu comună a SIDU; parteneriatele cu instituții publice subordonate includ și autoritatea publică locală tutelară.",
+            "Solicitantul și partenerii asigură contribuția proprie, cheltuielile neeligibile și resursele pentru operare și întreținere."
+          ],
+          "project_and_activity_conditions": [
+            "Locul de implementare este în mediul urban, zona metropolitană sau zona funcțională urbană din județele Alba, Brașov, Covasna, Harghita, Mureș ori Sibiu.",
+            "Proiectul este un proiect prioritar rezultat dintr-o SIDU admisibilă și este inclus în lista proiectelor prioritare anexată SIDU.",
+            "Activitatea de bază reprezintă minimum 50% din bugetul eligibil și se încadrează în regenerarea spațiilor publice, patrimoniu și cultură ori infrastructură și promovare turistică; activitățile soft, proiectarea, consultanța, auditul și comunicarea sunt conexe în limitele ghidului.",
+            "Valoarea eligibilă este între EUR 500.000 și EUR 7.500.000; implementarea se finalizează cel târziu la 31 decembrie 2029.",
+            "Investiția nu este finalizată fizic înainte de depunere și respectă drepturile asupra imobilelor, lipsa dublei finanțări, DNSH, accesibilitatea, egalitatea de șanse și cerințele tehnice și financiare aplicabile."
+          ]
+        },
+        "scoring": {
+          "competitive": true,
+          "minimum_quality_points": 50,
+          "excellence_threshold_points": 85,
+          "criteria_families": [
+            "contribuția la obiectivul specific OS 5.1",
+            "justificarea necesității proiectului",
+            "calitatea, maturitatea și sustenabilitatea proiectului",
+            "dezvoltarea durabilă, egalitatea de șanse, accesibilitatea și DNSH",
+            "complementaritatea cu alte investiții și surse de finanțare",
+            "cooperarea și inițiativele europene"
+          ],
+          "eliminatory_rules": [
+            "Un scor zero la criteriile marcate astfel în grila ETF conduce la respingere.",
+            "Un răspuns NU la oricare criteriu obligatoriu din grila de verificare a documentației tehnico-economice conduce la respingere."
+          ],
+          "ranking": "Proiectele sub pragul de excelență, dar cu minimum 50 de puncte, sunt ordonate descrescător după punctaj în limita bugetului, după soluționarea contestațiilor.",
+          "tie_breakers": [
+            "punctajul criteriului 3.3",
+            "punctajul criteriului 1",
+            "punctajul criteriului 3 fără 3.3",
+            "punctajul criteriului 2",
+            "punctajul criteriului 4",
+            "punctajul criteriului 5",
+            "punctajul criteriului 6",
+            "data și ora depunerii"
+          ]
+        }
+      },
+      "fact_evidence": {
+        "status": [
+          "EV-PR-CENTRU-URBAN-81-LAUNCH-20260813",
+          "EV-PR-CENTRU-URBAN-81-FINAL-GUIDE-20260813"
+        ],
+        "deadline": [
+          "EV-PR-CENTRU-URBAN-81-LAUNCH-20260813",
+          "EV-PR-CENTRU-URBAN-81-FINAL-GUIDE-20260813"
+        ],
+        "budget": [
+          "EV-PR-CENTRU-URBAN-81-FINAL-GUIDE-20260813"
+        ],
+        "grant": [
+          "EV-PR-CENTRU-URBAN-81-FINAL-GUIDE-20260813"
+        ],
+        "eligibility": [
+          "EV-PR-CENTRU-URBAN-81-FINAL-GUIDE-20260813"
+        ],
+        "scoring": [
+          "EV-PR-CENTRU-URBAN-81-FINAL-GUIDE-20260813"
+        ],
+        "beneficiaries": [
+          "EV-PR-CENTRU-URBAN-81-FINAL-GUIDE-20260813"
+        ]
+      }
+    }
+  ],
+  "changesets": [
+    {
+      "schema_version": "1.0",
+      "changeset_id": "CS-PR-CENTRU-URBAN-81-20260813",
+      "opportunity_id": "pr-centru-urban-81",
+      "automatic_publish_allowed": false,
+      "resolution_state": "VERIFIED",
+      "changes": [
+        {
+          "fact_class": "status",
+          "before": "EXPECTED (candidate only)",
+          "after": "EXPECTED",
+          "evidence_refs": ["EV-PR-CENTRU-URBAN-81-LAUNCH-20260813"]
+        },
+        {
+          "fact_class": "deadline",
+          "before": "20 august 2026, 12:00 — 20 noiembrie 2026, 12:00 (candidate only)",
+          "after": "2026-08-20T12:00:00+03:00 — 2026-11-20T12:00:00+02:00",
+          "evidence_refs": ["EV-PR-CENTRU-URBAN-81-FINAL-GUIDE-20260813"]
+        },
+        {
+          "fact_class": "budget",
+          "before": "22,678 million EUR (candidate only)",
+          "after": "EUR 22,677,762: EUR 1,406,525 PR Centru allocation plus EUR 21,271,237 overcontracting",
+          "evidence_refs": ["EV-PR-CENTRU-URBAN-81-FINAL-GUIDE-20260813"]
+        },
+        {
+          "fact_class": "grant",
+          "before": "Conform ghidului",
+          "after": "Grant; EUR 500,000–7,500,000 eligible project value; maximum 98% programme contribution; minimum 2% applicant contribution",
+          "evidence_refs": ["EV-PR-CENTRU-URBAN-81-FINAL-GUIDE-20260813"]
+        },
+        {
+          "fact_class": "eligibility",
+          "before": "Municipii din Regiunea Centru; condițiile exacte necesită rezoluție",
+          "after": "Cumulative municipality, partnership, location, SIDU, project and activity conditions extracted from the final guide",
+          "evidence_refs": ["EV-PR-CENTRU-URBAN-81-FINAL-GUIDE-20260813"]
+        },
+        {
+          "fact_class": "scoring",
+          "before": "Conform grilei oficiale; neextras",
+          "after": "Competitive; 50-point quality threshold; 85-point excellence threshold; six criteria families and ordered tie-breakers",
+          "evidence_refs": ["EV-PR-CENTRU-URBAN-81-FINAL-GUIDE-20260813"]
+        },
+        {
+          "fact_class": "beneficiaries",
+          "before": "Municipii din Regiunea Centru (candidate only)",
+          "after": "UAT municipalities individually or as mandatory leaders of eligible partnerships",
+          "evidence_refs": ["EV-PR-CENTRU-URBAN-81-FINAL-GUIDE-20260813"]
+        }
+      ]
+    }
+  ],
+  "resolution_tasks": [
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-PR-CENTRU-URBAN-81-MATERIAL",
+      "opportunity_id": "pr-centru-urban-81",
+      "status": "RESOLVED",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ],
+      "resolution_evidence_refs": [
+        "EV-PR-CENTRU-URBAN-81-LAUNCH-20260813",
+        "EV-PR-CENTRU-URBAN-81-FINAL-GUIDE-20260813"
+      ],
+      "resolution_note": "The official final guide demonstrates every material class. The call remains EXPECTED until 2026-08-20 12:00; the registry's generic 'Activ' label does not semantically assert that MySMIS currently accepts applications."
+    }
+  ]
+}
