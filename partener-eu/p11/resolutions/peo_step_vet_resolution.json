@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "resolution_id": "RES-PEO-STEP-VET-20260813",
+  "resolved_at": "2026-08-13T13:30:04Z",
+  "policy": {
+    "automatic_material_fact_update_allowed": false,
+    "resolution_rule": "A public-consultation notice and its elapsed comment deadline do not establish a final launch, an OPEN submission state, a submission deadline or any final-guide material fact. Every material class remains UNKNOWN until the final package is retrieved, hash-pinned and semantically reviewed together with an explicit current submission window or authoritative cancellation notice."
+  },
+  "blocker": {
+    "consultation_notice": {
+      "phase": "PUBLIC_CONSULTATION_ONLY",
+      "published_by_oir_nord_vest": "2026-07-14",
+      "comments_close": "2026-08-03",
+      "programme_identity": "PEO / P12 / ESO4.1 / Action 12.a.1",
+      "call_type": "COMPETITIVE"
+    },
+    "official_mipe_attachment": {
+      "url": "https://mfe.gov.ro/wp-content/uploads/2026/07/292afddab469f647f5d0a7657444bb51.zip",
+      "retrieval_result": "HTTP_503",
+      "sha256": null,
+      "semantic_review_completed": false
+    },
+    "observed_as_of": "2026-08-13T13:30:04Z",
+    "semantic_result": "CONSULTATION_CLOSED_FINAL_LAUNCH_AND_FINAL_PACKAGE_NOT_VERIFIABLE"
+  },
+  "evidence": [
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-PEO-STEP-VET-OIR-NV-CONSULTATION-20260813",
+      "source_tier": "T1B",
+      "source_owner": "Organismul Intermediar Regional pentru Programul Educație și Ocupare — Regiunea Nord-Vest",
+      "source_url": "https://www.runv.ro/anunturi.html",
+      "primary_attachment_url": "https://mfe.gov.ro/wp-content/uploads/2026/07/292afddab469f647f5d0a7657444bb51.zip",
+      "observed_at": "2026-08-13T13:30:04Z",
+      "semantic_sha256": "23e5273df79c56681e33d146f29fbf8537c14d596153a6c1ab5382f982d9c1ae",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "semantic_assertion": "The official OIR notice identifies STEP-VET as a competitive PEO call under Priority P12, Specific Objective ESO4.1 and Action 12.a.1, and accepts consultation comments through 2026-08-03. It is explicitly a public-consultation notice, not a final launch or submission-window notice, so it proves none of the seven publishable material fact classes.",
+      "temporal_role": "HISTORICAL_PUBLIC_CONSULTATION_NOTICE",
+      "retrieval_state": "OFFICIAL_OIR_PAGE_SEMANTICALLY_VERIFIED; LINKED_MIPE_ZIP_HTTP_503_NOT_HASH_PINNED"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-PEO-STEP-VET-OIR-VEST-CONSULTATION-20260812",
+      "source_tier": "T1B",
+      "source_owner": "Organismul Intermediar Regional pentru Programul Educație și Ocupare — Regiunea Vest",
+      "source_url": "https://oirvest.ro/peo-consultare-publica-ghidul-solicitantului-conditii-specifice-step-vet-formare-profesionala-la-locul-de-munca-pentru-elevii-din-invatamantul-profesional-si-tehnic-in-tehnologii-crit/",
+      "observed_at": "2026-08-12T13:12:33Z",
+      "semantic_sha256": "91ebb64ff40f3e72242361eb5de269a50b7a54235a39a69ecad194dd609300fe",
+      "semantic_verdict": "UNRESOLVED",
+      "supports_fact_classes": [],
+      "semantic_assertion": "The official OIR Vest notice records the STEP-VET guide as a public consultation from 2026-07-13 through 2026-08-03 and links to the MIPE guide page. Consultation timing is not a submission deadline and cannot establish OPEN or any final-guide material class.",
+      "temporal_role": "HISTORICAL_PUBLIC_CONSULTATION_NOTICE",
+      "retrieval_state": "PINNED_IMPORTED_OFFICIAL_PAGE_SEMANTICS; CURRENT_DIRECT_PAGE_REQUIRES_BROWSER_VERIFICATION"
+    }
+  ],
+  "opportunities": [
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "peo-step-vet",
+      "title": "STEP-VET — Formare profesională la locul de muncă pentru elevii din învățământul profesional și tehnic în tehnologii critice",
+      "programme": "PEO / STEP",
+      "code": "P12 — STEP-VET",
+      "status": "DISCOVERED",
+      "publication_state": "REVIEW_REQUIRED",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-IMPORT-PEO-STEP-VET",
+        "EV-PEO-STEP-VET-OIR-NV-CONSULTATION-20260813",
+        "EV-PEO-STEP-VET-OIR-VEST-CONSULTATION-20260812"
+      ],
+      "material_facts": {},
+      "fact_evidence": {},
+      "candidate_material_facts": {
+        "status": {
+          "value": "UNKNOWN",
+          "reason": "The official notices establish public consultation only; no final launch, explicit current submission state or cancellation was verified."
+        },
+        "deadline": {
+          "value": "UNKNOWN",
+          "reason": "2026-08-03 is the consultation-comment deadline, not a project-submission deadline."
+        },
+        "budget": {
+          "value": "UNKNOWN",
+          "reason": "The final guide package could not be retrieved, hash-pinned and semantically reviewed."
+        },
+        "grant": {
+          "value": "UNKNOWN",
+          "reason": "No authoritative final project-level grant and co-financing rules were verified."
+        },
+        "eligibility": {
+          "value": "UNKNOWN",
+          "reason": "The cumulative final applicant, partner, activity and exclusion rules were not verified from a final package."
+        },
+        "scoring": {
+          "value": "UNKNOWN",
+          "reason": "No final evaluation grid and thresholds were retrieved and hash-pinned."
+        },
+        "beneficiaries": {
+          "value": "UNKNOWN",
+          "reason": "The title indicates the target context but does not establish the final eligible-applicant or target-group rules."
+        }
+      }
+    }
+  ],
+  "changesets": [],
+  "resolution_tasks": [
+    {
+      "schema_version": "1.0",
+      "resolution_task_id": "RT-PEO-STEP-VET-MATERIAL",
+      "opportunity_id": "peo-step-vet",
+      "status": "IN_REVIEW",
+      "automatic_material_fact_update_allowed": false,
+      "blocked_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ],
+      "resolution_evidence_refs": [
+        "EV-PEO-STEP-VET-OIR-NV-CONSULTATION-20260813",
+        "EV-PEO-STEP-VET-OIR-VEST-CONSULTATION-20260812"
+      ],
+      "resolution_note": "All seven classes remain UNKNOWN. Re-review only when MIPE publishes an accessible final STEP-VET package plus an explicit MySMIS submission window, an authoritative launch notice, or a cancellation notice."
+    }
+  ]
+}
