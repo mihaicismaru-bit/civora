@@ -28,7 +28,10 @@ on:
 
 concurrency:
   group: partener-eu-production-validation
-  cancel-in-progress: true
+  # Every run persists a shared validation/checkpoint ledger. Queue overlapping
+  # monitor and Pages triggers so an interrupted writer cannot race the next
+  # run during git pull --rebase and lose the newer evidence commit.
+  cancel-in-progress: false
 
 permissions:
   contents: write
