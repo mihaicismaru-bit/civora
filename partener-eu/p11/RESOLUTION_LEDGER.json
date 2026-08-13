@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "updated_at": "2026-08-13T10:25:30Z",
+  "updated_at": "2026-08-13T11:26:15Z",
   "policy": "Resolve only material fact classes demonstrated by current T1/T1B semantic evidence; omit all other material facts.",
   "cases": [
     {
@@ -103,6 +103,23 @@
       ],
       "unresolved_fact_classes": [],
       "next_review_trigger": "Official clarification, corrigendum, suspension, closure, cancellation, specific-guide revision or general-guide revision"
+    },
+    {
+      "priority": 7,
+      "opportunity_id": "peo-step-edu-adulti",
+      "resolution_file": "resolutions/peo_step_edu_adulti_resolution.json",
+      "state": "IN_REVIEW_IDENTITY_COLLISION_WITH_STEP_LLL",
+      "unresolved_fact_classes": [
+        "status",
+        "deadline",
+        "budget",
+        "grant",
+        "eligibility",
+        "scoring",
+        "beneficiaries"
+      ],
+      "contradiction": "The candidate STEP-EDU record uses P11/ESO4.7/11.g.1, but current MIPE evidence maps that identity to the separately canonicalized STEP-LLL call. Candidate dates, EUR 120 million budget and university-only applicant scope conflict with the consolidated STEP-LLL guide; no distinct final STEP-EDU guide exists in the consulted official sources.",
+      "next_review_trigger": "A distinct official STEP-EDU page/final guide with an unambiguous call identifier, or authoritative identity evidence permitting formal reject/merge without duplicating STEP-LLL"
     }
   ]
 }
