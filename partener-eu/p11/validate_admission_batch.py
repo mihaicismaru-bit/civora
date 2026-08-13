@@ -17,6 +17,24 @@ EXPECTED_BATCH_SIZES = {
 TARGET_CANONICAL_OPPORTUNITIES = 25
 
 
+def explicitly_resolved_admission_ids() -> set[str]:
+    result: set[str] = set()
+    for path in sorted((ROOT / "resolutions").glob("*_resolution.json")):
+        resolution = json.loads(path.read_text(encoding="utf-8"))
+        resolved_tasks = {
+            row["opportunity_id"]
+            for row in resolution.get("resolution_tasks", [])
+            if row.get("status") == "RESOLVED"
+        }
+        result.update(
+            row["opportunity_id"]
+            for row in resolution.get("opportunities", [])
+            if row.get("publication_state") == "PUBLISHABLE"
+            and row["opportunity_id"] in resolved_tasks
+        )
+    return result
+
+
 def main() -> int:
     bundle = json.loads((ROOT / "opportunity_bundle.json").read_text(encoding="utf-8"))
     validate_bundle(bundle)
@@ -41,6 +59,7 @@ def main() -> int:
     if len(opportunities) < TARGET_CANONICAL_OPPORTUNITIES:
         raise SystemExit(f"canonical corpus must contain at least {TARGET_CANONICAL_OPPORTUNITIES} opportunities")
     evidence = {row["evidence_id"]: row for row in bundle["evidence"]}
+    resolved_admissions = set(ids) & explicitly_resolved_admission_ids()
     open_blocks = {
         row["opportunity_id"]: set(row["blocked_fact_classes"])
         for row in bundle["resolution_tasks"]
@@ -48,6 +67,10 @@ def main() -> int:
     }
     for opportunity_id in ids:
         item = opportunities[opportunity_id]
+        if opportunity_id in resolved_admissions:
+            if item["publication_state"] != "PUBLISHABLE" or item.get("candidate_material_facts"):
+                raise SystemExit(f"resolved admission is not explicitly publishable: {opportunity_id}")
+            continue
         if item["status"] != "DISCOVERED" or item["publication_state"] != "REVIEW_REQUIRED":
             raise SystemExit(f"admitted opportunity is not fail-closed: {opportunity_id}")
         if item.get("material_facts") or item.get("fact_evidence"):
@@ -60,7 +83,13 @@ def main() -> int:
         candidates = set((item.get("candidate_material_facts") or {}).keys())
         if candidates != MATERIAL_FACT_CLASSES or not candidates <= open_blocks.get(opportunity_id, set()):
             raise SystemExit(f"admitted candidate facts are not fully blocked: {opportunity_id}")
-    print(json.dumps({"batches": [batch["batch_id"] for batch in batches], "admitted": len(ids), "publishable": 0, "material_fact_action": "NONE"}, indent=2))
+    print(json.dumps({
+        "batches": [batch["batch_id"] for batch in batches],
+        "admitted": len(ids),
+        "explicitly_resolved_overlays": len(resolved_admissions),
+        "unresolved_admissions": len(ids) - len(resolved_admissions),
+        "admission_material_fact_action": "NONE",
+    }, indent=2))
     return 0
 
 

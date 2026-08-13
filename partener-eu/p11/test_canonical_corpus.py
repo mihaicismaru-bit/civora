@@ -29,13 +29,13 @@ class CanonicalCorpusTests(unittest.TestCase):
     def test_bundle_passes_contract(self):
         counts = validate_bundle(self.bundle)
         self.assertEqual(counts["opportunities"], 26)
-        self.assertEqual(counts["changesets"], 5)
+        self.assertEqual(counts["changesets"], 6)
 
     def test_normalization_has_no_publication_effect(self):
         publishable = [x["opportunity_id"] for x in self.bundle["opportunities"] if x["publication_state"] == "PUBLISHABLE"]
         self.assertEqual(
             publishable,
-            ["afir-energy-2026", "pr-ne-energy-residential-towns-2026", "pr-centru-clusters-122", "pids-supported-decision", "PEO-STEP-LLL-ADULTI-2026"],
+            ["afir-energy-2026", "pr-ne-energy-residential-towns-2026", "pr-centru-clusters-122", "pids-supported-decision", "pr-centru-urban-81", "PEO-STEP-LLL-ADULTI-2026"],
         )
         self.assertTrue(all(x.get("automatic_material_fact_update_allowed") is False for x in self.bundle["opportunities"]))
 
@@ -61,7 +61,7 @@ class CanonicalCorpusTests(unittest.TestCase):
     def test_admitted_batch_is_semantically_unresolved(self):
         opportunities = {x["opportunity_id"]: x for x in self.bundle["opportunities"]}
         evidence = {x["evidence_id"]: x for x in self.bundle["evidence"]}
-        resolved_admissions = {"pr-ne-energy-residential-towns-2026"}
+        resolved_admissions = {"pr-ne-energy-residential-towns-2026", "pr-centru-urban-81"}
         for opportunity_id in set(self.admitted_ids) - resolved_admissions:
             item = opportunities[opportunity_id]
             self.assertEqual(item["status"], "DISCOVERED")
