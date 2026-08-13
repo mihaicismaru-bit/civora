@@ -38,6 +38,18 @@ def main() -> None:
     assert clusters["publicationState"] == "PUBLISHABLE"
     assert clusters["materialFacts"]["budget"]["total_eur"] == 11664904
     assert clusters["materialFacts"]["grant"]["maximum_eur"] == 3500000
+    pids = next(
+        row for row in projection["opportunities"]
+        if row["id"] == "pids-supported-decision"
+    )
+    assert pids["status"] == "OPEN"
+    assert pids["publicationState"] == "PUBLISHABLE"
+    assert pids["materialFacts"]["budget"]["total_eur"] == 11804343
+    assert pids["materialFacts"]["grant"]["form"] == "grant nerambursabil"
+    assert pids["materialFacts"]["scoring"]["minimum_total_points"] == 70
+    assert set(pids["verifiedFactClasses"]) == {
+        "status", "deadline", "budget", "grant", "eligibility", "scoring", "beneficiaries"
+    }
     print("PASS P11 public projection")
 
 
