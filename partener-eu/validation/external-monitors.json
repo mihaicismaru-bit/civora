@@ -1,24 +1,24 @@
 {
   "schema_version": "1.0",
   "checkpoint": "PARTENER-EU-CIVORA-P10-0020",
-  "observed_at": "2026-08-13T09:50:43Z",
-  "validation_run_started": "2026-08-13T09:50:20Z",
+  "observed_at": "2026-08-13T09:52:13Z",
+  "validation_run_started": "2026-08-13T09:51:54Z",
   "integrity": {
     "latest_history_equal": true,
-    "latest_sha256": "6a53e54c9fcf8a5d7aed85b0b9adc8f9679ad04f80cde7ff48a9500fef259626",
-    "history_sha256": "6a53e54c9fcf8a5d7aed85b0b9adc8f9679ad04f80cde7ff48a9500fef259626",
-    "history_path": "validation/history/20260813T095020Z.json",
+    "latest_sha256": "c7f28d2e2b3239eb4f946eaaf49757ba3bd2c2db802cb37bb03cc32bde3e1233",
+    "history_sha256": "c7f28d2e2b3239eb4f946eaaf49757ba3bd2c2db802cb37bb03cc32bde3e1233",
+    "history_path": "validation/history/20260813T095154Z.json",
     "source_state_checkpoint_equal": true,
-    "source_state_sha256": "a9f9623103dfa10c3833a266e7aedced63018032db1a5d616925151d112238fa",
-    "checkpoint_sha256": "a9f9623103dfa10c3833a266e7aedced63018032db1a5d616925151d112238fa",
+    "source_state_sha256": "22de05822f5cbdb1b8928fa3a4e546c18ed0723203f747a557246c87d7ccb14d",
+    "checkpoint_sha256": "22de05822f5cbdb1b8928fa3a4e546c18ed0723203f747a557246c87d7ccb14d",
     "frontend_regression_pass": true,
     "frontend_pass": 10,
     "frontend_total": 10,
     "recovery_state_integrity": "PASS"
   },
   "source_registry": {
-    "observed_at": "2026-08-13T05:53:39.981433Z",
-    "age_seconds": 14223,
+    "observed_at": "2026-08-13T09:51:03.796221Z",
+    "age_seconds": 69,
     "stale_after_seconds": 28800,
     "stale": false,
     "health": "DEGRADED",
@@ -28,7 +28,7 @@
       "degraded": 0,
       "fail": 3,
       "quarantined": 3,
-      "resolution_tasks_required": 0
+      "resolution_tasks_required": 1
     },
     "tier_counts": {
       "T1": {
@@ -37,7 +37,7 @@
         "degraded": 0,
         "fail": 0,
         "quarantined": 0,
-        "hash_changes": 0
+        "hash_changes": 1
       },
       "T1B": {
         "total": 11,
@@ -48,7 +48,9 @@
         "hash_changes": 0
       }
     },
-    "changed_source_ids": [],
+    "changed_source_ids": [
+      "SRC-MAI-FED-CALLS"
+    ],
     "missing_resolution_tasks": [],
     "unsafe_material_updates": [],
     "fail_closed": true
@@ -360,7 +362,7 @@
   "summary": {
     "integrity_pass": true,
     "registry_health": "DEGRADED",
-    "registry_hash_changes": 0,
+    "registry_hash_changes": 1,
     "afir_hash_changes": 0,
     "peo_calendar_changes": 6,
     "mipe_health": "DEGRADED_FAIL_CLOSED",
