@@ -22,6 +22,38 @@ Priorități: angajatori mari, dezvoltatori, construcții, retail, horeca, turis
 
 Semnale urmărite: deschideri/închideri, investiții, concedieri/angajări, schimbări de management, proiecte, autorizații, incidente, litigii, insolvență, contracte publice, rebranding și modificări de ofertă/preț.
 
+#### 2A. Topuri și clasamente de firme
+
+Se folosesc ca **surse de semnale economice** topurile și clasamentele de companii disponibile public: clasamente după cifră de afaceri, profit, număr de angajați, dinamică anuală, domeniu CAEN, localitate și județ.
+
+Aceste topuri sunt folosite pentru:
+- descoperirea firmelor relevante care nu apar frecvent în presă;
+- detectarea creșterilor/scăderilor neobișnuite;
+- identificarea noilor lideri sectoriali;
+- compararea firmelor care câștigă contracte publice cu dimensiunea lor economică;
+- selecția companiilor pentru monitorizare continuă și investigații economice.
+
+Regulă: clasamentul produce `SIGNAL_ECONOMIC`; cifrele și structura de proprietate se verifică ulterior în surse oficiale/primare înainte de publicare.
+
+#### 2B. ONRC — Registrul Comerțului
+
+**ONRC** este sursă strategică pentru verificarea și generarea de semnale despre companiile locale. Se utilizează, în limitele datelor legal accesibile, pentru:
+- denumire juridică și CUI;
+- sediu și puncte de lucru;
+- administratori, asociați/acționari și modificări de structură;
+- obiecte de activitate/CAEN;
+- înființări, radieri, dizolvări, suspendări și alte mențiuni;
+- schimbări de denumire, sediu, capital sau conducere;
+- conexiuni între societăți atunci când sunt documentate oficial.
+
+Modificările ONRC pot genera semnale pentru `ECONOMIE`, `UNDE_IEȘIM`, `INVESTIGAȚII` sau `ADMINISTRAȚIE`, în funcție de relevanță.
+
+Reguli:
+- datele ONRC sunt tratate ca sursă primară pentru situația registrală la data verificării;
+- beneficiarul real se tratează separat și se publică numai când informația este legal accesibilă și relevantă;
+- nu se deduc relații politice sau economice doar din coincidențe de nume/adresă;
+- pentru afirmații sensibile se păstrează data extrasului/consultării și se solicită drept la replică unde este cazul.
+
 ### 3. Instituții administrative
 
 Se urmăresc site-urile și canalele oficiale ale instituțiilor publice locale și județene: Consiliul Județean, prefectură, primării și consilii locale, servicii/deconcentrate, poliție/jandarmerie/ISU, spitale și instituții sanitare publice, instituții de mediu și ape, transport/utilități și alte autorități cu impact local.
