@@ -28,6 +28,8 @@ class ProjectionExplainabilityTests(unittest.TestCase):
             "evidence_id": "EV-1",
             "semantic_verdict": "VERIFIED",
             "source_tier": "T1",
+            "source_url": "https://example.test/call",
+            "observed_at": "2026-08-14T00:00:00Z",
             "supports_fact_classes": ["status"],
         }
 
@@ -50,6 +52,14 @@ class ProjectionExplainabilityTests(unittest.TestCase):
             row["publicationDecision"]["reasonCodes"],
             ["PUBLICATION_STATE_PUBLISHABLE", "VERIFIED_FACTS_ONLY"],
         )
+        self.assertEqual(row["verifiedEvidenceCount"], 1)
+        self.assertEqual(row["verificationEvidence"], [{
+            "evidenceId": "EV-1",
+            "sourceTier": "T1",
+            "sourceUrl": "https://example.test/call",
+            "observedAt": "2026-08-14T00:00:00Z",
+            "supportedFactClasses": ["status"],
+        }])
 
     def test_active_resolution_task_blocks_even_publishable_state(self):
         task = {
@@ -146,6 +156,35 @@ class ProjectionExplainabilityTests(unittest.TestCase):
         result = self.build_projection()
         result["policy"]["automaticPublication"] = True
         with self.assertRaisesRegex(ValueError, "policy must disable automatic publication"):
+            projection.assert_projection_integrity(result)
+
+    def test_verification_provenance_is_deterministic_and_fact_scoped(self):
+        opportunity = copy.deepcopy(self.opportunity)
+        opportunity["material_facts"]["deadline"] = {"closes_at": "2026-08-31T12:00:00+03:00"}
+        opportunity["fact_evidence"] = {"status": ["EV-1"], "deadline": ["EV-1"]}
+        evidence = copy.deepcopy(self.evidence)
+        evidence["supports_fact_classes"] = ["status", "deadline"]
+        row = self.build(opportunity=opportunity, evidence=evidence)
+        self.assertEqual(row["verifiedFactClasses"], ["deadline", "status"])
+        self.assertEqual(row["verificationEvidence"][0]["supportedFactClasses"], ["deadline", "status"])
+
+    def test_unresolved_evidence_is_not_exposed_as_verification_provenance(self):
+        evidence = copy.deepcopy(self.evidence)
+        evidence["semantic_verdict"] = "UNRESOLVED"
+        row = self.build(evidence=evidence)
+        self.assertEqual(row["verifiedEvidenceCount"], 0)
+        self.assertEqual(row["verificationEvidence"], [])
+
+    def test_integrity_gate_rejects_provenance_fact_class_drift(self):
+        result = self.build_projection()
+        result["opportunities"][0]["verificationEvidence"][0]["supportedFactClasses"] = ["deadline"]
+        with self.assertRaisesRegex(ValueError, "provenance does not match verified fact classes"):
+            projection.assert_projection_integrity(result)
+
+    def test_integrity_gate_rejects_non_authoritative_provenance(self):
+        result = self.build_projection()
+        result["opportunities"][0]["verificationEvidence"][0]["sourceTier"] = "T2"
+        with self.assertRaisesRegex(ValueError, "verification evidence must be T1 or T1B"):
             projection.assert_projection_integrity(result)
 
 

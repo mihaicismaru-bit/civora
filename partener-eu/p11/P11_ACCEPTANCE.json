@@ -1,13 +1,13 @@
 {
   "schema_version": "1.0",
-  "checkpoint": "P11-R05-PROJECTION-INTEGRITY-GATE",
+  "checkpoint": "P11-R06-VERIFICATION-PROVENANCE",
   "status": "PASS",
   "accepted_at": "2026-08-14",
   "evidence": {
     "contract": "partener-eu/p11/opportunity_contract.py",
     "tests": "partener-eu/p11/test_opportunity_contract.py",
     "test_command": "python partener-eu/p11/apply_resolutions.py --check && python partener-eu/p11/build_public_projection.py --check && python -m unittest discover -s partener-eu/p11 -p 'test_*.py' && python partener-eu/ops/quality_gate.py",
-    "tests_passed": 40,
+    "tests_passed": 44,
     "tests_failed": 0
   },
   "policy_assertions": {
@@ -45,7 +45,12 @@
     "summary_and_decision_drift_is_rejected": true,
     "duplicate_public_opportunity_ids_are_rejected": true,
     "unsafe_publication_policy_is_rejected": true,
-    "public_projection_schema": 2,
+    "verified_fact_classes_have_public_authoritative_provenance": true,
+    "unresolved_evidence_is_excluded_from_verification_provenance": true,
+    "verification_provenance_is_deterministic": true,
+    "verification_provenance_drift_is_rejected": true,
+    "public_adapter_replaces_legacy_sources_with_verified_provenance": true,
+    "public_projection_schema": 3,
     "quality_gate_trigger_scope": ["pull_request", "push_main", "workflow_dispatch"],
     "unified_quality_gate": "18/18 PASS"
   },
