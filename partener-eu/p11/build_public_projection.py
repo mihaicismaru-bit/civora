@@ -54,12 +54,115 @@ def assert_artifact_current(path: pathlib.Path, expected: str) -> None:
     actual = path.read_text(encoding="utf-8")
     expected_projection = parse_payload(expected)
     actual_projection = parse_payload(actual)
+    assert_projection_integrity(expected_projection)
+    assert_projection_integrity(actual_projection)
     if actual_projection != expected_projection:
         raise ValueError(
             f"public projection drift: {path} "
             f"actual_sha256={digest(render(actual_projection))} "
             f"expected_sha256={digest(render(expected_projection))}"
         )
+
+
+def projection_integrity_errors(projection: dict) -> list[str]:
+    opportunities = projection.get("opportunities")
+    summary = projection.get("summary")
+    policy = projection.get("policy")
+    if not isinstance(opportunities, list):
+        return ["opportunities must be a list"]
+    if not isinstance(summary, dict):
+        return ["summary must be an object"]
+
+    errors = []
+    if not isinstance(policy, dict):
+        errors.append("policy must be an object")
+    else:
+        if policy.get("unverifiedMaterialFactsVisible") is not False:
+            errors.append("policy must hide unverified material facts")
+        if policy.get("automaticPublication") is not False:
+            errors.append("policy must disable automatic publication")
+        if policy.get("summaryDerivedFromEffectiveDecisions") is not True:
+            errors.append("policy must derive summary from effective decisions")
+    identifiers = [row.get("id") for row in opportunities if isinstance(row, dict)]
+    if len(identifiers) != len(opportunities) or any(not value for value in identifiers):
+        errors.append("every opportunity must have an id")
+    if len(set(identifiers)) != len(identifiers):
+        errors.append("opportunity ids must be unique")
+
+    allowed = []
+    blocked = []
+    for row in opportunities:
+        if not isinstance(row, dict):
+            errors.append("every opportunity must be an object")
+            continue
+        decision = (row.get("publicationDecision") or {}).get("decision")
+        reason_codes = (row.get("publicationDecision") or {}).get("reasonCodes")
+        blocked_fact_classes = (row.get("publicationDecision") or {}).get("blockedFactClasses")
+        active_task_count = (row.get("publicationDecision") or {}).get("activeResolutionTaskCount")
+        if decision == ALLOW_DECISION:
+            allowed.append(row)
+        elif decision == BLOCK_DECISION:
+            blocked.append(row)
+        else:
+            errors.append(f"{row.get('id')}: unknown publication decision")
+            continue
+
+        if not isinstance(reason_codes, list) or not reason_codes:
+            errors.append(f"{row.get('id')}: decision reason codes required")
+        elif len(reason_codes) != len(set(reason_codes)):
+            errors.append(f"{row.get('id')}: duplicate decision reason codes")
+        if not isinstance(blocked_fact_classes, list):
+            errors.append(f"{row.get('id')}: blocked fact classes must be a list")
+        elif blocked_fact_classes != sorted(set(blocked_fact_classes)):
+            errors.append(f"{row.get('id')}: blocked fact classes must be sorted and unique")
+
+        material_fact_classes = set((row.get("materialFacts") or {}).keys())
+        verified_fact_classes = set(row.get("verifiedFactClasses") or [])
+        if decision == BLOCK_DECISION and material_fact_classes:
+            errors.append(f"{row.get('id')}: blocked decision exposes material facts")
+        if decision == ALLOW_DECISION and material_fact_classes - verified_fact_classes:
+            errors.append(f"{row.get('id')}: allowed decision exposes unverified material facts")
+        if decision == ALLOW_DECISION and active_task_count:
+            errors.append(f"{row.get('id')}: active resolution task cannot be allowed")
+
+    decision_counts = {
+        ALLOW_DECISION: len(allowed),
+        BLOCK_DECISION: len(blocked),
+    }
+    block_reason_codes = sorted({
+        reason
+        for row in blocked
+        for reason in (row.get("publicationDecision") or {}).get("reasonCodes") or []
+    })
+    block_reason_counts = {
+        reason: sum(
+            1 for row in blocked
+            if reason in ((row.get("publicationDecision") or {}).get("reasonCodes") or [])
+        )
+        for reason in block_reason_codes
+    }
+    expected_summary = {
+        "opportunityCount": len(opportunities),
+        "openVerifiedCount": sum(
+            1 for row in allowed
+            if row.get("status") == "OPEN"
+            and {"status", "deadline"} <= set(row.get("verifiedFactClasses") or [])
+        ),
+        "publishableCount": len(allowed),
+        "reviewCount": len(blocked),
+        "decisionCounts": decision_counts,
+        "blockReasonCounts": block_reason_counts,
+    }
+    for key, expected in expected_summary.items():
+        if summary.get(key) != expected:
+            errors.append(f"summary.{key} does not match effective decisions")
+    return errors
+
+
+def assert_projection_integrity(projection: dict) -> None:
+    errors = projection_integrity_errors(projection)
+    if errors:
+        raise ValueError("public projection integrity failed: " + "; ".join(errors))
 
 
 def publication_decision(opportunity: dict, verified_fact_classes: list[str], tasks: list[dict]) -> dict:
@@ -155,7 +258,7 @@ def build(bundle: dict) -> dict:
         )
         for reason in block_reason_codes
     }
-    return {
+    projection = {
         "schemaVersion": 2,
         "asOf": bundle.get("as_of"),
         "policy": {
@@ -163,6 +266,7 @@ def build(bundle: dict) -> dict:
             "automaticPublication": False,
             "decisionReasonsVisible": True,
             "summaryDerivedFromEffectiveDecisions": True,
+            "integrityGate": "STRICT_FAIL_CLOSED",
         },
         "summary": {
             "opportunityCount": len(projected),
@@ -179,6 +283,8 @@ def build(bundle: dict) -> dict:
         },
         "opportunities": projected,
     }
+    assert_projection_integrity(projection)
+    return projection
 
 
 def main() -> int:

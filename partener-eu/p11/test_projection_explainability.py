@@ -112,6 +112,42 @@ class ProjectionExplainabilityTests(unittest.TestCase):
         })
         self.assertTrue(result["policy"]["summaryDerivedFromEffectiveDecisions"])
 
+    def test_integrity_gate_rejects_material_facts_on_blocked_record(self):
+        result = self.build_projection()
+        result["opportunities"][0]["publicationDecision"]["decision"] = "BLOCK_MATERIAL_FACTS"
+        with self.assertRaisesRegex(ValueError, "blocked decision exposes material facts"):
+            projection.assert_projection_integrity(result)
+
+    def test_integrity_gate_rejects_summary_drift(self):
+        result = self.build_projection()
+        result["summary"]["publishableCount"] += 1
+        with self.assertRaisesRegex(ValueError, "summary.publishableCount"):
+            projection.assert_projection_integrity(result)
+
+    def test_integrity_gate_rejects_unverified_allowed_fact(self):
+        result = self.build_projection()
+        result["opportunities"][0]["materialFacts"]["budget"] = {"total_eur": 1}
+        with self.assertRaisesRegex(ValueError, "allowed decision exposes unverified material facts"):
+            projection.assert_projection_integrity(result)
+
+    def test_integrity_gate_rejects_unknown_decision(self):
+        result = self.build_projection()
+        result["opportunities"][0]["publicationDecision"]["decision"] = "UNKNOWN"
+        with self.assertRaisesRegex(ValueError, "unknown publication decision"):
+            projection.assert_projection_integrity(result)
+
+    def test_integrity_gate_rejects_duplicate_opportunity_id(self):
+        result = self.build_projection()
+        result["opportunities"].append(copy.deepcopy(result["opportunities"][0]))
+        with self.assertRaisesRegex(ValueError, "opportunity ids must be unique"):
+            projection.assert_projection_integrity(result)
+
+    def test_integrity_gate_rejects_unsafe_policy(self):
+        result = self.build_projection()
+        result["policy"]["automaticPublication"] = True
+        with self.assertRaisesRegex(ValueError, "policy must disable automatic publication"):
+            projection.assert_projection_integrity(result)
+
 
 if __name__ == "__main__":
     unittest.main()
