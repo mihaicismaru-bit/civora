@@ -83,19 +83,43 @@ def graph_get(path: str, token: str, version: str) -> dict[str, Any]:
     return payload
 
 
-def graph_preflight(page_id: str, token: str, version: str) -> dict[str, Any]:
-    result: dict[str, Any] = {"expected_page_id": page_id}
-    try:
-        identity = graph_get("me?fields=id,name", token, version)
-        result["token_identity"] = {"id": identity.get("id"), "name": identity.get("name")}
-    except Exception as exc:  # diagnostic only
-        result["token_identity_error"] = str(exc)
-    try:
-        page = graph_get(f"{urllib.parse.quote(page_id, safe='')}?fields=id,name,tasks", token, version)
-        result["page"] = {"id": page.get("id"), "name": page.get("name"), "tasks": page.get("tasks")}
-    except Exception as exc:  # diagnostic only
-        result["page_tasks_error"] = str(exc)
-    return result
+def resolve_page_token(page_id: str, supplied_token: str, version: str) -> tuple[str, dict[str, Any]]:
+    """Accept either a Page token or a User token and return a Page token.
+
+    Meta's Graph Explorer often leaves the generated User token selected even after
+    Page authorization. If the supplied token identifies a person, derive the
+    Page Access Token directly from /{page_id}?fields=id,name,access_token.
+    """
+    identity = graph_get("me?fields=id,name", supplied_token, version)
+    identity_id = str(identity.get("id", ""))
+    if identity_id == page_id:
+        return supplied_token, {
+            "source": "page_token",
+            "id": identity_id,
+            "name": identity.get("name"),
+        }
+
+    page = graph_get(
+        f"{urllib.parse.quote(page_id, safe='')}?fields=id,name,access_token",
+        supplied_token,
+        version,
+    )
+    derived = str(page.get("access_token", "")).strip()
+    if str(page.get("id", "")) != page_id or not derived:
+        raise RuntimeError(
+            "Meta did not return a Page Access Token for the configured VÂLCEA CLAR Page ID"
+        )
+    page_identity = graph_get("me?fields=id,name", derived, version)
+    if str(page_identity.get("id", "")) != page_id:
+        raise RuntimeError(
+            f"Derived token does not identify configured page: {page_identity.get('id')}"
+        )
+    return derived, {
+        "source": "derived_from_user_token",
+        "user_id": identity_id,
+        "page_id": str(page_identity.get("id", "")),
+        "page_name": page_identity.get("name"),
+    }
 
 
 def graph_post(page_id: str, token: str, version: str, item: dict[str, Any]) -> str:
@@ -175,9 +199,9 @@ def main() -> int:
         return 0
 
     page_id = os.getenv("VALCEA_FB_PAGE_ID", "").strip()
-    token = os.getenv("VALCEA_FB_PAGE_ACCESS_TOKEN", "").strip()
+    supplied_token = os.getenv("VALCEA_FB_PAGE_ACCESS_TOKEN", "").strip()
     version = os.getenv("VALCEA_FB_GRAPH_VERSION", DEFAULT_GRAPH_VERSION).strip() or DEFAULT_GRAPH_VERSION
-    if not (page_id and token):
+    if not (page_id and supplied_token):
         print(
             json.dumps(
                 {
@@ -191,12 +215,12 @@ def main() -> int:
         )
         return 0
 
-    preflight = graph_preflight(page_id, token, version)
-    print(json.dumps({"status": "FACEBOOK_PREFLIGHT", **preflight}, ensure_ascii=False, indent=2))
+    page_token, resolution = resolve_page_token(page_id, supplied_token, version)
+    print(json.dumps({"status": "FACEBOOK_TOKEN_RESOLVED", **resolution}, ensure_ascii=False, indent=2))
 
     results = []
     for item in plan:
-        post_id = graph_post(page_id, token, version, item)
+        post_id = graph_post(page_id, page_token, version, item)
         published[item["id"]] = {
             "facebook_post_id": post_id,
             "published_at": dt.datetime.now(dt.timezone.utc).isoformat(),
