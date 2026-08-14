@@ -1,12 +1,15 @@
 {
-  "asOf": "2026-08-14T04:29:33Z",
-  "status": "LIVE_SURFACE_VERIFICATION_FAILED",
+  "asOf": "2026-08-14T19:29:17Z",
+  "status": "LIVE_SURFACE_VERIFIED",
   "sourceHealth": {
     "prioritySeed": "https://mfe.gov.ro/pdds/despre-program-programare/",
     "prioritySeedStatus": "TIMEOUT",
     "pddsNewsStatus": "TIMEOUT",
     "pddsGuidesStatus": "TIMEOUT",
     "mipeRootStatus": "TIMEOUT",
+    "peoRootStatus": "TIMEOUT",
+    "poidsRootStatus": "TIMEOUT",
+    "mipeGovRootStatus": "TIMEOUT",
     "webIndexNewCanonicalUrls": 0,
     "policy": "fail-closed; preserve last-known-good; never infer OPEN from ambiguous text"
   },
@@ -19,13 +22,18 @@
   "delivery": {
     "githubPagesConfiguredCname": "partener.eu",
     "githubPagesBuildType": "workflow",
+    "latestPagesRunId": 31829148978,
     "latestPagesBuildObserved": "success",
-    "publicSurfaceCheck": "https://partener.eu/ returned the legacy WordPress surface rather than the current PARTENER.EU Pages application during verification",
-    "result": "cannot confirm the GitHub Pages News surface is the content currently served at the public custom domain"
+    "latestPagesCompletedAt": "2026-08-14T18:33:04Z",
+    "publicSurfaceCheck": "https://partener.eu/ returned the current PARTENER.EU funding application shell during verification",
+    "newsAssetWired": true,
+    "newsAsset": "partener-eu/web/mipe-news.js",
+    "result": "current PARTENER.EU Pages surface verified; no new verified MIPE item required a new News deployment in this check"
   },
   "provenance": {
     "directOfficialFetchOnlyForFacts": true,
     "searchIndexDiscoveryOnly": true,
-    "mirrorCopiesPublishedAsMipeFacts": false
+    "mirrorCopiesPublishedAsMipeFacts": false,
+    "lastKnownGoodPreserved": true
   }
 }
