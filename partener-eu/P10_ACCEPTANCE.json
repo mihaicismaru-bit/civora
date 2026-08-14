@@ -15,9 +15,9 @@
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-08-14T19:37:37Z",
-    "source_pass": 3,
-    "source_degraded": 3,
+    "utc": "2026-08-14T19:39:59Z",
+    "source_pass": 5,
+    "source_degraded": 1,
     "source_fail": 1,
     "source_quarantined": 1,
     "critical_fail": false,
@@ -26,7 +26,7 @@
     "quarantined_source": "SRC-LEGISLATIE — Portal Legislativ; dependent material facts blocked fail-closed"
   },
   "deployment_evidence": {
-    "utc": "2026-08-14T19:37:51Z",
+    "utc": "2026-08-14T19:43:58Z",
     "status": "DEGRADED",
     "public_content_verified": true,
     "https_verified": true,
@@ -36,7 +36,7 @@
     "http_content_verified": true,
     "content_origin": "custom_https",
     "http_status": 200,
-    "final_url": "https://partener.eu/?p10_probe=20260814T193751Z",
+    "final_url": "https://partener.eu/?p10_probe=20260814T194358Z",
     "title": "PARTENER.EU — Finanțări europene",
     "required_markers_present": true,
     "critical_assets_ok": true,
@@ -46,7 +46,7 @@
       {
         "id": "custom_https",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260814T193751Z",
+        "final_url": "https://partener.eu/?p10_probe=20260814T194358Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -57,7 +57,7 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260814T193751Z",
+        "final_url": "http://partener.eu/?p10_probe=20260814T194358Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -68,12 +68,12 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260814T193751Z",
+        "final_url": "http://partener.eu/?p10_probe=20260814T194358Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260814T193751Z",
-            "to_url": "http://partener.eu/?p10_probe=20260814T193751Z"
+            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260814T194358Z",
+            "to_url": "http://partener.eu/?p10_probe=20260814T194358Z"
           }
         ],
         "content_verified": true,
@@ -123,16 +123,16 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-08-14T19:37:51Z",
-    "validation_run_started": "2026-08-14T19:37:37Z",
+    "utc": "2026-08-14T19:43:58Z",
+    "validation_run_started": "2026-08-14T19:39:59Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "14b75c2a5b24d3b7a30aeb9535dbb3a7ddc7acc3cf673bfd9a2f037b3d585b19",
-      "history_sha256": "14b75c2a5b24d3b7a30aeb9535dbb3a7ddc7acc3cf673bfd9a2f037b3d585b19",
-      "history_path": "validation/history/20260814T193737Z.json",
+      "latest_sha256": "30b814db7dd67b315fb1050788db834b549fc06779988f3967ac27edcf85ca4f",
+      "history_sha256": "30b814db7dd67b315fb1050788db834b549fc06779988f3967ac27edcf85ca4f",
+      "history_path": "validation/history/20260814T193959Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "22d81ffed2e9f13519cfee8247a0123aff3efc54ecf576ccb457f21632760c43",
-      "checkpoint_sha256": "22d81ffed2e9f13519cfee8247a0123aff3efc54ecf576ccb457f21632760c43",
+      "source_state_sha256": "22073088f6631faa94c53404bcfebe432e7b68d18681344b6bb4133bdab33e52",
+      "checkpoint_sha256": "22073088f6631faa94c53404bcfebe432e7b68d18681344b6bb4133bdab33e52",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
@@ -140,7 +140,7 @@
     },
     "source_registry": {
       "observed_at": "2026-08-14T19:36:52.548152Z",
-      "age_seconds": 59,
+      "age_seconds": 425,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
@@ -400,7 +400,7 @@
       "publication_policy": "candidate-state-only; web material facts are not auto-promoted on scheduled hash changes"
     },
     "mipe": {
-      "observed_at": "2026-08-14T17:35:25.394927+00:00",
+      "observed_at": "2026-08-14T19:39:41.220645+00:00",
       "status": "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
       "source_available": false,
       "candidate_count": 4,
