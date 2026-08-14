@@ -2,8 +2,8 @@
 """Fail-closed Facebook Page distributor for VÂLCEA CLAR.
 
 Reads a curated outbox. It never publishes inferred/discovered records directly.
-A post is eligible only when status == "ready". Published IDs are persisted in
-facebook_state.json so retries are idempotent.
+A post is eligible only when status == "ready" and it has a story-specific image.
+Published IDs are persisted in facebook_state.json so retries are idempotent.
 """
 from __future__ import annotations
 
@@ -21,6 +21,7 @@ ROOT = Path(__file__).resolve().parents[2]
 OUTBOX = ROOT / "valcea-clar" / "social" / "facebook_outbox.json"
 STATE = ROOT / "valcea-clar" / "social" / "facebook_state.json"
 DEFAULT_GRAPH_VERSION = "v25.0"
+CANONICAL_HOSTS = {"valceaclar.ro", "www.valceaclar.ro"}
 
 
 def load_json(path: Path, default: dict[str, Any]) -> dict[str, Any]:
@@ -41,8 +42,21 @@ def validate_item(item: dict[str, Any]) -> None:
         raise ValueError(f"invalid status for {item['id']}: {item['status']}")
     link = str(item["link"]).strip()
     parsed = urllib.parse.urlparse(link)
-    if parsed.scheme != "https" or parsed.hostname not in {"valceaclar.ro", "www.valceaclar.ro"}:
+    if parsed.scheme != "https" or parsed.hostname not in CANONICAL_HOSTS:
         raise ValueError(f"non-canonical link for {item['id']}: {link}")
+
+
+def validate_story_image(item: dict[str, Any]) -> None:
+    image_url = str(item.get("image_url", "")).strip()
+    if not image_url:
+        raise ValueError(
+            f"ready unpublished Facebook item {item['id']} has no story-specific image_url"
+        )
+    parsed = urllib.parse.urlparse(image_url)
+    if parsed.scheme != "https" or parsed.hostname not in CANONICAL_HOSTS:
+        raise ValueError(
+            f"Facebook image for {item['id']} must be hosted on valceaclar.ro: {image_url}"
+        )
 
 
 def eligible(items: list[dict[str, Any]], published: dict[str, Any]) -> list[dict[str, Any]]:
@@ -52,6 +66,7 @@ def eligible(items: list[dict[str, Any]], published: dict[str, Any]) -> list[dic
         validate_item(item)
         if item["status"] != "ready" or item["id"] in published:
             continue
+        validate_story_image(item)
         publish_after = item.get("publish_after")
         if publish_after:
             when = dt.datetime.fromisoformat(str(publish_after).replace("Z", "+00:00"))
@@ -84,12 +99,7 @@ def graph_get(path: str, token: str, version: str) -> dict[str, Any]:
 
 
 def resolve_page_token(page_id: str, supplied_token: str, version: str) -> tuple[str, dict[str, Any]]:
-    """Accept either a Page token or a User token and return a Page token.
-
-    Meta's Graph Explorer often leaves the generated User token selected even after
-    Page authorization. If the supplied token identifies a person, derive the
-    Page Access Token directly from /{page_id}?fields=id,name,access_token.
-    """
+    """Accept either a Page token or a User token and return a Page token."""
     identity = graph_get("me?fields=id,name", supplied_token, version)
     identity_id = str(identity.get("id", ""))
     if identity_id == page_id:
@@ -123,11 +133,14 @@ def resolve_page_token(page_id: str, supplied_token: str, version: str) -> tuple
 
 
 def graph_post(page_id: str, token: str, version: str, item: dict[str, Any]) -> str:
-    endpoint = f"https://graph.facebook.com/{version}/{urllib.parse.quote(page_id, safe='')}/feed"
+    """Publish a photo post so Facebook cannot substitute an unrelated link-preview image."""
+    endpoint = f"https://graph.facebook.com/{version}/{urllib.parse.quote(page_id, safe='')}/photos"
+    caption = f"{str(item['message']).strip()}\n\n{str(item['link']).strip()}"
     body = urllib.parse.urlencode(
         {
-            "message": str(item["message"]),
-            "link": str(item["link"]),
+            "url": str(item["image_url"]),
+            "caption": caption,
+            "published": "true",
             "access_token": token,
         }
     ).encode("utf-8")
@@ -146,7 +159,7 @@ def graph_post(page_id: str, token: str, version: str, item: dict[str, Any]) -> 
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="replace")
         raise RuntimeError(f"Meta Graph API HTTP {exc.code}: {detail[:600]}") from exc
-    post_id = str(payload.get("id", "")).strip()
+    post_id = str(payload.get("post_id") or payload.get("id") or "").strip()
     if not post_id:
         raise RuntimeError(f"Meta Graph API returned no post id: {payload}")
     return post_id
@@ -159,12 +172,27 @@ def write_state(state: dict[str, Any]) -> None:
 
 def self_test() -> int:
     sample = [
-        {"id": "a", "status": "ready", "message": "Test", "link": "https://valceaclar.ro/"},
+        {
+            "id": "a",
+            "status": "ready",
+            "message": "Test",
+            "link": "https://valceaclar.ro/",
+            "image_url": "https://valceaclar.ro/media/test.jpg",
+        },
         {"id": "b", "status": "hold", "message": "Hold", "link": "https://valceaclar.ro/x"},
     ]
     planned = eligible(sample, {})
     assert [item["id"] for item in planned] == ["a"]
     assert eligible(sample, {"a": {"facebook_post_id": "1"}}) == []
+    try:
+        eligible(
+            [{"id": "x", "status": "ready", "message": "x", "link": "https://valceaclar.ro/"}],
+            {},
+        )
+    except ValueError as exc:
+        assert "image_url" in str(exc)
+    else:
+        raise AssertionError("ready post without image was not rejected")
     try:
         validate_item({"id": "x", "status": "ready", "message": "x", "link": "https://example.com/"})
     except ValueError:
@@ -225,6 +253,7 @@ def main() -> int:
             "facebook_post_id": post_id,
             "published_at": dt.datetime.now(dt.timezone.utc).isoformat(),
             "link": item["link"],
+            "image_url": item["image_url"],
         }
         write_state(state)
         results.append({"id": item["id"], "facebook_post_id": post_id})
