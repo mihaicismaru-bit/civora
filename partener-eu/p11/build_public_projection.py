@@ -9,6 +9,7 @@ import json
 import os
 import pathlib
 import tempfile
+import urllib.parse
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -17,7 +18,7 @@ OUTPUT = ROOT / "web" / "p11-public-data.js"
 ACTIVE_RESOLUTION_STATES = {"OPEN", "IN_REVIEW"}
 ALLOW_DECISION = "ALLOW_VERIFIED_FACTS"
 BLOCK_DECISION = "BLOCK_MATERIAL_FACTS"
-PROJECTION_SCHEMA_VERSION = 4
+PROJECTION_SCHEMA_VERSION = 5
 
 
 def atomic_text(path: pathlib.Path, value: str) -> None:
@@ -54,6 +55,37 @@ def evidence_age_seconds(as_of: object, observed_at: object) -> int:
     if age < 0:
         raise ValueError("verified evidence cannot be observed after projection asOf")
     return age
+
+
+def source_host(value: object) -> str:
+    """Return a stable host key for an authoritative HTTPS evidence URL."""
+    if not isinstance(value, str) or not value:
+        raise ValueError("verified evidence requires an HTTPS source URL")
+    parsed = urllib.parse.urlsplit(value)
+    if parsed.scheme.lower() != "https" or not parsed.hostname:
+        raise ValueError("verified evidence requires an HTTPS source URL")
+    if parsed.username is not None or parsed.password is not None:
+        raise ValueError("verified evidence source URL cannot contain credentials")
+    return parsed.hostname.lower()
+
+
+def verification_source_coverage(verification_evidence: list[dict]) -> dict:
+    valid_items = [item for item in verification_evidence if isinstance(item, dict)]
+    hosts = sorted({
+        item.get("sourceHost")
+        for item in valid_items
+        if isinstance(item.get("sourceHost"), str) and item.get("sourceHost")
+    })
+    tier_counts = {
+        tier: sum(1 for item in valid_items if item.get("sourceTier") == tier)
+        for tier in ("T1", "T1B")
+    }
+    return {
+        "verifiedEvidenceLinkCount": len(verification_evidence),
+        "uniqueSourceHostCount": len(hosts),
+        "sourceHosts": hosts,
+        "sourceTierCounts": tier_counts,
+    }
 
 
 def render(projection: dict) -> str:
@@ -117,6 +149,8 @@ def projection_integrity_errors(projection: dict) -> list[str]:
             errors.append("policy must define projection asOf as freshness reference")
         if policy.get("freshnessTelemetryAuthorizesPublication") is not False:
             errors.append("freshness telemetry must not authorize publication")
+        if policy.get("sourceCoverageTelemetryAuthorizesPublication") is not False:
+            errors.append("source coverage telemetry must not authorize publication")
     identifiers = [row.get("id") for row in opportunities if isinstance(row, dict)]
     if len(identifiers) != len(opportunities) or any(not value for value in identifiers):
         errors.append("every opportunity must have an id")
@@ -185,6 +219,13 @@ def projection_integrity_errors(projection: dict) -> list[str]:
                     errors.append(f"{row.get('id')}: verification evidence must be T1 or T1B")
                 if not str(item.get("sourceUrl") or "").startswith("https://"):
                     errors.append(f"{row.get('id')}: verification evidence requires an HTTPS source URL")
+                else:
+                    try:
+                        expected_host = source_host(item.get("sourceUrl"))
+                        if item.get("sourceHost") != expected_host:
+                            errors.append(f"{row.get('id')}: verification evidence source host does not match URL")
+                    except ValueError as exc:
+                        errors.append(f"{row.get('id')}: {exc}")
                 if not item.get("observedAt"):
                     errors.append(f"{row.get('id')}: verification evidence observedAt required")
                 else:
@@ -214,6 +255,8 @@ def projection_integrity_errors(projection: dict) -> list[str]:
                 errors.append(f"{row.get('id')}: verification evidence ids must be sorted and unique")
             if row.get("verifiedEvidenceCount") != len(verification_evidence):
                 errors.append(f"{row.get('id')}: verified evidence count does not match provenance")
+            if row.get("verificationSourceCoverage") != verification_source_coverage(verification_evidence):
+                errors.append(f"{row.get('id')}: verification source coverage does not match provenance")
         if provenance_fact_classes != verified_fact_classes:
             errors.append(f"{row.get('id')}: verification provenance does not match verified fact classes")
         if decision == BLOCK_DECISION and material_fact_classes:
@@ -266,6 +309,26 @@ def projection_integrity_errors(projection: dict) -> list[str]:
         "maximumAgeSeconds": max(age_values) if age_values else None,
         "minimumAgeSeconds": min(age_values) if age_values else None,
     }
+    opportunity_source_coverages = [
+        coverage
+        for row in opportunities
+        if isinstance(row, dict)
+        for coverage in [row.get("verificationSourceCoverage")]
+        if isinstance(coverage, dict)
+        and coverage.get("verifiedEvidenceLinkCount", 0) > 0
+    ]
+    expected_source_coverage = {
+        **verification_source_coverage(verification_evidence),
+        "verifiedOpportunityCount": len(opportunity_source_coverages),
+        "singleSourceHostOpportunityCount": sum(
+            1 for coverage in opportunity_source_coverages
+            if coverage.get("uniqueSourceHostCount") == 1
+        ),
+        "multipleSourceHostOpportunityCount": sum(
+            1 for coverage in opportunity_source_coverages
+            if coverage.get("uniqueSourceHostCount", 0) > 1
+        ),
+    }
     expected_summary = {
         "opportunityCount": len(opportunities),
         "openVerifiedCount": sum(
@@ -278,6 +341,7 @@ def projection_integrity_errors(projection: dict) -> list[str]:
         "decisionCounts": decision_counts,
         "blockReasonCounts": block_reason_counts,
         "verificationFreshness": expected_freshness,
+        "verificationSourceCoverage": expected_source_coverage,
     }
     for key, expected in expected_summary.items():
         if summary.get(key) != expected:
@@ -338,6 +402,7 @@ def verification_provenance(opportunity: dict, evidence: dict[str, dict], as_of:
                 "evidenceId": evidence_id,
                 "sourceTier": item.get("source_tier"),
                 "sourceUrl": item.get("source_url"),
+                "sourceHost": source_host(item.get("source_url")),
                 "observedAt": item.get("observed_at"),
                 "ageSecondsAtProjection": evidence_age_seconds(as_of, item.get("observed_at")),
                 "supportedFactClasses": [],
@@ -383,6 +448,7 @@ def build(bundle: dict) -> dict:
             "evidenceCount": len(opportunity.get("evidence_refs") or []),
             "verifiedEvidenceCount": len(provenance),
             "verificationEvidence": provenance,
+            "verificationSourceCoverage": verification_source_coverage(provenance),
             "publicationDecision": decision,
         })
     decision_counts = {
@@ -416,6 +482,11 @@ def build(bundle: dict) -> dict:
     ]
     observed_at_values = sorted(item["observedAt"] for item in verification_evidence)
     age_values = [item["ageSecondsAtProjection"] for item in verification_evidence]
+    opportunity_source_coverages = [
+        row["verificationSourceCoverage"]
+        for row in projected
+        if row["verificationSourceCoverage"]["verifiedEvidenceLinkCount"] > 0
+    ]
     projection = {
         "schemaVersion": PROJECTION_SCHEMA_VERSION,
         "asOf": bundle.get("as_of"),
@@ -428,6 +499,7 @@ def build(bundle: dict) -> dict:
             "verificationProvenanceVisible": True,
             "freshnessReference": "PROJECTION_AS_OF",
             "freshnessTelemetryAuthorizesPublication": False,
+            "sourceCoverageTelemetryAuthorizesPublication": False,
         },
         "summary": {
             "opportunityCount": len(projected),
@@ -448,6 +520,18 @@ def build(bundle: dict) -> dict:
                 "newestObservedAt": observed_at_values[-1] if observed_at_values else None,
                 "maximumAgeSeconds": max(age_values) if age_values else None,
                 "minimumAgeSeconds": min(age_values) if age_values else None,
+            },
+            "verificationSourceCoverage": {
+                **verification_source_coverage(verification_evidence),
+                "verifiedOpportunityCount": len(opportunity_source_coverages),
+                "singleSourceHostOpportunityCount": sum(
+                    1 for coverage in opportunity_source_coverages
+                    if coverage["uniqueSourceHostCount"] == 1
+                ),
+                "multipleSourceHostOpportunityCount": sum(
+                    1 for coverage in opportunity_source_coverages
+                    if coverage["uniqueSourceHostCount"] > 1
+                ),
             },
         },
         "opportunities": projected,
