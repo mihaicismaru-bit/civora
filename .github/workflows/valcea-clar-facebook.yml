@@ -29,6 +29,9 @@ jobs:
         with:
           python-version: "3.13"
 
+      - name: Fetch approved real photographs
+        run: python valcea-clar/social/fetch_approved_photos.py
+
       - name: Validate real-photo publishing rules
         run: python valcea-clar/social/facebook_publish.py --self-test
 
