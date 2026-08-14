@@ -1,20 +1,14 @@
 {
-  "source_name": "MySMIS 2021-2027 — Apeluri validate",
-  "source_url": "https://resurse.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027",
-  "source_tier": "T1",
-  "criticality": "CRITICAL",
-  "baseline_semantic_sha256": "38125dc566b4d917181bdcd0bf06dd7fe0613427000e53f7d62d98308fdbcac6",
-  "candidate_semantic_sha256": "cca315765f195ff4ec7dc65f5bed8669333c9560dedac265c8c65b3cde9849df",
-  "confirmation_observations": 2,
-  "first_observed_at": "2026-08-12T04:38:17Z",
-  "last_observed_at": "2026-08-14T04:11:55Z",
-  "checkpoint": "PARTENER-EU-CIVORA-P10-0020",
-  "schema_version": "1.2",
-  "task_type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
+  "schema_version": "1.1",
+  "type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
   "source_id": "SRC-MYSMIS-CALLS",
-  "status": "OPEN_MANUAL_EVIDENCE_RESOLUTION",
-  "policy": "Do not automatically change deadline, eligibility, budget, scoring, beneficiaries, call status, or any other material fact. Resolve only from authoritative evidence and record provenance before publication.",
-  "automatic_material_fact_update_allowed": false,
+  "source_tier": "T1",
+  "source_url": "https://resurse.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027",
+  "status": "OPEN",
+  "first_observed_at": "2026-08-12T04:38:17Z",
+  "last_observed_at": "2026-08-14T05:50:40.654969Z",
+  "previous_semantic_sha256": "96236a80e13407bbf9ca505baa81a02066149df207c0c023fa600dc4566c94c9",
+  "current_semantic_sha256": "d9ba486cb446a1cb453c33f137ad1e51d430d8d26cc817230f81cde9f2f9de68",
   "material_fact_autoupdate_allowed": false,
   "blocked_fact_classes": [
     "deadline",
@@ -24,5 +18,6 @@
     "beneficiaries",
     "material_call_status",
     "other_material_facts"
-  ]
+  ],
+  "required_resolution": "Re-establish authoritative evidence and provenance before any material fact update."
 }
