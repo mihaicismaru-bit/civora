@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import datetime
 import hashlib
 import json
 import os
@@ -16,7 +17,7 @@ OUTPUT = ROOT / "web" / "p11-public-data.js"
 ACTIVE_RESOLUTION_STATES = {"OPEN", "IN_REVIEW"}
 ALLOW_DECISION = "ALLOW_VERIFIED_FACTS"
 BLOCK_DECISION = "BLOCK_MATERIAL_FACTS"
-PROJECTION_SCHEMA_VERSION = 3
+PROJECTION_SCHEMA_VERSION = 4
 
 
 def atomic_text(path: pathlib.Path, value: str) -> None:
@@ -34,6 +35,25 @@ def atomic_text(path: pathlib.Path, value: str) -> None:
 
 def digest(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def utc_timestamp(value: object, field: str) -> datetime.datetime:
+    if not isinstance(value, str) or not value:
+        raise ValueError(f"{field} must be an ISO-8601 timestamp")
+    try:
+        parsed = datetime.datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise ValueError(f"{field} must be an ISO-8601 timestamp") from exc
+    if parsed.tzinfo is None:
+        raise ValueError(f"{field} must include a timezone")
+    return parsed.astimezone(datetime.timezone.utc)
+
+
+def evidence_age_seconds(as_of: object, observed_at: object) -> int:
+    age = int((utc_timestamp(as_of, "asOf") - utc_timestamp(observed_at, "observedAt")).total_seconds())
+    if age < 0:
+        raise ValueError("verified evidence cannot be observed after projection asOf")
+    return age
 
 
 def render(projection: dict) -> str:
@@ -75,6 +95,11 @@ def projection_integrity_errors(projection: dict) -> list[str]:
         return ["summary must be an object"]
 
     errors = []
+    as_of = projection.get("asOf")
+    try:
+        utc_timestamp(as_of, "asOf")
+    except ValueError as exc:
+        errors.append(str(exc))
     if projection.get("schemaVersion") != PROJECTION_SCHEMA_VERSION:
         errors.append(f"schemaVersion must be {PROJECTION_SCHEMA_VERSION}")
     if not isinstance(policy, dict):
@@ -88,6 +113,10 @@ def projection_integrity_errors(projection: dict) -> list[str]:
             errors.append("policy must derive summary from effective decisions")
         if policy.get("verificationProvenanceVisible") is not True:
             errors.append("policy must expose verification provenance")
+        if policy.get("freshnessReference") != "PROJECTION_AS_OF":
+            errors.append("policy must define projection asOf as freshness reference")
+        if policy.get("freshnessTelemetryAuthorizesPublication") is not False:
+            errors.append("freshness telemetry must not authorize publication")
     identifiers = [row.get("id") for row in opportunities if isinstance(row, dict)]
     if len(identifiers) != len(opportunities) or any(not value for value in identifiers):
         errors.append("every opportunity must have an id")
@@ -158,6 +187,19 @@ def projection_integrity_errors(projection: dict) -> list[str]:
                     errors.append(f"{row.get('id')}: verification evidence requires an HTTPS source URL")
                 if not item.get("observedAt"):
                     errors.append(f"{row.get('id')}: verification evidence observedAt required")
+                else:
+                    try:
+                        expected_age = evidence_age_seconds(as_of, item.get("observedAt"))
+                        age_value = item.get("ageSecondsAtProjection")
+                        if (
+                            not isinstance(age_value, int)
+                            or isinstance(age_value, bool)
+                            or age_value < 0
+                            or age_value != expected_age
+                        ):
+                            errors.append(f"{row.get('id')}: verification evidence age does not match timestamps")
+                    except ValueError as exc:
+                        errors.append(f"{row.get('id')}: {exc}")
                 if (
                     not isinstance(supported, list)
                     or not supported
@@ -197,6 +239,33 @@ def projection_integrity_errors(projection: dict) -> list[str]:
         )
         for reason in block_reason_codes
     }
+    verification_evidence = [
+        item
+        for row in opportunities
+        if isinstance(row, dict)
+        for item in (row.get("verificationEvidence") or [])
+        if isinstance(item, dict)
+    ]
+    observed_at_values = sorted(
+        item.get("observedAt")
+        for item in verification_evidence
+        if isinstance(item.get("observedAt"), str) and item.get("observedAt")
+    )
+    age_values = [
+        item.get("ageSecondsAtProjection")
+        for item in verification_evidence
+        if isinstance(item.get("ageSecondsAtProjection"), int)
+        and not isinstance(item.get("ageSecondsAtProjection"), bool)
+        and item.get("ageSecondsAtProjection") >= 0
+    ]
+    expected_freshness = {
+        "referenceTime": as_of,
+        "verifiedEvidenceLinkCount": len(verification_evidence),
+        "oldestObservedAt": observed_at_values[0] if observed_at_values else None,
+        "newestObservedAt": observed_at_values[-1] if observed_at_values else None,
+        "maximumAgeSeconds": max(age_values) if age_values else None,
+        "minimumAgeSeconds": min(age_values) if age_values else None,
+    }
     expected_summary = {
         "opportunityCount": len(opportunities),
         "openVerifiedCount": sum(
@@ -208,6 +277,7 @@ def projection_integrity_errors(projection: dict) -> list[str]:
         "reviewCount": len(blocked),
         "decisionCounts": decision_counts,
         "blockReasonCounts": block_reason_counts,
+        "verificationFreshness": expected_freshness,
     }
     for key, expected in expected_summary.items():
         if summary.get(key) != expected:
@@ -252,7 +322,7 @@ def publication_decision(opportunity: dict, verified_fact_classes: list[str], ta
     }
 
 
-def verification_provenance(opportunity: dict, evidence: dict[str, dict]) -> list[dict]:
+def verification_provenance(opportunity: dict, evidence: dict[str, dict], as_of: object) -> list[dict]:
     """Return deterministic public provenance for semantically verified fact classes."""
     provenance: dict[str, dict] = {}
     for fact_class, refs in (opportunity.get("fact_evidence") or {}).items():
@@ -269,6 +339,7 @@ def verification_provenance(opportunity: dict, evidence: dict[str, dict]) -> lis
                 "sourceTier": item.get("source_tier"),
                 "sourceUrl": item.get("source_url"),
                 "observedAt": item.get("observed_at"),
+                "ageSecondsAtProjection": evidence_age_seconds(as_of, item.get("observed_at")),
                 "supportedFactClasses": [],
             })
             entry["supportedFactClasses"].append(fact_class)
@@ -285,7 +356,7 @@ def build(bundle: dict) -> dict:
         tasks_by_opportunity.setdefault(task["opportunity_id"], []).append(task)
     projected = []
     for opportunity in bundle["opportunities"]:
-        provenance = verification_provenance(opportunity, evidence)
+        provenance = verification_provenance(opportunity, evidence, bundle.get("as_of"))
         verified_fact_classes = sorted({
             fact_class
             for item in provenance
@@ -338,6 +409,13 @@ def build(bundle: dict) -> dict:
         )
         for reason in block_reason_codes
     }
+    verification_evidence = [
+        item
+        for row in projected
+        for item in row["verificationEvidence"]
+    ]
+    observed_at_values = sorted(item["observedAt"] for item in verification_evidence)
+    age_values = [item["ageSecondsAtProjection"] for item in verification_evidence]
     projection = {
         "schemaVersion": PROJECTION_SCHEMA_VERSION,
         "asOf": bundle.get("as_of"),
@@ -348,6 +426,8 @@ def build(bundle: dict) -> dict:
             "summaryDerivedFromEffectiveDecisions": True,
             "integrityGate": "STRICT_FAIL_CLOSED",
             "verificationProvenanceVisible": True,
+            "freshnessReference": "PROJECTION_AS_OF",
+            "freshnessTelemetryAuthorizesPublication": False,
         },
         "summary": {
             "opportunityCount": len(projected),
@@ -361,6 +441,14 @@ def build(bundle: dict) -> dict:
             "reviewCount": decision_counts[BLOCK_DECISION],
             "decisionCounts": decision_counts,
             "blockReasonCounts": block_reason_counts,
+            "verificationFreshness": {
+                "referenceTime": bundle.get("as_of"),
+                "verifiedEvidenceLinkCount": len(verification_evidence),
+                "oldestObservedAt": observed_at_values[0] if observed_at_values else None,
+                "newestObservedAt": observed_at_values[-1] if observed_at_values else None,
+                "maximumAgeSeconds": max(age_values) if age_values else None,
+                "minimumAgeSeconds": min(age_values) if age_values else None,
+            },
         },
         "opportunities": projected,
     }

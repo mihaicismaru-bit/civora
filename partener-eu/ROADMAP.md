@@ -27,10 +27,10 @@ Actualizat: 14 august 2026
 
 ## Ultimul increment validat
 
-- P11-R06 — proveniență autoritativă verificabilă în proiecția publică;
-- fiecare clasă de fapt verificată este legată determinist de evidența sa T1/T1B, URL-ul oficial și momentul observării;
-- evidențele nerezolvate nu sunt expuse ca verificate, iar adaptorul public înlocuiește sursele legacy cu proveniența canonică;
-- gate-ul respinge deriva dintre clasele verificate și proveniență;
+- P11-R07 — prospețime deterministă pentru evidența verificată din proiecția publică;
+- fiecare legătură de evidență expune vârsta exactă față de `projection.asOf`, iar sumarul public include intervalul observat și extremele de vârstă;
+- timestampurile viitoare, vârstele incoerente și deriva sumarului de prospețime sunt respinse de gate;
+- data observării este vizibilă în sursele din interfață, dar telemetria de prospețime nu poate autoriza publicarea;
 - corpusul și faptele materiale nu sunt modificate: 26 oportunități, șase publicabile și 20 taskuri deschise sau în review.
 
 ## Reguli de închidere

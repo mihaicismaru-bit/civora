@@ -33,10 +33,11 @@
     call.p11VerifiedFactClasses=item.verifiedFactClasses||[];
     call.p11VerificationEvidence=item.verificationEvidence||[];
     call.sourceFacts=call.p11VerificationEvidence.map(evidence=>({
-      label:`Evidență verificată pentru ${(evidence.supportedFactClasses||[]).join(', ')}`,
+      label:`Evidență verificată pentru ${(evidence.supportedFactClasses||[]).join(', ')} · observată ${String(evidence.observedAt||'necunoscut').slice(0,10)}`,
       url:evidence.sourceUrl,
       tier:evidence.sourceTier,
-      checkedAt:evidence.observedAt
+      checkedAt:evidence.observedAt,
+      ageSecondsAtProjection:evidence.ageSecondsAtProjection
     }));
     call.status=item.status;
     const facts=item.materialFacts||{};
