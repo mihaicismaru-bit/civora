@@ -6,11 +6,13 @@ on:
     paths:
       - 'valcea-clar/**'
       - '.github/workflows/valcea-clar-quality.yml'
+      - '.github/workflows/valcea-clar-source-radar.yml'
   push:
     branches: [main]
     paths:
       - 'valcea-clar/**'
       - '.github/workflows/valcea-clar-quality.yml'
+      - '.github/workflows/valcea-clar-source-radar.yml'
 
 permissions:
   contents: read
@@ -37,3 +39,35 @@ jobs:
         run: python valcea-clar/scripts/smoke_web.py
       - name: JavaScript syntax check
         run: node --check valcea-clar/web/app.js
+      - name: Source radar deterministic self-test
+        run: python valcea-clar/scripts/probe_sources.py --self-test
+      - name: Build ChatGPT Sites synchronization payload
+        run: python valcea-clar/scripts/build_sites_export.py
+      - name: Validate synchronization manifest
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('valcea-clar/dist/chatgpt-sites')
+          manifest = json.loads((root / 'manifest.json').read_text(encoding='utf-8'))
+          assert manifest['target']['canonical_domain'] == 'valceaclar.ro'
+          assert manifest['target']['platform'] == 'ChatGPT Sites'
+          assert manifest['target']['create_parallel_site'] is False
+          meta = json.loads(Path('valcea-clar/web/data/meta.json').read_text(encoding='utf-8'))
+          assert manifest['counts']['public_places'] == meta['place_count']
+          assert manifest['counts']['public_creators'] == meta['creator_count']
+          assert manifest['counts']['hidden_candidates'] == meta['candidate_count']
+          assert manifest['policy']['candidate_records_are_hidden'] is True
+          assert manifest['policy']['material_facts_autopublish'] is False
+          for item in manifest['files']:
+              assert (root / item['path']).is_file(), item['path']
+          print('ChatGPT Sites synchronization manifest: PASS')
+          PY
+      - name: Upload ChatGPT Sites synchronization payload
+        uses: actions/upload-artifact@v4
+        with:
+          name: valcea-clar-chatgpt-sites-${{ github.sha }}
+          path: valcea-clar/dist/chatgpt-sites
+          if-no-files-found: error
+          retention-days: 14

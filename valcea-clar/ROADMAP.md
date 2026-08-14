@@ -8,7 +8,9 @@
 - [x] quality gate fail-closed;
 - [x] proiecție publică fără candidați neverificați;
 - [x] prototip mobil pentru pagina secțiunii;
-- [x] primul material „Nou deschis”.
+- [x] primul material „Nou deschis”;
+- [x] radar automat la șase ore, cu hash semantic și task-uri fail-closed;
+- [x] export determinist pentru sincronizarea în ChatGPT Sites.
 
 ## F1 — Nucleu Râmnicu Vâlcea
 
@@ -34,7 +36,7 @@
 
 ## F4 — Integrare și monetizare
 
-- adaptor WordPress/API pentru `valceaclar.ro`;
+- adaptor de sincronizare pentru site-ul existent `valceaclar.ro` din ChatGPT Sites;
 - hartă și structured data `Restaurant`/`LocalBusiness`;
 - pagini sponsorizate marcate explicit;
 - rezervări, lead-uri și pachete comerciale fără ingerință editorială.
