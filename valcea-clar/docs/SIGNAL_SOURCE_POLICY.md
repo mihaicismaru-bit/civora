@@ -132,6 +132,79 @@ Orice material care leagă o apartenență masonică de o decizie publică, afac
 
 Orice clasă poate produce un `SIGNAL`; numai dovezile suficiente pot produce un `FACT_KERNEL` publicabil.
 
+## Scorarea obligatorie a surselor
+
+**Fiecare sursă din registru primește note explicite. Nicio sursă nu rămâne neclasificată.** Scorurile se păstrează împreună cu data ultimei evaluări și pot fi recalibrate în timp pe baza comportamentului real al sursei.
+
+### Scoruri de bază — 0–100
+
+Fiecare sursă primește separat:
+
+- `importance_score` — cât de importantă este sursa pentru ecosistemul informațional Vâlcea;
+- `relevance_score` — cât de relevantă este pentru aria geografică și editorială VÂLCEA CLAR;
+- `authority_score` — autoritatea/proximitatea față de faptul raportat;
+- `reliability_score` — istoricul de acuratețe, corecții și stabilitate;
+- `freshness_score` — cât de actuală și frecvent actualizată este;
+- `exclusivity_score` — probabilitatea de a genera informații originale sau timpurii;
+- `signal_value_score` — valoarea sursei pentru discovery chiar dacă nu este suficientă singură pentru publicare.
+
+### Nota agregată
+
+`source_priority_score` se calculează pe 0–100, implicit:
+
+`0.25 × importance + 0.20 × relevance + 0.20 × authority + 0.15 × reliability + 0.10 × freshness + 0.05 × exclusivity + 0.05 × signal_value`
+
+Ponderile pot fi ajustate pe verticală. Pentru `INVESTIGAȚII` și `JUSTIȚIE`, `authority` și `reliability` cântăresc mai mult; pentru `BREAKING` și `EVENIMENTE`, `freshness` și `signal_value` pot primi pondere mai mare.
+
+### Grade editoriale
+
+Pe baza notei agregate:
+
+- `A+` = 90–100 — sursă strategică esențială;
+- `A` = 80–89 — sursă majoră;
+- `B` = 65–79 — sursă relevantă și utilă;
+- `C` = 50–64 — sursă secundară / de completare;
+- `D` = 30–49 — predominant discovery, necesită verificare puternică;
+- `E` = 0–29 — semnal slab, zgomotos sau rar util.
+
+Gradul nu înlocuiește nivelul `T1/T1B/T2/T3`. O sursă oficială poate avea `T1` dar importanță mică pentru Vâlcea; un ziar local foarte rapid poate avea importanță mare ca radar, dar rămâne `T2` pentru afirmații care necesită confirmare.
+
+### Relevanță pe verticală
+
+O sursă primește și scoruri distincte pe secțiuni, 0–100: `breaking`, `administratie`, `politica`, `economie`, `cultura`, `evenimente`, `unde_iesim`, `lifestyle`, `investigatii`, `justitie`, `sport`, `judet` și `oras`.
+
+Exemplu: un restaurant poate avea `relevance.unde_iesim=100`, `relevance.economie=45`, `relevance.investigatii=15`; `portal.just.ro` poate avea `relevance.justitie=100`, `relevance.investigatii=95`, `relevance.unde_iesim=20`.
+
+### Scor de entitate și scor de eveniment
+
+Importanța sursei nu este confundată cu importanța subiectului. Fiecare semnal primește separat:
+
+- `entity_importance_score` — importanța persoanei/instituției/firmei vizate;
+- `event_impact_score` — impactul probabil asupra publicului;
+- `locality_score` — cât de direct privește județul/localitatea;
+- `public_interest_score` — interesul public legitim;
+- `novelty_score` — cât de nouă este informația;
+- `verification_need_score` — cât de urgentă este reverificarea.
+
+Astfel, o sursă de grad `C` poate produce un semnal foarte important dacă documentează un eveniment de impact, iar o sursă `A+` poate publica o informație banală care nu merită promovată.
+
+### Recalculare și istoric
+
+Scorurile sunt versionate. Se păstrează `score_updated_at`, motivul modificării și, unde este posibil, indicatori de performanță: proporția semnalelor confirmate, viteza, frecvența corecțiilor, rata de duplicate, rata de zgomot și numărul de investigații/știri utile generate.
+
+Sursele care publică repetat informații false, clickbait neverificabil sau conținut copiat își pierd `reliability_score`; sursele care produc constant informații originale confirmate pot crește. Scorurile nu sunt influențate de relații comerciale cu VÂLCEA CLAR.
+
+### Prioritizarea ingestiei
+
+Frecvența monitorizării se adaptează scorului și verticalei:
+
+- `A+/A`: monitorizare prioritară, frecventă;
+- `B`: monitorizare regulată;
+- `C`: monitorizare periodică;
+- `D/E`: discovery oportunist și verificare numai când semnalul depășește pragul editorial.
+
+În situații de breaking news, un `event_impact_score` mare poate temporar crește prioritatea unei surse indiferent de gradul ei general.
+
 ## Discovery continuu
 
 Lista surselor este deschisă. Motorul caută periodic publicații, firme, profesioniști, personalități, instituții și organizații noi, domenii mutate, conturi oficiale și feed-uri noi. O sursă dispărută nu se șterge din istoric; se marchează `INACTIVE`, `MOVED` sau `FAILED` și se caută succesorul.
