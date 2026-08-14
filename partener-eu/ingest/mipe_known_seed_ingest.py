@@ -8,10 +8,11 @@ from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[2]
 SEEDS = ROOT / 'partener-eu/ingest/state/mipe_known_canonical_seeds.json'
+SOURCES = ROOT / 'partener-eu/ingest/state/mipe_discovery_sources.json'
 STATE = ROOT / 'partener-eu/ingest/state/mipe_state.json'
 OUT = ROOT / 'partener-eu/web/mipe-news.js'
 MON=['ian','feb','mar','apr','mai','iun','iul','aug','sept','oct','nov','dec']
-KW=['fonduri','finanț','finant','apel','ghid','program','proiect','beneficiar','grant','alocare','buget','consultare','corrigendum','termen','eligibil','mysmis','step','educație','educatie','ocupare','incluziune','demnitate']
+KW=['fonduri','finanț','finant','apel','ghid','program','proiect','beneficiar','grant','alocare','buget','consultare','corrigendum','termen','eligibil','mysmis','step','educație','educatie','ocupare','incluziune','demnitate','sănătate','sanatate','instrucțiune','instructiune']
 
 def now(): return dt.datetime.now(dt.timezone.utc)
 def clean(s): return re.sub(r'\s+',' ',str(s or '')).strip()
@@ -38,6 +39,28 @@ def kind(t):
 def load_state():
     try:return json.loads(STATE.read_text(encoding='utf-8'))
     except:return {'items':[],'runs':[]}
+def load_seeds():
+    mapped=json.loads(SEEDS.read_text(encoding='utf-8')).get('items',[])
+    by_url={str(x.get('url') or ''):dict(x) for x in mapped if x.get('url')}
+    # Search-index discoveries stored as T1_CANONICAL_PENDING_FETCH are URL seeds
+    # only. They are never evidence for publication; this probe still requires a
+    # successful canonical fetch from mfe.gov.ro before an item can enter News.
+    try:
+        for src in json.loads(SOURCES.read_text(encoding='utf-8')).get('sources',[]):
+            if src.get('role')!='T1_CANONICAL_PENDING_FETCH':
+                continue
+            url=str(src.get('url') or '').strip()
+            if not url.startswith('https://mfe.gov.ro/'):
+                continue
+            by_url.setdefault(url,{
+                'url':url,
+                'programme':'Programul Sănătate' if ('ghiduri-ms/' in url or 'programul-sanatate' in url) else 'MIPE',
+                'titleHint':str(src.get('scope') or ''),
+                'discoveredVia':'web-index-canonical-pending'
+            })
+    except Exception:
+        pass
+    return list(by_url.values())
 def persist(st,fresh,run):
     prev={x.get('url'):x for x in st.get('items',[]) if x.get('url')}
     for x in fresh:prev[x['url']]=x
@@ -50,7 +73,7 @@ def persist(st,fresh,run):
     OUT.write_text('window.PARTENER_DATA=window.PARTENER_DATA||{};\nwindow.PARTENER_DATA.mipeIngestion='+json.dumps(meta,ensure_ascii=False,separators=(',',':'))+';\nwindow.PARTENER_DATA.mipeNews='+json.dumps(items,ensure_ascii=False,separators=(',',':'))+';\n',encoding='utf-8')
 
 def main():
-    seeds=json.loads(SEEDS.read_text(encoding='utf-8')).get('items',[])
+    seeds=load_seeds()
     st=load_state();fresh=[];fail=[];verified=0;host_timeouts=0;probed=0
     with sync_playwright() as pw:
         browser=pw.chromium.launch(headless=True,args=['--disable-dev-shm-usage','--no-sandbox'])
@@ -72,7 +95,7 @@ def main():
                 if sum(1 for k in KW if k in hay)<2: continue
                 d=pdate(body) or now().date(); summary=body[:900]
                 fp=hashlib.sha256((url+'\n'+title).encode()).hexdigest()[:20]
-                fresh.append({'id':fp,'title':title[:360],'url':url,'date':d.isoformat(),'dateLabel':label(d),'summary':summary,'tag':seed.get('programme','MIPE'),'kind':kind(title+' '+body[:1200]),'tier':'T1','source':'MIPE','observedAt':now().isoformat(),'discovery':'mapped-canonical-seed+verified-fetch'})
+                fresh.append({'id':fp,'title':title[:360],'url':url,'date':d.isoformat(),'dateLabel':label(d),'summary':summary,'tag':seed.get('programme','MIPE'),'kind':kind(title+' '+body[:1200]),'tier':'T1','source':'MIPE','observedAt':now().isoformat(),'discovery':'mapped-canonical-seed+verified-fetch','verification':'CANONICAL_OFFICIAL_FETCH'})
             except Exception as e:
                 msg=f'{type(e).__name__}: {e}'
                 if 'Timeout' in msg or 'ERR_CONNECTION' in msg or 'net::' in msg:
