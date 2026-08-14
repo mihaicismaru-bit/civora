@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "edition_id": "2026-08-14-evening",
+  "title": "VÂLCEA CLAR — Ediția de seară",
+  "edition_date": "2026-08-14",
+  "updated_local": "2026-08-15T00:10:00+03:00",
+  "status": "editor_approved",
+  "publication_intent": "publish",
+  "items": [
+    {
+      "id": "musiclover-weekend-20260814",
+      "section": "EVENIMENTE",
+      "priority": 95,
+      "headline": "Fețeni: MusicLover Festival a deschis weekendul. Sâmbătă urcă pe scenă Connect-R și Delia",
+      "confidence": 97,
+      "source_types": ["official_local_decision", "ticketing", "local_press"],
+      "material_fact_gate": "PASS"
+    },
+    {
+      "id": "luminos-fest-20260815",
+      "section": "EVENIMENTE",
+      "priority": 87,
+      "headline": "Sâmbătă începe Luminos Fest în Parcul Zăvoi",
+      "confidence": 96,
+      "source_types": ["official_local_decision", "ticketing"],
+      "material_fact_gate": "PASS"
+    },
+    {
+      "id": "olanesti-bridge-explainer-20260814",
+      "section": "INVESTIGAȚII",
+      "priority": 91,
+      "headline": "Ce se construiește în albia Olăneștiului, lângă Omniasig",
+      "confidence": 94,
+      "source_types": ["official_technical_documentation", "public_procurement", "editorial_investigation_file"],
+      "material_fact_gate": "PASS_EXPLAINER_ONLY",
+      "accusatory_publication": false
+    },
+    {
+      "id": "unde-iesim-weekend-20260814",
+      "section": "UNDE_IEȘIM",
+      "priority": 78,
+      "headline": "Unde ieșim în weekend",
+      "confidence": 95,
+      "source_types": ["canonical_venue_registry", "event_calendars"],
+      "material_fact_gate": "PASS"
+    }
+  ],
+  "source_snapshot": [
+    {
+      "name": "HCL Râmnicu Vâlcea nr. 159/2026",
+      "url": "https://hcl.usr.ro/ramnicu_valcea/2026/h159",
+      "tier": "T1",
+      "supports": ["musiclover_budget", "musiclover_dates", "organizer"]
+    },
+    {
+      "name": "HCL Râmnicu Vâlcea nr. 128/2026",
+      "url": "https://hcl.usr.ro/ramnicu_valcea/2026/h128",
+      "tier": "T1",
+      "supports": ["luminos_dates", "organizer", "municipal_budget_status"]
+    },
+    {
+      "name": "HCL Râmnicu Vâlcea nr. 100/2025",
+      "url": "https://hcl.usr.ro/ramnicu_valcea/2025/h100",
+      "tier": "T1",
+      "supports": ["smis_334436", "bridge_technical_parameters", "project_indicators"]
+    },
+    {
+      "name": "Ticketstore — Râmnicu Vâlcea",
+      "url": "https://ticketstore.ro/ro/oras/Ramnicu-Valcea",
+      "tier": "T2",
+      "supports": ["event_program"]
+    },
+    {
+      "name": "iaBilet — Râmnicu Vâlcea",
+      "url": "https://www.iabilet.ro/bilete-ramnicu-valcea",
+      "tier": "T2",
+      "supports": ["event_program", "ticketing_signal"]
+    },
+    {
+      "name": "Eveniment Vâlcean — MusicLover Festival",
+      "url": "https://evenimentvalcean.ro/musiclover-festival-aduce-la-ramnicu-valcea-primul-festival-hibrid-din-romania/",
+      "tier": "T2",
+      "supports": ["festival_format", "program_signal"]
+    }
+  ],
+  "policy": {
+    "facts_only_from_sufficient_evidence": true,
+    "signals_are_not_facts": true,
+    "sensitive_claims_require_extra_gate": true,
+    "no_external_paid_services": true
+  }
+}
