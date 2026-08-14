@@ -22,37 +22,13 @@ Priorități: angajatori mari, dezvoltatori, construcții, retail, horeca, turis
 
 Semnale urmărite: deschideri/închideri, investiții, concedieri/angajări, schimbări de management, proiecte, autorizații, incidente, litigii, insolvență, contracte publice, rebranding și modificări de ofertă/preț.
 
-#### 2A. Topuri și clasamente de firme
+#### Topuri de firme și ONRC
 
-Se folosesc ca **surse de semnale economice** topurile și clasamentele de companii disponibile public: clasamente după cifră de afaceri, profit, număr de angajați, dinamică anuală, domeniu CAEN, localitate și județ.
+Topurile de firme sunt surse de semnale economice: cifră de afaceri, profit, angajați, creșteri/scăderi anuale, lideri pe CAEN/localitate/județ și firme care apar disproporționat de des în contracte publice. Ele generează `SIGNAL_ECONOMIC`, dar cifrele sunt reverificate înainte de publicare.
 
-Aceste topuri sunt folosite pentru:
-- descoperirea firmelor relevante care nu apar frecvent în presă;
-- detectarea creșterilor/scăderilor neobișnuite;
-- identificarea noilor lideri sectoriali;
-- compararea firmelor care câștigă contracte publice cu dimensiunea lor economică;
-- selecția companiilor pentru monitorizare continuă și investigații economice.
+ONRC este sursă strategică primară pentru denumire juridică, CUI, sediu/puncte de lucru, administratori, asociați, CAEN, înființări, radieri, suspendări, schimbări de sediu/conducere/capital și conexiuni documentate între societăți. Semnalele ONRC pot alimenta `ECONOMIE`, `UNDE_IEȘIM`, `INVESTIGAȚII` și `ADMINISTRAȚIE`.
 
-Regulă: clasamentul produce `SIGNAL_ECONOMIC`; cifrele și structura de proprietate se verifică ulterior în surse oficiale/primare înainte de publicare.
-
-#### 2B. ONRC — Registrul Comerțului
-
-**ONRC** este sursă strategică pentru verificarea și generarea de semnale despre companiile locale. Se utilizează, în limitele datelor legal accesibile, pentru:
-- denumire juridică și CUI;
-- sediu și puncte de lucru;
-- administratori, asociați/acționari și modificări de structură;
-- obiecte de activitate/CAEN;
-- înființări, radieri, dizolvări, suspendări și alte mențiuni;
-- schimbări de denumire, sediu, capital sau conducere;
-- conexiuni între societăți atunci când sunt documentate oficial.
-
-Modificările ONRC pot genera semnale pentru `ECONOMIE`, `UNDE_IEȘIM`, `INVESTIGAȚII` sau `ADMINISTRAȚIE`, în funcție de relevanță.
-
-Reguli:
-- datele ONRC sunt tratate ca sursă primară pentru situația registrală la data verificării;
-- beneficiarul real se tratează separat și se publică numai când informația este legal accesibilă și relevantă;
-- nu se deduc relații politice sau economice doar din coincidențe de nume/adresă;
-- pentru afirmații sensibile se păstrează data extrasului/consultării și se solicită drept la replică unde este cazul.
+Nu se deduc relații politice sau economice doar din coincidențe de nume, adresă sau administrator. Pentru afirmații sensibile se păstrează data verificării și se solicită poziția părților relevante.
 
 ### 3. Instituții administrative
 
@@ -85,6 +61,68 @@ Reguli juridice:
 - datele personale fără relevanță publică nu se reproduc;
 - înainte de materiale sensibile se verifică documentele instanței și se solicită poziția părților relevante.
 
+### 6. Registrul local de profesii, servicii, comunități și personalități
+
+VÂLCEA CLAR menține un index backend de entități locale și persoane cu activitate publică/profesională relevantă. Indexarea este pentru discovery, verificare, relaționarea știrilor și construirea ghidurilor; nu presupune automat publicarea unui profil.
+
+#### Profesii reglementate
+
+Se indexează:
+- avocați și societăți de avocatură;
+- notari și birouri notariale;
+- executori, practicieni în insolvență, mediatori și alte profesii juridice relevante, când informația este publică și utilă editorial.
+
+Surse prioritare: registrele profesionale oficiale, site-urile barourilor/camerelor/uniunilor profesionale, site-urile cabinetelor și portal.just.ro pentru cauze publice relevante.
+
+Nu se publică date private de contact, adrese personale sau informații fără legătură cu activitatea profesională.
+
+#### Fitness, wellness și servicii personale
+
+Se indexează:
+- săli de fitness, studiouri și cluburi sportive;
+- antrenori personali (PT), instructori și coachi cu activitate publică;
+- frizerii/barbershop-uri și frizeri cu activitate profesională publică;
+- saloane de manichiură/pedichiură și tehnicieni cu activitate profesională publică;
+- servicii beauty/wellness conexe.
+
+Câmpuri: locație, program, servicii, prețuri publice datate, conturi oficiale, recenzii ca semnal, operator juridic când este relevant, acreditări/calificări numai dacă pot fi verificate.
+
+Aceste entități alimentează în principal `UNDE_IEȘIM`, `LIFESTYLE`, `ECONOMIE` și ghidurile locale.
+
+#### Săli de evenimente și hospitality
+
+Se indexează săli de evenimente, ballroom-uri, restaurante pentru evenimente, hoteluri cu spații de conferințe/nunți, centre de conferințe și locații private/publice pentru evenimente.
+
+Câmpuri: capacitate declarată, tipuri de evenimente, operator, facilități, parcare, catering, prețuri/pachete publice, calendare publice și conturi sociale oficiale.
+
+#### Cluburi de business și rețele profesionale
+
+Se indexează camere de comerț, cluburi de business, asociații patronale, networking groups, organizații profesionale și alte rețele economice active în Vâlcea.
+
+Se urmăresc: conducerea publică, membri declarați public, evenimente, sponsori, parteneriate, poziții publice și legături documentate cu proiecte sau achiziții. Apartenența unei persoane se publică numai dacă este declarată oficial/public sau documentată în surse credibile.
+
+#### Personalități politice cu origine sau legături relevante cu Vâlcea
+
+Se menține un registru backend pentru persoane care ocupă sau au ocupat funcții publice naționale și au o legătură documentată cu Vâlcea: origine, domiciliu public relevant, studii, carieră profesională/politică sau circumscripție.
+
+Prioritate: membri ai Guvernului, secretari de stat, parlamentari, conducători de agenții/companii publice și alte funcții naționale cu impact local.
+
+Se monitorizează declarații, decizii, numiri, proiecte și resurse care pot afecta județul. Originea sau legătura cu Vâlcea se publică numai când poate fi documentată; nu se transformă automat într-o relație de influență.
+
+#### Artiști și personalități culturale cu origine sau legături cu Vâlcea
+
+Se indexează artiști, muzicieni, actori, scriitori, regizori, creatori, sportivi și alte personalități culturale cu origine sau legături documentate cu județul.
+
+Semnale: lansări, concerte, expoziții, premii, apariții locale, proiecte, colaborări, festivaluri și declarații despre Vâlcea. Se separă clar `ORIGIN`, `BORN_IN`, `RAISED_IN`, `LIVES_IN`, `WORKS_IN`, `FAMILY_LINK`, `EVENT_LINK` și `HISTORICAL_LINK` pentru a evita formulările vagi.
+
+#### Masonerie și organizații cu apartenență sensibilă
+
+Masoneria și alte organizații de acest tip pot fi indexate numai ca **entități publice/documentabile**: obediențe, loji sau organizații care au site oficial, personalitate juridică, comunicate, evenimente publice sau apar în documente publice.
+
+**Nu se construiesc liste speculative de membri.** Apartenența individuală este considerată informație sensibilă editorial și se publică numai când persoana a declarat-o public ori există documente/surse publice robuste care o confirmă și există interes public legitim. Nu se deduce apartenența din fotografii, relații sociale, participarea la un eveniment, simboluri ambigue, prietenii sau zvonuri.
+
+Orice material care leagă o apartenență masonică de o decizie publică, afacere, licitație sau influență necesită dovezi separate pentru **apartenență**, **relația concretă** și **relevanța publică**. Vinovăția prin asociere este interzisă.
+
 ## Niveluri de încredere
 
 - `T1` — document/sursă oficială primară;
@@ -96,8 +134,8 @@ Orice clasă poate produce un `SIGNAL`; numai dovezile suficiente pot produce un
 
 ## Discovery continuu
 
-Lista surselor este deschisă. Motorul caută periodic publicații, firme și instituții noi, domenii mutate, conturi oficiale și feed-uri noi. O sursă dispărută nu se șterge din istoric; se marchează `INACTIVE`, `MOVED` sau `FAILED` și se caută succesorul.
+Lista surselor este deschisă. Motorul caută periodic publicații, firme, profesioniști, personalități, instituții și organizații noi, domenii mutate, conturi oficiale și feed-uri noi. O sursă dispărută nu se șterge din istoric; se marchează `INACTIVE`, `MOVED` sau `FAILED` și se caută succesorul.
 
 ## Rutare editorială
 
-Semnalele sunt clasificate automat în: `BREAKING`, `ORAȘ`, `JUDEȚ`, `ADMINISTRAȚIE`, `ECONOMIE`, `CULTURĂ`, `EVENIMENTE`, `UNDE_IEȘIM`, `INVESTIGAȚII`, `JUSTIȚIE`, `SPORT` sau `OTHER`. Un semnal poate alimenta mai multe secțiuni, dar se publică o singură versiune canonică a materialului.
+Semnalele sunt clasificate automat în: `BREAKING`, `ORAȘ`, `JUDEȚ`, `ADMINISTRAȚIE`, `ECONOMIE`, `CULTURĂ`, `EVENIMENTE`, `UNDE_IEȘIM`, `LIFESTYLE`, `INVESTIGAȚII`, `JUSTIȚIE`, `SPORT` sau `OTHER`. Un semnal poate alimenta mai multe secțiuni, dar se publică o singură versiune canonică a materialului.
