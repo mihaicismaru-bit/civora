@@ -1,0 +1,169 @@
+{
+  "schema_version": "1.0",
+  "case_id": "VC-INV-2026-001",
+  "title": "Pod pietonal-ciclist peste Olănești, lângă Omniasig",
+  "github_issue": 59,
+  "editorial_route": {
+    "primary_section": "Investigații",
+    "desk": "Bani publici și infrastructură",
+    "cross_sections": [
+      "Oraș",
+      "Fonduri europene"
+    ],
+    "tags": [
+      "Râmnicu Vâlcea",
+      "râul Olănești",
+      "mobilitate urbană",
+      "achiziții publice",
+      "SMIS 334436",
+      "CN1087529",
+      "CAN1168745",
+      "Ralunic",
+      "Dimex-2000"
+    ],
+    "public_state": "PREPUBLICATION_MONITORING",
+    "auto_publish": false
+  },
+  "cadence": {
+    "online": "twice_daily",
+    "field": "weekly_or_after_material_event"
+  },
+  "alert_policy": {
+    "first_run_is_baseline": true,
+    "comment_on_material_change": true,
+    "comment_after_consecutive_failures": 3,
+    "comment_on_recovery": true,
+    "maximum_comment_items": 12,
+    "no_auto_accusation": true
+  },
+  "entities": [
+    "Municipiul Râmnicu Vâlcea",
+    "Ralunic SRL",
+    "Dimex-2000 Company SRL",
+    "Elserv SRL",
+    "Prodial SRL",
+    "Teleteknika Engineering SRL",
+    "Strabag SRL",
+    "Terra Solution Services SRL",
+    "Rionvil SRL",
+    "Eurobridge SRL",
+    "ABA Olt",
+    "SGA Vâlcea",
+    "ADR Sud-Vest Oltenia"
+  ],
+  "material_signals": [
+    "act adițional",
+    "ajustare de preț",
+    "suplimentare",
+    "prelungire",
+    "suspendare",
+    "ordin de începere",
+    "situație de lucrări",
+    "certificat de plată",
+    "subcontractant",
+    "neconformitate",
+    "penalitate",
+    "recepție",
+    "aviz de gospodărire a apelor",
+    "autorizație de gospodărire a apelor",
+    "viitură",
+    "pod",
+    "Olănești",
+    "Omniasig",
+    "SMIS 334436",
+    "CN1087529",
+    "CAN1168745"
+  ],
+  "sources": [
+    {
+      "id": "hcl-100-2025",
+      "label": "HCL 100/2025 — deviz și indicatori PT",
+      "url": "https://hcl.usr.ro/ramnicu_valcea/2025/h100",
+      "tier": "T1_OFFICIAL",
+      "mode": "focused_text",
+      "materiality": "high",
+      "focus_terms": ["Componenta II", "Olănești", "pod", "28,31", "11,88", "44.373.317"]
+    },
+    {
+      "id": "hcl-101-2025",
+      "label": "HCL 101/2025 — aprobarea proiectului Componenta II",
+      "url": "https://hcl.usr.ro/ramnicu_valcea/2025/h101",
+      "tier": "T1_OFFICIAL",
+      "mode": "focused_text",
+      "materiality": "high",
+      "focus_terms": ["Componenta II", "334436", "Olănești", "pod", "mobilitate"]
+    },
+    {
+      "id": "hcl-index-2025",
+      "label": "Registrul HCL Râmnicu Vâlcea 2025",
+      "url": "https://hcl.usr.ro/ramnicu_valcea/2025",
+      "tier": "T1_OFFICIAL",
+      "mode": "focused_text",
+      "materiality": "high",
+      "focus_terms": ["Componenta II", "334436", "mobilitate", "pod", "Olănești"]
+    },
+    {
+      "id": "hcl-index-2026",
+      "label": "Registrul HCL Râmnicu Vâlcea 2026",
+      "url": "https://hcl.usr.ro/ramnicu_valcea/2026",
+      "tier": "T1_OFFICIAL",
+      "mode": "focused_text",
+      "materiality": "high",
+      "focus_terms": ["Componenta II", "334436", "mobilitate", "pod", "Olănești", "Ralunic", "Dimex"]
+    },
+    {
+      "id": "primaria-project-334436",
+      "label": "Primăria Râmnicu Vâlcea — pagina proiectului SMIS 334436",
+      "url": "https://www.primariavl.ro/informatii-publice/serviciul-proiecte/137-proiecte-in-derulare/10541-cresterea-mobilitatii-urbane-pietonale-si-cicliste-in-municipiul-ramnicu-valcea-componenta-ii-cod-smis-334436",
+      "tier": "T1_OFFICIAL",
+      "mode": "focused_text",
+      "materiality": "high",
+      "focus_terms": ["334436", "Componenta II", "valoarea", "perioada", "stadiul", "Ralunic", "Dimex", "pod"]
+    },
+    {
+      "id": "primaria-press-index",
+      "label": "Primăria Râmnicu Vâlcea — comunicate de presă",
+      "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa",
+      "tier": "T1_OFFICIAL",
+      "mode": "focused_text",
+      "materiality": "high",
+      "focus_terms": ["334436", "Componenta II", "Ralunic", "Dimex", "Olănești", "piste", "pod"]
+    },
+    {
+      "id": "aba-olt-home",
+      "label": "ABA Olt — comunicări publice",
+      "url": "https://olt.rowater.ro/",
+      "tier": "T1_OFFICIAL",
+      "mode": "focused_text",
+      "materiality": "high",
+      "focus_terms": ["Olănești", "Râmnicu Vâlcea", "pod", "aviz", "autorizație", "lucrări în albie"]
+    },
+    {
+      "id": "adr-pr-home",
+      "label": "Programul Regional Sud-Vest Oltenia 2021–2027",
+      "url": "https://pr2021-2027.adroltenia.ro/",
+      "tier": "T1_OFFICIAL",
+      "mode": "focused_text",
+      "materiality": "high",
+      "focus_terms": ["334436", "Râmnicu Vâlcea", "mobilitate", "Componenta II"]
+    },
+    {
+      "id": "news-rss-procurement",
+      "label": "Radar presă — achiziție și proiect",
+      "url": "https://news.google.com/rss/search?q=%22SMIS%20334436%22%20OR%20%22CN1087529%22%20OR%20%22CAN1168745%22&hl=ro&gl=RO&ceid=RO%3Aro",
+      "tier": "T3_DISCOVERY",
+      "mode": "rss",
+      "materiality": "medium",
+      "focus_terms": ["334436", "CN1087529", "CAN1168745", "Râmnicu Vâlcea"]
+    },
+    {
+      "id": "news-rss-companies",
+      "label": "Radar presă — executanți și șantier",
+      "url": "https://news.google.com/rss/search?q=%28Ralunic%20OR%20%22Dimex-2000%22%29%20%28Ol%C4%83ne%C8%99ti%20OR%20Omniasig%20OR%20%22R%C3%A2mnicu%20V%C3%A2lcea%22%29&hl=ro&gl=RO&ceid=RO%3Aro",
+      "tier": "T3_DISCOVERY",
+      "mode": "rss",
+      "materiality": "medium",
+      "focus_terms": ["Ralunic", "Dimex-2000", "Olănești", "Omniasig", "Râmnicu Vâlcea"]
+    }
+  ]
+}
