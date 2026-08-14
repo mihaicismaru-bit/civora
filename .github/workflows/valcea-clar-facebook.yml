@@ -29,6 +29,12 @@ jobs:
         with:
           python-version: "3.13"
 
+      - name: Install social-card renderer
+        run: python -m pip install --disable-pip-version-check pillow
+
+      - name: Render story-specific Facebook cards
+        run: python valcea-clar/social/generate_cards.py
+
       - name: Self-test distributor
         run: python valcea-clar/social/facebook_publish.py --self-test
 
