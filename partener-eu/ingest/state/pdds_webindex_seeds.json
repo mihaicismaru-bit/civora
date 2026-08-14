@@ -2,13 +2,13 @@
   "version": 1,
   "policy": "Web-index discovery only. These canonical URLs may be probed directly, but no fact may be published unless the canonical mfe.gov.ro URL is successfully fetched and parsed.",
   "discoveredAt": "2026-08-12T09:32:00Z",
-  "lastCheckedAt": "2026-08-14T10:32:19Z",
+  "lastCheckedAt": "2026-08-14T12:29:35Z",
   "lastDiscoveryResult": {
     "newCanonicalUrls": 0,
-    "note": "Fresh 2026-08-14 10:32Z check: the priority PDDS seed, PDDS Noutati, PDDS Ghiduri, the MIPE root and the PEO/PoIDS roots timed out on direct official fetch. Fresh web-index searches restricted to official MIPE-managed domains returned no new canonical PDDS or broader MIPE URLs suitable for verification. The official MySMIS reporting URL also timed out in this web check, so it was not used to claim a fresh semantic change. No mirror or third-party content was admitted as an MIPE fact; last-known-good provenance and explicit statuses are preserved, and no ambiguous text is promoted to OPEN.",
+    "note": "Fresh 2026-08-14 12:29Z check: the priority PDDS seed, PDDS Noutati, PDDS Ghiduri, the MIPE root and the PEO/PoIDS roots timed out on direct official fetch. Fresh web-index searches restricted to official MIPE-managed domains returned no new canonical PDDS or broader MIPE URLs suitable for verification. The official MySMIS reporting surface was reachable and still exposed 907 validated calls; the monitored rows matched the last-known-good canonical snapshot, with explicit FINALIZAT statuses preserved. No mirror or third-party content was admitted as an MIPE fact, and no ambiguous text is promoted to OPEN.",
     "mysmisValidatedCalls": 907,
-    "mysmisSemanticChange": null,
-    "mysmisFreshCheck": "DIRECT_WEB_TIMEOUT_AWAIT_INGESTION_RUN"
+    "mysmisSemanticChange": false,
+    "mysmisFreshCheck": "DIRECT_CANONICAL_FETCH_OK_NO_SEMANTIC_CHANGE"
   },
   "items": [
     {
