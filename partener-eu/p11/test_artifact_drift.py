@@ -35,7 +35,7 @@ class ArtifactDriftTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "resolution artifact drift"):
                 apply_mod.assert_artifact_current(artifact, expected)
 
-    def test_projection_check_detects_semantic_drift(self):
+    def test_projection_check_rejects_unsafe_semantic_drift(self):
         bundle = json.loads((ROOT / "opportunity_bundle.json").read_text(encoding="utf-8"))
         payload = projection_mod.render(projection_mod.build(bundle))
         with tempfile.TemporaryDirectory() as folder:
@@ -43,7 +43,7 @@ class ArtifactDriftTests(unittest.TestCase):
             artifact.write_text(payload, encoding="utf-8")
             projection_mod.assert_artifact_current(artifact, payload)
             artifact.write_text(payload.replace('"automaticPublication":false', '"automaticPublication":true'), encoding="utf-8")
-            with self.assertRaisesRegex(ValueError, "public projection drift"):
+            with self.assertRaisesRegex(ValueError, "policy must disable automatic publication"):
                 projection_mod.assert_artifact_current(artifact, payload)
 
 

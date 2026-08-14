@@ -27,9 +27,9 @@ Actualizat: 14 august 2026
 
 ## Ultimul increment validat
 
-- P11-R04 — sumar public derivat exclusiv din decizia fail-closed efectivă;
-- înregistrările blocate nu mai pot mări `publishableCount` sau `openVerifiedCount` printr-o stare declarativă inconsistentă;
-- sumarul expune numărul deciziilor și frecvența motivelor de blocare pentru audit și observabilitate;
+- P11-R05 — gate executabil de integritate pentru proiecția publică;
+- generarea și replay-ul se opresc dacă deciziile, sumarul sau numărătorile nu mai corespund semantic;
+- sunt respinse explicit scurgerile de fapte materiale pe înregistrări blocate, faptele neverificate permise și identitățile publice duplicate;
 - corpusul și faptele materiale nu sunt modificate: 26 oportunități, șase publicabile și 20 taskuri deschise sau în review.
 
 ## Reguli de închidere
