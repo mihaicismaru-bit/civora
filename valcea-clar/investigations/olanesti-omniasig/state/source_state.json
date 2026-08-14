@@ -1,16 +1,16 @@
 {
   "schema_version": "1.0",
   "case_id": "VC-INV-2026-001",
-  "observed_at": "2026-08-14T13:34:27+00:00",
-  "runs": 1,
-  "baseline": true,
+  "observed_at": "2026-08-14T17:37:04+00:00",
+  "runs": 2,
+  "baseline": false,
   "sources": {
     "hcl-100-2025": {
       "id": "hcl-100-2025",
       "label": "HCL 100/2025 — deviz și indicatori PT",
       "tier": "T1_OFFICIAL",
       "url": "https://hcl.usr.ro/ramnicu_valcea/2025/h100",
-      "observed_at": "2026-08-14T13:34:27+00:00",
+      "observed_at": "2026-08-14T17:37:04+00:00",
       "final_url": "https://hcl.usr.ro/ramnicu_valcea/2025/h100",
       "health": "OK",
       "http_status": 200,
@@ -37,14 +37,14 @@
       "materiality": "high",
       "mode": "focused_text",
       "consecutive_failures": 0,
-      "last_successful_at": "2026-08-14T13:34:27+00:00"
+      "last_successful_at": "2026-08-14T17:37:04+00:00"
     },
     "hcl-101-2025": {
       "id": "hcl-101-2025",
       "label": "HCL 101/2025 — aprobarea proiectului Componenta II",
       "tier": "T1_OFFICIAL",
       "url": "https://hcl.usr.ro/ramnicu_valcea/2025/h101",
-      "observed_at": "2026-08-14T13:34:28+00:00",
+      "observed_at": "2026-08-14T17:37:05+00:00",
       "final_url": "https://hcl.usr.ro/ramnicu_valcea/2025/h101",
       "health": "OK",
       "http_status": 200,
@@ -73,14 +73,14 @@
       "materiality": "high",
       "mode": "focused_text",
       "consecutive_failures": 0,
-      "last_successful_at": "2026-08-14T13:34:28+00:00"
+      "last_successful_at": "2026-08-14T17:37:05+00:00"
     },
     "hcl-index-2025": {
       "id": "hcl-index-2025",
       "label": "Registrul HCL Râmnicu Vâlcea 2025",
       "tier": "T1_OFFICIAL",
       "url": "https://hcl.usr.ro/ramnicu_valcea/2025",
-      "observed_at": "2026-08-14T13:34:28+00:00",
+      "observed_at": "2026-08-14T17:37:05+00:00",
       "final_url": "https://hcl.usr.ro/ramnicu_valcea/2025",
       "health": "OK",
       "http_status": 200,
@@ -100,14 +100,14 @@
       "materiality": "high",
       "mode": "focused_text",
       "consecutive_failures": 0,
-      "last_successful_at": "2026-08-14T13:34:28+00:00"
+      "last_successful_at": "2026-08-14T17:37:05+00:00"
     },
     "hcl-index-2026": {
       "id": "hcl-index-2026",
       "label": "Registrul HCL Râmnicu Vâlcea 2026",
       "tier": "T1_OFFICIAL",
       "url": "https://hcl.usr.ro/ramnicu_valcea/2026",
-      "observed_at": "2026-08-14T13:34:28+00:00",
+      "observed_at": "2026-08-14T17:37:05+00:00",
       "final_url": "https://hcl.usr.ro/ramnicu_valcea/2026",
       "health": "OK",
       "http_status": 200,
@@ -121,38 +121,38 @@
       "materiality": "high",
       "mode": "focused_text",
       "consecutive_failures": 0,
-      "last_successful_at": "2026-08-14T13:34:28+00:00"
+      "last_successful_at": "2026-08-14T17:37:05+00:00"
     },
     "primaria-project-334436": {
       "id": "primaria-project-334436",
       "label": "Primăria Râmnicu Vâlcea — pagina proiectului SMIS 334436",
       "tier": "T1_OFFICIAL",
       "url": "https://www.primariavl.ro/informatii-publice/serviciul-proiecte/137-proiecte-in-derulare/10541-cresterea-mobilitatii-urbane-pietonale-si-cicliste-in-municipiul-ramnicu-valcea-componenta-ii-cod-smis-334436",
-      "observed_at": "2026-08-14T13:34:29+00:00",
+      "observed_at": "2026-08-14T17:37:05+00:00",
       "health": "FAILED",
       "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
       "materiality": "high",
       "mode": "focused_text",
-      "consecutive_failures": 1
+      "consecutive_failures": 2
     },
     "primaria-press-index": {
       "id": "primaria-press-index",
       "label": "Primăria Râmnicu Vâlcea — comunicate de presă",
       "tier": "T1_OFFICIAL",
       "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa",
-      "observed_at": "2026-08-14T13:34:47+00:00",
+      "observed_at": "2026-08-14T17:37:23+00:00",
       "health": "FAILED",
       "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
       "materiality": "high",
       "mode": "focused_text",
-      "consecutive_failures": 1
+      "consecutive_failures": 2
     },
     "aba-olt-home": {
       "id": "aba-olt-home",
       "label": "ABA Olt — comunicări publice",
       "tier": "T1_OFFICIAL",
       "url": "https://olt.rowater.ro/",
-      "observed_at": "2026-08-14T13:35:05+00:00",
+      "observed_at": "2026-08-14T17:37:41+00:00",
       "final_url": "https://olt.rowater.ro/",
       "health": "OK",
       "http_status": 200,
@@ -191,44 +191,35 @@
       "materiality": "high",
       "mode": "focused_text",
       "consecutive_failures": 0,
-      "last_successful_at": "2026-08-14T13:35:05+00:00"
+      "last_successful_at": "2026-08-14T17:37:41+00:00"
     },
     "adr-pr-home": {
       "id": "adr-pr-home",
       "label": "Programul Regional Sud-Vest Oltenia 2021–2027",
       "tier": "T1_OFFICIAL",
       "url": "https://pr2021-2027.adroltenia.ro/",
-      "observed_at": "2026-08-14T13:35:07+00:00",
+      "observed_at": "2026-08-14T17:37:43+00:00",
       "final_url": "https://pr2021-2027.adroltenia.ro/",
       "health": "OK",
       "http_status": 200,
-      "content_type": "text/html; charset=UTF-8",
-      "semantic_sha256": "1010d8bfdbfa4e0282ee3810621dbcd100ca7705525a44d82f54e2ed7162576e",
-      "focused_text_empty": false,
-      "focused_excerpt": [
-        "IF pentru creșterea eficienței energetice – clădiri rezidențiale",
-        "Prioritatea 4 – Mobilitate urbană durabilă",
-        "Transport urban sustenabil și durabil – MRJ"
-      ],
-      "match_count": 3,
-      "link_hits": [
-        "prioritatea.php?id=67&nume=Prioritatea 4 – Mobilitate urbană durabilă",
-        "prioritatea.php?id=68&nume=Prioritatea 4 – Mobilitate urbană durabilă",
-        "prioritatea.php?id=69&nume=Prioritatea 4 – Mobilitate urbană durabilă",
-        "prioritatea.php?id=70&nume=Prioritatea 4 – Mobilitate urbană durabilă"
-      ],
-      "document_text_length": 6019,
+      "content_type": "text/html",
+      "semantic_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "focused_text_empty": true,
+      "focused_excerpt": [],
+      "match_count": 0,
+      "link_hits": [],
+      "document_text_length": 79,
       "materiality": "high",
       "mode": "focused_text",
       "consecutive_failures": 0,
-      "last_successful_at": "2026-08-14T13:35:07+00:00"
+      "last_successful_at": "2026-08-14T17:37:43+00:00"
     },
     "news-rss-procurement": {
       "id": "news-rss-procurement",
       "label": "Radar presă — achiziție și proiect",
       "tier": "T3_DISCOVERY",
       "url": "https://news.google.com/rss/search?q=%22SMIS%20334436%22%20OR%20%22CN1087529%22%20OR%20%22CAN1168745%22&hl=ro&gl=RO&ceid=RO%3Aro",
-      "observed_at": "2026-08-14T13:35:09+00:00",
+      "observed_at": "2026-08-14T17:37:44+00:00",
       "final_url": "https://news.google.com/rss/search?q=%22SMIS%20334436%22%20OR%20%22CN1087529%22%20OR%20%22CAN1168745%22&hl=ro&gl=RO&ceid=RO%3Aro",
       "health": "OK",
       "http_status": 200,
@@ -243,25 +234,24 @@
       "materiality": "medium",
       "mode": "rss",
       "consecutive_failures": 0,
-      "last_successful_at": "2026-08-14T13:35:09+00:00"
+      "last_successful_at": "2026-08-14T17:37:44+00:00"
     },
     "news-rss-companies": {
       "id": "news-rss-companies",
       "label": "Radar presă — executanți și șantier",
       "tier": "T3_DISCOVERY",
       "url": "https://news.google.com/rss/search?q=%28Ralunic%20OR%20%22Dimex-2000%22%29%20%28Ol%C4%83ne%C8%99ti%20OR%20Omniasig%20OR%20%22R%C3%A2mnicu%20V%C3%A2lcea%22%29&hl=ro&gl=RO&ceid=RO%3Aro",
-      "observed_at": "2026-08-14T13:35:09+00:00",
+      "observed_at": "2026-08-14T17:37:44+00:00",
       "final_url": "https://news.google.com/rss/search?q=%28Ralunic%20OR%20%22Dimex-2000%22%29%20%28Ol%C4%83ne%C8%99ti%20OR%20Omniasig%20OR%20%22R%C3%A2mnicu%20V%C3%A2lcea%22%29&hl=ro&gl=RO&ceid=RO%3Aro",
       "health": "OK",
       "http_status": 200,
       "content_type": "application/xml; charset=utf-8",
-      "semantic_sha256": "5ea4ab33d5938be456d675c16cc32bbd976258aebd723d087f35f6ceb67be90c",
+      "semantic_sha256": "c6659f41064e889b53d294f573dca4c0390662774992cba9e57005f01bc75d2b",
       "focused_text_empty": false,
       "focused_excerpt": [
         "Râmnicu Vâlcea: încă 40 km de piste pentru biciclete - Jurnalul Olteniei",
         "Încă 40 de km de piste de biciclete în Râmnicu Vâlcea: primarul Mircia Gutău a semnat contractul de execuție pentru a doua componentă a proiectului cu fonduri europene „Creșterea mobilității urbane, pietonale și cicliste” - Tribuna Vâlceană",
-        "Investiţie de 5,5 milioane de euro, printr-un proiect cu finanţare europeană, pentru modernizarea autobazei ETA SA, din Râmnicu Vâlcea - Tribuna Vâlceană",
-        "APAVIL SA investește peste 7 milioane lei în modernizarea sediului din Râmnicu Vâlcea. Constructori: RALUNIC si CONSTRUCȚII SILVA OAS - Ziarul de Vâlcea"
+        "Investiţie de 5,5 milioane de euro, printr-un proiect cu finanţare europeană, pentru modernizarea autobazei ETA SA, din Râmnicu Vâlcea - Tribuna Vâlceană"
       ],
       "entries": [
         {
@@ -281,29 +271,22 @@
           "title": "Investiţie de 5,5 milioane de euro, printr-un proiect cu finanţare europeană, pentru modernizarea autobazei ETA SA, din Râmnicu Vâlcea - Tribuna Vâlceană",
           "link": "https://news.google.com/rss/articles/CBMi9AFBVV95cUxQSHZWS3NBMVFESWNEN25VZkNicXZnRXpkLUxEMXhNTmpNZzNicGNfWncwOE1hc2p4OTY1LVpkdGQ2MGloa1RTWnh1bjQ1MGZ6VUE4OF85NHdnVjktTFBkYnF4blJoR2lUbHhlTEN4NmlTSWZEY2lsMk04MzNWaTU3T2EzTkdTWW5vemZLSldBb1lGdFZhb3M5VUpqZGNKNHdrcGNIUXdzNVBxQVJzUF96ZkVJVjItQjNydUxNNjBsd1NXaGF1TlhVQ3ppZ1dpakJFUWZmMFlrTTI3VU1VTjg3QnVydDVqVkcwaGxSaGJNckdGWm5p?oc=5",
           "published": "Wed, 12 May 2021 07:00:00 GMT"
-        },
-        {
-          "fingerprint": "8a611cc08da1c8dccb3c177cc6262c45e23e469059b9d341eef4a663edf5b556",
-          "title": "APAVIL SA investește peste 7 milioane lei în modernizarea sediului din Râmnicu Vâlcea. Constructori: RALUNIC si CONSTRUCȚII SILVA OAS - Ziarul de Vâlcea",
-          "link": "https://news.google.com/rss/articles/CBMi-gFBVV95cUxQcHF0Q29TYmxiN2hFbDBac0JhdWRacVkzTmhaVWZETFFDRXJxbGFtdGcyaFZkQno0NDdxd0xxdlZkanR3dVZGQWk4eVpkS0cweklBVnpoVFdLOWcwTHZvRzNaVm5pOW5LQVJZckV3Sjg4NEIyVHNFVHl4UGs2eUdsaEVfbUp1TXB1cEZ5em9aNW5VWmxxVjYxZXVTdGRFdnVTQ0pkUHF2ZDNUQmxScU1vWVpWWmJ2Tl84Q0hIV2Nqazg4NUpFX2E4SG00ZFprZ1FvT0taNXdBb0pwM1dXakE2Y3dTb3ZEM1hybXBRLUV1R2VpQ20wNV9jZGNR?oc=5",
-          "published": "Mon, 09 Feb 2026 08:00:00 GMT"
         }
       ],
-      "match_count": 4,
+      "match_count": 3,
       "link_hits": [
         "https://news.google.com/rss/articles/CBMilgFBVV95cUxNZzcwSVNsZ2FqNFpESGh5OUdKNHczcG1yaW5mT0JBdHdPT05pMmc2aE9LcTlpZF9LcE42eW5XVFNuLUNGbzlmdkZNTUdmMHZIWEVoc1NfcGUtc2cwU3p1THo2VjhBY1p5NmRjTlo4VkpxSmdzX2hSSjR6aE4tWjVsMUFEM1FHdWFqM0lhX2lyRjBWYm5BV2c?oc=5",
         "https://news.google.com/rss/articles/CBMixAJBVV95cUxQb2pGS3EySlIzaDY3V1ZpM2l3VVZqMERNN1VBa0Q1TkY4MjA3UU9iNi1QR3A3bkVRd0tITTZIcEZSMU9FaGo5NHcxV2tJWFVSel96WXlVaFltZEE2dUVUbkI2Y0xlQWFEcjhzSlNxa0p2ZGVsa3I5QktDeFpyTnZuRGp0WXFHU0Iwa2ozdlpXMUpSTzJ3ZzFHVExWM0pndHZfeTRFODdYdnZFeXd5WUlsZUFFUjJlQ1NVVGdkXzZfcWgtOEZ5MmJVNWQwQnlsUWVKUkMwajAtMnNld09EbVRRbk11V3I5Q29zd0dzT1d2XzI0c0ZSWlJNYy1Hbzl6Z2JtQy1ncWRtUzI1VzMybE5QNlB4c1VBOWdLRWhQVDZvQW5ral9ER3lRZFp4RkFVLVBfTWdkMFhlaGV1SGVtdUlZbkRwQlk?oc=5",
-        "https://news.google.com/rss/articles/CBMi9AFBVV95cUxQSHZWS3NBMVFESWNEN25VZkNicXZnRXpkLUxEMXhNTmpNZzNicGNfWncwOE1hc2p4OTY1LVpkdGQ2MGloa1RTWnh1bjQ1MGZ6VUE4OF85NHdnVjktTFBkYnF4blJoR2lUbHhlTEN4NmlTSWZEY2lsMk04MzNWaTU3T2EzTkdTWW5vemZLSldBb1lGdFZhb3M5VUpqZGNKNHdrcGNIUXdzNVBxQVJzUF96ZkVJVjItQjNydUxNNjBsd1NXaGF1TlhVQ3ppZ1dpakJFUWZmMFlrTTI3VU1VTjg3QnVydDVqVkcwaGxSaGJNckdGWm5p?oc=5",
-        "https://news.google.com/rss/articles/CBMi-gFBVV95cUxQcHF0Q29TYmxiN2hFbDBac0JhdWRacVkzTmhaVWZETFFDRXJxbGFtdGcyaFZkQno0NDdxd0xxdlZkanR3dVZGQWk4eVpkS0cweklBVnpoVFdLOWcwTHZvRzNaVm5pOW5LQVJZckV3Sjg4NEIyVHNFVHl4UGs2eUdsaEVfbUp1TXB1cEZ5em9aNW5VWmxxVjYxZXVTdGRFdnVTQ0pkUHF2ZDNUQmxScU1vWVpWWmJ2Tl84Q0hIV2Nqazg4NUpFX2E4SG00ZFprZ1FvT0taNXdBb0pwM1dXakE2Y3dTb3ZEM1hybXBRLUV1R2VpQ20wNV9jZGNR?oc=5"
+        "https://news.google.com/rss/articles/CBMi9AFBVV95cUxQSHZWS3NBMVFESWNEN25VZkNicXZnRXpkLUxEMXhNTmpNZzNicGNfWncwOE1hc2p4OTY1LVpkdGQ2MGloa1RTWnh1bjQ1MGZ6VUE4OF85NHdnVjktTFBkYnF4blJoR2lUbHhlTEN4NmlTSWZEY2lsMk04MzNWaTU3T2EzTkdTWW5vemZLSldBb1lGdFZhb3M5VUpqZGNKNHdrcGNIUXdzNVBxQVJzUF96ZkVJVjItQjNydUxNNjBsd1NXaGF1TlhVQ3ppZ1dpakJFUWZmMFlrTTI3VU1VTjg3QnVydDVqVkcwaGxSaGJNckdGWm5p?oc=5"
       ],
-      "document_text_length": 11987,
+      "document_text_length": 10251,
       "materiality": "medium",
       "mode": "rss",
       "consecutive_failures": 0,
-      "last_successful_at": "2026-08-14T13:35:09+00:00"
+      "last_successful_at": "2026-08-14T17:37:44+00:00"
     }
   },
-  "last_alert_fingerprint": null,
-  "last_comment_status": "NOT_REQUESTED",
+  "last_alert_fingerprint": "771956465a92f59b9d090a7ef22228b3421b1aaf8feddd4b23a41f559d219b78",
+  "last_comment_status": "POSTED",
   "last_comment_error": null
 }
