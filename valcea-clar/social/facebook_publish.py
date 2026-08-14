@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Fail-closed Facebook Page distributor for VÂLCEA CLAR.
 
-Only curated items with status=ready and a rendered, story-specific image are
-eligible. New photo posts are published first; superseded wrong-image posts are
-then removed. State is persisted for idempotent retries.
+Publication rule: every ready post must use a real, approved photograph with
+explicit provenance and reuse rights. Generated cards, illustrations, AI images,
+unverified downloads and generic stock substitutes are rejected.
 """
 from __future__ import annotations
 
@@ -22,9 +22,27 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 OUTBOX = ROOT / "valcea-clar" / "social" / "facebook_outbox.json"
 STATE = ROOT / "valcea-clar" / "social" / "facebook_state.json"
-GENERATED = (ROOT / "valcea-clar" / "social" / "generated").resolve()
+PHOTO_ROOT = (ROOT / "valcea-clar" / "social" / "photos" / "approved").resolve()
 DEFAULT_GRAPH_VERSION = "v26.0"
 CANONICAL_HOSTS = {"valceaclar.ro", "www.valceaclar.ro"}
+ALLOWED_SOURCE_TYPES = {
+    "staff",
+    "reader",
+    "official_press",
+    "official_institution",
+    "licensed_agency",
+    "public_domain",
+    "creative_commons",
+}
+ALLOWED_RIGHTS = {
+    "owned",
+    "written_permission",
+    "press_use",
+    "licensed",
+    "public_domain",
+    "creative_commons",
+    "official_reuse_permission",
+}
 
 
 def load_json(path: Path, default: dict[str, Any]) -> dict[str, Any]:
@@ -36,15 +54,48 @@ def load_json(path: Path, default: dict[str, Any]) -> dict[str, Any]:
     return value
 
 
+def photo_metadata(item: dict[str, Any]) -> dict[str, Any]:
+    value = item.get("image")
+    if not isinstance(value, dict):
+        raise ValueError(f"ready Facebook item {item['id']} has no image metadata")
+    required = ("kind", "source_type", "credit", "rights_basis", "alt_text")
+    missing = [key for key in required if not str(value.get(key, "")).strip()]
+    if missing:
+        raise ValueError(f"image metadata missing for {item['id']}: {', '.join(missing)}")
+    if value.get("kind") != "photograph":
+        raise ValueError(f"{item['id']} is not backed by a real photograph")
+    if value.get("synthetic") is not False:
+        raise ValueError(f"{item['id']} synthetic/generated visual is forbidden")
+    if value.get("subject_match") is not True:
+        raise ValueError(f"{item['id']} photo has not been confirmed to depict the story subject")
+    if value.get("editor_approved") is not True:
+        raise ValueError(f"{item['id']} photo has not received editorial approval")
+    if value.get("source_type") not in ALLOWED_SOURCE_TYPES:
+        raise ValueError(f"unsupported photo source_type for {item['id']}: {value.get('source_type')}")
+    if value.get("rights_basis") not in ALLOWED_RIGHTS:
+        raise ValueError(f"unsupported rights_basis for {item['id']}: {value.get('rights_basis')}")
+    if value.get("source_type") not in {"staff", "public_domain"} and not str(value.get("source_url", "")).strip():
+        raise ValueError(f"external photo source_url missing for {item['id']}")
+    return value
+
+
 def image_file(item: dict[str, Any]) -> Path:
+    photo_metadata(item)
     raw = str(item.get("image_path", "")).strip()
     if not raw:
         raise ValueError(f"ready Facebook item {item['id']} has no image_path")
     path = (ROOT / raw).resolve()
-    if path != GENERATED and GENERATED not in path.parents:
-        raise ValueError(f"Facebook image must be rendered under {GENERATED}: {raw}")
+    if path != PHOTO_ROOT and PHOTO_ROOT not in path.parents:
+        raise ValueError(f"photo must be approved under {PHOTO_ROOT}: {raw}")
+    if any(part.lower() in {"generated", "synthetic", "cards", "ai"} for part in path.parts):
+        raise ValueError(f"generated/card path is forbidden for {item['id']}: {raw}")
     if path.suffix.lower() not in {".jpg", ".jpeg", ".png"} or not path.is_file():
-        raise ValueError(f"Facebook image does not exist or is unsupported: {raw}")
+        raise ValueError(f"approved photograph does not exist or is unsupported: {raw}")
+    header = path.read_bytes()[:12]
+    is_jpeg = header.startswith(b"\xff\xd8\xff")
+    is_png = header.startswith(b"\x89PNG\r\n\x1a\n")
+    if not (is_jpeg or is_png):
+        raise ValueError(f"invalid image file signature for {item['id']}: {raw}")
     return path
 
 
@@ -82,7 +133,7 @@ def eligible(items: list[dict[str, Any]], published: dict[str, Any]) -> list[dic
 def graph_get(path: str, token: str, version: str) -> dict[str, Any]:
     endpoint = f"https://graph.facebook.com/{version}/{path.lstrip('/')}"
     endpoint += ("&" if "?" in endpoint else "?") + "access_token=" + urllib.parse.quote(token, safe="")
-    request = urllib.request.Request(endpoint, method="GET", headers={"User-Agent": "ValceaClar-Facebook/2.0"})
+    request = urllib.request.Request(endpoint, method="GET", headers={"User-Agent": "ValceaClar-Facebook/3.0"})
     try:
         with urllib.request.urlopen(request, timeout=30) as response:
             payload = json.loads(response.read().decode("utf-8"))
@@ -138,13 +189,23 @@ def multipart(fields: dict[str, str], file_path: Path) -> tuple[bytes, str]:
 
 def graph_photo_post(page_id: str, token: str, version: str, item: dict[str, Any]) -> str:
     path = image_file(item)
-    caption = f"{str(item['message']).strip()}\n\n{str(item['link']).strip()}"
-    body, content_type = multipart({"caption": caption, "published": "true", "access_token": token}, path)
+    metadata = photo_metadata(item)
+    caption_parts = [str(item["message"]).strip(), str(item["link"]).strip()]
+    credit = str(metadata.get("credit", "")).strip()
+    if credit:
+        caption_parts.append(f"Foto: {credit}")
+    fields = {
+        "caption": "\n\n".join(caption_parts),
+        "published": "true",
+        "access_token": token,
+        "alt_text_custom": str(metadata["alt_text"]).strip(),
+    }
+    body, content_type = multipart(fields, path)
     request = urllib.request.Request(
         f"https://graph.facebook.com/{version}/{page_id}/photos",
         data=body,
         method="POST",
-        headers={"Content-Type": content_type, "User-Agent": "ValceaClar-Facebook/2.0"},
+        headers={"Content-Type": content_type, "User-Agent": "ValceaClar-Facebook/3.0"},
     )
     try:
         with urllib.request.urlopen(request, timeout=60) as response:
@@ -164,7 +225,7 @@ def graph_delete(object_id: str, token: str, version: str) -> dict[str, Any]:
         f"https://graph.facebook.com/{version}/{urllib.parse.quote(object_id, safe='')}",
         data=body,
         method="DELETE",
-        headers={"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "ValceaClar-Facebook/2.0"},
+        headers={"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "ValceaClar-Facebook/3.0"},
     )
     try:
         with urllib.request.urlopen(request, timeout=30) as response:
@@ -196,18 +257,42 @@ def cleanup_replacements(state: dict[str, Any], token: str, version: str) -> Non
 
 
 def self_test() -> int:
+    PHOTO_ROOT.mkdir(parents=True, exist_ok=True)
+    test_path = PHOTO_ROOT / "_self_test.jpg"
+    test_path.write_bytes(b"\xff\xd8\xff\xe0" + b"V" * 256 + b"\xff\xd9")
     sample = {
-        "id": "a",
+        "id": "real-photo-test",
         "status": "ready",
         "message": "Test",
         "link": "https://valceaclar.ro/",
-        "image_path": "valcea-clar/social/generated/launch-valcea-clar.jpg",
+        "image_path": "valcea-clar/social/photos/approved/_self_test.jpg",
+        "image": {
+            "kind": "photograph",
+            "synthetic": False,
+            "subject_match": True,
+            "editor_approved": True,
+            "source_type": "staff",
+            "credit": "Vâlcea Clar",
+            "rights_basis": "owned",
+            "alt_text": "Fotografie de test Vâlcea Clar"
+        },
     }
-    validate_item(sample)
-    assert str(image_file(sample)).endswith("launch-valcea-clar.jpg")
-    assert eligible([sample], {})[0]["id"] == "a"
-    assert eligible([sample], {"a": {}}) == []
-    print("VÂLCEA CLAR Facebook distributor self-test: PASS")
+    try:
+        validate_item(sample)
+        assert image_file(sample) == test_path
+        assert eligible([sample], {})[0]["id"] == "real-photo-test"
+        bad = dict(sample)
+        bad["id"] = "synthetic-test"
+        bad["image"] = dict(sample["image"], synthetic=True)
+        try:
+            image_file(bad)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("synthetic image was not rejected")
+    finally:
+        test_path.unlink(missing_ok=True)
+    print("VÂLCEA CLAR real-photo-only distributor self-test: PASS")
     return 0
 
 
@@ -219,9 +304,9 @@ def main() -> int:
     if args.self_test:
         return self_test()
 
-    outbox = load_json(OUTBOX, {"schema_version": "2.0", "items": []})
+    outbox = load_json(OUTBOX, {"schema_version": "3.0", "items": []})
     items = outbox.get("items", [])
-    state = load_json(STATE, {"schema_version": "2.0", "published": {}})
+    state = load_json(STATE, {"schema_version": "3.0", "published": {}})
     published = state.setdefault("published", {})
     if not isinstance(items, list) or not isinstance(published, dict):
         raise ValueError("invalid Facebook outbox/state structure")
@@ -243,11 +328,15 @@ def main() -> int:
     results = []
     for item in plan:
         post_id = graph_photo_post(page_id, page_token, version, item)
+        metadata = photo_metadata(item)
         entry = {
             "facebook_post_id": post_id,
             "published_at": dt.datetime.now(dt.timezone.utc).isoformat(),
             "link": item["link"],
             "image_path": item["image_path"],
+            "image_credit": metadata["credit"],
+            "image_rights_basis": metadata["rights_basis"],
+            "image_source_url": metadata.get("source_url"),
             "replaces": list(item.get("replace_post_ids") or []),
             "replacement_cleanup": {},
         }
