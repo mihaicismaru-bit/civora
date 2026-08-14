@@ -1,13 +1,13 @@
 {
   "schema_version": "1.0",
-  "checkpoint": "P11-R06-VERIFICATION-PROVENANCE",
+  "checkpoint": "P11-R07-VERIFICATION-FRESHNESS",
   "status": "PASS",
   "accepted_at": "2026-08-14",
   "evidence": {
     "contract": "partener-eu/p11/opportunity_contract.py",
     "tests": "partener-eu/p11/test_opportunity_contract.py",
     "test_command": "python partener-eu/p11/apply_resolutions.py --check && python partener-eu/p11/build_public_projection.py --check && python -m unittest discover -s partener-eu/p11 -p 'test_*.py' && python partener-eu/ops/quality_gate.py",
-    "tests_passed": 44,
+    "tests_passed": 48,
     "tests_failed": 0
   },
   "policy_assertions": {
@@ -50,7 +50,12 @@
     "verification_provenance_is_deterministic": true,
     "verification_provenance_drift_is_rejected": true,
     "public_adapter_replaces_legacy_sources_with_verified_provenance": true,
-    "public_projection_schema": 3,
+    "verified_evidence_age_is_relative_to_projection_as_of": true,
+    "future_dated_verified_evidence_is_rejected": true,
+    "verification_freshness_summary_is_replay_checked": true,
+    "freshness_telemetry_cannot_authorize_publication": true,
+    "public_adapter_exposes_evidence_observation_date": true,
+    "public_projection_schema": 4,
     "quality_gate_trigger_scope": ["pull_request", "push_main", "workflow_dispatch"],
     "unified_quality_gate": "18/18 PASS"
   },

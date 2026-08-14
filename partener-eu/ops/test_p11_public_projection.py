@@ -21,6 +21,7 @@ def main() -> None:
     assert {"status", "deadline"} <= set(step["verifiedFactClasses"])
     assert step["verifiedEvidenceCount"] == len(step["verificationEvidence"])
     assert all(item["sourceUrl"].startswith("https://") for item in step["verificationEvidence"])
+    assert all(isinstance(item["ageSecondsAtProjection"], int) for item in step["verificationEvidence"])
     assert {
         fact_class
         for item in step["verificationEvidence"]
@@ -76,9 +77,12 @@ def main() -> None:
     assert step_edu["verifiedFactClasses"] == []
     assert step_edu["publicationDecision"]["decision"] == "BLOCK_MATERIAL_FACTS"
     assert "PUBLICATION_STATE_QUARANTINED" in step_edu["publicationDecision"]["reasonCodes"]
-    assert projection["schemaVersion"] == 3
+    assert projection["schemaVersion"] == 4
     assert projection["policy"]["decisionReasonsVisible"] is True
     assert projection["policy"]["verificationProvenanceVisible"] is True
+    assert projection["policy"]["freshnessReference"] == "PROJECTION_AS_OF"
+    assert projection["policy"]["freshnessTelemetryAuthorizesPublication"] is False
+    assert projection["summary"]["verificationFreshness"]["verifiedEvidenceLinkCount"] == 17
     adapter_path = json.dumps(str(ROOT / "web" / "p11-public-adapter.js"))
     adapter_result = subprocess.run(
         ["node", "-e", f"""
@@ -87,12 +91,12 @@ global.window={{
   PARTENER_P11:{{asOf:'2026-08-14T00:00:00Z',summary:{{}},opportunities:[{{
     id:'test-call',title:'Test',status:'OPEN',publicationState:'PUBLISHABLE',
     verifiedFactClasses:['status'],materialFacts:{{status:'OPEN'}},
-    verificationEvidence:[{{evidenceId:'EV-1',sourceTier:'T1',sourceUrl:'https://official.test/call',observedAt:'2026-08-14T00:00:00Z',supportedFactClasses:['status']}}]
+    verificationEvidence:[{{evidenceId:'EV-1',sourceTier:'T1',sourceUrl:'https://official.test/call',observedAt:'2026-08-14T00:00:00Z',ageSecondsAtProjection:0,supportedFactClasses:['status']}}]
   }}]}}
 }};
 require({adapter_path});
 const call=window.PARTENER_DATA.calls[0];
-if(call.sourceFacts.length!==1||call.sourceFacts[0].url!=='https://official.test/call'||call.sourceFacts[0].tier!=='T1')process.exit(2);
+if(call.sourceFacts.length!==1||call.sourceFacts[0].url!=='https://official.test/call'||call.sourceFacts[0].tier!=='T1'||call.sourceFacts[0].ageSecondsAtProjection!==0||!call.sourceFacts[0].label.includes('2026-08-14'))process.exit(2);
 """],
         text=True,
         capture_output=True,

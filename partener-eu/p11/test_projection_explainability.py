@@ -58,8 +58,10 @@ class ProjectionExplainabilityTests(unittest.TestCase):
             "sourceTier": "T1",
             "sourceUrl": "https://example.test/call",
             "observedAt": "2026-08-14T00:00:00Z",
+            "ageSecondsAtProjection": 0,
             "supportedFactClasses": ["status"],
         }])
+        self.assertEqual(row["verificationEvidence"][0]["ageSecondsAtProjection"], 0)
 
     def test_active_resolution_task_blocks_even_publishable_state(self):
         task = {
@@ -185,6 +187,38 @@ class ProjectionExplainabilityTests(unittest.TestCase):
         result = self.build_projection()
         result["opportunities"][0]["verificationEvidence"][0]["sourceTier"] = "T2"
         with self.assertRaisesRegex(ValueError, "verification evidence must be T1 or T1B"):
+            projection.assert_projection_integrity(result)
+
+    def test_verification_freshness_is_derived_from_projection_time(self):
+        evidence = copy.deepcopy(self.evidence)
+        evidence["observed_at"] = "2026-08-13T22:00:00Z"
+        result = self.build_projection(evidence=evidence)
+        self.assertEqual(result["opportunities"][0]["verificationEvidence"][0]["ageSecondsAtProjection"], 7200)
+        self.assertEqual(result["summary"]["verificationFreshness"], {
+            "referenceTime": "2026-08-14T00:00:00Z",
+            "verifiedEvidenceLinkCount": 1,
+            "oldestObservedAt": "2026-08-13T22:00:00Z",
+            "newestObservedAt": "2026-08-13T22:00:00Z",
+            "maximumAgeSeconds": 7200,
+            "minimumAgeSeconds": 7200,
+        })
+
+    def test_future_verified_evidence_is_rejected(self):
+        evidence = copy.deepcopy(self.evidence)
+        evidence["observed_at"] = "2026-08-14T00:00:01Z"
+        with self.assertRaisesRegex(ValueError, "cannot be observed after projection asOf"):
+            self.build_projection(evidence=evidence)
+
+    def test_integrity_gate_rejects_evidence_age_drift(self):
+        result = self.build_projection()
+        result["opportunities"][0]["verificationEvidence"][0]["ageSecondsAtProjection"] = 1
+        with self.assertRaisesRegex(ValueError, "verification evidence age does not match timestamps"):
+            projection.assert_projection_integrity(result)
+
+    def test_integrity_gate_rejects_freshness_summary_drift(self):
+        result = self.build_projection()
+        result["summary"]["verificationFreshness"]["maximumAgeSeconds"] = 1
+        with self.assertRaisesRegex(ValueError, "summary.verificationFreshness"):
             projection.assert_projection_integrity(result)
 
 
