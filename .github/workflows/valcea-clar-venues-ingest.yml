@@ -1,0 +1,77 @@
+name: VÂLCEA CLAR — UNDE IEȘIM ingest
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "valcea-clar/**"
+      - ".github/workflows/valcea-clar-venues-ingest.yml"
+  schedule:
+    - cron: "23 */6 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-unde-iesim-ingest
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Probe sources and rebuild canonical state
+        run: python valcea-clar/ingest/venue_ingest.py --timeout 12
+
+      - name: Upsert WordPress editorial drafts
+        env:
+          VALCEA_WP_BASE: ${{ secrets.VALCEA_WP_BASE }}
+          VALCEA_WP_USER: ${{ secrets.VALCEA_WP_USER }}
+          VALCEA_WP_APP_PASSWORD: ${{ secrets.VALCEA_WP_APP_PASSWORD }}
+        run: python valcea-clar/ingest/wordpress_draft_publish.py --apply
+
+      - name: Validate outputs
+        run: python valcea-clar/validation/validate.py
+
+      - name: Write job summary
+        if: always()
+        run: |
+          python - <<'PY'
+          import json, pathlib, os
+          state=json.load(open('valcea-clar/ingest/state/venues.json',encoding='utf-8'))
+          report=json.load(open('valcea-clar/validation/latest_report.json',encoding='utf-8'))
+          p=pathlib.Path(os.environ['GITHUB_STEP_SUMMARY'])
+          p.write_text(
+              '# VÂLCEA CLAR — UNDE IEȘIM\n\n'
+              f"- Ingest status: `{state['status']}`\n"
+              f"- Localuri: **{state['summary']['venues']}**\n"
+              f"- Creatori candidați: **{state['summary']['creatorCandidates']}**\n"
+              f"- Validare: **{report['status']}**\n",
+              encoding='utf-8'
+          )
+          PY
+
+      - name: Persist ingestion state
+        if: always() && github.event_name != 'pull_request'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            valcea-clar/ingest/state/venues.json \
+            valcea-clar/ingest/state/source_health.json \
+            valcea-clar/web/unde-iesim.json \
+            valcea-clar/validation/latest_report.json
+          git commit -m "Refresh Vâlcea Clar venue ingestion state" || exit 0
+          if ! git push; then
+            git fetch origin "${GITHUB_REF_NAME}"
+            git rebase "origin/${GITHUB_REF_NAME}"
+            git push
+          fi
