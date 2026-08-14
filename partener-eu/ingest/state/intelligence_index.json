@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-08-14T23:03:36Z",
+  "generatedAt": "2026-08-14T23:03:41Z",
   "readiness": "DEGRADED_FAIL_CLOSED",
   "policy": {
     "purpose": "unified-search-and-evidence-index",
@@ -110,14 +110,14 @@
         "REGISTERED_SOURCE_DEPENDENCIES"
       ],
       "status": "DEGRADED",
-      "observedAt": "2026-08-14T21:43:42.267783Z",
+      "observedAt": "2026-08-14T23:01:52.790229Z",
       "freshness": {
         "status": "CURRENT",
-        "ageHours": 1.33,
+        "ageHours": 0.03,
         "maxAgeHours": 6
       },
       "itemCount": 18,
-      "resolutionTasksRequired": 0,
+      "resolutionTasksRequired": 6,
       "failClosed": true
     }
   ],
@@ -2163,115 +2163,115 @@
         {
           "sourceId": "SRC-ADRCENTRU-FUNDING-CATALOG",
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-ADRCENTRU-PTJ-CONSULT",
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-ADRVEST-PTJ-ACTIVE",
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-MAI-FED-CALENDAR-INDEX",
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-MAI-FED-CALLS",
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-MAI-FED-GENERAL-GUIDE",
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-MYSMIS-CALLS",
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OI-RESEARCH-HEALTH",
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OI-RESEARCH-POCIDIF",
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OIRBI-PEO",
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OIRBI-PIDS",
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OIRCENTRU-PEO",
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OIRNE-PEO",
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OIRVEST-PEO",
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OIRVEST-PEO-GUIDES",
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OIRVEST-PEO-MANUALS",
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OLD-FONDURI-UE",
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-PREFECTURA-TM-FUNDING",
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         {
           "sourceId": "VERIFIED_SOURCE_REGISTRY",
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         }
       ]
@@ -2312,13 +2312,11 @@
         },
         {
           "family": "MYSMIS",
-          "status": "PRESENT_AVAILABLE",
+          "status": "PRESENT_DEGRADED",
           "sourceIds": [
             "SRC-MYSMIS-CALLS"
           ],
-          "availableSourceIds": [
-            "SRC-MYSMIS-CALLS"
-          ]
+          "availableSourceIds": []
         },
         {
           "family": "AFIR",
@@ -2350,7 +2348,6 @@
           "availableSourceIds": [
             "SRC-ADRCENTRU-FUNDING-CATALOG",
             "SRC-ADRCENTRU-PTJ-CONSULT",
-            "SRC-ADRVEST-PTJ-ACTIVE",
             "SRC-OIRBI-PEO",
             "SRC-OIRBI-PIDS",
             "SRC-OIRCENTRU-PEO",
@@ -2517,10 +2514,10 @@
         "owner": "ADR Centru",
         "canonicalUrl": "https://adrcentru.ro/csf/catalogul-surselor-de-finantare-iulie-2026",
         "status": "PASS",
-        "observedAt": "2026-08-14T21:43:42.267783Z",
+        "observedAt": "2026-08-14T23:01:52.790229Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -2555,15 +2552,15 @@
         "owner": "ADR Centru / OI Programul Tranzitie Justa",
         "canonicalUrl": "https://adrcentru.ro/category/ptj-centru/ptj-implementare/ptj-ghiduri-consultare",
         "status": "PASS",
-        "observedAt": "2026-08-14T21:43:42.267783Z",
+        "observedAt": "2026-08-14T23:01:52.790229Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
         "planningOnly": false,
-        "resolutionTaskRequired": false,
+        "resolutionTaskRequired": true,
         "lastKnownGoodPreserved": true,
         "contract": {
           "status": "PASS",
@@ -2592,11 +2589,11 @@
         "sourceClass": "official_intermediate_body_active_guides",
         "owner": "ADR Vest / OI Programul Tranzitie Justa",
         "canonicalUrl": "https://adrvest.ro/programul-tranzitie-justa-ghiduri-de-finantare-active",
-        "status": "PASS",
-        "observedAt": "2026-08-14T21:43:42.267783Z",
+        "status": "DEGRADED",
+        "observedAt": "2026-08-14T23:01:52.790229Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -2633,10 +2630,10 @@
         "owner": "Ministerul Afacerilor Interne / Autoritatea de Management Afaceri Interne",
         "canonicalUrl": "https://fed.mai.gov.ro/despre/lansare-apeluri",
         "status": "PASS",
-        "observedAt": "2026-08-14T21:43:42.267783Z",
+        "observedAt": "2026-08-14T23:01:52.790229Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -2670,10 +2667,10 @@
         "owner": "Ministerul Afacerilor Interne / Autoritatea de Management Afaceri Interne",
         "canonicalUrl": "https://fed.mai.gov.ro/in/apeluri",
         "status": "PASS",
-        "observedAt": "2026-08-14T21:43:42.267783Z",
+        "observedAt": "2026-08-14T23:01:52.790229Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -2707,10 +2704,10 @@
         "owner": "Ministerul Afacerilor Interne / Autoritatea de Management Afaceri Interne",
         "canonicalUrl": "https://fed.mai.gov.ro/fed-2021-2027/ghidul-general",
         "status": "PASS",
-        "observedAt": "2026-08-14T21:43:42.267783Z",
+        "observedAt": "2026-08-14T23:01:52.790229Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -2741,11 +2738,11 @@
         "sourceClass": "authoritative_call_registry",
         "owner": "MySMIS2021 / MIPE ecosystem",
         "canonicalUrl": "https://resurse.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027",
-        "status": "PASS",
-        "observedAt": "2026-08-14T21:43:42.267783Z",
+        "status": "DEGRADED",
+        "observedAt": "2026-08-14T23:01:52.790229Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -2778,10 +2775,10 @@
         "owner": "Organism Intermediar pentru Cercetare / Autoritatea Nationala pentru Cercetare",
         "canonicalUrl": "https://poc.research.gov.ro/ro/articol/4427/2021-2027-pos-2021-2027",
         "status": "FAIL",
-        "observedAt": "2026-08-14T21:43:42.267783Z",
+        "observedAt": "2026-08-14T23:01:52.790229Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -2814,10 +2811,10 @@
         "owner": "Organism Intermediar pentru Cercetare / Autoritatea Nationala pentru Cercetare",
         "canonicalUrl": "https://poc.research.gov.ro/ro/articol/4382/2021-2027-pocidif-2021-2027",
         "status": "FAIL",
-        "observedAt": "2026-08-14T21:43:42.267783Z",
+        "observedAt": "2026-08-14T23:01:52.790229Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -2850,10 +2847,10 @@
         "owner": "OIR PECU Bucuresti-Ilfov",
         "canonicalUrl": "https://oirbi.ro/peo-2021-2027",
         "status": "PASS",
-        "observedAt": "2026-08-14T21:43:42.267783Z",
+        "observedAt": "2026-08-14T23:01:52.790229Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -2886,10 +2883,10 @@
         "owner": "OIR PECU Bucuresti-Ilfov",
         "canonicalUrl": "https://oirbi.ro/pids-2021-2027",
         "status": "PASS",
-        "observedAt": "2026-08-14T21:43:42.267783Z",
+        "observedAt": "2026-08-14T23:01:52.790229Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -2922,15 +2919,15 @@
         "owner": "OIR PECU Regiunea Centru",
         "canonicalUrl": "https://oircentru.ro/peo-2021-2027",
         "status": "PASS",
-        "observedAt": "2026-08-14T21:43:42.267783Z",
+        "observedAt": "2026-08-14T23:01:52.790229Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
         "planningOnly": false,
-        "resolutionTaskRequired": false,
+        "resolutionTaskRequired": true,
         "lastKnownGoodPreserved": true,
         "contract": {
           "status": "PASS",
@@ -2961,15 +2958,15 @@
         "owner": "OIR PECU Regiunea Nord-Est",
         "canonicalUrl": "https://fsenordest.ro/contact_program.html",
         "status": "PASS",
-        "observedAt": "2026-08-14T21:43:42.267783Z",
+        "observedAt": "2026-08-14T23:01:52.790229Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
         "planningOnly": false,
-        "resolutionTaskRequired": false,
+        "resolutionTaskRequired": true,
         "lastKnownGoodPreserved": true,
         "contract": {
           "status": "PASS",
@@ -2997,15 +2994,15 @@
         "owner": "OIR PECU Regiunea Vest",
         "canonicalUrl": "https://oirvest.ro/peo-2021-2027",
         "status": "PASS",
-        "observedAt": "2026-08-14T21:43:42.267783Z",
+        "observedAt": "2026-08-14T23:01:52.790229Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
         "planningOnly": false,
-        "resolutionTaskRequired": false,
+        "resolutionTaskRequired": true,
         "lastKnownGoodPreserved": true,
         "contract": {
           "status": "PASS",
@@ -3033,15 +3030,15 @@
         "owner": "OIR PECU Regiunea Vest",
         "canonicalUrl": "https://oirvest.ro/ghiduri-peo",
         "status": "PASS",
-        "observedAt": "2026-08-14T21:43:42.267783Z",
+        "observedAt": "2026-08-14T23:01:52.790229Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
         "planningOnly": false,
-        "resolutionTaskRequired": false,
+        "resolutionTaskRequired": true,
         "lastKnownGoodPreserved": true,
         "contract": {
           "status": "PASS",
@@ -3072,15 +3069,15 @@
         "owner": "OIR PECU Regiunea Vest",
         "canonicalUrl": "https://oirvest.ro/manualul-beneficiarului-instructiuni-peo",
         "status": "PASS",
-        "observedAt": "2026-08-14T21:43:42.267783Z",
+        "observedAt": "2026-08-14T23:01:52.790229Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
         "planningOnly": false,
-        "resolutionTaskRequired": false,
+        "resolutionTaskRequired": true,
         "lastKnownGoodPreserved": true,
         "contract": {
           "status": "PASS",
@@ -3105,10 +3102,10 @@
         "owner": "Fonduri UE legacy reporting",
         "canonicalUrl": "https://b.fonduri-ue.ro/ords/f?p=110:10",
         "status": "FAIL",
-        "observedAt": "2026-08-14T21:43:42.267783Z",
+        "observedAt": "2026-08-14T23:01:52.790229Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -3138,10 +3135,10 @@
         "owner": "Institutia Prefectului Timis",
         "canonicalUrl": "https://tm.prefectura.mai.gov.ro/informatii-de-interes-public/apeluri-de-finantare-deschise-si-viitoare",
         "status": "PASS",
-        "observedAt": "2026-08-14T21:43:42.267783Z",
+        "observedAt": "2026-08-14T23:01:52.790229Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -3167,14 +3164,14 @@
           "REGISTERED_SOURCE_DEPENDENCIES"
         ],
         "status": "DEGRADED",
-        "observedAt": "2026-08-14T21:43:42.267783Z",
+        "observedAt": "2026-08-14T23:01:52.790229Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.33,
+          "ageHours": 0.03,
           "maxAgeHours": 6
         },
         "itemCount": 18,
-        "resolutionTasksRequired": 0,
+        "resolutionTasksRequired": 6,
         "failClosed": true,
         "kind": "CORPUS",
         "contract": {
@@ -3188,7 +3185,7 @@
         "materialFactUse": false,
         "planningOnly": false,
         "lastKnownGoodPreserved": true,
-        "resolutionTaskRequired": false
+        "resolutionTaskRequired": true
       }
     ],
     "dependencyIsolation": {
@@ -3196,8 +3193,16 @@
       "globalStop": false,
       "blockedSourceIds": [
         "MIPE_CORPUS",
+        "SRC-ADRCENTRU-PTJ-CONSULT",
+        "SRC-ADRVEST-PTJ-ACTIVE",
+        "SRC-MYSMIS-CALLS",
         "SRC-OI-RESEARCH-HEALTH",
         "SRC-OI-RESEARCH-POCIDIF",
+        "SRC-OIRCENTRU-PEO",
+        "SRC-OIRNE-PEO",
+        "SRC-OIRVEST-PEO",
+        "SRC-OIRVEST-PEO-GUIDES",
+        "SRC-OIRVEST-PEO-MANUALS",
         "SRC-OLD-FONDURI-UE",
         "VERIFIED_SOURCE_REGISTRY"
       ],
@@ -3256,25 +3261,29 @@
         {
           "sourceId": "SRC-ADRCENTRU-PTJ-CONSULT",
           "availability": "AVAILABLE",
-          "materialFactGate": "RECONCILIATION_REQUIRED",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
           "affectedScopes": [
             "PTJ",
             "PDDTJ"
           ],
-          "blockingReasons": [],
+          "blockingReasons": [
+            "UNRESOLVED_SEMANTIC_CHANGE"
+          ],
           "lastKnownGoodPreserved": true,
           "blocksUnrelatedSources": false,
           "publishMaterialFacts": false
         },
         {
           "sourceId": "SRC-ADRVEST-PTJ-ACTIVE",
-          "availability": "AVAILABLE",
-          "materialFactGate": "RECONCILIATION_REQUIRED",
+          "availability": "DEGRADED_LAST_KNOWN_GOOD",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
           "affectedScopes": [
             "PTJ",
             "PDDTJ"
           ],
-          "blockingReasons": [],
+          "blockingReasons": [
+            "DEGRADED_LAST_KNOWN_GOOD"
+          ],
           "lastKnownGoodPreserved": true,
           "blocksUnrelatedSources": false,
           "publishMaterialFacts": false
@@ -3323,12 +3332,14 @@
         },
         {
           "sourceId": "SRC-MYSMIS-CALLS",
-          "availability": "AVAILABLE",
-          "materialFactGate": "RECONCILIATION_REQUIRED",
+          "availability": "DEGRADED_LAST_KNOWN_GOOD",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
           "affectedScopes": [
             "2021-2027"
           ],
-          "blockingReasons": [],
+          "blockingReasons": [
+            "DEGRADED_LAST_KNOWN_GOOD"
+          ],
           "lastKnownGoodPreserved": true,
           "blocksUnrelatedSources": false,
           "publishMaterialFacts": false
@@ -3388,11 +3399,13 @@
         {
           "sourceId": "SRC-OIRCENTRU-PEO",
           "availability": "AVAILABLE",
-          "materialFactGate": "RECONCILIATION_REQUIRED",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
           "affectedScopes": [
             "PEO"
           ],
-          "blockingReasons": [],
+          "blockingReasons": [
+            "UNRESOLVED_SEMANTIC_CHANGE"
+          ],
           "lastKnownGoodPreserved": true,
           "blocksUnrelatedSources": false,
           "publishMaterialFacts": false
@@ -3400,12 +3413,14 @@
         {
           "sourceId": "SRC-OIRNE-PEO",
           "availability": "AVAILABLE",
-          "materialFactGate": "RECONCILIATION_REQUIRED",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
           "affectedScopes": [
             "PEO",
             "PoIDS"
           ],
-          "blockingReasons": [],
+          "blockingReasons": [
+            "UNRESOLVED_SEMANTIC_CHANGE"
+          ],
           "lastKnownGoodPreserved": true,
           "blocksUnrelatedSources": false,
           "publishMaterialFacts": false
@@ -3413,11 +3428,13 @@
         {
           "sourceId": "SRC-OIRVEST-PEO",
           "availability": "AVAILABLE",
-          "materialFactGate": "RECONCILIATION_REQUIRED",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
           "affectedScopes": [
             "PEO"
           ],
-          "blockingReasons": [],
+          "blockingReasons": [
+            "UNRESOLVED_SEMANTIC_CHANGE"
+          ],
           "lastKnownGoodPreserved": true,
           "blocksUnrelatedSources": false,
           "publishMaterialFacts": false
@@ -3425,11 +3442,13 @@
         {
           "sourceId": "SRC-OIRVEST-PEO-GUIDES",
           "availability": "AVAILABLE",
-          "materialFactGate": "RECONCILIATION_REQUIRED",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
           "affectedScopes": [
             "PEO"
           ],
-          "blockingReasons": [],
+          "blockingReasons": [
+            "UNRESOLVED_SEMANTIC_CHANGE"
+          ],
           "lastKnownGoodPreserved": true,
           "blocksUnrelatedSources": false,
           "publishMaterialFacts": false
@@ -3437,12 +3456,14 @@
         {
           "sourceId": "SRC-OIRVEST-PEO-MANUALS",
           "availability": "AVAILABLE",
-          "materialFactGate": "RECONCILIATION_REQUIRED",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
           "affectedScopes": [
             "PEO",
             "PoIDS"
           ],
-          "blockingReasons": [],
+          "blockingReasons": [
+            "UNRESOLVED_SEMANTIC_CHANGE"
+          ],
           "lastKnownGoodPreserved": true,
           "blocksUnrelatedSources": false,
           "publishMaterialFacts": false
@@ -3481,7 +3502,8 @@
             "REGISTERED_SOURCE_DEPENDENCIES"
           ],
           "blockingReasons": [
-            "DEGRADED_LAST_KNOWN_GOOD"
+            "DEGRADED_LAST_KNOWN_GOOD",
+            "UNRESOLVED_SEMANTIC_CHANGE"
           ],
           "lastKnownGoodPreserved": true,
           "blocksUnrelatedSources": false,
@@ -3492,11 +3514,11 @@
     "replay": {
       "status": "PASS",
       "algorithm": "sha256-canonical-json",
-      "referenceTime": "2026-08-14T23:03:36Z",
-      "inputDigest": "f567886ea2c59508cd0aa9d9076d97360acadb9566a5d23b7e3367cbe29de2ab",
-      "outputDigest": "b8142d768884ab0c5d6cf9a065256d8275c7233e030bc01639e640216d766c3a",
-      "firstPassDigest": "2fab004332218141d6f058212055592674c01082919cbbbae1774565edf0a0e2",
-      "secondPassDigest": "2fab004332218141d6f058212055592674c01082919cbbbae1774565edf0a0e2",
+      "referenceTime": "2026-08-14T23:03:41Z",
+      "inputDigest": "7366002da25a3fcf75351d612e664039ce9bbd75e903ec5e4d85b76614b6edd3",
+      "outputDigest": "5cc55cc77d77707a385e67bb2893c8bf5ef872d1d83df1ada1e4d08bfc38d151",
+      "firstPassDigest": "b13ffc887562677dbe42c8887298a17ae98593a55deaa4b41f3a286f492de680",
+      "secondPassDigest": "b13ffc887562677dbe42c8887298a17ae98593a55deaa4b41f3a286f492de680",
       "byteEquivalent": true
     }
   },
@@ -3516,9 +3538,10 @@
     },
     "staleOrUnknownSources": [],
     "unavailableT1Sources": [
-      "MIPE_CORPUS"
+      "MIPE_CORPUS",
+      "SRC-MYSMIS-CALLS"
     ],
-    "resolutionTasksRequired": 0,
+    "resolutionTasksRequired": 6,
     "materialFactsAutopromoted": 0
   },
   "contract": {
