@@ -4,6 +4,18 @@
 
 Radarul editorial trebuie să aibă acoperire largă. O sursă de semnal nu este automat o sursă suficientă pentru publicare. Semnalul intră în coada de verificare, iar faptele publicabile sunt confirmate separat, preferabil din surse primare/oficiale și prin documente.
 
+## Principiul de autoadaptare
+
+**Întregul sistem de surse, crawl, scoring, rutare și discovery este autoadaptabil.** Nu există o listă statică de surse, frecvențe sau ponderi care să rămână neschimbată dacă datele reale arată altceva.
+
+Autoadaptarea funcționează pe cinci niveluri:
+
+1. **Source discovery** — sistemul descoperă automat surse noi din sitemap-uri, RSS, linkuri canonice, documente, entități, social media, ONRC, SICAP, portal.just.ro, pagini oficiale, presă și grafurile de relații dintre entități.
+2. **Source scoring** — scorurile se ajustează în funcție de confirmări, infirmări, viteză, exclusivități, duplicate, corecții, zgomot și valoarea editorială reală produsă.
+3. **Crawl scheduling** — frecvența de crawl se recalibrează dinamic după volatilitatea sursei, prioritate, oră, zi, sezonalitate, evenimente și rata istorică de schimbare.
+4. **Editorial routing** — relevanța pe secțiuni se modifică în timp. O sursă poate deveni importantă pentru `INVESTIGAȚII`, `UNDE_IEȘIM` sau `BREAKING` fără intervenție manuală dacă începe să producă semnale validate în acea zonă.
+5. **Entity graph expansion** — fiecare entitate nouă poate genera automat căutări pentru surse, persoane, firme, contracte, dosare, localuri, evenimente și relații documentabile.
+
 ## Clase obligatorii de surse de semnale
 
 ### 1. Presa locală — acoperire exhaustivă
@@ -67,61 +79,33 @@ VÂLCEA CLAR menține un index backend de entități locale și persoane cu acti
 
 #### Profesii reglementate
 
-Se indexează:
-- avocați și societăți de avocatură;
-- notari și birouri notariale;
-- executori, practicieni în insolvență, mediatori și alte profesii juridice relevante, când informația este publică și utilă editorial.
+Se indexează avocați și societăți de avocatură, notari și birouri notariale, executori, practicieni în insolvență, mediatori și alte profesii juridice relevante, când informația este publică și utilă editorial.
 
 Surse prioritare: registrele profesionale oficiale, site-urile barourilor/camerelor/uniunilor profesionale, site-urile cabinetelor și portal.just.ro pentru cauze publice relevante.
 
-Nu se publică date private de contact, adrese personale sau informații fără legătură cu activitatea profesională.
-
 #### Fitness, wellness și servicii personale
 
-Se indexează:
-- săli de fitness, studiouri și cluburi sportive;
-- antrenori personali (PT), instructori și coachi cu activitate publică;
-- frizerii/barbershop-uri și frizeri cu activitate profesională publică;
-- saloane de manichiură/pedichiură și tehnicieni cu activitate profesională publică;
-- servicii beauty/wellness conexe.
-
-Câmpuri: locație, program, servicii, prețuri publice datate, conturi oficiale, recenzii ca semnal, operator juridic când este relevant, acreditări/calificări numai dacă pot fi verificate.
-
-Aceste entități alimentează în principal `UNDE_IEȘIM`, `LIFESTYLE`, `ECONOMIE` și ghidurile locale.
+Se indexează săli de fitness, studiouri și cluburi sportive, antrenori personali, instructori și coachi cu activitate publică, frizerii/barbershop-uri și frizeri, saloane de manichiură/pedichiură și tehnicieni, plus servicii beauty/wellness conexe.
 
 #### Săli de evenimente și hospitality
 
 Se indexează săli de evenimente, ballroom-uri, restaurante pentru evenimente, hoteluri cu spații de conferințe/nunți, centre de conferințe și locații private/publice pentru evenimente.
 
-Câmpuri: capacitate declarată, tipuri de evenimente, operator, facilități, parcare, catering, prețuri/pachete publice, calendare publice și conturi sociale oficiale.
-
 #### Cluburi de business și rețele profesionale
 
 Se indexează camere de comerț, cluburi de business, asociații patronale, networking groups, organizații profesionale și alte rețele economice active în Vâlcea.
-
-Se urmăresc: conducerea publică, membri declarați public, evenimente, sponsori, parteneriate, poziții publice și legături documentate cu proiecte sau achiziții. Apartenența unei persoane se publică numai dacă este declarată oficial/public sau documentată în surse credibile.
 
 #### Personalități politice cu origine sau legături relevante cu Vâlcea
 
 Se menține un registru backend pentru persoane care ocupă sau au ocupat funcții publice naționale și au o legătură documentată cu Vâlcea: origine, domiciliu public relevant, studii, carieră profesională/politică sau circumscripție.
 
-Prioritate: membri ai Guvernului, secretari de stat, parlamentari, conducători de agenții/companii publice și alte funcții naționale cu impact local.
-
-Se monitorizează declarații, decizii, numiri, proiecte și resurse care pot afecta județul. Originea sau legătura cu Vâlcea se publică numai când poate fi documentată; nu se transformă automat într-o relație de influență.
-
 #### Artiști și personalități culturale cu origine sau legături cu Vâlcea
 
 Se indexează artiști, muzicieni, actori, scriitori, regizori, creatori, sportivi și alte personalități culturale cu origine sau legături documentate cu județul.
 
-Semnale: lansări, concerte, expoziții, premii, apariții locale, proiecte, colaborări, festivaluri și declarații despre Vâlcea. Se separă clar `ORIGIN`, `BORN_IN`, `RAISED_IN`, `LIVES_IN`, `WORKS_IN`, `FAMILY_LINK`, `EVENT_LINK` și `HISTORICAL_LINK` pentru a evita formulările vagi.
-
 #### Masonerie și organizații cu apartenență sensibilă
 
-Masoneria și alte organizații de acest tip pot fi indexate numai ca **entități publice/documentabile**: obediențe, loji sau organizații care au site oficial, personalitate juridică, comunicate, evenimente publice sau apar în documente publice.
-
-**Nu se construiesc liste speculative de membri.** Apartenența individuală este considerată informație sensibilă editorial și se publică numai când persoana a declarat-o public ori există documente/surse publice robuste care o confirmă și există interes public legitim. Nu se deduce apartenența din fotografii, relații sociale, participarea la un eveniment, simboluri ambigue, prietenii sau zvonuri.
-
-Orice material care leagă o apartenență masonică de o decizie publică, afacere, licitație sau influență necesită dovezi separate pentru **apartenență**, **relația concretă** și **relevanța publică**. Vinovăția prin asociere este interzisă.
+Masoneria și alte organizații de acest tip pot fi indexate numai ca entități publice/documentabile. Nu se construiesc liste speculative de membri, iar apartenența individuală se publică numai când este declarată public sau confirmată robust și există interes public legitim.
 
 ## Niveluri de încredere
 
@@ -134,81 +118,98 @@ Orice clasă poate produce un `SIGNAL`; numai dovezile suficiente pot produce un
 
 ## Scorarea obligatorie a surselor
 
-**Fiecare sursă din registru primește note explicite. Nicio sursă nu rămâne neclasificată.** Scorurile se păstrează împreună cu data ultimei evaluări și pot fi recalibrate în timp pe baza comportamentului real al sursei.
+Fiecare sursă primește note 0–100 pentru `importance_score`, `relevance_score`, `authority_score`, `reliability_score`, `freshness_score`, `exclusivity_score` și `signal_value_score`.
 
-### Scoruri de bază — 0–100
+Nota agregată implicită este:
 
-Fiecare sursă primește separat:
+`0.22 × importance + 0.20 × relevance + 0.18 × authority + 0.15 × reliability + 0.10 × freshness + 0.08 × signal_value + 0.07 × exclusivity`
 
-- `importance_score` — cât de importantă este sursa pentru ecosistemul informațional Vâlcea;
-- `relevance_score` — cât de relevantă este pentru aria geografică și editorială VÂLCEA CLAR;
-- `authority_score` — autoritatea/proximitatea față de faptul raportat;
-- `reliability_score` — istoricul de acuratețe, corecții și stabilitate;
-- `freshness_score` — cât de actuală și frecvent actualizată este;
-- `exclusivity_score` — probabilitatea de a genera informații originale sau timpurii;
-- `signal_value_score` — valoarea sursei pentru discovery chiar dacă nu este suficientă singură pentru publicare.
+Gradele editoriale sunt: `A+` 90–100, `A` 80–89, `B` 65–79, `C` 50–64, `D` 30–49, `E` 0–29.
 
-### Nota agregată
+## Relevanță pe verticală
 
-`source_priority_score` se calculează pe 0–100, implicit:
+O sursă primește scoruri distincte 0–100 pentru `breaking`, `administratie`, `politica`, `economie`, `cultura`, `evenimente`, `unde_iesim`, `lifestyle`, `investigatii`, `justitie`, `sport`, `judet` și `oras`.
 
-`0.25 × importance + 0.20 × relevance + 0.20 × authority + 0.15 × reliability + 0.10 × freshness + 0.05 × exclusivity + 0.05 × signal_value`
+## Scor de entitate și scor de eveniment
 
-Ponderile pot fi ajustate pe verticală. Pentru `INVESTIGAȚII` și `JUSTIȚIE`, `authority` și `reliability` cântăresc mai mult; pentru `BREAKING` și `EVENIMENTE`, `freshness` și `signal_value` pot primi pondere mai mare.
+Importanța sursei nu este confundată cu importanța subiectului. Fiecare entitate și fiecare semnal primesc scoruri proprii pentru impact, interes public, caracter local, noutate, exclusivitate, risc și necesitatea verificării.
 
-### Grade editoriale
+## Motorul adaptiv de crawl
 
-Pe baza notei agregate:
+Fiecare sursă și fiecare rută internă au un profil dinamic:
 
-- `A+` = 90–100 — sursă strategică esențială;
-- `A` = 80–89 — sursă majoră;
-- `B` = 65–79 — sursă relevantă și utilă;
-- `C` = 50–64 — sursă secundară / de completare;
-- `D` = 30–49 — predominant discovery, necesită verificare puternică;
-- `E` = 0–29 — semnal slab, zgomotos sau rar util.
+- `change_frequency` — frecvența observată a schimbărilor reale;
+- `signal_yield` — semnale utile / 100 fetch-uri;
+- `confirmed_signal_rate` — proporția semnalelor ulterior confirmate;
+- `duplicate_rate` — cât conținut duplicat produce;
+- `noise_rate` — cât conținut irelevant produce;
+- `latency_score` — cât de repede publică informația față de alte surse;
+- `failure_rate` — indisponibilitate, erori, blocaje;
+- `cost_score` — costul de fetch/render/parsing;
+- `section_yield` — randament separat pe fiecare secțiune editorială.
 
-Gradul nu înlocuiește nivelul `T1/T1B/T2/T3`. O sursă oficială poate avea `T1` dar importanță mică pentru Vâlcea; un ziar local foarte rapid poate avea importanță mare ca radar, dar rămâne `T2` pentru afirmații care necesită confirmare.
+Schedulerul calculează dinamic `next_fetch_at`. Intervalele nu sunt fixe: se scurtează când sursa devine volatilă, produce semnale confirmate sau apare un eveniment relevant și se lungesc când sursa stagnează sau produce zgomot.
 
-### Relevanță pe verticală
+Exemple:
+- un site ISU care începe să publice intervenții la intervale scurte trece temporar de la 30 minute la 5–10 minute;
+- un restaurant fără modificări timp de 60 zile poate trece de la 6 ore la 24–72 ore;
+- o pagină de proiect monitorizată într-o investigație activă poate fi accelerată automat la detectarea unui act adițional sau a unei schimbări de document;
+- portal.just.ro poate accelera temporar în zilele cu termene asociate dosarelor urmărite.
 
-O sursă primește și scoruri distincte pe secțiuni, 0–100: `breaking`, `administratie`, `politica`, `economie`, `cultura`, `evenimente`, `unde_iesim`, `lifestyle`, `investigatii`, `justitie`, `sport`, `judet` și `oras`.
+## Auto-discovery și promovarea surselor
 
-Exemplu: un restaurant poate avea `relevance.unde_iesim=100`, `relevance.economie=45`, `relevance.investigatii=15`; `portal.just.ro` poate avea `relevance.justitie=100`, `relevance.investigatii=95`, `relevance.unde_iesim=20`.
+Sursele noi pornesc cu statut `DISCOVERED_UNRATED`. După primele observații primesc un scor provizoriu și pot evolua prin stările:
 
-### Scor de entitate și scor de eveniment
+`DISCOVERED_UNRATED → PROBATION → ACTIVE → STRATEGIC`
 
-Importanța sursei nu este confundată cu importanța subiectului. Fiecare semnal primește separat:
+sau, dacă sunt slabe:
 
-- `entity_importance_score` — importanța persoanei/instituției/firmei vizate;
-- `event_impact_score` — impactul probabil asupra publicului;
-- `locality_score` — cât de direct privește județul/localitatea;
-- `public_interest_score` — interesul public legitim;
-- `novelty_score` — cât de nouă este informația;
-- `verification_need_score` — cât de urgentă este reverificarea.
+`PROBATION → LOW_VALUE → DORMANT → INACTIVE`.
 
-Astfel, o sursă de grad `C` poate produce un semnal foarte important dacă documentează un eveniment de impact, iar o sursă `A+` poate publica o informație banală care nu merită promovată.
+O sursă poate reveni automat din `DORMANT` dacă reapare cu activitate relevantă. Nicio sursă nu este eliminată din istoric.
 
-### Recalculare și istoric
+## Recalibrare continuă
 
-Scorurile sunt versionate. Se păstrează `score_updated_at`, motivul modificării și, unde este posibil, indicatori de performanță: proporția semnalelor confirmate, viteza, frecvența corecțiilor, rata de duplicate, rata de zgomot și numărul de investigații/știri utile generate.
+Scorurile se recalculază prin ferestre mobile de 7, 30 și 180 zile. Sistemul păstrează atât scorul curent, cât și istoria modificărilor.
 
-Sursele care publică repetat informații false, clickbait neverificabil sau conținut copiat își pierd `reliability_score`; sursele care produc constant informații originale confirmate pot crește. Scorurile nu sunt influențate de relații comerciale cu VÂLCEA CLAR.
+Exemple de ajustări:
+- semnale confirmate repetat: crește `reliability` și `signal_value`;
+- exclusivități confirmate: crește `exclusivity`;
+- informații infirmate: scade `reliability`;
+- publicare rapidă înaintea altor surse: crește `freshness/latency`;
+- duplicate frecvente: scade `signal_value`;
+- pagini indisponibile: crește intervalul de crawl și scade `health`, fără ștergerea sursei;
+- schimbarea profilului editorial al unei surse: se modifică automat `vertical_relevance`.
 
-### Prioritizarea ingestiei
+Recalibrarea este limitată de guardrails: o sursă T3 nu devine T1 prin popularitate, iar o sursă oficială nu devine automat suficientă pentru orice afirmație.
 
-Frecvența monitorizării se adaptează scorului și verticalei:
+## Learning loop editorial
 
-- `A+/A`: monitorizare prioritară, frecventă;
-- `B`: monitorizare regulată;
-- `C`: monitorizare periodică;
-- `D/E`: discovery oportunist și verificare numai când semnalul depășește pragul editorial.
+După fiecare material, sistemul înregistrează:
+- ce sursă a produs primul semnal;
+- ce surse au confirmat;
+- ce surse au contrazis;
+- timpul până la confirmare;
+- dacă semnalul a devenit știre, investigație, update sau a fost respins;
+- importanța finală a materialului;
+- corecții ulterioare.
 
-În situații de breaking news, un `event_impact_score` mare poate temporar crește prioritatea unei surse indiferent de gradul ei general.
+Aceste rezultate realimentează scoringul, frecvența de crawl, descoperirea de surse și rutarea editorială.
+
+## Detectarea schimbării de regim
+
+Motorul urmărește `concept_drift`: o publicație își schimbă frecvența, un site devine inactiv, un restaurant începe să publice zilnic, o instituție mută comunicatele pe alt domeniu, un politician își schimbă platforma principală sau un nou canal social devine sursa dominantă.
+
+La detectarea unei schimbări de regim, sistemul creează automat o reevaluare a sursei și își adaptează frontier-ul de crawl.
 
 ## Discovery continuu
 
-Lista surselor este deschisă. Motorul caută periodic publicații, firme, profesioniști, personalități, instituții și organizații noi, domenii mutate, conturi oficiale și feed-uri noi. O sursă dispărută nu se șterge din istoric; se marchează `INACTIVE`, `MOVED` sau `FAILED` și se caută succesorul.
+Lista surselor este permanent deschisă. Motorul caută periodic publicații, firme, profesioniști, personalități, instituții și organizații noi, domenii mutate, conturi oficiale și feed-uri noi. O sursă dispărută se marchează `INACTIVE`, `MOVED` sau `FAILED`, iar sistemul caută automat succesorul.
 
 ## Rutare editorială
 
-Semnalele sunt clasificate automat în: `BREAKING`, `ORAȘ`, `JUDEȚ`, `ADMINISTRAȚIE`, `ECONOMIE`, `CULTURĂ`, `EVENIMENTE`, `UNDE_IEȘIM`, `LIFESTYLE`, `INVESTIGAȚII`, `JUSTIȚIE`, `SPORT` sau `OTHER`. Un semnal poate alimenta mai multe secțiuni, dar se publică o singură versiune canonică a materialului.
+Semnalele sunt clasificate automat în `BREAKING`, `ORAȘ`, `JUDEȚ`, `ADMINISTRAȚIE`, `ECONOMIE`, `CULTURĂ`, `EVENIMENTE`, `UNDE_IEȘIM`, `LIFESTYLE`, `INVESTIGAȚII`, `JUSTIȚIE`, `SPORT` sau `OTHER`. Un semnal poate alimenta mai multe secțiuni, dar se publică o singură versiune canonică a materialului.
+
+## Fail-closed
+
+Autoadaptarea poate modifica scoruri, frecvențe, priorități și cozi de verificare, dar **nu poate relaxa singură regulile de publicare**. Pentru proprietate, justiție, politică, apartenențe sensibile, acuzații, investigații și date personale rămân obligatorii pragurile editoriale și verificarea umană/documentară.
