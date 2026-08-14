@@ -1,0 +1,89 @@
+name: VÂLCEA CLAR Source Radar
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/data/sources.json'
+      - 'valcea-clar/scripts/probe_sources.py'
+      - '.github/workflows/valcea-clar-source-radar.yml'
+  schedule:
+    - cron: '47 */6 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-source-radar
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Probe sources without changing editorial facts
+        run: python valcea-clar/scripts/probe_sources.py
+
+      - name: Enforce fail-closed source-change policy
+        run: |
+          python - <<'PY'
+          import json, sys
+          from pathlib import Path
+
+          state = json.load(open('valcea-clar/state/source_health.json', encoding='utf-8'))
+          unsafe = []
+          missing_tasks = []
+          for source in state.get('sources', []):
+              if source.get('semantic_hash_changed') and source.get('material_fact_use'):
+                  if source.get('publish_material_fact_update') is not False:
+                      unsafe.append(source.get('id'))
+              if source.get('resolution_task_required'):
+                  task = Path('valcea-clar/ops/resolution_tasks') / f"{source.get('id')}.json"
+                  if not task.exists():
+                      missing_tasks.append(source.get('id'))
+          if unsafe or missing_tasks:
+              print({'unsafe': unsafe, 'missing_tasks': missing_tasks})
+              sys.exit(2)
+          print(json.dumps(state.get('summary', {}), ensure_ascii=False))
+          PY
+
+      - name: Persist health ledger and review tasks conflict-safe
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp valcea-clar/state/source_health.json /tmp/valcea-source-health.json
+          rm -rf /tmp/valcea-resolution-tasks
+          mkdir -p /tmp/valcea-resolution-tasks
+          cp -a valcea-clar/ops/resolution_tasks/. /tmp/valcea-resolution-tasks/ || true
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p valcea-clar/state valcea-clar/ops/resolution-tasks
+            cp /tmp/valcea-source-health.json valcea-clar/state/source_health.json
+            cp -a /tmp/valcea-resolution-tasks/. valcea-clar/ops/resolution-tasks/ || true
+            git add valcea-clar/state/source_health.json valcea-clar/ops/resolution-tasks
+            if git diff --cached --quiet; then
+              echo 'No VÂLCEA CLAR source-radar changes.'
+              exit 0
+            fi
+            git commit -m 'Persist VÂLCEA CLAR source radar state'
+            if git push origin HEAD:main; then exit 0; fi
+            echo "main advanced; retrying ${attempt}/5."
+            sleep $((attempt * 2))
+          done
+          echo 'Unable to persist source-radar state after five attempts.' >&2
+          exit 1

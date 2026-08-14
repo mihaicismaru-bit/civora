@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://valceaclar.ro/schemas/place.schema.json",
+  "title": "VÂLCEA CLAR place record",
+  "type": "object",
+  "required": [
+    "id",
+    "slug",
+    "name",
+    "type",
+    "status",
+    "publication_status",
+    "verification_level",
+    "location",
+    "contact",
+    "operator",
+    "offer",
+    "hours",
+    "source_ids"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 2
+    },
+    "type": {
+      "enum": [
+        "restaurant",
+        "fast_casual",
+        "cafe",
+        "pub",
+        "bar",
+        "club",
+        "spa",
+        "pool",
+        "leisure",
+        "bakery",
+        "dessert"
+      ]
+    },
+    "status": {
+      "enum": [
+        "open",
+        "temporarily_closed",
+        "seasonal",
+        "opening_soon",
+        "closed",
+        "unknown"
+      ]
+    },
+    "publication_status": {
+      "enum": [
+        "public",
+        "draft",
+        "candidate"
+      ]
+    },
+    "verification_level": {
+      "enum": [
+        "verified",
+        "verified_core",
+        "candidate"
+      ]
+    },
+    "source_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

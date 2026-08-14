@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Restaurante, cârciumi, cafenele și locuri de relaxare din Vâlcea — verificate, explicate și actualizate.">
+  <meta name="theme-color" content="#f4efe5">
+  <title>Unde ieșim — VÂLCEA CLAR</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Sari la conținut</a>
+  <header class="masthead">
+    <div class="brand-row">
+      <a class="brand" href="#" aria-label="VÂLCEA CLAR, prima pagină"><span>VÂLCEA</span><strong>CLAR</strong></a>
+      <span class="edition">Râmnicu Vâlcea · ediție în construcție</span>
+    </div>
+    <nav class="top-nav" aria-label="Secțiuni">
+      <a href="#noutati">Nou deschis</a>
+      <a href="#locuri">Unde mâncăm</a>
+      <a href="#transparenta">Cine este în spate</a>
+      <a href="#creatori">Creatori locali</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="noutati">
+      <div class="hero-copy">
+        <p class="eyebrow">VÂLCEA CLAR · UNDE IEȘIM</p>
+        <h1>Ce s-a deschis.<br>Ce se mănâncă.<br><em>Cine este în spate.</em></h1>
+        <p class="standfirst">Un ghid local care nu confundă reclama cu jurnalismul. Adrese, programe, meniuri, prețuri și operatori — fiecare cu sursă și dată.</p>
+        <div class="hero-actions">
+          <a class="primary-button" href="#locuri">Vezi locurile verificate</a>
+          <a class="text-link" href="#transparenta">Cum verificăm →</a>
+        </div>
+      </div>
+      <article class="lead-card" id="lead-story" aria-live="polite">
+        <p class="card-kicker">NOU DESCHIS</p>
+        <h2>Se încarcă primul material verificat…</h2>
+      </article>
+    </section>
+
+    <section class="utility-strip" aria-label="Starea bazei de date">
+      <div><strong id="verified-count">—</strong><span>locuri publice</span></div>
+      <div><strong id="price-count">—</strong><span>meniuri cu prețuri</span></div>
+      <div><strong id="operator-count">—</strong><span>operatori documentați</span></div>
+      <div><strong id="candidate-count">—</strong><span>candidați în verificare</span></div>
+    </section>
+
+    <section class="directory" id="locuri">
+      <div class="section-heading">
+        <div><p class="eyebrow">GHID VERIFICAT</p><h2>Unde ieșim în Râmnicu Vâlcea</h2></div>
+        <p>Fișele incomplete spun explicit ce lipsește. Nu completăm golurile cu presupuneri.</p>
+      </div>
+      <div class="toolbar" aria-label="Filtre pentru localuri">
+        <label class="search-box"><span class="sr-only">Caută local sau preparat</span><input id="search" type="search" placeholder="Caută local, bucătărie, preparat…" autocomplete="off"></label>
+        <div class="filter-row" role="group" aria-label="Tip local">
+          <button class="filter is-active" type="button" data-filter="all">Toate</button>
+          <button class="filter" type="button" data-filter="restaurant">Restaurante</button>
+          <button class="filter" type="button" data-filter="fast_casual">Rapid</button>
+          <button class="filter" type="button" data-filter="pub">Puburi</button>
+          <button class="filter" type="button" data-filter="leisure">Relaxare</button>
+        </div>
+      </div>
+      <div class="place-grid" id="place-grid" aria-live="polite"></div>
+      <p class="empty-state" id="empty-state" hidden>Niciun loc verificat nu corespunde filtrului.</p>
+    </section>
+
+    <section class="transparency" id="transparenta">
+      <div><p class="eyebrow light">TRANSPARENȚĂ</p><h2>Nu publicăm o legătură doar fiindcă „se spune”.</h2></div>
+      <div class="rules">
+        <article><span>01</span><h3>Operatorul</h3><p>Societatea, CUI-ul și relația cu localul au sursă publică.</p></article>
+        <article><span>02</span><h3>Meniul</h3><p>Prețurile expiră după 120 de zile și dispar până la reverificare.</p></article>
+        <article><span>03</span><h3>Recenzia</h3><p>Spunem cine a plătit masa și separăm opinia de informația factuală.</p></article>
+      </div>
+    </section>
+
+    <section class="creator-section" id="creatori">
+      <div class="section-heading">
+        <div><p class="eyebrow">FOOD CREATOR INDEX</p><h2>Creatorii locali sunt monitorizați, nu promovați automat.</h2></div>
+        <p id="creator-note">Registrul public rămâne gol până când există suficiente dovezi de relevanță culinară locală și transparență comercială.</p>
+      </div>
+      <div id="creator-grid" class="creator-grid"></div>
+    </section>
+  </main>
+
+  <dialog id="place-dialog" class="place-dialog" aria-labelledby="dialog-title">
+    <button class="dialog-close" type="button" aria-label="Închide">×</button>
+    <div id="dialog-content"></div>
+  </dialog>
+
+  <footer><strong>VÂLCEA CLAR</strong><p>Fișele au data ultimei verificări. Corecțiile materiale vor fi jurnalizate, nu ascunse.</p></footer>
+  <script src="app.js" defer></script>
+</body>
+</html>
