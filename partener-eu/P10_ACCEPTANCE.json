@@ -11,11 +11,11 @@
     "atomic_state_and_recovery": "PASS",
     "frontend_regression": "10/10_PASS_LATEST",
     "minimum_distinct_days": 30,
-    "current_qualifying_days": 3,
+    "current_qualifying_days": 4,
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-08-13T23:25:39Z",
+    "utc": "2026-08-14T00:13:08Z",
     "source_pass": 6,
     "source_degraded": 0,
     "source_fail": 1,
@@ -26,7 +26,7 @@
     "quarantined_source": "SRC-LEGISLATIE — Portal Legislativ; dependent material facts blocked fail-closed"
   },
   "deployment_evidence": {
-    "utc": "2026-08-13T23:26:01Z",
+    "utc": "2026-08-14T00:13:32Z",
     "status": "DEGRADED",
     "public_content_verified": true,
     "https_verified": true,
@@ -36,7 +36,7 @@
     "http_content_verified": true,
     "content_origin": "custom_https",
     "http_status": 200,
-    "final_url": "https://partener.eu/?p10_probe=20260813T232601Z",
+    "final_url": "https://partener.eu/?p10_probe=20260814T001332Z",
     "title": "PARTENER.EU — Finanțări europene",
     "required_markers_present": true,
     "critical_assets_ok": true,
@@ -46,7 +46,7 @@
       {
         "id": "custom_https",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260813T232601Z",
+        "final_url": "https://partener.eu/?p10_probe=20260814T001332Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -57,7 +57,7 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260813T232601Z",
+        "final_url": "http://partener.eu/?p10_probe=20260814T001332Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -68,12 +68,12 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260813T232601Z",
+        "final_url": "http://partener.eu/?p10_probe=20260814T001332Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260813T232601Z",
-            "to_url": "http://partener.eu/?p10_probe=20260813T232601Z"
+            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260814T001332Z",
+            "to_url": "http://partener.eu/?p10_probe=20260814T001332Z"
           }
         ],
         "content_verified": true,
@@ -123,16 +123,16 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-08-13T23:26:01Z",
-    "validation_run_started": "2026-08-13T23:25:39Z",
+    "utc": "2026-08-14T00:13:32Z",
+    "validation_run_started": "2026-08-14T00:13:08Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "3aa505303c2775eb857f47cb1f18f27a436976729a3976276102495b9ec4670b",
-      "history_sha256": "3aa505303c2775eb857f47cb1f18f27a436976729a3976276102495b9ec4670b",
-      "history_path": "validation/history/20260813T232539Z.json",
+      "latest_sha256": "ebea5bf5ff1ba97e1eb262bbe0227b88b169c359cbeedd6724f0d50ae1dafe48",
+      "history_sha256": "ebea5bf5ff1ba97e1eb262bbe0227b88b169c359cbeedd6724f0d50ae1dafe48",
+      "history_path": "validation/history/20260814T001308Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "3d4974022f642c6fbe75c0649d460fbf7355133c3c77a6452b726dd88e37adac",
-      "checkpoint_sha256": "3d4974022f642c6fbe75c0649d460fbf7355133c3c77a6452b726dd88e37adac",
+      "source_state_sha256": "eace2685a47dd68f002abc34a28ed5f0e44054a0e4db6049e55055e148bfbad5",
+      "checkpoint_sha256": "eace2685a47dd68f002abc34a28ed5f0e44054a0e4db6049e55055e148bfbad5",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
@@ -140,7 +140,7 @@
     },
     "source_registry": {
       "observed_at": "2026-08-13T22:26:49.763443Z",
-      "age_seconds": 3551,
+      "age_seconds": 6403,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
