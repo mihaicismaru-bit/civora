@@ -15,9 +15,9 @@
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-08-14T14:41:38Z",
-    "source_pass": 6,
-    "source_degraded": 0,
+    "utc": "2026-08-14T15:11:39Z",
+    "source_pass": 3,
+    "source_degraded": 3,
     "source_fail": 1,
     "source_quarantined": 1,
     "critical_fail": false,
@@ -26,7 +26,7 @@
     "quarantined_source": "SRC-LEGISLATIE — Portal Legislativ; dependent material facts blocked fail-closed"
   },
   "deployment_evidence": {
-    "utc": "2026-08-14T14:42:00Z",
+    "utc": "2026-08-14T15:11:55Z",
     "status": "DEGRADED",
     "public_content_verified": true,
     "https_verified": true,
@@ -36,7 +36,7 @@
     "http_content_verified": true,
     "content_origin": "custom_https",
     "http_status": 200,
-    "final_url": "https://partener.eu/?p10_probe=20260814T144200Z",
+    "final_url": "https://partener.eu/?p10_probe=20260814T151155Z",
     "title": "PARTENER.EU — Finanțări europene",
     "required_markers_present": true,
     "critical_assets_ok": true,
@@ -46,7 +46,7 @@
       {
         "id": "custom_https",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260814T144200Z",
+        "final_url": "https://partener.eu/?p10_probe=20260814T151155Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -57,7 +57,7 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260814T144200Z",
+        "final_url": "http://partener.eu/?p10_probe=20260814T151155Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -68,12 +68,12 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260814T144200Z",
+        "final_url": "http://partener.eu/?p10_probe=20260814T151155Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260814T144200Z",
-            "to_url": "http://partener.eu/?p10_probe=20260814T144200Z"
+            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260814T151155Z",
+            "to_url": "http://partener.eu/?p10_probe=20260814T151155Z"
           }
         ],
         "content_verified": true,
@@ -123,16 +123,16 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-08-14T14:42:00Z",
-    "validation_run_started": "2026-08-14T14:41:38Z",
+    "utc": "2026-08-14T15:11:55Z",
+    "validation_run_started": "2026-08-14T15:11:39Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "f4ceaa379c524bffa745775d33df80880072680038ca054654479a94d5c7941d",
-      "history_sha256": "f4ceaa379c524bffa745775d33df80880072680038ca054654479a94d5c7941d",
-      "history_path": "validation/history/20260814T144138Z.json",
+      "latest_sha256": "5493cd1752f81861e04a14ba3fd55b1b9f5b30dd22e2da5c2714b86a884d7907",
+      "history_sha256": "5493cd1752f81861e04a14ba3fd55b1b9f5b30dd22e2da5c2714b86a884d7907",
+      "history_path": "validation/history/20260814T151139Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "8930a960a40bb84f87efc7a06c0a9ba4e91c8060c0386b481d66f3437f7ff9f9",
-      "checkpoint_sha256": "8930a960a40bb84f87efc7a06c0a9ba4e91c8060c0386b481d66f3437f7ff9f9",
+      "source_state_sha256": "613e33f6e67ce402b63b206624ccbd5739c89b839136f5e1e0334b391f0b1eb6",
+      "checkpoint_sha256": "613e33f6e67ce402b63b206624ccbd5739c89b839136f5e1e0334b391f0b1eb6",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
@@ -140,7 +140,7 @@
     },
     "source_registry": {
       "observed_at": "2026-08-14T14:28:07.606804Z",
-      "age_seconds": 833,
+      "age_seconds": 2627,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
@@ -410,7 +410,7 @@
       "health": "DEGRADED_FAIL_CLOSED"
     },
     "mff_2028_2034": {
-      "observed_at": "2026-08-14T09:44:37.223631Z",
+      "observed_at": "2026-08-14T15:10:44.922799Z",
       "summary": {
         "total": 8,
         "pass": 2,
