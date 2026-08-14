@@ -38,9 +38,9 @@ jobs:
       - name: Publish eligible Facebook posts
         if: github.event_name != 'pull_request'
         env:
-          VALCEA_FB_PAGE_ID: ${{ secrets.VALCEA_FB_PAGE_ID }}
+          VALCEA_FB_PAGE_ID: "1234360446430980"
           VALCEA_FB_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_FB_PAGE_ACCESS_TOKEN }}
-          VALCEA_FB_GRAPH_VERSION: v25.0
+          VALCEA_FB_GRAPH_VERSION: v26.0
         run: python valcea-clar/social/facebook_publish.py --apply
 
       - name: Persist Facebook publication state
