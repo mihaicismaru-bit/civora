@@ -12,7 +12,6 @@ on:
       - "valcea-clar/ingest/seed_catalog.json.part-*"
       - "valcea-clar/ingest/source_registry.json"
       - "valcea-clar/ingest/venue_ingest.py"
-      - "valcea-clar/ingest/wordpress_draft_publish.py"
       - "valcea-clar/validation/validate.py"
       - "valcea-clar/scripts/reconcile_ingest.py"
       - "valcea-clar/ops/ingest_aliases.json"
@@ -41,18 +40,6 @@ jobs:
 
       - name: Probe sources and rebuild canonical state
         run: python valcea-clar/ingest/venue_ingest.py --timeout 12
-
-      - name: Plan WordPress editorial drafts on pull requests
-        if: github.event_name == 'pull_request'
-        run: python valcea-clar/ingest/wordpress_draft_publish.py
-
-      - name: Upsert WordPress editorial drafts
-        if: github.event_name != 'pull_request'
-        env:
-          VALCEA_WP_BASE: ${{ secrets.VALCEA_WP_BASE }}
-          VALCEA_WP_USER: ${{ secrets.VALCEA_WP_USER }}
-          VALCEA_WP_APP_PASSWORD: ${{ secrets.VALCEA_WP_APP_PASSWORD }}
-        run: python valcea-clar/ingest/wordpress_draft_publish.py --apply
 
       - name: Validate outputs
         run: python valcea-clar/validation/validate.py
