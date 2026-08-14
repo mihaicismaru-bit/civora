@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0",
+  "canonical_domain": "valceaclar.ro",
+  "section": {
+    "id": "unde-iesim",
+    "label": "Unde ieșim",
+    "path": "/unde-iesim/",
+    "description": "Restaurante, cafenele, puburi și locuri de relaxare din Vâlcea, verificate editorial.",
+    "primary_nav": {
+      "enabled": true,
+      "insert_after": "Evenimente"
+    },
+    "subnavigation": [
+      {"label": "Nou deschis", "path": "/unde-iesim/#noutati"},
+      {"label": "Unde mâncăm", "path": "/unde-iesim/#locuri"},
+      {"label": "Cine este în spate", "path": "/unde-iesim/#transparenta"},
+      {"label": "Creatori locali", "path": "/unde-iesim/#creatori"}
+    ]
+  },
+  "homepage_module": {
+    "id": "unde-iesim-home",
+    "enabled": true,
+    "position": "after_primary_news",
+    "eyebrow": "RESTAURANTE · CAFENELE · RELAXARE",
+    "title": "Unde ieșim",
+    "description": "Ce s-a deschis, ce se mănâncă și cine operează localurile.",
+    "cta_label": "Vezi ghidul verificat",
+    "cta_path": "/unde-iesim/",
+    "items_source": "site/homepage-module.json",
+    "max_items": 4,
+    "show_if_empty": false
+  },
+  "cross_links": [
+    {"from": "Evenimente", "to": "/unde-iesim/", "context": "locuri și program pentru weekend"},
+    {"from": "Oraș", "to": "/unde-iesim/", "context": "deschideri, închideri și schimbări de operator"},
+    {"from": "Investigații", "to": "/unde-iesim/", "context": "contracte sau legături publice relevante"}
+  ],
+  "publication_policy": {
+    "candidate_records_are_hidden": true,
+    "material_facts_autopublish": false,
+    "sponsored_rankings": false,
+    "commercial_content_must_be_labelled": true
+  }
+}

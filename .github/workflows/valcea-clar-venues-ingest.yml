@@ -6,6 +6,17 @@ on:
     paths:
       - "valcea-clar/**"
       - ".github/workflows/valcea-clar-venues-ingest.yml"
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/ingest/seed_catalog.json.part-*"
+      - "valcea-clar/ingest/source_registry.json"
+      - "valcea-clar/ingest/venue_ingest.py"
+      - "valcea-clar/ingest/wordpress_draft_publish.py"
+      - "valcea-clar/validation/validate.py"
+      - "valcea-clar/scripts/reconcile_ingest.py"
+      - "valcea-clar/ops/ingest_aliases.json"
+      - ".github/workflows/valcea-clar-venues-ingest.yml"
   schedule:
     - cron: "23 */6 * * *"
 
@@ -31,7 +42,12 @@ jobs:
       - name: Probe sources and rebuild canonical state
         run: python valcea-clar/ingest/venue_ingest.py --timeout 12
 
+      - name: Plan WordPress editorial drafts on pull requests
+        if: github.event_name == 'pull_request'
+        run: python valcea-clar/ingest/wordpress_draft_publish.py
+
       - name: Upsert WordPress editorial drafts
+        if: github.event_name != 'pull_request'
         env:
           VALCEA_WP_BASE: ${{ secrets.VALCEA_WP_BASE }}
           VALCEA_WP_USER: ${{ secrets.VALCEA_WP_USER }}
@@ -41,6 +57,9 @@ jobs:
       - name: Validate outputs
         run: python valcea-clar/validation/validate.py
 
+      - name: Reconcile ingestion with the curated public catalogue
+        run: python valcea-clar/scripts/reconcile_ingest.py
+
       - name: Write job summary
         if: always()
         run: |
@@ -48,30 +67,62 @@ jobs:
           import json, pathlib, os
           state=json.load(open('valcea-clar/ingest/state/venues.json',encoding='utf-8'))
           report=json.load(open('valcea-clar/validation/latest_report.json',encoding='utf-8'))
+          reconciliation=json.load(open('valcea-clar/ops/ingest_reconciliation.json',encoding='utf-8'))
           p=pathlib.Path(os.environ['GITHUB_STEP_SUMMARY'])
           p.write_text(
               '# VÂLCEA CLAR — UNDE IEȘIM\n\n'
               f"- Ingest status: `{state['status']}`\n"
-              f"- Localuri: **{state['summary']['venues']}**\n"
+              f"- Localuri urmărite: **{state['summary']['venues']}**\n"
               f"- Creatori candidați: **{state['summary']['creatorCandidates']}**\n"
+              f"- Coada editorială: **{reconciliation['summary']['review_queue']}**\n"
               f"- Validare: **{report['status']}**\n",
               encoding='utf-8'
           )
           PY
 
-      - name: Persist ingestion state
+      - name: Persist ingestion and reconciliation state conflict-safe
         if: always() && github.event_name != 'pull_request'
+        shell: bash
         run: |
+          set -euo pipefail
+          files=(
+            valcea-clar/ingest/state/venues.json
+            valcea-clar/ingest/state/source_health.json
+            valcea-clar/web/unde-iesim.json
+            valcea-clar/validation/latest_report.json
+            valcea-clar/ops/ingest_reconciliation.json
+            valcea-clar/ops/ingest_review_queue.json
+          )
+          rm -rf /tmp/valcea-clar-ingest-state
+          mkdir -p /tmp/valcea-clar-ingest-state
+          for file in "${files[@]}"; do
+            if [ -f "$file" ]; then
+              mkdir -p "/tmp/valcea-clar-ingest-state/$(dirname "$file")"
+              cp "$file" "/tmp/valcea-clar-ingest-state/$file"
+            fi
+          done
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add \
-            valcea-clar/ingest/state/venues.json \
-            valcea-clar/ingest/state/source_health.json \
-            valcea-clar/web/unde-iesim.json \
-            valcea-clar/validation/latest_report.json
-          git commit -m "Refresh Vâlcea Clar venue ingestion state" || exit 0
-          if ! git push; then
-            git fetch origin "${GITHUB_REF_NAME}"
-            git rebase "origin/${GITHUB_REF_NAME}"
-            git push
-          fi
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            for file in "${files[@]}"; do
+              if [ -f "/tmp/valcea-clar-ingest-state/$file" ]; then
+                mkdir -p "$(dirname "$file")"
+                cp "/tmp/valcea-clar-ingest-state/$file" "$file"
+                git add "$file"
+              fi
+            done
+            if git diff --cached --quiet; then
+              echo "No VÂLCEA CLAR ingestion-state changes."
+              exit 0
+            fi
+            git commit -m "Refresh VÂLCEA CLAR venue ingestion state"
+            if git push origin HEAD:main; then exit 0; fi
+            echo "main advanced; retrying ${attempt}/5"
+            sleep $((attempt * 2))
+          done
+          echo "Unable to persist VÂLCEA CLAR ingestion state after five attempts." >&2
+          exit 1

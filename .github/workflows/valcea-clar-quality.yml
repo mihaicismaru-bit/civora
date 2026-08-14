@@ -7,12 +7,14 @@ on:
       - 'valcea-clar/**'
       - '.github/workflows/valcea-clar-quality.yml'
       - '.github/workflows/valcea-clar-source-radar.yml'
+      - '.github/workflows/valcea-clar-venues-ingest.yml'
   push:
     branches: [main]
     paths:
       - 'valcea-clar/**'
       - '.github/workflows/valcea-clar-quality.yml'
       - '.github/workflows/valcea-clar-source-radar.yml'
+      - '.github/workflows/valcea-clar-venues-ingest.yml'
 
 permissions:
   contents: read
@@ -31,6 +33,8 @@ jobs:
           python-version: '3.12'
       - name: Validate editorial data
         run: python valcea-clar/scripts/validate_data.py
+      - name: Validate ingest-to-catalogue reconciliation
+        run: python valcea-clar/scripts/reconcile_ingest.py --check
       - name: Rebuild fail-closed public projection
         run: python valcea-clar/scripts/build_public_data.py
       - name: Verify generated files are committed
@@ -43,7 +47,7 @@ jobs:
         run: python valcea-clar/scripts/probe_sources.py --self-test
       - name: Build ChatGPT Sites synchronization payload
         run: python valcea-clar/scripts/build_sites_export.py
-      - name: Validate synchronization manifest
+      - name: Validate synchronization manifest and site integration
         run: |
           python - <<'PY'
           import json
@@ -60,9 +64,18 @@ jobs:
           assert manifest['counts']['hidden_candidates'] == meta['candidate_count']
           assert manifest['policy']['candidate_records_are_hidden'] is True
           assert manifest['policy']['material_facts_autopublish'] is False
+          integration = manifest['site_integration']
+          assert integration['section']['path'] == '/unde-iesim/'
+          assert integration['section']['primary_nav']['enabled'] is True
+          assert integration['homepage_module']['enabled'] is True
+          assert integration['homepage_module']['items_source'] == 'site/homepage-module.json'
+          homepage = json.loads((root / 'site/homepage-module.json').read_text(encoding='utf-8'))
+          assert len(homepage['items']) <= integration['homepage_module']['max_items']
+          assert all(item['path'].startswith('/unde-iesim/local/') for item in homepage['items'])
+          assert (root / 'site/integration.json').is_file()
           for item in manifest['files']:
               assert (root / item['path']).is_file(), item['path']
-          print('ChatGPT Sites synchronization manifest: PASS')
+          print('ChatGPT Sites synchronization and section integration: PASS')
           PY
       - name: Upload ChatGPT Sites synchronization payload
         uses: actions/upload-artifact@v7
