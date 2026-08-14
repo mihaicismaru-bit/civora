@@ -1,6 +1,22 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "canonical_domain": "valceaclar.ro",
+  "runtime": {
+    "platform": "Vercel",
+    "production_url": "https://valcea-clar-live-mihaicismaru-6634s-projects.vercel.app/",
+    "editor_url": "https://valcea-clar-live-mihaicismaru-6634s-projects.vercel.app/editor/",
+    "deployment_id": "dpl_GzzY51zn8wGwbio1HaiLCqVjbLoY",
+    "state": "READY",
+    "custom_domain_status": "PENDING_ATTACHMENT"
+  },
+  "editor": {
+    "enabled": true,
+    "path": "/editor/",
+    "visibility": "public_noindex",
+    "authentication": "GitHub repository permissions",
+    "write_model": "GitHub edit links and GitHub Actions",
+    "stores_credentials": false
+  },
   "section": {
     "id": "unde-iesim",
     "label": "Unde ieșim",
@@ -11,10 +27,22 @@
       "insert_after": "Evenimente"
     },
     "subnavigation": [
-      {"label": "Nou deschis", "path": "/unde-iesim/#noutati"},
-      {"label": "Unde mâncăm", "path": "/unde-iesim/#locuri"},
-      {"label": "Cine este în spate", "path": "/unde-iesim/#transparenta"},
-      {"label": "Creatori locali", "path": "/unde-iesim/#creatori"}
+      {
+        "label": "Nou deschis",
+        "path": "/unde-iesim/#noutati"
+      },
+      {
+        "label": "Unde mâncăm",
+        "path": "/unde-iesim/#locuri"
+      },
+      {
+        "label": "Cine este în spate",
+        "path": "/unde-iesim/#transparenta"
+      },
+      {
+        "label": "Creatori locali",
+        "path": "/unde-iesim/#creatori"
+      }
     ]
   },
   "homepage_module": {
@@ -31,9 +59,21 @@
     "show_if_empty": false
   },
   "cross_links": [
-    {"from": "Evenimente", "to": "/unde-iesim/", "context": "locuri și program pentru weekend"},
-    {"from": "Oraș", "to": "/unde-iesim/", "context": "deschideri, închideri și schimbări de operator"},
-    {"from": "Investigații", "to": "/unde-iesim/", "context": "contracte sau legături publice relevante"}
+    {
+      "from": "Evenimente",
+      "to": "/unde-iesim/",
+      "context": "locuri și program pentru weekend"
+    },
+    {
+      "from": "Oraș",
+      "to": "/unde-iesim/",
+      "context": "deschideri, închideri și schimbări de operator"
+    },
+    {
+      "from": "Investigații",
+      "to": "/unde-iesim/",
+      "context": "contracte sau legături publice relevante"
+    }
   ],
   "publication_policy": {
     "candidate_records_are_hidden": true,
