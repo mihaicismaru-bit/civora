@@ -1,0 +1,105 @@
+name: VÂLCEA CLAR — Olănești investigation monitor
+
+on:
+  workflow_dispatch:
+    inputs:
+      force_summary:
+        description: "Postează un sumar chiar dacă nu există schimbări"
+        type: boolean
+        required: false
+        default: false
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/investigations/olanesti-omniasig/watchlist.json"
+      - "valcea-clar/investigations/olanesti-omniasig/monitor.py"
+      - "valcea-clar/investigations/olanesti-omniasig/common.py"
+      - "valcea-clar/investigations/olanesti-omniasig/engine.py"
+      - "valcea-clar/investigations/olanesti-omniasig/README.md"
+      - ".github/workflows/valcea-clar-olanesti-investigation-monitor.yml"
+  schedule:
+    - cron: "17 4,14 * * *"
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: valcea-clar-olanesti-investigation-monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Validate monitor configuration
+        run: |
+          python -m py_compile \
+            valcea-clar/investigations/olanesti-omniasig/common.py \
+            valcea-clar/investigations/olanesti-omniasig/engine.py \
+            valcea-clar/investigations/olanesti-omniasig/monitor.py
+          python valcea-clar/investigations/olanesti-omniasig/monitor.py --validate-only
+
+      - name: Probe sources and update investigation issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          EXTRA=""
+          if [ "${{ github.event.inputs.force_summary || 'false' }}" = "true" ]; then
+            EXTRA="--force-summary"
+          fi
+          python valcea-clar/investigations/olanesti-omniasig/monitor.py --timeout 18 $EXTRA
+
+      - name: Persist monitor state
+        if: always()
+        run: |
+          git config user.name "valcea-clar-monitor[bot]"
+          git config user.email "valcea-clar-monitor@users.noreply.github.com"
+          for file in \
+            valcea-clar/investigations/olanesti-omniasig/state/source_state.json \
+            valcea-clar/investigations/olanesti-omniasig/state/latest_report.json; do
+            test -f "$file" && git add "$file"
+          done
+          git diff --cached --quiet && exit 0
+          git commit -m "Update Olănești investigation monitor state"
+          for attempt in 1 2 3 4 5; do
+            if git push; then exit 0; fi
+            git fetch origin main
+            git rebase origin/main
+            sleep $((attempt * 2))
+          done
+          exit 1
+
+      - name: Job summary
+        if: always()
+        run: |
+          python - <<'PY'
+          import json, os, pathlib
+          path = pathlib.Path('valcea-clar/investigations/olanesti-omniasig/state/latest_report.json')
+          if not path.exists():
+              pathlib.Path(os.environ['GITHUB_STEP_SUMMARY']).write_text('# VÂLCEA CLAR — monitor indisponibil\n', encoding='utf-8')
+              raise SystemExit(0)
+          report = json.loads(path.read_text(encoding='utf-8'))
+          summary = report['summary']
+          target = pathlib.Path(os.environ['GITHUB_STEP_SUMMARY'])
+          target.write_text(
+              '# VÂLCEA CLAR — Investigații / Bani publici și infrastructură\n\n'
+              f"- Dosar: `{report['case_id']}`\n"
+              f"- Status: `{report['status']}`\n"
+              f"- Surse: **{summary['sources']}**\n"
+              f"- Accesibile: **{summary['ok']}**\n"
+              f"- Indisponibile: **{summary['failed']}**\n"
+              f"- Evenimente: **{summary['events']}**\n"
+              f"- Comentariu issue: `{summary['comment_status']}`\n",
+              encoding='utf-8'
+          )
+          PY
