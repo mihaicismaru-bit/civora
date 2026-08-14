@@ -1,13 +1,13 @@
 {
   "schema_version": "1.0",
-  "checkpoint": "P11-PRODUCTION-CONSOLIDATION-V1",
+  "checkpoint": "P11-R04-DECISION-SUMMARY-INTEGRITY",
   "status": "PASS",
-  "accepted_at": "2026-08-13",
+  "accepted_at": "2026-08-14",
   "evidence": {
     "contract": "partener-eu/p11/opportunity_contract.py",
     "tests": "partener-eu/p11/test_opportunity_contract.py",
     "test_command": "python partener-eu/p11/apply_resolutions.py --check && python partener-eu/p11/build_public_projection.py --check && python -m unittest discover -s partener-eu/p11 -p 'test_*.py' && python partener-eu/ops/quality_gate.py",
-    "tests_passed": 31,
+    "tests_passed": 34,
     "tests_failed": 0
   },
   "policy_assertions": {
@@ -37,6 +37,9 @@
     "public_projection_decisions_are_explainable": true,
     "active_resolution_tasks_block_projection_material_facts": true,
     "unverified_material_facts_are_removed_at_projection_time": true,
+    "public_projection_summary_uses_effective_decisions": true,
+    "blocked_records_cannot_inflate_public_summary": true,
+    "decision_and_block_reason_counts_are_visible": true,
     "public_projection_schema": 2,
     "quality_gate_trigger_scope": ["pull_request", "push_main", "workflow_dispatch"],
     "unified_quality_gate": "18/18 PASS"

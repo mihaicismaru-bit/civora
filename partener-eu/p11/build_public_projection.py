@@ -14,6 +14,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 BUNDLE = ROOT / "p11" / "opportunity_bundle.json"
 OUTPUT = ROOT / "web" / "p11-public-data.js"
 ACTIVE_RESOLUTION_STATES = {"OPEN", "IN_REVIEW"}
+ALLOW_DECISION = "ALLOW_VERIFIED_FACTS"
+BLOCK_DECISION = "BLOCK_MATERIAL_FACTS"
 
 
 def atomic_text(path: pathlib.Path, value: str) -> None:
@@ -84,7 +86,7 @@ def publication_decision(opportunity: dict, verified_fact_classes: list[str], ta
             reason_codes.append("FAIL_CLOSED_DEFAULT")
 
     return {
-        "decision": "ALLOW_VERIFIED_FACTS" if allowed else "BLOCK_MATERIAL_FACTS",
+        "decision": ALLOW_DECISION if allowed else BLOCK_DECISION,
         "reasonCodes": reason_codes,
         "blockedFactClasses": sorted(blocked_fact_classes),
         "activeResolutionTaskCount": len(active_tasks),
@@ -122,13 +124,37 @@ def build(bundle: dict) -> dict:
             "publicationState": opportunity["publication_state"],
             "materialFacts": (
                 opportunity.get("material_facts") or {}
-                if decision["decision"] == "ALLOW_VERIFIED_FACTS"
+                if decision["decision"] == ALLOW_DECISION
                 else {}
             ),
             "verifiedFactClasses": verified_fact_classes,
             "evidenceCount": len(opportunity.get("evidence_refs") or []),
             "publicationDecision": decision,
         })
+    decision_counts = {
+        ALLOW_DECISION: sum(
+            1 for row in projected
+            if row["publicationDecision"]["decision"] == ALLOW_DECISION
+        ),
+        BLOCK_DECISION: sum(
+            1 for row in projected
+            if row["publicationDecision"]["decision"] == BLOCK_DECISION
+        ),
+    }
+    block_reason_codes = sorted({
+        reason
+        for row in projected
+        if row["publicationDecision"]["decision"] == BLOCK_DECISION
+        for reason in row["publicationDecision"]["reasonCodes"]
+    })
+    block_reason_counts = {
+        reason: sum(
+            1 for row in projected
+            if row["publicationDecision"]["decision"] == BLOCK_DECISION
+            and reason in row["publicationDecision"]["reasonCodes"]
+        )
+        for reason in block_reason_codes
+    }
     return {
         "schemaVersion": 2,
         "asOf": bundle.get("as_of"),
@@ -136,15 +162,20 @@ def build(bundle: dict) -> dict:
             "unverifiedMaterialFactsVisible": False,
             "automaticPublication": False,
             "decisionReasonsVisible": True,
+            "summaryDerivedFromEffectiveDecisions": True,
         },
         "summary": {
             "opportunityCount": len(projected),
             "openVerifiedCount": sum(
                 1 for row in projected
-                if row["status"] == "OPEN" and {"status", "deadline"} <= set(row["verifiedFactClasses"])
+                if row["publicationDecision"]["decision"] == ALLOW_DECISION
+                and row["status"] == "OPEN"
+                and {"status", "deadline"} <= set(row["verifiedFactClasses"])
             ),
-            "publishableCount": sum(1 for row in projected if row["publicationState"] == "PUBLISHABLE"),
-            "reviewCount": sum(1 for row in projected if row["publicationState"] != "PUBLISHABLE"),
+            "publishableCount": decision_counts[ALLOW_DECISION],
+            "reviewCount": decision_counts[BLOCK_DECISION],
+            "decisionCounts": decision_counts,
+            "blockReasonCounts": block_reason_counts,
         },
         "opportunities": projected,
     }

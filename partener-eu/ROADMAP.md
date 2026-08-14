@@ -27,11 +27,10 @@ Actualizat: 14 august 2026
 
 ## Ultimul increment validat
 
-- P11-R03 — decizii explicabile și apărare fail-closed în proiecția publică;
-- fiecare oportunitate expune determinist `ALLOW_VERIFIED_FACTS` sau `BLOCK_MATERIAL_FACTS`, împreună cu motivele și clasele de fapte blocate;
-- orice task de rezoluție activ blochează faptele materiale chiar dacă starea canonică ar fi inconsistentă;
-- orice fapt material fără evidență semantică T1/T1B verificată este eliminat la proiecție;
-- corpusul rămâne la 26 oportunități, șase publicabile și 20 taskuri deschise sau în review.
+- P11-R04 — sumar public derivat exclusiv din decizia fail-closed efectivă;
+- înregistrările blocate nu mai pot mări `publishableCount` sau `openVerifiedCount` printr-o stare declarativă inconsistentă;
+- sumarul expune numărul deciziilor și frecvența motivelor de blocare pentru audit și observabilitate;
+- corpusul și faptele materiale nu sunt modificate: 26 oportunități, șase publicabile și 20 taskuri deschise sau în review.
 
 ## Reguli de închidere
 
