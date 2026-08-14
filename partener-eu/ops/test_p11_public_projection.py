@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import importlib.util
 import json
+import subprocess
 from pathlib import Path
 
 
@@ -18,6 +19,13 @@ def main() -> None:
     step = next(row for row in projection["opportunities"] if row["id"] == "PEO-STEP-LLL-ADULTI-2026")
     assert step["status"] == "OPEN"
     assert {"status", "deadline"} <= set(step["verifiedFactClasses"])
+    assert step["verifiedEvidenceCount"] == len(step["verificationEvidence"])
+    assert all(item["sourceUrl"].startswith("https://") for item in step["verificationEvidence"])
+    assert {
+        fact_class
+        for item in step["verificationEvidence"]
+        for fact_class in item["supportedFactClasses"]
+    } == set(step["verifiedFactClasses"])
     assert step["publicationDecision"] == {
         "decision": "ALLOW_VERIFIED_FACTS",
         "reasonCodes": ["PUBLICATION_STATE_PUBLISHABLE", "VERIFIED_FACTS_ONLY"],
@@ -68,8 +76,28 @@ def main() -> None:
     assert step_edu["verifiedFactClasses"] == []
     assert step_edu["publicationDecision"]["decision"] == "BLOCK_MATERIAL_FACTS"
     assert "PUBLICATION_STATE_QUARANTINED" in step_edu["publicationDecision"]["reasonCodes"]
-    assert projection["schemaVersion"] == 2
+    assert projection["schemaVersion"] == 3
     assert projection["policy"]["decisionReasonsVisible"] is True
+    assert projection["policy"]["verificationProvenanceVisible"] is True
+    adapter_path = json.dumps(str(ROOT / "web" / "p11-public-adapter.js"))
+    adapter_result = subprocess.run(
+        ["node", "-e", f"""
+global.window={{
+  PARTENER_DATA:{{calls:[{{id:'test-call',title:'Test',status:'DISCOVERED',sourceFacts:[{{url:'https://legacy.test'}}]}}]}},
+  PARTENER_P11:{{asOf:'2026-08-14T00:00:00Z',summary:{{}},opportunities:[{{
+    id:'test-call',title:'Test',status:'OPEN',publicationState:'PUBLISHABLE',
+    verifiedFactClasses:['status'],materialFacts:{{status:'OPEN'}},
+    verificationEvidence:[{{evidenceId:'EV-1',sourceTier:'T1',sourceUrl:'https://official.test/call',observedAt:'2026-08-14T00:00:00Z',supportedFactClasses:['status']}}]
+  }}]}}
+}};
+require({adapter_path});
+const call=window.PARTENER_DATA.calls[0];
+if(call.sourceFacts.length!==1||call.sourceFacts[0].url!=='https://official.test/call'||call.sourceFacts[0].tier!=='T1')process.exit(2);
+"""],
+        text=True,
+        capture_output=True,
+    )
+    assert adapter_result.returncode == 0, adapter_result.stderr
     print("PASS P11 public projection")
 
 

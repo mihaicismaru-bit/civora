@@ -16,6 +16,7 @@ OUTPUT = ROOT / "web" / "p11-public-data.js"
 ACTIVE_RESOLUTION_STATES = {"OPEN", "IN_REVIEW"}
 ALLOW_DECISION = "ALLOW_VERIFIED_FACTS"
 BLOCK_DECISION = "BLOCK_MATERIAL_FACTS"
+PROJECTION_SCHEMA_VERSION = 3
 
 
 def atomic_text(path: pathlib.Path, value: str) -> None:
@@ -74,6 +75,8 @@ def projection_integrity_errors(projection: dict) -> list[str]:
         return ["summary must be an object"]
 
     errors = []
+    if projection.get("schemaVersion") != PROJECTION_SCHEMA_VERSION:
+        errors.append(f"schemaVersion must be {PROJECTION_SCHEMA_VERSION}")
     if not isinstance(policy, dict):
         errors.append("policy must be an object")
     else:
@@ -83,6 +86,8 @@ def projection_integrity_errors(projection: dict) -> list[str]:
             errors.append("policy must disable automatic publication")
         if policy.get("summaryDerivedFromEffectiveDecisions") is not True:
             errors.append("policy must derive summary from effective decisions")
+        if policy.get("verificationProvenanceVisible") is not True:
+            errors.append("policy must expose verification provenance")
     identifiers = [row.get("id") for row in opportunities if isinstance(row, dict)]
     if len(identifiers) != len(opportunities) or any(not value for value in identifiers):
         errors.append("every opportunity must have an id")
@@ -99,6 +104,7 @@ def projection_integrity_errors(projection: dict) -> list[str]:
         reason_codes = (row.get("publicationDecision") or {}).get("reasonCodes")
         blocked_fact_classes = (row.get("publicationDecision") or {}).get("blockedFactClasses")
         active_task_count = (row.get("publicationDecision") or {}).get("activeResolutionTaskCount")
+        verification_evidence = row.get("verificationEvidence")
         if decision == ALLOW_DECISION:
             allowed.append(row)
         elif decision == BLOCK_DECISION:
@@ -117,7 +123,57 @@ def projection_integrity_errors(projection: dict) -> list[str]:
             errors.append(f"{row.get('id')}: blocked fact classes must be sorted and unique")
 
         material_fact_classes = set((row.get("materialFacts") or {}).keys())
-        verified_fact_classes = set(row.get("verifiedFactClasses") or [])
+        verified_fact_class_list = row.get("verifiedFactClasses") or []
+        verified_fact_classes = (
+            set(verified_fact_class_list)
+            if isinstance(verified_fact_class_list, list)
+            and all(isinstance(value, str) and value for value in verified_fact_class_list)
+            else set()
+        )
+        if not isinstance(row.get("verifiedFactClasses"), list):
+            errors.append(f"{row.get('id')}: verified fact classes must be a list")
+        elif not all(isinstance(value, str) and value for value in verified_fact_class_list):
+            errors.append(f"{row.get('id')}: verified fact classes must be non-empty strings")
+        elif verified_fact_class_list != sorted(verified_fact_classes):
+            errors.append(f"{row.get('id')}: verified fact classes must be sorted and unique")
+
+        provenance_fact_classes = set()
+        provenance_ids = []
+        if not isinstance(verification_evidence, list):
+            errors.append(f"{row.get('id')}: verification evidence must be a list")
+        else:
+            for item in verification_evidence:
+                if not isinstance(item, dict):
+                    errors.append(f"{row.get('id')}: verification evidence entries must be objects")
+                    continue
+                evidence_id = item.get("evidenceId")
+                supported = item.get("supportedFactClasses")
+                if not isinstance(evidence_id, str) or not evidence_id:
+                    errors.append(f"{row.get('id')}: verification evidence id required")
+                else:
+                    provenance_ids.append(evidence_id)
+                if item.get("sourceTier") not in {"T1", "T1B"}:
+                    errors.append(f"{row.get('id')}: verification evidence must be T1 or T1B")
+                if not str(item.get("sourceUrl") or "").startswith("https://"):
+                    errors.append(f"{row.get('id')}: verification evidence requires an HTTPS source URL")
+                if not item.get("observedAt"):
+                    errors.append(f"{row.get('id')}: verification evidence observedAt required")
+                if (
+                    not isinstance(supported, list)
+                    or not supported
+                    or not all(isinstance(value, str) and value for value in supported)
+                ):
+                    errors.append(f"{row.get('id')}: verification evidence fact classes required")
+                elif supported != sorted(set(supported)):
+                    errors.append(f"{row.get('id')}: verification evidence fact classes must be sorted and unique")
+                else:
+                    provenance_fact_classes.update(supported)
+            if len(provenance_ids) != len(verification_evidence) or provenance_ids != sorted(set(provenance_ids)):
+                errors.append(f"{row.get('id')}: verification evidence ids must be sorted and unique")
+            if row.get("verifiedEvidenceCount") != len(verification_evidence):
+                errors.append(f"{row.get('id')}: verified evidence count does not match provenance")
+        if provenance_fact_classes != verified_fact_classes:
+            errors.append(f"{row.get('id')}: verification provenance does not match verified fact classes")
         if decision == BLOCK_DECISION and material_fact_classes:
             errors.append(f"{row.get('id')}: blocked decision exposes material facts")
         if decision == ALLOW_DECISION and material_fact_classes - verified_fact_classes:
@@ -196,6 +252,32 @@ def publication_decision(opportunity: dict, verified_fact_classes: list[str], ta
     }
 
 
+def verification_provenance(opportunity: dict, evidence: dict[str, dict]) -> list[dict]:
+    """Return deterministic public provenance for semantically verified fact classes."""
+    provenance: dict[str, dict] = {}
+    for fact_class, refs in (opportunity.get("fact_evidence") or {}).items():
+        for evidence_id in refs:
+            item = evidence.get(evidence_id) or {}
+            if (
+                item.get("semantic_verdict") != "VERIFIED"
+                or item.get("source_tier") not in {"T1", "T1B"}
+                or fact_class not in (item.get("supports_fact_classes") or [])
+            ):
+                continue
+            entry = provenance.setdefault(evidence_id, {
+                "evidenceId": evidence_id,
+                "sourceTier": item.get("source_tier"),
+                "sourceUrl": item.get("source_url"),
+                "observedAt": item.get("observed_at"),
+                "supportedFactClasses": [],
+            })
+            entry["supportedFactClasses"].append(fact_class)
+    return [
+        {**provenance[evidence_id], "supportedFactClasses": sorted(set(provenance[evidence_id]["supportedFactClasses"]))}
+        for evidence_id in sorted(provenance)
+    ]
+
+
 def build(bundle: dict) -> dict:
     evidence = {row["evidence_id"]: row for row in bundle["evidence"]}
     tasks_by_opportunity: dict[str, list[dict]] = {}
@@ -203,16 +285,12 @@ def build(bundle: dict) -> dict:
         tasks_by_opportunity.setdefault(task["opportunity_id"], []).append(task)
     projected = []
     for opportunity in bundle["opportunities"]:
-        fact_evidence = opportunity.get("fact_evidence") or {}
-        verified_fact_classes = sorted(
-            fact_class for fact_class, refs in fact_evidence.items()
-            if any(
-                evidence.get(ref, {}).get("semantic_verdict") == "VERIFIED"
-                and evidence.get(ref, {}).get("source_tier") in {"T1", "T1B"}
-                and fact_class in evidence.get(ref, {}).get("supports_fact_classes", [])
-                for ref in refs
-            )
-        )
+        provenance = verification_provenance(opportunity, evidence)
+        verified_fact_classes = sorted({
+            fact_class
+            for item in provenance
+            for fact_class in item["supportedFactClasses"]
+        })
         decision = publication_decision(
             opportunity,
             verified_fact_classes,
@@ -232,6 +310,8 @@ def build(bundle: dict) -> dict:
             ),
             "verifiedFactClasses": verified_fact_classes,
             "evidenceCount": len(opportunity.get("evidence_refs") or []),
+            "verifiedEvidenceCount": len(provenance),
+            "verificationEvidence": provenance,
             "publicationDecision": decision,
         })
     decision_counts = {
@@ -259,7 +339,7 @@ def build(bundle: dict) -> dict:
         for reason in block_reason_codes
     }
     projection = {
-        "schemaVersion": 2,
+        "schemaVersion": PROJECTION_SCHEMA_VERSION,
         "asOf": bundle.get("as_of"),
         "policy": {
             "unverifiedMaterialFactsVisible": False,
@@ -267,6 +347,7 @@ def build(bundle: dict) -> dict:
             "decisionReasonsVisible": True,
             "summaryDerivedFromEffectiveDecisions": True,
             "integrityGate": "STRICT_FAIL_CLOSED",
+            "verificationProvenanceVisible": True,
         },
         "summary": {
             "opportunityCount": len(projected),

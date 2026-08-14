@@ -27,9 +27,10 @@ Actualizat: 14 august 2026
 
 ## Ultimul increment validat
 
-- P11-R05 — gate executabil de integritate pentru proiecția publică;
-- generarea și replay-ul se opresc dacă deciziile, sumarul sau numărătorile nu mai corespund semantic;
-- sunt respinse explicit scurgerile de fapte materiale pe înregistrări blocate, faptele neverificate permise și identitățile publice duplicate;
+- P11-R06 — proveniență autoritativă verificabilă în proiecția publică;
+- fiecare clasă de fapt verificată este legată determinist de evidența sa T1/T1B, URL-ul oficial și momentul observării;
+- evidențele nerezolvate nu sunt expuse ca verificate, iar adaptorul public înlocuiește sursele legacy cu proveniența canonică;
+- gate-ul respinge deriva dintre clasele verificate și proveniență;
 - corpusul și faptele materiale nu sunt modificate: 26 oportunități, șase publicabile și 20 taskuri deschise sau în review.
 
 ## Reguli de închidere

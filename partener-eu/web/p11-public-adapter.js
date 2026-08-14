@@ -31,6 +31,13 @@
     call.p11CanonicalId=item.id;
     call.p11PublicationState=item.publicationState;
     call.p11VerifiedFactClasses=item.verifiedFactClasses||[];
+    call.p11VerificationEvidence=item.verificationEvidence||[];
+    call.sourceFacts=call.p11VerificationEvidence.map(evidence=>({
+      label:`Evidență verificată pentru ${(evidence.supportedFactClasses||[]).join(', ')}`,
+      url:evidence.sourceUrl,
+      tier:evidence.sourceTier,
+      checkedAt:evidence.observedAt
+    }));
     call.status=item.status;
     const facts=item.materialFacts||{};
     const deadline=deadlineValue(facts.deadline)||item.deadline_at;
