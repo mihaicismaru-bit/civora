@@ -4,7 +4,7 @@ Verticală CIVORA pentru restaurante, cafenele, puburi, terase, localuri de noap
 
 ## Stare
 
-`INTEGRATED_V0.3` — secțiunea publică, motorul de ingestie, reconcilierea editorială, radarul de surse și contractul de integrare în site funcționează ca un singur flux fail-closed.
+`INTEGRATED_V0.4` — secțiunea publică, motorul de ingestie, reconcilierea editorială, radarul de surse, contractul de integrare în site și distribuția Facebook funcționează ca un flux fail-closed.
 
 ## Arhitectură
 
@@ -15,6 +15,7 @@ Verticală CIVORA pentru restaurante, cafenele, puburi, terase, localuri de noap
 - `site/integration.json` — navigația principală, modulul de homepage și legăturile cu celelalte secțiuni;
 - `web/` — interfața mobilă și proiecția publică;
 - `scripts/build_sites_export.py` — pachetul determinist pentru site-ul existent `valceaclar.ro`;
+- `social/` — outbox Facebook curatat editorial, distribuit direct prin Meta Graph API și jurnal de deduplicare;
 - `investigations/` — dosarele de anchetă, separate de verticala comercială/editorială.
 
 ## Reguli nenegociabile
@@ -26,6 +27,7 @@ Verticală CIVORA pentru restaurante, cafenele, puburi, terase, localuri de noap
 - Creatorii locali nu sunt numiți „influenceri culinari” până nu există dovadă de conținut alimentar local, audiență relevantă și transparență comercială.
 - O listare comercială nu cumpără clasamentul, nota sau verdictul editorial.
 - Ingestia, potrivirile de nume și sursele T3 nu pot schimba direct catalogul public.
+- Nicio descoperire din ingestie nu ajunge direct pe Facebook; numai elementele marcate explicit `ready` în outbox sunt eligibile.
 
 ## Comenzi locale
 
@@ -36,6 +38,8 @@ python valcea-clar/ingest/venue_ingest.py --no-network
 python valcea-clar/validation/validate.py
 python valcea-clar/scripts/build_public_data.py
 python valcea-clar/scripts/build_sites_export.py
+python valcea-clar/social/facebook_publish.py --self-test
+python valcea-clar/social/facebook_publish.py
 ```
 
-Fluxul programat rulează la șase ore. El verifică sursele, păstrează ultimul rezultat bun, generează drafturi numai dacă există credențiale WordPress și produce o coadă de review cu `publication_effect=NONE`.
+Fluxul de ingestie rulează la șase ore, păstrează ultimul rezultat bun și produce o coadă editorială cu `publication_effect=NONE`. Distribuția Facebook este un flux separat și idempotent; publică numai elemente aprobate în outbox și numai când credențialele Meta sunt disponibile ca secrete de runtime.
