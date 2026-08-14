@@ -1,24 +1,24 @@
 {
   "schema_version": "1.0",
   "checkpoint": "PARTENER-EU-CIVORA-P10-0020",
-  "observed_at": "2026-08-14T04:32:18Z",
-  "validation_run_started": "2026-08-14T04:31:56Z",
+  "observed_at": "2026-08-14T05:51:47Z",
+  "validation_run_started": "2026-08-14T05:51:27Z",
   "integrity": {
     "latest_history_equal": true,
-    "latest_sha256": "b390682ad90e5a0880009183e862f8b1979d2baaca1a4b1e3947597498294f5e",
-    "history_sha256": "b390682ad90e5a0880009183e862f8b1979d2baaca1a4b1e3947597498294f5e",
-    "history_path": "validation/history/20260814T043156Z.json",
+    "latest_sha256": "3148339634f03d8d3063918176992dff76d754e4d534984be7faccdbed946711",
+    "history_sha256": "3148339634f03d8d3063918176992dff76d754e4d534984be7faccdbed946711",
+    "history_path": "validation/history/20260814T055127Z.json",
     "source_state_checkpoint_equal": true,
-    "source_state_sha256": "1c3659b86c0321ae8ebe9357410a59f2daf50c624f447b0753198ddf422255c5",
-    "checkpoint_sha256": "1c3659b86c0321ae8ebe9357410a59f2daf50c624f447b0753198ddf422255c5",
+    "source_state_sha256": "1c966b33e6934287f880939eebdeedff5f832b07b6704f3839b59602e2a52cc2",
+    "checkpoint_sha256": "1c966b33e6934287f880939eebdeedff5f832b07b6704f3839b59602e2a52cc2",
     "frontend_regression_pass": true,
     "frontend_pass": 10,
     "frontend_total": 10,
     "recovery_state_integrity": "PASS"
   },
   "source_registry": {
-    "observed_at": "2026-08-13T22:26:49.763443Z",
-    "age_seconds": 21928,
+    "observed_at": "2026-08-14T05:50:40.654969Z",
+    "age_seconds": 66,
     "stale_after_seconds": 28800,
     "stale": false,
     "health": "DEGRADED",
@@ -28,7 +28,7 @@
       "degraded": 0,
       "fail": 3,
       "quarantined": 3,
-      "resolution_tasks_required": 0
+      "resolution_tasks_required": 4
     },
     "tier_counts": {
       "T1": {
@@ -37,7 +37,7 @@
         "degraded": 0,
         "fail": 0,
         "quarantined": 0,
-        "hash_changes": 0
+        "hash_changes": 4
       },
       "T1B": {
         "total": 11,
@@ -48,13 +48,18 @@
         "hash_changes": 0
       }
     },
-    "changed_source_ids": [],
+    "changed_source_ids": [
+      "SRC-MYSMIS-CALLS",
+      "SRC-MAI-FED-CALLS",
+      "SRC-MAI-FED-GENERAL-GUIDE",
+      "SRC-MAI-FED-CALENDAR-INDEX"
+    ],
     "missing_resolution_tasks": [],
     "unsafe_material_updates": [],
     "fail_closed": true
   },
   "afir": {
-    "observed_at": "2026-08-13T22:07:40.551711+00:00",
+    "observed_at": "2026-08-14T05:14:04.140162+00:00",
     "status": "PASS",
     "item_count": 31,
     "error_count": 35,
@@ -264,8 +269,8 @@
     "material_facts_auto_promoted": false
   },
   "peo_calendar": {
-    "observed_at": "2026-08-13T18:40:21.100747+00:00",
-    "status": "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
+    "observed_at": "2026-08-14T05:15:03.435766+00:00",
+    "status": "OK_OFFICIAL_OIR_COPY",
     "source": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
     "source_class": "OFFICIAL_INSTITUTIONAL_COPY_OIR_PECU_VEST",
     "canonical_container": "https://mfe.gov.ro/peos/calendar-lansari-apeluri/",
@@ -278,7 +283,7 @@
     "publication_policy": "candidate-state-only; web material facts are not auto-promoted on scheduled hash changes"
   },
   "mipe": {
-    "observed_at": "2026-08-14T02:37:03.925076+00:00",
+    "observed_at": "2026-08-14T05:23:27.346945+00:00",
     "status": "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
     "source_available": false,
     "candidate_count": 4,
@@ -288,14 +293,16 @@
     "health": "DEGRADED_FAIL_CLOSED"
   },
   "mff_2028_2034": {
-    "observed_at": "2026-08-13T20:06:47.148924Z",
+    "observed_at": "2026-08-14T05:50:12.013784Z",
     "summary": {
       "total": 8,
       "pass": 2,
       "fail": 6,
-      "review_required": 0
+      "review_required": 1
     },
-    "hash_changed_source_ids": [],
+    "hash_changed_source_ids": [
+      "SRC-RO-MAI-EU-2028"
+    ],
     "unsafe_auto_promotions": [],
     "fail_closed": true
   },
@@ -358,7 +365,7 @@
   "summary": {
     "integrity_pass": true,
     "registry_health": "DEGRADED",
-    "registry_hash_changes": 0,
+    "registry_hash_changes": 4,
     "afir_hash_changes": 0,
     "peo_calendar_changes": 6,
     "mipe_health": "DEGRADED_FAIL_CLOSED",
