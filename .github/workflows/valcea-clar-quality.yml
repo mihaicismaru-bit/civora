@@ -65,7 +65,7 @@ jobs:
           print('ChatGPT Sites synchronization manifest: PASS')
           PY
       - name: Upload ChatGPT Sites synchronization payload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: valcea-clar-chatgpt-sites-${{ github.sha }}
           path: valcea-clar/dist/chatgpt-sites
