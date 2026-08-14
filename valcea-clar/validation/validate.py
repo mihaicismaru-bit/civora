@@ -14,7 +14,7 @@ REGISTRY = BASE / "ingest" / "source_registry.json"
 SEEDS = BASE / "ingest" / "seed_catalog.json"
 STATE = BASE / "ingest" / "state" / "venues.json"
 WEB = BASE / "web" / "unde-iesim.json"
-PUBLISHER = BASE / "ingest" / "wordpress_draft_publish.py"
+RECONCILER = BASE / "scripts" / "reconcile_ingest.py"
 REPORT = BASE / "validation" / "latest_report.json"
 
 
@@ -123,14 +123,29 @@ def main() -> int:
     if web_ids & forbidden:
         errors.append(f"discovery-only items leaked into web dataset: {sorted(web_ids & forbidden)}")
 
-    publisher_text = PUBLISHER.read_text(encoding="utf-8")
-    if '"status": "publish"' in publisher_text or "'status': 'publish'" in publisher_text:
-        errors.append("publisher contains publish status")
-    if '"status": "draft"' not in publisher_text:
-        errors.append("publisher does not enforce draft status")
+    # WordPress was removed from the canonical architecture. Validate the active
+    # reconciliation layer instead: ingestion may create review tasks, but it
+    # must never mutate the public catalogue or gain a publication effect.
+    reconciler_text = RECONCILER.read_text(encoding="utf-8")
+    required_fail_closed_markers = (
+        '"publication_effect": "NONE"',
+        '"auto_publish": False',
+        '"canonical_catalogue_mutated": False',
+        '"human_review_required": True',
+    )
+    for marker in required_fail_closed_markers:
+        if marker not in reconciler_text:
+            errors.append(f"reconciler missing fail-closed marker: {marker}")
+    forbidden_markers = (
+        '"auto_publish": True',
+        '"canonical_catalogue_mutated": True',
+    )
+    for marker in forbidden_markers:
+        if marker in reconciler_text:
+            errors.append(f"reconciler contains forbidden publication marker: {marker}")
 
     report = {
-        "schemaVersion": "1.0",
+        "schemaVersion": "1.1",
         "status": "PASS" if not errors else "FAIL",
         "summary": {
             "sources": len(sources),
