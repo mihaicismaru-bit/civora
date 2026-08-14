@@ -1,0 +1,39 @@
+name: VÂLCEA CLAR Quality
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'valcea-clar/**'
+      - '.github/workflows/valcea-clar-quality.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/**'
+      - '.github/workflows/valcea-clar-quality.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Validate editorial data
+        run: python valcea-clar/scripts/validate_data.py
+      - name: Rebuild fail-closed public projection
+        run: python valcea-clar/scripts/build_public_data.py
+      - name: Verify generated files are committed
+        run: git diff --exit-code -- valcea-clar/web/data
+      - name: Static web smoke test
+        run: python valcea-clar/scripts/smoke_web.py
+      - name: JavaScript syntax check
+        run: node --check valcea-clar/web/app.js

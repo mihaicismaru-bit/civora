@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://valceaclar.ro/schemas/creator.schema.json",
+  "title": "VÂLCEA CLAR food creator record",
+  "type": "object",
+  "required": [
+    "id",
+    "display_name",
+    "publication_status",
+    "platforms",
+    "evidence",
+    "score",
+    "source_ids"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "publication_status": {
+      "enum": [
+        "public",
+        "candidate",
+        "hidden"
+      ]
+    },
+    "score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "source_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
