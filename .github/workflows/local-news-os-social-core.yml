@@ -6,6 +6,8 @@ on:
     paths:
       - "local-news-os/social/**"
       - "valcea-clar/social/channels/**"
+      - "valcea-clar/social/channel_registry.json"
+      - "valcea-clar/social/*_publish.py"
       - "valcea-clar/social/series_registry.json"
       - ".github/workflows/local-news-os-social-core.yml"
   push:
@@ -13,6 +15,8 @@ on:
     paths:
       - "local-news-os/social/**"
       - "valcea-clar/social/channels/**"
+      - "valcea-clar/social/channel_registry.json"
+      - "valcea-clar/social/*_publish.py"
       - "valcea-clar/social/series_registry.json"
       - ".github/workflows/local-news-os-social-core.yml"
 
@@ -49,6 +53,7 @@ jobs:
             local-news-os/social/publication_state.py \
             local-news-os/social/correction_propagation.py \
             local-news-os/social/observed_metrics.py \
+            local-news-os/social/publishing_adapters.py \
             local-news-os/social/test_channel_fit.py \
             local-news-os/social/test_content_atomizer.py \
             local-news-os/social/test_hook_engine.py \
@@ -59,7 +64,8 @@ jobs:
             local-news-os/social/test_virality_engine.py \
             local-news-os/social/test_publication_state.py \
             local-news-os/social/test_correction_propagation.py \
-            local-news-os/social/test_observed_metrics.py
+            local-news-os/social/test_observed_metrics.py \
+            local-news-os/social/test_publishing_adapters.py
           python -m json.tool local-news-os/social/observed_metrics.schema.json >/dev/null
 
       - name: Run channel fit acceptance tests
@@ -95,6 +101,9 @@ jobs:
       - name: Run Observed Metrics / Feedback Learning acceptance tests
         run: python local-news-os/social/test_observed_metrics.py
 
+      - name: Run Publishing Adapter Contract acceptance tests
+        run: python local-news-os/social/test_publishing_adapters.py
+
       - name: Validate Vâlcea reference CHANNEL_CONFIG fixtures
         run: |
           python local-news-os/social/validate_channel_config.py \
@@ -105,6 +114,13 @@ jobs:
             --instance-root valcea-clar
           python local-news-os/social/validate_channel_config.py \
             valcea-clar/social/channels/tiktok.json \
+            --instance-root valcea-clar
+
+      - name: Validate Vâlcea publishing adapter registry
+        run: |
+          python local-news-os/social/publishing_adapters.py \
+            valcea-clar/social/channel_registry.json \
+            --repo-root . \
             --instance-root valcea-clar
 
       - name: Validate Vâlcea recurring series registry against declared channel series
