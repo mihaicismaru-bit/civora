@@ -15,9 +15,9 @@
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-08-15T10:34:54Z",
-    "source_pass": 6,
-    "source_degraded": 0,
+    "utc": "2026-08-15T10:35:30Z",
+    "source_pass": 3,
+    "source_degraded": 3,
     "source_fail": 1,
     "source_quarantined": 1,
     "critical_fail": false,
@@ -26,7 +26,7 @@
     "quarantined_source": "SRC-LEGISLATIE — Portal Legislativ; dependent material facts blocked fail-closed"
   },
   "deployment_evidence": {
-    "utc": "2026-08-15T10:35:16Z",
+    "utc": "2026-08-15T10:35:44Z",
     "status": "FAIL",
     "public_content_verified": false,
     "https_verified": false,
@@ -36,7 +36,7 @@
     "http_content_verified": false,
     "content_origin": null,
     "http_status": 200,
-    "final_url": "https://partener.eu/?p10_probe=20260815T103516Z",
+    "final_url": "https://partener.eu/?p10_probe=20260815T103544Z",
     "title": "PARTENER.EU — Finanțări europene explicate pentru decizie",
     "required_markers_present": false,
     "critical_assets_ok": true,
@@ -46,7 +46,7 @@
       {
         "id": "custom_https",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260815T103516Z",
+        "final_url": "https://partener.eu/?p10_probe=20260815T103544Z",
         "redirect_chain": [],
         "content_verified": false,
         "marker_ok": false,
@@ -57,7 +57,7 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260815T103516Z",
+        "final_url": "http://partener.eu/?p10_probe=20260815T103544Z",
         "redirect_chain": [],
         "content_verified": false,
         "marker_ok": false,
@@ -68,12 +68,12 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260815T103516Z",
+        "final_url": "http://partener.eu/?p10_probe=20260815T103544Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260815T103516Z",
-            "to_url": "http://partener.eu/?p10_probe=20260815T103516Z"
+            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260815T103544Z",
+            "to_url": "http://partener.eu/?p10_probe=20260815T103544Z"
           }
         ],
         "content_verified": false,
@@ -123,16 +123,16 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-08-15T10:35:16Z",
-    "validation_run_started": "2026-08-15T10:34:54Z",
+    "utc": "2026-08-15T10:35:44Z",
+    "validation_run_started": "2026-08-15T10:35:30Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "f7fb4a8cf7957b1a482f82418e97b31ff640dc067c2a352a9944d27b0cecb23a",
-      "history_sha256": "f7fb4a8cf7957b1a482f82418e97b31ff640dc067c2a352a9944d27b0cecb23a",
-      "history_path": "validation/history/20260815T103454Z.json",
+      "latest_sha256": "b75eb98022dbd837178f98fe468c340f14b4b65c9765c9175b3a905a3a991ba2",
+      "history_sha256": "b75eb98022dbd837178f98fe468c340f14b4b65c9765c9175b3a905a3a991ba2",
+      "history_path": "validation/history/20260815T103530Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "f81bd2e0a9baa7bfcfe8c41ef355908b5f9078515bc03434e3f33eb04d3e0755",
-      "checkpoint_sha256": "f81bd2e0a9baa7bfcfe8c41ef355908b5f9078515bc03434e3f33eb04d3e0755",
+      "source_state_sha256": "986c830d592e547467d4101867313f4219bb6d284adfb03461599b02757f1774",
+      "checkpoint_sha256": "986c830d592e547467d4101867313f4219bb6d284adfb03461599b02757f1774",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
@@ -140,7 +140,7 @@
     },
     "source_registry": {
       "observed_at": "2026-08-15T09:43:54.450737Z",
-      "age_seconds": 3082,
+      "age_seconds": 3109,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
