@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "product": "CIVORA / VÂLCEA CLAR Social Publication Engine",
+  "canonical_domain": "valceaclar.ro",
+  "execution_owner": "civora_site_engine",
+  "scheduler": "github_actions",
+  "state_owner": "repository",
+  "workflow": ".github/workflows/valcea-clar-social-publishing.yml",
+  "cadence": {
+    "cron": "7,22,37,52 * * * *",
+    "description": "check eligible social outboxes every 15 minutes"
+  },
+  "chatgpt": {
+    "scheduled_publication_allowed": false,
+    "direct_publication_allowed": false,
+    "credential_access_allowed": false,
+    "state_ownership_allowed": false,
+    "role": "operator_console_only"
+  },
+  "policy": {
+    "verified_fact_kernel_required": true,
+    "channel_native_copy_required": true,
+    "cross_post_verbatim_forbidden": true,
+    "approved_real_visual_required_when_visual_is_used": true,
+    "synthetic_portrayal_of_real_people_forbidden": true,
+    "idempotency_required": true,
+    "deduplication_required": true,
+    "correction_propagation_required": true,
+    "paid_social_scheduler_required": false,
+    "paid_llm_api_required": false,
+    "local_runner_allowed": false,
+    "self_hosted_runner_allowed": false,
+    "fail_closed_on_missing_credentials": true,
+    "fail_closed_on_missing_adapter": true
+  },
+  "channels": [
+    {
+      "channel_id": "facebook",
+      "status": "active",
+      "direct_publication_enabled": true,
+      "publication_mode": "native_api",
+      "adapter": "valcea-clar/social/facebook_publish.py",
+      "prepare": [
+        "valcea-clar/social/build_current_edition_outbox.py",
+        "valcea-clar/social/fetch_approved_photos.py"
+      ],
+      "outbox": "valcea-clar/social/facebook_outbox.json",
+      "state": "valcea-clar/social/facebook_state.json",
+      "credentials": {
+        "page_id_source": "workflow_configuration",
+        "access_token_secret": "VALCEA_FB_PAGE_ACCESS_TOKEN"
+      },
+      "requirements": {
+        "real_photo": true,
+        "editor_approval": true,
+        "rights_metadata": true,
+        "canonical_link": true
+      }
+    },
+    {
+      "channel_id": "instagram",
+      "status": "blocked_until_verified_adapter_and_credentials",
+      "direct_publication_enabled": false,
+      "publication_mode": "durable_outbox_only",
+      "adapter": null,
+      "credentials": null
+    },
+    {
+      "channel_id": "threads",
+      "status": "blocked_until_verified_adapter_and_credentials",
+      "direct_publication_enabled": false,
+      "publication_mode": "durable_outbox_only",
+      "adapter": null,
+      "credentials": null
+    },
+    {
+      "channel_id": "linkedin",
+      "status": "blocked_until_verified_adapter_and_credentials",
+      "direct_publication_enabled": false,
+      "publication_mode": "durable_outbox_only",
+      "adapter": null,
+      "credentials": null
+    },
+    {
+      "channel_id": "youtube_shorts",
+      "status": "blocked_until_verified_adapter_and_credentials",
+      "direct_publication_enabled": false,
+      "publication_mode": "durable_outbox_only",
+      "adapter": null,
+      "credentials": null
+    },
+    {
+      "channel_id": "tiktok",
+      "status": "blocked_until_verified_adapter_and_credentials",
+      "direct_publication_enabled": false,
+      "publication_mode": "durable_outbox_only",
+      "adapter": null,
+      "credentials": null
+    },
+    {
+      "channel_id": "telegram",
+      "status": "blocked_until_verified_adapter_and_credentials",
+      "direct_publication_enabled": false,
+      "publication_mode": "durable_outbox_only",
+      "adapter": null,
+      "credentials": null
+    },
+    {
+      "channel_id": "whatsapp",
+      "status": "blocked_until_verified_adapter_and_credentials",
+      "direct_publication_enabled": false,
+      "publication_mode": "durable_outbox_only",
+      "adapter": null,
+      "credentials": null
+    }
+  ]
+}
