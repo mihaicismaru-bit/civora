@@ -10,9 +10,12 @@ on:
       - 'partener-eu/ingest/build_decision_products.py'
       - 'partener-eu/ingest/polish_decision_products.py'
       - 'partener-eu/ingest/finalize_decision_products.py'
+      - 'partener-eu/ingest/localize_decision_products.py'
       - 'partener-eu/ops/fix_decision_products_determinism.py'
       - 'partener-eu/ops/fix_decision_products_source_coverage.py'
+      - 'partener-eu/ops/fix_decision_ui_romanian.py'
       - 'partener-eu/ops/test_decision_products.py'
+      - 'partener-eu/ops/test_public_language.py'
       - 'partener-eu/web/p11-public-data.js'
       - 'partener-eu/web/decision-intelligence-v2.js'
       - 'partener-eu/web/decision-intelligence-v2.css'
@@ -50,27 +53,31 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Apply deterministic and complete source projection rules
+      - name: Apply deterministic source and Romanian UI rules
         run: |
           python partener-eu/ops/fix_decision_products_determinism.py
           python partener-eu/ops/fix_decision_products_source_coverage.py
+          python partener-eu/ops/fix_decision_ui_romanian.py
 
       - name: Build decision-useful editorial products
         run: |
           python partener-eu/ingest/build_decision_products.py
           python partener-eu/ingest/polish_decision_products.py
           python partener-eu/ingest/finalize_decision_products.py
+          python partener-eu/ingest/localize_decision_products.py
 
-      - name: Validate JavaScript and product coverage
+      - name: Validate JavaScript, product coverage and public language
         run: |
           node --check partener-eu/web/decision-intelligence-v2.js
           python partener-eu/ops/test_decision_products.py
+          python partener-eu/ops/test_public_language.py
 
-      - name: Persist deterministic engine, dossiers and meaningful news
+      - name: Persist deterministic engine, Romanian UI, dossiers and meaningful news
         shell: bash
         run: |
           set -euo pipefail
           cp partener-eu/ingest/build_decision_products.py /tmp/build_decision_products.py
+          cp partener-eu/web/decision-intelligence-v2.js /tmp/decision-intelligence-v2.js
           cp partener-eu/ingest/state/decision_products.json /tmp/decision_products.json
           cp partener-eu/web/decision-products.js /tmp/decision-products.js
           git config user.name 'github-actions[bot]'
@@ -80,17 +87,19 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             cp /tmp/build_decision_products.py partener-eu/ingest/build_decision_products.py
+            cp /tmp/decision-intelligence-v2.js partener-eu/web/decision-intelligence-v2.js
             cp /tmp/decision_products.json partener-eu/ingest/state/decision_products.json
             cp /tmp/decision-products.js partener-eu/web/decision-products.js
             git add \
               partener-eu/ingest/build_decision_products.py \
+              partener-eu/web/decision-intelligence-v2.js \
               partener-eu/ingest/state/decision_products.json \
               partener-eu/web/decision-products.js
             if git diff --cached --quiet; then
               echo 'Decision products already current.'
               exit 0
             fi
-            git commit -m 'Regenerate deterministic decision-useful news and funding dossiers'
+            git commit -m 'Regenerate Romanian decision-useful news and funding dossiers'
             if git push origin HEAD:main; then exit 0; fi
             sleep $((attempt * 2))
           done
