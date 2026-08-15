@@ -130,7 +130,7 @@ def test_channel_fit_skip_is_respected() -> None:
 
 def test_long_preferred_atom_falls_back_without_truncation() -> None:
     source = story()
-    source["headline"] = "A" * 400
+    source["headline"] = ("Program local confirmat pentru weekend și pentru toate zonele municipiului. " * 7).strip()
     source["dek"] = "Program confirmat pentru weekend."
     result = build_hook(atoms(source), channel("facebook"))
     assert result["blocked"] is False
