@@ -15,7 +15,7 @@
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-08-15T20:01:41Z",
+    "utc": "2026-08-15T21:00:20Z",
     "source_pass": 6,
     "source_degraded": 0,
     "source_fail": 1,
@@ -26,7 +26,7 @@
     "quarantined_source": "SRC-LEGISLATIE — Portal Legislativ; dependent material facts blocked fail-closed"
   },
   "deployment_evidence": {
-    "utc": "2026-08-15T20:02:07Z",
+    "utc": "2026-08-15T21:00:45Z",
     "status": "FAIL",
     "public_content_verified": true,
     "https_verified": true,
@@ -36,7 +36,7 @@
     "http_content_verified": true,
     "content_origin": "custom_https",
     "http_status": 200,
-    "final_url": "https://partener.eu/?p10_probe=20260815T200207Z",
+    "final_url": "https://partener.eu/?p10_probe=20260815T210045Z",
     "title": "PARTENER.EU — Finanțări europene explicate simplu",
     "required_markers_present": true,
     "critical_assets_ok": true,
@@ -46,7 +46,7 @@
       {
         "id": "custom_https",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260815T200207Z",
+        "final_url": "https://partener.eu/?p10_probe=20260815T210045Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -57,7 +57,7 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260815T200207Z",
+        "final_url": "http://partener.eu/?p10_probe=20260815T210045Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -68,12 +68,12 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260815T200207Z",
+        "final_url": "http://partener.eu/?p10_probe=20260815T210045Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260815T200207Z",
-            "to_url": "http://partener.eu/?p10_probe=20260815T200207Z"
+            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260815T210045Z",
+            "to_url": "http://partener.eu/?p10_probe=20260815T210045Z"
           }
         ],
         "content_verified": true,
@@ -123,31 +123,31 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-08-15T20:02:06Z",
-    "validation_run_started": "2026-08-15T20:01:41Z",
+    "utc": "2026-08-15T21:00:45Z",
+    "validation_run_started": "2026-08-15T21:00:20Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "df9761a2a99b36fa396007e50545c049c6558d8dd4b7f3f97188df21638689bb",
-      "history_sha256": "df9761a2a99b36fa396007e50545c049c6558d8dd4b7f3f97188df21638689bb",
-      "history_path": "validation/history/20260815T200141Z.json",
+      "latest_sha256": "b184b511840d2915b265b1a9819eb30b1b1217166b7a7811c29d14c77a5c5a3b",
+      "history_sha256": "b184b511840d2915b265b1a9819eb30b1b1217166b7a7811c29d14c77a5c5a3b",
+      "history_path": "validation/history/20260815T210020Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "8753a5c096594c9e4651d78bdc1c048439b50b10fb90d7a6e65dff27ec001a02",
-      "checkpoint_sha256": "8753a5c096594c9e4651d78bdc1c048439b50b10fb90d7a6e65dff27ec001a02",
+      "source_state_sha256": "4b4ca1241f6c151a76b92bf7d8b530f4d654d4cc62e02013b974e3540d35a9e7",
+      "checkpoint_sha256": "4b4ca1241f6c151a76b92bf7d8b530f4d654d4cc62e02013b974e3540d35a9e7",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
       "recovery_state_integrity": "PASS"
     },
     "source_registry": {
-      "observed_at": "2026-08-15T19:30:15.116628Z",
-      "age_seconds": 1911,
+      "observed_at": "2026-08-15T20:59:29.655317Z",
+      "age_seconds": 75,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
       "summary": {
         "total": 18,
-        "pass": 14,
-        "degraded": 1,
+        "pass": 15,
+        "degraded": 0,
         "fail": 3,
         "quarantined": 3,
         "resolution_tasks_required": 0
@@ -163,8 +163,8 @@
         },
         "T1B": {
           "total": 11,
-          "pass": 8,
-          "degraded": 1,
+          "pass": 9,
+          "degraded": 0,
           "fail": 2,
           "quarantined": 2,
           "hash_changes": 0
