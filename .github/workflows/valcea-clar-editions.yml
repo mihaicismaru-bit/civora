@@ -9,6 +9,10 @@ on:
         default: "auto"
         type: choice
         options: [auto, morning, evening]
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/ops/autonomous-edition-trigger.json"
   schedule:
     # Run both UTC candidates for Romanian DST. The local-time gate below keeps
     # only 07:45 and 18:30 Europe/Bucharest.
@@ -41,7 +45,7 @@ jobs:
           REQUESTED_SLOT: ${{ github.event.inputs.slot || 'auto' }}
         run: |
           set -euo pipefail
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "${{ github.event_name }}" = "push" ]; then
             if [ "$REQUESTED_SLOT" = "auto" ]; then
               hour=$(TZ=Europe/Bucharest date +%H)
               if [ "$hour" -lt 15 ]; then slot=morning; else slot=evening; fi
