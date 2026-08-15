@@ -15,10 +15,12 @@ Historical DIRECTLY verified feed items are preserved on outage.
 """
 from __future__ import annotations
 
+import base64
 import datetime as dt
 import hashlib
 import html
 import json
+import os
 import re
 import ssl
 import sys
@@ -37,6 +39,7 @@ STATE_PATH = ROOT / "partener-eu" / "ingest" / "state" / "mipe_state.json"
 WEB_PATH = ROOT / "partener-eu" / "web" / "mipe-news.js"
 REGISTRY_PATH = ROOT / "partener-eu" / "ingest" / "state" / "mipe_source_registry.json"
 INDEX_PATH = ROOT / "partener-eu" / "web" / "index.html"
+MIPE_RELAY_URL = os.getenv("MIPE_RELAY_URL", "https://partener-mipe-relay-mihaicismaru-6634s-projects.vercel.app/api/mipe").strip()
 
 OFFICIAL_HOSTS = {
     "mfe.gov.ro",
@@ -150,6 +153,169 @@ def fetch(url: str, timeout: int = 24, attempts: int = 2, accept: str | None = N
             if attempt + 1 < attempts:
                 time.sleep(0.8 * (attempt + 1))
     return {"ok": False, "url": url, "error": last}
+
+
+def fetch_first_party_relay(canonical: str) -> dict[str, Any]:
+    """Fetch raw official bytes through a controlled PARTENER.EU relay.
+
+    The relay cannot turn a third-party page into an official source. Both the
+    requested canonical URL and the relay-reported final URL must remain on the
+    official allowlist, and the body hash is recomputed locally.
+    """
+    if not MIPE_RELAY_URL:
+        return {"ok": False, "error": "relay_disabled"}
+    relay_target = MIPE_RELAY_URL + ("&" if "?" in MIPE_RELAY_URL else "?") + urllib.parse.urlencode({"url": canonical})
+    response = fetch(relay_target, timeout=30, attempts=1, accept="application/json")
+    if not response.get("ok"):
+        return {"ok": False, "error": response.get("error", "relay_unavailable"), "relay": MIPE_RELAY_URL}
+    try:
+        payload = json.loads(response["data"].decode("utf-8", errors="strict"))
+        requested = canonicalize(str(payload.get("canonicalUrl") or ""))
+        final_url = canonicalize(str(payload.get("finalUrl") or payload.get("canonicalUrl") or ""))
+        upstream_status = int(payload.get("upstreamStatus") or payload.get("status") or 0)
+        encoded = str(payload.get("bodyBase64") or "")
+        body = base64.b64decode(encoded, validate=True)
+        claimed_hash = str(payload.get("sha256") or "").lower()
+        local_hash = hashlib.sha256(body).hexdigest()
+        if requested != canonical:
+            raise ValueError("relay_canonical_mismatch")
+        if not final_url or not is_official(final_url):
+            raise ValueError("relay_final_url_not_official")
+        if not 200 <= upstream_status < 400:
+            raise ValueError(f"relay_upstream_status_{upstream_status}")
+        if not body or len(body) > MAX_BYTES:
+            raise ValueError("relay_body_size_invalid")
+        if not claimed_hash or claimed_hash != local_hash:
+            raise ValueError("relay_sha256_mismatch")
+        return {
+            "ok": True,
+            "status": upstream_status,
+            "url": final_url,
+            "content_type": str(payload.get("contentType") or "application/octet-stream"),
+            "data": body,
+            "relay": MIPE_RELAY_URL,
+            "relay_region": payload.get("relayRegion"),
+            "relay_fetched_at": payload.get("fetchedAt"),
+            "relay_sha256": local_hash,
+        }
+    except Exception as exc:  # noqa: BLE001 - persisted as transport evidence
+        return {"ok": False, "error": f"relay_validation:{type(exc).__name__}:{exc}", "relay": MIPE_RELAY_URL}
+
+
+def translate_original_url(url: str, base_canonical: str) -> str | None:
+    """Map a Google Translate wrapper URL back to the official MIPE URL."""
+    try:
+        absolute = urllib.parse.urljoin(base_canonical, url)
+        parsed = urllib.parse.urlparse(absolute)
+        host = (parsed.hostname or "").lower()
+        if host == "mfe-gov-ro.translate.goog":
+            query = [(k, v) for k, v in urllib.parse.parse_qsl(parsed.query, keep_blank_values=True) if not k.startswith("_x_tr_")]
+            candidate = urllib.parse.urlunparse(("https", "mfe.gov.ro", parsed.path or "/", "", urllib.parse.urlencode(query), ""))
+            return canonicalize(candidate)
+        return canonicalize(absolute)
+    except Exception:
+        return None
+
+
+def google_translate_url(canonical: str) -> str | None:
+    parsed = urllib.parse.urlparse(canonical)
+    if (parsed.hostname or "").lower() not in {"mfe.gov.ro", "www.mfe.gov.ro"}:
+        return None
+    query = urllib.parse.parse_qsl(parsed.query, keep_blank_values=True)
+    query += [("_x_tr_sl", "ro"), ("_x_tr_tl", "en"), ("_x_tr_hl", "en")]
+    return urllib.parse.urlunparse(("https", "mfe-gov-ro.translate.goog", parsed.path or "/", "", urllib.parse.urlencode(query), ""))
+
+
+def meaningful_official_paths(links: Iterable[tuple[str, str]], base: str, translated: bool = False) -> set[str]:
+    paths: set[str] = set()
+    for href, _label in links:
+        official = translate_original_url(href, base) if translated else canonicalize(href, base)
+        if not official:
+            continue
+        path = urllib.parse.urlparse(official).path.rstrip("/") or "/"
+        if path in {"/", "/contact", "/despre-noi"}:
+            continue
+        if any(path.lower().endswith(ext) for ext in (".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp", ".css", ".js")):
+            continue
+        paths.add(path)
+    return paths
+
+
+def fetch_dual_relay(canonical: str) -> tuple[dict[str, Any] | None, dict[str, Any]]:
+    """Retrieve a canonical MIPE page through two independent live relays.
+
+    Jina supplies structured text and original official links. Google Translate
+    supplies an independent live HTML fetch. Publication is allowed only when
+    the Reader source URL is exact, the translated page has MIPE signatures,
+    and the two views share meaningful official link paths.
+    """
+    translate_url = google_translate_url(canonical)
+    if not translate_url:
+        return None, {"target": canonical, "ok": False, "transport": "dual-relay", "error": "translate_mapping_unavailable"}
+
+    reader_endpoint = "https://r.jina.ai/" + canonical
+    reader = fetch(reader_endpoint, timeout=22, attempts=1, accept="text/plain,text/markdown,*/*")
+    translated = fetch(translate_url, timeout=22, attempts=1, accept="text/html,application/xhtml+xml,*/*;q=0.7")
+    evidence: dict[str, Any] = {
+        "target": canonical,
+        "ok": False,
+        "transport": "canonical-dual-relay",
+        "readerUrl": reader_endpoint,
+        "translateUrl": translate_url,
+        "readerError": reader.get("error"),
+        "translateError": translated.get("error"),
+    }
+    if not reader.get("ok") or not translated.get("ok"):
+        return None, evidence
+
+    parsed_reader = parse_reader(reader["data"], canonical)
+    parsed_translate = parse_html(translated["data"])
+    if not parsed_reader or canonicalize(parsed_reader.get("canonical") or "") != canonical:
+        evidence["error"] = "reader_source_mismatch"
+        return None, evidence
+
+    raw_translate = translated["data"].decode("utf-8", errors="ignore").lower()
+    signatures = {
+        "mipeHost": "mfe.gov.ro" in raw_translate,
+        "ministry": ("ministerul investi" in raw_translate or "ministry of investment" in raw_translate),
+        "wordpress": "wp-content" in raw_translate,
+    }
+    if sum(bool(value) for value in signatures.values()) < 2:
+        evidence.update({"error": "translate_official_signature_insufficient", "signatures": signatures})
+        return None, evidence
+
+    reader_paths = meaningful_official_paths(parsed_reader.get("links", []), canonical)
+    translate_paths = meaningful_official_paths(parsed_translate.get("links", []), canonical, translated=True)
+    shared = sorted(reader_paths & translate_paths)
+    target_path = urllib.parse.urlparse(canonical).path.rstrip("/") or "/"
+    target_specific = [path for path in shared if path == target_path or path.startswith(target_path + "/") or path.lower().endswith((".pdf", ".doc", ".docx", ".xls", ".xlsx", ".zip", ".7z"))]
+
+    # Template-heavy pages still share many official links. Require either one
+    # target/document path or at least five independent shared official paths.
+    if not target_specific and len(shared) < 5:
+        evidence.update({
+            "error": "dual_relay_link_consensus_insufficient",
+            "sharedOfficialPathCount": len(shared),
+            "sharedOfficialPaths": shared[:20],
+            "signatures": signatures,
+        })
+        return None, evidence
+
+    evidence.update({
+        "ok": True,
+        "transport": "canonical-dual-relay-corroborated",
+        "verification": "CANONICAL_DUAL_RELAY_CORROBORATED",
+        "readerSha256": hashlib.sha256(reader["data"]).hexdigest(),
+        "translateSha256": hashlib.sha256(translated["data"]).hexdigest(),
+        "readerBytes": len(reader["data"]),
+        "translateBytes": len(translated["data"]),
+        "sharedOfficialPathCount": len(shared),
+        "sharedOfficialPaths": shared[:30],
+        "targetSpecificPaths": target_specific[:20],
+        "signatures": signatures,
+    })
+    parsed_reader["canonical"] = canonical
+    return parsed_reader, evidence
 
 
 def reader_url(target: str) -> str:
@@ -468,7 +634,7 @@ def previous_item_useful(item: dict[str, Any]) -> bool:
     transport = str(item.get("retrievalTransport") or "")
     if verification == "CANONICAL_OFFICIAL_FETCH":
         return True
-    return transport.startswith("direct")
+    return transport.startswith("direct") or "dual-relay-corroborated" in transport
 
 
 def item_id(url: str, title: str) -> str:
@@ -526,12 +692,43 @@ def fetch_document(target: str) -> tuple[dict[str, Any] | None, dict[str, Any]]:
         except Exception as exc:  # noqa: BLE001
             direct = {"ok": False, "error": f"direct_parse:{type(exc).__name__}:{exc}"}
 
+    dual_parsed, dual_evidence = fetch_dual_relay(canonical)
+    if dual_parsed is not None:
+        dual_evidence["directError"] = direct.get("error")
+        return dual_parsed, dual_evidence
+
+    relay = fetch_first_party_relay(canonical)
+    if relay.get("ok"):
+        content_type = str(relay.get("content_type", "")).lower()
+        evidence = {
+            "target": canonical,
+            "ok": True,
+            "transport": "direct-canonical-via-first-party-relay",
+            "directError": direct.get("error"),
+            "relay": relay.get("relay"),
+            "relayRegion": relay.get("relay_region"),
+            "relayFetchedAt": relay.get("relay_fetched_at"),
+            "sha256": relay.get("relay_sha256"),
+        }
+        try:
+            if "json" in content_type:
+                return {"json": json.loads(relay["data"].decode("utf-8", errors="replace")), "canonical": canonical}, evidence
+            if "xml" in content_type or relay["data"].lstrip().startswith(b"<?xml"):
+                return {"xml": relay["data"], "canonical": canonical}, evidence
+            parsed = parse_html(relay["data"])
+            parsed["canonical"] = canonicalize(relay.get("url") or canonical) or canonical
+            return parsed, evidence
+        except Exception as exc:  # noqa: BLE001
+            relay = {"ok": False, "error": f"relay_parse:{type(exc).__name__}:{exc}", "relay": relay.get("relay")}
+
     return None, {
         "target": canonical,
         "ok": False,
-        "transport": "direct-only",
+        "transport": "direct+first-party-relay",
         "directError": direct.get("error"),
-        "policy": "search-discovery-only-when-direct-unavailable",
+        "relayError": relay.get("error"),
+        "relay": relay.get("relay"),
+        "policy": "search-discovery-only-when-official-byte-transports-unavailable",
     }
 
 
@@ -703,7 +900,7 @@ def make_item(candidate: dict[str, str], cache: dict[str, tuple[dict[str, Any] |
         summary = f"Pagina oficială {classify_tag(title, canonical, description)} a fost actualizată și include {len(documents)} documente oficiale. Cele mai relevante elemente observate: " + "; ".join(highlights) + "."
     summary = summary[:900]
     transport = health.get("transport", "unknown")
-    tier = "T1" if transport.startswith("direct") else "T1_PROXY_TRANSPORT"
+    tier = "T1_DUAL_RELAY_CORROBORATED" if "dual-relay-corroborated" in transport else ("T1_RELAY_ATTESTED" if "first-party-relay" in transport else ("T1" if transport.startswith("direct") else "T1_PROXY_TRANSPORT"))
     observed = now_utc().isoformat()
     item = {
         "id": item_id(canonical, title),
@@ -868,7 +1065,7 @@ def main() -> int:
 
     items = sorted(merged.values(), key=sort_key, reverse=True)[:MAX_ITEMS]
     successful = [result for result in [*root_health, *page_health] if result.get("ok")]
-    direct_success = any(str(result.get("transport", "")).startswith("direct") for result in successful)
+    direct_success = any(str(result.get("transport", "")).startswith("direct") or "dual-relay-corroborated" in str(result.get("transport", "")) for result in successful)
     proxy_success = any("jina-reader" in str(result.get("transport", "")) for result in successful)
 
     if current and direct_success:

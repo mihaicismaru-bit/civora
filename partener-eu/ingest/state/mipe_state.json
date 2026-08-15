@@ -1,106 +1,397 @@
 {
-  "status": "OK_NO_NEW_RELEVANT_ITEMS",
+  "status": "OK",
   "lastRun": {
-    "observedAt": "2026-08-15T07:15:27.574024+00:00",
-    "status": "OK_NO_NEW_RELEVANT_ITEMS",
+    "observedAt": "2026-08-15T07:46:41.048720+00:00",
+    "status": "OK",
     "roots": [
       {
         "target": "https://mfe.gov.ro/",
-        "ok": false,
-        "transport": "direct-only",
-        "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-        "policy": "search-discovery-only-when-direct-unavailable"
+        "ok": true,
+        "transport": "canonical-dual-relay-corroborated",
+        "readerUrl": "https://r.jina.ai/https://mfe.gov.ro/",
+        "translateUrl": "https://mfe-gov-ro.translate.goog/?_x_tr_sl=ro&_x_tr_tl=en&_x_tr_hl=en",
+        "readerError": null,
+        "translateError": null,
+        "verification": "CANONICAL_DUAL_RELAY_CORROBORATED",
+        "readerSha256": "3823b980f02cf53a63ecd8fd517d3b76a421eeb8bb40f3c4de40c3144672d2c9",
+        "translateSha256": "c3f2edf3e71d348cf37daf1f49027dc5aa8702f30d485dd91767b340f7f76e35",
+        "readerBytes": 40944,
+        "translateBytes": 1520629,
+        "sharedOfficialPathCount": 136,
+        "sharedOfficialPaths": [
+          "/544/index.php",
+          "/act-aditional-nr-1-la-acordul-colectiv-incheiat-intre-ministerul-investitiilor-si-proiectelor-europene-si-federatia-publisind",
+          "/alerta-stire-falsa-privind-programarea-politicii-de-coeziune-2028-2034",
+          "/anunturi-autoritati-de-management-2021-2027",
+          "/avertizor-in-interes-public",
+          "/bilanturi-contabile",
+          "/calendar-apeluri-de-finantare",
+          "/calendar-apeluri-de-proiecte",
+          "/carta-drepturilor-fundamentale-a-uniunii-europene",
+          "/category/anunturi-pnrr",
+          "/category/contracte-semnate",
+          "/category/evolutia-fondurilor-europene-in-cifre",
+          "/category/ultimele-apeluri-prima-pagina",
+          "/centralizator-plati",
+          "/comunicare",
+          "/comunicare/banii-europeni-sunt-pentru-tine",
+          "/comunicare/campanie-media-bani-europeni-pentru-idei-romanesti",
+          "/comunicare/comunicarea-politicii-de-coeziune-2021-2027",
+          "/comunicare/comunicate-de-presa",
+          "/comunicare/evenimente",
+          "/comunicare/publicatii",
+          "/comunicare/strategie-de-comunicare",
+          "/comunicare/ultimele-stiri",
+          "/connecting-europe-facility",
+          "/contracte-si-absorbtie",
+          "/costuri-deplasari-externe",
+          "/declaratii-de-avere-si-de-interese-global",
+          "/fsc",
+          "/ghiduri-ms/dezvoltarea-competentelor-esentiale-compatibile-step-pentru-personalul-implicat-in-implementarea-interventiilor-strategice-in-domeniul-cercetarii-aplicate-din-genomica-finantate-prin-prioritatea-5",
+          "/ghiduri_peos/ghidul-solicitantului-diversificarea-si-flexibilizarea-serviciilor-de-educatie-timpurie-relansare-2026"
+        ],
+        "targetSpecificPaths": [
+          "/wp-content/uploads/2023/04/5fae90f38aed2752bf78f9daad608783.pdf"
+        ],
+        "signatures": {
+          "mipeHost": true,
+          "ministry": true,
+          "wordpress": true
+        },
+        "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>"
       },
       {
         "target": "https://mfe.gov.ro/ghiduri_peos/",
-        "ok": false,
-        "transport": "direct-only",
-        "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-        "policy": "search-discovery-only-when-direct-unavailable"
+        "ok": true,
+        "transport": "canonical-dual-relay-corroborated",
+        "readerUrl": "https://r.jina.ai/https://mfe.gov.ro/ghiduri_peos/",
+        "translateUrl": "https://mfe-gov-ro.translate.goog/ghiduri_peos/?_x_tr_sl=ro&_x_tr_tl=en&_x_tr_hl=en",
+        "readerError": null,
+        "translateError": null,
+        "verification": "CANONICAL_DUAL_RELAY_CORROBORATED",
+        "readerSha256": "a8f7c8bffb7e71390b1cf72cd3a05d69f69b606a14941e2abfa360a23ea936e4",
+        "translateSha256": "8f980b7e34d1ff8051350fd520fffd5d361e6eb102afbd0dd6fb12acdf1970d6",
+        "readerBytes": 10090,
+        "translateBytes": 196470,
+        "sharedOfficialPathCount": 13,
+        "sharedOfficialPaths": [
+          "/ghiduri_peos",
+          "/ghiduri_peos/activarea-potentialului-antreprenorial-al-tinerilor-iti-microregiunea-tara-fagarasului",
+          "/ghiduri_peos/apelul-de-tip-competitiv-initiativa-alma-finantat-din-prioritatea-2-valorificarea-potentialului-tinerilor-pe-piata-muncii-ocuparea-fortei-de-munca-in-randul-tinerilor-obiectiv-spec",
+          "/ghiduri_peos/apelul-de-tip-competitiv-sustinerea-in-cariera-a-cadrelor-didactice-si-a-personalului-didactic-auxiliar-prin-finantarea-primelor-de-cariera-didactica-finantat-din-prioritatea-7-cres",
+          "/ghiduri_peos/apelul-de-tip-non-competitiv-competente-pentru-incluziune-profesionalizarea-personalului-din-educatie-in-sprijinul-educatiei-incluzive-finantat-din-prioritatea-6-prevenirea-parasirii-timpurii-a-scol",
+          "/ghiduri_peos/ghidul-solicitantului-activarea-potentialului-antreprenorial-al-tinerilor-iti-delta-dunarii",
+          "/ghiduri_peos/ghidul-solicitantului-conditii-specifice-competente-pentru-incluziune-profesionalizarea-personalului-din-educatie-in-sprijinul-educatiei-incluzive-apel-de-proiecte-noncompetit",
+          "/ghiduri_peos/ghidul-solicitantului-conditii-specifice-educatori-pentru-copiii-din-medii-defavorizate",
+          "/ghiduri_peos/ghidul-solicitantului-diversificarea-si-flexibilizarea-serviciilor-de-educatie-timpurie-relansare-2026",
+          "/ghiduri_peos/ghidul-solicitantului-sustinerea-in-cariera-a-cadrelor-didactice-si-a-personalului-didactic-auxiliar-prin-finantarea-primelor-de-cariera-didactica",
+          "/ghiduri_peos/ghidul-solicitantului-universitati-deschise",
+          "/ghiduri_peos/initiativa-alma",
+          "/ghiduri_peos/peo-ghidul-solicitantului-step-vet-formare-profesionala-la-locul-de-munca-pentru-elevii-din-invatamantul-profesional-si-tehnic-in-tehnologii-critice"
+        ],
+        "targetSpecificPaths": [
+          "/ghiduri_peos",
+          "/ghiduri_peos/activarea-potentialului-antreprenorial-al-tinerilor-iti-microregiunea-tara-fagarasului",
+          "/ghiduri_peos/apelul-de-tip-competitiv-initiativa-alma-finantat-din-prioritatea-2-valorificarea-potentialului-tinerilor-pe-piata-muncii-ocuparea-fortei-de-munca-in-randul-tinerilor-obiectiv-spec",
+          "/ghiduri_peos/apelul-de-tip-competitiv-sustinerea-in-cariera-a-cadrelor-didactice-si-a-personalului-didactic-auxiliar-prin-finantarea-primelor-de-cariera-didactica-finantat-din-prioritatea-7-cres",
+          "/ghiduri_peos/apelul-de-tip-non-competitiv-competente-pentru-incluziune-profesionalizarea-personalului-din-educatie-in-sprijinul-educatiei-incluzive-finantat-din-prioritatea-6-prevenirea-parasirii-timpurii-a-scol",
+          "/ghiduri_peos/ghidul-solicitantului-activarea-potentialului-antreprenorial-al-tinerilor-iti-delta-dunarii",
+          "/ghiduri_peos/ghidul-solicitantului-conditii-specifice-competente-pentru-incluziune-profesionalizarea-personalului-din-educatie-in-sprijinul-educatiei-incluzive-apel-de-proiecte-noncompetit",
+          "/ghiduri_peos/ghidul-solicitantului-conditii-specifice-educatori-pentru-copiii-din-medii-defavorizate",
+          "/ghiduri_peos/ghidul-solicitantului-diversificarea-si-flexibilizarea-serviciilor-de-educatie-timpurie-relansare-2026",
+          "/ghiduri_peos/ghidul-solicitantului-sustinerea-in-cariera-a-cadrelor-didactice-si-a-personalului-didactic-auxiliar-prin-finantarea-primelor-de-cariera-didactica",
+          "/ghiduri_peos/ghidul-solicitantului-universitati-deschise",
+          "/ghiduri_peos/initiativa-alma",
+          "/ghiduri_peos/peo-ghidul-solicitantului-step-vet-formare-profesionala-la-locul-de-munca-pentru-elevii-din-invatamantul-profesional-si-tehnic-in-tehnologii-critice"
+        ],
+        "signatures": {
+          "mipeHost": true,
+          "ministry": true,
+          "wordpress": true
+        },
+        "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>"
       },
       {
         "target": "https://mfe.gov.ro/ghiduri_pids/",
-        "ok": false,
-        "transport": "direct-only",
-        "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-        "policy": "search-discovery-only-when-direct-unavailable"
+        "ok": true,
+        "transport": "canonical-dual-relay-corroborated",
+        "readerUrl": "https://r.jina.ai/https://mfe.gov.ro/ghiduri_pids/",
+        "translateUrl": "https://mfe-gov-ro.translate.goog/ghiduri_pids/?_x_tr_sl=ro&_x_tr_tl=en&_x_tr_hl=en",
+        "readerError": null,
+        "translateError": null,
+        "verification": "CANONICAL_DUAL_RELAY_CORROBORATED",
+        "readerSha256": "628d5f23f330f019768c68e7fc211c75e02dddbdbfe8c713c9c809a4c1a3963a",
+        "translateSha256": "9cf21ed2e0911c75ba220891c62bc34dffd90dbdcba3b2eff812a11f116472f7",
+        "readerBytes": 7789,
+        "translateBytes": 194098,
+        "sharedOfficialPathCount": 13,
+        "sharedOfficialPaths": [
+          "/ghiduri_pids",
+          "/ghiduri_pids/centre-multifunctionale-pentru-protejarea-si-reintegrarea-sociala-a-victimelor-violentei-domestice",
+          "/ghiduri_pids/consultare-publica-poids-ghidul-solicitantului-sprijin-pentru-autoritatile-publice-locale-in-vederea-asigurarii-de-locuinte-sociale-pentru-persoanele-vulnerabile-iti-valea-jiului",
+          "/ghiduri_pids/ghidul-solicitantului-formarea-profesionala-a-specialistilor-care-lucreaza-cu-grupuri-vulnerabile",
+          "/ghiduri_pids/ghidul-solicitantului-infrastructura-si-servicii-comunitare-pentru-copii-vulnerabili-iti-valea-jiului",
+          "/ghiduri_pids/ghidul-solicitantului-servicii-integrate-pentru-victimele-traficului-de-persoane",
+          "/ghiduri_pids/ghidul-solicitantului-sprijin-pentru-familii-monoparentale-iti-motii-tara-de-piatra",
+          "/ghiduri_pids/ghidul-solicitantului-sprijin-pentru-familii-monoparentale-iti-tara-fagarasului",
+          "/ghiduri_pids/masuri-integrate-de-sprijin-pentru-familiile-monoparentale-vulnerabile-din-romania",
+          "/ghiduri_pids/poids-ghidul-solicitantului-cresterea-accesului-profesionistilor-din-domeniul-serviciilor-sociale-pentru-copii-si-familii-la-programe-de-formare-continua",
+          "/ghiduri_pids/poids-ghidul-solicitantului-implementarea-pactului-de-integritate",
+          "/ghiduri_pids/poids-ghidul-solicitantului-servicii-de-sprijin-pentru-incluziunea-sociala-a-persoanelor-fara-adapost",
+          "/ghiduri_pids/servicii-de-asistenta-si-suport-in-luarea-deciziei-pentru-persoane-fara-sau-cu-capacitate-restransa-de-exercitiu"
+        ],
+        "targetSpecificPaths": [
+          "/ghiduri_pids",
+          "/ghiduri_pids/centre-multifunctionale-pentru-protejarea-si-reintegrarea-sociala-a-victimelor-violentei-domestice",
+          "/ghiduri_pids/consultare-publica-poids-ghidul-solicitantului-sprijin-pentru-autoritatile-publice-locale-in-vederea-asigurarii-de-locuinte-sociale-pentru-persoanele-vulnerabile-iti-valea-jiului",
+          "/ghiduri_pids/ghidul-solicitantului-formarea-profesionala-a-specialistilor-care-lucreaza-cu-grupuri-vulnerabile",
+          "/ghiduri_pids/ghidul-solicitantului-infrastructura-si-servicii-comunitare-pentru-copii-vulnerabili-iti-valea-jiului",
+          "/ghiduri_pids/ghidul-solicitantului-servicii-integrate-pentru-victimele-traficului-de-persoane",
+          "/ghiduri_pids/ghidul-solicitantului-sprijin-pentru-familii-monoparentale-iti-motii-tara-de-piatra",
+          "/ghiduri_pids/ghidul-solicitantului-sprijin-pentru-familii-monoparentale-iti-tara-fagarasului",
+          "/ghiduri_pids/masuri-integrate-de-sprijin-pentru-familiile-monoparentale-vulnerabile-din-romania",
+          "/ghiduri_pids/poids-ghidul-solicitantului-cresterea-accesului-profesionistilor-din-domeniul-serviciilor-sociale-pentru-copii-si-familii-la-programe-de-formare-continua",
+          "/ghiduri_pids/poids-ghidul-solicitantului-implementarea-pactului-de-integritate",
+          "/ghiduri_pids/poids-ghidul-solicitantului-servicii-de-sprijin-pentru-incluziunea-sociala-a-persoanelor-fara-adapost",
+          "/ghiduri_pids/servicii-de-asistenta-si-suport-in-luarea-deciziei-pentru-persoane-fara-sau-cu-capacitate-restransa-de-exercitiu"
+        ],
+        "signatures": {
+          "mipeHost": true,
+          "ministry": true,
+          "wordpress": true
+        },
+        "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>"
       },
       {
         "target": "https://mfe.gov.ro/pdds/despre-program-programare/",
-        "ok": false,
-        "transport": "direct-only",
-        "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-        "policy": "search-discovery-only-when-direct-unavailable"
+        "ok": true,
+        "transport": "canonical-dual-relay-corroborated",
+        "readerUrl": "https://r.jina.ai/https://mfe.gov.ro/pdds/despre-program-programare/",
+        "translateUrl": "https://mfe-gov-ro.translate.goog/pdds/despre-program-programare/?_x_tr_sl=ro&_x_tr_tl=en&_x_tr_hl=en",
+        "readerError": null,
+        "translateError": null,
+        "verification": "CANONICAL_DUAL_RELAY_CORROBORATED",
+        "readerSha256": "34d73897342b320328bd21eb2cd684ecbcce65af5bbad95539e12602130f7a42",
+        "translateSha256": "b6d0a22756d8becc94e15c59e441c6acd67becb97fd559a0147f208e740cf5b3",
+        "readerBytes": 39327,
+        "translateBytes": 208040,
+        "sharedOfficialPathCount": 127,
+        "sharedOfficialPaths": [
+          "/anunturi-autoritati-de-management-2021-2027",
+          "/avertizor-in-interes-public",
+          "/bilanturi-contabile",
+          "/calendar-apeluri-de-proiecte",
+          "/carta-drepturilor-fundamentale-a-uniunii-europene",
+          "/category/anunturi-pnrr",
+          "/comunicare",
+          "/comunicare/banii-europeni-sunt-pentru-tine",
+          "/comunicare/campanie-media-bani-europeni-pentru-idei-romanesti",
+          "/comunicare/comunicarea-politicii-de-coeziune-2021-2027",
+          "/comunicare/comunicate-de-presa",
+          "/comunicare/evenimente",
+          "/comunicare/publicatii",
+          "/comunicare/strategie-de-comunicare",
+          "/comunicare/ultimele-stiri",
+          "/connecting-europe-facility",
+          "/contracte-si-absorbtie",
+          "/costuri-deplasari-externe",
+          "/declaratii-de-avere-si-de-interese-global",
+          "/fsc",
+          "/granturi-see-si-norvegiene",
+          "/informatii-de-interes-public",
+          "/informatii-de-interes-public/achizitii-publice",
+          "/informatii-de-interes-public/acte-normative-in-consultare-publica",
+          "/informatii-de-interes-public/buget",
+          "/informatii-de-interes-public/comisia-paritara",
+          "/informatii-de-interes-public/date-deschise",
+          "/informatii-de-interes-public/formulare-tip",
+          "/informatii-de-interes-public/integritate-institutionala",
+          "/informatii-de-interes-public/protocoale-mipe"
+        ],
+        "targetSpecificPaths": [
+          "/pdds/despre-program-programare",
+          "/wp-content/uploads/2020/04/6fee253d783336dc0352d4bfb4888917.docx",
+          "/wp-content/uploads/2020/05/e1dfb646aa44d69b159554ba012ebf4e.doc",
+          "/wp-content/uploads/2020/07/6588501da9e75a7d8003d010af3b03fd.pdf",
+          "/wp-content/uploads/2020/07/72c81c03d0383e60d84d82292ce37bf2-1.pdf",
+          "/wp-content/uploads/2020/07/95c37097aeb9a00bcb5c2d5ddde31f38.pdf",
+          "/wp-content/uploads/2020/07/a5e943fc16254937511e4a975b416adc.pdf",
+          "/wp-content/uploads/2020/07/dc4af737fa9513f3fcd736b4a8a25696.pdf",
+          "/wp-content/uploads/2020/10/d0dbdb9617985540ebee24b7d1c19fbd.docx",
+          "/wp-content/uploads/2022/03/a0fe863f292d7e2d952820da8bbb99e8.pdf",
+          "/wp-content/uploads/2022/05/93c5aaf916f46d2f0038b6f46b1d1d8d-1.docx",
+          "/wp-content/uploads/2022/06/425394145037e12265f6e5ba96cfb08a.pdf",
+          "/wp-content/uploads/2022/06/63a89e37265bc71052610a48ab8fda00.pdf",
+          "/wp-content/uploads/2022/06/e31e4ff9fb6f68eb0549a04247139e6d.pdf",
+          "/wp-content/uploads/2022/07/7c301c2bddab4052b40952f29b8b5bf9.pdf",
+          "/wp-content/uploads/2022/10/b424db010b9375a0525a039202ad0bba.pdf",
+          "/wp-content/uploads/2022/11/508a700797fc0358aca3bde3a2950266.pdf",
+          "/wp-content/uploads/2022/11/ccd9ae994ca747e93c52ec9c97fc4c39.pdf",
+          "/wp-content/uploads/2024/06/6d03ba8d1ca84a39d036d8657a4fa0ee.zip",
+          "/wp-content/uploads/2024/07/4295622398a56cf505f895b39d8dc1ca.pdf"
+        ],
+        "signatures": {
+          "mipeHost": true,
+          "ministry": true,
+          "wordpress": true
+        },
+        "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>"
       },
       {
         "target": "https://mfe.gov.ro/pnrr/",
-        "ok": false,
-        "transport": "direct-only",
-        "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-        "policy": "search-discovery-only-when-direct-unavailable"
+        "ok": true,
+        "transport": "canonical-dual-relay-corroborated",
+        "readerUrl": "https://r.jina.ai/https://mfe.gov.ro/pnrr/",
+        "translateUrl": "https://mfe-gov-ro.translate.goog/pnrr/?_x_tr_sl=ro&_x_tr_tl=en&_x_tr_hl=en",
+        "readerError": null,
+        "translateError": null,
+        "verification": "CANONICAL_DUAL_RELAY_CORROBORATED",
+        "readerSha256": "60c265cedd7f252932a937ed84dcf9568f87c7ae82d5dc6eaafa43477b528996",
+        "translateSha256": "96b5aaa2f049f2bcef0efc076d9df1188b6d6385f7514cfee362592032051a1f",
+        "readerBytes": 35282,
+        "translateBytes": 266491,
+        "sharedOfficialPathCount": 69,
+        "sharedOfficialPaths": [
+          "/comisia-europeana-saluta-depunerea-pnrr-de-catre-romania",
+          "/comitetul-de-monitorizare-a-planului-national-de-redresare-si-rezilienta",
+          "/comitetul-interministerial-de-coordonare-pnrr-cic-pnrr",
+          "/inscrieri-deschise-la-dezbaterile-publice-pentru-actualizarea-planului-national-de-redresare-si-rezilienta",
+          "/memorandumul-aprobarea-mandatarii-mipe-in-vederea-finalizarii-ajustarii-pnrr",
+          "/mipe-publica-manualul-de-identitate-vizuala-pentru-planul-national-de-redresare-si-rezilienta/manual-identitate-vizuala-pnrr",
+          "/mipe-publica-un-formular-simplificat-pentru-trimiterea-de-idei-de-reforme-si-investitii-pentru-actualizarea-pnrr",
+          "/pnrr",
+          "/pnrr-dashboard",
+          "/pnrr-instructiunea-nr-2-pentru-aplicarea-unitara-a-prevederilor-ghidului-specific-conditii-de-accesare-a-fondurilor-europene-aferente-planului-national-de-redresare-si-rezilienta-in-cadrul-apelului",
+          "/pnrr-instructiunea-nr-4-28-10-2024-privind-modalitatea-de-actualizare-a-graficului-de-implementare-si-atentionare-a-beneficiarilor-in-vederea-respectarii-prevederilor-referitoare-la-determinar",
+          "/pnrr-instructiunea-nr-6-20-02-2025-privind-documentele-justificative-care-insotesc-cererea-de-transfer-si-declaratia-de-utilizare-a-cererii-de-transfer-in-cadrul-apelului-de-proiecte-digitalizarea-i",
+          "/pnrr-lista-cu-cei-mai-mari-100-destinatari-finali-care-au-primit-finantare-pentru-implementarea-masurilor-din-cadrul-pnrr-pana-la-data-de-15-aprilie-2024",
+          "/pnrr-lista-cu-cei-mai-mari-100-destinatari-finali-care-au-primit-finantare-pentru-implementarea-masurilor-din-cadrul-pnrr-pana-la-data-de-25-septembrie-2024",
+          "/pnrr/fraude.pnrr@mfe.gov.ro",
+          "/wp-content/uploads/2021/09/28ff3a6c360882865c596111d8aad533.pdf",
+          "/wp-content/uploads/2021/09/2d03353eb00e239cb0ef2e26de9f42aa.pdf",
+          "/wp-content/uploads/2021/09/89a22729ab84c1f9b42c85ae7eb498f3.pdf",
+          "/wp-content/uploads/2021/09/d05873457d3b15819a46ff8abb6048e3.pdf",
+          "/wp-content/uploads/2021/09/f2211c7d8ea2e3d3ba5831dc0c68fc72.pdf",
+          "/wp-content/uploads/2022/04/e6d481b413db9e7384a946c92e833d45.pdf",
+          "/wp-content/uploads/2022/05/6df6859265e2087aeae8e227427b4e66.pdf",
+          "/wp-content/uploads/2023/01/08596de99087bfcb55eafe80e11a21e4.pdf",
+          "/wp-content/uploads/2023/06/0f3f1374ef12ed29a38a89151f812434.pdf",
+          "/wp-content/uploads/2023/06/bd330fc02729949b3912a46c1f7c0ea5-1.pdf",
+          "/wp-content/uploads/2023/08/d5eb2b2494c865ce3d729b636552122d.docx",
+          "/wp-content/uploads/2023/10/c8c4f4c9e85ecdb40aef8d352d3bd1b1.xlsx",
+          "/wp-content/uploads/2024/06/c7b790719a7dd267ee77d0548f3cb7c8.pdf",
+          "/wp-content/uploads/2024/07/2ef3a89f22d20cf696058b4891e94ac0.pdf",
+          "/wp-content/uploads/2024/07/8c51672dc800f447bc9c586c415f21a1.zip"
+        ],
+        "targetSpecificPaths": [
+          "/pnrr",
+          "/pnrr/fraude.pnrr@mfe.gov.ro",
+          "/wp-content/uploads/2021/09/28ff3a6c360882865c596111d8aad533.pdf",
+          "/wp-content/uploads/2021/09/2d03353eb00e239cb0ef2e26de9f42aa.pdf",
+          "/wp-content/uploads/2021/09/89a22729ab84c1f9b42c85ae7eb498f3.pdf",
+          "/wp-content/uploads/2021/09/d05873457d3b15819a46ff8abb6048e3.pdf",
+          "/wp-content/uploads/2021/09/f2211c7d8ea2e3d3ba5831dc0c68fc72.pdf",
+          "/wp-content/uploads/2022/04/e6d481b413db9e7384a946c92e833d45.pdf",
+          "/wp-content/uploads/2022/05/6df6859265e2087aeae8e227427b4e66.pdf",
+          "/wp-content/uploads/2023/01/08596de99087bfcb55eafe80e11a21e4.pdf",
+          "/wp-content/uploads/2023/06/0f3f1374ef12ed29a38a89151f812434.pdf",
+          "/wp-content/uploads/2023/06/bd330fc02729949b3912a46c1f7c0ea5-1.pdf",
+          "/wp-content/uploads/2023/08/d5eb2b2494c865ce3d729b636552122d.docx",
+          "/wp-content/uploads/2023/10/c8c4f4c9e85ecdb40aef8d352d3bd1b1.xlsx",
+          "/wp-content/uploads/2024/06/c7b790719a7dd267ee77d0548f3cb7c8.pdf",
+          "/wp-content/uploads/2024/07/2ef3a89f22d20cf696058b4891e94ac0.pdf",
+          "/wp-content/uploads/2024/07/8c51672dc800f447bc9c586c415f21a1.zip",
+          "/wp-content/uploads/2024/12/777ff80b00d293189b3c9394e9363696.zip",
+          "/wp-content/uploads/2025/03/92e418e566dce94c438869fb8fcb2e86.xlsx",
+          "/wp-content/uploads/2025/03/f5f08f2bbe04214203ce56386e01242a.pdf"
+        ],
+        "signatures": {
+          "mipeHost": true,
+          "ministry": true,
+          "wordpress": true
+        },
+        "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>"
       },
       {
         "target": "https://oportunitati-ue.gov.ro/",
         "ok": false,
-        "transport": "direct-only",
+        "transport": "direct+first-party-relay",
         "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-        "policy": "search-discovery-only-when-direct-unavailable"
+        "relayError": "HTTPError: HTTP Error 401: Unauthorized",
+        "relay": "https://partener-mipe-relay-mihaicismaru-6634s-projects.vercel.app/api/mipe",
+        "policy": "search-discovery-only-when-official-byte-transports-unavailable"
       },
       {
         "target": "https://mfe.gov.ro/wp-json/wp/v2/posts?per_page=50&orderby=modified&order=desc&_fields=link%2Cdate%2Cmodified%2Ctitle%2Cexcerpt",
         "ok": false,
-        "transport": "direct-only",
+        "transport": "direct+first-party-relay",
         "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-        "policy": "search-discovery-only-when-direct-unavailable"
+        "relayError": "HTTPError: HTTP Error 401: Unauthorized",
+        "relay": "https://partener-mipe-relay-mihaicismaru-6634s-projects.vercel.app/api/mipe",
+        "policy": "search-discovery-only-when-official-byte-transports-unavailable"
       },
       {
         "target": "https://mfe.gov.ro/feed/",
         "ok": false,
-        "transport": "direct-only",
+        "transport": "direct+first-party-relay",
         "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-        "policy": "search-discovery-only-when-direct-unavailable"
+        "relayError": "HTTPError: HTTP Error 401: Unauthorized",
+        "relay": "https://partener-mipe-relay-mihaicismaru-6634s-projects.vercel.app/api/mipe",
+        "policy": "search-discovery-only-when-official-byte-transports-unavailable"
       },
       {
         "target": "https://mfe.gov.ro/wp-sitemap.xml",
         "ok": false,
-        "transport": "direct-only",
+        "transport": "direct+first-party-relay",
         "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-        "policy": "search-discovery-only-when-direct-unavailable"
+        "relayError": "HTTPError: HTTP Error 401: Unauthorized",
+        "relay": "https://partener-mipe-relay-mihaicismaru-6634s-projects.vercel.app/api/mipe",
+        "policy": "search-discovery-only-when-official-byte-transports-unavailable"
       },
       {
         "target": "https://mfe.gov.ro/sitemap.xml",
         "ok": false,
-        "transport": "direct-only",
+        "transport": "direct+first-party-relay",
         "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-        "policy": "search-discovery-only-when-direct-unavailable"
+        "relayError": "HTTPError: HTTP Error 401: Unauthorized",
+        "relay": "https://partener-mipe-relay-mihaicismaru-6634s-projects.vercel.app/api/mipe",
+        "policy": "search-discovery-only-when-official-byte-transports-unavailable"
       },
       {
         "target": "https://oportunitati-ue.gov.ro/wp-json/wp/v2/posts?per_page=50&orderby=modified&order=desc&_fields=link%2Cdate%2Cmodified%2Ctitle%2Cexcerpt",
         "ok": false,
-        "transport": "direct-only",
+        "transport": "direct+first-party-relay",
         "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-        "policy": "search-discovery-only-when-direct-unavailable"
+        "relayError": "HTTPError: HTTP Error 401: Unauthorized",
+        "relay": "https://partener-mipe-relay-mihaicismaru-6634s-projects.vercel.app/api/mipe",
+        "policy": "search-discovery-only-when-official-byte-transports-unavailable"
       },
       {
         "target": "https://oportunitati-ue.gov.ro/feed/",
         "ok": false,
-        "transport": "direct-only",
+        "transport": "direct+first-party-relay",
         "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-        "policy": "search-discovery-only-when-direct-unavailable"
+        "relayError": "HTTPError: HTTP Error 401: Unauthorized",
+        "relay": "https://partener-mipe-relay-mihaicismaru-6634s-projects.vercel.app/api/mipe",
+        "policy": "search-discovery-only-when-official-byte-transports-unavailable"
       },
       {
         "target": "https://oportunitati-ue.gov.ro/wp-sitemap.xml",
         "ok": false,
-        "transport": "direct-only",
+        "transport": "direct+first-party-relay",
         "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-        "policy": "search-discovery-only-when-direct-unavailable"
+        "relayError": "HTTPError: HTTP Error 401: Unauthorized",
+        "relay": "https://partener-mipe-relay-mihaicismaru-6634s-projects.vercel.app/api/mipe",
+        "policy": "search-discovery-only-when-official-byte-transports-unavailable"
       },
       {
         "target": "https://oportunitati-ue.gov.ro/sitemap.xml",
         "ok": false,
-        "transport": "direct-only",
+        "transport": "direct+first-party-relay",
         "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-        "policy": "search-discovery-only-when-direct-unavailable"
+        "relayError": "HTTPError: HTTP Error 401: Unauthorized",
+        "relay": "https://partener-mipe-relay-mihaicismaru-6634s-projects.vercel.app/api/mipe",
+        "policy": "search-discovery-only-when-official-byte-transports-unavailable"
       }
     ],
     "searchTransports": [
@@ -123,13 +414,13 @@
         "error": "HTTPError: HTTP Error 401: Unauthorized"
       }
     ],
-    "candidateCount": 1,
-    "fetchedCandidateCount": 1,
-    "currentVerifiedCount": 0,
-    "publishedItemCount": 1,
+    "candidateCount": 120,
+    "fetchedCandidateCount": 32,
+    "currentVerifiedCount": 11,
+    "publishedItemCount": 12,
     "transportMode": "direct",
-    "lastKnownGoodPreserved": true,
-    "directSuccessCount": 1,
+    "lastKnownGoodPreserved": false,
+    "directSuccessCount": 0,
     "proxySuccessCount": 0
   },
   "items": [
@@ -841,6 +1132,661 @@
       },
       "retrievalTransport": "direct-canonical-preserved",
       "documents": []
+    },
+    {
+      "id": "30d028b20e2caba7d36f",
+      "title": "Anunțuri Programul Incluziune și Demnitate Socială – Ministerul Investițiilor și Proiectelor Europene",
+      "url": "https://mfe.gov.ro/pids/anunturi/",
+      "date": "2026-08-13",
+      "dateLabel": "13 aug 2026",
+      "dateConfidence": "OFFICIAL_PAGE",
+      "summary": "Pagina oficială PoIDS a fost actualizată și include 25 documente oficiale. Cele mai relevante elemente observate: corrigendum la Ghidul Solicitantului - Condiții Specifice „Măsuri integrate de sprijin pentru familiile monoparentale vulnerabile din România”,; varianta consolidată a Ghidului Solicitantului Condiții Specifice „Pentru introducerea în MySMIS2021+ a fișelor de proiecte selectate de Grupurile de Acțiune Locală – etapa a III-a a mecanismului DLRC”,; varianta consolidată a Ghidului Solicitantului Condiții Specifice „Servicii de îngrijire de zi - terapii psihologice pentru copiii cu dizabilități – ITI Microregiunea Țara Făgărașului”,.",
+      "tag": "PoIDS",
+      "kind": "OFFICIAL_UPDATE",
+      "tier": "T1_DUAL_RELAY_CORROBORATED",
+      "source": "MIPE",
+      "observedAt": "2026-08-15T07:46:07.637692+00:00",
+      "relevanceScore": 23,
+      "discovery": "page-link",
+      "retrievalTransport": "canonical-dual-relay-corroborated",
+      "decisionUseful": true,
+      "documents": [
+        {
+          "name": "corrigendum la Ghidul Solicitantului - Condiții Specifice „Măsuri integrate de sprijin pentru familiile monoparentale vulnerabile din România”,",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/325bff691b98d6377888526011455bd6.pdf"
+        },
+        {
+          "name": "Lista plăților PoIDS la 13.08.2026",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/273e151510264c7aced79605e58868ab.xlsx"
+        },
+        {
+          "name": "Lista plăților PoIDS la 12.08.2026",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/fe5ecd6d0e38603d611551bf6be3af9e.xlsx"
+        },
+        {
+          "name": "varianta consolidată a Ghidului Solicitantului Condiții Specifice „Pentru introducerea în MySMIS2021+ a fișelor de proiecte selectate de Grupurile de Acțiune Locală – etapa a III-a a mecanismului DLRC”,",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/eee2c2e1ec005931d5fa0693346abfce.7z"
+        },
+        {
+          "name": "varianta consolidată a Ghidului Solicitantului Condiții Specifice „Servicii de îngrijire de zi - terapii psihologice pentru copiii cu dizabilități – ITI Microregiunea Țara Făgărașului”,",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/62b691aa5cba33d376dbf2c2800d5462.7z"
+        },
+        {
+          "name": "Lista proiectelor contractate pe regiuni de implementare la 31 iulie 2026.",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/8ed1d7474b75dd841c5f17146bf10e9c.xlsx"
+        },
+        {
+          "name": "Lista plăților PoIDS la 11.08.2026",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/3861435b57c878e3336768845b933f49.xlsx"
+        },
+        {
+          "name": "Metodologia de verificare, evaluare și selecție a proiectelor în cadrul PoIDS 2021-2027.",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/d33679a7733def89cc79fdae01b73cf7.pdf"
+        },
+        {
+          "name": "Fișa proiectului de importanță strategică „Cluster național de inovare socială și incluziune”.",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/433fe7864cfca71f115c1e35b6909e10.pdf"
+        },
+        {
+          "name": "Fișa proiectului de importanță strategică „ACASĂ în Comunitate. Parteneriat pentru locuire incluzivă și servicii comunitare pentru persoane cu dizabilități din Bihor”.",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/34926a8dfe2b9922d95f97f6b90e1374.pdf"
+        },
+        {
+          "name": "Lista plăților PoIDS la 07.08.2026",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/6a5a86e1600eec26bd295b7beee2fe80.xlsx"
+        },
+        {
+          "name": "Ghidul Solicitantului Condiții Specifice „Sprijin pentru familii monoparentale – ITI Țara Făgărașului”,",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/717ba3e33320359ef3f307eb31ce9638.7z"
+        },
+        {
+          "name": "Ghidul Solicitantului Condiții Specifice „Sprijin pentru familii monoparentale – ITI Moții Țara de Piatră”,",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/05627d6fe9df04f2c76ae595c36bb52e.7z"
+        },
+        {
+          "name": "Lista plăților PoIDS la 06.08.2026",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/544891a21e05bdad9954cb78b990b0fc.xlsx"
+        },
+        {
+          "name": "corrigendum",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/4c8b49b1b2cb1ac77fe0da7dfd97f2be.pdf"
+        },
+        {
+          "name": "Lista plăților PoIDS la 05.08.2026",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/9da6fa515436b5a484c971cb8b80f629.xlsx"
+        },
+        {
+          "name": "Lista plăților PoIDS la 04.08.2026",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/0e13d67737d44fa5281c1249b775a0ee.xlsx"
+        },
+        {
+          "name": "RO",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/0ad7156b06e7c26e7cbc6c477287d296.pdf"
+        },
+        {
+          "name": "EN",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/05474fdf6ceabdc7c1b8d84dc703e349.pdf"
+        },
+        {
+          "name": "Lista plăților PoIDS la 31.07.2026",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/ab8746819a1ddd5280e1b9f25288ef96.xlsx"
+        },
+        {
+          "name": "Lista plăților PoIDS la 30.07.2026",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/07/c3b1bd73802b998575a7ebfe41a0b95c.xlsx"
+        },
+        {
+          "name": "Lista plăților PoIDS la 29.07.2026",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/07/32f97e70b84de58a0b3f11fcea34ab06.xlsx"
+        },
+        {
+          "name": "Lista plăților PoIDS la 28.07.2026",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/07/125aa3b8031be4bcee30afbbc33277ba.xlsx"
+        },
+        {
+          "name": "Lista nr. 2 a cererilor de finanțare respinse în etapa de verificare tehnico-financiară preliminară",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/07/b90cd3ee4db4b2d662d3dc20194e4119.pdf"
+        },
+        {
+          "name": "Lista finală a proiectelor selectate la finanțare după soluționarea contestațiilor în etapa de evaluare tehnică și financiară calitativă (ETFC)",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/07/bd68c1a784e3ff7a834a3ef6466d6a0b.pdf"
+        }
+      ]
+    },
+    {
+      "id": "5f1db3bf6615854686b0",
+      "title": "Anunțuri Programul Educație și Ocupare – Ministerul Investițiilor și Proiectelor Europene",
+      "url": "https://mfe.gov.ro/peos/anunturi/",
+      "date": "2026-08-13",
+      "dateLabel": "13 aug 2026",
+      "dateConfidence": "OFFICIAL_PAGE",
+      "summary": "Pagina oficială PEO a fost actualizată și include 25 documente oficiale. Cele mai relevante elemente observate: corrigendum la Ghidul Solicitantului - Condiții Specifice „Inițiativa ALMA”,; varianta consolidată a Ghidului Solicitantului Condiții Specifice „Sprijin pentru înființarea de întreprinderi sociale în mediul urban - ITI Microregiunea Țara Făgărașului”,; varianta consolidată a Ghidului Solicitantului Condiții Specifice „STEP-LLL – Competențe pentru viitor: formare la locul de muncă și educația adulților în tehnologiile critice – Adulți”,.",
+      "tag": "PEO",
+      "kind": "OFFICIAL_UPDATE",
+      "tier": "T1_DUAL_RELAY_CORROBORATED",
+      "source": "MIPE",
+      "observedAt": "2026-08-15T07:46:07.299304+00:00",
+      "relevanceScore": 22,
+      "discovery": "page-link",
+      "retrievalTransport": "canonical-dual-relay-corroborated",
+      "decisionUseful": true,
+      "documents": [
+        {
+          "name": "Lista plăților PEO la 13.08.2026",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/2f772b17ccd4aaf831a3e9509588fde6.xlsx"
+        },
+        {
+          "name": "corrigendum la Ghidul Solicitantului - Condiții Specifice „Inițiativa ALMA”,",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/9063ceeed9390ee8312627b23340eb81.pdf"
+        },
+        {
+          "name": "varianta consolidată a Ghidului Solicitantului Condiții Specifice „Sprijin pentru înființarea de întreprinderi sociale în mediul urban - ITI Microregiunea Țara Făgărașului”,",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/04b330ddc38efe0152ef195cbd79adbb.zip"
+        },
+        {
+          "name": "Lista plăților PEO la 12.08.2026",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/a9133389081c798d023d0c9d67a88414.xlsx"
+        },
+        {
+          "name": "varianta consolidată a Ghidului Solicitantului Condiții Specifice „STEP-LLL – Competențe pentru viitor: formare la locul de muncă și educația adulților în tehnologiile critice – Adulți”,",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/8d05374378497f808ae1535b84671949.7z"
+        },
+        {
+          "name": "Lista proiectelor contractate pe regiuni de implementare la 31 iulie 2026.",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/b2435c1d90478e042e9e82349b4cfdc3.xlsx"
+        },
+        {
+          "name": "Lista plăților PEO la 11.08.2026",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/6c9650696c53ce2268163500cd289e55.xlsx"
+        },
+        {
+          "name": "Programul Educatie si Ocupare – versiunea 9.0",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/534485dfbab5f4110540735b3495b45b.pdf"
+        },
+        {
+          "name": "Decizia de aprobare – versiunea 9.0",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/0cca56c1538c63922abb2bf4ae4c1d9d.pdf"
+        },
+        {
+          "name": "Metodologia de verificare, evaluare și selecție a proiectelor în cadrul PEO 2021-2027.",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/afffe0a5c8b3a1c65177138a5542cde5.pdf"
+        },
+        {
+          "name": "Lista plăților PEO la 10.08.2026",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/5c986330ffcac337bc14b7ad5bb1b005.xlsx"
+        },
+        {
+          "name": "varianta consolidată a Ghidului Solicitantului Condiții Specifice „Scheme naționale de stimulare a ocupării tinerilor”,",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/eee0d17fca7aff33b8fc89687719635d.zip"
+        },
+        {
+          "name": "Lista plăților PEO la 07.08.2026",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/5ff807debcb3be52b846518824c73095.xlsx"
+        },
+        {
+          "name": "Lista plăților PEO la 06.08.2026",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/0f515af9e9dc13e959d72a57b950a023.xlsx"
+        },
+        {
+          "name": "Ghidul Solicitantului Condiții Specifice „Diversificarea și flexibilizarea serviciilor de educație timpurie - relansare 2026”,",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/52d86c131094266798a26f6fff7041ac.zip"
+        },
+        {
+          "name": "corrigendum la Ghidul Solicitantului - Condiții Specifice „Scheme naționale de stimulare a ocupării tinerilor”",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/2d8f34e2175de70ed2f71d0c509989db.pdf"
+        },
+        {
+          "name": "Lista plăților PEO la 05.08.2026",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/684454a1df13035ed6e1c91e58b8db5a.xlsx"
+        },
+        {
+          "name": "Lista plăților PEO la 04.08.2026",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/05e3108d11185b63e85640e65fdb87cb.xlsx"
+        },
+        {
+          "name": "Lista plăților PEO la 03.08.2026",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/020f79ab1ec677e9b4c58e5de152751f.xlsx"
+        },
+        {
+          "name": "RO",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/267a033a41d04f482b85720287e3bb25.pdf"
+        },
+        {
+          "name": "EN",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/8b30c1799a362a8ee31c884214021b90.pdf"
+        },
+        {
+          "name": "Lista plăților PEO la 31.07.2026",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/1fa0176f6fec6aea3f666d097ddc110a.xlsx"
+        },
+        {
+          "name": "Lista plăților PEO la 30.07.2026",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/07/f404254b55b69188a463317c1fec0a9a.xlsx"
+        },
+        {
+          "name": "Lista întrebărilor și răspunsurilor frecvente aferente apelului de proiecte „Sprijin pentru înființarea de întreprinderi sociale în mediul urban - ITI Microregiunea Țara Făgărașului”.",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/07/7a2bc69de518d7578ab67a4447747a2c.pdf"
+        },
+        {
+          "name": "Lista întrebărilor și răspunsurilor frecvente aferente apelului de proiecte „Sprijin pentru stimularea ocupării prin furnizarea de măsuri active în pachete de servicii integrate - ITI Moții, Țara de Piatră”.",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/07/ca00aba31582e7adb2b7c8e018a4aca8.pdf"
+        }
+      ]
+    },
+    {
+      "id": "b4f9f4848bebe71a2b3a",
+      "title": "Apelul de tip non-competitiv Competențe pentru incluziune: profesionalizarea personalului din educație în sprijinul educației incluzive finanțat din Prioritatea: 6 Prevenirea părăsirii timpurii a școlii și creșterea accesului și a participării grupurilor dezavantajate la educație, Acțiunea: 6.f.4 Organizarea unor oportunități variate de dezvoltare profesiona",
+      "url": "https://mfe.gov.ro/ghiduri_peos/apelul-de-tip-non-competitiv-competente-pentru-incluziune-profesionalizarea-personalului-din-educatie-in-sprijinul-educatiei-incluzive-finantat-din-prioritatea-6-prevenirea-parasirii-timpurii-a-scol/",
+      "date": "2026-07-30",
+      "dateLabel": "30 iul 2026",
+      "dateConfidence": "OFFICIAL_PAGE",
+      "summary": "Autoritatea de Management pentru Programul Educație și Ocupare din cadrul Ministerului Investițiilor și Proiectelor Europene lansează apelul de tip non-competitiv„ Competențe pentru incluziune: profesionalizarea personalului din educație în sprijinul educației incluzive ” finanțat din Prioritatea: 6 Prevenirea părăsirii timpurii a școlii și creșterea accesului și a participării grupurilor dezavantajate la educație, Acțiunea: 6.f.4 Organizarea unor oportunități variate de dezvoltare profesională pentru personalul didactic, în vederea asigurării unui sistem de educație incluziv.",
+      "tag": "PEO",
+      "kind": "OFFICIAL_UPDATE",
+      "tier": "T1_DUAL_RELAY_CORROBORATED",
+      "source": "MIPE",
+      "observedAt": "2026-08-15T07:46:14.187733+00:00",
+      "relevanceScore": 27,
+      "discovery": "page-link",
+      "retrievalTransport": "canonical-dual-relay-corroborated",
+      "decisionUseful": true,
+      "documents": [
+        {
+          "name": "„Competențe pentru incluziune: profesionalizarea personalului din educație în sprijinul educației incluzive”",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/07/8eb4ea2ac16e93767293816390e1f797-2.zip"
+        }
+      ]
+    },
+    {
+      "id": "9d184a6f28ac0b5fc0b4",
+      "title": "Ghidul Solicitantului Creșterea accesului profesioniștilor din domeniul serviciilor sociale pentru copii și familii la programe de formare continuă – Ministerul Investițiilor și Proiectelor Europene",
+      "url": "https://mfe.gov.ro/ghiduri_pids/poids-ghidul-solicitantului-cresterea-accesului-profesionistilor-din-domeniul-serviciilor-sociale-pentru-copii-si-familii-la-programe-de-formare-continua/",
+      "date": "2026-07-13",
+      "dateLabel": "13 iul 2026",
+      "dateConfidence": "OFFICIAL_PAGE",
+      "summary": "13 iulie 2026: Ghidul Solicitantului Condiții Specifice „Creșterea accesului profesioniștilor din domeniul serviciilor sociale pentru copii și familii la programe de formare continuă” (varianta în consultare publică) apel de proiecte non-competitiv finanțat din Prioritatea P05. Reducerea disparităților dintre copiii la risc de sărăcie și/sau excluziune socială și ceilalți copii, Obiectiv specific: ESO4.11. Lărgirea accesului egal și în timp util la servicii de calitate, sustenabile și la prețuri accesibile, inclusiv servicii care promovează accesul la locuințe și îngrijire orientată către persoane, inclusiv asistență medicală Modernizarea sistemelor de protecție socială, inclusiv promovarea accesului la protecție socială, acordând o atenție deosebită copiilor și grupurilor defavorizate Îmbunătățirea accesibilității, inclusiv pentru persoanele cu dizabilități, precum și a eficacității și",
+      "tag": "PoIDS",
+      "kind": "GUIDE_PUBLISHED",
+      "tier": "T1_DUAL_RELAY_CORROBORATED",
+      "source": "MIPE",
+      "observedAt": "2026-08-15T07:46:20.316038+00:00",
+      "relevanceScore": 27,
+      "discovery": "page-link",
+      "retrievalTransport": "canonical-dual-relay-corroborated",
+      "decisionUseful": true,
+      "documents": [
+        {
+          "name": "Ghidul Solicitantului Condiții Specifice „Creșterea accesului profesioniștilor din domeniul serviciilor sociale pentru copii și familii la programe de formare continuă” (varianta în consultare publică)",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/07/a93f6ae35bddcf44f2f8ac4bc1868cd9.zip"
+        }
+      ]
+    },
+    {
+      "id": "d89cdf97599265d00f98",
+      "title": "Ghidul Solicitantului Condiții Specifice „Competențe pentru incluziune: profesionalizarea personalului din educație în sprijinul educației incluzive” apel de proiecte noncompetitiv finanțat din Prioritatea: P6 Prevenirea părăsirii timpurii a școlii și creșterea accesului și a participării grupurilor dezavantajate la educație, Obiectiv specific: ESO 4.6. – Mi",
+      "url": "https://mfe.gov.ro/ghiduri_peos/ghidul-solicitantului-conditii-specifice-competente-pentru-incluziune-profesionalizarea-personalului-din-educatie-in-sprijinul-educatiei-incluzive-apel-de-proiecte-noncompetit/",
+      "date": "2026-06-17",
+      "dateLabel": "17 iun 2026",
+      "dateConfidence": "OFFICIAL_PAGE",
+      "summary": "Autoritatea de Management pentru Programul Educație și Ocupare lansează, în consultare publică, Ghidul Solicitantului Condiții Specifice „ Competențe pentru incluziune: profesionalizarea personalului din educație în sprijinul educației incluzive” apel de proiecte noncompetitiv finanțat din Prioritatea: P6 Prevenirea părăsirii timpurii a școlii și creșterea accesului și a participării grupurilor dezavantajate la educație, Obiectiv specific: ESO 4.6. Promovarea accesului egal la educație și formare de calitate și favorabile incluziunii, precum și a absolvirii acestora, în special pentru grupurile defavorizate, începând de la educația și îngrijirea timpurie, continuând cu educația și formarea generală și profesională până la învățământul terțiar, precum și educația și învățarea în rândul adulților, inclusiv prin facilitarea mobilității în scopul învățării pentru toți și a accesibilității pe",
+      "tag": "PEO",
+      "kind": "GUIDE_PUBLISHED",
+      "tier": "T1_DUAL_RELAY_CORROBORATED",
+      "source": "MIPE",
+      "observedAt": "2026-08-15T07:46:14.936430+00:00",
+      "relevanceScore": 28,
+      "discovery": "page-link",
+      "retrievalTransport": "canonical-dual-relay-corroborated",
+      "decisionUseful": true,
+      "documents": [
+        {
+          "name": "Ghidul Solicitantului Condiții Specifice „Competențe pentru incluziune: profesionalizarea personalului din educație în sprijinul educației incluzive”",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/06/a9330c71b2b8d887174c36e62657ac2d.zip"
+        }
+      ]
+    },
+    {
+      "id": "57d35241f3451f3070e9",
+      "title": "GHIDURI Programul Dezvoltare Durabilă – Ministerul Investițiilor și Proiectelor Europene",
+      "url": "https://mfe.gov.ro/pdds/ghiduri/",
+      "date": "2026-05-31",
+      "dateLabel": "31 mai 2026",
+      "dateConfidence": "OFFICIAL_PAGE",
+      "summary": "… mai departe Ghidul Solicitantului Energie din apă geotermală – proiecte noi Inactiv 30/05/2025 12:00 am 31/12/2025 11:59 pmAcțiunea 4.4 pddAutoritatea de Management pentru Programul Dezvoltare Durabilă și Tranziție Justă anunță prelungirea duratei până la semnarea contractelor de finanțare pentru proiectele depuse în cadrul apelului …",
+      "tag": "PDDS",
+      "kind": "CONSULTATION_OPENED",
+      "tier": "T1_DUAL_RELAY_CORROBORATED",
+      "source": "MIPE",
+      "observedAt": "2026-08-15T07:46:22.667039+00:00",
+      "relevanceScore": 17,
+      "discovery": "page-link",
+      "retrievalTransport": "canonical-dual-relay-corroborated",
+      "decisionUseful": true,
+      "documents": []
+    },
+    {
+      "id": "555254d4cc187316ae4a",
+      "title": "Apelul de tip competitiv „Inițiativa ALMA” finanțat din Prioritatea 2.Valorificarea potențialului tinerilor pe piața muncii (Ocuparea forței de muncă în rândul tinerilor) Obiectiv specific ESO4.1. – Ministerul Investițiilor și Proiectelor Europene",
+      "url": "https://mfe.gov.ro/ghiduri_peos/apelul-de-tip-competitiv-initiativa-alma-finantat-din-prioritatea-2-valorificarea-potentialului-tinerilor-pe-piata-muncii-ocuparea-fortei-de-munca-in-randul-tinerilor-obiectiv-spec/",
+      "date": "2026-05-28",
+      "dateLabel": "28 mai 2026",
+      "dateConfidence": "OFFICIAL_PAGE",
+      "summary": "14 august 2026: Corrigendum la Ghidul Solicitantului – Condiții Specifice „Inițiativa ALMA” , Prioritatea: 2 „Valorificarea potențialului tinerilor pe piața muncii (Ocuparea forței de muncă în rândul tinerilor)“, Obiectivul specific: ESO4.1 „Îmbunătățirea accesului la piața muncii și măsuri de activare pentru toate persoanele aflate în căutarea unui loc de muncă, în special pentru tineri, îndeosebi prin implementarea Garanției pentru tineret, pentru șomerii de lungă durată și grupurile defavorizate de pe piața muncii și pentru persoanele inactive, precum și prin promovarea desfășurării de activități independente și a economiei sociale (FSE+)“, Acțiunea 2.a.2. „Pregătirea și furnizarea ofertei de servicii de formare/ocupare pentru tineri, inclusiv pentru tineri NEET, prin pachete integrate de măsuri active personalizate în funcție de profilul tinerilor”, aprobat prin Ordinul ministrului i",
+      "tag": "PEO",
+      "kind": "OFFICIAL_UPDATE",
+      "tier": "T1_DUAL_RELAY_CORROBORATED",
+      "source": "MIPE",
+      "observedAt": "2026-08-15T07:46:17.019516+00:00",
+      "relevanceScore": 28,
+      "discovery": "page-link",
+      "retrievalTransport": "canonical-dual-relay-corroborated",
+      "decisionUseful": true,
+      "documents": [
+        {
+          "name": "Corrigendum la Ghidul Solicitantului - Condiții Specifice „Inițiativa ALMA”,",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/9063ceeed9390ee8312627b23340eb81.pdf"
+        },
+        {
+          "name": "Ghidul solicitantului Inițiativa ALMA",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/05/b3ab74f4a3eefb8a6ec443cd00a57d00.7z"
+        }
+      ]
+    },
+    {
+      "id": "bc99e647f8660ce4099b",
+      "title": "Apelul de tip necompetitiv „Susținerea în carieră a cadrelor didactice și a personalului didactic auxiliar prin finanțarea primelor de carieră didactică” finanțat din Prioritatea 7. Creșterea calității ofertei de educație și formare profesională pentru asigurarea echității sistemului și o mai bună adaptare la dinamica pieței muncii și la provocările inovării",
+      "url": "https://mfe.gov.ro/ghiduri_peos/apelul-de-tip-competitiv-sustinerea-in-cariera-a-cadrelor-didactice-si-a-personalului-didactic-auxiliar-prin-finantarea-primelor-de-cariera-didactica-finantat-din-prioritatea-7-cres/",
+      "date": "2026-05-28",
+      "dateLabel": "28 mai 2026",
+      "dateConfidence": "OFFICIAL_PAGE",
+      "summary": "Apelul de tip necompetitiv „Susținerea în carieră a cadrelor didactice și a personalului didactic auxiliar prin finanțarea primelor de carieră didactică” finanțat din Prioritatea 7. Creșterea calității ofertei de educație și formare profesională pentru asigurarea echității sistemului și o mai bună adaptare la dinamica pieței muncii și la provocările inovării și progresului tehnologic, Obiectiv specific: ESO4.5.",
+      "tag": "PEO",
+      "kind": "OFFICIAL_UPDATE",
+      "tier": "T1_DUAL_RELAY_CORROBORATED",
+      "source": "MIPE",
+      "observedAt": "2026-08-15T07:46:16.689407+00:00",
+      "relevanceScore": 27,
+      "discovery": "page-link",
+      "retrievalTransport": "canonical-dual-relay-corroborated",
+      "decisionUseful": true,
+      "documents": [
+        {
+          "name": "Ghidul Solicitantului Condiții Specifice Susținerea în carieră a cadrelor didactice și a personalului didactic auxiliar prin finanțarea primelor de carieră didactică",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/05/ca177091d3d531e3dfc2418fb4fea4c1.zip"
+        },
+        {
+          "name": "de0e49b4134ad3a3ea517d3b0494f9ea.pdf",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/06/de0e49b4134ad3a3ea517d3b0494f9ea.pdf"
+        }
+      ]
+    },
+    {
+      "id": "ae5309adb661a26ce96e",
+      "title": "MONITORIZARE PROGRAM Programul Dezvoltare Durabilă – Ministerul Investițiilor și Proiectelor Europene",
+      "url": "https://mfe.gov.ro/pdds/monitorizare-program/",
+      "date": "2026-04-24",
+      "dateLabel": "24 apr 2026",
+      "dateConfidence": "OFFICIAL_PAGE",
+      "summary": "Ordinul MIPE nr. 584/24.04.2026 pentru aprobarea constituirii Comitetului de Monitorizare pentru Programul Dezvoltare Durabilă și Tranziție Justă 2021 -2027",
+      "tag": "PDDS",
+      "kind": "OFFICIAL_UPDATE",
+      "tier": "T1_DUAL_RELAY_CORROBORATED",
+      "source": "MIPE",
+      "observedAt": "2026-08-15T07:46:28.121422+00:00",
+      "relevanceScore": 15,
+      "discovery": "page-link",
+      "retrievalTransport": "canonical-dual-relay-corroborated",
+      "decisionUseful": true,
+      "documents": [
+        {
+          "name": "Ordinul MIPE nr. 584/24.04.2026 pentru aprobarea constituirii Comitetului de Monitorizare pentru Programul Dezvoltare Durabilă și Tranziție Justă 2021 -2027",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/04/7b39b7c989815f84fc7bfc219ec5bcac.pdf"
+        },
+        {
+          "name": "Sinteza deciziilor primei reuniuni ordinare a CM PDDTJ 2021-2027, ce a avut loc în perioada 03 – 04.06.2026 la Timișoara;",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/02/0c3c6afb5f4da83e4fc60dfac3083879.pdf"
+        },
+        {
+          "name": "Minuta celei de-a V- a reuniuni a CM PDD 2021-2027, aprobată în cadrul reuniunii ordinare a CM PDDTJ din data de 03.06.2026;",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/02/f5e928a31a5616edca3049a77c7bcddd.pdf"
+        },
+        {
+          "name": "Minuta celei de-a VII- a reuniuni a CM PTJ 2021-2027, aprobată în cadrul reuniunii ordinare a CM PDDTJ din data de 03.06.2026;",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/02/38095ff6facd639c194bb83c3a087195.pdf"
+        },
+        {
+          "name": "Materialele prezentate în cadrul primei reuniuni ordinare a CM PDDTJ 2021-2027.",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/02/8c581b8152fcb64be5bb06dbeb36515f.zip"
+        },
+        {
+          "name": "Decizia nr. 1/19.05.2026, privind aprobarea Regulamentului de organizare și funcționare a Comitetului de Monitorizare pentru Programul Dezvoltare Durabilă și Tranziție Justă 2021-2027;",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/07/6a12583178f4fce3085cf2c2f22b9719.pdf"
+        },
+        {
+          "name": "Regulamentul de organizare și funcționare a Comitetului de monitorizare pentru Programul Dezvoltare Durabilă și Tranziție Justă 2021-2027",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/07/ad116e8659dc2a1251b81546ee86d53b.pdf"
+        },
+        {
+          "name": "Decizia nr. 21173/18.02.2026",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/03/6f7ffcf1435013888edade71a0b4c504.pdf"
+        },
+        {
+          "name": "Anexe la Decizia nr. 21173/18.02.2026",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/03/63cf0b6322ac6c45a73272cc8a9c690e.zip"
+        },
+        {
+          "name": "Sinteza deciziilor celei de cincea reuniuni PDD",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2025/12/489f87f0ec57b03393b0376f9a0441a1.pdf"
+        },
+        {
+          "name": "Anexe",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2025/12/63cf0b6322ac6c45a73272cc8a9c690e.zip"
+        },
+        {
+          "name": "Minuta celei de patra reuniuni",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2025/12/cd41dad510a5ace39fa6b3a1e07b9944.pdf"
+        },
+        {
+          "name": "Sinteza deciziilor celei de patra reuniuni PDD",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2025/03/55df6ae95b0c18ad955c2e5c340ca6cc.pdf"
+        },
+        {
+          "name": "Anexe",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2025/03/3096a9f36878e3d06d79ca38c15f95b4-2.zip"
+        },
+        {
+          "name": "Decizia nr. 211/23.10.2024",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/11/9f52009440cfcbc8f93ce45ad614a8fb.pdf"
+        },
+        {
+          "name": "Planul de evaluare aferent PDD 2021-2027",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/11/15085fa405d715ce3d8ae577975441f2.pdf"
+        },
+        {
+          "name": "Decizia nr. 66744/11.10.2024",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/11/80f4e8f3ff3f8e611ad9eb5d0cf82139.pdf"
+        },
+        {
+          "name": "Anexe",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/11/341d0cdefcff317b5c451d4921b107c0.zip"
+        },
+        {
+          "name": "Decizia nr. 17009/27.06.2024",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/11/d3b2a39716de2ad88db1bdd6f4d1760a.pdf"
+        },
+        {
+          "name": "Anexe",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/11/0c79d12b2a113541d6630ec55c60a553.zip"
+        },
+        {
+          "name": "Decizia nr. 2/28.05.2024",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/11/2f82b00942017616340bf5bee63a244b.pdf"
+        },
+        {
+          "name": "Sinteza deciziilor celei de-a treia reuniuni a CM PODD 2021-2027",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/03/213a37baca6b3d049e00a3792577bf3b.pdf"
+        },
+        {
+          "name": "Minuta celei de a treia reuniuni a CM PDD",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2025/03/c60f74c7ee419488920f5432927736c7-1.pdf"
+        },
+        {
+          "name": "Documente reuniune",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/03/19a4b0bbc1c3fa6841e7fcd552c5e7ac.zip"
+        },
+        {
+          "name": "Decizia privind oportunitatea aducerii unor modificări PDD 2021-2027",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/06/77c3d6d15deb6b5f0fed911f7e0ec601.zip"
+        }
+      ]
+    },
+    {
+      "id": "59dd2af91848c919bbde",
+      "title": "MONITORIZARE SI IMPLEMENTARE PROIECTE Programul Dezvoltare Durabilă – Ministerul Investițiilor și Proiectelor Europene",
+      "url": "https://mfe.gov.ro/pdds/monitorizare-si-implementare-proiecte/",
+      "date": "2026-04-08",
+      "dateLabel": "8 apr 2026",
+      "dateConfidence": "OFFICIAL_PAGE",
+      "summary": "Instrucțiunea nr. 1 PDDTJ /08.04.2026 privind identitatea vizuală și clarificarea unor măsuri de comunicare, vizibilitate și transparență a proiectelor finanțate în cadrul Programului Dezvoltare Durabilă și Tranziție Justă 2021-2027",
+      "tag": "PDDS",
+      "kind": "GUIDE_MODIFIED",
+      "tier": "T1_DUAL_RELAY_CORROBORATED",
+      "source": "MIPE",
+      "observedAt": "2026-08-15T07:46:28.652419+00:00",
+      "relevanceScore": 15,
+      "discovery": "page-link",
+      "retrievalTransport": "canonical-dual-relay-corroborated",
+      "decisionUseful": true,
+      "documents": [
+        {
+          "name": "Instrucțiunea nr. 1 PDDTJ /08.04.2026 privind identitatea vizuală și clarificarea unor măsuri de comunicare, vizibilitate și transparență a proiectelor finanțate în cadrul Programului Dezvoltare Durabilă și Tranziție Justă 2021-2027",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/04/a68eb160d61351312caf1d646da80292-1.pdf"
+        },
+        {
+          "name": "Instrucțiunea nr. 19/25.06.2025 privind prevenirea unor nereguli în gestionarea fondurilor europene în cazul subcontractării unor servicii/lucrări și/sau înlocuirii/nominalizării experților principali/secundari din cadrul contractelor",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2025/07/603d910c615f45f69a8b948d8872e07c.pdf"
+        },
+        {
+          "name": "Instrucțiunea nr. 18/12.06.2025 referitoare la Manualul Beneficiarului privind implementarea proiectelor PDD 2021-2027",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/02/09ffd3104f43a595998f7c879c4ec273.pdf"
+        },
+        {
+          "name": "Anexa 1",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/02/479bfd0607cb7b4446fae0cb893d6bd2.pdf"
+        },
+        {
+          "name": "Instrucțiunea nr. 17/09.05.2025 privind clarificarea valorii operațiunilor de peste 10.000.000 euro finanțate în cadrul PDD 2021-2027 și organizarea evenimentului de comunicare",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2025/05/9784dc91016a4e2552262c31ccf081ba.pdf"
+        },
+        {
+          "name": "Instrucțiunea nr. 16/28.02.2025 privind verificarea posibilelor conflicte de interese în cazul achizițiilor directe din cadrul proiectelor finanțate din PDD",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2025/03/a98c6ad2aefb3408b7b1364f98382300.pdf"
+        },
+        {
+          "name": "Anexa 1",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2025/03/0e3051d3bf0ab73b9bc2cd2bf3b877b3.pdf"
+        },
+        {
+          "name": "Anexa 2",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2025/03/d6d140661e43355aa3f01ec75c1eff74.pdf"
+        },
+        {
+          "name": "Instrucțiunea nr. 15/28.02.2025 privind suspendarea procedurilor de achiziție din cadrul proiectelor finanțate din PDD",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2025/03/c97ce022dcae9af3f1448be012e448b6.pdf"
+        },
+        {
+          "name": "Instrucțiunea nr. 13/14.01.2025 privind completarea Instrucțiunii nr. 5/18.06.2024 privind respectarea drepturilor fundamentale pe parcursul implementării proiectelor finanțate în cadrul Programului Dezvoltare Durabilă 2021-2027",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2025/01/45fce72a12489578cd5d9b666db1a132.pdf"
+        },
+        {
+          "name": "Anexa la Instrucțiune",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2025/01/2b96ab8ee75cba9a89911a5f9d0d1fb3.pdf"
+        },
+        {
+          "name": "Instrucțiunea nr. 12/17.12.2024 privind evidențierea în contabilitatea beneficiarilor a valorii proiectelor finanțate prin PDD",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/12/9f82acfc87a77acb71bc0a35b68bd69b.pdf"
+        },
+        {
+          "name": "Anexă la Instrucțiunea nr. 12",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/12/f1a6ab02159702e70f7abc8179d362e3.pdf"
+        },
+        {
+          "name": "Erată la Instrucțiunea nr. 11 privind măsurile destinate monitorizării implementării proiectelor finanţate prin Programul Dezvoltare Durabilă",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/12/55cee1b7c7e0d7af8eb5e71ff0bde2c2.pdf"
+        },
+        {
+          "name": "Ghidul actualizat",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/12/bf66ab28a880745f5db2bc106946e60f.zip"
+        },
+        {
+          "name": "Instrucțiunea nr. 11/07.11.2024",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/11/4c74977a15847590b3e0b328da0736f7.pdf"
+        },
+        {
+          "name": "Anexe la Instrucțiunea nr. 11",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/11/17c70e5d31867cc504dadf9db82030b9.zip"
+        },
+        {
+          "name": "Instrucțiunea nr. 10/30.10.2024",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/11/82e0ee3fb6883fa3b5cedbd37d846d99.pdf"
+        },
+        {
+          "name": "Clarificare privind aplicarea Instrucțiunii nr. 10/30.10.2024",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/11/99ae0e0ed2a01a53bf367886570f51f1.pdf"
+        },
+        {
+          "name": "Instrucțiunea nr. 2/11.03.2024",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/03/3182ba67eb5335960fc42c962cdf65a5.pdf"
+        },
+        {
+          "name": "Anexe la Instrucțiunea 2",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/03/259d282cb5be4854420bbbcffd2e1cfc.zip"
+        },
+        {
+          "name": "Instrucțiunea nr. 1 privind clarificarea unor măsuri de comunicare, vizibilitate și transparență a proiectelor finanțate în cadul Programului Dezvoltare Durabilă 2021-2027",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/03/8c4ca287aecaeecf5a3bb17a7c7c1628.pdf"
+        },
+        {
+          "name": "Circulara nr. 46044/28.03.2024",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/04/b776976221e2566daf2ed005621f615c.pdf"
+        },
+        {
+          "name": "Circulara nr. 24577/19.02.2024",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2024/04/43e20093467ea41106ceebbb918308c3.pdf"
+        }
+      ]
+    },
+    {
+      "id": "dba99eef8ca811930c8d",
+      "title": "Sprijin pentru autoritățile publice locale in vederea asigurării de locuințe sociale pentru persoanele vulnerabile – ITI Valea Jiului – Ministerul Investițiilor și Proiectelor Europene",
+      "url": "https://mfe.gov.ro/ghiduri_pids/consultare-publica-poids-ghidul-solicitantului-sprijin-pentru-autoritatile-publice-locale-in-vederea-asigurarii-de-locuinte-sociale-pentru-persoanele-vulnerabile-iti-valea-jiului/",
+      "date": "2026-03-31",
+      "dateLabel": "31 mar 2026",
+      "dateConfidence": "OFFICIAL_PAGE",
+      "summary": "27 iulie 2026: Corrigendum la Ghidul Solicitantului – Condiții Specifice „Sprijin pentru autoritățile publice locale în vederea asigurării de locuințe sociale pentru persoanele vulnerabile” – ITI Valea Jiului , Prioritatea: P03. Protejarea dreptului la demnitate socială, Obiectivul specific RSO4.3. Promovarea incluziunii socioeconomice a comunităților marginalizate, a gospodăriilor cu venituri reduse și a grupurilor defavorizate, inclusiv a persoanelor cu nevoi speciale, prin acțiuni integrate, inclusiv locuințe și servicii sociale (FEDR), Acțiunea 3.1 Locuințe sociale (FEDR), aprobat prin Ordinul ministrului investițiilor și proiectelor europene nr. 474/2026.",
+      "tag": "PoIDS",
+      "kind": "GUIDE_MODIFIED",
+      "tier": "T1_DUAL_RELAY_CORROBORATED",
+      "source": "MIPE",
+      "observedAt": "2026-08-15T07:46:23.317001+00:00",
+      "relevanceScore": 15,
+      "discovery": "page-link",
+      "retrievalTransport": "canonical-dual-relay-corroborated",
+      "decisionUseful": true,
+      "documents": [
+        {
+          "name": "Corrigendum la Ghidul Solicitantului - Condiții Specifice „Sprijin pentru autoritățile publice locale în vederea asigurării de locuințe sociale pentru persoanele vulnerabile” – ITI Valea Jiului,",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/07/b07b972e4e7f175bacb8f03c9aa63d42.pdf"
+        },
+        {
+          "name": "Ghidul Solicitantului „Sprijin pentru autoritățile publice locale in vederea asigurării de locuințe sociale pentru persoanele vulnerabile – ITI Valea Jiului”,",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/03/7429abe2abc12527172ba5f1549d46b4.zip"
+        },
+        {
+          "name": "Ghidul Solicitantului Condiții Specifice „Sprijin pentru autoritățile publice locale in vederea asigurării de locuințe sociale pentru persoanele vulnerabile” – ITI Valea Jiului (varianta în consultare publică)",
+          "url": "https://mfe.gov.ro/wp-content/uploads/2026/03/c1229c6c58409c293fba2c9383c42886.zip"
+        }
+      ]
     }
   ],
   "runs": [
@@ -2692,6 +3638,429 @@
       "transportMode": "direct",
       "lastKnownGoodPreserved": true,
       "directSuccessCount": 1,
+      "proxySuccessCount": 0
+    },
+    {
+      "observedAt": "2026-08-15T07:46:41.048720+00:00",
+      "status": "OK",
+      "roots": [
+        {
+          "target": "https://mfe.gov.ro/",
+          "ok": true,
+          "transport": "canonical-dual-relay-corroborated",
+          "readerUrl": "https://r.jina.ai/https://mfe.gov.ro/",
+          "translateUrl": "https://mfe-gov-ro.translate.goog/?_x_tr_sl=ro&_x_tr_tl=en&_x_tr_hl=en",
+          "readerError": null,
+          "translateError": null,
+          "verification": "CANONICAL_DUAL_RELAY_CORROBORATED",
+          "readerSha256": "3823b980f02cf53a63ecd8fd517d3b76a421eeb8bb40f3c4de40c3144672d2c9",
+          "translateSha256": "c3f2edf3e71d348cf37daf1f49027dc5aa8702f30d485dd91767b340f7f76e35",
+          "readerBytes": 40944,
+          "translateBytes": 1520629,
+          "sharedOfficialPathCount": 136,
+          "sharedOfficialPaths": [
+            "/544/index.php",
+            "/act-aditional-nr-1-la-acordul-colectiv-incheiat-intre-ministerul-investitiilor-si-proiectelor-europene-si-federatia-publisind",
+            "/alerta-stire-falsa-privind-programarea-politicii-de-coeziune-2028-2034",
+            "/anunturi-autoritati-de-management-2021-2027",
+            "/avertizor-in-interes-public",
+            "/bilanturi-contabile",
+            "/calendar-apeluri-de-finantare",
+            "/calendar-apeluri-de-proiecte",
+            "/carta-drepturilor-fundamentale-a-uniunii-europene",
+            "/category/anunturi-pnrr",
+            "/category/contracte-semnate",
+            "/category/evolutia-fondurilor-europene-in-cifre",
+            "/category/ultimele-apeluri-prima-pagina",
+            "/centralizator-plati",
+            "/comunicare",
+            "/comunicare/banii-europeni-sunt-pentru-tine",
+            "/comunicare/campanie-media-bani-europeni-pentru-idei-romanesti",
+            "/comunicare/comunicarea-politicii-de-coeziune-2021-2027",
+            "/comunicare/comunicate-de-presa",
+            "/comunicare/evenimente",
+            "/comunicare/publicatii",
+            "/comunicare/strategie-de-comunicare",
+            "/comunicare/ultimele-stiri",
+            "/connecting-europe-facility",
+            "/contracte-si-absorbtie",
+            "/costuri-deplasari-externe",
+            "/declaratii-de-avere-si-de-interese-global",
+            "/fsc",
+            "/ghiduri-ms/dezvoltarea-competentelor-esentiale-compatibile-step-pentru-personalul-implicat-in-implementarea-interventiilor-strategice-in-domeniul-cercetarii-aplicate-din-genomica-finantate-prin-prioritatea-5",
+            "/ghiduri_peos/ghidul-solicitantului-diversificarea-si-flexibilizarea-serviciilor-de-educatie-timpurie-relansare-2026"
+          ],
+          "targetSpecificPaths": [
+            "/wp-content/uploads/2023/04/5fae90f38aed2752bf78f9daad608783.pdf"
+          ],
+          "signatures": {
+            "mipeHost": true,
+            "ministry": true,
+            "wordpress": true
+          },
+          "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>"
+        },
+        {
+          "target": "https://mfe.gov.ro/ghiduri_peos/",
+          "ok": true,
+          "transport": "canonical-dual-relay-corroborated",
+          "readerUrl": "https://r.jina.ai/https://mfe.gov.ro/ghiduri_peos/",
+          "translateUrl": "https://mfe-gov-ro.translate.goog/ghiduri_peos/?_x_tr_sl=ro&_x_tr_tl=en&_x_tr_hl=en",
+          "readerError": null,
+          "translateError": null,
+          "verification": "CANONICAL_DUAL_RELAY_CORROBORATED",
+          "readerSha256": "a8f7c8bffb7e71390b1cf72cd3a05d69f69b606a14941e2abfa360a23ea936e4",
+          "translateSha256": "8f980b7e34d1ff8051350fd520fffd5d361e6eb102afbd0dd6fb12acdf1970d6",
+          "readerBytes": 10090,
+          "translateBytes": 196470,
+          "sharedOfficialPathCount": 13,
+          "sharedOfficialPaths": [
+            "/ghiduri_peos",
+            "/ghiduri_peos/activarea-potentialului-antreprenorial-al-tinerilor-iti-microregiunea-tara-fagarasului",
+            "/ghiduri_peos/apelul-de-tip-competitiv-initiativa-alma-finantat-din-prioritatea-2-valorificarea-potentialului-tinerilor-pe-piata-muncii-ocuparea-fortei-de-munca-in-randul-tinerilor-obiectiv-spec",
+            "/ghiduri_peos/apelul-de-tip-competitiv-sustinerea-in-cariera-a-cadrelor-didactice-si-a-personalului-didactic-auxiliar-prin-finantarea-primelor-de-cariera-didactica-finantat-din-prioritatea-7-cres",
+            "/ghiduri_peos/apelul-de-tip-non-competitiv-competente-pentru-incluziune-profesionalizarea-personalului-din-educatie-in-sprijinul-educatiei-incluzive-finantat-din-prioritatea-6-prevenirea-parasirii-timpurii-a-scol",
+            "/ghiduri_peos/ghidul-solicitantului-activarea-potentialului-antreprenorial-al-tinerilor-iti-delta-dunarii",
+            "/ghiduri_peos/ghidul-solicitantului-conditii-specifice-competente-pentru-incluziune-profesionalizarea-personalului-din-educatie-in-sprijinul-educatiei-incluzive-apel-de-proiecte-noncompetit",
+            "/ghiduri_peos/ghidul-solicitantului-conditii-specifice-educatori-pentru-copiii-din-medii-defavorizate",
+            "/ghiduri_peos/ghidul-solicitantului-diversificarea-si-flexibilizarea-serviciilor-de-educatie-timpurie-relansare-2026",
+            "/ghiduri_peos/ghidul-solicitantului-sustinerea-in-cariera-a-cadrelor-didactice-si-a-personalului-didactic-auxiliar-prin-finantarea-primelor-de-cariera-didactica",
+            "/ghiduri_peos/ghidul-solicitantului-universitati-deschise",
+            "/ghiduri_peos/initiativa-alma",
+            "/ghiduri_peos/peo-ghidul-solicitantului-step-vet-formare-profesionala-la-locul-de-munca-pentru-elevii-din-invatamantul-profesional-si-tehnic-in-tehnologii-critice"
+          ],
+          "targetSpecificPaths": [
+            "/ghiduri_peos",
+            "/ghiduri_peos/activarea-potentialului-antreprenorial-al-tinerilor-iti-microregiunea-tara-fagarasului",
+            "/ghiduri_peos/apelul-de-tip-competitiv-initiativa-alma-finantat-din-prioritatea-2-valorificarea-potentialului-tinerilor-pe-piata-muncii-ocuparea-fortei-de-munca-in-randul-tinerilor-obiectiv-spec",
+            "/ghiduri_peos/apelul-de-tip-competitiv-sustinerea-in-cariera-a-cadrelor-didactice-si-a-personalului-didactic-auxiliar-prin-finantarea-primelor-de-cariera-didactica-finantat-din-prioritatea-7-cres",
+            "/ghiduri_peos/apelul-de-tip-non-competitiv-competente-pentru-incluziune-profesionalizarea-personalului-din-educatie-in-sprijinul-educatiei-incluzive-finantat-din-prioritatea-6-prevenirea-parasirii-timpurii-a-scol",
+            "/ghiduri_peos/ghidul-solicitantului-activarea-potentialului-antreprenorial-al-tinerilor-iti-delta-dunarii",
+            "/ghiduri_peos/ghidul-solicitantului-conditii-specifice-competente-pentru-incluziune-profesionalizarea-personalului-din-educatie-in-sprijinul-educatiei-incluzive-apel-de-proiecte-noncompetit",
+            "/ghiduri_peos/ghidul-solicitantului-conditii-specifice-educatori-pentru-copiii-din-medii-defavorizate",
+            "/ghiduri_peos/ghidul-solicitantului-diversificarea-si-flexibilizarea-serviciilor-de-educatie-timpurie-relansare-2026",
+            "/ghiduri_peos/ghidul-solicitantului-sustinerea-in-cariera-a-cadrelor-didactice-si-a-personalului-didactic-auxiliar-prin-finantarea-primelor-de-cariera-didactica",
+            "/ghiduri_peos/ghidul-solicitantului-universitati-deschise",
+            "/ghiduri_peos/initiativa-alma",
+            "/ghiduri_peos/peo-ghidul-solicitantului-step-vet-formare-profesionala-la-locul-de-munca-pentru-elevii-din-invatamantul-profesional-si-tehnic-in-tehnologii-critice"
+          ],
+          "signatures": {
+            "mipeHost": true,
+            "ministry": true,
+            "wordpress": true
+          },
+          "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>"
+        },
+        {
+          "target": "https://mfe.gov.ro/ghiduri_pids/",
+          "ok": true,
+          "transport": "canonical-dual-relay-corroborated",
+          "readerUrl": "https://r.jina.ai/https://mfe.gov.ro/ghiduri_pids/",
+          "translateUrl": "https://mfe-gov-ro.translate.goog/ghiduri_pids/?_x_tr_sl=ro&_x_tr_tl=en&_x_tr_hl=en",
+          "readerError": null,
+          "translateError": null,
+          "verification": "CANONICAL_DUAL_RELAY_CORROBORATED",
+          "readerSha256": "628d5f23f330f019768c68e7fc211c75e02dddbdbfe8c713c9c809a4c1a3963a",
+          "translateSha256": "9cf21ed2e0911c75ba220891c62bc34dffd90dbdcba3b2eff812a11f116472f7",
+          "readerBytes": 7789,
+          "translateBytes": 194098,
+          "sharedOfficialPathCount": 13,
+          "sharedOfficialPaths": [
+            "/ghiduri_pids",
+            "/ghiduri_pids/centre-multifunctionale-pentru-protejarea-si-reintegrarea-sociala-a-victimelor-violentei-domestice",
+            "/ghiduri_pids/consultare-publica-poids-ghidul-solicitantului-sprijin-pentru-autoritatile-publice-locale-in-vederea-asigurarii-de-locuinte-sociale-pentru-persoanele-vulnerabile-iti-valea-jiului",
+            "/ghiduri_pids/ghidul-solicitantului-formarea-profesionala-a-specialistilor-care-lucreaza-cu-grupuri-vulnerabile",
+            "/ghiduri_pids/ghidul-solicitantului-infrastructura-si-servicii-comunitare-pentru-copii-vulnerabili-iti-valea-jiului",
+            "/ghiduri_pids/ghidul-solicitantului-servicii-integrate-pentru-victimele-traficului-de-persoane",
+            "/ghiduri_pids/ghidul-solicitantului-sprijin-pentru-familii-monoparentale-iti-motii-tara-de-piatra",
+            "/ghiduri_pids/ghidul-solicitantului-sprijin-pentru-familii-monoparentale-iti-tara-fagarasului",
+            "/ghiduri_pids/masuri-integrate-de-sprijin-pentru-familiile-monoparentale-vulnerabile-din-romania",
+            "/ghiduri_pids/poids-ghidul-solicitantului-cresterea-accesului-profesionistilor-din-domeniul-serviciilor-sociale-pentru-copii-si-familii-la-programe-de-formare-continua",
+            "/ghiduri_pids/poids-ghidul-solicitantului-implementarea-pactului-de-integritate",
+            "/ghiduri_pids/poids-ghidul-solicitantului-servicii-de-sprijin-pentru-incluziunea-sociala-a-persoanelor-fara-adapost",
+            "/ghiduri_pids/servicii-de-asistenta-si-suport-in-luarea-deciziei-pentru-persoane-fara-sau-cu-capacitate-restransa-de-exercitiu"
+          ],
+          "targetSpecificPaths": [
+            "/ghiduri_pids",
+            "/ghiduri_pids/centre-multifunctionale-pentru-protejarea-si-reintegrarea-sociala-a-victimelor-violentei-domestice",
+            "/ghiduri_pids/consultare-publica-poids-ghidul-solicitantului-sprijin-pentru-autoritatile-publice-locale-in-vederea-asigurarii-de-locuinte-sociale-pentru-persoanele-vulnerabile-iti-valea-jiului",
+            "/ghiduri_pids/ghidul-solicitantului-formarea-profesionala-a-specialistilor-care-lucreaza-cu-grupuri-vulnerabile",
+            "/ghiduri_pids/ghidul-solicitantului-infrastructura-si-servicii-comunitare-pentru-copii-vulnerabili-iti-valea-jiului",
+            "/ghiduri_pids/ghidul-solicitantului-servicii-integrate-pentru-victimele-traficului-de-persoane",
+            "/ghiduri_pids/ghidul-solicitantului-sprijin-pentru-familii-monoparentale-iti-motii-tara-de-piatra",
+            "/ghiduri_pids/ghidul-solicitantului-sprijin-pentru-familii-monoparentale-iti-tara-fagarasului",
+            "/ghiduri_pids/masuri-integrate-de-sprijin-pentru-familiile-monoparentale-vulnerabile-din-romania",
+            "/ghiduri_pids/poids-ghidul-solicitantului-cresterea-accesului-profesionistilor-din-domeniul-serviciilor-sociale-pentru-copii-si-familii-la-programe-de-formare-continua",
+            "/ghiduri_pids/poids-ghidul-solicitantului-implementarea-pactului-de-integritate",
+            "/ghiduri_pids/poids-ghidul-solicitantului-servicii-de-sprijin-pentru-incluziunea-sociala-a-persoanelor-fara-adapost",
+            "/ghiduri_pids/servicii-de-asistenta-si-suport-in-luarea-deciziei-pentru-persoane-fara-sau-cu-capacitate-restransa-de-exercitiu"
+          ],
+          "signatures": {
+            "mipeHost": true,
+            "ministry": true,
+            "wordpress": true
+          },
+          "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>"
+        },
+        {
+          "target": "https://mfe.gov.ro/pdds/despre-program-programare/",
+          "ok": true,
+          "transport": "canonical-dual-relay-corroborated",
+          "readerUrl": "https://r.jina.ai/https://mfe.gov.ro/pdds/despre-program-programare/",
+          "translateUrl": "https://mfe-gov-ro.translate.goog/pdds/despre-program-programare/?_x_tr_sl=ro&_x_tr_tl=en&_x_tr_hl=en",
+          "readerError": null,
+          "translateError": null,
+          "verification": "CANONICAL_DUAL_RELAY_CORROBORATED",
+          "readerSha256": "34d73897342b320328bd21eb2cd684ecbcce65af5bbad95539e12602130f7a42",
+          "translateSha256": "b6d0a22756d8becc94e15c59e441c6acd67becb97fd559a0147f208e740cf5b3",
+          "readerBytes": 39327,
+          "translateBytes": 208040,
+          "sharedOfficialPathCount": 127,
+          "sharedOfficialPaths": [
+            "/anunturi-autoritati-de-management-2021-2027",
+            "/avertizor-in-interes-public",
+            "/bilanturi-contabile",
+            "/calendar-apeluri-de-proiecte",
+            "/carta-drepturilor-fundamentale-a-uniunii-europene",
+            "/category/anunturi-pnrr",
+            "/comunicare",
+            "/comunicare/banii-europeni-sunt-pentru-tine",
+            "/comunicare/campanie-media-bani-europeni-pentru-idei-romanesti",
+            "/comunicare/comunicarea-politicii-de-coeziune-2021-2027",
+            "/comunicare/comunicate-de-presa",
+            "/comunicare/evenimente",
+            "/comunicare/publicatii",
+            "/comunicare/strategie-de-comunicare",
+            "/comunicare/ultimele-stiri",
+            "/connecting-europe-facility",
+            "/contracte-si-absorbtie",
+            "/costuri-deplasari-externe",
+            "/declaratii-de-avere-si-de-interese-global",
+            "/fsc",
+            "/granturi-see-si-norvegiene",
+            "/informatii-de-interes-public",
+            "/informatii-de-interes-public/achizitii-publice",
+            "/informatii-de-interes-public/acte-normative-in-consultare-publica",
+            "/informatii-de-interes-public/buget",
+            "/informatii-de-interes-public/comisia-paritara",
+            "/informatii-de-interes-public/date-deschise",
+            "/informatii-de-interes-public/formulare-tip",
+            "/informatii-de-interes-public/integritate-institutionala",
+            "/informatii-de-interes-public/protocoale-mipe"
+          ],
+          "targetSpecificPaths": [
+            "/pdds/despre-program-programare",
+            "/wp-content/uploads/2020/04/6fee253d783336dc0352d4bfb4888917.docx",
+            "/wp-content/uploads/2020/05/e1dfb646aa44d69b159554ba012ebf4e.doc",
+            "/wp-content/uploads/2020/07/6588501da9e75a7d8003d010af3b03fd.pdf",
+            "/wp-content/uploads/2020/07/72c81c03d0383e60d84d82292ce37bf2-1.pdf",
+            "/wp-content/uploads/2020/07/95c37097aeb9a00bcb5c2d5ddde31f38.pdf",
+            "/wp-content/uploads/2020/07/a5e943fc16254937511e4a975b416adc.pdf",
+            "/wp-content/uploads/2020/07/dc4af737fa9513f3fcd736b4a8a25696.pdf",
+            "/wp-content/uploads/2020/10/d0dbdb9617985540ebee24b7d1c19fbd.docx",
+            "/wp-content/uploads/2022/03/a0fe863f292d7e2d952820da8bbb99e8.pdf",
+            "/wp-content/uploads/2022/05/93c5aaf916f46d2f0038b6f46b1d1d8d-1.docx",
+            "/wp-content/uploads/2022/06/425394145037e12265f6e5ba96cfb08a.pdf",
+            "/wp-content/uploads/2022/06/63a89e37265bc71052610a48ab8fda00.pdf",
+            "/wp-content/uploads/2022/06/e31e4ff9fb6f68eb0549a04247139e6d.pdf",
+            "/wp-content/uploads/2022/07/7c301c2bddab4052b40952f29b8b5bf9.pdf",
+            "/wp-content/uploads/2022/10/b424db010b9375a0525a039202ad0bba.pdf",
+            "/wp-content/uploads/2022/11/508a700797fc0358aca3bde3a2950266.pdf",
+            "/wp-content/uploads/2022/11/ccd9ae994ca747e93c52ec9c97fc4c39.pdf",
+            "/wp-content/uploads/2024/06/6d03ba8d1ca84a39d036d8657a4fa0ee.zip",
+            "/wp-content/uploads/2024/07/4295622398a56cf505f895b39d8dc1ca.pdf"
+          ],
+          "signatures": {
+            "mipeHost": true,
+            "ministry": true,
+            "wordpress": true
+          },
+          "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>"
+        },
+        {
+          "target": "https://mfe.gov.ro/pnrr/",
+          "ok": true,
+          "transport": "canonical-dual-relay-corroborated",
+          "readerUrl": "https://r.jina.ai/https://mfe.gov.ro/pnrr/",
+          "translateUrl": "https://mfe-gov-ro.translate.goog/pnrr/?_x_tr_sl=ro&_x_tr_tl=en&_x_tr_hl=en",
+          "readerError": null,
+          "translateError": null,
+          "verification": "CANONICAL_DUAL_RELAY_CORROBORATED",
+          "readerSha256": "60c265cedd7f252932a937ed84dcf9568f87c7ae82d5dc6eaafa43477b528996",
+          "translateSha256": "96b5aaa2f049f2bcef0efc076d9df1188b6d6385f7514cfee362592032051a1f",
+          "readerBytes": 35282,
+          "translateBytes": 266491,
+          "sharedOfficialPathCount": 69,
+          "sharedOfficialPaths": [
+            "/comisia-europeana-saluta-depunerea-pnrr-de-catre-romania",
+            "/comitetul-de-monitorizare-a-planului-national-de-redresare-si-rezilienta",
+            "/comitetul-interministerial-de-coordonare-pnrr-cic-pnrr",
+            "/inscrieri-deschise-la-dezbaterile-publice-pentru-actualizarea-planului-national-de-redresare-si-rezilienta",
+            "/memorandumul-aprobarea-mandatarii-mipe-in-vederea-finalizarii-ajustarii-pnrr",
+            "/mipe-publica-manualul-de-identitate-vizuala-pentru-planul-national-de-redresare-si-rezilienta/manual-identitate-vizuala-pnrr",
+            "/mipe-publica-un-formular-simplificat-pentru-trimiterea-de-idei-de-reforme-si-investitii-pentru-actualizarea-pnrr",
+            "/pnrr",
+            "/pnrr-dashboard",
+            "/pnrr-instructiunea-nr-2-pentru-aplicarea-unitara-a-prevederilor-ghidului-specific-conditii-de-accesare-a-fondurilor-europene-aferente-planului-national-de-redresare-si-rezilienta-in-cadrul-apelului",
+            "/pnrr-instructiunea-nr-4-28-10-2024-privind-modalitatea-de-actualizare-a-graficului-de-implementare-si-atentionare-a-beneficiarilor-in-vederea-respectarii-prevederilor-referitoare-la-determinar",
+            "/pnrr-instructiunea-nr-6-20-02-2025-privind-documentele-justificative-care-insotesc-cererea-de-transfer-si-declaratia-de-utilizare-a-cererii-de-transfer-in-cadrul-apelului-de-proiecte-digitalizarea-i",
+            "/pnrr-lista-cu-cei-mai-mari-100-destinatari-finali-care-au-primit-finantare-pentru-implementarea-masurilor-din-cadrul-pnrr-pana-la-data-de-15-aprilie-2024",
+            "/pnrr-lista-cu-cei-mai-mari-100-destinatari-finali-care-au-primit-finantare-pentru-implementarea-masurilor-din-cadrul-pnrr-pana-la-data-de-25-septembrie-2024",
+            "/pnrr/fraude.pnrr@mfe.gov.ro",
+            "/wp-content/uploads/2021/09/28ff3a6c360882865c596111d8aad533.pdf",
+            "/wp-content/uploads/2021/09/2d03353eb00e239cb0ef2e26de9f42aa.pdf",
+            "/wp-content/uploads/2021/09/89a22729ab84c1f9b42c85ae7eb498f3.pdf",
+            "/wp-content/uploads/2021/09/d05873457d3b15819a46ff8abb6048e3.pdf",
+            "/wp-content/uploads/2021/09/f2211c7d8ea2e3d3ba5831dc0c68fc72.pdf",
+            "/wp-content/uploads/2022/04/e6d481b413db9e7384a946c92e833d45.pdf",
+            "/wp-content/uploads/2022/05/6df6859265e2087aeae8e227427b4e66.pdf",
+            "/wp-content/uploads/2023/01/08596de99087bfcb55eafe80e11a21e4.pdf",
+            "/wp-content/uploads/2023/06/0f3f1374ef12ed29a38a89151f812434.pdf",
+            "/wp-content/uploads/2023/06/bd330fc02729949b3912a46c1f7c0ea5-1.pdf",
+            "/wp-content/uploads/2023/08/d5eb2b2494c865ce3d729b636552122d.docx",
+            "/wp-content/uploads/2023/10/c8c4f4c9e85ecdb40aef8d352d3bd1b1.xlsx",
+            "/wp-content/uploads/2024/06/c7b790719a7dd267ee77d0548f3cb7c8.pdf",
+            "/wp-content/uploads/2024/07/2ef3a89f22d20cf696058b4891e94ac0.pdf",
+            "/wp-content/uploads/2024/07/8c51672dc800f447bc9c586c415f21a1.zip"
+          ],
+          "targetSpecificPaths": [
+            "/pnrr",
+            "/pnrr/fraude.pnrr@mfe.gov.ro",
+            "/wp-content/uploads/2021/09/28ff3a6c360882865c596111d8aad533.pdf",
+            "/wp-content/uploads/2021/09/2d03353eb00e239cb0ef2e26de9f42aa.pdf",
+            "/wp-content/uploads/2021/09/89a22729ab84c1f9b42c85ae7eb498f3.pdf",
+            "/wp-content/uploads/2021/09/d05873457d3b15819a46ff8abb6048e3.pdf",
+            "/wp-content/uploads/2021/09/f2211c7d8ea2e3d3ba5831dc0c68fc72.pdf",
+            "/wp-content/uploads/2022/04/e6d481b413db9e7384a946c92e833d45.pdf",
+            "/wp-content/uploads/2022/05/6df6859265e2087aeae8e227427b4e66.pdf",
+            "/wp-content/uploads/2023/01/08596de99087bfcb55eafe80e11a21e4.pdf",
+            "/wp-content/uploads/2023/06/0f3f1374ef12ed29a38a89151f812434.pdf",
+            "/wp-content/uploads/2023/06/bd330fc02729949b3912a46c1f7c0ea5-1.pdf",
+            "/wp-content/uploads/2023/08/d5eb2b2494c865ce3d729b636552122d.docx",
+            "/wp-content/uploads/2023/10/c8c4f4c9e85ecdb40aef8d352d3bd1b1.xlsx",
+            "/wp-content/uploads/2024/06/c7b790719a7dd267ee77d0548f3cb7c8.pdf",
+            "/wp-content/uploads/2024/07/2ef3a89f22d20cf696058b4891e94ac0.pdf",
+            "/wp-content/uploads/2024/07/8c51672dc800f447bc9c586c415f21a1.zip",
+            "/wp-content/uploads/2024/12/777ff80b00d293189b3c9394e9363696.zip",
+            "/wp-content/uploads/2025/03/92e418e566dce94c438869fb8fcb2e86.xlsx",
+            "/wp-content/uploads/2025/03/f5f08f2bbe04214203ce56386e01242a.pdf"
+          ],
+          "signatures": {
+            "mipeHost": true,
+            "ministry": true,
+            "wordpress": true
+          },
+          "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>"
+        },
+        {
+          "target": "https://oportunitati-ue.gov.ro/",
+          "ok": false,
+          "transport": "direct+first-party-relay",
+          "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "relayError": "HTTPError: HTTP Error 401: Unauthorized",
+          "relay": "https://partener-mipe-relay-mihaicismaru-6634s-projects.vercel.app/api/mipe",
+          "policy": "search-discovery-only-when-official-byte-transports-unavailable"
+        },
+        {
+          "target": "https://mfe.gov.ro/wp-json/wp/v2/posts?per_page=50&orderby=modified&order=desc&_fields=link%2Cdate%2Cmodified%2Ctitle%2Cexcerpt",
+          "ok": false,
+          "transport": "direct+first-party-relay",
+          "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "relayError": "HTTPError: HTTP Error 401: Unauthorized",
+          "relay": "https://partener-mipe-relay-mihaicismaru-6634s-projects.vercel.app/api/mipe",
+          "policy": "search-discovery-only-when-official-byte-transports-unavailable"
+        },
+        {
+          "target": "https://mfe.gov.ro/feed/",
+          "ok": false,
+          "transport": "direct+first-party-relay",
+          "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "relayError": "HTTPError: HTTP Error 401: Unauthorized",
+          "relay": "https://partener-mipe-relay-mihaicismaru-6634s-projects.vercel.app/api/mipe",
+          "policy": "search-discovery-only-when-official-byte-transports-unavailable"
+        },
+        {
+          "target": "https://mfe.gov.ro/wp-sitemap.xml",
+          "ok": false,
+          "transport": "direct+first-party-relay",
+          "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "relayError": "HTTPError: HTTP Error 401: Unauthorized",
+          "relay": "https://partener-mipe-relay-mihaicismaru-6634s-projects.vercel.app/api/mipe",
+          "policy": "search-discovery-only-when-official-byte-transports-unavailable"
+        },
+        {
+          "target": "https://mfe.gov.ro/sitemap.xml",
+          "ok": false,
+          "transport": "direct+first-party-relay",
+          "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "relayError": "HTTPError: HTTP Error 401: Unauthorized",
+          "relay": "https://partener-mipe-relay-mihaicismaru-6634s-projects.vercel.app/api/mipe",
+          "policy": "search-discovery-only-when-official-byte-transports-unavailable"
+        },
+        {
+          "target": "https://oportunitati-ue.gov.ro/wp-json/wp/v2/posts?per_page=50&orderby=modified&order=desc&_fields=link%2Cdate%2Cmodified%2Ctitle%2Cexcerpt",
+          "ok": false,
+          "transport": "direct+first-party-relay",
+          "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "relayError": "HTTPError: HTTP Error 401: Unauthorized",
+          "relay": "https://partener-mipe-relay-mihaicismaru-6634s-projects.vercel.app/api/mipe",
+          "policy": "search-discovery-only-when-official-byte-transports-unavailable"
+        },
+        {
+          "target": "https://oportunitati-ue.gov.ro/feed/",
+          "ok": false,
+          "transport": "direct+first-party-relay",
+          "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "relayError": "HTTPError: HTTP Error 401: Unauthorized",
+          "relay": "https://partener-mipe-relay-mihaicismaru-6634s-projects.vercel.app/api/mipe",
+          "policy": "search-discovery-only-when-official-byte-transports-unavailable"
+        },
+        {
+          "target": "https://oportunitati-ue.gov.ro/wp-sitemap.xml",
+          "ok": false,
+          "transport": "direct+first-party-relay",
+          "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "relayError": "HTTPError: HTTP Error 401: Unauthorized",
+          "relay": "https://partener-mipe-relay-mihaicismaru-6634s-projects.vercel.app/api/mipe",
+          "policy": "search-discovery-only-when-official-byte-transports-unavailable"
+        },
+        {
+          "target": "https://oportunitati-ue.gov.ro/sitemap.xml",
+          "ok": false,
+          "transport": "direct+first-party-relay",
+          "directError": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "relayError": "HTTPError: HTTP Error 401: Unauthorized",
+          "relay": "https://partener-mipe-relay-mihaicismaru-6634s-projects.vercel.app/api/mipe",
+          "policy": "search-discovery-only-when-official-byte-transports-unavailable"
+        }
+      ],
+      "searchTransports": [
+        {
+          "query": "site:mfe.gov.ro apel ghid consultare corrigendum 2026",
+          "ok": false,
+          "transport": "jina-search-discovery-only",
+          "error": "HTTPError: HTTP Error 401: Unauthorized"
+        },
+        {
+          "query": "site:mfe.gov.ro PEO PoIDS PDDS 2026",
+          "ok": false,
+          "transport": "jina-search-discovery-only",
+          "error": "HTTPError: HTTP Error 401: Unauthorized"
+        },
+        {
+          "query": "site:oportunitati-ue.gov.ro finantare 2026",
+          "ok": false,
+          "transport": "jina-search-discovery-only",
+          "error": "HTTPError: HTTP Error 401: Unauthorized"
+        }
+      ],
+      "candidateCount": 120,
+      "fetchedCandidateCount": 32,
+      "currentVerifiedCount": 11,
+      "publishedItemCount": 12,
+      "transportMode": "direct",
+      "lastKnownGoodPreserved": false,
+      "directSuccessCount": 0,
       "proxySuccessCount": 0
     }
   ]
