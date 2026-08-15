@@ -16,7 +16,9 @@ on:
       - 'partener-eu/ingest/build_mysmis_consultant_registry.py'
       - 'partener-eu/ingest/state/mipe_state.json'
       - 'partener-eu/ops/test_consultant_workspace_v3.py'
+      - 'partener-eu/ops/test_consultant_crud_v4.py'
       - 'partener-eu/ops/fix_consultant_workspace_v3.py'
+      - 'partener-eu/ops/fix_consultant_crud_v4.py'
       - '.github/workflows/partener-eu-consultant-v3.yml'
 
 concurrency:
@@ -24,29 +26,66 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   qa:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 6
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - uses: actions/setup-node@v6
         with:
           node-version: '22'
-      - name: Apply idempotent source corrections in test workspace
-        run: python partener-eu/ops/fix_consultant_workspace_v3.py
+
+      - name: Apply idempotent Consultant source corrections
+        run: |
+          python partener-eu/ops/fix_consultant_workspace_v3.py
+          python partener-eu/ops/fix_consultant_crud_v4.py
+
       - name: Rebuild direct MySMIS Consultant evidence
         run: python partener-eu/ingest/build_mysmis_consultant_registry.py
+
       - name: JavaScript syntax
         run: |
           node --check partener-eu/web/consultant-workspace-v3.js
           node --check partener-eu/web/consultant-onboarding-v3.js
           node --check partener-eu/web/consultant-mysmis-v1.js
           node --check partener-eu/web/mysmis-registry.js
-      - name: Product and evidence contract
-        run: python partener-eu/ops/test_consultant_workspace_v3.py
+
+      - name: Product, CRUD and evidence contract
+        run: |
+          python partener-eu/ops/test_consultant_workspace_v3.py
+          python partener-eu/ops/test_consultant_crud_v4.py
+
+      - name: Persist repaired Consultant runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp partener-eu/web/consultant-workspace-v3.js /tmp/consultant-workspace-v3.js
+          cp partener-eu/web/consultant-workspace-v3.css /tmp/consultant-workspace-v3.css
+          cp partener-eu/web/mysmis-registry.js /tmp/mysmis-registry.js
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for attempt in 1 2 3 4; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/consultant-workspace-v3.js partener-eu/web/consultant-workspace-v3.js
+            cp /tmp/consultant-workspace-v3.css partener-eu/web/consultant-workspace-v3.css
+            cp /tmp/mysmis-registry.js partener-eu/web/mysmis-registry.js
+            git add partener-eu/web/consultant-workspace-v3.js partener-eu/web/consultant-workspace-v3.css partener-eu/web/mysmis-registry.js
+            if git diff --cached --quiet; then
+              echo 'Consultant runtime already current.'
+              exit 0
+            fi
+            git commit -m 'Repair Consultant firm and organisation CRUD'
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1
