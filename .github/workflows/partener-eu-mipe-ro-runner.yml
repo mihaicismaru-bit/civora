@@ -2,79 +2,159 @@ name: PARTENER.EU MIPE Romania Collector
 
 on:
   workflow_dispatch:
+    inputs:
+      persist:
+        description: 'Persistă rezultatele verificate în main'
+        required: true
+        default: true
+        type: boolean
 
-# This collector is an optional Romanian-egress fallback. Keep it manual until
-# a trusted self-hosted runner carrying the `mipe-ro` label is online; otherwise
-# scheduled jobs remain queued indefinitely and obscure the healthy GitHub-hosted
-# MIPE ingestion workflow.
+# One-time Romanian-egress collector. It is deliberately manual and targets a
+# dedicated Windows runner carrying the `mipe-ro` label. Do not schedule it and
+# do not use the runner for pull_request workflows.
 
 permissions:
   contents: write
 
 concurrency:
   group: partener-eu-mipe-ro-runner
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   ingest-ro:
-    # Register a trusted self-hosted runner on a Romanian network with label: mipe-ro
-    runs-on: [self-hosted, mipe-ro]
-    timeout-minutes: 20
+    runs-on: [self-hosted, Windows, X64, mipe-ro]
+    timeout-minutes: 30
+    env:
+      PYTHONUTF8: '1'
+      MIPE_FORCE_IP: ''
+      MIPE_RELAY_URL: ''
+
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - name: Install browser runtime
-        shell: bash
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Test direct Romanian access to MIPE
+        shell: pwsh
         run: |
+          $ErrorActionPreference = 'Stop'
+          @'
+          import json, ssl, urllib.request
+          urls = [
+              'https://mfe.gov.ro/',
+              'https://mfe.gov.ro/ghiduri_peos/',
+              'https://mfe.gov.ro/ghiduri_pids/',
+              'https://mfe.gov.ro/pdds/despre-program-programare/',
+          ]
+          rows=[]
+          for url in urls:
+              try:
+                  req=urllib.request.Request(url,headers={
+                      'User-Agent':'Mozilla/5.0 PARTENER.EU Romanian Collector',
+                      'Accept-Language':'ro,en;q=0.7',
+                  })
+                  with urllib.request.urlopen(req,timeout=30,context=ssl.create_default_context()) as r:
+                      body=r.read(250000)
+                      rows.append({'url':url,'ok':200 <= r.status < 400,'status':r.status,'bytes':len(body),'finalUrl':r.geturl()})
+              except Exception as exc:
+                  rows.append({'url':url,'ok':False,'error':f'{type(exc).__name__}: {exc}'})
+          print(json.dumps(rows,ensure_ascii=False,indent=2))
+          if not any(row.get('ok') for row in rows):
+              raise SystemExit('Calculatorul nu poate accesa direct nicio rădăcină MIPE.')
+          '@ | Set-Content -Encoding UTF8 .\mipe_ro_probe.py
+          python .\mipe_ro_probe.py
+
+      - name: Install Chromium collector
+        shell: pwsh
+        run: |
+          python -m pip install --disable-pip-version-check --upgrade pip
           python -m pip install --disable-pip-version-check playwright
           python -m playwright install chromium
 
-      - name: Collect official MIPE pages from Romanian egress
-        shell: bash
+      - name: Collect official MIPE pages through Romanian egress
+        shell: pwsh
         run: |
-          unset MIPE_FORCE_IP || true
           python partener-eu/ingest/mipe_browser_ingest.py
 
-      - name: Enforce official-source gate
-        shell: bash
+      - name: Normalize direct-source provenance
+        shell: pwsh
         run: |
-          python - <<'PY'
-          import json, sys
-          p='partener-eu/ingest/state/mipe_state.json'
-          d=json.load(open(p,encoding='utf-8'))
-          run=d.get('lastRun') or {}
-          bad=[x for x in d.get('items',[]) if not (x.get('url','').startswith('https://mfe.gov.ro/') or x.get('url','').startswith('https://www.mfe.gov.ro/'))]
-          if bad:
-              print('Non-official URLs rejected:', [x.get('url') for x in bad])
-              sys.exit(2)
-          print(json.dumps({'status':d.get('status'),'sourceAvailable':run.get('sourceAvailable'),'items':len(d.get('items',[]))},ensure_ascii=False))
-          PY
+          @'
+          import json
+          from pathlib import Path
 
-      - name: Persist verified MIPE feed
-        shell: bash
+          state_path=Path('partener-eu/ingest/state/mipe_state.json')
+          feed_path=Path('partener-eu/web/mipe-news.js')
+          state=json.loads(state_path.read_text(encoding='utf-8'))
+          run=state.get('lastRun') or {}
+          if not run.get('sourceAvailable'):
+              raise SystemExit('MIPE direct nu a devenit disponibil în browserul Chromium.')
+          for item in state.get('items',[]):
+              url=item.get('url','')
+              if not (url.startswith('https://mfe.gov.ro/') or url.startswith('https://www.mfe.gov.ro/')):
+                  raise SystemExit(f'URL neoficial respins: {url}')
+              item['tier']='T1'
+              item['retrievalTransport']='playwright-direct-romania'
+              item['verification']='CANONICAL_OFFICIAL_FETCH'
+          state['status']='OK'
+          run['status']='OK'
+          run['transport']='playwright-direct-romania'
+          run['directSuccessCount']=sum(1 for root in run.get('roots',[]) if root.get('ok'))
+          state['lastRun']=run
+          state_path.write_text(json.dumps(state,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          meta={
+              'status':'OK',
+              'asOf':run.get('observedAt'),
+              'source':'MIPE official web properties',
+              'roots':run.get('roots',[]),
+              'itemCount':len(state.get('items',[])),
+              'transport':'playwright-direct-romania',
+          }
+          js='window.PARTENER_DATA=window.PARTENER_DATA||{};\n'
+          js+='window.PARTENER_DATA.mipeIngestion='+json.dumps(meta,ensure_ascii=False,separators=(',',':'))+';\n'
+          js+='window.PARTENER_DATA.mipeNews='+json.dumps(state.get('items',[]),ensure_ascii=False,separators=(',',':'))+';\n'
+          feed_path.write_text(js,encoding='utf-8')
+          print(json.dumps({'status':'OK','directRoots':run['directSuccessCount'],'items':len(state.get('items',[]))},ensure_ascii=False,indent=2))
+          '@ | Set-Content -Encoding UTF8 .\normalize_mipe_ro.py
+          python .\normalize_mipe_ro.py
+
+      - name: Refresh MySMIS consultant evidence
+        shell: pwsh
         run: |
-          set -euo pipefail
-          cp partener-eu/web/mipe-news.js /tmp/mipe-news.js
-          cp partener-eu/ingest/state/mipe_state.json /tmp/mipe_state.json
+          python partener-eu/ingest/build_mysmis_consultant_registry.py
+
+      - name: Persist verified direct feed
+        if: ${{ inputs.persist }}
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Copy-Item partener-eu/web/mipe-news.js $env:TEMP\mipe-news.js -Force
+          Copy-Item partener-eu/web/mysmis-registry.js $env:TEMP\mysmis-registry.js -Force
+          Copy-Item partener-eu/ingest/state/mipe_state.json $env:TEMP\mipe_state.json -Force
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
 
-          for attempt in 1 2 3 4 5; do
+          for ($attempt=1; $attempt -le 5; $attempt++) {
             git fetch origin main
             git reset --hard origin/main
-            cp /tmp/mipe-news.js partener-eu/web/mipe-news.js
-            cp /tmp/mipe_state.json partener-eu/ingest/state/mipe_state.json
-            git add partener-eu/web/mipe-news.js partener-eu/ingest/state/mipe_state.json
-            if git diff --cached --quiet; then
-              echo 'No verified MIPE changes.'
+            Copy-Item $env:TEMP\mipe-news.js partener-eu/web/mipe-news.js -Force
+            Copy-Item $env:TEMP\mysmis-registry.js partener-eu/web/mysmis-registry.js -Force
+            Copy-Item $env:TEMP\mipe_state.json partener-eu/ingest/state/mipe_state.json -Force
+            python partener-eu/ingest/intelligence_index.py
+            git add partener-eu/web/mipe-news.js partener-eu/web/mysmis-registry.js partener-eu/ingest/state/mipe_state.json partener-eu/ingest/state/intelligence_index.json
+            git diff --cached --quiet
+            if ($LASTEXITCODE -eq 0) {
+              Write-Host 'Nu există modificări MIPE verificate de persistat.'
               exit 0
-            fi
-            git commit -m 'Ingest verified MIPE updates from Romanian collector'
-            if git push origin HEAD:main; then exit 0; fi
-            echo "main advanced during MIPE RO persistence; retrying ${attempt}/5."
-            sleep $((attempt * 2))
-          done
-          echo 'Unable to persist MIPE RO outputs after five attempts.' >&2
-          exit 1
+            }
+            git commit -m 'Ingest verified MIPE updates from Romanian Windows collector'
+            git push origin HEAD:main
+            if ($LASTEXITCODE -eq 0) { exit 0 }
+            Write-Host "main a avansat; reîncercare $attempt/5"
+            Start-Sleep -Seconds ($attempt * 2)
+          }
+          throw 'Nu am putut persista rezultatele după cinci încercări.'
