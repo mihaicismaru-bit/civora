@@ -11,6 +11,7 @@ on:
       - 'partener-eu/ingest/polish_decision_products.py'
       - 'partener-eu/ingest/finalize_decision_products.py'
       - 'partener-eu/ops/fix_decision_products_determinism.py'
+      - 'partener-eu/ops/fix_decision_products_source_coverage.py'
       - 'partener-eu/ops/test_decision_products.py'
       - 'partener-eu/web/p11-public-data.js'
       - 'partener-eu/web/decision-intelligence-v2.js'
@@ -49,8 +50,10 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Make product version deterministic from source snapshots
-        run: python partener-eu/ops/fix_decision_products_determinism.py
+      - name: Apply deterministic and complete source projection rules
+        run: |
+          python partener-eu/ops/fix_decision_products_determinism.py
+          python partener-eu/ops/fix_decision_products_source_coverage.py
 
       - name: Build decision-useful editorial products
         run: |
