@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0",
+  "product": "CIVORA / VÂLCEA CLAR",
+  "execution_owner": "civora_site_engine",
+  "scheduler": "github_actions",
+  "workflow": ".github/workflows/valcea-clar-social.yml",
+  "chatgpt": {
+    "scheduled_publication_allowed": false,
+    "conversation_runtime_allowed": false,
+    "role": "operator_console_only"
+  },
+  "truth_source": "verified_fact_kernel",
+  "outbox": "valcea-clar/social/facebook_outbox.json",
+  "outbox_note": "legacy filename retained for backward compatibility; platform routing is defined by each item's platforms object",
+  "common_policy": {
+    "real_photographs_only": true,
+    "synthetic_people_forbidden": true,
+    "provenance_required": true,
+    "reuse_rights_required": true,
+    "editorial_gate_required": true,
+    "channel_native_copy_required": true,
+    "deduplicate_by_platform_state": true,
+    "credentials_in_repository": false,
+    "paid_social_scheduler_required": false
+  },
+  "platforms": {
+    "facebook": {
+      "enabled": true,
+      "mode": "direct_publish",
+      "adapter": "valcea-clar/social/facebook_publish.py",
+      "state": "valcea-clar/social/facebook_state.json",
+      "required_runtime_secrets": [
+        "VALCEA_FB_PAGE_ACCESS_TOKEN"
+      ],
+      "required_runtime_values": [
+        "VALCEA_FB_PAGE_ID"
+      ],
+      "status": "active_when_token_valid"
+    },
+    "instagram": {
+      "enabled": true,
+      "mode": "direct_publish",
+      "adapter": "valcea-clar/social/instagram_publish.py",
+      "state": "valcea-clar/social/instagram_state.json",
+      "required_runtime_secrets": [
+        "VALCEA_IG_ACCESS_TOKEN"
+      ],
+      "required_runtime_variables": [
+        "VALCEA_IG_ACCOUNT_ID"
+      ],
+      "account_requirement": "Instagram professional account authorized for content publishing",
+      "status": "engine_ready_credentials_required"
+    },
+    "tiktok": {
+      "enabled": true,
+      "mode": "direct_post_after_site_consent",
+      "adapter": "valcea-clar/social/tiktok_publish.py",
+      "state": "valcea-clar/social/tiktok_state.json",
+      "required_runtime_secrets": [
+        "VALCEA_TIKTOK_ACCESS_TOKEN"
+      ],
+      "required_runtime_variables": [
+        "VALCEA_TIKTOK_PUBLIC_POSTING_APPROVED"
+      ],
+      "media_domain": "https://valceaclar.ro/media/social/",
+      "site_consent_required_per_post": true,
+      "creator_info_required_per_publish": true,
+      "app_audit_required_for_public_visibility": true,
+      "status": "engine_ready_audit_credentials_and_site_consent_required"
+    }
+  },
+  "unsupported_or_future_platforms": {
+    "youtube_shorts": "adapter_not_yet_enabled",
+    "threads": "adapter_not_yet_enabled",
+    "linkedin": "adapter_not_yet_enabled",
+    "whatsapp": "adapter_not_yet_enabled",
+    "telegram": "adapter_not_yet_enabled"
+  }
+}
