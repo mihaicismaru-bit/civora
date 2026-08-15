@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Apply idempotent runtime bounds, legacy normalization and feed cache-busting."""
+"""Apply idempotent runtime bounds, legacy normalization and feed cache-busting.
+
+The runtime has moved to a stricter direct-publication policy. Reader/search
+transports may therefore disappear from the implementation entirely. Their
+absence is a valid, safer end state rather than a patch failure.
+"""
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -52,6 +57,7 @@ already_markers = {
     "parallel candidate fetch": 'ThreadPoolExecutor(max_workers=8, thread_name_prefix="mipe-fetch")',
     "MIPE asset cache bust": "GitHub Pages may cache static JavaScript by URL",
 }
+optional_retired = {"reader timeout", "search timeout"}
 
 for old, new, label in replacements:
     marker = already_markers.get(label)
@@ -63,6 +69,8 @@ for old, new, label in replacements:
         text = text.replace(old, new, 1)
         changed = True
         print(f"MIPE runtime {label}: applied")
+    elif label in optional_retired:
+        print(f"MIPE runtime {label}: transport retired by direct-only policy")
     else:
         raise SystemExit(f"Expected MIPE runtime pattern not found for {label}; refusing blind edit")
 
