@@ -1,0 +1,160 @@
+name: VÂLCEA CLAR Autonomous Editions
+
+on:
+  workflow_dispatch:
+    inputs:
+      slot:
+        description: "Edition slot"
+        required: true
+        default: "auto"
+        type: choice
+        options: [auto, morning, evening]
+  schedule:
+    # Run both UTC candidates for Romanian DST. The local-time gate below keeps
+    # only 07:45 and 18:30 Europe/Bucharest.
+    - cron: "45 4,5 * * *"
+    - cron: "30 15,16 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-autonomous-editions
+  cancel-in-progress: false
+
+jobs:
+  edition:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Resolve Romanian edition slot
+        id: slot
+        shell: bash
+        env:
+          REQUESTED_SLOT: ${{ github.event.inputs.slot || 'auto' }}
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ "$REQUESTED_SLOT" = "auto" ]; then
+              hour=$(TZ=Europe/Bucharest date +%H)
+              if [ "$hour" -lt 15 ]; then slot=morning; else slot=evening; fi
+            else
+              slot="$REQUESTED_SLOT"
+            fi
+            echo "run_generation=true" >> "$GITHUB_OUTPUT"
+            echo "slot=$slot" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          hour=$(TZ=Europe/Bucharest date +%H)
+          minute=$(TZ=Europe/Bucharest date +%M)
+          if [ "$hour" = "07" ] && [ "$minute" = "45" ]; then
+            echo "run_generation=true" >> "$GITHUB_OUTPUT"
+            echo "slot=morning" >> "$GITHUB_OUTPUT"
+          elif [ "$hour" = "18" ] && [ "$minute" = "30" ]; then
+            echo "run_generation=true" >> "$GITHUB_OUTPUT"
+            echo "slot=evening" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_generation=false" >> "$GITHUB_OUTPUT"
+            echo "slot=skip" >> "$GITHUB_OUTPUT"
+            echo "DST companion cron: nothing to generate at $(TZ=Europe/Bucharest date -Iseconds)."
+          fi
+
+      - name: Self-test autonomous generator
+        if: steps.slot.outputs.run_generation == 'true'
+        run: python valcea-clar/scripts/generate_edition.py --self-test
+
+      - name: Refresh source radar
+        if: steps.slot.outputs.run_generation == 'true'
+        run: python valcea-clar/scripts/probe_sources.py
+
+      - name: Refresh Unde ieșim ingestion
+        if: steps.slot.outputs.run_generation == 'true'
+        run: |
+          python valcea-clar/ingest/venue_ingest.py --timeout 12
+          python valcea-clar/validation/validate.py
+          python valcea-clar/scripts/reconcile_ingest.py
+
+      - name: Rebuild fail-closed public projection
+        if: steps.slot.outputs.run_generation == 'true'
+        run: python valcea-clar/scripts/build_public_data.py
+
+      - name: Generate verified edition
+        if: steps.slot.outputs.run_generation == 'true'
+        run: python valcea-clar/scripts/generate_edition.py --slot "${{ steps.slot.outputs.slot }}"
+
+      - name: Validate generated edition gate
+        if: steps.slot.outputs.run_generation == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          pointer=json.loads(Path('valcea-clar/site/current_edition.json').read_text(encoding='utf-8'))
+          edition=json.loads(Path('valcea-clar', pointer['json_source']).read_text(encoding='utf-8'))
+          assert edition['generator'] == 'deterministic_zero_llm_v1'
+          assert edition['policy']['llm_required'] is False
+          assert edition['policy']['external_paid_api_required'] is False
+          assert edition['status'] in {'auto_approved','auto_hold'}
+          if edition['publication_intent'] == 'publish':
+              assert edition['status'] == 'auto_approved'
+              assert edition['editorial_fact_count'] >= 1
+              assert pointer['homepage_role'] == 'primary_lead'
+          else:
+              assert pointer['homepage_role'] == 'hidden'
+          print(json.dumps({'edition_id': edition['edition_id'], 'status': edition['status'], 'facts': edition['editorial_fact_count']}))
+          PY
+
+      - name: Build frontpage/site synchronization payload
+        if: steps.slot.outputs.run_generation == 'true'
+        run: python valcea-clar/scripts/build_sites_export.py
+
+      - name: Persist autonomous edition and refreshed state
+        if: steps.slot.outputs.run_generation == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "vâlcea-clar-autonomous-editor"
+          git config user.email "valcea-clar-autonomous-editor@users.noreply.github.com"
+          git add \
+            valcea-clar/editions \
+            valcea-clar/site/current_edition.json \
+            valcea-clar/state/source_health.json \
+            valcea-clar/ingest/state \
+            valcea-clar/web/unde-iesim.json \
+            valcea-clar/web/data \
+            valcea-clar/validation/latest_report.json \
+            valcea-clar/ops/ingest_reconciliation.json \
+            valcea-clar/ops/ingest_review_queue.json \
+            valcea-clar/ops/resolution_tasks || true
+          if git diff --cached --quiet; then
+            echo "No autonomous editorial changes to persist."
+            exit 0
+          fi
+          git commit -m "Publish autonomous VÂLCEA CLAR ${{ steps.slot.outputs.slot }} edition"
+          for attempt in 1 2 3 4 5; do
+            if git pull --rebase origin main && git push origin HEAD:main; then
+              exit 0
+            fi
+            git rebase --abort || true
+            sleep $((attempt * 3))
+          done
+          echo "Could not persist autonomous edition after five attempts." >&2
+          exit 1
+
+      - name: Upload site payload for runtime bridge
+        if: steps.slot.outputs.run_generation == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-autonomous-site-${{ steps.slot.outputs.slot }}-${{ github.run_id }}
+          path: valcea-clar/dist/chatgpt-sites
+          if-no-files-found: error
+          retention-days: 7
