@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0",
+  "instance_id": "valcea",
+  "environment": "production",
+  "brand": {
+    "name": "VÂLCEA CLAR",
+    "short_name": "Vâlcea Clar",
+    "slogan": "Știrile Vâlcii, fără zgomot."
+  },
+  "canonical_domain": "valceaclar.ro",
+  "locale": "ro-RO",
+  "timezone": "Europe/Bucharest",
+  "country": "RO",
+  "geography": {
+    "type": "county",
+    "primary_name": "Vâlcea",
+    "county": "Vâlcea",
+    "settlements": [
+      "Râmnicu Vâlcea",
+      "Brezoi",
+      "Călimănești",
+      "Drăgășani",
+      "Horezu",
+      "Olănești",
+      "Vaideeni"
+    ],
+    "aliases": ["Valcea", "Vâlcea County", "Județul Vâlcea"]
+  },
+  "edition_schedule": {
+    "morning": "07:45",
+    "evening": "18:30"
+  },
+  "packs": {
+    "source_pack": "valcea-clar/editorial/news_sources.json",
+    "brand_pack": "valcea-clar/site/integration.json",
+    "geography_pack": "local-news-os/instances/valcea/instance.json"
+  },
+  "modules": {
+    "news": true,
+    "events": true,
+    "local_places": true,
+    "local_government": true,
+    "public_money": true,
+    "infrastructure": true,
+    "sport": true,
+    "culture": true,
+    "health": true,
+    "education": true,
+    "investigations": true,
+    "social_publications": true
+  },
+  "runtime": {
+    "state_root": "valcea-clar/state",
+    "output_root": "valcea-clar/site/runtime",
+    "current_edition": "valcea-clar/site/current_edition.json",
+    "live_feed": "valcea-clar/site/runtime/live-feed.json"
+  },
+  "social_channels": ["facebook", "instagram", "tiktok"],
+  "policies": {
+    "zero_paid_dependency": true,
+    "llm_required": false,
+    "verified_facts_only": true,
+    "last_known_good": true
+  }
+}
