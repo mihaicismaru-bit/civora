@@ -7,12 +7,11 @@ source URL on an official MIPE-managed host:
 
 1. direct HTTPS / WordPress REST / RSS / sitemap;
 2. the official MIPE Oportunitati-UE platform;
-3. Jina Reader as a transport proxy for an official canonical URL;
-4. Jina Search only for discovery, followed by a Reader fetch of the official
-   canonical URL before publication.
+3. search/index transports for discovery of official canonical URLs only.
 
-A third-party page is never published as a MIPE fact. Proxy/search transport is
-recorded explicitly. Historical feed items are preserved on outage.
+Only a successful direct fetch from the official canonical host may create or
+refresh a published MIPE fact. Search/proxy copies are never factual sources.
+Historical DIRECTLY verified feed items are preserved on outage.
 """
 from __future__ import annotations
 
@@ -465,12 +464,11 @@ def decision_useful(title: str, kind: str, date: dt.date | None, path: str) -> b
 
 
 def previous_item_useful(item: dict[str, Any]) -> bool:
-    if item.get("source") == "MIPE / MySMIS":
+    verification = str(item.get("verification") or "")
+    transport = str(item.get("retrievalTransport") or "")
+    if verification == "CANONICAL_OFFICIAL_FETCH":
         return True
-    url = str(item.get("url") or "")
-    path = urllib.parse.urlparse(url).path or "/"
-    date = parse_date(item.get("date"), body="")
-    return decision_useful(str(item.get("title") or ""), str(item.get("kind") or "OFFICIAL_UPDATE"), date, path)
+    return transport.startswith("direct")
 
 
 def item_id(url: str, title: str) -> str:
@@ -528,24 +526,12 @@ def fetch_document(target: str) -> tuple[dict[str, Any] | None, dict[str, Any]]:
         except Exception as exc:  # noqa: BLE001
             direct = {"ok": False, "error": f"direct_parse:{type(exc).__name__}:{exc}"}
 
-    proxy = fetch(reader_url(canonical), timeout=18, attempts=1, accept="text/plain,text/markdown,*/*")
-    if proxy.get("ok"):
-        parsed = parse_reader(proxy["data"], canonical)
-        if parsed:
-            return parsed, {
-                "target": canonical,
-                "ok": True,
-                "transport": "jina-reader-official-canonical",
-                "proxy": reader_url(canonical),
-                "directError": direct.get("error"),
-            }
-
     return None, {
         "target": canonical,
         "ok": False,
-        "transport": "direct+jina-reader",
+        "transport": "direct-only",
         "directError": direct.get("error"),
-        "proxyError": proxy.get("error"),
+        "policy": "search-discovery-only-when-direct-unavailable",
     }
 
 
@@ -651,7 +637,14 @@ def seed_candidates() -> tuple[list[dict[str, str]], list[dict[str, Any]]]:
         if "xml" in parsed:
             candidates.extend(candidates_from_xml(parsed["xml"]))
             continue
-        candidates.extend(candidate_links(parsed.get("links", []), canonical))
+        linked_candidates = candidate_links(parsed.get("links", []), canonical)
+        if canonicalize(target) == "https://mfe.gov.ro/pdds/despre-program-programare/":
+            linked_candidates = [
+                candidate for candidate in linked_candidates
+                if urllib.parse.urlparse(candidate["url"]).hostname == "mfe.gov.ro"
+                and urllib.parse.urlparse(candidate["url"]).path.startswith("/pdds/")
+            ]
+        candidates.extend(linked_candidates)
         # Seed pages themselves are retained as discovery candidates only. A
         # specific page may still be published if it is not an index path.
         candidates.append({"url": canonical, "title_hint": parsed.get("title", ""), "discovery": result.get("transport", "seed")})
@@ -809,6 +802,8 @@ def main() -> int:
         # satisfy the current provenance contract. The marker is explicit and
         # never pretends that an old item was fetched in the current run.
         normalized.setdefault("retrievalTransport", "legacy-preserved")
+        if normalized.get("verification") == "CANONICAL_OFFICIAL_FETCH" and normalized.get("retrievalTransport") == "legacy-preserved":
+            normalized["retrievalTransport"] = "direct-canonical-preserved"
         normalized.setdefault("tier", "T1_LEGACY_PRESERVED")
         normalized.setdefault("observedAt", previous_state.get("lastRun", {}).get("observedAt", ""))
         normalized.setdefault("documents", [])
@@ -879,18 +874,15 @@ def main() -> int:
     if current and direct_success:
         status = "OK"
         transport_mode = "direct"
-    elif current and proxy_success:
-        status = "OK_PROXY_VERIFIED"
-        transport_mode = "official-canonical-via-proxy"
-    elif items and successful:
+    elif items and direct_success:
         status = "OK_NO_NEW_RELEVANT_ITEMS"
-        transport_mode = "mixed"
+        transport_mode = "direct"
     elif items:
         status = "DEGRADED_LAST_KNOWN_GOOD_PRESERVED"
-        transport_mode = "unavailable"
+        transport_mode = "direct-unavailable"
     else:
         status = "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED"
-        transport_mode = "unavailable"
+        transport_mode = "direct-unavailable"
 
     observed = now_utc().isoformat()
     run = {
