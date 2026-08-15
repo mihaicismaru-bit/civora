@@ -40,6 +40,23 @@
         "public-service utility research"
       ],
       "core_feedback": "LOCAL NEWS OS needs a generic UTILITY_ADVISORY source contract that separates published_at from event_start/event_end, requires explicit geographic scope and primary-source provenance, and may admit only current/future service advisories without converting event dates into publication dates."
+    },
+    {
+      "id": "dragasani-urbanism-autorizatii-2026",
+      "publisher": "Primăria Municipiului Drăgășani — Serviciul Urbanism",
+      "url": "https://www.primariadragasani.ro/informatii-publice/urbanism/autorizatii-de-construire-desfiintare/2026",
+      "tier": "T1",
+      "section": "IMOBILIARE",
+      "status": "QUARANTINED_PERIODIC_DOCUMENT_REGISTER",
+      "checked_at": "2026-08-15",
+      "reason": "The official Drăgășani site exposes a dedicated 2026 register for building/demolition permits, but the underlying evidence is published as periodic register documents rather than ordinary article posts. The existing newsroom freshness gate is article-publication-date based and does not yet distinguish a register document's crawl/publication date from the permit row date inside that document.",
+      "safe_use": [
+        "manual discovery of new construction and demolition permits",
+        "primary-source verification of permit number and permit date",
+        "verification of beneficiary, declared work and location from the official register",
+        "local development and real-estate trend research"
+      ],
+      "core_feedback": "LOCAL NEWS OS needs a generic DOCUMENT_REGISTER source contract for periodic official tables/PDFs: preserve document_period and source_document provenance, extract row_id and row_date deterministically, admit candidates only from row-level dates, and never treat fetch/listing dates as the event or publication date."
     }
   ]
 }
