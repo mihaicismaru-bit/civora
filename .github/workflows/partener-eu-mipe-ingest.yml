@@ -7,6 +7,7 @@ on:
   push:
     branches: [main]
     paths:
+      - 'partener-eu/ingest/mipe_direct_only_ingest.py'
       - 'partener-eu/ingest/mipe_resilient_ingest.py'
       - 'partener-eu/ingest/mipe_discovery_ingest.py'
       - 'partener-eu/ingest/build_mysmis_consultant_registry.py'
@@ -27,8 +28,6 @@ jobs:
   ingest:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    env:
-      MIPE_RELAY_URL: https://partener-mipe-relay-mihaicismaru-6634s-projects.vercel.app/api/mipe
     steps:
       - uses: actions/checkout@v6
         with:
@@ -38,21 +37,22 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Discover official canonical MIPE URLs and refresh direct MySMIS snapshot
+      - name: Discover canonical official URLs and refresh direct MySMIS snapshot
         run: python partener-eu/ingest/mipe_discovery_ingest.py
 
       - name: Syntax and offline provenance regression
         run: |
           python -m py_compile partener-eu/ingest/mipe_resilient_ingest.py
+          python -m py_compile partener-eu/ingest/mipe_direct_only_ingest.py
           python partener-eu/ops/test_mipe_resilient_ingest.py
 
-      - name: Ingest official MIPE pages through the direct-first resilient transport
-        run: python partener-eu/ingest/mipe_resilient_ingest.py
+      - name: Ingest MIPE with direct canonical publication provenance only
+        run: python partener-eu/ingest/mipe_direct_only_ingest.py
 
       - name: Build direct MySMIS evidence for Consultant Workspace
         run: python partener-eu/ingest/build_mysmis_consultant_registry.py
 
-      - name: Validate provenance, corroboration and Consultant evidence
+      - name: Validate fail-closed provenance and Consultant evidence
         shell: bash
         run: |
           python - <<'PY'
@@ -82,36 +82,26 @@ jobs:
               'oportunitati-ue.gov.ro', 'www.oportunitati-ue.gov.ro',
               'reporting.mysmis2021.gov.ro',
           }
-          boilerplate = ('skip to main content', 'adaugă ca sursă preferată', 'bine ați venit pe site', 'blob:http://localhost')
+          forbidden_transport_markers = ('relay', 'jina-reader', 'translate')
           for item in state.get('items', []):
               url = item.get('url', '')
               assert urlparse(url).hostname in allowed_hosts, url
-              assert item.get('title') and item.get('retrievalTransport')
-              if item.get('source') == 'MIPE / MySMIS':
-                  assert item.get('verification') == 'CANONICAL_OFFICIAL_FETCH'
-                  continue
-              assert item.get('decisionUseful') is True, item.get('title')
-              assert not any(marker in item.get('summary', '').lower() for marker in boilerplate), item.get('title')
-              transport = item['retrievalTransport']
-              if 'dual-relay-corroborated' in transport:
-                  assert item.get('tier') == 'T1_DUAL_RELAY_CORROBORATED'
-              elif 'first-party-relay' in transport:
-                  assert item.get('tier') == 'T1_RELAY_ATTESTED'
-              else:
-                  assert transport.startswith('direct') or transport == 'legacy-preserved', transport
+              transport = str(item.get('retrievalTransport') or '')
+              assert item.get('verification') == 'CANONICAL_OFFICIAL_FETCH', item.get('title')
+              assert transport.startswith('direct'), (item.get('title'), transport)
+              assert not any(marker in transport for marker in forbidden_transport_markers), transport
 
-          dual_roots = [row for row in state.get('lastRun', {}).get('roots', []) if row.get('transport') == 'canonical-dual-relay-corroborated']
-          for row in dual_roots:
-              assert row.get('verification') == 'CANONICAL_DUAL_RELAY_CORROBORATED'
-              assert len(row.get('readerSha256', '')) == 64
-              assert len(row.get('translateSha256', '')) == 64
-              assert row.get('sharedOfficialPathCount', 0) >= 1
-              assert row.get('readerUrl', '').startswith('https://r.jina.ai/https://mfe.gov.ro/')
-              assert row.get('translateUrl', '').startswith('https://mfe-gov-ro.translate.goog/')
+          for row in state.get('lastRun', {}).get('roots', []):
+              if row.get('ok'):
+                  transport = str(row.get('transport') or '')
+                  assert transport.startswith('direct'), (row.get('target'), transport)
+                  assert row.get('verification') == 'CANONICAL_OFFICIAL_FETCH', row.get('target')
 
           feed_text = feed_path.read_text(encoding='utf-8')
           assert 'window.PARTENER_DATA.mipeIngestion=' in feed_text
           assert 'window.PARTENER_DATA.mipeNews=' in feed_text
+          assert 'CANONICAL_DUAL_RELAY_CORROBORATED' not in feed_text
+          assert 'T1_DUAL_RELAY_CORROBORATED' not in feed_text
 
           registry_text = consultant_registry_path.read_text(encoding='utf-8')
           marker = 'window.PARTENER_DATA.mysmisRegistry='
@@ -129,14 +119,13 @@ jobs:
               'transportMode': state.get('lastRun', {}).get('transportMode'),
               'currentVerifiedCount': state.get('lastRun', {}).get('currentVerifiedCount'),
               'publishedItemCount': state.get('lastRun', {}).get('publishedItemCount'),
-              'dualRelaySuccessCount': state.get('lastRun', {}).get('dualRelaySuccessCount'),
               'mysmisStatus': mysmis.get('status'),
               'mysmisVisibleRows': mysmis.get('visibleRowCount'),
               'mysmisValidatedCalls': mysmis.get('validatedCallCount'),
           }, ensure_ascii=False, indent=2))
           PY
 
-      - name: Persist verified feed, Source Registry and Consultant evidence
+      - name: Persist verified feed, source registry and Consultant evidence
         shell: bash
         run: |
           set -euo pipefail
@@ -145,7 +134,6 @@ jobs:
           cp partener-eu/ingest/state/mipe_state.json /tmp/mipe_state.json
           cp partener-eu/ingest/state/mipe_source_registry.json /tmp/mipe_source_registry.json
           cp partener-eu/ingest/state/mipe_known_canonical_seeds.json /tmp/mipe_known_canonical_seeds.json
-          cp partener-eu/ingest/mipe_resilient_ingest.py /tmp/mipe_resilient_ingest.py
           python - <<'PY' > /tmp/mipe_asset_version.txt
           import json
           from pathlib import Path
@@ -163,7 +151,6 @@ jobs:
             cp /tmp/mipe_state.json partener-eu/ingest/state/mipe_state.json
             cp /tmp/mipe_source_registry.json partener-eu/ingest/state/mipe_source_registry.json
             cp /tmp/mipe_known_canonical_seeds.json partener-eu/ingest/state/mipe_known_canonical_seeds.json
-            cp /tmp/mipe_resilient_ingest.py partener-eu/ingest/mipe_resilient_ingest.py
             MIPE_VERSION=$(cat /tmp/mipe_asset_version.txt)
             export MIPE_VERSION
             python - <<'PY'
@@ -183,18 +170,17 @@ jobs:
               partener-eu/web/index.html \
               partener-eu/web/mipe-news.js \
               partener-eu/web/mysmis-registry.js \
-              partener-eu/ingest/mipe_resilient_ingest.py \
               partener-eu/ingest/state/mipe_state.json \
               partener-eu/ingest/state/mipe_source_registry.json \
               partener-eu/ingest/state/mipe_known_canonical_seeds.json \
               partener-eu/ingest/state/intelligence_index.json
 
             if git diff --cached --quiet; then
-              echo 'No MIPE, MySMIS, runtime or discovery changes.'
+              echo 'No MIPE, MySMIS or discovery output changes.'
               exit 0
             fi
 
-            git commit -m 'Ingest verified MIPE and MySMIS updates'
+            git commit -m 'Ingest direct-verified MIPE and MySMIS updates'
             if git push origin HEAD:main; then
               exit 0
             fi
