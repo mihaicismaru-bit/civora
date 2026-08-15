@@ -35,10 +35,7 @@ def test_reader_contract() -> None:
 
 def test_fail_closed_reader() -> None:
     hostile = b"""Title: Fake\nURL Source: https://example.com/not-official\nMarkdown Content:\nPretins apel MIPE.\n"""
-    assert module.parse_reader(hostile, "https://mfe.gov.ro/fake/") is not None
-    # The requested target remains official, but candidate publication still
-    # requires material length and funding relevance. A non-official target is
-    # rejected at the transport boundary.
+    assert module.parse_reader(hostile, "https://mfe.gov.ro/fake/") is None
     assert module.fetch_document("https://example.com/not-official")[0] is None
 
 
