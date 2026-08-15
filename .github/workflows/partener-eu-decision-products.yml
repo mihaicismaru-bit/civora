@@ -10,6 +10,7 @@ on:
       - 'partener-eu/ingest/build_decision_products.py'
       - 'partener-eu/ingest/polish_decision_products.py'
       - 'partener-eu/ingest/finalize_decision_products.py'
+      - 'partener-eu/ops/fix_decision_products_determinism.py'
       - 'partener-eu/ops/test_decision_products.py'
       - 'partener-eu/web/p11-public-data.js'
       - 'partener-eu/web/decision-intelligence-v2.js'
@@ -48,6 +49,9 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Make product version deterministic from source snapshots
+        run: python partener-eu/ops/fix_decision_products_determinism.py
+
       - name: Build decision-useful editorial products
         run: |
           python partener-eu/ingest/build_decision_products.py
@@ -59,10 +63,11 @@ jobs:
           node --check partener-eu/web/decision-intelligence-v2.js
           python partener-eu/ops/test_decision_products.py
 
-      - name: Persist generated dossiers and meaningful news
+      - name: Persist deterministic engine, dossiers and meaningful news
         shell: bash
         run: |
           set -euo pipefail
+          cp partener-eu/ingest/build_decision_products.py /tmp/build_decision_products.py
           cp partener-eu/ingest/state/decision_products.json /tmp/decision_products.json
           cp partener-eu/web/decision-products.js /tmp/decision-products.js
           git config user.name 'github-actions[bot]'
@@ -71,14 +76,18 @@ jobs:
           for attempt in 1 2 3 4 5; do
             git fetch origin main
             git reset --hard origin/main
+            cp /tmp/build_decision_products.py partener-eu/ingest/build_decision_products.py
             cp /tmp/decision_products.json partener-eu/ingest/state/decision_products.json
             cp /tmp/decision-products.js partener-eu/web/decision-products.js
-            git add partener-eu/ingest/state/decision_products.json partener-eu/web/decision-products.js
+            git add \
+              partener-eu/ingest/build_decision_products.py \
+              partener-eu/ingest/state/decision_products.json \
+              partener-eu/web/decision-products.js
             if git diff --cached --quiet; then
               echo 'Decision products already current.'
               exit 0
             fi
-            git commit -m 'Regenerate decision-useful news and funding dossiers'
+            git commit -m 'Regenerate deterministic decision-useful news and funding dossiers'
             if git push origin HEAD:main; then exit 0; fi
             sleep $((attempt * 2))
           done
