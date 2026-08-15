@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local-news-os.invalid/schemas/channel_config.schema.json",
+  "title": "LOCAL NEWS OS Social CHANNEL_CONFIG",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "channel_id",
+    "instance_id",
+    "platform",
+    "status",
+    "audience_promise",
+    "editorial_mix",
+    "native_formats",
+    "cadence",
+    "fatigue",
+    "media_policy",
+    "link_policy",
+    "approval_gates",
+    "credentials_ref",
+    "publication_state",
+    "metrics",
+    "zero_paid_dependency"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "channel_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{2,63}$"},
+    "instance_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"},
+    "platform": {
+      "enum": ["facebook", "instagram", "tiktok", "youtube", "threads", "linkedin", "whatsapp", "telegram"]
+    },
+    "status": {"enum": ["active", "hold", "outbox_only", "disabled"]},
+    "audience_promise": {"type": "string", "minLength": 12},
+    "editorial_mix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["priorities", "exclusions"],
+      "properties": {
+        "priorities": {"type": "array", "minItems": 1, "items": {"type": "string"}, "uniqueItems": true},
+        "exclusions": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+      }
+    },
+    "native_formats": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": ["text", "single_photo", "carousel", "story", "reel", "short", "long_video", "thread", "alert", "digest", "live"]
+      }
+    },
+    "cadence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["timezone", "max_posts_per_day", "min_spacing_minutes", "quiet_hours"],
+      "properties": {
+        "timezone": {"type": "string", "minLength": 3},
+        "max_posts_per_day": {"type": "integer", "minimum": 1, "maximum": 48},
+        "min_spacing_minutes": {"type": "integer", "minimum": 0, "maximum": 1440},
+        "quiet_hours": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["start", "end", "breaking_override"],
+          "properties": {
+            "start": {"type": "string", "pattern": "^[0-2][0-9]:[0-5][0-9]$"},
+            "end": {"type": "string", "pattern": "^[0-2][0-9]:[0-5][0-9]$"},
+            "breaking_override": {"type": "boolean"}
+          }
+        }
+      }
+    },
+    "fatigue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["same_story_cooldown_hours", "max_related_posts_24h"],
+      "properties": {
+        "same_story_cooldown_hours": {"type": "integer", "minimum": 0, "maximum": 168},
+        "max_related_posts_24h": {"type": "integer", "minimum": 1, "maximum": 24}
+      }
+    },
+    "media_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["real_media_only", "provenance_required", "reuse_rights_required", "synthetic_real_person_forbidden"],
+      "properties": {
+        "real_media_only": {"type": "boolean"},
+        "provenance_required": {"type": "boolean"},
+        "reuse_rights_required": {"type": "boolean"},
+        "synthetic_real_person_forbidden": {"type": "boolean"}
+      }
+    },
+    "link_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "canonical_hosts"],
+      "properties": {
+        "mode": {"enum": ["required", "optional", "native_preferred"]},
+        "canonical_hosts": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+      }
+    },
+    "series": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["series_id", "promise"],
+        "properties": {
+          "series_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{2,63}$"},
+          "promise": {"type": "string", "minLength": 8}
+        }
+      }
+    },
+    "approval_gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["low_risk_auto", "reputational_human", "corrections_priority"],
+      "properties": {
+        "low_risk_auto": {"type": "boolean"},
+        "reputational_human": {"type": "boolean"},
+        "corrections_priority": {"type": "boolean"}
+      }
+    },
+    "credentials_ref": {"type": "string", "pattern": "^(github-actions-secret|connector|none):"},
+    "publication_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outbox_path", "state_path", "dedupe_by_id", "last_known_good"],
+      "properties": {
+        "outbox_path": {"type": "string", "minLength": 3},
+        "state_path": {"type": "string", "minLength": 3},
+        "dedupe_by_id": {"type": "boolean"},
+        "last_known_good": {"type": "boolean"}
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["observed_only", "sources"],
+      "properties": {
+        "observed_only": {"type": "boolean"},
+        "sources": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+      }
+    },
+    "zero_paid_dependency": {"const": true}
+  }
+}
