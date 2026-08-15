@@ -2,8 +2,10 @@
 """Generate VÂLCEA CLAR morning/evening editions without a paid LLM API.
 
 The generator is deterministic and fail-closed. It renders only structured
-facts that passed an editorial evidence gate. If a new edition cannot pass the
-publication gate, the public pointer remains on the last known good edition.
+facts that passed an editorial evidence gate. It merges the curated fact
+registry with narrowly scoped automatic facts discovered from primary sources.
+If a new edition cannot pass the publication gate, the public pointer remains
+on the last known good edition.
 """
 from __future__ import annotations
 
@@ -15,6 +17,7 @@ from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
 FACTS = ROOT / "editorial" / "facts_registry.json"
+AUTO_FACTS = ROOT / "editorial" / "auto_facts.json"
 EDITIONS = ROOT / "editions"
 SITE = ROOT / "site"
 META = ROOT / "web" / "data" / "meta.json"
@@ -23,7 +26,7 @@ SOURCE_HEALTH = ROOT / "state" / "source_health.json"
 POINTER = SITE / "current_edition.json"
 LAST_ATTEMPT = SITE / "last_edition_attempt.json"
 TZ = ZoneInfo("Europe/Bucharest")
-ALLOWED_GATES = {"PASS", "PASS_DATE_ONLY", "PASS_EXPLAINER_ONLY", "PASS_WITH_CAUTION"}
+ALLOWED_GATES = {"PASS", "PASS_DATE_ONLY", "PASS_TITLE_DATE_ONLY", "PASS_EXPLAINER_ONLY", "PASS_WITH_CAUTION"}
 ALLOWED_STATUSES = {"verified", "approved_carry_forward"}
 PUBLISHABLE_STATUSES = {"auto_approved", "editor_approved"}
 MIN_CONFIDENCE = 90
@@ -46,6 +49,18 @@ def choose_slot(now: datetime, requested: str) -> str:
     if requested != "auto":
         return requested
     return "morning" if now.hour < 15 else "evening"
+
+
+def merged_registry() -> tuple[dict, int]:
+    curated = load_json(FACTS)
+    automatic = load_json(AUTO_FACTS, {"facts": []})
+    # Curated facts win on id collisions. Automatic facts remain independently
+    # scoped and can only carry title/date/source data admitted by their gate.
+    combined = {fact["id"]: fact for fact in automatic.get("facts", []) if fact.get("id")}
+    for fact in curated.get("facts", []):
+        if fact.get("id"):
+            combined[fact["id"]] = fact
+    return {"facts": list(combined.values())}, len(automatic.get("facts", []))
 
 
 def eligible_facts(registry: dict, now: datetime, slot: str) -> list[dict]:
@@ -142,7 +157,7 @@ def render_markdown(now: datetime, slot: str, items: list[dict], status_note: st
                 continue
             seen.add(key)
             lines.append(f"- {source.get('name')} — {source.get('url')}\n")
-    lines.append("\n**Politică editorială:** această ediție este generată automat numai din fapte structurate care au trecut pragul de verificare. Dacă datele verificate sunt insuficiente, ediția este mai scurtă; sistemul nu completează golurile prin presupuneri.\n")
+    lines.append("\n**Politică editorială:** această ediție este generată automat numai din fapte structurate care au trecut pragul de verificare. Pentru fluxul automat din surse primare, sistemul poate admite numai titlul, data publicării și linkul sursei; detaliile materiale nu sunt deduse din articol. Dacă datele verificate sunt insuficiente, ediția este mai scurtă.\n")
     return "".join(lines)
 
 
@@ -157,6 +172,7 @@ def compact_item(item: dict) -> dict:
         "confidence": item["confidence"],
         "material_fact_gate": item["material_fact_gate"],
         "sources": item.get("sources", []),
+        **({"auto_generated": True, "auto_scope": item.get("auto_scope")} if item.get("auto_generated") else {}),
         **({"visual": item["visual"]} if item.get("visual") else {}),
     }
 
@@ -165,31 +181,36 @@ def pointer_is_publishable(pointer: dict) -> bool:
     return pointer.get("status") in PUBLISHABLE_STATUSES and pointer.get("publication_intent") == "publish" and bool(pointer.get("edition_id"))
 
 
-def write_outputs(now: datetime, slot: str, facts: list[dict]) -> tuple[Path, Path, dict]:
+def write_outputs(now: datetime, slot: str, facts: list[dict], auto_registry_count: int) -> tuple[Path, Path, dict]:
     EDITIONS.mkdir(parents=True, exist_ok=True)
     SITE.mkdir(parents=True, exist_ok=True)
     items = facts + operational_blocks()
     editorial_count = len(facts)
+    included_auto = sum(1 for fact in facts if fact.get("auto_generated"))
     publish = editorial_count >= 1
     status_note = "" if editorial_count >= 3 else "Ediție scurtă: publicăm doar informațiile care au trecut pragul de verificare."
     eid = edition_id(now, slot)
     title_slot = "dimineață" if slot == "morning" else "seară"
     payload = {
-        "schema_version": "2.1",
+        "schema_version": "2.2",
         "edition_id": eid,
         "slot": slot,
         "title": f"VÂLCEA CLAR — Ediția de {title_slot}",
         "edition_date": now.date().isoformat(),
         "updated_local": now.isoformat(timespec="seconds"),
-        "generator": "deterministic_zero_llm_v1",
+        "generator": "deterministic_zero_llm_v2",
         "status": "auto_approved" if publish else "auto_hold",
         "publication_intent": "publish" if publish else "hold",
         "editorial_fact_count": editorial_count,
+        "auto_fact_registry_count": auto_registry_count,
+        "auto_facts_included": included_auto,
         "items": [compact_item(item) for item in items],
         "policy": {
             "llm_required": False,
             "external_paid_api_required": False,
             "verified_facts_only": True,
+            "primary_source_auto_scope": "title_date_source_only",
+            "article_body_material_facts_autopublish": False,
             "shorter_edition_when_evidence_is_sparse": True,
             "last_known_good_fallback": True,
             "human_override_available": True,
@@ -201,12 +222,13 @@ def write_outputs(now: datetime, slot: str, facts: list[dict]) -> tuple[Path, Pa
     md_path.write_text(render_markdown(now, slot, items, status_note), encoding="utf-8")
 
     attempt = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "edition_id": eid,
         "slot": slot,
         "status": payload["status"],
         "publication_intent": payload["publication_intent"],
         "editorial_fact_count": editorial_count,
+        "auto_facts_included": included_auto,
         "updated_local": payload["updated_local"],
     }
     LAST_ATTEMPT.write_text(json.dumps(attempt, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -252,7 +274,7 @@ def self_test() -> int:
         "id": "x", "status": "verified", "section": "TEST", "priority": 1, "confidence": 99,
         "valid_from": "2026-08-15T00:00:00+03:00", "valid_until": "2026-08-15T23:59:59+03:00",
         "slots": ["morning"], "headline": "Test", "dek": "Test", "paragraphs": ["Test."],
-        "material_fact_gate": "PASS", "sources": [{"name": "S", "url": "https://example.test", "tier": "T1"}]
+        "material_fact_gate": "PASS_TITLE_DATE_ONLY", "sources": [{"name": "S", "url": "https://example.test", "tier": "T1"}]
     }]}
     now = datetime(2026, 8, 15, 8, 0, tzinfo=TZ)
     assert len(eligible_facts(sample, now, "morning")) == 1
@@ -277,14 +299,16 @@ def main() -> int:
         parsed_date = datetime.strptime(args.date, "%Y-%m-%d").date()
         now = datetime.combine(parsed_date, now.timetz()).astimezone(TZ)
     slot = choose_slot(now, args.slot)
-    registry = load_json(FACTS)
+    registry, auto_registry_count = merged_registry()
     facts = eligible_facts(registry, now, slot)
-    json_path, md_path, payload = write_outputs(now, slot, facts)
+    json_path, md_path, payload = write_outputs(now, slot, facts, auto_registry_count)
     print(json.dumps({
         "status": payload["status"],
         "publication_intent": payload["publication_intent"],
         "edition_id": payload["edition_id"],
         "editorial_fact_count": payload["editorial_fact_count"],
+        "auto_fact_registry_count": payload["auto_fact_registry_count"],
+        "auto_facts_included": payload["auto_facts_included"],
         "json": str(json_path.relative_to(ROOT)),
         "markdown": str(md_path.relative_to(ROOT)),
         "public_pointer_preserves_last_known_good_on_hold": True,
