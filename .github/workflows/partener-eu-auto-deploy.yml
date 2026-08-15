@@ -14,6 +14,7 @@ on:
       - 'PARTENER.EU MIPE Dual Cache'
       - 'PARTENER.EU AFIR Ingestion'
       - 'PARTENER.EU Decision Products'
+      - 'PARTENER.EU Consultant Workspace v3 QA'
     types: [completed]
 
 permissions:
@@ -35,7 +36,6 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          # Always deploy canonical main after autonomous ingestion/product commits.
           ref: main
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
