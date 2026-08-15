@@ -5,6 +5,11 @@ This moves source selection and publication identity into LOCAL NEWS OS instance
 configuration while preserving the proven VÂLCEA CLAR zero-LLM crawler during
 migration. The legacy crawler remains a TEMPORARY_COMPATIBILITY_ADAPTER; source
 resolution is already generic through SOURCE_PACK_V1.
+
+All instances using this adapter now pass publication-date extraction through
+the generic fail-closed provenance resolver before a title/date/source fact can
+be admitted. This prevents page/global dates from being mistaken for article
+publication dates when a template exposes multiple dates.
 """
 from __future__ import annotations
 
@@ -21,6 +26,7 @@ CORE = Path(__file__).resolve().parent
 if str(CORE) not in sys.path:
     sys.path.insert(0, str(CORE))
 
+from date_provenance import resolve_publication_date, self_test as date_provenance_self_test  # noqa: E402
 from resolve_source_pack import resolve  # noqa: E402
 
 LEGACY_CRAWLER = ROOT / "valcea-clar" / "scripts" / "discover_news_facts.py"
@@ -31,6 +37,7 @@ DEFAULT_POLICY = {
     "min_title_chars": 24,
     "max_candidates_per_source": 12,
 }
+DATE_GUARD = "LOCAL_NEWS_OS_DATE_PROVENANCE_V1"
 
 
 def load_json(path: Path) -> dict:
@@ -100,6 +107,12 @@ def brand_output(path: Path, instance_id: str, brand_name: str) -> None:
     payload["instance_id"] = instance_id
     payload["source_contract"] = "SOURCE_PACK_V1"
     payload["migration_adapter"] = "local_news_os_primary_source_compat_v1"
+    payload["publication_date_guard"] = DATE_GUARD
+    policy = payload.setdefault("policy", {})
+    if isinstance(policy, dict):
+        policy["publication_date_provenance"] = (
+            "structured article date > article-scoped date after H1 > unique page date; ambiguous dates reject"
+        )
     for fact in payload.get("facts", []):
         if not isinstance(fact, dict):
             continue
@@ -114,6 +127,7 @@ def tag_state(path: Path, instance_id: str) -> None:
     payload["instance_id"] = instance_id
     payload["source_contract"] = "SOURCE_PACK_V1"
     payload["migration_adapter"] = "local_news_os_primary_source_compat_v1"
+    payload["publication_date_guard"] = DATE_GUARD
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
@@ -129,9 +143,19 @@ def validate_only(instance_id: str) -> dict:
         "source_count": resolved["source_count"],
         "enabled_source_count": resolved["enabled_source_count"],
         "compatibility_source_count": len(registry["sources"]),
+        "publication_date_guard": DATE_GUARD,
         "zero_paid_dependency": instance["policies"]["zero_paid_dependency"],
         "llm_required": instance["policies"]["llm_required"],
     }
+
+
+def install_date_guard(legacy, timezone: ZoneInfo) -> None:
+    """Replace the compatibility crawler's first-page-date heuristic fail-closed."""
+
+    def guarded_extract_date(text: str):
+        return resolve_publication_date(text, timezone=timezone).published_at
+
+    legacy.extract_date = guarded_extract_date
 
 
 def run(instance_id: str, output: Path, state: Path) -> int:
@@ -147,6 +171,7 @@ def run(instance_id: str, output: Path, state: Path) -> int:
 
     legacy = load_legacy_module()
     timezone = ZoneInfo(str(instance["timezone"]))
+    install_date_guard(legacy, timezone)
     canonical_domain = str(instance["canonical_domain"])
     brand_name = str(instance["brand"]["name"])
 
@@ -173,17 +198,21 @@ def run(instance_id: str, output: Path, state: Path) -> int:
 
 
 def self_test() -> int:
+    assert date_provenance_self_test() == 0
     valcea = validate_only("valcea")
     test = validate_only("test-local")
     assert valcea["source_contract"] == "SOURCE_PACK_V1"
     assert test["source_contract"] == "SOURCE_PACK_V1"
     assert valcea["source_count"] >= 16
     assert test["source_count"] == 2
+    assert valcea["publication_date_guard"] == DATE_GUARD
+    assert test["publication_date_guard"] == DATE_GUARD
     assert valcea["zero_paid_dependency"] is True
     assert test["zero_paid_dependency"] is True
     assert valcea["llm_required"] is False
     assert test["llm_required"] is False
     legacy = load_legacy_module()
+    install_date_guard(legacy, ZoneInfo("Europe/Bucharest"))
     assert legacy.self_test() == 0
     print("LOCAL NEWS OS instance-aware discovery adapter self-test: PASS")
     return 0
