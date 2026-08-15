@@ -14,9 +14,9 @@ on:
     paths:
       - "valcea-clar/ops/autonomous-edition-trigger.json"
   schedule:
-    # Run both UTC candidates for Romanian DST. The local-time gate below keeps
-    # only the intended morning/evening window while tolerating normal GitHub
-    # Actions schedule delays.
+    # Run both UTC candidates for Romanian DST. Scheduled runs use wide local
+    # recovery windows plus a publishable-edition idempotency guard, so a late
+    # GitHub Actions start can still recover without publishing the slot twice.
     - cron: "45 4,5 * * *"
     - cron: "30 15,16 * * *"
 
@@ -46,36 +46,87 @@ jobs:
           REQUESTED_SLOT: ${{ github.event.inputs.slot || 'auto' }}
         run: |
           set -euo pipefail
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "${{ github.event_name }}" = "push" ]; then
-            if [ "$REQUESTED_SLOT" = "auto" ]; then
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            slot="$REQUESTED_SLOT"
+            if [ "$slot" = "auto" ]; then
               hour=$(TZ=Europe/Bucharest date +%H)
               if [ "$hour" -lt 15 ]; then slot=morning; else slot=evening; fi
-            else
-              slot="$REQUESTED_SLOT"
             fi
             echo "run_generation=true" >> "$GITHUB_OUTPUT"
             echo "slot=$slot" >> "$GITHUB_OUTPUT"
+            echo "reason=manual_dispatch" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ "${{ github.event_name }}" = "push" ]; then
+            slot=$(python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path('valcea-clar/ops/autonomous-edition-trigger.json')
+          try:
+              value = json.loads(path.read_text(encoding='utf-8')).get('slot', 'auto')
+          except Exception:
+              value = 'auto'
+          print(value if value in {'auto', 'morning', 'evening'} else 'auto')
+          PY
+            )
+            if [ "$slot" = "auto" ]; then
+              hour=$(TZ=Europe/Bucharest date +%H)
+              if [ "$hour" -lt 15 ]; then slot=morning; else slot=evening; fi
+            fi
+            echo "run_generation=true" >> "$GITHUB_OUTPUT"
+            echo "slot=$slot" >> "$GITHUB_OUTPUT"
+            echo "reason=explicit_engine_trigger" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           hour=$(TZ=Europe/Bucharest date +%H)
           minute=$(TZ=Europe/Bucharest date +%M)
+          local_date=$(TZ=Europe/Bucharest date +%F)
+          local_now=$(TZ=Europe/Bucharest date -Iseconds)
           now_minutes=$((10#$hour * 60 + 10#$minute))
-          # GitHub scheduled workflows are not guaranteed to start at the exact
-          # cron minute. Accept a bounded window around the desired local slot,
-          # while keeping the DST companion cron outside that window.
-          # Morning: 07:30-08:29. Evening: 18:15-19:14.
-          if [ "$now_minutes" -ge 450 ] && [ "$now_minutes" -le 509 ]; then
-            echo "run_generation=true" >> "$GITHUB_OUTPUT"
-            echo "slot=morning" >> "$GITHUB_OUTPUT"
-          elif [ "$now_minutes" -ge 1095 ] && [ "$now_minutes" -le 1154 ]; then
-            echo "run_generation=true" >> "$GITHUB_OUTPUT"
-            echo "slot=evening" >> "$GITHUB_OUTPUT"
+
+          # GitHub scheduled workflows can start substantially later than the
+          # cron minute. Both DST candidates therefore act as recovery attempts.
+          # A publishable edition guard below makes those attempts idempotent.
+          # Morning recovery: 07:30-10:59. Evening recovery: 18:15-21:59.
+          if [ "$now_minutes" -ge 450 ] && [ "$now_minutes" -le 659 ]; then
+            slot=morning
+          elif [ "$now_minutes" -ge 1095 ] && [ "$now_minutes" -le 1319 ]; then
+            slot=evening
           else
             echo "run_generation=false" >> "$GITHUB_OUTPUT"
             echo "slot=skip" >> "$GITHUB_OUTPUT"
-            echo "DST companion cron: nothing to generate at $(TZ=Europe/Bucharest date -Iseconds)."
+            echo "reason=outside_recovery_window" >> "$GITHUB_OUTPUT"
+            echo "Nothing due at $local_now."
+            exit 0
           fi
+
+          candidate="valcea-clar/editions/${local_date}-${slot}.json"
+          if [ -f "$candidate" ] && python - "$candidate" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+          payload = json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
+          publishable = (
+              payload.get('publication_intent') == 'publish'
+              and payload.get('status') in {'auto_approved', 'editor_approved'}
+          )
+          raise SystemExit(0 if publishable else 1)
+          PY
+          then
+            echo "run_generation=false" >> "$GITHUB_OUTPUT"
+            echo "slot=$slot" >> "$GITHUB_OUTPUT"
+            echo "reason=already_published" >> "$GITHUB_OUTPUT"
+            echo "Idempotency guard: ${local_date}-${slot} is already publishable."
+            exit 0
+          fi
+
+          echo "run_generation=true" >> "$GITHUB_OUTPUT"
+          echo "slot=$slot" >> "$GITHUB_OUTPUT"
+          echo "reason=recovery_window_due" >> "$GITHUB_OUTPUT"
+          echo "Generation due for ${local_date}-${slot} at $local_now."
 
       - name: Self-test autonomous generators
         if: steps.slot.outputs.run_generation == 'true'
