@@ -10,6 +10,7 @@ on:
       - 'partener-eu/ingest/mipe_resilient_ingest.py'
       - 'partener-eu/ingest/mipe_discovery_ingest.py'
       - 'partener-eu/ops/fix_mipe_resilient_classifier.py'
+      - 'partener-eu/ops/fix_mipe_resilient_runtime.py'
       - 'partener-eu/ops/test_mipe_resilient_ingest.py'
       - 'partener-eu/ingest/state/mipe_known_canonical_seeds.json'
       - 'partener-eu/ingest/state/mipe_discovery_sources.json'
@@ -26,7 +27,7 @@ concurrency:
 jobs:
   ingest:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v6
         with:
@@ -39,8 +40,10 @@ jobs:
       - name: Discover official canonical MIPE URLs
         run: python partener-eu/ingest/mipe_discovery_ingest.py
 
-      - name: Apply idempotent call-launch classifier fix
-        run: python partener-eu/ops/fix_mipe_resilient_classifier.py
+      - name: Apply idempotent classifier and bounded-runtime fixes
+        run: |
+          python partener-eu/ops/fix_mipe_resilient_classifier.py
+          python partener-eu/ops/fix_mipe_resilient_runtime.py
 
       - name: Offline policy and parser regression
         run: python partener-eu/ops/test_mipe_resilient_ingest.py
@@ -58,9 +61,11 @@ jobs:
           state_path = Path('partener-eu/ingest/state/mipe_state.json')
           feed_path = Path('partener-eu/web/mipe-news.js')
           registry_path = Path('partener-eu/ingest/state/mipe_source_registry.json')
+          index_path = Path('partener-eu/web/index.html')
           assert state_path.exists(), 'missing MIPE state'
           assert feed_path.exists(), 'missing MIPE feed'
           assert registry_path.exists(), 'missing MIPE source registry'
+          assert index_path.exists(), 'missing public index'
           state = json.loads(state_path.read_text(encoding='utf-8'))
           assert state.get('status') in {
               'OK',
@@ -81,6 +86,8 @@ jobs:
           text = feed_path.read_text(encoding='utf-8')
           assert 'window.PARTENER_DATA.mipeIngestion=' in text
           assert 'window.PARTENER_DATA.mipeNews=' in text
+          index = index_path.read_text(encoding='utf-8')
+          assert 'mipe-news.js?v=' in index and 'mipe-news-adapter.js?v=' in index
           print(json.dumps(state.get('lastRun', {}), ensure_ascii=False, indent=2))
           PY
 
@@ -89,6 +96,7 @@ jobs:
         run: |
           set -euo pipefail
           cp partener-eu/web/mipe-news.js /tmp/mipe-news.js
+          cp partener-eu/web/index.html /tmp/partener-index.html
           cp partener-eu/ingest/state/mipe_state.json /tmp/mipe_state.json
           cp partener-eu/ingest/state/mipe_source_registry.json /tmp/mipe_source_registry.json
           cp partener-eu/ingest/state/mipe_known_canonical_seeds.json /tmp/mipe_known_canonical_seeds.json
@@ -101,12 +109,14 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             cp /tmp/mipe-news.js partener-eu/web/mipe-news.js
+            cp /tmp/partener-index.html partener-eu/web/index.html
             cp /tmp/mipe_state.json partener-eu/ingest/state/mipe_state.json
             cp /tmp/mipe_source_registry.json partener-eu/ingest/state/mipe_source_registry.json
             cp /tmp/mipe_known_canonical_seeds.json partener-eu/ingest/state/mipe_known_canonical_seeds.json
             cp /tmp/mipe_resilient_ingest.py partener-eu/ingest/mipe_resilient_ingest.py
             python partener-eu/ingest/intelligence_index.py
             git add \
+              partener-eu/web/index.html \
               partener-eu/web/mipe-news.js \
               partener-eu/ingest/mipe_resilient_ingest.py \
               partener-eu/ingest/state/mipe_state.json \
@@ -115,11 +125,11 @@ jobs:
               partener-eu/ingest/state/intelligence_index.json
 
             if git diff --cached --quiet; then
-              echo 'No MIPE feed, classifier or discovery-map changes.'
+              echo 'No MIPE feed, runtime or discovery-map changes.'
               exit 0
             fi
 
-            git commit -m 'Ingest verified MIPE updates through resilient transport'
+            git commit -m 'Ingest verified MIPE updates through bounded resilient transport'
             if git push origin HEAD:main; then
               echo 'MIPE outputs persisted to main.'
               exit 0
