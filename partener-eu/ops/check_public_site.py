@@ -29,12 +29,15 @@ ENDPOINTS = [
 REQUIRED_MARKERS = {
     "brand": "PARTENER.EU",
     "boot_fallback": 'id="boot-fallback"',
-    "hero": "Găsește finanțarea potrivită",
+    "hero": "Ce finanțare poți accesa și ce trebuie să faci acum",
+    "product_definition": "Apeluri, condiții, documente, schimbări și riscuri",
     "critical_data_ref": 'src="data.js',
     "critical_app_ref": 'src="app.js',
+    "decision_data_ref": 'src="decision-products.js',
+    "decision_ui_ref": 'src="decision-intelligence-v2.js',
 }
 LEGACY_MARKERS = ("wp-content/", "wp-includes/", "wordpress.org", "wp-json")
-UA = "PARTENER.EU-CIVORA-P10-Deployment-Probe/1.4"
+UA = "PARTENER.EU-CIVORA-P10-Deployment-Probe/1.5"
 
 
 class RedirectAudit(urllib.request.HTTPRedirectHandler):
@@ -182,9 +185,13 @@ def probe(endpoint_id: str, url: str, stamp: str) -> dict[str, Any]:
         result["legacy_origin_detected"] = any(marker in low for marker in LEGACY_MARKERS)
         data_url = extract_asset(text, "data.js", final)
         app_url = extract_asset(text, "app.js", final)
+        decision_data_url = extract_asset(text, "decision-products.js", final)
+        decision_ui_url = extract_asset(text, "decision-intelligence-v2.js", final)
         result["assets"] = {
             "data.js": probe_asset(data_url, ("PARTENER_DATA", "window.PARTENER_DATA")),
             "app.js": probe_asset(app_url, ("function render", "render();", "document.getElementById('app')", 'document.getElementById("app")')),
+            "decision-products.js": probe_asset(decision_data_url, ("PARTENER_DECISION_PRODUCTS", "decisionProducts")),
+            "decision-intelligence-v2.js": probe_asset(decision_ui_url, ("Știri care explică", "Dosar complet", "Ce nu este confirmat")),
         }
         result["critical_assets_ok"] = all(x.get("ok") for x in result["assets"].values())
         result["content_verified"] = (
@@ -258,18 +265,10 @@ def main() -> int:
     https_verified = transport["custom_https_verified"]
     secure_transport_verified = transport["secure_transport_verified"]
     http_content_verified = bool(http.get("content_verified") or pages.get("content_verified"))
-    old_origin_detected = any(x.get("legacy_origin_detected") for x in endpoints)
 
-    if secure_transport_verified:
-        status = "PASS"
-    elif public_content_verified:
-        status = "DEGRADED"
-    else:
-        status = "FAIL"
-
-    best = next((x for x in (https, http, pages) if x.get("content_verified")), https)
-    obs = {
-        "schema_version": "1.4",
+    status = "PASS" if public_content_verified and secure_transport_verified else "FAIL"
+    result = {
+        "schema_version": "1.5",
         "observed_at": observed_at,
         "status": status,
         "public_content_verified": public_content_verified,
@@ -279,29 +278,30 @@ def main() -> int:
         "pages_https_preserved": transport["pages_https_preserved"],
         "http_content_verified": http_content_verified,
         "https_closure_gate": "PASS" if secure_transport_verified else "PENDING_HTTPS_ENFORCEMENT_AND_SECURE_REDIRECTS",
-        "content_origin": best.get("id") if public_content_verified else None,
-        "old_origin_detected": old_origin_detected,
+        "content_origin": next((x["id"] for x in endpoints if x.get("content_verified")), None),
+        "old_origin_detected": any(x.get("legacy_origin_detected") for x in endpoints),
         "endpoints": endpoints,
-        # Compatibility fields retained for acceptance synchronization.
-        "url": best.get("url"),
-        "http_status": best.get("http_status"),
-        "marker_ok": bool(best.get("marker_ok")),
-        "markers": best.get("markers"),
-        "final_url": best.get("final_url"),
-        "content_type": best.get("content_type"),
-        "bytes": best.get("bytes"),
-        "body_sha256": best.get("body_sha256"),
-        "title": best.get("title"),
-        "critical_assets_ok": bool(best.get("critical_assets_ok")),
-        "error": None if public_content_verified else "; ".join(
-            f"{x.get('id')}: {x.get('error') or 'required content/assets missing'}" for x in endpoints
-        ),
+        "url": https.get("url"),
+        "http_status": https.get("http_status"),
+        "marker_ok": https.get("marker_ok"),
+        "markers": https.get("markers"),
+        "final_url": https.get("final_url"),
+        "content_type": https.get("content_type"),
+        "bytes": https.get("bytes"),
+        "body_sha256": https.get("body_sha256"),
+        "title": https.get("title"),
+        "critical_assets_ok": https.get("critical_assets_ok"),
+        "error": None,
     }
-    atomic(OUT, obs)
-    print(json.dumps(obs, ensure_ascii=False, indent=2))
-    # HTTPS pending is a closure gate, not a workflow failure while verified
-    # content remains reachable. Total content loss is a critical deployment fail.
-    return 0 if public_content_verified else 2
+    if not public_content_verified:
+        failures = [f"{x['id']}: required content/assets missing" for x in endpoints if not x.get("content_verified")]
+        result["error"] = "; ".join(failures)
+    elif not secure_transport_verified:
+        result["error"] = "public content is available but HTTPS closure is incomplete"
+
+    atomic(OUT, result)
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    return 0 if status == "PASS" else 2
 
 
 if __name__ == "__main__":
