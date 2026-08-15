@@ -13,12 +13,13 @@ on:
     - cron: '17 */6 * * *'
       timezone: 'Europe/Bucharest'
   # GITHUB_TOKEN commits made by autonomous ingestion workflows do not emit a
-  # downstream push workflow. Validate again after every completed no-credential
-  # source/adapter monitor so its persistent state is included in P10 evidence.
+  # downstream push workflow. Validate again after completed source and product
+  # workflows so the persistent P10 evidence covers both facts and presentation.
   workflow_run:
     workflows:
       - 'PARTENER.EU MIPE Ingestion'
       - 'PARTENER.EU AFIR Ingestion'
+      - 'PARTENER.EU Decision Products'
       - 'PARTENER.EU Verified Source Registry'
       - 'PARTENER.EU PEO Calendar'
       - 'PARTENER.EU MFF 2028-2034 Monitor'
@@ -75,6 +76,13 @@ jobs:
         id: frontend
         continue-on-error: true
         run: python partener-eu/ops/test_frontend_regression.py
+
+      - name: Decision-useful news and universal dossier regression
+        id: editorial
+        continue-on-error: true
+        run: |
+          node --check partener-eu/web/decision-intelligence-v2.js
+          python partener-eu/ops/test_decision_products.py
 
       - name: Consultant Workspace v3 and MIPE resilient-ingestion regression
         id: intelligence_ui
@@ -181,6 +189,7 @@ jobs:
         env:
           RECOVERY_OUTCOME: ${{ steps.recovery.outcome }}
           FRONTEND_OUTCOME: ${{ steps.frontend.outcome }}
+          EDITORIAL_OUTCOME: ${{ steps.editorial.outcome }}
           INTELLIGENCE_UI_OUTCOME: ${{ steps.intelligence_ui.outcome }}
           POLICY_OUTCOME: ${{ steps.policy.outcome }}
           AFIR_POLICY_OUTCOME: ${{ steps.afir_policy.outcome }}
@@ -193,7 +202,7 @@ jobs:
           ACCEPTANCE_CODE: ${{ steps.acceptance.outputs.exit_code }}
         run: |
           FAIL=0
-          for OUTCOME in "$RECOVERY_OUTCOME" "$FRONTEND_OUTCOME" "$INTELLIGENCE_UI_OUTCOME" "$POLICY_OUTCOME" "$AFIR_POLICY_OUTCOME" "$PUBLIC_TRANSPORT_OUTCOME" "$QUALITY_OUTCOME"; do
+          for OUTCOME in "$RECOVERY_OUTCOME" "$FRONTEND_OUTCOME" "$EDITORIAL_OUTCOME" "$INTELLIGENCE_UI_OUTCOME" "$POLICY_OUTCOME" "$AFIR_POLICY_OUTCOME" "$PUBLIC_TRANSPORT_OUTCOME" "$QUALITY_OUTCOME"; do
             if [ "$OUTCOME" != "success" ]; then FAIL=2; fi
           done
           for CODE in "$VALIDATE_CODE" "$RESOLUTION_CODE" "$INTEGRITY_CODE" "$DEPLOYMENT_CODE" "$ACCEPTANCE_CODE"; do
