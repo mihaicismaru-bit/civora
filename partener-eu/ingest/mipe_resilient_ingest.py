@@ -256,7 +256,9 @@ PUBLISHABLE_EVENT_KINDS = {
 STATIC_TITLE_HINTS = (
     "poveste de succes", "povești de succes", "povesti de succes",
     "politica de coeziune", "alte finanțări și instrumente financiare",
-    "alte finantari si instrumente financiare",
+    "alte finantari si instrumente financiare", "hartă site", "harta site",
+    "programul dezvoltare durabilă și tranziție justă – ministerul",
+    "programul dezvoltare durabila si tranzitie justa – ministerul",
 )
 OFFICIAL_UPDATE_ACTIONS = (
     "anunț", "anunt", "finanț", "finant", "buget", "investi", "apel",
@@ -413,6 +415,10 @@ def classify_tag(title: str, url: str = "", context: str = "") -> str:
         return "PoIDS"
     if "pdds" in combined:
         return "PDDS"
+    if "programul sănătate" in combined or "programul sanatate" in combined:
+        return "SĂNĂTATE"
+    if "program regional" in combined or "programul regiunea" in combined or re.search(r"\badr\s+(?:centru|nord|sud|vest|bucure)", combined):
+        return "REGIONAL"
     return "MIPE"
 
 
@@ -440,7 +446,12 @@ def classify_kind(title: str, body: str) -> str:
 
 def decision_useful(title: str, kind: str, date: dt.date | None, path: str) -> bool:
     low = title.lower()
+    normalized_path = path.rstrip("/") or "/"
     if any(hint in low for hint in STATIC_TITLE_HINTS):
+        return False
+    if path.lower().endswith(".xml") or "sitemap" in path.lower():
+        return False
+    if normalized_path in {"/programul-dezvoltare-durabila-si-tranzitie-justa"}:
         return False
     if kind in PUBLISHABLE_EVENT_KINDS:
         return True
@@ -456,9 +467,10 @@ def decision_useful(title: str, kind: str, date: dt.date | None, path: str) -> b
 def previous_item_useful(item: dict[str, Any]) -> bool:
     if item.get("source") == "MIPE / MySMIS":
         return True
-    if item.get("decisionUseful") is True:
-        return True
-    return item.get("kind") in PUBLISHABLE_EVENT_KINDS
+    url = str(item.get("url") or "")
+    path = urllib.parse.urlparse(url).path or "/"
+    date = parse_date(item.get("date"), body="")
+    return decision_useful(str(item.get("title") or ""), str(item.get("kind") or "OFFICIAL_UPDATE"), date, path)
 
 
 def item_id(url: str, title: str) -> str:
@@ -692,6 +704,10 @@ def make_item(candidate: dict[str, str], cache: dict[str, tuple[dict[str, Any] |
         summary = f"Actualizare oficială MIPE: {title}."
         if documents:
             summary += f" Pagina include {len(documents)} documente oficiale pentru verificare."
+    if path.rstrip("/") in {"/peos/anunturi", "/pids/anunturi", "/poids/anunturi"} and documents:
+        material = [d["name"] for d in documents if "lista plăților" not in d["name"].lower() and "lista platilor" not in d["name"].lower()]
+        highlights = material[:3] or [d["name"] for d in documents[:3]]
+        summary = f"Pagina oficială {classify_tag(title, canonical, description)} a fost actualizată și include {len(documents)} documente oficiale. Cele mai relevante elemente observate: " + "; ".join(highlights) + "."
     summary = summary[:900]
     transport = health.get("transport", "unknown")
     tier = "T1" if transport.startswith("direct") else "T1_PROXY_TRANSPORT"
