@@ -96,11 +96,19 @@ jobs:
         run: |
           set -euo pipefail
           cp partener-eu/web/mipe-news.js /tmp/mipe-news.js
-          cp partener-eu/web/index.html /tmp/partener-index.html
           cp partener-eu/ingest/state/mipe_state.json /tmp/mipe_state.json
           cp partener-eu/ingest/state/mipe_source_registry.json /tmp/mipe_source_registry.json
           cp partener-eu/ingest/state/mipe_known_canonical_seeds.json /tmp/mipe_known_canonical_seeds.json
           cp partener-eu/ingest/mipe_resilient_ingest.py /tmp/mipe_resilient_ingest.py
+          python - <<'PY' > /tmp/mipe_asset_version.txt
+          import re
+          from pathlib import Path
+          text = Path('partener-eu/web/index.html').read_text(encoding='utf-8')
+          match = re.search(r'mipe-news\.js\?v=([^"\']+)', text)
+          if not match:
+              raise SystemExit('MIPE asset version missing from generated index')
+          print(match.group(1))
+          PY
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
 
@@ -109,11 +117,23 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             cp /tmp/mipe-news.js partener-eu/web/mipe-news.js
-            cp /tmp/partener-index.html partener-eu/web/index.html
             cp /tmp/mipe_state.json partener-eu/ingest/state/mipe_state.json
             cp /tmp/mipe_source_registry.json partener-eu/ingest/state/mipe_source_registry.json
             cp /tmp/mipe_known_canonical_seeds.json partener-eu/ingest/state/mipe_known_canonical_seeds.json
             cp /tmp/mipe_resilient_ingest.py partener-eu/ingest/mipe_resilient_ingest.py
+            MIPE_VERSION=$(cat /tmp/mipe_asset_version.txt)
+            export MIPE_VERSION
+            python - <<'PY'
+          import os
+          import re
+          from pathlib import Path
+          path = Path('partener-eu/web/index.html')
+          text = path.read_text(encoding='utf-8')
+          version = os.environ['MIPE_VERSION']
+          text = re.sub(r'(mipe-news\.js\?v=)[^"\']+', rf'\g<1>{version}', text)
+          text = re.sub(r'(mipe-news-adapter\.js\?v=)[^"\']+', rf'\g<1>{version}', text)
+          path.write_text(text, encoding='utf-8')
+          PY
             python partener-eu/ingest/intelligence_index.py
             git add \
               partener-eu/web/index.html \
