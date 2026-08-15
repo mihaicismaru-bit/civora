@@ -8,6 +8,7 @@ signals until corroborated by T1/T1B administrative evidence.
 from __future__ import annotations
 
 import datetime as dt
+import hashlib
 import html
 import json
 import re
@@ -73,8 +74,9 @@ def mention_item(person: dict[str,Any], source: dict[str,Any], source_kind: str)
     url=source.get("url") or (source.get("source") or {}).get("url")
     day=date_key(source.get("date") or source.get("observedAt") or source.get("updatedAt"))
     typ=type_for(hay)
+    token=hashlib.sha1(f"{person['id']}|{day}|{hay}|{url or ''}".encode("utf-8")).hexdigest()[:10]
     return {
-        "id":f"auto-{person['id']}-{day}-{abs(hash((hay,url)))%10000000}",
+        "id":f"auto-{person['id']}-{day}-{token}",
         "personId":person["id"],"date":day,"type":typ,"topic":source.get("programme") or source.get("tag") or person.get("institution"),
         "headline":clean(source.get("headline") or source.get("title"))[:220],
         "statement":clean(source.get("standfirst") or source.get("summary") or source.get("meaning"))[:500],
@@ -114,7 +116,6 @@ def main()->int:
 
     items=[x for x in items if x.get("personId") in people]
     items.sort(key=lambda x:(date_key(x.get("date")),int(x.get("priority") or 0)),reverse=True)
-    # Homepage diversity: max one signal/person, max three cards.
     home=[];seen=set()
     for x in items:
         if x["personId"] in seen:continue
