@@ -15,7 +15,7 @@
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-08-15T22:38:09Z",
+    "utc": "2026-08-15T22:59:39Z",
     "source_pass": 6,
     "source_degraded": 0,
     "source_fail": 1,
@@ -26,7 +26,7 @@
     "quarantined_source": "SRC-LEGISLATIE — Portal Legislativ; dependent material facts blocked fail-closed"
   },
   "deployment_evidence": {
-    "utc": "2026-08-15T22:38:32Z",
+    "utc": "2026-08-15T23:00:05Z",
     "status": "FAIL",
     "public_content_verified": true,
     "https_verified": true,
@@ -36,7 +36,7 @@
     "http_content_verified": true,
     "content_origin": "custom_https",
     "http_status": 200,
-    "final_url": "https://partener.eu/?p10_probe=20260815T223832Z",
+    "final_url": "https://partener.eu/?p10_probe=20260815T230005Z",
     "title": "PARTENER.EU — Finanțări europene explicate simplu",
     "required_markers_present": true,
     "critical_assets_ok": true,
@@ -46,7 +46,7 @@
       {
         "id": "custom_https",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260815T223832Z",
+        "final_url": "https://partener.eu/?p10_probe=20260815T230005Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -57,7 +57,7 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260815T223832Z",
+        "final_url": "http://partener.eu/?p10_probe=20260815T230005Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -68,12 +68,12 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260815T223832Z",
+        "final_url": "http://partener.eu/?p10_probe=20260815T230005Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260815T223832Z",
-            "to_url": "http://partener.eu/?p10_probe=20260815T223832Z"
+            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260815T230005Z",
+            "to_url": "http://partener.eu/?p10_probe=20260815T230005Z"
           }
         ],
         "content_verified": true,
@@ -123,31 +123,31 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-08-15T22:38:32Z",
-    "validation_run_started": "2026-08-15T22:38:09Z",
+    "utc": "2026-08-15T23:00:05Z",
+    "validation_run_started": "2026-08-15T22:59:39Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "ac7bc7040f00f40c8a059d7b01ecb0e525dd4ffbf8e9e2df302bd2fedb260782",
-      "history_sha256": "ac7bc7040f00f40c8a059d7b01ecb0e525dd4ffbf8e9e2df302bd2fedb260782",
-      "history_path": "validation/history/20260815T223809Z.json",
+      "latest_sha256": "9a47c1066dcff095b45ff6248cf6de7f639731c2e8a256f7e83c1cc8a51e5c29",
+      "history_sha256": "9a47c1066dcff095b45ff6248cf6de7f639731c2e8a256f7e83c1cc8a51e5c29",
+      "history_path": "validation/history/20260815T225939Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "ea597c52d6c722f3900e376713ea13601d324f01810dfeb5528a538b08825994",
-      "checkpoint_sha256": "ea597c52d6c722f3900e376713ea13601d324f01810dfeb5528a538b08825994",
+      "source_state_sha256": "324859d192b4ee397ba6b8093b485e5c2b59602a864f09fe1ef405d601a5a86f",
+      "checkpoint_sha256": "324859d192b4ee397ba6b8093b485e5c2b59602a864f09fe1ef405d601a5a86f",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
       "recovery_state_integrity": "PASS"
     },
     "source_registry": {
-      "observed_at": "2026-08-15T20:59:29.655317Z",
-      "age_seconds": 5943,
+      "observed_at": "2026-08-15T22:58:42.024699Z",
+      "age_seconds": 83,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
       "summary": {
         "total": 18,
-        "pass": 15,
-        "degraded": 0,
+        "pass": 11,
+        "degraded": 4,
         "fail": 3,
         "quarantined": 3,
         "resolution_tasks_required": 0
@@ -155,8 +155,8 @@
       "tier_counts": {
         "T1": {
           "total": 4,
-          "pass": 4,
-          "degraded": 0,
+          "pass": 1,
+          "degraded": 3,
           "fail": 0,
           "quarantined": 0,
           "hash_changes": 0
