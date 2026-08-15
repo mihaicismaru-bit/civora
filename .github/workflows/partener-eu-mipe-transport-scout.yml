@@ -1,0 +1,101 @@
+name: PARTENER.EU MIPE Transport Scout
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'partener-eu/ingest/mipe_transport_scout.py'
+      - '.github/workflows/partener-eu-mipe-transport-scout.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: partener-eu-mipe-transport-scout
+  cancel-in-progress: true
+
+jobs:
+  scout:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Probe MIPE transport paths
+        shell: bash
+        env:
+          MIPE_SCOUT_OUT: scout-${{ runner.os }}.json
+        run: python partener-eu/ingest/mipe_transport_scout.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mipe-scout-${{ runner.os }}
+          path: scout-${{ runner.os }}.json
+          retention-days: 7
+
+  aggregate:
+    needs: scout
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: mipe-scout-*
+          path: scout-results
+          merge-multiple: true
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Aggregate transport evidence
+        run: |
+          python - <<'PY'
+          import datetime as dt
+          import json
+          from pathlib import Path
+
+          files = sorted(Path('scout-results').glob('*.json'))
+          runs = [json.loads(path.read_text(encoding='utf-8')) for path in files]
+          working = []
+          for run in runs:
+              for item in run.get('workingTransports', []):
+                  working.append({'runner': run.get('runner', {}).get('os'), **item})
+          payload = {
+              'schema': 'CIVORA_MIPE_TRANSPORT_MATRIX_V1',
+              'observedAt': dt.datetime.now(dt.timezone.utc).isoformat(),
+              'runnerCount': len(runs),
+              'workingTransports': working,
+              'verdict': 'WORKING_TRANSPORT_FOUND' if working else 'NO_WORKING_TRANSPORT_IN_MATRIX',
+              'runs': runs,
+          }
+          out = Path('partener-eu/ingest/state/mipe_transport_matrix.json')
+          out.parent.mkdir(parents=True, exist_ok=True)
+          out.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          print(json.dumps({'verdict': payload['verdict'], 'workingTransports': working}, ensure_ascii=False, indent=2))
+          PY
+      - name: Persist transport matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp partener-eu/ingest/state/mipe_transport_matrix.json /tmp/mipe_transport_matrix.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/mipe_transport_matrix.json partener-eu/ingest/state/mipe_transport_matrix.json
+            git add partener-eu/ingest/state/mipe_transport_matrix.json
+            if git diff --cached --quiet; then exit 0; fi
+            git commit -m 'Record MIPE transport matrix'
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1
