@@ -729,11 +729,40 @@ def dedupe_news(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return out[:60]
 
 
+def stable_generated_at(p11: dict[str, Any], mipe: dict[str, Any], afir: dict[str, Any]) -> str:
+    """Return a deterministic product version from source snapshot times."""
+    candidates = [
+        p11.get("asOf"),
+        (mipe.get("lastRun") or {}).get("observedAt"),
+        mipe.get("observedAt"),
+        afir.get("observedAt"),
+    ]
+    for item in mipe.get("items") or []:
+        candidates.append(item.get("observedAt") or item.get("date"))
+    for item in afir.get("items") or []:
+        candidates.append(item.get("observedAt"))
+
+    parsed: list[dt.datetime] = []
+    for value in candidates:
+        if not value:
+            continue
+        try:
+            stamp = dt.datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+            if stamp.tzinfo is None:
+                stamp = stamp.replace(tzinfo=dt.timezone.utc)
+            parsed.append(stamp.astimezone(dt.timezone.utc))
+        except (TypeError, ValueError):
+            continue
+    if not parsed:
+        return "1970-01-01T00:00:00Z"
+    return max(parsed).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
 def main() -> int:
-    generated_at = utc_now()
     p11 = load_p11()
     mipe = read_json(MIPE_PATH, {"items": []})
     afir = read_json(AFIR_PATH, {"items": []})
+    generated_at = stable_generated_at(p11, mipe, afir)
 
     dossiers = [build_p11_dossier(item, generated_at) for item in p11.get("opportunities") or []]
     coverage = {
