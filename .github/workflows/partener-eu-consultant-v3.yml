@@ -1,0 +1,43 @@
+name: PARTENER.EU Consultant Workspace v3 QA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'partener-eu/web/consultant-workspace-v3.js'
+      - 'partener-eu/web/consultant-workspace-v3.css'
+      - 'partener-eu/web/consultant-onboarding-v3.js'
+      - 'partener-eu/web/consultant-onboarding-v3.css'
+      - 'partener-eu/web/index.html'
+      - 'partener-eu/ops/test_consultant_workspace_v3.py'
+      - 'partener-eu/ops/fix_consultant_workspace_v3.py'
+      - '.github/workflows/partener-eu-consultant-v3.yml'
+
+concurrency:
+  group: partener-eu-consultant-v3-qa
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Apply idempotent source corrections in test workspace
+        run: python partener-eu/ops/fix_consultant_workspace_v3.py
+      - name: JavaScript syntax
+        run: |
+          node --check partener-eu/web/consultant-workspace-v3.js
+          node --check partener-eu/web/consultant-onboarding-v3.js
+      - name: Product contract
+        run: python partener-eu/ops/test_consultant_workspace_v3.py
