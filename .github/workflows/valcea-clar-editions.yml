@@ -81,15 +81,19 @@ jobs:
         if: steps.slot.outputs.run_generation == 'true'
         run: |
           python valcea-clar/scripts/generate_edition.py --self-test
-          python valcea-clar/scripts/discover_news_facts.py --self-test
+          python local-news-os/core/discover_primary_source_facts.py --self-test
 
       - name: Refresh source radar
         if: steps.slot.outputs.run_generation == 'true'
         run: python valcea-clar/scripts/probe_sources.py
 
-      - name: Discover fresh primary-source facts
+      - name: Discover fresh primary-source facts through Local News OS
         if: steps.slot.outputs.run_generation == 'true'
-        run: python valcea-clar/scripts/discover_news_facts.py
+        run: |
+          python local-news-os/core/discover_primary_source_facts.py \
+            --instance valcea \
+            --output valcea-clar/editorial/auto_facts.json \
+            --state valcea-clar/editorial/news_discovery_state.json
 
       - name: Refresh Unde ieșim ingestion
         if: steps.slot.outputs.run_generation == 'true'
@@ -128,6 +132,9 @@ jobs:
           assert auto['policy']['llm_required'] is False
           assert auto['policy']['external_paid_api_required'] is False
           assert auto['policy']['article_body_material_facts_autopublish'] is False
+          assert auto.get('instance_id') == 'valcea'
+          assert auto.get('source_contract') == 'SOURCE_PACK_V1'
+          assert auto.get('migration_adapter') == 'local_news_os_primary_source_compat_v1'
           if attempt['publication_intent'] == 'publish':
               assert attempt['status'] == 'auto_approved'
               assert attempt['editorial_fact_count'] >= 1
@@ -144,7 +151,9 @@ jobs:
           print(json.dumps({
               'attempt': attempt,
               'public_pointer': pointer['edition_id'],
-              'auto_fact_registry_count': len(auto.get('facts', []))
+              'auto_fact_registry_count': len(auto.get('facts', [])),
+              'instance_id': auto['instance_id'],
+              'source_contract': auto['source_contract']
           }))
           PY
 
