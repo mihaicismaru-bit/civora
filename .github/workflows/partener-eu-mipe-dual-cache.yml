@@ -1,0 +1,68 @@
+name: PARTENER.EU MIPE Dual Cache
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '7 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'partener-eu/ingest/mipe_dual_cache.py'
+      - '.github/workflows/partener-eu-mipe-dual-cache.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: partener-eu-mipe-dual-cache
+  cancel-in-progress: true
+
+jobs:
+  cache:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Build dual-relay cache
+        run: python partener-eu/ingest/mipe_dual_cache.py
+      - name: Enforce cache evidence contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path('partener-eu/ingest/state/mipe_dual_cache.json')
+          data = json.loads(path.read_text(encoding='utf-8'))
+          assert data.get('schema') == 'CIVORA_MIPE_DUAL_CACHE_V1'
+          assert data.get('verifiedCount', 0) >= 1
+          for row in data.get('records', []):
+              if not row.get('ok'):
+                  continue
+              assert row.get('verification') == 'CANONICAL_DUAL_RELAY_CORROBORATED'
+              assert row.get('readerSource', '').replace('http://','https://').rstrip('/') == row['canonicalUrl'].rstrip('/')
+              assert len(row.get('readerSha256','')) == 64
+              assert len(row.get('translateSha256','')) == 64
+              assert row.get('readerText')
+          print({'status': data.get('status'), 'verifiedCount': data.get('verifiedCount')})
+          PY
+      - name: Persist cache
+        run: |
+          set -euo pipefail
+          cp partener-eu/ingest/state/mipe_dual_cache.json /tmp/mipe_dual_cache.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/mipe_dual_cache.json partener-eu/ingest/state/mipe_dual_cache.json
+            git add partener-eu/ingest/state/mipe_dual_cache.json
+            if git diff --cached --quiet; then exit 0; fi
+            git commit -m 'Refresh corroborated MIPE availability cache'
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1
