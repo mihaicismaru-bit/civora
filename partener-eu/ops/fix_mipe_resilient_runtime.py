@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Apply idempotent runtime bounds and feed cache-busting to MIPE ingest."""
+"""Apply idempotent runtime bounds, legacy normalization and feed cache-busting."""
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -23,6 +23,11 @@ replacements = [
     ("direct = fetch(canonical, timeout=18, attempts=1)", "direct = fetch(canonical, timeout=6, attempts=1)", "direct timeout"),
     ('proxy = fetch(reader_url(canonical), timeout=35, attempts=2, accept="text/plain,text/markdown,*/*")', 'proxy = fetch(reader_url(canonical), timeout=18, attempts=1, accept="text/plain,text/markdown,*/*")', "reader timeout"),
     ('result = fetch(search_url(query), timeout=35, attempts=1, accept="text/plain,text/markdown,*/*")', 'result = fetch(search_url(query), timeout=18, attempts=1, accept="text/plain,text/markdown,*/*")', "search timeout"),
+    (
+        '    previous_by_url = {item.get("url"): item for item in previous_state.get("items", []) if item.get("url")}\n',
+        '''    previous_by_url: dict[str, dict[str, Any]] = {}\n    for old_item in previous_state.get("items", []):\n        old_url = old_item.get("url")\n        if not old_url:\n            continue\n        normalized = dict(old_item)\n        # Items created by pre-v2 ingestion are preserved, but they must still\n        # satisfy the current provenance contract. The marker is explicit and\n        # never pretends that an old item was fetched in the current run.\n        normalized.setdefault("retrievalTransport", "legacy-preserved")\n        normalized.setdefault("tier", "T1_LEGACY_PRESERVED")\n        normalized.setdefault("observedAt", previous_state.get("lastRun", {}).get("observedAt", ""))\n        normalized.setdefault("documents", [])\n        previous_by_url[old_url] = normalized\n''',
+        "legacy feed provenance normalization",
+    ),
     (
         '''    cache: dict[str, tuple[dict[str, Any] | None, dict[str, Any]]] = {}\n    current: list[dict[str, Any]] = []\n    page_health: list[dict[str, Any]] = []\n    for candidate in queue:\n        item, health = make_item(candidate, cache)\n        page_health.append(health)\n        if item:\n            current.append(item)\n''',
         '''    current: list[dict[str, Any]] = []\n    page_health: list[dict[str, Any]] = []\n\n    def fetch_candidate(candidate: dict[str, str]) -> tuple[dict[str, Any] | None, dict[str, Any]]:\n        # Candidate URLs are deduplicated before this point; a private cache per\n        # worker avoids shared mutable state while bounding wall-clock latency.\n        return make_item(candidate, {})\n\n    with ThreadPoolExecutor(max_workers=8, thread_name_prefix="mipe-fetch") as pool:\n        for item, health in pool.map(fetch_candidate, queue):\n            page_health.append(health)\n            if item:\n                current.append(item)\n''',
