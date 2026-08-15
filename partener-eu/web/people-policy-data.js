@@ -1,0 +1,1 @@
+window.PARTENER_PEOPLE_POLICY={"schemaVersion":1,"asOf":"2026-08-15T13:56:00Z","mode":"AUTO","policy":{"statementIsNotAdministrativeFact":true,"homepageMaxItems":3,"officialEffectRequiresT1Evidence":true,"photoFallback":"initials"},"homeIds":[],"people":[],"items":[]};
