@@ -2,6 +2,9 @@ name: VÂLCEA CLAR Social Publication Engine
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: ["VÂLCEA CLAR Autonomous Editions"]
+    types: [completed]
   pull_request:
     paths:
       - "valcea-clar/social/**"
@@ -29,12 +32,14 @@ concurrency:
 
 jobs:
   distribute:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          ref: main
 
       - uses: actions/setup-python@v6
         with:
