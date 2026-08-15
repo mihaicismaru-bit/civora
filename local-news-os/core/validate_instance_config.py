@@ -27,6 +27,7 @@ REQUIRED_POLICIES = {
 }
 RUNTIME_KEYS = ("state_root", "output_root", "current_edition", "live_feed")
 PACK_KEYS = ("source_pack", "brand_pack", "geography_pack")
+TEST_FORBIDDEN = ("vâlcea", "valcea", "valceaclar.ro", "râmnicu", "ramnicu")
 
 
 def load(path: Path) -> dict:
@@ -57,17 +58,31 @@ def repo_file(raw: str) -> Path | None:
     return candidate
 
 
-def validate_packs(path: Path, cfg: dict, instance_id: str) -> list[str]:
+def validate_packs(path: Path, cfg: dict, instance_id: str, environment: str) -> list[str]:
+    """Require every local pack to be real, instance-owned and contamination-free."""
     errors: list[str] = []
     packs = cfg.get("packs")
     if not isinstance(packs, dict):
         return [f"{path}: packs must be object"]
+
+    instance_root = path.parent.resolve()
+    instance_config = path.resolve()
 
     for key in PACK_KEYS:
         raw = str(packs.get(key, "")).strip()
         target = repo_file(raw)
         if target is None:
             errors.append(f"{path}: packs.{key} must be a repository-relative path")
+            continue
+        if target == instance_config:
+            errors.append(f"{path}: packs.{key} cannot self-reference instance.json")
+            continue
+        try:
+            target.relative_to(instance_root)
+        except ValueError:
+            errors.append(
+                f"{path}: packs.{key} must be owned by instance {instance_id!r}; got {raw}"
+            )
             continue
         if not target.is_file():
             errors.append(f"{path}: packs.{key} does not exist: {raw}")
@@ -77,11 +92,21 @@ def validate_packs(path: Path, cfg: dict, instance_id: str) -> list[str]:
         except Exception as exc:
             errors.append(f"{path}: packs.{key} is not a valid JSON object: {exc}")
             continue
+
         pack_instance = payload.get("instance_id")
         if pack_instance is not None and str(pack_instance) != instance_id:
             errors.append(
                 f"{path}: packs.{key} instance_id {pack_instance!r} does not match {instance_id!r}"
             )
+
+        if environment == "test":
+            serialized = json.dumps(payload, ensure_ascii=False).lower()
+            leaks = [token for token in TEST_FORBIDDEN if token in serialized]
+            if leaks:
+                errors.append(
+                    f"{path}: production-instance contamination in test {key}: {', '.join(leaks)}"
+                )
+
     return errors
 
 
@@ -98,7 +123,7 @@ def validate_one(path: Path, cfg: dict) -> list[str]:
     if path.parent.name != instance_id:
         errors.append(f"{path}: directory must match instance_id {instance_id!r}")
 
-    environment = cfg.get("environment")
+    environment = str(cfg.get("environment", ""))
     if environment not in {"production", "staging", "test"}:
         errors.append(f"{path}: invalid environment {environment!r}")
 
@@ -116,7 +141,7 @@ def validate_one(path: Path, cfg: dict) -> list[str]:
     if not isinstance(geography, dict) or not str(geography.get("primary_name", "")).strip():
         errors.append(f"{path}: geography.primary_name is required")
 
-    errors.extend(validate_packs(path, cfg, instance_id))
+    errors.extend(validate_packs(path, cfg, instance_id, environment))
 
     policies = cfg.get("policies")
     if not isinstance(policies, dict):
@@ -141,8 +166,7 @@ def validate_one(path: Path, cfg: dict) -> list[str]:
             "geography": cfg.get("geography"),
         }
         serialized = json.dumps(identity, ensure_ascii=False).lower()
-        forbidden = ("vâlcea", "valcea", "valceaclar.ro", "râmnicu", "ramnicu")
-        leaks = [token for token in forbidden if token in serialized]
+        leaks = [token for token in TEST_FORBIDDEN if token in serialized]
         if leaks:
             errors.append(f"{path}: production-instance contamination in test identity: {', '.join(leaks)}")
 
