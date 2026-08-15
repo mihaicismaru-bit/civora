@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local-news-os.invalid/schemas/observed_metrics.schema.json",
+  "title": "LOCAL NEWS OS Observed Social Metrics",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "instance_id",
+    "channel_id",
+    "platform",
+    "publication_id",
+    "remote_publication_id",
+    "story_id",
+    "product_id",
+    "source",
+    "observed_at",
+    "window",
+    "publication_context",
+    "metrics",
+    "provenance",
+    "guards"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "observation_id": {"type": "string", "pattern": "^metric-observation:[a-f0-9]{24}$"},
+    "instance_id": {"type": "string", "minLength": 1},
+    "channel_id": {"type": "string", "minLength": 3},
+    "platform": {
+      "enum": ["facebook", "instagram", "tiktok", "youtube", "threads", "linkedin", "whatsapp", "telegram"]
+    },
+    "publication_id": {"type": "string", "minLength": 3},
+    "remote_publication_id": {"type": "string", "minLength": 1},
+    "story_id": {"type": "string", "minLength": 1},
+    "product_id": {"type": "string", "minLength": 1},
+    "source": {"type": "string", "minLength": 2},
+    "observed_at": {"type": "string", "format": "date-time"},
+    "window": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "start_at", "end_at"],
+      "properties": {
+        "kind": {"const": "cumulative"},
+        "start_at": {"type": "string", "format": "date-time"},
+        "end_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "publication_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "published_at", "native_format", "topic_keys", "series_id"],
+      "properties": {
+        "status": {"const": "PUBLISHED"},
+        "published_at": {"type": "string", "format": "date-time"},
+        "native_format": {
+          "enum": ["text", "single_photo", "carousel", "story", "reel", "short", "long_video", "thread", "alert", "digest", "live"]
+        },
+        "topic_keys": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "uniqueItems": true
+        },
+        "series_id": {"type": ["string", "null"]}
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "properties": {
+        "impressions": {"type": "number", "minimum": 0},
+        "reach": {"type": "number", "minimum": 0},
+        "reactions": {"type": "number", "minimum": 0},
+        "comments": {"type": "number", "minimum": 0},
+        "shares": {"type": "number", "minimum": 0},
+        "saves": {"type": "number", "minimum": 0},
+        "link_clicks": {"type": "number", "minimum": 0},
+        "video_views": {"type": "number", "minimum": 0},
+        "video_watch_seconds": {"type": "number", "minimum": 0},
+        "video_completions": {"type": "number", "minimum": 0},
+        "profile_visits": {"type": "number", "minimum": 0},
+        "follows": {"type": "number", "minimum": 0}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["retrieval_method", "collector", "source_payload_sha256", "collected_at"],
+      "properties": {
+        "retrieval_method": {"enum": ["native_api", "native_export", "manual_export"]},
+        "collector": {"type": "string", "minLength": 2},
+        "source_payload_sha256": {"type": "string", "pattern": "^[a-fA-F0-9]{64}$"},
+        "collected_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "guards": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["observed_only", "predicted_or_estimated"],
+      "properties": {
+        "observed_only": {"const": true},
+        "predicted_or_estimated": {"const": false}
+      }
+    }
+  }
+}
