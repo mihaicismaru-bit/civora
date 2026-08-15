@@ -1,0 +1,44 @@
+name: LOCAL NEWS OS Core Validation
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/core/**"
+      - "local-news-os/schemas/**"
+      - "local-news-os/instances/**"
+      - ".github/workflows/local-news-os-core.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/core/**"
+      - "local-news-os/schemas/**"
+      - "local-news-os/instances/**"
+      - ".github/workflows/local-news-os-core.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-instances:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Compile generic instance validator
+        run: python -m py_compile local-news-os/core/validate_instance_config.py
+      - name: Validate production and test instances
+        run: python local-news-os/core/validate_instance_config.py
+      - name: Assert fixture packs are isolated
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f local-news-os/instances/valcea/instance.json
+          test -f local-news-os/instances/test-local/instance.json
+          test -f local-news-os/instances/test-local/fixtures/source_pack.json
+          test -f local-news-os/instances/test-local/fixtures/brand_pack.json
+          ! grep -Eiq 'vâlcea|valcea|ramnicu|râmnicu|valceaclar\.ro' \
+            local-news-os/instances/test-local/fixtures/source_pack.json \
+            local-news-os/instances/test-local/fixtures/brand_pack.json
