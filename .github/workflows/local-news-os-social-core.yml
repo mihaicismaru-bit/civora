@@ -1,0 +1,53 @@
+name: LOCAL NEWS OS Social Core
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/social/**"
+      - ".github/workflows/local-news-os-social-core.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/social/**"
+      - ".github/workflows/local-news-os-social-core.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-news-os-social-core-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile dependency-free social core
+        run: |
+          python -m py_compile \
+            local-news-os/social/validate_channel_config.py \
+            local-news-os/social/channel_fit.py \
+            local-news-os/social/test_channel_fit.py
+
+      - name: Run channel fit acceptance tests
+        run: python local-news-os/social/test_channel_fit.py
+
+      - name: Validate Vâlcea reference CHANNEL_CONFIG fixtures
+        run: |
+          python local-news-os/social/validate_channel_config.py \
+            valcea-clar/social/channels/facebook.json \
+            --instance-root valcea-clar
+          python local-news-os/social/validate_channel_config.py \
+            valcea-clar/social/channels/instagram.json \
+            --instance-root valcea-clar
+          python local-news-os/social/validate_channel_config.py \
+            valcea-clar/social/channels/tiktok.json \
+            --instance-root valcea-clar
