@@ -10,6 +10,7 @@ on:
       - 'partener-eu/ingest/afir_ingest.py'
       - 'partener-eu/ingest/build_decision_products.py'
       - 'partener-eu/ingest/polish_decision_products.py'
+      - 'partener-eu/ingest/finalize_decision_products.py'
       - 'partener-eu/ops/fix_afir_decision_extraction.py'
       - 'partener-eu/ops/test_decision_products.py'
       - '.github/workflows/partener-eu-afir-ingest.yml'
@@ -41,10 +42,11 @@ jobs:
       - name: Discover and fingerprint official AFIR corpus fail-closed
         run: python partener-eu/ingest/afir_ingest.py
 
-      - name: Build and polish decision dossiers from fresh AFIR evidence
+      - name: Build, polish and deduplicate dossiers from fresh AFIR evidence
         run: |
           python partener-eu/ingest/build_decision_products.py
           python partener-eu/ingest/polish_decision_products.py
+          python partener-eu/ingest/finalize_decision_products.py
 
       - name: Validate decision products
         run: python partener-eu/ops/test_decision_products.py
