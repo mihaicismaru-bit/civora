@@ -20,10 +20,13 @@ assert index.index('people-policy-data.js') < index.index('people-policy-v1.js')
 assert daily.get('policy', {}).get('dailyGenerated') is True
 assert daily.get('policy', {}).get('decisionProductsOnly') is True
 assert daily.get('policy', {}).get('rawIngestionExcluded') is True
+assert daily.get('policy', {}).get('expiredOpenExcluded') is True
 assert len(daily.get('items') or []) <= 4
 for item in daily.get('items') or []:
     assert item.get('title') and item.get('action') and item.get('label')
-    assert "{'" not in str(item) and 'FUNDING_COMMITMENT' not in str(item.get('label'))
+    public_text=' '.join(str(item.get(k) or '') for k in ('label','programme','title','summary','action'))
+    assert "{'" not in public_text and 'FUNDING_COMMITMENT' not in public_text
+    assert not public_text.lstrip().startswith('{')
 
 assert people.get('mode') == 'AUTO'
 assert people.get('policy', {}).get('statementIsNotAdministrativeFact') is True
