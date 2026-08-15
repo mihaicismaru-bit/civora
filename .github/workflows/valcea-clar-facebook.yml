@@ -6,6 +6,8 @@ on:
     branches: [main]
     paths:
       - "valcea-clar/social/**"
+      - "valcea-clar/site/current_edition.json"
+      - "valcea-clar/editions/**"
       - ".github/workflows/valcea-clar-facebook.yml"
   schedule:
     - cron: "7,22,37,52 * * * *"
@@ -28,6 +30,9 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
+
+      - name: Build Facebook edition summary from current edition
+        run: python valcea-clar/social/build_current_edition_outbox.py
 
       - name: Fetch approved real photographs
         run: python valcea-clar/social/fetch_approved_photos.py
