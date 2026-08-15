@@ -1,0 +1,122 @@
+name: PARTENER.EU MIPE Access Bridge
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '37 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'partener-eu/ops/fix_mipe_first_party_relay.py'
+      - '.github/workflows/partener-eu-mipe-access-bridge.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: partener-eu-mipe-ingest
+  cancel-in-progress: true
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      MIPE_RELAY_URL: https://partener-mipe-relay-mihaicismaru-6634s-projects.vercel.app/api/mipe
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Apply canonical policy and first-party relay transport
+        run: |
+          python partener-eu/ops/fix_mipe_resilient_classifier.py
+          python partener-eu/ops/fix_mipe_resilient_runtime.py
+          python partener-eu/ops/fix_mipe_content_quality.py
+          python partener-eu/ops/fix_mipe_first_party_relay.py
+
+      - name: Syntax and offline policy regression
+        run: |
+          python -m py_compile partener-eu/ingest/mipe_resilient_ingest.py
+          python partener-eu/ops/test_mipe_resilient_ingest.py
+
+      - name: Ingest official MIPE bytes through direct or attested relay transport
+        run: python partener-eu/ingest/mipe_resilient_ingest.py
+
+      - name: Build MySMIS consultant evidence
+        run: python partener-eu/ingest/build_mysmis_consultant_registry.py
+
+      - name: Enforce source and relay evidence contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          state = json.loads(Path('partener-eu/ingest/state/mipe_state.json').read_text(encoding='utf-8'))
+          allowed_statuses = {
+              'OK', 'OK_NO_NEW_RELEVANT_ITEMS',
+              'DEGRADED_LAST_KNOWN_GOOD_PRESERVED',
+              'SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED',
+          }
+          assert state.get('status') in allowed_statuses, state.get('status')
+          allowed_hosts = ('mfe.gov.ro','fonduri-ue.gov.ro','fonduri-ue.ro','oportunitati-ue.gov.ro','reporting.mysmis2021.gov.ro')
+          for item in state.get('items', []):
+              assert item.get('url', '').startswith('https://')
+              assert any(host in item['url'] for host in allowed_hosts), item['url']
+              transport = item.get('retrievalTransport', '')
+              assert transport.startswith('direct') or item.get('verification') == 'CANONICAL_OFFICIAL_FETCH', transport
+              if 'first-party-relay' in transport:
+                  assert item.get('tier') == 'T1_RELAY_ATTESTED'
+          relay_roots = [r for r in state.get('lastRun', {}).get('roots', []) if 'first-party-relay' in str(r.get('transport', ''))]
+          for root in relay_roots:
+              assert root.get('ok') is True
+              assert root.get('sha256') and len(root['sha256']) == 64
+              assert root.get('relay')
+          print(json.dumps({
+              'status': state.get('status'),
+              'items': len(state.get('items', [])),
+              'relaySuccesses': len(relay_roots),
+              'observedAt': state.get('lastRun', {}).get('observedAt'),
+          }, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Persist access bridge, feed and evidence
+        run: |
+          set -euo pipefail
+          cp partener-eu/ingest/mipe_resilient_ingest.py /tmp/mipe_resilient_ingest.py
+          cp partener-eu/ingest/state/mipe_state.json /tmp/mipe_state.json
+          cp partener-eu/ingest/state/mipe_source_registry.json /tmp/mipe_source_registry.json
+          cp partener-eu/web/mipe-news.js /tmp/mipe-news.js
+          cp partener-eu/web/mysmis-registry.js /tmp/mysmis-registry.js
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/mipe_resilient_ingest.py partener-eu/ingest/mipe_resilient_ingest.py
+            cp /tmp/mipe_state.json partener-eu/ingest/state/mipe_state.json
+            cp /tmp/mipe_source_registry.json partener-eu/ingest/state/mipe_source_registry.json
+            cp /tmp/mipe-news.js partener-eu/web/mipe-news.js
+            cp /tmp/mysmis-registry.js partener-eu/web/mysmis-registry.js
+            python partener-eu/ingest/intelligence_index.py
+            git add \
+              partener-eu/ingest/mipe_resilient_ingest.py \
+              partener-eu/ingest/state/mipe_state.json \
+              partener-eu/ingest/state/mipe_source_registry.json \
+              partener-eu/ingest/state/intelligence_index.json \
+              partener-eu/web/mipe-news.js \
+              partener-eu/web/mysmis-registry.js
+            if git diff --cached --quiet; then
+              echo 'No MIPE access-bridge changes.'
+              exit 0
+            fi
+            git commit -m 'Ingest MIPE through attested first-party access bridge'
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1
