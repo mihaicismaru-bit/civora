@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "product": "CIVORA / VÂLCEA CLAR",
+  "canonical_domain": "valceaclar.ro",
+  "execution_owner": "civora_site_engine",
+  "scheduler": "github_actions",
+  "state_owner": "repository",
+  "chatgpt": {
+    "scheduled_tasks_allowed": false,
+    "conversation_runtime_allowed": false,
+    "role": "operator_console_only",
+    "presentation_bridge_may_exist": true,
+    "presentation_bridge_is_not_scheduler": true
+  },
+  "content_engine": {
+    "generator": "deterministic_zero_llm_v2",
+    "paid_llm_api_required": false,
+    "local_agent_runtime_required": false,
+    "self_hosted_runner_allowed": false
+  },
+  "jobs": [
+    {
+      "id": "autonomous_editions",
+      "kind": "content_generation_and_publication",
+      "workflow": ".github/workflows/valcea-clar-editions.yml",
+      "schedule": [
+        "45 4,5 * * *",
+        "30 15,16 * * *"
+      ],
+      "timezone_gate": "Europe/Bucharest 07:45 and 18:30",
+      "owner": "site_engine"
+    },
+    {
+      "id": "source_radar",
+      "kind": "source_monitoring",
+      "workflow": ".github/workflows/valcea-clar-source-radar.yml",
+      "schedule": [
+        "47 */6 * * *"
+      ],
+      "owner": "site_engine"
+    },
+    {
+      "id": "venue_ingest",
+      "kind": "venue_monitoring_and_ingest",
+      "workflow": ".github/workflows/valcea-clar-venues-ingest.yml",
+      "schedule": [
+        "23 */6 * * *"
+      ],
+      "owner": "site_engine"
+    },
+    {
+      "id": "olanesti_investigation",
+      "kind": "investigation_monitoring",
+      "workflow": ".github/workflows/valcea-clar-olanesti-investigation-monitor.yml",
+      "schedule": [
+        "17 4,14 * * *"
+      ],
+      "owner": "site_engine"
+    },
+    {
+      "id": "facebook_distribution",
+      "kind": "social_distribution",
+      "workflow": ".github/workflows/valcea-clar-facebook.yml",
+      "schedule": [
+        "7,22,37,52 * * * *"
+      ],
+      "owner": "site_engine"
+    },
+    {
+      "id": "quality_gate",
+      "kind": "event_driven_quality_assurance",
+      "workflow": ".github/workflows/valcea-clar-quality.yml",
+      "schedule": [],
+      "owner": "site_engine"
+    },
+    {
+      "id": "ownership_guard",
+      "kind": "runtime_ownership_monitoring",
+      "workflow": ".github/workflows/valcea-clar-engine-guard.yml",
+      "schedule": [
+        "11 2 * * *"
+      ],
+      "owner": "site_engine"
+    }
+  ],
+  "retired_external_monitors": [
+    {
+      "id": "VC-INV-2026-001",
+      "scope": "Olănești–Omniasig investigation monitoring",
+      "status": "retired",
+      "replacement_workflow": ".github/workflows/valcea-clar-olanesti-investigation-monitor.yml"
+    },
+    {
+      "id": "LEGACY-CHATGPT-VALCEA-CLAR-*",
+      "scope": "all recurring CIVORA/VÂLCEA CLAR monitoring and content-generation tasks outside the site engine",
+      "status": "retired",
+      "replacement": "registered GitHub Actions workflows in this file"
+    }
+  ]
+}
