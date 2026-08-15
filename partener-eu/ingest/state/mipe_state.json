@@ -1,7 +1,7 @@
 {
   "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
   "lastRun": {
-    "observedAt": "2026-08-15T21:01:35.433006+00:00",
+    "observedAt": "2026-08-15T21:57:03.412511+00:00",
     "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
     "roots": [
       {
@@ -6117,6 +6117,182 @@
     },
     {
       "observedAt": "2026-08-15T21:01:35.433006+00:00",
+      "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
+      "roots": [
+        {
+          "target": "https://mfe.gov.ro/",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://mfe.gov.ro/ghiduri_peos/",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://mfe.gov.ro/ghiduri_pids/",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://mfe.gov.ro/pdds/despre-program-programare/",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://mfe.gov.ro/pnrr/",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://oportunitati-ue.gov.ro/",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://mfe.gov.ro/wp-json/wp/v2/posts?per_page=50&orderby=modified&order=desc&_fields=link%2Cdate%2Cmodified%2Ctitle%2Cexcerpt",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://mfe.gov.ro/feed/",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://mfe.gov.ro/wp-sitemap.xml",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://mfe.gov.ro/sitemap.xml",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://oportunitati-ue.gov.ro/wp-json/wp/v2/posts?per_page=50&orderby=modified&order=desc&_fields=link%2Cdate%2Cmodified%2Ctitle%2Cexcerpt",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://oportunitati-ue.gov.ro/feed/",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://oportunitati-ue.gov.ro/wp-sitemap.xml",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://oportunitati-ue.gov.ro/sitemap.xml",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        }
+      ],
+      "searchTransports": [
+        {
+          "query": "site:mfe.gov.ro apel ghid consultare corrigendum 2026",
+          "ok": false,
+          "transport": "jina-search-discovery-only",
+          "error": "HTTPError: HTTP Error 401: Unauthorized",
+          "publicationPolicy": "discovery-only; canonical direct fetch required",
+          "pddsDiscoveryPolicy": "PDDS candidates must originate from the explicit priority seed crawl",
+          "excludedPddsSearchCandidates": 0
+        },
+        {
+          "query": "site:mfe.gov.ro PEO PoIDS PDDS 2026",
+          "ok": false,
+          "transport": "jina-search-discovery-only",
+          "error": "HTTPError: HTTP Error 401: Unauthorized",
+          "publicationPolicy": "discovery-only; canonical direct fetch required",
+          "pddsDiscoveryPolicy": "PDDS candidates must originate from the explicit priority seed crawl",
+          "excludedPddsSearchCandidates": 0
+        },
+        {
+          "query": "site:oportunitati-ue.gov.ro finantare 2026",
+          "ok": false,
+          "transport": "jina-search-discovery-only",
+          "error": "HTTPError: HTTP Error 401: Unauthorized",
+          "publicationPolicy": "discovery-only; canonical direct fetch required",
+          "pddsDiscoveryPolicy": "PDDS candidates must originate from the explicit priority seed crawl",
+          "excludedPddsSearchCandidates": 0
+        },
+        {
+          "query": "site:mfe.gov.ro apel ghid consultare corrigendum 2026",
+          "ok": true,
+          "transport": "bing-rss-discovery-only",
+          "error": null,
+          "publicationPolicy": "discovery-only; canonical direct fetch required",
+          "pddsDiscoveryPolicy": "PDDS candidates must originate from the explicit priority seed crawl",
+          "discoveredOfficialUrlCount": 0,
+          "excludedPddsSearchCandidates": 0
+        },
+        {
+          "query": "site:mfe.gov.ro PEO PoIDS PDDS 2026",
+          "ok": true,
+          "transport": "bing-rss-discovery-only",
+          "error": null,
+          "publicationPolicy": "discovery-only; canonical direct fetch required",
+          "pddsDiscoveryPolicy": "PDDS candidates must originate from the explicit priority seed crawl",
+          "discoveredOfficialUrlCount": 0,
+          "excludedPddsSearchCandidates": 0
+        },
+        {
+          "query": "site:oportunitati-ue.gov.ro finantare 2026",
+          "ok": true,
+          "transport": "bing-rss-discovery-only",
+          "error": null,
+          "publicationPolicy": "discovery-only; canonical direct fetch required",
+          "pddsDiscoveryPolicy": "PDDS candidates must originate from the explicit priority seed crawl",
+          "discoveredOfficialUrlCount": 0,
+          "excludedPddsSearchCandidates": 0
+        }
+      ],
+      "candidateCount": 1,
+      "fetchedCandidateCount": 1,
+      "currentVerifiedCount": 0,
+      "publishedItemCount": 1,
+      "transportMode": "primary-direct-unavailable",
+      "lastKnownGoodPreserved": true,
+      "directSuccessCount": 1,
+      "proxySuccessCount": 0,
+      "prioritySeed": "https://mfe.gov.ro/pdds/despre-program-programare/",
+      "prioritySeedAvailable": false,
+      "primaryOfficialRootAvailable": false,
+      "sourceHealth": "PDDS_PRIORITY_SEED_UNAVAILABLE",
+      "healthNormalizationReason": "A direct success on an ancillary/previous candidate does not make the MIPE source healthy while the explicit PDDS priority seed or primary discovery roots are unavailable."
+    },
+    {
+      "observedAt": "2026-08-15T21:57:03.412511+00:00",
       "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
       "roots": [
         {
