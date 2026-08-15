@@ -5,6 +5,8 @@ Automatic admission is intentionally narrow: only the existence of a newly
 published item, its source-provided title and publication date may become a
 fact. Numbers, claims, people, quotations and article-body details remain out
 of the automatic fact registry until a stronger verification layer exists.
+Title/date-only facts are deliberately ranked below fully verified editorial
+stories and repeated bulletin headlines are collapsed to the newest item.
 """
 from __future__ import annotations
 
@@ -27,7 +29,8 @@ REGISTRY = ROOT / "editorial" / "news_sources.json"
 OUT = ROOT / "editorial" / "auto_facts.json"
 STATE = ROOT / "editorial" / "news_discovery_state.json"
 TZ = ZoneInfo("Europe/Bucharest")
-UA = "Mozilla/5.0 VÂLCEA-CLAR-Autonomous-News/1.0 (+https://valceaclar.ro/)"
+UA = "Mozilla/5.0 VÂLCEA-CLAR-Autonomous-News/1.1 (+https://valceaclar.ro/)"
+AUTO_PRIORITY_CEILING = 76
 RO_MONTHS = {
     "ianuarie": 1, "februarie": 2, "martie": 3, "aprilie": 4, "mai": 5,
     "iunie": 6, "iulie": 7, "august": 8, "septembrie": 9, "octombrie": 10,
@@ -67,6 +70,12 @@ class AnchorParser(HTMLParser):
 def clean_text(value: str) -> str:
     value = html.unescape(re.sub(r"<[^>]+>", " ", value or ""))
     return re.sub(r"\s+", " ", value).strip(" \t\r\n-|•")
+
+
+def normalized_headline(value: str) -> str:
+    value = clean_text(value).casefold()
+    value = re.sub(r"[^a-z0-9ăâîșț]+", " ", value, flags=re.I)
+    return re.sub(r"\s+", " ", value).strip()
 
 
 def fetch(url: str, max_bytes: int = 4_000_000) -> tuple[str, str]:
@@ -150,7 +159,6 @@ def extract_article_title(text: str, fallback: str, source: dict, min_chars: int
     ]
     for candidate in candidates:
         if candidate and title_ok(candidate, source, min_chars):
-            # Remove common publisher suffixes from HTML titles, never rewrite substance.
             candidate = re.sub(r"\s+[|–—-]\s+(?:Primaria|Primăria|Consiliul|Instituția|IPJ|IGSU|ISU|SCM).*$", "", candidate, flags=re.I).strip()
             if title_ok(candidate, source, min_chars):
                 return candidate
@@ -180,7 +188,6 @@ def extract_date(text: str) -> datetime | None:
             parsed = parse_iso(html.unescape(m.group(1)))
             if parsed:
                 return parsed
-
     plain = clean_text(text[:500_000]).casefold()
     m = re.search(r"\b([0-3]?\d)[\s.\-/]+([01]?\d)[\s.\-/]+(20\d{2})\b", plain)
     if m:
@@ -230,7 +237,7 @@ def discover_source(source: dict, now: datetime, policy: dict) -> tuple[list[dic
                 "auto_generated": True,
                 "auto_scope": "source_title_and_publication_date_only",
                 "section": source["section"],
-                "priority": int(source.get("priority", 75)),
+                "priority": min(int(source.get("priority", 75)), AUTO_PRIORITY_CEILING),
                 "confidence": confidence,
                 "valid_from": published.isoformat(timespec="seconds"),
                 "valid_until": valid_until.isoformat(timespec="seconds"),
@@ -239,20 +246,25 @@ def discover_source(source: dict, now: datetime, policy: dict) -> tuple[list[dic
                 "dek": f"Publicat de {source['publisher']} la {published.strftime('%d.%m.%Y')}. VÂLCEA CLAR preia automat doar titlul, data și sursa primară; detaliile materiale rămân în verificare.",
                 "paragraphs": [],
                 "material_fact_gate": "PASS_TITLE_DATE_ONLY",
-                "sources": [{
-                    "name": source["publisher"],
-                    "url": article_url,
-                    "tier": source.get("tier", "T1"),
-                }],
+                "sources": [{"name": source["publisher"], "url": article_url, "tier": source.get("tier", "T1")}],
                 "discovered_at": now.isoformat(timespec="seconds"),
             })
         except Exception:
             failures += 1
         time.sleep(0.12)
-    # Stable order and URL/id dedupe.
     unique = {item["id"]: item for item in facts}
-    result = sorted(unique.values(), key=lambda item: (-item["priority"], item["valid_from"], item["id"]), reverse=False)
+    result = sorted(unique.values(), key=lambda item: (-item["priority"], item["valid_from"], item["id"]))
     return result, {"source_id": source["id"], "listing_ok": True, "links_examined": examined, "article_failures": failures, "facts": len(result)}
+
+
+def dedupe_repeated_headlines(items: list[dict]) -> list[dict]:
+    newest: dict[str, dict] = {}
+    for item in items:
+        key = normalized_headline(item.get("headline", "")) or item["id"]
+        incumbent = newest.get(key)
+        if incumbent is None or item.get("valid_from", "") > incumbent.get("valid_from", ""):
+            newest[key] = item
+    return sorted(newest.values(), key=lambda item: (-item["priority"], item["id"]))
 
 
 def self_test() -> int:
@@ -260,6 +272,9 @@ def self_test() -> int:
     assert extract_date(sample) == datetime(2026, 8, 15, 7, 30, tzinfo=TZ)
     source = {"generic_titles": [], "publisher": "X"}
     assert extract_article_title(sample, "x", source, 24) == "Un anunț oficial suficient de descriptiv"
+    old = {"id":"old","headline":"Același titlu oficial","valid_from":"2026-08-12T12:00:00+03:00","priority":76}
+    new = {"id":"new","headline":"ACELAȘI TITLU OFICIAL","valid_from":"2026-08-14T12:00:00+03:00","priority":76}
+    assert dedupe_repeated_headlines([old,new])[0]["id"] == "new"
     print("Autonomous news discovery self-test: PASS")
     return 0
 
@@ -270,7 +285,6 @@ def main() -> int:
     args = parser.parse_args()
     if args.self_test:
         return self_test()
-
     registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
     policy = registry.get("policy", {})
     now = datetime.now(TZ)
@@ -284,28 +298,29 @@ def main() -> int:
         except Exception as exc:
             health.append({"source_id": source["id"], "listing_ok": False, "error": f"{type(exc).__name__}: {exc}", "facts": 0})
         time.sleep(0.25)
-
-    deduped = {item["id"]: item for item in all_facts}
-    facts = sorted(deduped.values(), key=lambda item: (-item["priority"], item["id"]))
+    facts = dedupe_repeated_headlines(all_facts)
     output = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "generated_at": now.isoformat(timespec="seconds"),
-        "generator": "primary_source_title_date_zero_llm_v1",
+        "generator": "primary_source_title_date_zero_llm_v1_1",
         "facts": facts,
         "policy": {
             "llm_required": False,
             "external_paid_api_required": False,
             "autopublished_fields": ["source_title", "publication_date", "source_url"],
             "article_body_material_facts_autopublish": False,
+            "repeated_headline_policy": "keep_newest",
+            "automatic_priority_ceiling": AUTO_PRIORITY_CEILING,
         },
     }
     OUT.write_text(json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     state = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "observed_at": now.isoformat(timespec="seconds"),
         "sources_total": len(health),
         "sources_ok": sum(1 for row in health if row.get("listing_ok")),
         "facts_admitted": len(facts),
+        "facts_before_cross_source_headline_dedupe": len(all_facts),
         "sources": health,
     }
     STATE.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
