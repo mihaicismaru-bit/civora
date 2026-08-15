@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local-news-os.invalid/schemas/local_instance_config.schema.json",
+  "title": "LOCAL NEWS OS Local Instance Config",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "instance_id",
+    "environment",
+    "brand",
+    "canonical_domain",
+    "locale",
+    "timezone",
+    "country",
+    "geography",
+    "edition_schedule",
+    "packs",
+    "modules",
+    "runtime",
+    "social_channels",
+    "policies"
+  ],
+  "properties": {
+    "schema_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+$"},
+    "instance_id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "environment": {"enum": ["production", "staging", "test"]},
+    "brand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "short_name", "slogan"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "short_name": {"type": "string", "minLength": 1},
+        "slogan": {"type": "string", "minLength": 1}
+      }
+    },
+    "canonical_domain": {"type": "string", "minLength": 1},
+    "locale": {"type": "string", "minLength": 2},
+    "timezone": {"type": "string", "minLength": 1},
+    "country": {"type": "string", "minLength": 2},
+    "geography": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "primary_name", "county", "settlements", "aliases"],
+      "properties": {
+        "type": {"enum": ["county", "city", "metro", "region", "test"]},
+        "primary_name": {"type": "string", "minLength": 1},
+        "county": {"type": "string"},
+        "settlements": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "aliases": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+      }
+    },
+    "edition_schedule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["morning", "evening"],
+      "properties": {
+        "morning": {"type": "string", "pattern": "^[0-2][0-9]:[0-5][0-9]$"},
+        "evening": {"type": "string", "pattern": "^[0-2][0-9]:[0-5][0-9]$"}
+      }
+    },
+    "packs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_pack", "brand_pack", "geography_pack"],
+      "properties": {
+        "source_pack": {"type": "string", "minLength": 1},
+        "brand_pack": {"type": "string", "minLength": 1},
+        "geography_pack": {"type": "string", "minLength": 1}
+      }
+    },
+    "modules": {
+      "type": "object",
+      "additionalProperties": {"type": "boolean"}
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state_root", "output_root", "current_edition", "live_feed"],
+      "properties": {
+        "state_root": {"type": "string", "minLength": 1},
+        "output_root": {"type": "string", "minLength": 1},
+        "current_edition": {"type": "string", "minLength": 1},
+        "live_feed": {"type": "string", "minLength": 1}
+      }
+    },
+    "social_channels": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+      "uniqueItems": true
+    },
+    "policies": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["zero_paid_dependency", "llm_required", "verified_facts_only", "last_known_good"],
+      "properties": {
+        "zero_paid_dependency": {"const": true},
+        "llm_required": {"const": false},
+        "verified_facts_only": {"const": true},
+        "last_known_good": {"const": true}
+      }
+    }
+  }
+}
