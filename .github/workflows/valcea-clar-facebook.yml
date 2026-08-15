@@ -36,15 +36,34 @@ jobs:
         run: python valcea-clar/social/facebook_publish.py --self-test
 
       - name: Preview eligible Facebook posts
-        run: python valcea-clar/social/facebook_publish.py
+        id: preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          python valcea-clar/social/facebook_publish.py > /tmp/facebook-preview.json
+          cat /tmp/facebook-preview.json
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          payload = json.loads(Path('/tmp/facebook-preview.json').read_text(encoding='utf-8'))
+          has_eligible = bool(payload.get('eligible'))
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
+              output.write(f"has_eligible={'true' if has_eligible else 'false'}\n")
+          PY
 
       - name: Publish eligible Facebook posts
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && steps.preview.outputs.has_eligible == 'true'
         env:
           VALCEA_FB_PAGE_ID: "1234360446430980"
           VALCEA_FB_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_FB_PAGE_ACCESS_TOKEN }}
           VALCEA_FB_GRAPH_VERSION: v26.0
         run: python valcea-clar/social/facebook_publish.py --apply
+
+      - name: Report empty Facebook queue
+        if: steps.preview.outputs.has_eligible != 'true'
+        run: echo "No eligible VÂLCEA CLAR Facebook posts; Meta authentication skipped."
 
       - name: Persist Facebook publication state
         if: always()
