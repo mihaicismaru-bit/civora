@@ -9,6 +9,7 @@ on:
     paths:
       - 'partener-eu/ingest/mipe_resilient_ingest.py'
       - 'partener-eu/ingest/mipe_discovery_ingest.py'
+      - 'partener-eu/ops/fix_mipe_resilient_classifier.py'
       - 'partener-eu/ops/test_mipe_resilient_ingest.py'
       - 'partener-eu/ingest/state/mipe_known_canonical_seeds.json'
       - 'partener-eu/ingest/state/mipe_discovery_sources.json'
@@ -37,6 +38,9 @@ jobs:
 
       - name: Discover official canonical MIPE URLs
         run: python partener-eu/ingest/mipe_discovery_ingest.py
+
+      - name: Apply idempotent call-launch classifier fix
+        run: python partener-eu/ops/fix_mipe_resilient_classifier.py
 
       - name: Offline policy and parser regression
         run: python partener-eu/ops/test_mipe_resilient_ingest.py
@@ -88,6 +92,7 @@ jobs:
           cp partener-eu/ingest/state/mipe_state.json /tmp/mipe_state.json
           cp partener-eu/ingest/state/mipe_source_registry.json /tmp/mipe_source_registry.json
           cp partener-eu/ingest/state/mipe_known_canonical_seeds.json /tmp/mipe_known_canonical_seeds.json
+          cp partener-eu/ingest/mipe_resilient_ingest.py /tmp/mipe_resilient_ingest.py
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
 
@@ -99,16 +104,18 @@ jobs:
             cp /tmp/mipe_state.json partener-eu/ingest/state/mipe_state.json
             cp /tmp/mipe_source_registry.json partener-eu/ingest/state/mipe_source_registry.json
             cp /tmp/mipe_known_canonical_seeds.json partener-eu/ingest/state/mipe_known_canonical_seeds.json
+            cp /tmp/mipe_resilient_ingest.py partener-eu/ingest/mipe_resilient_ingest.py
             python partener-eu/ingest/intelligence_index.py
             git add \
               partener-eu/web/mipe-news.js \
+              partener-eu/ingest/mipe_resilient_ingest.py \
               partener-eu/ingest/state/mipe_state.json \
               partener-eu/ingest/state/mipe_source_registry.json \
               partener-eu/ingest/state/mipe_known_canonical_seeds.json \
               partener-eu/ingest/state/intelligence_index.json
 
             if git diff --cached --quiet; then
-              echo 'No MIPE feed or discovery-map changes.'
+              echo 'No MIPE feed, classifier or discovery-map changes.'
               exit 0
             fi
 
