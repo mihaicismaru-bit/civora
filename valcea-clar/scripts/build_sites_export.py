@@ -11,6 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / "web"
 EDITORIAL = ROOT / "editorial"
+EDITIONS = ROOT / "editions"
 SITE = ROOT / "site"
 OPS = ROOT / "ops"
 DIST = ROOT / "dist" / "chatgpt-sites"
@@ -29,11 +30,31 @@ def copy_file(source: Path, target: Path) -> None:
     shutil.copy2(source, target)
 
 
+def load_current_edition(integration: dict) -> tuple[dict | None, Path | None]:
+    config = integration.get("current_edition", {})
+    if not config.get("enabled"):
+        return None, None
+    edition_id = str(config.get("edition_id", "")).strip()
+    if not edition_id:
+        raise SystemExit("Refusing export: current edition enabled without edition_id")
+    json_path = EDITIONS / f"{edition_id}.json"
+    md_path = EDITIONS / f"{edition_id}.md"
+    if not json_path.is_file() or not md_path.is_file():
+        raise SystemExit(f"Refusing export: edition files missing for {edition_id}")
+    edition = json.loads(json_path.read_text(encoding="utf-8"))
+    if edition.get("status") != "editor_approved" or edition.get("publication_intent") != "publish":
+        raise SystemExit(f"Refusing export: edition {edition_id} is not approved for publication")
+    if edition.get("edition_id") != edition_id:
+        raise SystemExit("Refusing export: edition id mismatch")
+    return edition, md_path
+
+
 def main() -> int:
     places_doc = json.loads((WEB / "data" / "places.json").read_text(encoding="utf-8"))
     creators_doc = json.loads((WEB / "data" / "creators.json").read_text(encoding="utf-8"))
     meta = json.loads((WEB / "data" / "meta.json").read_text(encoding="utf-8"))
     integration = json.loads((SITE / "integration.json").read_text(encoding="utf-8"))
+    current_edition, current_edition_md = load_current_edition(integration)
 
     if any(place.get("publication_status") != "public" for place in places_doc.get("places", [])):
         raise SystemExit("Refusing export: non-public place detected in public projection")
@@ -52,6 +73,7 @@ def main() -> int:
         shutil.rmtree(DIST)
     (DIST / "unde-iesim" / "data").mkdir(parents=True, exist_ok=True)
     (DIST / "editorial").mkdir(parents=True, exist_ok=True)
+    (DIST / "editions").mkdir(parents=True, exist_ok=True)
     (DIST / "site").mkdir(parents=True, exist_ok=True)
 
     for filename in ("index.html", "styles.css", "app.js"):
@@ -60,6 +82,8 @@ def main() -> int:
         copy_file(WEB / "data" / filename, DIST / "unde-iesim" / "data" / filename)
     for article in sorted(EDITORIAL.glob("*.md")):
         copy_file(article, DIST / "editorial" / article.name)
+    for edition_file in sorted(EDITIONS.glob("*.md")) + sorted(EDITIONS.glob("*.json")):
+        copy_file(edition_file, DIST / "editions" / edition_file.name)
     copy_file(SITE / "integration.json", DIST / "site" / "integration.json")
 
     public_places = places_doc.get("places", [])
@@ -87,6 +111,25 @@ def main() -> int:
         json.dumps(homepage_module, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
 
+    if current_edition is not None and current_edition_md is not None:
+        current_config = integration["current_edition"]
+        current_payload = {
+            "schema_version": "1.0",
+            "module": current_config,
+            "edition": {
+                "edition_id": current_edition["edition_id"],
+                "title": current_edition.get("title"),
+                "date": current_edition.get("edition_date"),
+                "updated_local": current_edition.get("updated_local"),
+                "path": current_config["path"],
+                "source": f"editions/{current_edition_md.name}",
+                "items": current_edition.get("items", []),
+            },
+        }
+        (DIST / "site" / "current-edition.json").write_text(
+            json.dumps(current_payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
+
     reconciliation_path = OPS / "ingest_reconciliation.json"
     reconciliation_summary = {}
     if reconciliation_path.is_file():
@@ -106,6 +149,18 @@ def main() -> int:
             "update_mode": "upsert_by_path",
         },
     ]
+    if current_edition is not None and current_edition_md is not None:
+        routes.insert(
+            0,
+            {
+                "path": integration["current_edition"]["path"],
+                "source": f"editions/{current_edition_md.name}",
+                "record_id": current_edition["edition_id"],
+                "title": current_edition.get("title", "VÂLCEA CLAR — Ediția de dimineață"),
+                "update_mode": "upsert_by_path",
+                "homepage_role": "primary_lead",
+            },
+        )
     for place in public_places:
         routes.append(
             {
@@ -138,8 +193,8 @@ def main() -> int:
         )
 
     manifest = {
-        "schema_version": "1.1",
-        "product": "VÂLCEA CLAR — Unde ieșim",
+        "schema_version": "1.2",
+        "product": "VÂLCEA CLAR",
         "target": {
             "canonical_domain": "valceaclar.ro",
             "platform": "ChatGPT Sites",
@@ -147,6 +202,7 @@ def main() -> int:
         },
         "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "data_generated_at": meta.get("generated_at"),
+        "current_edition_id": current_edition.get("edition_id") if current_edition else None,
         "counts": {
             "public_places": len(public_places),
             "public_creators": len(creators_doc.get("creators", [])),
@@ -168,7 +224,7 @@ def main() -> int:
     )
     print(
         f"ChatGPT Sites export: PASS ({manifest['counts']['public_places']} places, "
-        f"{manifest['counts']['routes']} routes, {len(files)} payload files)"
+        f"{manifest['counts']['routes']} routes, current edition={manifest['current_edition_id']})"
     )
     return 0
 
