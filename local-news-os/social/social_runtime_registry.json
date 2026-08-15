@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "product": "LOCAL NEWS OS Social Runtime Fleet",
+  "policy": {
+    "zero_paid_dependency": true,
+    "cross_instance_resource_sharing_forbidden": true,
+    "cross_instance_credentials_forbidden": true,
+    "observed_metrics_instance_scoped": true,
+    "correction_targets_instance_scoped": true
+  },
+  "instances": [
+    {
+      "instance_id": "valcea",
+      "canonical_domain": "valceaclar.ro",
+      "instance_root": "valcea-clar",
+      "channel_registry": "valcea-clar/social/channel_registry.json",
+      "credential_namespace": "VALCEA_",
+      "metrics_namespace": "valcea",
+      "correction_target_namespace": "valcea:",
+      "resource_namespaces": {
+        "outbox": "valcea-clar/social",
+        "state": "valcea-clar/social",
+        "media": "valcea-clar/social/photos",
+        "metrics": "valcea-clar/social/metrics",
+        "corrections": "valcea-clar/social/corrections"
+      }
+    }
+  ]
+}
