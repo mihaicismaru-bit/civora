@@ -1,21 +1,32 @@
 {
-  "schema_version": "1.3",
+  "schema_version": "2.0",
   "canonical_domain": "valceaclar.ro",
   "runtime": {
-    "platform": "Vercel",
-    "production_url": "https://valcea-clar-live-mihaicismaru-6634s-projects.vercel.app/",
-    "editor_url": "https://valcea-clar-live-mihaicismaru-6634s-projects.vercel.app/editor/",
-    "deployment_id": "dpl_GzzY51zn8wGwbio1HaiLCqVjbLoY",
+    "architecture": "static_shell_plus_live_github_feed",
+    "platform": "Vercel Hobby static deployment",
+    "production_url": "https://valcea-clar-autonom-j7n3yujb7-mihaicismaru-6634s-projects.vercel.app/",
+    "deployment_id": "dpl_AHPab5CHgfbN3WtpPjqqBCMLxZLy",
     "state": "READY",
-    "custom_domain_status": "PENDING_ATTACHMENT"
+    "custom_domain_status": "PENDING_ONE_TIME_ATTACHMENT",
+    "content_source": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json",
+    "content_refresh_seconds": 300,
+    "redeploy_per_edition_required": false,
+    "paid_api_required": false,
+    "llm_api_required": false,
+    "chatgpt_sites_required": false
+  },
+  "legacy_runtime": {
+    "platform": "ChatGPT Sites",
+    "status": "DEPRECATED_NON_CANONICAL",
+    "reason": "Editing/publishing is quota-gated and cannot be a critical production dependency for an autonomous newsroom.",
+    "content_updates_allowed": false
   },
   "editor": {
     "enabled": true,
-    "path": "/editor/",
-    "visibility": "public_noindex",
     "authentication": "GitHub repository permissions",
-    "write_model": "GitHub edit links and GitHub Actions",
-    "stores_credentials": false
+    "write_model": "GitHub + GitHub Actions",
+    "stores_credentials": false,
+    "chatgpt_required_for_normal_operation": false
   },
   "current_edition": {
     "enabled": true,
@@ -29,8 +40,9 @@
     "show_timestamp": true,
     "show_source_note": true,
     "autonomous_generation": true,
-    "generator": "deterministic_zero_llm_v1",
-    "external_paid_api_required": false
+    "generator": "deterministic_zero_llm_v2",
+    "external_paid_api_required": false,
+    "last_known_good_fallback": true
   },
   "section": {
     "id": "unde-iesim",
@@ -73,6 +85,7 @@
     "verified_structured_facts_may_be_auto_rendered": true,
     "sponsored_rankings": false,
     "commercial_content_must_be_labelled": true,
-    "never_fill_evidence_gaps": true
+    "never_fill_evidence_gaps": true,
+    "paid_generation_or_paid_content_api_required": false
   }
 }
