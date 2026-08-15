@@ -4,6 +4,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 js = (ROOT / 'partener-eu/web/consultant-workspace-v3.js').read_text(encoding='utf-8')
 css = (ROOT / 'partener-eu/web/consultant-workspace-v3.css').read_text(encoding='utf-8')
+index = (ROOT / 'partener-eu/web/index.html').read_text(encoding='utf-8')
 
 required = [
     'data-cw3-new-client',
@@ -12,14 +13,20 @@ required = [
     'await persistNow()',
     'Consultant client save failed',
     'Consultant client delete failed',
-    'Document cleanup skipped',
+    'Document cleanup skipped during client deletion',
     'Șterge din portofoliu',
     'globalThis.crypto?.randomUUID?.()',
+    'deletedClientIds',
+    'deleted.has(raw.id)',
 ]
 for token in required:
     assert token in js, f'missing CRUD contract: {token}'
 
 assert "form.onsubmit=e=>" not in js, 'legacy non-atomic client save handler remains'
 assert "for(const doc of await idbListDocuments(client.id))" not in js, 'document cleanup can still abort deletion'
+assert "state.deletedClientIds=[...new Set" in js, 'deletions do not create persistent tombstones'
+assert "state.clients=state.clients.filter(c=>c.id!==removedId)" in js
+assert "state.selectedClientId=client.id" in js
 assert '.cw3AddClient{' in css, 'explicit add-client button has no styling'
+assert 'consultant-workspace-v3.js?v=20260815-2030' in index, 'CRUD runtime cache version not advanced'
 print('Consultant CRUD v4 regression: PASS')
