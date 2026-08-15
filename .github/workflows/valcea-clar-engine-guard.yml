@@ -2,6 +2,11 @@ name: VÂLCEA CLAR Site Engine Ownership Guard
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - "valcea-clar/engine/**"
+      - "valcea-clar/scripts/validate_site_engine_ownership.py"
+      - ".github/workflows/valcea-clar-*.yml"
   push:
     branches: [main]
     paths:
@@ -15,7 +20,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: valcea-clar-site-engine-ownership
+  group: valcea-clar-site-engine-ownership-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
