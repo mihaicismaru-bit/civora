@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import json
 import re
-import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -27,6 +26,7 @@ REQUIRED_POLICIES = {
     "last_known_good": True,
 }
 RUNTIME_KEYS = ("state_root", "output_root", "current_edition", "live_feed")
+PACK_KEYS = ("source_pack", "brand_pack", "geography_pack")
 
 
 def load(path: Path) -> dict:
@@ -43,6 +43,46 @@ def norm(path: str) -> str:
 def overlap(a: str, b: str) -> bool:
     a, b = norm(a), norm(b)
     return a == b or a.startswith(b + "/") or b.startswith(a + "/")
+
+
+def repo_file(raw: str) -> Path | None:
+    """Resolve a repository-relative path and reject traversal/outside paths."""
+    if not raw or Path(raw).is_absolute():
+        return None
+    candidate = (ROOT / raw).resolve()
+    try:
+        candidate.relative_to(ROOT.resolve())
+    except ValueError:
+        return None
+    return candidate
+
+
+def validate_packs(path: Path, cfg: dict, instance_id: str) -> list[str]:
+    errors: list[str] = []
+    packs = cfg.get("packs")
+    if not isinstance(packs, dict):
+        return [f"{path}: packs must be object"]
+
+    for key in PACK_KEYS:
+        raw = str(packs.get(key, "")).strip()
+        target = repo_file(raw)
+        if target is None:
+            errors.append(f"{path}: packs.{key} must be a repository-relative path")
+            continue
+        if not target.is_file():
+            errors.append(f"{path}: packs.{key} does not exist: {raw}")
+            continue
+        try:
+            payload = load(target)
+        except Exception as exc:
+            errors.append(f"{path}: packs.{key} is not a valid JSON object: {exc}")
+            continue
+        pack_instance = payload.get("instance_id")
+        if pack_instance is not None and str(pack_instance) != instance_id:
+            errors.append(
+                f"{path}: packs.{key} instance_id {pack_instance!r} does not match {instance_id!r}"
+            )
+    return errors
 
 
 def validate_one(path: Path, cfg: dict) -> list[str]:
@@ -76,6 +116,8 @@ def validate_one(path: Path, cfg: dict) -> list[str]:
     if not isinstance(geography, dict) or not str(geography.get("primary_name", "")).strip():
         errors.append(f"{path}: geography.primary_name is required")
 
+    errors.extend(validate_packs(path, cfg, instance_id))
+
     policies = cfg.get("policies")
     if not isinstance(policies, dict):
         errors.append(f"{path}: policies must be object")
@@ -93,12 +135,13 @@ def validate_one(path: Path, cfg: dict) -> list[str]:
                 errors.append(f"{path}: runtime.{key} is required")
 
     if environment == "test":
-        serialized = json.dumps({
+        identity = {
             "brand": cfg.get("brand"),
             "canonical_domain": cfg.get("canonical_domain"),
             "geography": cfg.get("geography"),
-        }, ensure_ascii=False).lower()
-        forbidden = ("vâlcea", "valcea", "valceaclar.ro", "râmnicu")
+        }
+        serialized = json.dumps(identity, ensure_ascii=False).lower()
+        forbidden = ("vâlcea", "valcea", "valceaclar.ro", "râmnicu", "ramnicu")
         leaks = [token for token in forbidden if token in serialized]
         if leaks:
             errors.append(f"{path}: production-instance contamination in test identity: {', '.join(leaks)}")
@@ -156,6 +199,11 @@ def main() -> int:
             isinstance(c.get("policies"), dict)
             and c["policies"].get("zero_paid_dependency") is True
             and c["policies"].get("llm_required") is False
+            for c in configs
+        ),
+        "packs_resolved": all(
+            isinstance(c.get("packs"), dict)
+            and all(repo_file(str(c["packs"].get(k, ""))) and repo_file(str(c["packs"].get(k, ""))).is_file() for k in PACK_KEYS)
             for c in configs
         ),
         "errors": errors,
