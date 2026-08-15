@@ -28,6 +28,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
+from concurrent.futures import ThreadPoolExecutor
 from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any, Iterable
@@ -36,6 +37,7 @@ ROOT = Path(__file__).resolve().parents[2]
 STATE_PATH = ROOT / "partener-eu" / "ingest" / "state" / "mipe_state.json"
 WEB_PATH = ROOT / "partener-eu" / "web" / "mipe-news.js"
 REGISTRY_PATH = ROOT / "partener-eu" / "ingest" / "state" / "mipe_source_registry.json"
+INDEX_PATH = ROOT / "partener-eu" / "web" / "index.html"
 
 OFFICIAL_HOSTS = {
     "mfe.gov.ro",
@@ -66,9 +68,9 @@ DISCOVERY_QUERIES = [
 
 USER_AGENT = "PARTENER.EU-CIVORA-MIPE-Resilient/2.0 (+https://partener.eu)"
 MAX_BYTES = 5_000_000
-MAX_CANDIDATES = 90
+MAX_CANDIDATES = 32
 MAX_ITEMS = 60
-MAX_SEARCH_RESULTS = 35
+MAX_SEARCH_RESULTS = 24
 
 FUNDING_KEYWORDS = [
     "fonduri", "finanț", "finant", "apel", "ghid", "program", "proiect",
@@ -406,7 +408,7 @@ def fetch_document(target: str) -> tuple[dict[str, Any] | None, dict[str, Any]]:
     if not canonical:
         return None, {"target": target, "ok": False, "error": "non_official_target"}
 
-    direct = fetch(canonical, timeout=18, attempts=1)
+    direct = fetch(canonical, timeout=6, attempts=1)
     if direct.get("ok"):
         content_type = direct.get("content_type", "").lower()
         try:
@@ -420,7 +422,7 @@ def fetch_document(target: str) -> tuple[dict[str, Any] | None, dict[str, Any]]:
         except Exception as exc:  # noqa: BLE001
             direct = {"ok": False, "error": f"direct_parse:{type(exc).__name__}:{exc}"}
 
-    proxy = fetch(reader_url(canonical), timeout=35, attempts=2, accept="text/plain,text/markdown,*/*")
+    proxy = fetch(reader_url(canonical), timeout=18, attempts=1, accept="text/plain,text/markdown,*/*")
     if proxy.get("ok"):
         parsed = parse_reader(proxy["data"], canonical)
         if parsed:
@@ -499,7 +501,7 @@ def search_discovery() -> tuple[list[dict[str, str]], list[dict[str, Any]]]:
     candidates: list[dict[str, str]] = []
     health: list[dict[str, Any]] = []
     for query in DISCOVERY_QUERIES:
-        result = fetch(search_url(query), timeout=35, attempts=1, accept="text/plain,text/markdown,*/*")
+        result = fetch(search_url(query), timeout=18, attempts=1, accept="text/plain,text/markdown,*/*")
         health.append({
             "query": query,
             "ok": bool(result.get("ok")),
@@ -642,6 +644,17 @@ def write_outputs(state: dict[str, Any]) -> None:
     WEB_PATH.parent.mkdir(parents=True, exist_ok=True)
     WEB_PATH.write_text(js, encoding="utf-8")
 
+    # GitHub Pages may cache static JavaScript by URL. Advance only the MIPE
+    # feed and adapter query versions after a completed ingest so every browser
+    # receives the newly persisted feed without invalidating unrelated assets.
+    if INDEX_PATH.exists():
+        index = INDEX_PATH.read_text(encoding="utf-8")
+        version = re.sub(r"[^0-9]", "", run["observedAt"])[:14]
+        updated = re.sub(r'(mipe-news\.js\?v=)[^"\']+', rf'\g<1>{version}', index)
+        updated = re.sub(r'(mipe-news-adapter\.js\?v=)[^"\']+', rf'\g<1>{version}', updated)
+        if updated != index:
+            INDEX_PATH.write_text(updated, encoding="utf-8")
+
 
 def write_registry(run: dict[str, Any]) -> None:
     records = []
@@ -668,7 +681,20 @@ def write_registry(run: dict[str, Any]) -> None:
 
 def main() -> int:
     previous_state = load_state()
-    previous_by_url = {item.get("url"): item for item in previous_state.get("items", []) if item.get("url")}
+    previous_by_url: dict[str, dict[str, Any]] = {}
+    for old_item in previous_state.get("items", []):
+        old_url = old_item.get("url")
+        if not old_url:
+            continue
+        normalized = dict(old_item)
+        # Items created by pre-v2 ingestion are preserved, but they must still
+        # satisfy the current provenance contract. The marker is explicit and
+        # never pretends that an old item was fetched in the current run.
+        normalized.setdefault("retrievalTransport", "legacy-preserved")
+        normalized.setdefault("tier", "T1_LEGACY_PRESERVED")
+        normalized.setdefault("observedAt", previous_state.get("lastRun", {}).get("observedAt", ""))
+        normalized.setdefault("documents", [])
+        previous_by_url[old_url] = normalized
 
     candidates, root_health = seed_candidates()
     search_candidates, search_health = search_discovery()
@@ -704,14 +730,19 @@ def main() -> int:
         ),
     )[:MAX_CANDIDATES]
 
-    cache: dict[str, tuple[dict[str, Any] | None, dict[str, Any]]] = {}
     current: list[dict[str, Any]] = []
     page_health: list[dict[str, Any]] = []
-    for candidate in queue:
-        item, health = make_item(candidate, cache)
-        page_health.append(health)
-        if item:
-            current.append(item)
+
+    def fetch_candidate(candidate: dict[str, str]) -> tuple[dict[str, Any] | None, dict[str, Any]]:
+        # Candidate URLs are deduplicated before this point; a private cache per
+        # worker avoids shared mutable state while bounding wall-clock latency.
+        return make_item(candidate, {})
+
+    with ThreadPoolExecutor(max_workers=8, thread_name_prefix="mipe-fetch") as pool:
+        for item, health in pool.map(fetch_candidate, queue):
+            page_health.append(health)
+            if item:
+                current.append(item)
 
     merged = dict(previous_by_url)
     for item in current:
