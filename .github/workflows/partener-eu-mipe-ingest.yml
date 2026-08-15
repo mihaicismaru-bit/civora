@@ -9,6 +9,7 @@ on:
     paths:
       - 'partener-eu/ingest/mipe_resilient_ingest.py'
       - 'partener-eu/ingest/mipe_discovery_ingest.py'
+      - 'partener-eu/ingest/build_mysmis_consultant_registry.py'
       - 'partener-eu/ops/fix_mipe_resilient_classifier.py'
       - 'partener-eu/ops/fix_mipe_resilient_runtime.py'
       - 'partener-eu/ops/fix_mipe_content_quality.py'
@@ -53,21 +54,28 @@ jobs:
       - name: Run resilient fail-closed MIPE ingestion
         run: python partener-eu/ingest/mipe_resilient_ingest.py
 
-      - name: Validate generated feed contract
+      - name: Build direct MySMIS evidence for Consultant Workspace
+        run: python partener-eu/ingest/build_mysmis_consultant_registry.py
+
+      - name: Validate generated feed and Consultant evidence contracts
         shell: bash
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
+          from urllib.parse import urlparse
 
           state_path = Path('partener-eu/ingest/state/mipe_state.json')
           feed_path = Path('partener-eu/web/mipe-news.js')
           registry_path = Path('partener-eu/ingest/state/mipe_source_registry.json')
+          consultant_registry_path = Path('partener-eu/web/mysmis-registry.js')
           index_path = Path('partener-eu/web/index.html')
           assert state_path.exists(), 'missing MIPE state'
           assert feed_path.exists(), 'missing MIPE feed'
           assert registry_path.exists(), 'missing MIPE source registry'
+          assert consultant_registry_path.exists(), 'missing Consultant MySMIS projection'
           assert index_path.exists(), 'missing public index'
+
           state = json.loads(state_path.read_text(encoding='utf-8'))
           assert state.get('status') in {
               'OK',
@@ -93,19 +101,44 @@ jobs:
                   assert item.get('decisionUseful') is True, item.get('title')
                   summary = item.get('summary', '').lower()
                   assert not any(marker in summary for marker in boilerplate), item.get('title')
+
           text = feed_path.read_text(encoding='utf-8')
           assert 'window.PARTENER_DATA.mipeIngestion=' in text
           assert 'window.PARTENER_DATA.mipeNews=' in text
+
+          registry_text = consultant_registry_path.read_text(encoding='utf-8')
+          marker = 'window.PARTENER_DATA.mysmisRegistry='
+          assert marker in registry_text
+          payload = json.loads(registry_text.split(marker, 1)[1].rsplit(';', 1)[0])
+          assert payload.get('directOnly') is True
+          source_url = payload.get('source', {}).get('canonicalUrl', '')
+          assert urlparse(source_url).hostname == 'reporting.mysmis2021.gov.ro'
+          assert payload.get('status') in {'OK_DIRECT', 'UNAVAILABLE_FAIL_CLOSED'}
+          if payload.get('status') == 'OK_DIRECT':
+              assert payload.get('calls'), 'direct registry must contain visible rows'
+              assert payload.get('source', {}).get('retrieval') == 'CANONICAL_OFFICIAL_FETCH'
+              for row in payload['calls']:
+                  assert row.get('programme') and row.get('call')
+                  assert row.get('officialStatus')
+
           index = index_path.read_text(encoding='utf-8')
           assert 'mipe-news.js?v=' in index and 'mipe-news-adapter.js?v=' in index
-          print(json.dumps(state.get('lastRun', {}), ensure_ascii=False, indent=2))
+          print(json.dumps({
+              'mipe': state.get('lastRun', {}),
+              'consultantMySMIS': {
+                  'status': payload.get('status'),
+                  'visibleRowCount': payload.get('visibleRowCount'),
+                  'validatedCallCount': payload.get('validatedCallCount'),
+              },
+          }, ensure_ascii=False, indent=2))
           PY
 
-      - name: Persist verified feed, source registry and health state
+      - name: Persist verified feed, Source Registry and Consultant evidence
         shell: bash
         run: |
           set -euo pipefail
           cp partener-eu/web/mipe-news.js /tmp/mipe-news.js
+          cp partener-eu/web/mysmis-registry.js /tmp/mysmis-registry.js
           cp partener-eu/ingest/state/mipe_state.json /tmp/mipe_state.json
           cp partener-eu/ingest/state/mipe_source_registry.json /tmp/mipe_source_registry.json
           cp partener-eu/ingest/state/mipe_known_canonical_seeds.json /tmp/mipe_known_canonical_seeds.json
@@ -127,6 +160,7 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             cp /tmp/mipe-news.js partener-eu/web/mipe-news.js
+            cp /tmp/mysmis-registry.js partener-eu/web/mysmis-registry.js
             cp /tmp/mipe_state.json partener-eu/ingest/state/mipe_state.json
             cp /tmp/mipe_source_registry.json partener-eu/ingest/state/mipe_source_registry.json
             cp /tmp/mipe_known_canonical_seeds.json partener-eu/ingest/state/mipe_known_canonical_seeds.json
@@ -142,12 +176,14 @@ jobs:
           version = os.environ['MIPE_VERSION']
           text = re.sub(r'(mipe-news\.js\?v=)[^"\']+', rf'\g<1>{version}', text)
           text = re.sub(r'(mipe-news-adapter\.js\?v=)[^"\']+', rf'\g<1>{version}', text)
+          text = re.sub(r'(mysmis-registry\.js\?v=)[^"\']+', rf'\g<1>{version}', text)
           path.write_text(text, encoding='utf-8')
           PY
             python partener-eu/ingest/intelligence_index.py
             git add \
               partener-eu/web/index.html \
               partener-eu/web/mipe-news.js \
+              partener-eu/web/mysmis-registry.js \
               partener-eu/ingest/mipe_resilient_ingest.py \
               partener-eu/ingest/state/mipe_state.json \
               partener-eu/ingest/state/mipe_source_registry.json \
@@ -155,13 +191,13 @@ jobs:
               partener-eu/ingest/state/intelligence_index.json
 
             if git diff --cached --quiet; then
-              echo 'No MIPE feed, runtime or discovery-map changes.'
+              echo 'No MIPE feed, MySMIS projection, runtime or discovery-map changes.'
               exit 0
             fi
 
-            git commit -m 'Ingest verified decision-useful MIPE updates'
+            git commit -m 'Ingest verified decision-useful MIPE and MySMIS updates'
             if git push origin HEAD:main; then
-              echo 'MIPE outputs persisted to main.'
+              echo 'MIPE and MySMIS outputs persisted to main.'
               exit 0
             fi
 
