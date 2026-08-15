@@ -14,9 +14,9 @@ on:
     paths:
       - "valcea-clar/ops/autonomous-edition-trigger.json"
   schedule:
-    # Run both UTC candidates for Romanian DST. Scheduled runs use wide local
-    # recovery windows plus a publishable-edition idempotency guard, so a late
-    # GitHub Actions start can still recover without publishing the slot twice.
+    # Run both UTC candidates for Romanian DST. Scheduled runs identify their
+    # intended slot from the triggering cron expression, then use a broad
+    # same-day recovery window plus an idempotency guard.
     - cron: "45 4,5 * * *"
     - cron: "30 15,16 * * *"
 
@@ -44,6 +44,7 @@ jobs:
         shell: bash
         env:
           REQUESTED_SLOT: ${{ github.event.inputs.slot || 'auto' }}
+          TRIGGER_SCHEDULE: ${{ github.event.schedule || '' }}
         run: |
           set -euo pipefail
 
@@ -87,19 +88,34 @@ jobs:
           local_now=$(TZ=Europe/Bucharest date -Iseconds)
           now_minutes=$((10#$hour * 60 + 10#$minute))
 
-          # GitHub scheduled workflows can start substantially later than the
-          # cron minute. Both DST candidates therefore act as recovery attempts.
-          # A publishable edition guard below makes those attempts idempotent.
-          # Morning recovery: 07:30-10:59. Evening recovery: 18:15-21:59.
-          if [ "$now_minutes" -ge 450 ] && [ "$now_minutes" -le 659 ]; then
-            slot=morning
-          elif [ "$now_minutes" -ge 1095 ] && [ "$now_minutes" -le 1319 ]; then
-            slot=evening
-          else
+          # Use the cron expression itself to preserve slot identity even if a
+          # scheduled job starts hours late. The local-time gate only rejects
+          # the inactive DST companion or a run delayed beyond its useful daypart.
+          case "$TRIGGER_SCHEDULE" in
+            "45 4,5 * * *")
+              slot=morning
+              window_start=450   # 07:30
+              window_end=899     # 14:59
+              ;;
+            "30 15,16 * * *")
+              slot=evening
+              window_start=1095  # 18:15
+              window_end=1439    # 23:59
+              ;;
+            *)
+              echo "run_generation=false" >> "$GITHUB_OUTPUT"
+              echo "slot=skip" >> "$GITHUB_OUTPUT"
+              echo "reason=unknown_schedule_expression" >> "$GITHUB_OUTPUT"
+              echo "Unknown schedule expression '$TRIGGER_SCHEDULE'; refusing generation."
+              exit 0
+              ;;
+          esac
+
+          if [ "$now_minutes" -lt "$window_start" ] || [ "$now_minutes" -gt "$window_end" ]; then
             echo "run_generation=false" >> "$GITHUB_OUTPUT"
-            echo "slot=skip" >> "$GITHUB_OUTPUT"
-            echo "reason=outside_recovery_window" >> "$GITHUB_OUTPUT"
-            echo "Nothing due at $local_now."
+            echo "slot=$slot" >> "$GITHUB_OUTPUT"
+            echo "reason=outside_same_day_recovery_window" >> "$GITHUB_OUTPUT"
+            echo "Nothing due for $slot at $local_now."
             exit 0
           fi
 
