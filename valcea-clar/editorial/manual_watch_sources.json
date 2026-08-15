@@ -9,22 +9,6 @@
   },
   "sources": [
     {
-      "id": "ajofm-valcea-comunicate",
-      "publisher": "AJOFM Vâlcea",
-      "url": "https://www.anofm.ro/valcea/categorie/comunicate-de-presa/",
-      "tier": "T1",
-      "section": "ECONOMIE",
-      "status": "QUARANTINED_DATE_PROVENANCE",
-      "reason": "The ANOFM page template exposes a current/global date before the article body. The zero-LLM extractor can therefore misclassify older articles as newly published. Example verified on 15.08.2026: the article 'Locuri de muncă vacante la nivel județean și în rețeaua EURES – 30 iunie 2026' contains the article-level date 30/06/2026 while the page also surfaces 14/08/2026 near the top.",
-      "safe_use": [
-        "manual discovery",
-        "manual verification",
-        "article-level date confirmation",
-        "local labour-market research"
-      ],
-      "core_feedback": "LOCAL NEWS OS needs a generic source-level publication-date strategy with provenance priority (structured article date > scoped article-body date > listing date) and rejection when the chosen date conflicts with an explicit date in title/body."
-    },
-    {
       "id": "apavil-opriri-programate",
       "publisher": "APAVIL S.A.",
       "url": "https://apavil.ro/?page_id=962",
