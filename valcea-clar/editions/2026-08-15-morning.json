@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "edition_id": "2026-08-15-morning",
+  "title": "VÂLCEA CLAR — Ediția de dimineață",
+  "edition_date": "2026-08-15",
+  "updated_local": "2026-08-15T08:11:00+03:00",
+  "status": "editor_approved",
+  "publication_intent": "publish",
+  "items": [
+    {
+      "id": "musiclover-green-day-20260815",
+      "section": "EVENIMENTE",
+      "priority": 98,
+      "headline": "Azi la Fețeni: Musiclover Festival continuă cu Delia și Connect-R",
+      "confidence": 98,
+      "source_types": ["ticketing_primary", "event_calendar"],
+      "material_fact_gate": "PASS"
+    },
+    {
+      "id": "luminos-fest-zavoi-20260815",
+      "section": "EVENIMENTE",
+      "priority": 94,
+      "headline": "Luminos Fest începe azi în Parcul Zăvoi. Intrarea este liberă",
+      "confidence": 99,
+      "source_types": ["organizer_official", "event_calendar"],
+      "material_fact_gate": "PASS"
+    },
+    {
+      "id": "scm-valcea-slatina-20260815",
+      "section": "SPORT",
+      "priority": 82,
+      "headline": "SCM Râmnicu Vâlcea joacă azi cu CSM Slatina în etapa a treia din Liga 2",
+      "confidence": 93,
+      "source_types": ["league_schedule", "club_official"],
+      "material_fact_gate": "PASS_DATE_ONLY"
+    },
+    {
+      "id": "unde-iesim-15-august-20260815",
+      "section": "UNDE_IEȘIM",
+      "priority": 78,
+      "headline": "Unde ieșim azi: Zăvoi, Fețeni și localurile deja verificate de Vâlcea Clar",
+      "confidence": 96,
+      "source_types": ["canonical_venue_registry", "organizer_official", "ticketing_primary"],
+      "material_fact_gate": "PASS"
+    },
+    {
+      "id": "weather-service-20260815",
+      "section": "UTIL",
+      "priority": 70,
+      "headline": "Zi caldă, cu risc de averse izolate: verifică vremea înainte de evenimentele în aer liber",
+      "confidence": 82,
+      "source_types": ["public_weather_models"],
+      "material_fact_gate": "PASS_WITH_CAUTION"
+    }
+  ],
+  "source_snapshot": [
+    {
+      "name": "Ticketstore — Musiclover Festival, 15 august",
+      "url": "https://ticketstore.ro/ro/bilete/12275/musiclover-festival-15-august-connect-r-delia",
+      "tier": "T2",
+      "supports": ["musiclover_date", "access_time", "artists", "zone_2_free_access"]
+    },
+    {
+      "name": "Luminos Fest — site oficial",
+      "url": "https://luminosfest.ro/",
+      "tier": "T1B",
+      "supports": ["luminos_dates", "location", "free_entry", "lampion_reservations"]
+    },
+    {
+      "name": "Zile și Nopți — Luminos Fest Râmnicu Vâlcea",
+      "url": "https://zilesinopti.ro/evenimente/luminos-fest-ramnicu-valcea-2026/",
+      "tier": "T2",
+      "supports": ["luminos_program_signal", "kit_prices", "safety_rules"]
+    },
+    {
+      "name": "Liga 2 — program SCM Râmnicu Vâlcea",
+      "url": "https://lpf2.ro/liga2/html/programul_meciurilor/Program_SCM_Ramnicu_Valcea-553.html",
+      "tier": "T2",
+      "supports": ["football_date", "opponent"]
+    },
+    {
+      "name": "SCM Râmnicu Vâlcea — site oficial",
+      "url": "https://scmramnicuvalcea.ro/",
+      "tier": "T1B",
+      "supports": ["club_status", "liga_2_participation"]
+    },
+    {
+      "name": "VÂLCEA CLAR — registrul canonic Unde ieșim",
+      "url": "https://github.com/mihaicismaru-bit/civora/blob/main/valcea-clar/data/places.json",
+      "tier": "T1_INTERNAL",
+      "supports": ["verified_venues"]
+    }
+  ],
+  "policy": {
+    "facts_only_from_sufficient_evidence": true,
+    "signals_are_not_facts": true,
+    "sensitive_claims_require_extra_gate": true,
+    "weather_is_service_information_not_hard_fact": true,
+    "no_external_paid_services": true
+  }
+}
