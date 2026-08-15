@@ -56,6 +56,7 @@ jobs:
 
       - name: Regenerate canonical data products
         run: |
+          python partener-eu/ingest/build_mysmis_consultant_registry.py
           python partener-eu/ingest/intelligence_index.py
           python partener-eu/p11/apply_resolutions.py
           python partener-eu/p11/build_public_projection.py
@@ -82,6 +83,9 @@ jobs:
           python partener-eu/ops/fix_mipe_resilient_classifier.py
           python partener-eu/ops/fix_consultant_workspace_v3.py
           node --check partener-eu/web/consultant-workspace-v3.js
+          node --check partener-eu/web/consultant-onboarding-v3.js
+          node --check partener-eu/web/consultant-mysmis-v1.js
+          node --check partener-eu/web/mysmis-registry.js
           python partener-eu/ops/test_consultant_workspace_v3.py
           python partener-eu/ops/test_mipe_resilient_ingest.py
 
@@ -163,7 +167,8 @@ jobs:
             partener-eu/ingest/state/intelligence_index.json \
             partener-eu/p11/opportunity_bundle.json \
             partener-eu/web/p11-public-data.js \
-            partener-eu/web/consultant-workspace-v3.js
+            partener-eu/web/consultant-workspace-v3.js \
+            partener-eu/web/mysmis-registry.js
           if ! git diff --cached --quiet; then
             git commit -m "PARTENER.EU validation ledger $(date -u +%Y-%m-%dT%H:%M:%SZ)"
             git pull --rebase origin main
