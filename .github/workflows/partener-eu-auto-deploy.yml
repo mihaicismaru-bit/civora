@@ -9,6 +9,8 @@ on:
   workflow_run:
     workflows:
       - 'PARTENER.EU MIPE Ingestion'
+      - 'PARTENER.EU MIPE Dual Relay'
+      - 'PARTENER.EU MIPE Dual Cache'
     types: [completed]
 
 permissions:
@@ -30,8 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          # workflow_run events must deploy the canonical state produced on main,
-          # not the workflow definition commit or a stale triggering checkout.
+          # Always deploy canonical main after autonomous ingest commits.
           ref: main
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
