@@ -46,6 +46,7 @@ jobs:
             local-news-os/social/cadence_fatigue.py \
             local-news-os/social/recurring_series.py \
             local-news-os/social/virality_engine.py \
+            local-news-os/social/publication_state.py \
             local-news-os/social/test_channel_fit.py \
             local-news-os/social/test_content_atomizer.py \
             local-news-os/social/test_hook_engine.py \
@@ -53,7 +54,8 @@ jobs:
             local-news-os/social/test_visual_router.py \
             local-news-os/social/test_cadence_fatigue.py \
             local-news-os/social/test_recurring_series.py \
-            local-news-os/social/test_virality_engine.py
+            local-news-os/social/test_virality_engine.py \
+            local-news-os/social/test_publication_state.py
 
       - name: Run channel fit acceptance tests
         run: python local-news-os/social/test_channel_fit.py
@@ -78,6 +80,9 @@ jobs:
 
       - name: Run deterministic Virality Engine acceptance tests
         run: python local-news-os/social/test_virality_engine.py
+
+      - name: Run Publication State / Retry / Dedupe acceptance tests
+        run: python local-news-os/social/test_publication_state.py
 
       - name: Validate Vâlcea reference CHANNEL_CONFIG fixtures
         run: |
