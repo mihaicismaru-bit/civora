@@ -50,6 +50,9 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
 
       - name: Regenerate canonical data products
         run: |
@@ -71,6 +74,15 @@ jobs:
         id: frontend
         continue-on-error: true
         run: python partener-eu/ops/test_frontend_regression.py
+
+      - name: Consultant Workspace v3 and MIPE resilient-ingestion regression
+        id: intelligence_ui
+        continue-on-error: true
+        run: |
+          python partener-eu/ops/fix_mipe_resilient_classifier.py
+          node --check partener-eu/web/consultant-workspace-v3.js
+          python partener-eu/ops/test_consultant_workspace_v3.py
+          python partener-eu/ops/test_mipe_resilient_ingest.py
 
       - name: P10 orchestration and fail-closed policy regression
         id: policy
@@ -156,6 +168,7 @@ jobs:
         env:
           RECOVERY_OUTCOME: ${{ steps.recovery.outcome }}
           FRONTEND_OUTCOME: ${{ steps.frontend.outcome }}
+          INTELLIGENCE_UI_OUTCOME: ${{ steps.intelligence_ui.outcome }}
           POLICY_OUTCOME: ${{ steps.policy.outcome }}
           AFIR_POLICY_OUTCOME: ${{ steps.afir_policy.outcome }}
           PUBLIC_TRANSPORT_OUTCOME: ${{ steps.public_transport.outcome }}
@@ -167,7 +180,7 @@ jobs:
           ACCEPTANCE_CODE: ${{ steps.acceptance.outputs.exit_code }}
         run: |
           FAIL=0
-          for OUTCOME in "$RECOVERY_OUTCOME" "$FRONTEND_OUTCOME" "$POLICY_OUTCOME" "$AFIR_POLICY_OUTCOME" "$PUBLIC_TRANSPORT_OUTCOME" "$QUALITY_OUTCOME"; do
+          for OUTCOME in "$RECOVERY_OUTCOME" "$FRONTEND_OUTCOME" "$INTELLIGENCE_UI_OUTCOME" "$POLICY_OUTCOME" "$AFIR_POLICY_OUTCOME" "$PUBLIC_TRANSPORT_OUTCOME" "$QUALITY_OUTCOME"; do
             if [ "$OUTCOME" != "success" ]; then FAIL=2; fi
           done
           for CODE in "$VALIDATE_CODE" "$RESOLUTION_CODE" "$INTEGRITY_CODE" "$DEPLOYMENT_CODE" "$ACCEPTANCE_CODE"; do
