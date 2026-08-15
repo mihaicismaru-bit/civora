@@ -42,6 +42,23 @@ def parse_date(value: Any) -> dt.datetime | None:
     return None
 
 
+def human_date(value: Any) -> str:
+    parsed=parse_date(value)
+    if not parsed:
+        return str(value or "")
+    raw=str(value or "")
+    has_time=bool(re.search(r"T\d{2}:\d{2}|\b\d{1,2}:\d{2}\b",raw))
+    base=f"{parsed.day} {MONTHS_RO[parsed.month-1]} {parsed.year}"
+    return f"{base}, {parsed.strftime('%H:%M')}" if has_time else base
+
+
+def clean_sentence(value: Any) -> str:
+    text=re.sub(r"\s+"," ",str(value or "")).strip()
+    text=re.sub(r"\bSunt confirmate:\s*open\.?", "Apelul este confirmat ca deschis.", text, flags=re.I)
+    text=re.sub(r"\bopen\b", "deschis", text, flags=re.I)
+    return text
+
+
 def fact(d: dict[str, Any], *labels: str) -> str:
     for label in labels:
         row = next((x for x in d.get("quickFacts") or [] if x.get("label") == label), None)
@@ -55,7 +72,6 @@ def is_current_candidate(d: dict[str, Any], today: dt.datetime) -> bool:
     if status not in {"OPEN","EXPECTED","PUBLIC_CONSULTATION"}:
         return False
     deadline = parse_date(fact(d, "Termen"))
-    # A stale OPEN flag must never survive into the executive briefing.
     if status == "OPEN" and deadline and deadline.date() < today.date():
         return False
     return True
@@ -80,9 +96,10 @@ def dossier_score(d: dict[str, Any], today: dt.datetime) -> tuple[int, int]:
 
 def dossier_item(d: dict[str, Any], today: dt.datetime) -> dict[str, Any]:
     status = str(d.get("status") or "REVIEW")
-    deadline = fact(d, "Termen")
-    grant = fact(d, "Grant", "Valoare proiect", "Finanțare")
-    budget = fact(d, "Buget")
+    deadline_raw = fact(d, "Termen")
+    deadline = human_date(deadline_raw) if deadline_raw else ""
+    grant = clean_sentence(fact(d, "Grant", "Valoare proiect", "Finanțare"))
+    budget = clean_sentence(fact(d, "Buget"))
     if status == "OPEN":
         tone, label = "open", "DESCHIS"
         action = "Deschide dosarul și verifică eligibilitatea, documentele și termenul intern de lucru."
@@ -99,7 +116,8 @@ def dossier_item(d: dict[str, Any], today: dt.datetime) -> dict[str, Any]:
     if grant: bits.append(f"Finanțare: {grant}")
     elif budget: bits.append(f"Buget: {budget}")
     if deadline: bits.append(f"Termen: {deadline}")
-    summary = " · ".join(bits) if bits else str(d.get("standfirst") or d.get("decisionAction") or "")
+    fallback=clean_sentence(d.get("decisionAction") or d.get("standfirst") or "")
+    summary = " · ".join(bits) if bits else fallback
     return {
         "id": f"brief-dossier-{d.get('id')}", "kind":"DOSSIER", "tone":tone, "label":label,
         "programme": d.get("programme") or "PROGRAM", "title": d.get("title") or "Oportunitate de finanțare",
@@ -115,9 +133,9 @@ def news_item(n: dict[str, Any]) -> dict[str, Any]:
     return {
         "id": f"brief-news-{n.get('id')}", "kind":"NEWS", "tone":"update",
         "label": labels.get(kind, "ACTUALIZARE"), "programme": n.get("programme") or "",
-        "title": n.get("headline") or "Actualizare relevantă",
-        "summary": str(n.get("standfirst") or n.get("meaning") or "")[:260],
-        "action": str(actions[0] if actions else n.get("meaning") or "Verifică dosarul și sursa oficială.")[:220],
+        "title": clean_sentence(n.get("headline") or "Actualizare relevantă"),
+        "summary": clean_sentence(n.get("standfirst") or n.get("meaning") or "")[:260],
+        "action": clean_sentence(actions[0] if actions else n.get("meaning") or "Verifică dosarul și sursa oficială.")[:220],
         "newsId": n.get("id"), "priority": int(n.get("utilityScore") or 60) + 25,
     }
 
@@ -160,7 +178,7 @@ def main() -> int:
         "lead": "Selecție zilnică din apeluri, ghiduri și schimbări verificate. Consultările și estimările nu sunt afișate ca sesiuni deschise.",
         "items": chosen,
         "parallel": parallel_text,
-        "policy": {"dailyGenerated": True, "decisionProductsOnly": True, "maxCards": 4, "rawIngestionExcluded": True, "expiredOpenExcluded": True},
+        "policy": {"dailyGenerated": True, "decisionProductsOnly": True, "maxCards": 4, "rawIngestionExcluded": True, "expiredOpenExcluded": True, "humanReadableDates": True},
     }
     OUT_JSON.parent.mkdir(parents=True, exist_ok=True)
     OUT_JSON.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
