@@ -35,10 +35,15 @@ jobs:
           python -m py_compile \
             local-news-os/social/validate_channel_config.py \
             local-news-os/social/channel_fit.py \
-            local-news-os/social/test_channel_fit.py
+            local-news-os/social/content_atomizer.py \
+            local-news-os/social/test_channel_fit.py \
+            local-news-os/social/test_content_atomizer.py
 
       - name: Run channel fit acceptance tests
         run: python local-news-os/social/test_channel_fit.py
+
+      - name: Run content atomizer acceptance tests
+        run: python local-news-os/social/test_content_atomizer.py
 
       - name: Validate Vâlcea reference CHANNEL_CONFIG fixtures
         run: |
