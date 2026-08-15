@@ -242,6 +242,67 @@ def parse_html(raw: bytes) -> dict[str, Any]:
     }
 
 
+READER_BOILERPLATE = (
+    "skip to main content", "adaugă ca sursă preferată", "adauga ca sursa preferata",
+    "bine ați venit pe site", "bine ati venit pe site", "acest site folosește",
+    "acest site foloseste", "politica de confidențialitate", "politica de confidentialitate",
+    "urmărește-ne", "urmareste-ne", "toate drepturile rezervate", "copyright",
+    "facebook", "linkedin", "youtube", "instagram", "sitemap", "meniu principal",
+)
+PUBLISHABLE_EVENT_KINDS = {
+    "CALL_OPENED", "DEADLINE_EXTENDED", "GUIDE_PUBLISHED", "GUIDE_MODIFIED",
+    "CONSULTATION_OPENED", "RESULTS_PUBLISHED",
+}
+STATIC_TITLE_HINTS = (
+    "poveste de succes", "povești de succes", "povesti de succes",
+    "politica de coeziune", "alte finanțări și instrumente financiare",
+    "alte finantari si instrumente financiare",
+)
+OFFICIAL_UPDATE_ACTIONS = (
+    "anunț", "anunt", "finanț", "finant", "buget", "investi", "apel",
+    "contract", "plată", "plata", "cerere", "negocier", "reform",
+    "aprobat", "publicat", "lansat", "actualizat", "modificat",
+)
+
+
+def markdown_plain(value: str) -> str:
+    value = re.sub(r"!\[[^\]]*\]\([^)]+\)", " ", value)
+    value = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", value)
+    value = re.sub(r"https?://\S+", " ", value)
+    value = re.sub(r"[`*_#>|]+", " ", value)
+    return clean_text(value)
+
+
+def is_boilerplate(value: str) -> bool:
+    plain = markdown_plain(value)
+    low = plain.lower()
+    if len(plain) < 55:
+        return True
+    if any(marker in low for marker in READER_BOILERPLATE):
+        return True
+    alpha = sum(ch.isalpha() for ch in plain)
+    return alpha < max(30, len(plain) // 3)
+
+
+def best_reader_summary(body_md: str, title: str) -> str:
+    title_terms = {w for w in re.findall(r"[a-zăâîșț0-9]+", title.lower()) if len(w) >= 5}
+    ranked: list[tuple[int, int, str]] = []
+    for index, paragraph in enumerate(re.split(r"\n\s*\n", body_md)):
+        candidate = markdown_plain(paragraph)
+        if is_boilerplate(candidate) or candidate.lower() == title.lower():
+            continue
+        low = candidate.lower()
+        relevance = sum(3 for keyword in FUNDING_KEYWORDS if keyword in low)
+        overlap = sum(1 for term in title_terms if term in low)
+        # Prefer early, title-related explanatory paragraphs, not navigation or footer text.
+        score = relevance + overlap + max(0, 8 - index // 4)
+        ranked.append((score, -index, candidate[:900]))
+    if not ranked:
+        return ""
+    ranked.sort(reverse=True)
+    return ranked[0][2]
+
+
 def parse_reader(raw: bytes, target: str) -> dict[str, Any] | None:
     text = raw.decode("utf-8", errors="replace")
     if len(text.strip()) < 180:
@@ -273,12 +334,7 @@ def parse_reader(raw: bytes, target: str) -> dict[str, Any] | None:
             links.append((href, ""))
     body = clean_text(re.sub(r"!\[[^\]]*\]\([^)]+\)", " ", body_md))
     body = clean_text(re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", body))
-    description = ""
-    for paragraph in re.split(r"\n\s*\n", body_md):
-        candidate = clean_text(paragraph)
-        if len(candidate) >= 70 and not candidate.lower().startswith(("title:", "url source:")):
-            description = candidate[:900]
-            break
+    description = best_reader_summary(body_md, title)
     return {
         "title": title,
         "description": description,
@@ -331,26 +387,38 @@ def score_relevance(title: str, description: str, body: str, url: str) -> int:
     return score
 
 
-def classify_tag(text: str) -> str:
-    value = text.lower()
-    if "poids" in value or "pids" in value or "incluziune și demnitate socială" in value or "incluziune si demnitate sociala" in value:
-        return "PoIDS"
-    if re.search(r"\bpeo\b", value) or "educație și ocupare" in value or "educatie si ocupare" in value:
+def classify_tag(title: str, url: str = "", context: str = "") -> str:
+    # URL and title outrank the page body because MIPE templates contain links
+    # to every programme and can otherwise contaminate programme classification.
+    primary = f"{title} {url}".lower()
+    secondary = context[:800].lower()
+    if "/ghiduri_peos/" in primary or re.search(r"\bpeo\b", primary) or "educație și ocupare" in primary or "educatie si ocupare" in primary:
         return "PEO"
-    if "pdds" in value or "dezvoltare durabilă" in value or "dezvoltare durabila" in value:
+    if "/ghiduri_pids/" in primary or "poids" in primary or re.search(r"\bpids\b", primary) or "incluziune și demnitate socială" in primary or "incluziune si demnitate sociala" in primary:
+        return "PoIDS"
+    if "/pdds/" in primary or "programul dezvoltare durabilă" in primary or "programul dezvoltare durabila" in primary:
         return "PDDS"
-    if "pnrr" in value or "redresare și reziliență" in value or "redresare si rezilienta" in value:
-        return "PNRR"
-    if "tranziție justă" in value or "tranzitie justa" in value or re.search(r"\bptj\b", value):
+    if "tranziție justă" in primary or "tranzitie justa" in primary or re.search(r"\bptj\b", primary):
         return "PTJ"
-    if "oportunități de finanțare" in value or "oportunitati de finantare" in value:
-        return "OPORTUNITĂȚI UE"
+    if "programul sănătate" in primary or "programul sanatate" in primary:
+        return "SĂNĂTATE"
+    if "pnrr" in primary or "redresare și reziliență" in primary or "redresare si rezilienta" in primary or "planul-national-de-redresare" in primary:
+        return "PNRR"
+    if re.search(r"\bpr[ -](?:nord|sud|vest|centru|bucure)", primary) or "program regional" in primary:
+        return "REGIONAL"
+    combined = f"{primary} {secondary}"
+    if re.search(r"\bpeo\b", combined):
+        return "PEO"
+    if "poids" in combined or re.search(r"\bpids\b", combined):
+        return "PoIDS"
+    if "pdds" in combined:
+        return "PDDS"
     return "MIPE"
 
 
 def classify_kind(title: str, body: str) -> str:
     text = f"{title} {body[:1800]}".lower()
-    if ("prelung" in text and "termen" in text) or ("extind" in text and "termen" in text):
+    if ("prelung" in text or "extind" in text) and any(token in text for token in ("termen", "perioada", "depunere", "deadline")):
         return "DEADLINE_EXTENDED"
     if "corrigendum" in text or "corrigend" in text or "rectific" in title.lower():
         return "GUIDE_MODIFIED"
@@ -361,11 +429,36 @@ def classify_kind(title: str, body: str) -> str:
     # guide publication merely because both words appear in the same page.
     if any(token in text for token in ("apelul este deschis", "apel deschis", "lansarea apelului", "s-a lansat apelul", "se lansează apelul", "se lanseaza apelul")):
         return "CALL_OPENED"
-    if "ghid" in text and any(token in text for token in ("publicat", "aprobat", "final", "lansat")):
+    if "ghid" in text and any(token in text for token in ("actualiz", "modific", "revizuit")):
+        return "GUIDE_MODIFIED"
+    if "ghidul solicitantului" in title.lower() or ("ghid" in text and any(token in text for token in ("publicat", "aprobat", "final", "lansat"))):
         return "GUIDE_PUBLISHED"
     if "rezultat" in text or "lista proiectelor" in text:
         return "RESULTS_PUBLISHED"
     return "OFFICIAL_UPDATE"
+
+
+def decision_useful(title: str, kind: str, date: dt.date | None, path: str) -> bool:
+    low = title.lower()
+    if any(hint in low for hint in STATIC_TITLE_HINTS):
+        return False
+    if kind in PUBLISHABLE_EVENT_KINDS:
+        return True
+    if kind != "OFFICIAL_UPDATE" or not date:
+        return False
+    if date < now_utc().date() - dt.timedelta(days=180):
+        return False
+    if path.rstrip("/") in {"", "/minister/perioade-de-programare", "/programe-de-finantare/planul-national-de-redresare-si-rezilienta", "/programe-de-finantare/alte-finantari-si-instrumente-financiare"}:
+        return False
+    return any(token in low for token in OFFICIAL_UPDATE_ACTIONS)
+
+
+def previous_item_useful(item: dict[str, Any]) -> bool:
+    if item.get("source") == "MIPE / MySMIS":
+        return True
+    if item.get("decisionUseful") is True:
+        return True
+    return item.get("kind") in PUBLISHABLE_EVENT_KINDS
 
 
 def item_id(url: str, title: str) -> str:
@@ -383,7 +476,8 @@ def document_links(links: Iterable[tuple[str, str]], base: str) -> list[dict[str
         if not re.search(r"\.(?:pdf|docx?|xlsx?|csv|zip|7z|rar)(?:$|/)", path):
             continue
         seen.add(url)
-        documents.append({"name": label or Path(path).name or "Document oficial", "url": url})
+        clean_label = re.sub(r"[`*_#]+", "", clean_text(label)).strip()
+        documents.append({"name": clean_label or Path(path).name or "Document oficial", "url": url})
     return documents[:25]
 
 
@@ -587,11 +681,18 @@ def make_item(candidate: dict[str, str], cache: dict[str, tuple[dict[str, Any] |
     if not date:
         date = parse_date(*(parsed.get("times") or []), candidate.get("date_hint"), body=body)
 
-    summary = description
-    if len(summary) < 50:
-        summary = body[:900]
-    summary = clean_text(summary)[:900]
-    combined = f"{title} {description} {body[:4000]}"
+    if not decision_useful(title, kind, date, path):
+        return None, health
+
+    documents = document_links(parsed.get("links", []), canonical)
+    summary = clean_text(description)
+    if is_boilerplate(summary):
+        summary = ""
+    if not summary:
+        summary = f"Actualizare oficială MIPE: {title}."
+        if documents:
+            summary += f" Pagina include {len(documents)} documente oficiale pentru verificare."
+    summary = summary[:900]
     transport = health.get("transport", "unknown")
     tier = "T1" if transport.startswith("direct") else "T1_PROXY_TRANSPORT"
     observed = now_utc().isoformat()
@@ -603,7 +704,7 @@ def make_item(candidate: dict[str, str], cache: dict[str, tuple[dict[str, Any] |
         "dateLabel": ro_date(date),
         "dateConfidence": "OFFICIAL_PAGE" if date else "OBSERVED_ONLY",
         "summary": summary,
-        "tag": classify_tag(combined),
+        "tag": classify_tag(title, canonical, description),
         "kind": kind,
         "tier": tier,
         "source": "MIPE",
@@ -611,7 +712,8 @@ def make_item(candidate: dict[str, str], cache: dict[str, tuple[dict[str, Any] |
         "relevanceScore": score,
         "discovery": candidate.get("discovery", "crawl"),
         "retrievalTransport": transport,
-        "documents": document_links(parsed.get("links", []), canonical),
+        "decisionUseful": True,
+        "documents": documents,
     }
     return item, health
 
@@ -694,7 +796,8 @@ def main() -> int:
         normalized.setdefault("tier", "T1_LEGACY_PRESERVED")
         normalized.setdefault("observedAt", previous_state.get("lastRun", {}).get("observedAt", ""))
         normalized.setdefault("documents", [])
-        previous_by_url[old_url] = normalized
+        if previous_item_useful(normalized):
+            previous_by_url[old_url] = normalized
 
     candidates, root_health = seed_candidates()
     search_candidates, search_health = search_discovery()
