@@ -18,6 +18,20 @@
     "local_agent_runtime_required": false,
     "self_hosted_runner_allowed": false
   },
+  "social_engine": {
+    "publication_owner": "civora_site_engine",
+    "chatgpt_publication_allowed": false,
+    "workflow": ".github/workflows/valcea-clar-social.yml",
+    "registry": "valcea-clar/social/social_channels.json",
+    "platforms": [
+      "facebook",
+      "instagram",
+      "tiktok"
+    ],
+    "credentials_owner": "github_actions_secrets_and_variables",
+    "channel_state_owner": "repository",
+    "tiktok_explicit_site_consent_required": true
+  },
   "jobs": [
     {
       "id": "autonomous_editions",
@@ -58,11 +72,16 @@
       "owner": "site_engine"
     },
     {
-      "id": "facebook_distribution",
-      "kind": "social_distribution",
-      "workflow": ".github/workflows/valcea-clar-facebook.yml",
+      "id": "social_distribution",
+      "kind": "multi_network_social_distribution",
+      "workflow": ".github/workflows/valcea-clar-social.yml",
       "schedule": [
         "7,22,37,52 * * * *"
+      ],
+      "platforms": [
+        "facebook",
+        "instagram",
+        "tiktok"
       ],
       "owner": "site_engine"
     },
@@ -92,9 +111,15 @@
     },
     {
       "id": "LEGACY-CHATGPT-VALCEA-CLAR-*",
-      "scope": "all recurring CIVORA/VÂLCEA CLAR monitoring and content-generation tasks outside the site engine",
+      "scope": "all recurring CIVORA/VÂLCEA CLAR monitoring, content-generation and social-publication tasks outside the site engine",
       "status": "retired",
       "replacement": "registered GitHub Actions workflows in this file"
+    },
+    {
+      "id": "LEGACY-VALCEA-CLAR-FACEBOOK-WORKFLOW",
+      "scope": "Facebook-only distribution workflow",
+      "status": "retired",
+      "replacement_workflow": ".github/workflows/valcea-clar-social.yml"
     }
   ]
 }
