@@ -31,7 +31,8 @@ jobs:
         run: |
           python -m py_compile \
             local-news-os/core/validate_instance_config.py \
-            local-news-os/core/build_instance_manifest.py
+            local-news-os/core/build_instance_manifest.py \
+            local-news-os/core/resolve_source_pack.py
       - name: Validate production and test instances
         run: python local-news-os/core/validate_instance_config.py
       - name: Assert fixture packs are isolated
@@ -42,16 +43,24 @@ jobs:
           test -f local-news-os/instances/test-local/instance.json
           test -f local-news-os/instances/test-local/fixtures/source_pack.json
           test -f local-news-os/instances/test-local/fixtures/brand_pack.json
+          test -f local-news-os/instances/test-local/fixtures/geography_pack.json
           ! grep -Eiq 'vâlcea|valcea|ramnicu|râmnicu|valceaclar\.ro' \
             local-news-os/instances/test-local/fixtures/source_pack.json \
-            local-news-os/instances/test-local/fixtures/brand_pack.json
+            local-news-os/instances/test-local/fixtures/brand_pack.json \
+            local-news-os/instances/test-local/fixtures/geography_pack.json
       - name: Build both instances with the same generic engine
         run: |
           python local-news-os/core/build_instance_manifest.py valcea --output /tmp/valcea-manifest.json
           python local-news-os/core/build_instance_manifest.py test-local --output /tmp/test-local-manifest.json
           cat /tmp/valcea-manifest.json
           cat /tmp/test-local-manifest.json
-      - name: Prove runtime and identity isolation
+      - name: Resolve both Source Packs with the same generic engine
+        run: |
+          python local-news-os/core/resolve_source_pack.py valcea --output /tmp/valcea-sources.json
+          python local-news-os/core/resolve_source_pack.py test-local --output /tmp/test-local-sources.json
+          cat /tmp/valcea-sources.json
+          cat /tmp/test-local-sources.json
+      - name: Prove runtime, identity and source isolation
         shell: bash
         run: |
           set -euo pipefail
@@ -61,6 +70,9 @@ jobs:
 
           valcea = json.loads(Path('/tmp/valcea-manifest.json').read_text(encoding='utf-8'))
           test = json.loads(Path('/tmp/test-local-manifest.json').read_text(encoding='utf-8'))
+          valcea_sources = json.loads(Path('/tmp/valcea-sources.json').read_text(encoding='utf-8'))
+          test_sources = json.loads(Path('/tmp/test-local-sources.json').read_text(encoding='utf-8'))
+
           assert valcea['instance_id'] == 'valcea'
           assert test['instance_id'] == 'test-local'
           assert valcea['canonical_domain'] != test['canonical_domain']
@@ -71,8 +83,19 @@ jobs:
           assert test['policies']['zero_paid_dependency'] is True
           assert valcea['policies']['llm_required'] is False
           assert test['policies']['llm_required'] is False
-          serialized = json.dumps(test, ensure_ascii=False).lower()
+
+          assert valcea_sources['contract'] == 'SOURCE_PACK_V1'
+          assert test_sources['contract'] == 'SOURCE_PACK_V1'
+          assert valcea_sources['instance_id'] == 'valcea'
+          assert test_sources['instance_id'] == 'test-local'
+          assert valcea_sources['source_count'] >= 16
+          assert test_sources['source_count'] == 2
+          assert valcea_sources['resolved_sha256'] != test_sources['resolved_sha256']
+          assert valcea_sources['material_detail_autopublish'] is False
+          assert test_sources['material_detail_autopublish'] is False
+
+          serialized = json.dumps({'manifest': test, 'sources': test_sources}, ensure_ascii=False).lower()
           for forbidden in ('vâlcea', 'valcea', 'râmnicu', 'ramnicu', 'valceaclar.ro'):
               assert forbidden not in serialized, forbidden
-          print('DUAL_INSTANCE_ISOLATION_PASS')
+          print('DUAL_INSTANCE_SOURCE_ISOLATION_PASS')
           PY
