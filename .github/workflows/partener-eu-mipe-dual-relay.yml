@@ -1,0 +1,128 @@
+name: PARTENER.EU MIPE Dual Relay
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '47 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'partener-eu/ops/fix_mipe_dual_relay.py'
+      - '.github/workflows/partener-eu-mipe-dual-relay.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: partener-eu-mipe-ingest
+  cancel-in-progress: true
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      MIPE_RELAY_URL: https://partener-mipe-relay-mihaicismaru-6634s-projects.vercel.app/api/mipe
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Assemble fail-closed multi-transport runtime
+        run: |
+          python partener-eu/ops/fix_mipe_resilient_classifier.py
+          python partener-eu/ops/fix_mipe_resilient_runtime.py
+          python partener-eu/ops/fix_mipe_content_quality.py
+          python partener-eu/ops/fix_mipe_first_party_relay.py
+          python partener-eu/ops/fix_mipe_dual_relay.py
+
+      - name: Syntax and parser regression
+        run: |
+          python -m py_compile partener-eu/ingest/mipe_resilient_ingest.py
+          python partener-eu/ops/test_mipe_resilient_ingest.py
+
+      - name: Ingest official MIPE pages
+        run: python partener-eu/ingest/mipe_resilient_ingest.py
+
+      - name: Build MySMIS consultant evidence
+        run: python partener-eu/ingest/build_mysmis_consultant_registry.py
+
+      - name: Validate dual-relay evidence and canonical provenance
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          state = json.loads(Path('partener-eu/ingest/state/mipe_state.json').read_text(encoding='utf-8'))
+          allowed_hosts = ('mfe.gov.ro','fonduri-ue.gov.ro','fonduri-ue.ro','oportunitati-ue.gov.ro','reporting.mysmis2021.gov.ro')
+          dual_items = []
+          for item in state.get('items', []):
+              assert item.get('url', '').startswith('https://')
+              assert any(host in item['url'] for host in allowed_hosts), item['url']
+              transport = item.get('retrievalTransport', '')
+              assert transport.startswith('direct') or 'dual-relay-corroborated' in transport or item.get('verification') == 'CANONICAL_OFFICIAL_FETCH', transport
+              if 'dual-relay-corroborated' in transport:
+                  assert item.get('tier') == 'T1_DUAL_RELAY_CORROBORATED'
+                  dual_items.append(item['url'])
+
+          dual_roots = [
+              r for r in state.get('lastRun', {}).get('roots', [])
+              if r.get('transport') == 'canonical-dual-relay-corroborated'
+          ]
+          for root in dual_roots:
+              assert root.get('verification') == 'CANONICAL_DUAL_RELAY_CORROBORATED'
+              assert len(root.get('readerSha256', '')) == 64
+              assert len(root.get('translateSha256', '')) == 64
+              assert root.get('sharedOfficialPathCount', 0) >= 1
+              assert root.get('readerUrl', '').startswith('https://r.jina.ai/https://mfe.gov.ro/')
+              assert root.get('translateUrl', '').startswith('https://mfe-gov-ro.translate.goog/')
+
+          print(json.dumps({
+              'status': state.get('status'),
+              'publishedItems': len(state.get('items', [])),
+              'dualRelayRoots': len(dual_roots),
+              'dualRelayItems': len(dual_items),
+              'observedAt': state.get('lastRun', {}).get('observedAt'),
+          }, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Persist transport runtime and verified outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp partener-eu/ingest/mipe_resilient_ingest.py /tmp/mipe_resilient_ingest.py
+          cp partener-eu/ingest/state/mipe_state.json /tmp/mipe_state.json
+          cp partener-eu/ingest/state/mipe_source_registry.json /tmp/mipe_source_registry.json
+          cp partener-eu/web/mipe-news.js /tmp/mipe-news.js
+          cp partener-eu/web/mysmis-registry.js /tmp/mysmis-registry.js
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/mipe_resilient_ingest.py partener-eu/ingest/mipe_resilient_ingest.py
+            cp /tmp/mipe_state.json partener-eu/ingest/state/mipe_state.json
+            cp /tmp/mipe_source_registry.json partener-eu/ingest/state/mipe_source_registry.json
+            cp /tmp/mipe-news.js partener-eu/web/mipe-news.js
+            cp /tmp/mysmis-registry.js partener-eu/web/mysmis-registry.js
+            python partener-eu/ingest/intelligence_index.py
+            git add \
+              partener-eu/ingest/mipe_resilient_ingest.py \
+              partener-eu/ingest/state/mipe_state.json \
+              partener-eu/ingest/state/mipe_source_registry.json \
+              partener-eu/ingest/state/intelligence_index.json \
+              partener-eu/web/mipe-news.js \
+              partener-eu/web/mysmis-registry.js
+            if git diff --cached --quiet; then
+              echo 'No dual-relay MIPE changes.'
+              exit 0
+            fi
+            git commit -m 'Ingest MIPE through dual independent relay corroboration'
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1
