@@ -1,25 +1,25 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "edition_id": "2026-08-15-morning",
   "title": "VÂLCEA CLAR — Ediția de dimineață",
   "edition_date": "2026-08-15",
-  "updated_local": "2026-08-15T08:11:00+03:00",
+  "updated_local": "2026-08-15T08:32:00+03:00",
   "status": "editor_approved",
   "publication_intent": "publish",
   "items": [
     {
       "id": "musiclover-green-day-20260815",
       "section": "EVENIMENTE",
-      "priority": 98,
+      "priority": 99,
       "headline": "Azi la Fețeni: Musiclover Festival continuă cu Delia și Connect-R",
-      "confidence": 98,
-      "source_types": ["ticketing_primary", "event_calendar"],
+      "confidence": 99,
+      "source_types": ["ticketing_primary", "official_local_decision"],
       "material_fact_gate": "PASS"
     },
     {
       "id": "luminos-fest-zavoi-20260815",
       "section": "EVENIMENTE",
-      "priority": 94,
+      "priority": 96,
       "headline": "Luminos Fest începe azi în Parcul Zăvoi. Intrarea este liberă",
       "confidence": 99,
       "source_types": ["organizer_official", "event_calendar"],
@@ -28,49 +28,90 @@
     {
       "id": "scm-valcea-slatina-20260815",
       "section": "SPORT",
-      "priority": 82,
+      "priority": 86,
       "headline": "SCM Râmnicu Vâlcea joacă azi cu CSM Slatina în etapa a treia din Liga 2",
-      "confidence": 93,
+      "confidence": 97,
       "source_types": ["league_schedule", "club_official"],
-      "material_fact_gate": "PASS_DATE_ONLY"
+      "material_fact_gate": "PASS_DATE_OPPONENT"
+    },
+    {
+      "id": "olanesti-bridge-monitor-20260815",
+      "section": "INVESTIGAȚII",
+      "priority": 84,
+      "headline": "Podul pietonal-ciclist peste Olănești: dosarul rămâne deschis",
+      "confidence": 95,
+      "source_types": ["official_technical_documentation", "public_procurement", "editorial_investigation_file"],
+      "material_fact_gate": "PASS_MONITORING",
+      "accusatory_publication": false
     },
     {
       "id": "unde-iesim-15-august-20260815",
       "section": "UNDE_IEȘIM",
-      "priority": 78,
+      "priority": 80,
       "headline": "Unde ieșim azi: Zăvoi, Fețeni și localurile deja verificate de Vâlcea Clar",
-      "confidence": 96,
+      "confidence": 97,
       "source_types": ["canonical_venue_registry", "organizer_official", "ticketing_primary"],
       "material_fact_gate": "PASS"
-    },
-    {
-      "id": "weather-service-20260815",
-      "section": "UTIL",
-      "priority": 70,
-      "headline": "Zi caldă, cu risc de averse izolate: verifică vremea înainte de evenimentele în aer liber",
-      "confidence": 82,
-      "source_types": ["public_weather_models"],
-      "material_fact_gate": "PASS_WITH_CAUTION"
     }
   ],
+  "ingest_snapshot": {
+    "source_radar": {
+      "observed_local": "2026-08-15T08:31:24+03:00",
+      "total": 20,
+      "pass": 19,
+      "degraded": 0,
+      "fail": 1,
+      "changed": 3,
+      "quarantined": 1,
+      "resolution_tasks_required": 3,
+      "publication_policy": "CHANGED_SOURCES_DO_NOT_UPDATE_MATERIAL_FACTS_WITHOUT_EDITORIAL_REVIEW"
+    },
+    "venues": {
+      "observed_local": "2026-08-15T08:31:36+03:00",
+      "status": "DEGRADED_PARTIAL_SOURCE_SUCCESS",
+      "source_count": 30,
+      "source_ok": 13,
+      "source_failed": 17,
+      "semantic_change_candidates": [
+        "SRC-LOSTERIA-VALCEA-EXPRES-2026-07",
+        "SRC-ARBUSTO-RG"
+      ],
+      "venue_count": 19,
+      "creator_candidate_count": 3,
+      "validation": {
+        "status": "PASS",
+        "errors": 0,
+        "warnings": 2
+      },
+      "reconciliation": {
+        "canonical_records": 9,
+        "ingest_records": 19,
+        "matched": 6,
+        "new_editorial_candidates": 8,
+        "unmatched_discovery_only": 5,
+        "conflicts": 1,
+        "review_queue": 16
+      }
+    }
+  },
   "source_snapshot": [
     {
       "name": "Ticketstore — Musiclover Festival, 15 august",
       "url": "https://ticketstore.ro/ro/bilete/12275/musiclover-festival-15-august-connect-r-delia",
       "tier": "T2",
-      "supports": ["musiclover_date", "access_time", "artists", "zone_2_free_access"]
+      "supports": ["musiclover_date", "access_time", "artists", "zone_2_free_access", "fan_zone"]
+    },
+    {
+      "name": "HCL Râmnicu Vâlcea nr. 159/2026",
+      "url": "https://hcl.usr.ro/ramnicu_valcea/2026/h159",
+      "tier": "T1",
+      "supports": ["musiclover_dates", "organizer", "estimated_public_budget"]
     },
     {
       "name": "Luminos Fest — site oficial",
       "url": "https://luminosfest.ro/",
       "tier": "T1B",
-      "supports": ["luminos_dates", "location", "free_entry", "lampion_reservations"]
-    },
-    {
-      "name": "Zile și Nopți — Luminos Fest Râmnicu Vâlcea",
-      "url": "https://zilesinopti.ro/evenimente/luminos-fest-ramnicu-valcea-2026/",
-      "tier": "T2",
-      "supports": ["luminos_program_signal", "kit_prices", "safety_rules"]
+      "supports": ["luminos_dates", "location", "free_entry", "lampion_reservations", "family_activities", "parking", "pets"]
     },
     {
       "name": "Liga 2 — program SCM Râmnicu Vâlcea",
@@ -82,7 +123,13 @@
       "name": "SCM Râmnicu Vâlcea — site oficial",
       "url": "https://scmramnicuvalcea.ro/",
       "tier": "T1B",
-      "supports": ["club_status", "liga_2_participation"]
+      "supports": ["club_status", "liga_2_participation", "home_match_context"]
+    },
+    {
+      "name": "VÂLCEA CLAR — dosarul Olănești / SMIS 334436",
+      "url": "https://github.com/mihaicismaru-bit/civora/tree/main/valcea-clar/investigations",
+      "tier": "T1_INTERNAL",
+      "supports": ["bridge_project", "procurement", "monitoring_scope"]
     },
     {
       "name": "VÂLCEA CLAR — registrul canonic Unde ieșim",
@@ -94,8 +141,8 @@
   "policy": {
     "facts_only_from_sufficient_evidence": true,
     "signals_are_not_facts": true,
+    "changed_sources_are_quarantined_until_review": true,
     "sensitive_claims_require_extra_gate": true,
-    "weather_is_service_information_not_hard_fact": true,
     "no_external_paid_services": true
   }
 }
