@@ -1,24 +1,24 @@
 {
   "schema_version": "1.0",
   "checkpoint": "PARTENER-EU-CIVORA-P10-0020",
-  "observed_at": "2026-08-15T10:51:08Z",
-  "validation_run_started": "2026-08-15T10:50:45Z",
+  "observed_at": "2026-08-15T11:00:59Z",
+  "validation_run_started": "2026-08-15T11:00:36Z",
   "integrity": {
     "latest_history_equal": true,
-    "latest_sha256": "c877eee3088729842c0b887455136128792f344c0ea84350c37b4da00a347da6",
-    "history_sha256": "c877eee3088729842c0b887455136128792f344c0ea84350c37b4da00a347da6",
-    "history_path": "validation/history/20260815T105045Z.json",
+    "latest_sha256": "d9869f732aad3c719a1045d109174f7a448b58960d1ad51212eab61afb354b94",
+    "history_sha256": "d9869f732aad3c719a1045d109174f7a448b58960d1ad51212eab61afb354b94",
+    "history_path": "validation/history/20260815T110036Z.json",
     "source_state_checkpoint_equal": true,
-    "source_state_sha256": "58d3e9bf6d440ecee35d45fb76f6b8c28411aa7095e592917b5089d9bf52f606",
-    "checkpoint_sha256": "58d3e9bf6d440ecee35d45fb76f6b8c28411aa7095e592917b5089d9bf52f606",
+    "source_state_sha256": "b39d9a559408bb928c2a05f196e4ea3a76b80d78ca4ab90e952da94e481f5d76",
+    "checkpoint_sha256": "b39d9a559408bb928c2a05f196e4ea3a76b80d78ca4ab90e952da94e481f5d76",
     "frontend_regression_pass": true,
     "frontend_pass": 10,
     "frontend_total": 10,
     "recovery_state_integrity": "PASS"
   },
   "source_registry": {
-    "observed_at": "2026-08-15T09:43:54.450737Z",
-    "age_seconds": 4034,
+    "observed_at": "2026-08-15T10:59:14.033943Z",
+    "age_seconds": 105,
     "stale_after_seconds": 28800,
     "stale": false,
     "health": "DEGRADED",
@@ -28,7 +28,7 @@
       "degraded": 0,
       "fail": 3,
       "quarantined": 3,
-      "resolution_tasks_required": 0
+      "resolution_tasks_required": 6
     },
     "tier_counts": {
       "T1": {
@@ -45,10 +45,17 @@
         "degraded": 0,
         "fail": 2,
         "quarantined": 2,
-        "hash_changes": 0
+        "hash_changes": 6
       }
     },
-    "changed_source_ids": [],
+    "changed_source_ids": [
+      "SRC-OIRVEST-PEO-GUIDES",
+      "SRC-OIRVEST-PEO-MANUALS",
+      "SRC-OIRVEST-PEO",
+      "SRC-OIRCENTRU-PEO",
+      "SRC-OIRNE-PEO",
+      "SRC-ADRCENTRU-PTJ-CONSULT"
+    ],
     "missing_resolution_tasks": [],
     "unsafe_material_updates": [],
     "fail_closed": true
@@ -278,7 +285,7 @@
     "publication_policy": "candidate-state-only; web material facts are not auto-promoted on scheduled hash changes"
   },
   "mipe": {
-    "observed_at": "2026-08-15T10:00:51.231773+00:00",
+    "observed_at": "2026-08-15T11:00:21.638958+00:00",
     "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
     "source_available": false,
     "candidate_count": 1,
@@ -358,7 +365,7 @@
   "summary": {
     "integrity_pass": true,
     "registry_health": "DEGRADED",
-    "registry_hash_changes": 0,
+    "registry_hash_changes": 6,
     "afir_hash_changes": 0,
     "peo_calendar_changes": 6,
     "mipe_health": "PASS",
