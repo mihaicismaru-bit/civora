@@ -1,0 +1,70 @@
+name: PARTENER.EU MIPE Browser Network Probe
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/partener-eu-mipe-browser-probe.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: partener-eu-mipe-browser-probe
+  cancel-in-progress: true
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install Chromium fallback
+        run: |
+          python -m pip install --disable-pip-version-check playwright
+          python -m playwright install --with-deps chromium
+      - name: Probe official pages with JavaScript enabled and TLS verification
+        run: |
+          python - <<'PY'
+          import json
+          from playwright.sync_api import sync_playwright
+
+          urls = [
+              'https://www.fonduri-ue.ro/',
+              'https://mfe.gov.ro/',
+              'https://oportunitati-ue.gov.ro/',
+          ]
+          output=[]
+          with sync_playwright() as p:
+              browser=p.chromium.launch(headless=True,args=['--disable-dev-shm-usage','--no-sandbox'])
+              context=browser.new_context(
+                  user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/130.0.0.0 Safari/537.36',
+                  locale='ro-RO',
+                  ignore_https_errors=False,
+              )
+              for url in urls:
+                  page=context.new_page()
+                  record={'requested':url}
+                  try:
+                      response=page.goto(url,wait_until='domcontentloaded',timeout=25000)
+                      page.wait_for_timeout(9000)
+                      record.update({
+                          'ok': bool(response and response.status < 400),
+                          'status': response.status if response else None,
+                          'final': page.url,
+                          'title': page.title(),
+                          'bodySample': (page.locator('body').inner_text(timeout=5000) or '')[:1200],
+                          'htmlBytes': len(page.content().encode('utf-8')),
+                      })
+                  except Exception as exc:
+                      record.update({'ok':False,'final':page.url,'error':f'{type(exc).__name__}: {exc}'})
+                  finally:
+                      page.close()
+                  output.append(record)
+              browser.close()
+          print(json.dumps(output,ensure_ascii=False,indent=2))
+          assert any(x.get('ok') for x in output), 'no official browser route was reachable'
+          PY
