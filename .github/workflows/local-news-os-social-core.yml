@@ -55,6 +55,7 @@ jobs:
             local-news-os/social/observed_metrics.py \
             local-news-os/social/publishing_adapters.py \
             local-news-os/social/multi_instance_isolation.py \
+            local-news-os/social/e2e_acceptance.py \
             local-news-os/social/test_channel_fit.py \
             local-news-os/social/test_content_atomizer.py \
             local-news-os/social/test_hook_engine.py \
@@ -67,7 +68,8 @@ jobs:
             local-news-os/social/test_correction_propagation.py \
             local-news-os/social/test_observed_metrics.py \
             local-news-os/social/test_publishing_adapters.py \
-            local-news-os/social/test_multi_instance_isolation.py
+            local-news-os/social/test_multi_instance_isolation.py \
+            local-news-os/social/test_e2e_acceptance.py
           python -m json.tool local-news-os/social/observed_metrics.schema.json >/dev/null
           python -m json.tool local-news-os/social/social_runtime_registry.json >/dev/null
 
@@ -109,6 +111,9 @@ jobs:
 
       - name: Run Multi-Instance Isolation acceptance tests
         run: python local-news-os/social/test_multi_instance_isolation.py
+
+      - name: Run end-to-end Social Runtime acceptance harness
+        run: python local-news-os/social/test_e2e_acceptance.py
 
       - name: Validate Vâlcea reference CHANNEL_CONFIG fixtures
         run: |
