@@ -11,6 +11,7 @@ on:
   push:
     branches: [main]
     paths:
+      - 'partener-eu/ingest/mipe_browser_ingest.py'
       - 'partener-eu/ingest/state/mipe_ro_trigger.txt'
       - '.github/workflows/partener-eu-mipe-ro-runner.yml'
 
@@ -27,11 +28,12 @@ concurrency:
 jobs:
   ingest-ro:
     runs-on: [self-hosted, Windows, X64]
-    timeout-minutes: 35
+    timeout-minutes: 40
     env:
       PYTHONUTF8: '1'
       MIPE_FORCE_IP: ''
       MIPE_RELAY_URL: ''
+      MIPE_MAX_PAGES: '90'
 
     steps:
       - uses: actions/checkout@v6
@@ -90,10 +92,9 @@ jobs:
           "PYTHON_EXE=$python" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           & $python --version
 
-      - name: Test direct Romanian access to MIPE
+      - name: Record raw HTTP probe without blocking browser collection
         shell: pwsh
         run: |
-          $ErrorActionPreference = 'Stop'
           @'
           import json, ssl, urllib.request
           urls = [
@@ -109,27 +110,44 @@ jobs:
                       'User-Agent':'Mozilla/5.0 PARTENER.EU Romanian Collector',
                       'Accept-Language':'ro,en;q=0.7',
                   })
-                  with urllib.request.urlopen(req,timeout=30,context=ssl.create_default_context()) as r:
+                  with urllib.request.urlopen(req,timeout=20,context=ssl.create_default_context()) as r:
                       body=r.read(250000)
                       rows.append({'url':url,'ok':200 <= r.status < 400,'status':r.status,'bytes':len(body),'finalUrl':r.geturl()})
               except Exception as exc:
                   rows.append({'url':url,'ok':False,'error':f'{type(exc).__name__}: {exc}'})
           print(json.dumps(rows,ensure_ascii=False,indent=2))
           if not any(row.get('ok') for row in rows):
-              raise SystemExit('Calculatorul nu poate accesa direct nicio rădăcină MIPE.')
+              print('HTTP simplu este respins de MIPE; continuăm printr-un browser Edge real.')
           '@ | Set-Content -Encoding UTF8 .\mipe_ro_probe.py
           & $env:PYTHON_EXE .\mipe_ro_probe.py
 
-      - name: Install Chromium collector
+      - name: Prepare Playwright with interactive Microsoft Edge
         shell: pwsh
         run: |
           & $env:PYTHON_EXE -m pip install --disable-pip-version-check --upgrade pip
           & $env:PYTHON_EXE -m pip install --disable-pip-version-check playwright
-          & $env:PYTHON_EXE -m playwright install chromium
 
-      - name: Collect official MIPE pages through Romanian egress
+          $edgeCandidates = @(
+            "$env:ProgramFiles(x86)\Microsoft\Edge\Application\msedge.exe",
+            "$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe",
+            "$env:LOCALAPPDATA\Microsoft\Edge\Application\msedge.exe"
+          )
+          $edge = $edgeCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if ($edge) {
+            Write-Host "Microsoft Edge găsit: $edge"
+            "MIPE_BROWSER_CHANNEL=msedge" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+            "MIPE_HEADLESS=0" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          } else {
+            Write-Host 'Microsoft Edge nu a fost găsit; instalez Chromium Playwright.'
+            & $env:PYTHON_EXE -m playwright install chromium
+            "MIPE_BROWSER_CHANNEL=" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+            "MIPE_HEADLESS=1" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          }
+
+      - name: Collect official MIPE pages through Romanian browser egress
         shell: pwsh
         run: |
+          Write-Host "Browser channel: $env:MIPE_BROWSER_CHANNEL; headless: $env:MIPE_HEADLESS"
           & $env:PYTHON_EXE partener-eu/ingest/mipe_browser_ingest.py
 
       - name: Normalize direct-source provenance and bust feed cache
@@ -145,17 +163,16 @@ jobs:
           state=json.loads(state_path.read_text(encoding='utf-8'))
           run=state.get('lastRun') or {}
           if not run.get('sourceAvailable'):
-              raise SystemExit('MIPE direct nu a devenit disponibil în browserul Chromium.')
+              raise SystemExit('MIPE nu a devenit disponibil nici în browserul Microsoft Edge.')
           for item in state.get('items',[]):
               url=item.get('url','')
               if not (url.startswith('https://mfe.gov.ro/') or url.startswith('https://www.mfe.gov.ro/')):
                   raise SystemExit(f'URL neoficial respins: {url}')
               item['tier']='T1'
-              item['retrievalTransport']='playwright-direct-romania'
+              item['retrievalTransport']=run.get('transport') or 'playwright-direct-romania'
               item['verification']='CANONICAL_OFFICIAL_FETCH'
           state['status']='OK'
           run['status']='OK'
-          run['transport']='playwright-direct-romania'
           run['directSuccessCount']=sum(1 for root in run.get('roots',[]) if root.get('ok'))
           state['lastRun']=run
           state_path.write_text(json.dumps(state,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
@@ -165,7 +182,7 @@ jobs:
               'source':'MIPE official web properties',
               'roots':run.get('roots',[]),
               'itemCount':len(state.get('items',[])),
-              'transport':'playwright-direct-romania',
+              'transport':run.get('transport'),
           }
           js='window.PARTENER_DATA=window.PARTENER_DATA||{};\n'
           js+='window.PARTENER_DATA.mipeIngestion='+json.dumps(meta,ensure_ascii=False,separators=(',',':'))+';\n'
@@ -179,7 +196,7 @@ jobs:
               index=re.sub(r'(mipe-news-adapter\.js\?v=)[^"\']+',rf'\g<1>{version}',index)
               index_path.write_text(index,encoding='utf-8')
 
-          print(json.dumps({'status':'OK','directRoots':run['directSuccessCount'],'items':len(state.get('items',[]))},ensure_ascii=False,indent=2))
+          print(json.dumps({'status':'OK','directRoots':run['directSuccessCount'],'items':len(state.get('items',[])),'transport':run.get('transport')},ensure_ascii=False,indent=2))
           '@ | Set-Content -Encoding UTF8 .\normalize_mipe_ro.py
           & $env:PYTHON_EXE .\normalize_mipe_ro.py
 
