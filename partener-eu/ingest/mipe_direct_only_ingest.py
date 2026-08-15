@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import urllib.parse
+import xml.etree.ElementTree as ET
 
 import mipe_resilient_ingest as base
 
@@ -100,11 +101,81 @@ def preserve_only_directly_verified(item: dict) -> bool:
     )
 
 
+def bing_rss_discovery():
+    """Discovery-only fallback when the primary index adapter is unavailable.
+
+    Bing RSS bytes and snippets are never publishable evidence. They may only
+    contribute canonical URLs on the existing official allowlist. PDDS URLs are
+    deliberately excluded here because the PDDS tree must originate from the
+    explicit priority-seed crawl.
+    """
+    candidates = []
+    health = []
+    for query in base.DISCOVERY_QUERIES:
+        search_url = "https://www.bing.com/search?" + urllib.parse.urlencode({
+            "q": query,
+            "format": "rss",
+            "count": 20,
+        })
+        result = base.fetch(
+            search_url,
+            timeout=12,
+            attempts=1,
+            accept="application/rss+xml,application/xml,text/xml;q=0.9,*/*;q=0.5",
+        )
+        row = {
+            "query": query,
+            "ok": bool(result.get("ok")),
+            "transport": "bing-rss-discovery-only",
+            "error": result.get("error"),
+            "publicationPolicy": "discovery-only; canonical direct fetch required",
+            "pddsDiscoveryPolicy": "PDDS candidates must originate from the explicit priority seed crawl",
+            "discoveredOfficialUrlCount": 0,
+            "excludedPddsSearchCandidates": 0,
+        }
+        if not result.get("ok"):
+            health.append(row)
+            continue
+        try:
+            root = ET.fromstring(result["data"])
+            seen = set()
+            for item in root.findall(".//item"):
+                raw_url = base.clean_text(item.findtext("link"))
+                canonical = base.canonicalize(raw_url)
+                if not canonical or canonical in seen:
+                    continue
+                parsed = urllib.parse.urlparse(canonical)
+                if parsed.hostname == "mfe.gov.ro" and parsed.path.startswith("/pdds/"):
+                    row["excludedPddsSearchCandidates"] += 1
+                    continue
+                seen.add(canonical)
+                candidates.append({
+                    "url": canonical,
+                    "title_hint": base.clean_text(item.findtext("title")),
+                    "excerpt_hint": base.clean_text(item.findtext("description")),
+                    "discovery": "bing-rss-official-url",
+                })
+            row["discoveredOfficialUrlCount"] = len(seen)
+        except Exception as exc:
+            row["ok"] = False
+            row["error"] = f"rss_parse:{type(exc).__name__}:{exc}"
+        health.append(row)
+    return candidates, health
+
+
 _original_search_discovery = base.search_discovery
 
 
 def search_discovery_without_pdds():
     candidates, health = _original_search_discovery()
+    # Jina Search can reject unauthenticated requests. Fall back to a separate
+    # public web index so discovery remains useful while preserving the exact
+    # same canonical-direct publication boundary.
+    if not any(row.get("ok") for row in health):
+        fallback_candidates, fallback_health = bing_rss_discovery()
+        candidates.extend(fallback_candidates)
+        health.extend(fallback_health)
+
     filtered = []
     excluded_pdds = 0
     for candidate in candidates:
@@ -119,7 +190,7 @@ def search_discovery_without_pdds():
     for row in health:
         row["publicationPolicy"] = "discovery-only; canonical direct fetch required"
         row["pddsDiscoveryPolicy"] = "PDDS candidates must originate from the explicit priority seed crawl"
-        row["excludedPddsSearchCandidates"] = excluded_pdds
+        row["excludedPddsSearchCandidates"] = int(row.get("excludedPddsSearchCandidates") or 0) + excluded_pdds
     return filtered, health
 
 
