@@ -10,6 +10,7 @@ on:
       - 'partener-eu/ingest/mipe_direct_only_ingest.py'
       - 'partener-eu/ingest/mipe_resilient_ingest.py'
       - 'partener-eu/ingest/mipe_discovery_ingest.py'
+      - 'partener-eu/ingest/normalize_mipe_health.py'
       - 'partener-eu/ingest/build_mysmis_consultant_registry.py'
       - 'partener-eu/ops/test_mipe_resilient_ingest.py'
       - 'partener-eu/ingest/state/mipe_known_canonical_seeds.json'
@@ -44,10 +45,14 @@ jobs:
         run: |
           python -m py_compile partener-eu/ingest/mipe_resilient_ingest.py
           python -m py_compile partener-eu/ingest/mipe_direct_only_ingest.py
+          python -m py_compile partener-eu/ingest/normalize_mipe_health.py
           python partener-eu/ops/test_mipe_resilient_ingest.py
 
       - name: Ingest MIPE with direct canonical publication provenance only
         run: python partener-eu/ingest/mipe_direct_only_ingest.py
+
+      - name: Normalize priority source health fail-closed
+        run: python partener-eu/ingest/normalize_mipe_health.py
 
       - name: Build direct MySMIS evidence for Consultant Workspace
         run: python partener-eu/ingest/build_mysmis_consultant_registry.py
@@ -75,6 +80,13 @@ jobs:
               'DEGRADED_LAST_KNOWN_GOOD_PRESERVED',
               'SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED',
           }
+          run = state.get('lastRun', {})
+          if run.get('prioritySeedAvailable') is False or run.get('primaryOfficialRootAvailable') is False:
+              assert state.get('status') in {
+                  'DEGRADED_LAST_KNOWN_GOOD_PRESERVED',
+                  'SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED',
+              }, 'unavailable priority/primary MIPE source may not report OK'
+
           allowed_hosts = {
               'mfe.gov.ro', 'www.mfe.gov.ro',
               'fonduri-ue.gov.ro', 'www.fonduri-ue.gov.ro',
@@ -91,7 +103,7 @@ jobs:
               assert transport.startswith('direct'), (item.get('title'), transport)
               assert not any(marker in transport for marker in forbidden_transport_markers), transport
 
-          for row in state.get('lastRun', {}).get('roots', []):
+          for row in run.get('roots', []):
               if row.get('ok'):
                   transport = str(row.get('transport') or '')
                   assert transport.startswith('direct'), (row.get('target'), transport)
@@ -116,9 +128,11 @@ jobs:
 
           print(json.dumps({
               'status': state.get('status'),
-              'transportMode': state.get('lastRun', {}).get('transportMode'),
-              'currentVerifiedCount': state.get('lastRun', {}).get('currentVerifiedCount'),
-              'publishedItemCount': state.get('lastRun', {}).get('publishedItemCount'),
+              'transportMode': run.get('transportMode'),
+              'prioritySeedAvailable': run.get('prioritySeedAvailable'),
+              'primaryOfficialRootAvailable': run.get('primaryOfficialRootAvailable'),
+              'currentVerifiedCount': run.get('currentVerifiedCount'),
+              'publishedItemCount': run.get('publishedItemCount'),
               'mysmisStatus': mysmis.get('status'),
               'mysmisVisibleRows': mysmis.get('visibleRowCount'),
               'mysmisValidatedCalls': mysmis.get('validatedCallCount'),
