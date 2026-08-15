@@ -186,12 +186,12 @@ def main() -> int:
         "platforms": {
             "facebook": {
                 "status": "ready",
-                "mode": "direct_publish"
+                "mode": "direct_publish",
             },
             "instagram": {
                 "status": "ready",
                 "mode": "direct_publish",
-                "caption": instagram_copy(selected, slot)
+                "caption": instagram_copy(selected, slot),
             },
             "tiktok": {
                 "status": "hold",
@@ -200,16 +200,16 @@ def main() -> int:
                 "title": tiktok_title,
                 "description": tiktok_description,
                 "photo_url": f"https://valceaclar.ro/media/social/{filename}",
-                "privacy_level": null,
-                "disable_comment": false,
+                "privacy_level": None,
+                "disable_comment": False,
                 "consent": {
-                    "granted": false,
-                    "source": null,
-                    "granted_at": null,
-                    "actor": null
-                }
-            }
-        }
+                    "granted": False,
+                    "source": None,
+                    "granted_at": None,
+                    "actor": None,
+                },
+            },
+        },
     }
     outbox.setdefault("items", []).append(new_item)
     write(OUTBOX, outbox)
@@ -221,9 +221,9 @@ def main() -> int:
                 "platforms": {
                     "facebook": "ready",
                     "instagram": "ready",
-                    "tiktok": "hold_for_site_consent"
+                    "tiktok": "hold_for_site_consent",
                 },
-                "stories": [item.get("id") for item in selected]
+                "stories": [item.get("id") for item in selected],
             },
             ensure_ascii=False,
         )
