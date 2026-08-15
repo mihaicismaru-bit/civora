@@ -12,6 +12,7 @@ JS = ROOT / "partener-eu" / "web" / "decision-products.js"
 UI = ROOT / "partener-eu" / "web" / "decision-intelligence-v2.js"
 CSS = ROOT / "partener-eu" / "web" / "decision-intelligence-v2.css"
 P11 = ROOT / "partener-eu" / "web" / "p11-public-data.js"
+CRITICAL = {"status", "deadline", "beneficiaries", "eligibility", "grant", "budget", "scoring"}
 
 assert DATA.exists(), "decision_products.json missing"
 assert JS.exists(), "decision-products.js missing"
@@ -44,13 +45,28 @@ for dossier in dossiers:
     assert dossier.get("standfirst"), dossier.get("id")
     assert len(dossier.get("quickFacts") or []) >= 5, dossier.get("id")
     assert len(dossier.get("sections") or []) >= 9, dossier.get("id")
-    assert dossier.get("sources"), f"dossier without provenance: {dossier.get('id')}"
     quality = dossier.get("quality") or {}
     assert quality.get("failClosed") is True
     assert 0 <= quality.get("completeness", -1) <= 100
+
+    sources = dossier.get("sources") or []
+    verified = set(quality.get("verifiedFactClasses") or [])
+    blocked = set(quality.get("blockedFactClasses") or [])
+    if sources:
+        for source in sources:
+            assert source.get("url"), f"source without URL in {dossier.get('id')}"
+    else:
+        # A dossier may still exist as an explicit fail-closed shell when the
+        # public projection does not expose its evidence links. In that state
+        # no material fact may be presented as verified or actionable.
+        assert dossier.get("publicationState") != "PUBLISHABLE", f"publishable dossier without provenance: {dossier.get('id')}"
+        assert dossier.get("status") != "OPEN", f"OPEN dossier without provenance: {dossier.get('id')}"
+        assert not (verified & CRITICAL), f"verified material facts without provenance: {dossier.get('id')}"
+        assert blocked or quality.get("completeness", 100) == 0, f"unexplained provenance gap: {dossier.get('id')}"
+
     if dossier.get("status") == "OPEN":
-        verified = set(quality.get("verifiedFactClasses") or [])
         source_type = dossier.get("sourceType", "")
+        assert sources, f"OPEN dossier without sources: {dossier.get('id')}"
         assert "status" in verified or source_type.endswith("PROVISIONAL"), f"OPEN without status evidence: {dossier.get('id')}"
     for section in dossier.get("sections") or []:
         assert section.get("title")
