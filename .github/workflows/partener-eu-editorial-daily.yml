@@ -1,0 +1,91 @@
+name: PARTENER.EU Editorial Daily Products
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '35 4 * * *'
+  workflow_run:
+    workflows:
+      - 'PARTENER.EU Decision Products'
+    types: [completed]
+    branches: [main]
+  push:
+    branches: [main]
+    paths:
+      - 'partener-eu/ingest/build_daily_brief.py'
+      - 'partener-eu/ingest/build_people_policy.py'
+      - 'partener-eu/ingest/state/people_policy_registry.json'
+      - 'partener-eu/ingest/state/people_policy_seed.json'
+      - 'partener-eu/ops/test_editorial_automation.py'
+      - 'partener-eu/web/daily-brief.js'
+      - 'partener-eu/web/people-policy-v1.js'
+      - 'partener-eu/web/daily-brief.css'
+      - 'partener-eu/web/people-policy-v1.css'
+      - '.github/workflows/partener-eu-editorial-daily.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: partener-eu-editorial-daily
+  cancel-in-progress: true
+
+jobs:
+  build:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Generate daily briefing and decision-maker intelligence
+        run: |
+          python partener-eu/ingest/build_daily_brief.py
+          python partener-eu/ingest/build_people_policy.py
+
+      - name: Validate editorial automation contract
+        run: |
+          node --check partener-eu/web/daily-brief.js
+          node --check partener-eu/web/people-policy-v1.js
+          python partener-eu/ops/test_editorial_automation.py
+
+      - name: Persist generated editorial products
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp partener-eu/ingest/state/daily_brief.json /tmp/daily_brief.json
+          cp partener-eu/ingest/state/people_policy.json /tmp/people_policy.json
+          cp partener-eu/web/daily-brief-data.js /tmp/daily-brief-data.js
+          cp partener-eu/web/people-policy-data.js /tmp/people-policy-data.js
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/daily_brief.json partener-eu/ingest/state/daily_brief.json
+            cp /tmp/people_policy.json partener-eu/ingest/state/people_policy.json
+            cp /tmp/daily-brief-data.js partener-eu/web/daily-brief-data.js
+            cp /tmp/people-policy-data.js partener-eu/web/people-policy-data.js
+            git add \
+              partener-eu/ingest/state/daily_brief.json \
+              partener-eu/ingest/state/people_policy.json \
+              partener-eu/web/daily-brief-data.js \
+              partener-eu/web/people-policy-data.js
+            if git diff --cached --quiet; then
+              echo 'Editorial products already current.'
+              exit 0
+            fi
+            git commit -m 'Refresh daily briefing and decision-maker intelligence'
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1
