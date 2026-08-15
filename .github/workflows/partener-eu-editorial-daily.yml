@@ -66,6 +66,12 @@ jobs:
           cp partener-eu/ingest/state/people_policy.json /tmp/people_policy.json
           cp partener-eu/web/daily-brief-data.js /tmp/daily-brief-data.js
           cp partener-eu/web/people-policy-data.js /tmp/people-policy-data.js
+          python - <<'PY' > /tmp/editorial-version.txt
+          import json,re
+          from pathlib import Path
+          data=json.loads(Path('/tmp/daily_brief.json').read_text(encoding='utf-8'))
+          print(re.sub(r'\D','',data['asOf'])[:14])
+          PY
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           for attempt in 1 2 3 4 5; do
@@ -75,7 +81,20 @@ jobs:
             cp /tmp/people_policy.json partener-eu/ingest/state/people_policy.json
             cp /tmp/daily-brief-data.js partener-eu/web/daily-brief-data.js
             cp /tmp/people-policy-data.js partener-eu/web/people-policy-data.js
+            EDITORIAL_VERSION=$(cat /tmp/editorial-version.txt)
+            export EDITORIAL_VERSION
+            python - <<'PY'
+          import os,re
+          from pathlib import Path
+          path=Path('partener-eu/web/index.html')
+          text=path.read_text(encoding='utf-8')
+          v=os.environ['EDITORIAL_VERSION']
+          for name in ('daily-brief-data.js','people-policy-data.js'):
+              text=re.sub(rf'({re.escape(name)}\?v=)[^"\']+',rf'\g<1>{v}',text)
+          path.write_text(text,encoding='utf-8')
+          PY
             git add \
+              partener-eu/web/index.html \
               partener-eu/ingest/state/daily_brief.json \
               partener-eu/ingest/state/people_policy.json \
               partener-eu/web/daily-brief-data.js \
