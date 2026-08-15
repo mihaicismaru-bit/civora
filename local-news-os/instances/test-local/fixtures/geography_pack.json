@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "instance_id": "test-local",
+  "classification": "INSTANCE_SPECIFIC",
+  "country": "RO",
+  "primary_area": {
+    "type": "test",
+    "name": "Județ Test",
+    "aliases": ["Test County"]
+  },
+  "priority_settlements": [
+    {"name": "Oraș Test", "type": "town", "aliases": []},
+    {"name": "Comuna Test", "type": "commune", "aliases": []}
+  ],
+  "coverage_policy": {
+    "county_wide": false,
+    "priority_area_order": ["Oraș Test", "Comuna Test"],
+    "unknown_place_requires_resolution": true
+  }
+}
