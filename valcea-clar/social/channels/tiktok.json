@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "channel_id": "valcea-tiktok",
+  "instance_id": "valcea",
+  "platform": "tiktok",
+  "status": "active",
+  "audience_promise": "Actualizări locale scurte și clare despre Vâlcea, publicate numai din fapte verificate și media reală, fără reprezentări sintetice ale oamenilor sau locurilor.",
+  "editorial_mix": {
+    "priorities": [
+      "service_journalism",
+      "local_events",
+      "infrastructure",
+      "civic_updates",
+      "local_places",
+      "verified_breaking_updates"
+    ],
+    "exclusions": [
+      "unverified_accusations",
+      "rage_bait",
+      "fake_urgency",
+      "synthetic_real_person_imagery",
+      "verbatim_cross_posting",
+      "unconsented_direct_post"
+    ]
+  },
+  "native_formats": [
+    "single_photo",
+    "short"
+  ],
+  "cadence": {
+    "timezone": "Europe/Bucharest",
+    "max_posts_per_day": 6,
+    "min_spacing_minutes": 45,
+    "quiet_hours": {
+      "start": "23:00",
+      "end": "07:00",
+      "breaking_override": true
+    }
+  },
+  "fatigue": {
+    "same_story_cooldown_hours": 8,
+    "max_related_posts_24h": 3
+  },
+  "media_policy": {
+    "real_media_only": true,
+    "provenance_required": true,
+    "reuse_rights_required": true,
+    "synthetic_real_person_forbidden": true
+  },
+  "link_policy": {
+    "mode": "native_preferred",
+    "canonical_hosts": [
+      "valceaclar.ro",
+      "www.valceaclar.ro"
+    ]
+  },
+  "series": [
+    {
+      "series_id": "valcea-azi",
+      "promise": "Trei sau patru lucruri locale de știut, într-un format nativ și verificat."
+    },
+    {
+      "series_id": "ce-se-schimba",
+      "promise": "Consecința practică a unei decizii, lucrări sau schimbări locale."
+    }
+  ],
+  "approval_gates": {
+    "low_risk_auto": false,
+    "reputational_human": true,
+    "corrections_priority": true
+  },
+  "credentials_ref": "github-actions-secret:VALCEA_TIKTOK_ACCESS_TOKEN",
+  "publication_state": {
+    "outbox_path": "valcea-clar/social/facebook_outbox.json",
+    "state_path": "valcea-clar/social/tiktok_state.json",
+    "dedupe_by_id": true,
+    "last_known_good": true
+  },
+  "metrics": {
+    "observed_only": true,
+    "sources": [
+      "tiktok_content_posting_api"
+    ]
+  },
+  "zero_paid_dependency": true
+}
