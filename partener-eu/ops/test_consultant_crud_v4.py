@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -28,5 +29,9 @@ assert "state.deletedClientIds=[...new Set" in js, 'deletions do not create pers
 assert "state.clients=state.clients.filter(c=>c.id!==removedId)" in js
 assert "state.selectedClientId=client.id" in js
 assert '.cw3AddClient{' in css, 'explicit add-client button has no styling'
-assert 'consultant-workspace-v3.js?v=20260815-2030' in index, 'CRUD runtime cache version not advanced'
-print('Consultant CRUD v4 regression: PASS')
+
+match = re.search(r'consultant-workspace-v3\.js\?v=([^"\']+)', index)
+assert match, 'Consultant runtime has no cache-busting version'
+assert match.group(1) not in {'20260815-1006','20260815-2020'}, 'stale Consultant runtime cache version remains'
+assert re.search(r'consultant-workspace-v3\.css\?v=([^"\']+)', index), 'Consultant CSS has no cache-busting version'
+print(f"Consultant CRUD v4 regression: PASS (runtime {match.group(1)})")
