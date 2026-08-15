@@ -1,0 +1,64 @@
+name: PARTENER.EU MIPE Trusted Collector Probe
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/partener-eu-mipe-collector-probe.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: partener-eu-mipe-collector-probe
+  cancel-in-progress: true
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      COLLECTOR_PRIMARY: https://partener-mipe-collector-mihaicismaru-6634s-projects.vercel.app
+      COLLECTOR_DEPLOYMENT: https://partener-mipe-collector-afvts34jm-mihaicismaru-6634s-projects.vercel.app
+    steps:
+      - name: Resolve active collector endpoint
+        id: endpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          for BASE in "$COLLECTOR_PRIMARY" "$COLLECTOR_DEPLOYMENT"; do
+            echo "Probing $BASE"
+            if curl -fsS --connect-timeout 8 --max-time 20 "$BASE/" >/tmp/collector-health.html; then
+              echo "base=$BASE" >> "$GITHUB_OUTPUT"
+              echo "Collector root reachable at $BASE"
+              exit 0
+            fi
+          done
+          echo 'No collector endpoint is reachable.' >&2
+          exit 1
+
+      - name: Direct-fetch official MIPE seed through collector
+        shell: bash
+        env:
+          BASE: ${{ steps.endpoint.outputs.base }}
+        run: |
+          set -euo pipefail
+          URL=$(python - <<'PY'
+          import urllib.parse
+          print(urllib.parse.quote('https://mfe.gov.ro/pdds/despre-program-programare/', safe=''))
+          PY
+          )
+          curl -fsS --connect-timeout 8 --max-time 35 "$BASE/api/fetch?url=$URL" -o /tmp/collector.json
+          python - <<'PY'
+          import base64, hashlib, json
+          d=json.load(open('/tmp/collector.json',encoding='utf-8'))
+          assert d.get('schema')=='CIVORA_TRUSTED_DIRECT_COLLECTOR_V1', d
+          assert d.get('directOfficialFetch') is True, d
+          assert d.get('tlsValidated') is True, d
+          assert d.get('finalUrl','').startswith('https://mfe.gov.ro/'), d
+          body=base64.b64decode(d['bodyBase64'])
+          assert hashlib.sha256(body).hexdigest()==d['sha256']
+          assert len(body)==d['byteLength'] and len(body)>500
+          print(json.dumps({k:d.get(k) for k in ('finalUrl','upstreamStatus','contentType','fetchedAt','region','byteLength','sha256')},ensure_ascii=False,indent=2))
+          PY
