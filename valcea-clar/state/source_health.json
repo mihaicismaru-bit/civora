@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "observed_at": "2026-08-15T13:52:27.189263Z",
+  "observed_at": "2026-08-15T17:18:28.620196Z",
   "policy": "monitor-and-open-review-task-never-autopublish-material-facts",
   "sources": [
     {
@@ -19,7 +19,7 @@
       "final_url": "https://spartan.ro/contact/",
       "content_type": "text/html; charset=UTF-8",
       "bytes": 237187,
-      "raw_sha256": "10a21cd3f444f890a5af8fe105f7eeff4594bd34bd62ca09e0187c1437b04374",
+      "raw_sha256": "a01d63d4dd3d3e13a1633dd9fb7a1dfe1bced120176bec1ab55d4fd7564a8c2b",
       "semantic_sha256": "0c15ea4c924f4b526383c459fb57e96f1cfb2a7d10542e07d0f5913b56340e90",
       "semantic_bytes": 11373,
       "signals": {
@@ -418,15 +418,34 @@
         "delivery_hours"
       ],
       "material_fact_use": true,
-      "ok": false,
-      "health": "FAIL",
-      "error": "URLError: <urlopen error [Errno 111] Connection refused>",
+      "ok": true,
+      "http_status": 200,
+      "final_url": "https://gyrospetros.ro/contact/",
+      "content_type": "text/html; charset=UTF-8",
+      "bytes": 111672,
+      "raw_sha256": "53dde2c374bbf90449724aa929d7313ea112282409850ca81a47e041d0f1fdba",
+      "semantic_sha256": "ad09f0e77f327deba6ae0b5f37e303bef21f72e9b0da658fb5f816a9fd3999c0",
+      "semantic_bytes": 2000,
+      "signals": {
+        "title": "Contact - GyrosPetros.ro",
+        "canonical_url": "https://gyrospetros.ro/contact/",
+        "jsonld_blocks": 1,
+        "social_links": [
+          "https://www.facebook.com/petrosgyros"
+        ],
+        "menu_links": [
+          "https://gyrospetros.ro/categorie/meniu-de-pui-cryspy-si-aripioare/",
+          "https://gyrospetros.ro/meniu/"
+        ],
+        "robots_noindex": false
+      },
+      "attempts": 1,
       "semantic_hash_changed": false,
       "resolution_task_required": false,
-      "publish_material_fact_update": false,
-      "consecutive_failures": 3,
-      "last_known_semantic_sha256": "f9af7f318dfb15d89afcd46973c80dc9f22fd58a2522a7d423d6f5b327cb86b7",
-      "quarantined": true
+      "publish_material_fact_update": null,
+      "consecutive_failures": 0,
+      "health": "PASS",
+      "quarantined": false
     },
     {
       "id": "petros-official-terms",
@@ -440,15 +459,34 @@
         "brand_owner"
       ],
       "material_fact_use": true,
-      "ok": false,
-      "health": "FAIL",
-      "error": "URLError: <urlopen error [Errno 111] Connection refused>",
+      "ok": true,
+      "http_status": 200,
+      "final_url": "https://gyrospetros.ro/termeni-si-conditii/",
+      "content_type": "text/html; charset=UTF-8",
+      "bytes": 119419,
+      "raw_sha256": "1fb80e6e615893551b0f467f30fa81319e6561612e2fd212ebb1697dfa1e07de",
+      "semantic_sha256": "3d3b885d21709c15aa471e4bbec92c6cd27096ec23e7b1de983ff260e033283b",
+      "semantic_bytes": 16346,
+      "signals": {
+        "title": "Termeni si conditii - GyrosPetros.ro",
+        "canonical_url": "https://gyrospetros.ro/termeni-si-conditii/",
+        "jsonld_blocks": 1,
+        "social_links": [
+          "https://www.facebook.com/petrosgyros"
+        ],
+        "menu_links": [
+          "https://gyrospetros.ro/categorie/meniu-de-pui-cryspy-si-aripioare/",
+          "https://gyrospetros.ro/meniu/"
+        ],
+        "robots_noindex": false
+      },
+      "attempts": 1,
       "semantic_hash_changed": false,
       "resolution_task_required": false,
-      "publish_material_fact_update": false,
-      "consecutive_failures": 3,
-      "last_known_semantic_sha256": "3d3b885d21709c15aa471e4bbec92c6cd27096ec23e7b1de983ff260e033283b",
-      "quarantined": true
+      "publish_material_fact_update": null,
+      "consecutive_failures": 0,
+      "health": "PASS",
+      "quarantined": false
     },
     {
       "id": "petros-official-menu",
@@ -460,15 +498,35 @@
         "products"
       ],
       "material_fact_use": true,
-      "ok": false,
-      "health": "FAIL",
-      "error": "URLError: <urlopen error [Errno 111] Connection refused>",
+      "ok": true,
+      "http_status": 200,
+      "final_url": "https://gyrospetros.ro/meniu/",
+      "content_type": "text/html; charset=UTF-8",
+      "bytes": 108803,
+      "raw_sha256": "88badc0f99cb6b727e36448a02d6f5324ac741721820ac827243389369d95d23",
+      "semantic_sha256": "b2bc5d93f23a2e34791f0d1e57c3638b1bfbd28022674a5fd3cdfef9318d6a2b",
+      "semantic_bytes": 1666,
+      "signals": {
+        "title": "Meniu - GyrosPetros.ro",
+        "canonical_url": "https://gyrospetros.ro/meniu/",
+        "jsonld_blocks": 1,
+        "social_links": [
+          "https://www.facebook.com/petrosgyros"
+        ],
+        "menu_links": [
+          "https://gyrospetros.ro/categorie/meniu-de-pui-cryspy-si-aripioare/",
+          "https://gyrospetros.ro/meniu/",
+          "https://gyrospetros.ro/meniu/#lafka_mobile_menu_tab"
+        ],
+        "robots_noindex": false
+      },
+      "attempts": 1,
       "semantic_hash_changed": false,
       "resolution_task_required": false,
-      "publish_material_fact_update": false,
-      "consecutive_failures": 3,
-      "last_known_semantic_sha256": "b2bc5d93f23a2e34791f0d1e57c3638b1bfbd28022674a5fd3cdfef9318d6a2b",
-      "quarantined": true
+      "publish_material_fact_update": null,
+      "consecutive_failures": 0,
+      "health": "PASS",
+      "quarantined": false
     },
     {
       "id": "petros-mix-grill-price",
@@ -480,15 +538,34 @@
         "price"
       ],
       "material_fact_use": true,
-      "ok": false,
-      "health": "FAIL",
-      "error": "URLError: <urlopen error [Errno 111] Connection refused>",
+      "ok": true,
+      "http_status": 200,
+      "final_url": "https://gyrospetros.ro/categorie/mix-grill/",
+      "content_type": "text/html; charset=UTF-8",
+      "bytes": 108192,
+      "raw_sha256": "c041c8db7e22f54b4a31833049cf83df77f219f2d6d08c110fe80bb9e194f2de",
+      "semantic_sha256": "bcee8b08631a650a3b8485dd92097a91c3d912e86b1f5d282ac514f2126c5a36",
+      "semantic_bytes": 1765,
+      "signals": {
+        "title": "Mix grill: Comanda online | Takeaway - GyrosPetros.ro",
+        "canonical_url": "https://gyrospetros.ro/categorie/mix-grill/",
+        "jsonld_blocks": 2,
+        "social_links": [
+          "https://www.facebook.com/petrosgyros"
+        ],
+        "menu_links": [
+          "https://gyrospetros.ro/categorie/meniu-de-pui-cryspy-si-aripioare/",
+          "https://gyrospetros.ro/meniu/"
+        ],
+        "robots_noindex": false
+      },
+      "attempts": 1,
       "semantic_hash_changed": false,
       "resolution_task_required": false,
-      "publish_material_fact_update": false,
-      "consecutive_failures": 3,
-      "last_known_semantic_sha256": "bcee8b08631a650a3b8485dd92097a91c3d912e86b1f5d282ac514f2126c5a36",
-      "quarantined": true
+      "publish_material_fact_update": null,
+      "consecutive_failures": 0,
+      "health": "PASS",
+      "quarantined": false
     },
     {
       "id": "petros-pita-club-price",
@@ -500,15 +577,34 @@
         "price"
       ],
       "material_fact_use": true,
-      "ok": false,
-      "health": "FAIL",
-      "error": "URLError: <urlopen error [Errno 111] Connection refused>",
+      "ok": true,
+      "http_status": 200,
+      "final_url": "https://gyrospetros.ro/categorie/pita/pita-club/",
+      "content_type": "text/html; charset=UTF-8",
+      "bytes": 113305,
+      "raw_sha256": "fae3df77e4902c1dbf332d9798910767516440128ff69902f27a4bd9d1229bb4",
+      "semantic_sha256": "dc6300f0e0c86ce850bbb56fa970c646d39ccde139cbcf90e0dee9cefb34264c",
+      "semantic_bytes": 1950,
+      "signals": {
+        "title": "Pita/Shaorma Club - GyrosPetros.ro",
+        "canonical_url": "https://gyrospetros.ro/categorie/pita/pita-club/",
+        "jsonld_blocks": 2,
+        "social_links": [
+          "https://www.facebook.com/petrosgyros"
+        ],
+        "menu_links": [
+          "https://gyrospetros.ro/categorie/meniu-de-pui-cryspy-si-aripioare/",
+          "https://gyrospetros.ro/meniu/"
+        ],
+        "robots_noindex": false
+      },
+      "attempts": 1,
       "semantic_hash_changed": false,
       "resolution_task_required": false,
-      "publish_material_fact_update": false,
-      "consecutive_failures": 3,
-      "last_known_semantic_sha256": "dc6300f0e0c86ce850bbb56fa970c646d39ccde139cbcf90e0dee9cefb34264c",
-      "quarantined": true
+      "publish_material_fact_update": null,
+      "consecutive_failures": 0,
+      "health": "PASS",
+      "quarantined": false
     },
     {
       "id": "petros-home-prices",
@@ -520,15 +616,35 @@
         "price"
       ],
       "material_fact_use": true,
-      "ok": false,
-      "health": "FAIL",
-      "error": "URLError: <urlopen error [Errno 111] Connection refused>",
+      "ok": true,
+      "http_status": 200,
+      "final_url": "https://gyrospetros.ro/",
+      "content_type": "text/html; charset=UTF-8",
+      "bytes": 184192,
+      "raw_sha256": "db1fb954cb68b001d6d04809d380313ae269cd8e3754becee1838b624e611fd5",
+      "semantic_sha256": "6b14feff7873a482930f35db29dc6b8289959d70b88db31a4a376a04f82e5adb",
+      "semantic_bytes": 4693,
+      "signals": {
+        "title": "GyrosPetros.ro - Petros Gyros & Grill",
+        "canonical_url": "https://gyrospetros.ro",
+        "jsonld_blocks": 1,
+        "social_links": [
+          "https://www.facebook.com/petrosgyros"
+        ],
+        "menu_links": [
+          "https://gyrospetros.ro/categorie/meniu-de-pui-cryspy-si-aripioare/",
+          "https://gyrospetros.ro/meniu/",
+          "https://gyrospetros.ro/produs/meniu-ozn-burger-cartofi-prajiti/"
+        ],
+        "robots_noindex": false
+      },
+      "attempts": 1,
       "semantic_hash_changed": false,
       "resolution_task_required": false,
-      "publish_material_fact_update": false,
-      "consecutive_failures": 3,
-      "last_known_semantic_sha256": "6b14feff7873a482930f35db29dc6b8289959d70b88db31a4a376a04f82e5adb",
-      "quarantined": true
+      "publish_material_fact_update": null,
+      "consecutive_failures": 0,
+      "health": "PASS",
+      "quarantined": false
     },
     {
       "id": "manarola-official-restaurant",
@@ -586,9 +702,9 @@
       "http_status": 200,
       "final_url": "https://www.ramadavalcea.ro/contact/",
       "content_type": "text/html; charset=UTF-8",
-      "bytes": 311284,
-      "raw_sha256": "98ee2e2f3141092cdee7751f71a7700b58863ba71b3536d28654799da5362bc4",
-      "semantic_sha256": "1f46f22c27e0d498d884ce8d7be17047f195e5466701a53469d621929ca0e91e",
+      "bytes": 311083,
+      "raw_sha256": "aed52441a1f26317f3665a8db77f11fbd5bb7300da5debe373a41be689937357",
+      "semantic_sha256": "5a9a922f84910882c72ba1036d5b6a751a71eb2771e85cd55258e2a0ec5c3f96",
       "semantic_bytes": 5895,
       "signals": {
         "title": "Contact - Ramada by Wyndham Ramnicu Valcea",
@@ -622,32 +738,14 @@
         "candidate_social_links"
       ],
       "material_fact_use": false,
-      "ok": true,
-      "http_status": 200,
-      "final_url": "https://valcea.ro/ro/regiuni/ramnicu-valcea/mancare-si-bautura/restaurant-bulevard",
-      "content_type": "text/html; charset=utf-8",
-      "bytes": 35794,
-      "raw_sha256": "66ccb3cf1ddf45fedd47e6ad703ebb15cd1cc2bddd2c69da4b1b4c41ed8ddba6",
-      "semantic_sha256": "20fff5628fbc4a53ae282ff59610869ca2963bff03cd4ecc9d83b178d0662a8f",
-      "semantic_bytes": 472,
-      "signals": {
-        "title": "Valcea - Restaurante, Cazari, Activitati si Afaceri Locale",
-        "canonical_url": null,
-        "jsonld_blocks": 0,
-        "social_links": [
-          "https://www.facebook.com/RevistaValcea.ro",
-          "https://www.instagram.com/valcearo",
-          "https://www.tiktok.com/@valcea.ro"
-        ],
-        "menu_links": [],
-        "robots_noindex": false
-      },
-      "attempts": 1,
+      "ok": false,
+      "health": "DEGRADED",
+      "error": "URLError: <urlopen error timed out>",
       "semantic_hash_changed": false,
       "resolution_task_required": false,
-      "publish_material_fact_update": null,
-      "consecutive_failures": 0,
-      "health": "PASS",
+      "publish_material_fact_update": false,
+      "consecutive_failures": 1,
+      "last_known_semantic_sha256": "20fff5628fbc4a53ae282ff59610869ca2963bff03cd4ecc9d83b178d0662a8f",
       "quarantined": false
     },
     {
@@ -665,7 +763,7 @@
       "semantic_hash_changed": false,
       "resolution_task_required": false,
       "publish_material_fact_update": false,
-      "consecutive_failures": 11,
+      "consecutive_failures": 12,
       "last_known_semantic_sha256": null,
       "quarantined": true
     },
@@ -683,7 +781,7 @@
       "final_url": "https://vinolavalcea.ro/restaurant/queens-pub-restaurant/",
       "content_type": "text/html; charset=UTF-8",
       "bytes": 92752,
-      "raw_sha256": "a7ab1edbc3028bc07452e80b53cd172f2e97e7c467186432547540eda262d4ad",
+      "raw_sha256": "d4777ba6255fa3409bcef86b9811c7ce701ea6a0e0875c76675adcddca0fdd30",
       "semantic_sha256": "d6ed3062cc520144ba2955fa1ee7da222a64e5ef23c113a55c816ed92916258a",
       "semantic_bytes": 2132,
       "signals": {
@@ -709,13 +807,13 @@
   ],
   "summary": {
     "total": 20,
-    "pass": 13,
-    "degraded": 0,
-    "fail": 7,
+    "pass": 18,
+    "degraded": 1,
+    "fail": 1,
     "changed": 1,
-    "quarantined": 7,
+    "quarantined": 1,
     "resolution_tasks_required": 1,
-    "sources_with_social_links": 11,
-    "sources_with_menu_links": 10
+    "sources_with_social_links": 16,
+    "sources_with_menu_links": 16
   }
 }
