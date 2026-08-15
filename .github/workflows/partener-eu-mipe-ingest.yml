@@ -11,6 +11,7 @@ on:
       - 'partener-eu/ingest/mipe_discovery_ingest.py'
       - 'partener-eu/ops/fix_mipe_resilient_classifier.py'
       - 'partener-eu/ops/fix_mipe_resilient_runtime.py'
+      - 'partener-eu/ops/fix_mipe_content_quality.py'
       - 'partener-eu/ops/test_mipe_resilient_ingest.py'
       - 'partener-eu/ingest/state/mipe_known_canonical_seeds.json'
       - 'partener-eu/ingest/state/mipe_discovery_sources.json'
@@ -40,10 +41,11 @@ jobs:
       - name: Discover official canonical MIPE URLs
         run: python partener-eu/ingest/mipe_discovery_ingest.py
 
-      - name: Apply idempotent classifier and bounded-runtime fixes
+      - name: Apply idempotent classifier, runtime and editorial-quality fixes
         run: |
           python partener-eu/ops/fix_mipe_resilient_classifier.py
           python partener-eu/ops/fix_mipe_resilient_runtime.py
+          python partener-eu/ops/fix_mipe_content_quality.py
 
       - name: Offline policy and parser regression
         run: python partener-eu/ops/test_mipe_resilient_ingest.py
@@ -78,11 +80,19 @@ jobs:
               'mfe.gov.ro', 'fonduri-ue.gov.ro', 'fonduri-ue.ro',
               'oportunitati-ue.gov.ro', 'reporting.mysmis2021.gov.ro'
           )
+          boilerplate = (
+              'skip to main content', 'adaugă ca sursă preferată',
+              'bine ați venit pe site', 'blob:http://localhost'
+          )
           for item in state.get('items', []):
               assert item.get('url', '').startswith('https://')
               assert any(host in item['url'] for host in allowed), item['url']
               assert item.get('title')
               assert item.get('retrievalTransport')
+              if item.get('source') != 'MIPE / MySMIS':
+                  assert item.get('decisionUseful') is True, item.get('title')
+                  summary = item.get('summary', '').lower()
+                  assert not any(marker in summary for marker in boilerplate), item.get('title')
           text = feed_path.read_text(encoding='utf-8')
           assert 'window.PARTENER_DATA.mipeIngestion=' in text
           assert 'window.PARTENER_DATA.mipeNews=' in text
@@ -149,7 +159,7 @@ jobs:
               exit 0
             fi
 
-            git commit -m 'Ingest verified MIPE updates through bounded resilient transport'
+            git commit -m 'Ingest verified decision-useful MIPE updates'
             if git push origin HEAD:main; then
               echo 'MIPE outputs persisted to main.'
               exit 0
