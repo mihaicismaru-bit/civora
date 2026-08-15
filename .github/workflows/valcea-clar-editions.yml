@@ -15,7 +15,8 @@ on:
       - "valcea-clar/ops/autonomous-edition-trigger.json"
   schedule:
     # Run both UTC candidates for Romanian DST. The local-time gate below keeps
-    # only 07:45 and 18:30 Europe/Bucharest.
+    # only the intended morning/evening window while tolerating normal GitHub
+    # Actions schedule delays.
     - cron: "45 4,5 * * *"
     - cron: "30 15,16 * * *"
 
@@ -59,10 +60,15 @@ jobs:
 
           hour=$(TZ=Europe/Bucharest date +%H)
           minute=$(TZ=Europe/Bucharest date +%M)
-          if [ "$hour" = "07" ] && [ "$minute" = "45" ]; then
+          now_minutes=$((10#$hour * 60 + 10#$minute))
+          # GitHub scheduled workflows are not guaranteed to start at the exact
+          # cron minute. Accept a bounded window around the desired local slot,
+          # while keeping the DST companion cron outside that window.
+          # Morning: 07:30-08:29. Evening: 18:15-19:14.
+          if [ "$now_minutes" -ge 450 ] && [ "$now_minutes" -le 509 ]; then
             echo "run_generation=true" >> "$GITHUB_OUTPUT"
             echo "slot=morning" >> "$GITHUB_OUTPUT"
-          elif [ "$hour" = "18" ] && [ "$minute" = "30" ]; then
+          elif [ "$now_minutes" -ge 1095 ] && [ "$now_minutes" -le 1154 ]; then
             echo "run_generation=true" >> "$GITHUB_OUTPUT"
             echo "slot=evening" >> "$GITHUB_OUTPUT"
           else
