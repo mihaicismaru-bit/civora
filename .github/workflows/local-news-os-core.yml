@@ -32,7 +32,8 @@ jobs:
           python -m py_compile \
             local-news-os/core/validate_instance_config.py \
             local-news-os/core/build_instance_manifest.py \
-            local-news-os/core/resolve_source_pack.py
+            local-news-os/core/resolve_source_pack.py \
+            local-news-os/core/discover_primary_source_facts.py
       - name: Validate production and test instances
         run: python local-news-os/core/validate_instance_config.py
       - name: Assert fixture packs are isolated
@@ -60,6 +61,11 @@ jobs:
           python local-news-os/core/resolve_source_pack.py test-local --output /tmp/test-local-sources.json
           cat /tmp/valcea-sources.json
           cat /tmp/test-local-sources.json
+      - name: Validate instance-aware discovery migration adapter
+        run: |
+          python local-news-os/core/discover_primary_source_facts.py --self-test
+          python local-news-os/core/discover_primary_source_facts.py --instance valcea --validate-only
+          python local-news-os/core/discover_primary_source_facts.py --instance test-local --validate-only
       - name: Prove runtime, identity and source isolation
         shell: bash
         run: |
