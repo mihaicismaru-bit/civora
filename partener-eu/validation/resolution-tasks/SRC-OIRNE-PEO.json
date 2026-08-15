@@ -1,14 +1,19 @@
 {
-  "schema_version": "1.1",
-  "type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
-  "source_id": "SRC-OIRNE-PEO",
-  "source_tier": "T1B",
+  "source_name": "official_intermediate_body",
   "source_url": "https://www.fsenordest.ro/contact_program.html",
-  "status": "OPEN",
+  "source_tier": "T1B",
+  "previous_semantic_sha256": "db3798a102892bba246a0688e93f76f86694c2bf10aa46684746c2c5d27ded8d",
+  "candidate_semantic_sha256": "eea7effafee0befae91d8d631650e54c14a70788e6e2b439d8bcb745c926e99b",
+  "current_semantic_sha256": "eea7effafee0befae91d8d631650e54c14a70788e6e2b439d8bcb745c926e99b",
   "first_observed_at": "2026-08-12T05:24:02.872428Z",
   "last_observed_at": "2026-08-15T03:09:36.667046Z",
-  "previous_semantic_sha256": "db3798a102892bba246a0688e93f76f86694c2bf10aa46684746c2c5d27ded8d",
-  "current_semantic_sha256": "eea7effafee0befae91d8d631650e54c14a70788e6e2b439d8bcb745c926e99b",
+  "registry_class": "official_intermediate_body",
+  "schema_version": "1.2",
+  "task_type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
+  "source_id": "SRC-OIRNE-PEO",
+  "status": "OPEN",
+  "policy": "Do not automatically change deadline, eligibility, budget, scoring, beneficiaries, call status, or any other material fact. Resolve only from authoritative evidence and record provenance before publication.",
+  "automatic_material_fact_update_allowed": false,
   "material_fact_autoupdate_allowed": false,
   "blocked_fact_classes": [
     "deadline",
@@ -18,6 +23,5 @@
     "beneficiaries",
     "material_call_status",
     "other_material_facts"
-  ],
-  "required_resolution": "Re-establish authoritative evidence and provenance before any material fact update."
+  ]
 }
