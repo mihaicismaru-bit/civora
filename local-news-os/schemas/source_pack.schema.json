@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local-news-os.invalid/schemas/source_pack.schema.json",
+  "title": "LOCAL NEWS OS Source Pack",
+  "type": "object",
+  "required": ["schema_version", "instance_id"],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "instance_id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "classification": {"type": "string"},
+    "mode": {"enum": ["inline", "compatibility_registry"]},
+    "registry_path": {"type": "string"},
+    "registry_schema_version": {"type": "string"},
+    "migration_policy": {"type": "object"},
+    "coverage_categories": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "automatic_publication_scope": {"type": "string"},
+    "material_detail_autopublish": {"type": "boolean"},
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "category", "url", "source_tier", "enabled"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "name": {"type": "string", "minLength": 1},
+          "category": {"type": "string", "minLength": 1},
+          "url": {"type": "string", "pattern": "^https://"},
+          "source_tier": {"type": "string", "minLength": 1},
+          "enabled": {"type": "boolean"}
+        }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "properties": {"mode": {"const": "compatibility_registry"}},
+      "required": ["mode", "registry_path"]
+    },
+    {
+      "anyOf": [
+        {"properties": {"mode": {"const": "inline"}}, "required": ["mode", "sources"]},
+        {"required": ["sources"]}
+      ]
+    }
+  ]
+}
