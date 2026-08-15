@@ -354,10 +354,13 @@ def classify_kind(title: str, body: str) -> str:
         return "GUIDE_MODIFIED"
     if "consultare" in text and ("ghid" in text or "apel" in text):
         return "CONSULTATION_OPENED"
-    if "ghid" in text and any(token in text for token in ("publicat", "aprobat", "final", "lansat")):
-        return "GUIDE_PUBLISHED"
+    # An explicit call launch outranks generic mentions of a guide. Launch
+    # pages commonly link the guide and would otherwise be misclassified as a
+    # guide publication merely because both words appear in the same page.
     if any(token in text for token in ("apelul este deschis", "apel deschis", "lansarea apelului", "s-a lansat apelul", "se lansează apelul", "se lanseaza apelul")):
         return "CALL_OPENED"
+    if "ghid" in text and any(token in text for token in ("publicat", "aprobat", "final", "lansat")):
+        return "GUIDE_PUBLISHED"
     if "rezultat" in text or "lista proiectelor" in text:
         return "RESULTS_PUBLISHED"
     return "OFFICIAL_UPDATE"
