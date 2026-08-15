@@ -1,42 +1,43 @@
 {
-  "schema_version": "1.5",
-  "observed_at": "2026-08-15T11:56:15Z",
+  "schema_version": "1.6",
+  "observed_at": "2026-08-15T11:58:26Z",
   "status": "FAIL",
-  "public_content_verified": false,
-  "https_verified": false,
+  "public_content_verified": true,
+  "https_verified": true,
   "secure_transport_verified": false,
   "http_redirects_to_https": false,
   "pages_https_preserved": false,
-  "http_content_verified": false,
+  "http_content_verified": true,
   "https_closure_gate": "PENDING_HTTPS_ENFORCEMENT_AND_SECURE_REDIRECTS",
-  "content_origin": null,
+  "content_origin": "custom_https",
   "old_origin_detected": false,
   "endpoints": [
     {
       "id": "custom_https",
       "url": "https://partener.eu/",
-      "requested_url": "https://partener.eu/?p10_probe=20260815T115615Z",
-      "ok": false,
-      "content_verified": false,
+      "requested_url": "https://partener.eu/?p10_probe=20260815T115826Z",
+      "ok": true,
+      "content_verified": true,
       "http_status": 200,
-      "final_url": "https://partener.eu/?p10_probe=20260815T115615Z",
+      "final_url": "https://partener.eu/?p10_probe=20260815T115826Z",
       "final_scheme": "https",
       "redirect_chain": [],
       "content_type": "text/html; charset=utf-8",
-      "bytes": 4004,
-      "body_sha256": "a53755495e976259aa4cec90d8676958e373301f49da09ba350ff52a0c7d806c",
+      "bytes": 4081,
+      "body_sha256": "64032c6b566c1eb96d2590dd9deeed3c4e3ca7c0233fe9866470159a76316b8a",
       "title": "PARTENER.EU — Finanțări europene explicate simplu",
       "markers": {
         "brand": true,
         "boot_fallback": true,
         "hero": true,
-        "product_definition": false,
+        "product_definition": true,
         "critical_data_ref": true,
         "critical_app_ref": true,
         "decision_data_ref": true,
-        "decision_ui_ref": true
+        "decision_ui_ref": true,
+        "novice_ui_ref": true
       },
-      "marker_ok": false,
+      "marker_ok": true,
       "legacy_origin_detected": false,
       "critical_assets_ok": true,
       "assets": {
@@ -66,7 +67,7 @@
           "http_status": 200,
           "final_url": "https://partener.eu/decision-products.js?v=20260815-1340",
           "bytes": 284731,
-          "sha256": "70d0c1d2549b1bcb30d5496bc6954cb3f47cb8410ac8a9ea66e3b97ef6401419",
+          "sha256": "c4b631cfba4b1b87dc3ce76a741e60a03daf457269af9173ab6c879473d9fa4f",
           "error": null,
           "expected_marker_found": true
         },
@@ -79,6 +80,16 @@
           "sha256": "e60029f65009b344cb7a22ca96326c1a7925a5538fbf41277a8ddd90d89e60ee",
           "error": null,
           "expected_marker_found": true
+        },
+        "home-novice-v1.js": {
+          "url": "https://partener.eu/home-novice-v1.js?v=20260815-1454",
+          "ok": true,
+          "http_status": 200,
+          "final_url": "https://partener.eu/home-novice-v1.js?v=20260815-1454",
+          "bytes": 7762,
+          "sha256": "0a4d2802513748c38504e993b3e38ab946ac97dc568ef7a8287982f54b301b63",
+          "error": null,
+          "expected_marker_found": true
         }
       },
       "error": null
@@ -86,28 +97,29 @@
     {
       "id": "custom_http",
       "url": "http://partener.eu/",
-      "requested_url": "http://partener.eu/?p10_probe=20260815T115615Z",
-      "ok": false,
-      "content_verified": false,
+      "requested_url": "http://partener.eu/?p10_probe=20260815T115826Z",
+      "ok": true,
+      "content_verified": true,
       "http_status": 200,
-      "final_url": "http://partener.eu/?p10_probe=20260815T115615Z",
+      "final_url": "http://partener.eu/?p10_probe=20260815T115826Z",
       "final_scheme": "http",
       "redirect_chain": [],
       "content_type": "text/html; charset=utf-8",
-      "bytes": 4004,
-      "body_sha256": "a53755495e976259aa4cec90d8676958e373301f49da09ba350ff52a0c7d806c",
+      "bytes": 4081,
+      "body_sha256": "64032c6b566c1eb96d2590dd9deeed3c4e3ca7c0233fe9866470159a76316b8a",
       "title": "PARTENER.EU — Finanțări europene explicate simplu",
       "markers": {
         "brand": true,
         "boot_fallback": true,
         "hero": true,
-        "product_definition": false,
+        "product_definition": true,
         "critical_data_ref": true,
         "critical_app_ref": true,
         "decision_data_ref": true,
-        "decision_ui_ref": true
+        "decision_ui_ref": true,
+        "novice_ui_ref": true
       },
-      "marker_ok": false,
+      "marker_ok": true,
       "legacy_origin_detected": false,
       "critical_assets_ok": true,
       "assets": {
@@ -137,7 +149,7 @@
           "http_status": 200,
           "final_url": "http://partener.eu/decision-products.js?v=20260815-1340",
           "bytes": 284731,
-          "sha256": "70d0c1d2549b1bcb30d5496bc6954cb3f47cb8410ac8a9ea66e3b97ef6401419",
+          "sha256": "c4b631cfba4b1b87dc3ce76a741e60a03daf457269af9173ab6c879473d9fa4f",
           "error": null,
           "expected_marker_found": true
         },
@@ -148,6 +160,16 @@
           "final_url": "http://partener.eu/decision-intelligence-v2.js?v=20260815-1340",
           "bytes": 18403,
           "sha256": "e60029f65009b344cb7a22ca96326c1a7925a5538fbf41277a8ddd90d89e60ee",
+          "error": null,
+          "expected_marker_found": true
+        },
+        "home-novice-v1.js": {
+          "url": "http://partener.eu/home-novice-v1.js?v=20260815-1454",
+          "ok": true,
+          "http_status": 200,
+          "final_url": "http://partener.eu/home-novice-v1.js?v=20260815-1454",
+          "bytes": 7762,
+          "sha256": "0a4d2802513748c38504e993b3e38ab946ac97dc568ef7a8287982f54b301b63",
           "error": null,
           "expected_marker_found": true
         }
@@ -157,34 +179,35 @@
     {
       "id": "pages_origin",
       "url": "https://mihaicismaru-bit.github.io/civora/",
-      "requested_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260815T115615Z",
-      "ok": false,
-      "content_verified": false,
+      "requested_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260815T115826Z",
+      "ok": true,
+      "content_verified": true,
       "http_status": 200,
-      "final_url": "http://partener.eu/?p10_probe=20260815T115615Z",
+      "final_url": "http://partener.eu/?p10_probe=20260815T115826Z",
       "final_scheme": "http",
       "redirect_chain": [
         {
           "http_status": 301,
-          "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260815T115615Z",
-          "to_url": "http://partener.eu/?p10_probe=20260815T115615Z"
+          "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260815T115826Z",
+          "to_url": "http://partener.eu/?p10_probe=20260815T115826Z"
         }
       ],
       "content_type": "text/html; charset=utf-8",
-      "bytes": 4004,
-      "body_sha256": "a53755495e976259aa4cec90d8676958e373301f49da09ba350ff52a0c7d806c",
+      "bytes": 4081,
+      "body_sha256": "64032c6b566c1eb96d2590dd9deeed3c4e3ca7c0233fe9866470159a76316b8a",
       "title": "PARTENER.EU — Finanțări europene explicate simplu",
       "markers": {
         "brand": true,
         "boot_fallback": true,
         "hero": true,
-        "product_definition": false,
+        "product_definition": true,
         "critical_data_ref": true,
         "critical_app_ref": true,
         "decision_data_ref": true,
-        "decision_ui_ref": true
+        "decision_ui_ref": true,
+        "novice_ui_ref": true
       },
-      "marker_ok": false,
+      "marker_ok": true,
       "legacy_origin_detected": false,
       "critical_assets_ok": true,
       "assets": {
@@ -214,7 +237,7 @@
           "http_status": 200,
           "final_url": "http://partener.eu/decision-products.js?v=20260815-1340",
           "bytes": 284731,
-          "sha256": "70d0c1d2549b1bcb30d5496bc6954cb3f47cb8410ac8a9ea66e3b97ef6401419",
+          "sha256": "c4b631cfba4b1b87dc3ce76a741e60a03daf457269af9173ab6c879473d9fa4f",
           "error": null,
           "expected_marker_found": true
         },
@@ -227,6 +250,16 @@
           "sha256": "e60029f65009b344cb7a22ca96326c1a7925a5538fbf41277a8ddd90d89e60ee",
           "error": null,
           "expected_marker_found": true
+        },
+        "home-novice-v1.js": {
+          "url": "http://partener.eu/home-novice-v1.js?v=20260815-1454",
+          "ok": true,
+          "http_status": 200,
+          "final_url": "http://partener.eu/home-novice-v1.js?v=20260815-1454",
+          "bytes": 7762,
+          "sha256": "0a4d2802513748c38504e993b3e38ab946ac97dc568ef7a8287982f54b301b63",
+          "error": null,
+          "expected_marker_found": true
         }
       },
       "error": null
@@ -234,22 +267,23 @@
   ],
   "url": "https://partener.eu/",
   "http_status": 200,
-  "marker_ok": false,
+  "marker_ok": true,
   "markers": {
     "brand": true,
     "boot_fallback": true,
     "hero": true,
-    "product_definition": false,
+    "product_definition": true,
     "critical_data_ref": true,
     "critical_app_ref": true,
     "decision_data_ref": true,
-    "decision_ui_ref": true
+    "decision_ui_ref": true,
+    "novice_ui_ref": true
   },
-  "final_url": "https://partener.eu/?p10_probe=20260815T115615Z",
+  "final_url": "https://partener.eu/?p10_probe=20260815T115826Z",
   "content_type": "text/html; charset=utf-8",
-  "bytes": 4004,
-  "body_sha256": "a53755495e976259aa4cec90d8676958e373301f49da09ba350ff52a0c7d806c",
+  "bytes": 4081,
+  "body_sha256": "64032c6b566c1eb96d2590dd9deeed3c4e3ca7c0233fe9866470159a76316b8a",
   "title": "PARTENER.EU — Finanțări europene explicate simplu",
   "critical_assets_ok": true,
-  "error": "custom_https: required content/assets missing; custom_http: required content/assets missing; pages_origin: required content/assets missing"
+  "error": "public content is current, but HTTP/Pages transport is not fully HTTPS-closed"
 }
