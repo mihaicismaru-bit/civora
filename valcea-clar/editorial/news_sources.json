@@ -1,12 +1,13 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "policy": {
     "purpose": "Discover fresh local-news candidates from primary institutional sources without using an LLM.",
     "automatic_publication_scope": "title_date_source_only",
     "detail_autopublish": false,
     "candidate_max_age_hours": 72,
     "min_title_chars": 24,
-    "max_candidates_per_source": 12
+    "max_candidates_per_source": 12,
+    "source_pack_scope": "VALCEA_SPECIFIC"
   },
   "sources": [
     {
@@ -32,12 +33,12 @@
     {
       "id": "cj-valcea-sedinte",
       "publisher": "Consiliul Județean Vâlcea",
-      "url": "https://cjvalcea.ro/monitorul-oficial-local/alte-documente/anunturi-sedinte/",
+      "url": "https://cjvalcea.ro/sedinte-ale-consiliului-judetean/",
       "tier": "T1",
       "section": "ADMINISTRAȚIE",
       "priority": 87,
       "path_hints": ["sedint", "avn_sedinte_cj"],
-      "generic_titles": ["anunțuri ședințe"]
+      "generic_titles": ["ședințe ale consiliului județean", "anunțuri ședințe"]
     },
     {
       "id": "cj-valcea-hotarari-2026",
@@ -78,6 +79,26 @@
       "priority": 91,
       "path_hints": ["/ro/stiri", "stiri-si-media"],
       "generic_titles": ["știre de presă", "stiri", "știri"]
+    },
+    {
+      "id": "dsp-valcea-anunturi",
+      "publisher": "Direcția de Sănătate Publică Vâlcea",
+      "url": "https://www.aspjvalcea.ro/",
+      "tier": "T1",
+      "section": "SĂNĂTATE",
+      "priority": 83,
+      "path_hints": ["anunt", "campanie", "sanat", "program"],
+      "generic_titles": ["anunțuri", "direcția de sănătate publică vâlcea"]
+    },
+    {
+      "id": "ajofm-valcea-comunicate",
+      "publisher": "AJOFM Vâlcea",
+      "url": "https://www.anofm.ro/valcea/categorie/comunicate-de-presa/",
+      "tier": "T1",
+      "section": "ECONOMIE",
+      "priority": 79,
+      "path_hints": ["comunicat", "categorie/comunicate-de-presa", "locuri-de-munca", "somaj"],
+      "generic_titles": ["comunicate de presă", "citește mai mult"]
     },
     {
       "id": "scm-rm-valcea",
