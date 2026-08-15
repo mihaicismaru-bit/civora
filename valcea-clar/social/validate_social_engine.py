@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""Validate fail-closed ownership of the VÂLCEA CLAR social publication engine."""
-
+"""Validate fail-closed ownership of the VÂLCEA CLAR social engine."""
 from __future__ import annotations
 
 import argparse
@@ -9,7 +8,6 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
-
 
 FORBIDDEN_MARKERS = {
     "OPENAI_API_KEY": "OpenAI API secret",
@@ -52,7 +50,7 @@ def cron_declared(workflow_text: str, cron: str) -> bool:
 def validate(repo_root: Path) -> dict[str, Any]:
     social_root = repo_root / "valcea-clar" / "social"
     registry_path = social_root / "channel_registry.json"
-    automation_registry_path = repo_root / "valcea-clar" / "engine" / "automation_registry.json"
+    automation_path = repo_root / "valcea-clar" / "engine" / "automation_registry.json"
     errors: list[str] = []
     checks: list[dict[str, Any]] = []
 
@@ -67,7 +65,6 @@ def validate(repo_root: Path) -> dict[str, Any]:
     registry = load_json(registry_path)
     chatgpt = registry.get("chatgpt", {})
     policy = registry.get("policy", {})
-
     ownership = {
         "execution_owner": registry.get("execution_owner") == "civora_site_engine",
         "scheduler": registry.get("scheduler") == "github_actions",
@@ -81,6 +78,7 @@ def validate(repo_root: Path) -> dict[str, Any]:
         "paid_llm_api_not_required": policy.get("paid_llm_api_required") is False,
         "missing_credentials_fail_closed": policy.get("fail_closed_on_missing_credentials") is True,
         "missing_adapter_fail_closed": policy.get("fail_closed_on_missing_adapter") is True,
+        "legacy_items_stay_facebook_only": policy.get("legacy_items_without_platform_routing_are_facebook_only") is True,
     }
     for name, passed in ownership.items():
         checks.append({"check": name, "passed": passed})
@@ -102,13 +100,15 @@ def validate(repo_root: Path) -> dict[str, Any]:
         if "actions/checkout@" not in workflow_text:
             errors.append("Social workflow must check out the canonical repository")
         if "validate_social_engine.py" not in workflow_text:
-            errors.append("Social workflow does not execute the social ownership validator")
+            errors.append("Social workflow does not execute the ownership validator")
         cron = str(registry.get("cadence", {}).get("cron", "")).strip()
         if not cron or not cron_declared(workflow_text, cron):
             errors.append(f"Registered social cron is missing from workflow: {cron!r}")
+        if "github.event_name != 'pull_request'" not in workflow_text:
+            errors.append("Social workflow does not explicitly block publication in PRs")
 
-    if automation_registry_path.is_file():
-        automation = load_json(automation_registry_path)
+    if automation_path.is_file():
+        automation = load_json(automation_path)
         matching = [
             job
             for job in automation.get("jobs", [])
@@ -126,8 +126,15 @@ def validate(repo_root: Path) -> dict[str, Any]:
         errors.append("Social channel registry has no channels")
         channels = []
 
+    expected_active = registry.get("required_active_direct_channels", [])
+    if not isinstance(expected_active, list) or not expected_active:
+        errors.append("required_active_direct_channels must be a non-empty array")
+        expected_active = []
+    expected_active = [str(value) for value in expected_active]
+
     seen: set[str] = set()
     active: list[str] = []
+    scan_paths: list[Path] = [registry_path, workflow_path]
     for channel in channels:
         channel_id = str(channel.get("channel_id", "")).strip()
         if not channel_id or channel_id in seen:
@@ -138,6 +145,7 @@ def validate(repo_root: Path) -> dict[str, Any]:
         status = str(channel.get("status", "")).strip()
         direct = channel.get("direct_publication_enabled") is True
         adapter = channel.get("adapter")
+        config_rel = str(channel.get("config", "")).strip()
 
         if status == "active":
             active.append(channel_id)
@@ -147,10 +155,23 @@ def validate(repo_root: Path) -> dict[str, Any]:
                 errors.append(f"Active channel {channel_id} has no adapter")
                 continue
             adapter_path = repo_root / adapter
+            scan_paths.append(adapter_path)
             if not adapter_path.is_file():
                 errors.append(f"Active channel {channel_id} adapter is missing: {adapter}")
             elif social_root not in adapter_path.resolve().parents:
                 errors.append(f"Active channel {channel_id} adapter must live in valcea-clar/social")
+            elif adapter_path.name not in workflow_text:
+                errors.append(f"Social workflow does not execute {channel_id} adapter {adapter_path.name}")
+
+            if not config_rel:
+                errors.append(f"Active channel {channel_id} has no CHANNEL_CONFIG")
+            else:
+                config_path = repo_root / config_rel
+                scan_paths.append(config_path)
+                if not config_path.is_file():
+                    errors.append(f"Active channel {channel_id} config is missing: {config_rel}")
+                elif config_path.name not in workflow_text:
+                    errors.append(f"Social workflow does not validate {channel_id} config {config_path.name}")
 
             for field in ("outbox", "state"):
                 rel = str(channel.get(field, "")).strip()
@@ -162,10 +183,18 @@ def validate(repo_root: Path) -> dict[str, Any]:
                 errors.append(f"Active channel {channel_id} must reference runtime credentials")
             else:
                 for key, value in credentials.items():
-                    if key.endswith("secret") and not str(value).strip():
+                    text = str(value or "").strip()
+                    if key.endswith("secret") and not text:
                         errors.append(f"Active channel {channel_id} has an empty secret reference")
-                    if key.endswith("token") and value:
+                    if key.endswith("token") and text:
                         errors.append(f"Raw token field is forbidden for active channel {channel_id}")
+                    if any(marker in text.upper() for marker in ("BEARER ", "ACCESS_TOKEN=")):
+                        errors.append(f"Credential reference for {channel_id} appears to contain a raw token")
+
+            for prepare in channel.get("prepare", []):
+                rel = str(prepare).strip()
+                if not rel or not (repo_root / rel).is_file():
+                    errors.append(f"Active channel {channel_id} missing prepare step: {rel!r}")
         else:
             if direct:
                 errors.append(f"Inactive channel {channel_id} may not enable direct publication")
@@ -180,18 +209,17 @@ def validate(repo_root: Path) -> dict[str, Any]:
             }
         )
 
-    if active != ["facebook"]:
+    if active != expected_active:
         errors.append(
-            "Current verified direct-adapter set must be exactly ['facebook']; "
-            f"found {active!r}"
+            f"Active direct channels must be {expected_active!r}; found {active!r}"
+        )
+    if expected_active != ["facebook", "instagram", "tiktok"]:
+        errors.append(
+            "Current required direct-adapter set must be exactly "
+            "['facebook', 'instagram', 'tiktok']"
         )
 
-    scan_paths = [registry_path, workflow_path]
-    for channel in channels:
-        adapter = channel.get("adapter")
-        if isinstance(adapter, str) and adapter.strip():
-            scan_paths.append(repo_root / adapter)
-    for path in scan_paths:
+    for path in sorted(set(scan_paths)):
         if not path.is_file():
             continue
         text = path.read_text(encoding="utf-8", errors="replace")
@@ -217,19 +245,13 @@ def validate(repo_root: Path) -> dict[str, Any]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Validate that social publishing is owned only by the CIVORA site engine."
+        description="Validate that social publishing is owned only by CIVORA."
     )
     parser.add_argument("--repo-root", type=Path)
     parser.add_argument("--report", type=Path)
     args = parser.parse_args()
-
-    repo_root = (
-        args.repo_root.resolve()
-        if args.repo_root
-        else Path(__file__).resolve().parents[2]
-    )
+    repo_root = args.repo_root.resolve() if args.repo_root else Path(__file__).resolve().parents[2]
     report = validate(repo_root)
-
     if args.report:
         target = args.report if args.report.is_absolute() else repo_root / args.report
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -237,7 +259,6 @@ def main() -> int:
             json.dumps(report, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",
         )
-
     print(json.dumps(report, ensure_ascii=False, indent=2))
     return 0 if report["status"] == "PASS" else 1
 
