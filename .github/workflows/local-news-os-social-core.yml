@@ -39,11 +39,13 @@ jobs:
             local-news-os/social/hook_engine.py \
             local-news-os/social/format_engine.py \
             local-news-os/social/visual_router.py \
+            local-news-os/social/cadence_fatigue.py \
             local-news-os/social/test_channel_fit.py \
             local-news-os/social/test_content_atomizer.py \
             local-news-os/social/test_hook_engine.py \
             local-news-os/social/test_format_engine.py \
-            local-news-os/social/test_visual_router.py
+            local-news-os/social/test_visual_router.py \
+            local-news-os/social/test_cadence_fatigue.py
 
       - name: Run channel fit acceptance tests
         run: python local-news-os/social/test_channel_fit.py
@@ -59,6 +61,9 @@ jobs:
 
       - name: Run fail-closed Visual Router acceptance tests
         run: python local-news-os/social/test_visual_router.py
+
+      - name: Run Cadence/Fatigue acceptance tests
+        run: python local-news-os/social/test_cadence_fatigue.py
 
       - name: Validate Vâlcea reference CHANNEL_CONFIG fixtures
         run: |
