@@ -1,0 +1,37 @@
+name: PARTENER.EU Homepage QA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'partener-eu/web/index.html'
+      - 'partener-eu/web/home-novice-v1.js'
+      - 'partener-eu/web/home-novice-v1.css'
+      - 'partener-eu/web/decision-intelligence-v2.js'
+      - 'partener-eu/ops/test_home_novice.py'
+      - '.github/workflows/partener-eu-homepage-qa.yml'
+
+concurrency:
+  group: partener-eu-homepage-qa
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: node --check partener-eu/web/home-novice-v1.js
+      - name: First-time visitor contract
+        run: python partener-eu/ops/test_home_novice.py
