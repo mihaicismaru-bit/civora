@@ -1,0 +1,56 @@
+name: PARTENER.EU MIPE Direct Network Probe
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/partener-eu-mipe-network-probe.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: DNS and HTTP/TLS matrix
+        shell: bash
+        run: |
+          set +e
+          HOSTS=(mfe.gov.ro www.mfe.gov.ro fonduri-ue.gov.ro www.fonduri-ue.gov.ro oportunitati-ue.gov.ro www.oportunitati-ue.gov.ro reporting.mysmis2021.gov.ro)
+          for H in "${HOSTS[@]}"; do
+            echo "===== DNS $H ====="
+            getent ahosts "$H" | head -20
+          done
+          URLS=(
+            https://mfe.gov.ro/
+            https://www.mfe.gov.ro/
+            http://mfe.gov.ro/
+            https://fonduri-ue.gov.ro/
+            https://www.fonduri-ue.gov.ro/
+            https://oportunitati-ue.gov.ro/
+            https://www.oportunitati-ue.gov.ro/
+            https://reporting.mysmis2021.gov.ro/
+          )
+          for U in "${URLS[@]}"; do
+            echo "===== CURL $U ====="
+            curl --http1.1 -L -sS -o /tmp/body -D /tmp/headers --connect-timeout 6 --max-time 18 -w 'code=%{http_code} remote=%{remote_ip} ssl_verify=%{ssl_verify_result} final=%{url_effective} bytes=%{size_download}\n' "$U"
+            RC=$?
+            echo "rc=$RC"
+            sed -n '1,18p' /tmp/headers
+            head -c 180 /tmp/body | tr -cd '\11\12\15\40-\176' || true
+            echo
+          done
+          exit 0
+
+      - name: Inspect official certificate chains
+        shell: bash
+        run: |
+          set +e
+          for H in fonduri-ue.gov.ro oportunitati-ue.gov.ro mfe.gov.ro; do
+            echo "===== CERT $H ====="
+            timeout 18 openssl s_client -connect "$H:443" -servername "$H" -showcerts -verify_return_error </dev/null 2>&1 | sed -n '1,160p'
+          done
+          exit 0
