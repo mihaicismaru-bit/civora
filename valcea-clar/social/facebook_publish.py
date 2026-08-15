@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Fail-closed Facebook Page distributor for VÂLCEA CLAR.
 
-Publication rule: every ready post must use a real, approved photograph with
-explicit provenance and reuse rights. Generated cards, illustrations, AI images,
-unverified downloads and generic stock substitutes are rejected.
+Every ready post must use a real approved photograph with explicit provenance.
+Meta authentication failures never consume the queue: the item remains eligible
+and is retried after credentials are restored. A shared durable Meta Page token
+is preferred over the legacy short-lived Facebook token.
 """
 from __future__ import annotations
 
@@ -26,23 +27,17 @@ PHOTO_ROOT = (ROOT / "valcea-clar" / "social" / "photos" / "approved").resolve()
 DEFAULT_GRAPH_VERSION = "v26.0"
 CANONICAL_HOSTS = {"valceaclar.ro", "www.valceaclar.ro"}
 ALLOWED_SOURCE_TYPES = {
-    "staff",
-    "reader",
-    "official_press",
-    "official_institution",
-    "licensed_agency",
-    "public_domain",
-    "creative_commons",
+    "staff", "reader", "official_press", "official_institution",
+    "licensed_agency", "public_domain", "creative_commons",
 }
 ALLOWED_RIGHTS = {
-    "owned",
-    "written_permission",
-    "press_use",
-    "licensed",
-    "public_domain",
-    "creative_commons",
-    "official_reuse_permission",
+    "owned", "written_permission", "press_use", "licensed", "public_domain",
+    "creative_commons", "official_reuse_permission",
 }
+
+
+def utc_now() -> str:
+    return dt.datetime.now(dt.timezone.utc).isoformat()
 
 
 def load_json(path: Path, default: dict[str, Any]) -> dict[str, Any]:
@@ -92,9 +87,7 @@ def image_file(item: dict[str, Any]) -> Path:
     if path.suffix.lower() not in {".jpg", ".jpeg", ".png"} or not path.is_file():
         raise ValueError(f"approved photograph does not exist or is unsupported: {raw}")
     header = path.read_bytes()[:12]
-    is_jpeg = header.startswith(b"\xff\xd8\xff")
-    is_png = header.startswith(b"\x89PNG\r\n\x1a\n")
-    if not (is_jpeg or is_png):
+    if not (header.startswith(b"\xff\xd8\xff") or header.startswith(b"\x89PNG\r\n\x1a\n")):
         raise ValueError(f"invalid image file signature for {item['id']}: {raw}")
     return path
 
@@ -133,7 +126,7 @@ def eligible(items: list[dict[str, Any]], published: dict[str, Any]) -> list[dic
 def graph_get(path: str, token: str, version: str) -> dict[str, Any]:
     endpoint = f"https://graph.facebook.com/{version}/{path.lstrip('/')}"
     endpoint += ("&" if "?" in endpoint else "?") + "access_token=" + urllib.parse.quote(token, safe="")
-    request = urllib.request.Request(endpoint, method="GET", headers={"User-Agent": "ValceaClar-Facebook/3.0"})
+    request = urllib.request.Request(endpoint, method="GET", headers={"User-Agent": "ValceaClar-Facebook/4.0"})
     try:
         with urllib.request.urlopen(request, timeout=30) as response:
             payload = json.loads(response.read().decode("utf-8"))
@@ -149,7 +142,11 @@ def resolve_page_token(page_id: str, supplied_token: str, version: str) -> tuple
     identity = graph_get("me?fields=id,name", supplied_token, version)
     identity_id = str(identity.get("id", ""))
     if identity_id == page_id:
-        return supplied_token, {"source": "page_token", "page_id": page_id, "page_name": identity.get("name")}
+        return supplied_token, {
+            "source": "page_token",
+            "page_id": page_id,
+            "page_name": identity.get("name"),
+        }
     page = graph_get(f"{page_id}?fields=id,name,access_token", supplied_token, version)
     derived = str(page.get("access_token", "")).strip()
     if str(page.get("id", "")) != page_id or not derived:
@@ -158,11 +155,20 @@ def resolve_page_token(page_id: str, supplied_token: str, version: str) -> tuple
     if str(check.get("id", "")) != page_id:
         raise RuntimeError(f"Derived token identifies {check.get('id')}, not {page_id}")
     return derived, {
-        "source": "derived_from_user_token",
-        "user_id": identity_id,
+        "source": "derived_from_identity_token",
+        "identity_id": identity_id,
         "page_id": page_id,
         "page_name": check.get("name"),
     }
+
+
+def classify_auth_error(exc: Exception) -> str:
+    message = str(exc).lower()
+    if "code\":190" in message or "code': 190" in message or "expired" in message:
+        return "EXPIRED"
+    if "missing" in message:
+        return "MISSING"
+    return "INVALID_OR_UNAUTHORIZED"
 
 
 def multipart(fields: dict[str, str], file_path: Path) -> tuple[bytes, str]:
@@ -172,16 +178,14 @@ def multipart(fields: dict[str, str], file_path: Path) -> tuple[bytes, str]:
         chunks.extend([
             f"--{boundary}\r\n".encode(),
             f'Content-Disposition: form-data; name="{key}"\r\n\r\n'.encode(),
-            value.encode("utf-8"),
-            b"\r\n",
+            value.encode("utf-8"), b"\r\n",
         ])
     mime = mimetypes.guess_type(file_path.name)[0] or "image/jpeg"
     chunks.extend([
         f"--{boundary}\r\n".encode(),
         f'Content-Disposition: form-data; name="source"; filename="{file_path.name}"\r\n'.encode(),
         f"Content-Type: {mime}\r\n\r\n".encode(),
-        file_path.read_bytes(),
-        b"\r\n",
+        file_path.read_bytes(), b"\r\n",
         f"--{boundary}--\r\n".encode(),
     ])
     return b"".join(chunks), f"multipart/form-data; boundary={boundary}"
@@ -205,7 +209,7 @@ def graph_photo_post(page_id: str, token: str, version: str, item: dict[str, Any
         f"https://graph.facebook.com/{version}/{page_id}/photos",
         data=body,
         method="POST",
-        headers={"Content-Type": content_type, "User-Agent": "ValceaClar-Facebook/3.0"},
+        headers={"Content-Type": content_type, "User-Agent": "ValceaClar-Facebook/4.0"},
     )
     try:
         with urllib.request.urlopen(request, timeout=60) as response:
@@ -225,7 +229,7 @@ def graph_delete(object_id: str, token: str, version: str) -> dict[str, Any]:
         f"https://graph.facebook.com/{version}/{urllib.parse.quote(object_id, safe='')}",
         data=body,
         method="DELETE",
-        headers={"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "ValceaClar-Facebook/3.0"},
+        headers={"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "ValceaClar-Facebook/4.0"},
     )
     try:
         with urllib.request.urlopen(request, timeout=30) as response:
@@ -261,26 +265,20 @@ def self_test() -> int:
     test_path = PHOTO_ROOT / "_self_test.jpg"
     test_path.write_bytes(b"\xff\xd8\xff\xe0" + b"V" * 256 + b"\xff\xd9")
     sample = {
-        "id": "real-photo-test",
-        "status": "ready",
-        "message": "Test",
+        "id": "real-photo-test", "status": "ready", "message": "Test",
         "link": "https://valceaclar.ro/",
         "image_path": "valcea-clar/social/photos/approved/_self_test.jpg",
         "image": {
-            "kind": "photograph",
-            "synthetic": False,
-            "subject_match": True,
-            "editor_approved": True,
-            "source_type": "staff",
-            "credit": "Vâlcea Clar",
-            "rights_basis": "owned",
-            "alt_text": "Fotografie de test Vâlcea Clar"
+            "kind": "photograph", "synthetic": False, "subject_match": True,
+            "editor_approved": True, "source_type": "staff", "credit": "Vâlcea Clar",
+            "rights_basis": "owned", "alt_text": "Fotografie de test Vâlcea Clar",
         },
     }
     try:
         validate_item(sample)
         assert image_file(sample) == test_path
         assert eligible([sample], {})[0]["id"] == "real-photo-test"
+        assert classify_auth_error(RuntimeError('OAuth code\":190 session expired')) == "EXPIRED"
         bad = dict(sample)
         bad["id"] = "synthetic-test"
         bad["image"] = dict(sample["image"], synthetic=True)
@@ -304,7 +302,7 @@ def main() -> int:
     if args.self_test:
         return self_test()
 
-    outbox = load_json(OUTBOX, {"schema_version": "3.0", "items": []})
+    outbox = load_json(OUTBOX, {"schema_version": "4.0", "items": []})
     items = outbox.get("items", [])
     state = load_json(STATE, {"schema_version": "3.0", "published": {}})
     published = state.setdefault("published", {})
@@ -315,23 +313,66 @@ def main() -> int:
     if not args.apply:
         print(json.dumps({"status": "DRY_RUN", "eligible": plan}, ensure_ascii=False, indent=2))
         return 0
+    if not plan:
+        print(json.dumps({"status": "NO_ELIGIBLE_POSTS", "eligible": []}, ensure_ascii=False, indent=2))
+        return 0
 
     page_id = os.getenv("VALCEA_FB_PAGE_ID", "").strip()
-    supplied_token = os.getenv("VALCEA_FB_PAGE_ACCESS_TOKEN", "").strip()
+    durable_token = os.getenv("VALCEA_META_PAGE_ACCESS_TOKEN", "").strip()
+    legacy_token = os.getenv("VALCEA_FB_PAGE_ACCESS_TOKEN", "").strip()
+    supplied_token = durable_token or legacy_token
+    token_source = "durable_meta_page" if durable_token else "legacy_facebook_page" if legacy_token else "none"
     version = os.getenv("VALCEA_FB_GRAPH_VERSION", DEFAULT_GRAPH_VERSION).strip() or DEFAULT_GRAPH_VERSION
+
     if not page_id or not supplied_token:
-        raise RuntimeError("Missing VALCEA_FB_PAGE_ID or VALCEA_FB_PAGE_ACCESS_TOKEN")
-    page_token, resolution = resolve_page_token(page_id, supplied_token, version)
-    print(json.dumps({"status": "FACEBOOK_TOKEN_RESOLVED", **resolution}, ensure_ascii=False))
+        state["auth"] = {
+            "status": "MISSING", "checked_at": utc_now(), "token_source": token_source,
+        }
+        write_state(state)
+        print(json.dumps({
+            "status": "BLOCKED_MISSING_CREDENTIALS",
+            "platform": "facebook",
+            "eligible_count": len(plan),
+            "required_runtime_values": ["VALCEA_META_PAGE_ACCESS_TOKEN or VALCEA_FB_PAGE_ACCESS_TOKEN"],
+        }, ensure_ascii=False, indent=2))
+        return 0
+
+    try:
+        page_token, resolution = resolve_page_token(page_id, supplied_token, version)
+    except Exception as exc:
+        auth_status = classify_auth_error(exc)
+        state["auth"] = {
+            "status": auth_status,
+            "checked_at": utc_now(),
+            "token_source": token_source,
+            "eligible_count": len(plan),
+        }
+        write_state(state)
+        print(json.dumps({
+            "status": "BLOCKED_META_AUTH",
+            "platform": "facebook",
+            "auth_status": auth_status,
+            "token_source": token_source,
+            "eligible_count": len(plan),
+            "queue_preserved": True,
+        }, ensure_ascii=False, indent=2))
+        return 0
+
+    state["auth"] = {
+        "status": "VALID", "checked_at": utc_now(), "token_source": token_source,
+        "page_id": page_id,
+    }
+    write_state(state)
+    print(json.dumps({"status": "FACEBOOK_TOKEN_RESOLVED", "token_source": token_source, **resolution}, ensure_ascii=False))
 
     cleanup_replacements(state, page_token, version)
-    results = []
+    results: list[dict[str, str]] = []
     for item in plan:
         post_id = graph_photo_post(page_id, page_token, version, item)
         metadata = photo_metadata(item)
-        entry = {
+        published[item["id"]] = {
             "facebook_post_id": post_id,
-            "published_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+            "published_at": utc_now(),
             "link": item["link"],
             "image_path": item["image_path"],
             "image_credit": metadata["credit"],
@@ -340,10 +381,10 @@ def main() -> int:
             "replaces": list(item.get("replace_post_ids") or []),
             "replacement_cleanup": {},
         }
-        published[item["id"]] = entry
         write_state(state)
         cleanup_replacements(state, page_token, version)
         results.append({"id": item["id"], "facebook_post_id": post_id})
+
     print(json.dumps({"status": "PUBLISHED", "results": results}, ensure_ascii=False, indent=2))
     return 0
 
