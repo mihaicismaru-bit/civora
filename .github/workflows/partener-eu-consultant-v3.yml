@@ -17,7 +17,6 @@ on:
       - 'partener-eu/ingest/state/mipe_state.json'
       - 'partener-eu/ops/test_consultant_workspace_v3.py'
       - 'partener-eu/ops/test_consultant_crud_v4.py'
-      - 'partener-eu/ops/fix_consultant_workspace_v3.py'
       - 'partener-eu/ops/fix_consultant_crud_v4.py'
       - '.github/workflows/partener-eu-consultant-v3.yml'
 
@@ -44,10 +43,8 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Apply canonical Consultant source corrections
-        run: |
-          python partener-eu/ops/fix_consultant_workspace_v3.py
-          python partener-eu/ops/fix_consultant_crud_v4.py
+      - name: Apply canonical Consultant CRUD repair
+        run: python partener-eu/ops/fix_consultant_crud_v4.py
 
       - name: Rebuild direct MySMIS Consultant evidence
         run: python partener-eu/ingest/build_mysmis_consultant_registry.py
