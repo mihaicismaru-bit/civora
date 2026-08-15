@@ -27,7 +27,7 @@ concurrency:
 jobs:
   ingest-ro:
     runs-on: [self-hosted, Windows, X64]
-    timeout-minutes: 30
+    timeout-minutes: 35
     env:
       PYTHONUTF8: '1'
       MIPE_FORCE_IP: ''
@@ -38,9 +38,57 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v6
-        with:
-          python-version: '3.12'
+      - name: Bootstrap private Python runtime
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $python = $null
+
+          $cmd = Get-Command python.exe -ErrorAction SilentlyContinue
+          if ($cmd) {
+            try {
+              & $cmd.Source -c "import sys; assert sys.version_info >= (3, 11)"
+              if ($LASTEXITCODE -eq 0) { $python = $cmd.Source }
+            } catch {}
+          }
+
+          if (-not $python) {
+            $launcher = Get-Command py.exe -ErrorAction SilentlyContinue
+            if ($launcher) {
+              try {
+                $candidate = (& $launcher.Source -3.12 -c "import sys; print(sys.executable)" 2>$null).Trim()
+                if ($candidate -and (Test-Path $candidate)) { $python = $candidate }
+              } catch {}
+            }
+          }
+
+          if (-not $python) {
+            $version = '3.12.10'
+            $installer = Join-Path $env:RUNNER_TEMP "python-$version-amd64.exe"
+            $target = Join-Path $env:RUNNER_TEMP 'partener-python312'
+            Invoke-WebRequest -Uri "https://www.python.org/ftp/python/$version/python-$version-amd64.exe" -OutFile $installer
+            $arguments = @(
+              '/quiet',
+              'InstallAllUsers=0',
+              "TargetDir=$target",
+              'PrependPath=0',
+              'Include_launcher=0',
+              'Include_test=0',
+              'Include_pip=1',
+              'SimpleInstall=1'
+            )
+            $process = Start-Process -FilePath $installer -ArgumentList $arguments -Wait -PassThru
+            if ($process.ExitCode -ne 0) { throw "Instalarea Python a eșuat cu codul $($process.ExitCode)." }
+            $python = Join-Path $target 'python.exe'
+          }
+
+          if (-not (Test-Path $python)) { throw "Runtime Python indisponibil: $python" }
+          $pythonDir = Split-Path $python -Parent
+          $scriptsDir = Join-Path $pythonDir 'Scripts'
+          $pythonDir | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          $scriptsDir | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          "PYTHON_EXE=$python" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          & $python --version
 
       - name: Test direct Romanian access to MIPE
         shell: pwsh
@@ -70,29 +118,30 @@ jobs:
           if not any(row.get('ok') for row in rows):
               raise SystemExit('Calculatorul nu poate accesa direct nicio rădăcină MIPE.')
           '@ | Set-Content -Encoding UTF8 .\mipe_ro_probe.py
-          python .\mipe_ro_probe.py
+          & $env:PYTHON_EXE .\mipe_ro_probe.py
 
       - name: Install Chromium collector
         shell: pwsh
         run: |
-          python -m pip install --disable-pip-version-check --upgrade pip
-          python -m pip install --disable-pip-version-check playwright
-          python -m playwright install chromium
+          & $env:PYTHON_EXE -m pip install --disable-pip-version-check --upgrade pip
+          & $env:PYTHON_EXE -m pip install --disable-pip-version-check playwright
+          & $env:PYTHON_EXE -m playwright install chromium
 
       - name: Collect official MIPE pages through Romanian egress
         shell: pwsh
         run: |
-          python partener-eu/ingest/mipe_browser_ingest.py
+          & $env:PYTHON_EXE partener-eu/ingest/mipe_browser_ingest.py
 
-      - name: Normalize direct-source provenance
+      - name: Normalize direct-source provenance and bust feed cache
         shell: pwsh
         run: |
           @'
-          import json
+          import json, re
           from pathlib import Path
 
           state_path=Path('partener-eu/ingest/state/mipe_state.json')
           feed_path=Path('partener-eu/web/mipe-news.js')
+          index_path=Path('partener-eu/web/index.html')
           state=json.loads(state_path.read_text(encoding='utf-8'))
           run=state.get('lastRun') or {}
           if not run.get('sourceAvailable'):
@@ -122,43 +171,83 @@ jobs:
           js+='window.PARTENER_DATA.mipeIngestion='+json.dumps(meta,ensure_ascii=False,separators=(',',':'))+';\n'
           js+='window.PARTENER_DATA.mipeNews='+json.dumps(state.get('items',[]),ensure_ascii=False,separators=(',',':'))+';\n'
           feed_path.write_text(js,encoding='utf-8')
+
+          if index_path.exists():
+              index=index_path.read_text(encoding='utf-8')
+              version=re.sub(r'[^0-9]','',str(run.get('observedAt') or ''))[:14] or 'directro'
+              index=re.sub(r'(mipe-news\.js\?v=)[^"\']+',rf'\g<1>{version}',index)
+              index=re.sub(r'(mipe-news-adapter\.js\?v=)[^"\']+',rf'\g<1>{version}',index)
+              index_path.write_text(index,encoding='utf-8')
+
           print(json.dumps({'status':'OK','directRoots':run['directSuccessCount'],'items':len(state.get('items',[]))},ensure_ascii=False,indent=2))
           '@ | Set-Content -Encoding UTF8 .\normalize_mipe_ro.py
-          python .\normalize_mipe_ro.py
+          & $env:PYTHON_EXE .\normalize_mipe_ro.py
 
-      - name: Refresh MySMIS consultant evidence
+      - name: Refresh MySMIS consultant evidence and intelligence index
         shell: pwsh
         run: |
-          python partener-eu/ingest/build_mysmis_consultant_registry.py
+          & $env:PYTHON_EXE partener-eu/ingest/build_mysmis_consultant_registry.py
+          & $env:PYTHON_EXE partener-eu/ingest/intelligence_index.py
 
-      - name: Persist verified direct feed
+      - name: Persist verified direct feed through GitHub API
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.persist }}
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPOSITORY: ${{ github.repository }}
         run: |
           $ErrorActionPreference = 'Stop'
-          Copy-Item partener-eu/web/mipe-news.js $env:TEMP\mipe-news.js -Force
-          Copy-Item partener-eu/web/mysmis-registry.js $env:TEMP\mysmis-registry.js -Force
-          Copy-Item partener-eu/ingest/state/mipe_state.json $env:TEMP\mipe_state.json -Force
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          @'
+          import base64, json, os, time, urllib.error, urllib.request
+          from pathlib import Path
 
-          for ($attempt=1; $attempt -le 5; $attempt++) {
-            git fetch origin main
-            git reset --hard origin/main
-            Copy-Item $env:TEMP\mipe-news.js partener-eu/web/mipe-news.js -Force
-            Copy-Item $env:TEMP\mysmis-registry.js partener-eu/web/mysmis-registry.js -Force
-            Copy-Item $env:TEMP\mipe_state.json partener-eu/ingest/state/mipe_state.json -Force
-            python partener-eu/ingest/intelligence_index.py
-            git add partener-eu/web/mipe-news.js partener-eu/web/mysmis-registry.js partener-eu/ingest/state/mipe_state.json partener-eu/ingest/state/intelligence_index.json
-            git diff --cached --quiet
-            if ($LASTEXITCODE -eq 0) {
-              Write-Host 'Nu există modificări MIPE verificate de persistat.'
-              exit 0
-            }
-            git commit -m 'Ingest verified MIPE updates from Romanian Windows collector'
-            git push origin HEAD:main
-            if ($LASTEXITCODE -eq 0) { exit 0 }
-            Write-Host "main a avansat; reîncercare $attempt/5"
-            Start-Sleep -Seconds ($attempt * 2)
+          token=os.environ['GH_TOKEN']
+          repository=os.environ['GH_REPOSITORY']
+          api=f'https://api.github.com/repos/{repository}'
+          paths=[
+              'partener-eu/web/index.html',
+              'partener-eu/web/mipe-news.js',
+              'partener-eu/web/mysmis-registry.js',
+              'partener-eu/ingest/state/mipe_state.json',
+              'partener-eu/ingest/state/intelligence_index.json',
+          ]
+          contents={path:Path(path).read_bytes() for path in paths}
+          headers={
+              'Authorization':f'Bearer {token}',
+              'Accept':'application/vnd.github+json',
+              'X-GitHub-Api-Version':'2022-11-28',
+              'User-Agent':'PARTENER.EU-MIPE-RO-Collector',
           }
-          throw 'Nu am putut persista rezultatele după cinci încercări.'
+
+          def request(method,url,payload=None):
+              data=None if payload is None else json.dumps(payload).encode()
+              req=urllib.request.Request(url,data=data,method=method,headers=headers)
+              with urllib.request.urlopen(req,timeout=60) as response:
+                  raw=response.read()
+                  return json.loads(raw) if raw else {}
+
+          for attempt in range(1,6):
+              try:
+                  ref=request('GET',f'{api}/git/ref/heads/main')
+                  parent=ref['object']['sha']
+                  commit=request('GET',f'{api}/git/commits/{parent}')
+                  entries=[]
+                  for path,raw in contents.items():
+                      blob=request('POST',f'{api}/git/blobs',{'content':base64.b64encode(raw).decode(),'encoding':'base64'})
+                      entries.append({'path':path,'mode':'100644','type':'blob','sha':blob['sha']})
+                  tree=request('POST',f'{api}/git/trees',{'base_tree':commit['tree']['sha'],'tree':entries})
+                  new_commit=request('POST',f'{api}/git/commits',{
+                      'message':'Ingest verified MIPE updates from Romanian Windows collector',
+                      'tree':tree['sha'],
+                      'parents':[parent],
+                  })
+                  request('PATCH',f'{api}/git/refs/heads/main',{'sha':new_commit['sha'],'force':False})
+                  print(json.dumps({'persisted':True,'commit':new_commit['sha'],'files':paths},ensure_ascii=False,indent=2))
+                  break
+              except urllib.error.HTTPError as exc:
+                  if exc.code not in (409,422) or attempt==5:
+                      raise
+                  print(f'main a avansat; reîncercare {attempt}/5')
+                  time.sleep(attempt*2)
+          '@ | Set-Content -Encoding UTF8 .\persist_mipe_ro_api.py
+          & $env:PYTHON_EXE .\persist_mipe_ro_api.py
