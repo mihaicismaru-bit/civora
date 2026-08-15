@@ -8,10 +8,14 @@ on:
         required: true
         default: true
         type: boolean
+  push:
+    branches: [main]
+    paths:
+      - 'partener-eu/ingest/state/mipe_ro_trigger.txt'
+      - '.github/workflows/partener-eu-mipe-ro-runner.yml'
 
-# One-time Romanian-egress collector. It is deliberately manual and targets a
-# dedicated Windows runner carrying the `mipe-ro` label. Do not schedule it and
-# do not use the runner for pull_request workflows.
+# One-time Romanian-egress collector. It runs only on a repository-owned
+# Windows x64 self-hosted runner and never on pull_request events.
 
 permissions:
   contents: write
@@ -22,7 +26,7 @@ concurrency:
 
 jobs:
   ingest-ro:
-    runs-on: [self-hosted, Windows, X64, mipe-ro]
+    runs-on: [self-hosted, Windows, X64]
     timeout-minutes: 30
     env:
       PYTHONUTF8: '1'
@@ -128,7 +132,7 @@ jobs:
           python partener-eu/ingest/build_mysmis_consultant_registry.py
 
       - name: Persist verified direct feed
-        if: ${{ inputs.persist }}
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.persist }}
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
