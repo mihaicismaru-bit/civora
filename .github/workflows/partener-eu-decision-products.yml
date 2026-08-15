@@ -8,6 +8,7 @@ on:
     branches: [main]
     paths:
       - 'partener-eu/ingest/build_decision_products.py'
+      - 'partener-eu/ingest/polish_decision_products.py'
       - 'partener-eu/ops/test_decision_products.py'
       - 'partener-eu/web/p11-public-data.js'
       - 'partener-eu/web/decision-intelligence-v2.js'
@@ -48,7 +49,9 @@ jobs:
           node-version: '22'
 
       - name: Build decision-useful editorial products
-        run: python partener-eu/ingest/build_decision_products.py
+        run: |
+          python partener-eu/ingest/build_decision_products.py
+          python partener-eu/ingest/polish_decision_products.py
 
       - name: Validate JavaScript and product coverage
         run: |
