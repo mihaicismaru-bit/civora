@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "policy": {
+    "purpose": "Discover fresh local-news candidates from primary institutional sources without using an LLM.",
+    "automatic_publication_scope": "title_date_source_only",
+    "detail_autopublish": false,
+    "candidate_max_age_hours": 72,
+    "min_title_chars": 24,
+    "max_candidates_per_source": 12
+  },
+  "sources": [
+    {
+      "id": "primaria-rm-valcea-comunicate",
+      "publisher": "Primăria Municipiului Râmnicu Vâlcea",
+      "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa",
+      "tier": "T1",
+      "section": "ADMINISTRAȚIE",
+      "priority": 84,
+      "path_hints": ["comunicate", "comunicat", "informatii-publice"],
+      "generic_titles": ["comunicate de presă", "articole"]
+    },
+    {
+      "id": "cj-valcea-anunturi",
+      "publisher": "Consiliul Județean Vâlcea",
+      "url": "https://cjvalcea.ro/categorie/anunturi/",
+      "tier": "T1",
+      "section": "ADMINISTRAȚIE",
+      "priority": 82,
+      "path_hints": ["anunt", "categorie/anunturi"],
+      "generic_titles": ["anunțuri", "citește"]
+    },
+    {
+      "id": "cj-valcea-sedinte",
+      "publisher": "Consiliul Județean Vâlcea",
+      "url": "https://cjvalcea.ro/monitorul-oficial-local/alte-documente/anunturi-sedinte/",
+      "tier": "T1",
+      "section": "ADMINISTRAȚIE",
+      "priority": 87,
+      "path_hints": ["sedint", "avn_sedinte_cj"],
+      "generic_titles": ["anunțuri ședințe"]
+    },
+    {
+      "id": "cj-valcea-hotarari-2026",
+      "publisher": "Consiliul Județean Vâlcea",
+      "url": "https://cjvalcea.ro/monitorul-oficial-local/hotararile-autoritatii-deliberative/2026-hotararile-autoritatii-deliberative/",
+      "tier": "T1",
+      "section": "ADMINISTRAȚIE",
+      "priority": 86,
+      "path_hints": ["hotarar", "monitorul-oficial-local"],
+      "generic_titles": ["2026 – hotărârile autorității deliberative"]
+    },
+    {
+      "id": "prefectura-valcea",
+      "publisher": "Instituția Prefectului — Județul Vâlcea",
+      "url": "https://vl.prefectura.mai.gov.ro/",
+      "tier": "T1",
+      "section": "ADMINISTRAȚIE",
+      "priority": 81,
+      "path_hints": ["comunicat", "anunt", "informare"],
+      "generic_titles": ["instituția prefectului"]
+    },
+    {
+      "id": "isu-valcea-comunicate",
+      "publisher": "ISU Vâlcea",
+      "url": "https://isuvl.igsu.ro/comunicate-de-presa",
+      "tier": "T1",
+      "section": "EVENIMENTE",
+      "priority": 92,
+      "path_hints": ["comunicate-de-presa", "comunicat", "buletin"],
+      "generic_titles": ["comunicate de presă", "buletin informativ"]
+    },
+    {
+      "id": "ipj-valcea-stiri",
+      "publisher": "IPJ Vâlcea",
+      "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri",
+      "tier": "T1",
+      "section": "EVENIMENTE",
+      "priority": 91,
+      "path_hints": ["/ro/stiri", "stiri-si-media"],
+      "generic_titles": ["știre de presă", "stiri", "știri"]
+    },
+    {
+      "id": "scm-rm-valcea",
+      "publisher": "SCM Râmnicu Vâlcea",
+      "url": "https://scmramnicuvalcea.ro/",
+      "tier": "T1B",
+      "section": "SPORT",
+      "priority": 78,
+      "path_hints": ["stiri", "noutati", "meci", "liga"],
+      "generic_titles": ["scm râmnicu vâlcea"]
+    }
+  ]
+}
