@@ -5,11 +5,15 @@ on:
   pull_request:
     paths:
       - "local-news-os/social/**"
+      - "valcea-clar/social/channels/**"
+      - "valcea-clar/social/series_registry.json"
       - ".github/workflows/local-news-os-social-core.yml"
   push:
     branches: [main]
     paths:
       - "local-news-os/social/**"
+      - "valcea-clar/social/channels/**"
+      - "valcea-clar/social/series_registry.json"
       - ".github/workflows/local-news-os-social-core.yml"
 
 permissions:
@@ -40,12 +44,14 @@ jobs:
             local-news-os/social/format_engine.py \
             local-news-os/social/visual_router.py \
             local-news-os/social/cadence_fatigue.py \
+            local-news-os/social/recurring_series.py \
             local-news-os/social/test_channel_fit.py \
             local-news-os/social/test_content_atomizer.py \
             local-news-os/social/test_hook_engine.py \
             local-news-os/social/test_format_engine.py \
             local-news-os/social/test_visual_router.py \
-            local-news-os/social/test_cadence_fatigue.py
+            local-news-os/social/test_cadence_fatigue.py \
+            local-news-os/social/test_recurring_series.py
 
       - name: Run channel fit acceptance tests
         run: python local-news-os/social/test_channel_fit.py
@@ -65,6 +71,9 @@ jobs:
       - name: Run Cadence/Fatigue acceptance tests
         run: python local-news-os/social/test_cadence_fatigue.py
 
+      - name: Run Recurring Series Engine acceptance tests
+        run: python local-news-os/social/test_recurring_series.py
+
       - name: Validate Vâlcea reference CHANNEL_CONFIG fixtures
         run: |
           python local-news-os/social/validate_channel_config.py \
@@ -76,3 +85,27 @@ jobs:
           python local-news-os/social/validate_channel_config.py \
             valcea-clar/social/channels/tiktok.json \
             --instance-root valcea-clar
+
+      - name: Validate Vâlcea recurring series registry against declared channel series
+        run: |
+          python - <<'PY'
+          import importlib.util
+          import json
+          from pathlib import Path
+
+          module_path = Path('local-news-os/social/recurring_series.py')
+          spec = importlib.util.spec_from_file_location('recurring_series', module_path)
+          mod = importlib.util.module_from_spec(spec)
+          assert spec and spec.loader
+          spec.loader.exec_module(mod)
+
+          registry = json.loads(Path('valcea-clar/social/series_registry.json').read_text(encoding='utf-8'))
+          for platform in ('facebook', 'instagram', 'tiktok'):
+              channel = json.loads(Path(f'valcea-clar/social/channels/{platform}.json').read_text(encoding='utf-8'))
+              policies, errors = mod.channel_policies(channel, registry)
+              if errors:
+                  raise SystemExit(f'{platform}: {errors}')
+              if not policies:
+                  raise SystemExit(f'{platform}: no recurring series policies')
+              print(f'{platform}: PASS ({len(policies)} series)')
+          PY
