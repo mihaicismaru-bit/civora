@@ -1,0 +1,210 @@
+name: VÂLCEA CLAR Social Publication Engine
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "valcea-clar/social/channel_registry.json"
+      - "valcea-clar/social/validate_social_engine.py"
+      - "valcea-clar/social/build_current_edition_outbox.py"
+      - "valcea-clar/social/facebook_outbox.json"
+      - "valcea-clar/social/facebook_publish.py"
+      - "valcea-clar/social/fetch_approved_photos.py"
+      - "valcea-clar/social/real_photo_replacement_queue.json"
+      - "valcea-clar/site/current_edition.json"
+      - "valcea-clar/editions/**"
+      - ".github/workflows/valcea-clar-social-publishing.yml"
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/social/channel_registry.json"
+      - "valcea-clar/social/validate_social_engine.py"
+      - "valcea-clar/social/build_current_edition_outbox.py"
+      - "valcea-clar/social/facebook_outbox.json"
+      - "valcea-clar/social/facebook_publish.py"
+      - "valcea-clar/social/fetch_approved_photos.py"
+      - "valcea-clar/social/real_photo_replacement_queue.json"
+      - "valcea-clar/site/current_edition.json"
+      - "valcea-clar/editions/**"
+      - ".github/workflows/valcea-clar-social-publishing.yml"
+  schedule:
+    - cron: "7,22,37,52 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-social-publication-engine
+  cancel-in-progress: false
+
+jobs:
+  distribute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Enforce site-engine-only social ownership
+        run: |
+          python valcea-clar/social/validate_social_engine.py \
+            --report /tmp/social-engine-ownership.json
+          python valcea-clar/scripts/validate_site_engine_ownership.py
+
+      - name: Build channel-native outboxes from the current verified edition
+        run: python valcea-clar/social/build_current_edition_outbox.py
+
+      - name: Fetch approved real photographs
+        run: python valcea-clar/social/fetch_approved_photos.py
+
+      - name: Validate active publishing adapters
+        run: python valcea-clar/social/facebook_publish.py --self-test
+
+      - name: Preview eligible social publications
+        id: preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          python valcea-clar/social/facebook_publish.py > /tmp/facebook-preview.json
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          facebook = json.loads(Path('/tmp/facebook-preview.json').read_text(encoding='utf-8'))
+          registry = json.loads(Path('valcea-clar/social/channel_registry.json').read_text(encoding='utf-8'))
+          eligible = facebook.get('eligible') or []
+          if isinstance(eligible, bool):
+              eligible_count = int(eligible)
+          elif isinstance(eligible, list):
+              eligible_count = len(eligible)
+          else:
+              eligible_count = 0
+
+          inactive = [
+              {
+                  'channel_id': channel['channel_id'],
+                  'status': channel['status'],
+                  'publication_mode': channel['publication_mode'],
+              }
+              for channel in registry['channels']
+              if channel['status'] != 'active'
+          ]
+          combined = {
+              'execution_owner': registry['execution_owner'],
+              'scheduler': registry['scheduler'],
+              'facebook': facebook,
+              'eligible_count': eligible_count,
+              'inactive_fail_closed_channels': inactive,
+          }
+          Path('/tmp/social-preview.json').write_text(
+              json.dumps(combined, ensure_ascii=False, indent=2) + '\n',
+              encoding='utf-8',
+          )
+          print(json.dumps(combined, ensure_ascii=False))
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
+              output.write(f"has_eligible={'true' if eligible_count else 'false'}\n")
+          PY
+
+      - name: Publish eligible Facebook items through the native Meta API
+        if: github.event_name != 'pull_request' && steps.preview.outputs.has_eligible == 'true'
+        env:
+          VALCEA_FB_PAGE_ID: "1234360446430980"
+          VALCEA_FB_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_FB_PAGE_ACCESS_TOKEN }}
+          VALCEA_FB_GRAPH_VERSION: v26.0
+        run: python valcea-clar/social/facebook_publish.py --apply
+
+      - name: Report an empty active-channel queue
+        if: steps.preview.outputs.has_eligible != 'true'
+        run: echo "No eligible VÂLCEA CLAR social publications; platform authentication skipped."
+
+      - name: Persist canonical social outbox and publication state
+        if: always() && github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=(
+            valcea-clar/social/facebook_outbox.json
+            valcea-clar/social/facebook_state.json
+            valcea-clar/social/real_photo_replacement_queue.json
+          )
+          rm -rf /tmp/valcea-social-state
+          mkdir -p /tmp/valcea-social-state
+          for file in "${files[@]}"; do
+            if [ -f "$file" ]; then
+              mkdir -p "/tmp/valcea-social-state/$(dirname "$file")"
+              cp "$file" "/tmp/valcea-social-state/$file"
+            fi
+          done
+
+          git config user.name "valcea-clar-social-engine[bot]"
+          git config user.email "valcea-clar-social-engine@users.noreply.github.com"
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            for file in "${files[@]}"; do
+              if [ -f "/tmp/valcea-social-state/$file" ]; then
+                mkdir -p "$(dirname "$file")"
+                cp "/tmp/valcea-social-state/$file" "$file"
+                git add "$file"
+              fi
+            done
+            if git diff --cached --quiet; then
+              echo "No VÂLCEA CLAR social-engine changes to persist."
+              exit 0
+            fi
+            git commit -m "Persist VÂLCEA CLAR social publication state"
+            if git push origin HEAD:main; then exit 0; fi
+            echo "main advanced; retrying ${attempt}/5"
+            sleep $((attempt * 2))
+          done
+          echo "Unable to persist social publication state after five attempts." >&2
+          exit 1
+
+      - name: Write social-engine summary
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          ownership_path = Path('/tmp/social-engine-ownership.json')
+          preview_path = Path('/tmp/social-preview.json')
+          ownership = json.loads(ownership_path.read_text(encoding='utf-8')) if ownership_path.exists() else {}
+          preview = json.loads(preview_path.read_text(encoding='utf-8')) if preview_path.exists() else {}
+          lines = [
+              '# VÂLCEA CLAR — Social Publication Engine',
+              '',
+              f"- Ownership: **{ownership.get('status', 'UNAVAILABLE')}**",
+              f"- Execution owner: `{ownership.get('execution_owner', 'unknown')}`",
+              f"- Active direct channels: `{', '.join(ownership.get('active_direct_channels', []))}`",
+              f"- Eligible active-channel items: **{preview.get('eligible_count', 0)}**",
+              '- ChatGPT direct publication: **disabled**',
+          ]
+          errors = ownership.get('errors') or []
+          if errors:
+              lines.extend(['', '## Errors'])
+              lines.extend(f"- {error}" for error in errors)
+          Path(os.environ['GITHUB_STEP_SUMMARY']).write_text(
+              '\n'.join(lines) + '\n',
+              encoding='utf-8',
+          )
+          PY
+
+      - name: Upload social-engine audit payload
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-social-engine-${{ github.run_id }}
+          path: |
+            /tmp/social-engine-ownership.json
+            /tmp/social-preview.json
+          if-no-files-found: warn
+          retention-days: 14
