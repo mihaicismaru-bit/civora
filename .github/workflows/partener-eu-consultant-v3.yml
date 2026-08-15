@@ -44,7 +44,7 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Apply idempotent Consultant source corrections
+      - name: Apply canonical Consultant source corrections
         run: |
           python partener-eu/ops/fix_consultant_workspace_v3.py
           python partener-eu/ops/fix_consultant_crud_v4.py
@@ -70,6 +70,7 @@ jobs:
           set -euo pipefail
           cp partener-eu/web/consultant-workspace-v3.js /tmp/consultant-workspace-v3.js
           cp partener-eu/web/consultant-workspace-v3.css /tmp/consultant-workspace-v3.css
+          cp partener-eu/web/index.html /tmp/partener-index.html
           cp partener-eu/web/mysmis-registry.js /tmp/mysmis-registry.js
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
@@ -78,8 +79,13 @@ jobs:
             git reset --hard origin/main
             cp /tmp/consultant-workspace-v3.js partener-eu/web/consultant-workspace-v3.js
             cp /tmp/consultant-workspace-v3.css partener-eu/web/consultant-workspace-v3.css
+            cp /tmp/partener-index.html partener-eu/web/index.html
             cp /tmp/mysmis-registry.js partener-eu/web/mysmis-registry.js
-            git add partener-eu/web/consultant-workspace-v3.js partener-eu/web/consultant-workspace-v3.css partener-eu/web/mysmis-registry.js
+            git add \
+              partener-eu/web/consultant-workspace-v3.js \
+              partener-eu/web/consultant-workspace-v3.css \
+              partener-eu/web/index.html \
+              partener-eu/web/mysmis-registry.js
             if git diff --cached --quiet; then
               echo 'Consultant runtime already current.'
               exit 0
