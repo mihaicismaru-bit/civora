@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Enforce the automation's fail-closed MIPE publication policy.
 
-Search/proxy transports may discover official canonical URLs, but only a direct
-successful fetch from an official MIPE-managed host may create or refresh a
-published MIPE fact. Existing items without direct provenance are removed from
-the public feed on the next ingest. The directly verified MySMIS feed remains
+Search/proxy/relay transports may discover or diagnose official canonical URLs,
+but only a direct successful fetch from an official MIPE-managed host may create
+or refresh a published MIPE fact. Existing non-direct items are removed from the
+public feed on the next ingest. The directly verified MySMIS feed remains
 eligible through its CANONICAL_OFFICIAL_FETCH marker.
 """
 from pathlib import Path
@@ -21,16 +21,16 @@ for marker in ("def decision_useful(", "def is_boilerplate(", "def classify_tag(
     if marker not in text:
         raise SystemExit(f"MIPE runtime missing required quality gate: {marker}")
 
-# 1) Reader/search copies must never be used as the factual body of an item.
-#    Direct failure returns source-unavailable. Search discovery remains in the
-#    runtime and may only enqueue canonical official URLs for a later direct
-#    fetch attempt.
+# 1) Reader/search/relay copies must never be used as the factual body of an
+#    item. Direct failure returns source-unavailable. Search and relay paths may
+#    remain as dormant diagnostic helpers, but fetch_document itself is restored
+#    to a direct-only publication boundary.
 proxy_pattern = re.compile(
     r"\n    proxy = fetch\(reader_url\(canonical\), timeout=18, attempts=1, accept=\"text/plain,text/markdown,\*/\*\"\).*?"
     r"\n\n\ndef candidates_from_json",
     re.S,
 )
-proxy_replacement = '''
+direct_only_tail = '''
     return None, {
         "target": canonical,
         "ok": False,
@@ -41,12 +41,23 @@ proxy_replacement = '''
 
 
 def candidates_from_json'''
-text, proxy_count = proxy_pattern.subn(proxy_replacement, text, count=1)
-if proxy_count == 0 and '"transport": "direct-only"' not in text:
-    raise SystemExit("Could not enforce direct-only fetch policy")
+text, proxy_count = proxy_pattern.subn(direct_only_tail, text, count=1)
 
-# 2) Last-known-good means last DIRECTLY verified good. Proxy-derived items from
-#    earlier runs are not grandfathered into News.
+# The runtime may already have been patched by the experimental first-party or
+# dual-relay workflow. Strip that entire fallback chain deterministically. This
+# makes the guard idempotent instead of failing before it can restore policy.
+if proxy_count == 0 and '"transport": "direct-only"' not in text:
+    relay_pattern = re.compile(
+        r"\n    dual_parsed, dual_evidence = fetch_dual_relay\(canonical\).*?"
+        r"\n\n\ndef candidates_from_json",
+        re.S,
+    )
+    text, relay_count = relay_pattern.subn(direct_only_tail, text, count=1)
+    if relay_count == 0:
+        raise SystemExit("Could not enforce direct-only fetch policy")
+
+# 2) Last-known-good means last DIRECTLY verified good. Proxy/relay-derived
+#    items from earlier experimental runs are not grandfathered into News.
 previous_pattern = re.compile(
     r"def previous_item_useful\(item: dict\[str, Any\]\) -> bool:\n.*?\n\n\ndef item_id",
     re.S,
@@ -87,7 +98,19 @@ linked_replacement = '''        linked_candidates = candidate_links(parsed.get("
 if linked_line in text and "linked_candidates = candidate_links" not in text:
     text = text.replace(linked_line, linked_replacement, 1)
 
-# 4) Proxy success can never make the ingestion healthy or verified.
+# 4) Relay success can never count as direct source health or receive a T1
+#    publication tier in the canonical runtime.
+relay_direct_success = '    direct_success = any(str(result.get("transport", "")).startswith("direct") or "dual-relay-corroborated" in str(result.get("transport", "")) for result in successful)'
+plain_direct_success = '    direct_success = any(str(result.get("transport", "")).startswith("direct") for result in successful)'
+if relay_direct_success in text:
+    text = text.replace(relay_direct_success, plain_direct_success, 1)
+
+relay_tier = '    tier = "T1_DUAL_RELAY_CORROBORATED" if "dual-relay-corroborated" in transport else ("T1_RELAY_ATTESTED" if "first-party-relay" in transport else ("T1" if transport.startswith("direct") else "T1_PROXY_TRANSPORT"))'
+plain_tier = '    tier = "T1" if transport.startswith("direct") else "T1_PROXY_TRANSPORT"'
+if relay_tier in text:
+    text = text.replace(relay_tier, plain_tier, 1)
+
+# 5) Non-direct success can never make the ingestion healthy or verified.
 status_pattern = re.compile(
     r"    if current and direct_success:\n        status = \"OK\"\n        transport_mode = \"direct\"\n"
     r"    elif current and proxy_success:\n        status = \"OK_PROXY_VERIFIED\"\n        transport_mode = \"official-canonical-via-proxy\"\n"
