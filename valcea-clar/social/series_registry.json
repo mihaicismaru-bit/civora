@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "instance_id": "valcea",
+  "channels": {
+    "valcea-facebook": [
+      {
+        "series_id": "editia-de-dimineata",
+        "priority": 100,
+        "slots": [{"days": [0,1,2,3,4,5,6], "time": "06:30", "window_minutes": 180}],
+        "preferred_formats": ["single_photo", "text"],
+        "eligible_topics": ["service_journalism", "local_events", "civic_updates", "public_money", "infrastructure", "local_places", "sports_utility", "verified_breaking_updates"],
+        "min_interval_hours": 10,
+        "max_occurrences_7d": 7,
+        "replay_policy": "material_update",
+        "resurface_after_hours": 0,
+        "min_items": 2,
+        "max_items": 4
+      },
+      {
+        "series_id": "editia-de-seara",
+        "priority": 95,
+        "slots": [{"days": [0,1,2,3,4,5,6], "time": "18:00", "window_minutes": 240}],
+        "preferred_formats": ["single_photo", "text"],
+        "eligible_topics": ["service_journalism", "local_events", "civic_updates", "public_money", "infrastructure", "local_places", "sports_utility", "verified_breaking_updates"],
+        "min_interval_hours": 8,
+        "max_occurrences_7d": 7,
+        "replay_policy": "material_update",
+        "resurface_after_hours": 0,
+        "min_items": 2,
+        "max_items": 4
+      },
+      {
+        "series_id": "unde-iesim",
+        "priority": 75,
+        "slots": [{"days": [3,4,5], "time": "11:00", "window_minutes": 300}],
+        "preferred_formats": ["single_photo", "text"],
+        "eligible_topics": ["local_places", "local_events", "service_journalism"],
+        "min_interval_hours": 36,
+        "max_occurrences_7d": 3,
+        "replay_policy": "evergreen_refresh",
+        "resurface_after_hours": 120,
+        "min_items": 1,
+        "max_items": 3
+      },
+      {
+        "series_id": "banii-publici",
+        "priority": 85,
+        "slots": [{"days": [0,2,4], "time": "12:00", "window_minutes": 240}],
+        "preferred_formats": ["single_photo", "text"],
+        "eligible_topics": ["public_money", "civic_updates", "infrastructure"],
+        "min_interval_hours": 24,
+        "max_occurrences_7d": 3,
+        "replay_policy": "material_update",
+        "resurface_after_hours": 0,
+        "min_items": 1,
+        "max_items": 2
+      }
+    ],
+    "valcea-instagram": [
+      {
+        "series_id": "valcea-pe-scurt",
+        "priority": 100,
+        "slots": [{"days": [0,1,2,3,4,5,6], "time": "07:30", "window_minutes": 180}],
+        "preferred_formats": ["carousel", "single_photo", "story"],
+        "eligible_topics": ["local_events", "service_journalism", "local_places", "civic_updates", "infrastructure", "public_money", "verified_breaking_updates"],
+        "min_interval_hours": 18,
+        "max_occurrences_7d": 7,
+        "replay_policy": "material_update",
+        "resurface_after_hours": 0,
+        "min_items": 2,
+        "max_items": 5
+      },
+      {
+        "series_id": "unde-iesim",
+        "priority": 80,
+        "slots": [{"days": [3,4,5], "time": "11:00", "window_minutes": 360}],
+        "preferred_formats": ["carousel", "single_photo", "reel", "story"],
+        "eligible_topics": ["local_places", "local_events"],
+        "min_interval_hours": 36,
+        "max_occurrences_7d": 3,
+        "replay_policy": "evergreen_refresh",
+        "resurface_after_hours": 120,
+        "min_items": 1,
+        "max_items": 5
+      },
+      {
+        "series_id": "banii-publici",
+        "priority": 85,
+        "slots": [{"days": [1,3], "time": "12:00", "window_minutes": 300}],
+        "preferred_formats": ["carousel", "single_photo", "story"],
+        "eligible_topics": ["public_money", "infrastructure", "civic_updates"],
+        "min_interval_hours": 36,
+        "max_occurrences_7d": 2,
+        "replay_policy": "material_update",
+        "resurface_after_hours": 0,
+        "min_items": 1,
+        "max_items": 4
+      }
+    ],
+    "valcea-tiktok": [
+      {
+        "series_id": "valcea-azi",
+        "priority": 100,
+        "slots": [{"days": [0,1,2,3,4,5,6], "time": "08:00", "window_minutes": 180}],
+        "preferred_formats": ["short", "single_photo"],
+        "eligible_topics": ["service_journalism", "local_events", "infrastructure", "civic_updates", "local_places", "verified_breaking_updates"],
+        "min_interval_hours": 18,
+        "max_occurrences_7d": 7,
+        "replay_policy": "material_update",
+        "resurface_after_hours": 0,
+        "min_items": 2,
+        "max_items": 4
+      },
+      {
+        "series_id": "ce-se-schimba",
+        "priority": 90,
+        "slots": [{"days": [1,3,5], "time": "16:00", "window_minutes": 240}],
+        "preferred_formats": ["short", "single_photo"],
+        "eligible_topics": ["service_journalism", "infrastructure", "civic_updates", "local_places"],
+        "min_interval_hours": 36,
+        "max_occurrences_7d": 3,
+        "replay_policy": "material_update",
+        "resurface_after_hours": 0,
+        "min_items": 1,
+        "max_items": 2
+      }
+    ]
+  }
+}
