@@ -8,6 +8,7 @@ on:
     branches: [main]
     paths:
       - 'partener-eu/ingest/afir_ingest.py'
+      - 'partener-eu/ops/fix_afir_decision_extraction.py'
       - '.github/workflows/partener-eu-afir-ingest.yml'
 
 permissions:
@@ -15,7 +16,7 @@ permissions:
 
 concurrency:
   group: partener-eu-afir-ingest
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   ingest:
@@ -29,30 +30,53 @@ jobs:
       - name: Install document parser
         run: python -m pip install --disable-pip-version-check pypdf
 
+      - name: Enable dossier-ready AFIR extraction
+        run: |
+          python partener-eu/ops/fix_afir_decision_extraction.py
+          python -m py_compile partener-eu/ingest/afir_ingest.py
+
       - name: Discover and fingerprint official AFIR corpus fail-closed
         run: python partener-eu/ingest/afir_ingest.py
 
-      - name: Persist AFIR corpus and health state conflict-safe
+      - name: Build decision dossiers from fresh AFIR evidence
+        run: python partener-eu/ingest/build_decision_products.py
+
+      - name: Validate decision products
+        run: python partener-eu/ops/test_decision_products.py
+
+      - name: Persist AFIR corpus, enriched source and decision products conflict-safe
         shell: bash
         run: |
           set -euo pipefail
+          cp partener-eu/ingest/afir_ingest.py /tmp/afir_ingest.py
           cp partener-eu/ingest/state/afir_state.json /tmp/afir_state.json
           cp partener-eu/ingest/state/afir_corpus.json /tmp/afir_corpus.json
+          cp partener-eu/ingest/state/decision_products.json /tmp/decision_products.json
+          cp partener-eu/web/decision-products.js /tmp/decision-products.js
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
 
           for attempt in 1 2 3 4 5; do
             git fetch origin main
             git reset --hard origin/main
+            cp /tmp/afir_ingest.py partener-eu/ingest/afir_ingest.py
             cp /tmp/afir_state.json partener-eu/ingest/state/afir_state.json
             cp /tmp/afir_corpus.json partener-eu/ingest/state/afir_corpus.json
+            cp /tmp/decision_products.json partener-eu/ingest/state/decision_products.json
+            cp /tmp/decision-products.js partener-eu/web/decision-products.js
             python partener-eu/ingest/intelligence_index.py
-            git add partener-eu/ingest/state/afir_state.json partener-eu/ingest/state/afir_corpus.json partener-eu/ingest/state/intelligence_index.json
+            git add \
+              partener-eu/ingest/afir_ingest.py \
+              partener-eu/ingest/state/afir_state.json \
+              partener-eu/ingest/state/afir_corpus.json \
+              partener-eu/ingest/state/intelligence_index.json \
+              partener-eu/ingest/state/decision_products.json \
+              partener-eu/web/decision-products.js
             if git diff --cached --quiet; then
-              echo 'No AFIR corpus/state changes.'
+              echo 'No AFIR corpus/state/product changes.'
               exit 0
             fi
-            git commit -m 'Validate official AFIR corpus'
+            git commit -m 'Validate AFIR corpus and regenerate funding dossiers'
             if git push origin HEAD:main; then exit 0; fi
             echo "main advanced during AFIR persistence; retrying ${attempt}/5."
             sleep $((attempt * 2))
