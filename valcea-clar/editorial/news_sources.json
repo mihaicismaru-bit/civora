@@ -8,7 +8,7 @@
     "min_title_chars": 24,
     "max_candidates_per_source": 12,
     "source_pack_scope": "VALCEA_SPECIFIC",
-    "date_provenance_rule": "Automatic sources must expose a trustworthy article-level publication date. Sources whose templates surface a misleading page/global date are quarantined from automatic admission."
+    "date_provenance_rule": "Automatic sources must expose a trustworthy article-level publication date. LOCAL NEWS OS resolves structured article metadata > article-scoped date after H1 > unique page date; ambiguous dates are rejected fail-closed."
   },
   "sources": [
     {
@@ -140,6 +140,16 @@
       "priority": 85,
       "path_hints": ["comunicate-de-pres", "avizier", "bacalaureat", "evaluare-națională", "definitivat", "admitere"],
       "generic_titles": ["comunicate de presă", "isj vâlcea"]
+    },
+    {
+      "id": "ajofm-valcea-comunicate",
+      "publisher": "AJOFM Vâlcea",
+      "url": "https://www.anofm.ro/valcea/categorie/comunicate-de-presa/",
+      "tier": "T1",
+      "section": "ECONOMIE",
+      "priority": 84,
+      "path_hints": ["rata-somajului", "locuri-de-munca", "comunicat", "bursa", "persoane-incadrate", "programe-de-formare"],
+      "generic_titles": ["comunicate de presă", "ajofm vâlcea"]
     },
     {
       "id": "bjai-valcea-evenimente",
