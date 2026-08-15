@@ -1,20 +1,18 @@
 {
   "schema_version": "1.0",
   "type": "VENUE_SOURCE_CHANGE_REVIEW",
-  "source_id": "petros-official-contact",
-  "source_url": "https://gyrospetros.ro/contact/",
+  "source_id": "spartan-official-contact",
+  "source_url": "https://spartan.ro/contact/",
   "source_kind": "official_site",
   "status": "OPEN",
   "first_observed_at": "2026-08-15T05:31:25.345972Z",
   "last_observed_at": "2026-08-15T05:31:25.345972Z",
-  "previous_semantic_sha256": "09f2ccebcccc5668cdc048e98883c49390570fb88cc2865e4ff75952f21b9e39",
-  "current_semantic_sha256": "d47a1f6aaca97165ecc3f501440ca960022e633d219358b09a490c8c30065a4d",
+  "previous_semantic_sha256": "1837601e1c1ac08a6592269326d6f142023c4682738c69ebdffc3ccc85b5b70d",
+  "current_semantic_sha256": "0c15ea4c924f4b526383c459fb57e96f1cfb2a7d10542e07d0f5913b56340e90",
   "potentially_impacted_fields": [
     "address",
-    "phone",
-    "email",
-    "opening_hours",
-    "delivery_hours"
+    "restaurant_existence",
+    "official_menu_link"
   ],
   "material_fact_autoupdate_allowed": false,
   "required_resolution": "Reverify the changed address, hours, menu, prices, operator or other supported facts against the source before rebuilding the public projection."
