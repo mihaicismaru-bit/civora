@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0",
+  "instance_id": "test-local",
+  "environment": "test",
+  "brand": {
+    "name": "LOCAL TEST NEWS",
+    "short_name": "Test Local",
+    "slogan": "Fixture editorială pentru testarea izolării."
+  },
+  "canonical_domain": "test-local.example.invalid",
+  "locale": "ro-RO",
+  "timezone": "Europe/Bucharest",
+  "country": "RO",
+  "geography": {
+    "type": "test",
+    "primary_name": "Județ Test",
+    "county": "Test",
+    "settlements": ["Oraș Test", "Comuna Test"],
+    "aliases": ["Test County"]
+  },
+  "edition_schedule": {
+    "morning": "08:00",
+    "evening": "19:00"
+  },
+  "packs": {
+    "source_pack": "local-news-os/instances/test-local/fixtures/source_pack.json",
+    "brand_pack": "local-news-os/instances/test-local/fixtures/brand_pack.json",
+    "geography_pack": "local-news-os/instances/test-local/instance.json"
+  },
+  "modules": {
+    "news": true,
+    "events": true,
+    "local_places": true,
+    "social_publications": true
+  },
+  "runtime": {
+    "state_root": "local-news-os/instances/test-local/state",
+    "output_root": "local-news-os/instances/test-local/runtime",
+    "current_edition": "local-news-os/instances/test-local/runtime/current_edition.json",
+    "live_feed": "local-news-os/instances/test-local/runtime/live-feed.json"
+  },
+  "social_channels": ["facebook", "instagram"],
+  "policies": {
+    "zero_paid_dependency": true,
+    "llm_required": false,
+    "verified_facts_only": true,
+    "last_known_good": true
+  }
+}
