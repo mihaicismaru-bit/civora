@@ -10,7 +10,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-
 FORBIDDEN_RUNTIME_MARKERS = {
     "OPENAI_API_KEY": "OpenAI API secret",
     "api.openai.com": "OpenAI API endpoint",
@@ -42,12 +41,14 @@ def load_json(path: Path) -> dict[str, Any]:
 
 
 def cron_declared(workflow_text: str, cron: str) -> bool:
-    candidates = (
-        f'cron: "{cron}"',
-        f"cron: '{cron}'",
-        f"cron: {cron}",
+    return any(
+        candidate in workflow_text
+        for candidate in (
+            f'cron: "{cron}"',
+            f"cron: '{cron}'",
+            f"cron: {cron}",
+        )
     )
-    return any(candidate in workflow_text for candidate in candidates)
 
 
 def runtime_files(site_root: Path) -> list[Path]:
@@ -81,7 +82,6 @@ def validate(repo_root: Path) -> dict[str, Any]:
 
     registry = load_json(registry_path)
     chatgpt = registry.get("chatgpt", {})
-
     ownership_checks = {
         "execution_owner": registry.get("execution_owner") == "civora_site_engine",
         "scheduler": registry.get("scheduler") == "github_actions",
@@ -106,21 +106,17 @@ def validate(repo_root: Path) -> dict[str, Any]:
     seen_ids: set[str] = set()
     seen_workflows: set[str] = set()
     workflow_texts: dict[str, str] = {}
-
     for job in jobs:
         job_id = str(job.get("id", "")).strip()
         workflow = str(job.get("workflow", "")).strip()
         owner = job.get("owner")
         schedule = job.get("schedule", [])
-
         if not job_id or job_id in seen_ids:
             errors.append(f"Invalid or duplicate job id: {job_id!r}")
         seen_ids.add(job_id)
-
         if not workflow or workflow in seen_workflows:
             errors.append(f"Invalid or duplicate workflow for {job_id}: {workflow!r}")
         seen_workflows.add(workflow)
-
         if owner != "site_engine":
             errors.append(f"{job_id}: owner must be site_engine, got {owner!r}")
 
@@ -128,22 +124,18 @@ def validate(repo_root: Path) -> dict[str, Any]:
         if not workflow_path.is_file():
             errors.append(f"{job_id}: missing workflow {workflow}")
             continue
-
         text = workflow_path.read_text(encoding="utf-8")
         workflow_texts[workflow] = text
         lowered = text.lower()
-
         if "runs-on: ubuntu-latest" not in text:
             errors.append(f"{job_id}: workflow must run on GitHub-hosted ubuntu-latest")
         if "runs-on: self-hosted" in lowered or "[self-hosted" in lowered:
             errors.append(f"{job_id}: self-hosted/local runners are forbidden")
         if "actions/checkout@" not in text:
             errors.append(f"{job_id}: workflow does not check out the canonical repository")
-
         for cron in schedule:
             if not cron_declared(text, str(cron)):
                 errors.append(f"{job_id}: missing registered cron {cron!r}")
-
         checks.append(
             {
                 "check": f"workflow:{job_id}",
@@ -169,8 +161,13 @@ def validate(repo_root: Path) -> dict[str, Any]:
     required_social_markers = {
         "validate_social_engine.py": "social ownership validator",
         "facebook_publish.py --apply": "native Facebook publishing adapter",
-        "VALCEA_FB_PAGE_ACCESS_TOKEN": "runtime secret reference",
-        "github.event_name != 'pull_request'": "no publishing from pull requests",
+        "instagram_publish.py --apply": "native Instagram publishing adapter",
+        "tiktok_publish.py --apply": "native TikTok publishing adapter",
+        "build_social_media_assets.py": "public social media asset projection",
+        "VALCEA_FB_PAGE_ACCESS_TOKEN": "Facebook runtime secret reference",
+        "VALCEA_IG_ACCESS_TOKEN": "Instagram runtime secret reference",
+        "VALCEA_TIKTOK_ACCESS_TOKEN": "TikTok runtime secret reference",
+        "github.event_name != 'pull_request'": "no social publication from pull requests",
     }
     for marker, label in required_social_markers.items():
         passed = marker in social
@@ -208,10 +205,9 @@ def validate(repo_root: Path) -> dict[str, Any]:
         if path and (repo_root / path).exists():
             errors.append(f"Retired workflow still exists and could execute: {path}")
 
-    status = "PASS" if not errors else "FAIL"
     return {
         "checked_at": utc_now(),
-        "status": status,
+        "status": "PASS" if not errors else "FAIL",
         "execution_owner": registry.get("execution_owner"),
         "scheduler": registry.get("scheduler"),
         "registered_jobs": len(jobs),
@@ -227,31 +223,18 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Validate that all CIVORA/VÂLCEA CLAR automation is site-engine owned."
     )
-    parser.add_argument(
-        "--repo-root",
-        type=Path,
-        help="Repository root. Defaults to the root inferred from this script.",
-    )
-    parser.add_argument(
-        "--report",
-        type=Path,
-        help="Optional JSON report path. Relative paths are resolved from the repository root.",
-    )
+    parser.add_argument("--repo-root", type=Path)
+    parser.add_argument("--report", type=Path)
     args = parser.parse_args()
-
     repo_root = args.repo_root.resolve() if args.repo_root else Path(__file__).resolve().parents[2]
     report = validate(repo_root)
-
     if args.report:
-        report_path = args.report
-        if not report_path.is_absolute():
-            report_path = repo_root / report_path
-        report_path.parent.mkdir(parents=True, exist_ok=True)
-        report_path.write_text(
+        target = args.report if args.report.is_absolute() else repo_root / args.report
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(
             json.dumps(report, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",
         )
-
     print(json.dumps(report, ensure_ascii=False, indent=2))
     return 0 if report["status"] == "PASS" else 1
 
