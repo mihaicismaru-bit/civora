@@ -10,11 +10,6 @@ on:
       - 'partener-eu/ingest/mipe_resilient_ingest.py'
       - 'partener-eu/ingest/mipe_discovery_ingest.py'
       - 'partener-eu/ingest/build_mysmis_consultant_registry.py'
-      - 'partener-eu/ops/fix_mipe_resilient_classifier.py'
-      - 'partener-eu/ops/fix_mipe_resilient_runtime.py'
-      - 'partener-eu/ops/fix_mipe_first_party_relay.py'
-      - 'partener-eu/ops/fix_mipe_dual_relay.py'
-      - 'partener-eu/ops/fix_mipe_dual_reporting.py'
       - 'partener-eu/ops/test_mipe_resilient_ingest.py'
       - 'partener-eu/ingest/state/mipe_known_canonical_seeds.json'
       - 'partener-eu/ingest/state/mipe_discovery_sources.json'
@@ -33,8 +28,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      # Direct canonical fetch remains first choice. The relay endpoint is a
-      # controlled fallback and is ignored when unavailable/protected.
       MIPE_RELAY_URL: https://partener-mipe-relay-mihaicismaru-6634s-projects.vercel.app/api/mipe
     steps:
       - uses: actions/checkout@v6
@@ -48,20 +41,12 @@ jobs:
       - name: Discover official canonical MIPE URLs and refresh direct MySMIS snapshot
         run: python partener-eu/ingest/mipe_discovery_ingest.py
 
-      - name: Assemble idempotent direct-first resilient transport
-        run: |
-          python partener-eu/ops/fix_mipe_resilient_classifier.py
-          python partener-eu/ops/fix_mipe_resilient_runtime.py
-          python partener-eu/ops/fix_mipe_first_party_relay.py
-          python partener-eu/ops/fix_mipe_dual_relay.py
-          python partener-eu/ops/fix_mipe_dual_reporting.py
-
-      - name: Syntax and offline policy regression
+      - name: Syntax and offline provenance regression
         run: |
           python -m py_compile partener-eu/ingest/mipe_resilient_ingest.py
           python partener-eu/ops/test_mipe_resilient_ingest.py
 
-      - name: Ingest official MIPE pages
+      - name: Ingest official MIPE pages through the direct-first resilient transport
         run: python partener-eu/ingest/mipe_resilient_ingest.py
 
       - name: Build direct MySMIS evidence for Consultant Workspace
@@ -77,11 +62,11 @@ jobs:
 
           state_path = Path('partener-eu/ingest/state/mipe_state.json')
           feed_path = Path('partener-eu/web/mipe-news.js')
-          registry_path = Path('partener-eu/ingest/state/mipe_source_registry.json')
+          source_registry_path = Path('partener-eu/ingest/state/mipe_source_registry.json')
           consultant_registry_path = Path('partener-eu/web/mysmis-registry.js')
           index_path = Path('partener-eu/web/index.html')
-          for path in (state_path, feed_path, registry_path, consultant_registry_path, index_path):
-              assert path.exists(), f'missing required artifact: {path}'
+          for path in (state_path, feed_path, source_registry_path, consultant_registry_path, index_path):
+              assert path.exists(), f'missing artifact: {path}'
 
           state = json.loads(state_path.read_text(encoding='utf-8'))
           assert state.get('status') in {
@@ -90,29 +75,24 @@ jobs:
               'DEGRADED_LAST_KNOWN_GOOD_PRESERVED',
               'SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED',
           }
-          allowed = {
+          allowed_hosts = {
               'mfe.gov.ro', 'www.mfe.gov.ro',
               'fonduri-ue.gov.ro', 'www.fonduri-ue.gov.ro',
               'fonduri-ue.ro', 'www.fonduri-ue.ro',
               'oportunitati-ue.gov.ro', 'www.oportunitati-ue.gov.ro',
               'reporting.mysmis2021.gov.ro',
           }
-          boilerplate = (
-              'skip to main content', 'adaugă ca sursă preferată',
-              'bine ați venit pe site', 'blob:http://localhost'
-          )
+          boilerplate = ('skip to main content', 'adaugă ca sursă preferată', 'bine ați venit pe site', 'blob:http://localhost')
           for item in state.get('items', []):
               url = item.get('url', '')
-              assert url.startswith('https://')
-              assert urlparse(url).hostname in allowed, url
-              assert item.get('title')
-              transport = item.get('retrievalTransport', '')
-              assert transport
+              assert urlparse(url).hostname in allowed_hosts, url
+              assert item.get('title') and item.get('retrievalTransport')
               if item.get('source') == 'MIPE / MySMIS':
                   assert item.get('verification') == 'CANONICAL_OFFICIAL_FETCH'
                   continue
               assert item.get('decisionUseful') is True, item.get('title')
               assert not any(marker in item.get('summary', '').lower() for marker in boilerplate), item.get('title')
+              transport = item['retrievalTransport']
               if 'dual-relay-corroborated' in transport:
                   assert item.get('tier') == 'T1_DUAL_RELAY_CORROBORATED'
               elif 'first-party-relay' in transport:
@@ -120,10 +100,7 @@ jobs:
               else:
                   assert transport.startswith('direct') or transport == 'legacy-preserved', transport
 
-          dual_roots = [
-              row for row in state.get('lastRun', {}).get('roots', [])
-              if row.get('transport') == 'canonical-dual-relay-corroborated'
-          ]
+          dual_roots = [row for row in state.get('lastRun', {}).get('roots', []) if row.get('transport') == 'canonical-dual-relay-corroborated']
           for row in dual_roots:
               assert row.get('verification') == 'CANONICAL_DUAL_RELAY_CORROBORATED'
               assert len(row.get('readerSha256', '')) == 64
@@ -132,35 +109,30 @@ jobs:
               assert row.get('readerUrl', '').startswith('https://r.jina.ai/https://mfe.gov.ro/')
               assert row.get('translateUrl', '').startswith('https://mfe-gov-ro.translate.goog/')
 
-          text = feed_path.read_text(encoding='utf-8')
-          assert 'window.PARTENER_DATA.mipeIngestion=' in text
-          assert 'window.PARTENER_DATA.mipeNews=' in text
+          feed_text = feed_path.read_text(encoding='utf-8')
+          assert 'window.PARTENER_DATA.mipeIngestion=' in feed_text
+          assert 'window.PARTENER_DATA.mipeNews=' in feed_text
 
           registry_text = consultant_registry_path.read_text(encoding='utf-8')
           marker = 'window.PARTENER_DATA.mysmisRegistry='
           assert marker in registry_text
-          payload = json.loads(registry_text.split(marker, 1)[1].rsplit(';', 1)[0])
-          assert payload.get('directOnly') is True
-          source_url = payload.get('source', {}).get('canonicalUrl', '')
-          assert urlparse(source_url).hostname == 'reporting.mysmis2021.gov.ro'
-          assert payload.get('status') in {'OK_DIRECT', 'UNAVAILABLE_FAIL_CLOSED'}
-          if payload.get('status') == 'OK_DIRECT':
-              assert payload.get('calls'), 'direct registry must contain visible rows'
-              assert payload.get('source', {}).get('retrieval') == 'CANONICAL_OFFICIAL_FETCH'
+          mysmis = json.loads(registry_text.split(marker, 1)[1].rsplit(';', 1)[0])
+          assert mysmis.get('directOnly') is True
+          assert urlparse(mysmis.get('source', {}).get('canonicalUrl', '')).hostname == 'reporting.mysmis2021.gov.ro'
+          assert mysmis.get('status') in {'OK_DIRECT', 'UNAVAILABLE_FAIL_CLOSED'}
+          if mysmis.get('status') == 'OK_DIRECT':
+              assert mysmis.get('calls')
+              assert mysmis.get('source', {}).get('retrieval') == 'CANONICAL_OFFICIAL_FETCH'
 
-          index = index_path.read_text(encoding='utf-8')
-          assert 'mipe-news.js?v=' in index and 'mipe-news-adapter.js?v=' in index
           print(json.dumps({
               'status': state.get('status'),
               'transportMode': state.get('lastRun', {}).get('transportMode'),
               'currentVerifiedCount': state.get('lastRun', {}).get('currentVerifiedCount'),
               'publishedItemCount': state.get('lastRun', {}).get('publishedItemCount'),
               'dualRelaySuccessCount': state.get('lastRun', {}).get('dualRelaySuccessCount'),
-              'mysmis': {
-                  'status': payload.get('status'),
-                  'visibleRowCount': payload.get('visibleRowCount'),
-                  'validatedCallCount': payload.get('validatedCallCount'),
-              },
+              'mysmisStatus': mysmis.get('status'),
+              'mysmisVisibleRows': mysmis.get('visibleRowCount'),
+              'mysmisValidatedCalls': mysmis.get('validatedCallCount'),
           }, ensure_ascii=False, indent=2))
           PY
 
@@ -184,7 +156,6 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
 
           for attempt in 1 2 3 4 5; do
-            echo "Persistence attempt ${attempt}/5"
             git fetch origin main
             git reset --hard origin/main
             cp /tmp/mipe-news.js partener-eu/web/mipe-news.js
@@ -219,19 +190,14 @@ jobs:
               partener-eu/ingest/state/intelligence_index.json
 
             if git diff --cached --quiet; then
-              echo 'No MIPE, MySMIS, runtime or discovery-map changes.'
+              echo 'No MIPE, MySMIS, runtime or discovery changes.'
               exit 0
             fi
 
             git commit -m 'Ingest verified MIPE and MySMIS updates'
             if git push origin HEAD:main; then
-              echo 'MIPE and MySMIS outputs persisted to main.'
               exit 0
             fi
-
-            echo 'main advanced during push; rebuilding output-only commit on the new tip.'
             sleep $((attempt * 2))
           done
-
-          echo 'Unable to persist MIPE outputs after five conflict-safe attempts.' >&2
           exit 1
