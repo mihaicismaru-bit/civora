@@ -40,8 +40,24 @@ replacements = [
     ),
 ]
 
+already_markers = {
+    "bounded concurrency import": "from concurrent.futures import ThreadPoolExecutor",
+    "index cache-bust path": 'INDEX_PATH = ROOT / "partener-eu" / "web" / "index.html"',
+    "candidate bound": "MAX_CANDIDATES = 32",
+    "search result bound": "MAX_SEARCH_RESULTS = 24",
+    "direct timeout": "direct = fetch(canonical, timeout=6, attempts=1)",
+    "reader timeout": 'proxy = fetch(reader_url(canonical), timeout=18, attempts=1',
+    "search timeout": 'result = fetch(search_url(query), timeout=18, attempts=1',
+    "legacy feed provenance normalization": 'normalized.setdefault("retrievalTransport", "legacy-preserved")',
+    "parallel candidate fetch": 'ThreadPoolExecutor(max_workers=8, thread_name_prefix="mipe-fetch")',
+    "MIPE asset cache bust": "GitHub Pages may cache static JavaScript by URL",
+}
+
 for old, new, label in replacements:
-    if new in text:
+    marker = already_markers.get(label)
+    if marker and marker in text:
+        print(f"MIPE runtime {label}: already applied")
+    elif new in text:
         print(f"MIPE runtime {label}: already applied")
     elif old in text:
         text = text.replace(old, new, 1)
