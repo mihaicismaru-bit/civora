@@ -27,8 +27,11 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
-      - name: Compile generic instance validator
-        run: python -m py_compile local-news-os/core/validate_instance_config.py
+      - name: Compile generic instance tools
+        run: |
+          python -m py_compile \
+            local-news-os/core/validate_instance_config.py \
+            local-news-os/core/build_instance_manifest.py
       - name: Validate production and test instances
         run: python local-news-os/core/validate_instance_config.py
       - name: Assert fixture packs are isolated
@@ -42,3 +45,34 @@ jobs:
           ! grep -Eiq 'vâlcea|valcea|ramnicu|râmnicu|valceaclar\.ro' \
             local-news-os/instances/test-local/fixtures/source_pack.json \
             local-news-os/instances/test-local/fixtures/brand_pack.json
+      - name: Build both instances with the same generic engine
+        run: |
+          python local-news-os/core/build_instance_manifest.py valcea --output /tmp/valcea-manifest.json
+          python local-news-os/core/build_instance_manifest.py test-local --output /tmp/test-local-manifest.json
+          cat /tmp/valcea-manifest.json
+          cat /tmp/test-local-manifest.json
+      - name: Prove runtime and identity isolation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          valcea = json.loads(Path('/tmp/valcea-manifest.json').read_text(encoding='utf-8'))
+          test = json.loads(Path('/tmp/test-local-manifest.json').read_text(encoding='utf-8'))
+          assert valcea['instance_id'] == 'valcea'
+          assert test['instance_id'] == 'test-local'
+          assert valcea['canonical_domain'] != test['canonical_domain']
+          assert valcea['runtime']['state_root'] != test['runtime']['state_root']
+          assert valcea['runtime']['output_root'] != test['runtime']['output_root']
+          assert valcea['config_sha256'] != test['config_sha256']
+          assert valcea['policies']['zero_paid_dependency'] is True
+          assert test['policies']['zero_paid_dependency'] is True
+          assert valcea['policies']['llm_required'] is False
+          assert test['policies']['llm_required'] is False
+          serialized = json.dumps(test, ensure_ascii=False).lower()
+          for forbidden in ('vâlcea', 'valcea', 'râmnicu', 'ramnicu', 'valceaclar.ro'):
+              assert forbidden not in serialized, forbidden
+          print('DUAL_INSTANCE_ISOLATION_PASS')
+          PY
