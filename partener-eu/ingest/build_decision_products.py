@@ -430,6 +430,9 @@ def build_p11_dossier(item: dict[str, Any], generated_at: str) -> dict[str, Any]
 
 
 def afir_page_class(item: dict[str, Any]) -> str:
+    explicit = str(item.get("pageClass") or "").upper()
+    if explicit in {"INTERVENTION_OR_CALL", "SESSION", "GUIDE", "CALL_CANDIDATE", "DOCUMENT"}:
+        return explicit
     value = norm_text(f"{item.get('title')} {item.get('url')}")
     if re.search(r"\bdr\s*\d{1,3}\b", value) or "schema de energie" in value or "investalim" in value:
         return "INTERVENTION_OR_CALL"
@@ -443,6 +446,8 @@ def afir_page_class(item: dict[str, Any]) -> str:
 
 
 def mipe_call_like(item: dict[str, Any]) -> bool:
+    if str(item.get("pageClass") or "").upper() in {"CALL_OR_GUIDE", "INTERVENTION_OR_CALL", "SESSION", "GUIDE", "CALL_CANDIDATE"}:
+        return True
     if item.get("kind") in CALL_EVENT_KINDS:
         return True
     value = norm_text(f"{item.get('title')} {item.get('url')}")
