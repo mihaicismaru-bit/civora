@@ -49,7 +49,15 @@ jobs:
           print(urllib.parse.quote('https://mfe.gov.ro/pdds/despre-program-programare/', safe=''))
           PY
           )
-          curl -fsS --connect-timeout 8 --max-time 35 "$BASE/api/fetch?url=$URL" -o /tmp/collector.json
+          CODE=$(curl -sS -D /tmp/collector.headers --connect-timeout 8 --max-time 35 "$BASE/api/fetch?url=$URL" -o /tmp/collector.body -w '%{http_code}')
+          echo "collector HTTP status: $CODE"
+          echo '--- headers ---'
+          sed -n '1,40p' /tmp/collector.headers
+          echo '--- first 800 bytes ---'
+          head -c 800 /tmp/collector.body | tr -cd '\11\12\15\40-\176' || true
+          echo
+          test "$CODE" -ge 200 -a "$CODE" -lt 300
+          cp /tmp/collector.body /tmp/collector.json
           python - <<'PY'
           import base64, hashlib, json
           d=json.load(open('/tmp/collector.json',encoding='utf-8'))
