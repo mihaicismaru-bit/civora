@@ -15,8 +15,8 @@ on:
       - 'partener-eu/ingest/state/mipe_ro_trigger.txt'
       - '.github/workflows/partener-eu-mipe-ro-runner.yml'
 
-# One-time Romanian-egress collector. It runs only on a repository-owned
-# Windows x64 self-hosted runner and never on pull_request events.
+# Romanian-egress collector. It runs only on a repository-owned Windows x64
+# self-hosted runner and never on pull_request events.
 
 permissions:
   contents: write
@@ -28,12 +28,15 @@ concurrency:
 jobs:
   ingest-ro:
     runs-on: [self-hosted, Windows, X64]
-    timeout-minutes: 40
+    timeout-minutes: 20
     env:
       PYTHONUTF8: '1'
       MIPE_FORCE_IP: ''
       MIPE_RELAY_URL: ''
-      MIPE_MAX_PAGES: '90'
+      MIPE_MAX_PAGES: '28'
+      MIPE_RUNTIME_SECONDS: '480'
+      MIPE_PAGE_TIMEOUT_MS: '15000'
+      MIPE_PAGE_WAIT_MS: '500'
 
     steps:
       - uses: actions/checkout@v6
@@ -102,6 +105,7 @@ jobs:
               'https://mfe.gov.ro/ghiduri_peos/',
               'https://mfe.gov.ro/ghiduri_pids/',
               'https://mfe.gov.ro/pdds/despre-program-programare/',
+              'https://mfe.gov.ro/pnrr/',
           ]
           rows=[]
           for url in urls:
@@ -110,36 +114,52 @@ jobs:
                       'User-Agent':'Mozilla/5.0 PARTENER.EU Romanian Collector',
                       'Accept-Language':'ro,en;q=0.7',
                   })
-                  with urllib.request.urlopen(req,timeout=20,context=ssl.create_default_context()) as r:
+                  with urllib.request.urlopen(req,timeout=12,context=ssl.create_default_context()) as r:
                       body=r.read(250000)
                       rows.append({'url':url,'ok':200 <= r.status < 400,'status':r.status,'bytes':len(body),'finalUrl':r.geturl()})
               except Exception as exc:
                   rows.append({'url':url,'ok':False,'error':f'{type(exc).__name__}: {exc}'})
           print(json.dumps(rows,ensure_ascii=False,indent=2))
           if not any(row.get('ok') for row in rows):
-              print('HTTP simplu este respins de MIPE; continuăm printr-un browser Edge real.')
+              print('HTTP simplu este respins de MIPE; continuăm prin browser real.')
           '@ | Set-Content -Encoding UTF8 .\mipe_ro_probe.py
           & $env:PYTHON_EXE .\mipe_ro_probe.py
 
-      - name: Prepare Playwright with interactive Microsoft Edge
+      - name: Prepare Playwright and detect Microsoft Edge correctly
         shell: pwsh
         run: |
-          & $env:PYTHON_EXE -m pip install --disable-pip-version-check --upgrade pip
+          $ErrorActionPreference = 'Stop'
           & $env:PYTHON_EXE -m pip install --disable-pip-version-check playwright
 
-          $edgeCandidates = @(
-            "$env:ProgramFiles(x86)\Microsoft\Edge\Application\msedge.exe",
-            "$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe",
-            "$env:LOCALAPPDATA\Microsoft\Edge\Application\msedge.exe"
-          )
-          $edge = $edgeCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+          $edgeCandidates = @()
+          if (${env:ProgramFiles(x86)}) {
+            $edgeCandidates += (Join-Path ${env:ProgramFiles(x86)} 'Microsoft\Edge\Application\msedge.exe')
+          }
+          if ($env:ProgramFiles) {
+            $edgeCandidates += (Join-Path $env:ProgramFiles 'Microsoft\Edge\Application\msedge.exe')
+          }
+          if ($env:LOCALAPPDATA) {
+            $edgeCandidates += (Join-Path $env:LOCALAPPDATA 'Microsoft\Edge\Application\msedge.exe')
+          }
+          try {
+            $registryEdge = (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\msedge.exe' -ErrorAction Stop).'(default)'
+            if ($registryEdge) { $edgeCandidates += $registryEdge }
+          } catch {}
+          try {
+            $registryEdge32 = (Get-ItemProperty 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\App Paths\msedge.exe' -ErrorAction Stop).'(default)'
+            if ($registryEdge32) { $edgeCandidates += $registryEdge32 }
+          } catch {}
+
+          $edge = $edgeCandidates | Where-Object { $_ -and (Test-Path $_) } | Select-Object -Unique | Select-Object -First 1
           if ($edge) {
             Write-Host "Microsoft Edge găsit: $edge"
-            "MIPE_BROWSER_CHANNEL=msedge" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+            "MIPE_BROWSER_EXECUTABLE=$edge" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+            "MIPE_BROWSER_CHANNEL=" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
             "MIPE_HEADLESS=0" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           } else {
-            Write-Host 'Microsoft Edge nu a fost găsit; instalez Chromium Playwright.'
+            Write-Host 'Microsoft Edge nu a fost găsit; folosesc Chromium Playwright headless.'
             & $env:PYTHON_EXE -m playwright install chromium
+            "MIPE_BROWSER_EXECUTABLE=" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
             "MIPE_BROWSER_CHANNEL=" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
             "MIPE_HEADLESS=1" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           }
@@ -147,10 +167,11 @@ jobs:
       - name: Collect official MIPE pages through Romanian browser egress
         shell: pwsh
         run: |
-          Write-Host "Browser channel: $env:MIPE_BROWSER_CHANNEL; headless: $env:MIPE_HEADLESS"
+          Write-Host "Browser executable: $env:MIPE_BROWSER_EXECUTABLE"
+          Write-Host "Headless: $env:MIPE_HEADLESS; page budget: $env:MIPE_MAX_PAGES; runtime budget: $env:MIPE_RUNTIME_SECONDS sec"
           & $env:PYTHON_EXE partener-eu/ingest/mipe_browser_ingest.py
 
-      - name: Normalize direct-source provenance and bust feed cache
+      - name: Normalize provenance and bust feed cache
         shell: pwsh
         run: |
           @'
@@ -162,27 +183,36 @@ jobs:
           index_path=Path('partener-eu/web/index.html')
           state=json.loads(state_path.read_text(encoding='utf-8'))
           run=state.get('lastRun') or {}
-          if not run.get('sourceAvailable'):
-              raise SystemExit('MIPE nu a devenit disponibil nici în browserul Microsoft Edge.')
-          for item in state.get('items',[]):
-              url=item.get('url','')
-              if not (url.startswith('https://mfe.gov.ro/') or url.startswith('https://www.mfe.gov.ro/')):
-                  raise SystemExit(f'URL neoficial respins: {url}')
-              item['tier']='T1'
-              item['retrievalTransport']=run.get('transport') or 'playwright-direct-romania'
-              item['verification']='CANONICAL_OFFICIAL_FETCH'
-          state['status']='OK'
-          run['status']='OK'
-          run['directSuccessCount']=sum(1 for root in run.get('roots',[]) if root.get('ok'))
+          available=bool(run.get('sourceAvailable'))
+
+          if available:
+              for item in state.get('items',[]):
+                  url=item.get('url','')
+                  if not (url.startswith('https://mfe.gov.ro/') or url.startswith('https://www.mfe.gov.ro/')):
+                      raise SystemExit(f'URL neoficial respins: {url}')
+                  if item.get('observedAt') == run.get('observedAt') or item.get('retrievalTransport','').startswith('playwright-'):
+                      item['tier']='T1'
+                      item['retrievalTransport']=run.get('transport') or 'playwright-direct-romania'
+                      item['verification']='CANONICAL_OFFICIAL_FETCH'
+              state['status']='OK' if run.get('parsedRelevantCount') else 'OK_NO_NEW_RELEVANT_ITEMS'
+              run['status']=state['status']
+              run['directSuccessCount']=sum(1 for root in run.get('roots',[]) if root.get('ok'))
+          else:
+              state['status']='SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED'
+              run['status']=state['status']
+              run['directSuccessCount']=0
+
           state['lastRun']=run
           state_path.write_text(json.dumps(state,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
           meta={
-              'status':'OK',
+              'status':state['status'],
               'asOf':run.get('observedAt'),
               'source':'MIPE official web properties',
               'roots':run.get('roots',[]),
               'itemCount':len(state.get('items',[])),
               'transport':run.get('transport'),
+              'sourceAvailable':available,
+              'deadlineReached':run.get('deadlineReached'),
           }
           js='window.PARTENER_DATA=window.PARTENER_DATA||{};\n'
           js+='window.PARTENER_DATA.mipeIngestion='+json.dumps(meta,ensure_ascii=False,separators=(',',':'))+';\n'
@@ -196,7 +226,15 @@ jobs:
               index=re.sub(r'(mipe-news-adapter\.js\?v=)[^"\']+',rf'\g<1>{version}',index)
               index_path.write_text(index,encoding='utf-8')
 
-          print(json.dumps({'status':'OK','directRoots':run['directSuccessCount'],'items':len(state.get('items',[])),'transport':run.get('transport')},ensure_ascii=False,indent=2))
+          print(json.dumps({
+              'status':state['status'],
+              'sourceAvailable':available,
+              'directRoots':run.get('directSuccessCount'),
+              'pagesVisited':run.get('candidateCount'),
+              'items':len(state.get('items',[])),
+              'fresh':run.get('parsedRelevantCount'),
+              'runtimeSeconds':run.get('runtimeSeconds'),
+          },ensure_ascii=False,indent=2))
           '@ | Set-Content -Encoding UTF8 .\normalize_mipe_ro.py
           & $env:PYTHON_EXE .\normalize_mipe_ro.py
 
@@ -206,7 +244,7 @@ jobs:
           & $env:PYTHON_EXE partener-eu/ingest/build_mysmis_consultant_registry.py
           & $env:PYTHON_EXE partener-eu/ingest/intelligence_index.py
 
-      - name: Persist verified direct feed through GitHub API
+      - name: Persist Romanian collector evidence through GitHub API
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.persist }}
         shell: pwsh
         env:
@@ -254,7 +292,7 @@ jobs:
                       entries.append({'path':path,'mode':'100644','type':'blob','sha':blob['sha']})
                   tree=request('POST',f'{api}/git/trees',{'base_tree':commit['tree']['sha'],'tree':entries})
                   new_commit=request('POST',f'{api}/git/commits',{
-                      'message':'Ingest verified MIPE updates from Romanian Windows collector',
+                      'message':'Persist MIPE Romanian collector evidence',
                       'tree':tree['sha'],
                       'parents':[parent],
                   })
@@ -268,3 +306,17 @@ jobs:
                   time.sleep(attempt*2)
           '@ | Set-Content -Encoding UTF8 .\persist_mipe_ro_api.py
           & $env:PYTHON_EXE .\persist_mipe_ro_api.py
+
+      - name: Enforce direct-source result after evidence persistence
+        shell: pwsh
+        run: |
+          @'
+          import json
+          from pathlib import Path
+          state=json.loads(Path('partener-eu/ingest/state/mipe_state.json').read_text(encoding='utf-8'))
+          run=state.get('lastRun') or {}
+          print(json.dumps(run,ensure_ascii=False,indent=2))
+          if not run.get('sourceAvailable') or not any(root.get('ok') for root in run.get('roots',[])):
+              raise SystemExit('Colectorul a persistat diagnosticul, dar nu a obținut încă o pagină MIPE directă.')
+          '@ | Set-Content -Encoding UTF8 .\gate_mipe_ro.py
+          & $env:PYTHON_EXE .\gate_mipe_ro.py
