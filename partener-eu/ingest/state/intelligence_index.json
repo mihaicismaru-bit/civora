@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-08-15T04:58:32Z",
+  "generatedAt": "2026-08-15T04:59:00Z",
   "readiness": "DEGRADED_FAIL_CLOSED",
   "policy": {
     "purpose": "unified-search-and-evidence-index",
@@ -34,7 +34,7 @@
       "observedAt": "2026-08-15T04:57:40.963379+00:00",
       "freshness": {
         "status": "CURRENT",
-        "ageHours": 0.01,
+        "ageHours": 0.02,
         "maxAgeHours": 4
       },
       "itemCount": 31,
@@ -56,11 +56,11 @@
       "dependencyScopes": [
         "PEO_PLANNING_SIGNALS"
       ],
-      "status": "OK_OFFICIAL_OIR_COPY",
+      "status": "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
       "observedAt": "2026-08-15T03:10:04.111355+00:00",
       "freshness": {
         "status": "CURRENT",
-        "ageHours": 1.81,
+        "ageHours": 1.82,
         "maxAgeHours": 8
       },
       "itemCount": 30,
@@ -88,7 +88,7 @@
       "observedAt": "2026-08-15T04:58:31.765760+00:00",
       "freshness": {
         "status": "CURRENT",
-        "ageHours": 0.0,
+        "ageHours": 0.01,
         "maxAgeHours": 4
       },
       "itemCount": 1,
@@ -2145,19 +2145,19 @@
         {
           "sourceId": "AFIR_CORPUS",
           "status": "CURRENT",
-          "ageHours": 0.01,
+          "ageHours": 0.02,
           "maxAgeHours": 4
         },
         {
           "sourceId": "MIPE_CORPUS",
           "status": "CURRENT",
-          "ageHours": 0.0,
+          "ageHours": 0.01,
           "maxAgeHours": 4
         },
         {
           "sourceId": "PEO_CALENDAR",
           "status": "CURRENT",
-          "ageHours": 1.81,
+          "ageHours": 1.82,
           "maxAgeHours": 8
         },
         {
@@ -2365,7 +2365,6 @@
             "SRC-MAI-FED-CALENDAR-INDEX"
           ],
           "availableSourceIds": [
-            "PEO_CALENDAR",
             "SRC-MAI-FED-CALENDAR-INDEX"
           ]
         }
@@ -2393,7 +2392,7 @@
         "observedAt": "2026-08-15T04:57:40.963379+00:00",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 0.01,
+          "ageHours": 0.02,
           "maxAgeHours": 4
         },
         "itemCount": 31,
@@ -2431,7 +2430,7 @@
         "observedAt": "2026-08-15T04:58:31.765760+00:00",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 0.0,
+          "ageHours": 0.01,
           "maxAgeHours": 4
         },
         "itemCount": 1,
@@ -2467,11 +2466,11 @@
         "dependencyScopes": [
           "PEO_PLANNING_SIGNALS"
         ],
-        "status": "OK_OFFICIAL_OIR_COPY",
+        "status": "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
         "observedAt": "2026-08-15T03:10:04.111355+00:00",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.81,
+          "ageHours": 1.82,
           "maxAgeHours": 8
         },
         "itemCount": 30,
@@ -3193,6 +3192,7 @@
       "globalStop": false,
       "blockedSourceIds": [
         "MIPE_CORPUS",
+        "PEO_CALENDAR",
         "SRC-ADRCENTRU-PTJ-CONSULT",
         "SRC-ADRVEST-PTJ-ACTIVE",
         "SRC-MAI-FED-CALENDAR-INDEX",
@@ -3239,12 +3239,14 @@
         },
         {
           "sourceId": "PEO_CALENDAR",
-          "availability": "AVAILABLE",
-          "materialFactGate": "PLANNING_ONLY",
+          "availability": "UNAVAILABLE_LAST_KNOWN_GOOD",
+          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
           "affectedScopes": [
             "PEO_PLANNING_SIGNALS"
           ],
-          "blockingReasons": [],
+          "blockingReasons": [
+            "UNAVAILABLE_LAST_KNOWN_GOOD"
+          ],
           "lastKnownGoodPreserved": true,
           "blocksUnrelatedSources": false,
           "publishMaterialFacts": false
@@ -3523,11 +3525,11 @@
     "replay": {
       "status": "PASS",
       "algorithm": "sha256-canonical-json",
-      "referenceTime": "2026-08-15T04:58:32Z",
-      "inputDigest": "224aedf4bdeb40507791586ef6bb40a46d32ddb9003bdc4b132739af0ac26b63",
-      "outputDigest": "4df15fc87307599d77b49c1f1e5a1e3994ec152bf4fde5783b701c47d4d174d5",
-      "firstPassDigest": "2e778b2a0a742d4b902adba0b2341262fc6d1a1915dabc404d7ef052208176fc",
-      "secondPassDigest": "2e778b2a0a742d4b902adba0b2341262fc6d1a1915dabc404d7ef052208176fc",
+      "referenceTime": "2026-08-15T04:59:00Z",
+      "inputDigest": "14d6bb3a7edc7b21059367e2fed3b8e09242f7b8822d0ea2124fde48630d6570",
+      "outputDigest": "661a9a41145ddf05fa4677d4a7fcc9a7b5325feded2db0351e089b0a3a5e88f2",
+      "firstPassDigest": "62fb28fb75c9638b91a2918353dab306d771ba44d224ece58aef64cf05770edc",
+      "secondPassDigest": "62fb28fb75c9638b91a2918353dab306d771ba44d224ece58aef64cf05770edc",
       "byteEquivalent": true
     }
   },
