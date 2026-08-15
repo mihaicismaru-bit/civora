@@ -10,16 +10,26 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: partener-eu-mipe-network-probe
+  cancel-in-progress: true
+
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
       - name: DNS and HTTP/TLS matrix
         shell: bash
         run: |
           set +e
-          HOSTS=(mfe.gov.ro www.mfe.gov.ro fonduri-ue.gov.ro www.fonduri-ue.gov.ro oportunitati-ue.gov.ro www.oportunitati-ue.gov.ro reporting.mysmis2021.gov.ro)
+          HOSTS=(
+            mfe.gov.ro www.mfe.gov.ro
+            fonduri-ue.gov.ro www.fonduri-ue.gov.ro
+            fonduri-ue.ro www.fonduri-ue.ro
+            oportunitati-ue.gov.ro www.oportunitati-ue.gov.ro
+            reporting.mysmis2021.gov.ro
+          )
           for H in "${HOSTS[@]}"; do
             echo "===== DNS $H ====="
             getent ahosts "$H" | head -20
@@ -30,27 +40,31 @@ jobs:
             http://mfe.gov.ro/
             https://fonduri-ue.gov.ro/
             https://www.fonduri-ue.gov.ro/
+            https://fonduri-ue.ro/
+            https://www.fonduri-ue.ro/
+            http://fonduri-ue.ro/
             https://oportunitati-ue.gov.ro/
             https://www.oportunitati-ue.gov.ro/
             https://reporting.mysmis2021.gov.ro/
           )
           for U in "${URLS[@]}"; do
             echo "===== CURL $U ====="
-            curl --http1.1 -L -sS -o /tmp/body -D /tmp/headers --connect-timeout 6 --max-time 18 -w 'code=%{http_code} remote=%{remote_ip} ssl_verify=%{ssl_verify_result} final=%{url_effective} bytes=%{size_download}\n' "$U"
+            rm -f /tmp/body /tmp/headers
+            curl --http1.1 -L -sS -o /tmp/body -D /tmp/headers --connect-timeout 6 --max-time 20 -w 'code=%{http_code} remote=%{remote_ip} ssl_verify=%{ssl_verify_result} final=%{url_effective} bytes=%{size_download}\n' "$U"
             RC=$?
             echo "rc=$RC"
-            sed -n '1,18p' /tmp/headers
-            head -c 180 /tmp/body | tr -cd '\11\12\15\40-\176' || true
+            test -f /tmp/headers && sed -n '1,20p' /tmp/headers
+            test -f /tmp/body && head -c 220 /tmp/body | tr -cd '\11\12\15\40-\176' || true
             echo
           done
           exit 0
 
-      - name: Inspect official certificate chains
+      - name: Inspect certificate chains and hostname coverage
         shell: bash
         run: |
           set +e
-          for H in fonduri-ue.gov.ro oportunitati-ue.gov.ro mfe.gov.ro; do
+          for H in fonduri-ue.gov.ro fonduri-ue.ro www.fonduri-ue.ro oportunitati-ue.gov.ro mfe.gov.ro; do
             echo "===== CERT $H ====="
-            timeout 18 openssl s_client -connect "$H:443" -servername "$H" -showcerts -verify_return_error </dev/null 2>&1 | sed -n '1,160p'
+            timeout 20 openssl s_client -connect "$H:443" -servername "$H" -showcerts -verify_return_error </dev/null 2>&1 | sed -n '1,180p'
           done
           exit 0
