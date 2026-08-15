@@ -24,6 +24,11 @@ replacements = [
         "programme classification",
     ),
     (
+        '''    combined = f"{primary} {secondary}"\n    if re.search(r"\\bpeo\\b", combined):\n        return "PEO"\n    if "poids" in combined or re.search(r"\\bpids\\b", combined):\n        return "PoIDS"\n    if "pdds" in combined:\n        return "PDDS"\n    return "MIPE"\n''',
+        '''    combined = f"{primary} {secondary}"\n    if re.search(r"\\bpeo\\b", combined):\n        return "PEO"\n    if "poids" in combined or re.search(r"\\bpids\\b", combined):\n        return "PoIDS"\n    if "pdds" in combined:\n        return "PDDS"\n    if "programul sănătate" in combined or "programul sanatate" in combined:\n        return "SĂNĂTATE"\n    if "program regional" in combined or "programul regiunea" in combined or re.search(r"\\badr\\s+(?:centru|nord|sud|vest|bucure)", combined):\n        return "REGIONAL"\n    return "MIPE"\n''',
+        "secondary programme classification",
+    ),
+    (
         '''    if ("prelung" in text and "termen" in text) or ("extind" in text and "termen" in text):\n        return "DEADLINE_EXTENDED"\n''',
         '''    if ("prelung" in text or "extind" in text) and any(token in text for token in ("termen", "perioada", "depunere", "deadline")):\n        return "DEADLINE_EXTENDED"\n''',
         "deadline extension classification",
@@ -39,6 +44,21 @@ replacements = [
         "decision usefulness gate",
     ),
     (
+        '''STATIC_TITLE_HINTS = (\n    "poveste de succes", "povești de succes", "povesti de succes",\n    "politica de coeziune", "alte finanțări și instrumente financiare",\n    "alte finantari si instrumente financiare",\n)\n''',
+        '''STATIC_TITLE_HINTS = (\n    "poveste de succes", "povești de succes", "povesti de succes",\n    "politica de coeziune", "alte finanțări și instrumente financiare",\n    "alte finantari si instrumente financiare", "hartă site", "harta site",\n    "programul dezvoltare durabilă și tranziție justă – ministerul",\n    "programul dezvoltare durabila si tranzitie justa – ministerul",\n)\n''',
+        "static title expansion",
+    ),
+    (
+        '''def decision_useful(title: str, kind: str, date: dt.date | None, path: str) -> bool:\n    low = title.lower()\n    if any(hint in low for hint in STATIC_TITLE_HINTS):\n        return False\n    if kind in PUBLISHABLE_EVENT_KINDS:\n        return True\n''',
+        '''def decision_useful(title: str, kind: str, date: dt.date | None, path: str) -> bool:\n    low = title.lower()\n    normalized_path = path.rstrip("/") or "/"\n    if any(hint in low for hint in STATIC_TITLE_HINTS):\n        return False\n    if path.lower().endswith(".xml") or "sitemap" in path.lower():\n        return False\n    if normalized_path in {"/programul-dezvoltare-durabila-si-tranzitie-justa"}:\n        return False\n    if kind in PUBLISHABLE_EVENT_KINDS:\n        return True\n''',
+        "static path exclusion",
+    ),
+    (
+        '''def previous_item_useful(item: dict[str, Any]) -> bool:\n    if item.get("source") == "MIPE / MySMIS":\n        return True\n    if item.get("decisionUseful") is True:\n        return True\n    return item.get("kind") in PUBLISHABLE_EVENT_KINDS\n''',
+        '''def previous_item_useful(item: dict[str, Any]) -> bool:\n    if item.get("source") == "MIPE / MySMIS":\n        return True\n    url = str(item.get("url") or "")\n    path = urllib.parse.urlparse(url).path or "/"\n    date = parse_date(item.get("date"), body="")\n    return decision_useful(str(item.get("title") or ""), str(item.get("kind") or "OFFICIAL_UPDATE"), date, path)\n''',
+        "previous feed revalidation",
+    ),
+    (
         '''        documents.append({"name": label or Path(path).name or "Document oficial", "url": url})\n''',
         '''        clean_label = re.sub(r"[`*_#]+", "", clean_text(label)).strip()\n        documents.append({"name": clean_label or Path(path).name or "Document oficial", "url": url})\n''',
         "document label cleanup",
@@ -47,6 +67,11 @@ replacements = [
         '''    summary = description\n    if len(summary) < 50:\n        summary = body[:900]\n    summary = clean_text(summary)[:900]\n    combined = f"{title} {description} {body[:4000]}"\n''',
         '''    if not decision_useful(title, kind, date, path):\n        return None, health\n\n    documents = document_links(parsed.get("links", []), canonical)\n    summary = clean_text(description)\n    if is_boilerplate(summary):\n        summary = ""\n    if not summary:\n        summary = f"Actualizare oficială MIPE: {title}."\n        if documents:\n            summary += f" Pagina include {len(documents)} documente oficiale pentru verificare."\n    summary = summary[:900]\n''',
         "decision-useful summary and document extraction",
+    ),
+    (
+        '''    if not summary:\n        summary = f"Actualizare oficială MIPE: {title}."\n        if documents:\n            summary += f" Pagina include {len(documents)} documente oficiale pentru verificare."\n    summary = summary[:900]\n''',
+        '''    if not summary:\n        summary = f"Actualizare oficială MIPE: {title}."\n        if documents:\n            summary += f" Pagina include {len(documents)} documente oficiale pentru verificare."\n    if path.rstrip("/") in {"/peos/anunturi", "/pids/anunturi", "/poids/anunturi"} and documents:\n        material = [d["name"] for d in documents if "lista plăților" not in d["name"].lower() and "lista platilor" not in d["name"].lower()]\n        highlights = material[:3] or [d["name"] for d in documents[:3]]\n        summary = f"Pagina oficială {classify_tag(title, canonical, description)} a fost actualizată și include {len(documents)} documente oficiale. Cele mai relevante elemente observate: " + "; ".join(highlights) + "."\n    summary = summary[:900]\n''',
+        "programme index summary",
     ),
     (
         '''        "tag": classify_tag(combined),\n''',
