@@ -1,10 +1,10 @@
 {
   "schema_version": "1.1",
-  "observed_at": "2026-08-15T20:19:57+03:00",
+  "observed_at": "2026-08-15T20:55:19+03:00",
   "sources_total": 16,
-  "sources_ok": 12,
-  "facts_admitted": 4,
-  "facts_before_cross_source_headline_dedupe": 4,
+  "sources_ok": 10,
+  "facts_admitted": 3,
+  "facts_before_cross_source_headline_dedupe": 3,
   "sources": [
     {
       "source_id": "primaria-rm-valcea-comunicate",
@@ -32,9 +32,8 @@
     },
     {
       "source_id": "prefectura-valcea",
-      "listing_ok": true,
-      "links_examined": 1,
-      "article_failures": 0,
+      "listing_ok": false,
+      "error": "HTTPError: HTTP Error 403: Forbidden",
       "facts": 0
     },
     {
@@ -60,10 +59,9 @@
     },
     {
       "source_id": "ipj-valcea-stiri",
-      "listing_ok": true,
-      "links_examined": 10,
-      "article_failures": 0,
-      "facts": 1
+      "listing_ok": false,
+      "error": "HTTPError: HTTP Error 403: Forbidden",
+      "facts": 0
     },
     {
       "source_id": "dsp-valcea-anunturi",
@@ -114,5 +112,8 @@
       "article_failures": 0,
       "facts": 0
     }
-  ]
+  ],
+  "instance_id": "valcea",
+  "source_contract": "SOURCE_PACK_V1",
+  "migration_adapter": "local_news_os_primary_source_compat_v1"
 }
