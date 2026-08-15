@@ -9,7 +9,12 @@ on:
       - 'partener-eu/web/consultant-workspace-v3.css'
       - 'partener-eu/web/consultant-onboarding-v3.js'
       - 'partener-eu/web/consultant-onboarding-v3.css'
+      - 'partener-eu/web/consultant-mysmis-v1.js'
+      - 'partener-eu/web/consultant-mysmis-v1.css'
+      - 'partener-eu/web/mysmis-registry.js'
       - 'partener-eu/web/index.html'
+      - 'partener-eu/ingest/build_mysmis_consultant_registry.py'
+      - 'partener-eu/ingest/state/mipe_state.json'
       - 'partener-eu/ops/test_consultant_workspace_v3.py'
       - 'partener-eu/ops/fix_consultant_workspace_v3.py'
       - '.github/workflows/partener-eu-consultant-v3.yml'
@@ -35,9 +40,13 @@ jobs:
           node-version: '22'
       - name: Apply idempotent source corrections in test workspace
         run: python partener-eu/ops/fix_consultant_workspace_v3.py
+      - name: Rebuild direct MySMIS Consultant evidence
+        run: python partener-eu/ingest/build_mysmis_consultant_registry.py
       - name: JavaScript syntax
         run: |
           node --check partener-eu/web/consultant-workspace-v3.js
           node --check partener-eu/web/consultant-onboarding-v3.js
-      - name: Product contract
+          node --check partener-eu/web/consultant-mysmis-v1.js
+          node --check partener-eu/web/mysmis-registry.js
+      - name: Product and evidence contract
         run: python partener-eu/ops/test_consultant_workspace_v3.py
