@@ -22,6 +22,10 @@ FORBIDDEN_RUNTIME_MARKERS = {
 }
 
 RUNTIME_SUFFIXES = {".py", ".js", ".mjs", ".cjs", ".ts", ".tsx", ".sh"}
+POLICY_VALIDATORS = {
+    "scripts/validate_site_engine_ownership.py",
+    "social/validate_social_engine.py",
+}
 
 
 def utc_now() -> str:
@@ -53,7 +57,7 @@ def runtime_files(site_root: Path) -> list[Path]:
         if not path.is_file() or path.suffix.lower() not in RUNTIME_SUFFIXES:
             continue
         relative = path.relative_to(site_root).as_posix()
-        if relative == "scripts/validate_site_engine_ownership.py":
+        if relative in POLICY_VALIDATORS:
             continue
         if any(relative == part or relative.startswith(f"{part}/") for part in ignored_parts):
             continue
@@ -76,26 +80,19 @@ def validate(repo_root: Path) -> dict[str, Any]:
         }
 
     registry = load_json(registry_path)
+    chatgpt = registry.get("chatgpt", {})
 
     ownership_checks = {
         "execution_owner": registry.get("execution_owner") == "civora_site_engine",
         "scheduler": registry.get("scheduler") == "github_actions",
         "state_owner": registry.get("state_owner") == "repository",
-        "chatgpt_scheduled_tasks_disabled": (
-            registry.get("chatgpt", {}).get("scheduled_tasks_allowed") is False
-        ),
-        "chatgpt_conversation_runtime_disabled": (
-            registry.get("chatgpt", {}).get("conversation_runtime_allowed") is False
-        ),
-        "paid_llm_api_not_required": (
-            registry.get("content_engine", {}).get("paid_llm_api_required") is False
-        ),
-        "local_agent_runtime_not_required": (
-            registry.get("content_engine", {}).get("local_agent_runtime_required") is False
-        ),
-        "self_hosted_runner_disabled": (
-            registry.get("content_engine", {}).get("self_hosted_runner_allowed") is False
-        ),
+        "chatgpt_scheduled_tasks_disabled": chatgpt.get("scheduled_tasks_allowed") is False,
+        "chatgpt_conversation_runtime_disabled": chatgpt.get("conversation_runtime_allowed") is False,
+        "chatgpt_direct_social_publication_disabled": chatgpt.get("direct_social_publication_allowed") is False,
+        "chatgpt_social_credential_access_disabled": chatgpt.get("social_credential_access_allowed") is False,
+        "paid_llm_api_not_required": registry.get("content_engine", {}).get("paid_llm_api_required") is False,
+        "local_agent_runtime_not_required": registry.get("content_engine", {}).get("local_agent_runtime_required") is False,
+        "self_hosted_runner_disabled": registry.get("content_engine", {}).get("self_hosted_runner_allowed") is False,
     }
     for name, passed in ownership_checks.items():
         checks.append({"check": name, "passed": passed})
@@ -168,6 +165,19 @@ def validate(repo_root: Path) -> dict[str, Any]:
         if not passed:
             errors.append(f"Autonomous editions missing {label}.")
 
+    social = workflow_texts.get(".github/workflows/valcea-clar-social-publishing.yml", "")
+    required_social_markers = {
+        "validate_social_engine.py": "social ownership validator",
+        "facebook_publish.py --apply": "native Facebook publishing adapter",
+        "VALCEA_FB_PAGE_ACCESS_TOKEN": "runtime secret reference",
+        "github.event_name != 'pull_request'": "no publishing from pull requests",
+    }
+    for marker, label in required_social_markers.items():
+        passed = marker in social
+        checks.append({"check": f"social:{label}", "passed": passed})
+        if not passed:
+            errors.append(f"Social publication workflow missing {label}.")
+
     scan_paths = [repo_root / workflow for workflow in seen_workflows]
     scan_paths.extend(runtime_files(site_root))
     scanned = 0
@@ -190,6 +200,14 @@ def validate(repo_root: Path) -> dict[str, Any]:
                 f"External monitor {item.get('id', '<unknown>')} is not marked retired."
             )
 
+    retired_workflows = registry.get("retired_workflows", [])
+    for item in retired_workflows:
+        path = str(item.get("path", "")).strip()
+        if item.get("status") != "retired":
+            errors.append(f"Workflow {path or '<unknown>'} is not marked retired.")
+        if path and (repo_root / path).exists():
+            errors.append(f"Retired workflow still exists and could execute: {path}")
+
     status = "PASS" if not errors else "FAIL"
     return {
         "checked_at": utc_now(),
@@ -199,6 +217,7 @@ def validate(repo_root: Path) -> dict[str, Any]:
         "registered_jobs": len(jobs),
         "runtime_files_scanned": scanned,
         "retired_external_monitors": [item.get("id") for item in retired],
+        "retired_workflows": [item.get("path") for item in retired_workflows],
         "errors": errors,
         "checks": checks,
     }
@@ -220,11 +239,7 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    repo_root = (
-        args.repo_root.resolve()
-        if args.repo_root
-        else Path(__file__).resolve().parents[2]
-    )
+    repo_root = args.repo_root.resolve() if args.repo_root else Path(__file__).resolve().parents[2]
     report = validate(repo_root)
 
     if args.report:

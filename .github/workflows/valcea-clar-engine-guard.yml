@@ -5,12 +5,16 @@ on:
   pull_request:
     paths:
       - "valcea-clar/engine/**"
+      - "valcea-clar/social/channel_registry.json"
+      - "valcea-clar/social/validate_social_engine.py"
       - "valcea-clar/scripts/validate_site_engine_ownership.py"
       - ".github/workflows/valcea-clar-*.yml"
   push:
     branches: [main]
     paths:
       - "valcea-clar/engine/**"
+      - "valcea-clar/social/channel_registry.json"
+      - "valcea-clar/social/validate_social_engine.py"
       - "valcea-clar/scripts/validate_site_engine_ownership.py"
       - ".github/workflows/valcea-clar-*.yml"
   schedule:
@@ -39,6 +43,11 @@ jobs:
           python valcea-clar/scripts/validate_site_engine_ownership.py \
             --report /tmp/site-engine-ownership-report.json
 
+      - name: Enforce site-engine-only social publishing
+        run: |
+          python valcea-clar/social/validate_social_engine.py \
+            --report /tmp/social-engine-ownership-report.json
+
       - name: Write ownership summary
         if: always()
         run: |
@@ -47,38 +56,38 @@ jobs:
           import os
           from pathlib import Path
 
-          report_path = Path('/tmp/site-engine-ownership-report.json')
-          summary_path = Path(os.environ['GITHUB_STEP_SUMMARY'])
-          if not report_path.exists():
-              summary_path.write_text(
-                  '# VÂLCEA CLAR — site engine ownership\n\nReport unavailable.\n',
-                  encoding='utf-8',
-              )
-              raise SystemExit(0)
+          def read(path):
+              target = Path(path)
+              return json.loads(target.read_text(encoding='utf-8')) if target.exists() else {}
 
-          report = json.loads(report_path.read_text(encoding='utf-8'))
-          errors = report.get('errors', [])
+          site = read('/tmp/site-engine-ownership-report.json')
+          social = read('/tmp/social-engine-ownership-report.json')
+          summary_path = Path(os.environ['GITHUB_STEP_SUMMARY'])
           lines = [
               '# VÂLCEA CLAR — site engine ownership',
               '',
-              f"- Status: **{report['status']}**",
-              f"- Execution owner: `{report.get('execution_owner')}`",
-              f"- Scheduler: `{report.get('scheduler')}`",
-              f"- Registered jobs: **{report.get('registered_jobs', 0)}**",
-              f"- Runtime files scanned: **{report.get('runtime_files_scanned', 0)}**",
-              f"- Retired external monitors: `{', '.join(report.get('retired_external_monitors', []))}`",
+              f"- Core ownership: **{site.get('status', 'UNAVAILABLE')}**",
+              f"- Social ownership: **{social.get('status', 'UNAVAILABLE')}**",
+              f"- Execution owner: `{site.get('execution_owner', social.get('execution_owner'))}`",
+              f"- Scheduler: `{site.get('scheduler')}`",
+              f"- Registered jobs: **{site.get('registered_jobs', 0)}**",
+              f"- Active direct social channels: `{', '.join(social.get('active_direct_channels', []))}`",
+              '- ChatGPT scheduled/direct publishing: **disabled**',
           ]
+          errors = (site.get('errors') or []) + (social.get('errors') or [])
           if errors:
               lines.extend(['', '## Errors'])
               lines.extend(f"- {error}" for error in errors)
           summary_path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
           PY
 
-      - name: Upload ownership report
+      - name: Upload ownership reports
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: valcea-clar-site-engine-ownership-${{ github.run_id }}
-          path: /tmp/site-engine-ownership-report.json
+          path: |
+            /tmp/site-engine-ownership-report.json
+            /tmp/social-engine-ownership-report.json
           if-no-files-found: warn
           retention-days: 14

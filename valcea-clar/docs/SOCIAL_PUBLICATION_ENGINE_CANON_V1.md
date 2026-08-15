@@ -1,4 +1,4 @@
-# SOCIAL PUBLICATION ENGINE CANON v1.0
+# SOCIAL PUBLICATION ENGINE CANON v1.1
 
 ## Mission
 VÂLCEA CLAR is the pilot instance of a replicable Local News OS. The website and every social-network page are sibling publications fed by the same verified fact kernel. Social channels are not mirrors of the website and must not be managed as copy-paste distribution endpoints.
@@ -7,6 +7,21 @@ VÂLCEA CLAR is the pilot instance of a replicable Local News OS. The website an
 All channels share the same verified facts, provenance, risk gates, corrections and entity registry. Each channel has its own editorial selection, cadence, native formats, tone, series, publishing state, backlog and performance learning.
 
 The website remains the durable archive and deepest context surface, but a social publication may publish a native, stand-alone item when the facts pass the editorial gates. A site link is optional when native consumption is the better product; it is required when context, evidence or depth cannot be safely carried in-platform.
+
+## Execution ownership rule
+All recurring preparation, scheduling, publication, retry, deduplication, correction propagation and publication-state persistence belong exclusively to the CIVORA site engine.
+
+The canonical scheduler and runtime are GitHub Actions workflows registered in `valcea-clar/engine/automation_registry.json`. Channel ownership, adapters, outboxes, credentials references and status are registered in `valcea-clar/social/channel_registry.json`.
+
+ChatGPT is an operator and development console only. It may not:
+
+- own or execute recurring social-publication tasks;
+- publish directly or on a schedule to any social network;
+- hold platform credentials or canonical publication state;
+- replace a missing adapter or credential through a conversational workaround;
+- become a dependency whose closure stops publication.
+
+Local cron jobs and GitHub `self-hosted` runners are also forbidden for the production social engine. A missing adapter, credential, visual approval or platform permission blocks that channel fail-closed while every other verified channel continues.
 
 ## Publication types
 - WEBSITE: full local newsroom, archive, explainers, dossiers, SEO, source notes.
@@ -20,20 +35,21 @@ The website remains the durable archive and deepest context surface, but a socia
 
 ## Channel independence contract
 Every social publication has a CHANNEL_CONFIG defining:
-- channel_id and instance_id
-- audience promise
-- editorial mix and exclusions
-- native formats
-- cadence and quiet hours
-- maximum repetition/fatigue rules
-- image/video requirements
-- call-to-action policy
-- link policy
-- series/templates
-- approval gates
-- credentials reference (never raw secret in repository)
-- publication state and last-known-good
-- metrics available from native/free interfaces
+
+- channel_id and instance_id;
+- audience promise;
+- editorial mix and exclusions;
+- native formats;
+- cadence and quiet hours;
+- maximum repetition/fatigue rules;
+- image/video requirements;
+- call-to-action policy;
+- link policy;
+- series/templates;
+- approval gates;
+- credentials reference, never a raw secret in repository;
+- publication state and last-known-good;
+- metrics available from native/free interfaces.
 
 No channel may reuse another channel's copy verbatim as its normal production path. The engine generates or composes channel-native packages from the shared STORY_OBJECT / FACT kernel.
 
@@ -53,71 +69,89 @@ No channel may reuse another channel's copy verbatim as its normal production pa
 
 ## Virality Engine
 Virality is a product objective, not a permission to sensationalize. It optimizes:
-- story/channel fit
-- first-frame or first-line strength
-- local relevance and proximity
-- useful specificity
-- shareability and saveability
-- timing
-- repeatable series
-- follow-up value
-- conversation prompts that do not manufacture outrage
-- topic fatigue and repetition avoidance
-- resurfacing of evergreen local utility
-- event lifecycle coverage: announcement -> reminder -> live/service -> result -> aftermath
-- breaking-news lifecycle: alert -> verified update -> explainer -> consequences
-- cross-channel handoff when a story performs naturally on another format
+
+- story/channel fit;
+- first-frame or first-line strength;
+- local relevance and proximity;
+- useful specificity;
+- shareability and saveability;
+- timing;
+- repeatable series;
+- follow-up value;
+- conversation prompts that do not manufacture outrage;
+- topic fatigue and repetition avoidance;
+- resurfacing of evergreen local utility;
+- event lifecycle coverage: announcement -> reminder -> live/service -> result -> aftermath;
+- breaking-news lifecycle: alert -> verified update -> explainer -> consequences;
+- cross-channel handoff when a story performs naturally on another format.
 
 Forbidden optimization: fabricated urgency, invented exclusivity, unsupported claims, misleading thumbnails, rage bait, synthetic engagement, fake analytics, harassment, or degrading editorial gates.
 
 ## Independent editorial mixes
 The same local story may have different treatments:
+
 - Website: full verified article and source context.
 - Facebook: stand-alone useful explanation plus community-relevant question when appropriate.
 - Instagram: real-photo carousel summarizing what changes for residents.
 - TikTok/Shorts: 20–60s script explaining the essential consequence or event utility.
 - WhatsApp/Telegram: one-paragraph alert with action/date/location.
+
 This is not duplication; each is a native publication product derived from one evidence base.
 
 ## Generic vs local
 CORE_GENERIC:
-- channel schemas
-- fit scoring
-- atomization
-- hook/format/cadence/series/virality engines
-- visual provenance rules
-- publication state, retry, dedupe and correction propagation
-- metrics schema and learning loop
+
+- channel schemas;
+- fit scoring;
+- atomization;
+- hook/format/cadence/series/virality engines;
+- visual provenance rules;
+- publication state, retry, dedupe and correction propagation;
+- metrics schema and learning loop.
 
 LOCAL_TEMPLATE:
-- recommended channel mix
-- default series library
-- local service/event/civic/sport/business templates
+
+- recommended channel mix;
+- default series library;
+- local service/event/civic/sport/business templates.
 
 VALCEA_SPECIFIC:
-- account/page IDs and handles
-- local series names when brand-specific
-- local audiences, events, venues and source references
-- credentials refs
+
+- account/page IDs and handles;
+- local series names when brand-specific;
+- local audiences, events, venues and source references;
+- credentials refs.
 
 TEMPORARY_ADAPTER:
-- any manual or quota-gated publishing surface
-- platform-specific workaround that cannot be generalized
+
+- any manual or quota-gated publishing surface;
+- platform-specific workaround that cannot be generalized.
+
+A TEMPORARY_ADAPTER may produce a durable outbox but may not delegate scheduled or direct publication to ChatGPT.
 
 ## Zero-paid-dependency rule
 Normal operation must not require paid LLM APIs, paid content APIs, paid schedulers, paid social-management suites or paid hosting APIs. Free/native platform APIs may be used when available and verified. If a platform cannot be published to automatically without paid infrastructure, the system must still generate a durable channel-native outbox package and continue all other channels.
 
 ## Current pilot
-Facebook is the first working publishing adapter. Existing GitHub Actions fetch approved real photographs, validate publishing rules, preview eligible posts, publish with the stored page credential and persist publication state. This adapter must be generalized rather than duplicated for future local instances and platforms.
+The unified workflow is `.github/workflows/valcea-clar-social-publishing.yml`, running server-side every 15 minutes and on relevant changes.
+
+Facebook is the first verified direct publishing adapter. The engine builds its channel-native outbox, fetches approved real photographs, validates publishing rules, previews eligible posts, publishes through the Meta API and persists the outbox and publication state. The former standalone workflow `.github/workflows/valcea-clar-facebook.yml` is retired to prevent duplicate schedulers.
+
+Instagram, Threads, LinkedIn, TikTok, YouTube Shorts, Telegram and WhatsApp are registered as fail-closed until a verified adapter and credentials exist. They may receive durable outbox packages, but they cannot publish directly and cannot fall back to ChatGPT.
+
+`social/validate_social_engine.py` and the site ownership guard verify this boundary in pull requests, on relevant changes and daily.
 
 ## Acceptance for Social Publication Engine 1.0
 PASS requires:
-- website + at least three social publications running from the same verified fact kernel
-- distinct channel-native outputs, not verbatim cross-posting
-- independent channel state and dedupe
-- real-photo provenance gates
-- correction propagation
-- observed-metrics learning without fabricated analytics
-- virality tests that do not weaken safety/editorial gates
-- instance isolation test with a second local-news fixture
-- no mandatory paid API/subscription dependency
+
+- website plus at least three social publications running from the same verified fact kernel;
+- distinct channel-native outputs, not verbatim cross-posting;
+- independent channel state and dedupe;
+- real-photo provenance gates;
+- correction propagation;
+- observed-metrics learning without fabricated analytics;
+- virality tests that do not weaken safety/editorial gates;
+- instance isolation test with a second local-news fixture;
+- no mandatory paid API/subscription dependency;
+- all recurring social execution owned by the CIVORA site engine;
+- zero direct or scheduled publication from ChatGPT.

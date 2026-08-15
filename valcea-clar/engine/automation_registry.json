@@ -8,6 +8,8 @@
   "chatgpt": {
     "scheduled_tasks_allowed": false,
     "conversation_runtime_allowed": false,
+    "direct_social_publication_allowed": false,
+    "social_credential_access_allowed": false,
     "role": "operator_console_only",
     "presentation_bridge_may_exist": true,
     "presentation_bridge_is_not_scheduler": true
@@ -58,12 +60,13 @@
       "owner": "site_engine"
     },
     {
-      "id": "facebook_distribution",
-      "kind": "social_distribution",
-      "workflow": ".github/workflows/valcea-clar-facebook.yml",
+      "id": "social_distribution",
+      "kind": "multi_channel_social_distribution",
+      "workflow": ".github/workflows/valcea-clar-social-publishing.yml",
       "schedule": [
         "7,22,37,52 * * * *"
       ],
+      "channel_registry": "valcea-clar/social/channel_registry.json",
       "owner": "site_engine"
     },
     {
@@ -95,6 +98,19 @@
       "scope": "all recurring CIVORA/VÂLCEA CLAR monitoring and content-generation tasks outside the site engine",
       "status": "retired",
       "replacement": "registered GitHub Actions workflows in this file"
+    },
+    {
+      "id": "LEGACY-CHATGPT-SOCIAL-PUBLISHING-*",
+      "scope": "all recurring or direct social-network publishing initiated from ChatGPT",
+      "status": "retired",
+      "replacement_workflow": ".github/workflows/valcea-clar-social-publishing.yml"
+    }
+  ],
+  "retired_workflows": [
+    {
+      "path": ".github/workflows/valcea-clar-facebook.yml",
+      "status": "retired",
+      "replacement_workflow": ".github/workflows/valcea-clar-social-publishing.yml"
     }
   ]
 }
