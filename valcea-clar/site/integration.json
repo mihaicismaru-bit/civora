@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.2",
+  "schema_version": "1.3",
   "canonical_domain": "valceaclar.ro",
   "runtime": {
     "platform": "Vercel",
@@ -19,15 +19,18 @@
   },
   "current_edition": {
     "enabled": true,
-    "edition_id": "2026-08-15-morning",
-    "label": "EDIȚIA DE DIMINEAȚĂ",
-    "title": "Ce trebuie să știi în Vâlcea azi, 15 august",
-    "path": "/editia-de-dimineata/",
-    "source": "editions/2026-08-15-morning.md",
+    "selection_mode": "latest_publishable",
+    "path": "/editia-curenta/",
+    "slot_paths": {
+      "morning": "/editia-de-dimineata/",
+      "evening": "/editia-de-seara/"
+    },
     "homepage_position": "primary_lead",
-    "updated_local": "2026-08-15T08:32:00+03:00",
     "show_timestamp": true,
-    "show_source_note": true
+    "show_source_note": true,
+    "autonomous_generation": true,
+    "generator": "deterministic_zero_llm_v1",
+    "external_paid_api_required": false
   },
   "section": {
     "id": "unde-iesim",
@@ -39,22 +42,10 @@
       "insert_after": "Evenimente"
     },
     "subnavigation": [
-      {
-        "label": "Nou deschis",
-        "path": "/unde-iesim/#noutati"
-      },
-      {
-        "label": "Unde mâncăm",
-        "path": "/unde-iesim/#locuri"
-      },
-      {
-        "label": "Cine este în spate",
-        "path": "/unde-iesim/#transparenta"
-      },
-      {
-        "label": "Creatori locali",
-        "path": "/unde-iesim/#creatori"
-      }
+      {"label": "Nou deschis", "path": "/unde-iesim/#noutati"},
+      {"label": "Unde mâncăm", "path": "/unde-iesim/#locuri"},
+      {"label": "Cine este în spate", "path": "/unde-iesim/#transparenta"},
+      {"label": "Creatori locali", "path": "/unde-iesim/#creatori"}
     ]
   },
   "homepage_module": {
@@ -71,31 +62,17 @@
     "show_if_empty": false
   },
   "cross_links": [
-    {
-      "from": "Evenimente",
-      "to": "/unde-iesim/",
-      "context": "locuri și program pentru weekend"
-    },
-    {
-      "from": "Oraș",
-      "to": "/unde-iesim/",
-      "context": "deschideri, închideri și schimbări de operator"
-    },
-    {
-      "from": "Investigații",
-      "to": "/unde-iesim/",
-      "context": "contracte sau legături publice relevante"
-    },
-    {
-      "from": "Homepage",
-      "to": "/editia-de-dimineata/",
-      "context": "ediția curentă a zilei"
-    }
+    {"from": "Evenimente", "to": "/unde-iesim/", "context": "locuri și program pentru weekend"},
+    {"from": "Oraș", "to": "/unde-iesim/", "context": "deschideri, închideri și schimbări de operator"},
+    {"from": "Investigații", "to": "/unde-iesim/", "context": "contracte sau legături publice relevante"},
+    {"from": "Homepage", "to": "/editia-curenta/", "context": "ediția autonomă curentă"}
   ],
   "publication_policy": {
     "candidate_records_are_hidden": true,
     "material_facts_autopublish": false,
+    "verified_structured_facts_may_be_auto_rendered": true,
     "sponsored_rankings": false,
-    "commercial_content_must_be_labelled": true
+    "commercial_content_must_be_labelled": true,
+    "never_fill_evidence_gaps": true
   }
 }
