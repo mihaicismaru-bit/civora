@@ -1,8 +1,8 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "scope": "VALCEA_SPECIFIC",
   "policy": {
-    "purpose": "Preserve high-value local sources that are useful editorially but unsafe for automatic freshness admission until their date provenance is reliable.",
+    "purpose": "Preserve high-value local sources that are useful editorially but unsafe for automatic freshness admission until their date provenance or event-time semantics are reliable.",
     "automatic_publication": false,
     "manual_review_required": true,
     "last_known_good": "PRESERVE"
@@ -23,6 +23,23 @@
         "local labour-market research"
       ],
       "core_feedback": "LOCAL NEWS OS needs a generic source-level publication-date strategy with provenance priority (structured article date > scoped article-body date > listing date) and rejection when the chosen date conflicts with an explicit date in title/body."
+    },
+    {
+      "id": "apavil-opriri-programate",
+      "publisher": "APAVIL S.A.",
+      "url": "https://apavil.ro/?page_id=962",
+      "tier": "T1",
+      "section": "UTILITATE",
+      "status": "QUARANTINED_EVENT_DATE_SEMANTICS",
+      "checked_at": "2026-08-15",
+      "reason": "The official APAVIL scheduled-outages page is highly useful for residents and exposes explicit interruption dates and time windows inside notice titles, but those are service-event dates, not necessarily article publication dates. The current zero-LLM freshness gate is publication-date based, so admitting this listing as a normal news source could conflate event time with published_at.",
+      "safe_use": [
+        "manual discovery",
+        "direct verification of affected localities and streets",
+        "verification of scheduled interruption date and time window",
+        "public-service utility research"
+      ],
+      "core_feedback": "LOCAL NEWS OS needs a generic UTILITY_ADVISORY source contract that separates published_at from event_start/event_end, requires explicit geographic scope and primary-source provenance, and may admit only current/future service advisories without converting event dates into publication dates."
     }
   ]
 }
