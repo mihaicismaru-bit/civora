@@ -80,6 +80,7 @@ jobs:
         continue-on-error: true
         run: |
           python partener-eu/ops/fix_mipe_resilient_classifier.py
+          python partener-eu/ops/fix_consultant_workspace_v3.py
           node --check partener-eu/web/consultant-workspace-v3.js
           python partener-eu/ops/test_consultant_workspace_v3.py
           python partener-eu/ops/test_mipe_resilient_ingest.py
@@ -149,13 +150,19 @@ jobs:
           echo "exit_code=$CODE" >> "$GITHUB_OUTPUT"
           exit 0
 
-      - name: Persist validation ledger
+      - name: Persist validation ledger and safe source corrections
         if: always()
         shell: bash
         run: |
           git config user.name "civora-validation-bot"
           git config user.email "civora-validation-bot@users.noreply.github.com"
-          git add partener-eu/validation partener-eu/P10_ACCEPTANCE.json partener-eu/ingest/state/intelligence_index.json partener-eu/p11/opportunity_bundle.json partener-eu/web/p11-public-data.js
+          git add \
+            partener-eu/validation \
+            partener-eu/P10_ACCEPTANCE.json \
+            partener-eu/ingest/state/intelligence_index.json \
+            partener-eu/p11/opportunity_bundle.json \
+            partener-eu/web/p11-public-data.js \
+            partener-eu/web/consultant-workspace-v3.js
           if ! git diff --cached --quiet; then
             git commit -m "PARTENER.EU validation ledger $(date -u +%Y-%m-%dT%H:%M:%SZ)"
             git pull --rebase origin main
