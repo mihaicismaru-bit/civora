@@ -9,8 +9,11 @@ on:
   workflow_run:
     workflows:
       - 'PARTENER.EU MIPE Ingestion'
+      - 'PARTENER.EU MIPE Romania Collector'
       - 'PARTENER.EU MIPE Dual Relay'
       - 'PARTENER.EU MIPE Dual Cache'
+      - 'PARTENER.EU AFIR Ingestion'
+      - 'PARTENER.EU Decision Products'
     types: [completed]
 
 permissions:
@@ -32,7 +35,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          # Always deploy canonical main after autonomous ingest commits.
+          # Always deploy canonical main after autonomous ingestion/product commits.
           ref: main
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
