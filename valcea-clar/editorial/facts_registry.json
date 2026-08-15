@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "policy": {
+    "purpose": "Structured verified facts used by the zero-LLM autonomous edition generator.",
+    "minimum_confidence": 90,
+    "allowed_statuses": ["verified", "approved_carry_forward"],
+    "material_facts_require_sources": true,
+    "never_infer_missing_fields": true,
+    "expired_facts_are_not_publishable": true
+  },
+  "facts": [
+    {
+      "id": "musiclover-green-day-20260815",
+      "status": "verified",
+      "section": "EVENIMENTE",
+      "priority": 98,
+      "confidence": 98,
+      "valid_from": "2026-08-15T00:00:00+03:00",
+      "valid_until": "2026-08-15T23:59:59+03:00",
+      "slots": ["morning", "evening"],
+      "headline": "Azi la Fețeni: Musiclover Festival continuă cu Delia și Connect-R",
+      "dek": "A doua zi a festivalului are loc pe Platoul Fețeni, cu acces anunțat de la ora 18:00.",
+      "paragraphs": [
+        "Programul publicat pentru 15 august îi are ca repere pe Delia și Connect-R, iar în GREEN DAY apare și proiectul Urban Lăutăresque.",
+        "Festivalul funcționează în format hibrid: FAN ZONE cu bilet și o Zonă 2 cu acces liber, dar cu vizibilitate mai redusă spre scenă și acces limitat în proximitatea acesteia.",
+        "Consiliul Local Râmnicu Vâlcea a inclus Music Lover Festival în calendarul cultural 2026 cu un buget estimat de 650.000 lei. VÂLCEA CLAR tratează separat programul evenimentului și monitorizarea banilor publici."
+      ],
+      "material_fact_gate": "PASS",
+      "sources": [
+        {"name": "Ticketstore — Musiclover Festival, 15 august", "url": "https://ticketstore.ro/ro/bilete/12275/musiclover-festival-15-august-connect-r-delia", "tier": "T2"},
+        {"name": "HCL Râmnicu Vâlcea nr. 159/2026", "url": "https://hcl.usr.ro/ramnicu_valcea/2026/h159", "tier": "T1"}
+      ]
+    },
+    {
+      "id": "luminos-fest-zavoi-20260815",
+      "status": "verified",
+      "section": "EVENIMENTE",
+      "priority": 94,
+      "confidence": 99,
+      "valid_from": "2026-08-15T00:00:00+03:00",
+      "valid_until": "2026-08-16T23:59:59+03:00",
+      "slots": ["morning", "evening"],
+      "headline": "Luminos Fest este în Parcul Zăvoi. Intrarea este liberă",
+      "dek": "Evenimentul de familie se desfășoară în 15–16 august, cu lampioane pe apă și activități pentru copii.",
+      "paragraphs": [
+        "Site-ul oficial al organizatorilor indică intrare liberă, iar lampioanele plutitoare se rezervă separat, online.",
+        "Programul este orientat spre familii și include lampioane pe apă, ateliere creative, muzică și o zonă dedicată creatorilor handmade."
+      ],
+      "material_fact_gate": "PASS",
+      "sources": [
+        {"name": "Luminos Fest — site oficial", "url": "https://luminosfest.ro/", "tier": "T1B"}
+      ]
+    },
+    {
+      "id": "scm-valcea-slatina-20260815",
+      "status": "verified",
+      "section": "SPORT",
+      "priority": 82,
+      "confidence": 93,
+      "valid_from": "2026-08-15T00:00:00+03:00",
+      "valid_until": "2026-08-15T23:59:59+03:00",
+      "slots": ["morning"],
+      "headline": "SCM Râmnicu Vâlcea are programată azi partida cu CSM Slatina",
+      "dek": "Meciul figurează în etapa a treia a sezonului 2026–2027 din Liga 2.",
+      "paragraphs": [
+        "În ediția automată păstrăm doar data și adversarul ca informații confirmate. Ora exactă și eventualele schimbări de ultim moment nu sunt completate din presupuneri."
+      ],
+      "material_fact_gate": "PASS_DATE_ONLY",
+      "sources": [
+        {"name": "Liga 2 — program SCM Râmnicu Vâlcea", "url": "https://lpf2.ro/liga2/html/programul_meciurilor/Program_SCM_Ramnicu_Valcea-553.html", "tier": "T2"},
+        {"name": "SCM Râmnicu Vâlcea — site oficial", "url": "https://scmramnicuvalcea.ro/", "tier": "T1B"}
+      ]
+    },
+    {
+      "id": "olanesti-bridge-monitor",
+      "status": "approved_carry_forward",
+      "section": "INVESTIGAȚII",
+      "priority": 88,
+      "confidence": 94,
+      "valid_from": "2026-08-14T00:00:00+03:00",
+      "valid_until": "2026-09-15T23:59:59+03:00",
+      "slots": ["morning", "evening"],
+      "headline": "Podul pietonal-ciclist peste Olănești: dosarul de documentare rămâne deschis",
+      "dek": "Urmărim executanții, autorizațiile, situațiile de lucrări, plățile și termenele proiectului SMIS 334436.",
+      "paragraphs": [
+        "Documentația tehnică identificată pentru proiectul «Creșterea mobilității urbane, pietonale și cicliste în Municipiul Râmnicu Vâlcea — Componenta II», SMIS 334436, include în zona de lângă Omniasig un nou pod exclusiv pietonal și ciclist.",
+        "Proiectul are o valoare totală aprobată de 44.373.317,87 lei cu TVA. Contractul principal de execuție a fost atribuit asocierii Ralunic SRL — Dimex-2000 Company SRL, cu subcontractanți declarați Elserv SRL, Prodial SRL, Teleteknika Engineering SRL și Strabag SRL; valoarea atribuită este de 29.167.613,30 lei fără TVA.",
+        "Nu atribuim lucrările vizibile unei anumite firme din asociere sau unui subcontractant până când documentele publice nu permit această legătură. Nu există în acest moment o acuzație de neregulă."
+      ],
+      "material_fact_gate": "PASS_EXPLAINER_ONLY",
+      "sources": [
+        {"name": "HCL Râmnicu Vâlcea nr. 100/2025 și documentația SMIS 334436", "url": "https://hcl.usr.ro/ramnicu_valcea/2025/h100", "tier": "T1"}
+      ]
+    }
+  ]
+}
