@@ -27,6 +27,8 @@ LINKEDIN_OUTBOX = VC / "social" / "linkedin_outbox.json"
 LINKEDIN_STATE = VC / "social" / "linkedin_state.json"
 TELEGRAM_OUTBOX = VC / "social" / "telegram_outbox.json"
 TELEGRAM_STATE = VC / "social" / "telegram_state.json"
+WHATSAPP_OUTBOX = VC / "social" / "whatsapp_outbox.json"
+WHATSAPP_STATE = VC / "social" / "whatsapp_state.json"
 YOUTUBE_OUTBOX = VC / "social" / "youtube_outbox.json"
 YOUTUBE_STATE = VC / "social" / "youtube_state.json"
 BASE = "https://valceaclar.ro"
@@ -129,6 +131,38 @@ def telegram_product(story: dict) -> dict:
     }
 
 
+def whatsapp_product(story: dict) -> dict:
+    """Build the low-noise WhatsApp sister-publication product.
+
+    WhatsApp deliberately does not inherit Telegram alert semantics. A normal
+    verified story remains a compact message; only an explicit correction is
+    labelled as such. Recipient scope is a future dispatch gate and is never
+    inferred here.
+    """
+    headline = str(story.get("headline") or "").strip()
+    dek = str(story.get("dek") or "").strip()
+    paragraphs = [str(p).strip() for p in story.get("paragraphs", []) if str(p).strip()]
+    correction = story.get("correction") is True
+    prefix = "Corecție — " if correction else "Vâlcea — "
+    support = [value for value in (dek, paragraphs[0] if paragraphs else "") if value]
+    return {
+        "id": f"whatsapp-story-{story['id']}",
+        "story_id": story["id"],
+        "status": "outbox_ready",
+        "publication_mode": "durable_outbox_only",
+        "native_format": "text",
+        "format_family": "message_update",
+        "message": [f"{prefix}{headline}", *support[:2]],
+        "canonical_url": canonical(story),
+        "link_policy": "native_preferred",
+        "source_preserving": True,
+        "fake_urgency_forbidden": True,
+        "verbatim_cross_platform_reuse_allowed": False,
+        "recipient_scope_required_before_dispatch": True,
+        "edition_gate": False,
+    }
+
+
 def youtube_product(story: dict) -> dict:
     headline = str(story.get("headline") or "").strip()
     dek = str(story.get("dek") or "").strip()
@@ -148,6 +182,17 @@ def youtube_product(story: dict) -> dict:
         "synthetic_real_person_media_forbidden": True,
         "edition_gate": False,
     }
+
+
+def output_specs():
+    """Return the deterministic materialization contract for outbox-only channels."""
+    return [
+        (THREADS_OUTBOX, THREADS_STATE, "threads", threads_product),
+        (LINKEDIN_OUTBOX, LINKEDIN_STATE, "linkedin", linkedin_product),
+        (TELEGRAM_OUTBOX, TELEGRAM_STATE, "telegram", telegram_product),
+        (WHATSAPP_OUTBOX, WHATSAPP_STATE, "whatsapp", whatsapp_product),
+        (YOUTUBE_OUTBOX, YOUTUBE_STATE, "youtube", youtube_product),
+    ]
 
 
 def upsert(doc: dict, products: list[dict]) -> dict:
@@ -175,14 +220,8 @@ def main() -> int:
         if item.get("id") in allowed and story_ready(item)[0]
     ]
 
-    outputs = [
-        (THREADS_OUTBOX, THREADS_STATE, "threads", threads_product),
-        (LINKEDIN_OUTBOX, LINKEDIN_STATE, "linkedin", linkedin_product),
-        (TELEGRAM_OUTBOX, TELEGRAM_STATE, "telegram", telegram_product),
-        (YOUTUBE_OUTBOX, YOUTUBE_STATE, "youtube", youtube_product),
-    ]
     counts = {}
-    for outbox_path, state_path, platform, factory in outputs:
+    for outbox_path, state_path, platform, factory in output_specs():
         outbox = upsert(
             load(outbox_path, {"schema_version": "1.0", "platform": platform, "items": []}),
             [factory(story) for story in stories],
@@ -206,6 +245,7 @@ def main() -> int:
         **counts,
         "youtube_state": "HOLD_MEDIA_UNTIL_REAL_VIDEO_AND_ACCESS",
         "telegram_state": "OUTBOX_ONLY_UNTIL_VERIFIED_ACCESS",
+        "whatsapp_state": "OUTBOX_ONLY_UNTIL_VERIFIED_ACCESS_AND_RECIPIENT_SCOPE_POLICY",
     }, ensure_ascii=False))
     return 0
 
