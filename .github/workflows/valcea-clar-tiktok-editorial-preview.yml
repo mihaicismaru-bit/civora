@@ -4,6 +4,11 @@ on:
   pull_request:
     paths:
       - "valcea-clar/social/tiktok_editorial_v1.py"
+      - "valcea-clar/social/test_tiktok_premium_photo_product.py"
+      - "valcea-clar/social/build_live_story_outbox.py"
+      - "valcea-clar/social/build_social_media_assets.py"
+      - "valcea-clar/social/social_common.py"
+      - "valcea-clar/social/tiktok_publish.py"
       - "valcea-clar/social/story_visuals.json"
       - "valcea-clar/site/current_edition.json"
       - "valcea-clar/site/newsroom_decision.json"
@@ -24,8 +29,22 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
-      - name: Self-test TikTok motion-value packaging
+      - name: Install deterministic TikTok renderer
+        run: python -m pip install --disable-pip-version-check Pillow==12.3.0
+      - name: Compile TikTok premium path
+        run: |
+          python -m py_compile \
+            valcea-clar/social/tiktok_editorial_v1.py \
+            valcea-clar/social/test_tiktok_premium_photo_product.py \
+            valcea-clar/social/build_live_story_outbox.py \
+            valcea-clar/social/build_social_media_assets.py \
+            valcea-clar/social/social_common.py \
+            valcea-clar/social/tiktok_publish.py
+      - name: Self-test TikTok editorial renderer
         run: python valcea-clar/social/tiktok_editorial_v1.py --self-test
+      - name: Prove editor-to-publisher premium photo path
+        working-directory: valcea-clar/social
+        run: python test_tiktok_premium_photo_product.py
       - name: Build TikTok editorial previews
         run: python valcea-clar/social/tiktok_editorial_v1.py
       - name: Validate current media gates and storyboards
@@ -36,6 +55,8 @@ jobs:
           value=json.loads(Path('valcea-clar/social/previews/tiktok-v1/manifest.json').read_text(encoding='utf-8'))
           if value.get('execution_mode')!='PREVIEW_ONLY_NO_NETWORK_CALLS':
               raise SystemExit('TikTok preview network-call guard missing')
+          if value.get('rendering_version')!='tiktok-editorial-v1.1':
+              raise SystemExit('TikTok premium rendering version mismatch')
           products={p['story_id']:p for p in value.get('products',[]) if isinstance(p,dict)}
           gov=products.get('florile-govorei-20260816')
           if not gov or gov.get('status')!='HOLD':
@@ -59,12 +80,16 @@ jobs:
                   raise SystemExit('TikTok media-integrity guard missing')
               if product.get('verbatim_cross_platform_reuse_allowed') is not False:
                   raise SystemExit('TikTok cross-platform reuse guard missing')
-          print(f"TikTok editorial preview: PASS ({value['ready']} READY / {value['held']} HOLD)")
+              # Current canonical fixtures are archival/thin, therefore no real
+              # premium post should be manufactured merely for CI.
+              if product.get('status')!='READY' and product.get('preview_file'):
+                  raise SystemExit('TikTok HOLD product incorrectly received a rendered publication asset')
+          print(f"TikTok editorial preview v1.1: PASS ({value['ready']} READY / {value['held']} HOLD)")
           PY
       - name: Upload TikTok editorial preview
         uses: actions/upload-artifact@v7
         with:
-          name: valcea-clar-tiktok-editorial-v1-${{ github.run_id }}
+          name: valcea-clar-tiktok-editorial-v1-1-${{ github.run_id }}
           path: valcea-clar/social/previews/tiktok-v1
           if-no-files-found: error
           retention-days: 14

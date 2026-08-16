@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import hashlib
 import json
 import urllib.parse
 from pathlib import Path
@@ -43,9 +44,11 @@ def utc_now() -> str:
     )
 
 
-def load_json(path: Path, default: dict[str, Any]) -> dict[str, Any]:
+def load_json(path: Path, default: dict[str, Any] | None = None) -> dict[str, Any]:
     if not path.exists():
-        return default
+        if default is not None:
+            return default
+        raise RuntimeError(f"missing required JSON file: {path}")
     value = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(value, dict):
         raise ValueError(f"{path} must contain a JSON object")
@@ -175,6 +178,63 @@ def direct_photo_url(item: dict[str, Any], platform: str) -> str:
     raise ValueError(f"{item.get('id')} has no HTTPS photo URL for {platform}")
 
 
+def _is_sha256(value: Any) -> bool:
+    text = str(value or "").strip().lower()
+    return len(text) == 64 and all(char in "0123456789abcdef" for char in text)
+
+
+def _canonical_digest(value: Any) -> str:
+    raw = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def _validate_tiktok_premium_asset(
+    item: dict[str, Any],
+    config: dict[str, Any],
+    explicit_url: str,
+) -> None:
+    if config.get("premium_asset_required") is not True:
+        return
+    if config.get("editorial_product_status") != "READY":
+        raise ValueError("TikTok premium asset is required for a non-READY editorial product")
+    if config.get("editorial_rendering_version") != "tiktok-editorial-v1.1":
+        raise ValueError("TikTok premium editorial rendering version drift")
+    product_fp = str(config.get("editorial_product_fingerprint_sha256") or "").strip().lower()
+    if not _is_sha256(product_fp):
+        raise ValueError("TikTok premium editorial product fingerprint missing")
+
+    asset = config.get("editorial_asset")
+    if not isinstance(asset, dict):
+        raise ValueError("TikTok premium asset required but editorial_asset is missing")
+    if asset.get("kind") != "editorial_composite" or asset.get("synthetic") is not False:
+        raise ValueError("TikTok premium asset must be a non-synthetic editorial_composite")
+    if asset.get("platform") != "tiktok" or asset.get("renderer") != "tiktok-editorial-v1.1":
+        raise ValueError("TikTok premium asset renderer/platform lineage drift")
+    if asset.get("source_fact_kernel") != "canonical_verified_story":
+        raise ValueError("TikTok premium asset fact-kernel lineage missing")
+    if asset.get("archive_as_current_forbidden") is not True:
+        raise ValueError("TikTok premium asset archive/current guard missing")
+    if str(asset.get("public_url") or "").strip() != explicit_url:
+        raise ValueError("TikTok premium asset URL does not match configured photo_url")
+    if str(asset.get("product_fingerprint_sha256") or "").strip().lower() != product_fp:
+        raise ValueError("TikTok premium asset/product fingerprint mismatch")
+    for field in ("sha256", "source_photo_sha256", "asset_fingerprint_sha256"):
+        if not _is_sha256(asset.get(field)):
+            raise ValueError(f"TikTok premium asset invalid {field}")
+    candidate = dict(asset)
+    supplied_asset_fp = str(candidate.pop("asset_fingerprint_sha256", "")).strip().lower()
+    if supplied_asset_fp != _canonical_digest(candidate):
+        raise ValueError("TikTok premium asset fingerprint is not authentic")
+
+    metadata = photo_metadata(item)
+    if asset.get("rights_basis") != metadata.get("rights_basis"):
+        raise ValueError("TikTok premium asset rights basis drift from source photograph")
+    if asset.get("credit") != metadata.get("credit"):
+        raise ValueError("TikTok premium asset credit drift from source photograph")
+    if asset.get("source_url") != metadata.get("source_url"):
+        raise ValueError("TikTok premium asset source URL drift from source photograph")
+
+
 def canonical_photo_url(item: dict[str, Any]) -> str:
     config = platform_config(item, "tiktok") or {}
     explicit = str(config.get("photo_url") or "").strip()
@@ -185,7 +245,10 @@ def canonical_photo_url(item: dict[str, Any]) -> str:
                 "TikTok photo URL must be hosted on the verified valceaclar.ro "
                 f"domain: {explicit}"
             )
+        _validate_tiktok_premium_asset(item, config, explicit)
         return explicit
+    if config.get("premium_asset_required") is True:
+        raise ValueError("TikTok premium asset required but canonical photo_url is missing")
     filename = Path(str(item.get("image_path", ""))).name
     if not filename:
         raise ValueError(f"{item.get('id')} has no image filename")
