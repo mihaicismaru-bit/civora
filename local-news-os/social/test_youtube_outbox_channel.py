@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Acceptance tests for YouTube Shorts as an independent durable-outbox publication.
 
-No YouTube upload credentials or verified adapter are assumed. The acceptance target is
-therefore a complete native video product with real-media provenance, independent state,
-and an idempotent OUTBOX_ONLY bridge handoff. Direct publication must remain impossible.
+OAuth credentials may be linked for verified channel identity while no verified
+upload adapter is assumed. The acceptance target is therefore a complete native
+video product with real-media provenance, independent state, and an idempotent
+OUTBOX_ONLY bridge handoff. Direct publication must remain impossible.
 """
 from __future__ import annotations
 
@@ -135,7 +136,10 @@ class YouTubeOutboxAcceptance(unittest.TestCase):
         self.assertEqual("valcea-youtube", self.youtube["channel_id"])
         self.assertEqual("outbox_only", self.youtube["status"])
         self.assertEqual(["short", "long_video"], self.youtube["native_formats"])
-        self.assertEqual("none:youtube-upload-access-not-verified", self.youtube["credentials_ref"])
+        self.assertEqual(
+            "github-actions-secret:VALCEA_YOUTUBE_CLIENT_ID+VALCEA_YOUTUBE_CLIENT_SECRET+VALCEA_YOUTUBE_REFRESH_TOKEN",
+            self.youtube["credentials_ref"],
+        )
         self.assertEqual("valcea-clar/social/youtube_outbox.json", self.youtube["publication_state"]["outbox_path"])
         self.assertEqual("valcea-clar/social/youtube_state.json", self.youtube["publication_state"]["state_path"])
         self.assertTrue(self.youtube["metrics"]["observed_only"])
