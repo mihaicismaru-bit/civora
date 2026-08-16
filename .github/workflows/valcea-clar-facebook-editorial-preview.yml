@@ -1,0 +1,73 @@
+name: VÂLCEA CLAR Facebook Editorial Preview
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/social/facebook_editorial_preview.py"
+      - "valcea-clar/social/facebook_visual_system.json"
+      - "valcea-clar/social/story_visuals.json"
+      - "valcea-clar/social/fetch_approved_photos.py"
+      - "valcea-clar/site/current_edition.json"
+      - "valcea-clar/site/newsroom_decision.json"
+      - "valcea-clar/editions/**"
+      - ".github/workflows/valcea-clar-facebook-editorial-preview.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Install renderer dependency
+        run: python -m pip install --disable-pip-version-check Pillow==11.3.0
+      - name: Fetch approved photographs
+        run: python valcea-clar/social/fetch_approved_photos.py
+      - name: Self-test Facebook packaging
+        run: python valcea-clar/social/facebook_editorial_preview.py --self-test
+      - name: Render Facebook products
+        run: python valcea-clar/social/facebook_editorial_preview.py
+      - name: Validate acceptance fixtures
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('valcea-clar/social/previews/facebook')
+          manifest=json.loads((root/'manifest.json').read_text(encoding='utf-8'))
+          plans={p['story_id']:p for p in manifest['plans']}
+          if manifest.get('execution_mode') != 'PREVIEW_ONLY_NO_META_CALLS':
+              raise SystemExit('Meta-call guard missing')
+          if manifest.get('canvas') != {'width':1200,'height':1500,'aspect_ratio':'4:5'}:
+              raise SystemExit('wrong Facebook preview canvas')
+          lum=plans.get('luminos-fest-zavoi-20260815')
+          if not lum or lum.get('status')!='READY' or lum.get('hook')!='Azi în Zăvoi: intrarea este liberă':
+              raise SystemExit('Luminos Facebook utility hook failed')
+          gov=plans.get('florile-govorei-20260816')
+          if not gov or gov.get('status')!='HOLD' or gov.get('reason')!='thin_title_date_source_only':
+              raise SystemExit('Florile Govorei FB_INTEREST_GATE failed')
+          ola=plans.get('olanesti-bridge-monitor')
+          if not ola or ola.get('status')!='READY' or not ola.get('hook','').startswith('44,37 mil. lei'):
+              raise SystemExit('Olănești Facebook public-interest hook failed')
+          if 'Ralunic + Dimex-2000 Company' not in ola.get('body',''):
+              raise SystemExit('Olănești contractor fact missing from Facebook body')
+          for plan in manifest['plans']:
+              name=plan.get('preview_file')
+              if name:
+                  path=root/name
+                  if not path.is_file() or path.stat().st_size < 30000:
+                      raise SystemExit(f'invalid Facebook preview: {path}')
+          print(f"Facebook Editorial preview: PASS ({manifest['ready']} READY / {manifest['held']} HOLD)")
+          PY
+      - name: Upload inspectable Facebook previews
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-facebook-editorial-preview-${{ github.run_id }}
+          path: valcea-clar/social/previews/facebook
+          if-no-files-found: error
+          retention-days: 14
