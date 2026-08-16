@@ -178,6 +178,23 @@
         "cross-checking local emergency, transport and infrastructure reporting without automatic publication"
       ],
       "core_feedback": "LOCAL NEWS OS needs a generic GEO_SCOPED_ALERT / STRUCTURED_ALERT contract: deterministically extract affected geography plus issued_at, valid_from, valid_to and severity from primary-source alert bodies; match that geography against the instance before admission; preserve canonical alert provenance; never synthesize a free-form headline; and reject the alert fail-closed when geography, severity or validity is ambiguous. This belongs in CORE, not in a Vâlcea-specific parser."
+    },
+    {
+      "id": "primaria-vaideeni-anunturi",
+      "publisher": "Primăria Comunei Vaideeni",
+      "url": "https://primaria-vaideeni.ro/VAIDEENI/anunturi/",
+      "tier": "T1",
+      "section": "ADMINISTRAȚIE",
+      "status": "QUARANTINED_LISTING_PDF_NO_ARTICLE_PUBLICATION_DATE",
+      "checked_at": "2026-08-17",
+      "reason": "The official Vaideeni announcements page is a high-value local source for municipal projects, infrastructure, cadastral work and consultations, but many entries lead directly to PDF/document files and the listing does not expose a trustworthy article-level published_at for each item. The current automatic newsroom adapter is article-publication-date based and must not infer freshness from PDF filenames, document-internal dates or crawl time. The source is therefore monitored fail-closed until a generic document-feed contract can preserve listing provenance and separate publication time from document and event dates.",
+      "safe_use": [
+        "manual discovery of Vaideeni municipal notices, projects and public consultations",
+        "primary-source verification of infrastructure notices, including works connected to the Tetila–Horezu–Râmnicu Vâlcea gas transmission pipeline",
+        "verification of cadastral, waste, tourism-strategy, school-meal and local-project documents",
+        "manual reporting only after confirming document date, affected geography and operative period on the primary evidence"
+      ],
+      "core_feedback": "This reinforces the existing generic DOCUMENT_REGISTER / PDF-document ingestion requirement: deterministically enumerate official documents from a listing, preserve listing and file provenance, keep published_at separate from document_date/event_date, and reject automatic freshness when publication time cannot be proven. No Vaideeni-specific parser should be added."
     }
   ]
 }
