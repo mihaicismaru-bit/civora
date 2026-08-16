@@ -174,7 +174,7 @@ jobs:
         continue-on-error: true
         env:
           VALCEA_IG_ACCOUNT_ID: ${{ steps.meta_auth.outputs.ig_account_id || vars.VALCEA_IG_ACCOUNT_ID }}
-          VALCEA_IG_ACCESS_TOKEN: ${{ secrets.VALCEA_META_PAGE_ACCESS_TOKEN || secrets.VALCEA_IG_ACCESS_TOKEN }}
+          VALCEA_IG_ACCESS_TOKEN: ${{ secrets.VALCEA_META_PAGE_ACCESS_TOKEN || secrets.VALCEA_IG_ACCESS_TOKEN || secrets.VALCEA_FB_PAGE_ACCESS_TOKEN }}
           VALCEA_IG_GRAPH_VERSION: v26.0
           VALCEA_IG_GRAPH_HOST: graph.facebook.com
           VALCEA_IG_MAX_PER_RUN: "1"
