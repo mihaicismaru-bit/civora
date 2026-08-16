@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 import linkedin_editorial_v1 as editorial
+from native_identity import product_identity
 
 ROOT = Path(__file__).resolve().parents[2]
 VC = ROOT / "valcea-clar"
@@ -44,6 +45,7 @@ def canonical_item(product: dict[str, Any]) -> dict[str, Any]:
         "direct_publication_enabled": False,
         "direct_publication_blocker": "linkedin_direct_access_not_configured",
         "generation_mode": "linkedin_editorial_v1",
+        "identity": product_identity("linkedin"),
         "edition_gate": False,
     }
     if product.get("status") == "HOLD":
@@ -90,6 +92,7 @@ def build() -> dict[str, Any]:
     outbox["platform"] = "linkedin"
     outbox["publication_model"] = "continuous_story_first"
     outbox["editorial_product_version"] = "linkedin-editorial-v1.0"
+    outbox["identity_source"] = "valcea-clar/social/native_platform_identity_system.json"
     outbox["edition_recaps_are_publication_gates"] = False
     outbox["items"] = list(existing.values())
     write(OUTBOX, outbox)
@@ -106,6 +109,7 @@ def build() -> dict[str, Any]:
     state["execution_owner"] = "civora_site_engine"
     state["publication_model"] = "continuous_story_first"
     state["editorial_product_version"] = "linkedin-editorial-v1.0"
+    state["identity_source"] = "valcea-clar/social/native_platform_identity_system.json"
     state["direct_publication_enabled"] = False
     state["direct_publication_blocker"] = "linkedin_direct_access_not_configured"
     state.setdefault("published", {})
@@ -138,8 +142,11 @@ def self_test() -> int:
     assert item["status"] == "outbox_ready"
     assert item["direct_publication_enabled"] is False
     assert item["generation_mode"] == "linkedin_editorial_v1"
+    assert item["identity"]["channel_id"] == "valcea-linkedin"
+    assert item["identity"]["presentation"]["document_or_data_visual_preferred_over_decorative_photo"] is True
     held = canonical_item({"story_id":"y","status":"HOLD","reason":"thin","canonical_url":"https://valceaclar.ro/stiri/y/"})
     assert held["status"] == "hold" and held["hold_reason"] == "thin"
+    assert held["identity"]["product_role"] == "decision_maker_publication"
     print("VÂLCEA CLAR LinkedIn editorial materializer self-test: PASS")
     return 0
 
