@@ -1,0 +1,104 @@
+name: LOCAL NEWS OS Series Adapter-Gated Dispatch Handoff
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/social/series_adapter_dispatch_handoff.py"
+      - "local-news-os/social/test_series_adapter_dispatch_handoff.py"
+      - "local-news-os/social/series_publication_state_bridge.py"
+      - "local-news-os/social/adapter_dispatch_bridge.py"
+      - "local-news-os/social/adapter_capability_gate.py"
+      - "local-news-os/social/publishing_adapters.py"
+      - "local-news-os/social/native_series_compositor.py"
+      - "local-news-os/social/series_visual_router.py"
+      - "local-news-os/social/cadence_fatigue.py"
+      - "valcea-clar/social/channel_registry.json"
+      - "valcea-clar/social/adapter_capabilities.json"
+      - "valcea-clar/social/channels/**"
+      - ".github/workflows/local-news-os-series-adapter-dispatch-handoff.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/social/series_adapter_dispatch_handoff.py"
+      - "local-news-os/social/test_series_adapter_dispatch_handoff.py"
+      - "local-news-os/social/series_publication_state_bridge.py"
+      - "local-news-os/social/adapter_dispatch_bridge.py"
+      - "local-news-os/social/adapter_capability_gate.py"
+      - "local-news-os/social/publishing_adapters.py"
+      - "local-news-os/social/native_series_compositor.py"
+      - "local-news-os/social/series_visual_router.py"
+      - "local-news-os/social/cadence_fatigue.py"
+      - "valcea-clar/social/channel_registry.json"
+      - "valcea-clar/social/adapter_capabilities.json"
+      - "valcea-clar/social/channels/**"
+      - ".github/workflows/local-news-os-series-adapter-dispatch-handoff.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-news-os-series-adapter-dispatch-handoff-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile recurring-series dispatch stack
+        run: |
+          python -m py_compile \
+            local-news-os/social/publishing_adapters.py \
+            local-news-os/social/adapter_dispatch_bridge.py \
+            local-news-os/social/adapter_capability_gate.py \
+            local-news-os/social/content_atomizer.py \
+            local-news-os/social/hook_engine.py \
+            local-news-os/social/visual_router.py \
+            local-news-os/social/cadence_fatigue.py \
+            local-news-os/social/native_series_compositor.py \
+            local-news-os/social/series_visual_router.py \
+            local-news-os/social/series_publication_state_bridge.py \
+            local-news-os/social/series_adapter_dispatch_handoff.py \
+            local-news-os/social/test_series_adapter_dispatch_handoff.py
+
+      - name: Run Series Adapter-Gated Dispatch Handoff acceptance tests
+        run: python local-news-os/social/test_series_adapter_dispatch_handoff.py
+
+      - name: Run upstream series publication-state regression
+        run: python local-news-os/social/test_series_publication_state_bridge.py
+
+      - name: Run generic adapter bridge regression
+        run: python local-news-os/social/test_adapter_dispatch_bridge.py
+
+      - name: Run truthful adapter capability regression
+        run: python local-news-os/social/test_adapter_capability_gate.py
+
+      - name: Assert READY-only handoff and zero-paid policies
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          registry = json.loads(Path('valcea-clar/social/channel_registry.json').read_text(encoding='utf-8'))
+          capabilities = json.loads(Path('valcea-clar/social/adapter_capabilities.json').read_text(encoding='utf-8'))
+          policy = registry.get('policy') or {}
+          if policy.get('paid_social_scheduler_required') is not False:
+              raise SystemExit('paid social scheduler must remain disabled')
+          if policy.get('paid_llm_api_required') is not False:
+              raise SystemExit('paid LLM API must remain disabled')
+          if policy.get('cross_post_verbatim_forbidden') is not True:
+              raise SystemExit('verbatim cross-posting must remain forbidden')
+          cap_policy = capabilities.get('policy') or {}
+          if cap_policy.get('zero_paid_dependency') is not True:
+              raise SystemExit('capability registry must remain zero-paid')
+          if cap_policy.get('verbatim_cross_platform_reuse_allowed') is not False:
+              raise SystemExit('capability registry must forbid verbatim reuse')
+          print('series adapter handoff policy: PASS')
+          PY
