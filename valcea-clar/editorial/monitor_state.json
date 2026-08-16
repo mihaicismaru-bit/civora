@@ -4,8 +4,8 @@
   "product": "VÂLCEA CLAR durable monitor state",
   "execution_owner": "CIVORA_SITE_ENGINE",
   "state_owner": "GITHUB_REPOSITORY",
-  "generated_at": "2026-08-16T22:47:44Z",
-  "last_live_probe_at": "2026-08-16T22:47:44Z",
+  "generated_at": "2026-08-16T23:19:32Z",
+  "last_live_probe_at": "2026-08-16T23:19:32Z",
   "mode": "LIVE_SOURCE_HEALTH",
   "discovery_observed_at": "2026-08-17T00:38:55+03:00",
   "monitor_count": 7,
@@ -15,7 +15,9 @@
       "label": "SJU Vâlcea — concursuri și recrutări",
       "registry_status": "ACTIVE_REVERIFY",
       "attention": "REVIEW_REQUIRED",
-      "changed_sources": [],
+      "changed_sources": [
+        "posturi-gov-valcea"
+      ],
       "degraded_sources": [
         "sju-valcea-direct"
       ],
@@ -32,11 +34,11 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://posturi.gov.ro/judet/valcea/",
-          "fingerprint": "90ec9d71c99d7fad994f19ee7506a9743cfd6b872f4e9e6dfcae65eabd1a2660",
+          "fingerprint": "769c42a07b07eee32bc84f1a81bea1d70af2273d6a267e549d37f9b738343f23",
           "match_count": 8,
           "error": null,
           "health": "OK",
-          "change": "NEW_BASELINE"
+          "change": "CHANGED_REVIEW_REQUIRED"
         },
         {
           "id": "sju-valcea-direct",
@@ -155,7 +157,7 @@
           "match_count": 0,
           "error": null,
           "health": "OK",
-          "change": "NEW_BASELINE"
+          "change": "UNCHANGED"
         },
         {
           "id": "cj-valcea-sedinte",
