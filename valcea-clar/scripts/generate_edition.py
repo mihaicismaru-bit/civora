@@ -6,6 +6,10 @@ facts that passed an editorial evidence gate. It merges the curated fact
 registry with narrowly scoped automatic facts discovered from primary sources.
 If a new edition cannot pass the publication gate, the public pointer remains
 on the last known good edition.
+
+Public edition items are strictly reader-facing editorial facts. Operational
+telemetry (source health, ingest queues, hidden candidates) stays in its
+backend state files and is never rendered as news.
 """
 from __future__ import annotations
 
@@ -20,9 +24,6 @@ FACTS = ROOT / "editorial" / "facts_registry.json"
 AUTO_FACTS = ROOT / "editorial" / "auto_facts.json"
 EDITIONS = ROOT / "editions"
 SITE = ROOT / "site"
-META = ROOT / "web" / "data" / "meta.json"
-RECON = ROOT / "ops" / "ingest_reconciliation.json"
-SOURCE_HEALTH = ROOT / "state" / "source_health.json"
 POINTER = SITE / "current_edition.json"
 LAST_ATTEMPT = SITE / "last_edition_attempt.json"
 TZ = ZoneInfo("Europe/Bucharest")
@@ -84,54 +85,6 @@ def eligible_facts(registry: dict, now: datetime, slot: str) -> list[dict]:
     return output
 
 
-def operational_blocks() -> list[dict]:
-    blocks: list[dict] = []
-    meta = load_json(META, {})
-    recon = load_json(RECON, {})
-    if meta:
-        places = int(meta.get("place_count") or 0)
-        candidates = int(meta.get("candidate_count") or 0)
-        summary = recon.get("summary", {}) if recon else {}
-        monitored = int(summary.get("ingest_records") or summary.get("ingest_records_total") or recon.get("ingest_records") or 0)
-        review_queue = int(summary.get("review_queue") or recon.get("review_queue") or 0)
-        blocks.append({
-            "id": "unde-iesim-operational",
-            "section": "UNDE_IEȘIM",
-            "priority": 72,
-            "confidence": 100,
-            "headline": "Unde ieșim: ghidul public rămâne separat de candidații în verificare",
-            "dek": f"{places} localuri sunt în proiecția publică verificată; candidații incompleți nu sunt promovați automat.",
-            "paragraphs": [
-                f"Motorul «Unde ieșim» are {places} fișe publice și {candidates} candidați ascunși în proiecția web."
-                + (f" Ingestia urmărește {monitored} înregistrări." if monitored else ""),
-                (f"Coada editorială are {review_queue} elemente de verificat. " if review_queue else "")
-                + "Datele comerciale, juridice și de meniu nu sunt completate din presupuneri."
-            ],
-            "material_fact_gate": "PASS",
-            "sources": [{"name": "Registrul canonic VÂLCEA CLAR — Unde ieșim", "url": "https://valceaclar.ro/unde-iesim/", "tier": "T1_INTERNAL"}],
-        })
-
-    health = load_json(SOURCE_HEALTH, {})
-    if health:
-        summary = health.get("summary", {})
-        blocks.append({
-            "id": "source-radar-operational",
-            "section": "NOTA_REDACTIEI",
-            "priority": 10,
-            "confidence": 100,
-            "headline": "Nota redacției — starea surselor",
-            "dek": "Schimbările detectate de radar sunt trimise la verificare și nu modifică automat faptele materiale.",
-            "paragraphs": [
-                f"Radarul a verificat {summary.get('total', 0)} surse: {summary.get('pass', 0)} au trecut normal, "
-                f"{summary.get('degraded', 0)} sunt degradate și {summary.get('fail', 0)} au eșuat. "
-                f"Au fost detectate {summary.get('changed', 0)} schimbări semantice și {summary.get('resolution_tasks_required', 0)} sarcini de rezoluție."
-            ],
-            "material_fact_gate": "PASS",
-            "sources": [{"name": "VÂLCEA CLAR Source Radar", "url": "https://github.com/mihaicismaru-bit/civora/tree/main/valcea-clar/state", "tier": "T1_INTERNAL"}],
-        })
-    return blocks
-
-
 def edition_id(now: datetime, slot: str) -> str:
     return f"{now.date().isoformat()}-{slot}"
 
@@ -184,15 +137,17 @@ def pointer_is_publishable(pointer: dict) -> bool:
 def write_outputs(now: datetime, slot: str, facts: list[dict], auto_registry_count: int) -> tuple[Path, Path, dict]:
     EDITIONS.mkdir(parents=True, exist_ok=True)
     SITE.mkdir(parents=True, exist_ok=True)
-    items = facts + operational_blocks()
-    editorial_count = len(facts)
-    included_auto = sum(1 for fact in facts if fact.get("auto_generated"))
+    # LOCAL NEWS OS contract: public edition items are editorial facts only.
+    # Backend health/queue telemetry remains in its dedicated state files.
+    items = facts
+    editorial_count = len(items)
+    included_auto = sum(1 for fact in items if fact.get("auto_generated"))
     publish = editorial_count >= 1
     status_note = "" if editorial_count >= 3 else "Ediție scurtă: publicăm doar informațiile care au trecut pragul de verificare."
     eid = edition_id(now, slot)
     title_slot = "dimineață" if slot == "morning" else "seară"
     payload = {
-        "schema_version": "2.2",
+        "schema_version": "2.3",
         "edition_id": eid,
         "slot": slot,
         "title": f"VÂLCEA CLAR — Ediția de {title_slot}",
@@ -214,6 +169,7 @@ def write_outputs(now: datetime, slot: str, facts: list[dict], auto_registry_cou
             "shorter_edition_when_evidence_is_sparse": True,
             "last_known_good_fallback": True,
             "human_override_available": True,
+            "internal_operational_telemetry_public": False,
         },
     }
     json_path = EDITIONS / f"{eid}.json"
@@ -277,8 +233,10 @@ def self_test() -> int:
         "material_fact_gate": "PASS_TITLE_DATE_ONLY", "sources": [{"name": "S", "url": "https://example.test", "tier": "T1"}]
     }]}
     now = datetime(2026, 8, 15, 8, 0, tzinfo=TZ)
-    assert len(eligible_facts(sample, now, "morning")) == 1
+    eligible = eligible_facts(sample, now, "morning")
+    assert len(eligible) == 1
     assert eligible_facts(sample, now, "evening") == []
+    assert all(item.get("id") not in {"unde-iesim-operational", "source-radar-operational"} for item in eligible)
     assert pointer_is_publishable({"edition_id": "x", "status": "auto_approved", "publication_intent": "publish"})
     assert not pointer_is_publishable({"edition_id": "x", "status": "auto_hold", "publication_intent": "hold"})
     print("Autonomous edition generator self-test: PASS")
@@ -312,6 +270,7 @@ def main() -> int:
         "json": str(json_path.relative_to(ROOT)),
         "markdown": str(md_path.relative_to(ROOT)),
         "public_pointer_preserves_last_known_good_on_hold": True,
+        "public_items_are_editorial_only": True,
     }, ensure_ascii=False))
     return 0
 
