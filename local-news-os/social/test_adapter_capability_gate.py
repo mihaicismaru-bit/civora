@@ -118,7 +118,7 @@ class AdapterCapabilityGateAcceptance(unittest.TestCase):
         self.assertEqual("DIRECT_READY", result["dispatch_disposition"])
         self.assertEqual("DIRECT_READY", result["capability_disposition"])
         self.assertTrue(result["capability_gate"]["compatible"])
-        self.assertEqual(["photo"], result["capability_gate"]["selected_media_kinds"])
+        self.assertEqual(["photograph"], result["capability_gate"]["selected_media_kinds"])
 
     def test_tiktok_single_photo_can_use_existing_adapter_when_editorial_product_selects_it(self) -> None:
         report = _runtime("tiktok", single_photo_only=True)
