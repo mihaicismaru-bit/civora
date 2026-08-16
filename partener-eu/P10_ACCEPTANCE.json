@@ -15,7 +15,7 @@
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-08-16T03:29:41Z",
+    "utc": "2026-08-16T03:34:06Z",
     "source_pass": 6,
     "source_degraded": 0,
     "source_fail": 1,
@@ -26,7 +26,7 @@
     "quarantined_source": "SRC-LEGISLATIE — Portal Legislativ; dependent material facts blocked fail-closed"
   },
   "deployment_evidence": {
-    "utc": "2026-08-16T03:30:03Z",
+    "utc": "2026-08-16T03:34:30Z",
     "status": "FAIL",
     "public_content_verified": true,
     "https_verified": true,
@@ -36,7 +36,7 @@
     "http_content_verified": true,
     "content_origin": "custom_https",
     "http_status": 200,
-    "final_url": "https://partener.eu/?p10_probe=20260816T033003Z",
+    "final_url": "https://partener.eu/?p10_probe=20260816T033430Z",
     "title": "PARTENER.EU — Finanțări europene explicate simplu",
     "required_markers_present": true,
     "critical_assets_ok": true,
@@ -46,7 +46,7 @@
       {
         "id": "custom_https",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260816T033003Z",
+        "final_url": "https://partener.eu/?p10_probe=20260816T033430Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -57,7 +57,7 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260816T033003Z",
+        "final_url": "http://partener.eu/?p10_probe=20260816T033430Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -68,12 +68,12 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260816T033003Z",
+        "final_url": "http://partener.eu/?p10_probe=20260816T033430Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260816T033003Z",
-            "to_url": "http://partener.eu/?p10_probe=20260816T033003Z"
+            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260816T033430Z",
+            "to_url": "http://partener.eu/?p10_probe=20260816T033430Z"
           }
         ],
         "content_verified": true,
@@ -86,8 +86,8 @@
     "pages_workflow": {
       "status": "LIVE",
       "page_url": "http://partener.eu/",
-      "git_sha": "5ed2fd505eb4d6b8a4aaaaf4f79b836d606fd202",
-      "observed_at": "2026-08-16T02:32:33.970967+00:00",
+      "git_sha": "34ee964142a3310b7fb8772396f15f4cace6e64e",
+      "observed_at": "2026-08-16T03:33:23.846888+00:00",
       "configure_outcome": "success",
       "upload_outcome": "success",
       "deploy_outcome": "success",
@@ -123,43 +123,43 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-08-16T03:30:03Z",
-    "validation_run_started": "2026-08-16T03:29:41Z",
+    "utc": "2026-08-16T03:34:30Z",
+    "validation_run_started": "2026-08-16T03:34:06Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "7eb6500abe794369b6a2934b837b2451a6ee8af9ab8a72f982e96922a3cb228d",
-      "history_sha256": "7eb6500abe794369b6a2934b837b2451a6ee8af9ab8a72f982e96922a3cb228d",
-      "history_path": "validation/history/20260816T032941Z.json",
+      "latest_sha256": "4ff7f51f2e309511f1ecee17a8ae073e0285d82b6f7033ee6bd8e4b0be2e86f5",
+      "history_sha256": "4ff7f51f2e309511f1ecee17a8ae073e0285d82b6f7033ee6bd8e4b0be2e86f5",
+      "history_path": "validation/history/20260816T033406Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "7878647cdffbfa79be3e68672ee01f525149e4972da51608adf40902a671843e",
-      "checkpoint_sha256": "7878647cdffbfa79be3e68672ee01f525149e4972da51608adf40902a671843e",
+      "source_state_sha256": "f6b761d2066b34843b34ff280eafd29a854e9c917100a2608b7703a36a90ead0",
+      "checkpoint_sha256": "f6b761d2066b34843b34ff280eafd29a854e9c917100a2608b7703a36a90ead0",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
       "recovery_state_integrity": "PASS"
     },
     "source_registry": {
-      "observed_at": "2026-08-15T22:58:42.024699Z",
-      "age_seconds": 16281,
+      "observed_at": "2026-08-16T03:29:59.758695Z",
+      "age_seconds": 270,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
       "summary": {
         "total": 18,
-        "pass": 11,
-        "degraded": 4,
+        "pass": 15,
+        "degraded": 0,
         "fail": 3,
         "quarantined": 3,
-        "resolution_tasks_required": 0
+        "resolution_tasks_required": 1
       },
       "tier_counts": {
         "T1": {
           "total": 4,
-          "pass": 1,
-          "degraded": 3,
+          "pass": 4,
+          "degraded": 0,
           "fail": 0,
           "quarantined": 0,
-          "hash_changes": 0
+          "hash_changes": 1
         },
         "T1B": {
           "total": 11,
@@ -170,13 +170,15 @@
           "hash_changes": 0
         }
       },
-      "changed_source_ids": [],
+      "changed_source_ids": [
+        "SRC-MYSMIS-CALLS"
+      ],
       "missing_resolution_tasks": [],
       "unsafe_material_updates": [],
       "fail_closed": true
     },
     "afir": {
-      "observed_at": "2026-08-15T23:58:09.464340+00:00",
+      "observed_at": "2026-08-16T03:30:49.692477+00:00",
       "status": "PASS",
       "item_count": 31,
       "error_count": 39,
@@ -386,7 +388,7 @@
       "material_facts_auto_promoted": false
     },
     "peo_calendar": {
-      "observed_at": "2026-08-15T23:58:59.012280+00:00",
+      "observed_at": "2026-08-16T03:31:35.562293+00:00",
       "status": "OK_OFFICIAL_OIR_COPY",
       "source": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
       "source_class": "OFFICIAL_INSTITUTIONAL_COPY_OIR_PECU_VEST",
@@ -400,7 +402,7 @@
       "publication_policy": "candidate-state-only; web material facts are not auto-promoted on scheduled hash changes"
     },
     "mipe": {
-      "observed_at": "2026-08-16T02:32:11.607271+00:00",
+      "observed_at": "2026-08-16T03:32:14.655157+00:00",
       "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
       "source_available": false,
       "candidate_count": 1,
@@ -467,7 +469,7 @@
     "summary": {
       "integrity_pass": true,
       "registry_health": "DEGRADED",
-      "registry_hash_changes": 0,
+      "registry_hash_changes": 1,
       "afir_hash_changes": 0,
       "peo_calendar_changes": 6,
       "mipe_health": "PASS",
