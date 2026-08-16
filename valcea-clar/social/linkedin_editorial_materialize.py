@@ -226,7 +226,7 @@ def self_test() -> int:
     }
     product = editorial.package(sample)
     assert product["status"] == "READY"
-    with tempfile.TemporaryDirectory() as raw:
+    with tempfile.TemporaryDirectory(dir=ROOT) as raw:
         asset = render_asset(product, Path(raw))
         item = canonical_item(product, asset)
         assert item["status"] == "outbox_ready"
