@@ -15,7 +15,7 @@ from social_common import (
     load_json,
     local_image_path,
     photo_metadata,
-    platform_selected,
+    platform_ready,
     write_json,
 )
 
@@ -44,9 +44,13 @@ def build() -> dict[str, Any]:
     for item in outbox.get("items", []):
         if not isinstance(item, dict):
             continue
+        # HOLD_MEDIA is a valid story-first state: the site story may already be
+        # live while a visual channel waits for its own approved native asset.
+        # Never dereference image metadata until at least one visual platform is
+        # actually ready.
         if not (
-            platform_selected(item, "instagram")
-            or platform_selected(item, "tiktok")
+            platform_ready(item, "instagram")
+            or platform_ready(item, "tiktok")
         ):
             continue
         source = local_image_path(item)
@@ -78,9 +82,11 @@ def build() -> dict[str, Any]:
             shutil.copyfile(source, destination / filename)
 
     manifest = {
-        "schema_version": "1.0",
-        "generation": "deterministic_from_social_outbox_v1",
+        "schema_version": "1.1",
+        "generation": "deterministic_from_ready_story_social_outbox_v1",
         "execution_owner": "civora_site_engine",
+        "publication_model": "continuous_story_first",
+        "held_channels_are_not_asset_errors": True,
         "canonical_base_url": "https://valceaclar.ro/media/social/",
         "assets": [records[key] for key in sorted(records)],
     }
