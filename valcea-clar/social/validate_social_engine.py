@@ -47,6 +47,14 @@ def cron_declared(workflow_text: str, cron: str) -> bool:
     )
 
 
+def workflow_text(repo_root: Path, rel: str, errors: list[str], label: str) -> tuple[Path, str]:
+    path = repo_root / rel
+    if not rel or not path.is_file():
+        errors.append(f"Missing {label} workflow: {rel!r}")
+        return path, ""
+    return path, path.read_text(encoding="utf-8")
+
+
 def validate(repo_root: Path) -> dict[str, Any]:
     social_root = repo_root / "valcea-clar" / "social"
     registry_path = social_root / "channel_registry.json"
@@ -86,25 +94,21 @@ def validate(repo_root: Path) -> dict[str, Any]:
             errors.append(f"Social ownership policy failed: {name}")
 
     workflow_rel = str(registry.get("workflow", "")).strip()
-    workflow_path = repo_root / workflow_rel
-    if not workflow_rel or not workflow_path.is_file():
-        errors.append(f"Missing registered social workflow: {workflow_rel!r}")
-        workflow_text = ""
-    else:
-        workflow_text = workflow_path.read_text(encoding="utf-8")
-        lowered = workflow_text.lower()
-        if "runs-on: ubuntu-latest" not in workflow_text:
+    main_workflow_path, main_workflow_text = workflow_text(repo_root, workflow_rel, errors, "registered social")
+    if main_workflow_text:
+        lowered = main_workflow_text.lower()
+        if "runs-on: ubuntu-latest" not in main_workflow_text:
             errors.append("Social workflow must run on GitHub-hosted ubuntu-latest")
         if "runs-on: self-hosted" in lowered or "[self-hosted" in lowered:
             errors.append("Social workflow may not use a self-hosted/local runner")
-        if "actions/checkout@" not in workflow_text:
+        if "actions/checkout@" not in main_workflow_text:
             errors.append("Social workflow must check out the canonical repository")
-        if "validate_social_engine.py" not in workflow_text:
+        if "validate_social_engine.py" not in main_workflow_text:
             errors.append("Social workflow does not execute the ownership validator")
         cron = str(registry.get("cadence", {}).get("cron", "")).strip()
-        if not cron or not cron_declared(workflow_text, cron):
+        if not cron or not cron_declared(main_workflow_text, cron):
             errors.append(f"Registered social cron is missing from workflow: {cron!r}")
-        if "github.event_name != 'pull_request'" not in workflow_text:
+        if "github.event_name != 'pull_request'" not in main_workflow_text:
             errors.append("Social workflow does not explicitly block publication in PRs")
 
     if automation_path.is_file():
@@ -134,7 +138,7 @@ def validate(repo_root: Path) -> dict[str, Any]:
 
     seen: set[str] = set()
     active: list[str] = []
-    scan_paths: list[Path] = [registry_path, workflow_path]
+    scan_paths: list[Path] = [registry_path, main_workflow_path]
     for channel in channels:
         channel_id = str(channel.get("channel_id", "")).strip()
         if not channel_id or channel_id in seen:
@@ -146,6 +150,22 @@ def validate(repo_root: Path) -> dict[str, Any]:
         direct = channel.get("direct_publication_enabled") is True
         adapter = channel.get("adapter")
         config_rel = str(channel.get("config", "")).strip()
+        channel_workflow_rel = str(channel.get("workflow") or workflow_rel).strip()
+        channel_workflow_path, channel_workflow = workflow_text(
+            repo_root, channel_workflow_rel, errors, f"{channel_id} channel"
+        )
+        scan_paths.append(channel_workflow_path)
+
+        if channel_workflow:
+            lowered = channel_workflow.lower()
+            if "runs-on: ubuntu-latest" not in channel_workflow:
+                errors.append(f"Channel {channel_id} workflow must run on ubuntu-latest")
+            if "runs-on: self-hosted" in lowered or "[self-hosted" in lowered:
+                errors.append(f"Channel {channel_id} workflow may not use self-hosted/local runners")
+            if "actions/checkout@" not in channel_workflow:
+                errors.append(f"Channel {channel_id} workflow must check out the canonical repository")
+            if direct and "github.event_name != 'pull_request'" not in channel_workflow:
+                errors.append(f"Channel {channel_id} workflow does not block direct publication in PRs")
 
         if status == "active":
             active.append(channel_id)
@@ -160,8 +180,8 @@ def validate(repo_root: Path) -> dict[str, Any]:
                 errors.append(f"Active channel {channel_id} adapter is missing: {adapter}")
             elif social_root not in adapter_path.resolve().parents:
                 errors.append(f"Active channel {channel_id} adapter must live in valcea-clar/social")
-            elif adapter_path.name not in workflow_text:
-                errors.append(f"Social workflow does not execute {channel_id} adapter {adapter_path.name}")
+            elif adapter_path.name not in channel_workflow:
+                errors.append(f"Channel workflow does not execute {channel_id} adapter {adapter_path.name}")
 
             if not config_rel:
                 errors.append(f"Active channel {channel_id} has no CHANNEL_CONFIG")
@@ -170,8 +190,8 @@ def validate(repo_root: Path) -> dict[str, Any]:
                 scan_paths.append(config_path)
                 if not config_path.is_file():
                     errors.append(f"Active channel {channel_id} config is missing: {config_rel}")
-                elif config_path.name not in workflow_text:
-                    errors.append(f"Social workflow does not validate {channel_id} config {config_path.name}")
+                elif config_path.name not in channel_workflow and config_rel not in main_workflow_text:
+                    errors.append(f"No registered workflow validates {channel_id} config {config_path.name}")
 
             for field in ("outbox", "state"):
                 rel = str(channel.get(field, "")).strip()
@@ -206,6 +226,7 @@ def validate(repo_root: Path) -> dict[str, Any]:
                 "check": f"channel:{channel_id}",
                 "status": status,
                 "direct_publication_enabled": direct,
+                "workflow": channel_workflow_rel,
             }
         )
 
@@ -213,10 +234,10 @@ def validate(repo_root: Path) -> dict[str, Any]:
         errors.append(
             f"Active direct channels must be {expected_active!r}; found {active!r}"
         )
-    if expected_active != ["facebook", "instagram", "tiktok"]:
+    if expected_active != ["facebook", "instagram", "threads", "tiktok"]:
         errors.append(
             "Current required direct-adapter set must be exactly "
-            "['facebook', 'instagram', 'tiktok']"
+            "['facebook', 'instagram', 'threads', 'tiktok']"
         )
 
     for path in sorted(set(scan_paths)):
