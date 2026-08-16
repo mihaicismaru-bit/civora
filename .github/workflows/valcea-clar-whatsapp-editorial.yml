@@ -11,6 +11,7 @@ on:
     paths:
       - "valcea-clar/social/whatsapp_editorial_v1.py"
       - "valcea-clar/social/whatsapp_editorial_materialize.py"
+      - "valcea-clar/social/whatsapp_channel_presence.json"
       - "valcea-clar/social/whatsapp_outbox.json"
       - "valcea-clar/social/whatsapp_state.json"
       - "valcea-clar/social/telegram_outbox.json"
@@ -65,6 +66,7 @@ jobs:
 
           outbox=json.loads(Path('valcea-clar/social/whatsapp_outbox.json').read_text(encoding='utf-8'))
           state=json.loads(Path('valcea-clar/social/whatsapp_state.json').read_text(encoding='utf-8'))
+          presence=json.loads(Path('valcea-clar/social/whatsapp_channel_presence.json').read_text(encoding='utf-8'))
           telegram=json.loads(Path('valcea-clar/social/telegram_outbox.json').read_text(encoding='utf-8'))
           result=json.loads(Path('/tmp/whatsapp-editorial-materialize.json').read_text(encoding='utf-8'))
           items={str(i.get('story_id')):i for i in outbox.get('items',[]) if isinstance(i,dict)}
@@ -79,37 +81,49 @@ jobs:
           if state.get('direct_publication_enabled') is not False:
               raise SystemExit('WhatsApp state falsely claims direct publication')
           if state.get('direct_publication_blocker')!='whatsapp_verified_access_and_recipient_scope_not_configured':
-              raise SystemExit('WhatsApp access/recipient blocker missing')
+              raise SystemExit('WhatsApp backward-compatible direct-messaging blocker missing')
+          expected_channel='https://whatsapp.com/channel/0029Vb9AHD7AInPl69ETcb3s'
+          if presence.get('status')!='active' or presence.get('url')!=expected_channel:
+              raise SystemExit('WhatsApp public Channel presence is not canonical')
+          public_channel=state.get('public_channel') or {}
+          if public_channel.get('active') is not True or public_channel.get('url')!=expected_channel:
+              raise SystemExit('WhatsApp public Channel is not projected into runtime state')
+          if public_channel.get('direct_publication_enabled') is not False:
+              raise SystemExit('WhatsApp public Channel falsely claims verified direct automation')
 
           ready=[item for item in items.values() if item.get('status')=='outbox_ready']
           if len(ready)>1 or int(result.get('ready') or 0)>1:
               raise SystemExit(f'WhatsApp interruption budget exceeded: {len(ready)} READY')
           selected=outbox.get('active_selected_story_ids') or []
-          if selected != ['olanesti-bridge-monitor']:
-              raise SystemExit(f'WhatsApp priority selection drifted: {selected}')
+          if selected != ['luminos-fest-zavoi-20260815']:
+              raise SystemExit(f'WhatsApp public-utility selection drifted: {selected}')
+          if outbox.get('selection_policy')!='highest_public_utility_and_urgency_then_editorial_priority_then_story_id':
+              raise SystemExit('WhatsApp utility-first selection policy missing')
 
           gov=items.get('florile-govorei-20260816')
           if not gov or gov.get('status')!='hold':
               raise SystemExit('Florile Govorei WhatsApp high-value HOLD failed')
           lum=items.get('luminos-fest-zavoi-20260815')
-          if not lum or lum.get('status')!='hold_frequency' or lum.get('distribution_class')!='weekend_utility':
-              raise SystemExit('Luminos WhatsApp frequency budget failed')
-          if int(lum.get('selection_rank') or 0)!=2:
-              raise SystemExit('Luminos WhatsApp ranking failed')
+          if not lum or lum.get('status')!='outbox_ready' or lum.get('distribution_class')!='weekend_utility':
+              raise SystemExit('Luminos WhatsApp utility selection failed')
+          if lum.get('selected_for_cycle') is not True or int(lum.get('selection_rank') or 0)!=1:
+              raise SystemExit('Luminos WhatsApp selection metadata failed')
           if 'Intrarea este liberă' not in lum.get('message',''):
               raise SystemExit('Luminos WhatsApp utility fact missing')
 
           ola=items.get('olanesti-bridge-monitor')
-          if not ola or ola.get('status')!='outbox_ready' or ola.get('distribution_class')!='essential_public_interest':
-              raise SystemExit('Olănești WhatsApp selected public-interest product failed')
-          if ola.get('selected_for_cycle') is not True or ola.get('selection_rank')!=1:
-              raise SystemExit('Olănești WhatsApp selection metadata failed')
+          if not ola or ola.get('status')!='hold_frequency' or ola.get('distribution_class')!='essential_public_interest':
+              raise SystemExit('Olănești WhatsApp public-interest product should remain inspectable, not selected')
+          if ola.get('selected_for_cycle') is not False or int(ola.get('selection_rank') or 0)!=2:
+              raise SystemExit('Olănești WhatsApp ranking metadata failed')
+          if int(lum.get('interruption_utility_score') or 0) <= int(ola.get('interruption_utility_score') or 0):
+              raise SystemExit('WhatsApp utility score does not outrank general investigation priority')
           text=ola.get('message','')
           for expected in ('44,37 mil. lei','Ralunic + Dimex-2000 Company','SMIS 334436'):
               if expected not in text:
                   raise SystemExit(f'Olănești WhatsApp missing {expected}')
           if int(ola.get('priority') or 0) < 85:
-              raise SystemExit('Olănești WhatsApp priority too low')
+              raise SystemExit('Olănești editorial priority unexpectedly changed')
           if '•' in text:
               raise SystemExit('WhatsApp copied Telegram bullet-list presentation')
 
@@ -127,7 +141,7 @@ jobs:
           for item in items.values():
               if item.get('status')=='outbox_ready':
                   if item.get('recipient_scope_required_before_dispatch') is not True:
-                      raise SystemExit('WhatsApp recipient-scope gate missing')
+                      raise SystemExit('WhatsApp recipient-scope compatibility gate missing')
                   if item.get('low_frequency') is not True or item.get('interruption_budget_per_cycle')!=1:
                       raise SystemExit('WhatsApp low-frequency invariant missing')
                   if item.get('verbatim_cross_platform_reuse_allowed') is not False:
@@ -136,7 +150,7 @@ jobs:
                       raise SystemExit('WhatsApp fake-urgency guard missing')
                   if len(str(item.get('message') or '')) > 700:
                       raise SystemExit('WhatsApp message budget exceeded')
-          print(f"WhatsApp editorial v1.1: PASS ({len(items)} products; {len(ready)} selected interruption)")
+          print(f"WhatsApp editorial v1.1: PASS ({len(items)} products; {len(ready)} selected interruption; public Channel active)")
           PY
 
       - name: Persist WhatsApp editorial state conflict-safe
@@ -172,6 +186,7 @@ jobs:
           name: valcea-clar-whatsapp-editorial-v1-1-${{ github.run_id }}
           path: |
             /tmp/whatsapp-editorial-materialize.json
+            valcea-clar/social/whatsapp_channel_presence.json
             valcea-clar/social/whatsapp_outbox.json
             valcea-clar/social/whatsapp_state.json
           if-no-files-found: warn
