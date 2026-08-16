@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
-"""Râmnicu Vâlcea Council Watch — official decision extractor.
+"""Râmnicu Vâlcea Council Watch — official adopted-decision reader.
 
-Reads only the official DocManager domain and turns the municipal Lotus Notes
-register into a durable review ledger. It never publishes a story itself.
+The monitor reads the municipality's official 2026 DocManager HCL register and
+keeps a durable review state. It never turns an agenda item into an adopted
+result and never publishes directly.
 
-The collector deliberately separates:
-- source discovery / register navigation;
-- decisions actually carrying the target meeting date;
-- extracted operative articles, money mentions and vote language;
-- editorial interpretation, which remains downstream and human/newsroom gated.
+Contract:
+- the official `HOTARARI ADOPTATE` register proves what has been published;
+- a target meeting date is confirmed only by HCL entries carrying that date;
+- when target HCLs exist, their official HTML attachments are fetched to expose
+  operative articles, vote language, money and procurement references;
+- when the register still stops before the target date, the state says exactly
+  that instead of inferring approval, rejection, postponement or even that the
+  meeting took place.
 """
 from __future__ import annotations
 
@@ -21,8 +25,7 @@ import ssl
 import urllib.error
 import urllib.parse
 import urllib.request
-from collections import deque
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
@@ -30,39 +33,51 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "editorial" / "council_watch_rm_valcea_state.json"
 BASE = "https://dm.primariavl.ro/dm/2026/hotarari.nsf"
+ADOPTED_VIEW = BASE + "/vwHotarariByAn?OpenView&Count=500"
 OFFICIAL_HOST = "dm.primariavl.ro"
-USER_AGENT = "VALCEA-CLAR-Council-Watch/1.0 (+https://valceaclar.ro/)"
+USER_AGENT = "VALCEA-CLAR-Council-Watch/1.1 (+https://valceaclar.ro/)"
 TARGET_DATE_ISO = "2026-08-14"
-TARGET_DATE_RO = "14 august 2026"
 MAX_BYTES = 3_000_000
-MAX_DISCOVERY_PAGES = 40
-MAX_DOCUMENT_FETCHES = 180
 MONTHS = {
-    "ianuarie": 1, "februarie": 2, "martie": 3, "aprilie": 4, "mai": 5,
-    "iunie": 6, "iulie": 7, "august": 8, "septembrie": 9, "octombrie": 10,
-    "noiembrie": 11, "decembrie": 12,
+    "ianuarie": 1,
+    "februarie": 2,
+    "martie": 3,
+    "aprilie": 4,
+    "mai": 5,
+    "iunie": 6,
+    "iulie": 7,
+    "august": 8,
+    "septembrie": 9,
+    "octombrie": 10,
+    "noiembrie": 11,
+    "decembrie": 12,
 }
+MONTH_PATTERN = "|".join(MONTHS)
+ENTRY_PATTERN = re.compile(
+    rf"\b2026\s+(?P<number>\d{{1,4}})\s+hotarirea\s+(?P=number)\s*-\s*"
+    rf"(?P<day>[0-3]?\d)\s+(?P<month>{MONTH_PATTERN})\s+2026\s*-\s*"
+    rf"(?P<title>.*?)(?=\s+2026\s+\d{{1,4}}\s+hotarirea\s+\d{{1,4}}\s*-|\Z)",
+    re.I,
+)
+ATTACHMENT_LABEL = re.compile(
+    rf"hotarirea\s+(?P<number>\d{{1,4}})\s*-\s*(?P<day>[0-3]?\d)\s+"
+    rf"(?P<month>{MONTH_PATTERN})\s+2026\s*-",
+    re.I,
+)
 
 
 class LinkParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
         self.links: list[dict[str, str]] = []
-        self.frames: list[str] = []
         self._href: str | None = None
         self._parts: list[str] = []
-        self.title_parts: list[str] = []
-        self._in_title = False
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         data = {k.lower(): (v or "") for k, v in attrs}
         if tag.lower() == "a" and data.get("href"):
             self._href = data["href"]
             self._parts = []
-        elif tag.lower() in {"frame", "iframe"} and data.get("src"):
-            self.frames.append(data["src"])
-        elif tag.lower() == "title":
-            self._in_title = True
 
     def handle_endtag(self, tag: str) -> None:
         if tag.lower() == "a" and self._href is not None:
@@ -70,14 +85,10 @@ class LinkParser(HTMLParser):
             self.links.append({"href": self._href, "text": text})
             self._href = None
             self._parts = []
-        elif tag.lower() == "title":
-            self._in_title = False
 
     def handle_data(self, data: str) -> None:
         if self._href is not None:
             self._parts.append(data)
-        if self._in_title:
-            self.title_parts.append(data)
 
 
 class TextParser(HTMLParser):
@@ -120,17 +131,18 @@ def decode_body(raw: bytes, content_type: str) -> str:
     candidates.extend(["utf-8", "windows-1250", "iso-8859-2", "windows-1252"])
     seen: set[str] = set()
     for charset in candidates:
-        if charset.lower() in seen:
+        key = charset.lower()
+        if key in seen:
             continue
-        seen.add(charset.lower())
+        seen.add(key)
         try:
             return raw.decode(charset)
         except (UnicodeDecodeError, LookupError):
-            pass
+            continue
     return raw.decode("utf-8", errors="replace")
 
 
-def fetch(url: str, timeout: int = 20) -> dict[str, Any]:
+def fetch(url: str, timeout: int = 18) -> dict[str, Any]:
     req = urllib.request.Request(
         url,
         headers={
@@ -142,12 +154,11 @@ def fetch(url: str, timeout: int = 20) -> dict[str, Any]:
     try:
         with urllib.request.urlopen(req, timeout=timeout, context=ssl.create_default_context()) as response:
             raw = response.read(MAX_BYTES)
-            body = decode_body(raw, response.headers.get("content-type") or "")
             return {
                 "ok": True,
                 "status": int(response.status),
                 "url": str(response.geturl()),
-                "body": body,
+                "body": decode_body(raw, response.headers.get("content-type") or ""),
                 "sha256": hashlib.sha256(raw).hexdigest(),
                 "error": None,
             }
@@ -163,33 +174,13 @@ def canonical_url(base: str, candidate: str) -> str | None:
         return None
     url = urllib.parse.urljoin(base, candidate)
     parsed = urllib.parse.urlparse(url)
-    if parsed.scheme != "https" or parsed.hostname != OFFICIAL_HOST:
+    if parsed.scheme.lower() != "https" or (parsed.hostname or "").lower() != OFFICIAL_HOST:
         return None
     if not parsed.path.lower().startswith("/dm/2026/hotarari.nsf"):
         return None
-    return urllib.parse.urlunparse((parsed.scheme, parsed.netloc, parsed.path, parsed.params, parsed.query, ""))
-
-
-def parse_links(page_url: str, body: str) -> tuple[list[dict[str, str]], list[str], str]:
-    parser = LinkParser()
-    parser.feed(body)
-    links: list[dict[str, str]] = []
-    for row in parser.links:
-        url = canonical_url(page_url, row["href"])
-        if url:
-            links.append({"url": url, "text": row["text"][:500]})
-    frames: list[str] = []
-    for raw in parser.frames:
-        url = canonical_url(page_url, raw)
-        if url:
-            frames.append(url)
-    # Lotus views sometimes hide URLs in JavaScript instead of anchors.
-    for raw in re.findall(r"(?i)(?:href|location(?:\.href)?|window\.open)\s*[=(]\s*['\"]([^'\"]+)", body):
-        url = canonical_url(page_url, raw)
-        if url:
-            links.append({"url": url, "text": "javascript-discovered"})
-    title = re.sub(r"\s+", " ", " ".join(parser.title_parts)).strip()
-    return links, frames, title
+    path = urllib.parse.quote(urllib.parse.unquote(parsed.path), safe="/$:@")
+    query = urllib.parse.quote(urllib.parse.unquote(parsed.query), safe="=&:$,()/-")
+    return urllib.parse.urlunparse(("https", parsed.netloc, path, parsed.params, query, ""))
 
 
 def to_text(body: str) -> str:
@@ -198,73 +189,67 @@ def to_text(body: str) -> str:
     return parser.text()
 
 
-def looks_document(url: str) -> bool:
-    low = urllib.parse.unquote(url).lower()
-    return "$file" in low or bool(re.search(r"/vw[^/]+/[0-9a-f]{24,}/", low))
+def parse_links(page_url: str, body: str) -> list[dict[str, str]]:
+    parser = LinkParser()
+    parser.feed(body)
+    rows: list[dict[str, str]] = []
+    for link in parser.links:
+        url = canonical_url(page_url, link.get("href") or "")
+        if url:
+            rows.append({"url": url, "text": link.get("text") or ""})
+    return rows
 
 
-def looks_navigation(url: str) -> bool:
-    low = url.lower()
-    return any(token in low for token in ("openview", "vw", "?start=", "?open")) and not looks_document(url)
-
-
-def discover() -> tuple[list[dict[str, Any]], dict[str, str]]:
-    seeds = [
-        BASE,
-        BASE + "/vwHotarariByAn?OpenView&Count=500",
-        BASE + "/vwHotarariByAn?OpenView&Start=1&Count=500",
-        BASE + "/vwHotarariByAn",
-    ]
-    queue: deque[tuple[str, int]] = deque((url, 0) for url in seeds)
-    visited: set[str] = set()
-    docs: dict[str, dict[str, Any]] = {}
-    page_health: dict[str, str] = {}
-
-    while queue and len(visited) < MAX_DISCOVERY_PAGES:
-        url, depth = queue.popleft()
-        if url in visited:
-            continue
-        visited.add(url)
-        result = fetch(url)
-        page_health[url] = "OK" if result["ok"] else str(result["error"])
-        if not result["ok"]:
-            continue
-        links, frames, title = parse_links(result["url"], result["body"])
-        for row in links:
-            target = row["url"]
-            if looks_document(target):
-                docs.setdefault(target, {"url": target, "link_text": row.get("text") or "", "discovered_from": result["url"]})
-            elif depth < 2 and looks_navigation(target) and target not in visited:
-                queue.append((target, depth + 1))
-        for frame in frames:
-            if depth < 2 and frame not in visited:
-                queue.append((frame, depth + 1))
-        # Keep discovery diagnostics useful without persisting raw HTML.
-        if title and result["url"] in page_health:
-            page_health[result["url"]] = "OK: " + title[:160]
-    return list(docs.values()), page_health
-
-
-def parse_ro_date(text: str) -> str | None:
-    folded = text.casefold()
-    pattern = r"\b([0-3]?\d)\s+(ianuarie|februarie|martie|aprilie|mai|iunie|iulie|august|septembrie|octombrie|noiembrie|decembrie)\s+(2026)\b"
-    match = re.search(pattern, folded)
-    if not match:
-        return None
-    day = int(match.group(1))
-    month = MONTHS[match.group(2)]
+def iso_date(day: int, month_name: str) -> str | None:
     try:
-        return datetime(2026, month, day).date().isoformat()
-    except ValueError:
+        return date(2026, MONTHS[month_name.casefold()], day).isoformat()
+    except (KeyError, ValueError):
         return None
 
 
-def snippets(pattern: str, text: str, limit: int = 12, radius: int = 260) -> list[str]:
+def parse_register(text: str) -> list[dict[str, Any]]:
+    compact = re.sub(r"\s+", " ", text)
+    rows: list[dict[str, Any]] = []
+    seen: set[int] = set()
+    for match in ENTRY_PATTERN.finditer(compact):
+        number = int(match.group("number"))
+        if number in seen:
+            continue
+        seen.add(number)
+        decision_date = iso_date(int(match.group("day")), match.group("month"))
+        title = re.sub(r"\s+", " ", match.group("title")).strip(" -|\t\r\n")
+        rows.append({
+            "decision_number": number,
+            "decision_date": decision_date,
+            "title": title,
+        })
+    return rows
+
+
+def attachment_index(page_url: str, body: str) -> dict[tuple[int, str], str]:
+    result: dict[tuple[int, str], str] = {}
+    for link in parse_links(page_url, body):
+        low = urllib.parse.unquote(link["url"]).lower()
+        if "$file" not in low or not low.endswith((".htm", ".html")):
+            continue
+        label = urllib.parse.unquote(link.get("text") or "") + " " + urllib.parse.unquote(link["url"])
+        match = ATTACHMENT_LABEL.search(label)
+        if not match:
+            continue
+        decision_date = iso_date(int(match.group("day")), match.group("month"))
+        if not decision_date:
+            continue
+        result[(int(match.group("number")), decision_date)] = link["url"]
+    return result
+
+
+def snippets(pattern: str, text: str, limit: int = 10, radius: int = 300) -> list[str]:
+    compact = re.sub(r"\s+", " ", text)
     rows: list[str] = []
-    for match in re.finditer(pattern, text, flags=re.I):
+    for match in re.finditer(pattern, compact, flags=re.I):
         start = max(0, match.start() - radius)
-        end = min(len(text), match.end() + radius)
-        piece = re.sub(r"\s+", " ", text[start:end]).strip()
+        end = min(len(compact), match.end() + radius)
+        piece = compact[start:end].strip()
         if piece and piece not in rows:
             rows.append(piece)
         if len(rows) >= limit:
@@ -276,106 +261,115 @@ def operative_articles(text: str) -> list[str]:
     compact = re.sub(r"\s+", " ", text)
     matches = list(re.finditer(r"\bArt\.\s*(\d+)\.?\s*", compact, flags=re.I))
     rows: list[str] = []
-    for index, match in enumerate(matches[:12]):
-        end = matches[index + 1].start() if index + 1 < len(matches) else min(len(compact), match.start() + 1200)
+    for index, match in enumerate(matches[:16]):
+        end = matches[index + 1].start() if index + 1 < len(matches) else min(len(compact), match.start() + 1400)
         piece = compact[match.start():end].strip()
-        if len(piece) > 900:
-            piece = piece[:900].rsplit(" ", 1)[0] + "…"
+        if len(piece) > 1050:
+            piece = piece[:1050].rsplit(" ", 1)[0] + "…"
         rows.append(piece)
     return rows
 
 
-def parse_document(meta: dict[str, Any]) -> dict[str, Any]:
-    result = fetch(meta["url"])
-    row: dict[str, Any] = {
-        "url": meta["url"],
-        "link_text": meta.get("link_text") or "",
-        "discovered_from": meta.get("discovered_from"),
-        "reachable": bool(result["ok"]),
-        "http_status": result["status"],
-        "source_sha256": result["sha256"],
-        "error": result["error"],
-    }
+def enrich_target(row: dict[str, Any], official_html_url: str | None) -> dict[str, Any]:
+    enriched = dict(row)
+    enriched["official_html_url"] = official_html_url
+    if not official_html_url:
+        enriched["document_health"] = "OFFICIAL_ATTACHMENT_NOT_RESOLVED"
+        return enriched
+    result = fetch(official_html_url)
+    enriched["document_health"] = "OK" if result["ok"] else "UNREACHABLE"
+    enriched["http_status"] = result["status"]
+    enriched["source_sha256"] = result["sha256"]
+    enriched["error"] = result["error"]
     if not result["ok"]:
-        return row
+        return enriched
     text = to_text(result["body"])
-    compact = re.sub(r"\s+", " ", text)
-    number_match = re.search(r"HOT[ĂA]R[ÂA]REA\s+NR\.?\s*([0-9]+)", compact, flags=re.I)
-    row["decision_number"] = int(number_match.group(1)) if number_match else None
-    row["decision_date"] = parse_ro_date(compact) or parse_ro_date(urllib.parse.unquote(meta["url"]))
-    row["target_date_match"] = row["decision_date"] == TARGET_DATE_ISO
-    row["text_head"] = compact[:1200]
-    row["operative_articles"] = operative_articles(text)
-    row["vote_snippets"] = snippets(r"\bvot(?:ul|uri|at|uri)?\b|unanimit|abțin|abtin|împotriv|impotriv", compact, limit=8)
-    row["money_snippets"] = snippets(r"\b(?:lei|RON|euro|EUR)\b", compact, limit=10)
-    row["procurement_snippets"] = snippets(r"achizi|contract|atribu|concesi|închiri|inchiri|licita", compact, limit=8)
-    return row
-
-
-def candidate_priority(meta: dict[str, Any]) -> tuple[int, str]:
-    text = (meta.get("link_text") or "") + " " + urllib.parse.unquote(meta.get("url") or "")
-    folded = text.casefold()
-    if TARGET_DATE_RO in folded:
-        return (0, meta["url"])
-    if "august" in folded or "08.2026" in folded or "2026" in folded:
-        return (1, meta["url"])
-    return (2, meta["url"])
+    enriched["operative_articles"] = operative_articles(text)
+    enriched["vote_snippets"] = snippets(r"\bvot(?:uri|ul|at|uri)?\b|unanimit|abțin|abtin|împotriv|impotriv", text, limit=8)
+    enriched["money_snippets"] = snippets(r"\b(?:lei|RON|euro|EUR)\b", text, limit=10)
+    enriched["procurement_snippets"] = snippets(r"achizi|contract|atribu|concesi|închiri|inchiri|licita", text, limit=8)
+    return enriched
 
 
 def build_state() -> dict[str, Any]:
-    discovered, health = discover()
-    ordered = sorted(discovered, key=candidate_priority)
-    documents: list[dict[str, Any]] = []
-    for meta in ordered[:MAX_DOCUMENT_FETCHES]:
-        documents.append(parse_document(meta))
+    result = fetch(ADOPTED_VIEW)
+    if not result["ok"]:
+        return {
+            "schema_version": "1.1",
+            "instance_id": "valcea",
+            "monitor_id": "council-watch-rm-valcea",
+            "generated_at": now_iso(),
+            "source": {"publisher": "Primăria Municipiului Râmnicu Vâlcea", "url": ADOPTED_VIEW, "tier": "T1"},
+            "target_meeting": {
+                "date": TARGET_DATE_ISO,
+                "status": "OFFICIAL_ADOPTED_HCL_REGISTER_UNREACHABLE",
+                "publication_allowed_from_this_state": False,
+            },
+            "register_health": {"reachable": False, "http_status": result["status"], "error": result["error"]},
+            "target_decisions": [],
+            "policy": {
+                "agenda_item_is_not_adopted_decision": True,
+                "no_inference_from_missing_document": True,
+                "normal_story_ready_gate_required": True,
+            },
+        }
 
-    # Keep all exact target-date decisions plus enough latest-number context to
-    # explain numbering gaps and to distinguish "not found" from crawl failure.
-    target = [row for row in documents if row.get("target_date_match")]
-    numbered = [row for row in documents if isinstance(row.get("decision_number"), int)]
-    latest = sorted(numbered, key=lambda row: row["decision_number"], reverse=True)[:25]
-    recent_august = [row for row in documents if str(row.get("decision_date") or "").startswith("2026-08-")]
+    text = to_text(result["body"])
+    register = parse_register(text)
+    attachments = attachment_index(result["url"], result["body"])
+    register.sort(key=lambda row: row["decision_number"], reverse=True)
+    latest = register[0] if register else None
+    target_rows = [row for row in register if row.get("decision_date") == TARGET_DATE_ISO]
+    target = [
+        enrich_target(row, attachments.get((row["decision_number"], TARGET_DATE_ISO)))
+        for row in target_rows
+    ]
 
-    if target:
-        target_status = "OFFICIAL_DECISIONS_FOUND_FOR_TARGET_DATE"
-    elif any(str(row.get("decision_date") or "").startswith("2026-08-") for row in documents):
-        target_status = "NO_TARGET_DATE_DECISION_FOUND_IN_ACCESSIBLE_OFFICIAL_REGISTER"
-    elif discovered:
-        target_status = "OFFICIAL_REGISTER_DISCOVERED_BUT_TARGET_DATE_NOT_RESOLVED"
+    if target_rows:
+        status = "OFFICIAL_ADOPTED_DECISIONS_PUBLISHED_FOR_TARGET_DATE"
+    elif latest and latest.get("decision_date") and latest["decision_date"] < TARGET_DATE_ISO:
+        status = "TARGET_DATE_NOT_YET_PUBLISHED_IN_OFFICIAL_ADOPTED_HCL_REGISTER"
+    elif latest and latest.get("decision_date") and latest["decision_date"] >= TARGET_DATE_ISO:
+        status = "NO_OFFICIAL_ADOPTED_DECISION_FOUND_FOR_TARGET_DATE"
+    elif register:
+        status = "OFFICIAL_REGISTER_DATE_NOT_RESOLVED"
     else:
-        target_status = "OFFICIAL_REGISTER_STRUCTURE_NOT_RESOLVED"
+        status = "OFFICIAL_REGISTER_EMPTY_OR_STRUCTURE_CHANGED"
 
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "instance_id": "valcea",
         "monitor_id": "council-watch-rm-valcea",
         "generated_at": now_iso(),
         "source": {
             "publisher": "Primăria Municipiului Râmnicu Vâlcea",
-            "url": BASE,
+            "url": ADOPTED_VIEW,
             "tier": "T1",
             "official_host_only": True,
+            "register_label": "HOTARARI ADOPTATE",
         },
         "target_meeting": {
             "date": TARGET_DATE_ISO,
             "weekday": "vineri",
-            "status": target_status,
+            "status": status,
             "publication_allowed_from_this_state": False,
         },
-        "discovery": {
-            "document_links_found": len(discovered),
-            "documents_fetched": len(documents),
-            "reachable_documents": sum(1 for row in documents if row.get("reachable")),
-            "page_health": health,
+        "register_health": {
+            "reachable": True,
+            "http_status": result["status"],
+            "source_sha256": result["sha256"],
+            "entries_parsed": len(register),
+            "official_html_attachments_indexed": len(attachments),
         },
+        "latest_official_decision": latest,
         "target_decisions": target,
-        "august_decisions": sorted(recent_august, key=lambda row: (row.get("decision_date") or "", row.get("decision_number") or -1), reverse=True)[:80],
-        "latest_numbered_decisions": latest,
+        "latest_decisions": register[:25],
         "policy": {
             "source_discovery_is_not_story": True,
             "official_decision_text_required_for_result_claim": True,
             "agenda_item_is_not_adopted_decision": True,
-            "no_inference_from_missing_document": True,
+            "meeting_occurrence_not_inferred_from_missing_hcl": True,
+            "missing_target_hcl_does_not_mean_rejected_or_postponed": True,
             "normal_story_ready_gate_required": True,
         },
     }
@@ -383,18 +377,21 @@ def build_state() -> dict[str, Any]:
 
 def self_test() -> int:
     sample = """
-    ROMÂNIA CONSILIUL LOCAL HOTĂRÂREA NR. 250
-    Consiliul Local întrunit în ședință la data de 14 august 2026.
-    Întrunind votul unanim al membrilor prezenți, HOTĂRĂȘTE:
-    Art.1. Se aprobă investiția la valoarea de 1.250.000 lei, inclusiv TVA.
-    Art.2. Se mandatează direcția de specialitate să încheie contractul.
+    HOTARARI ADOPTATE
+    An Nr. hotarare Titlul hotararii
+    2026 304 hotarirea 304 - 23 iulie 2026 - acordare autorizatie anuala
+    2026 303 hotarirea 303 - 23 iulie 2026 - alta hotarare
     """
-    assert parse_ro_date(sample) == TARGET_DATE_ISO
-    assert len(operative_articles(sample)) == 2
-    assert snippets(r"\blei\b", sample)
-    assert snippets(r"\bvot", sample)
-    assert canonical_url(BASE, "/dm/2026/hotarari.nsf/vwHotarariByAn/ABC/$FILE/test.htm") is not None
+    rows = parse_register(sample)
+    assert rows == [
+        {"decision_number": 304, "decision_date": "2026-07-23", "title": "acordare autorizatie anuala"},
+        {"decision_number": 303, "decision_date": "2026-07-23", "title": "alta hotarare"},
+    ]
+    assert canonical_url(BASE, "/dm/2026/hotarari.nsf/x/$FILE/a b.htm") == "https://dm.primariavl.ro/dm/2026/hotarari.nsf/x/$FILE/a%20b.htm"
     assert canonical_url(BASE, "https://evil.example/test") is None
+    sample_hcl = "Consiliul Local, întrunind 20 de voturi pentru, HOTĂRĂȘTE: Art.1. Se aprobă suma de 100.000 lei. Art.2. Se încheie contractul."
+    assert len(operative_articles(sample_hcl)) == 2
+    assert snippets(r"\blei\b", sample_hcl)
     print("Râmnicu Vâlcea Council Watch self-test: PASS")
     return 0
 
@@ -412,9 +409,9 @@ def main() -> int:
     path.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({
         "status": state["target_meeting"]["status"],
-        "target_decisions": len(state["target_decisions"]),
-        "august_decisions": len(state["august_decisions"]),
-        "document_links_found": state["discovery"]["document_links_found"],
+        "latest_official_decision": state.get("latest_official_decision"),
+        "target_decisions": len(state.get("target_decisions") or []),
+        "entries_parsed": state.get("register_health", {}).get("entries_parsed"),
     }, ensure_ascii=False))
     return 0
 
