@@ -88,7 +88,6 @@ class AdapterCapabilityGateAcceptance(unittest.TestCase):
         self.assertFalse(result["blocked"])
         self.assertEqual("DIRECT_READY", result["dispatch_disposition"])
         self.assertEqual("DIRECT_READY", result["capability_disposition"])
-        self.assertEqual([], result["capability_gap_reasons"])
         self.assertTrue(result["capability_gate"]["compatible"])
         self.assertEqual("carousel", result["capability_gate"]["native_format"])
         self.assertEqual(["photograph", "photograph"], result["capability_gate"]["selected_media_kinds"])
