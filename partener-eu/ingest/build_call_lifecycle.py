@@ -91,8 +91,9 @@ NEXT_EVENTS = {
     "COMPLETED": ["corecții ale listelor", "rezultate finale consolidate", "indicatori de implementare"],
 }
 RESULT_WORDS = (
-    "rezultat", "select", "castigator", "câștigător", "beneficiar", "contract", "admis",
-    "respins", "contest", "lista proiect", "proiecte aprobate", "finantate", "finanțate",
+    "rezultat", "selecție", "selectie", "câștigător", "castigator",
+    "lista proiectelor", "proiecte aprobate", "proiecte selectate",
+    "lista beneficiarilor", "contracte semnate", "contestații", "contestatii",
 )
 STOPWORDS = {
     "apel", "program", "proiect", "proiecte", "pentru", "privind", "sprijin", "regiunea",
@@ -219,26 +220,47 @@ def advance_with_mysmis(stage: str, match: dict[str, Any] | None) -> tuple[str, 
 
 def result_sources(dossier: dict[str, Any], afir: dict[str, Any]) -> list[dict[str, Any]]:
     candidates: list[dict[str, Any]] = []
+    # A source supporting the fact-class `beneficiaries` is about eligibility,
+    # not about winners. Only explicit result/selection/contract language counts.
     for source in dossier.get("sources") or []:
-        hay = norm(f"{source.get('label')} {source.get('url')}")
+        label = str(source.get("label") or "")
+        if norm(label).startswith("evidenta oficiala"):
+            continue
+        hay = norm(f"{label} {source.get('url')}")
         if any(norm(word) in hay for word in RESULT_WORDS):
             candidates.append({
-                "label": source.get("label") or "Rezultate / beneficiari",
+                "label": label or "Rezultate / proiecte selectate",
                 "url": source.get("url"),
                 "tier": source.get("tier") or "T1",
                 "observedAt": source.get("observedAt"),
             })
+
+    # AFIR navigation contains generic Beneficiari/Contracte links on almost
+    # every page. They are not call-specific. Accept AFIR evidence only when the
+    # page itself is explicitly a result/selection page and matches the dossier.
     dtitle = tokens(dossier.get("title"))
     if dossier.get("sourceType") == "AFIR_PROVISIONAL" or "AFIR" in str(dossier.get("programme") or "").upper():
         for item in afir.get("items") or []:
-            it = tokens(item.get("title"))
+            title = str(item.get("title") or "")
+            title_norm = norm(title)
+            if not any(norm(word) in title_norm for word in RESULT_WORDS):
+                continue
+            it = tokens(title)
             if dtitle and it and len(dtitle & it) / max(1, min(len(dtitle), len(it))) < 0.45:
                 continue
-            for link in item.get("relevantLinks") or []:
+            url = item.get("url")
+            if url:
+                candidates.append({
+                    "label": title or "Rezultate AFIR",
+                    "url": url,
+                    "tier": "T1",
+                    "observedAt": item.get("observedAt"),
+                })
+            for link in item.get("documentLinks") or []:
                 hay = norm(f"{link.get('name')} {link.get('url')}")
                 if any(norm(word) in hay for word in RESULT_WORDS):
                     candidates.append({
-                        "label": link.get("name") or "Rezultate / beneficiari AFIR",
+                        "label": link.get("name") or "Listă oficială rezultate",
                         "url": link.get("url"),
                         "tier": "T1",
                         "observedAt": item.get("observedAt"),
