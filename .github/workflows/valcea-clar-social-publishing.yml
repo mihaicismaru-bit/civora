@@ -20,8 +20,6 @@ on:
       - "local-news-os/social/**"
       - ".github/workflows/valcea-clar-social-publishing.yml"
   schedule:
-    # Fallback/recovery only. Normal distribution is triggered by a durable
-    # story_publication_event committed by the Live Newsroom.
     - cron: "7,22,37,52 * * * *"
 
 permissions:
@@ -67,6 +65,7 @@ jobs:
           python local-news-os/social/validate_channel_config.py valcea-clar/social/channels/tiktok.json --instance-root valcea-clar
           python local-news-os/social/validate_channel_config.py valcea-clar/social/channels/youtube.json --instance-root valcea-clar
           python local-news-os/social/validate_channel_config.py valcea-clar/social/channels/threads.json --instance-root valcea-clar
+          python local-news-os/social/validate_channel_config.py valcea-clar/social/channels/x.json --instance-root valcea-clar
           python local-news-os/social/validate_channel_config.py valcea-clar/social/channels/linkedin.json --instance-root valcea-clar
           python local-news-os/social/validate_channel_config.py valcea-clar/social/channels/telegram.json --instance-root valcea-clar
           python local-news-os/social/validate_channel_config.py valcea-clar/social/channels/whatsapp.json --instance-root valcea-clar
@@ -77,45 +76,51 @@ jobs:
       - name: Build story products for outbox-only sister publications
         run: python valcea-clar/social/build_outbox_only_story_products.py
 
+      - name: Verify durable X materialization
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          outbox=json.loads(Path('valcea-clar/social/x_outbox.json').read_text(encoding='utf-8'))
+          state=json.loads(Path('valcea-clar/social/x_state.json').read_text(encoding='utf-8'))
+          if outbox.get('platform')!='x' or outbox.get('publication_model')!='continuous_story_first':
+              raise SystemExit('X outbox identity/model mismatch')
+          if state.get('platform')!='x' or state.get('publication_model')!='continuous_story_first':
+              raise SystemExit('X state identity/model mismatch')
+          if state.get('direct_publication_enabled') is not False:
+              raise SystemExit('X falsely claims direct publication')
+          if state.get('blocker')!='x_api_pay_per_use_conflicts_zero_paid_dependency':
+              raise SystemExit('X zero-paid blocker missing')
+          for item in outbox.get('items',[]):
+              if not isinstance(item,dict): raise SystemExit('X non-object item')
+              if item.get('publication_mode')!='durable_outbox_only': raise SystemExit('X direct mode leak')
+              if item.get('verbatim_cross_platform_reuse_allowed') is not False: raise SystemExit('X cross-post reuse enabled')
+              posts=item.get('posts')
+              if not isinstance(posts,list) or not 1 <= len(posts) <= 4: raise SystemExit('X thread size invalid')
+              if any(len(str(post))>260 for post in posts): raise SystemExit('X internal post budget exceeded')
+          print(f"X materialization: PASS ({len(outbox.get('items',[]))} products)")
+          PY
+
       - name: Verify durable WhatsApp materialization
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-
-          outbox = json.loads(Path('valcea-clar/social/whatsapp_outbox.json').read_text(encoding='utf-8'))
-          state = json.loads(Path('valcea-clar/social/whatsapp_state.json').read_text(encoding='utf-8'))
-          registry = json.loads(Path('valcea-clar/social/series_registry.json').read_text(encoding='utf-8'))
-
-          if outbox.get('platform') != 'whatsapp':
-              raise SystemExit('WhatsApp outbox platform mismatch')
-          if outbox.get('publication_model') != 'continuous_story_first':
-              raise SystemExit('WhatsApp outbox is not story-first')
-          if state.get('platform') != 'whatsapp' or state.get('publication_model') != 'continuous_story_first':
-              raise SystemExit('WhatsApp state is not independently materialized')
-
-          expected_series = {'valcea-esential', 'weekend-in-valcea'}
-          actual_series = {
-              row.get('series_id')
-              for row in registry.get('channels', {}).get('valcea-whatsapp', [])
-              if isinstance(row, dict)
-          }
-          if actual_series != expected_series:
-              raise SystemExit(f'WhatsApp series mismatch: {sorted(actual_series)}')
-
-          for item in outbox.get('items', []):
-              if not isinstance(item, dict):
-                  raise SystemExit('WhatsApp outbox contains a non-object item')
-              if item.get('native_format') != 'text' or item.get('format_family') != 'message_update':
-                  raise SystemExit('WhatsApp product was degraded from native message format')
-              if item.get('fake_urgency_forbidden') is not True:
-                  raise SystemExit('WhatsApp product lost fake-urgency guard')
-              if item.get('verbatim_cross_platform_reuse_allowed') is not False:
-                  raise SystemExit('WhatsApp product allows verbatim cross-platform reuse')
-              if item.get('recipient_scope_required_before_dispatch') is not True:
-                  raise SystemExit('WhatsApp recipient scope gate missing')
-
-          print(f"WhatsApp materialization: PASS ({len(outbox.get('items', []))} products; {len(actual_series)} series)")
+          outbox=json.loads(Path('valcea-clar/social/whatsapp_outbox.json').read_text(encoding='utf-8'))
+          state=json.loads(Path('valcea-clar/social/whatsapp_state.json').read_text(encoding='utf-8'))
+          registry=json.loads(Path('valcea-clar/social/series_registry.json').read_text(encoding='utf-8'))
+          if outbox.get('platform')!='whatsapp' or outbox.get('publication_model')!='continuous_story_first': raise SystemExit('WhatsApp outbox mismatch')
+          if state.get('platform')!='whatsapp' or state.get('publication_model')!='continuous_story_first': raise SystemExit('WhatsApp state mismatch')
+          expected={'valcea-esential','weekend-in-valcea'}
+          actual={row.get('series_id') for row in registry.get('channels',{}).get('valcea-whatsapp',[]) if isinstance(row,dict)}
+          if actual!=expected: raise SystemExit(f'WhatsApp series mismatch: {sorted(actual)}')
+          for item in outbox.get('items',[]):
+              if not isinstance(item,dict): raise SystemExit('WhatsApp non-object item')
+              if item.get('native_format')!='text' or item.get('format_family')!='message_update': raise SystemExit('WhatsApp native format mismatch')
+              if item.get('fake_urgency_forbidden') is not True: raise SystemExit('WhatsApp urgency guard missing')
+              if item.get('verbatim_cross_platform_reuse_allowed') is not False: raise SystemExit('WhatsApp cross-post guard missing')
+              if item.get('recipient_scope_required_before_dispatch') is not True: raise SystemExit('WhatsApp recipient gate missing')
+          print(f"WhatsApp materialization: PASS ({len(outbox.get('items',[]))} products; {len(actual)} series)")
           PY
 
       - name: Fetch approved real photographs
@@ -173,13 +178,10 @@ jobs:
           set -euo pipefail
           python valcea-clar/social/facebook_editorial_publish.py | tee /tmp/facebook-preview.json
           python - <<'PY'
-          import json, os
+          import json,os
           from pathlib import Path
-          p=json.loads(Path('/tmp/facebook-preview.json').read_text(encoding='utf-8'))
-          e=p.get('eligible') or []
-          count=len(e) if isinstance(e,list) else int(bool(e))
-          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
-              f.write(f"has_eligible={'true' if count else 'false'}\n")
+          p=json.loads(Path('/tmp/facebook-preview.json').read_text(encoding='utf-8')); e=p.get('eligible') or []
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f: f.write(f"has_eligible={'true' if len(e) else 'false'}\n")
           PY
 
       - name: Preview Instagram editorial queue
@@ -189,13 +191,10 @@ jobs:
           set -euo pipefail
           python valcea-clar/social/instagram_editorial_publish.py | tee /tmp/instagram-preview.json
           python - <<'PY'
-          import json, os
+          import json,os
           from pathlib import Path
-          p=json.loads(Path('/tmp/instagram-preview.json').read_text(encoding='utf-8'))
-          e=p.get('eligible') or []
-          count=len(e) if isinstance(e,list) else int(bool(e))
-          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
-              f.write(f"has_eligible={'true' if count else 'false'}\n")
+          p=json.loads(Path('/tmp/instagram-preview.json').read_text(encoding='utf-8')); e=p.get('eligible') or []
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f: f.write(f"has_eligible={'true' if len(e) else 'false'}\n")
           PY
 
       - name: Preview TikTok queue
@@ -205,13 +204,10 @@ jobs:
           set -euo pipefail
           python valcea-clar/social/tiktok_publish.py | tee /tmp/tiktok-preview.json
           python - <<'PY'
-          import json, os
+          import json,os
           from pathlib import Path
-          p=json.loads(Path('/tmp/tiktok-preview.json').read_text(encoding='utf-8'))
-          e=p.get('eligible') or []
-          count=len(e) if isinstance(e,list) else int(bool(e))
-          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
-              f.write(f"has_eligible={'true' if count else 'false'}\n")
+          p=json.loads(Path('/tmp/tiktok-preview.json').read_text(encoding='utf-8')); e=p.get('eligible') or []
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f: f.write(f"has_eligible={'true' if len(e) else 'false'}\n")
           PY
 
       - name: Publish eligible Facebook editorial story through Meta Graph API
@@ -275,6 +271,8 @@ jobs:
             valcea-clar/social/tiktok_state.json
             valcea-clar/social/threads_outbox.json
             valcea-clar/social/threads_state.json
+            valcea-clar/social/x_outbox.json
+            valcea-clar/social/x_state.json
             valcea-clar/social/linkedin_outbox.json
             valcea-clar/social/linkedin_state.json
             valcea-clar/social/telegram_outbox.json
@@ -291,16 +289,10 @@ jobs:
           rm -rf /tmp/valcea-social-state
           mkdir -p /tmp/valcea-social-state
           for file in "${files[@]}"; do
-            if [ -f "$file" ]; then
-              mkdir -p "/tmp/valcea-social-state/$(dirname "$file")"
-              cp "$file" "/tmp/valcea-social-state/$file"
-            fi
+            if [ -f "$file" ]; then mkdir -p "/tmp/valcea-social-state/$(dirname "$file")"; cp "$file" "/tmp/valcea-social-state/$file"; fi
           done
           for dir in "$media_dir" "$instagram_export_dir"; do
-            if [ -d "$dir" ]; then
-              mkdir -p "/tmp/valcea-social-state/$(dirname "$dir")"
-              cp -a "$dir" "/tmp/valcea-social-state/$dir"
-            fi
+            if [ -d "$dir" ]; then mkdir -p "/tmp/valcea-social-state/$(dirname "$dir")"; cp -a "$dir" "/tmp/valcea-social-state/$dir"; fi
           done
           git config user.name "valcea-clar-social-engine[bot]"
           git config user.email "valcea-clar-social-engine@users.noreply.github.com"
@@ -308,24 +300,12 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             for file in "${files[@]}"; do
-              if [ -f "/tmp/valcea-social-state/$file" ]; then
-                mkdir -p "$(dirname "$file")"
-                cp "/tmp/valcea-social-state/$file" "$file"
-                git add "$file"
-              fi
+              if [ -f "/tmp/valcea-social-state/$file" ]; then mkdir -p "$(dirname "$file")"; cp "/tmp/valcea-social-state/$file" "$file"; git add "$file"; fi
             done
             for dir in "$media_dir" "$instagram_export_dir"; do
-              if [ -d "/tmp/valcea-social-state/$dir" ]; then
-                rm -rf "$dir"
-                mkdir -p "$(dirname "$dir")"
-                cp -a "/tmp/valcea-social-state/$dir" "$dir"
-                git add "$dir"
-              fi
+              if [ -d "/tmp/valcea-social-state/$dir" ]; then rm -rf "$dir"; mkdir -p "$(dirname "$dir")"; cp -a "/tmp/valcea-social-state/$dir" "$dir"; git add "$dir"; fi
             done
-            if git diff --cached --quiet; then
-              echo "No VÂLCEA CLAR social-engine changes to persist."
-              exit 0
-            fi
+            if git diff --cached --quiet; then echo "No VÂLCEA CLAR social-engine changes to persist."; exit 0; fi
             git commit -m "Persist VÂLCEA CLAR story-first social state"
             if git push origin HEAD:main; then exit 0; fi
             sleep $((attempt * 2))
@@ -336,15 +316,14 @@ jobs:
         if: always()
         run: |
           python - <<'PY'
-          import json, os
+          import json,os
           from pathlib import Path
           def read(name):
               p=Path('/tmp')/name
               if not p.exists(): return {'status':'NOT_RUN'}
               try: return json.loads(p.read_text(encoding='utf-8'))
               except Exception as exc: return {'status':'UNREADABLE','error':str(exc)}
-          ownership=read('social-engine-ownership.json')
-          meta=read('meta-auth.json')
+          ownership=read('social-engine-ownership.json'); meta=read('meta-auth.json')
           fb=read('facebook-apply.json'); ig=read('instagram-apply.json'); tt=read('tiktok-apply.json')
           lines=[
               '# VÂLCEA CLAR — Story-first Social Publication Engine','',
@@ -353,6 +332,7 @@ jobs:
               '- Facebook: **editorial-composite native packaging v1**',
               '- Instagram: **editorial cover/carousel native packaging v1; public-media preflight**',
               '- Threads: **story-first durable outbox**',
+              '- X: **platform-native source-forward durable outbox; direct API disabled under zero-paid policy**',
               '- LinkedIn: **story-first durable outbox**',
               '- Telegram: **story-first durable outbox; no direct-access claim**',
               '- WhatsApp: **story-first durable outbox; recipient scope + direct access remain gated**',
@@ -383,6 +363,8 @@ jobs:
             /tmp/tiktok-apply.json
             valcea-clar/social/meta_auth_state.json
             valcea-clar/social/threads_outbox.json
+            valcea-clar/social/x_outbox.json
+            valcea-clar/social/x_state.json
             valcea-clar/social/linkedin_outbox.json
             valcea-clar/social/telegram_outbox.json
             valcea-clar/social/whatsapp_outbox.json
