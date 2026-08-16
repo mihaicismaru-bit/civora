@@ -1,0 +1,94 @@
+name: LOCAL NEWS OS Series Visual Router
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/social/series_visual_router.py"
+      - "local-news-os/social/test_series_visual_router.py"
+      - "local-news-os/social/visual_router.py"
+      - "local-news-os/social/test_visual_router.py"
+      - "local-news-os/social/native_series_compositor.py"
+      - "local-news-os/social/test_native_series_compositor.py"
+      - "local-news-os/social/content_atomizer.py"
+      - "local-news-os/social/hook_engine.py"
+      - "valcea-clar/social/channels/**"
+      - ".github/workflows/local-news-os-series-visual-router.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/social/series_visual_router.py"
+      - "local-news-os/social/test_series_visual_router.py"
+      - "local-news-os/social/visual_router.py"
+      - "local-news-os/social/test_visual_router.py"
+      - "local-news-os/social/native_series_compositor.py"
+      - "local-news-os/social/test_native_series_compositor.py"
+      - "local-news-os/social/content_atomizer.py"
+      - "local-news-os/social/hook_engine.py"
+      - "valcea-clar/social/channels/**"
+      - ".github/workflows/local-news-os-series-visual-router.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-news-os-series-visual-router-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile recurring-series visual stack
+        run: |
+          python -m py_compile \
+            local-news-os/social/content_atomizer.py \
+            local-news-os/social/hook_engine.py \
+            local-news-os/social/visual_router.py \
+            local-news-os/social/native_series_compositor.py \
+            local-news-os/social/series_visual_router.py \
+            local-news-os/social/test_visual_router.py \
+            local-news-os/social/test_native_series_compositor.py \
+            local-news-os/social/test_series_visual_router.py
+
+      - name: Run single-story Visual Router regressions
+        run: python local-news-os/social/test_visual_router.py
+
+      - name: Run Native Series Compositor regressions
+        run: python local-news-os/social/test_native_series_compositor.py
+
+      - name: Run Series Visual Router acceptance tests
+        run: python local-news-os/social/test_series_visual_router.py
+
+      - name: Validate recurring-series media policy remains fail-closed
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          registry = json.loads(Path('valcea-clar/social/series_registry.json').read_text(encoding='utf-8'))
+          for channel_id in sorted(registry.get('channels', {})):
+              if not channel_id.startswith('valcea-'):
+                  raise SystemExit(f'{channel_id}: invalid channel namespace')
+              platform = channel_id[len('valcea-'):]
+              channel = json.loads(Path(f'valcea-clar/social/channels/{platform}.json').read_text(encoding='utf-8'))
+              policy = channel.get('media_policy') or {}
+              missing = [
+                  key for key in ('real_media_only', 'provenance_required', 'reuse_rights_required')
+                  if policy.get(key) is not True
+              ]
+              if missing:
+                  raise SystemExit(f'{channel_id}: missing fail-closed media policy {missing}')
+              if channel.get('zero_paid_dependency') is not True:
+                  raise SystemExit(f'{channel_id}: zero_paid_dependency must remain true')
+              if (channel.get('metrics') or {}).get('observed_only') is not True:
+                  raise SystemExit(f'{channel_id}: observed-only metrics required')
+              print(f'{channel_id}: PASS')
+          PY
