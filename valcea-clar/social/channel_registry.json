@@ -131,6 +131,28 @@
       }
     },
     {
+      "channel_id": "x",
+      "status": "outbox_only",
+      "direct_publication_enabled": false,
+      "publication_mode": "durable_outbox_only",
+      "config": "valcea-clar/social/channels/x.json",
+      "adapter": null,
+      "outbox": "valcea-clar/social/x_outbox.json",
+      "state": "valcea-clar/social/x_state.json",
+      "credentials": null,
+      "requirements": {
+        "story_event": true,
+        "native_source_forward_thread": true,
+        "fake_urgency_forbidden": true,
+        "engagement_bait_forbidden": true,
+        "editor_approval": true,
+        "rights_metadata_when_visual_is_used": true,
+        "zero_paid_dependency": true,
+        "verified_publishing_access": false,
+        "direct_publication_blocker": "x_api_pay_per_use_conflicts_zero_paid_dependency"
+      }
+    },
+    {
       "channel_id": "linkedin",
       "status": "outbox_only",
       "direct_publication_enabled": false,
