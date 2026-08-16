@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "product": "VÂLCEA CLAR Profile Identity System",
   "instance_id": "valcea",
   "brand_source": "valcea-clar/social/social_brand_system.json",
@@ -15,7 +15,10 @@
     "no_platform_logo_inside_brand_assets",
     "no_gradient_heavy_social_aesthetic",
     "no_ai_generated_brand_texture",
-    "same_newsroom_different_platform_product"
+    "same_newsroom_different_platform_product",
+    "editorial_grid_over_decorative_banner",
+    "negative_space_is_part_of_the_brand",
+    "typographic_punctuation_carries_accent_color"
   ],
   "handle_policy": {
     "preferred": "valceaclar",
@@ -24,6 +27,29 @@
       "valceaclar.ro"
     ],
     "rule": "use_the_shortest_available_handle_that_preserves_the_brand"
+  },
+  "visual_signature": {
+    "avatar": {
+      "composition": "optically_centered_serif_VC_plus_typographic_red_period",
+      "period_treatment": "same_typeface_same_baseline_accent_red",
+      "decorative_container": false,
+      "shadow": false,
+      "gradient": false,
+      "badge": false
+    },
+    "header": {
+      "composition": "dominant_masthead_editorial_hairline_split_support_row",
+      "top_accent": "short_quiet_red_rule",
+      "masthead_role": "dominant",
+      "support_row": "tagline_left_domain_right_when_tagline_enabled",
+      "hairline": "ink_low_weight",
+      "negative_space": "deliberate",
+      "photo": false,
+      "collage": false,
+      "shadow": false,
+      "gradient": false,
+      "badge": false
+    }
   },
   "avatar": {
     "asset_id": "avatar-master",
@@ -36,13 +62,14 @@
     "circle_crop_safe_ratio": 0.72,
     "background": "paper",
     "foreground": "ink",
-    "accent": "red_period",
+    "accent": "red_typographic_period",
     "requirements": [
       "legible_at_32px",
       "no_tagline",
       "no_photo",
       "same_master_mark_everywhere",
-      "works_on_light_and_dark_ui"
+      "works_on_light_and_dark_ui",
+      "period_is_part_of_the_wordmark_not_a_floating_shape"
     ]
   },
   "masthead": {
@@ -51,7 +78,10 @@
     "domain": "valceaclar.ro",
     "style": "editorial_masthead",
     "font_strategy": "system_serif_masthead_plus_system_sans_supporting_copy",
-    "accent_strategy": "one_quiet_red_rule"
+    "accent_strategy": "one_quiet_red_rule_plus_red_avatar_period",
+    "header_grid": "masthead_hairline_support_row",
+    "support_alignment": "split_left_right",
+    "text_effects": "none"
   },
   "platforms": {
     "facebook": {
@@ -231,9 +261,14 @@
   "quality_gate": {
     "all_configured_channels_must_be_covered": true,
     "all_avatar_exports_must_share_master_mark": true,
+    "avatar_accent_period_must_be_typographic": true,
     "header_safe_zones_must_fit_canvas": true,
     "header_critical_copy_must_fit_safe_zone": true,
     "headers_must_not_use_photography": true,
+    "headers_must_use_editorial_grid": true,
+    "masthead_must_dominate_header": true,
+    "header_support_copy_must_use_split_baseline": true,
+    "badges_gradients_and_drop_shadows_forbidden": true,
     "bios_must_be_platform_specific": true,
     "canonical_domain_required_in_long_form_identity": true,
     "profile_assets_must_be_deterministic": true
