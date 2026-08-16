@@ -11,6 +11,7 @@ on:
       - '.github/workflows/valcea-clar-social-publishing.yml'
       - '.github/workflows/valcea-clar-engine-guard.yml'
       - '.github/workflows/valcea-clar-newsroom-live.yml'
+      - '.github/workflows/valcea-clar-continuous-frontpage.yml'
   push:
     branches: [main]
     paths:
@@ -21,6 +22,7 @@ on:
       - '.github/workflows/valcea-clar-social-publishing.yml'
       - '.github/workflows/valcea-clar-engine-guard.yml'
       - '.github/workflows/valcea-clar-newsroom-live.yml'
+      - '.github/workflows/valcea-clar-continuous-frontpage.yml'
 
 permissions:
   contents: read
@@ -51,14 +53,55 @@ jobs:
         run: python valcea-clar/scripts/build_public_data.py
       - name: Verify generated files are committed
         run: git diff --exit-code -- valcea-clar/web/data
-      - name: Rebuild canonical story runtime deterministically
-        run: python valcea-clar/scripts/render_story_pages.py
-      - name: Verify canonical story runtime is committed
+      - name: Rebuild canonical continuous story runtime
         run: |
-          git diff --exit-code -- \
-            valcea-clar/site/runtime/stiri \
-            valcea-clar/site/runtime/robots.txt \
-            valcea-clar/site/runtime/sitemap.xml
+          set -euo pipefail
+          python valcea-clar/scripts/repair_continuous_frontpage.py --self-test
+          python valcea-clar/scripts/repair_continuous_frontpage.py
+      - name: Verify continuous story-first runtime contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('valcea-clar')
+          archive = json.loads((root / 'site/story_archive.json').read_text(encoding='utf-8'))
+          feed = json.loads((root / 'site/runtime/live-feed.json').read_text(encoding='utf-8'))
+          manifest = json.loads((root / 'site/runtime/stiri/manifest.json').read_text(encoding='utf-8'))
+          homepage = (root / 'site/runtime/index.html').read_text(encoding='utf-8')
+
+          expected = {
+              'musiclover-green-day-20260815',
+              'luminos-fest-zavoi-20260815',
+              'florile-govorei-20260816',
+              'scm-valcea-slatina-20260815',
+              'olanesti-bridge-monitor',
+          }
+          archive_ids = [str(item['id']) for item in archive.get('stories', [])]
+          feed_ids = [str(item['id']) for item in feed.get('stories', [])]
+          route_ids = [str(item['id']) for item in manifest.get('stories', [])]
+
+          assert archive.get('publication_model') == 'continuous_story_first'
+          assert archive.get('recap_editions_may_delete_published_stories') is False
+          assert archive.get('operational_records_public') is False
+          assert feed.get('publication_model') == 'continuous_story_first'
+          assert feed.get('policy', {}).get('published_story_persistence') is True
+          assert feed.get('policy', {}).get('edition_fields_are_compatibility_only') is True
+          assert feed.get('policy', {}).get('operational_records_hidden') is True
+          assert archive.get('story_count') == feed.get('story_count') == 5
+          assert set(archive_ids) == expected
+          assert archive_ids == feed_ids
+          assert set(route_ids) == expected
+          assert 'unde-iesim-operational' not in archive_ids
+          assert 'source-radar-operational' not in archive_ids
+          assert 'ACTUALIZAT LIVE' in homepage
+          assert 'Alte știri importante' in homepage
+          assert '<div class="cards"></div>' not in homepage
+          for story_id in archive_ids:
+              assert (root / 'site/runtime/stiri' / story_id / 'index.html').is_file(), story_id
+
+          print('Continuous story-first runtime quality gate: PASS')
+          PY
       - name: Static web smoke test
         run: python valcea-clar/scripts/smoke_web.py
       - name: JavaScript syntax check
@@ -71,6 +114,8 @@ jobs:
         run: python valcea-clar/scripts/probe_sources.py --self-test
       - name: Build ChatGPT Sites synchronization payload
         run: python valcea-clar/scripts/build_sites_export.py
+      - name: Overlay continuous runtime into synchronization payload
+        run: python valcea-clar/scripts/overlay_runtime_export.py
       - name: Validate synchronization manifest and site integration
         run: |
           python - <<'PY'
@@ -97,9 +142,20 @@ jobs:
           assert len(homepage['items']) <= integration['homepage_module']['max_items']
           assert all(item['path'].startswith('/unde-iesim/local/') for item in homepage['items'])
           assert (root / 'site/integration.json').is_file()
+          live_feed = json.loads((root / 'live-feed.json').read_text(encoding='utf-8'))
+          assert live_feed.get('publication_model') == 'continuous_story_first'
+          assert live_feed.get('story_count') == 5
+          for story_id in (
+              'musiclover-green-day-20260815',
+              'luminos-fest-zavoi-20260815',
+              'florile-govorei-20260816',
+              'scm-valcea-slatina-20260815',
+              'olanesti-bridge-monitor',
+          ):
+              assert (root / 'stiri' / story_id / 'index.html').is_file(), story_id
           for item in manifest['files']:
               assert (root / item['path']).is_file(), item['path']
-          print('ChatGPT Sites synchronization and section integration: PASS')
+          print('ChatGPT Sites synchronization and continuous story integration: PASS')
           PY
       - name: Upload ChatGPT Sites synchronization payload
         uses: actions/upload-artifact@v7

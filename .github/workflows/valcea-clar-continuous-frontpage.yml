@@ -1,0 +1,169 @@
+name: VÂLCEA CLAR Continuous Frontpage Invariant
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/editions/**"
+      - "valcea-clar/site/current_edition.json"
+      - "valcea-clar/scripts/repair_continuous_frontpage.py"
+      - ".github/workflows/valcea-clar-continuous-frontpage.yml"
+  pull_request:
+    paths:
+      - "valcea-clar/editions/**"
+      - "valcea-clar/site/current_edition.json"
+      - "valcea-clar/scripts/repair_continuous_frontpage.py"
+      - ".github/workflows/valcea-clar-continuous-frontpage.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-continuous-frontpage-${{ github.event.pull_request.number || 'main' }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Rebuild durable story archive and live frontpage
+        shell: bash
+        run: |
+          set -euo pipefail
+          python valcea-clar/scripts/repair_continuous_frontpage.py --self-test
+          python valcea-clar/scripts/repair_continuous_frontpage.py | tee /tmp/valcea-continuous-frontpage.json
+          python valcea-clar/scripts/build_sites_export.py
+          python valcea-clar/scripts/overlay_runtime_export.py
+
+      - name: Validate continuous story persistence
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root=Path('valcea-clar')
+          archive=json.loads((root/'site/story_archive.json').read_text(encoding='utf-8'))
+          feed=json.loads((root/'site/runtime/live-feed.json').read_text(encoding='utf-8'))
+          manifest=json.loads((root/'site/runtime/stiri/manifest.json').read_text(encoding='utf-8'))
+          homepage=(root/'site/runtime/index.html').read_text(encoding='utf-8')
+
+          expected={
+              'musiclover-green-day-20260815',
+              'luminos-fest-zavoi-20260815',
+              'florile-govorei-20260816',
+              'scm-valcea-slatina-20260815',
+              'olanesti-bridge-monitor',
+          }
+          archive_ids=[str(item['id']) for item in archive.get('stories', [])]
+          feed_ids=[str(item['id']) for item in feed.get('stories', [])]
+          route_ids=[str(item['id']) for item in manifest.get('stories', [])]
+
+          assert archive.get('publication_model') == 'continuous_story_first'
+          assert archive.get('recap_editions_may_delete_published_stories') is False
+          assert archive.get('operational_records_public') is False
+          assert feed.get('publication_model') == 'continuous_story_first'
+          assert feed.get('policy', {}).get('published_story_persistence') is True
+          assert feed.get('policy', {}).get('operational_records_hidden') is True
+          assert feed.get('story_count') == len(archive_ids) == 5
+          assert set(archive_ids) == expected
+          assert archive_ids == feed_ids
+          assert set(route_ids) == expected
+          assert 'unde-iesim-operational' not in archive_ids
+          assert 'source-radar-operational' not in archive_ids
+          assert 'ACTUALIZAT LIVE' in homepage
+          assert 'Alte știri importante' in homepage
+          assert '<div class="cards"></div>' not in homepage
+          for story_id in archive_ids:
+              assert (root/'site/runtime/stiri'/story_id/'index.html').is_file(), story_id
+          print(json.dumps({'status':'PASS','stories':len(archive_ids),'ids':archive_ids}, ensure_ascii=False))
+          PY
+
+      - name: Upload validated site payload
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-continuous-frontpage-validate-${{ github.run_id }}
+          path: |
+            /tmp/valcea-continuous-frontpage.json
+            valcea-clar/site/story_archive.json
+            valcea-clar/site/runtime
+            valcea-clar/dist/chatgpt-sites
+          if-no-files-found: warn
+          retention-days: 7
+
+  persist:
+    if: github.event_name != 'pull_request'
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Persist continuous frontpage conflict-safe
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "valcea-clar-continuous-frontpage[bot]"
+          git config user.email "valcea-clar-continuous-frontpage@users.noreply.github.com"
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            git clean -fd
+
+            python valcea-clar/scripts/repair_continuous_frontpage.py --self-test
+            python valcea-clar/scripts/repair_continuous_frontpage.py | tee /tmp/valcea-continuous-frontpage.json
+            python valcea-clar/scripts/build_sites_export.py
+            python valcea-clar/scripts/overlay_runtime_export.py
+
+            python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('valcea-clar')
+          archive=json.loads((root/'site/story_archive.json').read_text(encoding='utf-8'))
+          feed=json.loads((root/'site/runtime/live-feed.json').read_text(encoding='utf-8'))
+          manifest=json.loads((root/'site/runtime/stiri/manifest.json').read_text(encoding='utf-8'))
+          ids={str(x['id']) for x in archive.get('stories', [])}
+          assert archive.get('story_count') == 5
+          assert feed.get('story_count') == 5
+          assert ids == {str(x['id']) for x in feed.get('stories', [])}
+          assert ids == {str(x['id']) for x in manifest.get('stories', [])}
+          assert not {'unde-iesim-operational','source-radar-operational'} & ids
+          PY
+
+            git add \
+              valcea-clar/site/story_archive.json \
+              valcea-clar/site/runtime
+
+            if git diff --cached --quiet; then
+              echo "Continuous frontpage invariant already satisfied on main."
+              exit 0
+            fi
+
+            git commit -m "Repair VÂLCEA CLAR continuous frontpage"
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+
+            echo "main advanced during frontpage repair; retrying ${attempt}/5."
+            sleep $((attempt * 2))
+          done
+
+          echo "Could not persist continuous frontpage repair after five attempts." >&2
+          exit 1
