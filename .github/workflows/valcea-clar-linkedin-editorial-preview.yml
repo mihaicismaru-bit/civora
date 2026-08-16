@@ -24,18 +24,24 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
-      - name: Self-test LinkedIn packaging
+      - name: Install deterministic editorial renderer
+        run: python -m pip install --disable-pip-version-check Pillow==12.3.0
+      - name: Self-test LinkedIn packaging and card renderer
         run: python valcea-clar/social/linkedin_editorial_v1.py --self-test
       - name: Build LinkedIn-native previews
         run: python valcea-clar/social/linkedin_editorial_v1.py
-      - name: Validate professional relevance fixtures
+      - name: Validate professional relevance and visual fixtures
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-          value=json.loads(Path('valcea-clar/social/previews/linkedin-v1/manifest.json').read_text(encoding='utf-8'))
+          from PIL import Image
+          root=Path('valcea-clar/social/previews/linkedin-v1')
+          value=json.loads((root/'manifest.json').read_text(encoding='utf-8'))
           if value.get('execution_mode')!='PREVIEW_ONLY_NO_NETWORK_CALLS':
               raise SystemExit('LinkedIn preview network-call guard missing')
+          if value.get('rendering_version')!='linkedin-editorial-v1.1':
+              raise SystemExit('LinkedIn premium rendering version mismatch')
           products={p['story_id']:p for p in value.get('products',[]) if isinstance(p,dict)}
           lum=products.get('luminos-fest-zavoi-20260815')
           if not lum or lum.get('status')!='HOLD' or lum.get('reason')!='linkedin_professional_gate_no_decision_maker_relevance':
@@ -46,20 +52,34 @@ jobs:
           ola=products.get('olanesti-bridge-monitor')
           if not ola or ola.get('status')!='READY' or ola.get('format_family')!='document_explainer':
               raise SystemExit('Olănești LinkedIn document explainer failed')
+          if ola.get('native_format')!='image_plus_text':
+              raise SystemExit('Olănești LinkedIn must be image_plus_text')
           text=ola.get('body','')
           for expected in ('44,37 mil. lei','Ralunic + Dimex-2000 Company','SMIS 334436','Limită de atribuire'):
               if expected not in text:
                   raise SystemExit(f'Olănești LinkedIn missing: {expected}')
+          visual=ola.get('visual') or {}
+          if visual.get('kind')!='editorial_evidence_card' or visual.get('metric')!='44,37 mil. lei':
+              raise SystemExit('Olănești LinkedIn evidence-card contract failed')
+          if not str(visual.get('source_label','')).startswith('DOCUMENTE ȘI SURSE'):
+              raise SystemExit('LinkedIn source label missing')
+          name=ola.get('preview_file')
+          path=root/str(name or '')
+          if not path.is_file() or path.stat().st_size < 25000:
+              raise SystemExit(f'LinkedIn premium preview missing/too small: {path}')
+          with Image.open(path) as image:
+              if image.size != (1200,1500):
+                  raise SystemExit(f'LinkedIn premium preview dimensions drifted: {image.size}')
           if '#' in text:
               raise SystemExit('LinkedIn default hashtag block detected')
           if ola.get('verbatim_cross_platform_reuse_allowed') is not False:
               raise SystemExit('LinkedIn cross-platform reuse guard missing')
-          print(f"LinkedIn editorial preview: PASS ({value['ready']} READY / {value['held']} HOLD)")
+          print(f"LinkedIn editorial preview v1.1: PASS ({value['ready']} READY / {value['held']} HOLD)")
           PY
       - name: Upload LinkedIn editorial preview
         uses: actions/upload-artifact@v7
         with:
-          name: valcea-clar-linkedin-editorial-v1-${{ github.run_id }}
+          name: valcea-clar-linkedin-editorial-v1-1-${{ github.run_id }}
           path: valcea-clar/social/previews/linkedin-v1
           if-no-files-found: error
           retention-days: 14
