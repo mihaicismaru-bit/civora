@@ -9,6 +9,7 @@ on:
     paths:
       - 'partener-eu/ingest/build_decision_products.py'
       - 'partener-eu/ingest/build_mipe_canonical_calls.py'
+      - 'partener-eu/ingest/refine_mipe_canonical_calls.py'
       - 'partener-eu/ingest/merge_mipe_canonical_dossiers.py'
       - 'partener-eu/ingest/build_call_lifecycle.py'
       - 'partener-eu/ingest/polish_decision_products.py'
@@ -75,6 +76,7 @@ jobs:
       - name: Canonicalize MIPE corpus and build complete dossiers
         run: |
           python partener-eu/ingest/build_mipe_canonical_calls.py
+          python partener-eu/ingest/refine_mipe_canonical_calls.py
           python partener-eu/ingest/build_decision_products.py
           python partener-eu/ingest/merge_mipe_canonical_dossiers.py
           python partener-eu/ingest/polish_decision_products.py
@@ -97,6 +99,7 @@ jobs:
           set -euo pipefail
           cp partener-eu/ingest/build_decision_products.py /tmp/build_decision_products.py
           cp partener-eu/ingest/build_mipe_canonical_calls.py /tmp/build_mipe_canonical_calls.py
+          cp partener-eu/ingest/refine_mipe_canonical_calls.py /tmp/refine_mipe_canonical_calls.py
           cp partener-eu/ingest/merge_mipe_canonical_dossiers.py /tmp/merge_mipe_canonical_dossiers.py
           cp partener-eu/ingest/build_call_lifecycle.py /tmp/build_call_lifecycle.py
           cp partener-eu/web/decision-intelligence-v2.js /tmp/decision-intelligence-v2.js
@@ -114,6 +117,7 @@ jobs:
             git reset --hard origin/main
             cp /tmp/build_decision_products.py partener-eu/ingest/build_decision_products.py
             cp /tmp/build_mipe_canonical_calls.py partener-eu/ingest/build_mipe_canonical_calls.py
+            cp /tmp/refine_mipe_canonical_calls.py partener-eu/ingest/refine_mipe_canonical_calls.py
             cp /tmp/merge_mipe_canonical_dossiers.py partener-eu/ingest/merge_mipe_canonical_dossiers.py
             cp /tmp/build_call_lifecycle.py partener-eu/ingest/build_call_lifecycle.py
             cp /tmp/decision-intelligence-v2.js partener-eu/web/decision-intelligence-v2.js
@@ -126,6 +130,7 @@ jobs:
             git add \
               partener-eu/ingest/build_decision_products.py \
               partener-eu/ingest/build_mipe_canonical_calls.py \
+              partener-eu/ingest/refine_mipe_canonical_calls.py \
               partener-eu/ingest/merge_mipe_canonical_dossiers.py \
               partener-eu/ingest/build_call_lifecycle.py \
               partener-eu/web/decision-intelligence-v2.js \
