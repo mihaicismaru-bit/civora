@@ -23,15 +23,25 @@ def load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def story_feed(snapshot: dict) -> list[dict]:
-    routes = {}
+def ensure_story_runtime() -> None:
+    # render_frontpage.py recreates site/runtime. Recap workflows still call it
+    # for compatibility, so immediately restore canonical story routes and the
+    # live-newsroom homepage presentation before exporting the site.
     if STORY_MANIFEST.is_file():
-        manifest = load(STORY_MANIFEST)
-        routes = {
-            str(item.get("id")): item
-            for item in manifest.get("stories", [])
-            if isinstance(item, dict) and item.get("id") and item.get("canonical")
-        }
+        return
+    import render_story_pages
+    code = render_story_pages.main()
+    if code not in (None, 0) or not STORY_MANIFEST.is_file():
+        raise SystemExit("Refusing live feed: canonical story runtime was not rendered")
+
+
+def story_feed(snapshot: dict) -> list[dict]:
+    manifest = load(STORY_MANIFEST)
+    routes = {
+        str(item.get("id")): item
+        for item in manifest.get("stories", [])
+        if isinstance(item, dict) and item.get("id") and item.get("canonical")
+    }
     stories = []
     for item in snapshot.get("items", []):
         story_id = str(item.get("id") or "")
@@ -59,6 +69,7 @@ def main() -> int:
     snapshot = load(ROOT / pointer["json_source"])
     if snapshot.get("edition_id") != pointer.get("edition_id"):
         raise SystemExit("Refusing live feed: compatibility snapshot pointer mismatch")
+    ensure_story_runtime()
     places = load(PLACES).get("places", [])
     stories = story_feed(snapshot)
     payload = {
@@ -90,6 +101,7 @@ def main() -> int:
             "individual_story_is_publication_unit": True,
             "edition_windows_are_publication_gates": False,
             "canonical_story_urls_required": True,
+            "recap_render_may_not_remove_story_routes": True,
         },
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
