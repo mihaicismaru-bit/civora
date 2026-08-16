@@ -65,6 +65,7 @@ jobs:
         run: python valcea-clar/scripts/monitor_ledger.py --live
 
       - name: Read official Râmnicu Vâlcea council decisions
+        if: github.event_name != 'pull_request'
         run: python valcea-clar/scripts/council_watch_rm_valcea.py
 
       - name: Diagnose official HCL Lotus structure
