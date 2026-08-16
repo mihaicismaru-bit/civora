@@ -24,6 +24,7 @@ from native_identity import load_system, product_identity
 ROOT = Path(__file__).resolve().parents[2]
 VC = ROOT / "valcea-clar"
 VISUALS = VC / "social" / "story_visuals.json"
+VIDEO_VISUALS = VC / "social" / "story_video_media.json"
 PREVIEW = VC / "social" / "previews" / "youtube-v1"
 
 SERIF_BOLD = [
@@ -42,9 +43,21 @@ def digest(value: Any) -> str:
     ).hexdigest()
 
 
-def visual_for(story_id: str, registry: dict[str, Any]) -> dict[str, Any] | None:
-    value = registry.get("stories", {}).get(story_id)
-    return value if isinstance(value, dict) else None
+def visual_for(
+    story_id: str,
+    photo_registry: dict[str, Any],
+    video_registry: dict[str, Any] | None = None,
+) -> dict[str, Any] | None:
+    merged: dict[str, Any] = {}
+    photo_value = photo_registry.get("stories", {}).get(story_id)
+    if isinstance(photo_value, dict):
+        merged.update(photo_value)
+    if isinstance(video_registry, dict):
+        video_value = video_registry.get("stories", {}).get(story_id)
+        if isinstance(video_value, dict):
+            nested = video_value.get("video")
+            merged["video"] = nested if isinstance(nested, dict) else video_value
+    return merged or None
 
 
 def editorial_gate(story: dict[str, Any]) -> tuple[bool, str | None]:
@@ -287,10 +300,14 @@ def build() -> dict[str, Any]:
     snapshot = base.load(base.VC / str(pointer["json_source"]))
     decision = base.load(base.DECISION, {"publishable_story_ids": []})
     event = base.load(base.EVENT, {"story_ids": []})
-    registry = base.load(VISUALS, {"stories": {}})
+    photo_registry = base.load(VISUALS, {"stories": {}})
+    video_registry = base.load(VIDEO_VISUALS, {"stories": {}})
     allowed = set(event.get("story_ids") or decision.get("publishable_story_ids") or [])
     stories = [item for item in snapshot.get("items", []) if item.get("id") in allowed and base.story_ready(item)[0]]
-    products = [package(story, visual_for(str(story["id"]), registry)) for story in stories]
+    products = [
+        package(story, visual_for(str(story["id"]), photo_registry, video_registry))
+        for story in stories
+    ]
     PREVIEW.mkdir(parents=True, exist_ok=True)
     for old in PREVIEW.glob("*.jpg"):
         old.unlink()
@@ -316,6 +333,7 @@ def build() -> dict[str, Any]:
         "execution_mode": "PREVIEW_ONLY_NO_NETWORK_CALLS",
         "rendering_version": "youtube-editorial-v1.1",
         "identity_source": "valcea-clar/social/native_platform_identity_system.json",
+        "video_registry": "valcea-clar/social/story_video_media.json",
         "products": products,
         "ready": sum(1 for p in products if p.get("status") == "READY"),
         "held": sum(1 for p in products if p.get("status") != "READY"),
@@ -342,13 +360,14 @@ def self_test() -> int:
     current_image={"image":{"synthetic":False,"editor_approved":True,"subject_match":True,"contextual_archive":False}}
     held=package(deep,current_image)
     assert held["status"]=="HOLD_MEDIA"
+    assert visual_for("missing", {"stories":{}}, {"stories":{}}) is None
     with tempfile.TemporaryDirectory() as raw:
         work=Path(raw)
         poster=work/"poster.jpg"
         video=work/"video.mp4"
         Image.new("RGB",(1600,900),(90,112,128)).save(poster,"JPEG",quality=92)
         video.write_bytes(b"\x00\x00\x00\x18ftypmp42" + b"\x00" * 128)
-        visual={
+        video_record={
             "video":{
                 "kind":"video",
                 "synthetic":False,
@@ -363,7 +382,9 @@ def self_test() -> int:
                 "alt_text":"Cadru real de test din materialul video al subiectului.",
             }
         }
-        ready=package(deep,visual)
+        merged=visual_for("deep", {"stories":{}}, {"stories":{"deep":video_record}})
+        assert isinstance(merged,dict) and isinstance(merged.get("video"),dict)
+        ready=package(deep,merged)
         assert ready["status"]=="READY"
         assert ready["thumbnail_requires_ready_video"] is True
         assert ready["identity"]["thumbnail"]["brand_mark"] == "VC."
@@ -372,10 +393,10 @@ def self_test() -> int:
         with Image.open(output) as rendered:
             assert rendered.size==(1280,720)
         assert output.stat().st_size>20000
-        archived=json.loads(json.dumps(visual))
+        archived=json.loads(json.dumps(merged))
         archived["video"]["contextual_archive"]=True
         assert package(deep,archived)["status"]=="HOLD_MEDIA"
-        mismatch=json.loads(json.dumps(visual))
+        mismatch=json.loads(json.dumps(merged))
         mismatch["video"]["subject_match"]=False
         assert package(deep,mismatch)["status"]=="HOLD_MEDIA"
     print("VÂLCEA CLAR YouTube editorial v1.1 self-test: PASS")
