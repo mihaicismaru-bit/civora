@@ -1,23 +1,29 @@
 #!/usr/bin/env python3
 """Fetch approved, rights-documented real photographs for VÂLCEA CLAR.
 
-The files are downloaded only inside GitHub Actions and are not discovered
-algorithmically. Every URL is paired with explicit provenance in the curated
-Facebook outbox. Downloads fail closed on HTTP, file type or size errors.
+Static editorial assets remain supported, while story-specific media is loaded
+from story_visuals.json so a newly approved visual does not require a second
+hard-coded downloader edit. Every remote image must have explicit provenance
+and rights metadata in the registry. Downloads fail closed on path, HTTP, file
+type or size errors.
 """
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
-DEST = ROOT / "valcea-clar" / "social" / "photos" / "approved"
+DEST = (ROOT / "valcea-clar" / "social" / "photos" / "approved").resolve()
+REGISTRY = ROOT / "valcea-clar" / "social" / "story_visuals.json"
 
-ASSETS: dict[str, list[str]] = {
+STATIC_ASSETS: dict[str, list[str]] = {
     "launch-ramnicu-valcea-panorama.jpg": [
         "https://upload.wikimedia.org/wikipedia/commons/8/8d/Ramnicu_Valcea_panorama.jpg",
     ],
@@ -36,9 +42,69 @@ ASSETS: dict[str, list[str]] = {
 }
 
 HEADERS = {
-    "User-Agent": "VâlceaClarEditorialPhotoFetcher/1.0 (+https://valceaclar.ro)",
+    "User-Agent": "VâlceaClarEditorialPhotoFetcher/1.1 (+https://valceaclar.ro)",
     "Accept": "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
 }
+
+
+def load_registry() -> dict[str, Any]:
+    if not REGISTRY.exists():
+        return {"stories": {}}
+    value = json.loads(REGISTRY.read_text(encoding="utf-8"))
+    if not isinstance(value, dict):
+        raise RuntimeError("story_visuals.json must contain a JSON object")
+    stories = value.get("stories")
+    if not isinstance(stories, dict):
+        raise RuntimeError("story_visuals.json stories must contain a JSON object")
+    return value
+
+
+def registry_assets() -> dict[str, list[str]]:
+    assets: dict[str, list[str]] = {}
+    registry = load_registry()
+    for story_id, visual in registry.get("stories", {}).items():
+        if not isinstance(visual, dict):
+            raise RuntimeError(f"visual registry entry is not an object: {story_id}")
+        raw_path = str(visual.get("image_path", "")).strip()
+        image = visual.get("image")
+        if not raw_path or not isinstance(image, dict):
+            raise RuntimeError(f"visual registry entry is incomplete: {story_id}")
+        target = (ROOT / raw_path).resolve()
+        if target != DEST and DEST not in target.parents:
+            raise RuntimeError(f"story visual must be under approved photo root: {story_id}: {raw_path}")
+        if target.suffix.lower() not in {".jpg", ".jpeg"}:
+            raise RuntimeError(f"story visual must be a JPEG: {story_id}: {raw_path}")
+        direct_url = str(image.get("direct_source_url", "")).strip()
+        parsed = urllib.parse.urlparse(direct_url)
+        if parsed.scheme != "https" or not parsed.hostname:
+            raise RuntimeError(f"story visual lacks an HTTPS direct_source_url: {story_id}")
+        required = ("source_type", "source_url", "credit", "rights_basis", "alt_text")
+        missing = [key for key in required if not str(image.get(key, "")).strip()]
+        if missing:
+            raise RuntimeError(
+                f"story visual rights/provenance metadata missing for {story_id}: {', '.join(missing)}"
+            )
+        if image.get("kind") != "photograph" or image.get("synthetic") is not False:
+            raise RuntimeError(f"story visual is not a verified real photograph: {story_id}")
+        if image.get("subject_match") is not True or image.get("editor_approved") is not True:
+            raise RuntimeError(f"story visual lacks subject/editor approval: {story_id}")
+        if image.get("contextual_archive") is True and not str(image.get("editorial_note", "")).strip():
+            raise RuntimeError(f"archival story visual lacks disclosure note: {story_id}")
+        filename = target.name
+        if filename in assets and direct_url not in assets[filename]:
+            raise RuntimeError(f"conflicting direct URLs for approved photo filename: {filename}")
+        assets.setdefault(filename, []).append(direct_url)
+    return assets
+
+
+def all_assets() -> dict[str, list[str]]:
+    merged = {filename: list(urls) for filename, urls in STATIC_ASSETS.items()}
+    for filename, urls in registry_assets().items():
+        bucket = merged.setdefault(filename, [])
+        for url in urls:
+            if url not in bucket:
+                bucket.append(url)
+    return merged
 
 
 def valid_jpeg(data: bytes) -> bool:
@@ -62,7 +128,9 @@ def fetch_one(filename: str, urls: list[str]) -> None:
     for attempt, url in enumerate(urls, start=1):
         try:
             data = download(url)
-            target = DEST / filename
+            target = (DEST / filename).resolve()
+            if target.parent != DEST:
+                raise RuntimeError(f"invalid approved photo filename: {filename}")
             temporary = target.with_suffix(target.suffix + ".tmp")
             temporary.write_bytes(data)
             os.replace(temporary, target)
@@ -77,8 +145,10 @@ def fetch_one(filename: str, urls: list[str]) -> None:
 
 def main() -> int:
     DEST.mkdir(parents=True, exist_ok=True)
-    for filename, urls in ASSETS.items():
+    assets = all_assets()
+    for filename, urls in assets.items():
         fetch_one(filename, urls)
+    print(f"PHOTO_REGISTRY_READY assets={len(assets)} story_assets={len(registry_assets())}")
     return 0
 
 
