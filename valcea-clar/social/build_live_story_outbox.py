@@ -8,6 +8,10 @@ photograph is kept in HOLD_MEDIA for visual channels; the site publication is
 not delayed. Rights-cleared archival/context photographs are allowed only when
 they match the story subject and carry an explicit disclosure that is propagated
 into every visual-channel caption.
+
+TikTok additionally has its own platform-native editorial/media gate. An image
+that is acceptable as disclosed context on Facebook/Instagram does not become
+current TikTok media automatically.
 """
 from __future__ import annotations
 
@@ -19,8 +23,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 VC = ROOT / "valcea-clar"
 SCRIPTS = VC / "scripts"
+SOCIAL = VC / "social"
 sys.path.insert(0, str(SCRIPTS))
+sys.path.insert(0, str(SOCIAL))
 from newsroom_decide import story_ready  # noqa: E402
+import tiktok_editorial_v1 as tiktok_editorial  # noqa: E402
 
 CURRENT = VC / "site" / "current_edition.json"
 DECISION = VC / "site" / "newsroom_decision.json"
@@ -103,18 +110,29 @@ def instagram_copy(story: dict, visual: dict | None = None) -> str:
     return "\n\n".join(parts)
 
 
-def tiktok_copy(story: dict, visual: dict | None = None) -> tuple[str, str]:
-    headline = str(story.get("headline") or "").strip()
-    dek = str(story.get("dek") or "").strip()
-    title = headline[:90]
-    parts = [headline, dek]
+def tiktok_copy(product: dict, visual: dict | None = None) -> tuple[str, str]:
+    """Reader-facing TikTok copy from the native editorial product.
+
+    No generic hashtag block. The platform product already encodes the verified
+    hook and storyboard; copy only carries the strongest verified fact, useful
+    context and canonical source boundary.
+    """
+    hook = str(product.get("hook") or "").strip()
+    title = hook[:90]
+    parts: list[str] = []
+    storyboard = product.get("storyboard") if isinstance(product.get("storyboard"), list) else []
+    for purpose in ("verified_fact", "context", "document_fact", "attribution_boundary"):
+        for beat in storyboard:
+            if not isinstance(beat, dict) or beat.get("purpose") != purpose:
+                continue
+            text = " ".join(str(beat.get("on_screen") or "").split())
+            if text and text not in parts:
+                parts.append(text)
+            break
     disclosure = visual_disclosure(visual)
     if disclosure:
         parts.append(disclosure)
-    parts.extend([
-        "Detalii și surse pe valceaclar.ro.",
-        "#ValceaClar #Valcea #StiriValcea",
-    ])
+    parts.append("Documente și context: valceaclar.ro")
     return title, "\n\n".join(parts)
 
 
@@ -151,13 +169,50 @@ def remove_recap_items(outbox: dict) -> list[str]:
     return removed
 
 
+def tiktok_platform_config(story: dict, visual: dict | None) -> dict:
+    product = tiktok_editorial.package(story, visual)
+    tt_title, tt_description = tiktok_copy(product, visual)
+    common = {
+        "status": "hold",
+        "mode": "direct_post",
+        "title": tt_title,
+        "description": tt_description,
+        "privacy_level": None,
+        "disable_comment": False,
+        "consent": {"granted": False, "source": None, "granted_at": None, "actor": None},
+        "editorial_product_status": product.get("status"),
+        "editorial_rendering_version": product.get("rendering_version"),
+        "editorial_product_fingerprint_sha256": product.get("product_fingerprint_sha256"),
+        "editorial_native_format": product.get("native_format"),
+        "premium_asset_required": product.get("status") == "READY",
+        "synthetic_filler_forbidden": True,
+        "archive_as_current_forbidden": True,
+        "verbatim_cross_platform_reuse_allowed": False,
+    }
+    if product.get("status") != "READY":
+        return {
+            **common,
+            "reason": str(product.get("hold_reason") or "tiktok_editorial_gate_not_ready"),
+        }
+    source_path = str(product.get("source_image_path") or "").strip()
+    if source_path:
+        # Temporary source URL. build_social_media_assets.py replaces this with
+        # the canonical premium 1080x1920 composite URL before TikTok can ever
+        # become platform-ready.
+        common["photo_url"] = f"{BASE}/media/social/{Path(source_path).name}"
+    return {
+        **common,
+        "reason": "site_consent_and_tiktok_app_audit_required",
+    }
+
+
 def story_item(story: dict, visual: dict | None, existing: dict | None) -> dict:
     item = existing if isinstance(existing, dict) else {}
     item_id = f"story-{story['id']}"
     link = canonical_link(story)
     fb = facebook_copy(story, visual)
     ig = instagram_copy(story, visual)
-    tt_title, tt_description = tiktok_copy(story, visual)
+    tt = tiktok_platform_config(story, visual)
 
     item.update({
         "id": item_id,
@@ -173,21 +228,10 @@ def story_item(story: dict, visual: dict | None, existing: dict | None) -> dict:
         item["image_path"] = visual["image_path"]
         item["image"] = visual["image"]
         item.pop("hold_reason", None)
-        filename = Path(str(visual["image_path"])).name
         item["platforms"] = {
             "facebook": {"status": "ready", "mode": "direct_publish"},
             "instagram": {"status": "ready", "mode": "direct_publish", "caption": ig},
-            "tiktok": {
-                "status": "hold",
-                "mode": "direct_post",
-                "reason": "site_consent_and_tiktok_app_audit_required",
-                "title": tt_title,
-                "description": tt_description,
-                "photo_url": f"{BASE}/media/social/{filename}",
-                "privacy_level": None,
-                "disable_comment": False,
-                "consent": {"granted": False, "source": None, "granted_at": None, "actor": None},
-            },
+            "tiktok": tt,
         }
     else:
         item["status"] = "hold"
@@ -197,7 +241,7 @@ def story_item(story: dict, visual: dict | None, existing: dict | None) -> dict:
         item["platforms"] = {
             "facebook": {"status": "hold", "reason": "story_specific_approved_photo_required"},
             "instagram": {"status": "hold", "reason": "story_specific_approved_photo_required", "caption": ig},
-            "tiktok": {"status": "hold", "reason": "story_specific_approved_media_and_site_consent_required", "title": tt_title, "description": tt_description},
+            "tiktok": tt,
         }
     return item
 
@@ -243,6 +287,8 @@ def main() -> int:
     outbox["policy"]["legacy_recap_outbox_policy"] = "removed_from_active_queue; historical evidence remains in platform state"
     outbox["policy"]["site_story_may_publish_before_social_media_ready"] = True
     outbox["policy"]["archival_context_requires_explicit_disclosure"] = True
+    outbox["policy"]["tiktok_archival_context_never_counts_as_current_media"] = True
+    outbox["policy"]["tiktok_ready_photo_requires_premium_editorial_composite"] = True
     write(OUTBOX, outbox)
 
     result = {
