@@ -211,11 +211,14 @@ def _runtime_blocks(report: dict[str, Any], registry: dict[str, Any]) -> list[st
             blocks.append("LEDGER_RECORD_DEDUPE_MISMATCH")
 
     if product:
-        if _clean(product.get("instance_id")) != instance_id:
+        product_instance = _clean(product.get("instance_id"))
+        product_channel = _clean(product.get("channel_id"))
+        product_platform = _platform_key(product.get("platform"))
+        if product_instance and product_instance != instance_id:
             blocks.append("PRODUCT_INSTANCE_MISMATCH")
-        if _clean(product.get("channel_id")) != channel_id:
+        if product_channel and product_channel != channel_id:
             blocks.append("PRODUCT_CHANNEL_MISMATCH")
-        if _platform_key(product.get("platform")) != platform:
+        if product_platform and product_platform != platform:
             blocks.append("PRODUCT_PLATFORM_MISMATCH")
         if _clean(product.get("product_id")) != _clean(record.get("product_id")):
             blocks.append("PRODUCT_RECORD_ID_MISMATCH")
