@@ -6,7 +6,10 @@ on:
       - "valcea-clar/social/render_native_visual_identity_previews.py"
       - "valcea-clar/social/native_platform_identity_system.json"
       - "valcea-clar/social/native_identity.py"
+      - "valcea-clar/social/validate_native_platform_identity.py"
       - "valcea-clar/social/social_brand_system.json"
+      - "valcea-clar/social/profile_identity_system.json"
+      - "valcea-clar/social/social_network_doctrine.json"
       - ".github/workflows/valcea-clar-native-visual-identity-preview.yml"
   push:
     branches: [main]
@@ -14,12 +17,19 @@ on:
       - "valcea-clar/social/render_native_visual_identity_previews.py"
       - "valcea-clar/social/native_platform_identity_system.json"
       - "valcea-clar/social/native_identity.py"
+      - "valcea-clar/social/validate_native_platform_identity.py"
       - "valcea-clar/social/social_brand_system.json"
+      - "valcea-clar/social/profile_identity_system.json"
+      - "valcea-clar/social/social_network_doctrine.json"
       - ".github/workflows/valcea-clar-native-visual-identity-preview.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: valcea-clar-native-visual-identity-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   render-and-validate:
@@ -35,8 +45,28 @@ jobs:
       - name: Install deterministic renderer
         run: python -m pip install --disable-pip-version-check Pillow==12.3.0
 
-      - name: Compile native visual renderer
-        run: python -m py_compile valcea-clar/social/render_native_visual_identity_previews.py
+      - name: Compile native identity stack
+        run: |
+          python -m py_compile \
+            valcea-clar/social/native_identity.py \
+            valcea-clar/social/validate_native_platform_identity.py \
+            valcea-clar/social/render_native_visual_identity_previews.py
+
+      - name: Validate canonical identity JSON
+        run: |
+          python -m json.tool valcea-clar/social/native_platform_identity_system.json >/dev/null
+          python -m json.tool valcea-clar/social/social_brand_system.json >/dev/null
+          python -m json.tool valcea-clar/social/profile_identity_system.json >/dev/null
+          python -m json.tool valcea-clar/social/social_network_doctrine.json >/dev/null
+
+      - name: Run premium native identity validator self-test
+        run: python valcea-clar/social/validate_native_platform_identity.py --self-test
+
+      - name: Enforce premium native identity contract
+        run: python valcea-clar/social/validate_native_platform_identity.py
+
+      - name: Run native identity helper self-test
+        run: python valcea-clar/social/native_identity.py
 
       - name: Run renderer self-test
         run: python valcea-clar/social/render_native_visual_identity_previews.py --self-test
