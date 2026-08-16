@@ -1,0 +1,127 @@
+name: VÂLCEA CLAR X API Gate
+
+on:
+  workflow_run:
+    workflows: ["VÂLCEA CLAR Social Publication Engine"]
+    types: [completed]
+  pull_request:
+    paths:
+      - "valcea-clar/social/x_publish.py"
+      - "valcea-clar/social/channels/x.json"
+      - "valcea-clar/social/channel_registry.json"
+      - ".github/workflows/valcea-clar-x-api-gate.yml"
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/social/x_publish.py"
+      - "valcea-clar/social/channels/x.json"
+      - "valcea-clar/social/channel_registry.json"
+      - ".github/workflows/valcea-clar-x-api-gate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-x-api-gate
+  cancel-in-progress: false
+
+jobs:
+  validate-and-link:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Refresh canonical main for non-PR runs
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Compile and self-test billing-gated X adapter
+        run: |
+          python -m py_compile valcea-clar/social/x_publish.py
+          python valcea-clar/social/x_publish.py --self-test
+
+      - name: Validate X channel config
+        run: python local-news-os/social/validate_channel_config.py valcea-clar/social/channels/x.json --instance-root valcea-clar
+
+      - name: Preview X queue without network or billing
+        run: python valcea-clar/social/x_publish.py | tee /tmp/x-preview.json
+
+      - name: Record PR credential state without reading secrets
+        if: github.event_name == 'pull_request'
+        run: |
+          printf '%s\n' '{"status":"PR_NO_SECRET_READ","platform":"x","network_calls":false,"billing_charge_possible":false}' > /tmp/x-credential-check.json
+          cp /tmp/x-preview.json /tmp/x-configure.json
+
+      - name: Verify four X OAuth secret values are present without API call
+        id: x_credentials
+        if: github.event_name != 'pull_request'
+        continue-on-error: true
+        env:
+          VALCEA_X_API_KEY: ${{ secrets.VALCEA_X_API_KEY }}
+          VALCEA_X_API_SECRET: ${{ secrets.VALCEA_X_API_SECRET }}
+          VALCEA_X_ACCESS_TOKEN: ${{ secrets.VALCEA_X_ACCESS_TOKEN }}
+          VALCEA_X_ACCESS_TOKEN_SECRET: ${{ secrets.VALCEA_X_ACCESS_TOKEN_SECRET }}
+        run: python valcea-clar/social/x_publish.py --credential-check | tee /tmp/x-credential-check.json
+
+      - name: Persist credential link and activation baseline without X API call
+        if: github.event_name != 'pull_request' && steps.x_credentials.outcome == 'success'
+        env:
+          VALCEA_X_API_KEY: ${{ secrets.VALCEA_X_API_KEY }}
+          VALCEA_X_API_SECRET: ${{ secrets.VALCEA_X_API_SECRET }}
+          VALCEA_X_ACCESS_TOKEN: ${{ secrets.VALCEA_X_ACCESS_TOKEN }}
+          VALCEA_X_ACCESS_TOKEN_SECRET: ${{ secrets.VALCEA_X_ACCESS_TOKEN_SECRET }}
+        run: python valcea-clar/social/x_publish.py --configure | tee /tmp/x-configure.json
+
+      - name: Persist X credential-link state conflict-safe
+        if: github.event_name != 'pull_request' && steps.x_credentials.outcome == 'success'
+        run: |
+          set -euo pipefail
+          cp valcea-clar/social/x_state.json /tmp/x-state.json
+          git config user.name "valcea-clar-x-engine[bot]"
+          git config user.email "valcea-clar-x-engine@users.noreply.github.com"
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/x-state.json valcea-clar/social/x_state.json
+            git add valcea-clar/social/x_state.json
+            if git diff --cached --quiet; then
+              echo "No X credential-link state changes to persist."
+              exit 0
+            fi
+            git commit -m "Persist VÂLCEA CLAR X credential link"
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1
+
+      - name: Upload X credential-link audit
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-x-api-gate-${{ github.run_id }}
+          path: |
+            /tmp/x-preview.json
+            /tmp/x-credential-check.json
+            /tmp/x-configure.json
+            valcea-clar/social/x_state.json
+            valcea-clar/social/x_outbox.json
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Fail closed if configured X secrets are missing
+        if: github.event_name != 'pull_request' && steps.x_credentials.outcome == 'failure'
+        run: |
+          echo "The X adapter remains disabled because one or more required GitHub secrets are missing."
+          exit 1
