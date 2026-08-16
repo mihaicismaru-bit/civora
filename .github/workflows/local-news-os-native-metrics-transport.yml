@@ -1,0 +1,106 @@
+name: LOCAL NEWS OS Native Metrics Transport
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/social/native_metrics_transport.py"
+      - "local-news-os/social/test_native_metrics_transport.py"
+      - "local-news-os/social/observed_metrics_collector.py"
+      - "local-news-os/social/observed_metrics.py"
+      - "valcea-clar/social/channels/facebook.json"
+      - "valcea-clar/social/channels/instagram.json"
+      - "valcea-clar/social/meta_auth_state.json"
+      - ".github/workflows/local-news-os-native-metrics-transport.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/social/native_metrics_transport.py"
+      - "local-news-os/social/test_native_metrics_transport.py"
+      - "local-news-os/social/observed_metrics_collector.py"
+      - "local-news-os/social/observed_metrics.py"
+      - "valcea-clar/social/channels/facebook.json"
+      - "valcea-clar/social/channels/instagram.json"
+      - "valcea-clar/social/meta_auth_state.json"
+      - ".github/workflows/local-news-os-native-metrics-transport.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-news-os-native-metrics-transport-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile native metrics transport
+        run: |
+          python -m py_compile \
+            local-news-os/social/native_metrics_transport.py \
+            local-news-os/social/test_native_metrics_transport.py \
+            local-news-os/social/observed_metrics_collector.py \
+            local-news-os/social/observed_metrics.py
+
+      - name: Run native metrics transport acceptance tests
+        run: python local-news-os/social/test_native_metrics_transport.py
+
+      - name: Verify Vâlcea Meta metrics declarations and access attestation
+        run: |
+          python - <<'PY'
+          import importlib.util
+          import json
+          from pathlib import Path
+
+          module_path = Path('local-news-os/social/native_metrics_transport.py')
+          spec = importlib.util.spec_from_file_location('native_metrics_transport', module_path)
+          mod = importlib.util.module_from_spec(spec)
+          assert spec and spec.loader
+          spec.loader.exec_module(mod)
+
+          access = json.loads(Path('valcea-clar/social/meta_auth_state.json').read_text(encoding='utf-8'))
+          if access.get('status') != 'VALID' or access.get('secret_material_persisted') is not False:
+              raise SystemExit('Meta access attestation is not valid/secret-free')
+
+          fixtures = {
+              'facebook': {
+                  'publication_id': 'ci:facebook',
+                  'remote_publication_id': 'page_post_id',
+              },
+              'instagram': {
+                  'publication_id': 'ci:instagram',
+                  'remote_publication_id': 'media_id',
+              },
+          }
+          for platform, ids in fixtures.items():
+              channel = json.loads(Path(f'valcea-clar/social/channels/{platform}.json').read_text(encoding='utf-8'))
+              publication = {
+                  'instance_id': channel['instance_id'],
+                  'channel_id': channel['channel_id'],
+                  'platform': platform,
+                  'status': 'PUBLISHED',
+                  'publication_id': ids['publication_id'],
+                  'remote_publication_id': ids['remote_publication_id'],
+                  'story_id': 'ci:story',
+                  'product_id': f'ci:{platform}:product',
+                  'published_at': '2026-08-16T08:00:00Z',
+                  'native_format': 'single_photo',
+                  'topic_keys': ['service_journalism'],
+                  'series_id': None,
+              }
+              planned = mod.build_transport_plan(channel, publication, access)
+              if planned.get('status') != 'TRANSPORT_PLANNED':
+                  raise SystemExit(f'{platform}: {planned}')
+              encoded = json.dumps(planned, ensure_ascii=False)
+              if 'Bearer ' in encoded or 'access_token=' in encoded:
+                  raise SystemExit(f'{platform}: credential leaked into plan')
+              print(f'{platform}: PASS native/free metrics transport plan')
+          PY
