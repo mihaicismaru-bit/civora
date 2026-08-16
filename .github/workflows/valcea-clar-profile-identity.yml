@@ -8,6 +8,14 @@ on:
       - "valcea-clar/social/social_network_doctrine.json"
       - "valcea-clar/social/native_platform_identity_system.json"
       - "valcea-clar/social/native_identity.py"
+      - "valcea-clar/social/stamp_native_identity_outboxes.py"
+      - "valcea-clar/social/build_outbox_only_story_products.py"
+      - "valcea-clar/social/threads_editorial_materialize.py"
+      - "valcea-clar/social/linkedin_editorial_materialize.py"
+      - "valcea-clar/social/telegram_editorial_materialize.py"
+      - "valcea-clar/social/whatsapp_editorial_materialize.py"
+      - "valcea-clar/social/youtube_editorial_materialize.py"
+      - "valcea-clar/social/tiktok_editorial_v1.py"
       - "valcea-clar/social/facebook_visual_system.json"
       - "valcea-clar/social/instagram_visual_system.json"
       - "valcea-clar/social/instagram_editorial_v1_1.py"
@@ -25,6 +33,14 @@ on:
       - "valcea-clar/social/social_network_doctrine.json"
       - "valcea-clar/social/native_platform_identity_system.json"
       - "valcea-clar/social/native_identity.py"
+      - "valcea-clar/social/stamp_native_identity_outboxes.py"
+      - "valcea-clar/social/build_outbox_only_story_products.py"
+      - "valcea-clar/social/threads_editorial_materialize.py"
+      - "valcea-clar/social/linkedin_editorial_materialize.py"
+      - "valcea-clar/social/telegram_editorial_materialize.py"
+      - "valcea-clar/social/whatsapp_editorial_materialize.py"
+      - "valcea-clar/social/youtube_editorial_materialize.py"
+      - "valcea-clar/social/tiktok_editorial_v1.py"
       - "valcea-clar/social/facebook_visual_system.json"
       - "valcea-clar/social/instagram_visual_system.json"
       - "valcea-clar/social/instagram_editorial_v1_1.py"
@@ -62,13 +78,21 @@ jobs:
           python -m json.tool valcea-clar/social/facebook_visual_system.json >/dev/null
           python -m json.tool valcea-clar/social/instagram_visual_system.json >/dev/null
 
-      - name: Compile identity tools and bound renderers
+      - name: Compile identity tools and bound products
         run: |
           python -m py_compile \
             valcea-clar/social/validate_profile_identity.py \
             valcea-clar/social/validate_visual_identity_contract.py \
             valcea-clar/social/validate_native_platform_identity.py \
             valcea-clar/social/native_identity.py \
+            valcea-clar/social/stamp_native_identity_outboxes.py \
+            valcea-clar/social/build_outbox_only_story_products.py \
+            valcea-clar/social/threads_editorial_materialize.py \
+            valcea-clar/social/linkedin_editorial_materialize.py \
+            valcea-clar/social/telegram_editorial_materialize.py \
+            valcea-clar/social/whatsapp_editorial_materialize.py \
+            valcea-clar/social/youtube_editorial_materialize.py \
+            valcea-clar/social/tiktok_editorial_v1.py \
             valcea-clar/social/build_profile_identity_assets.py \
             valcea-clar/social/instagram_editorial_v1_1.py
 
@@ -92,6 +116,18 @@ jobs:
 
       - name: Validate seven native secondary channels
         run: python valcea-clar/social/validate_native_platform_identity.py
+
+      - name: Prove durable outbox identity stamping
+        run: python valcea-clar/social/stamp_native_identity_outboxes.py --self-test
+
+      - name: Prove native identity reaches final platform products
+        run: |
+          python valcea-clar/social/threads_editorial_materialize.py --self-test
+          python valcea-clar/social/linkedin_editorial_materialize.py --self-test
+          python valcea-clar/social/telegram_editorial_materialize.py --self-test
+          python valcea-clar/social/whatsapp_editorial_materialize.py --self-test
+          python valcea-clar/social/youtube_editorial_materialize.py --self-test
+          python valcea-clar/social/tiktok_editorial_v1.py --self-test
 
       - name: Run Instagram editorial renderer self-test
         working-directory: valcea-clar/social
