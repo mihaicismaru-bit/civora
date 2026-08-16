@@ -2,13 +2,15 @@
 """Build public VÂLCEA CLAR legal pages from a canonical structured source.
 
 The renderer is deterministic, dependency-free and deliberately contains no tracking,
-credentials or remote calls. It also adds stable legal links to generated runtime pages.
+credentials or remote calls. It writes only the two legal routes unless export is requested.
 """
 from __future__ import annotations
 
 import argparse
+import hashlib
 import html
 import json
+import shutil
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +18,8 @@ ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "site"
 SOURCE = SITE / "legal" / "legal_pages.json"
 RUNTIME = SITE / "runtime"
+DIST = ROOT / "dist" / "chatgpt-sites"
+MANIFEST = DIST / "manifest.json"
 EXPECTED = {
     "termeni": "/termeni/",
     "confidentialitate": "/confidentialitate/",
@@ -25,6 +29,14 @@ LEGAL_LINKS = '<a href="/termeni/">Termeni</a><span aria-hidden="true">·</span>
 
 def esc(value: Any) -> str:
     return html.escape(str(value or ""), quote=True)
+
+
+def sha256(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            h.update(chunk)
+    return h.hexdigest()
 
 
 def load_source() -> dict[str, Any]:
@@ -102,20 +114,6 @@ main{{max-width:850px;margin:0 auto;padding:50px 24px 70px}}.eyebrow{{color:var(
 </html>'''
 
 
-def add_footer_links(path: Path) -> bool:
-    if not path.is_file() or path.name != "index.html":
-        return False
-    text = path.read_text(encoding="utf-8")
-    if '/termeni/' in text and '/confidentialitate/' in text:
-        return False
-    if "</footer>" not in text:
-        return False
-    replacement = f'<div class="legal-links" style="display:flex;justify-content:center;gap:9px;margin-top:7px">{LEGAL_LINKS}</div></footer>'
-    text = text.replace("</footer>", replacement, 1)
-    path.write_text(text, encoding="utf-8")
-    return True
-
-
 def build() -> dict[str, Any]:
     doc = load_source()
     RUNTIME.mkdir(parents=True, exist_ok=True)
@@ -125,13 +123,71 @@ def build() -> dict[str, Any]:
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(render(doc, slug), encoding="utf-8")
         outputs.append(str(target.relative_to(ROOT)))
-    linked = 0
-    for candidate in RUNTIME.rglob("index.html"):
-        if candidate.parent.name in EXPECTED:
-            continue
-        linked += int(add_footer_links(candidate))
     validate_generated(doc)
-    return {"status": "PASS", "pages": outputs, "runtime_pages_linked": linked}
+    return {"status": "PASS", "pages": outputs, "remote_mutation": False}
+
+
+def legal_routes() -> list[dict[str, Any]]:
+    return [
+        {
+            "path": "/termeni/",
+            "source": "termeni/index.html",
+            "title": "Termeni și condiții — VÂLCEA CLAR",
+            "update_mode": "replace_legal_page",
+            "publication_unit": "legal_page",
+            "canonical_url": "https://valceaclar.ro/termeni/",
+        },
+        {
+            "path": "/confidentialitate/",
+            "source": "confidentialitate/index.html",
+            "title": "Politica de confidențialitate — VÂLCEA CLAR",
+            "update_mode": "replace_legal_page",
+            "publication_unit": "legal_page",
+            "canonical_url": "https://valceaclar.ro/confidentialitate/",
+        },
+    ]
+
+
+def export() -> dict[str, Any]:
+    report = build()
+    DIST.mkdir(parents=True, exist_ok=True)
+    for slug in EXPECTED:
+        source = RUNTIME / slug / "index.html"
+        target = DIST / slug / "index.html"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, target)
+
+    route_report = {"manifest_updated": False, "legal_routes": 2}
+    if MANIFEST.is_file():
+        manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+        routes = [route for route in manifest.get("routes", []) if route.get("path") not in set(EXPECTED.values())]
+        insert_at = 1 if routes and routes[0].get("path") == "/" else 0
+        routes[insert_at:insert_at] = legal_routes()
+        manifest["routes"] = routes
+        manifest["schema_version"] = "1.6"
+        manifest.setdefault("target", {})["public_legal_pages"] = True
+        manifest.setdefault("counts", {})["routes"] = len(routes)
+        manifest["counts"]["legal_routes"] = 2
+        manifest["legal_pages"] = {
+            "source": "site/legal/legal_pages.json",
+            "effective_date": "2026-08-16",
+            "contact": "redactie@valceaclar.ro",
+            "routes": list(EXPECTED.values()),
+        }
+        files = []
+        for path in sorted(p for p in DIST.rglob("*") if p.is_file() and p != MANIFEST):
+            files.append({
+                "path": path.relative_to(DIST).as_posix(),
+                "bytes": path.stat().st_size,
+                "sha256": sha256(path),
+            })
+        manifest["files"] = files
+        MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        route_report["manifest_updated"] = True
+        route_report["routes"] = len(routes)
+        route_report["files"] = len(files)
+    validate_exported()
+    return {**report, **route_report, "exported": True}
 
 
 def validate_generated(doc: dict[str, Any] | None = None) -> None:
@@ -158,6 +214,19 @@ def validate_generated(doc: dict[str, Any] | None = None) -> None:
             raise ValueError(f"generated legal page {slug} leaks secret marker: {leaked}")
 
 
+def validate_exported() -> None:
+    doc = load_source()
+    for slug in EXPECTED:
+        runtime = RUNTIME / slug / "index.html"
+        exported = DIST / slug / "index.html"
+        if not exported.is_file():
+            raise ValueError(f"missing exported legal page: {exported}")
+        if exported.read_bytes() != runtime.read_bytes():
+            raise ValueError(f"exported legal page differs from runtime source: {slug}")
+        if doc["pages"][slug]["title"] not in exported.read_text(encoding="utf-8"):
+            raise ValueError(f"exported legal title missing: {slug}")
+
+
 def self_test() -> int:
     doc = load_source()
     for slug in EXPECTED:
@@ -165,6 +234,7 @@ def self_test() -> int:
         assert f"https://valceaclar.ro{EXPECTED[slug]}" in text
         assert doc["contact_email"] in text
         assert "CLIENT_SECRET" not in text
+    assert [row["path"] for row in legal_routes()] == ["/termeni/", "/confidentialitate/"]
     print("VÂLCEA CLAR legal pages self-test: PASS")
     return 0
 
@@ -173,6 +243,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--self-test", action="store_true")
     parser.add_argument("--check", action="store_true")
+    parser.add_argument("--export", action="store_true")
     args = parser.parse_args()
     if args.self_test:
         return self_test()
@@ -180,7 +251,8 @@ def main() -> int:
         validate_generated()
         print("VÂLCEA CLAR legal pages validation: PASS")
         return 0
-    print(json.dumps(build(), ensure_ascii=False, indent=2))
+    result = export() if args.export else build()
+    print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
 
 
