@@ -34,6 +34,11 @@ function openHub(query='',tab='dossiers'){
     },60);
   },60);
 }
+function openConsultant(){
+  const mode=document.getElementById('mode');
+  if(!mode)return;
+  if(mode.textContent.trim()==='Spațiu consultant')mode.click();
+}
 
 function explainLabels(root=document){
   root.querySelectorAll('.diConfidence').forEach(el=>{
@@ -104,7 +109,7 @@ function injectBeginnerEntry(){
   if(!heroActions){
     heroActions=document.createElement('div');
     heroActions.className='noviceHeroActions';
-    heroActions.innerHTML='<button data-novice-profile>Găsește finanțări pentru mine</button><button class="secondary" data-novice-open>Vezi apelurile deschise</button>';
+    heroActions.innerHTML='<button data-novice-profile>Găsește finanțări pentru mine</button><button class="secondary" data-novice-open>Vezi apelurile deschise</button><button class="secondary" data-novice-consultant>Sunt consultant</button>';
     const target=hero.querySelector('p')||hero.firstElementChild;
     target?.insertAdjacentElement('afterend',heroActions);
   }
@@ -129,6 +134,7 @@ function injectBeginnerEntry(){
 
   document.querySelector('[data-novice-open]')?.addEventListener('click',()=>openHub('','open'));
   document.querySelector('[data-novice-profile]')?.addEventListener('click',()=>entry.scrollIntoView({behavior:'smooth',block:'start'}));
+  document.querySelector('[data-novice-consultant]')?.addEventListener('click',openConsultant);
   entry.querySelectorAll('[data-novice-query]').forEach(btn=>btn.addEventListener('click',()=>openHub(btn.dataset.noviceQuery,'dossiers')));
   simplifySummary(home);
   explainLabels(home);
