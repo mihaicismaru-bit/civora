@@ -76,6 +76,23 @@
         "cross-checking later award or contract reporting against the original notice"
       ],
       "core_feedback": "This confirms the existing generic DOCUMENT_REGISTER requirement with an HTML-table variant: LOCAL NEWS OS should extract row_id, row_date, row_description and canonical evidence links deterministically, keep row_date distinct from published_at, preserve source-table provenance, and admit nothing automatically when a stable row identity or date cannot be proven."
+    },
+    {
+      "id": "primaria-dragasani-anunturi-publice",
+      "publisher": "Primăria Municipiului Drăgășani — Anunțuri publice",
+      "url": "https://www.primariadragasani.ro/informatii-publice/anunturi-publice",
+      "tier": "T1",
+      "section": "ADMINISTRAȚIE",
+      "status": "QUARANTINED_JS_LISTING_DISCOVERY",
+      "checked_at": "2026-08-16",
+      "reason": "The official Drăgășani announcement listing is a JavaScript-rendered catalogue and its server-rendered HTML does not expose the article links needed by the current HTML-only automatic discovery adapter. Individual official announcement pages do expose a stable title and an explicit 'Adaugat la data' publication date, so the source is editorially strong but must remain fail-closed until article enumeration can be resolved without inventing URLs or relying on search-engine indexes as the canonical listing.",
+      "safe_use": [
+        "manual discovery of municipal announcements",
+        "direct verification on the individual official announcement page",
+        "verification of the explicit article-level 'Adaugat la data' publication date",
+        "administration, local taxes, public services and municipal-decision research"
+      ],
+      "core_feedback": "LOCAL NEWS OS needs a generic DYNAMIC_LISTING source contract for official JavaScript-rendered catalogues: resolve stable item URLs through a deterministic browser/API/embedded-data adapter, preserve the official listing as discovery provenance, require article-level date provenance before admission, and reject search-engine result pages as publication evidence."
     }
   ]
 }
