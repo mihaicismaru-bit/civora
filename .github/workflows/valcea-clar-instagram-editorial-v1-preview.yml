@@ -1,0 +1,81 @@
+name: VÂLCEA CLAR Instagram Editorial v1 Preview
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/social/instagram_editorial_v1.py"
+      - "valcea-clar/social/instagram_editorial_v1_1.py"
+      - "valcea-clar/social/instagram_editorial_v1_2.py"
+      - "valcea-clar/social/instagram_visual_system.json"
+      - "valcea-clar/social/story_visuals.json"
+      - "valcea-clar/social/fetch_approved_photos.py"
+      - "valcea-clar/site/current_edition.json"
+      - "valcea-clar/site/newsroom_decision.json"
+      - "valcea-clar/editions/**"
+      - ".github/workflows/valcea-clar-instagram-editorial-v1-preview.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Install renderer dependency
+        run: python -m pip install --disable-pip-version-check Pillow==11.3.0
+      - name: Fetch approved photographs
+        run: python valcea-clar/social/fetch_approved_photos.py
+      - name: Self-test editorial v1.1 + entity fix
+        run: |
+          python valcea-clar/social/instagram_editorial_v1.py --self-test
+          python valcea-clar/social/instagram_editorial_v1_2.py --self-test
+      - name: Render covers and carousels
+        run: python valcea-clar/social/instagram_editorial_v1_2.py
+      - name: Validate acceptance fixtures
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('valcea-clar/social/previews/instagram-v1-1')
+          manifest=json.loads((root/'manifest.json').read_text(encoding='utf-8'))
+          plans={p['story_id']:p for p in manifest['plans']}
+          if manifest.get('execution_mode') != 'PREVIEW_ONLY_NO_META_CALLS':
+              raise SystemExit('Meta-call guard missing')
+          if manifest.get('rendering_version') != 'instagram-editorial-v1.1':
+              raise SystemExit('wrong rendering version')
+          lum=plans.get('luminos-fest-zavoi-20260815')
+          if not lum or lum.get('status')!='READY' or lum.get('hook')!='Luminos Fest în Zăvoi':
+              raise SystemExit('Luminos event-utility fixture failed')
+          gov=plans.get('florile-govorei-20260816')
+          if not gov or gov.get('status')!='HOLD' or gov.get('reason')!='thin_title_date_source_only':
+              raise SystemExit('Florile Govorei utility gate fixture failed')
+          ola=plans.get('olanesti-bridge-monitor')
+          if not ola or ola.get('status')!='READY' or ola.get('native_format')!='carousel':
+              raise SystemExit('Olănești carousel fixture failed')
+          if ola.get('hook')!='44,37 mil. lei' or ola.get('slide_count') != 4:
+              raise SystemExit('Olănești public-interest packaging failed')
+          detail=ola.get('detail_slides') or []
+          if len(detail)!=3 or detail[1].get('lead')!='Ralunic + Dimex-2000 Company':
+              raise SystemExit('Olănești contractor hierarchy failed')
+          if detail[2].get('kicker')!='CE NU ȘTIM ÎNCĂ':
+              raise SystemExit('Olănești uncertainty slide failed')
+          for plan in manifest['plans']:
+              for name in plan.get('preview_files',[]):
+                  path=root/name
+                  if not path.is_file() or path.stat().st_size < 20000:
+                      raise SystemExit(f'invalid preview: {path}')
+          print(f"Instagram Editorial v1.1 preview: PASS ({manifest['ready']} READY / {manifest['held']} HOLD)")
+          PY
+      - name: Upload inspectable v1.1 previews
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-instagram-editorial-v1-1-${{ github.run_id }}
+          path: valcea-clar/social/previews/instagram-v1-1
+          if-no-files-found: error
+          retention-days: 14
