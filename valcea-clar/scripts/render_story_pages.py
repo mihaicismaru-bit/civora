@@ -16,6 +16,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "local-news-os" / "core"))
 
+from article_structured_data import build_newsarticle, reconcile_publication_dates, serialize_jsonld
 from indexing_assets import write_indexing_assets
 from related_stories import rank_related
 from newsroom_decide import story_ready
@@ -24,12 +25,18 @@ ROOT = Path(__file__).resolve().parents[1]
 POINTER = ROOT / "site" / "current_edition.json"
 RUNTIME = ROOT / "site" / "runtime"
 DECISION = ROOT / "site" / "newsroom_decision.json"
+PUBLICATION_EVENT = ROOT / "site" / "story_publication_event.json"
 BASE = "https://valceaclar.ro"
+PUBLISHER_NAME = "VÂLCEA CLAR"
 RELATED_LIMIT = 3
 
 
 def load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def load_optional(path: Path) -> dict:
+    return load(path) if path.exists() else {}
 
 
 def esc(value: object) -> str:
@@ -77,7 +84,25 @@ def related_links(item: dict, stories: list[dict]) -> str:
     )
 
 
-def page(item: dict, updated_local: str, stories: list[dict]) -> str:
+def structured_data(item: dict, canonical: str, published_at: str | None) -> str:
+    section = str(item.get("section") or "ȘTIRI").replace("_", " ")
+    document = build_newsarticle(
+        headline=item.get("headline"),
+        canonical_url=canonical,
+        publisher_name=PUBLISHER_NAME,
+        publisher_url=BASE + "/",
+        description=item.get("dek"),
+        article_section=section,
+        date_published=published_at,
+        language="ro-RO",
+        author_name=PUBLISHER_NAME,
+        author_url=BASE + "/",
+        # Deliberately omit image until a provenance-backed real story image exists.
+    )
+    return f'<script type="application/ld+json">{serialize_jsonld(document)}</script>'
+
+
+def page(item: dict, updated_local: str, stories: list[dict], published_at: str | None) -> str:
     route = route_for(item)
     canonical = BASE + route
     title = str(item.get("headline") or "VÂLCEA CLAR")
@@ -86,6 +111,7 @@ def page(item: dict, updated_local: str, stories: list[dict]) -> str:
     paragraphs = "".join(f"<p>{esc(p)}</p>" for p in item.get("paragraphs", []) if str(p).strip())
     sources = source_links(item)
     related = related_links(item, stories)
+    jsonld = structured_data(item, canonical, published_at)
     return f'''<!doctype html>
 <html lang="ro"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -95,6 +121,7 @@ def page(item: dict, updated_local: str, stories: list[dict]) -> str:
 <meta property="og:type" content="article"><meta property="og:site_name" content="VÂLCEA CLAR">
 <meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(dek)}">
 <meta property="og:url" content="{esc(canonical)}">
+{jsonld}
 <style>
 body{{margin:0;color:#101828;background:#fff;font:17px/1.65 system-ui,-apple-system,Segoe UI,Arial,sans-serif}}
 header{{background:#071a3d;color:#fff;padding:18px 22px}}header a{{color:#fff;text-decoration:none;font:700 30px Georgia,serif}}
@@ -110,7 +137,7 @@ h1{{font:800 clamp(36px,6vw,62px)/1.06 Georgia,serif;letter-spacing:-.025em;marg
 </style></head><body>
 <header><a href="/">VÂLCEA CLAR</a></header><main>
 <div class="k">{esc(section)}</div><h1>{esc(title)}</h1><p class="dek">{esc(dek)}</p>
-<div class="meta">Actualizat {esc(updated_local)} · informație locală verificată</div>
+<div class="meta">{(f"Publicat {esc(published_at)} · " if published_at else "")}Actualizat {esc(updated_local)} · informație locală verificată</div>
 <article>{paragraphs}</article>
 <section class="sources"><h2>Surse</h2><ul>{sources}</ul></section>
 {related}
@@ -144,7 +171,7 @@ def link_frontpage(stories: list[dict]) -> None:
 def main() -> int:
     pointer = load(POINTER)
     doc = load(ROOT / pointer["json_source"])
-    decision = load(DECISION) if DECISION.exists() else {}
+    decision = load_optional(DECISION)
     allowed_ids = set(decision.get("publishable_story_ids") or [])
     stories = []
     for item in doc.get("items", []):
@@ -155,28 +182,52 @@ def main() -> int:
 
     story_root = RUNTIME / "stiri"
     story_root.mkdir(parents=True, exist_ok=True)
+    previous_manifest = load_optional(story_root / "manifest.json")
+    publication_dates = reconcile_publication_dates(
+        [item.get("id") for item in stories],
+        previous_manifest.get("stories") or [],
+        new_story_ids=decision.get("new_story_ids") or [],
+        published_at=decision.get("evaluated_local"),
+        bootstrap_event=load_optional(PUBLICATION_EVENT),
+    )
+
     routes = []
     cross_link_count = 0
+    dated_count = 0
     for item in stories:
+        story_id = str(item.get("id") or "")
         route = route_for(item)
         related = rank_related(item, stories, limit=RELATED_LIMIT)
+        published_at = publication_dates.get(story_id)
         target = RUNTIME / route.strip("/") / "index.html"
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(page(item, str(doc.get("updated_local") or ""), stories), encoding="utf-8")
-        routes.append({
+        target.write_text(page(item, str(doc.get("updated_local") or ""), stories, published_at), encoding="utf-8")
+        row = {
             "id": item.get("id"),
             "path": route,
             "canonical": BASE + route,
             "related_story_ids": [story.get("id") for story in related],
-        })
+            "structured_data_type": "NewsArticle",
+        }
+        if published_at:
+            row["published_at"] = published_at
+            dated_count += 1
+        routes.append(row)
         cross_link_count += len(related)
 
     (story_root / "manifest.json").write_text(
         json.dumps({
-            "schema_version": "1.2",
+            "schema_version": "1.3",
             "publication_model": "continuous_story_first",
             "homepage_presentation": "live_newsroom",
             "edition_is_canonical_story_url": False,
+            "structured_data": {
+                "enabled": True,
+                "type": "NewsArticle",
+                "eligible_scope": "publishable_full_story_only",
+                "date_published_policy": "stable_publication_ledger_only",
+                "unverified_image_policy": "omit",
+            },
             "cross_linking": {
                 "enabled": True,
                 "ranking": "same_section_then_priority",
@@ -192,6 +243,8 @@ def main() -> int:
     print(json.dumps({
         "status": "PASS",
         "story_pages": len(routes),
+        "newsarticle_jsonld": len(routes),
+        "date_published": dated_count,
         "cross_links": cross_link_count,
         "routes": routes,
         "indexing_routes": indexing["route_count"],
