@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 import whatsapp_editorial_v1 as editorial
+from native_identity import product_identity
 
 ROOT = Path(__file__).resolve().parents[2]
 VC = ROOT / "valcea-clar"
@@ -49,6 +50,7 @@ def canonical_item(product: dict[str, Any]) -> dict[str, Any]:
         "direct_publication_enabled": False,
         "direct_publication_blocker": "whatsapp_verified_access_and_recipient_scope_not_configured",
         "generation_mode": "whatsapp_editorial_v1",
+        "identity": product_identity("whatsapp"),
         "edition_gate": False,
     }
     if product.get("status") == "HOLD":
@@ -92,6 +94,7 @@ def build() -> dict[str, Any]:
     outbox["platform"] = "whatsapp"
     outbox["publication_model"] = "continuous_story_first"
     outbox["editorial_product_version"] = "whatsapp-editorial-v1.0"
+    outbox["identity_source"] = "valcea-clar/social/native_platform_identity_system.json"
     outbox["edition_recaps_are_publication_gates"] = False
     outbox["items"] = list(existing.values())
     write(OUTBOX, outbox)
@@ -108,6 +111,7 @@ def build() -> dict[str, Any]:
     state["execution_owner"] = "civora_site_engine"
     state["publication_model"] = "continuous_story_first"
     state["editorial_product_version"] = "whatsapp-editorial-v1.0"
+    state["identity_source"] = "valcea-clar/social/native_platform_identity_system.json"
     state["direct_publication_enabled"] = False
     state["direct_publication_blocker"] = "whatsapp_verified_access_and_recipient_scope_not_configured"
     state.setdefault("published", {})
@@ -141,6 +145,7 @@ def self_test() -> int:
     assert ready["status"] == "outbox_ready"
     assert ready["recipient_scope_required_before_dispatch"] is True
     assert ready["direct_publication_enabled"] is False
+    assert ready["identity"]["channel_id"] == "valcea-whatsapp"
     held = canonical_item({
         "story_id": "y",
         "status": "HOLD",
@@ -148,6 +153,7 @@ def self_test() -> int:
         "canonical_url": "https://valceaclar.ro/stiri/y/",
     })
     assert held["status"] == "hold"
+    assert held["identity"]["product_role"] == "essential_local_update"
     print("VÂLCEA CLAR WhatsApp editorial materializer self-test: PASS")
     return 0
 
