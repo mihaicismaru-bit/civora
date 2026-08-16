@@ -48,22 +48,57 @@ assert meta["place_count"] == len(places)
 assert meta["candidate_count"] >= 1
 assert "fetch('data/places.json')" in (WEB / "app.js").read_text(encoding="utf-8")
 
+pointer = json.loads((ROOT / "site" / "current_edition.json").read_text(encoding="utf-8"))
+edition = json.loads((ROOT / pointer["json_source"]).read_text(encoding="utf-8"))
+items_by_id = {str(item.get("id")): item for item in edition.get("items", []) if item.get("id")}
+
 manifest_path = RUNTIME / "stiri" / "manifest.json"
 assert manifest_path.is_file(), "Lipsește manifestul rutelor de știri"
 manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
 rows = manifest.get("stories") or []
 cross = manifest.get("cross_linking") or {}
+structured = manifest.get("structured_data") or {}
 assert cross.get("enabled") is True, "Cross-linking intern dezactivat"
 assert cross.get("eligible_scope") == "publishable_full_story_only"
+assert structured.get("enabled") is True, "NewsArticle structured data dezactivat"
+assert structured.get("type") == "NewsArticle"
+assert structured.get("eligible_scope") == "publishable_full_story_only"
+assert structured.get("date_published_policy") == "stable_publication_ledger_only"
+assert structured.get("unverified_image_policy") == "omit"
 routes_by_id = {str(row.get("id")): str(row.get("path")) for row in rows if row.get("id") and row.get("path")}
 known_routes = set(routes_by_id.values())
 for row in rows:
     story_id = str(row.get("id") or "")
     route = str(row.get("path") or "")
+    canonical = str(row.get("canonical") or "")
+    published_at = str(row.get("published_at") or "")
+    assert story_id in items_by_id, f"Pagină fără material editorial curent: {story_id}"
+    item = items_by_id[story_id]
     assert route in known_routes and route.startswith("/stiri/") and route.endswith("/")
+    assert canonical == f"https://valceaclar.ro{route}"
+    assert published_at, f"Lipsește ledger-ul datePublished pentru {story_id}"
     target = RUNTIME / route.strip("/") / "index.html"
     assert target.is_file(), f"Pagina canonică lipsește: {route}"
     text = target.read_text(encoding="utf-8")
+
+    jsonld_matches = re.findall(r'<script type="application/ld\+json">(.*?)</script>', text, flags=re.S)
+    assert len(jsonld_matches) == 1, f"NewsArticle JSON-LD invalid ca număr pentru {story_id}"
+    news = json.loads(jsonld_matches[0])
+    assert news.get("@context") == "https://schema.org"
+    assert news.get("@type") == "NewsArticle"
+    assert news.get("headline") == item.get("headline")
+    assert news.get("description") == item.get("dek")
+    assert news.get("articleSection") == str(item.get("section") or "ȘTIRI").replace("_", " ")
+    assert news.get("url") == canonical
+    assert (news.get("mainEntityOfPage") or {}).get("@id") == canonical
+    assert news.get("datePublished") == published_at
+    assert f"Publicat {published_at}" in text, f"Data publicării nu este vizibilă pentru {story_id}"
+    assert news.get("inLanguage") == "ro-RO"
+    assert (news.get("publisher") or {}).get("name") == "VÂLCEA CLAR"
+    assert (news.get("publisher") or {}).get("url") == "https://valceaclar.ro/"
+    assert (news.get("author") or {}).get("name") == "VÂLCEA CLAR"
+    assert "image" not in news, f"Imagine fără provenance introdusă în JSON-LD pentru {story_id}"
+
     expected_ids = [str(value) for value in row.get("related_story_ids") or []]
     expected_routes = [routes_by_id[value] for value in expected_ids]
     assert story_id not in expected_ids, f"Self-link detectat pentru {story_id}"
@@ -82,5 +117,5 @@ for row in rows:
 
 print(
     f"Web smoke: PASS ({len(places)} localuri publice; candidații sunt ascunși; "
-    f"{len(rows)} pagini de știri cross-linkate fail-closed)"
+    f"{len(rows)} pagini canonice cu NewsArticle JSON-LD + cross-linking fail-closed)"
 )
