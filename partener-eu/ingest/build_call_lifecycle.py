@@ -291,6 +291,16 @@ def main() -> int:
             str(e.get("kind") or "").upper() == "RESULTS_PUBLISHED" for e in dossier.get("timeline") or []
         ):
             stage = "RESULTS"
+        prior_call = next((x for x in previous.get("calls") or [] if x.get("dossierId") == dossier.get("id")), None)
+        prior_stage = str(prior_call.get("stage") or "") if prior_call else ""
+        if prior_stage in STAGE_RANK and STAGE_RANK[prior_stage] > STAGE_RANK[stage]:
+            stage_evidence.append({
+                "type": "MONOTONIC_HISTORY_PRESERVED",
+                "previousStage": prior_stage,
+                "candidateStage": stage,
+                "reason": "Lipsa unei evidențe în snapshotul curent nu retrage o etapă administrativă confirmată anterior.",
+            })
+            stage = prior_stage
         source_urls = [s.get("url") for s in dossier.get("sources") or [] if s.get("url")]
         source_urls += [x.get("url") for x in result_links if x.get("url")]
         source_urls = list(dict.fromkeys(source_urls))[:30]
