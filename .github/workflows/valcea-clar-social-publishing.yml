@@ -49,11 +49,15 @@ jobs:
           python valcea-clar/social/validate_social_engine.py --report /tmp/social-engine-ownership.json
           python valcea-clar/scripts/validate_site_engine_ownership.py
 
-      - name: Validate Facebook Instagram and TikTok CHANNEL_CONFIG files
+      - name: Validate all configured CHANNEL_CONFIG files
         run: |
           python local-news-os/social/validate_channel_config.py valcea-clar/social/channels/facebook.json --instance-root valcea-clar
           python local-news-os/social/validate_channel_config.py valcea-clar/social/channels/instagram.json --instance-root valcea-clar
           python local-news-os/social/validate_channel_config.py valcea-clar/social/channels/tiktok.json --instance-root valcea-clar
+          python local-news-os/social/validate_channel_config.py valcea-clar/social/channels/youtube.json --instance-root valcea-clar
+          python local-news-os/social/validate_channel_config.py valcea-clar/social/channels/threads.json --instance-root valcea-clar
+          python local-news-os/social/validate_channel_config.py valcea-clar/social/channels/linkedin.json --instance-root valcea-clar
+          python local-news-os/social/validate_channel_config.py valcea-clar/social/channels/telegram.json --instance-root valcea-clar
 
       - name: Build channel-native packages from live stories
         run: python valcea-clar/social/build_live_story_outbox.py
@@ -207,6 +211,10 @@ jobs:
             valcea-clar/social/tiktok_state.json
             valcea-clar/social/threads_outbox.json
             valcea-clar/social/threads_state.json
+            valcea-clar/social/linkedin_outbox.json
+            valcea-clar/social/linkedin_state.json
+            valcea-clar/social/telegram_outbox.json
+            valcea-clar/social/telegram_state.json
             valcea-clar/social/youtube_outbox.json
             valcea-clar/social/youtube_state.json
             valcea-clar/social/real_photo_replacement_queue.json
@@ -272,6 +280,8 @@ jobs:
               '- Publication unit: **individual story**',
               '- Edition/recap publication gate: **disabled**',
               '- Threads: **story-first durable outbox**',
+              '- LinkedIn: **story-first durable outbox**',
+              '- Telegram: **story-first durable outbox; no direct-access claim**',
               '- YouTube: **story-first durable outbox, HOLD until real video + upload access**',
               f"- Ownership: **{ownership.get('status','UNAVAILABLE')}**",
               f"- Meta auth: **{meta.get('status','UNKNOWN')}**",
@@ -299,6 +309,8 @@ jobs:
             /tmp/tiktok-apply.json
             valcea-clar/social/meta_auth_state.json
             valcea-clar/social/threads_outbox.json
+            valcea-clar/social/linkedin_outbox.json
+            valcea-clar/social/telegram_outbox.json
             valcea-clar/social/youtube_outbox.json
             valcea-clar/social/social_media_manifest.json
             valcea-clar/dist/chatgpt-sites/media/social

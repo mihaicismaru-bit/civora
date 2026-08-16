@@ -180,6 +180,34 @@
         "min_items": 1,
         "max_items": 3
       }
+    ],
+    "valcea-telegram": [
+      {
+        "series_id": "valcea-acum",
+        "priority": 100,
+        "slots": [{"days": [0,1,2,3,4,5,6], "time": "07:15", "window_minutes": 180}],
+        "preferred_formats": ["digest", "text"],
+        "eligible_topics": ["verified_breaking_updates", "service_journalism", "civic_updates", "infrastructure", "local_events", "public_money", "local_places", "sports_utility"],
+        "min_interval_hours": 12,
+        "max_occurrences_7d": 7,
+        "replay_policy": "material_update",
+        "resurface_after_hours": 0,
+        "min_items": 2,
+        "max_items": 5
+      },
+      {
+        "series_id": "ce-trebuie-sa-stii",
+        "priority": 95,
+        "slots": [{"days": [0,1,2,3,4], "time": "16:30", "window_minutes": 210}],
+        "preferred_formats": ["digest", "text"],
+        "eligible_topics": ["service_journalism", "civic_updates", "infrastructure", "local_events", "public_money"],
+        "min_interval_hours": 24,
+        "max_occurrences_7d": 5,
+        "replay_policy": "material_update",
+        "resurface_after_hours": 0,
+        "min_items": 1,
+        "max_items": 4
+      }
     ]
   }
 }
