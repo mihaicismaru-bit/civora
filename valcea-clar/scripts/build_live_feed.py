@@ -79,6 +79,10 @@ def main() -> int:
         "publication_model": "continuous_story_first",
         "stories": stories,
         "story_count": len(stories),
+        # Compatibility aliases for existing consumers. They are explicitly not
+        # the publication model or canonical identity of an individual story.
+        "edition": snapshot,
+        "pointer": pointer,
         "compatibility_snapshot": snapshot,
         "compatibility_pointer": pointer,
         "unde_iesim": [
@@ -102,6 +106,7 @@ def main() -> int:
             "edition_windows_are_publication_gates": False,
             "canonical_story_urls_required": True,
             "recap_render_may_not_remove_story_routes": True,
+            "edition_fields_are_compatibility_only": True,
         },
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
