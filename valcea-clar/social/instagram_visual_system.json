@@ -1,1 +1,53 @@
-{}
+{
+  "schema_version": "1.0",
+  "channel_id": "valcea-instagram",
+  "canvas": {"width": 1080, "height": 1350, "aspect_ratio": "4:5"},
+  "brand": {
+    "name": "VÂLCEA CLAR",
+    "accent_rgb": [196, 27, 35],
+    "safe_margin_px": 72,
+    "top_margin_px": 64,
+    "bottom_margin_px": 72
+  },
+  "typography": {
+    "headline_max_lines": 3,
+    "headline_size_max": 82,
+    "headline_size_min": 62,
+    "subline_size": 36,
+    "kicker_size": 31,
+    "brand_size": 29,
+    "archive_size": 25
+  },
+  "templates": {
+    "event_utility_card": {
+      "headline_priority": ["what", "where"],
+      "subline_priority": ["access", "time", "price"],
+      "tone": "useful_immediate"
+    },
+    "investigation_card": {
+      "headline_priority": ["amount", "public_interest_fact"],
+      "subline_priority": ["actor_question", "what_is_being_built"],
+      "tone": "documented_public_interest"
+    },
+    "public_money_card": {
+      "headline_priority": ["amount"],
+      "subline_priority": ["decision", "actor"],
+      "tone": "clear_accountability"
+    },
+    "breaking_card": {
+      "headline_priority": ["verified_change"],
+      "subline_priority": ["place", "time", "consequence"],
+      "tone": "clear_not_alarmist"
+    }
+  },
+  "qa": {
+    "one_dominant_message": true,
+    "headline_word_target_max": 10,
+    "archive_marker_required_when_contextual": true,
+    "brand_mark_required": true,
+    "minimum_contrast_ratio_target": 4.5,
+    "text_must_not_cover_primary_subject": true,
+    "naked_photo_default_forbidden": true,
+    "verbatim_facebook_reuse_forbidden": true
+  }
+}
