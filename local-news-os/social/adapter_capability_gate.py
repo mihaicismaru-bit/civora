@@ -29,7 +29,16 @@ ALLOWED_FORMATS = {
     "text", "single_photo", "carousel", "story", "reel", "short",
     "long_video", "thread", "alert", "digest", "live",
 }
-ALLOWED_MEDIA_KINDS = {"none", "photo", "video"}
+ALLOWED_MEDIA_KINDS = {"none", "photograph", "video"}
+MEDIA_KIND_ALIASES = {
+    "photo": "photograph",
+    "photograph": "photograph",
+    "real_photo": "photograph",
+    "image": "photograph",
+    "video": "video",
+    "real_video": "video",
+    "none": "none",
+}
 VIDEO_FORMATS = {"reel", "short", "long_video", "live"}
 MULTI_ASSET_FORMATS = {"carousel"}
 COMPLETION_MODELS = {"immediate_remote_id", "async_remote_status"}
@@ -45,6 +54,10 @@ def _clean(value: Any) -> str:
 
 def _platform(value: Any) -> str:
     return _clean(value).lower().replace("-", "_")
+
+
+def _media_kind(value: Any) -> str:
+    return MEDIA_KIND_ALIASES.get(_clean(value).lower(), "")
 
 
 def _inside_instance(path: Any, instance_root: str) -> bool:
@@ -113,7 +126,10 @@ def _entry_errors(entry: dict[str, Any], *, instance_id: str, instance_root: str
     if not isinstance(media, list) or not media:
         errors.append(f"{platform or 'unknown'}:CAPABILITY_MEDIA_KINDS_INVALID")
         media = []
-    normalized_media = [_clean(value) for value in media if _clean(value)]
+    normalized_media = [_media_kind(value) for value in media if _clean(value)]
+    if "" in normalized_media:
+        errors.append(f"{platform or 'unknown'}:CAPABILITY_MEDIA_KIND_UNSUPPORTED")
+    normalized_media = [value for value in normalized_media if value]
     if len(normalized_media) != len(set(normalized_media)):
         errors.append(f"{platform or 'unknown'}:CAPABILITY_MEDIA_KINDS_DUPLICATE")
     for kind in normalized_media:
@@ -259,7 +275,7 @@ def assess_runtime_capability(report: dict[str, Any], capability: dict[str, Any]
     binding = visual.get("binding") if isinstance(visual.get("binding"), dict) else {}
     native_format = _clean(product.get("native_format"))
     supported_formats = set(capability.get("supported_native_formats", [])) if isinstance(capability.get("supported_native_formats"), list) else set()
-    supported_media = set(capability.get("supported_media_kinds", [])) if isinstance(capability.get("supported_media_kinds"), list) else set()
+    supported_media = {_media_kind(value) for value in capability.get("supported_media_kinds", []) if _media_kind(value)} if isinstance(capability.get("supported_media_kinds"), list) else set()
     selected = binding.get("selected_assets") if isinstance(binding.get("selected_assets"), list) else []
     max_assets = capability.get("max_media_assets") if isinstance(capability.get("max_media_assets"), int) else -1
 
@@ -284,7 +300,7 @@ def assess_runtime_capability(report: dict[str, Any], capability: dict[str, Any]
         if not isinstance(asset, dict):
             reasons.append("INVALID_RUNTIME_MEDIA_ASSET")
             continue
-        kind = _clean(asset.get("kind")).lower()
+        kind = _media_kind(asset.get("kind"))
         if kind not in supported_media:
             reasons.append(f"UNSUPPORTED_MEDIA_KIND:{kind or 'missing'}")
         if asset.get("synthetic") is not False:
@@ -311,7 +327,7 @@ def assess_runtime_capability(report: dict[str, Any], capability: dict[str, Any]
         "platform": platform or None,
         "native_format": native_format or None,
         "supported_native_formats": sorted(supported_formats),
-        "selected_media_kinds": sorted({_clean(asset.get("kind")).lower() for asset in selected if isinstance(asset, dict) and _clean(asset.get("kind"))}),
+        "selected_media_kinds": sorted({_media_kind(asset.get("kind")) for asset in selected if isinstance(asset, dict) and _media_kind(asset.get("kind"))}),
         "supported_media_kinds": sorted(supported_media),
         "selected_media_assets": len(selected),
         "max_media_assets": max_assets,
