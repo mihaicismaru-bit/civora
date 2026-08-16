@@ -164,6 +164,7 @@ jobs:
           git config user.email 'valcea-clar-live-newsroom@users.noreply.github.com'
           git add \
             valcea-clar/editions \
+            valcea-clar/editorial/news_discovery_state.json \
             valcea-clar/site/current_edition.json \
             valcea-clar/site/last_edition_attempt.json \
             valcea-clar/site/newsroom_decision.json \
@@ -179,8 +180,20 @@ jobs:
             exit 0
           fi
           git commit -m "Publish VÂLCEA CLAR live story update"
+
+          # Build/export steps intentionally create transient tracked and untracked
+          # files (for example the delivery bundle and rejected auto candidates).
+          # They are not canonical publication state and must not block rebasing
+          # the committed newsroom transaction onto a concurrently advancing main.
+          git reset --hard HEAD
+          git clean -fd
+
           for attempt in 1 2 3 4 5; do
             if git pull --rebase origin main && git push origin HEAD:main; then
+              # Rebuild the delivery bundle from the now-pushed canonical runtime
+              # so the next artifact step uploads the same story snapshot.
+              python valcea-clar/scripts/build_sites_export.py
+              python valcea-clar/scripts/overlay_runtime_export.py
               exit 0
             fi
             git rebase --abort || true
