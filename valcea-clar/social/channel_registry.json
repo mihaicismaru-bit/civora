@@ -48,12 +48,13 @@
       "channel_id": "facebook",
       "status": "active",
       "direct_publication_enabled": true,
-      "publication_mode": "native_api",
+      "publication_mode": "native_api_editorial_composite",
       "config": "valcea-clar/social/channels/facebook.json",
-      "adapter": "valcea-clar/social/facebook_publish.py",
+      "adapter": "valcea-clar/social/facebook_editorial_publish.py",
       "prepare": [
         "valcea-clar/social/build_live_story_outbox.py",
-        "valcea-clar/social/fetch_approved_photos.py"
+        "valcea-clar/social/fetch_approved_photos.py",
+        "valcea-clar/social/editorial_asset_contract.py"
       ],
       "outbox": "valcea-clar/social/facebook_outbox.json",
       "state": "valcea-clar/social/facebook_state.json",
@@ -63,10 +64,16 @@
       },
       "requirements": {
         "story_event": true,
-        "story_specific_real_photo": true,
+        "canonical_story_readiness_gate": true,
+        "facebook_interest_gate": true,
+        "story_specific_real_photo_source": true,
+        "editorial_composite": true,
+        "source_photo_provenance": true,
+        "source_photo_reuse_rights": true,
         "editor_approval": true,
-        "rights_metadata": true,
-        "canonical_story_link": true
+        "canonical_story_link": true,
+        "legacy_state_key_dedupe": true,
+        "platform_native_copy": true
       }
     },
     {
