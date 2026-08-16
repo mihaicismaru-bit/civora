@@ -93,6 +93,23 @@
         "administration, local taxes, public services and municipal-decision research"
       ],
       "core_feedback": "LOCAL NEWS OS needs a generic DYNAMIC_LISTING source contract for official JavaScript-rendered catalogues: resolve stable item URLs through a deterministic browser/API/embedded-data adapter, preserve the official listing as discovery provenance, require article-level date provenance before admission, and reject search-engine result pages as publication evidence."
+    },
+    {
+      "id": "ocpi-valcea-anunturi",
+      "publisher": "Oficiul de Cadastru și Publicitate Imobiliară Vâlcea",
+      "url": "https://vl.ancpi.ro/anunturi/",
+      "tier": "T1",
+      "section": "IMOBILIARE",
+      "status": "QUARANTINED_LISTING_ONLY_NO_ARTICLE_PAGES",
+      "checked_at": "2026-08-16",
+      "reason": "The official OCPI Vâlcea announcements page is editorially valuable for cadastral and property-registration developments, but notices are presented inline on the listing rather than as a reliable stream of individually dated article pages. The current automatic news adapter is article-link based; additionally, the live newsroom runner recorded a DNS resolution failure for this host while independent web verification still reached the official page. Keeping it in automatic discovery would therefore mix a structural incompatibility with transient network-health noise and cannot improve fail-closed freshness admission.",
+      "safe_use": [
+        "manual discovery of OCPI Vâlcea cadastral and property-registration announcements",
+        "primary-source verification of notice text and explicit inline notice date",
+        "verification of PNCCF financing and cadastral-registration developments",
+        "real-estate and land-registry research without automatic publication"
+      ],
+      "core_feedback": "LOCAL NEWS OS should distinguish ARTICLE_FEED from LISTING_ONLY source contracts before source admission. LISTING_ONLY sources need stable item identity plus scoped inline-date provenance, and network-health state must remain separate from structural eligibility so a transient DNS failure cannot be mistaken for an editorial-format failure."
     }
   ]
 }
