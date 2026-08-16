@@ -1,0 +1,58 @@
+name: VÂLCEA CLAR Social Doctrine
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/social/social_network_doctrine.json"
+      - "valcea-clar/social/validate_social_doctrine.py"
+      - "valcea-clar/social/channels/**"
+      - "local-news-os/social/channel_config.schema.json"
+      - "local-news-os/social/validate_channel_config.py"
+      - ".github/workflows/valcea-clar-social-doctrine.yml"
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/social/social_network_doctrine.json"
+      - "valcea-clar/social/validate_social_doctrine.py"
+      - "valcea-clar/social/channels/**"
+      - "local-news-os/social/channel_config.schema.json"
+      - "local-news-os/social/validate_channel_config.py"
+      - ".github/workflows/valcea-clar-social-doctrine.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Validate doctrine self-tests
+        run: python valcea-clar/social/validate_social_doctrine.py --self-test
+      - name: Validate platform-native doctrine
+        run: python valcea-clar/social/validate_social_doctrine.py
+      - name: Validate configured channel contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          for config in valcea-clar/social/channels/*.json; do
+            python local-news-os/social/validate_channel_config.py "$config" --instance-root valcea-clar
+          done
+      - name: Assert no configured network is missing doctrine coverage
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          doctrine=json.loads(Path('valcea-clar/social/social_network_doctrine.json').read_text(encoding='utf-8'))
+          configured={json.loads(p.read_text(encoding='utf-8'))['platform'] for p in Path('valcea-clar/social/channels').glob('*.json')}
+          covered=set(doctrine['channels'])
+          missing=sorted(configured-covered)
+          if missing:
+              raise SystemExit(f'missing doctrine coverage: {missing}')
+          print(f'Social doctrine coverage: PASS ({len(configured)} configured channels)')
+          PY

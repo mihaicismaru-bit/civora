@@ -1,0 +1,167 @@
+{
+  "schema_version": "1.0",
+  "instance_id": "valcea",
+  "publication_model": "continuous_story_first",
+  "canonical_source": "site_story",
+  "site_publish_independent": true,
+  "cross_platform_final_reuse_default": false,
+  "metrics_observed_only": true,
+  "benchmark_refresh_max_age_days": 180,
+  "shared_invariants": [
+    "same_verified_facts_different_packaging",
+    "no_factual_embellishment_for_reach",
+    "no_clickbait_or_fake_urgency",
+    "no_engagement_bait",
+    "rights_and_provenance_fail_closed",
+    "channel_failure_isolated",
+    "channel_may_hold_independently",
+    "civora_site_engine_owns_automation"
+  ],
+  "channels": {
+    "facebook": {
+      "channel_id": "valcea-facebook",
+      "product_mode": "platform_native",
+      "audience_role": "shareable local news and community utility",
+      "interest_gate": "FB_INTEREST_GATE",
+      "hook_policy": ["consequence", "concrete_number", "local_utility", "actor_action", "documented_question"],
+      "native_product_families": ["fb_news_card", "fb_breaking_update", "fb_public_money_card", "fb_investigation_card", "fb_event_utility", "fb_explainer_carousel"],
+      "visual_strategy": "mobile-first editorial visual with restrained typography and one dominant idea",
+      "final_copy_cross_platform_reuse": false,
+      "benchmark": {
+        "research_date": "2026-08-16",
+        "outlets": ["The New York Times", "The Washington Post", "The Wall Street Journal", "CNN", "Associated Press"],
+        "official_platform_guidance_reviewed": true,
+        "platform_owner": "Meta"
+      }
+    },
+    "instagram": {
+      "channel_id": "valcea-instagram",
+      "product_mode": "platform_native_visual",
+      "audience_role": "visual mini-newsroom for discovery, utility and explainers",
+      "interest_gate": "SOCIAL_UTILITY_GATE",
+      "hook_policy": ["visual_headline", "local_utility", "key_number", "public_interest_question"],
+      "native_product_families": ["breaking_card", "event_utility_card", "investigation_card", "explainer_carousel", "quote_card"],
+      "visual_strategy": "designed 4:5 cover or carousel; naked photo is not the default news product",
+      "final_copy_cross_platform_reuse": false,
+      "benchmark": {
+        "research_date": "2026-08-16",
+        "outlets": ["The New York Times", "The Washington Post", "The Wall Street Journal", "CNN"],
+        "official_platform_guidance_reviewed": true,
+        "platform_owner": "Meta"
+      }
+    },
+    "threads": {
+      "channel_id": "valcea-threads",
+      "product_mode": "platform_native_text",
+      "audience_role": "conversation-native timely local context",
+      "interest_gate": "THREADS_CONVERSATION_GATE",
+      "hook_policy": ["clear_observation", "what_changed", "short_explainer", "source_forward_update"],
+      "native_product_families": ["thread", "text_update", "correction"],
+      "visual_strategy": "text-first; media only when it adds evidence or comprehension",
+      "final_copy_cross_platform_reuse": false,
+      "benchmark": {
+        "research_date": "2026-08-16",
+        "outlets": ["The Washington Post", "CNN", "Associated Press"],
+        "official_platform_guidance_reviewed": true,
+        "platform_owner": "Meta"
+      }
+    },
+    "tiktok": {
+      "channel_id": "valcea-tiktok",
+      "product_mode": "platform_native_video",
+      "audience_role": "short vertical visual explainers and verified local footage",
+      "interest_gate": "TIKTOK_MOTION_VALUE_GATE",
+      "hook_policy": ["first_seconds_fact", "visual_evidence", "local_consequence", "explainer_question"],
+      "native_product_families": ["short_video", "photo_post", "visual_explainer"],
+      "visual_strategy": "vertical audiovisual hook, subtitles and source clarity; no synthetic filler",
+      "final_copy_cross_platform_reuse": false,
+      "benchmark": {
+        "research_date": "2026-08-16",
+        "outlets": ["The Washington Post", "CNN", "NBC News", "Associated Press"],
+        "official_platform_guidance_reviewed": true,
+        "platform_owner": "TikTok"
+      }
+    },
+    "youtube": {
+      "channel_id": "valcea-youtube",
+      "product_mode": "platform_native_video",
+      "audience_role": "durable explainers plus Shorts when motion materially helps",
+      "interest_gate": "YOUTUBE_VIDEO_VALUE_GATE",
+      "hook_policy": ["clear_title_promise", "local_consequence", "documented_explainer"],
+      "native_product_families": ["short", "long_video", "explainer"],
+      "visual_strategy": "strong title-thumbnail pairing with verified footage or evidence",
+      "final_copy_cross_platform_reuse": false,
+      "benchmark": {
+        "research_date": "2026-08-16",
+        "outlets": ["The New York Times", "The Washington Post", "CNN", "Associated Press"],
+        "official_platform_guidance_reviewed": true,
+        "platform_owner": "Google"
+      }
+    },
+    "linkedin": {
+      "channel_id": "valcea-linkedin",
+      "product_mode": "platform_native_professional",
+      "audience_role": "local decision-makers, business, investment, funding and institutions",
+      "interest_gate": "LINKEDIN_PROFESSIONAL_RELEVANCE_GATE",
+      "hook_policy": ["business_consequence", "investment_number", "public_funding", "institutional_change"],
+      "native_product_families": ["professional_update", "document_explainer", "carousel"],
+      "visual_strategy": "professional evidence-led visuals; charts or documents when more informative than photos",
+      "final_copy_cross_platform_reuse": false,
+      "benchmark": {
+        "research_date": "2026-08-16",
+        "outlets": ["The Wall Street Journal", "Bloomberg", "Reuters", "Associated Press"],
+        "official_platform_guidance_reviewed": true,
+        "platform_owner": "Microsoft"
+      }
+    },
+    "telegram": {
+      "channel_id": "valcea-telegram",
+      "product_mode": "platform_native_message",
+      "audience_role": "fast high-signal opt-in local updates",
+      "interest_gate": "TELEGRAM_SIGNAL_GATE",
+      "hook_policy": ["direct_update", "what_changed", "correction", "source_link"],
+      "native_product_families": ["text_update", "correction", "compact_digest"],
+      "visual_strategy": "text-first; media only when evidence or utility materially improves the update",
+      "final_copy_cross_platform_reuse": false,
+      "benchmark": {
+        "research_date": "2026-08-16",
+        "outlets": ["Reuters", "Associated Press", "BBC News"],
+        "official_platform_guidance_reviewed": true,
+        "platform_owner": "Telegram"
+      }
+    },
+    "whatsapp": {
+      "channel_id": "valcea-whatsapp",
+      "product_mode": "platform_native_low_frequency",
+      "audience_role": "low-frequency high-trust essential local updates",
+      "interest_gate": "WHATSAPP_HIGH_VALUE_GATE",
+      "hook_policy": ["essential_update", "service_utility", "correction", "weekend_utility"],
+      "native_product_families": ["message_update", "essential_digest", "weekend_digest"],
+      "visual_strategy": "message-first; use compact media only when it increases utility",
+      "final_copy_cross_platform_reuse": false,
+      "benchmark": {
+        "research_date": "2026-08-16",
+        "outlets": ["The Washington Post", "CNN", "Associated Press"],
+        "official_platform_guidance_reviewed": true,
+        "platform_owner": "Meta"
+      }
+    }
+  },
+  "planned_channels": {
+    "x": {
+      "channel_id": "valcea-x",
+      "status": "planned_unconfigured",
+      "product_mode": "platform_native_breaking",
+      "audience_role": "breaking updates, live threads, source links and quote-context",
+      "interest_gate": "X_LIVE_NEWS_GATE",
+      "final_copy_cross_platform_reuse": false,
+      "direct_publication_enabled": false,
+      "benchmark": {
+        "research_date": "2026-08-16",
+        "outlets": ["The New York Times", "The Washington Post", "Reuters", "Associated Press"],
+        "official_platform_guidance_reviewed": false,
+        "platform_owner": "X"
+      }
+    }
+  }
+}
