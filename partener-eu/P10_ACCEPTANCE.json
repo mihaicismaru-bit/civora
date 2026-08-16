@@ -15,9 +15,9 @@
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-08-16T09:49:27Z",
-    "source_pass": 3,
-    "source_degraded": 3,
+    "utc": "2026-08-16T09:59:17Z",
+    "source_pass": 6,
+    "source_degraded": 0,
     "source_fail": 1,
     "source_quarantined": 1,
     "critical_fail": false,
@@ -26,7 +26,7 @@
     "quarantined_source": "SRC-LEGISLATIE — Portal Legislativ; dependent material facts blocked fail-closed"
   },
   "deployment_evidence": {
-    "utc": "2026-08-16T09:49:41Z",
+    "utc": "2026-08-16T09:59:44Z",
     "status": "FAIL",
     "public_content_verified": true,
     "https_verified": true,
@@ -36,7 +36,7 @@
     "http_content_verified": true,
     "content_origin": "custom_https",
     "http_status": 200,
-    "final_url": "https://partener.eu/?p10_probe=20260816T094941Z",
+    "final_url": "https://partener.eu/?p10_probe=20260816T095944Z",
     "title": "PARTENER.EU — Finanțări europene explicate simplu",
     "required_markers_present": true,
     "critical_assets_ok": true,
@@ -46,7 +46,7 @@
       {
         "id": "custom_https",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260816T094941Z",
+        "final_url": "https://partener.eu/?p10_probe=20260816T095944Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -57,7 +57,7 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260816T094941Z",
+        "final_url": "http://partener.eu/?p10_probe=20260816T095944Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -68,12 +68,12 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260816T094941Z",
+        "final_url": "http://partener.eu/?p10_probe=20260816T095944Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260816T094941Z",
-            "to_url": "http://partener.eu/?p10_probe=20260816T094941Z"
+            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260816T095944Z",
+            "to_url": "http://partener.eu/?p10_probe=20260816T095944Z"
           }
         ],
         "content_verified": true,
@@ -123,16 +123,16 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-08-16T09:49:41Z",
-    "validation_run_started": "2026-08-16T09:49:27Z",
+    "utc": "2026-08-16T09:59:44Z",
+    "validation_run_started": "2026-08-16T09:59:17Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "9e86810ddee7688f83df166c6e9d1f666e711947a64232445a2b244689b17223",
-      "history_sha256": "9e86810ddee7688f83df166c6e9d1f666e711947a64232445a2b244689b17223",
-      "history_path": "validation/history/20260816T094927Z.json",
+      "latest_sha256": "25eb256607265d1fd4a022028098068332a1f6d3f430b7fef847319c21923bbb",
+      "history_sha256": "25eb256607265d1fd4a022028098068332a1f6d3f430b7fef847319c21923bbb",
+      "history_path": "validation/history/20260816T095917Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "1287eaf4c87c30da33d7c6b168cc6998614bbe8c93e790cc993b132359fb9603",
-      "checkpoint_sha256": "1287eaf4c87c30da33d7c6b168cc6998614bbe8c93e790cc993b132359fb9603",
+      "source_state_sha256": "d9c432f0ad60743cbf89f2face1bdb6b5195994aca20ae198bc4f7b68a3c7ae6",
+      "checkpoint_sha256": "d9c432f0ad60743cbf89f2face1bdb6b5195994aca20ae198bc4f7b68a3c7ae6",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
@@ -140,7 +140,7 @@
     },
     "source_registry": {
       "observed_at": "2026-08-16T09:46:41.935087Z",
-      "age_seconds": 179,
+      "age_seconds": 782,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
