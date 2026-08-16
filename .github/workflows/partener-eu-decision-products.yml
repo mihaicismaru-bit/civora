@@ -8,17 +8,22 @@ on:
     branches: [main]
     paths:
       - 'partener-eu/ingest/build_decision_products.py'
+      - 'partener-eu/ingest/build_call_lifecycle.py'
       - 'partener-eu/ingest/polish_decision_products.py'
       - 'partener-eu/ingest/finalize_decision_products.py'
       - 'partener-eu/ingest/localize_decision_products.py'
+      - 'partener-eu/ops/fix_call_lifecycle_monotonic.py'
       - 'partener-eu/ops/fix_decision_products_determinism.py'
       - 'partener-eu/ops/fix_decision_products_source_coverage.py'
       - 'partener-eu/ops/fix_decision_ui_romanian.py'
       - 'partener-eu/ops/test_decision_products.py'
+      - 'partener-eu/ops/test_call_lifecycle.py'
       - 'partener-eu/ops/test_public_language.py'
       - 'partener-eu/web/p11-public-data.js'
       - 'partener-eu/web/decision-intelligence-v2.js'
       - 'partener-eu/web/decision-intelligence-v2.css'
+      - 'partener-eu/web/call-lifecycle-ui.js'
+      - 'partener-eu/web/call-lifecycle-ui.css'
       - '.github/workflows/partener-eu-decision-products.yml'
   workflow_run:
     workflows:
@@ -40,7 +45,7 @@ jobs:
   build:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
         with:
@@ -53,33 +58,40 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Apply deterministic source and Romanian UI rules
+      - name: Apply deterministic source, lifecycle and Romanian UI rules
         run: |
           python partener-eu/ops/fix_decision_products_determinism.py
           python partener-eu/ops/fix_decision_products_source_coverage.py
           python partener-eu/ops/fix_decision_ui_romanian.py
+          python partener-eu/ops/fix_call_lifecycle_monotonic.py
 
-      - name: Build decision-useful editorial products
+      - name: Build complete call dossiers and lifecycle registry
         run: |
           python partener-eu/ingest/build_decision_products.py
           python partener-eu/ingest/polish_decision_products.py
           python partener-eu/ingest/finalize_decision_products.py
           python partener-eu/ingest/localize_decision_products.py
+          python partener-eu/ingest/build_call_lifecycle.py
 
-      - name: Validate JavaScript, product coverage and public language
+      - name: Validate JavaScript, dossier coverage, lifecycle and public language
         run: |
           node --check partener-eu/web/decision-intelligence-v2.js
+          node --check partener-eu/web/call-lifecycle-ui.js
           python partener-eu/ops/test_decision_products.py
+          python partener-eu/ops/test_call_lifecycle.py
           python partener-eu/ops/test_public_language.py
 
-      - name: Persist deterministic engine, Romanian UI, dossiers and meaningful news
+      - name: Persist canonical dossiers, lifecycle and meaningful news
         shell: bash
         run: |
           set -euo pipefail
           cp partener-eu/ingest/build_decision_products.py /tmp/build_decision_products.py
+          cp partener-eu/ingest/build_call_lifecycle.py /tmp/build_call_lifecycle.py
           cp partener-eu/web/decision-intelligence-v2.js /tmp/decision-intelligence-v2.js
           cp partener-eu/ingest/state/decision_products.json /tmp/decision_products.json
+          cp partener-eu/ingest/state/call_lifecycle.json /tmp/call_lifecycle.json
           cp partener-eu/web/decision-products.js /tmp/decision-products.js
+          cp partener-eu/web/call-lifecycle.js /tmp/call-lifecycle.js
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
 
@@ -87,19 +99,25 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             cp /tmp/build_decision_products.py partener-eu/ingest/build_decision_products.py
+            cp /tmp/build_call_lifecycle.py partener-eu/ingest/build_call_lifecycle.py
             cp /tmp/decision-intelligence-v2.js partener-eu/web/decision-intelligence-v2.js
             cp /tmp/decision_products.json partener-eu/ingest/state/decision_products.json
+            cp /tmp/call_lifecycle.json partener-eu/ingest/state/call_lifecycle.json
             cp /tmp/decision-products.js partener-eu/web/decision-products.js
+            cp /tmp/call-lifecycle.js partener-eu/web/call-lifecycle.js
             git add \
               partener-eu/ingest/build_decision_products.py \
+              partener-eu/ingest/build_call_lifecycle.py \
               partener-eu/web/decision-intelligence-v2.js \
               partener-eu/ingest/state/decision_products.json \
-              partener-eu/web/decision-products.js
+              partener-eu/ingest/state/call_lifecycle.json \
+              partener-eu/web/decision-products.js \
+              partener-eu/web/call-lifecycle.js
             if git diff --cached --quiet; then
-              echo 'Decision products already current.'
+              echo 'Call dossiers and lifecycle already current.'
               exit 0
             fi
-            git commit -m 'Regenerate Romanian decision-useful news and funding dossiers'
+            git commit -m 'Track funding calls from consultation through contracting and results'
             if git push origin HEAD:main; then exit 0; fi
             sleep $((attempt * 2))
           done
