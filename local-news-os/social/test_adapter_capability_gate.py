@@ -78,20 +78,25 @@ class AdapterCapabilityGateAcceptance(unittest.TestCase):
         self.assertEqual("single_photo", result["capability_gate"]["native_format"])
         self.assertTrue(result["adapter_handoff"]["dispatch_allowed"])
 
-    def test_instagram_carousel_is_preserved_in_durable_outbox_not_silently_downgraded(self) -> None:
+    def test_instagram_carousel_is_now_direct_ready_with_native_adapter(self) -> None:
         report = _runtime("instagram")
         self.assertEqual("carousel", report["artifacts"]["format"]["product"]["native_format"])
+        selected = report["artifacts"]["visual"]["binding"]["selected_assets"]
+        self.assertEqual(2, len(selected))
+        self.assertEqual(["photograph", "photograph"], [asset["kind"] for asset in selected])
         result = _bridge("instagram", report=report)
         self.assertFalse(result["blocked"])
-        self.assertEqual("OUTBOX_ONLY", result["dispatch_disposition"])
-        self.assertEqual("OUTBOX_ONLY_CAPABILITY_GAP", result["capability_disposition"])
-        self.assertIn("UNSUPPORTED_NATIVE_FORMAT:carousel", result["capability_gap_reasons"])
-        self.assertIn("TOO_MANY_MEDIA_ASSETS:2>1", result["capability_gap_reasons"])
-        self.assertEqual("OUTBOX_READY", result["publication_status_after_bridge"])
-        self.assertFalse(result["adapter_handoff"]["dispatch_allowed"])
+        self.assertEqual("DIRECT_READY", result["dispatch_disposition"])
+        self.assertEqual("DIRECT_READY", result["capability_disposition"])
+        self.assertTrue(result["capability_gate"]["compatible"])
+        self.assertEqual("carousel", result["capability_gate"]["native_format"])
+        self.assertEqual(["photograph"], result["capability_gate"]["selected_media_kinds"])
+        self.assertTrue(result["adapter_handoff"]["dispatch_allowed"])
         item = next(iter(result["commit_bundle"]["outbox"]["items"].values()))
-        self.assertEqual(report["artifacts"]["format"]["product"], item["adapter_payload"]["native_product"])
         self.assertEqual("carousel", item["adapter_payload"]["native_product"]["native_format"])
+        self.assertEqual(report["artifacts"]["format"]["product"], item["adapter_payload"]["native_product"])
+        self.assertFalse(result["guards"]["native_product_rewritten"])
+        self.assertFalse(result["guards"]["fallback_format_invented"])
 
     def test_tiktok_short_video_is_preserved_until_video_adapter_exists(self) -> None:
         report = _runtime("tiktok")
@@ -181,11 +186,12 @@ class AdapterCapabilityGateAcceptance(unittest.TestCase):
         self.assertEqual("NOT_APPLICABLE_UPSTREAM_NOT_READY", result["capability_disposition"])
         self.assertIsNone(result["adapter_handoff"])
 
-    def test_capability_gap_result_is_deterministic_and_keeps_zero_paid_guards(self) -> None:
+    def test_capability_result_is_deterministic_and_keeps_zero_paid_guards(self) -> None:
         report = _runtime("instagram")
         first = _bridge("instagram", report=report)
         second = _bridge("instagram", report=report)
         self.assertEqual(first, second)
+        self.assertEqual("DIRECT_READY", first["dispatch_disposition"])
         self.assertTrue(first["guards"]["zero_paid_dependency"])
         self.assertFalse(first["guards"]["credential_values_read_by_capability_gate"])
         self.assertFalse(first["guards"]["network_dispatch_performed"])
