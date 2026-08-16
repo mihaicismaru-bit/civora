@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
-"""Crash-safe dispatch execution for recurring LOCAL NEWS OS social series.
+"""Crash-safe execution/reconciliation for recurring social-series handoffs.
 
-This adapter composes the existing generic ``durable_dispatch_executor`` with the
-recurring-series state/outbox contract produced by ``series_adapter_dispatch_handoff``.
-It does not select channels, formats or media and never reads credential values.
+The module deliberately composes the existing ``durable_dispatch_executor``.
+It adds only the recurring-series durability contract around it: the exact
+multi-story native product, ordered source-story identity, channel-local series
+state and series outbox must remain synchronized while the generic executor owns
+PUBLISHING claims, retry/backoff and remote-publication proof.
 
-Only a truthful ``DIRECT_READY`` recurring-series handoff may initialize an
-executor state. The exact multi-story native product stays immutable while the
-publication is claimed, attempted, retried, reconciled and finally proven by a
-``remote_publication_id``. A PUBLISHING lease is persisted before any adapter
-callback may run; an expired/ambiguous lease requires explicit remote
-reconciliation and is never blindly resent.
+No credential values are accepted here and no network client is embedded. The
+caller injects the exact adapter callback after a compare-and-swap claim has
+been durably persisted.
 """
 from __future__ import annotations
 
@@ -24,16 +23,19 @@ import publication_state
 
 SCHEMA_VERSION = "1.0"
 PUBLICATION_KIND = "recurring_series"
-SECRET_KEY_PARTS = (
-    "access_token", "refresh_token", "secret", "password", "authorization",
-    "api_key", "apikey", "client_secret", "credential_value",
-)
 PREDICTIVE_KEYS = {
     "predicted_views", "predicted_reach", "predicted_engagement", "predicted_ctr",
     "predicted_shares", "predicted_saves", "virality_probability", "expected_views",
     "expected_reach", "expected_engagement", "forecast_views",
 }
-SYNC_RECORD_FIELDS = (
+# Exact names only: durable safety markers such as credential_values_read=False
+# are policy assertions, not credential values, and must remain valid products.
+SECRET_KEYS = {
+    "access_token", "refresh_token", "token", "secret", "password", "api_key",
+    "apikey", "client_secret", "credential_value", "credential_values",
+    "authorization", "bearer",
+}
+SYNC_FIELDS = (
     "status", "state_reason", "attempt_count", "attempts", "remote_publication_id",
     "next_attempt_at", "published_at", "dispatch_execution", "dispatch_history",
 )
@@ -60,32 +62,28 @@ def _is_sha256(value: Any) -> bool:
     return len(text) == 64 and all(ch in "0123456789abcdef" for ch in text)
 
 
-def _contains_key(value: Any, *, exact: set[str] | None = None, parts: tuple[str, ...] = ()) -> bool:
-    exact = exact or set()
+def _contains_exact_key(value: Any, keys: set[str]) -> bool:
     if isinstance(value, dict):
         for key, child in value.items():
-            lowered = _clean(key).casefold()
-            if lowered in exact or any(part in lowered for part in parts):
-                return True
-            if _contains_key(child, exact=exact, parts=parts):
+            if _clean(key).casefold() in keys or _contains_exact_key(child, keys):
                 return True
     elif isinstance(value, list):
-        return any(_contains_key(item, exact=exact, parts=parts) for item in value)
+        return any(_contains_exact_key(item, keys) for item in value)
     return False
 
 
-def _seal(state: dict[str, Any]) -> dict[str, Any]:
-    candidate = copy.deepcopy(state)
-    candidate.pop("state_fingerprint_sha256", None)
-    candidate["state_fingerprint_sha256"] = _digest(candidate)
-    return candidate
+def _seal(value: dict[str, Any]) -> dict[str, Any]:
+    result = copy.deepcopy(value)
+    result.pop("state_fingerprint_sha256", None)
+    result["state_fingerprint_sha256"] = _digest(result)
+    return result
 
 
-def _fingerprint_ok(state: dict[str, Any]) -> bool:
-    supplied = _clean(state.get("state_fingerprint_sha256")).lower()
+def _fingerprint_ok(value: dict[str, Any]) -> bool:
+    supplied = _clean(value.get("state_fingerprint_sha256")).lower()
     if not _is_sha256(supplied):
         return False
-    candidate = copy.deepcopy(state)
+    candidate = copy.deepcopy(value)
     candidate.pop("state_fingerprint_sha256", None)
     return supplied == _digest(candidate)
 
@@ -101,46 +99,46 @@ def _blocked(state: dict[str, Any] | None, reasons: list[str], *, adapter_invoke
     }
 
 
-def _handoff_item(dispatch_outbox: dict[str, Any], handoff_id: str) -> dict[str, Any] | None:
-    items = dispatch_outbox.get("items") if isinstance(dispatch_outbox.get("items"), dict) else {}
+def _handoff(outbox: dict[str, Any], handoff_id: str) -> dict[str, Any] | None:
+    items = outbox.get("items") if isinstance(outbox.get("items"), dict) else {}
     item = items.get(_clean(handoff_id))
     return item if isinstance(item, dict) else None
 
 
 def _series_record(state: dict[str, Any]) -> dict[str, Any] | None:
-    series_state = state.get("series_publication_state") if isinstance(state.get("series_publication_state"), dict) else {}
-    records = series_state.get("records") if isinstance(series_state.get("records"), dict) else {}
+    container = state.get("series_publication_state") if isinstance(state.get("series_publication_state"), dict) else {}
+    records = container.get("records") if isinstance(container.get("records"), dict) else {}
     record = records.get(_clean(state.get("publication_id")))
     return record if isinstance(record, dict) else None
 
 
-def _series_outbox_item(state: dict[str, Any]) -> dict[str, Any] | None:
-    outbox = state.get("series_publication_outbox") if isinstance(state.get("series_publication_outbox"), dict) else {}
-    items = outbox.get("items") if isinstance(outbox.get("items"), list) else []
-    matches = [item for item in items if isinstance(item, dict) and _clean(item.get("publication_id")) == _clean(state.get("publication_id"))]
+def _series_item(state: dict[str, Any]) -> dict[str, Any] | None:
+    container = state.get("series_publication_outbox") if isinstance(state.get("series_publication_outbox"), dict) else {}
+    items = container.get("items") if isinstance(container.get("items"), list) else []
+    matches = [row for row in items if isinstance(row, dict) and _clean(row.get("publication_id")) == _clean(state.get("publication_id"))]
     return matches[0] if len(matches) == 1 else None
 
 
-def _executor_record(inner: dict[str, Any]) -> dict[str, Any] | None:
-    ledger = inner.get("ledger") if isinstance(inner.get("ledger"), dict) else {}
-    records = ledger.get("records") if isinstance(ledger.get("records"), dict) else {}
+def _inner_record(inner: dict[str, Any]) -> dict[str, Any] | None:
     outbox = inner.get("outbox") if isinstance(inner.get("outbox"), dict) else {}
-    item = _handoff_item(outbox, _clean(inner.get("handoff_id")))
+    item = _handoff(outbox, _clean(inner.get("handoff_id")))
     if item is None:
         return None
+    ledger = inner.get("ledger") if isinstance(inner.get("ledger"), dict) else {}
+    records = ledger.get("records") if isinstance(ledger.get("records"), dict) else {}
     record = records.get(_clean(item.get("publication_id")))
     return record if isinstance(record, dict) else None
 
 
-def _story_ids_from_product(product: dict[str, Any]) -> list[str]:
+def _story_ids(product: dict[str, Any]) -> list[str]:
     return [
-        _clean(item.get("story_id"))
-        for item in product.get("items", [])
-        if isinstance(item, dict) and _clean(item.get("story_id"))
+        _clean(row.get("story_id"))
+        for row in product.get("items", [])
+        if isinstance(row, dict) and _clean(row.get("story_id"))
     ]
 
 
-def _initial_handoff_blocks(result: dict[str, Any]) -> list[str]:
+def _validate_handoff_result(result: dict[str, Any]) -> list[str]:
     blocks: list[str] = []
     if _clean(result.get("schema_version")) != SCHEMA_VERSION:
         blocks.append("HANDOFF_SCHEMA_VERSION")
@@ -150,7 +148,7 @@ def _initial_handoff_blocks(result: dict[str, Any]) -> list[str]:
         blocks.append("HANDOFF_NOT_DIRECT_READY")
 
     guards = result.get("guards") if isinstance(result.get("guards"), dict) else {}
-    expected_guards = {
+    expected = {
         "channel_native_series_only": True,
         "native_product_rewritten": False,
         "credential_values_read": False,
@@ -162,15 +160,14 @@ def _initial_handoff_blocks(result: dict[str, Any]) -> list[str]:
         "paid_llm_api_used": False,
         "zero_paid_dependency": True,
     }
-    for key, expected in expected_guards.items():
-        if guards.get(key) is not expected:
+    for key, value in expected.items():
+        if guards.get(key) is not value:
             blocks.append("HANDOFF_GUARD_INVALID:" + key)
 
     bundle = result.get("commit_bundle") if isinstance(result.get("commit_bundle"), dict) else {}
     supplied_bundle_fp = _clean(result.get("bundle_fingerprint_sha256")).lower()
     if not bundle:
-        blocks.append("MISSING_HANDOFF_COMMIT_BUNDLE")
-        return sorted(set(blocks))
+        return sorted(set(blocks + ["MISSING_HANDOFF_COMMIT_BUNDLE"]))
     if not _is_sha256(supplied_bundle_fp) or supplied_bundle_fp != _digest(bundle):
         blocks.append("HANDOFF_BUNDLE_FINGERPRINT_INVALID")
     if bundle.get("atomic_persist_required") is not True:
@@ -183,56 +180,44 @@ def _initial_handoff_blocks(result: dict[str, Any]) -> list[str]:
     platform = _platform(result.get("platform"))
     publication_id = _clean(bundle.get("publication_id"))
     handoff_id = _clean(bundle.get("handoff_id"))
-    for key, actual, expected in (
+    for label, actual, wanted in (
         ("INSTANCE", _clean(bundle.get("instance_id")), instance_id),
         ("CHANNEL", _clean(bundle.get("channel_id")), channel_id),
         ("PLATFORM", _platform(bundle.get("platform")), platform),
     ):
-        if not actual or actual != expected:
-            blocks.append(f"HANDOFF_BUNDLE_{key}_MISMATCH")
+        if not actual or actual != wanted:
+            blocks.append("HANDOFF_BUNDLE_" + label + "_MISMATCH")
     if not publication_id:
         blocks.append("MISSING_PUBLICATION_ID")
     if not handoff_id:
         blocks.append("MISSING_HANDOFF_ID")
 
-    handoff_meta = result.get("adapter_handoff") if isinstance(result.get("adapter_handoff"), dict) else {}
-    if handoff_meta.get("dispatch_allowed") is not True:
+    meta = result.get("adapter_handoff") if isinstance(result.get("adapter_handoff"), dict) else {}
+    if meta.get("dispatch_allowed") is not True:
         blocks.append("HANDOFF_DISPATCH_NOT_ALLOWED")
-    if _clean(handoff_meta.get("handoff_id")) != handoff_id:
+    if _clean(meta.get("handoff_id")) != handoff_id:
         blocks.append("HANDOFF_META_ID_MISMATCH")
-    if handoff_meta.get("credential_values_exposed") is not False:
+    if meta.get("credential_values_exposed") is not False:
         blocks.append("HANDOFF_META_CREDENTIAL_VALUES_EXPOSED")
 
     series_state = bundle.get("series_publication_state") if isinstance(bundle.get("series_publication_state"), dict) else {}
     series_outbox = bundle.get("series_publication_outbox") if isinstance(bundle.get("series_publication_outbox"), dict) else {}
     dispatch_outbox = bundle.get("dispatch_handoff_outbox") if isinstance(bundle.get("dispatch_handoff_outbox"), dict) else {}
-    if not series_state:
-        blocks.append("MISSING_SERIES_PUBLICATION_STATE")
-    if not series_outbox:
-        blocks.append("MISSING_SERIES_PUBLICATION_OUTBOX")
-    if not dispatch_outbox:
-        blocks.append("MISSING_SERIES_DISPATCH_HANDOFF_OUTBOX")
-    if blocks:
-        return sorted(set(blocks))
-
-    records = series_state.get("records") if isinstance(series_state.get("records"), dict) else {}
-    record = records.get(publication_id)
+    record = (series_state.get("records") or {}).get(publication_id) if isinstance(series_state.get("records"), dict) else None
     if not isinstance(record, dict):
         blocks.append("SERIES_PUBLICATION_RECORD_MISSING")
     elif _clean(record.get("status")) != "READY":
         blocks.append("SERIES_PUBLICATION_NOT_READY")
-
-    series_items = series_outbox.get("items") if isinstance(series_outbox.get("items"), list) else []
-    matches = [item for item in series_items if isinstance(item, dict) and _clean(item.get("publication_id")) == publication_id]
+    rows = series_outbox.get("items") if isinstance(series_outbox.get("items"), list) else []
+    matches = [row for row in rows if isinstance(row, dict) and _clean(row.get("publication_id")) == publication_id]
     if len(matches) != 1:
         blocks.append("SERIES_PUBLICATION_OUTBOX_ITEM_MISSING_OR_AMBIGUOUS")
     elif _clean(matches[0].get("status")) != "READY":
         blocks.append("SERIES_PUBLICATION_OUTBOX_ITEM_NOT_READY")
 
-    handoff = _handoff_item(dispatch_outbox, handoff_id)
+    handoff = _handoff(dispatch_outbox, handoff_id)
     if handoff is None:
-        blocks.append("SERIES_HANDOFF_ITEM_MISSING")
-        return sorted(set(blocks))
+        return sorted(set(blocks + ["SERIES_HANDOFF_ITEM_MISSING"]))
     if _clean(handoff.get("publication_kind")) != PUBLICATION_KIND:
         blocks.append("HANDOFF_PUBLICATION_KIND_MISMATCH")
     if _clean(handoff.get("dispatch_disposition")) != "DIRECT_READY":
@@ -241,46 +226,41 @@ def _initial_handoff_blocks(result: dict[str, Any]) -> list[str]:
         blocks.append("HANDOFF_ITEM_CREDENTIAL_VALUES_INCLUDED")
     if handoff.get("network_dispatch_performed") is not False:
         blocks.append("HANDOFF_ITEM_ALREADY_DISPATCHED")
-    if _clean(handoff.get("publication_id")) != publication_id:
-        blocks.append("HANDOFF_ITEM_PUBLICATION_MISMATCH")
-    supplied_handoff_fp = _clean(handoff.get("handoff_fingerprint_sha256")).lower()
-    handoff_payload = copy.deepcopy(handoff)
-    handoff_payload.pop("handoff_fingerprint_sha256", None)
-    if not _is_sha256(supplied_handoff_fp) or supplied_handoff_fp != _digest(handoff_payload):
+    handoff_fp = _clean(handoff.get("handoff_fingerprint_sha256")).lower()
+    handoff_body = copy.deepcopy(handoff)
+    handoff_body.pop("handoff_fingerprint_sha256", None)
+    if not _is_sha256(handoff_fp) or handoff_fp != _digest(handoff_body):
         blocks.append("HANDOFF_ITEM_FINGERPRINT_INVALID")
 
     payload = handoff.get("adapter_payload") if isinstance(handoff.get("adapter_payload"), dict) else {}
     payload_fp = _clean(handoff.get("adapter_payload_fingerprint_sha256")).lower()
     if not payload or not _is_sha256(payload_fp) or payload_fp != _digest(payload):
-        blocks.append("HANDOFF_ADAPTER_PAYLOAD_FINGERPRINT_INVALID")
-    else:
-        if _clean(payload.get("publication_kind")) != PUBLICATION_KIND:
-            blocks.append("ADAPTER_PAYLOAD_PUBLICATION_KIND_MISMATCH")
-        if _clean(payload.get("publication_id")) != publication_id:
-            blocks.append("ADAPTER_PAYLOAD_PUBLICATION_MISMATCH")
-        if _clean(payload.get("instance_id")) != instance_id:
-            blocks.append("ADAPTER_PAYLOAD_INSTANCE_MISMATCH")
-        if _clean(payload.get("channel_id")) != channel_id:
-            blocks.append("ADAPTER_PAYLOAD_CHANNEL_MISMATCH")
-        if _platform(payload.get("platform")) != platform:
-            blocks.append("ADAPTER_PAYLOAD_PLATFORM_MISMATCH")
-        product = payload.get("native_product") if isinstance(payload.get("native_product"), dict) else {}
-        if not product:
-            blocks.append("MISSING_NATIVE_SERIES_PRODUCT")
-        else:
-            story_ids = _story_ids_from_product(product)
-            if not story_ids or len(story_ids) != len(set(story_ids)):
-                blocks.append("INVALID_NATIVE_SERIES_SOURCE_STORIES")
-            if story_ids != [str(v) for v in payload.get("source_story_ids", [])]:
-                blocks.append("SERIES_SOURCE_STORY_IDENTITY_DIVERGENCE")
-            if product.get("verbatim_cross_platform_reuse_allowed") is not False:
-                blocks.append("VERBATIM_CROSS_PLATFORM_REUSE")
-            if product.get("zero_paid_dependency") is not True:
-                blocks.append("PRODUCT_ZERO_PAID_DEPENDENCY_VIOLATION")
-            if _contains_key(product, exact=PREDICTIVE_KEYS):
-                blocks.append("PREDICTIVE_ANALYTICS_FORBIDDEN")
-            if _contains_key(product, parts=SECRET_KEY_PARTS):
-                blocks.append("SECRET_VALUE_IN_NATIVE_SERIES_PRODUCT")
+        return sorted(set(blocks + ["HANDOFF_ADAPTER_PAYLOAD_FINGERPRINT_INVALID"]))
+    for label, actual, wanted in (
+        ("INSTANCE", _clean(payload.get("instance_id")), instance_id),
+        ("CHANNEL", _clean(payload.get("channel_id")), channel_id),
+        ("PLATFORM", _platform(payload.get("platform")), platform),
+        ("PUBLICATION", _clean(payload.get("publication_id")), publication_id),
+    ):
+        if actual != wanted:
+            blocks.append("ADAPTER_PAYLOAD_" + label + "_MISMATCH")
+    if _clean(payload.get("publication_kind")) != PUBLICATION_KIND:
+        blocks.append("ADAPTER_PAYLOAD_PUBLICATION_KIND_MISMATCH")
+
+    product = payload.get("native_product") if isinstance(payload.get("native_product"), dict) else {}
+    stories = _story_ids(product)
+    if not product or not stories or len(stories) != len(set(stories)):
+        blocks.append("INVALID_NATIVE_SERIES_SOURCE_STORIES")
+    if stories != [str(value) for value in payload.get("source_story_ids", [])]:
+        blocks.append("SERIES_SOURCE_STORY_IDENTITY_DIVERGENCE")
+    if product.get("verbatim_cross_platform_reuse_allowed") is not False:
+        blocks.append("VERBATIM_CROSS_PLATFORM_REUSE")
+    if product.get("zero_paid_dependency") is not True:
+        blocks.append("PRODUCT_ZERO_PAID_DEPENDENCY_VIOLATION")
+    if _contains_exact_key(product, PREDICTIVE_KEYS):
+        blocks.append("PREDICTIVE_ANALYTICS_FORBIDDEN")
+    if _contains_exact_key(product, SECRET_KEYS):
+        blocks.append("SECRET_VALUE_IN_NATIVE_SERIES_PRODUCT")
     return sorted(set(blocks))
 
 
@@ -289,14 +269,13 @@ def _normalized_ledger(bundle: dict[str, Any]) -> dict[str, Any]:
     channel_id = _clean(bundle.get("channel_id"))
     platform = _platform(bundle.get("platform"))
     publication_id = _clean(bundle.get("publication_id"))
-    source_state = bundle["series_publication_state"]
-    source_record = copy.deepcopy(source_state["records"][publication_id])
-    source_record.setdefault("attempt_count", 0)
-    source_record.setdefault("attempts", [])
-    source_record.setdefault("remote_publication_id", None)
-    source_record.setdefault("next_attempt_at", None)
+    record = copy.deepcopy(bundle["series_publication_state"]["records"][publication_id])
+    record.setdefault("attempt_count", 0)
+    record.setdefault("attempts", [])
+    record.setdefault("remote_publication_id", None)
+    record.setdefault("next_attempt_at", None)
     ledger = publication_state.empty_ledger(instance_id, channel_id, platform)
-    ledger["records"][publication_id] = source_record
+    ledger["records"][publication_id] = record
     return ledger
 
 
@@ -332,23 +311,23 @@ def _generic_bridge(result: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _sync_series_from_inner(state: dict[str, Any], inner: dict[str, Any]) -> dict[str, Any]:
+def _sync(state: dict[str, Any], inner: dict[str, Any]) -> dict[str, Any]:
     candidate = copy.deepcopy(state)
     candidate["executor_state"] = copy.deepcopy(inner)
-    inner_record = _executor_record(inner)
-    series_record = _series_record(candidate)
-    series_item = _series_outbox_item(candidate)
-    if inner_record is None or series_record is None or series_item is None:
-        raise ValueError("executor and recurring-series state diverged")
-
-    for field in SYNC_RECORD_FIELDS:
+    candidate["dispatch_handoff_outbox"] = copy.deepcopy(inner.get("outbox"))
+    source_record = _series_record(candidate)
+    source_item = _series_item(candidate)
+    inner_record = _inner_record(inner)
+    if source_record is None or source_item is None or inner_record is None:
+        raise ValueError("recurring-series and generic executor state diverged")
+    for field in SYNC_FIELDS:
         if field in inner_record:
-            series_record[field] = copy.deepcopy(inner_record[field])
+            source_record[field] = copy.deepcopy(inner_record[field])
         else:
-            series_record.pop(field, None)
-    series_item["status"] = _clean(inner_record.get("status"))
-    series_item["state_reason"] = _clean(inner_record.get("state_reason"))
-    dispatch = series_item.setdefault("dispatch", {})
+            source_record.pop(field, None)
+    source_item["status"] = _clean(inner_record.get("status"))
+    source_item["state_reason"] = _clean(inner_record.get("state_reason"))
+    dispatch = source_item.setdefault("dispatch", {})
     if not isinstance(dispatch, dict):
         raise ValueError("series outbox dispatch metadata must be a mapping")
     dispatch["durable_executor_status"] = _clean(inner_record.get("status"))
@@ -356,15 +335,14 @@ def _sync_series_from_inner(state: dict[str, Any], inner: dict[str, Any]) -> dic
     dispatch["remote_publication_id"] = _clean(inner_record.get("remote_publication_id")) or None
     attempts = inner_record.get("attempts") if isinstance(inner_record.get("attempts"), list) else []
     dispatch["last_attempt_at"] = _clean((attempts[-1] if attempts else {}).get("attempted_at")) or None
-    series_item["outbox_item_fingerprint_sha256"] = _digest({
-        key: value for key, value in series_item.items() if key != "outbox_item_fingerprint_sha256"
+    source_item["outbox_item_fingerprint_sha256"] = _digest({
+        key: value for key, value in source_item.items() if key != "outbox_item_fingerprint_sha256"
     })
-
     candidate["revision"] = int(candidate.get("revision", 0)) + 1
     return _seal(candidate)
 
 
-def _state_blocks(state: dict[str, Any]) -> list[str]:
+def _validate_state(state: dict[str, Any]) -> list[str]:
     if not isinstance(state, dict):
         return ["STATE_NOT_MAPPING"]
     blocks: list[str] = []
@@ -379,73 +357,66 @@ def _state_blocks(state: dict[str, Any]) -> list[str]:
 
     inner = state.get("executor_state") if isinstance(state.get("executor_state"), dict) else {}
     if not inner:
-        blocks.append("MISSING_GENERIC_EXECUTOR_STATE")
-        return sorted(set(blocks))
-    generic_blocks = executor._validate_state(inner)
-    blocks.extend("GENERIC_EXECUTOR:" + reason for reason in generic_blocks)
+        return sorted(set(blocks + ["MISSING_GENERIC_EXECUTOR_STATE"]))
+    blocks.extend("GENERIC_EXECUTOR:" + reason for reason in executor._validate_state(inner))
+    for label, actual, wanted in (
+        ("INSTANCE", _clean(inner.get("instance_id")), _clean(state.get("instance_id"))),
+        ("CHANNEL", _clean(inner.get("channel_id")), _clean(state.get("channel_id"))),
+        ("PLATFORM", _platform(inner.get("platform")), _platform(state.get("platform"))),
+        ("HANDOFF", _clean(inner.get("handoff_id")), _clean(state.get("handoff_id"))),
+    ):
+        if actual != wanted:
+            blocks.append("EXECUTOR_" + label + "_MISMATCH")
 
-    instance_id = _clean(state.get("instance_id"))
-    channel_id = _clean(state.get("channel_id"))
-    platform = _platform(state.get("platform"))
-    if _clean(inner.get("instance_id")) != instance_id:
-        blocks.append("EXECUTOR_INSTANCE_MISMATCH")
-    if _clean(inner.get("channel_id")) != channel_id:
-        blocks.append("EXECUTOR_CHANNEL_MISMATCH")
-    if _platform(inner.get("platform")) != platform:
-        blocks.append("EXECUTOR_PLATFORM_MISMATCH")
-    if _clean(inner.get("handoff_id")) != _clean(state.get("handoff_id")):
-        blocks.append("EXECUTOR_HANDOFF_MISMATCH")
-
-    series_state = state.get("series_publication_state") if isinstance(state.get("series_publication_state"), dict) else {}
-    series_outbox = state.get("series_publication_outbox") if isinstance(state.get("series_publication_outbox"), dict) else {}
-    for name, doc in (("SERIES_STATE", series_state), ("SERIES_OUTBOX", series_outbox)):
-        if _clean(doc.get("instance_id")) != instance_id:
-            blocks.append(f"{name}_INSTANCE_MISMATCH")
-        if _clean(doc.get("channel_id")) != channel_id:
-            blocks.append(f"{name}_CHANNEL_MISMATCH")
-        if _platform(doc.get("platform")) != platform:
-            blocks.append(f"{name}_PLATFORM_MISMATCH")
+    source_state = state.get("series_publication_state") if isinstance(state.get("series_publication_state"), dict) else {}
+    source_outbox = state.get("series_publication_outbox") if isinstance(state.get("series_publication_outbox"), dict) else {}
+    for label, doc in (("SERIES_STATE", source_state), ("SERIES_OUTBOX", source_outbox)):
+        if _clean(doc.get("instance_id")) != _clean(state.get("instance_id")):
+            blocks.append(label + "_INSTANCE_MISMATCH")
+        if _clean(doc.get("channel_id")) != _clean(state.get("channel_id")):
+            blocks.append(label + "_CHANNEL_MISMATCH")
+        if _platform(doc.get("platform")) != _platform(state.get("platform")):
+            blocks.append(label + "_PLATFORM_MISMATCH")
         if doc.get("zero_paid_dependency") is not True:
-            blocks.append(f"{name}_ZERO_PAID_DEPENDENCY")
+            blocks.append(label + "_ZERO_PAID_DEPENDENCY")
 
-    series_record = _series_record(state)
-    series_item = _series_outbox_item(state)
-    inner_record = _executor_record(inner)
-    if series_record is None:
+    source_record = _series_record(state)
+    source_item = _series_item(state)
+    inner_record = _inner_record(inner)
+    if source_record is None:
         blocks.append("SERIES_RECORD_MISSING")
-    if series_item is None:
+    if source_item is None:
         blocks.append("SERIES_OUTBOX_ITEM_MISSING_OR_AMBIGUOUS")
     if inner_record is None:
         blocks.append("EXECUTOR_RECORD_MISSING")
-    if series_record is not None and inner_record is not None:
+    if source_record is not None and inner_record is not None:
         for field in ("publication_id", "dedupe_key", "instance_id", "channel_id", "platform", "product_id", "product_fingerprint_sha256", "status"):
-            left = _platform(series_record.get(field)) if field == "platform" else _clean(series_record.get(field))
+            left = _platform(source_record.get(field)) if field == "platform" else _clean(source_record.get(field))
             right = _platform(inner_record.get(field)) if field == "platform" else _clean(inner_record.get(field))
             if left != right:
                 blocks.append("SERIES_EXECUTOR_RECORD_DIVERGENCE:" + field)
         for field in ("attempt_count", "remote_publication_id", "next_attempt_at"):
-            if series_record.get(field) != inner_record.get(field):
+            if source_record.get(field) != inner_record.get(field):
                 blocks.append("SERIES_EXECUTOR_RECORD_DIVERGENCE:" + field)
-    if series_item is not None and inner_record is not None and _clean(series_item.get("status")) != _clean(inner_record.get("status")):
+    if source_item is not None and inner_record is not None and _clean(source_item.get("status")) != _clean(inner_record.get("status")):
         blocks.append("SERIES_OUTBOX_STATUS_DIVERGENCE")
 
-    dispatch_copy = state.get("dispatch_handoff_outbox") if isinstance(state.get("dispatch_handoff_outbox"), dict) else {}
-    if not dispatch_copy or dispatch_copy != inner.get("outbox"):
+    if state.get("dispatch_handoff_outbox") != inner.get("outbox"):
         blocks.append("DISPATCH_HANDOFF_OUTBOX_DIVERGENCE")
-    handoff = _handoff_item(inner.get("outbox") if isinstance(inner.get("outbox"), dict) else {}, _clean(state.get("handoff_id")))
-    if series_item is not None:
-        supplied_item_fp = _clean(series_item.get("outbox_item_fingerprint_sha256")).lower()
-        item_payload = copy.deepcopy(series_item)
-        item_payload.pop("outbox_item_fingerprint_sha256", None)
-        if not _is_sha256(supplied_item_fp) or supplied_item_fp != _digest(item_payload):
+    handoff = _handoff(inner.get("outbox") if isinstance(inner.get("outbox"), dict) else {}, _clean(state.get("handoff_id")))
+    if source_item is not None:
+        supplied = _clean(source_item.get("outbox_item_fingerprint_sha256")).lower()
+        body = copy.deepcopy(source_item)
+        body.pop("outbox_item_fingerprint_sha256", None)
+        if not _is_sha256(supplied) or supplied != _digest(body):
             blocks.append("SERIES_OUTBOX_ITEM_FINGERPRINT_INVALID")
-    if series_item is not None and handoff is not None:
+    if source_item is not None and handoff is not None:
         payload = handoff.get("adapter_payload") if isinstance(handoff.get("adapter_payload"), dict) else {}
         native = payload.get("native_product") if isinstance(payload.get("native_product"), dict) else {}
-        current_product = series_item.get("product") if isinstance(series_item.get("product"), dict) else {}
-        if current_product != native:
+        current = source_item.get("product") if isinstance(source_item.get("product"), dict) else {}
+        if current != native:
             blocks.append("NATIVE_SERIES_PRODUCT_MUTATED_AFTER_HANDOFF")
-        if _story_ids_from_product(current_product) != [str(v) for v in payload.get("source_story_ids", [])]:
+        if _story_ids(current) != [str(value) for value in payload.get("source_story_ids", [])]:
             blocks.append("SERIES_SOURCE_STORY_IDENTITY_DIVERGENCE")
 
     guards = state.get("guards") if isinstance(state.get("guards"), dict) else {}
@@ -460,24 +431,21 @@ def _state_blocks(state: dict[str, Any]) -> list[str]:
         "paid_llm_api_used": False,
         "zero_paid_dependency": True,
     }
-    for key, expected in expected_guards.items():
-        if guards.get(key) is not expected:
+    for key, value in expected_guards.items():
+        if guards.get(key) is not value:
             blocks.append("STATE_GUARD_INVALID:" + key)
     return sorted(set(blocks))
 
 
 def initialize_series_dispatch_state(handoff_result: dict[str, Any]) -> dict[str, Any]:
-    """Initialize crash-safe executor state from one DIRECT_READY series handoff."""
     if not isinstance(handoff_result, dict):
         raise TypeError("handoff_result must be a mapping")
-    blocks = _initial_handoff_blocks(handoff_result)
+    blocks = _validate_handoff_result(handoff_result)
     if blocks:
         return _blocked(None, blocks)
-
     generic = executor.initialize_dispatch_state(_generic_bridge(handoff_result))
     if generic.get("blocked") is True:
         return _blocked(None, ["GENERIC_EXECUTOR_INIT:" + str(reason) for reason in generic.get("hard_blocks", [])])
-
     bundle = handoff_result["commit_bundle"]
     state = {
         "schema_version": SCHEMA_VERSION,
@@ -511,39 +479,29 @@ def initialize_series_dispatch_state(handoff_result: dict[str, Any]) -> dict[str
             "zero_paid_dependency": True,
         },
     }
-    state = _sync_series_from_inner(_seal(state), generic["state"])
-    blocks = _state_blocks(state)
+    state = _sync(_seal(state), generic["state"])
+    blocks = _validate_state(state)
     if blocks:
         return _blocked(state, blocks)
-    return {
-        "schema_version": SCHEMA_VERSION,
-        "blocked": False,
-        "hard_blocks": [],
-        "decision": "SERIES_DISPATCH_STATE_INITIALIZED",
-        "state": state,
-        "adapter_invoked": False,
-    }
+    return {"schema_version": SCHEMA_VERSION, "blocked": False, "hard_blocks": [], "decision": "SERIES_DISPATCH_STATE_INITIALIZED", "state": state, "adapter_invoked": False}
 
 
 def claim_series_dispatch(state: dict[str, Any], now: str, worker_id: str, *, lease_seconds: int = executor.DEFAULT_LEASE_SECONDS) -> dict[str, Any]:
-    """Claim one recurring-series publication; caller must CAS-persist before network."""
     if not isinstance(state, dict):
         raise TypeError("state must be a mapping")
-    blocks = _state_blocks(state)
+    blocks = _validate_state(state)
     if blocks:
         return _blocked(state, blocks)
-    inner_result = executor.claim_dispatch(copy.deepcopy(state["executor_state"]), now, worker_id, lease_seconds=lease_seconds)
-    if inner_result.get("blocked") is True:
-        return _blocked(state, ["GENERIC_EXECUTOR:" + str(reason) for reason in inner_result.get("hard_blocks", [])])
-    decision = _clean(inner_result.get("decision"))
-    if decision != "CLAIMED":
-        result = copy.deepcopy(inner_result)
+    inner = executor.claim_dispatch(copy.deepcopy(state["executor_state"]), now, worker_id, lease_seconds=lease_seconds)
+    if inner.get("blocked") is True:
+        return _blocked(state, ["GENERIC_EXECUTOR:" + str(reason) for reason in inner.get("hard_blocks", [])])
+    if _clean(inner.get("decision")) != "CLAIMED":
+        result = copy.deepcopy(inner)
         result["state"] = copy.deepcopy(state)
         result["publication_kind"] = PUBLICATION_KIND
         return result
-
-    candidate = _sync_series_from_inner(state, inner_result["state"])
-    invocation = copy.deepcopy(inner_result.get("adapter_invocation"))
+    candidate = _sync(state, inner["state"])
+    invocation = copy.deepcopy(inner.get("adapter_invocation"))
     if isinstance(invocation, dict):
         invocation["publication_kind"] = PUBLICATION_KIND
         invocation["series_id"] = _clean(state.get("series_id"))
@@ -552,19 +510,12 @@ def claim_series_dispatch(state: dict[str, Any], now: str, worker_id: str, *, le
         payload = invocation.get("adapter_payload") if isinstance(invocation.get("adapter_payload"), dict) else {}
         invocation["source_story_ids"] = copy.deepcopy(payload.get("source_story_ids") or [])
     return {
-        "schema_version": SCHEMA_VERSION,
-        "blocked": False,
-        "hard_blocks": [],
-        "decision": "CLAIMED",
-        "publication_kind": PUBLICATION_KIND,
-        "state": candidate,
-        "claim_token": _clean(inner_result.get("claim_token")),
+        "schema_version": SCHEMA_VERSION, "blocked": False, "hard_blocks": [], "decision": "CLAIMED",
+        "publication_kind": PUBLICATION_KIND, "state": candidate, "claim_token": _clean(inner.get("claim_token")),
         "expected_previous_state_fingerprint_sha256": _clean(state.get("state_fingerprint_sha256")),
         "claimed_state_fingerprint_sha256": _clean(candidate.get("state_fingerprint_sha256")),
-        "compare_and_swap_required": True,
-        "persist_before_adapter_required": True,
-        "adapter_invoked": False,
-        "adapter_invocation": invocation,
+        "compare_and_swap_required": True, "persist_before_adapter_required": True,
+        "adapter_invoked": False, "adapter_invocation": invocation,
     }
 
 
@@ -572,120 +523,85 @@ def reconcile_series_adapter_result(
     state: dict[str, Any], claim_token: str, attempted_at: str, adapter_result: dict[str, Any], *,
     max_attempts: int = 5, base_delay_seconds: int = 60, max_delay_seconds: int = 3600,
 ) -> dict[str, Any]:
-    """Reconcile one sanitized adapter result and synchronize series state/outbox."""
     if not isinstance(state, dict) or not isinstance(adapter_result, dict):
         raise TypeError("state and adapter_result must be mappings")
-    blocks = _state_blocks(state)
+    blocks = _validate_state(state)
     if blocks:
         return _blocked(state, blocks)
     inner = executor.reconcile_adapter_result(
         copy.deepcopy(state["executor_state"]), claim_token, attempted_at, copy.deepcopy(adapter_result),
-        max_attempts=max_attempts,
-        base_delay_seconds=base_delay_seconds,
-        max_delay_seconds=max_delay_seconds,
+        max_attempts=max_attempts, base_delay_seconds=base_delay_seconds, max_delay_seconds=max_delay_seconds,
     )
-    decision = _clean(inner.get("decision"))
     if inner.get("blocked") is True:
         return _blocked(state, ["GENERIC_EXECUTOR:" + str(reason) for reason in inner.get("hard_blocks", [])], adapter_invoked=True)
-    if decision == "RECONCILIATION_REQUIRED":
+    if _clean(inner.get("decision")) == "RECONCILIATION_REQUIRED":
         result = copy.deepcopy(inner)
         result["state"] = copy.deepcopy(state)
         result["publication_kind"] = PUBLICATION_KIND
         return result
-
-    candidate = _sync_series_from_inner(state, inner["state"])
-    final_record = _series_record(candidate) or {}
+    candidate = _sync(state, inner["state"])
+    record = _series_record(candidate) or {}
     return {
-        "schema_version": SCHEMA_VERSION,
-        "blocked": False,
-        "hard_blocks": [],
-        "decision": decision,
-        "publication_kind": PUBLICATION_KIND,
-        "publication_status": _clean(final_record.get("status")),
-        "record": copy.deepcopy(final_record),
-        "state": candidate,
+        "schema_version": SCHEMA_VERSION, "blocked": False, "hard_blocks": [], "decision": _clean(inner.get("decision")),
+        "publication_kind": PUBLICATION_KIND, "publication_status": _clean(record.get("status")),
+        "record": copy.deepcopy(record), "state": candidate,
         "expected_previous_state_fingerprint_sha256": _clean(state.get("state_fingerprint_sha256")),
         "result_state_fingerprint_sha256": _clean(candidate.get("state_fingerprint_sha256")),
-        "compare_and_swap_required": True,
-        "adapter_invoked": True,
+        "compare_and_swap_required": True, "adapter_invoked": True,
     }
 
 
-def recover_stale_series_claim(
-    state: dict[str, Any], now: str, *, remote_publication_id: str | None = None, remote_absent_confirmed: bool = False,
-) -> dict[str, Any]:
-    """Resolve an expired series claim only from explicit remote evidence."""
+def recover_stale_series_claim(state: dict[str, Any], now: str, *, remote_publication_id: str | None = None, remote_absent_confirmed: bool = False) -> dict[str, Any]:
     if not isinstance(state, dict):
         raise TypeError("state must be a mapping")
-    blocks = _state_blocks(state)
+    blocks = _validate_state(state)
     if blocks:
         return _blocked(state, blocks)
     inner = executor.recover_stale_claim(
         copy.deepcopy(state["executor_state"]), now,
-        remote_publication_id=remote_publication_id,
-        remote_absent_confirmed=remote_absent_confirmed,
+        remote_publication_id=remote_publication_id, remote_absent_confirmed=remote_absent_confirmed,
     )
     if inner.get("blocked") is True:
         return _blocked(state, ["GENERIC_EXECUTOR:" + str(reason) for reason in inner.get("hard_blocks", [])])
-    decision = _clean(inner.get("decision"))
-    if decision in {"LEASE_HELD", "RECONCILIATION_REQUIRED"}:
+    if _clean(inner.get("decision")) in {"LEASE_HELD", "RECONCILIATION_REQUIRED"}:
         result = copy.deepcopy(inner)
         result["state"] = copy.deepcopy(state)
         result["publication_kind"] = PUBLICATION_KIND
         return result
-    candidate = _sync_series_from_inner(state, inner["state"])
+    candidate = _sync(state, inner["state"])
     return {
-        "schema_version": SCHEMA_VERSION,
-        "blocked": False,
-        "hard_blocks": [],
-        "decision": decision,
-        "publication_kind": PUBLICATION_KIND,
-        "publication_status": _clean((_series_record(candidate) or {}).get("status")),
-        "state": candidate,
-        "expected_previous_state_fingerprint_sha256": _clean(state.get("state_fingerprint_sha256")),
+        "schema_version": SCHEMA_VERSION, "blocked": False, "hard_blocks": [], "decision": _clean(inner.get("decision")),
+        "publication_kind": PUBLICATION_KIND, "publication_status": _clean((_series_record(candidate) or {}).get("status")),
+        "state": candidate, "expected_previous_state_fingerprint_sha256": _clean(state.get("state_fingerprint_sha256")),
         "result_state_fingerprint_sha256": _clean(candidate.get("state_fingerprint_sha256")),
-        "compare_and_swap_required": True,
-        "adapter_invoked": False,
+        "compare_and_swap_required": True, "adapter_invoked": False,
     }
 
 
 def execute_series_dispatch(
     state: dict[str, Any], now: str, worker_id: str, *,
-    persist_claim: Callable[[str, dict[str, Any]], bool],
-    invoke_adapter: Callable[[dict[str, Any]], dict[str, Any]],
+    persist_claim: Callable[[str, dict[str, Any]], bool], invoke_adapter: Callable[[dict[str, Any]], dict[str, Any]],
     persist_result: Callable[[str, dict[str, Any]], bool] | None = None,
-    lease_seconds: int = executor.DEFAULT_LEASE_SECONDS,
-    max_attempts: int = 5,
-    base_delay_seconds: int = 60,
-    max_delay_seconds: int = 3600,
+    lease_seconds: int = executor.DEFAULT_LEASE_SECONDS, max_attempts: int = 5,
+    base_delay_seconds: int = 60, max_delay_seconds: int = 3600,
 ) -> dict[str, Any]:
-    """CAS-persist claim, invoke exact adapter once, then CAS-persist reconciled state."""
     if not callable(persist_claim) or not callable(invoke_adapter):
         raise TypeError("persist_claim and invoke_adapter must be callable")
     if persist_result is not None and not callable(persist_result):
         raise TypeError("persist_result must be callable when provided")
-
     claim = claim_series_dispatch(state, now, worker_id, lease_seconds=lease_seconds)
     if claim.get("blocked") is True or _clean(claim.get("decision")) != "CLAIMED":
         return claim
     try:
-        claim_saved = persist_claim(
-            _clean(claim.get("expected_previous_state_fingerprint_sha256")),
-            copy.deepcopy(claim["state"]),
-        ) is True
+        claim_saved = persist_claim(_clean(claim.get("expected_previous_state_fingerprint_sha256")), copy.deepcopy(claim["state"])) is True
     except Exception:
         claim_saved = False
     if not claim_saved:
         return {
-            "schema_version": SCHEMA_VERSION,
-            "blocked": False,
-            "hard_blocks": [],
-            "decision": "CLAIM_PERSIST_CONFLICT",
+            "schema_version": SCHEMA_VERSION, "blocked": False, "hard_blocks": [], "decision": "CLAIM_PERSIST_CONFLICT",
             "reason": "ADAPTER_NOT_INVOKED_BECAUSE_SERIES_PUBLISHING_CLAIM_WAS_NOT_DURABLE",
-            "state": copy.deepcopy(state),
-            "adapter_invoked": False,
+            "state": copy.deepcopy(state), "adapter_invoked": False,
         }
-
     claimed_state = claim["state"]
     try:
         adapter_result = invoke_adapter(copy.deepcopy(claim["adapter_invocation"]))
@@ -693,30 +609,21 @@ def execute_series_dispatch(
             adapter_result = {"success": False, "error_class": "transient", "error_code": "ADAPTER_RESULT_NOT_MAPPING"}
     except Exception as exc:
         adapter_result = {"success": False, "error_class": "network_error", "error_code": "ADAPTER_EXCEPTION_" + type(exc).__name__.upper()}
-
     reconciled = reconcile_series_adapter_result(
         claimed_state, _clean(claim.get("claim_token")), now, adapter_result,
-        max_attempts=max_attempts,
-        base_delay_seconds=base_delay_seconds,
-        max_delay_seconds=max_delay_seconds,
+        max_attempts=max_attempts, base_delay_seconds=base_delay_seconds, max_delay_seconds=max_delay_seconds,
     )
     if reconciled.get("blocked") is True or _clean(reconciled.get("decision")) == "RECONCILIATION_REQUIRED":
         reconciled["adapter_invoked"] = True
         return reconciled
-
     if persist_result is not None:
         try:
-            result_saved = persist_result(
-                _clean(claimed_state.get("state_fingerprint_sha256")),
-                copy.deepcopy(reconciled["state"]),
-            ) is True
+            saved = persist_result(_clean(claimed_state.get("state_fingerprint_sha256")), copy.deepcopy(reconciled["state"])) is True
         except Exception:
-            result_saved = False
-        if not result_saved:
+            saved = False
+        if not saved:
             return {
-                "schema_version": SCHEMA_VERSION,
-                "blocked": False,
-                "hard_blocks": [],
+                "schema_version": SCHEMA_VERSION, "blocked": False, "hard_blocks": [],
                 "decision": "RESULT_PERSIST_CONFLICT_RECONCILIATION_REQUIRED",
                 "reason": "ADAPTER_ALREADY_INVOKED_SERIES_STATE_REMAINS_PUBLISHING",
                 "state": copy.deepcopy(claimed_state),
