@@ -160,7 +160,6 @@ def validate(repo_root: Path) -> dict[str, Any]:
     social = workflow_texts.get(".github/workflows/valcea-clar-social-publishing.yml", "")
     required_social_markers = {
         "validate_social_engine.py": "social ownership validator",
-        "facebook_publish.py --apply": "native Facebook publishing adapter",
         "instagram_publish.py --apply": "native Instagram publishing adapter",
         "tiktok_publish.py --apply": "native TikTok publishing adapter",
         "build_social_media_assets.py": "public social media asset projection",
@@ -174,6 +173,18 @@ def validate(repo_root: Path) -> dict[str, Any]:
         checks.append({"check": f"social:{label}", "passed": passed})
         if not passed:
             errors.append(f"Social publication workflow missing {label}.")
+
+    # Facebook may move between versioned native adapters. The guard validates
+    # an explicit allowlist instead of pinning the site engine forever to the
+    # legacy naked-photo adapter name.
+    facebook_adapter_markers = (
+        "facebook_editorial_publish.py --apply",
+        "facebook_publish.py --apply",
+    )
+    facebook_passed = any(marker in social for marker in facebook_adapter_markers)
+    checks.append({"check": "social:native Facebook publishing adapter", "passed": facebook_passed})
+    if not facebook_passed:
+        errors.append("Social publication workflow missing native Facebook publishing adapter.")
 
     scan_paths = [repo_root / workflow for workflow in seen_workflows]
     scan_paths.extend(runtime_files(site_root))

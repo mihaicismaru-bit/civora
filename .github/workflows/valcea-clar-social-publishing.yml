@@ -44,6 +44,9 @@ jobs:
         with:
           python-version: "3.13"
 
+      - name: Install deterministic editorial renderer dependency
+        run: python -m pip install --disable-pip-version-check Pillow==11.3.0
+
       - name: Refresh latest canonical main state
         if: github.event_name != 'pull_request'
         shell: bash
@@ -129,6 +132,10 @@ jobs:
             valcea-clar/social/build_live_story_outbox.py \
             valcea-clar/social/build_outbox_only_story_products.py \
             valcea-clar/social/build_social_media_assets.py \
+            valcea-clar/social/editorial_asset_contract.py \
+            valcea-clar/social/facebook_editorial_preview.py \
+            valcea-clar/social/facebook_editorial_preview_v1_1.py \
+            valcea-clar/social/facebook_editorial_publish.py \
             valcea-clar/social/facebook_publish.py \
             valcea-clar/social/instagram_publish.py \
             valcea-clar/social/tiktok_publish.py
@@ -155,12 +162,12 @@ jobs:
         if: github.event_name == 'pull_request'
         run: printf '%s\n' '{"status":"PREVIEW_ONLY","facebook_ready":false,"instagram_ready":false}' > /tmp/meta-auth.json
 
-      - name: Preview Facebook queue
+      - name: Preview Facebook editorial queue
         id: preview_facebook
         shell: bash
         run: |
           set -euo pipefail
-          python valcea-clar/social/facebook_publish.py | tee /tmp/facebook-preview.json
+          python valcea-clar/social/facebook_editorial_publish.py | tee /tmp/facebook-preview.json
           python - <<'PY'
           import json, os
           from pathlib import Path
@@ -203,7 +210,7 @@ jobs:
               f.write(f"has_eligible={'true' if count else 'false'}\n")
           PY
 
-      - name: Publish eligible Facebook story through Meta Graph API
+      - name: Publish eligible Facebook editorial story through Meta Graph API
         id: publish_facebook
         if: github.event_name != 'pull_request' && steps.preview_facebook.outputs.has_eligible == 'true'
         continue-on-error: true
@@ -212,7 +219,9 @@ jobs:
           VALCEA_META_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_META_PAGE_ACCESS_TOKEN }}
           VALCEA_FB_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_FB_PAGE_ACCESS_TOKEN }}
           VALCEA_FB_GRAPH_VERSION: v26.0
-        run: python valcea-clar/social/facebook_publish.py --apply | tee /tmp/facebook-apply.json
+          VALCEA_FB_EDITORIAL_LIVE_ENABLED: "true"
+          VALCEA_FB_EDITORIAL_MAX_PER_RUN: "1"
+        run: python valcea-clar/social/facebook_editorial_publish.py --apply | tee /tmp/facebook-apply.json
 
       - name: Record skipped Facebook apply
         if: github.event_name == 'pull_request' || steps.preview_facebook.outputs.has_eligible != 'true'
@@ -331,6 +340,7 @@ jobs:
               '# VÂLCEA CLAR — Story-first Social Publication Engine','',
               '- Publication unit: **individual story**',
               '- Edition/recap publication gate: **disabled**',
+              '- Facebook: **editorial-composite native packaging v1**',
               '- Threads: **story-first durable outbox**',
               '- LinkedIn: **story-first durable outbox**',
               '- Telegram: **story-first durable outbox; no direct-access claim**',
@@ -368,6 +378,7 @@ jobs:
             valcea-clar/social/whatsapp_state.json
             valcea-clar/social/youtube_outbox.json
             valcea-clar/social/social_media_manifest.json
+            valcea-clar/site/runtime/media/social/editorial
             valcea-clar/dist/chatgpt-sites/media/social
           if-no-files-found: warn
           retention-days: 14
