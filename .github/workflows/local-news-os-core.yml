@@ -34,6 +34,7 @@ jobs:
             local-news-os/core/build_instance_manifest.py \
             local-news-os/core/resolve_source_pack.py \
             local-news-os/core/discover_primary_source_facts.py \
+            local-news-os/core/discovery_health.py \
             local-news-os/core/generate_verified_edition.py \
             local-news-os/core/render_frontpage.py
       - name: Validate production and test instances
@@ -66,6 +67,7 @@ jobs:
       - name: Validate instance-aware discovery migration adapter
         run: |
           python local-news-os/core/discover_primary_source_facts.py --self-test
+          python local-news-os/core/discovery_health.py --self-test
           python local-news-os/core/discover_primary_source_facts.py --instance valcea --validate-only
           python local-news-os/core/discover_primary_source_facts.py --instance test-local --validate-only
       - name: Validate generic multi-instance edition engine
