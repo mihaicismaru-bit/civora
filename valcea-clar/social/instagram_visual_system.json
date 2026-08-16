@@ -1,13 +1,25 @@
 {
   "schema_version": "1.0",
   "channel_id": "valcea-instagram",
+  "master_identity_system": "valcea-clar/social/social_brand_system.json",
   "canvas": {"width": 1080, "height": 1350, "aspect_ratio": "4:5"},
   "brand": {
     "name": "VÂLCEA CLAR",
+    "editorial_lockup": "VÂLCEA. CLAR.",
     "accent_rgb": [196, 27, 35],
+    "paper_rgb": [247, 246, 243],
+    "ink_rgb": [20, 20, 20],
     "safe_margin_px": 72,
     "top_margin_px": 64,
-    "bottom_margin_px": 72
+    "bottom_margin_px": 72,
+    "logo_presence": "quiet_consistent"
+  },
+  "profile_identity": {
+    "avatar_strategy": "small_size_editorial_mark_from_master_lockup",
+    "avatar_legible_at_px": 32,
+    "header_or_profile_art_direction": "publisher_masthead_not_marketing_banner",
+    "bio_strategy": "mission_first_plus_coverage_plus_canonical_site",
+    "grid_rule": "recognizable_as_one_newsroom_without_repeating_one_template"
   },
   "typography": {
     "headline_max_lines": 3,
@@ -16,9 +28,14 @@
     "subline_size": 36,
     "kicker_size": 31,
     "brand_size": 29,
-    "archive_size": 25
+    "archive_size": 25,
+    "principle": "editorial_not_decorative"
   },
   "templates": {
+    "editorial_photo_card": {
+      "headline_priority": ["local_consequence", "verified_change"],
+      "tone": "visual_newsroom"
+    },
     "event_utility_card": {
       "headline_priority": ["what", "where"],
       "subline_priority": ["access", "time", "price"],
@@ -38,6 +55,21 @@
       "headline_priority": ["verified_change"],
       "subline_priority": ["place", "time", "consequence"],
       "tone": "clear_not_alarmist"
+    },
+    "explainer_carousel": {
+      "cover": "one_claim_or_question",
+      "body": "one_fact_per_slide",
+      "last_slide": "what_to_watch_or_source_context",
+      "tone": "dense_but_mobile_readable"
+    },
+    "data_card": {
+      "headline_priority": ["number", "meaning"],
+      "tone": "evidence_led"
+    },
+    "quote_card": {
+      "use_only_when_quote_is_newsworthy": true,
+      "speaker_context_required": true,
+      "tone": "restrained"
     }
   },
   "qa": {
@@ -48,6 +80,11 @@
     "minimum_contrast_ratio_target": 4.5,
     "text_must_not_cover_primary_subject": true,
     "naked_photo_default_forbidden": true,
-    "verbatim_facebook_reuse_forbidden": true
+    "verbatim_facebook_reuse_forbidden": true,
+    "mobile_first_legibility_required": true,
+    "profile_and_post_identity_must_match": true,
+    "must_not_look_like_local_marketing_page": true,
+    "must_not_look_ai_generated": true,
+    "must_not_repeat_identical_layout_for_every_story": true
   }
 }
