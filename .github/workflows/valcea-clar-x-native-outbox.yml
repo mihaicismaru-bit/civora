@@ -32,6 +32,64 @@ jobs:
         run: python local-news-os/social/validate_channel_config.py valcea-clar/social/channels/x.json --instance-root valcea-clar
       - name: Validate platform-native doctrine
         run: python valcea-clar/social/validate_social_doctrine.py
+      - name: Directly self-test canonical X premium builder
+        run: |
+          python - <<'PY'
+          import importlib.util
+          import sys
+          from pathlib import Path
+
+          social = Path('valcea-clar/social').resolve()
+          sys.path.insert(0, str(social))
+          path = social / 'build_outbox_only_story_products.py'
+          spec = importlib.util.spec_from_file_location('vc_outbox_builder', path)
+          if spec is None or spec.loader is None:
+              raise SystemExit('cannot load canonical outbox builder')
+          mod = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(mod)
+
+          thin = {
+              'id': 'thin-fixture',
+              'headline': 'Eveniment local',
+              'dek': '15–16 august',
+              'paragraphs': [],
+              'material_fact_gate': 'PASS_DATE_ONLY',
+          }
+          held = mod.x_product(thin)
+          if held.get('status') != 'hold' or held.get('hold_reason') != 'x_interest_gate_thin_title_date_source_only':
+              raise SystemExit(f'canonical X thin-story gate failed: {held}')
+          if held.get('direct_publication_enabled') is not False:
+              raise SystemExit('canonical X HOLD falsely enables publication')
+
+          olanesti = {
+              'id': 'olanesti-fixture',
+              'section': 'INVESTIGAȚII',
+              'headline': 'Pod peste Olănești',
+              'dek': 'Proiect SMIS 334436 pentru zona Omniasig.',
+              'paragraphs': [
+                  'Documentația include un pod nou exclusiv pietonal și ciclist în zona Omniasig.',
+                  'Valoarea totală este 44.373.317,87 lei cu TVA. Contractul principal a fost atribuit asocierii Ralunic SRL — Dimex-2000 Company SRL, cu subcontractanți, la 29.167.613,30 lei fără TVA.',
+              ],
+              'material_fact_gate': 'PASS_MATERIAL_FACTS',
+          }
+          product = mod.x_product(olanesti)
+          if product.get('status') != 'outbox_ready':
+              raise SystemExit(f'canonical X Olănești fixture not ready: {product}')
+          posts = product.get('posts') or []
+          if not posts or posts[0] != '44,37 mil. lei pentru proiectul de pe Olănești.':
+              raise SystemExit(f'canonical X key-number hook drifted: {posts}')
+          if 'Ralunic + Dimex-2000 Company' not in ' '.join(posts):
+              raise SystemExit('canonical X contractor normalization failed')
+          if not 1 <= len(posts) <= 4 or any(len(str(post)) > 260 for post in posts):
+              raise SystemExit('canonical X bounded-thread contract failed')
+          if any('#' in str(post) for post in posts):
+              raise SystemExit('canonical X default hashtag block detected')
+          if product.get('verbatim_cross_platform_reuse_allowed') is not False:
+              raise SystemExit('canonical X cross-platform reuse guard missing')
+          if product.get('direct_publication_enabled') is not False:
+              raise SystemExit('canonical X falsely enables paid API publication')
+          print('Canonical X premium builder self-test: PASS')
+          PY
       - name: Materialize outbox-only sister publications
         run: python valcea-clar/social/build_outbox_only_story_products.py
       - name: Validate X product contract and editorial fixtures
