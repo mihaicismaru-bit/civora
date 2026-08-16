@@ -6,6 +6,7 @@ import json
 import re
 from html.parser import HTMLParser
 from pathlib import Path
+from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / "web"
@@ -64,9 +65,11 @@ assert structured.get("enabled") is True, "NewsArticle structured data dezactiva
 assert structured.get("type") == "NewsArticle"
 assert structured.get("eligible_scope") == "publishable_full_story_only"
 assert structured.get("date_published_policy") == "stable_publication_ledger_only"
+assert structured.get("verified_image_policy") == "provenance_backed_real_photograph_only"
 assert structured.get("unverified_image_policy") == "omit"
 routes_by_id = {str(row.get("id")): str(row.get("path")) for row in rows if row.get("id") and row.get("path")}
 known_routes = set(routes_by_id.values())
+verified_images = 0
 for row in rows:
     story_id = str(row.get("id") or "")
     route = str(row.get("path") or "")
@@ -97,7 +100,30 @@ for row in rows:
     assert (news.get("publisher") or {}).get("name") == "VÂLCEA CLAR"
     assert (news.get("publisher") or {}).get("url") == "https://valceaclar.ro/"
     assert (news.get("author") or {}).get("name") == "VÂLCEA CLAR"
-    assert "image" not in news, f"Imagine fără provenance introdusă în JSON-LD pentru {story_id}"
+
+    image = row.get("image")
+    if image:
+        verified_images += 1
+        public_url = str(image.get("public_url") or "")
+        source_url = str(image.get("source_url") or "")
+        assert image.get("synthetic") is False, f"Imagine sintetică admisă pentru {story_id}"
+        assert image.get("provenance_status") == "VERIFIED", f"Provenance neverificată pentru {story_id}"
+        assert public_url.startswith("https://valceaclar.ro/media/social/")
+        assert source_url.startswith("https://")
+        assert image.get("credit") and image.get("rights_basis")
+        if image.get("contextual_archive") is True:
+            assert image.get("captured_at"), f"Foto de arhivă fără captured_at pentru {story_id}"
+        filename = Path(urlparse(public_url).path).name
+        assert filename and (RUNTIME / "media" / "social" / filename).is_file(), f"Asset foto lipsă pentru {story_id}"
+        assert news.get("image") == [public_url], f"NewsArticle image nealiniată pentru {story_id}"
+        assert f'<meta property="og:image" content="{public_url}">' in text
+        assert 'data-photo-provenance="verified"' in text
+        assert f'src="{urlparse(public_url).path}"' in text
+        assert source_url in text and "Foto:" in text, f"Credit foto nevizibil pentru {story_id}"
+    else:
+        assert "image" not in news, f"Imagine fără provenance introdusă în JSON-LD pentru {story_id}"
+        assert '<meta property="og:image"' not in text, f"OG image fără provenance pentru {story_id}"
+        assert 'data-photo-provenance="verified"' not in text
 
     expected_ids = [str(value) for value in row.get("related_story_ids") or []]
     expected_routes = [routes_by_id[value] for value in expected_ids]
@@ -117,5 +143,6 @@ for row in rows:
 
 print(
     f"Web smoke: PASS ({len(places)} localuri publice; candidații sunt ascunși; "
-    f"{len(rows)} pagini canonice cu NewsArticle JSON-LD + cross-linking fail-closed)"
+    f"{len(rows)} pagini canonice cu NewsArticle JSON-LD + cross-linking fail-closed; "
+    f"{verified_images} fotografii reale cu provenance verificată)"
 )
