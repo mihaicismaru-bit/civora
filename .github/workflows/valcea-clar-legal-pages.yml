@@ -1,0 +1,92 @@
+name: VÂLCEA CLAR Legal Pages
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'valcea-clar/site/legal/legal_pages.json'
+      - 'valcea-clar/scripts/build_legal_pages.py'
+      - 'valcea-clar/scripts/overlay_runtime_export.py'
+      - '.github/workflows/valcea-clar-legal-pages.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/site/legal/legal_pages.json'
+      - 'valcea-clar/scripts/build_legal_pages.py'
+      - 'valcea-clar/scripts/overlay_runtime_export.py'
+      - '.github/workflows/valcea-clar-legal-pages.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-legal-pages
+  cancel-in-progress: false
+
+jobs:
+  validate-and-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Validate canonical legal source and renderer
+        run: |
+          python -m py_compile valcea-clar/scripts/build_legal_pages.py valcea-clar/scripts/overlay_runtime_export.py
+          python valcea-clar/scripts/build_legal_pages.py --self-test
+
+      - name: Build legal routes in pull requests without publication
+        if: github.event_name == 'pull_request'
+        run: |
+          python valcea-clar/scripts/build_legal_pages.py --export
+          python valcea-clar/scripts/build_legal_pages.py --check
+          test -s valcea-clar/site/runtime/termeni/index.html
+          test -s valcea-clar/site/runtime/confidentialitate/index.html
+          test -s valcea-clar/dist/chatgpt-sites/termeni/index.html
+          test -s valcea-clar/dist/chatgpt-sites/confidentialitate/index.html
+
+      - name: Publish legal routes conflict-safe on main
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'valcea-clar-legal-pages[bot]'
+          git config user.email 'valcea-clar-legal-pages@users.noreply.github.com'
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            git clean -fd
+
+            python valcea-clar/scripts/build_legal_pages.py --export
+            python valcea-clar/scripts/build_legal_pages.py --check
+
+            git add \
+              valcea-clar/site/runtime/termeni/index.html \
+              valcea-clar/site/runtime/confidentialitate/index.html \
+              valcea-clar/dist/chatgpt-sites/termeni/index.html \
+              valcea-clar/dist/chatgpt-sites/confidentialitate/index.html \
+              valcea-clar/dist/chatgpt-sites/manifest.json
+
+            if git diff --cached --quiet; then
+              echo 'VÂLCEA CLAR legal pages are already current on main.'
+              exit 0
+            fi
+
+            git commit -m 'Publish VÂLCEA CLAR terms and privacy pages'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+
+            echo "main advanced while publishing legal pages; retrying ${attempt}/5."
+            sleep $((attempt * 2))
+          done
+
+          echo 'Could not publish VÂLCEA CLAR legal pages after five attempts.' >&2
+          exit 1
