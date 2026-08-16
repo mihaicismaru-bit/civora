@@ -41,6 +41,23 @@
         "local development and real-estate trend research"
       ],
       "core_feedback": "LOCAL NEWS OS needs a generic DOCUMENT_REGISTER source contract for periodic official tables/PDFs: preserve document_period and source_document provenance, extract row_id and row_date deterministically, admit candidates only from row-level dates, and never treat fetch/listing dates as the event or publication date."
+    },
+    {
+      "id": "cs-valcea-1924-social-feed",
+      "publisher": "Clubul Sportiv Vâlcea 1924",
+      "url": "https://www.csvalcea.ro/",
+      "tier": "T1",
+      "section": "SPORT",
+      "status": "QUARANTINED_SOCIAL_EMBED_RELATIVE_TIME",
+      "checked_at": "2026-08-16",
+      "reason": "The official club site embeds a live Facebook feed with high-value local sports updates across multiple disciplines, but the website renders relative timestamps such as '1 day ago' and '2 days ago' rather than a stable article-level published_at. The feed is not a normal article archive, so converting those relative labels into publication dates would make freshness depend on crawl time and could misdate posts.",
+      "safe_use": [
+        "manual discovery of CS Vâlcea 1924 results, schedules and athlete updates",
+        "direct verification against the official club site and linked federation sources",
+        "manual use of official photographs only when the original post and provenance are preserved",
+        "sports-source monitoring without automatic publication"
+      ],
+      "core_feedback": "LOCAL NEWS OS needs a generic SOCIAL_EMBED source contract that resolves the canonical platform post URL or post ID and absolute platform timestamp, preserves account provenance, rejects crawl-relative time labels as published_at, and keeps social claims fail-closed until independently corroborated when material."
     }
   ]
 }
