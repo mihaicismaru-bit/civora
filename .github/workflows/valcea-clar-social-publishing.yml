@@ -58,6 +58,9 @@ jobs:
       - name: Build channel-native packages from live stories
         run: python valcea-clar/social/build_live_story_outbox.py
 
+      - name: Build story products for outbox-only sister publications
+        run: python valcea-clar/social/build_outbox_only_story_products.py
+
       - name: Fetch approved real photographs
         run: python valcea-clar/social/fetch_approved_photos.py
 
@@ -70,6 +73,7 @@ jobs:
             valcea-clar/social/social_common.py \
             valcea-clar/social/meta_auth_health.py \
             valcea-clar/social/build_live_story_outbox.py \
+            valcea-clar/social/build_outbox_only_story_products.py \
             valcea-clar/social/build_social_media_assets.py \
             valcea-clar/social/facebook_publish.py \
             valcea-clar/social/instagram_publish.py \
@@ -201,6 +205,10 @@ jobs:
             valcea-clar/social/meta_auth_state.json
             valcea-clar/social/instagram_state.json
             valcea-clar/social/tiktok_state.json
+            valcea-clar/social/threads_outbox.json
+            valcea-clar/social/threads_state.json
+            valcea-clar/social/youtube_outbox.json
+            valcea-clar/social/youtube_state.json
             valcea-clar/social/real_photo_replacement_queue.json
             valcea-clar/social/social_media_manifest.json
           )
@@ -263,6 +271,8 @@ jobs:
               '# VÂLCEA CLAR — Story-first Social Publication Engine','',
               '- Publication unit: **individual story**',
               '- Edition/recap publication gate: **disabled**',
+              '- Threads: **story-first durable outbox**',
+              '- YouTube: **story-first durable outbox, HOLD until real video + upload access**',
               f"- Ownership: **{ownership.get('status','UNAVAILABLE')}**",
               f"- Meta auth: **{meta.get('status','UNKNOWN')}**",
               f"- Facebook: **{fb.get('status','UNKNOWN')}**",
@@ -288,6 +298,8 @@ jobs:
             /tmp/instagram-apply.json
             /tmp/tiktok-apply.json
             valcea-clar/social/meta_auth_state.json
+            valcea-clar/social/threads_outbox.json
+            valcea-clar/social/youtube_outbox.json
             valcea-clar/social/social_media_manifest.json
             valcea-clar/dist/chatgpt-sites/media/social
           if-no-files-found: warn
