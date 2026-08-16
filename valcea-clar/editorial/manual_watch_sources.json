@@ -195,6 +195,23 @@
         "manual reporting only after confirming document date, affected geography and operative period on the primary evidence"
       ],
       "core_feedback": "This reinforces the existing generic DOCUMENT_REGISTER / PDF-document ingestion requirement: deterministically enumerate official documents from a listing, preserve listing and file provenance, keep published_at separate from document_date/event_date, and reject automatic freshness when publication time cannot be proven. No Vaideeni-specific parser should be added."
+    },
+    {
+      "id": "isj-valcea-comunicate",
+      "publisher": "Inspectoratul Școlar Județean Vâlcea",
+      "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83",
+      "tier": "T1",
+      "section": "EDUCAȚIE",
+      "status": "QUARANTINED_DOCUMENT_LISTING_PDF",
+      "checked_at": "2026-08-17",
+      "reason": "The official ISJ Vâlcea press-release page is a high-value education source, but it is a document listing: 2026 entries are exposed as dated labels whose evidence links are PDF files rather than stable HTML article pages with independently verifiable article-level published_at metadata. The current automatic ARTICLE_FEED adapter recorded article fetch failures on this source and must not reinterpret a listing label or PDF filename date as an article publication timestamp. ISJ is therefore removed from automatic admission while preserved for manual discovery and verification.",
+      "safe_use": [
+        "manual discovery of Bacalaureat, Evaluarea Națională, Definitivat, Titularizare, admission and education-event communications",
+        "primary-source verification of the dated listing label and attached official PDF",
+        "manual extraction from the PDF only after distinguishing listing date, document date and any event/result date",
+        "education reporting without automatic publication until document-feed provenance is supported"
+      ],
+      "core_feedback": "This reinforces the generic ARTICLE_FEED versus DOCUMENT_REGISTER/PDF-feed boundary: CORE should classify source structure before auto-admission, preserve the listing item identity and its explicit label date separately from PDF document dates, and fail closed when article-level published_at cannot be proven. It also suggests a source-health signal for systematic article failures (for example 2 of 3 links) so structural incompatibility is surfaced before it becomes a silent freshness gap."
     }
   ]
 }
