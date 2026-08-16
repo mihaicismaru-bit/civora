@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Static smoke checks for the Unde ieșim public projection and story runtime."""
+"""Static smoke checks for the Unde ieșim projection and continuous story runtime."""
 from __future__ import annotations
 
 import json
@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / "web"
 RUNTIME = ROOT / "site" / "runtime"
+ARCHIVE = ROOT / "site" / "story_archive.json"
 
 
 class Parser(HTMLParser):
@@ -49,33 +50,55 @@ assert meta["place_count"] == len(places)
 assert meta["candidate_count"] >= 1
 assert "fetch('data/places.json')" in (WEB / "app.js").read_text(encoding="utf-8")
 
-pointer = json.loads((ROOT / "site" / "current_edition.json").read_text(encoding="utf-8"))
-edition = json.loads((ROOT / pointer["json_source"]).read_text(encoding="utf-8"))
-items_by_id = {str(item.get("id")): item for item in edition.get("items", []) if item.get("id")}
+# The public story set is the durable continuous archive. The current edition is
+# recap/compatibility metadata and may legitimately contain fewer active items.
+if ARCHIVE.is_file():
+    story_source = json.loads(ARCHIVE.read_text(encoding="utf-8"))
+    assert story_source.get("publication_model") == "continuous_story_first"
+    assert story_source.get("recap_editions_may_delete_published_stories") is False
+    items_by_id = {
+        str(item.get("id")): item
+        for item in story_source.get("stories", [])
+        if isinstance(item, dict) and item.get("id")
+    }
+else:
+    pointer = json.loads((ROOT / "site" / "current_edition.json").read_text(encoding="utf-8"))
+    edition = json.loads((ROOT / pointer["json_source"]).read_text(encoding="utf-8"))
+    items_by_id = {str(item.get("id")): item for item in edition.get("items", []) if item.get("id")}
 
 manifest_path = RUNTIME / "stiri" / "manifest.json"
 assert manifest_path.is_file(), "Lipsește manifestul rutelor de știri"
 manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+assert manifest.get("publication_model") == "continuous_story_first"
 rows = manifest.get("stories") or []
+
+# Older manifests advertised cross-linking/structured-data policy as metadata;
+# the continuous archive validates the actual behavior below. If policy blocks
+# are present, they must remain truthful.
 cross = manifest.get("cross_linking") or {}
+if cross:
+    assert cross.get("enabled") is True, "Cross-linking intern dezactivat"
+    assert cross.get("eligible_scope") == "publishable_full_story_only"
 structured = manifest.get("structured_data") or {}
-assert cross.get("enabled") is True, "Cross-linking intern dezactivat"
-assert cross.get("eligible_scope") == "publishable_full_story_only"
-assert structured.get("enabled") is True, "NewsArticle structured data dezactivat"
-assert structured.get("type") == "NewsArticle"
-assert structured.get("eligible_scope") == "publishable_full_story_only"
-assert structured.get("date_published_policy") == "stable_publication_ledger_only"
-assert structured.get("verified_image_policy") == "provenance_backed_real_photograph_only"
-assert structured.get("unverified_image_policy") == "omit"
+if structured:
+    assert structured.get("enabled") is True, "NewsArticle structured data dezactivat"
+    assert structured.get("type") == "NewsArticle"
+    assert structured.get("eligible_scope") == "publishable_full_story_only"
+    assert structured.get("date_published_policy") == "stable_publication_ledger_only"
+    assert structured.get("verified_image_policy") == "provenance_backed_real_photograph_only"
+    assert structured.get("unverified_image_policy") == "omit"
+
 routes_by_id = {str(row.get("id")): str(row.get("path")) for row in rows if row.get("id") and row.get("path")}
 known_routes = set(routes_by_id.values())
+assert set(routes_by_id) == set(items_by_id), "Manifestul public nu este aliniat cu arhiva continuă"
 verified_images = 0
+cross_links_seen = 0
 for row in rows:
     story_id = str(row.get("id") or "")
     route = str(row.get("path") or "")
     canonical = str(row.get("canonical") or "")
     published_at = str(row.get("published_at") or "")
-    assert story_id in items_by_id, f"Pagină fără material editorial curent: {story_id}"
+    assert story_id in items_by_id, f"Pagină fără material editorial public: {story_id}"
     item = items_by_id[story_id]
     assert route in known_routes and route.startswith("/stiri/") and route.endswith("/")
     assert canonical == f"https://valceaclar.ro{route}"
@@ -138,11 +161,14 @@ for row in rows:
         links = re.findall(r'<a href="(/stiri/[^"]+/)">', match.group(1))
         assert links == expected_routes, f"Cross-link-uri nealiniate pentru {story_id}: {links} != {expected_routes}"
         assert all(link in known_routes for link in links), f"Cross-link către rută necunoscută în {story_id}"
+        cross_links_seen += len(links)
     else:
         assert not match, f"Bloc related neașteptat pentru {story_id}"
 
+assert rows, "Arhiva continuă nu are pagini canonice"
+assert cross_links_seen >= 1 if len(rows) > 1 else True, "Cross-linking intern nu funcționează pe arhiva multi-story"
 print(
     f"Web smoke: PASS ({len(places)} localuri publice; candidații sunt ascunși; "
-    f"{len(rows)} pagini canonice cu NewsArticle JSON-LD + cross-linking fail-closed; "
-    f"{verified_images} fotografii reale cu provenance verificată)"
+    f"{len(rows)} pagini canonice persistente cu NewsArticle JSON-LD; "
+    f"{cross_links_seen} cross-link-uri; {verified_images} fotografii reale cu provenance verificată)"
 )
