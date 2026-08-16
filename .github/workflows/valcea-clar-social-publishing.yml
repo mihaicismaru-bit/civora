@@ -44,6 +44,14 @@ jobs:
         with:
           python-version: "3.13"
 
+      - name: Refresh latest canonical main state
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
       - name: Enforce site-engine-only social ownership
         run: |
           python valcea-clar/social/validate_social_engine.py --report /tmp/social-engine-ownership.json
