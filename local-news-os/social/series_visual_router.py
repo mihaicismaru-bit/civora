@@ -46,8 +46,7 @@ def _product_fingerprint_valid(product: dict[str, Any]) -> bool:
         return False
     payload = copy.deepcopy(product)
     payload.pop("product_fingerprint_sha256", None)
-    return visual_router._digest(payload)
- == expected
+    return visual_router._digest(payload) == expected
 
 
 def _base_blocks(
