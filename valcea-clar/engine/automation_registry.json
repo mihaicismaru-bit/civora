@@ -1,5 +1,5 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "product": "CIVORA / VÂLCEA CLAR",
   "canonical_domain": "valceaclar.ro",
   "execution_owner": "civora_site_engine",
@@ -38,6 +38,8 @@
       "publication_gate": "per_story_editorial_quality_gate",
       "edition_window_gate": false,
       "emits": "valcea-clar/site/story_publication_event.json",
+      "post_persist_dispatch": ".github/workflows/valcea-clar-social-publishing.yml",
+      "post_persist_dispatch_mode": "explicit_workflow_dispatch",
       "owner": "site_engine"
     },
     {
@@ -78,6 +80,7 @@
       "schedule": ["7,22,37,52 * * * *"],
       "schedule_role": "recovery_only",
       "event_trigger": "valcea-clar/site/story_publication_event.json",
+      "event_trigger_mode": "explicit_workflow_dispatch_after_canonical_story_persist",
       "distribution_unit": "individual_story",
       "edition_window_gate": false,
       "site_story_may_precede_social_media_readiness": true,

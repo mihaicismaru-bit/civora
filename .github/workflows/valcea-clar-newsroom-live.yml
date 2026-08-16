@@ -19,6 +19,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: valcea-clar-autonomous-editions
@@ -164,8 +165,6 @@ jobs:
           rm -rf "$tx"
           mkdir -p "$tx"
 
-          # Snapshot only canonical newsroom outputs. Derived delivery files are
-          # rebuilt after persistence and are not part of the Git transaction.
           paths=(
             valcea-clar/editions
             valcea-clar/editorial/news_discovery_state.json
@@ -193,9 +192,6 @@ jobs:
             git reset --hard origin/main
             git clean -fd
 
-            # Overlay this validated story transaction onto the newest main.
-            # Directory copies do not delete unrelated concurrent files (for
-            # example social media assets already persisted under runtime).
             for path in "${paths[@]}"; do
               if [ -e "$tx/$path" ]; then
                 mkdir -p "$(dirname "$path")"
@@ -239,6 +235,28 @@ jobs:
 
           echo 'Could not persist live newsroom story transaction after five attempts.' >&2
           exit 1
+
+      - name: Dispatch Social Publication Engine for the canonical story event
+        if: steps.decision.outputs.changed == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          payload='{"ref":"main"}'
+          http_code=$(curl -sS -o /tmp/social-dispatch-response.txt -w '%{http_code}' \
+            -L -X POST \
+            -H 'Accept: application/vnd.github+json' \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/valcea-clar-social-publishing.yml/dispatches" \
+            -d "$payload")
+          if [ "$http_code" != '204' ]; then
+            echo "Immediate social workflow dispatch failed with HTTP ${http_code}." >&2
+            cat /tmp/social-dispatch-response.txt >&2 || true
+            exit 1
+          fi
+          echo 'Social Publication Engine dispatched from canonical story publication event.'
 
       - name: Upload current site payload
         if: steps.decision.outputs.changed == 'true'
