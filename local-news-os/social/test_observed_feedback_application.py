@@ -241,7 +241,7 @@ def test_no_matching_hints_has_zero_learning_effect() -> None:
     assert result["bounded_adjustment_points"] == 0.0, result
 
 
-def test_insufficient_observed_data_has_zero_learning_effect() -> None:
+def test_insufficient_samples_do_not_create_false_hint() -> None:
     one = observation(
         1,
         topic="service_journalism",
@@ -321,56 +321,73 @@ def test_rejected_observations_or_provenance_conflicts_are_not_learnable() -> No
         assert block in result["feedback_blocks"], result
 
 
+def test_absent_feedback_is_exact_virality_noop() -> None:
+    base = virality(71.0)
+    bundle = apply_to_virality(channel(), None, story(), format_result(), base, cadence=cadence(), series=series())
+    assert bundle["virality"] == base, bundle
+    assert bundle["effective_applied"] is False, bundle
+    assert bundle["feedback_application"]["status"] == "NO_FEEDBACK", bundle
+
+
 def test_valid_feedback_adjusts_virality_score_and_rank_action_only() -> None:
     base = virality(71.0)
-    result = apply_to_virality(
+    bundle = apply_to_virality(
         channel(), clean_feedback(), story(), format_result(), base, cadence=cadence(), series=series()
     )
-    adjustment = result["observed_feedback"]["bounded_adjustment_points"]
+    result = bundle["virality"]
+    application = bundle["feedback_application"]
+    adjustment = application["bounded_adjustment_points"]
+    assert bundle["effective_applied"] is True, bundle
     assert result["score"] == round(min(100.0, max(0.0, 71.0 + adjustment)), 2), result
     assert result["analytics"]["observed_metrics_used"] is True, result
     assert result["publication_action"] == "PRIORITIZE", result
     assert result["blocked"] is False, result
 
 
-def test_invalid_feedback_leaves_virality_decision_unblocked_and_score_unchanged() -> None:
+def test_invalid_feedback_leaves_virality_object_exactly_unchanged() -> None:
     feedback = clean_feedback()
     feedback["platform"] = "instagram"
     base = virality(71.0)
-    result = apply_to_virality(channel(), feedback, story(), format_result(), base, cadence=cadence(), series=series())
-    assert result["score"] == 71.0, result
-    assert result["blocked"] is False, result
-    assert result["publication_action"] == "ELIGIBLE", result
-    assert result["observed_feedback"]["status"] == "IGNORED_INVALID", result
-    assert result["analytics"]["observed_metrics_used"] is False, result
+    bundle = apply_to_virality(channel(), feedback, story(), format_result(), base, cadence=cadence(), series=series())
+    assert bundle["virality"] == base, bundle
+    assert bundle["effective_applied"] is False, bundle
+    assert bundle["feedback_application"]["status"] == "IGNORED_INVALID", bundle
+    assert bundle["feedback_application"]["bounded_adjustment_points"] == 0.0, bundle
 
 
 def test_learning_can_never_override_existing_hard_block() -> None:
-    result = apply_to_virality(
-        channel(), clean_feedback(), story(), format_result(), virality(71.0, blocked=True), cadence=cadence(), series=series()
+    base = virality(71.0, blocked=True)
+    bundle = apply_to_virality(
+        channel(), clean_feedback(), story(), format_result(), base, cadence=cadence(), series=series()
     )
-    assert result["blocked"] is True, result
-    assert "HOOK_CLICKBAIT_GUARD" in result["hard_blocks"], result
-    assert result["publication_action"] == "BLOCKED", result
-    assert result["guards"]["editorial_gates_weakened"] is False, result
+    assert bundle["virality"] == base, bundle
+    assert bundle["effective_applied"] is False, bundle
+    assert bundle["virality"]["publication_action"] == "BLOCKED", bundle
+    assert bundle["feedback_application"]["guards"]["editorial_gates_weakened"] is False, bundle
 
 
 def test_outbox_and_timing_gates_are_not_promoted_by_learning() -> None:
-    outbox_channel = channel(status="outbox_only")
-    outbox_feedback = clean_feedback()
-    outbox = apply_to_virality(outbox_channel, outbox_feedback, story(), format_result(), virality(71.0), cadence=cadence(), series=series())
-    assert outbox["publication_action"] == "OUTBOX_ONLY", outbox
-    held = apply_to_virality(channel(), clean_feedback(), story(), format_result(), virality(71.0), cadence=cadence(eligible=False), series=series())
-    assert held["publication_action"] == "HOLD_TIMING", held
+    outbox_bundle = apply_to_virality(
+        channel(status="outbox_only"), clean_feedback(), story(), format_result(), virality(71.0), cadence=cadence(), series=series()
+    )
+    assert outbox_bundle["virality"]["publication_action"] == "OUTBOX_ONLY", outbox_bundle
+    held_bundle = apply_to_virality(
+        channel(), clean_feedback(), story(), format_result(), virality(71.0), cadence=cadence(eligible=False), series=series()
+    )
+    assert held_bundle["virality"]["publication_action"] == "HOLD_TIMING", held_bundle
 
 
 def test_deterministic_application_and_fingerprint() -> None:
-    args = (channel(), clean_feedback(), story(), format_result(), virality(71.0))
-    first = apply_to_virality(*args, cadence=cadence(), series=series())
-    second = apply_to_virality(*copy.deepcopy(args), cadence=copy.deepcopy(cadence()), series=copy.deepcopy(series()))
+    first = apply_to_virality(
+        channel(), clean_feedback(), story(), format_result(), virality(71.0), cadence=cadence(), series=series()
+    )
+    second = apply_to_virality(
+        copy.deepcopy(channel()), copy.deepcopy(clean_feedback()), copy.deepcopy(story()), copy.deepcopy(format_result()),
+        copy.deepcopy(virality(71.0)), cadence=copy.deepcopy(cadence()), series=copy.deepcopy(series())
+    )
     assert first == second, (first, second)
-    assert len(first["decision_fingerprint_sha256"]) == 64, first
-    assert first["observed_feedback"]["guards"]["zero_paid_dependency"] is True, first
+    assert len(first["virality"]["decision_fingerprint_sha256"]) == 64, first
+    assert first["feedback_application"]["guards"]["zero_paid_dependency"] is True, first
 
 
 def main() -> int:
