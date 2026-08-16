@@ -15,9 +15,9 @@
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-08-16T07:21:20Z",
-    "source_pass": 6,
-    "source_degraded": 0,
+    "utc": "2026-08-16T07:33:32Z",
+    "source_pass": 3,
+    "source_degraded": 3,
     "source_fail": 1,
     "source_quarantined": 1,
     "critical_fail": false,
@@ -26,7 +26,7 @@
     "quarantined_source": "SRC-LEGISLATIE — Portal Legislativ; dependent material facts blocked fail-closed"
   },
   "deployment_evidence": {
-    "utc": "2026-08-16T07:21:42Z",
+    "utc": "2026-08-16T07:33:49Z",
     "status": "FAIL",
     "public_content_verified": true,
     "https_verified": true,
@@ -36,7 +36,7 @@
     "http_content_verified": true,
     "content_origin": "custom_https",
     "http_status": 200,
-    "final_url": "https://partener.eu/?p10_probe=20260816T072142Z",
+    "final_url": "https://partener.eu/?p10_probe=20260816T073349Z",
     "title": "PARTENER.EU — Finanțări europene explicate simplu",
     "required_markers_present": true,
     "critical_assets_ok": true,
@@ -46,7 +46,7 @@
       {
         "id": "custom_https",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260816T072142Z",
+        "final_url": "https://partener.eu/?p10_probe=20260816T073349Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -57,7 +57,7 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260816T072142Z",
+        "final_url": "http://partener.eu/?p10_probe=20260816T073349Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -68,12 +68,12 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260816T072142Z",
+        "final_url": "http://partener.eu/?p10_probe=20260816T073349Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260816T072142Z",
-            "to_url": "http://partener.eu/?p10_probe=20260816T072142Z"
+            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260816T073349Z",
+            "to_url": "http://partener.eu/?p10_probe=20260816T073349Z"
           }
         ],
         "content_verified": true,
@@ -123,16 +123,16 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-08-16T07:21:42Z",
-    "validation_run_started": "2026-08-16T07:21:20Z",
+    "utc": "2026-08-16T07:33:49Z",
+    "validation_run_started": "2026-08-16T07:33:32Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "75281a7829d3f417e640444ef5ba46b8a817ed50eb6979bbfd92dbcc4b3da87c",
-      "history_sha256": "75281a7829d3f417e640444ef5ba46b8a817ed50eb6979bbfd92dbcc4b3da87c",
-      "history_path": "validation/history/20260816T072120Z.json",
+      "latest_sha256": "c160caf3b2ff7776b3cddccfe49cbf8f1837be25a2de2e1fe23b508dcf5c6b50",
+      "history_sha256": "c160caf3b2ff7776b3cddccfe49cbf8f1837be25a2de2e1fe23b508dcf5c6b50",
+      "history_path": "validation/history/20260816T073332Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "0b2a6b81f7b352a7fb96e055f2b46432aa03b069add7356dcc76ba23bb2683c7",
-      "checkpoint_sha256": "0b2a6b81f7b352a7fb96e055f2b46432aa03b069add7356dcc76ba23bb2683c7",
+      "source_state_sha256": "4e5fa555d4de553a5fa31b17a6483b3cd1ce46519715c830cd4e6b3e76829140",
+      "checkpoint_sha256": "4e5fa555d4de553a5fa31b17a6483b3cd1ce46519715c830cd4e6b3e76829140",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
@@ -140,7 +140,7 @@
     },
     "source_registry": {
       "observed_at": "2026-08-16T05:49:01.047235Z",
-      "age_seconds": 5561,
+      "age_seconds": 6288,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
@@ -400,7 +400,7 @@
       "publication_policy": "candidate-state-only; web material facts are not auto-promoted on scheduled hash changes"
     },
     "mipe": {
-      "observed_at": "2026-08-16T05:50:04.242741+00:00",
+      "observed_at": "2026-08-16T07:33:14.843877+00:00",
       "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
       "source_available": false,
       "candidate_count": 1,
