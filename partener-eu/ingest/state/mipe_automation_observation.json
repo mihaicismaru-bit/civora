@@ -1,14 +1,16 @@
 {
-  "observedAt": "2026-08-14T19:29:17Z",
-  "status": "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
+  "observedAt": "2026-08-16T06:31:17Z",
+  "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
   "prioritySeed": "https://mfe.gov.ro/pdds/despre-program-programare/",
   "sourceRun": {
-    "observedAt": "2026-08-14T17:35:25.394927+00:00",
-    "candidateCount": 4,
-    "parsedRelevantCount": 0
+    "observedAt": "2026-08-16T05:50:04.242741+00:00",
+    "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
+    "currentVerifiedCount": 0,
+    "publishedLastKnownGoodCount": 1
   },
   "directFetch": {
     "available": false,
+    "checkedAt": "2026-08-16T06:31:17Z",
     "failures": [
       {"url": "https://mfe.gov.ro/pdds/despre-program-programare/", "error": "timeout"},
       {"url": "https://mfe.gov.ro/pdds/noutati/", "error": "timeout"},
@@ -16,31 +18,35 @@
       {"url": "https://mfe.gov.ro/", "error": "timeout"},
       {"url": "https://mfe.gov.ro/ghiduri_peos/", "error": "timeout"},
       {"url": "https://mfe.gov.ro/ghiduri_pids/", "error": "timeout"},
-      {"url": "https://mipe.gov.ro/", "error": "timeout"}
+      {"url": "https://reporting.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027", "error": "timeout_on_fresh_external_probe; last canonical pipeline snapshot preserved"}
     ]
   },
   "webIndex": {
     "canonicalOfficialDiscoveries": 0,
     "verifiedNewItems": 0,
-    "policy": "Search index is discovery-only. Third-party copies and snippets are never promoted as MIPE facts."
+    "policy": "Search index is discovery-only. PDDS candidates may only originate from the explicit priority-seed crawl. Third-party copies and snippets are never promoted as MIPE facts."
   },
-  "auxiliaryOfficialSurfaces": {
-    "mysmisReporting": {
-      "url": "https://reporting.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027",
-      "available": true,
-      "validatedCallCount": 907,
-      "visibleRowsStatus": "FINALIZAT",
-      "semanticChange": false,
-      "publicationDecision": "NO_NEW_NEWS_ITEM"
-    }
+  "lastCanonicalVerifiedUpdate": {
+    "observedAt": "2026-08-16T04:32:02.014794+00:00",
+    "source": "MIPE / MySMIS",
+    "url": "https://reporting.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027",
+    "verification": "CANONICAL_OFFICIAL_FETCH",
+    "validatedCallCount": 909,
+    "explicitStatuses": ["FINALIZAT"],
+    "change": "DJ-Sprijin pentru dezvoltarea microîntreprinderilor: total project budget 12.841.264.383 -> 12.841.259.803 RON; submitted grant budget 575.375.415 -> 575.368.906 RON",
+    "openInference": false,
+    "publicationDecision": "PUBLISHED_LAST_KNOWN_GOOD"
   },
   "delivery": {
     "verifiedNewsItemCount": 1,
-    "latestPagesRunId": 31829148978,
+    "latestPagesRunId": 31931459201,
     "latestPagesConclusion": "success",
-    "latestPagesCompletedAt": "2026-08-14T18:33:04Z",
-    "publicSurface": "https://partener.eu/",
-    "publicSurfaceVerified": true
+    "latestPagesCompletedAt": "2026-08-16T06:27:42Z",
+    "pagesConfiguredCname": "partener.eu",
+    "pagesUrl": "http://partener.eu/",
+    "artifactContainsMipeNews": true,
+    "newsAsset": "partener-eu/web/mipe-news.js",
+    "externalContentProbe": "inconclusive because web index returned a stale crawl; GitHub Pages deployment evidence is authoritative for this check"
   },
   "invariants": {
     "lastKnownGoodPreserved": true,
