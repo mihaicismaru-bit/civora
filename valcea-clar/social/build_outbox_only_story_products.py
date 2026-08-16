@@ -23,6 +23,8 @@ DECISION = VC / "site" / "newsroom_decision.json"
 EVENT = VC / "site" / "story_publication_event.json"
 THREADS_OUTBOX = VC / "social" / "threads_outbox.json"
 THREADS_STATE = VC / "social" / "threads_state.json"
+X_OUTBOX = VC / "social" / "x_outbox.json"
+X_STATE = VC / "social" / "x_state.json"
 LINKEDIN_OUTBOX = VC / "social" / "linkedin_outbox.json"
 LINKEDIN_STATE = VC / "social" / "linkedin_state.json"
 TELEGRAM_OUTBOX = VC / "social" / "telegram_outbox.json"
@@ -59,6 +61,28 @@ def canonical(story: dict) -> str:
     return f"{BASE}/stiri/{slug(str(story['id']))}/"
 
 
+def compact(text: str, limit: int = 260) -> str:
+    value = " ".join(str(text).split())
+    if len(value) <= limit:
+        return value
+    cut = value[: max(1, limit - 1)].rsplit(" ", 1)[0]
+    return (cut or value[: max(1, limit - 1)]).rstrip(" ,.;:") + "…"
+
+
+def first_money(text: str) -> str | None:
+    match = re.search(r"(?<!\d)(\d{1,3}(?:\.\d{3})+(?:,\d+)?)\s+lei\b", text, re.I)
+    if not match:
+        return None
+    raw = match.group(1).replace(".", "").replace(",", ".")
+    try:
+        number = float(raw)
+    except ValueError:
+        return None
+    if number >= 1_000_000:
+        return f"{number / 1_000_000:.2f}".rstrip("0").rstrip(".").replace(".", ",") + " mil. lei"
+    return f"{int(round(number)):,}".replace(",", ".") + " lei"
+
+
 def threads_product(story: dict) -> dict:
     headline = str(story.get("headline") or "").strip()
     dek = str(story.get("dek") or "").strip()
@@ -76,6 +100,71 @@ def threads_product(story: dict) -> dict:
         "thread": sequence,
         "canonical_url": canonical(story),
         "source_preserving": True,
+        "edition_gate": False,
+    }
+
+
+def x_product(story: dict) -> dict:
+    """Build a fast, source-forward X product without pretending paid API access.
+
+    X is intentionally distinct from Threads: shorter, denser, change/number
+    first, one canonical source link, and a bounded live-thread structure.
+    """
+    headline = str(story.get("headline") or "").strip()
+    dek = str(story.get("dek") or "").strip()
+    paragraphs = [str(p).strip() for p in story.get("paragraphs", []) if str(p).strip()]
+    section = str(story.get("section") or "").upper()
+    corpus = " ".join([headline, dek, *paragraphs])
+    lower = corpus.lower()
+    money = first_money(corpus)
+    correction = story.get("correction") is True
+
+    hook = headline
+    hook_family = "what_changed"
+    if correction:
+        hook = f"Corecție: {headline}"
+        hook_family = "correction"
+    elif "luminos" in lower and "zăvoi" in lower and "intrarea este liberă" in lower:
+        hook = "Azi în Zăvoi: intrarea este liberă la Luminos Fest."
+        hook_family = "local_utility"
+    elif money and (section == "INVESTIGAȚII" or any(token in lower for token in ("contract", "buget", "finanț", "smis"))):
+        if "olănești" in lower:
+            hook = f"{money} pentru proiectul de pe Olănești."
+        else:
+            hook = f"{money}: {headline}"
+        hook_family = "key_number"
+
+    posts: list[str] = [compact(hook)]
+    if dek and compact(dek).lower() != posts[0].lower():
+        posts.append(compact(dek))
+    if paragraphs:
+        first = compact(paragraphs[0])
+        if first.lower() not in {value.lower() for value in posts}:
+            posts.append(first)
+    posts = posts[:3]
+    posts.append(compact(f"Documente și context: {canonical(story)}"))
+
+    return {
+        "id": f"x-story-{story['id']}",
+        "story_id": story["id"],
+        "status": "outbox_ready",
+        "publication_mode": "durable_outbox_only",
+        "native_format": "thread" if len(posts) > 2 else "text",
+        "format_family": "x_live_thread" if len(posts) > 2 else "x_update",
+        "hook_family": hook_family,
+        "posts": posts,
+        "canonical_url": canonical(story),
+        "source_preserving": True,
+        "max_post_chars_internal": 260,
+        "hashtags_default": False,
+        "fake_urgency_forbidden": True,
+        "engagement_bait_forbidden": True,
+        "verbatim_cross_platform_reuse_allowed": False,
+        "quote_post_dependency_forbidden": True,
+        "direct_publication_enabled": False,
+        "direct_publication_blocker": "x_api_pay_per_use_conflicts_zero_paid_dependency",
+        "official_api_reference": "https://docs.x.com/x-api/posts/create-post",
+        "official_pricing_reference": "https://docs.x.com/x-api/getting-started/pricing",
         "edition_gate": False,
     }
 
@@ -188,6 +277,7 @@ def output_specs():
     """Return the deterministic materialization contract for outbox-only channels."""
     return [
         (THREADS_OUTBOX, THREADS_STATE, "threads", threads_product),
+        (X_OUTBOX, X_STATE, "x", x_product),
         (LINKEDIN_OUTBOX, LINKEDIN_STATE, "linkedin", linkedin_product),
         (TELEGRAM_OUTBOX, TELEGRAM_STATE, "telegram", telegram_product),
         (WHATSAPP_OUTBOX, WHATSAPP_STATE, "whatsapp", whatsapp_product),
@@ -243,6 +333,7 @@ def main() -> int:
         "publication_model": "continuous_story_first",
         "story_count": len(stories),
         **counts,
+        "x_state": "OUTBOX_ONLY_X_API_PAY_PER_USE_BLOCKED_BY_ZERO_PAID_POLICY",
         "youtube_state": "HOLD_MEDIA_UNTIL_REAL_VIDEO_AND_ACCESS",
         "telegram_state": "OUTBOX_ONLY_UNTIL_VERIFIED_ACCESS",
         "whatsapp_state": "OUTBOX_ONLY_UNTIL_VERIFIED_ACCESS_AND_RECIPIENT_SCOPE_POLICY",
