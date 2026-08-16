@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Static and data-contract regression for Consultant Workspace v3/v5 UX."""
+"""Static and data-contract regression for Consultant Workspace v3/v6 UX."""
 from __future__ import annotations
 
 import json
@@ -32,15 +32,16 @@ assert index.index('mysmis-registry.js') < index.index('consultant-mysmis-v1.js'
 assert index.index('consultant-workspace-v3.js') < index.index('consultant-mysmis-v1.js')
 
 required_js = [
-    "indexedDB","Radar de oportunități","Condiții eliminatorii automate","Verificare consultant",
+    "indexedDB","Radar de oportunități","Condiții eliminatorii verificate automat","Verificare consultant",
     "Compară oportunități","Documente client","Plan de lucru","Backup și portabilitate",
-    "T1","CANDIDAT DIRECT","NEPOTRIVIRE CUNOSCUTĂ","GO PENTRU PREGĂTIRE",
-    "NO-GO / BLOCAT","PARTENER.EU_CONSULTANT_WORKSPACE_V3","demoClientsRemoved",
+    "T1","CANDIDAT DIRECT","NEPOTRIVIRE CUNOSCUTĂ","PREGĂTIRE RECOMANDATĂ",
+    "NU CONTINUA / BLOCAT","PARTENER.EU_CONSULTANT_WORKSPACE_V3","demoClientsRemoved",
     "deletedClientIds","Termen expirat / status de reconciliat",
     "await persistNow();await renderWorkspace()","Document cleanup skipped during client deletion",
     "Ștergi din portofoliu","Consultant client save failed","Consultant client delete failed",
     "＋ Adaugă firmă / organizație","['Site public','Public site'].includes(mode.textContent.trim())",
     "Selectează o firmă și intră în Profil","priorityLabel","VERIFICĂ ELIGIBILITATEA","DE VERIFICAT",
+    "Editează / șterge organizația","sarcini deschise","Potrivire","Termen",
 ]
 for token in required_js:
     assert token in js, f"workspace missing capability: {token}"
@@ -51,6 +52,9 @@ assert "idbListDocuments(removedId)" in js
 assert "state.clients=state.clients.filter(c=>c.id!==removedId)" in js
 assert "deleted.has(raw.id)" in js
 assert "mode.textContent.trim()==='Public site'" not in js
+assert "hard-gates explicabile" not in js
+assert "NO-GO / BLOCAT" not in js
+assert "GO PENTRU PREGĂTIRE" not in js
 
 required_onboarding = [
     "De la client la decizia de pregătire sau renunțare","Creează profilul clientului",
@@ -99,4 +103,4 @@ assert "cw3MySMISSnapshot" in mysmis_css and "cw3MySMISEvidence" in mysmis_css
 assert len(js) > 20000
 assert len(css) > 8000
 assert len(onboarding_js) > 2500
-print("Consultant Workspace v5 CRUD + runtime handoff + direct MySMIS evidence: PASS")
+print("Consultant Workspace v6 CRUD + Romanian UX + direct MySMIS evidence: PASS")
