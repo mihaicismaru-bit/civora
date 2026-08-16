@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate fail-closed profile identity deployment state."""
+"""Validate fail-closed VÂLCEA CLAR profile identity deployment state."""
 from __future__ import annotations
 
 import argparse
@@ -91,6 +91,58 @@ def validate(profile: dict[str, Any], deployment: dict[str, Any]) -> list[str]:
     if runtime.get("oauth_env") != "VALCEA_YOUTUBE_OAUTH_ACCESS_TOKEN":
         errors.append("youtube:oauth_env_drift")
 
+    telegram = platforms.get("telegram") if isinstance(platforms.get("telegram"), dict) else {}
+    if telegram.get("deployment_mode") != "API_GATED_CHAT_PHOTO":
+        errors.append("telegram:deployment_mode_drift")
+    if telegram.get("api_capability_status") != "OFFICIAL_BOT_API_SET_CHAT_PHOTO_VERIFIED":
+        errors.append("telegram:api_capability_not_verified")
+    tg_api = telegram.get("profile_photo_api") if isinstance(telegram.get("profile_photo_api"), dict) else {}
+    if tg_api.get("apply_method") != "setChatPhoto" or tg_api.get("readback_method") != "getChat":
+        errors.append("telegram:official_chat_photo_flow_drift")
+    if tg_api.get("transport") != "multipart/form-data":
+        errors.append("telegram:multipart_transport_missing")
+    if tg_api.get("administrator_rights_required") is not True:
+        errors.append("telegram:administrator_rights_gate_missing")
+    if tg_api.get("canonical_input_asset") != "telegram-avatar.png":
+        errors.append("telegram:canonical_avatar_drift")
+    tg_runtime = telegram.get("runtime") if isinstance(telegram.get("runtime"), dict) else {}
+    if tg_runtime.get("enable_env") != "VALCEA_TELEGRAM_PROFILE_LIVE_ENABLED":
+        errors.append("telegram:live_enable_env_drift")
+    if tg_runtime.get("bot_token_env") != "VALCEA_TELEGRAM_BOT_TOKEN":
+        errors.append("telegram:bot_token_env_drift")
+    if tg_runtime.get("channel_id_env") != "VALCEA_TELEGRAM_CHANNEL_ID":
+        errors.append("telegram:channel_id_env_drift")
+
+    whatsapp = platforms.get("whatsapp") if isinstance(platforms.get("whatsapp"), dict) else {}
+    if whatsapp.get("deployment_mode") != "API_GATED_BUSINESS_PROFILE_PHOTO":
+        errors.append("whatsapp:deployment_mode_drift")
+    if whatsapp.get("api_capability_status") != "OFFICIAL_BUSINESS_PROFILE_PHOTO_API_VERIFIED":
+        errors.append("whatsapp:api_capability_not_verified")
+    wa_api = whatsapp.get("profile_photo_api") if isinstance(whatsapp.get("profile_photo_api"), dict) else {}
+    if wa_api.get("create_upload_session_method") != "POST /{app-id}/uploads":
+        errors.append("whatsapp:resumable_upload_session_flow_drift")
+    if wa_api.get("upload_file_method") != "POST /{upload-id}":
+        errors.append("whatsapp:resumable_file_upload_flow_drift")
+    if wa_api.get("apply_method") != "POST /{phone-number-id}/whatsapp_business_profile":
+        errors.append("whatsapp:business_profile_apply_flow_drift")
+    if wa_api.get("readback_method") != "GET /{phone-number-id}/whatsapp_business_profile?fields=profile_picture_url":
+        errors.append("whatsapp:business_profile_readback_flow_drift")
+    if wa_api.get("canonical_input_asset") != "whatsapp-avatar.png":
+        errors.append("whatsapp:canonical_avatar_drift")
+    if wa_api.get("upload_transform") != "deterministic_jpeg" or wa_api.get("upload_mime_type") != "image/jpeg":
+        errors.append("whatsapp:upload_transform_drift")
+    wa_runtime = whatsapp.get("runtime") if isinstance(whatsapp.get("runtime"), dict) else {}
+    expected_wa_runtime = {
+        "enable_env": "VALCEA_WHATSAPP_PROFILE_LIVE_ENABLED",
+        "access_token_env": "VALCEA_WHATSAPP_ACCESS_TOKEN",
+        "phone_number_id_env": "VALCEA_WHATSAPP_PHONE_NUMBER_ID",
+        "meta_app_id_env": "VALCEA_META_APP_ID",
+        "graph_version_env": "VALCEA_WHATSAPP_GRAPH_VERSION",
+    }
+    for key, expected in expected_wa_runtime.items():
+        if wa_runtime.get(key) != expected:
+            errors.append(f"whatsapp:{key}_drift")
+
     gate = deployment.get("quality_gate") if isinstance(deployment.get("quality_gate"), dict) else {}
     for key in (
         "all_identity_platforms_must_have_deployment_state",
@@ -98,6 +150,10 @@ def validate(profile: dict[str, Any], deployment: dict[str, Any]) -> list[str]:
         "live_status_cannot_be_true_from_local_generation",
         "youtube_banner_apply_requires_explicit_enable_and_oauth",
         "youtube_banner_apply_requires_remote_readback",
+        "telegram_photo_apply_requires_explicit_enable_and_bot_admin_access",
+        "telegram_photo_apply_requires_remote_readback",
+        "whatsapp_profile_apply_requires_explicit_enable_and_access",
+        "whatsapp_profile_apply_requires_remote_readback",
     ):
         if gate.get(key) is not True:
             errors.append(f"quality_gate_not_enabled:{key}")
@@ -108,19 +164,33 @@ def self_test() -> int:
     profile = {"platforms": {p: {"avatar_export": {}} for p in REQUIRED_PLATFORMS}}
     for p in ("facebook", "x", "youtube", "linkedin"):
         profile["platforms"][p]["header_export"] = {}
+    policy_keys = (
+        "asset_ready_does_not_mean_live", "never_claim_live_without_remote_ack_or_readback",
+        "profile_mutation_must_be_separate_from_story_publication", "live_apply_requires_explicit_runtime_enable",
+        "credential_values_must_never_be_persisted", "unsupported_or_unverified_mutation_paths_fail_closed",
+    )
+    quality_keys = (
+        "all_identity_platforms_must_have_deployment_state", "all_ready_assets_must_be_generated_by_canonical_builder",
+        "live_status_cannot_be_true_from_local_generation", "youtube_banner_apply_requires_explicit_enable_and_oauth",
+        "youtube_banner_apply_requires_remote_readback", "telegram_photo_apply_requires_explicit_enable_and_bot_admin_access",
+        "telegram_photo_apply_requires_remote_readback", "whatsapp_profile_apply_requires_explicit_enable_and_access",
+        "whatsapp_profile_apply_requires_remote_readback",
+    )
     deployment = {
         "identity_source": "valcea-clar/social/profile_identity_system.json",
         "asset_generator": "valcea-clar/social/build_profile_identity_assets.py",
-        "policy": {key: True for key in (
-            "asset_ready_does_not_mean_live","never_claim_live_without_remote_ack_or_readback","profile_mutation_must_be_separate_from_story_publication","live_apply_requires_explicit_runtime_enable","credential_values_must_never_be_persisted","unsupported_or_unverified_mutation_paths_fail_closed"
-        )},
+        "policy": {key: True for key in policy_keys},
         "platforms": {},
-        "quality_gate": {key: True for key in (
-            "all_identity_platforms_must_have_deployment_state","all_ready_assets_must_be_generated_by_canonical_builder","live_status_cannot_be_true_from_local_generation","youtube_banner_apply_requires_explicit_enable_and_oauth","youtube_banner_apply_requires_remote_readback"
-        )},
+        "quality_gate": {key: True for key in quality_keys},
     }
     for p in REQUIRED_PLATFORMS:
-        cfg = {"asset_status":"READY","avatar_asset":f"{p}-avatar.png","deployment_mode":"NOT_AUTOMATED","api_capability_status":"PROFILE_MUTATION_ACCESS_NOT_CONFIGURED","live_status":"UNCONFIRMED"}
+        cfg = {
+            "asset_status": "READY",
+            "avatar_asset": f"{p}-avatar.png",
+            "deployment_mode": "NOT_AUTOMATED",
+            "api_capability_status": "PROFILE_MUTATION_ACCESS_NOT_CONFIGURED",
+            "live_status": "UNCONFIRMED",
+        }
         if p in ("facebook", "x", "youtube", "linkedin"):
             cfg["header_asset"] = f"{p}-header.jpg"
         deployment["platforms"][p] = cfg
@@ -128,13 +198,50 @@ def self_test() -> int:
     deployment["platforms"]["instagram"]["api_capability_status"] = "PROFILE_MUTATION_PATH_NOT_VERIFIED"
     deployment["platforms"]["threads"]["api_capability_status"] = "PROFILE_MUTATION_PATH_NOT_VERIFIED"
     deployment["platforms"]["youtube"].update({
-        "deployment_mode":"API_GATED_BANNER_ONLY","api_capability_status":"OFFICIAL_BANNER_API_VERIFIED",
-        "banner_api":{"upload_method":"channelBanners.insert","apply_method":"channels.update","readback_method":"channels.list","recommended_width":2560,"recommended_height":1440,"max_bytes":6291456},
-        "runtime":{"enable_env":"VALCEA_YOUTUBE_PROFILE_LIVE_ENABLED","oauth_env":"VALCEA_YOUTUBE_OAUTH_ACCESS_TOKEN"},
+        "deployment_mode": "API_GATED_BANNER_ONLY",
+        "api_capability_status": "OFFICIAL_BANNER_API_VERIFIED",
+        "banner_api": {
+            "upload_method": "channelBanners.insert", "apply_method": "channels.update", "readback_method": "channels.list",
+            "recommended_width": 2560, "recommended_height": 1440, "max_bytes": 6291456,
+        },
+        "runtime": {"enable_env": "VALCEA_YOUTUBE_PROFILE_LIVE_ENABLED", "oauth_env": "VALCEA_YOUTUBE_OAUTH_ACCESS_TOKEN"},
+    })
+    deployment["platforms"]["telegram"].update({
+        "deployment_mode": "API_GATED_CHAT_PHOTO",
+        "api_capability_status": "OFFICIAL_BOT_API_SET_CHAT_PHOTO_VERIFIED",
+        "profile_photo_api": {
+            "apply_method": "setChatPhoto", "readback_method": "getChat", "transport": "multipart/form-data",
+            "administrator_rights_required": True, "canonical_input_asset": "telegram-avatar.png",
+        },
+        "runtime": {
+            "enable_env": "VALCEA_TELEGRAM_PROFILE_LIVE_ENABLED", "bot_token_env": "VALCEA_TELEGRAM_BOT_TOKEN",
+            "channel_id_env": "VALCEA_TELEGRAM_CHANNEL_ID",
+        },
+    })
+    deployment["platforms"]["whatsapp"].update({
+        "deployment_mode": "API_GATED_BUSINESS_PROFILE_PHOTO",
+        "api_capability_status": "OFFICIAL_BUSINESS_PROFILE_PHOTO_API_VERIFIED",
+        "profile_photo_api": {
+            "create_upload_session_method": "POST /{app-id}/uploads", "upload_file_method": "POST /{upload-id}",
+            "apply_method": "POST /{phone-number-id}/whatsapp_business_profile",
+            "readback_method": "GET /{phone-number-id}/whatsapp_business_profile?fields=profile_picture_url",
+            "canonical_input_asset": "whatsapp-avatar.png", "upload_transform": "deterministic_jpeg", "upload_mime_type": "image/jpeg",
+        },
+        "runtime": {
+            "enable_env": "VALCEA_WHATSAPP_PROFILE_LIVE_ENABLED", "access_token_env": "VALCEA_WHATSAPP_ACCESS_TOKEN",
+            "phone_number_id_env": "VALCEA_WHATSAPP_PHONE_NUMBER_ID", "meta_app_id_env": "VALCEA_META_APP_ID",
+            "graph_version_env": "VALCEA_WHATSAPP_GRAPH_VERSION",
+        },
     })
     assert validate(profile, deployment) == []
     deployment["platforms"]["youtube"]["live_status"] = "CONFIRMED_REMOTE"
     assert "youtube:confirmed_without_readback" in validate(profile, deployment)
+    deployment["platforms"]["youtube"]["live_status"] = "UNCONFIRMED"
+    deployment["platforms"]["telegram"]["deployment_mode"] = "NOT_AUTOMATED"
+    assert "telegram:deployment_mode_drift" in validate(profile, deployment)
+    deployment["platforms"]["telegram"]["deployment_mode"] = "API_GATED_CHAT_PHOTO"
+    deployment["platforms"]["whatsapp"]["profile_photo_api"]["upload_transform"] = "raw_png"
+    assert "whatsapp:upload_transform_drift" in validate(profile, deployment)
     print("VÂLCEA CLAR profile deployment validator self-test: PASS")
     return 0
 
@@ -150,7 +257,7 @@ def main() -> int:
         for error in errors:
             print(f"ERROR {error}")
         return 1
-    print("VÂLCEA CLAR profile deployment control: PASS (9 platforms; YouTube banner API gated)")
+    print("VÂLCEA CLAR profile deployment control: PASS (9 platforms; YouTube/Telegram/WhatsApp official API paths gated)")
     return 0
 
 
