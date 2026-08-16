@@ -1,0 +1,218 @@
+name: PARTENER.EU MIPE Windows Crawl v3
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_pages:
+        description: 'Număr maxim de pagini MIPE'
+        required: true
+        default: '120'
+        type: string
+      max_depth:
+        description: 'Adâncime maximă de crawl'
+        required: true
+        default: '3'
+        type: string
+      persist:
+        description: 'Persistă corpusul și dosarele în main'
+        required: true
+        default: true
+        type: boolean
+  push:
+    branches: [main]
+    paths:
+      - 'partener-eu/ingest/state/mipe_ro_v3_trigger.txt'
+      - 'partener-eu/ingest/mipe_windows_crawl_v3.py'
+      - '.github/workflows/partener-eu-mipe-ro-crawl-v3.yml'
+
+permissions:
+  contents: write
+
+env:
+  PYTHONUTF8: '1'
+  MIPE_RUNTIME_SECONDS: '1200'
+  MIPE_PAGE_TIMEOUT_MS: '18000'
+  MIPE_PAGE_WAIT_MS: '350'
+  MIPE_MAX_DOC_BYTES: '25000000'
+  MIPE_MAX_DOCUMENTS: '160'
+
+concurrency:
+  group: partener-eu-mipe-ro-crawl-v3
+  cancel-in-progress: true
+
+jobs:
+  crawl:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Bootstrap Python 3.12
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $python=$null
+          $cmd=Get-Command python.exe -ErrorAction SilentlyContinue
+          if($cmd){
+            try { & $cmd.Source -c "import sys; assert sys.version_info >= (3,11)"; if($LASTEXITCODE -eq 0){$python=$cmd.Source} } catch {}
+          }
+          if(-not $python){
+            $py=Get-Command py.exe -ErrorAction SilentlyContinue
+            if($py){
+              try { $candidate=(& $py.Source -3.12 -c "import sys; print(sys.executable)" 2>$null).Trim(); if($candidate -and (Test-Path $candidate)){$python=$candidate} } catch {}
+            }
+          }
+          if(-not $python){
+            $version='3.12.10'
+            $installer=Join-Path $env:RUNNER_TEMP "python-$version-amd64.exe"
+            $target=Join-Path $env:RUNNER_TEMP 'partener-python312'
+            Invoke-WebRequest -Uri "https://www.python.org/ftp/python/$version/python-$version-amd64.exe" -OutFile $installer
+            $p=Start-Process -FilePath $installer -ArgumentList @('/quiet','InstallAllUsers=0',"TargetDir=$target",'PrependPath=0','Include_launcher=0','Include_test=0','Include_pip=1','SimpleInstall=1') -Wait -PassThru
+            if($p.ExitCode -ne 0){throw "Instalarea Python a eșuat: $($p.ExitCode)"}
+            $python=Join-Path $target 'python.exe'
+          }
+          if(-not (Test-Path $python)){throw "Python indisponibil: $python"}
+          "PYTHON_EXE=$python" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
+          (Split-Path $python -Parent) | Out-File $env:GITHUB_PATH -Encoding utf8 -Append
+          & $python --version
+
+      - name: Prepare Edge + Playwright + document extraction
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          & $env:PYTHON_EXE -m pip install --disable-pip-version-check playwright pypdf
+          $candidates=@()
+          if(${env:ProgramFiles(x86)}){$candidates += (Join-Path ${env:ProgramFiles(x86)} 'Microsoft\Edge\Application\msedge.exe')}
+          if($env:ProgramFiles){$candidates += (Join-Path $env:ProgramFiles 'Microsoft\Edge\Application\msedge.exe')}
+          if($env:LOCALAPPDATA){$candidates += (Join-Path $env:LOCALAPPDATA 'Microsoft\Edge\Application\msedge.exe')}
+          try{$reg=(Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\msedge.exe' -ErrorAction Stop).'(default)';if($reg){$candidates+=$reg}}catch{}
+          $edge=$candidates|Where-Object{$_ -and (Test-Path $_)}|Select-Object -Unique|Select-Object -First 1
+          if($edge){
+            Write-Host "Microsoft Edge: $edge"
+            "MIPE_BROWSER_EXECUTABLE=$edge" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
+            "MIPE_HEADLESS=0" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
+          } else {
+            Write-Host 'Edge indisponibil; instalez Chromium Playwright.'
+            & $env:PYTHON_EXE -m playwright install chromium
+            "MIPE_BROWSER_EXECUTABLE=" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
+            "MIPE_HEADLESS=1" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
+          }
+
+      - name: Resolve crawl budget
+        shell: pwsh
+        run: |
+          $pages='120'; $depth='3'
+          if('${{ github.event_name }}' -eq 'workflow_dispatch'){
+            if('${{ inputs.max_pages }}'){$pages='${{ inputs.max_pages }}'}
+            if('${{ inputs.max_depth }}'){$depth='${{ inputs.max_depth }}'}
+          }
+          "MIPE_MAX_PAGES=$pages" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
+          "MIPE_MAX_DEPTH=$depth" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
+          Write-Host "Crawl MIPE: max_pages=$pages max_depth=$depth"
+
+      - name: Crawl official MIPE corpus from Romania
+        shell: pwsh
+        run: |
+          & $env:PYTHON_EXE partener-eu/ingest/mipe_windows_crawl_v3.py
+
+      - name: Build dossiers and lifecycle immediately from fresh corpus
+        shell: pwsh
+        run: |
+          & $env:PYTHON_EXE partener-eu/ingest/build_decision_products.py
+          & $env:PYTHON_EXE partener-eu/ingest/polish_decision_products.py
+          & $env:PYTHON_EXE partener-eu/ingest/finalize_decision_products.py
+          & $env:PYTHON_EXE partener-eu/ingest/localize_decision_products.py
+          & $env:PYTHON_EXE partener-eu/ingest/build_call_lifecycle.py
+          & $env:PYTHON_EXE partener-eu/ingest/intelligence_index.py
+
+      - name: Validate direct corpus and lifecycle contract
+        shell: pwsh
+        run: |
+          @'
+          import json
+          from pathlib import Path
+          corpus=json.loads(Path('partener-eu/ingest/state/mipe_ro_corpus.json').read_text(encoding='utf-8'))
+          state=json.loads(Path('partener-eu/ingest/state/mipe_state.json').read_text(encoding='utf-8'))
+          lifecycle=json.loads(Path('partener-eu/ingest/state/call_lifecycle.json').read_text(encoding='utf-8'))
+          assert corpus.get('schemaVersion') == 3
+          assert corpus.get('lastRun',{}).get('collectorVersion') == '3.0'
+          assert corpus.get('lastRun',{}).get('sourceAvailable') is True
+          assert any(x.get('ok') for x in corpus.get('lastRun',{}).get('roots',[]))
+          assert state.get('lastRun',{}).get('collectorVersion') == '3.0'
+          for page in corpus.get('pages',[]):
+              assert page.get('url','').startswith('https://mfe.gov.ro/')
+              assert page.get('verification') == 'CANONICAL_OFFICIAL_FETCH'
+              assert page.get('textPreview')
+          for doc in corpus.get('documents',[]):
+              if doc.get('sha256'):
+                  assert doc.get('url','').startswith('https://mfe.gov.ro/')
+                  assert len(doc['sha256']) == 64
+          assert lifecycle.get('policy',{}).get('lifecycleFirst') is True
+          print(json.dumps({
+              'pages':len(corpus.get('pages',[])),
+              'documents':len(corpus.get('documents',[])),
+              'freshPages':corpus.get('lastRun',{}).get('acceptedPages'),
+              'lifecycleCalls':lifecycle.get('summary',{}).get('callCount'),
+          },ensure_ascii=False,indent=2))
+          '@ | Set-Content -Encoding UTF8 .\validate_mipe_v3.py
+          & $env:PYTHON_EXE .\validate_mipe_v3.py
+
+      - name: Upload crawl evidence artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mipe-ro-crawl-v3
+          path: |
+            partener-eu/ingest/state/mipe_ro_corpus.json
+            partener-eu/ingest/state/mipe_state.json
+            partener-eu/ingest/state/decision_products.json
+            partener-eu/ingest/state/call_lifecycle.json
+          retention-days: 14
+
+      - name: Persist corpus, dossiers and lifecycle through GitHub API
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.persist }}
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPOSITORY: ${{ github.repository }}
+        run: |
+          $ErrorActionPreference='Stop'
+          @'
+          import base64,json,os,time,urllib.error,urllib.request
+          from pathlib import Path
+          token=os.environ['GH_TOKEN'];repo=os.environ['GH_REPOSITORY'];api=f'https://api.github.com/repos/{repo}'
+          paths=[
+            'partener-eu/ingest/state/mipe_ro_corpus.json',
+            'partener-eu/ingest/state/mipe_state.json',
+            'partener-eu/ingest/state/decision_products.json',
+            'partener-eu/ingest/state/call_lifecycle.json',
+            'partener-eu/ingest/state/intelligence_index.json',
+            'partener-eu/web/mipe-news.js',
+            'partener-eu/web/decision-products.js',
+            'partener-eu/web/call-lifecycle.js',
+          ]
+          contents={p:Path(p).read_bytes() for p in paths}
+          headers={'Authorization':f'Bearer {token}','Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','User-Agent':'PARTENER.EU-MIPE-Windows-v3'}
+          def req(method,url,payload=None):
+            data=None if payload is None else json.dumps(payload).encode()
+            r=urllib.request.Request(url,data=data,method=method,headers=headers)
+            with urllib.request.urlopen(r,timeout=60) as x:
+              raw=x.read();return json.loads(raw) if raw else {}
+          for attempt in range(1,6):
+            try:
+              ref=req('GET',f'{api}/git/ref/heads/main');parent=ref['object']['sha'];commit=req('GET',f'{api}/git/commits/{parent}')
+              entries=[]
+              for path,raw in contents.items():
+                blob=req('POST',f'{api}/git/blobs',{'content':base64.b64encode(raw).decode(),'encoding':'base64'})
+                entries.append({'path':path,'mode':'100644','type':'blob','sha':blob['sha']})
+              tree=req('POST',f'{api}/git/trees',{'base_tree':commit['tree']['sha'],'tree':entries})
+              new=req('POST',f'{api}/git/commits',{'message':'Refresh MIPE Romanian corpus, dossiers and lifecycle','tree':tree['sha'],'parents':[parent]})
+              req('PATCH',f'{api}/git/refs/heads/main',{'sha':new['sha'],'force':False})
+              print(json.dumps({'persisted':True,'commit':new['sha'],'files':len(paths)},indent=2));break
+            except urllib.error.HTTPError as exc:
+              if exc.code not in (409,422) or attempt==5: raise
+              time.sleep(attempt*2)
+          '@ | Set-Content -Encoding UTF8 .\persist_mipe_v3.py
+          & $env:PYTHON_EXE .\persist_mipe_v3.py
