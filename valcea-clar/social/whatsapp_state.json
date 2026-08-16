@@ -22,7 +22,7 @@
   "identity_source": "valcea-clar/social/native_platform_identity_system.json",
   "identity_channel_id": "valcea-whatsapp",
   "interruption_budget_per_cycle": 1,
-  "selection_policy": "highest_public_utility_and_urgency_then_story_id",
+  "selection_policy": "highest_public_utility_and_urgency_then_editorial_priority_then_story_id",
   "selection_dimensions": [
     "public_safety",
     "traffic_and_mobility",
@@ -32,5 +32,9 @@
     "high_local_utility"
   ],
   "general_editorial_priority_alone_may_trigger_channel_update": false,
-  "active_selected_story_ids": []
+  "active_selected_story_ids": [
+    "luminos-fest-zavoi-20260815"
+  ],
+  "direct_publication_enabled": false,
+  "direct_publication_blocker": "whatsapp_verified_access_and_recipient_scope_not_configured"
 }
