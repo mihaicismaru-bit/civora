@@ -153,7 +153,9 @@ def self_test() -> int:
         "id": "test",
         "headline": "Lucrări locale importante",
         "dek": "O schimbare verificată pentru comunitate.",
-        "paragraphs": ["Documentația publică explică proiectul și impactul."],
+        "paragraphs": [
+            "Documentația publică explică proiectul, valoarea intervenției, calendarul și impactul local pentru locuitori."
+        ],
         "material_fact_gate": "PASS",
     }
     current_visual = {
