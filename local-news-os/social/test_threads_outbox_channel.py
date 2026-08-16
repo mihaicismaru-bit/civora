@@ -11,6 +11,7 @@ import copy
 import hashlib
 import json
 from pathlib import Path
+import sys
 import unittest
 
 import adapter_dispatch_bridge
@@ -255,5 +256,21 @@ class ThreadsOutboxAcceptance(unittest.TestCase):
         )
 
 
+class GitHubAnnotationResult(unittest.TextTestResult):
+    def _annotate(self, test: unittest.TestCase) -> None:
+        name = test.id().replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+        print(f"::error title=Threads acceptance failure::{name}", file=sys.stderr)
+
+    def addFailure(self, test: unittest.TestCase, err) -> None:
+        self._annotate(test)
+        super().addFailure(test, err)
+
+    def addError(self, test: unittest.TestCase, err) -> None:
+        self._annotate(test)
+        super().addError(test, err)
+
+
 if __name__ == "__main__":
-    unittest.main(verbosity=2)
+    suite = unittest.defaultTestLoader.loadTestsFromTestCase(ThreadsOutboxAcceptance)
+    result = unittest.TextTestRunner(verbosity=2, resultclass=GitHubAnnotationResult).run(suite)
+    raise SystemExit(0 if result.wasSuccessful() else 1)
