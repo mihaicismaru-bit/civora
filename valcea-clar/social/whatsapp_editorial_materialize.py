@@ -2,9 +2,11 @@
 """Materialize VÂLCEA CLAR WhatsApp editorial v1.1 into canonical outbox/state.
 
 Outbox-only. WhatsApp has an executable interruption budget: at most one current
-READY product is selected per materialization cycle, ranked by editorial
-priority. Other high-value candidates remain inspectable as HOLD_FREQUENCY. No
-recipient set or direct WhatsApp access is inferred or used.
+READY product is selected per materialization cycle. Selection is ranked first
+by interruption utility/urgency, not by general editorial importance; editorial
+priority is only a secondary tie-breaker. Other high-value candidates remain
+inspectable as HOLD_FREQUENCY. No recipient set or direct WhatsApp access is
+inferred or used.
 """
 from __future__ import annotations
 
@@ -20,7 +22,15 @@ ROOT = Path(__file__).resolve().parents[2]
 VC = ROOT / "valcea-clar"
 OUTBOX = VC / "social" / "whatsapp_outbox.json"
 STATE = VC / "social" / "whatsapp_state.json"
+PRESENCE = VC / "social" / "whatsapp_channel_presence.json"
 INTERRUPTION_BUDGET_PER_CYCLE = 1
+SELECTION_POLICY = "highest_public_utility_and_urgency_then_editorial_priority_then_story_id"
+UTILITY_RANK = {
+    "correction": 100,
+    "essential_service_utility": 95,
+    "weekend_utility": 80,
+    "essential_public_interest": 60,
+}
 
 
 def load(path: Path, default: dict[str, Any]) -> dict[str, Any]:
@@ -37,11 +47,16 @@ def write(path: Path, value: dict[str, Any]) -> None:
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def interruption_utility(product: dict[str, Any]) -> int:
+    return int(UTILITY_RANK.get(str(product.get("distribution_class") or ""), 0))
+
+
 def ranked_ready(products: list[dict[str, Any]]) -> list[dict[str, Any]]:
     ready = [product for product in products if product.get("status") == "READY"]
     return sorted(
         ready,
         key=lambda product: (
+            -interruption_utility(product),
             -int(product.get("priority") or 0),
             str(product.get("story_id") or ""),
         ),
@@ -90,6 +105,7 @@ def canonical_item(
         "format_family": product["format_family"],
         "distribution_class": product["distribution_class"],
         "priority": product["priority"],
+        "interruption_utility_score": interruption_utility(product),
         "message": product["message"],
         "max_message_chars": product["max_message_chars"],
         "product_fingerprint_sha256": product["product_fingerprint_sha256"],
@@ -103,7 +119,7 @@ def canonical_item(
     return {
         **payload,
         "status": "hold_frequency",
-        "hold_reason": "whatsapp_interruption_budget_lower_priority_same_cycle",
+        "hold_reason": "whatsapp_interruption_budget_lower_utility_same_cycle",
     }
 
 
@@ -138,6 +154,7 @@ def build() -> dict[str, Any]:
         )
         for product in source_products
     ]
+    presence = load(PRESENCE, {})
 
     outbox = load(OUTBOX, {
         "schema_version": "1.0",
@@ -159,8 +176,14 @@ def build() -> dict[str, Any]:
     outbox["identity_source"] = "valcea-clar/social/native_platform_identity_system.json"
     outbox["edition_recaps_are_publication_gates"] = False
     outbox["interruption_budget_per_cycle"] = INTERRUPTION_BUDGET_PER_CYCLE
-    outbox["selection_policy"] = "highest_editorial_priority_then_story_id"
+    outbox["selection_policy"] = SELECTION_POLICY
     outbox["active_selected_story_ids"] = sorted(selected_ids)
+    if presence.get("status") == "active" and presence.get("url"):
+        outbox["public_channel"] = {
+            "status": "active",
+            "url": presence["url"],
+            "direct_channel_publication_enabled": bool(presence.get("direct_channel_publication_enabled", False)),
+        }
     outbox["items"] = list(existing.values())
     write(OUTBOX, outbox)
 
@@ -171,17 +194,42 @@ def build() -> dict[str, Any]:
         "published": {},
         "failures": {},
     })
-    state["schema_version"] = "1.2"
+    state["schema_version"] = "1.3"
     state["platform"] = "whatsapp"
     state["execution_owner"] = "civora_site_engine"
     state["publication_model"] = "continuous_story_first"
     state["editorial_product_version"] = "whatsapp-editorial-v1.1"
     state["identity_source"] = "valcea-clar/social/native_platform_identity_system.json"
+    # Backwards-compatible direct-messaging gate. The public Channel is tracked
+    # separately below and must not be confused with Business Platform messaging.
     state["direct_publication_enabled"] = False
     state["direct_publication_blocker"] = "whatsapp_verified_access_and_recipient_scope_not_configured"
     state["interruption_budget_per_cycle"] = INTERRUPTION_BUDGET_PER_CYCLE
-    state["selection_policy"] = "highest_editorial_priority_then_story_id"
+    state["selection_policy"] = SELECTION_POLICY
+    state["selection_dimensions"] = [
+        "public_safety",
+        "traffic_and_mobility",
+        "utilities_and_service_disruption",
+        "time_sensitive_civic_information",
+        "major_verified_breaking_news",
+        "high_local_utility",
+    ]
+    state["general_editorial_priority_alone_may_trigger_channel_update"] = False
     state["active_selected_story_ids"] = sorted(selected_ids)
+    if presence.get("status") == "active" and presence.get("url"):
+        state["public_channel"] = {
+            "active": True,
+            "display_name": presence.get("display_name", "VÂLCEA CLAR"),
+            "url": presence["url"],
+            "channel_key": presence.get("channel_key"),
+            "direct_publication_enabled": bool(presence.get("direct_channel_publication_enabled", False)),
+            "direct_publication_blocker": presence.get("direct_channel_publication_blocker"),
+        }
+        state["business_messaging"] = {
+            "enabled": False,
+            "role": presence.get("business_platform_role", "future_opt_in_direct_alerts_and_conversations"),
+            "blocker": "business_platform_access_opt_in_and_recipient_scope_not_configured",
+        }
     state.setdefault("published", {})
     state.setdefault("failures", {})
     write(STATE, state)
@@ -195,42 +243,46 @@ def build() -> dict[str, Any]:
         "held_frequency": sum(1 for item in products if item.get("status") == "hold_frequency"),
         "held": sum(1 for item in products if item.get("status") == "hold"),
         "selected_story_ids": sorted(selected_ids),
+        "selection_policy": SELECTION_POLICY,
+        "public_channel_active": presence.get("status") == "active",
         "direct_publication_enabled": False,
     }
 
 
 def self_test() -> int:
-    high = {
-        "story_id": "high",
+    investigation = {
+        "story_id": "investigation",
         "status": "READY",
         "native_format": "text",
         "format_family": "direct_high_trust_update",
         "distribution_class": "essential_public_interest",
-        "priority": 90,
-        "message": "Un proiect public important.\n\nDetalii și surse: https://valceaclar.ro/stiri/high/",
-        "canonical_url": "https://valceaclar.ro/stiri/high/",
+        "priority": 95,
+        "message": "Un proiect public important.\n\nDetalii și surse: https://valceaclar.ro/stiri/investigation/",
+        "canonical_url": "https://valceaclar.ro/stiri/investigation/",
         "max_message_chars": 700,
         "product_fingerprint_sha256": "a" * 64,
     }
-    lower = {
-        **high,
-        "story_id": "lower",
-        "priority": 78,
-        "canonical_url": "https://valceaclar.ro/stiri/lower/",
+    service = {
+        **investigation,
+        "story_id": "service",
+        "distribution_class": "essential_service_utility",
+        "priority": 75,
+        "canonical_url": "https://valceaclar.ro/stiri/service/",
         "product_fingerprint_sha256": "b" * 64,
     }
-    ranked = ranked_ready([lower, high])
-    assert [p["story_id"] for p in ranked] == ["high", "lower"]
-    selected = canonical_item(high, selected=True, rank=1)
-    held_frequency = canonical_item(lower, selected=False, rank=2)
+    ranked = ranked_ready([investigation, service])
+    assert [p["story_id"] for p in ranked] == ["service", "investigation"]
+    selected = canonical_item(service, selected=True, rank=1)
+    held_frequency = canonical_item(investigation, selected=False, rank=2)
     assert selected["status"] == "outbox_ready"
     assert selected["recipient_scope_required_before_dispatch"] is True
     assert selected["direct_publication_enabled"] is False
     assert selected["generation_mode"] == "whatsapp_editorial_v1_1"
     assert selected["identity"]["channel_id"] == "valcea-whatsapp"
     assert selected["interruption_budget_per_cycle"] == 1
+    assert selected["interruption_utility_score"] > held_frequency["interruption_utility_score"]
     assert held_frequency["status"] == "hold_frequency"
-    assert held_frequency["hold_reason"] == "whatsapp_interruption_budget_lower_priority_same_cycle"
+    assert held_frequency["hold_reason"] == "whatsapp_interruption_budget_lower_utility_same_cycle"
     assert demote_previous_ready(selected)["status"] == "hold_frequency"
     held = canonical_item({
         "story_id": "y",
