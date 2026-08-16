@@ -252,7 +252,7 @@ def render_thumbnail(product: dict[str, Any], poster: Path, output: Path) -> Non
     if product.get("status") != "READY":
         raise ValueError("YouTube thumbnail may only be rendered for READY real-video product")
     identity = product_identity("youtube")
-    canvas = tuple(int(v) for v in identity["visual"]["thumbnail_canvas"])
+    canvas = tuple(int(v) for v in identity["thumbnail"]["canvas"])
     common = load_system()["common"]
     paper = tuple(int(v) for v in common["paper_rgb"])
     ink = tuple(int(v) for v in common["ink_rgb"])
