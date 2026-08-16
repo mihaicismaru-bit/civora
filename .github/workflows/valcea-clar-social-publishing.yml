@@ -76,6 +76,9 @@ jobs:
       - name: Build story products for outbox-only sister publications
         run: python valcea-clar/social/build_outbox_only_story_products.py
 
+      - name: Materialize canonical WhatsApp editorial product
+        run: python valcea-clar/social/whatsapp_editorial_materialize.py
+
       - name: Verify durable X materialization
         run: |
           python - <<'PY'
@@ -89,8 +92,11 @@ jobs:
               raise SystemExit('X state identity/model mismatch')
           if state.get('direct_publication_enabled') is not False:
               raise SystemExit('X falsely claims direct publication')
-          if state.get('blocker')!='x_api_pay_per_use_conflicts_zero_paid_dependency':
-              raise SystemExit('X zero-paid blocker missing')
+          if state.get('billing_approved') is not False:
+              raise SystemExit('X zero-paid policy requires billing to remain unapproved')
+          expected_blocker='x_api_pay_per_use_requires_explicit_credit_purchase_zero_paid_policy_keeps_direct_disabled'
+          if state.get('blocker')!=expected_blocker:
+              raise SystemExit('X zero-paid blocker contract mismatch')
           for item in outbox.get('items',[]):
               if not isinstance(item,dict): raise SystemExit('X non-object item')
               if item.get('publication_mode')!='durable_outbox_only': raise SystemExit('X direct mode leak')
@@ -111,15 +117,34 @@ jobs:
           registry=json.loads(Path('valcea-clar/social/series_registry.json').read_text(encoding='utf-8'))
           if outbox.get('platform')!='whatsapp' or outbox.get('publication_model')!='continuous_story_first': raise SystemExit('WhatsApp outbox mismatch')
           if state.get('platform')!='whatsapp' or state.get('publication_model')!='continuous_story_first': raise SystemExit('WhatsApp state mismatch')
+          if state.get('direct_publication_enabled') is not False: raise SystemExit('WhatsApp falsely claims direct publication')
+          expected_blocker='whatsapp_verified_access_and_recipient_scope_not_configured'
+          if state.get('direct_publication_blocker')!=expected_blocker: raise SystemExit('WhatsApp direct-publication blocker mismatch')
+          if state.get('interruption_budget_per_cycle')!=1: raise SystemExit('WhatsApp interruption budget mismatch')
           expected={'valcea-esential','weekend-in-valcea'}
           actual={row.get('series_id') for row in registry.get('channels',{}).get('valcea-whatsapp',[]) if isinstance(row,dict)}
           if actual!=expected: raise SystemExit(f'WhatsApp series mismatch: {sorted(actual)}')
+          allowed_status_formats={
+              'outbox_ready':'direct_high_trust_update',
+              'hold_frequency':'direct_high_trust_update',
+              'hold':'whatsapp_hold',
+          }
           for item in outbox.get('items',[]):
               if not isinstance(item,dict): raise SystemExit('WhatsApp non-object item')
-              if item.get('native_format')!='text' or item.get('format_family')!='message_update': raise SystemExit('WhatsApp native format mismatch')
+              if item.get('publication_mode')!='durable_outbox_only': raise SystemExit('WhatsApp direct mode leak')
+              if item.get('direct_publication_enabled') is not False: raise SystemExit('WhatsApp item falsely claims direct publication')
+              if item.get('direct_publication_blocker')!=expected_blocker: raise SystemExit('WhatsApp item blocker mismatch')
+              if item.get('native_format')!='text': raise SystemExit('WhatsApp native format mismatch')
+              status=item.get('status')
+              if status not in allowed_status_formats: raise SystemExit(f'WhatsApp status invalid: {status!r}')
+              if item.get('format_family')!=allowed_status_formats[status]: raise SystemExit('WhatsApp status/format mismatch')
               if item.get('fake_urgency_forbidden') is not True: raise SystemExit('WhatsApp urgency guard missing')
               if item.get('verbatim_cross_platform_reuse_allowed') is not False: raise SystemExit('WhatsApp cross-post guard missing')
               if item.get('recipient_scope_required_before_dispatch') is not True: raise SystemExit('WhatsApp recipient gate missing')
+              if status in {'outbox_ready','hold_frequency'}:
+                  message=item.get('message')
+                  if not isinstance(message,str) or not message.strip(): raise SystemExit('WhatsApp high-trust message missing')
+                  if len(message)>int(item.get('max_message_chars') or 700): raise SystemExit('WhatsApp message budget exceeded')
           print(f"WhatsApp materialization: PASS ({len(outbox.get('items',[]))} products; {len(actual)} series)")
           PY
 
