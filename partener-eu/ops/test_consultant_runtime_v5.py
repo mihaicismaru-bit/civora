@@ -13,21 +13,26 @@ assert "['Site public','Public site'].includes(mode.textContent.trim())" in js, 
 assert "mode.textContent.trim()==='Public site'" not in js, 'stale English-only activation remains'
 assert '＋ Adaugă firmă / organizație' in js
 assert 'Șterge din portofoliu' in js
+assert 'Editează / șterge organizația' in js
 assert "form.onsubmit=async" in js
 assert "state.clients.push(client)" in js
 assert "state.clients=state.clients.filter(c=>c.id!==removedId)" in js
 assert "await persistNow()" in js
 assert "deletedClientIds" in js
 assert "Radar de oportunități" in js
-assert "Condiții eliminatorii automate" in js
+assert "Condiții eliminatorii verificate automat" in js
 assert "VERIFICĂ ELIGIBILITATEA" in js
 assert "DE VERIFICAT" in js
-assert "const labels={OPEN:'DESCHIS'" in js
-assert "priorityLabel" in js
+assert "const labels={OPEN:'DESCHIS'" in js or 'CW3_STATUS_LABELS' in js
+assert "priorityLabel" in js or 'CW3_PRIORITY_LABELS' in js
 assert 'Selectează o firmă și intră în Profil' in js
 assert '.cw3ClientManageHint{' in css
+assert 'sarcini deschise' in js
+assert 'PREGĂTIRE RECOMANDATĂ' in js
+assert 'NU CONTINUA / BLOCAT' in js
+assert 'hard-gates explicabile' not in js
 
 version = re.search(r'consultant-workspace-v3\.js\?v=([^"\']+)', index)
-assert version and version.group(1) == '20260815-2145', f'unexpected consultant cache version: {version.group(1) if version else None}'
+assert version and version.group(1) == '20260816-0931', f'unexpected consultant cache version: {version.group(1) if version else None}'
 
-print('Consultant runtime v5 handoff + CRUD + Romanian UX: PASS')
+print('Consultant runtime v6 handoff + CRUD + Romanian UX: PASS')
