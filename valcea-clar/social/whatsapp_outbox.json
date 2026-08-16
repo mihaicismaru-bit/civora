@@ -37,8 +37,8 @@
         }
       },
       "edition_gate": false,
-      "selected_for_cycle": true,
-      "selection_rank": 1,
+      "selected_for_cycle": false,
+      "selection_rank": null,
       "native_format": "text",
       "format_family": "direct_high_trust_update",
       "distribution_class": "weekend_utility",
@@ -47,8 +47,8 @@
       "message": "Dacă ieși azi: Luminos Fest în Zăvoi\n\nIntrarea este liberă, iar evenimentul are loc în 15–16 august. Lampioanele plutitoare se rezervă separat, online.\n\nDetalii și surse: https://valceaclar.ro/stiri/luminos-fest-zavoi-20260815/",
       "max_message_chars": 700,
       "product_fingerprint_sha256": "a10466eb3ade3cd9a74cba0f94c5c437653801c78fc7d1a99caf1175362f0dbf",
-      "status": "outbox_ready",
-      "hold_reason": null
+      "status": "hold_frequency",
+      "hold_reason": "whatsapp_not_selected_in_current_cycle"
     },
     {
       "id": "whatsapp-story-florile-govorei-20260816",
@@ -127,8 +127,8 @@
         }
       },
       "edition_gate": false,
-      "selected_for_cycle": false,
-      "selection_rank": 2,
+      "selected_for_cycle": true,
+      "selection_rank": 1,
       "native_format": "text",
       "format_family": "direct_high_trust_update",
       "distribution_class": "essential_public_interest",
@@ -137,8 +137,8 @@
       "message": "Un proiect public de 44,37 mil. lei pe Olănești\n\nSMIS 334436 include, în zona Omniasig, un pod nou exclusiv pietonal și ciclist. Contractul principal: Ralunic + Dimex-2000 Company, 29,17 mil. lei fără TVA.\n\nImportant: documentele publice nu permit încă atribuirea exactă a lucrărilor vizibile unei firme anume.\n\nDetalii și surse: https://valceaclar.ro/stiri/olanesti-bridge-monitor/",
       "max_message_chars": 700,
       "product_fingerprint_sha256": "c3792fd3b983a7e8b9f5da0f0c1c3baef388063dd3589edb82ca74b36eb35282",
-      "status": "hold_frequency",
-      "hold_reason": "whatsapp_interruption_budget_lower_utility_same_cycle"
+      "status": "outbox_ready",
+      "hold_reason": null
     }
   ],
   "publication_model": "continuous_story_first",
@@ -149,7 +149,7 @@
   "interruption_budget_per_cycle": 1,
   "selection_policy": "highest_public_utility_and_urgency_then_editorial_priority_then_story_id",
   "active_selected_story_ids": [
-    "luminos-fest-zavoi-20260815"
+    "olanesti-bridge-monitor"
   ],
   "public_channel": {
     "status": "active",
