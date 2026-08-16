@@ -37,7 +37,9 @@ jobs:
           python-version: "3.13"
 
       - name: Rebuild durable story archive and live frontpage
+        shell: bash
         run: |
+          set -euo pipefail
           python valcea-clar/scripts/repair_continuous_frontpage.py --self-test
           python valcea-clar/scripts/repair_continuous_frontpage.py | tee /tmp/valcea-continuous-frontpage.json
           python valcea-clar/scripts/build_sites_export.py
@@ -55,18 +57,29 @@ jobs:
           manifest=json.loads((root/'site/runtime/stiri/manifest.json').read_text(encoding='utf-8'))
           homepage=(root/'site/runtime/index.html').read_text(encoding='utf-8')
 
+          expected={
+              'musiclover-green-day-20260815',
+              'luminos-fest-zavoi-20260815',
+              'florile-govorei-20260816',
+              'scm-valcea-slatina-20260815',
+              'olanesti-bridge-monitor',
+          }
           archive_ids=[str(item['id']) for item in archive.get('stories', [])]
           feed_ids=[str(item['id']) for item in feed.get('stories', [])]
           route_ids=[str(item['id']) for item in manifest.get('stories', [])]
 
           assert archive.get('publication_model') == 'continuous_story_first'
           assert archive.get('recap_editions_may_delete_published_stories') is False
+          assert archive.get('operational_records_public') is False
           assert feed.get('publication_model') == 'continuous_story_first'
           assert feed.get('policy', {}).get('published_story_persistence') is True
-          assert feed.get('story_count') == len(archive_ids)
+          assert feed.get('policy', {}).get('operational_records_hidden') is True
+          assert feed.get('story_count') == len(archive_ids) == 5
+          assert set(archive_ids) == expected
           assert archive_ids == feed_ids
-          assert set(archive_ids) == set(route_ids)
-          assert len(archive_ids) >= 3, f'continuous archive unexpectedly collapsed: {archive_ids}'
+          assert set(route_ids) == expected
+          assert 'unde-iesim-operational' not in archive_ids
+          assert 'source-radar-operational' not in archive_ids
           assert 'ACTUALIZAT LIVE' in homepage
           assert 'Alte știri importante' in homepage
           assert '<div class="cards"></div>' not in homepage
@@ -126,9 +139,12 @@ jobs:
           archive=json.loads((root/'site/story_archive.json').read_text(encoding='utf-8'))
           feed=json.loads((root/'site/runtime/live-feed.json').read_text(encoding='utf-8'))
           manifest=json.loads((root/'site/runtime/stiri/manifest.json').read_text(encoding='utf-8'))
-          assert feed.get('story_count') == archive.get('story_count')
-          assert {str(x['id']) for x in feed.get('stories', [])} == {str(x['id']) for x in manifest.get('stories', [])}
-          assert archive.get('story_count', 0) >= 3
+          ids={str(x['id']) for x in archive.get('stories', [])}
+          assert archive.get('story_count') == 5
+          assert feed.get('story_count') == 5
+          assert ids == {str(x['id']) for x in feed.get('stories', [])}
+          assert ids == {str(x['id']) for x in manifest.get('stories', [])}
+          assert not {'unde-iesim-operational','source-radar-operational'} & ids
           PY
 
             git add \
