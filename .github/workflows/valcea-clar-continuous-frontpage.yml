@@ -7,12 +7,16 @@ on:
     paths:
       - "valcea-clar/editions/**"
       - "valcea-clar/site/current_edition.json"
+      - "valcea-clar/editorial/publication_holds.json"
+      - "valcea-clar/scripts/newsroom_decide.py"
       - "valcea-clar/scripts/repair_continuous_frontpage.py"
       - ".github/workflows/valcea-clar-continuous-frontpage.yml"
   pull_request:
     paths:
       - "valcea-clar/editions/**"
       - "valcea-clar/site/current_edition.json"
+      - "valcea-clar/editorial/publication_holds.json"
+      - "valcea-clar/scripts/newsroom_decide.py"
       - "valcea-clar/scripts/repair_continuous_frontpage.py"
       - ".github/workflows/valcea-clar-continuous-frontpage.yml"
 
@@ -40,12 +44,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          python valcea-clar/scripts/newsroom_decide.py --self-test
           python valcea-clar/scripts/repair_continuous_frontpage.py --self-test
           python valcea-clar/scripts/repair_continuous_frontpage.py | tee /tmp/valcea-continuous-frontpage.json
           python valcea-clar/scripts/build_sites_export.py
           python valcea-clar/scripts/overlay_runtime_export.py
 
-      - name: Validate continuous story persistence
+      - name: Validate continuous story persistence and editorial holds
         run: |
           python - <<'PY'
           import json
@@ -56,14 +61,15 @@ jobs:
           feed=json.loads((root/'site/runtime/live-feed.json').read_text(encoding='utf-8'))
           manifest=json.loads((root/'site/runtime/stiri/manifest.json').read_text(encoding='utf-8'))
           homepage=(root/'site/runtime/index.html').read_text(encoding='utf-8')
+          holds=json.loads((root/'editorial/publication_holds.json').read_text(encoding='utf-8'))
 
           expected={
               'musiclover-green-day-20260815',
               'luminos-fest-zavoi-20260815',
               'florile-govorei-20260816',
               'scm-valcea-slatina-20260815',
-              'olanesti-bridge-monitor',
           }
+          held={str(row['story_id']) for row in holds.get('holds', []) if row.get('public_projection') is False}
           archive_ids=[str(item['id']) for item in archive.get('stories', [])]
           feed_ids=[str(item['id']) for item in feed.get('stories', [])]
           route_ids=[str(item['id']) for item in manifest.get('stories', [])]
@@ -74,10 +80,15 @@ jobs:
           assert feed.get('publication_model') == 'continuous_story_first'
           assert feed.get('policy', {}).get('published_story_persistence') is True
           assert feed.get('policy', {}).get('operational_records_hidden') is True
-          assert feed.get('story_count') == len(archive_ids) == 5
+          assert feed.get('story_count') == len(archive_ids) == 4
           assert set(archive_ids) == expected
           assert archive_ids == feed_ids
           assert set(route_ids) == expected
+          assert not held & set(archive_ids)
+          assert not held & set(feed_ids)
+          assert not held & set(route_ids)
+          assert 'olanesti-bridge-monitor' in held
+          assert not (root/'site/runtime/stiri/olanesti-bridge-monitor/index.html').is_file()
           assert 'unde-iesim-operational' not in archive_ids
           assert 'source-radar-operational' not in archive_ids
           assert 'ACTUALIZAT LIVE' in homepage
@@ -85,7 +96,7 @@ jobs:
           assert '<div class="cards"></div>' not in homepage
           for story_id in archive_ids:
               assert (root/'site/runtime/stiri'/story_id/'index.html').is_file(), story_id
-          print(json.dumps({'status':'PASS','stories':len(archive_ids),'ids':archive_ids}, ensure_ascii=False))
+          print(json.dumps({'status':'PASS','stories':len(archive_ids),'ids':archive_ids,'held':sorted(held)}, ensure_ascii=False))
           PY
 
       - name: Upload validated site payload
@@ -127,6 +138,7 @@ jobs:
             git reset --hard origin/main
             git clean -fd
 
+            python valcea-clar/scripts/newsroom_decide.py --self-test
             python valcea-clar/scripts/repair_continuous_frontpage.py --self-test
             python valcea-clar/scripts/repair_continuous_frontpage.py | tee /tmp/valcea-continuous-frontpage.json
             python valcea-clar/scripts/build_sites_export.py
@@ -139,11 +151,16 @@ jobs:
           archive=json.loads((root/'site/story_archive.json').read_text(encoding='utf-8'))
           feed=json.loads((root/'site/runtime/live-feed.json').read_text(encoding='utf-8'))
           manifest=json.loads((root/'site/runtime/stiri/manifest.json').read_text(encoding='utf-8'))
+          holds=json.loads((root/'editorial/publication_holds.json').read_text(encoding='utf-8'))
           ids={str(x['id']) for x in archive.get('stories', [])}
-          assert archive.get('story_count') == 5
-          assert feed.get('story_count') == 5
+          held={str(row['story_id']) for row in holds.get('holds', []) if row.get('public_projection') is False}
+          assert archive.get('story_count') == 4
+          assert feed.get('story_count') == 4
           assert ids == {str(x['id']) for x in feed.get('stories', [])}
           assert ids == {str(x['id']) for x in manifest.get('stories', [])}
+          assert not held & ids
+          assert 'olanesti-bridge-monitor' in held
+          assert not (root/'site/runtime/stiri/olanesti-bridge-monitor/index.html').is_file()
           assert not {'unde-iesim-operational','source-radar-operational'} & ids
           PY
 
