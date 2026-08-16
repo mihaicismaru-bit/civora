@@ -1,0 +1,77 @@
+name: LOCAL NEWS OS Observed Feedback Application
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/social/observed_metrics.py"
+      - "local-news-os/social/test_observed_metrics.py"
+      - "local-news-os/social/observed_feedback_application.py"
+      - "local-news-os/social/test_observed_feedback_application.py"
+      - "local-news-os/social/test_observed_feedback_production_runtime.py"
+      - "local-news-os/social/virality_engine.py"
+      - "local-news-os/social/test_virality_engine.py"
+      - "local-news-os/social/production_runtime.py"
+      - "local-news-os/social/test_production_runtime.py"
+      - "valcea-clar/social/channels/**"
+      - ".github/workflows/local-news-os-observed-feedback-application.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/social/observed_metrics.py"
+      - "local-news-os/social/test_observed_metrics.py"
+      - "local-news-os/social/observed_feedback_application.py"
+      - "local-news-os/social/test_observed_feedback_application.py"
+      - "local-news-os/social/test_observed_feedback_production_runtime.py"
+      - "local-news-os/social/virality_engine.py"
+      - "local-news-os/social/test_virality_engine.py"
+      - "local-news-os/social/production_runtime.py"
+      - "local-news-os/social/test_production_runtime.py"
+      - "valcea-clar/social/channels/**"
+      - ".github/workflows/local-news-os-observed-feedback-application.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-news-os-observed-feedback-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile observed-feedback runtime
+        run: |
+          python -m py_compile \
+            local-news-os/social/observed_metrics.py \
+            local-news-os/social/observed_feedback_application.py \
+            local-news-os/social/virality_engine.py \
+            local-news-os/social/production_runtime.py \
+            local-news-os/social/test_observed_metrics.py \
+            local-news-os/social/test_observed_feedback_application.py \
+            local-news-os/social/test_observed_feedback_production_runtime.py \
+            local-news-os/social/test_virality_engine.py \
+            local-news-os/social/test_production_runtime.py
+
+      - name: Run observed metrics regression
+        run: python local-news-os/social/test_observed_metrics.py
+
+      - name: Run bounded observed feedback acceptance
+        run: python local-news-os/social/test_observed_feedback_application.py
+
+      - name: Run Virality Engine regression
+        run: python local-news-os/social/test_virality_engine.py
+
+      - name: Run Production Runtime regression
+        run: python local-news-os/social/test_production_runtime.py
+
+      - name: Run observed feedback production integration
+        run: python local-news-os/social/test_observed_feedback_production_runtime.py
