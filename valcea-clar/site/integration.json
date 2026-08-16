@@ -1,27 +1,26 @@
 {
-  "schema_version": "2.1",
+  "schema_version": "2.2",
   "canonical_domain": "valceaclar.ro",
   "runtime": {
     "architecture": "static_shell_plus_live_github_feed",
-    "platform": "UNRESOLVED_MANAGED_PUBLIC_HOST",
-    "state": "BLOCKED_NO_MANAGED_PRODUCTION_DEPLOYMENT",
-    "production_url": null,
-    "deployment_id": null,
-    "last_known_vercel_url": "https://valcea-clar-autonom-j7n3yujb7-mihaicismaru-6634s-projects.vercel.app/",
-    "last_known_vercel_deployment_id": "dpl_AHPab5CHgfbN3WtpPjqqBCMLxZLy",
-    "custom_domain_status": "REQUIRES_EXTERNAL_PUBLICATION_AND_HTTP_ACCEPTANCE",
+    "platform": "EXISTING_PUBLIC_SITE_PRESENTATION_LAYER",
+    "state": "READY_HTTP_ACCEPTED",
+    "production_url": "https://valceaclar.ro/",
+    "deployment_id": "site_existing",
+    "custom_domain_status": "ACTIVE_HTTP_200",
     "content_source": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json",
     "content_refresh_seconds": 60,
     "redeploy_per_story_required": false,
     "paid_api_required": false,
     "llm_api_required": false,
     "chatgpt_sites_required": false,
-    "public_http_acceptance_required": true
+    "public_http_acceptance_required": true,
+    "public_http_acceptance_source": ".github/workflows/valcea-clar-public-health.yml"
   },
   "legacy_runtime": {
     "platform": "ChatGPT Sites",
-    "status": "EXTERNAL_PRESENTATION_LAYER_NOT_EXECUTION_OWNER",
-    "reason": "CIVORA owns newsroom generation, state and publication. Any external presentation layer must consume CIVORA outputs and pass remote HTTP acceptance before it is considered production delivery.",
+    "status": "ACTIVE_PRESENTATION_LAYER_NOT_EXECUTION_OWNER",
+    "reason": "CIVORA owns newsroom generation, state and publication; the existing public site consumes CIVORA outputs and is not an execution owner.",
     "content_updates_allowed": true,
     "execution_owner": false
   },
@@ -37,7 +36,9 @@
     "individual_story_is_primary_publication_unit": true,
     "edition_recaps_are_publication_gates": false,
     "homepage_source": "site/runtime/live-feed.json:stories[]",
-    "story_route_pattern": "/stiri/<story-id>/"
+    "story_route_pattern": "/stiri/<story-id>/",
+    "published_story_persistence": true,
+    "recap_may_remove_published_story": false
   },
   "current_edition": {
     "enabled": true,
