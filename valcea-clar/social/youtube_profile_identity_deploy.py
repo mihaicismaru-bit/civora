@@ -2,8 +2,9 @@
 """Fail-closed YouTube banner deployment for VÂLCEA CLAR profile identity.
 
 Default mode is dry-run. Live mutation requires BOTH --apply and the explicit
-runtime enable flag plus OAuth. The adapter performs remote readback and never
-persists credentials. Avatar mutation is deliberately out of scope.
+runtime enable flag plus OAuth. The adapter performs remote readback, preserves
+existing mutable channel branding metadata, and never persists credentials.
+Avatar mutation is deliberately out of scope.
 """
 from __future__ import annotations
 
@@ -30,6 +31,17 @@ API_BASE = "https://www.googleapis.com/youtube/v3"
 UPLOAD_BASE = "https://www.googleapis.com/upload/youtube/v3"
 LIVE_ENABLE_ENV = "VALCEA_YOUTUBE_PROFILE_LIVE_ENABLED"
 OAUTH_ENV = "VALCEA_YOUTUBE_OAUTH_ACCESS_TOKEN"
+# Current mutable brandingSettings.channel properties documented by YouTube.
+# Title is intentionally omitted: channels.update permits omitting it and
+# rejects attempts to change it through this flow.
+MUTABLE_CHANNEL_KEYS = (
+    "country",
+    "description",
+    "defaultLanguage",
+    "keywords",
+    "trackingAnalyticsAccountId",
+    "unsubscribedTrailer",
+)
 
 
 def load(path: Path) -> dict[str, Any]:
@@ -117,6 +129,22 @@ def banner_signature(channel: dict[str, Any]) -> dict[str, str]:
     }
 
 
+def mutable_channel_settings(channel: dict[str, Any]) -> dict[str, Any]:
+    branding = channel.get("brandingSettings") if isinstance(channel.get("brandingSettings"), dict) else {}
+    current = branding.get("channel") if isinstance(branding.get("channel"), dict) else {}
+    return {key: current[key] for key in MUTABLE_CHANNEL_KEYS if key in current}
+
+
+def update_payload(channel: dict[str, Any], banner_url: str) -> dict[str, Any]:
+    if not str(channel.get("id") or "").strip():
+        raise ValueError("channel id is required for banner update")
+    branding: dict[str, Any] = {"image": {"bannerExternalUrl": banner_url}}
+    current_channel = mutable_channel_settings(channel)
+    if current_channel:
+        branding["channel"] = current_channel
+    return {"id": channel["id"], "brandingSettings": branding}
+
+
 def upload_banner(token: str, path: Path, *, request_fn: Callable[..., Any] = urllib.request.urlopen) -> str:
     url = f"{UPLOAD_BASE}/channelBanners/insert?uploadType=media"
     headers = auth_headers(token)
@@ -136,11 +164,7 @@ def update_banner(
     *,
     request_fn: Callable[..., Any] = urllib.request.urlopen,
 ) -> dict[str, Any]:
-    branding = json.loads(json.dumps(channel.get("brandingSettings") or {}))
-    image = branding.get("image") if isinstance(branding.get("image"), dict) else {}
-    image["bannerExternalUrl"] = banner_url
-    branding["image"] = image
-    body = json.dumps({"id": channel["id"], "brandingSettings": branding}, ensure_ascii=False).encode("utf-8")
+    body = json.dumps(update_payload(channel, banner_url), ensure_ascii=False).encode("utf-8")
     headers = auth_headers(token)
     headers["Content-Type"] = "application/json; charset=utf-8"
     query = urllib.parse.urlencode({"part": "brandingSettings"})
@@ -166,23 +190,30 @@ def apply_banner(token: str, *, request_fn: Callable[..., Any] = urllib.request.
     asset = banner_contract(BANNER, deployment)
     before_channel = read_channel(token, request_fn=request_fn)
     before = banner_signature(before_channel)
+    before_metadata = mutable_channel_settings(before_channel)
     uploaded_url = upload_banner(token, BANNER, request_fn=request_fn)
     update = update_banner(token, before_channel, uploaded_url, request_fn=request_fn)
     after_channel = read_channel(token, request_fn=request_fn)
     after = banner_signature(after_channel)
+    after_metadata = mutable_channel_settings(after_channel)
     confirmed = readback_confirms(before, after, uploaded_url)
+    metadata_preserved = before_metadata == after_metadata
     result = {
-        "status": "CONFIRMED_REMOTE" if confirmed else "REMOTE_UPDATE_ACKNOWLEDGED_READBACK_INCONCLUSIVE",
+        "status": "CONFIRMED_REMOTE" if confirmed and metadata_preserved else "REMOTE_UPDATE_NOT_FULLY_CONFIRMED",
         "at": utc_now(),
         "channel_id": str(before_channel["id"]),
         "asset": asset,
         "update_acknowledged": str(update.get("id") or "") == str(before_channel["id"]),
         "remote_readback_confirmed": confirmed,
+        "channel_metadata_preserved": metadata_preserved,
+        "preserved_channel_field_count": len(before_metadata),
         "before_banner_present": any(bool(v) for v in before.values()),
         "after_banner_present": any(bool(v) for v in after.values()),
         "credential_persisted": False,
     }
     write_state(result)
+    if not metadata_preserved:
+        raise RuntimeError("YouTube banner update changed existing mutable channel branding metadata")
     if not confirmed:
         raise RuntimeError("YouTube accepted the banner update but remote readback did not yet confirm a changed banner")
     return result
@@ -200,6 +231,7 @@ def dry_run() -> dict[str, Any]:
         "live_status": youtube["live_status"],
         "live_apply_enabled": os.getenv(LIVE_ENABLE_ENV, "").strip().lower() == "true",
         "oauth_present": bool(os.getenv(OAUTH_ENV, "").strip()),
+        "preserves_existing_mutable_channel_branding": True,
         "credentials_logged": False,
         "remote_mutation_performed": False,
     }
@@ -214,6 +246,37 @@ def self_test() -> int:
     exact = dict(before)
     exact["bannerExternalUrl"] = "https://upload.example/temp"
     assert readback_confirms(before, exact, "https://upload.example/temp") is True
+
+    channel = {
+        "id": "UCfixture",
+        "brandingSettings": {
+            "channel": {
+                "title": "VÂLCEA CLAR",
+                "description": "Descriere existentă",
+                "country": "RO",
+                "keywords": "valcea stiri",
+                "defaultLanguage": "ro",
+                "unsubscribedTrailer": "abc123",
+                "nonMutableFixture": "do-not-send",
+            },
+            "image": {"bannerImageUrl": "https://old.example/banner.jpg"},
+        },
+    }
+    preserved = mutable_channel_settings(channel)
+    assert preserved == {
+        "country": "RO",
+        "description": "Descriere existentă",
+        "defaultLanguage": "ro",
+        "keywords": "valcea stiri",
+        "unsubscribedTrailer": "abc123",
+    }
+    payload = update_payload(channel, "https://upload.example/temp")
+    assert payload["id"] == "UCfixture"
+    assert payload["brandingSettings"]["channel"] == preserved
+    assert "title" not in payload["brandingSettings"]["channel"]
+    assert "nonMutableFixture" not in payload["brandingSettings"]["channel"]
+    assert payload["brandingSettings"]["image"] == {"bannerExternalUrl": "https://upload.example/temp"}
+
     headers = auth_headers("secret-fixture-token")
     assert headers["Authorization"].endswith("secret-fixture-token")
     assert "secret-fixture-token" not in json.dumps({"credential_persisted": False})
