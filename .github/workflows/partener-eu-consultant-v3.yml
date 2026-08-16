@@ -20,6 +20,7 @@ on:
       - 'partener-eu/ops/test_consultant_runtime_v5.py'
       - 'partener-eu/ops/fix_consultant_crud_v4.py'
       - 'partener-eu/ops/fix_consultant_runtime_v5.py'
+      - 'partener-eu/ops/fix_consultant_polish_v6.py'
       - '.github/workflows/partener-eu-consultant-v3.yml'
 
 concurrency:
@@ -45,10 +46,11 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Apply canonical Consultant CRUD and runtime repair
+      - name: Apply canonical Consultant repair and Romanian UX polish
         run: |
           python partener-eu/ops/fix_consultant_crud_v4.py
           python partener-eu/ops/fix_consultant_runtime_v5.py
+          python partener-eu/ops/fix_consultant_polish_v6.py
 
       - name: Rebuild direct MySMIS Consultant evidence
         run: python partener-eu/ingest/build_mysmis_consultant_registry.py
@@ -92,7 +94,7 @@ jobs:
               echo 'Consultant runtime already current.'
               exit 0
             fi
-            git commit -m 'Activate functional Consultant workspace and client CRUD'
+            git commit -m 'Polish functional Consultant workspace UX'
             if git push origin HEAD:main; then exit 0; fi
             sleep $((attempt * 2))
           done
