@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "channel_id": "valcea-telegram",
+  "instance_id": "valcea",
+  "platform": "telegram",
+  "status": "outbox_only",
+  "audience_promise": "Actualizări locale verificate, rapide și utile pentru Vâlcea, livrate compact pentru cititorii care vor să știe ce se schimbă acum fără zgomot, alarmism sau clickbait.",
+  "editorial_mix": {
+    "priorities": [
+      "verified_breaking_updates",
+      "service_journalism",
+      "civic_updates",
+      "infrastructure",
+      "local_events",
+      "public_money",
+      "local_places",
+      "sports_utility"
+    ],
+    "exclusions": [
+      "unverified_accusations",
+      "rage_bait",
+      "fake_urgency",
+      "fake_exclusivity",
+      "engagement_bait",
+      "synthetic_real_person_imagery",
+      "verbatim_cross_posting"
+    ]
+  },
+  "native_formats": [
+    "text",
+    "digest",
+    "alert",
+    "single_photo"
+  ],
+  "cadence": {
+    "timezone": "Europe/Bucharest",
+    "max_posts_per_day": 12,
+    "min_spacing_minutes": 20,
+    "quiet_hours": {
+      "start": "22:30",
+      "end": "06:30",
+      "breaking_override": true
+    }
+  },
+  "fatigue": {
+    "same_story_cooldown_hours": 4,
+    "max_related_posts_24h": 4
+  },
+  "media_policy": {
+    "real_media_only": true,
+    "provenance_required": true,
+    "reuse_rights_required": true,
+    "synthetic_real_person_forbidden": true
+  },
+  "link_policy": {
+    "mode": "native_preferred",
+    "canonical_hosts": [
+      "valceaclar.ro",
+      "www.valceaclar.ro"
+    ]
+  },
+  "series": [
+    {
+      "series_id": "valcea-acum",
+      "promise": "Un rezumat scurt al actualizărilor locale utile care merită știute acum."
+    },
+    {
+      "series_id": "ce-trebuie-sa-stii",
+      "promise": "Schimbări practice de program, trafic, utilități și administrație explicate compact și verificabil."
+    }
+  ],
+  "approval_gates": {
+    "low_risk_auto": true,
+    "reputational_human": true,
+    "corrections_priority": true
+  },
+  "credentials_ref": "none:telegram-publishing-access-not-verified",
+  "publication_state": {
+    "outbox_path": "valcea-clar/social/telegram_outbox.json",
+    "state_path": "valcea-clar/social/telegram_state.json",
+    "dedupe_by_id": true,
+    "last_known_good": true
+  },
+  "metrics": {
+    "observed_only": true,
+    "sources": []
+  },
+  "zero_paid_dependency": true
+}
