@@ -2,10 +2,11 @@
 """Fail-closed WhatsApp Business profile-photo deployment for VÂLCEA CLAR.
 
 Default mode is dry-run. Live mutation requires --apply, an explicit runtime
-enable flag, Meta app id, WhatsApp phone-number id and access token. The
-canonical PNG avatar is converted deterministically to JPEG for Meta's resumable
-upload flow. Upload handles and credentials are never persisted. A remote
-business-profile readback is mandatory before CONFIRMED_REMOTE is reported.
+enable flag, Meta app id, a Meta User Access Token for the resumable upload,
+WhatsApp phone-number id and WhatsApp Business access token for profile
+update/readback. The canonical PNG avatar is converted deterministically to JPEG.
+Upload handles and credentials are never persisted. Remote readback is mandatory
+before CONFIRMED_REMOTE is reported.
 """
 from __future__ import annotations
 
@@ -32,7 +33,8 @@ AVATAR = ASSET_DIR / "whatsapp-avatar.png"
 STATE = VC / "site" / "runtime" / "media" / "social" / "profile" / "whatsapp-profile-deployment-state.json"
 DEFAULT_GRAPH_VERSION = "v26.0"
 LIVE_ENABLE_ENV = "VALCEA_WHATSAPP_PROFILE_LIVE_ENABLED"
-TOKEN_ENV = "VALCEA_WHATSAPP_ACCESS_TOKEN"
+PROFILE_TOKEN_ENV = "VALCEA_WHATSAPP_ACCESS_TOKEN"
+UPLOAD_USER_TOKEN_ENV = "VALCEA_META_USER_ACCESS_TOKEN"
 PHONE_ID_ENV = "VALCEA_WHATSAPP_PHONE_NUMBER_ID"
 APP_ID_ENV = "VALCEA_META_APP_ID"
 GRAPH_VERSION_ENV = "VALCEA_WHATSAPP_GRAPH_VERSION"
@@ -85,14 +87,7 @@ def prepare_upload_jpeg(source: Path, destination: Path) -> dict[str, Any]:
     contract = source_asset_contract(source)
     with Image.open(source) as image:
         rgb = image.convert("RGB")
-        rgb.save(
-            destination,
-            "JPEG",
-            quality=94,
-            optimize=True,
-            progressive=True,
-            subsampling=0,
-        )
+        rgb.save(destination, "JPEG", quality=94, optimize=True, progressive=True, subsampling=0)
     with Image.open(destination) as converted:
         width, height = converted.size
         fmt = converted.format
@@ -109,9 +104,18 @@ def prepare_upload_jpeg(source: Path, destination: Path) -> dict[str, Any]:
     }
 
 
-def auth_headers(token: str) -> dict[str, str]:
+def bearer_headers(token: str) -> dict[str, str]:
     return {
         "Authorization": f"Bearer {token}",
+        "User-Agent": "ValceaClar-WhatsApp-ProfileIdentity/1.0",
+    }
+
+
+def upload_headers(token: str) -> dict[str, str]:
+    # Meta's resumable-upload examples explicitly use the User Access Token on
+    # the upload endpoint. Keep it distinct from the WhatsApp profile token.
+    return {
+        "Authorization": f"OAuth {token}",
         "User-Agent": "ValceaClar-WhatsApp-ProfileIdentity/1.0",
     }
 
@@ -141,17 +145,13 @@ def graph_url(version: str, path: str) -> str:
 
 
 def read_profile(
-    *,
-    version: str,
-    phone_number_id: str,
-    token: str,
+    *, version: str, phone_number_id: str, token: str,
     request_fn: Callable[..., Any] = urllib.request.urlopen,
 ) -> dict[str, Any]:
     query = urllib.parse.urlencode({"fields": "profile_picture_url"})
     req = urllib.request.Request(
         graph_url(version, f"{phone_number_id}/whatsapp_business_profile") + "?" + query,
-        headers=auth_headers(token),
-        method="GET",
+        headers=bearer_headers(token), method="GET",
     )
     return request_json(req, request_fn=request_fn)
 
@@ -169,20 +169,14 @@ def extract_profile_picture_url(payload: dict[str, Any]) -> str:
 
 
 def create_upload_session(
-    *,
-    version: str,
-    app_id: str,
-    token: str,
-    file_length: int,
-    mime_type: str,
+    *, version: str, app_id: str, upload_user_token: str,
+    file_length: int, mime_type: str,
     request_fn: Callable[..., Any] = urllib.request.urlopen,
 ) -> str:
     query = urllib.parse.urlencode({"file_length": str(file_length), "file_type": mime_type})
     req = urllib.request.Request(
         graph_url(version, f"{app_id}/uploads") + "?" + query,
-        data=b"",
-        headers=auth_headers(token),
-        method="POST",
+        data=b"", headers=bearer_headers(upload_user_token), method="POST",
     )
     payload = request_json(req, request_fn=request_fn)
     upload_id = str(payload.get("id") or "").strip()
@@ -192,20 +186,13 @@ def create_upload_session(
 
 
 def upload_file_data(
-    *,
-    version: str,
-    upload_id: str,
-    token: str,
-    jpeg: Path,
+    *, version: str, upload_id: str, upload_user_token: str, jpeg: Path,
     request_fn: Callable[..., Any] = urllib.request.urlopen,
 ) -> str:
-    headers = auth_headers(token)
+    headers = upload_headers(upload_user_token)
     headers.update({"Content-Type": "image/jpeg", "file_offset": "0"})
     req = urllib.request.Request(
-        graph_url(version, upload_id),
-        data=jpeg.read_bytes(),
-        headers=headers,
-        method="POST",
+        graph_url(version, upload_id), data=jpeg.read_bytes(), headers=headers, method="POST",
     )
     payload = request_json(req, request_fn=request_fn, timeout=90)
     handle = str(payload.get("h") or "").strip()
@@ -215,27 +202,18 @@ def upload_file_data(
 
 
 def update_profile_picture(
-    *,
-    version: str,
-    phone_number_id: str,
-    token: str,
-    picture_handle: str,
+    *, version: str, phone_number_id: str, token: str, picture_handle: str,
     request_fn: Callable[..., Any] = urllib.request.urlopen,
 ) -> dict[str, Any]:
     body = json.dumps(
-        {
-            "messaging_product": "whatsapp",
-            "profile_picture_handle": picture_handle,
-        },
+        {"messaging_product": "whatsapp", "profile_picture_handle": picture_handle},
         ensure_ascii=False,
     ).encode("utf-8")
-    headers = auth_headers(token)
+    headers = bearer_headers(token)
     headers["Content-Type"] = "application/json; charset=utf-8"
     req = urllib.request.Request(
         graph_url(version, f"{phone_number_id}/whatsapp_business_profile"),
-        data=body,
-        headers=headers,
-        method="POST",
+        data=body, headers=headers, method="POST",
     )
     return request_json(req, request_fn=request_fn)
 
@@ -250,69 +228,46 @@ def update_acknowledged(payload: dict[str, Any]) -> bool:
 
 
 def apply_profile_picture(
-    *,
-    version: str,
-    app_id: str,
-    phone_number_id: str,
-    token: str,
+    *, version: str, app_id: str, phone_number_id: str,
+    profile_token: str, upload_user_token: str,
     request_fn: Callable[..., Any] = urllib.request.urlopen,
 ) -> dict[str, Any]:
     source = source_asset_contract(AVATAR)
     before_payload = read_profile(
-        version=version,
-        phone_number_id=phone_number_id,
-        token=token,
-        request_fn=request_fn,
+        version=version, phone_number_id=phone_number_id, token=profile_token, request_fn=request_fn,
     )
     before_url = extract_profile_picture_url(before_payload)
     with tempfile.TemporaryDirectory() as raw:
         jpeg = Path(raw) / "whatsapp-avatar.jpg"
         upload = prepare_upload_jpeg(AVATAR, jpeg)
         upload_id = create_upload_session(
-            version=version,
-            app_id=app_id,
-            token=token,
-            file_length=int(upload["bytes"]),
-            mime_type="image/jpeg",
-            request_fn=request_fn,
+            version=version, app_id=app_id, upload_user_token=upload_user_token,
+            file_length=int(upload["bytes"]), mime_type="image/jpeg", request_fn=request_fn,
         )
         picture_handle = upload_file_data(
-            version=version,
-            upload_id=upload_id,
-            token=token,
-            jpeg=jpeg,
-            request_fn=request_fn,
+            version=version, upload_id=upload_id, upload_user_token=upload_user_token,
+            jpeg=jpeg, request_fn=request_fn,
         )
         update = update_profile_picture(
-            version=version,
-            phone_number_id=phone_number_id,
-            token=token,
-            picture_handle=picture_handle,
-            request_fn=request_fn,
+            version=version, phone_number_id=phone_number_id, token=profile_token,
+            picture_handle=picture_handle, request_fn=request_fn,
         )
     after_payload = read_profile(
-        version=version,
-        phone_number_id=phone_number_id,
-        token=token,
-        request_fn=request_fn,
+        version=version, phone_number_id=phone_number_id, token=profile_token, request_fn=request_fn,
     )
     after_url = extract_profile_picture_url(after_payload)
     ack = update_acknowledged(update)
     readback = bool(after_url)
     result = {
         "status": "CONFIRMED_REMOTE" if ack and readback else "REMOTE_UPDATE_NOT_FULLY_CONFIRMED",
-        "at": utc_now(),
-        "platform": "whatsapp",
-        "scope": "business_profile_picture",
-        "graph_version": version,
-        "asset": source,
-        "upload_transform": upload,
-        "update_acknowledged": ack,
-        "remote_readback_confirmed": readback,
+        "at": utc_now(), "platform": "whatsapp", "scope": "business_profile_picture",
+        "graph_version": version, "asset": source, "upload_transform": upload,
+        "update_acknowledged": ack, "remote_readback_confirmed": readback,
         "before_profile_picture_present": bool(before_url),
         "after_profile_picture_present": bool(after_url),
         "remote_picture_url_changed": bool(before_url and after_url and before_url != after_url),
-        "credential_persisted": False,
+        "profile_credential_persisted": False,
+        "upload_user_credential_persisted": False,
         "upload_handle_persisted": False,
     }
     write_state(result)
@@ -330,19 +285,15 @@ def dry_run() -> dict[str, Any]:
     with tempfile.TemporaryDirectory() as raw:
         upload = prepare_upload_jpeg(AVATAR, Path(raw) / "whatsapp-avatar.jpg")
     return {
-        "status": "DRY_RUN_READY",
-        "platform": "whatsapp",
-        "scope": "business_profile_picture",
-        "asset": source,
-        "upload_transform": upload,
-        "live_status": whatsapp["live_status"],
+        "status": "DRY_RUN_READY", "platform": "whatsapp", "scope": "business_profile_picture",
+        "asset": source, "upload_transform": upload, "live_status": whatsapp["live_status"],
         "live_apply_enabled": os.getenv(LIVE_ENABLE_ENV, "").strip().lower() == "true",
-        "access_token_present": bool(os.getenv(TOKEN_ENV, "").strip()),
+        "profile_access_token_present": bool(os.getenv(PROFILE_TOKEN_ENV, "").strip()),
+        "upload_user_access_token_present": bool(os.getenv(UPLOAD_USER_TOKEN_ENV, "").strip()),
         "phone_number_id_present": bool(os.getenv(PHONE_ID_ENV, "").strip()),
         "meta_app_id_present": bool(os.getenv(APP_ID_ENV, "").strip()),
         "graph_version": os.getenv(GRAPH_VERSION_ENV, "").strip() or DEFAULT_GRAPH_VERSION,
-        "remote_mutation_performed": False,
-        "credentials_logged": False,
+        "remote_mutation_performed": False, "credentials_logged": False,
     }
 
 
@@ -352,20 +303,22 @@ def self_test() -> int:
         target = Path(raw) / "avatar.jpg"
         Image.new("RGBA", (512, 512), (247, 246, 243, 255)).save(source, "PNG")
         transformed = prepare_upload_jpeg(source, target)
-        assert transformed["format"] == "JPEG"
-        assert transformed["mime_type"] == "image/jpeg"
+        assert transformed["format"] == "JPEG" and transformed["mime_type"] == "image/jpeg"
         assert (transformed["width"], transformed["height"]) == (512, 512)
         assert transformed["source_sha256"] == sha256(source)
         assert transformed["sha256"] == sha256(target)
-
     assert extract_profile_picture_url({"data": [{"profile_picture_url": "https://pps.example/a.jpg"}]}) == "https://pps.example/a.jpg"
     assert extract_profile_picture_url({"data": [{"business_profile": {"profile_picture_url": "https://pps.example/b.jpg"}}]}) == "https://pps.example/b.jpg"
     assert update_acknowledged({"success": True}) is True
     assert update_acknowledged({"data": [{"id": "profile"}]}) is True
-    headers = auth_headers("fixture-secret-token")
-    assert headers["Authorization"].endswith("fixture-secret-token")
-    persisted = {"credential_persisted": False, "upload_handle_persisted": False}
-    assert "fixture-secret-token" not in json.dumps(persisted)
+    assert bearer_headers("profile-secret")["Authorization"] == "Bearer profile-secret"
+    assert upload_headers("user-secret")["Authorization"] == "OAuth user-secret"
+    persisted = {
+        "profile_credential_persisted": False,
+        "upload_user_credential_persisted": False,
+        "upload_handle_persisted": False,
+    }
+    assert "profile-secret" not in json.dumps(persisted) and "user-secret" not in json.dumps(persisted)
     assert graph_url("v26.0", "123/uploads") == "https://graph.facebook.com/v26.0/123/uploads"
     print("VÂLCEA CLAR WhatsApp profile identity deployer self-test: PASS")
     return 0
@@ -385,7 +338,7 @@ def main() -> int:
         print(json.dumps({"status": "BLOCKED_LIVE_NOT_ENABLED", "required": f"{LIVE_ENABLE_ENV}=true"}, ensure_ascii=False))
         return 2
     missing = [
-        name for name in (TOKEN_ENV, PHONE_ID_ENV, APP_ID_ENV)
+        name for name in (PROFILE_TOKEN_ENV, UPLOAD_USER_TOKEN_ENV, PHONE_ID_ENV, APP_ID_ENV)
         if not os.getenv(name, "").strip()
     ]
     if missing:
@@ -395,7 +348,8 @@ def main() -> int:
         version=os.getenv(GRAPH_VERSION_ENV, "").strip() or DEFAULT_GRAPH_VERSION,
         app_id=os.getenv(APP_ID_ENV, "").strip(),
         phone_number_id=os.getenv(PHONE_ID_ENV, "").strip(),
-        token=os.getenv(TOKEN_ENV, "").strip(),
+        profile_token=os.getenv(PROFILE_TOKEN_ENV, "").strip(),
+        upload_user_token=os.getenv(UPLOAD_USER_TOKEN_ENV, "").strip(),
     )
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
