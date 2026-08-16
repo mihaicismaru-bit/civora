@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any
 
 import build_outbox_only_story_products as base
+from native_identity import product_identity
 
 ROOT = Path(__file__).resolve().parents[2]
 VC = ROOT / "valcea-clar"
@@ -92,7 +93,7 @@ def package(story: dict[str, Any], visual: dict[str, Any] | None) -> dict[str, A
             {"beat": "14-20s", "purpose": "document_fact", "on_screen": "SMIS 334436: pod nou pietonal + ciclist în zona Omniasig"},
             {"beat": "20-27s", "purpose": "attribution_boundary", "on_screen": "Nu atribuim lucrările vizibile unei firme fără documente suficiente"},
         ])
-    storyboard.append({"beat": "final", "purpose": "source", "on_screen": "Surse și context: valceaclar.ro"})
+    storyboard.append({"beat": "final", "purpose": "source", "on_screen": "VÂLCEA CLAR · valceaclar.ro"})
 
     status = "READY" if useful and media_ok else "HOLD_MEDIA" if useful else "HOLD"
     reason = None if status == "READY" else (media_reason if useful else utility_reason)
@@ -114,6 +115,7 @@ def package(story: dict[str, Any], visual: dict[str, Any] | None) -> dict[str, A
         "archive_as_current_forbidden": True,
         "music_dependency_required": False,
         "verbatim_cross_platform_reuse_allowed": False,
+        "identity": product_identity("tiktok"),
         "rendering_version": "tiktok-editorial-v1.0",
     }
     product["product_fingerprint_sha256"] = digest(product)
@@ -137,6 +139,7 @@ def build() -> dict[str, Any]:
         "schema_version": "1.0-preview",
         "platform": "tiktok",
         "execution_mode": "PREVIEW_ONLY_NO_NETWORK_CALLS",
+        "identity_source": "valcea-clar/social/native_platform_identity_system.json",
         "products": products,
         "ready": sum(1 for p in products if p.get("status") == "READY"),
         "held": sum(1 for p in products if p.get("status") != "READY"),
@@ -157,7 +160,12 @@ def self_test() -> int:
         "image_path": "x.jpg",
         "image": {"synthetic": False, "editor_approved": True, "contextual_archive": False},
     }
-    assert package(story, current_visual)["status"] == "READY"
+    product = package(story, current_visual)
+    assert product["status"] == "READY"
+    assert product["identity"]["channel_id"] == "valcea-tiktok"
+    assert product["identity"]["visual"]["brand_mark"] == "VC."
+    assert product["identity"]["visual"]["source_end_slate"] == "VÂLCEA CLAR · valceaclar.ro"
+    assert product["storyboard"][-1]["on_screen"] == "VÂLCEA CLAR · valceaclar.ro"
     archived = json.loads(json.dumps(current_visual))
     archived["image"]["contextual_archive"] = True
     assert package(story, archived)["status"] == "HOLD_MEDIA"

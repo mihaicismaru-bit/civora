@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[2]
 VC = ROOT / "valcea-clar"
 sys.path.insert(0, str(VC / "scripts"))
 from newsroom_decide import story_ready  # noqa: E402
+from native_identity import product_identity  # noqa: E402
 
 POINTER = VC / "site" / "current_edition.json"
 DECISION = VC / "site" / "newsroom_decision.json"
@@ -34,6 +35,7 @@ WHATSAPP_STATE = VC / "social" / "whatsapp_state.json"
 YOUTUBE_OUTBOX = VC / "social" / "youtube_outbox.json"
 YOUTUBE_STATE = VC / "social" / "youtube_state.json"
 BASE = "https://valceaclar.ro"
+IDENTITY_SOURCE = "valcea-clar/social/native_platform_identity_system.json"
 
 
 def load(path: Path, default=None):
@@ -312,10 +314,16 @@ def main() -> int:
 
     counts = {}
     for outbox_path, state_path, platform, factory in output_specs():
+        identity = product_identity(platform)
+        products = [factory(story) for story in stories]
+        for product in products:
+            product["identity"] = identity
         outbox = upsert(
             load(outbox_path, {"schema_version": "1.0", "platform": platform, "items": []}),
-            [factory(story) for story in stories],
+            products,
         )
+        outbox["identity_source"] = IDENTITY_SOURCE
+        outbox["identity_channel_id"] = identity["channel_id"]
         write(outbox_path, outbox)
         state = load(state_path, {
             "schema_version": "1.0",
@@ -325,12 +333,15 @@ def main() -> int:
             "failures": {},
         })
         state["publication_model"] = "continuous_story_first"
+        state["identity_source"] = IDENTITY_SOURCE
+        state["identity_channel_id"] = identity["channel_id"]
         write(state_path, state)
         counts[f"{platform}_products"] = len(stories)
 
     print(json.dumps({
         "status": "PASS",
         "publication_model": "continuous_story_first",
+        "identity_source": IDENTITY_SOURCE,
         "story_count": len(stories),
         **counts,
         "x_state": "OUTBOX_ONLY_X_API_PAY_PER_USE_BLOCKED_BY_ZERO_PAID_POLICY",
