@@ -5,7 +5,9 @@ Individual stories are the unit of distribution. Morning/evening recap items are
 never allowed to become the trigger, queue item or canonical social product. A
 story that is publishable on the site but lacks an approved story-specific
 photograph is kept in HOLD_MEDIA for visual channels; the site publication is
-not delayed.
+not delayed. Rights-cleared archival/context photographs are allowed only when
+they match the story subject and carry an explicit disclosure that is propagated
+into every visual-channel caption.
 """
 from __future__ import annotations
 
@@ -51,43 +53,69 @@ def canonical_link(story: dict) -> str:
     return f"{BASE}/stiri/{slug(str(story['id']))}/"
 
 
-def facebook_copy(story: dict) -> str:
+def visual_disclosure(visual: dict | None) -> str:
+    if not isinstance(visual, dict):
+        return ""
+    image = visual.get("image")
+    if not isinstance(image, dict):
+        return ""
+    note = str(image.get("editorial_note") or "").strip()
+    if image.get("contextual_archive") is True and not note:
+        raise RuntimeError("contextual archival visual requires editorial_note disclosure")
+    return note
+
+
+def facebook_copy(story: dict, visual: dict | None = None) -> str:
     section = str(story.get("section") or "ȘTIRI").replace("_", " ")
     headline = str(story.get("headline") or "").strip()
     dek = str(story.get("dek") or "").strip()
-    return "\n\n".join([
+    parts = [
         f"{section} | VÂLCEA CLAR",
         headline,
         dek,
+    ]
+    disclosure = visual_disclosure(visual)
+    if disclosure:
+        parts.append(disclosure)
+    parts.extend([
         "Detaliile și sursele verificate sunt în articol.",
         "#ValceaClar #Valcea #RamnicuValcea #StiriValcea",
     ])
+    return "\n\n".join(parts)
 
 
-def instagram_copy(story: dict) -> str:
+def instagram_copy(story: dict, visual: dict | None = None) -> str:
     headline = str(story.get("headline") or "").strip()
     dek = str(story.get("dek") or "").strip()
     section = str(story.get("section") or "ȘTIRI").replace("_", " ")
-    return "\n\n".join([
+    parts = [
         section,
         headline,
         dek,
+    ]
+    disclosure = visual_disclosure(visual)
+    if disclosure:
+        parts.append(disclosure)
+    parts.extend([
         "Contextul complet și sursele: valceaclar.ro",
         "#ValceaClar #Valcea #RamnicuValcea #StiriLocale",
     ])
+    return "\n\n".join(parts)
 
 
-def tiktok_copy(story: dict) -> tuple[str, str]:
+def tiktok_copy(story: dict, visual: dict | None = None) -> tuple[str, str]:
     headline = str(story.get("headline") or "").strip()
     dek = str(story.get("dek") or "").strip()
     title = headline[:90]
-    description = "\n\n".join([
-        headline,
-        dek,
+    parts = [headline, dek]
+    disclosure = visual_disclosure(visual)
+    if disclosure:
+        parts.append(disclosure)
+    parts.extend([
         "Detalii și surse pe valceaclar.ro.",
         "#ValceaClar #Valcea #StiriValcea",
     ])
-    return title, description
+    return title, "\n\n".join(parts)
 
 
 def find_visual(story: dict, visual_registry: dict) -> dict | None:
@@ -127,9 +155,9 @@ def story_item(story: dict, visual: dict | None, existing: dict | None) -> dict:
     item = existing if isinstance(existing, dict) else {}
     item_id = f"story-{story['id']}"
     link = canonical_link(story)
-    fb = facebook_copy(story)
-    ig = instagram_copy(story)
-    tt_title, tt_description = tiktok_copy(story)
+    fb = facebook_copy(story, visual)
+    ig = instagram_copy(story, visual)
+    tt_title, tt_description = tiktok_copy(story, visual)
 
     item.update({
         "id": item_id,
@@ -214,6 +242,7 @@ def main() -> int:
     outbox["policy"]["edition_recaps_are_social_queue_items"] = False
     outbox["policy"]["legacy_recap_outbox_policy"] = "removed_from_active_queue; historical evidence remains in platform state"
     outbox["policy"]["site_story_may_publish_before_social_media_ready"] = True
+    outbox["policy"]["archival_context_requires_explicit_disclosure"] = True
     write(OUTBOX, outbox)
 
     result = {
