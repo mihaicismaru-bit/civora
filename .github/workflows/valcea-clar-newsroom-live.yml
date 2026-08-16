@@ -42,6 +42,7 @@ jobs:
         run: |
           python valcea-clar/scripts/newsroom_decide.py --self-test
           python local-news-os/core/discover_primary_source_facts_fast.py --self-test
+          python local-news-os/core/discovery_health.py --self-test
 
       - name: Discover fresh primary-source candidates with bounded parallelism
         run: |
@@ -93,52 +94,10 @@ jobs:
               printf '{}\n' > /tmp/valcea-news-discovery-previous.json
             fi
 
-            if python - <<'PY'
-          import json
-          from pathlib import Path
-
-          def load(path):
-              try:
-                  return json.loads(Path(path).read_text(encoding='utf-8'))
-              except Exception:
-                  return {}
-
-          def error_class(value):
-              text = str(value or '')
-              return text.split(':', 1)[0].strip() if text else None
-
-          def signature(doc):
-              rows = []
-              for row in doc.get('sources', []):
-                  rows.append({
-                      'source_id': row.get('source_id'),
-                      'listing_ok': bool(row.get('listing_ok')),
-                      'links_examined': row.get('links_examined'),
-                      'article_failures': row.get('article_failures'),
-                      'facts': row.get('facts'),
-                      'error_class': error_class(row.get('error')),
-                  })
-              return {
-                  'schema_version': doc.get('schema_version'),
-                  'execution_mode': doc.get('execution_mode'),
-                  'instance_id': doc.get('instance_id'),
-                  'source_contract': doc.get('source_contract'),
-                  'publication_date_guard': doc.get('publication_date_guard'),
-                  'sources_total': doc.get('sources_total'),
-                  'sources_ok': doc.get('sources_ok'),
-                  'facts_admitted': doc.get('facts_admitted'),
-                  'sources': rows,
-              }
-
-          current = signature(load('/tmp/valcea-news-discovery-state.json'))
-          previous = signature(load('/tmp/valcea-news-discovery-previous.json'))
-          if current == previous:
-              print('Discovery health is materially unchanged; no ledger commit required.')
-              raise SystemExit(0)
-          print(json.dumps({'previous': previous, 'current': current}, ensure_ascii=False))
-          raise SystemExit(3)
-          PY
-            then
+            if python local-news-os/core/discovery_health.py \
+              --current "$current" \
+              --previous /tmp/valcea-news-discovery-previous.json \
+              --changed-exit-code 3; then
               exit 0
             else
               rc=$?
