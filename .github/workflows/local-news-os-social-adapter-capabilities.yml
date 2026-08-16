@@ -1,0 +1,75 @@
+name: LOCAL NEWS OS Adapter Capability Gate
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/social/adapter_capability_gate.py"
+      - "local-news-os/social/test_adapter_capability_gate.py"
+      - "local-news-os/social/adapter_dispatch_bridge.py"
+      - "local-news-os/social/production_runtime.py"
+      - "local-news-os/social/format_engine.py"
+      - "local-news-os/social/visual_router.py"
+      - "valcea-clar/social/adapter_capabilities.json"
+      - "valcea-clar/social/channel_registry.json"
+      - "valcea-clar/social/channels/**"
+      - "valcea-clar/social/*_publish.py"
+      - ".github/workflows/local-news-os-social-adapter-capabilities.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/social/adapter_capability_gate.py"
+      - "local-news-os/social/test_adapter_capability_gate.py"
+      - "local-news-os/social/adapter_dispatch_bridge.py"
+      - "local-news-os/social/production_runtime.py"
+      - "local-news-os/social/format_engine.py"
+      - "local-news-os/social/visual_router.py"
+      - "valcea-clar/social/adapter_capabilities.json"
+      - "valcea-clar/social/channel_registry.json"
+      - "valcea-clar/social/channels/**"
+      - "valcea-clar/social/*_publish.py"
+      - ".github/workflows/local-news-os-social-adapter-capabilities.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-news-os-adapter-capabilities-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile capability-aware dispatch boundary
+        run: |
+          python -m py_compile \
+            local-news-os/social/adapter_capability_gate.py \
+            local-news-os/social/test_adapter_capability_gate.py \
+            local-news-os/social/adapter_dispatch_bridge.py \
+            local-news-os/social/production_runtime.py \
+            local-news-os/social/publishing_adapters.py
+          python -m json.tool valcea-clar/social/adapter_capabilities.json >/dev/null
+
+      - name: Validate truthful installed-adapter capability registry
+        run: |
+          python local-news-os/social/adapter_capability_gate.py \
+            valcea-clar/social/adapter_capabilities.json \
+            valcea-clar/social/channel_registry.json \
+            --repo-root .
+
+      - name: Run adapter capability gate acceptance tests
+        run: python local-news-os/social/test_adapter_capability_gate.py
+
+      - name: Re-run canonical Adapter-Gated Dispatch Bridge regression suite
+        run: python local-news-os/social/test_adapter_dispatch_bridge.py
+
+      - name: Re-run canonical Durable Dispatch Executor regression suite
+        run: python local-news-os/social/test_durable_dispatch_executor.py

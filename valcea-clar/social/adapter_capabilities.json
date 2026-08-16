@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "instance_id": "valcea",
+  "policy": {
+    "fail_closed_on_capability_mismatch": true,
+    "durable_outbox_on_supported_channel_format_gap": true,
+    "credential_values_allowed": false,
+    "verbatim_cross_platform_reuse_allowed": false,
+    "zero_paid_dependency": true
+  },
+  "adapters": [
+    {
+      "platform": "facebook",
+      "channel_id": "valcea-facebook",
+      "adapter": "valcea-clar/social/facebook_publish.py",
+      "supported_native_formats": ["single_photo"],
+      "supported_media_kinds": ["photo"],
+      "max_media_assets": 1,
+      "completion_model": "immediate_remote_id",
+      "remote_reconciliation_supported": false
+    },
+    {
+      "platform": "instagram",
+      "channel_id": "valcea-instagram",
+      "adapter": "valcea-clar/social/instagram_publish.py",
+      "supported_native_formats": ["single_photo"],
+      "supported_media_kinds": ["photo"],
+      "max_media_assets": 1,
+      "completion_model": "immediate_remote_id",
+      "remote_reconciliation_supported": false
+    },
+    {
+      "platform": "tiktok",
+      "channel_id": "valcea-tiktok",
+      "adapter": "valcea-clar/social/tiktok_publish.py",
+      "supported_native_formats": ["single_photo"],
+      "supported_media_kinds": ["photo"],
+      "max_media_assets": 1,
+      "completion_model": "async_remote_status",
+      "remote_reconciliation_supported": true
+    }
+  ]
+}
