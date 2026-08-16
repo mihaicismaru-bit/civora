@@ -80,7 +80,8 @@ jobs:
             local-news-os/social/test_async_remote_dispatch.py \
             local-news-os/social/test_youtube_outbox_channel.py \
             local-news-os/social/test_threads_outbox_channel.py \
-            local-news-os/social/test_linkedin_outbox_channel.py
+            local-news-os/social/test_linkedin_outbox_channel.py \
+            local-news-os/social/test_telegram_outbox_channel.py
           python -m json.tool local-news-os/social/observed_metrics.schema.json >/dev/null
           python -m json.tool local-news-os/social/social_runtime_registry.json >/dev/null
 
@@ -147,6 +148,9 @@ jobs:
       - name: Run LinkedIn durable outbox acceptance tests
         run: python local-news-os/social/test_linkedin_outbox_channel.py
 
+      - name: Run Telegram durable outbox acceptance tests
+        run: python local-news-os/social/test_telegram_outbox_channel.py
+
       - name: Validate Vâlcea reference CHANNEL_CONFIG fixtures
         run: |
           python local-news-os/social/validate_channel_config.py \
@@ -166,6 +170,9 @@ jobs:
             --instance-root valcea-clar
           python local-news-os/social/validate_channel_config.py \
             valcea-clar/social/channels/linkedin.json \
+            --instance-root valcea-clar
+          python local-news-os/social/validate_channel_config.py \
+            valcea-clar/social/channels/telegram.json \
             --instance-root valcea-clar
 
       - name: Validate Vâlcea publishing adapter registry
@@ -195,7 +202,7 @@ jobs:
           spec.loader.exec_module(mod)
 
           registry = json.loads(Path('valcea-clar/social/series_registry.json').read_text(encoding='utf-8'))
-          for platform in ('facebook', 'instagram', 'tiktok', 'threads', 'linkedin'):
+          for platform in ('facebook', 'instagram', 'tiktok', 'threads', 'linkedin', 'telegram'):
               channel = json.loads(Path(f'valcea-clar/social/channels/{platform}.json').read_text(encoding='utf-8'))
               policies, errors = mod.channel_policies(channel, registry)
               if errors:
