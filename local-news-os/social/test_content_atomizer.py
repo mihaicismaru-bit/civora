@@ -85,6 +85,22 @@ def test_content_change_changes_fingerprint_and_atom_id() -> None:
     assert first_headline["atom_id"] != second_headline["atom_id"]
 
 
+def test_non_content_analytics_do_not_change_source_identity() -> None:
+    baseline_story = sample_story()
+    baseline_story.pop("analytics")
+    baseline = atomize_story(baseline_story)
+
+    noisy_story = copy.deepcopy(baseline_story)
+    noisy_story["analytics"] = {"views": 888888, "predicted_engagement": 0.99}
+    noisy_story["predicted_views"] = 123456789
+    noisy_story["virality_probability"] = 0.999
+    noisy_story["confidence"] = 12
+    noisy = atomize_story(noisy_story)
+
+    assert baseline["source_fingerprint_sha256"] == noisy["source_fingerprint_sha256"]
+    assert baseline["atoms"] == noisy["atoms"]
+
+
 def test_no_instance_contamination() -> None:
     result = atomize_story(sample_story())
     assert result["instance_id"] == "valcea"
@@ -136,6 +152,7 @@ def main() -> int:
         test_quotes_are_verbatim_only,
         test_deterministic_output,
         test_content_change_changes_fingerprint_and_atom_id,
+        test_non_content_analytics_do_not_change_source_identity,
         test_no_instance_contamination,
         test_blocked_material_gate_yields_no_atoms,
         test_missing_identity_fails_closed,
