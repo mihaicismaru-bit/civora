@@ -204,11 +204,23 @@
     },
     {
       "channel_id": "whatsapp",
-      "status": "blocked_until_verified_adapter_and_credentials",
+      "status": "outbox_only",
       "direct_publication_enabled": false,
       "publication_mode": "durable_outbox_only",
+      "config": "valcea-clar/social/channels/whatsapp.json",
       "adapter": null,
-      "credentials": null
+      "outbox": "valcea-clar/social/whatsapp_outbox.json",
+      "state": "valcea-clar/social/whatsapp_state.json",
+      "credentials": null,
+      "requirements": {
+        "story_event": true,
+        "native_essential_message": true,
+        "low_frequency_distribution": true,
+        "editor_approval": true,
+        "rights_metadata_when_visual_is_used": true,
+        "recipient_scope_policy_before_dispatch": true,
+        "verified_publishing_access": false
+      }
     }
   ]
 }
