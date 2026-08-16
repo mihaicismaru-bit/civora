@@ -56,6 +56,7 @@ jobs:
       - name: Rebuild canonical continuous story runtime
         run: |
           set -euo pipefail
+          python valcea-clar/scripts/newsroom_decide.py --self-test
           python valcea-clar/scripts/repair_continuous_frontpage.py --self-test
           python valcea-clar/scripts/repair_continuous_frontpage.py
       - name: Verify continuous story-first runtime contract
@@ -69,14 +70,15 @@ jobs:
           feed = json.loads((root / 'site/runtime/live-feed.json').read_text(encoding='utf-8'))
           manifest = json.loads((root / 'site/runtime/stiri/manifest.json').read_text(encoding='utf-8'))
           homepage = (root / 'site/runtime/index.html').read_text(encoding='utf-8')
+          holds = json.loads((root / 'editorial/publication_holds.json').read_text(encoding='utf-8'))
 
           expected = {
               'musiclover-green-day-20260815',
               'luminos-fest-zavoi-20260815',
               'florile-govorei-20260816',
               'scm-valcea-slatina-20260815',
-              'olanesti-bridge-monitor',
           }
+          held = {str(row['story_id']) for row in holds.get('holds', []) if row.get('public_projection') is False}
           archive_ids = [str(item['id']) for item in archive.get('stories', [])]
           feed_ids = [str(item['id']) for item in feed.get('stories', [])]
           route_ids = [str(item['id']) for item in manifest.get('stories', [])]
@@ -88,10 +90,15 @@ jobs:
           assert feed.get('policy', {}).get('published_story_persistence') is True
           assert feed.get('policy', {}).get('edition_fields_are_compatibility_only') is True
           assert feed.get('policy', {}).get('operational_records_hidden') is True
-          assert archive.get('story_count') == feed.get('story_count') == 5
+          assert archive.get('story_count') == feed.get('story_count') == 4
           assert set(archive_ids) == expected
           assert archive_ids == feed_ids
           assert set(route_ids) == expected
+          assert not held & set(archive_ids)
+          assert not held & set(feed_ids)
+          assert not held & set(route_ids)
+          assert 'olanesti-bridge-monitor' in held
+          assert not (root / 'site/runtime/stiri/olanesti-bridge-monitor/index.html').is_file()
           assert 'unde-iesim-operational' not in archive_ids
           assert 'source-radar-operational' not in archive_ids
           assert 'ACTUALIZAT LIVE' in homepage
@@ -144,15 +151,15 @@ jobs:
           assert (root / 'site/integration.json').is_file()
           live_feed = json.loads((root / 'live-feed.json').read_text(encoding='utf-8'))
           assert live_feed.get('publication_model') == 'continuous_story_first'
-          assert live_feed.get('story_count') == 5
+          assert live_feed.get('story_count') == 4
           for story_id in (
               'musiclover-green-day-20260815',
               'luminos-fest-zavoi-20260815',
               'florile-govorei-20260816',
               'scm-valcea-slatina-20260815',
-              'olanesti-bridge-monitor',
           ):
               assert (root / 'stiri' / story_id / 'index.html').is_file(), story_id
+          assert not (root / 'stiri' / 'olanesti-bridge-monitor' / 'index.html').is_file()
           for item in manifest['files']:
               assert (root / item['path']).is_file(), item['path']
           print('ChatGPT Sites synchronization and continuous story integration: PASS')
