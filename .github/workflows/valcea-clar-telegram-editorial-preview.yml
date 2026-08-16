@@ -1,0 +1,67 @@
+name: VÂLCEA CLAR Telegram Editorial Preview
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/social/telegram_editorial_v1.py"
+      - "valcea-clar/social/telegram_outbox.json"
+      - "valcea-clar/site/current_edition.json"
+      - "valcea-clar/site/newsroom_decision.json"
+      - "valcea-clar/site/story_publication_event.json"
+      - "valcea-clar/editions/**"
+      - ".github/workflows/valcea-clar-telegram-editorial-preview.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Self-test Telegram packaging
+        run: python valcea-clar/social/telegram_editorial_v1.py --self-test
+      - name: Build Telegram-native previews
+        run: python valcea-clar/social/telegram_editorial_v1.py
+      - name: Validate high-signal fixtures
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          value=json.loads(Path('valcea-clar/social/previews/telegram-v1/manifest.json').read_text(encoding='utf-8'))
+          if value.get('execution_mode')!='PREVIEW_ONLY_NO_NETWORK_CALLS':
+              raise SystemExit('Telegram preview network-call guard missing')
+          products={p['story_id']:p for p in value.get('products',[]) if isinstance(p,dict)}
+          gov=products.get('florile-govorei-20260816')
+          if not gov or gov.get('status')!='HOLD':
+              raise SystemExit('Florile Govorei Telegram signal gate failed')
+          lum=products.get('luminos-fest-zavoi-20260815')
+          if not lum or lum.get('status')!='READY' or lum.get('format_family')!='event_utility':
+              raise SystemExit('Luminos Telegram utility fixture failed')
+          if not lum.get('message','').startswith('Zăvoi, azi: intrare liberă la Luminos Fest'):
+              raise SystemExit('Luminos Telegram headline is not useful enough')
+          ola=products.get('olanesti-bridge-monitor')
+          if not ola or ola.get('status')!='READY' or ola.get('format_family')!='public_interest_update':
+              raise SystemExit('Olănești Telegram public-interest fixture failed')
+          text=ola.get('message','')
+          for expected in ('44,37 mil. lei','Ralunic + Dimex-2000 Company','SMIS 334436'):
+              if expected not in text:
+                  raise SystemExit(f'Olănești Telegram missing: {expected}')
+          if '#' in text:
+              raise SystemExit('Telegram generic hashtag footer detected')
+          if len(text)>1050:
+              raise SystemExit('Telegram message budget exceeded')
+          print(f"Telegram editorial preview: PASS ({value['ready']} READY / {value['held']} HOLD)")
+          PY
+      - name: Upload Telegram editorial preview
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-telegram-editorial-v1-${{ github.run_id }}
+          path: valcea-clar/social/previews/telegram-v1
+          if-no-files-found: error
+          retention-days: 14
