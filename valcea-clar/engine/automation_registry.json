@@ -26,10 +26,10 @@
       "kind": "content_generation_and_publication",
       "workflow": ".github/workflows/valcea-clar-editions.yml",
       "schedule": [
-        "45 4,5 * * *",
-        "30 15,16 * * *"
+        "45,55 4,5,6 * * *",
+        "30,40 15,16,17 * * *"
       ],
-      "timezone_gate": "Europe/Bucharest targets 07:45 and 18:30; cron identity fixes the intended slot; same-day recovery windows 07:30-14:59 and 18:15-23:59 with publishable-edition idempotency per local date/slot",
+      "timezone_gate": "Europe/Bucharest targets 07:45 and 18:30; redundant 10-minute and later UTC recovery candidates cover scheduler delay and DST; same-day recovery windows 07:30-14:59 and 18:15-23:59 with publishable-edition idempotency per local date/slot",
       "owner": "site_engine"
     },
     {
