@@ -1,12 +1,8 @@
 #!/usr/bin/env python3
-"""Materialize VÂLCEA CLAR monitor health without turning signals into news.
+"""Materialize durable VÂLCEA CLAR monitor health.
 
-The ledger is intentionally conservative:
-- existing automatic news sources reuse the newsroom discovery-health ledger;
-- manual-watch sources remain manual and are never auto-promoted;
-- explicit monitor URLs may be probed for a bounded text fingerprint;
-- a page change is only a review signal, never a factual assertion or publication event;
-- recovered leads survive indefinitely until an explicit terminal state is committed.
+Signals are review inputs only. They never bypass normal story_ready verification,
+never publish directly, and never disappear because an edition or homepage turns over.
 """
 from __future__ import annotations
 
@@ -23,64 +19,51 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = ROOT.parent
-REGISTRY_PATH = ROOT / "editorial" / "monitor_registry.json"
-NEWS_SOURCES_PATH = ROOT / "editorial" / "news_sources.json"
-MANUAL_SOURCES_PATH = ROOT / "editorial" / "manual_watch_sources.json"
-DISCOVERY_STATE_PATH = ROOT / "editorial" / "news_discovery_state.json"
-DEFAULT_STATE_PATH = ROOT / "editorial" / "monitor_state.json"
+REGISTRY = ROOT / "editorial" / "monitor_registry.json"
+NEWS = ROOT / "editorial" / "news_sources.json"
+MANUAL = ROOT / "editorial" / "manual_watch_sources.json"
+DISCOVERY = ROOT / "editorial" / "news_discovery_state.json"
+DEFAULT_OUTPUT = ROOT / "editorial" / "monitor_state.json"
 USER_AGENT = "VALCEA-CLAR-Monitor-Ledger/1.0 (+https://valceaclar.ro/)"
-MAX_BODY = 2_000_000
 
 
 def load(path: Path, default: Any = None) -> Any:
-    if not path.is_file():
-        return default
-    return json.loads(path.read_text(encoding="utf-8"))
+    return json.loads(path.read_text(encoding="utf-8")) if path.is_file() else default
 
 
-def now_iso() -> str:
+def utc_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
-def normalize_text(raw: str) -> str:
+def text_only(raw: str) -> str:
     raw = re.sub(r"(?is)<script\b[^>]*>.*?</script>", " ", raw)
     raw = re.sub(r"(?is)<style\b[^>]*>.*?</style>", " ", raw)
     raw = re.sub(r"(?s)<[^>]+>", " ", raw)
-    raw = html.unescape(raw)
-    raw = raw.replace("\u00a0", " ")
-    return re.sub(r"\s+", " ", raw).strip()
+    return re.sub(r"\s+", " ", html.unescape(raw).replace("\u00a0", " ")).strip()
 
 
-def fingerprint_scope(text: str, terms: list[str]) -> tuple[str, int]:
+def scoped_fingerprint(text: str, terms: list[str]) -> tuple[str, int]:
     folded = text.casefold()
-    parts: list[str] = []
-    matches = 0
-    for term in terms:
-        needle = str(term).strip().casefold()
-        if not needle:
+    windows: list[str] = []
+    hits = 0
+    for raw_term in terms:
+        term = raw_term.strip().casefold()
+        if not term:
             continue
         start = 0
-        per_term = 0
-        while per_term < 8:
-            idx = folded.find(needle, start)
+        for _ in range(8):
+            idx = folded.find(term, start)
             if idx < 0:
                 break
-            left = max(0, idx - 350)
-            right = min(len(text), idx + len(needle) + 700)
-            parts.append(text[left:right])
-            matches += 1
-            per_term += 1
-            start = idx + max(1, len(needle))
-    if terms:
-        scope = " | ".join(parts) if parts else "__NO_MATCH__"
-    else:
-        scope = text[:250_000]
-    digest = hashlib.sha256(scope.encode("utf-8", errors="replace")).hexdigest()
-    return digest, matches
+            windows.append(text[max(0, idx - 350): min(len(text), idx + len(term) + 700)])
+            hits += 1
+            start = idx + max(1, len(term))
+    scope = " | ".join(windows) if windows else ("__NO_MATCH__" if terms else text[:250_000])
+    return hashlib.sha256(scope.encode("utf-8", errors="replace")).hexdigest(), hits
 
 
-def fetch_probe(url: str, terms: list[str], timeout: int = 18) -> dict[str, Any]:
-    req = urllib.request.Request(
+def probe(url: str, terms: list[str], timeout: int = 18) -> dict[str, Any]:
+    request = urllib.request.Request(
         url,
         headers={
             "User-Agent": USER_AGENT,
@@ -89,115 +72,40 @@ def fetch_probe(url: str, terms: list[str], timeout: int = 18) -> dict[str, Any]
         },
     )
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as response:
-            body = response.read(MAX_BODY).decode("utf-8", errors="replace")
-            text = normalize_text(body)
-            fingerprint, matches = fingerprint_scope(text, terms)
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            raw = response.read(2_000_000).decode("utf-8", errors="replace")
+            fingerprint, hits = scoped_fingerprint(text_only(raw), terms)
             return {
                 "reachable": True,
                 "http_status": int(response.status),
                 "final_url": str(response.geturl()),
                 "fingerprint": fingerprint,
-                "match_count": matches,
-                "bytes_read": min(len(body.encode("utf-8", errors="replace")), MAX_BODY),
+                "match_count": hits,
                 "error": None,
             }
     except urllib.error.HTTPError as exc:
-        return {
-            "reachable": False,
-            "http_status": int(exc.code),
-            "final_url": url,
-            "fingerprint": None,
-            "match_count": 0,
-            "bytes_read": 0,
-            "error": f"HTTP {exc.code}",
-        }
+        return {"reachable": False, "http_status": int(exc.code), "fingerprint": None, "match_count": 0, "error": f"HTTP {exc.code}"}
     except Exception as exc:
-        return {
-            "reachable": False,
-            "http_status": None,
-            "final_url": url,
-            "fingerprint": None,
-            "match_count": 0,
-            "bytes_read": 0,
-            "error": f"{type(exc).__name__}: {exc}",
-        }
+        return {"reachable": False, "http_status": None, "fingerprint": None, "match_count": 0, "error": f"{type(exc).__name__}: {exc}"}
 
 
 def prior_source(previous: dict[str, Any], monitor_id: str, source_id: str) -> dict[str, Any] | None:
     for monitor in previous.get("monitors") or []:
-        if monitor.get("id") != monitor_id:
-            continue
-        for source in monitor.get("sources") or []:
-            if source.get("id") == source_id:
-                return source
+        if monitor.get("id") == monitor_id:
+            return next((row for row in monitor.get("sources") or [] if row.get("id") == source_id), None)
     return None
 
 
-def source_from_discovery(binding: dict[str, Any], discovery_by_id: dict[str, dict[str, Any]]) -> dict[str, Any]:
+def semantic(state: dict[str, Any]) -> dict[str, Any]:
+    clone = json.loads(json.dumps(state, ensure_ascii=False))
+    clone.pop("generated_at", None)
+    clone.pop("last_live_probe_at", None)
+    return clone
+
+
+def direct_source(binding: dict[str, Any], previous: dict[str, Any], monitor_id: str, live: bool) -> dict[str, Any]:
     sid = str(binding["id"])
-    row = discovery_by_id.get(sid)
-    if row is None:
-        return {
-            "id": sid,
-            "ref_type": "news_source_id",
-            "health": "UNKNOWN_NO_DISCOVERY_STATE",
-            "change": "NO_CHANGE_SIGNAL",
-            "facts": 0,
-        }
-    ok = bool(row.get("listing_ok"))
-    return {
-        "id": sid,
-        "ref_type": "news_source_id",
-        "health": "OK" if ok else "DEGRADED",
-        "change": "NO_CHANGE_SIGNAL",
-        "facts": int(row.get("facts") or 0),
-        "links_examined": row.get("links_examined"),
-        "article_failures": row.get("article_failures"),
-        "error": row.get("error"),
-    }
-
-
-def source_from_manual(binding: dict[str, Any], manual_by_id: dict[str, dict[str, Any]]) -> dict[str, Any]:
-    sid = str(binding["id"])
-    row = manual_by_id.get(sid)
-    if row is None:
-        return {
-            "id": sid,
-            "ref_type": "manual_watch_source_id",
-            "health": "MISSING_SOURCE_BINDING",
-            "change": "NO_CHANGE_SIGNAL",
-        }
-    return {
-        "id": sid,
-        "ref_type": "manual_watch_source_id",
-        "health": "MANUAL_WATCH",
-        "change": "NO_CHANGE_SIGNAL",
-        "source_status": row.get("status"),
-        "checked_at": row.get("checked_at"),
-        "url": row.get("url"),
-    }
-
-
-def source_from_investigation(binding: dict[str, Any]) -> dict[str, Any]:
-    rel = str(binding.get("path") or "")
-    path = REPO_ROOT / rel
-    return {
-        "id": str(binding["id"]),
-        "ref_type": "investigation_file",
-        "health": "PRESENT" if path.is_file() else "MISSING",
-        "change": "NO_CHANGE_SIGNAL",
-        "path": rel,
-    }
-
-
-def direct_source(
-    binding: dict[str, Any],
-    previous: dict[str, Any],
-    monitor_id: str,
-    live: bool,
-) -> dict[str, Any]:
-    sid = str(binding["id"])
+    old = prior_source(previous, monitor_id, sid) or {}
     base = {
         "id": sid,
         "ref_type": "url",
@@ -208,108 +116,107 @@ def direct_source(
     if not binding.get("probe"):
         return {**base, "health": "REGISTERED_NO_PROBE", "change": "NO_CHANGE_SIGNAL"}
     if not live:
-        old = prior_source(previous, monitor_id, sid)
-        if old and old.get("fingerprint"):
-            return {**old, **base, "health": old.get("health", "OFFLINE_PRESERVED"), "change": "OFFLINE_PRESERVED"}
-        return {**base, "health": "UNPROBED_OFFLINE", "change": "NO_BASELINE", "fingerprint": None, "match_count": None}
+        return {**old, **base} if old else {**base, "health": "UNPROBED_OFFLINE", "change": "NO_BASELINE", "fingerprint": None, "match_count": None}
 
-    result = fetch_probe(str(binding.get("url")), [str(x) for x in binding.get("match_terms") or []])
-    old = prior_source(previous, monitor_id, sid)
-    old_fp = (old or {}).get("fingerprint")
-    new_fp = result.get("fingerprint")
+    result = probe(str(binding.get("url")), [str(term) for term in binding.get("match_terms") or []])
     if not result["reachable"]:
-        change = "PROBE_FAILED"
-        health = "UNREACHABLE"
-    elif old_fp is None:
+        return {**base, **result, "health": "UNREACHABLE", "change": "PROBE_FAILED"}
+
+    old_fp = old.get("fingerprint")
+    new_fp = result.get("fingerprint")
+    if old_fp is None:
         change = "NEW_BASELINE"
-        health = "OK"
     elif old_fp != new_fp:
         change = "CHANGED_REVIEW_REQUIRED"
-        health = "OK"
+    elif old.get("change") == "CHANGED_REVIEW_REQUIRED":
+        # A detected change remains actionable until a future explicit review/ack
+        # contract clears it. Repeated identical probes must not silently erase it.
+        change = "CHANGED_REVIEW_REQUIRED"
     else:
         change = "UNCHANGED"
-        health = "OK"
-    return {**base, **result, "health": health, "change": change}
-
-
-def semantic_state(state: dict[str, Any]) -> dict[str, Any]:
-    clone = json.loads(json.dumps(state, ensure_ascii=False))
-    clone.pop("generated_at", None)
-    clone.pop("last_live_probe_at", None)
-    for monitor in clone.get("monitors") or []:
-        for source in monitor.get("sources") or []:
-            source.pop("bytes_read", None)
-    return clone
+    return {**base, **result, "health": "OK", "change": change}
 
 
 def build(live: bool, previous: dict[str, Any]) -> dict[str, Any]:
-    registry = load(REGISTRY_PATH, {})
-    news = load(NEWS_SOURCES_PATH, {})
-    manual = load(MANUAL_SOURCES_PATH, {})
-    discovery = load(DISCOVERY_STATE_PATH, {})
-    news_by_id = {str(row.get("id")): row for row in news.get("sources") or []}
-    manual_by_id = {str(row.get("id")): row for row in manual.get("sources") or []}
-    discovery_by_id = {str(row.get("source_id")): row for row in discovery.get("sources") or []}
+    registry = load(REGISTRY, {}) or {}
+    news = {str(row.get("id")): row for row in (load(NEWS, {}) or {}).get("sources") or []}
+    manual = {str(row.get("id")): row for row in (load(MANUAL, {}) or {}).get("sources") or []}
+    discovery_doc = load(DISCOVERY, {}) or {}
+    discovery = {str(row.get("source_id")): row for row in discovery_doc.get("sources") or []}
 
     monitors_out: list[dict[str, Any]] = []
     for monitor in registry.get("monitors") or []:
         mid = str(monitor["id"])
-        source_rows: list[dict[str, Any]] = []
+        sources: list[dict[str, Any]] = []
         for binding in monitor.get("source_bindings") or []:
-            btype = binding.get("ref_type")
             sid = str(binding.get("id") or "")
-            if btype == "news_source_id":
-                # Validation guarantees the registry reference exists. Keep publisher URL out of the
-                # state unless needed; discovery health is the authoritative operational signal.
-                row = source_from_discovery(binding, discovery_by_id)
-                row["registered"] = sid in news_by_id
-            elif btype == "manual_watch_source_id":
-                row = source_from_manual(binding, manual_by_id)
-            elif btype == "investigation_file":
-                row = source_from_investigation(binding)
-            elif btype == "url":
-                row = direct_source(binding, previous, mid, live)
+            ref_type = binding.get("ref_type")
+            if ref_type == "news_source_id":
+                health = discovery.get(sid)
+                sources.append({
+                    "id": sid,
+                    "ref_type": ref_type,
+                    "registered": sid in news,
+                    "health": "OK" if health and health.get("listing_ok") else ("DEGRADED" if health else "UNKNOWN_NO_DISCOVERY_STATE"),
+                    "change": "NO_CHANGE_SIGNAL",
+                    "facts": int((health or {}).get("facts") or 0),
+                    "links_examined": (health or {}).get("links_examined"),
+                    "article_failures": (health or {}).get("article_failures"),
+                    "error": (health or {}).get("error"),
+                })
+            elif ref_type == "manual_watch_source_id":
+                row = manual.get(sid)
+                sources.append({
+                    "id": sid,
+                    "ref_type": ref_type,
+                    "health": "MANUAL_WATCH" if row else "MISSING_SOURCE_BINDING",
+                    "change": "NO_CHANGE_SIGNAL",
+                    "source_status": (row or {}).get("status"),
+                    "checked_at": (row or {}).get("checked_at"),
+                    "url": (row or {}).get("url"),
+                })
+            elif ref_type == "investigation_file":
+                rel = str(binding.get("path") or "")
+                sources.append({
+                    "id": sid,
+                    "ref_type": ref_type,
+                    "health": "PRESENT" if (REPO_ROOT / rel).is_file() else "MISSING",
+                    "change": "NO_CHANGE_SIGNAL",
+                    "path": rel,
+                })
+            elif ref_type == "url":
+                sources.append(direct_source(binding, previous, mid, live))
             else:
-                row = {"id": sid, "ref_type": str(btype), "health": "INVALID_BINDING", "change": "NO_CHANGE_SIGNAL"}
-            source_rows.append(row)
+                sources.append({"id": sid, "ref_type": str(ref_type), "health": "INVALID_BINDING", "change": "NO_CHANGE_SIGNAL"})
 
-        changed_sources = [row["id"] for row in source_rows if row.get("change") == "CHANGED_REVIEW_REQUIRED"]
-        degraded_sources = [
-            row["id"]
-            for row in source_rows
-            if row.get("health") in {"DEGRADED", "UNREACHABLE", "MISSING", "MISSING_SOURCE_BINDING", "INVALID_BINDING"}
-        ]
-        reverify_leads = [
-            lead["id"]
-            for lead in monitor.get("recovered_leads") or []
-            if "REVERIFY" in str(lead.get("verification_status") or "")
-        ]
-        attention = "REVIEW_REQUIRED" if changed_sources or reverify_leads else ("SOURCE_DEGRADED" if degraded_sources else "NORMAL")
-        monitors_out.append(
-            {
-                "id": mid,
-                "label": monitor.get("label"),
-                "registry_status": monitor.get("status"),
-                "attention": attention,
-                "changed_sources": changed_sources,
-                "degraded_sources": degraded_sources,
-                "reverify_leads": reverify_leads,
-                "sources": source_rows,
-                "lead_ids": [lead.get("id") for lead in monitor.get("recovered_leads") or []],
-                "public_projection": False,
-            }
-        )
+        changed = [row["id"] for row in sources if row.get("change") == "CHANGED_REVIEW_REQUIRED"]
+        degraded = [row["id"] for row in sources if row.get("health") in {"DEGRADED", "UNREACHABLE", "MISSING", "MISSING_SOURCE_BINDING", "INVALID_BINDING"}]
+        reverify = [lead["id"] for lead in monitor.get("recovered_leads") or [] if "REVERIFY" in str(lead.get("verification_status") or "")]
+        attention = "REVIEW_REQUIRED" if changed or reverify else ("SOURCE_DEGRADED" if degraded else "NORMAL")
+        monitors_out.append({
+            "id": mid,
+            "label": monitor.get("label"),
+            "registry_status": monitor.get("status"),
+            "attention": attention,
+            "changed_sources": changed,
+            "degraded_sources": degraded,
+            "reverify_leads": reverify,
+            "sources": sources,
+            "lead_ids": [lead.get("id") for lead in monitor.get("recovered_leads") or []],
+            "public_projection": False,
+        })
 
-    state = {
+    now = utc_now()
+    return {
         "schema_version": "1.0",
         "instance_id": "valcea",
         "product": "VÂLCEA CLAR durable monitor state",
         "execution_owner": "CIVORA_SITE_ENGINE",
         "state_owner": "GITHUB_REPOSITORY",
-        "generated_at": now_iso(),
-        "last_live_probe_at": now_iso() if live else previous.get("last_live_probe_at"),
+        "generated_at": now,
+        "last_live_probe_at": now if live else previous.get("last_live_probe_at"),
         "mode": "LIVE_SOURCE_HEALTH" if live else "OFFLINE_MATERIALIZATION",
-        "discovery_observed_at": discovery.get("observed_at"),
+        "discovery_observed_at": discovery_doc.get("observed_at"),
         "monitor_count": len(monitors_out),
         "monitors": monitors_out,
         "publication_contract": {
@@ -319,37 +226,33 @@ def build(live: bool, previous: dict[str, Any]) -> dict[str, Any]:
             "edition_expiry_may_delete_monitor": False,
         },
     }
-    return state
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--live", action="store_true", help="Probe direct monitor URLs. Default is offline/fail-closed.")
-    parser.add_argument("--output", default=str(DEFAULT_STATE_PATH))
-    parser.add_argument("--check", action="store_true", help="Validate materialization without writing state.")
+    parser.add_argument("--live", action="store_true")
+    parser.add_argument("--output", default=str(DEFAULT_OUTPUT))
+    parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
 
     output = Path(args.output)
     previous = load(output, {}) or {}
     state = build(args.live, previous)
 
-    if previous and semantic_state(previous) == semantic_state(state):
-        state = previous
-        print("VÂLCEA CLAR monitor ledger: NO_SEMANTIC_CHANGE")
-    else:
-        print(
-            "VÂLCEA CLAR monitor ledger: UPDATED "
-            f"({state['monitor_count']} monitors; mode={state['mode']})"
-        )
-
     if args.check:
-        if state.get("monitor_count", 0) < 7:
-            raise SystemExit("monitor ledger lost required recovered monitors")
+        if state.get("monitor_count") != 7:
+            raise SystemExit(f"expected 7 recovered monitors, found {state.get('monitor_count')}")
         if any(row.get("public_projection") is not False for row in state.get("monitors") or []):
             raise SystemExit("monitor ledger attempted public projection")
+        print("VÂLCEA CLAR monitor ledger offline contract: PASS")
+        return 0
+
+    if previous and semantic(previous) == semantic(state):
+        print("VÂLCEA CLAR monitor ledger: NO_SEMANTIC_CHANGE")
         return 0
 
     output.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"VÂLCEA CLAR monitor ledger: UPDATED ({state['monitor_count']} monitors; mode={state['mode']})")
     return 0
 
 
