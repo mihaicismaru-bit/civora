@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any
 
 import build_outbox_only_story_products as base
+from native_identity import product_identity
 
 ROOT = Path(__file__).resolve().parents[2]
 VC = ROOT / "valcea-clar"
@@ -94,7 +95,7 @@ def package(story: dict[str, Any], visual: dict[str, Any] | None) -> dict[str, A
             {"role": "document_fact", "text": "SMIS 334436 include un pod nou exclusiv pietonal și ciclist în zona Omniasig."},
             {"role": "uncertainty", "text": "Documentele consultate nu permit atribuirea exactă a lucrărilor vizibile unei firme anume din asociere sau subcontractanților."},
         ])
-    chapters.append({"role": "source", "text": "Documentele și sursele sunt disponibile în articolul de pe valceaclar.ro."})
+    chapters.append({"role": "source", "text": "VÂLCEA CLAR · valceaclar.ro — documentele și sursele sunt disponibile în articol."})
 
     status = "READY" if useful and media_ok else "HOLD_MEDIA" if useful else "HOLD"
     reason = None if status == "READY" else (media_reason if useful else editorial_reason)
@@ -115,6 +116,7 @@ def package(story: dict[str, Any], visual: dict[str, Any] | None) -> dict[str, A
         "archive_as_current_forbidden": True,
         "title_thumbnail_pair_required": True,
         "verbatim_cross_platform_reuse_allowed": False,
+        "identity": product_identity("youtube"),
         "rendering_version": "youtube-editorial-v1.0",
     }
     product["product_fingerprint_sha256"] = digest(product)
@@ -135,6 +137,7 @@ def build() -> dict[str, Any]:
         "schema_version": "1.0-preview",
         "platform": "youtube",
         "execution_mode": "PREVIEW_ONLY_NO_NETWORK_CALLS",
+        "identity_source": "valcea-clar/social/native_platform_identity_system.json",
         "products": products,
         "ready": sum(1 for p in products if p.get("status") == "READY"),
         "held": sum(1 for p in products if p.get("status") != "READY"),
@@ -148,9 +151,13 @@ def self_test() -> int:
     assert package(thin, None)["status"] == "HOLD"
     deep = {
         "id":"deep",
-        "headline":"Investiție locală documentată",
-        "dek":"Un proiect important cu efect local.",
-        "paragraphs":["Documentele descriu investiția.","Contractul și finanțarea sunt publice.","Impactul local este explicat."],
+        "headline":"Investiție locală documentată cu impact public clar",
+        "dek":"Un proiect important, verificat în documente, cu efect direct asupra comunității și infrastructurii locale.",
+        "paragraphs":[
+            "Documentația publică descrie investiția, calendarul, obiectivele și principalele lucrări care trebuie realizate.",
+            "Contractul și finanțarea sunt publice, iar valoarea și responsabilitățile actorilor pot fi explicate cititorilor.",
+            "Impactul local este suficient de amplu pentru un explainer video, dar publicarea trebuie să aștepte imagini reale adecvate.",
+        ],
         "material_fact_gate":"PASS",
     }
     current={"image":{"synthetic":False,"editor_approved":True,"contextual_archive":False}}
@@ -158,6 +165,8 @@ def self_test() -> int:
     assert product["status"]=="HOLD_MEDIA"
     assert product["real_video_required"] is True
     assert product["synthetic_filler_forbidden"] is True
+    assert product["identity"]["channel_id"] == "valcea-youtube"
+    assert product["identity"]["thumbnail"]["brand_mark"] == "VC."
     print("VÂLCEA CLAR YouTube editorial v1 self-test: PASS")
     return 0
 
