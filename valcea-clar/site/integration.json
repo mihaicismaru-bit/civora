@@ -1,25 +1,29 @@
 {
-  "schema_version": "2.0",
+  "schema_version": "2.1",
   "canonical_domain": "valceaclar.ro",
   "runtime": {
     "architecture": "static_shell_plus_live_github_feed",
-    "platform": "Vercel Hobby static deployment",
-    "production_url": "https://valcea-clar-autonom-j7n3yujb7-mihaicismaru-6634s-projects.vercel.app/",
-    "deployment_id": "dpl_AHPab5CHgfbN3WtpPjqqBCMLxZLy",
-    "state": "READY",
-    "custom_domain_status": "PENDING_ONE_TIME_ATTACHMENT",
+    "platform": "UNRESOLVED_MANAGED_PUBLIC_HOST",
+    "state": "BLOCKED_NO_MANAGED_PRODUCTION_DEPLOYMENT",
+    "production_url": null,
+    "deployment_id": null,
+    "last_known_vercel_url": "https://valcea-clar-autonom-j7n3yujb7-mihaicismaru-6634s-projects.vercel.app/",
+    "last_known_vercel_deployment_id": "dpl_AHPab5CHgfbN3WtpPjqqBCMLxZLy",
+    "custom_domain_status": "REQUIRES_EXTERNAL_PUBLICATION_AND_HTTP_ACCEPTANCE",
     "content_source": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json",
-    "content_refresh_seconds": 300,
-    "redeploy_per_edition_required": false,
+    "content_refresh_seconds": 60,
+    "redeploy_per_story_required": false,
     "paid_api_required": false,
     "llm_api_required": false,
-    "chatgpt_sites_required": false
+    "chatgpt_sites_required": false,
+    "public_http_acceptance_required": true
   },
   "legacy_runtime": {
     "platform": "ChatGPT Sites",
-    "status": "DEPRECATED_NON_CANONICAL",
-    "reason": "Editing/publishing is quota-gated and cannot be a critical production dependency for an autonomous newsroom.",
-    "content_updates_allowed": false
+    "status": "EXTERNAL_PRESENTATION_LAYER_NOT_EXECUTION_OWNER",
+    "reason": "CIVORA owns newsroom generation, state and publication. Any external presentation layer must consume CIVORA outputs and pass remote HTTP acceptance before it is considered production delivery.",
+    "content_updates_allowed": true,
+    "execution_owner": false
   },
   "editor": {
     "enabled": true,
@@ -28,21 +32,38 @@
     "stores_credentials": false,
     "chatgpt_required_for_normal_operation": false
   },
+  "publication_model": {
+    "mode": "continuous_story_first",
+    "individual_story_is_primary_publication_unit": true,
+    "edition_recaps_are_publication_gates": false,
+    "homepage_source": "site/runtime/live-feed.json:stories[]",
+    "story_route_pattern": "/stiri/<story-id>/"
+  },
   "current_edition": {
     "enabled": true,
-    "selection_mode": "latest_publishable",
+    "role": "recap_only",
+    "selection_mode": "latest_publishable_recap",
     "path": "/editia-curenta/",
     "slot_paths": {
       "morning": "/editia-de-dimineata/",
       "evening": "/editia-de-seara/"
     },
-    "homepage_position": "primary_lead",
+    "homepage_position": "secondary_recap_link_only",
     "show_timestamp": true,
     "show_source_note": true,
     "autonomous_generation": true,
     "generator": "deterministic_zero_llm_v2",
     "external_paid_api_required": false,
-    "last_known_good_fallback": true
+    "last_known_good_fallback": true,
+    "may_authorize_or_delay_story_publication": false
+  },
+  "legal_routes": {
+    "terms": "/termeni/",
+    "privacy": "/confidentialitate/",
+    "source": "site/legal/legal_pages.json",
+    "initial_html_required": true,
+    "index_follow_required": true,
+    "footer_links_required": true
   },
   "section": {
     "id": "unde-iesim",
@@ -77,7 +98,7 @@
     {"from": "Evenimente", "to": "/unde-iesim/", "context": "locuri și program pentru weekend"},
     {"from": "Oraș", "to": "/unde-iesim/", "context": "deschideri, închideri și schimbări de operator"},
     {"from": "Investigații", "to": "/unde-iesim/", "context": "contracte sau legături publice relevante"},
-    {"from": "Homepage", "to": "/editia-curenta/", "context": "ediția autonomă curentă"}
+    {"from": "Homepage", "to": "/editia-curenta/", "context": "recap editorial secundar; nu este fereastră de publicare"}
   ],
   "publication_policy": {
     "candidate_records_are_hidden": true,

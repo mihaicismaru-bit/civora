@@ -1,0 +1,84 @@
+name: VÂLCEA CLAR Public HTTP Health
+
+on:
+  workflow_dispatch:
+    inputs:
+      require_ready:
+        description: 'Fail the run unless every public route passes'
+        required: false
+        default: false
+        type: boolean
+  schedule:
+    - cron: '17,47 * * * *'
+  pull_request:
+    paths:
+      - 'valcea-clar/site/**'
+      - 'valcea-clar/scripts/probe_public_site.py'
+      - '.github/workflows/valcea-clar-public-health.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-public-http-health
+  cancel-in-progress: true
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Validate probe offline
+        run: python valcea-clar/scripts/probe_public_site.py --self-test
+
+      - name: Probe public site
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXTRA=''
+          if [ "${{ github.event_name }}" = 'workflow_dispatch' ] && [ "${{ inputs.require_ready }}" = 'true' ]; then
+            EXTRA='--require-ready'
+          fi
+          python valcea-clar/scripts/probe_public_site.py $EXTRA --output /tmp/valcea-clar-public-health.json | tee /tmp/valcea-clar-public-health.log
+
+      - name: Write health summary
+        if: github.event_name != 'pull_request' && always()
+        shell: bash
+        run: |
+          if [ -s /tmp/valcea-clar-public-health.json ]; then
+            python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+          p=Path('/tmp/valcea-clar-public-health.json')
+          d=json.loads(p.read_text(encoding='utf-8'))
+          print(f"## VÂLCEA CLAR public HTTP: {d['status']}")
+          print('')
+          print('| Route | HTTP | Result |')
+          print('|---|---:|---|')
+          for row in d['checks']:
+              print(f"| `{row['path']}` | {row['http_status'] if row['http_status'] is not None else '—'} | {'PASS' if row['ok'] else 'BLOCKED'} |")
+          if d['blockers']:
+              print('')
+              print('Blockers: ' + ', '.join(f'`{x}`' for x in d['blockers']))
+          PY
+          else
+            echo '## VÂLCEA CLAR public HTTP: probe did not produce a report' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload health evidence
+        if: github.event_name != 'pull_request' && always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-public-http-${{ github.run_id }}
+          path: |
+            /tmp/valcea-clar-public-health.json
+            /tmp/valcea-clar-public-health.log
+          if-no-files-found: warn
+          retention-days: 14
