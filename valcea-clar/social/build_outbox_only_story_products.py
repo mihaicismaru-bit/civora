@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Build durable story-first products for VÂLCEA CLAR outbox-only channels.
 
-Threads and YouTube do not have verified direct publishing access yet. They
-still consume the same individual story publication identity as the site and
-active social adapters, so enabling an adapter later cannot reintroduce edition
-windows as publication gates.
+Outbox-only sister publications consume the same individual verified story
+publication identity as the site and active social adapters. They remain native
+products with independent state/dedupe and cannot claim network publication
+until a verified adapter and credentials exist.
 """
 from __future__ import annotations
 
@@ -23,6 +23,10 @@ DECISION = VC / "site" / "newsroom_decision.json"
 EVENT = VC / "site" / "story_publication_event.json"
 THREADS_OUTBOX = VC / "social" / "threads_outbox.json"
 THREADS_STATE = VC / "social" / "threads_state.json"
+LINKEDIN_OUTBOX = VC / "social" / "linkedin_outbox.json"
+LINKEDIN_STATE = VC / "social" / "linkedin_state.json"
+TELEGRAM_OUTBOX = VC / "social" / "telegram_outbox.json"
+TELEGRAM_STATE = VC / "social" / "telegram_state.json"
 YOUTUBE_OUTBOX = VC / "social" / "youtube_outbox.json"
 YOUTUBE_STATE = VC / "social" / "youtube_state.json"
 BASE = "https://valceaclar.ro"
@@ -74,6 +78,57 @@ def threads_product(story: dict) -> dict:
     }
 
 
+def linkedin_product(story: dict) -> dict:
+    headline = str(story.get("headline") or "").strip()
+    dek = str(story.get("dek") or "").strip()
+    paragraphs = [str(p).strip() for p in story.get("paragraphs", []) if str(p).strip()]
+    opening = dek or headline
+    context = [headline]
+    if paragraphs:
+        context.append(paragraphs[0])
+    return {
+        "id": f"linkedin-story-{story['id']}",
+        "story_id": story["id"],
+        "status": "outbox_ready",
+        "publication_mode": "durable_outbox_only",
+        "native_format": "text",
+        "format_family": "professional_context_post",
+        "hook": f"Context local — {opening}",
+        "context_blocks": context,
+        "canonical_url": canonical(story),
+        "source_preserving": True,
+        "verbatim_cross_platform_reuse_allowed": False,
+        "edition_gate": False,
+    }
+
+
+def telegram_product(story: dict) -> dict:
+    headline = str(story.get("headline") or "").strip()
+    dek = str(story.get("dek") or "").strip()
+    paragraphs = [str(p).strip() for p in story.get("paragraphs", []) if str(p).strip()]
+    correction = story.get("correction") is True
+    topics = {str(value).strip() for value in story.get("topics", []) if str(value).strip()}
+    verified_breaking = story.get("lifecycle_stage") == "breaking" and "verified_breaking_updates" in topics
+    alert = correction or verified_breaking
+    prefix = "Corecție — " if correction else ("Actualizare — " if verified_breaking else "De știut — ")
+    support = [value for value in (dek, paragraphs[0] if paragraphs else "") if value]
+    return {
+        "id": f"telegram-story-{story['id']}",
+        "story_id": story["id"],
+        "status": "outbox_ready",
+        "publication_mode": "durable_outbox_only",
+        "native_format": "alert" if alert else "text",
+        "format_family": "channel_update",
+        "message": [f"{prefix}{headline}", *support[:2]],
+        "canonical_url": canonical(story),
+        "link_policy": "native_preferred",
+        "source_preserving": True,
+        "fake_urgency_forbidden": True,
+        "verbatim_cross_platform_reuse_allowed": False,
+        "edition_gate": False,
+    }
+
+
 def youtube_product(story: dict) -> dict:
     headline = str(story.get("headline") or "").strip()
     dek = str(story.get("dek") or "").strip()
@@ -120,19 +175,20 @@ def main() -> int:
         if item.get("id") in allowed and story_ready(item)[0]
     ]
 
-    threads = upsert(
-        load(THREADS_OUTBOX, {"schema_version": "1.0", "platform": "threads", "items": []}),
-        [threads_product(story) for story in stories],
-    )
-    youtube = upsert(
-        load(YOUTUBE_OUTBOX, {"schema_version": "1.0", "platform": "youtube", "items": []}),
-        [youtube_product(story) for story in stories],
-    )
-    write(THREADS_OUTBOX, threads)
-    write(YOUTUBE_OUTBOX, youtube)
-
-    for path, platform in ((THREADS_STATE, "threads"), (YOUTUBE_STATE, "youtube")):
-        state = load(path, {
+    outputs = [
+        (THREADS_OUTBOX, THREADS_STATE, "threads", threads_product),
+        (LINKEDIN_OUTBOX, LINKEDIN_STATE, "linkedin", linkedin_product),
+        (TELEGRAM_OUTBOX, TELEGRAM_STATE, "telegram", telegram_product),
+        (YOUTUBE_OUTBOX, YOUTUBE_STATE, "youtube", youtube_product),
+    ]
+    counts = {}
+    for outbox_path, state_path, platform, factory in outputs:
+        outbox = upsert(
+            load(outbox_path, {"schema_version": "1.0", "platform": platform, "items": []}),
+            [factory(story) for story in stories],
+        )
+        write(outbox_path, outbox)
+        state = load(state_path, {
             "schema_version": "1.0",
             "platform": platform,
             "execution_owner": "civora_site_engine",
@@ -140,15 +196,16 @@ def main() -> int:
             "failures": {},
         })
         state["publication_model"] = "continuous_story_first"
-        write(path, state)
+        write(state_path, state)
+        counts[f"{platform}_products"] = len(stories)
 
     print(json.dumps({
         "status": "PASS",
         "publication_model": "continuous_story_first",
         "story_count": len(stories),
-        "threads_products": len(stories),
-        "youtube_products": len(stories),
+        **counts,
         "youtube_state": "HOLD_MEDIA_UNTIL_REAL_VIDEO_AND_ACCESS",
+        "telegram_state": "OUTBOX_ONLY_UNTIL_VERIFIED_ACCESS",
     }, ensure_ascii=False))
     return 0
 
