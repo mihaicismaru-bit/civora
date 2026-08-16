@@ -1,0 +1,172 @@
+name: VÂLCEA CLAR Live Newsroom
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/editorial/facts_registry.json'
+      - 'valcea-clar/editorial/news_sources.json'
+      - 'valcea-clar/scripts/newsroom_decide.py'
+      - 'valcea-clar/scripts/generate_edition.py'
+      - 'valcea-clar/scripts/render_frontpage.py'
+      - 'local-news-os/core/**'
+      - '.github/workflows/valcea-clar-newsroom-live.yml'
+  schedule:
+    # GitHub cron is polling fallback, not an editorial publication window.
+    # Push/event triggers publish sooner whenever verified story state changes.
+    - cron: '*/5 * * * *'
+
+permissions:
+  contents: write
+
+# Share the lock with the legacy recap generator so both writers cannot race.
+concurrency:
+  group: valcea-clar-autonomous-editions
+  cancel-in-progress: false
+
+jobs:
+  newsroom:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Validate continuous newsroom gate
+        run: |
+          python valcea-clar/scripts/newsroom_decide.py --self-test
+          python local-news-os/core/discover_primary_source_facts.py --self-test
+
+      - name: Refresh local source radar
+        run: python valcea-clar/scripts/probe_sources.py
+
+      - name: Discover fresh primary-source candidates
+        run: |
+          python local-news-os/core/discover_primary_source_facts.py \
+            --instance valcea \
+            --output valcea-clar/editorial/auto_facts.json \
+            --state valcea-clar/editorial/news_discovery_state.json
+
+      - name: Decide whether publishable story state changed
+        id: decision
+        shell: bash
+        run: |
+          set -euo pipefail
+          python valcea-clar/scripts/newsroom_decide.py
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          from pathlib import Path
+          d=json.loads(Path('valcea-clar/site/newsroom_decision.json').read_text(encoding='utf-8'))
+          print(f"changed={'true' if d['changed'] else 'false'}")
+          print(f"slot={d['slot_for_legacy_snapshot_compatibility']}")
+          print(f"story_count={d['publishable_story_count']}")
+          print(f"new_story_count={len(d['new_story_ids'])}")
+          PY
+
+      - name: Explain no-publication result
+        if: steps.decision.outputs.changed != 'true'
+        run: |
+          echo "No newly publishable full story. Radar candidates remain candidates; the clock does not force publication."
+          cat valcea-clar/site/newsroom_decision.json
+
+      - name: Remove title/date-only candidates from live publication bundle
+        if: steps.decision.outputs.changed == 'true'
+        run: |
+          python - <<'PY'
+          import json, sys
+          from pathlib import Path
+          sys.path.insert(0, 'valcea-clar/scripts')
+          from newsroom_decide import story_ready
+          path=Path('valcea-clar/editorial/auto_facts.json')
+          doc=json.loads(path.read_text(encoding='utf-8'))
+          doc['facts']=[f for f in doc.get('facts', []) if story_ready(f)[0]]
+          doc.setdefault('policy', {})['continuous_newsroom_full_story_gate'] = True
+          path.write_text(json.dumps(doc, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+          PY
+
+      - name: Build current live publication snapshot
+        if: steps.decision.outputs.changed == 'true'
+        run: |
+          python valcea-clar/scripts/build_public_data.py
+          python valcea-clar/scripts/generate_edition.py --slot "${{ steps.decision.outputs.slot }}"
+
+      - name: Validate publishable snapshot
+        if: steps.decision.outputs.changed == 'true'
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('valcea-clar')
+          pointer=json.loads((root/'site/current_edition.json').read_text(encoding='utf-8'))
+          doc=json.loads((root/pointer['json_source']).read_text(encoding='utf-8'))
+          decision=json.loads((root/'site/newsroom_decision.json').read_text(encoding='utf-8'))
+          assert pointer['publication_intent'] == 'publish'
+          assert doc['publication_intent'] == 'publish'
+          assert doc['status'] in {'auto_approved','editor_approved'}
+          assert decision['edition_windows_are_publication_gates'] is False
+          assert decision['publishable_story_count'] >= 1
+          for item in doc.get('items', []):
+              if item.get('auto_generated'):
+                  assert item.get('paragraphs'), 'title/date-only auto fact leaked into live publication'
+          print({'status':'PASS','stories':decision['publishable_story_count'],'new':decision['new_story_ids']})
+          PY
+
+      - name: Render live frontpage and feed immediately
+        if: steps.decision.outputs.changed == 'true'
+        run: |
+          python valcea-clar/scripts/render_frontpage.py
+          python valcea-clar/scripts/build_live_feed.py
+          python valcea-clar/scripts/build_sites_export.py
+          python valcea-clar/scripts/overlay_runtime_export.py
+
+      - name: Mark newsroom snapshot published
+        if: steps.decision.outputs.changed == 'true'
+        run: python valcea-clar/scripts/newsroom_decide.py --commit-state
+
+      - name: Persist live newsroom publication conflict-safe
+        if: steps.decision.outputs.changed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'vâlcea-clar-live-newsroom[bot]'
+          git config user.email 'valcea-clar-live-newsroom@users.noreply.github.com'
+          git add \
+            valcea-clar/editions \
+            valcea-clar/site/current_edition.json \
+            valcea-clar/site/last_edition_attempt.json \
+            valcea-clar/site/newsroom_decision.json \
+            valcea-clar/site/newsroom_state.json \
+            valcea-clar/site/runtime \
+            valcea-clar/state/source_health.json \
+            valcea-clar/web/data \
+            valcea-clar/validation/latest_report.json \
+            valcea-clar/ops/resolution_tasks || true
+          if git diff --cached --quiet; then
+            echo 'No live newsroom publication changes to persist.'
+            exit 0
+          fi
+          git commit -m "Publish VÂLCEA CLAR live newsroom update"
+          for attempt in 1 2 3 4 5; do
+            if git pull --rebase origin main && git push origin HEAD:main; then
+              exit 0
+            fi
+            git rebase --abort || true
+            sleep $((attempt * 3))
+          done
+          echo 'Could not persist live newsroom update after five attempts.' >&2
+          exit 1
+
+      - name: Upload current site payload
+        if: steps.decision.outputs.changed == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-live-newsroom-${{ github.run_id }}
+          path: valcea-clar/dist/chatgpt-sites
+          if-no-files-found: error
+          retention-days: 7
