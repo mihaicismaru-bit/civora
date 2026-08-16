@@ -30,6 +30,17 @@
       "remote_reconciliation_supported": false
     },
     {
+      "platform": "threads",
+      "channel_id": "valcea-threads",
+      "adapter": "valcea-clar/social/threads_publish.py",
+      "supported_native_formats": ["text", "thread"],
+      "supported_media_kinds": ["none"],
+      "max_media_assets": 0,
+      "completion_model": "immediate_remote_id",
+      "remote_reconciliation_supported": false,
+      "partial_publish_policy": "manual_reconciliation_no_auto_retry"
+    },
+    {
       "platform": "tiktok",
       "channel_id": "valcea-tiktok",
       "adapter": "valcea-clar/social/tiktok_publish.py",

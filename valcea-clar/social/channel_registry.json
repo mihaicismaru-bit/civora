@@ -1,5 +1,5 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "instance_id": "valcea",
   "product": "CIVORA / VÂLCEA CLAR Social Publication Engine",
   "canonical_domain": "valceaclar.ro",
@@ -13,7 +13,7 @@
     "cron": "7,22,37,52 * * * *",
     "description": "15-minute recovery scan only; normal distribution is triggered immediately by a durable site story_publication_event"
   },
-  "required_active_direct_channels": ["facebook", "instagram", "tiktok"],
+  "required_active_direct_channels": ["facebook", "instagram", "threads", "tiktok"],
   "chatgpt": {
     "scheduled_publication_allowed": false,
     "direct_publication_allowed": false,
@@ -115,19 +115,32 @@
     },
     {
       "channel_id": "threads",
-      "status": "outbox_only",
-      "direct_publication_enabled": false,
-      "publication_mode": "durable_outbox_only",
+      "status": "active",
+      "direct_publication_enabled": true,
+      "publication_mode": "native_api_fail_closed",
+      "workflow": ".github/workflows/valcea-clar-threads-editorial.yml",
       "config": "valcea-clar/social/channels/threads.json",
-      "adapter": null,
+      "adapter": "valcea-clar/social/threads_publish.py",
+      "prepare": [
+        "valcea-clar/social/threads_editorial_v1.py",
+        "valcea-clar/social/threads_editorial_materialize.py"
+      ],
       "outbox": "valcea-clar/social/threads_outbox.json",
       "state": "valcea-clar/social/threads_state.json",
-      "credentials": null,
+      "credentials": {
+        "access_token_secret": "VALCEA_THREADS_ACCESS_TOKEN"
+      },
       "requirements": {
+        "story_event": true,
         "native_thread_sequence": true,
         "editor_approval": true,
-        "rights_metadata_when_visual_is_used": true,
-        "verified_publishing_access": false
+        "source_preserving": true,
+        "verified_publishing_access": true,
+        "verified_username": "valceaclar",
+        "activation_baseline_required": true,
+        "historical_backlog_replay_forbidden": true,
+        "partial_publish_manual_reconciliation": true,
+        "platform_native_copy": true
       }
     },
     {

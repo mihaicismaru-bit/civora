@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Materialize VÂLCEA CLAR Threads editorial v1 into its canonical outbox/state.
+"""Materialize VÂLCEA CLAR Threads editorial v1 into canonical outbox/state.
 
-This is outbox-only. It never calls Threads/Meta and never claims direct access.
-It consumes the same verified story publication identity as the site and replaces
-legacy generic Threads products with the platform-native editorial v1 shape.
+The editorial product is platform-native and may be consumed by the verified
+Threads direct adapter. When direct publishing is enabled for the first time,
+the current durable story-publication event is captured as an activation
+baseline so historical outbox items can never be replayed as new posts.
 """
 from __future__ import annotations
 
@@ -19,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[2]
 VC = ROOT / "valcea-clar"
 OUTBOX = VC / "social" / "threads_outbox.json"
 STATE = VC / "social" / "threads_state.json"
+EVENT = VC / "site" / "story_publication_event.json"
 
 
 def load(path: Path, default: dict[str, Any]) -> dict[str, Any]:
@@ -38,48 +40,40 @@ def write(path: Path, value: dict[str, Any]) -> None:
 def canonical_item(product: dict[str, Any]) -> dict[str, Any]:
     story_id = str(product["story_id"])
     identity = product_identity("threads")
+    common = {
+        "id": f"threads-story-{story_id}",
+        "story_id": story_id,
+        "publication_mode": "native_api_fail_closed",
+        "canonical_url": product["canonical_url"],
+        "source_preserving": True,
+        "conversation_native": True,
+        "verbatim_cross_platform_reuse_allowed": False,
+        "direct_publication_enabled": True,
+        "direct_publication_blocker": None,
+        "generation_mode": "threads_editorial_v1",
+        "identity": identity,
+        "edition_gate": False,
+    }
     if product.get("status") == "HOLD":
         return {
-            "id": f"threads-story-{story_id}",
-            "story_id": story_id,
+            **common,
             "status": "hold",
-            "publication_mode": "durable_outbox_only",
             "native_format": "text",
             "format_family": "threads_hold",
             "hold_reason": product.get("reason"),
-            "canonical_url": product["canonical_url"],
-            "source_preserving": True,
-            "conversation_native": True,
-            "verbatim_cross_platform_reuse_allowed": False,
-            "direct_publication_enabled": False,
-            "direct_publication_blocker": "threads_direct_access_not_configured",
-            "generation_mode": "threads_editorial_v1",
-            "identity": identity,
-            "edition_gate": False,
         }
     return {
-        "id": f"threads-story-{story_id}",
-        "story_id": story_id,
+        **common,
         "status": "outbox_ready",
-        "publication_mode": "durable_outbox_only",
         "native_format": product["native_format"],
         "format_family": product["format_family"],
         "hook_family": product["hook_family"],
         "posts": product["posts"],
-        "canonical_url": product["canonical_url"],
-        "source_preserving": True,
-        "conversation_native": True,
         "hashtags_default": False,
         "generic_engagement_prompt_forbidden": True,
         "fake_urgency_forbidden": True,
-        "verbatim_cross_platform_reuse_allowed": False,
         "max_internal_chars_per_post": product["max_internal_chars_per_post"],
         "product_fingerprint_sha256": product["product_fingerprint_sha256"],
-        "direct_publication_enabled": False,
-        "direct_publication_blocker": "threads_direct_access_not_configured",
-        "generation_mode": "threads_editorial_v1",
-        "identity": identity,
-        "edition_gate": False,
     }
 
 
@@ -99,12 +93,13 @@ def build() -> dict[str, Any]:
     }
     for product in products:
         existing[product["id"]] = product
-    outbox["schema_version"] = "1.1"
+    outbox["schema_version"] = "1.2"
     outbox["platform"] = "threads"
     outbox["publication_model"] = "continuous_story_first"
     outbox["editorial_product_version"] = "threads-editorial-v1.0"
     outbox["identity_source"] = "valcea-clar/social/native_platform_identity_system.json"
     outbox["edition_recaps_are_publication_gates"] = False
+    outbox["direct_publication_enabled"] = True
     outbox["items"] = list(existing.values())
     write(OUTBOX, outbox)
 
@@ -115,16 +110,23 @@ def build() -> dict[str, Any]:
         "published": {},
         "failures": {},
     })
-    state["schema_version"] = "1.1"
+    was_direct = state.get("direct_publication_enabled") is True
+    event = load(EVENT, {})
+    event_fp = str(event.get("fingerprint") or "").strip()
+    state["schema_version"] = "1.2"
     state["platform"] = "threads"
     state["execution_owner"] = "civora_site_engine"
     state["publication_model"] = "continuous_story_first"
     state["editorial_product_version"] = "threads-editorial-v1.0"
     state["identity_source"] = "valcea-clar/social/native_platform_identity_system.json"
-    state["direct_publication_enabled"] = False
-    state["direct_publication_blocker"] = "threads_direct_access_not_configured"
+    state["identity_channel_id"] = "valcea-threads"
+    state["direct_publication_enabled"] = True
+    state["direct_publication_blocker"] = None
     state.setdefault("published", {})
     state.setdefault("failures", {})
+    if not was_direct and event_fp:
+        state["direct_activation_baseline_event_fingerprint"] = event_fp
+        state["direct_activation_baseline_source"] = "story_publication_event_at_direct_enable"
     write(STATE, state)
 
     return {
@@ -134,7 +136,8 @@ def build() -> dict[str, Any]:
         "products": len(products),
         "ready": sum(1 for item in products if item.get("status") == "outbox_ready"),
         "held": sum(1 for item in products if item.get("status") == "hold"),
-        "direct_publication_enabled": False,
+        "direct_publication_enabled": True,
+        "activation_baseline_present": bool(state.get("direct_activation_baseline_event_fingerprint")),
     }
 
 
@@ -152,7 +155,8 @@ def self_test() -> int:
     }
     item = canonical_item(ready)
     assert item["status"] == "outbox_ready"
-    assert item["direct_publication_enabled"] is False
+    assert item["direct_publication_enabled"] is True
+    assert item["publication_mode"] == "native_api_fail_closed"
     assert item["generation_mode"] == "threads_editorial_v1"
     assert item["identity"]["channel_id"] == "valcea-threads"
     assert item["identity"]["profile_source"] == "valcea-clar/social/profile_identity_system.json"
@@ -163,6 +167,7 @@ def self_test() -> int:
         "canonical_url": "https://valceaclar.ro/stiri/y/",
     })
     assert held["status"] == "hold" and held["hold_reason"] == "thin"
+    assert held["direct_publication_enabled"] is True
     assert held["identity"]["channel_id"] == "valcea-threads"
     print("VÂLCEA CLAR Threads editorial materializer self-test: PASS")
     return 0

@@ -18,6 +18,7 @@ REGISTRY_PATH = REPO_ROOT / "valcea-clar/social/channel_registry.json"
 PRESENT_REFS = {
     "facebook": {"VALCEA_FB_PAGE_ACCESS_TOKEN"},
     "instagram": {"VALCEA_IG_ACCOUNT_ID", "VALCEA_IG_ACCESS_TOKEN"},
+    "threads": {"VALCEA_THREADS_ACCESS_TOKEN"},
     "tiktok": {"VALCEA_TIKTOK_ACCESS_TOKEN", "VALCEA_TIKTOK_PUBLIC_POSTING_APPROVED"},
 }
 
@@ -65,7 +66,7 @@ class AdapterCapabilityGateAcceptance(unittest.TestCase):
             REPO_ROOT,
         )
         self.assertEqual("PASS", result["status"], result["errors"])
-        self.assertEqual(["facebook", "instagram", "tiktok"], result["direct_platforms"])
+        self.assertEqual(["facebook", "instagram", "threads", "tiktok"], result["direct_platforms"])
         self.assertFalse(result["guards"]["credential_values_read"])
         self.assertTrue(result["guards"]["zero_paid_dependency"])
 
