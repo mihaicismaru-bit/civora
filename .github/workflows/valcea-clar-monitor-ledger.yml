@@ -63,8 +63,16 @@ jobs:
         run: python valcea-clar/scripts/monitor_ledger.py --live
 
       - name: Read official Râmnicu Vâlcea council decisions
-        if: github.event_name != 'pull_request'
         run: python valcea-clar/scripts/council_watch_rm_valcea.py
+
+      - name: Upload council review snapshot
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-council-watch-${{ github.run_id }}
+          path: valcea-clar/editorial/council_watch_rm_valcea_state.json
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: Persist monitor state
         if: github.event_name != 'pull_request'
