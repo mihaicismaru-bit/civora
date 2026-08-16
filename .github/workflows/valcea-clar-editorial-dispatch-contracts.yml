@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - "valcea-clar/social/editorial_asset_contract.py"
-      - "valcea-clar/social/build_editorial_dispatch_previews.py"
+      - "valcea-clar/social/build_editorial_dispatch_previews*.py"
       - "valcea-clar/social/facebook_editorial_preview*.py"
       - "valcea-clar/social/instagram_editorial_v1*.py"
       - "valcea-clar/social/*_visual_system.json"
@@ -35,9 +35,9 @@ jobs:
       - name: Self-test editorial composite contracts
         run: |
           python valcea-clar/social/editorial_asset_contract.py
-          python valcea-clar/social/build_editorial_dispatch_previews.py --self-test
+          python valcea-clar/social/build_editorial_dispatch_previews_v1_1.py --self-test
       - name: Build adapter-ready preview contracts
-        run: python valcea-clar/social/build_editorial_dispatch_previews.py
+        run: python valcea-clar/social/build_editorial_dispatch_previews_v1_1.py
       - name: Validate platform-native dispatch invariants
         run: |
           python - <<'PY'
