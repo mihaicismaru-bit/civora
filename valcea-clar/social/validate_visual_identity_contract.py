@@ -19,7 +19,7 @@ BRAND_PATH = SOCIAL / "social_brand_system.json"
 PROFILE_PATH = SOCIAL / "profile_identity_system.json"
 FACEBOOK_PATH = SOCIAL / "facebook_visual_system.json"
 INSTAGRAM_PATH = SOCIAL / "instagram_visual_system.json"
-INSTAGRAM_RENDERER = SOCIAL / "instagram_editorial_v1.py"
+INSTAGRAM_RENDERER = SOCIAL / "instagram_editorial_v1_1.py"
 
 CANONICAL_BRAND_REF = "valcea-clar/social/social_brand_system.json"
 CANONICAL_PROFILE_REF = "valcea-clar/social/profile_identity_system.json"
@@ -113,8 +113,8 @@ def validate(
     if profile_gate.get("profile_assets_must_be_deterministic") is not True:
         errors.append("profile:deterministic_assets_gate_disabled")
 
-    # Production Instagram rendering must use the visual-system palette rather
-    # than silently forking a second palette in Python constants.
+    # The production Instagram carousel renderer must use the visual-system
+    # palette rather than silently forking a second palette in Python constants.
     required_renderer_tokens = (
         'paper = tuple(brand["paper_rgb"])',
         'ink = tuple(brand["ink_rgb"])',
