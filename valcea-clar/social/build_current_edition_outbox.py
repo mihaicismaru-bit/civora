@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Build channel-native social packages from the current verified edition."""
+"""Build channel-native social packages from the current verified edition.
+
+Only the current edition summary may remain eligible for delayed publication.
+Older edition summaries are retired fail-closed so a restored platform token
+cannot publish stale morning/evening recaps hours or days later.
+"""
 from __future__ import annotations
 
 import json
@@ -204,6 +209,31 @@ def enrich_platforms(
             tiktok["reason"] = "site_consent_and_tiktok_app_audit_required"
 
 
+def retire_superseded_edition_items(outbox: dict, current_item_id: str) -> list[str]:
+    """Prevent stale edition recaps from being published after auth recovers."""
+    retired: list[str] = []
+    for item in outbox.get("items", []):
+        if not isinstance(item, dict):
+            continue
+        item_id = str(item.get("id", ""))
+        if not item_id.startswith("editia-de-") or item_id == current_item_id:
+            continue
+        if item.get("status") != "ready":
+            continue
+        item["status"] = "disabled"
+        item["disabled_reason"] = "superseded_by_current_edition"
+        item["superseded_by"] = current_item_id
+        platforms = item.get("platforms")
+        if isinstance(platforms, dict):
+            for platform in ("facebook", "instagram"):
+                package = platforms.get(platform)
+                if isinstance(package, dict) and package.get("status") == "ready":
+                    package["status"] = "disabled"
+                    package["reason"] = "superseded_by_current_edition"
+        retired.append(item_id)
+    return retired
+
+
 def main() -> int:
     current = load(CURRENT)
     if (
@@ -246,6 +276,7 @@ def main() -> int:
     slot = str(edition.get("slot", "morning"))
     date_compact = str(edition.get("edition_date", "")).replace("-", "")
     item_id = f"editia-de-{SLOT_ID.get(slot, slot)}-{date_compact}"
+    retired = retire_superseded_edition_items(outbox, item_id)
     photo = edition_photo_template(outbox)
     filename = Path(str(photo["image_path"])).name
     tiktok_title, tiktok_description = tiktok_copy(selected, slot)
@@ -274,7 +305,9 @@ def main() -> int:
         outbox.setdefault("items", []).append(existing)
     else:
         action = "enriched"
-        existing.setdefault("status", "ready")
+        existing["status"] = "ready"
+        existing.pop("disabled_reason", None)
+        existing.pop("superseded_by", None)
         existing.setdefault("link", "https://valceaclar.ro/")
         existing.setdefault("image_path", photo["image_path"])
         existing.setdefault("image", photo["image"])
@@ -291,6 +324,11 @@ def main() -> int:
         tiktok_description=tiktok_description,
         tiktok_photo_url=tiktok_photo_url,
     )
+    for platform in ("facebook", "instagram"):
+        package = existing.get("platforms", {}).get(platform)
+        if isinstance(package, dict):
+            package["status"] = "ready"
+            package.pop("reason", None)
 
     write(OUTBOX, outbox)
     print(
@@ -305,6 +343,7 @@ def main() -> int:
                     "tiktok": existing["platforms"]["tiktok"].get("status"),
                 },
                 "stories": [item.get("id") for item in selected],
+                "retired_superseded_edition_items": retired,
             },
             ensure_ascii=False,
         )
