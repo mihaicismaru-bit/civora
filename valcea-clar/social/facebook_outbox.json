@@ -14,7 +14,10 @@
     "native_facebook_copy_required": true,
     "canonical_links_only": true,
     "deduplicate_by_id": true,
-    "replacement_cleanup": true
+    "replacement_cleanup": true,
+    "publication_model": "continuous_story_first",
+    "edition_recaps_are_social_publication_gates": false,
+    "site_story_may_publish_before_social_media_ready": true
   },
   "items": [
     {
@@ -250,7 +253,7 @@
     },
     {
       "id": "editia-de-dimineata-20260816",
-      "status": "ready",
+      "status": "disabled",
       "message": "EDIȚIA DE DIMINEAȚĂ — VÂLCEA CLAR\n\nCe contează azi în Vâlcea:\n\n• Luminos Fest este în Parcul Zăvoi. Intrarea este liberă. Evenimentul de familie se desfășoară în 15–16 august, cu lampioane pe apă și activități pentru copii.\n\n• Azi la Băile Govora: «Florile Govorei», ediția a 55-a. Primăria Băile Govora anunță ediția a 55-a a evenimentului pentru 15–16 august 2026.\n\n• Podul pietonal-ciclist peste Olănești: dosarul de documentare rămâne deschis. Urmărim executanții, autorizațiile, situațiile de lucrări, plățile și termenele proiectului SMIS 334436.\n\nVÂLCEA CLAR separă semnalul de fapt și informația utilă de zgomot. Urmărim ce se schimbă pe parcursul zilei și corectăm transparent dacă apar informații noi.\n\n#ValceaClar #RamnicuValcea #Valcea #EditiaDeAzi #StiriValcea",
       "link": "https://valceaclar.ro/",
       "image_path": "valcea-clar/social/photos/approved/launch-ramnicu-valcea-panorama.jpg",
@@ -274,13 +277,15 @@
       "generation_mode": "deterministic_channel_native_social_v1",
       "platforms": {
         "facebook": {
-          "status": "ready",
-          "mode": "direct_publish"
+          "status": "disabled",
+          "mode": "direct_publish",
+          "reason": "recap_is_not_story_distribution_unit"
         },
         "instagram": {
-          "status": "ready",
+          "status": "disabled",
           "mode": "direct_publish",
-          "caption": "VÂLCEA, PE SCURT — EDIȚIA DE DIMINEAȚĂ\n\n1. Luminos Fest este în Parcul Zăvoi. Intrarea este liberă\nEvenimentul de familie se desfășoară în 15–16 august, cu lampioane pe apă și activități pentru copii.\n\n2. Azi la Băile Govora: «Florile Govorei», ediția a 55-a\nPrimăria Băile Govora anunță ediția a 55-a a evenimentului pentru 15–16 august 2026.\n\n3. Podul pietonal-ciclist peste Olănești: dosarul de documentare rămâne deschis\nUrmărim executanții, autorizațiile, situațiile de lucrări, plățile și termenele proiectului SMIS 334436.\n\nContextul, sursele și actualizările sunt pe valceaclar.ro.\n\n#ValceaClar #Valcea #RamnicuValcea #StiriLocale #EditiaDeAzi"
+          "caption": "VÂLCEA, PE SCURT — EDIȚIA DE DIMINEAȚĂ\n\n1. Luminos Fest este în Parcul Zăvoi. Intrarea este liberă\nEvenimentul de familie se desfășoară în 15–16 august, cu lampioane pe apă și activități pentru copii.\n\n2. Azi la Băile Govora: «Florile Govorei», ediția a 55-a\nPrimăria Băile Govora anunță ediția a 55-a a evenimentului pentru 15–16 august 2026.\n\n3. Podul pietonal-ciclist peste Olănești: dosarul de documentare rămâne deschis\nUrmărim executanții, autorizațiile, situațiile de lucrări, plățile și termenele proiectului SMIS 334436.\n\nContextul, sursele și actualizările sunt pe valceaclar.ro.\n\n#ValceaClar #Valcea #RamnicuValcea #StiriLocale #EditiaDeAzi",
+          "reason": "recap_is_not_story_distribution_unit"
         },
         "tiktok": {
           "status": "hold",
@@ -298,7 +303,8 @@
             "actor": null
           }
         }
-      }
+      },
+      "disabled_reason": "recap_is_not_story_distribution_unit"
     }
   ]
 }
