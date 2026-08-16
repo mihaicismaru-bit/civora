@@ -1,0 +1,64 @@
+name: VÂLCEA CLAR Instagram Visual Preview
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/social/instagram_editorial_preview.py"
+      - "valcea-clar/social/story_visuals.json"
+      - "valcea-clar/social/fetch_approved_photos.py"
+      - "valcea-clar/site/current_edition.json"
+      - "valcea-clar/site/newsroom_decision.json"
+      - "valcea-clar/editions/**"
+      - ".github/workflows/valcea-clar-instagram-visual-preview.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Install preview renderer dependency
+        run: python -m pip install --disable-pip-version-check Pillow==11.3.0
+      - name: Fetch approved source photographs
+        run: python valcea-clar/social/fetch_approved_photos.py
+      - name: Self-test Instagram editorial packaging
+        run: python valcea-clar/social/instagram_editorial_preview.py --self-test
+      - name: Render editorial covers and utility holds
+        run: python valcea-clar/social/instagram_editorial_preview.py
+      - name: Validate preview contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('valcea-clar/social/previews/instagram')
+          manifest=json.loads((root/'manifest.json').read_text(encoding='utf-8'))
+          if manifest.get('execution_mode') != 'PREVIEW_ONLY_NO_META_CALLS':
+              raise SystemExit('preview mode guard missing')
+          if manifest.get('canvas') != {'width':1080,'height':1350,'aspect_ratio':'4:5'}:
+              raise SystemExit('wrong Instagram preview canvas')
+          ready=[p for p in manifest.get('plans',[]) if p.get('status')=='READY']
+          held=[p for p in manifest.get('plans',[]) if p.get('status')=='HOLD']
+          if len(ready) < 2:
+              raise SystemExit(f'expected at least two visual-ready fixtures, got {len(ready)}')
+          if not any(p.get('reason')=='thin_title_date_source_only' for p in held):
+              raise SystemExit('SOCIAL_UTILITY_GATE negative fixture missing')
+          for plan in ready:
+              path=root/plan['preview_file']
+              if not path.is_file() or path.stat().st_size < 50000:
+                  raise SystemExit(f'invalid preview file: {path}')
+          print(f"Instagram visual preview: PASS ({len(ready)} READY / {len(held)} HOLD)")
+          PY
+      - name: Upload inspectable editorial previews
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-instagram-editorial-preview-${{ github.run_id }}
+          path: valcea-clar/social/previews/instagram
+          if-no-files-found: error
+          retention-days: 14
