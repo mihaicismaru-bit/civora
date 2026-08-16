@@ -1,0 +1,108 @@
+name: VÂLCEA CLAR YouTube Editorial Outbox
+
+on:
+  workflow_run:
+    workflows: ["VÂLCEA CLAR Social Publication Engine"]
+    types: [completed]
+  schedule:
+    - cron: "4,19,34,49 * * * *"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "valcea-clar/social/youtube_editorial_v1.py"
+      - "valcea-clar/social/youtube_editorial_materialize.py"
+      - "valcea-clar/social/youtube_outbox.json"
+      - "valcea-clar/social/youtube_state.json"
+      - "valcea-clar/site/current_edition.json"
+      - "valcea-clar/site/newsroom_decision.json"
+      - "valcea-clar/site/story_publication_event.json"
+      - "valcea-clar/editions/**"
+      - ".github/workflows/valcea-clar-youtube-editorial.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-youtube-editorial-outbox
+  cancel-in-progress: false
+
+jobs:
+  materialize:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Refresh canonical main for non-PR runs
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+      - name: Self-test YouTube editorial product
+        run: |
+          python valcea-clar/social/youtube_editorial_v1.py --self-test
+          python valcea-clar/social/youtube_editorial_materialize.py --self-test
+      - name: Materialize canonical YouTube editorial outbox
+        run: python valcea-clar/social/youtube_editorial_materialize.py | tee /tmp/youtube-editorial-materialize.json
+      - name: Validate canonical YouTube fixtures
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          outbox=json.loads(Path('valcea-clar/social/youtube_outbox.json').read_text(encoding='utf-8'))
+          state=json.loads(Path('valcea-clar/social/youtube_state.json').read_text(encoding='utf-8'))
+          items={str(i.get('story_id')):i for i in outbox.get('items',[]) if isinstance(i,dict)}
+          if outbox.get('platform')!='youtube' or outbox.get('editorial_product_version')!='youtube-editorial-v1.0': raise SystemExit('YouTube editorial version mismatch')
+          if state.get('direct_publication_enabled') is not False: raise SystemExit('YouTube falsely claims direct publication')
+          gov=items.get('florile-govorei-20260816')
+          if not gov or gov.get('status')!='hold': raise SystemExit('Florile Govorei YouTube HOLD failed')
+          lum=items.get('luminos-fest-zavoi-20260815')
+          if not lum or lum.get('status')!='hold_media': raise SystemExit('Luminos YouTube media HOLD failed')
+          ola=items.get('olanesti-bridge-monitor')
+          if not ola or ola.get('status')!='hold_media' or ola.get('format_family')!='document_explainer': raise SystemExit('Olănești YouTube explainer failed')
+          if ola.get('title')!='44,37 mil. lei pe Olănești: ce se construiește lângă Omniasig': raise SystemExit('Olănești YouTube title failed')
+          if ola.get('thumbnail_text')!='44,37 MIL. LEI PE OLĂNEȘTI': raise SystemExit('Olănești YouTube thumbnail failed')
+          for item in items.values():
+              if item.get('real_video_required') is not True or item.get('synthetic_filler_forbidden') is not True: raise SystemExit('YouTube media-integrity guard missing')
+              if item.get('verbatim_cross_platform_reuse_allowed') is not False: raise SystemExit('YouTube cross-platform reuse guard missing')
+          print(f"YouTube canonical editorial outbox: PASS ({len(items)} products)")
+          PY
+      - name: Persist YouTube editorial state conflict-safe
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/youtube-editorial-state
+          mkdir -p /tmp/youtube-editorial-state/valcea-clar/social
+          cp valcea-clar/social/youtube_outbox.json /tmp/youtube-editorial-state/valcea-clar/social/youtube_outbox.json
+          cp valcea-clar/social/youtube_state.json /tmp/youtube-editorial-state/valcea-clar/social/youtube_state.json
+          git config user.name "valcea-clar-youtube-engine[bot]"
+          git config user.email "valcea-clar-youtube-engine@users.noreply.github.com"
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/youtube-editorial-state/valcea-clar/social/youtube_outbox.json valcea-clar/social/youtube_outbox.json
+            cp /tmp/youtube-editorial-state/valcea-clar/social/youtube_state.json valcea-clar/social/youtube_state.json
+            git add valcea-clar/social/youtube_outbox.json valcea-clar/social/youtube_state.json
+            if git diff --cached --quiet; then echo "No YouTube editorial changes to persist."; exit 0; fi
+            git commit -m "Persist VÂLCEA CLAR YouTube editorial outbox"
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1
+      - name: Upload YouTube editorial audit
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-youtube-editorial-${{ github.run_id }}
+          path: |
+            /tmp/youtube-editorial-materialize.json
+            valcea-clar/social/youtube_outbox.json
+            valcea-clar/social/youtube_state.json
+          if-no-files-found: warn
+          retention-days: 14
