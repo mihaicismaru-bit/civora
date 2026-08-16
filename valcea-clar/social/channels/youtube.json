@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0",
+  "channel_id": "valcea-youtube",
+  "instance_id": "valcea",
+  "platform": "youtube",
+  "status": "outbox_only",
+  "audience_promise": "Explicații video locale scurte și verificabile pentru Vâlcea, construite din fapte confirmate și imagini reale, suficient de complete pentru a fi utile fără click obligatoriu.",
+  "editorial_mix": {
+    "priorities": [
+      "service_journalism",
+      "local_events",
+      "infrastructure",
+      "civic_updates",
+      "public_money",
+      "verified_breaking_updates"
+    ],
+    "exclusions": [
+      "unverified_accusations",
+      "rage_bait",
+      "fake_urgency",
+      "fake_exclusivity",
+      "misleading_thumbnail",
+      "synthetic_real_person_imagery",
+      "verbatim_cross_posting"
+    ]
+  },
+  "native_formats": [
+    "short",
+    "long_video"
+  ],
+  "cadence": {
+    "timezone": "Europe/Bucharest",
+    "max_posts_per_day": 4,
+    "min_spacing_minutes": 90,
+    "quiet_hours": {
+      "start": "23:00",
+      "end": "07:00",
+      "breaking_override": true
+    }
+  },
+  "fatigue": {
+    "same_story_cooldown_hours": 12,
+    "max_related_posts_24h": 2
+  },
+  "media_policy": {
+    "real_media_only": true,
+    "provenance_required": true,
+    "reuse_rights_required": true,
+    "synthetic_real_person_forbidden": true
+  },
+  "link_policy": {
+    "mode": "native_preferred",
+    "canonical_hosts": [
+      "valceaclar.ro",
+      "www.valceaclar.ro"
+    ]
+  },
+  "series": [],
+  "approval_gates": {
+    "low_risk_auto": false,
+    "reputational_human": true,
+    "corrections_priority": true
+  },
+  "credentials_ref": "none:youtube-upload-access-not-verified",
+  "publication_state": {
+    "outbox_path": "valcea-clar/social/youtube_outbox.json",
+    "state_path": "valcea-clar/social/youtube_state.json",
+    "dedupe_by_id": true,
+    "last_known_good": true
+  },
+  "metrics": {
+    "observed_only": true,
+    "sources": []
+  },
+  "zero_paid_dependency": true
+}
