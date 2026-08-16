@@ -110,12 +110,21 @@
       "credentials": null
     },
     {
-      "channel_id": "youtube_shorts",
-      "status": "blocked_until_verified_adapter_and_credentials",
+      "channel_id": "youtube",
+      "status": "outbox_only",
       "direct_publication_enabled": false,
       "publication_mode": "durable_outbox_only",
+      "config": "valcea-clar/social/channels/youtube.json",
       "adapter": null,
-      "credentials": null
+      "outbox": "valcea-clar/social/youtube_outbox.json",
+      "state": "valcea-clar/social/youtube_state.json",
+      "credentials": null,
+      "requirements": {
+        "real_video_for_short": true,
+        "editor_approval": true,
+        "rights_metadata": true,
+        "verified_upload_access": false
+      }
     },
     {
       "channel_id": "tiktok",
