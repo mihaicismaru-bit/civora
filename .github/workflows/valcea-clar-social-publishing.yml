@@ -137,6 +137,10 @@ jobs:
             valcea-clar/social/facebook_editorial_preview_v1_1.py \
             valcea-clar/social/facebook_editorial_publish.py \
             valcea-clar/social/facebook_publish.py \
+            valcea-clar/social/instagram_editorial_v1.py \
+            valcea-clar/social/instagram_editorial_v1_1.py \
+            valcea-clar/social/instagram_editorial_v1_2.py \
+            valcea-clar/social/instagram_editorial_publish.py \
             valcea-clar/social/instagram_publish.py \
             valcea-clar/social/tiktok_publish.py
           python valcea-clar/social/meta_auth_health.py --self-test
@@ -178,12 +182,12 @@ jobs:
               f.write(f"has_eligible={'true' if count else 'false'}\n")
           PY
 
-      - name: Preview Instagram queue
+      - name: Preview Instagram editorial queue
         id: preview_instagram
         shell: bash
         run: |
           set -euo pipefail
-          python valcea-clar/social/instagram_publish.py | tee /tmp/instagram-preview.json
+          python valcea-clar/social/instagram_editorial_publish.py | tee /tmp/instagram-preview.json
           python - <<'PY'
           import json, os
           from pathlib import Path
@@ -227,7 +231,7 @@ jobs:
         if: github.event_name == 'pull_request' || steps.preview_facebook.outputs.has_eligible != 'true'
         run: cp /tmp/facebook-preview.json /tmp/facebook-apply.json
 
-      - name: Publish eligible Instagram story through Meta Graph API
+      - name: Publish eligible Instagram editorial story through Meta Graph API
         id: publish_instagram
         if: github.event_name != 'pull_request' && steps.preview_instagram.outputs.has_eligible == 'true'
         continue-on-error: true
@@ -236,8 +240,9 @@ jobs:
           VALCEA_IG_ACCESS_TOKEN: ${{ secrets.VALCEA_META_PAGE_ACCESS_TOKEN || secrets.VALCEA_IG_ACCESS_TOKEN || secrets.VALCEA_FB_PAGE_ACCESS_TOKEN }}
           VALCEA_IG_GRAPH_VERSION: v26.0
           VALCEA_IG_GRAPH_HOST: graph.facebook.com
-          VALCEA_IG_MAX_PER_RUN: "1"
-        run: python valcea-clar/social/instagram_publish.py --apply | tee /tmp/instagram-apply.json
+          VALCEA_IG_EDITORIAL_LIVE_ENABLED: "true"
+          VALCEA_IG_EDITORIAL_MAX_PER_RUN: "1"
+        run: python valcea-clar/social/instagram_editorial_publish.py --apply | tee /tmp/instagram-apply.json
 
       - name: Record skipped Instagram apply
         if: github.event_name == 'pull_request' || steps.preview_instagram.outputs.has_eligible != 'true'
@@ -282,6 +287,7 @@ jobs:
             valcea-clar/social/social_media_manifest.json
           )
           media_dir="valcea-clar/site/runtime/media/social"
+          instagram_export_dir="valcea-clar/dist/chatgpt-sites/media/social/editorial/instagram"
           rm -rf /tmp/valcea-social-state
           mkdir -p /tmp/valcea-social-state
           for file in "${files[@]}"; do
@@ -290,10 +296,12 @@ jobs:
               cp "$file" "/tmp/valcea-social-state/$file"
             fi
           done
-          if [ -d "$media_dir" ]; then
-            mkdir -p "/tmp/valcea-social-state/$(dirname "$media_dir")"
-            cp -a "$media_dir" "/tmp/valcea-social-state/$media_dir"
-          fi
+          for dir in "$media_dir" "$instagram_export_dir"; do
+            if [ -d "$dir" ]; then
+              mkdir -p "/tmp/valcea-social-state/$(dirname "$dir")"
+              cp -a "$dir" "/tmp/valcea-social-state/$dir"
+            fi
+          done
           git config user.name "valcea-clar-social-engine[bot]"
           git config user.email "valcea-clar-social-engine@users.noreply.github.com"
           for attempt in 1 2 3 4 5; do
@@ -306,12 +314,14 @@ jobs:
                 git add "$file"
               fi
             done
-            if [ -d "/tmp/valcea-social-state/$media_dir" ]; then
-              rm -rf "$media_dir"
-              mkdir -p "$(dirname "$media_dir")"
-              cp -a "/tmp/valcea-social-state/$media_dir" "$media_dir"
-              git add "$media_dir"
-            fi
+            for dir in "$media_dir" "$instagram_export_dir"; do
+              if [ -d "/tmp/valcea-social-state/$dir" ]; then
+                rm -rf "$dir"
+                mkdir -p "$(dirname "$dir")"
+                cp -a "/tmp/valcea-social-state/$dir" "$dir"
+                git add "$dir"
+              fi
+            done
             if git diff --cached --quiet; then
               echo "No VÂLCEA CLAR social-engine changes to persist."
               exit 0
@@ -341,6 +351,7 @@ jobs:
               '- Publication unit: **individual story**',
               '- Edition/recap publication gate: **disabled**',
               '- Facebook: **editorial-composite native packaging v1**',
+              '- Instagram: **editorial cover/carousel native packaging v1; public-media preflight**',
               '- Threads: **story-first durable outbox**',
               '- LinkedIn: **story-first durable outbox**',
               '- Telegram: **story-first durable outbox; no direct-access claim**',
@@ -379,6 +390,7 @@ jobs:
             valcea-clar/social/youtube_outbox.json
             valcea-clar/social/social_media_manifest.json
             valcea-clar/site/runtime/media/social/editorial
+            valcea-clar/dist/chatgpt-sites/media/social/editorial/instagram
             valcea-clar/dist/chatgpt-sites/media/social
           if-no-files-found: warn
           retention-days: 14
