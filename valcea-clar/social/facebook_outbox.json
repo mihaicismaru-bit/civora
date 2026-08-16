@@ -20,7 +20,9 @@
     "site_story_may_publish_before_social_media_ready": true,
     "edition_recaps_are_social_queue_items": false,
     "legacy_recap_outbox_policy": "removed_from_active_queue; historical evidence remains in platform state",
-    "archival_context_requires_explicit_disclosure": true
+    "archival_context_requires_explicit_disclosure": true,
+    "tiktok_archival_context_never_counts_as_current_media": true,
+    "tiktok_ready_photo_requires_premium_editorial_composite": true
   },
   "items": [
     {
@@ -139,10 +141,8 @@
         "tiktok": {
           "status": "hold",
           "mode": "direct_post",
-          "reason": "site_consent_and_tiktok_app_audit_required",
-          "title": "Luminos Fest este în Parcul Zăvoi. Intrarea este liberă",
-          "description": "Luminos Fest este în Parcul Zăvoi. Intrarea este liberă\n\nEvenimentul de familie se desfășoară în 15–16 august, cu lampioane pe apă și activități pentru copii.\n\nFoto de arhivă: intrarea în Parcul Zăvoi (2010); imaginea nu este realizată la Luminos Fest 2026.\n\nDetalii și surse pe valceaclar.ro.\n\n#ValceaClar #Valcea #StiriValcea",
-          "photo_url": "https://valceaclar.ro/media/social/luminos-zavoi-context-2010.jpg",
+          "title": "Azi în Zăvoi: intrarea este liberă",
+          "description": "Evenimentul de familie se desfășoară în 15–16 august, cu lampioane pe apă și activități pentru copii.\n\nSite-ul oficial al organizatorilor indică intrare liberă, iar lampioanele plutitoare se rezervă separat, online.\n\nFoto de arhivă: intrarea în Parcul Zăvoi (2010); imaginea nu este realizată la Luminos Fest 2026.\n\nDocumente și context: valceaclar.ro",
           "privacy_level": null,
           "disable_comment": false,
           "consent": {
@@ -150,7 +150,16 @@
             "source": null,
             "granted_at": null,
             "actor": null
-          }
+          },
+          "editorial_product_status": "HOLD_MEDIA",
+          "editorial_rendering_version": "tiktok-editorial-v1.1",
+          "editorial_product_fingerprint_sha256": "65ac07d3f39cb63354ae7b711b316ceee74c33cd140dea883a0e8da9a025e4db",
+          "editorial_native_format": "short",
+          "premium_asset_required": false,
+          "synthetic_filler_forbidden": true,
+          "archive_as_current_forbidden": true,
+          "verbatim_cross_platform_reuse_allowed": false,
+          "reason": "current_event_or_subject_media_required"
         }
       },
       "image_path": "valcea-clar/social/photos/approved/luminos-zavoi-context-2010.jpg",
@@ -193,10 +202,8 @@
         "tiktok": {
           "status": "hold",
           "mode": "direct_post",
-          "reason": "site_consent_and_tiktok_app_audit_required",
           "title": "Azi la Băile Govora: «Florile Govorei», ediția a 55-a",
-          "description": "Azi la Băile Govora: «Florile Govorei», ediția a 55-a\n\nPrimăria Băile Govora anunță ediția a 55-a a evenimentului pentru 15–16 august 2026.\n\nFoto de arhivă: parc din Băile Govora (2006); imaginea nu este realizată la ediția 2026 a «Florile Govorei».\n\nDetalii și surse pe valceaclar.ro.\n\n#ValceaClar #Valcea #StiriValcea",
-          "photo_url": "https://valceaclar.ro/media/social/florile-govorei-context-govora-park.jpg",
+          "description": "Primăria Băile Govora anunță ediția a 55-a a evenimentului pentru 15–16 august 2026.\n\nVÂLCEA CLAR publică aici numai informația confirmată explicit de titlul paginii oficiale: denumirea evenimentului, ediția și intervalul 15–16 august 2026. Programul și alte detalii nu sunt completate din presupuneri.\n\nFoto de arhivă: parc din Băile Govora (2006); imaginea nu este realizată la ediția 2026 a «Florile Govorei».\n\nDocumente și context: valceaclar.ro",
           "privacy_level": null,
           "disable_comment": false,
           "consent": {
@@ -204,7 +211,16 @@
             "source": null,
             "granted_at": null,
             "actor": null
-          }
+          },
+          "editorial_product_status": "HOLD",
+          "editorial_rendering_version": "tiktok-editorial-v1.1",
+          "editorial_product_fingerprint_sha256": "f1a7d343049081d7756de927a03b44be6b99ea34bcadacc32567ee06e649f357",
+          "editorial_native_format": "short",
+          "premium_asset_required": false,
+          "synthetic_filler_forbidden": true,
+          "archive_as_current_forbidden": true,
+          "verbatim_cross_platform_reuse_allowed": false,
+          "reason": "tiktok_motion_value_gate_thin_story"
         }
       },
       "image_path": "valcea-clar/social/photos/approved/florile-govorei-context-govora-park.jpg",
@@ -246,10 +262,8 @@
         "tiktok": {
           "status": "hold",
           "mode": "direct_post",
-          "reason": "site_consent_and_tiktok_app_audit_required",
-          "title": "Podul pietonal-ciclist peste Olănești: dosarul de documentare rămâne deschis",
-          "description": "Podul pietonal-ciclist peste Olănești: dosarul de documentare rămâne deschis\n\nUrmărim executanții, autorizațiile, situațiile de lucrări, plățile și termenele proiectului SMIS 334436.\n\nFoto de arhivă: râul Olănești în Râmnicu Vâlcea (2016); imaginea nu surprinde șantierul actual și nu identifică executantul lucrărilor.\n\nDetalii și surse pe valceaclar.ro.\n\n#ValceaClar #Valcea #StiriValcea",
-          "photo_url": "https://valceaclar.ro/media/social/olanesti-river-context-2016-4x3.jpg",
+          "title": "44,37 mil. lei. Ce se construiește pe Olănești?",
+          "description": "Urmărim executanții, autorizațiile, situațiile de lucrări, plățile și termenele proiectului SMIS 334436.\n\nDocumentația tehnică identificată pentru proiectul «Creșterea mobilității urbane, pietonale și cicliste în Municipiul Râmnicu Vâlcea — Componenta II», SMIS 334436, include în zona de lângă Omniasig un nou pod exclusiv pietonal și ciclist.\n\nSMIS 334436: pod nou pietonal + ciclist în zona Omniasig\n\nNu atribuim lucrările vizibile unei firme fără documente suficiente\n\nFoto de arhivă: râul Olănești în Râmnicu Vâlcea (2016); imaginea nu surprinde șantierul actual și nu identifică executantul lucrărilor.\n\nDocumente și context: valceaclar.ro",
           "privacy_level": null,
           "disable_comment": false,
           "consent": {
@@ -257,7 +271,16 @@
             "source": null,
             "granted_at": null,
             "actor": null
-          }
+          },
+          "editorial_product_status": "HOLD_MEDIA",
+          "editorial_rendering_version": "tiktok-editorial-v1.1",
+          "editorial_product_fingerprint_sha256": "4396e03fe70cad595ebda8dc608f02c233eb3b5ddd2ed66373d3eba4adacd9e3",
+          "editorial_native_format": "short",
+          "premium_asset_required": false,
+          "synthetic_filler_forbidden": true,
+          "archive_as_current_forbidden": true,
+          "verbatim_cross_platform_reuse_allowed": false,
+          "reason": "current_site_photo_or_video_required"
         }
       },
       "image_path": "valcea-clar/social/photos/approved/olanesti-river-context-2016-4x3.jpg",
