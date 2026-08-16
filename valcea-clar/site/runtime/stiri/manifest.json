@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.3",
+  "schema_version": "1.4",
   "publication_model": "continuous_story_first",
   "homepage_presentation": "live_newsroom",
   "edition_is_canonical_story_url": false,
@@ -8,6 +8,7 @@
     "type": "NewsArticle",
     "eligible_scope": "publishable_full_story_only",
     "date_published_policy": "stable_publication_ledger_only",
+    "verified_image_policy": "provenance_backed_real_photograph_only",
     "unverified_image_policy": "omit"
   },
   "cross_linking": {
@@ -26,7 +27,17 @@
         "olanesti-bridge-monitor"
       ],
       "structured_data_type": "NewsArticle",
-      "published_at": "2026-08-16T11:08:04+03:00"
+      "published_at": "2026-08-16T11:08:04+03:00",
+      "image": {
+        "public_url": "https://valceaclar.ro/media/social/luminos-zavoi-context-2010.jpg",
+        "source_url": "https://commons.wikimedia.org/wiki/File:RamnicuValcea7.JPG",
+        "credit": "L.Kenzel / Wikimedia Commons — CC BY 3.0",
+        "rights_basis": "creative_commons",
+        "contextual_archive": true,
+        "captured_at": "2010-04-07",
+        "synthetic": false,
+        "provenance_status": "VERIFIED"
+      }
     },
     {
       "id": "florile-govorei-20260816",
@@ -37,7 +48,17 @@
         "olanesti-bridge-monitor"
       ],
       "structured_data_type": "NewsArticle",
-      "published_at": "2026-08-16T11:08:04+03:00"
+      "published_at": "2026-08-16T11:08:04+03:00",
+      "image": {
+        "public_url": "https://valceaclar.ro/media/social/florile-govorei-context-govora-park.jpg",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Baile_Govora_-_parcul.JPG",
+        "credit": "Bunu vio / Wikimedia Commons — domeniu public",
+        "rights_basis": "public_domain",
+        "contextual_archive": true,
+        "captured_at": "2006-08-31",
+        "synthetic": false,
+        "provenance_status": "VERIFIED"
+      }
     },
     {
       "id": "olanesti-bridge-monitor",
@@ -48,7 +69,17 @@
         "florile-govorei-20260816"
       ],
       "structured_data_type": "NewsArticle",
-      "published_at": "2026-08-16T11:08:04+03:00"
+      "published_at": "2026-08-16T11:08:04+03:00",
+      "image": {
+        "public_url": "https://valceaclar.ro/media/social/olanesti-river-context-2016-4x3.jpg",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Ramnicu_Valcea_-_Ol%C4%83ne%C8%99ti.jpg",
+        "credit": "Tiia Monto / Wikimedia Commons — CC BY-SA 4.0",
+        "rights_basis": "creative_commons",
+        "contextual_archive": true,
+        "captured_at": "2016-05-21",
+        "synthetic": false,
+        "provenance_status": "VERIFIED"
+      }
     }
   ]
 }
