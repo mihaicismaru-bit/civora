@@ -71,16 +71,12 @@
     "reputational_human": true,
     "corrections_priority": true
   },
-  "credentials_ref": "github-actions-secrets:VALCEA_X_API_KEY+VALCEA_X_API_SECRET+VALCEA_X_ACCESS_TOKEN+VALCEA_X_ACCESS_TOKEN_SECRET",
+  "credentials_ref": "none:x-api-pay-per-use-disabled-by-zero-paid-policy",
   "publication_state": {
     "outbox_path": "valcea-clar/social/x_outbox.json",
     "state_path": "valcea-clar/social/x_state.json",
     "dedupe_by_id": true,
-    "last_known_good": true,
-    "activation_baseline_required": true,
-    "network_identity_check_deferred_until_billing_approval": true,
-    "historical_backlog_replay_forbidden": true,
-    "partial_publish_requires_manual_reconciliation": true
+    "last_known_good": true
   },
   "metrics": {
     "observed_only": true,
