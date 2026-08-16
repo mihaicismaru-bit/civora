@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read-only diagnostics for the official Râmnicu Vâlcea Lotus HCL register."""
+"""Read-only diagnostics for the official Râmnicu Vâlcea Lotus council registers."""
 from __future__ import annotations
 
 import json
@@ -30,6 +30,12 @@ def main() -> int:
         cw.BASE + "/f4ea1f1d59c125fec22571090052215b?OpenView&Count=500",
         cw.BASE + "/d8c74d540a4c4a9bc2256c6900408bec?OpenView&Count=500",
         cw.BASE + "/7bc19da5efdf2be6c2256c59003667d1?OpenView&Count=500",
+        # Official DocManager views exposed by the same database template.
+        # These are read-only and used only to resolve whether a council
+        # convocation disposition exists for the target date.
+        cw.BASE + "/6118d3860998c41ac225705f004dfd17?OpenView&Count=500",
+        cw.BASE + "/c586e2c6e478cd3dc2256e8b0022b24e?OpenView&Count=500",
+        cw.BASE + "/3d84a029a0242175c2256c5d0039c0c4?OpenView&Count=500",
     ]
     pages = []
     all_links = []
@@ -43,7 +49,7 @@ def main() -> int:
                 "title": title,
                 "link_count": len(links),
                 "frame_count": len(frames),
-                "text_head": text[:7000],
+                "text_head": text[:12000],
             })
             for link in links:
                 all_links.append({**link, "class": classify(link["url"]), "from": result["url"]})
@@ -59,30 +65,44 @@ def main() -> int:
 
     probes = []
     candidates = [r for r in links if r["class"] in {"open_document", "unid_record", "other"}]
-    candidates.sort(key=lambda r: (0 if "2026" in (r.get("text") or "") else 1, r["url"]))
-    for meta in candidates[:6]:
+    # Prefer rows whose text looks like the target meeting/convocation; then a
+    # bounded generic sample to learn the canonical Lotus record shape.
+    def score(row):
+        text = (row.get("text") or "").casefold()
+        if "14 august 2026" in text or "14.08.2026" in text:
+            return 0
+        if "convoc" in text and "consili" in text:
+            return 1
+        if "august" in text:
+            return 2
+        if "2026" in text:
+            return 3
+        return 4
+    candidates.sort(key=lambda r: (score(r), r["url"]))
+    for meta in candidates[:10]:
         result = cw.fetch(meta["url"], timeout=8)
         probe = {
             "url": meta["url"],
             "text": meta.get("text"),
             "class": meta["class"],
+            "from": meta.get("from"),
             "ok": result["ok"],
             "status": result["status"],
             "error": result["error"],
         }
         if result["ok"]:
             body_text = cw.to_text(result["body"])
-            probe["text_head"] = body_text[:7000]
+            probe["text_head"] = body_text[:12000]
             plinks, _, ptitle = cw.parse_links(result["url"], result["body"])
             probe["title"] = ptitle
-            probe["links"] = [{**x, "class": classify(x["url"])} for x in plinks[:100]]
+            probe["links"] = [{**x, "class": classify(x["url"])} for x in plinks[:120]]
         probes.append(probe)
 
     payload = {
-        "schema_version": "1.1",
+        "schema_version": "1.2",
         "pages": pages,
         "link_class_counts": counts,
-        "links": links[:1200],
+        "links": links[:1800],
         "record_probes": probes,
         "publication_allowed": False,
     }
