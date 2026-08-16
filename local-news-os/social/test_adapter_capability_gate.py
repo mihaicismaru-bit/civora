@@ -98,20 +98,24 @@ class AdapterCapabilityGateAcceptance(unittest.TestCase):
         self.assertFalse(result["guards"]["native_product_rewritten"])
         self.assertFalse(result["guards"]["fallback_format_invented"])
 
-    def test_tiktok_short_video_is_preserved_until_video_adapter_exists(self) -> None:
+    def test_tiktok_short_video_is_now_direct_ready_with_native_async_adapter(self) -> None:
         report = _runtime("tiktok")
         self.assertEqual("short", report["artifacts"]["format"]["product"]["native_format"])
         selected = report["artifacts"]["visual"]["binding"]["selected_assets"]
         self.assertEqual(["video"], [asset["kind"] for asset in selected])
         result = _bridge("tiktok", report=report)
         self.assertFalse(result["blocked"])
-        self.assertEqual("OUTBOX_ONLY", result["dispatch_disposition"])
-        self.assertEqual("OUTBOX_ONLY_CAPABILITY_GAP", result["capability_disposition"])
-        self.assertIn("UNSUPPORTED_NATIVE_FORMAT:short", result["capability_gap_reasons"])
-        self.assertIn("UNSUPPORTED_MEDIA_KIND:video", result["capability_gap_reasons"])
-        self.assertIn("VIDEO_NATIVE_PRODUCT_WITHOUT_VIDEO_ADAPTER", result["capability_gap_reasons"])
+        self.assertEqual("DIRECT_READY", result["dispatch_disposition"])
+        self.assertEqual("DIRECT_READY", result["capability_disposition"])
+        self.assertTrue(result["capability_gate"]["compatible"])
+        self.assertEqual("short", result["capability_gate"]["native_format"])
+        self.assertEqual(["video"], result["capability_gate"]["selected_media_kinds"])
+        self.assertEqual("async_remote_status", result["capability_gate"]["completion_model"])
+        self.assertTrue(result["capability_gate"]["remote_reconciliation_supported"])
+        self.assertTrue(result["adapter_handoff"]["dispatch_allowed"])
         item = next(iter(result["commit_bundle"]["outbox"]["items"].values()))
         self.assertEqual("short", item["adapter_payload"]["native_product"]["native_format"])
+        self.assertEqual(report["artifacts"]["format"]["product"], item["adapter_payload"]["native_product"])
         self.assertFalse(result["guards"]["native_product_rewritten"])
         self.assertFalse(result["guards"]["fallback_format_invented"])
 
@@ -155,7 +159,7 @@ class AdapterCapabilityGateAcceptance(unittest.TestCase):
     def test_capability_contract_cannot_claim_video_format_on_photo_only_adapter(self) -> None:
         capabilities = _capabilities()
         tiktok = next(row for row in capabilities["adapters"] if row["platform"] == "tiktok")
-        tiktok["supported_native_formats"] = ["single_photo", "short"]
+        tiktok["supported_media_kinds"] = ["photo"]
         result = adapter_capability_gate.validate_capability_registry(
             capabilities,
             _registry(),
@@ -187,9 +191,9 @@ class AdapterCapabilityGateAcceptance(unittest.TestCase):
         self.assertIsNone(result["adapter_handoff"])
 
     def test_capability_result_is_deterministic_and_keeps_zero_paid_guards(self) -> None:
-        report = _runtime("instagram")
-        first = _bridge("instagram", report=report)
-        second = _bridge("instagram", report=report)
+        report = _runtime("tiktok")
+        first = _bridge("tiktok", report=report)
+        second = _bridge("tiktok", report=report)
         self.assertEqual(first, second)
         self.assertEqual("DIRECT_READY", first["dispatch_disposition"])
         self.assertTrue(first["guards"]["zero_paid_dependency"])
