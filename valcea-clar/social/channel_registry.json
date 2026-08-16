@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "instance_id": "valcea",
   "product": "CIVORA / VÂLCEA CLAR Social Publication Engine",
   "canonical_domain": "valceaclar.ro",
@@ -7,15 +7,13 @@
   "scheduler": "github_actions",
   "state_owner": "repository",
   "workflow": ".github/workflows/valcea-clar-social-publishing.yml",
+  "publication_model": "continuous_story_first",
+  "trigger_model": "story_publication_event_first_with_cron_recovery",
   "cadence": {
     "cron": "7,22,37,52 * * * *",
-    "description": "check eligible social outboxes every 15 minutes"
+    "description": "15-minute recovery scan only; normal distribution is triggered immediately by a durable site story_publication_event"
   },
-  "required_active_direct_channels": [
-    "facebook",
-    "instagram",
-    "tiktok"
-  ],
+  "required_active_direct_channels": ["facebook", "instagram", "tiktok"],
   "chatgpt": {
     "scheduled_publication_allowed": false,
     "direct_publication_allowed": false,
@@ -25,10 +23,15 @@
   },
   "policy": {
     "verified_fact_kernel_required": true,
+    "individual_story_is_distribution_unit": true,
+    "edition_recap_is_distribution_gate": false,
+    "site_story_may_publish_before_visual_channel_ready": true,
+    "missing_story_specific_media_holds_only_affected_channel": true,
     "channel_native_copy_required": true,
     "cross_post_verbatim_forbidden": true,
     "approved_real_visual_required_when_visual_is_used": true,
     "synthetic_portrayal_of_real_people_forbidden": true,
+    "generic_stock_substitution_forbidden": true,
     "idempotency_required": true,
     "deduplication_required": true,
     "correction_propagation_required": true,
@@ -49,7 +52,7 @@
       "config": "valcea-clar/social/channels/facebook.json",
       "adapter": "valcea-clar/social/facebook_publish.py",
       "prepare": [
-        "valcea-clar/social/build_current_edition_outbox.py",
+        "valcea-clar/social/build_live_story_outbox.py",
         "valcea-clar/social/fetch_approved_photos.py"
       ],
       "outbox": "valcea-clar/social/facebook_outbox.json",
@@ -59,10 +62,11 @@
         "access_token_secret": "VALCEA_FB_PAGE_ACCESS_TOKEN"
       },
       "requirements": {
-        "real_photo": true,
+        "story_event": true,
+        "story_specific_real_photo": true,
         "editor_approval": true,
         "rights_metadata": true,
-        "canonical_link": true
+        "canonical_story_link": true
       }
     },
     {
@@ -73,7 +77,7 @@
       "config": "valcea-clar/social/channels/instagram.json",
       "adapter": "valcea-clar/social/instagram_publish.py",
       "prepare": [
-        "valcea-clar/social/build_current_edition_outbox.py",
+        "valcea-clar/social/build_live_story_outbox.py",
         "valcea-clar/social/fetch_approved_photos.py",
         "valcea-clar/social/build_social_media_assets.py"
       ],
@@ -84,13 +88,14 @@
         "access_token_secret": "VALCEA_IG_ACCESS_TOKEN"
       },
       "requirements": {
+        "story_event": true,
         "professional_account": true,
         "content_publishing_permission": true,
         "public_jpeg": true,
-        "real_photo": true,
+        "story_specific_real_photo": true,
         "editor_approval": true,
         "rights_metadata": true,
-        "canonical_link": true
+        "canonical_story_link": true
       }
     },
     {
@@ -143,7 +148,7 @@
       "config": "valcea-clar/social/channels/tiktok.json",
       "adapter": "valcea-clar/social/tiktok_publish.py",
       "prepare": [
-        "valcea-clar/social/build_current_edition_outbox.py",
+        "valcea-clar/social/build_live_story_outbox.py",
         "valcea-clar/social/fetch_approved_photos.py",
         "valcea-clar/social/build_social_media_assets.py"
       ],
@@ -154,6 +159,7 @@
         "public_posting_approved_variable": "VALCEA_TIKTOK_PUBLIC_POSTING_APPROVED"
       },
       "requirements": {
+        "story_event": true,
         "creator_info_before_publish": true,
         "privacy_from_current_creator_options": true,
         "verified_media_domain": "valceaclar.ro",
