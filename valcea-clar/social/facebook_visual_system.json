@@ -1,12 +1,28 @@
 {
   "schema_version": "1.0",
   "channel_id": "valcea-facebook",
+  "master_identity_system": "valcea-clar/social/social_brand_system.json",
   "canvas": {"width": 1200, "height": 1500, "aspect_ratio": "4:5"},
   "brand": {
     "name": "VÂLCEA CLAR",
+    "editorial_lockup": "VÂLCEA. CLAR.",
     "accent_rgb": [196, 27, 35],
     "paper_rgb": [247, 246, 243],
-    "safe_margin_px": 76
+    "ink_rgb": [20, 20, 20],
+    "safe_margin_px": 76,
+    "logo_presence": "quiet_consistent"
+  },
+  "profile_identity": {
+    "avatar_strategy": "same_master_editorial_mark_as_instagram",
+    "avatar_legible_at_px": 32,
+    "cover_strategy": "editorial_masthead_not_advertising_banner",
+    "cover_required_elements": [
+      "VÂLCEA CLAR",
+      "Ce se întâmplă. Ce știm. Ce contează.",
+      "valceaclar.ro"
+    ],
+    "bio_strategy": "mission_first_plus_local_coverage_plus_canonical_site",
+    "page_rule": "must_read_as_established_newsroom_before_user_opens_any_post"
   },
   "typography": {
     "hook_max_lines": 3,
@@ -14,13 +30,22 @@
     "hook_size_min": 56,
     "subline_size": 34,
     "kicker_size": 28,
-    "brand_size": 27
+    "brand_size": 27,
+    "principle": "editorial_not_promotional"
   },
   "templates": {
     "fb_news_card": "photo_plus_editorial_footer",
     "fb_public_money_card": "photo_plus_number_led_footer",
     "fb_investigation_card": "photo_plus_public_interest_footer",
-    "fb_event_utility": "photo_plus_utility_footer"
+    "fb_event_utility": "photo_plus_utility_footer",
+    "fb_breaking_update": "verified_change_plus_place_or_consequence",
+    "fb_explainer_carousel": "one_fact_per_frame_with_clear_cover"
+  },
+  "copy": {
+    "lead_rule": "local_consequence_or_useful_fact_first",
+    "context_rule": "add_only_context_that_helps_reader_understand_or_act",
+    "link_rule": "canonical_story_link_when_article_exists",
+    "tone": "confident_clear_not_tabloid"
   },
   "qa": {
     "one_dominant_visual_idea": true,
@@ -29,6 +54,11 @@
     "canonical_link_required": true,
     "facebook_copy_must_not_equal_instagram": true,
     "engagement_bait_forbidden": true,
-    "fake_urgency_forbidden": true
+    "fake_urgency_forbidden": true,
+    "mobile_first_legibility_required": true,
+    "profile_and_post_identity_must_match": true,
+    "must_not_look_like_local_marketing_page": true,
+    "must_not_look_ai_generated": true,
+    "must_not_repeat_identical_layout_for_every_story": true
   }
 }
