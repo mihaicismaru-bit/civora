@@ -26,7 +26,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: valcea-clar-public-http-health
+  group: valcea-clar-public-http-health-${{ github.event.pull_request.number || 'main' }}
   cancel-in-progress: true
 
 jobs:
@@ -44,18 +44,31 @@ jobs:
         run: python valcea-clar/scripts/probe_public_site.py --self-test
 
       - name: Probe public site
-        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
           EXTRA=''
-          if [ "${{ github.event_name }}" = 'workflow_dispatch' ] && [ "${{ inputs.require_ready }}" = 'true' ]; then
+          if [ "${{ github.event_name }}" = 'push' ]; then
+            EXTRA='--require-ready'
+          elif [ "${{ github.event_name }}" = 'workflow_dispatch' ] && [ "${{ inputs.require_ready }}" = 'true' ]; then
             EXTRA='--require-ready'
           fi
-          python valcea-clar/scripts/probe_public_site.py $EXTRA --output /tmp/valcea-clar-public-health.json | tee /tmp/valcea-clar-public-health.log
+
+          # The installed site bridge refreshes the canonical feed every 60s.
+          # A main push therefore gets a bounded retry window before strict
+          # acceptance fails; scheduled/PR observations stay non-mutating.
+          for attempt in 1 2 3 4; do
+            if python valcea-clar/scripts/probe_public_site.py $EXTRA --output /tmp/valcea-clar-public-health.json | tee /tmp/valcea-clar-public-health.log; then
+              exit 0
+            fi
+            if [ "$attempt" -eq 4 ]; then
+              exit 1
+            fi
+            sleep 20
+          done
 
       - name: Write health summary
-        if: github.event_name != 'pull_request' && always()
+        if: always()
         shell: bash
         run: |
           if [ -s /tmp/valcea-clar-public-health.json ]; then
@@ -65,6 +78,8 @@ jobs:
           p=Path('/tmp/valcea-clar-public-health.json')
           d=json.loads(p.read_text(encoding='utf-8'))
           print(f"## VÂLCEA CLAR public HTTP: {d['status']}")
+          print('')
+          print(f"Expected durable stories: {d.get('expected_story_count', '—')}")
           print('')
           print('| Route | HTTP | Result |')
           print('|---|---:|---|')
@@ -79,7 +94,7 @@ jobs:
           fi
 
       - name: Upload health evidence
-        if: github.event_name != 'pull_request' && always()
+        if: always()
         uses: actions/upload-artifact@v7
         with:
           name: valcea-clar-public-http-${{ github.run_id }}
