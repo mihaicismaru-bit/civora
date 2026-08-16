@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "instance_id": "valcea",
+  "policy": {
+    "held_story_public_projection": false,
+    "held_story_social_distribution": false,
+    "release_requires_material_verified_update": true,
+    "normal_story_ready_gate_still_required": true,
+    "hold_survives_recap_and_homepage_rebuild": true
+  },
+  "holds": [
+    {
+      "story_id": "olanesti-bridge-monitor",
+      "kind": "incomplete_investigation",
+      "status": "HOLD_UNTIL_MATERIAL_VERIFIED_UPDATE",
+      "reason": "Dosarul Olănești–Omniasig rămâne în lucru și nu este un produs editorial complet. Nu se publică, nu se republică și nu se redistribuie până când apare informație nouă, verificată și suficient de materială pentru un articol complet.",
+      "release_when": [
+        "verified_new_material_fact_or_document",
+        "material_public_interest_value_beyond_routine_monitor_update",
+        "investigation_has_sufficient_context_for_reader",
+        "normal_story_ready_gate_passes"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    }
+  ]
+}

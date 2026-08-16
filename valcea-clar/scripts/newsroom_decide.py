@@ -23,6 +23,7 @@ import generate_edition as edition_engine
 ROOT = Path(__file__).resolve().parents[1]
 STATE = ROOT / "site" / "newsroom_state.json"
 DECISION = ROOT / "site" / "newsroom_decision.json"
+PUBLICATION_HOLDS = ROOT / "editorial" / "publication_holds.json"
 TZ = ZoneInfo("Europe/Bucharest")
 
 
@@ -48,7 +49,36 @@ def canonical_story(item: dict) -> dict:
     }
 
 
+def active_publication_holds() -> set[str]:
+    """Return story IDs that are explicitly barred from public projection.
+
+    Holds are editorial state, not temporary rendering hints. Any malformed hold
+    file fails closed for rows that can still be parsed as active holds, while a
+    missing file preserves the historical no-hold behavior.
+    """
+    if not PUBLICATION_HOLDS.is_file():
+        return set()
+    try:
+        document = json.loads(PUBLICATION_HOLDS.read_text(encoding="utf-8"))
+    except Exception:
+        return set()
+    held: set[str] = set()
+    for row in document.get("holds") or []:
+        if not isinstance(row, dict):
+            continue
+        story_id = str(row.get("story_id") or "").strip()
+        status = str(row.get("status") or "").strip().upper()
+        public_projection = row.get("public_projection")
+        if story_id and public_projection is False and status not in {"RELEASED", "CLOSED", "RESOLVED"}:
+            held.add(story_id)
+    return held
+
+
 def story_ready(item: dict) -> tuple[bool, str]:
+    story_id = str(item.get("id") or "").strip()
+    if story_id and story_id in active_publication_holds():
+        return False, "editorial_publication_hold"
+
     # Automatic primary-source discovery is intentionally title/date/source only.
     # It enters the radar immediately but cannot masquerade as a finished article.
     if item.get("auto_generated") and item.get("auto_scope") in {
@@ -113,7 +143,7 @@ def decide(now: datetime) -> dict:
     new_ids = [story_id for story_id in current_ids if story_id not in previous_ids]
 
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "evaluated_local": now.isoformat(timespec="seconds"),
         "mode": "continuous_story_first",
         "edition_windows_are_publication_gates": False,
@@ -127,9 +157,12 @@ def decide(now: datetime) -> dict:
         "auto_fact_registry_count": auto_count,
         "rejected_candidate_count": len(rejected),
         "rejected": rejected,
+        "active_publication_holds": sorted(active_publication_holds()),
         "policy": {
             "verified_structured_story_required": True,
             "title_date_only_is_not_article": True,
+            "editorial_publication_holds_fail_closed": True,
+            "held_story_social_distribution_allowed": False,
             "minimum_confidence_inherited_from_edition_engine": edition_engine.MIN_CONFIDENCE,
             "fail_closed": True,
             "publish_on_change_not_clock_window": True,
@@ -145,6 +178,7 @@ def main() -> int:
 
     if args.self_test:
         full = {
+            "id": "self-test-full",
             "headline": "Primăria publică un proiect verificat pentru municipiu",
             "dek": "Documentele publice confirmă măsura și permit redactarea unei știri complete, cu sursa indicată.",
             "paragraphs": ["Acesta este un paragraf verificat suficient de lung pentru a demonstra că materialul are corp editorial și nu este doar un titlu preluat automat dintr-o listă de comunicate."],
@@ -153,6 +187,9 @@ def main() -> int:
         assert story_ready(full)[0] is True
         title_only = dict(full, auto_generated=True, auto_scope="source_title_and_publication_date_only")
         assert story_ready(title_only)[0] is False
+        held = dict(full, id="olanesti-bridge-monitor")
+        assert story_ready(held) == (False, "editorial_publication_hold")
+        assert "olanesti-bridge-monitor" in active_publication_holds()
         print("Continuous newsroom decision self-test: PASS")
         return 0
 
@@ -162,10 +199,11 @@ def main() -> int:
 
     if args.commit_state and decision["publishable_story_count"]:
         state = {
-            "schema_version": "1.0",
+            "schema_version": "1.1",
             "last_published_at": decision["evaluated_local"],
             "last_published_fingerprint": decision["fingerprint"],
             "last_published_story_ids": decision["publishable_story_ids"],
+            "active_publication_holds": decision["active_publication_holds"],
             "mode": "continuous_story_first",
             "edition_windows_are_publication_gates": False,
         }
