@@ -1,0 +1,60 @@
+name: LOCAL NEWS OS Durable Feedback Snapshot
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/social/durable_feedback_snapshot.py"
+      - "local-news-os/social/test_durable_feedback_snapshot.py"
+      - "local-news-os/social/observed_metrics.py"
+      - "local-news-os/social/observed_feedback_application.py"
+      - "local-news-os/social/production_runtime.py"
+      - ".github/workflows/local-news-os-durable-feedback-snapshot.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/social/durable_feedback_snapshot.py"
+      - "local-news-os/social/test_durable_feedback_snapshot.py"
+      - "local-news-os/social/observed_metrics.py"
+      - "local-news-os/social/observed_feedback_application.py"
+      - "local-news-os/social/production_runtime.py"
+      - ".github/workflows/local-news-os-durable-feedback-snapshot.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-news-os-durable-feedback-snapshot-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile durable feedback snapshot runtime
+        run: |
+          python -m py_compile \
+            local-news-os/social/observed_metrics.py \
+            local-news-os/social/observed_feedback_application.py \
+            local-news-os/social/production_runtime.py \
+            local-news-os/social/durable_feedback_snapshot.py \
+            local-news-os/social/test_durable_feedback_snapshot.py
+
+      - name: Re-run observed metrics learning contract
+        run: python local-news-os/social/test_observed_metrics.py
+
+      - name: Re-run bounded feedback application contract
+        run: python local-news-os/social/test_observed_feedback_application.py
+
+      - name: Re-run production feedback integration contract
+        run: python local-news-os/social/test_observed_feedback_production_runtime.py
+
+      - name: Run durable feedback snapshot acceptance tests
+        run: python local-news-os/social/test_durable_feedback_snapshot.py
