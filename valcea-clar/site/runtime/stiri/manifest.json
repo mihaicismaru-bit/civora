@@ -1,23 +1,41 @@
 {
-  "schema_version": "1.1",
+  "schema_version": "1.2",
   "publication_model": "continuous_story_first",
   "homepage_presentation": "live_newsroom",
   "edition_is_canonical_story_url": false,
+  "cross_linking": {
+    "enabled": true,
+    "ranking": "same_section_then_priority",
+    "max_links_per_story": 3,
+    "eligible_scope": "publishable_full_story_only"
+  },
   "stories": [
     {
       "id": "luminos-fest-zavoi-20260815",
       "path": "/stiri/luminos-fest-zavoi-20260815/",
-      "canonical": "https://valceaclar.ro/stiri/luminos-fest-zavoi-20260815/"
+      "canonical": "https://valceaclar.ro/stiri/luminos-fest-zavoi-20260815/",
+      "related_story_ids": [
+        "florile-govorei-20260816",
+        "olanesti-bridge-monitor"
+      ]
     },
     {
       "id": "florile-govorei-20260816",
       "path": "/stiri/florile-govorei-20260816/",
-      "canonical": "https://valceaclar.ro/stiri/florile-govorei-20260816/"
+      "canonical": "https://valceaclar.ro/stiri/florile-govorei-20260816/",
+      "related_story_ids": [
+        "luminos-fest-zavoi-20260815",
+        "olanesti-bridge-monitor"
+      ]
     },
     {
       "id": "olanesti-bridge-monitor",
       "path": "/stiri/olanesti-bridge-monitor/",
-      "canonical": "https://valceaclar.ro/stiri/olanesti-bridge-monitor/"
+      "canonical": "https://valceaclar.ro/stiri/olanesti-bridge-monitor/",
+      "related_story_ids": [
+        "luminos-fest-zavoi-20260815",
+        "florile-govorei-20260816"
+      ]
     }
   ]
 }

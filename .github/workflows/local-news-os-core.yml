@@ -36,7 +36,8 @@ jobs:
             local-news-os/core/discover_primary_source_facts.py \
             local-news-os/core/discovery_health.py \
             local-news-os/core/generate_verified_edition.py \
-            local-news-os/core/render_frontpage.py
+            local-news-os/core/render_frontpage.py \
+            local-news-os/core/related_stories.py
       - name: Validate production and test instances
         run: python local-news-os/core/validate_instance_config.py
       - name: Assert fixture packs are isolated
@@ -74,6 +75,8 @@ jobs:
         run: python local-news-os/core/generate_verified_edition.py --self-test
       - name: Validate generic multi-instance frontpage renderer
         run: python local-news-os/core/render_frontpage.py --self-test
+      - name: Validate generic related-story ranking
+        run: python local-news-os/core/related_stories.py --self-test
       - name: Prove runtime, identity and source isolation
         shell: bash
         run: |

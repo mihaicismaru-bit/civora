@@ -17,6 +17,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "local-news-os" / "core"))
 
 from indexing_assets import write_indexing_assets
+from related_stories import rank_related
 from newsroom_decide import story_ready
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -24,6 +25,7 @@ POINTER = ROOT / "site" / "current_edition.json"
 RUNTIME = ROOT / "site" / "runtime"
 DECISION = ROOT / "site" / "newsroom_decision.json"
 BASE = "https://valceaclar.ro"
+RELATED_LIMIT = 3
 
 
 def load(path: Path) -> dict:
@@ -55,7 +57,27 @@ def source_links(item: dict) -> str:
     return "".join(links)
 
 
-def page(item: dict, updated_local: str) -> str:
+def related_links(item: dict, stories: list[dict]) -> str:
+    related = rank_related(item, stories, limit=RELATED_LIMIT)
+    if not related:
+        return ""
+    cards = []
+    for story in related:
+        section = str(story.get("section") or "ȘTIRI").replace("_", " ")
+        cards.append(
+            f'<li><a href="{esc(route_for(story))}">'
+            f'<span>{esc(section)}</span><strong>{esc(story.get("headline"))}</strong>'
+            "</a></li>"
+        )
+    return (
+        '<section class="related" data-crosslink-scope="publishable_full_story_only">'
+        "<h2>Mai citește</h2><ul>"
+        + "".join(cards)
+        + "</ul></section>"
+    )
+
+
+def page(item: dict, updated_local: str, stories: list[dict]) -> str:
     route = route_for(item)
     canonical = BASE + route
     title = str(item.get("headline") or "VÂLCEA CLAR")
@@ -63,6 +85,7 @@ def page(item: dict, updated_local: str) -> str:
     section = str(item.get("section") or "ȘTIRI").replace("_", " ")
     paragraphs = "".join(f"<p>{esc(p)}</p>" for p in item.get("paragraphs", []) if str(p).strip())
     sources = source_links(item)
+    related = related_links(item, stories)
     return f'''<!doctype html>
 <html lang="ro"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -79,6 +102,10 @@ main{{max-width:820px;margin:0 auto;padding:38px 22px 64px}}.k{{color:#d71920;fo
 h1{{font:800 clamp(36px,6vw,62px)/1.06 Georgia,serif;letter-spacing:-.025em;margin:8px 0 15px}}.dek{{font-size:21px;line-height:1.45;color:#475467}}
 .meta{{font-size:13px;color:#667085;border-bottom:1px solid #e4e7ec;padding-bottom:16px;margin-bottom:24px}}article p{{margin:0 0 19px}}
 .sources{{margin-top:34px;border-top:2px solid #101828;padding-top:14px}}.sources h2{{font-size:14px;text-transform:uppercase;letter-spacing:.05em}}.sources a{{color:#344054}}
+.related{{margin-top:34px;border-top:1px solid #d0d5dd;padding-top:20px}}.related h2{{font:800 20px/1.2 Georgia,serif;margin:0 0 14px}}
+.related ul{{list-style:none;padding:0;margin:0;display:grid;gap:10px}}.related a{{display:block;border:1px solid #e4e7ec;border-radius:12px;padding:14px 16px;color:#101828;text-decoration:none}}
+.related a:hover{{text-decoration:underline}}.related span{{display:block;color:#d71920;font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}}
+.related strong{{display:block;font:700 18px/1.25 Georgia,serif}}
 .back{{display:inline-block;margin-top:28px;color:#071a3d;font-weight:700}}
 </style></head><body>
 <header><a href="/">VÂLCEA CLAR</a></header><main>
@@ -86,6 +113,7 @@ h1{{font:800 clamp(36px,6vw,62px)/1.06 Georgia,serif;letter-spacing:-.025em;marg
 <div class="meta">Actualizat {esc(updated_local)} · informație locală verificată</div>
 <article>{paragraphs}</article>
 <section class="sources"><h2>Surse</h2><ul>{sources}</ul></section>
+{related}
 <a class="back" href="/">← Înapoi la VÂLCEA CLAR</a>
 </main></body></html>'''
 
@@ -128,19 +156,33 @@ def main() -> int:
     story_root = RUNTIME / "stiri"
     story_root.mkdir(parents=True, exist_ok=True)
     routes = []
+    cross_link_count = 0
     for item in stories:
         route = route_for(item)
+        related = rank_related(item, stories, limit=RELATED_LIMIT)
         target = RUNTIME / route.strip("/") / "index.html"
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(page(item, str(doc.get("updated_local") or "")), encoding="utf-8")
-        routes.append({"id": item.get("id"), "path": route, "canonical": BASE + route})
+        target.write_text(page(item, str(doc.get("updated_local") or ""), stories), encoding="utf-8")
+        routes.append({
+            "id": item.get("id"),
+            "path": route,
+            "canonical": BASE + route,
+            "related_story_ids": [story.get("id") for story in related],
+        })
+        cross_link_count += len(related)
 
     (story_root / "manifest.json").write_text(
         json.dumps({
-            "schema_version": "1.1",
+            "schema_version": "1.2",
             "publication_model": "continuous_story_first",
             "homepage_presentation": "live_newsroom",
             "edition_is_canonical_story_url": False,
+            "cross_linking": {
+                "enabled": True,
+                "ranking": "same_section_then_priority",
+                "max_links_per_story": RELATED_LIMIT,
+                "eligible_scope": "publishable_full_story_only",
+            },
             "stories": routes,
         }, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
@@ -150,6 +192,7 @@ def main() -> int:
     print(json.dumps({
         "status": "PASS",
         "story_pages": len(routes),
+        "cross_links": cross_link_count,
         "routes": routes,
         "indexing_routes": indexing["route_count"],
         "sitemap": "site/runtime/sitemap.xml",
