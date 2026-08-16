@@ -1,0 +1,157 @@
+{
+  "schema_version": "1.0",
+  "product": "VÂLCEA CLAR Native Platform Identity System",
+  "instance_id": "valcea",
+  "brand_source": "valcea-clar/social/social_brand_system.json",
+  "profile_source": "valcea-clar/social/profile_identity_system.json",
+  "doctrine_source": "valcea-clar/social/social_network_doctrine.json",
+  "principle": "one_newsroom_distinct_native_products",
+  "common": {
+    "display_name": "VÂLCEA CLAR",
+    "editorial_lockup": "VÂLCEA. CLAR.",
+    "canonical_domain": "valceaclar.ro",
+    "accent_rgb": [196, 27, 35],
+    "paper_rgb": [247, 246, 243],
+    "ink_rgb": [20, 20, 20],
+    "white_rgb": [255, 255, 255],
+    "rules": [
+      "brand_recognizable_without_repeating_logo_everywhere",
+      "no_social_template_aesthetic",
+      "no_synthetic_visual_filler",
+      "real_media_and_documents_preferred",
+      "source_clarity_over_decoration",
+      "platform_native_packaging_required",
+      "cross_platform_verbatim_reuse_forbidden"
+    ]
+  },
+  "platforms": {
+    "x": {
+      "channel_id": "valcea-x",
+      "identity_mode": "profile_plus_editorial_voice",
+      "product_role": "local_newswire",
+      "presentation": {
+        "text_first": true,
+        "brand_prefix_each_post": false,
+        "hashtags_default": false,
+        "emoji_as_brand_device": false,
+        "source_link_required_when_article_exists": true,
+        "correction_label_explicit": true
+      },
+      "optional_visual": {
+        "canvas": [1200, 675],
+        "use_when": ["document_extract", "map", "data", "real_scene_photo"],
+        "brand_treatment": "quiet_footer_or_corner_mark",
+        "headline_overlay_default": false
+      },
+      "benchmark_character": "Reuters_AP_speed_and_source_discipline"
+    },
+    "threads": {
+      "channel_id": "valcea-threads",
+      "identity_mode": "profile_plus_conversational_editorial_voice",
+      "product_role": "timely_local_context",
+      "presentation": {
+        "text_first": true,
+        "brand_prefix_each_post": false,
+        "hashtags_default": false,
+        "generic_engagement_prompt_forbidden": true,
+        "media_only_when_it_adds_evidence": true
+      }
+    },
+    "linkedin": {
+      "channel_id": "valcea-linkedin",
+      "identity_mode": "profile_plus_evidence_led_professional_product",
+      "product_role": "decision_maker_publication",
+      "presentation": {
+        "lead_with": ["business_consequence", "investment_number", "public_funding", "institutional_change"],
+        "hashtags_default": false,
+        "generic_engagement_prompt_forbidden": true,
+        "document_or_data_visual_preferred_over_decorative_photo": true
+      },
+      "visual": {
+        "portrait_card_canvas": [1200, 1500],
+        "landscape_card_canvas": [1200, 627],
+        "brand_treatment": "quiet_masthead_and_red_rule",
+        "typography": "serif_masthead_sans_information",
+        "photo_collage_forbidden": true,
+        "marketing_badge_forbidden": true
+      }
+    },
+    "tiktok": {
+      "channel_id": "valcea-tiktok",
+      "identity_mode": "on_screen_newsroom_identity",
+      "product_role": "short_vertical_explainer",
+      "visual": {
+        "master_canvas": [1080, 1920],
+        "brand_mark": "VC.",
+        "brand_mark_position": "top_left_safe_area",
+        "hook_target_words_max": 8,
+        "subtitle_lines_max": 2,
+        "subtitle_style": "high_contrast_no_full_width_marketing_banner",
+        "source_end_slate": "VÂLCEA CLAR · valceaclar.ro",
+        "synthetic_filler_forbidden": true,
+        "archive_as_current_forbidden": true,
+        "real_story_specific_media_required": true
+      },
+      "audio": {
+        "voice_first": true,
+        "music_dependency_required": false,
+        "news_comprehension_without_sound_required": true
+      }
+    },
+    "youtube": {
+      "channel_id": "valcea-youtube",
+      "identity_mode": "thumbnail_plus_video_newsroom_identity",
+      "product_role": "durable_video_explainer",
+      "thumbnail": {
+        "canvas": [1280, 720],
+        "brand_mark": "VC.",
+        "brand_mark_position": "top_left",
+        "text_words_target_max": 5,
+        "headline_duplication_default": false,
+        "one_dominant_visual_idea": true,
+        "clickbait_visual_expression_forbidden": true,
+        "marketing_badges_forbidden": true
+      },
+      "video": {
+        "source_end_slate": "VÂLCEA CLAR · valceaclar.ro",
+        "real_video_or_sufficient_visual_sequence_required": true,
+        "synthetic_filler_forbidden": true,
+        "archive_as_current_forbidden": true
+      }
+    },
+    "telegram": {
+      "channel_id": "valcea-telegram",
+      "identity_mode": "profile_plus_high_signal_message_voice",
+      "product_role": "fast_opt_in_update",
+      "presentation": {
+        "text_first": true,
+        "brand_prefix_each_message": false,
+        "fake_urgency_forbidden": true,
+        "media_only_when_evidence_or_utility_improves": true,
+        "source_link_required_when_article_exists": true
+      }
+    },
+    "whatsapp": {
+      "channel_id": "valcea-whatsapp",
+      "identity_mode": "profile_plus_low_frequency_trust_voice",
+      "product_role": "essential_local_update",
+      "presentation": {
+        "low_frequency": true,
+        "text_first": true,
+        "brand_prefix_each_message": false,
+        "recipient_scope_required_before_dispatch": true,
+        "fake_urgency_forbidden": true,
+        "source_link_required_when_article_exists": true
+      }
+    }
+  },
+  "quality_gate": {
+    "all_secondary_channels_must_match_profile_channel_ids": true,
+    "all_secondary_channels_must_match_doctrine_channel_ids": true,
+    "all_products_must_declare_identity_lineage": true,
+    "video_products_must_declare_on_screen_branding": true,
+    "x_must_remain_text_first": true,
+    "linkedin_must_remain_professional_evidence_led": true,
+    "message_channels_must_not_become_visual_template_feeds": true
+  }
+}
