@@ -1,0 +1,144 @@
+name: VÂLCEA CLAR Premium Presentation
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '29 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/site/runtime/**'
+      - 'valcea-clar/site/story_archive.json'
+      - 'valcea-clar/site/navigation.json'
+      - 'valcea-clar/site/legal/legal_pages.json'
+      - 'valcea-clar/editorial/story_enrichment.json'
+      - 'valcea-clar/editorial/publication_holds.json'
+      - 'valcea-clar/scripts/premium_presentation.py'
+      - 'valcea-clar/scripts/premium_story_integrity.py'
+      - 'valcea-clar/site/chatgpt-sites-live-bridge.js'
+      - '.github/workflows/valcea-clar-premium-presentation.yml'
+  pull_request:
+    paths:
+      - 'valcea-clar/**'
+      - '.github/workflows/valcea-clar-premium-presentation.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-premium-presentation-${{ github.event.pull_request.number || 'main' }}
+  cancel-in-progress: false
+
+jobs:
+  presentation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Validate presentation engine
+        run: |
+          python -m py_compile \
+            valcea-clar/scripts/premium_presentation.py \
+            valcea-clar/scripts/premium_story_integrity.py
+          python valcea-clar/scripts/premium_presentation.py --self-test
+          python valcea-clar/scripts/premium_story_integrity.py --self-test
+
+      - name: Build premium public presentation
+        run: |
+          python valcea-clar/scripts/premium_presentation.py
+          python valcea-clar/scripts/premium_story_integrity.py
+          python valcea-clar/scripts/premium_presentation.py --check
+
+      - name: Run canonical web integrity smoke test on premium output
+        run: python valcea-clar/scripts/smoke_web.py
+
+      - name: Build synchronized existing-site payload
+        run: |
+          python valcea-clar/scripts/build_sites_export.py
+          python valcea-clar/scripts/overlay_runtime_export.py
+
+      - name: Validate content fidelity and single shell
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('valcea-clar')
+          feed=json.loads((root/'site/runtime/live-feed.json').read_text(encoding='utf-8'))
+          nav=json.loads((root/'site/navigation.json').read_text(encoding='utf-8'))
+          state=json.loads((root/'site/presentation_state.json').read_text(encoding='utf-8'))
+          assert feed.get('navigation_contract') == nav.get('contract_id')
+          assert feed.get('policy',{}).get('content_fidelity_preserved') is True
+          assert state.get('policy',{}).get('single_public_shell') is True
+          assert state.get('policy',{}).get('same_navigation_everywhere') is True
+          assert 'olanesti-bridge-monitor' not in {str(x.get('id')) for x in feed.get('stories',[])}
+          music=(root/'site/runtime/stiri/musiclover-green-day-20260815/index.html').read_text(encoding='utf-8')
+          for name in ('Puya','Johny Romano','Badd G','Connect-R','Delia','Urban Lăutăresque','Leo de la Roșiori','Marcel Ștefăneț','Ethno Republic'):
+              assert name in music, name
+          luminos=(root/'site/runtime/stiri/luminos-fest-zavoi-20260815/index.html').read_text(encoding='utf-8')
+          for detail in ('Flower Bar','ROvederea','Aleea Creatorilor','Bebe Cros'):
+              assert detail in luminos, detail
+          print('Premium presentation contract: PASS')
+          PY
+
+      - name: Persist premium runtime conflict-safe
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'valcea-clar-presentation[bot]'
+          git config user.email 'valcea-clar-presentation@users.noreply.github.com'
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            git clean -fd
+
+            python valcea-clar/scripts/premium_presentation.py --self-test
+            python valcea-clar/scripts/premium_story_integrity.py --self-test
+            python valcea-clar/scripts/premium_presentation.py
+            python valcea-clar/scripts/premium_story_integrity.py
+            python valcea-clar/scripts/premium_presentation.py --check
+            python valcea-clar/scripts/smoke_web.py
+
+            git add \
+              valcea-clar/site/story_archive.json \
+              valcea-clar/site/runtime \
+              valcea-clar/site/presentation_state.json
+
+            if git diff --cached --quiet; then
+              echo 'Premium presentation already current on main.'
+              exit 0
+            fi
+
+            git commit -m 'Refresh VÂLCEA CLAR premium presentation'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+
+            echo "main advanced during presentation refresh; retrying ${attempt}/5."
+            sleep $((attempt * 2))
+          done
+
+          echo 'Could not persist premium presentation after five attempts.' >&2
+          exit 1
+
+      - name: Upload presentation evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-premium-presentation-${{ github.run_id }}
+          path: |
+            valcea-clar/site/presentation_state.json
+            valcea-clar/site/runtime/index.html
+            valcea-clar/site/runtime/stiri
+            valcea-clar/site/runtime/unde-iesim
+            valcea-clar/dist/chatgpt-sites
+          if-no-files-found: warn
+          retention-days: 7
