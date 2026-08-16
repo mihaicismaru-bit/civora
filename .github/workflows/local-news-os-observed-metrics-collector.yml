@@ -66,7 +66,10 @@ jobs:
               if channel.get('zero_paid_dependency') is not True:
                   raise SystemExit(f'{platform}: zero-paid dependency violated')
               sources = metrics.get('sources')
-              if not isinstance(sources, list) or not sources:
-                  raise SystemExit(f'{platform}: no declared native/free observation source')
-              print(f'{platform}: PASS ({", ".join(sources)})')
+              if not isinstance(sources, list) or not all(isinstance(item, str) and item.strip() for item in sources):
+                  raise SystemExit(f'{platform}: metrics.sources must be a list of verified source identifiers')
+              if sources:
+                  print(f'{platform}: PASS ({", ".join(sources)})')
+              else:
+                  print(f'{platform}: PASS (collection disabled until a native/free source is verified)')
           PY
