@@ -1,0 +1,73 @@
+name: VÂLCEA CLAR Profile Presence
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/social/profile_presence_system.json"
+      - "valcea-clar/social/validate_profile_presence.py"
+      - "valcea-clar/social/profile_identity_system.json"
+      - "valcea-clar/social/profile_identity_deployment.json"
+      - "valcea-clar/social/social_brand_system.json"
+      - "valcea-clar/social/native_platform_identity_system.json"
+      - ".github/workflows/valcea-clar-profile-presence.yml"
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/social/profile_presence_system.json"
+      - "valcea-clar/social/validate_profile_presence.py"
+      - "valcea-clar/social/profile_identity_system.json"
+      - "valcea-clar/social/profile_identity_deployment.json"
+      - "valcea-clar/social/social_brand_system.json"
+      - "valcea-clar/social/native_platform_identity_system.json"
+      - ".github/workflows/valcea-clar-profile-presence.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Validate profile presence JSON
+        run: python -m json.tool valcea-clar/social/profile_presence_system.json >/dev/null
+      - name: Compile validator
+        run: python -m py_compile valcea-clar/social/validate_profile_presence.py
+      - name: Run profile presence self-test
+        run: python valcea-clar/social/validate_profile_presence.py --self-test
+      - name: Validate nine platform-native profiles
+        run: python valcea-clar/social/validate_profile_presence.py
+      - name: Emit inspectable profile-copy matrix
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          value=json.loads(Path('valcea-clar/social/profile_presence_system.json').read_text(encoding='utf-8'))
+          rows=[]
+          for platform,cfg in value['platforms'].items():
+              rows.append({
+                  'platform':platform,
+                  'role':cfg['role'],
+                  'short_bio':cfg['short_bio'],
+                  'link_label':cfg['link_label'],
+                  'featured_strategy':cfg['featured_strategy'],
+                  'profile_asset':cfg['profile_asset'],
+                  'header_asset':cfg.get('header_asset'),
+              })
+          Path('/tmp/valcea-clar-profile-presence.json').write_text(json.dumps(rows,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print(f'Profile presence matrix: PASS ({len(rows)} platforms)')
+          PY
+      - name: Upload profile presence audit
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-profile-presence-${{ github.run_id }}
+          path: |
+            /tmp/valcea-clar-profile-presence.json
+            valcea-clar/social/profile_presence_system.json
+          if-no-files-found: error
+          retention-days: 30
