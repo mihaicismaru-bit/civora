@@ -1,19 +1,13 @@
 #!/usr/bin/env python3
-"""Durable async remote-dispatch lifecycle for LOCAL NEWS OS social adapters.
+"""Crash-safe async remote-dispatch lifecycle for LOCAL NEWS OS.
 
-Some native platform APIs accept a post and return a provider submission id long
-before a public post id exists. Treating that acknowledgement as publication
-would violate the canonical publication-state contract. This module composes the
-existing Durable Dispatch Executor with a small, channel-local pending sidecar:
+Adapters such as TikTok can acknowledge a submission before a public post id
+exists. This module composes the existing Durable Dispatch Executor with a
+credential-free pending sidecar so that an acknowledgement is never mistaken for
+publication and an ambiguous crash never causes a blind resend.
 
-1. persist the generic PUBLISHING claim before any network request;
-2. submit through the exact adapter selected by the handoff;
-3. persist only the provider submission id, never credentials or raw responses;
-4. reconcile provider status without resubmitting;
-5. mark PUBLISHED only after a real remote publication id is observed.
-
-The module performs no network calls and resolves no credential values itself.
-Adapter submission and provider-status lookup are injected callbacks.
+No network calls or credential resolution happen here. The caller injects the
+adapter submission and remote-status callbacks.
 """
 from __future__ import annotations
 
@@ -29,7 +23,8 @@ FORBIDDEN_KEY_PARTS = (
     "token", "secret", "password", "authorization", "api_key", "apikey",
     "cookie", "headers", "raw_response", "response_body",
 )
-ASYNC_PENDING_STATES = {"PENDING", "PENDING_PUBLICATION_PROOF"}
+SAFE_INTERNAL_KEYS = {"claim_token"}
+PENDING_STATES = {"PENDING", "PENDING_PUBLICATION_PROOF"}
 
 
 def _clean(value: Any) -> str:
@@ -53,7 +48,7 @@ def _contains_forbidden_field(value: Any) -> bool:
     if isinstance(value, dict):
         for key, child in value.items():
             lowered = _clean(key).lower()
-            if any(part in lowered for part in FORBIDDEN_KEY_PARTS):
+            if lowered not in SAFE_INTERNAL_KEYS and any(part in lowered for part in FORBIDDEN_KEY_PARTS):
                 return True
             if _contains_forbidden_field(child):
                 return True
@@ -78,41 +73,41 @@ def _pending_fingerprint_ok(value: dict[str, Any]) -> bool:
     return supplied == _digest(candidate)
 
 
-def _handoff_item(state: dict[str, Any]) -> dict[str, Any] | None:
+def _handoff(state: dict[str, Any]) -> dict[str, Any] | None:
     outbox = state.get("outbox") if isinstance(state.get("outbox"), dict) else {}
     items = outbox.get("items") if isinstance(outbox.get("items"), dict) else {}
-    item = items.get(_clean(state.get("handoff_id")))
-    return item if isinstance(item, dict) else None
+    value = items.get(_clean(state.get("handoff_id")))
+    return value if isinstance(value, dict) else None
 
 
-def _publication_record(state: dict[str, Any]) -> dict[str, Any] | None:
-    item = _handoff_item(state)
+def _record(state: dict[str, Any]) -> dict[str, Any] | None:
+    item = _handoff(state)
     if item is None:
         return None
     ledger = state.get("ledger") if isinstance(state.get("ledger"), dict) else {}
     records = ledger.get("records") if isinstance(ledger.get("records"), dict) else {}
-    record = records.get(_clean(item.get("publication_id")))
-    return record if isinstance(record, dict) else None
+    value = records.get(_clean(item.get("publication_id")))
+    return value if isinstance(value, dict) else None
 
 
-def _blocked(state: dict[str, Any] | None, reasons: list[str], *, decision: str = "BLOCKED") -> dict[str, Any]:
+def _blocked(state: dict[str, Any] | None, reasons: list[str], *, adapter_invoked: bool = False) -> dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
         "blocked": True,
         "hard_blocks": sorted(set(reasons)),
-        "decision": decision,
+        "decision": "BLOCKED",
         "state": copy.deepcopy(state) if isinstance(state, dict) else None,
-        "adapter_invoked": False,
+        "adapter_invoked": adapter_invoked,
     }
 
 
 def _submission_blocks(result: dict[str, Any], invocation: dict[str, Any]) -> list[str]:
-    blocks: list[str] = []
     allowed = {
         "accepted", "remote_submission_id", "adapter", "publication_id",
         "native_format", "credential_values_included",
         "network_submission_performed", "publication_confirmed",
     }
+    blocks: list[str] = []
     unknown = sorted(set(result) - allowed)
     if unknown:
         blocks.append("ASYNC_SUBMISSION_UNKNOWN_FIELDS:" + ",".join(unknown))
@@ -135,18 +130,19 @@ def _submission_blocks(result: dict[str, Any], invocation: dict[str, Any]) -> li
     return sorted(set(blocks))
 
 
-def _validate_pending(pending: dict[str, Any], state: dict[str, Any]) -> list[str]:
-    blocks: list[str] = []
+def _pending_blocks(pending: dict[str, Any], state: dict[str, Any]) -> list[str]:
     if not isinstance(pending, dict):
         return ["ASYNC_PENDING_NOT_MAPPING"]
+    blocks: list[str] = []
     if _clean(pending.get("schema_version")) != SCHEMA_VERSION:
         blocks.append("ASYNC_PENDING_SCHEMA_VERSION")
     if not _pending_fingerprint_ok(pending):
         blocks.append("ASYNC_PENDING_FINGERPRINT_INVALID")
     if _contains_forbidden_field(pending):
         blocks.append("ASYNC_PENDING_SECRET_OR_RAW_FIELD")
-    item = _handoff_item(state)
-    record = _publication_record(state)
+
+    item = _handoff(state)
+    record = _record(state)
     if item is None or record is None:
         return sorted(set(blocks + ["ASYNC_PENDING_SOURCE_STATE_INVALID"]))
     expected = {
@@ -157,8 +153,8 @@ def _validate_pending(pending: dict[str, Any], state: dict[str, Any]) -> list[st
         "publication_id": _clean(item.get("publication_id")),
         "adapter": _clean(item.get("adapter")),
     }
-    for key, value in expected.items():
-        if _clean(pending.get(key)) != value:
+    for key, expected_value in expected.items():
+        if _clean(pending.get(key)) != expected_value:
             blocks.append("ASYNC_PENDING_" + key.upper() + "_MISMATCH")
     if not _clean(pending.get("remote_submission_id")):
         blocks.append("ASYNC_PENDING_SUBMISSION_ID_MISSING")
@@ -186,7 +182,7 @@ def begin_async_dispatch(
     persist_pending: Callable[[dict[str, Any]], bool],
     lease_seconds: int = executor.DEFAULT_LEASE_SECONDS,
 ) -> dict[str, Any]:
-    """Claim, persist, submit once, then durably store the provider submission id."""
+    """Persist a generic claim, submit exactly once, and persist provider submission id."""
     if not all(callable(fn) for fn in (persist_claim, invoke_adapter, persist_pending)):
         raise TypeError("persist_claim, invoke_adapter and persist_pending must be callable")
     claim = executor.claim_dispatch(state, now, worker_id, lease_seconds=lease_seconds)
@@ -194,13 +190,13 @@ def begin_async_dispatch(
         return claim
 
     try:
-        persisted = persist_claim(
+        claim_saved = persist_claim(
             _clean(claim.get("expected_previous_state_fingerprint_sha256")),
             copy.deepcopy(claim["state"]),
         ) is True
     except Exception:
-        persisted = False
-    if not persisted:
+        claim_saved = False
+    if not claim_saved:
         return {
             "schema_version": SCHEMA_VERSION,
             "blocked": False,
@@ -216,8 +212,6 @@ def begin_async_dispatch(
     try:
         submission = invoke_adapter(copy.deepcopy(invocation))
     except Exception as exc:
-        # The network boundary was entered and its remote effect is ambiguous.
-        # Never convert this to an automatic retry here.
         return {
             "schema_version": SCHEMA_VERSION,
             "blocked": False,
@@ -230,11 +224,10 @@ def begin_async_dispatch(
             "blind_retry_allowed": False,
         }
     if not isinstance(submission, dict):
-        return _blocked(claimed_state, ["ASYNC_SUBMISSION_RESULT_NOT_MAPPING"])
+        return _blocked(claimed_state, ["ASYNC_SUBMISSION_RESULT_NOT_MAPPING"], adapter_invoked=True)
     blocks = _submission_blocks(submission, invocation)
     if blocks:
-        result = _blocked(claimed_state, blocks)
-        result["adapter_invoked"] = True
+        result = _blocked(claimed_state, blocks, adapter_invoked=True)
         result["blind_retry_allowed"] = False
         return result
 
@@ -260,15 +253,15 @@ def begin_async_dispatch(
             "blind_retry_allowed": False,
             "remote_publication_proof_required": True,
             "credential_values_persisted": False,
-            "raw_provider_response_persisted": False,
+            "raw_provider_payload_persisted": False,
             "zero_paid_dependency": True,
         },
     })
     try:
-        pending_persisted = persist_pending(copy.deepcopy(pending)) is True
+        pending_saved = persist_pending(copy.deepcopy(pending)) is True
     except Exception:
-        pending_persisted = False
-    if not pending_persisted:
+        pending_saved = False
+    if not pending_saved:
         return {
             "schema_version": SCHEMA_VERSION,
             "blocked": False,
@@ -298,22 +291,22 @@ def begin_async_dispatch(
 
 
 def _status_blocks(status: dict[str, Any], pending: dict[str, Any]) -> list[str]:
-    blocks: list[str] = []
     allowed = {
         "state", "remote_submission_id", "remote_publication_id",
         "provider_status", "error_code", "publication_confirmed",
     }
+    blocks: list[str] = []
     unknown = sorted(set(status) - allowed)
     if unknown:
         blocks.append("ASYNC_STATUS_UNKNOWN_FIELDS:" + ",".join(unknown))
     if _contains_forbidden_field(status):
         blocks.append("ASYNC_STATUS_SECRET_OR_RAW_FIELD")
-    state = _clean(status.get("state")).upper()
-    if state not in ASYNC_PENDING_STATES | {"PUBLISHED", "FAILED"}:
+    remote_state = _clean(status.get("state")).upper()
+    if remote_state not in PENDING_STATES | {"PUBLISHED", "FAILED"}:
         blocks.append("ASYNC_STATUS_STATE_INVALID")
     if _clean(status.get("remote_submission_id")) != _clean(pending.get("remote_submission_id")):
         blocks.append("ASYNC_STATUS_SUBMISSION_ID_MISMATCH")
-    if state == "PUBLISHED":
+    if remote_state == "PUBLISHED":
         if status.get("publication_confirmed") is not True:
             blocks.append("ASYNC_STATUS_PUBLISHED_WITHOUT_CONFIRMATION")
         if not _clean(status.get("remote_publication_id")):
@@ -335,14 +328,14 @@ def reconcile_async_dispatch(
     base_delay_seconds: int = 60,
     max_delay_seconds: int = 3600,
 ) -> dict[str, Any]:
-    """Poll one async submission and finalize generic state only with remote proof."""
+    """Poll a provider submission and finalize generic state only with remote proof."""
     if not callable(fetch_remote_status):
         raise TypeError("fetch_remote_status must be callable")
     if persist_pending is not None and not callable(persist_pending):
         raise TypeError("persist_pending must be callable")
     if persist_result is not None and not callable(persist_result):
         raise TypeError("persist_result must be callable")
-    blocks = _validate_pending(pending, state)
+    blocks = _pending_blocks(pending, state)
     if blocks:
         return _blocked(state, blocks)
 
@@ -368,7 +361,7 @@ def reconcile_async_dispatch(
         return _blocked(state, status_blocks)
 
     remote_state = _clean(status.get("state")).upper()
-    if remote_state in ASYNC_PENDING_STATES:
+    if remote_state in PENDING_STATES:
         updated = copy.deepcopy(pending)
         updated["provider_status"] = _clean(status.get("provider_status")) or remote_state
         updated["last_checked_at"] = now
@@ -408,7 +401,6 @@ def reconcile_async_dispatch(
             "blind_retry_allowed": False,
         }
 
-    adapter_result: dict[str, Any]
     if remote_state == "PUBLISHED":
         adapter_result = {
             "success": True,
@@ -417,7 +409,6 @@ def reconcile_async_dispatch(
             "publication_id": _clean(pending.get("publication_id")),
         }
     else:
-        # Provider explicitly reports terminal failure and therefore remote absence.
         adapter_result = {
             "success": False,
             "error_class": "permanent",
@@ -441,13 +432,13 @@ def reconcile_async_dispatch(
 
     if persist_result is not None:
         try:
-            saved = persist_result(
+            result_saved = persist_result(
                 _clean(state.get("state_fingerprint_sha256")),
                 copy.deepcopy(reconciled["state"]),
             ) is True
         except Exception:
-            saved = False
-        if not saved:
+            result_saved = False
+        if not result_saved:
             return {
                 "schema_version": SCHEMA_VERSION,
                 "blocked": False,
