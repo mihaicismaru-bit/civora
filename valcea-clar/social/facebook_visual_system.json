@@ -1,8 +1,9 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "channel_id": "valcea-facebook",
   "master_identity_system": "valcea-clar/social/social_brand_system.json",
   "profile_identity_system": "valcea-clar/social/profile_identity_system.json",
+  "feed_renderer": "valcea-clar/social/feed_identity_v1_1.py",
   "canvas": {"width": 1200, "height": 1500, "aspect_ratio": "4:5"},
   "brand": {
     "name": "VÂLCEA CLAR",
@@ -26,13 +27,33 @@
     "bio_strategy": "mission_first_plus_local_coverage_plus_canonical_site",
     "page_rule": "must_read_as_established_newsroom_before_user_opens_any_post"
   },
+  "feed_visual_signature": {
+    "composition": "contextual_photo_plus_spacious_paper_news_brief",
+    "brand_mark": "VC.",
+    "brand_mark_period": "typographic_red_same_baseline",
+    "brand_mark_role": "quiet_newsroom_locator",
+    "accent_rule": "short_horizontal_red_locator",
+    "divider": "thin_editorial_hairline",
+    "vertical_accent_bar": false,
+    "section_label": "plain_uppercase_no_pill",
+    "headline_family": "serif_bold",
+    "supporting_family": "sans",
+    "domain_treatment": "quiet",
+    "negative_space": "deliberate",
+    "decorative_badges": false,
+    "decorative_gradients": false,
+    "drop_shadows": false,
+    "debug_or_status_metadata_in_artwork": false
+  },
   "typography": {
     "hook_max_lines": 3,
-    "hook_size_max": 72,
-    "hook_size_min": 56,
-    "subline_size": 34,
-    "kicker_size": 28,
+    "hook_size_max": 68,
+    "hook_size_min": 52,
+    "subline_size": 32,
+    "kicker_size": 24,
     "brand_size": 27,
+    "headline_family": "serif_bold",
+    "supporting_family": "sans",
     "principle": "editorial_not_promotional"
   },
   "templates": {
@@ -59,6 +80,11 @@
     "fake_urgency_forbidden": true,
     "mobile_first_legibility_required": true,
     "profile_and_post_identity_must_match": true,
+    "shared_feed_signature_required": true,
+    "decorative_badges_forbidden": true,
+    "decorative_gradients_forbidden": true,
+    "vertical_accent_bar_forbidden": true,
+    "debug_or_status_metadata_in_artwork_forbidden": true,
     "must_not_look_like_local_marketing_page": true,
     "must_not_look_ai_generated": true,
     "must_not_repeat_identical_layout_for_every_story": true
