@@ -51,6 +51,14 @@ jobs:
         run: python valcea-clar/scripts/build_public_data.py
       - name: Verify generated files are committed
         run: git diff --exit-code -- valcea-clar/web/data
+      - name: Rebuild canonical story runtime deterministically
+        run: python valcea-clar/scripts/render_story_pages.py
+      - name: Verify canonical story runtime is committed
+        run: |
+          git diff --exit-code -- \
+            valcea-clar/site/runtime/stiri \
+            valcea-clar/site/runtime/robots.txt \
+            valcea-clar/site/runtime/sitemap.xml
       - name: Static web smoke test
         run: python valcea-clar/scripts/smoke_web.py
       - name: JavaScript syntax check
