@@ -10,8 +10,13 @@ from __future__ import annotations
 import html
 import json
 import re
+import sys
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT / "local-news-os" / "core"))
+
+from indexing_assets import write_indexing_assets
 from newsroom_decide import story_ready
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -141,7 +146,15 @@ def main() -> int:
         encoding="utf-8",
     )
     link_frontpage(stories)
-    print(json.dumps({"status": "PASS", "story_pages": len(routes), "routes": routes}, ensure_ascii=False))
+    indexing = write_indexing_assets(RUNTIME, BASE, ["/"] + [route["path"] for route in routes])
+    print(json.dumps({
+        "status": "PASS",
+        "story_pages": len(routes),
+        "routes": routes,
+        "indexing_routes": indexing["route_count"],
+        "sitemap": "site/runtime/sitemap.xml",
+        "robots": "site/runtime/robots.txt",
+    }, ensure_ascii=False))
     return 0
 
 
