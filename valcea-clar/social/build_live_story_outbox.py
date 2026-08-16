@@ -2,9 +2,10 @@
 """Build channel-native social packages from live newsroom stories.
 
 Individual stories are the unit of distribution. Morning/evening recap items are
-never allowed to become the trigger or canonical social product. A story that
-is publishable on the site but lacks an approved story-specific photograph is
-kept in HOLD_MEDIA for visual channels; the site publication is not delayed.
+never allowed to become the trigger, queue item or canonical social product. A
+story that is publishable on the site but lacks an approved story-specific
+photograph is kept in HOLD_MEDIA for visual channels; the site publication is
+not delayed.
 """
 from __future__ import annotations
 
@@ -99,25 +100,27 @@ def find_visual(story: dict, visual_registry: dict) -> dict | None:
     return None
 
 
-def disable_recap_items(outbox: dict) -> list[str]:
-    disabled = []
-    for item in outbox.get("items", []):
-        if not isinstance(item, dict):
-            continue
-        item_id = str(item.get("id") or "")
-        if not item_id.startswith("editia-de-"):
-            continue
-        if item.get("status") == "ready":
-            item["status"] = "disabled"
-            item["disabled_reason"] = "recap_is_not_story_distribution_unit"
-            disabled.append(item_id)
-        platforms = item.get("platforms")
-        if isinstance(platforms, dict):
-            for package in platforms.values():
-                if isinstance(package, dict) and package.get("status") == "ready":
-                    package["status"] = "disabled"
-                    package["reason"] = "recap_is_not_story_distribution_unit"
-    return disabled
+def remove_recap_items(outbox: dict) -> list[str]:
+    """Remove legacy recap snapshots from the active social queue entirely.
+
+    Historical remote-publication evidence is stored in the independent
+    platform state files, so keeping recap copies in the active outbox has no
+    audit value and risks accidental evaluation by a platform adapter.
+    """
+    items = outbox.get("items", [])
+    if not isinstance(items, list):
+        outbox["items"] = []
+        return []
+    removed = [
+        str(item.get("id"))
+        for item in items
+        if isinstance(item, dict) and str(item.get("id") or "").startswith("editia-de-")
+    ]
+    outbox["items"] = [
+        item for item in items
+        if not (isinstance(item, dict) and str(item.get("id") or "").startswith("editia-de-"))
+    ]
+    return removed
 
 
 def story_item(story: dict, visual: dict | None, existing: dict | None) -> dict:
@@ -159,8 +162,6 @@ def story_item(story: dict, visual: dict | None, existing: dict | None) -> dict:
             },
         }
     else:
-        # Site publication stays live. Visual channels wait for their own native
-        # readiness gate rather than falling back to a generic/AI image.
         item["status"] = "hold"
         item["hold_reason"] = "story_specific_approved_photo_required"
         item.pop("image_path", None)
@@ -188,7 +189,7 @@ def main() -> int:
         if story_ready(story)[0]:
             stories.append(story)
 
-    disabled_recaps = disable_recap_items(outbox)
+    removed_recaps = remove_recap_items(outbox)
     existing_by_id = {
         str(item.get("id")): item
         for item in outbox.get("items", [])
@@ -210,6 +211,8 @@ def main() -> int:
 
     outbox.setdefault("policy", {})["publication_model"] = "continuous_story_first"
     outbox["policy"]["edition_recaps_are_social_publication_gates"] = False
+    outbox["policy"]["edition_recaps_are_social_queue_items"] = False
+    outbox["policy"]["legacy_recap_outbox_policy"] = "removed_from_active_queue; historical evidence remains in platform state"
     outbox["policy"]["site_story_may_publish_before_social_media_ready"] = True
     write(OUTBOX, outbox)
 
@@ -220,7 +223,7 @@ def main() -> int:
         "story_items": created_or_updated,
         "ready_now": ready,
         "held_for_story_specific_media": held,
-        "disabled_recap_items": disabled_recaps,
+        "removed_recap_items": removed_recaps,
     }
     print(json.dumps(result, ensure_ascii=False))
     return 0
