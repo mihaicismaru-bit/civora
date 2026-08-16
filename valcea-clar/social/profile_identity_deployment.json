@@ -120,6 +120,8 @@
         "canonical_input_asset": "whatsapp-avatar.png",
         "upload_transform": "deterministic_jpeg",
         "upload_mime_type": "image/jpeg",
+        "upload_token_type": "Meta User Access Token",
+        "profile_token_type": "WhatsApp Business access token",
         "official_update_reference": "https://www.postman.com/meta/whatsapp-business-platform/request/mqqkbqj/update-business-profile",
         "official_upload_reference": "https://www.postman.com/meta/whatsapp-business-platform/request/13382743-871ea332-a6a4-4ad0-800a-0be9796b1933",
         "last_verified": "2026-08-16"
@@ -127,11 +129,12 @@
       "runtime": {
         "enable_env": "VALCEA_WHATSAPP_PROFILE_LIVE_ENABLED",
         "access_token_env": "VALCEA_WHATSAPP_ACCESS_TOKEN",
+        "upload_user_access_token_env": "VALCEA_META_USER_ACCESS_TOKEN",
         "phone_number_id_env": "VALCEA_WHATSAPP_PHONE_NUMBER_ID",
         "meta_app_id_env": "VALCEA_META_APP_ID",
         "graph_version_env": "VALCEA_WHATSAPP_GRAPH_VERSION"
       },
-      "notes": "The official Business Profile picture flow is verified; VÂLCEA CLAR WhatsApp Business access is not yet configured or confirmed."
+      "notes": "The official Business Profile picture flow is verified; VÂLCEA CLAR WhatsApp Business and Meta User Access Token credentials are not yet configured or confirmed."
     }
   },
   "quality_gate": {
