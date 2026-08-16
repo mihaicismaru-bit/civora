@@ -11,8 +11,10 @@ on:
       - 'valcea-clar/editorial/news_sources.json'
       - 'valcea-clar/editorial/manual_watch_sources.json'
       - 'valcea-clar/editorial/news_discovery_state.json'
+      - 'valcea-clar/editorial/publication_holds.json'
       - 'valcea-clar/investigations/**'
       - 'valcea-clar/scripts/monitor_ledger.py'
+      - 'valcea-clar/scripts/council_watch_rm_valcea.py'
       - 'valcea-clar/scripts/validate_monitor_registry.py'
       - '.github/workflows/valcea-clar-monitor-ledger.yml'
   pull_request:
@@ -20,8 +22,10 @@ on:
       - 'valcea-clar/editorial/monitor_registry.json'
       - 'valcea-clar/editorial/news_sources.json'
       - 'valcea-clar/editorial/manual_watch_sources.json'
+      - 'valcea-clar/editorial/publication_holds.json'
       - 'valcea-clar/investigations/**'
       - 'valcea-clar/scripts/monitor_ledger.py'
+      - 'valcea-clar/scripts/council_watch_rm_valcea.py'
       - 'valcea-clar/scripts/validate_monitor_registry.py'
       - '.github/workflows/valcea-clar-monitor-ledger.yml'
 
@@ -35,7 +39,7 @@ concurrency:
 jobs:
   monitor-ledger:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
         with:
@@ -51,9 +55,16 @@ jobs:
       - name: Validate offline materialization
         run: python valcea-clar/scripts/monitor_ledger.py --check
 
+      - name: Validate Râmnicu Vâlcea Council Watch extractor
+        run: python valcea-clar/scripts/council_watch_rm_valcea.py --self-test
+
       - name: Probe monitor sources
         if: github.event_name != 'pull_request'
         run: python valcea-clar/scripts/monitor_ledger.py --live
+
+      - name: Read official Râmnicu Vâlcea council decisions
+        if: github.event_name != 'pull_request'
+        run: python valcea-clar/scripts/council_watch_rm_valcea.py
 
       - name: Persist monitor state
         if: github.event_name != 'pull_request'
@@ -63,9 +74,10 @@ jobs:
           git config user.name 'vâlcea-clar-monitor-ledger[bot]'
           git config user.email 'valcea-clar-monitor-ledger@users.noreply.github.com'
 
-          # Add first so a brand-new monitor_state.json is not missed as an
-          # untracked file by `git diff`.
-          git add valcea-clar/editorial/monitor_state.json
+          # Add first so brand-new state files are not missed as untracked files.
+          git add \
+            valcea-clar/editorial/monitor_state.json \
+            valcea-clar/editorial/council_watch_rm_valcea_state.json
           if git diff --cached --quiet; then
             echo 'No monitor-state change to persist.'
             exit 0
