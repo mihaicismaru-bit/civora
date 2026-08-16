@@ -1,10 +1,12 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "product": "CIVORA / VÂLCEA CLAR",
   "canonical_domain": "valceaclar.ro",
   "execution_owner": "civora_site_engine",
   "scheduler": "github_actions",
   "state_owner": "repository",
+  "publication_model": "continuous_story_first",
+  "publication_rule": "publish_each_story_as_soon_as_it_passes_editorial_and_quality_gates; editions_are_recaps_not_gates",
   "chatgpt": {
     "scheduled_tasks_allowed": false,
     "conversation_runtime_allowed": false,
@@ -18,18 +20,36 @@
     "generator": "deterministic_zero_llm_v2",
     "paid_llm_api_required": false,
     "local_agent_runtime_required": false,
-    "self_hosted_runner_allowed": false
+    "self_hosted_runner_allowed": false,
+    "story_first": true,
+    "edition_window_may_delay_publishable_story": false,
+    "title_date_only_candidate_is_article": false,
+    "fail_closed_on_incomplete_story": true
   },
   "jobs": [
     {
+      "id": "live_newsroom",
+      "kind": "continuous_story_discovery_validation_and_publication",
+      "workflow": ".github/workflows/valcea-clar-newsroom-live.yml",
+      "schedule": [
+        "*/5 * * * *"
+      ],
+      "schedule_role": "polling_fallback_only",
+      "event_triggers": true,
+      "publication_gate": "per_story_editorial_quality_gate",
+      "edition_window_gate": false,
+      "owner": "site_engine"
+    },
+    {
       "id": "autonomous_editions",
-      "kind": "content_generation_and_publication",
+      "kind": "morning_evening_recap_generation",
       "workflow": ".github/workflows/valcea-clar-editions.yml",
       "schedule": [
         "45,55 4,5,6 * * *",
         "30,40 15,16,17 * * *"
       ],
-      "timezone_gate": "Europe/Bucharest targets 07:45 and 18:30; redundant 10-minute and later UTC recovery candidates cover scheduler delay and DST; same-day recovery windows 07:30-14:59 and 18:15-23:59 with publishable-edition idempotency per local date/slot",
+      "timezone_gate": "Europe/Bucharest targets 07:45 and 18:30 for recap snapshots only; these windows never delay or authorize an individual story publication.",
+      "publication_gate": false,
       "owner": "site_engine"
     },
     {
@@ -57,6 +77,7 @@
       "schedule": [
         "17 4,14 * * *"
       ],
+      "editorial_priority": "normal_case_priority; benchmark_only_for_investigation_engine",
       "owner": "site_engine"
     },
     {
