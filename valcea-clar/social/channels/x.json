@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "channel_id": "valcea-x",
+  "instance_id": "valcea",
+  "platform": "x",
+  "status": "outbox_only",
+  "audience_promise": "Actualizări locale rapide, verificabile și dense pentru Vâlcea: ce s-a schimbat, cine decide, cifrele importante și sursa canonică, fără zgomot sau titluri-capcană.",
+  "editorial_mix": {
+    "priorities": [
+      "verified_breaking_updates",
+      "civic_updates",
+      "public_money",
+      "infrastructure",
+      "service_journalism",
+      "local_events",
+      "sports_utility"
+    ],
+    "exclusions": [
+      "unverified_accusations",
+      "rage_bait",
+      "fake_urgency",
+      "fake_exclusivity",
+      "engagement_bait",
+      "verbatim_cross_posting"
+    ]
+  },
+  "native_formats": [
+    "text",
+    "thread",
+    "single_photo"
+  ],
+  "cadence": {
+    "timezone": "Europe/Bucharest",
+    "max_posts_per_day": 16,
+    "min_spacing_minutes": 10,
+    "quiet_hours": {
+      "start": "23:30",
+      "end": "06:00",
+      "breaking_override": true
+    }
+  },
+  "fatigue": {
+    "same_story_cooldown_hours": 2,
+    "max_related_posts_24h": 6
+  },
+  "media_policy": {
+    "real_media_only": true,
+    "provenance_required": true,
+    "reuse_rights_required": true,
+    "synthetic_real_person_forbidden": true
+  },
+  "link_policy": {
+    "mode": "native_preferred",
+    "canonical_hosts": [
+      "valceaclar.ro",
+      "www.valceaclar.ro"
+    ]
+  },
+  "series": [
+    {
+      "series_id": "live-valcea",
+      "promise": "Actualizări rapide și verificabile când un subiect local se dezvoltă."
+    },
+    {
+      "series_id": "cifra-zilei",
+      "promise": "Cifra publică relevantă pusă imediat în context local."
+    }
+  ],
+  "approval_gates": {
+    "low_risk_auto": true,
+    "reputational_human": true,
+    "corrections_priority": true
+  },
+  "credentials_ref": "none:x-api-pay-per-use-disabled-by-zero-paid-policy",
+  "publication_state": {
+    "outbox_path": "valcea-clar/social/x_outbox.json",
+    "state_path": "valcea-clar/social/x_state.json",
+    "dedupe_by_id": true,
+    "last_known_good": true
+  },
+  "metrics": {
+    "observed_only": true,
+    "sources": []
+  },
+  "zero_paid_dependency": true
+}
