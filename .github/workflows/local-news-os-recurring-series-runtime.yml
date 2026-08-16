@@ -1,0 +1,95 @@
+name: LOCAL NEWS OS Recurring Series Runtime
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/social/recurring_series.py"
+      - "local-news-os/social/recurring_series_runtime.py"
+      - "local-news-os/social/test_recurring_series.py"
+      - "local-news-os/social/test_recurring_series_runtime.py"
+      - "valcea-clar/social/series_registry.json"
+      - "valcea-clar/social/channels/**"
+      - ".github/workflows/local-news-os-recurring-series-runtime.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/social/recurring_series.py"
+      - "local-news-os/social/recurring_series_runtime.py"
+      - "local-news-os/social/test_recurring_series.py"
+      - "local-news-os/social/test_recurring_series_runtime.py"
+      - "valcea-clar/social/series_registry.json"
+      - "valcea-clar/social/channels/**"
+      - ".github/workflows/local-news-os-recurring-series-runtime.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-news-os-recurring-series-runtime-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile recurring series runtime
+        run: |
+          python -m py_compile \
+            local-news-os/social/recurring_series.py \
+            local-news-os/social/recurring_series_runtime.py \
+            local-news-os/social/test_recurring_series.py \
+            local-news-os/social/test_recurring_series_runtime.py
+
+      - name: Run Recurring Series Engine regression tests
+        run: python local-news-os/social/test_recurring_series.py
+
+      - name: Run Recurring Series Runtime acceptance tests
+        run: python local-news-os/social/test_recurring_series_runtime.py
+
+      - name: Validate every configured Vâlcea recurring-series publication
+        run: |
+          python - <<'PY'
+          import importlib.util
+          import json
+          from pathlib import Path
+
+          module_path = Path('local-news-os/social/recurring_series.py')
+          spec = importlib.util.spec_from_file_location('recurring_series', module_path)
+          mod = importlib.util.module_from_spec(spec)
+          assert spec and spec.loader
+          spec.loader.exec_module(mod)
+
+          registry = json.loads(Path('valcea-clar/social/series_registry.json').read_text(encoding='utf-8'))
+          if registry.get('instance_id') != 'valcea':
+              raise SystemExit('series registry instance mismatch')
+
+          for channel_id in sorted(registry.get('channels', {})):
+              prefix = 'valcea-'
+              if not channel_id.startswith(prefix):
+                  raise SystemExit(f'{channel_id}: non-canonical channel id')
+              platform = channel_id[len(prefix):]
+              path = Path(f'valcea-clar/social/channels/{platform}.json')
+              if not path.exists():
+                  raise SystemExit(f'{channel_id}: missing CHANNEL_CONFIG {path}')
+              channel = json.loads(path.read_text(encoding='utf-8'))
+              if channel.get('channel_id') != channel_id:
+                  raise SystemExit(f'{channel_id}: CHANNEL_CONFIG identity mismatch')
+              if channel.get('zero_paid_dependency') is not True:
+                  raise SystemExit(f'{channel_id}: zero_paid_dependency must be true')
+              if (channel.get('metrics') or {}).get('observed_only') is not True:
+                  raise SystemExit(f'{channel_id}: observed-only metrics policy required')
+              policies, errors = mod.channel_policies(channel, registry)
+              if errors:
+                  raise SystemExit(f'{channel_id}: {errors}')
+              if not policies:
+                  raise SystemExit(f'{channel_id}: no recurring series policies')
+              print(f'{channel_id}: PASS ({len(policies)} series)')
+          PY
