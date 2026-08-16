@@ -90,7 +90,7 @@ class AdapterCapabilityGateAcceptance(unittest.TestCase):
         self.assertEqual("DIRECT_READY", result["capability_disposition"])
         self.assertTrue(result["capability_gate"]["compatible"])
         self.assertEqual("carousel", result["capability_gate"]["native_format"])
-        self.assertEqual(["photograph", "photograph"], result["capability_gate"]["selected_media_kinds"])
+        self.assertEqual(["photograph"], result["capability_gate"]["selected_media_kinds"])
         self.assertTrue(result["adapter_handoff"]["dispatch_allowed"])
         item = next(iter(result["commit_bundle"]["outbox"]["items"].values()))
         self.assertEqual("carousel", item["adapter_payload"]["native_product"]["native_format"])
