@@ -15,6 +15,7 @@ on:
       - 'valcea-clar/investigations/**'
       - 'valcea-clar/scripts/monitor_ledger.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
+      - 'valcea-clar/scripts/council_watch_rm_valcea_diag.py'
       - 'valcea-clar/scripts/validate_monitor_registry.py'
       - '.github/workflows/valcea-clar-monitor-ledger.yml'
   pull_request:
@@ -26,6 +27,7 @@ on:
       - 'valcea-clar/investigations/**'
       - 'valcea-clar/scripts/monitor_ledger.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
+      - 'valcea-clar/scripts/council_watch_rm_valcea_diag.py'
       - 'valcea-clar/scripts/validate_monitor_registry.py'
       - '.github/workflows/valcea-clar-monitor-ledger.yml'
 
@@ -65,12 +67,18 @@ jobs:
       - name: Read official Râmnicu Vâlcea council decisions
         run: python valcea-clar/scripts/council_watch_rm_valcea.py
 
+      - name: Diagnose official HCL Lotus structure
+        if: github.event_name == 'pull_request'
+        run: python valcea-clar/scripts/council_watch_rm_valcea_diag.py
+
       - name: Upload council review snapshot
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: valcea-clar-council-watch-${{ github.run_id }}
-          path: valcea-clar/editorial/council_watch_rm_valcea_state.json
+          path: |
+            valcea-clar/editorial/council_watch_rm_valcea_state.json
+            valcea-clar/editorial/council_watch_rm_valcea_diag.json
           if-no-files-found: warn
           retention-days: 7
 
