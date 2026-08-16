@@ -1,10 +1,10 @@
 {
   "schema_version": "1.1",
-  "observed_at": "2026-08-16T09:05:16+03:00",
+  "observed_at": "2026-08-16T10:23:40+03:00",
   "sources_total": 24,
-  "sources_ok": 18,
-  "facts_admitted": 0,
-  "facts_before_cross_source_headline_dedupe": 0,
+  "sources_ok": 19,
+  "facts_admitted": 2,
+  "facts_before_cross_source_headline_dedupe": 2,
   "sources": [
     {
       "source_id": "primaria-rm-valcea-comunicate",
@@ -32,8 +32,9 @@
     },
     {
       "source_id": "prefectura-valcea",
-      "listing_ok": false,
-      "error": "HTTPError: HTTP Error 500: Internal Server Error",
+      "listing_ok": true,
+      "links_examined": 1,
+      "article_failures": 0,
       "facts": 0
     },
     {
@@ -164,9 +165,9 @@
     {
       "source_id": "scm-rm-valcea",
       "listing_ok": true,
-      "links_examined": 0,
+      "links_examined": 7,
       "article_failures": 0,
-      "facts": 0
+      "facts": 2
     }
   ],
   "instance_id": "valcea",
