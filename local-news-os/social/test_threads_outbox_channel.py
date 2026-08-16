@@ -250,7 +250,9 @@ class ThreadsOutboxAcceptance(unittest.TestCase):
             baseline_product["product_fingerprint_sha256"],
             injected_product["product_fingerprint_sha256"],
         )
-        self.assertFalse(injected["artifacts"]["virality"]["analytics_used"])
+        self.assertFalse(
+            injected["artifacts"]["virality"]["analytics"]["predictive_analytics_used"]
+        )
 
 
 if __name__ == "__main__":
