@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.1",
+  "schema_version": "1.0",
   "instance_id": "valcea",
   "policy": {
     "fail_closed_on_capability_mismatch": true,
@@ -34,9 +34,9 @@
       "channel_id": "valcea-threads",
       "adapter": "valcea-clar/social/threads_publish.py",
       "supported_native_formats": ["text", "thread"],
-      "supported_media_kinds": [],
+      "supported_media_kinds": ["none"],
       "max_media_assets": 0,
-      "completion_model": "immediate_remote_id_sequence",
+      "completion_model": "immediate_remote_id",
       "remote_reconciliation_supported": false,
       "partial_publish_policy": "manual_reconciliation_no_auto_retry"
     },
