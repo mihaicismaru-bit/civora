@@ -1,0 +1,53 @@
+name: VÂLCEA CLAR Social Identity Quality
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "valcea-clar/social/social_brand_system.json"
+      - "valcea-clar/social/profile_identity_system.json"
+      - "valcea-clar/social/*_visual_system.json"
+      - "valcea-clar/social/social_identity_quality_gate.py"
+      - ".github/workflows/valcea-social-identity-quality.yml"
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/social/social_brand_system.json"
+      - "valcea-clar/social/profile_identity_system.json"
+      - "valcea-clar/social/*_visual_system.json"
+      - "valcea-clar/social/social_identity_quality_gate.py"
+      - ".github/workflows/valcea-social-identity-quality.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-social-identity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  premium-identity-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile quality gate
+        run: python -m py_compile valcea-clar/social/social_identity_quality_gate.py
+
+      - name: Validate identity JSON
+        run: |
+          python -m json.tool valcea-clar/social/social_brand_system.json >/dev/null
+          python -m json.tool valcea-clar/social/profile_identity_system.json >/dev/null
+          python -m json.tool valcea-clar/social/facebook_visual_system.json >/dev/null
+          python -m json.tool valcea-clar/social/instagram_visual_system.json >/dev/null
+          python -m json.tool valcea-clar/social/tiktok_visual_system.json >/dev/null
+          python -m json.tool valcea-clar/social/youtube_visual_system.json >/dev/null
+          python -m json.tool valcea-clar/social/linkedin_visual_system.json >/dev/null
+
+      - name: Enforce premium publisher identity
+        run: python valcea-clar/social/social_identity_quality_gate.py
