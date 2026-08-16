@@ -1,0 +1,101 @@
+name: VÂLCEA CLAR Profile Identity
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/social/social_brand_system.json"
+      - "valcea-clar/social/profile_identity_system.json"
+      - "valcea-clar/social/validate_profile_identity.py"
+      - "valcea-clar/social/build_profile_identity_assets.py"
+      - "valcea-clar/social/channels/**"
+      - ".github/workflows/valcea-clar-profile-identity.yml"
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/social/social_brand_system.json"
+      - "valcea-clar/social/profile_identity_system.json"
+      - "valcea-clar/social/validate_profile_identity.py"
+      - "valcea-clar/social/build_profile_identity_assets.py"
+      - "valcea-clar/social/channels/**"
+      - ".github/workflows/valcea-clar-profile-identity.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-and-render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install deterministic renderer
+        run: python -m pip install --disable-pip-version-check Pillow==12.3.0
+
+      - name: Validate JSON sources
+        run: |
+          python -m json.tool valcea-clar/social/social_brand_system.json >/dev/null
+          python -m json.tool valcea-clar/social/profile_identity_system.json >/dev/null
+
+      - name: Compile profile identity tools
+        run: |
+          python -m py_compile \
+            valcea-clar/social/validate_profile_identity.py \
+            valcea-clar/social/build_profile_identity_assets.py
+
+      - name: Run profile identity validator self-test
+        run: python valcea-clar/social/validate_profile_identity.py --self-test
+
+      - name: Validate profile identity against configured channels
+        run: python valcea-clar/social/validate_profile_identity.py
+
+      - name: Run asset generator self-test
+        run: python valcea-clar/social/build_profile_identity_assets.py --self-test
+
+      - name: Render canonical profile identity kit
+        run: python valcea-clar/social/build_profile_identity_assets.py > /tmp/profile-identity-manifest.json
+
+      - name: Assert output contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          profile = json.loads(Path("valcea-clar/social/profile_identity_system.json").read_text(encoding="utf-8"))
+          manifest = json.loads(Path("valcea-clar/social/profile-assets/manifest.json").read_text(encoding="utf-8"))
+          assets = {row["asset_id"]: row for row in manifest["assets"]}
+          if manifest.get("photo_free_headers") is not True:
+              raise SystemExit("profile headers must remain photography-free")
+          if assets.get("avatar-master", {}).get("width") != 1024:
+              raise SystemExit("master avatar contract failed")
+          for platform, cfg in profile["platforms"].items():
+              avatar = assets.get(f"{platform}-avatar")
+              expected = cfg["avatar_export"]
+              if not avatar or (avatar["width"], avatar["height"]) != (expected["width"], expected["height"]):
+                  raise SystemExit(f"{platform}: avatar dimensions mismatch")
+              header_cfg = cfg.get("header_export")
+              if header_cfg:
+                  header = assets.get(f"{platform}-header")
+                  if not header or (header["width"], header["height"]) != (header_cfg["width"], header_cfg["height"]):
+                      raise SystemExit(f"{platform}: header dimensions mismatch")
+                  if header["bytes"] > 3 * 1024 * 1024:
+                      raise SystemExit(f"{platform}: header exceeds conservative 3 MB envelope")
+          if len(assets) != 14:
+              raise SystemExit(f"unexpected asset count: {len(assets)}")
+          print("VÂLCEA CLAR profile identity output contract: PASS")
+          PY
+
+      - name: Upload rendered identity kit
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-profile-identity-${{ github.run_id }}
+          path: |
+            valcea-clar/social/profile-assets
+            valcea-clar/social/profile_identity_system.json
+          if-no-files-found: error
+          retention-days: 30
