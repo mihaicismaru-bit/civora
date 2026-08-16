@@ -5,11 +5,15 @@ on:
     paths:
       - "valcea-clar/social/social_brand_system.json"
       - "valcea-clar/social/profile_identity_system.json"
+      - "valcea-clar/social/social_network_doctrine.json"
+      - "valcea-clar/social/native_platform_identity_system.json"
+      - "valcea-clar/social/native_identity.py"
       - "valcea-clar/social/facebook_visual_system.json"
       - "valcea-clar/social/instagram_visual_system.json"
       - "valcea-clar/social/instagram_editorial_v1_1.py"
       - "valcea-clar/social/validate_profile_identity.py"
       - "valcea-clar/social/validate_visual_identity_contract.py"
+      - "valcea-clar/social/validate_native_platform_identity.py"
       - "valcea-clar/social/build_profile_identity_assets.py"
       - "valcea-clar/social/channels/**"
       - ".github/workflows/valcea-clar-profile-identity.yml"
@@ -18,11 +22,15 @@ on:
     paths:
       - "valcea-clar/social/social_brand_system.json"
       - "valcea-clar/social/profile_identity_system.json"
+      - "valcea-clar/social/social_network_doctrine.json"
+      - "valcea-clar/social/native_platform_identity_system.json"
+      - "valcea-clar/social/native_identity.py"
       - "valcea-clar/social/facebook_visual_system.json"
       - "valcea-clar/social/instagram_visual_system.json"
       - "valcea-clar/social/instagram_editorial_v1_1.py"
       - "valcea-clar/social/validate_profile_identity.py"
       - "valcea-clar/social/validate_visual_identity_contract.py"
+      - "valcea-clar/social/validate_native_platform_identity.py"
       - "valcea-clar/social/build_profile_identity_assets.py"
       - "valcea-clar/social/channels/**"
       - ".github/workflows/valcea-clar-profile-identity.yml"
@@ -49,6 +57,8 @@ jobs:
         run: |
           python -m json.tool valcea-clar/social/social_brand_system.json >/dev/null
           python -m json.tool valcea-clar/social/profile_identity_system.json >/dev/null
+          python -m json.tool valcea-clar/social/social_network_doctrine.json >/dev/null
+          python -m json.tool valcea-clar/social/native_platform_identity_system.json >/dev/null
           python -m json.tool valcea-clar/social/facebook_visual_system.json >/dev/null
           python -m json.tool valcea-clar/social/instagram_visual_system.json >/dev/null
 
@@ -57,6 +67,8 @@ jobs:
           python -m py_compile \
             valcea-clar/social/validate_profile_identity.py \
             valcea-clar/social/validate_visual_identity_contract.py \
+            valcea-clar/social/validate_native_platform_identity.py \
+            valcea-clar/social/native_identity.py \
             valcea-clar/social/build_profile_identity_assets.py \
             valcea-clar/social/instagram_editorial_v1_1.py
 
@@ -71,6 +83,15 @@ jobs:
 
       - name: Validate profile-post visual contract
         run: python valcea-clar/social/validate_visual_identity_contract.py
+
+      - name: Run native identity helper self-test
+        run: python valcea-clar/social/native_identity.py
+
+      - name: Run secondary-platform identity validator self-test
+        run: python valcea-clar/social/validate_native_platform_identity.py --self-test
+
+      - name: Validate seven native secondary channels
+        run: python valcea-clar/social/validate_native_platform_identity.py
 
       - name: Run Instagram editorial renderer self-test
         working-directory: valcea-clar/social
@@ -119,5 +140,6 @@ jobs:
           path: |
             valcea-clar/social/profile-assets
             valcea-clar/social/profile_identity_system.json
+            valcea-clar/social/native_platform_identity_system.json
           if-no-files-found: error
           retention-days: 30
