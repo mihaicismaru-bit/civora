@@ -1,9 +1,9 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "channel_id": "valcea-threads",
   "instance_id": "valcea",
   "platform": "threads",
-  "status": "outbox_only",
+  "status": "active",
   "audience_promise": "Actualizări locale scurte, clare și verificabile pentru Vâlcea, cu context suficient în fir și conversație comunitară fără senzaționalism sau obligația de a da click.",
   "editorial_mix": {
     "priorities": [
@@ -72,16 +72,20 @@
     "reputational_human": true,
     "corrections_priority": true
   },
-  "credentials_ref": "none:threads-publishing-access-not-verified",
+  "credentials_ref": "github-actions-secret:VALCEA_THREADS_ACCESS_TOKEN",
   "publication_state": {
     "outbox_path": "valcea-clar/social/threads_outbox.json",
     "state_path": "valcea-clar/social/threads_state.json",
     "dedupe_by_id": true,
-    "last_known_good": true
+    "last_known_good": true,
+    "activation_baseline_required": true,
+    "partial_publish_requires_manual_reconciliation": true
   },
   "metrics": {
     "observed_only": true,
-    "sources": []
+    "sources": [
+      "threads_api"
+    ]
   },
   "zero_paid_dependency": true
 }
