@@ -1,0 +1,78 @@
+name: VÂLCEA CLAR Monitor Ledger
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '11 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/editorial/monitor_registry.json'
+      - 'valcea-clar/editorial/news_sources.json'
+      - 'valcea-clar/editorial/manual_watch_sources.json'
+      - 'valcea-clar/editorial/news_discovery_state.json'
+      - 'valcea-clar/investigations/**'
+      - 'valcea-clar/scripts/monitor_ledger.py'
+      - 'valcea-clar/scripts/validate_monitor_registry.py'
+      - '.github/workflows/valcea-clar-monitor-ledger.yml'
+  pull_request:
+    paths:
+      - 'valcea-clar/editorial/monitor_registry.json'
+      - 'valcea-clar/editorial/news_sources.json'
+      - 'valcea-clar/editorial/manual_watch_sources.json'
+      - 'valcea-clar/investigations/**'
+      - 'valcea-clar/scripts/monitor_ledger.py'
+      - 'valcea-clar/scripts/validate_monitor_registry.py'
+      - '.github/workflows/valcea-clar-monitor-ledger.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-monitor-ledger-${{ github.event.pull_request.number || 'main' }}
+  cancel-in-progress: true
+
+jobs:
+  monitor-ledger:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Validate durable monitor contract
+        run: python valcea-clar/scripts/validate_monitor_registry.py
+
+      - name: Validate offline materialization
+        run: python valcea-clar/scripts/monitor_ledger.py --check
+
+      - name: Probe monitor sources
+        if: github.event_name != 'pull_request'
+        run: python valcea-clar/scripts/monitor_ledger.py --live
+
+      - name: Persist monitor state
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'vâlcea-clar-monitor-ledger[bot]'
+          git config user.email 'valcea-clar-monitor-ledger@users.noreply.github.com'
+
+          # Add first so a brand-new monitor_state.json is not missed as an
+          # untracked file by `git diff`.
+          git add valcea-clar/editorial/monitor_state.json
+          if git diff --cached --quiet; then
+            echo 'No monitor-state change to persist.'
+            exit 0
+          fi
+          git commit -m 'Refresh VÂLCEA CLAR durable monitor state'
+
+          # Other newsroom jobs also persist state on main. Rebase on the latest
+          # canonical head before pushing; never overwrite concurrent newsroom work.
+          git pull --rebase origin main
+          git push origin HEAD:main

@@ -1,0 +1,333 @@
+{
+  "schema_version": "1.0",
+  "instance_id": "valcea",
+  "product": "VÂLCEA CLAR durable monitor and lead registry",
+  "recovered_at": "2026-08-17T01:38:00+03:00",
+  "execution_owner": "CIVORA_SITE_ENGINE",
+  "state_owner": "GITHUB_REPOSITORY",
+  "policy": {
+    "monitor_is_not_story": true,
+    "monitor_or_lead_public_projection": false,
+    "source_change_is_not_material_fact": true,
+    "normal_story_ready_gate_required_for_publication": true,
+    "recap_or_edition_expiry_may_delete_monitor": false,
+    "homepage_rebuild_may_delete_monitor": false,
+    "monitor_may_close_only_with_explicit_resolution": true,
+    "allowed_terminal_states": [
+      "RESOLVED",
+      "PUBLISHED_AND_CLOSED",
+      "INVALIDATED_WITH_REASON",
+      "SUPERSEDED_WITH_LINK"
+    ],
+    "unverified_recovered_details_must_remain_fail_closed": true,
+    "chatgpt_scheduler_allowed": false,
+    "chatgpt_state_owner_allowed": false,
+    "paid_dependency_required": false
+  },
+  "required_recovered_monitor_ids": [
+    "health-sju-valcea-recruitment-watch",
+    "health-brezoi-hospital-watch",
+    "health-horezu-hospital-watch",
+    "council-watch-valcea",
+    "real-estate-development-radar",
+    "real-estate-market-watch",
+    "olanesti-infrastructure-dossier"
+  ],
+  "monitors": [
+    {
+      "id": "health-sju-valcea-recruitment-watch",
+      "label": "SJU Vâlcea — concursuri și recrutări",
+      "section": "SĂNĂTATE",
+      "status": "ACTIVE_REVERIFY",
+      "priority": 88,
+      "purpose": "Urmărește posturile vacante, concursurile, calendarele, rezultatele și eventualele corecții publicate pentru Spitalul Județean de Urgență Vâlcea.",
+      "publication_mode": "STORY_ONLY_AFTER_PRIMARY_EVIDENCE",
+      "source_bindings": [
+        {
+          "ref_type": "url",
+          "id": "posturi-gov-valcea",
+          "publisher": "posturi.gov.ro",
+          "url": "https://posturi.gov.ro/judet/valcea/",
+          "tier": "T1",
+          "probe": true,
+          "match_terms": [
+            "SPITALUL JUDEȚEAN DE URGENȚĂ VĂLCEA",
+            "SPITALUL JUDETEAN DE URGENTA VALCEA",
+            "Spitalul Județean de Urgență Vâlcea"
+          ]
+        },
+        {
+          "ref_type": "url",
+          "id": "sju-valcea-direct",
+          "publisher": "Spitalul Județean de Urgență Vâlcea",
+          "url": "https://www.sjv.ro/",
+          "tier": "T1",
+          "probe": true,
+          "match_terms": [
+            "concurs",
+            "post vacant",
+            "posturi vacante",
+            "RUJC"
+          ]
+        }
+      ],
+      "recovered_leads": [
+        {
+          "id": "sju-bulk-recruitment-working-note",
+          "label": "Lot de recrutări SJU discutat anterior",
+          "verification_status": "REVERIFY",
+          "public_projection": false,
+          "recovery_note": "O notă de lucru anterioară menționa 55 de posturi și termenul 28.08.2026. Nici cifra, nici termenul nu sunt considerate fapte până la reverificare în sursă primară; nu se publică și nu se propagă social automat.",
+          "close_when": "Documentele primare sunt identificate și lotul este fie verificat și transformat în story, fie invalidat explicit cu motiv."
+        }
+      ],
+      "close_when": "Monitorul este permanent; numai un concurs individual poate fi închis după rezultat/expirare și arhivare explicită."
+    },
+    {
+      "id": "health-brezoi-hospital-watch",
+      "label": "Spitalul Orășenesc Brezoi — noutăți și investiții",
+      "section": "SĂNĂTATE",
+      "status": "ACTIVE",
+      "priority": 84,
+      "purpose": "Urmărește noutățile, proiectele, investițiile, concursurile și informațiile relevante pentru pacienți publicate de Spitalul Orășenesc Brezoi.",
+      "publication_mode": "STORY_WHEN_VERIFIED",
+      "source_bindings": [
+        {
+          "ref_type": "news_source_id",
+          "id": "spital-brezoi-noutati"
+        }
+      ],
+      "recovered_leads": [
+        {
+          "id": "brezoi-palliative-care-project",
+          "label": "Compartiment de îngrijiri paliative — proiect de urmărit",
+          "verification_status": "REVERIFY",
+          "public_projection": false,
+          "recovery_note": "Lead recuperat din agenda editorială; denumirea, stadiul, finanțarea, contractele și calendarul trebuie reverificate înainte de story."
+        },
+        {
+          "id": "brezoi-microbiology-project",
+          "label": "Capacitate/proiect de microbiologie — de urmărit",
+          "verification_status": "REVERIFY",
+          "public_projection": false,
+          "recovery_note": "Lead recuperat; se păstrează până la verificare sau invalidare explicită."
+        }
+      ],
+      "close_when": "Monitor permanent; lead-urile se închid explicit după verificare, publicare sau invalidare."
+    },
+    {
+      "id": "health-horezu-hospital-watch",
+      "label": "Spitalul Orășenesc Horezu — noutăți și investiții",
+      "section": "SĂNĂTATE",
+      "status": "ACTIVE",
+      "priority": 84,
+      "purpose": "Urmărește investițiile, proiectele, serviciile și noutățile Spitalului Orășenesc Horezu.",
+      "publication_mode": "STORY_WHEN_VERIFIED",
+      "source_bindings": [
+        {
+          "ref_type": "news_source_id",
+          "id": "spital-horezu-noutati"
+        }
+      ],
+      "recovered_leads": [
+        {
+          "id": "horezu-ambulatory-extension",
+          "label": "Extinderea ambulatoriului / corp nou — proiect de urmărit",
+          "verification_status": "REVERIFY",
+          "public_projection": false,
+          "recovery_note": "Lead recuperat; denumirea completă, codul SMIS, bugetul, achizițiile, constructorul și stadiul fizic trebuie reverificate din documentele primare înainte de publicare."
+        }
+      ],
+      "close_when": "Monitor permanent; proiectele individuale se închid numai după rezultat documentat sau invalidare explicită."
+    },
+    {
+      "id": "council-watch-valcea",
+      "label": "Council Watch — CJ și consilii locale Vâlcea",
+      "section": "ADMINISTRAȚIE",
+      "status": "ACTIVE",
+      "priority": 92,
+      "purpose": "Păstrează agenda instituțională de la convocare până la efect: convocator, ordine de zi, proiecte, amendamente, vot, hotărâre adoptată, bani/contracte și efecte ulterioare.",
+      "publication_mode": "SELECTIVE_STORY_WHEN_MATERIAL_AND_VERIFIED",
+      "source_bindings": [
+        {
+          "ref_type": "news_source_id",
+          "id": "primaria-rm-valcea-comunicate"
+        },
+        {
+          "ref_type": "url",
+          "id": "rm-valcea-hcl-2026",
+          "publisher": "Primăria Municipiului Râmnicu Vâlcea — hotărâri",
+          "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf",
+          "tier": "T1",
+          "probe": true,
+          "match_terms": [
+            "Consiliul Local",
+            "HOTĂRÂREA",
+            "ședință"
+          ]
+        },
+        {
+          "ref_type": "news_source_id",
+          "id": "cj-valcea-sedinte"
+        },
+        {
+          "ref_type": "news_source_id",
+          "id": "cj-valcea-hotarari-2026"
+        },
+        {
+          "ref_type": "news_source_id",
+          "id": "cl-calimanesti-hotarari"
+        },
+        {
+          "ref_type": "manual_watch_source_id",
+          "id": "primaria-dragasani-anunturi-publice"
+        },
+        {
+          "ref_type": "news_source_id",
+          "id": "primaria-horezu-anunturi"
+        },
+        {
+          "ref_type": "news_source_id",
+          "id": "primaria-brezoi-comunicate"
+        }
+      ],
+      "recovered_leads": [
+        {
+          "id": "rm-valcea-hcl159-2026-musiclover-public-money",
+          "label": "HCL 159/2026 — componenta de finanțare Music Lover Festival",
+          "verification_status": "REVERIFY_FOR_FOLLOWUP",
+          "public_projection": false,
+          "source_url": "https://hcl.usr.ro/ramnicu_valcea/2026/h159",
+          "recovery_note": "Materialul editorial anterior a consemnat un buget estimat de 650.000 lei pentru Music Lover Festival. Păstrează separat firul de bani publici și urmărește cheltuirea/contractarea; pentru un articol nou se reverifică documentul oficial și efectele ulterioare."
+        },
+        {
+          "id": "calimanesti-council-decisions-stream",
+          "label": "Hotărârile Consiliului Local Călimănești",
+          "verification_status": "SOURCE_ACTIVE_THIN_CANDIDATE",
+          "public_projection": false,
+          "recovery_note": "Un candidat anterior a trecut doar title/date/source. Nu este story; monitorul trebuie să păstreze hotărârile până când materialitatea și conținutul sunt verificate."
+        }
+      ],
+      "close_when": "Monitor permanent; fiecare ședință/decizie rămâne urmărită până la hotărâre/rezultat și eventualul efect material relevant."
+    },
+    {
+      "id": "real-estate-development-radar",
+      "label": "Radar dezvoltări imobiliare Vâlcea",
+      "section": "IMOBILIARE",
+      "status": "ACTIVE_REVERIFY",
+      "priority": 89,
+      "purpose": "Urmărește ciclul complet al proiectelor: intenție, PUZ/PUD, avize, hotărâri, autorizație, beneficiar/dezvoltator, constructor, șantier, modificări, vânzări și litigii relevante.",
+      "publication_mode": "STORY_ONLY_AFTER_DOCUMENT_CHAIN",
+      "source_bindings": [
+        {
+          "ref_type": "manual_watch_source_id",
+          "id": "dragasani-urbanism-autorizatii-2026"
+        },
+        {
+          "ref_type": "manual_watch_source_id",
+          "id": "ocpi-valcea-anunturi"
+        },
+        {
+          "ref_type": "url",
+          "id": "rm-valcea-urbanism-puz-pud",
+          "publisher": "Primăria Municipiului Râmnicu Vâlcea — Direcția Urbanism",
+          "url": "https://www.primariavl.ro/index.php?option=com_content&view=article&id=495&Itemid=572",
+          "tier": "T1",
+          "probe": true,
+          "match_terms": [
+            "PUZ",
+            "PUD",
+            "locuințe colective",
+            "locuinte colective"
+          ]
+        }
+      ],
+      "recovered_leads": [
+        {
+          "id": "ferdinand-19",
+          "label": "Ferdinand 19 — Râmnicu Vâlcea",
+          "verification_status": "SOURCE_LOCATED_REVERIFY_CHAIN",
+          "public_projection": false,
+          "source_url": "https://hcl.usr.ro/ramnicu_valcea/2026/h76",
+          "recovery_note": "Lead recuperat ca proiect cu documentație urbanistică asociată HCL 76/2026 și beneficiar menționat anterior ca Electrovalcea SRL. Se reverifică întregul lanț și stadiul actual înainte de publicare."
+        },
+        {
+          "id": "doru-popian-2-5-4a",
+          "label": "Doru Popian 2–5 / 4A — Râmnicu Vâlcea",
+          "verification_status": "REVERIFY",
+          "public_projection": false,
+          "recovery_note": "Lead recuperat din agenda editorială; nota anterioară menționa locuințe colective și Pigulin Fruit Import SRL. Niciun detaliu nu se publică înainte de documentare primară."
+        },
+        {
+          "id": "intrarea-crizantemei-1",
+          "label": "Intrarea Crizantemei 1 — Râmnicu Vâlcea",
+          "verification_status": "REVERIFY",
+          "public_projection": false,
+          "recovery_note": "Lead recuperat; nota anterioară menționa PUD, regim S+P+2E+Er și D&D Estate SRL. Se păstrează fail-closed până la reverificarea documentației."
+        },
+        {
+          "id": "dealul-malului-11g",
+          "label": "Dealul Malului 11G — Râmnicu Vâlcea",
+          "verification_status": "REVERIFY",
+          "public_projection": false,
+          "recovery_note": "Lead recuperat; nota anterioară menționa locuințe colective S(D)+P+2E și circuit CTATU. Se reverifică documentele și stadiul actual."
+        }
+      ],
+      "close_when": "Proiectele rămân în radar până la abandon/infirmare documentată sau până când ciclul urmărit este finalizat și arhivat explicit."
+    },
+    {
+      "id": "real-estate-market-watch",
+      "label": "Real Estate Market Watch — Vâlcea",
+      "section": "IMOBILIARE",
+      "status": "ACTIVE",
+      "priority": 82,
+      "purpose": "Monitorizează piața, separat de urbanism: proiecte noi, ofertă și prețuri €/mp, tranzacții/achiziții mari, licitații și proprietăți publice, terenuri, cadastru, schimbări de proprietar/operator și concentrări locale care merită verificare.",
+      "publication_mode": "ANALYSIS_OR_STORY_AFTER_MULTI_SOURCE_VERIFICATION",
+      "source_bindings": [
+        {
+          "ref_type": "manual_watch_source_id",
+          "id": "ocpi-valcea-anunturi"
+        },
+        {
+          "ref_type": "manual_watch_source_id",
+          "id": "dragasani-urbanism-autorizatii-2026"
+        },
+        {
+          "ref_type": "url",
+          "id": "rm-valcea-urbanism-market-signal",
+          "publisher": "Primăria Municipiului Râmnicu Vâlcea — urbanism",
+          "url": "https://www.primariavl.ro/index.php?option=com_content&view=article&id=495&Itemid=572",
+          "tier": "T1",
+          "probe": true,
+          "match_terms": [
+            "PUZ",
+            "PUD",
+            "parcelare",
+            "locuințe",
+            "locuinte"
+          ]
+        }
+      ],
+      "recovered_leads": [],
+      "close_when": "Monitor permanent; seriile/analizele individuale se închid explicit, monitorul de piață rămâne activ."
+    },
+    {
+      "id": "olanesti-infrastructure-dossier",
+      "label": "Dosar infrastructură Olănești — zona Omniasig",
+      "section": "INVESTIGAȚII",
+      "status": "ACTIVE_EXISTING",
+      "priority": 88,
+      "purpose": "Leagă registrul persistent de monitorul de investigație deja existent pentru podul pietonal-ciclist și lucrările asociate.",
+      "publication_mode": "EXISTING_INVESTIGATION_RULES",
+      "source_bindings": [
+        {
+          "ref_type": "investigation_file",
+          "id": "olanesti-bridge-monitor",
+          "path": "valcea-clar/investigations/olanesti-bridge-monitor.md"
+        }
+      ],
+      "recovered_leads": [],
+      "close_when": "Conform dosarului de investigație: numai după documentarea explicită a rezultatului sau după supersedare cu legătură către noul dosar."
+    }
+  ]
+}
