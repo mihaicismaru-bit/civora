@@ -2,44 +2,43 @@ name: VÂLCEA CLAR Social Publication Engine
 
 on:
   workflow_dispatch:
-  workflow_run:
-    workflows: ["VÂLCEA CLAR Autonomous Editions"]
-    types: [completed]
   pull_request:
     paths:
-      - "valcea-clar/social/**"
-      - "valcea-clar/site/current_edition.json"
-      - "valcea-clar/editions/**"
+      - "valcea-clar/social/*.py"
+      - "valcea-clar/social/channels/**"
+      - "valcea-clar/social/story_visuals.json"
+      - "valcea-clar/site/story_publication_event.json"
       - "local-news-os/social/**"
       - ".github/workflows/valcea-clar-social-publishing.yml"
   push:
     branches: [main]
     paths:
-      - "valcea-clar/social/**"
-      - "valcea-clar/site/current_edition.json"
-      - "valcea-clar/editions/**"
+      - "valcea-clar/social/*.py"
+      - "valcea-clar/social/channels/**"
+      - "valcea-clar/social/story_visuals.json"
+      - "valcea-clar/site/story_publication_event.json"
       - "local-news-os/social/**"
       - ".github/workflows/valcea-clar-social-publishing.yml"
   schedule:
+    # Fallback/recovery only. Normal distribution is triggered by a durable
+    # story_publication_event committed by the Live Newsroom.
     - cron: "7,22,37,52 * * * *"
 
 permissions:
   contents: write
 
 concurrency:
-  group: valcea-clar-social-publication-engine-${{ github.ref }}
+  group: valcea-clar-social-publication-engine
   cancel-in-progress: false
 
 jobs:
   distribute:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          ref: main
 
       - uses: actions/setup-python@v6
         with:
@@ -56,8 +55,8 @@ jobs:
           python local-news-os/social/validate_channel_config.py valcea-clar/social/channels/instagram.json --instance-root valcea-clar
           python local-news-os/social/validate_channel_config.py valcea-clar/social/channels/tiktok.json --instance-root valcea-clar
 
-      - name: Build channel-native packages from the current verified edition
-        run: python valcea-clar/social/build_current_edition_outbox.py
+      - name: Build channel-native packages from live stories
+        run: python valcea-clar/social/build_live_story_outbox.py
 
       - name: Fetch approved real photographs
         run: python valcea-clar/social/fetch_approved_photos.py
@@ -70,7 +69,7 @@ jobs:
           python -m py_compile \
             valcea-clar/social/social_common.py \
             valcea-clar/social/meta_auth_health.py \
-            valcea-clar/social/build_current_edition_outbox.py \
+            valcea-clar/social/build_live_story_outbox.py \
             valcea-clar/social/build_social_media_assets.py \
             valcea-clar/social/facebook_publish.py \
             valcea-clar/social/instagram_publish.py \
@@ -96,8 +95,7 @@ jobs:
 
       - name: Record Meta preview-only state
         if: github.event_name == 'pull_request'
-        run: |
-          printf '%s\n' '{"status":"PREVIEW_ONLY","facebook_ready":false,"instagram_ready":false}' > /tmp/meta-auth.json
+        run: printf '%s\n' '{"status":"PREVIEW_ONLY","facebook_ready":false,"instagram_ready":false}' > /tmp/meta-auth.json
 
       - name: Preview Facebook queue
         id: preview_facebook
@@ -108,12 +106,11 @@ jobs:
           python - <<'PY'
           import json, os
           from pathlib import Path
-          payload = json.loads(Path('/tmp/facebook-preview.json').read_text(encoding='utf-8'))
-          eligible = payload.get('eligible') or []
-          count = int(eligible) if isinstance(eligible, bool) else len(eligible) if isinstance(eligible, list) else 0
-          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
-              output.write(f"has_eligible={'true' if count else 'false'}\n")
-              output.write(f"eligible_count={count}\n")
+          p=json.loads(Path('/tmp/facebook-preview.json').read_text(encoding='utf-8'))
+          e=p.get('eligible') or []
+          count=len(e) if isinstance(e,list) else int(bool(e))
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
+              f.write(f"has_eligible={'true' if count else 'false'}\n")
           PY
 
       - name: Preview Instagram queue
@@ -125,12 +122,11 @@ jobs:
           python - <<'PY'
           import json, os
           from pathlib import Path
-          payload = json.loads(Path('/tmp/instagram-preview.json').read_text(encoding='utf-8'))
-          eligible = payload.get('eligible') or []
-          count = len(eligible) if isinstance(eligible, list) else int(bool(eligible))
-          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
-              output.write(f"has_eligible={'true' if count else 'false'}\n")
-              output.write(f"eligible_count={count}\n")
+          p=json.loads(Path('/tmp/instagram-preview.json').read_text(encoding='utf-8'))
+          e=p.get('eligible') or []
+          count=len(e) if isinstance(e,list) else int(bool(e))
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
+              f.write(f"has_eligible={'true' if count else 'false'}\n")
           PY
 
       - name: Preview TikTok queue
@@ -142,15 +138,14 @@ jobs:
           python - <<'PY'
           import json, os
           from pathlib import Path
-          payload = json.loads(Path('/tmp/tiktok-preview.json').read_text(encoding='utf-8'))
-          eligible = payload.get('eligible') or []
-          count = len(eligible) if isinstance(eligible, list) else int(bool(eligible))
-          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
-              output.write(f"has_eligible={'true' if count else 'false'}\n")
-              output.write(f"eligible_count={count}\n")
+          p=json.loads(Path('/tmp/tiktok-preview.json').read_text(encoding='utf-8'))
+          e=p.get('eligible') or []
+          count=len(e) if isinstance(e,list) else int(bool(e))
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
+              f.write(f"has_eligible={'true' if count else 'false'}\n")
           PY
 
-      - name: Publish eligible Facebook items through Meta Graph API
+      - name: Publish eligible Facebook story through Meta Graph API
         id: publish_facebook
         if: github.event_name != 'pull_request' && steps.preview_facebook.outputs.has_eligible == 'true'
         continue-on-error: true
@@ -159,18 +154,15 @@ jobs:
           VALCEA_META_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_META_PAGE_ACCESS_TOKEN }}
           VALCEA_FB_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_FB_PAGE_ACCESS_TOKEN }}
           VALCEA_FB_GRAPH_VERSION: v26.0
-        shell: bash
-        run: |
-          set -euo pipefail
-          python valcea-clar/social/facebook_publish.py --apply | tee /tmp/facebook-apply.json
+        run: python valcea-clar/social/facebook_publish.py --apply | tee /tmp/facebook-apply.json
 
       - name: Record skipped Facebook apply
         if: github.event_name == 'pull_request' || steps.preview_facebook.outputs.has_eligible != 'true'
         run: cp /tmp/facebook-preview.json /tmp/facebook-apply.json
 
-      - name: Publish eligible Instagram items through Meta Graph API
+      - name: Publish eligible Instagram story through Meta Graph API
         id: publish_instagram
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && steps.preview_instagram.outputs.has_eligible == 'true'
         continue-on-error: true
         env:
           VALCEA_IG_ACCOUNT_ID: ${{ steps.meta_auth.outputs.ig_account_id || vars.VALCEA_IG_ACCOUNT_ID }}
@@ -178,30 +170,24 @@ jobs:
           VALCEA_IG_GRAPH_VERSION: v26.0
           VALCEA_IG_GRAPH_HOST: graph.facebook.com
           VALCEA_IG_MAX_PER_RUN: "1"
-        shell: bash
-        run: |
-          set -euo pipefail
-          python valcea-clar/social/instagram_publish.py --apply | tee /tmp/instagram-apply.json
+        run: python valcea-clar/social/instagram_publish.py --apply | tee /tmp/instagram-apply.json
 
-      - name: Record Instagram preview-only run
-        if: github.event_name == 'pull_request'
+      - name: Record skipped Instagram apply
+        if: github.event_name == 'pull_request' || steps.preview_instagram.outputs.has_eligible != 'true'
         run: cp /tmp/instagram-preview.json /tmp/instagram-apply.json
 
-      - name: Publish eligible TikTok items through Content Posting API
+      - name: Publish eligible TikTok story through Content Posting API
         id: publish_tiktok
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && steps.preview_tiktok.outputs.has_eligible == 'true'
         continue-on-error: true
         env:
           VALCEA_TIKTOK_ACCESS_TOKEN: ${{ secrets.VALCEA_TIKTOK_ACCESS_TOKEN }}
           VALCEA_TIKTOK_PUBLIC_POSTING_APPROVED: ${{ vars.VALCEA_TIKTOK_PUBLIC_POSTING_APPROVED }}
           VALCEA_TIKTOK_MAX_PER_RUN: "1"
-        shell: bash
-        run: |
-          set -euo pipefail
-          python valcea-clar/social/tiktok_publish.py --apply | tee /tmp/tiktok-apply.json
+        run: python valcea-clar/social/tiktok_publish.py --apply | tee /tmp/tiktok-apply.json
 
-      - name: Record TikTok preview-only run
-        if: github.event_name == 'pull_request'
+      - name: Record skipped TikTok apply
+        if: github.event_name == 'pull_request' || steps.preview_tiktok.outputs.has_eligible != 'true'
         run: cp /tmp/tiktok-preview.json /tmp/tiktok-apply.json
 
       - name: Persist canonical social state and public media conflict-safe
@@ -231,7 +217,6 @@ jobs:
             mkdir -p "/tmp/valcea-social-state/$(dirname "$media_dir")"
             cp -a "$media_dir" "/tmp/valcea-social-state/$media_dir"
           fi
-
           git config user.name "valcea-clar-social-engine[bot]"
           git config user.email "valcea-clar-social-engine@users.noreply.github.com"
           for attempt in 1 2 3 4 5; do
@@ -254,12 +239,10 @@ jobs:
               echo "No VÂLCEA CLAR social-engine changes to persist."
               exit 0
             fi
-            git commit -m "Persist VÂLCEA CLAR multi-network publication state"
+            git commit -m "Persist VÂLCEA CLAR story-first social state"
             if git push origin HEAD:main; then exit 0; fi
-            echo "main advanced; retrying ${attempt}/5"
             sleep $((attempt * 2))
           done
-          echo "Unable to persist social publication state after five attempts." >&2
           exit 1
 
       - name: Write social-engine summary
@@ -269,27 +252,25 @@ jobs:
           import json, os
           from pathlib import Path
           def read(name):
-              path = Path('/tmp') / name
-              if not path.exists(): return {'status': 'NOT_RUN'}
-              try: return json.loads(path.read_text(encoding='utf-8'))
-              except Exception as exc: return {'status': 'UNREADABLE', 'error': str(exc)}
-          ownership = read('social-engine-ownership.json')
-          meta = read('meta-auth.json')
-          facebook = read('facebook-apply.json')
-          instagram = read('instagram-apply.json')
-          tiktok = read('tiktok-apply.json')
-          lines = [
-              '# VÂLCEA CLAR — Social Publication Engine', '',
-              f"- Ownership: **{ownership.get('status', 'UNAVAILABLE')}**",
-              f"- Execution owner: `{ownership.get('execution_owner', 'unknown')}`",
-              f"- Meta auth: **{meta.get('status', 'UNKNOWN')}** (`{meta.get('token_source', 'none')}`)",
-              '- ChatGPT direct publication: **disabled**',
-              f"- Facebook: **{facebook.get('status', 'UNKNOWN')}**",
-              f"- Instagram: **{instagram.get('status', 'UNKNOWN')}**",
-              f"- TikTok: **{tiktok.get('status', 'UNKNOWN')}**", '',
-              'TikTok remains fail-closed until app audit, verified media domain and explicit per-post consent are present.',
+              p=Path('/tmp')/name
+              if not p.exists(): return {'status':'NOT_RUN'}
+              try: return json.loads(p.read_text(encoding='utf-8'))
+              except Exception as exc: return {'status':'UNREADABLE','error':str(exc)}
+          ownership=read('social-engine-ownership.json')
+          meta=read('meta-auth.json')
+          fb=read('facebook-apply.json'); ig=read('instagram-apply.json'); tt=read('tiktok-apply.json')
+          lines=[
+              '# VÂLCEA CLAR — Story-first Social Publication Engine','',
+              '- Publication unit: **individual story**',
+              '- Edition/recap publication gate: **disabled**',
+              f"- Ownership: **{ownership.get('status','UNAVAILABLE')}**",
+              f"- Meta auth: **{meta.get('status','UNKNOWN')}**",
+              f"- Facebook: **{fb.get('status','UNKNOWN')}**",
+              f"- Instagram: **{ig.get('status','UNKNOWN')}**",
+              f"- TikTok: **{tt.get('status','UNKNOWN')}**",
+              '- Missing story-specific media holds only the affected visual channel; it never delays the site story.'
           ]
-          Path(os.environ['GITHUB_STEP_SUMMARY']).write_text('\n'.join(lines) + '\n', encoding='utf-8')
+          Path(os.environ['GITHUB_STEP_SUMMARY']).write_text('\n'.join(lines)+'\n',encoding='utf-8')
           PY
 
       - name: Upload social-engine audit and runtime payload
@@ -324,7 +305,4 @@ jobs:
           for outcome in "$FACEBOOK_OUTCOME" "$INSTAGRAM_OUTCOME" "$TIKTOK_OUTCOME"; do
             if [ "$outcome" = "failure" ]; then failed=1; fi
           done
-          if [ "$failed" -ne 0 ]; then
-            echo "At least one native social adapter failed after other channels and state persistence completed." >&2
-            exit 1
-          fi
+          if [ "$failed" -ne 0 ]; then exit 1; fi
