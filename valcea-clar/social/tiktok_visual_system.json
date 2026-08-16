@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0",
+  "channel_id": "valcea-tiktok",
+  "master_identity_system": "valcea-clar/social/social_brand_system.json",
+  "profile_identity_system": "valcea-clar/social/profile_identity_system.json",
+  "role": "native_vertical_news_explainer_and_field_video",
+  "canvas": {
+    "vertical": {
+      "width": 1080,
+      "height": 1920,
+      "aspect_ratio": "9:16"
+    },
+    "safe_zone_policy": "keep_critical_headline_subject_and_evidence_inside_central_reading_area_and_clear_of_platform_ui"
+  },
+  "brand": {
+    "name": "VÂLCEA CLAR",
+    "editorial_lockup": "VÂLCEA. CLAR.",
+    "accent_rgb": [196, 27, 35],
+    "paper_rgb": [247, 246, 243],
+    "ink_rgb": [20, 20, 20],
+    "white_rgb": [255, 255, 255],
+    "brand_bug": "small_quiet_top_corner_or_end_frame",
+    "opening_bumper": "forbidden_before_the_news"
+  },
+  "typography": {
+    "burned_in_headline_max_lines": 2,
+    "headline_word_target_max": 8,
+    "supporting_copy_max_lines": 3,
+    "speaker_or_place_lower_third_only_when_informative": true,
+    "all_caps_headline_default_forbidden": true,
+    "principle": "broadcast_clarity_not_creator_template_aesthetic"
+  },
+  "templates": {
+    "field_video": {
+      "opening": "strongest_verified_visual_or_local_consequence",
+      "body": "show_what_changed_then_context",
+      "end": "source_or_what_to_watch_if_useful"
+    },
+    "reporter_explainer": {
+      "opening": "verified_fact_not_self_intro",
+      "body": "one_question_or_consequence_per_segment",
+      "end": "what_is_known_unknown_or_next"
+    },
+    "document_explainer": {
+      "opening": "show_the_document_or_key_number",
+      "body": "translate_document_into_plain_language",
+      "end": "source_boundary_and_unknowns"
+    },
+    "utility_short": {
+      "opening": "what_reader_needs_to_know_now",
+      "body": "where_when_access_price_or_action",
+      "end": "canonical_detail_only_if_needed"
+    },
+    "data_motion_card": {
+      "opening": "one_number_and_its_meaning",
+      "body": "one_comparison_or_context",
+      "end": "source"
+    }
+  },
+  "audio": {
+    "natural_sound_preferred_when_editorially_useful": true,
+    "music_not_required": true,
+    "trending_audio_must_never_drive_story_selection": true,
+    "voice_or_sound_must_not_overstate_evidence": true
+  },
+  "qa": {
+    "real_story_specific_media_required": true,
+    "synthetic_real_person_or_place_portrayal_forbidden": true,
+    "generic_stock_substitution_forbidden": true,
+    "text_must_not_cover_primary_evidence": true,
+    "fake_urgency_forbidden": true,
+    "engagement_bait_forbidden": true,
+    "verbatim_cross_posting_forbidden": true,
+    "platform_native_pacing_required": true,
+    "must_not_look_like_local_marketing_page": true,
+    "must_not_look_ai_generated": true,
+    "must_not_repeat_identical_layout_for_every_story": true
+  }
+}
