@@ -1,0 +1,85 @@
+name: LOCAL NEWS OS Series Async Remote Dispatch
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/social/series_async_remote_dispatch.py"
+      - "local-news-os/social/test_series_async_remote_dispatch.py"
+      - "local-news-os/social/async_remote_dispatch.py"
+      - "local-news-os/social/test_async_remote_dispatch.py"
+      - "local-news-os/social/series_durable_dispatch_executor.py"
+      - "local-news-os/social/test_series_durable_dispatch_executor.py"
+      - "local-news-os/social/series_adapter_dispatch_handoff.py"
+      - "local-news-os/social/test_series_adapter_dispatch_handoff.py"
+      - "local-news-os/social/series_publication_state_bridge.py"
+      - "local-news-os/social/test_series_publication_state_bridge.py"
+      - "local-news-os/social/durable_dispatch_executor.py"
+      - "local-news-os/social/publication_state.py"
+      - "valcea-clar/social/channel_registry.json"
+      - "valcea-clar/social/adapter_capabilities.json"
+      - ".github/workflows/local-news-os-series-async-dispatch.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/social/series_async_remote_dispatch.py"
+      - "local-news-os/social/test_series_async_remote_dispatch.py"
+      - "local-news-os/social/async_remote_dispatch.py"
+      - "local-news-os/social/test_async_remote_dispatch.py"
+      - "local-news-os/social/series_durable_dispatch_executor.py"
+      - "local-news-os/social/test_series_durable_dispatch_executor.py"
+      - "local-news-os/social/series_adapter_dispatch_handoff.py"
+      - "local-news-os/social/test_series_adapter_dispatch_handoff.py"
+      - "local-news-os/social/series_publication_state_bridge.py"
+      - "local-news-os/social/test_series_publication_state_bridge.py"
+      - "local-news-os/social/durable_dispatch_executor.py"
+      - "local-news-os/social/publication_state.py"
+      - "valcea-clar/social/channel_registry.json"
+      - "valcea-clar/social/adapter_capabilities.json"
+      - ".github/workflows/local-news-os-series-async-dispatch.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-news-os-series-async-dispatch-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile recurring-series async dispatch core
+        run: |
+          python -m py_compile \
+            local-news-os/social/series_async_remote_dispatch.py \
+            local-news-os/social/test_series_async_remote_dispatch.py \
+            local-news-os/social/async_remote_dispatch.py \
+            local-news-os/social/test_async_remote_dispatch.py \
+            local-news-os/social/series_durable_dispatch_executor.py \
+            local-news-os/social/test_series_durable_dispatch_executor.py \
+            local-news-os/social/series_adapter_dispatch_handoff.py \
+            local-news-os/social/test_series_adapter_dispatch_handoff.py \
+            local-news-os/social/series_publication_state_bridge.py \
+            local-news-os/social/test_series_publication_state_bridge.py \
+            local-news-os/social/durable_dispatch_executor.py \
+            local-news-os/social/publication_state.py
+
+      - name: Run recurring-series adapter handoff regression
+        run: python local-news-os/social/test_series_adapter_dispatch_handoff.py
+
+      - name: Run generic asynchronous remote-dispatch regression
+        run: python local-news-os/social/test_async_remote_dispatch.py
+
+      - name: Run recurring-series durable-dispatch regression
+        run: python local-news-os/social/test_series_durable_dispatch_executor.py
+
+      - name: Run recurring-series async remote-dispatch acceptance
+        run: python local-news-os/social/test_series_async_remote_dispatch.py
