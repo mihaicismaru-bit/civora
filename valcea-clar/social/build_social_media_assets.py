@@ -18,7 +18,6 @@ from typing import Any
 import tiktok_editorial_v1 as tiktok_editorial
 from social_common import (
     OUTBOX,
-    canonical_photo_url,
     load_json,
     local_image_path,
     photo_metadata,
@@ -144,7 +143,9 @@ def build() -> dict[str, Any]:
             "synthetic": False,
             "sha256": source_digest,
             "bytes": source.stat().st_size,
-            "public_url": canonical_photo_url(item),
+            # Raw source asset location is independent from any platform-specific
+            # URL override such as TikTok's premium editorial composite.
+            "public_url": PUBLIC_BASE + filename,
             "credit": metadata["credit"],
             "rights_basis": metadata["rights_basis"],
             "source_url": metadata.get("source_url"),
