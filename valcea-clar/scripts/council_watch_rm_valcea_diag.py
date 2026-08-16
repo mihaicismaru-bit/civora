@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 import re
 import urllib.parse
-from pathlib import Path
 
 import council_watch_rm_valcea as cw
 
@@ -35,7 +34,7 @@ def main() -> int:
     pages = []
     all_links = []
     for seed in seeds:
-        result = cw.fetch(seed)
+        result = cw.fetch(seed, timeout=10)
         row = {"url": seed, "ok": result["ok"], "status": result["status"], "error": result["error"]}
         if result["ok"]:
             links, frames, title = cw.parse_links(result["url"], result["body"])
@@ -44,7 +43,7 @@ def main() -> int:
                 "title": title,
                 "link_count": len(links),
                 "frame_count": len(frames),
-                "text_head": text[:5000],
+                "text_head": text[:7000],
             })
             for link in links:
                 all_links.append({**link, "class": classify(link["url"]), "from": result["url"]})
@@ -58,13 +57,11 @@ def main() -> int:
     for row in links:
         counts[row["class"]] = counts.get(row["class"], 0) + 1
 
-    # Probe a small sample of records, not attachments, so we can learn the
-    # canonical Lotus document shape without making any editorial claim.
     probes = []
     candidates = [r for r in links if r["class"] in {"open_document", "unid_record", "other"}]
     candidates.sort(key=lambda r: (0 if "2026" in (r.get("text") or "") else 1, r["url"]))
-    for meta in candidates[:30]:
-        result = cw.fetch(meta["url"])
+    for meta in candidates[:6]:
+        result = cw.fetch(meta["url"], timeout=8)
         probe = {
             "url": meta["url"],
             "text": meta.get("text"),
@@ -75,14 +72,14 @@ def main() -> int:
         }
         if result["ok"]:
             body_text = cw.to_text(result["body"])
-            probe["text_head"] = body_text[:5000]
+            probe["text_head"] = body_text[:7000]
             plinks, _, ptitle = cw.parse_links(result["url"], result["body"])
             probe["title"] = ptitle
-            probe["links"] = [{**x, "class": classify(x["url"])} for x in plinks[:80]]
+            probe["links"] = [{**x, "class": classify(x["url"])} for x in plinks[:100]]
         probes.append(probe)
 
     payload = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "pages": pages,
         "link_class_counts": counts,
         "links": links[:1200],
