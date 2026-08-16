@@ -8,16 +8,20 @@ on:
     branches: [main]
     paths:
       - 'partener-eu/ingest/build_decision_products.py'
+      - 'partener-eu/ingest/build_mipe_canonical_calls.py'
+      - 'partener-eu/ingest/merge_mipe_canonical_dossiers.py'
       - 'partener-eu/ingest/build_call_lifecycle.py'
       - 'partener-eu/ingest/polish_decision_products.py'
       - 'partener-eu/ingest/finalize_decision_products.py'
       - 'partener-eu/ingest/localize_decision_products.py'
+      - 'partener-eu/ingest/state/mipe_ro_corpus.json'
       - 'partener-eu/ops/fix_call_lifecycle_monotonic.py'
       - 'partener-eu/ops/fix_call_lifecycle_result_evidence.py'
       - 'partener-eu/ops/fix_decision_products_determinism.py'
       - 'partener-eu/ops/fix_decision_products_source_coverage.py'
       - 'partener-eu/ops/fix_decision_ui_romanian.py'
       - 'partener-eu/ops/test_decision_products.py'
+      - 'partener-eu/ops/test_mipe_canonical_pipeline.py'
       - 'partener-eu/ops/test_call_lifecycle.py'
       - 'partener-eu/ops/test_public_language.py'
       - 'partener-eu/web/p11-public-data.js'
@@ -30,6 +34,7 @@ on:
     workflows:
       - 'PARTENER.EU MIPE Ingestion'
       - 'PARTENER.EU MIPE Romania Collector'
+      - 'PARTENER.EU MIPE Windows Crawl v3'
       - 'PARTENER.EU AFIR Ingestion'
       - 'PARTENER.EU PEO Calendar'
     types: [completed]
@@ -46,7 +51,7 @@ jobs:
   build:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v6
         with:
@@ -67,31 +72,38 @@ jobs:
           python partener-eu/ops/fix_call_lifecycle_monotonic.py
           python partener-eu/ops/fix_call_lifecycle_result_evidence.py
 
-      - name: Build complete call dossiers and lifecycle registry
+      - name: Canonicalize MIPE corpus and build complete dossiers
         run: |
+          python partener-eu/ingest/build_mipe_canonical_calls.py
           python partener-eu/ingest/build_decision_products.py
+          python partener-eu/ingest/merge_mipe_canonical_dossiers.py
           python partener-eu/ingest/polish_decision_products.py
           python partener-eu/ingest/finalize_decision_products.py
           python partener-eu/ingest/localize_decision_products.py
           python partener-eu/ingest/build_call_lifecycle.py
 
-      - name: Validate JavaScript, dossier coverage, lifecycle and public language
+      - name: Validate canonical MIPE grouping, dossier coverage, lifecycle and public language
         run: |
           node --check partener-eu/web/decision-intelligence-v2.js
           node --check partener-eu/web/call-lifecycle-ui.js
           python partener-eu/ops/test_decision_products.py
+          python partener-eu/ops/test_mipe_canonical_pipeline.py
           python partener-eu/ops/test_call_lifecycle.py
           python partener-eu/ops/test_public_language.py
 
-      - name: Persist canonical dossiers, lifecycle and meaningful news
+      - name: Persist canonical MIPE calls, dossiers, lifecycle and meaningful news
         shell: bash
         run: |
           set -euo pipefail
           cp partener-eu/ingest/build_decision_products.py /tmp/build_decision_products.py
+          cp partener-eu/ingest/build_mipe_canonical_calls.py /tmp/build_mipe_canonical_calls.py
+          cp partener-eu/ingest/merge_mipe_canonical_dossiers.py /tmp/merge_mipe_canonical_dossiers.py
           cp partener-eu/ingest/build_call_lifecycle.py /tmp/build_call_lifecycle.py
           cp partener-eu/web/decision-intelligence-v2.js /tmp/decision-intelligence-v2.js
+          cp partener-eu/ingest/state/mipe_canonical_calls.json /tmp/mipe_canonical_calls.json
           cp partener-eu/ingest/state/decision_products.json /tmp/decision_products.json
           cp partener-eu/ingest/state/call_lifecycle.json /tmp/call_lifecycle.json
+          cp partener-eu/web/mipe-canonical-calls.js /tmp/mipe-canonical-calls.js
           cp partener-eu/web/decision-products.js /tmp/decision-products.js
           cp partener-eu/web/call-lifecycle.js /tmp/call-lifecycle.js
           git config user.name 'github-actions[bot]'
@@ -101,25 +113,33 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             cp /tmp/build_decision_products.py partener-eu/ingest/build_decision_products.py
+            cp /tmp/build_mipe_canonical_calls.py partener-eu/ingest/build_mipe_canonical_calls.py
+            cp /tmp/merge_mipe_canonical_dossiers.py partener-eu/ingest/merge_mipe_canonical_dossiers.py
             cp /tmp/build_call_lifecycle.py partener-eu/ingest/build_call_lifecycle.py
             cp /tmp/decision-intelligence-v2.js partener-eu/web/decision-intelligence-v2.js
+            cp /tmp/mipe_canonical_calls.json partener-eu/ingest/state/mipe_canonical_calls.json
             cp /tmp/decision_products.json partener-eu/ingest/state/decision_products.json
             cp /tmp/call_lifecycle.json partener-eu/ingest/state/call_lifecycle.json
+            cp /tmp/mipe-canonical-calls.js partener-eu/web/mipe-canonical-calls.js
             cp /tmp/decision-products.js partener-eu/web/decision-products.js
             cp /tmp/call-lifecycle.js partener-eu/web/call-lifecycle.js
             git add \
               partener-eu/ingest/build_decision_products.py \
+              partener-eu/ingest/build_mipe_canonical_calls.py \
+              partener-eu/ingest/merge_mipe_canonical_dossiers.py \
               partener-eu/ingest/build_call_lifecycle.py \
               partener-eu/web/decision-intelligence-v2.js \
+              partener-eu/ingest/state/mipe_canonical_calls.json \
               partener-eu/ingest/state/decision_products.json \
               partener-eu/ingest/state/call_lifecycle.json \
+              partener-eu/web/mipe-canonical-calls.js \
               partener-eu/web/decision-products.js \
               partener-eu/web/call-lifecycle.js
             if git diff --cached --quiet; then
-              echo 'Call dossiers and lifecycle already current.'
+              echo 'Canonical MIPE dossiers already current.'
               exit 0
             fi
-            git commit -m 'Track funding calls from consultation through contracting and results'
+            git commit -m 'Canonicalize MIPE calls and publish complete grouped dossiers'
             if git push origin HEAD:main; then exit 0; fi
             sleep $((attempt * 2))
           done
