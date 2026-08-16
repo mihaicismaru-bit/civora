@@ -73,6 +73,99 @@ jobs:
           echo "No newly publishable full story. Discovery candidates remain candidates; the clock does not force publication."
           cat valcea-clar/site/newsroom_decision.json
 
+      - name: Persist material discovery-health changes without publishing
+        if: steps.decision.outputs.changed != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          current=/tmp/valcea-news-discovery-state.json
+          cp valcea-clar/editorial/news_discovery_state.json "$current"
+
+          git config user.name 'vâlcea-clar-live-newsroom[bot]'
+          git config user.email 'valcea-clar-live-newsroom@users.noreply.github.com'
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+
+            if git show origin/main:valcea-clar/editorial/news_discovery_state.json > /tmp/valcea-news-discovery-previous.json 2>/dev/null; then
+              :
+            else
+              printf '{}\n' > /tmp/valcea-news-discovery-previous.json
+            fi
+
+            if python - <<'PY'
+          import json
+          from pathlib import Path
+
+          def load(path):
+              try:
+                  return json.loads(Path(path).read_text(encoding='utf-8'))
+              except Exception:
+                  return {}
+
+          def error_class(value):
+              text = str(value or '')
+              return text.split(':', 1)[0].strip() if text else None
+
+          def signature(doc):
+              rows = []
+              for row in doc.get('sources', []):
+                  rows.append({
+                      'source_id': row.get('source_id'),
+                      'listing_ok': bool(row.get('listing_ok')),
+                      'links_examined': row.get('links_examined'),
+                      'article_failures': row.get('article_failures'),
+                      'facts': row.get('facts'),
+                      'error_class': error_class(row.get('error')),
+                  })
+              return {
+                  'schema_version': doc.get('schema_version'),
+                  'execution_mode': doc.get('execution_mode'),
+                  'instance_id': doc.get('instance_id'),
+                  'source_contract': doc.get('source_contract'),
+                  'publication_date_guard': doc.get('publication_date_guard'),
+                  'sources_total': doc.get('sources_total'),
+                  'sources_ok': doc.get('sources_ok'),
+                  'facts_admitted': doc.get('facts_admitted'),
+                  'sources': rows,
+              }
+
+          current = signature(load('/tmp/valcea-news-discovery-state.json'))
+          previous = signature(load('/tmp/valcea-news-discovery-previous.json'))
+          if current == previous:
+              print('Discovery health is materially unchanged; no ledger commit required.')
+              raise SystemExit(0)
+          print(json.dumps({'previous': previous, 'current': current}, ensure_ascii=False))
+          raise SystemExit(3)
+          PY
+            then
+              exit 0
+            else
+              rc=$?
+              if [ "$rc" -ne 3 ]; then
+                exit "$rc"
+              fi
+            fi
+
+            git reset --hard origin/main
+            mkdir -p valcea-clar/editorial
+            cp "$current" valcea-clar/editorial/news_discovery_state.json
+            git add valcea-clar/editorial/news_discovery_state.json
+            if git diff --cached --quiet; then
+              echo 'Discovery-health snapshot already present on main.'
+              exit 0
+            fi
+            git commit -m 'Refresh VÂLCEA CLAR discovery health ledger'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "main advanced during discovery-health commit; retrying ${attempt}/5."
+            sleep $((attempt * 2))
+          done
+
+          echo 'Could not persist discovery-health ledger after five attempts.' >&2
+          exit 1
+
       - name: Remove title/date-only candidates from live publication bundle
         if: steps.decision.outputs.changed == 'true'
         run: |
