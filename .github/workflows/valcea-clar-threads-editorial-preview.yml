@@ -1,0 +1,77 @@
+name: VÂLCEA CLAR Threads Editorial Preview
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/social/threads_editorial_v1.py"
+      - "valcea-clar/social/threads_outbox.json"
+      - "valcea-clar/social/x_outbox.json"
+      - "valcea-clar/site/current_edition.json"
+      - "valcea-clar/site/newsroom_decision.json"
+      - "valcea-clar/site/story_publication_event.json"
+      - "valcea-clar/editions/**"
+      - ".github/workflows/valcea-clar-threads-editorial-preview.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Self-test Threads packaging
+        run: python valcea-clar/social/threads_editorial_v1.py --self-test
+      - name: Build Threads-native previews
+        run: python valcea-clar/social/threads_editorial_v1.py
+      - name: Validate premium-news fixtures and sibling separation
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('valcea-clar/social/previews/threads-v1')
+          value=json.loads((root/'manifest.json').read_text(encoding='utf-8'))
+          if value.get('execution_mode')!='PREVIEW_ONLY_NO_NETWORK_CALLS':
+              raise SystemExit('Threads preview network-call guard missing')
+          products={p['story_id']:p for p in value.get('products',[]) if isinstance(p,dict)}
+          gov=products.get('florile-govorei-20260816')
+          if not gov or gov.get('status')!='HOLD' or gov.get('reason')!='threads_conversation_gate_thin_title_date_source_only':
+              raise SystemExit('Florile Govorei Threads gate failed')
+          lum=products.get('luminos-fest-zavoi-20260815')
+          if not lum or lum.get('status')!='READY' or lum.get('hook_family')!='local_utility':
+              raise SystemExit('Luminos Threads utility fixture failed')
+          if not lum.get('posts',[None])[0].startswith('În Zăvoi, azi:'):
+              raise SystemExit('Luminos Threads opening is not conversation-native')
+          ola=products.get('olanesti-bridge-monitor')
+          if not ola or ola.get('status')!='READY' or ola.get('format_family')!='explanatory_thread':
+              raise SystemExit('Olănești Threads explainer fixture failed')
+          text=' '.join(ola.get('posts',[]))
+          for expected in ('44,37 mil. lei','Ralunic + Dimex-2000 Company','Ce nu știm încă'):
+              if expected not in text:
+                  raise SystemExit(f'Olănești Threads missing: {expected}')
+          if any('#' in post for p in products.values() for post in p.get('posts',[])):
+              raise SystemExit('Threads default hashtag block detected')
+          if any(len(post)>470 for p in products.values() for post in p.get('posts',[])):
+              raise SystemExit('Threads internal post budget exceeded')
+          x_path=Path('valcea-clar/social/x_outbox.json')
+          if x_path.is_file():
+              x=json.loads(x_path.read_text(encoding='utf-8'))
+              xby={i.get('story_id'):i for i in x.get('items',[]) if isinstance(i,dict)}
+              for story_id, product in products.items():
+                  sibling=xby.get(story_id)
+                  if sibling and product.get('posts') == sibling.get('posts'):
+                      raise SystemExit(f'Threads product is verbatim X output: {story_id}')
+          print(f"Threads editorial preview: PASS ({value['ready']} READY / {value['held']} HOLD)")
+          PY
+      - name: Upload Threads editorial preview
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-threads-editorial-v1-${{ github.run_id }}
+          path: valcea-clar/social/previews/threads-v1
+          if-no-files-found: error
+          retention-days: 14
