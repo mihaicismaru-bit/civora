@@ -9,16 +9,22 @@ on:
       - "valcea-clar/site/current_edition.json"
       - "valcea-clar/scripts/repair_continuous_frontpage.py"
       - ".github/workflows/valcea-clar-continuous-frontpage.yml"
+  pull_request:
+    paths:
+      - "valcea-clar/editions/**"
+      - "valcea-clar/site/current_edition.json"
+      - "valcea-clar/scripts/repair_continuous_frontpage.py"
+      - ".github/workflows/valcea-clar-continuous-frontpage.yml"
 
 permissions:
   contents: write
 
 concurrency:
-  group: valcea-clar-continuous-frontpage
+  group: valcea-clar-continuous-frontpage-${{ github.event.pull_request.number || 'main' }}
   cancel-in-progress: false
 
 jobs:
-  repair:
+  validate:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -30,24 +36,16 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Rebuild durable story archive and live frontpage conflict-safe
-        shell: bash
+      - name: Rebuild durable story archive and live frontpage
         run: |
-          set -euo pipefail
-          git config user.name "valcea-clar-continuous-frontpage[bot]"
-          git config user.email "valcea-clar-continuous-frontpage@users.noreply.github.com"
+          python valcea-clar/scripts/repair_continuous_frontpage.py --self-test
+          python valcea-clar/scripts/repair_continuous_frontpage.py | tee /tmp/valcea-continuous-frontpage.json
+          python valcea-clar/scripts/build_sites_export.py
+          python valcea-clar/scripts/overlay_runtime_export.py
 
-          for attempt in 1 2 3 4 5; do
-            git fetch origin main
-            git reset --hard origin/main
-            git clean -fd
-
-            python valcea-clar/scripts/repair_continuous_frontpage.py --self-test
-            python valcea-clar/scripts/repair_continuous_frontpage.py | tee /tmp/valcea-continuous-frontpage.json
-            python valcea-clar/scripts/build_sites_export.py
-            python valcea-clar/scripts/overlay_runtime_export.py
-
-            python - <<'PY'
+      - name: Validate continuous story persistence
+        run: |
+          python - <<'PY'
           import json
           from pathlib import Path
 
@@ -77,6 +75,62 @@ jobs:
           print(json.dumps({'status':'PASS','stories':len(archive_ids),'ids':archive_ids}, ensure_ascii=False))
           PY
 
+      - name: Upload validated site payload
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-continuous-frontpage-validate-${{ github.run_id }}
+          path: |
+            /tmp/valcea-continuous-frontpage.json
+            valcea-clar/site/story_archive.json
+            valcea-clar/site/runtime
+            valcea-clar/dist/chatgpt-sites
+          if-no-files-found: warn
+          retention-days: 7
+
+  persist:
+    if: github.event_name != 'pull_request'
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Persist continuous frontpage conflict-safe
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "valcea-clar-continuous-frontpage[bot]"
+          git config user.email "valcea-clar-continuous-frontpage@users.noreply.github.com"
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            git clean -fd
+
+            python valcea-clar/scripts/repair_continuous_frontpage.py --self-test
+            python valcea-clar/scripts/repair_continuous_frontpage.py | tee /tmp/valcea-continuous-frontpage.json
+            python valcea-clar/scripts/build_sites_export.py
+            python valcea-clar/scripts/overlay_runtime_export.py
+
+            python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('valcea-clar')
+          archive=json.loads((root/'site/story_archive.json').read_text(encoding='utf-8'))
+          feed=json.loads((root/'site/runtime/live-feed.json').read_text(encoding='utf-8'))
+          manifest=json.loads((root/'site/runtime/stiri/manifest.json').read_text(encoding='utf-8'))
+          assert feed.get('story_count') == archive.get('story_count')
+          assert {str(x['id']) for x in feed.get('stories', [])} == {str(x['id']) for x in manifest.get('stories', [])}
+          assert archive.get('story_count', 0) >= 3
+          PY
+
             git add \
               valcea-clar/site/story_archive.json \
               valcea-clar/site/runtime
@@ -97,16 +151,3 @@ jobs:
 
           echo "Could not persist continuous frontpage repair after five attempts." >&2
           exit 1
-
-      - name: Upload repaired site payload
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: valcea-clar-continuous-frontpage-${{ github.run_id }}
-          path: |
-            /tmp/valcea-continuous-frontpage.json
-            valcea-clar/site/story_archive.json
-            valcea-clar/site/runtime
-            valcea-clar/dist/chatgpt-sites
-          if-no-files-found: warn
-          retention-days: 7
