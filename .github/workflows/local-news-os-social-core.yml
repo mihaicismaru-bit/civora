@@ -81,7 +81,8 @@ jobs:
             local-news-os/social/test_youtube_outbox_channel.py \
             local-news-os/social/test_threads_outbox_channel.py \
             local-news-os/social/test_linkedin_outbox_channel.py \
-            local-news-os/social/test_telegram_outbox_channel.py
+            local-news-os/social/test_telegram_outbox_channel.py \
+            local-news-os/social/test_whatsapp_outbox_channel.py
           python -m json.tool local-news-os/social/observed_metrics.schema.json >/dev/null
           python -m json.tool local-news-os/social/social_runtime_registry.json >/dev/null
 
@@ -151,6 +152,9 @@ jobs:
       - name: Run Telegram durable outbox acceptance tests
         run: python local-news-os/social/test_telegram_outbox_channel.py
 
+      - name: Run WhatsApp durable outbox acceptance tests
+        run: python local-news-os/social/test_whatsapp_outbox_channel.py
+
       - name: Validate Vâlcea reference CHANNEL_CONFIG fixtures
         run: |
           python local-news-os/social/validate_channel_config.py \
@@ -173,6 +177,9 @@ jobs:
             --instance-root valcea-clar
           python local-news-os/social/validate_channel_config.py \
             valcea-clar/social/channels/telegram.json \
+            --instance-root valcea-clar
+          python local-news-os/social/validate_channel_config.py \
+            valcea-clar/social/channels/whatsapp.json \
             --instance-root valcea-clar
 
       - name: Validate Vâlcea publishing adapter registry
