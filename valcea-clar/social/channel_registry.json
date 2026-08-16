@@ -80,13 +80,13 @@
       "channel_id": "instagram",
       "status": "active",
       "direct_publication_enabled": true,
-      "publication_mode": "native_api_fail_closed",
+      "publication_mode": "native_api",
       "config": "valcea-clar/social/channels/instagram.json",
-      "adapter": "valcea-clar/social/instagram_publish.py",
+      "adapter": "valcea-clar/social/instagram_editorial_publish.py",
       "prepare": [
         "valcea-clar/social/build_live_story_outbox.py",
         "valcea-clar/social/fetch_approved_photos.py",
-        "valcea-clar/social/build_social_media_assets.py"
+        "valcea-clar/social/editorial_asset_contract.py"
       ],
       "outbox": "valcea-clar/social/facebook_outbox.json",
       "state": "valcea-clar/social/instagram_state.json",
@@ -96,13 +96,21 @@
       },
       "requirements": {
         "story_event": true,
+        "canonical_story_readiness_gate": true,
+        "instagram_utility_gate": true,
         "professional_account": true,
         "content_publishing_permission": true,
         "public_jpeg": true,
-        "story_specific_real_photo": true,
+        "story_specific_real_photo_source": true,
+        "editorial_composite_cover": true,
+        "editorial_text_cards_allowed": true,
+        "public_media_preflight": true,
+        "source_photo_provenance": true,
+        "source_photo_reuse_rights": true,
         "editor_approval": true,
-        "rights_metadata": true,
-        "canonical_story_link": true
+        "canonical_story_link": true,
+        "legacy_state_key_dedupe": true,
+        "platform_native_copy": true
       }
     },
     {
