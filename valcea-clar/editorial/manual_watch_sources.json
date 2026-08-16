@@ -110,6 +110,23 @@
         "real-estate and land-registry research without automatic publication"
       ],
       "core_feedback": "LOCAL NEWS OS should distinguish ARTICLE_FEED from LISTING_ONLY source contracts before source admission. LISTING_ONLY sources need stable item identity plus scoped inline-date provenance, and network-health state must remain separate from structural eligibility so a transient DNS failure cannot be mistaken for an editorial-format failure."
+    },
+    {
+      "id": "cet-govora-termoficare-advisories",
+      "publisher": "CET Govora S.A. — Termoficare Vâlcea",
+      "url": "https://www.termoficarevalcea.ro/blog/",
+      "tier": "T1",
+      "section": "UTILITATE",
+      "status": "QUARANTINED_GENERIC_HEADLINE_SERVICE_ADVISORY",
+      "checked_at": "2026-08-16",
+      "reason": "The official Termoficare Vâlcea feed publishes individually dated posts with stable article pages and high-value service interruption details, but its article title/H1 is generically 'ANUNT'. The current automatic contract intentionally publishes only title + publication date + source and requires a meaningful title, so admitting this feed would either drop the item or expose a useless headline. The body also carries the actual service-event window and affected-area details, which must not be conflated with published_at or copied into a synthetic headline without a structured utility-advisory contract.",
+      "safe_use": [
+        "manual discovery of district-heating and hot-water interruptions",
+        "primary-source verification of publication date and service-event window",
+        "verification of affected streets, thermal points and public institutions",
+        "public-service utility research and cross-checking against CET Govora notices"
+      ],
+      "core_feedback": "This strengthens the existing generic UTILITY_ADVISORY requirement: support published_at separately from event_start/event_end and affected_area, preserve canonical article provenance, and allow only deterministic advisory labels derived from verified structured fields when the publisher uses a generic headline. Do not generate free-form headlines from body text and do not build a Vâlcea-specific parser."
     }
   ]
 }
