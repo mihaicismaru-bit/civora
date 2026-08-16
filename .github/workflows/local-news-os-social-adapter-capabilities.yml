@@ -14,6 +14,7 @@ on:
       - "valcea-clar/social/channel_registry.json"
       - "valcea-clar/social/channels/**"
       - "valcea-clar/social/*_publish.py"
+      - "valcea-clar/social/test_instagram_carousel_adapter.py"
       - ".github/workflows/local-news-os-social-adapter-capabilities.yml"
   push:
     branches: [main]
@@ -28,6 +29,7 @@ on:
       - "valcea-clar/social/channel_registry.json"
       - "valcea-clar/social/channels/**"
       - "valcea-clar/social/*_publish.py"
+      - "valcea-clar/social/test_instagram_carousel_adapter.py"
       - ".github/workflows/local-news-os-social-adapter-capabilities.yml"
 
 permissions:
@@ -55,7 +57,9 @@ jobs:
             local-news-os/social/test_adapter_capability_gate.py \
             local-news-os/social/adapter_dispatch_bridge.py \
             local-news-os/social/production_runtime.py \
-            local-news-os/social/publishing_adapters.py
+            local-news-os/social/publishing_adapters.py \
+            valcea-clar/social/instagram_publish.py \
+            valcea-clar/social/test_instagram_carousel_adapter.py
           python -m json.tool valcea-clar/social/adapter_capabilities.json >/dev/null
 
       - name: Validate truthful installed-adapter capability registry
@@ -67,6 +71,12 @@ jobs:
 
       - name: Run adapter capability gate acceptance tests
         run: python local-news-os/social/test_adapter_capability_gate.py
+
+      - name: Run Instagram native carousel adapter acceptance tests
+        run: python valcea-clar/social/test_instagram_carousel_adapter.py
+
+      - name: Run Instagram adapter self-test
+        run: python valcea-clar/social/instagram_publish.py --self-test
 
       - name: Re-run canonical Adapter-Gated Dispatch Bridge regression suite
         run: python local-news-os/social/test_adapter_dispatch_bridge.py
