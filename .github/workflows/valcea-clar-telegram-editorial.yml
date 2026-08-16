@@ -1,0 +1,133 @@
+name: VÂLCEA CLAR Telegram Editorial Outbox
+
+on:
+  workflow_run:
+    workflows: ["VÂLCEA CLAR Social Publication Engine"]
+    types: [completed]
+  schedule:
+    - cron: "0,15,30,45 * * * *"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "valcea-clar/social/telegram_editorial_v1.py"
+      - "valcea-clar/social/telegram_editorial_materialize.py"
+      - "valcea-clar/social/telegram_outbox.json"
+      - "valcea-clar/social/telegram_state.json"
+      - "valcea-clar/site/current_edition.json"
+      - "valcea-clar/site/newsroom_decision.json"
+      - "valcea-clar/site/story_publication_event.json"
+      - "valcea-clar/editions/**"
+      - ".github/workflows/valcea-clar-telegram-editorial.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-telegram-editorial-outbox
+  cancel-in-progress: false
+
+jobs:
+  materialize:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Refresh canonical main for non-PR runs
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Self-test Telegram editorial product
+        run: |
+          python valcea-clar/social/telegram_editorial_v1.py --self-test
+          python valcea-clar/social/telegram_editorial_materialize.py --self-test
+
+      - name: Materialize canonical Telegram editorial outbox
+        run: python valcea-clar/social/telegram_editorial_materialize.py | tee /tmp/telegram-editorial-materialize.json
+
+      - name: Validate canonical Telegram fixtures
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          outbox=json.loads(Path('valcea-clar/social/telegram_outbox.json').read_text(encoding='utf-8'))
+          state=json.loads(Path('valcea-clar/social/telegram_state.json').read_text(encoding='utf-8'))
+          items={str(i.get('story_id')):i for i in outbox.get('items',[]) if isinstance(i,dict)}
+          if outbox.get('platform')!='telegram' or outbox.get('editorial_product_version')!='telegram-editorial-v1.0':
+              raise SystemExit('Telegram canonical editorial outbox version mismatch')
+          if state.get('direct_publication_enabled') is not False:
+              raise SystemExit('Telegram state falsely claims direct publication')
+          if state.get('direct_publication_blocker')!='telegram_direct_access_not_configured':
+              raise SystemExit('Telegram direct-access blocker missing')
+          gov=items.get('florile-govorei-20260816')
+          if not gov or gov.get('status')!='hold':
+              raise SystemExit('Florile Govorei Telegram canonical HOLD failed')
+          lum=items.get('luminos-fest-zavoi-20260815')
+          if not lum or lum.get('status')!='outbox_ready' or lum.get('format_family')!='event_utility':
+              raise SystemExit('Luminos Telegram canonical utility failed')
+          if not lum.get('message','').startswith('Zăvoi, azi: intrare liberă la Luminos Fest'):
+              raise SystemExit('Luminos Telegram canonical title failed')
+          ola=items.get('olanesti-bridge-monitor')
+          if not ola or ola.get('status')!='outbox_ready' or ola.get('format_family')!='public_interest_update':
+              raise SystemExit('Olănești Telegram canonical public-interest product failed')
+          text=ola.get('message','')
+          for expected in ('44,37 mil. lei','Ralunic + Dimex-2000 Company','SMIS 334436'):
+              if expected not in text:
+                  raise SystemExit(f'Olănești Telegram missing {expected}')
+          for item in items.values():
+              if item.get('status')=='outbox_ready':
+                  if item.get('verbatim_cross_platform_reuse_allowed') is not False:
+                      raise SystemExit('Telegram cross-platform reuse guard missing')
+                  if item.get('fake_urgency_forbidden') is not True:
+                      raise SystemExit('Telegram fake-urgency guard missing')
+                  if len(str(item.get('message') or '')) > 1050:
+                      raise SystemExit('Telegram message budget exceeded')
+          print(f"Telegram canonical editorial outbox: PASS ({len(items)} products)")
+          PY
+
+      - name: Persist Telegram editorial state conflict-safe
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/telegram-editorial-state
+          mkdir -p /tmp/telegram-editorial-state/valcea-clar/social
+          cp valcea-clar/social/telegram_outbox.json /tmp/telegram-editorial-state/valcea-clar/social/telegram_outbox.json
+          cp valcea-clar/social/telegram_state.json /tmp/telegram-editorial-state/valcea-clar/social/telegram_state.json
+          git config user.name "valcea-clar-telegram-engine[bot]"
+          git config user.email "valcea-clar-telegram-engine@users.noreply.github.com"
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/telegram-editorial-state/valcea-clar/social/telegram_outbox.json valcea-clar/social/telegram_outbox.json
+            cp /tmp/telegram-editorial-state/valcea-clar/social/telegram_state.json valcea-clar/social/telegram_state.json
+            git add valcea-clar/social/telegram_outbox.json valcea-clar/social/telegram_state.json
+            if git diff --cached --quiet; then
+              echo "No Telegram editorial changes to persist."
+              exit 0
+            fi
+            git commit -m "Persist VÂLCEA CLAR Telegram editorial outbox"
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1
+
+      - name: Upload Telegram editorial audit
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-telegram-editorial-${{ github.run_id }}
+          path: |
+            /tmp/telegram-editorial-materialize.json
+            valcea-clar/social/telegram_outbox.json
+            valcea-clar/social/telegram_state.json
+          if-no-files-found: warn
+          retention-days: 14
