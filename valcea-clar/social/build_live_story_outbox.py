@@ -100,23 +100,35 @@ def find_visual(story: dict, visual_registry: dict) -> dict | None:
 
 
 def disable_recap_items(outbox: dict) -> list[str]:
-    disabled = []
+    """Permanently remove recap snapshots from active social evaluation.
+
+    Historic remote publication state lives in platform state files, so the
+    outbox item itself can always be disabled. This applies to READY, HOLD and
+    any legacy platform-local status: no adapter may evaluate an `editia-de-*`
+    item after the story-first migration.
+    """
+    disabled: list[str] = []
     for item in outbox.get("items", []):
         if not isinstance(item, dict):
             continue
         item_id = str(item.get("id") or "")
         if not item_id.startswith("editia-de-"):
             continue
-        if item.get("status") == "ready":
-            item["status"] = "disabled"
-            item["disabled_reason"] = "recap_is_not_story_distribution_unit"
+
+        if item.get("status") != "disabled" or item.get("disabled_reason") != "recap_is_not_story_distribution_unit":
             disabled.append(item_id)
+        item["status"] = "disabled"
+        item["disabled_reason"] = "recap_is_not_story_distribution_unit"
+        item["publication_model"] = "legacy_recap_retired"
+
         platforms = item.get("platforms")
         if isinstance(platforms, dict):
             for package in platforms.values():
-                if isinstance(package, dict) and package.get("status") == "ready":
-                    package["status"] = "disabled"
-                    package["reason"] = "recap_is_not_story_distribution_unit"
+                if not isinstance(package, dict):
+                    continue
+                package["status"] = "disabled"
+                package["reason"] = "recap_is_not_story_distribution_unit"
+                package["edition_gate"] = False
     return disabled
 
 
@@ -159,8 +171,6 @@ def story_item(story: dict, visual: dict | None, existing: dict | None) -> dict:
             },
         }
     else:
-        # Site publication stays live. Visual channels wait for their own native
-        # readiness gate rather than falling back to a generic/AI image.
         item["status"] = "hold"
         item["hold_reason"] = "story_specific_approved_photo_required"
         item.pop("image_path", None)
@@ -210,6 +220,7 @@ def main() -> int:
 
     outbox.setdefault("policy", {})["publication_model"] = "continuous_story_first"
     outbox["policy"]["edition_recaps_are_social_publication_gates"] = False
+    outbox["policy"]["edition_recaps_are_social_queue_items"] = False
     outbox["policy"]["site_story_may_publish_before_social_media_ready"] = True
     write(OUTBOX, outbox)
 
