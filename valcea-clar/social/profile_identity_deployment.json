@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "product": "VÂLCEA CLAR Profile Identity Deployment Control",
   "identity_source": "valcea-clar/social/profile_identity_system.json",
   "asset_generator": "valcea-clar/social/build_profile_identity_assets.py",
@@ -87,16 +87,51 @@
     "telegram": {
       "asset_status": "READY",
       "avatar_asset": "telegram-avatar.png",
-      "deployment_mode": "NOT_AUTOMATED",
-      "api_capability_status": "PROFILE_MUTATION_ACCESS_NOT_CONFIGURED",
-      "live_status": "UNCONFIRMED"
+      "deployment_mode": "API_GATED_CHAT_PHOTO",
+      "api_capability_status": "OFFICIAL_BOT_API_SET_CHAT_PHOTO_VERIFIED",
+      "live_status": "UNCONFIRMED",
+      "profile_photo_api": {
+        "apply_method": "setChatPhoto",
+        "readback_method": "getChat",
+        "transport": "multipart/form-data",
+        "administrator_rights_required": true,
+        "canonical_input_asset": "telegram-avatar.png",
+        "official_reference": "https://core.telegram.org/bots/api#setchatphoto",
+        "last_verified": "2026-08-16"
+      },
+      "runtime": {
+        "enable_env": "VALCEA_TELEGRAM_PROFILE_LIVE_ENABLED",
+        "bot_token_env": "VALCEA_TELEGRAM_BOT_TOKEN",
+        "channel_id_env": "VALCEA_TELEGRAM_CHANNEL_ID"
+      },
+      "notes": "The official mutation path is verified; VÂLCEA CLAR bot/channel administrator access is not yet configured or confirmed."
     },
     "whatsapp": {
       "asset_status": "READY",
       "avatar_asset": "whatsapp-avatar.png",
-      "deployment_mode": "NOT_AUTOMATED",
-      "api_capability_status": "PROFILE_MUTATION_ACCESS_NOT_CONFIGURED",
-      "live_status": "UNCONFIRMED"
+      "deployment_mode": "API_GATED_BUSINESS_PROFILE_PHOTO",
+      "api_capability_status": "OFFICIAL_BUSINESS_PROFILE_PHOTO_API_VERIFIED",
+      "live_status": "UNCONFIRMED",
+      "profile_photo_api": {
+        "create_upload_session_method": "POST /{app-id}/uploads",
+        "upload_file_method": "POST /{upload-id}",
+        "apply_method": "POST /{phone-number-id}/whatsapp_business_profile",
+        "readback_method": "GET /{phone-number-id}/whatsapp_business_profile?fields=profile_picture_url",
+        "canonical_input_asset": "whatsapp-avatar.png",
+        "upload_transform": "deterministic_jpeg",
+        "upload_mime_type": "image/jpeg",
+        "official_update_reference": "https://www.postman.com/meta/whatsapp-business-platform/request/mqqkbqj/update-business-profile",
+        "official_upload_reference": "https://www.postman.com/meta/whatsapp-business-platform/request/13382743-871ea332-a6a4-4ad0-800a-0be9796b1933",
+        "last_verified": "2026-08-16"
+      },
+      "runtime": {
+        "enable_env": "VALCEA_WHATSAPP_PROFILE_LIVE_ENABLED",
+        "access_token_env": "VALCEA_WHATSAPP_ACCESS_TOKEN",
+        "phone_number_id_env": "VALCEA_WHATSAPP_PHONE_NUMBER_ID",
+        "meta_app_id_env": "VALCEA_META_APP_ID",
+        "graph_version_env": "VALCEA_WHATSAPP_GRAPH_VERSION"
+      },
+      "notes": "The official Business Profile picture flow is verified; VÂLCEA CLAR WhatsApp Business access is not yet configured or confirmed."
     }
   },
   "quality_gate": {
@@ -104,6 +139,10 @@
     "all_ready_assets_must_be_generated_by_canonical_builder": true,
     "live_status_cannot_be_true_from_local_generation": true,
     "youtube_banner_apply_requires_explicit_enable_and_oauth": true,
-    "youtube_banner_apply_requires_remote_readback": true
+    "youtube_banner_apply_requires_remote_readback": true,
+    "telegram_photo_apply_requires_explicit_enable_and_bot_admin_access": true,
+    "telegram_photo_apply_requires_remote_readback": true,
+    "whatsapp_profile_apply_requires_explicit_enable_and_access": true,
+    "whatsapp_profile_apply_requires_remote_readback": true
   }
 }
