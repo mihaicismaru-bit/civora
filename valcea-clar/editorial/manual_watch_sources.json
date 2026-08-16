@@ -60,6 +60,23 @@
       "core_feedback": "LOCAL NEWS OS needs a generic SOCIAL_EMBED source contract that resolves the canonical platform post URL or post ID and absolute platform timestamp, preserves account provenance, rejects crawl-relative time labels as published_at, and keeps social claims fail-closed until independently corroborated when material."
     },
     {
+      "id": "ajf-valcea-comunicate",
+      "publisher": "Asociația Județeană de Fotbal Vâlcea",
+      "url": "https://www.frf-ajf.ro/valcea/stiri/comunicate-ajf-1",
+      "tier": "T1B",
+      "section": "SPORT",
+      "status": "QUARANTINED_MIXED_SPORT_AND_SENSITIVE_HEADLINES",
+      "checked_at": "2026-08-17",
+      "reason": "The official AJF Vâlcea portal is a high-value primary source for county football and exposes stable article pages with explicit publication dates. However, the same official Comunicate AJF stream mixes ordinary competition schedules, results and organizational decisions with obituary or memorial notices. Because the current automatic scope can republish title + date + source and category-level URL filtering cannot prove that every item is routine sports news, admitting the whole feed would create avoidable relevance and sensitivity risk. The source is therefore monitored but remains fail-closed until item-level source-safety filtering exists.",
+      "safe_use": [
+        "manual discovery of Liga IV, Liga V, Liga VI, Cupa României, youth and local-football schedules and results",
+        "primary-source verification of article publication time and competition dates",
+        "cross-checking match schedules and competition decisions against official AJF competition pages",
+        "manual publication only after excluding obituary, disciplinary and other sensitive or reputational items"
+      ],
+      "core_feedback": "This reinforces the existing generic SOURCE_SAFETY / REPUTATIONAL_RISK requirement with a mixed-feed case: safe sports updates and sensitive items can coexist under one official category. CORE should support fail-closed item-level safety classification or explicit allowlisted content classes before automatic projection; a source tier or category URL alone is insufficient. No Vâlcea-specific classifier should be added."
+    },
+    {
       "id": "ipj-valcea-stiri",
       "publisher": "Inspectoratul de Poliție Județean Vâlcea",
       "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri",
