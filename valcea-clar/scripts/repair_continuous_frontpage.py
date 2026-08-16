@@ -7,10 +7,10 @@ already published canonical story from the live homepage, story manifest, live
 feed or sitemap.
 
 This repair layer deterministically rebuilds the public story archive from all
-publishable edition snapshots that have already been committed. Only items that
-pass the full-story gate are admitted; title/date/source-only automatic
-candidates remain hidden. The current edition is retained only as compatibility
-metadata.
+publishable edition snapshots that have already been committed. Only reader-
+facing items that pass the full-story gate are admitted; title/date/source-only
+automatic candidates and operational telemetry remain hidden. The current
+edition is retained only as compatibility metadata.
 """
 from __future__ import annotations
 
@@ -33,6 +33,16 @@ ARCHIVE = ROOT / "site" / "story_archive.json"
 RUNTIME = ROOT / "site" / "runtime"
 PLACES = ROOT / "web" / "data" / "places.json"
 PUBLISHABLE = {"auto_approved", "editor_approved"}
+HIDDEN_OPERATIONAL_IDS = {
+    "unde-iesim-operational",
+    "source-radar-operational",
+}
+HIDDEN_SECTIONS = {
+    "NOTA_REDACTIEI",
+    "OPERATIONAL",
+    "OPERAȚIONAL",
+    "SISTEM",
+}
 TZ = ZoneInfo("Europe/Bucharest")
 BASE = "https://valceaclar.ro"
 
@@ -56,6 +66,20 @@ def parse_stamp(value: object) -> datetime | None:
     if parsed.tzinfo is None:
         parsed = parsed.replace(tzinfo=TZ)
     return parsed
+
+
+def public_reader_item(item: dict[str, Any]) -> bool:
+    story_id = str(item.get("id") or "").strip()
+    section = str(item.get("section") or "").strip().upper()
+    if not story_id:
+        return False
+    if story_id in HIDDEN_OPERATIONAL_IDS or story_id.endswith("-operational"):
+        return False
+    if section in HIDDEN_SECTIONS:
+        return False
+    if item.get("internal_operational_telemetry") is True or item.get("operational_only") is True:
+        return False
+    return True
 
 
 def canonical_story(item: dict[str, Any]) -> dict[str, Any]:
@@ -82,7 +106,7 @@ def canonical_story(item: dict[str, Any]) -> dict[str, Any]:
 
 
 def collect_from_documents(documents: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Return the durable union of full stories from publishable recap documents."""
+    """Return the durable union of reader-facing full stories from recaps."""
     rows: dict[str, dict[str, Any]] = {}
     for doc in documents:
         if doc.get("status") not in PUBLISHABLE or doc.get("publication_intent") != "publish":
@@ -90,14 +114,12 @@ def collect_from_documents(documents: Iterable[dict[str, Any]]) -> list[dict[str
         stamp = str(doc.get("updated_local") or "").strip()
         edition_id = str(doc.get("edition_id") or "").strip()
         for item in doc.get("items", []):
-            if not isinstance(item, dict):
+            if not isinstance(item, dict) or not public_reader_item(item):
                 continue
             ok, _reason = story_ready(item)
             if not ok:
                 continue
             story_id = str(item.get("id") or "").strip()
-            if not story_id:
-                continue
             previous = rows.get(story_id)
             row = canonical_story(item)
             row["first_published_at"] = (
@@ -168,6 +190,7 @@ def archive_payload(stories: list[dict[str, Any]], now: datetime) -> dict[str, A
         "generated_at": now.isoformat(timespec="seconds"),
         "retention_policy": "published_full_stories_persist_after_recap_or_validity_window_expires",
         "recap_editions_may_delete_published_stories": False,
+        "operational_records_public": False,
         "story_count": len(stories),
         "stories": stories,
     }
@@ -241,6 +264,7 @@ def render_story_archive(stories: list[dict[str, Any]], updated_local: str) -> l
         "homepage_presentation": "live_newsroom",
         "edition_is_canonical_story_url": False,
         "persistence_policy": "published_story_routes_survive_recap_turnover",
+        "operational_records_public": False,
         "stories": routes,
     }
     (story_root / "manifest.json").write_text(
@@ -306,6 +330,7 @@ def write_live_feed(
         "policy": {
             "verified_facts_only": True,
             "candidate_records_hidden": True,
+            "operational_records_hidden": True,
             "paid_llm_api_required": False,
             "individual_story_is_publication_unit": True,
             "edition_windows_are_publication_gates": False,
@@ -339,7 +364,8 @@ def write_homepage(
 def write_indexing(routes: list[dict[str, Any]]) -> dict[str, Any]:
     paths = ["/"] + [str(row["path"]) for row in routes if row.get("path")]
     for static_path in ("/unde-iesim/", "/termeni/", "/confidentialitate/"):
-        if static_path not in paths:
+        static_file = RUNTIME / static_path.strip("/") / "index.html"
+        if static_file.is_file() and static_path not in paths:
             paths.append(static_path)
     return story_renderer.write_indexing_assets(RUNTIME, BASE, paths)
 
@@ -399,12 +425,17 @@ def self_test() -> int:
         "auto_generated": True,
         "auto_scope": "source_title_and_publication_date_only",
     }
+    operational = {
+        **full,
+        "id": "source-radar-operational",
+        "headline": "Starea internă a surselor nu este știre pentru cititor",
+    }
     first = {
         "edition_id": "2026-08-16-evening",
         "updated_local": "2026-08-16T20:00:00+03:00",
         "status": "auto_approved",
         "publication_intent": "publish",
-        "items": [full, thin_auto],
+        "items": [full, thin_auto, operational],
     }
     second = {
         "edition_id": "2026-08-17-morning",
@@ -417,6 +448,7 @@ def self_test() -> int:
     assert [row["id"] for row in archived] == ["kept-story"]
     assert archived[0]["first_published_at"] == "2026-08-16T20:00:00+03:00"
     assert archived[0]["last_seen_edition"] == "2026-08-16-evening"
+    assert public_reader_item(operational) is False
     print("VÂLCEA CLAR continuous-frontpage persistence self-test: PASS")
     return 0
 
