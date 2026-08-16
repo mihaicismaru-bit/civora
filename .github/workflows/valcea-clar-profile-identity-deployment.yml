@@ -1,0 +1,103 @@
+name: VÂLCEA CLAR Profile Identity Deployment
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/social/profile_identity_deployment.json"
+      - "valcea-clar/social/validate_profile_identity_deployment.py"
+      - "valcea-clar/social/youtube_profile_identity_deploy.py"
+      - "valcea-clar/social/profile_identity_system.json"
+      - "valcea-clar/social/build_profile_identity_assets.py"
+      - ".github/workflows/valcea-clar-profile-identity-deployment.yml"
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/social/profile_identity_deployment.json"
+      - "valcea-clar/social/validate_profile_identity_deployment.py"
+      - "valcea-clar/social/youtube_profile_identity_deploy.py"
+      - "valcea-clar/social/profile_identity_system.json"
+      - "valcea-clar/social/build_profile_identity_assets.py"
+      - ".github/workflows/valcea-clar-profile-identity-deployment.yml"
+  workflow_dispatch:
+    inputs:
+      apply_youtube_banner:
+        description: "Apply the canonical VÂLCEA CLAR YouTube banner after dry-run validation"
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  validate-deployment-control:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install deterministic image dependency
+        run: python -m pip install --disable-pip-version-check Pillow==12.3.0
+
+      - name: Validate deployment source
+        run: python -m json.tool valcea-clar/social/profile_identity_deployment.json >/dev/null
+
+      - name: Compile deployment controls
+        run: |
+          python -m py_compile \
+            valcea-clar/social/validate_profile_identity_deployment.py \
+            valcea-clar/social/youtube_profile_identity_deploy.py \
+            valcea-clar/social/build_profile_identity_assets.py
+
+      - name: Run deployment validator self-test
+        run: python valcea-clar/social/validate_profile_identity_deployment.py --self-test
+
+      - name: Validate nine-platform deployment state
+        run: python valcea-clar/social/validate_profile_identity_deployment.py
+
+      - name: Run YouTube deployer self-test
+        run: python valcea-clar/social/youtube_profile_identity_deploy.py --self-test
+
+      - name: Render canonical profile asset kit
+        run: python valcea-clar/social/build_profile_identity_assets.py >/tmp/profile-assets.json
+
+      - name: Prove default YouTube mode is non-mutating
+        run: |
+          python valcea-clar/social/youtube_profile_identity_deploy.py >/tmp/youtube-profile-dry-run.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.loads(Path('/tmp/youtube-profile-dry-run.json').read_text(encoding='utf-8'))
+          if result.get('status') != 'DRY_RUN_READY':
+              raise SystemExit('YouTube profile deployer did not remain in dry-run mode')
+          if result.get('remote_mutation_performed') is not False:
+              raise SystemExit('dry-run unexpectedly claims remote mutation')
+          if result.get('asset', {}).get('width') != 2560 or result.get('asset', {}).get('height') != 1440:
+              raise SystemExit('YouTube canonical banner dimensions drifted')
+          if int(result.get('asset', {}).get('bytes') or 0) > 6 * 1024 * 1024:
+              raise SystemExit('YouTube banner exceeds official 6 MB limit')
+          print('VÂLCEA CLAR YouTube profile dry-run contract: PASS')
+          PY
+
+      - name: Apply YouTube banner only on explicit manual dispatch
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.apply_youtube_banner == true }}
+        env:
+          VALCEA_YOUTUBE_PROFILE_LIVE_ENABLED: "true"
+          VALCEA_YOUTUBE_OAUTH_ACCESS_TOKEN: ${{ secrets.VALCEA_YOUTUBE_OAUTH_ACCESS_TOKEN }}
+        run: python valcea-clar/social/youtube_profile_identity_deploy.py --apply
+
+      - name: Upload deployment audit
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-profile-deployment-${{ github.run_id }}
+          path: |
+            valcea-clar/social/profile_identity_deployment.json
+            valcea-clar/social/profile-assets
+            valcea-clar/site/runtime/media/social/profile/youtube-profile-deployment-state.json
+          if-no-files-found: ignore
+          retention-days: 30
