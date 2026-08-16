@@ -1,0 +1,178 @@
+{
+  "schema_version": "1.0",
+  "product": "VÂLCEA CLAR Social Publisher Identity System",
+  "brand": {
+    "display_name": "VÂLCEA CLAR",
+    "editorial_lockup": "VÂLCEA. CLAR.",
+    "tagline": "Ce se întâmplă. Ce știm. Ce contează.",
+    "canonical_domain": "valceaclar.ro",
+    "positioning": "premium_local_news_publisher",
+    "reference_publishers": [
+      "The New York Times",
+      "The Washington Post",
+      "Reuters"
+    ],
+    "benchmark_principle": "adopt_world_class_editorial_and_visual_principles_without_copying_proprietary_trade_dress",
+    "palette": {
+      "ink_rgb": [20, 20, 20],
+      "paper_rgb": [247, 246, 243],
+      "accent_rgb": [196, 27, 35],
+      "white_rgb": [255, 255, 255]
+    },
+    "voice": [
+      "clear",
+      "documented",
+      "confident_not_loud",
+      "useful",
+      "locally_specific",
+      "never_clickbait"
+    ]
+  },
+  "profile_identity": {
+    "display_name_required": "VÂLCEA CLAR",
+    "avatar": {
+      "strategy": "small_size_editorial_mark",
+      "preferred_concept": "VC_or_V_mark_derived_from_master_lockup",
+      "requirements": [
+        "legible_at_32px",
+        "single_dominant_mark",
+        "high_contrast",
+        "no_photo_avatar",
+        "no_platform_specific_logo_variants"
+      ]
+    },
+    "header_or_cover": {
+      "strategy": "editorial_masthead_not_advertising_banner",
+      "required_elements": [
+        "VÂLCEA CLAR",
+        "Ce se întâmplă. Ce știm. Ce contează.",
+        "valceaclar.ro"
+      ],
+      "forbidden": [
+        "collage_of_random_news_photos",
+        "generic_city_skyline_stock",
+        "multiple_cta_buttons_inside_artwork",
+        "gradient_heavy_social_media_style"
+      ]
+    },
+    "bio": {
+      "mission_first": true,
+      "utility_over_slogans": true,
+      "recommended_structure": [
+        "what_we_cover",
+        "how_we_work",
+        "canonical_site"
+      ]
+    }
+  },
+  "global_visual_grammar": {
+    "photo_first_journalism": true,
+    "typography_is_editorial_not_decorative": true,
+    "one_dominant_message_per_frame": true,
+    "logo_presence": "quiet_consistent",
+    "section_kicker_required_when_useful": true,
+    "real_story_specific_visual_preferred": true,
+    "synthetic_portrayal_of_real_people_forbidden": true,
+    "generic_stock_substitution_forbidden": true,
+    "fake_urgency_forbidden": true,
+    "engagement_bait_forbidden": true,
+    "cross_post_verbatim_forbidden": true,
+    "platform_native_visual_grammar_required": true,
+    "mobile_first_legibility_required": true
+  },
+  "platforms": {
+    "instagram": {
+      "role": "visual_news_product",
+      "default_feed_ratio": "4:5",
+      "formats": [
+        "editorial_photo_card",
+        "headline_card",
+        "carousel_explainer",
+        "data_card",
+        "reel"
+      ],
+      "identity_rule": "the_grid_must_read_as_one_newsroom_even_when_story_formats_change",
+      "caption_rule": "native_context_not_facebook_copy",
+      "naked_photo_default_forbidden": true
+    },
+    "facebook": {
+      "role": "reach_context_and_local_conversation",
+      "formats": [
+        "editorial_photo_card",
+        "number_led_public_money_card",
+        "utility_card",
+        "native_video",
+        "link_post_when_visual_treatment_is_not_required"
+      ],
+      "identity_rule": "strong_hook_plus_context_without_taboid_visual_noise",
+      "caption_rule": "lead_with_the_local_consequence_then_add_context_and_link"
+    },
+    "x": {
+      "role": "fast_verified_news_wire",
+      "formats": [
+        "single_verified_update",
+        "source_forward_thread",
+        "live_update_thread"
+      ],
+      "identity_rule": "Reuters_like_clarity_speed_and_attribution_without_copying_Reuters_trade_dress",
+      "visual_rule": "use_visual_only_when_it_adds_information"
+    },
+    "threads": {
+      "role": "conversational_context",
+      "formats": [
+        "compact_update",
+        "context_thread",
+        "what_we_know_sequence"
+      ],
+      "identity_rule": "human_readable_newsroom_voice_without_forced_informality"
+    },
+    "tiktok": {
+      "role": "native_explainer_and_field_video",
+      "formats": [
+        "reporter_explainer",
+        "field_video",
+        "document_explainer",
+        "utility_short"
+      ],
+      "identity_rule": "platform_native_pacing_with_full_editorial_integrity",
+      "visual_rule": "burned_in_headline_and_brand_bug_must_never_obscure_evidence"
+    },
+    "youtube": {
+      "role": "searchable_video_archive_and_explainers",
+      "formats": [
+        "short",
+        "explainer",
+        "investigation_video",
+        "event_or_field_report"
+      ],
+      "identity_rule": "consistent_thumbnail_system_and_opening_brand_bumper_kept_minimal"
+    },
+    "linkedin": {
+      "role": "institutional_public_money_economy_and_professional_context",
+      "formats": [
+        "data_card",
+        "document_explainer",
+        "public_money_summary",
+        "local_economy_analysis"
+      ],
+      "identity_rule": "professional_context_not_reposted_consumer_copy"
+    },
+    "telegram": {
+      "role": "compact_alert_and_service_wire",
+      "identity_rule": "minimal_visual_overhead_high_signal"
+    },
+    "whatsapp": {
+      "role": "essential_low_frequency_distribution",
+      "identity_rule": "trust_and_utility_over_brand_decoration"
+    }
+  },
+  "quality_gate": {
+    "must_look_like_established_newsroom": true,
+    "must_not_look_like_local_marketing_page": true,
+    "must_not_look_ai_generated": true,
+    "must_not_repeat_identical_layout_for_every_story": true,
+    "brand_recognition_without_logo_required": true,
+    "editorial_hierarchy_required": true,
+    "profile_and_post_identity_must_match": true
+  }
+}
