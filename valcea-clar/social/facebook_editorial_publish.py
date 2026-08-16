@@ -207,13 +207,67 @@ def persist_publication(state: dict[str, Any], product: dict[str, Any], post_id:
     write(STATE, state)
 
 
+def _fixture_product(story_id: str) -> dict[str, Any]:
+    visuals = load(VISUALS)
+    system = load(SYSTEM)
+    story = next((row for row in fb.stories() if str(row.get("id")) == story_id), None)
+    if not isinstance(story, dict):
+        raise AssertionError(f"fixture story missing: {story_id}")
+    visual = fb.visual_for(story_id, visuals)
+    if not isinstance(visual, dict):
+        raise AssertionError(f"fixture visual missing: {story_id}")
+    product = render_product(story, visual, system)
+    if product.get("status") != "READY":
+        raise AssertionError(f"fixture product not READY: {product}")
+    return product
+
+
 def self_test() -> int:
     assert state_key("abc") == "story-abc"
-    sample_state = {"published": {"story-x": {"facebook_post_id": "1"}}}
-    assert "story-x" in sample_state["published"]
-    assert os.getenv("DO_NOT_EXIST_12345", "").strip() == ""
-    # Validate that a composite cannot silently be treated as a source photo.
     assert "editorial_composite" != "photograph"
+    product = _fixture_product("olanesti-bridge-monitor")
+    assert product["state_key"] == "story-olanesti-bridge-monitor"
+    assert product["asset"]["kind"] == "editorial_composite"
+    assert product["asset"]["synthetic"] is False
+    assert product["asset"]["source_photo"]["kind"] == "photograph"
+    assert "Ralunic + Dimex-2000 Company" in product["body"]
+    assert product["canonical_url"].endswith("/stiri/olanesti-bridge-monitor/")
+
+    captured: dict[str, Any] = {}
+
+    class FakeResponse:
+        def __enter__(self):
+            return self
+        def __exit__(self, exc_type, exc, tb):
+            return False
+        def read(self):
+            return b'{"post_id":"fixture-post-id"}'
+
+    def fake_open(request, timeout=0):
+        captured["url"] = request.full_url
+        captured["method"] = request.get_method()
+        captured["content_type"] = request.headers.get("Content-type") or request.headers.get("Content-Type")
+        captured["body"] = request.data
+        captured["timeout"] = timeout
+        return FakeResponse()
+
+    post_id = graph_editorial_photo_post(
+        page_id="1234360446430980",
+        token="fixture-token-never-logged",
+        version="v26.0",
+        product=product,
+        request_fn=fake_open,
+    )
+    assert post_id == "fixture-post-id"
+    assert captured["method"] == "POST"
+    assert captured["url"].endswith("/v26.0/1234360446430980/photos")
+    assert str(captured["content_type"]).startswith("multipart/form-data; boundary=")
+    assert b"44,37 mil. lei" in captured["body"]
+    assert b"access_token" in captured["body"]
+    assert b"fixture-token-never-logged" in captured["body"]
+    # Runtime composite created only for test/workflow use; it is not a source photo.
+    runtime_path = ROOT / str(product["asset"]["rendered_path"])
+    assert runtime_path.is_file() and runtime_path.stat().st_size > 30_000
     print("VÂLCEA CLAR Facebook editorial adapter v1 self-test: PASS")
     return 0
 
