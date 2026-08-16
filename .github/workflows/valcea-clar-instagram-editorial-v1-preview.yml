@@ -3,6 +3,7 @@ name: VÂLCEA CLAR Instagram Editorial v1 Preview
 on:
   pull_request:
     paths:
+      - "valcea-clar/social/feed_identity_v1_1.py"
       - "valcea-clar/social/instagram_editorial_v1.py"
       - "valcea-clar/social/instagram_editorial_v1_1.py"
       - "valcea-clar/social/instagram_editorial_v1_2.py"
@@ -31,7 +32,9 @@ jobs:
         run: python -m pip install --disable-pip-version-check Pillow==11.3.0
       - name: Fetch approved photographs
         run: python valcea-clar/social/fetch_approved_photos.py
-      - name: Self-test editorial v1.1 + entity fix
+      - name: Compile premium feed renderer
+        run: python -m py_compile valcea-clar/social/feed_identity_v1_1.py valcea-clar/social/instagram_editorial_v1_1.py valcea-clar/social/instagram_editorial_v1_2.py
+      - name: Self-test editorial v1.1 + entity fix + premium identity
         run: |
           python valcea-clar/social/instagram_editorial_v1.py --self-test
           python valcea-clar/social/instagram_editorial_v1_2.py --self-test
