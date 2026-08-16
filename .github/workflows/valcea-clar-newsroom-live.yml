@@ -125,6 +125,50 @@ jobs:
           echo 'Could not persist discovery-health ledger after five attempts.' >&2
           exit 1
 
+      - name: Refresh canonical indexing assets without publishing
+        if: steps.decision.outputs.changed != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, sys
+          from pathlib import Path
+          sys.path.insert(0, 'local-news-os/core')
+          from indexing_assets import write_indexing_assets
+          runtime = Path('valcea-clar/site/runtime')
+          manifest = json.loads((runtime/'stiri/manifest.json').read_text(encoding='utf-8'))
+          routes = ['/'] + [str(row['path']) for row in manifest.get('stories', []) if row.get('path')]
+          result = write_indexing_assets(runtime, 'https://valceaclar.ro', routes)
+          print(json.dumps(result, ensure_ascii=False))
+          PY
+
+          cp valcea-clar/site/runtime/robots.txt /tmp/valcea-robots.txt
+          cp valcea-clar/site/runtime/sitemap.xml /tmp/valcea-sitemap.xml
+          git config user.name 'vâlcea-clar-live-newsroom[bot]'
+          git config user.email 'valcea-clar-live-newsroom@users.noreply.github.com'
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p valcea-clar/site/runtime
+            cp /tmp/valcea-robots.txt valcea-clar/site/runtime/robots.txt
+            cp /tmp/valcea-sitemap.xml valcea-clar/site/runtime/sitemap.xml
+            git add valcea-clar/site/runtime/robots.txt valcea-clar/site/runtime/sitemap.xml
+            if git diff --cached --quiet; then
+              echo 'Static indexing assets already current on main.'
+              exit 0
+            fi
+            git commit -m 'Refresh VÂLCEA CLAR static indexing assets'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "main advanced during indexing-assets commit; retrying ${attempt}/5."
+            sleep $((attempt * 2))
+          done
+
+          echo 'Could not persist static indexing assets after five attempts.' >&2
+          exit 1
+
       - name: Remove title/date-only candidates from live publication bundle
         if: steps.decision.outputs.changed == 'true'
         run: |
