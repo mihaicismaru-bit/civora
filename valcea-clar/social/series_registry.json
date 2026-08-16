@@ -124,6 +124,34 @@
         "min_items": 1,
         "max_items": 2
       }
+    ],
+    "valcea-threads": [
+      {
+        "series_id": "valcea-in-3-idei",
+        "priority": 100,
+        "slots": [{"days": [0,1,2,3,4,5,6], "time": "08:30", "window_minutes": 180}],
+        "preferred_formats": ["thread", "text"],
+        "eligible_topics": ["service_journalism", "civic_updates", "infrastructure", "local_events", "public_money", "local_places", "verified_breaking_updates"],
+        "min_interval_hours": 18,
+        "max_occurrences_7d": 7,
+        "replay_policy": "material_update",
+        "resurface_after_hours": 0,
+        "min_items": 2,
+        "max_items": 3
+      },
+      {
+        "series_id": "ce-se-schimba",
+        "priority": 90,
+        "slots": [{"days": [0,2,4], "time": "17:00", "window_minutes": 240}],
+        "preferred_formats": ["thread", "text"],
+        "eligible_topics": ["service_journalism", "civic_updates", "infrastructure", "public_money", "local_places"],
+        "min_interval_hours": 36,
+        "max_occurrences_7d": 3,
+        "replay_policy": "material_update",
+        "resurface_after_hours": 0,
+        "min_items": 1,
+        "max_items": 2
+      }
     ]
   }
 }
