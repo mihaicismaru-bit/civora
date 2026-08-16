@@ -85,11 +85,20 @@ h1{{font:800 clamp(36px,6vw,62px)/1.06 Georgia,serif;letter-spacing:-.025em;marg
 </main></body></html>'''
 
 
+def normalize_live_frontpage(text: str) -> str:
+    # The compatibility snapshot still has a morning/evening slot internally,
+    # but the public homepage is a continuous newsroom, not an edition landing page.
+    text = text.replace("EDIȚIA DE DIMINEAȚĂ", "ACTUALIZAT LIVE")
+    text = text.replace("EDIȚIA DE SEARĂ", "ACTUALIZAT LIVE")
+    text = text.replace("VÂLCEA CLAR — Ediția curentă", "VÂLCEA CLAR — Știri live din Vâlcea")
+    return text
+
+
 def link_frontpage(stories: list[dict]) -> None:
     path = RUNTIME / "index.html"
     if not path.exists():
         return
-    text = path.read_text(encoding="utf-8")
+    text = normalize_live_frontpage(path.read_text(encoding="utf-8"))
     for item in stories:
         headline = esc(item.get("headline"))
         route = route_for(item)
@@ -123,8 +132,9 @@ def main() -> int:
 
     (story_root / "manifest.json").write_text(
         json.dumps({
-            "schema_version": "1.0",
+            "schema_version": "1.1",
             "publication_model": "continuous_story_first",
+            "homepage_presentation": "live_newsroom",
             "edition_is_canonical_story_url": False,
             "stories": routes,
         }, ensure_ascii=False, indent=2) + "\n",
