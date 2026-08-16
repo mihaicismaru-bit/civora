@@ -1,9 +1,22 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "channel_id": "valcea-whatsapp",
   "instance_id": "valcea",
   "platform": "whatsapp",
   "status": "outbox_only",
+  "public_channel": {
+    "status": "active",
+    "display_name": "VÂLCEA CLAR",
+    "url": "https://whatsapp.com/channel/0029Vb9AHD7AInPl69ETcb3s",
+    "channel_key": "0029Vb9AHD7AInPl69ETcb3s",
+    "purpose": "one_way_editorial_broadcast",
+    "publication_model": "continuous_story_first",
+    "edition_recaps_are_publication_gates": false,
+    "business_platform_is_separate_product": true,
+    "business_platform_role": "opt_in_direct_alerts_and_conversations_only",
+    "direct_channel_publication_access": "not_verified",
+    "automation_policy": "materialize_channel_native_updates_in_civora; publish_directly_only_after_verified_official_channel_publishing_access"
+  },
   "audience_promise": "Actualizări locale esențiale, rare și clare pentru Vâlcea, gândite ca mesaje utile pentru cititori care vor informația practică fără flux continuu, alarmism sau clickbait.",
   "editorial_mix": {
     "priorities": [
@@ -72,7 +85,7 @@
     "reputational_human": true,
     "corrections_priority": true
   },
-  "credentials_ref": "none:whatsapp-publishing-access-not-verified",
+  "credentials_ref": "none:whatsapp-channel-direct-publishing-access-not-verified",
   "publication_state": {
     "outbox_path": "valcea-clar/social/whatsapp_outbox.json",
     "state_path": "valcea-clar/social/whatsapp_state.json",
