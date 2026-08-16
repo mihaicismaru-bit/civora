@@ -186,11 +186,21 @@
     },
     {
       "channel_id": "telegram",
-      "status": "blocked_until_verified_adapter_and_credentials",
+      "status": "outbox_only",
       "direct_publication_enabled": false,
       "publication_mode": "durable_outbox_only",
+      "config": "valcea-clar/social/channels/telegram.json",
       "adapter": null,
-      "credentials": null
+      "outbox": "valcea-clar/social/telegram_outbox.json",
+      "state": "valcea-clar/social/telegram_state.json",
+      "credentials": null,
+      "requirements": {
+        "story_event": true,
+        "native_compact_update": true,
+        "editor_approval": true,
+        "rights_metadata_when_visual_is_used": true,
+        "verified_publishing_access": false
+      }
     },
     {
       "channel_id": "whatsapp",
