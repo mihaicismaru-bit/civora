@@ -10,6 +10,12 @@ on:
         type: boolean
   schedule:
     - cron: '17,47 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/site/**'
+      - 'valcea-clar/scripts/probe_public_site.py'
+      - '.github/workflows/valcea-clar-public-health.yml'
   pull_request:
     paths:
       - 'valcea-clar/site/**'
