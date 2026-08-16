@@ -155,51 +155,89 @@ jobs:
           print(json.dumps(event,ensure_ascii=False))
           PY
 
-      - name: Persist live newsroom publication conflict-safe
+      - name: Persist live newsroom publication atomically
         if: steps.decision.outputs.changed == 'true'
         shell: bash
         run: |
           set -euo pipefail
+          tx=/tmp/valcea-live-story-transaction
+          rm -rf "$tx"
+          mkdir -p "$tx"
+
+          # Snapshot only canonical newsroom outputs. Derived delivery files are
+          # rebuilt after persistence and are not part of the Git transaction.
+          paths=(
+            valcea-clar/editions
+            valcea-clar/editorial/news_discovery_state.json
+            valcea-clar/site/current_edition.json
+            valcea-clar/site/last_edition_attempt.json
+            valcea-clar/site/newsroom_decision.json
+            valcea-clar/site/newsroom_state.json
+            valcea-clar/site/story_publication_event.json
+            valcea-clar/site/runtime
+            valcea-clar/state/source_health.json
+            valcea-clar/ops/resolution_tasks
+          )
+          for path in "${paths[@]}"; do
+            if [ -e "$path" ]; then
+              mkdir -p "$tx/$(dirname "$path")"
+              cp -a "$path" "$tx/$path"
+            fi
+          done
+
           git config user.name 'vâlcea-clar-live-newsroom[bot]'
           git config user.email 'valcea-clar-live-newsroom@users.noreply.github.com'
-          git add \
-            valcea-clar/editions \
-            valcea-clar/editorial/news_discovery_state.json \
-            valcea-clar/site/current_edition.json \
-            valcea-clar/site/last_edition_attempt.json \
-            valcea-clar/site/newsroom_decision.json \
-            valcea-clar/site/newsroom_state.json \
-            valcea-clar/site/story_publication_event.json \
-            valcea-clar/site/runtime \
-            valcea-clar/state/source_health.json \
-            valcea-clar/web/data \
-            valcea-clar/validation/latest_report.json \
-            valcea-clar/ops/resolution_tasks || true
-          if git diff --cached --quiet; then
-            echo 'No live newsroom publication changes to persist.'
-            exit 0
-          fi
-          git commit -m "Publish VÂLCEA CLAR live story update"
-
-          # Build/export steps intentionally create transient tracked and untracked
-          # files (for example the delivery bundle and rejected auto candidates).
-          # They are not canonical publication state and must not block rebasing
-          # the committed newsroom transaction onto a concurrently advancing main.
-          git reset --hard HEAD
-          git clean -fd
 
           for attempt in 1 2 3 4 5; do
-            if git pull --rebase origin main && git push origin HEAD:main; then
-              # Rebuild the delivery bundle from the now-pushed canonical runtime
-              # so the next artifact step uploads the same story snapshot.
+            git fetch origin main
+            git reset --hard origin/main
+            git clean -fd
+
+            # Overlay this validated story transaction onto the newest main.
+            # Directory copies do not delete unrelated concurrent files (for
+            # example social media assets already persisted under runtime).
+            for path in "${paths[@]}"; do
+              if [ -e "$tx/$path" ]; then
+                mkdir -p "$(dirname "$path")"
+                if [ -d "$tx/$path" ]; then
+                  mkdir -p "$path"
+                  cp -a "$tx/$path/." "$path/"
+                else
+                  cp -a "$tx/$path" "$path"
+                fi
+              fi
+            done
+
+            git add \
+              valcea-clar/editions \
+              valcea-clar/editorial/news_discovery_state.json \
+              valcea-clar/site/current_edition.json \
+              valcea-clar/site/last_edition_attempt.json \
+              valcea-clar/site/newsroom_decision.json \
+              valcea-clar/site/newsroom_state.json \
+              valcea-clar/site/story_publication_event.json \
+              valcea-clar/site/runtime \
+              valcea-clar/state/source_health.json \
+              valcea-clar/ops/resolution_tasks || true
+
+            if git diff --cached --quiet; then
+              echo 'Canonical story transaction is already present on main.'
               python valcea-clar/scripts/build_sites_export.py
               python valcea-clar/scripts/overlay_runtime_export.py
               exit 0
             fi
-            git rebase --abort || true
-            sleep $((attempt * 3))
+
+            git commit -m "Publish VÂLCEA CLAR live story update"
+            if git push origin HEAD:main; then
+              python valcea-clar/scripts/build_sites_export.py
+              python valcea-clar/scripts/overlay_runtime_export.py
+              exit 0
+            fi
+            echo "main advanced during live-story commit; retrying ${attempt}/5."
+            sleep $((attempt * 2))
           done
-          echo 'Could not persist live newsroom update after five attempts.' >&2
+
+          echo 'Could not persist live newsroom story transaction after five attempts.' >&2
           exit 1
 
       - name: Upload current site payload
