@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Preview-only WhatsApp editorial packaging v1 for VÂLCEA CLAR.
+"""Preview-only WhatsApp editorial packaging v1.1 for VÂLCEA CLAR.
 
-WhatsApp is a low-frequency, high-trust sister publication. It only prepares
-stories that are materially useful enough to justify an interruption: essential
-service utility, meaningful public-interest/infrastructure facts, corrections,
-or strong weekend utility. No network calls or recipient assumptions are made.
+WhatsApp is a low-frequency, high-trust sister publication. It prepares only
+stories useful enough to justify an interruption. Copy is deliberately shorter
+and more direct than Telegram: one consequence, the minimum verified context,
+and the canonical source. No network calls or recipient assumptions are made.
 """
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ import build_outbox_only_story_products as base
 ROOT = Path(__file__).resolve().parents[2]
 VC = ROOT / "valcea-clar"
 PREVIEW = VC / "social" / "previews" / "whatsapp-v1"
-MAX_MESSAGE_CHARS = 900
+MAX_MESSAGE_CHARS = 700
 
 
 def digest(value: Any) -> str:
@@ -101,7 +101,7 @@ def package(story: dict[str, Any]) -> dict[str, Any]:
             "status": "HOLD",
             "reason": reason,
             "canonical_url": base.canonical(story),
-            "rendering_version": "whatsapp-editorial-v1.0",
+            "rendering_version": "whatsapp-editorial-v1.1",
         }
 
     headline = str(story.get("headline") or "").strip()
@@ -113,42 +113,38 @@ def package(story: dict[str, Any]) -> dict[str, Any]:
     pair = contractor_pair(corpus)
     correction = story.get("correction") is True
 
-    title = headline
-    facts: list[str] = []
     priority = 70
+    paragraphs_out: list[str] = []
     if correction:
-        title = f"Corecție — {headline}"
-        facts = [dek] if dek else []
+        title = f"Corecție: {headline}"
+        if dek:
+            paragraphs_out.append(compact(dek, 240))
         priority = 100
     elif "luminos" in lower and "zăvoi" in lower and "intrarea este liberă" in lower:
-        title = "Weekend în Vâlcea: Luminos Fest, azi în Zăvoi"
-        facts = [
-            "Intrarea este liberă. Evenimentul are loc în 15–16 august.",
-            "Lampioanele plutitoare se rezervă separat, online.",
-        ]
+        title = "Dacă ieși azi: Luminos Fest în Zăvoi"
+        paragraphs_out.append("Intrarea este liberă, iar evenimentul are loc în 15–16 august. Lampioanele plutitoare se rezervă separat, online.")
         priority = 78
     elif "olănești" in lower and money:
-        title = f"De urmărit: {money[0]} pentru proiectul de pe Olănești"
-        facts = [
-            "SMIS 334436 include, în zona Omniasig, un pod nou exclusiv pietonal și ciclist.",
-        ]
+        title = f"Un proiect public de {money[0]} pe Olănești"
+        context = "SMIS 334436 include, în zona Omniasig, un pod nou exclusiv pietonal și ciclist."
         if pair:
             contract = money[1] if len(money) > 1 else None
-            facts.append(f"Contract principal: {pair}" + (f", {contract} fără TVA." if contract else "."))
-        facts.append("Documentele publice nu permit încă atribuirea exactă a lucrărilor vizibile unei firme anume.")
+            context += f" Contractul principal: {pair}" + (f", {contract} fără TVA." if contract else ".")
+        paragraphs_out.append(context)
+        paragraphs_out.append("Important: documentele publice nu permit încă atribuirea exactă a lucrărilor vizibile unei firme anume.")
         priority = 90
     else:
         title = headline
         if dek:
-            facts.append(dek)
-        if paragraphs:
-            facts.append(paragraphs[0])
+            paragraphs_out.append(compact(dek, 250))
+        elif paragraphs:
+            paragraphs_out.append(compact(paragraphs[0], 250))
         priority = 82 if distribution_class == "essential_public_interest" else 75
 
     lines = [title]
-    lines.extend(f"• {compact(fact, 260)}" for fact in facts[:3] if fact)
+    lines.extend(paragraphs_out[:2])
     lines.append("Detalii și surse: " + base.canonical(story))
-    message = "\n\n".join(lines)
+    message = "\n\n".join(line for line in lines if line)
     if len(message) > MAX_MESSAGE_CHARS:
         message = compact(message, MAX_MESSAGE_CHARS)
 
@@ -157,20 +153,21 @@ def package(story: dict[str, Any]) -> dict[str, Any]:
         "status": "READY",
         "publication_mode": "durable_outbox_only",
         "native_format": "text",
-        "format_family": "high_trust_update",
+        "format_family": "direct_high_trust_update",
         "distribution_class": distribution_class,
         "priority": priority,
         "message": message,
         "canonical_url": base.canonical(story),
         "source_preserving": True,
         "low_frequency": True,
+        "interruption_budget_candidate": True,
         "recipient_scope_required_before_dispatch": True,
         "generic_engagement_prompt_forbidden": True,
         "fake_urgency_forbidden": True,
         "hashtags_default": False,
         "verbatim_cross_platform_reuse_allowed": False,
         "max_message_chars": MAX_MESSAGE_CHARS,
-        "rendering_version": "whatsapp-editorial-v1.0",
+        "rendering_version": "whatsapp-editorial-v1.1",
     }
     product["product_fingerprint_sha256"] = digest(product)
     return product
@@ -189,11 +186,12 @@ def build() -> dict[str, Any]:
     products = [package(story) for story in stories]
     PREVIEW.mkdir(parents=True, exist_ok=True)
     manifest = {
-        "schema_version": "1.0-preview",
+        "schema_version": "1.1-preview",
         "platform": "whatsapp",
         "execution_mode": "PREVIEW_ONLY_NO_NETWORK_CALLS",
+        "rendering_version": "whatsapp-editorial-v1.1",
         "products": products,
-        "ready": sum(1 for p in products if p.get("status") == "READY"),
+        "ready_candidates": sum(1 for p in products if p.get("status") == "READY"),
         "held": sum(1 for p in products if p.get("status") == "HOLD"),
     }
     (PREVIEW / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -216,11 +214,14 @@ def self_test() -> int:
     product=package(sample)
     assert product["status"]=="READY"
     assert product["priority"]==90
+    assert product["format_family"]=="direct_high_trust_update"
     assert "44,37 mil. lei" in product["message"]
     assert "Ralunic + Dimex-2000 Company" in product["message"]
+    assert "•" not in product["message"]
     assert len(product["message"]) <= MAX_MESSAGE_CHARS
     assert "#" not in product["message"]
-    print("VÂLCEA CLAR WhatsApp editorial v1 self-test: PASS")
+    assert product["interruption_budget_candidate"] is True
+    print("VÂLCEA CLAR WhatsApp editorial v1.1 self-test: PASS")
     return 0
 
 
