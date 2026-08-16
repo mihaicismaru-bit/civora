@@ -232,7 +232,7 @@ def test_facebook_native_payload_flows_into_durable_observation_without_raw_secr
     secret = "never-persist-this"
     result = transport.collect_and_materialize(
         channel(), publication(), attestation(), secret,
-        now="2026-08-16T12:00:00Z", http_get=client, min_samples=1,
+        now="2026-08-16T12:00:00Z", http_get=client, min_samples=2,
     )
     assert result["status"] == "COLLECTED_AND_MATERIALIZED", result
     bundle = result["materialization"]
@@ -247,7 +247,7 @@ def test_facebook_native_payload_flows_into_durable_observation_without_raw_secr
 def test_instagram_native_payload_keeps_learning_isolated_to_instagram() -> None:
     result = transport.collect_and_materialize(
         channel("instagram"), publication("instagram"), attestation(), "ig-runtime-token",
-        now="2026-08-16T12:00:00Z", http_get=instagram_client(), min_samples=1,
+        now="2026-08-16T12:00:00Z", http_get=instagram_client(), min_samples=2,
     )
     assert result["status"] == "COLLECTED_AND_MATERIALIZED", result
     observation = result["materialization"]["observation_store"]["observations"][0]
@@ -261,13 +261,13 @@ def test_instagram_native_payload_keeps_learning_isolated_to_instagram() -> None
 def test_replay_of_same_remote_snapshot_is_idempotent() -> None:
     first = transport.collect_and_materialize(
         channel(), publication(), attestation(), "runtime-token",
-        now="2026-08-16T12:00:00Z", http_get=facebook_client(), min_samples=1,
+        now="2026-08-16T12:00:00Z", http_get=facebook_client(), min_samples=2,
     )
     store = first["materialization"]["observation_store"]
     snapshot = first["materialization"].get("snapshot_to_persist")
     second = transport.collect_and_materialize(
         channel(), publication(), attestation(), "runtime-token",
-        now="2026-08-16T12:00:00Z", http_get=facebook_client(), min_samples=1,
+        now="2026-08-16T12:00:00Z", http_get=facebook_client(), min_samples=2,
         existing_store=store, existing_snapshot=snapshot,
     )
     assert second["status"] == "COLLECTED_AND_MATERIALIZED", second
