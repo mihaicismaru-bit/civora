@@ -1,0 +1,126 @@
+name: VÂLCEA CLAR YouTube API Gate
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/social/youtube_auth_gate.py"
+      - "valcea-clar/social/channels/youtube.json"
+      - "valcea-clar/social/youtube_access_state.json"
+      - ".github/workflows/valcea-clar-youtube-api-gate.yml"
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/social/youtube_auth_gate.py"
+      - "valcea-clar/social/channels/youtube.json"
+      - "valcea-clar/social/youtube_access_state.json"
+      - ".github/workflows/valcea-clar-youtube-api-gate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-youtube-api-gate
+  cancel-in-progress: false
+
+jobs:
+  validate-and-link:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Refresh canonical main for non-PR runs
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Compile and self-test YouTube OAuth gate
+        run: |
+          python -m py_compile valcea-clar/social/youtube_auth_gate.py
+          python valcea-clar/social/youtube_auth_gate.py --self-test
+
+      - name: Validate YouTube channel config
+        run: python local-news-os/social/validate_channel_config.py valcea-clar/social/channels/youtube.json --instance-root valcea-clar
+
+      - name: Preview linkage without credentials or network
+        run: python valcea-clar/social/youtube_auth_gate.py | tee /tmp/youtube-preview.json
+
+      - name: Record PR credential state without reading secrets
+        if: github.event_name == 'pull_request'
+        run: |
+          printf '%s\n' '{"status":"PR_NO_SECRET_READ","platform":"youtube","network_calls":false,"remote_mutation_performed":false}' > /tmp/youtube-credential-check.json
+          cp /tmp/youtube-preview.json /tmp/youtube-remote-verification.json
+
+      - name: Verify three YouTube OAuth secret values are present
+        id: youtube_credentials
+        if: github.event_name != 'pull_request'
+        continue-on-error: true
+        env:
+          VALCEA_YOUTUBE_CLIENT_ID: ${{ secrets.VALCEA_YOUTUBE_CLIENT_ID }}
+          VALCEA_YOUTUBE_CLIENT_SECRET: ${{ secrets.VALCEA_YOUTUBE_CLIENT_SECRET }}
+          VALCEA_YOUTUBE_REFRESH_TOKEN: ${{ secrets.VALCEA_YOUTUBE_REFRESH_TOKEN }}
+        run: python valcea-clar/social/youtube_auth_gate.py --credential-check | tee /tmp/youtube-credential-check.json
+
+      - name: Verify OAuth refresh, scopes and exact YouTube channel identity
+        id: youtube_remote
+        if: github.event_name != 'pull_request' && steps.youtube_credentials.outcome == 'success'
+        continue-on-error: true
+        env:
+          VALCEA_YOUTUBE_CLIENT_ID: ${{ secrets.VALCEA_YOUTUBE_CLIENT_ID }}
+          VALCEA_YOUTUBE_CLIENT_SECRET: ${{ secrets.VALCEA_YOUTUBE_CLIENT_SECRET }}
+          VALCEA_YOUTUBE_REFRESH_TOKEN: ${{ secrets.VALCEA_YOUTUBE_REFRESH_TOKEN }}
+        run: python valcea-clar/social/youtube_auth_gate.py --verify-remote --persist | tee /tmp/youtube-remote-verification.json
+
+      - name: Persist YouTube OAuth link and anti-replay baseline conflict-safe
+        if: github.event_name != 'pull_request' && steps.youtube_remote.outcome == 'success'
+        run: |
+          set -euo pipefail
+          cp valcea-clar/social/youtube_access_state.json /tmp/youtube-access-state.json
+          git config user.name "valcea-clar-youtube-engine[bot]"
+          git config user.email "valcea-clar-youtube-engine@users.noreply.github.com"
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/youtube-access-state.json valcea-clar/social/youtube_access_state.json
+            git add valcea-clar/social/youtube_access_state.json
+            if git diff --cached --quiet; then
+              echo "No YouTube OAuth linkage state changes to persist."
+              exit 0
+            fi
+            git commit -m "Persist VÂLCEA CLAR YouTube OAuth link"
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1
+
+      - name: Upload YouTube OAuth linkage audit
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-youtube-api-gate-${{ github.run_id }}
+          path: |
+            /tmp/youtube-preview.json
+            /tmp/youtube-credential-check.json
+            /tmp/youtube-remote-verification.json
+            valcea-clar/social/youtube_access_state.json
+            valcea-clar/social/youtube_outbox.json
+            valcea-clar/social/youtube_state.json
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Fail closed if YouTube credentials or identity verification fail
+        if: >-
+          github.event_name != 'pull_request' &&
+          (steps.youtube_credentials.outcome == 'failure' || steps.youtube_remote.outcome == 'failure')
+        run: |
+          echo "YouTube direct publication remains disabled: OAuth credentials or remote channel identity could not be verified."
+          exit 1
