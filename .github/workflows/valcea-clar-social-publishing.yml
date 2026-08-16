@@ -76,6 +76,9 @@ jobs:
       - name: Build story products for outbox-only sister publications
         run: python valcea-clar/social/build_outbox_only_story_products.py
 
+      - name: Materialize canonical WhatsApp editorial product
+        run: python valcea-clar/social/whatsapp_editorial_materialize.py
+
       - name: Verify durable X materialization
         run: |
           python - <<'PY'
