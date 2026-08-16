@@ -59,7 +59,7 @@ PLATFORM_PROFILES: dict[str, dict[str, Any]] = {
         "structure": "message_update",
     },
     "telegram": {
-        "format_order": ["alert", "digest", "text", "single_photo"],
+        "format_order": ["text", "digest", "single_photo", "alert"],
         "body_order": ["fact", "dek", "paragraph", "quote"],
         "max_atoms": 5,
         "structure": "channel_update",
