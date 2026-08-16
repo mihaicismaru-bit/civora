@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "product": "CIVORA / VÂLCEA CLAR",
   "canonical_domain": "valceaclar.ro",
   "execution_owner": "civora_site_engine",
@@ -24,30 +24,27 @@
     "story_first": true,
     "edition_window_may_delay_publishable_story": false,
     "title_date_only_candidate_is_article": false,
-    "fail_closed_on_incomplete_story": true
+    "fail_closed_on_incomplete_story": true,
+    "site_and_social_share_story_identity": true
   },
   "jobs": [
     {
       "id": "live_newsroom",
       "kind": "continuous_story_discovery_validation_and_publication",
       "workflow": ".github/workflows/valcea-clar-newsroom-live.yml",
-      "schedule": [
-        "*/5 * * * *"
-      ],
+      "schedule": ["*/5 * * * *"],
       "schedule_role": "polling_fallback_only",
       "event_triggers": true,
       "publication_gate": "per_story_editorial_quality_gate",
       "edition_window_gate": false,
+      "emits": "valcea-clar/site/story_publication_event.json",
       "owner": "site_engine"
     },
     {
       "id": "autonomous_editions",
       "kind": "morning_evening_recap_generation",
       "workflow": ".github/workflows/valcea-clar-editions.yml",
-      "schedule": [
-        "45,55 4,5,6 * * *",
-        "30,40 15,16,17 * * *"
-      ],
+      "schedule": ["45,55 4,5,6 * * *", "30,40 15,16,17 * * *"],
       "timezone_gate": "Europe/Bucharest targets 07:45 and 18:30 for recap snapshots only; these windows never delay or authorize an individual story publication.",
       "publication_gate": false,
       "owner": "site_engine"
@@ -56,27 +53,21 @@
       "id": "source_radar",
       "kind": "source_monitoring",
       "workflow": ".github/workflows/valcea-clar-source-radar.yml",
-      "schedule": [
-        "47 */6 * * *"
-      ],
+      "schedule": ["47 */6 * * *"],
       "owner": "site_engine"
     },
     {
       "id": "venue_ingest",
       "kind": "venue_monitoring_and_ingest",
       "workflow": ".github/workflows/valcea-clar-venues-ingest.yml",
-      "schedule": [
-        "23 */6 * * *"
-      ],
+      "schedule": ["23 */6 * * *"],
       "owner": "site_engine"
     },
     {
       "id": "olanesti_investigation",
       "kind": "investigation_monitoring",
       "workflow": ".github/workflows/valcea-clar-olanesti-investigation-monitor.yml",
-      "schedule": [
-        "17 4,14 * * *"
-      ],
+      "schedule": ["17 4,14 * * *"],
       "editorial_priority": "normal_case_priority; benchmark_only_for_investigation_engine",
       "owner": "site_engine"
     },
@@ -84,9 +75,12 @@
       "id": "social_distribution",
       "kind": "multi_channel_social_distribution",
       "workflow": ".github/workflows/valcea-clar-social-publishing.yml",
-      "schedule": [
-        "7,22,37,52 * * * *"
-      ],
+      "schedule": ["7,22,37,52 * * * *"],
+      "schedule_role": "recovery_only",
+      "event_trigger": "valcea-clar/site/story_publication_event.json",
+      "distribution_unit": "individual_story",
+      "edition_window_gate": false,
+      "site_story_may_precede_social_media_readiness": true,
       "channel_registry": "valcea-clar/social/channel_registry.json",
       "owner": "site_engine"
     },
@@ -101,9 +95,7 @@
       "id": "ownership_guard",
       "kind": "runtime_ownership_monitoring",
       "workflow": ".github/workflows/valcea-clar-engine-guard.yml",
-      "schedule": [
-        "11 2 * * *"
-      ],
+      "schedule": ["11 2 * * *"],
       "owner": "site_engine"
     }
   ],
