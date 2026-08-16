@@ -69,10 +69,17 @@ jobs:
 
             git add \
               valcea-clar/site/runtime/termeni/index.html \
-              valcea-clar/site/runtime/confidentialitate/index.html \
+              valcea-clar/site/runtime/confidentialitate/index.html
+
+            # The deterministic ChatGPT Sites export is normally ephemeral/ignored.
+            # Preserve just the two legal route files when present, without requiring
+            # an export manifest to already exist in the canonical repository.
+            git add -f \
               valcea-clar/dist/chatgpt-sites/termeni/index.html \
-              valcea-clar/dist/chatgpt-sites/confidentialitate/index.html \
-              valcea-clar/dist/chatgpt-sites/manifest.json
+              valcea-clar/dist/chatgpt-sites/confidentialitate/index.html
+            if [ -f valcea-clar/dist/chatgpt-sites/manifest.json ]; then
+              git add -f valcea-clar/dist/chatgpt-sites/manifest.json
+            fi
 
             if git diff --cached --quiet; then
               echo 'VÂLCEA CLAR legal pages are already current on main.'
