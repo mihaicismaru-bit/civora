@@ -1,10 +1,10 @@
 {
   "schema_version": "1.1",
-  "observed_at": "2026-08-15T20:55:19+03:00",
-  "sources_total": 16,
-  "sources_ok": 10,
-  "facts_admitted": 3,
-  "facts_before_cross_source_headline_dedupe": 3,
+  "observed_at": "2026-08-16T08:36:00+03:00",
+  "sources_total": 24,
+  "sources_ok": 19,
+  "facts_admitted": 10,
+  "facts_before_cross_source_headline_dedupe": 10,
   "sources": [
     {
       "source_id": "primaria-rm-valcea-comunicate",
@@ -32,8 +32,9 @@
     },
     {
       "source_id": "prefectura-valcea",
-      "listing_ok": false,
-      "error": "HTTPError: HTTP Error 403: Forbidden",
+      "listing_ok": true,
+      "links_examined": 1,
+      "article_failures": 0,
       "facts": 0
     },
     {
@@ -51,6 +52,27 @@
       "facts": 1
     },
     {
+      "source_id": "primaria-horezu-anunturi",
+      "listing_ok": true,
+      "links_examined": 6,
+      "article_failures": 0,
+      "facts": 0
+    },
+    {
+      "source_id": "primaria-brezoi-comunicate",
+      "listing_ok": true,
+      "links_examined": 7,
+      "article_failures": 0,
+      "facts": 0
+    },
+    {
+      "source_id": "primaria-baile-govora-evenimente",
+      "listing_ok": true,
+      "links_examined": 11,
+      "article_failures": 0,
+      "facts": 1
+    },
+    {
       "source_id": "isu-valcea-comunicate",
       "listing_ok": true,
       "links_examined": 5,
@@ -59,9 +81,10 @@
     },
     {
       "source_id": "ipj-valcea-stiri",
-      "listing_ok": false,
-      "error": "HTTPError: HTTP Error 403: Forbidden",
-      "facts": 0
+      "listing_ok": true,
+      "links_examined": 10,
+      "article_failures": 0,
+      "facts": 1
     },
     {
       "source_id": "dsp-valcea-anunturi",
@@ -78,10 +101,30 @@
       "facts": 0
     },
     {
+      "source_id": "spital-horezu-noutati",
+      "listing_ok": true,
+      "links_examined": 5,
+      "article_failures": 2,
+      "facts": 0
+    },
+    {
       "source_id": "isj-valcea-comunicate",
       "listing_ok": true,
       "links_examined": 3,
       "article_failures": 2,
+      "facts": 0
+    },
+    {
+      "source_id": "ajofm-valcea-comunicate",
+      "listing_ok": true,
+      "links_examined": 12,
+      "article_failures": 0,
+      "facts": 5
+    },
+    {
+      "source_id": "ocpi-valcea-anunturi",
+      "listing_ok": false,
+      "error": "URLError: <urlopen error [Errno -2] Name or service not known>",
       "facts": 0
     },
     {
@@ -96,6 +139,20 @@
       "listing_ok": true,
       "links_examined": 8,
       "article_failures": 1,
+      "facts": 0
+    },
+    {
+      "source_id": "filarmonica-valcea-blog",
+      "listing_ok": true,
+      "links_examined": 12,
+      "article_failures": 0,
+      "facts": 0
+    },
+    {
+      "source_id": "apavil-comunicate",
+      "listing_ok": true,
+      "links_examined": 12,
+      "article_failures": 0,
       "facts": 0
     },
     {
@@ -115,5 +172,6 @@
   ],
   "instance_id": "valcea",
   "source_contract": "SOURCE_PACK_V1",
-  "migration_adapter": "local_news_os_primary_source_compat_v1"
+  "migration_adapter": "local_news_os_primary_source_compat_v1",
+  "publication_date_guard": "LOCAL_NEWS_OS_DATE_PROVENANCE_V1"
 }
