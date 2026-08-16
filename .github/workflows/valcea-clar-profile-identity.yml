@@ -5,7 +5,11 @@ on:
     paths:
       - "valcea-clar/social/social_brand_system.json"
       - "valcea-clar/social/profile_identity_system.json"
+      - "valcea-clar/social/facebook_visual_system.json"
+      - "valcea-clar/social/instagram_visual_system.json"
+      - "valcea-clar/social/instagram_editorial_v1_1.py"
       - "valcea-clar/social/validate_profile_identity.py"
+      - "valcea-clar/social/validate_visual_identity_contract.py"
       - "valcea-clar/social/build_profile_identity_assets.py"
       - "valcea-clar/social/channels/**"
       - ".github/workflows/valcea-clar-profile-identity.yml"
@@ -14,7 +18,11 @@ on:
     paths:
       - "valcea-clar/social/social_brand_system.json"
       - "valcea-clar/social/profile_identity_system.json"
+      - "valcea-clar/social/facebook_visual_system.json"
+      - "valcea-clar/social/instagram_visual_system.json"
+      - "valcea-clar/social/instagram_editorial_v1_1.py"
       - "valcea-clar/social/validate_profile_identity.py"
+      - "valcea-clar/social/validate_visual_identity_contract.py"
       - "valcea-clar/social/build_profile_identity_assets.py"
       - "valcea-clar/social/channels/**"
       - ".github/workflows/valcea-clar-profile-identity.yml"
@@ -41,18 +49,32 @@ jobs:
         run: |
           python -m json.tool valcea-clar/social/social_brand_system.json >/dev/null
           python -m json.tool valcea-clar/social/profile_identity_system.json >/dev/null
+          python -m json.tool valcea-clar/social/facebook_visual_system.json >/dev/null
+          python -m json.tool valcea-clar/social/instagram_visual_system.json >/dev/null
 
-      - name: Compile profile identity tools
+      - name: Compile identity tools and bound renderers
         run: |
           python -m py_compile \
             valcea-clar/social/validate_profile_identity.py \
-            valcea-clar/social/build_profile_identity_assets.py
+            valcea-clar/social/validate_visual_identity_contract.py \
+            valcea-clar/social/build_profile_identity_assets.py \
+            valcea-clar/social/instagram_editorial_v1_1.py
 
       - name: Run profile identity validator self-test
         run: python valcea-clar/social/validate_profile_identity.py --self-test
 
       - name: Validate profile identity against configured channels
         run: python valcea-clar/social/validate_profile_identity.py
+
+      - name: Run profile-post visual contract self-test
+        run: python valcea-clar/social/validate_visual_identity_contract.py --self-test
+
+      - name: Validate profile-post visual contract
+        run: python valcea-clar/social/validate_visual_identity_contract.py
+
+      - name: Run Instagram editorial renderer self-test
+        working-directory: valcea-clar/social
+        run: python instagram_editorial_v1_2.py --self-test
 
       - name: Run asset generator self-test
         run: python valcea-clar/social/build_profile_identity_assets.py --self-test

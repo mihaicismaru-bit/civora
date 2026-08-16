@@ -83,7 +83,9 @@ def render_text_slide(slide: dict[str, str], index: int, output: Path, system: d
     brand = system["brand"]
     safe = int(brand["safe_margin_px"])
     accent = tuple(brand["accent_rgb"])
-    image = Image.new("RGB", canvas, (247, 246, 243))
+    paper = tuple(brand["paper_rgb"])
+    ink = tuple(brand["ink_rgb"])
+    image = Image.new("RGB", canvas, paper)
     draw = ImageDraw.Draw(image)
 
     kicker_font = base.font(base.BOLD, 31)
@@ -93,7 +95,7 @@ def render_text_slide(slide: dict[str, str], index: int, output: Path, system: d
     small = base.font(base.REGULAR, 24)
 
     draw.rounded_rectangle((safe, 76, safe + 96, 84), radius=4, fill=accent)
-    draw.text((safe, 108), slide["kicker"], font=kicker_font, fill=(25, 25, 25))
+    draw.text((safe, 108), slide["kicker"], font=kicker_font, fill=ink)
     brand_text = str(brand["name"])
     bw = draw.textbbox((0, 0), brand_text, font=brand_font)[2]
     draw.text((canvas[0] - safe - bw, 108), brand_text, font=brand_font, fill=(70, 70, 70))
@@ -102,7 +104,7 @@ def render_text_slide(slide: dict[str, str], index: int, output: Path, system: d
     lead_lines = base.wrap(draw, lead, lead_font, canvas[0] - 2 * safe, 3)
     y = 310
     for line in lead_lines:
-        draw.text((safe, y), line, font=lead_font, fill=(24, 24, 24))
+        draw.text((safe, y), line, font=lead_font, fill=ink)
         y += 88
 
     y += 34
