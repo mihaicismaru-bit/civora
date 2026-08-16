@@ -1,29 +1,44 @@
 {
-  "schema_version": "2.0",
+  "schema_version": "2.1",
   "product": "VÂLCEA CLAR public site",
   "environment": "production",
-  "state": "BLOCKED_NO_MANAGED_PRODUCTION_DEPLOYMENT",
+  "state": "READY_HTTP_ACCEPTED",
   "canonical_domain": "valceaclar.ro",
+  "production_url": "https://valceaclar.ro/",
   "canonical_data_source": "https://github.com/mihaicismaru-bit/civora/tree/main/valcea-clar",
   "repository_runtime_ready": true,
-  "public_http_acceptance_ready": false,
-  "blocker": "No active Vercel project/deployment is present in the connected Vercel team; the historical deployment references return not_found. The existing external site must be structurally published or a new managed host attached before CIVORA may claim public delivery.",
-  "observed_external_hosting": {
-    "provider": "Vercel",
-    "team_id": "team_C4qLzkG5lGcGriTEdvm1a95a",
-    "active_projects_observed": 0,
-    "historical_deployment_lookup": "NOT_FOUND",
-    "observed_at_local": "2026-08-16T23:59:00+03:00"
+  "public_http_acceptance_ready": true,
+  "blocker": null,
+  "presentation_layer": {
+    "provider": "ChatGPT Sites",
+    "site": "existing valceaclar.ro site",
+    "execution_owner": false,
+    "content_source": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json",
+    "refresh_seconds": 60
+  },
+  "last_public_http_acceptance": {
+    "status": "READY",
+    "verified_at_utc": "2026-08-16T21:53:16Z",
+    "workflow_run_id": 31974794296,
+    "http_200_routes": [
+      "/",
+      "/robots.txt",
+      "/sitemap.xml",
+      "/termeni/",
+      "/confidentialitate/",
+      "/unde-iesim/",
+      "/stiri/olanesti-bridge-monitor/"
+    ],
+    "blockers": []
   },
   "historical_vercel": {
-    "status": "STALE_NONCANONICAL",
-    "public_url": "https://valcea-clar-live-mihaicismaru-6634s-projects.vercel.app/",
-    "deployment_url": "https://valcea-clar-live-l71y3can2-mihaicismaru-6634s-projects.vercel.app/",
-    "deployment_id": "dpl_GzzY51zn8wGwbio1HaiLCqVjbLoY"
+    "status": "STALE_NONCANONICAL_NOT_REQUIRED",
+    "active_projects_observed": 0,
+    "note": "Vercel nu este o condiție pentru livrarea publică actuală și absența unui proiect Vercel nu trebuie tratată ca blocker."
   },
   "custom_domain": {
     "name": "valceaclar.ro",
-    "status": "REQUIRES_EXTERNAL_PUBLICATION_AND_HTTP_ACCEPTANCE"
+    "status": "ACTIVE_HTTP_200"
   },
   "required_public_acceptance": {
     "http_200_routes": [
@@ -37,6 +52,8 @@
     "story_route_required": true,
     "legal_pages_initial_html_required": true,
     "canonical_required": true,
-    "robots_index_follow_required_for_legal": true
+    "robots_index_follow_required_for_legal": true,
+    "homepage_story_first_required": true,
+    "source_of_truth": ".github/workflows/valcea-clar-public-health.yml"
   }
 }
