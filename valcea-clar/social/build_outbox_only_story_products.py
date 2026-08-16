@@ -152,6 +152,7 @@ def x_product(story: dict) -> dict:
     and ends with one canonical source link. Thin event stubs stay HOLD.
     """
     story_id = str(story["id"])
+    headline = str(story.get("headline") or "").strip()
     ok, reason = x_interest_gate(story)
     if not ok:
         return {
@@ -162,17 +163,20 @@ def x_product(story: dict) -> dict:
             "native_format": "text",
             "format_family": "x_hold",
             "hold_reason": reason,
+            "posts": [compact(headline)],
             "canonical_url": canonical(story),
             "source_preserving": True,
+            "max_post_chars_internal": 260,
+            "hashtags_default": False,
             "fake_urgency_forbidden": True,
             "engagement_bait_forbidden": True,
             "verbatim_cross_platform_reuse_allowed": False,
+            "quote_post_dependency_forbidden": True,
             "direct_publication_enabled": False,
             "direct_publication_blocker": "x_api_pay_per_use_conflicts_zero_paid_dependency",
             "edition_gate": False,
         }
 
-    headline = str(story.get("headline") or "").strip()
     dek = str(story.get("dek") or "").strip()
     paragraphs = [str(p).strip() for p in story.get("paragraphs", []) if str(p).strip()]
     section = str(story.get("section") or "").upper()
