@@ -14,6 +14,7 @@ on:
       - 'valcea-clar/editorial/story_enrichment.json'
       - 'valcea-clar/editorial/publication_holds.json'
       - 'valcea-clar/scripts/premium_presentation.py'
+      - 'valcea-clar/scripts/premium_story_integrity.py'
       - 'valcea-clar/site/chatgpt-sites-live-bridge.js'
       - '.github/workflows/valcea-clar-premium-presentation.yml'
   pull_request:
@@ -43,13 +44,20 @@ jobs:
 
       - name: Validate presentation engine
         run: |
-          python -m py_compile valcea-clar/scripts/premium_presentation.py
+          python -m py_compile \
+            valcea-clar/scripts/premium_presentation.py \
+            valcea-clar/scripts/premium_story_integrity.py
           python valcea-clar/scripts/premium_presentation.py --self-test
+          python valcea-clar/scripts/premium_story_integrity.py --self-test
 
       - name: Build premium public presentation
         run: |
           python valcea-clar/scripts/premium_presentation.py
+          python valcea-clar/scripts/premium_story_integrity.py
           python valcea-clar/scripts/premium_presentation.py --check
+
+      - name: Run canonical web integrity smoke test on premium output
+        run: python valcea-clar/scripts/smoke_web.py
 
       - name: Build synchronized existing-site payload
         run: |
@@ -93,8 +101,11 @@ jobs:
             git clean -fd
 
             python valcea-clar/scripts/premium_presentation.py --self-test
+            python valcea-clar/scripts/premium_story_integrity.py --self-test
             python valcea-clar/scripts/premium_presentation.py
+            python valcea-clar/scripts/premium_story_integrity.py
             python valcea-clar/scripts/premium_presentation.py --check
+            python valcea-clar/scripts/smoke_web.py
 
             git add \
               valcea-clar/site/story_archive.json \
