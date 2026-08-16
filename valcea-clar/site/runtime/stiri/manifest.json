@@ -1,8 +1,15 @@
 {
-  "schema_version": "1.2",
+  "schema_version": "1.3",
   "publication_model": "continuous_story_first",
   "homepage_presentation": "live_newsroom",
   "edition_is_canonical_story_url": false,
+  "structured_data": {
+    "enabled": true,
+    "type": "NewsArticle",
+    "eligible_scope": "publishable_full_story_only",
+    "date_published_policy": "stable_publication_ledger_only",
+    "unverified_image_policy": "omit"
+  },
   "cross_linking": {
     "enabled": true,
     "ranking": "same_section_then_priority",
@@ -17,7 +24,9 @@
       "related_story_ids": [
         "florile-govorei-20260816",
         "olanesti-bridge-monitor"
-      ]
+      ],
+      "structured_data_type": "NewsArticle",
+      "published_at": "2026-08-16T11:08:04+03:00"
     },
     {
       "id": "florile-govorei-20260816",
@@ -26,7 +35,9 @@
       "related_story_ids": [
         "luminos-fest-zavoi-20260815",
         "olanesti-bridge-monitor"
-      ]
+      ],
+      "structured_data_type": "NewsArticle",
+      "published_at": "2026-08-16T11:08:04+03:00"
     },
     {
       "id": "olanesti-bridge-monitor",
@@ -35,7 +46,9 @@
       "related_story_ids": [
         "luminos-fest-zavoi-20260815",
         "florile-govorei-20260816"
-      ]
+      ],
+      "structured_data_type": "NewsArticle",
+      "published_at": "2026-08-16T11:08:04+03:00"
     }
   ]
 }
