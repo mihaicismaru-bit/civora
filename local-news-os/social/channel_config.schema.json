@@ -28,7 +28,7 @@
     "channel_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{2,63}$"},
     "instance_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"},
     "platform": {
-      "enum": ["facebook", "instagram", "tiktok", "youtube", "threads", "linkedin", "whatsapp", "telegram"]
+      "enum": ["facebook", "instagram", "tiktok", "youtube", "threads", "linkedin", "whatsapp", "telegram", "x"]
     },
     "status": {"enum": ["active", "hold", "outbox_only", "disabled"]},
     "audience_promise": {"type": "string", "minLength": 12},
