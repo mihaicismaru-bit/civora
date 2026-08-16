@@ -44,7 +44,12 @@ def rgb(value: Any) -> tuple[int, int, int]:
 
 def colors(brand: dict[str, Any]) -> dict[str, tuple[int, int, int]]:
     palette = brand["brand"]["palette"]
-    return {"ink": rgb(palette["ink_rgb"]), "paper": rgb(palette["paper_rgb"]), "accent": rgb(palette["accent_rgb"]), "white": rgb(palette["white_rgb"])}
+    return {
+        "ink": rgb(palette["ink_rgb"]),
+        "paper": rgb(palette["paper_rgb"]),
+        "accent": rgb(palette["accent_rgb"]),
+        "white": rgb(palette["white_rgb"]),
+    }
 
 
 def width(draw: ImageDraw.ImageDraw, text: str, fnt: ImageFont.FreeTypeFont) -> int:
@@ -52,7 +57,14 @@ def width(draw: ImageDraw.ImageDraw, text: str, fnt: ImageFont.FreeTypeFont) -> 
     return box[2] - box[0]
 
 
-def fit(draw: ImageDraw.ImageDraw, text: str, candidates: list[str], max_width: int, max_size: int, min_size: int) -> ImageFont.FreeTypeFont:
+def fit(
+    draw: ImageDraw.ImageDraw,
+    text: str,
+    candidates: list[str],
+    max_width: int,
+    max_size: int,
+    min_size: int,
+) -> ImageFont.FreeTypeFont:
     for size in range(max_size, min_size - 1, -2):
         candidate = font(candidates, size)
         if width(draw, text, candidate) <= max_width:
@@ -60,51 +72,112 @@ def fit(draw: ImageDraw.ImageDraw, text: str, candidates: list[str], max_width: 
     raise RuntimeError(f"text does not fit identity safe zone: {text!r}")
 
 
-def render_avatar(width_px: int, height_px: int, palette: dict[str, tuple[int, int, int]], output: Path) -> None:
+def render_avatar(
+    width_px: int,
+    height_px: int,
+    palette: dict[str, tuple[int, int, int]],
+    output: Path,
+) -> None:
     if width_px != height_px:
         raise ValueError("avatar export must remain square")
     image = Image.new("RGB", (width_px, height_px), palette["paper"])
     draw = ImageDraw.Draw(image)
     side = width_px
-    mark = "VC"
-    mark_font = fit(draw, mark, SERIF_BOLD, round(side * 0.62), round(side * 0.42), round(side * 0.22))
-    mark_w = width(draw, mark, mark_font)
+
+    mark = "VC."
+    mark_font = fit(
+        draw,
+        mark,
+        SERIF_BOLD,
+        round(side * 0.62),
+        round(side * 0.42),
+        round(side * 0.22),
+    )
     box = draw.textbbox((0, 0), mark, font=mark_font)
+    mark_w = box[2] - box[0]
     mark_h = box[3] - box[1]
-    x = round((side - mark_w) / 2) - round(side * 0.025)
-    y = round((side - mark_h) / 2) - box[1] - round(side * 0.015)
-    draw.text((x, y), mark, font=mark_font, fill=palette["ink"])
-    dot_r = max(4, round(side * 0.032))
-    dot_x = min(side - dot_r * 3, x + mark_w + round(side * 0.025))
-    dot_y = y + mark_h - round(side * 0.01)
-    draw.ellipse((dot_x, dot_y, dot_x + dot_r * 2, dot_y + dot_r * 2), fill=palette["accent"])
+    x = round((side - mark_w) / 2) - box[0]
+    y = round((side - mark_h) / 2) - box[1] - round(side * 0.012)
+
+    # The red period is punctuation in the same typeface and on the same
+    # baseline. It is not a floating badge/dot added after the mark.
+    prefix = "VC"
+    draw.text((x, y), prefix, font=mark_font, fill=palette["ink"])
+    prefix_advance = float(draw.textlength(prefix, font=mark_font))
+    draw.text((round(x + prefix_advance), y), ".", font=mark_font, fill=palette["accent"])
+
     output.parent.mkdir(parents=True, exist_ok=True)
     image.save(output, "PNG", optimize=True)
 
 
-def render_header(*, width_px: int, height_px: int, safe: dict[str, Any], palette: dict[str, tuple[int, int, int]], wordmark: str, tagline: str, domain: str, variant: str, output: Path) -> None:
+def render_header(
+    *,
+    width_px: int,
+    height_px: int,
+    safe: dict[str, Any],
+    palette: dict[str, tuple[int, int, int]],
+    wordmark: str,
+    tagline: str,
+    domain: str,
+    variant: str,
+    output: Path,
+) -> None:
     image = Image.new("RGB", (width_px, height_px), palette["paper"])
     draw = ImageDraw.Draw(image)
     x, y = int(safe["x"]), int(safe["y"])
     sw, sh = int(safe["width"]), int(safe["height"])
-    rule_h = max(5, round(height_px * 0.014))
-    draw.rectangle((x, y, x + min(sw, round(sw * 0.17)), y + rule_h), fill=palette["accent"])
-    mast = fit(draw, wordmark, SERIF_BOLD, sw, max(36, round(sh * 0.30)), max(24, round(sh * 0.15)))
-    box = draw.textbbox((0, 0), wordmark, font=mast)
-    mast_h = box[3] - box[1]
-    text_y = y + round(sh * 0.17)
-    draw.text((x, text_y - box[1]), wordmark, font=mast, fill=palette["ink"])
-    support_size = max(20, min(round(sh * 0.085), round(height_px * 0.055)))
-    support_y = text_y + mast_h + round(sh * 0.11)
+
+    # Quiet locator rule: the only non-typographic accent in the header.
+    rule_h = max(3, round(height_px * 0.006))
+    rule_w = max(48, round(sw * 0.135))
+    rule_y = y + round(sh * 0.04)
+    draw.rectangle((x, rule_y, x + rule_w, rule_y + rule_h), fill=palette["accent"])
+
+    # Masthead is the dominant element and deliberately leaves air around it.
+    mast_max_width = round(sw * 0.88)
+    mast = fit(
+        draw,
+        wordmark,
+        SERIF_BOLD,
+        mast_max_width,
+        max(38, round(sh * 0.30)),
+        max(24, round(sh * 0.16)),
+    )
+    mast_box = draw.textbbox((0, 0), wordmark, font=mast)
+    mast_h = mast_box[3] - mast_box[1]
+    mast_y = y + round(sh * 0.16)
+    draw.text((x, mast_y - mast_box[1]), wordmark, font=mast, fill=palette["ink"])
+
+    # Editorial hairline separates masthead from information, replacing the
+    # stacked marketing-banner look with a newspaper-like grid.
+    hairline_y = mast_y + mast_h + round(sh * 0.12)
+    hairline_h = max(1, round(height_px * 0.0018))
+    draw.rectangle((x, hairline_y, x + sw, hairline_y + hairline_h), fill=palette["ink"])
+
+    support_size = max(18, min(round(sh * 0.072), round(height_px * 0.046)))
     domain_font = font(SANS_BOLD, support_size)
+    domain_w = width(draw, domain, domain_font)
+    support_y = hairline_y + max(10, round(sh * 0.065))
+    domain_x = x + sw - domain_w
+
     if variant == "masthead_tagline_domain":
-        tagline_font = fit(draw, tagline, SANS_REGULAR, sw, support_size, max(18, support_size - 10))
+        gap = max(24, round(sw * 0.035))
+        tagline_max = max(160, sw - domain_w - gap)
+        tagline_font = fit(
+            draw,
+            tagline,
+            SANS_REGULAR,
+            tagline_max,
+            support_size,
+            max(16, support_size - 10),
+        )
         draw.text((x, support_y), tagline, font=tagline_font, fill=palette["ink"])
-        draw.text((x, support_y + round(tagline_font.size * 1.65)), domain, font=domain_font, fill=palette["ink"])
+        draw.text((domain_x, support_y), domain, font=domain_font, fill=palette["ink"])
     elif variant == "masthead_domain":
-        draw.text((x, support_y), domain, font=domain_font, fill=palette["ink"])
+        draw.text((domain_x, support_y), domain, font=domain_font, fill=palette["ink"])
     else:
         raise ValueError(f"unknown header variant: {variant}")
+
     output.parent.mkdir(parents=True, exist_ok=True)
     image.save(output, "JPEG", quality=95, optimize=True, progressive=True, subsampling=0)
 
@@ -120,6 +193,12 @@ def sha256(path: Path) -> str:
 def image_size(path: Path) -> tuple[int, int]:
     with Image.open(path) as image:
         return image.size
+
+
+def accent_pixels(path: Path, accent: tuple[int, int, int]) -> int:
+    with Image.open(path) as image:
+        rgb_image = image.convert("RGB")
+        return sum(1 for pixel in rgb_image.getdata() if pixel == accent)
 
 
 def build(output_dir: Path = OUTPUT) -> dict[str, Any]:
@@ -145,40 +224,90 @@ def build(output_dir: Path = OUTPUT) -> dict[str, Any]:
         header = cfg.get("header_export")
         if isinstance(header, dict):
             header_path = output_dir / f"{platform}-header.jpg"
-            render_header(width_px=int(header["width"]), height_px=int(header["height"]), safe=header["safe_zone"], palette=palette, wordmark=str(masthead["wordmark"]), tagline=str(masthead["tagline"]), domain=str(masthead["domain"]), variant=str(cfg.get("header_variant") or ""), output=header_path)
-            records.append({"asset_id": f"{platform}-header", "platform": platform, "kind": "header", "file": header_path.name, "safe_zone": header["safe_zone"], "spec_source": header.get("spec_source")})
+            render_header(
+                width_px=int(header["width"]),
+                height_px=int(header["height"]),
+                safe=header["safe_zone"],
+                palette=palette,
+                wordmark=str(masthead["wordmark"]),
+                tagline=str(masthead["tagline"]),
+                domain=str(masthead["domain"]),
+                variant=str(cfg.get("header_variant") or ""),
+                output=header_path,
+            )
+            records.append({
+                "asset_id": f"{platform}-header",
+                "platform": platform,
+                "kind": "header",
+                "file": header_path.name,
+                "safe_zone": header["safe_zone"],
+                "spec_source": header.get("spec_source"),
+            })
 
     assets = []
     for record in records:
         path = output_dir / record["file"]
         w, h = image_size(path)
-        assets.append({**record, "width": w, "height": h, "bytes": path.stat().st_size, "sha256": sha256(path)})
+        assets.append({
+            **record,
+            "width": w,
+            "height": h,
+            "bytes": path.stat().st_size,
+            "sha256": sha256(path),
+        })
     manifest = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "product": "VÂLCEA CLAR Social Profile Identity Assets",
         "generator": "build_profile_identity_assets.py",
-        "generation": "deterministic_editorial_profile_identity",
+        "generation": "deterministic_premium_editorial_profile_identity",
         "brand_source": "valcea-clar/social/social_brand_system.json",
         "profile_source": "valcea-clar/social/profile_identity_system.json",
         "photo_free_headers": True,
+        "visual_signature": profile.get("visual_signature"),
         "master_avatar": "avatar-master.png",
         "assets": assets,
-        "profile_copy": {platform: {"display_name": cfg.get("display_name"), "bio": cfg.get("bio"), "about": cfg.get("about")} for platform, cfg in sorted(platforms.items())},
+        "profile_copy": {
+            platform: {
+                "display_name": cfg.get("display_name"),
+                "bio": cfg.get("bio"),
+                "about": cfg.get("about"),
+            }
+            for platform, cfg in sorted(platforms.items())
+        },
     }
-    (output_dir / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    (output_dir / "manifest.json").write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
     return manifest
 
 
 def self_test() -> int:
-    palette = {"ink": (20, 20, 20), "paper": (247, 246, 243), "accent": (196, 27, 35), "white": (255, 255, 255)}
+    palette = {
+        "ink": (20, 20, 20),
+        "paper": (247, 246, 243),
+        "accent": (196, 27, 35),
+        "white": (255, 255, 255),
+    }
     with tempfile.TemporaryDirectory() as raw:
         tmp = Path(raw)
         avatar, header = tmp / "avatar.png", tmp / "header.jpg"
         render_avatar(400, 400, palette, avatar)
-        render_header(width_px=1500, height_px=500, safe={"x": 180, "y": 70, "width": 1140, "height": 360}, palette=palette, wordmark="VÂLCEA CLAR", tagline="Ce se întâmplă. Ce știm. Ce contează.", domain="valceaclar.ro", variant="masthead_domain", output=header)
+        render_header(
+            width_px=1500,
+            height_px=500,
+            safe={"x": 180, "y": 70, "width": 1140, "height": 360},
+            palette=palette,
+            wordmark="VÂLCEA CLAR",
+            tagline="Ce se întâmplă. Ce știm. Ce contează.",
+            domain="valceaclar.ro",
+            variant="masthead_tagline_domain",
+            output=header,
+        )
         assert image_size(avatar) == (400, 400)
         assert image_size(header) == (1500, 500)
         assert avatar.stat().st_size > 5000 and header.stat().st_size > 10000
+        assert accent_pixels(avatar, palette["accent"]) > 10
     print("VÂLCEA CLAR profile identity asset generator self-test: PASS")
     return 0
 
