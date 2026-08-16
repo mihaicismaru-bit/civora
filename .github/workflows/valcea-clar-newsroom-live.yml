@@ -40,15 +40,13 @@ jobs:
       - name: Validate continuous newsroom gate
         run: |
           python valcea-clar/scripts/newsroom_decide.py --self-test
-          python local-news-os/core/discover_primary_source_facts.py --self-test
+          python local-news-os/core/discover_primary_source_facts_fast.py --self-test
 
-      - name: Refresh local source radar
-        run: python valcea-clar/scripts/probe_sources.py
-
-      - name: Discover fresh primary-source candidates
+      - name: Discover fresh primary-source candidates with bounded parallelism
         run: |
-          python local-news-os/core/discover_primary_source_facts.py \
+          python local-news-os/core/discover_primary_source_facts_fast.py \
             --instance valcea \
+            --workers 6 \
             --output valcea-clar/editorial/auto_facts.json \
             --state valcea-clar/editorial/news_discovery_state.json
 
@@ -71,7 +69,7 @@ jobs:
       - name: Explain no-publication result
         if: steps.decision.outputs.changed != 'true'
         run: |
-          echo "No newly publishable full story. Radar candidates remain candidates; the clock does not force publication."
+          echo "No newly publishable full story. Discovery candidates remain candidates; the clock does not force publication."
           cat valcea-clar/site/newsroom_decision.json
 
       - name: Remove title/date-only candidates from live publication bundle
