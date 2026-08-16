@@ -34,7 +34,7 @@ jobs:
         run: python valcea-clar/social/validate_social_doctrine.py
       - name: Materialize outbox-only sister publications
         run: python valcea-clar/social/build_outbox_only_story_products.py
-      - name: Validate X product contract
+      - name: Validate X product contract and editorial fixtures
         run: |
           python - <<'PY'
           import json
@@ -56,7 +56,8 @@ jobs:
           if state.get('blocker')!='x_api_pay_per_use_conflicts_zero_paid_dependency':
               raise SystemExit('X pay-per-use blocker is not explicit')
           thread_by={str(i.get('story_id')):i for i in threads.get('items',[]) if isinstance(i,dict)}
-          for item in x.get('items',[]):
+          items={str(i.get('story_id')):i for i in x.get('items',[]) if isinstance(i,dict)}
+          for item in items.values():
               if item.get('publication_mode')!='durable_outbox_only':
                   raise SystemExit('X item claims direct publication')
               if item.get('verbatim_cross_platform_reuse_allowed') is not False:
@@ -73,5 +74,21 @@ jobs:
                   raise SystemExit('X product is a verbatim Threads cross-post')
               if item.get('direct_publication_enabled') is not False:
                   raise SystemExit('X product falsely enables direct publication')
-          print(f"X native outbox: PASS ({len(x.get('items',[]))} story products)")
+
+          gov=items.get('florile-govorei-20260816')
+          if not gov or gov.get('status')!='hold' or gov.get('hold_reason')!='x_interest_gate_thin_title_date_source_only':
+              raise SystemExit('Florile Govorei X interest-gate fixture failed')
+          lum=items.get('luminos-fest-zavoi-20260815')
+          if not lum or lum.get('status')!='outbox_ready' or lum.get('posts',[None])[0] != 'Azi în Zăvoi: intrarea este liberă la Luminos Fest.':
+              raise SystemExit('Luminos X local-utility fixture failed')
+          ola=items.get('olanesti-bridge-monitor')
+          if not ola or ola.get('status')!='outbox_ready' or ola.get('hook_family')!='key_number':
+              raise SystemExit('Olănești X key-number fixture failed')
+          if ola.get('posts',[None])[0] != '44,37 mil. lei pentru proiectul de pe Olănești.':
+              raise SystemExit('Olănești X hook is not concise enough')
+          if 'Ralunic + Dimex-2000 Company' not in ' '.join(ola.get('posts',[])):
+              raise SystemExit('Olănești X contract actor missing')
+          if 'Urmărim executanții' in ' '.join(ola.get('posts',[])):
+              raise SystemExit('Olănești X still exposes newsroom-process wording')
+          print(f"X native outbox: PASS ({len(items)} story products; thin-story gate + premium fixtures verified)")
           PY

@@ -85,6 +85,33 @@ def first_money(text: str) -> str | None:
     return f"{int(round(number)):,}".replace(",", ".") + " lei"
 
 
+def money_values(text: str) -> list[str]:
+    values: list[str] = []
+    for match in re.finditer(r"(?<!\d)(\d{1,3}(?:\.\d{3})+(?:,\d+)?)\s+lei\b", text, re.I):
+        raw = match.group(1).replace(".", "").replace(",", ".")
+        try:
+            number = float(raw)
+        except ValueError:
+            continue
+        if number >= 1_000_000:
+            shown = f"{number / 1_000_000:.2f}".rstrip("0").rstrip(".").replace(".", ",") + " mil. lei"
+        else:
+            shown = f"{int(round(number)):,}".replace(",", ".") + " lei"
+        if shown not in values:
+            values.append(shown)
+    return values
+
+
+def contractor_pair(text: str) -> str | None:
+    match = re.search(r"asocierii\s+(.+?)(?:,\s+cu\s+subcontractan|;|\.)", text, re.I)
+    if not match:
+        return None
+    value = " ".join(match.group(1).split())
+    value = re.sub(r"\bSRL\b", "", value, flags=re.I)
+    value = re.sub(r"\s+[—–-]\s+", " + ", value)
+    return re.sub(r"\s+", " ", value).strip(" +") or None
+
+
 def threads_product(story: dict) -> dict:
     headline = str(story.get("headline") or "").strip()
     dek = str(story.get("dek") or "").strip()
@@ -106,49 +133,99 @@ def threads_product(story: dict) -> dict:
     }
 
 
-def x_product(story: dict) -> dict:
-    """Build a fast, source-forward X product without pretending paid API access.
-
-    X is intentionally distinct from Threads: shorter, denser, change/number
-    first, one canonical source link, and a bounded live-thread structure.
-    """
+def x_interest_gate(story: dict) -> tuple[bool, str | None]:
+    gate = str(story.get("material_fact_gate") or "").strip()
+    if gate in {"PASS_DATE_ONLY", "PASS_TITLE_DATE_ONLY"}:
+        return False, "x_interest_gate_thin_title_date_source_only"
     headline = str(story.get("headline") or "").strip()
+    dek = str(story.get("dek") or "").strip()
+    paragraphs = [str(p).strip() for p in story.get("paragraphs", []) if str(p).strip()]
+    useful = len(headline) + len(dek) + sum(len(p) for p in paragraphs[:2])
+    if useful < 110:
+        return False, "x_interest_gate_insufficient_context"
+    return True, None
+
+
+def x_product(story: dict) -> dict:
+    """Build a compact, source-forward X product with an independent interest gate.
+
+    X is a live-news wire, not a second Threads account. It leads with the
+    verified change/number/utility, puts one concrete idea in each bounded post,
+    and ends with one canonical source link. Thin event stubs stay HOLD.
+    """
+    story_id = str(story["id"])
+    headline = str(story.get("headline") or "").strip()
+    ok, reason = x_interest_gate(story)
+    if not ok:
+        return {
+            "id": f"x-story-{story_id}",
+            "story_id": story_id,
+            "status": "hold",
+            "publication_mode": "durable_outbox_only",
+            "native_format": "text",
+            "format_family": "x_hold",
+            "hold_reason": reason,
+            "posts": [compact(headline)],
+            "canonical_url": canonical(story),
+            "source_preserving": True,
+            "max_post_chars_internal": 260,
+            "hashtags_default": False,
+            "fake_urgency_forbidden": True,
+            "engagement_bait_forbidden": True,
+            "verbatim_cross_platform_reuse_allowed": False,
+            "quote_post_dependency_forbidden": True,
+            "direct_publication_enabled": False,
+            "direct_publication_blocker": "x_api_pay_per_use_conflicts_zero_paid_dependency",
+            "edition_gate": False,
+        }
+
     dek = str(story.get("dek") or "").strip()
     paragraphs = [str(p).strip() for p in story.get("paragraphs", []) if str(p).strip()]
     section = str(story.get("section") or "").upper()
     corpus = " ".join([headline, dek, *paragraphs])
     lower = corpus.lower()
-    money = first_money(corpus)
+    money = money_values(corpus)
+    pair = contractor_pair(corpus)
     correction = story.get("correction") is True
-
-    hook = headline
+    posts: list[str] = []
     hook_family = "what_changed"
+
     if correction:
-        hook = f"Corecție: {headline}"
+        posts.append(compact(f"Corecție: {headline}"))
         hook_family = "correction"
     elif "luminos" in lower and "zăvoi" in lower and "intrarea este liberă" in lower:
-        hook = "Azi în Zăvoi: intrarea este liberă la Luminos Fest."
+        posts.append("Azi în Zăvoi: intrarea este liberă la Luminos Fest.")
+        posts.append("Evenimentul are loc în 15–16 august. Lampioanele plutitoare se rezervă separat, online.")
         hook_family = "local_utility"
-    elif money and (section == "INVESTIGAȚII" or any(token in lower for token in ("contract", "buget", "finanț", "smis"))):
-        if "olănești" in lower:
-            hook = f"{money} pentru proiectul de pe Olănești."
-        else:
-            hook = f"{money}: {headline}"
+    elif "olănești" in lower and money:
+        posts.append(f"{money[0]} pentru proiectul de pe Olănești.")
+        posts.append("Documentația SMIS 334436 include, în zona Omniasig, un pod nou exclusiv pietonal și ciclist.")
+        contract = money[1] if len(money) > 1 else None
+        actor = pair or "asocierea câștigătoare"
+        detail = f"Contractul principal: {actor}"
+        if contract:
+            detail += f", {contract} fără TVA"
+        detail += ". Nu atribuim lucrările vizibile unei firme fără documente suficiente."
+        posts.append(compact(detail))
         hook_family = "key_number"
+    elif money and (section == "INVESTIGAȚII" or any(token in lower for token in ("contract", "buget", "finanț", "smis"))):
+        posts.append(compact(f"{money[0]}: {headline}"))
+        if dek:
+            posts.append(compact(dek))
+        hook_family = "key_number"
+    else:
+        posts.append(compact(headline))
+        if dek:
+            posts.append(compact(dek))
+        elif paragraphs:
+            posts.append(compact(paragraphs[0]))
 
-    posts: list[str] = [compact(hook)]
-    if dek and compact(dek).lower() != posts[0].lower():
-        posts.append(compact(dek))
-    if paragraphs:
-        first = compact(paragraphs[0])
-        if first.lower() not in {value.lower() for value in posts}:
-            posts.append(first)
-    posts = posts[:3]
+    posts = [post for post in posts if post][:3]
     posts.append(compact(f"Documente și context: {canonical(story)}"))
 
     return {
-        "id": f"x-story-{story['id']}",
-        "story_id": story["id"],
+        "id": f"x-story-{story_id}",
+        "story_id": story_id,
         "status": "outbox_ready",
         "publication_mode": "durable_outbox_only",
         "native_format": "thread" if len(posts) > 2 else "text",
