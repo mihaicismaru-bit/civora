@@ -2,7 +2,7 @@
   "schema_version": "1.1",
   "scope": "VALCEA_SPECIFIC",
   "policy": {
-    "purpose": "Preserve high-value local sources that are useful editorially but unsafe for automatic freshness admission until their date provenance or event-time semantics are reliable.",
+    "purpose": "Preserve high-value local sources that are useful editorially but unsafe for automatic admission because of provenance, event-time semantics, structural incompatibility or editorial-safety constraints.",
     "automatic_publication": false,
     "manual_review_required": true,
     "last_known_good": "PRESERVE"
@@ -58,6 +58,23 @@
         "sports-source monitoring without automatic publication"
       ],
       "core_feedback": "LOCAL NEWS OS needs a generic SOCIAL_EMBED source contract that resolves the canonical platform post URL or post ID and absolute platform timestamp, preserves account provenance, rejects crawl-relative time labels as published_at, and keeps social claims fail-closed until independently corroborated when material."
+    },
+    {
+      "id": "ipj-valcea-stiri",
+      "publisher": "Inspectoratul de Poliție Județean Vâlcea",
+      "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri",
+      "tier": "T1",
+      "section": "EVENIMENTE",
+      "status": "QUARANTINED_REPUTATIONAL_SENSITIVE_POLICE_FEED",
+      "checked_at": "2026-08-16",
+      "reason": "The official IPJ Vâlcea feed is structurally compatible with article discovery and has trustworthy article-level dates, but many headlines themselves assert detention, investigation, suspected criminal conduct, sanctions or other reputationally sensitive facts about people before final adjudication. Because the current automatic scope can publish the source headline verbatim as title + date + source, date provenance alone is insufficient: automatic admission could republish allegations without the contextual safeguards, presumption-of-innocence language, corroboration and editorial review required by VÂLCEA CLAR. The feed is therefore removed from automatic publication while remaining a primary source for manual verification.",
+      "safe_use": [
+        "manual discovery of police and public-safety developments",
+        "primary-source verification of dates, procedural status and official police statements",
+        "cross-checking road-safety and prevention campaigns that do not identify or accuse private persons",
+        "manual reporting only after reputational-sensitivity review and preservation of presumption-of-innocence context"
+      ],
+      "core_feedback": "LOCAL NEWS OS needs a generic SOURCE_SAFETY / REPUTATIONAL_RISK gate that is independent of date provenance and source tier. Source classes such as police, prosecutors, courts and disciplinary bodies must not become automatically publishable merely because their article dates and titles are structurally valid. The gate should classify or require explicit review for allegation, detention, investigation, sanction and accusation semantics in headlines/body, preserve procedural status and presumption-of-innocence context, and fail closed before public projection. This belongs in CORE; Vâlcea should keep only the local source classification."
     },
     {
       "id": "cj-valcea-achizitii-publice",
