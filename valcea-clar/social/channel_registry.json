@@ -95,11 +95,20 @@
     },
     {
       "channel_id": "threads",
-      "status": "blocked_until_verified_adapter_and_credentials",
+      "status": "outbox_only",
       "direct_publication_enabled": false,
       "publication_mode": "durable_outbox_only",
+      "config": "valcea-clar/social/channels/threads.json",
       "adapter": null,
-      "credentials": null
+      "outbox": "valcea-clar/social/threads_outbox.json",
+      "state": "valcea-clar/social/threads_state.json",
+      "credentials": null,
+      "requirements": {
+        "native_thread_sequence": true,
+        "editor_approval": true,
+        "rights_metadata_when_visual_is_used": true,
+        "verified_publishing_access": false
+      }
     },
     {
       "channel_id": "linkedin",
