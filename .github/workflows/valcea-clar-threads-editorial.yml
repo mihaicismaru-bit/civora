@@ -1,0 +1,130 @@
+name: VÂLCEA CLAR Threads Editorial Outbox
+
+on:
+  workflow_run:
+    workflows: ["VÂLCEA CLAR Social Publication Engine"]
+    types: [completed]
+  schedule:
+    - cron: "11,26,41,56 * * * *"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "valcea-clar/social/threads_editorial_v1.py"
+      - "valcea-clar/social/threads_editorial_materialize.py"
+      - "valcea-clar/social/threads_outbox.json"
+      - "valcea-clar/social/threads_state.json"
+      - "valcea-clar/site/current_edition.json"
+      - "valcea-clar/site/newsroom_decision.json"
+      - "valcea-clar/site/story_publication_event.json"
+      - "valcea-clar/editions/**"
+      - ".github/workflows/valcea-clar-threads-editorial.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-threads-editorial-outbox
+  cancel-in-progress: false
+
+jobs:
+  materialize:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Refresh canonical main for non-PR runs
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Self-test Threads editorial product
+        run: |
+          python valcea-clar/social/threads_editorial_v1.py --self-test
+          python valcea-clar/social/threads_editorial_materialize.py --self-test
+
+      - name: Materialize canonical Threads editorial outbox
+        run: python valcea-clar/social/threads_editorial_materialize.py | tee /tmp/threads-editorial-materialize.json
+
+      - name: Validate canonical Threads fixtures
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          outbox=json.loads(Path('valcea-clar/social/threads_outbox.json').read_text(encoding='utf-8'))
+          state=json.loads(Path('valcea-clar/social/threads_state.json').read_text(encoding='utf-8'))
+          items={str(i.get('story_id')):i for i in outbox.get('items',[]) if isinstance(i,dict)}
+          if outbox.get('platform')!='threads' or outbox.get('editorial_product_version')!='threads-editorial-v1.0':
+              raise SystemExit('Threads canonical editorial outbox version mismatch')
+          if state.get('direct_publication_enabled') is not False:
+              raise SystemExit('Threads state falsely claims direct publication')
+          if state.get('direct_publication_blocker')!='threads_direct_access_not_configured':
+              raise SystemExit('Threads direct-access blocker missing')
+          gov=items.get('florile-govorei-20260816')
+          if not gov or gov.get('status')!='hold':
+              raise SystemExit('Florile Govorei Threads canonical HOLD failed')
+          lum=items.get('luminos-fest-zavoi-20260815')
+          if not lum or lum.get('status')!='outbox_ready' or not lum.get('posts',[None])[0].startswith('În Zăvoi, azi:'):
+              raise SystemExit('Luminos Threads canonical utility product failed')
+          ola=items.get('olanesti-bridge-monitor')
+          if not ola or ola.get('status')!='outbox_ready' or ola.get('format_family')!='explanatory_thread':
+              raise SystemExit('Olănești Threads canonical explainer failed')
+          text=' '.join(ola.get('posts',[]))
+          for expected in ('44,37 mil. lei','Ralunic + Dimex-2000 Company','Ce nu știm încă'):
+              if expected not in text:
+                  raise SystemExit(f'Olănești Threads missing {expected}')
+          for item in items.values():
+              if item.get('status')=='outbox_ready':
+                  if item.get('verbatim_cross_platform_reuse_allowed') is not False:
+                      raise SystemExit('Threads cross-platform reuse guard missing')
+                  if any(len(str(post))>470 for post in item.get('posts',[])):
+                      raise SystemExit('Threads internal text budget exceeded')
+          print(f"Threads canonical editorial outbox: PASS ({len(items)} products)")
+          PY
+
+      - name: Persist Threads editorial state conflict-safe
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/threads-editorial-state
+          mkdir -p /tmp/threads-editorial-state/valcea-clar/social
+          cp valcea-clar/social/threads_outbox.json /tmp/threads-editorial-state/valcea-clar/social/threads_outbox.json
+          cp valcea-clar/social/threads_state.json /tmp/threads-editorial-state/valcea-clar/social/threads_state.json
+          git config user.name "valcea-clar-threads-engine[bot]"
+          git config user.email "valcea-clar-threads-engine@users.noreply.github.com"
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/threads-editorial-state/valcea-clar/social/threads_outbox.json valcea-clar/social/threads_outbox.json
+            cp /tmp/threads-editorial-state/valcea-clar/social/threads_state.json valcea-clar/social/threads_state.json
+            git add valcea-clar/social/threads_outbox.json valcea-clar/social/threads_state.json
+            if git diff --cached --quiet; then
+              echo "No Threads editorial changes to persist."
+              exit 0
+            fi
+            git commit -m "Persist VÂLCEA CLAR Threads editorial outbox"
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1
+
+      - name: Upload Threads editorial audit
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-threads-editorial-${{ github.run_id }}
+          path: |
+            /tmp/threads-editorial-materialize.json
+            valcea-clar/social/threads_outbox.json
+            valcea-clar/social/threads_state.json
+          if-no-files-found: warn
+          retention-days: 14
