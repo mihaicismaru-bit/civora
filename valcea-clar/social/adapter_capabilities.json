@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "instance_id": "valcea",
   "policy": {
     "fail_closed_on_capability_mismatch": true,
@@ -28,6 +28,17 @@
       "max_media_assets": 10,
       "completion_model": "immediate_remote_id",
       "remote_reconciliation_supported": false
+    },
+    {
+      "platform": "threads",
+      "channel_id": "valcea-threads",
+      "adapter": "valcea-clar/social/threads_publish.py",
+      "supported_native_formats": ["text", "thread"],
+      "supported_media_kinds": [],
+      "max_media_assets": 0,
+      "completion_model": "immediate_remote_id_sequence",
+      "remote_reconciliation_supported": false,
+      "partial_publish_policy": "manual_reconciliation_no_auto_retry"
     },
     {
       "platform": "tiktok",
