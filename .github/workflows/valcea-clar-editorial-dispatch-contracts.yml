@@ -1,0 +1,87 @@
+name: VÂLCEA CLAR Editorial Dispatch Contracts
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/social/editorial_asset_contract.py"
+      - "valcea-clar/social/build_editorial_dispatch_previews*.py"
+      - "valcea-clar/social/facebook_editorial_preview*.py"
+      - "valcea-clar/social/instagram_editorial_v1*.py"
+      - "valcea-clar/social/*_visual_system.json"
+      - "valcea-clar/social/story_visuals.json"
+      - "valcea-clar/social/fetch_approved_photos.py"
+      - "valcea-clar/site/current_edition.json"
+      - "valcea-clar/site/newsroom_decision.json"
+      - "valcea-clar/editions/**"
+      - ".github/workflows/valcea-clar-editorial-dispatch-contracts.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Install deterministic renderer dependency
+        run: python -m pip install --disable-pip-version-check Pillow==11.3.0
+      - name: Fetch approved source photographs
+        run: python valcea-clar/social/fetch_approved_photos.py
+      - name: Self-test editorial composite contracts
+        run: |
+          python valcea-clar/social/editorial_asset_contract.py
+          python valcea-clar/social/build_editorial_dispatch_previews_v1_1.py --self-test
+      - name: Build adapter-ready preview contracts
+        run: python valcea-clar/social/build_editorial_dispatch_previews_v1_1.py
+      - name: Validate platform-native dispatch invariants
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('valcea-clar/social/previews/dispatch-contracts')
+          ig=json.loads((root/'instagram-dispatch.json').read_text(encoding='utf-8'))
+          fb=json.loads((root/'facebook-dispatch.json').read_text(encoding='utf-8'))
+          if ig.get('execution_mode')!='PREVIEW_ONLY_NO_META_CALLS' or fb.get('execution_mode')!='PREVIEW_ONLY_NO_META_CALLS':
+              raise SystemExit('network-call guard missing')
+          igp={p['story_id']:p for p in ig.get('products',[])}
+          fbp={p['story_id']:p for p in fb.get('products',[])}
+          igh={h['story_id']:h for h in ig.get('holds',[])}
+          fbh={h['story_id']:h for h in fb.get('holds',[])}
+          if 'florile-govorei-20260816' not in igh or 'florile-govorei-20260816' not in fbh:
+              raise SystemExit('thin-story independent hold contract failed')
+          lum=igp.get('luminos-fest-zavoi-20260815')
+          if not lum or lum.get('native_format')!='single_photo' or len(lum.get('assets',[]))!=1:
+              raise SystemExit('Luminos Instagram dispatch contract failed')
+          ola=igp.get('olanesti-bridge-monitor')
+          if not ola or ola.get('native_format')!='carousel' or len(ola.get('assets',[]))!=4:
+              raise SystemExit('Olănești Instagram carousel contract failed')
+          if len({a['sha256'] for a in ola['assets']}) != 4:
+              raise SystemExit('Instagram carousel repeats rendered asset bytes')
+          for asset in ola['assets']:
+              if asset.get('kind')!='editorial_composite' or asset.get('synthetic') is not False:
+                  raise SystemExit('Instagram asset mislabeled or synthetic')
+              if not str(asset.get('public_url') or '').startswith('https://valceaclar.ro/media/social/editorial/'):
+                  raise SystemExit('Instagram canonical public URL contract failed')
+              if asset.get('rights_inherited_from_approved_source') is not True:
+                  raise SystemExit('Instagram rights lineage missing')
+          fb_ola=fbp.get('olanesti-bridge-monitor')
+          if not fb_ola or fb_ola.get('publication_mode')!='editorial_photo_upload':
+              raise SystemExit('Facebook binary editorial upload contract failed')
+          if 'Ralunic + Dimex-2000 Company' not in fb_ola.get('body',''):
+              raise SystemExit('Facebook contract fact missing')
+          if fb_ola.get('body','').strip() == ola.get('caption','').strip():
+              raise SystemExit('verbatim Facebook/Instagram cross-post detected')
+          print('Editorial dispatch contracts: PASS')
+          PY
+      - name: Upload dispatch contracts and visual products
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-editorial-dispatch-contracts-${{ github.run_id }}
+          path: valcea-clar/social/previews/dispatch-contracts
+          if-no-files-found: error
+          retention-days: 14
