@@ -2,11 +2,11 @@
   "version": 1,
   "policy": "Web-index discovery only. These canonical URLs may be probed directly, but no fact may be published unless the canonical mfe.gov.ro URL is successfully fetched and parsed.",
   "discoveredAt": "2026-08-12T09:32:00Z",
-  "lastCheckedAt": "2026-08-16T05:29:30Z",
+  "lastCheckedAt": "2026-08-16T08:33:31Z",
   "lastDiscoveryResult": {
     "newCanonicalUrls": 0,
-    "note": "Fresh 2026-08-16 05:29Z check: the explicit PDDS priority seed, PDDS Noutati, PDDS Ghiduri, the MIPE root and the PEO/PoIDS roots all timed out on direct official fetch. Fresh web-index searches restricted to official MIPE-managed domains returned no new canonical PDDS or broader MIPE URLs suitable for verification. The official MySMIS reporting surface was directly reachable and reports 909 validated calls. Its current direct canonical response shows DJ-Sprijin pentru dezvoltarea microintreprinderilor at 56 contracts, total project budget 12.841.264.383 RON and submitted grant budget 575.375.415 RON, which differs from the immediately preceding canonical snapshot stored by the ingestion pipeline (12.841.259.803 RON / 575.368.906 RON). This is treated as a source-value inconsistency/change requiring the canonical pipeline to reconcile; no OPEN state is inferred. No mirror or third-party content was admitted as an MIPE fact, and last-known-good must be preserved on parser/source failure.",
-    "mysmisFreshCheck": "CANONICAL_VALUE_CHANGE_OR_INCONSISTENCY_909_VALIDATED_CALLS"
+    "note": "Fresh 2026-08-16 08:33Z check: the explicit PDDS priority seed, PDDS Noutati, PDDS Ghiduri, the MIPE root and the PEO/PoIDS roots all timed out on direct official fetch. Fresh web-index searches restricted to official MIPE-managed domains returned no new canonical PDDS or broader MIPE URLs suitable for verification. The official MySMIS reporting surface was directly reachable and reports 909 validated calls. Its current direct canonical response again shows DJ-Sprijin pentru dezvoltarea microintreprinderilor at 56 contracts, total project budget 12.841.264.383 RON and submitted grant budget 575.375.415 RON, while the last-known-good ingestion snapshot stores 12.841.259.803 RON / 575.368.906 RON. Because the source has oscillated between these two value pairs across direct canonical fetches, this remains a source-value inconsistency requiring reconciliation rather than a stable new fact. No OPEN state is inferred. No mirror or third-party content was admitted as an MIPE fact, and last-known-good must be preserved on parser/source failure.",
+    "mysmisFreshCheck": "CANONICAL_VALUE_OSCILLATION_909_VALIDATED_CALLS"
   },
   "items": [
     {
