@@ -10,17 +10,16 @@ on:
       - 'valcea-clar/scripts/newsroom_decide.py'
       - 'valcea-clar/scripts/generate_edition.py'
       - 'valcea-clar/scripts/render_frontpage.py'
+      - 'valcea-clar/scripts/render_story_pages.py'
       - 'local-news-os/core/**'
       - '.github/workflows/valcea-clar-newsroom-live.yml'
   schedule:
-    # GitHub cron is polling fallback, not an editorial publication window.
-    # Push/event triggers publish sooner whenever verified story state changes.
+    # Polling fallback only. Editorial publication is story/event driven.
     - cron: '*/5 * * * *'
 
 permissions:
   contents: write
 
-# Share the lock with the legacy recap generator so both writers cannot race.
 concurrency:
   group: valcea-clar-autonomous-editions
   cancel-in-progress: false
@@ -117,13 +116,15 @@ jobs:
           print({'status':'PASS','stories':decision['publishable_story_count'],'new':decision['new_story_ids']})
           PY
 
-      - name: Render live frontpage and feed immediately
+      - name: Render live site immediately with canonical story routes
         if: steps.decision.outputs.changed == 'true'
         run: |
           python valcea-clar/scripts/render_frontpage.py
+          python valcea-clar/scripts/render_story_pages.py
           python valcea-clar/scripts/build_live_feed.py
           python valcea-clar/scripts/build_sites_export.py
           python valcea-clar/scripts/overlay_runtime_export.py
+          test -s valcea-clar/site/runtime/stiri/manifest.json
 
       - name: Mark newsroom snapshot published
         if: steps.decision.outputs.changed == 'true'
@@ -151,7 +152,7 @@ jobs:
             echo 'No live newsroom publication changes to persist.'
             exit 0
           fi
-          git commit -m "Publish VÂLCEA CLAR live newsroom update"
+          git commit -m "Publish VÂLCEA CLAR live story update"
           for attempt in 1 2 3 4 5; do
             if git pull --rebase origin main && git push origin HEAD:main; then
               exit 0
