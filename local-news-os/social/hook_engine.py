@@ -24,7 +24,7 @@ PLATFORM_PROFILES: dict[str, dict[str, Any]] = {
     "youtube": {"prefix": "", "max_chars": 100, "order": ["headline", "fact", "dek", "paragraph", "quote"]},
     "threads": {"prefix": "Pe scurt — ", "max_chars": 260, "order": ["headline", "dek", "fact", "paragraph", "quote"]},
     "linkedin": {"prefix": "Context local — ", "max_chars": 280, "order": ["dek", "headline", "fact", "paragraph", "quote"]},
-    "whatsapp": {"prefix": "De știut — ", "max_chars": 220, "order": ["headline", "dek", "fact", "paragraph", "quote"]},
+    "whatsapp": {"prefix": "Vâlcea — ", "max_chars": 220, "order": ["headline", "dek", "fact", "paragraph", "quote"]},
     "telegram": {"prefix": "De știut — ", "max_chars": 220, "order": ["headline", "dek", "fact", "paragraph", "quote"]},
 }
 
