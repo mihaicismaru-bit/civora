@@ -6,10 +6,12 @@ configuration while preserving the proven VÂLCEA CLAR zero-LLM crawler during
 migration. The legacy crawler remains a TEMPORARY_COMPATIBILITY_ADAPTER; source
 resolution is already generic through SOURCE_PACK_V1.
 
-All instances using this adapter now pass publication-date extraction through
-the generic fail-closed provenance resolver before a title/date/source fact can
-be admitted. This prevents page/global dates from being mistaken for article
-publication dates when a template exposes multiple dates.
+Automatic publication-date admission is deliberately stricter than generic date
+resolution: only explicit article publication metadata may create an automatic
+fact. Plain dates near a headline or elsewhere on a page remain useful for
+review/diagnostics but cannot be treated as publication timestamps. This avoids
+mistaking event dates, document dates, or a site's current date for the article
+publication date.
 """
 from __future__ import annotations
 
@@ -37,7 +39,8 @@ DEFAULT_POLICY = {
     "min_title_chars": 24,
     "max_candidates_per_source": 12,
 }
-DATE_GUARD = "LOCAL_NEWS_OS_DATE_PROVENANCE_V1"
+DATE_GUARD = "LOCAL_NEWS_OS_STRICT_PUBLICATION_METADATA_V2"
+AUTOPUBLISH_DATE_PROVENANCE = {"structured.datePublished", "meta.article_published"}
 
 
 def load_json(path: Path) -> dict:
@@ -111,7 +114,8 @@ def brand_output(path: Path, instance_id: str, brand_name: str) -> None:
     policy = payload.setdefault("policy", {})
     if isinstance(policy, dict):
         policy["publication_date_provenance"] = (
-            "structured article date > article-scoped date after H1 > unique page date; ambiguous dates reject"
+            "autopublish only explicit article datePublished/article:published_time metadata; "
+            "plain/article-scoped dates are review-only and reject fail-closed"
         )
     for fact in payload.get("facts", []):
         if not isinstance(fact, dict):
@@ -144,16 +148,27 @@ def validate_only(instance_id: str) -> dict:
         "enabled_source_count": resolved["enabled_source_count"],
         "compatibility_source_count": len(registry["sources"]),
         "publication_date_guard": DATE_GUARD,
+        "autopublish_date_provenance": sorted(AUTOPUBLISH_DATE_PROVENANCE),
         "zero_paid_dependency": instance["policies"]["zero_paid_dependency"],
         "llm_required": instance["policies"]["llm_required"],
     }
 
 
+def strict_autopublish_date(text: str, timezone: ZoneInfo):
+    """Return a date only when explicit article publication metadata proves it."""
+    resolution = resolve_publication_date(text, timezone=timezone)
+    if resolution.status != "PASS_STRUCTURED_DATE":
+        return None
+    if resolution.provenance not in AUTOPUBLISH_DATE_PROVENANCE:
+        return None
+    return resolution.published_at
+
+
 def install_date_guard(legacy, timezone: ZoneInfo) -> None:
-    """Replace the compatibility crawler's first-page-date heuristic fail-closed."""
+    """Replace the compatibility crawler's permissive date heuristic fail-closed."""
 
     def guarded_extract_date(text: str):
-        return resolve_publication_date(text, timezone=timezone).published_at
+        return strict_autopublish_date(text, timezone)
 
     legacy.extract_date = guarded_extract_date
 
@@ -211,10 +226,36 @@ def self_test() -> int:
     assert test["zero_paid_dependency"] is True
     assert valcea["llm_required"] is False
     assert test["llm_required"] is False
+
+    tz = ZoneInfo("Europe/Bucharest")
+    explicit = (
+        '<html><head><meta property="article:published_time" '
+        'content="2026-08-16T07:30:00+03:00"></head>'
+        '<body><h1>Știre verificată suficient de descriptivă</h1></body></html>'
+    )
+    assert strict_autopublish_date(explicit, tz) is not None
+
+    # Regression: an event date placed beside/after the headline is not proof
+    # that the page itself was published that day.
+    event_date = (
+        '<html><body><h1>Florile Govorei – Ediția a 55-a – 15-16.08.2026</h1>'
+        '<div class="entry-content">Program 15-16.08.2026</div></body></html>'
+    )
+    assert strict_autopublish_date(event_date, tz) is None
+
+    # Regression: a generic service page with the site's/current day in its
+    # content or chrome must not become a fresh news item.
+    service_page = (
+        '<html><body><header>16/08/2026</header>'
+        '<h1>Declarare locuri de muncă vacante</h1>'
+        '<p>Serviciu permanent pentru angajatori.</p></body></html>'
+    )
+    assert strict_autopublish_date(service_page, tz) is None
+
     legacy = load_legacy_module()
-    install_date_guard(legacy, ZoneInfo("Europe/Bucharest"))
+    install_date_guard(legacy, tz)
     assert legacy.self_test() == 0
-    print("LOCAL NEWS OS instance-aware discovery adapter self-test: PASS")
+    print("LOCAL NEWS OS strict instance-aware discovery adapter self-test: PASS")
     return 0
 
 
