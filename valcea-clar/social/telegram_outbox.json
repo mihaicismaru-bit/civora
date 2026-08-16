@@ -81,17 +81,21 @@
     {
       "id": "telegram-story-olanesti-bridge-monitor",
       "story_id": "olanesti-bridge-monitor",
+      "status": "outbox_ready",
       "publication_mode": "durable_outbox_only",
+      "native_format": "text",
+      "format_family": "channel_update",
+      "message": [
+        "De știut — Podul pietonal-ciclist peste Olănești: dosarul de documentare rămâne deschis",
+        "Urmărim executanții, autorizațiile, situațiile de lucrări, plățile și termenele proiectului SMIS 334436.",
+        "Documentația tehnică identificată pentru proiectul «Creșterea mobilității urbane, pietonale și cicliste în Municipiul Râmnicu Vâlcea — Componenta II», SMIS 334436, include în zona de lângă Omniasig un nou pod exclusiv pietonal și ciclist."
+      ],
       "canonical_url": "https://valceaclar.ro/stiri/olanesti-bridge-monitor/",
+      "link_policy": "native_preferred",
       "source_preserving": true,
-      "high_signal": true,
-      "hashtags_default": false,
-      "generic_engagement_prompt_forbidden": true,
       "fake_urgency_forbidden": true,
       "verbatim_cross_platform_reuse_allowed": false,
-      "direct_publication_enabled": false,
-      "direct_publication_blocker": "telegram_direct_access_not_configured",
-      "generation_mode": "telegram_editorial_v1",
+      "edition_gate": false,
       "identity": {
         "brand_source": "valcea-clar/social/social_brand_system.json",
         "profile_source": "valcea-clar/social/profile_identity_system.json",
@@ -108,14 +112,7 @@
           "media_only_when_evidence_or_utility_improves": true,
           "source_link_required_when_article_exists": true
         }
-      },
-      "edition_gate": false,
-      "status": "outbox_ready",
-      "native_format": "text",
-      "format_family": "public_interest_update",
-      "message": "44,37 mil. lei pentru proiectul de pe Olănești\n\n• SMIS 334436 include, în zona Omniasig, un pod nou exclusiv pietonal și ciclist.\n\n• Contract principal: Ralunic + Dimex-2000 Company, 29,17 mil. lei fără TVA.\n\n• Documentele publice nu permit încă atribuirea lucrărilor vizibile unei firme anume din asociere/subcontractanților.\n\nDetalii și surse: https://valceaclar.ro/stiri/olanesti-bridge-monitor/",
-      "max_message_chars": 1050,
-      "product_fingerprint_sha256": "5082cb1dc3afbea832a90a17d7490b1be8b273a8405ba5f18eb83127e61e72c7"
+      }
     }
   ],
   "publication_model": "continuous_story_first",
