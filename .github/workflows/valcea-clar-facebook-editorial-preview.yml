@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "valcea-clar/social/facebook_editorial_preview.py"
+      - "valcea-clar/social/facebook_editorial_preview_v1_1.py"
       - "valcea-clar/social/facebook_visual_system.json"
       - "valcea-clar/social/story_visuals.json"
       - "valcea-clar/social/fetch_approved_photos.py"
@@ -30,9 +31,9 @@ jobs:
       - name: Fetch approved photographs
         run: python valcea-clar/social/fetch_approved_photos.py
       - name: Self-test Facebook packaging
-        run: python valcea-clar/social/facebook_editorial_preview.py --self-test
+        run: python valcea-clar/social/facebook_editorial_preview_v1_1.py --self-test
       - name: Render Facebook products
-        run: python valcea-clar/social/facebook_editorial_preview.py
+        run: python valcea-clar/social/facebook_editorial_preview_v1_1.py
       - name: Validate acceptance fixtures
         run: |
           python - <<'PY'
