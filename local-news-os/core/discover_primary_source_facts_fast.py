@@ -6,6 +6,11 @@ publication-date guard and legacy discovery semantics used by
 `discover_primary_source_facts.py`. It changes latency only, never the
 publication scope: automatically discovered records remain title/date/source
 candidates and cannot become full stories by themselves.
+
+Transport failures are also correlated by normalized source host. This lets a
+newsroom distinguish one host-level coverage incident from several unrelated
+source failures without weakening TLS, retrying through an untrusted transport,
+or changing editorial admission semantics.
 """
 from __future__ import annotations
 
@@ -16,6 +21,7 @@ import tempfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
 
 CORE = Path(__file__).resolve().parent
@@ -24,9 +30,67 @@ if str(CORE) not in sys.path:
     sys.path.insert(0, str(CORE))
 
 import discover_primary_source_facts as base  # noqa: E402
+import discovery_health as discovery_health  # noqa: E402
 
 DEFAULT_WORKERS = 6
 MAX_WORKERS = 8
+HOST_INCIDENT_MIN_FAILURES = 2
+
+
+def normalized_source_host(url: str) -> str:
+    host = (urlparse(str(url or "")).hostname or "").lower().strip(".")
+    return host.removeprefix("www.")
+
+
+def correlate_host_failures(sources: list[dict], rows: list[dict]) -> list[dict]:
+    """Group simultaneous failed source rows that share one source host.
+
+    The result is diagnostic only. It never changes source eligibility, retries,
+    TLS verification, fact admission, or publication. A group is emitted only
+    when at least two configured sources on the same normalized host fail in the
+    same discovery observation, which avoids turning isolated failures into
+    misleading host incidents.
+    """
+    source_by_id = {str(source.get("id")): source for source in sources}
+    grouped: dict[str, dict] = {}
+    for row in rows:
+        if bool(row.get("listing_ok")):
+            continue
+        source_id = str(row.get("source_id") or "")
+        source = source_by_id.get(source_id)
+        if not source:
+            continue
+        host = normalized_source_host(str(source.get("url") or ""))
+        if not host:
+            continue
+        group = grouped.setdefault(host, {
+            "host": host,
+            "status": "DEGRADED_HOST",
+            "failed_source_ids": [],
+            "error_categories": set(),
+            "correlated_failure": True,
+            "editorial_semantics_changed": False,
+        })
+        group["failed_source_ids"].append(source_id)
+        category = discovery_health.error_category(row.get("error")) or "UNKNOWN_ERROR"
+        group["error_categories"].add(category)
+
+    incidents: list[dict] = []
+    for host in sorted(grouped):
+        group = grouped[host]
+        source_ids = sorted(set(group["failed_source_ids"]))
+        if len(source_ids) < HOST_INCIDENT_MIN_FAILURES:
+            continue
+        incidents.append({
+            "host": host,
+            "status": group["status"],
+            "failed_source_count": len(source_ids),
+            "failed_source_ids": source_ids,
+            "error_categories": sorted(group["error_categories"]),
+            "correlated_failure": True,
+            "editorial_semantics_changed": False,
+        })
+    return incidents
 
 
 def run(instance_id: str, output: Path, state: Path, workers: int) -> int:
@@ -115,8 +179,9 @@ def run(instance_id: str, output: Path, state: Path, workers: int) -> int:
     }
     output.write_text(json.dumps(result_doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+    host_incidents = correlate_host_failures(sources, health)
     state_doc = {
-        "schema_version": "1.2",
+        "schema_version": "1.3",
         "observed_at": now.isoformat(timespec="seconds"),
         "execution_mode": "bounded_parallel",
         "max_parallel_sources": bounded_workers,
@@ -124,6 +189,8 @@ def run(instance_id: str, output: Path, state: Path, workers: int) -> int:
         "sources_ok": sum(1 for row in health if row.get("listing_ok")),
         "facts_admitted": len(facts),
         "facts_before_cross_source_headline_dedupe": len(all_facts),
+        "host_incident_count": len(host_incidents),
+        "host_incidents": host_incidents,
         "sources": health,
     }
     state.write_text(json.dumps(state_doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -137,6 +204,7 @@ def run(instance_id: str, output: Path, state: Path, workers: int) -> int:
         "sources_ok": state_doc["sources_ok"],
         "sources_total": state_doc["sources_total"],
         "facts_admitted": len(facts),
+        "host_incidents": len(host_incidents),
     }, ensure_ascii=False))
     return 0
 
@@ -152,6 +220,30 @@ def self_test() -> int:
         '<h1>Eveniment 16.08.2026</h1>',
         ZoneInfo("Europe/Bucharest"),
     ) is None
+
+    sources = [
+        {"id": "one", "url": "https://example.test/news"},
+        {"id": "two", "url": "https://www.example.test/decisions"},
+        {"id": "three", "url": "https://other.test/news"},
+    ]
+    rows = [
+        {"source_id": "one", "listing_ok": False,
+         "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed>"},
+        {"source_id": "two", "listing_ok": False,
+         "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed>"},
+        {"source_id": "three", "listing_ok": False,
+         "error": "socket timeout"},
+    ]
+    incidents = correlate_host_failures(sources, rows)
+    assert incidents == [{
+        "host": "example.test",
+        "status": "DEGRADED_HOST",
+        "failed_source_count": 2,
+        "failed_source_ids": ["one", "two"],
+        "error_categories": ["SSL_CERTIFICATE"],
+        "correlated_failure": True,
+        "editorial_semantics_changed": False,
+    }]
     print("LOCAL NEWS OS bounded-parallel discovery self-test: PASS")
     return 0
 
