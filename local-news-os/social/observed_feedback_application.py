@@ -13,7 +13,7 @@ import argparse
 import hashlib
 import json
 import math
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
@@ -435,6 +435,117 @@ def apply_observed_feedback(
     base["status"] = "APPLIED" if dimensions else "NO_MATCHING_HINTS"
     base["application_fingerprint_sha256"] = _digest(base)
     return base
+
+
+def _band(score: float) -> str:
+    if score >= 75.0:
+        return "strong"
+    if score >= 60.0:
+        return "useful"
+    if score >= 45.0:
+        return "modest"
+    return "low"
+
+
+def _publication_action(score: float, channel: dict[str, Any], cadence: dict[str, Any] | None, blocked: bool) -> str:
+    if blocked:
+        return "BLOCKED"
+    if _clean(channel.get("status")) == "outbox_only":
+        return "OUTBOX_ONLY"
+    if cadence is not None and cadence.get("eligible") is not True:
+        return "HOLD_TIMING"
+    if score >= 75.0:
+        return "PRIORITIZE"
+    if score >= 55.0:
+        return "ELIGIBLE"
+    return "ELIGIBLE_LOW_PRIORITY"
+
+
+def apply_to_virality(
+    channel: dict[str, Any],
+    feedback: dict[str, Any] | None,
+    story: dict[str, Any],
+    format_result: dict[str, Any],
+    base_virality: dict[str, Any],
+    *,
+    cadence: dict[str, Any] | None = None,
+    series: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Apply a valid observed-feedback adjustment without changing hard gates.
+
+    The returned bundle keeps the feedback audit separate from the virality decision.
+    When feedback is absent, invalid, insufficient, unmatched, or the base decision is
+    already blocked, ``virality`` is byte-for-byte-equivalent as a JSON object to the
+    supplied base decision. This avoids dedupe/state churn from unusable analytics.
+    """
+    if not isinstance(base_virality, dict):
+        raise TypeError("base_virality must be a mapping")
+    application = apply_observed_feedback(
+        channel,
+        feedback,
+        story,
+        format_result,
+        cadence=cadence,
+        series=series,
+    )
+    base = _clone(base_virality)
+    effective = application.get("applied") is True and base.get("blocked") is not True
+    bundle: dict[str, Any] = {
+        "schema_version": SCHEMA_VERSION,
+        "effective_applied": effective,
+        "feedback_application": application,
+        "virality": base,
+    }
+    if not effective:
+        bundle["bundle_fingerprint_sha256"] = _digest(bundle)
+        return bundle
+
+    adjustment = float(application.get("bounded_adjustment_points", 0.0) or 0.0)
+    original_score = float(base.get("score", 0.0) or 0.0)
+    adjusted_score = round(max(0.0, min(100.0, original_score + adjustment)), 2)
+
+    components = base.get("components") if isinstance(base.get("components"), dict) else {}
+    components = _clone(components)
+    components["observed_feedback"] = round(adjustment, 2)
+    base["components"] = components
+    base["score"] = adjusted_score
+    base["band"] = _band(adjusted_score)
+    base["publication_action"] = _publication_action(
+        adjusted_score,
+        channel,
+        cadence,
+        bool(base.get("blocked")),
+    )
+
+    reasons = base.get("reasons") if isinstance(base.get("reasons"), list) else []
+    reasons = [str(value) for value in reasons]
+    reasons.append(f"OBSERVED_FEEDBACK_APPLIED:{adjustment:+.2f}")
+    base["reasons"] = reasons
+
+    analytics = base.get("analytics") if isinstance(base.get("analytics"), dict) else {}
+    analytics = _clone(analytics)
+    analytics["observed_metrics_used"] = True
+    analytics["observed_feedback_adjustment_points"] = round(adjustment, 2)
+    analytics["observed_feedback_fingerprint_sha256"] = application.get("feedback_fingerprint_sha256")
+    analytics["predicted_analytics_used_for_feedback"] = False
+    base["analytics"] = analytics
+
+    guards = base.get("guards") if isinstance(base.get("guards"), dict) else {}
+    guards = _clone(guards)
+    guards["editorial_gates_weakened"] = False
+    guards["observed_feedback_bounded"] = True
+    guards["raw_reactions_optimized"] = False
+    guards["cross_channel_learning_used"] = False
+    guards["zero_paid_dependency"] = True
+    base["guards"] = guards
+
+    previous_fingerprint = _clean(base.get("decision_fingerprint_sha256")) or None
+    base["base_virality_decision_fingerprint_sha256"] = previous_fingerprint
+    base.pop("decision_fingerprint_sha256", None)
+    base["decision_fingerprint_sha256"] = _digest(base)
+    bundle["virality"] = base
+    bundle["bundle_fingerprint_sha256"] = _digest(bundle)
+    return bundle
 
 
 def _load(path: Path) -> dict[str, Any]:
