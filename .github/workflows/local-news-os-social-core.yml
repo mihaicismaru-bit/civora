@@ -54,6 +54,7 @@ jobs:
             local-news-os/social/correction_propagation.py \
             local-news-os/social/observed_metrics.py \
             local-news-os/social/observed_feedback_application.py \
+            local-news-os/social/observed_metrics_collector.py \
             local-news-os/social/publishing_adapters.py \
             local-news-os/social/multi_instance_isolation.py \
             local-news-os/social/e2e_acceptance.py \
@@ -74,6 +75,7 @@ jobs:
             local-news-os/social/test_observed_metrics.py \
             local-news-os/social/test_observed_feedback_application.py \
             local-news-os/social/test_observed_feedback_production_runtime.py \
+            local-news-os/social/test_observed_metrics_collector.py \
             local-news-os/social/test_publishing_adapters.py \
             local-news-os/social/test_multi_instance_isolation.py \
             local-news-os/social/test_e2e_acceptance.py \
@@ -127,6 +129,9 @@ jobs:
 
       - name: Run Observed Feedback Production Runtime integration tests
         run: python local-news-os/social/test_observed_feedback_production_runtime.py
+
+      - name: Run observed native-metrics collection and materialization tests
+        run: python local-news-os/social/test_observed_metrics_collector.py
 
       - name: Run Publishing Adapter Contract acceptance tests
         run: python local-news-os/social/test_publishing_adapters.py

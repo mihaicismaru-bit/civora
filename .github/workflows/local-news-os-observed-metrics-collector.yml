@@ -1,0 +1,75 @@
+name: LOCAL NEWS OS Observed Metrics Collector
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/social/observed_metrics.py"
+      - "local-news-os/social/observed_feedback_application.py"
+      - "local-news-os/social/durable_feedback_snapshot.py"
+      - "local-news-os/social/observed_metrics_collector.py"
+      - "local-news-os/social/test_observed_metrics_collector.py"
+      - "valcea-clar/social/channels/**"
+      - ".github/workflows/local-news-os-observed-metrics-collector.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/social/observed_metrics.py"
+      - "local-news-os/social/observed_feedback_application.py"
+      - "local-news-os/social/durable_feedback_snapshot.py"
+      - "local-news-os/social/observed_metrics_collector.py"
+      - "local-news-os/social/test_observed_metrics_collector.py"
+      - "valcea-clar/social/channels/**"
+      - ".github/workflows/local-news-os-observed-metrics-collector.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-news-os-observed-metrics-collector-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile observed-metrics collection stack
+        run: |
+          python -m py_compile \
+            local-news-os/social/observed_metrics.py \
+            local-news-os/social/observed_feedback_application.py \
+            local-news-os/social/durable_feedback_snapshot.py \
+            local-news-os/social/observed_metrics_collector.py \
+            local-news-os/social/test_observed_metrics_collector.py
+
+      - name: Run observed native-metrics collector acceptance tests
+        run: python local-news-os/social/test_observed_metrics_collector.py
+
+      - name: Validate Vâlcea observed-only channel contracts
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          for platform in ('facebook', 'instagram', 'tiktok', 'youtube', 'threads', 'linkedin', 'telegram', 'whatsapp'):
+              channel = json.loads(Path(f'valcea-clar/social/channels/{platform}.json').read_text(encoding='utf-8'))
+              metrics = channel.get('metrics', {})
+              if metrics.get('observed_only') is not True:
+                  raise SystemExit(f'{platform}: metrics must remain observed-only')
+              if channel.get('zero_paid_dependency') is not True:
+                  raise SystemExit(f'{platform}: zero-paid dependency violated')
+              sources = metrics.get('sources')
+              if not isinstance(sources, list) or not all(isinstance(item, str) and item.strip() for item in sources):
+                  raise SystemExit(f'{platform}: metrics.sources must be a list of verified source identifiers')
+              if sources:
+                  print(f'{platform}: PASS ({", ".join(sources)})')
+              else:
+                  print(f'{platform}: PASS (collection disabled until a native/free source is verified)')
+          PY
