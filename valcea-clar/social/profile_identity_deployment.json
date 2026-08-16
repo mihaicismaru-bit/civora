@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "product": "VÂLCEA CLAR Profile Identity Deployment Control",
+  "identity_source": "valcea-clar/social/profile_identity_system.json",
+  "asset_generator": "valcea-clar/social/build_profile_identity_assets.py",
+  "policy": {
+    "asset_ready_does_not_mean_live": true,
+    "never_claim_live_without_remote_ack_or_readback": true,
+    "profile_mutation_must_be_separate_from_story_publication": true,
+    "live_apply_requires_explicit_runtime_enable": true,
+    "credential_values_must_never_be_persisted": true,
+    "unsupported_or_unverified_mutation_paths_fail_closed": true
+  },
+  "platforms": {
+    "facebook": {
+      "asset_status": "READY",
+      "avatar_asset": "facebook-avatar.png",
+      "header_asset": "facebook-header.jpg",
+      "deployment_mode": "NOT_AUTOMATED",
+      "api_capability_status": "PROFILE_MUTATION_PATH_NOT_VERIFIED",
+      "live_status": "UNCONFIRMED",
+      "notes": "Story publishing through Meta is a separate adapter and does not imply profile avatar/cover deployment."
+    },
+    "instagram": {
+      "asset_status": "READY",
+      "avatar_asset": "instagram-avatar.png",
+      "deployment_mode": "NOT_AUTOMATED",
+      "api_capability_status": "PROFILE_MUTATION_PATH_NOT_VERIFIED",
+      "live_status": "UNCONFIRMED"
+    },
+    "x": {
+      "asset_status": "READY",
+      "avatar_asset": "x-avatar.png",
+      "header_asset": "x-header.jpg",
+      "deployment_mode": "NOT_AUTOMATED",
+      "api_capability_status": "PROFILE_MUTATION_ACCESS_NOT_CONFIGURED",
+      "live_status": "UNCONFIRMED"
+    },
+    "threads": {
+      "asset_status": "READY",
+      "avatar_asset": "threads-avatar.png",
+      "deployment_mode": "NOT_AUTOMATED",
+      "api_capability_status": "PROFILE_MUTATION_PATH_NOT_VERIFIED",
+      "live_status": "UNCONFIRMED"
+    },
+    "tiktok": {
+      "asset_status": "READY",
+      "avatar_asset": "tiktok-avatar.png",
+      "deployment_mode": "NOT_AUTOMATED",
+      "api_capability_status": "PROFILE_MUTATION_ACCESS_NOT_CONFIGURED",
+      "live_status": "UNCONFIRMED"
+    },
+    "youtube": {
+      "asset_status": "READY",
+      "avatar_asset": "youtube-avatar.png",
+      "header_asset": "youtube-header.jpg",
+      "deployment_mode": "API_GATED_BANNER_ONLY",
+      "api_capability_status": "OFFICIAL_BANNER_API_VERIFIED",
+      "live_status": "UNCONFIRMED",
+      "banner_api": {
+        "upload_method": "channelBanners.insert",
+        "apply_method": "channels.update",
+        "readback_method": "channels.list",
+        "minimum_width": 2048,
+        "minimum_height": 1152,
+        "recommended_width": 2560,
+        "recommended_height": 1440,
+        "max_bytes": 6291456,
+        "official_reference": "https://developers.google.com/youtube/v3/docs/channelBanners/insert",
+        "official_channels_update_reference": "https://developers.google.com/youtube/v3/docs/channels/update",
+        "last_verified": "2026-08-16"
+      },
+      "runtime": {
+        "enable_env": "VALCEA_YOUTUBE_PROFILE_LIVE_ENABLED",
+        "oauth_env": "VALCEA_YOUTUBE_OAUTH_ACCESS_TOKEN"
+      },
+      "notes": "Avatar deployment is not automated by this adapter; only the banner has a verified API mutation path."
+    },
+    "linkedin": {
+      "asset_status": "READY",
+      "avatar_asset": "linkedin-avatar.png",
+      "header_asset": "linkedin-header.jpg",
+      "deployment_mode": "NOT_AUTOMATED",
+      "api_capability_status": "PROFILE_MUTATION_ACCESS_NOT_CONFIGURED",
+      "live_status": "UNCONFIRMED"
+    },
+    "telegram": {
+      "asset_status": "READY",
+      "avatar_asset": "telegram-avatar.png",
+      "deployment_mode": "NOT_AUTOMATED",
+      "api_capability_status": "PROFILE_MUTATION_ACCESS_NOT_CONFIGURED",
+      "live_status": "UNCONFIRMED"
+    },
+    "whatsapp": {
+      "asset_status": "READY",
+      "avatar_asset": "whatsapp-avatar.png",
+      "deployment_mode": "NOT_AUTOMATED",
+      "api_capability_status": "PROFILE_MUTATION_ACCESS_NOT_CONFIGURED",
+      "live_status": "UNCONFIRMED"
+    }
+  },
+  "quality_gate": {
+    "all_identity_platforms_must_have_deployment_state": true,
+    "all_ready_assets_must_be_generated_by_canonical_builder": true,
+    "live_status_cannot_be_true_from_local_generation": true,
+    "youtube_banner_apply_requires_explicit_enable_and_oauth": true,
+    "youtube_banner_apply_requires_remote_readback": true
+  }
+}
