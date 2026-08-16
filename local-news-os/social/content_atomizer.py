@@ -47,6 +47,28 @@ def _hard_blocks(story: dict[str, Any]) -> list[str]:
     return blocks
 
 
+def _source_identity_payload(story: dict[str, Any]) -> dict[str, Any]:
+    """Return only source/editorial fields that can legitimately affect atom output.
+
+    Operational scores, observed/predictive analytics and arbitrary upstream metadata
+    are deliberately excluded. This keeps product/dedupe identity stable when such
+    non-content fields are attached to the same verified fact kernel.
+    """
+    return {
+        "instance_id": _clean_text(story.get("instance_id")) or None,
+        "story_id": _clean_text(story.get("story_id") or story.get("id")) or None,
+        "material_fact_gate": _clean_text(story.get("material_fact_gate") or "PASS").upper(),
+        "headline": copy.deepcopy(story.get("headline")),
+        "dek": copy.deepcopy(story.get("dek")),
+        "paragraphs": copy.deepcopy(_as_list(story.get("paragraphs"))),
+        "facts": copy.deepcopy(_as_list(story.get("facts"))),
+        "quotes": copy.deepcopy(_as_list(story.get("quotes"))),
+        "topics": [str(v).strip() for v in _as_list(story.get("topics")) if str(v).strip()],
+        "risk_flags": [str(v).strip() for v in _as_list(story.get("risk_flags")) if str(v).strip()],
+        "correction": story.get("correction") is True,
+    }
+
+
 def _atom_id(story_id: str, atom_type: str, ordinal: int, payload: Any) -> str:
     digest = _digest(
         {
@@ -104,7 +126,7 @@ def atomize_story(story: dict[str, Any]) -> dict[str, Any]:
     instance_id = _clean_text(story.get("instance_id"))
     story_id = _clean_text(story.get("story_id") or story.get("id"))
     gate = _clean_text(story.get("material_fact_gate") or "PASS").upper()
-    source_fingerprint = _digest(story)
+    source_fingerprint = _digest(_source_identity_payload(story))
 
     base = {
         "schema_version": "1.0",
