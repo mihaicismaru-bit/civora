@@ -5,7 +5,8 @@ This module composes the dependency-free social core into one deterministic,
 fail-closed per-story/per-channel execution path:
 
 CHANNEL FIT -> ATOMIZER -> SAFE HOOK -> NATIVE FORMAT -> REAL VISUALS ->
-LINK POLICY -> CADENCE/FATIGUE -> VIRALITY -> PUBLICATION STATE.
+LINK POLICY -> CADENCE/FATIGUE -> VIRALITY -> OPTIONAL OBSERVED FEEDBACK ->
+PUBLICATION STATE.
 
 It deliberately does *not* dispatch network requests or read credential values.
 Publishing adapters remain a separate boundary. A successful run returns the
@@ -31,6 +32,7 @@ import channel_fit
 import content_atomizer
 import format_engine
 import hook_engine
+import observed_feedback_application
 import publication_state
 import virality_engine
 import visual_router
@@ -46,6 +48,7 @@ PIPELINE_ORDER = [
     "link_policy",
     "cadence_fatigue",
     "virality_engine",
+    "observed_feedback",
     "publication_state",
 ]
 
@@ -187,6 +190,7 @@ def _pipeline_fingerprint(
     link = artifacts.get("link_binding") if isinstance(artifacts.get("link_binding"), dict) else {}
     cadence = artifacts.get("cadence") if isinstance(artifacts.get("cadence"), dict) else {}
     virality = artifacts.get("virality") if isinstance(artifacts.get("virality"), dict) else {}
+    feedback = artifacts.get("observed_feedback") if isinstance(artifacts.get("observed_feedback"), dict) else {}
     publication = artifacts.get("publication") if isinstance(artifacts.get("publication"), dict) else {}
     record = publication.get("record") if isinstance(publication.get("record"), dict) else {}
     return _digest(
@@ -202,6 +206,7 @@ def _pipeline_fingerprint(
             "link_binding_fingerprint_sha256": link.get("binding_fingerprint_sha256"),
             "cadence_decision_fingerprint_sha256": cadence.get("decision_fingerprint_sha256"),
             "virality_decision_fingerprint_sha256": virality.get("decision_fingerprint_sha256"),
+            "observed_feedback_application_fingerprint_sha256": feedback.get("application_fingerprint_sha256"),
             "publication_id": record.get("publication_id"),
             "stage_path": [(row.get("name"), row.get("status")) for row in stages],
         }
@@ -271,12 +276,15 @@ def orchestrate_channel(
     human_approved: bool = False,
     canonical_url: str | None = None,
     series_decision: dict[str, Any] | None = None,
+    observed_feedback: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Build one native social publication and register its durable state.
 
     The function is deterministic for identical inputs. It has no side effects and
     performs no adapter/network dispatch. Callers persist ``artifacts.publication.ledger``
     only after this function returns; repeated calls with that ledger are idempotent.
+    Observed feedback is optional and can only contribute a bounded ranking adjustment;
+    invalid feedback is ignored without changing the underlying publication decision.
     """
     required = (story, channel, media_inventory, cadence_history)
     if not all(isinstance(value, dict) for value in required):
@@ -285,6 +293,8 @@ def orchestrate_channel(
         raise TypeError("ledger must be a mapping when provided")
     if series_decision is not None and not isinstance(series_decision, dict):
         raise TypeError("series_decision must be a mapping when provided")
+    if observed_feedback is not None and not isinstance(observed_feedback, dict):
+        raise TypeError("observed_feedback must be a mapping when provided")
     if not _clean(now):
         raise ValueError("now is required and must be timezone-aware")
 
@@ -387,6 +397,38 @@ def orchestrate_channel(
         return _finish(story=story, channel=channel, stages=stages, artifacts=artifacts, blocked=True, disposition="BLOCKED_VIRALITY", hard_blocks=reasons)
     _stage(stages, "virality_engine", "PASS", fingerprint=_clean(virality.get("decision_fingerprint_sha256")))
 
+    if observed_feedback is not None:
+        feedback_bundle = observed_feedback_application.apply_to_virality(
+            channel,
+            observed_feedback,
+            story,
+            formatted,
+            virality,
+            cadence=cadence,
+            series=series_decision,
+        )
+        feedback_application = feedback_bundle["feedback_application"]
+        artifacts["observed_feedback"] = feedback_application
+        virality = feedback_bundle["virality"]
+        artifacts["virality"] = virality
+        feedback_status = _clean(feedback_application.get("status"))
+        if feedback_bundle.get("effective_applied") is True:
+            stage_status = "PASS"
+            stage_reasons = [f"BOUNDED_ADJUSTMENT:{float(feedback_application.get('bounded_adjustment_points', 0.0)):+.2f}"]
+        elif feedback_status == "IGNORED_INVALID":
+            stage_status = "IGNORED"
+            stage_reasons = [str(value) for value in feedback_application.get("feedback_blocks", [])]
+        else:
+            stage_status = "NOOP"
+            stage_reasons = [feedback_status] if feedback_status else []
+        _stage(
+            stages,
+            "observed_feedback",
+            stage_status,
+            reasons=stage_reasons,
+            fingerprint=_clean(feedback_application.get("application_fingerprint_sha256")),
+        )
+
     prepared = publication_state.prepare_publication(
         formatted,
         virality,
@@ -421,6 +463,7 @@ def main() -> int:
     parser.add_argument("--now", required=True, help="timezone-aware ISO-8601 instant")
     parser.add_argument("--ledger", type=Path)
     parser.add_argument("--series-decision", type=Path)
+    parser.add_argument("--observed-feedback", type=Path)
     parser.add_argument("--canonical-url")
     parser.add_argument("--human-approved", action="store_true")
     parser.add_argument("--output", type=Path)
@@ -436,6 +479,7 @@ def main() -> int:
         human_approved=args.human_approved,
         canonical_url=args.canonical_url,
         series_decision=_load(args.series_decision) if args.series_decision else None,
+        observed_feedback=_load(args.observed_feedback) if args.observed_feedback else None,
     )
     payload = json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
     if args.output:
