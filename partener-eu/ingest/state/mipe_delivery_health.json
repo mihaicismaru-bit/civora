@@ -1,6 +1,6 @@
 {
-  "asOf": "2026-08-14T19:29:17Z",
-  "status": "LIVE_SURFACE_VERIFIED",
+  "asOf": "2026-08-16T06:31:17Z",
+  "status": "LIVE_DEPLOYMENT_VERIFIED_SOURCE_DEGRADED",
   "sourceHealth": {
     "prioritySeed": "https://mfe.gov.ro/pdds/despre-program-programare/",
     "prioritySeedStatus": "TIMEOUT",
@@ -9,30 +9,41 @@
     "mipeRootStatus": "TIMEOUT",
     "peoRootStatus": "TIMEOUT",
     "poidsRootStatus": "TIMEOUT",
-    "mipeGovRootStatus": "TIMEOUT",
     "webIndexNewCanonicalUrls": 0,
-    "policy": "fail-closed; preserve last-known-good; never infer OPEN from ambiguous text"
+    "policy": "fail-closed; direct canonical official fetch required for facts; preserve last-known-good; never infer OPEN from ambiguous text"
   },
   "ingestionOutput": {
-    "status": "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
+    "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
     "verifiedItemCount": 1,
-    "verifiedNewItemCount": 0,
-    "output": "partener-eu/web/mipe-news.js"
+    "verifiedNewItemCountSincePreviousObservation": 1,
+    "output": "partener-eu/web/mipe-news.js",
+    "latestVerifiedItem": {
+      "kind": "OFFICIAL_UPDATE",
+      "source": "MIPE / MySMIS",
+      "verification": "CANONICAL_OFFICIAL_FETCH",
+      "observedAt": "2026-08-16T04:32:02.014794+00:00",
+      "validatedCallCount": 909,
+      "explicitStatus": "FINALIZAT",
+      "openInferred": false
+    }
   },
   "delivery": {
     "githubPagesConfiguredCname": "partener.eu",
     "githubPagesBuildType": "workflow",
-    "latestPagesRunId": 31829148978,
+    "latestPagesRunId": 31931459201,
     "latestPagesBuildObserved": "success",
-    "latestPagesCompletedAt": "2026-08-14T18:33:04Z",
-    "publicSurfaceCheck": "https://partener.eu/ returned the current PARTENER.EU funding application shell during verification",
+    "latestPagesCompletedAt": "2026-08-16T06:27:42Z",
+    "deployedGitSha": "a3b7653b248dc99908287a4a00195efd39ebe26f",
+    "pagesUrl": "http://partener.eu/",
     "newsAssetWired": true,
     "newsAsset": "partener-eu/web/mipe-news.js",
-    "result": "current PARTENER.EU Pages surface verified; no new verified MIPE item required a new News deployment in this check"
+    "artifactContainsNewsAsset": true,
+    "result": "verified MySMIS last-known-good item is present in the deployed Pages artifact; direct MIPE source remains degraded"
   },
   "provenance": {
     "directOfficialFetchOnlyForFacts": true,
     "searchIndexDiscoveryOnly": true,
+    "pddsDiscoveryRestrictedToPrioritySeedCrawl": true,
     "mirrorCopiesPublishedAsMipeFacts": false,
     "lastKnownGoodPreserved": true
   }
