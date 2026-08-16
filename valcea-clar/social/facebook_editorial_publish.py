@@ -26,9 +26,12 @@ fb = patch.impl
 ROOT = Path(__file__).resolve().parents[2]
 VC = ROOT / "valcea-clar"
 STATE = VC / "social" / "facebook_state.json"
+OUTBOX = VC / "social" / "facebook_outbox.json"
 VISUALS = VC / "social" / "story_visuals.json"
 SYSTEM = VC / "social" / "facebook_visual_system.json"
-RUNTIME = VC / "social" / "runtime" / "editorial" / "facebook"
+# Persist inside the canonical site runtime media tree. The social workflow
+# already conflict-safely persists this subtree after every production run.
+RUNTIME = VC / "site" / "runtime" / "media" / "social" / "editorial" / "facebook"
 DEFAULT_GRAPH_VERSION = "v26.0"
 LIVE_ENABLE_ENV = "VALCEA_FB_EDITORIAL_LIVE_ENABLED"
 ADAPTER_VERSION = "facebook-editorial-v1.0"
@@ -57,6 +60,28 @@ def utc_now() -> str:
 def state_key(story_id: str) -> str:
     # Preserve legacy identity so the old and new adapters share one dedupe key.
     return f"story-{story_id}"
+
+
+def legacy_ready_story_ids() -> set[str]:
+    """Reuse the canonical newsroom/story-ready decision already materialized in outbox.
+
+    The editorial adapter adds Facebook-specific interest/visual gates, but it
+    must never broaden the set of stories accepted by the existing newsroom
+    readiness path.
+    """
+    outbox = load(OUTBOX, {"items": []})
+    ready: set[str] = set()
+    for item in outbox.get("items", []):
+        if not isinstance(item, dict) or item.get("status") != "ready":
+            continue
+        platforms = item.get("platforms") if isinstance(item.get("platforms"), dict) else {}
+        facebook = platforms.get("facebook") if isinstance(platforms.get("facebook"), dict) else {}
+        if facebook.get("status") != "ready":
+            continue
+        story_id = str(item.get("source_story_id") or "").strip()
+        if story_id:
+            ready.add(story_id)
+    return ready
 
 
 def render_product(story: dict[str, Any], visual: dict[str, Any], system: dict[str, Any]) -> dict[str, Any]:
@@ -105,6 +130,7 @@ def plan_products() -> dict[str, Any]:
     system = load(SYSTEM)
     state = load(STATE, {"schema_version": "3.0", "published": {}})
     published = state.get("published") if isinstance(state.get("published"), dict) else {}
+    newsroom_ready = legacy_ready_story_ids()
     products: list[dict[str, Any]] = []
     holds: list[dict[str, Any]] = []
     skipped: list[dict[str, Any]] = []
@@ -113,6 +139,9 @@ def plan_products() -> dict[str, Any]:
         key = state_key(story_id)
         if key in published:
             skipped.append({"story_id": story_id, "state_key": key, "reason": "already_published"})
+            continue
+        if story_id not in newsroom_ready:
+            holds.append({"story_id": story_id, "reason": "canonical_story_readiness_gate_not_ready"})
             continue
         visual = fb.visual_for(story_id, visuals)
         ok, reason = fb.interest_gate(story, visual)
@@ -225,11 +254,13 @@ def _fixture_product(story_id: str) -> dict[str, Any]:
 def self_test() -> int:
     assert state_key("abc") == "story-abc"
     assert "editorial_composite" != "photograph"
+    assert "olanesti-bridge-monitor" in legacy_ready_story_ids()
     product = _fixture_product("olanesti-bridge-monitor")
     assert product["state_key"] == "story-olanesti-bridge-monitor"
     assert product["asset"]["kind"] == "editorial_composite"
     assert product["asset"]["synthetic"] is False
     assert product["asset"]["source_photo"]["kind"] == "photograph"
+    assert product["asset"]["rendered_path"].startswith("valcea-clar/site/runtime/media/social/editorial/facebook/")
     assert "Ralunic + Dimex-2000 Company" in product["body"]
     assert product["canonical_url"].endswith("/stiri/olanesti-bridge-monitor/")
 
@@ -265,7 +296,6 @@ def self_test() -> int:
     assert b"44,37 mil. lei" in captured["body"]
     assert b"access_token" in captured["body"]
     assert b"fixture-token-never-logged" in captured["body"]
-    # Runtime composite created only for test/workflow use; it is not a source photo.
     runtime_path = ROOT / str(product["asset"]["rendered_path"])
     assert runtime_path.is_file() and runtime_path.stat().st_size > 30_000
     print("VÂLCEA CLAR Facebook editorial adapter v1 self-test: PASS")
