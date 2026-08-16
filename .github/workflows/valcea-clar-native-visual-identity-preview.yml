@@ -1,0 +1,93 @@
+name: VÂLCEA CLAR Native Visual Identity Preview
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/social/render_native_visual_identity_previews.py"
+      - "valcea-clar/social/native_platform_identity_system.json"
+      - "valcea-clar/social/native_identity.py"
+      - "valcea-clar/social/social_brand_system.json"
+      - ".github/workflows/valcea-clar-native-visual-identity-preview.yml"
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/social/render_native_visual_identity_previews.py"
+      - "valcea-clar/social/native_platform_identity_system.json"
+      - "valcea-clar/social/native_identity.py"
+      - "valcea-clar/social/social_brand_system.json"
+      - ".github/workflows/valcea-clar-native-visual-identity-preview.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  render-and-validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install deterministic renderer
+        run: python -m pip install --disable-pip-version-check Pillow==12.3.0
+
+      - name: Compile native visual renderer
+        run: python -m py_compile valcea-clar/social/render_native_visual_identity_previews.py
+
+      - name: Run renderer self-test
+        run: python valcea-clar/social/render_native_visual_identity_previews.py --self-test
+
+      - name: Render native visual identity proofs
+        run: python valcea-clar/social/render_native_visual_identity_previews.py > /tmp/native-visual-preview.json
+
+      - name: Assert design-only output contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('valcea-clar/social/previews/native-identity-v1')
+          manifest = json.loads((root / 'manifest.json').read_text(encoding='utf-8'))
+          if manifest.get('execution_mode') != 'DESIGN_PREVIEW_ONLY_NOT_FOR_PUBLICATION':
+              raise SystemExit('native visual previews may not become publishable products')
+          if manifest.get('fixture_publication_allowed') is not False:
+              raise SystemExit('fixture must remain non-publishable')
+          if manifest.get('media_policy') != 'no_fabricated_photo_or_video':
+              raise SystemExit('fabricated media protection missing')
+          expected = {
+              'linkedin-portrait': (1200, 1500),
+              'linkedin-landscape': (1200, 627),
+              'tiktok-first-frame': (1080, 1920),
+              'youtube-thumbnail': (1280, 720),
+          }
+          rows = {row['asset_id']: row for row in manifest.get('assets', [])}
+          if set(rows) != set(expected):
+              raise SystemExit(f'unexpected native preview asset set: {sorted(rows)}')
+          for asset_id, size in expected.items():
+              row = rows[asset_id]
+              if (row.get('width'), row.get('height')) != size:
+                  raise SystemExit(f'{asset_id}: wrong dimensions')
+              if int(row.get('bytes') or 0) < 18000:
+                  raise SystemExit(f'{asset_id}: suspiciously small render')
+              file_name = str(row.get('file') or '').lower()
+              if any(token in file_name for token in ('real-photo', 'real-video', 'live-footage')):
+                  raise SystemExit(f'{asset_id}: preview filename falsely implies real media')
+          fixture = manifest.get('fixture') or {}
+          if fixture.get('publication_allowed') is not False:
+              raise SystemExit('fixture publication flag drifted')
+          print('VÂLCEA CLAR native visual identity proof contract: PASS')
+          PY
+
+      - name: Upload native visual identity proofs
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-native-visual-identity-${{ github.run_id }}
+          path: |
+            valcea-clar/social/previews/native-identity-v1
+            valcea-clar/social/native_platform_identity_system.json
+          if-no-files-found: error
+          retention-days: 30
