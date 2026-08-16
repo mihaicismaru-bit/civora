@@ -58,6 +58,24 @@
         "sports-source monitoring without automatic publication"
       ],
       "core_feedback": "LOCAL NEWS OS needs a generic SOCIAL_EMBED source contract that resolves the canonical platform post URL or post ID and absolute platform timestamp, preserves account provenance, rejects crawl-relative time labels as published_at, and keeps social claims fail-closed until independently corroborated when material."
+    },
+    {
+      "id": "cj-valcea-achizitii-publice",
+      "publisher": "Consiliul Județean Vâlcea — Achiziții publice",
+      "url": "https://cjvalcea.ro/informatii-de-interes-public/achizitii-publice/anunturi-publicitare-documentatie-de-atribuire/",
+      "tier": "T1",
+      "section": "BANI_PUBLICI",
+      "status": "QUARANTINED_OFFICIAL_TABLE_REGISTER",
+      "checked_at": "2026-08-16",
+      "reason": "The official CJ Vâlcea procurement page exposes high-value row-level evidence — notice identifier, notice date, procurement description and linked files — but it is an HTML register rather than an article feed. The current automatic news adapter is publication-date/article oriented and must not invent published_at from a row date or collapse generic 'Vizualizare' links into headlines. The source is therefore preserved for monitoring and verification but excluded from automatic publication.",
+      "safe_use": [
+        "manual discovery of county procurement notices",
+        "primary-source verification of notice identifier and notice date",
+        "verification of procurement description, deadline and attached procurement documents",
+        "public-money and infrastructure research",
+        "cross-checking later award or contract reporting against the original notice"
+      ],
+      "core_feedback": "This confirms the existing generic DOCUMENT_REGISTER requirement with an HTML-table variant: LOCAL NEWS OS should extract row_id, row_date, row_description and canonical evidence links deterministically, keep row_date distinct from published_at, preserve source-table provenance, and admit nothing automatically when a stable row identity or date cannot be proven."
     }
   ]
 }
