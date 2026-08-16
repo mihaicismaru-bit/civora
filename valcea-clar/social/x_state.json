@@ -1,12 +1,26 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "platform": "x",
   "execution_owner": "civora_site_engine",
   "publication_model": "continuous_story_first",
   "published": {},
   "failures": {},
   "direct_publication_enabled": false,
-  "blocker": "x_api_pay_per_use_conflicts_zero_paid_dependency",
+  "blocker": "x_api_pay_per_use_requires_explicit_credit_purchase_zero_paid_policy_keeps_direct_disabled",
   "identity_source": "valcea-clar/social/native_platform_identity_system.json",
-  "identity_channel_id": "valcea-x"
+  "identity_channel_id": "valcea-x",
+  "credential_contract": "oauth1_user_context_four_secret_refs",
+  "credential_references": [
+    "VALCEA_X_API_KEY",
+    "VALCEA_X_API_SECRET",
+    "VALCEA_X_ACCESS_TOKEN",
+    "VALCEA_X_ACCESS_TOKEN_SECRET"
+  ],
+  "credential_presence_verified": true,
+  "credential_presence_verified_at": "2026-08-16T18:11:12Z",
+  "network_identity_verified": false,
+  "network_identity_verification_deferred_reason": "avoid_paid_api_call_before_explicit_billing_approval",
+  "billing_approved": false,
+  "credential_link_activation_baseline_event_fingerprint": "ba8ef14ad2842dacc95d92c06d71e97a67d38669d820cd997815bc939543545b",
+  "credential_link_activation_baselined_at": "2026-08-16T18:11:12Z"
 }
