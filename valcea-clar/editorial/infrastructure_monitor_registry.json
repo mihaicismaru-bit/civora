@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "instance_id": "valcea",
+  "product": "VÂLCEA CLAR infrastructure monitor extension",
+  "execution_owner": "CIVORA_SITE_ENGINE",
+  "state_owner": "GITHUB_REPOSITORY",
+  "policy": {
+    "monitor_is_not_story": true,
+    "public_projection": false,
+    "source_change_is_not_material_fact": true,
+    "publication_requires_normal_story_ready_gate": true,
+    "primary_document_or_official_statement_required_for_result_claim": true
+  },
+  "monitors": [
+    {
+      "id": "a1-valcea-connectivity-watch",
+      "label": "A1 & conexiunile Vâlcii — infrastructură rutieră",
+      "section": "INFRASTRUCTURĂ",
+      "status": "ACTIVE_REVERIFY",
+      "priority": 94,
+      "purpose": "Urmărește autonom lucrările și deciziile care determină conectarea efectivă a județului Vâlcea și a municipiului Râmnicu Vâlcea la A1 Sibiu–Pitești: secțiunile montane relevante, DN73C și coridorul de mare viteză Găneasa–Râmnicu Vâlcea–Tigveni.",
+      "publication_mode": "EXPLAINER_OR_STORY_ONLY_AFTER_VERIFIED_MATERIAL_CHANGE",
+      "source_bindings": [
+        {
+          "ref_type": "url",
+          "id": "cnair-official",
+          "publisher": "Compania Națională de Administrare a Infrastructurii Rutiere",
+          "url": "https://www.cnair.ro/",
+          "tier": "T1",
+          "probe": true,
+          "match_terms": [
+            "Sibiu-Pitești",
+            "Sibiu - Pitești",
+            "Boița",
+            "Cornetu",
+            "Tigveni",
+            "DN 73C",
+            "DN73C",
+            "Râmnicu Vâlcea"
+          ]
+        },
+        {
+          "ref_type": "url",
+          "id": "transporturi-official",
+          "publisher": "Ministerul Transporturilor și Infrastructurii",
+          "url": "https://www.mt.ro/",
+          "tier": "T1",
+          "probe": true,
+          "match_terms": [
+            "Sibiu-Pitești",
+            "Tigveni",
+            "Râmnicu Vâlcea",
+            "DN 73C",
+            "Găneasa"
+          ]
+        },
+        {
+          "ref_type": "url",
+          "id": "seap-public-infrastructure",
+          "publisher": "SEAP / e-licitatie.ro",
+          "url": "https://www.e-licitatie.ro/pub",
+          "tier": "T1",
+          "probe": false,
+          "match_terms": []
+        }
+      ],
+      "recovered_leads": [
+        {
+          "id": "a1-section-2-boita-cornetu",
+          "label": "A1 Secțiunea 2 Boița–Cornetu",
+          "verification_status": "REVERIFY_CURRENT_PROGRESS",
+          "public_projection": false,
+          "recovery_note": "Monitor recuperat din fluxul editorial din 13 august 2026. Se urmăresc progresul fizic, tunelurile și viaductele, autorizațiile, acordurile de mediu, mobilizarea, termenele și eventualele blocaje. Orice procent sau termen se republică numai după reverificare în sursă oficială."
+        },
+        {
+          "id": "a1-section-3-cornetu-tigveni",
+          "label": "A1 Secțiunea 3 Cornetu–Tigveni",
+          "verification_status": "REVERIFY_CURRENT_PROGRESS",
+          "public_projection": false,
+          "recovery_note": "Monitor recuperat. Se urmăresc progresul fizic, fronturile autorizate, acordul revizuit de mediu, autorizațiile de construire, lucrările pe structuri și termenele."
+        },
+        {
+          "id": "a1-section-4-tigveni-curtea-de-arges",
+          "label": "A1 Secțiunea 4 Tigveni–Curtea de Argeș",
+          "verification_status": "REVERIFY_OPENING_AND_COMPLETION",
+          "public_projection": false,
+          "recovery_note": "Monitor recuperat. Se urmăresc finalizarea lucrărilor, tunelul Momaia, testele/recepția, sistemele ITS și data reală a deschiderii circulației."
+        },
+        {
+          "id": "dn73c-tigveni-ramnicu-valcea",
+          "label": "DN73C Tigveni–Râmnicu Vâlcea — legătura cu A1",
+          "verification_status": "REVERIFY_PROCUREMENT_AND_DESIGN",
+          "public_projection": false,
+          "recovery_note": "Monitor recuperat pentru legătura imediată Râmnicu Vâlcea–A1. Se urmăresc Lotul 1 Curtea de Argeș–Tigveni, Lotul 2 Tigveni–Râmnicu Vâlcea, traseul nou către nodul Tigveni, indicatorii tehnico-economici, licitațiile, proiectarea și execuția."
+        },
+        {
+          "id": "ganesa-ramnicu-valcea-tigveni-corridor",
+          "label": "Drum de mare viteză Găneasa–Râmnicu Vâlcea–Tigveni",
+          "verification_status": "REVERIFY_PREFEASIBILITY_AND_APPROVALS",
+          "public_projection": false,
+          "recovery_note": "Monitor recuperat distinct de DN73C. Se urmăresc studiul de prefezabilitate, analiza cost-beneficiu, avizarea, indicatorii/HG, eventualul studiu de fezabilitate, proiectarea, licitația și finanțarea. Nu se confundă cu modernizarea DN73C."
+        }
+      ],
+      "close_when": "Monitor permanent. Fiecare subproiect se închide numai după finalizare/recepție ori invalidare/supersedare documentată; monitorul de conectivitate rămâne activ până când legăturile de mare capacitate ale Vâlcii cu A1 sunt operaționale."
+    }
+  ]
+}
