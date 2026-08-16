@@ -28,6 +28,7 @@ BASELINE={
 'ba7f1d2c724617cd40c5':{'programme':'Program Educație și Ocupare','call':'“Ține pasul” - Regiuni mai putin dezvoltate','status':'FINALIZAT','contracts':'286','callBudgetRon':'499.299.881','totalProjectBudgetRon':'133.714.835.106','submittedGrantBudgetRon':'2.378.139.845'}
 }
 
+
 def clean(v): return re.sub(r'\s+',' ',html_lib.unescape(str(v or ''))).strip()
 def now(): return dt.datetime.now(dt.timezone.utc)
 
@@ -90,6 +91,13 @@ def changes(old,new):
         if d:out.append({'call':c['call'],'change':'; '.join(d)})
     return out
 
+def snapshot_signature(total,rows):
+    payload={'validatedCallCount':total,'rows':rows}
+    return hashlib.sha256(json.dumps(payload,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+
+def persist_state(state):
+    STATE.write_text(json.dumps(state,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
 def ingest_mysmis():
     state=json.loads(STATE.read_text(encoding='utf-8')) if STATE.exists() else {'status':'SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED','items':[],'runs':[]}
     byurl={x.get('url'):x for x in state.get('items',[]) if isinstance(x,dict) and x.get('url')}
@@ -104,8 +112,38 @@ def ingest_mysmis():
     diff=changes(baseline,rows)
     old_count=prior.get('validatedCallCount')
     count_changed=old_count is not None and old_count!=total
-    semantic=not prior or bool(diff) or count_changed
+    semantic_candidate=not prior or bool(diff) or count_changed
     observed=now()
+
+    # Fail closed on transient/oscillating official values. A semantic change
+    # must be observed identically in two consecutive canonical runs before it
+    # can replace the last-known-good feed item. This prevents load-balanced or
+    # mid-refresh MySMIS responses from making News bounce between snapshots.
+    if prior and semantic_candidate:
+        sig=snapshot_signature(total,rows)
+        pending=state.get('mysmisPendingChange') if isinstance(state.get('mysmisPendingChange'),dict) else None
+        if pending and pending.get('signature')==sig:
+            confirmations=int(pending.get('confirmations',1))+1
+            first_observed=pending.get('firstObservedAt') or observed.isoformat()
+        else:
+            confirmations=1
+            first_observed=observed.isoformat()
+        state['mysmisPendingChange']={
+            'signature':sig,
+            'firstObservedAt':first_observed,
+            'lastObservedAt':observed.isoformat(),
+            'confirmations':confirmations,
+            'validatedCallCount':total,
+            'changes':diff[:5],
+            'publicationPolicy':'publish only after two consecutive identical direct canonical observations'
+        }
+        if confirmations<2:
+            persist_state(state)
+            return {'ok':True,'url':MYSMIS,'validatedCallCount':total,'visibleRowCount':len(rows),'explicitStatuses':statuses,'semanticChange':False,'pendingSemanticChange':True,'pendingConfirmations':confirmations,'preserved':True,'changes':diff[:5]}
+    elif not semantic_candidate and state.pop('mysmisPendingChange',None) is not None:
+        persist_state(state)
+
+    semantic=semantic_candidate
     if semantic:
         parts=[]
         if count_changed:parts.append(f'validated-call count: {old_count} → {total}')
@@ -116,7 +154,8 @@ def ingest_mysmis():
         day=observed.date()
         byurl[MYSMIS]={'id':hashlib.sha256(MYSMIS.encode()).hexdigest()[:20],'title':'MySMIS official funding registry changed' if parts else f'MySMIS official funding registry verified: {total} validated calls','url':MYSMIS,'date':day.isoformat(),'dateLabel':f'{day.day} {MONTHS[day.month-1]} {day.year}','summary':summary[:1400],'tag':'MySMIS','kind':'OFFICIAL_UPDATE','tier':'T1','source':'MIPE / MySMIS','observedAt':observed.isoformat(),'discovery':'canonical-official-fetch','verification':'CANONICAL_OFFICIAL_FETCH','explicitStatuses':statuses,'validatedCallCount':total,'registrySnapshot':rows}
         state['items']=sorted(byurl.values(),key=lambda x:(x.get('date',''),x.get('observedAt','')),reverse=True)[:80]
-        STATE.write_text(json.dumps(state,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+        state.pop('mysmisPendingChange',None)
+        persist_state(state)
     return {'ok':True,'url':MYSMIS,'validatedCallCount':total,'visibleRowCount':len(rows),'explicitStatuses':statuses,'semanticChange':semantic,'changes':diff[:5]}
 
 def main():
