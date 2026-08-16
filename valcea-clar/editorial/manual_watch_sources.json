@@ -127,6 +127,23 @@
         "public-service utility research and cross-checking against CET Govora notices"
       ],
       "core_feedback": "This strengthens the existing generic UTILITY_ADVISORY requirement: support published_at separately from event_start/event_end and affected_area, preserve canonical article provenance, and allow only deterministic advisory labels derived from verified structured fields when the publisher uses a generic headline. Do not generate free-form headlines from body text and do not build a Vâlcea-specific parser."
+    },
+    {
+      "id": "inhga-avertizari-hidrologice-valcea",
+      "publisher": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+      "url": "https://www.hidro.ro/warning/",
+      "tier": "T1",
+      "section": "UTILITATE",
+      "status": "QUARANTINED_BODY_SCOPED_HYDROLOGICAL_ALERT",
+      "checked_at": "2026-08-16",
+      "reason": "The official INHGA warning archive publishes individually dated hydrological warnings and attentions with high public-safety value, including notices explicitly addressed to SGA Vâlcea and affecting Lotru or Olt sectors in Vâlcea. However, the headline is generic and does not prove Vâlcea relevance: affected geography, severity and the warning validity interval are encoded in the article body. The current title + publication date + source-only automatic contract therefore cannot safely localize the alert or distinguish publication/issue time from the phenomenon validity window, so automatic publication remains disabled.",
+      "safe_use": [
+        "manual discovery of hydrological warnings explicitly mentioning Vâlcea, Lotru or Olt sectors in the county",
+        "primary-source verification of warning or attention number and issue time",
+        "verification of affected basins, rivers, severity and validity interval from the official warning body",
+        "cross-checking local emergency, transport and infrastructure reporting without automatic publication"
+      ],
+      "core_feedback": "LOCAL NEWS OS needs a generic GEO_SCOPED_ALERT / STRUCTURED_ALERT contract: deterministically extract affected geography plus issued_at, valid_from, valid_to and severity from primary-source alert bodies; match that geography against the instance before admission; preserve canonical alert provenance; never synthesize a free-form headline; and reject the alert fail-closed when geography, severity or validity is ambiguous. This belongs in CORE, not in a Vâlcea-specific parser."
     }
   ]
 }
