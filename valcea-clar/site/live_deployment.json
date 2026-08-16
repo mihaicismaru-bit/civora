@@ -1,23 +1,42 @@
 {
-  "schema_version": "1.0",
-  "product": "VÂLCEA CLAR — Unde ieșim",
+  "schema_version": "2.0",
+  "product": "VÂLCEA CLAR public site",
   "environment": "production",
-  "platform": "Vercel",
-  "state": "READY",
-  "public_url": "https://valcea-clar-live-mihaicismaru-6634s-projects.vercel.app/",
-  "editor_url": "https://valcea-clar-live-mihaicismaru-6634s-projects.vercel.app/editor/",
-  "deployment_url": "https://valcea-clar-live-l71y3can2-mihaicismaru-6634s-projects.vercel.app/",
-  "deployment_id": "dpl_GzzY51zn8wGwbio1HaiLCqVjbLoY",
-  "inspector_url": "https://vercel.com/mihaicismaru-6634s-projects/valcea-clar-live/GzzY51zn8wGwbio1HaiLCqVjbLoY",
+  "state": "BLOCKED_NO_MANAGED_PRODUCTION_DEPLOYMENT",
+  "canonical_domain": "valceaclar.ro",
   "canonical_data_source": "https://github.com/mihaicismaru-bit/civora/tree/main/valcea-clar",
-  "editor_access": {
-    "dashboard_public": true,
-    "robots": "noindex,nofollow",
-    "writes_require_github_repository_permission": true,
-    "credentials_embedded": false
+  "repository_runtime_ready": true,
+  "public_http_acceptance_ready": false,
+  "blocker": "No active Vercel project/deployment is present in the connected Vercel team; the historical deployment references return not_found. The existing external site must be structurally published or a new managed host attached before CIVORA may claim public delivery.",
+  "observed_external_hosting": {
+    "provider": "Vercel",
+    "team_id": "team_C4qLzkG5lGcGriTEdvm1a95a",
+    "active_projects_observed": 0,
+    "historical_deployment_lookup": "NOT_FOUND",
+    "observed_at_local": "2026-08-16T23:59:00+03:00"
+  },
+  "historical_vercel": {
+    "status": "STALE_NONCANONICAL",
+    "public_url": "https://valcea-clar-live-mihaicismaru-6634s-projects.vercel.app/",
+    "deployment_url": "https://valcea-clar-live-l71y3can2-mihaicismaru-6634s-projects.vercel.app/",
+    "deployment_id": "dpl_GzzY51zn8wGwbio1HaiLCqVjbLoY"
   },
   "custom_domain": {
     "name": "valceaclar.ro",
-    "status": "PENDING_ATTACHMENT"
+    "status": "REQUIRES_EXTERNAL_PUBLICATION_AND_HTTP_ACCEPTANCE"
+  },
+  "required_public_acceptance": {
+    "http_200_routes": [
+      "/",
+      "/robots.txt",
+      "/sitemap.xml",
+      "/termeni/",
+      "/confidentialitate/",
+      "/unde-iesim/"
+    ],
+    "story_route_required": true,
+    "legal_pages_initial_html_required": true,
+    "canonical_required": true,
+    "robots_index_follow_required_for_legal": true
   }
 }
