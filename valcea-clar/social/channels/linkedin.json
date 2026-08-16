@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "channel_id": "valcea-linkedin",
+  "instance_id": "valcea",
+  "platform": "linkedin",
+  "status": "outbox_only",
+  "audience_promise": "Context local verificat pentru profesioniști, antreprenori și decidenți din Vâlcea, cu accent pe bani publici, infrastructură, economie locală și schimbări civice explicate fără jargon sau senzaționalism.",
+  "editorial_mix": {
+    "priorities": [
+      "public_money",
+      "civic_updates",
+      "infrastructure",
+      "local_economy",
+      "local_business",
+      "service_journalism",
+      "verified_breaking_updates"
+    ],
+    "exclusions": [
+      "unverified_accusations",
+      "rage_bait",
+      "fake_urgency",
+      "fake_exclusivity",
+      "engagement_bait",
+      "synthetic_real_person_imagery",
+      "verbatim_cross_posting"
+    ]
+  },
+  "native_formats": [
+    "text",
+    "single_photo",
+    "carousel"
+  ],
+  "cadence": {
+    "timezone": "Europe/Bucharest",
+    "max_posts_per_day": 5,
+    "min_spacing_minutes": 60,
+    "quiet_hours": {
+      "start": "21:30",
+      "end": "07:00",
+      "breaking_override": true
+    }
+  },
+  "fatigue": {
+    "same_story_cooldown_hours": 12,
+    "max_related_posts_24h": 2
+  },
+  "media_policy": {
+    "real_media_only": true,
+    "provenance_required": true,
+    "reuse_rights_required": true,
+    "synthetic_real_person_forbidden": true
+  },
+  "link_policy": {
+    "mode": "native_preferred",
+    "canonical_hosts": [
+      "valceaclar.ro",
+      "www.valceaclar.ro"
+    ]
+  },
+  "series": [
+    {
+      "series_id": "valcea-pentru-decidenti",
+      "promise": "Schimbări locale cu impact practic pentru organizații, profesioniști și antreprenori."
+    },
+    {
+      "series_id": "banii-publici-explicati",
+      "promise": "Contracte, investiții și cheltuieli publice locale explicate prin fapte și context verificabil."
+    }
+  ],
+  "approval_gates": {
+    "low_risk_auto": true,
+    "reputational_human": true,
+    "corrections_priority": true
+  },
+  "credentials_ref": "none:linkedin-publishing-access-not-verified",
+  "publication_state": {
+    "outbox_path": "valcea-clar/social/linkedin_outbox.json",
+    "state_path": "valcea-clar/social/linkedin_state.json",
+    "dedupe_by_id": true,
+    "last_known_good": true
+  },
+  "metrics": {
+    "observed_only": true,
+    "sources": []
+  },
+  "zero_paid_dependency": true
+}
