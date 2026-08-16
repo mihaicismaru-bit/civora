@@ -5,6 +5,11 @@ Every ready post must use a real approved photograph with explicit provenance.
 Meta authentication failures never consume the queue: the item remains eligible
 and is retried after credentials are restored. A shared durable Meta Page token
 is preferred over the legacy short-lived Facebook token.
+
+When --apply has eligible work but credentials are missing/expired/invalid, the
+adapter exits non-zero after persisting the fail-closed state. The parent social
+workflow uses continue-on-error to persist all channel state first, then marks
+the run failed instead of reporting a false-green publication.
 """
 from __future__ import annotations
 
@@ -25,6 +30,7 @@ OUTBOX = ROOT / "valcea-clar" / "social" / "facebook_outbox.json"
 STATE = ROOT / "valcea-clar" / "social" / "facebook_state.json"
 PHOTO_ROOT = (ROOT / "valcea-clar" / "social" / "photos" / "approved").resolve()
 DEFAULT_GRAPH_VERSION = "v26.0"
+AUTH_BLOCKED_EXIT = 2
 CANONICAL_HOSTS = {"valceaclar.ro", "www.valceaclar.ro"}
 ALLOWED_SOURCE_TYPES = {
     "staff", "reader", "official_press", "official_institution",
@@ -279,6 +285,7 @@ def self_test() -> int:
         assert image_file(sample) == test_path
         assert eligible([sample], {})[0]["id"] == "real-photo-test"
         assert classify_auth_error(RuntimeError('OAuth code\":190 session expired')) == "EXPIRED"
+        assert AUTH_BLOCKED_EXIT != 0
         bad = dict(sample)
         bad["id"] = "synthetic-test"
         bad["image"] = dict(sample["image"], synthetic=True)
@@ -335,7 +342,7 @@ def main() -> int:
             "eligible_count": len(plan),
             "required_runtime_values": ["VALCEA_META_PAGE_ACCESS_TOKEN or VALCEA_FB_PAGE_ACCESS_TOKEN"],
         }, ensure_ascii=False, indent=2))
-        return 0
+        return AUTH_BLOCKED_EXIT
 
     try:
         page_token, resolution = resolve_page_token(page_id, supplied_token, version)
@@ -356,7 +363,7 @@ def main() -> int:
             "eligible_count": len(plan),
             "queue_preserved": True,
         }, ensure_ascii=False, indent=2))
-        return 0
+        return AUTH_BLOCKED_EXIT
 
     state["auth"] = {
         "status": "VALID", "checked_at": utc_now(), "token_source": token_source,
