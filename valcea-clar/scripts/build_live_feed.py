@@ -54,9 +54,11 @@ def story_feed(snapshot: dict) -> list[dict]:
             "priority": item.get("priority"),
             "headline": item.get("headline"),
             "dek": item.get("dek"),
+            "paragraphs": item.get("paragraphs", []),
             "path": route.get("path"),
             "canonical_url": route.get("canonical"),
             "sources": item.get("sources", []),
+            "visual": item.get("visual"),
         })
     stories.sort(key=lambda item: (-int(item.get("priority") or 0), item["id"]))
     return stories
@@ -73,7 +75,7 @@ def main() -> int:
     places = load(PLACES).get("places", [])
     stories = story_feed(snapshot)
     payload = {
-        "schema_version": "2.0",
+        "schema_version": "2.1",
         "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "canonical_domain": "valceaclar.ro",
         "publication_model": "continuous_story_first",
@@ -105,6 +107,7 @@ def main() -> int:
             "individual_story_is_publication_unit": True,
             "edition_windows_are_publication_gates": False,
             "canonical_story_urls_required": True,
+            "story_body_is_source_preserving": True,
             "recap_render_may_not_remove_story_routes": True,
             "edition_fields_are_compatibility_only": True,
         },
