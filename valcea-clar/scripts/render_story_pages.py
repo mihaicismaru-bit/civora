@@ -19,6 +19,7 @@ sys.path.insert(0, str(REPO_ROOT / "local-news-os" / "core"))
 from article_structured_data import build_newsarticle, reconcile_publication_dates, serialize_jsonld
 from indexing_assets import write_indexing_assets
 from related_stories import rank_related
+from verified_story_media import resolve_verified_story_image
 from newsroom_decide import story_ready
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,7 +27,11 @@ POINTER = ROOT / "site" / "current_edition.json"
 RUNTIME = ROOT / "site" / "runtime"
 DECISION = ROOT / "site" / "newsroom_decision.json"
 PUBLICATION_EVENT = ROOT / "site" / "story_publication_event.json"
+STORY_VISUALS = ROOT / "social" / "story_visuals.json"
+SOCIAL_ASSETS = ROOT / "social" / "social_media_manifest.json"
+RUNTIME_MEDIA = RUNTIME / "media" / "social"
 BASE = "https://valceaclar.ro"
+MEDIA_BASE = BASE + "/media/social/"
 PUBLISHER_NAME = "VÂLCEA CLAR"
 RELATED_LIMIT = 3
 
@@ -84,7 +89,27 @@ def related_links(item: dict, stories: list[dict]) -> str:
     )
 
 
-def structured_data(item: dict, canonical: str, published_at: str | None) -> str:
+def photo_figure(media: dict | None) -> str:
+    if not media:
+        return ""
+    note = str(media.get("editorial_note") or "").strip()
+    disclosure = f"<span>{esc(note)}</span> " if note else ""
+    credit = (
+        f'Foto: <a href="{esc(media["source_url"])}" rel="nofollow noopener">'
+        f'{esc(media["credit"])}</a>'
+    )
+    if media.get("license_url"):
+        credit += f' · <a href="{esc(media["license_url"])}" rel="nofollow noopener">Licență</a>'
+    return (
+        '<figure class="hero-photo" data-photo-provenance="verified">'
+        f'<img src="{esc(media["relative_url"])}" alt="{esc(media["alt_text"])}" '
+        'loading="lazy" decoding="async">'
+        f'<figcaption>{disclosure}{credit}</figcaption>'
+        '</figure>'
+    )
+
+
+def structured_data(item: dict, canonical: str, published_at: str | None, media: dict | None) -> str:
     section = str(item.get("section") or "ȘTIRI").replace("_", " ")
     document = build_newsarticle(
         headline=item.get("headline"),
@@ -97,12 +122,18 @@ def structured_data(item: dict, canonical: str, published_at: str | None) -> str
         language="ro-RO",
         author_name=PUBLISHER_NAME,
         author_url=BASE + "/",
-        # Deliberately omit image until a provenance-backed real story image exists.
+        image_urls=[media["public_url"]] if media else None,
     )
     return f'<script type="application/ld+json">{serialize_jsonld(document)}</script>'
 
 
-def page(item: dict, updated_local: str, stories: list[dict], published_at: str | None) -> str:
+def page(
+    item: dict,
+    updated_local: str,
+    stories: list[dict],
+    published_at: str | None,
+    media: dict | None,
+) -> str:
     route = route_for(item)
     canonical = BASE + route
     title = str(item.get("headline") or "VÂLCEA CLAR")
@@ -111,7 +142,14 @@ def page(item: dict, updated_local: str, stories: list[dict], published_at: str 
     paragraphs = "".join(f"<p>{esc(p)}</p>" for p in item.get("paragraphs", []) if str(p).strip())
     sources = source_links(item)
     related = related_links(item, stories)
-    jsonld = structured_data(item, canonical, published_at)
+    figure = photo_figure(media)
+    jsonld = structured_data(item, canonical, published_at, media)
+    social_meta = ""
+    if media:
+        social_meta = (
+            f'<meta property="og:image" content="{esc(media["public_url"])}">\n'
+            f'<meta property="og:image:alt" content="{esc(media["alt_text"])}">\n'
+        )
     return f'''<!doctype html>
 <html lang="ro"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -121,24 +159,27 @@ def page(item: dict, updated_local: str, stories: list[dict], published_at: str 
 <meta property="og:type" content="article"><meta property="og:site_name" content="VÂLCEA CLAR">
 <meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(dek)}">
 <meta property="og:url" content="{esc(canonical)}">
-{jsonld}
+{social_meta}{jsonld}
 <style>
 body{{margin:0;color:#101828;background:#fff;font:17px/1.65 system-ui,-apple-system,Segoe UI,Arial,sans-serif}}
 header{{background:#071a3d;color:#fff;padding:18px 22px}}header a{{color:#fff;text-decoration:none;font:700 30px Georgia,serif}}
 main{{max-width:820px;margin:0 auto;padding:38px 22px 64px}}.k{{color:#d71920;font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}}
 h1{{font:800 clamp(36px,6vw,62px)/1.06 Georgia,serif;letter-spacing:-.025em;margin:8px 0 15px}}.dek{{font-size:21px;line-height:1.45;color:#475467}}
 .meta{{font-size:13px;color:#667085;border-bottom:1px solid #e4e7ec;padding-bottom:16px;margin-bottom:24px}}article p{{margin:0 0 19px}}
+.hero-photo{{margin:0 0 28px}}.hero-photo img{{display:block;width:100%;height:auto;max-height:560px;object-fit:cover;border-radius:4px;background:#f2f4f7}}
+.hero-photo figcaption{{margin-top:9px;color:#667085;font-size:12px;line-height:1.45}}.hero-photo figcaption span{{display:block;color:#475467;font-weight:650;margin-bottom:2px}}.hero-photo a{{color:#475467}}
 .sources{{margin-top:34px;border-top:2px solid #101828;padding-top:14px}}.sources h2{{font-size:14px;text-transform:uppercase;letter-spacing:.05em}}.sources a{{color:#344054}}
 .related{{margin-top:34px;border-top:1px solid #d0d5dd;padding-top:20px}}.related h2{{font:800 20px/1.2 Georgia,serif;margin:0 0 14px}}
 .related ul{{list-style:none;padding:0;margin:0;display:grid;gap:10px}}.related a{{display:block;border:1px solid #e4e7ec;border-radius:12px;padding:14px 16px;color:#101828;text-decoration:none}}
 .related a:hover{{text-decoration:underline}}.related span{{display:block;color:#d71920;font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}}
 .related strong{{display:block;font:700 18px/1.25 Georgia,serif}}
 .back{{display:inline-block;margin-top:28px;color:#071a3d;font-weight:700}}
+@media(max-width:560px){{main{{padding:28px 16px 52px}}.hero-photo{{margin-left:-16px;margin-right:-16px}}.hero-photo img{{border-radius:0;max-height:none}}.hero-photo figcaption{{padding:0 16px}}}}
 </style></head><body>
 <header><a href="/">VÂLCEA CLAR</a></header><main>
 <div class="k">{esc(section)}</div><h1>{esc(title)}</h1><p class="dek">{esc(dek)}</p>
 <div class="meta">{(f"Publicat {esc(published_at)} · " if published_at else "")}Actualizat {esc(updated_local)} · informație locală verificată</div>
-<article>{paragraphs}</article>
+{figure}<article>{paragraphs}</article>
 <section class="sources"><h2>Surse</h2><ul>{sources}</ul></section>
 {related}
 <a class="back" href="/">← Înapoi la VÂLCEA CLAR</a>
@@ -172,6 +213,8 @@ def main() -> int:
     pointer = load(POINTER)
     doc = load(ROOT / pointer["json_source"])
     decision = load_optional(DECISION)
+    visual_registry = load_optional(STORY_VISUALS)
+    asset_manifest = load_optional(SOCIAL_ASSETS)
     allowed_ids = set(decision.get("publishable_story_ids") or [])
     stories = []
     for item in doc.get("items", []):
@@ -194,14 +237,22 @@ def main() -> int:
     routes = []
     cross_link_count = 0
     dated_count = 0
+    media_count = 0
     for item in stories:
         story_id = str(item.get("id") or "")
         route = route_for(item)
         related = rank_related(item, stories, limit=RELATED_LIMIT)
         published_at = publication_dates.get(story_id)
+        media = resolve_verified_story_image(
+            story_id,
+            visual_registry,
+            asset_manifest,
+            runtime_asset_dir=RUNTIME_MEDIA,
+            canonical_media_base_url=MEDIA_BASE,
+        )
         target = RUNTIME / route.strip("/") / "index.html"
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(page(item, str(doc.get("updated_local") or ""), stories, published_at), encoding="utf-8")
+        target.write_text(page(item, str(doc.get("updated_local") or ""), stories, published_at, media), encoding="utf-8")
         row = {
             "id": item.get("id"),
             "path": route,
@@ -212,12 +263,24 @@ def main() -> int:
         if published_at:
             row["published_at"] = published_at
             dated_count += 1
+        if media:
+            row["image"] = {
+                "public_url": media["public_url"],
+                "source_url": media["source_url"],
+                "credit": media["credit"],
+                "rights_basis": media["rights_basis"],
+                "contextual_archive": media["contextual_archive"],
+                "captured_at": media["captured_at"],
+                "synthetic": False,
+                "provenance_status": media["provenance_status"],
+            }
+            media_count += 1
         routes.append(row)
         cross_link_count += len(related)
 
     (story_root / "manifest.json").write_text(
         json.dumps({
-            "schema_version": "1.3",
+            "schema_version": "1.4",
             "publication_model": "continuous_story_first",
             "homepage_presentation": "live_newsroom",
             "edition_is_canonical_story_url": False,
@@ -226,6 +289,7 @@ def main() -> int:
                 "type": "NewsArticle",
                 "eligible_scope": "publishable_full_story_only",
                 "date_published_policy": "stable_publication_ledger_only",
+                "verified_image_policy": "provenance_backed_real_photograph_only",
                 "unverified_image_policy": "omit",
             },
             "cross_linking": {
@@ -245,6 +309,7 @@ def main() -> int:
         "story_pages": len(routes),
         "newsarticle_jsonld": len(routes),
         "date_published": dated_count,
+        "provenance_backed_images": media_count,
         "cross_links": cross_link_count,
         "routes": routes,
         "indexing_routes": indexing["route_count"],
