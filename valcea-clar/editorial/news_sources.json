@@ -262,6 +262,12 @@
       "tier": "T1",
       "section": "INFRASTRUCTURĂ",
       "priority": 86,
+      "enabled": false,
+      "status": "QUARANTINED_DOCUMENT_LISTING_PDF",
+      "checked_at": "2026-08-17",
+      "disable_reason": "The official Voineasa announcements stream remains a high-value primary source for DN 7A, Obârșia Lotrului water/sewerage and environmental notices, but it is structurally a dated document/PDF listing rather than a reliable HTML article feed. The current live discovery ledger recorded 12 links examined with 4 article failures, and fresh direct browsing is intermittently intercepted by an anti-bot verification page. LOCAL NEWS OS must not promote a listing date, PDF filename or document-internal date to article published_at, so automatic admission is disabled until canonical item retrieval and publication provenance are deterministic.",
+      "safe_use": ["manual discovery of Voineasa infrastructure and environmental notices", "primary-source verification of attached official PDFs and affected geography", "manual reporting only after separating listing date, document date and event or decision date"],
+      "core_feedback": "No Voineasa-specific parser is justified. This reinforces the existing ARTICLE_FEED versus DOCUMENT_REGISTER/PDF_FEED boundary and the requirement to keep structural eligibility separate from network or WAF health; persistent article failures should surface contract incompatibility, but transient fetch errors alone must not rewrite editorial semantics.",
       "path_hints": ["modernizare-dn-7a", "dn-7a", "obarsia-lotrului", "apa-si-canal", "apa-si-apa-uzata", "proiect-regional", "gospodarirea-apelor", "acord-mediu"],
       "generic_titles": ["anunțuri", "anunțuri publice", "documente", "comuna voineasa"]
     },
