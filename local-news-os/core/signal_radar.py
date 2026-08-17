@@ -15,7 +15,6 @@ import html.parser
 import json
 import re
 import ssl
-import urllib.error
 import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -142,7 +141,8 @@ def fetch(url: str, max_bytes: int = 2_000_000, timeout: int = 14) -> tuple[str,
 
 def article_like(root_url: str, href: str, label: str) -> tuple[str, str] | None:
     title = clean(label)
-    if len(title) < 20 or len(title) > 240 or norm_text(title) in {norm_text(x) for x in GENERIC_LABELS}:
+    generic = {norm_text(x) for x in GENERIC_LABELS}
+    if len(title) < 20 or len(title) > 240 or norm_text(title) in generic:
         return None
     absolute = urllib.parse.urljoin(root_url, html.unescape(href).strip()).split("#", 1)[0]
     parsed = urllib.parse.urlsplit(absolute)
@@ -203,8 +203,8 @@ def seed_rows(config: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def resolve_registry_targets(config: dict[str, Any]) -> None:
-    news = load(repo_file("valcea-clar/editorial/news_sources.json")) if config.get("instance_id") == "valcea" else {"sources": []}
-    manual = load(repo_file("valcea-clar/editorial/manual_watch_sources.json")) if config.get("instance_id") == "valcea" else {"sources": []}
+    news = load(repo_file(str(config.get("news_registry_path") or "")))
+    manual = load(repo_file(str(config.get("manual_watch_registry_path") or "")))
     news_ids = {str(row.get("id")) for row in news.get("sources") or []}
     manual_ids = {str(row.get("id")) for row in manual.get("sources") or []}
     for rule in config.get("rules") or []:
@@ -214,6 +214,8 @@ def resolve_registry_targets(config: dict[str, Any]) -> None:
                 raise ValueError(f"unknown news verification target: {sid}")
             if ref_type == "manual_watch_source_id" and sid not in manual_ids:
                 raise ValueError(f"unknown manual verification target: {sid}")
+            if ref_type not in {"news_source_id", "manual_watch_source_id"}:
+                raise ValueError(f"unsupported verification target type: {ref_type}")
 
 
 def classify(title: str, config: dict[str, Any]) -> tuple[str, list[dict[str, str]]]:
@@ -290,10 +292,6 @@ def probe_seed(seed: dict[str, Any], config: dict[str, Any], tz: ZoneInfo, now: 
     return row
 
 
-def parse_saved_time(value: Any, tz: ZoneInfo) -> datetime | None:
-    return parse_time(str(value or ""), tz)
-
-
 def merge_queue(current_signals: list[dict[str, Any]], previous: dict[str, Any], config: dict[str, Any], tz: ZoneInfo, now: datetime) -> list[dict[str, Any]]:
     ttl = timedelta(hours=int(config.get("signal_ttl_hours") or 36))
     prior = {str(row.get("signal_id")): row for row in previous.get("tasks") or [] if row.get("signal_id")}
@@ -308,10 +306,14 @@ def merge_queue(current_signals: list[dict[str, Any]], previous: dict[str, Any],
     for sid, old in prior.items():
         if sid in merged:
             continue
-        last_seen = parse_saved_time(old.get("last_seen_at"), tz)
+        last_seen = parse_time(str(old.get("last_seen_at") or ""), tz)
         if last_seen and now - last_seen <= ttl:
             merged[sid] = old
-    return sorted(merged.values(), key=lambda row: (row.get("published_at") is None, row.get("published_at") or row.get("last_seen_at") or "", row["signal_id"]), reverse=True)
+    return sorted(
+        merged.values(),
+        key=lambda row: (row.get("published_at") is not None, row.get("published_at") or row.get("last_seen_at") or "", row["signal_id"]),
+        reverse=True,
+    )
 
 
 def run(instance_id: str, *, write: bool) -> dict[str, Any]:
@@ -380,8 +382,9 @@ def validate(instance_id: str) -> dict[str, Any]:
     seeds = seed_rows(config)
     if config.get("publication_authority") != "NONE":
         raise ValueError("signal radar must have zero publication authority")
-    if int(config.get("poll_interval_minutes") or 0) > 15:
-        raise ValueError("signal radar polling interval must be <=15 minutes")
+    interval = int(config.get("poll_interval_minutes") or 0)
+    if interval <= 0 or interval > 15:
+        raise ValueError("signal radar polling interval must be between 1 and 15 minutes")
     return {"status": "PASS", "instance_id": instance_id, "seed_count": len(seeds), "rule_count": len(config.get("rules") or []), "publication_authority": "NONE"}
 
 
@@ -389,7 +392,7 @@ def self_test() -> int:
     tz = ZoneInfo("Europe/Bucharest")
     html_doc = '<meta property="article:published_time" content="2026-08-17T14:30:00+03:00">'
     assert strict_published_at(html_doc, tz) == datetime(2026, 8, 17, 14, 30, tzinfo=tz)
-    assert article_like("https://news.example/", "/accident-grav-pe-dn7-la-budesti/", "Accident grav pe DN7 la Budești, două persoane rănite") is not None
+    assert article_like("https://news.example/", "/accident-grav-pe-dn7-la-oras/", "Accident grav pe DN7, două persoane rănite") is not None
     assert article_like("https://news.example/", "/category/sport/", "Sport") is None
     cfg = {"rules": [{"id": "safety", "keywords": ["accident", "rutier"], "verification_targets": [{"ref_type": "x", "id": "y"}]}]}
     route, targets = classify("Accident rutier pe DN7", cfg)
@@ -403,13 +406,15 @@ def self_test() -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--instance", default="valcea")
+    parser.add_argument("--instance", required=False)
     parser.add_argument("--self-test", action="store_true")
     parser.add_argument("--validate-only", action="store_true")
     parser.add_argument("--no-write", action="store_true")
     args = parser.parse_args()
     if args.self_test:
         return self_test()
+    if not args.instance:
+        parser.error("--instance is required")
     if args.validate_only:
         print(json.dumps(validate(args.instance), ensure_ascii=False))
         return 0
