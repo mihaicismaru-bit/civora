@@ -23,16 +23,19 @@ def main() -> int:
     assert set(doc.get("pages", {})) == {"termeni", "confidentialitate"}
 
     nav = json.loads(NAVIGATION.read_text(encoding="utf-8"))
-    assert nav.get("contract_id") == "valcea-clar-primary-v1"
+    assert nav.get("contract_id") == "valcea-clar-primary-v2"
     footer_links = {
         (str(row.get("label") or ""), str(row.get("href") or ""))
         for row in (nav.get("footer") or {}).get("links") or []
         if isinstance(row, dict)
     }
+    assert ("Despre noi", "/despre/") in footer_links
     assert ("Termeni", "/termeni/") in footer_links
     assert ("Confidențialitate", "/confidentialitate/") in footer_links
     assert (nav.get("policy") or {}).get("legal_links_in_footer") is True
     assert (nav.get("policy") or {}).get("same_primary_navigation_on_every_public_page") is True
+    assert (nav.get("policy") or {}).get("main_navigation_must_resolve_to_reader_content") is True
+    assert (nav.get("policy") or {}).get("empty_category_fallback_to_other_category_forbidden") is True
 
     bridge = BRIDGE.read_text(encoding="utf-8")
     install = INSTALL.read_text(encoding="utf-8")
@@ -79,7 +82,7 @@ def main() -> int:
 
     print(
         "VÂLCEA CLAR public legal bridge: PASS "
-        "(canonical navigation + repository legal contract; remote HTTP remains separate)"
+        "(canonical navigation v2 + repository legal contract; remote HTTP remains separate)"
     )
     return 0
 
