@@ -1,6 +1,6 @@
 # CIVORA persistence reconciliation engine acceptance
 
-This increment implements the executable core required by PRS-016–024 and the explicit acceptance cases required by PRS-042–052.
+This increment implements the executable core required by PRS-016–024 and the explicit acceptance cases required by PRS-042–053.
 
 ## Authority boundaries
 
@@ -32,6 +32,7 @@ This increment implements the executable core required by PRS-016–024 and the 
 19. **PRS-050:** current social truth is persisted by separate runtime and external dimensions. Facebook and Instagram may be direct and externally evidenced; Threads may be direct-capable while remaining `PARTIAL` without story-level remote evidence; TikTok remains `GATED_DIRECT`; X, LinkedIn, YouTube, Telegram and WhatsApp remain `OUTBOX_ONLY`. Direct capability never implies successful remote publication.
 20. **PRS-051:** profile persistence uses separate namespaced capability identities for local asset readiness and external deployment/readback. A locally READY asset may be `IMPLEMENTED` while the same profile's deployment remains `PARTIAL`/`UNCONFIRMED`; only independent remote evidence can promote the deployment capability. The generic acceptance fixture uses synthetic instance context and does not embed Vâlcea-specific values in CORE_GENERIC.
 21. **PRS-052:** special-editorial decisions remain active while implementation evidence exists only in an open unmerged PR. A stale persisted `PARTIAL` claim based only on that PR is corrected to `ACTIVE_UNIMPLEMENTED`, the decision backlog remains `TODO`, and only explicit `MERGED` main evidence may close the decision as `IMPLEMENTED`. The acceptance fixture is namespaced to a synthetic instance and does not integrate or promote any instance-specific product branch.
+22. **PRS-053:** a stale low-latency decision may still reference an older open proposal, but that proposal cannot keep a false active gap once independent repository evidence proves an equivalent later implementation is `MERGED` on main. Open-only evidence remains `ACTIVE_UNIMPLEMENTED`; authoritative merged evidence reconciles the decision to `IMPLEMENTED`, retires the stale backlog, replaces the stale implementation evidence, and emits `FALSE_NEGATIVE_PERSISTENCE`. The fixture is provider-neutral and namespaced to a synthetic instance.
 
 ## PRS mapping
 
@@ -55,5 +56,6 @@ This increment implements the executable core required by PRS-016–024 and the 
 - PRS-050: executable `prs_050_current_social_truth_acceptance.py` verifies the current nine-channel truth model without conflating direct-capable, gated, outbox-only and remotely evidenced publication states.
 - PRS-051: executable `prs_051_profile_state_separation_acceptance.py` verifies that asset readiness and profile deployment/readback are distinct namespaced capabilities, so local READY cannot promote external LIVE without independent remote evidence.
 - PRS-052: executable `prs_052_open_editorial_decision_acceptance.py` verifies that open special-editorial work remains an active namespaced decision/backlog item until executable implementation is actually merged on main.
+- PRS-053: executable `prs_053_low_latency_main_evidence_acceptance.py` verifies that stale open-proposal persistence cannot override an equivalent independently merged low-latency implementation already present on main.
 
 The engine does not replace the Google Drive writer lease. Any process that persists its result into active CIVORA state must separately acquire `CIVORA_PERSISTENCE_WRITER_LEASE_V1`, use per-target revision control, verify readback, and release the lease.
