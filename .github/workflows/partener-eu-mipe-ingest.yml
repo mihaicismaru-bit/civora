@@ -13,6 +13,7 @@ on:
       - 'partener-eu/ingest/normalize_mipe_health.py'
       - 'partener-eu/ingest/build_mysmis_consultant_registry.py'
       - 'partener-eu/ops/test_mipe_resilient_ingest.py'
+      - 'partener-eu/ops/test_mipe_route_arbitration.py'
       - 'partener-eu/ingest/state/mipe_known_canonical_seeds.json'
       - 'partener-eu/ingest/state/mipe_discovery_sources.json'
       - 'partener-eu/ingest/state/pdds_webindex_seeds.json'
@@ -47,11 +48,12 @@ jobs:
           python -m py_compile partener-eu/ingest/mipe_direct_only_ingest.py
           python -m py_compile partener-eu/ingest/normalize_mipe_health.py
           python partener-eu/ops/test_mipe_resilient_ingest.py
+          python partener-eu/ops/test_mipe_route_arbitration.py
 
       - name: Ingest MIPE with direct canonical publication provenance only
         run: python partener-eu/ingest/mipe_direct_only_ingest.py
 
-      - name: Normalize priority source health fail-closed
+      - name: Normalize priority source health and arbitrate authoritative direct routes
         run: python partener-eu/ingest/normalize_mipe_health.py
 
       - name: Build direct MySMIS evidence for Consultant Workspace
@@ -109,6 +111,12 @@ jobs:
                   assert transport.startswith('direct'), (row.get('target'), transport)
                   assert row.get('verification') == 'CANONICAL_OFFICIAL_FETCH', row.get('target')
 
+          if state.get('canonicalRoute') == 'romaniaWindows':
+              assert state.get('status') == 'OK'
+              assert state.get('routeHealth', {}).get('romaniaWindows', {}).get('status') == 'PASS'
+              assert state.get('routeHealth', {}).get('githubHosted', {}).get('status') == 'DEGRADED'
+              assert run.get('collectorVersion') == '3.0'
+
           feed_text = feed_path.read_text(encoding='utf-8')
           assert 'window.PARTENER_DATA.mipeIngestion=' in feed_text
           assert 'window.PARTENER_DATA.mipeNews=' in feed_text
@@ -128,6 +136,7 @@ jobs:
 
           print(json.dumps({
               'status': state.get('status'),
+              'canonicalRoute': state.get('canonicalRoute'),
               'transportMode': run.get('transportMode'),
               'prioritySeedAvailable': run.get('prioritySeedAvailable'),
               'primaryOfficialRootAvailable': run.get('primaryOfficialRootAvailable'),
