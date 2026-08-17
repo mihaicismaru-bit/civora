@@ -1,0 +1,384 @@
+name: LOCAL NEWS OS Fleet Observed Metrics Harvest
+
+on:
+  schedule:
+    - cron: "23 * * * *"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/social/fleet_metrics_harvest_orchestrator.py"
+      - "local-news-os/social/test_fleet_metrics_harvest_orchestrator.py"
+      - "local-news-os/social/metrics_transport_capability_registry.py"
+      - "local-news-os/social/fleet_metrics_transport_capability_gate.py"
+      - "local-news-os/social/test_metrics_transport_capability_registry.py"
+      - "local-news-os/social/metrics_transport_capabilities.json"
+      - "local-news-os/social/fleet_metrics_credential_binding.py"
+      - "local-news-os/social/test_fleet_metrics_credential_binding.py"
+      - "local-news-os/social/fleet_metrics_authorization_seal.py"
+      - "local-news-os/social/test_fleet_metrics_authorization_seal.py"
+      - "local-news-os/social/metrics_credential_bindings.json"
+      - "local-news-os/social/operational_metrics_harvest_trigger.py"
+      - "local-news-os/social/test_operational_metrics_harvest_trigger.py"
+      - "local-news-os/social/metrics_harvest_runtime.py"
+      - "local-news-os/social/metrics_harvest_scheduler.py"
+      - "local-news-os/social/native_metrics_transport.py"
+      - "local-news-os/social/observed_metrics_collector.py"
+      - "local-news-os/social/durable_feedback_snapshot.py"
+      - "local-news-os/social/publication_metrics_catalog.py"
+      - "local-news-os/social/multi_instance_isolation.py"
+      - "local-news-os/social/social_runtime_registry.json"
+      - "**/social/channel_registry.json"
+      - "**/social/channels/**"
+      - "**/social/*_auth_state.json"
+      - ".github/workflows/valcea-clar-observed-metrics-harvest.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/social/fleet_metrics_harvest_orchestrator.py"
+      - "local-news-os/social/test_fleet_metrics_harvest_orchestrator.py"
+      - "local-news-os/social/metrics_transport_capability_registry.py"
+      - "local-news-os/social/fleet_metrics_transport_capability_gate.py"
+      - "local-news-os/social/test_metrics_transport_capability_registry.py"
+      - "local-news-os/social/metrics_transport_capabilities.json"
+      - "local-news-os/social/fleet_metrics_credential_binding.py"
+      - "local-news-os/social/test_fleet_metrics_credential_binding.py"
+      - "local-news-os/social/fleet_metrics_authorization_seal.py"
+      - "local-news-os/social/test_fleet_metrics_authorization_seal.py"
+      - "local-news-os/social/metrics_credential_bindings.json"
+      - "local-news-os/social/operational_metrics_harvest_trigger.py"
+      - "local-news-os/social/metrics_harvest_runtime.py"
+      - "local-news-os/social/metrics_harvest_scheduler.py"
+      - "local-news-os/social/native_metrics_transport.py"
+      - "local-news-os/social/observed_metrics_collector.py"
+      - "local-news-os/social/durable_feedback_snapshot.py"
+      - "local-news-os/social/publication_metrics_catalog.py"
+      - "local-news-os/social/multi_instance_isolation.py"
+      - "local-news-os/social/social_runtime_registry.json"
+      - "**/social/channel_registry.json"
+      - "**/social/channels/**"
+      - "**/social/*_auth_state.json"
+      - ".github/workflows/valcea-clar-observed-metrics-harvest.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-news-os-fleet-observed-metrics-harvest-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile fleet observed metrics harvest boundary
+        run: |
+          python -m py_compile \
+            local-news-os/social/publication_metrics_catalog.py \
+            local-news-os/social/durable_feedback_snapshot.py \
+            local-news-os/social/observed_metrics_collector.py \
+            local-news-os/social/native_metrics_transport.py \
+            local-news-os/social/metrics_harvest_scheduler.py \
+            local-news-os/social/metrics_harvest_runtime.py \
+            local-news-os/social/operational_metrics_harvest_trigger.py \
+            local-news-os/social/multi_instance_isolation.py \
+            local-news-os/social/fleet_metrics_harvest_orchestrator.py \
+            local-news-os/social/metrics_transport_capability_registry.py \
+            local-news-os/social/fleet_metrics_transport_capability_gate.py \
+            local-news-os/social/fleet_metrics_credential_binding.py \
+            local-news-os/social/fleet_metrics_authorization_seal.py \
+            local-news-os/social/test_fleet_metrics_authorization_seal.py \
+            local-news-os/social/test_operational_metrics_harvest_trigger.py \
+            local-news-os/social/test_fleet_metrics_harvest_orchestrator.py \
+            local-news-os/social/test_metrics_transport_capability_registry.py \
+            local-news-os/social/test_fleet_metrics_credential_binding.py
+          python -m json.tool local-news-os/social/metrics_transport_capabilities.json >/dev/null
+          python -m json.tool local-news-os/social/metrics_credential_bindings.json >/dev/null
+
+      - name: Run operational channel harvest trigger acceptance tests
+        run: python local-news-os/social/test_operational_metrics_harvest_trigger.py
+
+      - name: Run fleet harvest discovery and isolation acceptance tests
+        run: python local-news-os/social/test_fleet_metrics_harvest_orchestrator.py
+
+      - name: Run explicit native/free transport capability acceptance tests
+        run: python local-news-os/social/test_metrics_transport_capability_registry.py
+
+      - name: Run per-instance credential binding acceptance tests
+        run: python local-news-os/social/test_fleet_metrics_credential_binding.py
+
+      - name: Run authorization fingerprint / TOCTOU acceptance tests
+        run: python local-news-os/social/test_fleet_metrics_authorization_seal.py
+
+      - name: Verify fleet evaluates native/free channels without network or descriptor fabrication
+        run: |
+          NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          python local-news-os/social/fleet_metrics_harvest_orchestrator.py \
+            --repo-root . \
+            --runtime-registry local-news-os/social/social_runtime_registry.json \
+            --now "$NOW" \
+            >/tmp/fleet-metrics-harvest-dry-run.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.loads(Path('/tmp/fleet-metrics-harvest-dry-run.json').read_text(encoding='utf-8'))
+          assert result['publication_blocked'] is False, result
+          assert result['guards']['fleet_discovery_from_registry'] is True, result
+          assert result['guards']['hardcoded_instance_or_platform_selection'] is False, result
+          assert result['guards']['native_free_transport_only'] is True, result
+          assert result['guards']['credential_values_returned'] is False, result
+          assert result['guards']['zero_paid_dependency'] is True, result
+          eligible = {(row['instance_id'], row['platform']) for row in result['channels'] if row.get('eligible') is True}
+          assert ('valcea', 'facebook') in eligible, result
+          assert ('valcea', 'instagram') in eligible, result
+          print(result['status'])
+          PY
+
+      - name: Verify explicit transport capability and access gate before credential binding
+        run: |
+          NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          python local-news-os/social/fleet_metrics_transport_capability_gate.py \
+            --repo-root . \
+            --runtime-registry local-news-os/social/social_runtime_registry.json \
+            --capability-registry local-news-os/social/metrics_transport_capabilities.json \
+            --now "$NOW" \
+            >/tmp/fleet-metrics-capability-gate.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.loads(Path('/tmp/fleet-metrics-capability-gate.json').read_text(encoding='utf-8'))
+          assert result['status'] == 'CAPABILITY_GATE_READY', result
+          assert result['publication_blocked'] is False, result
+          assert result['guards']['explicit_transport_registration_required'] is True, result
+          assert result['guards']['transport_implementation_match_required'] is True, result
+          assert result['guards']['verified_access_attestation_required'] is True, result
+          assert result['guards']['explicit_credential_binding_still_required'] is True, result
+          assert result['guards']['credential_values_read'] is False, result
+          assert result['guards']['zero_paid_dependency'] is True, result
+          approved = {(row['instance_id'], row['platform'], row['metric_source']) for row in result['approved_channels']}
+          assert approved == {
+              ('valcea', 'facebook', 'meta_graph_api'),
+              ('valcea', 'instagram', 'instagram_graph_api'),
+          }, result
+          print(result['status'])
+          PY
+
+      - name: Verify explicit credential binding matrix is secret-free and least-privilege
+        run: |
+          NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          python local-news-os/social/fleet_metrics_credential_binding.py \
+            --repo-root . \
+            --runtime-registry local-news-os/social/social_runtime_registry.json \
+            --binding-registry local-news-os/social/metrics_credential_bindings.json \
+            --now "$NOW" \
+            >/tmp/fleet-metrics-credential-plan.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.loads(Path('/tmp/fleet-metrics-credential-plan.json').read_text(encoding='utf-8'))
+          assert result['status'] == 'CREDENTIAL_BINDINGS_READY', result
+          assert result['publication_blocked'] is False, result
+          assert result['guards']['future_instance_implicit_secret_grant'] is False, result
+          assert result['guards']['cross_instance_secret_sharing_forbidden'] is True, result
+          assert result['guards']['secret_values_read_by_binding_engine'] is False, result
+          assert result['guards']['tojson_secrets_allowed'] is False, result
+          assert result['workflow_matrix'] == [{
+              'binding_id': 'valcea-meta-observed-metrics-v1',
+              'instance_id': 'valcea',
+              'credential_env_names': ['VALCEA_FB_PAGE_ACCESS_TOKEN', 'VALCEA_IG_ACCESS_TOKEN'],
+              'metric_sources': ['instagram_graph_api', 'meta_graph_api'],
+          }], result
+          print(result['status'])
+          PY
+
+  plan-harvest:
+    if: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' }}
+    needs: acceptance
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.binding-plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Fail closed unless transport capabilities and access are verified
+        shell: bash
+        run: |
+          set -euo pipefail
+          NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          python local-news-os/social/fleet_metrics_transport_capability_gate.py \
+            --repo-root . \
+            --runtime-registry local-news-os/social/social_runtime_registry.json \
+            --capability-registry local-news-os/social/metrics_transport_capabilities.json \
+            --now "$NOW" \
+            >/tmp/fleet-metrics-capability-gate.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.loads(Path('/tmp/fleet-metrics-capability-gate.json').read_text(encoding='utf-8'))
+          if result.get('status') not in {'CAPABILITY_GATE_READY', 'CAPABILITY_GATE_IDLE'}:
+              raise SystemExit(f"transport capability gate hold: {result.get('hard_blocks')} {result.get('channel_holds')}")
+          if result.get('publication_blocked') is not False:
+              raise SystemExit('analytics capability gate attempted to block publication')
+          print(result.get('status'))
+          PY
+
+      - name: Build secret-free per-instance harvest matrix
+        id: binding-plan
+        shell: bash
+        run: |
+          set -euo pipefail
+          NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          python local-news-os/social/fleet_metrics_authorization_seal.py \
+            --repo-root . \
+            --runtime-registry local-news-os/social/social_runtime_registry.json \
+            --binding-registry local-news-os/social/metrics_credential_bindings.json \
+            --now "$NOW" \
+            >/tmp/fleet-metrics-credential-plan.json
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          result = json.loads(Path('/tmp/fleet-metrics-credential-plan.json').read_text(encoding='utf-8'))
+          if result.get('status') == 'CREDENTIAL_BINDINGS_HOLD':
+              raise SystemExit(f"credential binding registry hold: {result.get('hard_blocks')}")
+          matrix = {'include': result.get('workflow_matrix', [])}
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as handle:
+              handle.write('matrix=' + json.dumps(matrix, separators=(',', ':'), sort_keys=True) + '\n')
+          print(result.get('status'))
+          PY
+
+  harvest:
+    if: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' }}
+    needs: [acceptance, plan-harvest]
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan-harvest.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      # Secret values are injected only in the step for the exact checked-in
+      # binding. Adding a future instance/binding grants it nothing until a new
+      # explicit workflow step is reviewed and added.
+      - name: Harvest Vâlcea bound publications through verified native/free transports
+        if: ${{ matrix.binding_id == 'valcea-meta-observed-metrics-v1' }}
+        env:
+          VALCEA_FB_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_FB_PAGE_ACCESS_TOKEN }}
+          VALCEA_IG_ACCESS_TOKEN: ${{ secrets.VALCEA_IG_ACCESS_TOKEN }}
+          BINDING_ID: ${{ matrix.binding_id }}
+          AUTHORIZATION_FINGERPRINT: ${{ matrix.authorization_fingerprint }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          python local-news-os/social/fleet_metrics_authorization_seal.py \
+            --repo-root . \
+            --runtime-registry local-news-os/social/social_runtime_registry.json \
+            --binding-registry local-news-os/social/metrics_credential_bindings.json \
+            --binding-id "$BINDING_ID" \
+            --expected-authorization-fingerprint "$AUTHORIZATION_FINGERPRINT" \
+            --now "$NOW" \
+            --execute \
+            | tee /tmp/fleet-observed-metrics-harvest.json
+
+      - name: Refuse any binding without explicit workflow secret wiring
+        if: ${{ matrix.binding_id != 'valcea-meta-observed-metrics-v1' }}
+        env:
+          BINDING_ID: ${{ matrix.binding_id }}
+        shell: bash
+        run: |
+          echo "No explicit GitHub Actions secret wiring exists for binding: $BINDING_ID"
+          exit 1
+
+      - name: Verify bound harvest output contains no credential material
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.loads(Path('/tmp/fleet-observed-metrics-harvest.json').read_text(encoding='utf-8'))
+          if result.get('publication_blocked') is not False:
+              raise SystemExit('analytics attempted to block publication')
+          guards = result.get('guards', {})
+          if guards.get('cross_instance_secret_sharing_forbidden') is not True:
+              raise SystemExit('per-instance secret isolation guard missing')
+          if guards.get('secret_values_read_by_binding_engine') is not False:
+              raise SystemExit('binding engine read secret values')
+          if guards.get('secret_values_returned') is not False:
+              raise SystemExit('binding engine returned secret values')
+          if guards.get('zero_paid_dependency') is not True:
+              raise SystemExit('zero-paid dependency guard missing')
+          if result.get('instance_id') is None:
+              raise SystemExit('bound harvest instance identity missing')
+          if result.get('authorization_fingerprint_verified') is not True:
+              raise SystemExit('planned authorization fingerprint was not verified')
+          if result.get('pre_network_authorization_recheck') is not True:
+              raise SystemExit('pre-network authorization recheck missing')
+          print(result.get('status'))
+          PY
+
+      - name: Persist only bound instance observed metrics runtime state
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY' >/tmp/fleet-metrics-durable-paths.txt
+          import json
+          from pathlib import Path, PurePosixPath
+          result = json.loads(Path('/tmp/fleet-observed-metrics-harvest.json').read_text(encoding='utf-8'))
+          runtime = json.loads(Path('local-news-os/social/social_runtime_registry.json').read_text(encoding='utf-8'))
+          instance_id = result.get('instance_id')
+          instance = next((row for row in runtime.get('instances', []) if row.get('instance_id') == instance_id), None)
+          if not instance:
+              raise SystemExit(f'bound instance missing from runtime registry: {instance_id}')
+          root = PurePosixPath(instance['instance_root'])
+          for raw in sorted(set(result.get('durable_paths', []))):
+              path = PurePosixPath(str(raw))
+              if path.is_absolute() or '..' in path.parts:
+                  raise SystemExit(f'unsafe durable metrics path: {raw}')
+              if not (path == root or root in path.parents):
+                  raise SystemExit(f'durable metrics path outside bound instance root: {raw}')
+              print(path.as_posix())
+          PY
+          while IFS= read -r path; do
+            [[ -z "$path" ]] && continue
+            if [[ -e "$path" ]]; then
+              git add -- "$path"
+            fi
+          done </tmp/fleet-metrics-durable-paths.txt
+          if git diff --cached --quiet; then
+            echo "No durable bound-instance metrics state changed."
+            exit 0
+          fi
+          git config user.name "civora-site-engine"
+          git config user.email "actions@users.noreply.github.com"
+          git commit -m "Persist LOCAL NEWS OS observed metrics harvest"
+          git fetch origin main
+          if ! git rebase origin/main; then
+            git rebase --abort || true
+            echo "Refusing to overwrite concurrent bound-instance metrics state."
+            exit 1
+          fi
+          git push origin HEAD:main

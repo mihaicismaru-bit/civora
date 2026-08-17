@@ -281,6 +281,18 @@ def _authorization_material(
         if capability_secretish:
             blocks.append("AUTHORIZATION_CAPABILITY_SECRETISH_FIELDS_FORBIDDEN")
             continue
+        approval_platform = _clean(approval.get("platform")).lower()
+        source = _clean(approval.get("metric_source")).lower()
+        approval_credential = _clean(approval.get("credential_env_name"))
+        if _clean(capability.get("capability_id")).lower() != capability_id:
+            blocks.append("AUTHORIZATION_CAPABILITY_ID_MISMATCH")
+            continue
+        if _clean(capability.get("platform")).lower() != approval_platform:
+            blocks.append("AUTHORIZATION_CAPABILITY_PLATFORM_MISMATCH")
+            continue
+        if _clean(capability.get("metric_source")).lower() != source:
+            blocks.append("AUTHORIZATION_CAPABILITY_SOURCE_MISMATCH")
+            continue
 
         channel, channel_blocks = _channel_for_approval(repo_root, instance, approval)
         blocks.extend(channel_blocks)
@@ -293,8 +305,21 @@ def _authorization_material(
         if channel_view["credentials_ref"] == "":
             blocks.append("AUTHORIZATION_CHANNEL_CREDENTIAL_REFERENCE_REQUIRED")
             continue
+        try:
+            channel_credential = binding.fleet.native_metrics_transport.credential_env_name(channel_view["credentials_ref"])
+        except ValueError:
+            blocks.append("AUTHORIZATION_CHANNEL_CREDENTIAL_REFERENCE_INVALID")
+            continue
+        if channel_credential != approval_credential:
+            blocks.append("AUTHORIZATION_CHANNEL_CREDENTIAL_REFERENCE_MISMATCH")
+            continue
+        if channel_view["metrics"]["observed_only"] is not True or source not in channel_view["metrics"]["sources"]:
+            blocks.append("AUTHORIZATION_CHANNEL_METRICS_POLICY_DRIFT")
+            continue
+        if channel_view["zero_paid_dependency"] is not True:
+            blocks.append("AUTHORIZATION_CHANNEL_ZERO_PAID_POLICY_DRIFT")
+            continue
 
-        source = _clean(approval.get("metric_source")).lower()
         attestation_rel = _safe_rel(approval.get("access_attestation_path"))
         declared_attestation = _safe_rel(attestation_map.get(source))
         if not attestation_rel or not declared_attestation or attestation_rel != declared_attestation:
@@ -311,6 +336,10 @@ def _authorization_material(
         secretish = _secretish_keys(attestation)
         if secretish:
             blocks.append("AUTHORIZATION_ACCESS_ATTESTATION_SECRETISH_FIELDS_FORBIDDEN")
+            continue
+        attestation_blocks = capability_gate.capabilities.validate_access_attestation(capability, attestation)
+        if attestation_blocks:
+            blocks.append("AUTHORIZATION_ACCESS_ATTESTATION_INVALID:" + ",".join(attestation_blocks))
             continue
 
         channel_material.append({
@@ -389,7 +418,7 @@ def seal_plan(
 
     instances = _instance_map(runtime)
     bindings = _binding_map(binding_registry)
-    capabilities = _capability_map(capability_registry)
+    capabilities: dict[str, dict[str, Any]] = {}
     approved = capability_result.get("approved_channels") if isinstance(capability_result.get("approved_channels"), list) else []
     approved_by_instance: dict[str, list[dict[str, Any]]] = {}
     for row in approved:
@@ -400,6 +429,13 @@ def seal_plan(
     matrix = result.get("workflow_matrix") if isinstance(result.get("workflow_matrix"), list) else []
     fingerprints: dict[str, str] = {}
     blocks: list[str] = []
+    capability_validation = capability_gate.capabilities.validate_registry(capability_registry)
+    if capability_validation.get("status") != "PASS":
+        blocks.append("AUTHORIZATION_CAPABILITY_REGISTRY_INVALID")
+    else:
+        capabilities = _capability_map({"capabilities": capability_validation.get("capabilities", [])})
+    if capability_result.get("status") not in {"CAPABILITY_GATE_READY", "CAPABILITY_GATE_PARTIAL_HOLD", "CAPABILITY_GATE_IDLE"}:
+        blocks.append("AUTHORIZATION_CAPABILITY_GATE_NOT_READY")
 
     for authorization in authorizations:
         if not isinstance(authorization, dict):
