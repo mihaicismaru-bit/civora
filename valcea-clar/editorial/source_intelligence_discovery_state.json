@@ -1,9 +1,14 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "instance_id": "valcea",
   "product": "VÂLCEA CLAR Source Intelligence discovery state",
   "publication_authority": "NONE",
-  "seed_count": 30,
+  "registry_count": 2,
+  "registry_origins": [
+    "editorial/source_intelligence_seed_registry.json",
+    "editorial/source_intelligence_seed_supplement_v1.json"
+  ],
+  "seed_count": 50,
   "observations": [
     {
       "seed_id": "anchor-aba-olt",
@@ -3316,11 +3321,11 @@
       "seed_id": "press-curierul-de-ramnic",
       "publisher": "Curierul de Râmnic",
       "seed_url": "https://curierulderamnic.ro/",
-      "checked_at_epoch": 1786951124,
+      "checked_at_epoch": 1786970405,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://curierulderamnic.ro/",
-      "content_sha256": "fff3198d5f429ec76f43373296d730d1186e3ea88a6ef4a19e6b9ef4c4d6d092",
+      "content_sha256": "0f5fab3756ff8fe6801f91a39d45ae6e0384aec7d6599613fd5b95460120e4ab",
       "candidates": [
         {
           "candidate_id": "09ebd70f685c38eaf580551f",
@@ -3466,9 +3471,9 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
-          "candidate_id": "e2d8bf49cad1cbf8551b6c8d",
+          "candidate_id": "3960d566fb897d409d23e510",
           "seed_id": "press-curierul-de-ramnic",
-          "url": "https://curierulderamnic.ro/2026/08/13/apavil-sa-anunt-privind-scoaterea-la-concurs-a-unui-post-de-electrician-in-cadrul-sectorului-dragasani/",
+          "url": "https://curierulderamnic.ro/2026/08/17/17-august-19-octombrie-2026-producatorii-vitivinicoli-pot-depune-cereri-de-finantare-pentru-investitii-in-cadrul-interventiilor-is-v-02-si-is-v-07/",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T2",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -3488,6 +3493,17 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
+          "candidate_id": "a3f6c2f94246d321e0958518",
+          "seed_id": "press-curierul-de-ramnic",
+          "url": "https://curierulderamnic.ro/2026/08/06/ramnicu-valcea-continua-sa-bata-recorduri-de-longevitate-doi-locuitori-ai-orasului-au-implinit-100-de-ani-in-aceasta-vara/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
           "candidate_id": "9a1031ca7ec03308f10bca81",
           "seed_id": "press-curierul-de-ramnic",
           "url": "https://curierulderamnic.ro/2026/08/03/uniunea-artistilor-plastici-din-romania-va-propune-cateva-evenimente-vizuale-care-se-vor-desfasura-in-perioada-urmatoare-3/",
@@ -3499,42 +3515,53 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
+          "candidate_id": "1e00088753d75dc3f53e418f",
+          "seed_id": "press-curierul-de-ramnic",
+          "url": "https://curierulderamnic.ro/categorie/sport/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "64c54776951a503e4c25a1f7",
+          "seed_id": "press-curierul-de-ramnic",
+          "url": "https://curierulderamnic.ro/2026/08/14/sprijin-integrat-pentru-educatia-timpurie-in-judetul-valcea-prin-programul-start-in-educatie-1620-copii-541-parinti-si-82-de-educatori-beneficiaza-de-resurse-educationale-si-inter/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "21728bb2006b5af6de2fdba2",
+          "seed_id": "press-curierul-de-ramnic",
+          "url": "https://curierulderamnic.ro/2026/08/14/a-castigat-meciul-in-15-secunde/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "e2d8bf49cad1cbf8551b6c8d",
+          "seed_id": "press-curierul-de-ramnic",
+          "url": "https://curierulderamnic.ro/2026/08/13/apavil-sa-anunt-privind-scoaterea-la-concurs-a-unui-post-de-electrician-in-cadrul-sectorului-dragasani/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
           "candidate_id": "bf7f771946520e28f2a30b95",
           "seed_id": "press-curierul-de-ramnic",
           "url": "https://curierulderamnic.ro/2026/08/13/apavil-scoate-la-concurs-doua-posturi-de-instalator-in-cadrul-sectorului-olanesti/",
-          "discovered_by": "html:relevant_internal",
-          "tier_ceiling": "T2",
-          "lifecycle": "DISCOVERED_UNRATED",
-          "public_projection": false,
-          "auto_publication": false,
-          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
-        },
-        {
-          "candidate_id": "d4c5b3304bf8360edef96949",
-          "seed_id": "press-curierul-de-ramnic",
-          "url": "https://curierulderamnic.ro/2026/08/12/dispozitia-nr-1433-privind-convocarea-consiliului-local-in-sedinta-extraordinara/",
-          "discovered_by": "html:relevant_internal",
-          "tier_ceiling": "T2",
-          "lifecycle": "DISCOVERED_UNRATED",
-          "public_projection": false,
-          "auto_publication": false,
-          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
-        },
-        {
-          "candidate_id": "86c734b79abcb67b6c264049",
-          "seed_id": "press-curierul-de-ramnic",
-          "url": "https://curierulderamnic.ro/categorie/publicitate/",
-          "discovered_by": "html:relevant_internal",
-          "tier_ceiling": "T2",
-          "lifecycle": "DISCOVERED_UNRATED",
-          "public_projection": false,
-          "auto_publication": false,
-          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
-        },
-        {
-          "candidate_id": "4323eead86f6c7992adf941e",
-          "seed_id": "press-curierul-de-ramnic",
-          "url": "https://curierulderamnic.ro/2026/08/10/dispozitia-nr-1428-privind-convocarea-consiliului-local-in-sedinta-extraordinara/",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T2",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -3565,6 +3592,50 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
+          "candidate_id": "86c734b79abcb67b6c264049",
+          "seed_id": "press-curierul-de-ramnic",
+          "url": "https://curierulderamnic.ro/categorie/publicitate/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "d4c5b3304bf8360edef96949",
+          "seed_id": "press-curierul-de-ramnic",
+          "url": "https://curierulderamnic.ro/2026/08/12/dispozitia-nr-1433-privind-convocarea-consiliului-local-in-sedinta-extraordinara/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "4323eead86f6c7992adf941e",
+          "seed_id": "press-curierul-de-ramnic",
+          "url": "https://curierulderamnic.ro/2026/08/10/dispozitia-nr-1428-privind-convocarea-consiliului-local-in-sedinta-extraordinara/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "3ed5e4c63d20fbff3754ed25",
+          "seed_id": "press-curierul-de-ramnic",
+          "url": "https://curierulderamnic.ro/2026/08/10/apavil-anunta-intreruperea-furnizarii-apei-potabile-in-mai-multe-zone-din-ramnicu-valcea/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
           "candidate_id": "8765bd6aab683cb690a34652",
           "seed_id": "press-curierul-de-ramnic",
           "url": "https://curierulderamnic.ro/2026/08/10/s-a-rasturnat-de-3-ori-cu-masina-de-concurs/",
@@ -3576,9 +3647,31 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
+          "candidate_id": "a7768f7ab3e948ce519c7365",
+          "seed_id": "press-curierul-de-ramnic",
+          "url": "https://curierulderamnic.ro/2026/08/10/educatia-nu-intra-in-vacanta-peste-1-500-de-copii-si-adolescenti-participa-la-scoli-de-vara-si-tabere-organizate-de-world-vision-romania/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
           "candidate_id": "cb0064d6d9a8118ca713a399",
           "seed_id": "press-curierul-de-ramnic",
           "url": "https://curierulderamnic.ro/2026/08/07/o-noua-investitie-finalizata-cladire-medico-administrativa-la-spitalul-mihaesti/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "52c582145fba77e54f8d17a1",
+          "seed_id": "press-curierul-de-ramnic",
+          "url": "https://curierulderamnic.ro/2026/08/05/1334-persoane-angajate-prin-intermediul-agentiei-judetene-pentru-ocuparea-fortei-de-munca-valcea/",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T2",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -3603,11 +3696,11 @@
       "seed_id": "press-curierul-valcea",
       "publisher": "Curierul de Vâlcea",
       "seed_url": "http://www.curierul.ro/",
-      "checked_at_epoch": 1786961241,
+      "checked_at_epoch": 1786970420,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://www.curierul.ro/",
-      "content_sha256": "7e1b1f0731e9128185f45eb45dbacf5b427662386a854f9474cf35ccdb910881",
+      "content_sha256": "5941c13eaaeb8aefc3216ebad21c55fbd6387e4e5df03fb379f1313bcf869637",
       "candidates": [
         {
           "candidate_id": "6e99be3624c8c56681d4348d",
@@ -3676,6 +3769,138 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
+          "candidate_id": "5508f42dc058b3c9c354150e",
+          "seed_id": "press-curierul-valcea",
+          "url": "https://www.curierul.ro/category/social/sanatate/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "552ed46cac0e7cf210ab2448",
+          "seed_id": "press-curierul-valcea",
+          "url": "http://curierul.ro/category/sport/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "c39e2d489ec657611c615927",
+          "seed_id": "press-curierul-valcea",
+          "url": "https://www.curierul.ro/category/sport/alte-sporturi/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "6229ca227b1195d50ec1534e",
+          "seed_id": "press-curierul-valcea",
+          "url": "https://www.curierul.ro/category/sport/atletism/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "8a1f01c566f709ce6afb861d",
+          "seed_id": "press-curierul-valcea",
+          "url": "https://www.curierul.ro/category/sport/baschet/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "622da8f149fa350948bc504b",
+          "seed_id": "press-curierul-valcea",
+          "url": "https://www.curierul.ro/category/sport/box/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "30dfc285dc49788e2c7edf49",
+          "seed_id": "press-curierul-valcea",
+          "url": "https://www.curierul.ro/category/sport/fotbal/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "5cbd1bfd7781952ae0db7494",
+          "seed_id": "press-curierul-valcea",
+          "url": "https://www.curierul.ro/category/sport/handbal/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "ebdada6839288e0fdedace6d",
+          "seed_id": "press-curierul-valcea",
+          "url": "https://www.curierul.ro/category/sport/karate/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "900ff28ee03753cc675a5970",
+          "seed_id": "press-curierul-valcea",
+          "url": "https://www.curierul.ro/category/sport/lupte-greco-romane/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "0d4d2fc746f8caacb53bc7b9",
+          "seed_id": "press-curierul-valcea",
+          "url": "https://www.curierul.ro/category/sport/tenis/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "8b65064f0dd99818835d17c9",
+          "seed_id": "press-curierul-valcea",
+          "url": "https://www.curierul.ro/category/sport/volei/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
           "candidate_id": "8e216465e1fc8b18dc58cd04",
           "seed_id": "press-curierul-valcea",
           "url": "https://www.curierul.ro/category/publicitate/anunturi/",
@@ -3731,6 +3956,182 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
+          "candidate_id": "19bca7de75f25dddb15f197d",
+          "seed_id": "press-curierul-valcea",
+          "url": "https://www.curierul.ro/presedinta-anmap-in-vizita-fulger-la-directia-judeteana-de-mediu-valcea-voicescu-nu-a-fost-prins-descoperit/?share=jetpack-whatsapp",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "5267f900258fab01e49e3053",
+          "seed_id": "press-curierul-valcea",
+          "url": "https://www.curierul.ro/presedinta-anmap-in-vizita-fulger-la-directia-judeteana-de-mediu-valcea-voicescu-nu-a-fost-prins-descoperit/?share=print",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "5157c5324b52ffccdcad69fa",
+          "seed_id": "press-curierul-valcea",
+          "url": "https://www.curierul.ro/presedinta-anmap-in-vizita-fulger-la-directia-judeteana-de-mediu-valcea-voicescu-nu-a-fost-prins-descoperit/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "8a699c4d1caaaff4bf72ac50",
+          "seed_id": "press-curierul-valcea",
+          "url": "https://www.curierul.ro/femeie-arestata-pentru-trafic-de-minori/?share=jetpack-whatsapp",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "cd26a02b114d26d5b5091283",
+          "seed_id": "press-curierul-valcea",
+          "url": "https://www.curierul.ro/femeie-arestata-pentru-trafic-de-minori/?share=print",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "3cbe614b7950192599142821",
+          "seed_id": "press-curierul-valcea",
+          "url": "https://www.curierul.ro/femeie-arestata-pentru-trafic-de-minori/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "2207f2d52d2b19dc107d3325",
+          "seed_id": "press-curierul-valcea",
+          "url": "https://www.curierul.ro/stefania-uta-o-minuneweekend-ul-alergat-intru-gloria-sportului-valcean/?share=jetpack-whatsapp",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "4087ae8e34af4dfc58e83381",
+          "seed_id": "press-curierul-valcea",
+          "url": "https://www.curierul.ro/stefania-uta-o-minuneweekend-ul-alergat-intru-gloria-sportului-valcean/?share=print",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "23d39f671af331237dcd280b",
+          "seed_id": "press-curierul-valcea",
+          "url": "https://www.curierul.ro/stefania-uta-o-minuneweekend-ul-alergat-intru-gloria-sportului-valcean/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "be3c1520ffd8d1f527661c9a",
+          "seed_id": "press-curierul-valcea",
+          "url": "https://www.curierul.ro/ce-poti-sa-alegi-dintre-magneziul-marin-si-citratul-de-magneziu-6-variante-recomandate-pentru-sportivii-care-pun-pret-pe-recuperare-in-2026/?share=jetpack-whatsapp",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "064e5c43bb9816c713244a46",
+          "seed_id": "press-curierul-valcea",
+          "url": "https://www.curierul.ro/ce-poti-sa-alegi-dintre-magneziul-marin-si-citratul-de-magneziu-6-variante-recomandate-pentru-sportivii-care-pun-pret-pe-recuperare-in-2026/?share=print",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "7e60b418a549b32ff4ff360b",
+          "seed_id": "press-curierul-valcea",
+          "url": "https://www.curierul.ro/ce-poti-sa-alegi-dintre-magneziul-marin-si-citratul-de-magneziu-6-variante-recomandate-pentru-sportivii-care-pun-pret-pe-recuperare-in-2026/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "043f0a4df7f8b39f2a69318b",
+          "seed_id": "press-curierul-valcea",
+          "url": "https://www.curierul.ro/sportivii-de-la-tiger-gym-s-au-intors-cu-8-medalii-de-aur-de-la-petrosani/?share=jetpack-whatsapp",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "e0532a1dfb700a555ccdb221",
+          "seed_id": "press-curierul-valcea",
+          "url": "https://www.curierul.ro/sportivii-de-la-tiger-gym-s-au-intors-cu-8-medalii-de-aur-de-la-petrosani/?share=print",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "c5c69969b7c04b05587e205d",
+          "seed_id": "press-curierul-valcea",
+          "url": "https://www.curierul.ro/sportivii-de-la-tiger-gym-s-au-intors-cu-8-medalii-de-aur-de-la-petrosani/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "72d4ed931b52a261d5ba90b3",
+          "seed_id": "press-curierul-valcea",
+          "url": "https://www.curierul.ro/category/sport/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
           "candidate_id": "b87d3831ed2ab919f19018cc",
           "seed_id": "press-curierul-valcea",
           "url": "https://www.curierul.ro/comunicat-de-presa-finalizare-proiect-renovarea-energetica-a-cladirilor-rezidentiale-multifamiliale-bloc-h-si-bloc-k-din-orasul-baile-olanesti-judetul-valcea/",
@@ -3769,7 +4170,7 @@
       "seed_id": "press-eurovalcea",
       "publisher": "EuroVâlcea",
       "seed_url": "https://www.eurovalcea.ro/",
-      "checked_at_epoch": 1786951118,
+      "checked_at_epoch": 1786970399,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://www.eurovalcea.ro/",
@@ -3842,9 +4243,108 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
+          "candidate_id": "18642eda7dace67ceef8976b",
+          "seed_id": "press-eurovalcea",
+          "url": "https://www.eurovalcea.ro/category/sanatate/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "0f82f0cd6aff1a2daa3daa91",
+          "seed_id": "press-eurovalcea",
+          "url": "https://www.eurovalcea.ro/category/sport/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "fd1339d76555b8ca65a39e5e",
+          "seed_id": "press-eurovalcea",
+          "url": "https://www.eurovalcea.ro/category/turism/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
           "candidate_id": "b0bb156c12d5e8a2bbec4ab1",
           "seed_id": "press-eurovalcea",
           "url": "https://www.eurovalcea.ro/category/comunicate/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "e4f23936f818abcdd0863079",
+          "seed_id": "press-eurovalcea",
+          "url": "https://www.eurovalcea.ro/2026/08/06/serviciul-judetean-anticoruptie-valcea-activitati-de-educatie-pentru-promovarea-integritatii/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "ad8dde7ad25c283c47c737c6",
+          "seed_id": "press-eurovalcea",
+          "url": "https://www.eurovalcea.ro/2026/08/14/intreruperi-programate-de-energie-electrica-in-valcea-vezi-localitatile-si-zonele-afectate-in-perioada-17-23-august/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "9045b6e0026c030912de53f8",
+          "seed_id": "press-eurovalcea",
+          "url": "https://www.eurovalcea.ro/wp-content/uploads/2026/08/Întreruperi-programate-de-energie-electrică-în-Vâlcea.-Vezi-localitățile-și-zonele-afectate-în-perioada-17–23-august-1024x683.jpg",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "4a1e8bfe56251512570cd7f9",
+          "seed_id": "press-eurovalcea",
+          "url": "https://www.eurovalcea.ro/2026/08/12/economia-valcii-prezentata-direct-ministrului-irineu-darau-de-la-industrie-si-antreprenoriat-la-turismul-balnear/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "9dbbcc5810656dadb4a5bb59",
+          "seed_id": "press-eurovalcea",
+          "url": "https://www.eurovalcea.ro/2026/08/12/valcea-1-620-de-copii-din-comunitati-vulnerabile-primesc-sprijin-prin-programul-start-in-educatie/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "97fbb67201a1f94c68816f9f",
+          "seed_id": "press-eurovalcea",
+          "url": "https://www.eurovalcea.ro/wp-content/uploads/2026/08/Start_in_Educatie_EUROVALCEA-1024x681.jpg",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T2",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -3884,6 +4384,17 @@
           "public_projection": false,
           "auto_publication": false,
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "f4b498c84535855e90e21af3",
+          "seed_id": "press-eurovalcea",
+          "url": "https://www.eurovalcea.ro/2026/08/03/distributie-oltenia-anunta-modificari-la-programul-lucrarilor-pentru-prevenirea-si-corectarea-avariilor-din-judetul-valcea-in-saptamana-3-9-august-2026/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         }
       ]
     },
@@ -3891,7 +4402,7 @@
       "seed_id": "press-impact-real",
       "publisher": "Impact Real",
       "seed_url": "http://www.impactreal.ro/",
-      "checked_at_epoch": 1786961234,
+      "checked_at_epoch": 1786970413,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://www.impactreal.ro/",
@@ -3997,6 +4508,17 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
+          "candidate_id": "141ad367692215d861f1b7c0",
+          "seed_id": "press-impact-real",
+          "url": "https://www.impactreal.ro/category/sport/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
           "candidate_id": "8d2a0e3f85fedae55c913ddb",
           "seed_id": "press-impact-real",
           "url": "https://www.impactreal.ro/category/stiri-diverse-descopera-lumea-prin-stirile-noastre-speciale/",
@@ -4030,6 +4552,17 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
+          "candidate_id": "451a3582b16114e537b1286e",
+          "seed_id": "press-impact-real",
+          "url": "https://www.impactreal.ro/2026/07/01/a-inceput-campania-electorala-constantin-radulescu-avertizeaza-asupra-dezinformarii-si-manipularii-din-mediul-online-libertatea-este-buna-insa-calomnia-si-minciuna-sunt-rele/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
           "candidate_id": "eb8b237f67c2306a861b51d1",
           "seed_id": "press-impact-real",
           "url": "https://www.impactreal.ro/2025/06/05/presedinte-nou-stil-diferit-pune-comunicarea-si-negocierea-in-centrul-jocului-politic/",
@@ -4052,9 +4585,31 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
+          "candidate_id": "68b12d30f5c6e80ee9397c28",
+          "seed_id": "press-impact-real",
+          "url": "https://www.impactreal.ro/2026/08/01/intercampus-ramnicu-valcea-duce-romania-in-elita-mondiala-in-sua-la-houston-o-mie-de-sportivi-50-de-tari-si-o-lectie-uriasa-de-curaj-la-genuine-cup/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
           "candidate_id": "bd096909bd5827591d1037e5",
           "seed_id": "press-impact-real",
           "url": "https://www.impactreal.ro/2026/07/11/centrul-de-afaceri-flandra-valcea-sa-are-un-nou-consiliu-de-administratie/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "96a598337e0e28b919fa6208",
+          "seed_id": "press-impact-real",
+          "url": "https://www.impactreal.ro/2026/06/08/antreprenoarea-adina-craciunescu-si-sportivul-radu-zarioiu-vor-fi-din-nou-parinti-e-tot-baiat/",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T2",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -4090,11 +4645,11 @@
       "seed_id": "press-indiscret",
       "publisher": "Indiscret în Oltenia",
       "seed_url": "http://www.indiscret.ro/",
-      "checked_at_epoch": 1786961235,
+      "checked_at_epoch": 1786970415,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://www.indiscret.ro/",
-      "content_sha256": "669cb9de9702823f5840976adde7983289b36c67435f14061954fd4c71ad0bbb",
+      "content_sha256": "777649a4c690aefcb9e29df8c61182096f14d918d19af29db96f3cbf654af9cd",
       "candidates": [
         {
           "candidate_id": "88b3b100f66b9d935b6402fa",
@@ -4284,6 +4839,28 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
+          "candidate_id": "1b3145ea8e62226887bf33f1",
+          "seed_id": "press-indiscret",
+          "url": "https://www.indiscret.ro/2026/08/10/seful-cnas-vorbeste-despre-fraude-uriase-in-sanatate-servicii-medicale-raportate-pentru-pacienti-morti-si-internari-fictive/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "77eafd79d0c4195a7f081e09",
+          "seed_id": "press-indiscret",
+          "url": "https://www.indiscret.ro/2026/08/04/valcea-trafic-blocat-complet-pe-valea-oltului-din-cauza-unui-tir-implicat-intr-un-accident-in-zona-brezoi/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
           "candidate_id": "4dac5a3cc013874947aaaa49",
           "seed_id": "press-indiscret",
           "url": "https://www.indiscret.ro/2026/08/03/romania-campioana-ue-la-scumpirea-motorinei-pretul-a-trecut-de-108-lei-pe-litru-iar-presedintele-nicusor-dan-intarzie-promulgarea-legii-care-ar-reduce-acciza/",
@@ -4322,11 +4899,11 @@
       "seed_id": "press-jurnal-valcean",
       "publisher": "Jurnal Vâlcean",
       "seed_url": "https://jurnalvalcean.ro/",
-      "checked_at_epoch": 1786951130,
+      "checked_at_epoch": 1786970408,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://jurnalvalcean.ro/",
-      "content_sha256": "dcf056bab8d5fe82d664270966e3db2f93f85db5a4251625acfa6194c562a5bc",
+      "content_sha256": "524089225f2210c48b728e9657c22b88633c416e6de4818be995478615cb1b1c",
       "candidates": [
         {
           "candidate_id": "6466a1459afae14e1eb0be87",
@@ -4428,6 +5005,17 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
+          "candidate_id": "4f52944749d456d52898c8c6",
+          "seed_id": "press-jurnal-valcean",
+          "url": "https://jurnalvalcean.ro/centru-modern-de-sanatate-mintala-si-de-prevenire-a-adictiilor-in-valcea/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
           "candidate_id": "2a85c13da6a081ba9d746917",
           "seed_id": "press-jurnal-valcean",
           "url": "https://jurnalvalcean.ro/un-nou-proiect-castigat-de-primaria-malaia-canalizare-etapa-a-ii-a-finantat-prin-afm/",
@@ -4444,7 +5032,7 @@
       "seed_id": "press-monitorul-valcea",
       "publisher": "Monitorul de Vâlcea",
       "seed_url": "http://www.monitoruldevalcea.ro/",
-      "checked_at_epoch": 1786961239,
+      "checked_at_epoch": 1786970418,
       "status": "DEGRADED",
       "http_error": "<urlopen error [Errno -3] Temporary failure in name resolution>",
       "final_url": null,
@@ -4455,11 +5043,11 @@
       "seed_id": "press-primplan",
       "publisher": "Primplan Press",
       "seed_url": "https://www.primplanpress.ro/",
-      "checked_at_epoch": 1786951131,
+      "checked_at_epoch": 1786970409,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://www.primplanpress.ro/",
-      "content_sha256": "20101595768c0dca011789d9d347c9607fd3e20c42bfd32bb7b0f67e006436d1",
+      "content_sha256": "abf854e138a89b79a667d8945da988b66249345a59766f0e8517021d6ee3bdb3",
       "candidates": [
         {
           "candidate_id": "d8e9cd6fa2ea7ebf91937c0f",
@@ -4594,9 +5182,53 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
-          "candidate_id": "99241835899463929c38d1a7",
+          "candidate_id": "52e969fc1cdd6fd1db08e04b",
           "seed_id": "press-primplan",
-          "url": "https://www.primplanpress.ro/horezu-accelereaza-investitiile-in-energie-transport-sanatate-si-servicii-publice/",
+          "url": "https://www.primplanpress.ro/category/educatie/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "bdf1f0f8dcbf3f47ed7454f8",
+          "seed_id": "press-primplan",
+          "url": "https://www.primplanpress.ro/category/sport/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "e751bb7c327394e3f515bb9e",
+          "seed_id": "press-primplan",
+          "url": "https://www.primplanpress.ro/budesti-pregateste-un-cabinet-stomatologic-la-scoala-gimnaziala-cu-dotari-achizitionate-printr-un-proiect-european/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "fa9ea8f547c0b71e16248477",
+          "seed_id": "press-primplan",
+          "url": "https://www.primplanpress.ro/politia-locala-dragasani-primeste-un-autoturism-nou-pentru-patrulare-si-interventie/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "6bef60b82a6913e87773811c",
+          "seed_id": "press-primplan",
+          "url": "https://www.primplanpress.ro/angajatii-din-sanatate-ameninta-cu-prima-greva-generala-din-ultimii-20-de-ani/",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T2",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -4638,9 +5270,9 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
-          "candidate_id": "67f4485a345055ae773088b5",
+          "candidate_id": "99241835899463929c38d1a7",
           "seed_id": "press-primplan",
-          "url": "https://www.primplanpress.ro/bujoreni-face-un-nou-pas-pentru-modernizarea-drumurilor-primaria-a-lansat-licitatia-pentru-proiectarea-si-executia-lucrarilor/",
+          "url": "https://www.primplanpress.ro/horezu-accelereaza-investitiile-in-energie-transport-sanatate-si-servicii-publice/",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T2",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -4649,9 +5281,9 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
-          "candidate_id": "c0b4f74b1ca61ab3c7b9517c",
+          "candidate_id": "67f4485a345055ae773088b5",
           "seed_id": "press-primplan",
-          "url": "https://www.primplanpress.ro/malaia-obtine-11-709-402-lei-pentru-canalizare-etapa-ii-printr-un-proiect-finantat-de-afm/",
+          "url": "https://www.primplanpress.ro/bujoreni-face-un-nou-pas-pentru-modernizarea-drumurilor-primaria-a-lansat-licitatia-pentru-proiectarea-si-executia-lucrarilor/",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T2",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -4693,6 +5325,17 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
+          "candidate_id": "c0b4f74b1ca61ab3c7b9517c",
+          "seed_id": "press-primplan",
+          "url": "https://www.primplanpress.ro/malaia-obtine-11-709-402-lei-pentru-canalizare-etapa-ii-printr-un-proiect-finantat-de-afm/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
           "candidate_id": "e9718c0d978922f832c4bbb5",
           "seed_id": "press-primplan",
           "url": "https://www.primplanpress.ro/proiectul-de-modernizare-a-cartierului-zlatarei-a-fost-aprobat-noua-strazi-din-dragasani-vor-intra-in-lucrari/",
@@ -4707,17 +5350,6 @@
           "candidate_id": "4a454cea59fe94ea7a6bf077",
           "seed_id": "press-primplan",
           "url": "https://www.primplanpress.ro/cartier-nou-pentru-tineri-si-locuinte-sociale-la-dragoesti-proiectul-vizeaza-un-teren-de-12-hectare/",
-          "discovered_by": "html:relevant_internal",
-          "tier_ceiling": "T2",
-          "lifecycle": "DISCOVERED_UNRATED",
-          "public_projection": false,
-          "auto_publication": false,
-          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
-        },
-        {
-          "candidate_id": "2a7d8b2762905841d1445170",
-          "seed_id": "press-primplan",
-          "url": "https://www.primplanpress.ro/contract-semnat-pentru-modernizarea-a-sapte-strazi-din-comuna-bujoreni-investitie-de-peste-66-milioane-de-lei/",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T2",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -4753,11 +5385,11 @@
       "seed_id": "press-realitatea-valceana",
       "publisher": "Realitatea Vâlceană",
       "seed_url": "http://realitateavalceana.ro/",
-      "checked_at_epoch": 1786961244,
+      "checked_at_epoch": 1786970423,
       "status": "PASS",
       "http_error": null,
       "final_url": "http://www.realitateavalceana.ro/",
-      "content_sha256": "905c2266d88cacd8cd15742d1f1795c0c71eb71bd961a22c7459272be7e33519",
+      "content_sha256": "89b425f08224ce12b45db471aaca6cc8fd98d21c027d70e205c7506093f3c680",
       "candidates": [
         {
           "candidate_id": "353f6266a878a0fa8269f3de",
@@ -4969,6 +5601,17 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
+          "candidate_id": "797fa3359bd07ab2b48fe6a0",
+          "seed_id": "press-realitatea-valceana",
+          "url": "http://www.realitateavalceana.ro/inca-20-microbuze-electrice-pentru-transportul-elevilor-valceni-care-sunt-localita%c8%9bile-beneficiare/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
           "candidate_id": "f9c523369eb2a47c1229c34f",
           "seed_id": "press-realitatea-valceana",
           "url": "http://www.realitateavalceana.ro/ve%c8%99ti-bune-de-la-senatorul-andra-bica-voi-sus%c8%9bine-intotdeauna-solu%c8%9biile-concrete-am-votat-prelungirea-pana-la-1-octombrie-a-termenului-in-care-cumparatorii-care-au-incheiat-promisiuni/",
@@ -5002,6 +5645,17 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
+          "candidate_id": "a98dcabbc9c0f0402b885d2e",
+          "seed_id": "press-realitatea-valceana",
+          "url": "http://www.realitateavalceana.ro/14-15-august-turneul-memorial-constantin-tita-in-sala-sporturilor-din-ramnic/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
           "candidate_id": "22ac5c2d5da33546223c1390",
           "seed_id": "press-realitatea-valceana",
           "url": "http://www.realitateavalceana.ro/stiri/editorial/",
@@ -5027,6 +5681,17 @@
           "candidate_id": "8af442b86b035f9b8593490d",
           "seed_id": "press-realitatea-valceana",
           "url": "http://www.realitateavalceana.ro/turn-de-laparoscopie-la-chirurgie-echipamente-moderne-la-reanimare-noi-investi%c8%9bii-la-sju-valcea/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "b7019b7e03dedd4d83a18f85",
+          "seed_id": "press-realitatea-valceana",
+          "url": "http://www.realitateavalceana.ro/ministrul-sanata%c8%9bii-alexandru-rogobete-la-valcea-viziune-implicare-%c8%99i-buna-credin%c8%9ba-pentru-sanatatea-oamenilor/",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T2",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -5112,6 +5777,17 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
+          "candidate_id": "7f6fbb711e8ad32de1372590",
+          "seed_id": "press-realitatea-valceana",
+          "url": "http://www.realitateavalceana.ro/in-intervalul-20-aprilie-15-iulie-apia-prime%c8%99te-cereri-de-plata-pentru-schema-de-ajutor-de-stat-%e2%80%9esprijin-pentru-prima-impadurire-%c8%99i-crearea-de-suprafe%c8%9be-impadurite%e2%80%9d/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
           "candidate_id": "6a14fcf424e4b4b388d78736",
           "seed_id": "press-realitatea-valceana",
           "url": "http://www.realitateavalceana.ro/stiri/social/politic/",
@@ -5150,11 +5826,11 @@
       "seed_id": "press-stirile-olteniei",
       "publisher": "Știrile Olteniei",
       "seed_url": "https://stirileolteniei.ro/",
-      "checked_at_epoch": 1786961231,
+      "checked_at_epoch": 1786970410,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://stirileolteniei.ro/",
-      "content_sha256": "235c28eb4c93a074767da5dbd7ea881007295d3eff8b59c8d277fafecd772f47",
+      "content_sha256": "7b0cf390bd39d0a31649c278b61156377d00e294ba4f12ecc6ad30984a138197",
       "candidates": [
         {
           "candidate_id": "f7f2aa43a4de70d50dc0cf71",
@@ -5393,11 +6069,11 @@
       "seed_id": "press-vocea-valcii",
       "publisher": "Vocea Vâlcii",
       "seed_url": "https://vocea-valcii.ro/category/prima-pagina/",
-      "checked_at_epoch": 1786951121,
+      "checked_at_epoch": 1786970402,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://vocea-valcii.ro/category/prima-pagina/",
-      "content_sha256": "68cc0b1bfc0a853e45ac9840b8ba8428adf4cdf795b56ce47edf30b10de3504d",
+      "content_sha256": "42798ce9afef5bec2b39dbfbc49f1eb4a75460751af691b735b5d7e6104056f0",
       "candidates": [
         {
           "candidate_id": "daad782c2191332d3daa7eb9",
@@ -5466,9 +6142,31 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
-          "candidate_id": "7c54dc425e505ef6e5eee7fa",
+          "candidate_id": "f6b361305eb61be0853ac044",
           "seed_id": "press-vocea-valcii",
-          "url": "https://vocea-valcii.ro/fapt-divers/taxi-fara-autorizatie-depistat-de-politisti-pe-dn-7-in-ramnicu-valcea-soferul-a-ramas-fara-placute-timp-de-6-luni/",
+          "url": "https://vocea-valcii.ro/category/sport/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "bc7bc87a86c726ed43d36100",
+          "seed_id": "press-vocea-valcii",
+          "url": "https://vocea-valcii.ro/dezvaluiri/trafic-de-cocaina-la-ramnicu-valcea-si-pitesti-doi-barbati-arestati-dupa-un-flagrant/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "04e436951c141fc8728a78d1",
+          "seed_id": "press-vocea-valcii",
+          "url": "https://vocea-valcii.ro/fapt-divers/amenda-de-5-000-de-lei-si-masina-indisponibilizata-6-luni-pentru-transport-ilegal-de-persoane-pe-dn7/",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T2",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -5499,6 +6197,28 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
+          "candidate_id": "9425ba67129ad3489acd6c26",
+          "seed_id": "press-vocea-valcii",
+          "url": "https://vocea-valcii.ro/sport/aur-mondial-pentru-ramnicu-valcea-stefania-uta-campioana-mondiala-u20-la-400-de-metri-garduri/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "deba2ea5fe770096b6ebc9fb",
+          "seed_id": "press-vocea-valcii",
+          "url": "https://vocea-valcii.ro/actualitate/viata-dedicata-sportului-intrerupta-prea-devreme-roxana-moise-a-murit-la-39-de-ani/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
           "candidate_id": "12399546703d4e303aa8f5cc",
           "seed_id": "press-vocea-valcii",
           "url": "https://vocea-valcii.ro/administratie-2/parcul-mircea-cel-batran-intra-in-reabilitare-investitie-de-peste-12-milioane-de-lei-finantata-din-fonduri-europene/",
@@ -5510,9 +6230,31 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
-          "candidate_id": "be2f77f2e2524077b681f0c2",
+          "candidate_id": "d09d8e4fb01ebe75234b77f4",
           "seed_id": "press-vocea-valcii",
-          "url": "https://vocea-valcii.ro/economie/o-legatura-veche-de-trei-secole-intarita-prin-canonizare-sfanta-maria-brancoveanu-si-manastirile-din-valcea/",
+          "url": "https://vocea-valcii.ro/sport/%f0%9d%97%96%f0%9d%97%b5%f0%9d%97%b6%f0%9d%97%ba%f0%9d%97%b0%f0%9d%97%bc%f0%9d%97%ba%f0%9d%97%bd%f0%9d%97%b9%f0%9d%97%b2%f0%9d%98%85-%f0%9d%98%80%f0%9d%98%82%f0%9d%98%80%f0%9d%98%81%f0%9d%97%b6/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "b7e60145cee65a8e1fa6e0d9",
+          "seed_id": "press-vocea-valcii",
+          "url": "https://vocea-valcii.ro/politica/zvonul-zilei-mircea-iova-va-fi-director-la-garda-de-mediu-valcea/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "48611524a93c84d72d9ba60c",
+          "seed_id": "press-vocea-valcii",
+          "url": "https://vocea-valcii.ro/actualitate/incendiu-la-un-autoturism-in-horezu-pompierii-au-intervenit-inainte-ca-focul-sa-se-extinda/",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T2",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -5537,11 +6279,11 @@
       "seed_id": "press-ziarul-de-valcea",
       "publisher": "Ziarul de Vâlcea",
       "seed_url": "https://ziaruldevalcea.ro/",
-      "checked_at_epoch": 1786951124,
+      "checked_at_epoch": 1786970404,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://ziaruldevalcea.ro/",
-      "content_sha256": "6989f95a400dcbea3f6d471dcb9865244e9bc4098ae7f0ee301365b47e3511de",
+      "content_sha256": "3ef3438c8c6ec82c734a53a31f83488461335148b02707c7a04fa5a88001e82b",
       "candidates": [
         {
           "candidate_id": "af7cc79c7a78c170b1a9a7b9",
@@ -5610,9 +6352,42 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
+          "candidate_id": "b26a7be99edc5b2934ac9167",
+          "seed_id": "press-ziarul-de-valcea",
+          "url": "https://ziaruldevalcea.ro/category/sport/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "2e2596726d6dabccc2876feb",
+          "seed_id": "press-ziarul-de-valcea",
+          "url": "https://ziaruldevalcea.ro/category/turism/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
           "candidate_id": "5e08ce9cb918bee83be780cf",
           "seed_id": "press-ziarul-de-valcea",
           "url": "https://ziaruldevalcea.ro/category/anunturi/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "38d6dce77af5db71b5609494",
+          "seed_id": "press-ziarul-de-valcea",
+          "url": "https://ziaruldevalcea.ro/2026/08/musamalizare-in-fata-sri-valcea-o-masina-a-serviciului-de-informatii-loveste-un-pieton-politia-gaseste-vinovat-trotuarul-intrerupt/",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T2",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -5654,6 +6429,28 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
+          "candidate_id": "3324a68d7b907263b6dc85de",
+          "seed_id": "press-ziarul-de-valcea",
+          "url": "https://ziaruldevalcea.ro/2026/08/alerta-in-valcea-focar-de-variola-ovina-pe-transalpina-aproximativ-500-de-oi-ar-putea-fi-sacrificate/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "91d03deace1eccc94d2c6df4",
+          "seed_id": "press-ziarul-de-valcea",
+          "url": "https://ziaruldevalcea.ro/2026/08/ramnicu-valcea-sufocat-din-nou-de-arderile-ilegale-cetatenii-acuza-am-inchis-geamurile-ne-sufoca-unde-sunt-autoritatile-politia-garda-de-mediu-jandarmeria-politia-locala/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
           "candidate_id": "0a9b1c6b8250de2194e0cdab",
           "seed_id": "press-ziarul-de-valcea",
           "url": "https://ziaruldevalcea.ro/2026/08/investigatie-ce-se-intampla-intr-un-ansamblu-rezidential-din-ramnicuvalcea-zeci-de-apartamente-ale-afaceristului-ducu-chiriasi-numerosi-si-acuzatii-grave-ale-locatarilor/",
@@ -5687,9 +6484,42 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
+          "candidate_id": "26811fe32c9a2ae068855542",
+          "seed_id": "press-ziarul-de-valcea",
+          "url": "https://ziaruldevalcea.ro/2026/08/hotel-olanesti-spa-medical-relaxare-sanatate-si-rasfat-in-apele-sulfuroase-ale-statiunii/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "80cc8406a28375bbc3af6a65",
+          "seed_id": "press-ziarul-de-valcea",
+          "url": "https://ziaruldevalcea.ro/2026/07/scandalul-de-trucare-a-unui-meci-din-liga-a-iii-a-ajunge-si-in-fotbalul-valcean-un-fost-antrenor-de-la-horezu-si-un-jucator-ajuns-la-budesti-suspendati-de-frf/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
           "candidate_id": "288b92f19da7872c599061b2",
           "seed_id": "press-ziarul-de-valcea",
           "url": "https://ziaruldevalcea.ro/2026/08/info-calan-un-proiect-editorial-din-valea-streiului-cu-teme-de-interes-national/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "34258530e5d742baebfde26a",
+          "seed_id": "press-ziarul-de-valcea",
+          "url": "https://ziaruldevalcea.ro/2026/08/spaga-uitata-in-masina-politiei-patru-agenti-de-la-rutiera-prinsi-dupa-o-gafa-incredibila-colegul-a-gasit-banii-si-si-a-alertat-superiorii/",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T2",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -6178,7 +7008,7 @@
       "candidates": []
     }
   ],
-  "candidate_count": 529,
+  "candidate_count": 604,
   "candidates": [
     {
       "candidate_id": "723808db7a7383c967e1a9ce",
@@ -9393,6 +10223,28 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
+      "candidate_id": "52c582145fba77e54f8d17a1",
+      "seed_id": "press-curierul-de-ramnic",
+      "url": "https://curierulderamnic.ro/2026/08/05/1334-persoane-angajate-prin-intermediul-agentiei-judetene-pentru-ocuparea-fortei-de-munca-valcea/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "a3f6c2f94246d321e0958518",
+      "seed_id": "press-curierul-de-ramnic",
+      "url": "https://curierulderamnic.ro/2026/08/06/ramnicu-valcea-continua-sa-bata-recorduri-de-longevitate-doi-locuitori-ai-orasului-au-implinit-100-de-ani-in-aceasta-vara/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
       "candidate_id": "cb0064d6d9a8118ca713a399",
       "seed_id": "press-curierul-de-ramnic",
       "url": "https://curierulderamnic.ro/2026/08/07/o-noua-investitie-finalizata-cladire-medico-administrativa-la-spitalul-mihaesti/",
@@ -9404,9 +10256,31 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
+      "candidate_id": "3ed5e4c63d20fbff3754ed25",
+      "seed_id": "press-curierul-de-ramnic",
+      "url": "https://curierulderamnic.ro/2026/08/10/apavil-anunta-intreruperea-furnizarii-apei-potabile-in-mai-multe-zone-din-ramnicu-valcea/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
       "candidate_id": "4323eead86f6c7992adf941e",
       "seed_id": "press-curierul-de-ramnic",
       "url": "https://curierulderamnic.ro/2026/08/10/dispozitia-nr-1428-privind-convocarea-consiliului-local-in-sedinta-extraordinara/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "a7768f7ab3e948ce519c7365",
+      "seed_id": "press-curierul-de-ramnic",
+      "url": "https://curierulderamnic.ro/2026/08/10/educatia-nu-intra-in-vacanta-peste-1-500-de-copii-si-adolescenti-participa-la-scoli-de-vara-si-tabere-organizate-de-world-vision-romania/",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
@@ -9470,6 +10344,39 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
+      "candidate_id": "21728bb2006b5af6de2fdba2",
+      "seed_id": "press-curierul-de-ramnic",
+      "url": "https://curierulderamnic.ro/2026/08/14/a-castigat-meciul-in-15-secunde/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "64c54776951a503e4c25a1f7",
+      "seed_id": "press-curierul-de-ramnic",
+      "url": "https://curierulderamnic.ro/2026/08/14/sprijin-integrat-pentru-educatia-timpurie-in-judetul-valcea-prin-programul-start-in-educatie-1620-copii-541-parinti-si-82-de-educatori-beneficiaza-de-resurse-educationale-si-inter/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "3960d566fb897d409d23e510",
+      "seed_id": "press-curierul-de-ramnic",
+      "url": "https://curierulderamnic.ro/2026/08/17/17-august-19-octombrie-2026-producatorii-vitivinicoli-pot-depune-cereri-de-finantare-pentru-investitii-in-cadrul-interventiilor-is-v-02-si-is-v-07/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
       "candidate_id": "2b225c92b767f82f22f3e8bb",
       "seed_id": "press-curierul-de-ramnic",
       "url": "https://curierulderamnic.ro/categorie/consiliu-judetean/",
@@ -9495,6 +10402,17 @@
       "candidate_id": "86c734b79abcb67b6c264049",
       "seed_id": "press-curierul-de-ramnic",
       "url": "https://curierulderamnic.ro/categorie/publicitate/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "1e00088753d75dc3f53e418f",
+      "seed_id": "press-curierul-de-ramnic",
+      "url": "https://curierulderamnic.ro/categorie/sport/",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
@@ -9657,6 +10575,17 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
+      "candidate_id": "552ed46cac0e7cf210ab2448",
+      "seed_id": "press-curierul-valcea",
+      "url": "http://curierul.ro/category/sport/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
       "candidate_id": "6d20274499b96d55e67d0e62",
       "seed_id": "press-curierul-valcea",
       "url": "http://www.curierul.ro/plati-anunturi/",
@@ -9693,6 +10622,171 @@
       "candidate_id": "8e216465e1fc8b18dc58cd04",
       "seed_id": "press-curierul-valcea",
       "url": "https://www.curierul.ro/category/publicitate/anunturi/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "5508f42dc058b3c9c354150e",
+      "seed_id": "press-curierul-valcea",
+      "url": "https://www.curierul.ro/category/social/sanatate/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "72d4ed931b52a261d5ba90b3",
+      "seed_id": "press-curierul-valcea",
+      "url": "https://www.curierul.ro/category/sport/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "c39e2d489ec657611c615927",
+      "seed_id": "press-curierul-valcea",
+      "url": "https://www.curierul.ro/category/sport/alte-sporturi/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "6229ca227b1195d50ec1534e",
+      "seed_id": "press-curierul-valcea",
+      "url": "https://www.curierul.ro/category/sport/atletism/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "8a1f01c566f709ce6afb861d",
+      "seed_id": "press-curierul-valcea",
+      "url": "https://www.curierul.ro/category/sport/baschet/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "622da8f149fa350948bc504b",
+      "seed_id": "press-curierul-valcea",
+      "url": "https://www.curierul.ro/category/sport/box/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "30dfc285dc49788e2c7edf49",
+      "seed_id": "press-curierul-valcea",
+      "url": "https://www.curierul.ro/category/sport/fotbal/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "5cbd1bfd7781952ae0db7494",
+      "seed_id": "press-curierul-valcea",
+      "url": "https://www.curierul.ro/category/sport/handbal/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "ebdada6839288e0fdedace6d",
+      "seed_id": "press-curierul-valcea",
+      "url": "https://www.curierul.ro/category/sport/karate/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "900ff28ee03753cc675a5970",
+      "seed_id": "press-curierul-valcea",
+      "url": "https://www.curierul.ro/category/sport/lupte-greco-romane/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "0d4d2fc746f8caacb53bc7b9",
+      "seed_id": "press-curierul-valcea",
+      "url": "https://www.curierul.ro/category/sport/tenis/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "8b65064f0dd99818835d17c9",
+      "seed_id": "press-curierul-valcea",
+      "url": "https://www.curierul.ro/category/sport/volei/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "7e60b418a549b32ff4ff360b",
+      "seed_id": "press-curierul-valcea",
+      "url": "https://www.curierul.ro/ce-poti-sa-alegi-dintre-magneziul-marin-si-citratul-de-magneziu-6-variante-recomandate-pentru-sportivii-care-pun-pret-pe-recuperare-in-2026/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "be3c1520ffd8d1f527661c9a",
+      "seed_id": "press-curierul-valcea",
+      "url": "https://www.curierul.ro/ce-poti-sa-alegi-dintre-magneziul-marin-si-citratul-de-magneziu-6-variante-recomandate-pentru-sportivii-care-pun-pret-pe-recuperare-in-2026/?share=jetpack-whatsapp",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "064e5c43bb9816c713244a46",
+      "seed_id": "press-curierul-valcea",
+      "url": "https://www.curierul.ro/ce-poti-sa-alegi-dintre-magneziul-marin-si-citratul-de-magneziu-6-variante-recomandate-pentru-sportivii-care-pun-pret-pe-recuperare-in-2026/?share=print",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
@@ -9745,6 +10839,39 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
+      "candidate_id": "3cbe614b7950192599142821",
+      "seed_id": "press-curierul-valcea",
+      "url": "https://www.curierul.ro/femeie-arestata-pentru-trafic-de-minori/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "8a699c4d1caaaff4bf72ac50",
+      "seed_id": "press-curierul-valcea",
+      "url": "https://www.curierul.ro/femeie-arestata-pentru-trafic-de-minori/?share=jetpack-whatsapp",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "cd26a02b114d26d5b5091283",
+      "seed_id": "press-curierul-valcea",
+      "url": "https://www.curierul.ro/femeie-arestata-pentru-trafic-de-minori/?share=print",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
       "candidate_id": "ba814aac38b6ba9914d813d3",
       "seed_id": "press-curierul-valcea",
       "url": "https://www.curierul.ro/ordinul-asistentilor-medicali-filiala-valcea-vine-cu-ultimele-detalii-legate-de-desfasurarea-examenului-de-grad-principal-sesiunea-2026-%f0%9f%91%87%f0%9f%8f%bb%f0%9f%91%87%f0%9f%8f%bb%f0%9f%91%87/",
@@ -9770,6 +10897,39 @@
       "candidate_id": "ff1c592659a1b80970c7038e",
       "seed_id": "press-curierul-valcea",
       "url": "https://www.curierul.ro/ordinul-asistentilor-medicali-filiala-valcea-vine-cu-ultimele-detalii-legate-de-desfasurarea-examenului-de-grad-principal-sesiunea-2026-%f0%9f%91%87%f0%9f%8f%bb%f0%9f%91%87%f0%9f%8f%bb%f0%9f%91%87/?share=print",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "5157c5324b52ffccdcad69fa",
+      "seed_id": "press-curierul-valcea",
+      "url": "https://www.curierul.ro/presedinta-anmap-in-vizita-fulger-la-directia-judeteana-de-mediu-valcea-voicescu-nu-a-fost-prins-descoperit/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "19bca7de75f25dddb15f197d",
+      "seed_id": "press-curierul-valcea",
+      "url": "https://www.curierul.ro/presedinta-anmap-in-vizita-fulger-la-directia-judeteana-de-mediu-valcea-voicescu-nu-a-fost-prins-descoperit/?share=jetpack-whatsapp",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "5267f900258fab01e49e3053",
+      "seed_id": "press-curierul-valcea",
+      "url": "https://www.curierul.ro/presedinta-anmap-in-vizita-fulger-la-directia-judeteana-de-mediu-valcea-voicescu-nu-a-fost-prins-descoperit/?share=print",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
@@ -9811,9 +10971,97 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
+      "candidate_id": "c5c69969b7c04b05587e205d",
+      "seed_id": "press-curierul-valcea",
+      "url": "https://www.curierul.ro/sportivii-de-la-tiger-gym-s-au-intors-cu-8-medalii-de-aur-de-la-petrosani/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "043f0a4df7f8b39f2a69318b",
+      "seed_id": "press-curierul-valcea",
+      "url": "https://www.curierul.ro/sportivii-de-la-tiger-gym-s-au-intors-cu-8-medalii-de-aur-de-la-petrosani/?share=jetpack-whatsapp",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "e0532a1dfb700a555ccdb221",
+      "seed_id": "press-curierul-valcea",
+      "url": "https://www.curierul.ro/sportivii-de-la-tiger-gym-s-au-intors-cu-8-medalii-de-aur-de-la-petrosani/?share=print",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "23d39f671af331237dcd280b",
+      "seed_id": "press-curierul-valcea",
+      "url": "https://www.curierul.ro/stefania-uta-o-minuneweekend-ul-alergat-intru-gloria-sportului-valcean/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "2207f2d52d2b19dc107d3325",
+      "seed_id": "press-curierul-valcea",
+      "url": "https://www.curierul.ro/stefania-uta-o-minuneweekend-ul-alergat-intru-gloria-sportului-valcean/?share=jetpack-whatsapp",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "4087ae8e34af4dfc58e83381",
+      "seed_id": "press-curierul-valcea",
+      "url": "https://www.curierul.ro/stefania-uta-o-minuneweekend-ul-alergat-intru-gloria-sportului-valcean/?share=print",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "f4b498c84535855e90e21af3",
+      "seed_id": "press-eurovalcea",
+      "url": "https://www.eurovalcea.ro/2026/08/03/distributie-oltenia-anunta-modificari-la-programul-lucrarilor-pentru-prevenirea-si-corectarea-avariilor-din-judetul-valcea-in-saptamana-3-9-august-2026/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
       "candidate_id": "82c1bb28b61ac0f337bb9968",
       "seed_id": "press-eurovalcea",
       "url": "https://www.eurovalcea.ro/2026/08/04/sudan-presa-prinsa-in-mijlocul-razboiului-jurnalisti-rapiti-amenintari-si-apeluri-internationale-pentru-protejarea-mass-media/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "e4f23936f818abcdd0863079",
+      "seed_id": "press-eurovalcea",
+      "url": "https://www.eurovalcea.ro/2026/08/06/serviciul-judetean-anticoruptie-valcea-activitati-de-educatie-pentru-promovarea-integritatii/",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
@@ -9833,9 +11081,75 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
+      "candidate_id": "4a1e8bfe56251512570cd7f9",
+      "seed_id": "press-eurovalcea",
+      "url": "https://www.eurovalcea.ro/2026/08/12/economia-valcii-prezentata-direct-ministrului-irineu-darau-de-la-industrie-si-antreprenoriat-la-turismul-balnear/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "9dbbcc5810656dadb4a5bb59",
+      "seed_id": "press-eurovalcea",
+      "url": "https://www.eurovalcea.ro/2026/08/12/valcea-1-620-de-copii-din-comunitati-vulnerabile-primesc-sprijin-prin-programul-start-in-educatie/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "ad8dde7ad25c283c47c737c6",
+      "seed_id": "press-eurovalcea",
+      "url": "https://www.eurovalcea.ro/2026/08/14/intreruperi-programate-de-energie-electrica-in-valcea-vezi-localitatile-si-zonele-afectate-in-perioada-17-23-august/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
       "candidate_id": "b0bb156c12d5e8a2bbec4ab1",
       "seed_id": "press-eurovalcea",
       "url": "https://www.eurovalcea.ro/category/comunicate/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "18642eda7dace67ceef8976b",
+      "seed_id": "press-eurovalcea",
+      "url": "https://www.eurovalcea.ro/category/sanatate/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "0f82f0cd6aff1a2daa3daa91",
+      "seed_id": "press-eurovalcea",
+      "url": "https://www.eurovalcea.ro/category/sport/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "fd1339d76555b8ca65a39e5e",
+      "seed_id": "press-eurovalcea",
+      "url": "https://www.eurovalcea.ro/category/turism/",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
@@ -9910,9 +11224,31 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
+      "candidate_id": "97fbb67201a1f94c68816f9f",
+      "seed_id": "press-eurovalcea",
+      "url": "https://www.eurovalcea.ro/wp-content/uploads/2026/08/Start_in_Educatie_EUROVALCEA-1024x681.jpg",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
       "candidate_id": "6d92e35bdad4cc8581e74ddc",
       "seed_id": "press-eurovalcea",
       "url": "https://www.eurovalcea.ro/wp-content/uploads/2026/08/Sudan-presa-prinsă-în-mijlocul-războiului.-Jurnaliști-răpiți-amenințări-și-apeluri-internaționale-pentru-protejarea-mass-media.jpg",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "9045b6e0026c030912de53f8",
+      "seed_id": "press-eurovalcea",
+      "url": "https://www.eurovalcea.ro/wp-content/uploads/2026/08/Întreruperi-programate-de-energie-electrică-în-Vâlcea.-Vezi-localitățile-și-zonele-afectate-în-perioada-17–23-august-1024x683.jpg",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
@@ -9932,9 +11268,31 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
+      "candidate_id": "96a598337e0e28b919fa6208",
+      "seed_id": "press-impact-real",
+      "url": "https://www.impactreal.ro/2026/06/08/antreprenoarea-adina-craciunescu-si-sportivul-radu-zarioiu-vor-fi-din-nou-parinti-e-tot-baiat/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
       "candidate_id": "5eeacf21850da95cc4722302",
       "seed_id": "press-impact-real",
       "url": "https://www.impactreal.ro/2026/06/08/presedintele-devine-tatucul-extremismului-din-romania/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "451a3582b16114e537b1286e",
+      "seed_id": "press-impact-real",
+      "url": "https://www.impactreal.ro/2026/07/01/a-inceput-campania-electorala-constantin-radulescu-avertizeaza-asupra-dezinformarii-si-manipularii-din-mediul-online-libertatea-este-buna-insa-calomnia-si-minciuna-sunt-rele/",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
@@ -9957,6 +11315,17 @@
       "candidate_id": "983638d129d38e0a05f46170",
       "seed_id": "press-impact-real",
       "url": "https://www.impactreal.ro/2026/07/17/peste-jumatate-dintre-solicitarile-adresate-cas-valcea-vizeaza-cardul-de-sanatate-alin-voiculet-oamenii-apreciaza-dialogul-direct-cu-specialistii/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "68b12d30f5c6e80ee9397c28",
+      "seed_id": "press-impact-real",
+      "url": "https://www.impactreal.ro/2026/08/01/intercampus-ramnicu-valcea-duce-romania-in-elita-mondiala-in-sua-la-houston-o-mie-de-sportivi-50-de-tari-si-o-lectie-uriasa-de-curaj-la-genuine-cup/",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
@@ -10001,6 +11370,17 @@
       "candidate_id": "b603a361000f1635942ff98c",
       "seed_id": "press-impact-real",
       "url": "https://www.impactreal.ro/2026/08/14/un-proiect-european-de-17-milioane-de-lei-ajunge-la-familiile-cu-probleme-din-lapusata-primarul-silviu-iliescu-explica-cine-poate-primi-sprijin/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "141ad367692215d861f1b7c0",
+      "seed_id": "press-impact-real",
+      "url": "https://www.impactreal.ro/category/sport/",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
@@ -10155,6 +11535,28 @@
       "candidate_id": "4dac5a3cc013874947aaaa49",
       "seed_id": "press-indiscret",
       "url": "https://www.indiscret.ro/2026/08/03/romania-campioana-ue-la-scumpirea-motorinei-pretul-a-trecut-de-108-lei-pe-litru-iar-presedintele-nicusor-dan-intarzie-promulgarea-legii-care-ar-reduce-acciza/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "77eafd79d0c4195a7f081e09",
+      "seed_id": "press-indiscret",
+      "url": "https://www.indiscret.ro/2026/08/04/valcea-trafic-blocat-complet-pe-valea-oltului-din-cauza-unui-tir-implicat-intr-un-accident-in-zona-brezoi/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "1b3145ea8e62226887bf33f1",
+      "seed_id": "press-indiscret",
+      "url": "https://www.indiscret.ro/2026/08/10/seful-cnas-vorbeste-despre-fraude-uriase-in-sanatate-servicii-medicale-raportate-pentru-pacienti-morti-si-internari-fictive/",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
@@ -10328,6 +11730,17 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
+      "candidate_id": "4f52944749d456d52898c8c6",
+      "seed_id": "press-jurnal-valcean",
+      "url": "https://jurnalvalcean.ro/centru-modern-de-sanatate-mintala-si-de-prevenire-a-adictiilor-in-valcea/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
       "candidate_id": "7af1da112a487720bcda2260",
       "seed_id": "press-jurnal-valcean",
       "url": "https://jurnalvalcean.ro/comments/feed/",
@@ -10449,9 +11862,31 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
+      "candidate_id": "6bef60b82a6913e87773811c",
+      "seed_id": "press-primplan",
+      "url": "https://www.primplanpress.ro/angajatii-din-sanatate-ameninta-cu-prima-greva-generala-din-ultimii-20-de-ani/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
       "candidate_id": "417a63029a6f0f8ff78215b8",
       "seed_id": "press-primplan",
       "url": "https://www.primplanpress.ro/au-inceput-lucrarile-la-reteaua-de-apa-de-pe-strada-tudor-vladimirescu-din-dragasani/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "e751bb7c327394e3f515bb9e",
+      "seed_id": "press-primplan",
+      "url": "https://www.primplanpress.ro/budesti-pregateste-un-cabinet-stomatologic-la-scoala-gimnaziala-cu-dotari-achizitionate-printr-un-proiect-european/",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
@@ -10493,9 +11928,9 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
-      "candidate_id": "ed19ffa6cb8b45fd4f2c1e63",
+      "candidate_id": "52e969fc1cdd6fd1db08e04b",
       "seed_id": "press-primplan",
-      "url": "https://www.primplanpress.ro/comments/feed/",
+      "url": "https://www.primplanpress.ro/category/educatie/",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
@@ -10504,9 +11939,20 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
-      "candidate_id": "2a7d8b2762905841d1445170",
+      "candidate_id": "bdf1f0f8dcbf3f47ed7454f8",
       "seed_id": "press-primplan",
-      "url": "https://www.primplanpress.ro/contract-semnat-pentru-modernizarea-a-sapte-strazi-din-comuna-bujoreni-investitie-de-peste-66-milioane-de-lei/",
+      "url": "https://www.primplanpress.ro/category/sport/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "ed19ffa6cb8b45fd4f2c1e63",
+      "seed_id": "press-primplan",
+      "url": "https://www.primplanpress.ro/comments/feed/",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
@@ -10551,6 +11997,17 @@
       "candidate_id": "c0b4f74b1ca61ab3c7b9517c",
       "seed_id": "press-primplan",
       "url": "https://www.primplanpress.ro/malaia-obtine-11-709-402-lei-pentru-canalizare-etapa-ii-printr-un-proiect-finantat-de-afm/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "fa9ea8f547c0b71e16248477",
+      "seed_id": "press-primplan",
+      "url": "https://www.primplanpress.ro/politia-locala-dragasani-primeste-un-autoturism-nou-pentru-patrulare-si-interventie/",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
@@ -10724,6 +12181,17 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
+      "candidate_id": "a98dcabbc9c0f0402b885d2e",
+      "seed_id": "press-realitatea-valceana",
+      "url": "http://www.realitateavalceana.ro/14-15-august-turneul-memorial-constantin-tita-in-sala-sporturilor-din-ramnic/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
       "candidate_id": "d59d0e42c9dda74f01723b39",
       "seed_id": "press-realitatea-valceana",
       "url": "http://www.realitateavalceana.ro/consiliul-jude%c8%9bean-investe%c8%99te-in-sanatate-in-valcea-se-vor-construi-trei-noi-cladiri-de-spital/",
@@ -10768,6 +12236,28 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
+      "candidate_id": "7f6fbb711e8ad32de1372590",
+      "seed_id": "press-realitatea-valceana",
+      "url": "http://www.realitateavalceana.ro/in-intervalul-20-aprilie-15-iulie-apia-prime%c8%99te-cereri-de-plata-pentru-schema-de-ajutor-de-stat-%e2%80%9esprijin-pentru-prima-impadurire-%c8%99i-crearea-de-suprafe%c8%9be-impadurite%e2%80%9d/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "797fa3359bd07ab2b48fe6a0",
+      "seed_id": "press-realitatea-valceana",
+      "url": "http://www.realitateavalceana.ro/inca-20-microbuze-electrice-pentru-transportul-elevilor-valceni-care-sunt-localita%c8%9bile-beneficiare/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
       "candidate_id": "6f6100eb93a5faed63f34552",
       "seed_id": "press-realitatea-valceana",
       "url": "http://www.realitateavalceana.ro/inca-o-investi%c8%9bie-a-cj-in-sanatate-saloane-moderne-%c8%99i-echipamente-de-ultima-genera%c8%9bie-la-spitalul-de-pneumoftiziologie-din-mihae%c8%99ti/",
@@ -10782,6 +12272,17 @@
       "candidate_id": "c25b11284c4997e1ad00f793",
       "seed_id": "press-realitatea-valceana",
       "url": "http://www.realitateavalceana.ro/luni-15-aprilie-consiliul-jude%c8%9bean-a-inaugurat-noua-cladire-de-spital-din-dragoe%c8%99ti/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "b7019b7e03dedd4d83a18f85",
+      "seed_id": "press-realitatea-valceana",
+      "url": "http://www.realitateavalceana.ro/ministrul-sanata%c8%9bii-alexandru-rogobete-la-valcea-viziune-implicare-%c8%99i-buna-credin%c8%9ba-pentru-sanatatea-oamenilor/",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
@@ -11340,6 +12841,28 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
+      "candidate_id": "48611524a93c84d72d9ba60c",
+      "seed_id": "press-vocea-valcii",
+      "url": "https://vocea-valcii.ro/actualitate/incendiu-la-un-autoturism-in-horezu-pompierii-au-intervenit-inainte-ca-focul-sa-se-extinda/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "deba2ea5fe770096b6ebc9fb",
+      "seed_id": "press-vocea-valcii",
+      "url": "https://vocea-valcii.ro/actualitate/viata-dedicata-sportului-intrerupta-prea-devreme-roxana-moise-a-murit-la-39-de-ani/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
       "candidate_id": "12399546703d4e303aa8f5cc",
       "seed_id": "press-vocea-valcii",
       "url": "https://vocea-valcii.ro/administratie-2/parcul-mircea-cel-batran-intra-in-reabilitare-investitie-de-peste-12-milioane-de-lei-finantata-din-fonduri-europene/",
@@ -11373,6 +12896,17 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
+      "candidate_id": "f6b361305eb61be0853ac044",
+      "seed_id": "press-vocea-valcii",
+      "url": "https://vocea-valcii.ro/category/sport/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
       "candidate_id": "817ce226d64edef873da9867",
       "seed_id": "press-vocea-valcii",
       "url": "https://vocea-valcii.ro/category/ultima-ora/",
@@ -11395,9 +12929,9 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
-      "candidate_id": "be2f77f2e2524077b681f0c2",
+      "candidate_id": "bc7bc87a86c726ed43d36100",
       "seed_id": "press-vocea-valcii",
-      "url": "https://vocea-valcii.ro/economie/o-legatura-veche-de-trei-secole-intarita-prin-canonizare-sfanta-maria-brancoveanu-si-manastirile-din-valcea/",
+      "url": "https://vocea-valcii.ro/dezvaluiri/trafic-de-cocaina-la-ramnicu-valcea-si-pitesti-doi-barbati-arestati-dupa-un-flagrant/",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
@@ -11406,9 +12940,9 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
-      "candidate_id": "7c54dc425e505ef6e5eee7fa",
+      "candidate_id": "04e436951c141fc8728a78d1",
       "seed_id": "press-vocea-valcii",
-      "url": "https://vocea-valcii.ro/fapt-divers/taxi-fara-autorizatie-depistat-de-politisti-pe-dn-7-in-ramnicu-valcea-soferul-a-ramas-fara-placute-timp-de-6-luni/",
+      "url": "https://vocea-valcii.ro/fapt-divers/amenda-de-5-000-de-lei-si-masina-indisponibilizata-6-luni-pentru-transport-ilegal-de-persoane-pe-dn7/",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
@@ -11420,6 +12954,17 @@
       "candidate_id": "c576b8e1c08bb4a218db5bcf",
       "seed_id": "press-vocea-valcii",
       "url": "https://vocea-valcii.ro/feed/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "b7e60145cee65a8e1fa6e0d9",
+      "seed_id": "press-vocea-valcii",
+      "url": "https://vocea-valcii.ro/politica/zvonul-zilei-mircea-iova-va-fi-director-la-garda-de-mediu-valcea/",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
@@ -11472,6 +13017,28 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
+      "candidate_id": "d09d8e4fb01ebe75234b77f4",
+      "seed_id": "press-vocea-valcii",
+      "url": "https://vocea-valcii.ro/sport/%f0%9d%97%96%f0%9d%97%b5%f0%9d%97%b6%f0%9d%97%ba%f0%9d%97%b0%f0%9d%97%bc%f0%9d%97%ba%f0%9d%97%bd%f0%9d%97%b9%f0%9d%97%b2%f0%9d%98%85-%f0%9d%98%80%f0%9d%98%82%f0%9d%98%80%f0%9d%98%81%f0%9d%97%b6/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "9425ba67129ad3489acd6c26",
+      "seed_id": "press-vocea-valcii",
+      "url": "https://vocea-valcii.ro/sport/aur-mondial-pentru-ramnicu-valcea-stefania-uta-campioana-mondiala-u20-la-400-de-metri-garduri/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
       "candidate_id": "92dab41cd4f8f8467d82e752",
       "seed_id": "press-ziarul-de-valcea",
       "url": "https://ziaruldevalcea.ro/2025/10/ramnicu-valcea-intra-in-liga-proiectelor-premium-nova-luxury-apartments-schimba-fata-centrului-orasului/",
@@ -11494,6 +13061,28 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
+      "candidate_id": "80cc8406a28375bbc3af6a65",
+      "seed_id": "press-ziarul-de-valcea",
+      "url": "https://ziaruldevalcea.ro/2026/07/scandalul-de-trucare-a-unui-meci-din-liga-a-iii-a-ajunge-si-in-fotbalul-valcean-un-fost-antrenor-de-la-horezu-si-un-jucator-ajuns-la-budesti-suspendati-de-frf/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "3324a68d7b907263b6dc85de",
+      "seed_id": "press-ziarul-de-valcea",
+      "url": "https://ziaruldevalcea.ro/2026/08/alerta-in-valcea-focar-de-variola-ovina-pe-transalpina-aproximativ-500-de-oi-ar-putea-fi-sacrificate/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
       "candidate_id": "f2564ace1d2927b9c4aba512",
       "seed_id": "press-ziarul-de-valcea",
       "url": "https://ziaruldevalcea.ro/2026/08/bujoreni-continua-modernizarea-drumurilor-primarul-gheorghe-gingu-anunta-o-noua-licitatie-pentru-18-kilometri-de-infrastructura-rutiera/",
@@ -11508,6 +13097,17 @@
       "candidate_id": "26981ecdaac49fd46dce08dc",
       "seed_id": "press-ziarul-de-valcea",
       "url": "https://ziaruldevalcea.ro/2026/08/conflict-de-interese-la-varful-primariei-gutau-si-pirvulescu-conectati-prin-afaceri-si-salarii-la-patronul-autoro-consiliul-local-pregateste-terenul-pentru-ca-operatorul-privat-autoro-sa-preia-ter/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "26811fe32c9a2ae068855542",
+      "seed_id": "press-ziarul-de-valcea",
+      "url": "https://ziaruldevalcea.ro/2026/08/hotel-olanesti-spa-medical-relaxare-sanatate-si-rasfat-in-apele-sulfuroase-ale-statiunii/",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
@@ -11549,6 +13149,28 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
+      "candidate_id": "38d6dce77af5db71b5609494",
+      "seed_id": "press-ziarul-de-valcea",
+      "url": "https://ziaruldevalcea.ro/2026/08/musamalizare-in-fata-sri-valcea-o-masina-a-serviciului-de-informatii-loveste-un-pieton-politia-gaseste-vinovat-trotuarul-intrerupt/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "91d03deace1eccc94d2c6df4",
+      "seed_id": "press-ziarul-de-valcea",
+      "url": "https://ziaruldevalcea.ro/2026/08/ramnicu-valcea-sufocat-din-nou-de-arderile-ilegale-cetatenii-acuza-am-inchis-geamurile-ne-sufoca-unde-sunt-autoritatile-politia-garda-de-mediu-jandarmeria-politia-locala/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
       "candidate_id": "4a8052376a2e11b5a5ea0788",
       "seed_id": "press-ziarul-de-valcea",
       "url": "https://ziaruldevalcea.ro/2026/08/scandal-la-dgaspc-valcea-raport-psihologic-care-se-contrazice-tatal-provoaca-stres-ridicat-copilului-dar-este-evaluat-drept-parinte-democratic-consiliul-judetea/",
@@ -11560,9 +13182,42 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
+      "candidate_id": "34258530e5d742baebfde26a",
+      "seed_id": "press-ziarul-de-valcea",
+      "url": "https://ziaruldevalcea.ro/2026/08/spaga-uitata-in-masina-politiei-patru-agenti-de-la-rutiera-prinsi-dupa-o-gafa-incredibila-colegul-a-gasit-banii-si-si-a-alertat-superiorii/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
       "candidate_id": "5e08ce9cb918bee83be780cf",
       "seed_id": "press-ziarul-de-valcea",
       "url": "https://ziaruldevalcea.ro/category/anunturi/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "b26a7be99edc5b2934ac9167",
+      "seed_id": "press-ziarul-de-valcea",
+      "url": "https://ziaruldevalcea.ro/category/sport/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "2e2596726d6dabccc2876feb",
+      "seed_id": "press-ziarul-de-valcea",
+      "url": "https://ziaruldevalcea.ro/category/turism/",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
