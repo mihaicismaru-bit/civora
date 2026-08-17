@@ -293,7 +293,7 @@ jobs:
         run: |
           set -euo pipefail
           NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          python local-news-os/social/fleet_metrics_authorization_seal.py \
+          python local-news-os/social/fleet_metrics_authorization_seal_with_reread_spend.py \
             --repo-root . \
             --runtime-registry local-news-os/social/social_runtime_registry.json \
             --binding-registry local-news-os/social/metrics_credential_bindings.json \
