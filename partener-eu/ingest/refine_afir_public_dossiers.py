@@ -18,12 +18,13 @@ ADMIN = (
     "omadr", "regulament de organizare", "metodologie de selectie", "metodologie de selecție",
     "fisa postului", "fișa postului", "organigrama", "raport anual",
 )
-CALL_TERMS = (
-    "dr-", "dr ", "schema de energie", "investalim", "transfer de cunostinte", "transfer de cunoștințe",
+STRONG_CALL_TERMS = (
+    "schema de energie", "investalim", "transfer de cunostinte", "transfer de cunoștințe",
     "sesiune depunere", "sesiune primire", "interventie", "intervenție", "apel de proiecte",
-    "ghidul solicitantului", "finantare", "finanțare", "investitii", "investiții",
+    "ghidul solicitantului",
 )
 FILELIKE = re.compile(r"\.(?:pdf|docx?|xlsx?|zip|rar|7z)$", re.I)
+DR_CODE = re.compile(r"(?:^|\b)dr[-\s]?\d{1,3}(?:\b|$)", re.I)
 
 
 def fold(value: Any) -> str:
@@ -35,13 +36,17 @@ def keep(dossier: dict[str, Any]) -> tuple[bool, str]:
     if not str(dossier.get("sourceType") or "").startswith("AFIR"):
         return True, "NOT_AFIR"
     title = fold(dossier.get("title"))
-    combined = fold(" ".join([str(dossier.get("title") or ""), str(dossier.get("standfirst") or ""), str(dossier.get("code") or "")]))
-    has_call_identity = any(fold(term) in combined for term in CALL_TERMS)
+    code = fold(dossier.get("code"))
+    title_has_call_identity = bool(DR_CODE.search(title) or DR_CODE.search(code)) or any(
+        fold(term) in title for term in STRONG_CALL_TERMS
+    )
     administrative = any(fold(term) in title for term in ADMIN)
-    file_like = bool(FILELIKE.search(title)) or title.startswith(("omadr-", "ordin-", "manual-", "procedura-", "metodologie-"))
-    if administrative and not has_call_identity:
+    file_like = bool(FILELIKE.search(title)) or title.startswith((
+        "omadr-", "ordin-", "manual-", "procedura-", "metodologie-", "rof-"
+    ))
+    if administrative and not title_has_call_identity:
         return False, "ADMINISTRATIVE_DOCUMENT"
-    if file_like and not has_call_identity:
+    if file_like and not title_has_call_identity:
         return False, "FILE_LEVEL_EVIDENCE_NOT_CALL"
     return True, "CALL_OR_INTERVENTION"
 
@@ -60,6 +65,10 @@ def main() -> int:
                 "sources": [s.get("url") for s in dossier.get("sources") or [] if s.get("url")][:10],
             })
     products["dossiers"] = kept
+    valid_ids = {d.get("id") for d in kept}
+    home = products.setdefault("home", {})
+    for key in ("openDossierIds", "prepareDossierIds"):
+        home[key] = [x for x in home.get(key) or [] if x in valid_ids]
     summary = products.setdefault("summary", {})
     summary["dossierCount"] = len(kept)
     summary["openCount"] = sum(1 for d in kept if d.get("status") == "OPEN")
