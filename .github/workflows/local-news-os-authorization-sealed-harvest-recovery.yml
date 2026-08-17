@@ -1,0 +1,56 @@
+name: LOCAL NEWS OS Authorization-Sealed Harvest Recovery
+
+on:
+  pull_request:
+    paths:
+      - "local-news-os/social/authorization_sealed_harvest_recovery.py"
+      - "local-news-os/social/test_authorization_sealed_harvest_recovery.py"
+      - "local-news-os/social/authorization_sealed_harvest_receipt.py"
+      - "local-news-os/social/test_authorization_sealed_harvest_receipt.py"
+      - "local-news-os/social/metrics_harvest_runtime.py"
+      - "local-news-os/social/observed_metrics_collector.py"
+      - ".github/workflows/local-news-os-authorization-sealed-harvest-recovery.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/social/authorization_sealed_harvest_recovery.py"
+      - "local-news-os/social/test_authorization_sealed_harvest_recovery.py"
+      - "local-news-os/social/authorization_sealed_harvest_receipt.py"
+      - "local-news-os/social/test_authorization_sealed_harvest_receipt.py"
+      - "local-news-os/social/metrics_harvest_runtime.py"
+      - "local-news-os/social/observed_metrics_collector.py"
+      - ".github/workflows/local-news-os-authorization-sealed-harvest-recovery.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-news-os-authorization-sealed-harvest-recovery-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile sealed recovery boundary
+        run: |
+          python -m py_compile \
+            local-news-os/social/authorization_sealed_harvest_recovery.py \
+            local-news-os/social/test_authorization_sealed_harvest_recovery.py \
+            local-news-os/social/authorization_sealed_harvest_receipt.py \
+            local-news-os/social/test_authorization_sealed_harvest_receipt.py \
+            local-news-os/social/metrics_harvest_runtime.py \
+            local-news-os/social/observed_metrics_collector.py
+
+      - name: Run authorization-sealed recovery acceptance tests
+        run: python local-news-os/social/test_authorization_sealed_harvest_recovery.py
+
+      - name: Run sealed execution receipt regression tests
+        run: python local-news-os/social/test_authorization_sealed_harvest_receipt.py
