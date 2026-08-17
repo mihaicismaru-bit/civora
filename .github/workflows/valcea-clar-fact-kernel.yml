@@ -7,6 +7,7 @@ on:
   pull_request:
     paths:
       - 'valcea-clar/scripts/council_fact_kernel.py'
+      - 'valcea-clar/scripts/council_docmanager_row_resolver.py'
       - 'valcea-clar/scripts/promote_fact_kernels.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
       - 'valcea-clar/editorial/editorial_manual.json'
@@ -17,6 +18,7 @@ on:
     branches: [main]
     paths:
       - 'valcea-clar/scripts/council_fact_kernel.py'
+      - 'valcea-clar/scripts/council_docmanager_row_resolver.py'
       - 'valcea-clar/scripts/promote_fact_kernels.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
       - 'valcea-clar/editorial/editorial_manual.json'
@@ -49,6 +51,7 @@ jobs:
         run: |
           python -m py_compile \
             valcea-clar/scripts/council_fact_kernel.py \
+            valcea-clar/scripts/council_docmanager_row_resolver.py \
             valcea-clar/scripts/promote_fact_kernels.py \
             valcea-clar/scripts/council_watch_rm_valcea.py \
             local-news-os/core/indexing_assets.py
@@ -57,10 +60,12 @@ jobs:
         run: |
           python valcea-clar/scripts/council_watch_rm_valcea.py --self-test
           python valcea-clar/scripts/council_fact_kernel.py --self-test
+          python valcea-clar/scripts/council_docmanager_row_resolver.py --resolver-self-test
+          python valcea-clar/scripts/council_docmanager_row_resolver.py --self-test
           python valcea-clar/scripts/promote_fact_kernels.py --self-test
 
       - name: Validate current offline kernel state
-        run: python valcea-clar/scripts/council_fact_kernel.py --check
+        run: python valcea-clar/scripts/council_docmanager_row_resolver.py --check
 
       - name: Refresh official Council Watch state
         if: github.event_name != 'pull_request'
@@ -68,7 +73,7 @@ jobs:
 
       - name: Verify official documents and build kernels
         if: github.event_name != 'pull_request'
-        run: python valcea-clar/scripts/council_fact_kernel.py --live
+        run: python valcea-clar/scripts/council_docmanager_row_resolver.py --live
 
       - name: Promote only complete verified kernels
         id: promote
