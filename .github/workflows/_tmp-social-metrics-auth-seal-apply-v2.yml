@@ -1,0 +1,193 @@
+name: TEMP Social metrics authorization seal patch v2
+
+on:
+  push:
+    branches:
+      - automation/social-metrics-auth-seal-20260817-1441
+    paths:
+      - ".github/workflows/_tmp-social-metrics-auth-seal-apply-v2.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: automation/social-metrics-auth-seal-20260817-1441
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Apply scoped integration patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(text: str, old: str, new: str, label: str) -> str:
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f"{label}: expected exactly one match, got {count}")
+              return text.replace(old, new, 1)
+
+          module_path = Path('local-news-os/social/fleet_metrics_authorization_seal.py')
+          text = module_path.read_text(encoding='utf-8')
+
+          text = replace_once(
+              text,
+              '''        capability_secretish = _secretish_keys(capability)\n        if capability_secretish:\n            blocks.append("AUTHORIZATION_CAPABILITY_SECRETISH_FIELDS_FORBIDDEN")\n            continue\n\n        channel, channel_blocks = _channel_for_approval(repo_root, instance, approval)\n''',
+              '''        capability_secretish = _secretish_keys(capability)\n        if capability_secretish:\n            blocks.append("AUTHORIZATION_CAPABILITY_SECRETISH_FIELDS_FORBIDDEN")\n            continue\n        approval_platform = _clean(approval.get("platform")).lower()\n        source = _clean(approval.get("metric_source")).lower()\n        approval_credential = _clean(approval.get("credential_env_name"))\n        if _clean(capability.get("capability_id")).lower() != capability_id:\n            blocks.append("AUTHORIZATION_CAPABILITY_ID_MISMATCH")\n            continue\n        if _clean(capability.get("platform")).lower() != approval_platform:\n            blocks.append("AUTHORIZATION_CAPABILITY_PLATFORM_MISMATCH")\n            continue\n        if _clean(capability.get("metric_source")).lower() != source:\n            blocks.append("AUTHORIZATION_CAPABILITY_SOURCE_MISMATCH")\n            continue\n\n        channel, channel_blocks = _channel_for_approval(repo_root, instance, approval)\n''',
+              'capability approval binding',
+          )
+
+          text = replace_once(
+              text,
+              '''        if channel_view["credentials_ref"] == "":\n            blocks.append("AUTHORIZATION_CHANNEL_CREDENTIAL_REFERENCE_REQUIRED")\n            continue\n\n        source = _clean(approval.get("metric_source")).lower()\n        attestation_rel = _safe_rel(approval.get("access_attestation_path"))\n''',
+              '''        if channel_view["credentials_ref"] == "":\n            blocks.append("AUTHORIZATION_CHANNEL_CREDENTIAL_REFERENCE_REQUIRED")\n            continue\n        try:\n            channel_credential = binding.fleet.native_metrics_transport.credential_env_name(channel_view["credentials_ref"])\n        except ValueError:\n            blocks.append("AUTHORIZATION_CHANNEL_CREDENTIAL_REFERENCE_INVALID")\n            continue\n        if channel_credential != approval_credential:\n            blocks.append("AUTHORIZATION_CHANNEL_CREDENTIAL_REFERENCE_MISMATCH")\n            continue\n        if channel_view["metrics"]["observed_only"] is not True or source not in channel_view["metrics"]["sources"]:\n            blocks.append("AUTHORIZATION_CHANNEL_METRICS_POLICY_DRIFT")\n            continue\n        if channel_view["zero_paid_dependency"] is not True:\n            blocks.append("AUTHORIZATION_CHANNEL_ZERO_PAID_POLICY_DRIFT")\n            continue\n\n        attestation_rel = _safe_rel(approval.get("access_attestation_path"))\n''',
+              'channel credential binding',
+          )
+
+          text = replace_once(
+              text,
+              '''        secretish = _secretish_keys(attestation)\n        if secretish:\n            blocks.append("AUTHORIZATION_ACCESS_ATTESTATION_SECRETISH_FIELDS_FORBIDDEN")\n            continue\n\n        channel_material.append({\n''',
+              '''        secretish = _secretish_keys(attestation)\n        if secretish:\n            blocks.append("AUTHORIZATION_ACCESS_ATTESTATION_SECRETISH_FIELDS_FORBIDDEN")\n            continue\n        attestation_blocks = capability_gate.capabilities.validate_access_attestation(capability, attestation)\n        if attestation_blocks:\n            blocks.append("AUTHORIZATION_ACCESS_ATTESTATION_INVALID:" + ",".join(attestation_blocks))\n            continue\n\n        channel_material.append({\n''',
+              'attestation revalidation',
+          )
+
+          text = replace_once(
+              text,
+              '''    instances = _instance_map(runtime)\n    bindings = _binding_map(binding_registry)\n    capabilities = _capability_map(capability_registry)\n    approved = capability_result.get("approved_channels") if isinstance(capability_result.get("approved_channels"), list) else []\n''',
+              '''    instances = _instance_map(runtime)\n    bindings = _binding_map(binding_registry)\n    capabilities: dict[str, dict[str, Any]] = {}\n    approved = capability_result.get("approved_channels") if isinstance(capability_result.get("approved_channels"), list) else []\n''',
+              'capability registry declaration',
+          )
+
+          text = replace_once(
+              text,
+              '''    fingerprints: dict[str, str] = {}\n    blocks: list[str] = []\n\n    for authorization in authorizations:\n''',
+              '''    fingerprints: dict[str, str] = {}\n    blocks: list[str] = []\n    capability_validation = capability_gate.capabilities.validate_registry(capability_registry)\n    if capability_validation.get("status") != "PASS":\n        blocks.append("AUTHORIZATION_CAPABILITY_REGISTRY_INVALID")\n    else:\n        capabilities = _capability_map({"capabilities": capability_validation.get("capabilities", [])})\n    if capability_result.get("status") not in {"CAPABILITY_GATE_READY", "CAPABILITY_GATE_PARTIAL_HOLD", "CAPABILITY_GATE_IDLE"}:\n        blocks.append("AUTHORIZATION_CAPABILITY_GATE_NOT_READY")\n\n    for authorization in authorizations:\n''',
+              'capability registry revalidation',
+          )
+          module_path.write_text(text, encoding='utf-8')
+
+          workflow_path = Path('.github/workflows/valcea-clar-observed-metrics-harvest.yml')
+          workflow = workflow_path.read_text(encoding='utf-8')
+
+          quoted_binding_test = '      - "local-news-os/social/test_fleet_metrics_credential_binding.py"\n'
+          if workflow.count(quoted_binding_test) != 2:
+              raise SystemExit(f'trigger binding test paths: got {workflow.count(quoted_binding_test)}')
+          workflow = workflow.replace(
+              quoted_binding_test,
+              quoted_binding_test
+              + '      - "local-news-os/social/fleet_metrics_authorization_seal.py"\n'
+              + '      - "local-news-os/social/test_fleet_metrics_authorization_seal.py"\n',
+          )
+
+          compile_line = '            local-news-os/social/fleet_metrics_credential_binding.py \\\n'
+          if workflow.count(compile_line) != 1:
+              raise SystemExit(f'compile binding line: got {workflow.count(compile_line)}')
+          workflow = workflow.replace(
+              compile_line,
+              compile_line
+              + '            local-news-os/social/fleet_metrics_authorization_seal.py \\\n'
+              + '            local-news-os/social/test_fleet_metrics_authorization_seal.py \\\n',
+              1,
+          )
+
+          test_run = '      - name: Run per-instance credential binding acceptance tests\n        run: python local-news-os/social/test_fleet_metrics_credential_binding.py\n'
+          workflow = replace_once(
+              workflow,
+              test_run,
+              test_run + '\n      - name: Run authorization fingerprint / TOCTOU acceptance tests\n        run: python local-news-os/social/test_fleet_metrics_authorization_seal.py\n',
+              'authorization acceptance wiring',
+          )
+
+          plan_marker = '      - name: Build secret-free per-instance harvest matrix\n'
+          harvest_marker = '\n  harvest:\n'
+          plan_start = workflow.index(plan_marker)
+          harvest_start = workflow.index(harvest_marker, plan_start)
+          plan_section = workflow[plan_start:harvest_start]
+          cli = 'python local-news-os/social/fleet_metrics_credential_binding.py'
+          if plan_section.count(cli) != 1:
+              raise SystemExit(f'plan section binding CLI: got {plan_section.count(cli)}')
+          plan_section = plan_section.replace(cli, 'python local-news-os/social/fleet_metrics_authorization_seal.py', 1)
+          workflow = workflow[:plan_start] + plan_section + workflow[harvest_start:]
+
+          step_marker = '      - name: Harvest Vâlcea bound publications through verified native/free transports\n'
+          refuse_marker = '\n      - name: Refuse any binding without explicit workflow secret wiring\n'
+          step_start = workflow.index(step_marker)
+          step_end = workflow.index(refuse_marker, step_start)
+          step = workflow[step_start:step_end]
+          if step.count(cli) != 1:
+              raise SystemExit(f'harvest section binding CLI: got {step.count(cli)}')
+          step = step.replace(cli, 'python local-news-os/social/fleet_metrics_authorization_seal.py', 1)
+          binding_env_plain = '          BINDING_ID: ' + '$' + '{{ matrix.binding_id }}' + '\n'
+          auth_expr = '$' + '{{ matrix.authorization_fingerprint }}'
+          if step.count(binding_env_plain) != 1:
+              raise SystemExit(f'harvest binding env: got {step.count(binding_env_plain)}')
+          step = step.replace(
+              binding_env_plain,
+              binding_env_plain + f'          AUTHORIZATION_FINGERPRINT: {auth_expr}\n',
+              1,
+          )
+          binding_arg = '            --binding-id "$BINDING_ID" \\\n'
+          if step.count(binding_arg) != 1:
+              raise SystemExit(f'harvest binding arg: got {step.count(binding_arg)}')
+          step = step.replace(
+              binding_arg,
+              binding_arg + '            --expected-authorization-fingerprint "$AUTHORIZATION_FINGERPRINT" \\\n',
+              1,
+          )
+          workflow = workflow[:step_start] + step + workflow[step_end:]
+
+          verify_marker = '      - name: Verify bound harvest output contains no credential material\n'
+          persist_marker = '\n      - name: Persist only bound instance observed metrics runtime state\n'
+          verify_start = workflow.index(verify_marker)
+          verify_end = workflow.index(persist_marker, verify_start)
+          verify = workflow[verify_start:verify_end]
+          print_line = "          print(result.get('status'))\n"
+          if verify.count(print_line) != 1:
+              raise SystemExit(f'harvest verify print anchor: got {verify.count(print_line)}')
+          verify = verify.replace(
+              print_line,
+              "          if result.get('authorization_fingerprint_verified') is not True:\n"
+              "              raise SystemExit('planned authorization fingerprint was not verified')\n"
+              "          if result.get('pre_network_authorization_recheck') is not True:\n"
+              "              raise SystemExit('pre-network authorization recheck missing')\n"
+              + print_line,
+              1,
+          )
+          workflow = workflow[:verify_start] + verify + workflow[verify_end:]
+          workflow_path.write_text(workflow, encoding='utf-8')
+          PY
+
+      - name: Validate patched authorization boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            local-news-os/social/fleet_metrics_authorization_seal.py \
+            local-news-os/social/test_fleet_metrics_authorization_seal.py
+          python local-news-os/social/test_fleet_metrics_credential_binding.py
+          python local-news-os/social/test_fleet_metrics_authorization_seal.py
+          git diff --check
+
+      - name: Commit scoped patch and remove temporary workflows
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "civora-social-automation[bot]"
+          git config user.email "civora-social-automation@users.noreply.github.com"
+          git rm .github/workflows/_tmp-social-metrics-auth-seal-apply.yml \
+                 .github/workflows/_tmp-social-metrics-auth-seal-apply-v2.yml
+          git add local-news-os/social/fleet_metrics_authorization_seal.py \
+                  local-news-os/social/test_fleet_metrics_authorization_seal.py \
+                  .github/workflows/valcea-clar-observed-metrics-harvest.yml
+          git commit -m "Bind metrics harvest execution to authorization fingerprint"
+          git push origin HEAD:automation/social-metrics-auth-seal-20260817-1441
