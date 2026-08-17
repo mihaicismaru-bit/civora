@@ -7,7 +7,10 @@
     "valcea-clar/editorial/source_intelligence_seed_registry.json",
     "valcea-clar/editorial/source_intelligence_seed_supplement_v1.json"
   ],
-  "news_registry_path": "valcea-clar/editorial/news_sources.json",
+  "news_registry_paths": [
+    "valcea-clar/editorial/news_sources.json",
+    "valcea-clar/editorial/news_sources_expansion_v1.json"
+  ],
   "manual_watch_registry_path": "valcea-clar/editorial/manual_watch_sources.json",
   "signal_tiers": ["T2", "T3"],
   "signal_families": ["LOCAL_PRESS", "REGIONAL_PRESS"],
@@ -20,71 +23,13 @@
   "max_workers": 8,
   "same_day_health_after_local_hour": 12,
   "rules": [
-    {
-      "id": "police_public_safety",
-      "keywords": ["accident", "rutier", "perchez", "dispăr", "dispar", "arme", "muni", "reținut", "retinut", "poliți", "politi"],
-      "verification_targets": [
-        {"ref_type": "manual_watch_source_id", "id": "ipj-valcea-stiri"}
-      ]
-    },
-    {
-      "id": "fire_rescue_alert",
-      "keywords": ["incendiu", "pompier", "flăcări", "flacari", "ro-alert", "urs", "exploz", "salvare", "înec", "inec", "inunda"],
-      "verification_targets": [
-        {"ref_type": "news_source_id", "id": "isu-valcea-comunicate"},
-        {"ref_type": "manual_watch_source_id", "id": "inhga-avertizari-hidrologice-valcea"}
-      ]
-    },
-    {
-      "id": "utilities",
-      "keywords": ["avarie", "apă", "apa", "canal", "curent", "energie", "electric", "termoficare", "întrerup", "intrerup"],
-      "verification_targets": [
-        {"ref_type": "news_source_id", "id": "apavil-comunicate"},
-        {"ref_type": "manual_watch_source_id", "id": "apavil-opriri-programate"},
-        {"ref_type": "manual_watch_source_id", "id": "cet-govora-termoficare-advisories"}
-      ]
-    },
-    {
-      "id": "sport",
-      "keywords": ["meci", "campio", "liga", "fotbal", "handbal", "judo", "scm", "chimia", "sportiv", "cupa"],
-      "verification_targets": [
-        {"ref_type": "news_source_id", "id": "scm-rm-valcea"},
-        {"ref_type": "manual_watch_source_id", "id": "cs-valcea-1924-social-feed"},
-        {"ref_type": "manual_watch_source_id", "id": "ajf-valcea-comunicate"}
-      ]
-    },
-    {
-      "id": "administration_projects",
-      "keywords": ["primăria", "primaria", "consiliul", "buget", "investi", "moderniz", "renovat", "bloc", "proiect", "drum"],
-      "verification_targets": [
-        {"ref_type": "news_source_id", "id": "prefectura-valcea"},
-        {"ref_type": "news_source_id", "id": "cj-valcea-anunturi"},
-        {"ref_type": "news_source_id", "id": "primaria-rm-valcea-comunicate"}
-      ]
-    },
-    {
-      "id": "health",
-      "keywords": ["spital", "sănăt", "sanat", "medical", "medic", "pacient", "ambulan"],
-      "verification_targets": [
-        {"ref_type": "news_source_id", "id": "dsp-valcea-anunturi"},
-        {"ref_type": "news_source_id", "id": "spital-horezu-noutati"}
-      ]
-    },
-    {
-      "id": "education",
-      "keywords": ["școal", "scoal", "elev", "profesor", "bacalaureat", "evaluarea", "educa", "liceu"],
-      "verification_targets": [
-        {"ref_type": "news_source_id", "id": "ccd-valcea-noutati"},
-        {"ref_type": "manual_watch_source_id", "id": "isj-valcea-comunicate"}
-      ]
-    },
-    {
-      "id": "environment_weather",
-      "keywords": ["cod galben", "cod portocaliu", "alertă", "alerta", "hidrolog", "inunda", "mediu", "polu", "pădur", "padur"],
-      "verification_targets": [
-        {"ref_type": "manual_watch_source_id", "id": "inhga-avertizari-hidrologice-valcea"},
-        {"ref_type": "news_source_id", "id": "parcul-national-cozia-noutati"}
-      ]
-    }
+    {"id":"police_public_safety","keywords":["accident","rutier","perchez","dispăr","dispar","arme","muni","reținut","retinut","poliți","politi"],"verification_targets":[{"ref_type":"manual_watch_source_id","id":"ipj-valcea-stiri"}]},
+    {"id":"fire_rescue_alert","keywords":["incendiu","pompier","flăcări","flacari","ro-alert","urs","exploz","salvare","înec","inec","inunda"],"verification_targets":[{"ref_type":"news_source_id","id":"isu-valcea-comunicate"},{"ref_type":"manual_watch_source_id","id":"inhga-avertizari-hidrologice-valcea"}]},
+    {"id":"utilities","keywords":["avarie","apă","apa","canal","curent","energie","electric","termoficare","întrerup","intrerup"],"verification_targets":[{"ref_type":"news_source_id","id":"apavil-comunicate"},{"ref_type":"manual_watch_source_id","id":"apavil-opriri-programate"},{"ref_type":"manual_watch_source_id","id":"cet-govora-termoficare-advisories"}]},
+    {"id":"sport","keywords":["meci","campio","liga","fotbal","handbal","judo","scm","chimia","sportiv","cupa"],"verification_targets":[{"ref_type":"news_source_id","id":"scm-rm-valcea"},{"ref_type":"manual_watch_source_id","id":"cs-valcea-1924-social-feed"},{"ref_type":"manual_watch_source_id","id":"ajf-valcea-comunicate"}]},
+    {"id":"administration_projects","keywords":["primăria","primaria","consiliul","buget","investi","moderniz","renovat","bloc","proiect","drum"],"verification_targets":[{"ref_type":"news_source_id","id":"prefectura-valcea"},{"ref_type":"news_source_id","id":"cj-valcea-anunturi"},{"ref_type":"news_source_id","id":"primaria-rm-valcea-comunicate"}]},
+    {"id":"health","keywords":["spital","sănăt","sanat","medical","medic","pacient","ambulan"],"verification_targets":[{"ref_type":"news_source_id","id":"dsp-valcea-anunturi"},{"ref_type":"news_source_id","id":"spital-horezu-noutati"}]},
+    {"id":"education","keywords":["școal","scoal","elev","profesor","bacalaureat","evaluarea","educa","liceu"],"verification_targets":[{"ref_type":"news_source_id","id":"ccd-valcea-noutati"},{"ref_type":"manual_watch_source_id","id":"isj-valcea-comunicate"}]},
+    {"id":"environment_weather","keywords":["cod galben","cod portocaliu","alertă","alerta","hidrolog","inunda","mediu","polu","pădur","padur"],"verification_targets":[{"ref_type":"manual_watch_source_id","id":"inhga-avertizari-hidrologice-valcea"},{"ref_type":"news_source_id","id":"parcul-national-cozia-noutati"}]}
   ]
 }
