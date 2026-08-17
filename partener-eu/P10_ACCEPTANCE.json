@@ -15,9 +15,9 @@
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-08-17T15:46:21Z",
-    "source_pass": 5,
-    "source_degraded": 0,
+    "utc": "2026-08-17T15:48:19Z",
+    "source_pass": 2,
+    "source_degraded": 3,
     "source_fail": 2,
     "source_quarantined": 2,
     "critical_fail": false,
@@ -26,7 +26,7 @@
     "quarantined_source": "SRC-AFIR-ENERGY-2026 — AFIR — Energie 2026; dependent material facts blocked fail-closed; SRC-LEGISLATIE — Portal Legislativ; dependent material facts blocked fail-closed"
   },
   "deployment_evidence": {
-    "utc": "2026-08-17T15:46:47Z",
+    "utc": "2026-08-17T15:48:35Z",
     "status": "FAIL",
     "public_content_verified": true,
     "https_verified": true,
@@ -36,7 +36,7 @@
     "http_content_verified": true,
     "content_origin": "custom_https",
     "http_status": 200,
-    "final_url": "https://partener.eu/?p10_probe=20260817T154647Z",
+    "final_url": "https://partener.eu/?p10_probe=20260817T154835Z",
     "title": "PARTENER.EU — Finanțări europene explicate simplu",
     "required_markers_present": true,
     "critical_assets_ok": true,
@@ -46,7 +46,7 @@
       {
         "id": "custom_https",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260817T154647Z",
+        "final_url": "https://partener.eu/?p10_probe=20260817T154835Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -57,7 +57,7 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260817T154647Z",
+        "final_url": "http://partener.eu/?p10_probe=20260817T154835Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -68,12 +68,12 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260817T154647Z",
+        "final_url": "http://partener.eu/?p10_probe=20260817T154835Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260817T154647Z",
-            "to_url": "http://partener.eu/?p10_probe=20260817T154647Z"
+            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260817T154835Z",
+            "to_url": "http://partener.eu/?p10_probe=20260817T154835Z"
           }
         ],
         "content_verified": true,
@@ -86,8 +86,8 @@
     "pages_workflow": {
       "status": "LIVE",
       "page_url": "http://partener.eu/",
-      "git_sha": "15c331b78ebbec3c8726c9bf781da43a361d06e5",
-      "observed_at": "2026-08-17T15:15:03.412032+00:00",
+      "git_sha": "e287560d76481ebefb733284113cc9b31252675f",
+      "observed_at": "2026-08-17T15:48:03.606760+00:00",
       "configure_outcome": "success",
       "upload_outcome": "success",
       "deploy_outcome": "success",
@@ -96,15 +96,17 @@
         "before_http_status": 200,
         "before_https_enforced": false,
         "attempted": true,
-        "attempt_http_status": 503,
+        "attempt_http_status": 403,
         "attempt_response": {
-          "message": "No server is currently available to service your request. Sorry about that. Please try resubmitting your request and contact us if the problem persists."
+          "message": "Resource not accessible by integration",
+          "documentation_url": "https://docs.github.com/rest/pages/pages#update-information-about-a-apiname-pages-site",
+          "status": "403"
         },
         "after_http_status": 200,
         "after_https_enforced": false,
         "cname": "partener.eu",
         "html_url": "http://partener.eu/",
-        "external_dependency": "PAGES_HTTPS_ENFORCEMENT_PENDING"
+        "external_dependency": "REPOSITORY_ADMINISTRATION_PERMISSION_REQUIRED"
       }
     },
     "error": "public content is current, but HTTP/Pages transport is not fully HTTPS-closed"
@@ -121,16 +123,16 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-08-17T15:46:47Z",
-    "validation_run_started": "2026-08-17T15:46:21Z",
+    "utc": "2026-08-17T15:48:35Z",
+    "validation_run_started": "2026-08-17T15:48:19Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "ba3e40cac2fb3b821c7b294d40258e4cec56f6a88f77e57260bdbf9f90b593b1",
-      "history_sha256": "ba3e40cac2fb3b821c7b294d40258e4cec56f6a88f77e57260bdbf9f90b593b1",
-      "history_path": "validation/history/20260817T154621Z.json",
+      "latest_sha256": "9de40a32f2c3d6982e6b979e6cbce2209f8a46bb2237fa32f1c8b78642eafe18",
+      "history_sha256": "9de40a32f2c3d6982e6b979e6cbce2209f8a46bb2237fa32f1c8b78642eafe18",
+      "history_path": "validation/history/20260817T154819Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "c52539a23cc5c9180d56d0b13884796b969989c2c5e66c7e59ebe7605dc114f1",
-      "checkpoint_sha256": "c52539a23cc5c9180d56d0b13884796b969989c2c5e66c7e59ebe7605dc114f1",
+      "source_state_sha256": "b9d29d063c89bf4efdec7b25ad61fae82513075daac4959ef74939ac409b6aae",
+      "checkpoint_sha256": "b9d29d063c89bf4efdec7b25ad61fae82513075daac4959ef74939ac409b6aae",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
@@ -138,7 +140,7 @@
     },
     "source_registry": {
       "observed_at": "2026-08-17T15:43:41.378420Z",
-      "age_seconds": 186,
+      "age_seconds": 293,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
