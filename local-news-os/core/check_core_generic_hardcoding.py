@@ -25,6 +25,7 @@ ALLOWLIST: dict[str, str] = {
     "local-news-os/core/discover_primary_source_facts.py": "TEMPORARY_COMPATIBILITY_ADAPTER",
     "local-news-os/core/discover_primary_source_facts_fast.py": "TEMPORARY_COMPATIBILITY_ADAPTER",
 }
+GENERIC_IDENTITY_WORDS = {"romania", "romanian", "county", "judetul", "local", "news", "clar"}
 
 
 def normalize(value: str) -> str:
@@ -79,7 +80,7 @@ def forbidden_tokens() -> tuple[str, ...]:
             for part in re.findall(r"[a-z0-9.-]+", value):
                 if len(part) >= 5:
                     tokens.add(part)
-    tokens.difference_update({"romania", "romanian"})
+    tokens.difference_update(GENERIC_IDENTITY_WORDS)
     return tuple(sorted(tokens, key=lambda item: (-len(item), item)))
 
 
