@@ -28,16 +28,17 @@ ENDPOINTS = [
 REQUIRED_MARKERS = {
     "brand": "PARTENER.EU",
     "boot_fallback": 'id="boot-fallback"',
-    "hero": "Găsește finanțarea potrivită fără să citești zeci de ghiduri",
-    "product_definition": "cine poate aplica, câți bani sunt disponibili, termenele, documentele",
+    "hero": "Ai o investiție în minte? Află ce finanțări merită urmărite acum.",
+    "product_definition": "eligibilitate, bani, termene, documente și următorul pas",
     "critical_data_ref": 'src="data.js',
     "critical_app_ref": 'src="app.js',
     "decision_data_ref": 'src="decision-products.js',
     "decision_ui_ref": 'src="decision-intelligence-v2.js',
     "novice_ui_ref": 'src="home-novice-v1.js',
+    "goto_ui_ref": 'src="home-go-to-v2.js',
 }
 LEGACY_MARKERS = ("wp-content/", "wp-includes/", "wordpress.org", "wp-json")
-UA = "PARTENER.EU-CIVORA-P10-Deployment-Probe/1.6"
+UA = "PARTENER.EU-CIVORA-P10-Deployment-Probe/1.7"
 
 
 class RedirectAudit(urllib.request.HTTPRedirectHandler):
@@ -112,13 +113,14 @@ def probe(endpoint_id: str,url: str,stamp: str) -> dict[str,Any]:
         if title: result["title"]=re.sub(r"\s+"," ",title.group(1)).strip()[:300]
         result["markers"]={key:marker in text for key,marker in REQUIRED_MARKERS.items()}; result["marker_ok"]=all(result["markers"].values())
         low=text.lower(); result["legacy_origin_detected"]=any(marker in low for marker in LEGACY_MARKERS)
-        data_url=extract_asset(text,"data.js",final); app_url=extract_asset(text,"app.js",final); decision_data_url=extract_asset(text,"decision-products.js",final); decision_ui_url=extract_asset(text,"decision-intelligence-v2.js",final); novice_url=extract_asset(text,"home-novice-v1.js",final)
+        data_url=extract_asset(text,"data.js",final); app_url=extract_asset(text,"app.js",final); decision_data_url=extract_asset(text,"decision-products.js",final); decision_ui_url=extract_asset(text,"decision-intelligence-v2.js",final); novice_url=extract_asset(text,"home-novice-v1.js",final); goto_url=extract_asset(text,"home-go-to-v2.js",final)
         result["assets"]={
             "data.js":probe_asset(data_url,("PARTENER_DATA","window.PARTENER_DATA")),
             "app.js":probe_asset(app_url,("function render","render();","document.getElementById('app')",'document.getElementById("app")')),
             "decision-products.js":probe_asset(decision_data_url,("PARTENER_DECISION_PRODUCTS",)),
             "decision-intelligence-v2.js":probe_asset(decision_ui_url,("renderHub","dossierCard")),
             "home-novice-v1.js":probe_asset(novice_url,("Nu trebuie să știi numele programului","Ce vrei să finanțezi?")),
+            "home-go-to-v2.js":probe_asset(goto_url,("Poți scrie în limbaj normal","Vezi ce s-a schimbat de la ultima verificare")),
         }
         result["critical_assets_ok"]=all(x.get("ok") for x in result["assets"].values())
         result["content_verified"]=200<=code<400 and result["marker_ok"] and result["critical_assets_ok"] and not result["legacy_origin_detected"]
@@ -146,7 +148,7 @@ def main() -> int:
     observed_at=nowz(); stamp=observed_at.replace(":","").replace("-",""); endpoints=[probe(i,u,stamp) for i,u in ENDPOINTS]; by_id={x["id"]:x for x in endpoints}; https=by_id["custom_https"]; http=by_id["custom_http"]; pages=by_id["pages_origin"]; transport=assess_transport(by_id)
     public_content_verified=any(x.get("content_verified") for x in endpoints); https_verified=transport["custom_https_verified"]; secure_transport_verified=transport["secure_transport_verified"]; http_content_verified=bool(http.get("content_verified") or pages.get("content_verified"))
     status="PASS" if public_content_verified and secure_transport_verified else "FAIL"
-    result={"schema_version":"1.6","observed_at":observed_at,"status":status,"public_content_verified":public_content_verified,"https_verified":https_verified,"secure_transport_verified":secure_transport_verified,"http_redirects_to_https":transport["http_redirects_to_https"],"pages_https_preserved":transport["pages_https_preserved"],"http_content_verified":http_content_verified,"https_closure_gate":"PASS" if secure_transport_verified else "PENDING_HTTPS_ENFORCEMENT_AND_SECURE_REDIRECTS","content_origin":"custom_https" if https.get("content_verified") else ("custom_http" if http.get("content_verified") else ("pages_origin" if pages.get("content_verified") else None)),"old_origin_detected":any(x.get("legacy_origin_detected") for x in endpoints),"endpoints":endpoints,"url":https.get("url"),"http_status":https.get("http_status"),"marker_ok":https.get("marker_ok"),"markers":https.get("markers"),"final_url":https.get("final_url"),"content_type":https.get("content_type"),"bytes":https.get("bytes"),"body_sha256":https.get("body_sha256"),"title":https.get("title"),"critical_assets_ok":https.get("critical_assets_ok"),"error":None}
+    result={"schema_version":"1.7","observed_at":observed_at,"status":status,"public_content_verified":public_content_verified,"https_verified":https_verified,"secure_transport_verified":secure_transport_verified,"http_redirects_to_https":transport["http_redirects_to_https"],"pages_https_preserved":transport["pages_https_preserved"],"http_content_verified":http_content_verified,"https_closure_gate":"PASS" if secure_transport_verified else "PENDING_HTTPS_ENFORCEMENT_AND_SECURE_REDIRECTS","content_origin":"custom_https" if https.get("content_verified") else ("custom_http" if http.get("content_verified") else ("pages_origin" if pages.get("content_verified") else None)),"old_origin_detected":any(x.get("legacy_origin_detected") for x in endpoints),"endpoints":endpoints,"url":https.get("url"),"http_status":https.get("http_status"),"marker_ok":https.get("marker_ok"),"markers":https.get("markers"),"final_url":https.get("final_url"),"content_type":https.get("content_type"),"bytes":https.get("bytes"),"body_sha256":https.get("body_sha256"),"title":https.get("title"),"critical_assets_ok":https.get("critical_assets_ok"),"error":None}
     if not public_content_verified: result["error"]="public content verification failed"
     elif not secure_transport_verified: result["error"]="public content is current, but HTTP/Pages transport is not fully HTTPS-closed"
     atomic(OUT,result); print(json.dumps(result,ensure_ascii=False,indent=2)); return 0 if status=="PASS" else 2
