@@ -1,0 +1,114 @@
+name: LOCAL NEWS OS Metrics Harvest Scheduler
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/social/metrics_harvest_scheduler.py"
+      - "local-news-os/social/test_metrics_harvest_scheduler.py"
+      - "local-news-os/social/native_metrics_transport.py"
+      - "local-news-os/social/observed_metrics_collector.py"
+      - "valcea-clar/social/channels/facebook.json"
+      - "valcea-clar/social/channels/instagram.json"
+      - "valcea-clar/social/meta_auth_state.json"
+      - ".github/workflows/local-news-os-metrics-harvest-scheduler.yml"
+      - ".github/workflows/local-news-os-social-core.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/social/metrics_harvest_scheduler.py"
+      - "local-news-os/social/test_metrics_harvest_scheduler.py"
+      - "local-news-os/social/native_metrics_transport.py"
+      - "local-news-os/social/observed_metrics_collector.py"
+      - "valcea-clar/social/channels/facebook.json"
+      - "valcea-clar/social/channels/instagram.json"
+      - "valcea-clar/social/meta_auth_state.json"
+      - ".github/workflows/local-news-os-metrics-harvest-scheduler.yml"
+      - ".github/workflows/local-news-os-social-core.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-news-os-metrics-harvest-scheduler-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile harvest scheduler boundary
+        run: |
+          python -m py_compile \
+            local-news-os/social/observed_metrics.py \
+            local-news-os/social/durable_feedback_snapshot.py \
+            local-news-os/social/observed_metrics_collector.py \
+            local-news-os/social/native_metrics_transport.py \
+            local-news-os/social/metrics_harvest_scheduler.py \
+            local-news-os/social/test_metrics_harvest_scheduler.py
+
+      - name: Run metrics harvest scheduler acceptance tests
+        run: python local-news-os/social/test_metrics_harvest_scheduler.py
+
+      - name: Validate Vâlcea Meta channels can emit secret-free harvest jobs
+        run: |
+          python - <<'PY'
+          import importlib.util
+          import json
+          import sys
+          from pathlib import Path
+
+          here = Path('local-news-os/social').resolve()
+          sys.path.insert(0, str(here))
+          spec = importlib.util.spec_from_file_location('metrics_harvest_scheduler', here / 'metrics_harvest_scheduler.py')
+          mod = importlib.util.module_from_spec(spec)
+          assert spec and spec.loader
+          spec.loader.exec_module(mod)
+
+          auth = json.loads(Path('valcea-clar/social/meta_auth_state.json').read_text(encoding='utf-8'))
+          expected = {
+              'facebook': ('meta_graph_api', 'VALCEA_FB_PAGE_ACCESS_TOKEN'),
+              'instagram': ('instagram_graph_api', 'VALCEA_IG_ACCESS_TOKEN'),
+          }
+          for platform, (source, env_name) in expected.items():
+              channel = json.loads(Path(f'valcea-clar/social/channels/{platform}.json').read_text(encoding='utf-8'))
+              publication = {
+                  'instance_id': channel['instance_id'],
+                  'channel_id': channel['channel_id'],
+                  'platform': platform,
+                  'status': 'PUBLISHED',
+                  'publication_id': f'acceptance:{platform}',
+                  'remote_publication_id': f'remote_{platform}_acceptance',
+                  'story_id': 'story:acceptance',
+                  'product_id': f'product:{platform}:acceptance',
+                  'published_at': '2026-08-16T08:00:00Z',
+                  'native_format': 'single_photo',
+                  'topic_keys': ['service_journalism'],
+                  'series_id': None,
+              }
+              state = {
+                  'instance_id': channel['instance_id'],
+                  'channel_id': channel['channel_id'],
+                  'platform': platform,
+                  'records': {publication['publication_id']: publication},
+              }
+              result = mod.plan_harvest(channel, state, auth, now='2026-08-16T15:00:00Z')
+              if result.get('status') != 'HARVEST_READY' or len(result.get('jobs', [])) != 1:
+                  raise SystemExit(f'{platform}: {result}')
+              job = result['jobs'][0]
+              if job.get('source') != source or job.get('credential_env_name') != env_name:
+                  raise SystemExit(f'{platform}: wrong transport identity {job}')
+              encoded = json.dumps(result, ensure_ascii=False)
+              if 'Bearer ' in encoded or 'access_token=' in encoded:
+                  raise SystemExit(f'{platform}: secret-bearing plan')
+              if result.get('publication_blocked') is not False or result['guards'].get('zero_paid_dependency') is not True:
+                  raise SystemExit(f'{platform}: policy guard failure {result}')
+              print(f'{platform}: PASS {job["checkpoint"]["checkpoint_hours"]}h via {source}')
+          PY
