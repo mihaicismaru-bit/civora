@@ -1,0 +1,81 @@
+name: VÂLCEA CLAR Primary Signal Verifier
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '5-55/10 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'local-news-os/core/primary_signal_verifier.py'
+      - 'local-news-os/core/signal_radar.py'
+      - 'local-news-os/instances/valcea/source_pack.json'
+      - 'valcea-clar/editorial/signal_radar_config.json'
+      - 'valcea-clar/editorial/news_sources.json'
+      - 'valcea-clar/editorial/manual_watch_sources.json'
+      - '.github/workflows/valcea-clar-primary-signal-verifier.yml'
+  pull_request:
+    paths:
+      - 'local-news-os/core/primary_signal_verifier.py'
+      - 'local-news-os/core/signal_radar.py'
+      - 'local-news-os/instances/valcea/source_pack.json'
+      - 'valcea-clar/editorial/signal_radar_config.json'
+      - 'valcea-clar/editorial/news_sources.json'
+      - 'valcea-clar/editorial/manual_watch_sources.json'
+      - '.github/workflows/valcea-clar-primary-signal-verifier.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-primary-signal-verifier-${{ github.event.pull_request.number || 'main' }}
+  cancel-in-progress: true
+
+jobs:
+  verify-signals:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Validate verifier contract offline
+        run: |
+          python -m py_compile local-news-os/core/primary_signal_verifier.py
+          python local-news-os/core/primary_signal_verifier.py --self-test
+          python local-news-os/core/primary_signal_verifier.py --instance valcea --validate-only
+      - name: Exercise primary verification against current queue read-only
+        if: github.event_name == 'pull_request'
+        run: python local-news-os/core/primary_signal_verifier.py --instance valcea --no-write
+      - name: Verify current radar queue against primary sources
+        if: github.event_name != 'pull_request'
+        run: python local-news-os/core/primary_signal_verifier.py --instance valcea
+      - name: Persist primary verification evidence safely
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp valcea-clar/editorial/signal_primary_verification_state.json /tmp/valcea-primary-signal-state.json
+          git config user.name 'vâlcea-clar-primary-verifier[bot]'
+          git config user.email 'valcea-clar-primary-verifier@users.noreply.github.com'
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p valcea-clar/editorial
+            cp /tmp/valcea-primary-signal-state.json valcea-clar/editorial/signal_primary_verification_state.json
+            git add valcea-clar/editorial/signal_primary_verification_state.json
+            if git diff --cached --quiet; then
+              echo 'Primary verification state already current.'
+              exit 0
+            fi
+            git commit -m 'Refresh VÂLCEA CLAR primary signal verification state'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            sleep $((attempt * 2))
+          done
+          echo 'Could not persist primary verification state without conflict.' >&2
+          exit 1
