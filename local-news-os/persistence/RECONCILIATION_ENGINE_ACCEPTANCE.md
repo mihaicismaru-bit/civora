@@ -1,6 +1,6 @@
 # CIVORA persistence reconciliation engine acceptance
 
-This increment implements the executable core required by PRS-016–024 and the explicit stale-Drive/new-main acceptance required by PRS-042.
+This increment implements the executable core required by PRS-016–024 and the explicit stale-Drive/new-main and open-PR acceptance required by PRS-042–043.
 
 ## Authority boundaries
 
@@ -22,6 +22,7 @@ This increment implements the executable core required by PRS-016–024 and the 
 9. Identical normalized inputs must produce byte-stable semantic output and identical fingerprints.
 10. `PERSISTENCE_FRESH` is possible only when every required freshness gate is true, no blocking reconciliation diagnostic remains, and repository scope is not `STRUCTURAL_RECONCILIATION`.
 11. **PRS-042:** when persisted/Drive state is older than current main and current main contains merged implementation evidence, repository evidence remains authoritative; the input is not mutated, the stale decision reconciles forward to `IMPLEMENTED`, `FALSE_NEGATIVE_PERSISTENCE` is emitted, and persistence health remains `RECONCILIATION_REQUIRED` until the corrected state is separately persisted under the writer lease.
+12. **PRS-043:** repository evidence that exists only as an `OPEN_PR` or `DRAFT_PR` never reconciles to `IMPLEMENTED`. With no explicit partial implementation evidence the decision remains `ACTIVE_UNIMPLEMENTED`; with explicit `partial_evidence=true`, `PARTIAL` is permitted. PR existence, branch existence, CI success or a locally READY asset is insufficient to infer merge/implementation.
 
 ## PRS mapping
 
@@ -35,5 +36,6 @@ This increment implements the executable core required by PRS-016–024 and the 
 - PRS-023: `SUPERSEDED_WORK` detector.
 - PRS-024: deterministic canonical JSON + SHA-256 fingerprints and repeated-run equality self-test.
 - PRS-042: executable `prs_042_drive_old_main_new_acceptance.py` verifies that stale Drive state cannot downgrade newer merged main evidence and cannot silently claim persistence freshness.
+- PRS-043: executable `prs_043_open_pr_unmerged_acceptance.py` verifies that open/draft unmerged work remains `ACTIVE_UNIMPLEMENTED` or explicit `PARTIAL`, never `IMPLEMENTED`.
 
 The engine does not replace the Google Drive writer lease. Any process that persists its result into active CIVORA state must separately acquire `CIVORA_PERSISTENCE_WRITER_LEASE_V1`, use per-target revision control, verify readback, and release the lease.
