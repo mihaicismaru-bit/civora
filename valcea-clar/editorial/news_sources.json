@@ -234,6 +234,12 @@
       "tier": "T1",
       "section": "CULTURĂ",
       "priority": 81,
+      "enabled": false,
+      "status": "QUARANTINED_EVENT_CALENDAR_EVENT_DATE_NO_PUBLISHED_AT",
+      "checked_at": "2026-08-17",
+      "disable_reason": "The official Ariel /evenimente/ surface is an event calendar, not an article publication feed. It exposes performance occurrence dates and times such as 1, 5, 12, 14, 24, 26 and 28 June 2026, together with venue, ticket and programme details, but does not provide a trustworthy article-level published_at for those calendar items. LOCAL NEWS OS must not reinterpret event_start as publication freshness or crawl time as published_at. Automatic title + date + source admission is disabled until a generic event-calendar contract models event time separately from editorial publication time.",
+      "safe_use": ["manual event discovery for Unde ieșim and culture coverage", "primary-source verification of performance date, time, venue and ticket information", "manual reporting after preserving event_start/event_end separately from published_at"],
+      "core_feedback": "Reinforces a reusable EVENT_CALENDAR contract for LOCAL NEWS OS: keep published_at distinct from event_start/event_end, preserve venue and ticket provenance, and allow calendar items into reader utility only through an event-specific freshness/materiality gate. No Ariel/Vâlcea-specific parser should be added.",
       "path_hints": ["evenimente", "spectacol", "teatru"],
       "generic_titles": ["evenimente", "programul de spectacole", "repertoriu"]
     },
