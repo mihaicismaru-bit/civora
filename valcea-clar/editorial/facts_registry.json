@@ -3,11 +3,17 @@
   "policy": {
     "purpose": "Structured verified facts used by the zero-LLM autonomous edition generator.",
     "minimum_confidence": 90,
-    "allowed_statuses": ["verified", "approved_carry_forward"],
+    "allowed_statuses": [
+      "verified",
+      "approved_carry_forward"
+    ],
     "material_facts_require_sources": true,
     "never_infer_missing_fields": true,
     "expired_facts_are_not_publishable": true,
-    "durable_temporal_language": "absolute_dates_only"
+    "durable_temporal_language": "absolute_dates_only",
+    "structured_primary_fact_kernel_contract": "LOCAL_NEWS_OS_STRUCTURED_ALERT_EVENTS_V1",
+    "structured_primary_fact_kernels_fail_closed": true,
+    "structured_primary_reader_copy_requires_editorial_writer": true
   },
   "facts": [
     {
@@ -18,7 +24,10 @@
       "confidence": 98,
       "valid_from": "2026-08-15T00:00:00+03:00",
       "valid_until": "2026-08-15T23:59:59+03:00",
-      "slots": ["morning", "evening"],
+      "slots": [
+        "morning",
+        "evening"
+      ],
       "headline": "Musiclover Festival continuă pe 15 august 2026 cu Delia și Connect-R",
       "dek": "A doua zi a festivalului are loc pe Platoul Fețeni, cu acces anunțat de la ora 18:00.",
       "paragraphs": [
@@ -28,8 +37,16 @@
       ],
       "material_fact_gate": "PASS",
       "sources": [
-        {"name": "Ticketstore — Musiclover Festival, 15 august", "url": "https://ticketstore.ro/ro/bilete/12275/musiclover-festival-15-august-connect-r-delia", "tier": "T2"},
-        {"name": "HCL Râmnicu Vâlcea nr. 159/2026", "url": "https://hcl.usr.ro/ramnicu_valcea/2026/h159", "tier": "T1"}
+        {
+          "name": "Ticketstore — Musiclover Festival, 15 august",
+          "url": "https://ticketstore.ro/ro/bilete/12275/musiclover-festival-15-august-connect-r-delia",
+          "tier": "T2"
+        },
+        {
+          "name": "HCL Râmnicu Vâlcea nr. 159/2026",
+          "url": "https://hcl.usr.ro/ramnicu_valcea/2026/h159",
+          "tier": "T1"
+        }
       ]
     },
     {
@@ -40,7 +57,10 @@
       "confidence": 99,
       "valid_from": "2026-08-15T00:00:00+03:00",
       "valid_until": "2026-08-16T23:59:59+03:00",
-      "slots": ["morning", "evening"],
+      "slots": [
+        "morning",
+        "evening"
+      ],
       "headline": "Luminos Fest este în Parcul Zăvoi în 15–16 august 2026. Intrarea este liberă",
       "dek": "Evenimentul de familie se desfășoară în 15–16 august, cu lampioane pe apă și activități pentru copii.",
       "paragraphs": [
@@ -49,7 +69,11 @@
       ],
       "material_fact_gate": "PASS",
       "sources": [
-        {"name": "Luminos Fest — site oficial", "url": "https://luminosfest.ro/", "tier": "T1B"}
+        {
+          "name": "Luminos Fest — site oficial",
+          "url": "https://luminosfest.ro/",
+          "tier": "T1B"
+        }
       ]
     },
     {
@@ -60,7 +84,10 @@
       "confidence": 99,
       "valid_from": "2026-08-16T00:00:00+03:00",
       "valid_until": "2026-08-16T23:59:59+03:00",
-      "slots": ["morning", "evening"],
+      "slots": [
+        "morning",
+        "evening"
+      ],
       "headline": "Florile Govorei, ediția a 55-a, în 15–16 august 2026",
       "dek": "Primăria Băile Govora anunță ediția a 55-a a evenimentului pentru 15–16 august 2026.",
       "paragraphs": [
@@ -68,7 +95,11 @@
       ],
       "material_fact_gate": "PASS_DATE_ONLY",
       "sources": [
-        {"name": "Primăria Orașului Băile Govora — Florile Govorei, ediția a 55-a", "url": "https://www.primaria-govora.ro/florile-govorei-editia-a-55-a-15-16-08-2026/", "tier": "T1"}
+        {
+          "name": "Primăria Orașului Băile Govora — Florile Govorei, ediția a 55-a",
+          "url": "https://www.primaria-govora.ro/florile-govorei-editia-a-55-a-15-16-08-2026/",
+          "tier": "T1"
+        }
       ]
     },
     {
@@ -79,7 +110,9 @@
       "confidence": 93,
       "valid_from": "2026-08-15T00:00:00+03:00",
       "valid_until": "2026-08-15T23:59:59+03:00",
-      "slots": ["morning"],
+      "slots": [
+        "morning"
+      ],
       "headline": "SCM Râmnicu Vâlcea – CSM Slatina, partida programată la 15 august 2026",
       "dek": "Meciul figurează în etapa a treia a sezonului 2026–2027 din Liga 2.",
       "paragraphs": [
@@ -87,8 +120,16 @@
       ],
       "material_fact_gate": "PASS_DATE_ONLY",
       "sources": [
-        {"name": "Liga 2 — program SCM Râmnicu Vâlcea", "url": "https://lpf2.ro/liga2/html/programul_meciurilor/Program_SCM_Ramnicu_Valcea-553.html", "tier": "T2"},
-        {"name": "SCM Râmnicu Vâlcea — site oficial", "url": "https://scmramnicuvalcea.ro/", "tier": "T1B"}
+        {
+          "name": "Liga 2 — program SCM Râmnicu Vâlcea",
+          "url": "https://lpf2.ro/liga2/html/programul_meciurilor/Program_SCM_Ramnicu_Valcea-553.html",
+          "tier": "T2"
+        },
+        {
+          "name": "SCM Râmnicu Vâlcea — site oficial",
+          "url": "https://scmramnicuvalcea.ro/",
+          "tier": "T1B"
+        }
       ]
     },
     {
@@ -99,7 +140,10 @@
       "confidence": 94,
       "valid_from": "2026-08-14T00:00:00+03:00",
       "valid_until": "2026-09-15T23:59:59+03:00",
-      "slots": ["morning", "evening"],
+      "slots": [
+        "morning",
+        "evening"
+      ],
       "headline": "Podul pietonal-ciclist peste Olănești: dosarul de documentare rămâne deschis",
       "dek": "Urmărim executanții, autorizațiile, situațiile de lucrări, plățile și termenele proiectului SMIS 334436.",
       "paragraphs": [
@@ -109,8 +153,153 @@
       ],
       "material_fact_gate": "PASS_EXPLAINER_ONLY",
       "sources": [
-        {"name": "HCL Râmnicu Vâlcea nr. 100/2025 și documentația SMIS 334436", "url": "https://hcl.usr.ro/ramnicu_valcea/2025/h100", "tier": "T1"}
+        {
+          "name": "HCL Râmnicu Vâlcea nr. 100/2025 și documentația SMIS 334436",
+          "url": "https://hcl.usr.ro/ramnicu_valcea/2025/h100",
+          "tier": "T1"
+        }
       ]
+    },
+    {
+      "id": "alert-1cd2159b942ec2b672f7",
+      "status": "verified",
+      "section": "MOBILITATE",
+      "priority": 96,
+      "confidence": 99,
+      "valid_from": "2026-08-17T15:45+03:00",
+      "valid_until": "2026-08-19T03:45+03:00",
+      "slots": [
+        "morning",
+        "evening"
+      ],
+      "editorial_type": "service",
+      "material_fact_gate": "PASS",
+      "sources": [
+        {
+          "name": "Centrul INFOTRAFIC — Poliția Română",
+          "url": "https://politiaromana.ro/ro/info-trafic/judetul-valcea-trafic-alternativ-pe-dn-71786972660",
+          "tier": "T1"
+        }
+      ],
+      "auto_generated": true,
+      "auto_scope": "structured_primary_fact_kernel",
+      "structured_primary_event": {
+        "source_id": "igpr-infotrafic",
+        "parser": "RO_INFOTRAFIC_DETAIL_V1",
+        "issued_at": "2026-08-17T15:45+03:00",
+        "official_status": "Inactiv",
+        "body_sha256": "abcf27fa3f4c9d794302ed0bc9bbe891d4d563699997113c94739f95a966e485"
+      },
+      "fact_kernel": {
+        "format_hint": "service_news",
+        "headline": {
+          "text": "DN 7, 17 august 2026: 2 victime într-un incident rutier semnalat de INFOTRAFIC",
+          "source_urls": [
+            "https://politiaromana.ro/ro/info-trafic/judetul-valcea-trafic-alternativ-pe-dn-71786972660"
+          ]
+        },
+        "dek": {
+          "text": "Alerta oficială emisă la ora 15:45 indică incidentul în zona localității Blidari, la kilometrul 167 + 300; la acel moment, trafic alternativ era în vigoare pe sectorul afectat.",
+          "source_urls": [
+            "https://politiaromana.ro/ro/info-trafic/judetul-valcea-trafic-alternativ-pe-dn-71786972660"
+          ]
+        },
+        "claims": [
+          {
+            "id": "issued",
+            "role": "who_what_when_where",
+            "kind": "fact",
+            "text": "Centrul INFOTRAFIC a emis în 17 august 2026, la ora 15:45, o alertă pentru DN 7, în zona localității Blidari, la kilometrul 167 + 300.",
+            "source_urls": [
+              "https://politiaromana.ro/ro/info-trafic/judetul-valcea-trafic-alternativ-pe-dn-71786972660"
+            ]
+          },
+          {
+            "id": "traffic",
+            "role": "material_change",
+            "kind": "reader_service",
+            "text": "La momentul emiterii alertei, sursa oficială indica trafic alternativ pe DN 7, în sectorul descris în informarea INFOTRAFIC.",
+            "source_urls": [
+              "https://politiaromana.ro/ro/info-trafic/judetul-valcea-trafic-alternativ-pe-dn-71786972660"
+            ]
+          },
+          {
+            "id": "consequence",
+            "role": "consequence",
+            "kind": "fact",
+            "text": "Alerta oficială consemnează 2 victime în incidentul rutier. Una dintre victime a fost proiectată pe carosabil, potrivit informării INFOTRAFIC.",
+            "source_urls": [
+              "https://politiaromana.ro/ro/info-trafic/judetul-valcea-trafic-alternativ-pe-dn-71786972660"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "alert-fdfdb85a579432f385f7",
+      "status": "verified",
+      "section": "MOBILITATE",
+      "priority": 90,
+      "confidence": 99,
+      "valid_from": "2026-08-17T10:15+03:00",
+      "valid_until": "2026-08-18T22:15+03:00",
+      "slots": [
+        "morning",
+        "evening"
+      ],
+      "editorial_type": "service",
+      "material_fact_gate": "PASS",
+      "sources": [
+        {
+          "name": "Centrul INFOTRAFIC — Poliția Română",
+          "url": "https://politiaromana.ro/ro/info-trafic/judetul-valcea-trafic-alternativ-pe-dn-71786952995",
+          "tier": "T1"
+        }
+      ],
+      "auto_generated": true,
+      "auto_scope": "structured_primary_fact_kernel",
+      "structured_primary_event": {
+        "source_id": "igpr-infotrafic",
+        "parser": "RO_INFOTRAFIC_DETAIL_V1",
+        "issued_at": "2026-08-17T10:15+03:00",
+        "official_status": "Inactiv",
+        "body_sha256": "0748c5fc0c68d1c248c387f074a031b7c1d6058c171aed073aae2ee8944d7581"
+      },
+      "fact_kernel": {
+        "format_hint": "service_news",
+        "headline": {
+          "text": "DN 7, 17 august 2026: INFOTRAFIC a semnalat trafic alternativ",
+          "source_urls": [
+            "https://politiaromana.ro/ro/info-trafic/judetul-valcea-trafic-alternativ-pe-dn-71786952995"
+          ]
+        },
+        "dek": {
+          "text": "Alerta oficială emisă la ora 10:15 vizează în zona localității Drăgănești, la kilometrul 214 și consemnează situația de trafic de pe sectorul indicat.",
+          "source_urls": [
+            "https://politiaromana.ro/ro/info-trafic/judetul-valcea-trafic-alternativ-pe-dn-71786952995"
+          ]
+        },
+        "claims": [
+          {
+            "id": "issued",
+            "role": "who_what_when_where",
+            "kind": "fact",
+            "text": "Centrul INFOTRAFIC a emis în 17 august 2026, la ora 10:15, o alertă pentru DN 7, în zona localității Drăgănești, la kilometrul 214.",
+            "source_urls": [
+              "https://politiaromana.ro/ro/info-trafic/judetul-valcea-trafic-alternativ-pe-dn-71786952995"
+            ]
+          },
+          {
+            "id": "traffic",
+            "role": "material_change",
+            "kind": "reader_service",
+            "text": "La momentul emiterii alertei, sursa oficială indica trafic alternativ pe DN 7, în sectorul descris în informarea INFOTRAFIC.",
+            "source_urls": [
+              "https://politiaromana.ro/ro/info-trafic/judetul-valcea-trafic-alternativ-pe-dn-71786952995"
+            ]
+          }
+        ]
+      }
     }
   ]
 }
