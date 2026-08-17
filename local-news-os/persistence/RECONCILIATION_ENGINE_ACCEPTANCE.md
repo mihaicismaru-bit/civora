@@ -1,6 +1,6 @@
 # CIVORA persistence reconciliation engine acceptance
 
-This increment implements the executable core required by PRS-016–024.
+This increment implements the executable core required by PRS-016–024 and the explicit stale-Drive/new-main acceptance required by PRS-042.
 
 ## Authority boundaries
 
@@ -21,6 +21,7 @@ This increment implements the executable core required by PRS-016–024.
 8. Unknown implementation states fail closed.
 9. Identical normalized inputs must produce byte-stable semantic output and identical fingerprints.
 10. `PERSISTENCE_FRESH` is possible only when every required freshness gate is true, no blocking reconciliation diagnostic remains, and repository scope is not `STRUCTURAL_RECONCILIATION`.
+11. **PRS-042:** when persisted/Drive state is older than current main and current main contains merged implementation evidence, repository evidence remains authoritative; the input is not mutated, the stale decision reconciles forward to `IMPLEMENTED`, `FALSE_NEGATIVE_PERSISTENCE` is emitted, and persistence health remains `RECONCILIATION_REQUIRED` until the corrected state is separately persisted under the writer lease.
 
 ## PRS mapping
 
@@ -33,5 +34,6 @@ This increment implements the executable core required by PRS-016–024.
 - PRS-022: `FALSE_POSITIVE_PERSISTENCE` detector.
 - PRS-023: `SUPERSEDED_WORK` detector.
 - PRS-024: deterministic canonical JSON + SHA-256 fingerprints and repeated-run equality self-test.
+- PRS-042: executable `prs_042_drive_old_main_new_acceptance.py` verifies that stale Drive state cannot downgrade newer merged main evidence and cannot silently claim persistence freshness.
 
 The engine does not replace the Google Drive writer lease. Any process that persists its result into active CIVORA state must separately acquire `CIVORA_PERSISTENCE_WRITER_LEASE_V1`, use per-target revision control, verify readback, and release the lease.
