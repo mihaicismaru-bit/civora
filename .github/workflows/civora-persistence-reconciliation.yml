@@ -41,6 +41,7 @@ jobs:
           python -m py_compile local-news-os/persistence/credential_safety.py
           python -m py_compile local-news-os/persistence/persistence_writer.py
           python -m py_compile local-news-os/persistence/latest_state_promotion.py
+          python -m py_compile local-news-os/persistence/persistence_health.py
       - name: Run deterministic fail-closed reconciliation acceptance
         run: python local-news-os/persistence/reconciliation_engine.py --self-test
       - name: Validate PRS-037 reconciliation trigger contract and executable wiring
@@ -51,6 +52,8 @@ jobs:
         run: python local-news-os/persistence/credential_safety.py --self-test
       - name: Validate PRS-040 readback-verified latest-state promotion
         run: python local-news-os/persistence/latest_state_promotion.py --self-test
+      - name: Validate PRS-041 canonical persistence health signal
+        run: python local-news-os/persistence/persistence_health.py --self-test
       - name: Validate existing scope classifier alongside reconciliation
         run: python local-news-os/core/repository_scope_fingerprint.py --self-test
       - name: Verify acceptance contracts are present
@@ -59,3 +62,4 @@ jobs:
           test -s local-news-os/persistence/PERSISTENCE_WRITER_ACCEPTANCE.md
           test -s local-news-os/persistence/CREDENTIAL_SAFETY_ACCEPTANCE.md
           test -s local-news-os/persistence/READBACK_PROMOTION_ACCEPTANCE.md
+          test -s local-news-os/persistence/PERSISTENCE_HEALTH_ACCEPTANCE.md
