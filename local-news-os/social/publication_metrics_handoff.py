@@ -187,7 +187,12 @@ def persist_catalog_cas(
 
     actual_previous = _clean((existing or {}).get("catalog_fingerprint_sha256")) or None
     expected_previous = _clean(expected_previous_catalog_fingerprint_sha256) or None
-    if actual_previous != expected_previous:
+    if existing is None:
+        canonical_empty_fp = _clean(publication_metrics_catalog.empty_catalog(channel).get("catalog_fingerprint_sha256")) or None
+        expected_matches = expected_previous in {None, canonical_empty_fp}
+    else:
+        expected_matches = actual_previous == expected_previous
+    if not expected_matches:
         return {
             "persisted": False,
             "status": "HOLD_CATALOG_CAS_CONFLICT",
