@@ -1,0 +1,308 @@
+{
+  "schema_version": "1.0",
+  "instance_id": "valcea",
+  "product": "VÂLCEA CLAR market intelligence monitors",
+  "execution_owner": "CIVORA_SITE_ENGINE",
+  "state_owner": "GITHUB_REPOSITORY",
+  "policy": {
+    "monitor_is_not_story": true,
+    "public_projection": false,
+    "source_change_is_not_material_fact": true,
+    "publication_requires_normal_story_ready_gate": true,
+    "commercial_sources_are_discovery_only": true,
+    "material_company_changes_require_official_or_documentary_confirmation": true,
+    "paid_dependency_required": false
+  },
+  "monitors": [
+    {
+      "id": "construction-permits-active-projects-watch",
+      "label": "Autorizații de construire & proiecte imobiliare active — Vâlcea",
+      "section": "IMOBILIARE",
+      "status": "ACTIVE_REVERIFY",
+      "priority": 91,
+      "purpose": "Urmărește autorizațiile de construire/desființare, PUZ/PUD, hotărârile urbanistice, beneficiarii/dezvoltatorii, proiectele rezidențiale și comerciale în pregătire sau în execuție și trecerea lor prin lanțul intenție–urbanism–autorizație–constructor–șantier–finalizare.",
+      "publication_mode": "STORY_OR_ANALYSIS_ONLY_AFTER_DOCUMENT_CHAIN",
+      "scope": {
+        "county": "Vâlcea",
+        "permit_registers": true,
+        "residential_projects": true,
+        "commercial_projects": true,
+        "active_construction": true,
+        "developer_and_builder_identity": true,
+        "public_decision_links": true
+      },
+      "source_bindings": [
+        {
+          "id": "rm-valcea-hcl-2026",
+          "publisher": "Primăria Municipiului Râmnicu Vâlcea — hotărâri",
+          "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
+          "source_class": "T1_OFFICIAL",
+          "probe": true,
+          "match_terms": ["PUZ", "PUD", "locuințe colective", "locuinte colective", "construire", "urbanism"]
+        },
+        {
+          "id": "rm-valcea-urbanism",
+          "publisher": "Primăria Municipiului Râmnicu Vâlcea — Urbanism",
+          "url": "https://www.primariavl.ro/index.php?option=com_content&view=article&id=495&Itemid=572",
+          "source_class": "T1_OFFICIAL",
+          "probe": true,
+          "match_terms": ["PUZ", "PUD", "autoriza", "construire", "locuințe", "locuinte"]
+        },
+        {
+          "id": "dragasani-authorizations-2026",
+          "publisher": "Primăria Municipiului Drăgășani — autorizații de construire/desființare",
+          "url": "https://www.primariadragasani.ro/informatii-publice/urbanism/autorizatii-de-construire-desfiintare/2026",
+          "source_class": "T1_OFFICIAL",
+          "probe": true,
+          "match_terms": ["Autoriza", "construire", "desființare", "desfiintare", "2026"]
+        },
+        {
+          "id": "ocpi-valcea-real-estate-signals",
+          "publisher": "OCPI Vâlcea",
+          "url": "https://vl.ancpi.ro/anunturi/",
+          "source_class": "T1_OFFICIAL",
+          "probe": true,
+          "match_terms": ["cadastru", "PNCCF", "imobil", "propriet"]
+        }
+      ],
+      "recovered_leads": [
+        {
+          "id": "ferdinand-19",
+          "label": "Ferdinand 19 — Râmnicu Vâlcea",
+          "verification_status": "SOURCE_LOCATED_REVERIFY_CHAIN",
+          "public_projection": false,
+          "recovery_note": "Lead recuperat; lanțul HCL/PUZ-PUD/autorizație/beneficiar/stadiu trebuie reverificat înainte de orice material nou."
+        },
+        {
+          "id": "doru-popian-2-5-4a",
+          "label": "Doru Popian 2–5 / 4A — Râmnicu Vâlcea",
+          "verification_status": "REVERIFY",
+          "public_projection": false,
+          "recovery_note": "Lead recuperat din radarul imobiliar; detaliile despre locuințe colective și beneficiar rămân fail-closed până la reverificare primară."
+        },
+        {
+          "id": "intrarea-crizantemei-1",
+          "label": "Intrarea Crizantemei 1 — Râmnicu Vâlcea",
+          "verification_status": "REVERIFY",
+          "public_projection": false,
+          "recovery_note": "Lead recuperat; PUD/regim de înălțime/beneficiar se reverifică înainte de publicare."
+        },
+        {
+          "id": "dealul-malului-11g",
+          "label": "Dealul Malului 11G — Râmnicu Vâlcea",
+          "verification_status": "REVERIFY",
+          "public_projection": false,
+          "recovery_note": "Lead recuperat; documentația CTATU/urbanism și stadiul fizic se reverifică."
+        },
+        {
+          "id": "historic-commercial-project-catalogue-recovery",
+          "label": "Catalogul vechi de proiecte comerciale/imobiliare",
+          "verification_status": "RECOVERY_INCOMPLETE",
+          "public_projection": false,
+          "recovery_note": "Fluxul anterior consemnase aproximativ 13 proiecte comerciale/imobiliare. Inventarul complet nu a supraviețuit durabil; monitorul păstrează explicit sarcina de reconstrucție din registrele oficiale în loc să pretindă că lista este completă."
+        }
+      ]
+    },
+    {
+      "id": "jobs-market-valcea-watch",
+      "label": "Job Intelligence — Piața muncii Vâlcea",
+      "section": "ECONOMIE",
+      "status": "ACTIVE_REVERIFY",
+      "priority": 90,
+      "purpose": "Urmărește ce se caută și ce se oferă în județul Vâlcea: posturi la stat și privat, joburi sezoniere, roluri recurente, angajatori care recrutează, salarii/beneficii când sunt publice, localizare/navetă și schimbări ale pieței muncii.",
+      "publication_mode": "JOB_ROUNDUP_OR_LABOR_MARKET_STORY_AFTER_VERIFICATION",
+      "scope": {
+        "public_sector": true,
+        "private_sector": true,
+        "seasonal": true,
+        "vacancy_trends": true,
+        "salary_only_when_explicit": true,
+        "commute_and_location": true
+      },
+      "source_bindings": [
+        {
+          "id": "ajofm-valcea-press",
+          "publisher": "AJOFM Vâlcea",
+          "url": "https://www.anofm.ro/valcea/categorie/comunicate-de-presa/",
+          "source_class": "T1_OFFICIAL",
+          "probe": true,
+          "match_terms": ["Locuri de muncă vacante", "locuri de munca vacante", "Bursa locurilor de muncă", "EURES"]
+        },
+        {
+          "id": "ajofm-valcea-statistics",
+          "publisher": "AJOFM Vâlcea — statistică șomaj",
+          "url": "https://www.anofm.ro/valcea/categorie/statistica-somaj/?anselectat=2026",
+          "source_class": "T1_OFFICIAL",
+          "probe": true,
+          "match_terms": ["șomaj", "somaj", "persoane", "locuri de muncă"]
+        },
+        {
+          "id": "posturi-gov-valcea-all",
+          "publisher": "posturi.gov.ro — Vâlcea",
+          "url": "https://posturi.gov.ro/judet/valcea/",
+          "source_class": "T1_OFFICIAL",
+          "probe": true,
+          "match_terms": ["Vâlcea", "VĂLCEA", "post", "perioadă nedeterminată", "perioada nedeterminata"]
+        },
+        {
+          "id": "ejobs-valcea",
+          "publisher": "eJobs — Râmnicu Vâlcea",
+          "url": "https://www.ejobs.ro/locuri-de-munca/ramnicu-valcea",
+          "source_class": "T2_DISCOVERY_ONLY",
+          "probe": true,
+          "match_terms": ["Joburi", "locuri de munca", "Râmnicu Vâlcea", "Ramnicu Valcea"]
+        },
+        {
+          "id": "bestjobs-valcea",
+          "publisher": "BestJobs — Vâlcea",
+          "url": "https://www.bestjobs.eu/locuri-de-munca-in-valcea",
+          "source_class": "T2_DISCOVERY_ONLY",
+          "probe": true,
+          "match_terms": ["locuri de munca", "Râmnicu Vâlcea", "Ramnicu Valcea", "Vâlcea"]
+        },
+        {
+          "id": "linkedin-jobs-valcea",
+          "publisher": "LinkedIn Jobs — Vâlcea",
+          "url": "https://ro.linkedin.com/jobs/jobs-in-v%C3%AElcea",
+          "source_class": "T2_DISCOVERY_ONLY",
+          "probe": true,
+          "match_terms": ["joburi", "Vîlcea", "Vâlcea", "Râmnicu Vâlcea"]
+        },
+        {
+          "id": "olx-jobs-valcea",
+          "publisher": "OLX Locuri de muncă — Vâlcea",
+          "url": "https://www.olx.ro/locuri-de-munca/valcea-judet/",
+          "source_class": "T3_DISCOVERY_ONLY",
+          "probe": true,
+          "match_terms": ["locuri de munca", "Râmnicu Vâlcea", "Valcea"]
+        }
+      ],
+      "recovered_leads": [
+        {
+          "id": "jobs-public-private-seasonal-vertical",
+          "label": "Verticalul public + privat + sezonier",
+          "verification_status": "RECOVERED_SCOPE",
+          "public_projection": false,
+          "recovery_note": "Specificație recuperată din 14 august 2026: nu o simplă listă de anunțuri, ci explicație despre ce se caută, ce se oferă, ce urmează să apară și cum se schimbă piața."
+        },
+        {
+          "id": "sju-recruitment-crosslink",
+          "label": "SJU Vâlcea — recrutări",
+          "verification_status": "CROSSLINK_EXISTING_MONITOR",
+          "public_projection": false,
+          "recovery_note": "Job Intelligence trebuie să consume și monitorul SJU existent, fără a duplica sau valida automat vechea notă de 55 de posturi."
+        }
+      ]
+    },
+    {
+      "id": "top-firms-onrc-watch",
+      "label": "Topul Firmelor & ONRC — Business Watch Vâlcea",
+      "section": "ECONOMIE",
+      "status": "ACTIVE_REVERIFY",
+      "priority": 93,
+      "purpose": "Urmărește toate firmele din județ prin seturile publice disponibile, cu prioritate pentru companiile din Topul Firmelor și cele conectate la bani publici: cifră de afaceri, profit, angajați, stare firmă, reprezentanți legali, schimbări ONRC, insolvențe/litigii, investiții și contracte publice.",
+      "publication_mode": "BUSINESS_STORY_ONLY_AFTER_OFFICIAL_OR_DOCUMENTARY_CONFIRMATION",
+      "scope": {
+        "all_valcea_companies": true,
+        "priority_top_firms": true,
+        "priority_public_money": true,
+        "financials": true,
+        "employees": true,
+        "legal_representatives": true,
+        "company_status": true,
+        "insolvency_and_litigation": true,
+        "investments": true,
+        "public_contracts": true
+      },
+      "source_bindings": [
+        {
+          "id": "data-gov-onrc-datasets",
+          "publisher": "data.gov.ro / ONRC",
+          "url": "https://data.gov.ro/dataset?organization=onrc",
+          "source_class": "T1_OFFICIAL_OPEN_DATA",
+          "probe": true,
+          "match_terms": ["Firme înregistrate la Registrul Comerțului", "OD_FIRME", "OD_STARE_FIRMA", "OD_REPREZENTANTI_LEGALI"]
+        },
+        {
+          "id": "data-gov-finance-datasets",
+          "publisher": "data.gov.ro / Ministerul Finanțelor",
+          "url": "https://data.gov.ro/organization/mfp",
+          "source_class": "T1_OFFICIAL_OPEN_DATA",
+          "probe": true,
+          "match_terms": ["Situații financiare", "Situaţiile financiare", "CSV"]
+        },
+        {
+          "id": "onrc-services",
+          "publisher": "Oficiul Național al Registrului Comerțului",
+          "url": "https://www.onrc.ro/index.php/ro/24-desfiintari-firme/index.php/servicii-online",
+          "source_class": "T1_OFFICIAL",
+          "probe": true,
+          "match_terms": ["Registrul Comerțului", "beneficiarilor reali", "reprezentanților legali", "servicii online"]
+        },
+        {
+          "id": "topfirme-valcea",
+          "publisher": "TopFirme — județul Vâlcea",
+          "url": "https://www.topfirme.com/judet/valcea/",
+          "source_class": "T2_DISCOVERY_REFERENCE",
+          "probe": true,
+          "match_terms": ["Top firme Judetul Valcea", "Cifra de afaceri", "Numar angajati", "Profit"]
+        },
+        {
+          "id": "termene-top50-valcea",
+          "publisher": "Termene Business Hub — Top companii Vâlcea",
+          "url": "https://termene.ro/articole/top-50-companii-din-valcea-de-la-oltchim-damila-si-cet-govora-la-faurecia-vel-pitar-si-avicarvil-cum-s-a-schimbat-varful-clasamentului-in-perioada-2008-2024-timeline",
+          "source_class": "T2_DISCOVERY_REFERENCE",
+          "probe": true,
+          "match_terms": ["Top 50 companii din Vâlcea", "cifră de afaceri", "profit", "angajați"]
+        },
+        {
+          "id": "ccivl-members",
+          "publisher": "Camera de Comerț și Industrie Vâlcea",
+          "url": "https://www.ccivl.ro/lista-membri/",
+          "source_class": "T1B_INSTITUTIONAL_SIGNAL",
+          "probe": true,
+          "match_terms": ["membri", "SRL", "SA"]
+        },
+        {
+          "id": "seap-business-contracts",
+          "publisher": "SEAP / e-licitatie.ro",
+          "url": "https://www.e-licitatie.ro/pub",
+          "source_class": "T1_OFFICIAL_REGISTERED_NO_QUERY_ADAPTER",
+          "probe": false,
+          "match_terms": []
+        }
+      ],
+      "priority_entities": [
+        "FAURECIA ROMANIA SRL",
+        "VEL PITAR SA",
+        "AVICARVIL SRL",
+        "DAMILA SRL",
+        "BOROMIR IND SRL",
+        "DIANA SRL",
+        "DIANA COM SRL",
+        "NURVIL SRL",
+        "CET GOVORA SA",
+        "PRELCHIM SRL",
+        "MW ROMANIA SA",
+        "INTERCOM SA",
+        "ELECTROVALCEA SRL"
+      ],
+      "recovered_leads": [
+        {
+          "id": "all-valcea-firms-universe",
+          "label": "Universul tuturor firmelor din Vâlcea",
+          "verification_status": "RECOVERED_SCOPE",
+          "public_projection": false,
+          "recovery_note": "Specificația din 14 august 2026 cere toate firmele județului, nu doar topul; seturile ONRC/data.gov sunt baza pentru universul de entități, iar topul stabilește prioritatea editorială."
+        },
+        {
+          "id": "public-money-company-priority",
+          "label": "Firme conectate la bani publici",
+          "verification_status": "RECOVERED_SCOPE",
+          "public_projection": false,
+          "recovery_note": "Companiile care apar în achiziții/contracte publice au prioritate, dar orice concluzie despre contracte, proprietari sau relații se publică numai după documentare verificabilă."
+        }
+      ]
+    }
+  ]
+}
