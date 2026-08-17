@@ -1,5 +1,5 @@
 {
-  "schema_version": 5,
+  "schema_version": 6,
   "product": "CIVORA / VÂLCEA CLAR",
   "canonical_domain": "valceaclar.ro",
   "execution_owner": "civora_site_engine",
@@ -18,6 +18,10 @@
   },
   "content_engine": {
     "generator": "deterministic_zero_llm_v2",
+    "fact_kernel_builder": "council_fact_kernel_v1",
+    "fact_kernel_registry": "valcea-clar/editorial/fact_kernel_registry.json",
+    "fact_kernel_promotion": "verified_only_claim_level_provenance",
+    "partial_document_coverage_publishable": false,
     "editorial_writer": "manual_journalism_v1",
     "editorial_manual": "valcea-clar/editorial/editorial_manual.json",
     "editorial_writer_runtime": "valcea-clar/scripts/editorial_writer.py",
@@ -49,6 +53,18 @@
       "emits": "valcea-clar/site/story_publication_event.json",
       "post_persist_dispatch": ".github/workflows/valcea-clar-social-publishing.yml",
       "post_persist_dispatch_mode": "explicit_workflow_dispatch",
+      "owner": "site_engine"
+    },
+    {
+      "id": "fact_kernel_builder",
+      "kind": "official_document_to_atomic_verified_claims",
+      "workflow": ".github/workflows/valcea-clar-fact-kernel.yml",
+      "schedule": ["4,19,34,49 * * * *"],
+      "schedule_role": "bounded_polling_fallback",
+      "current_adapter": "council_fact_kernel_v1",
+      "promotion_target": "valcea-clar/editorial/facts_registry.json",
+      "promotion_rule": "evidence_complete_and_coverage_1.0_only",
+      "post_promotion_dispatch": ".github/workflows/valcea-clar-newsroom-live.yml",
       "owner": "site_engine"
     },
     {

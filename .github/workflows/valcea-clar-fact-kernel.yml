@@ -1,0 +1,126 @@
+name: VÂLCEA CLAR Fact Kernel Builder
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '4,19,34,49 * * * *'
+  pull_request:
+    paths:
+      - 'valcea-clar/scripts/council_fact_kernel.py'
+      - 'valcea-clar/scripts/promote_fact_kernels.py'
+      - 'valcea-clar/scripts/council_watch_rm_valcea.py'
+      - 'valcea-clar/editorial/editorial_manual.json'
+      - 'valcea-clar/site/indexing_routes.json'
+      - 'local-news-os/core/indexing_assets.py'
+      - '.github/workflows/valcea-clar-fact-kernel.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/scripts/council_fact_kernel.py'
+      - 'valcea-clar/scripts/promote_fact_kernels.py'
+      - 'valcea-clar/scripts/council_watch_rm_valcea.py'
+      - 'valcea-clar/editorial/editorial_manual.json'
+      - 'valcea-clar/site/indexing_routes.json'
+      - 'local-news-os/core/indexing_assets.py'
+      - '.github/workflows/valcea-clar-fact-kernel.yml'
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: valcea-clar-fact-kernel-${{ github.event.pull_request.number || 'main' }}
+  cancel-in-progress: true
+
+jobs:
+  fact-kernel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Compile kernel runtime
+        run: |
+          python -m py_compile \
+            valcea-clar/scripts/council_fact_kernel.py \
+            valcea-clar/scripts/promote_fact_kernels.py \
+            valcea-clar/scripts/council_watch_rm_valcea.py \
+            local-news-os/core/indexing_assets.py
+
+      - name: Test Council Fact Kernel contract
+        run: |
+          python valcea-clar/scripts/council_watch_rm_valcea.py --self-test
+          python valcea-clar/scripts/council_fact_kernel.py --self-test
+          python valcea-clar/scripts/promote_fact_kernels.py --self-test
+
+      - name: Validate current offline kernel state
+        run: python valcea-clar/scripts/council_fact_kernel.py --check
+
+      - name: Refresh official Council Watch state
+        if: github.event_name != 'pull_request'
+        run: python valcea-clar/scripts/council_watch_rm_valcea.py
+
+      - name: Verify official documents and build kernels
+        if: github.event_name != 'pull_request'
+        run: python valcea-clar/scripts/council_fact_kernel.py --live
+
+      - name: Promote only complete verified kernels
+        id: promote
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python valcea-clar/scripts/promote_fact_kernels.py --apply | tee /tmp/kernel-promotion.json
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          row=json.loads(Path('/tmp/kernel-promotion.json').read_text(encoding='utf-8'))
+          count=int(row.get('promoted') or 0)+int(row.get('updated') or 0)
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
+              f.write(f'changed={"true" if count else "false"}\n')
+              f.write(f'count={count}\n')
+          PY
+
+      - name: Validate promoted registry through Editorial Writer
+        if: github.event_name != 'pull_request'
+        run: python valcea-clar/scripts/editorial_writer.py --check
+
+      - name: Persist kernel and promotion state conflict-safe
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'vâlcea-clar-fact-kernel[bot]'
+          git config user.email 'valcea-clar-fact-kernel@users.noreply.github.com'
+          git add \
+            valcea-clar/editorial/council_watch_rm_valcea_state.json \
+            valcea-clar/editorial/fact_kernel_registry.json \
+            valcea-clar/editorial/facts_registry.json
+          if git diff --cached --quiet; then
+            echo 'No fact-kernel state change to persist.'
+          else
+            git commit -m 'Refresh VÂLCEA CLAR verified fact kernels'
+            for attempt in 1 2 3; do
+              if git pull --rebase origin main && git push origin HEAD:main; then
+                break
+              fi
+              git rebase --abort || true
+              if [ "$attempt" -eq 3 ]; then
+                echo 'Could not persist fact-kernel state without conflict.' >&2
+                exit 1
+              fi
+              sleep $((attempt*2))
+            done
+          fi
+
+      - name: Dispatch Live Newsroom after verified kernel promotion
+        if: github.event_name != 'pull_request' && steps.promote.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run valcea-clar-newsroom-live.yml --ref main
