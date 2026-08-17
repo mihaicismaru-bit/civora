@@ -3,16 +3,10 @@
   "policy": {
     "purpose": "Structured verified facts used by the zero-LLM autonomous edition generator.",
     "minimum_confidence": 90,
-    "allowed_statuses": [
-      "verified",
-      "approved_carry_forward"
-    ],
+    "allowed_statuses": ["verified", "approved_carry_forward"],
     "material_facts_require_sources": true,
     "never_infer_missing_fields": true,
-    "expired_facts_are_not_publishable": true,
-    "monitor_fact_kernel_derivation": "monitor_fact_kernel_v1",
-    "monitor_signal_alone_is_publishable": false,
-    "derived_kernels_require_editorial_writer_and_story_gate": true
+    "expired_facts_are_not_publishable": true
   },
   "facts": [
     {
@@ -23,10 +17,7 @@
       "confidence": 98,
       "valid_from": "2026-08-15T00:00:00+03:00",
       "valid_until": "2026-08-15T23:59:59+03:00",
-      "slots": [
-        "morning",
-        "evening"
-      ],
+      "slots": ["morning", "evening"],
       "headline": "Azi la Fețeni: Musiclover Festival continuă cu Delia și Connect-R",
       "dek": "A doua zi a festivalului are loc pe Platoul Fețeni, cu acces anunțat de la ora 18:00.",
       "paragraphs": [
@@ -36,16 +27,8 @@
       ],
       "material_fact_gate": "PASS",
       "sources": [
-        {
-          "name": "Ticketstore — Musiclover Festival, 15 august",
-          "url": "https://ticketstore.ro/ro/bilete/12275/musiclover-festival-15-august-connect-r-delia",
-          "tier": "T2"
-        },
-        {
-          "name": "HCL Râmnicu Vâlcea nr. 159/2026",
-          "url": "https://hcl.usr.ro/ramnicu_valcea/2026/h159",
-          "tier": "T1"
-        }
+        {"name": "Ticketstore — Musiclover Festival, 15 august", "url": "https://ticketstore.ro/ro/bilete/12275/musiclover-festival-15-august-connect-r-delia", "tier": "T2"},
+        {"name": "HCL Râmnicu Vâlcea nr. 159/2026", "url": "https://hcl.usr.ro/ramnicu_valcea/2026/h159", "tier": "T1"}
       ]
     },
     {
@@ -56,10 +39,7 @@
       "confidence": 99,
       "valid_from": "2026-08-15T00:00:00+03:00",
       "valid_until": "2026-08-16T23:59:59+03:00",
-      "slots": [
-        "morning",
-        "evening"
-      ],
+      "slots": ["morning", "evening"],
       "headline": "Luminos Fest este în Parcul Zăvoi. Intrarea este liberă",
       "dek": "Evenimentul de familie se desfășoară în 15–16 august, cu lampioane pe apă și activități pentru copii.",
       "paragraphs": [
@@ -68,11 +48,7 @@
       ],
       "material_fact_gate": "PASS",
       "sources": [
-        {
-          "name": "Luminos Fest — site oficial",
-          "url": "https://luminosfest.ro/",
-          "tier": "T1B"
-        }
+        {"name": "Luminos Fest — site oficial", "url": "https://luminosfest.ro/", "tier": "T1B"}
       ]
     },
     {
@@ -83,10 +59,7 @@
       "confidence": 99,
       "valid_from": "2026-08-16T00:00:00+03:00",
       "valid_until": "2026-08-16T23:59:59+03:00",
-      "slots": [
-        "morning",
-        "evening"
-      ],
+      "slots": ["morning", "evening"],
       "headline": "Azi la Băile Govora: «Florile Govorei», ediția a 55-a",
       "dek": "Primăria Băile Govora anunță ediția a 55-a a evenimentului pentru 15–16 august 2026.",
       "paragraphs": [
@@ -94,11 +67,7 @@
       ],
       "material_fact_gate": "PASS_DATE_ONLY",
       "sources": [
-        {
-          "name": "Primăria Orașului Băile Govora — Florile Govorei, ediția a 55-a",
-          "url": "https://www.primaria-govora.ro/florile-govorei-editia-a-55-a-15-16-08-2026/",
-          "tier": "T1"
-        }
+        {"name": "Primăria Orașului Băile Govora — Florile Govorei, ediția a 55-a", "url": "https://www.primaria-govora.ro/florile-govorei-editia-a-55-a-15-16-08-2026/", "tier": "T1"}
       ]
     },
     {
@@ -109,9 +78,7 @@
       "confidence": 93,
       "valid_from": "2026-08-15T00:00:00+03:00",
       "valid_until": "2026-08-15T23:59:59+03:00",
-      "slots": [
-        "morning"
-      ],
+      "slots": ["morning"],
       "headline": "SCM Râmnicu Vâlcea are programată azi partida cu CSM Slatina",
       "dek": "Meciul figurează în etapa a treia a sezonului 2026–2027 din Liga 2.",
       "paragraphs": [
@@ -119,16 +86,8 @@
       ],
       "material_fact_gate": "PASS_DATE_ONLY",
       "sources": [
-        {
-          "name": "Liga 2 — program SCM Râmnicu Vâlcea",
-          "url": "https://lpf2.ro/liga2/html/programul_meciurilor/Program_SCM_Ramnicu_Valcea-553.html",
-          "tier": "T2"
-        },
-        {
-          "name": "SCM Râmnicu Vâlcea — site oficial",
-          "url": "https://scmramnicuvalcea.ro/",
-          "tier": "T1B"
-        }
+        {"name": "Liga 2 — program SCM Râmnicu Vâlcea", "url": "https://lpf2.ro/liga2/html/programul_meciurilor/Program_SCM_Ramnicu_Valcea-553.html", "tier": "T2"},
+        {"name": "SCM Râmnicu Vâlcea — site oficial", "url": "https://scmramnicuvalcea.ro/", "tier": "T1B"}
       ]
     },
     {
@@ -139,10 +98,7 @@
       "confidence": 94,
       "valid_from": "2026-08-14T00:00:00+03:00",
       "valid_until": "2026-09-15T23:59:59+03:00",
-      "slots": [
-        "morning",
-        "evening"
-      ],
+      "slots": ["morning", "evening"],
       "headline": "Podul pietonal-ciclist peste Olănești: dosarul de documentare rămâne deschis",
       "dek": "Urmărim executanții, autorizațiile, situațiile de lucrări, plățile și termenele proiectului SMIS 334436.",
       "paragraphs": [
@@ -152,109 +108,8 @@
       ],
       "material_fact_gate": "PASS_EXPLAINER_ONLY",
       "sources": [
-        {
-          "name": "HCL Râmnicu Vâlcea nr. 100/2025 și documentația SMIS 334436",
-          "url": "https://hcl.usr.ro/ramnicu_valcea/2025/h100",
-          "tier": "T1"
-        }
+        {"name": "HCL Râmnicu Vâlcea nr. 100/2025 și documentația SMIS 334436", "url": "https://hcl.usr.ro/ramnicu_valcea/2025/h100", "tier": "T1"}
       ]
-    },
-    {
-      "id": "derived-council-gambling-20260723",
-      "status": "verified",
-      "section": "ADMINISTRAȚIE",
-      "editorial_type": "explainer",
-      "priority": 92,
-      "confidence": 97,
-      "valid_from": "2026-08-17T05:39:56+00:00",
-      "valid_until": "2026-08-21T05:39:56+00:00",
-      "slots": [
-        "morning",
-        "evening"
-      ],
-      "headline": "19 din 25 de hotărâri publicate pentru 23 iulie 2026 privesc autorizații pentru jocuri de noroc",
-      "dek": "Registrul oficial al Consiliului Local Râmnicu Vâlcea afișează 19 hotărâri cu această temă în seria din 23 iulie 2026; ele sunt tratate ca autorizații anuale, nu ca dovadă automată a tot atâtea deschideri noi.",
-      "paragraphs": [],
-      "material_fact_gate": "PASS_EXPLAINER_ONLY",
-      "sources": [
-        {
-          "name": "Primăria Municipiului Râmnicu Vâlcea — registrul Hotărâri adoptate 2026",
-          "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
-          "tier": "T1"
-        }
-      ],
-      "fact_kernel": {
-        "format_hint": "explainer",
-        "headline": {
-          "text": "19 din 25 de hotărâri publicate pentru 23 iulie 2026 privesc autorizații pentru jocuri de noroc",
-          "source_urls": [
-            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500"
-          ]
-        },
-        "dek": {
-          "text": "Registrul oficial al Consiliului Local Râmnicu Vâlcea afișează 19 hotărâri cu această temă în seria din 23 iulie 2026; ele sunt tratate ca autorizații anuale, nu ca dovadă automată a tot atâtea deschideri noi.",
-          "source_urls": [
-            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500"
-          ]
-        },
-        "claims": [
-          {
-            "id": "cluster-count",
-            "role": "material_change",
-            "kind": "fact",
-            "text": "În cele 25 de hotărâri cu data de 23 iulie 2026 din setul cel mai recent al registrului oficial, 19 au în titlu autorizarea anuală de funcționare pentru jocuri de noroc, slot-machine sau pariuri.",
-            "source_urls": [
-              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500"
-            ]
-          },
-          {
-            "id": "meaning-not-new-openings",
-            "role": "meaning",
-            "kind": "documented_context",
-            "text": "Titlurile registrului folosesc formula de autorizație anuală de funcționare; din această evidență, singură, nu rezultă că fiecare hotărâre reprezintă deschiderea unei locații noi.",
-            "source_urls": [
-              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500"
-            ]
-          },
-          {
-            "id": "operators-in-register",
-            "role": "evidence",
-            "kind": "fact",
-            "text": "În titlurile hotărârilor din cluster apar 6 operatori identificați: BAUM SRL, CARADUNE SRL, CELLADA SRL, JOLLYGAMES SRL, PROJECT IMPEX SRL, SUPERBET RETAIL SA.",
-            "source_urls": [
-              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500"
-            ]
-          },
-          {
-            "id": "next-verification",
-            "role": "next_watch",
-            "kind": "reader_service",
-            "text": "Pentru a separa reînnoirile de eventualele puncte de lucru noi, VÂLCEA CLAR compară aceste hotărâri cu autorizările anterioare și cu documentele individuale înainte de a descrie o locație drept nou deschisă.",
-            "source_urls": [
-              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500"
-            ]
-          }
-        ]
-      },
-      "derivation": {
-        "deriver_id": "monitor_fact_kernel_v1",
-        "monitor_id": "council-watch-rm-valcea",
-        "source_state_generated_at": "2026-08-17T05:39:56Z",
-        "decision_date": "2026-07-23",
-        "rows_on_date": 25,
-        "matching_rows": 19,
-        "matching_ratio": 0.76,
-        "entities": [
-          "BAUM SRL",
-          "CARADUNE SRL",
-          "CELLADA SRL",
-          "JOLLYGAMES SRL",
-          "PROJECT IMPEX SRL",
-          "SUPERBET RETAIL SA"
-        ],
-        "decision_text_claims_made": false,
-        "source_change_alone_used_as_story": false
-      }
     }
   ]
 }
