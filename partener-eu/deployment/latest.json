@@ -1,26 +1,24 @@
 {
-  "status": "BLOCKED",
+  "status": "LIVE",
   "page_url": "http://partener.eu/",
   "configure_outcome": "success",
   "upload_outcome": "success",
-  "deploy_outcome": "failure",
-  "observed_at": "2026-08-17T12:02:23.624841+00:00",
-  "git_sha": "04f7e61bd297ba1b07ab2c2baaf41cb76ffb5535",
+  "deploy_outcome": "success",
+  "observed_at": "2026-08-17T15:15:03.412032+00:00",
+  "git_sha": "15c331b78ebbec3c8726c9bf781da43a361d06e5",
   "https_control": {
     "settings_api_url": "https://api.github.com/repos/mihaicismaru-bit/civora/pages",
     "before_http_status": 200,
     "before_https_enforced": false,
     "attempted": true,
-    "attempt_http_status": 403,
+    "attempt_http_status": 503,
     "attempt_response": {
-      "message": "Resource not accessible by integration",
-      "documentation_url": "https://docs.github.com/rest/pages/pages#update-information-about-a-apiname-pages-site",
-      "status": "403"
+      "message": "No server is currently available to service your request. Sorry about that. Please try resubmitting your request and contact us if the problem persists."
     },
     "after_http_status": 200,
     "after_https_enforced": false,
     "cname": "partener.eu",
     "html_url": "http://partener.eu/",
-    "external_dependency": "REPOSITORY_ADMINISTRATION_PERMISSION_REQUIRED"
+    "external_dependency": "PAGES_HTTPS_ENFORCEMENT_PENDING"
   }
 }
