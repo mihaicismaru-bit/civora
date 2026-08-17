@@ -34,15 +34,17 @@ jobs:
         run: python partener-eu/ops/test_peo_calendar_identity.py
 
       - name: Ingest and version official PEO calendar candidate
+        id: ingest
+        continue-on-error: true
         run: python partener-eu/ingest/peo_calendar_ingest.py
 
       - name: Persist candidate state conflict-safe without auto-promoting material facts
+        if: always()
         shell: bash
         run: |
           set -euo pipefail
-          # During P10, scheduled hash changes are persisted only as candidate
-          # state. The existing public feed stays unchanged until the resolution
-          # task is closed with authoritative evidence and provenance.
+          # Even a failed parser writes a fail-closed state. Persist that evidence
+          # first, then let the final gate make the workflow conclusion truthful.
           cp partener-eu/ingest/state/peo_calendar_state.json /tmp/peo_calendar_state.json
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
@@ -64,3 +66,9 @@ jobs:
           done
           echo 'Unable to persist PEO outputs after five attempts.' >&2
           exit 1
+
+      - name: Enforce ingest result after fail-closed persistence
+        if: always()
+        env:
+          INGEST_OUTCOME: ${{ steps.ingest.outcome }}
+        run: test "$INGEST_OUTCOME" = success
