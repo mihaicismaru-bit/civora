@@ -19,6 +19,8 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from typing import Callable
 
+from credential_safety import CONTRACT as CREDENTIAL_SAFETY_CONTRACT, find_credential_value_violations
+
 
 SCHEMA_VERSION = "1.0"
 CONTRACT = "CIVORA_PERSISTENCE_WRITER_V1"
@@ -137,14 +139,16 @@ def write_fail_closed(
     """Attempt one revision-controlled target write and exact readback.
 
     The function never reports synchronization unless all of the following are
-    true: the caller proves current lease ownership; the transport accepts the
-    supplied required revision; the write returns a new revision; the target is
-    read back successfully; the readback revision equals the written revision;
-    and the readback content is byte-for-byte identical as UTF-8 text.
+    true: the caller proves current lease ownership; the payload contains no
+    credential value; the transport accepts the supplied required revision; the
+    write returns a new revision; the target is read back successfully; the
+    readback revision equals the written revision; and the readback content is
+    byte-for-byte identical as UTF-8 text.
 
     Transport failures are fail-closed but non-fatal to the product runtime:
     callers receive ``PERSISTENCE_STALE`` and ``runtime_may_continue=True``.
-    Lease/ownership failures are ``PERSISTENCE_BLOCKED`` and perform no write.
+    Lease/ownership or credential-safety failures are ``PERSISTENCE_BLOCKED``
+    and perform no write.
     """
     if not _lease_is_owned(request, lease):
         return _receipt(
@@ -153,6 +157,16 @@ def write_fail_closed(
             persistence_health=PERSISTENCE_BLOCKED,
             synchronized=False,
             reason="LEASE_OWNERSHIP_NOT_PROVEN",
+        )
+
+    credential_violations = find_credential_value_violations(request.content)
+    if credential_violations:
+        return _receipt(
+            request,
+            outcome="BLOCKED",
+            persistence_health=PERSISTENCE_BLOCKED,
+            synchronized=False,
+            reason=f"CREDENTIAL_VALUE_FORBIDDEN:{CREDENTIAL_SAFETY_CONTRACT}:{len(credential_violations)}",
         )
 
     try:
@@ -313,6 +327,33 @@ def self_test() -> int:
     assert mismatch.synchronized is False
     assert mismatch.persistence_health == PERSISTENCE_STALE
     assert mismatch.reason == "READBACK_CONTENT_MISMATCH"
+
+    credential_write_called = False
+
+    def must_not_write_credential(_target_id: str, _content: str, _required_revision_id: str) -> TransportWriteResult:
+        nonlocal credential_write_called
+        credential_write_called = True
+        return TransportWriteResult(True, revision_id="impossible")
+
+    unsafe_request = WriteRequest(
+        namespace=request.namespace,
+        target_id=request.target_id,
+        required_revision_id=request.required_revision_id,
+        content='{"credential_reference_names":["SOCIAL_ACCESS_TOKEN"],"access_token":"runtime-secret"}',
+        holder=request.holder,
+        lease_token=request.lease_token,
+    )
+    credential_blocked = write_fail_closed(
+        unsafe_request,
+        lease,
+        write_fn=must_not_write_credential,
+        read_fn=ok_read,
+    )
+    assert credential_blocked.synchronized is False
+    assert credential_blocked.persistence_health == PERSISTENCE_BLOCKED
+    assert credential_blocked.reason.startswith("CREDENTIAL_VALUE_FORBIDDEN:")
+    assert "runtime-secret" not in credential_blocked.reason
+    assert credential_write_called is False
 
     write_called = False
 
