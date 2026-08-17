@@ -22,11 +22,7 @@ outcome.install()
 def _network_started(root: Path):
     ch, jb, issued, consumed, first_claim, reserved, second = _released_then_reclaimed(root)
     started = receipt.mark_network_started(
-        root,
-        ch,
-        jb,
-        authorization_fingerprint=FP1,
-        now="2026-08-16T10:24:01Z",
+        root, ch, jb, authorization_fingerprint=FP1, now="2026-08-16T10:24:01Z"
     )
     assert started["persisted"] is True, started
     assert started["reread_handoff_spent"] is True, started
@@ -37,28 +33,38 @@ def _latest(root: Path, ch: dict, jb: dict) -> dict:
     return read_state(root, ch)["entries"][runtime.checkpoint_key(jb)]["execution_receipts"][-1]
 
 
+def _transition(root: Path, ch: dict, jb: dict, *, status: str, result: str, materialization: str | None = None, retry_after: str | None = None) -> dict:
+    return receipt.transition_sealed(
+        root,
+        ch,
+        jb,
+        authorization_fingerprint=FP1,
+        now="2026-08-16T10:24:02Z",
+        status=status,
+        last_result_status=result,
+        retry_after_at=retry_after,
+        materialization_fingerprint_sha256=materialization,
+    )
+
+
 def test_completed_reread_binds_exact_outcome_atomically() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
-        ch, jb, issued, _, _, reserved, _, _ = _network_started(root)
+        ch, jb, issued, _, _, released, _, _ = _network_started(root)
         handoff_id = issued["handoff"]["handoff_id"]
-        pre = _latest(root, ch, jb)
-        pre_fp = pre["receipt_fingerprint_sha256"]
-        spent = _spend_store(root, ch)["records"][handoff_id]
-        assert spent["status"] == "SPENT"
-        assert spent["spend_id"] != reserved["record"]["spend_id"]
-        assert spent["network_receipt_fingerprint_sha256"] == pre_fp
+        network_receipt = _latest(root, ch, jb)
+        network_fp = network_receipt["receipt_fingerprint_sha256"]
+        current_spend = _spend_store(root, ch)["records"][handoff_id]
+        assert current_spend["status"] == "SPENT"
+        assert current_spend["spend_id"] != released["record"]["spend_id"]
+        assert current_spend["network_receipt_fingerprint_sha256"] == network_fp
 
         materialization_fp = "a" * 64
-        transitioned = receipt.transition_sealed(
-            root,
-            ch,
-            jb,
-            authorization_fingerprint=FP1,
-            now="2026-08-16T10:24:02Z",
+        transitioned = _transition(
+            root, ch, jb,
             status="COMPLETED",
-            last_result_status="COLLECTED_AND_MATERIALIZED",
-            materialization_fingerprint_sha256=materialization_fp,
+            result="COLLECTED_AND_MATERIALIZED",
+            materialization=materialization_fp,
         )
         assert transitioned["persisted"] is True, transitioned
         assert transitioned["reread_provider_outcome_bound"] is True, transitioned
@@ -67,14 +73,12 @@ def test_completed_reread_binds_exact_outcome_atomically() -> None:
         entry = state["entries"][runtime.checkpoint_key(jb)]
         latest = entry["execution_receipts"][-1]
         bound = latest[outcome.OUTCOME_FIELD]
-        assert entry["status"] == "COMPLETED"
-        assert latest["status"] == "COMPLETED"
+        assert entry["status"] == latest["status"] == "COMPLETED"
         assert bound["handoff_id"] == handoff_id
-        assert bound["released_spend_id"] == reserved["record"]["spend_id"]
-        assert bound["current_spend_id"] == spent["spend_id"]
-        assert bound["current_spend_id"] != bound["released_spend_id"]
-        assert bound["network_receipt_fingerprint_sha256"] == pre_fp
-        assert bound["spend_record_fingerprint_sha256"] == spent["record_fingerprint_sha256"]
+        assert bound["released_spend_id"] == released["record"]["spend_id"]
+        assert bound["current_spend_id"] == current_spend["spend_id"]
+        assert bound["network_receipt_fingerprint_sha256"] == network_fp
+        assert bound["spend_record_fingerprint_sha256"] == current_spend["record_fingerprint_sha256"]
         assert bound["checkpoint_status"] == "COMPLETED"
         assert bound["provider_result_status"] == "COLLECTED_AND_MATERIALIZED"
         assert bound["materialization_fingerprint_sha256"] == materialization_fp
@@ -85,49 +89,31 @@ def test_completed_reread_binds_exact_outcome_atomically() -> None:
 def test_no_data_reread_binds_terminal_outcome_without_materialization() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
-        ch, jb, _, _, _, _, _, _ = _network_started(root)
-        transitioned = receipt.transition_sealed(
-            root,
-            ch,
-            jb,
-            authorization_fingerprint=FP1,
-            now="2026-08-16T10:24:02Z",
-            status="COMPLETED_NO_DATA",
-            last_result_status="NO_OBSERVED_METRICS",
-        )
+        ch, jb, *_ = _network_started(root)
+        transitioned = _transition(root, ch, jb, status="COMPLETED_NO_DATA", result="NO_OBSERVED_METRICS")
         assert transitioned["persisted"] is True, transitioned
-        latest = _latest(root, ch, jb)
-        bound = latest[outcome.OUTCOME_FIELD]
+        bound = _latest(root, ch, jb)[outcome.OUTCOME_FIELD]
         assert bound["checkpoint_status"] == "COMPLETED_NO_DATA"
         assert bound["provider_result_status"] == "NO_OBSERVED_METRICS"
         assert bound["materialization_fingerprint_sha256"] is None
 
 
-def test_transient_provider_result_is_bound_and_single_use_spend_remains_spent() -> None:
+def test_transient_result_is_bound_and_spent_handoff_cannot_retry() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
-        ch, jb, issued, _, _, _, _, _ = _network_started(root)
-        transitioned = receipt.transition_sealed(
-            root,
-            ch,
-            jb,
-            authorization_fingerprint=FP1,
-            now="2026-08-16T10:24:02Z",
+        ch, jb, issued, *_ = _network_started(root)
+        transitioned = _transition(
+            root, ch, jb,
             status="RETRY_WAIT",
-            last_result_status="RETRY_LATER",
-            retry_after_at="2026-08-16T10:30:00Z",
+            result="RETRY_LATER",
+            retry_after="2026-08-16T10:30:00Z",
         )
         assert transitioned["persisted"] is True, transitioned
-        latest = _latest(root, ch, jb)
-        assert latest[outcome.OUTCOME_FIELD]["checkpoint_status"] == "RETRY_WAIT"
+        assert _latest(root, ch, jb)[outcome.OUTCOME_FIELD]["checkpoint_status"] == "RETRY_WAIT"
         record = _spend_store(root, ch)["records"][issued["handoff"]["handoff_id"]]
         assert record["status"] == "SPENT"
         blocked = receipt.claim_checkpoint_sealed(
-            root,
-            ch,
-            jb,
-            authorization_fingerprint=FP1,
-            now="2026-08-16T10:31:00Z",
+            root, ch, jb, authorization_fingerprint=FP1, now="2026-08-16T10:31:00Z"
         )
         assert blocked["claimed"] is False, blocked
         assert blocked["status"] == "HOLD_REREAD_REAUTHORIZATION_REQUIRED", blocked
@@ -136,33 +122,24 @@ def test_transient_provider_result_is_bound_and_single_use_spend_remains_spent()
 def test_missing_reclaim_provenance_after_network_start_is_fail_closed() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
-        ch, jb, _, _, _, _, _, _ = _network_started(root)
+        ch, jb, *_ = _network_started(root)
         state = read_state(root, ch)
         entry = state["entries"][runtime.checkpoint_key(jb)]
         latest = entry["execution_receipts"][-1]
         latest.pop(reclaim.PROVENANCE_FIELD, None)
         latest["receipt_fingerprint_sha256"] = receipt._receipt_fingerprint(latest)
         _write_state(root, ch, state)
-
-        blocked = receipt.transition_sealed(
-            root,
-            ch,
-            jb,
-            authorization_fingerprint=FP1,
-            now="2026-08-16T10:24:02Z",
-            status="COMPLETED_NO_DATA",
-            last_result_status="NO_OBSERVED_METRICS",
-        )
+        blocked = _transition(root, ch, jb, status="COMPLETED_NO_DATA", result="NO_OBSERVED_METRICS")
         assert blocked["persisted"] is False, blocked
         assert blocked["status"] == "HOLD_REREAD_OUTCOME_LINEAGE", blocked
-        assert "REREAD_OUTCOME_RECLAIM_PROVENANCE_REQUIRED" in blocked["hard_blocks"], blocked
+        assert "REREAD_OUTCOME_RECLAIM_PROVENANCE_REQUIRED" in blocked["hard_blocks"]
         assert _latest(root, ch, jb)["status"] == "NETWORK_CALL_STARTED"
 
 
 def test_spent_record_tamper_blocks_terminal_transition() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
-        ch, jb, issued, _, _, _, _, _ = _network_started(root)
+        ch, jb, issued, *_ = _network_started(root)
         path = root / spend.expected_spend_store_path(ch)
         store = json.loads(path.read_text(encoding="utf-8"))
         record = store["records"][issued["handoff"]["handoff_id"]]
@@ -170,41 +147,24 @@ def test_spent_record_tamper_blocks_terminal_transition() -> None:
         record["record_fingerprint_sha256"] = spend._record_fingerprint(record)
         store["store_fingerprint_sha256"] = spend._store_fingerprint(store)
         path.write_text(json.dumps(store, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-
-        blocked = receipt.transition_sealed(
-            root,
-            ch,
-            jb,
-            authorization_fingerprint=FP1,
-            now="2026-08-16T10:24:02Z",
-            status="COMPLETED_NO_DATA",
-            last_result_status="NO_OBSERVED_METRICS",
-        )
+        blocked = _transition(root, ch, jb, status="COMPLETED_NO_DATA", result="NO_OBSERVED_METRICS")
         assert blocked["persisted"] is False, blocked
         assert blocked["status"] == "HOLD_REREAD_OUTCOME_LINEAGE", blocked
-        assert "REREAD_OUTCOME_NETWORK_RECEIPT_FINGERPRINT_MISMATCH" in blocked["hard_blocks"], blocked
+        assert "REREAD_OUTCOME_NETWORK_RECEIPT_FINGERPRINT_MISMATCH" in blocked["hard_blocks"]
 
 
 def test_reclaim_provenance_tamper_blocks_terminal_transition() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
-        ch, jb, _, _, _, _, _, _ = _network_started(root)
+        ch, jb, *_ = _network_started(root)
         state = read_state(root, ch)
         latest = state["entries"][runtime.checkpoint_key(jb)]["execution_receipts"][-1]
-        latest[reclaim.PROVENANCE_FIELD]["source_release_evidence_fingerprint_sha256"] = "f" * 64
-        latest[reclaim.PROVENANCE_FIELD]["provenance_fingerprint_sha256"] = reclaim._provenance_fingerprint(latest[reclaim.PROVENANCE_FIELD])
+        provenance = latest[reclaim.PROVENANCE_FIELD]
+        provenance["source_release_evidence_fingerprint_sha256"] = "f" * 64
+        provenance["provenance_fingerprint_sha256"] = reclaim._provenance_fingerprint(provenance)
         latest["receipt_fingerprint_sha256"] = receipt._receipt_fingerprint(latest)
         _write_state(root, ch, state)
-
-        blocked = receipt.transition_sealed(
-            root,
-            ch,
-            jb,
-            authorization_fingerprint=FP1,
-            now="2026-08-16T10:24:02Z",
-            status="COMPLETED_NO_DATA",
-            last_result_status="NO_OBSERVED_METRICS",
-        )
+        blocked = _transition(root, ch, jb, status="COMPLETED_NO_DATA", result="NO_OBSERVED_METRICS")
         assert blocked["persisted"] is False, blocked
         assert blocked["status"] == "HOLD_REREAD_OUTCOME_LINEAGE", blocked
 
@@ -212,16 +172,12 @@ def test_reclaim_provenance_tamper_blocks_terminal_transition() -> None:
 def test_invalid_materialization_fingerprint_fails_before_transition() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
-        ch, jb, _, _, _, _, _, _ = _network_started(root)
-        blocked = receipt.transition_sealed(
-            root,
-            ch,
-            jb,
-            authorization_fingerprint=FP1,
-            now="2026-08-16T10:24:02Z",
+        ch, jb, *_ = _network_started(root)
+        blocked = _transition(
+            root, ch, jb,
             status="COMPLETED",
-            last_result_status="COLLECTED_AND_MATERIALIZED",
-            materialization_fingerprint_sha256="not-a-sha256",
+            result="COLLECTED_AND_MATERIALIZED",
+            materialization="not-a-sha256",
         )
         assert blocked["persisted"] is False, blocked
         assert blocked["status"] == "HOLD_REREAD_OUTCOME_MATERIALIZATION", blocked
@@ -233,56 +189,35 @@ def test_normal_non_reread_transition_is_unchanged() -> None:
         root = Path(tmp)
         ch = channel()
         jb = job(ch)
-        claim = receipt.claim_checkpoint_sealed(
-            root, ch, jb, authorization_fingerprint=FP1, now="2026-08-16T09:00:00Z"
-        )
+        claim = receipt.claim_checkpoint_sealed(root, ch, jb, authorization_fingerprint=FP1, now="2026-08-16T09:00:00Z")
         assert claim["claimed"] is True, claim
-        assert receipt.mark_network_started(
-            root, ch, jb, authorization_fingerprint=FP1, now="2026-08-16T09:00:01Z"
-        )["persisted"] is True
+        assert receipt.mark_network_started(root, ch, jb, authorization_fingerprint=FP1, now="2026-08-16T09:00:01Z")["persisted"] is True
         transitioned = receipt.transition_sealed(
-            root,
-            ch,
-            jb,
+            root, ch, jb,
             authorization_fingerprint=FP1,
             now="2026-08-16T09:00:02Z",
             status="COMPLETED_NO_DATA",
             last_result_status="NO_OBSERVED_METRICS",
         )
         assert transitioned["persisted"] is True, transitioned
-        latest = _latest(root, ch, jb)
-        assert outcome.OUTCOME_FIELD not in latest
+        assert outcome.OUTCOME_FIELD not in _latest(root, ch, jb)
 
 
 def test_outcome_is_secret_free_advisory_only_and_zero_paid() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
-        ch, jb, _, _, _, _, _, _ = _network_started(root)
-        transitioned = receipt.transition_sealed(
-            root,
-            ch,
-            jb,
-            authorization_fingerprint=FP1,
-            now="2026-08-16T10:24:02Z",
-            status="COMPLETED_NO_DATA",
-            last_result_status="NO_OBSERVED_METRICS",
-        )
+        ch, jb, *_ = _network_started(root)
+        transitioned = _transition(root, ch, jb, status="COMPLETED_NO_DATA", result="NO_OBSERVED_METRICS")
         assert transitioned["persisted"] is True, transitioned
         bound = _latest(root, ch, jb)[outcome.OUTCOME_FIELD]
         encoded = json.dumps(bound, ensure_ascii=False, sort_keys=True).lower()
-        for forbidden in (
-            "access_token",
-            "refresh_token",
-            "password",
-            "api_key",
-            "credential_value",
-            "provider_payload",
-            "predicted",
-            "estimated",
-        ):
+        for forbidden in ("access_token", "refresh_token", "password", "api_key", "credential_value", "predicted", "estimated"):
             assert forbidden not in encoded
+        assert bound["provider_payload_persisted"] is False
+        assert bound["provider_network_call_performed_by_binding"] is False
+        assert bound["publication_blocked"] is False
+        assert bound["zero_paid_dependency"] is True
         guards = outcome.outcome_guards()
-        assert guards["provider_network_call_performed_by_binding"] is False
         assert guards["credential_values_read"] is False
         assert guards["credential_values_persisted"] is False
         assert guards["provider_payload_persisted"] is False
