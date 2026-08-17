@@ -7,6 +7,7 @@ on:
       - "local-news-os/core/**"
       - "local-news-os/schemas/**"
       - "local-news-os/instances/**"
+      - "local-news-os/persistence/**"
       - ".github/workflows/local-news-os-core.yml"
   push:
     branches: [main]
@@ -14,6 +15,7 @@ on:
       - "local-news-os/core/**"
       - "local-news-os/schemas/**"
       - "local-news-os/instances/**"
+      - "local-news-os/persistence/**"
       - ".github/workflows/local-news-os-core.yml"
 
 permissions:
@@ -24,6 +26,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
@@ -39,7 +43,13 @@ jobs:
             local-news-os/core/render_frontpage.py \
             local-news-os/core/related_stories.py \
             local-news-os/core/article_structured_data.py \
-            local-news-os/core/verified_story_media.py
+            local-news-os/core/verified_story_media.py \
+            local-news-os/core/repository_scope_fingerprint.py
+      - name: Validate scope-aware persistence drift classifier
+        run: |
+          python local-news-os/core/repository_scope_fingerprint.py --self-test
+          python local-news-os/core/repository_scope_fingerprint.py --ref HEAD --output /tmp/civora-scope.json
+          cat /tmp/civora-scope.json
       - name: Validate production and test instances
         run: python local-news-os/core/validate_instance_config.py
       - name: Assert fixture packs are isolated
