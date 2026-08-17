@@ -4,9 +4,10 @@
 This is the operational execution entry point for observed-metrics harvest. It keeps
 ``fleet_metrics_authorization_seal`` as the canonical capability/access/credential
 boundary, installs the channel-local single-use re-read spend guard, crash-safe
-reconciliation for a RESERVED spend left before NETWORK_CALL_STARTED, and the
-receipt-only provenance binding from a safely released reservation to the eventual
-reclaim attempt. Planning semantics and command-line arguments remain unchanged.
+reconciliation for a RESERVED spend left before NETWORK_CALL_STARTED, receipt-only
+provenance binding from safe release to reclaim, and atomic provider-outcome binding
+for the resulting re-read transition. Planning semantics and CLI arguments are
+unchanged.
 """
 from __future__ import annotations
 
@@ -21,6 +22,10 @@ reread_reservation_recovery.install()
 import reread_spend_reclaim_binding as reread_reclaim_binding
 
 reread_reclaim_binding.install()
+
+import reread_provider_outcome_binding as reread_provider_outcome_binding
+
+reread_provider_outcome_binding.install()
 
 import fleet_metrics_authorization_seal as base
 
