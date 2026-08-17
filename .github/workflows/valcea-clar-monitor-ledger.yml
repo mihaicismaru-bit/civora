@@ -8,23 +8,27 @@ on:
     branches: [main]
     paths:
       - 'valcea-clar/editorial/monitor_registry.json'
+      - 'valcea-clar/editorial/infrastructure_monitor_registry.json'
       - 'valcea-clar/editorial/news_sources.json'
       - 'valcea-clar/editorial/manual_watch_sources.json'
       - 'valcea-clar/editorial/news_discovery_state.json'
       - 'valcea-clar/editorial/publication_holds.json'
       - 'valcea-clar/investigations/**'
       - 'valcea-clar/scripts/monitor_ledger.py'
+      - 'valcea-clar/scripts/infrastructure_watch.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
       - 'valcea-clar/scripts/validate_monitor_registry.py'
       - '.github/workflows/valcea-clar-monitor-ledger.yml'
   pull_request:
     paths:
       - 'valcea-clar/editorial/monitor_registry.json'
+      - 'valcea-clar/editorial/infrastructure_monitor_registry.json'
       - 'valcea-clar/editorial/news_sources.json'
       - 'valcea-clar/editorial/manual_watch_sources.json'
       - 'valcea-clar/editorial/publication_holds.json'
       - 'valcea-clar/investigations/**'
       - 'valcea-clar/scripts/monitor_ledger.py'
+      - 'valcea-clar/scripts/infrastructure_watch.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
       - 'valcea-clar/scripts/validate_monitor_registry.py'
       - '.github/workflows/valcea-clar-monitor-ledger.yml'
@@ -39,7 +43,7 @@ concurrency:
 jobs:
   monitor-ledger:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
         with:
@@ -55,6 +59,9 @@ jobs:
       - name: Validate offline materialization
         run: python valcea-clar/scripts/monitor_ledger.py --check
 
+      - name: Validate A1 connectivity watch
+        run: python valcea-clar/scripts/infrastructure_watch.py --check
+
       - name: Validate Râmnicu Vâlcea Council Watch extractor
         run: python valcea-clar/scripts/council_watch_rm_valcea.py --self-test
 
@@ -62,15 +69,21 @@ jobs:
         if: github.event_name != 'pull_request'
         run: python valcea-clar/scripts/monitor_ledger.py --live
 
+      - name: Probe A1 connectivity sources
+        if: github.event_name != 'pull_request'
+        run: python valcea-clar/scripts/infrastructure_watch.py --live
+
       - name: Read official Râmnicu Vâlcea adopted decisions
         run: python valcea-clar/scripts/council_watch_rm_valcea.py
 
-      - name: Upload council review snapshot
+      - name: Upload monitor review snapshots
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: valcea-clar-council-watch-${{ github.run_id }}
-          path: valcea-clar/editorial/council_watch_rm_valcea_state.json
+          name: valcea-clar-monitor-ledger-${{ github.run_id }}
+          path: |
+            valcea-clar/editorial/council_watch_rm_valcea_state.json
+            valcea-clar/editorial/infrastructure_monitor_state.json
           if-no-files-found: warn
           retention-days: 7
 
@@ -84,7 +97,8 @@ jobs:
 
           git add \
             valcea-clar/editorial/monitor_state.json \
-            valcea-clar/editorial/council_watch_rm_valcea_state.json
+            valcea-clar/editorial/council_watch_rm_valcea_state.json \
+            valcea-clar/editorial/infrastructure_monitor_state.json
           if git diff --cached --quiet; then
             echo 'No monitor-state change to persist.'
             exit 0
