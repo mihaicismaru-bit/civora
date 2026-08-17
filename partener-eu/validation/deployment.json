@@ -1,25 +1,25 @@
 {
   "schema_version": "1.6",
-  "observed_at": "2026-08-17T16:02:42Z",
+  "observed_at": "2026-08-17T16:03:30Z",
   "status": "FAIL",
   "public_content_verified": true,
-  "https_verified": false,
+  "https_verified": true,
   "secure_transport_verified": false,
   "http_redirects_to_https": false,
   "pages_https_preserved": false,
   "http_content_verified": true,
   "https_closure_gate": "PENDING_HTTPS_ENFORCEMENT_AND_SECURE_REDIRECTS",
-  "content_origin": "custom_http",
+  "content_origin": "custom_https",
   "old_origin_detected": false,
   "endpoints": [
     {
       "id": "custom_https",
       "url": "https://partener.eu/",
-      "requested_url": "https://partener.eu/?p10_probe=20260817T160242Z",
-      "ok": false,
-      "content_verified": false,
+      "requested_url": "https://partener.eu/?p10_probe=20260817T160330Z",
+      "ok": true,
+      "content_verified": true,
       "http_status": 200,
-      "final_url": "https://partener.eu/?p10_probe=20260817T160242Z",
+      "final_url": "https://partener.eu/?p10_probe=20260817T160330Z",
       "final_scheme": "https",
       "redirect_chain": [],
       "content_type": "text/html; charset=utf-8",
@@ -39,16 +39,17 @@
       },
       "marker_ok": true,
       "legacy_origin_detected": false,
-      "critical_assets_ok": false,
+      "critical_assets_ok": true,
       "assets": {
         "data.js": {
           "url": "https://partener.eu/data.js?v=20260813-1500",
-          "ok": false,
-          "http_status": null,
-          "final_url": null,
-          "bytes": 0,
-          "sha256": null,
-          "error": "HTTPError: HTTP Error 503: Service Unavailable"
+          "ok": true,
+          "http_status": 200,
+          "final_url": "https://partener.eu/data.js?v=20260813-1500",
+          "bytes": 10201,
+          "sha256": "25fe349f92448b29477febe948fa05e28a6d705cc2a7bf1fe8eb7fb3ec7aeb90",
+          "error": null,
+          "expected_marker_found": true
         },
         "app.js": {
           "url": "https://partener.eu/app.js?v=20260813-1500",
@@ -96,11 +97,11 @@
     {
       "id": "custom_http",
       "url": "http://partener.eu/",
-      "requested_url": "http://partener.eu/?p10_probe=20260817T160242Z",
+      "requested_url": "http://partener.eu/?p10_probe=20260817T160330Z",
       "ok": true,
       "content_verified": true,
       "http_status": 200,
-      "final_url": "http://partener.eu/?p10_probe=20260817T160242Z",
+      "final_url": "http://partener.eu/?p10_probe=20260817T160330Z",
       "final_scheme": "http",
       "redirect_chain": [],
       "content_type": "text/html; charset=utf-8",
@@ -178,17 +179,17 @@
     {
       "id": "pages_origin",
       "url": "https://mihaicismaru-bit.github.io/civora/",
-      "requested_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260817T160242Z",
+      "requested_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260817T160330Z",
       "ok": true,
       "content_verified": true,
       "http_status": 200,
-      "final_url": "http://partener.eu/?p10_probe=20260817T160242Z",
+      "final_url": "http://partener.eu/?p10_probe=20260817T160330Z",
       "final_scheme": "http",
       "redirect_chain": [
         {
           "http_status": 301,
-          "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260817T160242Z",
-          "to_url": "http://partener.eu/?p10_probe=20260817T160242Z"
+          "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260817T160330Z",
+          "to_url": "http://partener.eu/?p10_probe=20260817T160330Z"
         }
       ],
       "content_type": "text/html; charset=utf-8",
@@ -278,11 +279,11 @@
     "decision_ui_ref": true,
     "novice_ui_ref": true
   },
-  "final_url": "https://partener.eu/?p10_probe=20260817T160242Z",
+  "final_url": "https://partener.eu/?p10_probe=20260817T160330Z",
   "content_type": "text/html; charset=utf-8",
   "bytes": 4480,
   "body_sha256": "627bcf3d6aa284874b75aa929c25cbc09b352228b4da4404eeabf7a558a7db95",
   "title": "PARTENER.EU — Finanțări europene explicate simplu",
-  "critical_assets_ok": false,
+  "critical_assets_ok": true,
   "error": "public content is current, but HTTP/Pages transport is not fully HTTPS-closed"
 }
