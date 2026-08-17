@@ -118,6 +118,12 @@
       "tier": "T1",
       "section": "SĂNĂTATE",
       "priority": 83,
+      "enabled": false,
+      "status": "QUARANTINED_NO_CONSISTENT_ARTICLE_PUBLICATION_DATE",
+      "checked_at": "2026-08-17",
+      "disable_reason": "The official DSP Vâlcea site remains a high-value primary health source, but its current homepage and legacy Joomla health/press streams do not consistently expose trustworthy article-level publication metadata for current campaigns and notices. The live discovery ledger observed 3 candidate links with 2 article failures. Automatic freshness in LOCAL NEWS OS requires explicit article publication metadata, so this source is retained in the Vâlcea SOURCE_PACK but disabled from automatic admission until a deterministic publication timestamp can be proven.",
+      "safe_use": ["manual discovery", "primary-source verification of public-health campaigns and notices", "manual reporting after explicit publication-date verification"],
+      "core_feedback": "Reinforces the generic ARTICLE_FEED structural-eligibility requirement: source reachability must be distinct from publication-timestamp capability, and persistent high article-failure/no-date patterns should surface a source-contract incompatibility signal. No DSP/Vâlcea-specific parser should be added.",
       "path_hints": ["anunt", "campanie", "sanat", "program"],
       "generic_titles": ["anunțuri", "direcția de sănătate publică vâlcea"]
     },
