@@ -200,6 +200,12 @@
       "tier": "T1",
       "section": "SĂNĂTATE",
       "priority": 82,
+      "enabled": false,
+      "status": "QUARANTINED_RECRUITMENT_DOMINATED_MIXED_FEED",
+      "checked_at": "2026-08-18",
+      "disable_reason": "The official Spitalul Orășenesc Horezu blog is structurally reachable and contains valuable project and patient-information material, but the current stream is dominated by staffing notices and competition results. Fresh official entries include a 10.08.2026 specialist physician vacancy and multiple July 2026 recruitment/result notices, while the same surface also carries a project press release. The Vâlcea automatic contract admits only title + published_at + source and the current URL-hint approach cannot prove item-level editorial class strongly enough to ensure that staffing administration will never be projected as reader-facing SĂNĂTATE news. The live discovery ledger also observed 5 links examined with 2 article failures. Automatic admission is disabled until the feed can be separated deterministically or a generic item-level content-class gate can fail closed on recruitment/promotions while preserving genuine patient-care, service and investment stories.",
+      "safe_use": ["manual discovery of hospital investment, patient-service and capacity changes", "primary-source verification of recruitment and staffing developments when independently newsworthy", "manual reporting on projects and services after item-level editorial classification and evidence review"],
+      "core_feedback": "No Horezu/Vâlcea-specific classifier should be added. This reinforces the generic mixed-feed item classification requirement already exposed by other hospital and sports sources: source authority and article-level dates are insufficient when one official feed mixes recruitment administration with reader-facing news. A reusable item-level content-class gate should separate STAFFING/PROCUREMENT/ADMIN from SERVICE/INVESTMENT/PUBLIC_HEALTH before automatic projection.",
       "path_hints": ["proiect", "educatie", "sanatate", "program", "pacient"],
       "generic_titles": ["blog", "stiri – anunturi", "știri – anunțuri", "spitalul orășenesc horezu", "spitalul orasenesc horezu"]
     },
