@@ -1,0 +1,143 @@
+name: LOCAL NEWS OS Metrics Harvest Runtime
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/social/metrics_harvest_runtime.py"
+      - "local-news-os/social/test_metrics_harvest_runtime.py"
+      - "local-news-os/social/metrics_harvest_scheduler.py"
+      - "local-news-os/social/native_metrics_transport.py"
+      - "local-news-os/social/observed_metrics_collector.py"
+      - "local-news-os/social/durable_feedback_snapshot.py"
+      - "valcea-clar/social/channels/facebook.json"
+      - "valcea-clar/social/channels/instagram.json"
+      - "valcea-clar/social/meta_auth_state.json"
+      - ".github/workflows/local-news-os-metrics-harvest-runtime.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/social/metrics_harvest_runtime.py"
+      - "local-news-os/social/test_metrics_harvest_runtime.py"
+      - "local-news-os/social/metrics_harvest_scheduler.py"
+      - "local-news-os/social/native_metrics_transport.py"
+      - "local-news-os/social/observed_metrics_collector.py"
+      - "local-news-os/social/durable_feedback_snapshot.py"
+      - "valcea-clar/social/channels/facebook.json"
+      - "valcea-clar/social/channels/instagram.json"
+      - "valcea-clar/social/meta_auth_state.json"
+      - ".github/workflows/local-news-os-metrics-harvest-runtime.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-news-os-metrics-harvest-runtime-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile durable harvest runtime boundary
+        run: |
+          python -m py_compile \
+            local-news-os/social/observed_metrics.py \
+            local-news-os/social/durable_feedback_snapshot.py \
+            local-news-os/social/observed_metrics_collector.py \
+            local-news-os/social/native_metrics_transport.py \
+            local-news-os/social/metrics_harvest_scheduler.py \
+            local-news-os/social/metrics_harvest_runtime.py \
+            local-news-os/social/test_metrics_harvest_runtime.py
+
+      - name: Run metrics harvest runtime acceptance tests
+        run: python local-news-os/social/test_metrics_harvest_runtime.py
+
+      - name: Validate Vâlcea Meta checkpoint namespaces without network or secrets
+        run: |
+          python - <<'PY'
+          import importlib.util
+          import json
+          import sys
+          import tempfile
+          from pathlib import Path
+
+          here = Path('local-news-os/social').resolve()
+          sys.path.insert(0, str(here))
+          spec = importlib.util.spec_from_file_location('metrics_harvest_runtime', here / 'metrics_harvest_runtime.py')
+          mod = importlib.util.module_from_spec(spec)
+          assert spec and spec.loader
+          spec.loader.exec_module(mod)
+
+          auth = json.loads(Path('valcea-clar/social/meta_auth_state.json').read_text(encoding='utf-8'))
+          expected = {
+              'facebook': ('meta_graph_api', 'VALCEA_FB_PAGE_ACCESS_TOKEN'),
+              'instagram': ('instagram_graph_api', 'VALCEA_IG_ACCESS_TOKEN'),
+          }
+          paths = set()
+          for platform, (source, env_name) in expected.items():
+              channel = json.loads(Path(f'valcea-clar/social/channels/{platform}.json').read_text(encoding='utf-8'))
+              publication = {
+                  'instance_id': channel['instance_id'],
+                  'channel_id': channel['channel_id'],
+                  'platform': platform,
+                  'status': 'PUBLISHED',
+                  'publication_id': f'acceptance:{platform}',
+                  'remote_publication_id': f'remote_{platform}_acceptance',
+                  'story_id': 'story:acceptance',
+                  'product_id': f'product:{platform}:acceptance',
+                  'published_at': '2026-08-16T08:00:00Z',
+                  'native_format': 'single_photo',
+                  'topic_keys': ['service_journalism'],
+                  'series_id': None,
+              }
+              state = {
+                  'instance_id': channel['instance_id'],
+                  'channel_id': channel['channel_id'],
+                  'platform': platform,
+                  'records': {publication['publication_id']: publication},
+              }
+              plan = mod.metrics_harvest_scheduler.plan_harvest(channel, state, auth, now='2026-08-16T15:00:00Z')
+              if plan.get('status') != 'HARVEST_READY' or len(plan.get('jobs', [])) != 1:
+                  raise SystemExit(f'{platform}: {plan}')
+              job = plan['jobs'][0]
+              if job.get('source') != source or job.get('credential_env_name') != env_name:
+                  raise SystemExit(f'{platform}: wrong transport identity {job}')
+              with tempfile.TemporaryDirectory() as tmp:
+                  result = mod.execute_plan_durably(
+                      plan,
+                      channel,
+                      auth,
+                      repo_root=Path(tmp),
+                      now='2026-08-16T15:00:00Z',
+                      credential_resolver=lambda name: 'acceptance-secret-never-persisted',
+                      transport_call=lambda *a, **k: {
+                          'status': 'NO_OBSERVED_METRICS',
+                          'hard_blocks': [],
+                          'metric_issues': [],
+                          'publication_blocked': False,
+                      },
+                  )
+                  if result.get('status') != 'HARVEST_RUNTIME_EXECUTED':
+                      raise SystemExit(f'{platform}: runtime failed {result}')
+                  if result['results'][0].get('checkpoint_status') != 'COMPLETED_NO_DATA':
+                      raise SystemExit(f'{platform}: checkpoint not durable {result}')
+                  encoded = json.dumps(result, ensure_ascii=False)
+                  if 'acceptance-secret-never-persisted' in encoded:
+                      raise SystemExit(f'{platform}: secret returned')
+                  checkpoint_path = result.get('checkpoint_state_path')
+                  persisted = Path(tmp, checkpoint_path).read_text(encoding='utf-8')
+                  if 'acceptance-secret-never-persisted' in persisted:
+                      raise SystemExit(f'{platform}: secret persisted')
+                  paths.add(checkpoint_path)
+                  print(f'{platform}: PASS {job["checkpoint"]["checkpoint_hours"]}h -> {checkpoint_path}')
+          if len(paths) != 2:
+              raise SystemExit(f'checkpoint namespaces collided: {paths}')
+          PY
