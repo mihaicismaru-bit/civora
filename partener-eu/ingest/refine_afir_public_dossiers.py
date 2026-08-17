@@ -77,7 +77,21 @@ def main() -> int:
     afir = products.setdefault("coverage", {}).setdefault("afir", {})
     afir["administrativeDossiersRemoved"] = len(removed)
     afir["publishedDossiers"] = sum(1 for d in kept if str(d.get("sourceType") or "").startswith("AFIR") or "AFIR" in str(d.get("programme") or "").upper())
-    products.setdefault("qualityPass", {})["afirAdministrativeDossiersRemoved"] = removed
+
+    # This cleanup changes the final public dossier cardinality. Any aggregate
+    # contract coverage computed by an earlier stage must therefore be
+    # recomputed here against the final kept set, rather than left stale.
+    quality = products.setdefault("qualityPass", {})
+    quality["afirAdministrativeDossiersRemoved"] = removed
+    quality["executiveSummaryCoverage"] = sum(
+        1 for dossier in kept if dossier.get("executiveSummary")
+    )
+    quality["strictApplicantListCoverage"] = sum(
+        1
+        for dossier in kept
+        if (dossier.get("quality") or {}).get("applicantListPolicy") == "GUIDE_EXPLICIT_ONLY"
+    )
+
     products.setdefault("policy", {})["afirDocumentsAreEvidenceNotCalls"] = True
     PRODUCTS.write_text(json.dumps(products, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     OUT_JS.write_text(
@@ -85,7 +99,13 @@ def main() -> int:
         + ";\nwindow.PARTENER_DATA=window.PARTENER_DATA||{};\nwindow.PARTENER_DATA.decisionProducts=window.PARTENER_DECISION_PRODUCTS;\n",
         encoding="utf-8",
     )
-    print(json.dumps({"kept": len(kept), "removed": len(removed), "sample": removed[:8]}, ensure_ascii=False, indent=2))
+    print(json.dumps({
+        "kept": len(kept),
+        "removed": len(removed),
+        "executiveSummaryCoverage": quality["executiveSummaryCoverage"],
+        "strictApplicantListCoverage": quality["strictApplicantListCoverage"],
+        "sample": removed[:8],
+    }, ensure_ascii=False, indent=2))
     return 0
 
 
