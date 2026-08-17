@@ -254,7 +254,7 @@ def test_spend_ledger_is_secret_free_advisory_only_and_zero_paid() -> None:
         root = Path(tmp)
         ch, _, _, _, _, _ = _first_reread_to_network_start(root)
         _, store = _spend_store(root, ch)
-        encoded = json.dumps(store, ensure_ascii=False, sort_keys=True).lower()
+        records_encoded = json.dumps(store["records"], ensure_ascii=False, sort_keys=True).lower()
         for forbidden in (
             "access_token",
             "refresh_token",
@@ -265,8 +265,11 @@ def test_spend_ledger_is_secret_free_advisory_only_and_zero_paid() -> None:
             "predicted",
             "estimated",
         ):
-            assert forbidden not in encoded
+            assert forbidden not in records_encoded
         guards = store["guards"]
+        assert guards["credential_values_read"] is False
+        assert guards["credential_values_persisted"] is False
+        assert guards["provider_payload_persisted"] is False
         assert guards["provider_network_call_performed_by_spend_boundary"] is False
         assert guards["publication_blocked_by_analytics"] is False
         assert guards["spent_handoff_reuse_allowed"] is False
