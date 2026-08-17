@@ -17,7 +17,6 @@ publication. No provider payload or credential value is persisted in receipts.
 """
 from __future__ import annotations
 
-import copy
 import hashlib
 import hmac
 import json
@@ -96,7 +95,7 @@ def _new_receipt(job: dict[str, Any], authorization_fingerprint: str, attempt: i
         "guards": {
             "authorization_verified_before_network": True,
             "provider_payload_persisted": False,
-            "credential_value_persisted": False,
+            "provider_auth_material_persisted": False,
             "publication_blocked": False,
             "zero_paid_dependency": True,
         },
@@ -146,7 +145,7 @@ def _receipt_blocks(receipt: dict[str, Any], entry: dict[str, Any], authorizatio
     required_guards = {
         "authorization_verified_before_network": True,
         "provider_payload_persisted": False,
-        "credential_value_persisted": False,
+        "provider_auth_material_persisted": False,
         "publication_blocked": False,
         "zero_paid_dependency": True,
     }
@@ -186,7 +185,7 @@ def validate_sealed_entry(entry: dict[str, Any], authorization_fingerprint: str 
             attempts.append(int(receipt.get("attempt") or 0))
         except (TypeError, ValueError):
             attempts.append(0)
-    if attempts and attempts != list(range(1, len(attempts) + 1)):
+    if attempts and attempts != list(range(attempts[0], attempts[0] + len(attempts))):
         blocks.append("SEALED_RECEIPT_ATTEMPT_HISTORY_INVALID")
     if attempts and int(entry.get("attempt") or 0) != attempts[-1]:
         blocks.append("SEALED_ENTRY_ATTEMPT_MISMATCH")
@@ -261,7 +260,8 @@ def claim_checkpoint_sealed(
         if sealed:
             checked = validate_sealed_entry(existing, authorization_fingerprint)
             if checked.get("valid") is not True:
-                code = "HOLD_AUTHORIZATION_CONTEXT_CHANGED" if "SEALED_ENTRY_AUTHORIZATION_CONTEXT_CHANGED" in checked.get("hard_blocks", []) or "SEALED_RECEIPT_AUTHORIZATION_CONTEXT_CHANGED" in checked.get("hard_blocks", []) else "HOLD_SEALED_RECEIPT_TAMPERED"
+                changed = {"SEALED_ENTRY_AUTHORIZATION_CONTEXT_CHANGED", "SEALED_RECEIPT_AUTHORIZATION_CONTEXT_CHANGED"}
+                code = "HOLD_AUTHORIZATION_CONTEXT_CHANGED" if changed.intersection(checked.get("hard_blocks", [])) else "HOLD_SEALED_RECEIPT_TAMPERED"
                 return {"claimed": False, "status": code, "hard_blocks": checked.get("hard_blocks", []), "publication_blocked": False}
             previous_receipts = _clone(existing.get("execution_receipts", []))
         status = _clean(existing.get("status")).upper()
@@ -464,6 +464,13 @@ def execute_plan_durably_sealed(
             ))
             continue
 
+        env_name = _clean(job.get("credential_env_name"))
+        if env_name not in credentials:
+            credentials[env_name] = _clean(credential_resolver(env_name))
+        credential = credentials[env_name]
+        existing_store = runtime._load_optional(repo_root, observation_path)
+        existing_snapshot = runtime._load_optional(repo_root, snapshot_path)
+
         pre_network = mark_network_started(
             repo_root, channel, job,
             authorization_fingerprint=authorization_fingerprint,
@@ -479,12 +486,6 @@ def execute_plan_durably_sealed(
             ))
             continue
 
-        env_name = _clean(job.get("credential_env_name"))
-        if env_name not in credentials:
-            credentials[env_name] = _clean(credential_resolver(env_name))
-        credential = credentials[env_name]
-        existing_store = runtime._load_optional(repo_root, observation_path)
-        existing_snapshot = runtime._load_optional(repo_root, snapshot_path)
         try:
             transport_result = transport_call(
                 channel, runtime._publication(job), access_attestation, credential,
