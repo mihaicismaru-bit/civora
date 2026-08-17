@@ -4,10 +4,10 @@
   "product": "VÂLCEA CLAR durable monitor state",
   "execution_owner": "CIVORA_SITE_ENGINE",
   "state_owner": "GITHUB_REPOSITORY",
-  "generated_at": "2026-08-17T00:13:18Z",
-  "last_live_probe_at": "2026-08-17T00:13:18Z",
+  "generated_at": "2026-08-17T01:26:31Z",
+  "last_live_probe_at": "2026-08-17T01:26:31Z",
   "mode": "LIVE_SOURCE_HEALTH",
-  "discovery_observed_at": "2026-08-17T02:25:43+03:00",
+  "discovery_observed_at": "2026-08-17T04:23:36+03:00",
   "monitor_count": 7,
   "monitors": [
     {
@@ -34,7 +34,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://posturi.gov.ro/judet/valcea/",
-          "fingerprint": "aaba4eb7961eb2b999e9cace3a4601d4b39548118fa4efdc4d6a3e41373db6ae",
+          "fingerprint": "43381da76c75ea6087ca2f7af44e3fed57fa01b535c5a038e480395e37b38353",
           "match_count": 8,
           "error": null,
           "health": "OK",
@@ -126,8 +126,7 @@
       "changed_sources": [],
       "degraded_sources": [
         "primaria-rm-valcea-comunicate",
-        "cj-valcea-sedinte",
-        "cj-valcea-hotarari-2026"
+        "cj-valcea-sedinte"
       ],
       "reverify_leads": [
         "rm-valcea-hcl159-2026-musiclover-public-money"
@@ -172,14 +171,12 @@
         },
         {
           "id": "cj-valcea-hotarari-2026",
-          "ref_type": "news_source_id",
-          "registered": true,
-          "health": "DEGRADED",
+          "ref_type": "manual_watch_source_id",
+          "health": "MANUAL_WATCH",
           "change": "NO_CHANGE_SIGNAL",
-          "facts": 0,
-          "links_examined": null,
-          "article_failures": null,
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>"
+          "source_status": "QUARANTINED_OFFICIAL_DECISION_REGISTER",
+          "checked_at": "2026-08-17",
+          "url": "https://cjvalcea.ro/monitorul-oficial-local/hotararile-autoritatii-deliberative/2026-hotararile-autoritatii-deliberative/"
         },
         {
           "id": "cl-calimanesti-hotarari",

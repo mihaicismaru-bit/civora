@@ -4,7 +4,7 @@
   "product": "VÂLCEA CLAR market intelligence state",
   "execution_owner": "CIVORA_SITE_ENGINE",
   "state_owner": "GITHUB_REPOSITORY",
-  "generated_at": "2026-08-17T00:13:56Z",
+  "generated_at": "2026-08-17T01:27:09Z",
   "mode": "LIVE_SOURCE_HEALTH",
   "monitor_count": 3,
   "monitors": [
@@ -41,7 +41,7 @@
           "numeric_signals": [],
           "health": "OK",
           "error": null,
-          "change": "NEW_BASELINE"
+          "change": "UNCHANGED"
         },
         {
           "id": "rm-valcea-urbanism",
@@ -115,8 +115,12 @@
       "id": "jobs-market-valcea-watch",
       "label": "Job Intelligence — Piața muncii Vâlcea",
       "registry_status": "ACTIVE_REVERIFY",
-      "attention": "NORMAL",
-      "changed_sources": [],
+      "attention": "REVIEW_REQUIRED",
+      "changed_sources": [
+        "ejobs-valcea",
+        "linkedin-jobs-valcea",
+        "olx-jobs-valcea"
+      ],
       "official_changed_sources": [],
       "degraded_sources": [],
       "sources": [
@@ -139,7 +143,7 @@
           "numeric_signals": [],
           "health": "OK",
           "error": null,
-          "change": "NEW_BASELINE"
+          "change": "UNCHANGED"
         },
         {
           "id": "ajofm-valcea-statistics",
@@ -160,7 +164,7 @@
           "numeric_signals": [],
           "health": "OK",
           "error": null,
-          "change": "NEW_BASELINE"
+          "change": "UNCHANGED"
         },
         {
           "id": "posturi-gov-valcea-all",
@@ -180,7 +184,7 @@
           "numeric_signals": [],
           "health": "OK",
           "error": null,
-          "change": "NEW_BASELINE"
+          "change": "UNCHANGED"
         },
         {
           "id": "ejobs-valcea",
@@ -191,7 +195,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.ejobs.ro/locuri-de-munca/ramnicu-valcea",
-          "fingerprint": "2c9dc9cc4f3084083b8cfd2d449cbe0f8f46300f52c028c52f571e57e218c033",
+          "fingerprint": "e5aab7d89abf57a9df8076b2697a7d3acd437b338a9cc64598e1e97681aaef39",
           "match_count": 17,
           "matched_terms": [
             "Joburi",
@@ -207,7 +211,7 @@
           ],
           "health": "OK",
           "error": null,
-          "change": "NEW_BASELINE"
+          "change": "CHANGED_REVIEW_REQUIRED"
         },
         {
           "id": "bestjobs-valcea",
@@ -228,7 +232,7 @@
           "numeric_signals": [],
           "health": "OK",
           "error": null,
-          "change": "NEW_BASELINE"
+          "change": "UNCHANGED"
         },
         {
           "id": "linkedin-jobs-valcea",
@@ -239,7 +243,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://ro.linkedin.com/jobs/jobs-in-v%C3%AElcea",
-          "fingerprint": "1e91c4e5f7e1acd1248e9dfb59c6bbf082abe81edda673b0f1fb564b20f9c579",
+          "fingerprint": "28a0d3600068bc6c138194201e2ce1086dc51854cf41e4b6bcca0159bd038391",
           "match_count": 28,
           "matched_terms": [
             "joburi",
@@ -255,7 +259,7 @@
           ],
           "health": "OK",
           "error": null,
-          "change": "NEW_BASELINE"
+          "change": "CHANGED_REVIEW_REQUIRED"
         },
         {
           "id": "olx-jobs-valcea",
@@ -266,7 +270,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.olx.ro/locuri-de-munca/valcea-judet/",
-          "fingerprint": "45f609f59cf7bb7b958748b81fc3caf069f6b54ce594b3e64dcfa3033608211c",
+          "fingerprint": "672d565cb37962a610bc552247a89a6bac7c4ccfee8621828ec43e0644651f2a",
           "match_count": 24,
           "matched_terms": [
             "locuri de munca",
@@ -276,7 +280,7 @@
           "numeric_signals": [],
           "health": "OK",
           "error": null,
-          "change": "NEW_BASELINE"
+          "change": "CHANGED_REVIEW_REQUIRED"
         }
       ],
       "lead_ids": [
@@ -354,7 +358,7 @@
           "numeric_signals": [],
           "health": "OK",
           "error": null,
-          "change": "NEW_BASELINE"
+          "change": "UNCHANGED"
         },
         {
           "id": "topfirme-valcea",
@@ -425,7 +429,7 @@
           ],
           "health": "OK",
           "error": null,
-          "change": "NEW_BASELINE"
+          "change": "UNCHANGED"
         },
         {
           "id": "termene-top50-valcea",
@@ -488,7 +492,7 @@
           ],
           "health": "OK",
           "error": null,
-          "change": "NEW_BASELINE"
+          "change": "UNCHANGED"
         },
         {
           "id": "ccivl-members",
