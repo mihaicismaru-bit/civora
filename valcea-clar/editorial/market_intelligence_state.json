@@ -1,0 +1,563 @@
+{
+  "schema_version": "1.0",
+  "instance_id": "valcea",
+  "product": "VÂLCEA CLAR market intelligence state",
+  "execution_owner": "CIVORA_SITE_ENGINE",
+  "state_owner": "GITHUB_REPOSITORY",
+  "generated_at": "2026-08-17T00:13:56Z",
+  "mode": "LIVE_SOURCE_HEALTH",
+  "monitor_count": 3,
+  "monitors": [
+    {
+      "id": "construction-permits-active-projects-watch",
+      "label": "Autorizații de construire & proiecte imobiliare active — Vâlcea",
+      "registry_status": "ACTIVE_REVERIFY",
+      "attention": "SOURCE_DEGRADED",
+      "changed_sources": [],
+      "official_changed_sources": [],
+      "degraded_sources": [
+        "rm-valcea-urbanism",
+        "dragasani-authorizations-2026",
+        "ocpi-valcea-real-estate-signals"
+      ],
+      "sources": [
+        {
+          "id": "rm-valcea-hcl-2026",
+          "publisher": "Primăria Municipiului Râmnicu Vâlcea — hotărâri",
+          "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
+          "source_class": "T1_OFFICIAL",
+          "publication_authority": true,
+          "reachable": true,
+          "http_status": 200,
+          "final_url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
+          "fingerprint": "7ed65defe61163132a28a793bba588e647e5846470b9f8f4a0c17b7f204558a9",
+          "match_count": 21,
+          "matched_terms": [
+            "PUZ",
+            "PUD",
+            "locuinte colective",
+            "construire"
+          ],
+          "numeric_signals": [],
+          "health": "OK",
+          "error": null,
+          "change": "NEW_BASELINE"
+        },
+        {
+          "id": "rm-valcea-urbanism",
+          "publisher": "Primăria Municipiului Râmnicu Vâlcea — Urbanism",
+          "url": "https://www.primariavl.ro/index.php?option=com_content&view=article&id=495&Itemid=572",
+          "source_class": "T1_OFFICIAL",
+          "publication_authority": true,
+          "reachable": false,
+          "http_status": null,
+          "fingerprint": null,
+          "match_count": 0,
+          "matched_terms": [],
+          "numeric_signals": [],
+          "health": "UNREACHABLE",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "change": "PROBE_FAILED"
+        },
+        {
+          "id": "dragasani-authorizations-2026",
+          "publisher": "Primăria Municipiului Drăgășani — autorizații de construire/desființare",
+          "url": "https://www.primariadragasani.ro/informatii-publice/urbanism/autorizatii-de-construire-desfiintare/2026",
+          "source_class": "T1_OFFICIAL",
+          "publication_authority": true,
+          "reachable": false,
+          "http_status": null,
+          "fingerprint": null,
+          "match_count": 0,
+          "matched_terms": [],
+          "numeric_signals": [],
+          "health": "UNREACHABLE",
+          "error": "URLError: <urlopen error timed out>",
+          "change": "PROBE_FAILED"
+        },
+        {
+          "id": "ocpi-valcea-real-estate-signals",
+          "publisher": "OCPI Vâlcea",
+          "url": "https://vl.ancpi.ro/anunturi/",
+          "source_class": "T1_OFFICIAL",
+          "publication_authority": true,
+          "reachable": false,
+          "http_status": null,
+          "fingerprint": null,
+          "match_count": 0,
+          "matched_terms": [],
+          "numeric_signals": [],
+          "health": "UNREACHABLE",
+          "error": "URLError: <urlopen error [Errno -2] Name or service not known>",
+          "change": "PROBE_FAILED"
+        }
+      ],
+      "lead_ids": [
+        "ferdinand-19",
+        "doru-popian-2-5-4a",
+        "intrarea-crizantemei-1",
+        "dealul-malului-11g",
+        "historic-commercial-project-catalogue-recovery"
+      ],
+      "priority_entities": [],
+      "scope": {
+        "county": "Vâlcea",
+        "permit_registers": true,
+        "residential_projects": true,
+        "commercial_projects": true,
+        "active_construction": true,
+        "developer_and_builder_identity": true,
+        "public_decision_links": true
+      },
+      "public_projection": false
+    },
+    {
+      "id": "jobs-market-valcea-watch",
+      "label": "Job Intelligence — Piața muncii Vâlcea",
+      "registry_status": "ACTIVE_REVERIFY",
+      "attention": "NORMAL",
+      "changed_sources": [],
+      "official_changed_sources": [],
+      "degraded_sources": [],
+      "sources": [
+        {
+          "id": "ajofm-valcea-press",
+          "publisher": "AJOFM Vâlcea",
+          "url": "https://www.anofm.ro/valcea/categorie/comunicate-de-presa/",
+          "source_class": "T1_OFFICIAL",
+          "publication_authority": true,
+          "reachable": true,
+          "http_status": 200,
+          "final_url": "https://www.anofm.ro/valcea/categorie/comunicate-de-presa/",
+          "fingerprint": "aa0c630a5b8519d40c0c566d3d6ef4739e902b0305751cb71967c2d84fbf5e20",
+          "match_count": 14,
+          "matched_terms": [
+            "Locuri de muncă vacante",
+            "Bursa locurilor de muncă",
+            "EURES"
+          ],
+          "numeric_signals": [],
+          "health": "OK",
+          "error": null,
+          "change": "NEW_BASELINE"
+        },
+        {
+          "id": "ajofm-valcea-statistics",
+          "publisher": "AJOFM Vâlcea — statistică șomaj",
+          "url": "https://www.anofm.ro/valcea/categorie/statistica-somaj/?anselectat=2026",
+          "source_class": "T1_OFFICIAL",
+          "publication_authority": true,
+          "reachable": true,
+          "http_status": 200,
+          "final_url": "https://www.anofm.ro/valcea/categorie/statistica-somaj/?anselectat=2026",
+          "fingerprint": "b55f77ff04f7c06a193c823434e42d2508522130b216dc5e51ba117c742a38d0",
+          "match_count": 24,
+          "matched_terms": [
+            "șomaj",
+            "persoane",
+            "locuri de muncă"
+          ],
+          "numeric_signals": [],
+          "health": "OK",
+          "error": null,
+          "change": "NEW_BASELINE"
+        },
+        {
+          "id": "posturi-gov-valcea-all",
+          "publisher": "posturi.gov.ro — Vâlcea",
+          "url": "https://posturi.gov.ro/judet/valcea/",
+          "source_class": "T1_OFFICIAL",
+          "publication_authority": true,
+          "reachable": true,
+          "http_status": 200,
+          "final_url": "https://posturi.gov.ro/judet/valcea/",
+          "fingerprint": "7db4ec6d5c9b238f27fef42831138e5fc77c8462b0733c79051cfa695d32b603",
+          "match_count": 16,
+          "matched_terms": [
+            "Vâlcea",
+            "post"
+          ],
+          "numeric_signals": [],
+          "health": "OK",
+          "error": null,
+          "change": "NEW_BASELINE"
+        },
+        {
+          "id": "ejobs-valcea",
+          "publisher": "eJobs — Râmnicu Vâlcea",
+          "url": "https://www.ejobs.ro/locuri-de-munca/ramnicu-valcea",
+          "source_class": "T2_DISCOVERY_ONLY",
+          "publication_authority": false,
+          "reachable": true,
+          "http_status": 200,
+          "final_url": "https://www.ejobs.ro/locuri-de-munca/ramnicu-valcea",
+          "fingerprint": "2c9dc9cc4f3084083b8cfd2d449cbe0f8f46300f52c028c52f571e57e218c033",
+          "match_count": 17,
+          "matched_terms": [
+            "Joburi",
+            "locuri de munca",
+            "Râmnicu Vâlcea",
+            "Ramnicu Valcea"
+          ],
+          "numeric_signals": [
+            {
+              "kind": "jobs",
+              "value_text": "953"
+            }
+          ],
+          "health": "OK",
+          "error": null,
+          "change": "NEW_BASELINE"
+        },
+        {
+          "id": "bestjobs-valcea",
+          "publisher": "BestJobs — Vâlcea",
+          "url": "https://www.bestjobs.eu/locuri-de-munca-in-valcea",
+          "source_class": "T2_DISCOVERY_ONLY",
+          "publication_authority": false,
+          "reachable": true,
+          "http_status": 200,
+          "final_url": "https://www.bestjobs.eu/locuri-de-munca-in-valcea",
+          "fingerprint": "bc30aa20124faa1e7889a17e390290241c0e4371c5f9e6b46209d317fb847e8f",
+          "match_count": 18,
+          "matched_terms": [
+            "locuri de munca",
+            "Râmnicu Vâlcea",
+            "Vâlcea"
+          ],
+          "numeric_signals": [],
+          "health": "OK",
+          "error": null,
+          "change": "NEW_BASELINE"
+        },
+        {
+          "id": "linkedin-jobs-valcea",
+          "publisher": "LinkedIn Jobs — Vâlcea",
+          "url": "https://ro.linkedin.com/jobs/jobs-in-v%C3%AElcea",
+          "source_class": "T2_DISCOVERY_ONLY",
+          "publication_authority": false,
+          "reachable": true,
+          "http_status": 200,
+          "final_url": "https://ro.linkedin.com/jobs/jobs-in-v%C3%AElcea",
+          "fingerprint": "1e91c4e5f7e1acd1248e9dfb59c6bbf082abe81edda673b0f1fb564b20f9c579",
+          "match_count": 28,
+          "matched_terms": [
+            "joburi",
+            "Vîlcea",
+            "Vâlcea",
+            "Râmnicu Vâlcea"
+          ],
+          "numeric_signals": [
+            {
+              "kind": "jobs",
+              "value_text": "14"
+            }
+          ],
+          "health": "OK",
+          "error": null,
+          "change": "NEW_BASELINE"
+        },
+        {
+          "id": "olx-jobs-valcea",
+          "publisher": "OLX Locuri de muncă — Vâlcea",
+          "url": "https://www.olx.ro/locuri-de-munca/valcea-judet/",
+          "source_class": "T3_DISCOVERY_ONLY",
+          "publication_authority": false,
+          "reachable": true,
+          "http_status": 200,
+          "final_url": "https://www.olx.ro/locuri-de-munca/valcea-judet/",
+          "fingerprint": "45f609f59cf7bb7b958748b81fc3caf069f6b54ce594b3e64dcfa3033608211c",
+          "match_count": 24,
+          "matched_terms": [
+            "locuri de munca",
+            "Râmnicu Vâlcea",
+            "Valcea"
+          ],
+          "numeric_signals": [],
+          "health": "OK",
+          "error": null,
+          "change": "NEW_BASELINE"
+        }
+      ],
+      "lead_ids": [
+        "jobs-public-private-seasonal-vertical",
+        "sju-recruitment-crosslink"
+      ],
+      "priority_entities": [],
+      "scope": {
+        "public_sector": true,
+        "private_sector": true,
+        "seasonal": true,
+        "vacancy_trends": true,
+        "salary_only_when_explicit": true,
+        "commute_and_location": true
+      },
+      "public_projection": false
+    },
+    {
+      "id": "top-firms-onrc-watch",
+      "label": "Topul Firmelor & ONRC — Business Watch Vâlcea",
+      "registry_status": "ACTIVE_REVERIFY",
+      "attention": "SOURCE_DEGRADED",
+      "changed_sources": [],
+      "official_changed_sources": [],
+      "degraded_sources": [
+        "data-gov-onrc-datasets",
+        "data-gov-finance-datasets",
+        "ccivl-members"
+      ],
+      "sources": [
+        {
+          "id": "data-gov-onrc-datasets",
+          "publisher": "data.gov.ro / ONRC",
+          "url": "https://data.gov.ro/dataset?organization=onrc",
+          "source_class": "T1_OFFICIAL_OPEN_DATA",
+          "publication_authority": true,
+          "reachable": false,
+          "http_status": null,
+          "fingerprint": null,
+          "match_count": 0,
+          "matched_terms": [],
+          "numeric_signals": [],
+          "health": "UNREACHABLE",
+          "error": "URLError: <urlopen error timed out>",
+          "change": "PROBE_FAILED"
+        },
+        {
+          "id": "data-gov-finance-datasets",
+          "publisher": "data.gov.ro / Ministerul Finanțelor",
+          "url": "https://data.gov.ro/organization/mfp",
+          "source_class": "T1_OFFICIAL_OPEN_DATA",
+          "publication_authority": true,
+          "reachable": false,
+          "http_status": null,
+          "fingerprint": null,
+          "match_count": 0,
+          "matched_terms": [],
+          "numeric_signals": [],
+          "health": "UNREACHABLE",
+          "error": "URLError: <urlopen error timed out>",
+          "change": "PROBE_FAILED"
+        },
+        {
+          "id": "onrc-services",
+          "publisher": "Oficiul Național al Registrului Comerțului",
+          "url": "https://www.onrc.ro/index.php/ro/24-desfiintari-firme/index.php/servicii-online",
+          "source_class": "T1_OFFICIAL",
+          "publication_authority": true,
+          "reachable": true,
+          "http_status": 200,
+          "final_url": "https://www.onrc.ro/index.php/ro/24-desfiintari-firme/index.php/servicii-online",
+          "fingerprint": "896dd9f2858ac786346332602a19ad6caed9f0a61b6adb5df318cab8ccad28b7",
+          "match_count": 0,
+          "matched_terms": [],
+          "numeric_signals": [],
+          "health": "OK",
+          "error": null,
+          "change": "NEW_BASELINE"
+        },
+        {
+          "id": "topfirme-valcea",
+          "publisher": "TopFirme — județul Vâlcea",
+          "url": "https://www.topfirme.com/judet/valcea/",
+          "source_class": "T2_DISCOVERY_REFERENCE",
+          "publication_authority": false,
+          "reachable": true,
+          "http_status": 200,
+          "final_url": "https://www.topfirme.com/judet/valcea/",
+          "fingerprint": "7fbf6617c85f1a0115bb92d8db5a26a8c71aded31340b0f14625f7458a6de81b",
+          "match_count": 17,
+          "matched_terms": [
+            "Top firme Judetul Valcea",
+            "Cifra de afaceri",
+            "Numar angajati",
+            "Profit"
+          ],
+          "numeric_signals": [
+            {
+              "kind": "companies",
+              "value_text": "31.256"
+            },
+            {
+              "kind": "employees",
+              "value_text": "50.093"
+            },
+            {
+              "kind": "employees",
+              "value_text": "1.951"
+            },
+            {
+              "kind": "employees",
+              "value_text": "1.060"
+            },
+            {
+              "kind": "employees",
+              "value_text": "978"
+            },
+            {
+              "kind": "employees",
+              "value_text": "855"
+            },
+            {
+              "kind": "employees",
+              "value_text": "724"
+            },
+            {
+              "kind": "employees",
+              "value_text": "3.914"
+            },
+            {
+              "kind": "employees",
+              "value_text": "3.443"
+            },
+            {
+              "kind": "employees",
+              "value_text": "2.896"
+            },
+            {
+              "kind": "employees",
+              "value_text": "2.542"
+            },
+            {
+              "kind": "employees",
+              "value_text": "1.665"
+            }
+          ],
+          "health": "OK",
+          "error": null,
+          "change": "NEW_BASELINE"
+        },
+        {
+          "id": "termene-top50-valcea",
+          "publisher": "Termene Business Hub — Top companii Vâlcea",
+          "url": "https://termene.ro/articole/top-50-companii-din-valcea-de-la-oltchim-damila-si-cet-govora-la-faurecia-vel-pitar-si-avicarvil-cum-s-a-schimbat-varful-clasamentului-in-perioada-2008-2024-timeline",
+          "source_class": "T2_DISCOVERY_REFERENCE",
+          "publication_authority": false,
+          "reachable": true,
+          "http_status": 200,
+          "final_url": "https://termene.ro/articole/top-50-companii-din-valcea-de-la-oltchim-damila-si-cet-govora-la-faurecia-vel-pitar-si-avicarvil-cum-s-a-schimbat-varful-clasamentului-in-perioada-2008-2024-timeline",
+          "fingerprint": "de61b89889022391c0f062f665944eb377efc96bff2a56e4784d812cf04d9bd9",
+          "match_count": 24,
+          "matched_terms": [
+            "Top 50 companii din Vâlcea",
+            "cifră de afaceri",
+            "profit",
+            "angajați"
+          ],
+          "numeric_signals": [
+            {
+              "kind": "companies",
+              "value_text": "50"
+            },
+            {
+              "kind": "companies",
+              "value_text": "10"
+            },
+            {
+              "kind": "companies",
+              "value_text": "20"
+            },
+            {
+              "kind": "employees",
+              "value_text": "1.311"
+            },
+            {
+              "kind": "employees",
+              "value_text": "2"
+            },
+            {
+              "kind": "employees",
+              "value_text": "312"
+            },
+            {
+              "kind": "employees",
+              "value_text": "119"
+            },
+            {
+              "kind": "employees",
+              "value_text": "115"
+            },
+            {
+              "kind": "employees",
+              "value_text": "116"
+            },
+            {
+              "kind": "employees",
+              "value_text": "218"
+            }
+          ],
+          "health": "OK",
+          "error": null,
+          "change": "NEW_BASELINE"
+        },
+        {
+          "id": "ccivl-members",
+          "publisher": "Camera de Comerț și Industrie Vâlcea",
+          "url": "https://www.ccivl.ro/lista-membri/",
+          "source_class": "T1B_INSTITUTIONAL_SIGNAL",
+          "publication_authority": true,
+          "reachable": false,
+          "http_status": 403,
+          "fingerprint": null,
+          "match_count": 0,
+          "matched_terms": [],
+          "numeric_signals": [],
+          "health": "UNREACHABLE",
+          "error": "HTTP 403",
+          "change": "PROBE_FAILED"
+        },
+        {
+          "id": "seap-business-contracts",
+          "publisher": "SEAP / e-licitatie.ro",
+          "url": "https://www.e-licitatie.ro/pub",
+          "source_class": "T1_OFFICIAL_REGISTERED_NO_QUERY_ADAPTER",
+          "publication_authority": true,
+          "health": "REGISTERED_NO_PROBE",
+          "change": "NO_CHANGE_SIGNAL",
+          "fingerprint": null,
+          "match_count": null,
+          "matched_terms": [],
+          "numeric_signals": []
+        }
+      ],
+      "lead_ids": [
+        "all-valcea-firms-universe",
+        "public-money-company-priority"
+      ],
+      "priority_entities": [
+        "FAURECIA ROMANIA SRL",
+        "VEL PITAR SA",
+        "AVICARVIL SRL",
+        "DAMILA SRL",
+        "BOROMIR IND SRL",
+        "DIANA SRL",
+        "DIANA COM SRL",
+        "NURVIL SRL",
+        "CET GOVORA SA",
+        "PRELCHIM SRL",
+        "MW ROMANIA SA",
+        "INTERCOM SA",
+        "ELECTROVALCEA SRL"
+      ],
+      "scope": {
+        "all_valcea_companies": true,
+        "priority_top_firms": true,
+        "priority_public_money": true,
+        "financials": true,
+        "employees": true,
+        "legal_representatives": true,
+        "company_status": true,
+        "insolvency_and_litigation": true,
+        "investments": true,
+        "public_contracts": true
+      },
+      "public_projection": false
+    }
+  ],
+  "publication_contract": {
+    "monitor_signal_may_publish_directly": false,
+    "commercial_source_may_confirm_material_fact_alone": false,
+    "normal_story_ready_gate_required": true,
+    "public_projection": false
+  }
+}
