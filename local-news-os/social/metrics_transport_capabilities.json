@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0",
+  "product": "LOCAL NEWS OS Fleet Metrics Transport Capabilities",
+  "policy": {
+    "explicit_transport_registration_required": true,
+    "implementation_match_required": true,
+    "verified_access_attestation_required": true,
+    "explicit_credential_binding_required": true,
+    "observed_only": true,
+    "analytics_advisory_only": true,
+    "zero_paid_dependency": true
+  },
+  "capabilities": [
+    {
+      "capability_id": "meta-facebook-observed-metrics-v1",
+      "platform": "facebook",
+      "metric_source": "meta_graph_api",
+      "transport_module": "native_metrics_transport",
+      "transport_profile": "facebook",
+      "network_boundary": "native_free_api",
+      "credential_ref_kind": "github-actions-secret",
+      "access_ready_key": "facebook_ready",
+      "metric_candidates": [
+        "post_impressions",
+        "post_impressions_unique"
+      ],
+      "requires_remote_publication_proof": true,
+      "observed_only": true,
+      "zero_paid_dependency": true
+    },
+    {
+      "capability_id": "meta-instagram-observed-metrics-v1",
+      "platform": "instagram",
+      "metric_source": "instagram_graph_api",
+      "transport_module": "native_metrics_transport",
+      "transport_profile": "instagram",
+      "network_boundary": "native_free_api",
+      "credential_ref_kind": "github-actions-secret",
+      "access_ready_key": "instagram_ready",
+      "metric_candidates": [
+        "reach",
+        "saved"
+      ],
+      "requires_remote_publication_proof": true,
+      "observed_only": true,
+      "zero_paid_dependency": true
+    }
+  ]
+}
