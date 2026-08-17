@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - 'partener-eu/web/**'
+      - '.github/workflows/partener-eu-auto-deploy.yml'
   workflow_run:
     workflows:
       - 'PARTENER.EU MIPE Ingestion'
@@ -15,6 +16,7 @@ on:
       - 'PARTENER.EU AFIR Ingestion'
       - 'PARTENER.EU Decision Products'
       - 'PARTENER.EU Consultant Workspace v3 QA'
+      - 'PARTENER.EU Editorial Daily Products'
     types: [completed]
 
 permissions:
@@ -23,14 +25,14 @@ permissions:
   id-token: write
 
 concurrency:
-  group: partener-eu-pages
-  cancel-in-progress: false
+  group: partener-eu-pages-v2
+  cancel-in-progress: true
 
 jobs:
   deploy:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     environment:
-      name: github-pages
+      name: partener-eu-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
