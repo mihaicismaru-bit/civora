@@ -1,0 +1,98 @@
+name: LOCAL NEWS OS Reread Spend Reauthorization
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/social/reread_spend_reauthorization.py"
+      - "local-news-os/social/fleet_metrics_authorization_seal_with_reread_spend.py"
+      - "local-news-os/social/authorization_sealed_harvest_receipt.py"
+      - "local-news-os/social/fleet_metrics_reread_authorization_handoff.py"
+      - "local-news-os/social/authorization_sealed_harvest_recovery.py"
+      - "local-news-os/social/metrics_harvest_runtime.py"
+      - "local-news-os/social/test_reread_spend_reauthorization.py"
+      - "local-news-os/social/test_reread_attempt_provenance_binding.py"
+      - "local-news-os/social/test_fleet_metrics_reread_authorization_handoff.py"
+      - ".github/workflows/local-news-os-reread-spend-reauthorization.yml"
+      - ".github/workflows/valcea-clar-observed-metrics-harvest.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/social/reread_spend_reauthorization.py"
+      - "local-news-os/social/fleet_metrics_authorization_seal_with_reread_spend.py"
+      - "local-news-os/social/authorization_sealed_harvest_receipt.py"
+      - "local-news-os/social/fleet_metrics_reread_authorization_handoff.py"
+      - "local-news-os/social/authorization_sealed_harvest_recovery.py"
+      - "local-news-os/social/metrics_harvest_runtime.py"
+      - "local-news-os/social/test_reread_spend_reauthorization.py"
+      - "local-news-os/social/test_reread_attempt_provenance_binding.py"
+      - "local-news-os/social/test_fleet_metrics_reread_authorization_handoff.py"
+      - ".github/workflows/local-news-os-reread-spend-reauthorization.yml"
+      - ".github/workflows/valcea-clar-observed-metrics-harvest.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-news-os-reread-spend-reauthorization-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile reread spend boundary
+        run: |
+          python -m py_compile \
+            local-news-os/social/reread_spend_reauthorization.py \
+            local-news-os/social/fleet_metrics_authorization_seal_with_reread_spend.py \
+            local-news-os/social/authorization_sealed_harvest_receipt.py \
+            local-news-os/social/fleet_metrics_reread_authorization_handoff.py \
+            local-news-os/social/authorization_sealed_harvest_recovery.py \
+            local-news-os/social/metrics_harvest_runtime.py \
+            local-news-os/social/test_reread_spend_reauthorization.py
+
+      - name: Run single-use reread spend / reauthorization acceptance
+        working-directory: local-news-os/social
+        run: python test_reread_spend_reauthorization.py
+
+      - name: Run reread attempt provenance regression
+        working-directory: local-news-os/social
+        run: python test_reread_attempt_provenance_binding.py
+
+      - name: Run explicit reread handoff regression
+        working-directory: local-news-os/social
+        run: python test_fleet_metrics_reread_authorization_handoff.py
+
+      - name: Verify spend boundary remains analytics-only, secret-free and zero-paid
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, 'local-news-os/social')
+          import reread_spend_reauthorization as spend
+          guards = spend.spend_guards()
+          required = {
+              'explicit_single_use_handoff_required': True,
+              'spend_reserved_before_network_start': True,
+              'spend_sealed_before_provider_call': True,
+              'spent_handoff_reuse_allowed': False,
+              'new_explicit_reauthorization_required_after_spend': True,
+              'provider_network_call_performed_by_spend_boundary': False,
+              'credential_values_read': False,
+              'credential_values_persisted': False,
+              'provider_payload_persisted': False,
+              'publication_blocked_by_analytics': False,
+              'zero_paid_dependency': True,
+          }
+          for key, expected in required.items():
+              if guards.get(key) is not expected:
+                  raise SystemExit(f'reread spend guard mismatch: {key}={guards.get(key)!r}')
+          print('REREAD_SPEND_REAUTHORIZATION_GUARDS_PASS')
+          PY
