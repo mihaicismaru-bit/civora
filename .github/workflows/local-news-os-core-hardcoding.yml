@@ -1,0 +1,30 @@
+name: LOCAL NEWS OS CORE_GENERIC Hardcoding Guard
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/core/**"
+      - "local-news-os/instances/**/instance.json"
+      - ".github/workflows/local-news-os-core-hardcoding.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/core/**"
+      - "local-news-os/instances/**/instance.json"
+      - ".github/workflows/local-news-os-core-hardcoding.yml"
+permissions:
+  contents: read
+jobs:
+  anti-hardcoding:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Compile guard
+        run: python -m py_compile local-news-os/core/check_core_generic_hardcoding.py
+      - name: Reject instance identity in CORE_GENERIC
+        run: |
+          python local-news-os/core/check_core_generic_hardcoding.py --self-test
+          python local-news-os/core/check_core_generic_hardcoding.py

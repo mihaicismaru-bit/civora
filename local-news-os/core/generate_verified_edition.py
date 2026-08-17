@@ -32,6 +32,17 @@ def load_json(path: Path) -> dict:
     return value
 
 
+def default_production_instance_id() -> str:
+    candidates: list[str] = []
+    for path in sorted(INSTANCES.glob("*/instance.json")):
+        cfg = load_json(path)
+        if cfg.get("environment") == "production" and cfg.get("instance_id"):
+            candidates.append(str(cfg["instance_id"]))
+    if len(candidates) != 1:
+        raise ValueError(f"expected exactly one production instance, found {len(candidates)}")
+    return candidates[0]
+
+
 def instance_config(instance_id: str) -> dict:
     path = INSTANCES / instance_id / "instance.json"
     cfg = load_json(path)
@@ -223,7 +234,7 @@ def self_test() -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--instance", default="valcea")
+    parser.add_argument("--instance")
     parser.add_argument("--facts", action="append", default=[])
     parser.add_argument("--slot", choices=["auto", "morning", "evening"], default="auto")
     parser.add_argument("--now", help="ISO datetime; defaults to current local time")
@@ -237,14 +248,15 @@ def main() -> int:
     if not args.facts or not args.output:
         parser.error("--facts and --output are required")
 
-    cfg = instance_config(args.instance)
+    instance_id = args.instance or default_production_instance_id()
+    cfg = instance_config(instance_id)
     tz = ZoneInfo(str(cfg["timezone"]))
     now = datetime.fromisoformat(args.now.replace("Z", "+00:00")) if args.now else datetime.now(tz)
     if now.tzinfo is None:
         now = now.replace(tzinfo=tz)
     slot = choose_slot(now.astimezone(tz), args.slot)
     registry = merge_registries([Path(path) for path in args.facts])
-    payload = build_payload(args.instance, registry, now, slot)
+    payload = build_payload(instance_id, registry, now, slot)
 
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -254,7 +266,7 @@ def main() -> int:
         pointer_result = write_pointer(Path(args.pointer), payload, output)
     print(json.dumps({
         "status": "PASS",
-        "instance_id": args.instance,
+        "instance_id": instance_id,
         "edition_id": payload["edition_id"],
         "publication_intent": payload["publication_intent"],
         "editorial_fact_count": payload["editorial_fact_count"],
