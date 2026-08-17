@@ -2,7 +2,7 @@
 setlocal
 title PARTENER.EU - Instaleaza colector MIPE Romania
 set SCRIPT=%TEMP%\Setup-MIPE-Romania-Runner.ps1
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "Invoke-WebRequest -Headers @{'User-Agent'='PARTENER.EU-MIPE-Setup'} -Uri 'https://raw.githubusercontent.com/mihaicismaru-bit/civora/fix/partener-mipe-autocrawl-20260817/partener-eu/local-runner/Setup-MIPE-Romania-Runner.ps1' -OutFile '%SCRIPT%'"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "Invoke-WebRequest -Headers @{'User-Agent'='PARTENER.EU-MIPE-Setup'} -Uri 'https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/partener-eu/local-runner/Setup-MIPE-Romania-Runner.ps1' -OutFile '%SCRIPT%'"
 if errorlevel 1 (
   echo Nu am putut descarca installerul.
   pause
