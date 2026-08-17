@@ -1,80 +1,54 @@
 {
   "schemaVersion": 1,
-  "asOf": "2026-08-17T22:02:30Z",
-  "mode": "AUTO",
+  "generatedAt": "2026-08-17T22:02:13Z",
   "policy": {
-    "statementIsNotAdministrativeFact": true,
-    "homepageMaxItems": 3,
-    "officialEffectRequiresT1Evidence": true,
-    "photoFallback": "initials",
-    "homepageOnly": true,
-    "officialSourceIngestion": true,
-    "directOfficialHomepageOnly": true,
-    "homeFreshnessDays": 60,
-    "hideWhenNoFreshOfficialSignals": true
+    "directOfficialOnly": true,
+    "signalsDoNotChangeCalls": true,
+    "lastKnownGoodOnSourceFailure": true,
+    "fundingRelevanceRequired": true,
+    "failClosed": true
   },
-  "homeIds": [
-    "official-df721729fd9a08b0a6",
-    "auto-dragos-pislaru-2026-08-17-61fffdc9bf",
-    "cseke-attila-pnrr-deadline-2026-07-08"
-  ],
-  "people": [
+  "sources": [
     {
-      "id": "dragos-pislaru",
-      "name": "Dragoș Pîslaru",
-      "aliases": [
-        "Dragoș Pîslaru",
-        "Dragos Pislaru",
-        "Pîslaru",
-        "Pislaru"
-      ],
-      "role": "Ministrul Investițiilor și Proiectelor Europene",
-      "institution": "MIPE",
-      "topics": [
-        "PEO",
-        "PoIDS",
-        "PDDS",
-        "PNRR",
-        "politica de coeziune",
-        "fonduri europene"
-      ],
-      "priority": 100,
-      "active": true
+      "id": "MS_PRESS",
+      "publisher": "Ministerul Sănătății",
+      "url": "https://www.ms.gov.ro/ro/centrul-de-presa/",
+      "tier": "T1_DIRECT_OFFICIAL",
+      "status": "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
+      "observedAt": "2026-08-17T22:02:13.986562+00:00",
+      "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'www.ms.gov.ro'. (_ssl.c:1010)>",
+      "failClosed": true
     },
     {
-      "id": "cseke-attila",
-      "name": "Cseke Attila",
-      "aliases": [
-        "Cseke Attila"
-      ],
-      "role": "Ministrul Dezvoltării, Lucrărilor Publice și Administrației",
-      "institution": "MDLPA",
-      "topics": [
-        "PNRR",
-        "UAT",
-        "dezvoltare locală",
-        "investiții publice"
-      ],
-      "priority": 90,
-      "active": true
+      "id": "ANC_COMMUNICATES",
+      "publisher": "Autoritatea Națională pentru Cercetare",
+      "url": "https://www.research.gov.ro/category/comunicare/comunicate/",
+      "tier": "T1_DIRECT_OFFICIAL",
+      "status": "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
+      "observedAt": "2026-08-17T22:02:13.986562+00:00",
+      "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1010)>",
+      "failClosed": true
     },
     {
-      "id": "oana-toiu",
-      "name": "Oana Țoiu",
-      "aliases": [
-        "Oana Țoiu",
-        "Oana Toiu"
-      ],
-      "role": "Ministrul Afacerilor Externe",
-      "institution": "MAE",
-      "topics": [
-        "CFM 2028–2034",
-        "coeziune",
-        "competitivitate",
-        "buget UE"
-      ],
-      "priority": 65,
-      "active": true
+      "id": "ADR_ARTICLES",
+      "publisher": "Autoritatea pentru Digitalizarea României",
+      "url": "https://www.adr.gov.ro/articole",
+      "tier": "T1_DIRECT_OFFICIAL",
+      "status": "OK",
+      "observedAt": "2026-08-17T22:02:13.986562+00:00",
+      "candidateLinks": 11,
+      "acceptedItems": 11,
+      "failClosed": true
+    },
+    {
+      "id": "FED_MAI",
+      "publisher": "Ministerul Afacerilor Interne — Direcția Fonduri Externe Nerambursabile",
+      "url": "https://fed.mai.gov.ro/in/apeluri/",
+      "tier": "T1_DIRECT_OFFICIAL",
+      "status": "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
+      "observedAt": "2026-08-17T22:02:13.986562+00:00",
+      "error": "HTTP Error 403: Forbidden",
+      "failClosed": true
     }
   ],
   "items": [
@@ -351,141 +325,6 @@
       "fingerprint": "f1c812b49f3ec2588a1e5d9099c20493c44b3e4fc4a47940ebcdaccb939b6269"
     },
     {
-      "id": "auto-dragos-pislaru-2026-08-17-61fffdc9bf",
-      "personId": "dragos-pislaru",
-      "date": "2026-08-17",
-      "type": "FUNDING_COMMITMENT",
-      "topic": "PEO",
-      "headline": "https://mfe.gov.ro/",
-      "statement": "Programul Sănătate Dezvoltare Durabilă și Tranziție Justă Educație și Ocupare Incluziune și Demnitate Socială Creștere Inteligentă, Digitalizare și Instrumente Financiare Asistență Tehnică PNRR Știri și comunicate de presă 14 august 2026 Ministerul Investițiilor și Proiectelor Europene a demarat procesul de alimentare a primei de carieră didactică 13 august 2026 MIPE publică o serie de broșuri informative privind impactul fondurilor europene în România 07 august 2026 România pregătește perioada ",
-      "officialFact": "Semnalul este păstrat separat de efectul administrativ. Orice modificare de apel, termen, buget sau eligibilitate necesită document oficial T1/T1B.",
-      "analysis": "Declarația este relevantă pentru monitorizare; impactul concret se stabilește numai după legarea de documentul sau apelul canonic aplicabil.",
-      "watch": "Documentul oficial, ghidul, corrigendumul sau actul normativ care poate transforma semnalul într-un fapt operațional.",
-      "audiences": [
-        "Beneficiari",
-        "Consultanți"
-      ],
-      "sources": [
-        {
-          "label": "MIPE — sursă observată",
-          "url": "https://mfe.gov.ro/",
-          "tier": "T1"
-        }
-      ],
-      "autoGenerated": true,
-      "person": "Dragoș Pîslaru",
-      "role": "Ministrul Investițiilor și Proiectelor Europene",
-      "institution": "MIPE",
-      "priority": 100,
-      "initials": "DP",
-      "whyItMatters": "Declarația este relevantă pentru monitorizare; impactul concret se stabilește numai după legarea de documentul sau apelul canonic aplicabil."
-    },
-    {
-      "id": "cseke-attila-pnrr-deadline-2026-07-08",
-      "personId": "cseke-attila",
-      "date": "2026-07-08",
-      "type": "PROGRAMME_CHANGE_SIGNAL",
-      "topic": "PNRR / UAT",
-      "headline": "Termen prelungit pentru unele investiții PNRR gestionate de Ministerul Dezvoltării",
-      "statement": "Ministrul a cerut accelerarea execuției și a decontării și a anunțat prelungirea termenului pentru anumite investiții.",
-      "officialFact": "Ordinul nr. 770/2026 stabilește juridic prelungirea până la 30 august 2026 pentru proiectele din componentele 5, 10 și 15 gestionate de Ministerul Dezvoltării.",
-      "analysis": "Pentru UAT-uri, efectul este operațional: calendarul de execuție, facturare și decontare trebuie actualizat pe actul normativ, nu pe declarație.",
-      "watch": "Instrucțiuni suplimentare de decontare și clarificări pentru proiectele aflate la limită.",
-      "audiences": [
-        "UAT",
-        "Școli",
-        "Beneficiari PNRR"
-      ],
-      "sources": [
-        {
-          "label": "Comunicat MDLPA — 08.07.2026",
-          "url": "https://agerpres.ro/comunicate/2026/07/08/comunicat-de-presa---ministerul-dezvoltarii-lucrarilor-publice-si-administratiei--1574219",
-          "tier": "T1B OFFICIAL COMMUNIQUE"
-        },
-        {
-          "label": "Portal Legislativ — Ordinul nr. 770/2026",
-          "url": "https://legislatie.just.ro/Public/DetaliiDocument/312129",
-          "tier": "T1"
-        }
-      ],
-      "person": "Cseke Attila",
-      "role": "Ministrul Dezvoltării, Lucrărilor Publice și Administrației",
-      "institution": "MDLPA",
-      "priority": 90,
-      "initials": "CA",
-      "whyItMatters": "Pentru UAT-uri, efectul este operațional: calendarul de execuție, facturare și decontare trebuie actualizat pe actul normativ, nu pe declarație."
-    },
-    {
-      "id": "oana-toiu-eu-budget-cohesion-2026-07-03",
-      "personId": "oana-toiu",
-      "date": "2026-07-03",
-      "type": "POLICY_SIGNAL",
-      "topic": "Buget UE post-2027",
-      "headline": "Coeziunea și competitivitatea, priorități în negocierea bugetului european",
-      "statement": "Ministrul a indicat coeziunea și competitivitatea între prioritățile României în negocierile europene.",
-      "officialFact": "Este o poziționare de politică publică, nu o alocare de finanțare și nu un apel deschis.",
-      "analysis": "Semnalul este relevant pentru cadrul financiar 2028–2034 și pentru direcția viitoare a politicii de coeziune, fără efect direct asupra eligibilității curente.",
-      "watch": "Poziția formală a României pentru CFM 2028–2034 și negocierile privind politica de coeziune.",
-      "audiences": [
-        "Consultanți",
-        "UAT",
-        "IMM",
-        "ONG",
-        "Universități"
-      ],
-      "sources": [
-        {
-          "label": "Comunicat MAE — 04.07.2026",
-          "url": "https://agerpres.ro/comunicate/2026/07/04/comunicat-de-presa---ministerul-afacerilor-externe--1573083",
-          "tier": "T1B OFFICIAL COMMUNIQUE"
-        }
-      ],
-      "person": "Oana Țoiu",
-      "role": "Ministrul Afacerilor Externe",
-      "institution": "MAE",
-      "priority": 65,
-      "initials": "OȚ",
-      "whyItMatters": "Semnalul este relevant pentru cadrul financiar 2028–2034 și pentru direcția viitoare a politicii de coeziune, fără efect direct asupra eligibilității curente."
-    },
-    {
-      "id": "dragos-pislaru-pnrr-revision-2026-06-19",
-      "personId": "dragos-pislaru",
-      "date": "2026-06-19",
-      "type": "FUNDING_COMMITMENT",
-      "topic": "PNRR",
-      "headline": "Revizuirea tehnică a PNRR păstrează componenta de grant",
-      "statement": "Ministrul a anunțat finalizarea negocierilor tehnice privind ultima modificare a PNRR și menținerea componentei nerambursabile.",
-      "officialFact": "Efectele operaționale trebuie confirmate prin documentele oficiale de revizuire și prin actualizările aplicabile fiecărei investiții.",
-      "analysis": "Pentru beneficiari, semnalul relevant este riscul de reclasificare sau eliminare a proiectelor care nu pot fi finalizate la termen, nu dispariția generală a granturilor.",
-      "watch": "Decizia formală de revizuire, lista finală a investițiilor și efectele asupra contractelor individuale.",
-      "audiences": [
-        "Beneficiari PNRR",
-        "UAT",
-        "IMM",
-        "ONG",
-        "Școli"
-      ],
-      "sources": [
-        {
-          "label": "Declarație publică — 19.06.2026",
-          "url": "https://agerpres.ro/economic/2026/06/19/pislaru-am-finalizat-pozitiv-negocierile-tehnice-cu-comisia-europeana-privind-ultima-modificare-de-p--1568296",
-          "tier": "PUBLIC_STATEMENT / T2-ATTRIBUTED"
-        },
-        {
-          "label": "Portal Legislativ — rol ministerial",
-          "url": "https://legislatie.just.ro/Public/FormaPrintabila/00000G3M21JSNSHWBQN3C3FV4DO59YLY",
-          "tier": "T1"
-        }
-      ],
-      "person": "Dragoș Pîslaru",
-      "role": "Ministrul Investițiilor și Proiectelor Europene",
-      "institution": "MIPE",
-      "priority": 100,
-      "initials": "DP",
-      "photoUrl": "https://agerpres.ro/data/202606/20260619210918_248316.jpg",
-      "whyItMatters": "Pentru beneficiari, semnalul relevant este riscul de reclasificare sau eliminare a proiectelor care nu pot fi finalizate la termen, nu dispariția generală a granturilor."
-    },
-    {
       "id": "official-e448010278d0e515ca",
       "personId": "institution-adr",
       "person": "Autoritatea pentru Digitalizarea României",
@@ -587,11 +426,5 @@
       "sourceId": "ADR_ARTICLES",
       "fingerprint": "e08d749791475d78a69ee8b8c7f8dbf4c8eae1234b1d3d513cd7a5da8c36cdd0"
     }
-  ],
-  "officialIngestion": {
-    "generatedAt": "2026-08-17T22:02:13Z",
-    "sourceCount": 4,
-    "acceptedItemCount": 11,
-    "homeEligibleCount": 11
-  }
+  ]
 }
