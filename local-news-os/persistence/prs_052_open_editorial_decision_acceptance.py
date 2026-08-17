@@ -84,7 +84,7 @@ def main() -> int:
     assert open_row["status"] != "IMPLEMENTED"
     assert open_row["implementation_evidence"] == ["pull-request:synthetic-open-unmerged"]
 
-    open_backlog = [row for row in open_result["backlog"] if row.get("decision_id") == DECISION_ID]
+    open_backlog = [row for row in open_result["development_backlog"] if row.get("decision_id") == DECISION_ID]
     assert len(open_backlog) == 1
     assert open_backlog[0]["backlog_id"] == BACKLOG_ID
     assert open_backlog[0]["state"] == "TODO"
@@ -97,7 +97,7 @@ def main() -> int:
     merged_row = _decision(merged_result)
     assert merged_row["implementation_state"] == "MERGED"
     assert merged_row["status"] == "IMPLEMENTED"
-    assert all(row.get("decision_id") != DECISION_ID for row in merged_result["backlog"])
+    assert all(row.get("decision_id") != DECISION_ID for row in merged_result["development_backlog"])
 
     print(json.dumps({
         "status": "PASS",
