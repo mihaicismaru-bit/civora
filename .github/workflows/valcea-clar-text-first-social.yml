@@ -79,6 +79,15 @@ jobs:
           python valcea-clar/social/threads_editorial_materialize.py --self-test
           python valcea-clar/social/threads_publish.py --self-test
 
+      - name: Remove self-test media from production runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          runtime='valcea-clar/site/runtime/media/social/editorial/instagram-text'
+          if [ -d "$runtime" ]; then
+            find "$runtime" -maxdepth 1 -type f -name 'fixture-ig-text-*.jpg' -delete
+          fi
+
       - name: Materialize canonical Threads products for the current story event
         run: python valcea-clar/social/threads_editorial_materialize.py | tee /tmp/threads-materialize.json
 
@@ -196,7 +205,9 @@ jobs:
               --desired-threads-state /tmp/text-first-threads-state.json
             if [ -d /tmp/text-first-instagram-media ]; then
               mkdir -p valcea-clar/site/runtime/media/social/editorial/instagram-text
+              find valcea-clar/site/runtime/media/social/editorial/instagram-text -maxdepth 1 -type f -name 'fixture-ig-text-*.jpg' -delete
               cp -a /tmp/text-first-instagram-media/. valcea-clar/site/runtime/media/social/editorial/instagram-text/
+              find valcea-clar/site/runtime/media/social/editorial/instagram-text -maxdepth 1 -type f -name 'fixture-ig-text-*.jpg' -delete
             fi
             git add \
               valcea-clar/social/facebook_state.json \
@@ -204,7 +215,7 @@ jobs:
               valcea-clar/social/threads_outbox.json \
               valcea-clar/social/threads_state.json
             if [ -d valcea-clar/site/runtime/media/social/editorial/instagram-text ]; then
-              git add valcea-clar/site/runtime/media/social/editorial/instagram-text
+              git add -A valcea-clar/site/runtime/media/social/editorial/instagram-text
             fi
             if git diff --cached --quiet; then
               echo 'Text-first social state already current on main.'
@@ -232,6 +243,7 @@ jobs:
             echo '- Threads: canonical conversation-native materializer + direct publisher.'
             echo '- TikTok real-media/video gate is intentionally unchanged.'
             echo '- Expired transient service updates are held instead of replayed.'
+            echo '- Self-test media is removed before any production-state snapshot/persist.'
             echo
             echo '### Facebook preview/apply'
             cat /tmp/facebook-text-preview.json 2>/dev/null || true
