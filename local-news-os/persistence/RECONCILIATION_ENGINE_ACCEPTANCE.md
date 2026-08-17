@@ -1,6 +1,6 @@
 # CIVORA persistence reconciliation engine acceptance
 
-This increment implements the executable core required by PRS-016–024 and the explicit acceptance cases required by PRS-042–048.
+This increment implements the executable core required by PRS-016–024 and the explicit acceptance cases required by PRS-042–049.
 
 ## Authority boundaries
 
@@ -28,6 +28,7 @@ This increment implements the executable core required by PRS-016–024 and the 
 15. **PRS-046:** a profile asset/configuration that is locally `READY` with direct-capable runtime but has no remote readback remains capability `PARTIAL` with `external_state=UNCONFIRMED` and `gap=EXTERNAL_CONFIRMATION_GAP`. A stale persisted `LIVE_CONFIRMED` claim emits `FALSE_POSITIVE_PERSISTENCE`; local asset readiness never implies external LIVE.
 16. **PRS-047:** a `NO_PROGRESS_HISTORICAL_STATE` checkpoint remains immutable historical context after a later implementation is merged on main. The checkpoint is not rewritten or promoted to resume authority; current reconciled truth advances to the newer main/`IMPLEMENTED` decision, the stale checkpoint-derived backlog item is removed, and persistence remains `RECONCILIATION_REQUIRED` until the advanced current state is separately persisted under the writer lease.
 17. **PRS-048:** when current evidence explicitly replaces an old active decision with a newer not-yet-implemented decision, the old decision reconciles to `SUPERSEDED` with `superseded_by` lineage, its stale backlog is retired, and the replacement remains `ACTIVE_UNIMPLEMENTED` with an active backlog item. The replacement relationship alone must not make the new decision `IMPLEMENTED`, and the changed active binding remains `RECONCILIATION_REQUIRED` until separately persisted and read back under the writer lease.
+18. **PRS-049:** two consecutive reconciliations with unchanged repository/external evidence and the first result used as the second persisted layer must have zero semantic drift, zero diagnostics and exactly one row per decision, capability and backlog identity. Reconciliation must not duplicate already-active backlog items or manufacture new decision state on an unchanged second pass.
 
 ## PRS mapping
 
@@ -47,5 +48,6 @@ This increment implements the executable core required by PRS-016–024 and the 
 - PRS-046: executable `prs_046_profile_asset_no_remote_readback_acceptance.py` verifies that local profile readiness without remote readback remains `PARTIAL`/`UNCONFIRMED` and never becomes external LIVE.
 - PRS-047: executable `prs_047_no_progress_checkpoint_then_main_acceptance.py` verifies that a historical NO_PROGRESS checkpoint stays immutable/history-only while later merged main evidence advances current truth and retires stale checkpoint-derived backlog.
 - PRS-048: executable `prs_048_explicit_decision_replacement_acceptance.py` verifies that an explicit replacement retires the old decision/backlog as `SUPERSEDED` while the new decision remains active until independently implemented.
+- PRS-049: executable `prs_049_consecutive_no_change_idempotency_acceptance.py` verifies that two unchanged consecutive reconciliation passes preserve identical semantic state with zero diagnostics and no duplicate decisions, capabilities or backlog items.
 
 The engine does not replace the Google Drive writer lease. Any process that persists its result into active CIVORA state must separately acquire `CIVORA_PERSISTENCE_WRITER_LEASE_V1`, use per-target revision control, verify readback, and release the lease.
