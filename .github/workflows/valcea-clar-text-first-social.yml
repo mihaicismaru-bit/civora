@@ -1,0 +1,228 @@
+name: VÂLCEA CLAR Text-First Social Delivery
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/site/story_publication_event.json'
+      - 'valcea-clar/site/current_edition.json'
+      - 'valcea-clar/social/facebook_text_publish.py'
+      - 'valcea-clar/social/story_social_policy.py'
+      - 'valcea-clar/social/merge_text_first_social_state.py'
+      - 'valcea-clar/social/threads_editorial_v1.py'
+      - 'valcea-clar/social/threads_editorial_materialize.py'
+      - 'valcea-clar/social/threads_publish.py'
+      - '.github/workflows/valcea-clar-text-first-social.yml'
+  pull_request:
+    paths:
+      - 'valcea-clar/social/facebook_text_publish.py'
+      - 'valcea-clar/social/story_social_policy.py'
+      - 'valcea-clar/social/merge_text_first_social_state.py'
+      - 'valcea-clar/social/threads_editorial_v1.py'
+      - 'valcea-clar/social/threads_editorial_materialize.py'
+      - 'valcea-clar/social/threads_publish.py'
+      - '.github/workflows/valcea-clar-text-first-social.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-text-first-social
+  cancel-in-progress: false
+
+jobs:
+  deliver:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Refresh canonical main state
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Validate text-first social contracts
+        run: |
+          python -m py_compile \
+            valcea-clar/social/story_social_policy.py \
+            valcea-clar/social/facebook_text_publish.py \
+            valcea-clar/social/merge_text_first_social_state.py \
+            valcea-clar/social/threads_editorial_v1.py \
+            valcea-clar/social/threads_editorial_materialize.py \
+            valcea-clar/social/threads_publish.py
+          python valcea-clar/social/story_social_policy.py --self-test
+          python valcea-clar/social/facebook_text_publish.py --self-test
+          python valcea-clar/social/merge_text_first_social_state.py --self-test
+          python valcea-clar/social/threads_editorial_v1.py --self-test
+          python valcea-clar/social/threads_editorial_materialize.py --self-test
+          python valcea-clar/social/threads_publish.py --self-test
+
+      - name: Materialize canonical Threads products for the current story event
+        run: python valcea-clar/social/threads_editorial_materialize.py | tee /tmp/threads-materialize.json
+
+      - name: Preview Facebook text-first fallback
+        run: python valcea-clar/social/facebook_text_publish.py | tee /tmp/facebook-text-preview.json
+
+      - name: Preview Threads direct queue
+        run: python valcea-clar/social/threads_publish.py | tee /tmp/threads-preview.json
+
+      - name: Publish one eligible Facebook text-first story
+        id: facebook_apply
+        if: github.event_name != 'pull_request'
+        continue-on-error: true
+        env:
+          VALCEA_FB_PAGE_ID: '1234360446430980'
+          VALCEA_META_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_META_PAGE_ACCESS_TOKEN }}
+          VALCEA_FB_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_FB_PAGE_ACCESS_TOKEN }}
+          VALCEA_FB_GRAPH_VERSION: v26.0
+          VALCEA_FB_TEXT_LIVE_ENABLED: 'true'
+          VALCEA_FB_TEXT_MAX_PER_RUN: '1'
+        run: python valcea-clar/social/facebook_text_publish.py --apply | tee /tmp/facebook-text-apply.json
+
+      - name: Record Facebook PR preview
+        if: github.event_name == 'pull_request'
+        run: cp /tmp/facebook-text-preview.json /tmp/facebook-text-apply.json
+
+      - name: Verify Threads identity
+        id: threads_auth
+        if: github.event_name != 'pull_request'
+        continue-on-error: true
+        env:
+          VALCEA_THREADS_ACCESS_TOKEN: ${{ secrets.VALCEA_THREADS_ACCESS_TOKEN }}
+          VALCEA_THREADS_EXPECTED_USERNAME: valceaclar
+        run: python valcea-clar/social/threads_publish.py --health-check | tee /tmp/threads-auth.json
+
+      - name: Publish one eligible Threads story
+        id: threads_apply
+        if: github.event_name != 'pull_request' && steps.threads_auth.outcome == 'success'
+        continue-on-error: true
+        env:
+          VALCEA_THREADS_ACCESS_TOKEN: ${{ secrets.VALCEA_THREADS_ACCESS_TOKEN }}
+          VALCEA_THREADS_EXPECTED_USERNAME: valceaclar
+          VALCEA_THREADS_LIVE_ENABLED: 'true'
+          VALCEA_THREADS_MAX_PER_RUN: '1'
+        run: python valcea-clar/social/threads_publish.py --apply | tee /tmp/threads-apply.json
+
+      - name: Record Threads no-apply state
+        if: github.event_name == 'pull_request' || steps.threads_auth.outcome != 'success'
+        run: cp /tmp/threads-preview.json /tmp/threads-apply.json
+
+      - name: Snapshot desired publication state
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp valcea-clar/social/facebook_state.json /tmp/text-first-facebook-state.json
+          cp valcea-clar/social/threads_outbox.json /tmp/text-first-threads-outbox.json
+          cp valcea-clar/social/threads_state.json /tmp/text-first-threads-state.json
+
+      - name: Persist text-first publication state conflict-safe
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'valcea-clar-text-first-social[bot]'
+          git config user.email 'valcea-clar-text-first-social@users.noreply.github.com'
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            python valcea-clar/social/merge_text_first_social_state.py \
+              --desired-facebook /tmp/text-first-facebook-state.json \
+              --desired-threads-outbox /tmp/text-first-threads-outbox.json \
+              --desired-threads-state /tmp/text-first-threads-state.json
+            git add \
+              valcea-clar/social/facebook_state.json \
+              valcea-clar/social/threads_outbox.json \
+              valcea-clar/social/threads_state.json
+            if git diff --cached --quiet; then
+              echo 'Text-first social state already current on main.'
+              exit 0
+            fi
+            git commit -m 'Persist VÂLCEA CLAR text-first social delivery state'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "main advanced during text-first state persist; retrying ${attempt}/5."
+            sleep $((attempt * 2))
+          done
+          echo 'Could not persist text-first social state after five attempts.' >&2
+          exit 1
+
+      - name: Publish delivery audit summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '## VÂLCEA CLAR Text-First Social Delivery'
+            echo
+            echo '- Facebook fallback: verified text + canonical link only when no approved visual exists.'
+            echo '- Threads: canonical conversation-native materializer + direct publisher.'
+            echo '- Instagram/TikTok visual gates are intentionally unchanged.'
+            echo '- Expired transient service updates are held instead of replayed.'
+            echo
+            echo '### Facebook preview'
+            cat /tmp/facebook-text-preview.json 2>/dev/null || true
+            echo
+            echo '### Facebook apply'
+            cat /tmp/facebook-text-apply.json 2>/dev/null || true
+            echo
+            echo '### Threads preview/apply'
+            cat /tmp/threads-preview.json 2>/dev/null || true
+            cat /tmp/threads-apply.json 2>/dev/null || true
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload text-first social audit
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-text-first-social-${{ github.run_id }}
+          path: |
+            /tmp/facebook-text-preview.json
+            /tmp/facebook-text-apply.json
+            /tmp/threads-materialize.json
+            /tmp/threads-preview.json
+            /tmp/threads-auth.json
+            /tmp/threads-apply.json
+            valcea-clar/social/facebook_state.json
+            valcea-clar/social/threads_outbox.json
+            valcea-clar/social/threads_state.json
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Fail on hard direct-publication errors
+        if: always() && github.event_name != 'pull_request'
+        shell: bash
+        env:
+          FACEBOOK_OUTCOME: ${{ steps.facebook_apply.outcome }}
+          THREADS_AUTH_OUTCOME: ${{ steps.threads_auth.outcome }}
+          THREADS_APPLY_OUTCOME: ${{ steps.threads_apply.outcome }}
+        run: |
+          set -euo pipefail
+          failed=0
+          if [ "$FACEBOOK_OUTCOME" = 'failure' ]; then
+            echo 'Facebook text-first direct publication failed.' >&2
+            failed=1
+          fi
+          if [ "$THREADS_AUTH_OUTCOME" = 'failure' ]; then
+            echo 'Threads direct identity/authentication failed.' >&2
+            failed=1
+          fi
+          if [ "$THREADS_APPLY_OUTCOME" = 'failure' ]; then
+            echo 'Threads direct publication failed.' >&2
+            failed=1
+          fi
+          exit "$failed"
