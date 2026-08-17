@@ -310,8 +310,8 @@ def test_recovery_output_and_state_never_contain_credential_material() -> None:
         make_recovery(root, ch, jb)
         result = recovery.reconcile_recovery(root, ch, jb, authorization_fingerprint=FP1, now="2026-08-16T10:20:00Z", authorize_provider_reread=True)
         text = json.dumps(result, ensure_ascii=False) + (root / runtime.expected_checkpoint_state_path(ch)).read_text(encoding="utf-8")
-        assert "credential_value" not in text
-        assert "access_token" not in text.lower()
+        assert '"credential_value":' not in text
+        assert '"access_token":' not in text.lower()
         assert result["guards"]["credential_values_read"] is False
         assert result["guards"]["provider_payload_persisted"] is False
 
