@@ -8,6 +8,9 @@ WORKFLOWS = REPO / ".github" / "workflows"
 
 validation = (WORKFLOWS / "partener-eu-validation.yml").read_text(encoding="utf-8")
 peo_workflow = (WORKFLOWS / "partener-eu-peo-calendar.yml").read_text(encoding="utf-8")
+pages_workflow = (WORKFLOWS / "partener-eu-pages.yml").read_text(encoding="utf-8")
+auto_deploy_workflow = (WORKFLOWS / "partener-eu-auto-deploy.yml").read_text(encoding="utf-8")
+go_live_workflow = (WORKFLOWS / "partener-eu-go-live.yml").read_text(encoding="utf-8")
 tasks = (PARTENER / "ops" / "p10_resolution_tasks.py").read_text(encoding="utf-8")
 monitor = (PARTENER / "ops" / "p10_monitor_integrity.py").read_text(encoding="utf-8")
 deployment = (PARTENER / "ops" / "check_public_site.py").read_text(encoding="utf-8")
@@ -41,6 +44,21 @@ if "cancel-in-progress: false" not in validation:
     errors.append("production validation ledger writers are not serialized")
 if "ref: main" not in validation:
     errors.append("queued production validation can check out a stale workflow event SHA")
+
+# GitHub Pages accepts only one active deployment per repository. Every workflow
+# that invokes deploy-pages must queue on the same repository-wide lock; using
+# separate groups or cancelling an in-flight deployment can race the Pages API.
+for workflow_name, workflow in [
+    ("PARTENER.EU Pages", pages_workflow),
+    ("PARTENER.EU Auto Deploy", auto_deploy_workflow),
+    ("PARTENER.EU Go Live", go_live_workflow),
+]:
+    if "uses: actions/deploy-pages@v4" not in workflow:
+        errors.append(f"{workflow_name} no longer exposes its expected Pages deployment step")
+    if "group: partener-eu-pages" not in workflow:
+        errors.append(f"{workflow_name} does not share the repository-wide Pages deployment lock")
+    if "cancel-in-progress: false" not in workflow:
+        errors.append(f"{workflow_name} can cancel an in-flight Pages deployment")
 
 # Scheduled PEO calendar changes are candidate evidence only during P10. The
 # workflow may persist state but must not update the public JS feed automatically.
@@ -90,7 +108,7 @@ for marker in [
 for marker in [
     "https://partener.eu/",
     'id="boot-fallback"',
-    "Găsește finanțarea potrivită",
+    "Ai o investiție în minte?",
     "critical_assets_ok",
     "legacy_origin_detected",
 ]:
