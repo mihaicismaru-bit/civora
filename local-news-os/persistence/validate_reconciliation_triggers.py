@@ -7,6 +7,12 @@ import json
 from pathlib import Path
 from typing import Any
 
+ROOT = Path(__file__).resolve().parents[2]
+RECONCILIATION_WORKFLOW = ROOT / ".github" / "workflows" / "civora-persistence-reconciliation.yml"
+SCOPE_DRIFT_WORKFLOW = ROOT / ".github" / "workflows" / "civora-scope-drift.yml"
+SCOPE_CONFIG = Path(__file__).with_name("repository_scope.json")
+RECONCILIATION_WORKFLOW_PATH = ".github/workflows/civora-persistence-reconciliation.yml"
+
 REQUIRED_EVENTS = {
     "MAIN_MERGE",
     "CAPABILITY_REGISTRY_CHANGE",
@@ -102,9 +108,36 @@ def validate(contract: dict[str, Any]) -> None:
             raise ValueError(f"credential-like field forbidden in trigger contract: {forbidden}")
 
 
+def validate_executable_wiring() -> None:
+    """Fail closed if the declarative MAIN_MERGE trigger is not executable."""
+    reconciliation_workflow = RECONCILIATION_WORKFLOW.read_text(encoding="utf-8")
+    scope_workflow = SCOPE_DRIFT_WORKFLOW.read_text(encoding="utf-8")
+    scope_config = _load(SCOPE_CONFIG)
+
+    required_reconciliation_fragments = (
+        "workflow_run:",
+        'workflows: ["CIVORA Scope Drift"]',
+        "types: [completed]",
+        "github.event.workflow_run.head_sha",
+        "github.event.workflow_run.conclusion == 'success'",
+        "github.event.workflow_run.head_branch == 'main'",
+    )
+    for fragment in required_reconciliation_fragments:
+        if fragment not in reconciliation_workflow:
+            raise ValueError(f"reconciliation workflow missing executable MAIN_MERGE wiring: {fragment}")
+
+    if RECONCILIATION_WORKFLOW_PATH not in scope_workflow:
+        raise ValueError("scope-drift workflow does not observe reconciliation workflow changes")
+
+    include = scope_config.get("include")
+    if not isinstance(include, list) or RECONCILIATION_WORKFLOW_PATH not in include:
+        raise ValueError("reconciliation workflow is outside CIVORA structural scope")
+
+
 def self_test(path: Path) -> None:
     contract = _load(path)
     validate(contract)
+    validate_executable_wiring()
 
     duplicate = json.loads(json.dumps(contract))
     duplicate["events"].append(dict(duplicate["events"][0]))
@@ -146,9 +179,10 @@ def main() -> int:
     args = parser.parse_args()
     contract = _load(args.contract)
     validate(contract)
+    validate_executable_wiring()
     if args.self_test:
         self_test(args.contract)
-    print("PASS: CIVORA reconciliation trigger contract is valid")
+    print("PASS: CIVORA reconciliation trigger contract and executable wiring are valid")
     return 0
 
 
