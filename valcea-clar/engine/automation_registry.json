@@ -1,5 +1,5 @@
 {
-  "schema_version": 4,
+  "schema_version": 5,
   "product": "CIVORA / VÂLCEA CLAR",
   "canonical_domain": "valceaclar.ro",
   "execution_owner": "civora_site_engine",
@@ -18,6 +18,14 @@
   },
   "content_engine": {
     "generator": "deterministic_zero_llm_v2",
+    "editorial_writer": "manual_journalism_v1",
+    "editorial_manual": "valcea-clar/editorial/editorial_manual.json",
+    "editorial_writer_runtime": "valcea-clar/scripts/editorial_writer.py",
+    "editorial_writer_activation_point": "valcea-clar/scripts/generate_edition.py:merged_registry",
+    "new_story_fact_kernel_target": true,
+    "claim_level_provenance_required_for_new_kernel_composition": true,
+    "legacy_verified_copy_rewritten": false,
+    "reputational_formats_fail_closed": true,
     "paid_llm_api_required": false,
     "local_agent_runtime_required": false,
     "self_hosted_runner_allowed": false,
@@ -37,9 +45,18 @@
       "event_triggers": true,
       "publication_gate": "per_story_editorial_quality_gate",
       "edition_window_gate": false,
+      "editorial_writer": "manual_journalism_v1",
       "emits": "valcea-clar/site/story_publication_event.json",
       "post_persist_dispatch": ".github/workflows/valcea-clar-social-publishing.yml",
       "post_persist_dispatch_mode": "explicit_workflow_dispatch",
+      "owner": "site_engine"
+    },
+    {
+      "id": "editorial_writer_acceptance",
+      "kind": "editorial_manual_and_fact_kernel_validation",
+      "workflow": ".github/workflows/valcea-clar-editorial-writer.yml",
+      "schedule": [],
+      "event_driven": true,
       "owner": "site_engine"
     },
     {

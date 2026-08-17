@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0",
+  "instance_id": "valcea",
+  "product": "VÂLCEA CLAR Editorial Manual",
+  "writer_id": "manual_journalism_v1",
+  "execution_owner": "CIVORA_SITE_ENGINE",
+  "purpose": "Transform verified fact kernels into reader-facing journalistic products without adding unsupported facts.",
+  "principles": {
+    "fact_before_form": true,
+    "claim_level_provenance_required_for_new_kernel_composition": true,
+    "source_signal_is_not_fact": true,
+    "headline_may_not_exceed_evidence": true,
+    "dek_may_not_add_new_material_fact": true,
+    "inference_must_be_labeled": true,
+    "opinion_must_be_labeled": true,
+    "satire_must_be_labeled": true,
+    "correction_trace_required": true,
+    "anonymous_source_auto_publication_forbidden": true,
+    "synthetic_quote_forbidden": true,
+    "fabricated_scene_forbidden": true,
+    "false_balance_forbidden": true,
+    "fake_urgency_forbidden": true,
+    "clickbait_gap_forbidden": true,
+    "reputational_claims_fail_closed": true
+  },
+  "new_fact_kernel_contract": {
+    "required": ["headline", "dek", "claims"],
+    "headline": {
+      "required": ["text", "source_urls"],
+      "min_chars": 12,
+      "max_chars": 140
+    },
+    "dek": {
+      "required": ["text", "source_urls"],
+      "min_chars": 35,
+      "max_chars": 300
+    },
+    "claim": {
+      "required": ["id", "role", "text", "source_urls", "kind"],
+      "allowed_kinds": ["fact", "attributed_statement", "documented_context", "reader_service"],
+      "minimum_text_chars": 24,
+      "source_urls_must_exist_in_story_sources": true
+    }
+  },
+  "formats": {
+    "straight_news": {
+      "auto_publish_eligible": true,
+      "role_order": ["material_change", "who_what_when_where", "context", "consequence", "next_watch"],
+      "minimum_claims": 2,
+      "minimum_distinct_source_urls": 1
+    },
+    "explainer": {
+      "auto_publish_eligible": true,
+      "role_order": ["material_change", "meaning", "context", "evidence", "consequence", "next_watch"],
+      "minimum_claims": 2,
+      "minimum_distinct_source_urls": 1
+    },
+    "service_news": {
+      "auto_publish_eligible": true,
+      "role_order": ["material_change", "reader_action", "who_what_when_where", "context", "next_watch"],
+      "minimum_claims": 2,
+      "minimum_distinct_source_urls": 1
+    },
+    "investigation": {
+      "auto_publish_eligible": false,
+      "role_order": ["documented_finding", "evidence", "context", "response", "what_is_unknown", "next_watch"],
+      "minimum_claims": 3,
+      "minimum_distinct_source_urls": 2,
+      "additional_gate": "REPUTATIONAL_EDITORIAL_REVIEW"
+    },
+    "analysis": {
+      "auto_publish_eligible": false,
+      "role_order": ["verified_baseline", "interpretation", "counterevidence", "uncertainty", "next_watch"],
+      "minimum_claims": 3,
+      "minimum_distinct_source_urls": 2,
+      "additional_gate": "EDITORIAL_REVIEW"
+    }
+  },
+  "format_selection": [
+    {"when": "section=INVESTIGAȚII", "format": "investigation"},
+    {"when": "material_fact_gate=PASS_EXPLAINER_ONLY", "format": "explainer"},
+    {"when": "editorial_type=service", "format": "service_news"},
+    {"when": "editorial_type=analysis", "format": "analysis"},
+    {"when": "default", "format": "straight_news"}
+  ],
+  "legacy_compatibility": {
+    "existing_verified_story_without_fact_kernel": "validate_and_pass_through_without_rewriting",
+    "legacy_story_may_not_gain_new_facts": true,
+    "future_new_story_target": "fact_kernel_required"
+  },
+  "satire_boundary": {
+    "handled_by_this_writer": false,
+    "requires_verified_base_story": true,
+    "may_not_create_new_factual_allegation": true,
+    "must_be_visibly_labeled": true
+  }
+}

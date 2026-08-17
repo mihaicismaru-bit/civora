@@ -1,0 +1,53 @@
+name: VÂLCEA CLAR Editorial Writer
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'valcea-clar/editorial/editorial_manual.json'
+      - 'valcea-clar/editorial/facts_registry.json'
+      - 'valcea-clar/scripts/editorial_writer.py'
+      - 'valcea-clar/scripts/generate_edition.py'
+      - 'valcea-clar/scripts/newsroom_decide.py'
+      - '.github/workflows/valcea-clar-editorial-writer.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/editorial/editorial_manual.json'
+      - 'valcea-clar/editorial/facts_registry.json'
+      - 'valcea-clar/scripts/editorial_writer.py'
+      - 'valcea-clar/scripts/generate_edition.py'
+      - 'valcea-clar/scripts/newsroom_decide.py'
+      - '.github/workflows/valcea-clar-editorial-writer.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  editorial-writer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Compile editorial runtime
+        run: |
+          python -m py_compile \
+            valcea-clar/scripts/editorial_writer.py \
+            valcea-clar/scripts/generate_edition.py \
+            valcea-clar/scripts/newsroom_decide.py
+
+      - name: Validate editorial manual and current curated registry
+        run: python valcea-clar/scripts/editorial_writer.py --check
+
+      - name: Test claim-level composition and fail-closed behavior
+        run: python valcea-clar/scripts/editorial_writer.py --self-test
+
+      - name: Test edition integration
+        run: python valcea-clar/scripts/generate_edition.py --self-test
+
+      - name: Test continuous story gate integration
+        run: python valcea-clar/scripts/newsroom_decide.py --self-test

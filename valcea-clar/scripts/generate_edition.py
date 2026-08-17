@@ -2,10 +2,12 @@
 """Generate VÂLCEA CLAR morning/evening editions without a paid LLM API.
 
 The generator is deterministic and fail-closed. It renders only structured
-facts that passed an editorial evidence gate. It merges the curated fact
-registry with narrowly scoped automatic facts discovered from primary sources.
-If a new edition cannot pass the publication gate, the public pointer remains
-on the last known good edition.
+facts that passed an editorial evidence gate. Curated facts are first routed
+through the VÂLCEA CLAR Editorial Writer, which either composes a new story from
+claim-level provenance or validates legacy approved copy without rewriting it.
+It then merges those products with narrowly scoped automatic facts discovered
+from primary sources. If a new edition cannot pass the publication gate, the
+public pointer remains on the last known good edition.
 
 Public edition items are strictly reader-facing editorial facts. Operational
 telemetry (source health, ingest queues, hidden candidates) stays in its
@@ -18,6 +20,8 @@ import json
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
+
+import editorial_writer
 
 ROOT = Path(__file__).resolve().parents[1]
 FACTS = ROOT / "editorial" / "facts_registry.json"
@@ -53,10 +57,14 @@ def choose_slot(now: datetime, requested: str) -> str:
 
 
 def merged_registry() -> tuple[dict, int]:
-    curated = load_json(FACTS)
+    # This call is the activation point for Editorial Writer v1. It fails closed
+    # if the manual contract itself is invalid. Individual malformed fact kernels
+    # are converted to editorial_hold and therefore cannot enter eligible_facts.
+    curated = editorial_writer.materialize_curated_registry(write_output=True)
     automatic = load_json(AUTO_FACTS, {"facts": []})
-    # Curated facts win on id collisions. Automatic facts remain independently
-    # scoped and can only carry title/date/source data admitted by their gate.
+    # Curated/editorial products win on id collisions. Automatic facts remain
+    # independently scoped and can only carry title/date/source data admitted by
+    # their discovery gate until they acquire a verified full fact kernel.
     combined = {fact["id"]: fact for fact in automatic.get("facts", []) if fact.get("id")}
     for fact in curated.get("facts", []):
         if fact.get("id"):
@@ -110,7 +118,7 @@ def render_markdown(now: datetime, slot: str, items: list[dict], status_note: st
                 continue
             seen.add(key)
             lines.append(f"- {source.get('name')} — {source.get('url')}\n")
-    lines.append("\n**Politică editorială:** această ediție este generată automat numai din fapte structurate care au trecut pragul de verificare. Pentru fluxul automat din surse primare, sistemul poate admite numai titlul, data publicării și linkul sursei; detaliile materiale nu sunt deduse din articol. Dacă datele verificate sunt insuficiente, ediția este mai scurtă.\n")
+    lines.append("\n**Politică editorială:** această ediție este generată automat numai din fapte structurate care au trecut pragul de verificare. Materialele noi compuse de Editorial Writer folosesc exclusiv afirmații legate explicit de surse; materialele vechi sunt validate și păstrate fără rescriere. Pentru fluxul automat din surse primare, sistemul poate admite numai titlul, data publicării și linkul sursei până când există un fact kernel complet. Dacă datele verificate sunt insuficiente, ediția este mai scurtă.\n")
     return "".join(lines)
 
 
@@ -127,6 +135,9 @@ def compact_item(item: dict) -> dict:
         "sources": item.get("sources", []),
         **({"auto_generated": True, "auto_scope": item.get("auto_scope")} if item.get("auto_generated") else {}),
         **({"visual": item["visual"]} if item.get("visual") else {}),
+        **({"factbox": item["factbox"]} if item.get("factbox") else {}),
+        **({"article_sections": item["article_sections"]} if item.get("article_sections") else {}),
+        **({"editorial_product": item["editorial_product"]} if item.get("editorial_product") else {}),
     }
 
 
@@ -142,21 +153,23 @@ def write_outputs(now: datetime, slot: str, facts: list[dict], auto_registry_cou
     items = facts
     editorial_count = len(items)
     included_auto = sum(1 for fact in items if fact.get("auto_generated"))
+    writer_composed = sum(1 for fact in items if (fact.get("editorial_product") or {}).get("writer_mode") == "FACT_KERNEL_COMPOSED")
     publish = editorial_count >= 1
     status_note = "" if editorial_count >= 3 else "Ediție scurtă: publicăm doar informațiile care au trecut pragul de verificare."
     eid = edition_id(now, slot)
     title_slot = "dimineață" if slot == "morning" else "seară"
     payload = {
-        "schema_version": "2.3",
+        "schema_version": "2.4",
         "edition_id": eid,
         "slot": slot,
         "title": f"VÂLCEA CLAR — Ediția de {title_slot}",
         "edition_date": now.date().isoformat(),
         "updated_local": now.isoformat(timespec="seconds"),
-        "generator": "deterministic_zero_llm_v2",
+        "generator": "deterministic_zero_llm_v2+manual_journalism_v1",
         "status": "auto_approved" if publish else "auto_hold",
         "publication_intent": "publish" if publish else "hold",
         "editorial_fact_count": editorial_count,
+        "editorial_writer_composed_count": writer_composed,
         "auto_fact_registry_count": auto_registry_count,
         "auto_facts_included": included_auto,
         "items": [compact_item(item) for item in items],
@@ -164,6 +177,9 @@ def write_outputs(now: datetime, slot: str, facts: list[dict], auto_registry_cou
             "llm_required": False,
             "external_paid_api_required": False,
             "verified_facts_only": True,
+            "editorial_writer": editorial_writer.WRITER_ID,
+            "new_kernel_claim_level_provenance_required": True,
+            "legacy_copy_rewritten": False,
             "primary_source_auto_scope": "title_date_source_only",
             "article_body_material_facts_autopublish": False,
             "shorter_edition_when_evidence_is_sparse": True,
@@ -178,12 +194,13 @@ def write_outputs(now: datetime, slot: str, facts: list[dict], auto_registry_cou
     md_path.write_text(render_markdown(now, slot, items, status_note), encoding="utf-8")
 
     attempt = {
-        "schema_version": "1.1",
+        "schema_version": "1.2",
         "edition_id": eid,
         "slot": slot,
         "status": payload["status"],
         "publication_intent": payload["publication_intent"],
         "editorial_fact_count": editorial_count,
+        "editorial_writer_composed_count": writer_composed,
         "auto_facts_included": included_auto,
         "updated_local": payload["updated_local"],
     }
@@ -191,7 +208,7 @@ def write_outputs(now: datetime, slot: str, facts: list[dict], auto_registry_cou
 
     if publish:
         pointer = {
-            "schema_version": "1.1",
+            "schema_version": "1.2",
             "edition_id": eid,
             "slot": slot,
             "status": payload["status"],
@@ -208,7 +225,7 @@ def write_outputs(now: datetime, slot: str, facts: list[dict], auto_registry_cou
         previous = load_json(POINTER, {})
         if not pointer_is_publishable(previous):
             hold_pointer = {
-                "schema_version": "1.1",
+                "schema_version": "1.2",
                 "edition_id": eid,
                 "slot": slot,
                 "status": payload["status"],
@@ -239,6 +256,7 @@ def self_test() -> int:
     assert all(item.get("id") not in {"unde-iesim-operational", "source-radar-operational"} for item in eligible)
     assert pointer_is_publishable({"edition_id": "x", "status": "auto_approved", "publication_intent": "publish"})
     assert not pointer_is_publishable({"edition_id": "x", "status": "auto_hold", "publication_intent": "hold"})
+    editorial_writer.self_test()
     print("Autonomous edition generator self-test: PASS")
     return 0
 
@@ -265,6 +283,7 @@ def main() -> int:
         "publication_intent": payload["publication_intent"],
         "edition_id": payload["edition_id"],
         "editorial_fact_count": payload["editorial_fact_count"],
+        "editorial_writer_composed_count": payload["editorial_writer_composed_count"],
         "auto_fact_registry_count": payload["auto_fact_registry_count"],
         "auto_facts_included": payload["auto_facts_included"],
         "json": str(json_path.relative_to(ROOT)),
