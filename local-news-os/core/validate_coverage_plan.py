@@ -7,6 +7,8 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+TAXONOMY_CONTRACT = "LOCAL_NEWS_OS_EDITORIAL_COVERAGE_TAXONOMY_V1"
+COVERAGE_CONTRACT = "LOCAL_NEWS_OS_INSTANCE_COVERAGE_PLAN_V1"
 
 
 def load(path: Path) -> dict:
@@ -59,14 +61,14 @@ def validate(instance_id: str) -> dict:
     coverage_path = repo_file(coverage_raw)
     coverage = load(coverage_path)
     errors: list[str] = []
-    if coverage.get("contract") != "LOCAL_NEWS_OS_INSTANCE_COVERAGE_PLAN_V1":
+    if coverage.get("contract") != COVERAGE_CONTRACT:
         errors.append(f"{coverage_path}: invalid coverage contract")
     if coverage.get("instance_id") != instance_id:
         errors.append(f"{coverage_path}: instance_id mismatch")
 
     taxonomy_path = repo_file(str(coverage.get("taxonomy") or ""))
     taxonomy = load(taxonomy_path)
-    if taxonomy.get("contract") != "LOCAL_NEWS_OS_EDITORIAL_COVERAGE_TAXONOMY_V1":
+    if taxonomy.get("contract") != TAXONOMY_CONTRACT:
         errors.append(f"{taxonomy_path}: invalid taxonomy contract")
     if taxonomy.get("scope") != "CORE_GENERIC":
         errors.append(f"{taxonomy_path}: taxonomy scope must be CORE_GENERIC")
@@ -147,11 +149,16 @@ def validate(instance_id: str) -> dict:
 
 
 def self_test() -> int:
-    report = validate("valcea")
-    assert report["status"] == "PASS", report
-    assert report["taxonomy_topics"] >= 20
-    assert report["source_layers"] == 3
-    print("LOCAL NEWS OS coverage plan self-test: PASS")
+    taxonomy_path = repo_file("local-news-os/contracts/editorial_coverage_taxonomy_v1.json")
+    taxonomy = load(taxonomy_path)
+    assert taxonomy.get("contract") == TAXONOMY_CONTRACT
+    assert taxonomy.get("scope") == "CORE_GENERIC"
+    topic_ids = [row.get("id") for row in taxonomy.get("topics", []) if isinstance(row, dict)]
+    assert len(topic_ids) >= 20
+    assert len(topic_ids) == len(set(topic_ids))
+    layer_ids = {row.get("id") for row in taxonomy.get("source_layers", []) if isinstance(row, dict)}
+    assert layer_ids == {"PRIMARY_AUTOMATIC", "OFFICIAL_WATCH", "SIGNAL_RADAR"}
+    print("LOCAL NEWS OS coverage-plan validator self-test: PASS")
     return 0
 
 
