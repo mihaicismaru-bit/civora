@@ -1,0 +1,102 @@
+name: LOCAL NEWS OS Reread Materialization Crash Reconciliation
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/social/reread_materialization_crash_reconciliation.py"
+      - "local-news-os/social/test_reread_materialization_crash_reconciliation.py"
+      - "local-news-os/social/reread_result_materialization_binding.py"
+      - "local-news-os/social/reread_provider_outcome_binding.py"
+      - "local-news-os/social/reread_spend_reauthorization.py"
+      - "local-news-os/social/reread_spend_reclaim_binding.py"
+      - "local-news-os/social/authorization_sealed_harvest_receipt.py"
+      - "local-news-os/social/observed_metrics_collector.py"
+      - "local-news-os/social/durable_feedback_snapshot.py"
+      - ".github/workflows/local-news-os-reread-materialization-crash-reconciliation.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/social/reread_materialization_crash_reconciliation.py"
+      - "local-news-os/social/test_reread_materialization_crash_reconciliation.py"
+      - "local-news-os/social/reread_result_materialization_binding.py"
+      - "local-news-os/social/reread_provider_outcome_binding.py"
+      - "local-news-os/social/reread_spend_reauthorization.py"
+      - "local-news-os/social/reread_spend_reclaim_binding.py"
+      - "local-news-os/social/authorization_sealed_harvest_receipt.py"
+      - "local-news-os/social/observed_metrics_collector.py"
+      - "local-news-os/social/durable_feedback_snapshot.py"
+      - ".github/workflows/local-news-os-reread-materialization-crash-reconciliation.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-news-os-reread-materialization-crash-reconciliation-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile materialization crash reconciliation boundary
+        run: |
+          python -m py_compile \
+            local-news-os/social/reread_materialization_crash_reconciliation.py \
+            local-news-os/social/test_reread_materialization_crash_reconciliation.py \
+            local-news-os/social/reread_result_materialization_binding.py \
+            local-news-os/social/reread_provider_outcome_binding.py \
+            local-news-os/social/reread_spend_reauthorization.py \
+            local-news-os/social/reread_spend_reclaim_binding.py \
+            local-news-os/social/authorization_sealed_harvest_receipt.py \
+            local-news-os/social/observed_metrics_collector.py \
+            local-news-os/social/durable_feedback_snapshot.py
+
+      - name: Run materialization crash reconciliation acceptance
+        working-directory: local-news-os/social
+        run: python test_reread_materialization_crash_reconciliation.py
+
+      - name: Run durable materialization regression
+        working-directory: local-news-os/social
+        run: python test_reread_result_materialization_binding.py
+
+      - name: Run provider outcome regression
+        working-directory: local-news-os/social
+        run: python test_reread_provider_outcome_binding.py
+
+      - name: Verify recovery remains local-only and zero-paid
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, 'local-news-os/social')
+          import reread_materialization_crash_reconciliation as recovery
+          required = {
+              'recovery_requires_explicit_reread_lineage': True,
+              'recovery_requires_spent_handoff': True,
+              'recovery_requires_network_start_proof': True,
+              'recovery_requires_exact_durable_materialization': True,
+              'feedback_snapshot_readback_required_when_materialization_requires_it': True,
+              'ambiguous_or_missing_evidence_remains_recovery_required': True,
+              'completed_no_data_inferred_from_absence': False,
+              'provider_reread_authorized_by_recovery': False,
+              'provider_network_call_performed_by_recovery': False,
+              'credential_values_read': False,
+              'credential_values_persisted': False,
+              'provider_payload_persisted': False,
+              'predictive_analytics_used': False,
+              'publication_blocked_by_analytics': False,
+              'zero_paid_dependency': True,
+          }
+          guards = recovery.guards()
+          for key, expected in required.items():
+              if guards.get(key) is not expected:
+                  raise SystemExit(f'crash-recovery guard mismatch: {key}={guards.get(key)!r}')
+          print('REREAD_MATERIALIZATION_CRASH_RECOVERY_GUARDS_PASS')
+          PY
