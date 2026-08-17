@@ -3,7 +3,6 @@ from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[2]
 WEB=ROOT/'partener-eu/web'
-STATE=ROOT/'partener-eu/ingest/state'
 ui=(WEB/'public-product-v3.js').read_text(encoding='utf-8')
 people=(WEB/'people-policy-v1.js').read_text(encoding='utf-8')
 index=(WEB/'index.html').read_text(encoding='utf-8')
@@ -11,7 +10,6 @@ index=(WEB/'index.html').read_text(encoding='utf-8')
 assert 'PARTENER_DECISION_PRODUCTS' in ui
 assert 'Nu afișăm apeluri aleatoriu' in ui
 assert 'D.calls.slice(0,2)' not in ui
-assert 'data-r="changes"' not in ui
 assert "[data-r=\"changes\"]" in ui
 assert 'placeholder="Ex.: Sunt IMM' in ui
 assert 'value="Am firmă din industria alimentară' not in ui
