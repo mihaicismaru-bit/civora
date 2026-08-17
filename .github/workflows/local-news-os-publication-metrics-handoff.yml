@@ -1,0 +1,64 @@
+name: LOCAL NEWS OS Publication Metrics Handoff
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/social/publication_metrics_handoff.py"
+      - "local-news-os/social/test_publication_metrics_handoff.py"
+      - "local-news-os/social/publication_metrics_catalog.py"
+      - "local-news-os/social/metrics_harvest_scheduler.py"
+      - "local-news-os/social/durable_dispatch_executor.py"
+      - "local-news-os/social/observed_metrics_collector.py"
+      - "local-news-os/social/native_metrics_transport.py"
+      - "local-news-os/social/content_atomizer.py"
+      - "local-news-os/social/production_runtime.py"
+      - "local-news-os/social/publication_state.py"
+      - "valcea-clar/social/channels/facebook.json"
+      - "valcea-clar/social/channels/instagram.json"
+      - ".github/workflows/local-news-os-publication-metrics-handoff.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/social/publication_metrics_handoff.py"
+      - "local-news-os/social/test_publication_metrics_handoff.py"
+      - "local-news-os/social/publication_metrics_catalog.py"
+      - "local-news-os/social/metrics_harvest_scheduler.py"
+      - "local-news-os/social/durable_dispatch_executor.py"
+      - "local-news-os/social/observed_metrics_collector.py"
+      - "local-news-os/social/native_metrics_transport.py"
+      - "local-news-os/social/content_atomizer.py"
+      - "local-news-os/social/production_runtime.py"
+      - "local-news-os/social/publication_state.py"
+      - "valcea-clar/social/channels/facebook.json"
+      - "valcea-clar/social/channels/instagram.json"
+      - ".github/workflows/local-news-os-publication-metrics-handoff.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-news-os-publication-metrics-handoff-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile operational metrics handoff
+        run: |
+          python -m py_compile \
+            local-news-os/social/publication_metrics_handoff.py \
+            local-news-os/social/test_publication_metrics_handoff.py \
+            local-news-os/social/publication_metrics_catalog.py \
+            local-news-os/social/metrics_harvest_scheduler.py
+
+      - name: Run operational publication metrics handoff acceptance tests
+        run: python local-news-os/social/test_publication_metrics_handoff.py
