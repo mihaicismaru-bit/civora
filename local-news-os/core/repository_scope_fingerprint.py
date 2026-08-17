@@ -52,9 +52,7 @@ def _matches_any(path: str, patterns: tuple[str, ...]) -> bool:
 
 
 def _matches(path: str, config: ScopeConfig) -> bool:
-    if not _matches_any(path, config.include):
-        return False
-    return not _matches_any(path, config.exclude)
+    return _matches_any(path, config.include) and not _matches_any(path, config.exclude)
 
 
 def _tree_entries(ref: str, config: ScopeConfig, cwd: Path | None = None) -> list[tuple[str, str]]:
@@ -68,8 +66,7 @@ def _tree_entries(ref: str, config: ScopeConfig, cwd: Path | None = None) -> lis
             raise ScopeError(f"malformed git ls-tree line: {line!r}") from exc
         if obj_type == "blob" and _matches(path, config):
             entries.append((path, sha))
-    entries.sort()
-    return entries
+    return sorted(entries)
 
 
 def _fingerprint(entries: Iterable[tuple[str, str]]) -> str:
@@ -90,12 +87,15 @@ def _changed_scope_paths(base_ref: str, current_ref: str, config: ScopeConfig, c
 def describe(ref: str, config: ScopeConfig, config_sha256: str, cwd: Path | None = None) -> dict:
     head = _run_git(["rev-parse", ref], cwd=cwd).strip()
     entries = _tree_entries(ref, config, cwd=cwd)
+    structural_entries = [(path, sha) for path, sha in entries if not _matches_any(path, config.refresh_only)]
     return {
         "schema_version": 1,
         "scope_id": config.scope_id,
         "repository_head": head,
         "scope_fingerprint_sha256": _fingerprint(entries),
         "scope_entry_count": len(entries),
+        "structural_fingerprint_sha256": _fingerprint(structural_entries),
+        "structural_entry_count": len(structural_entries),
         "scope_config_sha256": config_sha256,
     }
 
@@ -104,15 +104,16 @@ def compare(base_ref: str, current_ref: str, config: ScopeConfig, config_sha256:
     base = describe(base_ref, config, config_sha256, cwd=cwd)
     current = describe(current_ref, config, config_sha256, cwd=cwd)
     scope_changed = base["scope_fingerprint_sha256"] != current["scope_fingerprint_sha256"]
+    structural_changed = base["structural_fingerprint_sha256"] != current["structural_fingerprint_sha256"]
     changed_scope_paths = _changed_scope_paths(base_ref, current_ref, config, cwd=cwd) if base["repository_head"] != current["repository_head"] else []
     refresh_only_paths = [path for path in changed_scope_paths if _matches_any(path, config.refresh_only)]
     structural_paths = [path for path in changed_scope_paths if path not in refresh_only_paths]
-    if not scope_changed:
-        drift_class = "NO_SCOPE_CHANGE"
-    elif structural_paths:
+    if structural_changed:
         drift_class = "STRUCTURAL_RECONCILIATION"
-    else:
+    elif scope_changed:
         drift_class = "RUNTIME_REFRESH_ONLY"
+    else:
+        drift_class = "NO_SCOPE_CHANGE"
     return {
         "schema_version": 1,
         "scope_id": config.scope_id,
@@ -120,12 +121,13 @@ def compare(base_ref: str, current_ref: str, config: ScopeConfig, config_sha256:
         "current": current,
         "repository_changed": base["repository_head"] != current["repository_head"],
         "scope_changed": scope_changed,
+        "structural_changed": structural_changed,
         "changed_scope_paths": changed_scope_paths,
         "refresh_only_paths": refresh_only_paths,
         "structural_paths": structural_paths,
         "drift_class": drift_class,
         "persistence_refresh_required": scope_changed,
-        "reconciliation_required": bool(scope_changed and structural_paths),
+        "reconciliation_required": structural_changed,
     }
 
 
@@ -148,25 +150,45 @@ def self_test() -> None:
         _run_git(["add", "."], cwd=root)
         _run_git(["commit", "-q", "-m", "base"], cwd=root)
         base = _run_git(["rev-parse", "HEAD"], cwd=root).strip()
-        config = ScopeConfig(scope_id="test-scope", include=("local-news-os/**", "valcea-clar/**", ".github/workflows/local-news-os-*.yml", ".github/workflows/valcea-clar-*.yml"), exclude=(), refresh_only=("valcea-clar/**/*_state.json",))
+        config = ScopeConfig(
+            scope_id="test-scope",
+            include=("local-news-os/**", "valcea-clar/**", ".github/workflows/local-news-os-*.yml", ".github/workflows/valcea-clar-*.yml"),
+            exclude=(),
+            refresh_only=("valcea-clar/**/*_state.json",),
+        )
         config_sha = "self-test"
-        assert describe("HEAD", config, config_sha, cwd=root) == describe("HEAD", config, config_sha, cwd=root)
+        base_desc = describe("HEAD", config, config_sha, cwd=root)
+        assert base_desc == describe("HEAD", config, config_sha, cwd=root)
+
         (root / "partener-eu/state.json").write_text('{"n":2}\n', encoding="utf-8")
-        _run_git(["add", "."], cwd=root); _run_git(["commit", "-q", "-m", "unrelated"], cwd=root)
+        _run_git(["add", "."], cwd=root)
+        _run_git(["commit", "-q", "-m", "unrelated"], cwd=root)
         unrelated = compare(base, "HEAD", config, config_sha, cwd=root)
-        assert unrelated["scope_changed"] is False and unrelated["reconciliation_required"] is False and unrelated["drift_class"] == "NO_SCOPE_CHANGE"
+        assert unrelated["drift_class"] == "NO_SCOPE_CHANGE"
+        assert unrelated["persistence_refresh_required"] is False
+        assert unrelated["reconciliation_required"] is False
         unrelated_head = _run_git(["rev-parse", "HEAD"], cwd=root).strip()
+
         (root / "valcea-clar/social/threads_state.json").write_text('{"verified_at":"t2"}\n', encoding="utf-8")
-        _run_git(["add", "."], cwd=root); _run_git(["commit", "-q", "-m", "runtime refresh"], cwd=root)
+        _run_git(["add", "."], cwd=root)
+        _run_git(["commit", "-q", "-m", "runtime refresh"], cwd=root)
         refresh = compare(unrelated_head, "HEAD", config, config_sha, cwd=root)
-        assert refresh["scope_changed"] is True and refresh["persistence_refresh_required"] is True and refresh["reconciliation_required"] is False
-        assert refresh["drift_class"] == "RUNTIME_REFRESH_ONLY" and refresh["structural_paths"] == []
+        assert refresh["scope_changed"] is True
+        assert refresh["structural_changed"] is False
+        assert refresh["current"]["structural_fingerprint_sha256"] == base_desc["structural_fingerprint_sha256"]
+        assert refresh["drift_class"] == "RUNTIME_REFRESH_ONLY"
+        assert refresh["persistence_refresh_required"] is True
+        assert refresh["reconciliation_required"] is False
         refresh_head = _run_git(["rev-parse", "HEAD"], cwd=root).strip()
+
         (root / "local-news-os/core/engine.py").write_text("x=2\n", encoding="utf-8")
-        _run_git(["add", "."], cwd=root); _run_git(["commit", "-q", "-m", "structural"], cwd=root)
+        _run_git(["add", "."], cwd=root)
+        _run_git(["commit", "-q", "-m", "structural"], cwd=root)
         structural = compare(refresh_head, "HEAD", config, config_sha, cwd=root)
-        assert structural["scope_changed"] is True and structural["persistence_refresh_required"] is True and structural["reconciliation_required"] is True
+        assert structural["structural_changed"] is True
         assert structural["drift_class"] == "STRUCTURAL_RECONCILIATION"
+        assert structural["persistence_refresh_required"] is True
+        assert structural["reconciliation_required"] is True
         print("REPOSITORY_SCOPE_FINGERPRINT_SELF_TEST_PASS")
 
 
@@ -179,12 +201,14 @@ def main() -> int:
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
     if args.self_test:
-        self_test(); return 0
+        self_test()
+        return 0
     config, config_sha = _load_config(args.config)
     payload = compare(args.base_ref, args.ref, config, config_sha) if args.base_ref else describe(args.ref, config, config_sha)
     rendered = json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
     if args.output:
-        args.output.parent.mkdir(parents=True, exist_ok=True); args.output.write_text(rendered, encoding="utf-8")
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(rendered, encoding="utf-8")
     else:
         print(rendered, end="")
     return 0
