@@ -1,25 +1,53 @@
 {
-  "schema_version": "1.0",
-  "evaluated_local": "2026-08-17T00:39:53+03:00",
+  "schema_version": "1.3",
+  "evaluated_local": "2026-08-18T00:01:24+03:00",
   "mode": "continuous_story_first",
   "edition_windows_are_publication_gates": false,
   "recap_editions_retained": true,
   "slot_for_legacy_snapshot_compatibility": "morning",
   "changed": true,
-  "publishable_story_count": 1,
+  "publishable_story_count": 2,
   "publishable_story_ids": [
+    "alert-1cd2159b942ec2b672f7",
+    "alert-fdfdb85a579432f385f7"
+  ],
+  "new_story_ids": [
+    "alert-1cd2159b942ec2b672f7",
+    "alert-fdfdb85a579432f385f7"
+  ],
+  "fingerprint": "f2fc32d2099ae63e057b93fcd891581e5a856917f3d697639b65cb9156bc30c4",
+  "auto_fact_registry_count": 0,
+  "editorial_writer": {
+    "writer_id": "manual_journalism_v1",
+    "status": "ACTIVE",
+    "story_count": 7,
+    "fact_kernel_composed": 2,
+    "legacy_passthrough": 5,
+    "editorial_holds": 0,
+    "registry_fingerprint_sha256": "6b05d66ea1d12b0e756ff0aa761751f643b549f898c9b42069b9b856508b5e72"
+  },
+  "rejected_candidate_count": 1,
+  "rejected": [
+    {
+      "id": "olanesti-bridge-monitor",
+      "reason": "editorial_publication_hold"
+    }
+  ],
+  "active_publication_holds": [
+    "derived-council-gambling-20260723",
     "olanesti-bridge-monitor"
   ],
-  "new_story_ids": [],
-  "fingerprint": "7a18771fbfbe5fe9e84d1b9a80088dc8c267bf02081499d3597adc0114ffe062",
-  "auto_fact_registry_count": 0,
-  "rejected_candidate_count": 0,
-  "rejected": [],
   "policy": {
     "verified_structured_story_required": true,
     "title_date_only_is_not_article": true,
+    "fact_kernel_claim_trace_required": true,
+    "reputational_formats_require_review": true,
+    "editorial_publication_holds_fail_closed": true,
+    "held_story_social_distribution_allowed": false,
     "minimum_confidence_inherited_from_edition_engine": 90,
     "fail_closed": true,
-    "publish_on_change_not_clock_window": true
+    "publish_on_change_not_clock_window": true,
+    "durable_temporal_language_contract": "LOCAL_NEWS_OS_DURABLE_TEMPORAL_LANGUAGE_V1",
+    "relative_time_words_in_durable_story_copy": false
   }
 }
