@@ -32,6 +32,20 @@ def normalize(value: str) -> str:
     return "".join(ch for ch in folded if not unicodedata.combining(ch))
 
 
+def _geography_identity_values(geography: dict) -> list[str]:
+    """Return place identity values, never generic schema labels such as type."""
+    values: list[str] = []
+    for key in ("primary_name", "county"):
+        value = geography.get(key)
+        if isinstance(value, str):
+            values.append(value)
+    for key in ("settlements", "aliases"):
+        value = geography.get(key)
+        if isinstance(value, list):
+            values.extend(item for item in value if isinstance(item, str))
+    return values
+
+
 def identity_strings(cfg: dict) -> list[str]:
     values: list[str] = []
     for key in ("instance_id", "canonical_domain"):
@@ -48,15 +62,7 @@ def identity_strings(cfg: dict) -> list[str]:
 
     geography = cfg.get("geography")
     if isinstance(geography, dict):
-        stack = list(geography.values())
-        while stack:
-            value = stack.pop()
-            if isinstance(value, str):
-                values.append(value)
-            elif isinstance(value, list):
-                stack.extend(value)
-            elif isinstance(value, dict):
-                stack.extend(value.values())
+        values.extend(_geography_identity_values(geography))
     return values
 
 
