@@ -97,9 +97,26 @@ def _decision_key(label: str) -> tuple[int, str] | None:
     return int(match.group("number")), day
 
 
+def _normalized_title(value: str) -> str:
+    value = urllib.parse.unquote(str(value or ""))
+    value = re.sub(r"\s+", " ", value).strip(" -|\t\r\n")
+    return value.casefold()
+
+
 def decision_attachments(register_url: str, register_body: str, rows: list[dict[str, Any]]) -> dict[int, str]:
-    """Resolve direct attachment URLs and intermediate DocManager document URLs."""
+    """Resolve direct attachment URLs and intermediate DocManager document URLs.
+
+    The Lotus view is allowed two exact identity routes only:
+    1. number + date encoded in anchor text/URL;
+    2. exact normalized official decision title matching a parsed register row.
+    No fuzzy title matching is used.
+    """
     wanted = {(int(row.get("decision_number") or 0), str(row.get("decision_date") or "")) for row in rows}
+    title_to_number = {
+        _normalized_title(str(row.get("title") or "")): int(row.get("decision_number") or 0)
+        for row in rows
+        if str(row.get("title") or "").strip()
+    }
     out: dict[int, str] = {}
 
     # Fast path: direct `$FILE/*.htm` links exposed by the view.
@@ -108,15 +125,19 @@ def decision_attachments(register_url: str, register_body: str, rows: list[dict[
         if (number, day) in wanted:
             out[number] = url
 
-    # Lotus views can instead expose an intermediate document URL. Its anchor
-    # text or URL still carries the decision number/date, so preserve it as a
-    # candidate; verify_document() will descend into an official `$FILE` child
-    # when the intermediate page does not itself contain the operative text.
+    # Lotus views can instead expose an intermediate document URL. Prefer the
+    # explicit number/date identity; if those fields are absent from the anchor,
+    # use only an exact normalized title match against the already parsed T1 row.
     for link in council.parse_links(register_url, register_body):
         label = f"{link.get('text') or ''} {link.get('url') or ''}"
         key = _decision_key(label)
         if key and key in wanted and key[0] not in out:
             out[key[0]] = str(link["url"])
+            continue
+        exact_title = _normalized_title(str(link.get("text") or ""))
+        number = title_to_number.get(exact_title)
+        if number and number not in out:
+            out[number] = str(link["url"])
     return out
 
 
@@ -372,16 +393,17 @@ def self_test() -> int:
     assert candidate["material_fact_gate"] == "HOLD_DOCUMENT_CHAIN_INCOMPLETE"
     assert candidate["kernel_provenance"]["never_infer_new_venue_from_annual_authorization"] is True
 
-    # Direct and intermediate register links are both accepted as bounded
-    # candidates when their label carries the official decision identity.
+    direct_title = sample["latest_decisions"][0]["title"]
+    intermediate_title = sample["latest_decisions"][1]["title"]
     direct_html = (
         '<a href="/dm/2026/hotarari.nsf/x/$FILE/hotarirea%20304%20-%2023%20iulie%202026%20-%20test.htm">'
         'hotarirea 304 - 23 iulie 2026 - test</a>'
         '<a href="/dm/2026/hotarari.nsf/vwHotarariByAn/ABC?OpenDocument">'
-        'hotarirea 303 - 23 iulie 2026 - test</a>'
+        f'{intermediate_title}</a>'
     )
     resolved = decision_attachments(council.ADOPTED_VIEW, direct_html, sample["latest_decisions"])
     assert 304 in resolved and 303 in resolved
+    assert _normalized_title(direct_title) in {_normalized_title(row["title"]) for row in sample["latest_decisions"]}
     print("VÂLCEA CLAR Council Fact Kernel v1 self-test: PASS")
     return 0
 
