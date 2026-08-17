@@ -90,7 +90,7 @@ def render_story(nav: dict, story: dict, stories: list[dict], published_at: str,
     rel_html = ""
     if related:
         rel_html = '<section class="related" data-crosslink-scope="publishable_full_story_only"><h2>Mai citește</h2>' + "".join(
-            f'<a href="{ux.esc(ux.story_path(row))}" style="display:block;margin:9px 0"><strong>{ux.esc(row.get("headline"))}</strong></a>' for row in related
+            f'<a href="{ux.esc(ux.story_path(row))}"><strong>{ux.esc(row.get("headline"))}</strong></a>' for row in related
         ) + '</section>'
     body = f'''<main><article class="article"><div class="kicker">{ux.esc(str(story.get('section') or 'ȘTIRI').replace('_',' '))}</div><h1>{ux.esc(story.get('headline'))}</h1><p class="dek">{ux.esc(story.get('dek'))}</p><div class="story-date">Publicat {ux.esc(published_at)}</div>{figure}{ux.factbox(story)}<div class="article-body">{body_ps}</div>{ux.rich_sections(story)}<section class="article-sources"><h2>Surse</h2><ul>{ux.source_links(story, True)}</ul></section>{rel_html}<a class="back" href="/stiri/">← Toate știrile</a></article></main>'''
     page = ux.shell(nav, title=f"{story.get('headline')} — VÂLCEA CLAR", description=str(story.get("dek") or ""), canonical=canonical, body=body)
@@ -108,8 +108,6 @@ def build() -> dict:
     if not stories:
         raise SystemExit("Story integrity has no safe stories")
 
-    # The durable archive is the union of every already-public safe story. Current
-    # feed stories are persisted here so future recap turnover cannot empty the site.
     archive["publication_model"] = "continuous_story_first"
     archive["recap_editions_may_delete_published_stories"] = False
     archive["operational_records_public"] = False
@@ -148,7 +146,6 @@ def build() -> dict:
             row["image"] = image
         rows.append(row)
 
-    # Persist any first-publication dates added above.
     archive["stories"] = stories
     write(ARCHIVE, archive)
     manifest = {
