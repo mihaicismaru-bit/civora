@@ -6,9 +6,11 @@ adopted-HCL register: clusters of annual gambling-operation authorizations.
 
 The builder never equates an annual authorization with a newly opened venue.
 It requires the official adopted-decision register AND the official HTML
-attachment for every decision in the cluster before the kernel can become
-`verified`. Partial evidence is persisted as `candidate_hold` for review and
-later completion, never as a publishable story.
+content for every decision in the cluster before the kernel can become
+`verified`. DocManager/Lotus may expose the decision either as a direct `$FILE`
+HTML attachment or as an intermediate document page; both are resolved without
+leaving the official host. Partial evidence is persisted as `candidate_hold`
+for later completion, never as a publishable story.
 """
 from __future__ import annotations
 
@@ -16,6 +18,7 @@ import argparse
 import hashlib
 import json
 import re
+import urllib.parse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -84,16 +87,56 @@ def company_names(rows: list[dict[str, Any]]) -> list[str]:
     return sorted(found.values())
 
 
+def _decision_key(label: str) -> tuple[int, str] | None:
+    match = council.ATTACHMENT_LABEL.search(urllib.parse.unquote(label))
+    if not match:
+        return None
+    day = council.iso_date(int(match.group("day")), match.group("month"))
+    if not day:
+        return None
+    return int(match.group("number")), day
+
+
 def decision_attachments(register_url: str, register_body: str, rows: list[dict[str, Any]]) -> dict[int, str]:
-    index = council.attachment_index(register_url, register_body)
+    """Resolve direct attachment URLs and intermediate DocManager document URLs."""
+    wanted = {(int(row.get("decision_number") or 0), str(row.get("decision_date") or "")) for row in rows}
     out: dict[int, str] = {}
-    for row in rows:
-        number = int(row.get("decision_number") or 0)
-        day = str(row.get("decision_date") or "")
-        url = index.get((number, day))
-        if url:
+
+    # Fast path: direct `$FILE/*.htm` links exposed by the view.
+    direct = council.attachment_index(register_url, register_body)
+    for (number, day), url in direct.items():
+        if (number, day) in wanted:
             out[number] = url
+
+    # Lotus views can instead expose an intermediate document URL. Its anchor
+    # text or URL still carries the decision number/date, so preserve it as a
+    # candidate; verify_document() will descend into an official `$FILE` child
+    # when the intermediate page does not itself contain the operative text.
+    for link in council.parse_links(register_url, register_body):
+        label = f"{link.get('text') or ''} {link.get('url') or ''}"
+        key = _decision_key(label)
+        if key and key in wanted and key[0] not in out:
+            out[key[0]] = str(link["url"])
     return out
+
+
+def _semantic_document(url: str, result: dict[str, Any]) -> dict[str, Any] | None:
+    if not result.get("ok"):
+        return None
+    text = council.to_text(str(result.get("body") or ""))
+    compact = re.sub(r"\s+", " ", text)
+    has_authorization = bool(ANNUAL_AUTH_RE.search(compact))
+    has_gambling = bool(GAMBLING_RE.search(compact))
+    articles = council.operative_articles(text)
+    if not (has_authorization and has_gambling and articles):
+        return None
+    return {
+        "url": str(result.get("url") or url),
+        "http_status": result.get("status"),
+        "source_sha256": result.get("sha256"),
+        "operative_article_count": len(articles),
+        "operative_article_sha256": [hashlib.sha256(article.encode("utf-8")).hexdigest() for article in articles[:8]],
+    }
 
 
 def verify_document(row: dict[str, Any], url: str) -> dict[str, Any]:
@@ -102,25 +145,35 @@ def verify_document(row: dict[str, Any], url: str) -> dict[str, Any]:
         "decision_number": int(row.get("decision_number") or 0),
         "decision_date": row.get("decision_date"),
         "title": row.get("title"),
-        "url": url,
-        "http_status": result.get("status"),
-        "source_sha256": result.get("sha256"),
+        "candidate_url": url,
         "error": result.get("error"),
     }
-    if not result.get("ok"):
-        return {**base, "verified": False, "reason": "OFFICIAL_DOCUMENT_UNREACHABLE"}
-    text = council.to_text(str(result.get("body") or ""))
-    compact = re.sub(r"\s+", " ", text)
-    has_authorization = bool(ANNUAL_AUTH_RE.search(compact))
-    has_gambling = bool(GAMBLING_RE.search(compact))
-    articles = council.operative_articles(text)
-    verified = has_authorization and has_gambling and bool(articles)
+    semantic = _semantic_document(url, result)
+    if semantic:
+        return {**base, **semantic, "verified": True, "reason": "PASS"}
+
+    # Intermediate DocManager page: follow only official-host HTML `$FILE`
+    # children. `parse_links` already applies council.canonical_url host/path
+    # restrictions, so this cannot become an open crawler.
+    if result.get("ok"):
+        child_links: list[str] = []
+        for link in council.parse_links(str(result.get("url") or url), str(result.get("body") or "")):
+            low = urllib.parse.unquote(str(link.get("url") or "")).lower()
+            if "$file" in low and low.endswith((".htm", ".html")):
+                child_links.append(str(link["url"]))
+        for child_url in list(dict.fromkeys(child_links))[:4]:
+            child = council.fetch(child_url, timeout=18)
+            semantic = _semantic_document(child_url, child)
+            if semantic:
+                return {**base, **semantic, "verified": True, "reason": "PASS_VIA_OFFICIAL_ATTACHMENT"}
+
     return {
         **base,
-        "verified": verified,
-        "reason": "PASS" if verified else "OFFICIAL_DOCUMENT_SEMANTICS_INCOMPLETE",
-        "operative_article_count": len(articles),
-        "operative_article_sha256": [hashlib.sha256(article.encode("utf-8")).hexdigest() for article in articles[:8]],
+        "url": str(result.get("url") or url),
+        "http_status": result.get("status"),
+        "source_sha256": result.get("sha256"),
+        "verified": False,
+        "reason": "OFFICIAL_DOCUMENT_UNREACHABLE" if not result.get("ok") else "OFFICIAL_DOCUMENT_SEMANTICS_INCOMPLETE",
     }
 
 
@@ -318,6 +371,17 @@ def self_test() -> int:
     assert candidate["kernel_provenance"]["evidence_complete"] is False
     assert candidate["material_fact_gate"] == "HOLD_DOCUMENT_CHAIN_INCOMPLETE"
     assert candidate["kernel_provenance"]["never_infer_new_venue_from_annual_authorization"] is True
+
+    # Direct and intermediate register links are both accepted as bounded
+    # candidates when their label carries the official decision identity.
+    direct_html = (
+        '<a href="/dm/2026/hotarari.nsf/x/$FILE/hotarirea%20304%20-%2023%20iulie%202026%20-%20test.htm">'
+        'hotarirea 304 - 23 iulie 2026 - test</a>'
+        '<a href="/dm/2026/hotarari.nsf/vwHotarariByAn/ABC?OpenDocument">'
+        'hotarirea 303 - 23 iulie 2026 - test</a>'
+    )
+    resolved = decision_attachments(council.ADOPTED_VIEW, direct_html, sample["latest_decisions"])
+    assert 304 in resolved and 303 in resolved
     print("VÂLCEA CLAR Council Fact Kernel v1 self-test: PASS")
     return 0
 
