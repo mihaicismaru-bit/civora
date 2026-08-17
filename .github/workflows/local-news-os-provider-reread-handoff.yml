@@ -1,0 +1,78 @@
+name: LOCAL NEWS OS Provider Reread Handoff
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/social/provider_reread_authorization_handoff.py"
+      - "local-news-os/social/test_provider_reread_authorization_handoff.py"
+      - "local-news-os/social/authorization_sealed_harvest_recovery.py"
+      - "local-news-os/social/authorization_sealed_harvest_receipt.py"
+      - "local-news-os/social/metrics_harvest_runtime.py"
+      - ".github/workflows/local-news-os-provider-reread-handoff.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/social/provider_reread_authorization_handoff.py"
+      - "local-news-os/social/test_provider_reread_authorization_handoff.py"
+      - "local-news-os/social/authorization_sealed_harvest_recovery.py"
+      - "local-news-os/social/authorization_sealed_harvest_receipt.py"
+      - "local-news-os/social/metrics_harvest_runtime.py"
+      - ".github/workflows/local-news-os-provider-reread-handoff.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-news-os-provider-reread-handoff-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile authorization handoff boundary
+        run: |
+          python -m py_compile \
+            local-news-os/social/authorization_sealed_harvest_receipt.py \
+            local-news-os/social/authorization_sealed_harvest_recovery.py \
+            local-news-os/social/provider_reread_authorization_handoff.py \
+            local-news-os/social/test_provider_reread_authorization_handoff.py
+
+      - name: Run explicit provider reread handoff acceptance
+        working-directory: local-news-os/social
+        run: python test_provider_reread_authorization_handoff.py
+
+      - name: Run sealed recovery regression
+        working-directory: local-news-os/social
+        run: python test_authorization_sealed_harvest_recovery.py
+
+      - name: Verify handoff remains analytics-only and network-free
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, 'local-news-os/social')
+          import provider_reread_authorization_handoff as handoff
+          guards = handoff._guards()
+          required = {
+              'provider_network_calls_performed': False,
+              'credential_values_read': False,
+              'credential_values_persisted': False,
+              'provider_payload_persisted': False,
+              'durable_observation_rechecked_before_reread_eligibility': True,
+              'single_use_handoff': True,
+              'sealed_authorization_required': True,
+              'publication_blocked_by_analytics': False,
+              'zero_paid_dependency': True,
+          }
+          for key, expected in required.items():
+              if guards.get(key) is not expected:
+                  raise SystemExit(f'handoff guard mismatch: {key}={guards.get(key)!r}')
+          print('PROVIDER_REREAD_HANDOFF_GUARDS_PASS')
+          PY
