@@ -8,6 +8,7 @@ on:
     branches: [main]
     paths:
       - 'partener-eu/ingest/peo_calendar_ingest.py'
+      - 'partener-eu/ops/test_peo_calendar_identity.py'
       - '.github/workflows/partener-eu-peo-calendar.yml'
 
 permissions:
@@ -28,6 +29,9 @@ jobs:
 
       - name: Install spreadsheet parser
         run: python -m pip install --disable-pip-version-check openpyxl
+
+      - name: Regression — PEO calendar identities are collision-safe
+        run: python partener-eu/ops/test_peo_calendar_identity.py
 
       - name: Ingest and version official PEO calendar candidate
         run: python partener-eu/ingest/peo_calendar_ingest.py
