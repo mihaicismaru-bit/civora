@@ -24,15 +24,18 @@ permissions:
   pages: write
   id-token: write
 
+# Every workflow that calls actions/deploy-pages for PARTENER.EU must share the
+# same serialization lock and Pages environment. Otherwise two valid artifacts
+# can race and GitHub Pages may reject or cancel one deployment.
 concurrency:
-  group: partener-eu-pages-v2
-  cancel-in-progress: true
+  group: partener-eu-pages
+  cancel-in-progress: false
 
 jobs:
   deploy:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     environment:
-      name: partener-eu-pages
+      name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
