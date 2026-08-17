@@ -98,6 +98,12 @@
       "tier": "T1",
       "section": "ADMINISTRAȚIE",
       "priority": 83,
+      "enabled": false,
+      "status": "QUARANTINED_WAF_ARTICLE_FETCH_BLOCK",
+      "checked_at": "2026-08-17",
+      "disable_reason": "The official Berbești Știri archive is indexed with stable municipal story titles and per-item dates, but a fresh direct fetch of the official archive is intercepted by an anti-bot verification page. LOCAL NEWS OS requires deterministic canonical-page access and article-level publication provenance before automatic admission; search-engine cache or listing metadata must not substitute for a verifiable article fetch. The source is retained for territorial coverage and manual discovery but disabled until direct article retrieval is deterministic.",
+      "safe_use": ["manual discovery of Berbești municipal developments", "primary-source verification after direct official-page access", "manual reporting on local services, infrastructure and projects after article-level verification"],
+      "core_feedback": "No new Vâlcea-specific parser is justified. This is the same generic ARTICLE_FEED structural-eligibility condition already observed on WAF-protected municipal sources: indexed listing evidence is insufficient when canonical article access cannot be reproduced deterministically.",
       "path_hints": ["stiri", "canalizare", "iluminat", "apa", "gaze", "proiect", "sportiv"],
       "generic_titles": ["stiri", "știri", "primăria berbești", "primaria berbesti"]
     },
