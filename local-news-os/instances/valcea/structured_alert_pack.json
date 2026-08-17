@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0",
+  "contract": "LOCAL_NEWS_OS_STRUCTURED_ALERT_PACK_V1",
+  "instance_id": "valcea",
+  "classification": "INSTANCE_SPECIFIC",
+  "publication_authority": "PRIMARY_FACT_KERNEL_AFTER_PARSER_VALIDATION",
+  "sources": [
+    {
+      "id": "igpr-infotrafic",
+      "name": "Centrul INFOTRAFIC — Poliția Română",
+      "url": "https://politiaromana.ro/ro/info-trafic",
+      "source_tier": "T1",
+      "parser": "RO_INFOTRAFIC_DETAIL_V1",
+      "section": "MOBILITATE",
+      "priority": 96,
+      "enabled": true,
+      "lookback_hours": 36,
+      "max_listing_candidates": 40,
+      "max_detail_fetches": 16,
+      "geography_match": "INSTANCE_PRIMARY_GEOGRAPHY",
+      "editorial_policy": {
+        "fact_kernel_required": true,
+        "claim_level_provenance_required": true,
+        "durable_absolute_dates_only": true,
+        "official_issue_time_not_crawl_time": true,
+        "generic_headline_body_facts_allowed_only_when_structured": true,
+        "victim_names_auto_publish_forbidden": true
+      }
+    }
+  ]
+}

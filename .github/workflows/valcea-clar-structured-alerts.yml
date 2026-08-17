@@ -1,0 +1,122 @@
+name: VÂLCEA CLAR Structured Primary Alerts
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '2-57/5 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'local-news-os/core/structured_alert_ingest.py'
+      - 'local-news-os/instances/valcea/structured_alert_pack.json'
+      - 'local-news-os/instances/valcea/source_pack.json'
+      - 'valcea-clar/scripts/compose_structured_alerts.py'
+      - '.github/workflows/valcea-clar-structured-alerts.yml'
+  pull_request:
+    paths:
+      - 'local-news-os/core/structured_alert_ingest.py'
+      - 'local-news-os/instances/valcea/structured_alert_pack.json'
+      - 'local-news-os/instances/valcea/source_pack.json'
+      - 'valcea-clar/scripts/compose_structured_alerts.py'
+      - '.github/workflows/valcea-clar-structured-alerts.yml'
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: valcea-clar-structured-alerts-${{ github.event.pull_request.number || 'main' }}
+  cancel-in-progress: true
+
+jobs:
+  structured-alerts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Validate structured-alert contracts offline
+        run: |
+          python -m py_compile \
+            local-news-os/core/structured_alert_ingest.py \
+            valcea-clar/scripts/compose_structured_alerts.py
+          python local-news-os/core/structured_alert_ingest.py --self-test
+          python valcea-clar/scripts/compose_structured_alerts.py --self-test
+
+      - name: Ingest current geo-scoped INFOTRAFIC alerts
+        run: |
+          python local-news-os/core/structured_alert_ingest.py \
+            --instance valcea \
+            --output valcea-clar/editorial/structured_alert_events.json
+
+      - name: Build and validate canonical fact kernels
+        if: github.event_name == 'pull_request'
+        run: |
+          python valcea-clar/scripts/compose_structured_alerts.py \
+            --events valcea-clar/editorial/structured_alert_events.json \
+            --facts-registry valcea-clar/editorial/facts_registry.json \
+            --no-write
+
+      - name: Build canonical fact kernels for persistence
+        if: github.event_name != 'pull_request'
+        run: |
+          python valcea-clar/scripts/compose_structured_alerts.py \
+            --events valcea-clar/editorial/structured_alert_events.json \
+            --facts-registry valcea-clar/editorial/facts_registry.json
+
+      - name: Validate runtime output contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          events=json.loads(Path('valcea-clar/editorial/structured_alert_events.json').read_text(encoding='utf-8'))
+          assert events['contract']=='LOCAL_NEWS_OS_STRUCTURED_ALERT_EVENTS_V1'
+          assert events['events_are_reader_stories'] is False
+          assert events['publication_authority']=='PRIMARY_STRUCTURED_EVENT_ONLY'
+          for row in events.get('events',[]):
+              assert row.get('source_tier')=='T1'
+              assert row.get('issued_at')
+              assert row.get('source_url')
+              assert row.get('body_sha256')
+          print({'status':'PASS','events':events.get('event_count',0)})
+          PY
+
+      - name: Persist structured fact kernels without stale overwrite
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp valcea-clar/editorial/facts_registry.json /tmp/valcea-facts-with-structured-alerts.json
+          cp valcea-clar/editorial/structured_alert_events.json /tmp/valcea-structured-alert-events.json
+          git config user.name 'vâlcea-clar-structured-alerts[bot]'
+          git config user.email 'valcea-clar-structured-alerts@users.noreply.github.com'
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p valcea-clar/editorial
+            cp /tmp/valcea-facts-with-structured-alerts.json valcea-clar/editorial/facts_registry.json
+            cp /tmp/valcea-structured-alert-events.json valcea-clar/editorial/structured_alert_events.json
+            git add valcea-clar/editorial/facts_registry.json valcea-clar/editorial/structured_alert_events.json
+            if git diff --cached --quiet; then
+              echo 'Structured alert fact kernels already current.'
+              exit 0
+            fi
+            git commit -m 'Refresh VÂLCEA CLAR structured primary alerts'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            sleep $((attempt * 2))
+          done
+          echo 'Could not persist structured primary alerts without conflict.' >&2
+          exit 1
+
+      - name: Dispatch canonical Live Newsroom
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run valcea-clar-newsroom-live.yml --ref main
