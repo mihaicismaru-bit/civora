@@ -4,10 +4,10 @@
   "product": "VÂLCEA CLAR durable monitor state",
   "execution_owner": "CIVORA_SITE_ENGINE",
   "state_owner": "GITHUB_REPOSITORY",
-  "generated_at": "2026-08-17T12:34:23Z",
-  "last_live_probe_at": "2026-08-17T12:34:23Z",
+  "generated_at": "2026-08-17T13:27:17Z",
+  "last_live_probe_at": "2026-08-17T13:27:17Z",
   "mode": "LIVE_SOURCE_HEALTH",
-  "discovery_observed_at": "2026-08-17T14:55:20+03:00",
+  "discovery_observed_at": "2026-08-17T15:40:01+03:00",
   "monitor_count": 7,
   "monitors": [
     {
@@ -34,7 +34,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://posturi.gov.ro/judet/valcea/",
-          "fingerprint": "8e0b8a1a36960b2d868f9c37b754e98b4b2f968f7245092c48bdb47f2edc6932",
+          "fingerprint": "02aed51af16da6065b8a8a45962175fa752001d2a7646654fdf4c8f1423dc64e",
           "match_count": 8,
           "error": null,
           "health": "OK",
@@ -125,8 +125,7 @@
       "attention": "REVIEW_REQUIRED",
       "changed_sources": [],
       "degraded_sources": [
-        "primaria-rm-valcea-comunicate",
-        "cj-valcea-sedinte"
+        "primaria-rm-valcea-comunicate"
       ],
       "reverify_leads": [
         "rm-valcea-hcl159-2026-musiclover-public-money"
@@ -162,12 +161,12 @@
           "id": "cj-valcea-sedinte",
           "ref_type": "news_source_id",
           "registered": true,
-          "health": "DEGRADED",
+          "health": "UNKNOWN_NO_DISCOVERY_STATE",
           "change": "NO_CHANGE_SIGNAL",
           "facts": 0,
           "links_examined": null,
           "article_failures": null,
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>"
+          "error": null
         },
         {
           "id": "cj-valcea-hotarari-2026",
