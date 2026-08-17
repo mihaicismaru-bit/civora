@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import sys
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -21,6 +22,10 @@ from zoneinfo import ZoneInfo
 import generate_edition as edition_engine
 
 ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = ROOT.parent
+sys.path.insert(0, str(REPO_ROOT / "local-news-os" / "core"))
+from temporal_freshness import CONTRACT as TEMPORAL_CONTRACT, durable_story_temporal_violations
+
 STATE = ROOT / "site" / "newsroom_state.json"
 DECISION = ROOT / "site" / "newsroom_decision.json"
 PUBLICATION_HOLDS = ROOT / "editorial" / "publication_holds.json"
@@ -79,6 +84,12 @@ def story_ready(item: dict) -> tuple[bool, str]:
     story_id = str(item.get("id") or "").strip()
     if story_id and story_id in active_publication_holds():
         return False, "editorial_publication_hold"
+
+    # Durable story copy must remain semantically true in the archive. Relative
+    # temporal words are forbidden at this gate even if another upstream path
+    # accidentally admitted them.
+    if durable_story_temporal_violations(item, "ro-RO"):
+        return False, "relative_temporal_language_not_durable"
 
     # Automatic primary-source discovery is intentionally title/date/source only.
     # It enters the radar immediately but cannot masquerade as a finished article.
@@ -160,7 +171,7 @@ def decide(now: datetime) -> dict:
 
     writer_stats = load_editorial_writer_stats()
     return {
-        "schema_version": "1.2",
+        "schema_version": "1.3",
         "evaluated_local": now.isoformat(timespec="seconds"),
         "mode": "continuous_story_first",
         "edition_windows_are_publication_gates": False,
@@ -186,6 +197,8 @@ def decide(now: datetime) -> dict:
             "minimum_confidence_inherited_from_edition_engine": edition_engine.MIN_CONFIDENCE,
             "fail_closed": True,
             "publish_on_change_not_clock_window": True,
+            "durable_temporal_language_contract": TEMPORAL_CONTRACT,
+            "relative_time_words_in_durable_story_copy": False,
         },
     }
 
@@ -216,12 +229,14 @@ def main() -> int:
         edition_engine.editorial_writer.self_test()
         full = {
             "id": "self-test-full",
-            "headline": "Primăria publică un proiect verificat pentru municipiu",
+            "headline": "Primăria publică un proiect verificat pentru municipiu în 17 august 2026",
             "dek": "Documentele publice confirmă măsura și permit redactarea unei știri complete, cu sursa indicată.",
             "paragraphs": ["Acesta este un paragraf verificat suficient de lung pentru a demonstra că materialul are corp editorial și nu este doar un titlu preluat automat dintr-o listă de comunicate."],
             "sources": [{"url": "https://example.com/document", "name": "Sursă"}],
         }
         assert story_ready(full)[0] is True
+        relative = dict(full, id="self-test-relative", headline="Azi primăria publică un proiect verificat pentru municipiu")
+        assert story_ready(relative) == (False, "relative_temporal_language_not_durable")
         title_only = dict(full, auto_generated=True, auto_scope="source_title_and_publication_date_only")
         assert story_ready(title_only)[0] is False
         held = dict(full, id="olanesti-bridge-monitor")
@@ -248,7 +263,7 @@ def main() -> int:
 
     if args.commit_state and decision["publishable_story_count"]:
         state = {
-            "schema_version": "1.2",
+            "schema_version": "1.3",
             "last_published_at": decision["evaluated_local"],
             "last_published_fingerprint": decision["fingerprint"],
             "last_published_story_ids": decision["publishable_story_ids"],
@@ -256,6 +271,7 @@ def main() -> int:
             "editorial_writer": decision["editorial_writer"],
             "mode": "continuous_story_first",
             "edition_windows_are_publication_gates": False,
+            "durable_temporal_language_contract": TEMPORAL_CONTRACT,
         }
         STATE.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
