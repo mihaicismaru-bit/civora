@@ -40,6 +40,8 @@ jobs:
             local-news-os/core/instance_bootstrap.py \
             local-news-os/core/discover_primary_source_facts.py \
             local-news-os/core/discovery_health.py \
+            local-news-os/core/date_provenance.py \
+            local-news-os/core/temporal_freshness.py \
             local-news-os/core/generate_verified_edition.py \
             local-news-os/core/render_frontpage.py \
             local-news-os/core/related_stories.py \
@@ -51,6 +53,8 @@ jobs:
           python local-news-os/core/repository_scope_fingerprint.py --self-test
           python local-news-os/core/repository_scope_fingerprint.py --ref HEAD --output /tmp/civora-scope.json
           cat /tmp/civora-scope.json
+      - name: Validate durable temporal-language contract
+        run: python local-news-os/core/temporal_freshness.py --self-test
       - name: Validate production and test instances
         run: python local-news-os/core/validate_instance_config.py
       - name: Validate INSTANCE_BOOTSTRAP_V1 cold-resume lifecycle
