@@ -29,6 +29,7 @@ import re
 from pathlib import Path, PurePosixPath
 from typing import Any, Callable
 
+import authorization_sealed_harvest_receipt as harvest_receipt
 import fleet_metrics_credential_binding as binding
 import fleet_metrics_transport_capability_gate as capability_gate
 import multi_instance_isolation
@@ -578,18 +579,19 @@ def execute_sealed_instance(
         return orchestrate_call(*args, **kwargs)
 
     try:
-        result = binding.execute_bound_instance(
-            repo_root,
-            runtime,
-            isolation_result,
-            sealed_plan,
-            binding_id,
-            now=now,
-            execute=execute,
-            windows_hours=windows_hours,
-            max_publications=max_publications,
-            orchestrate_call=guarded_orchestrate,
-        )
+        with harvest_receipt.authorization_sealed_execution(current if execute else None):
+            result = binding.execute_bound_instance(
+                repo_root,
+                runtime,
+                isolation_result,
+                sealed_plan,
+                binding_id,
+                now=now,
+                execute=execute,
+                windows_hours=windows_hours,
+                max_publications=max_publications,
+                orchestrate_call=guarded_orchestrate,
+            )
     except AuthorizationChanged as exc:
         return _hold(binding_id, str(exc), sealed_plan)
 
@@ -598,6 +600,7 @@ def execute_sealed_instance(
     result["authorization_fingerprint"] = current
     result["authorization_fingerprint_verified"] = True
     result["pre_network_authorization_recheck"] = bool(execute)
+    result["authorization_sealed_harvest_receipts"] = bool(execute)
     result["publication_blocked"] = False
     return result
 
