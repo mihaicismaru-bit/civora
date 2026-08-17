@@ -1,0 +1,81 @@
+name: VÂLCEA CLAR Signal Radar
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/10 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'local-news-os/core/signal_radar.py'
+      - 'local-news-os/instances/valcea/source_pack.json'
+      - 'valcea-clar/editorial/signal_radar_config.json'
+      - 'valcea-clar/editorial/source_intelligence_seed_registry.json'
+      - 'valcea-clar/editorial/source_intelligence_seed_supplement_v1.json'
+      - '.github/workflows/valcea-clar-signal-radar.yml'
+  pull_request:
+    paths:
+      - 'local-news-os/core/signal_radar.py'
+      - 'local-news-os/instances/valcea/source_pack.json'
+      - 'valcea-clar/editorial/signal_radar_config.json'
+      - 'valcea-clar/editorial/source_intelligence_seed_registry.json'
+      - 'valcea-clar/editorial/source_intelligence_seed_supplement_v1.json'
+      - '.github/workflows/valcea-clar-signal-radar.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-signal-radar-${{ github.event.pull_request.number || 'main' }}
+  cancel-in-progress: true
+
+jobs:
+  signal-radar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Validate generic radar contract offline
+        run: |
+          python -m py_compile local-news-os/core/signal_radar.py
+          python local-news-os/core/signal_radar.py --self-test
+          python local-news-os/core/signal_radar.py --instance valcea --validate-only
+      - name: Exercise real local/regional press radar read-only
+        if: github.event_name == 'pull_request'
+        run: python local-news-os/core/signal_radar.py --instance valcea --no-write
+      - name: Scan local/regional press as signal-only radar
+        if: github.event_name != 'pull_request'
+        run: python local-news-os/core/signal_radar.py --instance valcea
+      - name: Persist signal radar and verification queue safely
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp valcea-clar/editorial/signal_radar_state.json /tmp/valcea-signal-radar-state.json
+          cp valcea-clar/editorial/signal_verification_queue.json /tmp/valcea-signal-verification-queue.json
+          git config user.name 'vâlcea-clar-signal-radar[bot]'
+          git config user.email 'valcea-clar-signal-radar@users.noreply.github.com'
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p valcea-clar/editorial
+            cp /tmp/valcea-signal-radar-state.json valcea-clar/editorial/signal_radar_state.json
+            cp /tmp/valcea-signal-verification-queue.json valcea-clar/editorial/signal_verification_queue.json
+            git add valcea-clar/editorial/signal_radar_state.json valcea-clar/editorial/signal_verification_queue.json
+            if git diff --cached --quiet; then
+              echo 'Signal radar state already current.'
+              exit 0
+            fi
+            git commit -m 'Refresh VÂLCEA CLAR signal radar queue'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            sleep $((attempt * 2))
+          done
+          echo 'Could not persist signal radar queue without conflict.' >&2
+          exit 1

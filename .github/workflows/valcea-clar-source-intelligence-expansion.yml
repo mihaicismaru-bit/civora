@@ -8,12 +8,14 @@ on:
     branches: [main]
     paths:
       - 'valcea-clar/editorial/source_intelligence_seed_registry.json'
+      - 'valcea-clar/editorial/source_intelligence_seed_supplement_v1.json'
       - 'valcea-clar/scripts/validate_source_intelligence_seed_registry.py'
       - 'valcea-clar/scripts/source_intelligence_discover.py'
       - '.github/workflows/valcea-clar-source-intelligence-expansion.yml'
   pull_request:
     paths:
       - 'valcea-clar/editorial/source_intelligence_seed_registry.json'
+      - 'valcea-clar/editorial/source_intelligence_seed_supplement_v1.json'
       - 'valcea-clar/scripts/validate_source_intelligence_seed_registry.py'
       - 'valcea-clar/scripts/source_intelligence_discover.py'
       - '.github/workflows/valcea-clar-source-intelligence-expansion.yml'
@@ -46,10 +48,14 @@ jobs:
           python - <<'PY' > /tmp/source-offset.txt
           import datetime, json
           from pathlib import Path
-          d=json.loads(Path('valcea-clar/editorial/source_intelligence_seed_registry.json').read_text(encoding='utf-8'))
-          n=max(1,len(d['seed_sources']))
-          hour=int(datetime.datetime.now(datetime.timezone.utc).timestamp()//3600)
-          print((hour*12)%n)
+          registries = [
+              Path('valcea-clar/editorial/source_intelligence_seed_registry.json'),
+              Path('valcea-clar/editorial/source_intelligence_seed_supplement_v1.json'),
+          ]
+          n = sum(len(json.loads(path.read_text(encoding='utf-8')).get('seed_sources', [])) for path in registries if path.is_file())
+          n = max(1, n)
+          hour = int(datetime.datetime.now(datetime.timezone.utc).timestamp() // 3600)
+          print((hour * 12) % n)
           PY
           python valcea-clar/scripts/source_intelligence_discover.py --limit 12 --offset "$(cat /tmp/source-offset.txt)"
       - name: Persist discovery/probation state
