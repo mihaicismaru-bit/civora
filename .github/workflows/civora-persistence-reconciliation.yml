@@ -47,6 +47,7 @@ jobs:
           python -m py_compile local-news-os/persistence/prs_044_superseded_pr_later_merge_acceptance.py
           python -m py_compile local-news-os/persistence/prs_045_outbox_only_capability_acceptance.py
           python -m py_compile local-news-os/persistence/prs_046_profile_asset_no_remote_readback_acceptance.py
+          python -m py_compile local-news-os/persistence/prs_047_no_progress_checkpoint_then_main_acceptance.py
       - name: Run deterministic fail-closed reconciliation acceptance
         run: python local-news-os/persistence/reconciliation_engine.py --self-test
       - name: Validate PRS-037 reconciliation trigger contract and executable wiring
@@ -69,6 +70,8 @@ jobs:
         run: python local-news-os/persistence/prs_045_outbox_only_capability_acceptance.py
       - name: Validate PRS-046 profile asset without remote readback reconciliation
         run: python local-news-os/persistence/prs_046_profile_asset_no_remote_readback_acceptance.py
+      - name: Validate PRS-047 no-progress checkpoint followed by main implementation
+        run: python local-news-os/persistence/prs_047_no_progress_checkpoint_then_main_acceptance.py
       - name: Validate existing scope classifier alongside reconciliation
         run: python local-news-os/core/repository_scope_fingerprint.py --self-test
       - name: Verify acceptance contracts are present
