@@ -9,6 +9,8 @@ on:
     paths:
       - 'local-news-os/core/primary_signal_verifier.py'
       - 'local-news-os/core/primary_signal_verifier_strict.py'
+      - 'local-news-os/core/primary_signal_verifier_ranked.py'
+      - 'local-news-os/core/primary_signal_verifier_ranked_strict.py'
       - 'local-news-os/core/signal_radar.py'
       - 'local-news-os/instances/valcea/source_pack.json'
       - 'valcea-clar/editorial/signal_radar_config.json'
@@ -19,6 +21,8 @@ on:
     paths:
       - 'local-news-os/core/primary_signal_verifier.py'
       - 'local-news-os/core/primary_signal_verifier_strict.py'
+      - 'local-news-os/core/primary_signal_verifier_ranked.py'
+      - 'local-news-os/core/primary_signal_verifier_ranked_strict.py'
       - 'local-news-os/core/signal_radar.py'
       - 'local-news-os/instances/valcea/source_pack.json'
       - 'valcea-clar/editorial/signal_radar_config.json'
@@ -44,20 +48,21 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.13'
-      - name: Validate strict verifier contract offline
+      - name: Validate ranked strict verifier contract offline
         run: |
           python -m py_compile \
             local-news-os/core/primary_signal_verifier.py \
-            local-news-os/core/primary_signal_verifier_strict.py
-          python local-news-os/core/primary_signal_verifier.py --self-test
-          python local-news-os/core/primary_signal_verifier_strict.py --self-test
-          python local-news-os/core/primary_signal_verifier_strict.py --instance valcea --validate-only
-      - name: Exercise strict primary verification against current queue read-only
+            local-news-os/core/primary_signal_verifier_strict.py \
+            local-news-os/core/primary_signal_verifier_ranked.py \
+            local-news-os/core/primary_signal_verifier_ranked_strict.py
+          python local-news-os/core/primary_signal_verifier_ranked_strict.py --self-test
+          python local-news-os/core/primary_signal_verifier_ranked_strict.py --instance valcea --validate-only
+      - name: Exercise ranked strict primary verification against current queue read-only
         if: github.event_name == 'pull_request'
-        run: python local-news-os/core/primary_signal_verifier_strict.py --instance valcea --no-write
-      - name: Verify current radar queue against primary sources
+        run: python local-news-os/core/primary_signal_verifier_ranked_strict.py --instance valcea --no-write
+      - name: Verify current radar queue against ranked primary sources
         if: github.event_name != 'pull_request'
-        run: python local-news-os/core/primary_signal_verifier_strict.py --instance valcea
+        run: python local-news-os/core/primary_signal_verifier_ranked_strict.py --instance valcea
       - name: Persist primary verification evidence safely
         if: github.event_name != 'pull_request'
         shell: bash
