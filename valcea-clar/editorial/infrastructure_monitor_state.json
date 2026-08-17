@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "instance_id": "valcea",
+  "monitor_id": "a1-valcea-connectivity-watch",
+  "label": "A1 & conexiunile Vâlcii — infrastructură rutieră",
+  "generated_at": "2026-08-17T00:03:06Z",
+  "mode": "LIVE_SOURCE_HEALTH",
+  "registry_status": "ACTIVE_REVERIFY",
+  "attention": "SOURCE_DEGRADED",
+  "changed_sources": [],
+  "degraded_sources": [
+    "transporturi-official"
+  ],
+  "sources": [
+    {
+      "id": "cnair-official",
+      "publisher": "Compania Națională de Administrare a Infrastructurii Rutiere",
+      "url": "https://www.cnair.ro/",
+      "tier": "T1",
+      "reachable": true,
+      "http_status": 200,
+      "final_url": "https://cnair.ro/",
+      "fingerprint": "896dd9f2858ac786346332602a19ad6caed9f0a61b6adb5df318cab8ccad28b7",
+      "match_count": 0,
+      "error": null,
+      "health": "OK",
+      "change": "NEW_BASELINE"
+    },
+    {
+      "id": "transporturi-official",
+      "publisher": "Ministerul Transporturilor și Infrastructurii",
+      "url": "https://www.mt.ro/",
+      "tier": "T1",
+      "reachable": false,
+      "http_status": null,
+      "fingerprint": null,
+      "match_count": 0,
+      "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+      "health": "UNREACHABLE",
+      "change": "PROBE_FAILED"
+    },
+    {
+      "id": "seap-public-infrastructure",
+      "publisher": "SEAP / e-licitatie.ro",
+      "url": "https://www.e-licitatie.ro/pub",
+      "tier": "T1",
+      "health": "REGISTERED_NO_PROBE",
+      "change": "NO_CHANGE_SIGNAL"
+    }
+  ],
+  "subprojects": [
+    {
+      "id": "a1-section-2-boita-cornetu",
+      "label": "A1 Secțiunea 2 Boița–Cornetu",
+      "verification_status": "REVERIFY_CURRENT_PROGRESS",
+      "public_projection": false
+    },
+    {
+      "id": "a1-section-3-cornetu-tigveni",
+      "label": "A1 Secțiunea 3 Cornetu–Tigveni",
+      "verification_status": "REVERIFY_CURRENT_PROGRESS",
+      "public_projection": false
+    },
+    {
+      "id": "a1-section-4-tigveni-curtea-de-arges",
+      "label": "A1 Secțiunea 4 Tigveni–Curtea de Argeș",
+      "verification_status": "REVERIFY_OPENING_AND_COMPLETION",
+      "public_projection": false
+    },
+    {
+      "id": "dn73c-tigveni-ramnicu-valcea",
+      "label": "DN73C Tigveni–Râmnicu Vâlcea — legătura cu A1",
+      "verification_status": "REVERIFY_PROCUREMENT_AND_DESIGN",
+      "public_projection": false
+    },
+    {
+      "id": "ganesa-ramnicu-valcea-tigveni-corridor",
+      "label": "Drum de mare viteză Găneasa–Râmnicu Vâlcea–Tigveni",
+      "verification_status": "REVERIFY_PREFEASIBILITY_AND_APPROVALS",
+      "public_projection": false
+    }
+  ],
+  "publication_contract": {
+    "monitor_is_not_story": true,
+    "source_change_is_not_material_fact": true,
+    "public_projection": false,
+    "normal_story_ready_gate_required": true
+  }
+}
