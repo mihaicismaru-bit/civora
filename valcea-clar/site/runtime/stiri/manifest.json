@@ -1,52 +1,69 @@
 {
-  "schema_version": "1.5",
+  "schema_version": "2.1",
   "publication_model": "continuous_story_first",
-  "homepage_presentation": "live_newsroom",
-  "edition_is_canonical_story_url": false,
-  "persistence_policy": "published_story_routes_survive_recap_turnover",
+  "homepage_presentation": "reader_newsroom",
+  "news_index": "/stiri/",
   "operational_records_public": false,
+  "cross_linking": {
+    "enabled": true,
+    "eligible_scope": "publishable_full_story_only"
+  },
+  "structured_data": {
+    "enabled": true,
+    "type": "NewsArticle",
+    "eligible_scope": "publishable_full_story_only",
+    "date_published_policy": "stable_publication_ledger_only",
+    "verified_image_policy": "provenance_backed_real_photograph_only",
+    "unverified_image_policy": "omit"
+  },
   "stories": [
     {
       "id": "alert-1cd2159b942ec2b672f7",
       "path": "/stiri/alert-1cd2159b942ec2b672f7/",
       "canonical": "https://valceaclar.ro/stiri/alert-1cd2159b942ec2b672f7/",
+      "published_at": "2026-08-18T00:02:39+03:00",
       "archive_status": "active",
       "active_now": true,
       "related_story_ids": [
         "alert-fdfdb85a579432f385f7",
         "musiclover-green-day-20260815",
-        "luminos-fest-zavoi-20260815"
+        "luminos-fest-zavoi-20260815",
+        "florile-govorei-20260816"
       ],
       "structured_data_type": "NewsArticle",
-      "published_at": "2026-08-18T00:02:39+03:00"
+      "public_ux_authorized": true
     },
     {
       "id": "alert-fdfdb85a579432f385f7",
       "path": "/stiri/alert-fdfdb85a579432f385f7/",
       "canonical": "https://valceaclar.ro/stiri/alert-fdfdb85a579432f385f7/",
+      "published_at": "2026-08-18T00:02:39+03:00",
       "archive_status": "active",
       "active_now": true,
       "related_story_ids": [
         "alert-1cd2159b942ec2b672f7",
         "musiclover-green-day-20260815",
-        "luminos-fest-zavoi-20260815"
+        "luminos-fest-zavoi-20260815",
+        "florile-govorei-20260816"
       ],
       "structured_data_type": "NewsArticle",
-      "published_at": "2026-08-18T00:02:39+03:00"
+      "public_ux_authorized": true
     },
     {
       "id": "luminos-fest-zavoi-20260815",
       "path": "/stiri/luminos-fest-zavoi-20260815/",
       "canonical": "https://valceaclar.ro/stiri/luminos-fest-zavoi-20260815/",
+      "published_at": "2026-08-15T20:57:49+03:00",
       "archive_status": "published_archive",
       "active_now": false,
       "related_story_ids": [
         "musiclover-green-day-20260815",
         "alert-1cd2159b942ec2b672f7",
-        "florile-govorei-20260816"
+        "florile-govorei-20260816",
+        "alert-fdfdb85a579432f385f7"
       ],
       "structured_data_type": "NewsArticle",
-      "published_at": "2026-08-15T20:57:49+03:00",
+      "public_ux_authorized": true,
       "image": {
         "public_url": "https://valceaclar.ro/media/social/luminos-zavoi-context-2010.jpg",
         "source_url": "https://commons.wikimedia.org/wiki/File:RamnicuValcea7.JPG",
@@ -62,15 +79,17 @@
       "id": "florile-govorei-20260816",
       "path": "/stiri/florile-govorei-20260816/",
       "canonical": "https://valceaclar.ro/stiri/florile-govorei-20260816/",
+      "published_at": "2026-08-16T19:06:48+03:00",
       "archive_status": "published_archive",
       "active_now": false,
       "related_story_ids": [
         "musiclover-green-day-20260815",
         "alert-1cd2159b942ec2b672f7",
-        "luminos-fest-zavoi-20260815"
+        "luminos-fest-zavoi-20260815",
+        "alert-fdfdb85a579432f385f7"
       ],
       "structured_data_type": "NewsArticle",
-      "published_at": "2026-08-16T19:06:48+03:00",
+      "public_ux_authorized": true,
       "image": {
         "public_url": "https://valceaclar.ro/media/social/florile-govorei-context-govora-park.jpg",
         "source_url": "https://commons.wikimedia.org/wiki/File:Baile_Govora_-_parcul.JPG",
@@ -86,29 +105,33 @@
       "id": "musiclover-green-day-20260815",
       "path": "/stiri/musiclover-green-day-20260815/",
       "canonical": "https://valceaclar.ro/stiri/musiclover-green-day-20260815/",
+      "published_at": "2026-08-15T20:57:49+03:00",
       "archive_status": "published_archive",
       "active_now": false,
       "related_story_ids": [
         "luminos-fest-zavoi-20260815",
         "alert-1cd2159b942ec2b672f7",
-        "florile-govorei-20260816"
+        "florile-govorei-20260816",
+        "alert-fdfdb85a579432f385f7"
       ],
       "structured_data_type": "NewsArticle",
-      "published_at": "2026-08-15T20:57:49+03:00"
+      "public_ux_authorized": true
     },
     {
       "id": "scm-valcea-slatina-20260815",
       "path": "/stiri/scm-valcea-slatina-20260815/",
       "canonical": "https://valceaclar.ro/stiri/scm-valcea-slatina-20260815/",
+      "published_at": "2026-08-15T13:25:34+03:00",
       "archive_status": "published_archive",
       "active_now": false,
       "related_story_ids": [
         "musiclover-green-day-20260815",
         "alert-1cd2159b942ec2b672f7",
-        "luminos-fest-zavoi-20260815"
+        "luminos-fest-zavoi-20260815",
+        "florile-govorei-20260816"
       ],
       "structured_data_type": "NewsArticle",
-      "published_at": "2026-08-15T13:25:34+03:00"
+      "public_ux_authorized": true
     }
   ]
 }
