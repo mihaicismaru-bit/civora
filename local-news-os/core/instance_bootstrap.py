@@ -11,6 +11,7 @@ import argparse
 import hashlib
 import json
 import tempfile
+import unicodedata
 from pathlib import Path
 
 from build_instance_manifest import build as build_manifest, load as load_json
@@ -100,6 +101,36 @@ def read_json(path: Path) -> dict:
     if not isinstance(value, dict):
         raise ValueError(f"{path}: expected JSON object")
     return value
+
+
+def normalized_tokens(value: object) -> set[str]:
+    raw = str(value or "").strip().lower()
+    if not raw:
+        return set()
+    ascii_form = "".join(
+        ch for ch in unicodedata.normalize("NFKD", raw) if not unicodedata.combining(ch)
+    )
+    return {token for token in (raw, ascii_form) if len(token) >= 5}
+
+
+def production_identity_tokens() -> set[str]:
+    tokens: set[str] = set()
+    for path in sorted(INSTANCES_ROOT.glob("*/instance.json")):
+        cfg = load_json(path)
+        if cfg.get("environment") != "production":
+            continue
+        tokens.update(normalized_tokens(cfg.get("instance_id")))
+        tokens.update(normalized_tokens(cfg.get("canonical_domain")))
+        brand = cfg.get("brand") or {}
+        for key in ("name", "short_name", "slogan"):
+            tokens.update(normalized_tokens(brand.get(key)))
+        geography = cfg.get("geography") or {}
+        for key in ("primary_name", "county"):
+            tokens.update(normalized_tokens(geography.get(key)))
+        for key in ("settlements", "aliases"):
+            for item in geography.get(key) or []:
+                tokens.update(normalized_tokens(item))
+    return tokens
 
 
 def initial_artifacts(
@@ -297,9 +328,14 @@ def self_test() -> dict:
         resumed = transition(instance_id, "resume", workspace)
         snapshot = verify_workspace(Path(workspace), resumed["identity_sha256"])
         serialized = json.dumps(snapshot, ensure_ascii=False).lower()
-        for forbidden in ("vâlcea", "valcea", "râmnicu", "ramnicu", "valceaclar.ro"):
-            if forbidden in serialized:
-                raise AssertionError(f"test instance contamination: {forbidden}")
+        ascii_serialized = "".join(
+            ch
+            for ch in unicodedata.normalize("NFKD", serialized)
+            if not unicodedata.combining(ch)
+        )
+        for forbidden in production_identity_tokens():
+            if forbidden in serialized or forbidden in ascii_serialized:
+                raise AssertionError("test instance contains production identity")
         if first["result"] != "CREATED" or second["result"] != "IDEMPOTENT_REUSE":
             raise AssertionError("bootstrap idempotency failed")
         if (started["to"], stopped["to"], resumed["to"]) != (
