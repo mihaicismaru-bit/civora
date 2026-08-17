@@ -7,7 +7,9 @@
     "groupPagesCorrigendaAndDocuments": true,
     "openOnlyFromExplicitOfficialEvent": true,
     "unknownFactsRemainUnknown": true,
-    "failClosed": true
+    "failClosed": true,
+    "deepDossierFactExtraction": true,
+    "documentTextFeedsDossiers": true
   },
   "summary": {
     "corpusPages": 58,
@@ -17,7 +19,9 @@
     "withDocuments": 24,
     "publishable": 6,
     "prePrecisionGateCalls": 32,
-    "precisionGateRemoved": 4
+    "precisionGateRemoved": 4,
+    "deepStructured": 28,
+    "highDepth": 1
   },
   "calls": [
     {
@@ -63,6 +67,20 @@
         },
         "documents": [
           "Instrucțiunea nr. 2 pentru aplicarea unitară a prevederilor Ghidului specific Condiții de accesare a fondurilor europene aferente Planului Național de Redresare și Reziliență, în cadrul apelului de proiecte „Digitalizarea IMM-urilor – grant de până la 100.000 euro pe întreprinderecare să sprijine IMM-urile în adoptarea tehnologiilor digitale”PDF, 510,36 Ko"
+        ],
+        "state_aid_and_cost_rules": [
+          "346/2004 și calculul pentru întreprinderile partenere sau legate – actualizată; • Declarație pe propria răspundere cu privire la respectarea regulii cumulului ajutoarelor de stat / ajutor de minimis – actualizată; • Declarație prin care beneficiarul aderă la un set de principii ale Pilonului european al drepturilor sociale (conform modelului atașat); • Cazier judiciar al reprezentantului legal al solicitantului;"
+        ],
+        "implementation": [
+          "Calendarul de implementare a proiectului, Durata de implementare a contractului, Achiziții preconizate după depunerea cererii de finanţare și Grafic estimativ privind depunerea cererilor de transfer.",
+          "Activitatea privind consilierea IT nu se va regăsi în tabelul - Achiziţii preconizate după depunerea cererii de finanţare, în perioada de implementare a proiectului - din secțiunea 5 ACHIZIŢIILE DERULATE ÎN CADRUL PROIECTULUI La punctul II.",
+          "B) Durata de implementare a proiectului Data primei activități legată de realizarea proiectului trebuie să fie modificată și situată în mod rezonabil, ulterior datei estimative de semnare a contractului de finanțare, cel puțin 30 de zile lucrătoare de la data primirii scrisorii de notificare.",
+          "Perioada de implementare a proiectului este de maximum 12 luni (secțiunea 8 din ghidul specific) de la data semnării contractului de finanțare.",
+          "În situații justificate perioada de implementare poate fi prelungită cu maximum 6 luni, fără a depăși data de 31 decembrie 2025.",
+          "C) Achiziții preconizate după depunerea cererii de finanțare, în perioada de implementare a proiectului Data estimativă a începerii procedurilor de achiziții/cumpărării directe trebuie să fie în mod obligatoriu ulterioară (sau egală) datei de începere a duratei de implementare a proiectului, cu excepția serviciilor de consiliere/analiză pentru identificarea soluțiilor tehnice.",
+          "Durata de implementare a proiectului Durata de implementare a proiectului este între 01.06.2024 (data primei activități legate de realizarea proiectului, zi/luna/an și zi/lună/an) și 30.05.2025 (data finalizării tuturor activităților legate de realizarea proiectului, zi/luna/an și zi/lună/an) Exemplul 1:",
+          "În cazul unei achiziții de servicii de tip Cloud Computing, unde sunt înregistrate cheltuieli aferente perioadei de implementare și durabilitate a proiectului se vor bifa în tabelul Calendarul de implementare a proiectului luna 1, luna 2, luna 3, luna 4 și luna 5, luna 6, luna 7, luna 8, luna 9, luna 10, luna 11, respectiv luna 12 Adică: ** Luna 1 reprezintă perioada de derulare și finalizare a procedurii de achiziție/cumpărării directe cât și de începere a derulării contractului; ** Lunile 2-12 reprezintă perioadă de derulare a contractului de achiziție pe perioada de implementare.",
+          "Finanțat de Uniunea Europeană – UrmătoareaGenerațieUE https://mfe.gov.ro/pnrr/ https://mfe.gov.ro/category/anunturi-pnrr/ https://www.facebook.com/PNRROficial Se poate observa din exemplu faptul că aici nu sunt trecute lunile aferente perioadei de durabilitate aceasta fiind menționată doar în tabelul Achiziții preconizate după depunerea cererii de finanțare, în perioada de implementare a proiectului la coloana 8 Durata estimată a contractului."
         ]
       },
       "verifiedFactClasses": [
@@ -129,11 +147,39 @@
           "budget",
           "scoring"
         ],
-        "failClosed": true
+        "failClosed": true,
+        "depthCompleteness": 67,
+        "depthDimensions": {
+          "status": false,
+          "deadline": false,
+          "beneficiaries": false,
+          "eligibility": true,
+          "activities": true,
+          "financing": true,
+          "costsAid": true,
+          "documents": true,
+          "scoring": false,
+          "indicators": true,
+          "implementation": true,
+          "provenance": true
+        },
+        "missingDepthClasses": [
+          "status",
+          "deadline",
+          "beneficiaries",
+          "scoring"
+        ]
       },
       "canonicalGate": {
         "decision": "KEEP",
         "reason": "CALL_SPECIFIC"
+      },
+      "dossierConstruction": {
+        "engine": "MIPE_CANONICAL_DEEP_FACTS_V1",
+        "pageEvidenceCount": 1,
+        "documentEvidenceCount": 1,
+        "depthCompleteness": 67,
+        "autonomous": true
       }
     },
     {
@@ -152,16 +198,22 @@
         ],
         "documents": [
           "Lista de răspunsuriPDF, 131,50 Ko"
-        ]
+        ],
+        "eligibility": {
+          "conditions": [],
+          "geographic_scope": [
+            "Autoritatea de Management pentru Programul Educație și Ocupare 2021-2027 din cadrul Ministerului Investițiilor și Proiectelor Europene publică Lista de răspunsuri PDF, 131,50 Ko la propunerile, observațiile și întrebările formulate de solicitanții finanțării nerambursabile în cadrul procesului de consultare publică aferent Ghidului Solicitantului Condiții Specifice „Activarea potențialului antreprenorial al tinerilor – ITI Delta Dunării”, Programul Educație și Ocupare 2021 – 2027."
+          ]
+        }
       },
       "verifiedFactClasses": [
+        "eligibility",
         "status"
       ],
       "publicationDecision": {
         "blockedFactClasses": [
           "deadline",
           "beneficiaries",
-          "eligibility",
           "grant",
           "budget",
           "scoring"
@@ -210,7 +262,7 @@
         }
       ],
       "quality": {
-        "completeness": 14,
+        "completeness": 29,
         "blocked": [
           "deadline",
           "beneficiaries",
@@ -219,11 +271,42 @@
           "budget",
           "scoring"
         ],
-        "failClosed": true
+        "failClosed": true,
+        "depthCompleteness": 42,
+        "depthDimensions": {
+          "status": true,
+          "deadline": false,
+          "beneficiaries": false,
+          "eligibility": true,
+          "activities": true,
+          "financing": false,
+          "costsAid": false,
+          "documents": true,
+          "scoring": false,
+          "indicators": false,
+          "implementation": false,
+          "provenance": true
+        },
+        "missingDepthClasses": [
+          "deadline",
+          "beneficiaries",
+          "financing",
+          "costsAid",
+          "scoring",
+          "indicators",
+          "implementation"
+        ]
       },
       "canonicalGate": {
         "decision": "KEEP",
         "reason": "CALL_SPECIFIC"
+      },
+      "dossierConstruction": {
+        "engine": "MIPE_CANONICAL_DEEP_FACTS_V1",
+        "pageEvidenceCount": 1,
+        "documentEvidenceCount": 0,
+        "depthCompleteness": 42,
+        "autonomous": true
       }
     },
     {
@@ -242,7 +325,8 @@
         ],
         "deadline": {
           "evidence": [
-            "7Z, 2,06 MoSfarsitul primului paragraf Sistemul informatic MySMIS2021 se deschide în data de 28.05.2026, ora 16.00, până în data de 28.08.2026, ora 16.00."
+            "7Z, 2,06 MoSfarsitul primului paragraf Sistemul informatic MySMIS2021 se deschide în data de 28.05.2026, ora 16.00, până în data de 28.08.2026, ora 16.00.",
+            "0 0 6px; } Informații Apel Deschis Instrument financiar FSE+ Aria de acoperire Acoperire Națională Data lansării 28/05/2026 Data închiderii 30/10/2026 Valoarea apelului 19.714.235,00 euro euro Obiectivul specific vizat Prioritatea 2 peo Solicitanți eligibili Serviciul Public de Ocupare (ANOFM/AJOFM/AMOFM);"
           ]
         },
         "grant": {
@@ -252,17 +336,21 @@
         },
         "documents": [
           "Corrigendum la Ghidul Solicitantului – Condiții Specifice „Inițiativa ALMA”,",
-          "GHIDUL POATE FI CONSULTAT AICI.7Z, 2,06 Mo"
+          "GHIDUL POATE FI CONSULTAT AICI.7Z, 2,06 Mo",
+          "Ghidul solicitantului Inițiativa ALMA"
+        ],
+        "beneficiaries": [
+          "0 0 6px; } Informații Apel Deschis Instrument financiar FSE+ Aria de acoperire Acoperire Națională Data lansării 28/05/2026 Data închiderii 30/10/2026 Valoarea apelului 19.714.235,00 euro euro Obiectivul specific vizat Prioritatea 2 peo Solicitanți eligibili Serviciul Public de Ocupare (ANOFM/AJOFM/AMOFM);"
         ]
       },
       "verifiedFactClasses": [
+        "beneficiaries",
         "deadline",
         "grant",
         "status"
       ],
       "publicationDecision": {
         "blockedFactClasses": [
-          "beneficiaries",
           "eligibility",
           "budget",
           "scoring"
@@ -341,18 +429,47 @@
         }
       ],
       "quality": {
-        "completeness": 43,
+        "completeness": 57,
         "blocked": [
           "beneficiaries",
           "eligibility",
           "budget",
           "scoring"
         ],
-        "failClosed": true
+        "failClosed": true,
+        "depthCompleteness": 58,
+        "depthDimensions": {
+          "status": true,
+          "deadline": true,
+          "beneficiaries": true,
+          "eligibility": false,
+          "activities": true,
+          "financing": true,
+          "costsAid": false,
+          "documents": true,
+          "scoring": false,
+          "indicators": false,
+          "implementation": false,
+          "provenance": true
+        },
+        "missingDepthClasses": [
+          "eligibility",
+          "costsAid",
+          "scoring",
+          "indicators",
+          "implementation"
+        ]
       },
       "canonicalGate": {
         "decision": "KEEP",
         "reason": "CALL_SPECIFIC"
+      },
+      "dossierConstruction": {
+        "engine": "MIPE_CANONICAL_DEEP_FACTS_V1",
+        "pageEvidenceCount": 2,
+        "documentEvidenceCount": 2,
+        "depthCompleteness": 58,
+        "autonomous": true
       }
     },
     {
@@ -368,7 +485,8 @@
       "materialFacts": {
         "deadline": {
           "evidence": [
-            "Sistemul informatic MySMIS2021 se deschide în data de 30.07.2026, ora 16.00, până în data de 30.09.2026, ora 16.00.Sfarsitul primului paragraf"
+            "Sistemul informatic MySMIS2021 se deschide în data de 30.07.2026, ora 16.00, până în data de 30.09.2026, ora 16.00.Sfarsitul primului paragraf",
+            "0 0 6px; } Informații Apel Deschis Instrument financiar FSE+ Aria de acoperire – Data lansării 30/07/2026 Data închiderii 30/09/2026 Valoarea apelului 16.852.941 euro euro Solicitanți eligibili Ministerul Educației și Cercetării Atașamente „Competențe pentru incluziune: profesionalizarea personalului din educație în sprijinul educației incluzive” Autoritatea de Management pentru Programul Educație și Ocupare din cadrul Ministerului Investițiilor și Proiectelor Europene lansează apelul de tip non-competitiv „Competențe pentru incluziune: profesionalizarea personalului din educație în sprijinul educației incluzive” finanțat din Prioritatea:"
           ]
         },
         "grant": {
@@ -378,16 +496,19 @@
         },
         "documents": [
           "„Competențe pentru incluziune: profesionalizarea personalului din educație în sprijinul educației incluzive”"
+        ],
+        "beneficiaries": [
+          "0 0 6px; } Informații Apel Deschis Instrument financiar FSE+ Aria de acoperire – Data lansării 30/07/2026 Data închiderii 30/09/2026 Valoarea apelului 16.852.941 euro euro Solicitanți eligibili Ministerul Educației și Cercetării Atașamente „Competențe pentru incluziune: profesionalizarea personalului din educație în sprijinul educației incluzive” Autoritatea de Management pentru Programul Educație și Ocupare din cadrul Ministerului Investițiilor și Proiectelor Europene lansează apelul de tip non-competitiv „Competențe pentru incluziune: profesionalizarea personalului din educație în sprijinul educației incluzive” finanțat din Prioritatea:"
         ]
       },
       "verifiedFactClasses": [
+        "beneficiaries",
         "deadline",
         "grant",
         "status"
       ],
       "publicationDecision": {
         "blockedFactClasses": [
-          "beneficiaries",
           "eligibility",
           "budget",
           "scoring"
@@ -437,18 +558,48 @@
         }
       ],
       "quality": {
-        "completeness": 43,
+        "completeness": 57,
         "blocked": [
           "beneficiaries",
           "eligibility",
           "budget",
           "scoring"
         ],
-        "failClosed": true
+        "failClosed": true,
+        "depthCompleteness": 50,
+        "depthDimensions": {
+          "status": true,
+          "deadline": true,
+          "beneficiaries": true,
+          "eligibility": false,
+          "activities": false,
+          "financing": true,
+          "costsAid": false,
+          "documents": true,
+          "scoring": false,
+          "indicators": false,
+          "implementation": false,
+          "provenance": true
+        },
+        "missingDepthClasses": [
+          "eligibility",
+          "activities",
+          "costsAid",
+          "scoring",
+          "indicators",
+          "implementation"
+        ]
       },
       "canonicalGate": {
         "decision": "KEEP",
         "reason": "CALL_SPECIFIC"
+      },
+      "dossierConstruction": {
+        "engine": "MIPE_CANONICAL_DEEP_FACTS_V1",
+        "pageEvidenceCount": 1,
+        "documentEvidenceCount": 1,
+        "depthCompleteness": 50,
+        "autonomous": true
       }
     },
     {
@@ -468,7 +619,8 @@
         "deadline": {
           "evidence": [
             "Sfarsitul primului paragraf Propunerile și observațiile pot fi transmise pe adresa de e-mail consultare.peo@mfe.gov.ro până la data de 08.07.2026.",
-            "ZIP, 361,75 KoSfarsitul primului paragraf Propunerile și observațiile pot fi transmise pe adresa de e-mail consultare.peo@mfe.gov.ro până la data de 08.07.2026."
+            "ZIP, 361,75 KoSfarsitul primului paragraf Propunerile și observațiile pot fi transmise pe adresa de e-mail consultare.peo@mfe.gov.ro până la data de 08.07.2026.",
+            "0 0 6px; } Informații Apel Iesit din consultare publica Instrument financiar FSE+ Aria de acoperire Acoperire Națională Data lansării 17/06/2026 Data închiderii 08/07/2026 Valoarea apelului 16.852.941 euro euro Obiectivul specific vizat Prioritatea 6 peo Solicitanți eligibili Ministerul Educației și Cercetării Atașamente Ghidul Solicitantului Condiții Specifice „Competențe pentru incluziune: profesionalizarea personalului din educație în sprijinul educației incluzive” Autoritatea de Management pentru Programul Educație și Ocupare lansează, în consultare publică, Ghidul Solicitantului Condiții Specifice „Competențe pentru incluziune: profesionalizarea personalului din educație în sprijinul educației incluzive” apel de proiecte noncompetitiv finanțat din Prioritatea:"
           ]
         },
         "grant": {
@@ -477,17 +629,21 @@
           ]
         },
         "documents": [
-          "Ghidul poate fi consultat AICI.ZIP, 361,75 Ko"
+          "Ghidul poate fi consultat AICI.ZIP, 361,75 Ko",
+          "Ghidul Solicitantului Condiții Specifice „Competențe pentru incluziune: profesionalizarea personalului din educație în sprijinul educației incluzive”"
+        ],
+        "beneficiaries": [
+          "0 0 6px; } Informații Apel Iesit din consultare publica Instrument financiar FSE+ Aria de acoperire Acoperire Națională Data lansării 17/06/2026 Data închiderii 08/07/2026 Valoarea apelului 16.852.941 euro euro Obiectivul specific vizat Prioritatea 6 peo Solicitanți eligibili Ministerul Educației și Cercetării Atașamente Ghidul Solicitantului Condiții Specifice „Competențe pentru incluziune: profesionalizarea personalului din educație în sprijinul educației incluzive” Autoritatea de Management pentru Programul Educație și Ocupare lansează, în consultare publică, Ghidul Solicitantului Condiții Specifice „Competențe pentru incluziune: profesionalizarea personalului din educație în sprijinul educației incluzive” apel de proiecte noncompetitiv finanțat din Prioritatea:"
         ]
       },
       "verifiedFactClasses": [
+        "beneficiaries",
         "deadline",
         "grant",
         "status"
       ],
       "publicationDecision": {
         "blockedFactClasses": [
-          "beneficiaries",
           "eligibility",
           "budget",
           "scoring"
@@ -555,18 +711,47 @@
         }
       ],
       "quality": {
-        "completeness": 43,
+        "completeness": 57,
         "blocked": [
           "beneficiaries",
           "eligibility",
           "budget",
           "scoring"
         ],
-        "failClosed": true
+        "failClosed": true,
+        "depthCompleteness": 58,
+        "depthDimensions": {
+          "status": true,
+          "deadline": true,
+          "beneficiaries": true,
+          "eligibility": false,
+          "activities": true,
+          "financing": true,
+          "costsAid": false,
+          "documents": true,
+          "scoring": false,
+          "indicators": false,
+          "implementation": false,
+          "provenance": true
+        },
+        "missingDepthClasses": [
+          "eligibility",
+          "costsAid",
+          "scoring",
+          "indicators",
+          "implementation"
+        ]
       },
       "canonicalGate": {
         "decision": "KEEP",
         "reason": "CALL_SPECIFIC"
+      },
+      "dossierConstruction": {
+        "engine": "MIPE_CANONICAL_DEEP_FACTS_V1",
+        "pageEvidenceCount": 2,
+        "documentEvidenceCount": 1,
+        "depthCompleteness": 58,
+        "autonomous": true
       }
     },
     {
@@ -587,16 +772,26 @@
         },
         "documents": [
           "Ghidul Solicitantului Condiții Specifice „Consolidarea dialogului social și a parteneriatelor pentru ocupare și formare III – Organizațiile societății civile – ITI Valea Jiului”, apel de proiecte competitiv finanțat din Prioritate: 1.„Modernizarea instituțiilor pieței muncii“, Obiectiv specific: ESO4.2 „Modernizarea instituțiilor și a serviciilor pieței muncii pentru ca acestea să evalueze și să anticipeze necesitățile în materie de competențe, să asigure o asistență promptă și personalizată și să sprijine corelarea cererii și a ofertei, tranzițiile și mobilitatea pe piața muncii (FSE+)“, Acțiunea 1.b.2.Consolidarea dialogului social și a parteneriatelor pentru ocupare și formare, inclusiv cu participarea societății civile.ZIP, 402,26 Ko"
-        ]
+        ],
+        "eligibility": {
+          "conditions": [],
+          "partners": [
+            "Autoritatea de Management pentru Programul Educație și Ocupare 2021-2027 din cadrul Ministerului Investițiilor și Proiectelor Europene lansează, în consultare publică, Ghidul Solicitantului Condiții Specifice „Consolidarea dialogului social și a parteneriatelor pentru ocupare și formare III – Organizațiile societății civile – ITI Valea Jiului”, apel de proiecte competitiv finanțat din Prioritate:",
+            "ESO4.2 „Modernizarea instituțiilor și a serviciilor pieței muncii pentru ca acestea să evalueze și să anticipeze necesitățile în materie de competențe, să asigure o asistență promptă și personalizată și să sprijine corelarea cererii și a ofertei, tranzițiile și mobilitatea pe piața muncii (FSE+)“, Acțiunea 1.b.2.Consolidarea dialogului social și a parteneriatelor pentru ocupare și formare, inclusiv cu participarea societății civile."
+          ],
+          "geographic_scope": [
+            "Autoritatea de Management pentru Programul Educație și Ocupare 2021-2027 din cadrul Ministerului Investițiilor și Proiectelor Europene lansează, în consultare publică, Ghidul Solicitantului Condiții Specifice „Consolidarea dialogului social și a parteneriatelor pentru ocupare și formare III – Organizațiile societății civile – ITI Valea Jiului”, apel de proiecte competitiv finanțat din Prioritate:"
+          ]
+        }
       },
       "verifiedFactClasses": [
         "deadline",
+        "eligibility",
         "status"
       ],
       "publicationDecision": {
         "blockedFactClasses": [
           "beneficiaries",
-          "eligibility",
           "grant",
           "budget",
           "scoring"
@@ -645,7 +840,7 @@
         }
       ],
       "quality": {
-        "completeness": 29,
+        "completeness": 43,
         "blocked": [
           "beneficiaries",
           "eligibility",
@@ -653,11 +848,42 @@
           "budget",
           "scoring"
         ],
-        "failClosed": true
+        "failClosed": true,
+        "depthCompleteness": 42,
+        "depthDimensions": {
+          "status": true,
+          "deadline": true,
+          "beneficiaries": false,
+          "eligibility": true,
+          "activities": false,
+          "financing": false,
+          "costsAid": false,
+          "documents": true,
+          "scoring": false,
+          "indicators": false,
+          "implementation": false,
+          "provenance": true
+        },
+        "missingDepthClasses": [
+          "beneficiaries",
+          "activities",
+          "financing",
+          "costsAid",
+          "scoring",
+          "indicators",
+          "implementation"
+        ]
       },
       "canonicalGate": {
         "decision": "KEEP",
         "reason": "CALL_SPECIFIC"
+      },
+      "dossierConstruction": {
+        "engine": "MIPE_CANONICAL_DEEP_FACTS_V1",
+        "pageEvidenceCount": 1,
+        "documentEvidenceCount": 0,
+        "depthCompleteness": 42,
+        "autonomous": true
       }
     },
     {
@@ -770,11 +996,44 @@
           "budget",
           "scoring"
         ],
-        "failClosed": true
+        "failClosed": true,
+        "depthCompleteness": 25,
+        "depthDimensions": {
+          "status": true,
+          "deadline": false,
+          "beneficiaries": false,
+          "eligibility": false,
+          "activities": false,
+          "financing": false,
+          "costsAid": false,
+          "documents": true,
+          "scoring": false,
+          "indicators": false,
+          "implementation": false,
+          "provenance": true
+        },
+        "missingDepthClasses": [
+          "deadline",
+          "beneficiaries",
+          "eligibility",
+          "activities",
+          "financing",
+          "costsAid",
+          "scoring",
+          "indicators",
+          "implementation"
+        ]
       },
       "canonicalGate": {
         "decision": "KEEP",
         "reason": "CALL_SPECIFIC"
+      },
+      "dossierConstruction": {
+        "engine": "MIPE_CANONICAL_DEEP_FACTS_V1",
+        "pageEvidenceCount": 2,
+        "documentEvidenceCount": 0,
+        "depthCompleteness": 25,
+        "autonomous": true
       }
     },
     {
@@ -797,7 +1056,8 @@
           ]
         },
         "documents": [
-          "Ghidul Solicitantului Condiții Specifice „Diversificarea și flexibilizarea serviciilor de educație timpurie – relansare 2026”,ZIP, 569,22 Ko"
+          "Ghidul Solicitantului Condiții Specifice „Diversificarea și flexibilizarea serviciilor de educație timpurie – relansare 2026”,ZIP, 569,22 Ko",
+          "Ghidul Solicitantului Condiții Specifice „Diversificarea și flexibilizarea serviciilor de educație timpurie - relansare 2026”,"
         ]
       },
       "verifiedFactClasses": [
@@ -864,11 +1124,42 @@
           "budget",
           "scoring"
         ],
-        "failClosed": true
+        "failClosed": true,
+        "depthCompleteness": 42,
+        "depthDimensions": {
+          "status": true,
+          "deadline": true,
+          "beneficiaries": false,
+          "eligibility": false,
+          "activities": true,
+          "financing": false,
+          "costsAid": false,
+          "documents": true,
+          "scoring": false,
+          "indicators": false,
+          "implementation": false,
+          "provenance": true
+        },
+        "missingDepthClasses": [
+          "beneficiaries",
+          "eligibility",
+          "financing",
+          "costsAid",
+          "scoring",
+          "indicators",
+          "implementation"
+        ]
       },
       "canonicalGate": {
         "decision": "KEEP",
         "reason": "CALL_SPECIFIC"
+      },
+      "dossierConstruction": {
+        "engine": "MIPE_CANONICAL_DEEP_FACTS_V1",
+        "pageEvidenceCount": 1,
+        "documentEvidenceCount": 1,
+        "depthCompleteness": 42,
+        "autonomous": true
       }
     },
     {
@@ -959,11 +1250,42 @@
           "budget",
           "scoring"
         ],
-        "failClosed": true
+        "failClosed": true,
+        "depthCompleteness": 42,
+        "depthDimensions": {
+          "status": true,
+          "deadline": true,
+          "beneficiaries": false,
+          "eligibility": false,
+          "activities": true,
+          "financing": false,
+          "costsAid": false,
+          "documents": true,
+          "scoring": false,
+          "indicators": false,
+          "implementation": false,
+          "provenance": true
+        },
+        "missingDepthClasses": [
+          "beneficiaries",
+          "eligibility",
+          "financing",
+          "costsAid",
+          "scoring",
+          "indicators",
+          "implementation"
+        ]
       },
       "canonicalGate": {
         "decision": "KEEP",
         "reason": "CALL_SPECIFIC"
+      },
+      "dossierConstruction": {
+        "engine": "MIPE_CANONICAL_DEEP_FACTS_V1",
+        "pageEvidenceCount": 1,
+        "documentEvidenceCount": 0,
+        "depthCompleteness": 42,
+        "autonomous": true
       }
     },
     {
@@ -983,15 +1305,23 @@
         "documents": [
           "„Incluziunea copiilor și tinerilor cu cerințe educaționale speciale – regiuni mai puțin dezvoltate” PEO/548/PEO_P6/OP4.6/PEO_A33;PDF, 146,64 Ko",
           "„Incluziunea copiilor și tinerilor cu cerințe educaționale speciale – regiunea București-Ilfov” PEO/546/PEO_P6/OP4.6/PEO_A33.PDF, 115,37 Ko"
-        ]
+        ],
+        "eligibility": {
+          "conditions": [],
+          "geographic_scope": [
+            "Autoritatea de Management pentru Programul Educatie si Ocupare (PEO) 2021 – 2027 publică Listele finale ale proiectelor selectate la finanțare după soluționarea contestațiilor în etapa de evaluare tehnică și financiară calitativă (CSC ETFC) pentru apelurile de proiecte: „Incluziunea copiilor și tinerilor cu cerințe educaționale speciale – regiuni mai puțin dezvoltate” PEO/548/PEO_P6/OP4.6/PEO_A33;",
+            "PDF, 146,64 Ko „Incluziunea copiilor și tinerilor cu cerințe educaționale speciale – regiunea București-Ilfov” PEO/546/PEO_P6/OP4.6/PEO_A33."
+          ]
+        }
       },
-      "verifiedFactClasses": [],
+      "verifiedFactClasses": [
+        "eligibility"
+      ],
       "publicationDecision": {
         "blockedFactClasses": [
           "status",
           "deadline",
           "beneficiaries",
-          "eligibility",
           "grant",
           "budget",
           "scoring"
@@ -1050,7 +1380,7 @@
         }
       ],
       "quality": {
-        "completeness": 0,
+        "completeness": 14,
         "blocked": [
           "status",
           "deadline",
@@ -1060,11 +1390,43 @@
           "budget",
           "scoring"
         ],
-        "failClosed": true
+        "failClosed": true,
+        "depthCompleteness": 33,
+        "depthDimensions": {
+          "status": false,
+          "deadline": false,
+          "beneficiaries": false,
+          "eligibility": true,
+          "activities": false,
+          "financing": false,
+          "costsAid": false,
+          "documents": true,
+          "scoring": false,
+          "indicators": true,
+          "implementation": false,
+          "provenance": true
+        },
+        "missingDepthClasses": [
+          "status",
+          "deadline",
+          "beneficiaries",
+          "activities",
+          "financing",
+          "costsAid",
+          "scoring",
+          "implementation"
+        ]
       },
       "canonicalGate": {
         "decision": "KEEP",
         "reason": "EXPLICIT_CALL_CODE"
+      },
+      "dossierConstruction": {
+        "engine": "MIPE_CANONICAL_DEEP_FACTS_V1",
+        "pageEvidenceCount": 1,
+        "documentEvidenceCount": 0,
+        "depthCompleteness": 33,
+        "autonomous": true
       }
     },
     {
@@ -1150,11 +1512,43 @@
           "budget",
           "scoring"
         ],
-        "failClosed": true
+        "failClosed": true,
+        "depthCompleteness": 33,
+        "depthDimensions": {
+          "status": true,
+          "deadline": false,
+          "beneficiaries": false,
+          "eligibility": false,
+          "activities": true,
+          "financing": false,
+          "costsAid": false,
+          "documents": true,
+          "scoring": false,
+          "indicators": false,
+          "implementation": false,
+          "provenance": true
+        },
+        "missingDepthClasses": [
+          "deadline",
+          "beneficiaries",
+          "eligibility",
+          "financing",
+          "costsAid",
+          "scoring",
+          "indicators",
+          "implementation"
+        ]
       },
       "canonicalGate": {
         "decision": "KEEP",
         "reason": "CALL_SPECIFIC"
+      },
+      "dossierConstruction": {
+        "engine": "MIPE_CANONICAL_DEEP_FACTS_V1",
+        "pageEvidenceCount": 1,
+        "documentEvidenceCount": 0,
+        "depthCompleteness": 33,
+        "autonomous": true
       }
     },
     {
@@ -1178,16 +1572,22 @@
         },
         "documents": [
           "Ghidul Solicitantului Condiții Specifice „Măsuri active de ocupare pentru tineri, inclusiv pentru tineri NEET – TERITORIUL ITI DELTA DUNĂRII – 2026”,ZIP, 386,15 Ko"
-        ]
+        ],
+        "eligibility": {
+          "conditions": [],
+          "geographic_scope": [
+            "Autoritatea de Management pentru Programul Educație și Ocupare 2021-2027 lansează, în consultare publică, Ghidul Solicitantului Condiții Specifice „Măsuri active de ocupare pentru tineri, inclusiv pentru tineri NEET – TERITORIUL ITI DELTA DUNĂRII – 2026”, ZIP, 386,15 Ko apel de proiecte competitiv finanțat din Prioritatea P02 „Valorificarea potențialului tinerilor pe piața muncii (Ocuparea forței de muncă în rândul tinerilor)“, Obiectiv specific:"
+          ]
+        }
       },
       "verifiedFactClasses": [
         "deadline",
+        "eligibility",
         "status"
       ],
       "publicationDecision": {
         "blockedFactClasses": [
           "beneficiaries",
-          "eligibility",
           "grant",
           "budget",
           "scoring"
@@ -1236,7 +1636,7 @@
         }
       ],
       "quality": {
-        "completeness": 29,
+        "completeness": 43,
         "blocked": [
           "beneficiaries",
           "eligibility",
@@ -1244,11 +1644,41 @@
           "budget",
           "scoring"
         ],
-        "failClosed": true
+        "failClosed": true,
+        "depthCompleteness": 50,
+        "depthDimensions": {
+          "status": true,
+          "deadline": true,
+          "beneficiaries": false,
+          "eligibility": true,
+          "activities": true,
+          "financing": false,
+          "costsAid": false,
+          "documents": true,
+          "scoring": false,
+          "indicators": false,
+          "implementation": false,
+          "provenance": true
+        },
+        "missingDepthClasses": [
+          "beneficiaries",
+          "financing",
+          "costsAid",
+          "scoring",
+          "indicators",
+          "implementation"
+        ]
       },
       "canonicalGate": {
         "decision": "KEEP",
         "reason": "CALL_SPECIFIC"
+      },
+      "dossierConstruction": {
+        "engine": "MIPE_CANONICAL_DEEP_FACTS_V1",
+        "pageEvidenceCount": 1,
+        "documentEvidenceCount": 0,
+        "depthCompleteness": 50,
+        "autonomous": true
       }
     },
     {
@@ -1265,16 +1695,22 @@
         "documents": [
           "Lista finală a proiectelor aprobate în etapa de evaluare tehnică și financiară calitativă (ETFC) – 648PDF, 574,39 Ko",
           "Lista finală a proiectelor rezervă aprobate în etapa de evaluare tehnică și financiară calitativă (ETFC) – 648PDF, 288,89 Ko"
-        ]
+        ],
+        "eligibility": {
+          "conditions": [],
+          "geographic_scope": [
+            "Autoritatea de Management pentru Programul Educație și Ocupare (PEO) 2021 – 2027 publică lista finală pentru proiectele selectate la finanțare și lista finală pentru proiectele rezervă aprobate după soluționarea contestațiilor în etapa tehnică și financiară calitativă, pentru apelul de proiecte PEO/648/PEO_P8/OP4/ESO4.6/PEO_A68_C – „O ȘANSĂ ÎN PLUS PRIN ÎNVĂȚĂMÂNTUL PROFESIONAL ȘI TEHNIC – REGIUNI MAI PUȚIN DEZVOLTATE” Sfarsitul primului paragraf Lista finală a proiectelor aprobate în etapa de evaluare tehnică și financiară calitativă (ETFC) – 648 PDF, 574,39 Ko Lista finală a proiectelor rezervă aprobate în etapa de evaluare tehnică și financiară calitativă (ETFC) – 648 PDF, 288,89 Ko Începând cu data prezentului anunț, solicitanții vor primi prin sistemul electronic MySMIS 2021+, decizia privind rezultatul procesului de soluționare contestații -etapa de evaluare tehnică şi financiară calitativă (ETFC), pentru proiectele depuse în cadrul apelului de proiecte PEO/648/PEO_P8/OP4/ESO4.6/PEO_A68_C – „O ȘANSĂ ÎN PLUS PRIN ÎNVĂȚĂMÂNTUL PROFESIONAL ȘI TEHNIC – REGIUNI MAI PUȚIN DEZVOLTATE”"
+          ]
+        }
       },
       "verifiedFactClasses": [
+        "eligibility",
         "status"
       ],
       "publicationDecision": {
         "blockedFactClasses": [
           "deadline",
           "beneficiaries",
-          "eligibility",
           "grant",
           "budget",
           "scoring"
@@ -1333,7 +1769,7 @@
         }
       ],
       "quality": {
-        "completeness": 14,
+        "completeness": 29,
         "blocked": [
           "deadline",
           "beneficiaries",
@@ -1342,11 +1778,43 @@
           "budget",
           "scoring"
         ],
-        "failClosed": true
+        "failClosed": true,
+        "depthCompleteness": 33,
+        "depthDimensions": {
+          "status": true,
+          "deadline": false,
+          "beneficiaries": false,
+          "eligibility": true,
+          "activities": false,
+          "financing": false,
+          "costsAid": false,
+          "documents": true,
+          "scoring": false,
+          "indicators": false,
+          "implementation": false,
+          "provenance": true
+        },
+        "missingDepthClasses": [
+          "deadline",
+          "beneficiaries",
+          "activities",
+          "financing",
+          "costsAid",
+          "scoring",
+          "indicators",
+          "implementation"
+        ]
       },
       "canonicalGate": {
         "decision": "KEEP",
         "reason": "EXPLICIT_CALL_CODE"
+      },
+      "dossierConstruction": {
+        "engine": "MIPE_CANONICAL_DEEP_FACTS_V1",
+        "pageEvidenceCount": 1,
+        "documentEvidenceCount": 0,
+        "depthCompleteness": 33,
+        "autonomous": true
       }
     },
     {
@@ -1375,6 +1843,9 @@
         "documents": [
           "Instrucțiunea nr. 4 privind preluarea în sistemul informatic MySMIS2021/SMIS2021+ a Acordului de finanțare încheiat între Ministerul Investițiilor și Proiectelor Europene, prin Direcția Generală Programe Europene Capital Uman în calitate de Autoritate de Management pentru Programul Educație și Ocupare 2021-2027, și Fondul Național de Garantare a Creditelor pentru Întreprinderi Mici și Mijlocii.ZIP, 2,21 Mo",
           "schema de ajutor de minimisPDF, 123,27 Ko"
+        ],
+        "state_aid_and_cost_rules": [
+          "ZIP, 2,21 Mo Pentru apelul aferent acțiunii 4.a.3 Sprijin acordat sectorului de economie socială pentru dezvoltare /inovare /scalare/extindere de întreprinderi sociale și întreprinderi sociale de inserție din PEO, Sistemul informatic MySMIS2021 se deschide în data de 30.10.2025, ora 16.00, până în data de 29.01.2026, ora 16.00.Sfarsitul primului paragraf Acest apel are asociată schema de ajutor de minimis PDF, 123,27 Ko Sprijin acordat sectorului de economie socială pentru dezvoltare/inovare/scalare/extindere de întreprinderi sociale și întreprinderi sociale de inserție, aprobată prin Ordinul ministrului investițiilor și proiectelor europene nr."
         ]
       },
       "verifiedFactClasses": [
@@ -1452,11 +1923,42 @@
           "budget",
           "scoring"
         ],
-        "failClosed": true
+        "failClosed": true,
+        "depthCompleteness": 42,
+        "depthDimensions": {
+          "status": false,
+          "deadline": true,
+          "beneficiaries": false,
+          "eligibility": false,
+          "activities": true,
+          "financing": false,
+          "costsAid": true,
+          "documents": true,
+          "scoring": false,
+          "indicators": false,
+          "implementation": false,
+          "provenance": true
+        },
+        "missingDepthClasses": [
+          "status",
+          "beneficiaries",
+          "eligibility",
+          "financing",
+          "scoring",
+          "indicators",
+          "implementation"
+        ]
       },
       "canonicalGate": {
         "decision": "KEEP",
         "reason": "CALL_SPECIFIC"
+      },
+      "dossierConstruction": {
+        "engine": "MIPE_CANONICAL_DEEP_FACTS_V1",
+        "pageEvidenceCount": 1,
+        "documentEvidenceCount": 0,
+        "depthCompleteness": 42,
+        "autonomous": true
       }
     },
     {
@@ -1523,11 +2025,45 @@
           "budget",
           "scoring"
         ],
-        "failClosed": true
+        "failClosed": true,
+        "depthCompleteness": 17,
+        "depthDimensions": {
+          "status": true,
+          "deadline": false,
+          "beneficiaries": false,
+          "eligibility": false,
+          "activities": false,
+          "financing": false,
+          "costsAid": false,
+          "documents": false,
+          "scoring": false,
+          "indicators": false,
+          "implementation": false,
+          "provenance": true
+        },
+        "missingDepthClasses": [
+          "deadline",
+          "beneficiaries",
+          "eligibility",
+          "activities",
+          "financing",
+          "costsAid",
+          "documents",
+          "scoring",
+          "indicators",
+          "implementation"
+        ]
       },
       "canonicalGate": {
         "decision": "KEEP",
         "reason": "CALL_SPECIFIC"
+      },
+      "dossierConstruction": {
+        "engine": "MIPE_CANONICAL_DEEP_FACTS_V1",
+        "pageEvidenceCount": 1,
+        "documentEvidenceCount": 0,
+        "depthCompleteness": 17,
+        "autonomous": true
       }
     },
     {
@@ -1557,7 +2093,8 @@
           "Lista de răspunsuriPDF, 580,20 Ko",
           "Ghidul Solicitantului Condiții Specifice „STEP-LLL – Competențe pentru viitor: formare la locul de muncă și educația adulților în tehnologiile critice – Adulți”,ZIP, 415,05 Ko",
           "varianta consolidată a Ghidului Solicitantului Condiții Specifice „STEP-LLL – Competențe pentru viitor: formare la locul de muncă și educația adulților în tehnologiile critice – Adulți”,7Z, 474,82 Ko",
-          "Ghidul Solicitantului „STEP-LLL – Competențe pentru viitor: formare la locul de muncă și educația adulților în tehnologiile critice – Adulți”,ZIP, 2,05 Mo"
+          "Ghidul Solicitantului „STEP-LLL – Competențe pentru viitor: formare la locul de muncă și educația adulților în tehnologiile critice – Adulți”,ZIP, 2,05 Mo",
+          "varianta consolidată a Ghidului Solicitantului Condiții Specifice „STEP-LLL – Competențe pentru viitor: formare la locul de muncă și educația adulților în tehnologiile critice – Adulți”,"
         ]
       },
       "verifiedFactClasses": [
@@ -1710,11 +2247,42 @@
           "budget",
           "scoring"
         ],
-        "failClosed": true
+        "failClosed": true,
+        "depthCompleteness": 42,
+        "depthDimensions": {
+          "status": true,
+          "deadline": true,
+          "beneficiaries": false,
+          "eligibility": false,
+          "activities": true,
+          "financing": false,
+          "costsAid": false,
+          "documents": true,
+          "scoring": false,
+          "indicators": false,
+          "implementation": false,
+          "provenance": true
+        },
+        "missingDepthClasses": [
+          "beneficiaries",
+          "eligibility",
+          "financing",
+          "costsAid",
+          "scoring",
+          "indicators",
+          "implementation"
+        ]
       },
       "canonicalGate": {
         "decision": "KEEP",
         "reason": "CALL_SPECIFIC"
+      },
+      "dossierConstruction": {
+        "engine": "MIPE_CANONICAL_DEEP_FACTS_V1",
+        "pageEvidenceCount": 4,
+        "documentEvidenceCount": 1,
+        "depthCompleteness": 42,
+        "autonomous": true
       }
     },
     {
@@ -1804,11 +2372,42 @@
           "budget",
           "scoring"
         ],
-        "failClosed": true
+        "failClosed": true,
+        "depthCompleteness": 42,
+        "depthDimensions": {
+          "status": true,
+          "deadline": true,
+          "beneficiaries": false,
+          "eligibility": false,
+          "activities": true,
+          "financing": false,
+          "costsAid": false,
+          "documents": true,
+          "scoring": false,
+          "indicators": false,
+          "implementation": false,
+          "provenance": true
+        },
+        "missingDepthClasses": [
+          "beneficiaries",
+          "eligibility",
+          "financing",
+          "costsAid",
+          "scoring",
+          "indicators",
+          "implementation"
+        ]
       },
       "canonicalGate": {
         "decision": "KEEP",
         "reason": "CALL_SPECIFIC"
+      },
+      "dossierConstruction": {
+        "engine": "MIPE_CANONICAL_DEEP_FACTS_V1",
+        "pageEvidenceCount": 1,
+        "documentEvidenceCount": 0,
+        "depthCompleteness": 42,
+        "autonomous": true
       }
     },
     {
@@ -1828,7 +2427,8 @@
           "Pregătirea şi furnizarea ofertei de servicii de formare/ocupare pentru tineri, inclusiv pentru tineri NEET, prin pachete integrate de măsuri active personalizate în funcție de profilul tinerilor, aprobat prin Ordinul ministrului investițiilor și proiectelor europene nr."
         ],
         "documents": [
-          "corrigendum la Ghidul Solicitantului – Condiții Specifice „Scheme naționale de stimulare a ocupării tinerilor”PDF, 1,33 Mo"
+          "corrigendum la Ghidul Solicitantului – Condiții Specifice „Scheme naționale de stimulare a ocupării tinerilor”PDF, 1,33 Mo",
+          "corrigendum la Ghidul Solicitantului - Condiții Specifice „Scheme naționale de stimulare a ocupării tinerilor”"
         ]
       },
       "verifiedFactClasses": [
@@ -1896,11 +2496,43 @@
           "budget",
           "scoring"
         ],
-        "failClosed": true
+        "failClosed": true,
+        "depthCompleteness": 33,
+        "depthDimensions": {
+          "status": true,
+          "deadline": false,
+          "beneficiaries": false,
+          "eligibility": false,
+          "activities": true,
+          "financing": false,
+          "costsAid": false,
+          "documents": true,
+          "scoring": false,
+          "indicators": false,
+          "implementation": false,
+          "provenance": true
+        },
+        "missingDepthClasses": [
+          "deadline",
+          "beneficiaries",
+          "eligibility",
+          "financing",
+          "costsAid",
+          "scoring",
+          "indicators",
+          "implementation"
+        ]
       },
       "canonicalGate": {
         "decision": "KEEP",
         "reason": "CALL_SPECIFIC"
+      },
+      "dossierConstruction": {
+        "engine": "MIPE_CANONICAL_DEEP_FACTS_V1",
+        "pageEvidenceCount": 1,
+        "documentEvidenceCount": 1,
+        "depthCompleteness": 33,
+        "autonomous": true
       }
     },
     {
@@ -1928,23 +2560,33 @@
         ],
         "deadline": {
           "evidence": [
-            "Autoritatea de Management pentru Programul Educație și Ocupare (PEO) 2021 – 2027 informează solicitanții că, începând cu data de astăzi, 16.10.2025, vor primi prin sistemul informatic MySMIS 2021+ solicitări de clarificări aferente etapei de evaluare tehnică și financiară calitativă (ETFC) formulate de Comisia de evaluare a cererilor de finanțare depuse în cadrul apelului de proiecte: Sfarsitul primului paragraf Consolidarea dialogului social și a parteneriatelor pentru ocupare și formare II – Federații – relansare 2025, cod apel PEO/644/PEO_P1/OP4/ESO4.2/PEO_A7."
+            "Autoritatea de Management pentru Programul Educație și Ocupare (PEO) 2021 – 2027 informează solicitanții că, începând cu data de astăzi, 16.10.2025, vor primi prin sistemul informatic MySMIS 2021+ solicitări de clarificări aferente etapei de evaluare tehnică și financiară calitativă (ETFC) formulate de Comisia de evaluare a cererilor de finanțare depuse în cadrul apelului de proiecte: Sfarsitul primului paragraf Consolidarea dialogului social și a parteneriatelor pentru ocupare și formare II – Federații – relansare 2025, cod apel PEO/644/PEO_P1/OP4/ESO4.2/PEO_A7.",
+            "Autoritatea de Management pentru Programul Educație și Ocupare (PEO) 2021 – 2027 informează solicitanții că, începând cu data de astăzi, 16.10.2025, vor primi prin sistemul informatic MySMIS 2021+ solicitări de clarificări aferente etapei de evaluare tehnică și financiară calitativă (ETFC) formulate de Comisia de evaluare a cererilor de finanțare depuse în cadrul apelului de proiecte:"
           ]
         },
         "documents": [
           "Lista intermediară a cererilor de finanțare aprobate;PDF, 571,25 Ko",
           "Lista intermediară a cererilor de finanțare rezervăPDF, 569,61 Ko",
           "lista finală a cererilor de finanțare care au fost respinse după soluționarea contestațiilor în etapa de evaluare tehnică și financiară preliminară (ETFP)PDF, 200,14 Ko"
-        ]
+        ],
+        "eligibility": {
+          "conditions": [],
+          "partners": [
+            "Sfarsitul primului paragraf Consolidarea dialogului social și a parteneriatelor pentru ocupare și formare II – Federații – relansare 2025, cod apel PEO/644/PEO_P1/OP4/ESO4.2/PEO_A7.",
+            "Autoritatea de Management pentru Programul Educatie si Ocupare (PEO) 2021 – 2027 publică Listele intermediare privind cererile de finanțare aprobate și pe lista de rezervă pentru apelul Consolidarea dialogului social și a parteneriatelor pentru ocupare și formare II – Federații – relansare PEO/644/PEO_P1/OP4/ESO4.2/PEO_A7 ca urmare a finalizării procesului de evaluare tehnică și financiară calitativă (ETFC):",
+            "45/2024 cu modificările și completările ulterioare, Ministerul Investițiilor și Proiectelor Europene, prin Autoritatea de Management pentru Programul Educație și Ocupare informează beneficiarii proiectelor aprobate în urma etapei de evaluare tehnice și financiare calitative aferente apelului de proiecte Consolidarea dialogului social și a parteneriatelor pentru ocupare și formare II – Federații – relansare PEO/644/PEO_P1/OP4/ESO4.2/PEO_A7–, cu privire la derularea procesului de semnare a contractelor de finanțare, prin încadrarea în termenul menționat la articolului 11, aliniatul 17, Cap.",
+            "Autoritatea de Management pentru Programul Educație și Ocupare (PEO) 2021 – 2027 publică lista finală a cererilor de finanțare care au fost respinse după soluționarea contestațiilor în etapa de evaluare tehnică și financiară preliminară (ETFP) PDF, 200,14 Ko, pentru apelul de proiecte Consolidarea dialogului social și a parteneriatelor pentru ocupare și formare II – Federații – relansare 2025” PEO/644/PEO_P1/OP4/ESO4.2/PEO_A7."
+          ]
+        }
       },
       "verifiedFactClasses": [
         "deadline",
+        "eligibility",
         "status"
       ],
       "publicationDecision": {
         "blockedFactClasses": [
           "beneficiaries",
-          "eligibility",
           "grant",
           "budget",
           "scoring"
@@ -2049,7 +2691,7 @@
         }
       ],
       "quality": {
-        "completeness": 29,
+        "completeness": 43,
         "blocked": [
           "beneficiaries",
           "eligibility",
@@ -2057,11 +2699,40 @@
           "budget",
           "scoring"
         ],
-        "failClosed": true
+        "failClosed": true,
+        "depthCompleteness": 58,
+        "depthDimensions": {
+          "status": true,
+          "deadline": true,
+          "beneficiaries": false,
+          "eligibility": true,
+          "activities": true,
+          "financing": false,
+          "costsAid": false,
+          "documents": true,
+          "scoring": false,
+          "indicators": true,
+          "implementation": false,
+          "provenance": true
+        },
+        "missingDepthClasses": [
+          "beneficiaries",
+          "financing",
+          "costsAid",
+          "scoring",
+          "implementation"
+        ]
       },
       "canonicalGate": {
         "decision": "KEEP",
         "reason": "EXPLICIT_CALL_CODE"
+      },
+      "dossierConstruction": {
+        "engine": "MIPE_CANONICAL_DEEP_FACTS_V1",
+        "pageEvidenceCount": 3,
+        "documentEvidenceCount": 0,
+        "depthCompleteness": 58,
+        "autonomous": true
       }
     },
     {
@@ -2144,11 +2815,44 @@
           "budget",
           "scoring"
         ],
-        "failClosed": true
+        "failClosed": true,
+        "depthCompleteness": 25,
+        "depthDimensions": {
+          "status": true,
+          "deadline": false,
+          "beneficiaries": false,
+          "eligibility": false,
+          "activities": false,
+          "financing": false,
+          "costsAid": false,
+          "documents": true,
+          "scoring": false,
+          "indicators": false,
+          "implementation": false,
+          "provenance": true
+        },
+        "missingDepthClasses": [
+          "deadline",
+          "beneficiaries",
+          "eligibility",
+          "activities",
+          "financing",
+          "costsAid",
+          "scoring",
+          "indicators",
+          "implementation"
+        ]
       },
       "canonicalGate": {
         "decision": "KEEP",
         "reason": "CALL_SPECIFIC"
+      },
+      "dossierConstruction": {
+        "engine": "MIPE_CANONICAL_DEEP_FACTS_V1",
+        "pageEvidenceCount": 1,
+        "documentEvidenceCount": 0,
+        "depthCompleteness": 25,
+        "autonomous": true
       }
     },
     {
@@ -2171,16 +2875,22 @@
         ],
         "documents": [
           "Ghidul Solicitantului – Condiții Specifice „Sprijin pentru înființarea de întreprinderi sociale în mediul urban – teritoriul ITI Moții, Țara de Piatră”PDF, 326,71 Ko"
-        ]
+        ],
+        "eligibility": {
+          "conditions": [],
+          "geographic_scope": [
+            "Autoritatea de Management pentru Programul Educație și Ocupare din cadrul Ministerului Investițiilor și Proiectelor Europene publică un corrigendum la Ghidul Solicitantului – Condiții Specifice „Sprijin pentru înființarea de întreprinderi sociale în mediul urban – teritoriul ITI Moții, Țara de Piatră” PDF, 326,71 Ko, aferent Programului Educație și Ocupare 2021-2027, Prioritate:"
+          ]
+        }
       },
       "verifiedFactClasses": [
+        "eligibility",
         "status"
       ],
       "publicationDecision": {
         "blockedFactClasses": [
           "deadline",
           "beneficiaries",
-          "eligibility",
           "grant",
           "budget",
           "scoring"
@@ -2229,7 +2939,7 @@
         }
       ],
       "quality": {
-        "completeness": 14,
+        "completeness": 29,
         "blocked": [
           "deadline",
           "beneficiaries",
@@ -2238,11 +2948,41 @@
           "budget",
           "scoring"
         ],
-        "failClosed": true
+        "failClosed": true,
+        "depthCompleteness": 50,
+        "depthDimensions": {
+          "status": true,
+          "deadline": false,
+          "beneficiaries": false,
+          "eligibility": true,
+          "activities": true,
+          "financing": false,
+          "costsAid": false,
+          "documents": true,
+          "scoring": false,
+          "indicators": true,
+          "implementation": false,
+          "provenance": true
+        },
+        "missingDepthClasses": [
+          "deadline",
+          "beneficiaries",
+          "financing",
+          "costsAid",
+          "scoring",
+          "implementation"
+        ]
       },
       "canonicalGate": {
         "decision": "KEEP",
         "reason": "CALL_SPECIFIC"
+      },
+      "dossierConstruction": {
+        "engine": "MIPE_CANONICAL_DEEP_FACTS_V1",
+        "pageEvidenceCount": 1,
+        "documentEvidenceCount": 0,
+        "depthCompleteness": 50,
+        "autonomous": true
       }
     },
     {
@@ -2278,7 +3018,9 @@
         "deadline": {
           "evidence": [
             "Sfarsitul primului paragraf Propunerile și observațiile pot fi transmise pe adresa de e-mail consultare.peo@mfe.gov.ro până la data de 14.05.2026.",
-            "ZIP, 2,07 MoSfarsitul primului paragraf Sistemul informatic MySMIS2021 se deschide în data de 28.05.2026, ora 16.00, până în data de 31.07.2026, ora 16.00."
+            "ZIP, 2,07 MoSfarsitul primului paragraf Sistemul informatic MySMIS2021 se deschide în data de 28.05.2026, ora 16.00, până în data de 31.07.2026, ora 16.00.",
+            "0 0 6px; } Informații Apel Închis Instrument financiar FSE+ Aria de acoperire Acoperire Națională Data lansării 28/05/2026 Data închiderii 31/07/2026 Valoarea apelului 413.778.663,00 lei euro Obiectivul specific vizat Prioritatea 7 peo Solicitanți eligibili Ministerul Investițiilor și Proiectelor Europeneprin structura de specialitate cu rol de beneficiar al finanțării nerambursabile aferente Programului Educație și Ocupare 2021-2027desemnată potrivit Ordonanţei de urgență a Guvernului nr.",
+            "0 0 6px; } Informații Apel Iesit din consultare publica Instrument financiar FSE+ Aria de acoperire Acoperire Națională Data lansării 22/04/2026 Data închiderii 14/05/2026 Valoarea apelului 413.778.663,00 lei euro Obiectivul specific vizat Prioritatea 7 peo Solicitanți eligibili  Ministerul Investiției și Proiectelor Europeneprin structura de specialitate cu rol de beneficiar al finanțării nerambursabile aferente Programului Educație și Ocupare 2021-2027desemnată potrivit Ordonanţei de urgență a Guvernului nr."
           ]
         },
         "grant": {
@@ -2290,10 +3032,20 @@
         "documents": [
           "GHIDUL POATE FI CONSULTAT AICI.ZIP, 2,07 Mo",
           "Lista intermediară a proiectelor aprobate în etapa de evaluare tehnică și financiară calitativă aferentă apelului „Susținerea în carieră a cadrelor didactice și a personalului didactic auxiliar prin finanțarea primelor de carieră didactică” PEO/1161/PEO_P7/OP4/ESO4.5/PEO_A69.",
-          "Ghidul Solicitantului Condiții Specifice „Susținerea în carieră a cadrelor didactice și a personalului didactic auxiliar prin finanțarea primelor de carieră didactică”,ZIP, 313,63 Ko"
+          "Ghidul Solicitantului Condiții Specifice „Susținerea în carieră a cadrelor didactice și a personalului didactic auxiliar prin finanțarea primelor de carieră didactică”,ZIP, 313,63 Ko",
+          "Ghidul Solicitantului Condiții Specifice Susținerea în carieră a cadrelor didactice și a personalului didactic auxiliar prin finanțarea primelor de carieră didactică",
+          "Ghidul Solicitantului Condiții Specifice „Susținerea în carieră a cadrelor didactice și a personalului didactic auxiliar prin finanțarea primelor de carieră didactică” (varianta în consultare publică)"
+        ],
+        "beneficiaries": [
+          "0 0 6px; } Informații Apel Închis Instrument financiar FSE+ Aria de acoperire Acoperire Națională Data lansării 28/05/2026 Data închiderii 31/07/2026 Valoarea apelului 413.778.663,00 lei euro Obiectivul specific vizat Prioritatea 7 peo Solicitanți eligibili Ministerul Investițiilor și Proiectelor Europeneprin structura de specialitate cu rol de beneficiar al finanțării nerambursabile aferente Programului Educație și Ocupare 2021-2027desemnată potrivit Ordonanţei de urgență a Guvernului nr.",
+          "0 0 6px; } Informații Apel Iesit din consultare publica Instrument financiar FSE+ Aria de acoperire Acoperire Națională Data lansării 22/04/2026 Data închiderii 14/05/2026 Valoarea apelului 413.778.663,00 lei euro Obiectivul specific vizat Prioritatea 7 peo Solicitanți eligibili  Ministerul Investiției și Proiectelor Europeneprin structura de specialitate cu rol de beneficiar al finanțării nerambursabile aferente Programului Educație și Ocupare 2021-2027desemnată potrivit Ordonanţei de urgență a Guvernului nr."
+        ],
+        "cofinancing": [
+          "Lista intermediară a proiectelor aprobate în etapa de evaluare tehnică și financiară calitativă - Apel 1161 Total buget eligibil [LEI] Total buget nerambursabil (AFN) [LEI] Buget (UE) [lei] Buget de stat (BS) [lei] Contribuţie proprie [LEI] 1 = 2+5 2 = 3+4 3 4 5 1 366151 38918422 MINISTERUL INVESTITIILOR SI PROIECTELOR EUROPENE AUTORITATE A ADMINISTRAȚIEI PUBLICE CENTRALE FINANȚATĂ INTEGRAL DE LA BUGETUL DE STAT SAU BAS Mun."
         ]
       },
       "verifiedFactClasses": [
+        "beneficiaries",
         "deadline",
         "eligibility",
         "grant",
@@ -2301,7 +3053,6 @@
       ],
       "publicationDecision": {
         "blockedFactClasses": [
-          "beneficiaries",
           "budget",
           "scoring"
         ]
@@ -2430,17 +3181,43 @@
         }
       ],
       "quality": {
-        "completeness": 57,
+        "completeness": 71,
         "blocked": [
           "beneficiaries",
           "budget",
           "scoring"
         ],
-        "failClosed": true
+        "failClosed": true,
+        "depthCompleteness": 83,
+        "depthDimensions": {
+          "status": true,
+          "deadline": true,
+          "beneficiaries": true,
+          "eligibility": true,
+          "activities": true,
+          "financing": true,
+          "costsAid": true,
+          "documents": true,
+          "scoring": false,
+          "indicators": true,
+          "implementation": false,
+          "provenance": true
+        },
+        "missingDepthClasses": [
+          "scoring",
+          "implementation"
+        ]
       },
       "canonicalGate": {
         "decision": "KEEP",
         "reason": "CALL_SPECIFIC"
+      },
+      "dossierConstruction": {
+        "engine": "MIPE_CANONICAL_DEEP_FACTS_V1",
+        "pageEvidenceCount": 4,
+        "documentEvidenceCount": 3,
+        "depthCompleteness": 83,
+        "autonomous": true
       }
     },
     {
@@ -2459,7 +3236,8 @@
         ],
         "deadline": {
           "evidence": [
-            "Sfarsitul primului paragraf Propunerile și observațiile pot fi transmise pe adresa de e-mail consultare.poids@mfe.gov.ro până la data de 03.08.2026."
+            "Sfarsitul primului paragraf Propunerile și observațiile pot fi transmise pe adresa de e-mail consultare.poids@mfe.gov.ro până la data de 03.08.2026.",
+            "0 0 6px; } Informații Apel Iesit din consultare publica Instrument financiar FSE+ Aria de acoperire Regiuni mai puțin dezvoltate, Regiuni mai dezvoltate Data lansării 13/07/2026 Data închiderii 03/08/2026 Valoarea apelului 5.882.353 euro euro Obiectivul specific vizat Prioritatea 5 pids Solicitanți eligibili Ministerul MunciiFamilieiTineretului și Solidarității Sociale (MMFTSS)instituție publică cu rol de coordonare a politicilor în domeniul muncii și protecției sociale;"
           ]
         },
         "grant": {
@@ -2469,17 +3247,26 @@
         },
         "documents": [
           "Ghidul Solicitantului Condiții Specifice „Creșterea accesului profesioniștilor din domeniul serviciilor sociale pentru copii și familii la programe de formare continuă” (varianta în consultare publică)"
-        ]
+        ],
+        "beneficiaries": [
+          "0 0 6px; } Informații Apel Iesit din consultare publica Instrument financiar FSE+ Aria de acoperire Regiuni mai puțin dezvoltate, Regiuni mai dezvoltate Data lansării 13/07/2026 Data închiderii 03/08/2026 Valoarea apelului 5.882.353 euro euro Obiectivul specific vizat Prioritatea 5 pids Solicitanți eligibili Ministerul MunciiFamilieiTineretului și Solidarității Sociale (MMFTSS)instituție publică cu rol de coordonare a politicilor în domeniul muncii și protecției sociale;"
+        ],
+        "eligibility": {
+          "conditions": [],
+          "geographic_scope": [
+            "0 0 6px; } Informații Apel Iesit din consultare publica Instrument financiar FSE+ Aria de acoperire Regiuni mai puțin dezvoltate, Regiuni mai dezvoltate Data lansării 13/07/2026 Data închiderii 03/08/2026 Valoarea apelului 5.882.353 euro euro Obiectivul specific vizat Prioritatea 5 pids Solicitanți eligibili Ministerul MunciiFamilieiTineretului și Solidarității Sociale (MMFTSS)instituție publică cu rol de coordonare a politicilor în domeniul muncii și protecției sociale;"
+          ]
+        }
       },
       "verifiedFactClasses": [
+        "beneficiaries",
         "deadline",
+        "eligibility",
         "grant",
         "status"
       ],
       "publicationDecision": {
         "blockedFactClasses": [
-          "beneficiaries",
-          "eligibility",
           "budget",
           "scoring"
         ]
@@ -2528,18 +3315,46 @@
         }
       ],
       "quality": {
-        "completeness": 43,
+        "completeness": 71,
         "blocked": [
           "beneficiaries",
           "eligibility",
           "budget",
           "scoring"
         ],
-        "failClosed": true
+        "failClosed": true,
+        "depthCompleteness": 67,
+        "depthDimensions": {
+          "status": true,
+          "deadline": true,
+          "beneficiaries": true,
+          "eligibility": true,
+          "activities": true,
+          "financing": true,
+          "costsAid": false,
+          "documents": true,
+          "scoring": false,
+          "indicators": false,
+          "implementation": false,
+          "provenance": true
+        },
+        "missingDepthClasses": [
+          "costsAid",
+          "scoring",
+          "indicators",
+          "implementation"
+        ]
       },
       "canonicalGate": {
         "decision": "KEEP",
         "reason": "CALL_SPECIFIC"
+      },
+      "dossierConstruction": {
+        "engine": "MIPE_CANONICAL_DEEP_FACTS_V1",
+        "pageEvidenceCount": 1,
+        "documentEvidenceCount": 1,
+        "depthCompleteness": 67,
+        "autonomous": true
       }
     },
     {
@@ -2555,7 +3370,8 @@
       "materialFacts": {
         "deadline": {
           "evidence": [
-            "Sfarsitul primului paragraf Propunerile și observațiile pot fi transmise pe adresa de e-mail consultare.poids@mfe.gov.ro până la data de 28.07.2026."
+            "Sfarsitul primului paragraf Propunerile și observațiile pot fi transmise pe adresa de e-mail consultare.poids@mfe.gov.ro până la data de 28.07.2026.",
+            "0 0 6px; } Informații Apel Iesit din consultare publica Instrument financiar FSE+ Aria de acoperire Regiuni mai puțin dezvoltate, Regiunea București-Ilfov Data lansării 07/07/2026 Data închiderii 28/07/2026 Valoarea apelului 26.767.012 euro euro Obiectivul specific vizat Prioritatea 8 pids Solicitanți eligibili Furnizori de servicii sociale publici și privați acreditați;"
           ]
         },
         "grant": {
@@ -2564,18 +3380,28 @@
           ]
         },
         "documents": [
-          "Ghidul Solicitantului Condiții Specifice „Servicii de sprijin pentru incluziunea socială a persoanelor fără adăpost”"
-        ]
+          "Ghidul Solicitantului Condiții Specifice „Servicii de sprijin pentru incluziunea socială a persoanelor fără adăpost”",
+          "Ghidul Solicitantului „Servicii de sprijin pentru incluziunea socială a persoanelor fără adăpost”"
+        ],
+        "beneficiaries": [
+          "0 0 6px; } Informații Apel Iesit din consultare publica Instrument financiar FSE+ Aria de acoperire Regiuni mai puțin dezvoltate, Regiunea București-Ilfov Data lansării 07/07/2026 Data închiderii 28/07/2026 Valoarea apelului 26.767.012 euro euro Obiectivul specific vizat Prioritatea 8 pids Solicitanți eligibili Furnizori de servicii sociale publici și privați acreditați;"
+        ],
+        "eligibility": {
+          "conditions": [],
+          "geographic_scope": [
+            "0 0 6px; } Informații Apel Iesit din consultare publica Instrument financiar FSE+ Aria de acoperire Regiuni mai puțin dezvoltate, Regiunea București-Ilfov Data lansării 07/07/2026 Data închiderii 28/07/2026 Valoarea apelului 26.767.012 euro euro Obiectivul specific vizat Prioritatea 8 pids Solicitanți eligibili Furnizori de servicii sociale publici și privați acreditați;"
+          ]
+        }
       },
       "verifiedFactClasses": [
+        "beneficiaries",
         "deadline",
+        "eligibility",
         "grant",
         "status"
       ],
       "publicationDecision": {
         "blockedFactClasses": [
-          "beneficiaries",
-          "eligibility",
           "budget",
           "scoring"
         ]
@@ -2636,18 +3462,47 @@
         }
       ],
       "quality": {
-        "completeness": 43,
+        "completeness": 71,
         "blocked": [
           "beneficiaries",
           "eligibility",
           "budget",
           "scoring"
         ],
-        "failClosed": true
+        "failClosed": true,
+        "depthCompleteness": 58,
+        "depthDimensions": {
+          "status": true,
+          "deadline": true,
+          "beneficiaries": true,
+          "eligibility": true,
+          "activities": false,
+          "financing": true,
+          "costsAid": false,
+          "documents": true,
+          "scoring": false,
+          "indicators": false,
+          "implementation": false,
+          "provenance": true
+        },
+        "missingDepthClasses": [
+          "activities",
+          "costsAid",
+          "scoring",
+          "indicators",
+          "implementation"
+        ]
       },
       "canonicalGate": {
         "decision": "KEEP",
         "reason": "CALL_SPECIFIC"
+      },
+      "dossierConstruction": {
+        "engine": "MIPE_CANONICAL_DEEP_FACTS_V1",
+        "pageEvidenceCount": 1,
+        "documentEvidenceCount": 2,
+        "depthCompleteness": 58,
+        "autonomous": true
       }
     },
     {
@@ -2670,16 +3525,23 @@
             "Sfarsitul primului paragraf Sistemul informatic MySMIS2021 va permite depunerea de proiecte începând cu data de 07.08.2026, ora 14.30.",
             "Sistemul informatic MySMIS2021 se va închide la data de 21.12.2026, ora 17.00."
           ]
+        },
+        "eligibility": {
+          "conditions": [],
+          "geographic_scope": [
+            "Autoritatea de Management pentru Programul Sănătate publică Ghidul Solicitantului pentru apelul de proiecte Continuarea investițiilor în infrastructura de sănătate din Regiunea Sud – Est sprijinită inițial prin Planul Național de Redresare și Reziliență.",
+            "Ghidul Solicitantului este disponibil la: https://mfe.gov.ro/ghiduri-ms/continuarea-investitiilor-in-infrastructura-de-sanatate-din-regiunea-sud-est-sprijinita-initial-prin-planul-national-de-redresare-si-rezilienta/."
+          ]
         }
       },
       "verifiedFactClasses": [
         "deadline",
+        "eligibility",
         "status"
       ],
       "publicationDecision": {
         "blockedFactClasses": [
           "beneficiaries",
-          "eligibility",
           "grant",
           "budget",
           "scoring"
@@ -2715,7 +3577,7 @@
         }
       ],
       "quality": {
-        "completeness": 29,
+        "completeness": 43,
         "blocked": [
           "beneficiaries",
           "eligibility",
@@ -2723,11 +3585,42 @@
           "budget",
           "scoring"
         ],
-        "failClosed": true
+        "failClosed": true,
+        "depthCompleteness": 42,
+        "depthDimensions": {
+          "status": true,
+          "deadline": true,
+          "beneficiaries": false,
+          "eligibility": true,
+          "activities": true,
+          "financing": false,
+          "costsAid": false,
+          "documents": false,
+          "scoring": false,
+          "indicators": false,
+          "implementation": false,
+          "provenance": true
+        },
+        "missingDepthClasses": [
+          "beneficiaries",
+          "financing",
+          "costsAid",
+          "documents",
+          "scoring",
+          "indicators",
+          "implementation"
+        ]
       },
       "canonicalGate": {
         "decision": "KEEP",
         "reason": "CALL_SPECIFIC"
+      },
+      "dossierConstruction": {
+        "engine": "MIPE_CANONICAL_DEEP_FACTS_V1",
+        "pageEvidenceCount": 1,
+        "documentEvidenceCount": 0,
+        "depthCompleteness": 42,
+        "autonomous": true
       }
     },
     {
@@ -2818,11 +3711,42 @@
           "budget",
           "scoring"
         ],
-        "failClosed": true
+        "failClosed": true,
+        "depthCompleteness": 42,
+        "depthDimensions": {
+          "status": true,
+          "deadline": true,
+          "beneficiaries": false,
+          "eligibility": false,
+          "activities": true,
+          "financing": false,
+          "costsAid": false,
+          "documents": true,
+          "scoring": false,
+          "indicators": false,
+          "implementation": false,
+          "provenance": true
+        },
+        "missingDepthClasses": [
+          "beneficiaries",
+          "eligibility",
+          "financing",
+          "costsAid",
+          "scoring",
+          "indicators",
+          "implementation"
+        ]
       },
       "canonicalGate": {
         "decision": "KEEP",
         "reason": "CALL_SPECIFIC"
+      },
+      "dossierConstruction": {
+        "engine": "MIPE_CANONICAL_DEEP_FACTS_V1",
+        "pageEvidenceCount": 1,
+        "documentEvidenceCount": 1,
+        "depthCompleteness": 42,
+        "autonomous": true
       }
     },
     {
@@ -2894,11 +3818,44 @@
           "budget",
           "scoring"
         ],
-        "failClosed": true
+        "failClosed": true,
+        "depthCompleteness": 25,
+        "depthDimensions": {
+          "status": true,
+          "deadline": false,
+          "beneficiaries": false,
+          "eligibility": false,
+          "activities": true,
+          "financing": false,
+          "costsAid": false,
+          "documents": false,
+          "scoring": false,
+          "indicators": false,
+          "implementation": false,
+          "provenance": true
+        },
+        "missingDepthClasses": [
+          "deadline",
+          "beneficiaries",
+          "eligibility",
+          "financing",
+          "costsAid",
+          "documents",
+          "scoring",
+          "indicators",
+          "implementation"
+        ]
       },
       "canonicalGate": {
         "decision": "KEEP",
         "reason": "EXPLICIT_CALL_CODE"
+      },
+      "dossierConstruction": {
+        "engine": "MIPE_CANONICAL_DEEP_FACTS_V1",
+        "pageEvidenceCount": 1,
+        "documentEvidenceCount": 0,
+        "depthCompleteness": 25,
+        "autonomous": true
       }
     },
     {
@@ -2970,11 +3927,44 @@
           "budget",
           "scoring"
         ],
-        "failClosed": true
+        "failClosed": true,
+        "depthCompleteness": 25,
+        "depthDimensions": {
+          "status": true,
+          "deadline": false,
+          "beneficiaries": false,
+          "eligibility": false,
+          "activities": true,
+          "financing": false,
+          "costsAid": false,
+          "documents": false,
+          "scoring": false,
+          "indicators": false,
+          "implementation": false,
+          "provenance": true
+        },
+        "missingDepthClasses": [
+          "deadline",
+          "beneficiaries",
+          "eligibility",
+          "financing",
+          "costsAid",
+          "documents",
+          "scoring",
+          "indicators",
+          "implementation"
+        ]
       },
       "canonicalGate": {
         "decision": "KEEP",
         "reason": "CALL_SPECIFIC"
+      },
+      "dossierConstruction": {
+        "engine": "MIPE_CANONICAL_DEEP_FACTS_V1",
+        "pageEvidenceCount": 1,
+        "documentEvidenceCount": 0,
+        "depthCompleteness": 25,
+        "autonomous": true
       }
     }
   ],
