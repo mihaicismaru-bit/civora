@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -24,6 +25,10 @@ from zoneinfo import ZoneInfo
 import editorial_writer
 
 ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = ROOT.parent
+sys.path.insert(0, str(REPO_ROOT / "local-news-os" / "core"))
+from temporal_freshness import CONTRACT as TEMPORAL_CONTRACT, durable_story_temporal_violations
+
 FACTS = ROOT / "editorial" / "facts_registry.json"
 AUTO_FACTS = ROOT / "editorial" / "auto_facts.json"
 EDITIONS = ROOT / "editions"
@@ -88,6 +93,11 @@ def eligible_facts(registry: dict, now: datetime, slot: str) -> list[dict]:
             continue
         if not (parse_dt(fact["valid_from"]) <= now <= parse_dt(fact["valid_until"])):
             continue
+        # Durable newsroom copy must remain true when read later. Relative time
+        # words such as "azi", "mâine" or "ieri" are therefore fail-closed even
+        # when the underlying fact itself is inside its validity window.
+        if durable_story_temporal_violations(fact, "ro-RO"):
+            continue
         output.append(fact)
     output.sort(key=lambda item: (-int(item.get("priority") or 0), item["id"]))
     return output
@@ -118,7 +128,7 @@ def render_markdown(now: datetime, slot: str, items: list[dict], status_note: st
                 continue
             seen.add(key)
             lines.append(f"- {source.get('name')} — {source.get('url')}\n")
-    lines.append("\n**Politică editorială:** această ediție este generată automat numai din fapte structurate care au trecut pragul de verificare. Materialele noi compuse de Editorial Writer folosesc exclusiv afirmații legate explicit de surse; materialele vechi sunt validate și păstrate fără rescriere. Pentru fluxul automat din surse primare, sistemul poate admite numai titlul, data publicării și linkul sursei până când există un fact kernel complet. Dacă datele verificate sunt insuficiente, ediția este mai scurtă.\n")
+    lines.append("\n**Politică editorială:** această ediție este generată automat numai din fapte structurate care au trecut pragul de verificare. Materialele noi compuse de Editorial Writer folosesc exclusiv afirmații legate explicit de surse; materialele vechi sunt validate și păstrate fără rescriere. Pentru fluxul automat din surse primare, sistemul poate admite numai titlul, data publicării și linkul sursei până când există un fact kernel complet. Copia editorială durabilă folosește date absolute, nu formulări relative de tip «azi/mâine/ieri». Dacă datele verificate sunt insuficiente, ediția este mai scurtă.\n")
     return "".join(lines)
 
 
@@ -159,7 +169,7 @@ def write_outputs(now: datetime, slot: str, facts: list[dict], auto_registry_cou
     eid = edition_id(now, slot)
     title_slot = "dimineață" if slot == "morning" else "seară"
     payload = {
-        "schema_version": "2.4",
+        "schema_version": "2.5",
         "edition_id": eid,
         "slot": slot,
         "title": f"VÂLCEA CLAR — Ediția de {title_slot}",
@@ -186,6 +196,8 @@ def write_outputs(now: datetime, slot: str, facts: list[dict], auto_registry_cou
             "last_known_good_fallback": True,
             "human_override_available": True,
             "internal_operational_telemetry_public": False,
+            "durable_temporal_language_contract": TEMPORAL_CONTRACT,
+            "relative_time_words_in_durable_copy": False,
         },
     }
     json_path = EDITIONS / f"{eid}.json"
@@ -243,16 +255,21 @@ def write_outputs(now: datetime, slot: str, facts: list[dict], auto_registry_cou
 
 
 def self_test() -> int:
-    sample = {"facts": [{
+    sample_fact = {
         "id": "x", "status": "verified", "section": "TEST", "priority": 1, "confidence": 99,
         "valid_from": "2026-08-15T00:00:00+03:00", "valid_until": "2026-08-15T23:59:59+03:00",
-        "slots": ["morning"], "headline": "Test", "dek": "Test", "paragraphs": ["Test."],
+        "slots": ["morning"], "headline": "Program verificat pentru 15 august 2026",
+        "dek": "Programul pentru 15 august 2026 este confirmat de sursa oficială.",
+        "paragraphs": ["Informația este formulată cu dată absolută pentru a rămâne corectă în arhivă."],
         "material_fact_gate": "PASS_TITLE_DATE_ONLY", "sources": [{"name": "S", "url": "https://example.test", "tier": "T1"}]
-    }]}
+    }
+    sample = {"facts": [sample_fact]}
     now = datetime(2026, 8, 15, 8, 0, tzinfo=TZ)
     eligible = eligible_facts(sample, now, "morning")
     assert len(eligible) == 1
     assert eligible_facts(sample, now, "evening") == []
+    relative = {"facts": [{**sample_fact, "id": "relative", "headline": "Azi are loc programul verificat"}]}
+    assert eligible_facts(relative, now, "morning") == []
     assert all(item.get("id") not in {"unde-iesim-operational", "source-radar-operational"} for item in eligible)
     assert pointer_is_publishable({"edition_id": "x", "status": "auto_approved", "publication_intent": "publish"})
     assert not pointer_is_publishable({"edition_id": "x", "status": "auto_hold", "publication_intent": "hold"})
@@ -290,6 +307,7 @@ def main() -> int:
         "markdown": str(md_path.relative_to(ROOT)),
         "public_pointer_preserves_last_known_good_on_hold": True,
         "public_items_are_editorial_only": True,
+        "durable_temporal_language_contract": TEMPORAL_CONTRACT,
     }, ensure_ascii=False))
     return 0
 
