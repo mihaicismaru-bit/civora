@@ -1,7 +1,9 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "instance_id": "valcea",
   "routes": [
+    "/stiri/",
+    "/despre/",
     "/unde-iesim/",
     "/termeni/",
     "/confidentialitate/"
@@ -9,6 +11,8 @@
   "policy": {
     "require_static_index_html": true,
     "recap_routes_excluded": true,
-    "story_routes_owned_by_live_newsroom": true
+    "story_routes_owned_by_live_newsroom": true,
+    "news_index_owned_by_public_presentation": true,
+    "about_route_owned_by_public_presentation": true
   }
 }

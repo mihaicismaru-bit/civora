@@ -124,10 +124,26 @@ jobs:
         run: python valcea-clar/scripts/validate_public_legal_bridge.py
       - name: Source radar deterministic self-test
         run: python valcea-clar/scripts/probe_sources.py --self-test
+      - name: Build canonical reader UX
+        run: |
+          set -euo pipefail
+          python valcea-clar/scripts/public_ux_reset.py --self-test
+          python valcea-clar/scripts/public_ux_story_integrity.py --self-test
+          python valcea-clar/scripts/public_ux_reset.py
+          python valcea-clar/scripts/public_ux_story_integrity.py
+          python valcea-clar/scripts/public_ux_manifest.py
+          python valcea-clar/scripts/public_ux_reset.py --check
+          python valcea-clar/scripts/public_ux_story_integrity.py --check
+          python valcea-clar/scripts/public_ux_manifest.py --check
+          python valcea-clar/scripts/smoke_web.py
       - name: Build ChatGPT Sites synchronization payload
         run: python valcea-clar/scripts/build_sites_export.py
-      - name: Overlay continuous runtime into synchronization payload
-        run: python valcea-clar/scripts/overlay_runtime_export.py
+      - name: Overlay canonical runtime into synchronization payload
+        run: |
+          set -euo pipefail
+          python valcea-clar/scripts/public_ux_overlay.py
+          python valcea-clar/scripts/public_ux_legal.py
+          python valcea-clar/scripts/public_ux_export_contract.py
       - name: Validate synchronization manifest and site integration
         run: |
           python - <<'PY'
@@ -139,6 +155,8 @@ jobs:
           assert manifest['target']['canonical_domain'] == 'valceaclar.ro'
           assert manifest['target']['platform'] == 'ChatGPT Sites'
           assert manifest['target']['create_parallel_site'] is False
+          assert manifest['target']['public_ux_contract'] == 'valcea-clar-public-ux-v1'
+          assert manifest['target']['navigation_contract'] == 'valcea-clar-primary-v2'
           meta = json.loads(Path('valcea-clar/web/data/meta.json').read_text(encoding='utf-8'))
           assert manifest['counts']['public_places'] == meta['place_count']
           assert manifest['counts']['public_creators'] == meta['creator_count']
@@ -167,9 +185,17 @@ jobs:
           for story_id in runtime_ids:
               assert (root / 'stiri' / story_id / 'index.html').is_file(), story_id
           assert not (root / 'stiri' / 'olanesti-bridge-monitor' / 'index.html').is_file()
+          assert (root / 'stiri/index.html').is_file()
+          assert (root / 'despre/index.html').is_file()
+          assert (root / 'stiri/ansambluri-rezidentiale-ramnicu-valcea/index.html').is_file()
+          redirect = (root / 'stiri/ansambluri-rezidentiale-ramnicu-valcea/index.html').read_text(encoding='utf-8')
+          assert 'noindex,follow' in redirect and 'url=/stiri/' in redirect
+          assert manifest['public_ux']['same_navigation_everywhere'] is True
+          assert manifest['public_ux']['cross_category_fill'] is False
+          assert manifest['public_ux']['monitoring_is_news'] is False
           for item in manifest['files']:
               assert (root / item['path']).is_file(), item['path']
-          print('ChatGPT Sites synchronization and continuous story integration: PASS')
+          print('ChatGPT Sites synchronization and canonical public UX integration: PASS')
           PY
       - name: Upload ChatGPT Sites synchronization payload
         uses: actions/upload-artifact@v7

@@ -1,22 +1,22 @@
 {
-  "schema_version": "1.0",
-  "contract_id": "valcea-clar-primary-v1",
+  "schema_version": "2.0",
+  "contract_id": "valcea-clar-primary-v2",
   "brand": "VÂLCEA CLAR",
   "tagline": "Știrile Vâlcii, fără zgomot.",
   "domain_label": "valceaclar.ro",
   "items": [
     {"label": "Acasă", "href": "/"},
-    {"label": "Ultimele", "href": "/#stiri"},
-    {"label": "Administrație", "href": "/#administratie"},
-    {"label": "Sănătate", "href": "/#sanatate"},
-    {"label": "Infrastructură", "href": "/#infrastructura"},
-    {"label": "Cultură & Evenimente", "href": "/#cultura-evenimente"},
-    {"label": "Sport", "href": "/#sport"},
+    {"label": "Ultimele știri", "href": "/stiri/"},
+    {"label": "Bani publici", "href": "/stiri/#bani-publici"},
+    {"label": "Servicii", "href": "/stiri/#servicii"},
+    {"label": "Cultură & Evenimente", "href": "/stiri/#cultura-evenimente"},
+    {"label": "Sport", "href": "/stiri/#sport"},
     {"label": "Unde ieșim", "href": "/unde-iesim/"}
   ],
   "footer": {
     "line": "VÂLCEA CLAR · informație locală verificată · redactie@valceaclar.ro",
     "links": [
+      {"label": "Despre noi", "href": "/despre/"},
       {"label": "Termeni", "href": "/termeni/"},
       {"label": "Confidențialitate", "href": "/confidentialitate/"}
     ]
@@ -25,6 +25,8 @@
     "same_primary_navigation_on_every_public_page": true,
     "dead_platform_specific_navigation_forbidden": true,
     "mobile_navigation_may_scroll_horizontally": true,
-    "legal_links_in_footer": true
+    "legal_links_in_footer": true,
+    "main_navigation_must_resolve_to_reader_content": true,
+    "empty_category_fallback_to_other_category_forbidden": true
   }
 }
