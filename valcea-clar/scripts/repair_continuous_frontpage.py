@@ -69,7 +69,7 @@ def self_test() -> int:
         "headline": "Evenimentul a avut loc în 15 august 2026",
         "dek": "Documentele confirmă programul din 15 august 2026 și păstrează data explicită.",
         "paragraphs": [
-            "Acest material de test folosește o dată calendaristică absolută și rămâne corect când este citit ulterior."
+            "Acest material de test folosește o dată calendaristică absolută și rămâne corect când este citit ulterior, deoarece descrierea păstrează explicit contextul verificat, sursa și momentul evenimentului fără termeni temporali relativi."
         ],
         "sources": [{"name": "Sursă", "url": "https://example.invalid/document", "tier": "T1"}],
     }
