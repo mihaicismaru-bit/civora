@@ -7,6 +7,7 @@ on:
     paths:
       - 'partener-eu/ingest/source_registry.json'
       - 'partener-eu/ingest/source_registry_probe.py'
+      - 'partener-eu/ops/test_source_registry_low_info.py'
       - '.github/workflows/partener-eu-source-registry.yml'
   schedule:
     - cron: '23 */2 * * *'
@@ -27,6 +28,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Regression — low-information HTML shells fail closed
+        run: python partener-eu/ops/test_source_registry_low_info.py
+
       - name: Probe classified official sources without changing facts
         run: python partener-eu/ingest/source_registry_probe.py
 
@@ -39,6 +43,7 @@ jobs:
           d=json.load(open(p, encoding='utf-8'))
           bad=[]
           missing=[]
+          unsafe_shell=[]
           for x in d.get('sources', []):
               if x.get('semantic_hash_changed') and x.get('material_fact_use') and x.get('publish_material_fact_update') is not False:
                   bad.append(x.get('id'))
@@ -46,8 +51,10 @@ jobs:
                   tp=Path('partener-eu/validation/resolution-tasks') / f"{x.get('id')}.json"
                   if not tp.exists():
                       missing.append(x.get('id'))
-          if bad or missing:
-              print('FAIL fail-closed:', {'unsafe': bad, 'missing_tasks': missing})
+              if x.get('quality_issue') == 'LOW_INFORMATION_HTML_SHELL' and (x.get('semantic_hash_changed') or x.get('resolution_task_required')):
+                  unsafe_shell.append(x.get('id'))
+          if bad or missing or unsafe_shell:
+              print('FAIL fail-closed:', {'unsafe': bad, 'missing_tasks': missing, 'unsafe_shells': unsafe_shell})
               sys.exit(2)
           print(json.dumps(d.get('summary', {}), ensure_ascii=False))
           PY
