@@ -52,6 +52,7 @@ jobs:
           python -m py_compile local-news-os/persistence/prs_049_consecutive_no_change_idempotency_acceptance.py
           python -m py_compile local-news-os/persistence/prs_050_current_social_truth_acceptance.py
           python -m py_compile local-news-os/persistence/prs_051_profile_state_separation_acceptance.py
+          python -m py_compile local-news-os/persistence/prs_052_open_editorial_decision_acceptance.py
       - name: Run deterministic fail-closed reconciliation acceptance
         run: python local-news-os/persistence/reconciliation_engine.py --self-test
       - name: Validate PRS-037 reconciliation trigger contract and executable wiring
@@ -84,6 +85,8 @@ jobs:
         run: python local-news-os/persistence/prs_050_current_social_truth_acceptance.py
       - name: Validate PRS-051 profile asset/deployment state separation
         run: python local-news-os/persistence/prs_051_profile_state_separation_acceptance.py
+      - name: Validate PRS-052 open editorial decision remains active
+        run: python local-news-os/persistence/prs_052_open_editorial_decision_acceptance.py
       - name: Validate existing scope classifier alongside reconciliation
         run: python local-news-os/core/repository_scope_fingerprint.py --self-test
       - name: Verify acceptance contracts are present
