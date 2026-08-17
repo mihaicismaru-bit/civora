@@ -8,6 +8,7 @@ on:
     paths:
       - 'valcea-clar/scripts/council_fact_kernel.py'
       - 'valcea-clar/scripts/council_docmanager_row_resolver.py'
+      - 'valcea-clar/scripts/council_docmanager_diagnostic.py'
       - 'valcea-clar/scripts/promote_fact_kernels.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
       - 'valcea-clar/editorial/editorial_manual.json'
@@ -19,6 +20,7 @@ on:
     paths:
       - 'valcea-clar/scripts/council_fact_kernel.py'
       - 'valcea-clar/scripts/council_docmanager_row_resolver.py'
+      - 'valcea-clar/scripts/council_docmanager_diagnostic.py'
       - 'valcea-clar/scripts/promote_fact_kernels.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
       - 'valcea-clar/editorial/editorial_manual.json'
@@ -52,6 +54,7 @@ jobs:
           python -m py_compile \
             valcea-clar/scripts/council_fact_kernel.py \
             valcea-clar/scripts/council_docmanager_row_resolver.py \
+            valcea-clar/scripts/council_docmanager_diagnostic.py \
             valcea-clar/scripts/promote_fact_kernels.py \
             valcea-clar/scripts/council_watch_rm_valcea.py \
             local-news-os/core/indexing_assets.py
@@ -62,6 +65,7 @@ jobs:
           python valcea-clar/scripts/council_fact_kernel.py --self-test
           python valcea-clar/scripts/council_docmanager_row_resolver.py --resolver-self-test
           python valcea-clar/scripts/council_docmanager_row_resolver.py --self-test
+          python valcea-clar/scripts/council_docmanager_diagnostic.py --self-test
           python valcea-clar/scripts/promote_fact_kernels.py --self-test
 
       - name: Validate current offline kernel state
@@ -70,6 +74,10 @@ jobs:
       - name: Refresh official Council Watch state
         if: github.event_name != 'pull_request'
         run: python valcea-clar/scripts/council_watch_rm_valcea.py
+
+      - name: Capture bounded official DocManager structure diagnostic
+        if: github.event_name != 'pull_request'
+        run: python valcea-clar/scripts/council_docmanager_diagnostic.py
 
       - name: Verify official documents and build kernels
         if: github.event_name != 'pull_request'
@@ -96,7 +104,7 @@ jobs:
         if: github.event_name != 'pull_request'
         run: python valcea-clar/scripts/editorial_writer.py --check
 
-      - name: Persist kernel and promotion state conflict-safe
+      - name: Persist kernel and diagnostic state conflict-safe
         if: github.event_name != 'pull_request'
         shell: bash
         run: |
@@ -105,10 +113,11 @@ jobs:
           git config user.email 'valcea-clar-fact-kernel@users.noreply.github.com'
           git add \
             valcea-clar/editorial/council_watch_rm_valcea_state.json \
+            valcea-clar/editorial/council_docmanager_structure.json \
             valcea-clar/editorial/fact_kernel_registry.json \
             valcea-clar/editorial/facts_registry.json
           if git diff --cached --quiet; then
-            echo 'No fact-kernel state change to persist.'
+            echo 'No fact-kernel or diagnostic state change to persist.'
           else
             git commit -m 'Refresh VÂLCEA CLAR verified fact kernels'
             for attempt in 1 2 3; do
@@ -123,6 +132,15 @@ jobs:
               sleep $((attempt*2))
             done
           fi
+
+      - name: Upload bounded DocManager diagnostic
+        if: always() && github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-docmanager-structure-${{ github.run_id }}
+          path: valcea-clar/editorial/council_docmanager_structure.json
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: Dispatch Live Newsroom after verified kernel promotion
         if: github.event_name != 'pull_request' && steps.promote.outputs.changed == 'true'
