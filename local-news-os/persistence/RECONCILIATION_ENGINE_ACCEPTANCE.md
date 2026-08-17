@@ -1,0 +1,37 @@
+# CIVORA persistence reconciliation engine acceptance
+
+This increment implements the executable core required by PRS-016–024.
+
+## Authority boundaries
+
+- **Drive/persisted state** supplies prior decisions, capability claims and backlog state.
+- **Repository evidence** supplies implementation state (`MERGED`, `OPEN_PR`, `DRAFT_PR`, `CLOSED_UNMERGED`, `ABSENT`, `SUPERSEDED`) and runtime mode.
+- **External evidence** supplies remote/live confirmation independently from local readiness.
+- The engine is advisory and pure: it writes only its requested output file and never mutates Drive, GitHub state, external accounts or publication state.
+
+## Required fail-closed behavior
+
+1. An open/draft/closed-unmerged PR cannot reconcile to `IMPLEMENTED`.
+2. A merged implementation can repair a stale persisted `ACTIVE_UNIMPLEMENTED` claim and emits `FALSE_NEGATIVE_PERSISTENCE`.
+3. A persisted `IMPLEMENTED` claim without current merged evidence is downgraded and emits `FALSE_POSITIVE_PERSISTENCE`.
+4. Superseded work becomes `SUPERSEDED` and remains traceable.
+5. An outbox-only runtime cannot reconcile to direct publication.
+6. Local `READY` cannot reconcile to external/live without confirmed external evidence.
+7. Missing external evidence defaults to `UNCONFIRMED`.
+8. Unknown implementation states fail closed.
+9. Identical normalized inputs must produce byte-stable semantic output and identical fingerprints.
+10. `PERSISTENCE_FRESH` is possible only when every required freshness gate is true, no blocking reconciliation diagnostic remains, and repository scope is not `STRUCTURAL_RECONCILIATION`.
+
+## PRS mapping
+
+- PRS-016: normalized persisted-state reader (`--input` JSON contract).
+- PRS-017: repository implementation/runtime reader within the normalized contract.
+- PRS-018: Decision ↔ Implementation comparator.
+- PRS-019: Capability ↔ Runtime comparator.
+- PRS-020: Runtime ↔ External State comparator.
+- PRS-021: `FALSE_NEGATIVE_PERSISTENCE` detector.
+- PRS-022: `FALSE_POSITIVE_PERSISTENCE` detector.
+- PRS-023: `SUPERSEDED_WORK` detector.
+- PRS-024: deterministic canonical JSON + SHA-256 fingerprints and repeated-run equality self-test.
+
+The engine does not replace the Google Drive writer lease. Any process that persists its result into active CIVORA state must separately acquire `CIVORA_PERSISTENCE_WRITER_LEASE_V1`, use per-target revision control, verify readback, and release the lease.

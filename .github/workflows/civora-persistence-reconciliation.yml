@@ -1,0 +1,37 @@
+name: CIVORA Persistence Reconciliation
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/persistence/**"
+      - ".github/workflows/civora-persistence-reconciliation.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/persistence/**"
+      - ".github/workflows/civora-persistence-reconciliation.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: civora-persistence-reconciliation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Compile reconciliation engine
+        run: python -m py_compile local-news-os/persistence/reconciliation_engine.py
+      - name: Run deterministic fail-closed acceptance
+        run: python local-news-os/persistence/reconciliation_engine.py --self-test
+      - name: Validate existing scope classifier alongside reconciliation
+        run: python local-news-os/core/repository_scope_fingerprint.py --self-test
+      - name: Verify acceptance contract is present
+        run: test -s local-news-os/persistence/RECONCILIATION_ENGINE_ACCEPTANCE.md
