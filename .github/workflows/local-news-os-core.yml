@@ -37,6 +37,7 @@ jobs:
             local-news-os/core/validate_instance_config.py \
             local-news-os/core/build_instance_manifest.py \
             local-news-os/core/resolve_source_pack.py \
+            local-news-os/core/instance_bootstrap.py \
             local-news-os/core/discover_primary_source_facts.py \
             local-news-os/core/discovery_health.py \
             local-news-os/core/generate_verified_edition.py \
@@ -52,6 +53,18 @@ jobs:
           cat /tmp/civora-scope.json
       - name: Validate production and test instances
         run: python local-news-os/core/validate_instance_config.py
+      - name: Validate INSTANCE_BOOTSTRAP_V1 cold-resume lifecycle
+        shell: bash
+        run: |
+          set -euo pipefail
+          python local-news-os/core/instance_bootstrap.py --self-test
+          workspace="$(mktemp -d)/test-local"
+          python local-news-os/core/instance_bootstrap.py test-local bootstrap --workspace "$workspace"
+          python local-news-os/core/instance_bootstrap.py test-local start --workspace "$workspace"
+          python local-news-os/core/instance_bootstrap.py test-local stop --workspace "$workspace"
+          python local-news-os/core/instance_bootstrap.py test-local resume --workspace "$workspace"
+          python local-news-os/core/instance_bootstrap.py test-local status --workspace "$workspace"
+          test ! -e local-news-os/instances/test-local/state/bootstrap_v1
       - name: Assert fixture packs are isolated
         shell: bash
         run: |
