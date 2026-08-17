@@ -31,7 +31,7 @@ jobs:
             -H "Authorization: Bearer $GH_TOKEN" \
             -H 'X-GitHub-Api-Version: 2022-11-28' \
             "https://api.github.com/repos/${REPOSITORY}/actions/workflows/partener-eu-mipe-ro-crawl-v3.yml/dispatches" \
-            -d '{"ref":"main","inputs":{"max_pages":"80","max_depth":"3","persist":"true"}}')
+            -d '{"ref":"main","inputs":{"max_pages":"60","max_depth":"3","persist":"true"}}')
           cat /tmp/dispatch.json || true
           test "$code" = "204"
           echo "Romanian MIPE v3 crawl dispatched: HTTP $code"
