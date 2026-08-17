@@ -1,1 +1,155 @@
-PLACEHOLDER
+{
+  "schema_version": "2.0-seed",
+  "instance_id": "valcea",
+  "product": "VÂLCEA CLAR Source Intelligence Seed Registry",
+  "canonical_spec": "valcea-clar/docs/SOURCE_INTELLIGENCE_CANON_V1.md",
+  "parent_issues": [63, 67, 185],
+  "defaults": {
+    "lifecycle": "DISCOVERED_UNRATED",
+    "signal_only": true,
+    "public_projection": false,
+    "auto_publication": false,
+    "promotion_rule": "PROBATION_THEN_REVIEW",
+    "discovery_modes": ["robots", "sitemap", "rss_atom", "html_links", "json_ld", "canonical"]
+  },
+  "policy": {
+    "objective": "For every important local entity, know where to look when something changes.",
+    "zero_auto_publication": true,
+    "t2_t3_require_higher_authority_confirmation": true,
+    "sensitive_claims_require_elevated_gate": true,
+    "rumour_community_signal_only": true,
+    "learning_may_change_priority_not_evidence": true,
+    "preferred_access_order": ["API_RSS", "SITEMAP", "CONDITIONAL_HTML", "RENDERED_BROWSER_LAST_RESORT"]
+  },
+  "phase_targets": {
+    "phase_1_sources": 250,
+    "phase_1_monitored_urls": 2000,
+    "phase_2_sources": 1000,
+    "phase_2_monitored_urls_min": 15000
+  },
+  "seed_sources": [
+    ["press-eurovalcea", "EuroVâlcea", "https://www.eurovalcea.ro/", "T2", "LOCAL_PRESS", false],
+    ["press-vocea-valcii", "Vocea Vâlcii", "https://vocea-valcii.ro/category/prima-pagina/", "T2", "LOCAL_PRESS", false],
+    ["press-ziarul-de-valcea", "Ziarul de Vâlcea", "https://ziaruldevalcea.ro/", "T2", "LOCAL_PRESS", true],
+    ["press-curierul-de-ramnic", "Curierul de Râmnic", "https://curierulderamnic.ro/", "T2", "LOCAL_PRESS", false],
+    ["press-jurnal-valcean", "Jurnal Vâlcean", "https://jurnalvalcean.ro/", "T2", "LOCAL_PRESS", false],
+    ["press-primplan", "Primplan Press", "https://www.primplanpress.ro/", "T2", "LOCAL_PRESS", false],
+    ["press-stirile-olteniei", "Știrile Olteniei", "https://stirileolteniei.ro/", "T2", "REGIONAL_PRESS", false],
+    ["press-impact-real", "Impact Real", "http://www.impactreal.ro/", "T2", "LOCAL_PRESS", false],
+    ["press-indiscret", "Indiscret în Oltenia", "http://www.indiscret.ro/", "T2", "LOCAL_PRESS", true],
+    ["press-monitorul-valcea", "Monitorul de Vâlcea", "http://www.monitoruldevalcea.ro/", "T2", "LOCAL_PRESS", false],
+    ["press-curierul-valcea", "Curierul de Vâlcea", "http://www.curierul.ro/", "T2", "LOCAL_PRESS", false],
+    ["press-realitatea-valceana", "Realitatea Vâlceană", "http://realitateavalceana.ro/", "T2", "LOCAL_PRESS", true],
+    ["directory-ziareaz-valcea", "ZiareAZ — Vâlcea", "https://www.ziareaz.ro/stiri-din-valcea", "T3", "DISCOVERY_DIRECTORY", false],
+    ["directory-ziarcom-valcea", "ZIAR.COM — Vâlcea", "https://www.ziar.com/ziare-Valcea", "T3", "DISCOVERY_DIRECTORY", false],
+    ["directory-presa-valcea", "Director presă locală Vâlcea", "https://www.protectiamediului.org/presa/scrie-presei-locale-din-valcea/", "T3", "DISCOVERY_DIRECTORY", false],
+    ["directory-primarii-valcea", "Ghidul Primăriilor — Vâlcea", "https://ghidulprimariilor.ro/primarii/judet/215/", "T3", "DISCOVERY_DIRECTORY", false],
+    ["record-onrc", "ONRC", "https://www.onrc.ro/", "T1", "PUBLIC_RECORD", true],
+    ["record-sicap", "SICAP / e-licitatie", "https://e-licitatie.ro/pub", "T1", "PROCUREMENT", false],
+    ["record-cnsc-decizii", "CNSC — decizii", "https://portal.cnsc.ro/decizii.html", "T1", "PROCUREMENT_REMEDIES", true],
+    ["record-portal-just", "Portalul instanțelor de judecată", "https://portal.just.ro/SitePages/acasa.aspx", "T1", "JUSTICE", true],
+    ["record-tribunal-valcea", "Tribunalul Vâlcea — dosare", "https://portal.just.ro/90/SitePages/dosare.aspx", "T1", "JUSTICE", true],
+    ["record-ani", "ANI", "https://integritate.eu/", "T1", "INTEGRITY", true],
+    ["record-anaf", "ANAF", "https://www.anaf.ro/", "T1", "PUBLIC_RECORD", true],
+    ["record-monitorul-oficial", "Monitorul Oficial", "https://monitoruloficial.ro/", "T1", "OFFICIAL_GAZETTE", false],
+    ["record-data-gov-ro", "data.gov.ro", "https://data.gov.ro/", "T1", "OPEN_DATA", false],
+    ["anchor-prefectura-89-uats", "Prefectura Vâlcea — 89 UAT baseline", "https://vl.prefectura.mai.gov.ro/comunicat-de-presa-toti-cei-89-de-primari-valceni-alaturi-de-consilierii-locali-au-depus-juramantul-in-cadrul-sedintelor-de-constituire-a-consiliilor-locale/", "T1", "UAT_DISCOVERY", false],
+    ["anchor-cj-valcea", "Consiliul Județean Vâlcea", "https://cjvalcea.ro/", "T1", "COUNTY_ADMIN", false],
+    ["anchor-aba-olt", "Administrația Bazinală de Apă Olt", "https://olt.rowater.ro/", "T1", "ENVIRONMENT_WATER", false]
+  ],
+  "campaigns": [
+    {
+      "id": "all-valcea-local-press",
+      "family": "LOCAL_PRESS",
+      "target_sources": 25,
+      "seed_families": ["LOCAL_PRESS", "REGIONAL_PRESS", "DISCOVERY_DIRECTORY"],
+      "strategy": ["directory_links", "citation_driven", "rss_atom", "sitemap", "official_social_links"],
+      "default_tier": "T2",
+      "publication_policy": "SIGNAL_ONLY"
+    },
+    {
+      "id": "all-89-valcea-uats",
+      "family": "UAT",
+      "target_sources": 89,
+      "seed_ids": ["anchor-prefectura-89-uats", "directory-primarii-valcea"],
+      "strategy": ["entity_enumeration", "official_domain_resolution", "sitemap", "internal_section_discovery"],
+      "required_sections": ["news", "announcements", "local_council", "decisions", "procurement", "urbanism", "jobs", "events", "documents"],
+      "default_tier": "T1",
+      "publication_policy": "SOURCE_SPECIFIC_STORY_GATE"
+    },
+    {
+      "id": "public-record-pairs",
+      "family": "PUBLIC_RECORD",
+      "target_sources": 30,
+      "seed_families": ["PUBLIC_RECORD", "PROCUREMENT", "PROCUREMENT_REMEDIES", "JUSTICE", "INTEGRITY", "OFFICIAL_GAZETTE", "OPEN_DATA"],
+      "strategy": ["entity_link_expansion", "source_pair_watch", "document_registers", "open_data_catalogs"],
+      "source_pairs": [["SICAP", "CNSC"], ["COMPANY", "ONRC"], ["COMPANY", "PORTAL_JUST"], ["PUBLIC_OFFICIAL", "ANI"]],
+      "default_tier": "T1",
+      "publication_policy": "SIGNAL_OR_VERIFICATION_ONLY"
+    },
+    {
+      "id": "deconcentrated-and-public-safety",
+      "family": "PUBLIC_INSTITUTIONS",
+      "target_sources": 30,
+      "seed_ids": ["anchor-cj-valcea", "anchor-aba-olt"],
+      "strategy": ["prefectural_college_entities", "official_domain_resolution", "internal_section_discovery"],
+      "entity_classes": ["ISU", "IPJ", "IJJ", "DSP", "DSVSA", "GARDA_MEDIU", "APM", "SGA", "ABA", "AJOFM", "AJPIS", "APIA", "OCPI", "ISJ", "CAS"],
+      "default_tier": "T1",
+      "publication_policy": "FAIL_CLOSED_SENSITIVE_CLASSES"
+    },
+    {
+      "id": "economy-contractors-employers",
+      "family": "COMPANY",
+      "target_sources": 100,
+      "seed_ids": ["record-onrc", "record-sicap", "record-portal-just"],
+      "strategy": ["procurement_winners", "contractor_mentions", "onrc_entity_resolution", "company_official_site_resolution", "citation_driven"],
+      "sectors": ["construction", "energy", "transport", "retail", "health", "hospitality", "manufacturing", "IT", "real_estate", "utilities"],
+      "default_tier": "T1B",
+      "publication_policy": "SIGNAL_ONLY_UNTIL_DOCUMENT_CHAIN"
+    },
+    {
+      "id": "unde-iesim-and-local-life",
+      "family": "VENUE",
+      "target_sources": 80,
+      "strategy": ["reuse_unde_iesim_registry", "official_venue_sites", "official_social_accounts", "menu_pages", "event_pages", "operator_entity_resolution"],
+      "entity_classes": ["restaurant", "cafe", "pub", "club", "hotel", "event_hall", "leisure", "gym", "studio", "barber", "beauty", "nails"],
+      "default_tier": "T1B",
+      "publication_policy": "VENUE_FACTS_REQUIRE_PROVENANCE_FRESHNESS"
+    },
+    {
+      "id": "culture-events-creators",
+      "family": "CULTURE",
+      "target_sources": 50,
+      "strategy": ["institution_links", "festival_sites", "official_social_accounts", "event_to_entity_memory"],
+      "entity_classes": ["theatre", "museum", "library", "philharmonic", "gallery", "festival", "artist", "creator", "athlete"],
+      "default_tier": "T1B",
+      "publication_policy": "SIGNAL_ONLY_UNTIL_VERIFIED"
+    },
+    {
+      "id": "professional-networks",
+      "family": "PROFESSIONAL",
+      "target_sources": 30,
+      "strategy": ["official_professional_registries", "chamber_and_business_club_links", "official_entity_sites"],
+      "entity_classes": ["lawyer", "law_firm", "notary", "medical_professional", "business_club", "chamber", "employer_association"],
+      "default_tier": "T1",
+      "publication_policy": "REGISTER_FACTS_ONLY_WITH_EXACT_ROLE"
+    },
+    {
+      "id": "political-public-figure-official-channels",
+      "family": "PUBLIC_FIGURE",
+      "target_sources": 40,
+      "strategy": ["official_institution_profiles", "self_declared_official_sites", "verified_public_channels"],
+      "entity_classes": ["mayor", "county_council_leadership", "mp", "senator", "public_manager"],
+      "default_tier": "T1B",
+      "publication_policy": "OFFICIAL_CHANNEL_IS_SIGNAL_NOT_INDEPENDENT_CONFIRMATION"
+    },
+    {
+      "id": "community-rumour-radar",
+      "family": "COMMUNITY",
+      "target_sources": 100,
+      "strategy": ["public_groups", "public_pages", "public_comments", "public_community_channels"],
+      "default_tier": "T3",
+      "publication_policy": "SIGNAL_ONLY_NEVER_FACT"
+    }
+  ]
+}
