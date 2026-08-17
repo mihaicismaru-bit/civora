@@ -1,0 +1,107 @@
+name: LOCAL NEWS OS Reread Result Materialization Binding
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/social/reread_result_materialization_binding.py"
+      - "local-news-os/social/reread_provider_outcome_binding.py"
+      - "local-news-os/social/observed_metrics_collector.py"
+      - "local-news-os/social/durable_feedback_snapshot.py"
+      - "local-news-os/social/authorization_sealed_harvest_receipt.py"
+      - "local-news-os/social/fleet_metrics_authorization_seal_with_reread_spend.py"
+      - "local-news-os/social/test_reread_result_materialization_binding.py"
+      - "local-news-os/social/test_reread_provider_outcome_binding.py"
+      - ".github/workflows/local-news-os-reread-result-materialization-binding.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/social/reread_result_materialization_binding.py"
+      - "local-news-os/social/reread_provider_outcome_binding.py"
+      - "local-news-os/social/observed_metrics_collector.py"
+      - "local-news-os/social/durable_feedback_snapshot.py"
+      - "local-news-os/social/authorization_sealed_harvest_receipt.py"
+      - "local-news-os/social/fleet_metrics_authorization_seal_with_reread_spend.py"
+      - "local-news-os/social/test_reread_result_materialization_binding.py"
+      - "local-news-os/social/test_reread_provider_outcome_binding.py"
+      - ".github/workflows/local-news-os-reread-result-materialization-binding.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-news-os-reread-result-materialization-binding-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile durable reread materialization boundary
+        run: |
+          python -m py_compile \
+            local-news-os/social/reread_result_materialization_binding.py \
+            local-news-os/social/reread_provider_outcome_binding.py \
+            local-news-os/social/observed_metrics_collector.py \
+            local-news-os/social/durable_feedback_snapshot.py \
+            local-news-os/social/authorization_sealed_harvest_receipt.py \
+            local-news-os/social/fleet_metrics_authorization_seal_with_reread_spend.py \
+            local-news-os/social/test_reread_result_materialization_binding.py
+
+      - name: Run durable reread materialization acceptance
+        working-directory: local-news-os/social
+        shell: bash
+        run: |
+          set +e
+          python test_reread_result_materialization_binding.py > /tmp/reread-materialization.log 2>&1
+          status=$?
+          cat /tmp/reread-materialization.log
+          if [ "$status" -ne 0 ]; then
+            diagnostic="$(tail -n 30 /tmp/reread-materialization.log | tr '\n' '|' | sed 's/%/%25/g; s/\r/%0D/g; s/|/%0A/g')"
+            echo "::error title=Reread result materialization acceptance failed::$diagnostic"
+            exit "$status"
+          fi
+
+      - name: Run provider reread outcome regression
+        working-directory: local-news-os/social
+        run: python test_reread_provider_outcome_binding.py
+
+      - name: Verify operational install and zero-paid boundary
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, 'local-news-os/social')
+          import authorization_sealed_harvest_receipt as receipt
+          import fleet_metrics_authorization_seal_with_reread_spend  # noqa: F401
+          import reread_result_materialization_binding as binding
+
+          if receipt.transition_sealed.__module__ != binding.__name__:
+              raise SystemExit('operational harvest does not install durable reread materialization binding')
+          guards = binding.materialization_guards()
+          required = {
+              'completed_reread_requires_exact_durable_observation': True,
+              'observation_store_readback_validated': True,
+              'feedback_snapshot_readback_validated_when_present': True,
+              'feedback_snapshot_required_when_durable_store_yields_usable_feedback': True,
+              'snapshot_sources_must_exist_in_observation_store': True,
+              'persisted_materialization_fingerprint_derived_from_readback': True,
+              'caller_bundle_fingerprint_not_trusted_as_persistence_proof': True,
+              'provider_network_call_performed_by_binding': False,
+              'credential_values_read': False,
+              'credential_values_persisted': False,
+              'provider_payload_persisted': False,
+              'publication_blocked_by_analytics': False,
+              'zero_paid_dependency': True,
+          }
+          for key, expected in required.items():
+              if guards.get(key) is not expected:
+                  raise SystemExit(f'durable materialization guard mismatch: {key}={guards.get(key)!r}')
+          print('REREAD_RESULT_MATERIALIZATION_OPERATIONAL_GUARDS_PASS')
+          PY
