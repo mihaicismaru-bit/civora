@@ -57,6 +57,7 @@ jobs:
           python -m py_compile local-news-os/persistence/prs_054_source_intelligence_workstream_acceptance.py
           python -m py_compile local-news-os/persistence/prs_055_monitor_fact_kernel_bridge_acceptance.py
           python -m py_compile local-news-os/persistence/prs_056_local_places_subcapability_acceptance.py
+          python -m py_compile local-news-os/persistence/prs_057_operational_dashboard_recovery_acceptance.py
       - name: Run deterministic fail-closed reconciliation acceptance
         run: python local-news-os/persistence/reconciliation_engine.py --self-test
       - name: Validate PRS-037 reconciliation trigger contract and executable wiring
@@ -99,6 +100,8 @@ jobs:
         run: python local-news-os/persistence/prs_055_monitor_fact_kernel_bridge_acceptance.py
       - name: Validate PRS-056 local-places sub-capability persistence
         run: python local-news-os/persistence/prs_056_local_places_subcapability_acceptance.py
+      - name: Validate PRS-057 operational dashboard/failure-recovery separation
+        run: python local-news-os/persistence/prs_057_operational_dashboard_recovery_acceptance.py
       - name: Validate existing scope classifier alongside reconciliation
         run: python local-news-os/core/repository_scope_fingerprint.py --self-test
       - name: Verify acceptance contracts are present
