@@ -3,7 +3,7 @@
 
 Remote publication can happen before `main` advances again. This helper merges
 the desired state captured immediately after publishing into the newest main
-state so a concurrent photo/social run cannot be overwritten by stale files.
+state so concurrent photo/social runs cannot be overwritten by stale files.
 """
 from __future__ import annotations
 
@@ -69,6 +69,28 @@ def merge_threads_state(current: dict[str, Any], desired: dict[str, Any]) -> dic
     return merged
 
 
+def merge_instagram_state(current: dict[str, Any], desired: dict[str, Any]) -> dict[str, Any]:
+    merged = {**current, **desired}
+    published = merge_map(current.get("published"), desired.get("published"))
+    failures = merge_map(current.get("failures"), desired.get("failures"))
+    pending = merge_map(current.get("pending_public_media"), desired.get("pending_public_media"))
+    for item_id in published:
+        failures.pop(item_id, None)
+        pending.pop(item_id, None)
+    merged["published"] = published
+    merged["failures"] = failures
+    merged["pending_public_media"] = pending
+
+    desired_last = desired.get("last_attempt") if isinstance(desired.get("last_attempt"), dict) else None
+    current_last = current.get("last_attempt") if isinstance(current.get("last_attempt"), dict) else None
+    if desired_last and desired_last.get("status") == "waiting_public_media":
+        item_id = str(desired_last.get("item_id") or "")
+        if item_id and item_id in published and item_id not in (desired.get("published") or {}):
+            if current_last:
+                merged["last_attempt"] = current_last
+    return merged
+
+
 def self_test() -> int:
     fb = merge_facebook(
         {"published": {"old": {"id": 1}}, "last": "current"},
@@ -88,6 +110,23 @@ def self_test() -> int:
         {"published": {"b": {}}, "failures": {}},
     )
     assert set(state["published"]) == {"a", "b"} and "b" not in state["failures"]
+
+    instagram = merge_instagram_state(
+        {
+            "published": {"old": {}},
+            "failures": {"new": {"error": "old"}},
+            "pending_public_media": {"old": {"status": "stale"}},
+        },
+        {
+            "published": {"new": {"instagram_media_id": "m1"}},
+            "failures": {},
+            "pending_public_media": {"new": {"status": "waiting"}},
+        },
+    )
+    assert set(instagram["published"]) == {"old", "new"}
+    assert "new" not in instagram["failures"] and "new" not in instagram["pending_public_media"]
+    assert "old" not in instagram["pending_public_media"]
+
     print("VÂLCEA CLAR text-first social state merger self-test: PASS")
     return 0
 
@@ -97,13 +136,15 @@ def main() -> int:
     parser.add_argument("--desired-facebook", type=Path)
     parser.add_argument("--desired-threads-outbox", type=Path)
     parser.add_argument("--desired-threads-state", type=Path)
+    parser.add_argument("--desired-instagram-state", type=Path)
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
     if args.self_test:
         return self_test()
 
-    if not args.desired_facebook or not args.desired_threads_outbox or not args.desired_threads_state:
-        raise SystemExit("desired state paths are required")
+    required = (args.desired_facebook, args.desired_threads_outbox, args.desired_threads_state)
+    if any(value is None for value in required):
+        raise SystemExit("Facebook and Threads desired state paths are required")
 
     fb_path = VC / "social" / "facebook_state.json"
     threads_outbox_path = VC / "social" / "threads_outbox.json"
@@ -118,7 +159,17 @@ def main() -> int:
         threads_state_path,
         merge_threads_state(load(threads_state_path), load(args.desired_threads_state)),
     )
-    print(json.dumps({"status": "PASS", "merged": [str(fb_path), str(threads_outbox_path), str(threads_state_path)]}))
+
+    merged_paths = [str(fb_path), str(threads_outbox_path), str(threads_state_path)]
+    if args.desired_instagram_state:
+        instagram_path = VC / "social" / "instagram_state.json"
+        write(
+            instagram_path,
+            merge_instagram_state(load(instagram_path), load(args.desired_instagram_state)),
+        )
+        merged_paths.append(str(instagram_path))
+
+    print(json.dumps({"status": "PASS", "merged": merged_paths}))
     return 0
 
 
