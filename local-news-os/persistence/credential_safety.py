@@ -36,6 +36,19 @@ _REFERENCE_KEY_HINTS = (
     "reference_names",
 )
 
+_VERIFICATION_CONTAINER_HINTS = (
+    "credential_verification",
+    "credential_verifications",
+    "credential_state",
+    "credential_states",
+    "credential_status",
+    "credential_statuses",
+    "verification_state",
+    "verification_states",
+    "verification_status",
+    "verification_statuses",
+)
+
 _SAFE_EMPTY_MARKERS = {
     "",
     "null",
@@ -73,6 +86,11 @@ def _is_reference_key(key: str) -> bool:
     return any(hint in normalized for hint in _REFERENCE_KEY_HINTS) or normalized.endswith("_ref")
 
 
+def _is_verification_container_key(key: str) -> bool:
+    normalized = _normalize_key(key)
+    return any(hint in normalized for hint in _VERIFICATION_CONTAINER_HINTS)
+
+
 def _is_forbidden_value_key(key: str) -> bool:
     normalized = _normalize_key(key)
     if _is_reference_key(normalized):
@@ -88,18 +106,40 @@ def _value_is_effectively_empty(value: object) -> bool:
     return False
 
 
-def _walk_json(value: Any, path: str, out: list[CredentialViolation]) -> None:
+def _walk_json(
+    value: Any,
+    path: str,
+    out: list[CredentialViolation],
+    *,
+    credential_name_context: bool = False,
+) -> None:
     if isinstance(value, dict):
         for raw_key, child in value.items():
             key = str(raw_key)
             child_path = f"{path}.{key}" if path else key
-            if _is_forbidden_value_key(key) and not _value_is_effectively_empty(child):
+            if (
+                not credential_name_context
+                and _is_forbidden_value_key(key)
+                and not _value_is_effectively_empty(child)
+            ):
                 out.append(CredentialViolation(child_path, "FORBIDDEN_CREDENTIAL_VALUE_FIELD"))
-            _walk_json(child, child_path, out)
+            _walk_json(
+                child,
+                child_path,
+                out,
+                credential_name_context=(
+                    _is_reference_key(key) or _is_verification_container_key(key)
+                ),
+            )
         return
     if isinstance(value, list):
         for index, child in enumerate(value):
-            _walk_json(child, f"{path}[{index}]", out)
+            _walk_json(
+                child,
+                f"{path}[{index}]",
+                out,
+                credential_name_context=credential_name_context,
+            )
         return
     if isinstance(value, str) and _PRIVATE_KEY_RE.search(value):
         out.append(CredentialViolation(path or "$", "PRIVATE_KEY_MATERIAL"))
@@ -165,6 +205,15 @@ def self_test() -> int:
     )
     hits = find_credential_value_violations(unsafe_json)
     assert hits and all("runtime-value" not in str(hit.to_dict()) for hit in hits)
+
+    unsafe_nested = json.dumps(
+        {
+            "credentials": {
+                "SOCIAL_ACCESS_TOKEN": "runtime-value-must-never-persist",
+            }
+        }
+    )
+    assert find_credential_value_violations(unsafe_nested)
 
     assert find_credential_value_violations("API_KEY=actual-value\n")
     assert find_credential_value_violations("Authorization: Bearer actual-value\n")
