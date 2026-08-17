@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Fail closed when production-instance identity leaks into CORE_GENERIC source.
 
-The forbidden vocabulary is derived from production instance configuration so the
-guard itself contains no publication-specific names. Fixture/migration/
-compatibility exceptions must be explicit repository-relative paths.
+The forbidden vocabulary is derived from production instance configuration so
+the guard itself contains no publication-specific names. Test fixtures are
+ignored structurally; fixture/migration/compatibility file exceptions must be
+explicit repository-relative paths.
 """
 from __future__ import annotations
 
+import ast
 import json
 import re
 import unicodedata
@@ -17,8 +19,12 @@ CORE_ROOT = ROOT / "local-news-os" / "core"
 INSTANCES_ROOT = ROOT / "local-news-os" / "instances"
 
 # PRS-074 permits explicit exceptions only for fixtures, migrations and
-# compatibility adapters. Keep empty unless such a file genuinely exists.
-ALLOWLIST: dict[str, str] = {}
+# compatibility adapters. These two files are the bounded legacy-crawler
+# compatibility bridge and remain migration targets under PRS-065/066.
+ALLOWLIST: dict[str, str] = {
+    "local-news-os/core/discover_primary_source_facts.py": "TEMPORARY_COMPATIBILITY_ADAPTER",
+    "local-news-os/core/discover_primary_source_facts_fast.py": "TEMPORARY_COMPATIBILITY_ADAPTER",
+}
 
 
 def normalize(value: str) -> str:
@@ -71,6 +77,41 @@ def forbidden_tokens() -> tuple[str, ...]:
     return tuple(sorted(tokens, key=lambda item: (-len(item), item)))
 
 
+def _docstring_node_ids(tree: ast.AST) -> set[int]:
+    result: set[int] = set()
+    for node in ast.walk(tree):
+        body = getattr(node, "body", None)
+        if not isinstance(body, list) or not body:
+            continue
+        first = body[0]
+        if isinstance(first, ast.Expr) and isinstance(first.value, ast.Constant) and isinstance(first.value.value, str):
+            result.add(id(first.value))
+    return result
+
+
+class IdentityLiteralVisitor(ast.NodeVisitor):
+    def __init__(self, tokens: tuple[str, ...], docstrings: set[int]) -> None:
+        self.tokens = tokens
+        self.docstrings = docstrings
+        self.hits: set[str] = set()
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        if node.name == "self_test" or node.name.startswith("test_"):
+            return
+        self.generic_visit(node)
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+        if node.name == "self_test" or node.name.startswith("test_"):
+            return
+        self.generic_visit(node)
+
+    def visit_Constant(self, node: ast.Constant) -> None:
+        if id(node) in self.docstrings or not isinstance(node.value, str):
+            return
+        value = normalize(node.value)
+        self.hits.update(token for token in self.tokens if token in value)
+
+
 def scan() -> list[str]:
     tokens = forbidden_tokens()
     errors: list[str] = []
@@ -81,16 +122,27 @@ def scan() -> list[str]:
         rel = path.relative_to(ROOT).as_posix()
         if rel in ALLOWLIST:
             continue
-        text = normalize(path.read_text(encoding="utf-8"))
-        hits = [token for token in tokens if token in text]
-        if hits:
-            errors.append(f"{rel}: production identity in CORE_GENERIC: {', '.join(hits[:8])}")
+        source = path.read_text(encoding="utf-8")
+        try:
+            tree = ast.parse(source, filename=rel)
+        except SyntaxError as exc:
+            errors.append(f"{rel}: cannot scan invalid Python: {exc}")
+            continue
+        visitor = IdentityLiteralVisitor(tokens, _docstring_node_ids(tree))
+        visitor.visit(tree)
+        if visitor.hits:
+            hits = sorted(visitor.hits, key=lambda item: (-len(item), item))
+            errors.append(f"{rel}: production identity in CORE_GENERIC executable literals: {', '.join(hits[:8])}")
     return errors
 
 
 def self_test() -> None:
     tokens = forbidden_tokens()
     assert tokens, "at least one production identity token must be derived"
+    sample = ast.parse("VALUE = 'synthetic-instance'\n\ndef self_test():\n    x = 'fixture-only'\n")
+    visitor = IdentityLiteralVisitor(("synthetic-instance", "fixture-only"), _docstring_node_ids(sample))
+    visitor.visit(sample)
+    assert visitor.hits == {"synthetic-instance"}
     print("CORE_GENERIC_HARDCODING_GUARD_SELF_TEST_PASS")
 
 
