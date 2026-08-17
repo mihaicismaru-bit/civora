@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Compose primary structured alerts into claim-traced VÂLCEA CLAR products.
+"""Compose primary structured alerts into canonical VÂLCEA CLAR fact kernels.
 
 The generic ingest emits evidence fields only. This instance adapter builds a
-Fact Kernel exclusively from those fields, routes it through the canonical
-Editorial Writer and appends only writer-approved products to auto_facts.json.
+Fact Kernel exclusively from those fields, validates it through the canonical
+Editorial Writer, and upserts the RAW fact kernel into facts_registry.json.
+The Live Newsroom later runs the canonical writer again and remains the sole
+publication gate.
 """
 from __future__ import annotations
 
@@ -17,11 +19,12 @@ import editorial_writer
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_EVENTS = ROOT / "editorial" / "structured_alert_events.json"
-DEFAULT_AUTO = ROOT / "editorial" / "auto_facts.json"
+DEFAULT_FACTS = ROOT / "editorial" / "facts_registry.json"
 RO_MONTHS = {
     1: "ianuarie", 2: "februarie", 3: "martie", 4: "aprilie", 5: "mai", 6: "iunie",
     7: "iulie", 8: "august", 9: "septembrie", 10: "octombrie", 11: "noiembrie", 12: "decembrie",
 }
+AUTO_SCOPE = "structured_primary_fact_kernel"
 
 
 def load(path: Path, default=None) -> dict[str, Any]:
@@ -98,7 +101,7 @@ def make_fact(event: dict[str, Any]) -> dict[str, Any] | None:
 
     source = {"name": str(event.get("source_name") or "Centrul INFOTRAFIC — Poliția Română"), "url": source_url, "tier": "T1"}
     valid_until = issued + timedelta(hours=36)
-    fact = {
+    return {
         "id": str(event["event_id"]),
         "status": "verified",
         "section": "MOBILITATE",
@@ -111,7 +114,7 @@ def make_fact(event: dict[str, Any]) -> dict[str, Any] | None:
         "material_fact_gate": "PASS",
         "sources": [source],
         "auto_generated": True,
-        "auto_scope": "structured_primary_fact_kernel",
+        "auto_scope": AUTO_SCOPE,
         "structured_primary_event": {
             "source_id": event.get("source_id"),
             "parser": event.get("parser"),
@@ -126,48 +129,64 @@ def make_fact(event: dict[str, Any]) -> dict[str, Any] | None:
             "claims": claims,
         },
     }
-    return fact
 
 
-def compose(events_path: Path, auto_path: Path, *, write: bool) -> dict[str, Any]:
+def validate_fact(fact: dict[str, Any], manual: dict[str, Any]) -> tuple[bool, str | None]:
+    product = editorial_writer.transform_item(fact, manual)
+    editorial = product.get("editorial_product") or {}
+    mode = str(editorial.get("writer_mode") or "")
+    if mode != "FACT_KERNEL_COMPOSED":
+        return False, str(editorial.get("hold_reason") or mode or "writer_rejected")
+    if product.get("status") == "editorial_hold":
+        return False, str(editorial.get("hold_reason") or "editorial_hold")
+    if editorial.get("claim_trace_complete") is not True:
+        return False, "claim_trace_incomplete"
+    if editorial.get("source_level_trace") is not True:
+        return False, "source_trace_incomplete"
+    if editorial.get("auto_publish_eligible_by_format") is not True:
+        return False, "format_not_auto_publishable"
+    return True, None
+
+
+def compose(events_path: Path, facts_path: Path, *, write: bool) -> dict[str, Any]:
     events_doc = load(events_path)
     if events_doc.get("contract") != "LOCAL_NEWS_OS_STRUCTURED_ALERT_EVENTS_V1":
         raise ValueError("structured alert event contract mismatch")
     manual = editorial_writer.load(editorial_writer.MANUAL)
     editorial_writer.validate_manual(manual)
 
-    products: list[dict[str, Any]] = []
+    accepted: list[dict[str, Any]] = []
     rejected: list[dict[str, str]] = []
     for event in events_doc.get("events") or []:
         fact = make_fact(event)
         if fact is None:
             rejected.append({"event_id": str(event.get("event_id")), "reason": "insufficient_structured_fields"})
             continue
-        product = editorial_writer.transform_item(fact, manual)
-        mode = str((product.get("editorial_product") or {}).get("writer_mode") or "")
-        if mode != "FACT_KERNEL_COMPOSED" or product.get("status") == "editorial_hold":
-            rejected.append({"event_id": str(event.get("event_id")), "reason": str((product.get("editorial_product") or {}).get("hold_reason") or mode)})
+        ok, reason = validate_fact(fact, manual)
+        if not ok:
+            rejected.append({"event_id": str(event.get("event_id")), "reason": str(reason)})
             continue
-        products.append(product)
+        accepted.append(fact)
 
-    auto = load(auto_path, {"schema_version": "1.2", "facts": []})
-    existing = {str(row.get("id")): row for row in auto.get("facts") or [] if row.get("id")}
-    for product in products:
-        existing[str(product["id"])] = product
-    auto["facts"] = list(existing.values())
-    auto.setdefault("policy", {})["structured_primary_fact_kernels_appended"] = len(products)
-    auto["policy"]["structured_alert_signal_is_not_fact"] = True
-    auto["policy"]["structured_alert_primary_evidence_required"] = True
+    registry = load(facts_path)
+    if not isinstance(registry.get("facts"), list):
+        raise ValueError("facts registry missing facts array")
+    existing = {str(row.get("id")): row for row in registry.get("facts") or [] if row.get("id")}
+    for fact in accepted:
+        existing[str(fact["id"])] = fact
+    registry["facts"] = list(existing.values())
+    registry.setdefault("policy", {})["structured_primary_fact_kernel_contract"] = "LOCAL_NEWS_OS_STRUCTURED_ALERT_EVENTS_V1"
+    registry["policy"]["structured_primary_fact_kernels_fail_closed"] = True
+    registry["policy"]["structured_primary_reader_copy_requires_editorial_writer"] = True
     if write:
-        auto_path.parent.mkdir(parents=True, exist_ok=True)
-        auto_path.write_text(json.dumps(auto, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        facts_path.write_text(json.dumps(registry, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return {
         "status": "PASS",
         "event_count": len(events_doc.get("events") or []),
-        "composed_count": len(products),
+        "accepted_fact_kernel_count": len(accepted),
         "rejected_count": len(rejected),
         "rejected": rejected,
-        "products": products,
+        "accepted_ids": [str(row["id"]) for row in accepted],
     }
 
 
@@ -190,12 +209,10 @@ def self_test() -> int:
     fact = make_fact(event)
     assert fact is not None
     manual = editorial_writer.load(editorial_writer.MANUAL)
-    product = editorial_writer.transform_item(fact, manual)
-    editorial = product.get("editorial_product") or {}
-    assert editorial.get("writer_mode") == "FACT_KERNEL_COMPOSED", editorial
-    assert editorial.get("claim_trace_complete") is True
-    assert editorial.get("auto_publish_eligible_by_format") is True
-    assert "azi" not in (product.get("headline") or "").casefold()
+    ok, reason = validate_fact(fact, manual)
+    assert ok is True, reason
+    assert fact["auto_scope"] == AUTO_SCOPE
+    assert "azi" not in str((fact["fact_kernel"]["headline"] or {}).get("text") or "").casefold()
     print("VÂLCEA CLAR structured alert composition self-test: PASS")
     return 0
 
@@ -203,14 +220,14 @@ def self_test() -> int:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--events", default=str(DEFAULT_EVENTS))
-    parser.add_argument("--auto-facts", default=str(DEFAULT_AUTO))
+    parser.add_argument("--facts-registry", default=str(DEFAULT_FACTS))
     parser.add_argument("--no-write", action="store_true")
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
     if args.self_test:
         return self_test()
-    report = compose(Path(args.events), Path(args.auto_facts), write=not args.no_write)
-    print(json.dumps({k: v for k, v in report.items() if k != "products"}, ensure_ascii=False))
+    report = compose(Path(args.events), Path(args.facts_registry), write=not args.no_write)
+    print(json.dumps(report, ensure_ascii=False))
     return 0
 
 
