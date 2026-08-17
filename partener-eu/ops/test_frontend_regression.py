@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Deterministic P10 guard for the public frontpage freeze/blank-page incidents.
+"""Deterministic guard for PARTENER.EU public frontpage resilience and clarity.
 
-The public page must have a visible HTML fallback, render its critical app path
-before progressive enhancements, and explain the product to a first-time visitor.
+The public page must keep a visible HTML fallback, render its critical app path
+before progressive enhancements, and explain the product to a first-time visitor
+without requiring knowledge of programme names.
 """
 from pathlib import Path
 
@@ -11,6 +12,7 @@ WEB = ROOT / "web"
 index = (WEB / "index.html").read_text(encoding="utf-8")
 public_copy = (WEB / "public-product-copy-v1.js").read_text(encoding="utf-8")
 home_novice = (WEB / "home-novice-v1.js").read_text(encoding="utf-8")
+home_goto = (WEB / "home-go-to-v2.js").read_text(encoding="utf-8")
 
 errors = []
 
@@ -23,12 +25,15 @@ if 'src="public-product-copy-v1.js' in index:
 
 if 'id="boot-fallback"' not in index:
     errors.append("visible boot fallback missing")
-if "Găsește finanțarea potrivită fără să citești zeci de ghiduri" not in index:
-    errors.append("novice-first boot fallback has no meaningful visible content")
-if "cine poate aplica, câți bani sunt disponibili, termenele, documentele" not in index:
-    errors.append("boot fallback does not explain the public product")
+for marker in (
+    "Ai o investiție în minte?",
+    "Nu trebuie să știi programul",
+    "eligibilitate, bani, termene, documente și următorul pas",
+):
+    if marker not in index:
+        errors.append(f"intent-first boot fallback missing: {marker}")
 
-# A first-time visitor must have an obvious entry path independent of programme knowledge.
+# First-time discovery remains available even before the go-to-market layer.
 for required in (
     "Nu trebuie să știi numele programului",
     "Cine ești?",
@@ -39,6 +44,18 @@ for required in (
 ):
     if required not in home_novice:
         errors.append(f"novice homepage entry missing: {required}")
+
+# The go-to layer must expose natural-language discovery, freshness and a path
+# for returning visitors without replacing fail-closed product semantics.
+for required in (
+    "Caută finanțări",
+    "Poți scrie în limbaj normal",
+    "apeluri confirmate deschise",
+    "Vezi ce s-a schimbat de la ultima verificare",
+    "Necunoscutele sunt marcate, nu inventate",
+):
+    if required not in home_goto:
+        errors.append(f"go-to homepage utility missing: {required}")
 
 # Critical path is deliberately bounded.
 data_pos = index.find('src="data.js')
@@ -61,10 +78,11 @@ for script in [
 decision_data_pos = index.find('src="decision-products.js')
 decision_ui_pos = index.find('src="decision-intelligence-v2.js')
 home_novice_pos = index.find('src="home-novice-v1.js')
-if min(decision_data_pos, decision_ui_pos, home_novice_pos) < 0 or not (
-    app_pos < decision_data_pos < decision_ui_pos < home_novice_pos
+home_goto_pos = index.find('src="home-go-to-v2.js')
+if min(decision_data_pos, decision_ui_pos, home_novice_pos, home_goto_pos) < 0 or not (
+    app_pos < decision_data_pos < decision_ui_pos < home_novice_pos < home_goto_pos
 ):
-    errors.append("decision products and novice homepage must load after app.js in order")
+    errors.append("decision products, novice homepage and go-to layer must load after app.js in order")
 
 active_app = (WEB / "app.js").read_text(encoding="utf-8").casefold()
 for stale_public_label in ("pilot", "facts demo", "corpusul canonic demo", "apeluri deschise în pilot"):
