@@ -1,105 +1,23 @@
-<!doctype html>
-<html lang="ro">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Restaurante, cârciumi, cafenele și locuri de relaxare din Vâlcea — verificate, explicate și actualizate.">
-  <meta name="theme-color" content="#f4efe5">
-  <link rel="canonical" href="https://valceaclar.ro/unde-iesim/">
-  <meta property="og:locale" content="ro_RO">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Vâlcea Clar">
-  <meta property="og:title" content="Unde ieșim — Vâlcea Clar">
-  <meta property="og:description" content="Restaurante, cafenele și locuri de relaxare din Vâlcea — verificate, explicate și actualizate.">
-  <meta property="og:url" content="https://valceaclar.ro/unde-iesim/">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Unde ieșim — Vâlcea Clar">
-  <meta name="twitter:description" content="Restaurante, cafenele și locuri de relaxare din Vâlcea — verificate, explicate și actualizate.">
-  <title>Unde ieșim — VÂLCEA CLAR</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <a class="skip-link" href="#main">Sari la conținut</a>
-  <header class="masthead">
-    <div class="brand-row">
-      <a class="brand" href="/" aria-label="VÂLCEA CLAR, prima pagină"><span>VÂLCEA</span><strong>CLAR</strong></a>
-      <span class="edition">Râmnicu Vâlcea · ediție în construcție</span>
-    </div>
-    <nav class="top-nav" aria-label="Secțiuni">
-      <a href="#noutati">Nou deschis</a>
-      <a href="#locuri">Unde mâncăm</a>
-      <a href="#transparenta">Cine este în spate</a>
-      <a href="#creatori">Creatori locali</a>
-    </nav>
-  </header>
-
-  <main id="main">
-    <section class="hero" id="noutati">
-      <div class="hero-copy">
-        <p class="eyebrow">VÂLCEA CLAR · UNDE IEȘIM</p>
-        <h1>Ce s-a deschis.<br>Ce se mănâncă.<br><em>Cine este în spate.</em></h1>
-        <p class="standfirst">Un ghid local care nu confundă reclama cu jurnalismul. Adrese, programe, meniuri, prețuri și operatori — fiecare cu sursă și dată.</p>
-        <div class="hero-actions">
-          <a class="primary-button" href="#locuri">Vezi locurile verificate</a>
-          <a class="text-link" href="#transparenta">Cum verificăm →</a>
-        </div>
-      </div>
-      <article class="lead-card" id="lead-story" aria-live="polite">
-        <p class="card-kicker">NOU DESCHIS</p>
-        <h2>Se încarcă primul material verificat…</h2>
-      </article>
-    </section>
-
-    <section class="utility-strip" aria-label="Starea bazei de date">
-      <div><strong id="verified-count">—</strong><span>locuri publice</span></div>
-      <div><strong id="price-count">—</strong><span>meniuri cu prețuri</span></div>
-      <div><strong id="operator-count">—</strong><span>operatori documentați</span></div>
-      <div><strong id="candidate-count">—</strong><span>candidați în verificare</span></div>
-    </section>
-
-    <section class="directory" id="locuri">
-      <div class="section-heading">
-        <div><p class="eyebrow">GHID VERIFICAT</p><h2>Unde ieșim în Râmnicu Vâlcea</h2></div>
-        <p>Fișele incomplete spun explicit ce lipsește. Nu completăm golurile cu presupuneri.</p>
-      </div>
-      <div class="toolbar" aria-label="Filtre pentru localuri">
-        <label class="search-box"><span class="sr-only">Caută local sau preparat</span><input id="search" type="search" placeholder="Caută local, bucătărie, preparat…" autocomplete="off"></label>
-        <div class="filter-row" role="group" aria-label="Tip local">
-          <button class="filter is-active" type="button" data-filter="all">Toate</button>
-          <button class="filter" type="button" data-filter="restaurant">Restaurante</button>
-          <button class="filter" type="button" data-filter="fast_casual">Rapid</button>
-          <button class="filter" type="button" data-filter="pub">Puburi</button>
-          <button class="filter" type="button" data-filter="leisure">Relaxare</button>
-        </div>
-      </div>
-      <div class="place-grid" id="place-grid" aria-live="polite"></div>
-      <p class="empty-state" id="empty-state" hidden>Niciun loc verificat nu corespunde filtrului.</p>
-    </section>
-
-    <section class="transparency" id="transparenta">
-      <div><p class="eyebrow light">TRANSPARENȚĂ</p><h2>Nu publicăm o legătură doar fiindcă „se spune”.</h2></div>
-      <div class="rules">
-        <article><span>01</span><h3>Operatorul</h3><p>Societatea, CUI-ul și relația cu localul au sursă publică.</p></article>
-        <article><span>02</span><h3>Meniul</h3><p>Prețurile expiră după 120 de zile și dispar până la reverificare.</p></article>
-        <article><span>03</span><h3>Recenzia</h3><p>Spunem cine a plătit masa și separăm opinia de informația factuală.</p></article>
-      </div>
-    </section>
-
-    <section class="creator-section" id="creatori">
-      <div class="section-heading">
-        <div><p class="eyebrow">FOOD CREATOR INDEX</p><h2>Creatorii locali sunt monitorizați, nu promovați automat.</h2></div>
-        <p id="creator-note">Registrul public rămâne gol până când există suficiente dovezi de relevanță culinară locală și transparență comercială.</p>
-      </div>
-      <div id="creator-grid" class="creator-grid"></div>
-    </section>
-  </main>
-
-  <dialog id="place-dialog" class="place-dialog" aria-labelledby="dialog-title">
-    <button class="dialog-close" type="button" aria-label="Închide">×</button>
-    <div id="dialog-content"></div>
-  </dialog>
-
-  <footer><strong>VÂLCEA CLAR</strong><p>Fișele au data ultimei verificări. Corecțiile materiale vor fi jurnalizate, nu ascunse.</p><p><a href="https://www.facebook.com/valceaclar" rel="me">Facebook</a></p></footer>
-  <script src="app.js" defer></script>
-</body>
-</html>
+<!doctype html><html lang="ro"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Unde ieșim — VÂLCEA CLAR</title><meta name="description" content="Ghid local VÂLCEA CLAR pentru restaurante, cafenele și locuri de ieșit.">
+<link rel="canonical" href="https://valceaclar.ro/unde-iesim/">
+<meta property="og:site_name" content="VÂLCEA CLAR"><meta property="og:type" content="website">
+<meta property="og:title" content="Unde ieșim — VÂLCEA CLAR"><meta property="og:description" content="Ghid local VÂLCEA CLAR pentru restaurante, cafenele și locuri de ieșit."><meta property="og:url" content="https://valceaclar.ro/unde-iesim/">
+<style>
+:root{--navy:#071a3d;--navy2:#102a56;--red:#d71920;--ink:#101828;--muted:#667085;--line:#e4e7ec;--soft:#f6f7f9;--paper:#fff}
+*{box-sizing:border-box}html{scroll-behavior:smooth;background:var(--paper)}body{margin:0;color:var(--ink);background:var(--paper);font:16px/1.58 Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif}a{color:inherit}
+.top{background:var(--navy);color:#fff}.mast{max-width:1240px;margin:auto;padding:20px 22px 17px;display:flex;align-items:flex-start;justify-content:space-between;gap:24px}.brand{font:700 clamp(30px,4vw,48px)/1 Georgia,serif;letter-spacing:.035em}.brand a{text-decoration:none}.brand span{border-bottom:3px solid var(--red);padding-bottom:7px}.tag{font-family:Georgia,serif;opacity:.84;margin-top:10px}.domain{font-size:13px;opacity:.76;padding-top:5px}.nav{max-width:1240px;margin:auto;padding:0 22px;border-top:1px solid rgba(255,255,255,.14);display:flex;gap:23px;overflow-x:auto;white-space:nowrap;scrollbar-width:thin}.nav a{padding:12px 0;text-decoration:none;font-size:12px;font-weight:850;letter-spacing:.025em;text-transform:uppercase}.nav a:hover{text-decoration:underline;text-underline-offset:4px}
+main{max-width:1240px;margin:auto;padding:25px 22px 58px}.livebar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:22px}.pill{background:var(--red);color:#fff;padding:7px 11px;border-radius:4px;font-size:11px;font-weight:900;letter-spacing:.045em}.time,.status{font-size:13px;color:var(--muted)}.anchor{scroll-margin-top:20px}
+.grid{display:grid;grid-template-columns:minmax(0,1.86fr) minmax(285px,.72fr);gap:36px}.kicker{color:var(--red);font-size:12px;font-weight:900;letter-spacing:.075em;text-transform:uppercase}.hero h1{font:800 clamp(38px,5.4vw,66px)/1.03 Georgia,serif;letter-spacing:-.03em;margin:8px 0 14px}.hero h1 a{text-decoration:none}.hero h1 a:hover{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:6px}.dek{font-size:20px;line-height:1.45;color:#344054;max-width:900px}.hero-copy{font:18px/1.68 Georgia,serif;max-width:900px}.hero-copy p{margin:13px 0}.story-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:12px;margin:10px 0}.archive{font-weight:850;color:#475467;background:#f2f4f7;padding:4px 7px;border-radius:999px}.live{font-weight:900;color:#067647;background:#ecfdf3;padding:4px 7px;border-radius:999px}.sources{font-size:12px;color:var(--muted);margin-top:14px}.sources a{color:#475467}.sources a:hover{text-decoration:underline}
+.section-title{font-size:13px;letter-spacing:.07em;text-transform:uppercase;border-bottom:2px solid var(--ink);padding-bottom:8px;margin:30px 0 15px}.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.card{border-top:3px solid var(--navy);padding-top:12px}.card h3{font:700 22px/1.15 Georgia,serif;margin:7px 0}.card h3 a{text-decoration:none}.card h3 a:hover{text-decoration:underline}.card p{color:#475467;margin:0}.side{border-left:1px solid var(--line);padding-left:28px}.side>h2{font-size:14px;text-transform:uppercase;letter-spacing:.07em;border-bottom:2px solid var(--red);padding-bottom:9px;margin:0}.side-story{padding:13px 0;border-bottom:1px solid var(--line)}.side-story strong{display:block;font:700 18px/1.2 Georgia,serif}.side-story a{text-decoration:none}.side-story a:hover{text-decoration:underline}
+.venues{background:var(--navy);color:#fff;border-radius:10px;padding:18px;margin-top:28px}.venues-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.venues h2{font-size:15px;text-transform:uppercase;letter-spacing:.06em;margin:0}.venues .cta{font-size:12px;text-decoration:none;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:5px 8px}.venue{display:block;text-decoration:none;padding:12px 0;border-top:1px solid rgba(255,255,255,.14)}.venue:first-of-type{margin-top:10px}.venue span{display:block;color:#d0d5dd;font-size:13px;margin-top:3px}.venue-badges{font-size:11px;color:#f2f4f7;margin-top:4px}.note{margin-top:34px;background:var(--soft);border-left:4px solid var(--red);padding:15px 18px;color:#475467;font-size:13px}
+.article{max-width:860px;margin:0 auto;padding:18px 0 18px}.article h1{font:800 clamp(39px,6vw,65px)/1.04 Georgia,serif;letter-spacing:-.03em;margin:8px 0 15px}.article-body{font:18px/1.72 Georgia,serif;margin-top:26px}.article-body p{margin:0 0 20px}.hero-photo{margin:25px 0 28px}.hero-photo img{display:block;width:100%;max-height:570px;object-fit:cover;border-radius:5px}.hero-photo figcaption{font-size:12px;color:var(--muted);margin-top:7px}.factbox{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:26px 0}.fact{background:#fff;padding:13px 15px}.fact b{display:block;text-transform:uppercase;font-size:10px;letter-spacing:.08em;color:var(--muted);margin-bottom:3px}.fact span{font-weight:750}.rich-section{border-top:1px solid var(--line);padding-top:24px;margin-top:28px}.rich-section h2{font:800 26px/1.16 Georgia,serif;margin:0 0 13px}.rich-section p{font:17px/1.7 Georgia,serif;color:#344054}.rich-section ul{padding-left:22px}.rich-section li{margin:8px 0;line-height:1.55}.article-sources{margin-top:38px;border-top:2px solid var(--ink);padding-top:15px}.article-sources h2{font-size:13px;text-transform:uppercase;letter-spacing:.07em}.article-sources li{margin:7px 0}.article-sources a{color:#344054}.related{margin-top:35px;border-top:1px solid var(--line);padding-top:20px}.related h2{font:800 20px/1.2 Georgia,serif}.related-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.related-card{border:1px solid var(--line);border-radius:10px;padding:14px;text-decoration:none}.related-card span{display:block;color:var(--red);font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}.related-card strong{font:700 17px/1.25 Georgia,serif}.back{display:inline-block;margin-top:30px;color:var(--navy);font-weight:800}
+.legal{max-width:860px;margin:0 auto}.legal h1,.venues-page h1{font:800 clamp(39px,6vw,62px)/1.04 Georgia,serif;letter-spacing:-.025em;margin:8px 0 15px}.legal-section{padding:3px 0 20px;border-bottom:1px solid var(--line)}.legal-section h2{font:700 25px/1.2 Georgia,serif;margin:28px 0 10px}.legal-section p{color:#344054}.contact{margin-top:30px;background:var(--soft);border-left:4px solid var(--red);padding:16px 18px}.venue-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:24px}.venue-card{border:1px solid var(--line);border-radius:12px;padding:17px;text-decoration:none}.venue-card h2{font:700 22px/1.2 Georgia,serif;margin:4px 0 8px}.venue-card p{color:#475467}.venue-card .city{font-size:11px;color:var(--red);font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+footer{background:var(--navy);color:#d0d5dd;padding:22px;text-align:center;font-size:13px}.footer-links{display:flex;justify-content:center;gap:9px;margin-top:7px}.footer-links a{color:#fff}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.side{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:24px}.cards,.venue-grid{grid-template-columns:1fr}.tag{display:none}.hero h1{font-size:43px}}@media(max-width:560px){main{padding:20px 16px 48px}.mast{padding-left:16px;padding-right:16px}.nav{padding-left:16px;padding-right:16px}.article h1{font-size:39px}.factbox{grid-template-columns:1fr}.related-grid{grid-template-columns:1fr}.hero-photo{margin-left:-16px;margin-right:-16px}.hero-photo img{border-radius:0}.hero-photo figcaption{padding:0 16px}}
+</style></head><body data-nav-contract="valcea-clar-primary-v1">
+<header class="top"><div class="mast"><div><div class="brand"><a href="/"><span>VÂLCEA CLAR</span></a></div><div class="tag">Știrile Vâlcii, fără zgomot.</div></div><div class="domain">valceaclar.ro</div></div><nav class="nav" aria-label="Navigație principală"><a href="/">Acasă</a><a href="/#stiri">Ultimele</a><a href="/#administratie">Administrație</a><a href="/#sanatate">Sănătate</a><a href="/#infrastructura">Infrastructură</a><a href="/#cultura-evenimente">Cultură &amp; Evenimente</a><a href="/#sport">Sport</a><a href="/unde-iesim/">Unde ieșim</a></nav></header>
+<main class="venues-page"><div class="kicker">GHID LOCAL</div><h1>Unde ieșim</h1><p class="dek">Restaurante, cafenele și locuri de ieșit verificate editorial. Candidații incompleți rămân ascunși până la verificare.</p><div class="venue-grid"><a class="venue-card" href="/unde-iesim/local/spartan-ramnicu-valcea/"><div class="city">Râmnicu Vâlcea</div><h2>Spartan Râmnicu Vâlcea</h2><p>O franciză nouă în Shopping City, cu investiție anunțată de aproape 1,5 milioane lei.</p><div class="venue-badges">Nou deschis · Operator documentat</div></a><a class="venue-card" href="/unde-iesim/local/gyros-petros/"><div class="city">Râmnicu Vâlcea</div><h2>Gyros Petros</h2><p>Primul meniu din nucleu cu eșantion de prețuri oficiale și operator juridic verificat.</p><div class="venue-badges">Prețuri verificate · Operator documentat</div></a><a class="venue-card" href="/unde-iesim/local/restaurant-castel-ramnicu-valcea/"><div class="city">Râmnicu Vâlcea</div><h2>Restaurant Castel</h2><p>Adresă, telefoane, program și un eșantion de prețuri din meniul oficial sunt confirmate; operatorul juridic rămâne în verificare.</p><div class="venue-badges">Program verificat · Prețuri verificate</div></a><a class="venue-card" href="/unde-iesim/local/taverna-damici/"><div class="city">Râmnicu Vâlcea</div><h2>Taverna D’amici</h2><p>O fișă completă de bază, cu operatorul juridic și oferta oficială documentate.</p><div class="venue-badges">Operator documentat · Meniu oficial</div></a><a class="venue-card" href="/unde-iesim/local/ristorante-damici/"><div class="city">Râmnicu Vâlcea</div><h2>Ristorante D’amici</h2><p>Specific italian și operator documentat; numărul stradal exact rămâne de confirmat.</p><div class="venue-badges">Operator documentat · Italian</div></a><a class="venue-card" href="/unde-iesim/local/manarola-ristorante/"><div class="city">Râmnicu Vâlcea</div><h2>Manarola Ristorante</h2><p>Restaurant italian central, cu meniu oficial și rezervări; operatorul juridic rămâne în verificare.</p><div class="venue-badges">Italian · Terasă</div></a><a class="venue-card" href="/unde-iesim/local/queens-pub/"><div class="city">Râmnicu Vâlcea</div><h2>Restaurant Queen</h2><p>Adresă, telefon, program și un eșantion de prețuri sunt confirmate pe surse oficiale; operatorul juridic rămâne în verificare.</p><div class="venue-badges">Program verificat · Prețuri verificate</div></a></div></main>
+<footer><div>VÂLCEA CLAR · informație locală verificată · redactie@valceaclar.ro</div><div class="footer-links"><a href="/termeni/">Termeni</a><span aria-hidden="true">·</span><a href="/confidentialitate/">Confidențialitate</a></div></footer>
+</body></html>
