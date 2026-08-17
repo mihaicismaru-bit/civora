@@ -1,0 +1,48 @@
+name: LOCAL NEWS OS Authorization-Sealed Harvest Receipt
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/social/authorization_sealed_harvest_receipt.py"
+      - "local-news-os/social/fleet_metrics_authorization_seal.py"
+      - "local-news-os/social/metrics_harvest_runtime.py"
+      - "local-news-os/social/test_authorization_sealed_harvest_receipt.py"
+      - "local-news-os/social/test_fleet_metrics_authorization_seal.py"
+      - "local-news-os/social/test_metrics_harvest_runtime.py"
+      - ".github/workflows/local-news-os-authorization-sealed-harvest-receipt.yml"
+  pull_request:
+    paths:
+      - "local-news-os/social/authorization_sealed_harvest_receipt.py"
+      - "local-news-os/social/fleet_metrics_authorization_seal.py"
+      - "local-news-os/social/metrics_harvest_runtime.py"
+      - "local-news-os/social/test_authorization_sealed_harvest_receipt.py"
+      - "local-news-os/social/test_fleet_metrics_authorization_seal.py"
+      - "local-news-os/social/test_metrics_harvest_runtime.py"
+      - ".github/workflows/local-news-os-authorization-sealed-harvest-receipt.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile sealed receipt boundary
+        run: |
+          python -m py_compile \
+            local-news-os/social/authorization_sealed_harvest_receipt.py \
+            local-news-os/social/fleet_metrics_authorization_seal.py \
+            local-news-os/social/metrics_harvest_runtime.py
+      - name: Run authorization-sealed receipt acceptance
+        run: python local-news-os/social/test_authorization_sealed_harvest_receipt.py
+      - name: Regress authorization TOCTOU seal
+        run: python local-news-os/social/test_fleet_metrics_authorization_seal.py
+      - name: Regress legacy harvest runtime
+        run: python local-news-os/social/test_metrics_harvest_runtime.py
