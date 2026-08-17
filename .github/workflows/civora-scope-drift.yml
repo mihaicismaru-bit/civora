@@ -17,9 +17,11 @@ on:
 permissions:
   contents: read
 
+# Preserve exact-head evidence: a later scheduled observer must never cancel the
+# read-only fingerprint run for an earlier main head.
 concurrency:
-  group: civora-scope-drift
-  cancel-in-progress: true
+  group: civora-scope-drift-${{ github.sha }}
+  cancel-in-progress: false
 
 jobs:
   fingerprint:
