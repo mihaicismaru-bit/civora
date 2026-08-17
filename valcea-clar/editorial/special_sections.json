@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0",
+  "instance_id": "valcea",
+  "product": "VÂLCEA CLAR special editorial sections",
+  "execution_owner": "CIVORA_SITE_ENGINE",
+  "state_owner": "GITHUB_REPOSITORY",
+  "policy": {
+    "empty_public_section_pages_forbidden": true,
+    "public_navigation_requires_at_least_one_publishable_item": true,
+    "investigation_monitor_is_not_article": true,
+    "satire_must_be_derived_from_verified_facts": true,
+    "satire_may_not_create_new_factual_allegations": true,
+    "satire_must_be_visibly_labeled": true,
+    "synthetic_real_person_deception_forbidden": true,
+    "normal_story_ready_gate_required_for_investigations": true
+  },
+  "sections": [
+    {
+      "id": "investigatii",
+      "public_label": "Investigații",
+      "route": "/investigatii/",
+      "status": "CANONICAL_BACKEND_READY_PUBLIC_WHEN_CONTENT_EXISTS",
+      "content_types": ["investigation", "ancheta", "document_explainer", "follow_the_money", "ownership_and_influence_map"],
+      "homepage_mode": "feature_only_when_publishable",
+      "navigation_mode": "show_only_after_first_publishable_item",
+      "requirements": {
+        "primary_or_documentary_evidence": true,
+        "material_public_interest": true,
+        "fact_kernel_verified": true,
+        "right_of_reply_when_reputationally_required": true,
+        "monitor_progress_report_forbidden": true,
+        "incomplete_dossier_publication_forbidden": true
+      },
+      "existing_backend_paths": ["valcea-clar/investigations/"]
+    },
+    {
+      "id": "satira",
+      "public_label": "Satiră",
+      "route": "/satira/",
+      "status": "CANONICAL_BACKEND_READY_PUBLIC_WHEN_CONTENT_EXISTS",
+      "content_types": ["meme", "gluma_editoriala", "pamflet", "satirical_card", "short_satirical_video"],
+      "homepage_mode": "occasional_native_module",
+      "navigation_mode": "show_only_after_first_publishable_item",
+      "requirements": {
+        "verified_source_story_or_fact_kernel": true,
+        "visible_satire_label": true,
+        "no_new_unverified_claims": true,
+        "no_misleading_edit_of_real_people": true,
+        "no_fake_quote_attributed_as_real": true,
+        "no_confusion_with_news_article": true,
+        "platform_native_social_variants": true
+      },
+      "editorial_tone": {
+        "allowed": ["dry_humor", "absurdity_of_verified_local_bureaucracy", "visual_wordplay", "self_deprecating_local_humor", "document_based_satire"],
+        "forbidden": ["defamation_by_insinuation", "fabricated_scandal", "humiliation_of_private_people", "rage_bait", "fake_breaking_news"]
+      }
+    }
+  ]
+}
