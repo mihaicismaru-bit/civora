@@ -8,13 +8,13 @@
     "editorial/source_intelligence_seed_registry.json",
     "editorial/source_intelligence_seed_supplement_v1.json"
   ],
-  "seed_count": 52,
+  "seed_count": 53,
   "observations": [
     {
       "seed_id": "anchor-aba-olt",
       "publisher": "Administrația Bazinală de Apă Olt",
       "seed_url": "https://olt.rowater.ro/",
-      "checked_at_epoch": 1786975380,
+      "checked_at_epoch": 1786995064,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://olt.rowater.ro/",
@@ -642,7 +642,7 @@
       "seed_id": "anchor-cj-valcea",
       "publisher": "Consiliul Județean Vâlcea",
       "seed_url": "https://cjvalcea.ro/",
-      "checked_at_epoch": 1786975380,
+      "checked_at_epoch": 1786995063,
       "status": "DEGRADED",
       "http_error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
       "final_url": null,
@@ -653,7 +653,7 @@
       "seed_id": "anchor-prefectura-89-uats",
       "publisher": "Prefectura Vâlcea — 89 UAT baseline",
       "seed_url": "https://vl.prefectura.mai.gov.ro/comunicat-de-presa-toti-cei-89-de-primari-valceni-alaturi-de-consilierii-locali-au-depus-juramantul-in-cadrul-sedintelor-de-constituire-a-consiliilor-locale/",
-      "checked_at_epoch": 1786975378,
+      "checked_at_epoch": 1786995061,
       "status": "DEGRADED",
       "http_error": "HTTP Error 404: Not Found",
       "final_url": null,
@@ -664,7 +664,7 @@
       "seed_id": "anchor-salvamont-brezoi",
       "publisher": "Serviciul Public Local SALVAMONT Brezoi",
       "seed_url": "https://www.salvamontromania.ro/serviciu.php?id=56",
-      "checked_at_epoch": 1786975385,
+      "checked_at_epoch": 1786995068,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://www.salvamontromania.ro/serviciu.php?id=56",
@@ -753,7 +753,7 @@
       "seed_id": "anchor-salvamont-valcea",
       "publisher": "Serviciul Public Județean Salvamont Salvaspeo Vâlcea",
       "seed_url": "https://www.salvamontromania.ro/serviciu.php?id=17",
-      "checked_at_epoch": 1786975384,
+      "checked_at_epoch": 1786995066,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://www.salvamontromania.ro/serviciu.php?id=17",
@@ -837,6 +837,17 @@
           "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
         }
       ]
+    },
+    {
+      "seed_id": "anchor-sju-valcea",
+      "publisher": "Spitalul Județean de Urgență Vâlcea",
+      "seed_url": "https://www.sjv.ro/",
+      "checked_at_epoch": 1786995070,
+      "status": "DEGRADED",
+      "http_error": "<urlopen error [Errno 101] Network is unreachable>",
+      "final_url": null,
+      "content_sha256": null,
+      "candidates": []
     },
     {
       "seed_id": "directory-presa-valcea",
@@ -7077,7 +7088,7 @@
       "seed_id": "signal-ajofm-valcea",
       "publisher": "AJOFM Vâlcea",
       "seed_url": "https://www.anofm.ro/valcea/categorie/comunicate-de-presa/",
-      "checked_at_epoch": 1786975392,
+      "checked_at_epoch": 1786995095,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://www.anofm.ro/valcea/categorie/comunicate-de-presa/",
@@ -7548,14 +7559,125 @@
       ]
     },
     {
+      "seed_id": "signal-daj-valcea",
+      "publisher": "Direcția pentru Agricultură Județeană Vâlcea",
+      "seed_url": "https://dadrvalcea.ro/",
+      "checked_at_epoch": 1786995098,
+      "status": "PASS",
+      "http_error": null,
+      "final_url": "https://dadrvalcea.ro/",
+      "content_sha256": "c7e1e6bc9798f14f28e909f259fbe8cf235e653a66157f4b05a8e877d2d25c9b",
+      "candidates": [
+        {
+          "candidate_id": "533f14a938e0f4b0b33bc8f3",
+          "seed_id": "signal-daj-valcea",
+          "url": "https://dadrvalcea.ro/robots.txt",
+          "discovered_by": "standard:robots",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
+          "candidate_id": "bd26bedebba34ecb9cef376a",
+          "seed_id": "signal-daj-valcea",
+          "url": "https://dadrvalcea.ro/sitemap.xml",
+          "discovered_by": "standard:sitemap",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
+          "candidate_id": "549210379128d7c3375f5cdd",
+          "seed_id": "signal-daj-valcea",
+          "url": "https://dadrvalcea.ro/feed/",
+          "discovered_by": "standard:feed",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
+          "candidate_id": "d474c4259f1e0f5ad654c932",
+          "seed_id": "signal-daj-valcea",
+          "url": "https://dadrvalcea.ro/rss/",
+          "discovered_by": "standard:rss",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
+          "candidate_id": "8b7764b5711fe8c56e44ef02",
+          "seed_id": "signal-daj-valcea",
+          "url": "https://dadrvalcea.ro/comunicate-de-presa/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
+          "candidate_id": "c9cf62ff57b8e1095110c537",
+          "seed_id": "signal-daj-valcea",
+          "url": "https://dadrvalcea.ro/cariera-anunturile-posturilor-scoase-la-concurs/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
+          "candidate_id": "65d19d4d4721d806c19f0c9f",
+          "seed_id": "signal-daj-valcea",
+          "url": "https://dadrvalcea.ro/solicitarea-informatiilor-de-interes-public/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
+          "candidate_id": "854e1b48c0b7262dd9026bfd",
+          "seed_id": "signal-daj-valcea",
+          "url": "https://dadrvalcea.ro/programul-anual-al-achizitiilor-publice/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
+          "candidate_id": "69c3a5a7bd53d65d36fb0b22",
+          "seed_id": "signal-daj-valcea",
+          "url": "https://dadrvalcea.ro/anunturi-si-informari/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        }
+      ]
+    },
+    {
       "seed_id": "signal-eveniment-valcean",
       "publisher": "Eveniment Vâlcean",
       "seed_url": "https://evenimentvalcean.ro/",
-      "checked_at_epoch": 1786975386,
+      "checked_at_epoch": 1786995088,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://evenimentvalcean.ro/",
-      "content_sha256": "3d556f237974684d6db6d9137bc67ea427a83dca92c665d381ed2b16f5b314df",
+      "content_sha256": "23540d05a1431e789dd3f9ed2759171923905c17ffda26be4eba5597db0d1414",
       "candidates": [
         {
           "candidate_id": "1477086248f3e49ed2c7e27e",
@@ -7706,7 +7828,7 @@
       "seed_id": "signal-ipj-valcea",
       "publisher": "Inspectoratul de Poliție Județean Vâlcea",
       "seed_url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri",
-      "checked_at_epoch": 1786975390,
+      "checked_at_epoch": 1786995092,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri",
@@ -8423,11 +8545,11 @@
       "seed_id": "signal-isu-valcea",
       "publisher": "Inspectoratul pentru Situații de Urgență Vâlcea",
       "seed_url": "https://isuvl.igsu.ro/comunicate-de-presa",
-      "checked_at_epoch": 1786975391,
+      "checked_at_epoch": 1786995093,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://isuvl.igsu.ro/comunicate-de-presa",
-      "content_sha256": "afe3237aa968283f421eed658c04850698584d5d65dac17060336df4aedf92f8",
+      "content_sha256": "37f75825262df7ccdf00b3148b49bf62696673b526673633d8238cc13dfd059b",
       "candidates": [
         {
           "candidate_id": "59548f715c7714adbce6950c",
@@ -8589,11 +8711,11 @@
       "seed_id": "signal-se-intampla-in-valcea",
       "publisher": "Se întâmplă în Vâlcea",
       "seed_url": "https://seintamplainvalcea.ro/",
-      "checked_at_epoch": 1786975388,
+      "checked_at_epoch": 1786995090,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://seintamplainvalcea.ro/",
-      "content_sha256": "79aa6df228b7782863e8a8c8680004fec82064f1d898fd77be3306d0bc17977c",
+      "content_sha256": "51ee72c7aca448aa73a203d07b5b1c60c7074cd40081cc23057fd727ca5dc762",
       "candidates": [
         {
           "candidate_id": "3dea03749a10fb619d863a6b",
@@ -8772,17 +8894,6 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
-          "candidate_id": "32c090a70f6afa32662ba6b8",
-          "seed_id": "signal-se-intampla-in-valcea",
-          "url": "https://seintamplainvalcea.ro/2026/08/17/foto-un-autoturism-a-luat-foc-dupa-un-accident-pe-valea-oltului-in-zona-brezoi/",
-          "discovered_by": "html:relevant_internal",
-          "tier_ceiling": "T2",
-          "lifecycle": "DISCOVERED_UNRATED",
-          "public_projection": false,
-          "auto_publication": false,
-          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
-        },
-        {
           "candidate_id": "db3e4ef2630c9f9e6626aaa1",
           "seed_id": "signal-se-intampla-in-valcea",
           "url": "https://seintamplainvalcea.ro/2026/08/16/foto-fost-prefect-al-judetului-valcea-avertizeaza-asupra-unor-presupusi-falsi-politisti-am-transmis-poza-la-politie/",
@@ -8871,9 +8982,9 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
-          "candidate_id": "23bb5b7e7b4e9cc4a70c88d8",
+          "candidate_id": "32c090a70f6afa32662ba6b8",
           "seed_id": "signal-se-intampla-in-valcea",
-          "url": "https://seintamplainvalcea.ro/2026/08/16/presedintii-curtilor-de-apel-solicita-clarificari-privind-intalnirea-dintre-presedinta-ccr-si-ilie-bolojan/",
+          "url": "https://seintamplainvalcea.ro/2026/08/17/foto-un-autoturism-a-luat-foc-dupa-un-accident-pe-valea-oltului-in-zona-brezoi/",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T2",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -8884,7 +8995,7 @@
       ]
     }
   ],
-  "candidate_count": 768,
+  "candidate_count": 776,
   "candidates": [
     {
       "candidate_id": "723808db7a7383c967e1a9ce",
@@ -16059,6 +16170,105 @@
       "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
     },
     {
+      "candidate_id": "69c3a5a7bd53d65d36fb0b22",
+      "seed_id": "signal-daj-valcea",
+      "url": "https://dadrvalcea.ro/anunturi-si-informari/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
+      "candidate_id": "c9cf62ff57b8e1095110c537",
+      "seed_id": "signal-daj-valcea",
+      "url": "https://dadrvalcea.ro/cariera-anunturile-posturilor-scoase-la-concurs/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
+      "candidate_id": "8b7764b5711fe8c56e44ef02",
+      "seed_id": "signal-daj-valcea",
+      "url": "https://dadrvalcea.ro/comunicate-de-presa/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
+      "candidate_id": "549210379128d7c3375f5cdd",
+      "seed_id": "signal-daj-valcea",
+      "url": "https://dadrvalcea.ro/feed/",
+      "discovered_by": "standard:feed",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
+      "candidate_id": "854e1b48c0b7262dd9026bfd",
+      "seed_id": "signal-daj-valcea",
+      "url": "https://dadrvalcea.ro/programul-anual-al-achizitiilor-publice/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
+      "candidate_id": "533f14a938e0f4b0b33bc8f3",
+      "seed_id": "signal-daj-valcea",
+      "url": "https://dadrvalcea.ro/robots.txt",
+      "discovered_by": "standard:robots",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
+      "candidate_id": "d474c4259f1e0f5ad654c932",
+      "seed_id": "signal-daj-valcea",
+      "url": "https://dadrvalcea.ro/rss/",
+      "discovered_by": "standard:rss",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
+      "candidate_id": "bd26bedebba34ecb9cef376a",
+      "seed_id": "signal-daj-valcea",
+      "url": "https://dadrvalcea.ro/sitemap.xml",
+      "discovered_by": "standard:sitemap",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
+      "candidate_id": "65d19d4d4721d806c19f0c9f",
+      "seed_id": "signal-daj-valcea",
+      "url": "https://dadrvalcea.ro/solicitarea-informatiilor-de-interes-public/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
       "candidate_id": "5697ea3b6c077d894a08205a",
       "seed_id": "signal-eveniment-valcean",
       "url": "https://evenimentvalcean.ro/category/anunturi/",
@@ -17118,17 +17328,6 @@
       "candidate_id": "db3e4ef2630c9f9e6626aaa1",
       "seed_id": "signal-se-intampla-in-valcea",
       "url": "https://seintamplainvalcea.ro/2026/08/16/foto-fost-prefect-al-judetului-valcea-avertizeaza-asupra-unor-presupusi-falsi-politisti-am-transmis-poza-la-politie/",
-      "discovered_by": "html:relevant_internal",
-      "tier_ceiling": "T2",
-      "lifecycle": "DISCOVERED_UNRATED",
-      "public_projection": false,
-      "auto_publication": false,
-      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
-    },
-    {
-      "candidate_id": "23bb5b7e7b4e9cc4a70c88d8",
-      "seed_id": "signal-se-intampla-in-valcea",
-      "url": "https://seintamplainvalcea.ro/2026/08/16/presedintii-curtilor-de-apel-solicita-clarificari-privind-intalnirea-dintre-presedinta-ccr-si-ilie-bolojan/",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
