@@ -1,6 +1,6 @@
 # CIVORA persistence reconciliation engine acceptance
 
-This increment implements the executable core required by PRS-016–024 and the explicit acceptance cases required by PRS-042–057.
+This increment implements the executable core required by PRS-016–024 and the explicit acceptance cases required by PRS-042–058.
 
 ## Authority boundaries
 
@@ -37,6 +37,7 @@ This increment implements the executable core required by PRS-016–024 and the 
 24. **PRS-055:** monitor → Fact Kernel bridge persistence is represented by one namespaced capability identity per monitor, never by a single aggregate boolean. A monitor with independent `READY` repository evidence may reconcile to `IMPLEMENTED` while another monitor remains `ACTIVE_UNIMPLEMENTED` with its own backlog; completing the second bridge retires only that monitor's backlog and cannot manufacture implementation evidence for unrelated monitors.
 25. **PRS-056:** the generic local-places/“Unde ieșim” family is persisted as seven independent, per-instance sub-capabilities—ingest, reconciliation, public catalogue, operators, menus/prices, local creators and publication—rather than one coarse feature flag. Each sub-capability has its own identity, evidence and backlog lifecycle, so independently completing one gap retires only that gap while the remaining sub-capabilities stay active; the synthetic fixture contains no production-instance hardcoding and does not imply external LIVE publication.
 26. **PRS-057:** operational dashboard closure and failure-recovery readiness are distinct namespaced deliverables. Existing health workflows or independently READY recovery mechanics may reconcile failure recovery to `IMPLEMENTED`, but they cannot close the dashboard while independent dashboard evidence is absent; the dashboard remains `ACTIVE_UNIMPLEMENTED` with its own backlog until an operational panel is independently verifiable. The synthetic fixture contains no production-instance hardcoding and creates no external LIVE authority.
+27. **PRS-058:** self-improvement persistence is split into six namespaced components—metrics harvest, feedback, ranking influence, controlled change, validation and rollback. Metrics/feedback activity cannot imply a closed autonomous loop; ranking influence may close independently without granting change authority; a controlled-change component cannot retire validation or rollback. Each component owns its own evidence and backlog lifecycle, and no aggregate self-improvement boolean may manufacture closure or bypass reversible validation safeguards.
 
 ## PRS mapping
 
@@ -65,5 +66,6 @@ This increment implements the executable core required by PRS-016–024 and the 
 - PRS-055: executable `prs_055_monitor_fact_kernel_bridge_acceptance.py` verifies that Fact Kernel bridge truth is persisted per monitor, so one monitor can be implemented while another independently retains backlog, with no aggregate global implementation boolean.
 - PRS-056: executable `prs_056_local_places_subcapability_acceptance.py` verifies namespaced local-places persistence across the seven required sub-capabilities, including independent partial progression and backlog retirement without a coarse aggregate capability.
 - PRS-057: executable `prs_057_operational_dashboard_recovery_acceptance.py` verifies that health/recovery readiness cannot falsely close the operational dashboard deliverable and that dashboard closure requires its own verifiable evidence and backlog lifecycle.
+- PRS-058: executable `prs_058_self_improvement_component_acceptance.py` verifies that metrics harvest, feedback, ranking influence, controlled change, validation and rollback are persisted independently, so metrics/feedback or controlled-change readiness cannot bypass the separate validation and rollback gaps.
 
 The engine does not replace the Google Drive writer lease. Any process that persists its result into active CIVORA state must separately acquire `CIVORA_PERSISTENCE_WRITER_LEASE_V1`, use per-target revision control, verify readback, and release the lease.
