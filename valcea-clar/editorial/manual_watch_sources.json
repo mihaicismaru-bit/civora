@@ -212,6 +212,23 @@
         "education reporting without automatic publication until document-feed provenance is supported"
       ],
       "core_feedback": "This reinforces the generic ARTICLE_FEED versus DOCUMENT_REGISTER/PDF-feed boundary: CORE should classify source structure before auto-admission, preserve the listing item identity and its explicit label date separately from PDF document dates, and fail closed when article-level published_at cannot be proven. It also suggests a source-health signal for systematic article failures (for example 2 of 3 links) so structural incompatibility is surfaced before it becomes a silent freshness gap."
+    },
+    {
+      "id": "cj-valcea-hotarari-2026",
+      "publisher": "Consiliul Județean Vâlcea — Hotărârile Autorității Deliberative",
+      "url": "https://cjvalcea.ro/monitorul-oficial-local/hotararile-autoritatii-deliberative/2026-hotararile-autoritatii-deliberative/",
+      "tier": "T1",
+      "section": "ADMINISTRAȚIE",
+      "status": "QUARANTINED_OFFICIAL_DECISION_REGISTER",
+      "checked_at": "2026-08-17",
+      "reason": "The official 2026 CJ Vâlcea page is an administrative decision register, not an article feed: it exposes row-level fields such as HCJ number, HCJ adoption date, decision title and a generic evidence link. The row date is the date of the adopted decision, while the page itself has separate page-level modification metadata. The current automatic newsroom adapter is article-publication-date based and must not reinterpret an HCJ adoption date as published_at or a register row as an article page. Automatic admission is therefore disabled while the source remains available for primary-source monitoring and verification.",
+      "safe_use": [
+        "manual discovery of new County Council decisions",
+        "primary-source verification of HCJ number, adoption date and exact decision title",
+        "public-money, appointments, infrastructure, property and administration research",
+        "cross-checking meeting reporting against the adopted decision and linked evidence file"
+      ],
+      "core_feedback": "This reinforces the existing generic DOCUMENT_REGISTER boundary already identified by procurement, cadastral and education sources: decision registers need stable row identity, row_date semantics and evidence-link provenance kept separate from article published_at. No new Vâlcea-specific parser or CORE function is required for this increment; the source should remain fail-closed until the generic register contract is implemented."
     }
   ]
 }
