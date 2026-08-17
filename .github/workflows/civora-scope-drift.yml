@@ -1,0 +1,55 @@
+name: CIVORA Scope Drift
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/**"
+      - "valcea-clar/**"
+      - ".github/workflows/local-news-os-*.yml"
+      - ".github/workflows/valcea-clar-*.yml"
+      - ".github/workflows/civora-scope-drift.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: civora-scope-drift
+  cancel-in-progress: true
+
+jobs:
+  fingerprint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Compute current CIVORA scope fingerprint
+        run: |
+          python local-news-os/core/repository_scope_fingerprint.py \
+            --ref "$GITHUB_SHA" \
+            --output /tmp/civora-scope-current.json
+          cat /tmp/civora-scope-current.json
+      - name: Classify this push when a prior head exists
+        if: github.event_name == 'push' && github.event.before != '0000000000000000000000000000000000000000'
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          python local-news-os/core/repository_scope_fingerprint.py \
+            --base-ref "$BEFORE_SHA" \
+            --ref "$GITHUB_SHA" \
+            --output /tmp/civora-scope-compare.json
+          cat /tmp/civora-scope-compare.json
+      - name: Upload scope evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: civora-scope-drift-${{ github.run_id }}
+          path: |
+            /tmp/civora-scope-current.json
+            /tmp/civora-scope-compare.json
+          if-no-files-found: ignore
+          retention-days: 14
