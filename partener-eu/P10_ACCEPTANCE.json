@@ -15,7 +15,7 @@
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-08-17T15:14:53Z",
+    "utc": "2026-08-17T15:15:40Z",
     "source_pass": 5,
     "source_degraded": 0,
     "source_fail": 2,
@@ -26,7 +26,7 @@
     "quarantined_source": "SRC-AFIR-ENERGY-2026 — AFIR — Energie 2026; dependent material facts blocked fail-closed; SRC-LEGISLATIE — Portal Legislativ; dependent material facts blocked fail-closed"
   },
   "deployment_evidence": {
-    "utc": "2026-08-17T15:15:20Z",
+    "utc": "2026-08-17T15:16:07Z",
     "status": "FAIL",
     "public_content_verified": true,
     "https_verified": true,
@@ -36,7 +36,7 @@
     "http_content_verified": true,
     "content_origin": "custom_https",
     "http_status": 200,
-    "final_url": "https://partener.eu/?p10_probe=20260817T151520Z",
+    "final_url": "https://partener.eu/?p10_probe=20260817T151607Z",
     "title": "PARTENER.EU — Finanțări europene explicate simplu",
     "required_markers_present": true,
     "critical_assets_ok": true,
@@ -46,7 +46,7 @@
       {
         "id": "custom_https",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260817T151520Z",
+        "final_url": "https://partener.eu/?p10_probe=20260817T151607Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -57,7 +57,7 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260817T151520Z",
+        "final_url": "http://partener.eu/?p10_probe=20260817T151607Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -68,12 +68,12 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "http://partener.eu/?p10_probe=20260817T151520Z",
+        "final_url": "http://partener.eu/?p10_probe=20260817T151607Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260817T151520Z",
-            "to_url": "http://partener.eu/?p10_probe=20260817T151520Z"
+            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260817T151607Z",
+            "to_url": "http://partener.eu/?p10_probe=20260817T151607Z"
           }
         ],
         "content_verified": true,
@@ -84,29 +84,27 @@
       }
     ],
     "pages_workflow": {
-      "status": "BLOCKED",
+      "status": "LIVE",
       "page_url": "http://partener.eu/",
-      "git_sha": "04f7e61bd297ba1b07ab2c2baaf41cb76ffb5535",
-      "observed_at": "2026-08-17T12:02:23.624841+00:00",
+      "git_sha": "15c331b78ebbec3c8726c9bf781da43a361d06e5",
+      "observed_at": "2026-08-17T15:15:03.412032+00:00",
       "configure_outcome": "success",
       "upload_outcome": "success",
-      "deploy_outcome": "failure",
+      "deploy_outcome": "success",
       "https_control": {
         "settings_api_url": "https://api.github.com/repos/mihaicismaru-bit/civora/pages",
         "before_http_status": 200,
         "before_https_enforced": false,
         "attempted": true,
-        "attempt_http_status": 403,
+        "attempt_http_status": 503,
         "attempt_response": {
-          "message": "Resource not accessible by integration",
-          "documentation_url": "https://docs.github.com/rest/pages/pages#update-information-about-a-apiname-pages-site",
-          "status": "403"
+          "message": "No server is currently available to service your request. Sorry about that. Please try resubmitting your request and contact us if the problem persists."
         },
         "after_http_status": 200,
         "after_https_enforced": false,
         "cname": "partener.eu",
         "html_url": "http://partener.eu/",
-        "external_dependency": "REPOSITORY_ADMINISTRATION_PERMISSION_REQUIRED"
+        "external_dependency": "PAGES_HTTPS_ENFORCEMENT_PENDING"
       }
     },
     "error": "public content is current, but HTTP/Pages transport is not fully HTTPS-closed"
@@ -123,16 +121,16 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-08-17T15:15:20Z",
-    "validation_run_started": "2026-08-17T15:14:53Z",
+    "utc": "2026-08-17T15:16:07Z",
+    "validation_run_started": "2026-08-17T15:15:40Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "676b684b37d475843c4517cf1c60859f04507f4e041379731b50e3aec1ca787d",
-      "history_sha256": "676b684b37d475843c4517cf1c60859f04507f4e041379731b50e3aec1ca787d",
-      "history_path": "validation/history/20260817T151453Z.json",
+      "latest_sha256": "e15276768206cf7d25d5a3a3753ec4243fd15d4a6d7dd2b86c81630d8ad4b3a3",
+      "history_sha256": "e15276768206cf7d25d5a3a3753ec4243fd15d4a6d7dd2b86c81630d8ad4b3a3",
+      "history_path": "validation/history/20260817T151540Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "d82ba4789344818d8139747a74652280271e8c50f4aba985176e069a17d5e27f",
-      "checkpoint_sha256": "d82ba4789344818d8139747a74652280271e8c50f4aba985176e069a17d5e27f",
+      "source_state_sha256": "e0ad123c57db3d693b35e657a729888690573b8cf62e13ade6a440b3c8edfed2",
+      "checkpoint_sha256": "e0ad123c57db3d693b35e657a729888690573b8cf62e13ade6a440b3c8edfed2",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
@@ -140,7 +138,7 @@
     },
     "source_registry": {
       "observed_at": "2026-08-17T14:03:24.835641Z",
-      "age_seconds": 4315,
+      "age_seconds": 4362,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
