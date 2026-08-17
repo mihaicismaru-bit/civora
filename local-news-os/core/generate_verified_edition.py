@@ -14,6 +14,8 @@ from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+from temporal_freshness import CONTRACT as TEMPORAL_CONTRACT, durable_story_temporal_violations
+
 ROOT = Path(__file__).resolve().parents[2]
 INSTANCES = ROOT / "local-news-os" / "instances"
 ALLOWED_GATES = {
@@ -72,7 +74,7 @@ def merge_registries(paths: list[Path]) -> dict:
     return {"facts": list(merged.values())}
 
 
-def eligible_facts(registry: dict, now: datetime, slot: str, tz: ZoneInfo) -> list[dict]:
+def eligible_facts(registry: dict, now: datetime, slot: str, tz: ZoneInfo, locale: str = "ro-RO") -> list[dict]:
     output: list[dict] = []
     for fact in registry.get("facts", []):
         if fact.get("status") not in ALLOWED_STATUSES:
@@ -92,6 +94,8 @@ def eligible_facts(registry: dict, now: datetime, slot: str, tz: ZoneInfo) -> li
         except (KeyError, TypeError, ValueError):
             continue
         if not (valid_from <= now <= valid_until):
+            continue
+        if durable_story_temporal_violations(fact, locale):
             continue
         output.append(fact)
     output.sort(key=lambda item: (-int(item.get("priority") or 0), str(item["id"])))
@@ -122,12 +126,13 @@ def build_payload(instance_id: str, registry: dict, now: datetime, slot: str) ->
     cfg = instance_config(instance_id)
     tz = ZoneInfo(str(cfg["timezone"]))
     local_now = now.astimezone(tz)
-    selected = eligible_facts(registry, local_now, slot, tz)
+    locale = str(cfg.get("locale") or "")
+    selected = eligible_facts(registry, local_now, slot, tz, locale)
     brand = str(cfg["brand"]["name"])
     publish = bool(selected)
     label = "dimineață" if slot == "morning" else "seară"
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "contract": "LOCAL_NEWS_OS_EDITION_V1",
         "instance_id": instance_id,
         "canonical_domain": cfg["canonical_domain"],
@@ -148,6 +153,8 @@ def build_payload(instance_id: str, registry: dict, now: datetime, slot: str) ->
             "shorter_edition_when_evidence_is_sparse": True,
             "last_known_good_fallback": True,
             "material_detail_autopublish": False,
+            "durable_temporal_language_contract": TEMPORAL_CONTRACT,
+            "relative_time_words_in_durable_copy": False,
         },
     }
 
@@ -225,6 +232,11 @@ def self_test() -> int:
     assert valcea["title"] != test["title"]
     assert valcea["publication_intent"] == "publish"
     assert test["publication_intent"] == "publish"
+    relative_registry = synthetic_registry("valcea", now)
+    relative_registry["facts"][0]["headline"] = "Azi are loc evenimentul local"
+    relative = build_payload("valcea", relative_registry, now, "morning")
+    assert relative["publication_intent"] == "hold"
+    assert relative["editorial_fact_count"] == 0
     serialized = json.dumps(test, ensure_ascii=False).lower()
     for forbidden in ("vâlcea", "valcea", "valceaclar.ro", "râmnicu", "ramnicu"):
         assert forbidden not in serialized, forbidden
@@ -271,6 +283,7 @@ def main() -> int:
         "publication_intent": payload["publication_intent"],
         "editorial_fact_count": payload["editorial_fact_count"],
         "pointer_result": pointer_result,
+        "durable_temporal_language_contract": TEMPORAL_CONTRACT,
     }, ensure_ascii=False, indent=2))
     return 0
 
