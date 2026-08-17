@@ -52,7 +52,7 @@ def build(cfg: dict) -> dict:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("instance", help="instance id, e.g. valcea")
+    parser.add_argument("instance", help="instance id")
     parser.add_argument("--output", help="optional output path")
     args = parser.parse_args()
 
