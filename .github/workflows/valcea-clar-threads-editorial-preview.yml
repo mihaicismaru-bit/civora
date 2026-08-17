@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "valcea-clar/social/threads_editorial_v1.py"
+      - "valcea-clar/social/story_social_policy.py"
       - "valcea-clar/social/threads_outbox.json"
       - "valcea-clar/social/x_outbox.json"
       - "valcea-clar/site/current_edition.json"
@@ -26,10 +27,12 @@ jobs:
         with:
           python-version: "3.13"
       - name: Self-test Threads packaging
-        run: python valcea-clar/social/threads_editorial_v1.py --self-test
+        run: |
+          python valcea-clar/social/story_social_policy.py --self-test
+          python valcea-clar/social/threads_editorial_v1.py --self-test
       - name: Build Threads-native previews
         run: python valcea-clar/social/threads_editorial_v1.py
-      - name: Validate premium-news fixtures and sibling separation
+      - name: Validate current runtime products and sibling separation
         run: |
           python - <<'PY'
           import json
@@ -38,26 +41,33 @@ jobs:
           value=json.loads((root/'manifest.json').read_text(encoding='utf-8'))
           if value.get('execution_mode')!='PREVIEW_ONLY_NO_NETWORK_CALLS':
               raise SystemExit('Threads preview network-call guard missing')
-          products={p['story_id']:p for p in value.get('products',[]) if isinstance(p,dict)}
-          gov=products.get('florile-govorei-20260816')
-          if not gov or gov.get('status')!='HOLD' or gov.get('reason')!='threads_conversation_gate_thin_title_date_source_only':
-              raise SystemExit('Florile Govorei Threads gate failed')
-          lum=products.get('luminos-fest-zavoi-20260815')
-          if not lum or lum.get('status')!='READY' or lum.get('hook_family')!='local_utility':
-              raise SystemExit('Luminos Threads utility fixture failed')
-          if not lum.get('posts',[None])[0].startswith('În Zăvoi, azi:'):
-              raise SystemExit('Luminos Threads opening is not conversation-native')
-          ola=products.get('olanesti-bridge-monitor')
-          if not ola or ola.get('status')!='READY' or ola.get('format_family')!='explanatory_thread':
-              raise SystemExit('Olănești Threads explainer fixture failed')
-          text=' '.join(ola.get('posts',[]))
-          for expected in ('44,37 mil. lei','Ralunic + Dimex-2000 Company','Ce nu știm încă'):
-              if expected not in text:
-                  raise SystemExit(f'Olănești Threads missing: {expected}')
-          if any('#' in post for p in products.values() for post in p.get('posts',[])):
-              raise SystemExit('Threads default hashtag block detected')
-          if any(len(post)>470 for p in products.values() for post in p.get('posts',[])):
-              raise SystemExit('Threads internal post budget exceeded')
+          products={p['story_id']:p for p in value.get('products',[]) if isinstance(p,dict) and p.get('story_id')}
+          if value.get('ready') != sum(1 for p in products.values() if p.get('status')=='READY'):
+              raise SystemExit('Threads READY count drift')
+          if value.get('held') != sum(1 for p in products.values() if p.get('status')=='HOLD'):
+              raise SystemExit('Threads HOLD count drift')
+          for story_id, product in products.items():
+              status=product.get('status')
+              if status not in {'READY','HOLD'}:
+                  raise SystemExit(f'Threads invalid status for {story_id}: {status!r}')
+              if not str(product.get('canonical_url') or '').startswith('https://valceaclar.ro/stiri/'):
+                  raise SystemExit(f'Threads canonical URL missing for {story_id}')
+              if status=='READY':
+                  if product.get('publication_mode')!='native_api_fail_closed':
+                      raise SystemExit(f'Threads direct publication mode drift for {story_id}')
+                  if product.get('source_preserving') is not True or product.get('conversation_native') is not True:
+                      raise SystemExit(f'Threads native/provenance gate failed for {story_id}')
+                  if product.get('verbatim_cross_platform_reuse_allowed') is not False:
+                      raise SystemExit(f'Threads cross-post reuse enabled for {story_id}')
+                  posts=product.get('posts')
+                  if not isinstance(posts,list) or not posts:
+                      raise SystemExit(f'Threads READY product has no posts: {story_id}')
+                  if any('#' in str(post) for post in posts):
+                      raise SystemExit(f'Threads default hashtag block detected: {story_id}')
+                  if any(len(str(post))>470 for post in posts):
+                      raise SystemExit(f'Threads internal post budget exceeded: {story_id}')
+              elif not str(product.get('reason') or '').strip():
+                  raise SystemExit(f'Threads HOLD has no reason: {story_id}')
           x_path=Path('valcea-clar/social/x_outbox.json')
           if x_path.is_file():
               x=json.loads(x_path.read_text(encoding='utf-8'))
