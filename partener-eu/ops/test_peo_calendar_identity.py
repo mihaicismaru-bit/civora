@@ -14,68 +14,74 @@ module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 
 program = "Program Educație și Ocupare"
-title = "Competențe pentru piața muncii"
-priority = "P9"
+title = "Educație incluzivă de calitate pentru copiii din învățământul primar"
+priority = "Educație"
+objective = "6.f.1 Intervenții integrate"
+region = "LDR+MDR"
+sheet = "Apeluri PC 2025"
 
-# Identity v1 used only programme+title+priority and could collide. V2 must
-# distinguish objective/region/sheet while remaining deterministic.
-a = module.stable_id(program, title, priority, "Obiectiv A", "Național", "Calendar PEO")
-b = module.stable_id(program, title, priority, "Obiectiv B", "Național", "Calendar PEO")
-c = module.stable_id(program, title, priority, "Obiectiv A", "Sud-Vest", "Calendar PEO")
-d = module.stable_id(program, title, priority, "Obiectiv A", "Național", "Altă foaie")
-assert len({a, b, c, d}) == 4
-assert a == module.stable_id(program, title, priority, "Obiectiv A", "Național", "Calendar PEO")
-assert module.IDENTITY_SCHEMA_VERSION == 2
+# Schema v3 distinguishes applicant variants of the same call concept.
+a_isj = module.stable_id(program, title, priority, objective, region, sheet, "ISJ/ISMB")
+a_min = module.stable_id(program, title, priority, objective, region, sheet, "Ministerul Educației")
+assert a_isj != a_min
+assert module.IDENTITY_SCHEMA_VERSION == 3
 
-# Semantic identity lets a legacy row migrate without manufacturing an addition.
-legacy = {
-    "id": "legacy-colliding-id",
+isj = {
+    "id": a_isj,
     "programme": "PEO",
     "programmeRaw": program,
     "title": title,
     "priority": priority,
-    "objective": "Obiectiv A",
-    "region": "Național",
-    "budget": "100",
+    "objective": objective,
+    "region": region,
+    "budget": "235349042.47",
     "fund": "FSE+",
-    "plannedLaunch": "2026-01-01",
-    "plannedClose": "2026-02-01",
+    "plannedLaunch": "2025-10-01",
+    "plannedClose": "2025-12-31",
     "callType": "competitiv",
-    "applicants": "IMM",
+    "applicants": "ISJ/ISMB",
     "notes": "",
-    "sourceSheet": "Calendar PEO",
-    "sourceRow": 10,
+    "sourceSheet": sheet,
+    "sourceRow": 254,
 }
-current = {
-    **legacy,
-    "id": a,
-    "identitySchemaVersion": 2,
+ministry = {
+    **isj,
+    "id": a_min,
+    "budget": "13395588",
+    "applicants": "Ministerul Educației",
+    "sourceRow": 255,
 }
-assert module.identity_tuple(legacy) == module.identity_tuple(current)
+assert module.base_identity_tuple(isj) == module.base_identity_tuple(ministry)
+assert module.identity_tuple(isj) != module.identity_tuple(ministry)
 
-# Exact duplicate source rows are presentation duplication, not two calls.
-duplicate = {**current, "sourceRow": 11}
-deduped, dropped = module.dedupe_exact_identities([current, duplicate])
+# Exact duplicate rows for the same applicant variant collapse deterministically.
+duplicate = {**isj, "sourceRow": 256}
+deduped, dropped = module.dedupe_exact_identities([isj, duplicate])
 assert len(deduped) == 1
 assert len(dropped) == 1
-assert deduped[0]["sourceRow"] == 10
+assert deduped[0]["sourceRow"] == 254
 
-# Conflicting twins with the same stable identity remain fail-closed.
-conflict = {**duplicate, "budget": "200"}
+# A conflicting twin for the same applicant variant still fails closed.
+conflict = {**duplicate, "budget": "999"}
 try:
-    module.dedupe_exact_identities([current, conflict])
+    module.dedupe_exact_identities([isj, conflict])
 except RuntimeError as exc:
     assert "conflicting duplicate PEO stable identity" in str(exc)
 else:
     raise AssertionError("conflicting duplicate identity did not fail closed")
 
-# A V2 result set must never retain duplicate stable identities.
-assert all(v == 1 for v in Counter([a, b, c, d]).values())
+# Legacy base identity can still be used only when unique; variant ambiguity is explicit.
+base_map, ambiguous = module.build_unique_map([isj, ministry], module.base_identity_tuple)
+assert module.base_identity_tuple(isj) not in base_map
+assert len(ambiguous) == 1
+variant_map, variant_ambiguous = module.build_unique_map([isj, ministry], module.identity_tuple)
+assert len(variant_map) == 2
+assert not variant_ambiguous
 
-# The runtime contains the strong migration invariant: unchanged source bytes
-# cannot produce a material calendar change merely because IDs were upgraded.
+assert all(v == 1 for v in Counter([a_isj, a_min]).values())
 source = MODULE_PATH.read_text(encoding="utf-8")
 assert "same_source_bytes" in source
 assert "if not same_source_bytes:" in source
 assert "UNCHANGED_WORKBOOK_SHA_IMPLIES_ZERO_MATERIAL_CHANGES" in source
-print("PASS PEO calendar identity regression")
+assert "return 2" in source
+print("PASS PEO calendar identity v3 regression")
