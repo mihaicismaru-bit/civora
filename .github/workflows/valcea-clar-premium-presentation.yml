@@ -10,12 +10,12 @@ on:
       - 'valcea-clar/site/runtime/**'
       - 'valcea-clar/site/story_archive.json'
       - 'valcea-clar/site/navigation.json'
+      - 'valcea-clar/site/indexing_routes.json'
       - 'valcea-clar/site/legal/legal_pages.json'
-      - 'valcea-clar/editorial/story_enrichment.json'
       - 'valcea-clar/editorial/publication_holds.json'
-      - 'valcea-clar/scripts/premium_presentation.py'
-      - 'valcea-clar/scripts/premium_story_integrity.py'
-      - 'valcea-clar/site/chatgpt-sites-live-bridge.js'
+      - 'valcea-clar/scripts/public_ux_*.py'
+      - 'valcea-clar/scripts/build_sites_export.py'
+      - 'valcea-clar/scripts/overlay_runtime_export.py'
       - '.github/workflows/valcea-clar-premium-presentation.yml'
   pull_request:
     paths:
@@ -42,52 +42,77 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Validate presentation engine
+      - name: Validate public UX engines
         run: |
           python -m py_compile \
-            valcea-clar/scripts/premium_presentation.py \
-            valcea-clar/scripts/premium_story_integrity.py
-          python valcea-clar/scripts/premium_presentation.py --self-test
-          python valcea-clar/scripts/premium_story_integrity.py --self-test
+            valcea-clar/scripts/public_ux_reset.py \
+            valcea-clar/scripts/public_ux_story_integrity.py \
+            valcea-clar/scripts/public_ux_manifest.py \
+            valcea-clar/scripts/public_ux_overlay.py \
+            valcea-clar/scripts/public_ux_legal.py \
+            valcea-clar/scripts/public_ux_export_contract.py
+          python valcea-clar/scripts/public_ux_reset.py --self-test
+          python valcea-clar/scripts/public_ux_story_integrity.py --self-test
 
-      - name: Build premium public presentation
+      - name: Build canonical reader presentation
         run: |
-          python valcea-clar/scripts/premium_presentation.py
-          python valcea-clar/scripts/premium_story_integrity.py
-          python valcea-clar/scripts/premium_presentation.py --check
+          set -euo pipefail
+          python valcea-clar/scripts/public_ux_reset.py
+          python valcea-clar/scripts/public_ux_story_integrity.py
+          python valcea-clar/scripts/public_ux_manifest.py
+          python valcea-clar/scripts/public_ux_reset.py --check
+          python valcea-clar/scripts/public_ux_story_integrity.py --check
+          python valcea-clar/scripts/public_ux_manifest.py --check
 
-      - name: Run canonical web integrity smoke test on premium output
+      - name: Preserve canonical story web integrity
         run: python valcea-clar/scripts/smoke_web.py
 
       - name: Build synchronized existing-site payload
         run: |
+          set -euo pipefail
           python valcea-clar/scripts/build_sites_export.py
-          python valcea-clar/scripts/overlay_runtime_export.py
+          python valcea-clar/scripts/public_ux_overlay.py
+          python valcea-clar/scripts/public_ux_legal.py
+          python valcea-clar/scripts/public_ux_export_contract.py
 
-      - name: Validate content fidelity and single shell
+      - name: Validate public structure and export contract
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
           root=Path('valcea-clar')
-          feed=json.loads((root/'site/runtime/live-feed.json').read_text(encoding='utf-8'))
+          runtime=root/'site/runtime'
           nav=json.loads((root/'site/navigation.json').read_text(encoding='utf-8'))
-          state=json.loads((root/'site/presentation_state.json').read_text(encoding='utf-8'))
-          assert feed.get('navigation_contract') == nav.get('contract_id')
-          assert feed.get('policy',{}).get('content_fidelity_preserved') is True
-          assert state.get('policy',{}).get('single_public_shell') is True
-          assert state.get('policy',{}).get('same_navigation_everywhere') is True
-          assert 'olanesti-bridge-monitor' not in {str(x.get('id')) for x in feed.get('stories',[])}
-          music=(root/'site/runtime/stiri/musiclover-green-day-20260815/index.html').read_text(encoding='utf-8')
-          for name in ('Puya','Johny Romano','Badd G','Connect-R','Delia','Urban Lăutăresque','Leo de la Roșiori','Marcel Ștefăneț','Ethno Republic'):
-              assert name in music, name
-          luminos=(root/'site/runtime/stiri/luminos-fest-zavoi-20260815/index.html').read_text(encoding='utf-8')
-          for detail in ('Flower Bar','ROvederea','Aleea Creatorilor','Bebe Cros'):
-              assert detail in luminos, detail
-          print('Premium presentation contract: PASS')
+          state=json.loads((root/'site/public_ux_state.json').read_text(encoding='utf-8'))
+          manifest=json.loads((root/'dist/chatgpt-sites/manifest.json').read_text(encoding='utf-8'))
+          assert nav['contract_id'] == 'valcea-clar-primary-v2'
+          assert state['policy']['monitoring_is_news'] is False
+          assert state['policy']['cross_category_fill'] is False
+          assert (runtime/'stiri/index.html').is_file()
+          assert (runtime/'despre/index.html').is_file()
+          home=(runtime/'index.html').read_text(encoding='utf-8')
+          news=(runtime/'stiri/index.html').read_text(encoding='utf-8')
+          assert 'REDACTIE STORY-FIRST' not in home.upper()
+          assert 'olanesti-bridge-monitor' not in home
+          assert 'olanesti-bridge-monitor' not in news
+          assert 'data-nav-contract="valcea-clar-primary-v2"' in home
+          assert 'data-nav-contract="valcea-clar-primary-v2"' in news
+          for page in ('termeni/index.html','confidentialitate/index.html','despre/index.html'):
+              text=(runtime/page).read_text(encoding='utf-8')
+              assert 'data-nav-contract="valcea-clar-primary-v2"' in text, page
+          culture=state['story_ids']
+          story_manifest=json.loads((runtime/'stiri/manifest.json').read_text(encoding='utf-8'))
+          assert {row['id'] for row in story_manifest['stories']} == set(culture)
+          routes={row['path'] for row in manifest['routes']}
+          assert '/stiri/' in routes
+          assert '/despre/' in routes
+          assert '/stiri/ansambluri-rezidentiale-ramnicu-valcea/' in routes
+          redirect=(runtime/'stiri/ansambluri-rezidentiale-ramnicu-valcea/index.html').read_text(encoding='utf-8')
+          assert 'noindex,follow' in redirect and 'url=/stiri/' in redirect
+          print('VÂLCEA CLAR public structure contract: PASS')
           PY
 
-      - name: Persist premium runtime conflict-safe
+      - name: Persist canonical presentation conflict-safe
         if: github.event_name != 'pull_request'
         shell: bash
         run: |
@@ -100,24 +125,31 @@ jobs:
             git reset --hard origin/main
             git clean -fd
 
-            python valcea-clar/scripts/premium_presentation.py --self-test
-            python valcea-clar/scripts/premium_story_integrity.py --self-test
-            python valcea-clar/scripts/premium_presentation.py
-            python valcea-clar/scripts/premium_story_integrity.py
-            python valcea-clar/scripts/premium_presentation.py --check
+            python valcea-clar/scripts/public_ux_reset.py --self-test
+            python valcea-clar/scripts/public_ux_story_integrity.py --self-test
+            python valcea-clar/scripts/public_ux_reset.py
+            python valcea-clar/scripts/public_ux_story_integrity.py
+            python valcea-clar/scripts/public_ux_manifest.py
+            python valcea-clar/scripts/public_ux_reset.py --check
+            python valcea-clar/scripts/public_ux_story_integrity.py --check
+            python valcea-clar/scripts/public_ux_manifest.py --check
             python valcea-clar/scripts/smoke_web.py
+            python valcea-clar/scripts/build_sites_export.py
+            python valcea-clar/scripts/public_ux_overlay.py
+            python valcea-clar/scripts/public_ux_legal.py
+            python valcea-clar/scripts/public_ux_export_contract.py
 
             git add \
               valcea-clar/site/story_archive.json \
               valcea-clar/site/runtime \
-              valcea-clar/site/presentation_state.json
+              valcea-clar/site/public_ux_state.json
 
             if git diff --cached --quiet; then
-              echo 'Premium presentation already current on main.'
+              echo 'Canonical public presentation already current on main.'
               exit 0
             fi
 
-            git commit -m 'Refresh VÂLCEA CLAR premium presentation'
+            git commit -m 'Refresh VÂLCEA CLAR canonical public presentation'
             if git push origin HEAD:main; then
               exit 0
             fi
@@ -126,18 +158,19 @@ jobs:
             sleep $((attempt * 2))
           done
 
-          echo 'Could not persist premium presentation after five attempts.' >&2
+          echo 'Could not persist public presentation after five attempts.' >&2
           exit 1
 
-      - name: Upload presentation evidence
+      - name: Upload public UX evidence
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: valcea-clar-premium-presentation-${{ github.run_id }}
+          name: valcea-clar-public-ux-${{ github.run_id }}
           path: |
-            valcea-clar/site/presentation_state.json
+            valcea-clar/site/public_ux_state.json
             valcea-clar/site/runtime/index.html
             valcea-clar/site/runtime/stiri
+            valcea-clar/site/runtime/despre
             valcea-clar/site/runtime/unde-iesim
             valcea-clar/dist/chatgpt-sites
           if-no-files-found: warn
