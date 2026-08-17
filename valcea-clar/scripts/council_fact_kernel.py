@@ -30,7 +30,12 @@ BUILDER_ID = "council_fact_kernel_v1"
 TZ_RO_OFFSET = timezone(timedelta(hours=3))
 GAMBLING_RE = re.compile(r"jocuri\s+de\s+noroc|slot[ -]?machine|pariuri", re.I)
 ANNUAL_AUTH_RE = re.compile(r"autoriza(?:t|ț)ie\s+anual(?:a|ă)|autorizatie\s+anuala", re.I)
-COMPANY_RE = re.compile(r"\b([A-ZĂÂÎȘȚ][A-ZĂÂÎȘȚ0-9.&'’\- ]{1,80}?\s+(?:SRL|SA))\b", re.I)
+COMPANY_RE = re.compile(
+    r"(?:JOCURI\s+DE\s+NOROC|PARIURI(?:\s+IN\s+COTA\s+FIXA)?|SLOT[ -]?MACHINE)\s*"
+    r"(?:-\s*(?:PARIURI(?:\s+IN\s+COTA\s+FIXA)?|SLOT[ -]?MACHINE)\s*)?"
+    r"([A-ZĂÂÎȘȚ0-9.&'’\-]+(?:\s+[A-ZĂÂÎȘȚ0-9.&'’\-]+){0,2}\s+(?:SRL|SA))\b",
+    re.I,
+)
 
 
 def now_local() -> datetime:
