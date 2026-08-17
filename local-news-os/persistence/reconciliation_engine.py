@@ -168,6 +168,9 @@ def _reconcile_decisions(
         row["status"] = current_status
         row["implementation_state"] = str(repo.get("implementation_state") or "ABSENT")
         row["external_state"] = external_state
+        effective_superseded_by = str(prior.get("superseded_by") or repo.get("superseded_by") or "").strip()
+        if effective_superseded_by:
+            row["superseded_by"] = effective_superseded_by
         row["implementation_evidence"] = list(repo.get("evidence", prior.get("implementation_evidence", [])) or [])
         row["runtime_evidence"] = list(external.get("evidence", prior.get("runtime_evidence", [])) or [])
         output.append(row)

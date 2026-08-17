@@ -1,6 +1,6 @@
 # CIVORA persistence reconciliation engine acceptance
 
-This increment implements the executable core required by PRS-016–024 and the explicit acceptance cases required by PRS-042–047.
+This increment implements the executable core required by PRS-016–024 and the explicit acceptance cases required by PRS-042–048.
 
 ## Authority boundaries
 
@@ -27,6 +27,7 @@ This increment implements the executable core required by PRS-016–024 and the 
 14. **PRS-045:** an implemented/READY social adapter whose runtime is `OUTBOX_ONLY` or `DURABLE_OUTBOX_ONLY` reconciles to capability `PARTIAL`, `direct_or_outbox=OUTBOX_ONLY`, and `direct publication=false`. A stale persisted `DIRECT` claim emits `FALSE_POSITIVE_PERSISTENCE`; adapter code readiness alone cannot imply direct publication.
 15. **PRS-046:** a profile asset/configuration that is locally `READY` with direct-capable runtime but has no remote readback remains capability `PARTIAL` with `external_state=UNCONFIRMED` and `gap=EXTERNAL_CONFIRMATION_GAP`. A stale persisted `LIVE_CONFIRMED` claim emits `FALSE_POSITIVE_PERSISTENCE`; local asset readiness never implies external LIVE.
 16. **PRS-047:** a `NO_PROGRESS_HISTORICAL_STATE` checkpoint remains immutable historical context after a later implementation is merged on main. The checkpoint is not rewritten or promoted to resume authority; current reconciled truth advances to the newer main/`IMPLEMENTED` decision, the stale checkpoint-derived backlog item is removed, and persistence remains `RECONCILIATION_REQUIRED` until the advanced current state is separately persisted under the writer lease.
+17. **PRS-048:** when current evidence explicitly replaces an old active decision with a newer not-yet-implemented decision, the old decision reconciles to `SUPERSEDED` with `superseded_by` lineage, its stale backlog is retired, and the replacement remains `ACTIVE_UNIMPLEMENTED` with an active backlog item. The replacement relationship alone must not make the new decision `IMPLEMENTED`, and the changed active binding remains `RECONCILIATION_REQUIRED` until separately persisted and read back under the writer lease.
 
 ## PRS mapping
 
@@ -45,5 +46,6 @@ This increment implements the executable core required by PRS-016–024 and the 
 - PRS-045: executable `prs_045_outbox_only_capability_acceptance.py` verifies that implemented adapter code plus outbox-only runtime remains `PARTIAL` and never becomes direct publication.
 - PRS-046: executable `prs_046_profile_asset_no_remote_readback_acceptance.py` verifies that local profile readiness without remote readback remains `PARTIAL`/`UNCONFIRMED` and never becomes external LIVE.
 - PRS-047: executable `prs_047_no_progress_checkpoint_then_main_acceptance.py` verifies that a historical NO_PROGRESS checkpoint stays immutable/history-only while later merged main evidence advances current truth and retires stale checkpoint-derived backlog.
+- PRS-048: executable `prs_048_explicit_decision_replacement_acceptance.py` verifies that an explicit replacement retires the old decision/backlog as `SUPERSEDED` while the new decision remains active until independently implemented.
 
 The engine does not replace the Google Drive writer lease. Any process that persists its result into active CIVORA state must separately acquire `CIVORA_PERSISTENCE_WRITER_LEASE_V1`, use per-target revision control, verify readback, and release the lease.
