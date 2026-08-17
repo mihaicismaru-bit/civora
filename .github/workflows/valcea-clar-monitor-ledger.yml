@@ -19,7 +19,6 @@ on:
       - 'valcea-clar/scripts/infrastructure_watch.py'
       - 'valcea-clar/scripts/market_intelligence_watch.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
-      - 'valcea-clar/scripts/monitor_to_fact_kernel.py'
       - 'valcea-clar/scripts/validate_monitor_registry.py'
       - '.github/workflows/valcea-clar-monitor-ledger.yml'
   pull_request:
@@ -35,7 +34,6 @@ on:
       - 'valcea-clar/scripts/infrastructure_watch.py'
       - 'valcea-clar/scripts/market_intelligence_watch.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
-      - 'valcea-clar/scripts/monitor_to_fact_kernel.py'
       - 'valcea-clar/scripts/validate_monitor_registry.py'
       - '.github/workflows/valcea-clar-monitor-ledger.yml'
 
@@ -74,9 +72,6 @@ jobs:
       - name: Validate Râmnicu Vâlcea Council Watch extractor
         run: python valcea-clar/scripts/council_watch_rm_valcea.py --self-test
 
-      - name: Validate monitor to Fact Kernel bridge
-        run: python valcea-clar/scripts/monitor_to_fact_kernel.py --self-test
-
       - name: Probe monitor sources
         if: github.event_name != 'pull_request'
         run: python valcea-clar/scripts/monitor_ledger.py --live
@@ -92,14 +87,6 @@ jobs:
       - name: Read official Râmnicu Vâlcea adopted decisions
         run: python valcea-clar/scripts/council_watch_rm_valcea.py
 
-      - name: Validate derived Fact Kernels without applying on PR
-        if: github.event_name == 'pull_request'
-        run: python valcea-clar/scripts/monitor_to_fact_kernel.py --check
-
-      - name: Derive verified monitor Fact Kernels for Editorial Writer
-        if: github.event_name != 'pull_request'
-        run: python valcea-clar/scripts/monitor_to_fact_kernel.py
-
       - name: Upload monitor review snapshots
         if: always()
         uses: actions/upload-artifact@v7
@@ -109,11 +96,10 @@ jobs:
             valcea-clar/editorial/council_watch_rm_valcea_state.json
             valcea-clar/editorial/infrastructure_monitor_state.json
             valcea-clar/editorial/market_intelligence_state.json
-            valcea-clar/editorial/facts_registry.json
           if-no-files-found: warn
           retention-days: 7
 
-      - name: Persist monitor state and derived Fact Kernels
+      - name: Persist monitor state
         if: github.event_name != 'pull_request'
         shell: bash
         run: |
@@ -125,13 +111,12 @@ jobs:
             valcea-clar/editorial/monitor_state.json \
             valcea-clar/editorial/council_watch_rm_valcea_state.json \
             valcea-clar/editorial/infrastructure_monitor_state.json \
-            valcea-clar/editorial/market_intelligence_state.json \
-            valcea-clar/editorial/facts_registry.json
+            valcea-clar/editorial/market_intelligence_state.json
           if git diff --cached --quiet; then
-            echo 'No monitor-state or derived Fact Kernel change to persist.'
+            echo 'No monitor-state change to persist.'
             exit 0
           fi
-          git commit -m 'Refresh VÂLCEA CLAR monitor state and Fact Kernels'
+          git commit -m 'Refresh VÂLCEA CLAR durable monitor state'
 
           # Other newsroom jobs also persist state on main. Rebase on the latest
           # canonical head before pushing; never overwrite concurrent newsroom work.
