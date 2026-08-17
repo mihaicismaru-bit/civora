@@ -8,6 +8,9 @@ on:
     paths:
       - "local-news-os/social/fleet_metrics_harvest_orchestrator.py"
       - "local-news-os/social/test_fleet_metrics_harvest_orchestrator.py"
+      - "local-news-os/social/fleet_metrics_credential_binding.py"
+      - "local-news-os/social/test_fleet_metrics_credential_binding.py"
+      - "local-news-os/social/metrics_credential_bindings.json"
       - "local-news-os/social/operational_metrics_harvest_trigger.py"
       - "local-news-os/social/test_operational_metrics_harvest_trigger.py"
       - "local-news-os/social/metrics_harvest_runtime.py"
@@ -27,6 +30,9 @@ on:
     paths:
       - "local-news-os/social/fleet_metrics_harvest_orchestrator.py"
       - "local-news-os/social/test_fleet_metrics_harvest_orchestrator.py"
+      - "local-news-os/social/fleet_metrics_credential_binding.py"
+      - "local-news-os/social/test_fleet_metrics_credential_binding.py"
+      - "local-news-os/social/metrics_credential_bindings.json"
       - "local-news-os/social/operational_metrics_harvest_trigger.py"
       - "local-news-os/social/metrics_harvest_runtime.py"
       - "local-news-os/social/metrics_harvest_scheduler.py"
@@ -71,14 +77,20 @@ jobs:
             local-news-os/social/operational_metrics_harvest_trigger.py \
             local-news-os/social/multi_instance_isolation.py \
             local-news-os/social/fleet_metrics_harvest_orchestrator.py \
+            local-news-os/social/fleet_metrics_credential_binding.py \
             local-news-os/social/test_operational_metrics_harvest_trigger.py \
-            local-news-os/social/test_fleet_metrics_harvest_orchestrator.py
+            local-news-os/social/test_fleet_metrics_harvest_orchestrator.py \
+            local-news-os/social/test_fleet_metrics_credential_binding.py
+          python -m json.tool local-news-os/social/metrics_credential_bindings.json >/dev/null
 
       - name: Run operational channel harvest trigger acceptance tests
         run: python local-news-os/social/test_operational_metrics_harvest_trigger.py
 
       - name: Run fleet harvest discovery and isolation acceptance tests
         run: python local-news-os/social/test_fleet_metrics_harvest_orchestrator.py
+
+      - name: Run per-instance credential binding acceptance tests
+        run: python local-news-os/social/test_fleet_metrics_credential_binding.py
 
       - name: Verify fleet evaluates native/free channels without network or descriptor fabrication
         run: |
@@ -104,18 +116,85 @@ jobs:
           print(result['status'])
           PY
 
-  harvest:
+      - name: Verify explicit credential binding matrix is secret-free and least-privilege
+        run: |
+          NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          python local-news-os/social/fleet_metrics_credential_binding.py \
+            --repo-root . \
+            --runtime-registry local-news-os/social/social_runtime_registry.json \
+            --binding-registry local-news-os/social/metrics_credential_bindings.json \
+            --now "$NOW" \
+            >/tmp/fleet-metrics-credential-plan.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.loads(Path('/tmp/fleet-metrics-credential-plan.json').read_text(encoding='utf-8'))
+          assert result['status'] == 'CREDENTIAL_BINDINGS_READY', result
+          assert result['publication_blocked'] is False, result
+          assert result['guards']['future_instance_implicit_secret_grant'] is False, result
+          assert result['guards']['cross_instance_secret_sharing_forbidden'] is True, result
+          assert result['guards']['secret_values_read_by_binding_engine'] is False, result
+          assert result['guards']['tojson_secrets_allowed'] is False, result
+          assert result['workflow_matrix'] == [{
+              'binding_id': 'valcea-meta-observed-metrics-v1',
+              'instance_id': 'valcea',
+              'credential_env_names': ['VALCEA_FB_PAGE_ACCESS_TOKEN', 'VALCEA_IG_ACCESS_TOKEN'],
+              'metric_sources': ['instagram_graph_api', 'meta_graph_api'],
+          }], result
+          print(result['status'])
+          PY
+
+  plan-harvest:
     if: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' }}
     needs: acceptance
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.binding-plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Build secret-free per-instance harvest matrix
+        id: binding-plan
+        shell: bash
+        run: |
+          set -euo pipefail
+          NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          python local-news-os/social/fleet_metrics_credential_binding.py \
+            --repo-root . \
+            --runtime-registry local-news-os/social/social_runtime_registry.json \
+            --binding-registry local-news-os/social/metrics_credential_bindings.json \
+            --now "$NOW" \
+            >/tmp/fleet-metrics-credential-plan.json
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          result = json.loads(Path('/tmp/fleet-metrics-credential-plan.json').read_text(encoding='utf-8'))
+          if result.get('status') == 'CREDENTIAL_BINDINGS_HOLD':
+              raise SystemExit(f"credential binding registry hold: {result.get('hard_blocks')}")
+          matrix = {'include': result.get('workflow_matrix', [])}
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as handle:
+              handle.write('matrix=' + json.dumps(matrix, separators=(',', ':'), sort_keys=True) + '\n')
+          print(result.get('status'))
+          PY
+
+  harvest:
+    if: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' }}
+    needs: [acceptance, plan-harvest]
     runs-on: ubuntu-latest
     timeout-minutes: 12
     permissions:
       contents: write
-    # Credential injection remains an explicit least-privilege allowlist. Fleet
-    # discovery is generic; adding a future instance never grants it a secret.
-    env:
-      VALCEA_FB_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_FB_PAGE_ACCESS_TOKEN }}
-      VALCEA_IG_ACCESS_TOKEN: ${{ secrets.VALCEA_IG_ACCESS_TOKEN }}
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan-harvest.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -125,43 +204,62 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Harvest due fleet publications through verified native/free transports
+      # Secret values are injected only in the step for the exact checked-in
+      # binding. Adding a future instance/binding grants it nothing until a new
+      # explicit workflow step is reviewed and added.
+      - name: Harvest Vâlcea bound publications through verified native/free transports
+        if: ${{ matrix.binding_id == 'valcea-meta-observed-metrics-v1' }}
+        env:
+          VALCEA_FB_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_FB_PAGE_ACCESS_TOKEN }}
+          VALCEA_IG_ACCESS_TOKEN: ${{ secrets.VALCEA_IG_ACCESS_TOKEN }}
+          BINDING_ID: ${{ matrix.binding_id }}
         shell: bash
         run: |
           set -euo pipefail
           NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          python local-news-os/social/fleet_metrics_harvest_orchestrator.py \
+          python local-news-os/social/fleet_metrics_credential_binding.py \
             --repo-root . \
             --runtime-registry local-news-os/social/social_runtime_registry.json \
+            --binding-registry local-news-os/social/metrics_credential_bindings.json \
+            --binding-id "$BINDING_ID" \
             --now "$NOW" \
             --execute \
             | tee /tmp/fleet-observed-metrics-harvest.json
 
-      - name: Verify fleet harvest output contains no credential material
+      - name: Refuse any binding without explicit workflow secret wiring
+        if: ${{ matrix.binding_id != 'valcea-meta-observed-metrics-v1' }}
+        env:
+          BINDING_ID: ${{ matrix.binding_id }}
+        shell: bash
+        run: |
+          echo "No explicit GitHub Actions secret wiring exists for binding: $BINDING_ID"
+          exit 1
+
+      - name: Verify bound harvest output contains no credential material
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
           import json
-          import os
           from pathlib import Path
           result = json.loads(Path('/tmp/fleet-observed-metrics-harvest.json').read_text(encoding='utf-8'))
-          encoded = json.dumps(result, ensure_ascii=False)
-          for name in ('VALCEA_FB_PAGE_ACCESS_TOKEN', 'VALCEA_IG_ACCESS_TOKEN'):
-              value = os.environ.get(name, '')
-              if value and value in encoded:
-                  raise SystemExit(f'credential value leaked into fleet harvest output: {name}')
           if result.get('publication_blocked') is not False:
               raise SystemExit('analytics attempted to block publication')
           guards = result.get('guards', {})
-          if guards.get('cross_instance_metrics_sharing_forbidden') is not True:
-              raise SystemExit('fleet metrics isolation guard missing')
+          if guards.get('cross_instance_secret_sharing_forbidden') is not True:
+              raise SystemExit('per-instance secret isolation guard missing')
+          if guards.get('secret_values_read_by_binding_engine') is not False:
+              raise SystemExit('binding engine read secret values')
+          if guards.get('secret_values_returned') is not False:
+              raise SystemExit('binding engine returned secret values')
           if guards.get('zero_paid_dependency') is not True:
               raise SystemExit('zero-paid dependency guard missing')
+          if result.get('instance_id') is None:
+              raise SystemExit('bound harvest instance identity missing')
           print(result.get('status'))
           PY
 
-      - name: Persist only fleet-declared channel-local observed metrics runtime state
+      - name: Persist only bound instance observed metrics runtime state
         shell: bash
         run: |
           set -euo pipefail
@@ -170,13 +268,17 @@ jobs:
           from pathlib import Path, PurePosixPath
           result = json.loads(Path('/tmp/fleet-observed-metrics-harvest.json').read_text(encoding='utf-8'))
           runtime = json.loads(Path('local-news-os/social/social_runtime_registry.json').read_text(encoding='utf-8'))
-          roots = [PurePosixPath(row['instance_root']) for row in runtime.get('instances', []) if row.get('instance_root')]
+          instance_id = result.get('instance_id')
+          instance = next((row for row in runtime.get('instances', []) if row.get('instance_id') == instance_id), None)
+          if not instance:
+              raise SystemExit(f'bound instance missing from runtime registry: {instance_id}')
+          root = PurePosixPath(instance['instance_root'])
           for raw in sorted(set(result.get('durable_paths', []))):
               path = PurePosixPath(str(raw))
               if path.is_absolute() or '..' in path.parts:
                   raise SystemExit(f'unsafe durable metrics path: {raw}')
-              if not any(path == root or root in path.parents for root in roots):
-                  raise SystemExit(f'durable metrics path outside fleet instance roots: {raw}')
+              if not (path == root or root in path.parents):
+                  raise SystemExit(f'durable metrics path outside bound instance root: {raw}')
               print(path.as_posix())
           PY
           while IFS= read -r path; do
@@ -186,7 +288,7 @@ jobs:
             fi
           done </tmp/fleet-metrics-durable-paths.txt
           if git diff --cached --quiet; then
-            echo "No durable fleet metrics state changed."
+            echo "No durable bound-instance metrics state changed."
             exit 0
           fi
           git config user.name "civora-site-engine"
@@ -195,7 +297,7 @@ jobs:
           git fetch origin main
           if ! git rebase origin/main; then
             git rebase --abort || true
-            echo "Refusing to overwrite concurrent fleet metrics state."
+            echo "Refusing to overwrite concurrent bound-instance metrics state."
             exit 1
           fi
           git push origin HEAD:main
