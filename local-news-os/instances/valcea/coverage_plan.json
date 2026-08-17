@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "contract": "LOCAL_NEWS_OS_INSTANCE_COVERAGE_PLAN_V1",
+  "instance_id": "valcea",
+  "taxonomy": "local-news-os/contracts/editorial_coverage_taxonomy_v1.json",
+  "objective": "Make VÂLCEA CLAR a county-wide daily source of fresh, useful and accountable local information rather than a small set of institutional feeds.",
+  "territorial_scope": {
+    "countywide": true,
+    "uat_target": 89,
+    "priority_clusters": [
+      "Râmnicu Vâlcea metropolitan",
+      "Lotru–Valea Oltului",
+      "Călimănești–Cozia",
+      "Horezu–Depresiunea Horezu",
+      "Drăgășani–sudul județului",
+      "Berbești–Alunu",
+      "Băile Olănești–Păușești Măglași–Vlădești"
+    ]
+  },
+  "source_layers": {
+    "PRIMARY_AUTOMATIC": {
+      "minimum_target": 40,
+      "authority": "CANDIDATE_ONLY_UNTIL_STORY_GATE",
+      "registry_paths": [
+        "valcea-clar/editorial/news_sources.json",
+        "valcea-clar/editorial/news_sources_expansion_v1.json"
+      ]
+    },
+    "OFFICIAL_WATCH": {
+      "minimum_target": 80,
+      "authority": "VERIFICATION_OR_SIGNAL_ONLY",
+      "registry_paths": [
+        "valcea-clar/editorial/manual_watch_sources.json"
+      ]
+    },
+    "SIGNAL_RADAR": {
+      "minimum_target": 150,
+      "authority": "NONE",
+      "registry_paths": [
+        "valcea-clar/editorial/source_intelligence_seed_registry.json",
+        "valcea-clar/editorial/source_intelligence_seed_supplement_v1.json"
+      ]
+    }
+  },
+  "active_topics": [
+    "administration",
+    "politics",
+    "public_money",
+    "justice_integrity",
+    "public_safety",
+    "utilities",
+    "transport",
+    "infrastructure",
+    "urbanism_real_estate",
+    "economy_business",
+    "jobs",
+    "health",
+    "education",
+    "social_support",
+    "environment",
+    "weather_hazards",
+    "agriculture_rural",
+    "sport",
+    "culture_events",
+    "tourism_outdoors",
+    "food_venues",
+    "consumer",
+    "heritage_history",
+    "community_signals"
+  ],
+  "freshness_targets_minutes": {
+    "breaking_and_public_safety": 10,
+    "utility_and_transport_service": 15,
+    "institutional_news": 30,
+    "local_press_signal": 20,
+    "community_signal": 30,
+    "document_registers": 180,
+    "business_and_jobs": 120,
+    "culture_and_events": 120
+  },
+  "evidence_rules": {
+    "t1_can_support_facts_but_still_requires_story_gate": true,
+    "t1b_first_party_is_not_independent_confirmation": true,
+    "t2_t3_never_become_material_fact_without_higher_authority": true,
+    "community_signal_never_fact": true,
+    "police_court_prosecutor_allegations_fail_closed": true,
+    "utility_event_time_must_not_become_published_at": true,
+    "document_register_row_date_must_not_become_article_published_at": true,
+    "durable_copy_absolute_dates_only": true
+  },
+  "p0_contract_gaps": [
+    "PUBLIC_SAFETY_BULLETIN",
+    "UTILITY_ADVISORY",
+    "DOCUMENT_REGISTER",
+    "DYNAMIC_LISTING",
+    "SOCIAL_EMBED",
+    "GEO_SCOPED_ALERT"
+  ]
+}

@@ -3,6 +3,8 @@
 
 Supports both native inline packs and reversible compatibility registries so the
 pilot can migrate without duplicating or breaking its live source registry.
+Compatibility packs may add zero or more supplement registries; they are folded
+in order, preserve per-registry provenance and fail closed on duplicate IDs.
 """
 from __future__ import annotations
 
@@ -74,6 +76,24 @@ def normalize_source(raw: dict, *, compatibility: bool) -> dict:
     return source
 
 
+def compatibility_registry_paths(pack: dict) -> list[Path]:
+    primary = repo_file(str(pack.get("registry_path", "")))
+    raw_supplements = pack.get("supplement_registry_paths", [])
+    if raw_supplements is None:
+        raw_supplements = []
+    if not isinstance(raw_supplements, list):
+        raise ValueError("supplement_registry_paths must be an array")
+    paths = [primary]
+    seen = {primary}
+    for raw in raw_supplements:
+        path = repo_file(str(raw))
+        if path in seen:
+            raise ValueError(f"duplicate source registry path: {raw}")
+        seen.add(path)
+        paths.append(path)
+    return paths
+
+
 def resolve(instance_id: str) -> dict:
     instance_path = ROOT / "local-news-os" / "instances" / instance_id / "instance.json"
     instance = load(instance_path)
@@ -88,14 +108,24 @@ def resolve(instance_id: str) -> dict:
     mode = str(pack.get("mode") or ("inline" if isinstance(pack.get("sources"), list) else ""))
     compatibility = mode == "compatibility_registry"
     if compatibility:
-        registry_path = repo_file(str(pack.get("registry_path", "")))
-        registry = load(registry_path)
-        raw_sources = registry.get("sources")
-        source_origin = str(registry_path.relative_to(ROOT))
-        upstream_policy = registry.get("policy", {})
+        registry_paths = compatibility_registry_paths(pack)
+        raw_sources: list[dict] = []
+        source_origins: list[str] = []
+        upstream_policy: dict = {}
+        for index, registry_path in enumerate(registry_paths):
+            registry = load(registry_path)
+            registry_sources = registry.get("sources")
+            if not isinstance(registry_sources, list):
+                raise ValueError(f"{registry_path}: registry must contain a sources array")
+            raw_sources.extend(registry_sources)
+            source_origins.append(str(registry_path.relative_to(ROOT)))
+            if index == 0:
+                upstream_policy = registry.get("policy", {})
+        source_origin = source_origins[0]
     elif mode == "inline":
         raw_sources = pack.get("sources")
         source_origin = str(pack_path.relative_to(ROOT))
+        source_origins = [source_origin]
         upstream_policy = pack.get("policy", {})
     else:
         raise ValueError(f"unsupported source pack mode: {mode!r}")
@@ -117,11 +147,13 @@ def resolve(instance_id: str) -> dict:
 
     categories = sorted({str(s["category"]) for s in sources if s["enabled"]})
     resolved = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "contract": "SOURCE_PACK_V1",
         "instance_id": instance_id,
         "mode": mode,
         "source_origin": source_origin,
+        "source_origins": source_origins,
+        "supplement_registry_count": max(0, len(source_origins) - 1),
         "source_count": len(sources),
         "enabled_source_count": sum(1 for s in sources if s["enabled"]),
         "categories": categories,
@@ -133,7 +165,7 @@ def resolve(instance_id: str) -> dict:
             pack.get("material_detail_autopublish", False)
         ),
         "sources": sources,
-        "resolver": "local_news_os_source_pack_resolver_v1",
+        "resolver": "local_news_os_source_pack_resolver_v1_1",
     }
     resolved["resolved_sha256"] = stable_hash(resolved)
     return resolved

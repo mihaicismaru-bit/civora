@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.1",
+  "instance_id": "valcea",
+  "scope": "VALCEA_SPECIFIC",
+  "policy": {
+    "purpose": "Incremental primary-source expansion for fresh county coverage without weakening the existing title/date/source-only and full-story gates.",
+    "automatic_publication_scope": "title_date_source_only",
+    "detail_autopublish": false,
+    "candidate_max_age_hours": 72,
+    "supplement": true,
+    "promotion_rule": "STRICT_ARTICLE_DATE_THEN_NORMAL_STORY_GATE"
+  },
+  "sources": [
+    {
+      "id": "primaria-ocnele-mari-noutati",
+      "publisher": "Primăria Orașului Ocnele Mari",
+      "url": "https://ocne.ro/",
+      "tier": "T1",
+      "section": "ADMINISTRAȚIE",
+      "priority": 83,
+      "path_hints": ["consultare", "buget", "invest", "proiect", "hotar", "utilitat", "deseuri", "apa", "canal", "gaz"],
+      "generic_titles": ["primăria orașului ocnele mari", "primaria orasului ocnele mari", "mai mult", "citește mai mult"]
+    },
+    {
+      "id": "primaria-sutesti-valcea-interes-public",
+      "publisher": "Primăria Comunei Sutești, Vâlcea",
+      "url": "https://www.primaria-sutesti-valcea.ro/anunturi/",
+      "tier": "T1",
+      "section": "ADMINISTRAȚIE",
+      "priority": 81,
+      "path_hints": ["proiect", "buget", "iluminat", "gaz", "apa", "canal", "deseuri", "hotarare", "consultare", "investitie", "drum"],
+      "generic_titles": ["anunțuri", "anunturi", "site-ul oficial al primăriei comunei sutești"]
+    },
+    {
+      "id": "parcul-national-cozia-noutati",
+      "publisher": "Administrația Parcului Național Cozia",
+      "url": "https://www.parccozia.ro/",
+      "tier": "T1",
+      "section": "MEDIU",
+      "priority": 80,
+      "path_hints": ["nout", "stiri", "știri", "eveniment", "avertiz", "trase", "turism", "biodivers", "conserv"],
+      "generic_titles": ["parcul național cozia", "parcul national cozia", "acasa", "acasă"]
+    }
+  ]
+}

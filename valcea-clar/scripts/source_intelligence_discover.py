@@ -3,7 +3,8 @@
 
 Starts from explicit source-intelligence seeds, discovers standard metadata and
 relevant links, and persists candidates only as DISCOVERED_UNRATED. This module
-has zero publication authority.
+has zero publication authority. Seed supplements extend discovery breadth without
+changing the authority of any discovered candidate.
 """
 from __future__ import annotations
 
@@ -19,15 +20,20 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-REGISTRY = ROOT / "editorial" / "source_intelligence_seed_registry.json"
+REGISTRIES = (
+    ROOT / "editorial" / "source_intelligence_seed_registry.json",
+    ROOT / "editorial" / "source_intelligence_seed_supplement_v1.json",
+)
 STATE = ROOT / "editorial" / "source_intelligence_discovery_state.json"
-USER_AGENT = "ValceaClar-SourceIntelligence/2.0 (+https://valceaclar.ro/)"
+USER_AGENT = "ValceaClar-SourceIntelligence/2.1 (+https://valceaclar.ro/)"
 KEY_TERMS = (
     "stiri", "știri", "news", "noutati", "noutăți", "comunicate", "comunicat",
     "anunturi", "anunțuri", "hotarari", "hotărâri", "consili", "sedinte", "ședințe",
     "achiz", "licit", "urbanism", "autoriz", "proiect", "invest", "evenimente",
     "events", "jobs", "posturi", "concurs", "blog", "presa", "press", "document",
     "transparenta", "transparență", "menu", "meniu", "rss", "atom", "feed", "sitemap",
+    "trafic", "transport", "utilitat", "avar", "intrerup", "întrerup", "alert", "avertiz",
+    "mediu", "padur", "pădur", "turism", "trase", "sport", "meci", "educa", "sanat", "sănăt",
 )
 
 
@@ -68,6 +74,37 @@ def expand(raw: list, defaults: dict) -> dict:
         "id": sid, "publisher": publisher, "url": url, "tier": tier, "family": family,
         "sensitive": sensitive, "verification_route": route, **defaults,
     }
+
+
+def merge_seed_documents(documents: list[dict]) -> list[dict]:
+    seeds: list[dict] = []
+    seen: set[str] = set()
+    for data in documents:
+        defaults = data.get("defaults") or {}
+        for raw in data.get("seed_sources", []):
+            seed = expand(raw, defaults)
+            seed_id = str(seed["id"])
+            if seed_id in seen:
+                raise ValueError(f"duplicate source-intelligence seed id: {seed_id}")
+            seen.add(seed_id)
+            seeds.append(seed)
+    return seeds
+
+
+def load_seed_registries(paths: tuple[Path, ...] = REGISTRIES) -> tuple[list[dict], list[str]]:
+    documents: list[dict] = []
+    origins: list[str] = []
+    for path in paths:
+        if not path.is_file():
+            continue
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(data, dict):
+            raise ValueError(f"{path}: root must be object")
+        documents.append(data)
+        origins.append(str(path.relative_to(ROOT)))
+    if not documents:
+        raise ValueError("no source-intelligence registries found")
+    return merge_seed_documents(documents), origins
 
 
 def norm(url: str) -> str:
@@ -159,6 +196,21 @@ def self_test() -> int:
     assert candidate["public_projection"] is False
     assert candidate["auto_publication"] is False
     assert candidate["lifecycle"] == "DISCOVERED_UNRATED"
+    docs = [
+        {"defaults": defaults, "seed_sources": [["a", "A", "https://a.example/", "T2", "LOCAL_PRESS", False]]},
+        {"defaults": defaults, "seed_sources": [["b", "B", "https://b.example/", "T1", "PUBLIC_RECORD", False]]},
+    ]
+    assert [row["id"] for row in merge_seed_documents(docs)] == ["a", "b"]
+    try:
+        merge_seed_documents(docs + [{"defaults": defaults, "seed_sources": [["a", "Again", "https://c.example/", "T3", "COMMUNITY", False]]}])
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("duplicate seed id must fail closed")
+    seeds, origins = load_seed_registries()
+    assert len(seeds) >= 50
+    assert len(origins) >= 2
+    assert all(row.get("auto_publication") is False for row in seeds)
     print("VÂLCEA CLAR source discovery self-test: PASS")
     return 0
 
@@ -166,24 +218,20 @@ def self_test() -> int:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--self-test", action="store_true")
-    parser.add_argument("--limit", type=int, default=12)
+    parser.add_argument("--limit", type=int, default=20)
     parser.add_argument("--offset", type=int, default=0)
     args = parser.parse_args()
     if args.self_test:
         return self_test()
 
-    data = json.loads(REGISTRY.read_text(encoding="utf-8"))
-    defaults = data.get("defaults") or {}
-    seeds = [expand(raw, defaults) for raw in data.get("seed_sources", [])]
-    if not seeds:
-        raise SystemExit("No source seeds")
-    limit = max(1, min(args.limit, 30))
+    seeds, origins = load_seed_registries()
+    limit = max(1, min(args.limit, 60))
     offset = args.offset % len(seeds)
     selected = [seeds[(offset + i) % len(seeds)] for i in range(min(limit, len(seeds)))]
     observations = [discover(seed) for seed in selected]
 
     previous = json.loads(STATE.read_text(encoding="utf-8")) if STATE.exists() else {}
-    by_seed = {row["seed_id"]: row for row in previous.get("observations", [])}
+    by_seed = {row["seed_id"]: row for row in previous.get("observations", []) if row.get("seed_id") in {s["id"] for s in seeds}}
     for row in observations:
         by_seed[row["seed_id"]] = row
     candidates: dict[str, dict] = {}
@@ -192,10 +240,12 @@ def main() -> int:
             candidates[candidate["candidate_id"]] = candidate
 
     output = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "instance_id": "valcea",
         "product": "VÂLCEA CLAR Source Intelligence discovery state",
         "publication_authority": "NONE",
+        "registry_count": len(origins),
+        "registry_origins": origins,
         "seed_count": len(seeds),
         "observations": sorted(by_seed.values(), key=lambda item: item["seed_id"]),
         "candidate_count": len(candidates),
@@ -204,6 +254,7 @@ def main() -> int:
     STATE.write_text(json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({
         "status": "PASS", "probed": len(observations), "known_candidates": len(candidates),
+        "registry_count": len(origins), "seed_count": len(seeds),
         "publication_authority": "NONE", "state": str(STATE),
     }, ensure_ascii=False))
     return 0

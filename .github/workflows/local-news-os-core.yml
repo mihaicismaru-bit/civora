@@ -5,17 +5,25 @@ on:
   pull_request:
     paths:
       - "local-news-os/core/**"
+      - "local-news-os/contracts/**"
       - "local-news-os/schemas/**"
       - "local-news-os/instances/**"
       - "local-news-os/persistence/**"
+      - "valcea-clar/editorial/news_sources_expansion_v1.json"
+      - "valcea-clar/editorial/source_intelligence_seed_supplement_v1.json"
+      - "valcea-clar/scripts/source_intelligence_discover.py"
       - ".github/workflows/local-news-os-core.yml"
   push:
     branches: [main]
     paths:
       - "local-news-os/core/**"
+      - "local-news-os/contracts/**"
       - "local-news-os/schemas/**"
       - "local-news-os/instances/**"
       - "local-news-os/persistence/**"
+      - "valcea-clar/editorial/news_sources_expansion_v1.json"
+      - "valcea-clar/editorial/source_intelligence_seed_supplement_v1.json"
+      - "valcea-clar/scripts/source_intelligence_discover.py"
       - ".github/workflows/local-news-os-core.yml"
 
 permissions:
@@ -35,6 +43,7 @@ jobs:
         run: |
           python -m py_compile \
             local-news-os/core/validate_instance_config.py \
+            local-news-os/core/validate_coverage_plan.py \
             local-news-os/core/build_instance_manifest.py \
             local-news-os/core/resolve_source_pack.py \
             local-news-os/core/instance_bootstrap.py \
@@ -55,6 +64,11 @@ jobs:
           cat /tmp/civora-scope.json
       - name: Validate durable temporal-language contract
         run: python local-news-os/core/temporal_freshness.py --self-test
+      - name: Validate generic editorial coverage contract
+        run: |
+          python local-news-os/core/validate_coverage_plan.py --self-test
+          python local-news-os/core/validate_coverage_plan.py valcea
+          python valcea-clar/scripts/source_intelligence_discover.py --self-test
       - name: Validate production and test instances
         run: python local-news-os/core/validate_instance_config.py
       - name: Validate INSTANCE_BOOTSTRAP_V1 cold-resume lifecycle
@@ -138,8 +152,10 @@ jobs:
           assert test_sources['contract'] == 'SOURCE_PACK_V1'
           assert valcea_sources['instance_id'] == 'valcea'
           assert test_sources['instance_id'] == 'test-local'
-          assert valcea_sources['source_count'] >= 16
+          assert valcea_sources['source_count'] >= 19
           assert test_sources['source_count'] == 2
+          assert valcea_sources['supplement_registry_count'] == 1
+          assert test_sources['supplement_registry_count'] == 0
           assert valcea_sources['resolved_sha256'] != test_sources['resolved_sha256']
           assert valcea_sources['material_detail_autopublish'] is False
           assert test_sources['material_detail_autopublish'] is False
