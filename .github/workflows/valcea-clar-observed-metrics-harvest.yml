@@ -14,6 +14,8 @@ on:
       - "local-news-os/social/metrics_transport_capabilities.json"
       - "local-news-os/social/fleet_metrics_credential_binding.py"
       - "local-news-os/social/test_fleet_metrics_credential_binding.py"
+      - "local-news-os/social/fleet_metrics_authorization_seal.py"
+      - "local-news-os/social/test_fleet_metrics_authorization_seal.py"
       - "local-news-os/social/metrics_credential_bindings.json"
       - "local-news-os/social/operational_metrics_harvest_trigger.py"
       - "local-news-os/social/test_operational_metrics_harvest_trigger.py"
@@ -40,6 +42,8 @@ on:
       - "local-news-os/social/metrics_transport_capabilities.json"
       - "local-news-os/social/fleet_metrics_credential_binding.py"
       - "local-news-os/social/test_fleet_metrics_credential_binding.py"
+      - "local-news-os/social/fleet_metrics_authorization_seal.py"
+      - "local-news-os/social/test_fleet_metrics_authorization_seal.py"
       - "local-news-os/social/metrics_credential_bindings.json"
       - "local-news-os/social/operational_metrics_harvest_trigger.py"
       - "local-news-os/social/metrics_harvest_runtime.py"
@@ -88,6 +92,8 @@ jobs:
             local-news-os/social/metrics_transport_capability_registry.py \
             local-news-os/social/fleet_metrics_transport_capability_gate.py \
             local-news-os/social/fleet_metrics_credential_binding.py \
+            local-news-os/social/fleet_metrics_authorization_seal.py \
+            local-news-os/social/test_fleet_metrics_authorization_seal.py \
             local-news-os/social/test_operational_metrics_harvest_trigger.py \
             local-news-os/social/test_fleet_metrics_harvest_orchestrator.py \
             local-news-os/social/test_metrics_transport_capability_registry.py \
@@ -106,6 +112,9 @@ jobs:
 
       - name: Run per-instance credential binding acceptance tests
         run: python local-news-os/social/test_fleet_metrics_credential_binding.py
+
+      - name: Run authorization fingerprint / TOCTOU acceptance tests
+        run: python local-news-os/social/test_fleet_metrics_authorization_seal.py
 
       - name: Verify fleet evaluates native/free channels without network or descriptor fabrication
         run: |
@@ -230,7 +239,7 @@ jobs:
         run: |
           set -euo pipefail
           NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          python local-news-os/social/fleet_metrics_credential_binding.py \
+          python local-news-os/social/fleet_metrics_authorization_seal.py \
             --repo-root . \
             --runtime-registry local-news-os/social/social_runtime_registry.json \
             --binding-registry local-news-os/social/metrics_credential_bindings.json \
@@ -279,15 +288,17 @@ jobs:
           VALCEA_FB_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_FB_PAGE_ACCESS_TOKEN }}
           VALCEA_IG_ACCESS_TOKEN: ${{ secrets.VALCEA_IG_ACCESS_TOKEN }}
           BINDING_ID: ${{ matrix.binding_id }}
+          AUTHORIZATION_FINGERPRINT: ${{ matrix.authorization_fingerprint }}
         shell: bash
         run: |
           set -euo pipefail
           NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          python local-news-os/social/fleet_metrics_credential_binding.py \
+          python local-news-os/social/fleet_metrics_authorization_seal.py \
             --repo-root . \
             --runtime-registry local-news-os/social/social_runtime_registry.json \
             --binding-registry local-news-os/social/metrics_credential_bindings.json \
             --binding-id "$BINDING_ID" \
+            --expected-authorization-fingerprint "$AUTHORIZATION_FINGERPRINT" \
             --now "$NOW" \
             --execute \
             | tee /tmp/fleet-observed-metrics-harvest.json
@@ -322,6 +333,10 @@ jobs:
               raise SystemExit('zero-paid dependency guard missing')
           if result.get('instance_id') is None:
               raise SystemExit('bound harvest instance identity missing')
+          if result.get('authorization_fingerprint_verified') is not True:
+              raise SystemExit('planned authorization fingerprint was not verified')
+          if result.get('pre_network_authorization_recheck') is not True:
+              raise SystemExit('pre-network authorization recheck missing')
           print(result.get('status'))
           PY
 
