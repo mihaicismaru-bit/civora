@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
 """Atomically bind an explicit provider re-read outcome to its authorization lineage.
 
-The explicit re-read path is already sealed before a provider call: recovery evidence
-is bound to the reclaim attempt and the single-use handoff is marked SPENT before
-network execution. This layer closes the post-network gap. A provider-facing re-read
-cannot transition from NETWORK_CALL_STARTED to a durable checkpoint outcome unless
-that exact outcome is atomically sealed to the reclaim provenance and current SPENT
-record.
+A safely released re-read reservation may be reclaimed only through the existing
+single-use handoff. Once that reclaim reaches NETWORK_CALL_STARTED and its current
+spend record is SPENT, this layer requires the resulting checkpoint transition to
+carry a SHA-256-sealed link to the release evidence, reclaim provenance, network
+receipt, current spend record and normalized provider outcome.
 
-The binding stores only authorization/provenance metadata and normalized outcome
-status. It performs no provider call, reads no credential value, persists no raw
+This boundary performs no provider call, reads no credential value, persists no raw
 provider payload, never blocks editorial publication, and preserves zero-paid policy.
-Normal non-reread harvest transitions are delegated unchanged.
+Normal non-reread transitions are delegated unchanged.
 """
 from __future__ import annotations
 
@@ -33,15 +31,10 @@ PATCH_ID = RUNTIME_ID + ":installed"
 OUTCOME_FIELD = "reread_provider_outcome_provenance"
 ACTION = "SEAL_PROVIDER_REREAD_OUTCOME"
 ALLOWED_TRANSITION_STATUSES = {
-    "COMPLETED",
-    "COMPLETED_NO_DATA",
-    "RETRY_WAIT",
-    "BLOCKED_AUTH",
-    "HOLD_ANALYTICS",
-    "RECOVERY_REQUIRED",
+    "COMPLETED", "COMPLETED_NO_DATA", "RETRY_WAIT", "BLOCKED_AUTH",
+    "HOLD_ANALYTICS", "RECOVERY_REQUIRED",
 }
 
-# Preserve the established install order before wrapping the terminal transition.
 spend.install()
 recovery.install()
 reclaim.install()
@@ -65,6 +58,12 @@ def _digest(value: Any) -> str:
     return hashlib.sha256(_canonical(value).encode("utf-8")).hexdigest()
 
 
+def _outcome_fingerprint(value: dict[str, Any]) -> str:
+    unsigned = _clone(value)
+    unsigned.pop("outcome_fingerprint_sha256", None)
+    return _digest(unsigned)
+
+
 def outcome_guards() -> dict[str, Any]:
     return {
         "reclaim_provenance_required_for_reread_outcome": True,
@@ -82,43 +81,31 @@ def outcome_guards() -> dict[str, Any]:
     }
 
 
-def _outcome_fingerprint(value: dict[str, Any]) -> str:
-    unsigned = _clone(value)
-    unsigned.pop("outcome_fingerprint_sha256", None)
-    return _digest(unsigned)
-
-
 def _find_release_source(
-    entry: dict[str, Any],
-    provenance: dict[str, Any],
-    job: dict[str, Any],
-    authorization_fingerprint: str,
+    entry: dict[str, Any], provenance: dict[str, Any], job: dict[str, Any], authorization_fingerprint: str,
 ) -> tuple[dict[str, Any] | None, dict[str, Any] | None, list[str]]:
-    receipts = entry.get("execution_receipts") if isinstance(entry.get("execution_receipts"), list) else []
     expected_receipt_fp = _clean(provenance.get("source_release_receipt_fingerprint_sha256"))
     expected_evidence_fp = _clean(provenance.get("source_release_evidence_fingerprint_sha256"))
     handoff_id = _clean(provenance.get("handoff_id"))
+    receipts = entry.get("execution_receipts") if isinstance(entry.get("execution_receipts"), list) else []
     for row in receipts:
         if not isinstance(row, dict):
             continue
         evidence = row.get(recovery.EVIDENCE_FIELD) if isinstance(row.get(recovery.EVIDENCE_FIELD), dict) else None
-        if not isinstance(evidence, dict):
-            continue
-        if _clean(evidence.get("handoff_id")) != handoff_id:
+        if not isinstance(evidence, dict) or _clean(evidence.get("handoff_id")) != handoff_id:
             continue
         if expected_receipt_fp and not hmac.compare_digest(_clean(row.get("receipt_fingerprint_sha256")), expected_receipt_fp):
             continue
         if expected_evidence_fp and not hmac.compare_digest(_clean(evidence.get("evidence_fingerprint_sha256")), expected_evidence_fp):
             continue
-        blocks = reclaim._release_evidence_blocks(evidence, row, job, authorization_fingerprint)
-        return row, evidence, blocks
+        return row, evidence, reclaim._release_evidence_blocks(evidence, row, job, authorization_fingerprint)
     return None, None, ["REREAD_OUTCOME_RELEASE_SOURCE_NOT_FOUND"]
 
 
-def _spent_record(
+def _current_spent_record(
     repo_root: Path,
     channel: dict[str, Any],
-    current_receipt: dict[str, Any],
+    current: dict[str, Any],
     provenance: dict[str, Any],
     authorization_fingerprint: str,
 ) -> tuple[dict[str, Any] | None, list[str]]:
@@ -133,21 +120,20 @@ def _spent_record(
     expected = {
         "handoff_id": handoff_id,
         "authorization_fingerprint": authorization_fingerprint,
-        "checkpoint_key": _clean(current_receipt.get("checkpoint_key")),
-        "job_fingerprint_sha256": _clean(current_receipt.get("job_fingerprint_sha256")),
-        "execution_id": _clean(current_receipt.get("execution_id")),
+        "checkpoint_key": _clean(current.get("checkpoint_key")),
+        "job_fingerprint_sha256": _clean(current.get("job_fingerprint_sha256")),
+        "execution_id": _clean(current.get("execution_id")),
     }
     for key, expected_value in expected.items():
         if not expected_value or not hmac.compare_digest(_clean(record.get(key)), expected_value):
             blocks.append("REREAD_OUTCOME_SPEND_IDENTITY_MISMATCH:" + key)
-    if not _clean(record.get("spend_id")):
+    current_spend_id = _clean(record.get("spend_id"))
+    if not current_spend_id:
         blocks.append("REREAD_OUTCOME_CURRENT_SPEND_ID_REQUIRED")
-    # A safely released reservation and its later reclaim are distinct spend records.
-    # The current SPENT record must therefore not be confused with released_spend_id.
-    if _clean(record.get("spend_id")) == _clean(provenance.get("released_spend_id")):
+    if current_spend_id == _clean(provenance.get("released_spend_id")):
         blocks.append("REREAD_OUTCOME_CURRENT_SPEND_REUSED_RELEASED_SPEND_ID")
     try:
-        if int(record.get("attempt") or 0) != int(current_receipt.get("attempt") or 0):
+        if int(record.get("attempt") or 0) != int(current.get("attempt") or 0):
             blocks.append("REREAD_OUTCOME_SPEND_ATTEMPT_MISMATCH")
     except (TypeError, ValueError):
         blocks.append("REREAD_OUTCOME_SPEND_ATTEMPT_MISMATCH")
@@ -157,64 +143,67 @@ def _spent_record(
         blocks.append("REREAD_OUTCOME_NETWORK_STARTED_AT_REQUIRED")
     if not hmac.compare_digest(
         _clean(record.get("network_receipt_fingerprint_sha256")),
-        _clean(current_receipt.get("receipt_fingerprint_sha256")),
+        _clean(current.get("receipt_fingerprint_sha256")),
     ):
         blocks.append("REREAD_OUTCOME_NETWORK_RECEIPT_FINGERPRINT_MISMATCH")
     return (record if not blocks else None), sorted(set(blocks))
 
 
-def _context(
+def _reread_lineage_present(entry: dict[str, Any], current: dict[str, Any] | None) -> bool:
+    if isinstance(current, dict) and isinstance(current.get("reread_attempt_provenance"), dict):
+        return True
+    return isinstance(receipt._lineage_recovery_receipt(entry), dict)
+
+
+def _lineage_context(
     repo_root: Path,
     channel: dict[str, Any],
     job: dict[str, Any],
     entry: dict[str, Any],
-    current_receipt: dict[str, Any],
+    current: dict[str, Any],
     authorization_fingerprint: str,
-) -> tuple[dict[str, Any] | None, dict[str, Any] | None, dict[str, Any] | None, dict[str, Any] | None, list[str]]:
-    provenance = current_receipt.get(reclaim.PROVENANCE_FIELD) if isinstance(current_receipt.get(reclaim.PROVENANCE_FIELD), dict) else None
+) -> tuple[dict[str, Any] | None, dict[str, Any] | None, dict[str, Any] | None, list[str]]:
+    provenance = current.get(reclaim.PROVENANCE_FIELD) if isinstance(current.get(reclaim.PROVENANCE_FIELD), dict) else None
     if provenance is None:
-        return None, None, None, None, ["REREAD_OUTCOME_RECLAIM_PROVENANCE_REQUIRED"]
-    source_receipt, evidence, release_blocks = _find_release_source(
-        entry, provenance, job, authorization_fingerprint
-    )
-    blocks = list(release_blocks)
-    if isinstance(source_receipt, dict) and isinstance(evidence, dict):
+        return None, None, None, ["REREAD_OUTCOME_RECLAIM_PROVENANCE_REQUIRED"]
+    source, evidence, blocks = _find_release_source(entry, provenance, job, authorization_fingerprint)
+    blocks = list(blocks)
+    if isinstance(source, dict) and isinstance(evidence, dict):
         blocks.extend(reclaim._provenance_blocks(
             provenance,
             evidence=evidence,
-            source_receipt=source_receipt,
-            current_receipt=current_receipt,
+            source_receipt=source,
+            current_receipt=current,
             job=job,
             authorization_fingerprint=authorization_fingerprint,
         ))
-    record, spend_blocks = _spent_record(
-        repo_root, channel, current_receipt, provenance, authorization_fingerprint
+    record, spend_blocks = _current_spent_record(
+        repo_root, channel, current, provenance, authorization_fingerprint
     )
     blocks.extend(spend_blocks)
-    return provenance, source_receipt, evidence, record, sorted(set(blocks))
+    return provenance, evidence, record, sorted(set(blocks))
 
 
 def _build_outcome(
-    *,
     provenance: dict[str, Any],
     evidence: dict[str, Any],
     spend_record: dict[str, Any],
-    current_receipt: dict[str, Any],
+    current: dict[str, Any],
     job: dict[str, Any],
     authorization_fingerprint: str,
+    *,
     now: str,
     status: str,
     last_result_status: str,
     retry_after_at: str | None,
     materialization_fingerprint_sha256: str | None,
 ) -> dict[str, Any]:
-    now_iso = runtime._iso(runtime._dt(now))
     outcome = {
         "schema_version": SCHEMA_VERSION,
         "runtime_id": RUNTIME_ID,
         "outcome_binding_id": "metrics-reread-outcome:" + _digest({
             "reclaim_binding_id": _clean(provenance.get("reclaim_binding_id")),
-            "execution_id": _clean(current_receipt.get("execution_id")),
+            "execution_id": _clean(current.get("execution_id")),
             "checkpoint_status": status,
             "provider_result_status": last_result_status,
             "materialization_fingerprint_sha256": _clean(materialization_fingerprint_sha256),
@@ -233,17 +222,15 @@ def _build_outcome(
         "job_fingerprint_sha256": _clean(job.get("job_fingerprint_sha256")),
         "publication_id": _clean(job.get("publication_id")),
         "remote_publication_id": _clean((job.get("publication") or {}).get("remote_publication_id")),
-        "execution_id": _clean(current_receipt.get("execution_id")),
-        "attempt": int(current_receipt.get("attempt") or 0),
-        "network_started_at": _clean(current_receipt.get("network_started_at")),
+        "execution_id": _clean(current.get("execution_id")),
+        "attempt": int(current.get("attempt") or 0),
+        "network_started_at": _clean(current.get("network_started_at")),
         "checkpoint_status": status,
         "provider_result_status": last_result_status,
         "retry_after_at": _clean(retry_after_at) or None,
         "materialization_fingerprint_sha256": _clean(materialization_fingerprint_sha256) or None,
-        "bound_at": now_iso,
+        "bound_at": runtime._iso(runtime._dt(now)),
         "provider_network_call_performed_by_binding": False,
-        "credential_values_read": False,
-        "credential_values_persisted": False,
         "provider_payload_persisted": False,
         "publication_blocked": False,
         "zero_paid_dependency": True,
@@ -253,22 +240,12 @@ def _build_outcome(
 
 
 def _outcome_blocks(
-    outcome: dict[str, Any],
-    *,
-    provenance: dict[str, Any],
-    evidence: dict[str, Any],
-    spend_record: dict[str, Any],
-    current_receipt: dict[str, Any],
-    job: dict[str, Any],
-    authorization_fingerprint: str,
-    status: str,
-    last_result_status: str,
-    retry_after_at: str | None,
-    materialization_fingerprint_sha256: str | None,
+    outcome: dict[str, Any], provenance: dict[str, Any], evidence: dict[str, Any],
+    spend_record: dict[str, Any], current: dict[str, Any], job: dict[str, Any],
+    authorization_fingerprint: str, *, status: str, last_result_status: str,
+    retry_after_at: str | None, materialization_fingerprint_sha256: str | None,
 ) -> list[str]:
     blocks: list[str] = []
-    if not isinstance(outcome, dict):
-        return ["REREAD_OUTCOME_PROVENANCE_REQUIRED"]
     if _clean(outcome.get("schema_version")) != SCHEMA_VERSION:
         blocks.append("REREAD_OUTCOME_SCHEMA_VERSION")
     if _clean(outcome.get("runtime_id")) != RUNTIME_ID:
@@ -291,33 +268,29 @@ def _outcome_blocks(
         "job_fingerprint_sha256": _clean(job.get("job_fingerprint_sha256")),
         "publication_id": _clean(job.get("publication_id")),
         "remote_publication_id": _clean((job.get("publication") or {}).get("remote_publication_id")),
-        "execution_id": _clean(current_receipt.get("execution_id")),
-        "network_started_at": _clean(current_receipt.get("network_started_at")),
+        "execution_id": _clean(current.get("execution_id")),
+        "network_started_at": _clean(current.get("network_started_at")),
         "checkpoint_status": status,
         "provider_result_status": last_result_status,
         "retry_after_at": _clean(retry_after_at),
         "materialization_fingerprint_sha256": _clean(materialization_fingerprint_sha256),
     }
     for key, expected_value in expected.items():
-        actual = _clean(outcome.get(key))
-        if actual != expected_value:
+        if _clean(outcome.get(key)) != expected_value:
             blocks.append("REREAD_OUTCOME_IDENTITY_MISMATCH:" + key)
     try:
-        if int(outcome.get("attempt") or 0) != int(current_receipt.get("attempt") or 0):
+        if int(outcome.get("attempt") or 0) != int(current.get("attempt") or 0):
             blocks.append("REREAD_OUTCOME_ATTEMPT_MISMATCH")
     except (TypeError, ValueError):
         blocks.append("REREAD_OUTCOME_ATTEMPT_MISMATCH")
     if not _clean(outcome.get("bound_at")):
         blocks.append("REREAD_OUTCOME_BOUND_AT_REQUIRED")
-    required_bools = {
+    for key, expected_bool in {
         "provider_network_call_performed_by_binding": False,
-        "credential_values_read": False,
-        "credential_values_persisted": False,
         "provider_payload_persisted": False,
         "publication_blocked": False,
         "zero_paid_dependency": True,
-    }
-    for key, expected_bool in required_bools.items():
+    }.items():
         if outcome.get(key) is not expected_bool:
             blocks.append("REREAD_OUTCOME_GUARD:" + key)
     supplied = _clean(outcome.get("outcome_fingerprint_sha256"))
@@ -326,12 +299,6 @@ def _outcome_blocks(
     if spend.handoff._contains_forbidden_material(outcome):
         blocks.append("REREAD_OUTCOME_FORBIDDEN_MATERIAL")
     return sorted(set(blocks))
-
-
-def _reread_lineage_present(entry: dict[str, Any], current: dict[str, Any] | None) -> bool:
-    if isinstance(current, dict) and isinstance(current.get("reread_attempt_provenance"), dict):
-        return True
-    return isinstance(receipt._lineage_recovery_receipt(entry), dict)
 
 
 def transition_sealed(
@@ -352,8 +319,7 @@ def transition_sealed(
     entry = state.get("entries", {}).get(runtime.checkpoint_key(job))
     if not isinstance(entry, dict):
         return _BASE_TRANSITION(
-            repo_root, channel, job,
-            authorization_fingerprint=authorization_fingerprint,
+            repo_root, channel, job, authorization_fingerprint=authorization_fingerprint,
             now=now, status=status, last_result_status=last_result_status,
             retry_after_at=retry_after_at,
             materialization_fingerprint_sha256=materialization_fingerprint_sha256,
@@ -363,18 +329,13 @@ def transition_sealed(
     lineage_present = _reread_lineage_present(entry, current)
     if provenance is None and not lineage_present:
         return _BASE_TRANSITION(
-            repo_root, channel, job,
-            authorization_fingerprint=authorization_fingerprint,
+            repo_root, channel, job, authorization_fingerprint=authorization_fingerprint,
             now=now, status=status, last_result_status=last_result_status,
             retry_after_at=retry_after_at,
             materialization_fingerprint_sha256=materialization_fingerprint_sha256,
         )
     if provenance is None:
-        return {
-            "persisted": False,
-            "status": "HOLD_REREAD_OUTCOME_LINEAGE",
-            "hard_blocks": ["REREAD_OUTCOME_RECLAIM_PROVENANCE_REQUIRED"],
-        }
+        return {"persisted": False, "status": "HOLD_REREAD_OUTCOME_LINEAGE", "hard_blocks": ["REREAD_OUTCOME_RECLAIM_PROVENANCE_REQUIRED"]}
 
     checked = receipt.validate_sealed_entry(entry, authorization_fingerprint)
     if checked.get("valid") is not True:
@@ -387,39 +348,22 @@ def transition_sealed(
     if materialization_fingerprint_sha256 and not receipt.RECEIPT_FINGERPRINT_RE.fullmatch(_clean(materialization_fingerprint_sha256)):
         return {"persisted": False, "status": "HOLD_REREAD_OUTCOME_MATERIALIZATION", "hard_blocks": ["REREAD_OUTCOME_MATERIALIZATION_FINGERPRINT_INVALID"]}
 
-    provenance, source_receipt, evidence, spend_record, context_blocks = _context(
+    provenance, evidence, spend_record, context_blocks = _lineage_context(
         repo_root, channel, job, entry, current, authorization_fingerprint
     )
-    if context_blocks or not all(isinstance(value, dict) for value in (provenance, source_receipt, evidence, spend_record)):
-        return {
-            "persisted": False,
-            "status": "HOLD_REREAD_OUTCOME_LINEAGE",
-            "hard_blocks": context_blocks or ["REREAD_OUTCOME_LINEAGE_INCOMPLETE"],
-        }
+    if context_blocks or not all(isinstance(value, dict) for value in (provenance, evidence, spend_record)):
+        return {"persisted": False, "status": "HOLD_REREAD_OUTCOME_LINEAGE", "hard_blocks": context_blocks or ["REREAD_OUTCOME_LINEAGE_INCOMPLETE"]}
 
+    normalized_result = _clean(last_result_status)
     outcome = _build_outcome(
-        provenance=provenance,
-        evidence=evidence,
-        spend_record=spend_record,
-        current_receipt=current,
-        job=job,
-        authorization_fingerprint=authorization_fingerprint,
-        now=now,
-        status=target_status,
-        last_result_status=_clean(last_result_status),
+        provenance, evidence, spend_record, current, job, authorization_fingerprint,
+        now=now, status=target_status, last_result_status=normalized_result,
         retry_after_at=retry_after_at,
         materialization_fingerprint_sha256=materialization_fingerprint_sha256,
     )
     outcome_blocks = _outcome_blocks(
-        outcome,
-        provenance=provenance,
-        evidence=evidence,
-        spend_record=spend_record,
-        current_receipt=current,
-        job=job,
-        authorization_fingerprint=authorization_fingerprint,
-        status=target_status,
-        last_result_status=_clean(last_result_status),
+        outcome, provenance, evidence, spend_record, current, job, authorization_fingerprint,
+        status=target_status, last_result_status=normalized_result,
         retry_after_at=retry_after_at,
         materialization_fingerprint_sha256=materialization_fingerprint_sha256,
     )
@@ -442,17 +386,10 @@ def transition_sealed(
     current["receipt_fingerprint_sha256"] = receipt._receipt_fingerprint(current)
     state["state_fingerprint_sha256"] = runtime._state_fingerprint(state)
     persisted = runtime.persist_checkpoint_state_cas(
-        repo_root,
-        channel,
-        state,
-        expected_previous_fingerprint_sha256=previous_fp,
+        repo_root, channel, state, expected_previous_fingerprint_sha256=previous_fp,
     )
     if persisted.get("persisted") is not True:
-        return {
-            "persisted": False,
-            "status": persisted.get("status") or "HOLD_REREAD_OUTCOME_PERSISTENCE",
-            "hard_blocks": list(persisted.get("hard_blocks", [])),
-        }
+        return {"persisted": False, "status": persisted.get("status") or "HOLD_REREAD_OUTCOME_PERSISTENCE", "hard_blocks": list(persisted.get("hard_blocks", []))}
     result = dict(persisted)
     result.update({
         "reread_provider_outcome_bound": True,
@@ -463,7 +400,6 @@ def transition_sealed(
 
 
 def install() -> None:
-    """Install atomic terminal outcome binding on the authorization-sealed runtime."""
     global _INSTALLED
     if _INSTALLED or getattr(receipt, "_reread_provider_outcome_binding_patch_id", None) == PATCH_ID:
         _INSTALLED = True
