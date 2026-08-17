@@ -24,6 +24,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: valcea-clar-signal-radar-${{ github.event.pull_request.number || 'main' }}
@@ -79,3 +80,8 @@ jobs:
           done
           echo 'Could not persist signal radar queue without conflict.' >&2
           exit 1
+      - name: Dispatch primary signal verification immediately
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run valcea-clar-primary-signal-verifier.yml --ref main
