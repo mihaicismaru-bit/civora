@@ -90,6 +90,10 @@ def validate(contract: dict[str, Any]) -> None:
         if by_type[event_type].get("reconciliation_required") is not True:
             raise ValueError(f"{event_type} must require reconciliation")
 
+    deployment_evidence = set(by_type["DEPLOYMENT_STATE_CHANGE"].get("minimum_evidence") or [])
+    if "remote_ack_or_readback_when_live_is_claimed" not in deployment_evidence:
+        raise ValueError("DEPLOYMENT_STATE_CHANGE must require remote LIVE readback evidence")
+
     serialized = json.dumps(contract, ensure_ascii=False).lower()
     if "valcea" in serialized or "vâlcea" in serialized:
         raise ValueError("CORE_GENERIC trigger contract contains instance-specific Vâlcea hardcoding")
@@ -119,8 +123,16 @@ def self_test(path: Path) -> None:
     except ValueError:
         pass
     else:
-        # The static validator cannot infer semantic evidence names unless we assert it here.
         raise AssertionError("deployment LIVE evidence regression was not rejected")
+
+    hardcoded_instance = json.loads(json.dumps(contract))
+    hardcoded_instance["events"][0]["example_instance"] = "valcea"
+    try:
+        validate(hardcoded_instance)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("instance-specific hardcoding in CORE_GENERIC must fail closed")
 
 
 def main() -> int:
@@ -135,11 +147,6 @@ def main() -> int:
     contract = _load(args.contract)
     validate(contract)
     if args.self_test:
-        # Explicit semantic requirements not expressible by generic shape validation.
-        deployment = next(row for row in contract["events"] if row["event_type"] == "DEPLOYMENT_STATE_CHANGE")
-        required = set(deployment["minimum_evidence"])
-        if "remote_ack_or_readback_when_live_is_claimed" not in required:
-            raise ValueError("DEPLOYMENT_STATE_CHANGE must require remote LIVE readback evidence")
         self_test(args.contract)
     print("PASS: CIVORA reconciliation trigger contract is valid")
     return 0
