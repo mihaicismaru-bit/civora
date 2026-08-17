@@ -58,7 +58,8 @@
     ["anchor-aba-olt", "Administrația Bazinală de Apă Olt", "https://olt.rowater.ro/", "T1", "ENVIRONMENT_WATER", false],
     ["anchor-salvamont-valcea", "Serviciul Public Județean Salvamont Salvaspeo Vâlcea", "https://www.salvamontromania.ro/serviciu.php?id=17", "T1", "PUBLIC_SAFETY_MOUNTAIN", true],
     ["anchor-salvamont-brezoi", "Serviciul Public Local SALVAMONT Brezoi", "https://www.salvamontromania.ro/serviciu.php?id=56", "T1", "PUBLIC_SAFETY_MOUNTAIN", true],
-    ["anchor-sju-valcea", "Spitalul Județean de Urgență Vâlcea", "https://www.sjv.ro/", "T1", "PUBLIC_HEALTH_HOSPITAL", true]
+    ["anchor-sju-valcea", "Spitalul Județean de Urgență Vâlcea", "https://www.sjv.ro/", "T1", "PUBLIC_HEALTH_HOSPITAL", true],
+    ["anchor-itm-valcea", "Inspectoratul Teritorial de Muncă Vâlcea", "https://www.inspectiamuncii.ro/web/itm-valcea", "T1", "LABOR_INSPECTION", true]
   ],
   "campaigns": [
     {
@@ -96,7 +97,7 @@
       "target_sources": 30,
       "seed_ids": ["anchor-cj-valcea", "anchor-aba-olt"],
       "strategy": ["prefectural_college_entities", "official_domain_resolution", "internal_section_discovery"],
-      "entity_classes": ["ISU", "IPJ", "IJJ", "DSP", "DSVSA", "GARDA_MEDIU", "APM", "SGA", "ABA", "AJOFM", "AJPIS", "APIA", "OCPI", "ISJ", "CAS"],
+      "entity_classes": ["ISU", "IPJ", "IJJ", "DSP", "DSVSA", "GARDA_MEDIU", "APM", "SGA", "ABA", "AJOFM", "AJPIS", "APIA", "OCPI", "ISJ", "CAS", "ITM"],
       "default_tier": "T1",
       "publication_policy": "FAIL_CLOSED_SENSITIVE_CLASSES"
     },
