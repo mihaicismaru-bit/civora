@@ -28,6 +28,12 @@
       "tier": "T1",
       "section": "ADMINISTRAȚIE",
       "priority": 81,
+      "enabled": false,
+      "status": "QUARANTINED_MIXED_DOCUMENT_LISTING_HIGH_ARTICLE_FAILURES",
+      "checked_at": "2026-08-17",
+      "disable_reason": "The official Sutești announcements surface is a broad mixed listing that combines public-consultation notices, fiscal debtor publications, recruitment results, land/pre-emption records, budgets, procurement documents, environment notices, utility notices and direct document/PDF material. The current live discovery ledger examined 12 candidate links and recorded 10 article failures. LOCAL NEWS OS must not treat a listing item, document wrapper, file name or document-internal date as a trustworthy article published_at, so this source is disabled from automatic title + date + source projection until a deterministic article-feed subset can be proven.",
+      "safe_use": ["manual discovery of Sutești municipal developments", "primary-source verification of budgets, council projects, infrastructure and utility notices", "manual reporting after separating listing date, document date, decision date and event date"],
+      "core_feedback": "No Sutești-specific parser is justified. This reinforces the existing ARTICLE_FEED versus DOCUMENT_REGISTER/PDF_FEED boundary and the generic health signal that persistently high article-failure ratios should trigger structural-eligibility review without changing source authority or publication gates.",
       "path_hints": ["proiect", "buget", "iluminat", "gaz", "apa", "canal", "deseuri", "hotarare", "consultare", "investitie", "drum"],
       "generic_titles": ["anunțuri", "anunturi", "site-ul oficial al primăriei comunei sutești"]
     },
