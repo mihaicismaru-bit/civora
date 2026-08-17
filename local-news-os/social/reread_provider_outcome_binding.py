@@ -5,7 +5,8 @@ The explicit re-read path is already sealed before a provider call: recovery evi
 is bound to the reclaim attempt and the single-use handoff is marked SPENT before
 network execution. This layer closes the post-network gap. A provider-facing re-read
 cannot transition from NETWORK_CALL_STARTED to a durable checkpoint outcome unless
-that exact outcome is atomically sealed to the reclaim provenance and SPENT record.
+that exact outcome is atomically sealed to the reclaim provenance and current SPENT
+record.
 
 The binding stores only authorization/provenance metadata and normalized outcome
 status. It performs no provider call, reads no credential value, persists no raw
@@ -127,21 +128,24 @@ def _spent_record(
         return None, blocks
     if not isinstance(record, dict):
         return None, ["REREAD_OUTCOME_SPENT_RECORD_REQUIRED"]
+    if _clean(record.get("status")).upper() != "SPENT":
+        blocks.append("REREAD_OUTCOME_HANDOFF_NOT_SPENT")
     expected = {
-        "status": "SPENT",
         "handoff_id": handoff_id,
-        "spend_id": _clean(provenance.get("released_spend_id")),
         "authorization_fingerprint": authorization_fingerprint,
         "checkpoint_key": _clean(current_receipt.get("checkpoint_key")),
         "job_fingerprint_sha256": _clean(current_receipt.get("job_fingerprint_sha256")),
         "execution_id": _clean(current_receipt.get("execution_id")),
     }
-    record_status = _clean(record.get("status")).upper()
-    if record_status != expected["status"]:
-        blocks.append("REREAD_OUTCOME_HANDOFF_NOT_SPENT")
-    for key in ("handoff_id", "spend_id", "authorization_fingerprint", "checkpoint_key", "job_fingerprint_sha256", "execution_id"):
-        if not expected[key] or not hmac.compare_digest(_clean(record.get(key)), expected[key]):
+    for key, expected_value in expected.items():
+        if not expected_value or not hmac.compare_digest(_clean(record.get(key)), expected_value):
             blocks.append("REREAD_OUTCOME_SPEND_IDENTITY_MISMATCH:" + key)
+    if not _clean(record.get("spend_id")):
+        blocks.append("REREAD_OUTCOME_CURRENT_SPEND_ID_REQUIRED")
+    # A safely released reservation and its later reclaim are distinct spend records.
+    # The current SPENT record must therefore not be confused with released_spend_id.
+    if _clean(record.get("spend_id")) == _clean(provenance.get("released_spend_id")):
+        blocks.append("REREAD_OUTCOME_CURRENT_SPEND_REUSED_RELEASED_SPEND_ID")
     try:
         if int(record.get("attempt") or 0) != int(current_receipt.get("attempt") or 0):
             blocks.append("REREAD_OUTCOME_SPEND_ATTEMPT_MISMATCH")
@@ -218,6 +222,7 @@ def _build_outcome(
         "action": ACTION,
         "handoff_id": _clean(provenance.get("handoff_id")),
         "released_spend_id": _clean(provenance.get("released_spend_id")),
+        "current_spend_id": _clean(spend_record.get("spend_id")),
         "reclaim_binding_id": _clean(provenance.get("reclaim_binding_id")),
         "reclaim_provenance_fingerprint_sha256": _clean(provenance.get("provenance_fingerprint_sha256")),
         "source_release_evidence_fingerprint_sha256": _clean(evidence.get("evidence_fingerprint_sha256")),
@@ -275,6 +280,7 @@ def _outcome_blocks(
     expected = {
         "handoff_id": _clean(provenance.get("handoff_id")),
         "released_spend_id": _clean(provenance.get("released_spend_id")),
+        "current_spend_id": _clean(spend_record.get("spend_id")),
         "reclaim_binding_id": _clean(provenance.get("reclaim_binding_id")),
         "reclaim_provenance_fingerprint_sha256": _clean(provenance.get("provenance_fingerprint_sha256")),
         "source_release_evidence_fingerprint_sha256": _clean(evidence.get("evidence_fingerprint_sha256")),
