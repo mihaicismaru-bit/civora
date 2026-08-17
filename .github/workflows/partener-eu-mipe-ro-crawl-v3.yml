@@ -23,6 +23,7 @@ on:
     paths:
       - 'partener-eu/ingest/state/mipe_ro_v3_trigger.txt'
       - 'partener-eu/ingest/mipe_windows_crawl_v3.py'
+      - 'partener-eu/ingest/mipe_windows_crawl_v3_entry.py'
       - '.github/workflows/partener-eu-mipe-ro-crawl-v3.yml'
 
 permissions:
@@ -113,10 +114,10 @@ jobs:
           "MIPE_MAX_DEPTH=$depth" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
           Write-Host "Crawl MIPE: max_pages=$pages max_depth=$depth"
 
-      - name: Crawl official MIPE corpus from Romania
+      - name: Crawl official MIPE corpus from Romania, prioritizing dossier gaps
         shell: pwsh
         run: |
-          & $env:PYTHON_EXE partener-eu/ingest/mipe_windows_crawl_v3.py
+          & $env:PYTHON_EXE partener-eu/ingest/mipe_windows_crawl_v3_entry.py
 
       - name: Canonicalize evidence and construct deep dossiers immediately
         shell: pwsh
@@ -130,7 +131,9 @@ jobs:
           & $env:PYTHON_EXE partener-eu/ingest/polish_decision_products.py
           & $env:PYTHON_EXE partener-eu/ingest/finalize_decision_products.py
           & $env:PYTHON_EXE partener-eu/ingest/localize_decision_products.py
+          & $env:PYTHON_EXE partener-eu/ingest/refine_afir_public_dossiers.py
           & $env:PYTHON_EXE partener-eu/ingest/score_dossier_depth.py
+          & $env:PYTHON_EXE partener-eu/ingest/build_mipe_enrichment_seeds.py
           & $env:PYTHON_EXE partener-eu/ingest/build_call_lifecycle.py
           & $env:PYTHON_EXE partener-eu/ingest/intelligence_index.py
 
@@ -146,6 +149,7 @@ jobs:
           state=json.loads(Path('partener-eu/ingest/state/mipe_state.json').read_text(encoding='utf-8'))
           canonical=json.loads(Path('partener-eu/ingest/state/mipe_canonical_calls.json').read_text(encoding='utf-8'))
           queue=json.loads(Path('partener-eu/ingest/state/dossier_enrichment_queue.json').read_text(encoding='utf-8'))
+          seeds=json.loads(Path('partener-eu/ingest/state/mipe_enrichment_seeds.json').read_text(encoding='utf-8'))
           lifecycle=json.loads(Path('partener-eu/ingest/state/call_lifecycle.json').read_text(encoding='utf-8'))
           assert corpus.get('schemaVersion') == 3
           assert corpus.get('lastRun',{}).get('collectorVersion') == '3.0'
@@ -156,6 +160,7 @@ jobs:
           assert canonical.get('precisionGate',{}).get('failClosed') is True
           assert canonical.get('policy',{}).get('deepDossierFactExtraction') is True
           assert queue.get('policy',{}).get('officialEvidenceOnly') is True
+          assert seeds.get('policy',{}).get('officialHostOnly') is True
           for page in corpus.get('pages',[]):
               assert page.get('url','').startswith('https://mfe.gov.ro/')
               assert page.get('verification') == 'CANONICAL_OFFICIAL_FETCH'
@@ -172,6 +177,7 @@ jobs:
               'canonicalCalls':canonical.get('summary',{}).get('canonicalCalls'),
               'highDepth':canonical.get('summary',{}).get('highDepth'),
               'queuedDossiers':queue.get('summary',{}).get('queued'),
+              'targetedSeeds':seeds.get('summary',{}).get('targetedSeeds'),
               'lifecycleCalls':lifecycle.get('summary',{}).get('callCount'),
           },ensure_ascii=False,indent=2))
           '@ | Set-Content -Encoding UTF8 .\validate_mipe_v3.py
@@ -187,6 +193,7 @@ jobs:
             partener-eu/ingest/state/mipe_canonical_calls.json
             partener-eu/ingest/state/decision_products.json
             partener-eu/ingest/state/dossier_enrichment_queue.json
+            partener-eu/ingest/state/mipe_enrichment_seeds.json
             partener-eu/ingest/state/call_lifecycle.json
           retention-days: 14
 
@@ -208,6 +215,7 @@ jobs:
             'partener-eu/ingest/state/mipe_canonical_calls.json',
             'partener-eu/ingest/state/decision_products.json',
             'partener-eu/ingest/state/dossier_enrichment_queue.json',
+            'partener-eu/ingest/state/mipe_enrichment_seeds.json',
             'partener-eu/ingest/state/call_lifecycle.json',
             'partener-eu/ingest/state/intelligence_index.json',
             'partener-eu/web/mipe-news.js',
@@ -230,7 +238,7 @@ jobs:
                 blob=req('POST',f'{api}/git/blobs',{'content':base64.b64encode(raw).decode(),'encoding':'base64'})
                 entries.append({'path':path,'mode':'100644','type':'blob','sha':blob['sha']})
               tree=req('POST',f'{api}/git/trees',{'base_tree':commit['tree']['sha'],'tree':entries})
-              new=req('POST',f'{api}/git/commits',{'message':'Refresh MIPE Romanian corpus, deep dossiers and lifecycle','tree':tree['sha'],'parents':[parent]})
+              new=req('POST',f'{api}/git/commits',{'message':'Refresh MIPE Romanian corpus, targeted deep dossiers and lifecycle','tree':tree['sha'],'parents':[parent]})
               req('PATCH',f'{api}/git/refs/heads/main',{'sha':new['sha'],'force':False})
               print(json.dumps({'persisted':True,'commit':new['sha'],'files':len(paths)},indent=2));break
             except urllib.error.HTTPError as exc:
