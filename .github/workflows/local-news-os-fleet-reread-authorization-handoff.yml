@@ -1,0 +1,84 @@
+name: LOCAL NEWS OS Fleet Provider Reread Handoff
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/social/fleet_metrics_reread_authorization_handoff.py"
+      - "local-news-os/social/test_fleet_metrics_reread_authorization_handoff.py"
+      - "local-news-os/social/authorization_sealed_harvest_receipt.py"
+      - "local-news-os/social/authorization_sealed_harvest_recovery.py"
+      - "local-news-os/social/metrics_harvest_runtime.py"
+      - "local-news-os/social/observed_metrics_collector.py"
+      - ".github/workflows/local-news-os-fleet-reread-authorization-handoff.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/social/fleet_metrics_reread_authorization_handoff.py"
+      - "local-news-os/social/test_fleet_metrics_reread_authorization_handoff.py"
+      - "local-news-os/social/authorization_sealed_harvest_receipt.py"
+      - "local-news-os/social/authorization_sealed_harvest_recovery.py"
+      - "local-news-os/social/metrics_harvest_runtime.py"
+      - "local-news-os/social/observed_metrics_collector.py"
+      - ".github/workflows/local-news-os-fleet-reread-authorization-handoff.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-news-os-fleet-provider-reread-handoff-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile explicit provider reread handoff boundary
+        run: |
+          python -m py_compile \
+            local-news-os/social/authorization_sealed_harvest_receipt.py \
+            local-news-os/social/authorization_sealed_harvest_recovery.py \
+            local-news-os/social/metrics_harvest_runtime.py \
+            local-news-os/social/observed_metrics_collector.py \
+            local-news-os/social/fleet_metrics_reread_authorization_handoff.py \
+            local-news-os/social/test_fleet_metrics_reread_authorization_handoff.py
+
+      - name: Run explicit provider reread handoff acceptance tests
+        working-directory: local-news-os/social
+        run: python test_fleet_metrics_reread_authorization_handoff.py
+
+      - name: Verify handoff is secret-free, network-free and single-use
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, 'local-news-os/social')
+          import fleet_metrics_reread_authorization_handoff as handoff
+          guards = handoff._guards()
+          required = {
+              'provider_network_calls_performed': False,
+              'credential_values_read': False,
+              'credential_values_persisted': False,
+              'provider_payload_persisted': False,
+              'explicit_decision_required': True,
+              'single_use_handoff_required': True,
+              'authorization_sealed': True,
+              'observation_ledger_rechecked_before_retry_eligibility': True,
+              'blind_retry_after_ambiguous_network_call': False,
+              'analytics_advisory_only': True,
+              'publication_blocked_by_analytics': False,
+              'zero_paid_dependency': True,
+          }
+          for key, expected in required.items():
+              if guards.get(key) is not expected:
+                  raise SystemExit(f'reread handoff guard mismatch: {key}={guards.get(key)!r}')
+          assert handoff.DECISION == 'AUTHORIZE_ONE_PROVIDER_REREAD'
+          assert handoff.DEFAULT_TTL_MINUTES <= 30
+          print('FLEET_PROVIDER_REREAD_HANDOFF_GUARDS_PASS')
+          PY

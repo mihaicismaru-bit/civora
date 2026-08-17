@@ -7,8 +7,9 @@ authorization fingerprint and durable observation ledger still describe the same
 publication/channel. If a durable cumulative observation already covers the
 checkpoint, the checkpoint is completed from that evidence. Otherwise the default
 is to remain in RECOVERY_REQUIRED. A later provider read can only be made eligible
-through an explicit ``authorize_provider_reread`` reconciliation decision after the
-durable ledger has been checked and found not to cover the checkpoint.
+through the durable, explicit, single-use provider re-read handoff boundary; the
+legacy direct authorization flag is retained only as a fail-closed compatibility
+surface and can no longer transition the checkpoint to RETRY_WAIT.
 
 No credential value or provider payload is accepted or persisted here. Analytics
 remains advisory-only and never blocks editorial publication.
@@ -54,6 +55,7 @@ def _guards() -> dict[str, Any]:
         "credential_values_persisted": False,
         "provider_payload_persisted": False,
         "observation_ledger_checked_before_provider_reread": True,
+        "explicit_reread_handoff_required": True,
         "blind_retry_after_ambiguous_network_call": False,
         "publication_blocked_by_analytics": False,
         "zero_paid_dependency": True,
@@ -368,49 +370,26 @@ def reconcile_recovery(
             "guards": _guards(),
         }
 
-    if not authorize_provider_reread:
-        result = _hold(job, "RECOVERY_REQUIRED_NO_DURABLE_OBSERVATION", [], entry=entry)
-        result["hard_blocks"] = []
-        result["recovery_evidence"] = _recovery_evidence(
-            kind="NO_DURABLE_COVERAGE_OBSERVATION",
-            store=store,
-            observation=None,
-            checked_at=runtime._iso(runtime._dt(now)),
-            provider_reread_authorized=False,
-        )
-        return result
-
-    evidence = _recovery_evidence(
+    no_observation_evidence = _recovery_evidence(
         kind="NO_DURABLE_COVERAGE_OBSERVATION",
         store=store,
         observation=None,
         checked_at=runtime._iso(runtime._dt(now)),
-        provider_reread_authorized=True,
+        provider_reread_authorized=False,
     )
-    persisted = _persist_reconciled_state(
-        repo_root, channel, job, state, previous_fp,
-        authorization_fingerprint=authorization_fingerprint,
-        now=now,
-        target_status="RETRY_WAIT",
-        evidence=evidence,
-    )
-    if persisted.get("persisted") is not True:
-        return _hold(job, persisted.get("status") or "HOLD_RECOVERY_PERSISTENCE", list(persisted.get("hard_blocks", [])), entry=entry)
-    result = {
-        "schema_version": SCHEMA_VERSION,
-        "recovery_id": RECOVERY_ID,
-        "status": "PROVIDER_REREAD_AUTHORIZED_AFTER_RECONCILIATION",
-        "checkpoint_key": runtime.checkpoint_key(job),
-        "publication_id": _clean(job.get("publication_id")) or None,
-        "checkpoint_status": "RETRY_WAIT",
-        "recovery_evidence": evidence,
-        "provider_reread_authorized": True,
-        "publication_blocked": False,
-        "durable_paths": [runtime.expected_checkpoint_state_path(channel)],
-        "hard_blocks": [],
-        "guards": _guards(),
-    }
-    result["guards"]["blind_retry_after_ambiguous_network_call"] = False
+    if authorize_provider_reread:
+        result = _hold(
+            job,
+            "HOLD_EXPLICIT_REREAD_HANDOFF_REQUIRED",
+            ["EXPLICIT_PROVIDER_REREAD_HANDOFF_REQUIRED"],
+            entry=entry,
+        )
+        result["recovery_evidence"] = no_observation_evidence
+        return result
+
+    result = _hold(job, "RECOVERY_REQUIRED_NO_DURABLE_OBSERVATION", [], entry=entry)
+    result["hard_blocks"] = []
+    result["recovery_evidence"] = no_observation_evidence
     return result
 
 
@@ -428,7 +407,11 @@ def main() -> int:
     parser.add_argument("--repo-root", type=Path, default=Path("."))
     parser.add_argument("--authorization-fingerprint", required=True)
     parser.add_argument("--now", required=True)
-    parser.add_argument("--authorize-provider-reread", action="store_true")
+    parser.add_argument(
+        "--authorize-provider-reread",
+        action="store_true",
+        help="Deprecated fail-closed flag; durable explicit re-read handoff is required.",
+    )
     args = parser.parse_args()
     result = reconcile_recovery(
         args.repo_root,
