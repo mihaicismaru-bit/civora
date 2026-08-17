@@ -16,7 +16,7 @@ MIPE_CONTAINER='https://mfe.gov.ro/peos/calendar-lansari-apeluri/'
 OIR_XLSX='https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx'
 MIPE_CM_2026='https://mfe.gov.ro/wp-content/uploads/2026/05/ce7339fe643b3ee00e250662c1aa10b3-2.pdf'
 UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36'
-IDENTITY_SCHEMA_VERSION=2
+IDENTITY_SCHEMA_VERSION=3
 COMPARE_FIELDS=['plannedLaunch','plannedClose','budget','priority','callType','applicants']
 SIGNATURE_FIELDS=['programmeRaw','priority','title','objective','region','budget','fund','plannedLaunch','plannedClose','callType','applicants','notes','sourceSheet']
 
@@ -60,7 +60,7 @@ def is_peo(program):
     n=norm(program)
     return bool(re.search(r'(^| )peo( |$)',n) or ('educatie' in n and 'ocupare' in n))
 
-def identity_tuple(item):
+def base_identity_tuple(item):
     return (
         norm(item.get('programmeRaw') or item.get('programme')),
         norm(item.get('title')),
@@ -70,8 +70,12 @@ def identity_tuple(item):
         norm(item.get('sourceSheet')),
     )
 
-def stable_id(program,title,priority,objective,region,sheet):
-    identity='|'.join([norm(program),norm(title),norm(priority),norm(objective),norm(region),norm(sheet)])
+def identity_tuple(item):
+    """Variant-aware identity: same call concept may have distinct applicant tracks."""
+    return base_identity_tuple(item)+(norm(item.get('applicants')),)
+
+def stable_id(program,title,priority,objective,region,sheet,applicants=''):
+    identity='|'.join([norm(program),norm(title),norm(priority),norm(objective),norm(region),norm(sheet),norm(applicants)])
     return hashlib.sha256(identity.encode('utf-8')).hexdigest()[:18]
 
 def record_signature(item):
@@ -116,9 +120,10 @@ def parse(blob):
             priority=cell(row,cols.get('priority'))
             objective=cell(row,cols.get('objective'))
             region=cell(row,cols.get('region'))
+            applicants=cell(row,cols.get('applicants'))
             launch=cell(row,cols.get('launch'));close=cell(row,cols.get('close'))
-            key=stable_id(program,title,priority,objective,region,ws.title)
-            items.append({'id':key,'identitySchemaVersion':IDENTITY_SCHEMA_VERSION,'programme':'PEO','programmeRaw':program,'priority':priority,'title':title,'objective':objective,'region':region,'budget':cell(row,cols.get('budget')),'fund':cell(row,cols.get('fund')),'plannedLaunch':launch,'plannedClose':close,'callType':cell(row,cols.get('callType')),'applicants':cell(row,cols.get('applicants')),'notes':cell(row,cols.get('notes')),'calendarStatus':'PLANNED','materialization':'NOT_YET_VERIFIED','sourceSheet':ws.title,'sourceRow':rn})
+            key=stable_id(program,title,priority,objective,region,ws.title,applicants)
+            items.append({'id':key,'identitySchemaVersion':IDENTITY_SCHEMA_VERSION,'programme':'PEO','programmeRaw':program,'priority':priority,'title':title,'objective':objective,'region':region,'budget':cell(row,cols.get('budget')),'fund':cell(row,cols.get('fund')),'plannedLaunch':launch,'plannedClose':close,'callType':cell(row,cols.get('callType')),'applicants':applicants,'notes':cell(row,cols.get('notes')),'calendarStatus':'PLANNED','materialization':'NOT_YET_VERIFIED','sourceSheet':ws.title,'sourceRow':rn})
     items,dropped=dedupe_exact_identities(items)
     diag.append({'identitySchemaVersion':IDENTITY_SCHEMA_VERSION,'exactDuplicateRowsDropped':len(dropped),'exactDuplicates':dropped[:20]})
     counts=Counter(x['id'] for x in items)
@@ -130,18 +135,16 @@ def load_state():
     try:return json.loads(STATE.read_text(encoding='utf-8'))
     except:return {'versions':[],'items':[]}
 
-def build_old_identity_map(old_items):
+def build_unique_map(items,key_fn):
     grouped={}
-    for old in old_items:grouped.setdefault(identity_tuple(old),[]).append(old)
+    for item in items:grouped.setdefault(key_fn(item),[]).append(item)
     mapped={};ambiguous=[]
     for ident,group in grouped.items():
         if len(group)==1:
             mapped[ident]=group[0];continue
         signatures={record_signature(row) for row in group}
-        if len(signatures)==1:
-            mapped[ident]=group[0]
-        else:
-            ambiguous.append(ident)
+        if len(signatures)==1:mapped[ident]=group[0]
+        else:ambiguous.append(ident)
     return mapped,ambiguous
 
 def main():
@@ -155,18 +158,19 @@ def main():
         old_items=[x for x in prev.get('items',[]) if x.get('programme')=='PEO']
         old_id_counts=Counter(x.get('id') for x in old_items if x.get('id'))
         old_by_id={x.get('id'):x for x in old_items if x.get('id') and old_id_counts[x.get('id')]==1}
-        old_by_identity,ambiguous_old_identities=build_old_identity_map(old_items)
+        old_by_identity,ambiguous_old_identities=build_unique_map(old_items,identity_tuple)
+        old_by_base,ambiguous_old_bases=build_unique_map(old_items,base_identity_tuple)
         same_source_bytes=bool(prev.get('lastRun',{}).get('sha256') and prev.get('lastRun',{}).get('sha256')==sha)
 
         changes=[]
         if not same_source_bytes:
             for x in items:
-                p=old_by_id.get(x['id']) or old_by_identity.get(identity_tuple(x))
+                p=old_by_id.get(x['id']) or old_by_identity.get(identity_tuple(x)) or old_by_base.get(base_identity_tuple(x))
                 if not p:
                     changes.append({'kind':'CALENDAR_ITEM_ADDED','id':x['id'],'title':x['title']});continue
                 for f in COMPARE_FIELDS:
                     if clean(p.get(f))!=clean(x.get(f)):changes.append({'kind':'CALENDAR_ITEM_CHANGED','id':x['id'],'title':x['title'],'field':f,'before':p.get(f,''),'after':x.get(f,'')})
-        diag.append({'sameSourceBytesAsPrevious':same_source_bytes,'ambiguousLegacySemanticIdentities':len(ambiguous_old_identities),'materialChangeInvariant':'UNCHANGED_WORKBOOK_SHA_IMPLIES_ZERO_MATERIAL_CHANGES'})
+        diag.append({'sameSourceBytesAsPrevious':same_source_bytes,'ambiguousLegacyVariantIdentities':len(ambiguous_old_identities),'ambiguousLegacyBaseIdentities':len(ambiguous_old_bases),'materialChangeInvariant':'UNCHANGED_WORKBOOK_SHA_IMPLIES_ZERO_MATERIAL_CHANGES'})
 
         version={'observedAt':observed,'sha256':sha,'bytes':len(blob),'itemCount':len(items),'changes':len(changes),'source':OIR_XLSX,'identitySchemaVersion':IDENTITY_SCHEMA_VERSION}
         versions=prev.get('versions') or []
@@ -177,6 +181,8 @@ def main():
         payload={'status':state['status'],'asOf':observed,'programme':'PEO','title':'Calendar estimativ consolidat al lansărilor de apeluri de proiecte — PEO','canonicalContainer':MIPE_CONTAINER,'retrievalSource':OIR_XLSX,'retrievalSourceClass':state['retrievalSourceClass'],'directMipeVerified':False,'versionSha256':sha,'itemCount':len(items),'changeCount':len(changes),'items':items,'changes':changes[:100]}
         OUT.write_text('window.PARTENER_DATA=window.PARTENER_DATA||{};\nwindow.PARTENER_DATA.peoCalendar='+json.dumps(payload,ensure_ascii=False,separators=(',',':'))+';\n',encoding='utf-8')
         print(json.dumps({'status':state['status'],'sha256':sha,'itemCount':len(items),'changeCount':len(changes),'sameSourceBytesAsPrevious':same_source_bytes,'identitySchemaVersion':IDENTITY_SCHEMA_VERSION,'diagnostics':diag},ensure_ascii=False,indent=2))
+        return 0
     except Exception as e:
         fail={'observedAt':observed,'error':f'{type(e).__name__}: {e}','source':OIR_XLSX};prev['lastFailure']=fail;prev['status']='SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED';STATE.write_text(json.dumps(prev,ensure_ascii=False,indent=2)+'\n',encoding='utf-8');print(json.dumps({'status':prev['status'],'failure':fail},ensure_ascii=False,indent=2))
-if __name__=='__main__':main()
+        return 2
+if __name__=='__main__':raise SystemExit(main())
