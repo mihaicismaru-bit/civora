@@ -2,19 +2,142 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-18T02:49:43+03:00",
+  "generated_at": "2026-08-18T02:50:26+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-18T02:24:52+03:00",
-  "task_count": 37,
+  "queue_generated_at": "2026-08-18T02:49:09+03:00",
+  "task_count": 42,
   "primary_match_count": 0,
-  "no_match_count": 20,
-  "unrouted_count": 17,
+  "no_match_count": 22,
+  "unrouted_count": 20,
   "target_count": 14,
   "targets_ok": 11,
   "results": [
+    {
+      "signal_id": "1b92a47d7fad423eca9a06e1",
+      "signal_title": "De la pământ neproductiv la facturi zero: primii pași către ferma independentă energetic",
+      "signal_url": "https://ziaruldevalcea.ro/2026/08/de-la-pamant-neproductiv-la-facturi-zero-primii-pasi-catre-ferma-independenta-energetic/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_published_at": "2026-08-18T00:51:09+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "a6e3fb407034b7ca9274658f",
+      "signal_title": "Cauciucurile all season și regretele care apar abia la prima zăpadă serioasă",
+      "signal_url": "https://ziaruldevalcea.ro/2026/08/cauciucurile-all-season-si-regretele-care-apar-abia-la-prima-zapada-serioasa/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-18T00:49:38+03:00",
+      "verification_route_id": "utilities",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "apavil-comunicate",
+            "name": "APAVIL S.A.",
+            "url": "https://apavil.ro/?page_id=1178"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "apavil-opriri-programate",
+            "name": "APAVIL S.A.",
+            "url": "https://apavil.ro/?page_id=962"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 2
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "cet-govora-termoficare-advisories",
+            "name": "CET Govora S.A. — Termoficare Vâlcea",
+            "url": "https://www.termoficarevalcea.ro/blog/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 1
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "d595a36be90396bf83487ff7",
+      "signal_title": "Consumabilele Karcher: saci, filtre și perii de schimb",
+      "signal_url": "https://ziaruldevalcea.ro/2026/08/consumabilele-karcher-saci-filtre-si-perii-de-schimb/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_published_at": "2026-08-18T00:36:43+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "0af2235933dec900e2ff005c",
+      "signal_title": "Pavele și borduri de beton pentru amenajări exterioare elegante",
+      "signal_url": "https://ziaruldevalcea.ro/2026/08/pavele-si-borduri-de-beton-pentru-amenajari-exterioare-elegante/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_published_at": "2026-08-18T00:35:06+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "c1e1582a422e635b168a4b33",
+      "signal_title": "APAVIL SA – ANUNȚ privind scoaterea la concurs a unui post de electrician în cadrul Sectorului Drăgășani",
+      "signal_url": "https://ziaruldevalcea.ro/2026/08/apavil-sa-anunt-privind-scoaterea-la-concurs-a-unui-post-de-electrician-in-cadrul-sectorului-dragasani/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-18T00:32:30+03:00",
+      "verification_route_id": "fire_rescue_alert",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "isu-valcea-comunicate",
+            "name": "ISU Vâlcea",
+            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "dc68541ad0eca69ef5492fa8",
       "signal_title": "Poze acte Râmnicu Vâlcea – fotografii ID rapide, fără programare, la BW Photo Booth",
