@@ -8,6 +8,10 @@ on:
     paths:
       - "local-news-os/social/fleet_metrics_harvest_orchestrator.py"
       - "local-news-os/social/test_fleet_metrics_harvest_orchestrator.py"
+      - "local-news-os/social/metrics_transport_capability_registry.py"
+      - "local-news-os/social/fleet_metrics_transport_capability_gate.py"
+      - "local-news-os/social/test_metrics_transport_capability_registry.py"
+      - "local-news-os/social/metrics_transport_capabilities.json"
       - "local-news-os/social/fleet_metrics_credential_binding.py"
       - "local-news-os/social/test_fleet_metrics_credential_binding.py"
       - "local-news-os/social/metrics_credential_bindings.json"
@@ -30,6 +34,10 @@ on:
     paths:
       - "local-news-os/social/fleet_metrics_harvest_orchestrator.py"
       - "local-news-os/social/test_fleet_metrics_harvest_orchestrator.py"
+      - "local-news-os/social/metrics_transport_capability_registry.py"
+      - "local-news-os/social/fleet_metrics_transport_capability_gate.py"
+      - "local-news-os/social/test_metrics_transport_capability_registry.py"
+      - "local-news-os/social/metrics_transport_capabilities.json"
       - "local-news-os/social/fleet_metrics_credential_binding.py"
       - "local-news-os/social/test_fleet_metrics_credential_binding.py"
       - "local-news-os/social/metrics_credential_bindings.json"
@@ -77,10 +85,14 @@ jobs:
             local-news-os/social/operational_metrics_harvest_trigger.py \
             local-news-os/social/multi_instance_isolation.py \
             local-news-os/social/fleet_metrics_harvest_orchestrator.py \
+            local-news-os/social/metrics_transport_capability_registry.py \
+            local-news-os/social/fleet_metrics_transport_capability_gate.py \
             local-news-os/social/fleet_metrics_credential_binding.py \
             local-news-os/social/test_operational_metrics_harvest_trigger.py \
             local-news-os/social/test_fleet_metrics_harvest_orchestrator.py \
+            local-news-os/social/test_metrics_transport_capability_registry.py \
             local-news-os/social/test_fleet_metrics_credential_binding.py
+          python -m json.tool local-news-os/social/metrics_transport_capabilities.json >/dev/null
           python -m json.tool local-news-os/social/metrics_credential_bindings.json >/dev/null
 
       - name: Run operational channel harvest trigger acceptance tests
@@ -88,6 +100,9 @@ jobs:
 
       - name: Run fleet harvest discovery and isolation acceptance tests
         run: python local-news-os/social/test_fleet_metrics_harvest_orchestrator.py
+
+      - name: Run explicit native/free transport capability acceptance tests
+        run: python local-news-os/social/test_metrics_transport_capability_registry.py
 
       - name: Run per-instance credential binding acceptance tests
         run: python local-news-os/social/test_fleet_metrics_credential_binding.py
@@ -113,6 +128,35 @@ jobs:
           eligible = {(row['instance_id'], row['platform']) for row in result['channels'] if row.get('eligible') is True}
           assert ('valcea', 'facebook') in eligible, result
           assert ('valcea', 'instagram') in eligible, result
+          print(result['status'])
+          PY
+
+      - name: Verify explicit transport capability and access gate before credential binding
+        run: |
+          NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          python local-news-os/social/fleet_metrics_transport_capability_gate.py \
+            --repo-root . \
+            --runtime-registry local-news-os/social/social_runtime_registry.json \
+            --capability-registry local-news-os/social/metrics_transport_capabilities.json \
+            --now "$NOW" \
+            >/tmp/fleet-metrics-capability-gate.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.loads(Path('/tmp/fleet-metrics-capability-gate.json').read_text(encoding='utf-8'))
+          assert result['status'] == 'CAPABILITY_GATE_READY', result
+          assert result['publication_blocked'] is False, result
+          assert result['guards']['explicit_transport_registration_required'] is True, result
+          assert result['guards']['transport_implementation_match_required'] is True, result
+          assert result['guards']['verified_access_attestation_required'] is True, result
+          assert result['guards']['explicit_credential_binding_still_required'] is True, result
+          assert result['guards']['credential_values_read'] is False, result
+          assert result['guards']['zero_paid_dependency'] is True, result
+          approved = {(row['instance_id'], row['platform'], row['metric_source']) for row in result['approved_channels']}
+          assert approved == {
+              ('valcea', 'facebook', 'meta_graph_api'),
+              ('valcea', 'instagram', 'instagram_graph_api'),
+          }, result
           print(result['status'])
           PY
 
@@ -157,6 +201,28 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
+
+      - name: Fail closed unless transport capabilities and access are verified
+        shell: bash
+        run: |
+          set -euo pipefail
+          NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          python local-news-os/social/fleet_metrics_transport_capability_gate.py \
+            --repo-root . \
+            --runtime-registry local-news-os/social/social_runtime_registry.json \
+            --capability-registry local-news-os/social/metrics_transport_capabilities.json \
+            --now "$NOW" \
+            >/tmp/fleet-metrics-capability-gate.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.loads(Path('/tmp/fleet-metrics-capability-gate.json').read_text(encoding='utf-8'))
+          if result.get('status') not in {'CAPABILITY_GATE_READY', 'CAPABILITY_GATE_IDLE'}:
+              raise SystemExit(f"transport capability gate hold: {result.get('hard_blocks')} {result.get('channel_holds')}")
+          if result.get('publication_blocked') is not False:
+              raise SystemExit('analytics capability gate attempted to block publication')
+          print(result.get('status'))
+          PY
 
       - name: Build secret-free per-instance harvest matrix
         id: binding-plan
