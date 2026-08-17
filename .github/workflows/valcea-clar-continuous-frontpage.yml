@@ -63,16 +63,19 @@ jobs:
           homepage=(root/'site/runtime/index.html').read_text(encoding='utf-8')
           holds=json.loads((root/'editorial/publication_holds.json').read_text(encoding='utf-8'))
 
-          expected={
+          durable_baseline={
               'musiclover-green-day-20260815',
               'luminos-fest-zavoi-20260815',
               'florile-govorei-20260816',
               'scm-valcea-slatina-20260815',
+              'alert-1cd2159b942ec2b672f7',
+              'alert-fdfdb85a579432f385f7',
           }
           held={str(row['story_id']) for row in holds.get('holds', []) if row.get('public_projection') is False}
           archive_ids=[str(item['id']) for item in archive.get('stories', [])]
           feed_ids=[str(item['id']) for item in feed.get('stories', [])]
           route_ids=[str(item['id']) for item in manifest.get('stories', [])]
+          archive_set=set(archive_ids)
 
           assert archive.get('publication_model') == 'continuous_story_first'
           assert archive.get('recap_editions_may_delete_published_stories') is False
@@ -80,11 +83,13 @@ jobs:
           assert feed.get('publication_model') == 'continuous_story_first'
           assert feed.get('policy', {}).get('published_story_persistence') is True
           assert feed.get('policy', {}).get('operational_records_hidden') is True
-          assert feed.get('story_count') == len(archive_ids) == 4
-          assert set(archive_ids) == expected
+          assert len(archive_ids) == len(archive_set)
+          assert archive.get('story_count') == len(archive_ids)
+          assert feed.get('story_count') == len(feed_ids) == len(archive_ids)
+          assert durable_baseline <= archive_set
           assert archive_ids == feed_ids
-          assert set(route_ids) == expected
-          assert not held & set(archive_ids)
+          assert set(route_ids) == archive_set
+          assert not held & archive_set
           assert not held & set(feed_ids)
           assert not held & set(route_ids)
           assert 'olanesti-bridge-monitor' in held
@@ -152,12 +157,25 @@ jobs:
           feed=json.loads((root/'site/runtime/live-feed.json').read_text(encoding='utf-8'))
           manifest=json.loads((root/'site/runtime/stiri/manifest.json').read_text(encoding='utf-8'))
           holds=json.loads((root/'editorial/publication_holds.json').read_text(encoding='utf-8'))
-          ids={str(x['id']) for x in archive.get('stories', [])}
+          durable_baseline={
+              'musiclover-green-day-20260815',
+              'luminos-fest-zavoi-20260815',
+              'florile-govorei-20260816',
+              'scm-valcea-slatina-20260815',
+              'alert-1cd2159b942ec2b672f7',
+              'alert-fdfdb85a579432f385f7',
+          }
+          archive_ids=[str(x['id']) for x in archive.get('stories', [])]
+          feed_ids=[str(x['id']) for x in feed.get('stories', [])]
+          route_ids=[str(x['id']) for x in manifest.get('stories', [])]
+          ids=set(archive_ids)
           held={str(row['story_id']) for row in holds.get('holds', []) if row.get('public_projection') is False}
-          assert archive.get('story_count') == 4
-          assert feed.get('story_count') == 4
-          assert ids == {str(x['id']) for x in feed.get('stories', [])}
-          assert ids == {str(x['id']) for x in manifest.get('stories', [])}
+          assert len(archive_ids) == len(ids)
+          assert archive.get('story_count') == len(archive_ids)
+          assert feed.get('story_count') == len(feed_ids) == len(archive_ids)
+          assert durable_baseline <= ids
+          assert archive_ids == feed_ids
+          assert ids == set(route_ids)
           assert not held & ids
           assert 'olanesti-bridge-monitor' in held
           assert not (root/'site/runtime/stiri/olanesti-bridge-monitor/index.html').is_file()
