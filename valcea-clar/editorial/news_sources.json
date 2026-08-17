@@ -140,8 +140,14 @@
       "tier": "T1",
       "section": "EVENIMENTE",
       "priority": 92,
+      "enabled": false,
+      "status": "QUARANTINED_GENERIC_INCIDENT_BULLETIN_FEED",
+      "checked_at": "2026-08-17",
+      "disable_reason": "The official ISU Vâlcea press stream is trustworthy and article-dated, but its current output is dominated by recurring generic bulletin headlines such as ‘Misiunile pompierilor vâlceni în ultimele 48 de ore’. The newsworthy local facts, affected places, incident type, victim/medical context and safety significance are inside the article body, while the Vâlcea automatic contract only admits title + published_at + source. The existing broad ‘comunicate-de-presa’ path hint therefore risks auto-projecting low-information bulletin labels and, on mixed emergency content, incident-sensitive headlines without the body context needed for safe editorial framing. Automatic admission is disabled until a generic body-verified UTILITY/PUBLIC_SAFETY item contract can extract scoped facts without inventing a headline or exposing victim-sensitive details.",
+      "safe_use": ["manual discovery of fires, rescues, severe-weather response and public-safety measures", "primary-source verification of incident chronology, affected geography and official safety guidance", "manual reporting after victim/privacy and materiality review"],
+      "core_feedback": "No ISU/Vâlcea-specific parser should be added. This reinforces the existing item-level SOURCE_SAFETY direction for mixed official feeds and identifies a reusable PUBLIC_SAFETY_BULLETIN contract need: separate published_at from incident time, extract affected geography and verified event type from the body, preserve source wording/provenance, and require privacy/sensitivity review before public projection.",
       "path_hints": ["comunicate-de-presa", "comunicat", "buletin"],
-      "generic_titles": ["comunicate de presă", "buletin informativ"]
+      "generic_titles": ["comunicate de presă", "buletin informativ", "misiunile pompierilor vâlceni în ultimele 48 de ore", "misiunile pompierilor vâlceni în ultimele 72 de ore", "misiunile pompierilor vâlceni în ultimele 3 zile"]
     },
     {
       "id": "dsp-valcea-anunturi",
