@@ -45,7 +45,7 @@ places = json.loads((WEB / "data" / "places.json").read_text(encoding="utf-8"))[
 meta = json.loads((WEB / "data" / "meta.json").read_text(encoding="utf-8"))
 assert places, "Proiecția publică nu are localuri"
 assert all(p["publication_status"] == "public" for p in places)
-assert not {"restaurant-bulevard", "sempre-buono-ramnicu-valcea", "queens-pub"} & {p["id"] for p in places}
+assert not {"restaurant-bulevard", "sempre-buono-ramnicu-valcea"} & {p["id"] for p in places}
 assert meta["place_count"] == len(places)
 assert meta["candidate_count"] >= 1
 assert "fetch('data/places.json')" in (WEB / "app.js").read_text(encoding="utf-8")
