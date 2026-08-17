@@ -18,6 +18,12 @@
       "tier": "T1",
       "section": "ADMINISTRAȚIE",
       "priority": 83,
+      "enabled": false,
+      "status": "QUARANTINED_LISTING_REACHABLE_ZERO_ARTICLE_LINKS",
+      "checked_at": "2026-08-17",
+      "disable_reason": "The official Ocnele Mari municipal homepage exposes dated announcement summaries, but the current LOCAL NEWS OS discovery run reports listing_ok=true with 0 article links examined. Fresh independent verification also finds the dated listing surface while direct canonical-page retrieval is not deterministic enough to prove a stable per-item article identity. A reachable landing page must not be treated as a healthy ARTICLE_FEED when the generic adapter cannot enumerate any canonical article pages; search-index snippets, listing dates and crawl time are not substitutes for article-level publication provenance. The source remains high-value T1 for territorial discovery and verification, but automatic title + date + source admission is disabled until stable item links can be enumerated and fetched deterministically.",
+      "safe_use": ["manual discovery of Ocnele Mari municipal developments", "primary-source verification from the official municipal listing and linked public documents", "manual reporting after item identity, publication date and source content are verified"],
+      "core_feedback": "No Ocnele Mari-specific parser should be added. This reinforces the generic source-health contract already identified by the pilot: listing_reachable must be distinct from article_links_discovered/ARTICLE_FEED structural eligibility, and HTTP/listing success with zero canonical item links should surface an inert-feed incompatibility signal rather than a healthy automatic source.",
       "path_hints": ["consultare", "buget", "invest", "proiect", "hotar", "utilitat", "deseuri", "apa", "canal", "gaz"],
       "generic_titles": ["primăria orașului ocnele mari", "primaria orasului ocnele mari", "mai mult", "citește mai mult"]
     },
