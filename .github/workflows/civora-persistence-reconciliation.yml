@@ -2,6 +2,9 @@ name: CIVORA Persistence Reconciliation
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: ["CIVORA Scope Drift"]
+    types: [completed]
   pull_request:
     paths:
       - "local-news-os/persistence/**"
@@ -21,9 +24,13 @@ concurrency:
 
 jobs:
   validate:
+    if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
@@ -35,7 +42,7 @@ jobs:
           python -m py_compile local-news-os/persistence/persistence_writer.py
       - name: Run deterministic fail-closed reconciliation acceptance
         run: python local-news-os/persistence/reconciliation_engine.py --self-test
-      - name: Validate PRS-037 reconciliation trigger contract
+      - name: Validate PRS-037 reconciliation trigger contract and executable wiring
         run: python local-news-os/persistence/validate_reconciliation_triggers.py --self-test
       - name: Validate PRS-038 fail-closed persistence writer
         run: python local-news-os/persistence/persistence_writer.py --self-test
