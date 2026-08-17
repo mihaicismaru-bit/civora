@@ -25,6 +25,11 @@ ALLOWED_SCOPE_OUTCOMES = {
     "RUNTIME_REFRESH_ONLY",
     "STRUCTURAL_RECONCILIATION",
 }
+SCOPE_EXACT_HEAD_GROUP = "group: civora-scope-drift-${{ github.sha }}"
+RECONCILIATION_EXACT_HEAD_GROUP = (
+    "group: civora-persistence-reconciliation-${{ github.event_name == 'workflow_run' "
+    "&& github.event.workflow_run.head_sha || github.sha }}"
+)
 
 
 def _load(path: Path) -> dict[str, Any]:
@@ -108,6 +113,26 @@ def validate(contract: dict[str, Any]) -> None:
             raise ValueError(f"credential-like field forbidden in trigger contract: {forbidden}")
 
 
+def validate_exact_head_concurrency(
+    reconciliation_workflow: str,
+    scope_workflow: str,
+) -> None:
+    """Prevent scheduled/newer observers from deleting exact-head evidence."""
+    if SCOPE_EXACT_HEAD_GROUP not in scope_workflow:
+        raise ValueError("scope-drift concurrency must be keyed by exact github.sha")
+    if "cancel-in-progress: false" not in scope_workflow:
+        raise ValueError("scope-drift exact-head evidence must not be cancelled")
+    if "group: civora-scope-drift\n" in scope_workflow:
+        raise ValueError("scope-drift global concurrency group can cancel a different head")
+
+    if RECONCILIATION_EXACT_HEAD_GROUP not in reconciliation_workflow:
+        raise ValueError("reconciliation concurrency must be keyed by exact reconciled head")
+    if "cancel-in-progress: false" not in reconciliation_workflow:
+        raise ValueError("reconciliation exact-head evidence must not be cancelled")
+    if "civora-persistence-reconciliation-${{ github.ref }}" in reconciliation_workflow:
+        raise ValueError("ref-wide reconciliation concurrency can cancel a different head")
+
+
 def validate_executable_wiring() -> None:
     """Fail closed if the declarative MAIN_MERGE trigger is not executable."""
     reconciliation_workflow = RECONCILIATION_WORKFLOW.read_text(encoding="utf-8")
@@ -125,6 +150,8 @@ def validate_executable_wiring() -> None:
     for fragment in required_reconciliation_fragments:
         if fragment not in reconciliation_workflow:
             raise ValueError(f"reconciliation workflow missing executable MAIN_MERGE wiring: {fragment}")
+
+    validate_exact_head_concurrency(reconciliation_workflow, scope_workflow)
 
     if RECONCILIATION_WORKFLOW_PATH not in scope_workflow:
         raise ValueError("scope-drift workflow does not observe reconciliation workflow changes")
@@ -166,6 +193,44 @@ def self_test(path: Path) -> None:
         pass
     else:
         raise AssertionError("instance-specific hardcoding in CORE_GENERIC must fail closed")
+
+    reconciliation_workflow = RECONCILIATION_WORKFLOW.read_text(encoding="utf-8")
+    scope_workflow = SCOPE_DRIFT_WORKFLOW.read_text(encoding="utf-8")
+
+    stale_ref_group = reconciliation_workflow.replace(
+        RECONCILIATION_EXACT_HEAD_GROUP,
+        "group: civora-persistence-reconciliation-${{ github.ref }}",
+    )
+    try:
+        validate_exact_head_concurrency(stale_ref_group, scope_workflow)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("ref-wide reconciliation cancellation risk must fail closed")
+
+    cancellable_scope = scope_workflow.replace(
+        "cancel-in-progress: false",
+        "cancel-in-progress: true",
+        1,
+    )
+    try:
+        validate_exact_head_concurrency(reconciliation_workflow, cancellable_scope)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("cancellable scope-drift evidence must fail closed")
+
+    cancellable_reconciliation = reconciliation_workflow.replace(
+        "cancel-in-progress: false",
+        "cancel-in-progress: true",
+        1,
+    )
+    try:
+        validate_exact_head_concurrency(cancellable_reconciliation, scope_workflow)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("cancellable reconciliation evidence must fail closed")
 
 
 def main() -> int:
