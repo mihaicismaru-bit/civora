@@ -14,6 +14,8 @@ on:
     paths:
       - 'partener-eu/ingest/build_daily_brief.py'
       - 'partener-eu/ingest/build_people_policy.py'
+      - 'partener-eu/ingest/people_policy_official_ingest.py'
+      - 'partener-eu/ingest/refine_people_policy.py'
       - 'partener-eu/ingest/state/people_policy_registry.json'
       - 'partener-eu/ingest/state/people_policy_seed.json'
       - 'partener-eu/ops/test_editorial_automation.py'
@@ -34,7 +36,7 @@ jobs:
   build:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 7
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
         with:
@@ -47,10 +49,12 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Generate daily briefing and decision-maker intelligence
+      - name: Ingest official signals and generate editorial intelligence
         run: |
+          python partener-eu/ingest/people_policy_official_ingest.py
           python partener-eu/ingest/build_daily_brief.py
           python partener-eu/ingest/build_people_policy.py
+          python partener-eu/ingest/refine_people_policy.py
 
       - name: Validate editorial automation contract
         run: |
@@ -58,12 +62,13 @@ jobs:
           node --check partener-eu/web/people-policy-v1.js
           python partener-eu/ops/test_editorial_automation.py
 
-      - name: Persist generated editorial products
+      - name: Persist generated editorial products and official-source ledger
         shell: bash
         run: |
           set -euo pipefail
           cp partener-eu/ingest/state/daily_brief.json /tmp/daily_brief.json
           cp partener-eu/ingest/state/people_policy.json /tmp/people_policy.json
+          cp partener-eu/ingest/state/people_policy_official_sources.json /tmp/people_policy_official_sources.json
           cp partener-eu/web/daily-brief-data.js /tmp/daily-brief-data.js
           cp partener-eu/web/people-policy-data.js /tmp/people-policy-data.js
           python - <<'PY' > /tmp/editorial-version.txt
@@ -79,6 +84,7 @@ jobs:
             git reset --hard origin/main
             cp /tmp/daily_brief.json partener-eu/ingest/state/daily_brief.json
             cp /tmp/people_policy.json partener-eu/ingest/state/people_policy.json
+            cp /tmp/people_policy_official_sources.json partener-eu/ingest/state/people_policy_official_sources.json
             cp /tmp/daily-brief-data.js partener-eu/web/daily-brief-data.js
             cp /tmp/people-policy-data.js partener-eu/web/people-policy-data.js
             EDITORIAL_VERSION=$(cat /tmp/editorial-version.txt)
@@ -97,13 +103,14 @@ jobs:
               partener-eu/web/index.html \
               partener-eu/ingest/state/daily_brief.json \
               partener-eu/ingest/state/people_policy.json \
+              partener-eu/ingest/state/people_policy_official_sources.json \
               partener-eu/web/daily-brief-data.js \
               partener-eu/web/people-policy-data.js
             if git diff --cached --quiet; then
               echo 'Editorial products already current.'
               exit 0
             fi
-            git commit -m 'Refresh daily briefing and decision-maker intelligence'
+            git commit -m 'Refresh official decision-maker intelligence and daily briefing'
             if git push origin HEAD:main; then exit 0; fi
             sleep $((attempt * 2))
           done
