@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import re
+import unicodedata
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -27,7 +28,6 @@ REQUIRED_POLICIES = {
 }
 RUNTIME_KEYS = ("state_root", "output_root", "current_edition", "live_feed")
 PACK_KEYS = ("source_pack", "brand_pack", "geography_pack")
-TEST_FORBIDDEN = ("vâlcea", "valcea", "valceaclar.ro", "râmnicu", "ramnicu")
 
 
 def load(path: Path) -> dict:
@@ -35,6 +35,51 @@ def load(path: Path) -> dict:
     if not isinstance(value, dict):
         raise ValueError(f"{path}: root must be object")
     return value
+
+
+def normalize_identity(value: str) -> str:
+    folded = unicodedata.normalize("NFKD", value.casefold())
+    return "".join(ch for ch in folded if not unicodedata.combining(ch))
+
+
+def production_identity_tokens() -> tuple[str, ...]:
+    """Derive contamination tokens from current production instance configs."""
+    tokens: set[str] = set()
+    for path in sorted(INSTANCES_ROOT.glob("*/instance.json")):
+        try:
+            cfg = load(path)
+        except Exception:
+            continue
+        if cfg.get("environment") != "production":
+            continue
+        values: list[str] = []
+        for key in ("instance_id", "canonical_domain"):
+            value = cfg.get(key)
+            if isinstance(value, str):
+                values.append(value)
+        brand = cfg.get("brand")
+        if isinstance(brand, dict):
+            values.extend(str(brand[key]) for key in ("name", "short_name") if isinstance(brand.get(key), str))
+        geography = cfg.get("geography")
+        if isinstance(geography, dict):
+            stack = list(geography.values())
+            while stack:
+                value = stack.pop()
+                if isinstance(value, str):
+                    values.append(value)
+                elif isinstance(value, list):
+                    stack.extend(value)
+                elif isinstance(value, dict):
+                    stack.extend(value.values())
+        for raw in values:
+            normalized = normalize_identity(raw).strip()
+            if len(normalized) >= 5:
+                tokens.add(normalized)
+            for part in re.findall(r"[a-z0-9.-]+", normalized):
+                if len(part) >= 5:
+                    tokens.add(part)
+    tokens.difference_update({"romania", "romanian"})
+    return tuple(sorted(tokens))
 
 
 def norm(path: str) -> str:
@@ -58,7 +103,13 @@ def repo_file(raw: str) -> Path | None:
     return candidate
 
 
-def validate_packs(path: Path, cfg: dict, instance_id: str, environment: str) -> list[str]:
+def validate_packs(
+    path: Path,
+    cfg: dict,
+    instance_id: str,
+    environment: str,
+    forbidden_tokens: tuple[str, ...],
+) -> list[str]:
     """Require every local pack to be real, instance-owned and contamination-free."""
     errors: list[str] = []
     packs = cfg.get("packs")
@@ -100,17 +151,17 @@ def validate_packs(path: Path, cfg: dict, instance_id: str, environment: str) ->
             )
 
         if environment == "test":
-            serialized = json.dumps(payload, ensure_ascii=False).lower()
-            leaks = [token for token in TEST_FORBIDDEN if token in serialized]
+            serialized = normalize_identity(json.dumps(payload, ensure_ascii=False))
+            leaks = [token for token in forbidden_tokens if token in serialized]
             if leaks:
                 errors.append(
-                    f"{path}: production-instance contamination in test {key}: {', '.join(leaks)}"
+                    f"{path}: production-instance contamination in test {key}: {', '.join(leaks[:8])}"
                 )
 
     return errors
 
 
-def validate_one(path: Path, cfg: dict) -> list[str]:
+def validate_one(path: Path, cfg: dict, forbidden_tokens: tuple[str, ...]) -> list[str]:
     errors: list[str] = []
     missing = sorted(REQUIRED_TOP - set(cfg))
     if missing:
@@ -141,7 +192,7 @@ def validate_one(path: Path, cfg: dict) -> list[str]:
     if not isinstance(geography, dict) or not str(geography.get("primary_name", "")).strip():
         errors.append(f"{path}: geography.primary_name is required")
 
-    errors.extend(validate_packs(path, cfg, instance_id, environment))
+    errors.extend(validate_packs(path, cfg, instance_id, environment, forbidden_tokens))
 
     policies = cfg.get("policies")
     if not isinstance(policies, dict):
@@ -165,10 +216,10 @@ def validate_one(path: Path, cfg: dict) -> list[str]:
             "canonical_domain": cfg.get("canonical_domain"),
             "geography": cfg.get("geography"),
         }
-        serialized = json.dumps(identity, ensure_ascii=False).lower()
-        leaks = [token for token in TEST_FORBIDDEN if token in serialized]
+        serialized = normalize_identity(json.dumps(identity, ensure_ascii=False))
+        leaks = [token for token in forbidden_tokens if token in serialized]
         if leaks:
-            errors.append(f"{path}: production-instance contamination in test identity: {', '.join(leaks)}")
+            errors.append(f"{path}: production-instance contamination in test identity: {', '.join(leaks[:8])}")
 
     return errors
 
@@ -177,6 +228,7 @@ def validate_all() -> tuple[list[dict], list[str]]:
     paths = sorted(INSTANCES_ROOT.glob("*/instance.json"))
     errors: list[str] = []
     configs: list[dict] = []
+    forbidden_tokens = production_identity_tokens()
     if len(paths) < 2:
         errors.append("at least two instances are required to prove isolation")
 
@@ -187,7 +239,7 @@ def validate_all() -> tuple[list[dict], list[str]]:
             errors.append(f"{path}: cannot load: {exc}")
             continue
         configs.append(cfg)
-        errors.extend(validate_one(path, cfg))
+        errors.extend(validate_one(path, cfg, forbidden_tokens))
 
     domains: dict[str, str] = {}
     for cfg in configs:
