@@ -36,7 +36,15 @@ legacy = {
     "priority": priority,
     "objective": "Obiectiv A",
     "region": "Național",
+    "budget": "100",
+    "fund": "FSE+",
+    "plannedLaunch": "2026-01-01",
+    "plannedClose": "2026-02-01",
+    "callType": "competitiv",
+    "applicants": "IMM",
+    "notes": "",
     "sourceSheet": "Calendar PEO",
+    "sourceRow": 10,
 }
 current = {
     **legacy,
@@ -45,6 +53,29 @@ current = {
 }
 assert module.identity_tuple(legacy) == module.identity_tuple(current)
 
+# Exact duplicate source rows are presentation duplication, not two calls.
+duplicate = {**current, "sourceRow": 11}
+deduped, dropped = module.dedupe_exact_identities([current, duplicate])
+assert len(deduped) == 1
+assert len(dropped) == 1
+assert deduped[0]["sourceRow"] == 10
+
+# Conflicting twins with the same stable identity remain fail-closed.
+conflict = {**duplicate, "budget": "200"}
+try:
+    module.dedupe_exact_identities([current, conflict])
+except RuntimeError as exc:
+    assert "conflicting duplicate PEO stable identity" in str(exc)
+else:
+    raise AssertionError("conflicting duplicate identity did not fail closed")
+
 # A V2 result set must never retain duplicate stable identities.
 assert all(v == 1 for v in Counter([a, b, c, d]).values())
+
+# The runtime contains the strong migration invariant: unchanged source bytes
+# cannot produce a material calendar change merely because IDs were upgraded.
+source = MODULE_PATH.read_text(encoding="utf-8")
+assert "same_source_bytes" in source
+assert "if not same_source_bytes:" in source
+assert "UNCHANGED_WORKBOOK_SHA_IMPLIES_ZERO_MATERIAL_CHANGES" in source
 print("PASS PEO calendar identity regression")
