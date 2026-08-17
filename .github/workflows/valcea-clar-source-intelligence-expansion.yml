@@ -1,0 +1,76 @@
+name: VÂLCEA CLAR Source Intelligence Expansion
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/editorial/source_intelligence_seed_registry.json'
+      - 'valcea-clar/scripts/validate_source_intelligence_seed_registry.py'
+      - 'valcea-clar/scripts/source_intelligence_discover.py'
+      - '.github/workflows/valcea-clar-source-intelligence-expansion.yml'
+  pull_request:
+    paths:
+      - 'valcea-clar/editorial/source_intelligence_seed_registry.json'
+      - 'valcea-clar/scripts/validate_source_intelligence_seed_registry.py'
+      - 'valcea-clar/scripts/source_intelligence_discover.py'
+      - '.github/workflows/valcea-clar-source-intelligence-expansion.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-source-intelligence-${{ github.event.pull_request.number || 'main' }}
+  cancel-in-progress: true
+
+jobs:
+  source-intelligence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Validate seed contract
+        run: python valcea-clar/scripts/validate_source_intelligence_seed_registry.py
+      - name: Validate discovery engine offline
+        run: python valcea-clar/scripts/source_intelligence_discover.py --self-test
+      - name: Probe bounded source frontier
+        if: github.event_name != 'pull_request'
+        run: |
+          python - <<'PY' > /tmp/source-offset.txt
+          import datetime, json
+          from pathlib import Path
+          d=json.loads(Path('valcea-clar/editorial/source_intelligence_seed_registry.json').read_text(encoding='utf-8'))
+          n=max(1,len(d['seed_sources']))
+          hour=int(datetime.datetime.now(datetime.timezone.utc).timestamp()//3600)
+          print((hour*12)%n)
+          PY
+          python valcea-clar/scripts/source_intelligence_discover.py --limit 12 --offset "$(cat /tmp/source-offset.txt)"
+      - name: Persist discovery/probation state
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add valcea-clar/editorial/source_intelligence_discovery_state.json
+          if git diff --cached --quiet; then
+            echo 'No source-intelligence state change.'
+            exit 0
+          fi
+          git config user.name 'vâlcea-clar-source-intelligence[bot]'
+          git config user.email 'valcea-clar-source-intelligence@users.noreply.github.com'
+          git commit -m 'Refresh VÂLCEA CLAR source discovery probation state'
+          for attempt in 1 2 3; do
+            if git pull --rebase origin main && git push origin HEAD:main; then
+              exit 0
+            fi
+            git rebase --abort || true
+            sleep $((attempt*2))
+          done
+          echo 'Could not persist source discovery state without conflict.'
+          exit 1
