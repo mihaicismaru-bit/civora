@@ -31,10 +31,13 @@ jobs:
         run: |
           python -m py_compile local-news-os/persistence/reconciliation_engine.py
           python -m py_compile local-news-os/persistence/validate_reconciliation_triggers.py
+          python -m py_compile local-news-os/persistence/persistence_writer.py
       - name: Run deterministic fail-closed reconciliation acceptance
         run: python local-news-os/persistence/reconciliation_engine.py --self-test
       - name: Validate PRS-037 reconciliation trigger contract
         run: python local-news-os/persistence/validate_reconciliation_triggers.py --self-test
+      - name: Validate PRS-038 fail-closed persistence writer
+        run: python local-news-os/persistence/persistence_writer.py --self-test
       - name: Validate existing scope classifier alongside reconciliation
         run: python local-news-os/core/repository_scope_fingerprint.py --self-test
       - name: Verify acceptance contract is present
