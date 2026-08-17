@@ -27,7 +27,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - name: Inspect Pages and attempt custom domain
+      - name: Inspect Pages and enforce custom-domain HTTPS
         id: pagesapi
         env:
           GH_TOKEN: ${{ github.token }}
@@ -39,24 +39,23 @@ jobs:
             https://api.github.com/repos/${GITHUB_REPOSITORY}/pages || true)
           echo "before=$code" >> "$GITHUB_OUTPUT"
           echo "create=not_needed" >> "$GITHUB_OUTPUT"
-          cname=$(curl -sS -o /tmp/pages-cname.json -w '%{http_code}' -X PUT \
+          configure=$(curl -sS -o /tmp/pages-configure.json -w '%{http_code}' -X PUT \
             -H 'Accept: application/vnd.github+json' \
             -H "Authorization: Bearer $GH_TOKEN" \
             -H 'X-GitHub-Api-Version: 2026-03-10' \
             https://api.github.com/repos/${GITHUB_REPOSITORY}/pages \
-            -d '{"cname":"partener.eu","build_type":"workflow"}' || true)
-          echo "cname=$cname" >> "$GITHUB_OUTPUT"
+            -d '{"cname":"partener.eu","build_type":"workflow","https_enforced":true}' || true)
+          echo "cname=$configure" >> "$GITHUB_OUTPUT"
+          echo "https_configure=$configure" >> "$GITHUB_OUTPUT"
+          test "$configure" = "204"
       - id: configure
-        continue-on-error: true
         uses: actions/configure-pages@v5
       - id: upload
-        continue-on-error: true
         uses: actions/upload-pages-artifact@v4
         with:
           path: partener-eu/web
       - name: Deploy Pages
         id: deployment
-        continue-on-error: true
         uses: actions/deploy-pages@v4
       - name: Inspect final Pages state
         id: finalapi
@@ -78,6 +77,8 @@ jobs:
               f.write('html_url='+str(d.get('html_url') or '')+'\n')
               f.write('cname='+str(d.get('cname') or '')+'\n')
               f.write('https_enforced='+str(d.get('https_enforced') or '')+'\n')
+          assert d.get('cname') == 'partener.eu', d
+          assert d.get('https_enforced') is True, d
           PY
       - name: Verify live DNS and HTTP
         id: livecheck
@@ -94,7 +95,7 @@ jobs:
                   return [f'ERROR:{type(e).__name__}:{e}']
           def http(url):
               try:
-                  req=urllib.request.Request(url, headers={'User-Agent':'PARTENER-EU-livecheck/1.0'})
+                  req=urllib.request.Request(url, headers={'User-Agent':'PARTENER-EU-livecheck/1.1'})
                   with urllib.request.urlopen(req, timeout=20, context=ssl.create_default_context()) as r:
                       body=r.read(120000).decode('utf-8','ignore')
                       return {'ok':True,'status':r.status,'final_url':r.geturl(),'title_new':('Funding Explorer' in body or 'PARTENER.EU' in body),'wordpress':('wp-content' in body or 'WordPress' in body)}
@@ -110,6 +111,9 @@ jobs:
             'https_www':http('https://www.partener.eu/')
           }
           json.dump(out,open('/tmp/livecheck.json','w'),indent=2)
+          assert out['https_apex'].get('ok') is True, out
+          assert out['https_apex'].get('wordpress') is False, out
+          assert str(out['http_apex'].get('final_url') or '').startswith('https://'), out
           PY
       - name: Record go-live result
         if: always()
@@ -118,6 +122,7 @@ jobs:
           BEFORE_CODE: ${{ steps.pagesapi.outputs.before }}
           CREATE_CODE: ${{ steps.pagesapi.outputs.create }}
           CNAME_CODE: ${{ steps.pagesapi.outputs.cname }}
+          HTTPS_CONFIGURE_CODE: ${{ steps.pagesapi.outputs.https_configure }}
           FINAL_CODE: ${{ steps.finalapi.outputs.code }}
           FINAL_URL: ${{ steps.finalapi.outputs.html_url }}
           FINAL_CNAME: ${{ steps.finalapi.outputs.cname }}
@@ -125,19 +130,26 @@ jobs:
           CONFIGURE_OUTCOME: ${{ steps.configure.outcome }}
           UPLOAD_OUTCOME: ${{ steps.upload.outcome }}
           DEPLOY_OUTCOME: ${{ steps.deployment.outcome }}
+          LIVECHECK_OUTCOME: ${{ steps.livecheck.outcome }}
         run: |
           mkdir -p partener-eu/deployment
           python - <<'PY'
           import json, os, datetime
           try: live=json.load(open('/tmp/livecheck.json'))
           except Exception: live={}
-          ok=os.getenv('DEPLOY_OUTCOME')=='success' and bool(os.getenv('PAGE_URL'))
+          ok=(
+              os.getenv('DEPLOY_OUTCOME')=='success'
+              and bool(os.getenv('PAGE_URL'))
+              and os.getenv('HTTPS_ENFORCED','').lower()=='true'
+              and os.getenv('LIVECHECK_OUTCOME')=='success'
+          )
           out={
             'status':'LIVE_ENDPOINT_READY' if ok else 'BLOCKED',
             'page_url':os.getenv('PAGE_URL') or None,
             'pages_get_before':os.getenv('BEFORE_CODE'),
             'pages_create_attempt':os.getenv('CREATE_CODE'),
             'custom_domain_attempt':os.getenv('CNAME_CODE'),
+            'https_configure_attempt':os.getenv('HTTPS_CONFIGURE_CODE'),
             'pages_final_get':os.getenv('FINAL_CODE'),
             'pages_final_url':os.getenv('FINAL_URL') or None,
             'pages_final_cname':os.getenv('FINAL_CNAME') or None,
@@ -145,6 +157,7 @@ jobs:
             'configure_outcome':os.getenv('CONFIGURE_OUTCOME'),
             'upload_outcome':os.getenv('UPLOAD_OUTCOME'),
             'deploy_outcome':os.getenv('DEPLOY_OUTCOME'),
+            'livecheck_outcome':os.getenv('LIVECHECK_OUTCOME'),
             'live_check':live,
             'observed_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),
             'trigger':'issue'
