@@ -1,24 +1,20 @@
-name: PARTENER.EU MIPE Dual Relay
+name: PARTENER.EU MIPE Dual Relay Diagnostic
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '47 * * * *'
-  push:
-    branches: [main]
-    paths:
-      - 'partener-eu/ops/fix_mipe_dual_relay.py'
-      - '.github/workflows/partener-eu-mipe-dual-relay.yml'
 
+# Relays are diagnostics/discovery only. Canonical PARTENER.EU publication stays
+# direct-source/fail-closed and the Romanian self-hosted runner is the supported
+# transport when GitHub-hosted egress cannot reach MIPE directly.
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: partener-eu-mipe-ingest
+  group: partener-eu-mipe-dual-relay-diagnostic
   cancel-in-progress: true
 
 jobs:
-  ingest:
+  diagnose:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
@@ -31,7 +27,7 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Assemble fail-closed multi-transport runtime
+      - name: Assemble ephemeral diagnostic runtime
         run: |
           python partener-eu/ops/fix_mipe_resilient_classifier.py
           python partener-eu/ops/fix_mipe_resilient_runtime.py
@@ -44,13 +40,10 @@ jobs:
           python -m py_compile partener-eu/ingest/mipe_resilient_ingest.py
           python partener-eu/ops/test_mipe_resilient_ingest.py
 
-      - name: Ingest official MIPE pages
+      - name: Probe MIPE through dual relay without publication
         run: python partener-eu/ingest/mipe_resilient_ingest.py
 
-      - name: Build MySMIS consultant evidence
-        run: python partener-eu/ingest/build_mysmis_consultant_registry.py
-
-      - name: Validate dual-relay evidence and canonical provenance
+      - name: Validate diagnostic evidence and canonical provenance
         run: |
           python - <<'PY'
           import json
@@ -77,52 +70,20 @@ jobs:
               assert len(root.get('readerSha256', '')) == 64
               assert len(root.get('translateSha256', '')) == 64
               assert root.get('sharedOfficialPathCount', 0) >= 1
-              assert root.get('readerUrl', '').startswith('https://r.jina.ai/https://mfe.gov.ro/')
-              assert root.get('translateUrl', '').startswith('https://mfe-gov-ro.translate.goog/')
 
           print(json.dumps({
+              'diagnosticOnly': True,
+              'canonicalPublicationChanged': False,
               'status': state.get('status'),
-              'publishedItems': len(state.get('items', [])),
+              'publishedItemsInEphemeralWorkspace': len(state.get('items', [])),
               'dualRelayRoots': len(dual_roots),
               'dualRelayItems': len(dual_items),
               'observedAt': state.get('lastRun', {}).get('observedAt'),
           }, ensure_ascii=False, indent=2))
           PY
 
-      - name: Persist transport runtime and verified outputs
+      - name: Confirm repository remains untouched
         shell: bash
         run: |
-          set -euo pipefail
-          cp partener-eu/ingest/mipe_resilient_ingest.py /tmp/mipe_resilient_ingest.py
-          cp partener-eu/ingest/state/mipe_state.json /tmp/mipe_state.json
-          cp partener-eu/ingest/state/mipe_source_registry.json /tmp/mipe_source_registry.json
-          cp partener-eu/web/mipe-news.js /tmp/mipe-news.js
-          cp partener-eu/web/mysmis-registry.js /tmp/mysmis-registry.js
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-
-          for attempt in 1 2 3 4 5; do
-            git fetch origin main
-            git reset --hard origin/main
-            cp /tmp/mipe_resilient_ingest.py partener-eu/ingest/mipe_resilient_ingest.py
-            cp /tmp/mipe_state.json partener-eu/ingest/state/mipe_state.json
-            cp /tmp/mipe_source_registry.json partener-eu/ingest/state/mipe_source_registry.json
-            cp /tmp/mipe-news.js partener-eu/web/mipe-news.js
-            cp /tmp/mysmis-registry.js partener-eu/web/mysmis-registry.js
-            python partener-eu/ingest/intelligence_index.py
-            git add \
-              partener-eu/ingest/mipe_resilient_ingest.py \
-              partener-eu/ingest/state/mipe_state.json \
-              partener-eu/ingest/state/mipe_source_registry.json \
-              partener-eu/ingest/state/intelligence_index.json \
-              partener-eu/web/mipe-news.js \
-              partener-eu/web/mysmis-registry.js
-            if git diff --cached --quiet; then
-              echo 'No dual-relay MIPE changes.'
-              exit 0
-            fi
-            git commit -m 'Ingest MIPE through dual independent relay corroboration'
-            if git push origin HEAD:main; then exit 0; fi
-            sleep $((attempt * 2))
-          done
-          exit 1
+          echo 'Diagnostic workspace changes are intentionally not committed or pushed.'
+          git status --short
