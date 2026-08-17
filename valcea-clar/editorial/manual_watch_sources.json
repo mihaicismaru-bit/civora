@@ -26,6 +26,23 @@
       "core_feedback": "LOCAL NEWS OS needs a generic UTILITY_ADVISORY source contract that separates published_at from event_start/event_end, requires explicit geographic scope and primary-source provenance, and may admit only current/future service advisories without converting event dates into publication dates."
     },
     {
+      "id": "distributie-oltenia-intreruperi-valcea",
+      "publisher": "Distribuție Oltenia — Lucrări programate Vâlcea",
+      "url": "https://www.distributieoltenia.ro/ro/suport/lucrari-pentru-prevenire-si-corectare-avarii/valcea.html",
+      "tier": "T1",
+      "section": "UTILITATE",
+      "status": "QUARANTINED_UTILITY_SCHEDULE_EVENT_TIME_NO_PUBLISHED_AT",
+      "checked_at": "2026-08-17",
+      "reason": "The official Distribuție Oltenia Vâlcea page is a high-value county-specific source for planned electricity interruptions and exposes weekly schedule items such as 'Valcea - Intreruperi 03.08 - 09.08.2026'. Those dates describe the service-event window, not a trustworthy article publication timestamp, and the listing is organized as recurring schedule documents rather than a conventional news article feed. The current title + published_at + source automatic contract must not reinterpret the outage week or crawl time as freshness evidence, so the source is monitored fail-closed instead of being admitted to autopublication.",
+      "safe_use": [
+        "manual discovery of current and upcoming planned electricity interruptions in Vâlcea",
+        "primary-source verification of interruption date, time interval, locality and affected zone",
+        "utility reporting only from the official county schedule or the operator's live interruption map",
+        "cross-checking municipal service notices without treating the event week as published_at"
+      ],
+      "core_feedback": "This reinforces the existing generic UTILITY_ADVISORY requirement already identified by APAVIL and CET Govora: preserve stable advisory identity and source-document provenance, model event_start/event_end and affected_area separately from published_at, admit only current/future advisories after deterministic geography matching, and never derive freshness from the service interval itself. No Vâlcea-specific parser or new CORE function is justified in this increment."
+    },
+    {
       "id": "dragasani-urbanism-autorizatii-2026",
       "publisher": "Primăria Municipiului Drăgășani — Serviciul Urbanism",
       "url": "https://www.primariadragasani.ro/informatii-publice/urbanism/autorizatii-de-construire-desfiintare/2026",
