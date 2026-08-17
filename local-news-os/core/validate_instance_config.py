@@ -28,6 +28,7 @@ REQUIRED_POLICIES = {
 }
 RUNTIME_KEYS = ("state_root", "output_root", "current_edition", "live_feed")
 PACK_KEYS = ("source_pack", "brand_pack", "geography_pack")
+GENERIC_IDENTITY_WORDS = {"romania", "romanian", "county", "judetul", "local", "news", "clar"}
 
 
 def load(path: Path) -> dict:
@@ -84,7 +85,7 @@ def production_identity_tokens() -> tuple[str, ...]:
             for part in re.findall(r"[a-z0-9.-]+", normalized):
                 if len(part) >= 5:
                     tokens.add(part)
-    tokens.difference_update({"romania", "romanian"})
+    tokens.difference_update(GENERIC_IDENTITY_WORDS)
     return tuple(sorted(tokens))
 
 
