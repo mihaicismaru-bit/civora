@@ -1,6 +1,6 @@
 # CIVORA persistence reconciliation engine acceptance
 
-This increment implements the executable core required by PRS-016–024 and the explicit acceptance cases required by PRS-042–050.
+This increment implements the executable core required by PRS-016–024 and the explicit acceptance cases required by PRS-042–051.
 
 ## Authority boundaries
 
@@ -30,6 +30,7 @@ This increment implements the executable core required by PRS-016–024 and the 
 17. **PRS-048:** when current evidence explicitly replaces an old active decision with a newer not-yet-implemented decision, the old decision reconciles to `SUPERSEDED` with `superseded_by` lineage, its stale backlog is retired, and the replacement remains `ACTIVE_UNIMPLEMENTED` with an active backlog item. The replacement relationship alone must not make the new decision `IMPLEMENTED`, and the changed active binding remains `RECONCILIATION_REQUIRED` until separately persisted and read back under the writer lease.
 18. **PRS-049:** two consecutive reconciliations with unchanged repository/external evidence and the first result used as the second persisted layer must have zero semantic drift, zero diagnostics and exactly one row per decision, capability and backlog identity. Reconciliation must not duplicate already-active backlog items or manufacture new decision state on an unchanged second pass.
 19. **PRS-050:** current social truth is persisted by separate runtime and external dimensions. Facebook and Instagram may be direct and externally evidenced; Threads may be direct-capable while remaining `PARTIAL` without story-level remote evidence; TikTok remains `GATED_DIRECT`; X, LinkedIn, YouTube, Telegram and WhatsApp remain `OUTBOX_ONLY`. Direct capability never implies successful remote publication.
+20. **PRS-051:** profile persistence uses separate namespaced capability identities for local asset readiness and external deployment/readback. A locally READY asset may be `IMPLEMENTED` while the same profile's deployment remains `PARTIAL`/`UNCONFIRMED`; only independent remote evidence can promote the deployment capability. The generic acceptance fixture uses synthetic instance context and does not embed Vâlcea-specific values in CORE_GENERIC.
 
 ## PRS mapping
 
@@ -51,5 +52,6 @@ This increment implements the executable core required by PRS-016–024 and the 
 - PRS-048: executable `prs_048_explicit_decision_replacement_acceptance.py` verifies that an explicit replacement retires the old decision/backlog as `SUPERSEDED` while the new decision remains active until independently implemented.
 - PRS-049: executable `prs_049_consecutive_no_change_idempotency_acceptance.py` verifies that two unchanged consecutive reconciliation passes preserve identical semantic state with zero diagnostics and no duplicate decisions, capabilities or backlog items.
 - PRS-050: executable `prs_050_current_social_truth_acceptance.py` verifies the current nine-channel truth model without conflating direct-capable, gated, outbox-only and remotely evidenced publication states.
+- PRS-051: executable `prs_051_profile_state_separation_acceptance.py` verifies that asset readiness and profile deployment/readback are distinct namespaced capabilities, so local READY cannot promote external LIVE without independent remote evidence.
 
 The engine does not replace the Google Drive writer lease. Any process that persists its result into active CIVORA state must separately acquire `CIVORA_PERSISTENCE_WRITER_LEASE_V1`, use per-target revision control, verify readback, and release the lease.
