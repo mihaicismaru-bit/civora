@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
+      - "local-news-os/social/reread_result_materialization_binding.py"
       - "local-news-os/social/reread_provider_outcome_binding.py"
       - "local-news-os/social/reread_spend_reclaim_binding.py"
       - "local-news-os/social/reread_spend_reservation_recovery.py"
@@ -18,6 +19,7 @@ on:
   push:
     branches: [main]
     paths:
+      - "local-news-os/social/reread_result_materialization_binding.py"
       - "local-news-os/social/reread_provider_outcome_binding.py"
       - "local-news-os/social/reread_spend_reclaim_binding.py"
       - "local-news-os/social/reread_spend_reservation_recovery.py"
@@ -51,6 +53,7 @@ jobs:
       - name: Compile provider reread outcome boundary
         run: |
           python -m py_compile \
+            local-news-os/social/reread_result_materialization_binding.py \
             local-news-os/social/reread_provider_outcome_binding.py \
             local-news-os/social/reread_spend_reclaim_binding.py \
             local-news-os/social/reread_spend_reservation_recovery.py \
@@ -93,9 +96,12 @@ jobs:
           import authorization_sealed_harvest_receipt as receipt
           import fleet_metrics_authorization_seal_with_reread_spend  # noqa: F401
           import reread_provider_outcome_binding as outcome
+          import reread_result_materialization_binding as materialization
 
-          if receipt.transition_sealed.__module__ != outcome.__name__:
-              raise SystemExit('operational harvest does not install reread provider outcome binding')
+          if receipt.transition_sealed.__module__ != materialization.__name__:
+              raise SystemExit('operational harvest does not install durable reread materialization as outer boundary')
+          if materialization._BASE_TRANSITION.__module__ != outcome.__name__:
+              raise SystemExit('durable materialization boundary does not preserve provider outcome binding underneath')
           guards = outcome.outcome_guards()
           required = {
               'reclaim_provenance_required_for_reread_outcome': True,
