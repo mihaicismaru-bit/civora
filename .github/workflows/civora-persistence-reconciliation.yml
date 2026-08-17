@@ -31,6 +31,7 @@ jobs:
         run: |
           python -m py_compile local-news-os/persistence/reconciliation_engine.py
           python -m py_compile local-news-os/persistence/validate_reconciliation_triggers.py
+          python -m py_compile local-news-os/persistence/credential_safety.py
           python -m py_compile local-news-os/persistence/persistence_writer.py
       - name: Run deterministic fail-closed reconciliation acceptance
         run: python local-news-os/persistence/reconciliation_engine.py --self-test
@@ -38,9 +39,12 @@ jobs:
         run: python local-news-os/persistence/validate_reconciliation_triggers.py --self-test
       - name: Validate PRS-038 fail-closed persistence writer
         run: python local-news-os/persistence/persistence_writer.py --self-test
+      - name: Validate PRS-039 zero-credential persistence contract
+        run: python local-news-os/persistence/credential_safety.py --self-test
       - name: Validate existing scope classifier alongside reconciliation
         run: python local-news-os/core/repository_scope_fingerprint.py --self-test
       - name: Verify acceptance contracts are present
         run: |
           test -s local-news-os/persistence/RECONCILIATION_ENGINE_ACCEPTANCE.md
           test -s local-news-os/persistence/PERSISTENCE_WRITER_ACCEPTANCE.md
+          test -s local-news-os/persistence/CREDENTIAL_SAFETY_ACCEPTANCE.md
