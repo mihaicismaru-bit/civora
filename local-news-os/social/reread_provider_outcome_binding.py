@@ -173,7 +173,7 @@ def _context(
 ) -> tuple[dict[str, Any] | None, dict[str, Any] | None, dict[str, Any] | None, dict[str, Any] | None, list[str]]:
     provenance = current_receipt.get(reclaim.PROVENANCE_FIELD) if isinstance(current_receipt.get(reclaim.PROVENANCE_FIELD), dict) else None
     if provenance is None:
-        return None, None, None, None, []
+        return None, None, None, None, ["REREAD_OUTCOME_RECLAIM_PROVENANCE_REQUIRED"]
     source_receipt, evidence, release_blocks = _find_release_source(
         entry, provenance, job, authorization_fingerprint
     )
@@ -328,6 +328,12 @@ def _outcome_blocks(
     return sorted(set(blocks))
 
 
+def _reread_lineage_present(entry: dict[str, Any], current: dict[str, Any] | None) -> bool:
+    if isinstance(current, dict) and isinstance(current.get("reread_attempt_provenance"), dict):
+        return True
+    return isinstance(receipt._lineage_recovery_receipt(entry), dict)
+
+
 def transition_sealed(
     repo_root: Path,
     channel: dict[str, Any],
@@ -354,7 +360,8 @@ def transition_sealed(
         )
     current = receipt._latest_receipt(entry)
     provenance = current.get(reclaim.PROVENANCE_FIELD) if isinstance(current, dict) and isinstance(current.get(reclaim.PROVENANCE_FIELD), dict) else None
-    if provenance is None:
+    lineage_present = _reread_lineage_present(entry, current)
+    if provenance is None and not lineage_present:
         return _BASE_TRANSITION(
             repo_root, channel, job,
             authorization_fingerprint=authorization_fingerprint,
@@ -362,6 +369,12 @@ def transition_sealed(
             retry_after_at=retry_after_at,
             materialization_fingerprint_sha256=materialization_fingerprint_sha256,
         )
+    if provenance is None:
+        return {
+            "persisted": False,
+            "status": "HOLD_REREAD_OUTCOME_LINEAGE",
+            "hard_blocks": ["REREAD_OUTCOME_RECLAIM_PROVENANCE_REQUIRED"],
+        }
 
     checked = receipt.validate_sealed_entry(entry, authorization_fingerprint)
     if checked.get("valid") is not True:
