@@ -1,0 +1,98 @@
+name: LOCAL NEWS OS Provider Reread Handoff
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/social/authorization_sealed_provider_reread_handoff.py"
+      - "local-news-os/social/test_authorization_sealed_provider_reread_handoff.py"
+      - "local-news-os/social/authorization_sealed_harvest_recovery.py"
+      - "local-news-os/social/authorization_sealed_harvest_receipt.py"
+      - "local-news-os/social/metrics_harvest_runtime.py"
+      - "local-news-os/social/fleet_metrics_recovery_orchestrator.py"
+      - "local-news-os/social/operational_metrics_harvest_trigger.py"
+      - ".github/workflows/local-news-os-provider-reread-handoff.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/social/authorization_sealed_provider_reread_handoff.py"
+      - "local-news-os/social/test_authorization_sealed_provider_reread_handoff.py"
+      - "local-news-os/social/authorization_sealed_harvest_recovery.py"
+      - "local-news-os/social/authorization_sealed_harvest_receipt.py"
+      - "local-news-os/social/metrics_harvest_runtime.py"
+      - "local-news-os/social/fleet_metrics_recovery_orchestrator.py"
+      - "local-news-os/social/operational_metrics_harvest_trigger.py"
+      - ".github/workflows/local-news-os-provider-reread-handoff.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-news-os-provider-reread-handoff-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile sealed reread authorization boundary
+        run: |
+          python -m py_compile \
+            local-news-os/social/authorization_sealed_harvest_receipt.py \
+            local-news-os/social/authorization_sealed_harvest_recovery.py \
+            local-news-os/social/authorization_sealed_provider_reread_handoff.py \
+            local-news-os/social/test_authorization_sealed_provider_reread_handoff.py
+
+      - name: Run explicit provider reread handoff acceptance tests
+        working-directory: local-news-os/social
+        run: python test_authorization_sealed_provider_reread_handoff.py
+
+      - name: Run sealed recovery regression tests
+        working-directory: local-news-os/social
+        run: python test_authorization_sealed_harvest_recovery.py
+
+      - name: Verify operational recovery has no direct reread bypass
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -R -n -E 'authorize_provider_reread[[:space:]]*=[[:space:]]*True|--authorize-provider-reread' \
+            .github/workflows \
+            local-news-os/social/fleet_metrics_recovery_orchestrator.py \
+            local-news-os/social/operational_metrics_harvest_trigger.py; then
+            echo "Operational recovery must use the durable single-use handoff, not direct reread authorization."
+            exit 1
+          fi
+          echo "PROVIDER_REREAD_NO_OPERATIONAL_BYPASS_PASS"
+
+      - name: Verify handoff guards
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, 'local-news-os/social')
+          import authorization_sealed_provider_reread_handoff as h
+          guards = h._guards()
+          required = {
+              'explicit_authorization_required': True,
+              'single_use_handoff': True,
+              'handoff_consumed_before_retry_eligibility': True,
+              'observation_ledger_rechecked_before_consume': True,
+              'provider_network_calls_performed': False,
+              'credential_values_read': False,
+              'credential_values_persisted': False,
+              'provider_payload_persisted': False,
+              'analytics_advisory_only': True,
+              'publication_blocked_by_analytics': False,
+              'zero_paid_dependency': True,
+          }
+          for key, expected in required.items():
+              if guards.get(key) is not expected:
+                  raise SystemExit(f'guard mismatch: {key}={guards.get(key)!r}')
+          print('PROVIDER_REREAD_HANDOFF_GUARDS_PASS')
+          PY
