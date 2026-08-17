@@ -25,6 +25,10 @@ from typing import Any
 import council_fact_kernel as base
 import council_watch_rm_valcea as council
 
+# Preserve the base resolver before install() patches the module global. This
+# avoids recursive self-delegation when base.self_test() calls the patched name.
+_BASE_DECISION_ATTACHMENTS = base.decision_attachments
+
 ROW_ENTRY = re.compile(
     rf"\b2026\s+(?P<number>\d{{1,4}})\s+hotarirea\s+(?P=number)\s*-\s*"
     rf"(?P<day>[0-3]?\d)\s+(?P<month>{council.MONTH_PATTERN})\s+2026\s*-\s*"
@@ -98,9 +102,6 @@ def table_row_links(register_url: str, register_body: str) -> list[dict[str, Any
                 canonical.append(url)
         if not canonical:
             continue
-        # Prefer the actual document/attachment-shaped URL when present, then
-        # any official link in the same exact HCL row. verify_document() will
-        # still require operative HCL semantics before accepting it.
         canonical = list(dict.fromkeys(canonical))
         canonical.sort(
             key=lambda url: (
@@ -119,8 +120,8 @@ def table_row_links(register_url: str, register_body: str) -> list[dict[str, Any
 
 
 def structural_decision_attachments(register_url: str, register_body: str, requested: list[dict[str, Any]]) -> dict[int, str]:
-    """Combine the base exact resolvers with structural `<tr>` identity."""
-    out = dict(base.decision_attachments(register_url, register_body, requested))
+    """Combine the original exact resolvers with structural `<tr>` identity."""
+    out = dict(_BASE_DECISION_ATTACHMENTS(register_url, register_body, requested))
     wanted = {
         (int(row.get("decision_number") or 0), str(row.get("decision_date") or ""))
         for row in requested
@@ -155,6 +156,9 @@ def self_test() -> int:
     }]
     resolved = structural_decision_attachments(council.ADOPTED_VIEW, mock, requested)
     assert 304 in resolved and "ABC" in resolved[304]
+    install()
+    resolved_again = structural_decision_attachments(council.ADOPTED_VIEW, mock, requested)
+    assert resolved_again == resolved
     print("VÂLCEA CLAR DocManager table-row resolver self-test: PASS")
     return 0
 
