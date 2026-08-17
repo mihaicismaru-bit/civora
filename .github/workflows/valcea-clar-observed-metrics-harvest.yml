@@ -1,4 +1,4 @@
-name: VÂLCEA CLAR Observed Metrics Harvest
+name: LOCAL NEWS OS Fleet Observed Metrics Harvest
 
 on:
   schedule:
@@ -6,6 +6,8 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
+      - "local-news-os/social/fleet_metrics_harvest_orchestrator.py"
+      - "local-news-os/social/test_fleet_metrics_harvest_orchestrator.py"
       - "local-news-os/social/operational_metrics_harvest_trigger.py"
       - "local-news-os/social/test_operational_metrics_harvest_trigger.py"
       - "local-news-os/social/metrics_harvest_runtime.py"
@@ -14,37 +16,42 @@ on:
       - "local-news-os/social/observed_metrics_collector.py"
       - "local-news-os/social/durable_feedback_snapshot.py"
       - "local-news-os/social/publication_metrics_catalog.py"
-      - "valcea-clar/social/channels/facebook.json"
-      - "valcea-clar/social/channels/instagram.json"
-      - "valcea-clar/social/meta_auth_state.json"
+      - "local-news-os/social/multi_instance_isolation.py"
+      - "local-news-os/social/social_runtime_registry.json"
+      - "**/social/channel_registry.json"
+      - "**/social/channels/**"
+      - "**/social/*_auth_state.json"
       - ".github/workflows/valcea-clar-observed-metrics-harvest.yml"
   push:
     branches: [main]
     paths:
+      - "local-news-os/social/fleet_metrics_harvest_orchestrator.py"
+      - "local-news-os/social/test_fleet_metrics_harvest_orchestrator.py"
       - "local-news-os/social/operational_metrics_harvest_trigger.py"
-      - "local-news-os/social/test_operational_metrics_harvest_trigger.py"
       - "local-news-os/social/metrics_harvest_runtime.py"
       - "local-news-os/social/metrics_harvest_scheduler.py"
       - "local-news-os/social/native_metrics_transport.py"
       - "local-news-os/social/observed_metrics_collector.py"
       - "local-news-os/social/durable_feedback_snapshot.py"
       - "local-news-os/social/publication_metrics_catalog.py"
-      - "valcea-clar/social/channels/facebook.json"
-      - "valcea-clar/social/channels/instagram.json"
-      - "valcea-clar/social/meta_auth_state.json"
+      - "local-news-os/social/multi_instance_isolation.py"
+      - "local-news-os/social/social_runtime_registry.json"
+      - "**/social/channel_registry.json"
+      - "**/social/channels/**"
+      - "**/social/*_auth_state.json"
       - ".github/workflows/valcea-clar-observed-metrics-harvest.yml"
 
 permissions:
   contents: read
 
 concurrency:
-  group: valcea-clar-observed-metrics-harvest-${{ github.ref }}
+  group: local-news-os-fleet-observed-metrics-harvest-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
   acceptance:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
 
@@ -52,7 +59,7 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Compile operational metrics harvest boundary
+      - name: Compile fleet observed metrics harvest boundary
         run: |
           python -m py_compile \
             local-news-os/social/publication_metrics_catalog.py \
@@ -62,32 +69,38 @@ jobs:
             local-news-os/social/metrics_harvest_scheduler.py \
             local-news-os/social/metrics_harvest_runtime.py \
             local-news-os/social/operational_metrics_harvest_trigger.py \
-            local-news-os/social/test_operational_metrics_harvest_trigger.py
+            local-news-os/social/multi_instance_isolation.py \
+            local-news-os/social/fleet_metrics_harvest_orchestrator.py \
+            local-news-os/social/test_operational_metrics_harvest_trigger.py \
+            local-news-os/social/test_fleet_metrics_harvest_orchestrator.py
 
-      - name: Run operational metrics harvest trigger acceptance tests
+      - name: Run operational channel harvest trigger acceptance tests
         run: python local-news-os/social/test_operational_metrics_harvest_trigger.py
 
-      - name: Verify Vâlcea Meta channels evaluate without network or catalog fabrication
+      - name: Run fleet harvest discovery and isolation acceptance tests
+        run: python local-news-os/social/test_fleet_metrics_harvest_orchestrator.py
+
+      - name: Verify fleet evaluates native/free channels without network or descriptor fabrication
         run: |
           NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          python local-news-os/social/operational_metrics_harvest_trigger.py \
+          python local-news-os/social/fleet_metrics_harvest_orchestrator.py \
             --repo-root . \
-            --channel valcea-clar/social/channels/facebook.json \
-            --channel valcea-clar/social/channels/instagram.json \
-            --access-attestation valcea-clar/social/meta_auth_state.json \
+            --runtime-registry local-news-os/social/social_runtime_registry.json \
             --now "$NOW" \
-            >/tmp/valcea-metrics-harvest-dry-run.json
+            >/tmp/fleet-metrics-harvest-dry-run.json
           python - <<'PY'
           import json
           from pathlib import Path
-          result = json.loads(Path('/tmp/valcea-metrics-harvest-dry-run.json').read_text(encoding='utf-8'))
+          result = json.loads(Path('/tmp/fleet-metrics-harvest-dry-run.json').read_text(encoding='utf-8'))
           assert result['publication_blocked'] is False, result
+          assert result['guards']['fleet_discovery_from_registry'] is True, result
+          assert result['guards']['hardcoded_instance_or_platform_selection'] is False, result
           assert result['guards']['native_free_transport_only'] is True, result
           assert result['guards']['credential_values_returned'] is False, result
           assert result['guards']['zero_paid_dependency'] is True, result
-          for row in result['channels']:
-              assert row['platform'] in {'facebook', 'instagram'}, row
-              assert row['publication_blocked'] is False, row
+          eligible = {(row['instance_id'], row['platform']) for row in result['channels'] if row.get('eligible') is True}
+          assert ('valcea', 'facebook') in eligible, result
+          assert ('valcea', 'instagram') in eligible, result
           print(result['status'])
           PY
 
@@ -98,6 +111,8 @@ jobs:
     timeout-minutes: 12
     permissions:
       contents: write
+    # Credential injection remains an explicit least-privilege allowlist. Fleet
+    # discovery is generic; adding a future instance never grants it a secret.
     env:
       VALCEA_FB_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_FB_PAGE_ACCESS_TOKEN }}
       VALCEA_IG_ACCESS_TOKEN: ${{ secrets.VALCEA_IG_ACCESS_TOKEN }}
@@ -110,21 +125,19 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Harvest due confirmed Meta publications through native/free transport
+      - name: Harvest due fleet publications through verified native/free transports
         shell: bash
         run: |
           set -euo pipefail
           NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          python local-news-os/social/operational_metrics_harvest_trigger.py \
+          python local-news-os/social/fleet_metrics_harvest_orchestrator.py \
             --repo-root . \
-            --channel valcea-clar/social/channels/facebook.json \
-            --channel valcea-clar/social/channels/instagram.json \
-            --access-attestation valcea-clar/social/meta_auth_state.json \
+            --runtime-registry local-news-os/social/social_runtime_registry.json \
             --now "$NOW" \
             --execute \
-            | tee /tmp/valcea-observed-metrics-harvest.json
+            | tee /tmp/fleet-observed-metrics-harvest.json
 
-      - name: Verify harvest output contains no credential material
+      - name: Verify fleet harvest output contains no credential material
         shell: bash
         run: |
           set -euo pipefail
@@ -132,47 +145,57 @@ jobs:
           import json
           import os
           from pathlib import Path
-          result = json.loads(Path('/tmp/valcea-observed-metrics-harvest.json').read_text(encoding='utf-8'))
+          result = json.loads(Path('/tmp/fleet-observed-metrics-harvest.json').read_text(encoding='utf-8'))
           encoded = json.dumps(result, ensure_ascii=False)
           for name in ('VALCEA_FB_PAGE_ACCESS_TOKEN', 'VALCEA_IG_ACCESS_TOKEN'):
               value = os.environ.get(name, '')
               if value and value in encoded:
-                  raise SystemExit(f'credential value leaked into harvest output: {name}')
+                  raise SystemExit(f'credential value leaked into fleet harvest output: {name}')
           if result.get('publication_blocked') is not False:
               raise SystemExit('analytics attempted to block publication')
-          if result.get('guards', {}).get('zero_paid_dependency') is not True:
+          guards = result.get('guards', {})
+          if guards.get('cross_instance_metrics_sharing_forbidden') is not True:
+              raise SystemExit('fleet metrics isolation guard missing')
+          if guards.get('zero_paid_dependency') is not True:
               raise SystemExit('zero-paid dependency guard missing')
           print(result.get('status'))
           PY
 
-      - name: Persist only channel-local observed metrics runtime state
+      - name: Persist only fleet-declared channel-local observed metrics runtime state
         shell: bash
         run: |
           set -euo pipefail
-          paths=(
-            valcea-clar/social/facebook_state_metrics_harvest_state.json
-            valcea-clar/social/facebook_state_observed_metrics.json
-            valcea-clar/social/facebook_state_feedback_snapshot.json
-            valcea-clar/social/instagram_state_metrics_harvest_state.json
-            valcea-clar/social/instagram_state_observed_metrics.json
-            valcea-clar/social/instagram_state_feedback_snapshot.json
-          )
-          for path in "${paths[@]}"; do
+          python - <<'PY' >/tmp/fleet-metrics-durable-paths.txt
+          import json
+          from pathlib import Path, PurePosixPath
+          result = json.loads(Path('/tmp/fleet-observed-metrics-harvest.json').read_text(encoding='utf-8'))
+          runtime = json.loads(Path('local-news-os/social/social_runtime_registry.json').read_text(encoding='utf-8'))
+          roots = [PurePosixPath(row['instance_root']) for row in runtime.get('instances', []) if row.get('instance_root')]
+          for raw in sorted(set(result.get('durable_paths', []))):
+              path = PurePosixPath(str(raw))
+              if path.is_absolute() or '..' in path.parts:
+                  raise SystemExit(f'unsafe durable metrics path: {raw}')
+              if not any(path == root or root in path.parents for root in roots):
+                  raise SystemExit(f'durable metrics path outside fleet instance roots: {raw}')
+              print(path.as_posix())
+          PY
+          while IFS= read -r path; do
+            [[ -z "$path" ]] && continue
             if [[ -e "$path" ]]; then
               git add -- "$path"
             fi
-          done
+          done </tmp/fleet-metrics-durable-paths.txt
           if git diff --cached --quiet; then
-            echo "No durable metrics state changed."
+            echo "No durable fleet metrics state changed."
             exit 0
           fi
           git config user.name "civora-site-engine"
           git config user.email "actions@users.noreply.github.com"
-          git commit -m "Persist VÂLCEA CLAR observed metrics harvest"
+          git commit -m "Persist LOCAL NEWS OS observed metrics harvest"
           git fetch origin main
           if ! git rebase origin/main; then
             git rebase --abort || true
-            echo "Refusing to overwrite concurrent metrics state."
+            echo "Refusing to overwrite concurrent fleet metrics state."
             exit 1
           fi
           git push origin HEAD:main

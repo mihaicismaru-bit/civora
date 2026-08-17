@@ -57,6 +57,10 @@ jobs:
             local-news-os/social/observed_metrics_collector.py \
             local-news-os/social/native_metrics_transport.py \
             local-news-os/social/metrics_harvest_scheduler.py \
+            local-news-os/social/metrics_harvest_runtime.py \
+            local-news-os/social/operational_metrics_harvest_trigger.py \
+            local-news-os/social/fleet_metrics_harvest_orchestrator.py \
+            local-news-os/social/publication_metrics_catalog.py \
             local-news-os/social/publishing_adapters.py \
             local-news-os/social/multi_instance_isolation.py \
             local-news-os/social/e2e_acceptance.py \
@@ -80,6 +84,7 @@ jobs:
             local-news-os/social/test_observed_metrics_collector.py \
             local-news-os/social/test_native_metrics_transport.py \
             local-news-os/social/test_metrics_harvest_scheduler.py \
+            local-news-os/social/test_fleet_metrics_harvest_orchestrator.py \
             local-news-os/social/test_publishing_adapters.py \
             local-news-os/social/test_multi_instance_isolation.py \
             local-news-os/social/test_e2e_acceptance.py \
@@ -142,6 +147,9 @@ jobs:
 
       - name: Run observed-metrics harvest scheduler tests
         run: python local-news-os/social/test_metrics_harvest_scheduler.py
+
+      - name: Run fleet observed-metrics harvest orchestration tests
+        run: python local-news-os/social/test_fleet_metrics_harvest_orchestrator.py
 
       - name: Run Publishing Adapter Contract acceptance tests
         run: python local-news-os/social/test_publishing_adapters.py
