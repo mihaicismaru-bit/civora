@@ -118,29 +118,34 @@ jobs:
         run: |
           & $env:PYTHON_EXE partener-eu/ingest/mipe_windows_crawl_v3.py
 
-      - name: Canonicalize calls, group evidence and build dossiers immediately
+      - name: Canonicalize evidence and construct deep dossiers immediately
         shell: pwsh
         run: |
+          & $env:PYTHON_EXE partener-eu/ops/fix_call_lifecycle_event_aliases.py
           & $env:PYTHON_EXE partener-eu/ingest/build_mipe_canonical_calls.py
           & $env:PYTHON_EXE partener-eu/ingest/refine_mipe_canonical_calls.py
+          & $env:PYTHON_EXE partener-eu/ingest/enrich_mipe_canonical_facts.py
           & $env:PYTHON_EXE partener-eu/ingest/build_decision_products.py
           & $env:PYTHON_EXE partener-eu/ingest/merge_mipe_canonical_dossiers.py
           & $env:PYTHON_EXE partener-eu/ingest/polish_decision_products.py
           & $env:PYTHON_EXE partener-eu/ingest/finalize_decision_products.py
           & $env:PYTHON_EXE partener-eu/ingest/localize_decision_products.py
+          & $env:PYTHON_EXE partener-eu/ingest/score_dossier_depth.py
           & $env:PYTHON_EXE partener-eu/ingest/build_call_lifecycle.py
           & $env:PYTHON_EXE partener-eu/ingest/intelligence_index.py
 
-      - name: Validate direct corpus, canonical calls and lifecycle contract
+      - name: Validate direct corpus, canonical calls, dossier depth and lifecycle
         shell: pwsh
         run: |
           & $env:PYTHON_EXE partener-eu/ops/test_mipe_canonical_pipeline.py
+          & $env:PYTHON_EXE partener-eu/ops/test_dossier_autonomy.py
           @'
           import json
           from pathlib import Path
           corpus=json.loads(Path('partener-eu/ingest/state/mipe_ro_corpus.json').read_text(encoding='utf-8'))
           state=json.loads(Path('partener-eu/ingest/state/mipe_state.json').read_text(encoding='utf-8'))
           canonical=json.loads(Path('partener-eu/ingest/state/mipe_canonical_calls.json').read_text(encoding='utf-8'))
+          queue=json.loads(Path('partener-eu/ingest/state/dossier_enrichment_queue.json').read_text(encoding='utf-8'))
           lifecycle=json.loads(Path('partener-eu/ingest/state/call_lifecycle.json').read_text(encoding='utf-8'))
           assert corpus.get('schemaVersion') == 3
           assert corpus.get('lastRun',{}).get('collectorVersion') == '3.0'
@@ -149,6 +154,8 @@ jobs:
           assert state.get('lastRun',{}).get('collectorVersion') == '3.0'
           assert canonical.get('calls')
           assert canonical.get('precisionGate',{}).get('failClosed') is True
+          assert canonical.get('policy',{}).get('deepDossierFactExtraction') is True
+          assert queue.get('policy',{}).get('officialEvidenceOnly') is True
           for page in corpus.get('pages',[]):
               assert page.get('url','').startswith('https://mfe.gov.ro/')
               assert page.get('verification') == 'CANONICAL_OFFICIAL_FETCH'
@@ -163,13 +170,14 @@ jobs:
               'documents':len(corpus.get('documents',[])),
               'freshPages':corpus.get('lastRun',{}).get('acceptedPages'),
               'canonicalCalls':canonical.get('summary',{}).get('canonicalCalls'),
-              'precisionRemoved':canonical.get('summary',{}).get('precisionGateRemoved'),
+              'highDepth':canonical.get('summary',{}).get('highDepth'),
+              'queuedDossiers':queue.get('summary',{}).get('queued'),
               'lifecycleCalls':lifecycle.get('summary',{}).get('callCount'),
           },ensure_ascii=False,indent=2))
           '@ | Set-Content -Encoding UTF8 .\validate_mipe_v3.py
           & $env:PYTHON_EXE .\validate_mipe_v3.py
 
-      - name: Upload crawl and canonical evidence artifact
+      - name: Upload crawl, canonical and dossier evidence artifact
         uses: actions/upload-artifact@v4
         with:
           name: mipe-ro-crawl-v3
@@ -178,10 +186,11 @@ jobs:
             partener-eu/ingest/state/mipe_state.json
             partener-eu/ingest/state/mipe_canonical_calls.json
             partener-eu/ingest/state/decision_products.json
+            partener-eu/ingest/state/dossier_enrichment_queue.json
             partener-eu/ingest/state/call_lifecycle.json
           retention-days: 14
 
-      - name: Persist corpus, canonical calls, dossiers and lifecycle through GitHub API
+      - name: Persist corpus, canonical calls, deep dossiers and lifecycle through GitHub API
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.persist }}
         shell: pwsh
         env:
@@ -198,6 +207,7 @@ jobs:
             'partener-eu/ingest/state/mipe_state.json',
             'partener-eu/ingest/state/mipe_canonical_calls.json',
             'partener-eu/ingest/state/decision_products.json',
+            'partener-eu/ingest/state/dossier_enrichment_queue.json',
             'partener-eu/ingest/state/call_lifecycle.json',
             'partener-eu/ingest/state/intelligence_index.json',
             'partener-eu/web/mipe-news.js',
@@ -220,7 +230,7 @@ jobs:
                 blob=req('POST',f'{api}/git/blobs',{'content':base64.b64encode(raw).decode(),'encoding':'base64'})
                 entries.append({'path':path,'mode':'100644','type':'blob','sha':blob['sha']})
               tree=req('POST',f'{api}/git/trees',{'base_tree':commit['tree']['sha'],'tree':entries})
-              new=req('POST',f'{api}/git/commits',{'message':'Refresh MIPE Romanian corpus, canonical calls, dossiers and lifecycle','tree':tree['sha'],'parents':[parent]})
+              new=req('POST',f'{api}/git/commits',{'message':'Refresh MIPE Romanian corpus, deep dossiers and lifecycle','tree':tree['sha'],'parents':[parent]})
               req('PATCH',f'{api}/git/refs/heads/main',{'sha':new['sha'],'force':False})
               print(json.dumps({'persisted':True,'commit':new['sha'],'files':len(paths)},indent=2));break
             except urllib.error.HTTPError as exc:
