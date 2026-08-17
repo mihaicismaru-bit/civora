@@ -92,6 +92,22 @@
       "generic_titles": ["comunicate de presă", "comunicate de presa", "primăria orașului brezoi", "primaria orasului brezoi"]
     },
     {
+      "id": "primaria-malaia-stiri",
+      "publisher": "Primăria Comunei Mălaia",
+      "url": "https://primariamalaiavl.ro/stiri/",
+      "tier": "T1",
+      "section": "ADMINISTRAȚIE",
+      "priority": 83,
+      "enabled": false,
+      "status": "QUARANTINED_WAF_ARTICLE_FETCH_BLOCK",
+      "checked_at": "2026-08-17",
+      "disable_reason": "The official Știri listing exposes individual article links and per-item dates, but direct article fetches are currently intercepted by an anti-bot verification page. LOCAL NEWS OS requires article-level publication provenance before automatic admission and must not treat a listing date or crawl time as a substitute. The source is retained for territorial coverage and manual discovery but disabled until canonical article pages can be fetched deterministically.",
+      "safe_use": ["manual discovery of Mălaia municipal developments", "primary-source verification from the official listing and linked documents", "manual reporting after article-level date and content verification"],
+      "core_feedback": "No new Vâlcea-specific parser is justified. This source reinforces the existing ARTICLE_FEED structural-eligibility rule: listing reachability and per-item dates are insufficient when canonical article fetch/provenance cannot be verified deterministically.",
+      "path_hints": ["consult", "impozit", "apia", "lea-220", "registr", "urbanistic", "proiect", "lemne", "parc-de-aventura"],
+      "generic_titles": ["stiri", "știri", "primăria mălaia", "primaria malaia"]
+    },
+    {
       "id": "primaria-baile-govora-evenimente",
       "publisher": "Primăria Orașului Băile Govora",
       "url": "https://www.primaria-govora.ro/category/community/",
