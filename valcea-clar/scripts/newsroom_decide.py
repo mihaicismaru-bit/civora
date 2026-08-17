@@ -3,8 +3,8 @@
 
 This is the continuous-newsroom gate. It deliberately does NOT weaken the
 existing evidence rules. A source title/date discovery is useful for the radar
-but is not, by itself, a publishable article. The live newsroom only advances
-when the structured story set that meets the editorial standard changes.
+but is not, by itself, a publishable article. New claim-kernel stories must also
+carry the provenance proof emitted by Editorial Writer v1.
 
 Morning/evening editions remain recap snapshots. They are not publication
 windows and must never delay an otherwise publishable story.
@@ -46,6 +46,7 @@ def canonical_story(item: dict) -> dict:
             if src.get("url")
         ],
         "visual": item.get("visual") or None,
+        "editorial_product": item.get("editorial_product") or None,
     }
 
 
@@ -86,6 +87,21 @@ def story_ready(item: dict) -> tuple[bool, str]:
         "title_date_source_only",
     }:
         return False, "title_date_only_not_full_story"
+
+    editorial = item.get("editorial_product") if isinstance(item.get("editorial_product"), dict) else {}
+    writer_mode = str(editorial.get("writer_mode") or "")
+    if writer_mode == "FACT_KERNEL_REJECTED_FAIL_CLOSED":
+        return False, "editorial_writer_rejected_fact_kernel"
+    if writer_mode == "FACT_KERNEL_COMPOSED":
+        if editorial.get("claim_trace_complete") is not True:
+            return False, "claim_trace_incomplete"
+        if editorial.get("source_level_trace") is not True:
+            return False, "source_trace_incomplete"
+        if editorial.get("auto_publish_eligible_by_format") is not True:
+            return False, "editorial_format_requires_review"
+        trace = editorial.get("claim_trace") or []
+        if not trace or any(not row.get("source_urls") or not row.get("text_sha256") for row in trace if isinstance(row, dict)):
+            return False, "claim_trace_invalid"
 
     headline = str(item.get("headline") or "").strip()
     dek = str(item.get("dek") or "").strip()
@@ -142,8 +158,9 @@ def decide(now: datetime) -> dict:
     current_ids = [story["id"] for story in publishable]
     new_ids = [story_id for story_id in current_ids if story_id not in previous_ids]
 
+    writer_stats = load_editorial_writer_stats()
     return {
-        "schema_version": "1.1",
+        "schema_version": "1.2",
         "evaluated_local": now.isoformat(timespec="seconds"),
         "mode": "continuous_story_first",
         "edition_windows_are_publication_gates": False,
@@ -155,18 +172,37 @@ def decide(now: datetime) -> dict:
         "new_story_ids": new_ids,
         "fingerprint": fingerprint,
         "auto_fact_registry_count": auto_count,
+        "editorial_writer": writer_stats,
         "rejected_candidate_count": len(rejected),
         "rejected": rejected,
         "active_publication_holds": sorted(active_publication_holds()),
         "policy": {
             "verified_structured_story_required": True,
             "title_date_only_is_not_article": True,
+            "fact_kernel_claim_trace_required": True,
+            "reputational_formats_require_review": True,
             "editorial_publication_holds_fail_closed": True,
             "held_story_social_distribution_allowed": False,
             "minimum_confidence_inherited_from_edition_engine": edition_engine.MIN_CONFIDENCE,
             "fail_closed": True,
             "publish_on_change_not_clock_window": True,
         },
+    }
+
+
+def load_editorial_writer_stats() -> dict:
+    path = ROOT / "editorial" / "editorial_products.json"
+    if not path.is_file():
+        return {"writer_id": "manual_journalism_v1", "status": "NOT_MATERIALIZED"}
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {"writer_id": "manual_journalism_v1", "status": "INVALID_OUTPUT"}
+    return {
+        "writer_id": doc.get("writer_id"),
+        "status": "ACTIVE",
+        **(doc.get("stats") or {}),
+        "registry_fingerprint_sha256": doc.get("registry_fingerprint_sha256"),
     }
 
 
@@ -177,6 +213,7 @@ def main() -> int:
     args = parser.parse_args()
 
     if args.self_test:
+        edition_engine.editorial_writer.self_test()
         full = {
             "id": "self-test-full",
             "headline": "Primăria publică un proiect verificat pentru municipiu",
@@ -190,6 +227,18 @@ def main() -> int:
         held = dict(full, id="olanesti-bridge-monitor")
         assert story_ready(held) == (False, "editorial_publication_hold")
         assert "olanesti-bridge-monitor" in active_publication_holds()
+        composed = dict(full, editorial_product={
+            "writer_mode": "FACT_KERNEL_COMPOSED",
+            "claim_trace_complete": True,
+            "source_level_trace": True,
+            "auto_publish_eligible_by_format": True,
+            "claim_trace": [{"text_sha256": "abc", "source_urls": ["https://example.com/document"]}],
+        })
+        assert story_ready(composed)[0] is True
+        no_trace = dict(composed, editorial_product={**composed["editorial_product"], "claim_trace_complete": False})
+        assert story_ready(no_trace) == (False, "claim_trace_incomplete")
+        review_format = dict(composed, editorial_product={**composed["editorial_product"], "auto_publish_eligible_by_format": False})
+        assert story_ready(review_format) == (False, "editorial_format_requires_review")
         print("Continuous newsroom decision self-test: PASS")
         return 0
 
@@ -199,11 +248,12 @@ def main() -> int:
 
     if args.commit_state and decision["publishable_story_count"]:
         state = {
-            "schema_version": "1.1",
+            "schema_version": "1.2",
             "last_published_at": decision["evaluated_local"],
             "last_published_fingerprint": decision["fingerprint"],
             "last_published_story_ids": decision["publishable_story_ids"],
             "active_publication_holds": decision["active_publication_holds"],
+            "editorial_writer": decision["editorial_writer"],
             "mode": "continuous_story_first",
             "edition_windows_are_publication_gates": False,
         }
