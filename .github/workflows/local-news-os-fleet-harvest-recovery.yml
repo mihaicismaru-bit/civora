@@ -1,0 +1,201 @@
+name: LOCAL NEWS OS Fleet Harvest Recovery
+
+on:
+  schedule:
+    - cron: "18 * * * *"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/social/fleet_metrics_recovery_orchestrator.py"
+      - "local-news-os/social/test_fleet_metrics_recovery_orchestrator.py"
+      - "local-news-os/social/authorization_sealed_harvest_recovery.py"
+      - "local-news-os/social/authorization_sealed_harvest_receipt.py"
+      - "local-news-os/social/fleet_metrics_authorization_seal.py"
+      - "local-news-os/social/metrics_harvest_runtime.py"
+      - "local-news-os/social/observed_metrics_collector.py"
+      - "local-news-os/social/publication_metrics_catalog.py"
+      - "local-news-os/social/social_runtime_registry.json"
+      - "local-news-os/social/metrics_credential_bindings.json"
+      - "local-news-os/social/metrics_transport_capabilities.json"
+      - "**/social/channel_registry.json"
+      - "**/social/channels/**"
+      - ".github/workflows/local-news-os-fleet-harvest-recovery.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/social/fleet_metrics_recovery_orchestrator.py"
+      - "local-news-os/social/test_fleet_metrics_recovery_orchestrator.py"
+      - "local-news-os/social/authorization_sealed_harvest_recovery.py"
+      - "local-news-os/social/authorization_sealed_harvest_receipt.py"
+      - "local-news-os/social/fleet_metrics_authorization_seal.py"
+      - "local-news-os/social/metrics_harvest_runtime.py"
+      - "local-news-os/social/observed_metrics_collector.py"
+      - "local-news-os/social/publication_metrics_catalog.py"
+      - "local-news-os/social/social_runtime_registry.json"
+      - "local-news-os/social/metrics_credential_bindings.json"
+      - "local-news-os/social/metrics_transport_capabilities.json"
+      - "**/social/channel_registry.json"
+      - "**/social/channels/**"
+      - ".github/workflows/local-news-os-fleet-harvest-recovery.yml"
+
+permissions:
+  contents: read
+
+# Share the exact concurrency group used by normal fleet harvest. Scheduled recovery
+# starts five minutes earlier and normal harvest cannot overlap it.
+concurrency:
+  group: local-news-os-fleet-observed-metrics-harvest-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile fleet recovery boundary
+        run: |
+          python -m py_compile \
+            local-news-os/social/authorization_sealed_harvest_receipt.py \
+            local-news-os/social/authorization_sealed_harvest_recovery.py \
+            local-news-os/social/fleet_metrics_authorization_seal.py \
+            local-news-os/social/metrics_harvest_runtime.py \
+            local-news-os/social/observed_metrics_collector.py \
+            local-news-os/social/publication_metrics_catalog.py \
+            local-news-os/social/fleet_metrics_recovery_orchestrator.py \
+            local-news-os/social/test_fleet_metrics_recovery_orchestrator.py
+
+      - name: Run fleet recovery acceptance tests
+        working-directory: local-news-os/social
+        run: python test_fleet_metrics_recovery_orchestrator.py
+
+      - name: Verify fleet recovery is network-free and cannot authorize rereads
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, 'local-news-os/social')
+          import fleet_metrics_recovery_orchestrator as recovery
+          guards = recovery._guards()
+          assert guards['provider_network_calls_performed'] is False
+          assert guards['credential_values_read'] is False
+          assert guards['credential_values_persisted'] is False
+          assert guards['provider_payload_persisted'] is False
+          assert guards['provider_reread_authorized_automatically'] is False
+          assert guards['recovery_runs_before_normal_harvest'] is True
+          assert guards['sealed_authorization_required'] is True
+          assert guards['durable_observation_required_for_automatic_completion'] is True
+          assert guards['publication_blocked_by_analytics'] is False
+          assert guards['zero_paid_dependency'] is True
+          print('FLEET_RECOVERY_GUARDS_PASS')
+          PY
+
+  reconcile:
+    if: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' }}
+    needs: acceptance
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Reconcile authorization-sealed fleet recovery before normal harvest
+        shell: bash
+        run: |
+          set -euo pipefail
+          NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          python local-news-os/social/fleet_metrics_recovery_orchestrator.py \
+            --repo-root . \
+            --runtime-registry local-news-os/social/social_runtime_registry.json \
+            --binding-registry local-news-os/social/metrics_credential_bindings.json \
+            --capability-registry local-news-os/social/metrics_transport_capabilities.json \
+            --now "$NOW" \
+            | tee /tmp/fleet-harvest-recovery.json
+
+      - name: Verify recovery result remains analytics-only and secret-free
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.loads(Path('/tmp/fleet-harvest-recovery.json').read_text(encoding='utf-8'))
+          if result.get('publication_blocked') is not False:
+              raise SystemExit('recovery attempted to block editorial publication')
+          if result.get('provider_reread_authorized') is not False:
+              raise SystemExit('fleet recovery must never auto-authorize provider reread')
+          guards = result.get('guards', {})
+          required = {
+              'provider_network_calls_performed': False,
+              'credential_values_read': False,
+              'credential_values_persisted': False,
+              'provider_payload_persisted': False,
+              'provider_reread_authorized_automatically': False,
+              'recovery_runs_before_normal_harvest': True,
+              'sealed_authorization_required': True,
+              'durable_observation_required_for_automatic_completion': True,
+              'publication_blocked_by_analytics': False,
+              'zero_paid_dependency': True,
+          }
+          for key, expected in required.items():
+              if guards.get(key) is not expected:
+                  raise SystemExit(f'recovery guard mismatch: {key}={guards.get(key)!r}')
+          encoded = json.dumps(result, sort_keys=True).lower()
+          for forbidden in ('access_token_value', 'secret_value', 'credential_value', 'provider_payload'):
+              if forbidden in encoded:
+                  raise SystemExit(f'forbidden material in recovery output: {forbidden}')
+          print(result.get('status'))
+          PY
+
+      - name: Persist only reconciled metrics checkpoint state
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY' >/tmp/fleet-recovery-durable-paths.txt
+          import json
+          from pathlib import Path, PurePosixPath
+          result = json.loads(Path('/tmp/fleet-harvest-recovery.json').read_text(encoding='utf-8'))
+          runtime = json.loads(Path('local-news-os/social/social_runtime_registry.json').read_text(encoding='utf-8'))
+          roots = [PurePosixPath(row['instance_root']) for row in runtime.get('instances', []) if isinstance(row, dict) and row.get('instance_root')]
+          for raw in sorted(set(result.get('durable_paths', []))):
+              path = PurePosixPath(str(raw))
+              if path.is_absolute() or '..' in path.parts:
+                  raise SystemExit(f'unsafe recovery durable path: {raw}')
+              if not any(path == root or root in path.parents for root in roots):
+                  raise SystemExit(f'recovery durable path outside registered instance roots: {raw}')
+              print(path.as_posix())
+          PY
+
+          while IFS= read -r path; do
+            [[ -z "$path" ]] && continue
+            if [[ -e "$path" ]]; then
+              git add -- "$path"
+            fi
+          done </tmp/fleet-recovery-durable-paths.txt
+
+          if git diff --cached --quiet; then
+            echo "No sealed recovery checkpoint state changed."
+            exit 0
+          fi
+
+          git config user.name "civora-site-engine"
+          git config user.email "actions@users.noreply.github.com"
+          git commit -m "Persist LOCAL NEWS OS sealed harvest recovery"
+          git fetch origin main
+          if ! git rebase origin/main; then
+            git rebase --abort || true
+            echo "Refusing to overwrite concurrent metrics recovery state."
+            exit 1
+          fi
+          git push origin HEAD:main
