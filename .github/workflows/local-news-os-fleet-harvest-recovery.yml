@@ -7,11 +7,17 @@ on:
   pull_request:
     paths:
       - "local-news-os/social/fleet_metrics_recovery_orchestrator.py"
+      - "local-news-os/social/fleet_reread_materialization_recovery_routing.py"
       - "local-news-os/social/test_fleet_metrics_recovery_orchestrator.py"
+      - "local-news-os/social/test_fleet_reread_materialization_recovery_routing.py"
+      - "local-news-os/social/reread_materialization_crash_reconciliation.py"
+      - "local-news-os/social/test_reread_materialization_crash_reconciliation.py"
       - "local-news-os/social/authorization_sealed_harvest_recovery.py"
       - "local-news-os/social/authorization_sealed_harvest_receipt.py"
       - "local-news-os/social/fleet_metrics_authorization_seal.py"
       - "local-news-os/social/metrics_harvest_runtime.py"
+      - "local-news-os/social/metrics_harvest_scheduler.py"
+      - "local-news-os/social/native_metrics_transport.py"
       - "local-news-os/social/observed_metrics_collector.py"
       - "local-news-os/social/publication_metrics_catalog.py"
       - "local-news-os/social/social_runtime_registry.json"
@@ -24,11 +30,17 @@ on:
     branches: [main]
     paths:
       - "local-news-os/social/fleet_metrics_recovery_orchestrator.py"
+      - "local-news-os/social/fleet_reread_materialization_recovery_routing.py"
       - "local-news-os/social/test_fleet_metrics_recovery_orchestrator.py"
+      - "local-news-os/social/test_fleet_reread_materialization_recovery_routing.py"
+      - "local-news-os/social/reread_materialization_crash_reconciliation.py"
+      - "local-news-os/social/test_reread_materialization_crash_reconciliation.py"
       - "local-news-os/social/authorization_sealed_harvest_recovery.py"
       - "local-news-os/social/authorization_sealed_harvest_receipt.py"
       - "local-news-os/social/fleet_metrics_authorization_seal.py"
       - "local-news-os/social/metrics_harvest_runtime.py"
+      - "local-news-os/social/metrics_harvest_scheduler.py"
+      - "local-news-os/social/native_metrics_transport.py"
       - "local-news-os/social/observed_metrics_collector.py"
       - "local-news-os/social/publication_metrics_catalog.py"
       - "local-news-os/social/social_runtime_registry.json"
@@ -41,8 +53,8 @@ on:
 permissions:
   contents: read
 
-# Share the exact concurrency group used by normal fleet harvest. Scheduled recovery
-# starts five minutes earlier and normal harvest cannot overlap it.
+# Recovery and normal harvest share one concurrency group. Explicit reread recovery
+# is routed before generic covering-observation recovery and remains network-free.
 concurrency:
   group: local-news-os-fleet-observed-metrics-harvest-${{ github.ref }}
   cancel-in-progress: false
@@ -58,40 +70,63 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Compile fleet recovery boundary
+      - name: Compile fleet recovery routing boundary
         run: |
           python -m py_compile \
             local-news-os/social/authorization_sealed_harvest_receipt.py \
             local-news-os/social/authorization_sealed_harvest_recovery.py \
+            local-news-os/social/reread_materialization_crash_reconciliation.py \
             local-news-os/social/fleet_metrics_authorization_seal.py \
             local-news-os/social/metrics_harvest_runtime.py \
+            local-news-os/social/metrics_harvest_scheduler.py \
+            local-news-os/social/native_metrics_transport.py \
             local-news-os/social/observed_metrics_collector.py \
             local-news-os/social/publication_metrics_catalog.py \
             local-news-os/social/fleet_metrics_recovery_orchestrator.py \
-            local-news-os/social/test_fleet_metrics_recovery_orchestrator.py
+            local-news-os/social/fleet_reread_materialization_recovery_routing.py \
+            local-news-os/social/test_fleet_metrics_recovery_orchestrator.py \
+            local-news-os/social/test_reread_materialization_crash_reconciliation.py \
+            local-news-os/social/test_fleet_reread_materialization_recovery_routing.py
 
-      - name: Run fleet recovery acceptance tests
+      - name: Run fleet reread materialization routing acceptance
+        working-directory: local-news-os/social
+        run: python test_fleet_reread_materialization_recovery_routing.py
+
+      - name: Run generic fleet recovery regression acceptance
         working-directory: local-news-os/social
         run: python test_fleet_metrics_recovery_orchestrator.py
 
-      - name: Verify fleet recovery is network-free and cannot authorize rereads
+      - name: Run strict reread materialization crash recovery regression acceptance
+        working-directory: local-news-os/social
+        run: python test_reread_materialization_crash_reconciliation.py
+
+      - name: Verify explicit reread cannot fall through to generic recovery
         run: |
           python - <<'PY'
           import sys
           sys.path.insert(0, 'local-news-os/social')
-          import fleet_metrics_recovery_orchestrator as recovery
-          guards = recovery._guards()
-          assert guards['provider_network_calls_performed'] is False
-          assert guards['credential_values_read'] is False
-          assert guards['credential_values_persisted'] is False
-          assert guards['provider_payload_persisted'] is False
-          assert guards['provider_reread_authorized_automatically'] is False
-          assert guards['recovery_runs_before_normal_harvest'] is True
-          assert guards['sealed_authorization_required'] is True
-          assert guards['durable_observation_required_for_automatic_completion'] is True
-          assert guards['publication_blocked_by_analytics'] is False
-          assert guards['zero_paid_dependency'] is True
-          print('FLEET_RECOVERY_GUARDS_PASS')
+          import fleet_reread_materialization_recovery_routing as routing
+          guards = routing._guards()
+          required = {
+              'provider_network_calls_performed': False,
+              'credential_values_read': False,
+              'credential_values_persisted': False,
+              'provider_payload_persisted': False,
+              'provider_reread_authorized_automatically': False,
+              'recovery_runs_before_normal_harvest': True,
+              'sealed_authorization_required': True,
+              'durable_observation_required_for_automatic_completion': True,
+              'explicit_reread_materialization_recovery_routed_before_generic': True,
+              'generic_covering_observation_allowed_for_explicit_reread': False,
+              'explicit_reread_job_reconstruction_must_match_sealed_fingerprint': True,
+              'provider_reread_authorized_by_router': False,
+              'provider_network_calls_performed_by_router': False,
+              'publication_blocked_by_analytics': False,
+              'zero_paid_dependency': True,
+          }
+          for key, expected in required.items():
+              assert guards.get(key) is expected, (key, guards.get(key))
+          print('FLEET_REREAD_MATERIALIZATION_ROUTING_GUARDS_PASS')
           PY
 
   reconcile:
@@ -110,12 +145,12 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Reconcile authorization-sealed fleet recovery before normal harvest
+      - name: Route explicit reread recovery before generic fleet recovery
         shell: bash
         run: |
           set -euo pipefail
           NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          python local-news-os/social/fleet_metrics_recovery_orchestrator.py \
+          python local-news-os/social/fleet_reread_materialization_recovery_routing.py \
             --repo-root . \
             --runtime-registry local-news-os/social/social_runtime_registry.json \
             --binding-registry local-news-os/social/metrics_credential_bindings.json \
@@ -123,7 +158,7 @@ jobs:
             --now "$NOW" \
             | tee /tmp/fleet-harvest-recovery.json
 
-      - name: Verify recovery result remains analytics-only and secret-free
+      - name: Verify routed recovery remains analytics-only and secret-free
         shell: bash
         run: |
           set -euo pipefail
@@ -145,6 +180,11 @@ jobs:
               'recovery_runs_before_normal_harvest': True,
               'sealed_authorization_required': True,
               'durable_observation_required_for_automatic_completion': True,
+              'explicit_reread_materialization_recovery_routed_before_generic': True,
+              'generic_covering_observation_allowed_for_explicit_reread': False,
+              'explicit_reread_job_reconstruction_must_match_sealed_fingerprint': True,
+              'provider_reread_authorized_by_router': False,
+              'provider_network_calls_performed_by_router': False,
               'publication_blocked_by_analytics': False,
               'zero_paid_dependency': True,
           }
@@ -158,7 +198,7 @@ jobs:
           print(result.get('status'))
           PY
 
-      - name: Persist only reconciled metrics checkpoint state
+      - name: Persist only reconciled metrics recovery state
         shell: bash
         run: |
           set -euo pipefail
