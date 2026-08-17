@@ -1,7 +1,7 @@
 {
-  "schema_version": "1.2",
-  "observed_at": "2026-08-17T19:46:17.115062Z",
-  "policy": "health-and-hash-only-no-material-fact-autoupdate",
+  "schema_version": "1.3",
+  "observed_at": "2026-08-17T20:08:01.009751Z",
+  "policy": "health-and-hash-only-no-material-fact-autoupdate-low-information-fail-closed",
   "sources": [
     {
       "id": "SRC-MYSMIS-CALLS",
@@ -14,15 +14,19 @@
       "final_url": "https://resurse.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027",
       "content_type": "text/html;charset=utf-8",
       "bytes": 119091,
-      "raw_sha256": "a7b8b81837a12f75e794eba84467252ba47c6ae13bd70932c47c0cbae19f23b9",
+      "raw_sha256": "2502e164ff3b44b568749bd754cb640eecee2e5db28885120825380d516d6ccb",
       "semantic_sha256": "b08c97a1699fd7da9226dbd274b772c98ea2f482aa6c1040d28eb159b55d8a5a",
       "semantic_bytes": 13425,
+      "semantic_chars": 13066,
+      "content_quality_ok": true,
+      "quality_issue": null,
       "attempts": 1,
       "semantic_hash_changed": false,
       "resolution_task_required": false,
       "publish_material_fact_update": null,
       "consecutive_failures": 0,
-      "health": "PASS"
+      "health": "PASS",
+      "quarantined": false
     },
     {
       "id": "SRC-OIRBI-PEO",
@@ -34,16 +38,20 @@
       "http_status": 200,
       "final_url": "https://www.oirbi.ro/peo-2021-2027/",
       "content_type": "text/html; charset=UTF-8",
-      "bytes": 130410,
-      "raw_sha256": "9da5d5f0a3c047d8d3b0f5ae37ec77159f3ac503e6d1f567f05606b4d0e5235f",
+      "bytes": 130370,
+      "raw_sha256": "2eb6e9a8ca0d0ad12ea112e562006289a364a518b9665b10310e584855b1c6e7",
       "semantic_sha256": "6de25418f2c0b00a77b15dbe2acebbd98c87e1c38d839e6f03af2b9a41665551",
       "semantic_bytes": 12507,
+      "semantic_chars": 12229,
+      "content_quality_ok": true,
+      "quality_issue": null,
       "attempts": 1,
       "semantic_hash_changed": false,
       "resolution_task_required": false,
       "publish_material_fact_update": null,
       "consecutive_failures": 0,
-      "health": "PASS"
+      "health": "PASS",
+      "quarantined": false
     },
     {
       "id": "SRC-OIRBI-PIDS",
@@ -55,16 +63,20 @@
       "http_status": 200,
       "final_url": "https://www.oirbi.ro/pids-2021-2027/",
       "content_type": "text/html; charset=UTF-8",
-      "bytes": 127146,
-      "raw_sha256": "6b7b026202df1092a43c7010f60e8de8f01625401a963a6cb337cda32b8d539a",
+      "bytes": 127115,
+      "raw_sha256": "4727cf5b621b9b77b41bbfb707bc4052090f48b6399f11931c643cf5f0c21b61",
       "semantic_sha256": "5147a99f8241f5a2d22e85079b3707169468ed1f973f04289636669285af6cf0",
       "semantic_bytes": 12135,
+      "semantic_chars": 11897,
+      "content_quality_ok": true,
+      "quality_issue": null,
       "attempts": 1,
       "semantic_hash_changed": false,
       "resolution_task_required": false,
       "publish_material_fact_update": null,
       "consecutive_failures": 0,
-      "health": "PASS"
+      "health": "PASS",
+      "quarantined": false
     },
     {
       "id": "SRC-OIRVEST-PEO-GUIDES",
@@ -80,12 +92,16 @@
       "raw_sha256": "c902d7cc4c704f98edb306eed5691179a3c53a06fba9cf14c1e9ffaa65d1924a",
       "semantic_sha256": "ea1f753aacdefe580aed585456851451ed420dc5472457097771f5bb2c8ff087",
       "semantic_bytes": 11040,
+      "semantic_chars": 10668,
+      "content_quality_ok": true,
+      "quality_issue": null,
       "attempts": 1,
       "semantic_hash_changed": false,
       "resolution_task_required": false,
       "publish_material_fact_update": null,
       "consecutive_failures": 0,
-      "health": "PASS"
+      "health": "PASS",
+      "quarantined": false
     },
     {
       "id": "SRC-OIRVEST-PEO-MANUALS",
@@ -101,12 +117,16 @@
       "raw_sha256": "3395968df77c7b737a893d3cbd4152c3d6051ea1ac36a5a1a3a2e4da8f7b7e23",
       "semantic_sha256": "3d2d1f0ae3d21ac6f29d1320d18273be0ce61875b5a294b95a5d120ed872ca48",
       "semantic_bytes": 11414,
+      "semantic_chars": 11036,
+      "content_quality_ok": true,
+      "quality_issue": null,
       "attempts": 1,
       "semantic_hash_changed": false,
       "resolution_task_required": false,
       "publish_material_fact_update": null,
       "consecutive_failures": 0,
-      "health": "PASS"
+      "health": "PASS",
+      "quarantined": false
     },
     {
       "id": "SRC-OIRVEST-PEO",
@@ -122,12 +142,16 @@
       "raw_sha256": "7095b479698425724cd14ea8c356d083ef35fdd06b01881da6c6635b835b08d8",
       "semantic_sha256": "150ce578bf583d9acd34b094b7bdf6b31bbfd02990eab07cd8b74725a5b75c08",
       "semantic_bytes": 11218,
+      "semantic_chars": 10802,
+      "content_quality_ok": true,
+      "quality_issue": null,
       "attempts": 1,
       "semantic_hash_changed": false,
       "resolution_task_required": false,
       "publish_material_fact_update": null,
       "consecutive_failures": 0,
-      "health": "PASS"
+      "health": "PASS",
+      "quarantined": false
     },
     {
       "id": "SRC-OIRCENTRU-PEO",
@@ -143,12 +167,16 @@
       "raw_sha256": "c55c9b2d94f40a6287603db46343d4521007633c74023b84672bc658d1780a67",
       "semantic_sha256": "f7db26fc916565b7ca46d39c19c7ca27c5d23745739e54eeb70d1ec5de806c78",
       "semantic_bytes": 17348,
+      "semantic_chars": 16910,
+      "content_quality_ok": true,
+      "quality_issue": null,
       "attempts": 1,
       "semantic_hash_changed": false,
       "resolution_task_required": false,
       "publish_material_fact_update": null,
       "consecutive_failures": 0,
-      "health": "PASS"
+      "health": "PASS",
+      "quarantined": false
     },
     {
       "id": "SRC-OIRNE-PEO",
@@ -164,12 +192,16 @@
       "raw_sha256": "0e87d9e27d7a02fbaeead3c0c2ca947dae3e833f500500b4117806a3a915ac67",
       "semantic_sha256": "eea7effafee0befae91d8d631650e54c14a70788e6e2b439d8bcb745c926e99b",
       "semantic_bytes": 3819,
+      "semantic_chars": 3772,
+      "content_quality_ok": true,
+      "quality_issue": null,
       "attempts": 1,
       "semantic_hash_changed": false,
       "resolution_task_required": false,
       "publish_material_fact_update": null,
       "consecutive_failures": 0,
-      "health": "PASS"
+      "health": "PASS",
+      "quarantined": false
     },
     {
       "id": "SRC-OI-RESEARCH-POCIDIF",
@@ -180,10 +212,12 @@
       "ok": false,
       "health": "FAIL",
       "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1000)>",
+      "content_quality_ok": false,
+      "quality_issue": null,
       "semantic_hash_changed": false,
       "resolution_task_required": false,
       "publish_material_fact_update": false,
-      "consecutive_failures": 47,
+      "consecutive_failures": 48,
       "last_known_semantic_sha256": null,
       "quarantined": true
     },
@@ -196,10 +230,12 @@
       "ok": false,
       "health": "FAIL",
       "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1000)>",
+      "content_quality_ok": false,
+      "quality_issue": null,
       "semantic_hash_changed": false,
       "resolution_task_required": false,
       "publish_material_fact_update": false,
-      "consecutive_failures": 47,
+      "consecutive_failures": 48,
       "last_known_semantic_sha256": null,
       "quarantined": true
     },
@@ -214,15 +250,19 @@
       "final_url": "https://fed.mai.gov.ro/in/apeluri/",
       "content_type": "text/html; charset=UTF-8",
       "bytes": 149332,
-      "raw_sha256": "f5832fcf3855cca08cbc230fc769611dd24601016b6770643a40addb10a977bd",
+      "raw_sha256": "9418d42a2bac1825968358ca0caaf9131a7b0f9a42bacff1d334eb2e6c634f67",
       "semantic_sha256": "27a30ff5b6a08b55e93cdf57958c5bf4c9911c2ef0f230d9a1953618cf8f8778",
       "semantic_bytes": 8403,
+      "semantic_chars": 8123,
+      "content_quality_ok": true,
+      "quality_issue": null,
       "attempts": 1,
       "semantic_hash_changed": false,
       "resolution_task_required": false,
       "publish_material_fact_update": null,
       "consecutive_failures": 0,
-      "health": "PASS"
+      "health": "PASS",
+      "quarantined": false
     },
     {
       "id": "SRC-MAI-FED-GENERAL-GUIDE",
@@ -235,15 +275,19 @@
       "final_url": "https://fed.mai.gov.ro/fed-2021-2027/ghidul-general/",
       "content_type": "text/html; charset=UTF-8",
       "bytes": 104468,
-      "raw_sha256": "20d1bf91d6b6512f52a03c479e0dca56f039281f0bd33774167b3ed0b3663b12",
+      "raw_sha256": "34930fcddd23bb97187ee32ff4ef7efa3960f32e51bbeed99c5b2833ad3076cb",
       "semantic_sha256": "6ff608ff5c4817926dbe9d11be49f425078b83e383550217ca8082f28b8f8e36",
       "semantic_bytes": 8740,
+      "semantic_chars": 8560,
+      "content_quality_ok": true,
+      "quality_issue": null,
       "attempts": 1,
       "semantic_hash_changed": false,
       "resolution_task_required": false,
       "publish_material_fact_update": null,
       "consecutive_failures": 0,
-      "health": "PASS"
+      "health": "PASS",
+      "quarantined": false
     },
     {
       "id": "SRC-MAI-FED-CALENDAR-INDEX",
@@ -256,15 +300,19 @@
       "final_url": "https://fed.mai.gov.ro/despre/lansare-apeluri/",
       "content_type": "text/html; charset=UTF-8",
       "bytes": 85097,
-      "raw_sha256": "9accf12b2e5c45d988f192c6628c934e3a08f50848774394748d393d665aeb21",
+      "raw_sha256": "7ea2bc93552eb1f2eab03c17580b0b23e3f829be31c9a80c78e75bd3cdd2edaf",
       "semantic_sha256": "7f46a3ef18553bc252d5dd2ff8bfbb35a027478c06de44a74879c15d3ae66835",
       "semantic_bytes": 2481,
+      "semantic_chars": 2420,
+      "content_quality_ok": true,
+      "quality_issue": null,
       "attempts": 1,
       "semantic_hash_changed": false,
       "resolution_task_required": false,
       "publish_material_fact_update": null,
       "consecutive_failures": 0,
-      "health": "PASS"
+      "health": "PASS",
+      "quarantined": false
     },
     {
       "id": "SRC-ADRVEST-PTJ-ACTIVE",
@@ -280,12 +328,16 @@
       "raw_sha256": "c6a9058f06efd1246e5a3173a777b63bfc01c7ef903bb0761589e262105483f3",
       "semantic_sha256": "dac4c52f51c0fdf2845e2266dbe66e1f6c5965492b494e4fc2cfced0babacd01",
       "semantic_bytes": 6657,
+      "semantic_chars": 6450,
+      "content_quality_ok": true,
+      "quality_issue": null,
       "attempts": 1,
       "semantic_hash_changed": false,
       "resolution_task_required": false,
       "publish_material_fact_update": null,
       "consecutive_failures": 0,
-      "health": "PASS"
+      "health": "PASS",
+      "quarantined": false
     },
     {
       "id": "SRC-ADRCENTRU-PTJ-CONSULT",
@@ -301,12 +353,16 @@
       "raw_sha256": "bdb5feb3e3b994611863facb2f05bf7077599ac31e578ee36df23ebff8799ee9",
       "semantic_sha256": "49a9fdfd684f32d1a9ad31e30b2b40cde6534b5fc9329a3023db779248a60a66",
       "semantic_bytes": 11883,
+      "semantic_chars": 11378,
+      "content_quality_ok": true,
+      "quality_issue": null,
       "attempts": 1,
       "semantic_hash_changed": false,
       "resolution_task_required": false,
       "publish_material_fact_update": null,
       "consecutive_failures": 0,
-      "health": "PASS"
+      "health": "PASS",
+      "quarantined": false
     },
     {
       "id": "SRC-ADRCENTRU-FUNDING-CATALOG",
@@ -322,12 +378,16 @@
       "raw_sha256": "7530c04f6cdfa5e4117b34b6bc721f6e868a2a71e21be61bfef04568ade9a614",
       "semantic_sha256": "b3f7ed8552b02380f27a140416ba06c3cd039d442b5cd596de481d9131ea00c3",
       "semantic_bytes": 7247,
+      "semantic_chars": 7025,
+      "content_quality_ok": true,
+      "quality_issue": null,
       "attempts": 1,
       "semantic_hash_changed": false,
       "resolution_task_required": false,
       "publish_material_fact_update": null,
       "consecutive_failures": 0,
-      "health": "PASS"
+      "health": "PASS",
+      "quarantined": false
     },
     {
       "id": "SRC-PREFECTURA-TM-FUNDING",
@@ -343,12 +403,16 @@
       "raw_sha256": "32d6651d8f6e84033c2e50749b2453d393c4347df811978370b54fe4e03d944d",
       "semantic_sha256": "978f14698a0738d659036a6607e5eb21b6f2c90bf97067d190f2fc91526efd94",
       "semantic_bytes": 12005,
+      "semantic_chars": 11509,
+      "content_quality_ok": true,
+      "quality_issue": null,
       "attempts": 1,
       "semantic_hash_changed": false,
       "resolution_task_required": false,
       "publish_material_fact_update": null,
       "consecutive_failures": 0,
-      "health": "PASS"
+      "health": "PASS",
+      "quarantined": false
     },
     {
       "id": "SRC-OLD-FONDURI-UE",
@@ -359,10 +423,12 @@
       "ok": false,
       "health": "FAIL",
       "error": "URLError: <urlopen error [SSL: SSLV3_ALERT_HANDSHAKE_FAILURE] sslv3 alert handshake failure (_ssl.c:1000)>",
+      "content_quality_ok": false,
+      "quality_issue": null,
       "semantic_hash_changed": false,
       "resolution_task_required": false,
       "publish_material_fact_update": false,
-      "consecutive_failures": 47,
+      "consecutive_failures": 48,
       "last_known_semantic_sha256": null,
       "quarantined": true
     }
@@ -373,6 +439,7 @@
     "degraded": 0,
     "fail": 3,
     "quarantined": 3,
+    "low_information": 0,
     "resolution_tasks_required": 0
   }
 }
