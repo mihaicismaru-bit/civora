@@ -1,6 +1,6 @@
 # CIVORA persistence reconciliation engine acceptance
 
-This increment implements the executable core required by PRS-016–024 and the explicit acceptance cases required by PRS-042–049.
+This increment implements the executable core required by PRS-016–024 and the explicit acceptance cases required by PRS-042–050.
 
 ## Authority boundaries
 
@@ -29,6 +29,7 @@ This increment implements the executable core required by PRS-016–024 and the 
 16. **PRS-047:** a `NO_PROGRESS_HISTORICAL_STATE` checkpoint remains immutable historical context after a later implementation is merged on main. The checkpoint is not rewritten or promoted to resume authority; current reconciled truth advances to the newer main/`IMPLEMENTED` decision, the stale checkpoint-derived backlog item is removed, and persistence remains `RECONCILIATION_REQUIRED` until the advanced current state is separately persisted under the writer lease.
 17. **PRS-048:** when current evidence explicitly replaces an old active decision with a newer not-yet-implemented decision, the old decision reconciles to `SUPERSEDED` with `superseded_by` lineage, its stale backlog is retired, and the replacement remains `ACTIVE_UNIMPLEMENTED` with an active backlog item. The replacement relationship alone must not make the new decision `IMPLEMENTED`, and the changed active binding remains `RECONCILIATION_REQUIRED` until separately persisted and read back under the writer lease.
 18. **PRS-049:** two consecutive reconciliations with unchanged repository/external evidence and the first result used as the second persisted layer must have zero semantic drift, zero diagnostics and exactly one row per decision, capability and backlog identity. Reconciliation must not duplicate already-active backlog items or manufacture new decision state on an unchanged second pass.
+19. **PRS-050:** current social truth is persisted by separate runtime and external dimensions. Facebook and Instagram may be direct and externally evidenced; Threads may be direct-capable while remaining `PARTIAL` without story-level remote evidence; TikTok remains `GATED_DIRECT`; X, LinkedIn, YouTube, Telegram and WhatsApp remain `OUTBOX_ONLY`. Direct capability never implies successful remote publication.
 
 ## PRS mapping
 
@@ -49,5 +50,6 @@ This increment implements the executable core required by PRS-016–024 and the 
 - PRS-047: executable `prs_047_no_progress_checkpoint_then_main_acceptance.py` verifies that a historical NO_PROGRESS checkpoint stays immutable/history-only while later merged main evidence advances current truth and retires stale checkpoint-derived backlog.
 - PRS-048: executable `prs_048_explicit_decision_replacement_acceptance.py` verifies that an explicit replacement retires the old decision/backlog as `SUPERSEDED` while the new decision remains active until independently implemented.
 - PRS-049: executable `prs_049_consecutive_no_change_idempotency_acceptance.py` verifies that two unchanged consecutive reconciliation passes preserve identical semantic state with zero diagnostics and no duplicate decisions, capabilities or backlog items.
+- PRS-050: executable `prs_050_current_social_truth_acceptance.py` verifies the current nine-channel truth model without conflating direct-capable, gated, outbox-only and remotely evidenced publication states.
 
 The engine does not replace the Google Drive writer lease. Any process that persists its result into active CIVORA state must separately acquire `CIVORA_PERSISTENCE_WRITER_LEASE_V1`, use per-target revision control, verify readback, and release the lease.
