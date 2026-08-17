@@ -38,6 +38,12 @@
       "tier": "T1",
       "section": "ADMINISTRAȚIE",
       "priority": 87,
+      "enabled": false,
+      "status": "QUARANTINED_OFFICIAL_SESSION_DOCUMENT_REGISTER",
+      "checked_at": "2026-08-17",
+      "disable_reason": "The official CJ Vâlcea sessions surface is a session/document register, not a single-article publication feed. Its landing page enumerates meeting dates, while each session page aggregates agenda items, draft decisions, minutes, adopted decisions and files with multiple distinct dates (meeting date, display date, decision date and later process-verbal date). LOCAL NEWS OS must not synthesize article published_at from any of those administrative dates or from page modification metadata. The source remains a high-value T1 Council Watch reference but is disabled from automatic title + date + source projection until a generic session/document-register contract preserves those date semantics explicitly.",
+      "safe_use": ["manual Council Watch discovery", "primary-source verification of agendas, minutes and adopted decisions", "manual reporting after separating meeting, display, decision and document dates"],
+      "core_feedback": "Reinforces the generic DOCUMENT_REGISTER / SESSION_REGISTER contract already identified by the pilot: preserve session_date, display_date, decision_date, document_date and page_modified separately from published_at, and keep structural eligibility distinct from host/network health. No CJ Vâlcea-specific parser should be added.",
       "path_hints": ["sedint", "avn_sedinte_cj"],
       "generic_titles": ["ședințe ale consiliului județean", "anunțuri ședințe"]
     },
