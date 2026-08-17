@@ -18,9 +18,13 @@ on:
 permissions:
   contents: read
 
+# Reconciliation is read-only validation. Key concurrency by the exact head being
+# reconciled so later scope-observer completions cannot cancel evidence for an
+# earlier structural head. Duplicate observations of one head may queue, but no
+# exact-head run is discarded.
 concurrency:
-  group: civora-persistence-reconciliation-${{ github.ref }}
-  cancel-in-progress: true
+  group: civora-persistence-reconciliation-${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+  cancel-in-progress: false
 
 jobs:
   validate:
