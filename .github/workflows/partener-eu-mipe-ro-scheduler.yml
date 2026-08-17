@@ -1,0 +1,59 @@
+name: PARTENER.EU MIPE Romania Scheduler
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '47 */3 * * *'
+      timezone: 'Europe/Bucharest'
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: partener-eu-mipe-ro-scheduler
+  cancel-in-progress: true
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Dispatch Romanian MIPE collector
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import urllib.request
+
+          repository = os.environ['REPOSITORY']
+          token = os.environ['GH_TOKEN']
+          url = (
+              f'https://api.github.com/repos/{repository}/actions/workflows/'
+              'partener-eu-mipe-ro-runner.yml/dispatches'
+          )
+          payload = json.dumps({
+              'ref': 'main',
+              'inputs': {'persist': 'true'},
+          }).encode()
+          request = urllib.request.Request(
+              url,
+              data=payload,
+              method='POST',
+              headers={
+                  'Authorization': f'Bearer {token}',
+                  'Accept': 'application/vnd.github+json',
+                  'X-GitHub-Api-Version': '2022-11-28',
+                  'User-Agent': 'PARTENER.EU-MIPE-RO-Scheduler',
+                  'Content-Type': 'application/json',
+              },
+          )
+          with urllib.request.urlopen(request, timeout=30) as response:
+              if response.status != 204:
+                  raise SystemExit(f'Unexpected dispatch status: {response.status}')
+          print('Romanian MIPE collector dispatched with persist=true.')
+          PY
