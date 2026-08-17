@@ -134,6 +134,12 @@
       "tier": "T1",
       "section": "SĂNĂTATE",
       "priority": 82,
+      "enabled": false,
+      "status": "QUARANTINED_RECRUITMENT_DOMINATED_NEWS_FEED",
+      "checked_at": "2026-08-17",
+      "disable_reason": "The official Noutăți page is structurally reachable and article-dated, but its current editorial output is dominated by RUNOS recruitment and exam/competition notices. The existing Vâlcea path hints explicitly admit /anunturi/ and examene-si-concursuri URLs, so a newly posted vacancy could be projected automatically as a SĂNĂTATE news item even though it is staffing administration rather than reader-facing health news. Automatic admission is disabled until the hospital exposes a separable patient-care/service/investment stream or the source can be constrained deterministically without importing recruitment notices.",
+      "safe_use": ["manual discovery of hospital staffing and service developments", "primary-source verification of medical-service or patient-information changes", "manual reporting on hospital investment or service capacity when independently newsworthy"],
+      "core_feedback": "No new CORE parser or Vâlcea-specific classifier is justified for this source. Topical fit and source selection are VALCEA_SPECIFIC configuration concerns. The existing generic item-level content-class/safety direction may eventually support mixed feeds, but until then this feed should fail closed rather than turn recruitment notices into health news.",
       "path_hints": ["anunturi", "noutati", "examene-si-concursuri", "informatii-pacienti"],
       "generic_titles": ["noutăți", "anunțuri", "spitalul orășenesc brezoi"]
     },
