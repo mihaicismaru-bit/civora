@@ -25,6 +25,17 @@ def load_json(path: Path) -> dict:
     return value
 
 
+def default_production_instance_id() -> str:
+    candidates: list[str] = []
+    for path in sorted(INSTANCES.glob("*/instance.json")):
+        cfg = load_json(path)
+        if cfg.get("environment") == "production" and cfg.get("instance_id"):
+            candidates.append(str(cfg["instance_id"]))
+    if len(candidates) != 1:
+        raise ValueError(f"expected exactly one production instance, found {len(candidates)}")
+    return candidates[0]
+
+
 def repo_file(raw: str) -> Path:
     path = (ROOT / raw).resolve()
     path.relative_to(ROOT.resolve())
@@ -204,7 +215,7 @@ def self_test() -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--instance", default="valcea")
+    parser.add_argument("--instance")
     parser.add_argument("--edition")
     parser.add_argument("--output")
     parser.add_argument("--self-test", action="store_true")
@@ -213,14 +224,15 @@ def main() -> int:
         return self_test()
     if not args.edition or not args.output:
         parser.error("--edition and --output are required")
+    instance_id = args.instance or default_production_instance_id()
     doc = load_json(Path(args.edition))
-    rendered = render(args.instance, doc)
+    rendered = render(instance_id, doc)
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(rendered, encoding="utf-8")
     print(json.dumps({
         "status": "PASS",
-        "instance_id": args.instance,
+        "instance_id": instance_id,
         "edition_id": doc.get("edition_id"),
         "output": str(output),
         "paid_api_required": False,
