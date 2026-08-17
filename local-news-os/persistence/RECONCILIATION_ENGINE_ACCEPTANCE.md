@@ -1,6 +1,6 @@
 # CIVORA persistence reconciliation engine acceptance
 
-This increment implements the executable core required by PRS-016–024 and the explicit acceptance cases required by PRS-042–054.
+This increment implements the executable core required by PRS-016–024 and the explicit acceptance cases required by PRS-042–055.
 
 ## Authority boundaries
 
@@ -34,6 +34,7 @@ This increment implements the executable core required by PRS-016–024 and the 
 21. **PRS-052:** special-editorial decisions remain active while implementation evidence exists only in an open unmerged PR. A stale persisted `PARTIAL` claim based only on that PR is corrected to `ACTIVE_UNIMPLEMENTED`, the decision backlog remains `TODO`, and only explicit `MERGED` main evidence may close the decision as `IMPLEMENTED`. The acceptance fixture is namespaced to a synthetic instance and does not integrate or promote any instance-specific product branch.
 22. **PRS-053:** a stale low-latency decision may still reference an older open proposal, but that proposal cannot keep a false active gap once independent repository evidence proves an equivalent later implementation is `MERGED` on main. Open-only evidence remains `ACTIVE_UNIMPLEMENTED`; authoritative merged evidence reconciles the decision to `IMPLEMENTED`, retires the stale backlog, replaces the stale implementation evidence, and emits `FALSE_NEGATIVE_PERSISTENCE`. The fixture is provider-neutral and namespaced to a synthetic instance.
 23. **PRS-054:** Source Intelligence engine readiness and per-instance source coverage/rating are separate namespaced capability identities. A generic engine proven `READY` on main remains `IMPLEMENTED` even while coverage/rating is independently incomplete; the coverage/rating workstream retains its own backlog until threshold evidence marks that capability ready. Completing or reopening coverage/rating must not change the engine capability identity or manufacture external authority.
+24. **PRS-055:** monitor → Fact Kernel bridge persistence is represented by one namespaced capability identity per monitor, never by a single aggregate boolean. A monitor with independent `READY` repository evidence may reconcile to `IMPLEMENTED` while another monitor remains `ACTIVE_UNIMPLEMENTED` with its own backlog; completing the second bridge retires only that monitor's backlog and cannot manufacture implementation evidence for unrelated monitors.
 
 ## PRS mapping
 
@@ -59,5 +60,6 @@ This increment implements the executable core required by PRS-016–024 and the 
 - PRS-052: executable `prs_052_open_editorial_decision_acceptance.py` verifies that open special-editorial work remains an active namespaced decision/backlog item until executable implementation is actually merged on main.
 - PRS-053: executable `prs_053_low_latency_main_evidence_acceptance.py` verifies that stale open-proposal persistence cannot override an equivalent independently merged low-latency implementation already present on main.
 - PRS-054: executable `prs_054_source_intelligence_workstream_acceptance.py` verifies that generic Source Intelligence engine readiness is persisted independently from per-instance coverage/rating progress, with only the incomplete coverage/rating capability retaining active backlog.
+- PRS-055: executable `prs_055_monitor_fact_kernel_bridge_acceptance.py` verifies that Fact Kernel bridge truth is persisted per monitor, so one monitor can be implemented while another independently retains backlog, with no aggregate global implementation boolean.
 
 The engine does not replace the Google Drive writer lease. Any process that persists its result into active CIVORA state must separately acquire `CIVORA_PERSISTENCE_WRITER_LEASE_V1`, use per-target revision control, verify readback, and release the lease.
