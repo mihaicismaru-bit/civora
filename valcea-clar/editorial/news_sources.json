@@ -74,6 +74,12 @@
       "tier": "T1",
       "section": "ADMINISTRAȚIE",
       "priority": 86,
+      "enabled": false,
+      "status": "QUARANTINED_OFFICIAL_DECISION_REGISTER",
+      "checked_at": "2026-08-17",
+      "disable_reason": "The official Călimănești surface identifies itself as the Register for Evidence of Local Council Decisions and publishes adopted HCL items with administrative decision dates embedded in the title, a separate site display date, and an attached official PDF. Although the page is reachable and exposes stable item pages, this is an official decision register rather than an editorial ARTICLE_FEED. The automatic Vâlcea contract must not treat decision_date, display_date or page-modified metadata as interchangeable with news published_at, and title-only projection can expose material administrative acts (budget, borrowing, urbanism, property and individual decisions) without the evidence/context needed for a reader-facing story. Automatic admission is therefore disabled; the register remains a high-value T1 Council Watch and public-money evidence source.",
+      "safe_use": ["manual Council Watch discovery", "primary-source verification of adopted HCL decisions and attached PDFs", "manual reporting on budgets, borrowing, urbanism, property and public services after separating decision_date from publication metadata"],
+      "core_feedback": "Reinforces the generic DOCUMENT_REGISTER / OFFICIAL_DECISION_REGISTER contract already identified by the pilot: preserve stable decision identity, decision_date, display/listing date and evidence document separately from editorial published_at. No Călimănești-specific parser is justified; structural eligibility for automatic news must remain distinct from source authority and network health.",
       "path_hints": ["consiliul-local/hotarari-adoptate", "hcl", "hotarari", "buget", "imprumut"],
       "generic_titles": ["hotărâri adoptate de consiliul local al orașului călimănești", "registrul pentru evidența hotărârilor"]
     },
