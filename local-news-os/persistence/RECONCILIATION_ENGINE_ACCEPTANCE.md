@@ -1,6 +1,6 @@
 # CIVORA persistence reconciliation engine acceptance
 
-This increment implements the executable core required by PRS-016–024 and the explicit acceptance cases required by PRS-042–044.
+This increment implements the executable core required by PRS-016–024 and the explicit acceptance cases required by PRS-042–045.
 
 ## Authority boundaries
 
@@ -24,6 +24,7 @@ This increment implements the executable core required by PRS-016–024 and the 
 11. **PRS-042:** when persisted/Drive state is older than current main and current main contains merged implementation evidence, repository evidence remains authoritative; the input is not mutated, the stale decision reconciles forward to `IMPLEMENTED`, `FALSE_NEGATIVE_PERSISTENCE` is emitted, and persistence health remains `RECONCILIATION_REQUIRED` until the corrected state is separately persisted under the writer lease.
 12. **PRS-043:** repository evidence that exists only as an `OPEN_PR` or `DRAFT_PR` never reconciles to `IMPLEMENTED`. With no explicit partial implementation evidence the decision remains `ACTIVE_UNIMPLEMENTED`; with explicit `partial_evidence=true`, `PARTIAL` is permitted. PR existence, branch existence, CI success or a locally READY asset is insufficient to infer merge/implementation.
 13. **PRS-044:** when an older PR is explicitly superseded by a later merged replacement, the older decision reconciles to `SUPERSEDED`, keeps its `superseded_by` lineage and is removed from the active backlog. The later replacement reconciles independently from `MERGED` evidence to `IMPLEMENTED`; the old PR never reactivates merely because its historical branch/PR evidence still exists.
+14. **PRS-045:** an implemented/READY social adapter whose runtime is `OUTBOX_ONLY` or `DURABLE_OUTBOX_ONLY` reconciles to capability `PARTIAL`, `direct_or_outbox=OUTBOX_ONLY`, and `direct publication=false`. A stale persisted `DIRECT` claim emits `FALSE_POSITIVE_PERSISTENCE`; adapter code readiness alone cannot imply direct publication.
 
 ## PRS mapping
 
@@ -39,5 +40,6 @@ This increment implements the executable core required by PRS-016–024 and the 
 - PRS-042: executable `prs_042_drive_old_main_new_acceptance.py` verifies that stale Drive state cannot downgrade newer merged main evidence and cannot silently claim persistence freshness.
 - PRS-043: executable `prs_043_open_pr_unmerged_acceptance.py` verifies that open/draft unmerged work remains `ACTIVE_UNIMPLEMENTED` or explicit `PARTIAL`, never `IMPLEMENTED`.
 - PRS-044: executable `prs_044_superseded_pr_later_merge_acceptance.py` verifies that a later merged replacement becomes the implementation truth, while the explicitly superseded PR remains historical and cannot re-enter the active backlog.
+- PRS-045: executable `prs_045_outbox_only_capability_acceptance.py` verifies that implemented adapter code plus outbox-only runtime remains `PARTIAL` and never becomes direct publication.
 
 The engine does not replace the Google Drive writer lease. Any process that persists its result into active CIVORA state must separately acquire `CIVORA_PERSISTENCE_WRITER_LEASE_V1`, use per-target revision control, verify readback, and release the lease.
