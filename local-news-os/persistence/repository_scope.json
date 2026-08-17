@@ -8,5 +8,18 @@
     ".github/workflows/valcea-clar-*.yml",
     ".github/workflows/civora-scope-drift.yml"
   ],
-  "exclude": []
+  "exclude": [],
+  "refresh_only": [
+    "valcea-clar/**/*_state.json",
+    "valcea-clar/**/*_outbox.json",
+    "valcea-clar/**/*_checkpoint*.json",
+    "valcea-clar/**/*_ledger*.json",
+    "valcea-clar/**/*_snapshot*.json",
+    "valcea-clar/site/runtime/**",
+    "valcea-clar/site/current_edition.json",
+    "valcea-clar/editions/**",
+    "valcea-clar/data/**",
+    "valcea-clar/dist/**",
+    "valcea-clar/state/**"
+  ]
 }
