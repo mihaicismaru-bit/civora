@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-17T23:32:43+03:00",
+  "generated_at": "2026-08-17T23:42:31+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
@@ -105,7 +105,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 9
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -901,6 +901,7 @@
     "max_publication_time_delta_hours": 36,
     "title_event_overlap_required": true,
     "instance_identity_is_not_event_evidence": true,
-    "body_only_similarity_rejected": true
+    "body_only_similarity_rejected": true,
+    "primary_candidate_ranking": "LISTING_PATH_THEN_SOURCE_HINTS_THEN_NEWS_STRUCTURE"
   }
 }
