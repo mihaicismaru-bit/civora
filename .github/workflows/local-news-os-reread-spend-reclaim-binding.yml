@@ -1,0 +1,102 @@
+name: LOCAL NEWS OS Reread Spend Reclaim Binding
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/social/reread_spend_reclaim_binding.py"
+      - "local-news-os/social/reread_spend_reservation_recovery.py"
+      - "local-news-os/social/reread_spend_reauthorization.py"
+      - "local-news-os/social/authorization_sealed_harvest_receipt.py"
+      - "local-news-os/social/fleet_metrics_authorization_seal_with_reread_spend.py"
+      - "local-news-os/social/test_reread_spend_reclaim_binding.py"
+      - "local-news-os/social/test_reread_spend_reservation_recovery.py"
+      - "local-news-os/social/test_reread_spend_reauthorization.py"
+      - "local-news-os/social/test_reread_attempt_provenance_binding.py"
+      - ".github/workflows/local-news-os-reread-spend-reclaim-binding.yml"
+      - ".github/workflows/valcea-clar-observed-metrics-harvest.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/social/reread_spend_reclaim_binding.py"
+      - "local-news-os/social/reread_spend_reservation_recovery.py"
+      - "local-news-os/social/reread_spend_reauthorization.py"
+      - "local-news-os/social/authorization_sealed_harvest_receipt.py"
+      - "local-news-os/social/fleet_metrics_authorization_seal_with_reread_spend.py"
+      - "local-news-os/social/test_reread_spend_reclaim_binding.py"
+      - "local-news-os/social/test_reread_spend_reservation_recovery.py"
+      - "local-news-os/social/test_reread_spend_reauthorization.py"
+      - "local-news-os/social/test_reread_attempt_provenance_binding.py"
+      - ".github/workflows/local-news-os-reread-spend-reclaim-binding.yml"
+      - ".github/workflows/valcea-clar-observed-metrics-harvest.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-news-os-reread-spend-reclaim-binding-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile reread reclaim provenance boundary
+        run: |
+          python -m py_compile \
+            local-news-os/social/reread_spend_reclaim_binding.py \
+            local-news-os/social/reread_spend_reservation_recovery.py \
+            local-news-os/social/reread_spend_reauthorization.py \
+            local-news-os/social/authorization_sealed_harvest_receipt.py \
+            local-news-os/social/fleet_metrics_authorization_seal_with_reread_spend.py \
+            local-news-os/social/test_reread_spend_reclaim_binding.py
+
+      - name: Run reread reclaim binding acceptance
+        working-directory: local-news-os/social
+        run: python test_reread_spend_reclaim_binding.py
+
+      - name: Run RESERVED spend recovery regression
+        working-directory: local-news-os/social
+        run: python test_reread_spend_reservation_recovery.py
+
+      - name: Run reread spend regression
+        working-directory: local-news-os/social
+        run: python test_reread_spend_reauthorization.py
+
+      - name: Run reread attempt provenance regression
+        working-directory: local-news-os/social
+        run: python test_reread_attempt_provenance_binding.py
+
+      - name: Verify reclaim binding remains receipt-only, secret-free and zero-paid
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, 'local-news-os/social')
+          import reread_spend_reclaim_binding as reclaim
+          reclaim.install()
+          guards = reclaim.reclaim_guards()
+          required = {
+              'safe_release_evidence_required': True,
+              'released_handoff_identity_preserved': True,
+              'release_evidence_fingerprint_bound': True,
+              'reclaim_attempt_bound_before_network_start': True,
+              'unsatisfied_release_cannot_reach_network_without_binding': True,
+              'provider_network_call_performed_by_binding': False,
+              'credential_values_read': False,
+              'credential_values_persisted': False,
+              'provider_payload_persisted': False,
+              'publication_blocked_by_analytics': False,
+              'zero_paid_dependency': True,
+          }
+          for key, expected in required.items():
+              if guards.get(key) is not expected:
+                  raise SystemExit(f'reread reclaim guard mismatch: {key}={guards.get(key)!r}')
+          print('REREAD_SPEND_RECLAIM_BINDING_GUARDS_PASS')
+          PY
