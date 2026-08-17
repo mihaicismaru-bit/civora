@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "scope": "CORE_GENERIC",
+  "contract": "CIVORA_RECONCILIATION_TRIGGERS_V1",
+  "policy": {
+    "default_fail_closed": true,
+    "credentials_forbidden": true,
+    "historical_checkpoint_mutation_forbidden": true,
+    "ready_local_never_implies_live_external": true,
+    "scope_classifier_required_for_main_merge": true,
+    "instance_namespace_required_for_instance_state": true
+  },
+  "events": [
+    {
+      "event_type": "MAIN_MERGE",
+      "authority_source": "repository",
+      "reconciliation_required": "SCOPE_CLASSIFIER_DECIDES",
+      "persistence_refresh_required": true,
+      "scope_classifier_required": true,
+      "allowed_scope_outcomes": [
+        "NO_SCOPE_CHANGE",
+        "RUNTIME_REFRESH_ONLY",
+        "STRUCTURAL_RECONCILIATION"
+      ],
+      "minimum_evidence": [
+        "repository_main_head",
+        "changed_paths_or_scope_fingerprint"
+      ],
+      "dedupe_identity": [
+        "event_type",
+        "repository_main_head"
+      ],
+      "fail_closed_behavior": "If scope cannot be classified deterministically, require STRUCTURAL_RECONCILIATION."
+    },
+    {
+      "event_type": "CAPABILITY_REGISTRY_CHANGE",
+      "authority_source": "repository",
+      "reconciliation_required": true,
+      "persistence_refresh_required": true,
+      "scope_classifier_required": false,
+      "minimum_evidence": [
+        "registry_path",
+        "content_identity"
+      ],
+      "dedupe_identity": [
+        "event_type",
+        "registry_path",
+        "content_identity"
+      ],
+      "fail_closed_behavior": "Do not promote capability or direct publication state until reconciliation and readback complete."
+    },
+    {
+      "event_type": "DEPLOYMENT_STATE_CHANGE",
+      "authority_source": "external_or_runtime",
+      "reconciliation_required": true,
+      "persistence_refresh_required": true,
+      "scope_classifier_required": false,
+      "minimum_evidence": [
+        "deployment_target_ref",
+        "observed_state",
+        "remote_ack_or_readback_when_live_is_claimed"
+      ],
+      "dedupe_identity": [
+        "event_type",
+        "deployment_target_ref",
+        "observed_state",
+        "evidence_identity"
+      ],
+      "fail_closed_behavior": "Without remote acknowledgment/readback, persist external state as UNCONFIRMED."
+    },
+    {
+      "event_type": "EXTERNAL_BLOCKER_CLOSED",
+      "authority_source": "external",
+      "reconciliation_required": true,
+      "persistence_refresh_required": true,
+      "scope_classifier_required": false,
+      "minimum_evidence": [
+        "blocker_id",
+        "closure_evidence"
+      ],
+      "dedupe_identity": [
+        "event_type",
+        "blocker_id",
+        "closure_evidence_identity"
+      ],
+      "fail_closed_behavior": "A blocker is not closed from local readiness alone; external closure evidence is mandatory."
+    },
+    {
+      "event_type": "CANON_CHANGE",
+      "authority_source": "persistence",
+      "reconciliation_required": true,
+      "persistence_refresh_required": true,
+      "scope_classifier_required": false,
+      "minimum_evidence": [
+        "canon_artifact_id",
+        "canon_revision_identity"
+      ],
+      "dedupe_identity": [
+        "event_type",
+        "canon_artifact_id",
+        "canon_revision_identity"
+      ],
+      "fail_closed_behavior": "Do not derive runtime or external LIVE claims from canon changes; reconcile code/runtime/external evidence separately."
+    }
+  ]
+}
