@@ -40,9 +40,9 @@ SOURCES = [
         "id": "ANC_COMMUNICATES",
         "publisher": "Autoritatea Națională pentru Cercetare",
         "institution": "ANC",
-        "url": "https://www.research.gov.ro/category/comunicare/comunicate/",
+        "url": "https://www.mcid.gov.ro/category/comunicare/comunicate/",
         "tier": "T1_DIRECT_OFFICIAL",
-        "pathHints": ("research.gov.ro/",),
+        "pathHints": ("mcid.gov.ro/",),
         "maxLinks": 14,
     },
     {
@@ -202,7 +202,6 @@ def actor_for(text: str, publisher: str, institution: str, registry: dict[str, A
         if not person.get("active"):
             continue
         if any(fold(alias) in f for alias in person.get("aliases") or []):
-            # Avoid a stale office title from the registry: the direct official publisher is the safe context.
             return str(person.get("id")), str(person.get("name")), f"Decident public · {publisher}"
     pid = "institution-" + re.sub(r"[^a-z0-9]+", "-", institution.lower()).strip("-")
     return pid, publisher, "Instituție publică · sursă oficială"
