@@ -14,7 +14,7 @@
       "seed_id": "anchor-aba-olt",
       "publisher": "Administrația Bazinală de Apă Olt",
       "seed_url": "https://olt.rowater.ro/",
-      "checked_at_epoch": 1786995916,
+      "checked_at_epoch": 1787007689,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://olt.rowater.ro/",
@@ -642,7 +642,7 @@
       "seed_id": "anchor-cj-valcea",
       "publisher": "Consiliul Județean Vâlcea",
       "seed_url": "https://cjvalcea.ro/",
-      "checked_at_epoch": 1786995915,
+      "checked_at_epoch": 1787007688,
       "status": "DEGRADED",
       "http_error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
       "final_url": null,
@@ -653,7 +653,7 @@
       "seed_id": "anchor-prefectura-89-uats",
       "publisher": "Prefectura Vâlcea — 89 UAT baseline",
       "seed_url": "https://vl.prefectura.mai.gov.ro/comunicat-de-presa-toti-cei-89-de-primari-valceni-alaturi-de-consilierii-locali-au-depus-juramantul-in-cadrul-sedintelor-de-constituire-a-consiliilor-locale/",
-      "checked_at_epoch": 1786995914,
+      "checked_at_epoch": 1787007687,
       "status": "DEGRADED",
       "http_error": "HTTP Error 404: Not Found",
       "final_url": null,
@@ -664,7 +664,7 @@
       "seed_id": "anchor-salvamont-brezoi",
       "publisher": "Serviciul Public Local SALVAMONT Brezoi",
       "seed_url": "https://www.salvamontromania.ro/serviciu.php?id=56",
-      "checked_at_epoch": 1786995921,
+      "checked_at_epoch": 1787007694,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://www.salvamontromania.ro/serviciu.php?id=56",
@@ -753,7 +753,7 @@
       "seed_id": "anchor-salvamont-valcea",
       "publisher": "Serviciul Public Județean Salvamont Salvaspeo Vâlcea",
       "seed_url": "https://www.salvamontromania.ro/serviciu.php?id=17",
-      "checked_at_epoch": 1786995919,
+      "checked_at_epoch": 1787007692,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://www.salvamontromania.ro/serviciu.php?id=17",
@@ -842,7 +842,7 @@
       "seed_id": "anchor-sju-valcea",
       "publisher": "Spitalul Județean de Urgență Vâlcea",
       "seed_url": "https://www.sjv.ro/",
-      "checked_at_epoch": 1786995922,
+      "checked_at_epoch": 1787007695,
       "status": "DEGRADED",
       "http_error": "<urlopen error [Errno 101] Network is unreachable>",
       "final_url": null,
@@ -6621,11 +6621,11 @@
       "seed_id": "record-anaf",
       "publisher": "ANAF",
       "seed_url": "https://www.anaf.ro/",
-      "checked_at_epoch": 1786967052,
+      "checked_at_epoch": 1787007661,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://www.anaf.ro/",
-      "content_sha256": "10ecf841e5910cff2931cc77fe33b51867aaa0c787af2e467c80f7527e42bcf4",
+      "content_sha256": "3f63871f3cfbd87f574183c3508f8d94b5dca835aeef9d5a89fd3ff36455195c",
       "candidates": [
         {
           "candidate_id": "8daedee2333e758eb790b6f4",
@@ -6744,7 +6744,7 @@
       "seed_id": "record-data-gov-ro",
       "publisher": "data.gov.ro",
       "seed_url": "https://data.gov.ro/",
-      "checked_at_epoch": 1786975360,
+      "checked_at_epoch": 1787007669,
       "status": "DEGRADED",
       "http_error": "<urlopen error timed out>",
       "final_url": null,
@@ -6755,11 +6755,11 @@
       "seed_id": "record-monitorul-oficial",
       "publisher": "Monitorul Oficial",
       "seed_url": "https://monitoruloficial.ro/",
-      "checked_at_epoch": 1786967052,
+      "checked_at_epoch": 1787007662,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://monitoruloficial.ro/",
-      "content_sha256": "638f967ae540cc9d111f59f8f7bf0aee8be10668f022093fef226d6e97f21b23",
+      "content_sha256": "bf4a473e19e9a63fad2bb6ee64f13b626eff58b3e217c42b2770d4b8214eced4",
       "candidates": [
         {
           "candidate_id": "e93147afbb51f0528c4ce944",
@@ -6916,6 +6916,17 @@
           "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
         },
         {
+          "candidate_id": "5195094f6e865a374ce190ac",
+          "seed_id": "record-monitorul-oficial",
+          "url": "https://monitoruloficial.ro/politici-calitate-mediu/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
           "candidate_id": "e217208f705f4508628122e6",
           "seed_id": "record-monitorul-oficial",
           "url": "https://monitoruloficial.ro/solicitarea-informatiilor-de-interes-public/",
@@ -6941,6 +6952,28 @@
           "candidate_id": "dd430b429b8b143fe41fb946",
           "seed_id": "record-monitorul-oficial",
           "url": "https://monitoruloficial.ro/achizitii-publice/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
+          "candidate_id": "d24163a97a954214ac3fc85b",
+          "seed_id": "record-monitorul-oficial",
+          "url": "https://monitoruloficial.ro/elementor-8875/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
+          "candidate_id": "1eb6ae23ace993c667996ef8",
+          "seed_id": "record-monitorul-oficial",
+          "url": "https://monitoruloficial.ro/categorie-produse/editura-monitorul-oficial/sanatate/",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T1",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -8845,7 +8878,7 @@
       "seed_id": "signal-eveniment-valcean",
       "publisher": "Eveniment Vâlcean",
       "seed_url": "https://evenimentvalcean.ro/",
-      "checked_at_epoch": 1786995940,
+      "checked_at_epoch": 1787007713,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://evenimentvalcean.ro/",
@@ -9309,7 +9342,7 @@
       "seed_id": "signal-ipj-valcea",
       "publisher": "Inspectoratul de Poliție Județean Vâlcea",
       "seed_url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri",
-      "checked_at_epoch": 1786995943,
+      "checked_at_epoch": 1787007716,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri",
@@ -10734,11 +10767,11 @@
       "seed_id": "signal-se-intampla-in-valcea",
       "publisher": "Se întâmplă în Vâlcea",
       "seed_url": "https://seintamplainvalcea.ro/",
-      "checked_at_epoch": 1786995941,
+      "checked_at_epoch": 1787007715,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://seintamplainvalcea.ro/",
-      "content_sha256": "3e67ec77c832c80eb2666d512b9bea9f06f600c1bc05240bfb5cadbc8b908502",
+      "content_sha256": "de53abfb2d9e2ca6b0127a9cbd9bd047f40d10e1c7d5b68c5c7edc1c38814d7e",
       "candidates": [
         {
           "candidate_id": "3dea03749a10fb619d863a6b",
@@ -12495,7 +12528,7 @@
       ]
     }
   ],
-  "candidate_count": 1079,
+  "candidate_count": 1082,
   "candidates": [
     {
       "candidate_id": "723808db7a7383c967e1a9ce",
@@ -18966,6 +18999,17 @@
       "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
     },
     {
+      "candidate_id": "1eb6ae23ace993c667996ef8",
+      "seed_id": "record-monitorul-oficial",
+      "url": "https://monitoruloficial.ro/categorie-produse/editura-monitorul-oficial/sanatate/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
       "candidate_id": "187310db5d299b0b7e5913df",
       "seed_id": "record-monitorul-oficial",
       "url": "https://monitoruloficial.ro/category/comunicate/",
@@ -18999,6 +19043,17 @@
       "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
     },
     {
+      "candidate_id": "d24163a97a954214ac3fc85b",
+      "seed_id": "record-monitorul-oficial",
+      "url": "https://monitoruloficial.ro/elementor-8875/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
       "candidate_id": "9b2464e8c22c348df1f06f15",
       "seed_id": "record-monitorul-oficial",
       "url": "https://monitoruloficial.ro/feed/",
@@ -19024,6 +19079,17 @@
       "candidate_id": "2df7f3d1b642bb0a322674f6",
       "seed_id": "record-monitorul-oficial",
       "url": "https://monitoruloficial.ro/lista-documentelor-si-informatiilor-publicate/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
+      "candidate_id": "5195094f6e865a374ce190ac",
+      "seed_id": "record-monitorul-oficial",
+      "url": "https://monitoruloficial.ro/politici-calitate-mediu/",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T1",
       "lifecycle": "DISCOVERED_UNRATED",
