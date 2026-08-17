@@ -12,7 +12,9 @@ on:
       - 'partener-eu/ingest/refine_mipe_canonical_calls.py'
       - 'partener-eu/ingest/enrich_mipe_canonical_facts.py'
       - 'partener-eu/ingest/merge_mipe_canonical_dossiers.py'
+      - 'partener-eu/ingest/refine_afir_public_dossiers.py'
       - 'partener-eu/ingest/score_dossier_depth.py'
+      - 'partener-eu/ingest/build_mipe_enrichment_seeds.py'
       - 'partener-eu/ingest/build_call_lifecycle.py'
       - 'partener-eu/ingest/polish_decision_products.py'
       - 'partener-eu/ingest/finalize_decision_products.py'
@@ -88,7 +90,9 @@ jobs:
           python partener-eu/ingest/polish_decision_products.py
           python partener-eu/ingest/finalize_decision_products.py
           python partener-eu/ingest/localize_decision_products.py
+          python partener-eu/ingest/refine_afir_public_dossiers.py
           python partener-eu/ingest/score_dossier_depth.py
+          python partener-eu/ingest/build_mipe_enrichment_seeds.py
           python partener-eu/ingest/build_call_lifecycle.py
 
       - name: Validate canonical grouping, dossier depth, lifecycle and public language
@@ -101,7 +105,7 @@ jobs:
           python partener-eu/ops/test_call_lifecycle.py
           python partener-eu/ops/test_public_language.py
 
-      - name: Persist canonical calls, deep dossiers, enrichment queue and lifecycle
+      - name: Persist canonical calls, deep dossiers, enrichment targets and lifecycle
         shell: bash
         run: |
           set -euo pipefail
@@ -110,12 +114,15 @@ jobs:
           cp partener-eu/ingest/refine_mipe_canonical_calls.py /tmp/refine_mipe_canonical_calls.py
           cp partener-eu/ingest/enrich_mipe_canonical_facts.py /tmp/enrich_mipe_canonical_facts.py
           cp partener-eu/ingest/merge_mipe_canonical_dossiers.py /tmp/merge_mipe_canonical_dossiers.py
+          cp partener-eu/ingest/refine_afir_public_dossiers.py /tmp/refine_afir_public_dossiers.py
           cp partener-eu/ingest/score_dossier_depth.py /tmp/score_dossier_depth.py
+          cp partener-eu/ingest/build_mipe_enrichment_seeds.py /tmp/build_mipe_enrichment_seeds.py
           cp partener-eu/ingest/build_call_lifecycle.py /tmp/build_call_lifecycle.py
           cp partener-eu/web/decision-intelligence-v2.js /tmp/decision-intelligence-v2.js
           cp partener-eu/ingest/state/mipe_canonical_calls.json /tmp/mipe_canonical_calls.json
           cp partener-eu/ingest/state/decision_products.json /tmp/decision_products.json
           cp partener-eu/ingest/state/dossier_enrichment_queue.json /tmp/dossier_enrichment_queue.json
+          cp partener-eu/ingest/state/mipe_enrichment_seeds.json /tmp/mipe_enrichment_seeds.json
           cp partener-eu/ingest/state/call_lifecycle.json /tmp/call_lifecycle.json
           cp partener-eu/web/mipe-canonical-calls.js /tmp/mipe-canonical-calls.js
           cp partener-eu/web/decision-products.js /tmp/decision-products.js
@@ -131,12 +138,15 @@ jobs:
             cp /tmp/refine_mipe_canonical_calls.py partener-eu/ingest/refine_mipe_canonical_calls.py
             cp /tmp/enrich_mipe_canonical_facts.py partener-eu/ingest/enrich_mipe_canonical_facts.py
             cp /tmp/merge_mipe_canonical_dossiers.py partener-eu/ingest/merge_mipe_canonical_dossiers.py
+            cp /tmp/refine_afir_public_dossiers.py partener-eu/ingest/refine_afir_public_dossiers.py
             cp /tmp/score_dossier_depth.py partener-eu/ingest/score_dossier_depth.py
+            cp /tmp/build_mipe_enrichment_seeds.py partener-eu/ingest/build_mipe_enrichment_seeds.py
             cp /tmp/build_call_lifecycle.py partener-eu/ingest/build_call_lifecycle.py
             cp /tmp/decision-intelligence-v2.js partener-eu/web/decision-intelligence-v2.js
             cp /tmp/mipe_canonical_calls.json partener-eu/ingest/state/mipe_canonical_calls.json
             cp /tmp/decision_products.json partener-eu/ingest/state/decision_products.json
             cp /tmp/dossier_enrichment_queue.json partener-eu/ingest/state/dossier_enrichment_queue.json
+            cp /tmp/mipe_enrichment_seeds.json partener-eu/ingest/state/mipe_enrichment_seeds.json
             cp /tmp/call_lifecycle.json partener-eu/ingest/state/call_lifecycle.json
             cp /tmp/mipe-canonical-calls.js partener-eu/web/mipe-canonical-calls.js
             cp /tmp/decision-products.js partener-eu/web/decision-products.js
@@ -147,12 +157,15 @@ jobs:
               partener-eu/ingest/refine_mipe_canonical_calls.py \
               partener-eu/ingest/enrich_mipe_canonical_facts.py \
               partener-eu/ingest/merge_mipe_canonical_dossiers.py \
+              partener-eu/ingest/refine_afir_public_dossiers.py \
               partener-eu/ingest/score_dossier_depth.py \
+              partener-eu/ingest/build_mipe_enrichment_seeds.py \
               partener-eu/ingest/build_call_lifecycle.py \
               partener-eu/web/decision-intelligence-v2.js \
               partener-eu/ingest/state/mipe_canonical_calls.json \
               partener-eu/ingest/state/decision_products.json \
               partener-eu/ingest/state/dossier_enrichment_queue.json \
+              partener-eu/ingest/state/mipe_enrichment_seeds.json \
               partener-eu/ingest/state/call_lifecycle.json \
               partener-eu/web/mipe-canonical-calls.js \
               partener-eu/web/decision-products.js \
@@ -161,7 +174,7 @@ jobs:
               echo 'Autonomous dossier products already current.'
               exit 0
             fi
-            git commit -m 'Autonomously deepen funding dossiers and lifecycle intelligence'
+            git commit -m 'Autonomously target missing evidence and deepen funding dossiers'
             if git push origin HEAD:main; then exit 0; fi
             sleep $((attempt * 2))
           done
