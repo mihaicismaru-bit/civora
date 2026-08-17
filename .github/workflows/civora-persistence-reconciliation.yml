@@ -40,5 +40,7 @@ jobs:
         run: python local-news-os/persistence/persistence_writer.py --self-test
       - name: Validate existing scope classifier alongside reconciliation
         run: python local-news-os/core/repository_scope_fingerprint.py --self-test
-      - name: Verify acceptance contract is present
-        run: test -s local-news-os/persistence/RECONCILIATION_ENGINE_ACCEPTANCE.md
+      - name: Verify acceptance contracts are present
+        run: |
+          test -s local-news-os/persistence/RECONCILIATION_ENGINE_ACCEPTANCE.md
+          test -s local-news-os/persistence/PERSISTENCE_WRITER_ACCEPTANCE.md
