@@ -181,7 +181,7 @@ def test_normal_transient_retry_is_unchanged_and_creates_no_spend_record() -> No
 def test_handoff_tamper_before_network_does_not_create_spend_record() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
-        ch, jb, issued, _, _, _ = _prepare_consumed(root)
+        ch, jb, issued, _ = _prepare_consumed(root)
         claim = receipt.claim_checkpoint_sealed(
             root, ch, jb, authorization_fingerprint=FP1, now="2026-08-16T10:22:00Z"
         )
@@ -231,7 +231,7 @@ def test_spend_store_tamper_blocks_reuse_fail_closed() -> None:
 def test_spend_reservation_is_idempotent_only_for_same_execution() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
-        ch, jb, issued, _, _, _ = _prepare_consumed(root)
+        ch, jb, issued, _ = _prepare_consumed(root)
         claim = receipt.claim_checkpoint_sealed(
             root, ch, jb, authorization_fingerprint=FP1, now="2026-08-16T10:22:00Z"
         )
