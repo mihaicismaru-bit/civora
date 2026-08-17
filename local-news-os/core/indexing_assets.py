@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """Generate fail-closed robots.txt and sitemap.xml for a static LOCAL NEWS OS runtime.
 
-The caller supplies canonical public routes. A route is admitted only when the
-corresponding static index.html exists, so the sitemap cannot advertise a page
-that the generated runtime does not actually contain. The module is instance-
-agnostic; brand/domain/routes remain instance data.
+The caller supplies canonical dynamic/public routes. An instance may also keep a
+`site/indexing_routes.json` contract next to its runtime directory for durable
+static routes (legal pages, venue guides, future section landings). Every route
+is admitted only when the corresponding static index.html exists, so a newsroom
+refresh cannot advertise missing pages or silently drop healthy static products.
 """
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from urllib.parse import urlsplit
 from xml.sax.saxutils import escape
@@ -36,21 +38,41 @@ def _index_for(runtime_dir: Path, route: str) -> Path:
     return runtime_dir / route.strip("/") / "index.html"
 
 
+def _configured_static_routes(runtime_dir: Path) -> list[str]:
+    """Read optional instance-level routes that every indexing refresh preserves."""
+    contract = runtime_dir.parent / "indexing_routes.json"
+    if not contract.is_file():
+        return []
+    try:
+        doc = json.loads(contract.read_text(encoding="utf-8"))
+    except Exception as exc:
+        raise RuntimeError(f"invalid indexing route contract: {contract}: {exc}") from exc
+    routes = doc.get("routes")
+    if not isinstance(routes, list):
+        raise RuntimeError("indexing route contract requires a routes list")
+    policy = doc.get("policy") or {}
+    if policy.get("require_static_index_html") is not True:
+        raise RuntimeError("indexing route contract must require static index.html")
+    return [str(route) for route in routes]
+
+
 def write_indexing_assets(runtime_dir: Path, base_url: str, routes: list[str]) -> dict:
-    """Write robots.txt and sitemap.xml for verified static routes.
+    """Write robots.txt and sitemap.xml for verified dynamic + static routes.
 
     Raises instead of silently emitting a broken sitemap when a requested route
     has no corresponding static page. Duplicate routes are collapsed while the
-    first-seen order is preserved.
+    first-seen order is preserved. Instance-level configured static routes are
+    appended after caller-owned routes and are subject to the same existence gate.
     """
     runtime = Path(runtime_dir).resolve()
     if not runtime.is_dir():
         raise RuntimeError(f"runtime directory missing: {runtime}")
     base = _base_url(base_url)
 
+    requested = list(routes) + _configured_static_routes(runtime)
     admitted: list[str] = []
     seen: set[str] = set()
-    for raw in routes:
+    for raw in requested:
         route = _route(raw)
         if route in seen:
             continue
@@ -89,6 +111,7 @@ def write_indexing_assets(runtime_dir: Path, base_url: str, routes: list[str]) -
         "status": "PASS",
         "routes": admitted,
         "route_count": len(admitted),
+        "configured_static_routes": _configured_static_routes(runtime),
         "robots": robots_path.as_posix(),
         "sitemap": sitemap_path.as_posix(),
     }
