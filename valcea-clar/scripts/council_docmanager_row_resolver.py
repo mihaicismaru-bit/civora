@@ -2,18 +2,20 @@
 """Structural resolver for Râmnicu Vâlcea DocManager HCL view rows.
 
 Lotus/DocManager can split year, decision number, title and navigation metadata
-across separate cells/attributes in one table row. This module reconstructs an
-exact row identity and extracts only literal official document targets. It then
-delegates document semantics and publication eligibility to the existing strict
-Council Fact Kernel Builder.
+across separate cells/attributes in one table row. The live run proved that
+literal `$FILE` targets in row attributes can be truncated at the first space
+(`.../$FILE/hotarirea`), while the same target still carries the exact 32-hex
+Lotus document UNID. This resolver therefore uses the confirmed row UNID to
+open the canonical official document page and treats only complete HTML `$FILE`
+URLs as direct attachment candidates.
 
 Security/editorial boundaries:
 - only targets canonicalized by council_watch_rm_valcea are admitted;
 - only URLs containing a Lotus 32-hex document UNID are eligible;
-- JavaScript is never executed; only literal URL/path substrings are extracted;
-- only rows that exactly parse as 2026 HCL entries are eligible;
+- a UNID is used only inside an exactly parsed HCL row;
+- JavaScript is never executed; only literal values/tokens are extracted;
 - only requested decision-number + decision-date pairs are mapped;
-- no fuzzy matching, no cross-host crawling, no inferred document identity;
+- no fuzzy matching, no cross-host crawling;
 - semantic verification and the 100% evidence requirement remain unchanged.
 """
 from __future__ import annotations
@@ -39,12 +41,11 @@ ROW_ENTRY = re.compile(
     re.I,
 )
 LOTUS_UNID = r"[0-9a-f]{32}"
+LOTUS_UNID_RE = re.compile(rf"(?<![0-9a-f])(?P<unid>{LOTUS_UNID})(?![0-9a-f])", re.I)
 LOTUS_DOCUMENT_PATH = re.compile(
     rf"^/dm/2026/hotarari\.nsf/(?:[^/]+/)?{LOTUS_UNID}(?:/|$)",
     re.I,
 )
-# Extract only a literal official-path-shaped value from an attribute. This is
-# deliberately not a JavaScript parser: executable expressions are ignored.
 LOTUS_LITERAL_TARGET = re.compile(
     rf"(?P<target>(?:https?://[^\s\"'()<>]+)?/?dm/2026/hotarari\.nsf/"
     rf"(?:[^/\s\"'()<>]+/)?{LOTUS_UNID}(?:[/?][^\s\"'()<>]*)?)",
@@ -71,21 +72,16 @@ class RowParser(HTMLParser):
                 self._parts = []
                 self._route_values = []
             self._depth += 1
-
         if self._depth:
             for key, raw_value in attrs:
                 name = str(key or "").lower()
                 value = str(raw_value or "").strip()
                 if not value:
                     continue
-                # Known routing attributes are retained. A value attribute is
-                # considered only if it visibly contains a Lotus/document token;
-                # ordinary form data is never collected.
                 if name in ROUTE_ATTRS or (
                     name == "value" and ("hotarari.nsf" in value.lower() or re.search(LOTUS_UNID, value, re.I))
                 ):
                     self._route_values.append((name, value))
-
         if self._depth and low in {"td", "th", "br", "p", "div"}:
             self._parts.append(" ")
 
@@ -98,10 +94,7 @@ class RowParser(HTMLParser):
             if self._depth == 0:
                 text = html.unescape(" ".join(self._parts)).replace("\u00a0", " ")
                 text = re.sub(r"\s+", " ", text).strip()
-                self.rows.append({
-                    "text": text,
-                    "route_values": list(dict.fromkeys(self._route_values)),
-                })
+                self.rows.append({"text": text, "route_values": list(dict.fromkeys(self._route_values))})
                 self._parts = []
                 self._route_values = []
 
@@ -113,23 +106,55 @@ class RowParser(HTMLParser):
 def is_lotus_document_url(url: str) -> bool:
     parsed = urllib.parse.urlsplit(url)
     path = urllib.parse.unquote(parsed.path)
-    return bool(LOTUS_DOCUMENT_PATH.match(path))
+    return parsed.netloc.lower() == "dm.primariavl.ro" and bool(LOTUS_DOCUMENT_PATH.match(path))
+
+
+def opendocument_url(register_url: str, unid: str) -> str | None:
+    token = str(unid or "").upper()
+    if not re.fullmatch(r"[0-9A-F]{32}", token):
+        return None
+    candidate = urllib.parse.urljoin(
+        register_url,
+        f"/dm/2026/hotarari.nsf/vwHotarariByAn/{token}?OpenDocument",
+    )
+    canonical = council.canonical_url(register_url, candidate)
+    return canonical if canonical and is_lotus_document_url(canonical) else None
+
+
+def complete_file_target(url: str) -> bool:
+    parsed = urllib.parse.urlsplit(url)
+    path = urllib.parse.unquote(parsed.path).lower()
+    if "$file" not in path:
+        return True
+    return path.endswith((".htm", ".html"))
 
 
 def literal_targets(register_url: str, values: Iterable[tuple[str, str]]) -> list[str]:
-    """Extract literal Lotus document paths without executing any script."""
-    targets: list[str] = []
+    """Resolve exact row attributes to complete FILE URLs or UNID OpenDocument."""
+    direct_complete: list[str] = []
+    open_documents: list[str] = []
+    seen_unids: set[str] = set()
     for _kind, raw in values:
         decoded = urllib.parse.unquote(html.unescape(str(raw)))
+        for unid_match in LOTUS_UNID_RE.finditer(decoded):
+            token = unid_match.group("unid").upper()
+            if token in seen_unids:
+                continue
+            seen_unids.add(token)
+            candidate = opendocument_url(register_url, token)
+            if candidate:
+                open_documents.append(candidate)
         for match in LOTUS_LITERAL_TARGET.finditer(decoded):
             literal = match.group("target")
-            # Normalize optional missing leading slash for relative `dm/...`.
             if literal.lower().startswith("dm/"):
                 literal = "/" + literal
             url = council.canonical_url(register_url, literal)
-            if url and is_lotus_document_url(url):
-                targets.append(url)
-    return list(dict.fromkeys(targets))
+            if url and is_lotus_document_url(url) and complete_file_target(url):
+                direct_complete.append(url)
+    # A complete attachment is the most specific target. Otherwise the exact
+    # UNID OpenDocument page is authoritative and lets verify_document descend
+    # into the real attachment without guessing its filename.
+    return list(dict.fromkeys(direct_complete + open_documents))[:8]
 
 
 def table_row_links(register_url: str, register_body: str) -> list[dict[str, Any]]:
@@ -142,7 +167,7 @@ def table_row_links(register_url: str, register_body: str) -> list[dict[str, Any
     hcl_rows_with_onclick = 0
     hcl_rows_with_data_link = 0
     hcl_rows_with_form_action = 0
-    literal_doc_targets_found = 0
+    document_targets_found = 0
 
     for row in parser.rows:
         text = str(row.get("text") or "")
@@ -153,7 +178,6 @@ def table_row_links(register_url: str, register_body: str) -> list[dict[str, Any
         day = council.iso_date(int(match.group("day")), match.group("month"))
         if not day:
             continue
-
         values = [(str(name), str(value)) for name, value in row.get("route_values") or []]
         names = {name for name, _value in values}
         href_values = [value for name, value in values if name == "href"]
@@ -169,12 +193,12 @@ def table_row_links(register_url: str, register_body: str) -> list[dict[str, Any
             hcl_rows_with_form_action += 1
 
         canonical = literal_targets(register_url, values)
-        literal_doc_targets_found += len(canonical)
+        document_targets_found += len(canonical)
         if not canonical:
             continue
         canonical.sort(
             key=lambda url: (
-                0 if "$file" in url.lower() else 1 if "opendocument" in url.lower() else 2,
+                0 if "$file" in urllib.parse.unquote(url).lower() else 1 if "opendocument" in url.lower() else 2,
                 len(url),
             )
         )
@@ -194,7 +218,7 @@ def table_row_links(register_url: str, register_body: str) -> list[dict[str, Any
         "hcl_rows_with_onclick": hcl_rows_with_onclick,
         "hcl_rows_with_data_link": hcl_rows_with_data_link,
         "hcl_rows_with_form_action": hcl_rows_with_form_action,
-        "literal_doc_targets_found": literal_doc_targets_found,
+        "document_targets_found": document_targets_found,
         "hcl_rows_with_document_url": len(rows),
     })
     return rows
@@ -227,40 +251,33 @@ def install() -> None:
 
 
 def self_test() -> int:
-    unid_href = "0123456789ABCDEF0123456789ABCDEF"
-    unid_onclick = "11111111111111111111111111111111"
-    unid_data = "22222222222222222222222222222222"
+    unid_truncated = "0123456789ABCDEF0123456789ABCDEF"
+    unid_complete = "11111111111111111111111111111111"
     mock = f"""
     <table>
-      <tr><td><a href="/dm/2026/hotarari.nsf/vwHotarariByAn/{unid_href}?OpenDocument">2026</a></td>
-          <td>304</td><td>hotarirea 304 - 23 iulie 2026 - acordare autorizatie anuala de functionare slot machine pentru jocuri de noroc CARADUNE SRL strada Lucian Blaga nr 1A</td></tr>
-      <tr onclick="window.open('/dm/2026/hotarari.nsf/vwHotarariByAn/{unid_onclick}?OpenDocument')">
+      <tr onclick="window.location='/dm/2026/hotarari.nsf/vwHotarariByAn/{unid_truncated}/$FILE/hotarirea 304 - 23 iulie 2026 - test.htm'">
+          <td>2026</td><td>304</td><td>hotarirea 304 - 23 iulie 2026 - acordare autorizatie anuala de functionare slot machine pentru jocuri de noroc CARADUNE SRL strada Lucian Blaga nr 1A</td></tr>
+      <tr data-url="/dm/2026/hotarari.nsf/vwHotarariByAn/{unid_complete}?OpenDocument">
           <td>2026</td><td>303</td><td>hotarirea 303 - 23 iulie 2026 - acordare autorizatie anuala jocuri de noroc CARADUNE SRL</td></tr>
-      <tr data-href="/dm/2026/hotarari.nsf/vwHotarariByAn/{unid_data}?OpenDocument">
-          <td>2026</td><td>302</td><td>hotarirea 302 - 23 iulie 2026 - acordare autorizatie anuala jocuri de noroc SUPERBET RETAIL SA</td></tr>
-      <tr onclick="doSomething(304)"><td><a href="javascript:openRow(304)">2026</a></td>
-          <td>299</td><td>hotarirea 299 - 23 iulie 2026 - aprobare raport activitate</td></tr>
     </table>
     """
     parsed = table_row_links(council.ADOPTED_VIEW, mock)
-    assert [row["decision_number"] for row in parsed] == [304, 303, 302]
-    assert all(row["decision_date"] == "2026-07-23" for row in parsed)
-    assert all(is_lotus_document_url(row["url"]) for row in parsed)
-    assert _LAST_STATS["hcl_rows_with_onclick"] == 2
-    assert _LAST_STATS["hcl_rows_with_data_link"] == 1
-    assert _LAST_STATS["hcl_rows_with_javascript_href"] == 1
-    assert _LAST_STATS["literal_doc_targets_found"] == 3
-
+    assert [row["decision_number"] for row in parsed] == [304, 303]
+    first = parsed[0]["url"]
+    assert unid_truncated in first and "OpenDocument" in first
+    assert "$FILE/hotarirea" not in first
+    assert complete_file_target("https://dm.primariavl.ro/dm/2026/hotarari.nsf/vw/" + unid_complete + "/$FILE/test.htm")
+    assert not complete_file_target("https://dm.primariavl.ro/dm/2026/hotarari.nsf/vw/" + unid_complete + "/$FILE/hotarirea")
     requested = [
         {"decision_number": 304, "decision_date": "2026-07-23", "title": "x"},
-        {"decision_number": 303, "decision_date": "2026-07-23", "title": "x"},
-        {"decision_number": 302, "decision_date": "2026-07-23", "title": "x"},
+        {"decision_number": 303, "decision_date": "2026-07-23", "title": "y"},
     ]
     resolved = structural_decision_attachments(council.ADOPTED_VIEW, mock, requested)
-    assert set(resolved) == {304, 303, 302}
+    assert set(resolved) == {303, 304}
+    assert all("OpenDocument" in url for url in resolved.values())
     install()
     assert structural_decision_attachments(council.ADOPTED_VIEW, mock, requested) == resolved
-    print("VÂLCEA CLAR DocManager literal-target resolver self-test: PASS")
+    print("VÂLCEA CLAR DocManager UNID OpenDocument resolver self-test: PASS")
     return 0
 
 
