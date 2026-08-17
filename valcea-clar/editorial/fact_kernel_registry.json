@@ -1,0 +1,156 @@
+{
+  "schema_version": "1.0",
+  "instance_id": "valcea",
+  "product": "VÂLCEA CLAR generated fact kernel registry",
+  "builder_id": "council_fact_kernel_v1",
+  "generated_at": "2026-08-17T08:33:23+03:00",
+  "mode": "LIVE_DOCUMENT_VERIFICATION",
+  "facts": [
+    {
+      "id": "rm-valcea-gambling-authorizations-20260723",
+      "status": "candidate_hold",
+      "section": "ADMINISTRAȚIE",
+      "editorial_type": "explainer",
+      "priority": 91,
+      "confidence": 0,
+      "valid_from": "2026-07-23T00:00:00+03:00",
+      "valid_until": "2026-09-06T23:59:59+03:00",
+      "slots": [
+        "morning",
+        "evening"
+      ],
+      "headline": "19 hotărâri pentru autorizații anuale de jocuri de noroc în cea mai recentă serie analizată a Consiliului Local Râmnicu Vâlcea",
+      "dek": "În registrul oficial, 19 dintre cele mai recente 25 de hotărâri din 23.07.2026 privesc autorizații anuale de funcționare pentru jocuri de noroc; ele nu sunt tratate automat drept tot atâtea săli noi.",
+      "paragraphs": [
+        "În grupul celor mai recente 25 de hotărâri afișate în registrul oficial, 19 acte din 23.07.2026 au ca obiect acordarea unei autorizații anuale de funcționare pentru jocuri de noroc.",
+        "Hotărârile din acest grup nominalizează BAUM SRL, CARADUNE SRL, CELLADA SRL, JOLLYGAMES SRL, PROJECT IMPEX SRL, SUPERBET RETAIL SA; fiecare act este urmărit separat prin documentul oficial al hotărârii, nu doar prin titlul din registru.",
+        "O autorizație anuală de funcționare nu este clasificată de VÂLCEA CLAR drept dovadă a deschiderii unei săli noi; pentru această concluzie este necesar istoricul fiecărui punct de lucru și al autorizațiilor sale."
+      ],
+      "material_fact_gate": "HOLD_DOCUMENT_CHAIN_INCOMPLETE",
+      "sources": [
+        {
+          "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
+          "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
+          "tier": "T1",
+          "sha256": "a9692abb1dc2e229f0579fe32f794b8c1f8a3b0119ca676259239e4d2c248ad7"
+        }
+      ],
+      "fact_kernel": {
+        "format_hint": "explainer",
+        "headline": {
+          "text": "19 hotărâri pentru autorizații anuale de jocuri de noroc în cea mai recentă serie analizată a Consiliului Local Râmnicu Vâlcea",
+          "source_urls": [
+            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500"
+          ]
+        },
+        "dek": {
+          "text": "În registrul oficial, 19 dintre cele mai recente 25 de hotărâri din 23.07.2026 privesc autorizații anuale de funcționare pentru jocuri de noroc; ele nu sunt tratate automat drept tot atâtea săli noi.",
+          "source_urls": [
+            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500"
+          ]
+        },
+        "claims": [
+          {
+            "id": "hcl-gambling-count",
+            "role": "material_change",
+            "kind": "fact",
+            "text": "În grupul celor mai recente 25 de hotărâri afișate în registrul oficial, 19 acte din 23.07.2026 au ca obiect acordarea unei autorizații anuale de funcționare pentru jocuri de noroc.",
+            "source_urls": [
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500"
+            ]
+          },
+          {
+            "id": "hcl-gambling-operators",
+            "role": "context",
+            "kind": "documented_context",
+            "text": "Hotărârile din acest grup nominalizează BAUM SRL, CARADUNE SRL, CELLADA SRL, JOLLYGAMES SRL, PROJECT IMPEX SRL, SUPERBET RETAIL SA; fiecare act este urmărit separat prin documentul oficial al hotărârii, nu doar prin titlul din registru.",
+            "source_urls": [
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500"
+            ]
+          },
+          {
+            "id": "hcl-gambling-not-new-halls",
+            "role": "meaning",
+            "kind": "reader_service",
+            "text": "O autorizație anuală de funcționare nu este clasificată de VÂLCEA CLAR drept dovadă a deschiderii unei săli noi; pentru această concluzie este necesar istoricul fiecărui punct de lucru și al autorizațiilor sale.",
+            "source_urls": [
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500"
+            ]
+          }
+        ]
+      },
+      "kernel_provenance": {
+        "builder_id": "council_fact_kernel_v1",
+        "source_monitor": "council-watch-rm-valcea",
+        "cluster_date": "2026-07-23",
+        "register_url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
+        "register_sha256": "a9692abb1dc2e229f0579fe32f794b8c1f8a3b0119ca676259239e4d2c248ad7",
+        "latest_decision_window": 25,
+        "matching_decisions": 19,
+        "verified_official_documents": 0,
+        "coverage": 0.0,
+        "evidence_complete": false,
+        "register_fetch_error": null,
+        "missing_attachment_decision_numbers": [
+          280,
+          281,
+          282,
+          283,
+          284,
+          285,
+          286,
+          287,
+          288,
+          289,
+          290,
+          291,
+          292,
+          293,
+          300,
+          301,
+          302,
+          303,
+          304
+        ],
+        "failed_document_decision_numbers": [],
+        "decision_numbers": [
+          304,
+          303,
+          302,
+          301,
+          300,
+          293,
+          292,
+          291,
+          290,
+          289,
+          288,
+          287,
+          286,
+          285,
+          284,
+          283,
+          282,
+          281,
+          280
+        ],
+        "verification": [],
+        "never_infer_new_venue_from_annual_authorization": true
+      }
+    }
+  ],
+  "stats": {
+    "kernel_count": 1,
+    "verified": 0,
+    "held": 1
+  },
+  "policy": {
+    "monitor_signal_is_not_fact": true,
+    "official_decision_text_required_for_result_claim": true,
+    "partial_document_coverage_publishable": false,
+    "annual_authorization_is_new_venue": false,
+    "writer_claim_level_provenance_required": true,
+    "publication_authority": "ONLY_VERIFIED_KERNELS_THROUGH_NORMAL_STORY_GATE"
+  },
+  "registry_fingerprint_sha256": "f6cd9dffe2655d01e371935c1a04b35c3d831fbef2228c3aaa406c5c09f2f0ac"
+}
