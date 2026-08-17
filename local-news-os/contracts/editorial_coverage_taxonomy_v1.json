@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0",
+  "contract": "LOCAL_NEWS_OS_EDITORIAL_COVERAGE_TAXONOMY_V1",
+  "scope": "CORE_GENERIC",
+  "purpose": "Define a broad, reusable local-news coverage surface without granting publication authority to any source class.",
+  "principles": {
+    "topic_breadth_does_not_lower_evidence_threshold": true,
+    "t2_t3_are_signal_only_until_verified": true,
+    "sensitive_classes_fail_closed": true,
+    "service_information_prefers_event_time_over_crawl_time": true,
+    "durable_copy_requires_absolute_dates": true,
+    "instance_geography_is_configuration": true
+  },
+  "source_layers": [
+    {
+      "id": "PRIMARY_AUTOMATIC",
+      "authority": "CANDIDATE_ONLY_UNTIL_STORY_GATE",
+      "description": "Primary or first-party sources with deterministic item identity and trustworthy temporal provenance."
+    },
+    {
+      "id": "OFFICIAL_WATCH",
+      "authority": "VERIFICATION_OR_SIGNAL_ONLY",
+      "description": "Official registers, alerts, utility schedules, social embeds and sensitive feeds that require a specialized contract or editorial review."
+    },
+    {
+      "id": "SIGNAL_RADAR",
+      "authority": "NONE",
+      "description": "Local press, regional press, public community channels, public figures and other discovery signals that must route to higher-authority verification."
+    }
+  ],
+  "topics": [
+    {"id":"administration","label":"Administrație locală","source_classes":["UAT","COUNTY_ADMIN","PREFECTURE","PUBLIC_INSTITUTION"],"formats":["straight_news","explainer","service"]},
+    {"id":"politics","label":"Politică și putere locală","source_classes":["PUBLIC_FIGURE","PARTY_CHANNEL","COUNCIL","PARLIAMENT"],"formats":["straight_news","analysis","accountability"],"sensitive":true},
+    {"id":"public_money","label":"Bani publici și achiziții","source_classes":["PROCUREMENT","PROCUREMENT_REMEDIES","BUDGET","AUDIT","COUNCIL"],"formats":["straight_news","document_explainer","follow_the_money","investigation"]},
+    {"id":"justice_integrity","label":"Justiție, integritate și litigii","source_classes":["JUSTICE","INTEGRITY","PUBLIC_RECORD"],"formats":["straight_news","document_explainer","investigation"],"sensitive":true},
+    {"id":"public_safety","label":"Siguranță publică și incidente","source_classes":["POLICE","FIRE_RESCUE","GENDARMERIE","MOUNTAIN_RESCUE","EMERGENCY_ALERT"],"formats":["breaking","service","straight_news"],"sensitive":true},
+    {"id":"utilities","label":"Utilități și întreruperi","source_classes":["WATER","ELECTRICITY","DISTRICT_HEATING","GAS","WASTE"],"formats":["service","breaking","explainer"]},
+    {"id":"transport","label":"Trafic, transport și mobilitate","source_classes":["ROAD_AUTHORITY","PUBLIC_TRANSPORT","RAIL","POLICE_ROAD","INFRASTRUCTURE_OPERATOR"],"formats":["service","breaking","straight_news"]},
+    {"id":"infrastructure","label":"Infrastructură și lucrări","source_classes":["ROAD_AUTHORITY","UAT","COUNTY_ADMIN","PROCUREMENT","UTILITY_OPERATOR"],"formats":["straight_news","project_tracker","document_explainer","investigation"]},
+    {"id":"urbanism_real_estate","label":"Urbanism, construcții și imobiliare","source_classes":["URBANISM_REGISTER","CADASTRE","UAT","COMPANY","PUBLIC_RECORD"],"formats":["straight_news","trend","document_explainer","investigation"]},
+    {"id":"economy_business","label":"Economie, companii și angajatori","source_classes":["COMPANY","ONRC","FINANCE_RECORD","EMPLOYER","CHAMBER"],"formats":["straight_news","business_profile","trend","investigation"]},
+    {"id":"jobs","label":"Locuri de muncă și piața muncii","source_classes":["EMPLOYMENT_AGENCY","EMPLOYER","JOB_BOARD","PUBLIC_INSTITUTION"],"formats":["service","data_story","trend"]},
+    {"id":"health","label":"Sănătate și servicii medicale","source_classes":["HOSPITAL","PUBLIC_HEALTH","HEALTH_INSURANCE","AMBULANCE"],"formats":["service","straight_news","explainer"],"sensitive":true},
+    {"id":"education","label":"Educație, școli și tineri","source_classes":["SCHOOL_INSPECTORATE","SCHOOL","TRAINING","UNIVERSITY","YOUTH"],"formats":["service","straight_news","results","explainer"]},
+    {"id":"social_support","label":"Asistență socială și comunități vulnerabile","source_classes":["SOCIAL_ASSISTANCE","AJPIS","UAT","NGO"],"formats":["service","straight_news","explainer"],"sensitive":true},
+    {"id":"environment","label":"Mediu, apă, păduri și biodiversitate","source_classes":["WATER_AUTHORITY","ENVIRONMENT_AGENCY","ENVIRONMENT_GUARD","FORESTRY","PROTECTED_AREA"],"formats":["alert","straight_news","data_story","investigation"]},
+    {"id":"weather_hazards","label":"Vreme și riscuri naturale","source_classes":["METEO_ALERT","HYDRO_ALERT","MOUNTAIN_RESCUE","EMERGENCY_ALERT"],"formats":["alert","service","breaking"]},
+    {"id":"agriculture_rural","label":"Agricultură și economie rurală","source_classes":["AGRICULTURE_AGENCY","APIA","DSVSA","UAT","PRODUCER"],"formats":["service","straight_news","trend"]},
+    {"id":"sport","label":"Sport județean și local","source_classes":["CLUB","FEDERATION","ASSOCIATION","SCHOOL_SPORT"],"formats":["results","preview","straight_news","profile"]},
+    {"id":"culture_events","label":"Cultură, evenimente și viață locală","source_classes":["CULTURAL_INSTITUTION","EVENT_ORGANIZER","UAT","VENUE"],"formats":["service","preview","review","straight_news"]},
+    {"id":"tourism_outdoors","label":"Turism, munte și agrement","source_classes":["TOURISM_AUTHORITY","PROTECTED_AREA","MOUNTAIN_RESCUE","VENUE"],"formats":["service","guide","straight_news"]},
+    {"id":"food_venues","label":"Restaurante, cafenele și locuri de ieșit","source_classes":["VENUE","OPERATOR","FOOD_CREATOR","PUBLIC_RECORD"],"formats":["guide","opening","profile","service"]},
+    {"id":"consumer","label":"Consumatori, prețuri și servicii","source_classes":["CONSUMER_AUTHORITY","UTILITY_OPERATOR","RETAILER","MARKET_DATA"],"formats":["service","price_watch","explainer"]},
+    {"id":"heritage_history","label":"Patrimoniu și istorie locală","source_classes":["MUSEUM","ARCHIVE","LIBRARY","CULTURAL_INSTITUTION"],"formats":["history","explainer","anniversary"]},
+    {"id":"community_signals","label":"Comunitate și semnale locale","source_classes":["LOCAL_PRESS","COMMUNITY_PAGE","PUBLIC_GROUP","PUBLIC_COMMENT","CREATOR"],"formats":["signal"],"publication_authority":"NONE"}
+  ]
+}
