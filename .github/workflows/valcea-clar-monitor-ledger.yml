@@ -9,6 +9,7 @@ on:
     paths:
       - 'valcea-clar/editorial/monitor_registry.json'
       - 'valcea-clar/editorial/infrastructure_monitor_registry.json'
+      - 'valcea-clar/editorial/market_intelligence_registry.json'
       - 'valcea-clar/editorial/news_sources.json'
       - 'valcea-clar/editorial/manual_watch_sources.json'
       - 'valcea-clar/editorial/news_discovery_state.json'
@@ -16,6 +17,7 @@ on:
       - 'valcea-clar/investigations/**'
       - 'valcea-clar/scripts/monitor_ledger.py'
       - 'valcea-clar/scripts/infrastructure_watch.py'
+      - 'valcea-clar/scripts/market_intelligence_watch.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
       - 'valcea-clar/scripts/validate_monitor_registry.py'
       - '.github/workflows/valcea-clar-monitor-ledger.yml'
@@ -23,12 +25,14 @@ on:
     paths:
       - 'valcea-clar/editorial/monitor_registry.json'
       - 'valcea-clar/editorial/infrastructure_monitor_registry.json'
+      - 'valcea-clar/editorial/market_intelligence_registry.json'
       - 'valcea-clar/editorial/news_sources.json'
       - 'valcea-clar/editorial/manual_watch_sources.json'
       - 'valcea-clar/editorial/publication_holds.json'
       - 'valcea-clar/investigations/**'
       - 'valcea-clar/scripts/monitor_ledger.py'
       - 'valcea-clar/scripts/infrastructure_watch.py'
+      - 'valcea-clar/scripts/market_intelligence_watch.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
       - 'valcea-clar/scripts/validate_monitor_registry.py'
       - '.github/workflows/valcea-clar-monitor-ledger.yml'
@@ -43,7 +47,7 @@ concurrency:
 jobs:
   monitor-ledger:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
         with:
@@ -62,6 +66,9 @@ jobs:
       - name: Validate A1 connectivity watch
         run: python valcea-clar/scripts/infrastructure_watch.py --check
 
+      - name: Validate market intelligence watches
+        run: python valcea-clar/scripts/market_intelligence_watch.py --check
+
       - name: Validate Râmnicu Vâlcea Council Watch extractor
         run: python valcea-clar/scripts/council_watch_rm_valcea.py --self-test
 
@@ -72,6 +79,10 @@ jobs:
       - name: Probe A1 connectivity sources
         if: github.event_name != 'pull_request'
         run: python valcea-clar/scripts/infrastructure_watch.py --live
+
+      - name: Probe jobs firms and construction sources
+        if: github.event_name != 'pull_request'
+        run: python valcea-clar/scripts/market_intelligence_watch.py --live
 
       - name: Read official Râmnicu Vâlcea adopted decisions
         run: python valcea-clar/scripts/council_watch_rm_valcea.py
@@ -84,6 +95,7 @@ jobs:
           path: |
             valcea-clar/editorial/council_watch_rm_valcea_state.json
             valcea-clar/editorial/infrastructure_monitor_state.json
+            valcea-clar/editorial/market_intelligence_state.json
           if-no-files-found: warn
           retention-days: 7
 
@@ -98,7 +110,8 @@ jobs:
           git add \
             valcea-clar/editorial/monitor_state.json \
             valcea-clar/editorial/council_watch_rm_valcea_state.json \
-            valcea-clar/editorial/infrastructure_monitor_state.json
+            valcea-clar/editorial/infrastructure_monitor_state.json \
+            valcea-clar/editorial/market_intelligence_state.json
           if git diff --cached --quiet; then
             echo 'No monitor-state change to persist.'
             exit 0
