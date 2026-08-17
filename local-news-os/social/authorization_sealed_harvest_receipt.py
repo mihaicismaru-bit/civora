@@ -620,3 +620,403 @@ def authorization_sealed_execution(authorization_fingerprint: str | None) -> Ite
     finally:
         runtime.execute_plan_durably = original_execute
         _ACTIVE_FINGERPRINT = previous_active
+
+
+# --- Explicit provider re-read attempt provenance binding -------------------
+#
+# The explicit re-read handoff moves an ambiguous RECOVERY_REQUIRED checkpoint
+# only as far as RETRY_WAIT. The provider-facing attempt that follows must carry
+# durable provenance for the exact consumed handoff and must re-check that handoff
+# immediately before NETWORK_CALL_STARTED. These wrappers leave normal transient
+# RETRY_WAIT / BLOCKED_AUTH retries unchanged.
+
+REREAD_ATTEMPT_PROVENANCE_ID = "local-news-os-reread-attempt-provenance-v1"
+RECOVERY_REREAD_RESULT = "RECOVERY_RECONCILED_NO_DURABLE_OBSERVATION"
+EXPLICIT_REREAD_MODE = "EXPLICIT_SINGLE_USE_HANDOFF"
+
+
+def reread_attempt_provenance_guards() -> dict[str, Any]:
+    return {
+        "explicit_single_use_handoff_required": True,
+        "handoff_rechecked_at_claim": True,
+        "handoff_rechecked_before_network": True,
+        "provider_network_call_performed_by_binding": False,
+        "credential_values_read_by_binding": False,
+        "credential_values_persisted": False,
+        "provider_payload_persisted": False,
+        "publication_blocked_by_analytics": False,
+        "zero_paid_dependency": True,
+    }
+
+
+def _lineage_recovery_receipt(entry: dict[str, Any]) -> dict[str, Any] | None:
+    receipts = entry.get("execution_receipts") if isinstance(entry.get("execution_receipts"), list) else []
+    for row in reversed(receipts):
+        if not isinstance(row, dict):
+            continue
+        evidence = row.get("recovery_evidence") if isinstance(row.get("recovery_evidence"), dict) else {}
+        if (
+            _clean(evidence.get("authorization_mode")) == EXPLICIT_REREAD_MODE
+            or evidence.get("provider_reread_authorized") is True
+        ):
+            return row
+    return None
+
+
+def _requires_reread_attempt_provenance(entry: dict[str, Any]) -> bool:
+    status = _clean(entry.get("status")).upper()
+    latest = _latest_receipt(entry)
+    if status == "RETRY_WAIT":
+        return (
+            _clean(entry.get("last_result_status")).upper() == RECOVERY_REREAD_RESULT
+            or _lineage_recovery_receipt(entry) is not None
+        )
+    if status == "IN_FLIGHT" and isinstance(latest, dict):
+        if _clean(latest.get("status")).upper() != "CLAIMED" or _clean(latest.get("network_started_at")):
+            return False
+        if isinstance(latest.get("reread_attempt_provenance"), dict):
+            return True
+        receipts = entry.get("execution_receipts") if isinstance(entry.get("execution_receipts"), list) else []
+        previous_entry = _clone(entry)
+        previous_entry["execution_receipts"] = receipts[:-1]
+        return _lineage_recovery_receipt(previous_entry) is not None
+    return False
+
+
+def _provenance_shape_blocks(provenance: dict[str, Any], job: dict[str, Any], authorization_fingerprint: str) -> list[str]:
+    blocks: list[str] = []
+    if not isinstance(provenance, dict):
+        return ["REREAD_ATTEMPT_PROVENANCE_REQUIRED"]
+    if _clean(provenance.get("provenance_id")) != REREAD_ATTEMPT_PROVENANCE_ID:
+        blocks.append("REREAD_ATTEMPT_PROVENANCE_ID_INVALID")
+    if not _clean(provenance.get("handoff_id")):
+        blocks.append("REREAD_ATTEMPT_HANDOFF_ID_REQUIRED")
+    seal = _clean(provenance.get("handoff_authorization_fingerprint_sha256"))
+    if not _valid_authorization_fingerprint(seal):
+        blocks.append("REREAD_ATTEMPT_HANDOFF_SEAL_INVALID")
+    record_fp = _clean(provenance.get("handoff_record_fingerprint_sha256"))
+    if not RECEIPT_FINGERPRINT_RE.fullmatch(record_fp):
+        blocks.append("REREAD_ATTEMPT_HANDOFF_RECORD_FINGERPRINT_INVALID")
+    consumed_state_fp = _clean(provenance.get("handoff_consumed_checkpoint_state_fingerprint_sha256"))
+    if not RECEIPT_FINGERPRINT_RE.fullmatch(consumed_state_fp):
+        blocks.append("REREAD_ATTEMPT_CONSUMED_STATE_FINGERPRINT_INVALID")
+    if not _clean(provenance.get("handoff_consumed_at")):
+        blocks.append("REREAD_ATTEMPT_HANDOFF_CONSUMED_AT_REQUIRED")
+    if not _clean(provenance.get("explicit_decision_id")):
+        blocks.append("REREAD_ATTEMPT_DECISION_ID_REQUIRED")
+    if not hmac.compare_digest(_clean(provenance.get("authorization_fingerprint")), authorization_fingerprint):
+        blocks.append("REREAD_ATTEMPT_AUTHORIZATION_CONTEXT_CHANGED")
+    if _clean(provenance.get("checkpoint_key")) != runtime.checkpoint_key(job):
+        blocks.append("REREAD_ATTEMPT_CHECKPOINT_MISMATCH")
+    if _clean(provenance.get("job_fingerprint_sha256")) != _clean(job.get("job_fingerprint_sha256")):
+        blocks.append("REREAD_ATTEMPT_JOB_FINGERPRINT_MISMATCH")
+    if provenance.get("provider_network_call_performed") is not False:
+        blocks.append("REREAD_ATTEMPT_BINDING_NETWORK_BOUNDARY_VIOLATION")
+    if provenance.get("publication_blocked") is not False:
+        blocks.append("REREAD_ATTEMPT_PUBLICATION_BOUNDARY_VIOLATION")
+    if provenance.get("zero_paid_dependency") is not True:
+        blocks.append("REREAD_ATTEMPT_ZERO_PAID_POLICY_VIOLATION")
+    if runtime._entry_has_forbidden_fields(provenance):
+        blocks.append("REREAD_ATTEMPT_PROVENANCE_FORBIDDEN_FIELD")
+    return sorted(set(blocks))
+
+
+def _consumed_handoff_record_blocks(
+    repo_root: Path,
+    channel: dict[str, Any],
+    job: dict[str, Any],
+    authorization_fingerprint: str,
+    *,
+    handoff_id: str,
+    expected_seal: str,
+    expected_record_fingerprint: str | None = None,
+    expected_decision_id: str | None = None,
+) -> tuple[dict[str, Any] | None, list[str]]:
+    # Local import deliberately avoids a module import cycle: the handoff module
+    # imports this receipt module for its existing sealed-recovery primitives.
+    import fleet_metrics_reread_authorization_handoff as handoff
+
+    store, store_blocks, _ = handoff.load_handoff_store(repo_root, channel)
+    if store_blocks:
+        return None, ["REREAD_ATTEMPT_HANDOFF_STORE_INVALID"] + list(store_blocks)
+    record = store.get("records", {}).get(_clean(handoff_id))
+    if not isinstance(record, dict):
+        return None, ["REREAD_ATTEMPT_HANDOFF_RECORD_MISSING"]
+    record_blocks = handoff._record_blocks(record)
+    if record_blocks:
+        return None, ["REREAD_ATTEMPT_HANDOFF_RECORD_INVALID"] + list(record_blocks)
+    if _clean(record.get("status")).upper() != "CONSUMED":
+        return None, ["REREAD_ATTEMPT_HANDOFF_NOT_CONSUMED"]
+    if not hmac.compare_digest(_clean(record.get("handoff_authorization_fingerprint_sha256")), _clean(expected_seal)):
+        return None, ["REREAD_ATTEMPT_HANDOFF_SEAL_MISMATCH"]
+    if expected_record_fingerprint and not hmac.compare_digest(
+        _clean(record.get("record_fingerprint_sha256")), _clean(expected_record_fingerprint)
+    ):
+        return None, ["REREAD_ATTEMPT_HANDOFF_RECORD_FINGERPRINT_MISMATCH"]
+    authorization = record.get("authorization") if isinstance(record.get("authorization"), dict) else {}
+    expected_identity = {
+        "instance_id": _clean(channel.get("instance_id")),
+        "channel_id": _clean(channel.get("channel_id")),
+        "platform": _clean(channel.get("platform")).lower(),
+        "checkpoint_key": runtime.checkpoint_key(job),
+        "publication_id": _clean(job.get("publication_id")),
+        "remote_publication_id": _clean((job.get("publication") or {}).get("remote_publication_id")),
+        "job_fingerprint_sha256": _clean(job.get("job_fingerprint_sha256")),
+        "authorization_fingerprint": authorization_fingerprint,
+    }
+    identity_blocks = [
+        "REREAD_ATTEMPT_HANDOFF_IDENTITY_MISMATCH:" + key
+        for key, expected in expected_identity.items()
+        if _clean(authorization.get(key)) != expected
+    ]
+    if expected_decision_id and _clean(authorization.get("decision_id")) != _clean(expected_decision_id):
+        identity_blocks.append("REREAD_ATTEMPT_HANDOFF_DECISION_MISMATCH")
+    if not _clean(record.get("consumed_at")):
+        identity_blocks.append("REREAD_ATTEMPT_HANDOFF_CONSUMED_AT_REQUIRED")
+    if not RECEIPT_FINGERPRINT_RE.fullmatch(_clean(record.get("consumed_checkpoint_state_fingerprint_sha256"))):
+        identity_blocks.append("REREAD_ATTEMPT_HANDOFF_CONSUMED_STATE_FINGERPRINT_INVALID")
+    return (record if not identity_blocks else None), sorted(set(identity_blocks))
+
+
+def _build_reread_attempt_provenance(
+    repo_root: Path,
+    channel: dict[str, Any],
+    job: dict[str, Any],
+    authorization_fingerprint: str,
+    source_state: dict[str, Any],
+    source_entry: dict[str, Any],
+) -> tuple[dict[str, Any] | None, list[str]]:
+    lineage = _lineage_recovery_receipt(source_entry)
+    if not isinstance(lineage, dict):
+        return None, ["REREAD_ATTEMPT_RECOVERY_EVIDENCE_REQUIRED"]
+    evidence = lineage.get("recovery_evidence") if isinstance(lineage.get("recovery_evidence"), dict) else {}
+    if _clean(evidence.get("authorization_mode")) != EXPLICIT_REREAD_MODE:
+        return None, ["REREAD_ATTEMPT_EXPLICIT_HANDOFF_EVIDENCE_REQUIRED"]
+    if evidence.get("provider_reread_authorized") is not True:
+        return None, ["REREAD_ATTEMPT_PROVIDER_REREAD_AUTHORIZATION_REQUIRED"]
+    handoff_id = _clean(evidence.get("reread_handoff_id"))
+    seal = _clean(evidence.get("reread_handoff_authorization_fingerprint_sha256"))
+    decision_id = _clean(evidence.get("explicit_decision_id"))
+    if not handoff_id:
+        return None, ["REREAD_ATTEMPT_HANDOFF_ID_REQUIRED"]
+    if not _valid_authorization_fingerprint(seal):
+        return None, ["REREAD_ATTEMPT_HANDOFF_SEAL_INVALID"]
+    record, blocks = _consumed_handoff_record_blocks(
+        repo_root,
+        channel,
+        job,
+        authorization_fingerprint,
+        handoff_id=handoff_id,
+        expected_seal=seal,
+        expected_decision_id=decision_id,
+    )
+    if blocks or record is None:
+        return None, blocks or ["REREAD_ATTEMPT_HANDOFF_RECORD_INVALID"]
+    if _clean(source_entry.get("status")).upper() == "RETRY_WAIT":
+        consumed_state_fp = _clean(record.get("consumed_checkpoint_state_fingerprint_sha256"))
+        if not hmac.compare_digest(consumed_state_fp, _clean(source_state.get("state_fingerprint_sha256"))):
+            return None, ["REREAD_ATTEMPT_CONSUMED_CHECKPOINT_STATE_MISMATCH"]
+    authorization = record.get("authorization") if isinstance(record.get("authorization"), dict) else {}
+    provenance = {
+        "provenance_id": REREAD_ATTEMPT_PROVENANCE_ID,
+        "handoff_id": handoff_id,
+        "handoff_authorization_fingerprint_sha256": seal,
+        "handoff_record_fingerprint_sha256": _clean(record.get("record_fingerprint_sha256")),
+        "handoff_consumed_at": _clean(record.get("consumed_at")),
+        "handoff_consumed_checkpoint_state_fingerprint_sha256": _clean(record.get("consumed_checkpoint_state_fingerprint_sha256")),
+        "explicit_decision_id": _clean(authorization.get("decision_id")),
+        "authorization_fingerprint": authorization_fingerprint,
+        "checkpoint_key": runtime.checkpoint_key(job),
+        "job_fingerprint_sha256": _clean(job.get("job_fingerprint_sha256")),
+        "provider_network_call_performed": False,
+        "publication_blocked": False,
+        "zero_paid_dependency": True,
+    }
+    shape_blocks = _provenance_shape_blocks(provenance, job, authorization_fingerprint)
+    return (provenance if not shape_blocks else None), shape_blocks
+
+
+def _verify_bound_reread_attempt(
+    repo_root: Path,
+    channel: dict[str, Any],
+    job: dict[str, Any],
+    authorization_fingerprint: str,
+    provenance: dict[str, Any],
+) -> list[str]:
+    blocks = _provenance_shape_blocks(provenance, job, authorization_fingerprint)
+    if blocks:
+        return blocks
+    record, record_blocks = _consumed_handoff_record_blocks(
+        repo_root,
+        channel,
+        job,
+        authorization_fingerprint,
+        handoff_id=_clean(provenance.get("handoff_id")),
+        expected_seal=_clean(provenance.get("handoff_authorization_fingerprint_sha256")),
+        expected_record_fingerprint=_clean(provenance.get("handoff_record_fingerprint_sha256")),
+        expected_decision_id=_clean(provenance.get("explicit_decision_id")),
+    )
+    if record_blocks or record is None:
+        return record_blocks or ["REREAD_ATTEMPT_HANDOFF_RECORD_INVALID"]
+    if _clean(record.get("consumed_at")) != _clean(provenance.get("handoff_consumed_at")):
+        blocks.append("REREAD_ATTEMPT_HANDOFF_CONSUMED_AT_MISMATCH")
+    if _clean(record.get("consumed_checkpoint_state_fingerprint_sha256")) != _clean(
+        provenance.get("handoff_consumed_checkpoint_state_fingerprint_sha256")
+    ):
+        blocks.append("REREAD_ATTEMPT_HANDOFF_CONSUMED_STATE_MISMATCH")
+    return sorted(set(blocks))
+
+
+_claim_checkpoint_sealed_base = claim_checkpoint_sealed
+_mark_network_started_base = mark_network_started
+
+
+def claim_checkpoint_sealed(
+    repo_root: Path,
+    channel: dict[str, Any],
+    job: dict[str, Any],
+    *,
+    authorization_fingerprint: str,
+    now: str,
+    lease_minutes: int = runtime.DEFAULT_LEASE_MINUTES,
+) -> dict[str, Any]:
+    pre_state, pre_blocks, _ = runtime.load_checkpoint_state(repo_root, channel)
+    pre_entry = pre_state.get("entries", {}).get(runtime.checkpoint_key(job)) if not pre_blocks else None
+    requires_provenance = isinstance(pre_entry, dict) and _requires_reread_attempt_provenance(pre_entry)
+    source_state = _clone(pre_state) if isinstance(pre_state, dict) else {}
+    source_entry = _clone(pre_entry) if isinstance(pre_entry, dict) else {}
+
+    result = _claim_checkpoint_sealed_base(
+        repo_root,
+        channel,
+        job,
+        authorization_fingerprint=authorization_fingerprint,
+        now=now,
+        lease_minutes=lease_minutes,
+    )
+    if result.get("claimed") is not True or not requires_provenance:
+        return result
+
+    provenance, provenance_blocks = _build_reread_attempt_provenance(
+        repo_root,
+        channel,
+        job,
+        authorization_fingerprint,
+        source_state,
+        source_entry,
+    )
+    if provenance_blocks or provenance is None:
+        return {
+            "claimed": False,
+            "status": "HOLD_REREAD_ATTEMPT_PROVENANCE",
+            "hard_blocks": provenance_blocks or ["REREAD_ATTEMPT_PROVENANCE_REQUIRED"],
+            "entry": result.get("entry"),
+            "publication_blocked": False,
+        }
+
+    post_state, post_blocks, _ = runtime.load_checkpoint_state(repo_root, channel)
+    if post_blocks:
+        return {
+            "claimed": False,
+            "status": "HOLD_REREAD_ATTEMPT_PROVENANCE_PERSISTENCE",
+            "hard_blocks": post_blocks,
+            "entry": result.get("entry"),
+            "publication_blocked": False,
+        }
+    previous_fp = _clean(post_state.get("state_fingerprint_sha256")) or None
+    post_entry = post_state.get("entries", {}).get(runtime.checkpoint_key(job))
+    if not isinstance(post_entry, dict):
+        return {
+            "claimed": False,
+            "status": "HOLD_REREAD_ATTEMPT_PROVENANCE_PERSISTENCE",
+            "hard_blocks": ["REREAD_ATTEMPT_CLAIMED_ENTRY_MISSING"],
+            "publication_blocked": False,
+        }
+    latest = _latest_receipt(post_entry)
+    if not isinstance(latest, dict) or _clean(latest.get("status")).upper() != "CLAIMED" or _clean(latest.get("network_started_at")):
+        return {
+            "claimed": False,
+            "status": "HOLD_REREAD_ATTEMPT_PROVENANCE_PERSISTENCE",
+            "hard_blocks": ["REREAD_ATTEMPT_CLAIM_RECEIPT_INVALID"],
+            "entry": _clone(post_entry),
+            "publication_blocked": False,
+        }
+    latest["reread_attempt_provenance"] = _clone(provenance)
+    latest["receipt_fingerprint_sha256"] = _receipt_fingerprint(latest)
+    post_state["state_fingerprint_sha256"] = runtime._state_fingerprint(post_state)
+    persisted = runtime.persist_checkpoint_state_cas(
+        repo_root,
+        channel,
+        post_state,
+        expected_previous_fingerprint_sha256=previous_fp,
+    )
+    if persisted.get("persisted") is not True:
+        return {
+            "claimed": False,
+            "status": "HOLD_REREAD_ATTEMPT_PROVENANCE_PERSISTENCE",
+            "hard_blocks": list(persisted.get("hard_blocks", [])) or ["REREAD_ATTEMPT_PROVENANCE_NOT_PERSISTED"],
+            "entry": result.get("entry"),
+            "publication_blocked": False,
+        }
+    final_state, final_blocks, _ = runtime.load_checkpoint_state(repo_root, channel)
+    final_entry = final_state.get("entries", {}).get(runtime.checkpoint_key(job)) if not final_blocks else None
+    if final_blocks or not isinstance(final_entry, dict):
+        return {
+            "claimed": False,
+            "status": "HOLD_REREAD_ATTEMPT_PROVENANCE_READBACK",
+            "hard_blocks": final_blocks or ["REREAD_ATTEMPT_PROVENANCE_READBACK_MISSING"],
+            "publication_blocked": False,
+        }
+    return {
+        "claimed": True,
+        "status": "CLAIMED",
+        "hard_blocks": [],
+        "entry": _clone(final_entry),
+        "publication_blocked": False,
+        "reread_attempt_provenance_bound": True,
+    }
+
+
+def mark_network_started(
+    repo_root: Path,
+    channel: dict[str, Any],
+    job: dict[str, Any],
+    *,
+    authorization_fingerprint: str,
+    now: str,
+) -> dict[str, Any]:
+    state, blocks, _ = runtime.load_checkpoint_state(repo_root, channel)
+    if blocks:
+        return {"persisted": False, "status": "HOLD_CHECKPOINT_STATE", "hard_blocks": blocks}
+    entry = state.get("entries", {}).get(runtime.checkpoint_key(job))
+    if not isinstance(entry, dict):
+        return {"persisted": False, "status": "HOLD_PRE_NETWORK_RECEIPT", "hard_blocks": ["SEALED_ENTRY_MISSING"]}
+    if _requires_reread_attempt_provenance(entry):
+        latest = _latest_receipt(entry)
+        provenance = latest.get("reread_attempt_provenance") if isinstance(latest, dict) and isinstance(latest.get("reread_attempt_provenance"), dict) else None
+        if provenance is None:
+            return {
+                "persisted": False,
+                "status": "HOLD_PRE_NETWORK_REREAD_PROVENANCE",
+                "hard_blocks": ["REREAD_ATTEMPT_PROVENANCE_REQUIRED_BEFORE_NETWORK"],
+            }
+        provenance_blocks = _verify_bound_reread_attempt(
+            repo_root,
+            channel,
+            job,
+            authorization_fingerprint,
+            provenance,
+        )
+        if provenance_blocks:
+            return {
+                "persisted": False,
+                "status": "HOLD_PRE_NETWORK_REREAD_PROVENANCE",
+                "hard_blocks": provenance_blocks,
+            }
+    return _mark_network_started_base(
+        repo_root,
+        channel,
+        job,
+        authorization_fingerprint=authorization_fingerprint,
+        now=now,
+    )
