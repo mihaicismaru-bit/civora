@@ -110,7 +110,7 @@ def persist_observation(root: Path, ch: dict, jb: dict, observed_at: str, *, rem
         window_start_at=pub["published_at"],
         window_end_at=observed_at,
         now=observed_at,
-        min_samples=1,
+        min_samples=2,
     )
     assert not bundle.get("hard_blocks"), bundle
     persisted = collector.persist_bundle(root, bundle)
@@ -254,7 +254,7 @@ def test_cross_instance_observation_store_is_rejected() -> None:
         beta_bundle = collector.materialize_bundle(
             beta, beta_job["publication"], {"metrics": {"impressions": 10, "reach": 8}},
             source=beta_job["source"], observed_at="2026-08-16T10:00:00Z", collected_at="2026-08-16T10:00:00Z",
-            window_start_at=beta_job["publication"]["published_at"], window_end_at="2026-08-16T10:00:00Z", now="2026-08-16T10:00:00Z", min_samples=1,
+            window_start_at=beta_job["publication"]["published_at"], window_end_at="2026-08-16T10:00:00Z", now="2026-08-16T10:00:00Z", min_samples=2,
         )
         assert not beta_bundle.get("hard_blocks"), beta_bundle
         alpha_path = root / collector.expected_observation_store_path(ch)
