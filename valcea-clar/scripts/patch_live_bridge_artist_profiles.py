@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Idempotently add artist-profile rendering to the VÂLCEA CLAR Sites live bridge."""
+"""Idempotently add and validate artist-profile rendering in the VÂLCEA CLAR live bridge."""
 from __future__ import annotations
 
 import argparse
@@ -54,16 +54,40 @@ def validate(text: str) -> None:
         raise ValueError("artist bridge contract incomplete: " + ", ".join(missing))
 
 
+def self_test() -> None:
+    unpatched = '''(() => {\n  function styleOnce() {\n    const css = ".vc-rich li{margin:8px 0;line-height:1.55}";\n  }\n  const factbox = () => '';\n  const richSections = () => '';\n  function renderHome(nav, feed) {}\n  function renderStory(story) {\n    return `${factbox(story)}<div class="vc-body">${body}</div>${richSections(story)}<section class="vc-article-sources">`;\n  }\n})();'''
+    try:
+        validate(unpatched)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("unpatched bridge must fail validation")
+    patched = patch(unpatched)
+    validate(patched)
+    assert patch(patched) == patched, "artist bridge patch must be idempotent"
+    print("VÂLCEA CLAR live bridge artist-profile patcher self-test: PASS")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
+    parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
+    if args.self_test:
+        self_test()
+        return 0
+
     original = TARGET.read_text(encoding="utf-8")
-    updated = patch(original)
-    validate(updated)
     if args.check:
+        # Validation must inspect the checked-out artifact as-is.  The old
+        # implementation patched an in-memory copy first, which allowed an
+        # unpatched-but-patchable bridge to report a false PASS.
+        validate(original)
         print("VÂLCEA CLAR live bridge artist-profile contract: PASS")
         return 0
+
+    updated = patch(original)
+    validate(updated)
     if updated != original:
         TARGET.write_text(updated, encoding="utf-8")
         print("VÂLCEA CLAR live bridge artist-profile patch: UPDATED")
