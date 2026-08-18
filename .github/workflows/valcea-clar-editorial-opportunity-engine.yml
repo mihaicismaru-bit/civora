@@ -1,0 +1,76 @@
+name: VÂLCEA CLAR Editorial Opportunity Engine
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '7,37 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/editorial/editorial_product_policy.json'
+      - 'valcea-clar/editorial/monitor_registry.json'
+      - 'valcea-clar/editorial/monitor_state.json'
+      - 'valcea-clar/editorial/infrastructure_monitor_registry.json'
+      - 'valcea-clar/editorial/market_intelligence_registry.json'
+      - 'valcea-clar/editorial/fact_kernel_registry.json'
+      - 'valcea-clar/editorial/facts_registry.json'
+      - 'valcea-clar/scripts/editorial_opportunity_engine.py'
+      - '.github/workflows/valcea-clar-editorial-opportunity-engine.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-editorial-opportunity-engine
+  cancel-in-progress: true
+
+jobs:
+  opportunities:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Validate opportunity contracts
+        run: |
+          python -m py_compile valcea-clar/scripts/editorial_opportunity_engine.py
+          python valcea-clar/scripts/editorial_opportunity_engine.py --self-test
+          python valcea-clar/scripts/editorial_opportunity_engine.py --check
+
+      - name: Materialize ranked editorial opportunity queue
+        run: python valcea-clar/scripts/editorial_opportunity_engine.py
+
+      - name: Persist opportunity queue conflict-safe
+        shell: bash
+        run: |
+          set -euo pipefail
+          path='valcea-clar/editorial/editorial_opportunity_queue.json'
+          if [ ! -s "$path" ]; then
+            echo 'Opportunity queue was not materialized.' >&2
+            exit 1
+          fi
+          cp "$path" /tmp/editorial-opportunity-queue.json
+          git config user.name 'vâlcea-clar-opportunity-engine[bot]'
+          git config user.email 'valcea-clar-opportunity-engine@users.noreply.github.com'
+          for attempt in 1 2 3 4; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/editorial-opportunity-queue.json "$path"
+            git add "$path"
+            if git diff --cached --quiet; then
+              echo 'Editorial opportunity queue already current.'
+              exit 0
+            fi
+            git commit -m 'Refresh VÂLCEA CLAR editorial opportunity queue'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            sleep $((attempt * 2))
+          done
+          echo 'Could not persist editorial opportunity queue after four attempts.' >&2
+          exit 1
