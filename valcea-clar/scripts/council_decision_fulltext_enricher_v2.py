@@ -17,6 +17,7 @@ from typing import Any
 import council_decision_fulltext_enricher as base
 
 ORIGINAL_GENERIC_STORY = base.generic_story
+PORTAL_JUST_RM_VALCEA = "https://portal.just.ro/288/SitePages/dosare.aspx"
 
 
 def _short_effect(value: str, limit: int = 118) -> str:
@@ -200,6 +201,113 @@ def story_309(item: dict[str, Any], doc: dict[str, Any], url: str):
     return headline, dek, claims, sections, factbox
 
 
+def story_310(item: dict[str, Any], doc: dict[str, Any], url: str):
+    """Join HCL 310 with the verified public court-case identity.
+
+    The HCL explains why external representation is purchased; Portal Just
+    explains what case 8244/288/2026 actually is and who the parties are.  We
+    keep those provenance domains separate and do not infer employment status
+    for the individual defendants from the municipality's wording.
+    """
+    text = base.clean(doc.get("document_text"))
+    vote = base.vote_from(text) or "18 pentru · 2 împotrivă · 0 abțineri"
+    case = "8244/288/2026"
+    portal = PORTAL_JUST_RM_VALCEA
+    base.add_source(item, "Portalul instanțelor de judecată – dosar 8244/288/2026", portal, "T1")
+
+    headline = "Primăria ia avocați externi într-un proces pentru daune morale. Cine a dat în judecată Municipiul și DAS"
+    dek = (
+        "HCL 310 autorizează reprezentare juridică externă în dosarul 8244/288/2026. "
+        "Dosarul este o acțiune în răspundere delictuală aflată pe fond la Judecătoria Râmnicu Vâlcea, "
+        "iar hotărârea locală precizează că sunt solicitate daune morale."
+    )
+    claims = [
+        base.claim(
+            "legal-services",
+            "material_change",
+            f"Consiliul Local aprobă achiziționarea de servicii juridice de consultanță, asistență și reprezentare pentru Municipiul Râmnicu Vâlcea în dosarul nr. {case}, până la soluționarea definitivă a procesului.",
+            url,
+        ),
+        base.claim(
+            "court-case",
+            "evidence",
+            "Portalul instanțelor indică dosarul 8244/288/2026 ca fiind înregistrat la Judecătoria Râmnicu Vâlcea la 22 iunie 2026, Secția civilă, materia Civil, cu obiect «acțiune în răspundere delictuală» și stadiu procesual Fond.",
+            portal,
+            "documented_context",
+        ),
+        base.claim(
+            "damages-and-municipality-role",
+            "evidence",
+            "HCL 310 descrie cauza mai precis ca «răspundere civilă delictuală – daune morale» și consemnează că Municipiul Râmnicu Vâlcea este citat ca pârât «în calitate de comitent pentru angajați ai Primăriei». Citația a fost înregistrată la Primărie cu nr. 28823 din 4 august 2026.",
+            url,
+            "documented_context",
+        ),
+        base.claim(
+            "claimants",
+            "evidence",
+            "În fișa publică a dosarului, reclamanți sunt Vasile Melinte și Maria Melinte.",
+            portal,
+            "documented_context",
+        ),
+        base.claim(
+            "defendants",
+            "evidence",
+            "Pârâții înscriși în fișa publică sunt Ileana-Marcela Dobra, Elena-Cerasela Truțoiu, Direcția de Asistență Socială – Primăria Municipiului Râmnicu Vâlcea și Municipiul Râmnicu Vâlcea, prin primar.",
+            portal,
+            "documented_context",
+        ),
+        base.claim(
+            "no-employment-inference",
+            "meaning",
+            "Hotărârea locală nu identifică, în pasajul public referitor la calitatea de comitent, care dintre persoanele fizice din dosar ar avea calitatea de angajat. VÂLCEA CLAR nu atribuie această calitate fără un document care o stabilește explicit.",
+            url,
+            "reader_service",
+        ),
+        base.claim(
+            "approval-record",
+            "context",
+            "Necesitatea achiziției este susținută în HCL prin Referatul de aprobare nr. 29614/11.08.2026 și Raportul nr. 29624/11.08.2026 al Direcției Administrație, Juridic, Contencios.",
+            url,
+            "documented_context",
+        ),
+        base.claim(
+            "mayor",
+            "consequence",
+            "Primarul municipiului este împuternicit să contracteze serviciile juridice în condițiile legii, iar punerea în aplicare revine Direcției Administrație, Juridic, Contencios.",
+            url,
+        ),
+        base.claim(
+            "vote",
+            "context",
+            f"HCL 310 a fost adoptată cu {vote}.",
+            url,
+            "documented_context",
+        ),
+        base.claim(
+            "unknown",
+            "next_watch",
+            "Documentele publice verificate nu indică în acest moment valoarea daunelor morale solicitate, avocatul sau societatea de avocatură care va primi contractul și nici valoarea contractului de asistență juridică. Aceste elemente trebuie urmărite în dosar și în achiziția ulterioară.",
+            url,
+            "reader_service",
+        ),
+    ]
+    sections = [
+        {"title": "Despre ce este procesul", "paragraphs": [claims[1]["text"], claims[2]["text"]]},
+        {"title": "Cine se judecă", "paragraphs": [claims[3]["text"], claims[4]["text"], claims[5]["text"]]},
+        {"title": "De ce cumpără Primăria avocați externi", "paragraphs": [claims[0]["text"], claims[6]["text"], claims[7]["text"], claims[8]["text"]]},
+        {"title": "Ce nu este public încă", "paragraphs": [claims[9]["text"]]},
+    ]
+    factbox = [
+        {"label": "Dosar", "value": case},
+        {"label": "Instanță", "value": "Judecătoria Râmnicu Vâlcea"},
+        {"label": "Obiect", "value": "Răspundere delictuală – daune morale"},
+        {"label": "Stadiu", "value": "Fond"},
+        {"label": "Reclamanți", "value": "Vasile Melinte · Maria Melinte"},
+        {"label": "Vot HCL 310", "value": vote},
+    ]
+    return headline, dek, claims, sections, factbox
+
+
 def story_311(item: dict[str, Any], doc: dict[str, Any], url: str):
     text = base.clean(doc.get("document_text"))
     vote = base.vote_from(text) or "20 pentru · 0 împotrivă · 0 abțineri"
@@ -228,14 +336,14 @@ def story_311(item: dict[str, Any], doc: dict[str, Any], url: str):
 
 
 def install() -> None:
-    base.SPECIAL.update({306: story_306, 308: story_308, 309: story_309, 311: story_311})
+    base.SPECIAL.update({306: story_306, 308: story_308, 309: story_309, 310: story_310, 311: story_311})
     base.generic_story = consequence_led_generic_story
 
 
 def self_test() -> int:
     install()
     assert base.SPECIAL[306] is story_306
-    assert base.SPECIAL[308] is story_308 and base.SPECIAL[309] is story_309 and base.SPECIAL[311] is story_311
+    assert base.SPECIAL[308] is story_308 and base.SPECIAL[309] is story_309 and base.SPECIAL[310] is story_310 and base.SPECIAL[311] is story_311
 
     h306_url = "https://example.test/h306"
     h306_doc = {
@@ -257,6 +365,27 @@ def self_test() -> int:
     assert "475,62" in h306_item["dek"]
     assert any(row["label"] == "Diferență buget local" and row["value"] == "110,65 lei/MWh" for row in h306_item["factbox"])
     assert h306_item["fulltext_enrichment"]["topic_specific_parser"] is True
+
+    h310_url = "https://example.test/h310"
+    h310_doc = {
+        "decision_number": 310,
+        "decision_date": "2026-08-14",
+        "official_html_url": h310_url,
+        "resolved": True,
+        "document_text": "HOTĂRÂREA NR.310 Întrunind 18 voturi pentru, 2 voturi împotrivă și 0 abţineri. Dosarul nr.8244/288/2026 are ca obiect răspundere civilă delictuală - daune morale. Municipiul este citat în calitate de comitent pentru angajați ai Primăriei. Citația a fost înregistrată cu nr.28823/04.08.2026. Art.1. Se aprobă achiziționarea serviciilor juridice. Art.2. Se împuternicește Primarul municipiului să contracteze serviciile.",
+        "operative_articles": ["Art.1. Se aprobă achiziționarea serviciilor juridice.", "Art.2. Se împuternicește Primarul municipiului să contracteze serviciile."],
+        "source_sha256": "x310",
+        "document_text_sha256": "y310",
+    }
+    h310_item = {"id": "rm-valcea-hcl-310-20260814", "status": "verified", "council_decision": {"decision_number": 310}, "sources": []}
+    h310_facts = {"facts": [h310_item]}
+    count, ids = base.apply_enrichment(h310_facts, {"documents": [h310_doc]})
+    assert count == 1 and ids == [h310_item["id"]]
+    assert "daune morale" in h310_item["headline"].lower()
+    assert any(row.get("url") == PORTAL_JUST_RM_VALCEA for row in h310_item["sources"])
+    assert any("Vasile Melinte" in paragraph for section in h310_item["article_sections"] for paragraph in section["paragraphs"])
+    assert any(row["label"] == "Stadiu" and row["value"] == "Fond" for row in h310_item["factbox"])
+    assert h310_item["fulltext_enrichment"]["topic_specific_parser"] is True
 
     h311_doc = {"decision_number":311,"decision_date":"2026-08-14","official_html_url":"https://example.test/h311","resolved":True,"document_text":"HOTĂRÂREA NR.311 Întrunind 20 de voturi pentru, 0 voturi împotrivă și 0 abţineri. Art.1. Se aprobă punerea la dispoziția ETA S.A. a bunurilor.","operative_articles":["Art.1. Se aprobă punerea la dispoziția ETA S.A. a bunurilor."],"source_sha256":"x","document_text_sha256":"y"}
     h311_item = {"id":"rm-valcea-hcl-311-20260814","status":"verified","council_decision":{"decision_number":311},"sources":[]}
