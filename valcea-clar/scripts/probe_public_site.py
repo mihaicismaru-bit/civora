@@ -4,6 +4,10 @@
 CIVORA owns newsroom state and publication. The public site is accepted only if
 critical routes are reachable and the homepage can project the durable
 continuous-story feed rather than collapsing to a recap snapshot.
+
+When a live-feed story carries verified ``artist_profiles``, its public story
+route must also expose the Artist Intelligence UI contract. Repository data is
+not sufficient publication proof.
 """
 from __future__ import annotations
 
@@ -18,12 +22,21 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_BASE = "https://valceaclar.ro"
 FEED_URL = "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json"
-USER_AGENT = "VALCEA-CLAR-Public-Health/1.1 (+https://valceaclar.ro/)"
+USER_AGENT = "VALCEA-CLAR-Public-Health/1.2 (+https://valceaclar.ro/)"
 BRIDGE_MARKERS = (
     "chatgpt-sites-live-bridge",
     "data-valcea-clar-live",
     "raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json",
     "vc-runtime",
+)
+ARTIST_UI_MARKERS = (
+    "/artisti/",
+    "artistProfiles",
+    "artistLinkedText",
+    "data-artist-intelligence",
+    "Artiști și creatori din acest material",
+    "vc-artistlinks",
+    "vc-artist-inline",
 )
 
 
@@ -61,6 +74,10 @@ def story_links(html: str) -> set[str]:
 
 def bridge_present(html: str) -> bool:
     return any(marker in html for marker in BRIDGE_MARKERS)
+
+
+def artist_ui_present(html: str) -> bool:
+    return any(marker in html for marker in ARTIST_UI_MARKERS)
 
 
 def story_contracts(limit: int = 5) -> list[tuple[str, str]]:
@@ -103,7 +120,9 @@ def remote_feed_contract() -> tuple[dict[str, Any] | None, dict[str, Any]]:
     minimum = min(3, len(story_contracts()))
     publication_ok = feed.get("publication_model") == "continuous_story_first"
     count_ok = len(paths) >= minimum and int(feed.get("story_count") or 0) == len(paths)
+    artist_story_count = sum(1 for row in (stories or []) if isinstance(row, dict) and row.get("artist_profiles"))
     details["feed_story_count"] = len(paths)
+    details["artist_profile_story_count"] = artist_story_count
     details["feed_story_paths"] = paths[:10]
     details["publication_model"] = feed.get("publication_model")
     details["ok"] = bool(publication_ok and count_ok)
@@ -122,11 +141,12 @@ def evaluate(base_url: str) -> dict[str, Any]:
 
     feed, feed_check = remote_feed_contract()
     checks.append(feed_check)
-    remote_paths = {
-        str(row.get("path") or "")
+    remote_rows = {
+        str(row.get("path") or ""): row
         for row in ((feed or {}).get("stories") or [])
         if isinstance(row, dict)
     }
+    remote_paths = set(remote_rows)
 
     status, homepage, error = fetch(base + "/")
     found_links = story_links(homepage)
@@ -155,20 +175,32 @@ def evaluate(base_url: str) -> dict[str, Any]:
         "live_bridge_projection_ok": bridge_projection_ok,
     })
 
-    def check(path: str, required: list[str], canonical: str | None = None, forbidden: list[str] | None = None) -> None:
+    def check(
+        path: str,
+        required: list[str],
+        canonical: str | None = None,
+        forbidden: list[str] | None = None,
+        require_artist_ui: bool = False,
+    ) -> None:
         url = base + path
         code, body, fetch_error = fetch(url)
         missing = [marker for marker in required if marker not in body]
+        artist_ok = True
+        if require_artist_ui and not artist_ui_present(body):
+            artist_ok = False
+            missing.append("artist_profile_ui_projection")
         forbidden_found = [marker for marker in (forbidden or []) if marker in body]
         canonical_ok = True if canonical is None else canonical_present(body, canonical)
         checks.append({
             "path": path,
             "url": url,
             "http_status": code,
-            "ok": code == 200 and not missing and not forbidden_found and canonical_ok,
+            "ok": code == 200 and not missing and not forbidden_found and canonical_ok and artist_ok,
             "missing_markers": missing,
             "forbidden_markers": forbidden_found,
             "canonical_ok": canonical_ok,
+            "artist_ui_required": require_artist_ui,
+            "artist_ui_ok": artist_ok,
             "error": fetch_error,
         })
 
@@ -200,7 +232,13 @@ def evaluate(base_url: str) -> dict[str, Any]:
 
     if contracts:
         for path, canonical in contracts:
-            check(path, ["VÂLCEA CLAR"], canonical=canonical)
+            row = remote_rows.get(path) or {}
+            check(
+                path,
+                ["VÂLCEA CLAR"],
+                canonical=canonical,
+                require_artist_ui=bool(row.get("artist_profiles")),
+            )
     else:
         checks.append({
             "path": "/stiri/<story-id>/",
@@ -210,12 +248,14 @@ def evaluate(base_url: str) -> dict[str, Any]:
             "missing_markers": ["canonical_story_manifest_entry"],
             "forbidden_markers": [],
             "canonical_ok": False,
+            "artist_ui_required": False,
+            "artist_ui_ok": True,
             "error": "No canonical story route available in repository manifest",
         })
 
     blockers = [item["path"] for item in checks if not item["ok"]]
     return {
-        "schema_version": "1.2",
+        "schema_version": "1.3",
         "product": "VÂLCEA CLAR public HTTP acceptance",
         "base_url": base,
         "status": "READY" if not blockers else "BLOCKED",
@@ -225,6 +265,7 @@ def evaluate(base_url: str) -> dict[str, Any]:
         "publication_model": "continuous_story_first",
         "expected_story_count": len(expected_paths),
         "homepage_collapse_guard": True,
+        "artist_profile_ui_guard": True,
         "repository_is_not_publication_proof": True,
     }
 
@@ -234,6 +275,8 @@ def self_test() -> None:
     assert not canonical_present('<link rel="canonical" href="https://example.com/">', "https://valceaclar.ro/termeni/")
     assert story_links('<a href="/stiri/a/"></a><a href="/stiri/b/"></a>') == {"/stiri/a/", "/stiri/b/"}
     assert bridge_present('<script src="/chatgpt-sites-live-bridge.js"></script>')
+    assert artist_ui_present('<a class="vc-artist-inline" href="/artisti/analia-selis/">Analia Selis</a>')
+    assert not artist_ui_present('<p>Analia Selis</p>')
     contracts = story_contracts()
     assert contracts
     assert all(path.startswith("/stiri/") and canonical == f"https://valceaclar.ro{path}" for path, canonical in contracts)
