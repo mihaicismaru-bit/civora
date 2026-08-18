@@ -10,6 +10,7 @@ import sys
 from pathlib import Path
 
 import build_legal_pages
+import render_news_index
 
 ROOT = Path(__file__).resolve().parents[1]
 REPO = ROOT.parent
@@ -56,7 +57,7 @@ def restore_committed_runtime_route(route: str, target: Path) -> bool:
     """Restore a committed static runtime product erased by the dynamic renderer.
 
     `render_frontpage.py` intentionally rebuilds `site/runtime` from scratch.
-    Some independently maintained static products (`/stiri/`, `/despre/`) are
+    Some independently maintained static products (`/despre/`, for example) are
     canonical committed runtime pages rather than outputs of `build_sites_export`.
     During the live transaction we may safely recover exactly the version pinned
     at the checked-out commit. This is deterministic and cannot introduce newer
@@ -83,12 +84,11 @@ def restore_committed_runtime_route(route: str, target: Path) -> bool:
 def materialize_static_runtime_routes() -> list[str]:
     """Materialize independent static products before final sitemap validation.
 
+    `/stiri/` is rebuilt from the canonical live feed before this function runs.
     Legal pages are rendered directly into runtime by build_legal_pages. Other
-    configured static products are built first in DIST by build_sites_export and
-    copied into runtime here. If a committed static runtime page was erased by
-    the dynamic frontpage rebuild and has no DIST producer, restore the exact
-    checked-out version from git. Runtime is therefore a complete publication
-    snapshot before indexing finalization without weakening the static-route gate.
+    configured static products are built first in DIST or restored from the exact
+    committed same-revision runtime artifact. The static-route gate remains
+    fail-closed.
     """
     materialized: list[str] = []
     for route in configured_static_routes():
@@ -140,7 +140,13 @@ def main() -> int:
         raise SystemExit("Refusing runtime overlay: frontpage was not rendered")
     if not MANIFEST.is_file():
         raise SystemExit("Refusing runtime overlay: base manifest missing")
+    if not (RUNTIME / "live-feed.json").is_file():
+        raise SystemExit("Refusing runtime overlay: canonical live feed missing")
 
+    # `/stiri/` is a live newsroom index, not an independently stale static page.
+    # Rebuild it from the exact feed that is about to be exported, while reusing
+    # the committed same-revision shell for branding/navigation/CSS.
+    news_index_report = render_news_index.build()
     legal_report = build_legal_pages.build()
     static_materialized = materialize_static_runtime_routes()
 
@@ -152,11 +158,12 @@ def main() -> int:
         shutil.copy2(source, target)
 
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
-    manifest["schema_version"] = "1.7"
+    manifest["schema_version"] = "1.8"
     manifest["target"]["autonomous_frontpage"] = True
     manifest["target"]["frontpage_source"] = "site/runtime/index.html"
     manifest["target"]["publication_model"] = "continuous_story_first"
     manifest["target"]["public_legal_pages"] = True
+    manifest["target"]["news_index_source"] = "site/runtime/live-feed.json"
     routes = manifest.setdefault("routes", [])
     routes = [
         route for route in routes
@@ -218,6 +225,7 @@ def main() -> int:
     manifest["counts"]["story_routes"] = len(story_routes)
     manifest["counts"]["static_routes"] = len(static_routes)
     manifest["counts"]["legal_routes"] = len(legal_routes)
+    manifest["counts"]["news_index_stories"] = int(news_index_report.get("story_count") or 0)
     manifest["legal_pages"] = {
         "source": "site/legal/legal_pages.json",
         "effective_date": "2026-08-16",
@@ -225,6 +233,7 @@ def main() -> int:
         "routes": [route["path"] for route in legal_routes],
         "build_status": legal_report.get("status"),
     }
+    manifest["news_index"] = news_index_report
 
     # Finalize indexing only after all independently built static products have
     # been materialized into the same runtime snapshot as the story pages.
@@ -257,6 +266,7 @@ def main() -> int:
         "publication_model": "continuous_story_first",
         "frontpage": "index.html",
         "story_routes": len(story_routes),
+        "news_index_stories": news_index_report.get("story_count"),
         "static_routes": len(static_routes),
         "legal_routes": len(legal_routes),
         "routes": len(routes),
