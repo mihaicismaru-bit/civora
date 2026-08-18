@@ -1,0 +1,209 @@
+name: VÂLCEA CLAR Publication Reconcile
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '2-57/5 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/editorial/facts_registry.json'
+      - 'valcea-clar/scripts/generate_edition.py'
+      - 'valcea-clar/scripts/newsroom_decide.py'
+      - 'valcea-clar/scripts/build_live_feed.py'
+      - '.github/workflows/valcea-clar-publication-reconcile.yml'
+  pull_request:
+    paths:
+      - '.github/workflows/valcea-clar-publication-reconcile.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  # Serialize with the ordinary Live Newsroom so a reconciliation can never
+  # race the canonical publication transaction.
+  group: valcea-clar-live-newsroom
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Refresh canonical main
+        if: github.event_name != 'pull_request'
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Validate existing publication contracts
+        run: |
+          python valcea-clar/scripts/newsroom_decide.py --self-test
+          python valcea-clar/scripts/render_news_index.py --self-test
+
+      - name: Compute desired publication state
+        id: desired
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp valcea-clar/site/newsroom_state.json /tmp/previous-newsroom-state.json 2>/dev/null || printf '{}\n' > /tmp/previous-newsroom-state.json
+          python valcea-clar/scripts/newsroom_decide.py
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          from pathlib import Path
+
+          decision=json.loads(Path('valcea-clar/site/newsroom_decision.json').read_text(encoding='utf-8'))
+          previous=json.loads(Path('/tmp/previous-newsroom-state.json').read_text(encoding='utf-8'))
+          feed_path=Path('valcea-clar/site/runtime/live-feed.json')
+          feed=json.loads(feed_path.read_text(encoding='utf-8')) if feed_path.is_file() else {}
+
+          desired_ids=[str(x) for x in decision.get('publishable_story_ids') or []]
+          state_ids=[str(x) for x in previous.get('last_published_story_ids') or []]
+          feed_ids=[str(row.get('id')) for row in feed.get('stories') or [] if isinstance(row,dict) and row.get('id')]
+          fingerprint=str(decision.get('fingerprint') or '')
+          state_fingerprint=str(previous.get('last_published_fingerprint') or '')
+
+          mismatch=(desired_ids != state_ids or desired_ids != feed_ids or fingerprint != state_fingerprint)
+          print(f"needs_reconcile={'true' if mismatch else 'false'}")
+          print(f"slot={decision.get('slot_for_legacy_snapshot_compatibility') or 'evening'}")
+          print(f"desired_count={len(desired_ids)}")
+          print(f"feed_count={len(feed_ids)}")
+          print(f"state_count={len(state_ids)}")
+          print('desired_ids_json='+json.dumps(desired_ids,separators=(',',':')))
+          print('previous_ids_json='+json.dumps(state_ids,separators=(',',':')))
+          PY
+
+      - name: Report already coherent state
+        if: steps.desired.outputs.needs_reconcile != 'true'
+        run: |
+          echo "Publication state already coherent: ${{ steps.desired.outputs.desired_count }} canonical stories."
+
+      - name: Rebuild canonical snapshot and public runtime from desired stories
+        if: steps.desired.outputs.needs_reconcile == 'true' && github.event_name != 'pull_request'
+        run: |
+          python valcea-clar/scripts/build_public_data.py
+          python valcea-clar/scripts/generate_edition.py --slot "${{ steps.desired.outputs.slot }}"
+          python valcea-clar/scripts/render_frontpage.py
+          python valcea-clar/scripts/render_story_pages.py
+          python valcea-clar/scripts/build_live_feed.py
+          python valcea-clar/scripts/build_sites_export.py
+          python valcea-clar/scripts/overlay_runtime_export.py
+          python valcea-clar/scripts/render_news_index.py
+
+      - name: Verify runtime matches the newsroom decision
+        if: steps.desired.outputs.needs_reconcile == 'true' && github.event_name != 'pull_request'
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          decision=json.loads(Path('valcea-clar/site/newsroom_decision.json').read_text(encoding='utf-8'))
+          feed=json.loads(Path('valcea-clar/site/runtime/live-feed.json').read_text(encoding='utf-8'))
+          desired=[str(x) for x in decision.get('publishable_story_ids') or []]
+          actual=[str(row.get('id')) for row in feed.get('stories') or []]
+          if desired != actual:
+              raise SystemExit(f'live-feed mismatch: desired={desired} actual={actual}')
+          if int(feed.get('story_count') or -1) != len(desired):
+              raise SystemExit('live-feed story_count mismatch')
+          print({'status':'PASS','story_count':len(desired)})
+          PY
+
+      - name: Commit desired state and emit a canonical publication event
+        if: steps.desired.outputs.needs_reconcile == 'true' && github.event_name != 'pull_request'
+        run: |
+          python valcea-clar/scripts/newsroom_decide.py --commit-state
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('valcea-clar')
+          decision=json.loads((root/'site/newsroom_decision.json').read_text(encoding='utf-8'))
+          previous=json.loads(Path('/tmp/previous-newsroom-state.json').read_text(encoding='utf-8'))
+          manifest=json.loads((root/'site/runtime/stiri/manifest.json').read_text(encoding='utf-8'))
+          routes={str(row.get('id')):str(row.get('canonical')) for row in manifest.get('stories') or [] if row.get('id') and row.get('canonical')}
+          previous_ids={str(x) for x in previous.get('last_published_story_ids') or []}
+          story_ids=[str(x) for x in decision.get('publishable_story_ids') or []]
+          new_ids=[sid for sid in story_ids if sid not in previous_ids]
+          event={
+              'schema_version':'1.1',
+              'event':'story_publication',
+              'publication_model':'continuous_story_first',
+              'published_at':decision['evaluated_local'],
+              'fingerprint':decision['fingerprint'],
+              'story_ids':story_ids,
+              'new_story_ids':new_ids,
+              'updated_story_ids':[],
+              'canonical_urls':{sid:routes[sid] for sid in story_ids if sid in routes},
+              'editions_are_publication_gates':False,
+              'reconciliation_event':True,
+          }
+          (root/'site/story_publication_event.json').write_text(json.dumps(event,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps(event,ensure_ascii=False))
+          PY
+
+      - name: Persist reconciled publication atomically
+        if: steps.desired.outputs.needs_reconcile == 'true' && github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          tx=/tmp/valcea-publication-reconcile
+          rm -rf "$tx"
+          mkdir -p "$tx"
+          paths=(
+            valcea-clar/editions
+            valcea-clar/site/current_edition.json
+            valcea-clar/site/last_edition_attempt.json
+            valcea-clar/site/newsroom_decision.json
+            valcea-clar/site/newsroom_state.json
+            valcea-clar/site/story_publication_event.json
+            valcea-clar/site/runtime
+          )
+          for path in "${paths[@]}"; do
+            if [ -e "$path" ]; then
+              mkdir -p "$tx/$(dirname "$path")"
+              cp -a "$path" "$tx/$path"
+            fi
+          done
+
+          git config user.name 'valcea-clar-publication-reconcile[bot]'
+          git config user.email 'valcea-clar-publication-reconcile@users.noreply.github.com'
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            git clean -fd
+            for path in "${paths[@]}"; do
+              if [ -d "$tx/$path" ]; then
+                mkdir -p "$path"
+                cp -a "$tx/$path/." "$path/"
+              elif [ -f "$tx/$path" ]; then
+                mkdir -p "$(dirname "$path")"
+                cp -a "$tx/$path" "$path"
+              fi
+            done
+            git add -A \
+              valcea-clar/editions \
+              valcea-clar/site/current_edition.json \
+              valcea-clar/site/last_edition_attempt.json \
+              valcea-clar/site/newsroom_decision.json \
+              valcea-clar/site/newsroom_state.json \
+              valcea-clar/site/story_publication_event.json \
+              valcea-clar/site/runtime
+            if git diff --cached --quiet; then
+              echo 'Reconciled state already present on main.'
+              exit 0
+            fi
+            git commit -m 'Reconcile VÂLCEA CLAR canonical publication state'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "main advanced during publication reconcile; retrying ${attempt}/5."
+            sleep $((attempt * 2))
+          done
+          echo 'Could not persist publication reconciliation.' >&2
+          exit 1
