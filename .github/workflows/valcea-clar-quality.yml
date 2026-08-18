@@ -114,6 +114,8 @@ jobs:
 
           print('Continuous story-first runtime quality gate: PASS')
           PY
+      - name: Validate durable artist profile runtime
+        run: python valcea-clar/scripts/validate_artist_profile_runtime.py
       - name: Static web smoke test
         run: python valcea-clar/scripts/smoke_web.py
       - name: JavaScript syntax check
@@ -121,6 +123,10 @@ jobs:
           node --check valcea-clar/web/app.js
           node --check valcea-clar/site/chatgpt-sites-live-bridge.js
           node --check valcea-clar/site/chatgpt-sites-route-bridge.js
+      - name: Validate live artist profile bridge contract
+        run: |
+          python valcea-clar/scripts/patch_live_bridge_artist_profiles.py --self-test
+          python valcea-clar/scripts/patch_live_bridge_artist_profiles.py --check
       - name: Validate public legal bridge
         run: python valcea-clar/scripts/validate_public_legal_bridge.py
       - name: Source radar deterministic self-test
@@ -132,6 +138,7 @@ jobs:
           python valcea-clar/scripts/public_ux_story_integrity.py --self-test
           python valcea-clar/scripts/public_ux_reset.py
           python valcea-clar/scripts/public_ux_story_integrity.py
+          python valcea-clar/scripts/validate_artist_profile_runtime.py
           python valcea-clar/scripts/public_ux_manifest.py
           python valcea-clar/scripts/public_ux_reset.py --check
           python valcea-clar/scripts/public_ux_story_integrity.py --check
