@@ -1,0 +1,26 @@
+name: VÂLCEA CLAR Gambling Dossier Live Handoff
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["VÂLCEA CLAR Gambling Dossier Finalizer"]
+    types: [completed]
+    branches: [main]
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/valcea-clar-gambling-live-handoff.yml'
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  dispatch-live-newsroom:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch canonical Live Newsroom after dossier finalization
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run valcea-clar-newsroom-live.yml --repo "${{ github.repository }}" --ref main
