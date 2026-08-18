@@ -2,18 +2,18 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-18T14:48:46+03:00",
+  "generated_at": "2026-08-18T14:49:36+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-18T13:59:53+03:00",
+  "queue_generated_at": "2026-08-18T14:48:12+03:00",
   "task_count": 65,
   "primary_match_count": 0,
-  "no_match_count": 31,
-  "unrouted_count": 34,
-  "target_count": 16,
-  "targets_ok": 13,
+  "no_match_count": 28,
+  "unrouted_count": 37,
+  "target_count": 18,
+  "targets_ok": 12,
   "results": [
     {
       "signal_id": "8a2701661e399950f3d2bfef",
@@ -32,12 +32,27 @@
       "signal_title": "Continuare about O săptămână de consultări privind modificarea Contractului-cadru și a Normelor de aplicare. CAS Vâlcea are concluziile👇🏻👇🏻👇🏻",
       "signal_url": "https://www.curierul.ro/o-saptamana-de-consultari-privind-modificarea-contractului-cadru-si-a-normelor-de-aplicare-cas-valcea-are-concluziile%f0%9f%91%87%f0%9f%8f%bb%f0%9f%91%87%f0%9f%8f%bb%f0%9f%91%87/",
       "signal_publisher": "Curierul de Vâlcea",
+      "signal_tier": "T2",
       "signal_published_at": "2026-08-18T13:43:14+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "verification_route_id": "health_insurance",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "cas-valcea-official",
+            "name": "Casa de Asigurări de Sănătate Vâlcea",
+            "url": "https://cas.cnas.ro/casvl/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error timed out>",
+          "documents_examined": 0
+        }
+      ],
       "publication_authority": "NONE",
+      "signal_is_fact": false,
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "a73765c06151c85c47426e0c",
@@ -84,18 +99,40 @@
       "signal_publisher": "Se întâmplă în Vâlcea",
       "signal_tier": "T2",
       "signal_published_at": "2026-08-18T12:43:56+03:00",
-      "verification_route_id": "police_public_safety",
+      "verification_route_id": "administration_projects",
       "attempts": [
         {
           "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -144,9 +181,9 @@
             "name": "Instituția Prefectului — Județul Vâlcea",
             "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         },
         {
           "target": {
@@ -184,29 +221,18 @@
       "signal_publisher": "Curierul de Râmnic",
       "signal_tier": "T2",
       "signal_published_at": "2026-08-18T12:30:56+03:00",
-      "verification_route_id": "fire_rescue_alert",
+      "verification_route_id": "apavil_employment",
       "attempts": [
         {
           "target": {
-            "ref_type": "news_source_id",
-            "id": "isu-valcea-comunicate",
-            "name": "ISU Vâlcea",
-            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
+            "ref_type": "primary_target_id",
+            "id": "apavil-angajari",
+            "name": "APAVIL S.A. — Anunțuri angajare",
+            "url": "https://apavil.ro/?page_id=7981"
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "inhga-avertizari-hidrologice-valcea",
-            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
-            "url": "https://www.hidro.ro/warning/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "documents_examined": 2
         }
       ],
       "publication_authority": "NONE",
@@ -320,49 +346,12 @@
       "signal_title": "Transalpina, în topul celor mai spectaculoase șosele din Europa. Drumul din Vâlcea urcă pe locul 5",
       "signal_url": "https://evenimentvalcean.ro/transalpina-in-topul-celor-mai-spectaculoase-sosele-din-europa-drumul-din-valcea-urca-pe-locul-5/",
       "signal_publisher": "Eveniment Vâlcean",
-      "signal_tier": "T2",
       "signal_published_at": "2026-08-18T08:17:37+03:00",
-      "verification_route_id": "administration_projects",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "prefectura-valcea",
-            "name": "Instituția Prefectului — Județul Vâlcea",
-            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "cj-valcea-anunturi",
-            "name": "Consiliul Județean Vâlcea",
-            "url": "https://cjvalcea.ro/categorie/anunturi/"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "primaria-rm-valcea-comunicate",
-            "name": "Primăria Municipiului Râmnicu Vâlcea",
-            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-          "documents_examined": 0
-        }
-      ],
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
-      "signal_is_fact": false,
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "4aac0a731b6509aa591e1642",
@@ -453,9 +442,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -493,49 +482,12 @@
       "signal_title": "Cauciucurile all season și regretele care apar abia la prima zăpadă serioasă",
       "signal_url": "https://ziaruldevalcea.ro/2026/08/cauciucurile-all-season-si-regretele-care-apar-abia-la-prima-zapada-serioasa/",
       "signal_publisher": "Ziarul de Vâlcea",
-      "signal_tier": "T2",
       "signal_published_at": "2026-08-18T00:49:38+03:00",
-      "verification_route_id": "utilities",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "apavil-comunicate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=1178"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "apavil-opriri-programate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=962"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 2
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "cet-govora-termoficare-advisories",
-            "name": "CET Govora S.A. — Termoficare Vâlcea",
-            "url": "https://www.termoficarevalcea.ro/blog/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 1
-        }
-      ],
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
-      "signal_is_fact": false,
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "d595a36be90396bf83487ff7",
@@ -568,29 +520,18 @@
       "signal_publisher": "Ziarul de Vâlcea",
       "signal_tier": "T2",
       "signal_published_at": "2026-08-18T00:32:30+03:00",
-      "verification_route_id": "fire_rescue_alert",
+      "verification_route_id": "apavil_employment",
       "attempts": [
         {
           "target": {
-            "ref_type": "news_source_id",
-            "id": "isu-valcea-comunicate",
-            "name": "ISU Vâlcea",
-            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
+            "ref_type": "primary_target_id",
+            "id": "apavil-angajari",
+            "name": "APAVIL S.A. — Anunțuri angajare",
+            "url": "https://apavil.ro/?page_id=7981"
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "inhga-avertizari-hidrologice-valcea",
-            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
-            "url": "https://www.hidro.ro/warning/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "documents_examined": 2
         }
       ],
       "publication_authority": "NONE",
@@ -678,49 +619,12 @@
       "signal_title": "Toate drumurile duc la sfârșitul lunii august spre Izlazul Modoia! Primarul Dumitru Ciorîcă îi invită pe vâlceni la două zile de sărbătoare, cu Niculina Stoican în recital și ansambluri din Vâlcea, Dolj și Alba",
       "signal_url": "https://www.impactreal.ro/2026/08/17/toate-drumurile-duc-la-sfarsitul-lunii-august-spre-izlazul-modoia-primarul-dumitru-ciorica-ii-invita-pe-valceni-la-doua-zile-de-sarbatoare-cu-niculina-stoican-in-recital-si-ansambluri-din-valcea-do/",
       "signal_publisher": "Impact Real",
-      "signal_tier": "T2",
       "signal_published_at": "2026-08-17T21:55:03+03:00",
-      "verification_route_id": "administration_projects",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "prefectura-valcea",
-            "name": "Instituția Prefectului — Județul Vâlcea",
-            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "cj-valcea-anunturi",
-            "name": "Consiliul Județean Vâlcea",
-            "url": "https://cjvalcea.ro/categorie/anunturi/"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "primaria-rm-valcea-comunicate",
-            "name": "Primăria Municipiului Râmnicu Vâlcea",
-            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-          "documents_examined": 0
-        }
-      ],
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
-      "signal_is_fact": false,
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "9a0058aad3af998e68e927bf",
@@ -739,38 +643,12 @@
       "signal_title": "Pe 8 septembrie se deschide Centrul „Sfânta Marie” din Orlești: medici, recuperare, îngrijire la domiciliu și masă caldă pentru persoanele vârstnice",
       "signal_url": "https://www.impactreal.ro/2026/08/17/pe-8-septembrie-se-deschide-centrul-sfanta-marie-din-orlesti-medici-recuperare-ingrijire-la-domiciliu-si-masa-calda-pentru-persoanele-varstnice/",
       "signal_publisher": "Impact Real",
-      "signal_tier": "T2",
       "signal_published_at": "2026-08-17T21:02:48+03:00",
-      "verification_route_id": "health",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "dsp-valcea-anunturi",
-            "name": "Direcția de Sănătate Publică Vâlcea",
-            "url": "https://www.aspjvalcea.ro/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "spital-horezu-noutati",
-            "name": "Spitalul Orășenesc Horezu",
-            "url": "https://spitalulhorezu.ro/blog/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
-      "signal_is_fact": false,
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "c96ff69a597ad2e4914fcada",
@@ -788,9 +666,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -827,9 +705,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -854,9 +732,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -893,9 +771,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -920,9 +798,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -996,9 +874,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -1134,9 +1012,9 @@
             "name": "Instituția Prefectului — Județul Vâlcea",
             "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         },
         {
           "target": {
@@ -1256,9 +1134,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -1319,9 +1197,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -1541,9 +1419,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
