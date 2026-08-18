@@ -120,21 +120,17 @@
     {
       "id": "telegram-story-alert-1cd2159b942ec2b672f7",
       "story_id": "alert-1cd2159b942ec2b672f7",
-      "status": "outbox_ready",
       "publication_mode": "durable_outbox_only",
-      "native_format": "text",
-      "format_family": "channel_update",
-      "message": [
-        "De știut — DN 7, 17 august 2026: 2 victime într-un incident rutier semnalat de INFOTRAFIC",
-        "Alerta oficială emisă la ora 15:45 indică incidentul în zona localității Blidari, la kilometrul 167 + 300; la acel moment, trafic alternativ era în vigoare pe sectorul afectat.",
-        "La momentul emiterii alertei, sursa oficială indica trafic alternativ pe DN 7, în sectorul descris în informarea INFOTRAFIC."
-      ],
       "canonical_url": "https://valceaclar.ro/stiri/alert-1cd2159b942ec2b672f7/",
-      "link_policy": "native_preferred",
       "source_preserving": true,
+      "high_signal": true,
+      "hashtags_default": false,
+      "generic_engagement_prompt_forbidden": true,
       "fake_urgency_forbidden": true,
       "verbatim_cross_platform_reuse_allowed": false,
-      "edition_gate": false,
+      "direct_publication_enabled": false,
+      "direct_publication_blocker": "telegram_direct_access_not_configured",
+      "generation_mode": "telegram_editorial_v1",
       "identity": {
         "brand_source": "valcea-clar/social/social_brand_system.json",
         "profile_source": "valcea-clar/social/profile_identity_system.json",
@@ -151,26 +147,29 @@
           "media_only_when_evidence_or_utility_improves": true,
           "source_link_required_when_article_exists": true
         }
-      }
+      },
+      "edition_gate": false,
+      "status": "outbox_ready",
+      "native_format": "text",
+      "format_family": "signal_update",
+      "message": "DN 7, 17 august 2026: 2 victime într-un incident rutier semnalat de INFOTRAFIC\n\n• Alerta oficială emisă la ora 15:45 indică incidentul în zona localității Blidari, la kilometrul 167 + 300; la acel moment, trafic alternativ era în vigoare pe sectorul afectat.\n\n• La momentul emiterii alertei, sursa oficială indica trafic alternativ pe DN 7, în sectorul descris în informarea INFOTRAFIC.\n\nDetalii și surse: https://valceaclar.ro/stiri/alert-1cd2159b942ec2b672f7/",
+      "max_message_chars": 1050,
+      "product_fingerprint_sha256": "fa601979540e60bff33c29b50b34625a601be83abe0b1b0b79e9b915fcf82248"
     },
     {
       "id": "telegram-story-alert-fdfdb85a579432f385f7",
       "story_id": "alert-fdfdb85a579432f385f7",
-      "status": "outbox_ready",
       "publication_mode": "durable_outbox_only",
-      "native_format": "text",
-      "format_family": "channel_update",
-      "message": [
-        "De știut — DN 7, 17 august 2026: INFOTRAFIC a semnalat trafic alternativ",
-        "Alerta oficială emisă la ora 10:15 vizează în zona localității Drăgănești, la kilometrul 214 și consemnează situația de trafic de pe sectorul indicat.",
-        "La momentul emiterii alertei, sursa oficială indica trafic alternativ pe DN 7, în sectorul descris în informarea INFOTRAFIC."
-      ],
       "canonical_url": "https://valceaclar.ro/stiri/alert-fdfdb85a579432f385f7/",
-      "link_policy": "native_preferred",
       "source_preserving": true,
+      "high_signal": true,
+      "hashtags_default": false,
+      "generic_engagement_prompt_forbidden": true,
       "fake_urgency_forbidden": true,
       "verbatim_cross_platform_reuse_allowed": false,
-      "edition_gate": false,
+      "direct_publication_enabled": false,
+      "direct_publication_blocker": "telegram_direct_access_not_configured",
+      "generation_mode": "telegram_editorial_v1",
       "identity": {
         "brand_source": "valcea-clar/social/social_brand_system.json",
         "profile_source": "valcea-clar/social/profile_identity_system.json",
@@ -187,7 +186,14 @@
           "media_only_when_evidence_or_utility_improves": true,
           "source_link_required_when_article_exists": true
         }
-      }
+      },
+      "edition_gate": false,
+      "status": "outbox_ready",
+      "native_format": "text",
+      "format_family": "signal_update",
+      "message": "DN 7, 17 august 2026: INFOTRAFIC a semnalat trafic alternativ\n\n• Alerta oficială emisă la ora 10:15 vizează în zona localității Drăgănești, la kilometrul 214 și consemnează situația de trafic de pe sectorul indicat.\n\n• La momentul emiterii alertei, sursa oficială indica trafic alternativ pe DN 7, în sectorul descris în informarea INFOTRAFIC.\n\nDetalii și surse: https://valceaclar.ro/stiri/alert-fdfdb85a579432f385f7/",
+      "max_message_chars": 1050,
+      "product_fingerprint_sha256": "a03d30de598795e848b604807b6b11997624c26e5a06203afddbf9e7870e9382"
     }
   ],
   "publication_model": "continuous_story_first",
