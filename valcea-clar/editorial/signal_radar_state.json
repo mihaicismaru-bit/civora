@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_SIGNAL_RADAR_STATE_V1",
   "instance_id": "valcea",
-  "observed_at": "2026-08-18T20:03:17+03:00",
+  "observed_at": "2026-08-18T21:01:32+03:00",
   "publication_authority": "NONE",
   "health": "PASS",
   "source_count": 14,
-  "sources_ok": 12,
-  "current_signal_count": 33,
+  "sources_ok": 10,
+  "current_signal_count": 31,
   "today_signal_count": 25,
   "observations": [
     {
@@ -28,7 +28,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-18T12:30:56+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "apavil_employment",
           "verification_targets": [
             {
@@ -84,7 +84,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-18T13:43:14+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "health_insurance",
           "verification_targets": [
             {
@@ -144,7 +144,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -164,7 +164,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "utilities",
           "verification_targets": [
             {
@@ -211,7 +211,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-17T21:55:03+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -231,7 +231,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-17T21:30:53+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -251,7 +251,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-17T21:02:48+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -272,11 +272,9 @@
       "publisher": "Indiscret în Oltenia",
       "tier": "T2",
       "family": "LOCAL_PRESS",
-      "status": "PASS",
-      "error": null,
+      "status": "DEGRADED",
+      "error": "TimeoutError: timed out",
       "signals": [],
-      "final_url": "https://www.indiscret.ro/",
-      "links_examined": 14,
       "hygiene_dropped_count": 0,
       "hygiene_dropped": []
     },
@@ -320,7 +318,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-17T14:47:28+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "education",
           "verification_targets": [
             {
@@ -349,7 +347,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-17T13:54:33+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "sport",
           "verification_targets": [
             {
@@ -383,57 +381,9 @@
       "publisher": "Realitatea Vâlceană",
       "tier": "T2",
       "family": "LOCAL_PRESS",
-      "status": "PASS",
-      "error": null,
-      "signals": [
-        {
-          "signal_id": "0a9f0e5efa5edfde1c95a354",
-          "signal_title": "Declaratie de accesibilitate",
-          "signal_url": "http://www.realitateavalceana.ro/declaratie-de-accesibilitate/",
-          "signal_publisher": "Realitatea Vâlceană",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": true,
-          "published_at": null,
-          "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-08-18T20:03:17+03:00",
-          "verification_route_id": "general_local_signal",
-          "verification_targets": [],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "press-realitatea-valceana"
-        },
-        {
-          "signal_id": "3aa1b371615995761d30a9af",
-          "signal_title": "Primăria Municipiului mulțumește tuturor celor care au făcut posibilă organizarea deosebită a Zilelor Imnului Național 2026 »",
-          "signal_url": "http://www.realitateavalceana.ro/primaria-municipiului-mul%c8%9bume%c8%99te-tuturor-celor-care-au-facut-posibila-organizarea-deosebita-a-zilelor-imnului-na%c8%9bional-2026/",
-          "signal_publisher": "Realitatea Vâlceană",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": true,
-          "published_at": null,
-          "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-08-18T20:03:17+03:00",
-          "verification_route_id": "police_public_safety",
-          "verification_targets": [
-            {
-              "ref_type": "manual_watch_source_id",
-              "id": "ipj-valcea-stiri"
-            }
-          ],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "press-realitatea-valceana"
-        }
-      ],
-      "final_url": "http://www.realitateavalceana.ro/",
-      "links_examined": 14,
+      "status": "DEGRADED",
+      "error": "TimeoutError: timed out",
+      "signals": [],
       "hygiene_dropped_count": 0,
       "hygiene_dropped": []
     },
@@ -468,7 +418,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-18T10:35:07+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -493,7 +443,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-18T08:10:39+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -518,7 +468,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-17T15:05:47+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -557,7 +507,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-18T01:14:47+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "sport",
           "verification_targets": [
             {
@@ -590,7 +540,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-18T01:03:38+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -615,7 +565,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-18T00:58:35+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -635,7 +585,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-18T00:51:09+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -655,7 +605,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-18T00:49:38+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -675,7 +625,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-18T00:36:43+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -695,7 +645,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-18T00:35:06+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -715,7 +665,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-18T00:32:30+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "apavil_employment",
           "verification_targets": [
             {
@@ -754,7 +704,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-18T08:17:37+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -774,7 +724,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-17T10:11:24+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "utilities",
           "verification_targets": [
             {
@@ -807,7 +757,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-18T08:08:10+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -841,7 +791,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-18T17:32:48+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -861,7 +811,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-18T16:49:22+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -881,7 +831,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-18T15:21:04+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -901,7 +851,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-18T13:10:04+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "health",
           "verification_targets": [
             {
@@ -930,7 +880,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-18T12:43:56+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "horezu_administration",
           "verification_targets": [
             {
@@ -955,7 +905,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-18T12:03:39+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "fire_rescue_alert",
           "verification_targets": [
             {
@@ -988,7 +938,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-17T17:29:29+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -1013,7 +963,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-17T15:58:58+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T20:03:17+03:00",
+          "observed_at": "2026-08-18T21:01:32+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
