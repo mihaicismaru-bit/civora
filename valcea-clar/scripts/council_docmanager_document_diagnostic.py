@@ -3,11 +3,14 @@
 
 Reads the most recent Council Fact Kernel state and revisits only the bounded set
 of official OpenDocument pages that failed semantic verification. It persists a
-sanitized structural fingerprint so the resolver can be improved from observed
-Lotus markup instead of by weakening the evidence threshold.
+sanitized structural fingerprint and a bounded diagnostic of same-UNID HTML
+children so the resolver can be improved from observed Lotus markup instead of
+by weakening the evidence threshold.
 
-No raw HTML, scripts, cookies, headers or external URLs are persisted. This
-artifact can never promote a Fact Kernel or publish a story.
+No raw HTML, scripts, cookies, headers or external URLs are persisted. Short
+normalized text prefixes are retained only from the public official documents
+to identify document shape. This artifact can never promote a Fact Kernel or
+publish a story.
 """
 from __future__ import annotations
 
@@ -30,6 +33,8 @@ OUTPUT = ROOT / "editorial" / "council_docmanager_document_structure.json"
 MAX_TARGETS = 12
 MAX_ATTR_ROWS = 40
 MAX_QUOTED_ROWS = 40
+MAX_CHILD_DIAGNOSTICS = 4
+TEXT_PREFIX_LIMIT = 700
 ROUTE_ATTRS = {
     "href", "src", "data", "action", "formaction", "onclick", "value",
     "data-href", "data-url", "data-link", "data-target", "data-document",
@@ -47,6 +52,19 @@ def _document_unid(url: str) -> str | None:
     return matches[-1].group(1).upper() if matches else None
 
 
+def _official_url_shape(url: str) -> dict[str, Any]:
+    parsed = urllib.parse.urlsplit(url)
+    path = urllib.parse.unquote(parsed.path)
+    low = path.casefold()
+    return {
+        "path_sha256": sha(path),
+        "path_suffix": path[-180:],
+        "query_keys": sorted(urllib.parse.parse_qs(parsed.query, keep_blank_values=True).keys()),
+        "is_file_attachment": "$file" in low,
+        "extension": Path(path).suffix.casefold(),
+    }
+
+
 def _flags(value: str, base_unid: str | None) -> dict[str, Any]:
     decoded = urllib.parse.unquote(html.unescape(str(value or "")))
     low = decoded.casefold()
@@ -60,6 +78,26 @@ def _flags(value: str, base_unid: str | None) -> dict[str, Any]:
         "has_lotus_path": "hotarari.nsf" in low,
         "lotus_unid_count": len(unids),
         "same_document_unid": bool(base_unid and unids and unids[-1] == base_unid),
+    }
+
+
+def _body_summary(body: str) -> dict[str, Any]:
+    text = council.to_text(body)
+    compact = re.sub(r"\s+", " ", text).strip()
+    return {
+        "operative_article_count": len(council.operative_articles(text)),
+        "semantic_markers": {
+            "annual_authorization": bool(re.search(r"autoriza(?:t|ț)ie\s+anual(?:a|ă)|autorizatie\s+anuala", compact, re.I)),
+            "gambling": bool(re.search(r"jocuri\s+de\s+noroc|slot[ -]?machine|pariuri", compact, re.I)),
+            "open_document_literal_count": body.casefold().count("opendocument"),
+            "open_field_literal_count": body.casefold().count("openfield"),
+            "file_literal_count": body.casefold().count("$file") + body.casefold().count("%24file"),
+            "window_open_literal_count": body.casefold().count("window.open"),
+            "location_literal_count": body.casefold().count("location"),
+        },
+        "text_prefix": compact[:TEXT_PREFIX_LIMIT],
+        "text_prefix_sha256": sha(compact[:1000]),
+        "text_length": len(compact),
     }
 
 
@@ -85,12 +123,7 @@ class StructureParser(HTMLParser):
                 row = {"tag": low_tag, "attr": name, **_flags(value, self.base_unid)}
                 canonical = council.canonical_url(self.base_url, urllib.parse.unquote(html.unescape(value)))
                 if canonical:
-                    parsed = urllib.parse.urlsplit(canonical)
-                    row["official_url_shape"] = {
-                        "path_sha256": sha(urllib.parse.unquote(parsed.path)),
-                        "query_keys": sorted(urllib.parse.parse_qs(parsed.query, keep_blank_values=True).keys()),
-                        "is_file_attachment": "$file" in urllib.parse.unquote(parsed.path).casefold(),
-                    }
+                    row["official_url_shape"] = _official_url_shape(canonical)
                 self.route_attrs.append(row)
                 if len(self.route_attrs) >= MAX_ATTR_ROWS:
                     return
@@ -119,6 +152,29 @@ def failed_targets(document: dict[str, Any]) -> list[dict[str, Any]]:
     return rows
 
 
+def diagnose_child(parent_url: str, child_url: str) -> dict[str, Any]:
+    fetched = council.fetch(child_url, timeout=18)
+    row: dict[str, Any] = {
+        "url_sha256": sha(child_url),
+        "url_shape": _official_url_shape(child_url),
+        "parent_document_unid": _document_unid(parent_url),
+        "child_document_unid": _document_unid(child_url),
+        "same_document_unid": _document_unid(parent_url) == _document_unid(child_url),
+        "reachable": bool(fetched.get("ok")),
+        "http_status": fetched.get("status"),
+        "body_sha256": fetched.get("sha256"),
+        "error": fetched.get("error"),
+    }
+    if not fetched.get("ok"):
+        return row
+    body = str(fetched.get("body") or "")
+    parser = StructureParser(str(fetched.get("url") or child_url))
+    parser.feed(body)
+    row["tag_counts"] = parser.tag_counts
+    row.update(_body_summary(body))
+    return row
+
+
 def diagnose_target(target: dict[str, Any]) -> dict[str, Any]:
     url = str(target["candidate_url"])
     fetched = council.fetch(url, timeout=18)
@@ -127,6 +183,7 @@ def diagnose_target(target: dict[str, Any]) -> dict[str, Any]:
         "decision_number": target.get("decision_number"),
         "decision_date": target.get("decision_date"),
         "candidate_url_sha256": sha(url),
+        "candidate_url_shape": _official_url_shape(url),
         "candidate_document_unid": _document_unid(url),
         "reachable": bool(fetched.get("ok")),
         "http_status": fetched.get("status"),
@@ -142,8 +199,6 @@ def diagnose_target(target: dict[str, Any]) -> dict[str, Any]:
     base_unid = _document_unid(final_url)
     parser = StructureParser(final_url)
     parser.feed(body)
-    text = council.to_text(body)
-    compact = re.sub(r"\s+", " ", text)
 
     quoted_rows: list[dict[str, Any]] = []
     for match in QUOTED.finditer(html.unescape(body)):
@@ -156,6 +211,11 @@ def diagnose_target(target: dict[str, Any]) -> dict[str, Any]:
             break
 
     embedded_links = embedded.embedded_attachment_links(final_url, body)
+    child_diagnostics = [
+        diagnose_child(final_url, str(link.get("url") or ""))
+        for link in embedded_links[:MAX_CHILD_DIAGNOSTICS]
+        if str(link.get("url") or "").strip()
+    ]
     row.update({
         "tag_counts": parser.tag_counts,
         "route_attributes": parser.route_attrs,
@@ -164,18 +224,9 @@ def diagnose_target(target: dict[str, Any]) -> dict[str, Any]:
         "quoted_lotus_literal_count": len(quoted_rows),
         "embedded_attachment_candidate_count": len(embedded_links),
         "embedded_attachment_candidate_hashes": [sha(str(link.get("url") or "")) for link in embedded_links],
-        "operative_article_count": len(council.operative_articles(text)),
-        "semantic_markers": {
-            "annual_authorization": bool(re.search(r"autoriza(?:t|ț)ie\s+anual(?:a|ă)|autorizatie\s+anuala", compact, re.I)),
-            "gambling": bool(re.search(r"jocuri\s+de\s+noroc|slot[ -]?machine|pariuri", compact, re.I)),
-            "open_document_literal_count": body.casefold().count("opendocument"),
-            "open_field_literal_count": body.casefold().count("openfield"),
-            "file_literal_count": body.casefold().count("$file") + body.casefold().count("%24file"),
-            "window_open_literal_count": body.casefold().count("window.open"),
-            "location_literal_count": body.casefold().count("location"),
-        },
-        "text_prefix_sha256": sha(compact[:1000]),
-        "text_length": len(compact),
+        "child_diagnostics": child_diagnostics,
+        "child_diagnostic_count": len(child_diagnostics),
+        **_body_summary(body),
     })
     return row
 
@@ -183,7 +234,7 @@ def diagnose_target(target: dict[str, Any]) -> dict[str, Any]:
 def build() -> dict[str, Any]:
     if not KERNELS.is_file():
         return {
-            "schema_version": "1.0",
+            "schema_version": "1.1",
             "instance_id": "valcea",
             "product": "VÂLCEA CLAR failed DocManager document diagnostic",
             "status": "NO_KERNEL_STATE",
@@ -194,7 +245,7 @@ def build() -> dict[str, Any]:
     targets = failed_targets(document)
     diagnostics = [diagnose_target(target) for target in targets]
     output = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "instance_id": "valcea",
         "product": "VÂLCEA CLAR failed DocManager document diagnostic",
         "status": "PASS",
@@ -203,6 +254,8 @@ def build() -> dict[str, Any]:
             "target_limit": MAX_TARGETS,
             "route_attribute_limit_per_target": MAX_ATTR_ROWS,
             "quoted_literal_limit_per_target": MAX_QUOTED_ROWS,
+            "child_diagnostic_limit_per_target": MAX_CHILD_DIAGNOSTICS,
+            "text_prefix_limit": TEXT_PREFIX_LIMIT,
             "raw_html_persisted": False,
             "script_source_persisted": False,
             "external_urls_persisted": False,
@@ -236,8 +289,14 @@ def self_test() -> int:
     assert any(row.get("has_file_literal") for row in parser.route_attrs)
     links = embedded.embedded_attachment_links(page, body)
     assert len(links) == 2
+    assert all(_official_url_shape(str(link["url"]))["extension"] == ".htm" for link in links)
     flags = _flags(f"/dm/2026/hotarari.nsf/x/{unid}/%24FILE/test.htm", unid)
     assert flags["has_file_literal"] and flags["same_document_unid"]
+    summary = _body_summary(body)
+    assert summary["operative_article_count"] == 1
+    assert summary["semantic_markers"]["annual_authorization"] is True
+    assert summary["semantic_markers"]["gambling"] is True
+    assert "autorizația anuală" in summary["text_prefix"]
     mock = {
         "facts": [{
             "id": "x", "status": "candidate_hold",
@@ -248,7 +307,7 @@ def self_test() -> int:
         }]
     }
     assert len(failed_targets(mock)) == 1
-    print("VÂLCEA CLAR failed DocManager document diagnostic self-test: PASS")
+    print("VÂLCEA CLAR failed DocManager child document diagnostic self-test: PASS")
     return 0
 
 
