@@ -2,19 +2,233 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-18T12:53:57+03:00",
+  "generated_at": "2026-08-18T12:55:16+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-18T11:04:01+03:00",
-  "task_count": 51,
+  "queue_generated_at": "2026-08-18T12:53:35+03:00",
+  "task_count": 61,
   "primary_match_count": 0,
-  "no_match_count": 25,
-  "unrouted_count": 26,
-  "target_count": 14,
-  "targets_ok": 11,
+  "no_match_count": 30,
+  "unrouted_count": 31,
+  "target_count": 16,
+  "targets_ok": 13,
   "results": [
+    {
+      "signal_id": "f495689294ab887e82c065f3",
+      "signal_title": "Primăria Horezu pregătește aniversarea celor 539 de ani ai orașului. Trei zile de sărbătoare pentru comunitate",
+      "signal_url": "https://seintamplainvalcea.ro/2026/08/18/primaria-horezu-pregateste-aniversarea-celor-539-de-ani-ai-orasului-trei-zile-de-sarbatoare-pentru-comunitate/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-18T12:43:56+03:00",
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "6bc59e4917d28a92411ef24a",
+      "signal_title": "Festivalul Internațional de Film Transilvania revine la Timișoara pentru a treia ediție, între 17-20 septembrie",
+      "signal_url": "https://curierulderamnic.ro/2026/08/18/festivalul-international-de-film-transilvania-revine-la-timisoara-pentru-a-treia-editie-intre-17-20-septembrie/",
+      "signal_publisher": "Curierul de Râmnic",
+      "signal_published_at": "2026-08-18T12:36:37+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "c9e08616f287b03c52d85e9a",
+      "signal_title": "Colliers: Producția schimbă dinamica pieței industriale și logistice",
+      "signal_url": "https://curierulderamnic.ro/2026/08/18/colliers-productia-schimba-dinamica-pietei-industriale-si-logistice/",
+      "signal_publisher": "Curierul de Râmnic",
+      "signal_published_at": "2026-08-18T12:34:09+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "70b72bd8783d5dc3be1caf5c",
+      "signal_title": "Leonardo Badea¸ Prim-viceguvernator BNR: Scăderea investițiilor străine directe, un semnal pe care România nu trebuie să-l ignore",
+      "signal_url": "https://curierulderamnic.ro/2026/08/18/leonardo-badea%c2%b8-prim-viceguvernator-bnr-scaderea-investitiilor-straine-directe-un-semnal-pe-care-romania-nu-trebuie-sa-l-ignore/",
+      "signal_publisher": "Curierul de Râmnic",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-18T12:33:03+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "7c57bd7e501417326af16511",
+      "signal_title": "APAVIL SA – ANUNȚ privind scoaterea la concurs a unui post de încasator-cititor în cadrul Sectorului Govora, subzona Pietrari",
+      "signal_url": "https://curierulderamnic.ro/2026/08/18/apavil-sa-anunt-privind-scoaterea-la-concurs-a-unui-post-de-incasator-cititor-in-cadrul-sectorului-govora-subzona-pietrari/",
+      "signal_publisher": "Curierul de Râmnic",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-18T12:30:56+03:00",
+      "verification_route_id": "fire_rescue_alert",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "isu-valcea-comunicate",
+            "name": "ISU Vâlcea",
+            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "bb0e213ccec6da393c432790",
+      "signal_title": "World Vision România avertizează din nou asupra examenelor suplimentare de admitere la liceu",
+      "signal_url": "https://curierulderamnic.ro/2026/08/18/world-vision-romania-avertizeaza-din-nou-asupra-examenelor-suplimentare-de-admitere-la-liceu/",
+      "signal_publisher": "Curierul de Râmnic",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-18T12:29:54+03:00",
+      "verification_route_id": "education",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "ccd-valcea-noutati",
+            "name": "Casa Corpului Didactic Vâlcea",
+            "url": "https://ccdvl.ro/category/noutati/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "isj-valcea-comunicate",
+            "name": "Inspectoratul Școlar Județean Vâlcea",
+            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 3
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "1a962ce7609e6dbda919f813",
+      "signal_title": "INCENDIU în RÂMNICU VÂLCEA. O mașină a luat foc",
+      "signal_url": "https://seintamplainvalcea.ro/2026/08/18/incendiu-in-ramnicu-valcea-o-masina-a-luat-foc/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-18T12:03:39+03:00",
+      "verification_route_id": "fire_rescue_alert",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "isu-valcea-comunicate",
+            "name": "ISU Vâlcea",
+            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "9c52090ed6ee485ca6ec5d2b",
       "signal_title": "Reacția IPJ Vâlcea la bătaia din Călimănești: trei persoane agresate și patru ordine de protecție emise",
@@ -657,7 +871,7 @@
     },
     {
       "signal_id": "d0c30c783ca59fcfc9ecd9fa",
-      "signal_title": "Ultima oră 21 de ore in urma Ziua Comunei Drăgoești 2026: aniversări de familie și Cupa „Mihai Viteazul” au adus generațiile împreună",
+      "signal_title": "Ultima oră 23 de ore in urma Ziua Comunei Drăgoești 2026: aniversări de familie și Cupa „Mihai Viteazul” au adus generațiile împreună",
       "signal_url": "https://www.primplanpress.ro/ziua-comunei-dragoesti-2026-aniversari-de-familie-si-cupa-mihai-viteazul-au-adus-generatiile-impreuna/",
       "signal_publisher": "Primplan Press",
       "signal_tier": "T2",
@@ -890,6 +1104,30 @@
       "material_fact_ready": false,
       "fact_kernel_ready": false,
       "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "ceb0ab427ca4a013b08a6f26",
+      "signal_title": "Imprimare(Se deschide într-o fereastră nouă) Imprimare",
+      "signal_url": "https://www.curierul.ro/david-e-goliat/?share=print",
+      "signal_publisher": "Curierul de Vâlcea",
+      "signal_published_at": "2026-08-17T11:31:35+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "61f540c72bfd73ba8d10c2fe",
+      "signal_title": "Continuare about David e Goliat",
+      "signal_url": "https://www.curierul.ro/david-e-goliat/",
+      "signal_publisher": "Curierul de Vâlcea",
+      "signal_published_at": "2026-08-17T11:31:35+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "85861799c686819f54722f8b",
@@ -1165,9 +1403,9 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "bc100e91da64c1115430131f",
+      "signal_id": "c31219ba6526f291a111f8fd",
       "signal_title": "Partajează prin WhatsApp(Se deschide într-o fereastră nouă) WhatsApp",
-      "signal_url": "https://api.whatsapp.com/send?text=Teren%201.117%20mp%20%C8%99i%20construc%C8%9Bie%2024%20MP%2C%20%C3%AEn%20mijlocul%20naturii%2C%20la%20doar%2014.900%20Euro%21%21%21%20https%3A%2F%2Fwww.curierul.ro%2Fteren-1-117-mp-si-constructie-24-mp-in-mijlocul-naturii-la-doar-14-900-euro%2F",
+      "signal_url": "https://api.whatsapp.com/send?text=David%20e%20Goliat%C2%A0%20https%3A%2F%2Fwww.curierul.ro%2Fdavid-e-goliat%2F",
       "signal_publisher": "Curierul de Vâlcea",
       "signal_published_at": null,
       "verification_route_id": "general_local_signal",
@@ -1269,6 +1507,18 @@
       "signal_title": "Declaratie de accesibilitate",
       "signal_url": "http://www.realitateavalceana.ro/declaratie-de-accesibilitate/",
       "signal_publisher": "Realitatea Vâlceană",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "bc100e91da64c1115430131f",
+      "signal_title": "Partajează prin WhatsApp(Se deschide într-o fereastră nouă) WhatsApp",
+      "signal_url": "https://api.whatsapp.com/send?text=Teren%201.117%20mp%20%C8%99i%20construc%C8%9Bie%2024%20MP%2C%20%C3%AEn%20mijlocul%20naturii%2C%20la%20doar%2014.900%20Euro%21%21%21%20https%3A%2F%2Fwww.curierul.ro%2Fteren-1-117-mp-si-constructie-24-mp-in-mijlocul-naturii-la-doar-14-900-euro%2F",
+      "signal_publisher": "Curierul de Vâlcea",
       "signal_published_at": null,
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
