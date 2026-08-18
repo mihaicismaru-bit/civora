@@ -8,6 +8,7 @@ on:
       - 'valcea-clar/editorial/facts_registry.json'
       - 'valcea-clar/editorial/news_sources.json'
       - 'valcea-clar/scripts/newsroom_decide.py'
+      - 'valcea-clar/scripts/discovery_snapshot_material.py'
       - 'valcea-clar/scripts/generate_edition.py'
       - 'valcea-clar/scripts/render_frontpage.py'
       - 'valcea-clar/scripts/render_story_pages.py'
@@ -41,6 +42,7 @@ jobs:
       - name: Validate continuous newsroom gate
         run: |
           python valcea-clar/scripts/newsroom_decide.py --self-test
+          python valcea-clar/scripts/discovery_snapshot_material.py --self-test
           python local-news-os/core/discover_primary_source_facts_fast.py --self-test
           python local-news-os/core/discovery_health.py --self-test
 
@@ -74,13 +76,14 @@ jobs:
           echo "No newly publishable full story. Discovery candidates remain candidates; the clock does not force publication."
           cat valcea-clar/site/newsroom_decision.json
 
-      - name: Persist material discovery-health changes without publishing
+      - name: Persist material discovery snapshot without publishing
         if: steps.decision.outputs.changed != 'true'
         shell: bash
         run: |
           set -euo pipefail
-          current=/tmp/valcea-news-discovery-state.json
-          cp valcea-clar/editorial/news_discovery_state.json "$current"
+          cp valcea-clar/editorial/news_discovery_state.json /tmp/valcea-news-discovery-state.json
+          cp valcea-clar/editorial/auto_facts.json /tmp/valcea-auto-facts.json
+          cp valcea-clar/site/newsroom_decision.json /tmp/valcea-newsroom-decision.json
 
           git config user.name 'vâlcea-clar-live-newsroom[bot]'
           git config user.email 'valcea-clar-live-newsroom@users.noreply.github.com'
@@ -88,41 +91,69 @@ jobs:
           for attempt in 1 2 3 4 5; do
             git fetch origin main
 
-            if git show origin/main:valcea-clar/editorial/news_discovery_state.json > /tmp/valcea-news-discovery-previous.json 2>/dev/null; then
-              :
-            else
-              printf '{}\n' > /tmp/valcea-news-discovery-previous.json
-            fi
+            git show origin/main:valcea-clar/editorial/news_discovery_state.json > /tmp/valcea-news-discovery-previous.json 2>/dev/null || printf '{}\n' > /tmp/valcea-news-discovery-previous.json
+            git show origin/main:valcea-clar/editorial/auto_facts.json > /tmp/valcea-auto-facts-previous.json 2>/dev/null || printf '{}\n' > /tmp/valcea-auto-facts-previous.json
+            git show origin/main:valcea-clar/site/newsroom_decision.json > /tmp/valcea-newsroom-decision-previous.json 2>/dev/null || printf '{}\n' > /tmp/valcea-newsroom-decision-previous.json
 
+            health_changed=false
             if python local-news-os/core/discovery_health.py \
-              --current "$current" \
+              --current /tmp/valcea-news-discovery-state.json \
               --previous /tmp/valcea-news-discovery-previous.json \
               --changed-exit-code 3; then
-              exit 0
+              :
             else
               rc=$?
-              if [ "$rc" -ne 3 ]; then
+              if [ "$rc" -eq 3 ]; then
+                health_changed=true
+              else
                 exit "$rc"
               fi
             fi
 
-            git reset --hard origin/main
-            mkdir -p valcea-clar/editorial
-            cp "$current" valcea-clar/editorial/news_discovery_state.json
-            git add valcea-clar/editorial/news_discovery_state.json
-            if git diff --cached --quiet; then
-              echo 'Discovery-health snapshot already present on main.'
+            snapshot_changed=false
+            if python valcea-clar/scripts/discovery_snapshot_material.py \
+              --current-auto /tmp/valcea-auto-facts.json \
+              --previous-auto /tmp/valcea-auto-facts-previous.json \
+              --current-decision /tmp/valcea-newsroom-decision.json \
+              --previous-decision /tmp/valcea-newsroom-decision-previous.json \
+              --changed-exit-code 3; then
+              :
+            else
+              rc=$?
+              if [ "$rc" -eq 3 ]; then
+                snapshot_changed=true
+              else
+                exit "$rc"
+              fi
+            fi
+
+            if [ "$health_changed" != true ] && [ "$snapshot_changed" != true ]; then
+              echo 'No material discovery, candidate, or editorial-decision change.'
               exit 0
             fi
-            git commit -m 'Refresh VÂLCEA CLAR discovery health ledger'
+
+            git reset --hard origin/main
+            mkdir -p valcea-clar/editorial valcea-clar/site
+            cp /tmp/valcea-news-discovery-state.json valcea-clar/editorial/news_discovery_state.json
+            cp /tmp/valcea-auto-facts.json valcea-clar/editorial/auto_facts.json
+            cp /tmp/valcea-newsroom-decision.json valcea-clar/site/newsroom_decision.json
+            git add \
+              valcea-clar/editorial/news_discovery_state.json \
+              valcea-clar/editorial/auto_facts.json \
+              valcea-clar/site/newsroom_decision.json
+            if git diff --cached --quiet; then
+              echo 'Material discovery snapshot already present on main.'
+              exit 0
+            fi
+            git commit -m 'Refresh VÂLCEA CLAR material discovery snapshot'
             if git push origin HEAD:main; then
               exit 0
             fi
-            echo "main advanced during discovery-health commit; retrying ${attempt}/5."
+            echo "main advanced during discovery snapshot commit; retrying ${attempt}/5."
             sleep $((attempt * 2))
           done
 
-          echo 'Could not persist discovery-health ledger after five attempts.' >&2
+          echo 'Could not persist material discovery snapshot after five attempts.' >&2
           exit 1
 
       - name: Refresh canonical indexing assets without publishing
