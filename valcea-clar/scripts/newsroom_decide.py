@@ -169,6 +169,7 @@ def load_editorial_integrity_stats() -> dict:
         "status": "ACTIVE",
         "story_count": report.get("story_count"),
         "passed": report.get("passed"),
+        "held": report.get("held"),
         "failed": report.get("failed"),
     }
 
