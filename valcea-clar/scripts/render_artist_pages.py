@@ -40,12 +40,24 @@ def label_for_link(kind: str) -> str:
     }.get(kind, kind.replace("_", " ").title())
 
 
+def appearance_label(row: dict) -> str:
+    title = str(row.get("title") or row.get("name") or "Apariție documentată").strip()
+    date = str(row.get("date") or "").strip()
+    role = str(row.get("role") or "").strip()
+    institution = str(row.get("institution") or "").strip()
+    suffix = " · ".join(value for value in (date, institution, role) if value)
+    return title + (f" — {suffix}" if suffix else "")
+
+
 def render_index(profiles: list[dict]) -> None:
     cards = []
     for p in profiles:
-        festivals = ", ".join(row.get("name", "") for row in p.get("festivals", [])[:2])
-        cards.append(f'<a class="card" href="{esc(p["path"])}"><strong>{esc(p["name"])}</strong><span>{esc(festivals or "Profil muzical verificat")}</span></a>')
-    description = "Artiștii care apar în festivalurile documentate de VÂLCEA CLAR, cu biografii și conturi externe validate."
+        appearances = p.get("appearances") or []
+        labels = [appearance_label(row) for row in appearances[:2] if isinstance(row, dict)]
+        if not labels:
+            labels = [row.get("name", "") for row in p.get("festivals", [])[:2] if isinstance(row, dict)]
+        cards.append(f'<a class="card" href="{esc(p["path"])}"><strong>{esc(p["name"])}</strong><span>{esc(", ".join(labels) or "Profil artistic verificat")}</span></a>')
+    description = "Artiști, actori, regizori, dirijori și ansambluri care apar în programele culturale documentate de VÂLCEA CLAR, cu biografii și conturi externe validate când identitatea este univocă."
     body = f'<main><div class="k">ARTIST INTELLIGENCE</div><h1>Artiști</h1><p class="dek">{esc(description)}</p><div class="grid">{"".join(cards)}</div></main>'
     target = RUNTIME / "artisti" / "index.html"
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -53,10 +65,26 @@ def render_index(profiles: list[dict]) -> None:
 
 
 def render_profile(p: dict) -> None:
-    festival_links = "".join(
-        f'<li><a href="/stiri/{esc(row.get("story_id"))}/">{esc(row.get("name"))}</a></li>'
-        for row in p.get("festivals", []) if row.get("story_id")
-    )
+    appearances = p.get("appearances") or []
+    if not appearances:
+        appearances = [
+            {"kind":"festival","story_id":row.get("story_id"),"title":row.get("name"),"role":"artist / performer"}
+            for row in p.get("festivals", []) if isinstance(row, dict)
+        ]
+    appearance_links = []
+    for row in appearances:
+        if not isinstance(row, dict):
+            continue
+        label = appearance_label(row)
+        story_id = str(row.get("story_id") or "").strip()
+        source_url = str(row.get("source_url") or "").strip()
+        if story_id:
+            appearance_links.append(f'<li><a href="/stiri/{esc(story_id)}/">{esc(label)}</a></li>')
+        elif source_url:
+            appearance_links.append(f'<li><a href="{esc(source_url)}" rel="nofollow noopener">{esc(label)}</a></li>')
+        else:
+            appearance_links.append(f'<li>{esc(label)}</li>')
+
     external = []
     for kind, urls in (p.get("links") or {}).items():
         for url in urls[:2]:
@@ -64,11 +92,11 @@ def render_profile(p: dict) -> None:
     status_text = (
         "Identitatea externă a fost potrivită în registrul muzical; linkurile afișate provin din relații publice asociate acelei identități."
         if p.get("musicbrainz_id") else
-        "Apariția în festival este verificată, dar identitatea externă nu este încă suficient de univocă pentru a atașa conturi sociale fără risc de confuzie."
+        "Apariția în program este verificată, dar identitatea externă nu este încă suficient de univocă pentru a atașa conturi sociale fără risc de confuzie."
     )
-    description = str(p.get("bio") or f"Profilul {p.get('name')} în arhiva festivalurilor VÂLCEA CLAR.")
+    description = str(p.get("bio") or f"Profilul {p.get('name')} în arhiva culturală VÂLCEA CLAR.")
     links = f'<div class="links">{"".join(external)}</div>' if external else '<p>Conturile externe rămân în verificare.</p>'
-    body = f'''<main><article><div class="k">ARTIST</div><h1>{esc(p.get("name"))}</h1><p class="dek">Profil verificat în contextul festivalurilor din Vâlcea.</p><div class="status">{esc(status_text)}</div><div class="bio"><p>{esc(description)}</p></div><section class="box"><h2>Festivaluri documentate de VÂLCEA CLAR</h2><ul>{festival_links}</ul></section><section class="box"><h2>Pagini oficiale și sociale validate</h2>{links}</section><section class="box"><h2>Surse de identificare</h2><ul>{''.join(f'<li><a href="{esc(url)}" rel="nofollow noopener">Sursă festival</a></li>' for url in p.get("source_urls", []))}</ul></section><p><a href="/artisti/">← Toți artiștii</a></p></article></main>'''
+    body = f'''<main><article><div class="k">ARTIST</div><h1>{esc(p.get("name"))}</h1><p class="dek">Profil verificat în contextul programelor culturale din Vâlcea.</p><div class="status">{esc(status_text)}</div><div class="bio"><p>{esc(description)}</p></div><section class="box"><h2>Apariții documentate de VÂLCEA CLAR</h2><ul>{''.join(appearance_links)}</ul></section><section class="box"><h2>Pagini oficiale și sociale validate</h2>{links}</section><section class="box"><h2>Surse de identificare</h2><ul>{''.join(f'<li><a href="{esc(url)}" rel="nofollow noopener">Sursă program</a></li>' for url in p.get("source_urls", []))}</ul></section><p><a href="/artisti/">← Toți artiștii</a></p></article></main>'''
     target = RUNTIME / p["path"].strip("/") / "index.html"
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(shell(str(p.get("name")), description[:280], body, BASE + p["path"]), encoding="utf-8")
@@ -82,6 +110,7 @@ def update_indexing(profiles: list[dict]) -> None:
     policy = doc.setdefault("policy", {})
     policy["artist_routes_owned_by_artist_intelligence"] = True
     policy["artist_external_identity_fail_closed"] = True
+    policy["artist_sources_include_performing_arts_programmes"] = True
     INDEXING.write_text(json.dumps(doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
