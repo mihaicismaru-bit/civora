@@ -111,8 +111,8 @@ jobs:
           )
           PY
 
-      - name: Persist ingestion, promotion and live projection conflict-safe
-        if: always() && github.event_name != 'pull_request'
+      - name: Persist validated ingestion, promotion and live projection conflict-safe
+        if: success() && github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
