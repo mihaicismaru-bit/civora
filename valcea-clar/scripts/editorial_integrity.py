@@ -9,6 +9,7 @@ same evidence-bound product the writer emitted.
 It does not rewrite copy. It validates identity, claim hashes, source lineage,
 headline/dek provenance and the writer product fingerprint. Reputational
 formats remain review-only unless an explicit human approval flag is present.
+Expected per-story editorial holds remain HOLD; integrity corruption is FAIL.
 """
 from __future__ import annotations
 
@@ -20,8 +21,14 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 PRODUCTS = ROOT / "editorial" / "editorial_products.json"
+PUBLICATION_HOLDS = ROOT / "editorial" / "publication_holds.json"
 WRITER_ID = "manual_journalism_v1"
 REVIEW_ONLY_FORMATS = {"investigation", "analysis"}
+EXPECTED_HOLD_REASONS = {
+    "reputational_format_requires_human_editor",
+    "writer_rejected_fact_kernel",
+    "editorial_format_requires_review",
+}
 
 
 def canonical_digest(value: Any) -> str:
@@ -31,6 +38,24 @@ def canonical_digest(value: Any) -> str:
 
 def text_sha256(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def active_publication_hold_ids() -> set[str]:
+    if not PUBLICATION_HOLDS.is_file():
+        return set()
+    try:
+        document = json.loads(PUBLICATION_HOLDS.read_text(encoding="utf-8"))
+    except Exception:
+        return set()
+    held: set[str] = set()
+    for row in document.get("holds") or []:
+        if not isinstance(row, dict):
+            continue
+        story_id = str(row.get("story_id") or "").strip()
+        status = str(row.get("status") or "").strip().upper()
+        if story_id and row.get("public_projection") is False and status not in {"RELEASED", "CLOSED", "RESOLVED"}:
+            held.add(story_id)
+    return held
 
 
 def story_source_urls(item: dict[str, Any]) -> set[str]:
@@ -177,23 +202,42 @@ def validate_story(item: dict[str, Any]) -> tuple[bool, str, dict[str, Any]]:
     }
 
 
+def _is_expected_hold(item: dict[str, Any], reason: str, active_holds: set[str]) -> bool:
+    story_id = str(item.get("id") or "").strip()
+    return reason in EXPECTED_HOLD_REASONS and (
+        item.get("status") == "editorial_hold" or story_id in active_holds
+    )
+
+
 def validate_registry(document: dict[str, Any]) -> dict[str, Any]:
     rows = document.get("facts") or []
+    active_holds = active_publication_hold_ids()
     reports = []
     failed = 0
+    held = 0
+    passed = 0
     for item in rows:
         if not isinstance(item, dict):
             failed += 1
             reports.append({"id": None, "status": "FAIL", "reason": "story_not_object"})
             continue
         ok, reason, detail = validate_story(item)
-        failed += 0 if ok else 1
-        reports.append({"id": item.get("id"), "status": "PASS" if ok else "FAIL", "reason": reason, **detail})
+        if ok:
+            passed += 1
+            status = "PASS"
+        elif _is_expected_hold(item, reason, active_holds):
+            held += 1
+            status = "HOLD"
+        else:
+            failed += 1
+            status = "FAIL"
+        reports.append({"id": item.get("id"), "status": status, "reason": reason, **detail})
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "gate_id": "editorial_integrity_v1",
         "story_count": len(rows),
-        "passed": len(rows) - failed,
+        "passed": passed,
+        "held": held,
         "failed": failed,
         "reports": reports,
     }
@@ -245,6 +289,14 @@ def self_test() -> int:
     investigation["editorial_product"]["human_editor_approved"] = True
     investigation["editorial_product"]["product_fingerprint_sha256"] = expected_product_fingerprint(investigation)
     assert validate_story(investigation)[0] is True
+
+    held_investigation = json.loads(json.dumps(item))
+    held_investigation["id"] = "held-test"
+    held_investigation["status"] = "editorial_hold"
+    held_investigation["editorial_product"]["format"] = "investigation"
+    held_investigation["editorial_product"]["product_fingerprint_sha256"] = expected_product_fingerprint(held_investigation)
+    report = validate_registry({"facts": [item, held_investigation]})
+    assert report["passed"] == 1 and report["held"] == 1 and report["failed"] == 0
 
     print("VÂLCEA CLAR editorial integrity self-test: PASS")
     return 0
