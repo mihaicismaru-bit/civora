@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "publication_model": "continuous_story_first",
+  "principles": {
+    "real_photographs_only": true,
+    "synthetic_images_forbidden": true,
+    "generic_substitution_forbidden": true,
+    "rights_cleared_does_not_imply_subject_match": true,
+    "subject_match_required_before_publication": true,
+    "editor_approval_required_before_publication": true,
+    "no_photo_is_better_than_false_relevance": true,
+    "automatic_candidate_promotion": false
+  },
+  "provider_order": [
+    {
+      "id": "approved_story_visual",
+      "priority": 0,
+      "enabled": true,
+      "cost": "free_or_precleared",
+      "auth": "none",
+      "role": "publishable_when_existing_contract_passes"
+    },
+    {
+      "id": "official_source_allowlist",
+      "priority": 10,
+      "enabled": true,
+      "cost": "free",
+      "auth": "none",
+      "role": "exact_event_or_institution_photo_after_documented_reuse_permission",
+      "allowlist": []
+    },
+    {
+      "id": "wikimedia_commons",
+      "priority": 20,
+      "enabled": true,
+      "cost": "free",
+      "auth": "none",
+      "role": "open_license_real_photo_candidate",
+      "candidate_only": true
+    },
+    {
+      "id": "openverse",
+      "priority": 30,
+      "enabled": true,
+      "cost": "free",
+      "auth": "optional",
+      "role": "open_license_discovery_candidate",
+      "candidate_only": true,
+      "source_license_reverification_required": true
+    },
+    {
+      "id": "social_embed",
+      "priority": 40,
+      "enabled": false,
+      "cost": "free",
+      "auth": "platform_dependent",
+      "role": "web_only_context_not_social_image_asset",
+      "reason": "requires_separate_site_embed_contract"
+    },
+    {
+      "id": "mapillary",
+      "priority": 50,
+      "enabled": false,
+      "cost": "free_tier",
+      "auth": "token_required",
+      "role": "place_context_candidate",
+      "reason": "activate_only_after_token_and_attribution_contract_are_configured"
+    },
+    {
+      "id": "pexels",
+      "priority": 60,
+      "enabled": false,
+      "cost": "free",
+      "auth": "api_key_required",
+      "role": "illustrative_only",
+      "reason": "generic_stock_may_not_impersonate_local_event_or_subject"
+    }
+  ],
+  "license_allowlist": [
+    "public-domain",
+    "cc0",
+    "cc-by",
+    "cc-by-sa"
+  ],
+  "disallowed_license_markers": [
+    "NC",
+    "ND",
+    "noncommercial",
+    "no-derivatives",
+    "unknown"
+  ],
+  "candidate_contract": {
+    "kind": "photograph",
+    "synthetic": false,
+    "subject_match": false,
+    "editor_approved": false,
+    "publication_eligible": false
+  }
+}
