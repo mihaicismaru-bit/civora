@@ -165,7 +165,7 @@ def run() -> tuple[int, dict]:
                         "lineup_signal": bool(lineup_hits),
                         "lineup_terms": lineup_hits,
                         "excerpt": excerpt(text, terms),
-                        "publication_authority": false
+                        "publication_authority": False
                     })
                     known_keys.add(key)
                     new_candidates += 1
