@@ -9,10 +9,11 @@ SPENT handoff record, and durable materialization read-back, then completes the
 RECOVERY_REQUIRED checkpoint by CAS. Missing or ambiguous evidence remains
 RECOVERY_REQUIRED and never authorizes another provider read.
 
-A successful recovery claim is emitted only after the exact recovered execution receipt
-and recovery evidence are read back from the durable checkpoint state after CAS. This
+A successful recovery claim is emitted only after the exact recovered execution receipt,
+recovery evidence, and exact durable materialization are read back after CAS. This
 prevents a successful write response from being mistaken for durable completion when a
-same-checkpoint mutation or storage divergence intervenes immediately after persistence.
+same-checkpoint mutation, observation-ledger mutation, feedback-snapshot mutation, or
+storage divergence intervenes immediately after persistence.
 
 No provider call, credential value, raw provider payload, or predictive analytics are
 accepted or persisted. Editorial publication is never blocked and zero-paid dependency
@@ -34,7 +35,7 @@ import reread_result_materialization_binding as materialization
 import reread_spend_reauthorization as spend
 import reread_spend_reclaim_binding as reclaim
 
-SCHEMA_VERSION = "1.1"
+SCHEMA_VERSION = "1.2"
 RUNTIME_ID = "local-news-os-reread-materialization-crash-reconciliation-v1"
 ACTION = "RECOVER_REREAD_FROM_DURABLE_MATERIALIZATION"
 EVIDENCE_FIELD = "reread_materialization_crash_recovery"
@@ -64,6 +65,8 @@ def guards() -> dict[str, Any]:
         "recovery_requires_exact_durable_materialization": True,
         "feedback_snapshot_readback_required_when_materialization_requires_it": True,
         "recovery_completion_requires_post_cas_readback": True,
+        "post_cas_readback_revalidates_durable_materialization": True,
+        "post_cas_materialization_toctou_success_allowed": False,
         "recovery_success_claims_without_post_cas_readback": False,
         "ambiguous_or_missing_evidence_remains_recovery_required": True,
         "completed_no_data_inferred_from_absence": False,
@@ -311,8 +314,9 @@ def _verify_post_cas_readback(
     expected_receipt_fingerprint_sha256: str,
     expected_evidence_fingerprint_sha256: str,
     expected_materialization_fingerprint_sha256: str,
+    expected_durable_observed_at: str,
 ) -> tuple[dict[str, Any] | None, list[str]]:
-    """Read back the exact recovered receipt before claiming durable completion."""
+    """Read back the exact recovered receipt and durable materialization before success."""
     state, state_blocks, _ = runtime.load_checkpoint_state(repo_root, channel)
     if state_blocks:
         return None, [
@@ -392,6 +396,47 @@ def _verify_post_cas_readback(
         blocks.append("REREAD_MATERIALIZATION_RECOVERY_POST_CAS_EVIDENCE_FINGERPRINT_MISMATCH")
     if _clean(evidence.get("materialization_fingerprint_sha256")) != actual_materialization_fp:
         blocks.append("REREAD_MATERIALIZATION_RECOVERY_POST_CAS_EVIDENCE_MATERIALIZATION_MISMATCH")
+
+    post_built = materialization.build_durable_materialization_proof(
+        repo_root,
+        channel,
+        job,
+        now=expected_durable_observed_at,
+    )
+    post_proof = post_built.get("proof") if isinstance(post_built.get("proof"), dict) else None
+    if post_built.get("valid") is not True or not isinstance(post_proof, dict):
+        blocks.extend(
+            "REREAD_MATERIALIZATION_RECOVERY_POST_CAS_DURABLE_MATERIALIZATION:" + str(code)
+            for code in (
+                post_built.get("hard_blocks", [])
+                or ["REREAD_RESULT_DURABLE_MATERIALIZATION_PROOF_INVALID"]
+            )
+        )
+    else:
+        post_materialization_fp = _clean(post_proof.get("materialization_fingerprint_sha256"))
+        if (
+            not post_materialization_fp
+            or not hmac.compare_digest(
+                post_materialization_fp,
+                expected_materialization_fingerprint_sha256,
+            )
+        ):
+            blocks.append(
+                "REREAD_MATERIALIZATION_RECOVERY_POST_CAS_DURABLE_MATERIALIZATION_FINGERPRINT_MISMATCH"
+            )
+        proof_evidence_fields = (
+            "observation_id",
+            "observation_fingerprint_sha256",
+            "observation_store_fingerprint_sha256",
+            "snapshot_fingerprint_sha256",
+            "feedback_fingerprint_sha256",
+        )
+        for field in proof_evidence_fields:
+            if _clean(post_proof.get(field)) != _clean(evidence.get(field)):
+                blocks.append(
+                    "REREAD_MATERIALIZATION_RECOVERY_POST_CAS_DURABLE_MATERIALIZATION_EVIDENCE_MISMATCH:"
+                    + field
+                )
     if blocks:
         return None, sorted(set(blocks))
 
@@ -403,7 +448,11 @@ def _verify_post_cas_readback(
         "receipt_fingerprint_sha256": actual_receipt_fp,
         "recovery_evidence_fingerprint_sha256": actual_evidence_fp,
         "materialization_fingerprint_sha256": actual_materialization_fp,
+        "post_cas_materialization_fingerprint_sha256": _clean(
+            post_proof.get("materialization_fingerprint_sha256")
+        ),
         "verified_from_durable_checkpoint_state": True,
+        "durable_materialization_reverified_after_cas": True,
         "provider_network_call_performed_by_readback": False,
         "publication_blocked": False,
         "zero_paid_dependency": True,
@@ -522,6 +571,7 @@ def reconcile_materialized_reread_crash(
         expected_receipt_fingerprint_sha256=expected_receipt_fp,
         expected_evidence_fingerprint_sha256=expected_evidence_fp,
         expected_materialization_fingerprint_sha256=expected_materialization_fp,
+        expected_durable_observed_at=durable_now,
     )
     if readback_blocks or not isinstance(readback, dict):
         return _result(
