@@ -1,0 +1,58 @@
+name: VÂLCEA CLAR Fact Kernel → Live Newsroom Handoff
+
+on:
+  workflow_run:
+    workflows: ["VÂLCEA CLAR Fact Kernel Builder"]
+    types: [completed]
+    branches: [main]
+  # Bootstrap the handoff immediately when this contract first lands on main.
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/valcea-clar-fact-kernel-newsroom-handoff.yml'
+  pull_request:
+    paths:
+      - '.github/workflows/valcea-clar-fact-kernel-newsroom-handoff.yml'
+      - '.github/workflows/valcea-clar-fact-kernel.yml'
+      - '.github/workflows/valcea-clar-newsroom-live.yml'
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: valcea-clar-fact-kernel-newsroom-handoff
+  cancel-in-progress: false
+
+jobs:
+  contract:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Validate handoff endpoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s .github/workflows/valcea-clar-fact-kernel.yml
+          test -s .github/workflows/valcea-clar-newsroom-live.yml
+          grep -Fq 'name: VÂLCEA CLAR Fact Kernel Builder' .github/workflows/valcea-clar-fact-kernel.yml
+          grep -Fq 'workflow_dispatch:' .github/workflows/valcea-clar-newsroom-live.yml
+          grep -Fq "valcea-clar/editorial/facts_registry.json" .github/workflows/valcea-clar-newsroom-live.yml
+          echo 'Fact Kernel → Live Newsroom handoff contract: PASS'
+
+  dispatch:
+    if: >-
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch canonical Live Newsroom
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh workflow run valcea-clar-newsroom-live.yml \
+            --repo "${{ github.repository }}" \
+            --ref main
+          echo 'Live Newsroom dispatch accepted.'
