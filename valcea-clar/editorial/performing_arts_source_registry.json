@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "product": "VÂLCEA CLAR Performing Arts source registry",
+  "policy": {
+    "purpose": "Feed verified performing-arts signals into the general autonomous newsroom without treating event dates as publication dates.",
+    "monitor_interval_hours": 2,
+    "source_change_is_not_publishable_fact": true,
+    "event_date_is_not_published_at": true,
+    "calendar_item_requires_event_identity": true,
+    "last_known_good_preserved": true,
+    "material_update_requires_editorial_verification": true,
+    "general_editorial_opportunity_engine_feed": true,
+    "public_money_terms": ["buget", "lei", "subven", "finant", "finanț", "contract", "plata", "plată", "achiz", "onorariu", "investi", "execuție", "executie"],
+    "programme_terms": ["program", "calendar", "spectacol", "premier", "concert", "stagiune", "turneu", "festival", "recital", "bilet", "bilete"]
+  },
+  "sources": [
+    {
+      "id": "filarmonica-valcea-events",
+      "institution": "Centrul Cultural Municipal Râmnicu Vâlcea — Filarmonica Ion Dumitrescu",
+      "source_contract": "EVENT_CALENDAR",
+      "url": "https://filarmonica-valcea.ro/evenimente/",
+      "tier": "T1",
+      "scope": ["programme", "event_date", "venue", "performers", "ticketing", "archive"],
+      "section": "CULTURĂ"
+    },
+    {
+      "id": "filarmonica-valcea-home",
+      "institution": "Centrul Cultural Municipal Râmnicu Vâlcea — Filarmonica Ion Dumitrescu",
+      "source_contract": "INSTITUTION_HOME",
+      "url": "https://filarmonica-valcea.ro/",
+      "tier": "T1",
+      "scope": ["upcoming_events", "ticketing", "audience_rules", "cultural_agenda"],
+      "section": "CULTURĂ"
+    },
+    {
+      "id": "ariel-valcea-home",
+      "institution": "Centrul Cultural Municipal Râmnicu Vâlcea — Teatrul Ariel",
+      "source_contract": "INSTITUTION_HOME",
+      "url": "https://www.arieltheatre.ro/",
+      "tier": "T1",
+      "scope": ["programme", "premieres", "productions", "company", "projects"],
+      "section": "CULTURĂ"
+    },
+    {
+      "id": "ariel-valcea-programme",
+      "institution": "Centrul Cultural Municipal Râmnicu Vâlcea — Teatrul Ariel",
+      "source_contract": "EVENT_CALENDAR",
+      "url": "https://www.arieltheatre.ro/trupa-romana/program/calendar.html",
+      "tier": "T1",
+      "scope": ["programme", "event_date", "venue", "production", "age_guidance", "ticketing"],
+      "section": "CULTURĂ"
+    },
+    {
+      "id": "anton-pann-home",
+      "institution": "Teatrul Anton Pann Râmnicu Vâlcea",
+      "source_contract": "INSTITUTION_HOME",
+      "url": "https://teatrulantonpann.ro/",
+      "tier": "T1",
+      "scope": ["programme", "premieres", "productions", "company", "touring", "festival_participation"],
+      "section": "CULTURĂ"
+    },
+    {
+      "id": "anton-pann-ticketing",
+      "institution": "Teatrul Anton Pann Râmnicu Vâlcea",
+      "source_contract": "TICKETING_DISCOVERY",
+      "url": "https://www.iabilet.ro/bilete-teatrul-anton-pann-venue-2299/",
+      "tier": "T2",
+      "scope": ["ticketing", "guest_events", "event_date"],
+      "section": "CULTURĂ",
+      "publication_authority": false
+    },
+    {
+      "id": "rm-valcea-cultural-center-rof",
+      "institution": "Centrul Cultural Municipal Râmnicu Vâlcea",
+      "source_contract": "OFFICIAL_DECISION",
+      "url": "https://hcl.usr.ro/ramnicu_valcea/2026/h133",
+      "tier": "T1",
+      "scope": ["governance", "institution_structure", "venues", "mission"],
+      "section": "ADMINISTRAȚIE"
+    },
+    {
+      "id": "rm-valcea-cultural-center-organization",
+      "institution": "Centrul Cultural Municipal Râmnicu Vâlcea",
+      "source_contract": "OFFICIAL_DECISION",
+      "url": "https://hcl.usr.ro/ramnicu_valcea/2026/h83",
+      "tier": "T1",
+      "scope": ["governance", "organization", "public_financing"],
+      "section": "ADMINISTRAȚIE"
+    },
+    {
+      "id": "rm-valcea-cultural-calendar",
+      "institution": "Municipiul Râmnicu Vâlcea",
+      "source_contract": "OFFICIAL_DECISION",
+      "url": "https://hcl.usr.ro/ramnicu_valcea/2026/h128",
+      "tier": "T1",
+      "scope": ["public_money", "cultural_calendar", "partnerships"],
+      "section": "ADMINISTRAȚIE"
+    },
+    {
+      "id": "cj-valcea-anton-pann-decisions",
+      "institution": "Consiliul Județean Vâlcea / Teatrul Anton Pann",
+      "source_contract": "OFFICIAL_DECISION_REGISTER",
+      "url": "https://cjvalcea.ro/monitorul-oficial-local/hotararile-autoritatii-deliberative/2026-hotararile-autoritatii-deliberative/",
+      "tier": "T1",
+      "scope": ["public_money", "governance", "investments", "legal_services", "organization"],
+      "section": "ADMINISTRAȚIE"
+    },
+    {
+      "id": "cj-valcea-anton-pann-execution",
+      "institution": "Consiliul Județean Vâlcea / Teatrul Anton Pann",
+      "source_contract": "BUDGET_EXECUTION_REGISTER",
+      "url": "https://cjvalcea.ro/informatii-de-interes-public/buget-din-toate-sursele-de-venituri/executie-bugetara-situatia-platilor/",
+      "tier": "T1",
+      "scope": ["public_money", "budget_execution", "payments", "annual_reports"],
+      "section": "ADMINISTRAȚIE"
+    },
+    {
+      "id": "cj-valcea-cultural-agenda",
+      "institution": "Consiliul Județean Vâlcea — Agenda Culturală Vâlceană",
+      "source_contract": "MONTHLY_CULTURAL_AGENDA",
+      "url": "https://filarmonica-valcea.ro/",
+      "tier": "T1B",
+      "scope": ["cross_institution_programme", "filarmonica", "ariel", "anton_pann", "county_culture"],
+      "section": "CULTURĂ"
+    }
+  ]
+}
