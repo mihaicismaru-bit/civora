@@ -2,12 +2,12 @@
 """Generic boundary-safe routing extension for LOCAL NEWS OS signal verification.
 
 Keeps signal discovery evidence-only while allowing instance config to express
-exact phrase boundaries and dedicated primary verification targets without
-hardcoding geography or publishers into CORE.
+exact phrase boundaries, explicit token-prefix matches, and dedicated primary
+verification targets without hardcoding geography or publishers into CORE.
 """
 from __future__ import annotations
 
-import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -23,15 +23,30 @@ ORIGINAL_RESOLVE_REGISTRY_TARGETS = radar.resolve_registry_targets
 
 
 def phrase_matches(haystack: str, keyword: str) -> bool:
-    """Match normalized words/phrases, never arbitrary substrings.
+    """Match normalized words/phrases without accidental substring matches.
 
-    Example: ``urs`` must not match ``concurs``.
+    Exact words/phrases are the default. A trailing ``*`` explicitly opts a
+    keyword into token-prefix matching, e.g. ``politi*`` matches ``politisti``.
+    Consequently ``urs`` never matches ``concurs``.
     """
+    raw = str(keyword or "").strip()
+    prefix = raw.endswith("*")
+    if prefix:
+        raw = raw[:-1]
     hay = radar.norm_text(haystack)
-    needle = radar.norm_text(keyword)
+    needle = radar.norm_text(raw)
     if not hay or not needle:
         return False
-    return f" {needle} " in f" {hay} "
+    if not prefix:
+        return f" {needle} " in f" {hay} "
+    # Prefix semantics are token-scoped. For a multi-token expression only the
+    # final token is treated as a prefix.
+    parts = needle.split()
+    if len(parts) == 1:
+        return any(token.startswith(parts[0]) for token in hay.split())
+    head = " ".join(parts[:-1])
+    tail = re.escape(parts[-1])
+    return re.search(rf"(?:^|\s){re.escape(head)}\s+{tail}\w*(?:\s|$)", hay) is not None
 
 
 def _rule_matches(title: str, rule: dict[str, Any]) -> bool:
@@ -105,6 +120,8 @@ def install() -> None:
 def self_test() -> int:
     assert phrase_matches("APAVIL scoate la concurs trei posturi", "urs") is False
     assert phrase_matches("Un urs a fost văzut lângă localitate", "urs") is True
+    assert phrase_matches("Polițiștii au făcut percheziții", "politi*") is True
+    assert phrase_matches("Polițiștii au făcut percheziții", "perchez*") is True
     assert phrase_matches("Săptămâna Europeană a Mobilității", "saptamana europeana") is True
 
     cfg = {
