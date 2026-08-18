@@ -126,18 +126,14 @@
     {
       "id": "threads-story-alert-1cd2159b942ec2b672f7",
       "story_id": "alert-1cd2159b942ec2b672f7",
-      "status": "outbox_ready",
-      "publication_mode": "durable_outbox_only",
-      "native_format": "thread",
-      "thread": [
-        "DN 7, 17 august 2026: 2 victime într-un incident rutier semnalat de INFOTRAFIC",
-        "Alerta oficială emisă la ora 15:45 indică incidentul în zona localității Blidari, la kilometrul 167 + 300; la acel moment, trafic alternativ era în vigoare pe sectorul afectat.",
-        "La momentul emiterii alertei, sursa oficială indica trafic alternativ pe DN 7, în sectorul descris în informarea INFOTRAFIC.",
-        "Surse și context complet: https://valceaclar.ro/stiri/alert-1cd2159b942ec2b672f7/"
-      ],
+      "publication_mode": "native_api_fail_closed",
       "canonical_url": "https://valceaclar.ro/stiri/alert-1cd2159b942ec2b672f7/",
       "source_preserving": true,
-      "edition_gate": false,
+      "conversation_native": true,
+      "verbatim_cross_platform_reuse_allowed": false,
+      "direct_publication_enabled": true,
+      "direct_publication_blocker": null,
+      "generation_mode": "threads_editorial_v1",
       "identity": {
         "brand_source": "valcea-clar/social/social_brand_system.json",
         "profile_source": "valcea-clar/social/profile_identity_system.json",
@@ -154,23 +150,34 @@
           "generic_engagement_prompt_forbidden": true,
           "media_only_when_it_adds_evidence": true
         }
-      }
+      },
+      "edition_gate": false,
+      "status": "outbox_ready",
+      "native_format": "thread",
+      "format_family": "text_update",
+      "hook_family": "clear_observation",
+      "posts": [
+        "Alerta oficială emisă la ora 15:45 indică incidentul în zona localității Blidari, la kilometrul 167 + 300; la acel moment, trafic alternativ era în vigoare pe sectorul afectat.",
+        "La momentul emiterii alertei, sursa oficială indica trafic alternativ pe DN 7, în sectorul descris în informarea INFOTRAFIC.",
+        "Context și surse: https://valceaclar.ro/stiri/alert-1cd2159b942ec2b672f7/"
+      ],
+      "hashtags_default": false,
+      "generic_engagement_prompt_forbidden": true,
+      "fake_urgency_forbidden": true,
+      "max_internal_chars_per_post": 470,
+      "product_fingerprint_sha256": "6230da7568cc0cdbf5a295e6c6c69b663cb58877a7bc0584b5835f9ffe376e75"
     },
     {
       "id": "threads-story-alert-fdfdb85a579432f385f7",
       "story_id": "alert-fdfdb85a579432f385f7",
-      "status": "outbox_ready",
-      "publication_mode": "durable_outbox_only",
-      "native_format": "thread",
-      "thread": [
-        "DN 7, 17 august 2026: INFOTRAFIC a semnalat trafic alternativ",
-        "Alerta oficială emisă la ora 10:15 vizează în zona localității Drăgănești, la kilometrul 214 și consemnează situația de trafic de pe sectorul indicat.",
-        "La momentul emiterii alertei, sursa oficială indica trafic alternativ pe DN 7, în sectorul descris în informarea INFOTRAFIC.",
-        "Surse și context complet: https://valceaclar.ro/stiri/alert-fdfdb85a579432f385f7/"
-      ],
+      "publication_mode": "native_api_fail_closed",
       "canonical_url": "https://valceaclar.ro/stiri/alert-fdfdb85a579432f385f7/",
       "source_preserving": true,
-      "edition_gate": false,
+      "conversation_native": true,
+      "verbatim_cross_platform_reuse_allowed": false,
+      "direct_publication_enabled": true,
+      "direct_publication_blocker": null,
+      "generation_mode": "threads_editorial_v1",
       "identity": {
         "brand_source": "valcea-clar/social/social_brand_system.json",
         "profile_source": "valcea-clar/social/profile_identity_system.json",
@@ -187,7 +194,12 @@
           "generic_engagement_prompt_forbidden": true,
           "media_only_when_it_adds_evidence": true
         }
-      }
+      },
+      "edition_gate": false,
+      "status": "hold",
+      "native_format": "text",
+      "format_family": "threads_hold",
+      "hold_reason": "threads_transient_service_update_expired"
     }
   ],
   "publication_model": "continuous_story_first",
