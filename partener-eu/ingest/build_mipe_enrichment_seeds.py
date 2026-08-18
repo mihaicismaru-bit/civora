@@ -1,16 +1,11 @@
 #!/usr/bin/env python3
-"""Derive targeted MIPE follow-up crawl seeds from incomplete canonical dossiers.
-
-The script does not access the network. It mines already captured official MIPE
-page/document text for canonical guide/call URLs that are not yet in the local
-corpus, then orders them using the dossier enrichment queue.
-"""
+"""Derive targeted MIPE follow-up seeds from incomplete canonical dossiers."""
 from __future__ import annotations
 
 import json
 import re
 from pathlib import Path
-from typing import Any
+from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[2]
 QUEUE = ROOT / "partener-eu/ingest/state/dossier_enrichment_queue.json"
@@ -20,6 +15,11 @@ OUT = ROOT / "partener-eu/ingest/state/mipe_enrichment_seeds.json"
 
 URL_RE = re.compile(r"https://(?:www\.)?mfe\.gov\.ro/[^\s\"'<>\]\[)]+", re.I)
 DOC_RE = re.compile(r"\.(?:pdf|docx?|xlsx?|zip|rar|7z)(?:\?.*)?$", re.I)
+BARE_PATHS = {
+    "/ghiduri", "/ghiduri/", "/ghiduri-", "/ghiduri_",
+    "/ghiduri-ms", "/ghiduri-ms/", "/ghiduri_peos", "/ghiduri_peos/",
+    "/ghiduri_pids", "/ghiduri_pids/",
+}
 
 
 def clean_url(value: str) -> str:
@@ -27,8 +27,13 @@ def clean_url(value: str) -> str:
 
 
 def useful(url: str) -> bool:
+    parsed = urlparse(url)
+    host = (parsed.hostname or "").lower().removeprefix("www.")
+    path = (parsed.path or "/").lower()
     low = url.lower()
-    if DOC_RE.search(low):
+    if host != "mfe.gov.ro" or DOC_RE.search(low):
+        return False
+    if path in BARE_PATHS or len(path.strip("/")) < 12:
         return False
     return any(token in low for token in (
         "/ghiduri_", "/ghiduri-", "/ghiduri/", "/ghiduri-ms/", "/pdds/",
@@ -89,6 +94,7 @@ def main() -> int:
             "officialHostOnly": True,
             "documentsAreFetchedFromParentPages": True,
             "unseenUrlsFirst": True,
+            "rejectMalformedSeeds": True,
             "failClosed": True,
         },
         "summary": {
