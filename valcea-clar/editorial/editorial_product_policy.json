@@ -1,0 +1,134 @@
+{
+  "schema_version": "1.0",
+  "instance_id": "valcea",
+  "product": "VÂLCEA CLAR editorial product policy",
+  "execution_owner": "CIVORA_SITE_ENGINE",
+  "publication_model": "continuous_publication_multi_product",
+  "principles": {
+    "publication_is_not_breaking_news_only": true,
+    "fact_date_and_publication_date_are_distinct": true,
+    "historical_verified_facts_may_generate_new_editorial_products": true,
+    "age_of_fact_is_not_global_rejection_reason": true,
+    "old_fact_must_be_dated_explicitly": true,
+    "current_status_claim_requires_current_evidence": true,
+    "source_signal_is_not_fact": true,
+    "monitor_is_not_story": true,
+    "opportunity_is_not_story": true,
+    "fact_kernel_required_for_automatic_reader_copy": true,
+    "reputational_claims_fail_closed": true,
+    "no_fake_urgency": true
+  },
+  "lanes": {
+    "breaking": {
+      "purpose": "Rapid event-driven publication for fresh material changes.",
+      "recency_affects_priority": true,
+      "recency_is_eligibility_gate": true,
+      "products": ["NEWS", "SERVICE_ALERT"]
+    },
+    "knowledge": {
+      "purpose": "Publish useful journalism from verified archives, registers and document chains even when the underlying facts are weeks, months or years old.",
+      "recency_affects_priority": false,
+      "recency_is_eligibility_gate": false,
+      "products": ["EXPLAINER", "TIMELINE", "LIST_INDEX", "MONEY_TRACE", "DECISION_DIGEST"]
+    },
+    "monitor": {
+      "purpose": "Revisit previously documented projects, permits, promises and decisions to establish present status.",
+      "recency_affects_priority": false,
+      "recency_is_eligibility_gate": false,
+      "products": ["STATUS_CHECK", "WHAT_HAPPENED_NEXT", "PROJECT_TRACKER", "PERMIT_FOLLOWUP"]
+    },
+    "service": {
+      "purpose": "Reader-useful inventories, calendars and current lists from structured verified registers.",
+      "recency_affects_priority": true,
+      "recency_is_eligibility_gate": false,
+      "products": ["ACTIVE_PERMITS_INDEX", "JOBS_ROUNDUP", "PUBLIC_DECISIONS_INDEX", "UPCOMING_EVENTS"]
+    }
+  },
+  "product_contracts": {
+    "EXPLAINER": {
+      "writer_format": "explainer",
+      "minimum_verified_claims": 2,
+      "current_status_required": false,
+      "automatic_publication_allowed_after_normal_story_gate": true
+    },
+    "TIMELINE": {
+      "writer_format": "explainer",
+      "minimum_verified_claims": 3,
+      "current_status_required": false,
+      "automatic_publication_allowed_after_normal_story_gate": true
+    },
+    "LIST_INDEX": {
+      "writer_format": "service_news",
+      "minimum_verified_claims": 2,
+      "current_status_required": false,
+      "automatic_publication_allowed_after_normal_story_gate": true
+    },
+    "DECISION_DIGEST": {
+      "writer_format": "explainer",
+      "minimum_verified_claims": 2,
+      "current_status_required": false,
+      "automatic_publication_allowed_after_normal_story_gate": true
+    },
+    "MONEY_TRACE": {
+      "writer_format": "explainer",
+      "minimum_verified_claims": 3,
+      "current_status_required": true,
+      "automatic_publication_allowed_after_normal_story_gate": true
+    },
+    "STATUS_CHECK": {
+      "writer_format": "explainer",
+      "minimum_verified_claims": 2,
+      "current_status_required": true,
+      "automatic_publication_allowed_after_normal_story_gate": true
+    },
+    "WHAT_HAPPENED_NEXT": {
+      "writer_format": "explainer",
+      "minimum_verified_claims": 2,
+      "current_status_required": true,
+      "automatic_publication_allowed_after_normal_story_gate": true
+    },
+    "PROJECT_TRACKER": {
+      "writer_format": "service_news",
+      "minimum_verified_claims": 2,
+      "current_status_required": true,
+      "automatic_publication_allowed_after_normal_story_gate": true
+    },
+    "PERMIT_FOLLOWUP": {
+      "writer_format": "explainer",
+      "minimum_verified_claims": 2,
+      "current_status_required": true,
+      "automatic_publication_allowed_after_normal_story_gate": true
+    },
+    "ACTIVE_PERMITS_INDEX": {
+      "writer_format": "service_news",
+      "minimum_verified_claims": 2,
+      "current_status_required": true,
+      "automatic_publication_allowed_after_normal_story_gate": true
+    }
+  },
+  "ranking": {
+    "base_monitor_priority_weight": 1.0,
+    "verified_archive_reuse_bonus": 8,
+    "unresolved_lead_bonus": 6,
+    "changed_primary_source_bonus": 12,
+    "reader_utility_bonus": 10,
+    "public_money_bonus": 12,
+    "infrastructure_bonus": 9,
+    "real_estate_bonus": 9,
+    "age_can_create_followup_opportunity": true
+  },
+  "examples": [
+    {
+      "scenario": "Consiliul Local a adoptat decizii acum 1-2 luni",
+      "allowed_products": ["DECISION_DIGEST", "EXPLAINER", "MONEY_TRACE", "WHAT_HAPPENED_NEXT"]
+    },
+    {
+      "scenario": "Autorizație de construire emisă acum un an",
+      "allowed_products": ["PERMIT_FOLLOWUP", "STATUS_CHECK", "WHAT_HAPPENED_NEXT"]
+    },
+    {
+      "scenario": "Registru de autorizații încă în termen",
+      "allowed_products": ["ACTIVE_PERMITS_INDEX", "PROJECT_TRACKER", "LIST_INDEX"]
+    }
+  ]
+}
