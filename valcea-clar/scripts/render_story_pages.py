@@ -4,6 +4,12 @@
 A story page is created only for items that pass the same full-story gate used
 by the live newsroom. Morning/evening recap documents remain compatibility
 snapshots and are never the canonical URL of an individual story.
+
+The recap JSON intentionally carries a compact public projection and does not
+embed the internal Fact Kernel. Therefore canonical story rendering resolves
+the decision-approved IDs back to the full Editorial Writer products before
+re-running `story_ready`. This preserves independent integrity verification
+without leaking the Fact Kernel into public edition payloads.
 """
 from __future__ import annotations
 
@@ -20,6 +26,7 @@ from article_structured_data import build_newsarticle, reconcile_publication_dat
 from indexing_assets import write_indexing_assets
 from related_stories import rank_related
 from verified_story_media import resolve_verified_story_image
+import generate_edition
 from newsroom_decide import story_ready
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -209,19 +216,43 @@ def link_frontpage(stories: list[dict]) -> None:
     path.write_text(text, encoding="utf-8")
 
 
+def decision_approved_full_stories(decision: dict, recap_doc: dict) -> list[dict]:
+    """Resolve decision-approved IDs to full Writer products for integrity recheck.
+
+    `generate_edition.compact_item()` intentionally omits the internal Fact
+    Kernel. Re-running `story_ready()` on that compact projection would therefore
+    reject every new FACT_KERNEL_COMPOSED story even though it already passed
+    Writer + Integrity upstream. Rehydrate from the canonical in-memory Writer
+    registry, never by exposing the kernel in public recap JSON.
+    """
+    allowed_order = [str(value) for value in decision.get("publishable_story_ids") or [] if str(value)]
+    if allowed_order:
+        registry, _ = generate_edition.merged_registry()
+        full_by_id = {
+            str(item.get("id") or ""): item
+            for item in registry.get("facts") or []
+            if isinstance(item, dict) and str(item.get("id") or "")
+        }
+        stories: list[dict] = []
+        for story_id in allowed_order:
+            item = full_by_id.get(story_id)
+            if item is not None and story_ready(item)[0]:
+                stories.append(item)
+        return stories
+
+    # Backward-compatible fallback for historical/manual rendering when no
+    # newsroom decision exists. New continuous-story publication uses the path
+    # above and therefore always gets full products.
+    return [item for item in recap_doc.get("items", []) if isinstance(item, dict) and story_ready(item)[0]]
+
+
 def main() -> int:
     pointer = load(POINTER)
     doc = load(ROOT / pointer["json_source"])
     decision = load_optional(DECISION)
     visual_registry = load_optional(STORY_VISUALS)
     asset_manifest = load_optional(SOCIAL_ASSETS)
-    allowed_ids = set(decision.get("publishable_story_ids") or [])
-    stories = []
-    for item in doc.get("items", []):
-        if allowed_ids and item.get("id") not in allowed_ids:
-            continue
-        if story_ready(item)[0]:
-            stories.append(item)
+    stories = decision_approved_full_stories(decision, doc)
 
     story_root = RUNTIME / "stiri"
     story_root.mkdir(parents=True, exist_ok=True)
@@ -280,10 +311,12 @@ def main() -> int:
 
     (story_root / "manifest.json").write_text(
         json.dumps({
-            "schema_version": "1.4",
+            "schema_version": "1.5",
             "publication_model": "continuous_story_first",
             "homepage_presentation": "live_newsroom",
             "edition_is_canonical_story_url": False,
+            "story_materialization_source": "decision_approved_full_editorial_writer_products",
+            "public_recap_embeds_fact_kernel": False,
             "structured_data": {
                 "enabled": True,
                 "type": "NewsArticle",
