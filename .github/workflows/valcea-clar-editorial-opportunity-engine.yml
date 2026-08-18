@@ -15,6 +15,7 @@ on:
       - 'valcea-clar/editorial/fact_kernel_registry.json'
       - 'valcea-clar/editorial/facts_registry.json'
       - 'valcea-clar/scripts/editorial_opportunity_engine.py'
+      - 'valcea-clar/scripts/performing_arts_opportunity_adapter.py'
       - '.github/workflows/valcea-clar-editorial-opportunity-engine.yml'
 
 permissions:
@@ -38,12 +39,18 @@ jobs:
 
       - name: Validate opportunity contracts
         run: |
-          python -m py_compile valcea-clar/scripts/editorial_opportunity_engine.py
+          python -m py_compile \
+            valcea-clar/scripts/editorial_opportunity_engine.py \
+            valcea-clar/scripts/performing_arts_opportunity_adapter.py
           python valcea-clar/scripts/editorial_opportunity_engine.py --self-test
           python valcea-clar/scripts/editorial_opportunity_engine.py --check
+          python valcea-clar/scripts/performing_arts_opportunity_adapter.py --self-test
 
       - name: Materialize ranked editorial opportunity queue
-        run: python valcea-clar/scripts/editorial_opportunity_engine.py
+        run: |
+          python valcea-clar/scripts/editorial_opportunity_engine.py
+          python valcea-clar/scripts/performing_arts_opportunity_adapter.py
+          python valcea-clar/scripts/performing_arts_opportunity_adapter.py --check
 
       - name: Persist opportunity queue conflict-safe
         shell: bash
