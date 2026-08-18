@@ -4,6 +4,11 @@
 The script enriches the public live feed and canonical static story pages. It
 never creates an artist identity; it only links profiles already admitted by
 Artist Intelligence from a verified festival lineup or performing-arts programme.
+
+UI contract: when a verified profile name is mentioned in the story body, the
+visible mention is linked directly to the canonical /artisti/<slug>/ profile.
+The complete artist/creator index remains visible below the body as a fallback
+and discovery surface.
 """
 from __future__ import annotations
 
@@ -19,6 +24,8 @@ FEED = RUNTIME / "live-feed.json"
 STORY_MANIFEST = RUNTIME / "stiri" / "manifest.json"
 MARKER_START = '<section class="artist-profiles" data-artist-intelligence="verified">'
 MARKER_END = '</section><!-- /artist-profiles -->'
+ARTICLE_START = '<article>'
+ARTICLE_END = '</article>'
 
 
 def load(path: Path) -> dict:
@@ -77,19 +84,56 @@ def section_html(rows: list[dict]) -> str:
     )
 
 
-def replace_static_section(path: Path, rows: list[dict]) -> bool:
+def inline_link_text_nodes(fragment: str, rows: list[dict]) -> str:
+    """Link exact visible profile names without touching existing HTML tags."""
+    candidates = [row for row in rows if str(row.get("name") or "").strip() and str(row.get("path") or "").startswith("/artisti/")]
+    if not candidates:
+        return fragment
+
+    # Longest first avoids linking a shorter name inside a longer act/person name.
+    candidates.sort(key=lambda row: (-len(str(row["name"])), str(row["name"]).casefold()))
+    by_escaped_name = {esc(row["name"]): row for row in candidates}
+    pattern = re.compile("|".join(re.escape(name) for name in by_escaped_name), re.UNICODE)
+
+    parts = re.split(r"(<[^>]+>)", fragment)
+    for index in range(0, len(parts), 2):
+        text = parts[index]
+        if not text:
+            continue
+
+        def replace(match: re.Match[str]) -> str:
+            token = match.group(0)
+            row = by_escaped_name[token]
+            return f'<a class="artist-inline-link" href="{esc(row["path"])}" data-artist-profile="{esc(row["id"])}">{token}</a>'
+
+        parts[index] = pattern.sub(replace, text)
+    return "".join(parts)
+
+
+def replace_static_story(path: Path, rows: list[dict]) -> bool:
     if not path.is_file():
         return False
-    text = path.read_text(encoding="utf-8")
-    pattern = re.compile(re.escape(MARKER_START) + r".*?" + re.escape(MARKER_END), re.S)
-    text = pattern.sub("", text)
+    before = path.read_text(encoding="utf-8")
+    text = before
+
+    # Remove the generated profile block before modifying the body, so repeated
+    # runs are deterministic and never wrap links inside links.
+    block_pattern = re.compile(re.escape(MARKER_START) + r".*?" + re.escape(MARKER_END), re.S)
+    text = block_pattern.sub("", text)
+
+    article_match = re.search(re.escape(ARTICLE_START) + r"(.*?)" + re.escape(ARTICLE_END), text, re.S)
+    if article_match and rows:
+        linked_body = inline_link_text_nodes(article_match.group(1), rows)
+        replacement = ARTICLE_START + linked_body + ARTICLE_END
+        text = text[:article_match.start()] + replacement + text[article_match.end():]
+
     block = section_html(rows)
     if block:
         anchor = '<section class="sources">'
         if anchor not in text:
             raise RuntimeError(f"story source anchor missing: {path}")
         text = text.replace(anchor, block + "\n" + anchor, 1)
-    before = path.read_text(encoding="utf-8")
+
     if text == before:
         return False
     path.write_text(text, encoding="utf-8")
@@ -120,13 +164,15 @@ def main() -> int:
         if previous != rows:
             touched_feed += 1
         static_path = RUNTIME / "stiri" / story_id / "index.html"
-        if replace_static_section(static_path, rows):
+        if replace_static_story(static_path, rows):
             static_changed += 1
 
     feed.setdefault("extensions", {})["artist_intelligence"] = {
         "enabled": True,
         "profile_directory": "/artisti/",
         "story_links_bidirectional": True,
+        "inline_story_mentions_linked": True,
+        "complete_story_profile_index": True,
         "verified_sources": ["festival_lineup", "performing_arts_programme"],
         "unverified_external_identity_links": False,
     }
@@ -140,10 +186,12 @@ def main() -> int:
             if profiles:
                 row["artist_profile_ids"] = [profile["id"] for profile in profiles]
                 row["artist_profile_paths"] = [profile["path"] for profile in profiles]
+                row["artist_inline_links"] = True
             else:
                 row.pop("artist_profile_ids", None)
                 row.pop("artist_profile_paths", None)
-        manifest.setdefault("cross_linking", {})["artist_intelligence"] = "verified_programme_profiles_only"
+                row.pop("artist_inline_links", None)
+        manifest.setdefault("cross_linking", {})["artist_intelligence"] = "verified_programme_profiles_inline_and_index"
         STORY_MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     print(json.dumps({
@@ -152,6 +200,7 @@ def main() -> int:
         "linked_profiles": linked_profiles,
         "feed_stories_changed": touched_feed,
         "static_story_pages_changed": static_changed,
+        "inline_story_mentions": True,
     }, ensure_ascii=False))
     return 0
 
