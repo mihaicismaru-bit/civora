@@ -13,6 +13,8 @@ on:
       - 'valcea-clar/scripts/council_docmanager_document_diagnostic.py'
       - 'valcea-clar/scripts/promote_fact_kernels.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
+      - 'valcea-clar/scripts/gambling_dossier_enricher.py'
+      - 'valcea-clar/editorial/gambling_ramnicu_2026_dossier.json'
       - 'valcea-clar/scripts/scm_program_fact_kernel.py'
       - 'valcea-clar/scripts/scm_program_structure_diagnostic.py'
       - 'valcea-clar/editorial/editorial_manual.json'
@@ -29,6 +31,8 @@ on:
       - 'valcea-clar/scripts/council_docmanager_document_diagnostic.py'
       - 'valcea-clar/scripts/promote_fact_kernels.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
+      - 'valcea-clar/scripts/gambling_dossier_enricher.py'
+      - 'valcea-clar/editorial/gambling_ramnicu_2026_dossier.json'
       - 'valcea-clar/scripts/scm_program_fact_kernel.py'
       - 'valcea-clar/scripts/scm_program_structure_diagnostic.py'
       - 'valcea-clar/editorial/editorial_manual.json'
@@ -67,6 +71,7 @@ jobs:
             valcea-clar/scripts/council_docmanager_document_diagnostic.py \
             valcea-clar/scripts/promote_fact_kernels.py \
             valcea-clar/scripts/council_watch_rm_valcea.py \
+            valcea-clar/scripts/gambling_dossier_enricher.py \
             valcea-clar/scripts/scm_program_fact_kernel.py \
             valcea-clar/scripts/scm_program_structure_diagnostic.py \
             local-news-os/core/indexing_assets.py
@@ -80,6 +85,7 @@ jobs:
           python valcea-clar/scripts/council_docmanager_diagnostic.py --self-test
           python valcea-clar/scripts/council_docmanager_document_diagnostic.py --self-test
           python valcea-clar/scripts/promote_fact_kernels.py --self-test
+          python valcea-clar/scripts/gambling_dossier_enricher.py --self-test
           python valcea-clar/scripts/scm_program_fact_kernel.py --self-test
           python valcea-clar/scripts/scm_program_structure_diagnostic.py --self-test
 
@@ -118,6 +124,12 @@ jobs:
               f.write(f'changed={"true" if count else "false"}\n')
               f.write(f'count={count}\n')
           PY
+
+      - name: Enrich verified gambling explainer from durable dossier
+        if: github.event_name != 'pull_request'
+        run: |
+          python valcea-clar/scripts/gambling_dossier_enricher.py
+          python valcea-clar/scripts/gambling_dossier_enricher.py --check
 
       - name: Capture SCM live markup structure
         if: github.event_name != 'pull_request'
