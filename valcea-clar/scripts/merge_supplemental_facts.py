@@ -10,7 +10,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = ROOT.parent
 FACTS = ROOT / "editorial" / "facts_registry.json"
-SUPPLEMENT = ROOT / "editorial" / "supplemental_facts_registry.json"
+SUPPLEMENT_INPUTS = (
+    ROOT / "editorial" / "supplemental_facts_registry.json",
+    ROOT / "editorial" / "festival_dossiers_2026.json",
+)
 CORE = REPO_ROOT / "local-news-os" / "core"
 if str(CORE) not in sys.path:
     sys.path.insert(0, str(CORE))
@@ -22,17 +25,17 @@ def load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def validate_supplement(document: dict) -> list[dict]:
+def validate_supplement(document: dict, *, source: str) -> list[dict]:
     rows = document.get("facts") or []
-    if not isinstance(rows, list) or not rows:
-        raise ValueError("supplemental facts must be a non-empty list")
+    if not isinstance(rows, list):
+        raise ValueError(f"supplemental facts must be a list: {source}")
     seen: set[str] = set()
     for item in rows:
         if not isinstance(item, dict):
-            raise ValueError("supplemental story must be an object")
+            raise ValueError(f"supplemental story must be an object: {source}")
         story_id = str(item.get("id") or "").strip()
         if not story_id or story_id in seen:
-            raise ValueError(f"invalid or duplicate story id: {story_id!r}")
+            raise ValueError(f"invalid or duplicate story id in {source}: {story_id!r}")
         seen.add(story_id)
         if item.get("status") != "verified":
             raise ValueError(f"supplemental story must be verified: {story_id}")
@@ -48,6 +51,19 @@ def validate_supplement(document: dict) -> list[dict]:
         if violations:
             raise ValueError(f"durable temporal language violation in {story_id}: {violations}")
     return rows
+
+
+def load_all_supplemental() -> list[dict]:
+    combined: dict[str, dict] = {}
+    for path in SUPPLEMENT_INPUTS:
+        if not path.is_file():
+            continue
+        rows = validate_supplement(load(path), source=str(path.relative_to(ROOT)))
+        for row in rows:
+            combined[str(row["id"])] = row
+    if not combined:
+        raise ValueError("no supplemental stories available")
+    return list(combined.values())
 
 
 def merge(base: dict, supplemental_rows: list[dict]) -> tuple[dict, int, int]:
@@ -77,7 +93,7 @@ def main() -> int:
     args = parser.parse_args()
 
     base = load(FACTS)
-    supplemental_rows = validate_supplement(load(SUPPLEMENT))
+    supplemental_rows = load_all_supplemental()
     output, replaced, appended = merge(base, supplemental_rows)
     print(json.dumps({
         "status": "PASS",
