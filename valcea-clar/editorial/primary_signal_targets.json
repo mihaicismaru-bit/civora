@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "instance_id": "valcea",
+  "product": "VÂLCEA CLAR dedicated primary signal verification targets",
+  "publication_authority": "NONE",
+  "auto_publication": false,
+  "sources": [
+    {
+      "id": "apavil-angajari",
+      "publisher": "APAVIL S.A. — Anunțuri angajare",
+      "url": "https://apavil.ro/?page_id=7981",
+      "tier": "T1",
+      "section": "ECONOMIE",
+      "status": "PRIMARY_VERIFICATION_ONLY",
+      "path_hints": ["angaj", "concurs", "posturi", "page_id=7981"],
+      "purpose": "Verify APAVIL recruitment signals against the operator's official hiring surface."
+    },
+    {
+      "id": "cas-valcea-official",
+      "publisher": "Casa de Asigurări de Sănătate Vâlcea",
+      "url": "https://cas.cnas.ro/casvl/",
+      "tier": "T1",
+      "section": "SĂNĂTATE",
+      "status": "PRIMARY_VERIFICATION_ONLY",
+      "path_hints": ["casvl", "medicamente", "farmac", "asigurat"],
+      "purpose": "Verify health-insurance and compensated-medicine signals against the official county insurance surface."
+    }
+  ]
+}
