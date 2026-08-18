@@ -46,21 +46,22 @@ jobs:
         run: |
           python -m py_compile \
             valcea-clar/scripts/public_ux_reset.py \
+            valcea-clar/scripts/public_ux_currentness.py \
             valcea-clar/scripts/public_ux_story_integrity.py \
             valcea-clar/scripts/public_ux_manifest.py \
             valcea-clar/scripts/public_ux_overlay.py \
             valcea-clar/scripts/public_ux_legal.py \
             valcea-clar/scripts/public_ux_export_contract.py
-          python valcea-clar/scripts/public_ux_reset.py --self-test
+          python valcea-clar/scripts/public_ux_currentness.py --self-test
           python valcea-clar/scripts/public_ux_story_integrity.py --self-test
 
       - name: Build canonical reader presentation
         run: |
           set -euo pipefail
-          python valcea-clar/scripts/public_ux_reset.py
+          python valcea-clar/scripts/public_ux_currentness.py
           python valcea-clar/scripts/public_ux_story_integrity.py
           python valcea-clar/scripts/public_ux_manifest.py
-          python valcea-clar/scripts/public_ux_reset.py --check
+          python valcea-clar/scripts/public_ux_currentness.py --check
           python valcea-clar/scripts/public_ux_story_integrity.py --check
           python valcea-clar/scripts/public_ux_manifest.py --check
 
@@ -125,12 +126,12 @@ jobs:
             git reset --hard origin/main
             git clean -fd
 
-            python valcea-clar/scripts/public_ux_reset.py --self-test
+            python valcea-clar/scripts/public_ux_currentness.py --self-test
             python valcea-clar/scripts/public_ux_story_integrity.py --self-test
-            python valcea-clar/scripts/public_ux_reset.py
+            python valcea-clar/scripts/public_ux_currentness.py
             python valcea-clar/scripts/public_ux_story_integrity.py
             python valcea-clar/scripts/public_ux_manifest.py
-            python valcea-clar/scripts/public_ux_reset.py --check
+            python valcea-clar/scripts/public_ux_currentness.py --check
             python valcea-clar/scripts/public_ux_story_integrity.py --check
             python valcea-clar/scripts/public_ux_manifest.py --check
             python valcea-clar/scripts/smoke_web.py
