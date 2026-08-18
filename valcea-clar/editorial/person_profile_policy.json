@@ -1,0 +1,178 @@
+{
+  "schema_version": "1.0",
+  "product": "VÂLCEA CLAR People Intelligence",
+  "public_route_root": "/oameni/",
+  "purpose": "Construiește în timp profiluri verificabile pentru personalități publice, politicieni, demnitari, funcționari publici relevanți, organizatori, influenceri și alte persoane cu relevanță publică în Vâlcea.",
+  "profile_layers": [
+    "AUTO_PROFILE",
+    "VERIFIED_ENRICHMENT",
+    "INVESTIGATION_DOSSIER",
+    "MANUAL_OVERRIDE"
+  ],
+  "identity_policy": {
+    "ambiguous_identity_fail_closed": true,
+    "same_name_is_not_same_person": true,
+    "minimum_resolution_status_for_public_profile": "RESOLVED",
+    "allowed_disambiguators": [
+      "public_office",
+      "organization",
+      "locality",
+      "public_birth_year_or_date",
+      "verified_official_profile",
+      "verified_social_identity",
+      "election_identity"
+    ],
+    "private_address_forbidden": true,
+    "personal_identifiers_forbidden": [
+      "CNP",
+      "CI_SERIES",
+      "CI_NUMBER",
+      "PRIVATE_PHONE",
+      "PRIVATE_EMAIL",
+      "HOME_ADDRESS"
+    ]
+  },
+  "public_profile_sections": [
+    "summary",
+    "current_and_historical_roles",
+    "timeline",
+    "election_history",
+    "public_companies_and_organizations",
+    "publicly_documented_relationships",
+    "court_and_legal_history",
+    "public_statements_and_positions",
+    "investigations_and_accountability",
+    "source_history"
+  ],
+  "legal_status_gate": {
+    "enabled": true,
+    "case_existence_never_implies_guilt": true,
+    "criminal_case_roles_must_be_explicit": true,
+    "civil_case_roles_must_be_explicit": true,
+    "outcome_must_not_be_inferred": true,
+    "imprisonment_claim_requires_authoritative_evidence": true,
+    "imprisonment_claim_requires_final_legal_basis_when_applicable": true,
+    "allowed_status_vocabulary": [
+      "PLAINTIFF",
+      "DEFENDANT_CIVIL",
+      "PETITIONER",
+      "RESPONDENT",
+      "SUSPECT",
+      "DEFENDANT_CRIMINAL",
+      "INDICTED",
+      "CONVICTED_NOT_FINAL",
+      "CONVICTED_FINAL",
+      "ACQUITTED",
+      "CASE_DISMISSED",
+      "PROCEEDINGS_TERMINATED",
+      "IMPRISONMENT_SERVED_VERIFIED",
+      "UNKNOWN"
+    ],
+    "unknown_or_ambiguous_status_publication": "HOLD"
+  },
+  "relationship_gate": {
+    "publish_only_if_publicly_documented": true,
+    "require_public_interest_relevance": true,
+    "private_person_details_minimized": true,
+    "rumor_or_social_inference_forbidden": true
+  },
+  "economic_interest_gate": {
+    "company_relationship_must_state_role_and_dates_when_known": true,
+    "beneficial_owner_must_not_be_inferred": true,
+    "shareholding_must_not_be_inferred_from_management_role": true,
+    "historical_company_role_must_not_be_presented_as_current": true
+  },
+  "private_evidence": {
+    "allowed_for_editorial_research": true,
+    "repository_commit_forbidden": true,
+    "public_source_projection_forbidden": true,
+    "raw_content_public_projection_forbidden": true,
+    "private_evidence_only_claim_auto_publish": false,
+    "private_evidence_only_claim_status": "NEEDS_PUBLIC_CORROBORATION_OR_EDITOR_APPROVAL",
+    "public_artifact_may_retain_only": [
+      "opaque_evidence_id",
+      "sha256",
+      "evidence_class",
+      "verification_state"
+    ],
+    "supported_classes": [
+      "ONRC_EXTRACT",
+      "PAID_DATABASE_EXPORT",
+      "EDITORIAL_DOCUMENT",
+      "USER_SUPPLIED_RESEARCH"
+    ]
+  },
+  "manual_control": {
+    "manual_override_applied_last": true,
+    "manual_suppression_survives_regeneration": true,
+    "manual_corrections_require_audit_note": true,
+    "autonomous_regeneration_must_not_erase_editorial_decisions": true
+  },
+  "source_priorities": [
+    {
+      "tier": "T1",
+      "class": "official_court",
+      "domains": ["portal.just.ro"],
+      "uses": ["case_identity", "parties", "procedural_stage", "hearings"]
+    },
+    {
+      "tier": "T1",
+      "class": "integrity_and_declarations",
+      "domains": ["integritate.eu", "old-declaratii.integritate.eu"],
+      "uses": ["historical_asset_declarations", "historical_interest_declarations", "integrity_findings"]
+    },
+    {
+      "tier": "T1",
+      "class": "elections",
+      "domains": ["roaep.ro", "prezenta.roaep.ro", "bec.ro"],
+      "uses": ["candidacies", "vote_results", "electoral_history"]
+    },
+    {
+      "tier": "T1",
+      "class": "official_gazette",
+      "domains": ["monitoruloficial.ro"],
+      "uses": ["appointments", "dismissals", "official_acts", "historical_legal_records"]
+    },
+    {
+      "tier": "T1",
+      "class": "public_authority",
+      "domains": ["gov.ro", "senat.ro", "cdep.ro", "cjvalcea.ro", "primariavl.ro", "primariabrezoi.ro"],
+      "uses": ["roles", "CVs", "decisions", "appointments", "official_biographies"]
+    },
+    {
+      "tier": "T2",
+      "class": "reputable_press_and_archives",
+      "domains": [],
+      "uses": ["historical_context", "interviews", "contemporaneous_reporting"],
+      "sensitive_claims_require_stronger_corroboration": true
+    },
+    {
+      "tier": "T3",
+      "class": "self_published_or_social",
+      "domains": [],
+      "uses": ["attributed_statements", "self_description", "public_activity"],
+      "cannot_alone_establish_sensitive_adverse_fact": true
+    }
+  ],
+  "historical_discovery": {
+    "enabled": true,
+    "oldest_first_backfill_after_identity_resolution": true,
+    "preferred_archival_targets": [
+      "official_authority_archives",
+      "election_archives",
+      "court_history",
+      "historical_declarations_2008_2025_when_legally_public",
+      "official_gazette_2000_present",
+      "reputable_local_and_national_press_archives"
+    ],
+    "never_rewrite_old_role_as_current": true,
+    "timeline_requires_absolute_dates_or_date_ranges": true
+  },
+  "autonomy": {
+    "profiles_are_incremental": true,
+    "new_evidence_merges_into_existing_identity": true,
+    "sensitive_claims_fail_closed": true,
+    "investigation_leads_are_private_by_default": true,
+    "public_profile_can_be_minimal_while_research_continues": true
+  }
+}
