@@ -10,6 +10,10 @@ in the link label or in a dated accordion/button title while the linked primary
 document omits machine-readable date metadata. This adapter may recover that
 explicit date only from strict, unambiguous official-listing text and records the
 provenance so the strict freshness gate remains fail-closed.
+
+Title/date-only listing evidence is held to an additional identity guard: generic
+procedural wording such as "scoaterea la concurs" cannot by itself corroborate a
+different official item from the same listing.
 """
 from __future__ import annotations
 
@@ -40,6 +44,27 @@ LEGACY_BUILD_TARGET_CORPUS = base.build_target_corpus
 LEGACY_VERIFY_TASK = base.verify_task
 LISTING_DATE_DMY = re.compile(r"\((\d{1,2})[./](\d{1,2})[./](\d{4})\)\s*$")
 LISTING_DATE_ISO = re.compile(r"\((\d{4})-(\d{2})-(\d{2})\)\s*$")
+LISTING_TITLE_ONLY_SCOPE = "official_listing_item_title_date_only"
+LISTING_IDENTITY_BOILERPLATE = {
+    "anunt",
+    "angajare",
+    "angajari",
+    "cadrul",
+    "concurs",
+    "ocuparea",
+    "post",
+    "postul",
+    "privind",
+    "procedura",
+    "scoaterea",
+    "selectie",
+    "serviciului",
+    "sectorului",
+    "subzona",
+    "vacant",
+    "vacanta",
+    "vacante",
+}
 
 
 class DatedListingButtonParser(html.parser.HTMLParser):
@@ -91,6 +116,31 @@ def listing_label_published_at(label: str, tz: ZoneInfo) -> datetime | None:
         return None
 
 
+def _listing_identity_tokens(value: str) -> set[str]:
+    """Return non-geographic, non-procedural tokens suitable for item identity."""
+    return strict.evidence_tokens(value) - LISTING_IDENTITY_BOILERPLATE
+
+
+def listing_title_identity_compatible(signal_title: str, listing_title: str) -> bool:
+    """Require at least one specific shared identity token for title-only evidence.
+
+    A dated listing button has no body evidence. The generic strict matcher can
+    otherwise accept a different job announcement because phrases such as
+    "scoaterea la concurs", "post" and "cadrul" overlap strongly. For this
+    evidence class we require a shared non-boilerplate token of at least seven
+    characters (for example an occupation, institution unit, project name) or
+    two shared non-boilerplate tokens with one at least six characters.
+    """
+    signal_tokens = _listing_identity_tokens(signal_title)
+    listing_tokens = _listing_identity_tokens(listing_title)
+    shared = signal_tokens & listing_tokens
+    if not shared:
+        return False
+    if any(not token.isdigit() and len(token) >= 7 for token in shared):
+        return True
+    return len(shared) >= 2 and any(not token.isdigit() and len(token) >= 6 for token in shared)
+
+
 def dated_listing_button_documents(
     article: str,
     listing_url: str,
@@ -118,7 +168,7 @@ def dated_listing_button_documents(
             "published_at_source": "official_listing_button",
             "listing_url": listing_url,
             "listing_label": title,
-            "evidence_scope": "official_listing_item_title_date_only",
+            "evidence_scope": LISTING_TITLE_ONLY_SCOPE,
             "title_tokens": sorted(base.tokens(title)),
             "body_tokens": sorted(base.tokens(title)),
             "content_sha256": digest,
@@ -193,18 +243,48 @@ def listing_item_aware_build_target_corpus(
     return corpus
 
 
+def _task_safe_corpora(
+    task: dict[str, Any],
+    corpora: dict[tuple[str, str], dict[str, Any]],
+) -> tuple[dict[tuple[str, str], dict[str, Any]], int]:
+    """Filter incompatible title/date-only listing rows before generic scoring."""
+    signal_title = str(task.get("signal_title") or "")
+    filtered: dict[tuple[str, str], dict[str, Any]] = {}
+    rejected = 0
+    for key, corpus in corpora.items():
+        clone = dict(corpus)
+        docs: list[dict[str, Any]] = []
+        for doc in corpus.get("documents") or []:
+            if not isinstance(doc, dict):
+                continue
+            if (
+                str(doc.get("evidence_scope") or "") == LISTING_TITLE_ONLY_SCOPE
+                and not listing_title_identity_compatible(signal_title, str(doc.get("title") or ""))
+            ):
+                rejected += 1
+                continue
+            docs.append(doc)
+        clone["documents"] = docs
+        filtered[key] = clone
+    return filtered, rejected
+
+
 def listing_date_aware_verify_task(
     task: dict[str, Any],
     corpora: dict[tuple[str, str], dict[str, Any]],
     tz: ZoneInfo,
 ) -> dict[str, Any]:
-    result = LEGACY_VERIFY_TASK(task, corpora, tz)
+    safe_corpora, rejected = _task_safe_corpora(task, corpora)
+    result = LEGACY_VERIFY_TASK(task, safe_corpora, tz)
+    if rejected:
+        result["listing_title_identity_rejections"] = rejected
+
     evidence = result.get("primary_evidence")
     if result.get("status") != "PRIMARY_MATCH_FOUND" or not isinstance(evidence, dict):
         return result
 
     primary_url = str(evidence.get("primary_item_url") or "")
-    for corpus in corpora.values():
+    for corpus in safe_corpora.values():
         for doc in corpus.get("documents") or []:
             if not isinstance(doc, dict) or str(doc.get("url") or "") != primary_url:
                 continue
@@ -217,6 +297,7 @@ def listing_date_aware_verify_task(
                 evidence["primary_listing_url"] = str(doc["listing_url"])
             if doc.get("evidence_scope"):
                 evidence["primary_evidence_scope"] = str(doc["evidence_scope"])
+                evidence["listing_title_identity_guard"] = True
             return result
     return result
 
@@ -261,6 +342,7 @@ def validate(instance_id: str) -> dict[str, Any]:
         "official_dated_button_evidence": True,
         "official_listing_evidence_is_title_date_only": True,
         "official_listing_label_date_must_be_explicit_terminal": True,
+        "official_listing_title_identity_guard": True,
         "title_event_overlap_required": True,
         "candidate_ranking": "LISTING_PATH_THEN_SOURCE_HINTS_THEN_NEWS_STRUCTURE",
         "registered_targets": len(registry),
@@ -280,6 +362,7 @@ def run(instance_id: str, *, write: bool) -> dict[str, Any]:
         "official_dated_button_evidence": True,
         "official_listing_evidence_is_title_date_only": True,
         "official_listing_label_date_must_be_explicit_terminal": True,
+        "official_listing_title_identity_guard": True,
         "max_publication_time_delta_hours": 36,
         "title_event_overlap_required": True,
         "instance_identity_is_not_event_evidence": True,
@@ -320,7 +403,7 @@ def self_test() -> int:
     assert len(docs) == 1, docs
     assert docs[0]["published_at"] == "2026-08-17T00:00:00+03:00"
     assert docs[0]["published_at_source"] == "official_listing_button"
-    assert docs[0]["evidence_scope"] == "official_listing_item_title_date_only"
+    assert docs[0]["evidence_scope"] == LISTING_TITLE_ONLY_SCOPE
     assert docs[0]["url"].startswith("https://example.invalid/jobs#official-listing-item-")
 
     strict.install_strict_guard("valcea")
@@ -335,6 +418,46 @@ def self_test() -> int:
         derived_doc,
         tz,
     ) is False
+
+    false_signal = (
+        "APAVIL SA – ANUNȚ privind scoaterea la concurs a unui post de "
+        "încasator-cititor în cadrul Sectorului Govora, subzona Pietrari"
+    )
+    wrong_listing = (
+        "Anunt privind scoaterea la concurs a unui post de inginer in cadrul "
+        "Serviciului Mecano-Energetic (18.08.2026)"
+    )
+    assert listing_title_identity_compatible(false_signal, wrong_listing) is False
+
+    right_listing = (
+        "Anunt privind scoaterea la concurs a unui post de incasator-cititor "
+        "in cadrul Sectorului Govora, subzona Pietrari (18.08.2026)"
+    )
+    assert listing_title_identity_compatible(false_signal, right_listing) is True
+    assert listing_title_identity_compatible(
+        "APAVIL scoate la concurs un post de inginer",
+        wrong_listing,
+    ) is True
+
+    fake_corpus = {
+        ("primary_target_id", "apavil-angajari"): {
+            "target": {"id": "apavil-angajari", "name": "APAVIL", "url": "https://example.invalid", "tier": "T1"},
+            "status": "PASS",
+            "error": None,
+            "documents": [{
+                "url": "https://example.invalid#wrong",
+                "title": wrong_listing,
+                "published_at": "2026-08-18T00:00:00+03:00",
+                "evidence_scope": LISTING_TITLE_ONLY_SCOPE,
+                "title_tokens": sorted(base.tokens(wrong_listing)),
+                "body_tokens": sorted(base.tokens(wrong_listing)),
+                "content_sha256": "0" * 64,
+            }],
+        }
+    }
+    safe, rejected = _task_safe_corpora({"signal_title": false_signal}, fake_corpus)
+    assert rejected == 1
+    assert safe[("primary_target_id", "apavil-angajari")]["documents"] == []
 
     assert routing.self_test() == 0
     assert ranked.self_test() == 0
@@ -369,6 +492,7 @@ def main() -> int:
         "strict_false_positive_guard": True,
         "official_listing_label_date_fallback": True,
         "official_dated_button_evidence": True,
+        "official_listing_title_identity_guard": True,
         "boundary_safe_signal_routing": True,
         "publication_authority": "NONE",
     }, ensure_ascii=False))
