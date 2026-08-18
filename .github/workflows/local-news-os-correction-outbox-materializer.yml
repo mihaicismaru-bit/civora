@@ -1,0 +1,57 @@
+name: LOCAL NEWS OS Correction Outbox Materializer
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/social/correction_dispatch_router.py"
+      - "local-news-os/social/test_correction_dispatch_router.py"
+      - "local-news-os/social/correction_outbox_materializer.py"
+      - "local-news-os/social/test_correction_outbox_materializer.py"
+      - "valcea-clar/social/adapter_capabilities.json"
+      - "valcea-clar/social/channel_registry.json"
+      - ".github/workflows/local-news-os-correction-outbox-materializer.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/social/correction_dispatch_router.py"
+      - "local-news-os/social/test_correction_dispatch_router.py"
+      - "local-news-os/social/correction_outbox_materializer.py"
+      - "local-news-os/social/test_correction_outbox_materializer.py"
+      - "valcea-clar/social/adapter_capabilities.json"
+      - "valcea-clar/social/channel_registry.json"
+      - ".github/workflows/local-news-os-correction-outbox-materializer.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-news-os-correction-outbox-materializer-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile correction outbox boundary
+        run: |
+          python -m py_compile \
+            local-news-os/social/correction_dispatch_router.py \
+            local-news-os/social/test_correction_dispatch_router.py \
+            local-news-os/social/correction_outbox_materializer.py \
+            local-news-os/social/test_correction_outbox_materializer.py
+          python -m json.tool valcea-clar/social/adapter_capabilities.json >/dev/null
+          python -m json.tool valcea-clar/social/channel_registry.json >/dev/null
+
+      - name: Run correction dispatch regression suite
+        run: python local-news-os/social/test_correction_dispatch_router.py
+
+      - name: Run durable correction outbox materializer acceptance
+        run: python local-news-os/social/test_correction_outbox_materializer.py
