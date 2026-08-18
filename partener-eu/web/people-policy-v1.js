@@ -43,6 +43,6 @@ function inject(){
   section.innerHTML=`<div class="peopleHead"><div><div class="eyebrow">Monitorizare decizională</div><h2>Semnale care pot schimba finanțările</h2><div class="peopleSub">Afișăm numai informații oficiale cu efect potențial concret asupra apelurilor, bugetelor, termenelor, eligibilității sau calendarului. Declarațiile generale nu intră aici.</div></div></div>${chosen.length?`<div class="peopleGrid">${chosen.map(card).join('')}</div>`:'<div class="peopleEmpty"><strong>Niciun semnal material confirmat acum.</strong><p>Nu avem astăzi un semnal oficial suficient de concret care să modifice un apel, un calendar sau o condiție urmărită. Când apare unul, îl afișăm aici împreună cu efectul posibil și sursa oficială.</p></div>'}`;
   main.appendChild(section);
 }
-let timer=null;function sync(){clearTimeout(timer);timer=setTimeout(()=>{removePromo();inject()},80)}
+let timer=null;function sync(){clearTimeout(timer);timer=setTimeout(()=>{if(isHome())inject();else removePromo()},80)}
 const app=document.querySelector('#app')||document.body;new MutationObserver(sync).observe(app,{childList:true,subtree:true});window.addEventListener('load',sync,{once:true});setTimeout(sync,220);
 })();
