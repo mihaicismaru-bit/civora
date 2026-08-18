@@ -1,6 +1,6 @@
 {
   "schema_version": "1.3",
-  "observed_at": "2026-08-19T01:56:55+03:00",
+  "observed_at": "2026-08-19T01:58:00+03:00",
   "execution_mode": "bounded_parallel",
   "max_parallel_sources": 6,
   "sources_total": 17,
@@ -24,9 +24,8 @@
     },
     {
       "source_id": "prefectura-valcea",
-      "listing_ok": true,
-      "links_examined": 4,
-      "article_failures": 0,
+      "listing_ok": false,
+      "error": "HTTPError: HTTP Error 500: Internal Server Error",
       "facts": 0
     },
     {
@@ -59,8 +58,9 @@
     },
     {
       "source_id": "ajofm-valcea-comunicate",
-      "listing_ok": false,
-      "error": "URLError: <urlopen error timed out>",
+      "listing_ok": true,
+      "links_examined": 12,
+      "article_failures": 0,
       "facts": 0
     },
     {
