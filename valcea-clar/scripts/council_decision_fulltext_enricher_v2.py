@@ -2,7 +2,7 @@
 """V2 consequence-led parsers for VÂLCEA CLAR adopted-HCL explainers.
 
 Extends the reusable full-text HCL enricher with precise, document-bound
-editorial products for high-value recurring decision classes.  It also replaces
+editorial products for high-value recurring decision classes. It also replaces
 the generic administrative headline fallback with an operative-clause headline:
 when full official text exists, the story must lead with what changes, not with
 the registry title or a generic ``HCL X: ce a decis`` label.
@@ -15,6 +15,8 @@ import re
 from typing import Any
 
 import council_decision_fulltext_enricher as base
+
+ORIGINAL_GENERIC_STORY = base.generic_story
 
 
 def _short_effect(value: str, limit: int = 118) -> str:
@@ -35,7 +37,7 @@ def _short_effect(value: str, limit: int = 118) -> str:
 
 def consequence_led_generic_story(item: dict[str, Any], doc: dict[str, Any], url: str):
     """Fallback for future HCLs: full text may never degrade to a register-title story."""
-    headline, dek, claims, sections, factbox = base.generic_story(item, doc, url)
+    headline, dek, claims, sections, factbox = ORIGINAL_GENERIC_STORY(item, doc, url)
     clauses = base.operative_clauses(doc)
     if clauses:
         effect = _short_effect(base.plain_clause(clauses[0]))
