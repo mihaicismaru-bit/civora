@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 from urllib.parse import urlparse
 
+import link_artist_profiles as artist_links
 import public_ux_reset as ux
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -193,6 +194,7 @@ def self_test() -> None:
     other = {"id":"b","section":"SPORT","headline":"Altul","dek":"D","sources":[{"url":"https://example.test/b"}]}
     assert rank_related(sample, [sample, other])[0]["id"] == "b"
     assert "NewsArticle" in jsonld(sample, BASE+"/stiri/a/", "2026-08-18T00:00:00+03:00", None)
+    artist_links.self_test()
     print("VÂLCEA CLAR public UX story-integrity self-test: PASS")
 
 
@@ -204,3 +206,7 @@ if __name__ == "__main__":
         check()
     else:
         build()
+        # Public UX owns the final canonical shell. Reapply the verified artist
+        # cross-link layer after that rewrite so canonical pages and manifest do
+        # not lose clickability during a reader-UX rebuild.
+        artist_links.main()
