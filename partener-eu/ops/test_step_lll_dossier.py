@@ -16,6 +16,10 @@ def get_fact(d, label):
     return next((f for f in d.get("quickFacts") or [] if f.get("label") == label), None)
 
 
+def joined(section):
+    return " ".join(section.get("items") or []).lower() if section else ""
+
+
 def main() -> int:
     payload = json.loads(PRODUCTS.read_text(encoding="utf-8"))
     d = next(
@@ -28,33 +32,64 @@ def main() -> int:
     )
     assert d, "STEP-LLL Adults dossier missing"
     assert d.get("status") == "OPEN"
-    assert d.get("region") == "7 regiuni mai puțin dezvoltate (fără București–Ilfov)"
+    assert d.get("region") == "Național; minimum 2 regiuni de dezvoltare"
+    assert get_fact(d, "Deschidere")["value"] == "29 mai 2026, 16:00"
     assert get_fact(d, "Termen")["value"] == "30 septembrie 2026, 16:00"
     assert get_fact(d, "Buget")["value"] == "92.000.000 EUR"
     assert get_fact(d, "Contribuție proprie")["value"] == "0%"
+    assert get_fact(d, "Durată maximă")["value"] == "36 luni"
     assert "7.974 EUR" in get_fact(d, "Grant")["value"]
     assert d.get("quality", {}).get("completeness") == 100
+    assert d.get("quality", {}).get("depthCompleteness") == 100
     assert d.get("quality", {}).get("stepLllAuthoritativeBundle") is True
     assert not d.get("quality", {}).get("blockedFactClasses")
-    assert get_section(d, "Cine poate aplica") and len(get_section(d, "Cine poate aplica")["items"]) >= 7
-    assert get_section(d, "Ce finanțează și în ce condiții") and not get_section(d, "Ce finanțează și în ce condiții").get("empty")
-    assert get_section(d, "Costuri, cofinanțare și ajutor de stat") and not get_section(d, "Costuri, cofinanțare și ajutor de stat").get("empty")
-    assert get_section(d, "Documente de pregătit") and len(get_section(d, "Documente de pregătit")["items"]) >= 6
-    assert get_section(d, "Indicatori și obligații") and any("EECO01" in x for x in get_section(d, "Indicatori și obligații")["items"])
+
+    applicants = get_section(d, "Cine poate aplica")
+    eligibility = get_section(d, "Condiții esențiale de eligibilitate")
+    activities = get_section(d, "Ce finanțează și în ce condiții")
+    costs = get_section(d, "Costuri, cofinanțare și ajutor de stat")
+    docs = get_section(d, "Documente de pregătit")
+    scoring = get_section(d, "Cum se punctează")
+    indicators = get_section(d, "Indicatori și obligații")
     corr = get_section(d, "Corrigendum nr. 1 — rezumat")
     qa = get_section(d, "Q&A AM — clarificări esențiale")
-    assert corr and any("30 septembrie 2026" in x for x in corr["items"])
-    assert qa and any("minimum 25" in x.lower() for x in qa["items"])
-    assert qa and any("7.974 EUR" in x for x in qa["items"])
+    implementation = get_section(d, "Implementare")
+
+    assert applicants and len(applicants["items"]) >= 6
+    assert "fpc" in joined(applicants)
+    assert "confederații sindicale" in joined(applicants)
+    assert "asociații profesionale sectoriale" in joined(applicants)
+    assert eligibility and "angajate și/sau șomeri" in joined(eligibility)
+    assert "minimum 25" in joined(eligibility)
+    assert "minimum două regiuni" in joined(eligibility)
+    assert "pensionar" not in joined(eligibility)
+    assert activities and "a1" in joined(activities) and "exclusiv șomerilor" in joined(activities)
+    assert "a2.1" in joined(activities) and "a2.2" in joined(activities)
+    assert costs and "nu este un cost unitar" in joined(costs)
+    assert docs and len(docs["items"]) >= 8
+    assert scoring and "eeco01" in joined(scoring)
+    assert indicators and "11.538" in joined(indicators)
+    assert corr and "30 septembrie 2026" in joined(corr)
+    assert "12 august" not in joined(corr)
+    assert qa and "minimum 25" in joined(qa)
+    assert "7.974 eur" in joined(qa)
+    assert "minimum două regiuni" in joined(qa)
+    assert "36 de luni" in joined(qa)
+    assert "a1" in joined(qa) and "a2.2" in joined(qa)
+    assert implementation and "36 de luni" in joined(implementation)
+
     summaries = d.get("documentSummaries") or []
-    assert {x.get("kind") for x in summaries} >= {"CORRIGENDUM", "QA_AM"}
-    assert all(str(x.get("sourceUrl") or "").startswith("http") for x in summaries)
-    assert all("mfe.gov.ro" in str(x.get("sourceUrl") or "") for x in summaries)
+    by_kind = {x.get("kind"): x for x in summaries}
+    assert {"CORRIGENDUM", "QA_AM"} <= set(by_kind)
+    assert "mfe.gov.ro" in str(by_kind["CORRIGENDUM"].get("sourceUrl") or "")
+    assert "mfe.gov.ro" in str(by_kind["QA_AM"].get("sourceUrl") or "")
     assert payload.get("policy", {}).get("stepLllSourceBoundDossier") is True
+
     print(json.dumps({
         "ok": True,
         "dossierId": d.get("id"),
         "quality": d.get("quality", {}).get("completeness"),
+        "depth": d.get("quality", {}).get("depthCompleteness"),
         "sections": len(d.get("sections") or []),
         "sources": len(d.get("sources") or []),
     }, ensure_ascii=False))
