@@ -13,6 +13,7 @@ on:
       - 'valcea-clar/scripts/council_docmanager_document_diagnostic.py'
       - 'valcea-clar/scripts/promote_fact_kernels.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
+      - 'valcea-clar/scripts/scm_program_fact_kernel.py'
       - 'valcea-clar/editorial/editorial_manual.json'
       - 'valcea-clar/site/indexing_routes.json'
       - 'local-news-os/core/indexing_assets.py'
@@ -27,6 +28,7 @@ on:
       - 'valcea-clar/scripts/council_docmanager_document_diagnostic.py'
       - 'valcea-clar/scripts/promote_fact_kernels.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
+      - 'valcea-clar/scripts/scm_program_fact_kernel.py'
       - 'valcea-clar/editorial/editorial_manual.json'
       - 'valcea-clar/site/indexing_routes.json'
       - 'local-news-os/core/indexing_assets.py'
@@ -63,9 +65,10 @@ jobs:
             valcea-clar/scripts/council_docmanager_document_diagnostic.py \
             valcea-clar/scripts/promote_fact_kernels.py \
             valcea-clar/scripts/council_watch_rm_valcea.py \
+            valcea-clar/scripts/scm_program_fact_kernel.py \
             local-news-os/core/indexing_assets.py
 
-      - name: Test Council Fact Kernel contract
+      - name: Test Fact Kernel contracts
         run: |
           python valcea-clar/scripts/council_watch_rm_valcea.py --self-test
           python valcea-clar/scripts/council_fact_kernel.py --self-test
@@ -74,6 +77,7 @@ jobs:
           python valcea-clar/scripts/council_docmanager_diagnostic.py --self-test
           python valcea-clar/scripts/council_docmanager_document_diagnostic.py --self-test
           python valcea-clar/scripts/promote_fact_kernels.py --self-test
+          python valcea-clar/scripts/scm_program_fact_kernel.py --self-test
 
       - name: Validate current offline kernel state
         run: python valcea-clar/scripts/council_docmanager_embedded_resolver.py --check
@@ -86,7 +90,7 @@ jobs:
         if: github.event_name != 'pull_request'
         run: python valcea-clar/scripts/council_docmanager_diagnostic.py
 
-      - name: Verify official documents and build kernels
+      - name: Verify official documents and build Council kernels
         if: github.event_name != 'pull_request'
         run: python valcea-clar/scripts/council_docmanager_embedded_resolver.py --live
 
@@ -94,7 +98,7 @@ jobs:
         if: github.event_name != 'pull_request'
         run: python valcea-clar/scripts/council_docmanager_document_diagnostic.py
 
-      - name: Promote only complete verified kernels
+      - name: Promote only complete verified Council kernels
         id: promote
         if: github.event_name != 'pull_request'
         shell: bash
@@ -109,6 +113,23 @@ jobs:
           with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
               f.write(f'changed={"true" if count else "false"}\n')
               f.write(f'count={count}\n')
+          PY
+
+      - name: Build next SCM official-program service kernel
+        id: scm
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python valcea-clar/scripts/scm_program_fact_kernel.py | tee /tmp/scm-program-kernel.json
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          row=json.loads(Path('/tmp/scm-program-kernel.json').read_text(encoding='utf-8'))
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
+              f.write(f'changed={"true" if row.get("changed") else "false"}\n')
+              if row.get('fact_id'):
+                  f.write(f'fact_id={row["fact_id"]}\n')
           PY
 
       - name: Validate promoted registry through Editorial Writer
@@ -156,8 +177,9 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
-      - name: Dispatch Live Newsroom after verified kernel promotion
-        if: github.event_name != 'pull_request' && steps.promote.outputs.changed == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh workflow run valcea-clar-newsroom-live.yml --ref main
+      - name: Report downstream handoff
+        if: github.event_name != 'pull_request'
+        run: |
+          echo "Council registry changed: ${{ steps.promote.outputs.changed }}"
+          echo "SCM program registry changed: ${{ steps.scm.outputs.changed }}"
+          echo 'The durable Fact Kernel → Live Newsroom workflow_run handoff owns downstream dispatch.'
