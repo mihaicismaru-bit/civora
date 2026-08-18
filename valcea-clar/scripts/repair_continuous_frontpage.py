@@ -5,7 +5,8 @@ The canonical story archive is durable publication state. Historical recap
 snapshots may contribute new safe stories, but must never delete or downgrade a
 canonical story merely because old recap copy used now-forbidden relative-time
 language such as ``azi``. The legacy renderer remains unchanged; this wrapper
-only fixes archive input precedence.
+fixes archive input precedence and reapplies verified artist cross-links after a
+full repair so generated runtime cannot silently erase them.
 """
 from __future__ import annotations
 
@@ -13,6 +14,7 @@ import sys
 from datetime import datetime
 from typing import Any
 
+import link_artist_profiles as artist_links
 import repair_continuous_frontpage_legacy as legacy
 
 _ORIGINAL_COLLECT_ARCHIVE = legacy.collect_archive
@@ -78,6 +80,7 @@ def self_test() -> int:
     assert legacy.story_ready(stale)[0] is False
     assert _is_newer("2026-08-17T10:00:00+03:00", "2026-08-16T10:00:00+03:00") is True
     assert _is_newer("2026-08-15T10:00:00+03:00", "2026-08-16T10:00:00+03:00") is False
+    artist_links.self_test()
     print("Archive-preserving continuous frontpage wrapper self-test: PASS")
     return 0
 
@@ -85,7 +88,15 @@ def self_test() -> int:
 def main() -> int:
     if "--self-test" in sys.argv:
         return self_test()
-    return legacy.main()
+    result = legacy.main()
+    if result:
+        return result
+    # The legacy repair intentionally projects a narrow story schema and can
+    # discard artist_profiles. Reapply the verified cross-link layer after the
+    # canonical rebuild so live feed, archive, manifest and static pages agree.
+    if len(sys.argv) == 1:
+        return artist_links.main()
+    return result
 
 
 if __name__ == "__main__":
