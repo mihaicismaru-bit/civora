@@ -28,6 +28,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: valcea-clar-council-decision-articles-${{ github.event.pull_request.number || 'main' }}
@@ -123,6 +124,12 @@ jobs:
           done
           echo 'Could not persist HCL article products.' >&2
           exit 1
+
+      - name: Dispatch live newsroom after HCL materialization
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run valcea-clar-newsroom-live.yml --ref main
 
       - name: Report autonomous article set
         if: always()
