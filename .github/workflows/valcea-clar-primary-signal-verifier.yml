@@ -13,6 +13,7 @@ on:
       - 'local-news-os/core/primary_signal_verifier_ranked_strict.py'
       - 'local-news-os/core/primary_signal_verifier_routed_strict.py'
       - 'local-news-os/core/signal_radar.py'
+      - 'local-news-os/core/signal_radar_routed.py'
       - 'local-news-os/core/signal_routing_contract.py'
       - 'local-news-os/instances/valcea/source_pack.json'
       - 'valcea-clar/editorial/signal_radar_config.json'
@@ -28,6 +29,7 @@ on:
       - 'local-news-os/core/primary_signal_verifier_ranked_strict.py'
       - 'local-news-os/core/primary_signal_verifier_routed_strict.py'
       - 'local-news-os/core/signal_radar.py'
+      - 'local-news-os/core/signal_radar_routed.py'
       - 'local-news-os/core/signal_routing_contract.py'
       - 'local-news-os/instances/valcea/source_pack.json'
       - 'valcea-clar/editorial/signal_radar_config.json'
@@ -46,7 +48,7 @@ concurrency:
 jobs:
   verify-signals:
     runs-on: ubuntu-latest
-    timeout-minutes: 9
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v6
         with:
@@ -62,10 +64,14 @@ jobs:
             local-news-os/core/primary_signal_verifier_ranked.py \
             local-news-os/core/primary_signal_verifier_ranked_strict.py \
             local-news-os/core/primary_signal_verifier_routed_strict.py \
+            local-news-os/core/signal_radar_routed.py \
             local-news-os/core/signal_routing_contract.py
           python local-news-os/core/primary_signal_verifier_routed_strict.py --self-test
           python local-news-os/core/primary_signal_verifier_routed_strict.py --instance valcea --validate-only
-      - name: Exercise routed ranked strict primary verification against current queue read-only
+      - name: Rebuild routed signal queue locally for PR verification
+        if: github.event_name == 'pull_request'
+        run: python local-news-os/core/signal_radar_routed.py --instance valcea
+      - name: Exercise routed ranked strict primary verification against freshly routed queue
         if: github.event_name == 'pull_request'
         run: python local-news-os/core/primary_signal_verifier_routed_strict.py --instance valcea --no-write
       - name: Verify current radar queue against routed ranked primary sources
