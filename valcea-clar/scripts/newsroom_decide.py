@@ -4,7 +4,8 @@
 This is the continuous-newsroom gate. It deliberately does NOT weaken the
 existing evidence rules. A source title/date discovery is useful for the radar
 but is not, by itself, a publishable article. New claim-kernel stories must also
-carry the provenance proof emitted by Editorial Writer v1.
+carry the provenance proof emitted by Editorial Writer v1 and pass the separate
+post-writer Editorial Integrity gate.
 
 Morning/evening editions remain recap snapshots. They are not publication
 windows and must never delay an otherwise publishable story.
@@ -19,6 +20,7 @@ from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+import editorial_integrity
 import generate_edition as edition_engine
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -100,19 +102,10 @@ def story_ready(item: dict) -> tuple[bool, str]:
         return False, "title_date_only_not_full_story"
 
     editorial = item.get("editorial_product") if isinstance(item.get("editorial_product"), dict) else {}
-    writer_mode = str(editorial.get("writer_mode") or "")
-    if writer_mode == "FACT_KERNEL_REJECTED_FAIL_CLOSED":
-        return False, "editorial_writer_rejected_fact_kernel"
-    if writer_mode == "FACT_KERNEL_COMPOSED":
-        if editorial.get("claim_trace_complete") is not True:
-            return False, "claim_trace_incomplete"
-        if editorial.get("source_level_trace") is not True:
-            return False, "source_trace_incomplete"
-        if editorial.get("auto_publish_eligible_by_format") is not True:
-            return False, "editorial_format_requires_review"
-        trace = editorial.get("claim_trace") or []
-        if not trace or any(not row.get("source_urls") or not row.get("text_sha256") for row in trace if isinstance(row, dict)):
-            return False, "claim_trace_invalid"
+    if editorial:
+        integrity_ok, integrity_reason, _ = editorial_integrity.validate_story(item)
+        if not integrity_ok:
+            return False, f"editorial_integrity:{integrity_reason}"
 
     headline = str(item.get("headline") or "").strip()
     dek = str(item.get("dek") or "").strip()
@@ -146,6 +139,40 @@ def load_state() -> dict:
         return {}
 
 
+def load_editorial_writer_stats() -> dict:
+    path = ROOT / "editorial" / "editorial_products.json"
+    if not path.is_file():
+        return {"writer_id": "manual_journalism_v1", "status": "NOT_MATERIALIZED"}
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {"writer_id": "manual_journalism_v1", "status": "INVALID_OUTPUT"}
+    return {
+        "writer_id": doc.get("writer_id"),
+        "status": "ACTIVE",
+        **(doc.get("stats") or {}),
+        "registry_fingerprint_sha256": doc.get("registry_fingerprint_sha256"),
+    }
+
+
+def load_editorial_integrity_stats() -> dict:
+    path = ROOT / "editorial" / "editorial_products.json"
+    if not path.is_file():
+        return {"gate_id": "editorial_integrity_v1", "status": "NOT_MATERIALIZED"}
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        report = editorial_integrity.validate_registry(doc)
+    except Exception:
+        return {"gate_id": "editorial_integrity_v1", "status": "INVALID_OUTPUT"}
+    return {
+        "gate_id": report.get("gate_id"),
+        "status": "ACTIVE",
+        "story_count": report.get("story_count"),
+        "passed": report.get("passed"),
+        "failed": report.get("failed"),
+    }
+
+
 def decide(now: datetime) -> dict:
     registry, auto_count = edition_engine.merged_registry()
     slot = edition_engine.choose_slot(now, "auto")
@@ -170,8 +197,9 @@ def decide(now: datetime) -> dict:
     new_ids = [story_id for story_id in current_ids if story_id not in previous_ids]
 
     writer_stats = load_editorial_writer_stats()
+    integrity_stats = load_editorial_integrity_stats()
     return {
-        "schema_version": "1.3",
+        "schema_version": "1.4",
         "evaluated_local": now.isoformat(timespec="seconds"),
         "mode": "continuous_story_first",
         "edition_windows_are_publication_gates": False,
@@ -184,6 +212,7 @@ def decide(now: datetime) -> dict:
         "fingerprint": fingerprint,
         "auto_fact_registry_count": auto_count,
         "editorial_writer": writer_stats,
+        "editorial_integrity": integrity_stats,
         "rejected_candidate_count": len(rejected),
         "rejected": rejected,
         "active_publication_holds": sorted(active_publication_holds()),
@@ -191,6 +220,7 @@ def decide(now: datetime) -> dict:
             "verified_structured_story_required": True,
             "title_date_only_is_not_article": True,
             "fact_kernel_claim_trace_required": True,
+            "post_writer_integrity_gate_required": True,
             "reputational_formats_require_review": True,
             "editorial_publication_holds_fail_closed": True,
             "held_story_social_distribution_allowed": False,
@@ -203,22 +233,6 @@ def decide(now: datetime) -> dict:
     }
 
 
-def load_editorial_writer_stats() -> dict:
-    path = ROOT / "editorial" / "editorial_products.json"
-    if not path.is_file():
-        return {"writer_id": "manual_journalism_v1", "status": "NOT_MATERIALIZED"}
-    try:
-        doc = json.loads(path.read_text(encoding="utf-8"))
-    except Exception:
-        return {"writer_id": "manual_journalism_v1", "status": "INVALID_OUTPUT"}
-    return {
-        "writer_id": doc.get("writer_id"),
-        "status": "ACTIVE",
-        **(doc.get("stats") or {}),
-        "registry_fingerprint_sha256": doc.get("registry_fingerprint_sha256"),
-    }
-
-
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--commit-state", action="store_true", help="Persist decision as the last published newsroom state")
@@ -227,6 +241,7 @@ def main() -> int:
 
     if args.self_test:
         edition_engine.editorial_writer.self_test()
+        editorial_integrity.self_test()
         full = {
             "id": "self-test-full",
             "headline": "Primăria publică un proiect verificat pentru municipiu în 17 august 2026",
@@ -242,18 +257,52 @@ def main() -> int:
         held = dict(full, id="olanesti-bridge-monitor")
         assert story_ready(held) == (False, "editorial_publication_hold")
         assert "olanesti-bridge-monitor" in active_publication_holds()
-        composed = dict(full, editorial_product={
-            "writer_mode": "FACT_KERNEL_COMPOSED",
-            "claim_trace_complete": True,
-            "source_level_trace": True,
-            "auto_publish_eligible_by_format": True,
-            "claim_trace": [{"text_sha256": "abc", "source_urls": ["https://example.com/document"]}],
-        })
+
+        url = "https://example.com/document"
+        claim_text = (
+            "Documentul oficial confirmă măsura descrisă și oferă suficiente detalii verificabile pentru corpul "
+            "materialului, fără a adăuga interpretări sau fapte care nu apar în kernelul sursă."
+        )
+        composed = {
+            "id": "self-test-composed",
+            "headline": "Primăria confirmă proiectul verificat pentru municipiu în 17 august 2026",
+            "dek": "Documentele publice confirmă măsura și permit redactarea unei știri complete, cu sursa indicată.",
+            "paragraphs": [claim_text],
+            "sources": [{"url": url, "name": "Sursă", "tier": "T1"}],
+            "fact_kernel": {
+                "format_hint": "straight_news",
+                "headline": {"text": "Primăria confirmă proiectul verificat pentru municipiu în 17 august 2026", "source_urls": [url]},
+                "dek": {"text": "Documentele publice confirmă măsura și permit redactarea unei știri complete, cu sursa indicată.", "source_urls": [url]},
+                "claims": [{"id": "c1", "role": "who_what_when_where", "kind": "fact", "text": claim_text, "source_urls": [url]}],
+            },
+            "editorial_product": {
+                "writer_id": "manual_journalism_v1",
+                "writer_mode": "FACT_KERNEL_COMPOSED",
+                "format": "straight_news",
+                "claim_trace_complete": True,
+                "source_level_trace": True,
+                "headline_source_urls": [url],
+                "dek_source_urls": [url],
+                "claim_trace": [{"claim_id": "c1", "role": "who_what_when_where", "kind": "fact", "text_sha256": editorial_integrity.text_sha256(claim_text), "source_urls": [url]}],
+                "auto_publish_eligible_by_format": True,
+            },
+        }
+        composed["editorial_product"]["product_fingerprint_sha256"] = editorial_integrity.expected_product_fingerprint(composed)
         assert story_ready(composed)[0] is True
-        no_trace = dict(composed, editorial_product={**composed["editorial_product"], "claim_trace_complete": False})
-        assert story_ready(no_trace) == (False, "claim_trace_incomplete")
-        review_format = dict(composed, editorial_product={**composed["editorial_product"], "auto_publish_eligible_by_format": False})
-        assert story_ready(review_format) == (False, "editorial_format_requires_review")
+
+        tampered = json.loads(json.dumps(composed))
+        tampered["paragraphs"][0] += " Fapt nesusținut."
+        assert story_ready(tampered)[0] is False
+
+        no_trace = json.loads(json.dumps(composed))
+        no_trace["editorial_product"]["claim_trace_complete"] = False
+        no_trace["editorial_product"]["product_fingerprint_sha256"] = editorial_integrity.expected_product_fingerprint(no_trace)
+        assert story_ready(no_trace) == (False, "editorial_integrity:claim_or_source_trace_incomplete")
+
+        review_format = json.loads(json.dumps(composed))
+        review_format["editorial_product"]["auto_publish_eligible_by_format"] = False
+        review_format["editorial_product"]["product_fingerprint_sha256"] = editorial_integrity.expected_product_fingerprint(review_format)
+        assert story_ready(review_format) == (False, "editorial_integrity:editorial_format_requires_review")
         print("Continuous newsroom decision self-test: PASS")
         return 0
 
@@ -263,12 +312,13 @@ def main() -> int:
 
     if args.commit_state and decision["publishable_story_count"]:
         state = {
-            "schema_version": "1.3",
+            "schema_version": "1.4",
             "last_published_at": decision["evaluated_local"],
             "last_published_fingerprint": decision["fingerprint"],
             "last_published_story_ids": decision["publishable_story_ids"],
             "active_publication_holds": decision["active_publication_holds"],
             "editorial_writer": decision["editorial_writer"],
+            "editorial_integrity": decision["editorial_integrity"],
             "mode": "continuous_story_first",
             "edition_windows_are_publication_gates": False,
             "durable_temporal_language_contract": TEMPORAL_CONTRACT,
