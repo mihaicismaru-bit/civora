@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Conflict-safe merge of text-first social state after a production run.
+"""Conflict-safe merge of text-first social state after production runs.
 
-Remote publication can happen before `main` advances again. This helper merges
-the desired state captured immediately after publishing into the newest main
-state so concurrent photo/social runs cannot be overwritten by stale files.
+Remote publication can happen before `main` advances again.  Every social lane
+must therefore merge its just-published desired state into the newest repository
+state instead of replacing the file wholesale.  Each lane may now be merged
+independently; the legacy multi-lane invocation remains supported.
 """
 from __future__ import annotations
 
@@ -112,22 +113,14 @@ def self_test() -> int:
     assert set(state["published"]) == {"a", "b"} and "b" not in state["failures"]
 
     instagram = merge_instagram_state(
-        {
-            "published": {"old": {}},
-            "failures": {"new": {"error": "old"}},
-            "pending_public_media": {"old": {"status": "stale"}},
-        },
-        {
-            "published": {"new": {"instagram_media_id": "m1"}},
-            "failures": {},
-            "pending_public_media": {"new": {"status": "waiting"}},
-        },
+        {"published": {"old": {}}, "failures": {"new": {"error": "old"}}, "pending_public_media": {"old": {"status": "stale"}}},
+        {"published": {"new": {"instagram_media_id": "m1"}}, "failures": {}, "pending_public_media": {"new": {"status": "waiting"}}},
     )
     assert set(instagram["published"]) == {"old", "new"}
     assert "new" not in instagram["failures"] and "new" not in instagram["pending_public_media"]
     assert "old" not in instagram["pending_public_media"]
 
-    print("VÂLCEA CLAR text-first social state merger self-test: PASS")
+    print("VÂLCEA CLAR independent social state merger self-test: PASS")
     return 0
 
 
@@ -142,32 +135,34 @@ def main() -> int:
     if args.self_test:
         return self_test()
 
-    required = (args.desired_facebook, args.desired_threads_outbox, args.desired_threads_state)
-    if any(value is None for value in required):
-        raise SystemExit("Facebook and Threads desired state paths are required")
+    selected = [
+        args.desired_facebook,
+        args.desired_threads_outbox,
+        args.desired_threads_state,
+        args.desired_instagram_state,
+    ]
+    if not any(value is not None for value in selected):
+        raise SystemExit("at least one desired social state path is required")
+    if bool(args.desired_threads_outbox) != bool(args.desired_threads_state):
+        raise SystemExit("Threads outbox and Threads state must be supplied together")
 
-    fb_path = VC / "social" / "facebook_state.json"
-    threads_outbox_path = VC / "social" / "threads_outbox.json"
-    threads_state_path = VC / "social" / "threads_state.json"
+    merged_paths: list[str] = []
+    if args.desired_facebook:
+        path = VC / "social" / "facebook_state.json"
+        write(path, merge_facebook(load(path), load(args.desired_facebook)))
+        merged_paths.append(str(path))
 
-    write(fb_path, merge_facebook(load(fb_path), load(args.desired_facebook)))
-    write(
-        threads_outbox_path,
-        merge_threads_outbox(load(threads_outbox_path), load(args.desired_threads_outbox)),
-    )
-    write(
-        threads_state_path,
-        merge_threads_state(load(threads_state_path), load(args.desired_threads_state)),
-    )
+    if args.desired_threads_outbox and args.desired_threads_state:
+        outbox_path = VC / "social" / "threads_outbox.json"
+        state_path = VC / "social" / "threads_state.json"
+        write(outbox_path, merge_threads_outbox(load(outbox_path), load(args.desired_threads_outbox)))
+        write(state_path, merge_threads_state(load(state_path), load(args.desired_threads_state)))
+        merged_paths.extend([str(outbox_path), str(state_path)])
 
-    merged_paths = [str(fb_path), str(threads_outbox_path), str(threads_state_path)]
     if args.desired_instagram_state:
-        instagram_path = VC / "social" / "instagram_state.json"
-        write(
-            instagram_path,
-            merge_instagram_state(load(instagram_path), load(args.desired_instagram_state)),
-        )
-        merged_paths.append(str(instagram_path))
+        path = VC / "social" / "instagram_state.json"
+        write(path, merge_instagram_state(load(path), load(args.desired_instagram_state)))
+        merged_paths.append(str(path))
 
     print(json.dumps({"status": "PASS", "merged": merged_paths}))
     return 0
