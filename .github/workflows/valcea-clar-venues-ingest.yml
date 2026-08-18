@@ -12,6 +12,8 @@ on:
       - "valcea-clar/ingest/seed_catalog.json.part-*"
       - "valcea-clar/ingest/source_registry.json"
       - "valcea-clar/ingest/venue_ingest.py"
+      - "valcea-clar/ingest/venue_discovery.py"
+      - "valcea-clar/ingest/discovery_overlay_guard.py"
       - "valcea-clar/validation/validate.py"
       - "valcea-clar/scripts/reconcile_ingest.py"
       - "valcea-clar/scripts/promote_verified_venues.py"
@@ -44,10 +46,18 @@ jobs:
 
       - name: Validate autonomous venue safety gates offline
         run: |
+          python valcea-clar/ingest/venue_discovery.py --self-test
+          python valcea-clar/ingest/discovery_overlay_guard.py --self-test
           python valcea-clar/scripts/promote_verified_venues.py --self-test
           python valcea-clar/scripts/quarantine_venue_identity_collisions.py --self-test
 
-      - name: Probe sources and rebuild fresh ingest state
+      - name: Discover new venue identities from public frontier
+        run: python valcea-clar/ingest/venue_discovery.py --timeout 7 --max-websites 12
+
+      - name: Fail closed on ambiguous dynamic discovery overlays
+        run: python valcea-clar/ingest/discovery_overlay_guard.py
+
+      - name: Probe baseline and discovered official sources
         run: python valcea-clar/ingest/venue_ingest.py --timeout 12
 
       - name: Validate raw ingest outputs
@@ -104,6 +114,10 @@ jobs:
           state=json.load(open('valcea-clar/ingest/state/venues.json',encoding='utf-8'))
           report=json.load(open('valcea-clar/validation/latest_report.json',encoding='utf-8'))
           reconciliation=json.load(open('valcea-clar/ops/ingest_reconciliation.json',encoding='utf-8'))
+          discovery_path=pathlib.Path('valcea-clar/ops/venue_discovery_receipt.json')
+          discovery=json.loads(discovery_path.read_text(encoding='utf-8')) if discovery_path.is_file() else {}
+          overlay_path=pathlib.Path('valcea-clar/ops/venue_discovery_overlay_guard.json')
+          overlay=json.loads(overlay_path.read_text(encoding='utf-8')) if overlay_path.is_file() else {'blocked': []}
           holds_path=pathlib.Path('valcea-clar/ops/venue_identity_collision_holds.json')
           holds=json.loads(holds_path.read_text(encoding='utf-8')) if holds_path.is_file() else {'holds': []}
           receipt_path=pathlib.Path('valcea-clar/ops/venue_auto_promotion.json')
@@ -114,8 +128,12 @@ jobs:
               '# VÂLCEA CLAR — UNDE IEȘIM\n\n'
               f"- Ingest status: `{state['status']}`\n"
               f"- Localuri urmărite: **{state['summary']['venues']}**\n"
+              f"- Frontier discovery: **{discovery.get('frontier_count', 0)}** localuri, **{discovery.get('website_candidates', 0)}** cu website\n"
+              f"- Website-uri verificate în această rulare: **{discovery.get('websites_checked', 0)}**\n"
+              f"- Identități oficiale noi: **{discovery.get('official_identity_matches', 0)}**\n"
+              f"- Overlay-uri dinamice blocate ca ambigue/duplicate: **{len(overlay.get('blocked', []))}**\n"
               f"- Creatori candidați: **{state['summary']['creatorCandidates']}**\n"
-              f"- Coliziuni de identitate blocate: **{len(holds.get('holds', []))}**\n"
+              f"- Coliziuni canonice de identitate blocate: **{len(holds.get('holds', []))}**\n"
               f"- Localuri promovate sigur în această stare: **{promoted}**\n"
               f"- Coada editorială rămasă: **{reconciliation['summary']['review_queue']}**\n"
               f"- Validare ingest: **{report['status']}**\n",
@@ -123,7 +141,7 @@ jobs:
           )
           PY
 
-      - name: Persist validated ingestion, promotion and live projection conflict-safe
+      - name: Persist validated ingestion, discovery, promotion and live projection conflict-safe
         if: success() && github.event_name != 'pull_request'
         shell: bash
         run: |
@@ -131,8 +149,14 @@ jobs:
           files=(
             valcea-clar/ingest/state/venues.json
             valcea-clar/ingest/state/source_health.json
+            valcea-clar/ingest/state/venue_discovery_state.json
+            valcea-clar/ingest/state/discovered_venues.json
+            valcea-clar/ingest/state/discovered_sources.json
+            valcea-clar/ingest/state/venue_discovery_frontier.json
             valcea-clar/web/unde-iesim.json
             valcea-clar/validation/latest_report.json
+            valcea-clar/ops/venue_discovery_receipt.json
+            valcea-clar/ops/venue_discovery_overlay_guard.json
             valcea-clar/ops/ingest_reconciliation.json
             valcea-clar/ops/ingest_review_queue.json
             valcea-clar/ops/venue_identity_collision_holds.json
@@ -166,7 +190,7 @@ jobs:
               fi
             done
             if git diff --cached --quiet; then
-              echo "No VÂLCEA CLAR venue state or public projection changes."
+              echo "No VÂLCEA CLAR venue state, discovery or public projection changes."
               exit 0
             fi
             git commit -m "Refresh VÂLCEA CLAR venue publication state"
