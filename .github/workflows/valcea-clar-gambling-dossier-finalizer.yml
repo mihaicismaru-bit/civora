@@ -1,0 +1,76 @@
+name: VÂLCEA CLAR Gambling Dossier Finalizer
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["VÂLCEA CLAR Fact Kernel Builder"]
+    types: [completed]
+    branches: [main]
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/scripts/gambling_dossier_enricher_v2.py'
+      - 'valcea-clar/editorial/gambling_ramnicu_2026_dossier.json'
+      - '.github/workflows/valcea-clar-gambling-dossier-finalizer.yml'
+  schedule:
+    - cron: '11,41 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-gambling-dossier-finalizer
+  cancel-in-progress: true
+
+jobs:
+  finalize:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: main
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Validate temporal-safe dossier contract
+        run: |
+          python -m py_compile \
+            valcea-clar/scripts/gambling_dossier_enricher.py \
+            valcea-clar/scripts/gambling_dossier_enricher_v2.py \
+            local-news-os/core/temporal_freshness.py
+          python valcea-clar/scripts/gambling_dossier_enricher_v2.py --self-test
+
+      - name: Rebuild and validate enriched canonical fact
+        run: |
+          python valcea-clar/scripts/gambling_dossier_enricher_v2.py
+          python valcea-clar/scripts/gambling_dossier_enricher_v2.py --check
+          python valcea-clar/scripts/editorial_writer.py --check
+
+      - name: Persist temporal-safe enriched fact conflict-safe
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp valcea-clar/editorial/facts_registry.json /tmp/valcea-gambling-facts.json
+          git config user.name 'vâlcea-clar-gambling-dossier[bot]'
+          git config user.email 'valcea-clar-gambling-dossier@users.noreply.github.com'
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/valcea-gambling-facts.json valcea-clar/editorial/facts_registry.json
+            git add valcea-clar/editorial/facts_registry.json
+            if git diff --cached --quiet; then
+              echo 'Temporal-safe gambling dossier already current.'
+              exit 0
+            fi
+            git commit -m 'Finalize VÂLCEA CLAR gambling explainer'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            sleep $((attempt * 2))
+          done
+          echo 'Could not persist gambling dossier after five attempts.' >&2
+          exit 1
