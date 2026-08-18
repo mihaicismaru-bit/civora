@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Fail-closed direct Threads publisher for VÂLCEA CLAR.
 
-The adapter consumes only the canonical Threads editorial outbox, requires a
-verified @valceaclar Threads token at runtime, publishes only story IDs from a
-new durable story_publication_event, and never replays the pre-activation
-backlog. Partial remote publication is quarantined for manual reconciliation so
-an uncertain retry cannot duplicate a thread.
+The adapter consumes only the canonical Threads editorial outbox and requires a
+verified @valceaclar token at runtime.  The durable publication ledger is the
+source of dedupe truth: every currently canonical story in the publication
+event is eligible if it has not already been published.  This avoids losing a
+story when a `new_story_ids` handoff races another workflow, while still never
+replaying items outside the current canonical story set.
 """
 from __future__ import annotations
 
@@ -74,7 +75,7 @@ def api_request(method: str, path: str, token: str, params: dict[str, Any] | Non
         headers={
             "Authorization": f"Bearer {token}",
             "Accept": "application/json",
-            "User-Agent": "valcea-clar-threads-engine/1.0",
+            "User-Agent": "valcea-clar-threads-engine/1.1",
         },
     )
     try:
@@ -142,12 +143,16 @@ def eligible_items(outbox: dict[str, Any], state: dict[str, Any], event: dict[st
     baseline = str(state.get("direct_activation_baseline_event_fingerprint") or "").strip()
     if not baseline:
         return "BASELINE_REQUIRED", []
-    if event_fp == baseline:
-        return "ACTIVATION_BASELINE", []
-    new_ids = event.get("new_story_ids")
-    if not isinstance(new_ids, list) or not new_ids:
-        return "NO_NEW_STORIES", []
-    wanted = {str(value) for value in new_ids if str(value).strip()}
+
+    # Only stories in the current canonical event can be drained.  Unlike v1,
+    # delivery is not restricted to the fragile `new_story_ids` edge; the
+    # durable state ledger is the dedupe authority.
+    canonical_ids = event.get("story_ids")
+    if not isinstance(canonical_ids, list) or not canonical_ids:
+        canonical_ids = event.get("new_story_ids")
+    if not isinstance(canonical_ids, list) or not canonical_ids:
+        return "NO_CANONICAL_STORIES", []
+    wanted = {str(value) for value in canonical_ids if str(value).strip()}
     published = state.get("published") if isinstance(state.get("published"), dict) else {}
     failures = state.get("failures") if isinstance(state.get("failures"), dict) else {}
     result: list[dict[str, Any]] = []
@@ -168,11 +173,7 @@ def eligible_items(outbox: dict[str, Any], state: dict[str, Any], event: dict[st
 
 
 def publish_text(token: str, text: str, reply_to_id: str | None = None) -> str:
-    params: dict[str, Any] = {
-        "media_type": "TEXT",
-        "text": text,
-        "auto_publish_text": True,
-    }
+    params: dict[str, Any] = {"media_type": "TEXT", "text": text, "auto_publish_text": True}
     if reply_to_id:
         params["reply_to_id"] = reply_to_id
     response = api_request("POST", "/me/threads", token, params)
@@ -187,24 +188,12 @@ def preview() -> dict[str, Any]:
     state = load(STATE)
     event = load(EVENT)
     reason, items = eligible_items(outbox, state, event)
-    return {
-        "status": "PREVIEW",
-        "platform": "threads",
-        "reason": reason,
-        "eligible": [str(item.get("id")) for item in items],
-        "network_calls": False,
-    }
+    return {"status": "PREVIEW", "platform": "threads", "reason": reason, "eligible": [str(item.get("id")) for item in items], "network_calls": False}
 
 
 def health_check() -> dict[str, Any]:
     profile = verify_identity(token_from_env())
-    return {
-        "status": "PASS",
-        "platform": "threads",
-        "username": profile["username"],
-        "profile_id_present": True,
-        "token_value_logged": False,
-    }
+    return {"status": "PASS", "platform": "threads", "username": profile["username"], "profile_id_present": True, "token_value_logged": False}
 
 
 def apply(max_items: int) -> dict[str, Any]:
@@ -248,28 +237,18 @@ def apply(max_items: int) -> dict[str, Any]:
                 previous_id = remote_id
         except Exception as exc:
             failures[item_id] = {
-                "failed_at": utc_now(),
-                "story_id": item.get("story_id"),
-                "event_fingerprint": event_fp,
-                "product_fingerprint_sha256": item.get("product_fingerprint_sha256"),
-                "remote_ids_observed": remote_ids,
-                "manual_reconciliation_required": True,
-                "reason": str(exc)[:1000],
+                "failed_at": utc_now(), "story_id": item.get("story_id"), "event_fingerprint": event_fp,
+                "product_fingerprint_sha256": item.get("product_fingerprint_sha256"), "remote_ids_observed": remote_ids,
+                "manual_reconciliation_required": True, "reason": str(exc)[:1000],
             }
             state["last_verified_username"] = profile["username"]
             write(STATE, state)
-            raise ThreadsPublishError(
-                f"Threads item {item_id} entered manual reconciliation after a partial/uncertain publish"
-            ) from exc
+            raise ThreadsPublishError(f"Threads item {item_id} entered manual reconciliation after a partial/uncertain publish") from exc
 
         published[item_id] = {
-            "published_at": utc_now(),
-            "story_id": item.get("story_id"),
-            "event_fingerprint": event_fp,
-            "product_fingerprint_sha256": item.get("product_fingerprint_sha256"),
-            "root_remote_id": remote_ids[0],
-            "remote_ids": remote_ids,
-            "posts": len(posts),
+            "published_at": utc_now(), "story_id": item.get("story_id"), "event_fingerprint": event_fp,
+            "product_fingerprint_sha256": item.get("product_fingerprint_sha256"), "root_remote_id": remote_ids[0],
+            "remote_ids": remote_ids, "posts": len(posts),
         }
         failures.pop(item_id, None)
         completed.append({"id": item_id, "remote_ids": remote_ids})
@@ -284,32 +263,18 @@ def apply(max_items: int) -> dict[str, Any]:
 
 def self_test() -> int:
     item = {
-        "id": "threads-story-new",
-        "story_id": "new",
-        "status": "outbox_ready",
-        "direct_publication_enabled": True,
-        "source_preserving": True,
-        "conversation_native": True,
-        "verbatim_cross_platform_reuse_allowed": False,
-        "identity": {"channel_id": "valcea-threads"},
-        "posts": ["Primul fapt.", "Contextul."],
+        "id": "threads-story-new", "story_id": "new", "status": "outbox_ready", "direct_publication_enabled": True,
+        "source_preserving": True, "conversation_native": True, "verbatim_cross_platform_reuse_allowed": False,
+        "identity": {"channel_id": "valcea-threads"}, "posts": ["Primul fapt.", "Contextul."],
     }
     outbox = {"platform": "threads", "publication_model": "continuous_story_first", "items": [item]}
-    state = {
-        "direct_publication_enabled": True,
-        "direct_activation_baseline_event_fingerprint": "old",
-        "published": {},
-        "failures": {},
-    }
-    reason, items = eligible_items(outbox, state, {"fingerprint": "new", "new_story_ids": ["new"]})
+    state = {"direct_publication_enabled": True, "direct_activation_baseline_event_fingerprint": "old", "published": {}, "failures": {}}
+    reason, items = eligible_items(outbox, state, {"fingerprint": "new", "story_ids": ["new"], "new_story_ids": []})
     assert reason == "READY" and [row["id"] for row in items] == ["threads-story-new"]
-    reason, items = eligible_items(outbox, state, {"fingerprint": "old", "new_story_ids": ["new"]})
-    assert reason == "ACTIVATION_BASELINE" and not items
-    state["failures"] = {"threads-story-new": {"manual_reconciliation_required": True}}
-    reason, items = eligible_items(outbox, state, {"fingerprint": "new", "new_story_ids": ["new"]})
+    state["published"] = {"threads-story-new": {}}
+    reason, items = eligible_items(outbox, state, {"fingerprint": "new", "story_ids": ["new"]})
     assert reason == "NO_ELIGIBLE_ITEMS" and not items
-    assert preview is not None
-    print("VÂLCEA CLAR Threads direct publisher self-test: PASS")
+    print("VÂLCEA CLAR Threads direct publisher v1.1 self-test: PASS")
     return 0
 
 
