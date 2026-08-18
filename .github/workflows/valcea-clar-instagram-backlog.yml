@@ -11,10 +11,12 @@ on:
       - 'valcea-clar/site/newsroom_decision.json'
       - 'valcea-clar/editions/**'
       - 'valcea-clar/social/instagram_fact_card_publish_v2.py'
+      - 'valcea-clar/social/merge_text_first_social_state.py'
       - '.github/workflows/valcea-clar-instagram-backlog.yml'
   pull_request:
     paths:
       - 'valcea-clar/social/instagram_fact_card_publish_v2.py'
+      - 'valcea-clar/social/merge_text_first_social_state.py'
       - '.github/workflows/valcea-clar-instagram-backlog.yml'
 
 permissions:
@@ -44,9 +46,10 @@ jobs:
           git reset --hard origin/main
       - name: Validate Instagram backlog contract
         run: |
-          python -m py_compile valcea-clar/social/instagram_fact_card_publish_v2.py
+          python -m py_compile valcea-clar/social/instagram_fact_card_publish_v2.py valcea-clar/social/merge_text_first_social_state.py
           python valcea-clar/social/story_social_policy.py --self-test
           python valcea-clar/social/instagram_fact_card_publish_v2.py --self-test
+          python valcea-clar/social/merge_text_first_social_state.py --self-test
       - name: Preview unpublished canonical stories
         run: python valcea-clar/social/instagram_fact_card_publish_v2.py | tee /tmp/instagram-backlog-preview.json
       - name: Resolve Meta/Instagram identity
@@ -83,7 +86,8 @@ jobs:
           for attempt in 1 2 3 4 5; do
             git fetch origin main
             git reset --hard origin/main
-            cp /tmp/instagram-backlog-state.json valcea-clar/social/instagram_state.json
+            python valcea-clar/social/merge_text_first_social_state.py \
+              --desired-instagram-state /tmp/instagram-backlog-state.json
             if [ -d /tmp/instagram-backlog-media ]; then
               mkdir -p valcea-clar/site/runtime/media/social/editorial/instagram-text
               cp -a /tmp/instagram-backlog-media/. valcea-clar/site/runtime/media/social/editorial/instagram-text/
@@ -91,7 +95,7 @@ jobs:
             git add valcea-clar/social/instagram_state.json
             git add -A valcea-clar/site/runtime/media/social/editorial/instagram-text || true
             if git diff --cached --quiet; then
-              echo 'Instagram delivery state already current.'
+              echo 'Instagram delivery state already contains the published/pending item.'
               exit 0
             fi
             git commit -m 'Persist VÂLCEA CLAR Instagram story delivery'
