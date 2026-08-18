@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.5",
+  "schema_version": "1.6",
   "contract": "LOCAL_NEWS_OS_SIGNAL_RADAR_CONFIG_V1",
   "instance_id": "valcea",
   "publication_authority": "NONE",
@@ -115,6 +115,12 @@
         {"ref_type": "news_source_id", "id": "dsp-valcea-anunturi"},
         {"ref_type": "news_source_id", "id": "spital-horezu-noutati"}
       ]
+    },
+    {
+      "id": "education_directors",
+      "required_any_keywords": ["director*"],
+      "keywords": ["vacant*", "posturi vacante", "funcții vacante", "functii vacante", "școli", "scoli"],
+      "verification_targets": [{"ref_type": "primary_target_id", "id": "isj-valcea-directori"}]
     },
     {
       "id": "education",
