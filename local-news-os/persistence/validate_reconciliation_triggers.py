@@ -30,6 +30,13 @@ RECONCILIATION_EXACT_HEAD_GROUP = (
     "group: civora-persistence-reconciliation-${{ github.event_name == 'workflow_run' "
     "&& github.event.workflow_run.head_sha || github.sha }}"
 )
+SCOPE_STATUS_CONTEXT = "civora/scope-drift"
+RECONCILIATION_STATUS_CONTEXT = "civora/persistence-reconciliation"
+EXACT_HEAD_STATUS_ENDPOINT = "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${HEAD_SHA}"
+SCOPE_STATUS_HEAD = "HEAD_SHA: ${{ github.sha }}"
+RECONCILIATION_STATUS_HEAD = (
+    "HEAD_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}"
+)
 
 
 def _load(path: Path) -> dict[str, Any]:
@@ -133,6 +140,40 @@ def validate_exact_head_concurrency(
         raise ValueError("ref-wide reconciliation concurrency can cancel a different head")
 
 
+def validate_exact_head_status_evidence(
+    reconciliation_workflow: str,
+    scope_workflow: str,
+) -> None:
+    """Require exact-head PASS evidence to be queryable without workflow-run discovery."""
+    checks = (
+        (
+            "scope-drift",
+            scope_workflow,
+            SCOPE_STATUS_CONTEXT,
+            SCOPE_STATUS_HEAD,
+        ),
+        (
+            "reconciliation",
+            reconciliation_workflow,
+            RECONCILIATION_STATUS_CONTEXT,
+            RECONCILIATION_STATUS_HEAD,
+        ),
+    )
+    for label, workflow, context, head_fragment in checks:
+        if "statuses: write" not in workflow:
+            raise ValueError(f"{label} workflow must grant statuses: write")
+        if head_fragment not in workflow:
+            raise ValueError(f"{label} workflow status must target the exact reconciled head")
+        if EXACT_HEAD_STATUS_ENDPOINT not in workflow:
+            raise ValueError(f"{label} workflow must publish through the exact-head status endpoint")
+        if context not in workflow:
+            raise ValueError(f"{label} workflow missing stable exact-head status context={context}")
+        if '"state":"success"' not in workflow:
+            raise ValueError(f"{label} workflow must publish status only after successful validation")
+        if "github.run_id" not in workflow:
+            raise ValueError(f"{label} workflow status must retain run provenance")
+
+
 def validate_executable_wiring() -> None:
     """Fail closed if the declarative MAIN_MERGE trigger is not executable."""
     reconciliation_workflow = RECONCILIATION_WORKFLOW.read_text(encoding="utf-8")
@@ -152,6 +193,7 @@ def validate_executable_wiring() -> None:
             raise ValueError(f"reconciliation workflow missing executable MAIN_MERGE wiring: {fragment}")
 
     validate_exact_head_concurrency(reconciliation_workflow, scope_workflow)
+    validate_exact_head_status_evidence(reconciliation_workflow, scope_workflow)
 
     if RECONCILIATION_WORKFLOW_PATH not in scope_workflow:
         raise ValueError("scope-drift workflow does not observe reconciliation workflow changes")
@@ -231,6 +273,30 @@ def self_test(path: Path) -> None:
         pass
     else:
         raise AssertionError("cancellable reconciliation evidence must fail closed")
+
+    missing_scope_status_permission = scope_workflow.replace(
+        "  statuses: write\n",
+        "",
+        1,
+    )
+    try:
+        validate_exact_head_status_evidence(reconciliation_workflow, missing_scope_status_permission)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("scope status evidence without write permission must fail closed")
+
+    wrong_reconciliation_status_head = reconciliation_workflow.replace(
+        RECONCILIATION_STATUS_HEAD,
+        SCOPE_STATUS_HEAD,
+        1,
+    )
+    try:
+        validate_exact_head_status_evidence(wrong_reconciliation_status_head, scope_workflow)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("reconciliation status targeting trigger sha instead of reconciled head must fail closed")
 
 
 def main() -> int:
