@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "instance_id": "valcea",
   "product": "VÂLCEA CLAR editorial product policy",
   "execution_owner": "CIVORA_SITE_ENGINE",
@@ -16,7 +16,8 @@
     "opportunity_is_not_story": true,
     "fact_kernel_required_for_automatic_reader_copy": true,
     "reputational_claims_fail_closed": true,
-    "no_fake_urgency": true
+    "no_fake_urgency": true,
+    "verification_burden_is_risk_proportionate": true
   },
   "lanes": {
     "breaking": {
@@ -42,6 +43,35 @@
       "recency_affects_priority": true,
       "recency_is_eligibility_gate": false,
       "products": ["ACTIVE_PERMITS_INDEX", "JOBS_ROUNDUP", "PUBLIC_DECISIONS_INDEX", "UPCOMING_EVENTS"]
+    }
+  },
+  "breaking_evidence_policy": {
+    "purpose": "Avoid making every low-risk breaking item wait for a primary-source match while preserving strict verification for harmful or reputational claims.",
+    "unattributed_signal_never_publishes_as_fact": true,
+    "claim_may_not_exceed_source": true,
+    "correction_path_required": true,
+    "classes": {
+      "LOW_RISK_ATTRIBUTABLE": {
+        "examples": ["event announcement", "traffic/service notice", "job opening", "public schedule", "non-controversial institutional update"],
+        "minimum_evidence": "ONE_IDENTIFIED_CREDIBLE_SOURCE_WITH_EXPLICIT_ATTRIBUTION",
+        "primary_source_required": false,
+        "second_source_required": false,
+        "copy_rule": "State who reports/announces the information and do not silently upgrade it to independently verified fact."
+      },
+      "MEDIUM_RISK_MATERIAL": {
+        "examples": ["material infrastructure change", "public spending claim", "business change", "significant local disruption"],
+        "minimum_evidence": "ONE_PRIMARY_OR_TWO_INDEPENDENT_CREDIBLE_SOURCES",
+        "primary_source_required": false,
+        "second_source_required_when_no_primary": true,
+        "copy_rule": "Attribute disputed or incomplete elements and state what remains unconfirmed."
+      },
+      "HIGH_RISK_REPUTATIONAL": {
+        "examples": ["crime allegation", "violence with identified persons", "corruption allegation", "legal culpability", "medical harm", "dismissal or misconduct claim"],
+        "minimum_evidence": "PRIMARY_EVIDENCE_OR_STRONG_MULTI_SOURCE_REVIEW",
+        "primary_source_required_by_default": true,
+        "second_source_required_when_primary_is_incomplete": true,
+        "copy_rule": "Fail closed on identity, guilt, motive and legal conclusions; preserve attribution and uncertainty."
+      }
     }
   },
   "product_contracts": {
