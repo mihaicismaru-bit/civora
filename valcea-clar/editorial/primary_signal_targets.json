@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "instance_id": "valcea",
   "product": "VÂLCEA CLAR dedicated primary signal verification targets",
   "publication_authority": "NONE",
@@ -24,6 +24,16 @@
       "status": "PRIMARY_VERIFICATION_ONLY",
       "path_hints": ["casvl", "medicamente", "farmac", "asigurat"],
       "purpose": "Verify health-insurance and compensated-medicine signals against the official county insurance surface."
+    },
+    {
+      "id": "isj-valcea-directori",
+      "publisher": "Inspectoratul Școlar Județean Vâlcea — Management",
+      "url": "https://www.isjvalcea.ro/management/management",
+      "tier": "T1",
+      "section": "EDUCAȚIE",
+      "status": "PRIMARY_VERIFICATION_ONLY",
+      "path_hints": ["management", "director", "directori", "vacant", "funcții", "functii"],
+      "purpose": "Verify signals about vacant school director and deputy-director positions against the dedicated official ISJ Vâlcea management surface."
     }
   ]
 }
