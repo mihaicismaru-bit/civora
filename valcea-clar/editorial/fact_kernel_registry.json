@@ -3,16 +3,16 @@
   "instance_id": "valcea",
   "product": "VÂLCEA CLAR generated fact kernel registry",
   "builder_id": "council_fact_kernel_v1",
-  "generated_at": "2026-08-18T15:21:43+03:00",
+  "generated_at": "2026-08-18T15:29:38+03:00",
   "mode": "LIVE_DOCUMENT_VERIFICATION",
   "facts": [
     {
       "id": "rm-valcea-gambling-authorizations-20260723",
-      "status": "candidate_hold",
+      "status": "verified",
       "section": "ADMINISTRAȚIE",
       "editorial_type": "explainer",
       "priority": 91,
-      "confidence": 0,
+      "confidence": 98,
       "valid_from": "2026-07-23T00:00:00+03:00",
       "valid_until": "2026-09-06T23:59:59+03:00",
       "slots": [
@@ -26,13 +26,13 @@
         "Hotărârile din acest grup nominalizează BAUM SRL, CARADUNE SRL, CELLADA SRL, SUPERBET RETAIL SA; fiecare act este urmărit separat prin documentul oficial al hotărârii, nu doar prin titlul din registru.",
         "O autorizație anuală de funcționare nu este clasificată de VÂLCEA CLAR drept dovadă a deschiderii unei săli noi; pentru această concluzie este necesar istoricul fiecărui punct de lucru și al autorizațiilor sale."
       ],
-      "material_fact_gate": "HOLD_DOCUMENT_CHAIN_INCOMPLETE",
+      "material_fact_gate": "PASS_EXPLAINER_ONLY",
       "sources": [
         {
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "d955f02fd1ec1702bcd382e656f00df2ee15fdfa07dfbff21e55290f5bce9979"
+          "sha256": "c3bbebb2fa73d79f25b6b4e0bc8607dd414d866b30bdf7441687a6f91ca4f2f2"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 304/2026-07-23",
@@ -45,6 +45,60 @@
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/c32f780f6452a3d0c2258e4200398c67/$FILE/hotarirea%20303%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20CARADUNE%20SRL%20strada%20Florilor%20nr%2022.htm",
           "tier": "T1",
           "sha256": "bee59ed289a7bc2ecca7f16d82a6f32b8a56a0d30b87b60388ca5183d69eb790"
+        },
+        {
+          "name": "HCL Râmnicu Vâlcea nr. 302/2026-07-23",
+          "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/78608e4dca0f0ae8c2258e4200397b6e/$FILE/hotarirea%20302%20-%2023%20iulie%202026%20-%20%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20CARADUNE%20SRL%20strada%20Grigore%20Sinescu%20nr%202.htm",
+          "tier": "T1",
+          "sha256": "d25c0e65d1983f81ea0f632e6a7e4331bb057e8985f6f661aaa553fb648eca58"
+        },
+        {
+          "name": "HCL Râmnicu Vâlcea nr. 301/2026-07-23",
+          "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/abc685fe985a9ac9c2258e4200396543/$FILE/hotarirea%20301%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-SUPERBET%20RETAIL%20SA.htm",
+          "tier": "T1",
+          "sha256": "935778c639bc88c438f35deb02da55bf1b2e846145a952f9e6cbc06f7336bc1e"
+        },
+        {
+          "name": "HCL Râmnicu Vâlcea nr. 300/2026-07-23",
+          "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/b238ef336112764bc2258e4200394710/$FILE/hotarirea%20300%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-SUPERBET%20RETAIL%20SA%20-Stirbei%20Voda%205.htm",
+          "tier": "T1",
+          "sha256": "9efc149d17ced359790a00e34899e10bc87757e8a8b3d14ea08bd3730d9fe3ae"
+        },
+        {
+          "name": "HCL Râmnicu Vâlcea nr. 293/2026-07-23",
+          "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/05ec8dfa0069cbdfc2258e420038aae6/$FILE/hotarirea%20293%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20CELLADA%20SRL%20punct%20de%20lucru%20bd%20Tineretului%20nr%206-8.htm",
+          "tier": "T1",
+          "sha256": "8368c13e3e4a4ca0c3ce21eafd3cea40aadc4e59adf97802440b9582fcb934c7"
+        },
+        {
+          "name": "HCL Râmnicu Vâlcea nr. 292/2026-07-23",
+          "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/fb271afc2637e706c2258e4200389af3/$FILE/hotarirea%20292%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20BAUM%20SRL%20-%20str%20Mr%20VPopescu%20bloc%20P2.htm",
+          "tier": "T1",
+          "sha256": "454b209d79f13fb872846f1ba4714033b4816f06cec286da36ea1dcd9cfff7c2"
+        },
+        {
+          "name": "HCL Râmnicu Vâlcea nr. 291/2026-07-23",
+          "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/2005ffb776813bcfc2258e4200388766/$FILE/hotarirea%20291%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20pariuri%20%20BAUM%20SRL%20-%20str%20%20Mihai%20Eminescu%20nr%2039.htm",
+          "tier": "T1",
+          "sha256": "49a4cf7d9141d4535bda9ba6b6c52efc27202602f61d9dd6344ad36edd29fda4"
+        },
+        {
+          "name": "HCL Râmnicu Vâlcea nr. 290/2026-07-23",
+          "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/0766f96fb1ca2470c2258e42003871dc/$FILE/hotarirea%20290%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20pariuri%20%20BAUM%20SRL%20-%20str%20%20CLT%20nr186.htm",
+          "tier": "T1",
+          "sha256": "a93d0fd0d2decdc3ea0149ea0b3d84eae03b20a66a170b832fe5e10af944b9ca"
+        },
+        {
+          "name": "HCL Râmnicu Vâlcea nr. 289/2026-07-23",
+          "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/34b83e05bd314619c2258e4200385c9a/$FILE/hotarirea%20289%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20pariuri%20%20BAUM%20SRL%20-%20str%20%20Nicolae%20Iorga%20nr%201.htm",
+          "tier": "T1",
+          "sha256": "c81abf47e1331f972e619905f04629efb6b200f629c6e5ccfac46875f98c28e8"
+        },
+        {
+          "name": "HCL Râmnicu Vâlcea nr. 288/2026-07-23",
+          "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/3d6cbd17864a4478c2258e420038491d/$FILE/hotarirea%20288%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20pariuri%20SUPERBET%20RETAIL%20SA%20-%20Calea%20lui%20Traian%20bl%20S9.htm",
+          "tier": "T1",
+          "sha256": "b233aaf6d5beb461b626a710808b9ad0045848827263836687e7d072ad7db0cf"
         }
       ],
       "fact_kernel": {
@@ -52,13 +106,35 @@
         "headline": {
           "text": "11 hotărâri pentru autorizații anuale de jocuri de noroc în cea mai recentă serie analizată a Consiliului Local Râmnicu Vâlcea",
           "source_urls": [
-            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500"
+            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
+            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/59cd750a582ac29bc2258e4200399d91/$FILE/hotarirea%20304%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20slot%20machine%20pentru%20jocuri%20de%20noroc%20CARADUNE%20SRL%20strada%20Lucian%20Blaga%20nr%201A.htm",
+            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/c32f780f6452a3d0c2258e4200398c67/$FILE/hotarirea%20303%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20CARADUNE%20SRL%20strada%20Florilor%20nr%2022.htm",
+            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/78608e4dca0f0ae8c2258e4200397b6e/$FILE/hotarirea%20302%20-%2023%20iulie%202026%20-%20%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20CARADUNE%20SRL%20strada%20Grigore%20Sinescu%20nr%202.htm",
+            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/abc685fe985a9ac9c2258e4200396543/$FILE/hotarirea%20301%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-SUPERBET%20RETAIL%20SA.htm",
+            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/b238ef336112764bc2258e4200394710/$FILE/hotarirea%20300%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-SUPERBET%20RETAIL%20SA%20-Stirbei%20Voda%205.htm",
+            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/05ec8dfa0069cbdfc2258e420038aae6/$FILE/hotarirea%20293%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20CELLADA%20SRL%20punct%20de%20lucru%20bd%20Tineretului%20nr%206-8.htm",
+            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/fb271afc2637e706c2258e4200389af3/$FILE/hotarirea%20292%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20BAUM%20SRL%20-%20str%20Mr%20VPopescu%20bloc%20P2.htm",
+            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/2005ffb776813bcfc2258e4200388766/$FILE/hotarirea%20291%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20pariuri%20%20BAUM%20SRL%20-%20str%20%20Mihai%20Eminescu%20nr%2039.htm",
+            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/0766f96fb1ca2470c2258e42003871dc/$FILE/hotarirea%20290%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20pariuri%20%20BAUM%20SRL%20-%20str%20%20CLT%20nr186.htm",
+            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/34b83e05bd314619c2258e4200385c9a/$FILE/hotarirea%20289%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20pariuri%20%20BAUM%20SRL%20-%20str%20%20Nicolae%20Iorga%20nr%201.htm",
+            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/3d6cbd17864a4478c2258e420038491d/$FILE/hotarirea%20288%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20pariuri%20SUPERBET%20RETAIL%20SA%20-%20Calea%20lui%20Traian%20bl%20S9.htm"
           ]
         },
         "dek": {
           "text": "În registrul oficial, 11 dintre cele mai recente 25 de hotărâri din 23.07.2026 privesc autorizații anuale de funcționare pentru jocuri de noroc; ele nu sunt tratate automat drept tot atâtea săli noi.",
           "source_urls": [
-            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500"
+            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
+            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/59cd750a582ac29bc2258e4200399d91/$FILE/hotarirea%20304%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20slot%20machine%20pentru%20jocuri%20de%20noroc%20CARADUNE%20SRL%20strada%20Lucian%20Blaga%20nr%201A.htm",
+            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/c32f780f6452a3d0c2258e4200398c67/$FILE/hotarirea%20303%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20CARADUNE%20SRL%20strada%20Florilor%20nr%2022.htm",
+            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/78608e4dca0f0ae8c2258e4200397b6e/$FILE/hotarirea%20302%20-%2023%20iulie%202026%20-%20%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20CARADUNE%20SRL%20strada%20Grigore%20Sinescu%20nr%202.htm",
+            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/abc685fe985a9ac9c2258e4200396543/$FILE/hotarirea%20301%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-SUPERBET%20RETAIL%20SA.htm",
+            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/b238ef336112764bc2258e4200394710/$FILE/hotarirea%20300%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-SUPERBET%20RETAIL%20SA%20-Stirbei%20Voda%205.htm",
+            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/05ec8dfa0069cbdfc2258e420038aae6/$FILE/hotarirea%20293%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20CELLADA%20SRL%20punct%20de%20lucru%20bd%20Tineretului%20nr%206-8.htm",
+            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/fb271afc2637e706c2258e4200389af3/$FILE/hotarirea%20292%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20BAUM%20SRL%20-%20str%20Mr%20VPopescu%20bloc%20P2.htm",
+            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/2005ffb776813bcfc2258e4200388766/$FILE/hotarirea%20291%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20pariuri%20%20BAUM%20SRL%20-%20str%20%20Mihai%20Eminescu%20nr%2039.htm",
+            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/0766f96fb1ca2470c2258e42003871dc/$FILE/hotarirea%20290%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20pariuri%20%20BAUM%20SRL%20-%20str%20%20CLT%20nr186.htm",
+            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/34b83e05bd314619c2258e4200385c9a/$FILE/hotarirea%20289%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20pariuri%20%20BAUM%20SRL%20-%20str%20%20Nicolae%20Iorga%20nr%201.htm",
+            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/3d6cbd17864a4478c2258e420038491d/$FILE/hotarirea%20288%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20pariuri%20SUPERBET%20RETAIL%20SA%20-%20Calea%20lui%20Traian%20bl%20S9.htm"
           ]
         },
         "claims": [
@@ -68,7 +144,18 @@
             "kind": "fact",
             "text": "În grupul celor mai recente 25 de hotărâri afișate în registrul oficial, 11 acte din 23.07.2026 au ca obiect acordarea unei autorizații anuale de funcționare pentru jocuri de noroc.",
             "source_urls": [
-              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500"
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/59cd750a582ac29bc2258e4200399d91/$FILE/hotarirea%20304%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20slot%20machine%20pentru%20jocuri%20de%20noroc%20CARADUNE%20SRL%20strada%20Lucian%20Blaga%20nr%201A.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/c32f780f6452a3d0c2258e4200398c67/$FILE/hotarirea%20303%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20CARADUNE%20SRL%20strada%20Florilor%20nr%2022.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/78608e4dca0f0ae8c2258e4200397b6e/$FILE/hotarirea%20302%20-%2023%20iulie%202026%20-%20%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20CARADUNE%20SRL%20strada%20Grigore%20Sinescu%20nr%202.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/abc685fe985a9ac9c2258e4200396543/$FILE/hotarirea%20301%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-SUPERBET%20RETAIL%20SA.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/b238ef336112764bc2258e4200394710/$FILE/hotarirea%20300%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-SUPERBET%20RETAIL%20SA%20-Stirbei%20Voda%205.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/05ec8dfa0069cbdfc2258e420038aae6/$FILE/hotarirea%20293%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20CELLADA%20SRL%20punct%20de%20lucru%20bd%20Tineretului%20nr%206-8.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/fb271afc2637e706c2258e4200389af3/$FILE/hotarirea%20292%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20BAUM%20SRL%20-%20str%20Mr%20VPopescu%20bloc%20P2.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/2005ffb776813bcfc2258e4200388766/$FILE/hotarirea%20291%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20pariuri%20%20BAUM%20SRL%20-%20str%20%20Mihai%20Eminescu%20nr%2039.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/0766f96fb1ca2470c2258e42003871dc/$FILE/hotarirea%20290%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20pariuri%20%20BAUM%20SRL%20-%20str%20%20CLT%20nr186.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/34b83e05bd314619c2258e4200385c9a/$FILE/hotarirea%20289%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20pariuri%20%20BAUM%20SRL%20-%20str%20%20Nicolae%20Iorga%20nr%201.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/3d6cbd17864a4478c2258e420038491d/$FILE/hotarirea%20288%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20pariuri%20SUPERBET%20RETAIL%20SA%20-%20Calea%20lui%20Traian%20bl%20S9.htm"
             ]
           },
           {
@@ -77,7 +164,18 @@
             "kind": "documented_context",
             "text": "Hotărârile din acest grup nominalizează BAUM SRL, CARADUNE SRL, CELLADA SRL, SUPERBET RETAIL SA; fiecare act este urmărit separat prin documentul oficial al hotărârii, nu doar prin titlul din registru.",
             "source_urls": [
-              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500"
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/59cd750a582ac29bc2258e4200399d91/$FILE/hotarirea%20304%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20slot%20machine%20pentru%20jocuri%20de%20noroc%20CARADUNE%20SRL%20strada%20Lucian%20Blaga%20nr%201A.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/c32f780f6452a3d0c2258e4200398c67/$FILE/hotarirea%20303%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20CARADUNE%20SRL%20strada%20Florilor%20nr%2022.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/78608e4dca0f0ae8c2258e4200397b6e/$FILE/hotarirea%20302%20-%2023%20iulie%202026%20-%20%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20CARADUNE%20SRL%20strada%20Grigore%20Sinescu%20nr%202.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/abc685fe985a9ac9c2258e4200396543/$FILE/hotarirea%20301%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-SUPERBET%20RETAIL%20SA.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/b238ef336112764bc2258e4200394710/$FILE/hotarirea%20300%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-SUPERBET%20RETAIL%20SA%20-Stirbei%20Voda%205.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/05ec8dfa0069cbdfc2258e420038aae6/$FILE/hotarirea%20293%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20CELLADA%20SRL%20punct%20de%20lucru%20bd%20Tineretului%20nr%206-8.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/fb271afc2637e706c2258e4200389af3/$FILE/hotarirea%20292%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20BAUM%20SRL%20-%20str%20Mr%20VPopescu%20bloc%20P2.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/2005ffb776813bcfc2258e4200388766/$FILE/hotarirea%20291%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20pariuri%20%20BAUM%20SRL%20-%20str%20%20Mihai%20Eminescu%20nr%2039.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/0766f96fb1ca2470c2258e42003871dc/$FILE/hotarirea%20290%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20pariuri%20%20BAUM%20SRL%20-%20str%20%20CLT%20nr186.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/34b83e05bd314619c2258e4200385c9a/$FILE/hotarirea%20289%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20pariuri%20%20BAUM%20SRL%20-%20str%20%20Nicolae%20Iorga%20nr%201.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/3d6cbd17864a4478c2258e420038491d/$FILE/hotarirea%20288%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20pariuri%20SUPERBET%20RETAIL%20SA%20-%20Calea%20lui%20Traian%20bl%20S9.htm"
             ]
           },
           {
@@ -86,7 +184,18 @@
             "kind": "reader_service",
             "text": "O autorizație anuală de funcționare nu este clasificată de VÂLCEA CLAR drept dovadă a deschiderii unei săli noi; pentru această concluzie este necesar istoricul fiecărui punct de lucru și al autorizațiilor sale.",
             "source_urls": [
-              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500"
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/59cd750a582ac29bc2258e4200399d91/$FILE/hotarirea%20304%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20slot%20machine%20pentru%20jocuri%20de%20noroc%20CARADUNE%20SRL%20strada%20Lucian%20Blaga%20nr%201A.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/c32f780f6452a3d0c2258e4200398c67/$FILE/hotarirea%20303%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20CARADUNE%20SRL%20strada%20Florilor%20nr%2022.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/78608e4dca0f0ae8c2258e4200397b6e/$FILE/hotarirea%20302%20-%2023%20iulie%202026%20-%20%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20CARADUNE%20SRL%20strada%20Grigore%20Sinescu%20nr%202.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/abc685fe985a9ac9c2258e4200396543/$FILE/hotarirea%20301%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-SUPERBET%20RETAIL%20SA.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/b238ef336112764bc2258e4200394710/$FILE/hotarirea%20300%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-SUPERBET%20RETAIL%20SA%20-Stirbei%20Voda%205.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/05ec8dfa0069cbdfc2258e420038aae6/$FILE/hotarirea%20293%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20CELLADA%20SRL%20punct%20de%20lucru%20bd%20Tineretului%20nr%206-8.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/fb271afc2637e706c2258e4200389af3/$FILE/hotarirea%20292%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20BAUM%20SRL%20-%20str%20Mr%20VPopescu%20bloc%20P2.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/2005ffb776813bcfc2258e4200388766/$FILE/hotarirea%20291%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20pariuri%20%20BAUM%20SRL%20-%20str%20%20Mihai%20Eminescu%20nr%2039.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/0766f96fb1ca2470c2258e42003871dc/$FILE/hotarirea%20290%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20pariuri%20%20BAUM%20SRL%20-%20str%20%20CLT%20nr186.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/34b83e05bd314619c2258e4200385c9a/$FILE/hotarirea%20289%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20pariuri%20%20BAUM%20SRL%20-%20str%20%20Nicolae%20Iorga%20nr%201.htm",
+              "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/3d6cbd17864a4478c2258e420038491d/$FILE/hotarirea%20288%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20pariuri%20SUPERBET%20RETAIL%20SA%20-%20Calea%20lui%20Traian%20bl%20S9.htm"
             ]
           }
         ]
@@ -96,25 +205,15 @@
         "source_monitor": "council-watch-rm-valcea",
         "cluster_date": "2026-07-23",
         "register_url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
-        "register_sha256": "d955f02fd1ec1702bcd382e656f00df2ee15fdfa07dfbff21e55290f5bce9979",
+        "register_sha256": "c3bbebb2fa73d79f25b6b4e0bc8607dd414d866b30bdf7441687a6f91ca4f2f2",
         "latest_decision_window": 25,
         "matching_decisions": 11,
-        "verified_official_documents": 2,
-        "coverage": 0.181818,
-        "evidence_complete": false,
+        "verified_official_documents": 11,
+        "coverage": 1.0,
+        "evidence_complete": true,
         "register_fetch_error": null,
         "missing_attachment_decision_numbers": [],
-        "failed_document_decision_numbers": [
-          288,
-          289,
-          290,
-          291,
-          292,
-          293,
-          300,
-          301,
-          302
-        ],
+        "failed_document_decision_numbers": [],
         "decision_numbers": [
           304,
           303,
@@ -181,11 +280,22 @@
             "title": "acordare autorizatie anuala de functionare pentru jocuri de noroc CARADUNE SRL strada Grigore Sinescu nr 2",
             "candidate_url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn/78608E4DCA0F0AE8C2258E4200397B6E?OpenDocument",
             "error": null,
-            "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn/78608E4DCA0F0AE8C2258E4200397B6E?OpenDocument",
+            "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/78608e4dca0f0ae8c2258e4200397b6e/$FILE/hotarirea%20302%20-%2023%20iulie%202026%20-%20%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20CARADUNE%20SRL%20strada%20Grigore%20Sinescu%20nr%202.htm",
             "http_status": 200,
-            "source_sha256": "98fcd633fb7bd2760302c03ba7e7154cc283bc8c47c022c3835aff967eea52d3",
-            "verified": false,
-            "reason": "OFFICIAL_DOCUMENT_SEMANTICS_INCOMPLETE"
+            "source_sha256": "d25c0e65d1983f81ea0f632e6a7e4331bb057e8985f6f661aaa553fb648eca58",
+            "operative_article_count": 9,
+            "operative_article_sha256": [
+              "9d17f9e92dfcda2c7f0c44ff3c2ec8a3725fbe9109ece3332b291a9bdf4fa002",
+              "2a4bf5e3803a9bf899e73b2581d65d6bf6bc43741669f8ba627a1f00d2849003",
+              "161303cb9a2bdfdaee7b47b39865506cbf496ade3170ddcd3213644249bfd0b7",
+              "080867b9756cc93294cd0aee2b7039cdce1b2db227be5f158d4d62950972648b",
+              "dea2be1eceb52dd2597901ea5165ec3beeec6349f65052c7b89007a3df9e8e43",
+              "60e53fafb438fae38f39e7740beeb265cb65831c070322ddc340905c67c8da7b",
+              "9891136063f64d01925945ebeb3682f1b3d6c3eba8950a1e9686743668c0e244",
+              "98e456d4eb4f626d631585048dec49212890ad61de4e086ec98b1f0bc8d01e21"
+            ],
+            "verified": true,
+            "reason": "PASS_VIA_OFFICIAL_ATTACHMENT"
           },
           {
             "decision_number": 301,
@@ -193,11 +303,22 @@
             "title": "acordare autorizatie anuala de functionare pentru jocuri de noroc - pariuri SUPERBET RETAIL SA -Stirbei Voda 5",
             "candidate_url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn/ABC685FE985A9AC9C2258E4200396543?OpenDocument",
             "error": null,
-            "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn/ABC685FE985A9AC9C2258E4200396543?OpenDocument",
+            "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/abc685fe985a9ac9c2258e4200396543/$FILE/hotarirea%20301%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-SUPERBET%20RETAIL%20SA.htm",
             "http_status": 200,
-            "source_sha256": "7313c69d000a4f968709d1b4d3f2b9a54f22525f9d087a2d46b8428741d39d97",
-            "verified": false,
-            "reason": "OFFICIAL_DOCUMENT_SEMANTICS_INCOMPLETE"
+            "source_sha256": "935778c639bc88c438f35deb02da55bf1b2e846145a952f9e6cbc06f7336bc1e",
+            "operative_article_count": 9,
+            "operative_article_sha256": [
+              "9d17f9e92dfcda2c7f0c44ff3c2ec8a3725fbe9109ece3332b291a9bdf4fa002",
+              "2a4bf5e3803a9bf899e73b2581d65d6bf6bc43741669f8ba627a1f00d2849003",
+              "161303cb9a2bdfdaee7b47b39865506cbf496ade3170ddcd3213644249bfd0b7",
+              "312020a2e9807f328a7d253f092bba8b0204cff6673e4ba462b83b599aa5f087",
+              "c3dbbf2e6f4ca2e5f18d72504b199bba38f4fa6e2d93bcb9dd051767f2f82c59",
+              "60e53fafb438fae38f39e7740beeb265cb65831c070322ddc340905c67c8da7b",
+              "9891136063f64d01925945ebeb3682f1b3d6c3eba8950a1e9686743668c0e244",
+              "98e456d4eb4f626d631585048dec49212890ad61de4e086ec98b1f0bc8d01e21"
+            ],
+            "verified": true,
+            "reason": "PASS_VIA_OFFICIAL_ATTACHMENT"
           },
           {
             "decision_number": 300,
@@ -205,11 +326,22 @@
             "title": "acordare autorizatie anuala de functionare pentru jocuri de noroc - slot machine SUPERBET RETAIL SA - str. Stirbei Voda nr.5",
             "candidate_url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn/B238EF336112764BC2258E4200394710?OpenDocument",
             "error": null,
-            "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn/B238EF336112764BC2258E4200394710?OpenDocument",
+            "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/b238ef336112764bc2258e4200394710/$FILE/hotarirea%20300%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-SUPERBET%20RETAIL%20SA%20-Stirbei%20Voda%205.htm",
             "http_status": 200,
-            "source_sha256": "9823ac282376903ff7fe242932827cd62f6e20b89d9bcc6459ef85ffcae0fa71",
-            "verified": false,
-            "reason": "OFFICIAL_DOCUMENT_SEMANTICS_INCOMPLETE"
+            "source_sha256": "9efc149d17ced359790a00e34899e10bc87757e8a8b3d14ea08bd3730d9fe3ae",
+            "operative_article_count": 9,
+            "operative_article_sha256": [
+              "9d17f9e92dfcda2c7f0c44ff3c2ec8a3725fbe9109ece3332b291a9bdf4fa002",
+              "2a4bf5e3803a9bf899e73b2581d65d6bf6bc43741669f8ba627a1f00d2849003",
+              "161303cb9a2bdfdaee7b47b39865506cbf496ade3170ddcd3213644249bfd0b7",
+              "76ed37df1f5cfd93566c9dbca47ff29c04661f874a7192ebeef9406afb0fea47",
+              "a6f5b9c48b51bbae733758c6cc5d24ba740ea70383828125255b73c6b5e07528",
+              "60e53fafb438fae38f39e7740beeb265cb65831c070322ddc340905c67c8da7b",
+              "9891136063f64d01925945ebeb3682f1b3d6c3eba8950a1e9686743668c0e244",
+              "98e456d4eb4f626d631585048dec49212890ad61de4e086ec98b1f0bc8d01e21"
+            ],
+            "verified": true,
+            "reason": "PASS_VIA_OFFICIAL_ATTACHMENT"
           },
           {
             "decision_number": 293,
@@ -217,11 +349,22 @@
             "title": "acordare autorizatie anuala de functionare pentru jocuri de noroc CELLADA SRL punct de lucru bd Tineretului nr 6-8",
             "candidate_url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn/05EC8DFA0069CBDFC2258E420038AAE6?OpenDocument",
             "error": null,
-            "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn/05EC8DFA0069CBDFC2258E420038AAE6?OpenDocument",
+            "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/05ec8dfa0069cbdfc2258e420038aae6/$FILE/hotarirea%20293%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20CELLADA%20SRL%20punct%20de%20lucru%20bd%20Tineretului%20nr%206-8.htm",
             "http_status": 200,
-            "source_sha256": "d5bc73d26406c53fb456c31baf74d1602633b6cd515df760bf6e41a737ecd9bc",
-            "verified": false,
-            "reason": "OFFICIAL_DOCUMENT_SEMANTICS_INCOMPLETE"
+            "source_sha256": "8368c13e3e4a4ca0c3ce21eafd3cea40aadc4e59adf97802440b9582fcb934c7",
+            "operative_article_count": 9,
+            "operative_article_sha256": [
+              "9d17f9e92dfcda2c7f0c44ff3c2ec8a3725fbe9109ece3332b291a9bdf4fa002",
+              "2a4bf5e3803a9bf899e73b2581d65d6bf6bc43741669f8ba627a1f00d2849003",
+              "161303cb9a2bdfdaee7b47b39865506cbf496ade3170ddcd3213644249bfd0b7",
+              "7313cee2241ea9239f2be1b6d328786cc6184d9f450812df6dabd9c85fbe5bd9",
+              "3109d0bc0c773c516d27ab3215aaea2f15b9fe34d5a927268f592ed3a5d5277a",
+              "60e53fafb438fae38f39e7740beeb265cb65831c070322ddc340905c67c8da7b",
+              "9891136063f64d01925945ebeb3682f1b3d6c3eba8950a1e9686743668c0e244",
+              "98e456d4eb4f626d631585048dec49212890ad61de4e086ec98b1f0bc8d01e21"
+            ],
+            "verified": true,
+            "reason": "PASS_VIA_OFFICIAL_ATTACHMENT"
           },
           {
             "decision_number": 292,
@@ -229,11 +372,22 @@
             "title": "acordare autorizatie anuala de functionare pentru jocuri de noroc - pariuri BAUM SRL - str. Maior V. Popescu bloc P2",
             "candidate_url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn/FB271AFC2637E706C2258E4200389AF3?OpenDocument",
             "error": null,
-            "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn/FB271AFC2637E706C2258E4200389AF3?OpenDocument",
+            "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/fb271afc2637e706c2258e4200389af3/$FILE/hotarirea%20292%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20BAUM%20SRL%20-%20str%20Mr%20VPopescu%20bloc%20P2.htm",
             "http_status": 200,
-            "source_sha256": "c27a053eba848fb92811ec5dc27e1829c11fd887d2d807e52061dd849cdb18a2",
-            "verified": false,
-            "reason": "OFFICIAL_DOCUMENT_SEMANTICS_INCOMPLETE"
+            "source_sha256": "454b209d79f13fb872846f1ba4714033b4816f06cec286da36ea1dcd9cfff7c2",
+            "operative_article_count": 9,
+            "operative_article_sha256": [
+              "9d17f9e92dfcda2c7f0c44ff3c2ec8a3725fbe9109ece3332b291a9bdf4fa002",
+              "2a4bf5e3803a9bf899e73b2581d65d6bf6bc43741669f8ba627a1f00d2849003",
+              "161303cb9a2bdfdaee7b47b39865506cbf496ade3170ddcd3213644249bfd0b7",
+              "a0f5e6a8b83928a555a1281cb964eea945f07710d1135daff60f7d8598d07785",
+              "3fae1682ea7d2246a1c29b9e88afe556b7ca937ce8f7077a51133386ea690d8b",
+              "60e53fafb438fae38f39e7740beeb265cb65831c070322ddc340905c67c8da7b",
+              "9891136063f64d01925945ebeb3682f1b3d6c3eba8950a1e9686743668c0e244",
+              "98e456d4eb4f626d631585048dec49212890ad61de4e086ec98b1f0bc8d01e21"
+            ],
+            "verified": true,
+            "reason": "PASS_VIA_OFFICIAL_ATTACHMENT"
           },
           {
             "decision_number": 291,
@@ -241,11 +395,22 @@
             "title": "acordare autorizatie anuala de functionare pentru jocuri de noroc - pariuri BAUM SRL - str. Mihai Eminescu nr.39",
             "candidate_url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn/2005FFB776813BCFC2258E4200388766?OpenDocument",
             "error": null,
-            "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn/2005FFB776813BCFC2258E4200388766?OpenDocument",
+            "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/2005ffb776813bcfc2258e4200388766/$FILE/hotarirea%20291%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20pariuri%20%20BAUM%20SRL%20-%20str%20%20Mihai%20Eminescu%20nr%2039.htm",
             "http_status": 200,
-            "source_sha256": "4af696ceda19feb20516de58897a3d235ddb395f5e29ffd2bdce398d0a3d6d57",
-            "verified": false,
-            "reason": "OFFICIAL_DOCUMENT_SEMANTICS_INCOMPLETE"
+            "source_sha256": "49a4cf7d9141d4535bda9ba6b6c52efc27202602f61d9dd6344ad36edd29fda4",
+            "operative_article_count": 9,
+            "operative_article_sha256": [
+              "9d17f9e92dfcda2c7f0c44ff3c2ec8a3725fbe9109ece3332b291a9bdf4fa002",
+              "2a4bf5e3803a9bf899e73b2581d65d6bf6bc43741669f8ba627a1f00d2849003",
+              "161303cb9a2bdfdaee7b47b39865506cbf496ade3170ddcd3213644249bfd0b7",
+              "9ae204054bbd6c043e150973e391946ef348a11db6e257f869ba40fd9462bcfe",
+              "6195601677cfa025c5a70285b6191c98e5ac723ab73c45d4a2c992aec9218418",
+              "60e53fafb438fae38f39e7740beeb265cb65831c070322ddc340905c67c8da7b",
+              "9891136063f64d01925945ebeb3682f1b3d6c3eba8950a1e9686743668c0e244",
+              "98e456d4eb4f626d631585048dec49212890ad61de4e086ec98b1f0bc8d01e21"
+            ],
+            "verified": true,
+            "reason": "PASS_VIA_OFFICIAL_ATTACHMENT"
           },
           {
             "decision_number": 290,
@@ -253,11 +418,22 @@
             "title": "acordare autorizatie anuala de functionare pentru jocuri de noroc - pariuri BAUM SRL - str. CLT nr.186",
             "candidate_url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn/0766F96FB1CA2470C2258E42003871DC?OpenDocument",
             "error": null,
-            "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn/0766F96FB1CA2470C2258E42003871DC?OpenDocument",
+            "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/0766f96fb1ca2470c2258e42003871dc/$FILE/hotarirea%20290%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20pariuri%20%20BAUM%20SRL%20-%20str%20%20CLT%20nr186.htm",
             "http_status": 200,
-            "source_sha256": "6314ce947941faa7a82e670811d2615f130fcaaee48e75201f1ae3f00f80adea",
-            "verified": false,
-            "reason": "OFFICIAL_DOCUMENT_SEMANTICS_INCOMPLETE"
+            "source_sha256": "a93d0fd0d2decdc3ea0149ea0b3d84eae03b20a66a170b832fe5e10af944b9ca",
+            "operative_article_count": 9,
+            "operative_article_sha256": [
+              "9d17f9e92dfcda2c7f0c44ff3c2ec8a3725fbe9109ece3332b291a9bdf4fa002",
+              "2a4bf5e3803a9bf899e73b2581d65d6bf6bc43741669f8ba627a1f00d2849003",
+              "161303cb9a2bdfdaee7b47b39865506cbf496ade3170ddcd3213644249bfd0b7",
+              "033af635a1a5f88421cbe849e5b8c93e24fda704b4404446902d24f99f6e2440",
+              "18221a0602545a39b8c592b70be456eeeb30da6c437603df79e926c4d7c2e4a3",
+              "60e53fafb438fae38f39e7740beeb265cb65831c070322ddc340905c67c8da7b",
+              "9891136063f64d01925945ebeb3682f1b3d6c3eba8950a1e9686743668c0e244",
+              "98e456d4eb4f626d631585048dec49212890ad61de4e086ec98b1f0bc8d01e21"
+            ],
+            "verified": true,
+            "reason": "PASS_VIA_OFFICIAL_ATTACHMENT"
           },
           {
             "decision_number": 289,
@@ -265,11 +441,22 @@
             "title": "acordare autorizatie anuala de functionare pentru jocuri de noroc - pariuri BAUM SRL - str. Nicolae Iorga nr.1",
             "candidate_url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn/34B83E05BD314619C2258E4200385C9A?OpenDocument",
             "error": null,
-            "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn/34B83E05BD314619C2258E4200385C9A?OpenDocument",
+            "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/34b83e05bd314619c2258e4200385c9a/$FILE/hotarirea%20289%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20pariuri%20%20BAUM%20SRL%20-%20str%20%20Nicolae%20Iorga%20nr%201.htm",
             "http_status": 200,
-            "source_sha256": "d9cf6539af0e8f14c1c7ac0375a1b5556a4a19d921fa24875fda8ac1578d4a26",
-            "verified": false,
-            "reason": "OFFICIAL_DOCUMENT_SEMANTICS_INCOMPLETE"
+            "source_sha256": "c81abf47e1331f972e619905f04629efb6b200f629c6e5ccfac46875f98c28e8",
+            "operative_article_count": 9,
+            "operative_article_sha256": [
+              "9d17f9e92dfcda2c7f0c44ff3c2ec8a3725fbe9109ece3332b291a9bdf4fa002",
+              "2a4bf5e3803a9bf899e73b2581d65d6bf6bc43741669f8ba627a1f00d2849003",
+              "161303cb9a2bdfdaee7b47b39865506cbf496ade3170ddcd3213644249bfd0b7",
+              "26bd88d78a59464c376990fff3639f909ea550a99e2686a86097f7ac562ee20a",
+              "3fae1682ea7d2246a1c29b9e88afe556b7ca937ce8f7077a51133386ea690d8b",
+              "60e53fafb438fae38f39e7740beeb265cb65831c070322ddc340905c67c8da7b",
+              "9891136063f64d01925945ebeb3682f1b3d6c3eba8950a1e9686743668c0e244",
+              "98e456d4eb4f626d631585048dec49212890ad61de4e086ec98b1f0bc8d01e21"
+            ],
+            "verified": true,
+            "reason": "PASS_VIA_OFFICIAL_ATTACHMENT"
           },
           {
             "decision_number": 288,
@@ -277,11 +464,22 @@
             "title": "acordare autorizatie anuala de functionare pentru jocuri de noroc - pariuri SUPERBET RETAIL SA - Calea lui Traian bl.S9",
             "candidate_url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn/3D6CBD17864A4478C2258E420038491D?OpenDocument",
             "error": null,
-            "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn/3D6CBD17864A4478C2258E420038491D?OpenDocument",
+            "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/3d6cbd17864a4478c2258e420038491d/$FILE/hotarirea%20288%20-%2023%20iulie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20pariuri%20SUPERBET%20RETAIL%20SA%20-%20Calea%20lui%20Traian%20bl%20S9.htm",
             "http_status": 200,
-            "source_sha256": "cdcec725405e8b30dcaf023a71d69f22e78a9c090433f0b3c12f73bc9c8f862e",
-            "verified": false,
-            "reason": "OFFICIAL_DOCUMENT_SEMANTICS_INCOMPLETE"
+            "source_sha256": "b233aaf6d5beb461b626a710808b9ad0045848827263836687e7d072ad7db0cf",
+            "operative_article_count": 9,
+            "operative_article_sha256": [
+              "9d17f9e92dfcda2c7f0c44ff3c2ec8a3725fbe9109ece3332b291a9bdf4fa002",
+              "2a4bf5e3803a9bf899e73b2581d65d6bf6bc43741669f8ba627a1f00d2849003",
+              "161303cb9a2bdfdaee7b47b39865506cbf496ade3170ddcd3213644249bfd0b7",
+              "44d852fc002f3f9f9c4e818c7398ebb861eb26379c0b7977b8e6b626940103a1",
+              "13e8eace8d4a51d0244dab26a362dee64191003412ac32349fc9580da46f4c22",
+              "60e53fafb438fae38f39e7740beeb265cb65831c070322ddc340905c67c8da7b",
+              "9891136063f64d01925945ebeb3682f1b3d6c3eba8950a1e9686743668c0e244",
+              "98e456d4eb4f626d631585048dec49212890ad61de4e086ec98b1f0bc8d01e21"
+            ],
+            "verified": true,
+            "reason": "PASS_VIA_OFFICIAL_ATTACHMENT"
           }
         ],
         "never_infer_new_venue_from_annual_authorization": true
@@ -290,8 +488,8 @@
   ],
   "stats": {
     "kernel_count": 1,
-    "verified": 0,
-    "held": 1
+    "verified": 1,
+    "held": 0
   },
   "policy": {
     "monitor_signal_is_not_fact": true,
@@ -301,5 +499,5 @@
     "writer_claim_level_provenance_required": true,
     "publication_authority": "ONLY_VERIFIED_KERNELS_THROUGH_NORMAL_STORY_GATE"
   },
-  "registry_fingerprint_sha256": "a5300271b3fec400b28753e19cfa205f5ab101ec2219eee3747a6dc74bfd28b4"
+  "registry_fingerprint_sha256": "bc3a1a2e15b38e5ae96b338750e74beafb1f9601e4eeb861fbb1f00b22b1b629"
 }
