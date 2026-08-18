@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.4",
+  "schema_version": "1.5",
   "contract": "LOCAL_NEWS_OS_SIGNAL_RADAR_CONFIG_V1",
   "instance_id": "valcea",
   "publication_authority": "NONE",
@@ -109,19 +109,19 @@
       "verification_targets": [{"ref_type": "manual_watch_source_id", "id": "primaria-dragasani-anunturi-publice"}]
     },
     {
-      "id": "education",
-      "keywords": ["școal*", "scoal*", "școli", "scoli", "elev*", "profesor*", "director*", "posturi vacante", "bacalaureat", "evaluarea", "educa*", "liceu"],
-      "verification_targets": [
-        {"ref_type": "news_source_id", "id": "ccd-valcea-noutati"},
-        {"ref_type": "manual_watch_source_id", "id": "isj-valcea-comunicate"}
-      ]
-    },
-    {
       "id": "health",
       "keywords": ["spital", "sănăt*", "sanat*", "medical*", "medic", "pacient*", "ambulan*"],
       "verification_targets": [
         {"ref_type": "news_source_id", "id": "dsp-valcea-anunturi"},
         {"ref_type": "news_source_id", "id": "spital-horezu-noutati"}
+      ]
+    },
+    {
+      "id": "education",
+      "keywords": ["școal*", "scoal*", "școli", "scoli", "elev*", "profesor*", "director*", "posturi vacante", "bacalaureat", "evaluarea", "educa*", "liceu"],
+      "verification_targets": [
+        {"ref_type": "news_source_id", "id": "ccd-valcea-noutati"},
+        {"ref_type": "manual_watch_source_id", "id": "isj-valcea-comunicate"}
       ]
     },
     {
