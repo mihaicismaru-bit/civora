@@ -2,18 +2,18 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-18T15:34:19+03:00",
+  "generated_at": "2026-08-18T15:37:29+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-18T15:32:24+03:00",
+  "queue_generated_at": "2026-08-18T15:35:58+03:00",
   "task_count": 52,
   "primary_match_count": 0,
   "no_match_count": 27,
   "unrouted_count": 25,
-  "target_count": 15,
-  "targets_ok": 13,
+  "target_count": 16,
+  "targets_ok": 14,
   "results": [
     {
       "signal_id": "33b372fe66bc237202009852",
@@ -155,6 +155,17 @@
       "signal_published_at": "2026-08-18T12:03:39+03:00",
       "verification_route_id": "fire_rescue_alert",
       "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "isu-valcea-stiri-locale",
+            "name": "ISU Vâlcea — Știri locale",
+            "url": "https://isuvl.igsu.ro/stiri-locale"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 7
+        },
         {
           "target": {
             "ref_type": "news_source_id",
