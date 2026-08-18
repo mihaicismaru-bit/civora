@@ -1,0 +1,76 @@
+name: VÂLCEA CLAR Person Candidate Discovery
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["VÂLCEA CLAR Live Newsroom"]
+    types: [completed]
+    branches: [main]
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/editorial/facts_registry.json'
+      - 'valcea-clar/editorial/person_profile_seeds.json'
+      - 'valcea-clar/scripts/discover_person_candidates.py'
+      - '.github/workflows/valcea-clar-person-candidate-discovery.yml'
+  schedule:
+    - cron: '17 */6 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-person-candidate-discovery
+  cancel-in-progress: true
+
+jobs:
+  discover:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Validate candidate radar
+        run: |
+          python -m py_compile valcea-clar/scripts/discover_person_candidates.py
+          python valcea-clar/scripts/discover_person_candidates.py --self-test
+      - name: Build candidate queue
+        run: python valcea-clar/scripts/discover_person_candidates.py
+      - name: Enforce no-publication boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('valcea-clar/editorial/person_profile_candidate_queue.json').read_text(encoding='utf-8'))
+          assert d['publication_authority']=='NONE'
+          assert d['policy']['auto_profile_creation'] is False
+          for row in d.get('candidates',[]):
+              assert row['identity_status']=='UNRESOLVED'
+              assert row['publication_authority']=='NONE'
+              assert row['public_projection'] is False
+              assert row['auto_profile_creation'] is False
+          print('PERSON_CANDIDATE_FAIL_CLOSED_PASS')
+          PY
+      - name: Persist candidate queue conflict-safe
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp valcea-clar/editorial/person_profile_candidate_queue.json /tmp/person-profile-candidates.json
+          git config user.name 'vâlcea-clar-person-radar[bot]'
+          git config user.email 'valcea-clar-person-radar@users.noreply.github.com'
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/person-profile-candidates.json valcea-clar/editorial/person_profile_candidate_queue.json
+            git add valcea-clar/editorial/person_profile_candidate_queue.json
+            if git diff --cached --quiet; then exit 0; fi
+            git commit -m 'Refresh VÂLCEA CLAR public-person candidate queue'
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1
