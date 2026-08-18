@@ -12,7 +12,7 @@ on:
 
 permissions:
   contents: write
-  actions: read
+  actions: write
 
 concurrency:
   group: valcea-clar-primary-source-service-kernels
@@ -74,3 +74,14 @@ jobs:
 
           echo 'Could not persist verified service kernel conflict-safe.' >&2
           exit 1
+
+      - name: Dispatch canonical Live Newsroom
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Commits created with GITHUB_TOKEN intentionally do not fan out into
+          # new push-triggered workflow runs. Use workflow_dispatch, which GitHub
+          # explicitly allows for chained workflow execution, so every verified
+          # primary-source kernel reaches the canonical publication gate.
+          gh workflow run valcea-clar-newsroom-live.yml --repo "$GITHUB_REPOSITORY" --ref main
+          echo 'Live Newsroom dispatch accepted.'
