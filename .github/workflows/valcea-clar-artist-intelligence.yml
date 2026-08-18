@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - 'valcea-clar/editorial/festival_lineups_2026.json'
+      - 'valcea-clar/editorial/performing_arts_people_2026.json'
       - 'valcea-clar/scripts/enrich_festival_artists.py'
       - 'valcea-clar/scripts/render_artist_pages.py'
       - '.github/workflows/valcea-clar-artist-intelligence.yml'
@@ -22,7 +23,7 @@ concurrency:
 jobs:
   enrich:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:
@@ -66,7 +67,7 @@ jobs:
               echo 'Artist intelligence already present on main.'
               exit 0
             fi
-            git commit -m 'Refresh VÂLCEA CLAR festival artist profiles'
+            git commit -m 'Refresh VÂLCEA CLAR artist profiles'
             if git push origin HEAD:main; then exit 0; fi
             sleep $((attempt * 2))
           done
