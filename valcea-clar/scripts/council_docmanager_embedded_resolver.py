@@ -3,12 +3,13 @@
 
 The municipality's Lotus/DocManager pages can expose their real `$FILE` HTML
 attachment through non-anchor attributes (for example iframe/object/input/form
-metadata). The base verifier intentionally follows only canonical official links;
-this adapter broadens only that *HTML extraction surface* while preserving the
-same host, document UNID, semantic verification and 100% evidence gates.
+metadata) or as a literal URL inside inert JavaScript source. The base verifier
+intentionally follows only canonical official links; this adapter broadens only
+that *HTML extraction surface* while preserving the same host, document UNID,
+semantic verification and 100% evidence gates.
 
-JavaScript is never executed. No cross-host URL, unrelated Lotus document or
-non-HTML attachment is admitted.
+JavaScript is never executed. Only bounded literal strings are inspected. No
+cross-host URL, unrelated Lotus document or non-HTML attachment is admitted.
 """
 from __future__ import annotations
 
@@ -38,6 +39,9 @@ EMBEDDED_ATTRS = {
     "data-document",
 }
 QUOTED_TARGET = re.compile(r"(?P<q>['\"])(?P<target>[^'\"]*\$FILE[^'\"]+)(?P=q)", re.I)
+RAW_QUOTED_VALUE = re.compile(r"(?P<q>['\"])(?P<target>[^'\"]{1,2000})(?P=q)", re.S)
+MAX_RAW_QUOTED_VALUES = 2000
+MAX_ATTACHMENT_LINKS = 8
 
 
 class EmbeddedTargetParser(HTMLParser):
@@ -96,20 +100,59 @@ def _value_candidates(value: str) -> list[str]:
     return list(dict.fromkeys(candidates))
 
 
-def embedded_attachment_links(page_url: str, body: str) -> list[dict[str, str]]:
-    parser = EmbeddedTargetParser()
-    parser.feed(body)
+def raw_quoted_attachment_links(page_url: str, body: str) -> list[dict[str, str]]:
+    """Read inert quoted `$FILE` literals from the raw page without executing JS.
+
+    This catches Lotus pages that construct the viewer target in a script body
+    instead of an element attribute. Every literal still has to pass the same
+    official-host, Lotus-path, HTML-extension and exact-document-UNID checks.
+    """
+    text = html.unescape(str(body or ""))
     rows: list[dict[str, str]] = []
     seen: set[str] = set()
-    for value in parser.values:
-        for candidate in _value_candidates(value):
+    inspected = 0
+    for match in RAW_QUOTED_VALUE.finditer(text):
+        inspected += 1
+        if inspected > MAX_RAW_QUOTED_VALUES:
+            break
+        raw = match.group("target")
+        decoded = urllib.parse.unquote(raw)
+        if "$file" not in decoded.lower():
+            continue
+        for candidate in _value_candidates(raw):
             url = _eligible_attachment(page_url, candidate)
             if not url or url in seen:
                 continue
             seen.add(url)
             rows.append({"url": url, "text": ""})
-            if len(rows) >= 8:
+            if len(rows) >= MAX_ATTACHMENT_LINKS:
                 return rows
+    return rows
+
+
+def embedded_attachment_links(page_url: str, body: str) -> list[dict[str, str]]:
+    parser = EmbeddedTargetParser()
+    parser.feed(body)
+    rows: list[dict[str, str]] = []
+    seen: set[str] = set()
+
+    def admit(url: str | None) -> bool:
+        if not url or url in seen:
+            return False
+        seen.add(url)
+        rows.append({"url": url, "text": ""})
+        return len(rows) >= MAX_ATTACHMENT_LINKS
+
+    for value in parser.values:
+        for candidate in _value_candidates(value):
+            if admit(_eligible_attachment(page_url, candidate)):
+                return rows
+
+    # Script bodies are deliberately not handled by HTMLParser above. Inspect
+    # their literal strings only after normal attributes, never execute code.
+    for row in raw_quoted_attachment_links(page_url, body):
+        if admit(row["url"]):
+            return rows
     return rows
 
 
@@ -141,16 +184,21 @@ def self_test() -> None:
       <iframe src="/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/{unid}/$FILE/hotarirea 302 - 23 iulie 2026 - test.htm"></iframe>
       <object data="/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/{unid}/$FILE/hotarirea 302 - copie.html"></object>
       <input onclick="window.location='/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/{unid}/$FILE/hotarirea 302 - oficial.htm'" />
+      <script>
+        var hiddenViewer = '/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/{unid}/%24FILE/hotarirea%20302%20-%20script.htm';
+      </script>
       <input value="/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/{other}/$FILE/unrelated.htm" />
+      <script>var wrong = '/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/{other}/$FILE/wrong.htm';</script>
       <img src="https://example.test/not-official.htm" />
     </body></html>
     """
     links = embedded_attachment_links(base_url, body)
     urls = [row["url"] for row in links]
-    assert len(urls) == 3
+    assert len(urls) == 4
     assert all(_document_unid(url) == unid for url in urls)
     assert all("$FILE" in urllib.parse.unquote(url) for url in urls)
     assert not any(other.lower() in url.lower() for url in urls)
+    assert any("script.htm" in urllib.parse.unquote(url) for url in urls)
     combined = structural_parse_links(base_url, body)
     assert {row["url"] for row in combined}.issuperset(urls)
     print("VÂLCEA CLAR DocManager embedded attachment resolver self-test: PASS")
