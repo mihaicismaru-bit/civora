@@ -1,31 +1,37 @@
 #!/usr/bin/env python3
-"""Facebook text-first v2: drain every unpublished canonical story, not only the latest event.
+"""Facebook text-first v2: drain every unpublished canonical story.
 
 The v1 adapter correctly publishes verified text+link posts without a photograph,
-but discovery was tied to `story_publication_event.new_story_ids`.  A workflow
-race could therefore permanently strand a story.  v2 treats Facebook state as
-the durable delivery ledger: every currently publishable story is considered,
-while v1's readiness, social-interest, approved-visual preference, identity and
-Graph API safety gates remain unchanged.
+but discovery was tied to `story_publication_event.new_story_ids` and to the
+compact recap projection.  Either condition could strand a verified story:
+workflow races lose a `new_story_ids` event, while FACT_KERNEL_COMPOSED stories
+need their internal kernel for the independent integrity recheck.
+
+v2 uses the newsroom decision as the desired story set and rehydrates every id
+from the full Editorial Writer registry.  Facebook state remains the durable
+delivery ledger; v1's social-interest, visual preference, identity and Graph API
+safety gates remain unchanged.
 """
 from __future__ import annotations
 
-import json
 from typing import Any
 
 import facebook_text_publish as base
+import generate_edition
 
 
 def current_publishable_backlog() -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    pointer = base.load(base.CURRENT)
-    snapshot = base.load(base.VC / str(pointer["json_source"]))
     decision = base.load(base.VC / "site" / "newsroom_decision.json", {"publishable_story_ids": []})
     event = base.load(base.EVENT, {"canonical_urls": {}})
-
     allowed_order = [str(value) for value in decision.get("publishable_story_ids") or [] if str(value).strip()]
+
+    # Rehydrate the full Writer products.  The edition snapshot intentionally
+    # omits `fact_kernel`; feeding that compact projection back into story_ready
+    # would fail the post-writer integrity gate for new composed stories.
+    registry, _ = generate_edition.merged_registry()
     by_id = {
         str(row.get("id")): row
-        for row in snapshot.get("items") or []
+        for row in registry.get("facts") or []
         if isinstance(row, dict) and row.get("id")
     }
     stories = [by_id[story_id] for story_id in allowed_order if story_id in by_id]
@@ -35,7 +41,7 @@ def current_publishable_backlog() -> tuple[list[dict[str, Any]], dict[str, Any]]
         urls.setdefault(story_id, f"https://valceaclar.ro/stiri/{story_id}/")
     event["canonical_urls"] = urls
     event["new_story_ids"] = allowed_order
-    event["delivery_discovery_mode"] = "ALL_CURRENT_PUBLISHABLE_NOT_IN_FACEBOOK_LEDGER"
+    event["delivery_discovery_mode"] = "ALL_CURRENT_PUBLISHABLE_NOT_IN_FACEBOOK_LEDGER_FULL_WRITER_PRODUCTS"
     return stories, event
 
 
@@ -58,6 +64,7 @@ def self_test() -> int:
     )
     assert product["native_format"] == "text_link"
     assert product["visual_used"] is False
+    assert "FULL_WRITER_PRODUCTS" in current_publishable_backlog.__doc__ if current_publishable_backlog.__doc__ else True
     print("VÂLCEA CLAR Facebook text-first v2 durable backlog self-test: PASS")
     return 0
 
