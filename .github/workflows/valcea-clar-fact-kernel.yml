@@ -14,6 +14,7 @@ on:
       - 'valcea-clar/scripts/promote_fact_kernels.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
       - 'valcea-clar/scripts/scm_program_fact_kernel.py'
+      - 'valcea-clar/scripts/scm_program_structure_diagnostic.py'
       - 'valcea-clar/editorial/editorial_manual.json'
       - 'valcea-clar/site/indexing_routes.json'
       - 'local-news-os/core/indexing_assets.py'
@@ -29,6 +30,7 @@ on:
       - 'valcea-clar/scripts/promote_fact_kernels.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
       - 'valcea-clar/scripts/scm_program_fact_kernel.py'
+      - 'valcea-clar/scripts/scm_program_structure_diagnostic.py'
       - 'valcea-clar/editorial/editorial_manual.json'
       - 'valcea-clar/site/indexing_routes.json'
       - 'local-news-os/core/indexing_assets.py'
@@ -66,6 +68,7 @@ jobs:
             valcea-clar/scripts/promote_fact_kernels.py \
             valcea-clar/scripts/council_watch_rm_valcea.py \
             valcea-clar/scripts/scm_program_fact_kernel.py \
+            valcea-clar/scripts/scm_program_structure_diagnostic.py \
             local-news-os/core/indexing_assets.py
 
       - name: Test Fact Kernel contracts
@@ -78,6 +81,7 @@ jobs:
           python valcea-clar/scripts/council_docmanager_document_diagnostic.py --self-test
           python valcea-clar/scripts/promote_fact_kernels.py --self-test
           python valcea-clar/scripts/scm_program_fact_kernel.py --self-test
+          python valcea-clar/scripts/scm_program_structure_diagnostic.py --self-test
 
       - name: Validate current offline kernel state
         run: python valcea-clar/scripts/council_docmanager_embedded_resolver.py --check
@@ -115,6 +119,10 @@ jobs:
               f.write(f'count={count}\n')
           PY
 
+      - name: Capture SCM live markup structure
+        if: github.event_name != 'pull_request'
+        run: python valcea-clar/scripts/scm_program_structure_diagnostic.py
+
       - name: Build next SCM official-program service kernel
         id: scm
         if: github.event_name != 'pull_request'
@@ -128,6 +136,7 @@ jobs:
           row=json.loads(Path('/tmp/scm-program-kernel.json').read_text(encoding='utf-8'))
           with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
               f.write(f'changed={"true" if row.get("changed") else "false"}\n')
+              f.write(f'events_parsed={int(row.get("events_parsed") or 0)}\n')
               if row.get('fact_id'):
                   f.write(f'fact_id={row["fact_id"]}\n')
           PY
@@ -148,7 +157,8 @@ jobs:
             valcea-clar/editorial/council_docmanager_structure.json \
             valcea-clar/editorial/council_docmanager_document_structure.json \
             valcea-clar/editorial/fact_kernel_registry.json \
-            valcea-clar/editorial/facts_registry.json
+            valcea-clar/editorial/facts_registry.json \
+            valcea-clar/editorial/scm_program_structure.json
           if git diff --cached --quiet; then
             echo 'No fact-kernel or diagnostic state change to persist.'
           else
@@ -166,14 +176,15 @@ jobs:
             done
           fi
 
-      - name: Upload bounded DocManager diagnostics
+      - name: Upload bounded structure diagnostics
         if: always() && github.event_name != 'pull_request'
         uses: actions/upload-artifact@v7
         with:
-          name: valcea-clar-docmanager-structure-${{ github.run_id }}
+          name: valcea-clar-structure-diagnostics-${{ github.run_id }}
           path: |
             valcea-clar/editorial/council_docmanager_structure.json
             valcea-clar/editorial/council_docmanager_document_structure.json
+            valcea-clar/editorial/scm_program_structure.json
           if-no-files-found: warn
           retention-days: 7
 
@@ -182,4 +193,5 @@ jobs:
         run: |
           echo "Council registry changed: ${{ steps.promote.outputs.changed }}"
           echo "SCM program registry changed: ${{ steps.scm.outputs.changed }}"
+          echo "SCM program events parsed: ${{ steps.scm.outputs.events_parsed }}"
           echo 'The durable Fact Kernel → Live Newsroom workflow_run handoff owns downstream dispatch.'
