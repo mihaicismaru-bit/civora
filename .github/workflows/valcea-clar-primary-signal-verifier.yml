@@ -2,6 +2,10 @@ name: VÂLCEA CLAR Primary Signal Verifier
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: ["VÂLCEA CLAR Signal Radar"]
+    types: [completed]
+    branches: [main]
   schedule:
     - cron: '5-55/10 * * * *'
   push:
@@ -48,12 +52,14 @@ concurrency:
 
 jobs:
   verify-signals:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || 'main' }}
       - uses: actions/setup-python@v6
         with:
           python-version: '3.13'
@@ -95,7 +101,7 @@ jobs:
             git fetch origin main
             latest_queue_generated_at=$(git show origin/main:valcea-clar/editorial/signal_verification_queue.json | python -c "import json,sys; print(json.load(sys.stdin)['generated_at'])")
             if [ "$state_queue_generated_at" != "$latest_queue_generated_at" ]; then
-              echo "Verifier result is stale (${state_queue_generated_at}); latest persisted queue is ${latest_queue_generated_at}. A queue-triggered verifier run will handle it."
+              echo "Verifier result is stale (${state_queue_generated_at}); latest persisted queue is ${latest_queue_generated_at}. The next successful radar workflow_run or schedule fallback will verify the newer queue."
               exit 0
             fi
             git reset --hard origin/main
