@@ -2,19 +2,107 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-18T03:23:19+03:00",
+  "generated_at": "2026-08-18T03:34:31+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-18T02:49:09+03:00",
-  "task_count": 42,
+  "queue_generated_at": "2026-08-18T03:33:09+03:00",
+  "task_count": 46,
   "primary_match_count": 0,
-  "no_match_count": 22,
-  "unrouted_count": 20,
+  "no_match_count": 24,
+  "unrouted_count": 22,
   "target_count": 14,
   "targets_ok": 11,
   "results": [
+    {
+      "signal_id": "878c09601f46bae79edaf3a4",
+      "signal_title": "Vâlceanca Gabriela-Cristina Dumitrescu este CAMPIOANĂ EUROPEANĂ la Para Judo",
+      "signal_url": "https://ziaruldevalcea.ro/2026/08/valceanca-gabriela-cristina-dumitrescu-este-campioana-europeana-la-para-judo/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-18T01:14:47+03:00",
+      "verification_route_id": "sport",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "scm-rm-valcea",
+            "name": "SCM Râmnicu Vâlcea",
+            "url": "https://scmramnicuvalcea.ro/category/stiri/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "cs-valcea-1924-social-feed",
+            "name": "Clubul Sportiv Vâlcea 1924",
+            "url": "https://www.csvalcea.ro/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 2
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ajf-valcea-comunicate",
+            "name": "Asociația Județeană de Fotbal Vâlcea",
+            "url": "https://www.frf-ajf.ro/valcea/stiri/comunicate-ajf-1"
+          },
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "4b479ad95d65e366eb78f351",
+      "signal_title": "DESCINDERI în Vâlcea: arme, muniție și capcane artizanale, găsite la Măciuca și Gușoeni",
+      "signal_url": "https://ziaruldevalcea.ro/2026/08/descinderi-in-valcea-arme-munitie-si-capcane-artizanale-gasite-la-maciuca-si-gusoeni/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-18T01:03:38+03:00",
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "c570f21ac383e06006e1ede8",
+      "signal_title": "GATA CU TĂMÂIEREA! Mircia Gutău este primar, nu împărat. Râmnicenii au dreptul să întrebe ce se întâmplă cu banii și căldura lor",
+      "signal_url": "https://ziaruldevalcea.ro/2026/08/gata-cu-tamaierea-mircia-gutau-este-primar-nu-imparat-ramnicenii-au-dreptul-sa-intrebe-ce-se-intampla-cu-banii-si-caldura-lor/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_published_at": "2026-08-18T00:58:35+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
     {
       "signal_id": "1b92a47d7fad423eca9a06e1",
       "signal_title": "De la pământ neproductiv la facturi zero: primii pași către ferma independentă energetic",
@@ -472,7 +560,7 @@
     },
     {
       "signal_id": "d0c30c783ca59fcfc9ecd9fa",
-      "signal_title": "Ultima oră 13 ore in urma Ziua Comunei Drăgoești 2026: aniversări de familie și Cupa „Mihai Viteazul” au adus generațiile împreună",
+      "signal_title": "Ultima oră 14 ore in urma Ziua Comunei Drăgoești 2026: aniversări de familie și Cupa „Mihai Viteazul” au adus generațiile împreună",
       "signal_url": "https://www.primplanpress.ro/ziua-comunei-dragoesti-2026-aniversari-de-familie-si-cupa-mihai-viteazul-au-adus-generatiile-impreuna/",
       "signal_publisher": "Primplan Press",
       "signal_tier": "T2",
@@ -968,6 +1056,18 @@
       "fact_kernel_ready": false
     },
     {
+      "signal_id": "cd804be29168f1b14e816f65",
+      "signal_title": "Râmnicu Vâlcea, între vechiul CET și noua centrală. Cât va costa căldura și ce urmează după 31 august",
+      "signal_url": "https://www.eurovalcea.ro/2026/08/18/ramnicu-valcea-intre-vechiul-cet-si-noua-centrala-cat-va-costa-caldura-si-ce-urmeaza-dupa-31-august/",
+      "signal_publisher": "EuroVâlcea",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
       "signal_id": "bc100e91da64c1115430131f",
       "signal_title": "Partajează prin WhatsApp(Se deschide într-o fereastră nouă) WhatsApp",
       "signal_url": "https://api.whatsapp.com/send?text=Teren%201.117%20mp%20%C8%99i%20construc%C8%9Bie%2024%20MP%2C%20%C3%AEn%20mijlocul%20naturii%2C%20la%20doar%2014.900%20Euro%21%21%21%20https%3A%2F%2Fwww.curierul.ro%2Fteren-1-117-mp-si-constructie-24-mp-in-mijlocul-naturii-la-doar-14-900-euro%2F",
@@ -1029,18 +1129,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "77f648b24870ed1f2c606484",
-      "signal_title": "e-Terra funcționează din nou. ANCPI recuperează întârzierile, plata cu cardul rămâne temporar suspendată",
-      "signal_url": "https://www.eurovalcea.ro/2026/08/12/e-terra-functioneaza-din-nou-ancpi-recupereaza-intarzierile-plata-cu-cardul-ramane-temporar-suspendata/",
-      "signal_publisher": "EuroVâlcea",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "443a5ed6e841698c85bd199e",
       "signal_title": "Partajează prin WhatsApp(Se deschide într-o fereastră nouă) WhatsApp",
       "signal_url": "https://api.whatsapp.com/send?text=Cre%C8%99te%20subven%C8%9Bia%20pentru%20gigacalorie%2C%20%C3%AEn%20R%C3%A2mnic%20https%3A%2F%2Fwww.curierul.ro%2Fcreste-subventia-pentru-gigacalorie-in-ramnic%2F",
@@ -1084,6 +1172,18 @@
       "signal_title": "Declaratie de accesibilitate",
       "signal_url": "http://www.realitateavalceana.ro/declaratie-de-accesibilitate/",
       "signal_publisher": "Realitatea Vâlceană",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "77f648b24870ed1f2c606484",
+      "signal_title": "e-Terra funcționează din nou. ANCPI recuperează întârzierile, plata cu cardul rămâne temporar suspendată",
+      "signal_url": "https://www.eurovalcea.ro/2026/08/12/e-terra-functioneaza-din-nou-ancpi-recupereaza-intarzierile-plata-cu-cardul-ramane-temporar-suspendata/",
+      "signal_publisher": "EuroVâlcea",
       "signal_published_at": null,
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
