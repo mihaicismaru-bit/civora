@@ -1,0 +1,80 @@
+name: VÂLCEA CLAR SCM Newsroom Acceptance Diagnostic
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/editorial/facts_registry.json'
+      - 'valcea-clar/scripts/newsroom_candidate_diagnostic.py'
+      - 'valcea-clar/scripts/scm_program_fact_kernel.py'
+      - '.github/workflows/valcea-clar-scm-newsroom-diagnostic.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-scm-newsroom-diagnostic
+  cancel-in-progress: true
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Resolve current SCM program fact
+        id: fact
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          from pathlib import Path
+          doc=json.loads(Path('valcea-clar/editorial/facts_registry.json').read_text(encoding='utf-8'))
+          rows=[row for row in doc.get('facts',[]) if row.get('auto_scope')=='scm_official_program_fact_kernel']
+          print('story_id=' + (str(rows[-1].get('id')) if rows else ''))
+          PY
+      - name: Diagnose canonical newsroom acceptance
+        if: steps.fact.outputs.story_id != ''
+        run: |
+          python valcea-clar/scripts/newsroom_candidate_diagnostic.py \
+            --story-id "${{ steps.fact.outputs.story_id }}" \
+            > valcea-clar/editorial/scm_newsroom_candidate_diagnostic.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          doc=json.loads(Path('valcea-clar/editorial/scm_newsroom_candidate_diagnostic.json').read_text(encoding='utf-8'))
+          assert doc.get('publication_authority') == 'NONE'
+          assert doc.get('candidate_count') == 1
+          print(json.dumps(doc, ensure_ascii=False))
+          PY
+      - name: Persist diagnostic safely
+        if: steps.fact.outputs.story_id != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp valcea-clar/editorial/scm_newsroom_candidate_diagnostic.json /tmp/scm-newsroom-candidate-diagnostic.json
+          git config user.name 'vâlcea-clar-newsroom-diagnostic[bot]'
+          git config user.email 'valcea-clar-newsroom-diagnostic@users.noreply.github.com'
+          for attempt in 1 2 3 4; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p valcea-clar/editorial
+            cp /tmp/scm-newsroom-candidate-diagnostic.json valcea-clar/editorial/scm_newsroom_candidate_diagnostic.json
+            git add valcea-clar/editorial/scm_newsroom_candidate_diagnostic.json
+            if git diff --cached --quiet; then
+              exit 0
+            fi
+            git commit -m 'Refresh VÂLCEA CLAR SCM newsroom acceptance diagnostic'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            sleep $((attempt * 2))
+          done
+          exit 1
