@@ -153,15 +153,18 @@ def self_test() -> None:
     assert not any(other.lower() in url.lower() for url in urls)
     combined = structural_parse_links(base_url, body)
     assert {row["url"] for row in combined}.issuperset(urls)
-    install()
     print("VÂLCEA CLAR DocManager embedded attachment resolver self-test: PASS")
 
 
 def main() -> int:
-    install()
     if "--resolver-self-test" in sys.argv[1:]:
+        # Keep the legacy resolver's contract test isolated from this module's
+        # parse-link monkeypatch. Only after it passes do we test the broadened
+        # extraction surface in the same short-lived process.
+        row_resolver.self_test()
         self_test()
-        return row_resolver.self_test()
+        return 0
+    install()
     return row_resolver.main()
 
 
