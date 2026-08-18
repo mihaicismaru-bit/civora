@@ -1,6 +1,8 @@
 name: PARTENER.EU MIPE Windows Crawl v3
 
 on:
+  schedule:
+    - cron: '17 */3 * * *'
   workflow_dispatch:
     inputs:
       max_pages:
@@ -142,6 +144,7 @@ jobs:
         run: |
           & $env:PYTHON_EXE partener-eu/ops/test_mipe_canonical_pipeline.py
           & $env:PYTHON_EXE partener-eu/ops/test_dossier_autonomy.py
+          & $env:PYTHON_EXE partener-eu/ops/test_mipe_enrichment_seed_quality.py
           @'
           import json
           from pathlib import Path
@@ -161,6 +164,7 @@ jobs:
           assert canonical.get('policy',{}).get('deepDossierFactExtraction') is True
           assert queue.get('policy',{}).get('officialEvidenceOnly') is True
           assert seeds.get('policy',{}).get('officialHostOnly') is True
+          assert all(seed.get('url') != 'https://mfe.gov.ro/ghiduri-' for seed in seeds.get('seeds',[]))
           for page in corpus.get('pages',[]):
               assert page.get('url','').startswith('https://mfe.gov.ro/')
               assert page.get('verification') == 'CANONICAL_OFFICIAL_FETCH'
