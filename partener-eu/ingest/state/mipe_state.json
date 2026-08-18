@@ -1,102 +1,180 @@
 {
-  "status": "OK",
+  "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
   "lastRun": {
-    "observedAt": "2026-08-17T20:34:50.137547+00:00",
-    "sourceAvailable": true,
+    "observedAt": "2026-08-18T03:15:47.855958+00:00",
+    "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
     "roots": [
       {
         "target": "https://mfe.gov.ro/",
-        "ok": true,
-        "transport": "direct-playwright-edge-romania-v3",
-        "verification": "CANONICAL_OFFICIAL_FETCH",
-        "finalUrl": "https://mfe.gov.ro/",
-        "status": 200,
-        "error": null
-      },
-      {
-        "target": "https://mfe.gov.ro/ghiduri-",
-        "ok": true,
-        "transport": "direct-playwright-edge-romania-v3",
-        "verification": "CANONICAL_OFFICIAL_FETCH",
-        "finalUrl": "https://mfe.gov.ro/pdds/ghiduri/",
-        "status": 200,
-        "error": null
+        "ok": false,
+        "transport": "direct-canonical",
+        "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+        "policy": "search-discovery-only-on-direct-source-failure"
       },
       {
         "target": "https://mfe.gov.ro/ghiduri_peos/",
-        "ok": true,
-        "transport": "direct-playwright-edge-romania-v3",
-        "verification": "CANONICAL_OFFICIAL_FETCH",
-        "finalUrl": "https://mfe.gov.ro/ghiduri_peos/",
-        "status": 200,
-        "error": null
+        "ok": false,
+        "transport": "direct-canonical",
+        "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+        "policy": "search-discovery-only-on-direct-source-failure"
       },
       {
         "target": "https://mfe.gov.ro/ghiduri_pids/",
-        "ok": true,
-        "transport": "direct-playwright-edge-romania-v3",
-        "verification": "CANONICAL_OFFICIAL_FETCH",
-        "finalUrl": "https://mfe.gov.ro/ghiduri_pids/",
-        "status": 200,
-        "error": null
+        "ok": false,
+        "transport": "direct-canonical",
+        "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+        "policy": "search-discovery-only-on-direct-source-failure"
       },
       {
         "target": "https://mfe.gov.ro/pdds/despre-program-programare/",
-        "ok": true,
-        "transport": "direct-playwright-edge-romania-v3",
-        "verification": "CANONICAL_OFFICIAL_FETCH",
-        "finalUrl": "https://mfe.gov.ro/pdds/despre-program-programare/",
-        "status": 200,
-        "error": null
+        "ok": false,
+        "transport": "direct-canonical",
+        "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+        "policy": "search-discovery-only-on-direct-source-failure"
       },
       {
         "target": "https://mfe.gov.ro/pnrr/",
-        "ok": true,
-        "transport": "direct-playwright-edge-romania-v3",
-        "verification": "CANONICAL_OFFICIAL_FETCH",
-        "finalUrl": "https://mfe.gov.ro/pnrr/",
-        "status": 200,
-        "error": null
+        "ok": false,
+        "transport": "direct-canonical",
+        "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+        "policy": "search-discovery-only-on-direct-source-failure"
+      },
+      {
+        "target": "https://oportunitati-ue.gov.ro/",
+        "ok": false,
+        "transport": "direct-canonical",
+        "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+        "policy": "search-discovery-only-on-direct-source-failure"
+      },
+      {
+        "target": "https://mfe.gov.ro/wp-json/wp/v2/posts?per_page=50&orderby=modified&order=desc&_fields=link%2Cdate%2Cmodified%2Ctitle%2Cexcerpt",
+        "ok": false,
+        "transport": "direct-canonical",
+        "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+        "policy": "search-discovery-only-on-direct-source-failure"
+      },
+      {
+        "target": "https://mfe.gov.ro/feed/",
+        "ok": false,
+        "transport": "direct-canonical",
+        "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+        "policy": "search-discovery-only-on-direct-source-failure"
+      },
+      {
+        "target": "https://mfe.gov.ro/wp-sitemap.xml",
+        "ok": false,
+        "transport": "direct-canonical",
+        "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+        "policy": "search-discovery-only-on-direct-source-failure"
+      },
+      {
+        "target": "https://mfe.gov.ro/sitemap.xml",
+        "ok": false,
+        "transport": "direct-canonical",
+        "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+        "policy": "search-discovery-only-on-direct-source-failure"
+      },
+      {
+        "target": "https://oportunitati-ue.gov.ro/wp-json/wp/v2/posts?per_page=50&orderby=modified&order=desc&_fields=link%2Cdate%2Cmodified%2Ctitle%2Cexcerpt",
+        "ok": false,
+        "transport": "direct-canonical",
+        "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+        "policy": "search-discovery-only-on-direct-source-failure"
+      },
+      {
+        "target": "https://oportunitati-ue.gov.ro/feed/",
+        "ok": false,
+        "transport": "direct-canonical",
+        "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+        "policy": "search-discovery-only-on-direct-source-failure"
+      },
+      {
+        "target": "https://oportunitati-ue.gov.ro/wp-sitemap.xml",
+        "ok": false,
+        "transport": "direct-canonical",
+        "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+        "policy": "search-discovery-only-on-direct-source-failure"
+      },
+      {
+        "target": "https://oportunitati-ue.gov.ro/sitemap.xml",
+        "ok": false,
+        "transport": "direct-canonical",
+        "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+        "policy": "search-discovery-only-on-direct-source-failure"
       }
     ],
-    "pagesVisited": 61,
-    "acceptedPages": 60,
-    "documentsObserved": 160,
-    "queuedRemaining": 652,
-    "failures": [],
-    "runtimeSeconds": 1201.69,
-    "runtimeBudgetSeconds": 1200,
-    "deadlineReached": true,
-    "maxPages": 120,
-    "maxDepth": 3,
-    "collectorVersion": "3.0",
-    "transport": "direct-playwright-edge-romania-v3",
-    "status": "OK",
-    "transportMode": "direct-romania-authoritative",
-    "prioritySeed": "https://mfe.gov.ro/pdds/despre-program-programare/",
-    "prioritySeedAvailable": true,
-    "primaryOfficialRootAvailable": true,
-    "sourceHealth": "PRIMARY_SOURCES_AVAILABLE_VIA_ROMANIA_DIRECT",
-    "lastKnownGoodPreserved": false,
-    "currentVerifiedCount": 60,
-    "publishedItemCount": 64,
-    "routeHealth": {
-      "romaniaWindows": {
-        "status": "PASS",
-        "observedAt": "2026-08-17T20:34:50.137547+00:00",
-        "sourceAvailable": true,
-        "transport": "playwright-edge-direct-romania-v3"
+    "searchTransports": [
+      {
+        "query": "site:mfe.gov.ro apel ghid consultare corrigendum 2026",
+        "ok": false,
+        "transport": "jina-search-discovery-only",
+        "error": "HTTPError: HTTP Error 401: Unauthorized",
+        "publicationPolicy": "discovery-only; canonical direct fetch required",
+        "pddsDiscoveryPolicy": "PDDS candidates must originate from the explicit priority seed crawl",
+        "excludedPddsSearchCandidates": 0
       },
-      "githubHosted": {
-        "status": "DEGRADED",
-        "observedAt": "2026-08-18T00:00:29.112756+00:00",
-        "sourceAvailable": false,
-        "prioritySeedAvailable": false,
-        "transportMode": "primary-direct-unavailable",
-        "sourceHealth": "PDDS_PRIORITY_SEED_UNAVAILABLE"
+      {
+        "query": "site:mfe.gov.ro PEO PoIDS PDDS 2026",
+        "ok": false,
+        "transport": "jina-search-discovery-only",
+        "error": "HTTPError: HTTP Error 401: Unauthorized",
+        "publicationPolicy": "discovery-only; canonical direct fetch required",
+        "pddsDiscoveryPolicy": "PDDS candidates must originate from the explicit priority seed crawl",
+        "excludedPddsSearchCandidates": 0
+      },
+      {
+        "query": "site:oportunitati-ue.gov.ro finantare 2026",
+        "ok": false,
+        "transport": "jina-search-discovery-only",
+        "error": "HTTPError: HTTP Error 401: Unauthorized",
+        "publicationPolicy": "discovery-only; canonical direct fetch required",
+        "pddsDiscoveryPolicy": "PDDS candidates must originate from the explicit priority seed crawl",
+        "excludedPddsSearchCandidates": 0
+      },
+      {
+        "query": "site:mfe.gov.ro apel ghid consultare corrigendum 2026",
+        "ok": true,
+        "transport": "bing-rss-discovery-only",
+        "error": null,
+        "publicationPolicy": "discovery-only; canonical direct fetch required",
+        "pddsDiscoveryPolicy": "PDDS candidates must originate from the explicit priority seed crawl",
+        "discoveredOfficialUrlCount": 0,
+        "excludedPddsSearchCandidates": 0
+      },
+      {
+        "query": "site:mfe.gov.ro PEO PoIDS PDDS 2026",
+        "ok": true,
+        "transport": "bing-rss-discovery-only",
+        "error": null,
+        "publicationPolicy": "discovery-only; canonical direct fetch required",
+        "pddsDiscoveryPolicy": "PDDS candidates must originate from the explicit priority seed crawl",
+        "discoveredOfficialUrlCount": 0,
+        "excludedPddsSearchCandidates": 0
+      },
+      {
+        "query": "site:oportunitati-ue.gov.ro finantare 2026",
+        "ok": true,
+        "transport": "bing-rss-discovery-only",
+        "error": null,
+        "publicationPolicy": "discovery-only; canonical direct fetch required",
+        "pddsDiscoveryPolicy": "PDDS candidates must originate from the explicit priority seed crawl",
+        "discoveredOfficialUrlCount": 0,
+        "excludedPddsSearchCandidates": 0
       }
-    },
-    "healthArbitration": "fresh authoritative Romanian direct evidence supersedes unavailable GitHub-hosted route for canonical source health"
+    ],
+    "candidateCount": 64,
+    "fetchedCandidateCount": 32,
+    "currentVerifiedCount": 0,
+    "publishedItemCount": 60,
+    "transportMode": "primary-direct-unavailable",
+    "lastKnownGoodPreserved": true,
+    "directSuccessCount": 1,
+    "proxySuccessCount": 0,
+    "prioritySeed": "https://mfe.gov.ro/pdds/despre-program-programare/",
+    "prioritySeedAvailable": false,
+    "primaryOfficialRootAvailable": false,
+    "sourceHealth": "PDDS_PRIORITY_SEED_UNAVAILABLE",
+    "healthNormalizationReason": "A direct success on an ancillary/previous candidate does not make the GitHub-hosted MIPE route healthy while the explicit PDDS priority seed or primary discovery roots are unavailable."
   },
   "items": [
     {
@@ -3005,166 +3083,6 @@
       "verification": "CANONICAL_OFFICIAL_FETCH",
       "documents": [],
       "contentHash": "4d74d6d06ea8b7c2b41c747df4700d2bb94fd9ada59101f7db08b8a4534d7c7a"
-    },
-    {
-      "id": "4e72f6f3f0a37c3899b7",
-      "title": "Ghidul Solicitantului pentru finanțarea proiectelor dedicate menținerii/îmbunătățirii stării de conservare a speciilor și habitatelor prin măsuri de conservare în cadrul Priorității 2. Protecţia mediului prin conservarea biodiversității, asigurarea calității aerului şi remediere a siturilor contaminate a Programului Dezvoltare Durabilă 2021-2027",
-      "url": "https://mfe.gov.ro/ghiduri_pdd/ghidul-solicitantului-pentru-finantarea-proiectelor-dedicate-mentinerii-imbunatatirii-starii-de-conservare-a-speciilor-si-habitatelor-prin-masuri-de-conservare-in-cadrul-prioritatii-2-protectia-mediu/",
-      "date": "",
-      "dateLabel": "Observat direct",
-      "dateConfidence": "OBSERVED_ONLY",
-      "summary": ".pdd-menu-wrap{ max-width:1420px; margin:0 auto 34px; padding:0 14px; font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,sans-serif; } .pdd-menu-logo{ text-align:center; margin:22px 0 18px; } .pdd-menu-logo img{ max-width:417px; width:100%; height:auto; } .pdd-menu{ display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:10px; padding:18px; background:#f8fafc; border:1px solid #e5e7eb; border-radius:16px; box-shadow:0 10px 28px rgba(15,23,42,.06); } .pdd-menu a{ display:flex; align-items:center; gap:10px; min-height:48px; padding:11px 14px; border-radius:12px; background:#fff; color:#0f3f78; text-decoration:none; font-size:14px; font-weight:600; border:1px solid #dbeafe; transition:all .18s ease; } .pdd-menu a:hover{ background:#0851a3; color:#fff; border-color:#0851a3; transform:translateY(-2px); box-shadow:0 8px 18px rgba(8,81,163,.22); text-decoration:none; } .pdd-menu .pdd-icon{ width:28px; height:28px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; flex:0 0 28px; background:#eaf2ff; color:#0851a3; transition:all .18s ease; } .pdd-menu a:hover .pdd-icon{ background:rgba(255,255,255,.18); color:#fff; } .pdd-men",
-      "textPreview": ".pdd-menu-wrap{ max-width:1420px; margin:0 auto 34px; padding:0 14px; font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,sans-serif; } .pdd-menu-logo{ text-align:center; margin:22px 0 18px; } .pdd-menu-logo img{ max-width:417px; width:100%; height:auto; } .pdd-menu{ display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:10px; padding:18px; background:#f8fafc; border:1px solid #e5e7eb; border-radius:16px; box-shadow:0 10px 28px rgba(15,23,42,.06); } .pdd-menu a{ display:flex; align-items:center; gap:10px; min-height:48px; padding:11px 14px; border-radius:12px; background:#fff; color:#0f3f78; text-decoration:none; font-size:14px; font-weight:600; border:1px solid #dbeafe; transition:all .18s ease; } .pdd-menu a:hover{ background:#0851a3; color:#fff; border-color:#0851a3; transform:translateY(-2px); box-shadow:0 8px 18px rgba(8,81,163,.22); text-decoration:none; } .pdd-menu .pdd-icon{ width:28px; height:28px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; flex:0 0 28px; background:#eaf2ff; color:#0851a3; transition:all .18s ease; } .pdd-menu a:hover .pdd-icon{ background:rgba(255,255,255,.18); color:#fff; } .pdd-menu svg{ width:15px; height:15px; stroke:currentColor; } @media(max-width:640px){ .pdd-menu{ grid-template-columns:1fr; padding:12px; } .pdd-menu a{ min-height:46px; } } Noutăți Despre program Ghiduri Calendar apeluri proiecte Monitorizare program Monitorizare și implementare proiecte Evaluare program Identitate vizuală Operațiuni de importanță strategică Contact /* Scoped to .ia-box so styles don't leak into the rest of the page */ .ia-box *, .ia-box *::before, .ia-box *::after { box-sizing: border-box; } .ia-box { font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif; color: #1a1a1a; margin: 1.5rem 0; } /* ── Header ── */ .ia-header { display: flex; align-items: center; justify-content: space-between; padding-bottom: 1rem; margin-bottom: 1.25rem; border-bottom: 1px solid #e5e7eb; } .ia-header__title { font-size: 1.25rem; font-weight: 600; color: #111827; margin: 0; display: flex; align-items: center; gap: 8px; } .ia-header__title svg { flex-shrink: 0; color: #6b7280; } /* Status badges */ .ia-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 0.8125rem; font-weight: 600; padding: 5px 12px; border-radius: 20px; } .ia-badge__dot { width: 7px; height: 7px; border-radius: 50%; } .badge-open { background: #dcfce7; color: #166534; } .badge-open .ia-badge__dot { background: #16a34a; } .badge-closed { background: #fee2e2; color: #991b1b; } .badge-closed .ia-badge__dot { background: #dc2626; } .badge-other { background: #f3f4f6; color: #374151; } .badge-other .ia-badge__dot { background: #9ca3af; } /* ── 2-column meta grid ── */ .ia-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; } @media (max-width: 520px) { .ia-meta-grid { grid-template-columns: 1fr; } } .ia-meta-card { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px 14px; } .ia-meta-card__label { display: flex; align-items: center; gap: 5px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #6b7280; margin: 0 0 4px; } .ia-meta-card__label svg { flex-shrink: 0; } .ia-meta-card__value { font-size: 0.9375rem; font-weight: 500; color: #111827; margin: 0; } .ia-meta-card__value a { color: #2563eb; text-decoration: none; } .ia-meta-card__value a:hover { text-decoration: underline; } .ia-meta-card__value--date { color: #2563eb; } .ia-meta-card__value--small { font-size: 0.8125rem; } /* ── Generic section card ── */ .ia-section { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; } .ia-section__label { display: flex; align-items: center; gap: 5px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #6b7280; margin: 0 0 8px; } .ia-section__label svg { flex-shrink: 0; } .ia-section__body { font-size: 0.875rem; color: #374151; line-height: 1.6; margin: 0; } .ia-section__body a { color: #2563eb; text-decoration: none; } .ia-section__body a:hover { text-decoration: underline; } /* Value highlight (valoarea apelului) */ .ia-value-big { font-size: 1.375rem; font-weight: 700; color: #111827; } .ia-value-currency { font-size: 0.875rem; color: #6b7280; margin-left: 4px; } /* ── Tags ── */ .ia-tag-row { display: flex; flex-wrap: wrap; gap: 6px; } .ia-tag { display: inline-block; font-size: 0.8125rem; padding: 4px 10px; border-radius: 6px; } .ia-tag--info { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; } .ia-tag--priority { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; } /* ── Attachments ── */ .ia-attach-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; } .ia-attach-list li { display: flex; align-items: flex-start; gap: 8px; font-size: 0.875rem; color: #374151; line-height: 1.5; } .ia-attach-list__icon { flex-shrink: 0; margin-top: 2px; color: #9ca3af; } /* ── Observatii ── */ .ia-observatii-title { font-weight: 600; font-size: 0.9375rem; color: #111827; margin: 0 0 6px; } Informații Apel Deschis Instrument financiar FEDR Aria de acoperire Regiuni mai puțin dezvoltate Data lansării 09/03/2026 Data închiderii 30/09/2026 Valoarea apelului 36.493.238 euro euro Prioritate și Obiectiv specific Conservarea biodiversității pentru a îndeplini cerințele directivelor de mediu Obiectivul specific vizat Acțiunea 2.1 pdd Solicitanți eligibili Agenția Națională pentru Arii Naturale Protejate (ANMAP)administratorii ariilor naturale protejate cu structuri de administrare propriiAdministrația Rezervației Biosferei „Delta Dunării” (ARBDD)Ministerul MediuluiApelor și Pădurilor (MMAP). Atașamente Ghidul Solicitantului pentru finanțarea proiectelor dedicate menținerii/îmbunătățirii stării de conservare a speciilor și habitatelor prin măsuri de conservare,Centralizatorul propunerilor, observațiilor și întrebărilorGhidul Solicitantului pentru finanțarea proiectelor dedicate menținerii/îmbunătățirii stării de conservare a speciilor și habitatelor prin măsuri de conservare în cadrul Priorității 2. Protecţia mediului prin conservarea biodiversității, asigurarea calității aerului şi remediere a siturilor contaminate a Programului Dezvoltare Durabilă (PDD) 2021-2027 (varianta în consultare publică). 27 februarie 2026: Ghidul Solicitantului pentru finanțarea proiectelor dedicate menținerii/îmbunătățirii stării de conservare a speciilor și habitatelor prin măsuri de conservare, Prioritatea 2 – Protecţia mediului prin conservarea biodiversităţii, asigurarea calităţii aerului şi remediere a siturilor contaminate, Obiectivul Specific RSO2.7 – Intensificarea acțiunilor de protecție și conservare a naturii, a biodiversității și a infrastructurii verzi, inclusiv în zonele urbane, precum și reducerea tuturor formelor de poluare, Acțiunea 2.1 – Conservarea biodiversității pentru a îndeplini cerințele directivelor de mediu. 27 februarie 2026: Centralizatorul propunerilor, observațiilor și întrebărilor primite în cadrul procesului de consultare publică privind Ghidul Solicitantului pentru finanțarea proiectelor dedicate menținerii/îmbunătățirii stării de conservare a speciilor și habitatelor prin măsuri de conservare, Prioritatea 2 – Protecţia mediului prin conservarea biodiversităţii, asigurarea calităţii aerului şi remediere a siturilor contaminate, Obiectivul Specific RSO2.7 – Intensificarea acțiunilor de protecție și conservare a naturii, a biodiversității și a infrastructurii verzi, inclusiv în zonele urbane, precum și reducerea tuturor formelor de poluare, Acțiunea 2.1 – Conservarea biodiversității pentru a îndeplini cerințele directivelor de mediu. Sfarsitul primului paragraf 29 ianuarie 2026: Ghidul Solicitantului pentru finanțarea proiectelor dedicate menținerii/îmbunătățirii stării de conservare a speciilor și habitatelor prin măsuri de conservare în cadrul Priorității 2. Protecţia mediului prin conservarea biodiversității, asigurarea calității aerului şi remediere a siturilor contaminate a Programului Dezvoltare Durabilă (PDD) 2021-2027 (varianta în consultare publică). Propunerile și sugestiile publicului pot fi transmise la sediul din Șos. București-Ploiești, nr. 1-1B, Victoria Office – Intrarea Menuetului nr.7, București, sector 1 și/sau pe adresa de email: secretariat.dgpim@mfe.gov.ro, în termen de 5 zile lucrătoare de la data prezentului anunț.",
-      "pageClass": "CALL_LIFECYCLE_EVENT",
-      "tag": "MIPE",
-      "kind": "CONSULTATION_OPENED",
-      "tier": "T1",
-      "source": "MIPE",
-      "observedAt": "2026-08-17T20:34:50.137547+00:00",
-      "retrievalTransport": "direct-playwright-edge-romania-v3",
-      "sourceRetrievalTransport": "playwright-edge-direct-romania-v3",
-      "verification": "CANONICAL_OFFICIAL_FETCH",
-      "documents": [
-        {
-          "name": "Ghidul Solicitantului pentru finanțarea proiectelor dedicate menținerii/îmbunătățirii stării de conservare a speciilor și habitatelor prin măsuri de conservare,",
-          "url": "https://mfe.gov.ro/wp-content/uploads/2026/02/b2ee02f3a53d73cb05006c5b7ebfafef.zip"
-        },
-        {
-          "name": "Centralizatorul propunerilor, observațiilor și întrebărilor",
-          "url": "https://mfe.gov.ro/wp-content/uploads/2026/02/2717afe5fa7258116fbf1bb6c44214a5.pdf"
-        },
-        {
-          "name": "Ghidul Solicitantului pentru finanțarea proiectelor dedicate menținerii/îmbunătățirii stării de conservare a speciilor și habitatelor prin măsuri de conservare în cadrul Priorității 2. Protecţia mediului prin conservarea biodiversității, asigurarea calității aerului şi remediere a siturilor contaminate a Programului Dezvoltare Durabilă (PDD) 2021-2027 (varianta în consultare publică).",
-          "url": "https://mfe.gov.ro/wp-content/uploads/2026/01/a69c01b69f7eba0878d78db235000557.zip"
-        },
-        {
-          "name": "Ghidul Solicitantului pentru finanțarea proiectelor dedicate menținerii/îmbunătățirii stării de conservare a speciilor și habitatelor prin măsuri de conservare,",
-          "url": "https://mfe.gov.ro/wp-content/uploads/2026/02/b2ee02f3a53d73cb05006c5b7ebfafef.zip"
-        },
-        {
-          "name": "Centralizatorul propunerilor, observațiilor și întrebărilor",
-          "url": "https://mfe.gov.ro/wp-content/uploads/2026/02/2717afe5fa7258116fbf1bb6c44214a5.pdf"
-        },
-        {
-          "name": "Ghidul Solicitantului pentru finanțarea proiectelor dedicate menținerii/îmbunătățirii stării de conservare a speciilor și habitatelor prin măsuri de conservare în cadrul Priorității 2. Protecţia mediului prin conservarea biodiversității, asigurarea calității aerului şi remediere a siturilor contaminate a Programului Dezvoltare Durabilă (PDD) 2021-2027 (varianta în consultare publică).",
-          "url": "https://mfe.gov.ro/wp-content/uploads/2026/01/a69c01b69f7eba0878d78db235000557.zip"
-        }
-      ],
-      "contentHash": "4f6b5d7a3d040e195d30d528984779f256066dbda3d3ae46b5fda166bf7e66c5"
-    },
-    {
-      "id": "3bfb2ca053bdb525294b",
-      "title": "Continuarea investitiilor in infrastructura de sanatate din regiunea sud est sprijinita initial prin planul national de redresare si rezilienta",
-      "url": "https://mfe.gov.ro/ghiduri-ms/continuarea-investitiilor-in-infrastructura-de-sanatate-din-regiunea-sud-est-sprijinita-initial-prin-planul-national-de-redresare-si-rezilienta/",
-      "date": "",
-      "dateLabel": "Observat direct",
-      "dateConfidence": "OBSERVED_ONLY",
-      "summary": "7 august 2026: Ministerul Investițiilor și Proiectelor Europene, prin Autoritatea de Management pentru Programul Sănătate publică Ghidul Solicitantului pentru apelul de proiecte Continuarea investițiilor în infrastructura de sănătate din Regiunea Sud – Est sprijinită inițial prin Planul Național de Redresare și Reziliență. Sistemul informatic MySMIS2021 va permite depunerea de proiecte începând cu data de 07.08.2026, ora 14.30. Sistemul informatic MySMIS2021 se va închide la data de 21.12.2026, ora 17.00.Sfarsitul primului paragraf Ghidul Solicitantului, însoțit de anexele acestuia se regăsesc în tabelul de mai jos. ______________________________________________________________________ 7 august 2026: Ministerul Investițiilor și Proiectelor Europene, prin Autoritatea de Management pentru Programul Sănătate publică Centralizatorul observațiilor, propunerilor și întrebărilor primite pe conținutul Ghidul Solicitantului pentru apelul de proiecte Continuarea investițiilor în infrastructura de sănătate din Regiunea Sud – Est sprijinită inițial prin Planul Național de Redresare și Reziliență. Centralizatorul observațiilor, propunerilor și întrebărilor primite pe conținutul Ghidului Solicit",
-      "textPreview": "7 august 2026: Ministerul Investițiilor și Proiectelor Europene, prin Autoritatea de Management pentru Programul Sănătate publică Ghidul Solicitantului pentru apelul de proiecte Continuarea investițiilor în infrastructura de sănătate din Regiunea Sud – Est sprijinită inițial prin Planul Național de Redresare și Reziliență. Sistemul informatic MySMIS2021 va permite depunerea de proiecte începând cu data de 07.08.2026, ora 14.30. Sistemul informatic MySMIS2021 se va închide la data de 21.12.2026, ora 17.00.Sfarsitul primului paragraf Ghidul Solicitantului, însoțit de anexele acestuia se regăsesc în tabelul de mai jos. ______________________________________________________________________ 7 august 2026: Ministerul Investițiilor și Proiectelor Europene, prin Autoritatea de Management pentru Programul Sănătate publică Centralizatorul observațiilor, propunerilor și întrebărilor primite pe conținutul Ghidul Solicitantului pentru apelul de proiecte Continuarea investițiilor în infrastructura de sănătate din Regiunea Sud – Est sprijinită inițial prin Planul Național de Redresare și Reziliență. Centralizatorul observațiilor, propunerilor și întrebărilor primite pe conținutul Ghidului Solicitantului pentru apelul de proiecte Continuarea investițiilor în infrastructura de sănătate din Regiunea Sud – Est sprijinită inițial prin Planul Național de Redresare și Reziliență se regăsește aici. ______________________________________________________________________ 14 iulie 2026: Ministerul Investițiilor și Proiectelor Europene, prin Autoritatea de Management pentru Programul Sănătate publică Ghidul Solicitantului pentru apelul de proiecte Continuarea investițiilor în infrastructura de sănătate din Regiunea Sud – Est sprijinită inițial prin Planul Național de Redresare și Reziliență (consultare publică). Perioada de consultare publică se va desfășura până la data de 6 august 2026. Propunerile și observațiile la acest document se vor transmite la adresa de e-mail consultare.ctapnrr@mfe.gov.ro Ghidul Solicitantului pentru apelul de proiecte Continuarea investițiilor în infrastructura de sănătate din Regiunea Sud – Est sprijinită inițial prin Planul Național de Redresare și Reziliență (consultare publică) se regăsește în tabelul de mai jos. Mod afișare:TabelMasonryNu există articole pentru filtrele selectate. Ghid FEDR Regiune de dezvoltare vizată Consultare publică Apel Activă - perioada consultare publică Inactivă Variante anterioare ghiduri în consultare Activ - perioadă depunere proiecte Inactiv Variante anterioare ghiduri apeluri lansate, inclusiv corrigendum Continuarea investițiilor în infrastructura de sănătate din Regiunea Sud – Est sprijinită inițial prin Planul Național de Redresare și Reziliență Regiunea Sud Est X 14.07.2026 - 6.08.2026 GS consultare 07.08.2026-21.12.2026 GS 7 august 2026 «‹1›»",
-      "pageClass": "CALL_LIFECYCLE_EVENT",
-      "tag": "MIPE",
-      "kind": "GUIDE_MODIFIED",
-      "tier": "T1",
-      "source": "MIPE",
-      "observedAt": "2026-08-17T08:56:36.302567+00:00",
-      "retrievalTransport": "direct-playwright-edge-romania-v3",
-      "sourceRetrievalTransport": "playwright-edge-direct-romania-v3",
-      "verification": "CANONICAL_OFFICIAL_FETCH",
-      "documents": [
-        {
-          "name": "aici",
-          "url": "https://mfe.gov.ro/wp-content/uploads/2026/07/bb5aec4f4f3407a2a3ab1ba9e156802c.pdf"
-        },
-        {
-          "name": "GS consultare",
-          "url": "https://mfe.gov.ro/wp-content/uploads/2026/07/9371f6f42e753388d4d5a4fee008c8c3.zip"
-        },
-        {
-          "name": "GS 7 august 2026",
-          "url": "https://mfe.gov.ro/wp-content/uploads/2026/07/3485eaf3fda2ea4cf66dd0073c1785bd.zip"
-        }
-      ],
-      "contentHash": "3f5344f8b1cca9c0c5e886e58291af313a97965a35e95a0f3a6de833485e0494"
-    },
-    {
-      "id": "e75d314e3bd5950c4dac",
-      "title": "Investitii in infrastructura cabinetelor medicilor de familie",
-      "url": "https://mfe.gov.ro/ghiduri-ms/investitii-in-infrastructura-cabinetelor-medicilor-de-familie/",
-      "date": "",
-      "dateLabel": "Observat direct",
-      "dateConfidence": "OBSERVED_ONLY",
-      "summary": "13 august 2026: Ministerul Investițiilor și Proiectelor Europene, prin Autoritatea de Management pentru Programul Sănătate publică Corrigendumul nr. 1 la Ghidul Solicitantului pentru apelul de proiecte ”Investiții în infrastructura cabinetelor medicilor de familie localizate în cele 4 ITI”, cod apel PS/959/PS_P1/OP4/RSO4.5/PS_P1_RSO4.5_A2. Corrigendumul nr. 1 este disponibil în tabelul de mai jos. Sistemul informatic MySMIS2021 se va închide la data de 30 septembrie 2026, ora 17.00. ________________________________________________________________________________Sfarsitul primului paragraf 29 mai 2026: Ministerul Investițiilor și Proiectelor Europene, prin Autoritatea de Management pentru Programul Sănătate publică Ghidul Solicitantului pentru apelul de proiecte ”Investiții în infrastructura cabinetelor medicilor de familie localizate în cele 4 ITI”, cod apel PS/959/PS_P1/OP4/RSO4.5/PS_P1_RSO4.5_A2. Sistemul informatic MySMIS2021 va permite depunerea de proiecte începând cu data de 29 mai 2026, ora 14:00. Sistemul informatic MySMIS2021 se va închide la data de 31 august 2026, ora 14.00. Ghidul Solicitantului se regăsește în tabelul de mai jos. _______________________________________",
-      "textPreview": "13 august 2026: Ministerul Investițiilor și Proiectelor Europene, prin Autoritatea de Management pentru Programul Sănătate publică Corrigendumul nr. 1 la Ghidul Solicitantului pentru apelul de proiecte ”Investiții în infrastructura cabinetelor medicilor de familie localizate în cele 4 ITI”, cod apel PS/959/PS_P1/OP4/RSO4.5/PS_P1_RSO4.5_A2. Corrigendumul nr. 1 este disponibil în tabelul de mai jos. Sistemul informatic MySMIS2021 se va închide la data de 30 septembrie 2026, ora 17.00. ________________________________________________________________________________Sfarsitul primului paragraf 29 mai 2026: Ministerul Investițiilor și Proiectelor Europene, prin Autoritatea de Management pentru Programul Sănătate publică Ghidul Solicitantului pentru apelul de proiecte ”Investiții în infrastructura cabinetelor medicilor de familie localizate în cele 4 ITI”, cod apel PS/959/PS_P1/OP4/RSO4.5/PS_P1_RSO4.5_A2. Sistemul informatic MySMIS2021 va permite depunerea de proiecte începând cu data de 29 mai 2026, ora 14:00. Sistemul informatic MySMIS2021 se va închide la data de 31 august 2026, ora 14.00. Ghidul Solicitantului se regăsește în tabelul de mai jos. ________________________________________________________________________________ 27 mai 2026: Ministerul Investițiilor și Proiectelor Europene, prin Autoritatea de Management pentru Programul Sănătate publică Centralizatorul referitor la observațiile, propunerile și întrebările primite la Ghidul Solicitantului pentru apelul de proiecte Investiții în infrastructura cabinetelor medicilor de familie localizate în cele 4 ITI, cod apel PS/959/PS_P1/OP4/RSO4.5/PS_P1_RSO4.5_A2. Centralizatorul referitor la observațiile, propunerile și întrebările primite la Ghidul Solicitantului pentru apelul de proiecte Investiții în infrastructura cabinetelor medicilor de familie localizate în cele 4 ITI, cod apel PS/959/PS_P1/OP4/RSO4.5/PS_P1_RSO4.5_A2 se regăsește aici! ________________________________________________________________________________ 17 aprilie 2026: Ministerul Investițiilor și Proiectelor Europene, prin Autoritatea de Management pentru Programul Sănătate publică Ghidul Solicitantului pentru apelul de proiecte Investiții în infrastructura cabinetelor medicilor de familie localizate în cele 4 ITI (consultare publică). Perioada de consultare publică se va desfășura până la data de 12 mai 2026. Propunerile și observațiile la acest document se vor transmite la adresa de e-mail consultare.cabinetemedfam@mfe.gov.ro Ghidul Solicitantului pentru apelul de proiecte Investiții în infrastructura cabinetelor medicilor de familie localizate în cele 4 ITI (consultare publică) se regăsește în tabelul de mai jos. Mod afișare:TabelMasonryNu există articole pentru filtrele selectate. Ghid FEDR Regiune de dezvoltare vizată Consultare publică Apel Activă - perioada consultare publică Inactivă Variante anterioare ghiduri în consultare Activ - perioadă depunere proiecte Inactiv Variante anterioare ghiduri apeluri lansate, inclusiv corrigendum PS/959/PS_P1/OP4/RSO4.5/PS_P1_RSO4.5_A2 Investiții în infrastructura cabinetelor medicilor de familie localizate în cele 4 ITI Regiuni mai puțin dezvoltate X 17.04.2026-12.05.2026 Ghidul Solicitantului – consultare publica 29.05-30.09.2026 P1 FEDR cab medici de familie_FINAL Corrigendum nr 1 apel 959 «‹1›»",
-      "pageClass": "CALL_LIFECYCLE_EVENT",
-      "tag": "MIPE",
-      "kind": "GUIDE_MODIFIED",
-      "tier": "T1",
-      "source": "MIPE",
-      "observedAt": "2026-08-17T08:56:36.302567+00:00",
-      "retrievalTransport": "direct-playwright-edge-romania-v3",
-      "sourceRetrievalTransport": "playwright-edge-direct-romania-v3",
-      "verification": "CANONICAL_OFFICIAL_FETCH",
-      "documents": [
-        {
-          "name": "aici",
-          "url": "https://mfe.gov.ro/wp-content/uploads/2023/05/8a2b76553ba80a1f2bc5e5913b6d2d6a-2.pdf"
-        },
-        {
-          "name": "Ghidul Solicitantului – consultare publica",
-          "url": "https://mfe.gov.ro/wp-content/uploads/2023/05/a7d892b7f6e3575336b038d63ac22449.zip"
-        },
-        {
-          "name": "P1 FEDR cab medici de familie_FINAL",
-          "url": "https://mfe.gov.ro/wp-content/uploads/2023/05/6847240f261a719683b3641020755998.7z"
-        },
-        {
-          "name": "Corrigendum nr 1 apel 959",
-          "url": "https://mfe.gov.ro/wp-content/uploads/2023/05/70afdc20e6650b9c467fb14b2016e298.pdf"
-        }
-      ],
-      "contentHash": "228dfc26399f3d27f88d35670c087def3c8f24fdfb0473f4b42ac0247f2a13fc"
-    },
-    {
-      "id": "8593f5bc2207016743c2",
-      "title": "Investitii in infrastructura publica in care se furnizeaza servicii de asistenta medicala scolara inclusiv servicii de asistenta stomatologica",
-      "url": "https://mfe.gov.ro/ghiduri-ms/investitii-in-infrastructura-publica-in-care-se-furnizeaza-servicii-de-asistenta-medicala-scolara-inclusiv-servicii-de-asistenta-stomatologica/",
-      "date": "",
-      "dateLabel": "Observat direct",
-      "dateConfidence": "OBSERVED_ONLY",
-      "summary": "12 august 2026: Ministerul Investițiilor și Proiectelor Europene, prin Autoritatea de Management pentru Programul Sănătate publică Corrigendumul nr.3 la Ghidul Solicitantului aferent apelului de proiecte Investiții în infrastructura publică a cabinetelor medicale școlare, inclusiv a cabinetelor medicale stomatologice din cadrul unităților de învățământ publice pentru asigurarea accesului copiilor și tinerilor care urmează o formă de învățământ la servicii de calitate (reabilitare/modernizare/dotare). Corrigendumul nr.3 se regăsește în tabelul de mai jos. Sistemul informatic MySMIS2021 se va închide la data de 16 noiembrie 2026, ora 17.00 –––––––––––––––––––––––––––––––––––Sfarsitul primului paragraf 10 iunie 2026: Ministerul Investițiilor și Proiectelor Europene, prin Autoritatea de Management pentru Programul Sănătate publică Lista întrebărilor frecvente și a răspunsurilor acestora (FAQ) pentru apelul de proiecte Investiții în infrastructura publică a cabinetelor medicale școlare, inclusiv a cabinetelor medicale stomatologice din cadrul unităților de învățământ publice pentru asigurarea accesului copiilor și tinerilor care urmează o formă de învățământ la servicii de calitate (rea",
-      "textPreview": "12 august 2026: Ministerul Investițiilor și Proiectelor Europene, prin Autoritatea de Management pentru Programul Sănătate publică Corrigendumul nr.3 la Ghidul Solicitantului aferent apelului de proiecte Investiții în infrastructura publică a cabinetelor medicale școlare, inclusiv a cabinetelor medicale stomatologice din cadrul unităților de învățământ publice pentru asigurarea accesului copiilor și tinerilor care urmează o formă de învățământ la servicii de calitate (reabilitare/modernizare/dotare). Corrigendumul nr.3 se regăsește în tabelul de mai jos. Sistemul informatic MySMIS2021 se va închide la data de 16 noiembrie 2026, ora 17.00 –––––––––––––––––––––––––––––––––––Sfarsitul primului paragraf 10 iunie 2026: Ministerul Investițiilor și Proiectelor Europene, prin Autoritatea de Management pentru Programul Sănătate publică Lista întrebărilor frecvente și a răspunsurilor acestora (FAQ) pentru apelul de proiecte Investiții în infrastructura publică a cabinetelor medicale școlare, inclusiv a cabinetelor medicale stomatologice din cadrul unităților de învățământ publice pentru asigurarea accesului copiilor și tinerilor care urmează o formă de învățământ la servicii de calitate (reabilitare/modernizare/dotare), cod apel PS/900/PS_P1/OP4/RSO4.5/PS_P1_RSO4.5_A2. Lista respectivă se regăsește aici! ––––––––––––––––––––––––––––––––––– 8 iunie 2026: Ministerul Investițiilor și Proiectelor Europene, prin Autoritatea de Management pentru Programul Sănătate publică următorul anunț de informare pentru potențialii solicitanți ai apelului de proiecte Investiții în infrastructura publică a cabinetelor medicale școlare, inclusiv a cabinetelor medicale stomatologice din cadrul unităților de învățământ publice pentru asigurarea accesului copiilor și tinerilor care urmează o formă de învățământ la servicii de calitate (reabilitare/modernizare/dotare), cod apel PS/900/PS_P1/OP4/RSO4.5/PS_P1_RSO4.5_A2: Urmare a solicitărilor transmise de către potențiali solicitanți în vederea acceptării spre finanțare, a investițiilor de tipul construcție nouă/extindere, vă comunicăm faptul că Autoritatea de Management pentru Programul Sănătate a transmis serviciilor Comisiei Europene, în data de 25 mai 2026, o propunere de modificare a Programului Sănătate în vederea extinderii tipologiei acțiunilor sprijinite pentru infrastructura publică a cabinetelor medicale școlare, inclusiv a cabinetelor medicale stomatologice din cadrul unităților de învățământ publice. Sub rezerva aprobării propunerii transmise, Autoritatea de Management pentru Programul Sănătate va avea în vedere aprobarea și publicarea unui Corrigendum de modificare a Ghidului Solicitantului aferent apelului de proiecte „Investiții în infrastructura publică a cabinetelor medicale școlare, inclusiv a cabinetelor medicale stomatologice din cadrul unităților de învățământ publice pentru asigurarea accesului copiilor și tinerilor care urmează o formă de învățământ la servicii de calitate (reabilitare/modernizare/dotare)”, cod apel PS/900/PS_P1/OP4/RSO4.5/PS_P1_RSO4.5_A2, prin care, și investițiile de tipul construcție nouă/extindere vor fi acțiuni sprijinite în cadrul apelului de proiecte. Pentru a urmări evoluțiile legate de acest subiect, vă recomandăm să accesați periodic secțiunea dedicată Programului Sănătate (https://mfe.gov.ro/minister/perioade-de-programare/perioada-2021-2027/autoritatea-de-management-pentru-programul-sanatate/noutati/), precum și la adresa https://mfe.gov.ro/ghiduri-ms/investitii-in-infrastructura-publica-in-care-se-furnizeaza-servicii-de-asistenta-medicala-scolara-inclusiv-servicii-de-asistenta-stomatologica/ (secțiunea aferentă apelului de proiecte). _____________________________________________________________ 21 mai 2026: Ministerul Investițiilor și Proiectelor Europene, prin Autoritatea de Management pentru Programul Sănătate publică Corrigendumul nr.2 la Ghidul Solicitantului aferent apelului de proiecte Investiții în infrastructura publică a cabinetelor medicale școlare, inclusiv a cabinetelor medicale stomatologice din cadrul unităților de învățământ publice pentru asigurarea accesului copiilor și tinerilor care urmează o formă de învățământ la servicii de calitate (reabilitare/modernizare/dotare). Sistemul informatic MySMIS2021 se va închide la data de 25 septembrie 2026, ora 17.00. Corrigendumul nr. 2 se regăsește în tabelul de mai jos. ___________________________________________________________________ 6 mai 2026: Ministerul Investițiilor și Proiectelor Europene, prin Autoritatea de Management pentru Programul Sănătate publică Corrigendumul nr.1 la Ghidul Solicitantului aferent apelului de proiecte Investiții în infrastructura publică a cabinetelor medicale școlare, inclusiv a cabinetelor medicale stomatologice din cadrul unităților de învățământ publice pentru asigurarea accesului copiilor și tinerilor care urmează o formă de învățământ la servicii de calitate (reabilitare/modernizare/dotare). Corrigendumul nr.1 se regăsește în tabelul de mai jos. ___________________________________________________________________ 27 martie 2026: Ministerul Investițiilor și Proiectelor Europene, prin Autoritatea de Management pentru Programul Sănătate publică Ghidul Solicitantului privind apelul de proiecte Investiții în infrastructura publică a cabinetelor medicale școlare, inclusiv a cabinetelor medicale stomatologice din cadrul unităților de învățământ publice pentru asigurarea accesului copiilor și tinerilor care urmează o formă de învățământ la servicii de calitate (reabilitare/modernizare/dotare), cod apel PS/900/PS_P1/OP4/RSO4.5/PS_P1_RSO4.5_A2. Prezentul apel este de tip competitiv, cu termen limită de depunere. Bugetul total alocat prin Programul Sănătate pentru prezentul apel este de 11.698.274,12 euro. În contextul prezentului apel sunt vizate investiții de tipul reabilitare/ modernizare și dotare (dacă este necesar) în infrastructura cabinetelor medicale și/sau stomatologice din unitățile de învățământ publice, pentru asigurarea accesului copiilor și tinerilor care urmează o formă de învățământ la servicii de calitate. Acțiunile eligibile vizează atât investițiile în cabinete medicale școlare și/sau stomatologice existente precum și investițiile pentru înființarea unor astfel de cabinete în școlile unde nu există. Conform Programului Sănătate, în contextul prezentului ghid, grupul țintă eligibil se limitează la unități de învățământ publice unde se vor furniza servicii de asistență medicală școlară, inclusiv servicii de sănătate orală. Sistemul informatic MySMIS2021 va permite depunerea de proiecte începând cu data de 27 martie 2026, ora 17:00. Sistemul informatic MySMIS2021 se va închide la data de 26 iunie 2026, ora 17.00. Ghidul Solicitantului se regăsește în tabelul de mai jos. ____________________________________________________________________ 20 martie 2026: Ministerul Investițiilor și Proiectelor Europene, prin Autoritatea de Management pentru Programul Sănătate publică Centralizatorul observațiilor, propunerilor și întrebărilor primite pe conținutul Ghidului Solicitantului privind apelul de proiecte Investiții în infrastructura publică a cabinetelor medicale școlare, inclusiv a cabinetelor medicale stomatologice din cadrul unităților de învățământ publice pentru asigurarea accesului copiilor și tinerilor care urmează o formă de învățământ la servicii de calitate (reabilitare/modernizare/dotare) (consultarea publică a fost derulată în perioada 30 ianuarie – 20 februarie 2026). Centralizatorul se regăsește aici. _____________________________________________________________________ 30 ianuarie 2026: Ministerul Investițiilor și Proiectelor Europene, prin Autoritatea de Management pentru Programul Sănătate publică Ghidul Solicitantului pentru apelul de proiecte Investiții în infrastructura publică a unităților de învățământ publice din mediul rural în care se furnizează servicii de asistență medicală școlară, inclusiv servicii de sănătate orală (reabilitare/modernizare/dotare) – (consultare publică). Prezentul apel este de tip competitiv, cu termen limită de depunere. Bugetul total alocat prin Programul Sănătate pentru prezentul apel este de 11.698.274,12 euro. În contextul prezentului apel sunt vizate investiții de tipul reabilitare/ modernizare și dotare (dacă este necesar) în infrastructura cabinetelor medicale/stomatologice din unitățile de învățământ publice, din mediul rural, unde se vor furniza servicii de asistență medicală școlară, inclusiv servicii de sănătate orală copiilor și tinerilor care urmează o formă de învățământ. Perioada de consultare publică se va desfășura în perioada 30 ianuarie 2026 – 20 februarie 2026. Propunerile și observațiile la acest material se vor transmite la adresa de e-mail consultare.cabinete@mfe.gov.ro Ghidul Solicitantului pentru apelul de proiecte Investiții în infrastructura publică a unităților de învățământ publice din mediul rural în care se furnizează servicii de asistență medicală școlară, inclusiv servicii de sănătate orală (reabilitare/modernizare/dotare) – (consultare publică) se regăsește în tabelul de mai jos. Mod afișare:TabelMasonryNu există articole pentru filtrele selectate. Ghid FEDR Regiune de dezvoltare vizată Consultare publică Apel Activă - perioada consultare publică Inactivă Variante anterioare ghiduri în consultare Activ - perioadă depunere proiecte Inactiv Variante anterioare ghiduri apeluri lansate, inclusiv corrigendum PS/900/PS_P1/OP4/RSO4.5/PS_P1_RSO4.5_A2 Investiții în infrastructura publică în care se furnizează servicii de asistență medicală școlară, inclusiv servicii de asistență stomatologică (reabilitare/modernizare/dotare) Regiuni mai puțin dezvoltate X 30.01.2026-20.02.2026 P1 FEDR GS cabinete medicina scolara_30 ian 2026 27.03.2025-16.11.2026 Ghidul Solicitantului apel 900 Corrigendumuri GS cabinete med scolare «‹1›»",
-      "pageClass": "CALL_LIFECYCLE_EVENT",
-      "tag": "MIPE",
-      "kind": "GUIDE_MODIFIED",
-      "tier": "T1",
-      "source": "MIPE",
-      "observedAt": "2026-08-17T08:56:36.302567+00:00",
-      "retrievalTransport": "direct-playwright-edge-romania-v3",
-      "sourceRetrievalTransport": "playwright-edge-direct-romania-v3",
-      "verification": "CANONICAL_OFFICIAL_FETCH",
-      "documents": [
-        {
-          "name": "aici",
-          "url": "https://mfe.gov.ro/wp-content/uploads/2023/05/d79dc181bc494eff768c22f45e587653.pdf"
-        },
-        {
-          "name": "aici",
-          "url": "https://mfe.gov.ro/wp-content/uploads/2023/05/1511f974a271c7dfcfdce63536214e02.pdf"
-        },
-        {
-          "name": "P1 FEDR GS cabinete medicina scolara_30 ian 2026",
-          "url": "https://mfe.gov.ro/wp-content/uploads/2023/05/b18f0bb298908f28b69db0fe513c5eac.zip"
-        },
-        {
-          "name": "Ghidul Solicitantului apel 900",
-          "url": "https://mfe.gov.ro/wp-content/uploads/2023/05/a0c0e3cd0cc0e8cebf738b04489aa395.zip"
-        },
-        {
-          "name": "Corrigendumuri GS cabinete med scolare",
-          "url": "https://mfe.gov.ro/wp-content/uploads/2023/05/502276842d1ce4f909e68505861477b1-1.zip"
-        }
-      ],
-      "contentHash": "9c982de2c86eea3b2649b2bc15f33427f44999492c2240d091c596e731ab55b0"
     }
   ],
   "runs": [
@@ -10257,23 +10175,182 @@
       "primaryOfficialRootAvailable": false,
       "sourceHealth": "PDDS_PRIORITY_SEED_UNAVAILABLE",
       "healthNormalizationReason": "A direct success on an ancillary/previous candidate does not make the GitHub-hosted MIPE route healthy while the explicit PDDS priority seed or primary discovery roots are unavailable."
-    }
-  ],
-  "canonicalRoute": "romaniaWindows",
-  "routeHealth": {
-    "romaniaWindows": {
-      "status": "PASS",
-      "observedAt": "2026-08-17T20:34:50.137547+00:00",
-      "sourceAvailable": true,
-      "transport": "playwright-edge-direct-romania-v3"
     },
-    "githubHosted": {
-      "status": "DEGRADED",
-      "observedAt": "2026-08-18T00:00:29.112756+00:00",
-      "sourceAvailable": false,
-      "prioritySeedAvailable": false,
+    {
+      "observedAt": "2026-08-18T03:15:47.855958+00:00",
+      "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
+      "roots": [
+        {
+          "target": "https://mfe.gov.ro/",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://mfe.gov.ro/ghiduri_peos/",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://mfe.gov.ro/ghiduri_pids/",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://mfe.gov.ro/pdds/despre-program-programare/",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://mfe.gov.ro/pnrr/",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://oportunitati-ue.gov.ro/",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://mfe.gov.ro/wp-json/wp/v2/posts?per_page=50&orderby=modified&order=desc&_fields=link%2Cdate%2Cmodified%2Ctitle%2Cexcerpt",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://mfe.gov.ro/feed/",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://mfe.gov.ro/wp-sitemap.xml",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://mfe.gov.ro/sitemap.xml",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://oportunitati-ue.gov.ro/wp-json/wp/v2/posts?per_page=50&orderby=modified&order=desc&_fields=link%2Cdate%2Cmodified%2Ctitle%2Cexcerpt",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://oportunitati-ue.gov.ro/feed/",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://oportunitati-ue.gov.ro/wp-sitemap.xml",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://oportunitati-ue.gov.ro/sitemap.xml",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        }
+      ],
+      "searchTransports": [
+        {
+          "query": "site:mfe.gov.ro apel ghid consultare corrigendum 2026",
+          "ok": false,
+          "transport": "jina-search-discovery-only",
+          "error": "HTTPError: HTTP Error 401: Unauthorized",
+          "publicationPolicy": "discovery-only; canonical direct fetch required",
+          "pddsDiscoveryPolicy": "PDDS candidates must originate from the explicit priority seed crawl",
+          "excludedPddsSearchCandidates": 0
+        },
+        {
+          "query": "site:mfe.gov.ro PEO PoIDS PDDS 2026",
+          "ok": false,
+          "transport": "jina-search-discovery-only",
+          "error": "HTTPError: HTTP Error 401: Unauthorized",
+          "publicationPolicy": "discovery-only; canonical direct fetch required",
+          "pddsDiscoveryPolicy": "PDDS candidates must originate from the explicit priority seed crawl",
+          "excludedPddsSearchCandidates": 0
+        },
+        {
+          "query": "site:oportunitati-ue.gov.ro finantare 2026",
+          "ok": false,
+          "transport": "jina-search-discovery-only",
+          "error": "HTTPError: HTTP Error 401: Unauthorized",
+          "publicationPolicy": "discovery-only; canonical direct fetch required",
+          "pddsDiscoveryPolicy": "PDDS candidates must originate from the explicit priority seed crawl",
+          "excludedPddsSearchCandidates": 0
+        },
+        {
+          "query": "site:mfe.gov.ro apel ghid consultare corrigendum 2026",
+          "ok": true,
+          "transport": "bing-rss-discovery-only",
+          "error": null,
+          "publicationPolicy": "discovery-only; canonical direct fetch required",
+          "pddsDiscoveryPolicy": "PDDS candidates must originate from the explicit priority seed crawl",
+          "discoveredOfficialUrlCount": 0,
+          "excludedPddsSearchCandidates": 0
+        },
+        {
+          "query": "site:mfe.gov.ro PEO PoIDS PDDS 2026",
+          "ok": true,
+          "transport": "bing-rss-discovery-only",
+          "error": null,
+          "publicationPolicy": "discovery-only; canonical direct fetch required",
+          "pddsDiscoveryPolicy": "PDDS candidates must originate from the explicit priority seed crawl",
+          "discoveredOfficialUrlCount": 0,
+          "excludedPddsSearchCandidates": 0
+        },
+        {
+          "query": "site:oportunitati-ue.gov.ro finantare 2026",
+          "ok": true,
+          "transport": "bing-rss-discovery-only",
+          "error": null,
+          "publicationPolicy": "discovery-only; canonical direct fetch required",
+          "pddsDiscoveryPolicy": "PDDS candidates must originate from the explicit priority seed crawl",
+          "discoveredOfficialUrlCount": 0,
+          "excludedPddsSearchCandidates": 0
+        }
+      ],
+      "candidateCount": 64,
+      "fetchedCandidateCount": 32,
+      "currentVerifiedCount": 0,
+      "publishedItemCount": 60,
       "transportMode": "primary-direct-unavailable",
-      "sourceHealth": "PDDS_PRIORITY_SEED_UNAVAILABLE"
+      "lastKnownGoodPreserved": true,
+      "directSuccessCount": 1,
+      "proxySuccessCount": 0,
+      "prioritySeed": "https://mfe.gov.ro/pdds/despre-program-programare/",
+      "prioritySeedAvailable": false,
+      "primaryOfficialRootAvailable": false,
+      "sourceHealth": "PDDS_PRIORITY_SEED_UNAVAILABLE",
+      "healthNormalizationReason": "A direct success on an ancillary/previous candidate does not make the GitHub-hosted MIPE route healthy while the explicit PDDS priority seed or primary discovery roots are unavailable."
     }
-  }
+  ]
 }
