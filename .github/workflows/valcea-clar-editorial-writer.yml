@@ -30,7 +30,7 @@ permissions:
 jobs:
   editorial-writer:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -70,3 +70,38 @@ jobs:
         run: |
           python valcea-clar/scripts/newsroom_candidate_diagnostic.py --self-test
           python valcea-clar/scripts/newsroom_candidate_diagnostic.py --story-id rm-valcea-gambling-authorizations-20260723
+
+      - name: Dry-run Council explainer through live rendering transaction
+        shell: bash
+        run: |
+          set -euo pipefail
+          python valcea-clar/scripts/newsroom_decide.py
+          slot=$(python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('valcea-clar/site/newsroom_decision.json').read_text(encoding='utf-8'))
+          sid='rm-valcea-gambling-authorizations-20260723'
+          if sid not in d.get('publishable_story_ids',[]):
+              raise SystemExit(f'{sid} did not reach publishable_story_ids: {d.get("rejected")}')
+          print(d['slot_for_legacy_snapshot_compatibility'])
+          PY
+          )
+          python valcea-clar/scripts/build_public_data.py
+          python valcea-clar/scripts/generate_edition.py --slot "$slot"
+          python valcea-clar/scripts/render_frontpage.py
+          python valcea-clar/scripts/render_story_pages.py
+          python valcea-clar/scripts/build_live_feed.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          sid='rm-valcea-gambling-authorizations-20260723'
+          decision=json.loads(Path('valcea-clar/site/newsroom_decision.json').read_text(encoding='utf-8'))
+          manifest=json.loads(Path('valcea-clar/site/runtime/stiri/manifest.json').read_text(encoding='utf-8'))
+          feed=json.loads(Path('valcea-clar/site/runtime/live-feed.json').read_text(encoding='utf-8'))
+          manifest_ids={str(row.get('id') or '') for row in manifest.get('stories',[]) if isinstance(row,dict)}
+          feed_ids={str(row.get('id') or '') for row in feed.get('stories',[]) if isinstance(row,dict)}
+          if sid not in decision.get('publishable_story_ids',[]): raise SystemExit('Council story missing from decision')
+          if sid not in manifest_ids: raise SystemExit('Council story missing from rendered story manifest')
+          if sid not in feed_ids: raise SystemExit('Council story missing from live feed')
+          print(json.dumps({'status':'PASS','story_id':sid,'publishable_count':decision['publishable_story_count'],'manifest':True,'live_feed':True},ensure_ascii=False))
+          PY
