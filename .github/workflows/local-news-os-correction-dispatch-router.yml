@@ -1,0 +1,64 @@
+name: LOCAL NEWS OS Correction Dispatch Router
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/social/correction_dispatch_router.py"
+      - "local-news-os/social/test_correction_dispatch_router.py"
+      - "local-news-os/social/correction_propagation.py"
+      - "local-news-os/social/test_correction_propagation.py"
+      - "valcea-clar/social/adapter_capabilities.json"
+      - "valcea-clar/social/channel_registry.json"
+      - ".github/workflows/local-news-os-correction-dispatch-router.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/social/correction_dispatch_router.py"
+      - "local-news-os/social/test_correction_dispatch_router.py"
+      - "local-news-os/social/correction_propagation.py"
+      - "local-news-os/social/test_correction_propagation.py"
+      - "valcea-clar/social/adapter_capabilities.json"
+      - "valcea-clar/social/channel_registry.json"
+      - ".github/workflows/local-news-os-correction-dispatch-router.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-news-os-correction-dispatch-router-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile correction routing boundary
+        run: |
+          python -m py_compile \
+            local-news-os/social/correction_propagation.py \
+            local-news-os/social/test_correction_propagation.py \
+            local-news-os/social/correction_dispatch_router.py \
+            local-news-os/social/test_correction_dispatch_router.py
+          python -m json.tool valcea-clar/social/adapter_capabilities.json >/dev/null
+          python -m json.tool valcea-clar/social/channel_registry.json >/dev/null
+
+      - name: Run correction propagation regression suite
+        run: python local-news-os/social/test_correction_propagation.py
+
+      - name: Run correction dispatch router acceptance tests
+        run: python local-news-os/social/test_correction_dispatch_router.py
+
+      - name: Re-run truthful adapter capability registry validation
+        run: |
+          python local-news-os/social/adapter_capability_gate.py \
+            valcea-clar/social/adapter_capabilities.json \
+            valcea-clar/social/channel_registry.json \
+            --repo-root .
