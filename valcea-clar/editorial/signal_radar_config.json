@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.3",
+  "schema_version": "1.4",
   "contract": "LOCAL_NEWS_OS_SIGNAL_RADAR_CONFIG_V1",
   "instance_id": "valcea",
   "publication_authority": "NONE",
@@ -49,7 +49,7 @@
     },
     {
       "id": "police_public_safety",
-      "keywords": ["accident", "rutier", "dn7", "dn 7", "autocamion", "răsturn*", "rasturn*", "victim*", "dispăr*", "dispar*", "perchez*", "arme", "muni*", "reținut*", "retinut*", "poliți*", "politi*"],
+      "keywords": ["ipj", "poliți*", "politi*", "accident", "rutier", "dn7", "dn 7", "autocamion", "răsturn*", "rasturn*", "victim*", "dispăr*", "dispar*", "perchez*", "arme", "muni*", "reținut*", "retinut*", "agres*", "bătaie", "bataie", "scandal", "ordine de protec*"],
       "verification_targets": [{"ref_type": "manual_watch_source_id", "id": "ipj-valcea-stiri"}]
     },
     {
@@ -85,12 +85,35 @@
       "verification_targets": [{"ref_type": "news_source_id", "id": "primaria-rm-valcea-comunicate"}]
     },
     {
-      "id": "administration_projects",
-      "keywords": ["primăria", "primaria", "consiliul", "buget", "investi*", "moderniz*", "renovat*", "bloc", "proiect", "drum"],
+      "id": "horezu_administration",
+      "required_any_keywords": ["horezu"],
+      "keywords": ["primăria", "primaria", "oraș*", "oras*", "consili*", "proiect", "investi*", "moderniz*", "drum", "anivers*", "sărbăto*", "sarbato*", "eveniment*"],
+      "verification_targets": [{"ref_type": "news_source_id", "id": "primaria-horezu-anunturi"}]
+    },
+    {
+      "id": "calimanesti_administration",
+      "required_any_keywords": ["călimănești", "calimanesti"],
+      "keywords": ["primăria", "primaria", "oraș*", "oras*", "consili*", "proiect", "investi*", "moderniz*", "drum", "eveniment*"],
+      "verification_targets": [{"ref_type": "news_source_id", "id": "primaria-calimanesti-comunicate"}]
+    },
+    {
+      "id": "brezoi_administration",
+      "required_any_keywords": ["brezoi"],
+      "keywords": ["primăria", "primaria", "oraș*", "oras*", "consili*", "proiect", "investi*", "moderniz*", "drum", "eveniment*"],
+      "verification_targets": [{"ref_type": "news_source_id", "id": "primaria-brezoi-comunicate"}]
+    },
+    {
+      "id": "dragasani_administration",
+      "required_any_keywords": ["drăgășani", "dragasani"],
+      "keywords": ["primăria", "primaria", "municip*", "consili*", "proiect", "investi*", "moderniz*", "drum", "eveniment*"],
+      "verification_targets": [{"ref_type": "manual_watch_source_id", "id": "primaria-dragasani-anunturi-publice"}]
+    },
+    {
+      "id": "education",
+      "keywords": ["școal*", "scoal*", "școli", "scoli", "elev*", "profesor*", "director*", "posturi vacante", "bacalaureat", "evaluarea", "educa*", "liceu"],
       "verification_targets": [
-        {"ref_type": "news_source_id", "id": "prefectura-valcea"},
-        {"ref_type": "news_source_id", "id": "cj-valcea-anunturi"},
-        {"ref_type": "news_source_id", "id": "primaria-rm-valcea-comunicate"}
+        {"ref_type": "news_source_id", "id": "ccd-valcea-noutati"},
+        {"ref_type": "manual_watch_source_id", "id": "isj-valcea-comunicate"}
       ]
     },
     {
@@ -102,11 +125,12 @@
       ]
     },
     {
-      "id": "education",
-      "keywords": ["școal*", "scoal*", "elev*", "profesor*", "bacalaureat", "evaluarea", "educa*", "liceu"],
+      "id": "administration_projects",
+      "keywords": ["primăria", "primaria", "consiliul", "buget", "investi*", "moderniz*", "renovat*", "bloc", "proiect", "drum"],
       "verification_targets": [
-        {"ref_type": "news_source_id", "id": "ccd-valcea-noutati"},
-        {"ref_type": "manual_watch_source_id", "id": "isj-valcea-comunicate"}
+        {"ref_type": "news_source_id", "id": "prefectura-valcea"},
+        {"ref_type": "news_source_id", "id": "cj-valcea-anunturi"},
+        {"ref_type": "news_source_id", "id": "primaria-rm-valcea-comunicate"}
       ]
     },
     {
