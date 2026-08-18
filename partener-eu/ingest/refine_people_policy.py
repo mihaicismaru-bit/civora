@@ -17,7 +17,7 @@ DIRECT_HOSTS = {
     "mfe.gov.ro", "www.mfe.gov.ro", "ms.gov.ro", "www.ms.gov.ro",
     "research.gov.ro", "www.research.gov.ro", "adr.gov.ro", "www.adr.gov.ro",
     "fed.mai.gov.ro", "gov.ro", "www.gov.ro", "legislatie.just.ro",
-    "ec.europa.eu", "commission.europa.eu",
+    "ec.europa.eu", "commission.europa.eu", "romania.representation.ec.europa.eu",
 }
 FRESH_DAYS = 60
 
