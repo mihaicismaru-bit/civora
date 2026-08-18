@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Build public festival artist profiles from verified lineups and MusicBrainz relations.
+"""Build public VÂLCEA CLAR artist profiles from verified festival and performing-arts appearances.
 
-Festival lineups prove only that an act appeared in a verified programme. External
-identity and social links are added only after a high-confidence exact MusicBrainz
-match. Ambiguous matches remain public as minimal festival-context profiles and
-are never linked to an unverified external account.
+A programme proves an appearance, not an external identity. Musical roles may be
+resolved against MusicBrainz when one high-confidence exact match exists. Actors,
+directors and other non-musical roles remain minimal verified profiles until a
+generic identity resolver can prove their external accounts without ambiguity.
 """
 from __future__ import annotations
 
@@ -18,9 +18,10 @@ from urllib.parse import quote, urlparse
 from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
-SEEDS = ROOT / "editorial" / "festival_lineups_2026.json"
+FESTIVAL_SEEDS = ROOT / "editorial" / "festival_lineups_2026.json"
+PERFORMING_SEEDS = ROOT / "editorial" / "performing_arts_people_2026.json"
 OUT = ROOT / "site" / "runtime" / "artists.json"
-UA = "VÂLCEA-CLAR/1.0 (editorial identity resolver; redactie@valceaclar.ro)"
+UA = "VÂLCEA-CLAR/1.1 (editorial identity resolver; redactie@valceaclar.ro)"
 MB = "https://musicbrainz.org/ws/2"
 
 
@@ -45,26 +46,92 @@ def get_json(url: str) -> dict:
         return json.loads(response.read().decode("utf-8"))
 
 
-def flatten_seeds(document: dict) -> list[dict]:
-    festivals = document.get("festivals") or []
+def merge_seed(by_name: dict[str, dict], *, name: str, appearance: dict, source_url: str, musicbrainz: bool, festival: dict | None = None) -> None:
+    name = str(name or "").strip()
+    if not name:
+        return
+    key = norm(name)
+    row = by_name.setdefault(key, {
+        "name": name,
+        "appearances": [],
+        "festivals": [],
+        "source_urls": [],
+        "musicbrainz_eligible": False,
+    })
+    if appearance not in row["appearances"]:
+        row["appearances"].append(appearance)
+    if festival and festival not in row["festivals"]:
+        row["festivals"].append(festival)
+    if source_url and source_url not in row["source_urls"]:
+        row["source_urls"].append(source_url)
+    row["musicbrainz_eligible"] = bool(row["musicbrainz_eligible"] or musicbrainz)
+
+
+def flatten_seeds() -> list[dict]:
+    by_name: dict[str, dict] = {}
+    festival_doc = load(FESTIVAL_SEEDS)
+    festivals = festival_doc.get("festivals") or []
     if not isinstance(festivals, list) or not festivals:
         raise ValueError("festival seed registry is empty")
-    by_name: dict[str, dict] = {}
     for festival in festivals:
         story_id = str(festival.get("story_id") or "").strip()
         festival_name = str(festival.get("festival") or "").strip()
         source_url = str(festival.get("source_url") or "").strip()
         if not story_id or not festival_name or not source_url:
             raise ValueError("festival seed row missing identity/source")
+        festival_ref = {"story_id": story_id, "name": festival_name}
         for raw_name in festival.get("artists") or []:
             name = str(raw_name or "").strip()
-            if not name:
-                continue
-            key = norm(name)
-            row = by_name.setdefault(key, {"name": name, "festivals": [], "source_urls": []})
-            row["festivals"].append({"story_id": story_id, "name": festival_name})
-            if source_url not in row["source_urls"]:
-                row["source_urls"].append(source_url)
+            merge_seed(
+                by_name,
+                name=name,
+                appearance={
+                    "kind":"festival",
+                    "story_id":story_id,
+                    "title":festival_name,
+                    "role":"artist / performer",
+                    "source_url":source_url,
+                },
+                source_url=source_url,
+                musicbrainz=True,
+                festival=festival_ref,
+            )
+
+    if PERFORMING_SEEDS.is_file():
+        performing_doc = load(PERFORMING_SEEDS)
+        events = performing_doc.get("events") or []
+        if not isinstance(events, list):
+            raise ValueError("performing arts people seed events must be a list")
+        for event in events:
+            event_id = str(event.get("id") or "").strip()
+            title = str(event.get("title") or "").strip()
+            date = str(event.get("date") or "").strip()
+            institution = str(event.get("institution") or "").strip()
+            source_url = str(event.get("source_url") or "").strip()
+            story_id = str(event.get("story_id") or "").strip()
+            if not event_id or not title or not source_url:
+                raise ValueError("performing arts event seed missing identity/source")
+            for person in event.get("participants") or []:
+                if not isinstance(person, dict):
+                    continue
+                name = str(person.get("name") or "").strip()
+                role = str(person.get("role") or "participant").strip()
+                merge_seed(
+                    by_name,
+                    name=name,
+                    appearance={
+                        "kind":"performing_arts",
+                        "event_id":event_id,
+                        "story_id":story_id or None,
+                        "title":title,
+                        "date":date or None,
+                        "institution":institution or None,
+                        "role":role,
+                        "source_url":source_url,
+                    },
+                    source_url=source_url,
+                    musicbrainz=bool(person.get("musicbrainz")),
+                )
     return sorted(by_name.values(), key=lambda row: row["name"].casefold())
 
 
@@ -111,38 +178,61 @@ def relation_links(mbid: str) -> dict[str, list[str]]:
     return links
 
 
+def appearance_summary(seed: dict) -> str:
+    values = []
+    for row in seed.get("appearances") or []:
+        title = str(row.get("title") or "").strip()
+        role = str(row.get("role") or "").strip()
+        institution = str(row.get("institution") or "").strip()
+        label = title
+        if institution and row.get("kind") == "performing_arts":
+            label += f" ({institution})"
+        if role:
+            label += f", rol: {role}"
+        if label and label not in values:
+            values.append(label)
+    return "; ".join(values[:5])
+
+
 def bio_from_mb(seed: dict, artist: dict) -> str:
     name = seed["name"]
-    kind = str(artist.get("type") or "act muzical").strip()
+    kind = str(artist.get("type") or "act artistic").strip()
     area = str(((artist.get("area") or {}).get("name")) or ((artist.get("begin-area") or {}).get("name")) or "").strip()
     disambiguation = str(artist.get("disambiguation") or "").strip()
     tags = [str(row.get("name") or "").strip() for row in (artist.get("tags") or []) if str(row.get("name") or "").strip()]
-    parts = [f"{name} este un act muzical identificat în MusicBrainz ca {kind.lower()}."]
+    parts = [f"{name} este un artist sau proiect artistic identificat în MusicBrainz ca {kind.lower()}."]
     if area:
-        parts.append(f"Identitatea muzicală este asociată cu {area}.")
+        parts.append(f"Identitatea artistică este asociată cu {area}.")
     if tags:
-        parts.append("Etichete muzicale publice: " + ", ".join(tags[:4]) + ".")
+        parts.append("Etichete publice: " + ", ".join(tags[:4]) + ".")
     if disambiguation:
         parts.append(f"MusicBrainz îl diferențiază prin descrierea: {disambiguation}.")
-    festivals = ", ".join(row["name"] for row in seed["festivals"])
-    parts.append(f"În dosarele VÂLCEA CLAR apare în programul {festivals}.")
+    summary = appearance_summary(seed)
+    if summary:
+        parts.append(f"În documentarea VÂLCEA CLAR apare în: {summary}.")
     return " ".join(parts)
 
 
 def minimal_bio(seed: dict) -> str:
-    festivals = ", ".join(row["name"] for row in seed["festivals"])
-    return (f"{seed['name']} este un act muzical inclus în programul verificat al {festivals}. "
-            "Identitatea externă și conturile sociale sunt publicate numai după o potrivire unică și verificabilă; profilul rămâne deschis pentru îmbogățire editorială.")
+    summary = appearance_summary(seed)
+    return (
+        f"{seed['name']} este un artist sau participant cultural identificat într-un program verificat de VÂLCEA CLAR"
+        + (f": {summary}. " if summary else ". ")
+        + "Identitatea externă și conturile sociale sunt publicate numai după o potrivire unică și verificabilă; profilul rămâne deschis pentru îmbogățire editorială."
+    )
 
 
 def build(*, network: bool) -> dict:
-    seeds = flatten_seeds(load(SEEDS))
+    seeds = flatten_seeds()
     profiles = []
     for index, seed in enumerate(seeds):
         artist = None
-        status = "festival_lineup_verified_external_identity_pending"
+        if seed.get("musicbrainz_eligible"):
+            status = "programme_verified_external_identity_pending"
+        else:
+            status = "programme_verified_generic_identity_resolver_pending"
         links: dict[str, list[str]] = {}
-        if network:
+        if network and seed.get("musicbrainz_eligible"):
             try:
                 artist, status = search_musicbrainz(seed["name"])
                 if artist:
@@ -157,27 +247,31 @@ def build(*, network: bool) -> dict:
             "publication_status": "public",
             "resolution_status": status,
             "bio": bio_from_mb(seed, artist) if artist else minimal_bio(seed),
-            "festivals": seed["festivals"],
+            "festivals": seed.get("festivals") or [],
+            "appearances": seed.get("appearances") or [],
             "links": links,
             "source_urls": seed["source_urls"],
+            "musicbrainz_eligible": bool(seed.get("musicbrainz_eligible")),
         }
         if artist:
             profile["musicbrainz_id"] = artist.get("id")
             profile["musicbrainz_type"] = artist.get("type")
             profile["musicbrainz_disambiguation"] = artist.get("disambiguation")
         profiles.append(profile)
-        if network and index + 1 < len(seeds):
+        if network and seed.get("musicbrainz_eligible") and index + 1 < len(seeds):
             time.sleep(0.9)
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "product": "VÂLCEA CLAR Artist Intelligence",
-        "generated_from": "editorial/festival_lineups_2026.json",
+        "generated_from": ["editorial/festival_lineups_2026.json", "editorial/performing_arts_people_2026.json"],
         "profile_count": len(profiles),
         "profiles": profiles,
         "policy": {
-            "festival_lineup_proves_appearance_not_external_identity": True,
+            "verified_programme_proves_appearance_not_external_identity": True,
             "ambiguous_external_identity_fail_closed": True,
             "unverified_social_link_publication": False,
+            "musicbrainz_only_for_musical_roles": True,
+            "generic_actor_director_resolver_pending": True,
             "profiles_remain_public_minimal_when_external_identity_is_pending": True,
         },
     }
@@ -186,8 +280,9 @@ def build(*, network: bool) -> dict:
 def self_test() -> None:
     assert slugify("Ionuț Fulea") == "ionut-fulea"
     assert norm("Connect-R") == "connect r"
-    seeds = flatten_seeds({"festivals": [{"story_id":"s","festival":"F","source_url":"https://example.test","artists":["A","A"]}]})
-    assert len(seeds) == 1
+    seeds = flatten_seeds()
+    assert seeds
+    assert any(row.get("appearances") for row in seeds)
     assert category("https://www.instagram.com/test/") == "instagram"
     print("VÂLCEA CLAR artist intelligence self-test: PASS")
 
