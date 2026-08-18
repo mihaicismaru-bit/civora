@@ -15,6 +15,7 @@ on:
       - "valcea-clar/validation/validate.py"
       - "valcea-clar/scripts/reconcile_ingest.py"
       - "valcea-clar/scripts/promote_verified_venues.py"
+      - "valcea-clar/scripts/quarantine_venue_identity_collisions.py"
       - "valcea-clar/scripts/build_public_data.py"
       - "valcea-clar/scripts/build_live_feed.py"
       - "valcea-clar/ops/ingest_aliases.json"
@@ -41,13 +42,21 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Validate autonomous promotion gate offline
-        run: python valcea-clar/scripts/promote_verified_venues.py --self-test
+      - name: Validate autonomous venue safety gates offline
+        run: |
+          python valcea-clar/scripts/promote_verified_venues.py --self-test
+          python valcea-clar/scripts/quarantine_venue_identity_collisions.py --self-test
 
       - name: Probe sources and rebuild fresh ingest state
         run: python valcea-clar/ingest/venue_ingest.py --timeout 12
 
-      - name: Validate ingest outputs
+      - name: Validate raw ingest outputs
+        run: python valcea-clar/validation/validate.py
+
+      - name: Quarantine ambiguous venue identity collisions
+        run: python valcea-clar/scripts/quarantine_venue_identity_collisions.py
+
+      - name: Validate quarantined ingest outputs
         run: python valcea-clar/validation/validate.py
 
       - name: Evaluate safe verified venue promotion on pull requests
@@ -95,6 +104,8 @@ jobs:
           state=json.load(open('valcea-clar/ingest/state/venues.json',encoding='utf-8'))
           report=json.load(open('valcea-clar/validation/latest_report.json',encoding='utf-8'))
           reconciliation=json.load(open('valcea-clar/ops/ingest_reconciliation.json',encoding='utf-8'))
+          holds_path=pathlib.Path('valcea-clar/ops/venue_identity_collision_holds.json')
+          holds=json.loads(holds_path.read_text(encoding='utf-8')) if holds_path.is_file() else {'holds': []}
           receipt_path=pathlib.Path('valcea-clar/ops/venue_auto_promotion.json')
           receipt=json.loads(receipt_path.read_text(encoding='utf-8')) if receipt_path.is_file() else {}
           p=pathlib.Path(os.environ['GITHUB_STEP_SUMMARY'])
@@ -104,6 +115,7 @@ jobs:
               f"- Ingest status: `{state['status']}`\n"
               f"- Localuri urmărite: **{state['summary']['venues']}**\n"
               f"- Creatori candidați: **{state['summary']['creatorCandidates']}**\n"
+              f"- Coliziuni de identitate blocate: **{len(holds.get('holds', []))}**\n"
               f"- Localuri promovate sigur în această stare: **{promoted}**\n"
               f"- Coada editorială rămasă: **{reconciliation['summary']['review_queue']}**\n"
               f"- Validare ingest: **{report['status']}**\n",
@@ -123,6 +135,7 @@ jobs:
             valcea-clar/validation/latest_report.json
             valcea-clar/ops/ingest_reconciliation.json
             valcea-clar/ops/ingest_review_queue.json
+            valcea-clar/ops/venue_identity_collision_holds.json
             valcea-clar/ops/venue_auto_promotion.json
             valcea-clar/data/places.json
             valcea-clar/data/sources.json
