@@ -50,7 +50,7 @@ def grouped_profiles(document: dict) -> dict[str, list[dict]]:
             "id": str(profile.get("id") or ""),
             "name": name,
             "path": path,
-            # Only the identity resolver may mint musicbrainz_id.  Collapse that
+            # Only the identity resolver may mint musicbrainz_id. Collapse that
             # evidence to an actual bool before it crosses into public runtime.
             "external_identity_verified": bool(profile.get("musicbrainz_id")),
         }
@@ -229,7 +229,10 @@ def main() -> int:
             else:
                 row.pop("artist_profile_ids", None)
                 row.pop("artist_profile_paths", None)
-        manifest.setdefault("cross_linking", {})["artist_intelligence"] = "verified_programme_profiles_only"
+        cross_linking = manifest.setdefault("cross_linking", {})
+        cross_linking.setdefault("enabled", True)
+        cross_linking.setdefault("eligible_scope", "publishable_full_story_only")
+        cross_linking["artist_intelligence"] = "verified_programme_profiles_only"
         STORY_MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     print(json.dumps({
