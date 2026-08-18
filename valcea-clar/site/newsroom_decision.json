@@ -1,11 +1,11 @@
 {
   "schema_version": "1.4",
-  "evaluated_local": "2026-08-18T23:43:06+03:00",
+  "evaluated_local": "2026-08-18T23:52:40+03:00",
   "mode": "continuous_story_first",
   "edition_windows_are_publication_gates": false,
   "recap_editions_retained": true,
   "slot_for_legacy_snapshot_compatibility": "evening",
-  "changed": true,
+  "changed": false,
   "publishable_story_count": 24,
   "publishable_story_ids": [
     "musiclover-festival-2026-dosar-complet-20260818",
@@ -35,7 +35,7 @@
   ],
   "new_story_ids": [],
   "fingerprint": "6333e83aa24a19755448a3d714969af9f2f9ec8661a7691a1280f4924028e7a7",
-  "auto_fact_registry_count": 0,
+  "auto_fact_registry_count": 1,
   "editorial_writer": {
     "writer_id": "manual_journalism_v1",
     "status": "ACTIVE",
@@ -43,7 +43,7 @@
     "fact_kernel_composed": 15,
     "legacy_passthrough": 15,
     "editorial_holds": 0,
-    "registry_fingerprint_sha256": "de2d6f9157e78a4cd84ed38cb61cce4e01059dce666cd5bbab4204c2f186fc12"
+    "registry_fingerprint_sha256": "3e4d58ef9c65faf53db3bd668c11e24faddc8697f5c3b4536454b0a41c3ed0f6"
   },
   "editorial_integrity": {
     "gate_id": "editorial_integrity_v1",
@@ -53,11 +53,15 @@
     "held": 1,
     "failed": 0
   },
-  "rejected_candidate_count": 1,
+  "rejected_candidate_count": 2,
   "rejected": [
     {
       "id": "olanesti-bridge-monitor",
       "reason": "editorial_publication_hold"
+    },
+    {
+      "id": "auto-scm-rm-valcea-5f4df08da156",
+      "reason": "title_date_only_not_full_story"
     }
   ],
   "active_publication_holds": [
