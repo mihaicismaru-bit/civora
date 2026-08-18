@@ -2,19 +2,31 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-18T17:09:40+03:00",
+  "generated_at": "2026-08-18T18:52:21+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-18T17:07:10+03:00",
-  "task_count": 53,
+  "queue_generated_at": "2026-08-18T18:50:57+03:00",
+  "task_count": 55,
   "primary_match_count": 0,
-  "no_match_count": 27,
-  "unrouted_count": 26,
-  "target_count": 16,
-  "targets_ok": 14,
+  "no_match_count": 28,
+  "unrouted_count": 27,
+  "target_count": 18,
+  "targets_ok": 16,
   "results": [
+    {
+      "signal_id": "712ddef7cfb604ef9d748874",
+      "signal_title": "ANAF a descoperit o fraudă de peste 26 de milioane de lei cu mașini second-hand",
+      "signal_url": "https://seintamplainvalcea.ro/2026/08/18/anaf-a-descoperit-o-frauda-de-peste-26-de-milioane-de-lei-cu-masini-second-hand/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_published_at": "2026-08-18T17:32:48+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
     {
       "signal_id": "cf7bcde1946885414907e82d",
       "signal_title": "Un bărbat din Râmnicu Vâlcea a sfidat ordinul de protecție și a ajuns după gratii",
@@ -736,6 +748,44 @@
           "status": "PASS",
           "error": null,
           "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "e751bb7c327394e3f515bb9e",
+      "signal_title": "Ultima oră o zi in urma Budești pregătește un cabinet stomatologic la Școala Gimnazială, cu dotări achiziționate printr-un proiect european",
+      "signal_url": "https://www.primplanpress.ro/budesti-pregateste-un-cabinet-stomatologic-la-scoala-gimnaziala-cu-dotari-achizitionate-printr-un-proiect-european/",
+      "signal_publisher": "Primplan Press",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-17T14:47:28+03:00",
+      "verification_route_id": "education",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "ccd-valcea-noutati",
+            "name": "Casa Corpului Didactic Vâlcea",
+            "url": "https://ccdvl.ro/category/noutati/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "isj-valcea-comunicate",
+            "name": "Inspectoratul Școlar Județean Vâlcea",
+            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 3
         }
       ],
       "publication_authority": "NONE",
