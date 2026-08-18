@@ -1,0 +1,69 @@
+name: VÂLCEA CLAR Live Newsroom Transaction Diagnostic
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/scripts/newsroom_transaction_diagnostic.py'
+      - '.github/workflows/valcea-clar-newsroom-transaction-diagnostic.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-newsroom-transaction-diagnostic
+  cancel-in-progress: true
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Resolve current SCM story id
+        id: fact
+        shell: bash
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          from pathlib import Path
+          doc=json.loads(Path('valcea-clar/editorial/facts_registry.json').read_text(encoding='utf-8'))
+          rows=[row for row in doc.get('facts',[]) if row.get('auto_scope')=='scm_official_program_fact_kernel']
+          print('story_id=' + (str(rows[-1].get('id')) if rows else ''))
+          PY
+      - name: Run canonical build/render dry-run
+        if: steps.fact.outputs.story_id != ''
+        run: |
+          python valcea-clar/scripts/newsroom_transaction_diagnostic.py \
+            --story-id "${{ steps.fact.outputs.story_id }}" \
+            --output valcea-clar/editorial/newsroom_transaction_diagnostic.json
+      - name: Persist diagnostic result
+        if: steps.fact.outputs.story_id != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp valcea-clar/editorial/newsroom_transaction_diagnostic.json /tmp/newsroom-transaction-diagnostic.json
+          git config user.name 'vâlcea-clar-transaction-diagnostic[bot]'
+          git config user.email 'valcea-clar-transaction-diagnostic@users.noreply.github.com'
+          for attempt in 1 2 3 4; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p valcea-clar/editorial
+            cp /tmp/newsroom-transaction-diagnostic.json valcea-clar/editorial/newsroom_transaction_diagnostic.json
+            git add valcea-clar/editorial/newsroom_transaction_diagnostic.json
+            if git diff --cached --quiet; then
+              exit 0
+            fi
+            git commit -m 'Refresh VÂLCEA CLAR newsroom transaction diagnostic'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            sleep $((attempt * 2))
+          done
+          exit 1
