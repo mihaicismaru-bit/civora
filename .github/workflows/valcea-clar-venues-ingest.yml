@@ -20,7 +20,7 @@ on:
       - "valcea-clar/ops/ingest_aliases.json"
       - ".github/workflows/valcea-clar-venues-ingest.yml"
   schedule:
-    - cron: "23 * * * *"
+    - cron: "23 */6 * * *"
 
 permissions:
   contents: write
