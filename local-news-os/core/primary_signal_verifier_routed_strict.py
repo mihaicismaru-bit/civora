@@ -6,14 +6,16 @@ config-driven primary-target registry. It grants no Fact Kernel or publication
 authority.
 
 Official primary listings sometimes carry the only trustworthy publication date
-in the link label while the linked document omits machine-readable date metadata.
-This adapter may recover that explicit terminal listing date, but only from a
-strict unambiguous pattern, and records the provenance so the strict freshness
-gate remains fail-closed rather than silently accepting undated evidence.
+in the link label or in a dated accordion/button title while the linked primary
+document omits machine-readable date metadata. This adapter may recover that
+explicit date only from strict, unambiguous official-listing text and records the
+provenance so the strict freshness gate remains fail-closed.
 """
 from __future__ import annotations
 
 import argparse
+import hashlib
+import html.parser
 import json
 import re
 from datetime import datetime
@@ -34,9 +36,42 @@ import signal_radar as radar  # noqa: E402
 import signal_routing_contract as routing  # noqa: E402
 
 LEGACY_FETCH_PRIMARY_CANDIDATE = base.fetch_primary_candidate
+LEGACY_BUILD_TARGET_CORPUS = base.build_target_corpus
 LEGACY_VERIFY_TASK = base.verify_task
 LISTING_DATE_DMY = re.compile(r"\((\d{1,2})[./](\d{1,2})[./](\d{4})\)\s*$")
 LISTING_DATE_ISO = re.compile(r"\((\d{4})-(\d{2})-(\d{2})\)\s*$")
+
+
+class DatedListingButtonParser(html.parser.HTMLParser):
+    """Extract visible button labels without treating arbitrary page text as evidence."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self._depth = 0
+        self._parts: list[str] = []
+        self.labels: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs) -> None:
+        if tag.casefold() == "button":
+            if self._depth == 0:
+                self._parts = []
+            self._depth += 1
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag.casefold() != "button" or self._depth == 0:
+            return
+        self._depth -= 1
+        if self._depth == 0:
+            value = radar.clean(" ".join(self._parts))
+            if value:
+                self.labels.append(value)
+            self._parts = []
+
+    def handle_data(self, data: str) -> None:
+        if self._depth:
+            value = radar.clean(data)
+            if value:
+                self._parts.append(value)
 
 
 def listing_label_published_at(label: str, tz: ZoneInfo) -> datetime | None:
@@ -54,6 +89,43 @@ def listing_label_published_at(label: str, tz: ZoneInfo) -> datetime | None:
         return datetime(year, month, day, tzinfo=tz)
     except ValueError:
         return None
+
+
+def dated_listing_button_documents(
+    article: str,
+    listing_url: str,
+    tz: ZoneInfo,
+    *,
+    max_items: int = 80,
+) -> list[dict[str, Any]]:
+    """Turn explicit dated official-listing button titles into evidence-only documents."""
+    parser = DatedListingButtonParser()
+    parser.feed(article)
+    documents: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for raw in parser.labels:
+        title = radar.clean(raw)
+        published = listing_label_published_at(title, tz)
+        identity = radar.norm_text(title)
+        if published is None or not 20 <= len(title) <= 300 or identity in seen:
+            continue
+        seen.add(identity)
+        digest = hashlib.sha256(f"{listing_url}\n{title}".encode("utf-8")).hexdigest()
+        documents.append({
+            "url": f"{listing_url}#official-listing-item-{digest[:16]}",
+            "title": title,
+            "published_at": published.isoformat(timespec="seconds"),
+            "published_at_source": "official_listing_button",
+            "listing_url": listing_url,
+            "listing_label": title,
+            "evidence_scope": "official_listing_item_title_date_only",
+            "title_tokens": sorted(base.tokens(title)),
+            "body_tokens": sorted(base.tokens(title)),
+            "content_sha256": digest,
+        })
+        if len(documents) >= max_items:
+            break
+    return documents
 
 
 def listing_date_aware_fetch_primary_candidate(
@@ -76,6 +148,51 @@ def listing_date_aware_fetch_primary_candidate(
     return doc
 
 
+def listing_item_aware_build_target_corpus(
+    target: dict[str, Any],
+    tz: ZoneInfo,
+    *,
+    max_links: int,
+    max_fetches: int,
+) -> dict[str, Any]:
+    corpus = LEGACY_BUILD_TARGET_CORPUS(
+        target,
+        tz,
+        max_links=max_links,
+        max_fetches=max_fetches,
+    )
+    if len(corpus.get("documents") or []) >= min(4, max(1, max_fetches)):
+        return corpus
+
+    try:
+        listing, final = radar.fetch(str(target["url"]), max_bytes=2_000_000, timeout=14)
+    except Exception:
+        return corpus
+
+    listing_docs = dated_listing_button_documents(listing, final, tz)
+    if not listing_docs:
+        return corpus
+
+    existing = {
+        (str(row.get("title") or ""), str(row.get("published_at") or ""))
+        for row in corpus.get("documents") or []
+        if isinstance(row, dict)
+    }
+    added = [
+        row for row in listing_docs
+        if (str(row.get("title") or ""), str(row.get("published_at") or "")) not in existing
+    ]
+    if not added:
+        return corpus
+
+    corpus["documents"] = list(corpus.get("documents") or []) + added
+    corpus["status"] = "PASS"
+    if corpus.get("error") == "no_primary_documents_retrieved":
+        corpus["error"] = None
+    corpus["official_listing_item_documents"] = len(added)
+    return corpus
+
+
 def listing_date_aware_verify_task(
     task: dict[str, Any],
     corpora: dict[tuple[str, str], dict[str, Any]],
@@ -94,8 +211,12 @@ def listing_date_aware_verify_task(
             source = str(doc.get("published_at_source") or "").strip()
             if source:
                 evidence["primary_published_at_source"] = source
-            if source == "official_listing_label" and doc.get("listing_label"):
+            if doc.get("listing_label"):
                 evidence["primary_listing_label"] = str(doc["listing_label"])[:300]
+            if doc.get("listing_url"):
+                evidence["primary_listing_url"] = str(doc["listing_url"])
+            if doc.get("evidence_scope"):
+                evidence["primary_evidence_scope"] = str(doc["evidence_scope"])
             return result
     return result
 
@@ -120,13 +241,9 @@ def install(instance_id: str) -> None:
     routing.install()
     ranked.install_ranking()
     strict.install_strict_guard(instance_id)
-    # Ranking installs its own two-registry target loader. Extend it only after
-    # ranking/strict installation so dedicated config targets survive.
     base.target_registry = extended_target_registry
-    # Preserve the evidence-only verifier contract while recovering a date that
-    # the official listing itself explicitly supplies. No date is inferred from
-    # URL shape, file mtime, crawl time, or the secondary signal.
     base.fetch_primary_candidate = listing_date_aware_fetch_primary_candidate
+    base.build_target_corpus = listing_item_aware_build_target_corpus
     base.verify_task = listing_date_aware_verify_task
 
 
@@ -141,6 +258,8 @@ def validate(instance_id: str) -> dict[str, Any]:
         "strict_false_positive_guard": True,
         "primary_published_at_required": True,
         "official_listing_label_date_fallback": True,
+        "official_dated_button_evidence": True,
+        "official_listing_evidence_is_title_date_only": True,
         "official_listing_label_date_must_be_explicit_terminal": True,
         "title_event_overlap_required": True,
         "candidate_ranking": "LISTING_PATH_THEN_SOURCE_HINTS_THEN_NEWS_STRUCTURE",
@@ -158,6 +277,8 @@ def run(instance_id: str, *, write: bool) -> dict[str, Any]:
         "strict_false_positive_guard": True,
         "primary_published_at_required": True,
         "official_listing_label_date_fallback": True,
+        "official_dated_button_evidence": True,
+        "official_listing_evidence_is_title_date_only": True,
         "official_listing_label_date_must_be_explicit_terminal": True,
         "max_publication_time_delta_hours": 36,
         "title_event_overlap_required": True,
@@ -187,8 +308,21 @@ def self_test() -> int:
     assert listing_label_published_at("Comunicat (18.08.2026) actualizat", tz) is None
     assert listing_label_published_at("Comunicat oficial (31.02.2026)", tz) is None
 
-    # The recovered listing date is still subject to the existing strict
-    # temporal gate; it does not grant publication authority by itself.
+    sample = """
+    <div class="accordion">
+      <button>Anunt privind scoaterea la concurs a unui post de incasator-cititor
+      in cadrul Sectorului Govora, subzona Pietrari (17.08.2026)</button>
+      <a href="/materiale/detalii.pdf">Detalii anunt</a>
+      <button>Arhiva fara data verificabila</button>
+    </div>
+    """
+    docs = dated_listing_button_documents(sample, "https://example.invalid/jobs", tz)
+    assert len(docs) == 1, docs
+    assert docs[0]["published_at"] == "2026-08-17T00:00:00+03:00"
+    assert docs[0]["published_at_source"] == "official_listing_button"
+    assert docs[0]["evidence_scope"] == "official_listing_item_title_date_only"
+    assert docs[0]["url"].startswith("https://example.invalid/jobs#official-listing-item-")
+
     strict.install_strict_guard("valcea")
     derived_doc = {"published_at": dmy.isoformat(timespec="seconds")}
     assert strict.strict_date_compatible(
@@ -234,6 +368,7 @@ def main() -> int:
         "target_count": state["target_count"],
         "strict_false_positive_guard": True,
         "official_listing_label_date_fallback": True,
+        "official_dated_button_evidence": True,
         "boundary_safe_signal_routing": True,
         "publication_authority": "NONE",
     }, ensure_ascii=False))
