@@ -1,0 +1,145 @@
+name: VÂLCEA CLAR Real Photo Resolver
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "valcea-clar/social/real_photo_resolver.py"
+      - "valcea-clar/social/photo_source_policy.json"
+      - ".github/workflows/valcea-clar-real-photo-resolver.yml"
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/site/story_publication_event.json"
+      - "valcea-clar/site/current_edition.json"
+      - "valcea-clar/social/real_photo_replacement_queue.json"
+      - "valcea-clar/social/real_photo_resolver.py"
+      - "valcea-clar/social/photo_source_policy.json"
+      - ".github/workflows/valcea-clar-real-photo-resolver.yml"
+  schedule:
+    - cron: "17 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-real-photo-resolver
+  cancel-in-progress: false
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Validate resolver safety contract
+        run: |
+          python -m py_compile valcea-clar/social/real_photo_resolver.py
+          python valcea-clar/social/real_photo_resolver.py --self-test
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          policy=json.loads(Path('valcea-clar/social/photo_source_policy.json').read_text(encoding='utf-8'))
+          p=policy['principles']
+          assert p['real_photographs_only'] is True
+          assert p['synthetic_images_forbidden'] is True
+          assert p['generic_substitution_forbidden'] is True
+          assert p['rights_cleared_does_not_imply_subject_match'] is True
+          assert p['subject_match_required_before_publication'] is True
+          assert p['editor_approval_required_before_publication'] is True
+          assert p['automatic_candidate_promotion'] is False
+          enabled=[row['id'] for row in policy['provider_order'] if row.get('enabled')]
+          assert 'wikimedia_commons' in enabled
+          assert 'openverse' in enabled
+          print({'status':'PASS','enabled_providers':enabled})
+          PY
+
+      - name: Discover free real-photo candidates
+        run: python valcea-clar/social/real_photo_resolver.py
+
+      - name: Enforce candidate-only output
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path=Path('valcea-clar/social/story_visual_candidates.json')
+          doc=json.loads(path.read_text(encoding='utf-8'))
+          assert doc['candidate_only'] is True
+          assert doc['automatic_promotion_forbidden'] is True
+          assert doc['rights_cleared_does_not_imply_subject_match'] is True
+          assert doc['no_photo_is_better_than_false_relevance'] is True
+          for story_id, row in doc.get('stories', {}).items():
+              assert row.get('automatic_promotion') is False
+              for candidate in row.get('candidates', []):
+                  assert candidate.get('kind') == 'photograph', story_id
+                  assert candidate.get('synthetic') is False, story_id
+                  assert candidate.get('subject_match') is False, story_id
+                  assert candidate.get('editor_approved') is False, story_id
+                  assert candidate.get('publication_eligible') is False, story_id
+                  assert candidate.get('rights_basis') in {'creative_commons','public_domain'}, story_id
+                  assert candidate.get('license') in {'public-domain','cc0','cc-by','cc-by-sa'}, story_id
+          print({'status':'PASS','stories':len(doc.get('stories',{}))})
+          PY
+
+      - name: Persist candidate registry conflict-safe
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          candidate="valcea-clar/social/story_visual_candidates.json"
+          cp "$candidate" /tmp/valcea-story-visual-candidates.json
+          git config user.name "valcea-clar-photo-resolver[bot]"
+          git config user.email "valcea-clar-photo-resolver@users.noreply.github.com"
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p "$(dirname "$candidate")"
+            cp /tmp/valcea-story-visual-candidates.json "$candidate"
+            git add "$candidate"
+            if git diff --cached --quiet; then
+              echo "Real-photo candidate registry already current."
+              exit 0
+            fi
+            git commit -m "Refresh VÂLCEA CLAR real-photo candidates"
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "main advanced during photo-candidate persistence; retrying ${attempt}/5."
+            sleep $((attempt * 2))
+          done
+          echo "Could not persist real-photo candidate registry after five attempts." >&2
+          exit 1
+
+      - name: Write resolver summary
+        if: always()
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          path=Path('valcea-clar/social/story_visual_candidates.json')
+          if not path.exists():
+              text='# VÂLCEA CLAR — Real Photo Resolver\n\n- Status: **NO_OUTPUT**\n'
+          else:
+              doc=json.loads(path.read_text(encoding='utf-8'))
+              stories=doc.get('stories', {})
+              candidates=sum(int(row.get('candidate_count') or 0) for row in stories.values() if isinstance(row,dict))
+              ready=sum(1 for row in stories.values() if isinstance(row,dict) and row.get('status')=='CANDIDATES_READY')
+              text=(
+                  '# VÂLCEA CLAR — Real Photo Resolver\n\n'
+                  f'- Stories evaluated: **{len(stories)}**\n'
+                  f'- Stories with candidates: **{ready}**\n'
+                  f'- Rights-filtered real-photo candidates: **{candidates}**\n'
+                  '- Automatic publication from discovery: **disabled**\n'
+                  '- Subject-match + editor approval gate: **required**\n'
+                  '- Paid photo API required: **no**\n'
+              )
+          Path(os.environ['GITHUB_STEP_SUMMARY']).write_text(text,encoding='utf-8')
+          PY
