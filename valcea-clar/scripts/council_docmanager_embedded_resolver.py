@@ -58,8 +58,11 @@ class EmbeddedTargetParser(HTMLParser):
 
 
 def _document_unid(url: str) -> str | None:
-    match = LOTUS_UNID_RE.search(urllib.parse.unquote(str(url or "")))
-    return match.group("unid").upper() if match else None
+    # Lotus `$FILE` URLs can contain both a 32-hex view/design token and the
+    # actual document UNID. The document identity is the final 32-hex token
+    # before the attachment tail, whereas OpenDocument URLs contain only it.
+    matches = list(LOTUS_UNID_RE.finditer(urllib.parse.unquote(str(url or ""))))
+    return matches[-1].group("unid").upper() if matches else None
 
 
 def _eligible_attachment(base_url: str, candidate: str) -> str | None:
@@ -145,7 +148,7 @@ def self_test() -> None:
     links = embedded_attachment_links(base_url, body)
     urls = [row["url"] for row in links]
     assert len(urls) == 3
-    assert all(unid.lower() in urllib.parse.unquote(url).lower() for url in urls)
+    assert all(_document_unid(url) == unid for url in urls)
     assert all("$FILE" in urllib.parse.unquote(url) for url in urls)
     assert not any(other.lower() in url.lower() for url in urls)
     combined = structural_parse_links(base_url, body)
