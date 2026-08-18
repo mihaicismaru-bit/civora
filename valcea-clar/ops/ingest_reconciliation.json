@@ -1,20 +1,21 @@
 {
-  "schema_version": "1.0",
-  "generated_at": "2026-08-14T11:30:00+00:00",
+  "schema_version": "1.1",
+  "generated_at": "2026-08-18T20:16:01.163009+00:00",
   "policy": {
     "canonical_catalogue_mutated": false,
     "auto_publish": false,
     "discovery_only_publication_effect": "NONE",
-    "human_review_required": true
+    "human_review_required": true,
+    "reconciliation_reads_fresh_ingest_state": true
   },
   "summary": {
-    "canonical_records": 9,
+    "canonical_records": 11,
     "ingest_records": 19,
-    "matched": 7,
-    "new_editorial_candidates": 7,
+    "matched": 9,
+    "new_editorial_candidates": 5,
     "unmatched_discovery_only": 5,
     "conflicts": 1,
-    "review_queue": 15
+    "review_queue": 13
   },
   "records": [
     {
@@ -128,10 +129,10 @@
     {
       "ingest_id": "old-city-garden",
       "ingest_name": "Old City Garden",
-      "canonical_id": null,
-      "match_method": null,
-      "status": "NEW_EDITORIAL_CANDIDATE",
-      "action": "CREATE_CANONICAL_DRAFT",
+      "canonical_id": "old-city-garden",
+      "match_method": "same_id",
+      "status": "MATCHED_PUBLIC",
+      "action": "NO_ACTION",
       "editorial_eligibility": "DRAFT_ELIGIBLE",
       "verification": "VERIFIED_OFFICIAL",
       "publication_effect": "NONE",
@@ -140,10 +141,10 @@
     {
       "ingest_id": "restaurant-autentic",
       "ingest_name": "Restaurant Autentic",
-      "canonical_id": null,
-      "match_method": null,
-      "status": "NEW_EDITORIAL_CANDIDATE",
-      "action": "CREATE_CANONICAL_DRAFT",
+      "canonical_id": "restaurant-autentic",
+      "match_method": "same_id",
+      "status": "MATCHED_PUBLIC",
+      "action": "NO_ACTION",
       "editorial_eligibility": "DRAFT_ELIGIBLE",
       "verification": "VERIFIED_OFFICIAL",
       "publication_effect": "NONE",
@@ -222,7 +223,7 @@
       "match_method": null,
       "status": "NEW_EDITORIAL_CANDIDATE",
       "action": "CREATE_CANONICAL_DRAFT",
-      "editorial_eligibility": "DRAFT_ELIGIBLE",
+      "editorial_eligibility": "DRAFT_REVIEW_REQUIRED",
       "verification": "VERIFIED_OFFICIAL",
       "publication_effect": "NONE",
       "differences": []
