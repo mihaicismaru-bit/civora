@@ -1,10 +1,13 @@
 {
-  "schema_version": "1.5",
+  "schema_version": "2.1",
   "publication_model": "continuous_story_first",
-  "homepage_presentation": "live_newsroom",
-  "edition_is_canonical_story_url": false,
-  "story_materialization_source": "decision_approved_full_editorial_writer_products",
-  "public_recap_embeds_fact_kernel": false,
+  "homepage_presentation": "reader_newsroom",
+  "news_index": "/stiri/",
+  "operational_records_public": false,
+  "cross_linking": {
+    "enabled": true,
+    "eligible_scope": "publishable_full_story_only"
+  },
   "structured_data": {
     "enabled": true,
     "type": "NewsArticle",
@@ -13,179 +16,310 @@
     "verified_image_policy": "provenance_backed_real_photograph_only",
     "unverified_image_policy": "omit"
   },
-  "cross_linking": {
-    "enabled": true,
-    "ranking": "same_section_then_priority",
-    "max_links_per_story": 3,
-    "eligible_scope": "publishable_full_story_only"
-  },
   "stories": [
-    {
-      "id": "rm-valcea-gambling-authorizations-20260723",
-      "path": "/stiri/rm-valcea-gambling-authorizations-20260723/",
-      "canonical": "https://valceaclar.ro/stiri/rm-valcea-gambling-authorizations-20260723/",
-      "related_story_ids": [
-        "rm-valcea-hcl-310-20260814",
-        "rm-valcea-hcl-311-20260814",
-        "cj-valcea-cocos-rajdp-mandat-guvernanta-20260818"
-      ],
-      "structured_data_type": "NewsArticle"
-    },
     {
       "id": "alert-1cd2159b942ec2b672f7",
       "path": "/stiri/alert-1cd2159b942ec2b672f7/",
       "canonical": "https://valceaclar.ro/stiri/alert-1cd2159b942ec2b672f7/",
+      "published_at": "2026-08-18T00:02:39+03:00",
+      "archive_status": "active",
+      "active_now": true,
       "related_story_ids": [
         "rm-valcea-hcl-312-20260814",
         "alert-fdfdb85a579432f385f7",
+        "musiclover-green-day-20260815",
         "rm-valcea-gambling-authorizations-20260723"
       ],
-      "structured_data_type": "NewsArticle"
-    },
-    {
-      "id": "rm-valcea-hcl-305-20260814",
-      "path": "/stiri/rm-valcea-hcl-305-20260814/",
-      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-305-20260814/",
-      "related_story_ids": [
-        "rm-valcea-hcl-306-20260814",
-        "rm-valcea-gambling-authorizations-20260723",
-        "alert-1cd2159b942ec2b672f7"
-      ],
-      "structured_data_type": "NewsArticle"
-    },
-    {
-      "id": "rm-valcea-hcl-306-20260814",
-      "path": "/stiri/rm-valcea-hcl-306-20260814/",
-      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-306-20260814/",
-      "related_story_ids": [
-        "rm-valcea-hcl-305-20260814",
-        "rm-valcea-gambling-authorizations-20260723",
-        "alert-1cd2159b942ec2b672f7"
-      ],
-      "structured_data_type": "NewsArticle"
-    },
-    {
-      "id": "rm-valcea-hcl-307-20260814",
-      "path": "/stiri/rm-valcea-hcl-307-20260814/",
-      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-307-20260814/",
-      "related_story_ids": [
-        "rm-valcea-hcl-308-20260814",
-        "rm-valcea-hcl-309-20260814",
-        "rm-valcea-gambling-authorizations-20260723"
-      ],
-      "structured_data_type": "NewsArticle"
-    },
-    {
-      "id": "rm-valcea-hcl-308-20260814",
-      "path": "/stiri/rm-valcea-hcl-308-20260814/",
-      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-308-20260814/",
-      "related_story_ids": [
-        "rm-valcea-hcl-307-20260814",
-        "rm-valcea-hcl-309-20260814",
-        "rm-valcea-gambling-authorizations-20260723"
-      ],
-      "structured_data_type": "NewsArticle"
-    },
-    {
-      "id": "rm-valcea-hcl-309-20260814",
-      "path": "/stiri/rm-valcea-hcl-309-20260814/",
-      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-309-20260814/",
-      "related_story_ids": [
-        "rm-valcea-hcl-307-20260814",
-        "rm-valcea-hcl-308-20260814",
-        "rm-valcea-gambling-authorizations-20260723"
-      ],
-      "structured_data_type": "NewsArticle"
-    },
-    {
-      "id": "rm-valcea-hcl-310-20260814",
-      "path": "/stiri/rm-valcea-hcl-310-20260814/",
-      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-310-20260814/",
-      "related_story_ids": [
-        "rm-valcea-gambling-authorizations-20260723",
-        "rm-valcea-hcl-311-20260814",
-        "cj-valcea-cocos-rajdp-mandat-guvernanta-20260818"
-      ],
-      "structured_data_type": "NewsArticle"
-    },
-    {
-      "id": "rm-valcea-hcl-311-20260814",
-      "path": "/stiri/rm-valcea-hcl-311-20260814/",
-      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-311-20260814/",
-      "related_story_ids": [
-        "rm-valcea-gambling-authorizations-20260723",
-        "rm-valcea-hcl-310-20260814",
-        "cj-valcea-cocos-rajdp-mandat-guvernanta-20260818"
-      ],
-      "structured_data_type": "NewsArticle"
-    },
-    {
-      "id": "rm-valcea-hcl-312-20260814",
-      "path": "/stiri/rm-valcea-hcl-312-20260814/",
-      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-312-20260814/",
-      "related_story_ids": [
-        "alert-1cd2159b942ec2b672f7",
-        "alert-fdfdb85a579432f385f7",
-        "rm-valcea-gambling-authorizations-20260723"
-      ],
-      "structured_data_type": "NewsArticle"
-    },
-    {
-      "id": "apavil-joburi-fara-experienta-20260818",
-      "path": "/stiri/apavil-joburi-fara-experienta-20260818/",
-      "canonical": "https://valceaclar.ro/stiri/apavil-joburi-fara-experienta-20260818/",
-      "related_story_ids": [
-        "bujoreni-11-zidari-4582-6000-20260818",
-        "rm-valcea-gambling-authorizations-20260723",
-        "alert-1cd2159b942ec2b672f7"
-      ],
-      "structured_data_type": "NewsArticle"
+      "structured_data_type": "NewsArticle",
+      "public_ux_authorized": true
     },
     {
       "id": "alert-fdfdb85a579432f385f7",
       "path": "/stiri/alert-fdfdb85a579432f385f7/",
       "canonical": "https://valceaclar.ro/stiri/alert-fdfdb85a579432f385f7/",
+      "published_at": "2026-08-18T00:02:39+03:00",
+      "archive_status": "active",
+      "active_now": true,
       "related_story_ids": [
         "alert-1cd2159b942ec2b672f7",
         "rm-valcea-hcl-312-20260814",
+        "musiclover-green-day-20260815",
         "rm-valcea-gambling-authorizations-20260723"
       ],
-      "structured_data_type": "NewsArticle"
-    },
-    {
-      "id": "cj-valcea-cocos-rajdp-mandat-guvernanta-20260818",
-      "path": "/stiri/cj-valcea-cocos-rajdp-mandat-guvernanta-20260818/",
-      "canonical": "https://valceaclar.ro/stiri/cj-valcea-cocos-rajdp-mandat-guvernanta-20260818/",
-      "related_story_ids": [
-        "rm-valcea-gambling-authorizations-20260723",
-        "rm-valcea-hcl-310-20260814",
-        "rm-valcea-hcl-311-20260814"
-      ],
       "structured_data_type": "NewsArticle",
-      "published_at": "2026-08-18T20:32:36+03:00"
+      "public_ux_authorized": true
     },
     {
-      "id": "bujoreni-11-zidari-4582-6000-20260818",
-      "path": "/stiri/bujoreni-11-zidari-4582-6000-20260818/",
-      "canonical": "https://valceaclar.ro/stiri/bujoreni-11-zidari-4582-6000-20260818/",
+      "id": "rm-valcea-hcl-305-20260814",
+      "path": "/stiri/rm-valcea-hcl-305-20260814/",
+      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-305-20260814/",
+      "published_at": "2026-08-18T15:18:10.668481Z",
+      "archive_status": "published_archive",
+      "active_now": false,
       "related_story_ids": [
-        "apavil-joburi-fara-experienta-20260818",
+        "rm-valcea-hcl-306-20260814",
+        "musiclover-green-day-20260815",
         "rm-valcea-gambling-authorizations-20260723",
         "alert-1cd2159b942ec2b672f7"
       ],
       "structured_data_type": "NewsArticle",
-      "published_at": "2026-08-18T20:29:43+03:00"
+      "public_ux_authorized": true
+    },
+    {
+      "id": "rm-valcea-hcl-306-20260814",
+      "path": "/stiri/rm-valcea-hcl-306-20260814/",
+      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-306-20260814/",
+      "published_at": "2026-08-18T15:18:10.668481Z",
+      "archive_status": "published_archive",
+      "active_now": false,
+      "related_story_ids": [
+        "rm-valcea-hcl-305-20260814",
+        "musiclover-green-day-20260815",
+        "rm-valcea-gambling-authorizations-20260723",
+        "alert-1cd2159b942ec2b672f7"
+      ],
+      "structured_data_type": "NewsArticle",
+      "public_ux_authorized": true
+    },
+    {
+      "id": "rm-valcea-hcl-307-20260814",
+      "path": "/stiri/rm-valcea-hcl-307-20260814/",
+      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-307-20260814/",
+      "published_at": "2026-08-18T15:18:10.668481Z",
+      "archive_status": "published_archive",
+      "active_now": false,
+      "related_story_ids": [
+        "rm-valcea-hcl-308-20260814",
+        "rm-valcea-hcl-309-20260814",
+        "musiclover-green-day-20260815",
+        "rm-valcea-gambling-authorizations-20260723"
+      ],
+      "structured_data_type": "NewsArticle",
+      "public_ux_authorized": true
+    },
+    {
+      "id": "rm-valcea-hcl-308-20260814",
+      "path": "/stiri/rm-valcea-hcl-308-20260814/",
+      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-308-20260814/",
+      "published_at": "2026-08-18T15:18:10.668481Z",
+      "archive_status": "published_archive",
+      "active_now": false,
+      "related_story_ids": [
+        "rm-valcea-hcl-307-20260814",
+        "rm-valcea-hcl-309-20260814",
+        "musiclover-green-day-20260815",
+        "rm-valcea-gambling-authorizations-20260723"
+      ],
+      "structured_data_type": "NewsArticle",
+      "public_ux_authorized": true
+    },
+    {
+      "id": "rm-valcea-hcl-309-20260814",
+      "path": "/stiri/rm-valcea-hcl-309-20260814/",
+      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-309-20260814/",
+      "published_at": "2026-08-18T15:18:10.668481Z",
+      "archive_status": "published_archive",
+      "active_now": false,
+      "related_story_ids": [
+        "rm-valcea-hcl-307-20260814",
+        "rm-valcea-hcl-308-20260814",
+        "musiclover-green-day-20260815",
+        "rm-valcea-gambling-authorizations-20260723"
+      ],
+      "structured_data_type": "NewsArticle",
+      "public_ux_authorized": true
+    },
+    {
+      "id": "rm-valcea-hcl-310-20260814",
+      "path": "/stiri/rm-valcea-hcl-310-20260814/",
+      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-310-20260814/",
+      "published_at": "2026-08-18T15:18:10.668481Z",
+      "archive_status": "published_archive",
+      "active_now": false,
+      "related_story_ids": [
+        "rm-valcea-gambling-authorizations-20260723",
+        "rm-valcea-hcl-311-20260814",
+        "cj-valcea-cocos-rajdp-mandat-guvernanta-20260818",
+        "musiclover-green-day-20260815"
+      ],
+      "structured_data_type": "NewsArticle",
+      "public_ux_authorized": true
+    },
+    {
+      "id": "rm-valcea-hcl-311-20260814",
+      "path": "/stiri/rm-valcea-hcl-311-20260814/",
+      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-311-20260814/",
+      "published_at": "2026-08-18T15:18:10.668481Z",
+      "archive_status": "published_archive",
+      "active_now": false,
+      "related_story_ids": [
+        "rm-valcea-gambling-authorizations-20260723",
+        "rm-valcea-hcl-310-20260814",
+        "cj-valcea-cocos-rajdp-mandat-guvernanta-20260818",
+        "musiclover-green-day-20260815"
+      ],
+      "structured_data_type": "NewsArticle",
+      "public_ux_authorized": true
+    },
+    {
+      "id": "rm-valcea-hcl-312-20260814",
+      "path": "/stiri/rm-valcea-hcl-312-20260814/",
+      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-312-20260814/",
+      "published_at": "2026-08-18T15:18:10.668481Z",
+      "archive_status": "published_archive",
+      "active_now": false,
+      "related_story_ids": [
+        "alert-1cd2159b942ec2b672f7",
+        "alert-fdfdb85a579432f385f7",
+        "musiclover-green-day-20260815",
+        "rm-valcea-gambling-authorizations-20260723"
+      ],
+      "structured_data_type": "NewsArticle",
+      "public_ux_authorized": true
+    },
+    {
+      "id": "rm-valcea-gambling-authorizations-20260723",
+      "path": "/stiri/rm-valcea-gambling-authorizations-20260723/",
+      "canonical": "https://valceaclar.ro/stiri/rm-valcea-gambling-authorizations-20260723/",
+      "published_at": "2026-08-18T16:10:21+03:00",
+      "archive_status": "published_archive",
+      "active_now": false,
+      "related_story_ids": [
+        "rm-valcea-hcl-310-20260814",
+        "rm-valcea-hcl-311-20260814",
+        "cj-valcea-cocos-rajdp-mandat-guvernanta-20260818",
+        "musiclover-green-day-20260815"
+      ],
+      "structured_data_type": "NewsArticle",
+      "public_ux_authorized": true
     },
     {
       "id": "scm-program-fdbf66a4a5bb7ef4f69b",
       "path": "/stiri/scm-program-fdbf66a4a5bb7ef4f69b/",
       "canonical": "https://valceaclar.ro/stiri/scm-program-fdbf66a4a5bb7ef4f69b/",
+      "published_at": "2026-08-18T16:10:21+03:00",
+      "archive_status": "published_archive",
+      "active_now": false,
+      "related_story_ids": [
+        "scm-valcea-slatina-20260815",
+        "musiclover-green-day-20260815",
+        "rm-valcea-gambling-authorizations-20260723",
+        "alert-1cd2159b942ec2b672f7"
+      ],
+      "structured_data_type": "NewsArticle",
+      "public_ux_authorized": true
+    },
+    {
+      "id": "apavil-joburi-fara-experienta-20260818",
+      "path": "/stiri/apavil-joburi-fara-experienta-20260818/",
+      "canonical": "https://valceaclar.ro/stiri/apavil-joburi-fara-experienta-20260818/",
+      "published_at": "2026-08-18T17:32:36.966819Z",
+      "archive_status": "published_archive",
+      "active_now": false,
+      "related_story_ids": [
+        "bujoreni-11-zidari-4582-6000-20260818",
+        "musiclover-green-day-20260815",
+        "rm-valcea-gambling-authorizations-20260723",
+        "alert-1cd2159b942ec2b672f7"
+      ],
+      "structured_data_type": "NewsArticle",
+      "public_ux_authorized": true
+    },
+    {
+      "id": "cj-valcea-cocos-rajdp-mandat-guvernanta-20260818",
+      "path": "/stiri/cj-valcea-cocos-rajdp-mandat-guvernanta-20260818/",
+      "canonical": "https://valceaclar.ro/stiri/cj-valcea-cocos-rajdp-mandat-guvernanta-20260818/",
+      "published_at": "2026-08-18T20:32:36+03:00",
+      "archive_status": "published_archive",
+      "active_now": false,
       "related_story_ids": [
         "rm-valcea-gambling-authorizations-20260723",
-        "alert-1cd2159b942ec2b672f7",
-        "rm-valcea-hcl-305-20260814"
+        "rm-valcea-hcl-310-20260814",
+        "rm-valcea-hcl-311-20260814",
+        "musiclover-green-day-20260815"
       ],
-      "structured_data_type": "NewsArticle"
+      "structured_data_type": "NewsArticle",
+      "public_ux_authorized": true
+    },
+    {
+      "id": "bujoreni-11-zidari-4582-6000-20260818",
+      "path": "/stiri/bujoreni-11-zidari-4582-6000-20260818/",
+      "canonical": "https://valceaclar.ro/stiri/bujoreni-11-zidari-4582-6000-20260818/",
+      "published_at": "2026-08-18T20:29:43+03:00",
+      "archive_status": "published_archive",
+      "active_now": false,
+      "related_story_ids": [
+        "apavil-joburi-fara-experienta-20260818",
+        "musiclover-green-day-20260815",
+        "rm-valcea-gambling-authorizations-20260723",
+        "alert-1cd2159b942ec2b672f7"
+      ],
+      "structured_data_type": "NewsArticle",
+      "public_ux_authorized": true
+    },
+    {
+      "id": "luminos-fest-zavoi-20260815",
+      "path": "/stiri/luminos-fest-zavoi-20260815/",
+      "canonical": "https://valceaclar.ro/stiri/luminos-fest-zavoi-20260815/",
+      "published_at": "2026-08-15T20:57:49+03:00",
+      "archive_status": "published_archive",
+      "active_now": false,
+      "related_story_ids": [
+        "musiclover-green-day-20260815",
+        "rm-valcea-gambling-authorizations-20260723",
+        "alert-1cd2159b942ec2b672f7",
+        "florile-govorei-20260816"
+      ],
+      "structured_data_type": "NewsArticle",
+      "public_ux_authorized": true
+    },
+    {
+      "id": "florile-govorei-20260816",
+      "path": "/stiri/florile-govorei-20260816/",
+      "canonical": "https://valceaclar.ro/stiri/florile-govorei-20260816/",
+      "published_at": "2026-08-16T19:06:48+03:00",
+      "archive_status": "published_archive",
+      "active_now": false,
+      "related_story_ids": [
+        "musiclover-green-day-20260815",
+        "rm-valcea-gambling-authorizations-20260723",
+        "alert-1cd2159b942ec2b672f7",
+        "luminos-fest-zavoi-20260815"
+      ],
+      "structured_data_type": "NewsArticle",
+      "public_ux_authorized": true
+    },
+    {
+      "id": "musiclover-green-day-20260815",
+      "path": "/stiri/musiclover-green-day-20260815/",
+      "canonical": "https://valceaclar.ro/stiri/musiclover-green-day-20260815/",
+      "published_at": "2026-08-15T20:57:49+03:00",
+      "archive_status": "published_archive",
+      "active_now": false,
+      "related_story_ids": [
+        "luminos-fest-zavoi-20260815",
+        "rm-valcea-gambling-authorizations-20260723",
+        "alert-1cd2159b942ec2b672f7",
+        "florile-govorei-20260816"
+      ],
+      "structured_data_type": "NewsArticle",
+      "public_ux_authorized": true
+    },
+    {
+      "id": "scm-valcea-slatina-20260815",
+      "path": "/stiri/scm-valcea-slatina-20260815/",
+      "canonical": "https://valceaclar.ro/stiri/scm-valcea-slatina-20260815/",
+      "published_at": "2026-08-15T13:25:34+03:00",
+      "archive_status": "published_archive",
+      "active_now": false,
+      "related_story_ids": [
+        "scm-program-fdbf66a4a5bb7ef4f69b",
+        "musiclover-green-day-20260815",
+        "rm-valcea-gambling-authorizations-20260723",
+        "alert-1cd2159b942ec2b672f7"
+      ],
+      "structured_data_type": "NewsArticle",
+      "public_ux_authorized": true
     }
   ]
 }
