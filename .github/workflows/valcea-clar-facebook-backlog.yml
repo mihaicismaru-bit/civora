@@ -1,0 +1,97 @@
+name: VÂLCEA CLAR Facebook Backlog
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '1-56/5 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/site/story_publication_event.json'
+      - 'valcea-clar/site/newsroom_decision.json'
+      - 'valcea-clar/editions/**'
+      - 'valcea-clar/social/facebook_text_publish_v2.py'
+      - '.github/workflows/valcea-clar-facebook-backlog.yml'
+  pull_request:
+    paths:
+      - 'valcea-clar/social/facebook_text_publish_v2.py'
+      - '.github/workflows/valcea-clar-facebook-backlog.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-facebook-text-delivery
+  cancel-in-progress: false
+
+jobs:
+  drain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Refresh canonical main
+        if: github.event_name != 'pull_request'
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Validate durable Facebook backlog contract
+        run: |
+          python -m py_compile valcea-clar/social/facebook_text_publish_v2.py
+          python valcea-clar/social/story_social_policy.py --self-test
+          python valcea-clar/social/facebook_text_publish_v2.py --self-test
+
+      - name: Preview unpublished canonical stories
+        run: python valcea-clar/social/facebook_text_publish_v2.py | tee /tmp/facebook-backlog-preview.json
+
+      - name: Publish next eligible Facebook text+link story
+        id: apply
+        if: github.event_name != 'pull_request'
+        env:
+          VALCEA_FB_PAGE_ID: '1234360446430980'
+          VALCEA_META_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_META_PAGE_ACCESS_TOKEN }}
+          VALCEA_FB_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_FB_PAGE_ACCESS_TOKEN }}
+          VALCEA_FB_GRAPH_VERSION: v26.0
+          VALCEA_FB_TEXT_LIVE_ENABLED: 'true'
+          VALCEA_FB_TEXT_MAX_PER_RUN: '1'
+        run: python valcea-clar/social/facebook_text_publish_v2.py --apply | tee /tmp/facebook-backlog-apply.json
+
+      - name: Persist Facebook delivery ledger conflict-safe
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp valcea-clar/social/facebook_state.json /tmp/facebook-backlog-state.json
+          git config user.name 'valcea-clar-facebook-backlog[bot]'
+          git config user.email 'valcea-clar-facebook-backlog@users.noreply.github.com'
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/facebook-backlog-state.json valcea-clar/social/facebook_state.json
+            git add valcea-clar/social/facebook_state.json
+            if git diff --cached --quiet; then
+              echo 'Facebook delivery ledger already current.'
+              exit 0
+            fi
+            git commit -m 'Persist VÂLCEA CLAR Facebook story delivery'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            sleep $((attempt * 2))
+          done
+          exit 1
+
+      - name: Audit backlog delivery
+        if: always()
+        run: |
+          echo '## VÂLCEA CLAR Facebook Backlog' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Scheduled runs inspect every current publishable story and skip only stories already present in the Facebook ledger or held by the social-interest gate.' >> "$GITHUB_STEP_SUMMARY"
+          cat /tmp/facebook-backlog-preview.json >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+          cat /tmp/facebook-backlog-apply.json >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
