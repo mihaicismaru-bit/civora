@@ -3,17 +3,21 @@ name: VÂLCEA CLAR Council Decision Articles
 on:
   workflow_dispatch:
   schedule:
+    # Runs two minutes after the generic DocManager resolver slots.
     - cron: '8,23,38,53 * * * *'
   push:
     branches: [main]
     paths:
       - 'valcea-clar/editorial/council_watch_rm_valcea_state.json'
+      - 'valcea-clar/editorial/council_decision_document_corpus.json'
       - 'valcea-clar/scripts/council_decision_article_engine.py'
+      - 'valcea-clar/scripts/council_decision_fulltext_enricher.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
       - '.github/workflows/valcea-clar-council-decision-articles.yml'
   pull_request:
     paths:
       - 'valcea-clar/scripts/council_decision_article_engine.py'
+      - 'valcea-clar/scripts/council_decision_fulltext_enricher.py'
       - '.github/workflows/valcea-clar-council-decision-articles.yml'
 
 permissions:
@@ -38,8 +42,11 @@ jobs:
 
       - name: Validate HCL article contracts
         run: |
-          python -m py_compile valcea-clar/scripts/council_decision_article_engine.py
+          python -m py_compile \
+            valcea-clar/scripts/council_decision_article_engine.py \
+            valcea-clar/scripts/council_decision_fulltext_enricher.py
           python valcea-clar/scripts/council_decision_article_engine.py --self-test
+          python valcea-clar/scripts/council_decision_fulltext_enricher.py --self-test
 
       - name: Refresh adopted-decision register
         if: github.event_name != 'pull_request'
@@ -50,8 +57,18 @@ jobs:
 
       - name: Materialize one article per adopted HCL and investigation graph
         if: github.event_name != 'pull_request'
+        run: python valcea-clar/scripts/council_decision_article_engine.py --apply
+
+      - name: Upgrade stable HCL articles from full official documents
+        if: github.event_name != 'pull_request'
+        shell: bash
         run: |
-          python valcea-clar/scripts/council_decision_article_engine.py --apply
+          set -euo pipefail
+          if [ -s valcea-clar/editorial/council_decision_document_corpus.json ]; then
+            python valcea-clar/scripts/council_decision_fulltext_enricher.py --apply
+          else
+            echo 'Full official HCL corpus not materialized yet; register-safe articles remain valid.'
+          fi
           python valcea-clar/scripts/editorial_writer.py --check
 
       - name: Persist HCL article products conflict-safe
@@ -97,6 +114,7 @@ jobs:
       - name: Report autonomous article set
         if: always()
         run: |
-          echo 'Each adopted HCL is a stable evergreen article candidate.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Register-only articles remain explicitly scoped until full official attachments resolve.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Each adopted HCL keeps one stable evergreen article URL.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Full official DocManager text upgrades the same article with operative clauses, money, beneficiaries, contracts and follow-up questions.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Register-only fallback remains fail-closed if a document cannot be resolved.' >> "$GITHUB_STEP_SUMMARY"
           echo 'Cross-decision patterns create private investigation leads, never automatic allegations.' >> "$GITHUB_STEP_SUMMARY"
