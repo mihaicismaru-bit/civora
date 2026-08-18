@@ -10,8 +10,10 @@ on:
       - 'local-news-os/core/signal_radar.py'
       - 'local-news-os/core/signal_radar_routed.py'
       - 'local-news-os/core/signal_routing_contract.py'
+      - 'local-news-os/core/validate_signal_routing_regressions.py'
       - 'local-news-os/instances/valcea/source_pack.json'
       - 'valcea-clar/editorial/signal_radar_config.json'
+      - 'valcea-clar/editorial/signal_routing_regressions.json'
       - 'valcea-clar/editorial/primary_signal_targets.json'
       - 'valcea-clar/editorial/source_intelligence_seed_registry.json'
       - 'valcea-clar/editorial/source_intelligence_seed_supplement_v1.json'
@@ -21,8 +23,10 @@ on:
       - 'local-news-os/core/signal_radar.py'
       - 'local-news-os/core/signal_radar_routed.py'
       - 'local-news-os/core/signal_routing_contract.py'
+      - 'local-news-os/core/validate_signal_routing_regressions.py'
       - 'local-news-os/instances/valcea/source_pack.json'
       - 'valcea-clar/editorial/signal_radar_config.json'
+      - 'valcea-clar/editorial/signal_routing_regressions.json'
       - 'valcea-clar/editorial/primary_signal_targets.json'
       - 'valcea-clar/editorial/source_intelligence_seed_registry.json'
       - 'valcea-clar/editorial/source_intelligence_seed_supplement_v1.json'
@@ -52,9 +56,11 @@ jobs:
           python -m py_compile \
             local-news-os/core/signal_radar.py \
             local-news-os/core/signal_routing_contract.py \
-            local-news-os/core/signal_radar_routed.py
+            local-news-os/core/signal_radar_routed.py \
+            local-news-os/core/validate_signal_routing_regressions.py
           python local-news-os/core/signal_radar_routed.py --self-test
           python local-news-os/core/signal_radar_routed.py --instance valcea --validate-only
+          python local-news-os/core/validate_signal_routing_regressions.py
       - name: Exercise real local/regional press radar read-only
         if: github.event_name == 'pull_request'
         run: python local-news-os/core/signal_radar_routed.py --instance valcea --no-write
