@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.1",
+  "schema_version": "1.2",
   "instance_id": "valcea",
   "cases": [
     {
@@ -28,6 +28,12 @@
       "id": "education-school-directors",
       "title": "Zeci de școli din Vâlcea își caută directori. Lista completă a posturilor vacante",
       "expected_route": "education"
+    },
+    {
+      "id": "medical-conference-not-education",
+      "title": "Medicalma Vision, partener al conferinței-eveniment cu profesorul Constantin Dulcan",
+      "expected_route": "health",
+      "forbidden_route": "education"
     },
     {
       "id": "horezu-municipal-event",
