@@ -1,0 +1,185 @@
+name: VÂLCEA CLAR Published Photo Recovery
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "valcea-clar/social/published_photo_recovery.py"
+      - "valcea-clar/social/photo_reuse_inference_policy.json"
+      - "valcea-clar/social/real_photo_resolver.py"
+      - "valcea-clar/social/photo_source_policy.json"
+      - ".github/workflows/valcea-clar-published-photo-recovery.yml"
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/site/story_archive.json"
+      - "valcea-clar/site/story_publication_event.json"
+      - "valcea-clar/site/current_edition.json"
+      - "valcea-clar/social/real_photo_replacement_queue.json"
+      - "valcea-clar/social/published_photo_recovery.py"
+      - "valcea-clar/social/photo_reuse_inference_policy.json"
+      - "valcea-clar/social/real_photo_resolver.py"
+      - "valcea-clar/social/photo_source_policy.json"
+      - ".github/workflows/valcea-clar-published-photo-recovery.yml"
+  schedule:
+    - cron: "37 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-published-photo-recovery
+  cancel-in-progress: false
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Validate recovery safety contract
+        run: |
+          python -m py_compile \
+            valcea-clar/social/real_photo_resolver.py \
+            valcea-clar/social/published_photo_recovery.py
+          python valcea-clar/social/real_photo_resolver.py --self-test
+          python valcea-clar/social/published_photo_recovery.py --self-test
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('valcea-clar/social/photo_reuse_inference_policy.json').read_text(encoding='utf-8'))
+          principles=p['principles']
+          assert principles['publicly_visible_does_not_equal_open_license'] is True
+          assert principles['operational_reuse_presumption_allowed'] is True
+          assert principles['third_party_rights_signal_cancels_presumption'] is True
+          assert principles['subject_match_still_required_before_publication'] is True
+          assert principles['autonomous_rights_verifier_required_before_promotion'] is True
+          assert principles['candidate_only_until_verifier_passes'] is True
+          assert set(p['allowed_editorial_use_bases']) == {
+              'PUBLIC_SECTOR_REUSE_PRESUMPTION',
+              'OFFICIAL_PROMOTIONAL_PRESUMPTION',
+              'PUBLIC_FIGURE_OFFICIAL_MEDIA_PRESUMPTION',
+          }
+          print({'status':'PASS','policy':p['policy_name']})
+          PY
+
+      - name: Recover candidates for every published story
+        run: python valcea-clar/social/published_photo_recovery.py
+
+      - name: Enforce fail-closed candidate registry
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          doc=json.loads(Path('valcea-clar/social/story_visual_candidates.json').read_text(encoding='utf-8'))
+          assert doc['candidate_only'] is True
+          assert doc['automatic_promotion_forbidden'] is True
+          assert doc['rights_cleared_does_not_imply_subject_match'] is True
+          assert doc['risk_assessed_editorial_use_is_not_open_license'] is True
+          counts=doc['scope_counts']
+          assert counts['archived_published'] > 0
+          assert counts['unique_total'] >= counts['archived_published']
+          allowed_inferred={
+              'PUBLIC_SECTOR_REUSE_PRESUMPTION',
+              'OFFICIAL_PROMOTIONAL_PRESUMPTION',
+              'PUBLIC_FIGURE_OFFICIAL_MEDIA_PRESUMPTION',
+          }
+          for story_id,row in doc.get('stories',{}).items():
+              assert row.get('automatic_promotion') is False, story_id
+              for candidate in row.get('candidates',[]):
+                  assert candidate.get('kind') == 'photograph', story_id
+                  assert candidate.get('synthetic') is False, story_id
+                  assert candidate.get('subject_match') is False, story_id
+                  assert candidate.get('editor_approved') is False, story_id
+                  assert candidate.get('publication_eligible') is False, story_id
+                  basis=candidate.get('rights_basis')
+                  if basis == 'risk_assessed_editorial_use':
+                      assert candidate.get('rights_status') == 'PRESUMED_REUSE', story_id
+                      assert candidate.get('editorial_use_basis') in allowed_inferred, story_id
+                      assert candidate.get('rights_metadata_verified') is False, story_id
+                      assert candidate.get('provenance_verified_to_source_page') is True, story_id
+                      assert 'autonomous_rights_verifier_required' in candidate.get('blockers',[]), story_id
+                  else:
+                      assert basis in {'creative_commons','public_domain'}, story_id
+                      assert candidate.get('license') in {'public-domain','cc0','cc-by','cc-by-sa'}, story_id
+          print({'status':'PASS','scope_counts':counts,'stories':len(doc.get('stories',{}))})
+          PY
+
+      - name: Upload candidate audit artifact
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: valcea-published-photo-candidates
+          path: valcea-clar/social/story_visual_candidates.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Persist candidate registry conflict-safe
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          candidate="valcea-clar/social/story_visual_candidates.json"
+          cp "$candidate" /tmp/valcea-story-visual-candidates.json
+          git config user.name "valcea-clar-photo-recovery[bot]"
+          git config user.email "valcea-clar-photo-recovery@users.noreply.github.com"
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p "$(dirname "$candidate")"
+            cp /tmp/valcea-story-visual-candidates.json "$candidate"
+            git add "$candidate"
+            if git diff --cached --quiet; then
+              echo "Published-photo candidate registry already current."
+              exit 0
+            fi
+            git commit -m "Refresh VÂLCEA CLAR published-photo candidates"
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "main advanced during candidate persistence; retrying ${attempt}/5."
+            sleep $((attempt * 2))
+          done
+          echo "Could not persist candidate registry after five attempts." >&2
+          exit 1
+
+      - name: Write recovery summary
+        if: always()
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          path=Path('valcea-clar/social/story_visual_candidates.json')
+          if not path.exists():
+              text='# VÂLCEA CLAR — Published Photo Recovery\n\n- Status: **NO_OUTPUT**\n'
+          else:
+              doc=json.loads(path.read_text(encoding='utf-8'))
+              stories=doc.get('stories',{})
+              counts=doc.get('scope_counts',{})
+              candidates=sum(int(row.get('candidate_count') or 0) for row in stories.values() if isinstance(row,dict))
+              ready=sum(1 for row in stories.values() if isinstance(row,dict) and row.get('status')=='CANDIDATES_READY')
+              inferred=sum(
+                  1
+                  for row in stories.values() if isinstance(row,dict)
+                  for c in row.get('candidates',[])
+                  if c.get('rights_basis')=='risk_assessed_editorial_use'
+              )
+              text=(
+                  '# VÂLCEA CLAR — Published Photo Recovery\n\n'
+                  f"- Archived published stories: **{counts.get('archived_published',0)}**\n"
+                  f"- Unique stories evaluated: **{counts.get('unique_total',len(stories))}**\n"
+                  f'- Stories with candidates: **{ready}**\n'
+                  f'- Candidate photographs: **{candidates}**\n'
+                  f'- Official-source reuse-presumption candidates: **{inferred}**\n'
+                  '- Automatic promotion from recovery: **disabled until autonomous verifier passes**\n'
+              )
+          Path(os.environ['GITHUB_STEP_SUMMARY']).write_text(text,encoding='utf-8')
+          PY

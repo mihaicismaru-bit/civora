@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "policy_name": "VÂLCEA CLAR controlled editorial photo reuse inference",
+  "purpose": "Allow Romanian official and promotional sources to enter autonomous photo recovery without falsely claiming an explicit open license.",
+  "principles": {
+    "publicly_visible_does_not_equal_open_license": true,
+    "operational_reuse_presumption_allowed": true,
+    "presumption_is_editorial_not_ownership_claim": true,
+    "source_page_provenance_required": true,
+    "third_party_rights_signal_cancels_presumption": true,
+    "subject_match_still_required_before_publication": true,
+    "autonomous_rights_verifier_required_before_promotion": true,
+    "candidate_only_until_verifier_passes": true,
+    "no_photo_is_better_than_false_relevance": true
+  },
+  "allowed_editorial_use_bases": [
+    "PUBLIC_SECTOR_REUSE_PRESUMPTION",
+    "OFFICIAL_PROMOTIONAL_PRESUMPTION",
+    "PUBLIC_FIGURE_OFFICIAL_MEDIA_PRESUMPTION"
+  ],
+  "source_classes": {
+    "public_sector_official": {
+      "name_markers": [
+        "primăria",
+        "primaria",
+        "consiliul județean",
+        "consiliul judetean",
+        "prefectura",
+        "poliția română",
+        "politia romana",
+        "inspectoratul",
+        "ministerul",
+        "guvernul",
+        "spitalul",
+        "direcția",
+        "directia",
+        "agenția",
+        "agentia",
+        "autoritatea",
+        "cet govora"
+      ],
+      "host_suffixes": [
+        ".gov.ro"
+      ],
+      "hosts": [
+        "politiaromana.ro",
+        "primariavl.ro",
+        "cjvalcea.ro",
+        "valcea.ro"
+      ],
+      "allow_non_t1": false
+    },
+    "official_promotional": {
+      "name_markers": [
+        "festival",
+        "organizator",
+        "pagina oficială",
+        "pagina oficiala",
+        "press kit",
+        "media kit"
+      ],
+      "host_markers": [
+        "festival",
+        "fest"
+      ]
+    },
+    "public_figure_official": {
+      "name_markers": [
+        "pagina oficială",
+        "pagina oficiala",
+        "profil oficial"
+      ],
+      "hosts": [
+        "facebook.com",
+        "instagram.com"
+      ]
+    }
+  },
+  "third_party_rights_markers": [
+    "Getty Images",
+    "Shutterstock",
+    "AGERPRES",
+    "Reuters",
+    "Associated Press",
+    "AFP",
+    "Adobe Stock",
+    "iStock",
+    "Alamy",
+    "Dreamstime",
+    "Depositphotos"
+  ],
+  "candidate_contract": {
+    "rights_basis": "risk_assessed_editorial_use",
+    "rights_status": "PRESUMED_REUSE",
+    "rights_metadata_verified": false,
+    "subject_match": false,
+    "editor_approved": false,
+    "publication_eligible": false,
+    "automatic_promotion": false
+  }
+}
