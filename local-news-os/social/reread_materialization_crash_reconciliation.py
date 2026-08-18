@@ -9,6 +9,11 @@ SPENT handoff record, and durable materialization read-back, then completes the
 RECOVERY_REQUIRED checkpoint by CAS. Missing or ambiguous evidence remains
 RECOVERY_REQUIRED and never authorizes another provider read.
 
+A successful recovery claim is emitted only after the exact recovered execution receipt
+and recovery evidence are read back from the durable checkpoint state after CAS. This
+prevents a successful write response from being mistaken for durable completion when a
+same-checkpoint mutation or storage divergence intervenes immediately after persistence.
+
 No provider call, credential value, raw provider payload, or predictive analytics are
 accepted or persisted. Editorial publication is never blocked and zero-paid dependency
 is mandatory.
@@ -29,7 +34,7 @@ import reread_result_materialization_binding as materialization
 import reread_spend_reauthorization as spend
 import reread_spend_reclaim_binding as reclaim
 
-SCHEMA_VERSION = "1.0"
+SCHEMA_VERSION = "1.1"
 RUNTIME_ID = "local-news-os-reread-materialization-crash-reconciliation-v1"
 ACTION = "RECOVER_REREAD_FROM_DURABLE_MATERIALIZATION"
 EVIDENCE_FIELD = "reread_materialization_crash_recovery"
@@ -58,6 +63,8 @@ def guards() -> dict[str, Any]:
         "recovery_requires_network_start_proof": True,
         "recovery_requires_exact_durable_materialization": True,
         "feedback_snapshot_readback_required_when_materialization_requires_it": True,
+        "recovery_completion_requires_post_cas_readback": True,
+        "recovery_success_claims_without_post_cas_readback": False,
         "ambiguous_or_missing_evidence_remains_recovery_required": True,
         "completed_no_data_inferred_from_absence": False,
         "provider_reread_authorized_by_recovery": False,
@@ -293,6 +300,118 @@ def _recovery_evidence(
     return evidence
 
 
+def _verify_post_cas_readback(
+    repo_root: Path,
+    channel: dict[str, Any],
+    job: dict[str, Any],
+    *,
+    authorization_fingerprint: str,
+    expected_execution_id: str,
+    expected_attempt: Any,
+    expected_receipt_fingerprint_sha256: str,
+    expected_evidence_fingerprint_sha256: str,
+    expected_materialization_fingerprint_sha256: str,
+) -> tuple[dict[str, Any] | None, list[str]]:
+    """Read back the exact recovered receipt before claiming durable completion."""
+    state, state_blocks, _ = runtime.load_checkpoint_state(repo_root, channel)
+    if state_blocks:
+        return None, [
+            "REREAD_MATERIALIZATION_RECOVERY_POST_CAS_STATE:" + str(code)
+            for code in state_blocks
+        ]
+    entry = state.get("entries", {}).get(runtime.checkpoint_key(job))
+    if not isinstance(entry, dict):
+        return None, ["REREAD_MATERIALIZATION_RECOVERY_POST_CAS_ENTRY_MISSING"]
+    blocks: list[str] = []
+    if _clean(entry.get("status")).upper() != "COMPLETED":
+        blocks.append("REREAD_MATERIALIZATION_RECOVERY_POST_CAS_CHECKPOINT_NOT_COMPLETED")
+    if _clean(entry.get("last_result_status")) != "RECOVERED_FROM_DURABLE_MATERIALIZATION":
+        blocks.append("REREAD_MATERIALIZATION_RECOVERY_POST_CAS_RESULT_STATUS_MISMATCH")
+    if _clean(entry.get("job_fingerprint_sha256")) != _clean(job.get("job_fingerprint_sha256")):
+        blocks.append("REREAD_MATERIALIZATION_RECOVERY_POST_CAS_JOB_FINGERPRINT_MISMATCH")
+    sealed = receipt.validate_sealed_entry(entry, authorization_fingerprint)
+    if sealed.get("valid") is not True:
+        blocks.extend(
+            "REREAD_MATERIALIZATION_RECOVERY_POST_CAS_RECEIPT:" + str(code)
+            for code in sealed.get("hard_blocks", [])
+        )
+
+    try:
+        wanted_attempt = int(expected_attempt)
+    except (TypeError, ValueError):
+        wanted_attempt = -1
+        blocks.append("REREAD_MATERIALIZATION_RECOVERY_POST_CAS_ATTEMPT_INVALID")
+    receipts = entry.get("execution_receipts") if isinstance(entry.get("execution_receipts"), list) else []
+    matches = []
+    for candidate in receipts:
+        if not isinstance(candidate, dict):
+            continue
+        try:
+            candidate_attempt = int(candidate.get("attempt"))
+        except (TypeError, ValueError):
+            continue
+        if (
+            _clean(candidate.get("execution_id")) == expected_execution_id
+            and candidate_attempt == wanted_attempt
+        ):
+            matches.append(candidate)
+    if len(matches) != 1:
+        blocks.append("REREAD_MATERIALIZATION_RECOVERY_POST_CAS_RECEIPT_IDENTITY_NOT_UNIQUE")
+        return None, sorted(set(blocks))
+    recovered_receipt = matches[0]
+    actual_receipt_fp = _clean(recovered_receipt.get("receipt_fingerprint_sha256"))
+    if (
+        not expected_receipt_fingerprint_sha256
+        or not hmac.compare_digest(actual_receipt_fp, expected_receipt_fingerprint_sha256)
+    ):
+        blocks.append("REREAD_MATERIALIZATION_RECOVERY_POST_CAS_RECEIPT_FINGERPRINT_MISMATCH")
+    if _clean(recovered_receipt.get("status")).upper() != "COMPLETED":
+        blocks.append("REREAD_MATERIALIZATION_RECOVERY_POST_CAS_RECEIPT_NOT_COMPLETED")
+    if _clean(recovered_receipt.get("provider_result_status")) != "RECOVERED_FROM_DURABLE_MATERIALIZATION":
+        blocks.append("REREAD_MATERIALIZATION_RECOVERY_POST_CAS_PROVIDER_RESULT_MISMATCH")
+    actual_materialization_fp = _clean(recovered_receipt.get("materialization_fingerprint_sha256"))
+    if (
+        not expected_materialization_fingerprint_sha256
+        or not hmac.compare_digest(actual_materialization_fp, expected_materialization_fingerprint_sha256)
+    ):
+        blocks.append("REREAD_MATERIALIZATION_RECOVERY_POST_CAS_MATERIALIZATION_FINGERPRINT_MISMATCH")
+
+    evidence = recovered_receipt.get(EVIDENCE_FIELD)
+    if not isinstance(evidence, dict):
+        blocks.append("REREAD_MATERIALIZATION_RECOVERY_POST_CAS_EVIDENCE_MISSING")
+        return None, sorted(set(blocks))
+    actual_evidence_fp = _clean(evidence.get("evidence_fingerprint_sha256"))
+    unsigned_evidence = _clone(evidence)
+    unsigned_evidence.pop("evidence_fingerprint_sha256", None)
+    if not actual_evidence_fp or not hmac.compare_digest(actual_evidence_fp, _digest(unsigned_evidence)):
+        blocks.append("REREAD_MATERIALIZATION_RECOVERY_POST_CAS_EVIDENCE_SELF_SEAL_INVALID")
+    if (
+        not expected_evidence_fingerprint_sha256
+        or not hmac.compare_digest(actual_evidence_fp, expected_evidence_fingerprint_sha256)
+    ):
+        blocks.append("REREAD_MATERIALIZATION_RECOVERY_POST_CAS_EVIDENCE_FINGERPRINT_MISMATCH")
+    if _clean(evidence.get("materialization_fingerprint_sha256")) != actual_materialization_fp:
+        blocks.append("REREAD_MATERIALIZATION_RECOVERY_POST_CAS_EVIDENCE_MATERIALIZATION_MISMATCH")
+    if blocks:
+        return None, sorted(set(blocks))
+
+    readback = {
+        "checkpoint_state_path": runtime.expected_checkpoint_state_path(channel),
+        "checkpoint_state_fingerprint_sha256": _clean(state.get("state_fingerprint_sha256")),
+        "execution_id": expected_execution_id,
+        "attempt": wanted_attempt,
+        "receipt_fingerprint_sha256": actual_receipt_fp,
+        "recovery_evidence_fingerprint_sha256": actual_evidence_fp,
+        "materialization_fingerprint_sha256": actual_materialization_fp,
+        "verified_from_durable_checkpoint_state": True,
+        "provider_network_call_performed_by_readback": False,
+        "publication_blocked": False,
+        "zero_paid_dependency": True,
+    }
+    readback["readback_fingerprint_sha256"] = _digest(readback)
+    return readback, []
+
+
 def reconcile_materialized_reread_crash(
     repo_root: Path,
     channel: dict[str, Any],
@@ -374,6 +493,11 @@ def reconcile_materialized_reread_crash(
     latest["updated_at"] = runtime._iso(runtime._dt(now))
     latest[EVIDENCE_FIELD] = _clone(evidence)
     latest["receipt_fingerprint_sha256"] = receipt._receipt_fingerprint(latest)
+    expected_execution_id = _clean(latest.get("execution_id"))
+    expected_attempt = latest.get("attempt")
+    expected_receipt_fp = _clean(latest.get("receipt_fingerprint_sha256"))
+    expected_evidence_fp = _clean(evidence.get("evidence_fingerprint_sha256"))
+    expected_materialization_fp = _clean(proof.get("materialization_fingerprint_sha256"))
     state["state_fingerprint_sha256"] = runtime._state_fingerprint(state)
     persisted = runtime.persist_checkpoint_state_cas(
         repo_root,
@@ -387,6 +511,27 @@ def reconcile_materialized_reread_crash(
             _clean(persisted.get("status")) or "HOLD_REREAD_MATERIALIZATION_RECOVERY_PERSISTENCE",
             list(persisted.get("hard_blocks", [])),
         )
+
+    readback, readback_blocks = _verify_post_cas_readback(
+        repo_root,
+        channel,
+        job,
+        authorization_fingerprint=authorization_fingerprint,
+        expected_execution_id=expected_execution_id,
+        expected_attempt=expected_attempt,
+        expected_receipt_fingerprint_sha256=expected_receipt_fp,
+        expected_evidence_fingerprint_sha256=expected_evidence_fp,
+        expected_materialization_fingerprint_sha256=expected_materialization_fp,
+    )
+    if readback_blocks or not isinstance(readback, dict):
+        return _result(
+            job,
+            "HOLD_REREAD_MATERIALIZATION_RECOVERY_POST_CAS_READBACK",
+            readback_blocks or ["REREAD_MATERIALIZATION_RECOVERY_POST_CAS_READBACK_REQUIRED"],
+            checkpoint_status="COMPLETED",
+            recovery_state_may_be_committed=True,
+        )
+
     durable_paths = [runtime.expected_checkpoint_state_path(channel), _clean(proof.get("observation_store_path"))]
     if proof.get("snapshot_present") is True:
         durable_paths.append(_clean(proof.get("snapshot_path")))
@@ -397,6 +542,7 @@ def reconcile_materialized_reread_crash(
         [],
         checkpoint_status="COMPLETED",
         recovery_evidence=evidence,
-        durable_materialization_fingerprint_sha256=_clean(proof.get("materialization_fingerprint_sha256")),
+        post_cas_readback=readback,
+        durable_materialization_fingerprint_sha256=expected_materialization_fp,
         durable_paths=sorted({value for value in durable_paths if value}),
     )
