@@ -7,6 +7,7 @@ on:
       - 'valcea-clar/editorial/editorial_manual.json'
       - 'valcea-clar/editorial/facts_registry.json'
       - 'valcea-clar/scripts/editorial_writer.py'
+      - 'valcea-clar/scripts/editorial_integrity.py'
       - 'valcea-clar/scripts/generate_edition.py'
       - 'valcea-clar/scripts/newsroom_decide.py'
       - '.github/workflows/valcea-clar-editorial-writer.yml'
@@ -16,6 +17,7 @@ on:
       - 'valcea-clar/editorial/editorial_manual.json'
       - 'valcea-clar/editorial/facts_registry.json'
       - 'valcea-clar/scripts/editorial_writer.py'
+      - 'valcea-clar/scripts/editorial_integrity.py'
       - 'valcea-clar/scripts/generate_edition.py'
       - 'valcea-clar/scripts/newsroom_decide.py'
       - '.github/workflows/valcea-clar-editorial-writer.yml'
@@ -37,6 +39,7 @@ jobs:
         run: |
           python -m py_compile \
             valcea-clar/scripts/editorial_writer.py \
+            valcea-clar/scripts/editorial_integrity.py \
             valcea-clar/scripts/generate_edition.py \
             valcea-clar/scripts/newsroom_decide.py
 
@@ -45,6 +48,14 @@ jobs:
 
       - name: Test claim-level composition and fail-closed behavior
         run: python valcea-clar/scripts/editorial_writer.py --self-test
+
+      - name: Materialize editorial products for independent integrity review
+        run: python valcea-clar/scripts/editorial_writer.py
+
+      - name: Validate independent post-writer integrity gate
+        run: |
+          python valcea-clar/scripts/editorial_integrity.py --self-test
+          python valcea-clar/scripts/editorial_integrity.py --check
 
       - name: Test edition integration
         run: python valcea-clar/scripts/generate_edition.py --self-test
