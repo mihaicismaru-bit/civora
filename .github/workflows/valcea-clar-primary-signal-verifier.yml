@@ -17,6 +17,7 @@ on:
       - 'local-news-os/core/signal_routing_contract.py'
       - 'local-news-os/instances/valcea/source_pack.json'
       - 'valcea-clar/editorial/signal_radar_config.json'
+      - 'valcea-clar/editorial/signal_verification_queue.json'
       - 'valcea-clar/editorial/primary_signal_targets.json'
       - 'valcea-clar/editorial/news_sources.json'
       - 'valcea-clar/editorial/manual_watch_sources.json'
@@ -74,7 +75,7 @@ jobs:
       - name: Exercise routed ranked strict primary verification against freshly routed queue
         if: github.event_name == 'pull_request'
         run: python local-news-os/core/primary_signal_verifier_routed_strict.py --instance valcea --no-write
-      - name: Verify current radar queue against routed ranked primary sources
+      - name: Verify current persisted radar queue against routed ranked primary sources
         if: github.event_name != 'pull_request'
         run: python local-news-os/core/primary_signal_verifier_routed_strict.py --instance valcea
       - name: Persist primary verification evidence safely
@@ -83,10 +84,20 @@ jobs:
         run: |
           set -euo pipefail
           cp valcea-clar/editorial/signal_primary_verification_state.json /tmp/valcea-primary-signal-state.json
+          state_queue_generated_at=$(python - <<'PY'
+          import json
+          print(json.load(open('/tmp/valcea-primary-signal-state.json', encoding='utf-8'))['queue_generated_at'])
+          PY
+          )
           git config user.name 'vâlcea-clar-primary-verifier[bot]'
           git config user.email 'valcea-clar-primary-verifier@users.noreply.github.com'
           for attempt in 1 2 3 4 5; do
             git fetch origin main
+            latest_queue_generated_at=$(git show origin/main:valcea-clar/editorial/signal_verification_queue.json | python -c "import json,sys; print(json.load(sys.stdin)['generated_at'])")
+            if [ "$state_queue_generated_at" != "$latest_queue_generated_at" ]; then
+              echo "Verifier result is stale (${state_queue_generated_at}); latest persisted queue is ${latest_queue_generated_at}. A queue-triggered verifier run will handle it."
+              exit 0
+            fi
             git reset --hard origin/main
             mkdir -p valcea-clar/editorial
             cp /tmp/valcea-primary-signal-state.json valcea-clar/editorial/signal_primary_verification_state.json
