@@ -2,6 +2,10 @@ name: VÂLCEA CLAR Live Newsroom
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: ["VÂLCEA CLAR Fact Kernel Builder"]
+    types: [completed]
+    branches: [main]
   push:
     branches: [main]
     paths:
@@ -23,11 +27,15 @@ permissions:
   actions: write
 
 concurrency:
-  group: valcea-clar-autonomous-editions
+  # Individual-story publication must never queue behind morning/evening recap
+  # generation. Recaps use `valcea-clar-autonomous-editions`; the live newsroom
+  # owns its own serialization lane.
+  group: valcea-clar-live-newsroom
   cancel-in-progress: false
 
 jobs:
   newsroom:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
