@@ -2,19 +2,71 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-18T22:37:01+03:00",
+  "generated_at": "2026-08-18T22:38:32+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-18T21:01:32+03:00",
-  "task_count": 55,
+  "queue_generated_at": "2026-08-18T22:36:52+03:00",
+  "task_count": 57,
   "primary_match_count": 0,
-  "no_match_count": 28,
-  "unrouted_count": 27,
+  "no_match_count": 29,
+  "unrouted_count": 28,
   "target_count": 18,
   "targets_ok": 16,
   "results": [
+    {
+      "signal_id": "d5f16e839c8601a1d574f99f",
+      "signal_title": "Atacurile de pe Facebook ajung în instanță. Primarul din Copăceni pregătește procesul în urma acuzațiilor la adresa sa și a Primăriei",
+      "signal_url": "https://www.impactreal.ro/2026/08/18/atacurile-de-pe-facebook-ajung-in-instanta-primarul-din-copaceni-pregateste-procesul-in-urma-acuzatiilor-la-adresa-sa-si-a-primariei/",
+      "signal_publisher": "Impact Real",
+      "signal_published_at": "2026-08-18T22:06:52+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "3263db582ef0c06be2742290",
+      "signal_title": "Schimbare pentru milioane de români: Cardul de sănătate va fi retras treptat",
+      "signal_url": "https://seintamplainvalcea.ro/2026/08/18/schimbare-pentru-milioane-de-romani-cardul-de-sanatate-va-fi-retras-treptat/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-18T22:03:56+03:00",
+      "verification_route_id": "health",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "dsp-valcea-anunturi",
+            "name": "Direcția de Sănătate Publică Vâlcea",
+            "url": "https://www.aspjvalcea.ro/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "spital-horezu-noutati",
+            "name": "Spitalul Orășenesc Horezu",
+            "url": "https://spitalulhorezu.ro/blog/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
+    },
     {
       "signal_id": "712ddef7cfb604ef9d748874",
       "signal_title": "ANAF a descoperit o fraudă de peste 26 de milioane de lei cu mașini second-hand",
