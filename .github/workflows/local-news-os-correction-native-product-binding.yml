@@ -1,0 +1,51 @@
+name: LOCAL NEWS OS Correction Native Product Binding
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/social/correction_outbox_materializer.py"
+      - "local-news-os/social/test_correction_outbox_materializer.py"
+      - "local-news-os/social/correction_native_product_binding.py"
+      - "local-news-os/social/test_correction_native_product_binding.py"
+      - ".github/workflows/local-news-os-correction-native-product-binding.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/social/correction_outbox_materializer.py"
+      - "local-news-os/social/test_correction_outbox_materializer.py"
+      - "local-news-os/social/correction_native_product_binding.py"
+      - "local-news-os/social/test_correction_native_product_binding.py"
+      - ".github/workflows/local-news-os-correction-native-product-binding.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-news-os-correction-native-product-binding-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile correction native product boundary
+        run: |
+          python -m py_compile \
+            local-news-os/social/correction_outbox_materializer.py \
+            local-news-os/social/test_correction_outbox_materializer.py \
+            local-news-os/social/correction_native_product_binding.py \
+            local-news-os/social/test_correction_native_product_binding.py
+
+      - name: Regress durable correction outbox materialization
+        run: python local-news-os/social/test_correction_outbox_materializer.py
+
+      - name: Run corrected native product binding acceptance
+        run: python local-news-os/social/test_correction_native_product_binding.py
