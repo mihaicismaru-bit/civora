@@ -12,4 +12,15 @@ spec.loader.exec_module(mod)
 assert mod.useful("https://mfe.gov.ro/ghiduri-") is False
 assert mod.useful("https://mfe.gov.ro/ghiduri-ms/") is False
 assert mod.useful("https://mfe.gov.ro/ghiduri-ms/investitii-in-infrastructura-cabinetelor-medicilor-de-familie/") is True
-print("MIPE enrichment seed quality: PASS")
+
+crawler = (ROOT / "partener-eu/ingest/mipe_windows_crawl_v3.py").read_text(encoding="utf-8")
+for token in (
+    'previous_corpus.get("frontier")',
+    '"frontier": frontier',
+    '"frontierPersisted": len(frontier)',
+    '"resumedFrontier": resumed',
+    'if u in previous_urls and not force:',
+):
+    assert token in crawler, f"missing durable MIPE frontier contract: {token}"
+
+print("MIPE enrichment seed + durable frontier quality: PASS")
