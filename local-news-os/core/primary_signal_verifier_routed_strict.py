@@ -4,13 +4,22 @@
 This adapter preserves the ranked strict corroboration gate and adds only a
 config-driven primary-target registry. It grants no Fact Kernel or publication
 authority.
+
+Official primary listings sometimes carry the only trustworthy publication date
+in the link label while the linked document omits machine-readable date metadata.
+This adapter may recover that explicit terminal listing date, but only from a
+strict unambiguous pattern, and records the provenance so the strict freshness
+gate remains fail-closed rather than silently accepting undated evidence.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import re
+from datetime import datetime
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo
 
 CORE = Path(__file__).resolve().parent
 ROOT = CORE.parents[1]
@@ -23,6 +32,72 @@ import primary_signal_verifier_ranked as ranked  # noqa: E402
 import primary_signal_verifier_strict as strict  # noqa: E402
 import signal_radar as radar  # noqa: E402
 import signal_routing_contract as routing  # noqa: E402
+
+LEGACY_FETCH_PRIMARY_CANDIDATE = base.fetch_primary_candidate
+LEGACY_VERIFY_TASK = base.verify_task
+LISTING_DATE_DMY = re.compile(r"\((\d{1,2})[./](\d{1,2})[./](\d{4})\)\s*$")
+LISTING_DATE_ISO = re.compile(r"\((\d{4})-(\d{2})-(\d{2})\)\s*$")
+
+
+def listing_label_published_at(label: str, tz: ZoneInfo) -> datetime | None:
+    """Return a date only when an official listing label ends in an explicit date."""
+    clean = radar.clean(label)
+    match = LISTING_DATE_DMY.search(clean)
+    if match:
+        day, month, year = (int(value) for value in match.groups())
+    else:
+        match = LISTING_DATE_ISO.search(clean)
+        if not match:
+            return None
+        year, month, day = (int(value) for value in match.groups())
+    try:
+        return datetime(year, month, day, tzinfo=tz)
+    except ValueError:
+        return None
+
+
+def listing_date_aware_fetch_primary_candidate(
+    url: str,
+    fallback_title: str,
+    tz: ZoneInfo,
+) -> dict[str, Any] | None:
+    doc = LEGACY_FETCH_PRIMARY_CANDIDATE(url, fallback_title, tz)
+    if doc is None:
+        return None
+    if doc.get("published_at"):
+        doc.setdefault("published_at_source", "primary_document_metadata")
+        return doc
+
+    published = listing_label_published_at(fallback_title, tz)
+    if published is not None:
+        doc["published_at"] = published.isoformat(timespec="seconds")
+        doc["published_at_source"] = "official_listing_label"
+        doc["listing_label"] = radar.clean(fallback_title)[:300]
+    return doc
+
+
+def listing_date_aware_verify_task(
+    task: dict[str, Any],
+    corpora: dict[tuple[str, str], dict[str, Any]],
+    tz: ZoneInfo,
+) -> dict[str, Any]:
+    result = LEGACY_VERIFY_TASK(task, corpora, tz)
+    evidence = result.get("primary_evidence")
+    if result.get("status") != "PRIMARY_MATCH_FOUND" or not isinstance(evidence, dict):
+        return result
+
+    primary_url = str(evidence.get("primary_item_url") or "")
+    for corpus in corpora.values():
+        for doc in corpus.get("documents") or []:
+            if not isinstance(doc, dict) or str(doc.get("url") or "") != primary_url:
+                continue
+            source = str(doc.get("published_at_source") or "").strip()
+            if source:
+                evidence["primary_published_at_source"] = source
+            if source == "official_listing_label" and doc.get("listing_label"):
+                evidence["primary_listing_label"] = str(doc["listing_label"])[:300]
+            return result
+    return result
 
 
 def extended_target_registry(config: dict[str, Any]) -> dict[tuple[str, str], dict[str, Any]]:
@@ -48,6 +123,11 @@ def install(instance_id: str) -> None:
     # Ranking installs its own two-registry target loader. Extend it only after
     # ranking/strict installation so dedicated config targets survive.
     base.target_registry = extended_target_registry
+    # Preserve the evidence-only verifier contract while recovering a date that
+    # the official listing itself explicitly supplies. No date is inferred from
+    # URL shape, file mtime, crawl time, or the secondary signal.
+    base.fetch_primary_candidate = listing_date_aware_fetch_primary_candidate
+    base.verify_task = listing_date_aware_verify_task
 
 
 def validate(instance_id: str) -> dict[str, Any]:
@@ -60,6 +140,8 @@ def validate(instance_id: str) -> dict[str, Any]:
         **report,
         "strict_false_positive_guard": True,
         "primary_published_at_required": True,
+        "official_listing_label_date_fallback": True,
+        "official_listing_label_date_must_be_explicit_terminal": True,
         "title_event_overlap_required": True,
         "candidate_ranking": "LISTING_PATH_THEN_SOURCE_HINTS_THEN_NEWS_STRUCTURE",
         "registered_targets": len(registry),
@@ -75,6 +157,8 @@ def run(instance_id: str, *, write: bool) -> dict[str, Any]:
     state["verification_policy"] = {
         "strict_false_positive_guard": True,
         "primary_published_at_required": True,
+        "official_listing_label_date_fallback": True,
+        "official_listing_label_date_must_be_explicit_terminal": True,
         "max_publication_time_delta_hours": 36,
         "title_event_overlap_required": True,
         "instance_identity_is_not_event_evidence": True,
@@ -91,6 +175,33 @@ def run(instance_id: str, *, write: bool) -> dict[str, Any]:
 
 
 def self_test() -> int:
+    tz = ZoneInfo("Europe/Bucharest")
+    dmy = listing_label_published_at(
+        "APAVIL SA – concurs încasator-cititor, Sector Govora (18.08.2026)",
+        tz,
+    )
+    assert dmy is not None and dmy.isoformat(timespec="seconds") == "2026-08-18T00:00:00+03:00"
+    iso = listing_label_published_at("Comunicat oficial (2026-08-18)", tz)
+    assert iso is not None and iso.date().isoformat() == "2026-08-18"
+    assert listing_label_published_at("Comunicat oficial 18.08.2026", tz) is None
+    assert listing_label_published_at("Comunicat (18.08.2026) actualizat", tz) is None
+    assert listing_label_published_at("Comunicat oficial (31.02.2026)", tz) is None
+
+    # The recovered listing date is still subject to the existing strict
+    # temporal gate; it does not grant publication authority by itself.
+    strict.install_strict_guard("valcea")
+    derived_doc = {"published_at": dmy.isoformat(timespec="seconds")}
+    assert strict.strict_date_compatible(
+        {"published_at": "2026-08-18T12:30:00+03:00"},
+        derived_doc,
+        tz,
+    ) is True
+    assert strict.strict_date_compatible(
+        {"published_at": "2026-08-20T12:30:00+03:00"},
+        derived_doc,
+        tz,
+    ) is False
+
     assert routing.self_test() == 0
     assert ranked.self_test() == 0
     assert strict.self_test() == 0
@@ -122,6 +233,7 @@ def main() -> int:
         "targets_ok": state["targets_ok"],
         "target_count": state["target_count"],
         "strict_false_positive_guard": True,
+        "official_listing_label_date_fallback": True,
         "boundary_safe_signal_routing": True,
         "publication_authority": "NONE",
     }, ensure_ascii=False))
