@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Reconcile the venue ingestion layer with the curated public catalogue.
+"""Reconcile the fresh venue ingestion state with the curated public catalogue.
 
-The script is intentionally fail-closed: it creates an editorial review queue,
-never mutates ``data/places.json`` and never changes publication status.
+The reconciliation queue remains intentionally fail-closed: it never mutates
+``data/places.json`` and never changes publication status. The separate,
+strictly-bounded ``promote_verified_venues.py`` gate is the only autonomous
+venue-identity promotion path.
 """
 from __future__ import annotations
 
@@ -15,7 +17,7 @@ from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 CANONICAL_PATH = ROOT / "data" / "places.json"
-SEED_PATH = ROOT / "ingest" / "seed_catalog.json"
+STATE_PATH = ROOT / "ingest" / "state" / "venues.json"
 ALIASES_PATH = ROOT / "ops" / "ingest_aliases.json"
 REPORT_PATH = ROOT / "ops" / "ingest_reconciliation.json"
 QUEUE_PATH = ROOT / "ops" / "ingest_review_queue.json"
@@ -123,11 +125,11 @@ def priority(action: str, differences: list[dict], canonical: dict | None) -> st
 
 def build() -> tuple[dict, dict, list[str]]:
     canonical_doc = load_json(CANONICAL_PATH)
-    ingest_doc = load_json(SEED_PATH)
+    ingest_doc = load_json(STATE_PATH)
     aliases_doc = load_json(ALIASES_PATH)
 
     canonical_items = canonical_doc.get("places", [])
-    ingest_items = ingest_doc.get("venues", [])
+    ingest_items = ingest_doc.get("items", [])
     canonical_by_id = {item["id"]: item for item in canonical_items}
     ingest_by_id = {item["id"]: item for item in ingest_items}
     aliases = aliases_doc.get("aliases", {})
@@ -240,15 +242,20 @@ def build() -> tuple[dict, dict, list[str]]:
         errors.append(f"discovery-only records gained publication effect: {', '.join(leaked)}")
 
     queue_items.sort(key=lambda item: (item["priority"], item["name"] or item["ingest_id"]))
-    generated_at = ingest_doc.get("generatedAt") or canonical_doc.get("generated_at")
+    generated_at = (
+        ingest_doc.get("lastRun", {}).get("observedAt")
+        or ingest_doc.get("generatedAt")
+        or canonical_doc.get("generated_at")
+    )
     report = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "generated_at": generated_at,
         "policy": {
             "canonical_catalogue_mutated": False,
             "auto_publish": False,
             "discovery_only_publication_effect": "NONE",
             "human_review_required": True,
+            "reconciliation_reads_fresh_ingest_state": True,
         },
         "summary": {
             "canonical_records": len(canonical_items),
@@ -262,7 +269,7 @@ def build() -> tuple[dict, dict, list[str]]:
         "records": matches,
     }
     queue = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "generated_at": generated_at,
         "status": "EDITORIAL_REVIEW_REQUIRED" if queue_items else "CLEAR",
         "policy": {"auto_publish": False, "publication_effect": "NONE"},
