@@ -39,6 +39,10 @@ jobs:
       - uses: actions/checkout@v6
         with:
           ref: main
+      - name: Validate public STEP-LLL dossier bridge
+        run: |
+          node --check partener-eu/web/step-lll-dossier-bridge-v2.js
+          grep -F 'step-lll-dossier-bridge-v2.js' partener-eu/web/index.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
