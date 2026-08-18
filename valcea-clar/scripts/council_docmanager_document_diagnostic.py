@@ -87,7 +87,7 @@ def _body_summary(body: str) -> dict[str, Any]:
     return {
         "operative_article_count": len(council.operative_articles(text)),
         "semantic_markers": {
-            "annual_authorization": bool(re.search(r"autoriza(?:t|ț)ie\s+anual(?:a|ă)|autorizatie\s+anuala", compact, re.I)),
+            "annual_authorization": bool(embedded.ANNUAL_AUTH_RE_V2.search(compact)),
             "gambling": bool(re.search(r"jocuri\s+de\s+noroc|slot[ -]?machine|pariuri", compact, re.I)),
             "open_document_literal_count": body.casefold().count("opendocument"),
             "open_field_literal_count": body.casefold().count("openfield"),
