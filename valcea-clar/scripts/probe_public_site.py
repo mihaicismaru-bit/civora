@@ -175,6 +175,16 @@ def evaluate(base_url: str) -> dict[str, Any]:
     check("/robots.txt", ["Sitemap:", "valceaclar.ro/sitemap.xml"])
     check("/sitemap.xml", ["<urlset", "valceaclar.ro"])
     check(
+        "/stiri/",
+        ["Știrile Vâlcii, puse în ordine.", 'data-nav-contract="valcea-clar-primary-v2"'],
+        canonical="https://valceaclar.ro/stiri/",
+    )
+    check(
+        "/despre/",
+        ["Clar înainte de rapid.", "VÂLCEA CLAR"],
+        canonical="https://valceaclar.ro/despre/",
+    )
+    check(
         "/termeni/",
         ["Termeni și condiții", "redactie@valceaclar.ro", 'name="robots" content="index,follow"'],
         canonical="https://valceaclar.ro/termeni/",
@@ -205,7 +215,7 @@ def evaluate(base_url: str) -> dict[str, Any]:
 
     blockers = [item["path"] for item in checks if not item["ok"]]
     return {
-        "schema_version": "1.1",
+        "schema_version": "1.2",
         "product": "VÂLCEA CLAR public HTTP acceptance",
         "base_url": base,
         "status": "READY" if not blockers else "BLOCKED",
