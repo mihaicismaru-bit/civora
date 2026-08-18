@@ -25,6 +25,7 @@ def load(path: Path) -> dict:
 def supplemental_inputs() -> list[Path]:
     paths = [EDITORIAL / "supplemental_facts_registry.json"]
     paths.extend(sorted(EDITORIAL.glob("festival_dossiers_*.json")))
+    paths.extend(sorted(EDITORIAL.glob("performing_arts_dossiers_*.json")))
     unique: list[Path] = []
     seen: set[str] = set()
     for path in paths:
