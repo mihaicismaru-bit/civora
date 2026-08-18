@@ -21,12 +21,30 @@ from typing import Any
 from urllib.parse import urljoin, urlparse
 
 ROOT = Path(__file__).resolve().parents[2]
-STATE = ROOT / "partener-eu/ingest/state/people_policy_official_sources.json"
-REGISTRY = ROOT / "partener-eu/ingest/state/people_policy_registry.json"
-UA = "PARTENER.EU-DecisionMakerOfficialIngest/1.0 (+https://partener.eu)"
+STATE = ROOT / "partener-eu" / "ingest" / "state" / "people_policy_official_sources.json"
+REGISTRY = ROOT / "partener-eu" / "ingest" / "state" / "people_policy_registry.json"
+UA = "PARTENER.EU-DecisionMakerOfficialIngest/1.1 (+https://partener.eu)"
 NOW = dt.datetime.now(dt.timezone.utc)
 
 SOURCES = [
+    {
+        "id": "GOV_RO_NEWS",
+        "publisher": "Guvernul României",
+        "institution": "Guvernul României",
+        "url": "https://gov.ro/ro/stiri",
+        "tier": "T1_DIRECT_OFFICIAL",
+        "pathHints": ("/ro/stiri/", "/ro/media/"),
+        "maxLinks": 20,
+    },
+    {
+        "id": "EC_RO_NEWS",
+        "publisher": "Comisia Europeană — Reprezentanța în România",
+        "institution": "Comisia Europeană",
+        "url": "https://romania.representation.ec.europa.eu/stiri-evenimente-si-resurse-pentru-presa_ro",
+        "tier": "T1_DIRECT_OFFICIAL_EU",
+        "pathHints": ("/stiri-evenimente-si-resurse-pentru-presa/stiri/",),
+        "maxLinks": 20,
+    },
     {
         "id": "MS_PRESS",
         "publisher": "Ministerul Sănătății",
@@ -69,11 +87,13 @@ FUNDING_TERMS = (
     "fonduri europene", "finantare", "finanțare", "pnrr", "programul", "apel",
     "grant", "buget", "coeziune", "investitii", "investiții", "mysmis",
     "digital europe", "proiecte selectate", "contracte", "plati", "plăți",
+    "ajutor de stat", "mecanism", "nextgenerationeu", "competitivitate",
 )
 SIGNAL_TERMS = (
-    "ministr", "secretar de stat", "presed", "președ", "a declarat", "a anuntat",
-    "a anunțat", "prioritate", "prelung", "acceler", "negocier", "decizie",
-    "aprobat", "adoptat", "semnat", "lans", "rezultat", "contract",
+    "ministr", "secretar de stat", "presed", "președ", "premier", "prim-ministr",
+    "comisia european", "a declarat", "a anuntat", "a anunțat", "prioritate",
+    "prelung", "acceler", "negocier", "decizie", "aprobat", "adoptat", "semnat",
+    "lans", "rezultat", "contract", "plătește", "plateste", "propune", "alocă", "aloca",
 )
 
 
@@ -184,7 +204,7 @@ def classify(text: str) -> str:
     f = fold(text)
     if any(x in f for x in ("termen", "prelung", "calendar", "ghid", "lans")):
         return "PROGRAMME_CHANGE_SIGNAL"
-    if any(x in f for x in ("buget", "finant", "grant", "milioane", "miliarde", "plati", "plăți")):
+    if any(x in f for x in ("buget", "finant", "grant", "milioane", "miliarde", "plati", "plăți", "aloc", "ajutor de stat")):
         return "FUNDING_COMMITMENT"
     return "POLICY_SIGNAL"
 
@@ -203,19 +223,19 @@ def actor_for(text: str, publisher: str, institution: str, registry: dict[str, A
             continue
         if any(fold(alias) in f for alias in person.get("aliases") or []):
             return str(person.get("id")), str(person.get("name")), f"Decident public · {publisher}"
-    pid = "institution-" + re.sub(r"[^a-z0-9]+", "-", institution.lower()).strip("-")
+    pid = "institution-" + re.sub(r"[^a-z0-9]+", "-", fold(institution)).strip("-")
     return pid, publisher, "Instituție publică · sursă oficială"
 
 
 def candidate_links(source: dict[str, Any], body: str) -> list[str]:
     parser = LinkParser(); parser.feed(body)
-    base_host = urlparse(source["url"]).hostname
+    base_host = (urlparse(source["url"]).hostname or "").lower()
     out: list[str] = []
     seen: set[str] = set()
     for href, label in parser.links:
         url = urljoin(source["url"], href)
         p = urlparse(url)
-        if p.scheme not in {"http", "https"} or p.hostname != base_host:
+        if p.scheme not in {"http", "https"} or (p.hostname or "").lower() != base_host:
             continue
         if url.rstrip("/") == source["url"].rstrip("/"):
             continue
@@ -227,7 +247,8 @@ def candidate_links(source: dict[str, Any], body: str) -> list[str]:
         key = url.split("#", 1)[0]
         if key in seen:
             continue
-        seen.add(key); out.append(key)
+        seen.add(key)
+        out.append(key)
         if len(out) >= int(source.get("maxLinks") or 10):
             break
     return out
@@ -298,7 +319,8 @@ def main() -> int:
     for source in SOURCES:
         try:
             status, fresh = ingest_source(source, registry)
-            statuses.append(status); items.extend(fresh)
+            statuses.append(status)
+            items.extend(fresh)
         except Exception as exc:
             statuses.append({
                 "id": source["id"], "publisher": source["publisher"], "url": source["url"],
@@ -311,7 +333,7 @@ def main() -> int:
     for item in items:
         key = str(item.get("fingerprint") or item.get("id"))
         dedup[key] = item
-    items = sorted(dedup.values(), key=lambda x: (str(x.get("date") or ""), int(x.get("priority") or 0)), reverse=True)[:120]
+    items = sorted(dedup.values(), key=lambda x: (str(x.get("date") or ""), int(x.get("priority") or 0)), reverse=True)[:160]
     payload = {
         "schemaVersion": 1,
         "generatedAt": NOW.replace(microsecond=0).isoformat().replace("+00:00", "Z"),
