@@ -2,9 +2,12 @@
 """Build one fail-closed service-news Fact Kernel from SCM Râmnicu Vâlcea's official program.
 
 The source page is rendered by SportsPress. We consume only structured event-list
-fields (startDate, home, away and venue), never free-form press copy. The result
-is validated by the canonical Editorial Writer before it may enter the facts
-registry. A transport, parse or validation failure produces no publication.
+fields (date, time, home, away and venue), never free-form press copy. The parser
+prefers the machine-readable startDate attribute and has a bounded fallback to
+the visible SportsPress date/time cells when the deployed theme omits that
+attribute. The result is validated by the canonical Editorial Writer before it
+may enter the facts registry. A transport, parse or validation failure produces
+no publication.
 """
 from __future__ import annotations
 
@@ -41,6 +44,20 @@ RO_MONTHS = {
     1: "ianuarie", 2: "februarie", 3: "martie", 4: "aprilie", 5: "mai", 6: "iunie",
     7: "iulie", 8: "august", 9: "septembrie", 10: "octombrie", 11: "noiembrie", 12: "decembrie",
 }
+RO_MONTH_NUMBERS = {
+    "ian": 1, "ianuarie": 1,
+    "feb": 2, "februarie": 2,
+    "mar": 3, "martie": 3,
+    "apr": 4, "aprilie": 4,
+    "mai": 5,
+    "iun": 6, "iunie": 6,
+    "iul": 7, "iulie": 7,
+    "aug": 8, "august": 8,
+    "sept": 9, "sep": 9, "septembrie": 9,
+    "oct": 10, "octombrie": 10,
+    "nov": 11, "noiembrie": 11,
+    "dec": 12, "decembrie": 12,
+}
 
 
 def load(path: Path) -> dict[str, Any]:
@@ -52,6 +69,31 @@ def load(path: Path) -> dict[str, Any]:
 
 def clean_text(value: str) -> str:
     return re.sub(r"\s+", " ", value or "").strip()
+
+
+def parse_visible_start(date_text: str, time_text: str) -> datetime | None:
+    """Parse only the explicit SportsPress visible date/time cells.
+
+    Accepted form is the Romanian event-table form such as ``22 aug., 2026``
+    plus a 24-hour clock such as ``11:00``. Results (``1 - 2``), relative dates,
+    and incomplete dates are rejected.
+    """
+    date_value = clean_text(date_text).casefold().replace(".", "")
+    time_value = clean_text(time_text)
+    date_match = re.fullmatch(r"(\d{1,2})\s+([a-zăâîșşțţ]+),?\s+(\d{4})", date_value)
+    time_match = re.fullmatch(r"([01]?\d|2[0-3]):([0-5]\d)", time_value)
+    if not date_match or not time_match:
+        return None
+    day = int(date_match.group(1))
+    month_token = date_match.group(2)
+    year = int(date_match.group(3))
+    month = RO_MONTH_NUMBERS.get(month_token)
+    if month is None:
+        return None
+    try:
+        return datetime(year, month, day, int(time_match.group(1)), int(time_match.group(2)), tzinfo=TZ)
+    except ValueError:
+        return None
 
 
 class SportsPressEventListParser(HTMLParser):
@@ -127,18 +169,23 @@ class SportsPressEventListParser(HTMLParser):
 
     @staticmethod
     def _finish_row(row: dict[str, Any]) -> dict[str, Any] | None:
-        start = clean_text(str(row.get("start") or ""))
-        if not start:
-            return None
         text = row.get("text") or {}
         meta = row.get("team_meta") or {}
         home = clean_text(str(meta.get("data-home") or " ".join(text.get("data-home") or [])))
         away = clean_text(str(meta.get("data-away") or " ".join(text.get("data-away") or [])))
         venue = clean_text(" ".join(text.get("data-venue") or []))
+        date_text = clean_text(" ".join(text.get("data-date") or []))
         time_text = clean_text(" ".join(text.get("data-time") or []))
-        if not home or not away:
+        if not home or not away or not date_text:
             return None
-        return {"start": start, "home": home, "away": away, "venue": venue, "time_text": time_text}
+        return {
+            "start": clean_text(str(row.get("start") or "")),
+            "date_text": date_text,
+            "home": home,
+            "away": away,
+            "venue": venue,
+            "time_text": time_text,
+        }
 
 
 def fetch_html(url: str = SOURCE_URL) -> str:
@@ -157,14 +204,22 @@ def parse_events(html: str) -> list[dict[str, Any]]:
     parser.feed(html)
     result: list[dict[str, Any]] = []
     for row in parser.events:
-        try:
-            start = datetime.fromisoformat(str(row["start"]).replace("Z", "+00:00"))
-        except ValueError:
+        start: datetime | None = None
+        raw_start = clean_text(str(row.get("start") or ""))
+        if raw_start:
+            try:
+                start = datetime.fromisoformat(raw_start.replace("Z", "+00:00"))
+            except ValueError:
+                start = None
+        if start is None:
+            start = parse_visible_start(str(row.get("date_text") or ""), str(row.get("time_text") or ""))
+        if start is None:
             continue
         if start.tzinfo is None:
             start = start.replace(tzinfo=TZ)
         row = dict(row)
         row["start_dt"] = start.astimezone(TZ)
+        row["start_provenance"] = "STARTDATE_ATTRIBUTE" if raw_start else "VISIBLE_EVENT_TABLE_DATE_TIME"
         result.append(row)
     result.sort(key=lambda row: row["start_dt"])
     return result
@@ -224,11 +279,12 @@ def make_fact(event: dict[str, Any]) -> dict[str, Any]:
         "auto_scope": AUTO_SCOPE,
         "official_event": {
             "start": start.isoformat(timespec="minutes"),
+            "start_provenance": str(event.get("start_provenance") or "UNKNOWN"),
             "home": home,
             "away": away,
             "venue": venue,
             "source_url": SOURCE_URL,
-            "parser": "SPORTSPRESS_EVENT_LIST_V1",
+            "parser": "SPORTSPRESS_EVENT_LIST_V2",
         },
         "fact_kernel": {
             "format_hint": "service_news",
@@ -285,8 +341,9 @@ def apply_fact(registry: dict[str, Any], fact: dict[str, Any]) -> tuple[dict[str
     order.append(str(fact["id"]))
     registry["facts"] = [by_id[key] for key in order if key in by_id]
     policy = registry.setdefault("policy", {})
-    policy["scm_official_program_fact_kernel"] = "SPORTSPRESS_EVENT_LIST_V1"
+    policy["scm_official_program_fact_kernel"] = "SPORTSPRESS_EVENT_LIST_V2"
     policy["scm_program_fail_closed"] = True
+    policy["scm_visible_date_fallback_requires_explicit_24h_time"] = True
     after = json.dumps(registry["facts"], ensure_ascii=False, sort_keys=True)
     return registry, before != after
 
@@ -296,7 +353,12 @@ def run(facts_path: Path, *, write: bool, html: str | None = None, now: datetime
     events = parse_events(html if html is not None else fetch_html())
     event = select_next(events, now)
     if event is None:
-        return {"status": "PASS", "changed": False, "reason": "no_upcoming_valcea_fixture_within_window", "events_parsed": len(events)}
+        return {
+            "status": "PASS",
+            "changed": False,
+            "reason": "no_upcoming_valcea_fixture_within_window",
+            "events_parsed": len(events),
+        }
     fact = make_fact(event)
     ok, reason = validate_fact(fact)
     if not ok:
@@ -310,6 +372,7 @@ def run(facts_path: Path, *, write: bool, html: str | None = None, now: datetime
         "changed": changed,
         "fact_id": fact["id"],
         "start": event["start_dt"].isoformat(timespec="minutes"),
+        "start_provenance": event.get("start_provenance"),
         "home": event["home"],
         "away": event["away"],
         "venue": event.get("venue"),
@@ -328,24 +391,28 @@ def self_test() -> int:
         <td class="data-venue">Stadionul Municipal</td>
       </tr>
       <tr>
-        <td class="data-date" itemprop="startDate" content="2026-08-22T11:00:00+03:00">22 aug., 2026</td>
-        <td class="data-home"><meta itemprop="name" content="CSM Ramnicu Valcea">CSM Ramnicu Valcea</td>
+        <td class="data-date">22 aug., 2026</td>
         <td class="data-time">11:00</td>
-        <td class="data-away"><meta itemprop="name" content="FC Bacau">FC Bacau</td>
+        <td class="data-home">CSM Ramnicu Valcea</td>
+        <td class="data-away">FC Bacau</td>
         <td class="data-venue">Stadionul Municipal</td>
       </tr>
     </tbody></table>'''
     events = parse_events(html)
     assert len(events) == 2
+    assert events[1]["start_provenance"] == "VISIBLE_EVENT_TABLE_DATE_TIME"
     next_event = select_next(events, datetime(2026, 8, 18, 15, 0, tzinfo=TZ))
     assert next_event is not None
     assert next_event["away"] == "FC Bacau"
+    assert next_event["start_dt"] == datetime(2026, 8, 22, 11, 0, tzinfo=TZ)
     fact = make_fact(next_event)
     assert fact["material_fact_gate"] == "PASS"
     assert len(fact["fact_kernel"]["claims"]) == 2
     ok, reason = validate_fact(fact)
     assert ok is True, reason
     assert "azi" not in json.dumps(fact, ensure_ascii=False).casefold()
+    assert parse_visible_start("22 aug., 2026", "1 - 2") is None
+    assert parse_visible_start("22 aug., 2026", "11:00") == datetime(2026, 8, 22, 11, 0, tzinfo=TZ)
     print("VÂLCEA CLAR SCM official-program Fact Kernel self-test: PASS")
     return 0
 
