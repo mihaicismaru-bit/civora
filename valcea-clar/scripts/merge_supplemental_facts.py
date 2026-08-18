@@ -10,10 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = ROOT.parent
 FACTS = ROOT / "editorial" / "facts_registry.json"
-SUPPLEMENT_INPUTS = (
-    ROOT / "editorial" / "supplemental_facts_registry.json",
-    ROOT / "editorial" / "festival_dossiers_2026.json",
-)
+EDITORIAL = ROOT / "editorial"
 CORE = REPO_ROOT / "local-news-os" / "core"
 if str(CORE) not in sys.path:
     sys.path.insert(0, str(CORE))
@@ -23,6 +20,19 @@ from temporal_freshness import durable_story_temporal_violations  # noqa: E402
 
 def load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def supplemental_inputs() -> list[Path]:
+    paths = [EDITORIAL / "supplemental_facts_registry.json"]
+    paths.extend(sorted(EDITORIAL.glob("festival_dossiers_*.json")))
+    unique: list[Path] = []
+    seen: set[str] = set()
+    for path in paths:
+        key = str(path.resolve())
+        if key not in seen and path.is_file():
+            unique.append(path)
+            seen.add(key)
+    return unique
 
 
 def validate_supplement(document: dict, *, source: str) -> list[dict]:
@@ -55,9 +65,7 @@ def validate_supplement(document: dict, *, source: str) -> list[dict]:
 
 def load_all_supplemental() -> list[dict]:
     combined: dict[str, dict] = {}
-    for path in SUPPLEMENT_INPUTS:
-        if not path.is_file():
-            continue
+    for path in supplemental_inputs():
         rows = validate_supplement(load(path), source=str(path.relative_to(ROOT)))
         for row in rows:
             combined[str(row["id"])] = row
@@ -97,6 +105,7 @@ def main() -> int:
     output, replaced, appended = merge(base, supplemental_rows)
     print(json.dumps({
         "status": "PASS",
+        "inputs": [str(path.relative_to(ROOT)) for path in supplemental_inputs()],
         "supplemental": len(supplemental_rows),
         "replaced": replaced,
         "appended": appended,
