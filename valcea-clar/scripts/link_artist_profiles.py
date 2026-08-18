@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Attach verified VÂLCEA CLAR artist profiles to festival and performing-arts stories.
 
-The script enriches the public live feed and canonical static story pages. It
-never creates an artist identity; it only links profiles already admitted by
-Artist Intelligence from a verified festival lineup or performing-arts programme.
+The script enriches the durable archive, public live feed and canonical static
+story pages. It never creates an artist identity; it only links profiles already
+admitted by Artist Intelligence from a verified festival lineup or
+performing-arts programme.
 """
 from __future__ import annotations
 
+import argparse
 import html
 import json
 import re
@@ -16,9 +18,11 @@ ROOT = Path(__file__).resolve().parents[1]
 RUNTIME = ROOT / "site" / "runtime"
 ARTISTS = RUNTIME / "artists.json"
 FEED = RUNTIME / "live-feed.json"
+ARCHIVE = ROOT / "site" / "story_archive.json"
 STORY_MANIFEST = RUNTIME / "stiri" / "manifest.json"
 MARKER_START = '<section class="artist-profiles" data-artist-intelligence="verified">'
 MARKER_END = '</section><!-- /artist-profiles -->'
+ARTIST_PATH = re.compile(r"^/artisti/[a-z0-9-]+/$")
 
 
 def load(path: Path) -> dict:
@@ -29,6 +33,10 @@ def esc(value: object) -> str:
     return html.escape(str(value or ""), quote=True)
 
 
+def valid_artist_path(value: object) -> bool:
+    return bool(ARTIST_PATH.fullmatch(str(value or "").strip()))
+
+
 def grouped_profiles(document: dict) -> dict[str, list[dict]]:
     grouped: dict[str, list[dict]] = {}
     for profile in document.get("profiles") or []:
@@ -36,12 +44,14 @@ def grouped_profiles(document: dict) -> dict[str, list[dict]]:
             continue
         name = str(profile.get("name") or "").strip()
         path = str(profile.get("path") or "").strip()
-        if not name or not path.startswith("/artisti/"):
+        if not name or not valid_artist_path(path):
             continue
         public = {
             "id": str(profile.get("id") or ""),
             "name": name,
             "path": path,
+            # Only the identity resolver may mint musicbrainz_id.  Collapse that
+            # evidence to an actual bool before it crosses into public runtime.
             "external_identity_verified": bool(profile.get("musicbrainz_id")),
         }
         story_ids: set[str] = set()
@@ -60,13 +70,19 @@ def grouped_profiles(document: dict) -> dict[str, list[dict]]:
 
 
 def section_html(rows: list[dict]) -> str:
-    if not rows:
+    safe_rows = [
+        row for row in rows
+        if isinstance(row, dict)
+        and str(row.get("name") or "").strip()
+        and valid_artist_path(row.get("path"))
+    ]
+    if not safe_rows:
         return ""
     links = "".join(
         f'<li><a href="{esc(row["path"])}">{esc(row["name"])}</a>'
-        + (' <span title="Identitate externă verificată">✓</span>' if row.get("external_identity_verified") else '')
+        + (' <span title="Identitate externă verificată">✓</span>' if row.get("external_identity_verified") is True else '')
         + '</li>'
-        for row in rows
+        for row in safe_rows
     )
     return (
         MARKER_START
@@ -96,16 +112,8 @@ def replace_static_section(path: Path, rows: list[dict]) -> bool:
     return True
 
 
-def main() -> int:
-    if not ARTISTS.is_file() or not FEED.is_file():
-        raise SystemExit("Artist intelligence and live feed are required")
-    grouped = grouped_profiles(load(ARTISTS))
-    feed = load(FEED)
-    stories = feed.get("stories") or []
-    touched_feed = 0
-    linked_profiles = 0
-    static_changed = 0
-
+def apply_story_profiles(stories: list, grouped: dict[str, list[dict]]) -> int:
+    changed = 0
     for story in stories:
         if not isinstance(story, dict):
             continue
@@ -114,13 +122,84 @@ def main() -> int:
         previous = story.get("artist_profiles") or []
         if rows:
             story["artist_profiles"] = rows
-            linked_profiles += len(rows)
         else:
             story.pop("artist_profiles", None)
         if previous != rows:
-            touched_feed += 1
-        static_path = RUNTIME / "stiri" / story_id / "index.html"
-        if replace_static_section(static_path, rows):
+            changed += 1
+    return changed
+
+
+def self_test() -> None:
+    grouped = grouped_profiles({
+        "profiles": [
+            {
+                "id": "verified",
+                "name": "Verified Artist",
+                "path": "/artisti/verified-artist/",
+                "publication_status": "public",
+                "musicbrainz_id": "mbid-1",
+                "festivals": [{"story_id": "festival-1"}],
+            },
+            {
+                "id": "pending",
+                "name": "Pending Artist",
+                "path": "/artisti/pending-artist/",
+                "publication_status": "public",
+                "festivals": [{"story_id": "festival-1"}],
+            },
+            {
+                "id": "unsafe",
+                "name": "Unsafe",
+                "path": "https://example.invalid/artist",
+                "publication_status": "public",
+                "musicbrainz_id": "mbid-unsafe",
+                "festivals": [{"story_id": "festival-1"}],
+            },
+        ]
+    })
+    rows = grouped["festival-1"]
+    assert [row["path"] for row in rows] == [
+        "/artisti/pending-artist/",
+        "/artisti/verified-artist/",
+    ]
+    assert next(row for row in rows if row["id"] == "verified")["external_identity_verified"] is True
+    assert next(row for row in rows if row["id"] == "pending")["external_identity_verified"] is False
+    rendered = section_html(rows)
+    assert '<a href="/artisti/verified-artist/">Verified Artist</a>' in rendered
+    assert '<a href="/artisti/pending-artist/">Pending Artist</a>' in rendered
+    assert rendered.count("Identitate externă verificată") == 1
+    forged = section_html([{
+        "id": "forged",
+        "name": "Forged Flag",
+        "path": "/artisti/forged-flag/",
+        "external_identity_verified": "false",
+    }])
+    assert "Identitate externă verificată" not in forged
+    print("VÂLCEA CLAR artist story-link contract self-test: PASS")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--self-test", action="store_true")
+    args = parser.parse_args()
+    if args.self_test:
+        self_test()
+        return 0
+
+    if not ARTISTS.is_file() or not FEED.is_file():
+        raise SystemExit("Artist intelligence and live feed are required")
+    grouped = grouped_profiles(load(ARTISTS))
+    feed = load(FEED)
+    stories = feed.get("stories") or []
+    touched_feed = apply_story_profiles(stories, grouped)
+    linked_profiles = sum(len(grouped.get(str(story.get("id") or ""), [])) for story in stories if isinstance(story, dict))
+    static_changed = 0
+
+    for story in stories:
+        if not isinstance(story, dict):
+            continue
+        story_id = str(story.get("id") or "").strip()
+        if replace_static_section(RUNTIME / "stiri" / story_id / "index.html", grouped.get(story_id, [])):
             static_changed += 1
 
     feed.setdefault("extensions", {})["artist_intelligence"] = {
@@ -131,6 +210,13 @@ def main() -> int:
         "unverified_external_identity_links": False,
     }
     FEED.write_text(json.dumps(feed, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+    archive_changed = 0
+    if ARCHIVE.is_file():
+        archive = load(ARCHIVE)
+        archive_changed = apply_story_profiles(archive.get("stories") or [], grouped)
+        if archive_changed:
+            ARCHIVE.write_text(json.dumps(archive, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     if STORY_MANIFEST.is_file():
         manifest = load(STORY_MANIFEST)
@@ -151,6 +237,7 @@ def main() -> int:
         "stories_with_profiles": sum(1 for rows in grouped.values() if rows),
         "linked_profiles": linked_profiles,
         "feed_stories_changed": touched_feed,
+        "archive_stories_changed": archive_changed,
         "static_story_pages_changed": static_changed,
     }, ensure_ascii=False))
     return 0
