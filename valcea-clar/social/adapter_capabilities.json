@@ -17,7 +17,14 @@
       "supported_media_kinds": ["photo"],
       "max_media_assets": 1,
       "completion_model": "immediate_remote_id",
-      "remote_reconciliation_supported": false
+      "remote_reconciliation_supported": false,
+      "correction_capabilities": {
+        "remote_edit_supported": false,
+        "remote_edit_verified": false,
+        "native_correction_direct_publish_supported": false,
+        "durable_native_correction_outbox_supported": true,
+        "requires_regenerated_native_product": true
+      }
     },
     {
       "platform": "instagram",
@@ -27,7 +34,14 @@
       "supported_media_kinds": ["photo"],
       "max_media_assets": 10,
       "completion_model": "immediate_remote_id",
-      "remote_reconciliation_supported": false
+      "remote_reconciliation_supported": false,
+      "correction_capabilities": {
+        "remote_edit_supported": false,
+        "remote_edit_verified": false,
+        "native_correction_direct_publish_supported": false,
+        "durable_native_correction_outbox_supported": true,
+        "requires_regenerated_native_product": true
+      }
     },
     {
       "platform": "threads",
@@ -38,7 +52,14 @@
       "max_media_assets": 0,
       "completion_model": "immediate_remote_id",
       "remote_reconciliation_supported": false,
-      "partial_publish_policy": "manual_reconciliation_no_auto_retry"
+      "partial_publish_policy": "manual_reconciliation_no_auto_retry",
+      "correction_capabilities": {
+        "remote_edit_supported": false,
+        "remote_edit_verified": false,
+        "native_correction_direct_publish_supported": false,
+        "durable_native_correction_outbox_supported": true,
+        "requires_regenerated_native_product": true
+      }
     },
     {
       "platform": "tiktok",
@@ -48,7 +69,14 @@
       "supported_media_kinds": ["photo", "video"],
       "max_media_assets": 1,
       "completion_model": "async_remote_status",
-      "remote_reconciliation_supported": true
+      "remote_reconciliation_supported": true,
+      "correction_capabilities": {
+        "remote_edit_supported": false,
+        "remote_edit_verified": false,
+        "native_correction_direct_publish_supported": false,
+        "durable_native_correction_outbox_supported": true,
+        "requires_regenerated_native_product": true
+      }
     }
   ]
 }
