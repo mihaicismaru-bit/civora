@@ -10,6 +10,7 @@ on:
       - 'valcea-clar/scripts/editorial_integrity.py'
       - 'valcea-clar/scripts/generate_edition.py'
       - 'valcea-clar/scripts/newsroom_decide.py'
+      - 'valcea-clar/scripts/newsroom_candidate_diagnostic.py'
       - '.github/workflows/valcea-clar-editorial-writer.yml'
   push:
     branches: [main]
@@ -20,6 +21,7 @@ on:
       - 'valcea-clar/scripts/editorial_integrity.py'
       - 'valcea-clar/scripts/generate_edition.py'
       - 'valcea-clar/scripts/newsroom_decide.py'
+      - 'valcea-clar/scripts/newsroom_candidate_diagnostic.py'
       - '.github/workflows/valcea-clar-editorial-writer.yml'
 
 permissions:
@@ -41,7 +43,8 @@ jobs:
             valcea-clar/scripts/editorial_writer.py \
             valcea-clar/scripts/editorial_integrity.py \
             valcea-clar/scripts/generate_edition.py \
-            valcea-clar/scripts/newsroom_decide.py
+            valcea-clar/scripts/newsroom_decide.py \
+            valcea-clar/scripts/newsroom_candidate_diagnostic.py
 
       - name: Validate editorial manual and current curated registry
         run: python valcea-clar/scripts/editorial_writer.py --check
@@ -62,3 +65,8 @@ jobs:
 
       - name: Test continuous story gate integration
         run: python valcea-clar/scripts/newsroom_decide.py --self-test
+
+      - name: Diagnose current promoted Council story readiness
+        run: |
+          python valcea-clar/scripts/newsroom_candidate_diagnostic.py --self-test
+          python valcea-clar/scripts/newsroom_candidate_diagnostic.py --story-id rm-valcea-gambling-authorizations-20260723
