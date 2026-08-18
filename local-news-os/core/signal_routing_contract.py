@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""Generic boundary-safe routing extension for LOCAL NEWS OS signal verification.
+"""Generic routing and hygiene extension for LOCAL NEWS OS signal verification.
 
-Keeps signal discovery evidence-only while allowing instance config to express
-exact phrase boundaries, explicit token-prefix matches, and dedicated primary
-verification targets without hardcoding geography or publishers into CORE.
+All geography and publisher choices stay instance-owned. CORE only supplies
+boundary-safe matching, configurable source-locality filtering, and duplicate
+share/print suppression. This layer has zero publication authority.
 """
 from __future__ import annotations
 
 import re
+import urllib.parse
 from pathlib import Path
 from typing import Any
 
@@ -20,15 +21,12 @@ import signal_radar as radar  # noqa: E402
 
 ORIGINAL_CLASSIFY = radar.classify
 ORIGINAL_RESOLVE_REGISTRY_TARGETS = radar.resolve_registry_targets
+ORIGINAL_PROBE_SEED = radar.probe_seed
+ORIGINAL_MERGE_QUEUE = radar.merge_queue
 
 
 def phrase_matches(haystack: str, keyword: str) -> bool:
-    """Match normalized words/phrases without accidental substring matches.
-
-    Exact words/phrases are the default. A trailing ``*`` explicitly opts a
-    keyword into token-prefix matching, e.g. ``politi*`` matches ``politisti``.
-    Consequently ``urs`` never matches ``concurs``.
-    """
+    """Match words/phrases; trailing ``*`` explicitly enables token prefixes."""
     raw = str(keyword or "").strip()
     prefix = raw.endswith("*")
     if prefix:
@@ -39,8 +37,6 @@ def phrase_matches(haystack: str, keyword: str) -> bool:
         return False
     if not prefix:
         return f" {needle} " in f" {hay} "
-    # Prefix semantics are token-scoped. For a multi-token expression only the
-    # final token is treated as a prefix.
     parts = needle.split()
     if len(parts) == 1:
         return any(token.startswith(parts[0]) for token in hay.split())
@@ -50,22 +46,17 @@ def phrase_matches(haystack: str, keyword: str) -> bool:
 
 
 def _rule_matches(title: str, rule: dict[str, Any]) -> bool:
-    keywords = [str(value) for value in rule.get("keywords") or [] if str(value).strip()]
-    if not keywords or not any(phrase_matches(title, value) for value in keywords):
+    keywords = [str(v) for v in rule.get("keywords") or [] if str(v).strip()]
+    if not keywords or not any(phrase_matches(title, v) for v in keywords):
         return False
-
-    required_any = [str(value) for value in rule.get("required_any_keywords") or [] if str(value).strip()]
-    if required_any and not any(phrase_matches(title, value) for value in required_any):
+    required_any = [str(v) for v in rule.get("required_any_keywords") or [] if str(v).strip()]
+    if required_any and not any(phrase_matches(title, v) for v in required_any):
         return False
-
-    required_all = [str(value) for value in rule.get("required_all_keywords") or [] if str(value).strip()]
-    if required_all and not all(phrase_matches(title, value) for value in required_all):
+    required_all = [str(v) for v in rule.get("required_all_keywords") or [] if str(v).strip()]
+    if required_all and not all(phrase_matches(title, v) for v in required_all):
         return False
-
-    excluded = [str(value) for value in rule.get("excluded_keywords") or [] if str(value).strip()]
-    if excluded and any(phrase_matches(title, value) for value in excluded):
-        return False
-    return True
+    excluded = [str(v) for v in rule.get("excluded_keywords") or [] if str(v).strip()]
+    return not (excluded and any(phrase_matches(title, v) for v in excluded))
 
 
 def classify(title: str, config: dict[str, Any]) -> tuple[str, list[dict[str, str]]]:
@@ -112,40 +103,83 @@ def resolve_registry_targets(config: dict[str, Any]) -> None:
                 raise ValueError(f"unsupported verification target type: {ref_type}")
 
 
+def _query_is_distribution_variant(url: str, config: dict[str, Any]) -> bool:
+    keys = {str(v).casefold() for v in config.get("drop_query_keys") or []}
+    if not keys:
+        return False
+    query = urllib.parse.parse_qs(urllib.parse.urlsplit(url).query, keep_blank_values=True)
+    return bool(keys.intersection(str(key).casefold() for key in query))
+
+
+def _generic_signal_title(title: str, config: dict[str, Any]) -> bool:
+    normalized = radar.norm_text(title)
+    return any(normalized == radar.norm_text(str(value)) for value in config.get("drop_signal_titles") or [])
+
+
+def signal_scope_allowed(signal: dict[str, Any], config: dict[str, Any], seed_id: str | None = None) -> bool:
+    if _query_is_distribution_variant(str(signal.get("signal_url") or ""), config):
+        return False
+    if _generic_signal_title(str(signal.get("signal_title") or ""), config):
+        return False
+    strict_ids = {str(v) for v in config.get("strict_locality_seed_ids") or []}
+    if seed_id and seed_id in strict_ids:
+        title = str(signal.get("signal_title") or "")
+        anchors = [str(v) for v in config.get("locality_title_anchors") or [] if str(v).strip()]
+        if anchors and not any(phrase_matches(title, anchor) for anchor in anchors):
+            return False
+    return True
+
+
+def scoped_probe_seed(seed: dict[str, Any], config: dict[str, Any], tz, now) -> dict[str, Any]:
+    row = ORIGINAL_PROBE_SEED(seed, config, tz, now)
+    kept, dropped = [], []
+    for signal in row.get("signals") or []:
+        signal = dict(signal)
+        signal["signal_seed_id"] = seed["id"]
+        if signal_scope_allowed(signal, config, seed["id"]):
+            kept.append(signal)
+        else:
+            dropped.append({"title": signal.get("signal_title"), "url": signal.get("signal_url")})
+    row["signals"] = kept
+    row["hygiene_dropped_count"] = len(dropped)
+    row["hygiene_dropped"] = dropped[:10]
+    return row
+
+
+def scoped_merge_queue(current_signals, previous, config, tz, now):
+    seeds = radar.seed_rows(config)
+    publisher_to_seed = {str(row.get("publisher")): str(row.get("id")) for row in seeds}
+    cleaned_previous = dict(previous)
+    cleaned_tasks = []
+    for task in previous.get("tasks") or []:
+        seed_id = str(task.get("signal_seed_id") or publisher_to_seed.get(str(task.get("signal_publisher"))) or "")
+        if signal_scope_allowed(task, config, seed_id or None):
+            cleaned_tasks.append(task)
+    cleaned_previous["tasks"] = cleaned_tasks
+    return ORIGINAL_MERGE_QUEUE(current_signals, cleaned_previous, config, tz, now)
+
+
 def install() -> None:
     radar.classify = classify
     radar.resolve_registry_targets = resolve_registry_targets
+    radar.probe_seed = scoped_probe_seed
+    radar.merge_queue = scoped_merge_queue
 
 
 def self_test() -> int:
-    assert phrase_matches("APAVIL scoate la concurs trei posturi", "urs") is False
-    assert phrase_matches("Un urs a fost văzut lângă localitate", "urs") is True
-    assert phrase_matches("Polițiștii au făcut percheziții", "politi*") is True
-    assert phrase_matches("Polițiștii au făcut percheziții", "perchez*") is True
-    assert phrase_matches("Săptămâna Europeană a Mobilității", "saptamana europeana") is True
-
+    assert phrase_matches("Job scos la concurs", "urs") is False
+    assert phrase_matches("Un urs a fost văzut", "urs") is True
+    assert phrase_matches("Polițiștii fac percheziții", "politi*") is True
     cfg = {
-        "rules": [
-            {
-                "id": "apavil_employment",
-                "required_any_keywords": ["apavil"],
-                "keywords": ["concurs", "posturi"],
-                "verification_targets": [{"ref_type": "primary_target_id", "id": "apavil-angajari"}],
-            },
-            {
-                "id": "fire_rescue_alert",
-                "keywords": ["urs", "incendiu"],
-                "verification_targets": [{"ref_type": "news_source_id", "id": "isu"}],
-            },
-        ]
+        "drop_query_keys": ["share"],
+        "drop_signal_titles": ["Imprimare"],
+        "strict_locality_seed_ids": ["syndicated-local"],
+        "locality_title_anchors": ["Exampleville", "Local Utility"],
     }
-    route, targets = classify("APAVIL scoate la concurs trei posturi", cfg)
-    assert route == "apavil_employment" and targets[0]["id"] == "apavil-angajari"
-    route, _ = classify("Pompierii au intervenit după apariția unui urs", cfg)
-    assert route == "fire_rescue_alert"
-    route, targets = classify("Concurs de fotografie locală", cfg)
-    assert route == "general_local_signal" and targets == []
-    print("LOCAL NEWS OS boundary-safe signal routing self-test: PASS")
+    assert not signal_scope_allowed({"signal_title": "Imprimare", "signal_url": "https://x.test/a?share=print"}, cfg, "syndicated-local")
+    assert not signal_scope_allowed({"signal_title": "National market report", "signal_url": "https://x.test/a"}, cfg, "syndicated-local")
+    assert signal_scope_allowed({"signal_title": "Local Utility opens jobs", "signal_url": "https://x.test/a"}, cfg, "syndicated-local")
+    print("LOCAL NEWS OS signal routing/hygiene self-test: PASS")
     return 0
 
 

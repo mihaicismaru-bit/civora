@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.2",
+  "schema_version": "1.3",
   "contract": "LOCAL_NEWS_OS_SIGNAL_RADAR_CONFIG_V1",
   "instance_id": "valcea",
   "publication_authority": "NONE",
@@ -24,29 +24,33 @@
   "primary_verifier_max_links_per_target": 14,
   "primary_verifier_max_fetches_per_target": 10,
   "primary_verifier_max_workers": 6,
+  "drop_query_keys": ["share", "output", "print"],
+  "drop_signal_titles": ["Imprimare", "Print", "Email", "WhatsApp"],
+  "strict_locality_seed_ids": ["press-curierul-de-ramnic", "press-curierul-valcea"],
+  "locality_title_anchors": [
+    "vâlcea", "valcea", "râmnicu", "ramnicu", "horezu", "brezoi", "călimănești", "calimanesti",
+    "drăgășani", "dragasani", "olănești", "olanesti", "govora", "ocnele mari", "băbeni", "babeni",
+    "bălcești", "balcesti", "berbești", "berbesti", "voineasa", "malaia", "vaideeni", "câineni", "caineni",
+    "bujoreni", "mihăești", "mihaesti", "pietrari", "șușani", "susani", "șuțești", "sutesti", "costești", "costesti",
+    "apavil", "cjas", "cas valcea", "scm", "chimia", "cet govora", "casa simian", "zăvoi", "zavoi", "lotru", "cozia"
+  ],
   "rules": [
     {
       "id": "apavil_employment",
       "required_any_keywords": ["apavil"],
       "keywords": ["concurs", "post", "posturi", "angaj*", "recrut*", "vacant*"],
-      "verification_targets": [
-        {"ref_type": "primary_target_id", "id": "apavil-angajari"}
-      ]
+      "verification_targets": [{"ref_type": "primary_target_id", "id": "apavil-angajari"}]
     },
     {
       "id": "health_insurance",
       "required_any_keywords": ["cjas", "cas valcea", "casa judeteana de asigurari", "casa de asigurari"],
       "keywords": ["economat", "medicament*", "compensat*", "farmac*", "asigurat*", "contract*", "furnizor*"],
-      "verification_targets": [
-        {"ref_type": "primary_target_id", "id": "cas-valcea-official"}
-      ]
+      "verification_targets": [{"ref_type": "primary_target_id", "id": "cas-valcea-official"}]
     },
     {
       "id": "police_public_safety",
       "keywords": ["accident", "rutier", "dn7", "dn 7", "autocamion", "răsturn*", "rasturn*", "victim*", "dispăr*", "dispar*", "perchez*", "arme", "muni*", "reținut*", "retinut*", "poliți*", "politi*"],
-      "verification_targets": [
-        {"ref_type": "manual_watch_source_id", "id": "ipj-valcea-stiri"}
-      ]
+      "verification_targets": [{"ref_type": "manual_watch_source_id", "id": "ipj-valcea-stiri"}]
     },
     {
       "id": "fire_rescue_alert",
@@ -78,9 +82,7 @@
       "id": "rm_valcea_mobility",
       "required_any_keywords": ["ramnicu valcea", "râmnicu vâlcea"],
       "keywords": ["mobilitat*", "saptamana europeana", "săptămâna europeană", "transport", "trafic"],
-      "verification_targets": [
-        {"ref_type": "news_source_id", "id": "primaria-rm-valcea-comunicate"}
-      ]
+      "verification_targets": [{"ref_type": "news_source_id", "id": "primaria-rm-valcea-comunicate"}]
     },
     {
       "id": "administration_projects",
@@ -110,9 +112,7 @@
     {
       "id": "environment_weather",
       "keywords": ["cod galben", "cod portocaliu", "alertă", "alerta", "hidrolog*", "inunda*", "mediu", "polu*", "pădur*", "padur*"],
-      "verification_targets": [
-        {"ref_type": "manual_watch_source_id", "id": "inhga-avertizari-hidrologice-valcea"}
-      ]
+      "verification_targets": [{"ref_type": "manual_watch_source_id", "id": "inhga-avertizari-hidrologice-valcea"}]
     }
   ]
 }
