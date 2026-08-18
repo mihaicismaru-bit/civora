@@ -12,8 +12,11 @@ on:
       - 'partener-eu/web/public-product-v3.js'
       - 'partener-eu/web/public-product-v3.css'
       - 'partener-eu/web/people-policy-v1.js'
+      - 'partener-eu/web/ask-partener-v2.js'
+      - 'partener-eu/web/ask-partener-v2.css'
       - 'partener-eu/ops/test_home_novice.py'
       - 'partener-eu/ops/test_public_product_v3.py'
+      - 'partener-eu/ops/test_ask_partener_v2.py'
       - '.github/workflows/partener-eu-homepage-qa.yml'
 
 concurrency:
@@ -40,7 +43,9 @@ jobs:
           node --check partener-eu/web/home-novice-v1.js
           node --check partener-eu/web/public-product-v3.js
           node --check partener-eu/web/people-policy-v1.js
+          node --check partener-eu/web/ask-partener-v2.js
       - name: First-time visitor and public-product contracts
         run: |
           python partener-eu/ops/test_home_novice.py
           python partener-eu/ops/test_public_product_v3.py
+          python partener-eu/ops/test_ask_partener_v2.py
