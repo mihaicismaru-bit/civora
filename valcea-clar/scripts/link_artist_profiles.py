@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Attach verified VÂLCEA CLAR artist profiles to festival stories.
+"""Attach verified VÂLCEA CLAR artist profiles to festival and performing-arts stories.
 
 The script enriches the public live feed and canonical static story pages. It
 never creates an artist identity; it only links profiles already admitted by
-Artist Intelligence.
+Artist Intelligence from a verified festival lineup or performing-arts programme.
 """
 from __future__ import annotations
 
@@ -44,12 +44,15 @@ def grouped_profiles(document: dict) -> dict[str, list[dict]]:
             "path": path,
             "external_identity_verified": bool(profile.get("musicbrainz_id")),
         }
+        story_ids: set[str] = set()
         for festival in profile.get("festivals") or []:
-            if not isinstance(festival, dict):
-                continue
-            story_id = str(festival.get("story_id") or "").strip()
-            if story_id:
-                grouped.setdefault(story_id, []).append(public)
+            if isinstance(festival, dict) and str(festival.get("story_id") or "").strip():
+                story_ids.add(str(festival.get("story_id")).strip())
+        for appearance in profile.get("appearances") or []:
+            if isinstance(appearance, dict) and str(appearance.get("story_id") or "").strip():
+                story_ids.add(str(appearance.get("story_id")).strip())
+        for story_id in story_ids:
+            grouped.setdefault(story_id, []).append(public)
     for story_id, rows in grouped.items():
         dedupe = {row["path"]: row for row in rows}
         grouped[story_id] = sorted(dedupe.values(), key=lambda row: row["name"].casefold())
@@ -67,8 +70,8 @@ def section_html(rows: list[dict]) -> str:
     )
     return (
         MARKER_START
-        + '<h2>Artiști din acest festival</h2>'
-        + '<p>Profiluri VÂLCEA CLAR construite din line-up verificat; conturile externe apar numai după rezolvarea identității.</p>'
+        + '<h2>Artiști și creatori din acest material</h2>'
+        + '<p>Profiluri VÂLCEA CLAR construite din line-up, distribuții și programe verificate; conturile externe apar numai după rezolvarea identității.</p>'
         + f'<ul>{links}</ul>'
         + MARKER_END
     )
@@ -124,6 +127,7 @@ def main() -> int:
         "enabled": True,
         "profile_directory": "/artisti/",
         "story_links_bidirectional": True,
+        "verified_sources": ["festival_lineup", "performing_arts_programme"],
         "unverified_external_identity_links": False,
     }
     FEED.write_text(json.dumps(feed, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -139,12 +143,12 @@ def main() -> int:
             else:
                 row.pop("artist_profile_ids", None)
                 row.pop("artist_profile_paths", None)
-        manifest.setdefault("cross_linking", {})["artist_intelligence"] = "verified_lineup_profiles_only"
+        manifest.setdefault("cross_linking", {})["artist_intelligence"] = "verified_programme_profiles_only"
         STORY_MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     print(json.dumps({
         "status": "PASS",
-        "festival_stories_with_profiles": sum(1 for rows in grouped.values() if rows),
+        "stories_with_profiles": sum(1 for rows in grouped.values() if rows),
         "linked_profiles": linked_profiles,
         "feed_stories_changed": touched_feed,
         "static_story_pages_changed": static_changed,
