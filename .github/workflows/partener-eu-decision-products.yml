@@ -13,6 +13,7 @@ on:
       - 'partener-eu/ingest/enrich_mipe_canonical_facts.py'
       - 'partener-eu/ingest/merge_mipe_canonical_dossiers.py'
       - 'partener-eu/ingest/refine_afir_public_dossiers.py'
+      - 'partener-eu/ingest/apply_step_lll_authoritative_dossier.py'
       - 'partener-eu/ingest/score_dossier_depth.py'
       - 'partener-eu/ingest/build_mipe_enrichment_seeds.py'
       - 'partener-eu/ingest/build_call_lifecycle.py'
@@ -31,6 +32,7 @@ on:
       - 'partener-eu/ops/test_dossier_autonomy.py'
       - 'partener-eu/ops/test_call_lifecycle.py'
       - 'partener-eu/ops/test_public_language.py'
+      - 'partener-eu/ops/test_step_lll_dossier.py'
       - 'partener-eu/web/p11-public-data.js'
       - 'partener-eu/web/decision-intelligence-v2.js'
       - 'partener-eu/web/decision-intelligence-v2.css'
@@ -91,6 +93,7 @@ jobs:
           python partener-eu/ingest/finalize_decision_products.py
           python partener-eu/ingest/localize_decision_products.py
           python partener-eu/ingest/refine_afir_public_dossiers.py
+          python partener-eu/ingest/apply_step_lll_authoritative_dossier.py
           python partener-eu/ingest/score_dossier_depth.py
           python partener-eu/ingest/build_mipe_enrichment_seeds.py
           python partener-eu/ingest/build_call_lifecycle.py
@@ -104,6 +107,7 @@ jobs:
           python partener-eu/ops/test_dossier_autonomy.py
           python partener-eu/ops/test_call_lifecycle.py
           python partener-eu/ops/test_public_language.py
+          python partener-eu/ops/test_step_lll_dossier.py
 
       - name: Persist canonical calls, deep dossiers, enrichment targets and lifecycle
         shell: bash
