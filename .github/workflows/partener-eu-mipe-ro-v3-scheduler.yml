@@ -1,10 +1,10 @@
 name: PARTENER.EU MIPE Romania v3 Scheduler
 
 on:
+  # Recurring ownership lives in PARTENER.EU MIPE Windows Crawl v3 itself.
+  # Keep this bounded dispatcher only as a manual recovery path so two 3-hour
+  # schedules cannot cancel each other through the shared crawler concurrency group.
   workflow_dispatch:
-  schedule:
-    # Keep the authoritative Romanian corpus inside the 4h freshness gate.
-    - cron: '11 */3 * * *'
 
 permissions:
   actions: write
