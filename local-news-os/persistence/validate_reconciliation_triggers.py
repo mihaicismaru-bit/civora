@@ -168,7 +168,7 @@ def validate_exact_head_status_evidence(
             raise ValueError(f"{label} workflow must publish through the exact-head status endpoint")
         if context not in workflow:
             raise ValueError(f"{label} workflow missing stable exact-head status context={context}")
-        if '"state":"success"' not in workflow:
+        if r'\"state\":\"success\"' not in workflow:
             raise ValueError(f"{label} workflow must publish status only after successful validation")
         if "github.run_id" not in workflow:
             raise ValueError(f"{label} workflow status must retain run provenance")
