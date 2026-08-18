@@ -1,0 +1,70 @@
+name: VÂLCEA CLAR Editorial Lifecycle
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '13,28,43,58 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/editorial/facts_registry.json'
+      - 'valcea-clar/scripts/editorial_lifecycle_normalizer.py'
+      - '.github/workflows/valcea-clar-editorial-lifecycle.yml'
+  pull_request:
+    paths:
+      - 'valcea-clar/scripts/editorial_lifecycle_normalizer.py'
+      - '.github/workflows/valcea-clar-editorial-lifecycle.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-editorial-lifecycle-${{ github.event.pull_request.number || 'main' }}
+  cancel-in-progress: true
+
+jobs:
+  normalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Validate lifecycle contract
+        run: |
+          python -m py_compile valcea-clar/scripts/editorial_lifecycle_normalizer.py
+          python valcea-clar/scripts/editorial_lifecycle_normalizer.py --self-test
+      - name: Apply lifecycle contract
+        if: github.event_name != 'pull_request'
+        run: python valcea-clar/scripts/editorial_lifecycle_normalizer.py --apply
+      - name: Persist only material lifecycle changes
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- valcea-clar/editorial/facts_registry.json; then
+            echo 'No lifecycle changes.'
+            exit 0
+          fi
+          cp valcea-clar/editorial/facts_registry.json /tmp/lifecycle-facts.json
+          git config user.name 'valcea-clar-lifecycle[bot]'
+          git config user.email 'valcea-clar-lifecycle@users.noreply.github.com'
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/lifecycle-facts.json valcea-clar/editorial/facts_registry.json
+            git add valcea-clar/editorial/facts_registry.json
+            if git diff --cached --quiet; then
+              echo 'Lifecycle state already current.'
+              exit 0
+            fi
+            git commit -m 'Keep VÂLCEA CLAR durable explainers evergreen'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            sleep $((attempt * 2))
+          done
+          exit 1
