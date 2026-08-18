@@ -46,6 +46,7 @@ def validate(text: str) -> None:
         MARKER,
         ".vc-artistlinks{",
         "${artistProfiles(story)}<section class=\"vc-article-sources\">",
+        'href="${esc(item.path)}"',
         "href=\"/artisti/\"",
         "external_identity_verified",
     ]
@@ -79,7 +80,7 @@ def main() -> int:
 
     original = TARGET.read_text(encoding="utf-8")
     if args.check:
-        # Validation must inspect the checked-out artifact as-is.  The old
+        # Validation must inspect the checked-out artifact as-is. The old
         # implementation patched an in-memory copy first, which allowed an
         # unpatched-but-patchable bridge to report a false PASS.
         validate(original)
