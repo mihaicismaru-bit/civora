@@ -5,8 +5,10 @@ The source page is rendered by SportsPress. We consume only structured event-lis
 fields (date, time, home, away and venue), never free-form press copy. The parser
 prefers the machine-readable startDate attribute and has a bounded fallback to
 the visible SportsPress date/time cells when the deployed theme omits that
-attribute. The result is validated by the canonical Editorial Writer before it
-may enter the facts registry. A transport, parse or validation failure produces
+attribute. It does not depend on the surrounding table wrapper class: a row is
+eligible only when it exposes the exact SportsPress data-date/data-time/data-home/
+data-away cells. The result is validated by the canonical Editorial Writer before
+it may enter the facts registry. A transport, parse or validation failure produces
 no publication.
 """
 from __future__ import annotations
@@ -58,6 +60,7 @@ RO_MONTH_NUMBERS = {
     "nov": 11, "noiembrie": 11,
     "dec": 12, "decembrie": 12,
 }
+SPORTSPRESS_EVENT_CELLS = ("data-date", "data-home", "data-away", "data-time", "data-venue")
 
 
 def load(path: Path) -> dict[str, Any]:
@@ -72,12 +75,7 @@ def clean_text(value: str) -> str:
 
 
 def parse_visible_start(date_text: str, time_text: str) -> datetime | None:
-    """Parse only the explicit SportsPress visible date/time cells.
-
-    Accepted form is the Romanian event-table form such as ``22 aug., 2026``
-    plus a 24-hour clock such as ``11:00``. Results (``1 - 2``), relative dates,
-    and incomplete dates are rejected.
-    """
+    """Parse only the explicit SportsPress visible date/time cells."""
     date_value = clean_text(date_text).casefold().replace(".", "")
     time_value = clean_text(time_text)
     date_match = re.fullmatch(r"(\d{1,2})\s+([a-zăâîșşțţ]+),?\s+(\d{4})", date_value)
@@ -85,9 +83,8 @@ def parse_visible_start(date_text: str, time_text: str) -> datetime | None:
     if not date_match or not time_match:
         return None
     day = int(date_match.group(1))
-    month_token = date_match.group(2)
+    month = RO_MONTH_NUMBERS.get(date_match.group(2))
     year = int(date_match.group(3))
-    month = RO_MONTH_NUMBERS.get(month_token)
     if month is None:
         return None
     try:
@@ -97,10 +94,11 @@ def parse_visible_start(date_text: str, time_text: str) -> datetime | None:
 
 
 class SportsPressEventListParser(HTMLParser):
+    """Scan HTML tables but accept only rows carrying exact SportsPress event-cell classes."""
+
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
         self.table_depth = 0
-        self.in_target_table = False
         self.in_row = False
         self.current_cell: str | None = None
         self.current: dict[str, Any] = {}
@@ -114,24 +112,22 @@ class SportsPressEventListParser(HTMLParser):
         a = self.attrs_dict(attrs)
         classes = set(a.get("class", "").split())
         if tag == "table":
-            if self.in_target_table:
-                self.table_depth += 1
-            elif "sp-event-list" in classes:
-                self.in_target_table = True
-                self.table_depth = 1
+            self.table_depth += 1
             return
-        if not self.in_target_table:
+        if self.table_depth <= 0:
             return
         if tag == "tr":
             self.in_row = True
-            self.current = {"text": {}, "team_meta": {}}
+            self.current = {"text": {}, "team_meta": {}, "recognized_cells": set()}
             return
         if not self.in_row:
             return
         if tag == "td":
-            for key in ("data-date", "data-home", "data-away", "data-time", "data-venue"):
+            self.current_cell = None
+            for key in SPORTSPRESS_EVENT_CELLS:
                 if key in classes:
                     self.current_cell = key
+                    self.current["recognized_cells"].add(key)
                     self.current["text"].setdefault(key, [])
                     if key == "data-date" and a.get("itemprop") == "startDate" and a.get("content"):
                         self.current["start"] = a["content"]
@@ -142,13 +138,13 @@ class SportsPressEventListParser(HTMLParser):
                 self.current["team_meta"][self.current_cell] = clean_text(a["content"])
 
     def handle_data(self, data: str) -> None:
-        if self.in_target_table and self.in_row and self.current_cell:
+        if self.table_depth > 0 and self.in_row and self.current_cell:
             text = clean_text(data)
             if text:
                 self.current["text"].setdefault(self.current_cell, []).append(text)
 
     def handle_endtag(self, tag: str) -> None:
-        if not self.in_target_table:
+        if self.table_depth <= 0:
             return
         if tag == "td":
             self.current_cell = None
@@ -162,13 +158,14 @@ class SportsPressEventListParser(HTMLParser):
             self.current = {}
             return
         if tag == "table":
-            self.table_depth -= 1
-            if self.table_depth <= 0:
-                self.in_target_table = False
-                self.table_depth = 0
+            self.table_depth = max(0, self.table_depth - 1)
 
     @staticmethod
     def _finish_row(row: dict[str, Any]) -> dict[str, Any] | None:
+        recognized = set(row.get("recognized_cells") or set())
+        required = {"data-date", "data-time", "data-home", "data-away"}
+        if not required.issubset(recognized):
+            return None
         text = row.get("text") or {}
         meta = row.get("team_meta") or {}
         home = clean_text(str(meta.get("data-home") or " ".join(text.get("data-home") or [])))
@@ -176,7 +173,7 @@ class SportsPressEventListParser(HTMLParser):
         venue = clean_text(" ".join(text.get("data-venue") or []))
         date_text = clean_text(" ".join(text.get("data-date") or []))
         time_text = clean_text(" ".join(text.get("data-time") or []))
-        if not home or not away or not date_text:
+        if not home or not away or not date_text or not time_text:
             return None
         return {
             "start": clean_text(str(row.get("start") or "")),
@@ -284,7 +281,7 @@ def make_fact(event: dict[str, Any]) -> dict[str, Any]:
             "away": away,
             "venue": venue,
             "source_url": SOURCE_URL,
-            "parser": "SPORTSPRESS_EVENT_LIST_V2",
+            "parser": "SPORTSPRESS_EVENT_CELLS_V3",
         },
         "fact_kernel": {
             "format_hint": "service_news",
@@ -341,7 +338,7 @@ def apply_fact(registry: dict[str, Any], fact: dict[str, Any]) -> tuple[dict[str
     order.append(str(fact["id"]))
     registry["facts"] = [by_id[key] for key in order if key in by_id]
     policy = registry.setdefault("policy", {})
-    policy["scm_official_program_fact_kernel"] = "SPORTSPRESS_EVENT_LIST_V2"
+    policy["scm_official_program_fact_kernel"] = "SPORTSPRESS_EVENT_CELLS_V3"
     policy["scm_program_fail_closed"] = True
     policy["scm_visible_date_fallback_requires_explicit_24h_time"] = True
     after = json.dumps(registry["facts"], ensure_ascii=False, sort_keys=True)
@@ -382,7 +379,7 @@ def run(facts_path: Path, *, write: bool, html: str | None = None, now: datetime
 
 def self_test() -> int:
     html = '''
-    <table class="sp-event-list sp-data-table"><tbody>
+    <table class="custom-theme-table"><tbody>
       <tr>
         <td class="data-date" itemprop="startDate" content="2026-08-15T11:00:00+03:00">15 aug., 2026</td>
         <td class="data-home"><meta itemprop="name" content="CSM Ramnicu Valcea">CSM Ramnicu Valcea</td>
