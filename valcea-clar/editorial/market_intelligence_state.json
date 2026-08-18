@@ -4,7 +4,7 @@
   "product": "VÂLCEA CLAR market intelligence state",
   "execution_owner": "CIVORA_SITE_ENGINE",
   "state_owner": "GITHUB_REPOSITORY",
-  "generated_at": "2026-08-18T12:02:07Z",
+  "generated_at": "2026-08-18T14:10:31Z",
   "mode": "LIVE_SOURCE_HEALTH",
   "monitor_count": 3,
   "monitors": [
@@ -120,7 +120,6 @@
         "ajofm-valcea-statistics",
         "posturi-gov-valcea-all",
         "ejobs-valcea",
-        "bestjobs-valcea",
         "linkedin-jobs-valcea",
         "olx-jobs-valcea"
       ],
@@ -128,7 +127,9 @@
         "ajofm-valcea-statistics",
         "posturi-gov-valcea-all"
       ],
-      "degraded_sources": [],
+      "degraded_sources": [
+        "bestjobs-valcea"
+      ],
       "sources": [
         {
           "id": "ajofm-valcea-press",
@@ -181,7 +182,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://posturi.gov.ro/judet/valcea/",
-          "fingerprint": "d65c1e73e4c59aef806639202ddff77d8b38d954fcf03040d39fe5343169b0c2",
+          "fingerprint": "a0c2514243c9f345dcd8c9d09d3f19602c4dc14cc7d8fc49e2abfce72927dd3a",
           "match_count": 16,
           "matched_terms": [
             "Vâlcea",
@@ -201,8 +202,8 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.ejobs.ro/locuri-de-munca/ramnicu-valcea",
-          "fingerprint": "4f4d295a3d8bd360294ff4d36a719625768dab46d780bd7bc1e785791e0e9ded",
-          "match_count": 19,
+          "fingerprint": "a9a248e362ebf79eaa8c6d44d845cbf007c32770ff26222bd677e49c1bb28351",
+          "match_count": 22,
           "matched_terms": [
             "Joburi",
             "locuri de munca",
@@ -212,7 +213,7 @@
           "numeric_signals": [
             {
               "kind": "jobs",
-              "value_text": "1085"
+              "value_text": "1089"
             }
           ],
           "health": "OK",
@@ -225,20 +226,15 @@
           "url": "https://www.bestjobs.eu/locuri-de-munca-in-valcea",
           "source_class": "T2_DISCOVERY_ONLY",
           "publication_authority": false,
-          "reachable": true,
-          "http_status": 200,
-          "final_url": "https://www.bestjobs.eu/locuri-de-munca-in-valcea",
-          "fingerprint": "a393f16c32e4275c22529fcb06fc00ca9c13d0825c60301ace6fcfb1a7f8c6be",
-          "match_count": 18,
-          "matched_terms": [
-            "locuri de munca",
-            "Râmnicu Vâlcea",
-            "Vâlcea"
-          ],
+          "reachable": false,
+          "http_status": null,
+          "fingerprint": null,
+          "match_count": 0,
+          "matched_terms": [],
           "numeric_signals": [],
-          "health": "OK",
-          "error": null,
-          "change": "CHANGED_REVIEW_REQUIRED"
+          "health": "UNREACHABLE",
+          "error": "TimeoutError: The read operation timed out",
+          "change": "PROBE_FAILED"
         },
         {
           "id": "linkedin-jobs-valcea",
@@ -249,8 +245,8 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://ro.linkedin.com/jobs/jobs-in-v%C3%AElcea",
-          "fingerprint": "7fe30b62bf85be445b4a749aed0b856c9e0db87233c591d411756d45b5bd1a07",
-          "match_count": 24,
+          "fingerprint": "8c911643e4ae8d5501f50bc8ad622c3dc4ebe80c5fa3a2e8ee7efa4dbf4ab0c5",
+          "match_count": 28,
           "matched_terms": [
             "joburi",
             "Vîlcea",
@@ -260,7 +256,7 @@
           "numeric_signals": [
             {
               "kind": "jobs",
-              "value_text": "6"
+              "value_text": "14"
             }
           ],
           "health": "OK",
@@ -276,7 +272,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.olx.ro/locuri-de-munca/valcea-judet/",
-          "fingerprint": "240f6dd8ae2fe0580df107df3bd45fbd65d347f272371dc7785e7890c52d7d3a",
+          "fingerprint": "e8138c3610406e09c5f8d607d25cdf742f5b3350a66fe4c2bbd0397bfd8bdb80",
           "match_count": 23,
           "matched_terms": [
             "locuri de munca",
