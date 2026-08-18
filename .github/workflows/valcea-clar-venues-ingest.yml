@@ -14,6 +14,10 @@ on:
       - "valcea-clar/ingest/venue_ingest.py"
       - "valcea-clar/validation/validate.py"
       - "valcea-clar/scripts/reconcile_ingest.py"
+      - "valcea-clar/scripts/promote_verified_venues.py"
+      - "valcea-clar/scripts/quarantine_venue_identity_collisions.py"
+      - "valcea-clar/scripts/build_public_data.py"
+      - "valcea-clar/scripts/build_live_feed.py"
       - "valcea-clar/ops/ingest_aliases.json"
       - ".github/workflows/valcea-clar-venues-ingest.yml"
   schedule:
@@ -38,13 +42,58 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Probe sources and rebuild canonical state
+      - name: Validate autonomous venue safety gates offline
+        run: |
+          python valcea-clar/scripts/promote_verified_venues.py --self-test
+          python valcea-clar/scripts/quarantine_venue_identity_collisions.py --self-test
+
+      - name: Probe sources and rebuild fresh ingest state
         run: python valcea-clar/ingest/venue_ingest.py --timeout 12
 
-      - name: Validate outputs
+      - name: Validate raw ingest outputs
         run: python valcea-clar/validation/validate.py
 
-      - name: Reconcile ingestion with the curated public catalogue
+      - name: Quarantine ambiguous venue identity collisions
+        run: python valcea-clar/scripts/quarantine_venue_identity_collisions.py
+
+      - name: Validate quarantined ingest outputs
+        run: python valcea-clar/validation/validate.py
+
+      - name: Evaluate safe verified venue promotion on pull requests
+        if: github.event_name == 'pull_request'
+        id: promotion_preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          output="$(python valcea-clar/scripts/promote_verified_venues.py --check)"
+          echo "$output"
+          echo "result=$output" >> "$GITHUB_OUTPUT"
+
+      - name: Promote only verified official venue identities
+        if: github.event_name != 'pull_request'
+        id: promotion
+        shell: bash
+        run: |
+          set -euo pipefail
+          output="$(python valcea-clar/scripts/promote_verified_venues.py)"
+          echo "$output"
+          changed="$(printf '%s' "$output" | python -c 'import json,sys; print(str(json.load(sys.stdin)["changed"]).lower())')"
+          echo "changed=$changed" >> "$GITHUB_OUTPUT"
+          echo "result=$output" >> "$GITHUB_OUTPUT"
+
+      - name: Validate promoted canonical catalogue
+        if: github.event_name != 'pull_request' && steps.promotion.outputs.changed == 'true'
+        run: python valcea-clar/scripts/validate_data.py
+
+      - name: Rebuild public venue projection
+        if: github.event_name != 'pull_request' && steps.promotion.outputs.changed == 'true'
+        run: python valcea-clar/scripts/build_public_data.py
+
+      - name: Rebuild live site feed with complete verified venue catalogue
+        if: github.event_name != 'pull_request' && steps.promotion.outputs.changed == 'true'
+        run: python valcea-clar/scripts/build_live_feed.py
+
+      - name: Reconcile fresh ingestion with the curated public catalogue
         run: python valcea-clar/scripts/reconcile_ingest.py
 
       - name: Write job summary
@@ -55,20 +104,27 @@ jobs:
           state=json.load(open('valcea-clar/ingest/state/venues.json',encoding='utf-8'))
           report=json.load(open('valcea-clar/validation/latest_report.json',encoding='utf-8'))
           reconciliation=json.load(open('valcea-clar/ops/ingest_reconciliation.json',encoding='utf-8'))
+          holds_path=pathlib.Path('valcea-clar/ops/venue_identity_collision_holds.json')
+          holds=json.loads(holds_path.read_text(encoding='utf-8')) if holds_path.is_file() else {'holds': []}
+          receipt_path=pathlib.Path('valcea-clar/ops/venue_auto_promotion.json')
+          receipt=json.loads(receipt_path.read_text(encoding='utf-8')) if receipt_path.is_file() else {}
           p=pathlib.Path(os.environ['GITHUB_STEP_SUMMARY'])
+          promoted=len(receipt.get('promoted_new', [])) + len(receipt.get('promoted_existing_candidates', []))
           p.write_text(
               '# VÂLCEA CLAR — UNDE IEȘIM\n\n'
               f"- Ingest status: `{state['status']}`\n"
               f"- Localuri urmărite: **{state['summary']['venues']}**\n"
               f"- Creatori candidați: **{state['summary']['creatorCandidates']}**\n"
-              f"- Coada editorială: **{reconciliation['summary']['review_queue']}**\n"
-              f"- Validare: **{report['status']}**\n",
+              f"- Coliziuni de identitate blocate: **{len(holds.get('holds', []))}**\n"
+              f"- Localuri promovate sigur în această stare: **{promoted}**\n"
+              f"- Coada editorială rămasă: **{reconciliation['summary']['review_queue']}**\n"
+              f"- Validare ingest: **{report['status']}**\n",
               encoding='utf-8'
           )
           PY
 
-      - name: Persist ingestion and reconciliation state conflict-safe
-        if: always() && github.event_name != 'pull_request'
+      - name: Persist validated ingestion, promotion and live projection conflict-safe
+        if: success() && github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
@@ -79,6 +135,13 @@ jobs:
             valcea-clar/validation/latest_report.json
             valcea-clar/ops/ingest_reconciliation.json
             valcea-clar/ops/ingest_review_queue.json
+            valcea-clar/ops/venue_identity_collision_holds.json
+            valcea-clar/ops/venue_auto_promotion.json
+            valcea-clar/data/places.json
+            valcea-clar/data/sources.json
+            valcea-clar/web/data/places.json
+            valcea-clar/web/data/meta.json
+            valcea-clar/site/runtime/live-feed.json
           )
           rm -rf /tmp/valcea-clar-ingest-state
           mkdir -p /tmp/valcea-clar-ingest-state
@@ -103,13 +166,13 @@ jobs:
               fi
             done
             if git diff --cached --quiet; then
-              echo "No VÂLCEA CLAR ingestion-state changes."
+              echo "No VÂLCEA CLAR venue state or public projection changes."
               exit 0
             fi
-            git commit -m "Refresh VÂLCEA CLAR venue ingestion state"
+            git commit -m "Refresh VÂLCEA CLAR venue publication state"
             if git push origin HEAD:main; then exit 0; fi
             echo "main advanced; retrying ${attempt}/5"
             sleep $((attempt * 2))
           done
-          echo "Unable to persist VÂLCEA CLAR ingestion state after five attempts." >&2
+          echo "Unable to persist VÂLCEA CLAR venue state after five attempts." >&2
           exit 1

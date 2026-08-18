@@ -74,8 +74,20 @@ def main() -> int:
     ensure_story_runtime()
     places = load(PLACES).get("places", [])
     stories = story_feed(snapshot)
+    venue_feed = [
+        {
+            "id": p.get("id"),
+            "slug": p.get("slug"),
+            "name": p.get("name"),
+            "type": p.get("type"),
+            "city": (p.get("location") or {}).get("city"),
+            "summary": (p.get("editorial") or {}).get("dek") or (p.get("offer") or {}).get("summary"),
+            "badges": p.get("badges", [])[:2],
+        }
+        for p in places
+    ]
     payload = {
-        "schema_version": "2.1",
+        "schema_version": "2.2",
         "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "canonical_domain": "valceaclar.ro",
         "publication_model": "continuous_story_first",
@@ -87,18 +99,11 @@ def main() -> int:
         "pointer": pointer,
         "compatibility_snapshot": snapshot,
         "compatibility_pointer": pointer,
-        "unde_iesim": [
-            {
-                "id": p.get("id"),
-                "slug": p.get("slug"),
-                "name": p.get("name"),
-                "type": p.get("type"),
-                "city": (p.get("location") or {}).get("city"),
-                "summary": (p.get("editorial") or {}).get("dek") or (p.get("offer") or {}).get("summary"),
-                "badges": p.get("badges", [])[:2],
-            }
-            for p in places[:8]
-        ],
+        # The section route consumes the complete verified catalogue. Homepage
+        # consumers apply their own small display cap, so the section itself can
+        # keep growing autonomously without silently truncating at eight venues.
+        "unde_iesim": venue_feed,
+        "unde_iesim_count": len(venue_feed),
         "policy": {
             "verified_facts_only": True,
             "candidate_records_hidden": True,
@@ -110,6 +115,7 @@ def main() -> int:
             "story_body_is_source_preserving": True,
             "recap_render_may_not_remove_story_routes": True,
             "edition_fields_are_compatibility_only": True,
+            "unde_iesim_full_verified_catalogue": True,
         },
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
@@ -118,6 +124,7 @@ def main() -> int:
         "status": "PASS",
         "publication_model": payload["publication_model"],
         "stories": len(stories),
+        "venues": len(venue_feed),
         "compatibility_snapshot": snapshot["edition_id"],
         "feed": str(OUT.relative_to(ROOT)),
     }, ensure_ascii=False))
