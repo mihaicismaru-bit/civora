@@ -33,8 +33,11 @@ for item in daily.get('items') or []:
 assert official.get('policy', {}).get('directOfficialOnly') is True
 assert official.get('policy', {}).get('signalsDoNotChangeCalls') is True
 assert official.get('policy', {}).get('failClosed') is True
-assert len(official.get('sources') or []) >= 3
-for source in official.get('sources') or []:
+sources = official.get('sources') or []
+assert len(sources) >= 6
+source_ids = {x.get('id') for x in sources}
+assert {'GOV_RO_NEWS','EC_RO_NEWS','MS_PRESS','ANC_COMMUNICATES','ADR_ARTICLES','FED_MAI'} <= source_ids
+for source in sources:
     assert source.get('url','').startswith('https://')
     assert source.get('failClosed') is True
 
@@ -64,4 +67,4 @@ assert 'isHome()' in ui
 assert 'data-peopleall' not in ui
 assert "document.addEventListener('click'" not in ui
 
-print(json.dumps({'dailyCards':len(daily.get('items') or []),'peopleSignals':len(people.get('items') or []),'homePeople':len(people.get('homeIds') or []),'officialSources':len(official.get('sources') or [])},ensure_ascii=False,indent=2))
+print(json.dumps({'dailyCards':len(daily.get('items') or []),'peopleSignals':len(people.get('items') or []),'homePeople':len(people.get('homeIds') or []),'officialSources':len(sources)},ensure_ascii=False,indent=2))
