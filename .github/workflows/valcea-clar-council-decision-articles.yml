@@ -15,6 +15,7 @@ on:
       - 'valcea-clar/scripts/council_decision_fulltext_enricher_v2.py'
       - 'valcea-clar/scripts/council_claim_attribution_normalizer.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
+      - 'valcea-clar/scripts/council_watch_rm_valcea_v2.py'
       - '.github/workflows/valcea-clar-council-decision-articles.yml'
   pull_request:
     paths:
@@ -22,6 +23,7 @@ on:
       - 'valcea-clar/scripts/council_decision_fulltext_enricher.py'
       - 'valcea-clar/scripts/council_decision_fulltext_enricher_v2.py'
       - 'valcea-clar/scripts/council_claim_attribution_normalizer.py'
+      - 'valcea-clar/scripts/council_watch_rm_valcea_v2.py'
       - '.github/workflows/valcea-clar-council-decision-articles.yml'
 
 permissions:
@@ -50,17 +52,19 @@ jobs:
             valcea-clar/scripts/council_decision_article_engine.py \
             valcea-clar/scripts/council_decision_fulltext_enricher.py \
             valcea-clar/scripts/council_decision_fulltext_enricher_v2.py \
-            valcea-clar/scripts/council_claim_attribution_normalizer.py
+            valcea-clar/scripts/council_claim_attribution_normalizer.py \
+            valcea-clar/scripts/council_watch_rm_valcea_v2.py
+          python valcea-clar/scripts/council_watch_rm_valcea_v2.py --self-test
           python valcea-clar/scripts/council_decision_article_engine.py --self-test
           python valcea-clar/scripts/council_decision_fulltext_enricher.py --self-test
           python valcea-clar/scripts/council_decision_fulltext_enricher_v2.py --self-test
           python valcea-clar/scripts/council_claim_attribution_normalizer.py --self-test
 
-      - name: Refresh adopted-decision register
+      - name: Select latest official adopted-decision date
         if: github.event_name != 'pull_request'
-        run: python valcea-clar/scripts/council_watch_rm_valcea.py
+        run: python valcea-clar/scripts/council_watch_rm_valcea_v2.py
 
-      - name: Preview target-meeting article set
+      - name: Preview latest-meeting article set
         run: python valcea-clar/scripts/council_decision_article_engine.py
 
       - name: Materialize one article per adopted HCL and investigation graph
@@ -123,6 +127,7 @@ jobs:
       - name: Report autonomous article set
         if: always()
         run: |
+          echo 'Target meeting is selected from the newest date actually present in the official adopted-HCL register; no calendar date is hardcoded.' >> "$GITHUB_STEP_SUMMARY"
           echo 'Each adopted HCL keeps one stable evergreen article URL.' >> "$GITHUB_STEP_SUMMARY"
           echo 'Full official DocManager text upgrades the same article with operative clauses, money, beneficiaries, contracts and follow-up questions.' >> "$GITHUB_STEP_SUMMARY"
           echo 'Topic parsers convert recurring legal forms into reader-oriented explainers; unresolved details stay explicit follow-up questions.' >> "$GITHUB_STEP_SUMMARY"
