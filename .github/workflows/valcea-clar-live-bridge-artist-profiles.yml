@@ -1,0 +1,46 @@
+name: VÂLCEA CLAR Live Bridge Artist Profiles
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/scripts/patch_live_bridge_artist_profiles.py'
+      - '.github/workflows/valcea-clar-live-bridge-artist-profiles.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-live-bridge-artist-profiles
+  cancel-in-progress: false
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Patch and validate live bridge
+        run: |
+          python valcea-clar/scripts/patch_live_bridge_artist_profiles.py
+          python valcea-clar/scripts/patch_live_bridge_artist_profiles.py --check
+      - name: Persist live bridge extension
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- valcea-clar/site/chatgpt-sites-live-bridge.js; then
+            echo 'Live bridge already renders artist profiles.'
+            exit 0
+          fi
+          git config user.name 'vâlcea-clar-live-bridge[bot]'
+          git config user.email 'valcea-clar-live-bridge@users.noreply.github.com'
+          git add valcea-clar/site/chatgpt-sites-live-bridge.js
+          git commit -m 'Render artist profiles in VÂLCEA CLAR festival stories'
+          git pull --rebase origin main
+          git push origin HEAD:main
