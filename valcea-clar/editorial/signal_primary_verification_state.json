@@ -2,19 +2,92 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-18T08:04:24+03:00",
+  "generated_at": "2026-08-18T09:02:19+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-18T08:02:44+03:00",
-  "task_count": 46,
+  "queue_generated_at": "2026-08-18T09:00:58+03:00",
+  "task_count": 49,
   "primary_match_count": 0,
-  "no_match_count": 24,
-  "unrouted_count": 22,
+  "no_match_count": 25,
+  "unrouted_count": 24,
   "target_count": 14,
-  "targets_ok": 9,
+  "targets_ok": 11,
   "results": [
+    {
+      "signal_id": "650243aae22a873ba383dd84",
+      "signal_title": "Transalpina, în topul celor mai spectaculoase șosele din Europa. Drumul din Vâlcea urcă pe locul 5",
+      "signal_url": "https://evenimentvalcean.ro/transalpina-in-topul-celor-mai-spectaculoase-sosele-din-europa-drumul-din-valcea-urca-pe-locul-5/",
+      "signal_publisher": "Eveniment Vâlcean",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-18T08:17:37+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "4aac0a731b6509aa591e1642",
+      "signal_title": "VIDEO EXCLUSIV | AU VENIT CU BÂTELE! SCANDAL VIOLENT ÎN JIBLEA VECHE",
+      "signal_url": "https://vocea-valcii.ro/dezvaluiri/video-exclusiv-au-venit-cu-batele-scandal-violent-in-jiblea-veche/",
+      "signal_publisher": "Vocea Vâlcii",
+      "signal_published_at": "2026-08-18T08:10:39+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "9e094830455875493302adab",
+      "signal_title": "Scundu își sărbătorește tradițiile: „Tradiții și obiceiuri strămoșești”, ediția a IV-a",
+      "signal_url": "https://evenimentvalcean.ro/scundu-isi-sarbatoreste-traditiile-traditii-si-obiceiuri-stramosesti-editia-a-iv-a/",
+      "signal_publisher": "Eveniment Vâlcean",
+      "signal_published_at": "2026-08-18T08:08:10+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
     {
       "signal_id": "878c09601f46bae79edaf3a4",
       "signal_title": "Vâlceanca Gabriela-Cristina Dumitrescu este CAMPIOANĂ EUROPEANĂ la Para Judo",
@@ -80,9 +153,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "DEGRADED",
-          "error": "HTTPError: HTTP Error 403: Forbidden",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -316,9 +389,9 @@
             "name": "Instituția Prefectului — Județul Vâlcea",
             "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
           },
-          "status": "DEGRADED",
-          "error": "HTTPError: HTTP Error 403: Forbidden",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         },
         {
           "target": {
@@ -415,9 +488,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "DEGRADED",
-          "error": "HTTPError: HTTP Error 403: Forbidden",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -454,9 +527,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "DEGRADED",
-          "error": "HTTPError: HTTP Error 403: Forbidden",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -481,9 +554,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "DEGRADED",
-          "error": "HTTPError: HTTP Error 403: Forbidden",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -520,9 +593,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "DEGRADED",
-          "error": "HTTPError: HTTP Error 403: Forbidden",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -547,9 +620,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "DEGRADED",
-          "error": "HTTPError: HTTP Error 403: Forbidden",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -560,7 +633,7 @@
     },
     {
       "signal_id": "d0c30c783ca59fcfc9ecd9fa",
-      "signal_title": "Ultima oră 18 ore in urma Ziua Comunei Drăgoești 2026: aniversări de familie și Cupa „Mihai Viteazul” au adus generațiile împreună",
+      "signal_title": "Ultima oră 19 ore in urma Ziua Comunei Drăgoești 2026: aniversări de familie și Cupa „Mihai Viteazul” au adus generațiile împreună",
       "signal_url": "https://www.primplanpress.ro/ziua-comunei-dragoesti-2026-aniversari-de-familie-si-cupa-mihai-viteazul-au-adus-generatiile-impreuna/",
       "signal_publisher": "Primplan Press",
       "signal_tier": "T2",
@@ -623,9 +696,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "DEGRADED",
-          "error": "HTTPError: HTTP Error 403: Forbidden",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -761,9 +834,9 @@
             "name": "Instituția Prefectului — Județul Vâlcea",
             "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
           },
-          "status": "DEGRADED",
-          "error": "HTTPError: HTTP Error 403: Forbidden",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         },
         {
           "target": {
@@ -859,9 +932,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "DEGRADED",
-          "error": "HTTPError: HTTP Error 403: Forbidden",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -922,9 +995,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "DEGRADED",
-          "error": "HTTPError: HTTP Error 403: Forbidden",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -1156,9 +1229,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "DEGRADED",
-          "error": "HTTPError: HTTP Error 403: Forbidden",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
