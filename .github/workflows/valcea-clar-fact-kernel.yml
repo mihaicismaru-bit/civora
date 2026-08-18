@@ -13,6 +13,7 @@ on:
       - 'valcea-clar/scripts/council_docmanager_document_diagnostic.py'
       - 'valcea-clar/scripts/promote_fact_kernels.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
+      - 'valcea-clar/scripts/council_watch_rm_valcea_v2.py'
       - 'valcea-clar/scripts/gambling_dossier_enricher.py'
       - 'valcea-clar/editorial/gambling_ramnicu_2026_dossier.json'
       - 'valcea-clar/scripts/scm_program_fact_kernel.py'
@@ -31,6 +32,7 @@ on:
       - 'valcea-clar/scripts/council_docmanager_document_diagnostic.py'
       - 'valcea-clar/scripts/promote_fact_kernels.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
+      - 'valcea-clar/scripts/council_watch_rm_valcea_v2.py'
       - 'valcea-clar/scripts/gambling_dossier_enricher.py'
       - 'valcea-clar/editorial/gambling_ramnicu_2026_dossier.json'
       - 'valcea-clar/scripts/scm_program_fact_kernel.py'
@@ -71,6 +73,7 @@ jobs:
             valcea-clar/scripts/council_docmanager_document_diagnostic.py \
             valcea-clar/scripts/promote_fact_kernels.py \
             valcea-clar/scripts/council_watch_rm_valcea.py \
+            valcea-clar/scripts/council_watch_rm_valcea_v2.py \
             valcea-clar/scripts/gambling_dossier_enricher.py \
             valcea-clar/scripts/scm_program_fact_kernel.py \
             valcea-clar/scripts/scm_program_structure_diagnostic.py \
@@ -79,6 +82,7 @@ jobs:
       - name: Test Fact Kernel contracts
         run: |
           python valcea-clar/scripts/council_watch_rm_valcea.py --self-test
+          python valcea-clar/scripts/council_watch_rm_valcea_v2.py --self-test
           python valcea-clar/scripts/council_fact_kernel.py --self-test
           python valcea-clar/scripts/council_docmanager_embedded_resolver.py --resolver-self-test
           python valcea-clar/scripts/council_docmanager_embedded_resolver.py --self-test
@@ -92,9 +96,9 @@ jobs:
       - name: Validate current offline kernel state
         run: python valcea-clar/scripts/council_docmanager_embedded_resolver.py --check
 
-      - name: Refresh official Council Watch state
+      - name: Refresh Council Watch at latest official adopted date
         if: github.event_name != 'pull_request'
-        run: python valcea-clar/scripts/council_watch_rm_valcea.py
+        run: python valcea-clar/scripts/council_watch_rm_valcea_v2.py
 
       - name: Capture bounded official DocManager structure diagnostic
         if: github.event_name != 'pull_request'
@@ -203,6 +207,7 @@ jobs:
       - name: Report downstream handoff
         if: github.event_name != 'pull_request'
         run: |
+          echo "Council target selector: latest official adopted-decision date"
           echo "Council registry changed: ${{ steps.promote.outputs.changed }}"
           echo "SCM program registry changed: ${{ steps.scm.outputs.changed }}"
           echo "SCM program events parsed: ${{ steps.scm.outputs.events_parsed }}"
