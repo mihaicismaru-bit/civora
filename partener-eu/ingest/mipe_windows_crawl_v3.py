@@ -11,6 +11,7 @@ It:
 - extracts PDF and DOCX text when practical;
 - emits page-level lifecycle evidence and call/guide candidates;
 - preserves raw page text needed by the downstream dossier engine;
+- persists the unseen discovery frontier and resumes it on the next run;
 - updates mipe_state.json for backwards compatibility;
 - writes mipe_ro_corpus.json as the richer source of truth.
 
@@ -56,6 +57,7 @@ PAGE_TIMEOUT_MS = max(7000, int(os.getenv("MIPE_PAGE_TIMEOUT_MS", "18000")))
 PAGE_WAIT_MS = max(0, int(os.getenv("MIPE_PAGE_WAIT_MS", "350")))
 MAX_DOC_BYTES = max(1_000_000, int(os.getenv("MIPE_MAX_DOC_BYTES", "25000000")))
 MAX_DOCUMENTS = max(20, int(os.getenv("MIPE_MAX_DOCUMENTS", "160")))
+MAX_FRONTIER = max(200, int(os.getenv("MIPE_MAX_FRONTIER", "3000")))
 BROWSER_EXECUTABLE = os.getenv("MIPE_BROWSER_EXECUTABLE", "").strip()
 HEADLESS = os.getenv("MIPE_HEADLESS", "0").strip().lower() not in {"0", "false", "no"}
 
@@ -137,7 +139,7 @@ def is_generic_url(url: str) -> bool:
     if any(path.startswith(x) for x in GENERIC_PATH_PARTS):
         return True
     if re.search(r"/page/\d+/?$", path):
-        return False  # pagination is useful discovery
+        return False
     return False
 
 
@@ -313,7 +315,7 @@ def load_previous() -> tuple[dict[str, Any], dict[str, Any]]:
     try:
         corpus = json.loads(CORPUS_PATH.read_text(encoding="utf-8"))
     except Exception:
-        corpus = {"pages": [], "documents": [], "runs": []}
+        corpus = {"pages": [], "documents": [], "runs": [], "frontier": []}
     return state, corpus
 
 
@@ -322,6 +324,19 @@ def main() -> int:
     started = time.monotonic()
     deadline = started + RUNTIME_SECONDS
     observed_at = now_iso()
+
+    previous_urls = {
+        canonicalize(str(p.get("url") or ""))
+        for p in previous_corpus.get("pages", [])
+        if p.get("url")
+    }
+    previous_urls.discard(None)
+    previous_doc_urls = {
+        canonicalize(str(d.get("url") or ""))
+        for d in previous_corpus.get("documents", [])
+        if d.get("url")
+    }
+    previous_doc_urls.discard(None)
 
     queue: list[tuple[int, int, str, int, str, str]] = []
     queued: set[str] = set()
@@ -333,6 +348,8 @@ def main() -> int:
         u = canonicalize(url, parent)
         if not u or u in queued or u in seen or is_document(u) or is_asset(u) or is_generic_url(u):
             return
+        if u in previous_urls and not force:
+            return
         score = 1000 if force else score_link(u, hint, parent, depth)
         if not force and depth > 0 and score <= 0:
             return
@@ -343,11 +360,24 @@ def main() -> int:
     for seed in SEEDS:
         enqueue(seed, 0, force=True)
 
+    resumed = 0
+    for row in previous_corpus.get("frontier") or []:
+        before = len(queued)
+        enqueue(
+            str(row.get("url") or ""),
+            int(row.get("depth") or 1),
+            str(row.get("hint") or ""),
+            str(row.get("parent") or ROOT_URL),
+        )
+        if len(queued) > before:
+            resumed += 1
+
     pages: list[dict[str, Any]] = []
     documents: dict[str, dict[str, Any]] = {}
     failures: list[dict[str, Any]] = []
     roots: list[dict[str, Any]] = []
     source_available = False
+    seed_urls = {canonicalize(x) for x in SEEDS}
 
     with sync_playwright() as pw:
         launch: dict[str, Any] = {
@@ -405,7 +435,7 @@ def main() -> int:
                     label = clean(link.get("text"))
                     if is_document(href):
                         doc_refs.append({"name": label or Path(urllib.parse.urlparse(href).path).name, "url": href})
-                        if href not in documents and len(documents) < MAX_DOCUMENTS and time.monotonic() < deadline - 15:
+                        if href not in documents and href not in previous_doc_urls and len(documents) < MAX_DOCUMENTS and time.monotonic() < deadline - 15:
                             try:
                                 r = context.request.get(href, timeout=PAGE_TIMEOUT_MS, fail_on_status_code=False)
                                 raw = r.body()
@@ -453,13 +483,13 @@ def main() -> int:
                         "retrievalTransport": "playwright-edge-direct-romania-v3",
                         "verification": "CANONICAL_OFFICIAL_FETCH",
                     })
-                if url in {canonicalize(x) for x in SEEDS}:
+                if url in seed_urls:
                     roots.append({"root": url, "ok": True, "status": status, "finalUrl": final})
                 print(f"  OK accepted={accepted} links={len(links)} docs={len(doc_refs)} title={title[:100]!r}", flush=True)
             except Exception as exc:
                 err = f"{type(exc).__name__}: {exc}"
                 failures.append({"url": url, "error": err})
-                if url in {canonicalize(x) for x in SEEDS}:
+                if url in seed_urls:
                     roots.append({"root": url, "ok": False, "error": err})
                 print(f"  FAIL {err}", flush=True)
             finally:
@@ -467,12 +497,25 @@ def main() -> int:
         context.close()
         browser.close()
 
-    # Merge page history by canonical URL, keeping current crawl evidence.
     current_by_url = {p["url"]: p for p in pages}
     previous_by_url = {p.get("url"): p for p in previous_corpus.get("pages", []) if p.get("url")}
     merged_pages = {**previous_by_url, **current_by_url}
     merged_docs = {d.get("url"): d for d in previous_corpus.get("documents", []) if d.get("url")}
     merged_docs.update(documents)
+
+    frontier = []
+    for rank, _order, url, depth, hint, parent in sorted(queue):
+        if url in merged_pages:
+            continue
+        frontier.append({
+            "url": url,
+            "depth": depth,
+            "hint": hint,
+            "parent": parent,
+            "score": -rank,
+        })
+        if len(frontier) >= MAX_FRONTIER:
+            break
 
     run = {
         "observedAt": observed_at,
@@ -482,6 +525,8 @@ def main() -> int:
         "acceptedPages": len(pages),
         "documentsObserved": len(documents),
         "queuedRemaining": len(queue),
+        "resumedFrontier": resumed,
+        "frontierPersisted": len(frontier),
         "failures": failures[:60],
         "runtimeSeconds": round(time.monotonic() - started, 2),
         "runtimeBudgetSeconds": RUNTIME_SECONDS,
@@ -489,6 +534,7 @@ def main() -> int:
         "maxPages": MAX_PAGES,
         "maxDepth": MAX_DEPTH,
         "collectorVersion": "3.0",
+        "frontierVersion": 1,
         "transport": "playwright-edge-direct-romania-v3",
     }
 
@@ -499,6 +545,8 @@ def main() -> int:
         "generatedAt": observed_at,
         "status": "PASS" if source_available else "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
         "lastRun": run,
+        "frontierVersion": 1,
+        "frontier": frontier,
         "pages": sorted(merged_pages.values(), key=lambda x: str(x.get("observedAt", "")), reverse=True)[:500],
         "documents": sorted(merged_docs.values(), key=lambda x: str(x.get("observedAt", "")), reverse=True)[:800],
         "runs": (previous_corpus.get("runs") or [])[-29:] + [run],
@@ -506,7 +554,6 @@ def main() -> int:
     CORPUS_PATH.parent.mkdir(parents=True, exist_ok=True)
     CORPUS_PATH.write_text(json.dumps(corpus, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
-    # Backwards-compatible MIPE item projection used by existing dossier builder.
     prior_items = {i.get("url"): i for i in previous_state.get("items", []) if i.get("url")}
     for page in pages:
         prior_items[page["url"]] = {
@@ -528,7 +575,8 @@ def main() -> int:
             "documentCount": len(documents), "transport": run["transport"],
             "runtimeSeconds": run["runtimeSeconds"], "deadlineReached": run["deadlineReached"],
             "status": state_status, "directSuccessCount": sum(1 for x in roots if x.get("ok")),
-            "collectorVersion": "3.0",
+            "collectorVersion": "3.0", "frontierVersion": 1,
+            "frontierPersisted": len(frontier), "resumedFrontier": resumed,
         },
         "items": items,
         "runs": (previous_state.get("runs") or [])[-39:] + [run],
@@ -540,6 +588,7 @@ def main() -> int:
             "status": state_status, "asOf": observed_at, "source": "MIPE official web properties",
             "roots": roots, "itemCount": len(items), "transport": run["transport"],
             "sourceAvailable": source_available, "collectorVersion": "3.0",
+            "frontierVersion": 1, "frontierPersisted": len(frontier),
             "corpusPages": len(corpus["pages"]), "corpusDocuments": len(corpus["documents"]),
         }, ensure_ascii=False, separators=(",", ":")) + ";\n"
         + "window.PARTENER_DATA.mipeNews=" + json.dumps(items, ensure_ascii=False, separators=(",", ":")) + ";\n",
@@ -549,6 +598,7 @@ def main() -> int:
         "status": state_status, "pagesVisited": len(seen), "freshPages": len(pages),
         "corpusPages": len(corpus["pages"]), "documents": len(corpus["documents"]),
         "runtimeSeconds": run["runtimeSeconds"], "queuedRemaining": len(queue),
+        "resumedFrontier": resumed, "frontierPersisted": len(frontier),
     }, ensure_ascii=False, indent=2))
     return 0 if source_available else 2
 
