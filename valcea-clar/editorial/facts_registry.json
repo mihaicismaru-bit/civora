@@ -13,7 +13,10 @@
     "durable_temporal_language": "absolute_dates_only",
     "structured_primary_fact_kernel_contract": "LOCAL_NEWS_OS_STRUCTURED_ALERT_EVENTS_V1",
     "structured_primary_fact_kernels_fail_closed": true,
-    "structured_primary_reader_copy_requires_editorial_writer": true
+    "structured_primary_reader_copy_requires_editorial_writer": true,
+    "scm_official_program_fact_kernel": "SCM_SEMANTIC_PROGRAM_TABLE_V4",
+    "scm_program_fail_closed": true,
+    "scm_program_requires_semantic_table_headers": true
   },
   "facts": [
     {
@@ -327,7 +330,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "17a96b7190ff0fbe0e3a0c7d5ad9605bdeca719f9e90f910da0cfc2892338755"
+          "sha256": "4db6f97e93e2cbb9bdfd3b94ae9fc67424f3690d48f8cc18eb131447c4146013"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 304/2026-07-23",
@@ -500,7 +503,7 @@
         "source_monitor": "council-watch-rm-valcea",
         "cluster_date": "2026-07-23",
         "register_url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
-        "register_sha256": "17a96b7190ff0fbe0e3a0c7d5ad9605bdeca719f9e90f910da0cfc2892338755",
+        "register_sha256": "4db6f97e93e2cbb9bdfd3b94ae9fc67424f3690d48f8cc18eb131447c4146013",
         "latest_decision_window": 25,
         "matching_decisions": 11,
         "verified_official_documents": 11,
@@ -778,6 +781,74 @@
           }
         ],
         "never_infer_new_venue_from_annual_authorization": true
+      }
+    },
+    {
+      "id": "scm-program-fdbf66a4a5bb7ef4f69b",
+      "status": "verified",
+      "section": "SPORT",
+      "priority": 88,
+      "confidence": 99,
+      "valid_from": "2026-08-15T11:00+03:00",
+      "valid_until": "2026-08-22T15:00+03:00",
+      "slots": [
+        "morning",
+        "evening"
+      ],
+      "editorial_type": "service",
+      "material_fact_gate": "PASS",
+      "sources": [
+        {
+          "name": "SCM Râmnicu Vâlcea — program oficial",
+          "url": "https://scmramnicuvalcea.ro/program/",
+          "tier": "T1B"
+        }
+      ],
+      "auto_generated": true,
+      "auto_scope": "scm_official_program_fact_kernel",
+      "official_event": {
+        "start": "2026-08-22T11:00+03:00",
+        "start_provenance": "SEMANTIC_TABLE_HEADER_DATE_TIME",
+        "home": "CSM Ramnicu Valcea",
+        "away": "FC Bacau",
+        "venue": "Stadionul Municipal",
+        "source_url": "https://scmramnicuvalcea.ro/program/",
+        "parser": "SCM_SEMANTIC_PROGRAM_TABLE_V4"
+      },
+      "fact_kernel": {
+        "format_hint": "service_news",
+        "headline": {
+          "text": "CSM Ramnicu Valcea – FC Bacau: meci programat pe 22 august 2026, de la 11:00",
+          "source_urls": [
+            "https://scmramnicuvalcea.ro/program/"
+          ]
+        },
+        "dek": {
+          "text": "Programul oficial al SCM Râmnicu Vâlcea listează partida la Stadionul Municipal. Informația este verificată direct în calendarul clubului.",
+          "source_urls": [
+            "https://scmramnicuvalcea.ro/program/"
+          ]
+        },
+        "claims": [
+          {
+            "id": "fixture",
+            "role": "who_what_when_where",
+            "kind": "fact",
+            "text": "În programul oficial al SCM Râmnicu Vâlcea, partida CSM Ramnicu Valcea – FC Bacau este programată pe 22 august 2026, la ora 11:00.",
+            "source_urls": [
+              "https://scmramnicuvalcea.ro/program/"
+            ]
+          },
+          {
+            "id": "venue",
+            "role": "reader_service",
+            "kind": "reader_service",
+            "text": "Programul oficial indică pentru această partidă locația Stadionul Municipal.",
+            "source_urls": [
+              "https://scmramnicuvalcea.ro/program/"
+            ]
+          }
+        ]
       }
     }
   ]
