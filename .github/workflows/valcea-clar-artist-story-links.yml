@@ -47,7 +47,7 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             python valcea-clar/scripts/link_artist_profiles.py
-            git add valcea-clar/site/story_archive.json valcea-clar/site/runtime/live-feed.json valcea-clar/site/runtime/stiri
+            git add valcea-clar/site/runtime/live-feed.json valcea-clar/site/runtime/stiri
             if git diff --cached --quiet; then
               echo 'Festival-to-artist links already current.'
               exit 0
