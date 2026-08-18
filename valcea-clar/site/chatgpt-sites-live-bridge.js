@@ -76,7 +76,7 @@
       .vc-grid{display:grid;grid-template-columns:minmax(0,1.86fr) minmax(285px,.72fr);gap:36px}.vc-kicker{color:var(--vc-red);font-size:12px;font-weight:900;letter-spacing:.075em;text-transform:uppercase}.vc-storylink{text-decoration:none}.vc-storylink:hover{text-decoration:underline;text-underline-offset:5px}.vc-hero h1{font:800 clamp(38px,5.4vw,66px)/1.03 Georgia,serif;letter-spacing:-.03em;margin:8px 0 14px}.vc-dek{font-size:20px;line-height:1.45;color:#344054}.vc-hero p{font:18px/1.68 Georgia,serif}.vc-storymeta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:9px 0;color:var(--vc-muted);font-size:12px}.vc-archive{font-weight:850;background:#f2f4f7;color:#475467;padding:4px 7px;border-radius:999px}.vc-live{font-weight:900;background:#ecfdf3;color:#067647;padding:4px 7px;border-radius:999px}.vc-sources{font-size:12px;color:var(--vc-muted);margin-top:14px}.vc-sources a{color:#475467}
       .vc-section-title{font-size:13px;letter-spacing:.07em;text-transform:uppercase;border-bottom:2px solid var(--vc-ink);padding-bottom:8px;margin:30px 0 15px}.vc-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.vc-card{border-top:3px solid var(--vc-navy);padding-top:12px}.vc-card h3{font:700 22px/1.15 Georgia,serif;margin:7px 0}.vc-card p{color:#475467;margin:0}.vc-side{border-left:1px solid var(--vc-line);padding-left:28px}.vc-side>h2{font-size:14px;text-transform:uppercase;letter-spacing:.07em;border-bottom:2px solid var(--vc-red);padding-bottom:9px;margin:0}.vc-side-story{padding:13px 0;border-bottom:1px solid var(--vc-line)}.vc-side-story strong{display:block;font:700 18px/1.2 Georgia,serif}
       .vc-venues{background:var(--vc-navy);color:#fff;border-radius:10px;padding:18px;margin-top:28px}.vc-venues-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.vc-venues h2{font-size:15px;text-transform:uppercase;letter-spacing:.06em;margin:0}.vc-venues .vc-cta{font-size:12px;text-decoration:none;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:5px 8px}.vc-venue{display:block;text-decoration:none;padding:12px 0;border-top:1px solid rgba(255,255,255,.14)}.vc-venue span{display:block;color:#d0d5dd;font-size:13px;margin-top:3px}.vc-note{margin-top:34px;background:var(--vc-soft);border-left:4px solid var(--vc-red);padding:15px 18px;color:#475467;font-size:13px}
-      .vc-article,.vc-legal{max-width:860px;margin:0 auto}.vc-article h1,.vc-legal h1,.vc-venues-page h1{font:800 clamp(39px,6vw,65px)/1.04 Georgia,serif;letter-spacing:-.03em;margin:8px 0 15px}.vc-body{font:18px/1.72 Georgia,serif;margin-top:26px}.vc-body p{margin:0 0 20px}.vc-factbox{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--vc-line);border:1px solid var(--vc-line);border-radius:10px;overflow:hidden;margin:26px 0}.vc-fact{background:#fff;padding:13px 15px}.vc-fact b{display:block;text-transform:uppercase;font-size:10px;letter-spacing:.08em;color:var(--vc-muted);margin-bottom:3px}.vc-fact span{font-weight:750}.vc-rich{border-top:1px solid var(--vc-line);padding-top:24px;margin-top:28px}.vc-rich h2{font:800 26px/1.16 Georgia,serif;margin:0 0 13px}.vc-rich p{font:17px/1.7 Georgia,serif;color:#344054}.vc-rich li{margin:8px 0;line-height:1.55}.vc-artist-inline{font-weight:700;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}.vc-artist-inline:hover{color:var(--vc-red)}.vc-artistlinks{display:flex;gap:9px;flex-wrap:wrap}.vc-artistlinks a{border:1px solid var(--vc-line);border-radius:999px;padding:7px 11px;text-decoration:none;font:750 13px/1.2 Inter,system-ui,sans-serif}.vc-artistlinks a:hover{text-decoration:underline}.vc-article-sources{margin-top:38px;border-top:2px solid var(--vc-ink);padding-top:15px}.vc-article-sources h2{font-size:13px;text-transform:uppercase;letter-spacing:.07em}.vc-back{display:inline-block;margin-top:30px;font-weight:800;color:var(--vc-navy)!important}.vc-legal-section{padding:3px 0 20px;border-bottom:1px solid var(--vc-line)}.vc-legal-section h2{font:700 25px/1.2 Georgia,serif}.vc-contact{margin-top:30px;background:var(--vc-soft);border-left:4px solid var(--vc-red);padding:16px 18px}
+      .vc-article,.vc-legal{max-width:860px;margin:0 auto}.vc-article h1,.vc-legal h1,.vc-venues-page h1{font:800 clamp(39px,6vw,65px)/1.04 Georgia,serif;letter-spacing:-.03em;margin:8px 0 15px}.vc-body{font:18px/1.72 Georgia,serif;margin-top:26px}.vc-body p{margin:0 0 20px}.vc-factbox{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--vc-line);border:1px solid var(--vc-line);border-radius:10px;overflow:hidden;margin:26px 0}.vc-fact{background:#fff;padding:13px 15px}.vc-fact b{display:block;text-transform:uppercase;font-size:10px;letter-spacing:.08em;color:var(--vc-muted);margin-bottom:3px}.vc-fact span{font-weight:750}.vc-rich{border-top:1px solid var(--vc-line);padding-top:24px;margin-top:28px}.vc-rich h2{font:800 26px/1.16 Georgia,serif;margin:0 0 13px}.vc-rich p{font:17px/1.7 Georgia,serif;color:#344054}.vc-rich li{margin:8px 0;line-height:1.55}.vc-artist-inline{font-weight:700;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}.vc-artist-inline:hover{color:var(--vc-red)}.vc-person-inline{font-weight:700;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}.vc-person-inline:hover{color:var(--vc-red)}.vc-personlinks{display:flex;gap:9px;flex-wrap:wrap}.vc-personlinks a{border:1px solid var(--vc-line);border-radius:999px;padding:7px 11px;text-decoration:none;font:750 13px/1.2 Inter,system-ui,sans-serif}.vc-personlinks a:hover{text-decoration:underline}.vc-artistlinks{display:flex;gap:9px;flex-wrap:wrap}.vc-artistlinks a{border:1px solid var(--vc-line);border-radius:999px;padding:7px 11px;text-decoration:none;font:750 13px/1.2 Inter,system-ui,sans-serif}.vc-artistlinks a:hover{text-decoration:underline}.vc-article-sources{margin-top:38px;border-top:2px solid var(--vc-ink);padding-top:15px}.vc-article-sources h2{font-size:13px;text-transform:uppercase;letter-spacing:.07em}.vc-back{display:inline-block;margin-top:30px;font-weight:800;color:var(--vc-navy)!important}.vc-legal-section{padding:3px 0 20px;border-bottom:1px solid var(--vc-line)}.vc-legal-section h2{font:700 25px/1.2 Georgia,serif}.vc-contact{margin-top:30px;background:var(--vc-soft);border-left:4px solid var(--vc-red);padding:16px 18px}
       .vc-venue-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:24px}.vc-venue-card{border:1px solid var(--vc-line);border-radius:12px;padding:17px;text-decoration:none}.vc-venue-card h2{font:700 22px/1.2 Georgia,serif;margin:4px 0 8px}.vc-venue-card p{color:#475467}.vc-city{font-size:11px;color:var(--vc-red);font-weight:900;text-transform:uppercase;letter-spacing:.06em}
       .vc-footer{background:var(--vc-navy);color:#d0d5dd;padding:22px;text-align:center;font-size:13px}.vc-footer-links{display:flex;justify-content:center;gap:9px;margin-top:7px}.vc-footer-links a{color:#fff}
       @media(max-width:900px){.vc-grid{grid-template-columns:1fr}.vc-side{border-left:0;padding-left:0;border-top:1px solid var(--vc-line);padding-top:24px}.vc-cards,.vc-venue-grid{grid-template-columns:1fr}.vc-tag{display:none}.vc-hero h1{font-size:43px}}@media(max-width:560px){.vc-main{padding:20px 16px 48px}.vc-mast,.vc-nav{padding-left:16px;padding-right:16px}.vc-factbox{grid-template-columns:1fr}.vc-article h1{font-size:39px}}
@@ -105,19 +105,37 @@
   }).join('');
 
   function artistLinkedText(value, story) {
-    const rows = Array.isArray(story?.artist_profiles) ? story.artist_profiles : [];
+    const artists = Array.isArray(story?.artist_profiles) ? story.artist_profiles : [];
+    const people = Array.isArray(story?.person_profiles) ? story.person_profiles : [];
     let output = esc(value);
+    const rows = [
+      ...artists
+        .filter(item => item?.name && /^\/artisti\/[a-z0-9-]+\/$/.test(String(item?.path || '')))
+        .map(item => ({...item, kind:'artist'})),
+      ...people
+        .filter(item => item?.name && item?.identity_resolved === true && /^\/oameni\/[a-z0-9-]+\/$/.test(String(item?.path || '')))
+        .map(item => ({...item, kind:'person'})),
+    ].sort((a,b) => String(b.name).length - String(a.name).length);
     if (!rows.length) return output;
-    const ordered = [...rows]
-      .filter(item => item?.name && /^\/artisti\/[a-z0-9-]+\/$/.test(String(item?.path || '')))
-      .sort((a,b) => String(b.name).length - String(a.name).length);
-    for (const item of ordered) {
+    for (const item of rows) {
       const token = esc(item.name);
       if (!token || !output.includes(token)) continue;
-      const linked = `<a class="vc-artist-inline" href="${esc(item.path)}" data-artist-profile="${esc(item.id || '')}">${token}</a>`;
+      const cls = item.kind === 'person' ? 'vc-person-inline' : 'vc-artist-inline';
+      const attr = item.kind === 'person' ? 'data-person-profile' : 'data-artist-profile';
+      const linked = `<a class="${cls}" href="${esc(item.path)}" ${attr}="${esc(item.id || '')}">${token}</a>`;
       output = output.split(token).join(linked);
     }
     return output;
+  }
+
+  function personProfiles(story) {
+    const rows = Array.isArray(story?.person_profiles) ? story.person_profiles : [];
+    const links = rows
+      .filter(item => item?.name && item?.identity_resolved === true && /^\/oameni\/[a-z0-9-]+\/$/.test(String(item?.path || '')))
+      .map(item => `<a href="${esc(item.path)}">${esc(item.name)}</a>`)
+      .join('');
+    if (!links) return '';
+    return `<section class="vc-rich vc-people" data-people-intelligence="verified"><h2>Oameni din acest material</h2><p>Profiluri publice VÂLCEA CLAR cu identitate rezolvată și istoric construit incremental din surse verificabile.</p><div class="vc-personlinks">${links}</div><p><a href="/oameni/">Vezi directorul de persoane →</a></p></section>`;
   }
 
   function artistProfiles(story) {
@@ -155,7 +173,7 @@
       return;
     }
     const body = (story.paragraphs || []).map(p => `<p>${artistLinkedText(p, story)}</p>`).join('');
-    root.innerHTML = shell(nav, `<main class="vc-main"><article class="vc-article"><div class="vc-kicker">${esc(String(story.section || 'ȘTIRI').replaceAll('_',' '))}</div><div class="vc-storymeta">${archiveLabel(story)}</div><h1>${esc(story.headline)}</h1><p class="vc-dek">${esc(story.dek)}</p><div class="vc-status">Publicat ${esc(story.first_published_at || '')} · informație locală verificată</div>${factbox(story)}<div class="vc-body">${body}</div>${richSections(story)}${artistProfiles(story)}<section class="vc-article-sources"><h2>Surse</h2><ul>${sources(story,true)}</ul></section><a class="vc-back" href="/">← Înapoi la VÂLCEA CLAR</a></article></main>`);
+    root.innerHTML = shell(nav, `<main class="vc-main"><article class="vc-article"><div class="vc-kicker">${esc(String(story.section || 'ȘTIRI').replaceAll('_',' '))}</div><div class="vc-storymeta">${archiveLabel(story)}</div><h1>${esc(story.headline)}</h1><p class="vc-dek">${esc(story.dek)}</p><div class="vc-status">Publicat ${esc(story.first_published_at || '')} · informație locală verificată</div>${factbox(story)}<div class="vc-body">${body}</div>${richSections(story)}${artistProfiles(story)}${personProfiles(story)}<section class="vc-article-sources"><h2>Surse</h2><ul>${sources(story,true)}</ul></section><a class="vc-back" href="/">← Înapoi la VÂLCEA CLAR</a></article></main>`);
     document.title = `${story.headline} — VÂLCEA CLAR`;
     setCanonical(story.canonical_url || `https://valceaclar.ro${storyHref(story)}`);
     setDescription(story.dek || story.headline || 'Material VÂLCEA CLAR');
@@ -194,7 +212,7 @@
   }
 
   function feedFingerprint(feed) {
-    return `${feed.generated_at || ''}:${feed.navigation_contract || ''}:${(feed.stories || []).map(s => `${s.id}:${s.headline}:${(s.article_sections || []).length}:${(s.artist_profiles || []).map(a => `${a.id}:${a.path}`).join(',')}`).join('|')}`;
+    return `${feed.generated_at || ''}:${feed.navigation_contract || ''}:${(feed.stories || []).map(s => `${s.id}:${s.headline}:${(s.article_sections || []).length}:${(s.artist_profiles || []).map(a => `${a.id}:${a.path}`).join(',')}:${(s.person_profiles || []).map(p => `${p.id}:${p.path}`).join(',')}`).join('|')}`;
   }
 
   async function refreshNews(target) {
