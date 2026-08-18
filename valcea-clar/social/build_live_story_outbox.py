@@ -27,6 +27,7 @@ SOCIAL = VC / "social"
 sys.path.insert(0, str(SCRIPTS))
 sys.path.insert(0, str(SOCIAL))
 from newsroom_decide import story_ready  # noqa: E402
+import generate_edition  # noqa: E402
 import tiktok_editorial_v1 as tiktok_editorial  # noqa: E402
 
 CURRENT = VC / "site" / "current_edition.json"
@@ -246,6 +247,43 @@ def story_item(story: dict, visual: dict | None, existing: dict | None) -> dict:
     return item
 
 
+def decision_approved_full_stories(decision: dict, snapshot: dict) -> list[dict]:
+    """Rehydrate decision-approved Fact Kernel stories before social readiness.
+
+    The public edition snapshot intentionally omits the internal Fact Kernel.
+    Running ``story_ready`` directly on that compact projection drops otherwise
+    publishable FACT_KERNEL_COMPOSED stories from the social outbox. Resolve the
+    newsroom-approved IDs back to the canonical Writer registry, exactly as the
+    canonical story-page renderer does, and re-run the gate on the full product.
+    """
+    allowed_order = [
+        str(value)
+        for value in decision.get("publishable_story_ids") or []
+        if str(value)
+    ]
+    if allowed_order:
+        registry, _ = generate_edition.merged_registry()
+        full_by_id = {
+            str(item.get("id") or ""): item
+            for item in registry.get("facts") or []
+            if isinstance(item, dict) and str(item.get("id") or "")
+        }
+        stories: list[dict] = []
+        for story_id in allowed_order:
+            item = full_by_id.get(story_id)
+            if item is not None and story_ready(item)[0]:
+                stories.append(item)
+        return stories
+
+    # Backward-compatible fallback for historical/manual operation when no
+    # newsroom decision has been materialized yet.
+    return [
+        story
+        for story in snapshot.get("items", [])
+        if isinstance(story, dict) and story_ready(story)[0]
+    ]
+
+
 def main() -> int:
     pointer = load(CURRENT)
     snapshot = load(VC / str(pointer["json_source"]))
@@ -253,13 +291,7 @@ def main() -> int:
     outbox = load(OUTBOX, {"schema_version": "4.0", "items": []})
     visuals = load(VISUALS, {"stories": {}})
 
-    allowed = set(decision.get("publishable_story_ids") or [])
-    stories = []
-    for story in snapshot.get("items", []):
-        if story.get("id") not in allowed:
-            continue
-        if story_ready(story)[0]:
-            stories.append(story)
+    stories = decision_approved_full_stories(decision, snapshot)
 
     removed_recaps = remove_recap_items(outbox)
     existing_by_id = {
