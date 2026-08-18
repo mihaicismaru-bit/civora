@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.6",
+  "schema_version": "1.7",
   "contract": "LOCAL_NEWS_OS_SIGNAL_RADAR_CONFIG_V1",
   "instance_id": "valcea",
   "publication_authority": "NONE",
@@ -56,6 +56,7 @@
       "id": "fire_rescue_alert",
       "keywords": ["incendiu", "pompier*", "flăcăr*", "flacar*", "ro-alert", "urs", "exploz*", "salvare", "înec*", "inec*", "inunda*"],
       "verification_targets": [
+        {"ref_type": "primary_target_id", "id": "isu-valcea-stiri-locale"},
         {"ref_type": "news_source_id", "id": "isu-valcea-comunicate"},
         {"ref_type": "manual_watch_source_id", "id": "inhga-avertizari-hidrologice-valcea"}
       ]
