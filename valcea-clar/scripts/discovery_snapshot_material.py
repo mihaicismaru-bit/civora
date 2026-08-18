@@ -103,3 +103,5 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+# No-op trigger: promoted festival dossiers require an immediate live-newsroom pass.
