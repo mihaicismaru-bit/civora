@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 """Materialize verified non-HCL primary-source service stories for VÂLCEA CLAR.
 
-This bridge exists for fully verified primary-source facts that are already
-specific enough to publish (AJOFM/ANOFM job offers, utility notices, official
-service announcements) and therefore must not wait for a council-decision
-pipeline. New stories use the canonical claim-level fact-kernel contract.
-
-The current seed is built only from the two official ANOFM job-offer pages for
-APAVIL SA verified on 18 August 2026. Durable copy uses absolute dates.
+This bridge is for fully verified primary-source facts that are already specific
+enough to publish (AJOFM/ANOFM job offers, utility notices, official service
+announcements) and therefore must not wait for a council-decision pipeline.
+Every new story uses the canonical claim-level fact-kernel contract and durable
+absolute-date copy.
 """
 from __future__ import annotations
 
@@ -21,10 +19,13 @@ FACTS = ROOT / "editorial" / "facts_registry.json"
 
 LAB_URL = "https://mediere.anofm.ro/app/module/mediere/job/3315405"
 ELEC_URL = "https://mediere.anofm.ro/app/module/mediere/job/3318496"
-STORY_ID = "apavil-joburi-fara-experienta-20260818"
+BUJORENI_ZIDAR_URL = "https://mediere.anofm.ro/app/module/mediere/job/3301248"
+
+APAVIL_STORY_ID = "apavil-joburi-fara-experienta-20260818"
+BUJORENI_STORY_ID = "bujoreni-11-zidari-4582-6000-20260818"
 
 
-def story() -> dict:
+def apavil_story() -> dict:
     headline = "APAVIL scoate la concurs două posturi fără experiență: laborant în Râmnicu Vâlcea și electrician în Călimănești"
     dek = (
         "Cele două oferte oficiale ANOFM sunt pentru contracte pe perioadă nedeterminată și normă întreagă. "
@@ -103,7 +104,7 @@ def story() -> dict:
         },
     ]
     return {
-        "id": STORY_ID,
+        "id": APAVIL_STORY_ID,
         "status": "verified",
         "section": "LOCURI DE MUNCĂ",
         "priority": 91,
@@ -136,6 +137,101 @@ def story() -> dict:
     }
 
 
+def bujoreni_story() -> dict:
+    headline = "11 locuri de muncă la Bujoreni pentru zidari: 4.582–6.000 lei brut și bonuri de masă"
+    dek = (
+        "CAROLIN SRL declară în oferta oficială ANOFM 11 posturi nou create de zidar roșar-tencuitor în Olteni, Bujoreni. "
+        "Contractele sunt pe perioadă nedeterminată, iar oferta este valabilă până la 18 decembrie 2026."
+    )
+    claims = [
+        {
+            "id": "eleven-jobs",
+            "role": "material_change",
+            "kind": "fact",
+            "text": (
+                "Oferta ANOFM cu ID 3301248, publicată de CAROLIN SRL, indică 11 locuri de muncă nou create pentru ocupația "
+                "zidar roșar-tencuitor în localitatea Olteni, comuna Bujoreni, județul Vâlcea."
+            ),
+            "source_urls": [BUJORENI_ZIDAR_URL],
+        },
+        {
+            "id": "apply",
+            "role": "reader_action",
+            "kind": "reader_service",
+            "text": (
+                "Oferta este valabilă până la 18 decembrie 2026, selecția este prin interviu, iar ANOFM publică drept contact "
+                "Statica Ion, adresa office.carolin@yahoo.ro și numărul de telefon 0744 589 735."
+            ),
+            "source_urls": [BUJORENI_ZIDAR_URL],
+        },
+        {
+            "id": "salary-contract-location",
+            "role": "who_what_when_where",
+            "kind": "fact",
+            "text": (
+                "Salariul declarat este între 4.582 și 6.000 lei brut, cu bonuri de masă. Contractul este pe durată nedeterminată, "
+                "cu normă întreagă și muncă la sediu, la Bujoreni – Olteni."
+            ),
+            "source_urls": [BUJORENI_ZIDAR_URL],
+        },
+        {
+            "id": "requirements",
+            "role": "context",
+            "kind": "documented_context",
+            "text": (
+                "Cerința minimă de educație este școala generală, iar oferta solicită experiență medie, între 3 și 5 ani. "
+                "Condițiile de muncă menționate sunt lucrul la înălțime și deplasările în țară."
+            ),
+            "source_urls": [BUJORENI_ZIDAR_URL],
+        },
+        {
+            "id": "watch",
+            "role": "next_watch",
+            "kind": "reader_service",
+            "text": (
+                "ANOFM indică 11 poziții disponibile în oferta consultată. VÂLCEA CLAR va actualiza materialul dacă angajatorul sau "
+                "platforma oficială modifică numărul de locuri, nivelul salarial ori termenul de valabilitate."
+            ),
+            "source_urls": [BUJORENI_ZIDAR_URL],
+        },
+    ]
+    return {
+        "id": BUJORENI_STORY_ID,
+        "status": "verified",
+        "section": "LOCURI DE MUNCĂ",
+        "priority": 88,
+        "confidence": 99,
+        "material_fact_gate": "PASS",
+        "editorial_type": "service",
+        "valid_from": "2026-08-18T00:00:00+03:00",
+        "valid_until": "2026-12-18T23:59:59+02:00",
+        "slots": ["morning", "evening"],
+        "headline": headline,
+        "dek": dek,
+        "paragraphs": [],
+        "sources": [
+            {"name": "ANOFM — oferta CAROLIN SRL pentru zidar roșar-tencuitor, ID 3301248", "url": BUJORENI_ZIDAR_URL, "tier": "T1"}
+        ],
+        "fact_kernel": {
+            "format_hint": "service_news",
+            "headline": {"text": headline, "source_urls": [BUJORENI_ZIDAR_URL]},
+            "dek": {"text": dek, "source_urls": [BUJORENI_ZIDAR_URL]},
+            "claims": claims,
+        },
+        "primary_source_verification": {
+            "verified_at": "2026-08-18T20:30:00+03:00",
+            "source_class": "official_employment_service",
+            "non_hcl_source_allowed": True,
+            "title_date_only": False,
+            "full_structured_fact_kernel": True,
+        },
+    }
+
+
+def stories() -> list[dict]:
+    return [apavil_story(), bujoreni_story()]
+
+
 def upsert(document: dict, item: dict) -> tuple[dict, bool]:
     out = copy.deepcopy(document)
     facts = list(out.get("facts") or [])
@@ -151,18 +247,31 @@ def upsert(document: dict, item: dict) -> tuple[dict, bool]:
     return out, changed
 
 
+def upsert_all(document: dict, items: list[dict]) -> tuple[dict, list[str]]:
+    out = document
+    changed_ids: list[str] = []
+    for item in items:
+        out, changed = upsert(out, item)
+        if changed:
+            changed_ids.append(item["id"])
+    return out, changed_ids
+
+
 def self_test() -> None:
-    item = story()
-    assert item["status"] == "verified"
-    assert item["material_fact_gate"] == "PASS"
-    assert item["editorial_type"] == "service"
-    assert len(item["fact_kernel"]["claims"]) >= 2
-    assert {src["url"] for src in item["sources"]} == {LAB_URL, ELEC_URL}
-    assert all(claim.get("source_urls") for claim in item["fact_kernel"]["claims"])
-    doc, changed = upsert({"facts": []}, item)
-    assert changed and doc["facts"][0]["id"] == STORY_ID
-    doc2, changed2 = upsert(doc, item)
-    assert not changed2 and doc2 == doc
+    items = stories()
+    assert {item["id"] for item in items} == {APAVIL_STORY_ID, BUJORENI_STORY_ID}
+    for item in items:
+        assert item["status"] == "verified"
+        assert item["material_fact_gate"] == "PASS"
+        assert item["editorial_type"] == "service"
+        assert len(item["fact_kernel"]["claims"]) >= 2
+        assert all(claim.get("source_urls") for claim in item["fact_kernel"]["claims"])
+    assert {src["url"] for src in items[0]["sources"]} == {LAB_URL, ELEC_URL}
+    assert items[1]["sources"][0]["url"] == BUJORENI_ZIDAR_URL
+    doc, changed_ids = upsert_all({"facts": []}, items)
+    assert set(changed_ids) == {APAVIL_STORY_ID, BUJORENI_STORY_ID}
+    doc2, changed_ids2 = upsert_all(doc, items)
+    assert not changed_ids2 and doc2 == doc
     print("VÂLCEA CLAR primary-source service kernels self-test: PASS")
 
 
@@ -175,10 +284,11 @@ def main() -> int:
         self_test()
         return 0
     document = json.loads(FACTS.read_text(encoding="utf-8"))
-    updated, changed = upsert(document, story())
-    if args.apply and changed:
+    updated, changed_ids = upsert_all(document, stories())
+    if args.apply and changed_ids:
         FACTS.write_text(json.dumps(updated, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
-    print(json.dumps({"status": "UPDATED" if args.apply and changed else "UNCHANGED" if not changed else "DRY_RUN", "story_id": STORY_ID, "changed": changed}, ensure_ascii=False))
+    status = "UPDATED" if args.apply and changed_ids else "UNCHANGED" if not changed_ids else "DRY_RUN"
+    print(json.dumps({"status": status, "story_ids": changed_ids, "changed": bool(changed_ids)}, ensure_ascii=False))
     return 0
 
 
