@@ -2,13 +2,13 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_SIGNAL_RADAR_STATE_V1",
   "instance_id": "valcea",
-  "observed_at": "2026-08-18T21:01:32+03:00",
+  "observed_at": "2026-08-18T22:36:52+03:00",
   "publication_authority": "NONE",
   "health": "PASS",
   "source_count": 14,
-  "sources_ok": 10,
-  "current_signal_count": 31,
-  "today_signal_count": 25,
+  "sources_ok": 12,
+  "current_signal_count": 33,
+  "today_signal_count": 27,
   "observations": [
     {
       "seed_id": "press-curierul-de-ramnic",
@@ -28,7 +28,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-18T12:30:56+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T21:01:32+03:00",
+          "observed_at": "2026-08-18T22:36:52+03:00",
           "verification_route_id": "apavil_employment",
           "verification_targets": [
             {
@@ -84,7 +84,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-18T13:43:14+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T21:01:32+03:00",
+          "observed_at": "2026-08-18T22:36:52+03:00",
           "verification_route_id": "health_insurance",
           "verification_targets": [
             {
@@ -144,7 +144,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-08-18T21:01:32+03:00",
+          "observed_at": "2026-08-18T22:36:52+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -164,7 +164,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-08-18T21:01:32+03:00",
+          "observed_at": "2026-08-18T22:36:52+03:00",
           "verification_route_id": "utilities",
           "verification_targets": [
             {
@@ -202,6 +202,26 @@
       "error": null,
       "signals": [
         {
+          "signal_id": "d5f16e839c8601a1d574f99f",
+          "signal_title": "Atacurile de pe Facebook ajung în instanță. Primarul din Copăceni pregătește procesul în urma acuzațiilor la adresa sa și a Primăriei",
+          "signal_url": "https://www.impactreal.ro/2026/08/18/atacurile-de-pe-facebook-ajung-in-instanta-primarul-din-copaceni-pregateste-procesul-in-urma-acuzatiilor-la-adresa-sa-si-a-primariei/",
+          "signal_publisher": "Impact Real",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-18T22:06:52+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-08-18T22:36:52+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-impact-real"
+        },
+        {
           "signal_id": "613675d190fa8a3c7b464cfd",
           "signal_title": "Toate drumurile duc la sfârșitul lunii august spre Izlazul Modoia! Primarul Dumitru Ciorîcă îi invită pe vâlceni la două zile de sărbătoare, cu Niculina Stoican în recital și ansambluri din Vâlcea, Dolj și Alba",
           "signal_url": "https://www.impactreal.ro/2026/08/17/toate-drumurile-duc-la-sfarsitul-lunii-august-spre-izlazul-modoia-primarul-dumitru-ciorica-ii-invita-pe-valceni-la-doua-zile-de-sarbatoare-cu-niculina-stoican-in-recital-si-ansambluri-din-valcea-do/",
@@ -211,7 +231,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-17T21:55:03+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T21:01:32+03:00",
+          "observed_at": "2026-08-18T22:36:52+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -231,7 +251,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-17T21:30:53+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T21:01:32+03:00",
+          "observed_at": "2026-08-18T22:36:52+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -251,7 +271,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-17T21:02:48+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T21:01:32+03:00",
+          "observed_at": "2026-08-18T22:36:52+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -272,9 +292,11 @@
       "publisher": "Indiscret în Oltenia",
       "tier": "T2",
       "family": "LOCAL_PRESS",
-      "status": "DEGRADED",
-      "error": "TimeoutError: timed out",
+      "status": "PASS",
+      "error": null,
       "signals": [],
+      "final_url": "https://www.indiscret.ro/",
+      "links_examined": 14,
       "hygiene_dropped_count": 0,
       "hygiene_dropped": []
     },
@@ -318,7 +340,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-17T14:47:28+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T21:01:32+03:00",
+          "observed_at": "2026-08-18T22:36:52+03:00",
           "verification_route_id": "education",
           "verification_targets": [
             {
@@ -347,7 +369,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-17T13:54:33+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T21:01:32+03:00",
+          "observed_at": "2026-08-18T22:36:52+03:00",
           "verification_route_id": "sport",
           "verification_targets": [
             {
@@ -381,9 +403,57 @@
       "publisher": "Realitatea Vâlceană",
       "tier": "T2",
       "family": "LOCAL_PRESS",
-      "status": "DEGRADED",
-      "error": "TimeoutError: timed out",
-      "signals": [],
+      "status": "PASS",
+      "error": null,
+      "signals": [
+        {
+          "signal_id": "0a9f0e5efa5edfde1c95a354",
+          "signal_title": "Declaratie de accesibilitate",
+          "signal_url": "http://www.realitateavalceana.ro/declaratie-de-accesibilitate/",
+          "signal_publisher": "Realitatea Vâlceană",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": true,
+          "published_at": null,
+          "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
+          "observed_at": "2026-08-18T22:36:52+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-realitatea-valceana"
+        },
+        {
+          "signal_id": "3aa1b371615995761d30a9af",
+          "signal_title": "Primăria Municipiului mulțumește tuturor celor care au făcut posibilă organizarea deosebită a Zilelor Imnului Național 2026 »",
+          "signal_url": "http://www.realitateavalceana.ro/primaria-municipiului-mul%c8%9bume%c8%99te-tuturor-celor-care-au-facut-posibila-organizarea-deosebita-a-zilelor-imnului-na%c8%9bional-2026/",
+          "signal_publisher": "Realitatea Vâlceană",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": true,
+          "published_at": null,
+          "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
+          "observed_at": "2026-08-18T22:36:52+03:00",
+          "verification_route_id": "police_public_safety",
+          "verification_targets": [
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "ipj-valcea-stiri"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-realitatea-valceana"
+        }
+      ],
+      "final_url": "http://www.realitateavalceana.ro/",
+      "links_examined": 14,
       "hygiene_dropped_count": 0,
       "hygiene_dropped": []
     },
@@ -418,7 +488,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-18T10:35:07+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T21:01:32+03:00",
+          "observed_at": "2026-08-18T22:36:52+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -443,7 +513,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-18T08:10:39+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T21:01:32+03:00",
+          "observed_at": "2026-08-18T22:36:52+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -468,7 +538,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-17T15:05:47+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T21:01:32+03:00",
+          "observed_at": "2026-08-18T22:36:52+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -507,7 +577,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-18T01:14:47+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T21:01:32+03:00",
+          "observed_at": "2026-08-18T22:36:52+03:00",
           "verification_route_id": "sport",
           "verification_targets": [
             {
@@ -540,7 +610,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-18T01:03:38+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T21:01:32+03:00",
+          "observed_at": "2026-08-18T22:36:52+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -565,7 +635,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-18T00:58:35+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T21:01:32+03:00",
+          "observed_at": "2026-08-18T22:36:52+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -585,7 +655,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-18T00:51:09+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T21:01:32+03:00",
+          "observed_at": "2026-08-18T22:36:52+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -605,7 +675,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-18T00:49:38+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T21:01:32+03:00",
+          "observed_at": "2026-08-18T22:36:52+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -625,7 +695,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-18T00:36:43+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T21:01:32+03:00",
+          "observed_at": "2026-08-18T22:36:52+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -645,7 +715,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-18T00:35:06+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T21:01:32+03:00",
+          "observed_at": "2026-08-18T22:36:52+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -665,7 +735,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-18T00:32:30+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T21:01:32+03:00",
+          "observed_at": "2026-08-18T22:36:52+03:00",
           "verification_route_id": "apavil_employment",
           "verification_targets": [
             {
@@ -704,42 +774,9 @@
           "signal_sensitive": false,
           "published_at": "2026-08-18T08:17:37+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T21:01:32+03:00",
+          "observed_at": "2026-08-18T22:36:52+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "signal-eveniment-valcean"
-        },
-        {
-          "signal_id": "85861799c686819f54722f8b",
-          "signal_title": "FOTO/VIDEO A învins durerea și a cucerit apa! Povestea lui Alexandru Hogea, de la un diagnostic greșit la podium",
-          "signal_url": "https://evenimentvalcean.ro/foto-video-a-invins-durerea-si-a-cucerit-apa-povestea-lui-alexandru-hogea-de-la-un-diagnostic-gresit-la-podium/",
-          "signal_publisher": "Eveniment Vâlcean",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-08-17T10:11:24+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T21:01:32+03:00",
-          "verification_route_id": "utilities",
-          "verification_targets": [
-            {
-              "ref_type": "news_source_id",
-              "id": "apavil-comunicate"
-            },
-            {
-              "ref_type": "manual_watch_source_id",
-              "id": "apavil-opriri-programate"
-            },
-            {
-              "ref_type": "manual_watch_source_id",
-              "id": "cet-govora-termoficare-advisories"
-            }
-          ],
           "status": "NEEDS_PRIMARY_VERIFICATION",
           "required_authority": "T1_OR_T1B_PRIMARY",
           "publication_authority": "NONE",
@@ -757,7 +794,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-18T08:08:10+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T21:01:32+03:00",
+          "observed_at": "2026-08-18T22:36:52+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -782,76 +819,16 @@
       "error": null,
       "signals": [
         {
-          "signal_id": "712ddef7cfb604ef9d748874",
-          "signal_title": "ANAF a descoperit o fraudă de peste 26 de milioane de lei cu mașini second-hand",
-          "signal_url": "https://seintamplainvalcea.ro/2026/08/18/anaf-a-descoperit-o-frauda-de-peste-26-de-milioane-de-lei-cu-masini-second-hand/",
+          "signal_id": "3263db582ef0c06be2742290",
+          "signal_title": "Schimbare pentru milioane de români: Cardul de sănătate va fi retras treptat",
+          "signal_url": "https://seintamplainvalcea.ro/2026/08/18/schimbare-pentru-milioane-de-romani-cardul-de-sanatate-va-fi-retras-treptat/",
           "signal_publisher": "Se întâmplă în Vâlcea",
           "signal_tier": "T2",
           "signal_family": "LOCAL_PRESS",
           "signal_sensitive": false,
-          "published_at": "2026-08-18T17:32:48+03:00",
+          "published_at": "2026-08-18T22:03:56+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T21:01:32+03:00",
-          "verification_route_id": "general_local_signal",
-          "verification_targets": [],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "signal-se-intampla-in-valcea"
-        },
-        {
-          "signal_id": "cf7bcde1946885414907e82d",
-          "signal_title": "Un bărbat din Râmnicu Vâlcea a sfidat ordinul de protecție și a ajuns după gratii",
-          "signal_url": "https://seintamplainvalcea.ro/2026/08/18/un-barbat-din-ramnicu-valcea-a-sfidat-ordinul-de-protectie-si-a-ajuns-dupa-gratii/",
-          "signal_publisher": "Se întâmplă în Vâlcea",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-08-18T16:49:22+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T21:01:32+03:00",
-          "verification_route_id": "general_local_signal",
-          "verification_targets": [],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "signal-se-intampla-in-valcea"
-        },
-        {
-          "signal_id": "33b372fe66bc237202009852",
-          "signal_title": "Un bărbat din județul vecin riscă închisoarea după ce a omorât un șarpe găsit în casă",
-          "signal_url": "https://seintamplainvalcea.ro/2026/08/18/un-barbat-din-judetul-vecin-risca-inchisoarea-dupa-ce-a-omorat-un-sarpe-gasit-in-casa/",
-          "signal_publisher": "Se întâmplă în Vâlcea",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-08-18T15:21:04+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T21:01:32+03:00",
-          "verification_route_id": "general_local_signal",
-          "verification_targets": [],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "signal-se-intampla-in-valcea"
-        },
-        {
-          "signal_id": "a73765c06151c85c47426e0c",
-          "signal_title": "Medicalma Vision, partener al conferinței-eveniment cu profesorul Constantin Dulcan",
-          "signal_url": "https://seintamplainvalcea.ro/2026/08/18/medicalma-vision-partener-al-conferintei-eveniment-cu-profesorul-constantin-dulcan/",
-          "signal_publisher": "Se întâmplă în Vâlcea",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-08-18T13:10:04+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T21:01:32+03:00",
+          "observed_at": "2026-08-18T22:36:52+03:00",
           "verification_route_id": "health",
           "verification_targets": [
             {
@@ -871,21 +848,85 @@
           "signal_seed_id": "signal-se-intampla-in-valcea"
         },
         {
-          "signal_id": "f495689294ab887e82c065f3",
-          "signal_title": "Primăria Horezu pregătește aniversarea celor 539 de ani ai orașului. Trei zile de sărbătoare pentru comunitate",
-          "signal_url": "https://seintamplainvalcea.ro/2026/08/18/primaria-horezu-pregateste-aniversarea-celor-539-de-ani-ai-orasului-trei-zile-de-sarbatoare-pentru-comunitate/",
+          "signal_id": "712ddef7cfb604ef9d748874",
+          "signal_title": "ANAF a descoperit o fraudă de peste 26 de milioane de lei cu mașini second-hand",
+          "signal_url": "https://seintamplainvalcea.ro/2026/08/18/anaf-a-descoperit-o-frauda-de-peste-26-de-milioane-de-lei-cu-masini-second-hand/",
           "signal_publisher": "Se întâmplă în Vâlcea",
           "signal_tier": "T2",
           "signal_family": "LOCAL_PRESS",
           "signal_sensitive": false,
-          "published_at": "2026-08-18T12:43:56+03:00",
+          "published_at": "2026-08-18T17:32:48+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T21:01:32+03:00",
-          "verification_route_id": "horezu_administration",
+          "observed_at": "2026-08-18T22:36:52+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-se-intampla-in-valcea"
+        },
+        {
+          "signal_id": "cf7bcde1946885414907e82d",
+          "signal_title": "Un bărbat din Râmnicu Vâlcea a sfidat ordinul de protecție și a ajuns după gratii",
+          "signal_url": "https://seintamplainvalcea.ro/2026/08/18/un-barbat-din-ramnicu-valcea-a-sfidat-ordinul-de-protectie-si-a-ajuns-dupa-gratii/",
+          "signal_publisher": "Se întâmplă în Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-18T16:49:22+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-08-18T22:36:52+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-se-intampla-in-valcea"
+        },
+        {
+          "signal_id": "33b372fe66bc237202009852",
+          "signal_title": "Un bărbat din județul vecin riscă închisoarea după ce a omorât un șarpe găsit în casă",
+          "signal_url": "https://seintamplainvalcea.ro/2026/08/18/un-barbat-din-judetul-vecin-risca-inchisoarea-dupa-ce-a-omorat-un-sarpe-gasit-in-casa/",
+          "signal_publisher": "Se întâmplă în Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-18T15:21:04+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-08-18T22:36:52+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-se-intampla-in-valcea"
+        },
+        {
+          "signal_id": "a73765c06151c85c47426e0c",
+          "signal_title": "Medicalma Vision, partener al conferinței-eveniment cu profesorul Constantin Dulcan",
+          "signal_url": "https://seintamplainvalcea.ro/2026/08/18/medicalma-vision-partener-al-conferintei-eveniment-cu-profesorul-constantin-dulcan/",
+          "signal_publisher": "Se întâmplă în Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-18T13:10:04+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-08-18T22:36:52+03:00",
+          "verification_route_id": "health",
           "verification_targets": [
             {
               "ref_type": "news_source_id",
-              "id": "primaria-horezu-anunturi"
+              "id": "dsp-valcea-anunturi"
+            },
+            {
+              "ref_type": "news_source_id",
+              "id": "spital-horezu-noutati"
             }
           ],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -905,7 +946,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-18T12:03:39+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T21:01:32+03:00",
+          "observed_at": "2026-08-18T22:36:52+03:00",
           "verification_route_id": "fire_rescue_alert",
           "verification_targets": [
             {
@@ -938,7 +979,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-17T17:29:29+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T21:01:32+03:00",
+          "observed_at": "2026-08-18T22:36:52+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -963,7 +1004,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-17T15:58:58+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-18T21:01:32+03:00",
+          "observed_at": "2026-08-18T22:36:52+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
