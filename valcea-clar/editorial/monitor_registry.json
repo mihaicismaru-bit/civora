@@ -22,7 +22,10 @@
     "unverified_recovered_details_must_remain_fail_closed": true,
     "chatgpt_scheduler_allowed": false,
     "chatgpt_state_owner_allowed": false,
-    "paid_dependency_required": false
+    "paid_dependency_required": false,
+    "performing_arts_sources_feed_general_opportunity_engine": true,
+    "event_date_may_not_be_inferred_as_published_at": true,
+    "performing_arts_source_change_is_not_story": true
   },
   "required_recovered_monitor_ids": [
     "health-sju-valcea-recruitment-watch",
@@ -328,6 +331,163 @@
       ],
       "recovered_leads": [],
       "close_when": "Conform dosarului de investigație: numai după documentarea explicită a rezultatului sau după supersedare cu legătură către noul dosar."
+    },
+    {
+      "id": "performing-arts-filarmonica-valcea",
+      "label": "Filarmonica Ion Dumitrescu — program, artiști și bani publici",
+      "section": "CULTURĂ",
+      "priority": 88,
+      "purpose": "Urmărește stagiunea, concertele, invitații, biletele, turneele și schimbările de finanțare sau organizare ale Filarmonicii Ion Dumitrescu.",
+      "source_bindings": [
+        {
+          "id": "filarmonica-valcea-events",
+          "ref_type": "url",
+          "publisher": "Filarmonica Ion Dumitrescu",
+          "url": "https://filarmonica-valcea.ro/evenimente/",
+          "tier": "T1"
+        },
+        {
+          "id": "filarmonica-valcea-home",
+          "ref_type": "url",
+          "publisher": "Filarmonica Ion Dumitrescu",
+          "url": "https://filarmonica-valcea.ro/",
+          "tier": "T1"
+        },
+        {
+          "id": "rm-valcea-cultural-center-rof",
+          "ref_type": "url",
+          "publisher": "Consiliul Local Râmnicu Vâlcea",
+          "url": "https://hcl.usr.ro/ramnicu_valcea/2026/h133",
+          "tier": "T1"
+        },
+        {
+          "id": "rm-valcea-cultural-calendar",
+          "ref_type": "url",
+          "publisher": "Consiliul Local Râmnicu Vâlcea",
+          "url": "https://hcl.usr.ro/ramnicu_valcea/2026/h128",
+          "tier": "T1"
+        }
+      ],
+      "status": "ACTIVE_REVERIFY",
+      "publication_mode": "STORY_ONLY_AFTER_PRIMARY_EVIDENCE",
+      "public_projection": false,
+      "normal_story_ready_gate_required": true
+    },
+    {
+      "id": "performing-arts-ariel-valcea",
+      "label": "Teatrul Ariel — program, premiere și companie",
+      "section": "CULTURĂ",
+      "priority": 87,
+      "purpose": "Urmărește calendarul Teatrului Ariel, premierele, distribuțiile, turneele, proiectele și efectele reorganizării în Centrul Cultural Municipal.",
+      "source_bindings": [
+        {
+          "id": "ariel-valcea-home",
+          "ref_type": "url",
+          "publisher": "Teatrul Ariel",
+          "url": "https://www.arieltheatre.ro/",
+          "tier": "T1"
+        },
+        {
+          "id": "ariel-valcea-programme",
+          "ref_type": "url",
+          "publisher": "Teatrul Ariel",
+          "url": "https://www.arieltheatre.ro/trupa-romana/program/calendar.html",
+          "tier": "T1"
+        },
+        {
+          "id": "rm-valcea-cultural-center-rof",
+          "ref_type": "url",
+          "publisher": "Consiliul Local Râmnicu Vâlcea",
+          "url": "https://hcl.usr.ro/ramnicu_valcea/2026/h133",
+          "tier": "T1"
+        }
+      ],
+      "status": "ACTIVE_REVERIFY",
+      "publication_mode": "STORY_ONLY_AFTER_PRIMARY_EVIDENCE",
+      "public_projection": false,
+      "normal_story_ready_gate_required": true
+    },
+    {
+      "id": "performing-arts-anton-pann",
+      "label": "Teatrul Anton Pann — program, premiere, turnee și bani publici",
+      "section": "CULTURĂ",
+      "priority": 90,
+      "purpose": "Urmărește spectacolele, premierele, producțiile, participările la festivaluri, conducerea, investițiile și execuția bugetară a Teatrului Anton Pann.",
+      "source_bindings": [
+        {
+          "id": "anton-pann-home",
+          "ref_type": "url",
+          "publisher": "Teatrul Anton Pann",
+          "url": "https://teatrulantonpann.ro/",
+          "tier": "T1"
+        },
+        {
+          "id": "anton-pann-ticketing",
+          "ref_type": "url",
+          "publisher": "iaBilet",
+          "url": "https://www.iabilet.ro/bilete-teatrul-anton-pann-venue-2299/",
+          "tier": "T2"
+        },
+        {
+          "id": "cj-valcea-anton-pann-decisions",
+          "ref_type": "url",
+          "publisher": "Consiliul Județean Vâlcea",
+          "url": "https://cjvalcea.ro/monitorul-oficial-local/hotararile-autoritatii-deliberative/2026-hotararile-autoritatii-deliberative/",
+          "tier": "T1"
+        },
+        {
+          "id": "cj-valcea-anton-pann-execution",
+          "ref_type": "url",
+          "publisher": "Consiliul Județean Vâlcea",
+          "url": "https://cjvalcea.ro/informatii-de-interes-public/buget-din-toate-sursele-de-venituri/executie-bugetara-situatia-platilor/",
+          "tier": "T1"
+        }
+      ],
+      "status": "ACTIVE_REVERIFY",
+      "publication_mode": "STORY_ONLY_AFTER_PRIMARY_EVIDENCE",
+      "public_projection": false,
+      "normal_story_ready_gate_required": true
+    },
+    {
+      "id": "performing-arts-valcea-agenda",
+      "label": "Agenda spectacolelor din Vâlcea",
+      "section": "CULTURĂ",
+      "priority": 91,
+      "purpose": "Construiește o agendă verificată transversală din Filarmonică, Ariel, Anton Pann și agenda culturală județeană; separă strict data evenimentului de data publicării sursei.",
+      "source_bindings": [
+        {
+          "id": "filarmonica-valcea-events",
+          "ref_type": "url",
+          "publisher": "Filarmonica Ion Dumitrescu",
+          "url": "https://filarmonica-valcea.ro/evenimente/",
+          "tier": "T1"
+        },
+        {
+          "id": "ariel-valcea-programme",
+          "ref_type": "url",
+          "publisher": "Teatrul Ariel",
+          "url": "https://www.arieltheatre.ro/trupa-romana/program/calendar.html",
+          "tier": "T1"
+        },
+        {
+          "id": "anton-pann-home",
+          "ref_type": "url",
+          "publisher": "Teatrul Anton Pann",
+          "url": "https://teatrulantonpann.ro/",
+          "tier": "T1"
+        },
+        {
+          "id": "cj-valcea-cultural-agenda",
+          "ref_type": "url",
+          "publisher": "Agenda Culturală Vâlceană",
+          "url": "https://filarmonica-valcea.ro/",
+          "tier": "T1B"
+        }
+      ],
+      "status": "ACTIVE_REVERIFY",
+      "publication_mode": "STORY_ONLY_AFTER_PRIMARY_EVIDENCE",
+      "public_projection": false,
+      "normal_story_ready_gate_required": true
     }
   ]
 }
