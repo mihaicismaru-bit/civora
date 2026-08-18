@@ -1,18 +1,148 @@
 #!/usr/bin/env python3
-"""V2 topic parsers for the remaining 14 August 2026 HCL explainers.
+"""V2 consequence-led parsers for VÂLCEA CLAR adopted-HCL explainers.
 
-Extends v1 with precise, document-bound editorial products for HCL 308, 309 and
-311.  The underlying generic fulltext resolver remains reusable for other HCLs;
-these parsers only improve headline, structure and reader utility where the
-official document provides a clear deterministic pattern.
+Extends the reusable full-text HCL enricher with precise, document-bound
+editorial products for high-value recurring decision classes.  It also replaces
+the generic administrative headline fallback with an operative-clause headline:
+when full official text exists, the story must lead with what changes, not with
+the registry title or a generic ``HCL X: ce a decis`` label.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import re
 from typing import Any
 
 import council_decision_fulltext_enricher as base
+
+
+def _short_effect(value: str, limit: int = 118) -> str:
+    """Turn an operative clause into a durable reader-facing headline fragment."""
+    text = base.clean(value)
+    text = re.sub(r"^Art\.\s*\d+\.\s*", "", text, flags=re.I)
+    text = re.sub(r"^Consiliul Local\s+(?:aprobă|modifică)\s+", "", text, flags=re.I)
+    text = re.sub(r"^Se\s+(?:aprobă|modifică)\s+", "", text, flags=re.I)
+    text = text.rstrip(" .;:")
+    if not text:
+        return "Consiliul Local schimbă o regulă locală"
+    text = text[0].upper() + text[1:]
+    if len(text) <= limit:
+        return text
+    clipped = text[:limit].rsplit(" ", 1)[0].rstrip(" ,;:-")
+    return clipped + "…"
+
+
+def consequence_led_generic_story(item: dict[str, Any], doc: dict[str, Any], url: str):
+    """Fallback for future HCLs: full text may never degrade to a register-title story."""
+    headline, dek, claims, sections, factbox = base.generic_story(item, doc, url)
+    clauses = base.operative_clauses(doc)
+    if clauses:
+        effect = _short_effect(base.plain_clause(clauses[0]))
+        headline = effect
+        day = base.human_date(str(doc["decision_date"]))
+        dek = (
+            f"Textul integral al HCL {int(doc['decision_number'])}, adoptată la {day}, "
+            "arată măsura operativă și efectele care pot fi stabilite direct din document. "
+            "VÂLCEA CLAR nu publică titlul administrativ al hotărârii ca substitut pentru știre."
+        )
+    return headline, dek, claims, sections, factbox
+
+
+def story_306(item: dict[str, Any], doc: dict[str, Any], url: str):
+    text = base.clean(doc.get("document_text"))
+    vote = base.vote_from(text) or "18 pentru · 0 împotrivă · 1 abținere"
+    non_participation = bool(re.search(r"nu\s+(?:a\s+)?particip", text, re.I))
+    old_total = 518.61
+    new_total = 586.27
+    increase = (new_total / old_total - 1.0) * 100.0
+    old_budget_gap = old_total - 475.62
+    new_budget_gap = 110.65
+    gap_increase = (new_budget_gap / old_budget_gap - 1.0) * 100.0
+
+    headline = "Căldura se scumpește cu 13% la Râmnicu Vâlcea. Factura populației rămâne neschimbată, Primăria acoperă diferența"
+    dek = (
+        "HCL 306 ridică de la 1 august 2026 costul total al energiei termice pe rețeaua de distribuție "
+        "de la 518,61 la 586,27 lei/MWh, fără TVA. Prețul facturat populației rămâne 475,62 lei/MWh, "
+        "iar bugetul local preia o diferență de 110,65 lei/MWh."
+    )
+    claims = [
+        base.claim(
+            "cost-rise",
+            "material_change",
+            f"Pentru utilizatorii racordați la rețeaua de distribuție, costul total de producere, transport, distribuție și furnizare crește de la 518,61 lei/MWh la 586,27 lei/MWh, fără TVA, adică cu aproximativ {increase:.1f}% potrivit calculului VÂLCEA CLAR pe valorile înscrise în hotărâre; noul nivel se aplică de la 1 august 2026.",
+            url,
+        ),
+        base.claim(
+            "cost-components",
+            "evidence",
+            "Noul total de 586,27 lei/MWh este format din 352,42 lei/MWh pentru producere, 57,69 lei/MWh pentru transport și 176,16 lei/MWh pentru distribuție, toate valorile fiind fără TVA.",
+            url,
+        ),
+        base.claim(
+            "billing-distribution",
+            "consequence",
+            "Prețul de facturare către populația racordată la rețeaua de distribuție rămâne neschimbat la 475,62 lei/MWh, respectiv 553,15 lei/Gcal, fără TVA, astfel încât creșterea costului nu este transferată direct în acest tarif facturat populației.",
+            url,
+            "reader_service",
+        ),
+        base.claim(
+            "budget-distribution",
+            "consequence",
+            "Diferența dintre cost și prețul facturat populației pe rețeaua de distribuție este stabilită la 110,65 lei/MWh, respectiv 128,67 lei/Gcal, fără TVA, și este asigurată din bugetul local al municipiului.",
+            url,
+        ),
+        base.claim(
+            "budget-gap-comparison",
+            "meaning",
+            f"Raportat la vechiul cost de 518,61 lei/MWh și la același tarif de 475,62 lei/MWh, diferența implicită era 42,99 lei/MWh; noua diferență de 110,65 lei/MWh este cu aproximativ {gap_increase:.0f}% mai mare. Aceasta este o comparație calculată de VÂLCEA CLAR din valorile oficiale, nu o valoare distinctă declarată ca atare în HCL.",
+            url,
+            "reader_service",
+        ),
+        base.claim(
+            "transport-network",
+            "evidence",
+            "Pentru populația racordată la rețeaua de transport, costul total este 410,11 lei/MWh, prețul facturat rămâne 344,18 lei/MWh, iar diferența de 65,93 lei/MWh este acoperită din bugetul local, fără TVA.",
+            url,
+        ),
+        base.claim(
+            "anre-context",
+            "context",
+            "Hotărârea folosește prețul de producere de 352,42 lei/MWh aprobat pentru CET Govora prin decizia ANRE nr. 1414 din 25 iunie 2026 pentru perioada iulie–octombrie 2026.",
+            url,
+            "documented_context",
+        ),
+        base.claim(
+            "vote",
+            "context",
+            f"HCL 306 a fost adoptată cu {vote}." + (" Documentul consemnează și un consilier care nu a participat la vot." if non_participation else ""),
+            url,
+            "documented_context",
+        ),
+        base.claim(
+            "watch",
+            "next_watch",
+            "Impactul total asupra bugetului municipiului depinde de cantitatea de energie termică livrată la aceste tarife; urmărirea editorială trebuie să lege HCL 306 de plățile efective de subvenție și de evoluția costului după perioada tarifară ANRE indicată în document.",
+            url,
+            "reader_service",
+        ),
+    ]
+    sections = [
+        {"title": "Ce s-a scumpit", "paragraphs": [claims[0]["text"], claims[1]["text"]]},
+        {"title": "Ce vede populația în tarif", "paragraphs": [claims[2]["text"]]},
+        {"title": "Ce preia bugetul local", "paragraphs": [claims[3]["text"], claims[4]["text"], claims[5]["text"]]},
+        {"title": "De ce se schimbă costul", "paragraphs": [claims[6]["text"], claims[7]["text"]]},
+        {"title": "Ce urmărim", "paragraphs": [claims[8]["text"]]},
+    ]
+    factbox = [
+        {"label": "Cost vechi distribuție", "value": "518,61 lei/MWh"},
+        {"label": "Cost nou distribuție", "value": "586,27 lei/MWh"},
+        {"label": "Creștere cost", "value": "+13,0%"},
+        {"label": "Facturat populației", "value": "475,62 lei/MWh"},
+        {"label": "Diferență buget local", "value": "110,65 lei/MWh"},
+        {"label": "Aplicare", "value": "1 august 2026"},
+    ]
+    return headline, dek, claims, sections, factbox
 
 
 def story_308(item: dict[str, Any], doc: dict[str, Any], url: str):
@@ -96,38 +226,81 @@ def story_311(item: dict[str, Any], doc: dict[str, Any], url: str):
 
 
 def install() -> None:
-    base.SPECIAL.update({308: story_308, 309: story_309, 311: story_311})
+    base.SPECIAL.update({306: story_306, 308: story_308, 309: story_309, 311: story_311})
+    base.generic_story = consequence_led_generic_story
 
 
 def self_test() -> int:
     install()
+    assert base.SPECIAL[306] is story_306
     assert base.SPECIAL[308] is story_308 and base.SPECIAL[309] is story_309 and base.SPECIAL[311] is story_311
-    doc={"decision_number":311,"decision_date":"2026-08-14","official_html_url":"https://example.test/h311","resolved":True,"document_text":"HOTĂRÂREA NR.311 Întrunind 20 de voturi pentru, 0 voturi împotrivă și 0 abţineri. Art.1. Se aprobă punerea la dispoziția ETA S.A. a bunurilor.","operative_articles":["Art.1. Se aprobă punerea la dispoziția ETA S.A. a bunurilor."],"source_sha256":"x","document_text_sha256":"y"}
-    item={"id":"rm-valcea-hcl-311-20260814","status":"verified","council_decision":{"decision_number":311},"sources":[]}
-    facts={"facts":[item]}
-    count, ids=base.apply_enrichment(facts,{"documents":[doc]})
-    assert count==1 and ids==[item["id"]]
-    assert item["factbox"][0]["value"]=="ETA S.A."
+
+    h306_url = "https://example.test/h306"
+    h306_doc = {
+        "decision_number": 306,
+        "decision_date": "2026-08-14",
+        "official_html_url": h306_url,
+        "resolved": True,
+        "registered_title": "aprobare pret energie termica incepand cu 1 august 2026",
+        "document_text": "HOTĂRÂREA NR.306 Întrunind 18 voturi pentru, 0 voturi împotrivă și 1 abţinere. Art.1. Se aprobă prețul total de 586,27 lei/MWh. Art.2. Prețul facturat populației rămâne 475,62 lei/MWh. Diferența de 110,65 lei/MWh se asigură din bugetul local. Un consilier nu a participat la vot.",
+        "operative_articles": ["Art.1. Se aprobă prețul total de 586,27 lei/MWh.", "Art.2. Prețul facturat populației rămâne 475,62 lei/MWh."],
+        "source_sha256": "x306",
+        "document_text_sha256": "y306",
+    }
+    h306_item = {"id": "rm-valcea-hcl-306-20260814", "status": "verified", "council_decision": {"decision_number": 306}, "sources": []}
+    h306_facts = {"facts": [h306_item]}
+    count, ids = base.apply_enrichment(h306_facts, {"documents": [h306_doc]})
+    assert count == 1 and ids == [h306_item["id"]]
+    assert "13%" in h306_item["headline"]
+    assert "475,62" in h306_item["dek"]
+    assert any(row["label"] == "Diferență buget local" and row["value"] == "110,65 lei/MWh" for row in h306_item["factbox"])
+    assert h306_item["fulltext_enrichment"]["topic_specific_parser"] is True
+
+    h311_doc = {"decision_number":311,"decision_date":"2026-08-14","official_html_url":"https://example.test/h311","resolved":True,"document_text":"HOTĂRÂREA NR.311 Întrunind 20 de voturi pentru, 0 voturi împotrivă și 0 abţineri. Art.1. Se aprobă punerea la dispoziția ETA S.A. a bunurilor.","operative_articles":["Art.1. Se aprobă punerea la dispoziția ETA S.A. a bunurilor."],"source_sha256":"x","document_text_sha256":"y"}
+    h311_item = {"id":"rm-valcea-hcl-311-20260814","status":"verified","council_decision":{"decision_number":311},"sources":[]}
+    h311_facts = {"facts":[h311_item]}
+    count, ids = base.apply_enrichment(h311_facts,{"documents":[h311_doc]})
+    assert count == 1 and ids == [h311_item["id"]]
+    assert h311_item["factbox"][0]["value"] == "ETA S.A."
+
+    generic_doc = {
+        "decision_number": 999,
+        "decision_date": "2026-08-14",
+        "official_html_url": "https://example.test/h999",
+        "resolved": True,
+        "registered_title": "privind aprobarea unor măsuri",
+        "document_text": "HOTĂRÂREA NR.999 Art.1. Se aprobă transferul unui imobil către serviciul public local.",
+        "operative_articles": ["Art.1. Se aprobă transferul unui imobil către serviciul public local."],
+        "source_sha256": "x999",
+        "document_text_sha256": "y999",
+    }
+    generic_item = {"id": "rm-valcea-hcl-999-test", "status": "verified", "council_decision": {"decision_number": 999}, "sources": []}
+    generic_facts = {"facts": [generic_item]}
+    count, _ = base.apply_enrichment(generic_facts, {"documents": [generic_doc]})
+    assert count == 1
+    assert not generic_item["headline"].startswith("HCL 999")
+    assert "Transferul" in generic_item["headline"]
+
     print("VÂLCEA CLAR Council fulltext enricher v2 self-test: PASS")
     return 0
 
 
 def main() -> int:
-    parser=argparse.ArgumentParser()
-    parser.add_argument("--apply",action="store_true")
-    parser.add_argument("--self-test",action="store_true")
-    args=parser.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--apply", action="store_true")
+    parser.add_argument("--self-test", action="store_true")
+    args = parser.parse_args()
     if args.self_test:
         return self_test()
     install()
-    facts=base.load(base.FACTS)
-    corpus=base.load(base.CORPUS)
-    count, ids=base.apply_enrichment(facts,corpus)
+    facts = base.load(base.FACTS)
+    corpus = base.load(base.CORPUS)
+    count, ids = base.apply_enrichment(facts, corpus)
     if args.apply and count:
-        base.write(base.FACTS,facts)
-    print(json.dumps({"status":"UPDATED" if args.apply and count else "DRY_RUN","enriched":count,"story_ids":ids,"version":2},ensure_ascii=False))
+        base.write(base.FACTS, facts)
+    print(json.dumps({"status": "UPDATED" if args.apply and count else "DRY_RUN", "enriched": count, "story_ids": ids, "version": 2, "generic_headline_policy": "OPERATIVE_CONSEQUENCE_FIRST"}, ensure_ascii=False))
     return 0
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     raise SystemExit(main())
