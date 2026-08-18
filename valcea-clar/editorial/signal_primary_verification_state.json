@@ -2,15 +2,15 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-18T21:03:21+03:00",
+  "generated_at": "2026-08-18T21:21:13+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
   "queue_generated_at": "2026-08-18T21:01:32+03:00",
   "task_count": 55,
-  "primary_match_count": 0,
-  "no_match_count": 28,
+  "primary_match_count": 2,
+  "no_match_count": 26,
   "unrouted_count": 27,
   "target_count": 18,
   "targets_ok": 16,
@@ -134,7 +134,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 10
+          "documents_examined": 1
         }
       ],
       "publication_authority": "NONE",
@@ -161,14 +161,40 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 2
+          "documents_examined": 82
         }
       ],
       "publication_authority": "NONE",
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "PRIMARY_MATCH_FOUND",
+      "primary_evidence": {
+        "source_id": "apavil-angajari",
+        "source_name": "APAVIL S.A. — Anunțuri angajare",
+        "source_tier": "T1",
+        "source_url": "https://apavil.ro/?page_id=7981",
+        "primary_item_url": "https://apavil.ro/?page_id=7981#official-listing-item-4d8bfd5b1fc7e559",
+        "primary_item_title": "Anunt privind scoaterea la concurs a unui post de inginer in cadrul Serviciului Mecano-Energetic (18.08.2026)",
+        "primary_published_at": "2026-08-18T00:00:00+03:00",
+        "content_sha256": "4d8bfd5b1fc7e559a54279bbd279c6a087a2b85032d0011070809bb33a7f47cd",
+        "match_score": 0.4873,
+        "matched_terms": [
+          "cadrul",
+          "concurs",
+          "post",
+          "scoaterea"
+        ],
+        "distinctive_matched_terms": [
+          "concurs",
+          "scoaterea"
+        ],
+        "primary_published_at_source": "official_listing_button",
+        "primary_listing_label": "Anunt privind scoaterea la concurs a unui post de inginer in cadrul Serviciului Mecano-Energetic (18.08.2026)",
+        "primary_listing_url": "https://apavil.ro/?page_id=7981",
+        "primary_evidence_scope": "official_listing_item_title_date_only"
+      },
+      "next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE"
     },
     {
       "signal_id": "1a962ce7609e6dbda919f813",
@@ -353,7 +379,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 2
+          "documents_examined": 1
         },
         {
           "target": {
@@ -478,14 +504,42 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 2
+          "documents_examined": 82
         }
       ],
       "publication_authority": "NONE",
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "PRIMARY_MATCH_FOUND",
+      "primary_evidence": {
+        "source_id": "apavil-angajari",
+        "source_name": "APAVIL S.A. — Anunțuri angajare",
+        "source_tier": "T1",
+        "source_url": "https://apavil.ro/?page_id=7981",
+        "primary_item_url": "https://apavil.ro/?page_id=7981#official-listing-item-7f96c2a1553a4e57",
+        "primary_item_title": "Anunt privind scoaterea la concurs a unui post de lacatus mecanic in cadrul Sectorului Horezu, Centrul Exploatare Vest (17.08.2026)",
+        "primary_published_at": "2026-08-17T00:00:00+03:00",
+        "content_sha256": "7f96c2a1553a4e5749d6312d60eedfe7f354f4b91a10c0d1401ba5ad00352f76",
+        "match_score": 0.8829,
+        "matched_terms": [
+          "cadrul",
+          "concurs",
+          "post",
+          "scoaterea",
+          "sectorului"
+        ],
+        "distinctive_matched_terms": [
+          "concurs",
+          "scoaterea",
+          "sectorului"
+        ],
+        "primary_published_at_source": "official_listing_button",
+        "primary_listing_label": "Anunt privind scoaterea la concurs a unui post de lacatus mecanic in cadrul Sectorului Horezu, Centrul Exploatare Vest (17.08.2026)",
+        "primary_listing_url": "https://apavil.ro/?page_id=7981",
+        "primary_evidence_scope": "official_listing_item_title_date_only"
+      },
+      "next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE"
     },
     {
       "signal_id": "dc68541ad0eca69ef5492fa8",
@@ -823,7 +877,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 2
+          "documents_examined": 1
         },
         {
           "target": {
@@ -1088,7 +1142,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 2
+          "documents_examined": 1
         },
         {
           "target": {
@@ -1137,7 +1191,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 2
+          "documents_examined": 1
         },
         {
           "target": {
@@ -1297,6 +1351,10 @@
   "verification_policy": {
     "strict_false_positive_guard": true,
     "primary_published_at_required": true,
+    "official_listing_label_date_fallback": true,
+    "official_dated_button_evidence": true,
+    "official_listing_evidence_is_title_date_only": true,
+    "official_listing_label_date_must_be_explicit_terminal": true,
     "max_publication_time_delta_hours": 36,
     "title_event_overlap_required": true,
     "instance_identity_is_not_event_evidence": true,
