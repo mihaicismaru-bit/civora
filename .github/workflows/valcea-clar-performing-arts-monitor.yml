@@ -1,0 +1,107 @@
+name: VÂLCEA CLAR Performing Arts Monitor
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/editorial/performing_arts_source_registry.json'
+      - 'valcea-clar/editorial/performing_arts_monitor_registry.json'
+      - 'valcea-clar/scripts/monitor_performing_arts_sources.py'
+      - '.github/workflows/valcea-clar-performing-arts-monitor.yml'
+  schedule:
+    - cron: '13 */2 * * *'
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: valcea-clar-performing-arts-monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validate performing arts monitor
+        run: python valcea-clar/scripts/monitor_performing_arts_sources.py --self-test
+
+      - name: Monitor performing arts sources
+        id: monitor
+        shell: bash
+        run: |
+          set +e
+          python valcea-clar/scripts/monitor_performing_arts_sources.py
+          rc=$?
+          set -e
+          if [ "$rc" -eq 3 ]; then
+            echo 'new_candidates=true' >> "$GITHUB_OUTPUT"
+          elif [ "$rc" -eq 0 ]; then
+            echo 'new_candidates=false' >> "$GITHUB_OUTPUT"
+          else
+            exit "$rc"
+          fi
+
+      - name: Persist performing arts monitor state
+        shell: bash
+        run: |
+          set -euo pipefail
+          paths=(valcea-clar/state/performing_arts_source_state.json valcea-clar/editorial/performing_arts_update_candidates.json)
+          changed=false
+          for p in "${paths[@]}"; do
+            if [ -e "$p" ] && ! git diff --quiet -- "$p"; then changed=true; fi
+            if [ -e "$p" ] && ! git ls-files --error-unmatch "$p" >/dev/null 2>&1; then changed=true; fi
+          done
+          if [ "$changed" != true ]; then
+            echo 'No material performing arts state change.'
+            exit 0
+          fi
+          rm -rf /tmp/performing-arts-monitor
+          mkdir -p /tmp/performing-arts-monitor/state /tmp/performing-arts-monitor/editorial
+          [ ! -f valcea-clar/state/performing_arts_source_state.json ] || cp valcea-clar/state/performing_arts_source_state.json /tmp/performing-arts-monitor/state/
+          [ ! -f valcea-clar/editorial/performing_arts_update_candidates.json ] || cp valcea-clar/editorial/performing_arts_update_candidates.json /tmp/performing-arts-monitor/editorial/
+          git config user.name 'vâlcea-clar-performing-arts[bot]'
+          git config user.email 'valcea-clar-performing-arts@users.noreply.github.com'
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p valcea-clar/state valcea-clar/editorial
+            [ ! -f /tmp/performing-arts-monitor/state/performing_arts_source_state.json ] || cp /tmp/performing-arts-monitor/state/performing_arts_source_state.json valcea-clar/state/
+            [ ! -f /tmp/performing-arts-monitor/editorial/performing_arts_update_candidates.json ] || cp /tmp/performing-arts-monitor/editorial/performing_arts_update_candidates.json valcea-clar/editorial/
+            git add valcea-clar/state/performing_arts_source_state.json valcea-clar/editorial/performing_arts_update_candidates.json 2>/dev/null || true
+            if git diff --cached --quiet; then exit 0; fi
+            git commit -m 'Refresh VÂLCEA CLAR performing arts monitor'
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          echo 'Could not persist performing arts monitor state.' >&2
+          exit 1
+
+      - name: Dispatch general editorial opportunity engine
+        if: steps.monitor.outputs.new_candidates == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          payload='{"ref":"main"}'
+          code=$(curl -sS -o /tmp/opportunity-dispatch.txt -w '%{http_code}' -L -X POST \
+            -H 'Accept: application/vnd.github+json' \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/valcea-clar-editorial-opportunity-engine.yml/dispatches" \
+            -d "$payload")
+          if [ "$code" != '204' ]; then
+            echo "Opportunity Engine dispatch failed with HTTP ${code}." >&2
+            cat /tmp/opportunity-dispatch.txt >&2 || true
+            exit 1
+          fi
