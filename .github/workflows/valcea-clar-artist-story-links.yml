@@ -1,0 +1,69 @@
+name: VÂLCEA CLAR Artist Story Links
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["VÂLCEA CLAR Live Newsroom", "VÂLCEA CLAR Artist Intelligence"]
+    types: [completed]
+    branches: [main]
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/scripts/link_artist_profiles.py'
+      - '.github/workflows/valcea-clar-artist-story-links.yml'
+  schedule:
+    - cron: '41 */6 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-artist-story-links
+  cancel-in-progress: false
+
+jobs:
+  link:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Attach artist profiles to festival stories
+        run: python valcea-clar/scripts/link_artist_profiles.py
+      - name: Persist bidirectional festival artist links
+        shell: bash
+        run: |
+          set -euo pipefail
+          paths=(valcea-clar/site/runtime/live-feed.json valcea-clar/site/runtime/stiri)
+          if git diff --quiet -- "${paths[@]}"; then
+            echo 'Festival-to-artist links already current.'
+            exit 0
+          fi
+          rm -rf /tmp/artist-story-links
+          mkdir -p /tmp/artist-story-links
+          cp valcea-clar/site/runtime/live-feed.json /tmp/artist-story-links/live-feed.json
+          cp -a valcea-clar/site/runtime/stiri /tmp/artist-story-links/stiri
+          git config user.name 'vâlcea-clar-artist-links[bot]'
+          git config user.email 'valcea-clar-artist-links@users.noreply.github.com'
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/artist-story-links/live-feed.json valcea-clar/site/runtime/live-feed.json
+            rm -rf valcea-clar/site/runtime/stiri
+            cp -a /tmp/artist-story-links/stiri valcea-clar/site/runtime/stiri
+            git add valcea-clar/site/runtime/live-feed.json valcea-clar/site/runtime/stiri
+            if git diff --cached --quiet; then
+              echo 'Artist story links already present on main.'
+              exit 0
+            fi
+            git commit -m 'Link VÂLCEA CLAR festival stories to artist profiles'
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          echo 'Could not persist artist story links.' >&2
+          exit 1
