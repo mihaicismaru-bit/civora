@@ -15,6 +15,8 @@ on:
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea_v2.py'
       - 'valcea-clar/scripts/gambling_dossier_enricher.py'
+      - 'valcea-clar/scripts/gambling_dossier_enricher_v2.py'
+      - 'valcea-clar/scripts/editorial_lifecycle_normalizer.py'
       - 'valcea-clar/editorial/gambling_ramnicu_2026_dossier.json'
       - 'valcea-clar/scripts/scm_program_fact_kernel.py'
       - 'valcea-clar/scripts/scm_program_structure_diagnostic.py'
@@ -34,6 +36,8 @@ on:
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea_v2.py'
       - 'valcea-clar/scripts/gambling_dossier_enricher.py'
+      - 'valcea-clar/scripts/gambling_dossier_enricher_v2.py'
+      - 'valcea-clar/scripts/editorial_lifecycle_normalizer.py'
       - 'valcea-clar/editorial/gambling_ramnicu_2026_dossier.json'
       - 'valcea-clar/scripts/scm_program_fact_kernel.py'
       - 'valcea-clar/scripts/scm_program_structure_diagnostic.py'
@@ -75,6 +79,8 @@ jobs:
             valcea-clar/scripts/council_watch_rm_valcea.py \
             valcea-clar/scripts/council_watch_rm_valcea_v2.py \
             valcea-clar/scripts/gambling_dossier_enricher.py \
+            valcea-clar/scripts/gambling_dossier_enricher_v2.py \
+            valcea-clar/scripts/editorial_lifecycle_normalizer.py \
             valcea-clar/scripts/scm_program_fact_kernel.py \
             valcea-clar/scripts/scm_program_structure_diagnostic.py \
             local-news-os/core/indexing_assets.py
@@ -89,7 +95,8 @@ jobs:
           python valcea-clar/scripts/council_docmanager_diagnostic.py --self-test
           python valcea-clar/scripts/council_docmanager_document_diagnostic.py --self-test
           python valcea-clar/scripts/promote_fact_kernels.py --self-test
-          python valcea-clar/scripts/gambling_dossier_enricher.py --self-test
+          python valcea-clar/scripts/gambling_dossier_enricher_v2.py --self-test
+          python valcea-clar/scripts/editorial_lifecycle_normalizer.py --self-test
           python valcea-clar/scripts/scm_program_fact_kernel.py --self-test
           python valcea-clar/scripts/scm_program_structure_diagnostic.py --self-test
 
@@ -129,11 +136,12 @@ jobs:
               f.write(f'count={count}\n')
           PY
 
-      - name: Enrich verified gambling explainer from durable dossier
+      - name: Reapply durable gambling dossier and evergreen lifecycle
         if: github.event_name != 'pull_request'
         run: |
-          python valcea-clar/scripts/gambling_dossier_enricher.py
-          python valcea-clar/scripts/gambling_dossier_enricher.py --check
+          python valcea-clar/scripts/gambling_dossier_enricher_v2.py
+          python valcea-clar/scripts/gambling_dossier_enricher_v2.py --check
+          python valcea-clar/scripts/editorial_lifecycle_normalizer.py --apply
 
       - name: Capture SCM live markup structure
         if: github.event_name != 'pull_request'
@@ -211,4 +219,5 @@ jobs:
           echo "Council registry changed: ${{ steps.promote.outputs.changed }}"
           echo "SCM program registry changed: ${{ steps.scm.outputs.changed }}"
           echo "SCM program events parsed: ${{ steps.scm.outputs.events_parsed }}"
+          echo 'Durable explainers are normalized after any kernel regeneration so old workflows cannot reintroduce relative-time copy or transient expiry.'
           echo 'The durable Fact Kernel → Live Newsroom workflow_run handoff owns downstream dispatch.'
