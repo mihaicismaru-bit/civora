@@ -1,0 +1,83 @@
+name: VÂLCEA CLAR Primary Source Admin Kernels
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/scripts/primary_source_admin_kernels.py'
+      - '.github/workflows/valcea-clar-primary-source-admin-kernels.yml'
+  schedule:
+    - cron: '14,44 * * * *'
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: valcea-clar-primary-source-admin-kernels
+  cancel-in-progress: false
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Validate administration kernel builder
+        run: |
+          python -m py_compile valcea-clar/scripts/primary_source_admin_kernels.py
+          python valcea-clar/scripts/primary_source_admin_kernels.py --self-test
+
+      - name: Materialize verified administration stories
+        run: python valcea-clar/scripts/primary_source_admin_kernels.py --apply
+
+      - name: Validate through canonical Editorial Writer
+        run: python valcea-clar/scripts/editorial_writer.py --check
+
+      - name: Persist verified administration kernels
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- valcea-clar/editorial/facts_registry.json; then
+            echo 'No verified administration-kernel change.'
+            exit 0
+          fi
+
+          cp valcea-clar/editorial/facts_registry.json /tmp/valcea-facts-registry.json
+          git config user.name 'vâlcea-clar-primary-admin[bot]'
+          git config user.email 'valcea-clar-primary-admin@users.noreply.github.com'
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/valcea-facts-registry.json valcea-clar/editorial/facts_registry.json
+            git add valcea-clar/editorial/facts_registry.json
+            if git diff --cached --quiet; then
+              echo 'Verified administration kernel already present on main.'
+              exit 0
+            fi
+            git commit -m 'Publish verified VÂLCEA CLAR administration kernel'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "main advanced during administration-kernel persistence; retrying ${attempt}/5."
+            sleep $((attempt * 2))
+          done
+
+          echo 'Could not persist verified administration kernel conflict-safe.' >&2
+          exit 1
+
+      - name: Dispatch canonical Live Newsroom
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run valcea-clar-newsroom-live.yml --repo "$GITHUB_REPOSITORY" --ref main
+          echo 'Live Newsroom dispatch accepted.'
