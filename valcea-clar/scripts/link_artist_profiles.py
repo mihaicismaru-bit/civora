@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Attach verified VÂLCEA CLAR artist profiles to festival and performing-arts stories.
+"""Attach verified VÂLCEA CLAR artist profiles to public festival stories.
 
-The script enriches the durable archive, public live feed and canonical static
-story pages. It never creates an artist identity; it only links profiles already
-admitted by Artist Intelligence from a verified festival lineup or
-performing-arts programme.
+The script enriches the current public feed and canonical static story pages.
+It never creates an artist identity; it only links profiles already admitted by
+Artist Intelligence from a verified festival lineup or performing-arts programme.
+The durable source of truth for the relation remains Artist Intelligence itself,
+so generated story/archive projections may be rebuilt safely and then relinked.
 """
 from __future__ import annotations
 
@@ -18,7 +19,6 @@ ROOT = Path(__file__).resolve().parents[1]
 RUNTIME = ROOT / "site" / "runtime"
 ARTISTS = RUNTIME / "artists.json"
 FEED = RUNTIME / "live-feed.json"
-ARCHIVE = ROOT / "site" / "story_archive.json"
 STORY_MANIFEST = RUNTIME / "stiri" / "manifest.json"
 MARKER_START = '<section class="artist-profiles" data-artist-intelligence="verified">'
 MARKER_END = '</section><!-- /artist-profiles -->'
@@ -211,13 +211,6 @@ def main() -> int:
     }
     FEED.write_text(json.dumps(feed, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
-    archive_changed = 0
-    if ARCHIVE.is_file():
-        archive = load(ARCHIVE)
-        archive_changed = apply_story_profiles(archive.get("stories") or [], grouped)
-        if archive_changed:
-            ARCHIVE.write_text(json.dumps(archive, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-
     if STORY_MANIFEST.is_file():
         manifest = load(STORY_MANIFEST)
         for row in manifest.get("stories") or []:
@@ -240,7 +233,6 @@ def main() -> int:
         "stories_with_profiles": sum(1 for rows in grouped.values() if rows),
         "linked_profiles": linked_profiles,
         "feed_stories_changed": touched_feed,
-        "archive_stories_changed": archive_changed,
         "static_story_pages_changed": static_changed,
     }, ensure_ascii=False))
     return 0
