@@ -1,0 +1,39 @@
+name: VÂLCEA CLAR Persistence Scope Runtime Guard
+
+on:
+  pull_request:
+    paths:
+      - 'local-news-os/persistence/repository_scope.json'
+      - 'valcea-clar/scripts/validate_persistence_scope_runtime_outputs.py'
+      - '.github/workflows/valcea-clar-signal-radar.yml'
+      - '.github/workflows/valcea-clar-structured-alerts.yml'
+      - '.github/workflows/valcea-clar-persistence-scope-runtime.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'local-news-os/persistence/repository_scope.json'
+      - 'valcea-clar/scripts/validate_persistence_scope_runtime_outputs.py'
+      - '.github/workflows/valcea-clar-signal-radar.yml'
+      - '.github/workflows/valcea-clar-structured-alerts.yml'
+      - '.github/workflows/valcea-clar-persistence-scope-runtime.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-persistence-scope-runtime-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Validate generated runtime output scope
+        run: |
+          python -m py_compile valcea-clar/scripts/validate_persistence_scope_runtime_outputs.py
+          python valcea-clar/scripts/validate_persistence_scope_runtime_outputs.py
