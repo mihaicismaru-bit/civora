@@ -24,6 +24,14 @@ import council_watch_rm_valcea as council
 
 _BASE_PARSE_LINKS = council.parse_links
 LOTUS_UNID_RE = row_resolver.LOTUS_UNID_RE
+# Romanian official documents use several inflected forms. Keep this exact to
+# annual authorizations only: autorizație anuală / autorizația anuală /
+# autorizației anuale plus ASCII equivalents. It must not match a generic or
+# temporary authorization.
+ANNUAL_AUTH_RE_V2 = re.compile(
+    r"\b(?:autoriza(?:t|ț)(?:ie|ia|iei)|autorizatie(?:a|i)?)\s+anual(?:a|ă|e)\b",
+    re.I,
+)
 EMBEDDED_ATTRS = {
     "href",
     "src",
@@ -168,6 +176,9 @@ def structural_parse_links(page_url: str, body: str) -> list[dict[str, str]]:
 
 def install() -> None:
     row_resolver.install()
+    # Use the same morphology contract for cluster recognition and for semantic
+    # verification of the official child document in this canonical live path.
+    row_resolver.base.ANNUAL_AUTH_RE = ANNUAL_AUTH_RE_V2
     council.parse_links = structural_parse_links
 
 
@@ -201,6 +212,21 @@ def self_test() -> None:
     assert any("script.htm" in urllib.parse.unquote(url) for url in urls)
     combined = structural_parse_links(base_url, body)
     assert {row["url"] for row in combined}.issuperset(urls)
+
+    for phrase in (
+        "autorizație anuală",
+        "autorizația anuală",
+        "autorizației anuale",
+        "autorizatie anuala",
+        "autorizatia anuala",
+        "autorizatiei anuale",
+    ):
+        assert ANNUAL_AUTH_RE_V2.search(phrase), phrase
+    assert not ANNUAL_AUTH_RE_V2.search("autorizație temporară")
+    assert not ANNUAL_AUTH_RE_V2.search("autorizația de construire")
+    install()
+    for phrase in ("autorizația anuală", "autorizației anuale"):
+        assert row_resolver.base.ANNUAL_AUTH_RE.search(phrase), phrase
     print("VÂLCEA CLAR DocManager embedded attachment resolver self-test: PASS")
 
 
