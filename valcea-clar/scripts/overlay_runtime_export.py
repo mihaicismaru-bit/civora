@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -51,29 +52,87 @@ def configured_static_routes() -> list[str]:
     return [str(route) for route in routes]
 
 
+def restore_committed_runtime_route(route: str, target: Path) -> bool:
+    """Restore a committed static runtime product erased by the dynamic renderer.
+
+    `render_frontpage.py` intentionally rebuilds `site/runtime` from scratch.
+    Some independently maintained static products (`/stiri/`, `/despre/`) are
+    canonical committed runtime pages rather than outputs of `build_sites_export`.
+    During the live transaction we may safely recover exactly the version pinned
+    at the checked-out commit. This is deterministic and cannot introduce newer
+    unreviewed content.
+    """
+    try:
+        relative = target.relative_to(REPO).as_posix()
+    except ValueError:
+        return False
+    proc = subprocess.run(
+        ["git", "show", f"HEAD:{relative}"],
+        cwd=REPO,
+        capture_output=True,
+        check=False,
+        timeout=20,
+    )
+    if proc.returncode != 0 or not proc.stdout:
+        return False
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes(proc.stdout)
+    return True
+
+
 def materialize_static_runtime_routes() -> list[str]:
     """Materialize independent static products before final sitemap validation.
 
     Legal pages are rendered directly into runtime by build_legal_pages. Other
     configured static products are built first in DIST by build_sites_export and
-    copied into runtime here. This makes runtime a complete publication snapshot
-    before indexing finalization and removes the story-render/static-export race.
+    copied into runtime here. If a committed static runtime page was erased by
+    the dynamic frontpage rebuild and has no DIST producer, restore the exact
+    checked-out version from git. Runtime is therefore a complete publication
+    snapshot before indexing finalization without weakening the static-route gate.
     """
     materialized: list[str] = []
     for route in configured_static_routes():
+        target = route_index(RUNTIME, route)
         if route in LEGAL_PATHS:
-            target = route_index(RUNTIME, route)
             if target.is_file():
                 materialized.append(route)
             continue
-        source = route_index(DIST, route)
-        if not source.is_file():
+        if target.is_file():
+            materialized.append(route)
             continue
-        target = route_index(RUNTIME, route)
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(source, target)
-        materialized.append(route)
+        source = route_index(DIST, route)
+        if source.is_file():
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, target)
+            materialized.append(route)
+            continue
+        if restore_committed_runtime_route(route, target):
+            materialized.append(route)
     return materialized
+
+
+def static_manifest_routes(existing_paths: set[str]) -> list[dict]:
+    rows: list[dict] = []
+    titles = {
+        "/stiri/": "Știri — VÂLCEA CLAR",
+        "/despre/": "Despre VÂLCEA CLAR",
+    }
+    for route in configured_static_routes():
+        if route in LEGAL_PATHS or route in existing_paths:
+            continue
+        target = route_index(DIST, route)
+        if not target.is_file():
+            continue
+        rows.append({
+            "path": route,
+            "source": target.relative_to(DIST).as_posix(),
+            "title": titles.get(route, f"VÂLCEA CLAR — {route.strip('/') or 'Acasă'}"),
+            "update_mode": "replace_static_page",
+            "publication_unit": "static_page",
+            "canonical_url": BASE_URL + route,
+        })
+        existing_paths.add(route)
+    return rows
 
 
 def main() -> int:
@@ -93,7 +152,7 @@ def main() -> int:
         shutil.copy2(source, target)
 
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
-    manifest["schema_version"] = "1.6"
+    manifest["schema_version"] = "1.7"
     manifest["target"]["autonomous_frontpage"] = True
     manifest["target"]["frontpage_source"] = "site/runtime/index.html"
     manifest["target"]["publication_model"] = "continuous_story_first"
@@ -150,10 +209,14 @@ def main() -> int:
                 "publication_unit": "individual_story",
                 "canonical_url": story.get("canonical"),
             })
-    routes[1:1] = legal_routes + story_routes
+
+    existing_paths = {str(route.get("path") or "") for route in routes} | {row["path"] for row in legal_routes}
+    static_routes = static_manifest_routes(existing_paths)
+    routes[1:1] = static_routes + legal_routes + story_routes
     manifest["routes"] = routes
     manifest.setdefault("counts", {})["routes"] = len(routes)
     manifest["counts"]["story_routes"] = len(story_routes)
+    manifest["counts"]["static_routes"] = len(static_routes)
     manifest["counts"]["legal_routes"] = len(legal_routes)
     manifest["legal_pages"] = {
         "source": "site/legal/legal_pages.json",
@@ -194,6 +257,7 @@ def main() -> int:
         "publication_model": "continuous_story_first",
         "frontpage": "index.html",
         "story_routes": len(story_routes),
+        "static_routes": len(static_routes),
         "legal_routes": len(legal_routes),
         "routes": len(routes),
         "files": len(files),
