@@ -4,7 +4,7 @@
 
 Această operațiune structurală se face în editorul site-ului existent `valceaclar.ro`. Nu se creează un site paralel și nu se schimbă domeniul. După publicare, site-ul citește automat fluxul canonic generat de CIVORA și afișează fiecare story imediat ce intră în feed ca material verificat. Edițiile de dimineață și de seară rămân recapuri, nu ferestre de publicare.
 
-Aceeași instalare trebuie să păstreze paginile juridice reale `/termeni/` și `/confidentialitate/` și să materializeze corect indexurile editoriale `/stiri/` și `/despre/`. Rutele juridice trebuie să rămână server-rendered/static, cu textul integral în HTML-ul inițial. `/stiri/` și `/despre/` trebuie să aibă HTTP 200, canonical propriu și conținut coerent cu runtime-ul CIVORA; bridge-ul client-side este fallback/reîmprospătare, nu motiv pentru a lăsa aceste rute ca shell generic.
+Aceeași instalare trebuie să păstreze paginile juridice reale `https://valceaclar.ro/termeni/` și `https://valceaclar.ro/confidentialitate/` și să materializeze corect indexurile editoriale `/stiri/` și `/despre/`. Rutele juridice trebuie să rămână server-rendered/static, cu textul integral în HTML-ul inițial. `/stiri/` și `/despre/` trebuie să aibă HTTP 200, canonical propriu și conținut coerent cu runtime-ul CIVORA; bridge-ul client-side este fallback/reîmprospătare, nu motiv pentru a lăsa aceste rute ca shell generic.
 
 Conținutul editorial și juridic rămâne canonic în CIVORA. Bridge-ul public nu inventează, completează sau rescrie fapte ori clauze.
 
@@ -33,15 +33,15 @@ Folosește acest prompt în chatul/editorul Site-ului VÂLCEA CLAR:
 >
 > **Pagina `/despre/`:** păstrează/creează ruta publică reală `/despre/`, HTTP 200, canonical exact `https://valceaclar.ro/despre/`, cu titlul `Clar înainte de rapid.`. Pagina trebuie să explice pe scurt principiile deja canonice: verificare înainte de publicare, arhivă distinctă de actualitate și surse verificabile. Instalează și logica din `chatgpt-sites-route-bridge.js` ca fallback client-side.
 >
-> **Story routes:** configurează/c păstrează catch-all `/stiri/*` astfel încât pagina individuală să fie randată din story-ul corespunzător. Dacă story-ul nu există în fluxul autorizat, afișează indisponibilitate fără conținut inventat.
+> **Story routes:** configurează/păstrează catch-all `/stiri/*` astfel încât pagina individuală să fie randată din story-ul corespunzător. Dacă story-ul nu există în fluxul autorizat, afișează indisponibilitate fără conținut inventat.
 >
-> **Documente juridice:** `/termeni/` și `/confidentialitate/` rămân pagini publice reale, server-rendered/static. Sursa unică este `legal_pages.json`. În HTML-ul inițial trebuie să existe textul integral, `redactie@valceaclar.ro`, `<meta name="robots" content="index,follow">` și canonicalul exact al fiecărei rute. Nu folosi doar JavaScript pentru conținutul juridic.
+> **Documente juridice:** `https://valceaclar.ro/termeni/` și `https://valceaclar.ro/confidentialitate/` rămân pagini publice reale, server-rendered/static. Sursa unică este `legal_pages.json`. În HTML-ul inițial trebuie să existe textul integral, `redactie@valceaclar.ro`, `<meta name="robots" content="index,follow">` și canonicalul exact al fiecărei rute. Nu folosi doar JavaScript pentru conținutul juridic.
 >
 > Footer-ul tuturor paginilor trebuie să includă linkuri vizibile către `Termeni`, `Confidențialitate` și `Despre`. `Unde ieșim` trebuie să rămână funcțional.
 >
 > Dacă feed-ul nu poate fi citit, păstrează ultima versiune bună deja randată. Nu reveni la o ediție veche ca sursă editorială principală. Nu folosi imagini generate automat pentru persoane, evenimente sau locuri reale. Nu introduce chei API, parole ori tokenuri în client și nu apela API-uri LLM din bridge.
 >
-> În preview verifică obligatoriu înainte de Publish: (1) homepage-ul este story-first și diferențiază actualitatea de arhivă; (2) `/stiri/` are HTTP 200, canonical propriu, titlul `Știrile Vâlcii, puse în ordine.` și navigația v2; (3) `/despre/` are HTTP 200, canonical propriu și titlul `Clar înainte de rapid.`; (4) un `story.id` deschide exact `story.path` și canonicalul corect; (5) `/termeni/` și `/confidentialitate/` au textul integral în HTML-ul inițial, canonical propriu și `index,follow`; (6) `Unde ieșim` funcționează; (7) layoutul mobil nu are overflow. Nu publica până când toate verificările trec.
+> În preview verifică obligatoriu înainte de Publish: (1) homepage-ul este story-first și diferențiază actualitatea de arhivă; (2) `/stiri/` are HTTP 200, canonical propriu, titlul `Știrile Vâlcii, puse în ordine.` și navigația v2; (3) `/despre/` are HTTP 200, canonical propriu și titlul `Clar înainte de rapid.`; (4) un `story.id` deschide exact `story.path` și canonicalul corect; (5) `https://valceaclar.ro/termeni/` și `https://valceaclar.ro/confidentialitate/` au textul integral în HTML-ul inițial, canonical propriu și `index,follow`; (6) `Unde ieșim` funcționează; (7) layoutul mobil nu are overflow. Nu publica până când toate verificările trec.
 
 ## Criterii de acceptare după Publish
 
@@ -50,7 +50,7 @@ Folosește acest prompt în chatul/editorul Site-ului VÂLCEA CLAR:
 - `/stiri/` răspunde HTTP 200, canonical `https://valceaclar.ro/stiri/`, conține `Știrile Vâlcii, puse în ordine.` și navigația `valcea-clar-primary-v2`;
 - `/despre/` răspunde HTTP 200, canonical `https://valceaclar.ro/despre/` și conține `Clar înainte de rapid.`;
 - fiecare material are URL propriu `/stiri/<story-id>/` și canonical corect;
-- `/termeni/` și `/confidentialitate/` sunt HTTP 200, text integral în HTML-ul inițial, canonical propriu și `index,follow`;
+- `https://valceaclar.ro/termeni/` și `https://valceaclar.ro/confidentialitate/` sunt HTTP 200, text integral în HTML-ul inițial, canonical propriu și `index,follow`;
 - `Unde ieșim` rămâne funcțional;
 - footer-ul conține Termeni, Confidențialitate și Despre;
 - mobilul nu are overflow orizontal;
