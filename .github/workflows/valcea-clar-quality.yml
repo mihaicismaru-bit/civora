@@ -120,6 +120,7 @@ jobs:
         run: |
           node --check valcea-clar/web/app.js
           node --check valcea-clar/site/chatgpt-sites-live-bridge.js
+          node --check valcea-clar/site/chatgpt-sites-route-bridge.js
       - name: Validate public legal bridge
         run: python valcea-clar/scripts/validate_public_legal_bridge.py
       - name: Source radar deterministic self-test
