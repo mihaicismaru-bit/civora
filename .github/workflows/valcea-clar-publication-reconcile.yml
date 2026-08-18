@@ -11,9 +11,12 @@ on:
       - 'valcea-clar/scripts/generate_edition.py'
       - 'valcea-clar/scripts/newsroom_decide.py'
       - 'valcea-clar/scripts/build_live_feed.py'
+      - 'valcea-clar/scripts/render_story_pages.py'
+      - 'valcea-clar/scripts/render_rich_story_sections.py'
       - '.github/workflows/valcea-clar-publication-reconcile.yml'
   pull_request:
     paths:
+      - 'valcea-clar/scripts/render_rich_story_sections.py'
       - '.github/workflows/valcea-clar-publication-reconcile.yml'
 
 permissions:
@@ -48,6 +51,7 @@ jobs:
         run: |
           python valcea-clar/scripts/newsroom_decide.py --self-test
           python valcea-clar/scripts/render_news_index.py --self-test
+          python valcea-clar/scripts/render_rich_story_sections.py --self-test
 
       - name: Compute desired publication state
         id: desired
@@ -93,6 +97,7 @@ jobs:
           python valcea-clar/scripts/generate_edition.py --slot "${{ steps.desired.outputs.slot }}"
           python valcea-clar/scripts/render_frontpage.py
           python valcea-clar/scripts/render_story_pages.py
+          python valcea-clar/scripts/render_rich_story_sections.py
           python valcea-clar/scripts/build_live_feed.py
           python valcea-clar/scripts/build_sites_export.py
           python valcea-clar/scripts/overlay_runtime_export.py
@@ -112,6 +117,13 @@ jobs:
               raise SystemExit(f'live-feed mismatch: desired={desired} actual={actual}')
           if int(feed.get('story_count') or -1) != len(desired):
               raise SystemExit('live-feed story_count mismatch')
+          for story_id in desired:
+              if not story_id.startswith('rm-valcea-hcl-'):
+                  continue
+              path=Path('valcea-clar/site/runtime/stiri')/story_id/'index.html'
+              text=path.read_text(encoding='utf-8')
+              if 'data-rich-structured-story="v1"' not in text:
+                  raise SystemExit(f'rich HCL presentation missing: {story_id}')
           print({'status':'PASS','story_count':len(desired)})
           PY
 
