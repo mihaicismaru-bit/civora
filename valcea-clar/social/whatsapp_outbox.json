@@ -175,8 +175,8 @@
         }
       },
       "edition_gate": false,
-      "selected_for_cycle": true,
-      "selection_rank": 1,
+      "selected_for_cycle": false,
+      "selection_rank": null,
       "native_format": "text",
       "format_family": "direct_high_trust_update",
       "distribution_class": "essential_public_interest",
@@ -185,8 +185,8 @@
       "message": "DN 7, 17 august 2026: 2 victime într-un incident rutier semnalat de INFOTRAFIC\n\nAlerta oficială emisă la ora 15:45 indică incidentul în zona localității Blidari, la kilometrul 167 + 300; la acel moment, trafic alternativ era în vigoare pe sectorul afectat.\n\nDetalii și surse: https://valceaclar.ro/stiri/alert-1cd2159b942ec2b672f7/",
       "max_message_chars": 700,
       "product_fingerprint_sha256": "4ca9394d6e270de76bba78687ecc4c9c43a1d99402343355abb35b32e191fd1a",
-      "status": "outbox_ready",
-      "hold_reason": null
+      "status": "hold_frequency",
+      "hold_reason": "whatsapp_not_selected_in_current_cycle"
     },
     {
       "id": "whatsapp-story-alert-fdfdb85a579432f385f7",
@@ -244,9 +244,7 @@
   "identity_channel_id": "valcea-whatsapp",
   "interruption_budget_per_cycle": 1,
   "selection_policy": "highest_public_utility_and_urgency_then_editorial_priority_then_story_id",
-  "active_selected_story_ids": [
-    "alert-1cd2159b942ec2b672f7"
-  ],
+  "active_selected_story_ids": [],
   "public_channel": {
     "status": "active",
     "url": "https://whatsapp.com/channel/0029Vb9AHD7AInPl69ETcb3s",
