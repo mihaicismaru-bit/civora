@@ -69,9 +69,11 @@ def test_exact_durable_materialization_recovers_without_provider_read() -> None:
         assert evidence["provider_network_call_performed_by_recovery"] is False
         readback = result["post_cas_readback"]
         assert readback["verified_from_durable_checkpoint_state"] is True
+        assert readback["durable_materialization_reverified_after_cas"] is True
         assert readback["receipt_fingerprint_sha256"] == latest["receipt_fingerprint_sha256"]
         assert readback["recovery_evidence_fingerprint_sha256"] == evidence["evidence_fingerprint_sha256"]
         assert readback["materialization_fingerprint_sha256"] == latest["materialization_fingerprint_sha256"]
+        assert readback["post_cas_materialization_fingerprint_sha256"] == latest["materialization_fingerprint_sha256"]
         assert len(readback["readback_fingerprint_sha256"]) == 64
         assert receipt.validate_sealed_entry(entry, FP1)["valid"] is True
 
@@ -105,6 +107,68 @@ def test_post_cas_same_checkpoint_divergence_blocks_success_claim() -> None:
         assert result["provider_reread_authorized"] is False
         assert result["provider_network_call_performed"] is False
         assert any("POST_CAS" in code for code in result["hard_blocks"])
+
+
+def test_post_cas_feedback_snapshot_loss_blocks_success_claim() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        ch, jb, *_ = _materialized_then_crashed(root)
+        original_persist = recovery.runtime.persist_checkpoint_state_cas
+
+        def persist_then_remove_snapshot(*args, **kwargs):
+            result = original_persist(*args, **kwargs)
+            if result.get("persisted") is True:
+                snapshot_path = root / durable_feedback_snapshot.expected_snapshot_path(ch)
+                assert snapshot_path.exists()
+                snapshot_path.unlink()
+            return result
+
+        recovery.runtime.persist_checkpoint_state_cas = persist_then_remove_snapshot
+        try:
+            result = _recover(root, ch, jb)
+        finally:
+            recovery.runtime.persist_checkpoint_state_cas = original_persist
+        assert result["status"] == "HOLD_REREAD_MATERIALIZATION_RECOVERY_POST_CAS_READBACK", result
+        assert result["checkpoint_status"] == "COMPLETED"
+        assert result["recovery_state_may_be_committed"] is True
+        assert result["provider_reread_authorized"] is False
+        assert result["provider_network_call_performed"] is False
+        assert any(
+            code.startswith("REREAD_MATERIALIZATION_RECOVERY_POST_CAS_DURABLE_MATERIALIZATION:")
+            and "REREAD_RESULT_FEEDBACK_SNAPSHOT_MISSING" in code
+            for code in result["hard_blocks"]
+        ), result
+
+
+def test_post_cas_observation_ledger_loss_blocks_success_claim() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        ch, jb, *_ = _materialized_then_crashed(root)
+        original_persist = recovery.runtime.persist_checkpoint_state_cas
+
+        def persist_then_remove_ledger(*args, **kwargs):
+            result = original_persist(*args, **kwargs)
+            if result.get("persisted") is True:
+                ledger_path = root / collector.expected_observation_store_path(ch)
+                assert ledger_path.exists()
+                ledger_path.unlink()
+            return result
+
+        recovery.runtime.persist_checkpoint_state_cas = persist_then_remove_ledger
+        try:
+            result = _recover(root, ch, jb)
+        finally:
+            recovery.runtime.persist_checkpoint_state_cas = original_persist
+        assert result["status"] == "HOLD_REREAD_MATERIALIZATION_RECOVERY_POST_CAS_READBACK", result
+        assert result["checkpoint_status"] == "COMPLETED"
+        assert result["recovery_state_may_be_committed"] is True
+        assert result["provider_reread_authorized"] is False
+        assert result["provider_network_call_performed"] is False
+        assert any(
+            code.startswith("REREAD_MATERIALIZATION_RECOVERY_POST_CAS_DURABLE_MATERIALIZATION:")
+            and "REREAD_RESULT_OBSERVATION_STORE_MISSING" in code
+            for code in result["hard_blocks"]
+        ), result
 
 
 def test_recovery_is_idempotent_after_completion() -> None:
@@ -259,6 +323,8 @@ def test_guards_keep_recovery_network_free_secret_free_and_zero_paid() -> None:
         "recovery_requires_exact_durable_materialization": True,
         "feedback_snapshot_readback_required_when_materialization_requires_it": True,
         "recovery_completion_requires_post_cas_readback": True,
+        "post_cas_readback_revalidates_durable_materialization": True,
+        "post_cas_materialization_toctou_success_allowed": False,
         "recovery_success_claims_without_post_cas_readback": False,
         "ambiguous_or_missing_evidence_remains_recovery_required": True,
         "completed_no_data_inferred_from_absence": False,
