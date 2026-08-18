@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "publication_authority": "NONE",
+  "diagnostic_only": true,
+  "evaluated_local": "2026-08-18T16:04:00+03:00",
+  "requested_story_id": "scm-program-fdbf66a4a5bb7ef4f69b",
+  "all_steps_ok": false,
+  "first_failed_step": "overlay_runtime_export",
+  "steps": [
+    {
+      "name": "newsroom_decide",
+      "argv": [
+        "/opt/hostedtoolcache/Python/3.13.15/x64/bin/python",
+        "valcea-clar/scripts/newsroom_decide.py"
+      ],
+      "returncode": 0,
+      "ok": true,
+      "stdout_tail": "{\"schema_version\": \"1.4\", \"evaluated_local\": \"2026-08-18T16:03:59+03:00\", \"mode\": \"continuous_story_first\", \"edition_windows_are_publication_gates\": false, \"recap_editions_retained\": true, \"slot_for_legacy_snapshot_compatibility\": \"evening\", \"changed\": true, \"publishable_story_count\": 4, \"publishable_story_ids\": [\"alert-1cd2159b942ec2b672f7\", \"rm-valcea-gambling-authorizations-20260723\", \"alert-fdfdb85a579432f385f7\", \"scm-program-fdbf66a4a5bb7ef4f69b\"], \"new_story_ids\": [\"rm-valcea-gambling-authorizations-20260723\", \"scm-program-fdbf66a4a5bb7ef4f69b\"], \"fingerprint\": \"09d35dffe37cef89259d2044f82355a6616e58fe8eb96568940bb4af234bd871\", \"auto_fact_registry_count\": 2, \"editorial_writer\": {\"writer_id\": \"manual_journalism_v1\", \"status\": \"ACTIVE\", \"story_count\": 9, \"fact_kernel_composed\": 4, \"legacy_passthrough\": 5, \"editorial_holds\": 0, \"registry_fingerprint_sha256\": \"c8495c4f41cd8e1c553f598730cf62619af925b61be72fcd07a743c1f310cf58\"}, \"editorial_integrity\": {\"gate_id\": \"editorial_integrity_v1\", \"status\": \"ACTIVE\", \"story_count\": 9, \"passed\": 8, \"held\": 1, \"failed\": 0}, \"rejected_candidate_count\": 2, \"rejected\": [{\"id\": \"olanesti-bridge-monitor\", \"reason\": \"editorial_publication_hold\"}, {\"id\": \"auto-scm-rm-valcea-13a16a62434f\", \"reason\": \"title_date_only_not_full_story\"}], \"active_publication_holds\": [\"derived-council-gambling-20260723\", \"olanesti-bridge-monitor\"], \"policy\": {\"verified_structured_story_required\": true, \"title_date_only_is_not_article\": true, \"fact_kernel_claim_trace_required\": true, \"post_writer_integrity_gate_required\": true, \"reputational_formats_require_review\": true, \"editorial_publication_holds_fail_closed\": true, \"held_story_social_distribution_allowed\": false, \"minimum_confidence_inherited_from_edition_engine\": 90, \"fail_closed\": true, \"publish_on_change_not_clock_window\": true, \"durable_temporal_language_contract\": \"LOCAL_NEWS_OS_DURABLE_TEMPORAL_LANGUAGE_V1\", \"relative_time_words_in_durable_story_copy\": false}}\n",
+      "stderr_tail": ""
+    },
+    {
+      "name": "build_public_data",
+      "argv": [
+        "/opt/hostedtoolcache/Python/3.13.15/x64/bin/python",
+        "valcea-clar/scripts/build_public_data.py"
+      ],
+      "returncode": 0,
+      "ok": true,
+      "stdout_tail": "Built public projection: 7 places, 0 creators.\n",
+      "stderr_tail": ""
+    },
+    {
+      "name": "generate_evening_edition",
+      "argv": [
+        "/opt/hostedtoolcache/Python/3.13.15/x64/bin/python",
+        "valcea-clar/scripts/generate_edition.py",
+        "--slot",
+        "evening"
+      ],
+      "returncode": 0,
+      "ok": true,
+      "stdout_tail": "{\"status\": \"auto_approved\", \"publication_intent\": \"publish\", \"edition_id\": \"2026-08-18-evening\", \"editorial_fact_count\": 6, \"editorial_writer_composed_count\": 4, \"auto_fact_registry_count\": 2, \"auto_facts_included\": 4, \"json\": \"editions/2026-08-18-evening.json\", \"markdown\": \"editions/2026-08-18-evening.md\", \"public_pointer_preserves_last_known_good_on_hold\": true, \"public_items_are_editorial_only\": true, \"durable_temporal_language_contract\": \"LOCAL_NEWS_OS_DURABLE_TEMPORAL_LANGUAGE_V1\"}\n",
+      "stderr_tail": ""
+    },
+    {
+      "name": "render_frontpage",
+      "argv": [
+        "/opt/hostedtoolcache/Python/3.13.15/x64/bin/python",
+        "valcea-clar/scripts/render_frontpage.py"
+      ],
+      "returncode": 0,
+      "ok": true,
+      "stdout_tail": "{\"schema_version\": \"1.0\", \"edition_id\": \"2026-08-18-evening\", \"updated_local\": \"2026-08-18T16:03:59+03:00\", \"frontpage\": \"site/runtime/index.html\", \"edition_route\": \"/editia-de-seara/\", \"generator\": \"deterministic_zero_llm_v2+manual_journalism_v1\", \"paid_llm_api_required\": false}\n",
+      "stderr_tail": ""
+    },
+    {
+      "name": "render_story_pages",
+      "argv": [
+        "/opt/hostedtoolcache/Python/3.13.15/x64/bin/python",
+        "valcea-clar/scripts/render_story_pages.py"
+      ],
+      "returncode": 0,
+      "ok": true,
+      "stdout_tail": "{\"status\": \"PASS\", \"story_pages\": 4, \"newsarticle_jsonld\": 4, \"date_published\": 4, \"provenance_backed_images\": 0, \"cross_links\": 12, \"routes\": [{\"id\": \"alert-1cd2159b942ec2b672f7\", \"path\": \"/stiri/alert-1cd2159b942ec2b672f7/\", \"canonical\": \"https://valceaclar.ro/stiri/alert-1cd2159b942ec2b672f7/\", \"related_story_ids\": [\"alert-fdfdb85a579432f385f7\", \"rm-valcea-gambling-authorizations-20260723\", \"scm-program-fdbf66a4a5bb7ef4f69b\"], \"structured_data_type\": \"NewsArticle\", \"published_at\": \"2026-08-18T00:02:39+03:00\"}, {\"id\": \"rm-valcea-gambling-authorizations-20260723\", \"path\": \"/stiri/rm-valcea-gambling-authorizations-20260723/\", \"canonical\": \"https://valceaclar.ro/stiri/rm-valcea-gambling-authorizations-20260723/\", \"related_story_ids\": [\"alert-1cd2159b942ec2b672f7\", \"alert-fdfdb85a579432f385f7\", \"scm-program-fdbf66a4a5bb7ef4f69b\"], \"structured_data_type\": \"NewsArticle\", \"published_at\": \"2026-08-18T16:03:59+03:00\"}, {\"id\": \"alert-fdfdb85a579432f385f7\", \"path\": \"/stiri/alert-fdfdb85a579432f385f7/\", \"canonical\": \"https://valceaclar.ro/stiri/alert-fdfdb85a579432f385f7/\", \"related_story_ids\": [\"alert-1cd2159b942ec2b672f7\", \"rm-valcea-gambling-authorizations-20260723\", \"scm-program-fdbf66a4a5bb7ef4f69b\"], \"structured_data_type\": \"NewsArticle\", \"published_at\": \"2026-08-18T00:02:39+03:00\"}, {\"id\": \"scm-program-fdbf66a4a5bb7ef4f69b\", \"path\": \"/stiri/scm-program-fdbf66a4a5bb7ef4f69b/\", \"canonical\": \"https://valceaclar.ro/stiri/scm-program-fdbf66a4a5bb7ef4f69b/\", \"related_story_ids\": [\"alert-1cd2159b942ec2b672f7\", \"rm-valcea-gambling-authorizations-20260723\", \"alert-fdfdb85a579432f385f7\"], \"structured_data_type\": \"NewsArticle\", \"published_at\": \"2026-08-18T16:03:59+03:00\"}], \"indexing_routes\": 5, \"sitemap\": \"site/runtime/sitemap.xml\", \"robots\": \"site/runtime/robots.txt\"}\n",
+      "stderr_tail": ""
+    },
+    {
+      "name": "build_live_feed",
+      "argv": [
+        "/opt/hostedtoolcache/Python/3.13.15/x64/bin/python",
+        "valcea-clar/scripts/build_live_feed.py"
+      ],
+      "returncode": 0,
+      "ok": true,
+      "stdout_tail": "{\"status\": \"PASS\", \"publication_model\": \"continuous_story_first\", \"stories\": 4, \"compatibility_snapshot\": \"2026-08-18-evening\", \"feed\": \"site/runtime/live-feed.json\"}\n",
+      "stderr_tail": ""
+    },
+    {
+      "name": "build_sites_export",
+      "argv": [
+        "/opt/hostedtoolcache/Python/3.13.15/x64/bin/python",
+        "valcea-clar/scripts/build_sites_export.py"
+      ],
+      "returncode": 0,
+      "ok": true,
+      "stdout_tail": "VÂLCEA CLAR site export: PASS (7 places, 12 routes, current edition=2026-08-18-evening, generator=deterministic_zero_llm_v2+manual_journalism_v1)\n",
+      "stderr_tail": ""
+    },
+    {
+      "name": "overlay_runtime_export",
+      "argv": [
+        "/opt/hostedtoolcache/Python/3.13.15/x64/bin/python",
+        "valcea-clar/scripts/overlay_runtime_export.py"
+      ],
+      "returncode": 1,
+      "ok": false,
+      "stdout_tail": "",
+      "stderr_tail": "Traceback (most recent call last):\n  File \"/home/runner/work/civora/civora/valcea-clar/scripts/overlay_runtime_export.py\", line 209, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/home/runner/work/civora/civora/valcea-clar/scripts/overlay_runtime_export.py\", line 170, in main\n    raise RuntimeError(f\"refusing export with deferred indexing: {indexing}\")\nRuntimeError: refusing export with deferred indexing: {'status': 'DEFERRED_CONFIGURED_STATIC_MISSING', 'routes': ['/', '/stiri/alert-1cd2159b942ec2b672f7/', '/stiri/rm-valcea-gambling-authorizations-20260723/', '/stiri/alert-fdfdb85a579432f385f7/', '/stiri/scm-program-fdbf66a4a5bb7ef4f69b/', '/unde-iesim/', '/termeni/', '/confidentialitate/'], 'route_count': 8, 'configured_static_routes': ['/stiri/', '/despre/', '/unde-iesim/', '/termeni/', '/confidentialitate/'], 'missing_configured_static_routes': ['/stiri/', '/despre/'], 'robots': '/home/runner/work/civora/civora/valcea-clar/site/runtime/robots.txt', 'sitemap': '/home/runner/work/civora/civora/valcea-clar/site/runtime/sitemap.xml', 'indexing_assets_written': False}\n"
+    }
+  ],
+  "decision": {
+    "evaluated_local": "2026-08-18T16:03:59+03:00",
+    "changed": true,
+    "publishable_story_count": 4,
+    "new_story_ids": [
+      "rm-valcea-gambling-authorizations-20260723",
+      "scm-program-fdbf66a4a5bb7ef4f69b"
+    ],
+    "requested_story_publishable": true
+  },
+  "render": {
+    "manifest_story_count": 4,
+    "feed_story_count": 4,
+    "requested_story_in_manifest": true,
+    "requested_story_in_live_feed": true
+  }
+}
