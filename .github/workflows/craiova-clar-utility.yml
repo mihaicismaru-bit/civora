@@ -60,17 +60,18 @@ jobs:
           git add craiova-clar/site craiova-clar/state || true
           if git diff --cached --quiet; then
             echo 'No generated change to persist.'
-            exit 0
+          else
+            git commit -m 'Publish CRAIOVA CLAR utility story snapshot'
+            git push origin HEAD:craiova-clar-build
           fi
-          git commit -m 'Publish CRAIOVA CLAR utility story snapshot'
-          git push origin HEAD:craiova-clar-build
 
-      - name: Verify public utility publication
+      - name: Verify public utility publication and write PublicationReceipt
         env:
           BASE_URL: https://craiova-clar-mihaicismaru-6634s-projects.vercel.app
         run: |
           python - <<'PY'
           import json, time, urllib.request
+          from datetime import datetime, timezone
           from pathlib import Path
 
           doc = json.loads(Path('craiova-clar/site/stories.json').read_text(encoding='utf-8'))
@@ -85,7 +86,24 @@ jobs:
                       body = response.read().decode('utf-8', errors='replace')
                       status = response.status
                   if status == 200 and expected in body and 'CRAIOVA CLAR' in body:
-                      print(json.dumps({'status':'PASS','url':url,'headline':expected}, ensure_ascii=False))
+                      receipt = {
+                          'story_id': story['story_id'],
+                          'canonical_url': url,
+                          'published_at': story['published_at'],
+                          'destination': 'public_web',
+                          'status': 'published_verified',
+                          'external_id': None,
+                          'metadata': {
+                              'verified_at': datetime.now(timezone.utc).isoformat(),
+                              'http_status': status,
+                              'headline_verified': True,
+                              'product_verified': True,
+                          },
+                      }
+                      Path('craiova-clar/site/utility_publication_receipt.json').write_text(
+                          json.dumps(receipt, ensure_ascii=False, indent=2) + '\n', encoding='utf-8'
+                      )
+                      print(json.dumps(receipt, ensure_ascii=False))
                       raise SystemExit(0)
                   last_error = f'HTTP {status}; expected live headline not found'
               except Exception as exc:
@@ -93,3 +111,15 @@ jobs:
               time.sleep(5)
           raise SystemExit(f'Public publication verification failed for {url}: {last_error}')
           PY
+
+      - name: Persist verified PublicationReceipt
+        run: |
+          git config user.name 'craiova-clar[bot]'
+          git config user.email 'craiova-clar@users.noreply.github.com'
+          git add craiova-clar/site/utility_publication_receipt.json
+          if git diff --cached --quiet; then
+            echo 'Verified publication receipt already current.'
+            exit 0
+          fi
+          git commit -m 'Verify CRAIOVA CLAR utility publication live'
+          git push origin HEAD:craiova-clar-build
