@@ -27,7 +27,7 @@ STATE = ROOT / "partener-eu" / "ingest" / "state" / "people_policy_official_sour
 REGISTRY = ROOT / "partener-eu" / "ingest" / "state" / "people_policy_registry.json"
 SOURCE_REGISTRY = ROOT / "partener-eu" / "ingest" / "state" / "people_policy_source_registry.json"
 CANONICAL_CALLS = ROOT / "partener-eu" / "ingest" / "state" / "mipe_canonical_calls.json"
-UA = "PARTENER.EU-DecisionMakerOfficialIngest/2.3 (+https://partener.eu)"
+UA = "PARTENER.EU-DecisionMakerOfficialIngest/2.4 (+https://partener.eu)"
 NOW = dt.datetime.now(dt.timezone.utc)
 FETCH_TIMEOUT_SECONDS = 18
 MAX_SOURCE_FETCH_WORKERS = 9
@@ -219,14 +219,28 @@ def first_relevant_sentence(text: str) -> str:
     return clean(text)[:500]
 
 
-def actor_alias(person: dict[str, Any], text: str) -> str | None:
+def alias_present(text: Any, alias: Any) -> bool:
+    """Match a person alias only as a complete folded token sequence.
+
+    Romanian diacritics are folded before matching, while ASCII alphanumerics
+    define the entity boundary. This preserves explicit surname mentions such as
+    `Maxim a declarat` but rejects accidental substrings such as `maximizează`
+    or `maximum`.
+    """
     value = fold(text)
+    needle = fold(alias)
+    if not needle:
+        return False
+    return re.search(rf"(?<![a-z0-9]){re.escape(needle)}(?![a-z0-9])", value) is not None
+
+
+def actor_alias(person: dict[str, Any], text: str) -> str | None:
     aliases = [clean(alias) for alias in person.get("aliases") or [] if clean(alias)]
     name = clean(person.get("name"))
     if name:
         aliases.append(name)
     for alias in sorted(set(aliases), key=len, reverse=True):
-        if fold(alias) in value:
+        if alias_present(text, alias):
             return alias
     return None
 
@@ -292,11 +306,10 @@ def statement_window_for(person: dict[str, Any], text: str) -> dict[str, Any] | 
 
 
 def actor_for(text: str, registry: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]] | None:
-    value = fold(text)
     for person in registry.get("people") or []:
         if not person.get("active"):
             continue
-        if not any(fold(alias) in value for alias in person.get("aliases") or []):
+        if not actor_alias(person, text):
             continue
         snapshot = verified_role(person)
         if snapshot:
@@ -572,6 +585,7 @@ def main() -> int:
             "canonicalLinkRequiresExplicitCodeMatch": True,
             "sourceHealthRequiresArticleFetchProofWhenCandidatesExist": True,
             "actorSpeechFundingEvidenceRequired": True,
+            "actorAliasesRequireTokenBoundaries": True,
             "boundedConcurrentSourceIngest": True,
             "maxSourceFetchWorkers": MAX_SOURCE_FETCH_WORKERS,
             "fetchTimeoutSeconds": FETCH_TIMEOUT_SECONDS,
