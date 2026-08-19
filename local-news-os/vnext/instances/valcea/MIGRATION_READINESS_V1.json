@@ -1,21 +1,21 @@
 {
-  "schema_version": "1.2",
+  "schema_version": "1.3",
   "contract": "LOCAL_NEWS_OS_VNEXT_VALCEA_MIGRATION_READINESS_V1",
   "instance_id": "valcea",
   "status": "PRE_MIGRATION_READINESS_ONLY",
-  "observed_at": "2026-08-19T14:36:16+03:00",
+  "observed_at": "2026-08-19T15:33:33+03:00",
   "cutover_authorized": false,
-  "reason": "LOCAL NEWS OS vNext is BUILD_ACTIVE. P0-P5 are CLOSED, P6_DYNAMIC_PRIMARY_RESOLVER is NEXT, and P7-P18 are not yet closed. This snapshot refreshes migration inputs only and MUST NOT mutate the current public runtime.",
+  "reason": "LOCAL NEWS OS vNext is BUILD_ACTIVE. P0-P7 are CLOSED, P8_NEWSWORTHINESS_ENGINE is NEXT, and P9-P18 are not yet closed. This snapshot refreshes migration inputs only and MUST NOT mutate the current public runtime.",
   "vnext_gate": {
     "state_path": "local-news-os/vnext/VNEXT_STATE.json",
-    "state_sha": "1d535c188a30f88cb269e36d02a92198546d32ed",
-    "observed_build_commit": "067070c9adbc64f1d8c699b1469acf78d9eac3e4",
+    "state_sha": "a363566ca4e54bbe0b82988b522c907b10072dcf",
+    "observed_build_commit": "ec8fb2fb87263057cc0da4abf7fc6809c16dba24",
     "required_before_migration": "BUILD_READY_FOR_MIGRATION",
-    "current_next_phase": "P6_DYNAMIC_PRIMARY_RESOLVER",
+    "current_next_phase": "P8_NEWSWORTHINESS_ENGINE",
     "production_cutover": false
   },
   "readiness_delta": {
-    "build_progress": "P4_GENERIC_SOURCE_ADAPTER_CORE and P5_SIGNAL_ENGINE are now CLOSED with validation evidence; P6 is next.",
+    "build_progress": "P6_DYNAMIC_PRIMARY_RESOLVER and P7_FACT_KERNEL_ENGINE are now CLOSED with dedicated green validation evidence; P8 is next.",
     "legacy_source_drift_detected": true,
     "refreshed_domains": [
       "public_money_and_decisions",
@@ -54,162 +54,331 @@
       "domain": "stories_and_urls",
       "source_path": "valcea-clar/site/story_publication_event.json",
       "source_sha": "709af6f8b7f8bcdab9d3530f06523b51aa2ed276",
-      "target": ["stories", "publication_events"],
-      "requirements": ["preserve_story_id", "preserve_canonical_url", "preserve_published_at", "idempotent_import"]
+      "target": [
+        "stories",
+        "publication_events"
+      ],
+      "requirements": [
+        "preserve_story_id",
+        "preserve_canonical_url",
+        "preserve_published_at",
+        "idempotent_import"
+      ]
     },
     {
       "domain": "story_content_and_public_projection",
       "source_path": "valcea-clar/site/runtime/live-feed.json",
       "source_sha": "fc47648a0b228d43293348e445d5d613072d3f32",
-      "target": ["stories", "story_revisions"],
-      "requirements": ["do_not_treat_repository_json_as_future_runtime_authority", "import_once_then_database_owns_runtime"]
+      "target": [
+        "stories",
+        "story_revisions"
+      ],
+      "requirements": [
+        "do_not_treat_repository_json_as_future_runtime_authority",
+        "import_once_then_database_owns_runtime"
+      ]
     },
     {
       "domain": "people",
       "source_path": "valcea-clar/site/runtime/people.json",
       "source_sha": "a99562617891720a0e211bc8f0341f4435eab5b8",
-      "target": ["knowledge_nodes", "knowledge_edges", "entity_sources"],
-      "requirements": ["preserve_profile_id", "preserve_public_path", "preserve_role_source_urls", "unsupported_relationships_remain_absent"]
+      "target": [
+        "knowledge_nodes",
+        "knowledge_edges",
+        "entity_sources"
+      ],
+      "requirements": [
+        "preserve_profile_id",
+        "preserve_public_path",
+        "preserve_role_source_urls",
+        "unsupported_relationships_remain_absent"
+      ]
     },
     {
       "domain": "artists",
       "source_path": "valcea-clar/site/runtime/artists.json",
       "source_sha": "b4cc261d3632f6c71ad2d9b4be51a659d7df71fa",
-      "target": ["knowledge_nodes", "knowledge_edges", "entity_sources"],
-      "requirements": ["preserve_profile_id", "preserve_public_path", "preserve_festival_appearance_edges", "preserve_identity_resolution_status"]
+      "target": [
+        "knowledge_nodes",
+        "knowledge_edges",
+        "entity_sources"
+      ],
+      "requirements": [
+        "preserve_profile_id",
+        "preserve_public_path",
+        "preserve_festival_appearance_edges",
+        "preserve_identity_resolution_status"
+      ]
     },
     {
       "domain": "festival_history",
       "source_path": "valcea-clar/editorial/festival_dossiers_2026.json",
       "source_sha": "84ff4e5b1bae39f63d349b1a7d79d1083e03c62c",
-      "target": ["knowledge_nodes", "knowledge_edges", "evidence"],
-      "requirements": ["preserve_organizers", "preserve_sponsors_when_evidenced", "preserve_public_money_provenance", "preserve_historical_context"]
+      "target": [
+        "knowledge_nodes",
+        "knowledge_edges",
+        "evidence"
+      ],
+      "requirements": [
+        "preserve_organizers",
+        "preserve_sponsors_when_evidenced",
+        "preserve_public_money_provenance",
+        "preserve_historical_context"
+      ]
     },
     {
       "domain": "festival_lineups",
       "source_path": "valcea-clar/editorial/festival_lineups_2026.json",
       "source_sha": "c0c7a4e834c3ce24aa4640ed8ed2f2962974fb81",
-      "target": ["knowledge_edges", "evidence"],
-      "requirements": ["artist_event_edges_are_provenance_bound"]
+      "target": [
+        "knowledge_edges",
+        "evidence"
+      ],
+      "requirements": [
+        "artist_event_edges_are_provenance_bound"
+      ]
     },
     {
       "domain": "performing_arts_people",
       "source_path": "valcea-clar/editorial/performing_arts_people_2026.json",
       "source_sha": "05d8fce762d124ad01977d55b2e9c8ae5e5f9734",
-      "target": ["knowledge_nodes", "knowledge_edges", "evidence"],
-      "requirements": ["preserve_identity_evidence", "preserve_appearance_context"]
+      "target": [
+        "knowledge_nodes",
+        "knowledge_edges",
+        "evidence"
+      ],
+      "requirements": [
+        "preserve_identity_evidence",
+        "preserve_appearance_context"
+      ]
     },
     {
       "domain": "places_and_venues",
       "source_path": "valcea-clar/data/places.json",
       "source_sha": "83f236a8d344769b370db643d7681789c9f55a9d",
-      "target": ["knowledge_nodes", "knowledge_edges", "entity_sources"],
-      "requirements": ["preserve_place_id", "preserve_slug", "preserve_verification_level", "preserve_operator_only_when_sourced", "preserve_source_ids", "preserve_unknowns_and_conflicts", "rendered_html_is_not_entity_authority"]
+      "target": [
+        "knowledge_nodes",
+        "knowledge_edges",
+        "entity_sources"
+      ],
+      "requirements": [
+        "preserve_place_id",
+        "preserve_slug",
+        "preserve_verification_level",
+        "preserve_operator_only_when_sourced",
+        "preserve_source_ids",
+        "preserve_unknowns_and_conflicts",
+        "rendered_html_is_not_entity_authority"
+      ]
     },
     {
       "domain": "place_source_registry",
       "source_path": "valcea-clar/data/sources.json",
       "source_sha": "96d33e842bfbda12c2b72bdc78db45e3fdacd1bd",
-      "target": ["sources", "entity_sources"],
-      "requirements": ["preserve_source_id", "preserve_authority_score", "preserve_supports_scope", "deduplicate_against_global_source_registry"]
+      "target": [
+        "sources",
+        "entity_sources"
+      ],
+      "requirements": [
+        "preserve_source_id",
+        "preserve_authority_score",
+        "preserve_supports_scope",
+        "deduplicate_against_global_source_registry"
+      ]
     },
     {
       "domain": "creator_intelligence",
       "source_path": "valcea-clar/data/creators.json",
       "source_sha": "89e6dd1d9b4a84b62221c9fab1197a6726568af1",
-      "target": ["knowledge_nodes", "knowledge_edges", "entity_sources"],
-      "requirements": ["preserve_publication_status", "hidden_candidates_remain_hidden", "do_not_promote_without_required_evidence", "preserve_commercial_disclosure_review_gate"]
+      "target": [
+        "knowledge_nodes",
+        "knowledge_edges",
+        "entity_sources"
+      ],
+      "requirements": [
+        "preserve_publication_status",
+        "hidden_candidates_remain_hidden",
+        "do_not_promote_without_required_evidence",
+        "preserve_commercial_disclosure_review_gate"
+      ]
     },
     {
       "domain": "public_money_and_decisions",
       "source_path": "valcea-clar/editorial/council_decision_graph.json",
-      "source_sha": "0ec1f95f44a913db74b2effae982eb6783a4e019",
-      "target": ["knowledge_nodes", "knowledge_edges", "evidence"],
-      "requirements": ["decision_amount_beneficiary_edges_require_primary_evidence", "calculations_remain_labeled_as_calculations"]
+      "source_sha": "a8048187172941bedf6caf753cfc0bbd6639fc85",
+      "target": [
+        "knowledge_nodes",
+        "knowledge_edges",
+        "evidence"
+      ],
+      "requirements": [
+        "decision_amount_beneficiary_edges_require_primary_evidence",
+        "calculations_remain_labeled_as_calculations"
+      ]
     },
     {
       "domain": "facts",
       "source_path": "valcea-clar/editorial/facts_registry.json",
-      "source_sha": "6b411dbae46ad45adfc00c2f4fde18e9975778fd",
-      "target": ["evidence", "fact_kernels"],
-      "requirements": ["no_evidence_no_material_claim", "preserve_source_urls", "deduplicate_by_fingerprint"]
+      "source_sha": "67bc6f8b9f2f6c5c32626d07577e4feb6e02c16a",
+      "target": [
+        "evidence",
+        "fact_kernels"
+      ],
+      "requirements": [
+        "no_evidence_no_material_claim",
+        "preserve_source_urls",
+        "deduplicate_by_fingerprint"
+      ]
     },
     {
       "domain": "fact_kernels",
       "source_path": "valcea-clar/editorial/fact_kernel_registry.json",
-      "source_sha": "8e04b78a5e6de23aa3f03914a95e6fd39db78f78",
-      "target": ["fact_kernels"],
-      "requirements": ["preserve_claim_provenance", "legacy_kernel_is_import_evidence_not_future_runtime_authority"]
+      "source_sha": "10a1fe8ea3d4a0841546ddd2434e358901e5740e",
+      "target": [
+        "fact_kernels"
+      ],
+      "requirements": [
+        "preserve_claim_provenance",
+        "legacy_kernel_is_import_evidence_not_future_runtime_authority"
+      ]
     },
     {
       "domain": "source_registry",
       "source_path": "valcea-clar/editorial/news_sources.json",
       "source_sha": "a885b64334e3848d83e894800d13fc6a149d99d7",
-      "target": ["sources"],
-      "requirements": ["map_to_generic_adapter_class", "preserve_tier", "preserve_health_or_quarantine_status"]
+      "target": [
+        "sources"
+      ],
+      "requirements": [
+        "map_to_generic_adapter_class",
+        "preserve_tier",
+        "preserve_health_or_quarantine_status"
+      ]
     },
     {
       "domain": "manual_watch_sources",
       "source_path": "valcea-clar/editorial/manual_watch_sources.json",
       "source_sha": "0bcff3f7a1715543181d219b460326c2bfe8f11f",
-      "target": ["sources"],
-      "requirements": ["deduplicate_against_primary_registry", "convert_manual_watch_to_configured_source_or_explicit_hold"]
+      "target": [
+        "sources"
+      ],
+      "requirements": [
+        "deduplicate_against_primary_registry",
+        "convert_manual_watch_to_configured_source_or_explicit_hold"
+      ]
     },
     {
       "domain": "source_intelligence_seed",
       "source_path": "valcea-clar/editorial/source_intelligence_seed_registry.json",
       "source_sha": "30604a2cb9c3aaf73a7c68d09b1e87b930a8a6b6",
-      "target": ["sources", "entity_sources"],
-      "requirements": ["retain_discovery_provenance", "do_not_promote_discovery_only_sources_to_fact_authority"]
+      "target": [
+        "sources",
+        "entity_sources"
+      ],
+      "requirements": [
+        "retain_discovery_provenance",
+        "do_not_promote_discovery_only_sources_to_fact_authority"
+      ]
     },
     {
       "domain": "media_bindings",
       "source_path": "valcea-clar/social/story_visuals.json",
       "source_sha": "52a2f1eb83ce442a750f3f63df2ffc5ced2005d2",
-      "target": ["media_assets", "story_media"],
-      "requirements": ["preserve_source_url", "preserve_credit", "preserve_rights_basis", "preserve_license_url_when_present", "preserve_archive_disclosure", "missing_media_must_not_block_story"]
+      "target": [
+        "media_assets",
+        "story_media"
+      ],
+      "requirements": [
+        "preserve_source_url",
+        "preserve_credit",
+        "preserve_rights_basis",
+        "preserve_license_url_when_present",
+        "preserve_archive_disclosure",
+        "missing_media_must_not_block_story"
+      ]
     },
     {
       "domain": "photo_atlas",
       "source_path": "valcea-clar/social/photo_atlas.json",
       "source_sha": "55edc3ee416f24ea2d8ddcad12ae2d6fe9ea40f0",
-      "target": ["media_assets", "knowledge_edges"],
-      "requirements": ["import_approved_assets_only_as_approved", "preserve_provenance", "preserve_rights_basis", "preserve_license_url_when_present", "preserve_usage_scope", "preserve_contextual_archive_disclosure", "candidate_registry_remains_candidate_only"]
+      "target": [
+        "media_assets",
+        "knowledge_edges"
+      ],
+      "requirements": [
+        "import_approved_assets_only_as_approved",
+        "preserve_provenance",
+        "preserve_rights_basis",
+        "preserve_license_url_when_present",
+        "preserve_usage_scope",
+        "preserve_contextual_archive_disclosure",
+        "candidate_registry_remains_candidate_only"
+      ]
     },
     {
       "domain": "facebook_delivery_history",
       "source_path": "valcea-clar/social/facebook_state.json",
-      "source_sha": "52865f984d7b7d7a0973b679fa05f384b6446eeb",
-      "target": ["social_deliveries"],
-      "requirements": ["preserve_external_post_id", "preserve_published_at", "historical_state_is_read_only_after_import"]
+      "source_sha": "d90b89dd6ec868d2c8e5a0dafbc2543c7830310b",
+      "target": [
+        "social_deliveries"
+      ],
+      "requirements": [
+        "preserve_external_post_id",
+        "preserve_published_at",
+        "historical_state_is_read_only_after_import"
+      ]
     },
     {
       "domain": "instagram_delivery_history",
       "source_path": "valcea-clar/social/instagram_state.json",
-      "source_sha": "9078d1c02d9850f19503be75c2c56840ad6d1be4",
-      "target": ["social_deliveries", "media_assets"],
-      "requirements": ["preserve_media_id", "preserve_container_status", "preserve_product_fingerprint", "preserve_fact_card_non_synthetic_semantics"]
+      "source_sha": "4ffc683a276b9e368bc46e33c09ab4fabd1d1812",
+      "target": [
+        "social_deliveries",
+        "media_assets"
+      ],
+      "requirements": [
+        "preserve_media_id",
+        "preserve_container_status",
+        "preserve_product_fingerprint",
+        "preserve_fact_card_non_synthetic_semantics"
+      ]
     },
     {
       "domain": "leisure_public_route",
       "source_path": "valcea-clar/site/runtime/unde-iesim/index.html",
       "source_sha": "c6b017c042463198408a27451a630c4f7f7b17ac",
-      "target": ["public_route_compatibility"],
-      "requirements": ["preserve_/unde-iesim/", "future_venue_data_must_move_to_site_database", "rendered_html_is_not_entity_authority"]
+      "target": [
+        "public_route_compatibility"
+      ],
+      "requirements": [
+        "preserve_/unde-iesim/",
+        "future_venue_data_must_move_to_site_database",
+        "rendered_html_is_not_entity_authority"
+      ]
     },
     {
       "domain": "public_runtime_shell",
       "source_path": "valcea-clar/site/runtime/index.html",
       "source_sha": "d6bb904a060d0301fc8982d6e592430ad446721f",
-      "target": ["public_route_compatibility"],
-      "requirements": ["preserve_brand_and_valid_public_routes", "future_story_projection_must_read_site_database"]
+      "target": [
+        "public_route_compatibility"
+      ],
+      "requirements": [
+        "preserve_brand_and_valid_public_routes",
+        "future_story_projection_must_read_site_database"
+      ]
     },
     {
       "domain": "sitemap",
       "source_path": "valcea-clar/site/runtime/sitemap.xml",
       "source_sha": "9d1722ea68749ebf627ec6c586cb5dcc085d4192",
-      "target": ["sitemap_generator"],
-      "requirements": ["preserve_existing_indexable_canonical_urls", "generate_from_database_after_cutover"]
+      "target": [
+        "sitemap_generator"
+      ],
+      "requirements": [
+        "preserve_existing_indexable_canonical_urls",
+        "generate_from_database_after_cutover"
+      ]
     }
   ],
   "social_capability_snapshot": {
@@ -228,7 +397,7 @@
     {
       "id": "GAP_VNEXT_BUILD_NOT_READY",
       "severity": "BLOCKING_CUTOVER",
-      "resolution": "Close P6-P17 and reach BUILD_READY_FOR_MIGRATION before any production migration."
+      "resolution": "Close P8-P17 and reach BUILD_READY_FOR_MIGRATION before any production migration."
     },
     {
       "id": "GAP_VENUE_ENTITY_SOURCE",
