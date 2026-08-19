@@ -40,7 +40,7 @@ jobs:
             local-news-os/vnext/core/public_route_compat.py \
             local-news-os/vnext/instances/valcea/migration/p18_shadow_projection_diff.py
 
-      - name: Enforce config-driven route boundary
+      - name: Enforce config-driven route and provenance boundary
         shell: bash
         run: |
           set -euo pipefail
@@ -49,6 +49,8 @@ jobs:
           grep -q '/oameni' local-news-os/vnext/instances/valcea/packs/publication.json
           grep -q '/artisti' local-news-os/vnext/instances/valcea/packs/publication.json
           grep -q '/unde-iesim/' local-news-os/vnext/instances/valcea/packs/publication.json
+          grep -q '"source_kind": "LEGACY_MIGRATION"' local-news-os/vnext/instances/valcea/migration/p18_shadow_migration.py
+          grep -q 'http_sources = sorted' local-news-os/vnext/instances/valcea/migration/p18_shadow_migration.py
           echo 'VNEXT_P18_ROUTE_COMPAT_BOUNDARY_PASS'
 
       - name: Run shadow projection parity with diagnostic capture
