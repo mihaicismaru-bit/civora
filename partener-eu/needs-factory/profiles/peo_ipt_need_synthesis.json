@@ -1,0 +1,26 @@
+{
+  "schema_version": "nf.need_synthesis_policy.v0.1",
+  "profile_id": "PEO_IPT_WORK_BASED_LEARNING",
+  "need_candidate_constructs": [
+    "career_guidance_need",
+    "practice_quality",
+    "skills_baseline",
+    "career_intention"
+  ],
+  "context_only_constructs": [
+    "labour_demand",
+    "youth_labour_market_context",
+    "ipt_system_relevance",
+    "qualification_offer",
+    "demographic_context"
+  ],
+  "rules": {
+    "school_need_requires_direct_school_evidence": true,
+    "context_only_construct_cannot_create_need": true,
+    "indicator_cannot_create_need": true,
+    "compliance_cannot_create_need": true,
+    "cause_fields_forbidden_at_need_synthesis": true,
+    "ranking_dimensions_require_evidence_refs": true,
+    "prohibited_overclaim_must_be_preserved": true
+  }
+}
