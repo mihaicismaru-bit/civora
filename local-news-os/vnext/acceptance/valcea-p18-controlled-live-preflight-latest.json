@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0",
+  "contract": "LOCAL_NEWS_OS_VNEXT_VALCEA_P18_CONTROLLED_LIVE_PREFLIGHT_V1",
+  "instance_id": "valcea",
+  "status": "BLOCKED_EXTERNAL_RUNTIME_BINDING",
+  "production_cutover": false,
+  "public_runtime_mutated": false,
+  "network_publication_attempted": false,
+  "observed_main_sha": "808e5c4dfc45d77bacda07b7351c8c3f25456ef6",
+  "build": {
+    "status": "BUILD_READY_FOR_MIGRATION",
+    "build_ready_blob_sha": "34b86b4cc398c0e04038ca046304ab7077c7f077",
+    "site_owns_runtime": true,
+    "core_knows_no_locality": true
+  },
+  "shadow_acceptance": {
+    "migration_status": "SHADOW_MIGRATION_PASS",
+    "projection_status": "SHADOW_PROJECTION_PASS",
+    "stories": 23,
+    "people": 6,
+    "artists": 172,
+    "verified_places": 4,
+    "media_assets": 4,
+    "facebook_legacy_history": 37,
+    "instagram_legacy_history": 23,
+    "canonical_url_parity": true,
+    "duplicate_canonical_paths_zero": true,
+    "public_runtime_mutated": false,
+    "network_publication_attempted": false
+  },
+  "runtime_contract": {
+    "owner": "site_application",
+    "state_backend": "postgresql",
+    "database_secret_ref": "LOCAL_NEWS_RUNTIME_DATABASE_URL",
+    "public_base_url": "https://valceaclar.ro",
+    "newsroom_path": "/newsroom",
+    "repository_runtime_state_enabled": false
+  },
+  "deployment_evidence": {
+    "bound_vnext_production_target_verified": false,
+    "vercel_connected_team_projects_count": 0,
+    "vercel_project_for_valceaclar_verified": false,
+    "repo_vercel_config_found": false,
+    "postgres_runtime_binding_verified": false,
+    "newsroom_runtime_secret_binding_verified": false,
+    "note": "No production target capable of serving the vNext site application plus its PostgreSQL runtime is evidenced by the currently connected deployment surface. This is not a code-quality failure and does not invalidate shadow acceptance."
+  },
+  "social_single_writer_preflight": {
+    "legacy_workflow_path": ".github/workflows/valcea-clar-social-publishing.yml",
+    "legacy_schedule_present": true,
+    "legacy_schedule": "7,22,37,52 * * * *",
+    "legacy_facebook_direct_apply_present": true,
+    "legacy_instagram_direct_apply_present": true,
+    "legacy_repository_state_write_present": true,
+    "vnext_facebook_mode": "direct_capable",
+    "vnext_instagram_mode": "direct_capable",
+    "cutover_rule": "Do not enable vNext direct apply until a production runtime is live and independently healthy; then fence the legacy scheduled direct writer atomically before the first vNext apply. Preserve legacy state as read-only history and rollback evidence."
+  },
+  "public_host_verification": {
+    "status": "UNVERIFIED_FROM_THIS_EXECUTION_ENVIRONMENT",
+    "downtime_claimed": false,
+    "note": "Public-host browsing could not produce a fresh independent readback in this execution. Shadow WSGI projection is PASS, but that is not treated as proof that the new runtime is deployed at valceaclar.ro."
+  },
+  "non_blocking_media_gap": {
+    "user_owned_photo_inventory_bound_to_vnext": false,
+    "current_shadow_imported_media_assets": 4,
+    "policy": "Missing user-owned assets does not block controlled-live because editorial-card/no-visual fallback is valid; user-owned photos remain migration/media debt and must retain ownership provenance when imported."
+  },
+  "blocking_requirements_before_controlled_live": [
+    "Bind a production hosting target for the LOCAL NEWS OS vNext site application serving valceaclar.ro.",
+    "Provision and bind the PostgreSQL runtime secret LOCAL_NEWS_RUNTIME_DATABASE_URL to that production target.",
+    "Bind the private newsroom authentication secret required by the site runtime.",
+    "Deploy the already-validated vNext artifact without changing public DNS until health/readback passes on the target.",
+    "Run health and canonical-route parity against the deployed target.",
+    "Fence the legacy scheduled Facebook/Instagram direct writer atomically immediately before first vNext direct apply.",
+    "Perform one low-risk controlled-live story publication and independent public/social readback with rollback armed."
+  ],
+  "next_gate": "EXTERNAL_RUNTIME_BINDING_THEN_CONTROLLED_LIVE",
+  "intervention_required": true,
+  "intervention_scope": "Provide or authorize a production runtime target and PostgreSQL binding for valceaclar.ro; no editorial decision or code redesign is required."
+}
