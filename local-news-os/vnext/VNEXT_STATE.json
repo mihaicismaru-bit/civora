@@ -37,8 +37,8 @@
       ]
     },
     "P3_SITE_RUNTIME_PRIVATE_NEWSROOM": {
-      "status": "IN_REVIEW",
-      "candidate_evidence": [
+      "status": "CLOSED",
+      "evidence": [
         "generic WSGI site runtime",
         "public /healthz backed only by site database",
         "private /newsroom HTML surface",
@@ -47,10 +47,11 @@
         "Bearer authentication with constant-time comparison",
         "fail-closed newsroom when auth secret is absent",
         "private no-store and noindex response policy",
-        "repository-runtime dependency rejection in CI"
+        "repository-runtime dependency rejection in CI",
+        "LOCAL NEWS OS vNext Validation run 32241275942 PASS"
       ]
     },
-    "P4_GENERIC_SOURCE_ADAPTER_CORE": {"status": "PENDING"},
+    "P4_GENERIC_SOURCE_ADAPTER_CORE": {"status": "NEXT"},
     "P5_SIGNAL_ENGINE": {"status": "PENDING"},
     "P6_DYNAMIC_PRIMARY_RESOLVER": {"status": "PENDING"},
     "P7_FACT_KERNEL_ENGINE": {"status": "PENDING"},
@@ -66,5 +67,5 @@
     "P17_INSTANCE_BOOTSTRAP_SECOND_INSTANCE_TEST": {"status": "PENDING"},
     "P18_MIGRATION_SHADOW_LIVE_SOAK_PRODUCTION_LOCK": {"status": "PENDING"}
   },
-  "next_action": "Validate P3 in pull-request CI; on PASS close P3 and advance to generic source adapters."
+  "next_action": "Implement the generic source adapter core as configuration-driven adapters with no locality-specific parser in generic code."
 }
