@@ -10,11 +10,13 @@ on:
       - 'valcea-clar/site/story_publication_event.json'
       - 'valcea-clar/site/newsroom_decision.json'
       - 'valcea-clar/editions/**'
+      - 'valcea-clar/social/facebook_text_publish.py'
       - 'valcea-clar/social/facebook_text_publish_v2.py'
       - 'valcea-clar/social/merge_text_first_social_state.py'
       - '.github/workflows/valcea-clar-facebook-backlog.yml'
   pull_request:
     paths:
+      - 'valcea-clar/social/facebook_text_publish.py'
       - 'valcea-clar/social/facebook_text_publish_v2.py'
       - 'valcea-clar/social/merge_text_first_social_state.py'
       - '.github/workflows/valcea-clar-facebook-backlog.yml'
@@ -46,7 +48,7 @@ jobs:
 
       - name: Validate durable Facebook backlog contract
         run: |
-          python -m py_compile valcea-clar/social/facebook_text_publish_v2.py valcea-clar/social/merge_text_first_social_state.py
+          python -m py_compile valcea-clar/social/facebook_text_publish.py valcea-clar/social/facebook_text_publish_v2.py valcea-clar/social/merge_text_first_social_state.py
           python valcea-clar/social/story_social_policy.py --self-test
           python valcea-clar/social/facebook_text_publish_v2.py --self-test
           python valcea-clar/social/merge_text_first_social_state.py --self-test
