@@ -9,6 +9,7 @@ on:
       - 'partener-eu/ingest/state/people_policy_registry.json'
       - 'partener-eu/ingest/state/people_policy_source_registry.json'
       - 'partener-eu/ops/test_people_policy_source_intelligence.py'
+      - 'partener-eu/ops/test_people_policy_actor_boundaries.py'
       - '.github/workflows/partener-eu-editorial-daily.yml'
       - '.github/workflows/partener-eu-source-intelligence-ci.yml'
   workflow_dispatch:
@@ -38,3 +39,6 @@ jobs:
 
       - name: Validate source intelligence contract
         run: python partener-eu/ops/test_people_policy_source_intelligence.py
+
+      - name: Validate decision-maker actor boundaries
+        run: python partener-eu/ops/test_people_policy_actor_boundaries.py
