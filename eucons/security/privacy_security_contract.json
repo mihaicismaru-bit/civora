@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "engine_id": "EUCONS_E21_PRIVACY_SECURITY",
+  "product": "EUCONS_COMMERCIAL_OS",
+  "policy_state": "ACTIVE_FOR_ENGINEERING_GATES",
+  "production_collection_enabled": false,
+  "scope": {
+    "systems": ["public_site", "lead_engine", "crm_lite", "offer_engine", "commercial_email", "analytics", "social_outboxes"],
+    "principles": ["purpose_limitation", "data_minimization", "storage_limitation", "integrity_confidentiality", "accountability", "privacy_by_design_default"]
+  },
+  "official_sources": [
+    {
+      "id": "GDPR",
+      "authority": "EUR-Lex",
+      "url": "https://eur-lex.europa.eu/eli/reg/2016/679/oj",
+      "articles": ["5", "6", "7", "12", "13", "25", "30", "32"]
+    },
+    {
+      "id": "EDPB_BASIC_PRINCIPLES",
+      "authority": "European Data Protection Board",
+      "url": "https://www.edpb.europa.eu/topics/key-gdpr-concepts/basic-principles_en",
+      "topics": ["purpose limitation", "data minimisation", "storage limitation", "integrity and confidentiality", "accountability"]
+    },
+    {
+      "id": "EDPB_SME_BASICS",
+      "authority": "European Data Protection Board",
+      "url": "https://www.edpb.europa.eu/sme/learn-the-basics/data-protection-basics_en",
+      "topics": ["data minimisation", "storage limitation", "security"]
+    }
+  ],
+  "engineering_interpretation": {
+    "not_legal_advice": true,
+    "retention_periods_are_controller_policy_not_statutory_claims": true,
+    "privacy_notice_must_match_active_runtime_before_production": true,
+    "lawful_basis_must_be_purpose_specific": true
+  },
+  "data_map": {
+    "service_inquiry": {
+      "purpose": "Respond to an evaluation, consultation, implementation review, recovery assessment, or proposal request initiated by the contact.",
+      "basis_candidate": "GDPR_6_1_b_PRECONTRACT_REQUEST",
+      "required_fields": ["contact_name", "email", "organization_name", "form_id", "submission_id", "privacy_ack"],
+      "optional_fields": ["phone", "audience_id", "activity_codes", "county", "region_terms", "investment_terms", "requested_grant_eur", "project_stage", "timeline", "message"],
+      "forbidden_fields": ["special_category_data", "criminal_conviction_data", "government_id", "bank_credentials", "password"],
+      "retention_class": "LEAD_INQUIRY"
+    },
+    "commercial_relationship": {
+      "purpose": "Manage a qualified opportunity, scoped offer and related commercial activity.",
+      "basis_candidate": "GDPR_6_1_b_PRECONTRACT_OR_CONTRACT",
+      "required_fields": ["contact_ref", "organization_ref", "activity_state"],
+      "optional_fields": ["offer_ref", "opportunity_ref", "next_action", "commercial_notes"],
+      "forbidden_fields": ["special_category_data", "criminal_conviction_data", "bank_credentials", "password"],
+      "retention_class": "COMMERCIAL_RELATIONSHIP"
+    },
+    "marketing_messages": {
+      "purpose": "Send optional promotional or opportunity communications separately from requested service communications.",
+      "basis_candidate": "GDPR_6_1_a_CONSENT",
+      "required_fields": ["contact_ref", "consent_receipt_id", "consent_at", "purpose_id"],
+      "optional_fields": ["channel", "preference_tags"],
+      "forbidden_fields": ["implicit_consent", "bundled_consent"],
+      "retention_class": "MARKETING_CONSENT"
+    },
+    "suppression": {
+      "purpose": "Prevent future promotional contact after withdrawal or opt-out.",
+      "basis_candidate": "COMPLIANCE_ACCOUNTABILITY_SUPPRESSION",
+      "required_fields": ["pseudonymous_contact_hash", "purpose_id", "suppressed_at"],
+      "optional_fields": ["channel"],
+      "forbidden_fields": ["message_body", "raw_email", "raw_phone"],
+      "retention_class": "SUPPRESSION_MINIMAL"
+    },
+    "analytics": {
+      "purpose": "Measure provider-neutral funnel performance without raw contact data.",
+      "basis_candidate": "PROVIDER_AND_IMPLEMENTATION_DEPENDENT",
+      "required_fields": ["event_id", "event_name", "occurred_at"],
+      "optional_fields": ["path", "service_id", "opportunity_id", "case_id", "cta_id", "form_id", "pseudonymous_lead_id", "attribution"],
+      "forbidden_fields": ["email", "phone", "contact_name", "organization_name", "message", "ip", "ip_address", "user_agent", "full_url", "referrer_url"],
+      "retention_class": "ANALYTICS_MINIMAL"
+    }
+  },
+  "retention": {
+    "policy_clock": "last_material_activity_at",
+    "classes": {
+      "LEAD_INQUIRY": {"days": 180, "terminal_action": "ERASE_OR_IRREVERSIBLY_ANONYMIZE", "restart_on_material_activity": true},
+      "COMMERCIAL_RELATIONSHIP": {"days": 730, "terminal_action": "REVIEW_THEN_ERASE_OR_ANONYMIZE", "restart_on_material_activity": true},
+      "MARKETING_CONSENT": {"days": 730, "terminal_action": "ERASE_CONSENT_DETAIL_KEEP_MINIMAL_SUPPRESSION_IF_WITHDRAWN", "restart_on_material_activity": true},
+      "ANALYTICS_MINIMAL": {"days": 395, "terminal_action": "ERASE_OR_AGGREGATE_IRREVERSIBLY", "restart_on_material_activity": false},
+      "SUPPRESSION_MINIMAL": {"days": 1825, "terminal_action": "REVIEW_PURPOSE_THEN_ERASE", "restart_on_material_activity": false}
+    },
+    "holds": {
+      "legal_or_contractual_hold_overrides_automatic_deletion": true,
+      "hold_requires_reason_code": true,
+      "hold_requires_review_at": true,
+      "silent_indefinite_hold_forbidden": true
+    }
+  },
+  "consent_lineage": {
+    "marketing_default": false,
+    "privacy_ack_is_not_marketing_consent": true,
+    "consent_must_be_separate": true,
+    "required_receipt_fields": ["consent_receipt_id", "contact_ref", "purpose_id", "channel", "statement_version", "consent_at", "source"],
+    "withdrawal_required_fields": ["consent_receipt_id", "withdrawn_at", "suppression_receipt_id"],
+    "withdrawal_must_be_honoured_before_next_marketing_dispatch": true
+  },
+  "repository_and_secrets": {
+    "real_pii_under_repository_root_forbidden": true,
+    "synthetic_fixtures_allowed": true,
+    "credentials_under_repository_root_forbidden": true,
+    "runtime_secrets_source": "AUTHORIZED_EXTERNAL_SECRET_STORE_OR_GITHUB_ACTIONS_SECRETS",
+    "secret_values_must_not_appear_in_logs": true,
+    "secret_like_pattern_scan_required": true
+  },
+  "input_guards": {
+    "reject_control_characters": true,
+    "max_short_text_length": 300,
+    "max_long_text_length": 4000,
+    "reject_raw_script_or_event_handler_markup": true,
+    "allow_unknown_fields": false
+  },
+  "output_guards": {
+    "html_escape_untrusted_text": true,
+    "javascript_string_interpolation_of_untrusted_text_forbidden": true,
+    "log_redaction_required": true,
+    "sensitive_log_keys": ["contact_name", "email", "phone", "message", "access_token", "refresh_token", "client_secret", "password", "authorization"]
+  },
+  "web_security": {
+    "headers": {
+      "Content-Security-Policy": "default-src 'self'; img-src 'self' data: https:; style-src 'self'; script-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+      "Referrer-Policy": "strict-origin-when-cross-origin",
+      "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "DENY",
+      "Permissions-Policy": "camera=(), microphone=(), geolocation=()"
+    },
+    "https_required_in_production": true,
+    "inline_script_forbidden": true,
+    "inline_event_handlers_forbidden": true
+  },
+  "dependency_policy": {
+    "lock_or_exact_version_required_when_third_party_runtime_dependencies_exist": true,
+    "unneeded_runtime_dependencies_forbidden": true,
+    "security_review_required_for_new_network_or_auth_dependency": true
+  },
+  "activation_gates": [
+    "privacy_notice_matches_active_purposes_and_fields",
+    "retention_jobs_enabled_and_tested",
+    "deletion_and_suppression_receipts_verified",
+    "production_secret_store_configured",
+    "production_transport_https_verified",
+    "runtime_logs_pass_redaction_test"
+  ]
+}
