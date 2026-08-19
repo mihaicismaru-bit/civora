@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "engine_id": "EUCONS_E11_LEAD_ENGINE",
+  "production_collection_enabled": false,
+  "required_global_fields": ["form_id", "submission_id", "submission_age_ms", "privacy_ack", "contact_name", "email"],
+  "allowed_fields": [
+    "form_id", "submission_id", "submitted_at", "submission_age_ms", "website", "privacy_ack", "marketing_consent",
+    "contact_name", "email", "phone", "organization_name", "audience_id", "organization_labels", "activity_codes",
+    "county", "region_terms", "investment_terms", "requested_grant_eur", "project_stage", "timeline", "message"
+  ],
+  "consent": {
+    "privacy_ack_required": true,
+    "marketing_consent_default": false,
+    "marketing_consent_independent": true
+  },
+  "anti_spam": {
+    "honeypot_field": "website",
+    "honeypot_must_be_blank": true,
+    "minimum_submission_age_ms": 800,
+    "maximum_submission_age_ms": 86400000
+  },
+  "validation": {
+    "max_text_length": 4000,
+    "max_short_text_length": 300,
+    "email_pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+    "allowed_audiences": ["companies_entrepreneurs", "public_authorities_institutions", "ngos_eligible_organizations", "existing_beneficiaries"],
+    "allowed_timelines": ["now_30_days", "31_90_days", "91_180_days", "later", "unknown"],
+    "allowed_project_stages": ["idea", "preparation", "application", "contracted", "implementation", "at_risk", "unknown"]
+  },
+  "scoring": {
+    "completeness_max": 30,
+    "form_intent": {
+      "project_evaluation": 25,
+      "funding_consultation": 20,
+      "implementation_review": 25,
+      "project_recovery": 30,
+      "proposal_request": 30
+    },
+    "timeline_urgency": {
+      "now_30_days": 20,
+      "31_90_days": 12,
+      "91_180_days": 7,
+      "later": 3,
+      "unknown": 0
+    },
+    "matching_candidate_bonus": 20,
+    "matching_requires_data_bonus": 5,
+    "lead_score_max": 100
+  },
+  "next_actions": {
+    "project_recovery": "PRIORITY_DIAGNOSTIC",
+    "high_score": "COMMERCIAL_REVIEW",
+    "matching_candidate": "FUNDING_QUALIFICATION",
+    "default": "REQUEST_MISSING_DATA"
+  },
+  "rules": {
+    "dedupe_key_is_hash": true,
+    "raw_pii_never_committed_to_repository": true,
+    "marketing_without_explicit_consent_forbidden": true,
+    "synthetic_test_data_only_in_repository": true,
+    "matching_handoff_uses_E10_profile_contract": true
+  }
+}
