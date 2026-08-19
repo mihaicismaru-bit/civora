@@ -69,7 +69,22 @@
         "LOCAL NEWS OS vNext Validation run 32246572918 PASS"
       ]
     },
-    "P5_SIGNAL_ENGINE": {"status": "NEXT"},
+    "P5_SIGNAL_ENGINE": {
+      "status": "IN_REVIEW",
+      "evidence": [
+        "site-owned signals table",
+        "deterministic signal identity and dedupe",
+        "normalized SourceItem to SignalCandidate materialization",
+        "non-authoritative deterministic claim hints",
+        "unresolved entity mention hints",
+        "publication_authority hard locked to NONE",
+        "material_fact_ready and fact_kernel_ready hard locked false",
+        "append-only SIGNAL_DISCOVERED event",
+        "cross-instance signal isolation",
+        "private newsroom signal summary/list/detail API",
+        "private newsroom visible recent-signal table"
+      ]
+    },
     "P6_DYNAMIC_PRIMARY_RESOLVER": {"status": "PENDING"},
     "P7_FACT_KERNEL_ENGINE": {"status": "PENDING"},
     "P8_NEWSWORTHINESS_ENGINE": {"status": "PENDING"},
@@ -84,5 +99,5 @@
     "P17_INSTANCE_BOOTSTRAP_SECOND_INSTANCE_TEST": {"status": "PENDING"},
     "P18_MIGRATION_SHADOW_LIVE_SOAK_PRODUCTION_LOCK": {"status": "PENDING"}
   },
-  "next_action": "Implement P5 Signal Engine: transform normalized SourceItems into site-owned signals with deterministic claim/entity hints, instance isolation, dedupe and no publication authority."
+  "next_action": "Validate P5 on dedicated vNext CI; on PASS close P5 and advance P6 Dynamic Primary Resolver."
 }
