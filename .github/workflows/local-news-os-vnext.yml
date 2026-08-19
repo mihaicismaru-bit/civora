@@ -33,7 +33,8 @@ jobs:
             local-news-os/vnext/core/source_adapters.py \
             local-news-os/vnext/core/signal_engine.py \
             local-news-os/vnext/core/primary_resolver.py \
-            local-news-os/vnext/core/fact_kernel_engine.py
+            local-news-os/vnext/core/fact_kernel_engine.py \
+            local-news-os/vnext/core/newsworthiness_engine.py
 
       - name: Validate frozen product contract
         run: |
@@ -101,6 +102,9 @@ jobs:
       - name: Validate Fact Kernel Engine
         run: python local-news-os/vnext/core/fact_kernel_engine.py --self-test
 
+      - name: Validate Newsworthiness Engine
+        run: python local-news-os/vnext/core/newsworthiness_engine.py --self-test
+
       - name: Validate private site newsroom and fail-closed authentication
         run: python local-news-os/vnext/core/site_runtime.py --self-test
 
@@ -123,6 +127,23 @@ jobs:
           neutral = json.loads(Path('local-news-os/vnext/instances/test-county/packs/sources.json').read_text(encoding='utf-8'))
           assert {item['adapter'] for item in neutral['sources']} == {'RSS_ATOM', 'JSON_API'}
           print('VNEXT_SOURCE_PACK_CONTRACT_PASS')
+          PY
+
+      - name: Validate configuration-driven newsworthiness policies
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, str(Path('local-news-os/vnext/core').resolve()))
+          import newsworthiness_engine as module
+          policies = []
+          for instance_id in ('valcea', 'test-county'):
+              pack = json.loads(Path(f'local-news-os/vnext/instances/{instance_id}/packs/editorial.json').read_text(encoding='utf-8'))
+              policies.append(module.validate_newsworthiness_policy(pack, instance_id=instance_id))
+          assert policies[0]['weights'] != policies[1]['weights']
+          assert set(policies[0]['weights']) == set(module.DIMENSIONS)
+          print('VNEXT_NEWSWORTHINESS_POLICY_PASS')
           PY
 
       - name: Assert runtime schema is database-only
@@ -178,6 +199,20 @@ jobs:
           grep -q 'FACT_KERNEL_READY' local-news-os/vnext/core/fact_kernel_engine.py
           ! grep -Eiq 'requests\.|urllib\.request|httpx|aiohttp|subprocess.*curl|git_state_path|state_root|live-feed|current_edition|output_root' local-news-os/vnext/core/fact_kernel_engine.py
           echo 'VNEXT_FACT_KERNEL_BOUNDARY_PASS'
+
+      - name: Assert newsworthiness ranks but never publishes
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'NEWSWORTHINESS_SCORED' local-news-os/vnext/core/newsworthiness_engine.py
+          grep -q 'BUILD_PRIORITY' local-news-os/vnext/core/newsworthiness_engine.py
+          grep -q 'publication_authority' local-news-os/vnext/core/newsworthiness_engine.py
+          grep -q 'PUBLICATION_AUTHORITY = "NONE"' local-news-os/vnext/core/newsworthiness_engine.py
+          grep -q 'local_impact' local-news-os/vnext/core/newsworthiness_engine.py
+          grep -q 'public_utility' local-news-os/vnext/core/newsworthiness_engine.py
+          grep -q 'affected_people' local-news-os/vnext/core/newsworthiness_engine.py
+          ! grep -Eiq 'requests\.|urllib\.request|httpx|aiohttp|subprocess.*curl|git_state_path|state_root|live-feed|current_edition|output_root' local-news-os/vnext/core/newsworthiness_engine.py
+          echo 'VNEXT_NEWSWORTHINESS_BOUNDARY_PASS'
 
       - name: Assert newsroom is private and site-owned
         shell: bash
