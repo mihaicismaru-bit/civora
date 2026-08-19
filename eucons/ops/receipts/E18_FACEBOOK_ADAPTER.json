@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E18",
+  "unit": "E18_FACEBOOK_ADAPTER",
+  "status": "PASS",
+  "validated_at": "2026-08-19T12:03:40Z",
+  "validation": {
+    "workflow": "EUCONS Quality",
+    "run_id": 32250601612,
+    "run_number": 91,
+    "conclusion": "success",
+    "validated_head": "250cb24039d3dd05760faf10d34d11c9d59acd47",
+    "merged_commit": "ec193e85080ba206cbf09bb3d4ace9982615c53c",
+    "exact_head_gate_passed": true
+  },
+  "coverage": {
+    "provider_neutral_adapter": "PASS",
+    "e15_ready_only": "PASS",
+    "e14_knowledge_identity_binding": "PASS",
+    "eucons_canonical_urls": "PASS",
+    "facebook_specific_copy": "PASS",
+    "linkedin_verbatim_reuse": "DISABLED",
+    "default_hashtags": "DISABLED",
+    "idempotency": "PASS",
+    "immutable_receipts": "PASS",
+    "retry_limit": 3,
+    "direct_publication": "DISABLED_UNTIL_FACEBOOK_PAGE_AND_META_APP_AUTHORIZATION",
+    "external_authorization_required": ["FACEBOOK_PAGE", "META_APP"]
+  },
+  "artifacts": [
+    "eucons/social/facebook_contract.json",
+    "eucons/social/facebook_adapter.py",
+    "eucons/validation/validate_facebook_adapter.py",
+    "eucons/validation/test_facebook_adapter_fail_closed.py",
+    ".github/workflows/eucons-quality.yml"
+  ],
+  "next_phase": "E19"
+}
