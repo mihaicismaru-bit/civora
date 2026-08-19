@@ -32,13 +32,13 @@ permissions:
 
 concurrency:
   group: partener-eu-editorial-daily
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v6
         with:
