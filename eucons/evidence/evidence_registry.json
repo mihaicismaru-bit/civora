@@ -1,0 +1,223 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E03",
+  "status": "CANONICAL",
+  "publication_policy": {
+    "public_states": ["PUBLISHABLE"],
+    "non_public_states": ["HOLD", "RETIRED"],
+    "unsupported_claim_state": "HOLD",
+    "contradictory_material_fact_state": "HOLD",
+    "client_evidence_default_confidentiality": "PRIVATE",
+    "testimonial_requires_explicit_consent": true,
+    "numeric_price_requires": "APPROVED_PRICING_RULE"
+  },
+  "minimum_evidence": {
+    "SERVICE_OFFERING": ["OWNER_AUTHORIZED_CANON"],
+    "SERVICE_PROCESS": ["OWNER_AUTHORIZED_CANON"],
+    "CTA_AVAILABILITY": ["OWNER_AUTHORIZED_CANON"],
+    "COMPANY_IDENTITY": ["PRIMARY_OFFICIAL"],
+    "COMPANY_EXPERIENCE": ["PRIMARY_OFFICIAL", "EUROCONS_CONTROLLED_RECORD"],
+    "CLIENT_RELATIONSHIP": ["CLIENT_CONTROLLED_RECORD"],
+    "PROJECT_RESULT": ["CLIENT_CONTROLLED_RECORD"],
+    "TESTIMONIAL": ["CLIENT_CONTROLLED_RECORD"],
+    "EXPERT_IDENTITY": ["PUBLIC_PRIMARY_ORGANIZATION_SOURCE"],
+    "EXPERT_ROLE": ["PUBLIC_PRIMARY_ORGANIZATION_SOURCE"],
+    "EXPERT_CREDENTIAL": ["PUBLIC_PRIMARY_ORGANIZATION_SOURCE"],
+    "FUNDING_FACT": ["VERIFIED_PARTENER_PROJECTION", "PRIMARY_OFFICIAL"],
+    "PRICE_TERM": ["APPROVED_PRICING_RULE"]
+  },
+  "evidence_items": [
+    {
+      "id": "EV-E01-COMMERCIAL-CANON",
+      "evidence_class": "OWNER_AUTHORIZED_CANON",
+      "source_type": "REPOSITORY_CANON",
+      "source_path": "eucons/canon/commercial_canon.json",
+      "status": "ACTIVE",
+      "confidentiality": "PUBLIC_INTERNAL_CANON",
+      "allowed_claim_classes": ["SERVICE_OFFERING", "SERVICE_PROCESS", "CTA_AVAILABILITY"],
+      "notes": "Defines owner-authorized audiences, service capabilities, CTA journeys and hard truth rules; it does not prove historical Euroconsult performance."
+    },
+    {
+      "id": "EV-E02-SERVICE-REGISTRY",
+      "evidence_class": "OWNER_AUTHORIZED_CANON",
+      "source_type": "REPOSITORY_CANON",
+      "source_path": "eucons/services/service_registry.json",
+      "status": "ACTIVE",
+      "confidentiality": "PUBLIC_INTERNAL_CANON",
+      "allowed_claim_classes": ["SERVICE_OFFERING", "SERVICE_PROCESS", "CTA_AVAILABILITY"],
+      "notes": "Defines the eight currently authorized EUCONS service offerings, processes, boundaries and CTA coverage."
+    }
+  ],
+  "claims": [
+    {
+      "id": "CLM-SERVICE-FUNDING-STRATEGY",
+      "claim_class": "SERVICE_OFFERING",
+      "subject": "EUROCONS",
+      "object_ref": "funding_strategy_and_eligibility",
+      "public_statement": "Euroconsult oferă servicii de strategie de finanțare și analiză a eligibilității.",
+      "publication_state": "PUBLISHABLE",
+      "evidence_ids": ["EV-E02-SERVICE-REGISTRY"],
+      "consent_verified": null,
+      "confidentiality_review": "NOT_APPLICABLE"
+    },
+    {
+      "id": "CLM-SERVICE-APPLICATION",
+      "claim_class": "SERVICE_OFFERING",
+      "subject": "EUROCONS",
+      "object_ref": "application_design_and_submission",
+      "public_statement": "Euroconsult oferă servicii de pregătire și depunere a proiectelor.",
+      "publication_state": "PUBLISHABLE",
+      "evidence_ids": ["EV-E02-SERVICE-REGISTRY"],
+      "consent_verified": null,
+      "confidentiality_review": "NOT_APPLICABLE"
+    },
+    {
+      "id": "CLM-SERVICE-IMPLEMENTATION",
+      "claim_class": "SERVICE_OFFERING",
+      "subject": "EUROCONS",
+      "object_ref": "implementation_and_reporting",
+      "public_statement": "Euroconsult oferă suport pentru implementarea și raportarea proiectelor finanțate.",
+      "publication_state": "PUBLISHABLE",
+      "evidence_ids": ["EV-E02-SERVICE-REGISTRY"],
+      "consent_verified": null,
+      "confidentiality_review": "NOT_APPLICABLE"
+    },
+    {
+      "id": "CLM-SERVICE-PROCUREMENT",
+      "claim_class": "SERVICE_OFFERING",
+      "subject": "EUROCONS",
+      "object_ref": "procurement_support",
+      "public_statement": "Euroconsult oferă suport documentar pentru achizițiile din proiecte finanțate.",
+      "publication_state": "PUBLISHABLE",
+      "evidence_ids": ["EV-E02-SERVICE-REGISTRY"],
+      "consent_verified": null,
+      "confidentiality_review": "NOT_APPLICABLE"
+    },
+    {
+      "id": "CLM-SERVICE-FINANCIAL",
+      "claim_class": "SERVICE_OFFERING",
+      "subject": "EUROCONS",
+      "object_ref": "financial_management_and_reimbursement",
+      "public_statement": "Euroconsult oferă suport pentru management financiar, plăți și rambursări în proiecte finanțate.",
+      "publication_state": "PUBLISHABLE",
+      "evidence_ids": ["EV-E02-SERVICE-REGISTRY"],
+      "consent_verified": null,
+      "confidentiality_review": "NOT_APPLICABLE"
+    },
+    {
+      "id": "CLM-SERVICE-RECOVERY",
+      "claim_class": "SERVICE_OFFERING",
+      "subject": "EUROCONS",
+      "object_ref": "project_recovery_and_corrections",
+      "public_statement": "Euroconsult oferă servicii de diagnostic și remediere pentru proiecte întârziate, blocate sau expuse neconformităților.",
+      "publication_state": "PUBLISHABLE",
+      "evidence_ids": ["EV-E02-SERVICE-REGISTRY"],
+      "consent_verified": null,
+      "confidentiality_review": "NOT_APPLICABLE"
+    },
+    {
+      "id": "CLM-SERVICE-COMPLIANCE",
+      "claim_class": "SERVICE_OFFERING",
+      "subject": "EUROCONS",
+      "object_ref": "monitoring_and_compliance",
+      "public_statement": "Euroconsult oferă servicii de monitorizare și conformitate pentru proiecte finanțate.",
+      "publication_state": "PUBLISHABLE",
+      "evidence_ids": ["EV-E02-SERVICE-REGISTRY"],
+      "consent_verified": null,
+      "confidentiality_review": "NOT_APPLICABLE"
+    },
+    {
+      "id": "CLM-SERVICE-PM-CAPACITY",
+      "claim_class": "SERVICE_OFFERING",
+      "subject": "EUROCONS",
+      "object_ref": "project_management_capacity",
+      "public_statement": "Euroconsult oferă servicii pentru structurarea capacității de management de proiect.",
+      "publication_state": "PUBLISHABLE",
+      "evidence_ids": ["EV-E02-SERVICE-REGISTRY"],
+      "consent_verified": null,
+      "confidentiality_review": "NOT_APPLICABLE"
+    },
+    {
+      "id": "CLM-COMPANY-LEGAL-IDENTITY",
+      "claim_class": "COMPANY_IDENTITY",
+      "subject": "EUROCONS",
+      "value": null,
+      "publication_state": "HOLD",
+      "evidence_ids": [],
+      "required_evidence_classes": ["PRIMARY_OFFICIAL"],
+      "hold_reason": "No official legal-identity evidence has been ingested into EUCONS yet."
+    },
+    {
+      "id": "CLM-COMPANY-EXPERIENCE",
+      "claim_class": "COMPANY_EXPERIENCE",
+      "subject": "EUROCONS",
+      "value": null,
+      "publication_state": "HOLD",
+      "evidence_ids": [],
+      "required_evidence_classes": ["PRIMARY_OFFICIAL", "EUROCONS_CONTROLLED_RECORD"],
+      "hold_reason": "No verified duration or quantified experience evidence has been ingested; no years-of-experience claim may be published."
+    },
+    {
+      "id": "CLM-PROJECT-RESULT",
+      "claim_class": "PROJECT_RESULT",
+      "subject": "EUROCONS",
+      "value": null,
+      "publication_state": "HOLD",
+      "evidence_ids": [],
+      "required_evidence_classes": ["CLIENT_CONTROLLED_RECORD"],
+      "hold_reason": "No client/project result has passed evidence and confidentiality review."
+    },
+    {
+      "id": "CLM-CLIENT-RELATIONSHIP",
+      "claim_class": "CLIENT_RELATIONSHIP",
+      "subject": "EUROCONS",
+      "value": null,
+      "publication_state": "HOLD",
+      "evidence_ids": [],
+      "required_evidence_classes": ["CLIENT_CONTROLLED_RECORD"],
+      "hold_reason": "No client identity has been cleared for public attribution."
+    },
+    {
+      "id": "CLM-TESTIMONIAL",
+      "claim_class": "TESTIMONIAL",
+      "subject": "EUROCONS",
+      "value": null,
+      "publication_state": "HOLD",
+      "evidence_ids": [],
+      "required_evidence_classes": ["CLIENT_CONTROLLED_RECORD"],
+      "consent_verified": false,
+      "hold_reason": "No authentic testimonial with explicit publication consent is registered."
+    },
+    {
+      "id": "CLM-EXPERT-CREDENTIAL",
+      "claim_class": "EXPERT_CREDENTIAL",
+      "subject": "EUROCONS_TEAM",
+      "value": null,
+      "publication_state": "HOLD",
+      "evidence_ids": [],
+      "required_evidence_classes": ["PUBLIC_PRIMARY_ORGANIZATION_SOURCE"],
+      "hold_reason": "Expert identities, roles and credentials are deferred to E04 and remain non-public until verified."
+    },
+    {
+      "id": "CLM-FUNDING-MATERIAL-FACT",
+      "claim_class": "FUNDING_FACT",
+      "subject": "FUNDING_OPPORTUNITY",
+      "value": null,
+      "publication_state": "HOLD",
+      "evidence_ids": [],
+      "required_evidence_classes": ["VERIFIED_PARTENER_PROJECTION", "PRIMARY_OFFICIAL"],
+      "hold_reason": "The E09 verified PARTENER-to-EUCONS bridge is not yet active; no funding status/deadline/budget fact is publishable from E03."
+    },
+    {
+      "id": "CLM-NUMERIC-PRICE",
+      "claim_class": "PRICE_TERM",
+      "subject": "EUROCONS_SERVICE",
+      "value": null,
+      "publication_state": "HOLD",
+      "evidence_ids": [],
+      "required_evidence_classes": ["APPROVED_PRICING_RULE"],
+      "hold_reason": "No E13 approved pricing rule exists; numeric prices, discounts and binding commercial terms remain HOLD."
+    }
+  ]
+}
