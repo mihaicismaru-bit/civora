@@ -189,38 +189,52 @@ CREATE TABLE IF NOT EXISTS story_drafts (
     FOREIGN KEY (instance_id) REFERENCES publication_instances(instance_id) ON DELETE RESTRICT
 );
 
+CREATE TABLE IF NOT EXISTS editorial_qa_decisions (
+    instance_id TEXT NOT NULL,
+    decision_id TEXT NOT NULL,
+    story_id TEXT NOT NULL,
+    draft_fingerprint TEXT NOT NULL,
+    draft_revision INTEGER NOT NULL CHECK (draft_revision >= 1),
+    decision_fingerprint TEXT NOT NULL,
+    editorial_class TEXT NOT NULL,
+    outcome TEXT NOT NULL CHECK (outcome IN ('QA_PASSED', 'HUMAN_REVIEW', 'HOLD')),
+    gates_json TEXT NOT NULL,
+    duplicate_story_id TEXT,
+    publication_authority TEXT NOT NULL CHECK (publication_authority = 'NONE'),
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (instance_id, decision_id),
+    UNIQUE (instance_id, story_id, draft_fingerprint, decision_fingerprint),
+    FOREIGN KEY (instance_id, story_id) REFERENCES stories(instance_id, story_id) ON DELETE RESTRICT,
+    FOREIGN KEY (instance_id, duplicate_story_id) REFERENCES stories(instance_id, story_id) ON DELETE RESTRICT,
+    FOREIGN KEY (instance_id) REFERENCES publication_instances(instance_id) ON DELETE RESTRICT
+);
+
 CREATE INDEX IF NOT EXISTS idx_runtime_events_aggregate
     ON runtime_events(instance_id, aggregate_type, aggregate_id, event_id);
-
 CREATE INDEX IF NOT EXISTS idx_stories_state
     ON stories(instance_id, state, updated_at);
-
 CREATE INDEX IF NOT EXISTS idx_signals_state
     ON signals(instance_id, state, updated_at);
-
 CREATE INDEX IF NOT EXISTS idx_signals_source
     ON signals(instance_id, source_id, updated_at);
-
 CREATE INDEX IF NOT EXISTS idx_verification_tasks_state
     ON verification_tasks(instance_id, state, updated_at);
-
 CREATE INDEX IF NOT EXISTS idx_verification_tasks_signal
     ON verification_tasks(instance_id, signal_id, updated_at);
-
 CREATE INDEX IF NOT EXISTS idx_primary_targets_status
     ON primary_targets(instance_id, status, updated_at);
-
 CREATE INDEX IF NOT EXISTS idx_verification_results_signal
     ON verification_results(instance_id, signal_id, created_at);
-
 CREATE INDEX IF NOT EXISTS idx_verification_results_task
     ON verification_results(instance_id, task_id, created_at);
-
 CREATE INDEX IF NOT EXISTS idx_fact_kernels_signal
     ON fact_kernels(instance_id, signal_id, created_at);
-
 CREATE INDEX IF NOT EXISTS idx_story_drafts_kernel
     ON story_drafts(instance_id, kernel_id, updated_at);
+CREATE INDEX IF NOT EXISTS idx_editorial_qa_story
+    ON editorial_qa_decisions(instance_id, story_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_editorial_qa_outcome
+    ON editorial_qa_decisions(instance_id, outcome, created_at);
 
 CREATE TRIGGER IF NOT EXISTS runtime_events_no_update
 BEFORE UPDATE ON runtime_events
