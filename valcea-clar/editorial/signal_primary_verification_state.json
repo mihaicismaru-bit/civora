@@ -2,19 +2,82 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-19T11:06:08+03:00",
+  "generated_at": "2026-08-19T12:55:51+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-19T11:04:01+03:00",
-  "task_count": 67,
+  "queue_generated_at": "2026-08-19T12:53:53+03:00",
+  "task_count": 66,
   "primary_match_count": 0,
-  "no_match_count": 36,
-  "unrouted_count": 31,
+  "no_match_count": 37,
+  "unrouted_count": 29,
   "target_count": 21,
   "targets_ok": 17,
   "results": [
+    {
+      "signal_id": "1dd09f2c72d390e75b4e3453",
+      "signal_title": "Primăria Băile Olănești dă startul unei noi campanii gratuite de sterilizare a câinilor și pisicilor",
+      "signal_url": "https://seintamplainvalcea.ro/2026/08/19/primaria-baile-olanesti-da-startul-unei-noi-campanii-gratuite-de-sterilizare-a-cainilor-si-pisicilor/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-19T11:54:44+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "de2480703f28306d4dc66189",
+      "signal_title": "Patru tuia au încins spiritele la Râmnicu Vâlcea. Primarul Gutău îl face praf pe Vicențiu Mocanu",
+      "signal_url": "https://seintamplainvalcea.ro/2026/08/19/patru-tuia-au-incins-spiritele-la-ramnicu-valcea-primarul-gutau-il-face-praf-pe-vicentiu-mocanu/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_published_at": "2026-08-19T11:29:51+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
     {
       "signal_id": "b83d8c49b09e0dd2870e5074",
       "signal_title": "FOTO – Gospodărie distrusă de flăcări, noaptea trecută, într-o comună din Vâlcea",
@@ -1462,19 +1525,6 @@
       "listing_title_identity_rejections": 80
     },
     {
-      "signal_id": "62683835384ff3d4eb171263",
-      "signal_title": "PAMFLET | Generalul Ciucă \"al nostru\" revine în forță! Cezar Bulacu a prins poza verii și Facebook-ul poate răsufla ușurat",
-      "signal_url": "https://ziaruldevalcea.ro/2026/08/pamflet-generalul-ciuca-al-nostru-revine-in-forta-cezar-bulacu-a-prins-poza-verii-si-facebook-ul-poate-rasufla-usurat/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_published_at": "2026-08-16T19:19:36+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
-    },
-    {
       "signal_id": "db3e4ef2630c9f9e6626aaa1",
       "signal_title": "FOTO – Fost prefect al județului Vâlcea avertizează asupra unor presupuși falși polițiști: „Am transmis poza la Poliție”",
       "signal_url": "https://seintamplainvalcea.ro/2026/08/16/foto-fost-prefect-al-judetului-valcea-avertizeaza-asupra-unor-presupusi-falsi-politisti-am-transmis-poza-la-politie/",
@@ -1600,32 +1650,6 @@
       "material_fact_ready": false,
       "fact_kernel_ready": false,
       "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
-    },
-    {
-      "signal_id": "c8bc95f3811fa173a2732dc7",
-      "signal_title": "OLiX de la Kiss FM, într-un interviu realizat de Alina Palade pentru LumeaMuzicii.ro",
-      "signal_url": "https://stirileolteniei.ro/olix-de-la-kiss-fm-intr-un-interviu-realizat-de-alina-palade-pentru-lumeamuzicii-ro/",
-      "signal_publisher": "Știrile Olteniei",
-      "signal_published_at": "2026-08-16T12:06:23+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
-    },
-    {
-      "signal_id": "87bd51f0ea3850d3b5d82bc6",
-      "signal_title": "FOTO De la Vâlcea la Beijing! TEAM AKTIV a dus pasiunea copiilor români pe scena mondială a roboticii",
-      "signal_url": "https://evenimentvalcean.ro/foto-de-la-valcea-la-beijing-team-aktiv-a-dus-pasiunea-copiilor-romani-pe-scena-mondiala-a-roboticii/",
-      "signal_publisher": "Eveniment Vâlcean",
-      "signal_published_at": "2026-08-16T12:01:39+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
       "listing_title_identity_rejections": 80
     },
     {
