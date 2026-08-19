@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E14",
+  "unit": "E14_KNOWLEDGE_ENGINE",
+  "status": "PASS",
+  "validated_at": "2026-08-19T10:41:00Z",
+  "validation": {
+    "workflow": "EUCONS Quality",
+    "run_id": 32243782235,
+    "run_number": 75,
+    "conclusion": "success",
+    "validated_head": "30721c148923d0c4775389cbf79aa7992d50033b",
+    "merged_commit": "182cb3f50dec6a3498b0ab0d3a21a04809b84956",
+    "exact_head_gate_passed": true
+  },
+  "coverage": {
+    "record_types": ["GUIDE", "ANALYSIS", "OPPORTUNITY", "CASE", "FAQ"],
+    "synthetic_records_validated": 26,
+    "synthetic_publishable": 25,
+    "synthetic_held": 1,
+    "service_claim_evidence_binding": "PASS",
+    "analysis_fact_separation": "PASS",
+    "stale_opportunity_hold": "PASS",
+    "opportunity_provenance_guard": "PASS",
+    "case_registry_only": "PASS",
+    "deterministic_ids": "PASS",
+    "runtime_publication": "DISABLED"
+  },
+  "artifacts": [
+    "eucons/knowledge/knowledge_contract.json",
+    "eucons/knowledge/knowledge_engine.py",
+    "eucons/validation/validate_knowledge_engine.py",
+    "eucons/validation/test_knowledge_engine_fail_closed.py",
+    ".github/workflows/eucons-quality.yml"
+  ],
+  "next_phase": "E15"
+}
