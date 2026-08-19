@@ -1,0 +1,114 @@
+name: PARTENER Source Intelligence attributed quote patch
+
+on:
+  push:
+    branches:
+      - partener/source-intel-attributed-quote-20260820
+    paths:
+      - '.github/workflows/partener-source-intel-attributed-quote-patch.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: partener/source-intel-attributed-quote-20260820
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Apply fail-closed attributed quote increment
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path: str, old: str, new: str) -> None:
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{path}: expected exactly one replacement target, got {count}')
+              p.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          collector = 'partener-eu/ingest/people_policy_official_ingest.py'
+          builder = 'partener-eu/ingest/build_people_policy.py'
+          test = 'partener-eu/ops/test_people_policy_anre_source.py'
+
+          old = '''STATEMENT_CUES = (\n    "a declarat", "a anuntat", "a anunțat", "a precizat", "a spus", "a afirmat",\n    "a explicat", "a subliniat", "a mentionat", "a menționat", "a transmis",\n    "a aratat", "a arătat", "a adaugat", "a adăugat", "anunta", "anunță",\n    "declara", "declară", "precizeaza", "precizează", "spune", "afirma", "afirmă",\n    "explica", "explică", "subliniaza", "subliniază", "propune",\n)\n'''
+          new = old + '''DIRECT_QUOTE_SIGNAL_CUE = "DIRECT_QUOTE_ATTRIBUTION"\nDIRECT_QUOTE_ROLE_TERMS = (\n    "ministr", "președ", "presed", "director", "secretar de stat",\n    "comisar", "premier", "prim-ministr",\n)\nDIRECT_QUOTE_CLOSERS = {"„": "”", "“": "”", "«": "»", '"': '"'}\n'''
+          replace_once(collector, old, new)
+
+          old = '''def sentence_units(text: str) -> list[str]:\n    return [\n        sentence for sentence in re.split(r"(?<=[.!?])\\s+", clean(text))\n        if 25 <= len(sentence) <= 700\n    ]\n\n\ndef statement_window_for(person: dict[str, Any], text: str) -> dict[str, Any] | None:\n'''
+          new = '''def direct_quote_window_for(person: dict[str, Any], text: str) -> dict[str, Any] | None:\n    """Accept only explicit actor + role + colon + bounded direct-quote attribution.\n\n    The role phrase must sit between the tracked actor and the colon, the quote\n    must be explicitly delimited in article body text, and funding context must\n    occur inside the quote itself. This is intentionally stricter than generic\n    quotation detection and never infers the verified role from article wording.\n    """\n    value = clean(text)\n    folded = fold(value)\n    aliases = [clean(alias) for alias in person.get("aliases") or [] if clean(alias)]\n    name = clean(person.get("name"))\n    if name:\n        aliases.append(name)\n    for alias in sorted(set(aliases), key=len, reverse=True):\n        needle = fold(alias)\n        if not needle:\n            continue\n        pattern = rf"(?<![a-z0-9]){re.escape(needle)}(?![a-z0-9])"\n        for match in re.finditer(pattern, folded):\n            colon = folded.find(":", match.end(), min(len(folded), match.end() + 180))\n            if colon < 0:\n                continue\n            attribution = folded[match.end():colon]\n            if not any(fold(term) in attribution for term in DIRECT_QUOTE_ROLE_TERMS):\n                continue\n            tail = value[colon + 1:colon + 951]\n            stripped = tail.lstrip()\n            leading = len(tail) - len(stripped)\n            if not stripped or stripped[0] not in DIRECT_QUOTE_CLOSERS:\n                continue\n            opener = stripped[0]\n            quote_start = leading + 1\n            closer = DIRECT_QUOTE_CLOSERS[opener]\n            quote_end = tail.find(closer, quote_start)\n            if quote_end < 0:\n                continue\n            quote = clean(tail[quote_start:quote_end])\n            if len(quote) < 45 or len(quote.split()) < 8:\n                continue\n            funding = next((term for term in FUNDING_TERMS if fold(term) in fold(quote)), None)\n            if not funding:\n                continue\n            statement_end = colon + 1 + quote_end + 1\n            statement = clean(value[match.start():statement_end])\n            if len(statement) > 900:\n                continue\n            return {\n                "statement": statement,\n                "actorAlias": alias,\n                "signalCue": DIRECT_QUOTE_SIGNAL_CUE,\n                "fundingCue": funding,\n                "scope": "ACTOR_ROLE_COLON_QUOTE",\n                "sentenceIndex": len(sentence_units(value[:match.start()])),\n            }\n    return None\n\n\ndef sentence_units(text: str) -> list[str]:\n    return [\n        sentence for sentence in re.split(r"(?<=[.!?])\\s+", clean(text))\n        if 25 <= len(sentence) <= 700\n    ]\n\n\ndef statement_window_for(person: dict[str, Any], text: str) -> dict[str, Any] | None:\n'''
+          replace_once(collector, old, new)
+
+          old = '''            return {\n                "statement": window,\n                "actorAlias": alias,\n                "signalCue": cue,\n                "fundingCue": funding,\n                "scope": "ADJACENT_SENTENCES",\n                "sentenceIndex": min(index, neighbor_index),\n            }\n    return None\n\n\ndef actor_for'''
+          new = '''            return {\n                "statement": window,\n                "actorAlias": alias,\n                "signalCue": cue,\n                "fundingCue": funding,\n                "scope": "ADJACENT_SENTENCES",\n                "sentenceIndex": min(index, neighbor_index),\n            }\n    direct_quote = direct_quote_window_for(person, text)\n    if direct_quote:\n        return direct_quote\n    return None\n\n\ndef actor_for'''
+          replace_once(collector, old, new)
+
+          old = '''            "actorSpeechFundingEvidenceRequired": True,\n            "actorAliasesRequireTokenBoundaries": True,\n'''
+          new = '''            "actorSpeechFundingEvidenceRequired": True,\n            "attributedDirectQuoteEvidenceSupported": True,\n            "directQuoteRequiresActorRoleColonAndFundingInQuote": True,\n            "actorAliasesRequireTokenBoundaries": True,\n'''
+          replace_once(collector, old, new)
+
+          old = '''SIGNAL_EVIDENCE_TERMS = (\n    "a declarat", "a anuntat", "a anunțat", "a precizat", "a spus", "a afirmat",\n    "anunta", "anunță", "declara", "declară", "propune", "prelung", "acceler",\n    "negocier", "aprobat", "adoptat", "semnat", "lans", "prioritate", "decizie",\n)\n'''
+          new = old + '''DIRECT_QUOTE_SIGNAL_CUE = "DIRECT_QUOTE_ATTRIBUTION"\nDIRECT_QUOTE_ROLE_TERMS = (\n    "ministr", "președ", "presed", "director", "secretar de stat",\n    "comisar", "premier", "prim-ministr",\n)\nDIRECT_QUOTE_CLOSERS = {"„": "”", "“": "”", "«": "»", '"': '"'}\n'''
+          replace_once(builder, old, new)
+
+          old = '''def article_statement_evidence(\n    item: dict[str, Any], person: dict[str, Any], source_url: str, snapshot: dict[str, Any]\n) -> dict[str, Any] | None:\n'''
+          new = '''def direct_quote_statement_evidence(person: dict[str, Any], statement: str) -> dict[str, str] | None:\n    """Re-derive attributed direct-quote evidence at the canonical trust boundary."""\n    value = clean(statement)\n    folded = norm(value)\n    aliases = [clean(alias) for alias in person.get("aliases") or [] if clean(alias)]\n    name = clean(person.get("name"))\n    if name:\n        aliases.append(name)\n    for alias in sorted(set(aliases), key=len, reverse=True):\n        needle = norm(alias)\n        if not needle:\n            continue\n        pattern = rf"(?<![a-z0-9]){re.escape(needle)}(?![a-z0-9])"\n        for match in re.finditer(pattern, folded):\n            colon = folded.find(":", match.end(), min(len(folded), match.end() + 180))\n            if colon < 0:\n                continue\n            attribution = folded[match.end():colon]\n            if not any(norm(term) in attribution for term in DIRECT_QUOTE_ROLE_TERMS):\n                continue\n            tail = value[colon + 1:colon + 951]\n            stripped = tail.lstrip()\n            leading = len(tail) - len(stripped)\n            if not stripped or stripped[0] not in DIRECT_QUOTE_CLOSERS:\n                continue\n            opener = stripped[0]\n            quote_start = leading + 1\n            quote_end = tail.find(DIRECT_QUOTE_CLOSERS[opener], quote_start)\n            if quote_end < 0:\n                continue\n            quote = clean(tail[quote_start:quote_end])\n            if len(quote) < 45 or len(quote.split()) < 8:\n                continue\n            funding = next((term for term in FUNDING_EVIDENCE_TERMS if norm(term) in norm(quote)), None)\n            if funding:\n                return {\n                    "actorAlias": alias,\n                    "fundingCue": funding,\n                    "evidenceMode": "ACTOR_ROLE_COLON_QUOTE",\n                }\n    return None\n\n\ndef article_statement_evidence(\n    item: dict[str, Any], person: dict[str, Any], source_url: str, snapshot: dict[str, Any]\n) -> dict[str, Any] | None:\n'''
+          replace_once(builder, old, new)
+
+          old = '''    folded = norm(window)\n    statement_folded = norm(statement)\n    signal = next((x for x in SIGNAL_EVIDENCE_TERMS if norm(x) in statement_folded or norm(x) in folded), None)\n    funding = next((x for x in FUNDING_EVIDENCE_TERMS if norm(x) in folded), None)\n    if not signal or not funding:\n        return None\n'''
+          new = '''    folded = norm(window)\n    statement_folded = norm(statement)\n    direct_quote = direct_quote_statement_evidence(person, statement)\n    if direct_quote:\n        signal = DIRECT_QUOTE_SIGNAL_CUE\n        funding = direct_quote["fundingCue"]\n        evidence_mode = direct_quote["evidenceMode"]\n        alias = direct_quote["actorAlias"]\n    else:\n        signal = next((x for x in SIGNAL_EVIDENCE_TERMS if norm(x) in statement_folded or norm(x) in folded), None)\n        funding = next((x for x in FUNDING_EVIDENCE_TERMS if norm(x) in folded), None)\n        evidence_mode = "ACTOR_SPEECH_CUE"\n        if not signal or not funding:\n            return None\n'''
+          replace_once(builder, old, new)
+
+          old = '''        "statement": statement[:600],\n        "signalCue": signal,\n        "fundingCue": funding,\n    }\n\n\ndef persisted_statement_evidence'''
+          new = '''        "statement": statement[:600],\n        "signalCue": signal,\n        "fundingCue": funding,\n        "evidenceMode": evidence_mode,\n    }\n\n\ndef persisted_statement_evidence'''
+          replace_once(builder, old, new)
+
+          old = '''    if not actor_alias(person, clean(f"{value.get('actorAlias')} {statement}")):\n        return None\n    if not any(norm(x) in norm(statement) for x in SIGNAL_EVIDENCE_TERMS):\n        return None\n    combined = clean(f"{value.get('fundingCue')} {statement}")\n    if not any(norm(x) in norm(combined) for x in FUNDING_EVIDENCE_TERMS):\n        return None\n    return {\n        "status": "VERIFIED_ARTICLE_STATEMENT",\n        "actorAlias": clean(value.get("actorAlias")),\n        "articleUrl": article_url,\n        "observedAt": observed_at,\n        "contentHash": content_hash,\n        "statement": statement[:600],\n        "signalCue": clean(value.get("signalCue")),\n        "fundingCue": clean(value.get("fundingCue")),\n    }\n'''
+          new = '''    if not actor_alias(person, statement):\n        return None\n    signal_cue = clean(value.get("signalCue"))\n    if signal_cue == DIRECT_QUOTE_SIGNAL_CUE:\n        direct_quote = direct_quote_statement_evidence(person, statement)\n        if not direct_quote:\n            return None\n        funding_cue = direct_quote["fundingCue"]\n        evidence_mode = direct_quote["evidenceMode"]\n        actor = direct_quote["actorAlias"]\n    else:\n        if not any(norm(x) in norm(statement) for x in SIGNAL_EVIDENCE_TERMS):\n            return None\n        combined = clean(f"{value.get('fundingCue')} {statement}")\n        if not any(norm(x) in norm(combined) for x in FUNDING_EVIDENCE_TERMS):\n            return None\n        funding_cue = clean(value.get("fundingCue"))\n        evidence_mode = clean(value.get("evidenceMode")) or "ACTOR_SPEECH_CUE"\n        actor = clean(value.get("actorAlias"))\n    return {\n        "status": "VERIFIED_ARTICLE_STATEMENT",\n        "actorAlias": actor,\n        "articleUrl": article_url,\n        "observedAt": observed_at,\n        "contentHash": content_hash,\n        "statement": statement[:600],\n        "signalCue": signal_cue,\n        "fundingCue": funding_cue,\n        "evidenceMode": evidence_mode,\n    }\n'''
+          replace_once(builder, old, new)
+
+          old = '''        "articleStatementEvidenceRequiredForOfficialSignals": True,\n        "historicalSignalsRequireRoleAtObservation": True,\n        "actorAliasesRequireTokenBoundaries": True,\n'''
+          new = '''        "articleStatementEvidenceRequiredForOfficialSignals": True,\n        "attributedDirectQuoteEvidenceSupported": True,\n        "directQuoteRequiresActorRoleColonAndFundingInQuote": True,\n        "historicalSignalsRequireRoleAtObservation": True,\n        "actorAliasesRequireTokenBoundaries": True,\n'''
+          replace_once(builder, old, new)
+
+          marker = '''assert trusted["statementEvidence"]["status"] == "VERIFIED_ARTICLE_STATEMENT"\nassert trusted["administrativeFact"]["failClosed"] is True\n\n'''
+          addition = marker + '''direct_quote_article = """<html><head><title>ANRE — investiții energetice</title></head><body>\n20 august 2026. George Niculescu, președinte ANRE: „Investițiile în rețele și finanțarea proiectelor de energie regenerabilă trebuie accelerate prin reguli predictibile și transparente.”\n</body></html>"""\ntry:\n    collector.fetch = lambda url, limit=900_000: listing if url == source["url"] else direct_quote_article\n    quote_status, quote_items = collector.ingest_source(source, people, canonical)\nfinally:\n    collector.fetch = old_fetch\nassert quote_status["statementEvidenceRejected"] == 0\nassert len(quote_items) == 1\nquote_item = quote_items[0]\nassert quote_item["statementExtraction"]["scope"] == "ACTOR_ROLE_COLON_QUOTE"\nassert quote_item["statementExtraction"]["signalCue"] == "DIRECT_QUOTE_ATTRIBUTION"\nassert quote_item["signalKind"] == "STATEMENT_SIGNAL"\nassert quote_item["administrativeFact"] == {"status": "UNCONFIRMED_FROM_SIGNAL", "failClosed": True}\ntrusted_quote = builder.trusted_official_item(quote_item, tracked)\nassert trusted_quote is not None\nassert trusted_quote["statementEvidence"]["signalCue"] == "DIRECT_QUOTE_ATTRIBUTION"\nassert trusted_quote["statementEvidence"]["evidenceMode"] == "ACTOR_ROLE_COLON_QUOTE"\n\ncolon_without_quote = """<html><head><title>ANRE — investiții energetice</title></head><body>\n20 august 2026. George Niculescu, președinte ANRE: Investițiile în rețele și finanțarea proiectelor trebuie accelerate prin reguli predictibile.\n</body></html>"""\ntry:\n    collector.fetch = lambda url, limit=900_000: listing if url == source["url"] else colon_without_quote\n    no_quote_status, no_quote_items = collector.ingest_source(source, people, canonical)\nfinally:\n    collector.fetch = old_fetch\nassert no_quote_items == []\nassert no_quote_status["statementEvidenceRejected"] == 1\n\nquote_without_funding = """<html><head><title>ANRE — investiții energetice</title></head><body>\n20 august 2026. George Niculescu, președinte ANRE: „Regulile trebuie să fie predictibile, transparente și aplicate consecvent pentru toți participanții la piață.”\n</body></html>"""\ntry:\n    collector.fetch = lambda url, limit=900_000: listing if url == source["url"] else quote_without_funding\n    no_funding_status, no_funding_items = collector.ingest_source(source, people, canonical)\nfinally:\n    collector.fetch = old_fetch\nassert no_funding_items == []\nassert no_funding_status["statementEvidenceRejected"] == 1\n\nreversed_attribution = """<html><head><title>ANRE — investiții energetice</title></head><body>\n20 august 2026. ANRE: „George Niculescu, președinte, consideră că finanțarea proiectelor energetice trebuie să rămână predictibilă și transparentă pentru investitori.”\n</body></html>"""\ntry:\n    collector.fetch = lambda url, limit=900_000: listing if url == source["url"] else reversed_attribution\n    reversed_status, reversed_items = collector.ingest_source(source, people, canonical)\nfinally:\n    collector.fetch = old_fetch\nassert reversed_items == []\nassert reversed_status["statementEvidenceRejected"] == 1\n\n'''
+          replace_once(test, marker, addition)
+          PY
+
+      - name: Compile source-intelligence modules
+        run: |
+          python -m py_compile \
+            partener-eu/ingest/people_policy_official_ingest.py \
+            partener-eu/ingest/build_people_policy.py \
+            partener-eu/ingest/refine_people_policy.py
+
+      - name: Run source-intelligence regressions
+        run: |
+          python partener-eu/ops/test_people_policy_source_intelligence.py
+          python partener-eu/ops/test_people_policy_mipe_corpus_replay.py
+          python partener-eu/ops/test_people_policy_actor_boundaries.py
+          python partener-eu/ops/test_people_policy_signal_history.py
+          python partener-eu/ops/test_people_policy_anre_source.py
+
+      - name: Commit tested increment and remove patch workflow
+        shell: bash
+        run: |
+          git config user.name "partener-source-intelligence-bot"
+          git config user.email "partener-source-intelligence-bot@users.noreply.github.com"
+          git rm .github/workflows/partener-source-intel-attributed-quote-patch.yml
+          git add partener-eu/ingest/people_policy_official_ingest.py partener-eu/ingest/build_people_policy.py partener-eu/ops/test_people_policy_anre_source.py
+          git commit -m "PARTENER: verify attributed direct quote signals"
+          git push origin HEAD:partener/source-intel-attributed-quote-20260820
