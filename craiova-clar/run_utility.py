@@ -31,6 +31,7 @@ def main() -> int:
         source_id=source["id"],
         feed_url=source["feed_url"],
         max_items=int(source.get("max_items", 12)),
+        max_age_hours=int(source["max_age_hours"]) if source.get("max_age_hours") is not None else None,
     )
     extract = WaterUtilityExtractor(
         allowed_localities=source.get("allowed_localities", []),
