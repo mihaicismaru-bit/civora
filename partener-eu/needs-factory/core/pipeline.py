@@ -4,14 +4,18 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Mapping, Optional, Sequence
 
+from .causal import validate_causal_graph
 from .engine import (
+    NeedsFactoryValidationError,
     detect_evidence_gaps,
     sha256_json,
     validate_need,
     validate_release,
     validate_traceability,
 )
+from .package import build_narrative_ready_pack
 from .primary_research import generate_primary_research_plan
+from .ranking import rank_needs as rank_needs_impl
 
 
 STAGE_ORDER = [
@@ -203,6 +207,36 @@ class PipelineRun:
             self.close(checkpoint, "PASS")
         return artifact
 
+    def rank_needs(
+        self,
+        needs: Sequence[Mapping[str, Any]],
+        evidence_by_id: Mapping[str, Mapping[str, Any]],
+    ) -> Dict[str, Any]:
+        checkpoint = "NF08_NEED_RANKING"
+        self.start(checkpoint)
+        result = rank_needs_impl(needs, evidence_by_id)
+        self.add_artifact(checkpoint, "NEEDS_RANKED.json", result)
+        if result.get("blocked"):
+            self._emit("NF_QA_FAILED", checkpoint, "BLOCKED", blocking=True, detail="unrankable_needs")
+            self.close(checkpoint, "PASS_WITH_BLOCKED_NEEDS")
+        else:
+            self.close(checkpoint, "PASS")
+        return result
+
+    def causal_model(self, graph: Mapping[str, Any]) -> Dict[str, Any]:
+        checkpoint = "NF09_CAUSAL_MODEL"
+        self.start(checkpoint)
+        graph_artifact = dict(graph)
+        self.add_artifact(checkpoint, "CAUSAL_GRAPH.json", graph_artifact)
+        result = validate_causal_graph(graph_artifact)
+        self.add_artifact(checkpoint, "CAUSAL_VALIDATION.json", result)
+        if result["valid"]:
+            self.close(checkpoint, "PASS" if not result.get("warnings") else "PASS_WITH_WARNINGS")
+        else:
+            self._emit("NF_QA_FAILED", checkpoint, "FAIL", blocking=True, detail="causal_graph")
+            self.close(checkpoint, "FAIL")
+        return result
+
     def traceability(
         self,
         chains: Sequence[Mapping[str, Any]],
@@ -231,6 +265,35 @@ class PipelineRun:
         else:
             self._emit("NF_QA_FAILED", checkpoint, "FAIL", blocking=True, detail="release_gate")
             self.close(checkpoint, "FAIL")
+        return result
+
+    def package(
+        self,
+        ranked_needs: Mapping[str, Any],
+        needs_by_id: Mapping[str, Mapping[str, Any]],
+        evidence_by_id: Mapping[str, Mapping[str, Any]],
+        causal_validation: Mapping[str, Any],
+        traceability_validation: Mapping[str, Any],
+        release_gate: Mapping[str, Any],
+    ) -> Dict[str, Any]:
+        checkpoint = "NF12_PACKAGE"
+        self.start(checkpoint)
+        try:
+            result = build_narrative_ready_pack(
+                self.project_input,
+                ranked_needs,
+                needs_by_id,
+                evidence_by_id,
+                causal_validation,
+                traceability_validation,
+                release_gate,
+            )
+        except NeedsFactoryValidationError as exc:
+            self._emit("NF_QA_FAILED", checkpoint, "FAIL", blocking=True, detail=str(exc))
+            self.close(checkpoint, "FAIL")
+            raise
+        self.add_artifact(checkpoint, "NARRATIVE_READY_PACK.json", result)
+        self.close(checkpoint, "PASS")
         return result
 
     def manifest(self) -> Dict[str, Any]:
