@@ -142,6 +142,25 @@ def evidence_scope_satisfies_claim(claim_scope: str, evidence_scope: str) -> boo
     return True
 
 
+def evidence_matches_claim(claim: Mapping[str, Any], evidence: Mapping[str, Any]) -> bool:
+    """Match evidence by territory, construct and directness rather than geography alone."""
+    if not evidence_scope_satisfies_claim(
+        str(claim.get("scope", "national")),
+        str(evidence.get("scope", "national")),
+    ):
+        return False
+
+    construct = claim.get("construct")
+    if construct:
+        supported = {str(item) for item in (evidence.get("constructs") or [])}
+        if str(construct) not in supported:
+            return False
+
+    if claim.get("requires_direct_local") and evidence.get("direct_measurement") is not True:
+        return False
+    return True
+
+
 def detect_evidence_gaps(claims: Sequence[Mapping[str, Any]], evidence_by_id: Mapping[str, Mapping[str, Any]]) -> List[Dict[str, Any]]:
     gaps: List[Dict[str, Any]] = []
     for claim in claims:
@@ -151,22 +170,24 @@ def detect_evidence_gaps(claims: Sequence[Mapping[str, Any]], evidence_by_id: Ma
             evidence = evidence_by_id.get(evidence_id)
             if not evidence:
                 continue
-            if evidence_scope_satisfies_claim(str(claim.get("scope", "national")), str(evidence.get("scope", "national"))):
+            if evidence_matches_claim(claim, evidence):
                 matching.append(evidence_id)
         if claim.get("requires_direct_local") and not matching:
             gaps.append({
                 "gap_id": f"GAP-{claim.get('id')}",
                 "claim_id": claim.get("id"),
                 "gap_type": claim.get("gap_type", "direct_local_evidence"),
+                "construct": claim.get("construct"),
                 "scope": claim.get("scope"),
                 "blocking": bool(claim.get("priority", True)),
-                "reason": "school_or_local_claim_without_direct_matching_evidence",
+                "reason": "local_claim_without_direct_construct_matching_evidence",
             })
         elif not ids:
             gaps.append({
                 "gap_id": f"GAP-{claim.get('id')}",
                 "claim_id": claim.get("id"),
                 "gap_type": "missing_evidence",
+                "construct": claim.get("construct"),
                 "scope": claim.get("scope"),
                 "blocking": bool(claim.get("priority", True)),
                 "reason": "claim_has_no_evidence",
