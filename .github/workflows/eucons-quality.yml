@@ -1,0 +1,40 @@
+name: EUCONS Quality
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/**'
+      - '.github/workflows/eucons-quality.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/**'
+      - '.github/workflows/eucons-quality.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bootstrap-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate EUCONS bootstrap contracts
+        run: python eucons/validation/validate_bootstrap.py
+      - name: Reject committed secret-like assignments
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RInE --exclude='*.md' --exclude='validate_bootstrap.py' '(API_KEY|ACCESS_TOKEN|CLIENT_SECRET|PASSWORD)[[:space:]]*=[[:space:]]*[A-Za-z0-9_./+-]{12,}' eucons; then
+            echo 'Potential secret-like assignment committed under eucons/' >&2
+            exit 1
+          fi
