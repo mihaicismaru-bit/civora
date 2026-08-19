@@ -14,7 +14,13 @@ def _esc(value: object) -> str:
 
 
 class StaticSitePublisher:
-    """Materialize a Story as a real static article route plus a tiny index."""
+    """Materialize a Story as a static article route plus a tiny index.
+
+    This publisher deliberately reports ``rendered`` even when ``base_url`` is
+    configured. A configured public URL is an intended destination, not proof
+    that the bytes are reachable over public HTTP. External/live verification
+    is responsible for promoting publication truth.
+    """
 
     def __init__(self, *, root: str | Path, product_name: str, base_url: str | None = None) -> None:
         self.root = Path(root)
@@ -105,8 +111,8 @@ body{{font-family:Arial,sans-serif;margin:0;color:#171717;background:#fff}}main{
             canonical_url=canonical,
             published_at=datetime.now(timezone.utc),
             destination="static_site",
-            status="published" if self.base_url else "rendered",
-            metadata={"route": "/" + route},
+            status="rendered",
+            metadata={"route": "/" + route, "public_url_candidate": canonical if self.base_url else None},
         )
 
     def _write_index(self, manifest: dict) -> None:
