@@ -37,10 +37,17 @@ def build_narrative_ready_pack(
             evidence_refs.append({
                 "evidence_id": evidence_id,
                 "source": evidence.get("source"),
+                "source_type": evidence.get("source_type"),
                 "source_url": evidence.get("source_url"),
+                "source_document_id": evidence.get("source_document_id"),
                 "territory": evidence.get("territory"),
+                "scope": evidence.get("scope"),
                 "period": evidence.get("period") or evidence.get("source_date") or evidence.get("publication_date"),
                 "tier": evidence.get("tier"),
+                "constructs": list(evidence.get("constructs") or []),
+                "direct_measurement": evidence.get("direct_measurement"),
+                "population_snapshot_id": evidence.get("population_snapshot_id"),
+                "measures": [dict(measure) for measure in (evidence.get("measures") or [])],
             })
         claim_ledger.append({
             "need_id": need_id,
@@ -70,6 +77,7 @@ def build_narrative_ready_pack(
             "do_not_fill_evidence_gaps": True,
             "do_not_convert_association_to_causality": True,
             "do_not_promote_compliance_to_empirical_need": True,
+            "retain_need_and_evidence_ids_in_compiled_artifact": True,
         },
     }
     pack["pack_sha256"] = sha256_json(pack)
