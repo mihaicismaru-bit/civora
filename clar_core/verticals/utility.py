@@ -198,7 +198,7 @@ class UtilityStoryComposer:
         if affected:
             paragraphs.append("Potrivit anunțului oficial, sunt afectați: " + affected + ".")
         if f.get("reason"):
-            paragraphs.append("Oprirea este legată de " + _clean(str(f["reason"])) + ".")
+            paragraphs.append("Operatorul spune că oprirea este necesară în vederea " + _clean(str(f["reason"])) + ".")
         if f.get("turbidity_advisory"):
             paragraphs.append(
                 "Operatorul avertizează că, după golirea și reumplerea rețelei, apa poate avea temporar turbiditate; consumul trebuie evitat până la limpezire dacă apare acest fenomen."
