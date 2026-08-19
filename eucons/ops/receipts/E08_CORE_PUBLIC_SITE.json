@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E08",
+  "unit": "E08_HOMEPAGE_CORE_PUBLIC_SITE",
+  "status": "PASS",
+  "validated_at": "2026-08-19T08:44:44Z",
+  "validation": {
+    "workflow": "EUCONS Quality",
+    "run_id": 32233982102,
+    "run_number": 45,
+    "conclusion": "success",
+    "validated_head": "81e400c6bd0f4208091abc6a5d0720f362ede2a9",
+    "final_head_revalidation_required_before_merge": true
+  },
+  "coverage": {
+    "generated_pages": 26,
+    "core_routes_materialized": 18,
+    "service_routes_materialized": 8,
+    "evidence_backed_services": 8,
+    "publishable_people": 0,
+    "publishable_cases": 0,
+    "funding_projection_active": false,
+    "homepage_value_proposition_validated": true,
+    "audience_paths_validated": true,
+    "service_paths_validated": true,
+    "commercial_ctas_validated": true,
+    "hold_and_unverified_records_omitted": true,
+    "lead_forms_dry_run": true,
+    "all_pages_noindex": true,
+    "external_stylesheet_dependency_forbidden": true,
+    "internal_link_integrity_validated": true,
+    "legal_surfaces_development_only_until_e21": true
+  },
+  "artifacts": [
+    "eucons/web/PUBLIC_SITE.md",
+    "eucons/web/public_site.json",
+    "eucons/web/build_public_site.py",
+    "eucons/validation/validate_public_site.py",
+    "eucons/validation/test_public_site.py",
+    ".github/workflows/eucons-quality.yml",
+    "eucons/ops/artifact_registry.json",
+    "eucons/ops/checkpoint.json"
+  ],
+  "next_phase": "E09"
+}
