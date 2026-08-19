@@ -1,0 +1,85 @@
+name: LOCAL NEWS OS vNext Distribution
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/vnext/core/distribution_engine.py"
+      - "local-news-os/vnext/core/distribution_runtime.py"
+      - "local-news-os/vnext/core/test_distribution_engine.py"
+      - "local-news-os/vnext/runtime/distribution_schema.sql"
+      - "local-news-os/vnext/instances/*/packs/channels.json"
+      - ".github/workflows/local-news-os-vnext-distribution.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/vnext/core/distribution_engine.py"
+      - "local-news-os/vnext/core/distribution_runtime.py"
+      - "local-news-os/vnext/core/test_distribution_engine.py"
+      - "local-news-os/vnext/runtime/distribution_schema.sql"
+      - "local-news-os/vnext/instances/*/packs/channels.json"
+      - ".github/workflows/local-news-os-vnext-distribution.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-distribution:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile P14 distribution core
+        run: |
+          python -m py_compile \
+            local-news-os/vnext/core/distribution_engine.py \
+            local-news-os/vnext/core/distribution_runtime.py \
+            local-news-os/vnext/core/test_distribution_engine.py
+
+      - name: Run site-owned distribution regressions
+        run: python local-news-os/vnext/core/test_distribution_engine.py
+
+      - name: Validate private distribution newsroom
+        run: python local-news-os/vnext/core/distribution_runtime.py --self-test
+
+      - name: Validate instance packs
+        run: |
+          python local-news-os/vnext/core/instance_model.py valcea >/tmp/valcea-instance.json
+          python local-news-os/vnext/core/instance_model.py test-county >/tmp/test-county-instance.json
+
+      - name: Assert P14 delivery truthfulness contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'CREATE TABLE IF NOT EXISTS channel_products' local-news-os/vnext/runtime/distribution_schema.sql
+          grep -q 'CREATE TABLE IF NOT EXISTS delivery_ledger' local-news-os/vnext/runtime/distribution_schema.sql
+          grep -q 'CREATE TABLE IF NOT EXISTS delivery_attempts' local-news-os/vnext/runtime/distribution_schema.sql
+          grep -q 'CREATE TABLE IF NOT EXISTS delivery_remote_receipts' local-news-os/vnext/runtime/distribution_schema.sql
+          grep -q 'SUCCESS_UNVERIFIED' local-news-os/vnext/core/distribution_engine.py
+          grep -q 'remote receipt requires independent evidence' local-news-os/vnext/core/distribution_engine.py
+          grep -q "status='PUBLISHED'" local-news-os/vnext/core/distribution_engine.py
+          grep -q 'provider_readback_fingerprint' local-news-os/vnext/core/distribution_engine.py
+          grep -q '/newsroom/distribution' local-news-os/vnext/core/distribution_runtime.py
+          grep -q '/newsroom/api/distribution' local-news-os/vnext/core/distribution_runtime.py
+          ! grep -Eiq 'facebook_state\.json|instagram_state\.json|facebook_outbox\.json|story_publication_event\.json|current_edition\.json|git_state_path|state_root|live-feed' \
+            local-news-os/vnext/core/distribution_engine.py \
+            local-news-os/vnext/core/distribution_runtime.py \
+            local-news-os/vnext/runtime/distribution_schema.sql
+          echo 'VNEXT_P14_SITE_OWNED_DISTRIBUTION_PASS'
+
+      - name: Enforce credential references and CORE_KNOWS_NO_LOCALITY
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'credential_refs' local-news-os/vnext/instances/valcea/packs/channels.json
+          if grep -niE 'vâlcea|valcea|râmnicu|ramnicu|valceaclar\.ro' \
+            local-news-os/vnext/core/distribution_engine.py \
+            local-news-os/vnext/core/distribution_runtime.py \
+            local-news-os/vnext/runtime/distribution_schema.sql; then
+            echo 'P14 generic distribution code contains locality-specific material' >&2
+            exit 1
+          fi
+          echo 'VNEXT_P14_CORE_NO_LOCALITY_PASS'
