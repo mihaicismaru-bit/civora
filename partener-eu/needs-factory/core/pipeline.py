@@ -14,8 +14,11 @@ from .engine import (
     validate_traceability,
 )
 from .package import build_narrative_ready_pack
+from .population import validate_population_snapshot
 from .primary_research import generate_primary_research_plan
 from .ranking import rank_needs as rank_needs_impl
+from .research_evidence import promote_primary_research_evidence
+from .resume import build_resume_plan, validate_resume_plan
 
 
 STAGE_ORDER = [
@@ -111,6 +114,8 @@ class PipelineRun:
         self.artifacts: Dict[str, Any] = {}
         self.events: List[Dict[str, Any]] = []
         self.closed_checkpoints: List[str] = []
+        self.predecessor_run_id: Optional[str] = None
+        self.resume_plan: Optional[Dict[str, Any]] = None
 
     def _emit(self, event: str, checkpoint: str, status: str, **kwargs: Any) -> None:
         self.events.append(PipelineEvent(
@@ -141,6 +146,25 @@ class PipelineRun:
         if checkpoint not in self.closed_checkpoints:
             self.closed_checkpoints.append(checkpoint)
         self._emit("NF_CHECKPOINT_CLOSED", checkpoint, status)
+
+    def apply_resume(
+        self,
+        previous_manifest: Mapping[str, Any],
+        *,
+        changed_inputs: Sequence[str],
+    ) -> Dict[str, Any]:
+        plan = build_resume_plan(
+            previous_manifest,
+            changed_inputs=changed_inputs,
+            successor_run_id=self.run_id,
+        )
+        validation = validate_resume_plan(plan)
+        if not validation["valid"]:
+            raise NeedsFactoryValidationError(f"invalid resume plan: {validation['failures']}")
+        self.predecessor_run_id = str(previous_manifest.get("run_id"))
+        self.resume_plan = plan
+        self.closed_checkpoints = list(plan["reusable_closed_checkpoints"])
+        return plan
 
     def gap_detection(
         self,
@@ -188,6 +212,73 @@ class PipelineRun:
         status = "BLOCKED_POPULATION" if plan.get("sampling_strategy") == "population_snapshot_required" else "PLAN_READY"
         self.close(checkpoint, status)
         return plan
+
+    def resolve_primary_research(
+        self,
+        evidence_gaps: Mapping[str, Any],
+        population_snapshot: Mapping[str, Any],
+        rows: Sequence[Mapping[str, Any]],
+        *,
+        territory: str,
+        school_identity: str,
+        period: str,
+        source_document_id: str,
+    ) -> Dict[str, Any]:
+        checkpoint = "NF06_PRIMARY_RESEARCH"
+        self.start(checkpoint)
+        if self.resume_plan:
+            self.add_artifact(checkpoint, "RESUME_PLAN.json", self.resume_plan)
+
+        population_validation = validate_population_snapshot(
+            population_snapshot,
+            historical_cutoff=self.historical_cutoff,
+        )
+        self.add_artifact(checkpoint, "POPULATION_VALIDATION.json", population_validation)
+        if not population_validation["valid"]:
+            self._emit("NF_QA_FAILED", checkpoint, "FAIL", blocking=True, detail="population_snapshot")
+            self.close(checkpoint, "FAIL_POPULATION")
+            return {
+                "valid": False,
+                "population_validation": population_validation,
+                "research_plan": None,
+                "primary_research_evidence": None,
+            }
+
+        normalized_snapshot = population_validation["normalized_snapshot"]
+        gaps = [g for g in evidence_gaps.get("gaps", []) if g.get("gap_type") != "population_snapshot"]
+        research_plan = generate_primary_research_plan(gaps, normalized_snapshot)
+        self.add_artifact(checkpoint, "PRIMARY_RESEARCH_PLAN.json", research_plan)
+
+        try:
+            promoted = promote_primary_research_evidence(
+                rows,
+                research_plan,
+                population_validation,
+                territory=territory,
+                school_identity=school_identity,
+                period=period,
+                source_document_id=source_document_id,
+            )
+        except ValueError as exc:
+            self._emit("NF_QA_FAILED", checkpoint, "FAIL", blocking=True, detail=str(exc))
+            self.close(checkpoint, "FAIL_PRIMARY_RESEARCH")
+            return {
+                "valid": False,
+                "population_validation": population_validation,
+                "research_plan": research_plan,
+                "primary_research_evidence": None,
+                "error": str(exc),
+            }
+
+        self.add_artifact(checkpoint, "PRIMARY_RESEARCH_AGGREGATES.json", promoted["aggregates"])
+        self.add_artifact(checkpoint, "PRIMARY_RESEARCH_EVIDENCE.json", promoted)
+        self.close(checkpoint, "PASS")
+        return {
+            "valid": True,
+            "population_validation": population_validation,
+            "research_plan": research_plan,
+            "primary_research_evidence": promoted,
+        }
 
     def validate_needs(
         self,
@@ -300,11 +391,13 @@ class PipelineRun:
         return {
             "schema_version": "nf.run_manifest.v0.1",
             "run_id": self.run_id,
+            "predecessor_run_id": self.predecessor_run_id,
             "project_id": self.project_id,
             "historical_cutoff": self.historical_cutoff,
             "ruleset_version": self.ruleset_version,
             "source_snapshot_ids": self.source_snapshot_ids,
             "closed_checkpoints": self.closed_checkpoints,
+            "resume_plan": self.resume_plan,
             "artifact_hashes": {path: sha256_json(value) for path, value in sorted(self.artifacts.items())},
             "events": self.events,
         }
