@@ -4,6 +4,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 WEB=ROOT/'partener-eu/web'
 ui=(WEB/'public-product-v3.js').read_text(encoding='utf-8')
+askui=(WEB/'ask-partener-v2.js').read_text(encoding='utf-8')
 people=(WEB/'people-policy-v1.js').read_text(encoding='utf-8')
 decision=(WEB/'decision-intelligence-v2.js').read_text(encoding='utf-8')
 app=(WEB/'app.js').read_text(encoding='utf-8')
@@ -16,12 +17,32 @@ def function_chunk(source: str, name: str) -> str:
     return source[start:] if end<0 else source[start:end]
 
 
-assert 'PARTENER_DECISION_PRODUCTS' in ui
-assert 'Nu afișăm apeluri aleatoriu' in ui
-assert 'D.calls.slice(0,2)' not in ui
+# public-product-v3 owns generic public polish only; Ask has one dedicated enhancement owner.
 assert "[data-r=\"changes\"]" in ui
-assert 'placeholder="Ex.: Sunt IMM' in ui
-assert 'value="Am firmă din industria alimentară' not in ui
+assert 'function humanizeEvents(' in ui
+assert 'function enhanceAsk(' not in ui
+assert 'PARTENER_DECISION_PRODUCTS' not in ui
+assert '#aq' not in ui
+assert 'askV3' not in ui
+
+# Dedicated Ask enhancement is canonical-data-only, explainable and fail-closed.
+assert 'PARTENER_DECISION_PRODUCTS' in askui
+assert 'P.dossiers' in askui
+assert 'D.calls.slice(0,2)' not in askui
+assert 'value="Am firmă din industria alimentară' not in askui
+assert "placeholder='Ex.: IMM din Vâlcea" in askui
+assert "x.d.status!=='CLOSED'" in askui
+assert 'De ce apare:' in askui
+assert 'Cine poate aplica' in askui
+assert 'Încă neconfirmat' in askui
+assert 'sourceEvidence' in askui
+assert 'Sursa oficială ↗' in askui
+assert 'Proveniență' in askui
+assert 'Deschide dosarul verificat' in askui
+assert 'openDossier(d.id,d.title)' in askui
+assert "addEventListener('keydown'" in askui
+assert "e.key==='Enter'" in askui
+assert 'Nu îți afișăm apeluri aleatorii' in askui
 
 # Baseline public shell must remain useful and fail-closed without progressive enhancements.
 nav_chunk=function_chunk(app,'nav')
@@ -54,6 +75,7 @@ for view in ('renderHub','renderNews','renderDossier'):
 assert 'document.addEventListener(\'click\'' not in people
 assert 'data-peopleall' not in people
 assert 'Sursa oficială' in people
+assert 'ask-partener-v2.js' in index
 assert 'public-product-v3.js' in index
 assert 'public-product-v3.css' in index
 print('PARTENER.EU public product v3: PASS')
