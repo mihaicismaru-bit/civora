@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E07",
+  "unit": "E07_DESIGN_SYSTEM",
+  "status": "PASS",
+  "validated_at": "2026-08-19T08:32:41Z",
+  "validation": {
+    "workflow": "EUCONS Quality",
+    "run_id": 32232976453,
+    "run_number": 39,
+    "conclusion": "success",
+    "validated_head": "cd74c20a02c4d525418ef4b8cb319a553ea54f91",
+    "final_head_revalidation_required_before_merge": true
+  },
+  "coverage": {
+    "contrast_pairs": 8,
+    "component_families": 8,
+    "commercial_card_variants": 6,
+    "responsive_breakpoints": 4,
+    "minimum_touch_target_px": 44,
+    "visible_focus_validated": true,
+    "reduced_motion_validated": true,
+    "unverified_claims_omitted": true,
+    "hold_people_cases_omitted": true,
+    "numeric_proof_requires_claim_reference": true,
+    "invented_real_person_portraits_forbidden": true,
+    "remote_css_fonts_forbidden": true,
+    "development_preview_noindex": true
+  },
+  "artifacts": [
+    "eucons/web/design_system.json",
+    "eucons/web/DESIGN_SYSTEM.md",
+    "eucons/web/assets/eucons.css",
+    "eucons/web/design-system/index.html",
+    "eucons/validation/validate_design_system.py",
+    "eucons/validation/test_design_system.py",
+    ".github/workflows/eucons-quality.yml",
+    "eucons/ops/artifact_registry.json",
+    "eucons/ops/checkpoint.json"
+  ],
+  "next_phase": "E08"
+}

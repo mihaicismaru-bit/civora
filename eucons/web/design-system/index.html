@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>EUCONS — E07 design system preview</title>
+  <link rel="stylesheet" href="../assets/eucons.css">
+</head>
+<body>
+<a class="eu-skip-link" href="#main-content">Sari la conținut</a>
+
+<header class="eu-header">
+  <div class="eu-shell eu-header__inner">
+    <a class="eu-wordmark" href="../">EUROCONSULT</a>
+    <nav class="eu-nav" aria-label="Navigație principală">
+      <a href="#servicii">Servicii</a>
+      <a href="#oportunitati">Finanțări</a>
+      <a href="#dovezi">Dovezi</a>
+      <a class="eu-button eu-button--primary" href="#formular">Evaluare proiect</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main-content">
+  <section class="eu-section eu-section--surface">
+    <div class="eu-shell eu-stack">
+      <p class="eu-eyebrow">EUCONS Commercial OS · E07</p>
+      <h1 class="eu-heading-xl">Claritate înainte de promisiuni.</h1>
+      <p class="eu-lead">Preview sintetic pentru validarea sistemului vizual Euroconsult. Nu publică rezultate comerciale, persoane sau finanțări neverificate.</p>
+      <div class="eu-actions">
+        <a class="eu-button eu-button--primary" href="#formular">Cere evaluarea proiectului</a>
+        <a class="eu-button eu-button--secondary" href="#servicii">Vezi serviciile</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="eu-section" id="servicii">
+    <div class="eu-shell eu-stack">
+      <p class="eu-eyebrow">Card variants</p>
+      <h2 class="eu-heading-lg">Serviciu, oportunitate, expertiză și caz — fără decor care maschează starea dovezii.</h2>
+      <div class="eu-grid">
+        <article class="eu-card eu-card--interactive">
+          <span class="eu-badge eu-badge--info">Serviciu</span>
+          <h3 class="eu-heading-md">Strategie și eligibilitate</h3>
+          <p class="eu-card__body">Componentă sintetică. Eligibilitatea nu este garantată înaintea verificării documentelor și a sursei oficiale.</p>
+          <p><a class="eu-card__link" href="#formular">Cere o evaluare</a></p>
+        </article>
+
+        <article class="eu-card eu-card--interactive">
+          <span class="eu-badge eu-badge--success">Persoană verificată</span>
+          <h3 class="eu-heading-md">Profil expert</h3>
+          <p class="eu-card__body">În lipsa unei fotografii verificate, sistemul folosește wordmark/inițiale și nu inventează portrete.</p>
+          <p><a class="eu-card__link" href="#dovezi">Vezi regula de dovadă</a></p>
+        </article>
+
+        <article class="eu-card eu-card--interactive">
+          <span class="eu-badge">Studiu de caz</span>
+          <h3 class="eu-heading-md">Rezultat publicabil numai cu proveniență</h3>
+          <p class="eu-card__body">Valori, procente și rezultate rămân omise până când sunt legate de un claim verificat.</p>
+          <p><a class="eu-card__link" href="#dovezi">Vezi proof contract</a></p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="eu-section eu-section--surface" id="oportunitati">
+    <div class="eu-shell eu-stack">
+      <p class="eu-eyebrow">Opportunity presentation</p>
+      <h2 class="eu-heading-lg">Maturitatea finanțării este explicită.</h2>
+      <div class="eu-grid">
+        <article class="eu-card">
+          <span class="eu-badge eu-badge--success">Verificat · exemplu UI</span>
+          <h3 class="eu-heading-md">Oportunitate demonstrativă</h3>
+          <p class="eu-card__body">Acest text validează componenta. Nu reprezintă un apel real sau un claim public.</p>
+          <div class="eu-actions">
+            <a class="eu-button eu-button--primary" href="#formular">Verifică potrivirea</a>
+          </div>
+        </article>
+        <div class="eu-alert eu-alert--warning" role="alert">
+          <strong>HOLD / stale</strong>
+          <p>În producție, datele neconfirmate sau HOLD nu sunt proiectate ca oportunități comerciale publice.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="eu-section" id="dovezi">
+    <div class="eu-shell eu-stack">
+      <p class="eu-eyebrow">Evidence-first presentation</p>
+      <h2 class="eu-heading-lg">Nicio cifră de marketing fără referință de claim.</h2>
+      <div class="eu-grid">
+        <div class="eu-card">
+          <div class="eu-metric">
+            <span class="eu-metric__value">—</span>
+            <span class="eu-metric__label">Valoare ascunsă până la verificare</span>
+          </div>
+        </div>
+        <div class="eu-alert eu-alert--info" role="alert">
+          <strong>Regulă de prezentare</strong>
+          <p>Registrul de dovezi decide ce poate fi afișat; designul nu poate promova un claim aflat în HOLD.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="eu-section eu-section--surface" id="formular">
+    <div class="eu-shell eu-stack">
+      <p class="eu-eyebrow">Lead journey</p>
+      <h2 class="eu-heading-lg">Formular etichetat, navigabil și explicit la eroare.</h2>
+      <form class="eu-form" action="#" method="post" onsubmit="return false">
+        <div class="eu-field">
+          <label class="eu-label" for="organizatie">Organizație</label>
+          <input class="eu-control" id="organizatie" name="organizatie" autocomplete="organization">
+          <span class="eu-hint">Exemplu sintetic pentru QA.</span>
+        </div>
+        <div class="eu-field">
+          <label class="eu-label" for="email">Email</label>
+          <input class="eu-control" id="email" name="email" type="email" autocomplete="email" aria-invalid="true" aria-describedby="email-error">
+          <span class="eu-error" id="email-error">Exemplu de eroare textuală; culoarea nu este singurul indiciu.</span>
+        </div>
+        <label class="eu-check">
+          <input type="checkbox" name="consent">
+          <span>Exemplu de consimțământ pentru validarea controlului.</span>
+        </label>
+        <div class="eu-actions">
+          <button class="eu-button eu-button--primary" type="submit">Cere evaluarea</button>
+          <button class="eu-button eu-button--secondary" type="button" disabled>Stare disabled</button>
+        </div>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer class="eu-footer">
+  <div class="eu-shell eu-stack">
+    <strong>Euroconsult</strong>
+    <p class="eu-reading">Sistem vizual provider-independent. Logo-ul real rămâne în starea PENDING_VERIFIED_ASSET până când există o sursă verificată.</p>
+    <div class="eu-footer__links">
+      <a href="../">Preview root</a>
+      <a href="#dovezi">Dovezi</a>
+      <a href="#formular">Evaluare</a>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

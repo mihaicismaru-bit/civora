@@ -50,6 +50,10 @@ jobs:
         run: python eucons/validation/validate_information_architecture.py
       - name: Test EUCONS information architecture regressions
         run: python eucons/validation/test_information_architecture.py
+      - name: Validate EUCONS design system
+        run: python eucons/validation/validate_design_system.py
+      - name: Test EUCONS design system regressions
+        run: python eucons/validation/test_design_system.py
       - name: Reject committed secret-like assignments
         shell: bash
         run: |
