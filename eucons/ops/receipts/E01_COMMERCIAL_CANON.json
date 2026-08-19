@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E01",
+  "unit": "E01_COMMERCIAL_CANON",
+  "status": "PASS",
+  "validated_at": "2026-08-19T06:54:00Z",
+  "validation": {
+    "workflow": "EUCONS Quality",
+    "run_id": 32225343782,
+    "run_number": 7,
+    "conclusion": "success",
+    "validated_head": "e9a84f65c239c45555f88113b03311baf548f5ce",
+    "final_head_revalidation_required_before_merge": true
+  },
+  "coverage": {
+    "priority_audiences": 4,
+    "material_problems": 15,
+    "service_capabilities": 8,
+    "ctas": 5,
+    "all_priority_audiences_mapped": true,
+    "all_capabilities_referenced": true,
+    "all_ctas_referenced": true
+  },
+  "artifacts": [
+    "eucons/canon/commercial_canon.json",
+    "eucons/validation/validate_commercial_canon.py",
+    ".github/workflows/eucons-quality.yml",
+    "eucons/ops/artifact_registry.json",
+    "eucons/ops/checkpoint.json"
+  ],
+  "next_phase": "E02"
+}
