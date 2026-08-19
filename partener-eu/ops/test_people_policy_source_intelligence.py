@@ -24,9 +24,14 @@ builder = load_module("build_people_policy", INGEST / "build_people_policy.py")
 refiner = load_module("refine_people_policy", INGEST / "refine_people_policy.py")
 sources = json.loads((STATE / "people_policy_source_registry.json").read_text(encoding="utf-8"))
 people = json.loads((STATE / "people_policy_registry.json").read_text(encoding="utf-8"))
+seed_state = json.loads((STATE / "people_policy_seed.json").read_text(encoding="utf-8"))
 
 assert sources["policy"]["directOfficialOnly"] is True
 assert sources["policy"]["generalPressExcludedAsAuthority"] is True
+assert sources["policy"]["articleStatementEvidenceRequiredForProjection"] is True
+assert sources["policy"]["genericListingRowsCannotBecomePersonSignals"] is True
+assert people["policy"]["historicalSignalsRequireRoleAtObservation"] is True
+assert people["policy"]["articleStatementEvidenceRequiredForOfficialSignals"] is True
 ids = {x["id"] for x in sources["sources"]}
 assert {"GOV_RO_NEWS", "MIPE_PRIMARY", "EC_RO_NEWS", "MS_PRESS", "AFIR_COMMUNICATES", "ADR_SV_OLTENIA_NEWS", "FED_MAI"} <= ids
 
@@ -138,6 +143,17 @@ tracked = {p["id"]: p for p in people["people"] if p.get("active")}
 accepted = builder.trusted_official_item(item, tracked)
 assert accepted is not None
 assert accepted["roleVerification"] == item["roleVerification"]
+assert accepted["statementEvidence"]["status"] == "VERIFIED_ARTICLE_STATEMENT"
+assert accepted["statementEvidence"]["articleUrl"] == item["sources"][0]["url"]
+assert accepted["statementEvidence"]["contentHash"] == item["sourceSnapshot"]["contentHash"]
+
+# Article-level evidence is mandatory: an official article that merely contains
+# funding language but no attributable statement from the tracked actor is not a
+# person signal.
+no_actor_statement = copy.deepcopy(item)
+no_actor_statement["headline"] = "Finanțări europene pentru investiții"
+no_actor_statement["statement"] = "Programul de finanțare pentru investiții are un buget actualizat."
+assert builder.trusted_official_item(no_actor_statement, tracked) is None
 
 bad = copy.deepcopy(item)
 bad["administrativeFact"]["status"] = "CONFIRMED"
@@ -151,21 +167,71 @@ bad = copy.deepcopy(item)
 bad["sourceSnapshot"]["contentHash"] = ""
 assert builder.trusted_official_item(bad, tracked) is None
 
-# Historical observations keep their verified role-at-observation snapshot even
+# Historical official observations keep their verified role-at-observation even
 # if the live registry later changes; history is not silently rewritten.
 changed_registry = copy.deepcopy(tracked)
 changed_registry["dragos-pislaru"]["role"] = "Altă funcție ulterioară"
-accepted = builder.trusted_official_item(item, changed_registry)
-assert accepted is not None
-assert accepted["roleVerification"]["role"] == item["roleVerification"]["role"]
+accepted_after_role_change = builder.trusted_official_item(item, changed_registry)
+assert accepted_after_role_change is not None
+assert accepted_after_role_change["roleVerification"]["role"] == item["roleVerification"]["role"]
+
+# Legacy seeds without a role-at-observation snapshot are now fail-closed instead
+# of receiving the person's current role during rebuild.
+legacy_seed = next(x for x in seed_state["items"] if x["personId"] == "cseke-attila")
+assert builder.trusted_seed_item(legacy_seed, tracked) is None
+historical_seed = copy.deepcopy(legacy_seed)
+historical_seed["signalKind"] = "STATEMENT_SIGNAL"
+historical_seed["administrativeFact"] = {"status": "UNCONFIRMED_FROM_SIGNAL", "failClosed": True}
+historical_seed["roleVerification"] = {
+    "role": "Ministrul Dezvoltării, Lucrărilor Publice și Administrației",
+    "institution": "MDLPA",
+    "verifiedAt": "2026-07-08",
+    "sourceUrl": "https://www.mdlpa.ro/pages/comunicate",
+    "sourceTier": "T1_DIRECT_OFFICIAL",
+}
+trusted_historical_seed = builder.trusted_seed_item(historical_seed, changed_registry)
+assert trusted_historical_seed is not None
+assert trusted_historical_seed["role"] == "Ministrul Dezvoltării, Lucrărilor Publice și Administrației"
+assert trusted_historical_seed["institution"] == "MDLPA"
+
+# Generic MIPE/decision-product rows cannot be upgraded into person statements.
+generic_mipe_row = {
+    "date": "2026-08-18",
+    "headline": "https://mfe.gov.ro/",
+    "summary": "Dragoș Pîslaru. Programul PEO, PNRR, finanțări și noutăți.",
+    "url": "https://mfe.gov.ro/",
+    "tier": "T1",
+}
+assert builder.mention_item(verified["dragos-pislaru"], generic_mipe_row, "MIPE") is None
+
+# An upstream row may enter the synthetic path only when it already carries a
+# role-at-observation snapshot, article snapshot and explicit statement evidence.
+trusted_synthetic = {
+    "date": "2026-08-19",
+    "headline": "Dragoș Pîslaru anunță priorități pentru fonduri europene",
+    "url": item["sources"][0]["url"],
+    "tier": "T1_DIRECT_OFFICIAL",
+    "roleVerification": item["roleVerification"],
+    "sourceSnapshot": item["sourceSnapshot"],
+    "statementEvidence": accepted["statementEvidence"],
+    "programme": "PNRR",
+}
+synthetic = builder.mention_item(verified["dragos-pislaru"], trusted_synthetic, "MIPE")
+assert synthetic is not None
+assert synthetic["statementEvidence"]["status"] == "VERIFIED_ARTICLE_STATEMENT"
+assert synthetic["roleVerification"] == item["roleVerification"]
 
 hosts = refiner.official_hosts(sources)
 assert "www.afir.ro" in hosts
-assert refiner.direct_official(item, hosts) is True
-assert refiner.fail_closed_signal(item) is True
-unsafe = copy.deepcopy(item)
+assert refiner.direct_official(accepted, hosts) is True
+assert refiner.fail_closed_signal(accepted) is True
+assert refiner.article_statement_evidence(accepted) is True
+unsafe = copy.deepcopy(accepted)
 unsafe["administrativeFact"]["failClosed"] = False
 assert refiner.fail_closed_signal(unsafe) is False
+no_evidence = copy.deepcopy(accepted)
+no_evidence.pop("statementEvidence", None)
+assert refiner.article_statement_evidence(no_evidence) is False
 
 # The durable source ledger and the verified people projection are independent
 # checkpoints. A failure in daily-brief generation must not strand a fresh
@@ -201,6 +267,9 @@ print(json.dumps({
     "explicitCodeCanonicalLink": True,
     "canonicalOfficialLedgerBoundary": True,
     "historicalRoleSnapshotPreserved": True,
+    "historicalSeedsRequireRoleAtObservation": True,
+    "genericListingRowsRejected": True,
+    "articleStatementEvidenceRequired": True,
     "sourceHealthRequiresArticleFetchProof": True,
     "boundedConcurrentSourceIngest": True,
     "durableVerifiedProjectionCheckpoint": True,
