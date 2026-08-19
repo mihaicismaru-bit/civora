@@ -52,7 +52,7 @@ def retention_decision(retention_class: str, last_material_activity_at: str, now
     if current < activity:
         raise ValueError("now cannot predate last material activity")
 
-    if hold:
+    if hold is not None:
         rules = contract["retention"]["holds"]
         if rules["hold_requires_reason_code"] and not hold.get("reason_code"):
             raise ValueError("hold missing reason_code")
