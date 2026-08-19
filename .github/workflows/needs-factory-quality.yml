@@ -27,8 +27,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Compile Needs Factory core
-        run: python -m compileall -q partener-eu/needs-factory/core partener-eu/needs-factory/tools
+      - name: Compile Needs Factory domain and adapters
+        run: python -m compileall -q partener-eu/needs-factory/core partener-eu/needs-factory/adapters partener-eu/needs-factory/tools
       - name: Parse canonical JSON schemas
         run: |
           python - <<'PY'
@@ -42,6 +42,21 @@ jobs:
           PY
       - name: Run Needs Factory regression suite
         run: python -m unittest discover -s partener-eu/needs-factory/tests -v
+      - name: Verify PARTENER source-state adapter against repository state
+        run: |
+          python partener-eu/needs-factory/tools/source_receipt.py \
+            partener-eu/validation/source_state.checkpoint.json \
+            SRC-MYSMIS-CALLS \
+            --output /tmp/partener-source-receipt.json
+          python - <<'PY'
+          import json
+          receipt = json.load(open('/tmp/partener-source-receipt.json', encoding='utf-8'))
+          assert receipt['health'] == 'PASS'
+          assert receipt['quarantined'] is False
+          assert receipt['material_fact_state'] in {'STABLE_LAST_KNOWN_GOOD', 'LAST_KNOWN_GOOD_PENDING_RECONCILIATION'}
+          assert receipt['source_snapshot_id'].startswith('SRC-MYSMIS-CALLS@')
+          print(receipt['source_snapshot_id'])
+          PY
       - name: Run deterministic pipeline smoke fixture through NF12
         run: |
           python partener-eu/needs-factory/tools/run_fixture.py \
