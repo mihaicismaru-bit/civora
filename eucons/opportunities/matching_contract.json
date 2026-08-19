@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "engine_id": "EUCONS_E10_OPPORTUNITY_MATCHING",
+  "score_semantics": "RELEVANCE_NOT_APPROVAL_PROBABILITY",
+  "input": {
+    "profile_id_required": true,
+    "allowed_profile_fields": ["profile_id", "audience_id", "organization_labels", "activity_codes", "region_terms", "investment_terms", "requested_grant_eur"],
+    "pii_fields_forbidden": ["name", "email", "phone", "address", "personal_identifier"],
+    "list_fields": ["organization_labels", "activity_codes", "region_terms", "investment_terms"]
+  },
+  "source_guards": {
+    "required_bridge_state": "READY",
+    "required_record_state": "VERIFIED_AVAILABLE",
+    "require_actionable": true,
+    "stale_or_held_result": "HOLD_SOURCE_STATE"
+  },
+  "hard_exclusions": {
+    "activity_code_mismatch_when_source_codes_explicit": true,
+    "requested_grant_above_verified_cap": true,
+    "result": "EXCLUDED_KNOWN_RULE"
+  },
+  "weights": {
+    "activity_code": 35,
+    "investment_terms_max": 30,
+    "organization_terms_max": 20,
+    "region_terms_max": 10,
+    "grant_within_verified_cap": 5
+  },
+  "thresholds": {
+    "match_candidate_min": 40,
+    "high_confidence_min_score": 70,
+    "high_confidence_min_positive_dimensions": 3,
+    "medium_confidence_min_score": 40,
+    "medium_confidence_min_positive_dimensions": 2
+  },
+  "outputs": {
+    "candidate": "MATCH_CANDIDATE",
+    "insufficient": "REQUIRES_DATA",
+    "excluded": "EXCLUDED_KNOWN_RULE",
+    "held": "HOLD_SOURCE_STATE",
+    "confidence_levels": ["LOW", "MEDIUM", "HIGH"]
+  },
+  "rules": {
+    "explanations_required": true,
+    "hard_exclusion_reasons_required": true,
+    "deterministic_sort": ["score_desc", "opportunity_id_asc"],
+    "never_claim_eligibility_or_award_probability": true,
+    "source_provenance_must_be_retained": true
+  }
+}
