@@ -19,7 +19,7 @@ on:
         default: '2025,2024,2023,2022,2021'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   live-anaf-smoke:
@@ -39,9 +39,20 @@ jobs:
         shell: bash
         run: |
           set +e
+          mkdir -p partener-eu/ingest/state
           python partener-eu/ingest/anaf_company_financials.py \
             --cui "$CUI" --years "$YEARS" --pretty --attempts 3 --pace 1 \
-            > /tmp/anaf-financial-result.json
+            > partener-eu/ingest/state/anaf_smoke_9293117.json
           code=$?
-          cat /tmp/anaf-financial-result.json
+          cat partener-eu/ingest/state/anaf_smoke_9293117.json
           test $code -eq 0
+      - name: Persist smoke receipt on branch
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add partener-eu/ingest/state/anaf_smoke_9293117.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Record ANAF financial smoke receipt'
+            git push origin HEAD:agent/anaf-company-financials
+          fi
