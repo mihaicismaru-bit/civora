@@ -1,19 +1,58 @@
 {
-  "project_input": {"project_id": "SMOKE-001", "territory": "Vâlcea", "target": 251},
+  "project_input": {"project_id": "SMOKE-001", "territory": "Vâlcea", "target": 251, "target_group": "elevi IPT"},
   "call_snapshot": {"call_code": "PEO/76", "indicators": ["EECO06+07", "EECR03"]},
   "ruleset_version": "0.2",
   "historical_cutoff": "2024-01-12",
   "source_snapshot_ids": ["SRC-SMOKE-A", "SRC-SMOKE-B"],
   "evidence": {
-    "E1": {"id": "E1", "tier": "A1", "scope": "county", "territory": "Vâlcea"},
-    "E2": {"id": "E2", "tier": "A2", "scope": "national", "territory": "România"}
+    "E1": {
+      "id": "E1", "tier": "A1", "scope": "county", "territory": "Vâlcea",
+      "source": "Official county source", "source_url": "https://example.test/e1", "period": "2023",
+      "territory_fit": 1.0, "population_fit": 0.9, "recency_score": 1.0, "directness": 0.9
+    },
+    "E2": {
+      "id": "E2", "tier": "A2", "scope": "national", "territory": "România",
+      "source": "Official national source", "source_url": "https://example.test/e2", "period": "2023",
+      "territory_fit": 0.75, "population_fit": 0.85, "recency_score": 1.0, "directness": 0.85
+    }
   },
   "needs": [
-    {"id": "N1", "title": "Practică relevantă", "statement": "Expunere practică relevantă", "scope": "county", "priority": true, "evidence_ids": ["E1"]},
-    {"id": "N2", "title": "Orientare profesională", "statement": "Orientare legată de traseul profesional", "scope": "national", "priority": true, "evidence_ids": ["E1", "E2"]}
+    {
+      "id": "N1", "title": "Practică relevantă", "statement": "Expunere practică relevantă", "scope": "county",
+      "priority": true, "evidence_ids": ["E1", "E2"], "confidence": 0.9,
+      "ranking_dimensions": {"magnitude": 0.8, "severity": 0.75, "gap_strength": 0.7, "call_relevance": 1.0},
+      "prohibited_overclaim": "Nu extrapola la un deficit individual de competențe."
+    },
+    {
+      "id": "N2", "title": "Orientare profesională", "statement": "Orientare legată de traseul profesional", "scope": "national",
+      "priority": true, "evidence_ids": ["E1", "E2"], "confidence": 0.8,
+      "ranking_dimensions": {"magnitude": 0.65, "severity": 0.65, "gap_strength": 0.6, "call_relevance": 0.9},
+      "prohibited_overclaim": "Nu afirma indecizie la nivelul unei școli fără cercetare primară."
+    }
   ],
+  "causal_graph": {
+    "nodes": [
+      {"id":"C1","type":"cause","label":"expunere limitată la contexte reale de lucru"},
+      {"id":"C2","type":"cause","label":"informație incomplet conectată la trasee profesionale"},
+      {"id":"N1","type":"need","priority":true,"label":"practică relevantă"},
+      {"id":"N2","type":"need","priority":true,"label":"orientare profesională"},
+      {"id":"I1","type":"intervention","label":"programe de învățare la locul de muncă"},
+      {"id":"O1","type":"output","label":"elevi sprijiniți"},
+      {"id":"R1","type":"result","label":"calificare"},
+      {"id":"IND1","type":"indicator","label":"EECR03"}
+    ],
+    "edges": [
+      {"source":"C1","target":"N1","relation":"CAUSES","evidence_ids":["E1","E2"]},
+      {"source":"C2","target":"N2","relation":"CAUSES","evidence_ids":["E2"]},
+      {"source":"I1","target":"N1","relation":"TARGETS"},
+      {"source":"I1","target":"N2","relation":"TARGETS"},
+      {"source":"I1","target":"O1","relation":"PRODUCES"},
+      {"source":"O1","target":"R1","relation":"CONTRIBUTES_TO"},
+      {"source":"R1","target":"IND1","relation":"MEASURED_BY"}
+    ]
+  },
   "chains": [
-    {"need_id": "N1", "evidence_ids": ["E1"], "intervention": "work-based learning", "indicator_id": "EECO06+07"},
+    {"need_id": "N1", "evidence_ids": ["E1", "E2"], "intervention": "work-based learning", "indicator_id": "EECO06+07"},
     {"need_id": "N2", "evidence_ids": ["E1", "E2"], "intervention": "practice at employers", "indicator_id": "EECR03"}
   ],
   "indicator_ids": ["EECO06+07", "EECR03"]
