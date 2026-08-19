@@ -15,6 +15,8 @@
     "territory": {"type": "string", "minLength": 1},
     "scope": {"enum": ["school", "beneficiary", "uat", "locality", "county", "region", "national", "eu"]},
     "population": {"type": ["string", "null"]},
+    "constructs": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "direct_measurement": {"type": "boolean", "default": false},
     "period": {"type": ["string", "null"]},
     "source_date": {"type": ["string", "null"]},
     "publication_date": {"type": ["string", "null"]},
