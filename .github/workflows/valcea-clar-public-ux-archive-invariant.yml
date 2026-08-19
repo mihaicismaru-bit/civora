@@ -1,0 +1,69 @@
+name: VÂLCEA CLAR Public UX Archive Invariant
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'valcea-clar/scripts/public_ux_reset.py'
+      - 'valcea-clar/scripts/public_ux_story_integrity.py'
+      - 'valcea-clar/scripts/public_ux_manifest.py'
+      - 'valcea-clar/site/story_archive.json'
+      - '.github/workflows/valcea-clar-public-ux-archive-invariant.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/scripts/public_ux_reset.py'
+      - 'valcea-clar/scripts/public_ux_story_integrity.py'
+      - 'valcea-clar/scripts/public_ux_manifest.py'
+      - '.github/workflows/valcea-clar-public-ux-archive-invariant.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-public-ux-archive-invariant-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Run Public UX without mutating durable archive
+        run: |
+          set -euo pipefail
+          archive='valcea-clar/site/story_archive.json'
+          before="$(sha256sum "$archive" | cut -d' ' -f1)"
+          before_count="$(python - <<'PY'
+          import json
+          from pathlib import Path
+          doc=json.loads(Path('valcea-clar/site/story_archive.json').read_text(encoding='utf-8'))
+          print(doc['story_count'])
+          PY
+          )"
+
+          python valcea-clar/scripts/public_ux_reset.py --self-test
+          python valcea-clar/scripts/public_ux_story_integrity.py --self-test
+          python valcea-clar/scripts/public_ux_reset.py
+          python valcea-clar/scripts/public_ux_story_integrity.py
+          python valcea-clar/scripts/public_ux_manifest.py
+          python valcea-clar/scripts/public_ux_reset.py --check
+          python valcea-clar/scripts/public_ux_story_integrity.py --check
+          python valcea-clar/scripts/public_ux_manifest.py --check
+
+          after="$(sha256sum "$archive" | cut -d' ' -f1)"
+          after_count="$(python - <<'PY'
+          import json
+          from pathlib import Path
+          doc=json.loads(Path('valcea-clar/site/story_archive.json').read_text(encoding='utf-8'))
+          print(doc['story_count'])
+          PY
+          )"
+
+          test "$before" = "$after"
+          test "$before_count" = "$after_count"
+          git diff --exit-code -- "$archive"
+          echo "Public UX durable archive invariant: PASS (${before_count} stories unchanged)"
