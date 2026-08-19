@@ -70,9 +70,11 @@ def main() -> None:
 
     assert result["runtime_publication_enabled"] is False
     assert result["provider_neutral"] is True
-    assert result["summary"]["by_type"] == {"GUIDE": 8, "ANALYSIS": 8, "OPPORTUNITY": 2, "CASE": 0, "FAQ": 8}
-    assert result["summary"]["records"] == 26
-    assert result["summary"]["publishable"] == 25
+    expected_publishable_cases = sum(1 for row in cases.get("cases", []) if row.get("publication_state") == "PUBLISHABLE")
+    expected_by_type = {"GUIDE": 8, "ANALYSIS": 8, "OPPORTUNITY": 2, "CASE": expected_publishable_cases, "FAQ": 8}
+    assert result["summary"]["by_type"] == expected_by_type
+    assert result["summary"]["records"] == 26 + expected_publishable_cases
+    assert result["summary"]["publishable"] == 25 + expected_publishable_cases
     assert result["summary"]["held"] == 1
     ids = [row["id"] for row in result["records"]]
     assert len(ids) == len(set(ids))
@@ -88,6 +90,11 @@ def main() -> None:
     assert opportunity_rows["fresh-synthetic-opportunity"]["material_facts"]["deadline"] == "2099-12-31"
     assert opportunity_rows["stale-synthetic-opportunity"]["publication_state"] == "HOLD"
     assert opportunity_rows["stale-synthetic-opportunity"]["semantics"] == "WITHHELD_FUNDING_FACTS"
+
+    case_rows = [row for row in result["records"] if row["type"] == "CASE"]
+    assert len(case_rows) == expected_publishable_cases
+    assert all(row["publication_state"] == "PUBLISHABLE" for row in case_rows)
+    assert all(row["provenance"].get("claim_ids") and row["provenance"].get("evidence_ids") for row in case_rows)
 
     print(json.dumps({
         "status": "PASS", "phase": "E14", "records": result["summary"]["records"],
