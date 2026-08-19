@@ -1,0 +1,188 @@
+{
+  "fixture_type": "SYNTHETIC_ACCEPTANCE_ONLY_NOT_PROJECT_EVIDENCE",
+  "project_input": {
+    "project_id": "SYNTH-RESEARCH-001",
+    "territory": "Synthetic County",
+    "target_group": "synthetic vocational students"
+  },
+  "call_snapshot": {
+    "call_code": "SYNTH-CALL",
+    "indicators": ["OUT-1", "RES-1"]
+  },
+  "ruleset_version": "0.2",
+  "historical_cutoff": "2024-01-12",
+  "predecessor_source_snapshot_ids": ["EXT-A", "EXT-B"],
+  "successor_source_snapshot_ids": ["EXT-A", "EXT-B", "POP-SYNTH-1@sha256:synthetic-roster", "PR-SYNTH-RAW@v1"],
+  "external_evidence": {
+    "EXT-A": {
+      "id": "EXT-A",
+      "source": "Synthetic official county context",
+      "source_url": "https://example.test/ext-a",
+      "tier": "A1",
+      "territory": "Synthetic County",
+      "scope": "county",
+      "period": "2023",
+      "constructs": ["labour_demand"],
+      "direct_measurement": true,
+      "territory_fit": 1.0,
+      "population_fit": 0.8,
+      "recency_score": 1.0,
+      "directness": 0.8
+    },
+    "EXT-B": {
+      "id": "EXT-B",
+      "source": "Synthetic official national education context",
+      "source_url": "https://example.test/ext-b",
+      "tier": "A2",
+      "territory": "Synthetic Country",
+      "scope": "national",
+      "period": "2023",
+      "constructs": ["career_guidance_policy", "work_based_learning_policy"],
+      "direct_measurement": false,
+      "territory_fit": 0.7,
+      "population_fit": 0.8,
+      "recency_score": 1.0,
+      "directness": 0.7
+    }
+  },
+  "claims": [
+    {
+      "id": "C1",
+      "scope": "school",
+      "construct": "career_guidance_need",
+      "requires_direct_local": true,
+      "priority": true,
+      "gap_type": "career_guidance",
+      "evidence_ids": ["EXT-B"]
+    },
+    {
+      "id": "C2",
+      "scope": "school",
+      "construct": "practice_quality",
+      "requires_direct_local": true,
+      "priority": true,
+      "gap_type": "practice_quality",
+      "evidence_ids": ["EXT-A", "EXT-B"]
+    },
+    {
+      "id": "C3",
+      "scope": "school",
+      "construct": "skills_baseline",
+      "requires_direct_local": true,
+      "priority": true,
+      "gap_type": "skills_baseline",
+      "evidence_ids": ["EXT-A"]
+    },
+    {
+      "id": "C4",
+      "scope": "school",
+      "construct": "career_intention",
+      "requires_direct_local": true,
+      "priority": true,
+      "gap_type": "career_intention",
+      "evidence_ids": ["EXT-B"]
+    }
+  ],
+  "unresolved_population_snapshot": {
+    "snapshot_id": "POP-SYNTH-UNRESOLVED"
+  },
+  "resolved_population_snapshot": {
+    "snapshot_id": "POP-SYNTH-1",
+    "as_of_date": "2024-01-03",
+    "school_year": "2023-2024",
+    "school_identity": "Synthetic Technical School",
+    "eligible_population_n": 4,
+    "grades_in_scope": ["X", "XI"],
+    "qualifications_in_scope": ["Mecanic auto", "Electrician auto"],
+    "count_by_grade_and_qualification": [
+      {"grade": "X", "qualification": "Mecanic auto", "count": 2},
+      {"grade": "XI", "qualification": "Electrician auto", "count": 2}
+    ],
+    "source_document_id": "SYNTHETIC-AUTH-ROSTER",
+    "source_date": "2024-01-05",
+    "source_hash_or_receipt": "sha256:synthetic-roster"
+  },
+  "raw_responses": [
+    {"respondent_id":"R1","population_snapshot_id":"POP-SYNTH-1","grade":"X","qualification":"Mecanic auto","question_id":"Q01","value":"4"},
+    {"respondent_id":"R1","population_snapshot_id":"POP-SYNTH-1","grade":"X","qualification":"Mecanic auto","question_id":"Q02","value":"4"},
+    {"respondent_id":"R1","population_snapshot_id":"POP-SYNTH-1","grade":"X","qualification":"Mecanic auto","question_id":"Q03","value":"yes"},
+    {"respondent_id":"R1","population_snapshot_id":"POP-SYNTH-1","grade":"X","qualification":"Mecanic auto","question_id":"Q04","value":"4"},
+    {"respondent_id":"R1","population_snapshot_id":"POP-SYNTH-1","grade":"X","qualification":"Mecanic auto","question_id":"Q05","value":"5"},
+    {"respondent_id":"R1","population_snapshot_id":"POP-SYNTH-1","grade":"X","qualification":"Mecanic auto","question_id":"Q06","value":"3"},
+
+    {"respondent_id":"R2","population_snapshot_id":"POP-SYNTH-1","grade":"X","qualification":"Mecanic auto","question_id":"Q01","value":"5"},
+    {"respondent_id":"R2","population_snapshot_id":"POP-SYNTH-1","grade":"X","qualification":"Mecanic auto","question_id":"Q02","value":"4"},
+    {"respondent_id":"R2","population_snapshot_id":"POP-SYNTH-1","grade":"X","qualification":"Mecanic auto","question_id":"Q03","value":"yes"},
+    {"respondent_id":"R2","population_snapshot_id":"POP-SYNTH-1","grade":"X","qualification":"Mecanic auto","question_id":"Q04","value":"5"},
+    {"respondent_id":"R2","population_snapshot_id":"POP-SYNTH-1","grade":"X","qualification":"Mecanic auto","question_id":"Q05","value":"5"},
+    {"respondent_id":"R2","population_snapshot_id":"POP-SYNTH-1","grade":"X","qualification":"Mecanic auto","question_id":"Q06","value":"4"},
+
+    {"respondent_id":"R3","population_snapshot_id":"POP-SYNTH-1","grade":"XI","qualification":"Electrician auto","question_id":"Q01","value":"3"},
+    {"respondent_id":"R3","population_snapshot_id":"POP-SYNTH-1","grade":"XI","qualification":"Electrician auto","question_id":"Q02","value":"3"},
+    {"respondent_id":"R3","population_snapshot_id":"POP-SYNTH-1","grade":"XI","qualification":"Electrician auto","question_id":"Q03","value":"no"},
+    {"respondent_id":"R3","population_snapshot_id":"POP-SYNTH-1","grade":"XI","qualification":"Electrician auto","question_id":"Q04","value":"3"},
+    {"respondent_id":"R3","population_snapshot_id":"POP-SYNTH-1","grade":"XI","qualification":"Electrician auto","question_id":"Q05","value":"4"},
+    {"respondent_id":"R3","population_snapshot_id":"POP-SYNTH-1","grade":"XI","qualification":"Electrician auto","question_id":"Q06","value":"3"},
+
+    {"respondent_id":"R4","population_snapshot_id":"POP-SYNTH-1","grade":"XI","qualification":"Electrician auto","question_id":"Q01","value":"4"},
+    {"respondent_id":"R4","population_snapshot_id":"POP-SYNTH-1","grade":"XI","qualification":"Electrician auto","question_id":"Q02","value":"5"},
+    {"respondent_id":"R4","population_snapshot_id":"POP-SYNTH-1","grade":"XI","qualification":"Electrician auto","question_id":"Q03","value":"yes"},
+    {"respondent_id":"R4","population_snapshot_id":"POP-SYNTH-1","grade":"XI","qualification":"Electrician auto","question_id":"Q04","value":"4"},
+    {"respondent_id":"R4","population_snapshot_id":"POP-SYNTH-1","grade":"XI","qualification":"Electrician auto","question_id":"Q05","value":"5"},
+    {"respondent_id":"R4","population_snapshot_id":"POP-SYNTH-1","grade":"XI","qualification":"Electrician auto","question_id":"Q06","value":"4"}
+  ],
+  "needs": [
+    {
+      "id":"N1","title":"Orientare profesională","statement":"Este necesară orientarea profesională bazată pe trasee reale.","scope":"school","priority":true,
+      "evidence_ids":["EV-PR-Q01-CAREER-GUIDANCE-NEED","EXT-B"],"confidence":0.8,
+      "ranking_dimensions":{"magnitude":0.75,"severity":0.65,"gap_strength":0.75,"call_relevance":0.9},
+      "prohibited_overclaim":"Nu transforma nevoia percepută în rezultat de ocupare."
+    },
+    {
+      "id":"N2","title":"Calitatea experienței practice","statement":"Este necesară o experiență practică relevantă calificării.","scope":"school","priority":true,
+      "evidence_ids":["EV-PR-Q04-PRACTICE-QUALITY","EV-PR-Q05-PRACTICE-RELEVANCE","EXT-A"],"confidence":0.85,
+      "ranking_dimensions":{"magnitude":0.8,"severity":0.75,"gap_strength":0.8,"call_relevance":1.0},
+      "prohibited_overclaim":"Nu afirma un deficit tehnic individual fără evaluare de competențe."
+    },
+    {
+      "id":"N3","title":"Baseline de pregătire practică percepută","statement":"Este necesară consolidarea pregătirii practice acolo unde baseline-ul o indică.","scope":"school","priority":true,
+      "evidence_ids":["EV-PR-Q06-SKILLS-CONFIDENCE","EXT-A"],"confidence":0.75,
+      "ranking_dimensions":{"magnitude":0.65,"severity":0.7,"gap_strength":0.65,"call_relevance":0.9},
+      "prohibited_overclaim":"Autoevaluarea nu este test obiectiv de competențe."
+    },
+    {
+      "id":"N4","title":"Clarificarea intenției de carieră","statement":"Este necesară conectarea calificării cu opțiunile profesionale viitoare.","scope":"school","priority":true,
+      "evidence_ids":["EV-PR-Q02-CAREER-INTENTION","EXT-B"],"confidence":0.8,
+      "ranking_dimensions":{"magnitude":0.7,"severity":0.6,"gap_strength":0.7,"call_relevance":0.85},
+      "prohibited_overclaim":"Intenția declarată nu este predicție certă de angajare."
+    }
+  ],
+  "causal_graph": {
+    "nodes": [
+      {"id":"N1","type":"need","priority":true,"cause_status":"not_established"},
+      {"id":"N2","type":"need","priority":true,"cause_status":"not_established"},
+      {"id":"N3","type":"need","priority":true,"cause_status":"not_established"},
+      {"id":"N4","type":"need","priority":true,"cause_status":"not_established"},
+      {"id":"I1","type":"intervention"},
+      {"id":"O1","type":"output"},
+      {"id":"R1","type":"result"},
+      {"id":"IND1","type":"indicator"}
+    ],
+    "edges": [
+      {"source":"I1","target":"N1","relation":"TARGETS"},
+      {"source":"I1","target":"N2","relation":"TARGETS"},
+      {"source":"I1","target":"N3","relation":"TARGETS"},
+      {"source":"I1","target":"N4","relation":"TARGETS"},
+      {"source":"I1","target":"O1","relation":"PRODUCES"},
+      {"source":"O1","target":"R1","relation":"CONTRIBUTES_TO"},
+      {"source":"R1","target":"IND1","relation":"MEASURED_BY"}
+    ]
+  },
+  "chains": [
+    {"need_id":"N1","evidence_ids":["EV-PR-Q01-CAREER-GUIDANCE-NEED","EXT-B"],"intervention":"orientation linked to work-based learning","indicator_id":"OUT-1"},
+    {"need_id":"N2","evidence_ids":["EV-PR-Q04-PRACTICE-QUALITY","EV-PR-Q05-PRACTICE-RELEVANCE","EXT-A"],"intervention":"work-based learning","indicator_id":"OUT-1"},
+    {"need_id":"N3","evidence_ids":["EV-PR-Q06-SKILLS-CONFIDENCE","EXT-A"],"intervention":"targeted practical learning","indicator_id":"RES-1"},
+    {"need_id":"N4","evidence_ids":["EV-PR-Q02-CAREER-INTENTION","EXT-B"],"intervention":"career-linked employer exposure","indicator_id":"OUT-1"}
+  ],
+  "indicator_ids": ["OUT-1", "RES-1"]
+}
