@@ -1,6 +1,15 @@
 name: EUCONS Scheduler
 
 on:
+  pull_request:
+    paths:
+      - 'eucons/opportunities/**'
+      - 'eucons/editorial/**'
+      - 'eucons/email/**'
+      - 'eucons/analytics/**'
+      - 'eucons/security/**'
+      - 'eucons/ops/github_automation*'
+      - '.github/workflows/eucons-scheduler.yml'
   schedule:
     - cron: '17 */6 * * *'
   workflow_dispatch:
@@ -9,7 +18,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: eucons-scheduler
+  group: eucons-scheduler-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
