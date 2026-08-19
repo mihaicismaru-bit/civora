@@ -1,0 +1,41 @@
+{
+  "schema_version": "2.0",
+  "instance_id": "test-county",
+  "environment": "test",
+  "publication": {
+    "name": "TEST COUNTY CLAR",
+    "short_name": "Test County",
+    "canonical_domain": "test-county.invalid"
+  },
+  "locale": "ro-RO",
+  "timezone": "Europe/Bucharest",
+  "runtime": {
+    "owner": "site_application",
+    "state_backend": {
+      "kind": "sqlite",
+      "connection_secret_ref": "TEST_LOCAL_NEWS_DATABASE"
+    },
+    "repository_runtime_state_enabled": false,
+    "public_base_url": "https://test-county.invalid",
+    "newsroom": {
+      "path": "/newsroom",
+      "private": true
+    }
+  },
+  "packs": {
+    "publication": "local-news-os/vnext/instances/test-county/packs/publication.json",
+    "geography": "local-news-os/vnext/instances/test-county/packs/geography.json",
+    "brand": "local-news-os/vnext/instances/test-county/packs/brand.json",
+    "sources": "local-news-os/vnext/instances/test-county/packs/sources.json",
+    "editorial": "local-news-os/vnext/instances/test-county/packs/editorial.json",
+    "channels": "local-news-os/vnext/instances/test-county/packs/channels.json",
+    "entities": "local-news-os/vnext/instances/test-county/packs/entities.json",
+    "photos": "local-news-os/vnext/instances/test-county/packs/photos.json"
+  },
+  "policies": {
+    "verified_facts_only": true,
+    "title_only_publishable": false,
+    "held_story_blocks_publication": false,
+    "development_gate_may_stop_validated_runtime": false
+  }
+}

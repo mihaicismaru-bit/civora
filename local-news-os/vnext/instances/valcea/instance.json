@@ -1,0 +1,41 @@
+{
+  "schema_version": "2.0",
+  "instance_id": "valcea",
+  "environment": "production",
+  "publication": {
+    "name": "VÂLCEA CLAR",
+    "short_name": "Vâlcea Clar",
+    "canonical_domain": "valceaclar.ro"
+  },
+  "locale": "ro-RO",
+  "timezone": "Europe/Bucharest",
+  "runtime": {
+    "owner": "site_application",
+    "state_backend": {
+      "kind": "postgresql",
+      "connection_secret_ref": "LOCAL_NEWS_RUNTIME_DATABASE_URL"
+    },
+    "repository_runtime_state_enabled": false,
+    "public_base_url": "https://valceaclar.ro",
+    "newsroom": {
+      "path": "/newsroom",
+      "private": true
+    }
+  },
+  "packs": {
+    "publication": "local-news-os/vnext/instances/valcea/packs/publication.json",
+    "geography": "local-news-os/vnext/instances/valcea/packs/geography.json",
+    "brand": "local-news-os/vnext/instances/valcea/packs/brand.json",
+    "sources": "local-news-os/vnext/instances/valcea/packs/sources.json",
+    "editorial": "local-news-os/vnext/instances/valcea/packs/editorial.json",
+    "channels": "local-news-os/vnext/instances/valcea/packs/channels.json",
+    "entities": "local-news-os/vnext/instances/valcea/packs/entities.json",
+    "photos": "local-news-os/vnext/instances/valcea/packs/photos.json"
+  },
+  "policies": {
+    "verified_facts_only": true,
+    "title_only_publishable": false,
+    "held_story_blocks_publication": false,
+    "development_gate_may_stop_validated_runtime": false
+  }
+}
