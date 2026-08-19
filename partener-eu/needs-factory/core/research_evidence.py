@@ -94,7 +94,7 @@ def promote_primary_research_evidence(
         aliases = list(CONSTRUCT_ALIASES.get(construct, []))
         constructs = sorted(set([construct] + aliases))
         aggregate = aggregates["aggregates"].get(qid, {"valid_n": 0, "counts": {}})
-        evidence_id = f"EV-PR-{qid}-{construct.upper().replace('_', '-') }"
+        evidence_id = f"EV-PR-{qid}-{construct.upper().replace('_', '-')}"
         semantic_payload = {
             "question_id": qid,
             "constructs": constructs,
@@ -105,8 +105,9 @@ def promote_primary_research_evidence(
         evidence[evidence_id] = {
             "id": evidence_id,
             "source": f"Needs Factory primary research – {school_identity}",
+            "source_type": "primary_research",
             "source_document_id": source_document_id,
-            "tier": "P1",
+            "tier": "A",
             "health": "PASS",
             "quarantined": False,
             "territory": territory,
