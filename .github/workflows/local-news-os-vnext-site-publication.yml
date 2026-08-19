@@ -1,0 +1,85 @@
+name: LOCAL NEWS OS vNext Site Publication Validation
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/vnext/core/site_publication.py"
+      - "local-news-os/vnext/runtime/publication_schema.sql"
+      - "local-news-os/vnext/instances/**/packs/publication.json"
+      - ".github/workflows/local-news-os-vnext-site-publication.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/vnext/core/site_publication.py"
+      - "local-news-os/vnext/runtime/publication_schema.sql"
+      - "local-news-os/vnext/instances/**/packs/publication.json"
+      - ".github/workflows/local-news-os-vnext-site-publication.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-site-publication:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile publication dependency chain
+        run: |
+          python -m py_compile \
+            local-news-os/vnext/core/runtime_store.py \
+            local-news-os/vnext/core/signal_engine.py \
+            local-news-os/vnext/core/primary_resolver.py \
+            local-news-os/vnext/core/fact_kernel_engine.py \
+            local-news-os/vnext/core/newsworthiness_engine.py \
+            local-news-os/vnext/core/story_engine.py \
+            local-news-os/vnext/core/editorial_qa.py \
+            local-news-os/vnext/core/site_publication.py
+
+      - name: Run Site Publication self-test
+        run: python local-news-os/vnext/core/site_publication.py --self-test
+
+      - name: Validate per-instance publication policies through same core
+        run: |
+          python - <<'PY'
+          import json, sys
+          from pathlib import Path
+          sys.path.insert(0, str(Path('local-news-os/vnext/core').resolve()))
+          import site_publication
+          policies=[]
+          for instance_id in ('valcea','test-county'):
+              pack=json.loads(Path(f'local-news-os/vnext/instances/{instance_id}/packs/publication.json').read_text(encoding='utf-8'))
+              policies.append(site_publication.validate_publication_policy(pack, instance_id=instance_id))
+          assert policies[0]['story_path_prefix'] != policies[1]['story_path_prefix']
+          assert policies[0]['category_path_prefix'] != policies[1]['category_path_prefix']
+          assert policies[0]['canonical_domain'] != policies[1]['canonical_domain']
+          print('VNEXT_SITE_PUBLICATION_POLICY_REPLICATION_PASS')
+          PY
+
+      - name: Assert site-owned publication boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'CREATE TABLE IF NOT EXISTS story_publications' local-news-os/vnext/runtime/publication_schema.sql
+          grep -q 'CREATE TABLE IF NOT EXISTS publication_revisions' local-news-os/vnext/runtime/publication_schema.sql
+          grep -q 'publication_revisions is append-only' local-news-os/vnext/runtime/publication_schema.sql
+          grep -q "site publication requires QA_PASSED story" local-news-os/vnext/core/site_publication.py
+          grep -q 'STORY_PUBLISHED' local-news-os/vnext/core/site_publication.py
+          grep -q '/feed.xml' local-news-os/vnext/core/site_publication.py
+          grep -q '/sitemap.xml' local-news-os/vnext/core/site_publication.py
+          ! grep -Eiq 'requests\.|urllib\.request|httpx|aiohttp|subprocess.*curl|git_state_path|state_root|live-feed|current_edition|story_publication_event|git commit|git push' local-news-os/vnext/core/site_publication.py
+          echo 'VNEXT_SITE_PUBLICATION_BOUNDARY_PASS'
+
+      - name: Enforce CORE_KNOWS_NO_LOCALITY
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -niE 'vâlcea|valcea|râmnicu|ramnicu|valceaclar\.ro' local-news-os/vnext/core/site_publication.py; then
+            echo 'Site Publication core contains locality-specific material' >&2
+            exit 1
+          fi
+          echo 'VNEXT_SITE_PUBLICATION_NO_LOCALITY_PASS'
