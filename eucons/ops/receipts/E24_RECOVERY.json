@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E24",
+  "unit": "E24_RECOVERY",
+  "status": "PASS",
+  "validated_at": "2026-08-19T12:57:00Z",
+  "validation": {
+    "quality": {"run_id": 32255188754, "run_number": 117, "conclusion": "success"},
+    "build": {"run_id": 32255188683, "run_number": 9, "conclusion": "success"},
+    "reconciliation": {"run_id": 32255188742, "run_number": 5, "conclusion": "success"},
+    "health": {"run_id": 32255188691, "run_number": 5, "conclusion": "success"},
+    "validated_head": "6ed9e8f52b3126f193699262cec0da2960e027ff",
+    "merged_commit": "8e60fb215bb06b92897ec4f6fa62a7533255328c",
+    "exact_head_gate_passed": true
+  },
+  "coverage": {
+    "stale_lease_recovery": "PASS",
+    "active_lease_protection": "PASS",
+    "retry_budget": "PASS",
+    "duplicate_execution_idempotency": "PASS",
+    "delivery_receipt_side_effect_guard": "PASS",
+    "orphan_prepare_discard": "PASS",
+    "opportunity_stale_reconciliation": "PASS",
+    "offer_replay_guard": "PASS",
+    "canonical_hash_corruption_hold": "PASS",
+    "receipt_lineage_rollback": "PASS",
+    "deterministic_resume_plan": "PASS",
+    "runtime_side_effects": "DISABLED"
+  },
+  "artifacts": [
+    "eucons/ops/recovery_contract.json",
+    "eucons/ops/recovery.py",
+    "eucons/validation/validate_recovery.py",
+    "eucons/validation/test_recovery_fail_closed.py",
+    ".github/workflows/eucons-quality.yml"
+  ],
+  "next_phase": "E25"
+}
