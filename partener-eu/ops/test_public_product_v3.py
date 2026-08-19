@@ -103,14 +103,15 @@ assert 'De ce apare:' in answer_chunk
 assert 'Eligibilitate cunoscută:' in answer_chunk
 assert 'Vezi dosarul' in answer_chunk
 
-# "Ce spun decidenții" keeps the strict editorial gate but labels source provenance by tier.
+# "Ce spun decidenții" keeps tier-aware provenance and honors the source-intelligence policy.
 assert 'officialIngested' in function_chunk(people,'isMaterial')
 official_people_source_chunk=function_chunk(people,'officialSource')
 primary_people_source_chunk=function_chunk(people,'primarySource')
 people_source_label_chunk=function_chunk(people,'sourceLabel')
 people_card_chunk=function_chunk(people,'card')
-assert r'^T1(?:B)?\b' in official_people_source_chunk
-assert 'rows.find(officialSource)||rows[0]||null' in primary_people_source_chunk
+assert r'^T1(?:B)?(?:\b|_)' in official_people_source_chunk
+assert 'function requiresOfficialEvidence(' in people
+assert 'official||(!requiresOfficialEvidence()?rows[0]:null)||null' in primary_people_source_chunk
 assert "officialSource(s)?'Sursa oficială':'Evidență publică'" in people_source_label_chunk
 assert "sourceKind=officialSource(src)?'sursa oficială':'evidența publică'" in people_card_chunk
 assert "label=src?sourceLabel(src):'Proveniență neconfirmată'" in people_card_chunk
@@ -118,6 +119,20 @@ assert 'deschide ${esc(sourceKind)}' in people_card_chunk
 assert 'Vezi semnalul și ${esc(sourceKind)} ↗' in people_card_chunk
 assert "x.institution||'Sursă oficială'" not in people_card_chunk
 assert "x.person||x.institution||'Sursă oficială'" not in people_card_chunk
+
+# Decision-maker promo is fresh and disappears instead of showing an empty/filler module.
+assert 'function freshnessDays(' in people
+fresh_chunk=function_chunk(people,'isFresh')
+assert 'Date.now()' in fresh_chunk
+assert 'age>=-1&&age<=freshnessDays()' in fresh_chunk
+material_people_chunk=function_chunk(people,'isMaterial')
+assert '!x?.officialIngested||!isFresh(x)' in material_people_chunk
+inject_people_chunk=function_chunk(people,'inject')
+assert 'hideWhenNoFreshOfficialSignals' in inject_people_chunk
+assert 'if(!chosen.length' in inject_people_chunk
+assert 'removePromo();return' in inject_people_chunk
+assert 'Ce fapt oficial lipsește:' in people_card_chunk
+assert 'informații proaspete și suficient de concrete' in people
 
 # "Ce spun decidenții" belongs to the explicit decision-home projection only.
 assert 'isHome()' in people
