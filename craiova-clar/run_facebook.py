@@ -40,6 +40,16 @@ def parse_dt(value: str) -> datetime:
     return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
 
 
+def _persist_block_once(state: dict, block: dict) -> None:
+    previous = state.get("last_attempt") if isinstance(state.get("last_attempt"), dict) else {}
+    comparable = {key: value for key, value in block.items() if key != "at"}
+    previous_comparable = {key: value for key, value in previous.items() if key != "at"}
+    if comparable == previous_comparable:
+        return
+    state["last_attempt"] = block
+    save(state)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--apply", action="store_true", help="perform the external Facebook write")
@@ -115,19 +125,21 @@ def main() -> int:
     token = os.getenv(str(config["access_token_env"]), "").strip()
     version = os.getenv(str(config["graph_version_env"]), str(config.get("graph_version_default") or "")).strip()
     if not page_id or not token or not version:
-        state["last_attempt"] = {
+        missing = [
+            name for name, value in (
+                (str(config["page_id_env"]), page_id),
+                (str(config["access_token_env"]), token),
+                (str(config["graph_version_env"]), version),
+            ) if not value
+        ]
+        block = {
             "at": datetime.now(timezone.utc).isoformat(),
             "status": "BLOCKED_MISSING_CREDENTIALS",
             "story_id": story.story_id,
-            "missing": [
-                name for name, value in (
-                    (str(config["page_id_env"]), page_id),
-                    (str(config["access_token_env"]), token),
-                    (str(config["graph_version_env"]), version),
-                ) if not value
-            ],
+            "missing": missing,
+            "queue_preserved": True,
         }
-        save(state)
+        _persist_block_once(state, block)
         print(json.dumps({
             "status": "BLOCKED_MISSING_CREDENTIALS",
             "story_id": story.story_id,
@@ -147,15 +159,15 @@ def main() -> int:
         else:
             receipt = publisher(story, site_receipt)
     except FacebookPublishError as exc:
-        state["last_attempt"] = {
+        block = {
             "at": datetime.now(timezone.utc).isoformat(),
             "status": "BLOCKED_META_OR_TRANSPORT",
             "story_id": story.story_id,
             "error": str(exc),
             "queue_preserved": True,
         }
-        save(state)
-        print(json.dumps(state["last_attempt"], ensure_ascii=False))
+        _persist_block_once(state, block)
+        print(json.dumps(block, ensure_ascii=False))
         return 0
 
     record = {
