@@ -15,7 +15,7 @@
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-08-19T05:27:16Z",
+    "utc": "2026-08-19T05:55:57Z",
     "source_pass": 5,
     "source_degraded": 0,
     "source_fail": 2,
@@ -26,7 +26,7 @@
     "quarantined_source": "SRC-AFIR-ENERGY-2026 — AFIR — Energie 2026; dependent material facts blocked fail-closed; SRC-LEGISLATIE — Portal Legislativ; dependent material facts blocked fail-closed"
   },
   "deployment_evidence": {
-    "utc": "2026-08-19T05:27:43Z",
+    "utc": "2026-08-19T05:56:26Z",
     "status": "PASS",
     "public_content_verified": true,
     "https_verified": true,
@@ -36,7 +36,7 @@
     "http_content_verified": true,
     "content_origin": "custom_https",
     "http_status": 200,
-    "final_url": "https://partener.eu/?p10_probe=20260819T052743Z",
+    "final_url": "https://partener.eu/?p10_probe=20260819T055626Z",
     "title": "PARTENER.EU — Găsește finanțări europene pentru investiția ta",
     "required_markers_present": true,
     "critical_assets_ok": true,
@@ -46,7 +46,7 @@
       {
         "id": "custom_https",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260819T052743Z",
+        "final_url": "https://partener.eu/?p10_probe=20260819T055626Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -57,12 +57,12 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260819T052743Z",
+        "final_url": "https://partener.eu/?p10_probe=20260819T055626Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "http://partener.eu/?p10_probe=20260819T052743Z",
-            "to_url": "https://partener.eu/?p10_probe=20260819T052743Z"
+            "from_url": "http://partener.eu/?p10_probe=20260819T055626Z",
+            "to_url": "https://partener.eu/?p10_probe=20260819T055626Z"
           }
         ],
         "content_verified": true,
@@ -74,12 +74,12 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260819T052743Z",
+        "final_url": "https://partener.eu/?p10_probe=20260819T055626Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260819T052743Z",
-            "to_url": "https://partener.eu/?p10_probe=20260819T052743Z"
+            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260819T055626Z",
+            "to_url": "https://partener.eu/?p10_probe=20260819T055626Z"
           }
         ],
         "content_verified": true,
@@ -125,35 +125,35 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-08-19T05:27:43Z",
-    "validation_run_started": "2026-08-19T05:27:16Z",
+    "utc": "2026-08-19T05:56:26Z",
+    "validation_run_started": "2026-08-19T05:55:57Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "c9b78e1bf2d6a8cf70e91b055703cab8b96120832450752ac4918f93a15fc607",
-      "history_sha256": "c9b78e1bf2d6a8cf70e91b055703cab8b96120832450752ac4918f93a15fc607",
-      "history_path": "validation/history/20260819T052716Z.json",
+      "latest_sha256": "aee495a414c0725da2a8cc08e385edf38b918c6b465a3c77fbeb5e0eabd3eb11",
+      "history_sha256": "aee495a414c0725da2a8cc08e385edf38b918c6b465a3c77fbeb5e0eabd3eb11",
+      "history_path": "validation/history/20260819T055557Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "646008f7d1b63869e55784769f1a191a3423b5c8406b6acf321b4972a2f65a91",
-      "checkpoint_sha256": "646008f7d1b63869e55784769f1a191a3423b5c8406b6acf321b4972a2f65a91",
+      "source_state_sha256": "2cae40f33263949bbad538b606c91b3a5457c2a18c228ab05b3cc7f0e0b870d9",
+      "checkpoint_sha256": "2cae40f33263949bbad538b606c91b3a5457c2a18c228ab05b3cc7f0e0b870d9",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
       "recovery_state_integrity": "PASS"
     },
     "source_registry": {
-      "observed_at": "2026-08-19T03:26:45.716143Z",
-      "age_seconds": 7257,
+      "observed_at": "2026-08-19T05:53:17.270549Z",
+      "age_seconds": 188,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
       "summary": {
         "total": 18,
-        "pass": 15,
-        "degraded": 0,
+        "pass": 14,
+        "degraded": 1,
         "fail": 3,
         "quarantined": 3,
         "low_information": 0,
-        "resolution_tasks_required": 4
+        "resolution_tasks_required": 0
       },
       "tier_counts": {
         "T1": {
@@ -162,23 +162,18 @@
           "degraded": 0,
           "fail": 0,
           "quarantined": 0,
-          "hash_changes": 4
+          "hash_changes": 0
         },
         "T1B": {
           "total": 11,
-          "pass": 9,
-          "degraded": 0,
+          "pass": 8,
+          "degraded": 1,
           "fail": 2,
           "quarantined": 2,
           "hash_changes": 0
         }
       },
-      "changed_source_ids": [
-        "SRC-MYSMIS-CALLS",
-        "SRC-MAI-FED-CALLS",
-        "SRC-MAI-FED-GENERAL-GUIDE",
-        "SRC-MAI-FED-CALENDAR-INDEX"
-      ],
+      "changed_source_ids": [],
       "missing_resolution_tasks": [],
       "unsafe_material_updates": [],
       "fail_closed": true
@@ -408,7 +403,7 @@
       "publication_policy": "candidate-state-only; web material facts are not auto-promoted on scheduled hash changes"
     },
     "mipe": {
-      "observed_at": "2026-08-19T00:00:34.662877+00:00",
+      "observed_at": "2026-08-19T05:54:40.800490+00:00",
       "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
       "source_available": false,
       "candidate_count": 60,
@@ -477,7 +472,7 @@
     "summary": {
       "integrity_pass": true,
       "registry_health": "DEGRADED",
-      "registry_hash_changes": 4,
+      "registry_hash_changes": 0,
       "afir_hash_changes": 0,
       "peo_calendar_changes": 0,
       "mipe_health": "PASS",
