@@ -40,6 +40,12 @@ SIGNAL_EVIDENCE_TERMS = (
     "anunta", "anunță", "declara", "declară", "propune", "prelung", "acceler",
     "negocier", "aprobat", "adoptat", "semnat", "lans", "prioritate", "decizie",
 )
+DIRECT_QUOTE_SIGNAL_CUE = "DIRECT_QUOTE_ATTRIBUTION"
+DIRECT_QUOTE_ROLE_TERMS = (
+    "ministr", "președ", "presed", "director", "secretar de stat",
+    "comisar", "premier", "prim-ministr",
+)
+DIRECT_QUOTE_CLOSERS = {"„": "”", "“": "”", "«": "»", '"': '"'}
 
 
 def load(path: Path, default: Any) -> Any:
@@ -137,6 +143,49 @@ def actor_alias(person: dict[str, Any], text: str) -> str | None:
     return None
 
 
+def direct_quote_statement_evidence(person: dict[str, Any], statement: str) -> dict[str, str] | None:
+    """Re-derive attributed direct-quote evidence at the canonical trust boundary."""
+    value = clean(statement)
+    folded = norm(value)
+    aliases = [clean(alias) for alias in person.get("aliases") or [] if clean(alias)]
+    name = clean(person.get("name"))
+    if name:
+        aliases.append(name)
+    for alias in sorted(set(aliases), key=len, reverse=True):
+        needle = norm(alias)
+        if not needle:
+            continue
+        pattern = rf"(?<![a-z0-9]){re.escape(needle)}(?![a-z0-9])"
+        for match in re.finditer(pattern, folded):
+            colon = folded.find(":", match.end(), min(len(folded), match.end() + 180))
+            if colon < 0:
+                continue
+            attribution = folded[match.end():colon]
+            if not any(norm(term) in attribution for term in DIRECT_QUOTE_ROLE_TERMS):
+                continue
+            tail = value[colon + 1:colon + 951]
+            stripped = tail.lstrip()
+            leading = len(tail) - len(stripped)
+            if not stripped or stripped[0] not in DIRECT_QUOTE_CLOSERS:
+                continue
+            opener = stripped[0]
+            quote_start = leading + 1
+            quote_end = tail.find(DIRECT_QUOTE_CLOSERS[opener], quote_start)
+            if quote_end < 0:
+                continue
+            quote = clean(tail[quote_start:quote_end])
+            if len(quote) < 45 or len(quote.split()) < 8:
+                continue
+            funding = next((term for term in FUNDING_EVIDENCE_TERMS if norm(term) in norm(quote)), None)
+            if funding:
+                return {
+                    "actorAlias": alias,
+                    "fundingCue": funding,
+                    "evidenceMode": "ACTOR_ROLE_COLON_QUOTE",
+                }
+    return None
+
+
 def article_statement_evidence(
     item: dict[str, Any], person: dict[str, Any], source_url: str, snapshot: dict[str, Any]
 ) -> dict[str, Any] | None:
@@ -157,10 +206,18 @@ def article_statement_evidence(
         return None
     folded = norm(window)
     statement_folded = norm(statement)
-    signal = next((x for x in SIGNAL_EVIDENCE_TERMS if norm(x) in statement_folded or norm(x) in folded), None)
-    funding = next((x for x in FUNDING_EVIDENCE_TERMS if norm(x) in folded), None)
-    if not signal or not funding:
-        return None
+    direct_quote = direct_quote_statement_evidence(person, statement)
+    if direct_quote:
+        signal = DIRECT_QUOTE_SIGNAL_CUE
+        funding = direct_quote["fundingCue"]
+        evidence_mode = direct_quote["evidenceMode"]
+        alias = direct_quote["actorAlias"]
+    else:
+        signal = next((x for x in SIGNAL_EVIDENCE_TERMS if norm(x) in statement_folded or norm(x) in folded), None)
+        funding = next((x for x in FUNDING_EVIDENCE_TERMS if norm(x) in folded), None)
+        evidence_mode = "ACTOR_SPEECH_CUE"
+        if not signal or not funding:
+            return None
     content_hash = clean(snapshot.get("contentHash"))
     observed_at = clean(snapshot.get("observedAt"))
     if not SHA256_RE.fullmatch(content_hash) or not observed_at:
@@ -174,6 +231,7 @@ def article_statement_evidence(
         "statement": statement[:600],
         "signalCue": signal,
         "fundingCue": funding,
+        "evidenceMode": evidence_mode,
     }
 
 
@@ -190,22 +248,35 @@ def persisted_statement_evidence(
         return None
     if observed_at != clean(snapshot.get("observedAt")) or not statement:
         return None
-    if not actor_alias(person, clean(f"{value.get('actorAlias')} {statement}")):
+    if not actor_alias(person, statement):
         return None
-    if not any(norm(x) in norm(statement) for x in SIGNAL_EVIDENCE_TERMS):
-        return None
-    combined = clean(f"{value.get('fundingCue')} {statement}")
-    if not any(norm(x) in norm(combined) for x in FUNDING_EVIDENCE_TERMS):
-        return None
+    signal_cue = clean(value.get("signalCue"))
+    if signal_cue == DIRECT_QUOTE_SIGNAL_CUE:
+        direct_quote = direct_quote_statement_evidence(person, statement)
+        if not direct_quote:
+            return None
+        funding_cue = direct_quote["fundingCue"]
+        evidence_mode = direct_quote["evidenceMode"]
+        actor = direct_quote["actorAlias"]
+    else:
+        if not any(norm(x) in norm(statement) for x in SIGNAL_EVIDENCE_TERMS):
+            return None
+        combined = clean(f"{value.get('fundingCue')} {statement}")
+        if not any(norm(x) in norm(combined) for x in FUNDING_EVIDENCE_TERMS):
+            return None
+        funding_cue = clean(value.get("fundingCue"))
+        evidence_mode = clean(value.get("evidenceMode")) or "ACTOR_SPEECH_CUE"
+        actor = clean(value.get("actorAlias"))
     return {
         "status": "VERIFIED_ARTICLE_STATEMENT",
-        "actorAlias": clean(value.get("actorAlias")),
+        "actorAlias": actor,
         "articleUrl": article_url,
         "observedAt": observed_at,
         "contentHash": content_hash,
         "statement": statement[:600],
-        "signalCue": clean(value.get("signalCue")),
-        "fundingCue": clean(value.get("fundingCue")),
+        "signalCue": signal_cue,
+        "fundingCue": funding_cue,
+        "evidenceMode": evidence_mode,
     }
 
 
@@ -474,6 +545,8 @@ def main() -> int:
     policy.update({
         "genericListingRowsCannotBecomePersonSignals": True,
         "articleStatementEvidenceRequiredForOfficialSignals": True,
+        "attributedDirectQuoteEvidenceSupported": True,
+        "directQuoteRequiresActorRoleColonAndFundingInQuote": True,
         "historicalSignalsRequireRoleAtObservation": True,
         "actorAliasesRequireTokenBoundaries": True,
     })

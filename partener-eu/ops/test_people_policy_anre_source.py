@@ -76,6 +76,59 @@ assert trusted is not None
 assert trusted["statementEvidence"]["status"] == "VERIFIED_ARTICLE_STATEMENT"
 assert trusted["administrativeFact"]["failClosed"] is True
 
+direct_quote_article = """<html><head><title>ANRE — investiții energetice</title></head><body>
+20 august 2026. George Niculescu, președinte ANRE: „Investițiile în rețele și finanțarea proiectelor de energie regenerabilă trebuie accelerate prin reguli predictibile și transparente.”
+</body></html>"""
+try:
+    collector.fetch = lambda url, limit=900_000: listing if url == source["url"] else direct_quote_article
+    quote_status, quote_items = collector.ingest_source(source, people, canonical)
+finally:
+    collector.fetch = old_fetch
+assert quote_status["statementEvidenceRejected"] == 0
+assert len(quote_items) == 1
+quote_item = quote_items[0]
+assert quote_item["statementExtraction"]["scope"] == "ACTOR_ROLE_COLON_QUOTE"
+assert quote_item["statementExtraction"]["signalCue"] == "DIRECT_QUOTE_ATTRIBUTION"
+assert quote_item["signalKind"] == "STATEMENT_SIGNAL"
+assert quote_item["administrativeFact"] == {"status": "UNCONFIRMED_FROM_SIGNAL", "failClosed": True}
+trusted_quote = builder.trusted_official_item(quote_item, tracked)
+assert trusted_quote is not None
+assert trusted_quote["statementEvidence"]["signalCue"] == "DIRECT_QUOTE_ATTRIBUTION"
+assert trusted_quote["statementEvidence"]["evidenceMode"] == "ACTOR_ROLE_COLON_QUOTE"
+
+colon_without_quote = """<html><head><title>ANRE — investiții energetice</title></head><body>
+20 august 2026. George Niculescu, președinte ANRE: Investițiile în rețele și finanțarea proiectelor trebuie accelerate prin reguli predictibile.
+</body></html>"""
+try:
+    collector.fetch = lambda url, limit=900_000: listing if url == source["url"] else colon_without_quote
+    no_quote_status, no_quote_items = collector.ingest_source(source, people, canonical)
+finally:
+    collector.fetch = old_fetch
+assert no_quote_items == []
+assert no_quote_status["statementEvidenceRejected"] == 1
+
+quote_without_funding = """<html><head><title>ANRE — investiții energetice</title></head><body>
+20 august 2026. George Niculescu, președinte ANRE: „Regulile trebuie să fie predictibile, transparente și aplicate consecvent pentru toți participanții la piață.”
+</body></html>"""
+try:
+    collector.fetch = lambda url, limit=900_000: listing if url == source["url"] else quote_without_funding
+    no_funding_status, no_funding_items = collector.ingest_source(source, people, canonical)
+finally:
+    collector.fetch = old_fetch
+assert no_funding_items == []
+assert no_funding_status["statementEvidenceRejected"] == 1
+
+reversed_attribution = """<html><head><title>ANRE — investiții energetice</title></head><body>
+20 august 2026. ANRE: „George Niculescu, președinte, consideră că finanțarea proiectelor energetice trebuie să rămână predictibilă și transparentă pentru investitori.”
+</body></html>"""
+try:
+    collector.fetch = lambda url, limit=900_000: listing if url == source["url"] else reversed_attribution
+    reversed_status, reversed_items = collector.ingest_source(source, people, canonical)
+finally:
+    collector.fetch = old_fetch
+assert reversed_items == []
+assert reversed_status["statementEvidenceRejected"] == 1
+
 print(json.dumps({
     "source": source["id"],
     "person": person["id"],
