@@ -39,8 +39,6 @@ enabled_sources = [x for x in sources["sources"] if x.get("enabled", True)]
 network_budget_seconds = collector.source_fetch_budget_seconds(enabled_sources)
 assert collector.MAX_SOURCE_FETCH_WORKERS >= 2
 assert collector.FETCH_TIMEOUT_SECONDS <= 18
-# The editorial workflow has a 10-minute wall-clock envelope. Keep a full
-# minute of headroom for parsing, validation and durable checkpointing.
 assert network_budget_seconds < 540
 
 for source in sources["sources"]:
@@ -84,7 +82,7 @@ assert collector.canonical_link_for("Un apel PEO fără cod explicit.", canonica
 
 source = next(x for x in sources["sources"] if x["id"] == "AFIR_COMMUNICATES")
 listing = '<a href="/comunicate/test-signal">Fonduri europene PNRR</a>'
-article = """<html><head><title>Dragoș Pîslaru: finanțare europeană</title></head><body>
+article = """<html><head><title>Declarație Dragoș Pîslaru</title></head><body>
 19 august 2026. Dragoș Pîslaru a anunțat că fondurile europene pentru investiții rămân o prioritate.
 </body></html>"""
 old_fetch = collector.fetch
@@ -108,8 +106,6 @@ assert item["sourceSnapshot"]["contentHash"]
 assert item["canonicalLink"]["status"] == "UNRESOLVED"
 assert item["person"] == "Dragoș Pîslaru"
 
-# A reachable listing is not reported as healthy article coverage when every
-# candidate article fetch fails. The ledger must expose the measured failure.
 try:
     def fetch_failure(url, limit=900_000):
         if url == source["url"]:
@@ -126,8 +122,6 @@ assert failed_status["articleFetchSuccesses"] == 0
 assert failed_status["articleFetchFailures"] == 1
 assert failed_items == []
 
-# A reachable source with no discoverable candidates is distinct from proven
-# article coverage; it must not be collapsed into OK.
 try:
     collector.fetch = lambda url, limit=900_000: "<html><body>Nicio legătură candidată.</body></html>"
     empty_status, empty_items = collector.ingest_source(source, people, canonical)
@@ -147,9 +141,6 @@ assert accepted["statementEvidence"]["status"] == "VERIFIED_ARTICLE_STATEMENT"
 assert accepted["statementEvidence"]["articleUrl"] == item["sources"][0]["url"]
 assert accepted["statementEvidence"]["contentHash"] == item["sourceSnapshot"]["contentHash"]
 
-# Article-level evidence is mandatory: an official article that merely contains
-# funding language but no attributable statement from the tracked actor is not a
-# person signal.
 no_actor_statement = copy.deepcopy(item)
 no_actor_statement["headline"] = "Finanțări europene pentru investiții"
 no_actor_statement["statement"] = "Programul de finanțare pentru investiții are un buget actualizat."
@@ -167,16 +158,12 @@ bad = copy.deepcopy(item)
 bad["sourceSnapshot"]["contentHash"] = ""
 assert builder.trusted_official_item(bad, tracked) is None
 
-# Historical official observations keep their verified role-at-observation even
-# if the live registry later changes; history is not silently rewritten.
 changed_registry = copy.deepcopy(tracked)
 changed_registry["dragos-pislaru"]["role"] = "Altă funcție ulterioară"
 accepted_after_role_change = builder.trusted_official_item(item, changed_registry)
 assert accepted_after_role_change is not None
 assert accepted_after_role_change["roleVerification"]["role"] == item["roleVerification"]["role"]
 
-# Legacy seeds without a role-at-observation snapshot are now fail-closed instead
-# of receiving the person's current role during rebuild.
 legacy_seed = next(x for x in seed_state["items"] if x["personId"] == "cseke-attila")
 assert builder.trusted_seed_item(legacy_seed, tracked) is None
 historical_seed = copy.deepcopy(legacy_seed)
@@ -194,7 +181,6 @@ assert trusted_historical_seed is not None
 assert trusted_historical_seed["role"] == "Ministrul Dezvoltării, Lucrărilor Publice și Administrației"
 assert trusted_historical_seed["institution"] == "MDLPA"
 
-# Generic MIPE/decision-product rows cannot be upgraded into person statements.
 generic_mipe_row = {
     "date": "2026-08-18",
     "headline": "https://mfe.gov.ro/",
@@ -204,8 +190,6 @@ generic_mipe_row = {
 }
 assert builder.mention_item(verified["dragos-pislaru"], generic_mipe_row, "MIPE") is None
 
-# An upstream row may enter the synthetic path only when it already carries a
-# role-at-observation snapshot, article snapshot and explicit statement evidence.
 trusted_synthetic = {
     "date": "2026-08-19",
     "headline": "Dragoș Pîslaru anunță priorități pentru fonduri europene",
@@ -233,9 +217,6 @@ no_evidence = copy.deepcopy(accepted)
 no_evidence.pop("statementEvidence", None)
 assert refiner.article_statement_evidence(no_evidence) is False
 
-# The durable source ledger and the verified people projection are independent
-# checkpoints. A failure in daily-brief generation must not strand a fresh
-# source ledger behind a stale people_policy projection.
 workflow_path = ROOT / ".github" / "workflows" / "partener-eu-editorial-daily.yml"
 workflow = workflow_path.read_text(encoding="utf-8")
 ordered_markers = [
