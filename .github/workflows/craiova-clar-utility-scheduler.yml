@@ -73,7 +73,7 @@ jobs:
       - name: Probe public publication
         run: |
           python - <<'PY'
-          import hashlib, json, re, time, urllib.request
+          import hashlib, json, os, re, time, urllib.request
           from datetime import datetime, timezone
           from pathlib import Path
 
@@ -84,12 +84,15 @@ jobs:
           url = story['canonical_url']
           expected = story['headline']
           expected_source = 'github:craiova-clar-build'
+          media = story.get('media') if isinstance(story.get('media'), dict) else None
           outcome = {
               'story_id': story['story_id'], 'canonical_url': url,
               'checked_at': datetime.now(timezone.utc).isoformat(),
               'status': 'verification_failed', 'http_status': None,
               'source_header': None, 'content_type': None, 'server': None,
-              'final_url': None, 'body_sha256': None, 'body_prefix': None, 'error': None,
+              'final_url': None, 'body_sha256': None, 'body_prefix': None,
+              'run_id': os.environ.get('GITHUB_RUN_ID'),
+              'media_expected': bool(media), 'media_verified': None, 'error': None,
           }
           for attempt in range(12):
               try:
@@ -108,7 +111,16 @@ jobs:
                           'body_sha256': hashlib.sha256(raw).hexdigest(),
                           'body_prefix': re.sub(r'\s+', ' ', body[:400]).strip(),
                       })
-                  if status == 200 and source_header == expected_source and expected in body and 'CRAIOVA CLAR' in body:
+                  media_ok = True
+                  if media:
+                      expected_media_bits = [
+                          str(media.get('image_url') or ''),
+                          str(media.get('creator') or ''),
+                          str(media.get('license') or ''),
+                      ]
+                      media_ok = all(bit and bit in body for bit in expected_media_bits)
+                  outcome['media_verified'] = media_ok if media else None
+                  if status == 200 and source_header == expected_source and expected in body and 'CRAIOVA CLAR' in body and media_ok:
                       outcome['status'] = 'published_verified'
                       outcome['error'] = None
                       receipt = {
@@ -117,12 +129,18 @@ jobs:
                           'status': 'published_verified', 'external_id': None,
                           'metadata': {'verified_at': datetime.now(timezone.utc).isoformat(),
                                        'http_status': status, 'headline_verified': True,
-                                       'product_verified': True, 'source_header': source_header},
+                                       'product_verified': True, 'source_header': source_header,
+                                       'run_id': os.environ.get('GITHUB_RUN_ID'),
+                                       'media_expected': bool(media),
+                                       'media_verified': media_ok if media else None},
                       }
                       Path('craiova-clar/site/utility_publication_receipt.json').write_text(
                           json.dumps(receipt, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
                       break
-                  outcome['error'] = f'HTTP {status}; source={source_header!r}; expected live headline/source marker not found'
+                  outcome['error'] = (
+                      f'HTTP {status}; source={source_header!r}; '
+                      f'headline/product/media verification failed (media_expected={bool(media)}, media_ok={media_ok})'
+                  )
               except Exception as exc:
                   outcome['error'] = repr(exc)
               if attempt < 11:
@@ -155,4 +173,6 @@ jobs:
           from pathlib import Path
           probe = json.loads(Path('craiova-clar/state/utility_live_probe.json').read_text(encoding='utf-8'))
           assert probe['status'] == 'published_verified', probe
+          if probe.get('media_expected'):
+              assert probe.get('media_verified') is True, probe
           PY
