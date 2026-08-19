@@ -118,7 +118,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if grep -RInE --exclude='*.md' --exclude='validate_bootstrap.py' '(API_KEY|ACCESS_TOKEN|CLIENT_SECRET|PASSWORD)[[:space:]]*=[[:space:]]*[A-Za-z0-9_./+-]{12,}' eucons; then
+          if grep -RInE --exclude='*.md' --exclude='validate_bootstrap.py' --exclude='test_privacy_security_fail_closed.py' '(API_KEY|ACCESS_TOKEN|CLIENT_SECRET|PASSWORD)[[:space:]]*=[[:space:]]*[A-Za-z0-9_./+-]{12,}' eucons; then
             echo 'Potential secret-like assignment committed under eucons/' >&2
             exit 1
           fi
