@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "engine_id": "EUCONS_E15_AUTONOMOUS_EDITORIAL_LOOP",
+  "input": {
+    "required_product": "EUCONS_COMMERCIAL_OS",
+    "required_engine_id": "EUCONS_E14_KNOWLEDGE_ENGINE",
+    "required_publication_state": "PUBLISHABLE",
+    "allowed_types": [
+      "GUIDE",
+      "ANALYSIS",
+      "OPPORTUNITY",
+      "CASE",
+      "FAQ"
+    ]
+  },
+  "selection": {
+    "type_priority": [
+      "OPPORTUNITY",
+      "CASE",
+      "GUIDE",
+      "ANALYSIS",
+      "FAQ"
+    ],
+    "max_ready_per_cycle": 12,
+    "duplicate_key": [
+      "type",
+      "source_ref"
+    ],
+    "deterministic_order": true
+  },
+  "qa": {
+    "provenance_required": true,
+    "analysis_label_required": true,
+    "funding_facts_require_partener_e09": true,
+    "case_claim_refs_required": true,
+    "unknown_type_fails_closed": true,
+    "duplicate_source_fails_closed": true
+  },
+  "publication": {
+    "ready_state": "READY",
+    "hold_state": "HOLD",
+    "dispatch_state": "DISABLED_RUNTIME_GATE",
+    "immutable_receipts": true,
+    "receipt_hash": "sha256",
+    "reconciliation_states": [
+      "NEW",
+      "UNCHANGED",
+      "SUPERSEDED",
+      "WITHDRAWN"
+    ]
+  },
+  "output": {
+    "product": "EUCONS_COMMERCIAL_OS",
+    "schema_version": 1,
+    "runtime_publication_enabled": false,
+    "dispatch_enabled": false
+  }
+}
