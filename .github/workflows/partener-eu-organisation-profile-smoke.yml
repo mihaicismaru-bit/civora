@@ -1,0 +1,39 @@
+name: PARTENER.EU Organisation Profile Smoke
+
+on:
+  push:
+    branches:
+      - agent/anaf-company-financials
+    paths:
+      - 'partener-eu/ingest/organisation_profile_probe.py'
+      - '.github/workflows/partener-eu-organisation-profile-smoke.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'partener-eu/ingest/organisation_profile_probe.py'
+      - '.github/workflows/partener-eu-organisation-profile-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  profile-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile probe
+        run: python -m py_compile partener-eu/ingest/organisation_profile_probe.py
+      - name: Probe CUI 9293117 from official sources
+        run: |
+          python partener-eu/ingest/organisation_profile_probe.py \
+            --cui 9293117 \
+            --name 'FUNDATIA ANTREPRENORIAT SOCIAL' \
+            --date 2026-08-19
