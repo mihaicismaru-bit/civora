@@ -1,0 +1,63 @@
+name: CRAIOVA CLAR Utility Lane
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [craiova-clar-build]
+    paths:
+      - 'clar_core/**'
+      - 'craiova-clar/config/**'
+      - 'craiova-clar/run_utility.py'
+      - 'craiova-clar/tests/**'
+      - '.github/workflows/craiova-clar-utility.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: craiova-clar-utility
+  cancel-in-progress: true
+
+jobs:
+  utility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: craiova-clar-build
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Regression tests
+        run: python -m unittest discover -s craiova-clar/tests -p 'test_*.py' -v
+
+      - name: Discover fresh official utility notice and render story
+        run: python craiova-clar/run_utility.py | tee /tmp/craiova-clar-utility-result.json
+
+      - name: Require first visible utility story for greenfield acceptance
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('craiova-clar/site/stories.json')
+          assert p.exists(), 'No utility story was rendered from the fresh official source.'
+          doc = json.loads(p.read_text(encoding='utf-8'))
+          assert doc.get('stories'), 'Utility story manifest is empty.'
+          print(json.dumps(doc['stories'][0], ensure_ascii=False, indent=2))
+          PY
+
+      - name: Persist rendered utility story on build branch
+        run: |
+          git config user.name 'craiova-clar[bot]'
+          git config user.email 'craiova-clar@users.noreply.github.com'
+          git add craiova-clar/site craiova-clar/state || true
+          if git diff --cached --quiet; then
+            echo 'No generated change to persist.'
+            exit 0
+          fi
+          git commit -m 'Publish CRAIOVA CLAR utility story snapshot'
+          git push origin HEAD:craiova-clar-build
