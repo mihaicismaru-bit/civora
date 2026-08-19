@@ -32,6 +32,8 @@ jobs:
         run: python eucons/validation/validate_bootstrap.py
       - name: Validate EUCONS commercial canon
         run: python eucons/validation/validate_commercial_canon.py
+      - name: Validate EUCONS service registry
+        run: python eucons/validation/validate_service_registry.py
       - name: Reject committed secret-like assignments
         shell: bash
         run: |

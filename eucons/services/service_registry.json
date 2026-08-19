@@ -1,0 +1,252 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E02",
+  "status": "CANONICAL",
+  "pricing_policy": {
+    "public_fixed_prices": false,
+    "default_mode": "SCOPED_AFTER_QUALIFICATION",
+    "rule": "No numeric price, discount or binding commercial term may be generated unless a later approved pricing rule explicitly determines it."
+  },
+  "services": [
+    {
+      "id": "funding_strategy_and_eligibility",
+      "label": "Strategie de finanțare și eligibilitate",
+      "summary": "Analiză structurată a investiției, profilului beneficiarului și rutelor de finanțare care pot merita aprofundate.",
+      "commercial_outcome": "O decizie documentată privind ce oportunități merită urmărite, ce condiții trebuie verificate și ce pregătire este necesară înainte de aplicare.",
+      "audiences": ["companies_entrepreneurs", "public_authorities_institutions", "ngos_eligible_organizations", "existing_beneficiaries"],
+      "deliverables": [
+        "profil de finanțare al beneficiarului și investiției",
+        "listă scurtă de oportunități relevante sau concluzie motivată că nu există încă o potrivire suficientă",
+        "matrice de criterii și condiții care trebuie confirmate",
+        "plan de pregătire și următorii pași"
+      ],
+      "process": [
+        "colectarea datelor despre beneficiar și investiție",
+        "identificarea oportunităților numai din surse/proiecții verificate",
+        "verificarea criteriilor eliminatorii și a condițiilor materiale",
+        "compararea scenariilor și documentarea incertitudinilor",
+        "livrarea recomandării și a pașilor următori"
+      ],
+      "boundaries": [
+        "nu garantează obținerea finanțării",
+        "nu transformă declarațiile publice sau calendarele neconfirmate în apeluri deschise",
+        "criteriile neclare sau contradictorii rămân marcate pentru verificare",
+        "nu include pregătirea cererii de finanțare decât dacă este contractată separat"
+      ],
+      "evidence_requirements": ["profil beneficiar", "descriere investiție", "surse oficiale sau proiecții PARTENER verificate pentru faptele de finanțare"],
+      "pricing_mode": "SCOPED_AFTER_QUALIFICATION",
+      "ctas": ["request_project_evaluation", "request_funding_consultation"]
+    },
+    {
+      "id": "application_design_and_submission",
+      "label": "Pregătire și depunere proiect",
+      "summary": "Structurarea cererii de finanțare și coordonarea documentației necesare pentru o depunere controlată.",
+      "commercial_outcome": "Un dosar de aplicare coerent, urmărit prin checklist și pregătit pentru depunere în limitele documentației și regulilor aplicabile.",
+      "audiences": ["companies_entrepreneurs", "public_authorities_institutions", "ngos_eligible_organizations"],
+      "deliverables": [
+        "plan de lucru și checklist de depunere",
+        "structura proiectului: obiective, activități, rezultate și calendar",
+        "buget și corelări documentate cu activitățile, în limita informațiilor furnizate și validate",
+        "registru de documente și neconcordanțe",
+        "pachet final de depunere sau handoff pentru depunere, conform canalului agreat"
+      ],
+      "process": [
+        "confirmarea eligibilității de lucru și a ghidului aplicabil",
+        "colectarea și verificarea datelor de intrare",
+        "proiectarea intervenției și bugetului",
+        "completarea și reconcilierea documentației",
+        "QA final și pregătirea depunerii"
+      ],
+      "boundaries": [
+        "nu inventează documente, indicatori, capacități sau cofinanțare",
+        "nu garantează punctajul, aprobarea sau contractarea",
+        "informațiile lipsă care afectează eligibilitatea sau bugetul blochează finalizarea",
+        "depunerea în numele clientului este inclusă numai dacă accesul și mandatul sunt explicit autorizate"
+      ],
+      "evidence_requirements": ["ghid și anexe aplicabile", "date juridice și financiare ale solicitantului", "documentele tehnice și administrative cerute de apel"],
+      "pricing_mode": "SCOPED_AFTER_QUALIFICATION",
+      "ctas": ["request_project_evaluation", "request_offer"]
+    },
+    {
+      "id": "implementation_and_reporting",
+      "label": "Implementare și raportare",
+      "summary": "Suport operațional pentru executarea proiectului, urmărirea obligațiilor și pregătirea raportărilor pe baza documentelor verificabile.",
+      "commercial_outcome": "Un proces de implementare controlat, cu termene, obligații, documente și raportări urmărite explicit.",
+      "audiences": ["companies_entrepreneurs", "public_authorities_institutions", "ngos_eligible_organizations", "existing_beneficiaries"],
+      "deliverables": [
+        "plan de implementare și calendar de obligații",
+        "registru de activități, livrabile și documente justificative",
+        "pregătirea raportărilor contractate",
+        "registru de probleme, decizii și acțiuni corective",
+        "dosar de evidențe pentru verificări, în aria serviciilor contractate"
+      ],
+      "process": [
+        "preluarea contractului și a versiunii curente a proiectului",
+        "construirea planului de conformitate și implementare",
+        "urmărirea execuției și colectarea evidențelor",
+        "reconcilierea activităților, bugetului și indicatorilor",
+        "pregătirea raportărilor și a acțiunilor următoare"
+      ],
+      "boundaries": [
+        "nu validează retroactiv activități fără dovezi",
+        "nu declară eligibile cheltuieli fără suport documentar și reguli aplicabile",
+        "nu înlocuiește responsabilitățile legale sau contractuale ale beneficiarului",
+        "modificările materiale se tratează prin flux separat de analiză și aprobare"
+      ],
+      "evidence_requirements": ["contract de finanțare și anexe curente", "documente de implementare", "evidențe privind activitățile, indicatorii și cheltuielile"],
+      "pricing_mode": "SCOPED_AFTER_QUALIFICATION",
+      "ctas": ["request_implementation_review", "request_offer"]
+    },
+    {
+      "id": "procurement_support",
+      "label": "Achiziții în proiecte finanțate",
+      "summary": "Planificare și suport documentar pentru achizițiile din proiect, raportate la regulile și obligațiile aplicabile beneficiarului.",
+      "commercial_outcome": "Un traseu documentat al achiziției, cu cerințe, pași, evidențe și puncte de control urmărite înainte de angajarea cheltuielii.",
+      "audiences": ["companies_entrepreneurs", "public_authorities_institutions", "ngos_eligible_organizations", "existing_beneficiaries"],
+      "deliverables": [
+        "plan sau registru de achiziții pentru aria contractată",
+        "checklist de documente și pași",
+        "suport la pregătirea documentației tehnice/administrative furnizate de beneficiar",
+        "registru de clarificări și decizii",
+        "dosar de evidențe pentru achiziția asistată"
+      ],
+      "process": [
+        "stabilirea cadrului aplicabil și a legăturii cu bugetul proiectului",
+        "definirea necesității și a traseului procedural",
+        "pregătirea și verificarea documentelor din aria contractată",
+        "urmărirea clarificărilor și etapelor",
+        "închiderea dosarului de evidențe și semnalarea riscurilor rămase"
+      ],
+      "boundaries": [
+        "nu substituie atribuțiile autorității contractante sau ale persoanelor legal responsabile",
+        "nu inventează specificații tehnice, oferte sau justificări",
+        "conflictele de interese și informațiile contradictorii produc HOLD până la clarificare",
+        "asistența juridică sau reprezentarea în litigii nu este inclusă implicit"
+      ],
+      "evidence_requirements": ["buget aprobat și contract curent", "necesitate și specificații furnizate/validate de beneficiar", "reguli de achiziție aplicabile"],
+      "pricing_mode": "SCOPED_AFTER_QUALIFICATION",
+      "ctas": ["request_implementation_review", "request_offer"]
+    },
+    {
+      "id": "financial_management_and_reimbursement",
+      "label": "Management financiar, plăți și rambursări",
+      "summary": "Controlul documentar al fluxurilor financiare din proiect și suport pentru cereri de plată/rambursare în aria contractată.",
+      "commercial_outcome": "O evidență reconciliată între buget, cheltuieli, documente și solicitările financiare pregătite pentru verificare.",
+      "audiences": ["companies_entrepreneurs", "public_authorities_institutions", "ngos_eligible_organizations", "existing_beneficiaries"],
+      "deliverables": [
+        "registru financiar al proiectului pentru aria contractată",
+        "checklist de eligibilitate documentară",
+        "reconciliere între buget, contracte, facturi, plăți și categorii de cheltuieli",
+        "pachet de lucru pentru cereri de plată/rambursare",
+        "registru de neconcordanțe și acțiuni de remediere"
+      ],
+      "process": [
+        "preluarea bugetului și regulilor financiare aplicabile",
+        "colectarea documentelor și trasabilitatea cheltuielilor",
+        "reconcilierea datelor și identificarea lipsurilor",
+        "pregătirea solicitărilor financiare din aria contractată",
+        "QA și urmărirea clarificărilor"
+      ],
+      "boundaries": [
+        "nu certifică eligibilitatea unei cheltuieli fără suport suficient",
+        "nu înlocuiește contabilitatea beneficiarului sau auditul independent când acestea sunt obligatorii",
+        "documentele lipsă sau tranzacțiile neclare rămân neconfirmate",
+        "nu garantează acceptarea unei cereri de plată sau rambursare"
+      ],
+      "evidence_requirements": ["buget și contract curent", "documente contabile și de plată relevante", "contracte/comenzi/recepții și alte justificative aplicabile"],
+      "pricing_mode": "SCOPED_AFTER_QUALIFICATION",
+      "ctas": ["request_implementation_review", "request_offer"]
+    },
+    {
+      "id": "project_recovery_and_corrections",
+      "label": "Remediere și recuperare proiect",
+      "summary": "Diagnostic pentru proiecte întârziate, blocate sau expuse unor neconformități, urmat de un plan de acțiune documentat.",
+      "commercial_outcome": "O imagine clară a problemelor demonstrabile, a riscurilor și a pașilor de remediere care pot fi executați sau escaladați.",
+      "audiences": ["companies_entrepreneurs", "public_authorities_institutions", "existing_beneficiaries"],
+      "deliverables": [
+        "diagnostic de stare și cronologie a problemei",
+        "matrice problemă-dovadă-risc",
+        "plan de remediere cu responsabilități și termene",
+        "drafturi/documentație pentru clarificări sau modificări, dacă intră în aria contractată",
+        "registru de acțiuni și rezultat al fiecărei remedieri"
+      ],
+      "process": [
+        "înghețarea versiunii documentare analizate",
+        "reconstruirea cronologiei și a obligațiilor relevante",
+        "separarea faptelor dovedite de ipoteze și lipsuri",
+        "prioritizarea riscurilor și opțiunilor de remediere",
+        "implementarea sau handoff-ul acțiunilor aprobate"
+      ],
+      "boundaries": [
+        "nu promite anularea corecțiilor sau acceptarea modificărilor de către finanțator",
+        "nu falsifică, reconstruiește fictiv sau antedatează dovezi",
+        "situațiile care necesită opinie juridică specializată sunt escaladate separat",
+        "orice concluzie materială trebuie legată de documente și reguli verificabile"
+      ],
+      "evidence_requirements": ["contract și versiuni relevante ale proiectului", "corespondență și documente privind problema", "documente financiare/tehnice/procedurale relevante"],
+      "pricing_mode": "SCOPED_AFTER_QUALIFICATION",
+      "ctas": ["request_recovery_assessment", "request_offer"]
+    },
+    {
+      "id": "monitoring_and_compliance",
+      "label": "Monitorizare și conformitate",
+      "summary": "Urmărirea structurată a termenelor, indicatorilor, obligațiilor și evidențelor care pot afecta conformitatea proiectului.",
+      "commercial_outcome": "Un registru viu de obligații și riscuri, cu alerte și acțiuni documentate înainte ca problemele cunoscute să devină blocaje.",
+      "audiences": ["companies_entrepreneurs", "public_authorities_institutions", "ngos_eligible_organizations", "existing_beneficiaries"],
+      "deliverables": [
+        "matrice de obligații și termene",
+        "registru de indicatori și evidențe",
+        "registru de riscuri și neconformități",
+        "calendar de verificări și acțiuni",
+        "rapoarte de stare pentru aria contractată"
+      ],
+      "process": [
+        "identificarea obligațiilor din documentele curente",
+        "construirea registrelor și pragurilor de alertă",
+        "colectarea periodică a evidențelor",
+        "semnalarea abaterilor și atribuirea acțiunilor",
+        "reconcilierea și închiderea sau escaladarea problemelor"
+      ],
+      "boundaries": [
+        "monitorizarea nu înlocuiește aprobările sau controalele autorităților competente",
+        "o obligație neclară nu este reinterpretată ca fapt cert fără sursă",
+        "lipsa dovezilor produce stare neconfirmată/HOLD, nu conformitate implicită",
+        "aria de monitorizare trebuie definită în ofertă/contract"
+      ],
+      "evidence_requirements": ["contract și anexe curente", "calendar și indicatori aprobați", "evidențe periodice furnizate de beneficiar"],
+      "pricing_mode": "SCOPED_AFTER_QUALIFICATION",
+      "ctas": ["request_implementation_review", "request_offer"]
+    },
+    {
+      "id": "project_management_capacity",
+      "label": "Capacitate de management de proiect",
+      "summary": "Structurarea rolurilor, proceselor, registrelor și rutinei de lucru necesare pentru coordonarea unui proiect finanțat.",
+      "commercial_outcome": "O echipă care lucrează pe roluri, fluxuri și evidențe explicite, reducând dependența de memorie și improvizație.",
+      "audiences": ["public_authorities_institutions", "ngos_eligible_organizations", "existing_beneficiaries"],
+      "deliverables": [
+        "hartă de roluri și responsabilități",
+        "calendar operațional și ritm de guvernanță",
+        "set de registre/checklisturi pentru aria contractată",
+        "procedură de escaladare și decizie",
+        "handoff și instruire operațională pentru instrumentele livrate"
+      ],
+      "process": [
+        "evaluarea echipei și a obligațiilor proiectului",
+        "maparea responsabilităților și punctelor de control",
+        "configurarea registrelor și fluxurilor de lucru",
+        "testarea pe scenarii reale sau sintetice",
+        "handoff și ajustarea rutinei operaționale"
+      ],
+      "boundaries": [
+        "nu creează responsabilități legale inexistente și nu modifică organigrame fără bază",
+        "nu presupune automat externalizarea rolurilor interne ale beneficiarului",
+        "procedurile sunt adaptate numai pe baza documentelor și constrângerilor confirmate",
+        "executarea efectivă a managementului de proiect este un serviciu separat dacă este contractată"
+      ],
+      "evidence_requirements": ["contract și structură de proiect", "roluri/resurse disponibile", "proceduri și constrângeri organizaționale relevante"],
+      "pricing_mode": "SCOPED_AFTER_QUALIFICATION",
+      "ctas": ["request_implementation_review", "request_offer"]
+    }
+  ]
+}
