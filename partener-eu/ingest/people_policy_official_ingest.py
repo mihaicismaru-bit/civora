@@ -25,7 +25,7 @@ STATE = ROOT / "partener-eu" / "ingest" / "state" / "people_policy_official_sour
 REGISTRY = ROOT / "partener-eu" / "ingest" / "state" / "people_policy_registry.json"
 SOURCE_REGISTRY = ROOT / "partener-eu" / "ingest" / "state" / "people_policy_source_registry.json"
 CANONICAL_CALLS = ROOT / "partener-eu" / "ingest" / "state" / "mipe_canonical_calls.json"
-UA = "PARTENER.EU-DecisionMakerOfficialIngest/2.0 (+https://partener.eu)"
+UA = "PARTENER.EU-DecisionMakerOfficialIngest/2.1 (+https://partener.eu)"
 NOW = dt.datetime.now(dt.timezone.utc)
 
 FUNDING_TERMS = (
@@ -261,10 +261,16 @@ def ingest_source(source: dict[str, Any], registry: dict[str, Any], canonical: d
     urls = candidate_links(source, listing)
     items: list[dict[str, Any]] = []
     unverified_roles = 0
+    article_fetch_attempts = 0
+    article_fetch_successes = 0
+    article_fetch_failures = 0
     for url in urls:
+        article_fetch_attempts += 1
         try:
             body = fetch(url)
+            article_fetch_successes += 1
         except Exception:
+            article_fetch_failures += 1
             continue
         parser = TextParser()
         parser.feed(body)
@@ -318,10 +324,23 @@ def ingest_source(source: dict[str, Any], registry: dict[str, Any], canonical: d
             "sourceId": source["id"],
             "fingerprint": fingerprint,
         })
+    if not urls:
+        source_status = "OK_NO_CANDIDATES"
+    elif article_fetch_successes == 0:
+        source_status = "DEGRADED_ARTICLE_FETCH_FAILED"
+    elif article_fetch_failures:
+        source_status = "DEGRADED_PARTIAL_ARTICLE_FETCH"
+    else:
+        source_status = "OK"
     status = {
         "id": source["id"], "publisher": source["publisher"], "url": source["url"],
-        "tier": source["tier"], "status": "OK", "observedAt": observed,
-        "candidateLinks": len(urls), "acceptedItems": len(items),
+        "tier": source["tier"], "status": source_status, "observedAt": observed,
+        "listingFetched": True,
+        "candidateLinks": len(urls),
+        "articleFetchAttempts": article_fetch_attempts,
+        "articleFetchSuccesses": article_fetch_successes,
+        "articleFetchFailures": article_fetch_failures,
+        "acceptedItems": len(items),
         "unverifiedRoleMentionsRejected": unverified_roles, "failClosed": True,
     }
     return status, items
@@ -391,6 +410,7 @@ def main() -> int:
             "historyDeduplicatedByFingerprint": True,
             "legacyUnverifiedSignalsQuarantined": True,
             "canonicalLinkRequiresExplicitCodeMatch": True,
+            "sourceHealthRequiresArticleFetchProofWhenCandidatesExist": True,
             "failClosed": True,
         },
         "sources": statuses,
@@ -404,6 +424,8 @@ def main() -> int:
         "historyItems": len(items),
         "quarantinedLegacy": len(quarantine),
         "ok": sum(1 for x in statuses if x.get("status") == "OK"),
+        "reachableNoCandidates": sum(1 for x in statuses if x.get("status") == "OK_NO_CANDIDATES"),
+        "degraded": sum(1 for x in statuses if str(x.get("status", "")).startswith("DEGRADED_")),
         "failed": sum(1 for x in statuses if str(x.get("status", "")).startswith("SOURCE_UNAVAILABLE")),
     }, ensure_ascii=False, indent=2))
     return 0

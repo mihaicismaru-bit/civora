@@ -81,6 +81,10 @@ try:
 finally:
     collector.fetch = old_fetch
 assert status["status"] == "OK"
+assert status["listingFetched"] is True
+assert status["articleFetchAttempts"] == 1
+assert status["articleFetchSuccesses"] == 1
+assert status["articleFetchFailures"] == 0
 assert len(items) == 1
 item = items[0]
 assert item["signalKind"] == "STATEMENT_SIGNAL"
@@ -90,6 +94,37 @@ assert item["roleVerification"]["sourceTier"].startswith("T1")
 assert item["sourceSnapshot"]["contentHash"]
 assert item["canonicalLink"]["status"] == "UNRESOLVED"
 assert item["person"] == "Dragoș Pîslaru"
+
+# A reachable listing is not reported as healthy article coverage when every
+# candidate article fetch fails. The ledger must expose the measured failure.
+try:
+    def fetch_failure(url, limit=900_000):
+        if url == source["url"]:
+            return listing
+        raise OSError("simulated article fetch failure")
+    collector.fetch = fetch_failure
+    failed_status, failed_items = collector.ingest_source(source, people, canonical)
+finally:
+    collector.fetch = old_fetch
+assert failed_status["status"] == "DEGRADED_ARTICLE_FETCH_FAILED"
+assert failed_status["listingFetched"] is True
+assert failed_status["articleFetchAttempts"] == 1
+assert failed_status["articleFetchSuccesses"] == 0
+assert failed_status["articleFetchFailures"] == 1
+assert failed_items == []
+
+# A reachable source with no discoverable candidates is distinct from proven
+# article coverage; it must not be collapsed into OK.
+try:
+    collector.fetch = lambda url, limit=900_000: "<html><body>Nicio legătură candidată.</body></html>"
+    empty_status, empty_items = collector.ingest_source(source, people, canonical)
+finally:
+    collector.fetch = old_fetch
+assert empty_status["status"] == "OK_NO_CANDIDATES"
+assert empty_status["listingFetched"] is True
+assert empty_status["candidateLinks"] == 0
+assert empty_status["articleFetchAttempts"] == 0
+assert empty_items == []
 
 tracked = {p["id"]: p for p in people["people"] if p.get("active")}
 accepted = builder.trusted_official_item(item, tracked)
@@ -131,4 +166,5 @@ print(json.dumps({
     "explicitCodeCanonicalLink": True,
     "canonicalOfficialLedgerBoundary": True,
     "historicalRoleSnapshotPreserved": True,
+    "sourceHealthRequiresArticleFetchProof": True,
 }, ensure_ascii=False, indent=2))
