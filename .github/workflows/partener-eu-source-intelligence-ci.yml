@@ -13,6 +13,7 @@ on:
       - 'partener-eu/ops/test_people_policy_mipe_corpus_replay.py'
       - 'partener-eu/ops/test_people_policy_actor_boundaries.py'
       - 'partener-eu/ops/test_people_policy_signal_history.py'
+      - 'partener-eu/ops/test_people_policy_anre_source.py'
       - '.github/workflows/partener-eu-editorial-daily.yml'
       - '.github/workflows/partener-eu-mipe-source-replay.yml'
       - '.github/workflows/partener-eu-source-intelligence-ci.yml'
@@ -53,3 +54,6 @@ jobs:
 
       - name: Validate stable signal history deduplication
         run: python partener-eu/ops/test_people_policy_signal_history.py
+
+      - name: Validate ANRE official source and tracked actor
+        run: python partener-eu/ops/test_people_policy_anre_source.py
