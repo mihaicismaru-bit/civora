@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "engine_id": "EUCONS_E16_SEO_ENGINE",
+  "surfaces": ["HOME","SERVICE_INDEX","OPPORTUNITY_INDEX","AUDIENCE","CASE_INDEX","PEOPLE_INDEX","KNOWLEDGE_INDEX","GUIDE_INDEX","ARTICLE_INDEX","RESOURCE_INDEX","ABOUT","LEAD_JOURNEY","CONTACT","LEGAL"],
+  "core_metadata": {
+    "home": {"title":"Consultanță fonduri europene și management de proiect | Euroconsult","description":"Consultanță Euroconsult pentru strategie de finanțare, pregătirea proiectelor, implementare, raportare și conformitate."},
+    "services_index": {"title":"Servicii de consultanță pentru proiecte finanțate | Euroconsult","description":"Servicii Euroconsult pentru eligibilitate, depunere, implementare, achiziții, management financiar, conformitate și remediere."},
+    "funding_index": {"title":"Finanțări și oportunități verificate | Euroconsult","description":"Oportunități de finanțare publicate numai după verificarea sursei, statutului și faptelor materiale relevante."},
+    "companies": {"title":"Fonduri europene pentru companii și antreprenori | Euroconsult","description":"Trasee de consultanță pentru companii și antreprenori care pregătesc investiții sau proiecte finanțate."},
+    "public_authorities": {"title":"Consultanță proiecte pentru autorități publice | Euroconsult","description":"Sprijin pentru autorități și instituții publice în pregătirea, implementarea și conformitatea proiectelor finanțate."},
+    "ngos": {"title":"Finanțări și proiecte pentru ONG-uri | Euroconsult","description":"Consultanță pentru organizații eligibile și ONG-uri privind finanțarea, pregătirea și implementarea proiectelor."},
+    "projects_index": {"title":"Proiecte și studii de caz verificate | Euroconsult","description":"Studii de caz Euroconsult publicate numai când rezultatele și informațiile pot fi susținute prin dovezi publicabile."},
+    "team_index": {"title":"Echipa și experții Euroconsult","description":"Profiluri profesionale publicate numai pentru persoane cu identitate, rol și competențe susținute prin dovezi."},
+    "expertise": {"title":"Expertiză în fonduri europene și implementare | Euroconsult","description":"Analize și explicații operaționale Euroconsult bazate pe servicii canonice și surse verificabile."},
+    "guides_index": {"title":"Ghiduri pentru proiecte finanțate | Euroconsult","description":"Ghiduri practice despre pregătirea, implementarea, raportarea și conformitatea proiectelor finanțate."},
+    "articles_index": {"title":"Articole și analize Euroconsult","description":"Articole și analize despre finanțări și management de proiect, cu proveniență și reguli editoriale fail-closed."},
+    "resources": {"title":"Resurse pentru beneficiarii proiectelor finanțate | Euroconsult","description":"Resurse utile pentru organizații care pregătesc sau implementează proiecte finanțate."},
+    "about": {"title":"Despre Euroconsult și modul de lucru","description":"Cum lucrează Euroconsult: servicii cu limite explicite, informații verificabile și trasabilitate comercială."},
+    "project_evaluation": {"title":"Evaluare proiect și potrivire cu finanțări | Euroconsult","description":"Pornește evaluarea structurată a unei investiții sau a unui proiect pentru identificarea serviciilor și oportunităților relevante."},
+    "request_offer": {"title":"Solicită o ofertă de consultanță | Euroconsult","description":"Solicită o ofertă Euroconsult după calificarea nevoii, serviciilor și condițiilor aplicabile proiectului."},
+    "contact": {"title":"Contact Euroconsult","description":"Contactează Euroconsult pentru o discuție despre finanțare, pregătirea sau implementarea unui proiect."},
+    "terms": {"title":"Termeni de utilizare | Euroconsult","description":"Termenii de utilizare aplicabili site-ului și serviciilor digitale Euroconsult."},
+    "privacy": {"title":"Confidențialitate și protecția datelor | Euroconsult","description":"Informații despre confidențialitate, protecția datelor și regulile aplicabile interacțiunilor digitale Euroconsult."}
+  },
+  "rules": {
+    "https_canonical_required": true,
+    "unique_path_required": true,
+    "unique_canonical_required": true,
+    "unique_title_required": true,
+    "nonempty_description_required": true,
+    "publishable_service_evidence_required": true,
+    "conditional_routes_hold_until_materialized": true,
+    "orphan_routes_forbidden": true,
+    "preview_must_remain_noindex": true
+  },
+  "output": {"product":"EUCONS_COMMERCIAL_OS","schema_version":1,"production_indexing_enabled":false,"preview_robots":"noindex,nofollow"}
+}
