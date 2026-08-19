@@ -146,11 +146,108 @@ jobs:
           git fetch origin main
           git reset --hard origin/main
 
-      - name: Generate editorial intelligence
+      - name: Generate verified decision-maker projection
         run: |
-          python partener-eu/ingest/build_daily_brief.py
           python partener-eu/ingest/build_people_policy.py
           python partener-eu/ingest/refine_people_policy.py
+
+      - name: Validate verified decision-maker projection
+        run: |
+          python partener-eu/ops/test_people_policy_source_intelligence.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          state = Path('partener-eu/ingest/state')
+          projection = json.loads((state / 'people_policy.json').read_text(encoding='utf-8'))
+          ledger = json.loads((state / 'people_policy_official_sources.json').read_text(encoding='utf-8'))
+          js_text = Path('partener-eu/web/people-policy-data.js').read_text(encoding='utf-8').strip()
+
+          assert projection.get('schemaVersion') == 3, 'people_policy projection must materialize schemaVersion 3'
+          policy = projection.get('policy') or {}
+          assert policy.get('statementIsNotAdministrativeFact') is True
+          assert policy.get('officialEffectRequiresT1Evidence') is True
+          assert policy.get('rawOfficialLedgerNeverBypassesCanonicalBuilder') is True
+
+          summary = projection.get('officialIngestion') or {}
+          assert summary.get('generatedAt') == ledger.get('generatedAt')
+          assert summary.get('ledgerSchemaVersion') == 2
+          assert summary.get('sourceCount') == len(ledger.get('sources') or [])
+          assert summary.get('ledgerItemCount') == len(ledger.get('items') or [])
+          assert summary.get('quarantineCount') == len(ledger.get('quarantine') or [])
+          assert int(summary.get('trustedItemCount') or 0) <= int(summary.get('ledgerItemCount') or 0)
+
+          items = projection.get('items') or []
+          ids = {x.get('id') for x in items}
+          assert all(home_id in ids for home_id in projection.get('homeIds') or [])
+          quarantine_fingerprints = {x.get('fingerprint') for x in ledger.get('quarantine') or [] if x.get('fingerprint')}
+          projected_official_fingerprints = {
+              x.get('fingerprint') for x in items
+              if x.get('officialIngested') is True and x.get('fingerprint')
+          }
+          assert not (quarantine_fingerprints & projected_official_fingerprints), 'quarantined official history leaked into projection'
+          for item in items:
+              if item.get('officialIngested') is not True:
+                  continue
+              assert item.get('signalKind') == 'STATEMENT_SIGNAL'
+              fact = item.get('administrativeFact') or {}
+              assert fact.get('status') == 'UNCONFIRMED_FROM_SIGNAL'
+              assert fact.get('failClosed') is True
+              assert (item.get('roleVerification') or {}).get('sourceTier', '').startswith('T1')
+              assert (item.get('sourceSnapshot') or {}).get('contentHash')
+              assert item.get('fingerprint')
+
+          prefix = 'window.PARTENER_PEOPLE_POLICY='
+          assert js_text.startswith(prefix) and js_text.endswith(';')
+          js_payload = json.loads(js_text[len(prefix):-1])
+          assert js_payload == projection, 'web projection must exactly mirror canonical people_policy.json'
+          print(json.dumps({
+              'schemaVersion': projection.get('schemaVersion'),
+              'ledgerSchemaVersion': summary.get('ledgerSchemaVersion'),
+              'items': len(items),
+              'home': len(projection.get('homeIds') or []),
+              'trustedOfficialItems': summary.get('trustedItemCount'),
+          }))
+          PY
+
+      - name: Persist verified decision-maker projection checkpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp partener-eu/ingest/state/people_policy.json /tmp/people_policy.json
+          cp partener-eu/web/people-policy-data.js /tmp/people-policy-data.js
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          checkpointed=false
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/people_policy.json partener-eu/ingest/state/people_policy.json
+            cp /tmp/people-policy-data.js partener-eu/web/people-policy-data.js
+            git add \
+              partener-eu/ingest/state/people_policy.json \
+              partener-eu/web/people-policy-data.js
+            if git diff --cached --quiet; then
+              echo 'Verified decision-maker projection already current.'
+              checkpointed=true
+              break
+            fi
+            git commit -m 'Checkpoint verified decision-maker projection'
+            if git push origin HEAD:main; then
+              checkpointed=true
+              break
+            fi
+            sleep $((attempt * 2))
+          done
+          if [ "$checkpointed" != true ]; then
+            echo 'Failed to persist verified decision-maker projection after retries.' >&2
+            exit 1
+          fi
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Generate daily briefing
+        run: python partener-eu/ingest/build_daily_brief.py
 
       - name: Validate editorial automation contract
         run: |
