@@ -34,6 +34,32 @@ jobs:
         with:
           python-version: "3.13"
 
+      - name: Repair rendered-HTML comparison in projection harness
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('local-news-os/vnext/instances/valcea/migration/p18_shadow_projection_diff.py')
+          text = p.read_text(encoding='utf-8')
+          if 'import html\n' not in text:
+              text = text.replace('import argparse\n', 'import argparse\nimport html\n', 1)
+          replacements = {
+              'str(story.get("headline") or "") not in body': 'html.escape(str(story.get("headline") or "")) not in body',
+              'str(story.get("dek") or "") not in body': 'html.escape(str(story.get("dek") or "")) not in body',
+              'str(profile.get("name") or "") not in body': 'html.escape(str(profile.get("name") or "")) not in body',
+              'str(item.get("name")) not in leisure_body': 'html.escape(str(item.get("name"))) not in leisure_body',
+          }
+          for old, new in replacements.items():
+              if old in text:
+                  text = text.replace(old, new)
+          if 'html.escape(str(story.get("headline") or "")) not in body' not in text:
+              raise SystemExit('story HTML-safe comparison not installed')
+          if text.count('html.escape(str(profile.get("name") or "")) not in body') < 2:
+              raise SystemExit('profile HTML-safe comparisons not installed')
+          p.write_text(text, encoding='utf-8')
+          print('VNEXT_P18_PROJECTION_HTML_COMPARISON_REPAIRED')
+          PY
+
       - name: Compile projection compatibility modules
         run: |
           python -m py_compile \
@@ -125,18 +151,20 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-      - name: Persist latest projection receipt
+      - name: Persist projection repair and latest receipt
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add local-news-os/vnext/acceptance/valcea-p18-projection-latest.json
+          git add \
+            local-news-os/vnext/instances/valcea/migration/p18_shadow_projection_diff.py \
+            local-news-os/vnext/acceptance/valcea-p18-projection-latest.json
           if git diff --cached --quiet; then
             exit 0
           fi
           status=$(python -c "import json; print(json.load(open('local-news-os/vnext/acceptance/valcea-p18-projection-latest.json', encoding='utf-8'))['status'])")
-          git commit -m "P18: persist Vâlcea shadow projection ${status}"
+          git commit -m "P18: repair Vâlcea projection and persist ${status}"
           git pull --rebase origin main
           git push origin HEAD:main
 
