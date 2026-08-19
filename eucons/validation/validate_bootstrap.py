@@ -50,7 +50,8 @@ def main() -> None:
 
     preview = (EUCONS / "web" / "index.html").read_text(encoding="utf-8")
     assert 'name="robots" content="noindex,nofollow"' in preview
-    assert "Development preview" in preview
+    assert "EUROCONSULT" in preview, "preview must remain visibly tied to the product"
+    assert '<link rel="canonical" href="https://eucons.ro/">' in preview, "preview canonical drift"
 
     autonomy = (EUCONS / "EUCONS_AUTONOMY_CONTRACT.md").read_text(encoding="utf-8")
     assert "PRODUCTION_READY" in autonomy
