@@ -34,12 +34,12 @@ jobs:
       - name: Regression tests
         run: python -m unittest discover -s craiova-clar/tests -p 'test_*.py' -v
 
-      - name: Discover fresh official utility notices and render publishable stories
+      - name: Discover fresh official utility notices and render stories
         env:
           CRAIOVA_CLAR_BASE_URL: https://craiova-clar-mihaicismaru-6634s-projects.vercel.app
         run: python craiova-clar/run_utility.py
 
-      - name: Persist only material generated output
+      - name: Persist material generated output
         shell: bash
         run: |
           set -euo pipefail
@@ -48,7 +48,93 @@ jobs:
           git add craiova-clar/site craiova-clar/state || true
           if git diff --cached --quiet; then
             echo 'No new CRAIOVA CLAR utility publication material.'
-            exit 0
+          else
+            git commit -m 'Publish CRAIOVA CLAR utility story snapshot'
+            git push origin HEAD:craiova-clar-build
           fi
-          git commit -m 'Publish CRAIOVA CLAR utility story snapshot'
-          git push origin HEAD:craiova-clar-build
+
+      - name: Probe public publication
+        run: |
+          python - <<'PY'
+          import json, time, urllib.request
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          manifest = Path('craiova-clar/site/stories.json')
+          if not manifest.exists():
+              raise SystemExit('No CRAIOVA CLAR story manifest exists yet.')
+          story = json.loads(manifest.read_text(encoding='utf-8'))['stories'][0]
+          url = story['canonical_url']
+          expected = story['headline']
+          outcome = {
+              'story_id': story['story_id'],
+              'canonical_url': url,
+              'checked_at': datetime.now(timezone.utc).isoformat(),
+              'status': 'verification_failed',
+              'http_status': None,
+              'error': None,
+          }
+          for attempt in range(12):
+              try:
+                  req = urllib.request.Request(url, headers={'User-Agent':'CRAIOVA-CLAR-live-check/1.0'})
+                  with urllib.request.urlopen(req, timeout=12) as response:
+                      body = response.read().decode('utf-8', errors='replace')
+                      status = response.status
+                  outcome['http_status'] = status
+                  if status == 200 and expected in body and 'CRAIOVA CLAR' in body:
+                      outcome['status'] = 'published_verified'
+                      receipt = {
+                          'story_id': story['story_id'],
+                          'canonical_url': url,
+                          'published_at': story['published_at'],
+                          'destination': 'public_web',
+                          'status': 'published_verified',
+                          'external_id': None,
+                          'metadata': {
+                              'verified_at': datetime.now(timezone.utc).isoformat(),
+                              'http_status': status,
+                              'headline_verified': True,
+                              'product_verified': True,
+                          },
+                      }
+                      Path('craiova-clar/site/utility_publication_receipt.json').write_text(
+                          json.dumps(receipt, ensure_ascii=False, indent=2) + '\n', encoding='utf-8'
+                      )
+                      break
+                  outcome['error'] = f'HTTP {status}; expected live headline not found'
+              except Exception as exc:
+                  outcome['error'] = repr(exc)
+              if attempt < 11:
+                  time.sleep(5)
+          outcome['checked_at'] = datetime.now(timezone.utc).isoformat()
+          Path('craiova-clar/state/utility_live_probe.json').write_text(
+              json.dumps(outcome, ensure_ascii=False, indent=2) + '\n', encoding='utf-8'
+          )
+          print(json.dumps(outcome, ensure_ascii=False))
+          PY
+
+      - name: Persist public verification evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'craiova-clar[bot]'
+          git config user.email 'craiova-clar@users.noreply.github.com'
+          git add craiova-clar/state/utility_live_probe.json
+          if test -f craiova-clar/site/utility_publication_receipt.json; then
+            git add craiova-clar/site/utility_publication_receipt.json
+          fi
+          if git diff --cached --quiet; then
+            echo 'Public verification evidence already current.'
+          else
+            git commit -m 'Record CRAIOVA CLAR utility live verification'
+            git push origin HEAD:craiova-clar-build
+          fi
+
+      - name: Require verified public publication
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          probe = json.loads(Path('craiova-clar/state/utility_live_probe.json').read_text(encoding='utf-8'))
+          assert probe['status'] == 'published_verified', probe
+          PY
