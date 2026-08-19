@@ -1,0 +1,32 @@
+name: LOCAL NEWS OS vNext Build State
+
+on:
+  pull_request:
+    paths:
+      - 'local-news-os/vnext/VNEXT_STATE.json'
+      - 'local-news-os/vnext/BUILD_READY_FOR_MIGRATION.json'
+      - 'local-news-os/vnext/acceptance/**'
+      - 'local-news-os/vnext/runtime/build_state_consistency.py'
+      - '.github/workflows/local-news-os-vnext-build-state.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'local-news-os/vnext/VNEXT_STATE.json'
+      - 'local-news-os/vnext/BUILD_READY_FOR_MIGRATION.json'
+      - 'local-news-os/vnext/acceptance/**'
+      - 'local-news-os/vnext/runtime/build_state_consistency.py'
+      - '.github/workflows/local-news-os-vnext-build-state.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  canonical-state:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate vNext build and acceptance state coherence
+        run: python local-news-os/vnext/runtime/build_state_consistency.py
