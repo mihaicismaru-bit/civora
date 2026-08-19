@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "engine_id": "EUCONS_E19_COMMERCIAL_EMAIL_ENGINE",
+  "input": {
+    "required_product": "EUCONS_COMMERCIAL_OS",
+    "required_lead_engine_id": "EUCONS_E11_LEAD_ENGINE",
+    "allowed_message_types": [
+      "LEAD_ACKNOWLEDGEMENT",
+      "QUALIFICATION_REQUEST",
+      "OPPORTUNITY_ALERT",
+      "OFFER_EMAIL",
+      "FOLLOW_UP",
+      "OFFER_EXPIRATION"
+    ]
+  },
+  "consent": {
+    "privacy_ack_required_all": true,
+    "marketing_types": ["OPPORTUNITY_ALERT"],
+    "marketing_consent_required_for_marketing_types": true,
+    "transactional_types": ["LEAD_ACKNOWLEDGEMENT", "QUALIFICATION_REQUEST", "OFFER_EMAIL", "FOLLOW_UP", "OFFER_EXPIRATION"],
+    "unsubscribe_required_for_marketing": true,
+    "unsubscribe_placeholder": "{UNSUBSCRIBE_URL}",
+    "suppressed_recipient_must_hold": true
+  },
+  "offer": {
+    "required_engine_id": "EUCONS_E13_OFFER_ENGINE",
+    "numeric_price_without_determined_pricing_forbidden": true,
+    "human_price_placeholder_allowed": true,
+    "automatic_send_flag_must_remain_false_during_e19": true
+  },
+  "opportunity": {
+    "required_source_product": "PARTENER.EU",
+    "actionable_required": true,
+    "verified_fact_classes_required": true
+  },
+  "presentation": {
+    "from_identity": "Euroconsult",
+    "subjects": {
+      "LEAD_ACKNOWLEDGEMENT": "Am primit solicitarea ta — Euroconsult",
+      "QUALIFICATION_REQUEST": "Informații necesare pentru evaluare — Euroconsult",
+      "OPPORTUNITY_ALERT": "O oportunitate de finanțare relevantă pentru tine",
+      "OFFER_EMAIL": "Oferta Euroconsult pentru solicitarea ta",
+      "FOLLOW_UP": "Revenim privind solicitarea ta — Euroconsult",
+      "OFFER_EXPIRATION": "Actualizare privind oferta Euroconsult"
+    },
+    "max_subject_chars": 120,
+    "max_body_chars": 12000
+  },
+  "dispatch": {
+    "mode": "DRY_RUN_ONLY",
+    "dry_run_state": "EMAIL_OUTBOX_READY_MAILBOX_AUTH_REQUIRED",
+    "real_sending_enabled": false,
+    "external_authorization_required": ["COMMERCIAL_MAILBOX", "MAIL_PROVIDER_API_OR_SMTP"],
+    "max_attempts": 3,
+    "idempotent": true,
+    "immutable_receipts": true
+  },
+  "repository_policy": {
+    "real_pii_records_forbidden": true,
+    "synthetic_fixtures_allowed": true,
+    "runtime_output_under_repository_root_forbidden": true
+  },
+  "output": {
+    "schema_version": 1,
+    "product": "EUCONS_COMMERCIAL_OS",
+    "channel": "email",
+    "direct_sending_enabled": false
+  }
+}
