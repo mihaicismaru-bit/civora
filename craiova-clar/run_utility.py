@@ -38,7 +38,7 @@ def main() -> int:
         area_prefixes=source.get("area_prefixes", []),
     )
     compose = UtilityStoryComposer(product_name=instance["product_name"], source_name=source["name"])
-    base_url = os.environ.get("CRAIOVA_CLAR_BASE_URL") or instance.get("domain")
+    base_url = instance.get("domain") or os.environ.get("CRAIOVA_CLAR_BASE_URL")
     publish = StaticSitePublisher(root=HERE / "site", product_name=instance["product_name"], base_url=base_url)
 
     state_path = HERE / "state" / "utility_seen.json"
