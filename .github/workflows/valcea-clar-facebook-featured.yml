@@ -1,0 +1,83 @@
+name: VÂLCEA CLAR Facebook Featured Setup
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/social/facebook_featured_setup.py'
+      - 'valcea-clar/social/profile_presence_system.json'
+      - '.github/workflows/valcea-clar-facebook-featured.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-facebook-featured
+  cancel-in-progress: false
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Refresh canonical main
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Validate featured setup
+        run: |
+          python -m py_compile valcea-clar/social/facebook_featured_setup.py
+          python valcea-clar/social/facebook_featured_setup.py --self-test
+
+      - name: Create or pin canonical orientation post
+        env:
+          VALCEA_FB_PAGE_ID: '1234360446430980'
+          VALCEA_META_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_META_PAGE_ACCESS_TOKEN }}
+          VALCEA_FB_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_FB_PAGE_ACCESS_TOKEN }}
+          VALCEA_FB_GRAPH_VERSION: v26.0
+          VALCEA_FB_FEATURED_LIVE_ENABLED: 'true'
+        run: python valcea-clar/social/facebook_featured_setup.py --apply | tee /tmp/facebook-featured.json
+
+      - name: Persist featured state conflict-safe
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f valcea-clar/social/facebook_featured_state.json ]; then
+            echo 'No featured state was produced.' >&2
+            exit 1
+          fi
+          cp valcea-clar/social/facebook_featured_state.json /tmp/facebook_featured_state.json
+          git config user.name 'valcea-clar-facebook-featured[bot]'
+          git config user.email 'valcea-clar-facebook-featured@users.noreply.github.com'
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/facebook_featured_state.json valcea-clar/social/facebook_featured_state.json
+            git add valcea-clar/social/facebook_featured_state.json
+            if git diff --cached --quiet; then
+              echo 'Facebook featured state already current.'
+              exit 0
+            fi
+            git commit -m 'Persist VÂLCEA CLAR Facebook featured state'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            sleep $((attempt * 2))
+          done
+          exit 1
+
+      - name: Audit setup
+        if: always()
+        run: |
+          echo '## VÂLCEA CLAR Facebook Featured Setup' >> "$GITHUB_STEP_SUMMARY"
+          cat /tmp/facebook-featured.json >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
