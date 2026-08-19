@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "engine_id": "EUCONS_E14_KNOWLEDGE_ENGINE",
+  "record_types": ["GUIDE", "ANALYSIS", "OPPORTUNITY", "CASE", "FAQ"],
+  "publication_states": ["PUBLISHABLE", "HOLD"],
+  "service_content": {
+    "required_evidence_id": "EV-E02-SERVICE-REGISTRY",
+    "required_claim_class": "SERVICE_OFFERING",
+    "required_claim_state": "PUBLISHABLE",
+    "generated_types": ["GUIDE", "ANALYSIS", "FAQ"]
+  },
+  "opportunity_content": {
+    "required_bridge_id": "PARTENER_P11_TO_EUCONS_E09",
+    "required_bridge_state": "READY",
+    "required_record_state": "VERIFIED_AVAILABLE",
+    "requires_actionable": true,
+    "stale_or_nonactionable_state": "HOLD"
+  },
+  "case_content": {
+    "required_registry_state": "PUBLISHABLE",
+    "empty_projection_allowed": true,
+    "invented_case_forbidden": true
+  },
+  "rules": {
+    "unknown_evidence_fails_closed": true,
+    "inactive_evidence_fails_closed": true,
+    "hold_claims_cannot_publish": true,
+    "analysis_must_label_interpretation": true,
+    "funding_material_facts_must_come_from_e09": true,
+    "people_or_results_cannot_be_inferred": true,
+    "record_ids_deterministic": true,
+    "duplicate_source_records_forbidden": true
+  },
+  "output": {
+    "product": "EUCONS_COMMERCIAL_OS",
+    "schema_version": 1,
+    "provider_neutral": true,
+    "runtime_publication_enabled": false
+  }
+}
