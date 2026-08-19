@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import copy
 import importlib.util
 import json
 from pathlib import Path
@@ -20,6 +21,7 @@ def load_module(name: str, path: Path):
 
 collector = load_module("people_policy_official_ingest", INGEST / "people_policy_official_ingest.py")
 builder = load_module("build_people_policy", INGEST / "build_people_policy.py")
+refiner = load_module("refine_people_policy", INGEST / "refine_people_policy.py")
 sources = json.loads((STATE / "people_policy_source_registry.json").read_text(encoding="utf-8"))
 people = json.loads((STATE / "people_policy_registry.json").read_text(encoding="utf-8"))
 
@@ -89,9 +91,44 @@ assert item["sourceSnapshot"]["contentHash"]
 assert item["canonicalLink"]["status"] == "UNRESOLVED"
 assert item["person"] == "Dragoș Pîslaru"
 
+tracked = {p["id"]: p for p in people["people"] if p.get("active")}
+accepted = builder.trusted_official_item(item, tracked)
+assert accepted is not None
+assert accepted["roleVerification"] == item["roleVerification"]
+
+bad = copy.deepcopy(item)
+bad["administrativeFact"]["status"] = "CONFIRMED"
+assert builder.trusted_official_item(bad, tracked) is None
+
+bad = copy.deepcopy(item)
+bad["roleVerification"]["sourceUrl"] = ""
+assert builder.trusted_official_item(bad, tracked) is None
+
+bad = copy.deepcopy(item)
+bad["sourceSnapshot"]["contentHash"] = ""
+assert builder.trusted_official_item(bad, tracked) is None
+
+# Historical observations keep their verified role-at-observation snapshot even
+# if the live registry later changes; history is not silently rewritten.
+changed_registry = copy.deepcopy(tracked)
+changed_registry["dragos-pislaru"]["role"] = "Altă funcție ulterioară"
+accepted = builder.trusted_official_item(item, changed_registry)
+assert accepted is not None
+assert accepted["roleVerification"]["role"] == item["roleVerification"]["role"]
+
+hosts = refiner.official_hosts(sources)
+assert "www.afir.ro" in hosts
+assert refiner.direct_official(item, hosts) is True
+assert refiner.fail_closed_signal(item) is True
+unsafe = copy.deepcopy(item)
+unsafe["administrativeFact"]["failClosed"] = False
+assert refiner.fail_closed_signal(unsafe) is False
+
 print(json.dumps({
     "officialSources": len(sources["sources"]),
     "verifiedRoles": len(verified),
     "failClosedSignalContract": True,
     "explicitCodeCanonicalLink": True,
+    "canonicalOfficialLedgerBoundary": True,
+    "historicalRoleSnapshotPreserved": True,
 }, ensure_ascii=False, indent=2))
