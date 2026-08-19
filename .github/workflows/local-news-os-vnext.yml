@@ -29,7 +29,8 @@ jobs:
           python -m py_compile \
             local-news-os/vnext/core/instance_model.py \
             local-news-os/vnext/core/runtime_store.py \
-            local-news-os/vnext/core/site_runtime.py
+            local-news-os/vnext/core/site_runtime.py \
+            local-news-os/vnext/core/source_adapters.py
 
       - name: Validate frozen product contract
         run: |
@@ -88,6 +89,30 @@ jobs:
       - name: Validate private site newsroom and fail-closed authentication
         run: python local-news-os/vnext/core/site_runtime.py --self-test
 
+      - name: Validate generic source adapter core
+        run: python local-news-os/vnext/core/source_adapters.py --self-test
+
+      - name: Validate source packs through the same adapter core
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, str(Path('local-news-os/vnext/core').resolve()))
+          import source_adapters as module
+          schema = json.loads(Path('local-news-os/vnext/schemas/source_pack.schema.json').read_text(encoding='utf-8'))
+          adapter_enum = schema['properties']['sources']['items']['properties']['adapter']['enum']
+          assert set(adapter_enum) == module.SUPPORTED_ADAPTERS
+          for instance_id in ('valcea', 'test-county'):
+              path = Path(f'local-news-os/vnext/instances/{instance_id}/packs/sources.json')
+              pack = json.loads(path.read_text(encoding='utf-8'))
+              definitions = module.validate_source_pack(pack, instance_id)
+              assert all(item.adapter in module.SUPPORTED_ADAPTERS for item in definitions)
+          neutral = json.loads(Path('local-news-os/vnext/instances/test-county/packs/sources.json').read_text(encoding='utf-8'))
+          assert {item['adapter'] for item in neutral['sources']} == {'RSS_ATOM', 'JSON_API'}
+          print('VNEXT_SOURCE_PACK_CONTRACT_PASS')
+          PY
+
       - name: Assert runtime schema is database-only
         shell: bash
         run: |
@@ -108,6 +133,16 @@ jobs:
           grep -q 'noindex, nofollow, noarchive' local-news-os/vnext/core/site_runtime.py
           ! grep -Eiq 'git_state_path|state_root|live-feed|current_edition|output_root' local-news-os/vnext/core/site_runtime.py
           echo 'VNEXT_PRIVATE_NEWSROOM_CONTRACT_PASS'
+
+      - name: Assert source adapters are configuration-driven and transport-free
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'SUPPORTED_ADAPTERS' local-news-os/vnext/core/source_adapters.py
+          grep -q 'validate_source_pack' local-news-os/vnext/core/source_adapters.py
+          ! grep -Eiq 'requests\.|urllib\.request|httpx|aiohttp|subprocess.*curl' local-news-os/vnext/core/source_adapters.py
+          ! grep -Eiq 'CUSTOM_LOCAL_PARSER|specific_parser' local-news-os/vnext/schemas/source_pack.schema.json
+          echo 'VNEXT_SOURCE_ADAPTER_BOUNDARY_PASS'
 
       - name: Enforce CORE_KNOWS_NO_LOCALITY in generic vNext code
         shell: bash

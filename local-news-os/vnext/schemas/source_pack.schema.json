@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local-news-os.invalid/schemas/source-pack-v2.json",
+  "title": "LOCAL NEWS OS vNext Source Pack",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "pack_type",
+    "instance_id",
+    "sources"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": {
+      "const": "2.0"
+    },
+    "pack_type": {
+      "const": "sources"
+    },
+    "instance_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "migration": {
+      "type": "object"
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "source_id",
+          "adapter",
+          "url"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "adapter": {
+            "enum": [
+              "RSS_ATOM",
+              "HTML_LIST",
+              "HTML_ARTICLE",
+              "WORDPRESS_REST",
+              "JSON_API",
+              "SITEMAP",
+              "PDF_REGISTER"
+            ]
+          },
+          "role": {
+            "enum": [
+              "DISCOVERY",
+              "PRIMARY",
+              "BOTH"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "pattern": "^https?://"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "max_items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          "config": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}
