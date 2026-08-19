@@ -11,7 +11,10 @@ const rawUrl=/^https?:\/\/\S+\/?$/i;
 const materialTerms=/(apel|ghid|termen|calendar|buget|alocar|realoc|finanț|finant|depun|eligibil|consultare|prelung|contract|rezultat|selec|lansar|deschider|închider|inchider|corrigend|ordin)/i;
 const noisyChrome=/(Despre instituție.*Transparență|Media Articole Descoper|Transparență instituțională.*Informații de interes public)/i;
 function isHome(){return !!document.querySelector('.main [data-decision-home="1"]')}
-function primarySource(x){return (x.sources||[]).find(s=>safeUrl(s?.url))||null}
+function sourceTier(s){return String(s?.tier||'').trim()}
+function officialSource(s){return /^T1(?:B)?\b/i.test(sourceTier(s))}
+function primarySource(x){const rows=(x.sources||[]).filter(s=>safeUrl(s?.url));return rows.find(officialSource)||rows[0]||null}
+function sourceLabel(s){return officialSource(s)?'Sursa oficială':'Evidență publică'}
 function safeUrl(v){try{const u=new URL(String(v||''),location.href);return /^https?:$/.test(u.protocol)?u.href:''}catch{return ''}}
 function cleanStatement(x){const s=compact(x.statement||x.officialFact||'');if(!s||rawUrl.test(s)||noisyChrome.test(s))return '';return s.length>230?s.slice(0,227).trim()+'…':s}
 function isMaterial(x){
@@ -30,8 +33,8 @@ function affectedText(x){
 }
 function watchText(x){const w=compact(x.watch);if(w&&!rawUrl.test(w))return w;return 'Ghidul, ordinul, corrigendumul, calendarul sau alt act oficial care transformă semnalul într-o regulă aplicabilă.'}
 function card(x){
-  const src=primarySource(x),href=safeUrl(src?.url),statement=cleanStatement(x);
-  return `<a class="personSignalCard" href="${esc(href)}" target="_blank" rel="noreferrer" aria-label="${esc(x.headline)} — deschide sursa oficială"><div class="personSignalTop"><span class="signalBadge ${typeClass(x.type)}">${esc(typeLabel(x.type))}</span><span>${esc(x.institution||'Sursă oficială')} · ${esc(dateText(x.date))}</span></div><div class="personName">${esc(x.person||x.institution||'Sursă oficială')}</div>${x.role?`<div class="personRole">${esc(x.role)}</div>`:''}<h3>${esc(x.headline)}</h3><p class="personSignalText"><b>Ce s-a anunțat:</b> ${esc(statement)}</p><p class="personImpact"><b>Poate afecta:</b> ${esc(affectedText(x))}</p><p class="personWatch"><b>Ce urmărim:</b> ${esc(watchText(x))}</p><div class="personCardFoot"><span>Analiză PARTENER.EU</span><strong>Vezi semnalul și sursa oficială ↗</strong></div></a>`;
+  const src=primarySource(x),href=safeUrl(src?.url),statement=cleanStatement(x),label=src?sourceLabel(src):'Proveniență neconfirmată',sourceKind=officialSource(src)?'sursa oficială':'evidența publică';
+  return `<a class="personSignalCard" href="${esc(href)}" target="_blank" rel="noreferrer" aria-label="${esc(x.headline)} — deschide ${esc(sourceKind)}"><div class="personSignalTop"><span class="signalBadge ${typeClass(x.type)}">${esc(typeLabel(x.type))}</span><span>${esc(x.institution||'Instituție neprecizată')} · ${esc(dateText(x.date))}</span></div><div class="personName">${esc(x.person||x.institution||'Reprezentant al autorității')}</div>${x.role?`<div class="personRole">${esc(x.role)}</div>`:''}<h3>${esc(x.headline)}</h3><p class="personSignalText"><b>Ce s-a anunțat:</b> ${esc(statement)}</p><p class="personImpact"><b>Poate afecta:</b> ${esc(affectedText(x))}</p><p class="personWatch"><b>Ce urmărim:</b> ${esc(watchText(x))}</p><div class="personCardFoot"><span>Analiză PARTENER.EU · ${esc(label)}</span><strong>Vezi semnalul și ${esc(sourceKind)} ↗</strong></div></a>`;
 }
 function removePromo(){document.querySelectorAll('[data-peoplepromo]').forEach(x=>x.remove())}
 function inject(){
@@ -40,7 +43,7 @@ function inject(){
   if(document.querySelector('[data-peoplepromo]'))return;
   const chosen=(P.homeIds||[]).map(id=>byId.get(id)).filter(Boolean).filter(isMaterial).slice(0,3);
   const section=document.createElement('section');section.className='section peoplePromo';section.dataset.peoplepromo='1';
-  section.innerHTML=`<div class="peopleHead"><div><div class="eyebrow">Monitorizare decizională</div><h2>Semnale care pot schimba finanțările</h2><div class="peopleSub">Afișăm numai informații oficiale cu efect potențial concret asupra apelurilor, bugetelor, termenelor, eligibilității sau calendarului. Declarațiile generale nu intră aici.</div></div></div>${chosen.length?`<div class="peopleGrid">${chosen.map(card).join('')}</div>`:'<div class="peopleEmpty"><strong>Niciun semnal material confirmat acum.</strong><p>Nu avem astăzi un semnal oficial suficient de concret care să modifice un apel, un calendar sau o condiție urmărită. Când apare unul, îl afișăm aici împreună cu efectul posibil și sursa oficială.</p></div>'}`;
+  section.innerHTML=`<div class="peopleHead"><div><div class="eyebrow">Monitorizare decizională</div><h2>Semnale care pot schimba finanțările</h2><div class="peopleSub">Afișăm numai informații oficiale cu efect potențial concret asupra apelurilor, bugetelor, termenelor, eligibilității sau calendarului. Declarațiile generale nu intră aici.</div></div></div>${chosen.length?`<div class="peopleGrid">${chosen.map(card).join('')}</div>`:'<div class="peopleEmpty"><strong>Niciun semnal material confirmat acum.</strong><p>Nu avem astăzi un semnal oficial suficient de concret care să modifice un apel, un calendar sau o condiție urmărită. Când apare unul, îl afișăm aici împreună cu efectul posibil și proveniența disponibilă.</p></div>'}`;
   main.appendChild(section);
 }
 let timer=null;function sync(){clearTimeout(timer);timer=setTimeout(()=>{if(isHome())inject();else removePromo()},80)}
