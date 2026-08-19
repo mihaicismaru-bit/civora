@@ -27,7 +27,7 @@ MIPE = ROOT / "partener-eu" / "ingest" / "state" / "mipe_state.json"
 DECISIONS = ROOT / "partener-eu" / "ingest" / "state" / "decision_products.json"
 OUT_JSON = ROOT / "partener-eu" / "ingest" / "state" / "people_policy.json"
 OUT_JS = ROOT / "partener-eu" / "web" / "people-policy-data.js"
-UA = "PARTENER.EU-PeoplePolicy/3.1 (+https://partener.eu)"
+UA = "PARTENER.EU-PeoplePolicy/3.2 (+https://partener.eu)"
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$", re.I)
 
 FUNDING_EVIDENCE_TERMS = (
@@ -117,14 +117,24 @@ def fail_closed_signal(item: Any) -> bool:
     )
 
 
-def actor_alias(person: dict[str, Any], text: str) -> str | None:
+def alias_present(text: Any, alias: Any) -> bool:
+    """Match a person alias only as a complete folded token sequence."""
     value = norm(text)
+    needle = norm(alias)
+    if not needle:
+        return False
+    return re.search(rf"(?<![a-z0-9]){re.escape(needle)}(?![a-z0-9])", value) is not None
+
+
+def actor_alias(person: dict[str, Any], text: str) -> str | None:
     aliases = [clean(x) for x in person.get("aliases") or [] if clean(x)]
-    for alias in sorted(aliases, key=len, reverse=True):
-        if norm(alias) in value:
-            return alias
     name = clean(person.get("name"))
-    return name if name and norm(name) in value else None
+    if name:
+        aliases.append(name)
+    for alias in sorted(set(aliases), key=len, reverse=True):
+        if alias_present(text, alias):
+            return alias
+    return None
 
 
 def article_statement_evidence(
@@ -465,6 +475,7 @@ def main() -> int:
         "genericListingRowsCannotBecomePersonSignals": True,
         "articleStatementEvidenceRequiredForOfficialSignals": True,
         "historicalSignalsRequireRoleAtObservation": True,
+        "actorAliasesRequireTokenBoundaries": True,
     })
     out = {
         "schemaVersion": 3,
