@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E09",
+  "unit": "E09_PARTENER_EUCONS_OPPORTUNITY_BRIDGE",
+  "status": "PASS",
+  "validated_at": "2026-08-19T10:00:16Z",
+  "validation": {
+    "workflow": "EUCONS Quality",
+    "run_id": 32240478842,
+    "run_number": 55,
+    "conclusion": "success",
+    "validated_head": "2c4c661b7bfce75e0e7c5ff14c9e74e3335a7f24",
+    "merged_commit": "2d9abd1b5b3f3741e440c457347e646c83d40e98",
+    "exact_head_gate_passed": true
+  },
+  "coverage": {
+    "source_projection": "partener-eu/web/p11-public-data.js",
+    "source_opportunities": 26,
+    "admitted_verified": 6,
+    "fresh_actionable_open": 3,
+    "stale_actionable_open": 0,
+    "current_reference_admitted_verified": 6,
+    "current_reference_held_stale": 6,
+    "read_only": true,
+    "provenance": "PASS",
+    "blocked_records_excluded": true,
+    "unverified_material_facts_excluded": true,
+    "stale_source_fail_closed": "PASS",
+    "source_mutation_allowed": false
+  },
+  "artifacts": [
+    "eucons/opportunities/bridge_contract.json",
+    "eucons/opportunities/build_projection.py",
+    "eucons/validation/validate_opportunity_bridge.py",
+    "eucons/validation/test_opportunity_bridge_fail_closed.py",
+    ".github/workflows/eucons-quality.yml"
+  ],
+  "next_phase": "E10"
+}
