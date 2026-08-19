@@ -1,0 +1,92 @@
+name: LOCAL NEWS OS vNext Editorial QA Validation
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/vnext/core/editorial_qa.py"
+      - "local-news-os/vnext/core/story_engine.py"
+      - "local-news-os/vnext/runtime/schema.sql"
+      - "local-news-os/vnext/instances/**/packs/editorial.json"
+      - ".github/workflows/local-news-os-vnext-editorial-qa.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/vnext/core/editorial_qa.py"
+      - "local-news-os/vnext/core/story_engine.py"
+      - "local-news-os/vnext/runtime/schema.sql"
+      - "local-news-os/vnext/instances/**/packs/editorial.json"
+      - ".github/workflows/local-news-os-vnext-editorial-qa.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-editorial-qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile Editorial QA dependency chain
+        run: |
+          python -m py_compile \
+            local-news-os/vnext/core/runtime_store.py \
+            local-news-os/vnext/core/signal_engine.py \
+            local-news-os/vnext/core/primary_resolver.py \
+            local-news-os/vnext/core/fact_kernel_engine.py \
+            local-news-os/vnext/core/newsworthiness_engine.py \
+            local-news-os/vnext/core/story_engine.py \
+            local-news-os/vnext/core/editorial_qa.py
+
+      - name: Run Editorial QA self-test
+        run: python local-news-os/vnext/core/editorial_qa.py --self-test
+
+      - name: Validate per-instance QA policies through the same core
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, str(Path('local-news-os/vnext/core').resolve()))
+          import editorial_qa
+          policies = []
+          for instance_id in ('valcea', 'test-county'):
+              pack = json.loads(Path(f'local-news-os/vnext/instances/{instance_id}/packs/editorial.json').read_text(encoding='utf-8'))
+              policies.append(editorial_qa.validate_qa_policy(pack, instance_id=instance_id))
+          assert policies[0]['duplicate_headline_similarity_threshold'] != policies[1]['duplicate_headline_similarity_threshold']
+          assert policies[0]['risk_term_classes'] != policies[1]['risk_term_classes']
+          assert 'straight_news' in policies[0]['auto_classes']
+          assert 'reputational_claim' in policies[0]['review_classes']
+          print('VNEXT_EDITORIAL_QA_POLICY_REPLICATION_PASS')
+          PY
+
+      - name: Assert site-owned auditable QA and fail-closed routing
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'CREATE TABLE IF NOT EXISTS editorial_qa_decisions' local-news-os/vnext/runtime/schema.sql
+          grep -q "outcome TEXT NOT NULL CHECK (outcome IN ('QA_PASSED', 'HUMAN_REVIEW', 'HOLD'))" local-news-os/vnext/runtime/schema.sql
+          grep -q "publication_authority TEXT NOT NULL CHECK (publication_authority = 'NONE')" local-news-os/vnext/runtime/schema.sql
+          grep -q 'EDITORIAL_QA_DECIDED' local-news-os/vnext/core/editorial_qa.py
+          grep -q 'structured_draft_matches_verified_kernel' local-news-os/vnext/core/editorial_qa.py
+          grep -q 'claim_level_grounding' local-news-os/vnext/core/editorial_qa.py
+          grep -q 'provenance_complete' local-news-os/vnext/core/editorial_qa.py
+          grep -q 'temporal_consistency' local-news-os/vnext/core/editorial_qa.py
+          grep -q 'duplicate_risk' local-news-os/vnext/core/editorial_qa.py
+          grep -q 'HUMAN_REVIEW' local-news-os/vnext/core/editorial_qa.py
+          grep -q 'QA_PASSED' local-news-os/vnext/core/editorial_qa.py
+          ! grep -Eiq "to_state.?=.?'PUBLISHED'|state.?=.?'PUBLISHED'|publish_story|requests\.|urllib\.request|httpx|aiohttp|subprocess.*curl|git_state_path|state_root|live-feed|current_edition|output_root" local-news-os/vnext/core/editorial_qa.py
+          echo 'VNEXT_EDITORIAL_QA_BOUNDARY_PASS'
+
+      - name: Enforce CORE_KNOWS_NO_LOCALITY
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -niE 'vâlcea|valcea|râmnicu|ramnicu|valceaclar\.ro' local-news-os/vnext/core/editorial_qa.py; then
+            echo 'Editorial QA contains locality-specific material' >&2
+            exit 1
+          fi
+          echo 'VNEXT_EDITORIAL_QA_NO_LOCALITY_PASS'

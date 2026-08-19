@@ -3,6 +3,7 @@
   "pack_type": "editorial",
   "instance_id": "valcea",
   "auto_publish_classes": [
+    "straight_news",
     "service_news",
     "verified_administrative_decision",
     "verified_jobs",
@@ -47,5 +48,26 @@
       "HEADLINE_ASSERTION": "ACTUALITATE"
     },
     "follow_up_label": "Ce urmărim"
+  },
+  "editorial_qa": {
+    "default_editorial_class": "straight_news",
+    "minimum_body_blocks": 2,
+    "minimum_primary_sources": 1,
+    "duplicate_headline_similarity_threshold": 0.92,
+    "max_source_future_skew_hours": 6,
+    "risk_term_classes": [
+      {
+        "editorial_class": "reputational_claim",
+        "terms": ["acuz", "suspect", "fraud", "corup", "mită", "mita", "abuz", "infracți", "infracti"]
+      },
+      {
+        "editorial_class": "investigation",
+        "terms": ["anchet", "perchezi", "dna", "diicot"]
+      },
+      {
+        "editorial_class": "legal_ambiguity",
+        "terms": ["litig", "proces", "instanț", "instanta", "dosar civil", "dosar penal"]
+      }
+    ]
   }
 }
