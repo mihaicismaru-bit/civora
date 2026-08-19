@@ -32,7 +32,8 @@ jobs:
             local-news-os/vnext/core/site_runtime.py \
             local-news-os/vnext/core/source_adapters.py \
             local-news-os/vnext/core/signal_engine.py \
-            local-news-os/vnext/core/primary_resolver.py
+            local-news-os/vnext/core/primary_resolver.py \
+            local-news-os/vnext/core/fact_kernel_engine.py
 
       - name: Validate frozen product contract
         run: |
@@ -97,6 +98,9 @@ jobs:
       - name: Validate Dynamic Primary Resolver
         run: python local-news-os/vnext/core/primary_resolver.py --self-test
 
+      - name: Validate Fact Kernel Engine
+        run: python local-news-os/vnext/core/fact_kernel_engine.py --self-test
+
       - name: Validate private site newsroom and fail-closed authentication
         run: python local-news-os/vnext/core/site_runtime.py --self-test
 
@@ -159,6 +163,21 @@ jobs:
           grep -q '/newsroom/api/primary-targets' local-news-os/vnext/core/site_runtime.py
           ! grep -Eiq 'requests\.|urllib\.request|httpx|aiohttp|subprocess.*curl|git_state_path|state_root|live-feed|current_edition|output_root' local-news-os/vnext/core/primary_resolver.py
           echo 'VNEXT_PRIMARY_RESOLVER_BOUNDARY_PASS'
+
+      - name: Assert fact kernels require primary evidence and remain non-publishing
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'CREATE TABLE IF NOT EXISTS verification_results' local-news-os/vnext/runtime/schema.sql
+          grep -q 'CREATE TABLE IF NOT EXISTS fact_kernels' local-news-os/vnext/runtime/schema.sql
+          grep -q "verdict IN ('SUPPORTS', 'CONTRADICTS', 'INCONCLUSIVE')" local-news-os/vnext/runtime/schema.sql
+          grep -q 'material_fact_ready INTEGER NOT NULL CHECK (material_fact_ready = 1)' local-news-os/vnext/runtime/schema.sql
+          grep -q 'fact_kernel_ready INTEGER NOT NULL CHECK (fact_kernel_ready = 1)' local-news-os/vnext/runtime/schema.sql
+          grep -q 'fact kernel blocked' local-news-os/vnext/core/fact_kernel_engine.py
+          grep -q 'PRIMARY_EVIDENCE_RECORDED' local-news-os/vnext/core/fact_kernel_engine.py
+          grep -q 'FACT_KERNEL_READY' local-news-os/vnext/core/fact_kernel_engine.py
+          ! grep -Eiq 'requests\.|urllib\.request|httpx|aiohttp|subprocess.*curl|git_state_path|state_root|live-feed|current_edition|output_root' local-news-os/vnext/core/fact_kernel_engine.py
+          echo 'VNEXT_FACT_KERNEL_BOUNDARY_PASS'
 
       - name: Assert newsroom is private and site-owned
         shell: bash
