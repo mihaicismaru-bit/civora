@@ -1,0 +1,139 @@
+name: VÂLCEA CLAR Photo Candidate Discovery
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'valcea-clar/social/photo_candidate_policy.json'
+      - 'valcea-clar/social/photo_candidate_resolver.py'
+      - '.github/workflows/valcea-clar-photo-candidate-discovery.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/site/story_archive.json'
+      - 'valcea-clar/social/story_visuals.json'
+      - 'valcea-clar/social/photo_atlas.json'
+      - 'valcea-clar/social/photo_candidate_policy.json'
+      - 'valcea-clar/social/photo_candidate_resolver.py'
+      - '.github/workflows/valcea-clar-photo-candidate-discovery.yml'
+  schedule:
+    - cron: '23 */2 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-photo-candidate-discovery
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Validate candidate-only resolver offline
+        run: |
+          python -m py_compile valcea-clar/social/photo_candidate_resolver.py
+          python valcea-clar/social/photo_candidate_resolver.py --self-test
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          policy=json.loads(Path('valcea-clar/social/photo_candidate_policy.json').read_text(encoding='utf-8'))
+          assert policy['publication_authority'] == 'NONE'
+          p=policy['principles']
+          assert p['real_photographs_only'] is True
+          assert p['synthetic_images_forbidden'] is True
+          assert p['generic_stock_substitution_forbidden'] is True
+          assert p['candidate_only'] is True
+          assert p['automatic_story_assignment_allowed'] is False
+          assert p['rights_cleared_does_not_imply_subject_match'] is True
+          assert p['subject_match_required_before_promotion'] is True
+          assert p['editor_approval_required_before_promotion'] is True
+          assert p['openverse_original_source_reverification_required'] is True
+          enabled={row['id'] for row in policy['providers'] if row.get('enabled')}
+          assert enabled == {'wikimedia_commons','openverse'}
+          print({'status':'PASS','enabled_providers':sorted(enabled)})
+          PY
+
+      - name: Confirm approved Atlas remains separate
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          atlas=json.loads(Path('valcea-clar/social/photo_atlas.json').read_text(encoding='utf-8'))
+          assert atlas['publication_authority'] == 'NONE'
+          assert atlas['policy']['automatic_story_assignment_allowed'] is False
+          print({'status':'PASS','approved_assets':atlas['summary']['approved_asset_count']})
+          PY
+
+  discover:
+    if: github.event_name != 'pull_request'
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Discover bounded free-photo candidates
+        run: python valcea-clar/social/photo_candidate_resolver.py --max-stories 4 --timeout 12
+
+      - name: Enforce candidate registry has zero authority
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          doc=json.loads(Path('valcea-clar/social/photo_candidate_registry.json').read_text(encoding='utf-8'))
+          assert doc['publication_authority'] == 'NONE'
+          assert doc['candidate_only'] is True
+          assert doc['automatic_promotion_forbidden'] is True
+          for sid,row in doc.get('stories',{}).items():
+              assert row['publication_authority'] == 'NONE', sid
+              assert row['automatic_promotion'] is False, sid
+              for candidate in row.get('candidates',[]):
+                  assert candidate['kind'] == 'photograph', sid
+                  assert candidate['synthetic'] is False, sid
+                  assert candidate['subject_match'] is False, sid
+                  assert candidate['editor_approved'] is False, sid
+                  assert candidate['publication_eligible'] is False, sid
+                  assert candidate['publication_authority'] == 'NONE', sid
+                  assert candidate['license'] in {'public-domain','cc0','cc-by','cc-by-sa'}, sid
+                  if candidate['provider'] == 'openverse':
+                      assert candidate['source_license_reverification_required'] is True, sid
+          print({'status':'PASS','summary':doc['summary']})
+          PY
+
+      - name: Persist candidate registry conflict-safe
+        shell: bash
+        run: |
+          set -euo pipefail
+          candidate='valcea-clar/social/photo_candidate_registry.json'
+          cp "$candidate" /tmp/valcea-photo-candidate-registry.json
+          git config user.name 'valcea-clar-photo-candidates[bot]'
+          git config user.email 'valcea-clar-photo-candidates@users.noreply.github.com'
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/valcea-photo-candidate-registry.json "$candidate"
+            git add "$candidate"
+            if git diff --cached --quiet; then
+              echo 'Photo candidate registry already current.'
+              exit 0
+            fi
+            git commit -m 'Refresh VÂLCEA CLAR photo candidates'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "main advanced during candidate persistence; retrying ${attempt}/5"
+            sleep $((attempt * 2))
+          done
+          echo 'Could not persist Photo Candidate registry after five attempts.' >&2
+          exit 1
