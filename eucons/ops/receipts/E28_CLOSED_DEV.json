@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E28",
+  "unit": "E28_CLOSED_DEV",
+  "status": "PASS",
+  "validated_at": "2026-08-19T14:12:30Z",
+  "validation": {
+    "quality": {"run_id": 32262584729, "run_number": 144, "conclusion": "success"},
+    "build": {"run_id": 32262584718, "run_number": 36, "conclusion": "success"},
+    "validated_head": "eb98cd472415999b73b18b92907076c5ca1e8dc8",
+    "merged_commit": "dbd3a59a1e94271c1680cd14ce98463d05576db8",
+    "exact_head_gate_passed": true
+  },
+  "coverage": {
+    "prerequisite_phase_receipts": 28,
+    "public_services": 8,
+    "public_people": 2,
+    "public_cases": 2,
+    "production_ready_pages": 26,
+    "production_ready_sitemap_entries": 26,
+    "full_acceptance_replay": "PASS",
+    "claim_to_active_evidence_lineage": "PASS",
+    "legal_privacy_surfaces": "PASS",
+    "provider_neutral_lead_runtime": "PASS",
+    "external_handoff_actions": 4,
+    "owner_development_actions_required": false,
+    "internal_development_blockers": 0,
+    "production_side_effects": "DISABLED"
+  },
+  "external_only": [
+    "domain_and_hosting",
+    "linkedin",
+    "facebook",
+    "commercial_mailbox"
+  ],
+  "artifacts": [
+    "eucons/acceptance/closed_dev_contract.json",
+    "eucons/acceptance/closed_dev.py",
+    "eucons/deployment/build_production_ready.py",
+    "eucons/deployment/production_build_contract.json",
+    "eucons/deployment/runtime_activation_contract.json",
+    "eucons/deployment/external_handoff_manifest.json",
+    "eucons/validation/validate_closed_dev.py",
+    "eucons/validation/test_closed_dev_fail_closed.py",
+    ".github/workflows/eucons-quality.yml"
+  ],
+  "next_phase": "E29"
+}
