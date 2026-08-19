@@ -32,16 +32,20 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Compile generic bootstrap
+      - name: Compile generic bootstrap and second-instance acceptance
         run: |
           python -m py_compile \
             local-news-os/vnext/core/instance_bootstrap.py \
             local-news-os/vnext/core/instance_model.py \
             local-news-os/vnext/core/runtime_store.py \
-            local-news-os/vnext/core/release_control.py
+            local-news-os/vnext/core/release_control.py \
+            local-news-os/vnext/runtime/p17_second_instance_acceptance.py
 
       - name: Validate generic instance bootstrap and site-owned runtime initialization
         run: python local-news-os/vnext/core/instance_bootstrap.py --self-test
+
+      - name: Validate full same-core second-instance runtime path
+        run: python local-news-os/vnext/runtime/p17_second_instance_acceptance.py
 
       - name: Enforce no locality or repository-owned runtime in bootstrap
         shell: bash
@@ -55,3 +59,13 @@ jobs:
           grep -q 'repository_runtime_state_enabled' local-news-os/vnext/core/instance_bootstrap.py
           grep -q 'site_application' local-news-os/vnext/core/instance_bootstrap.py
           echo 'VNEXT_P17_BOOTSTRAP_BOUNDARY_PASS'
+
+      - name: Enforce second-instance acceptance outside generic core
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f local-news-os/vnext/runtime/p17_second_instance_acceptance.py
+          ! grep -Eiq 'vâlcea|valcea|râmnicu|ramnicu|valceaclar\.ro' local-news-os/vnext/runtime/p17_second_instance_acceptance.py
+          grep -q 'network_publication_attempted' local-news-os/vnext/runtime/p17_second_instance_acceptance.py
+          grep -q 'release_rollback_restored' local-news-os/vnext/runtime/p17_second_instance_acceptance.py
+          echo 'VNEXT_P17_SECOND_INSTANCE_BOUNDARY_PASS'
