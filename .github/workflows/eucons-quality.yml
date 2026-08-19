@@ -30,6 +30,8 @@ jobs:
           python-version: '3.12'
       - name: Validate EUCONS bootstrap contracts
         run: python eucons/validation/validate_bootstrap.py
+      - name: Validate EUCONS commercial canon
+        run: python eucons/validation/validate_commercial_canon.py
       - name: Reject committed secret-like assignments
         shell: bash
         run: |
