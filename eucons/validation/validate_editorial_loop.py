@@ -70,17 +70,22 @@ def main() -> None:
 
     knowledge = knowledge_engine.build_knowledge(services, evidence, synthetic_projection(), cases, knowledge_contract)
     cycle = editorial_engine.build_cycle(knowledge, editorial_contract)
+    total = int(knowledge["summary"]["records"])
+    publishable = int(knowledge["summary"]["publishable"])
+    max_ready = int(editorial_contract["selection"]["max_ready_per_cycle"])
+    expected_ready = min(publishable, max_ready)
+    expected_held = total - expected_ready
 
     assert cycle["engine_id"] == "EUCONS_E15_AUTONOMOUS_EDITORIAL_LOOP"
     assert cycle["runtime_publication_enabled"] is False
     assert cycle["dispatch_enabled"] is False
-    assert cycle["summary"]["records_considered"] == 26
-    assert cycle["summary"]["ready"] == 12
-    assert cycle["summary"]["held"] == 14
+    assert cycle["summary"]["records_considered"] == total
+    assert cycle["summary"]["ready"] == expected_ready
+    assert cycle["summary"]["held"] == expected_held
     assert cycle["summary"]["published"] == 0
-    assert cycle["summary"]["new_receipts"] == 26
-    assert len(cycle["receipts"]) == 26
-    assert len({row["receipt_id"] for row in cycle["receipts"]}) == 26
+    assert cycle["summary"]["new_receipts"] == total
+    assert len(cycle["receipts"]) == total
+    assert len({row["receipt_id"] for row in cycle["receipts"]}) == total
     assert all(row["published"] is False and row["dispatch_state"] == "DISABLED_RUNTIME_GATE" for row in cycle["decisions"])
 
     opportunity = next(row for row in cycle["decisions"] if row["source_ref"] == "fresh-synthetic-opportunity")
@@ -92,13 +97,18 @@ def main() -> None:
     assert stale["decision"] == "HOLD"
     assert "INPUT_NOT_PUBLISHABLE" in stale["hold_reasons"]
 
+    case_decisions = [row for row in cycle["decisions"] if row["type"] == "CASE"]
+    assert len(case_decisions) == int(knowledge["summary"]["by_type"]["CASE"])
+    assert all(row["fact_kernel"].get("claim_refs") for row in case_decisions)
+    assert all("MISSING_CASE_CLAIMS" not in row["hold_reasons"] for row in case_decisions)
+
     for receipt in cycle["receipts"]:
         body = {key: value for key, value in receipt.items() if key != "receipt_hash"}
         assert receipt["receipt_hash"] == editorial_engine.sha256_json(body)
 
     replay = editorial_engine.build_cycle(knowledge, editorial_contract, cycle["receipts"])
     assert replay["summary"]["new_receipts"] == 0
-    assert replay["summary"]["unchanged_receipts"] == 26
+    assert replay["summary"]["unchanged_receipts"] == total
     assert replay["summary"]["superseded_receipts"] == 0
     assert replay["summary"]["withdrawn_receipts"] == 0
     assert [row["receipt_id"] for row in replay["receipts"]] == [row["receipt_id"] for row in cycle["receipts"]]
@@ -110,6 +120,7 @@ def main() -> None:
         "ready": cycle["summary"]["ready"],
         "held": cycle["summary"]["held"],
         "receipts": len(cycle["receipts"]),
+        "case_records": len(case_decisions),
         "runtime_publication": "DISABLED",
         "replay": "DETERMINISTIC",
     }, ensure_ascii=False))
