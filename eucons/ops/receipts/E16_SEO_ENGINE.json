@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E16",
+  "unit": "E16_SEO_ENGINE",
+  "status": "PASS",
+  "validated_at": "2026-08-19T11:02:44Z",
+  "validation": {
+    "workflow": "EUCONS Quality",
+    "run_id": 32245617595,
+    "run_number": 83,
+    "conclusion": "success",
+    "validated_head": "b10af60e70589e8f1266a079caa15d4e9aa7e289",
+    "merged_commit": "303090a34ddd33cb072982c2128034255d696429",
+    "exact_head_gate_passed": true
+  },
+  "coverage": {
+    "core_routes": 18,
+    "publishable_service_routes": 8,
+    "active_routes": 26,
+    "sitemap_entries": 26,
+    "canonical_https": "PASS",
+    "unique_titles_and_canonicals": "PASS",
+    "schema_projection": "PASS",
+    "clusters": ["services", "funding", "audiences", "authority", "trust"],
+    "orphan_routes": 0,
+    "unproven_service_withheld": "PASS",
+    "conditional_routes": "HOLD_UNTIL_MATERIALIZED",
+    "preview_indexing": "DISABLED",
+    "production_indexing": "DISABLED"
+  },
+  "artifacts": [
+    "eucons/seo/seo_contract.json",
+    "eucons/seo/seo_engine.py",
+    "eucons/validation/validate_seo_engine.py",
+    "eucons/validation/test_seo_engine_fail_closed.py",
+    ".github/workflows/eucons-quality.yml"
+  ],
+  "next_phase": "E17"
+}
