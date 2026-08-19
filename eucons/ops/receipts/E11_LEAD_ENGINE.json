@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E11",
+  "unit": "E11_LEAD_ENGINE",
+  "status": "PASS",
+  "validated_at": "2026-08-19T10:11:19Z",
+  "validation": {
+    "workflow": "EUCONS Quality",
+    "run_id": 32241429450,
+    "run_number": 63,
+    "conclusion": "success",
+    "validated_head": "1fa64abf8407b4b657594b63d887ebfa4103c8a0",
+    "merged_commit": "cf11aafa06523e400e2b4b3bcc54ec1aa43c4ea3",
+    "exact_head_gate_passed": true
+  },
+  "coverage": {
+    "qualification_forms": 5,
+    "synthetic_lead_score": 95,
+    "synthetic_intent_score": 83,
+    "synthetic_urgency_score": 100,
+    "matching_candidates": 1,
+    "next_action": "COMMERCIAL_REVIEW",
+    "consent_fail_closed": "PASS",
+    "anti_spam": "PASS",
+    "dedupe": "PASS",
+    "pii_repository_write_guard": "PASS",
+    "production_collection": "DISABLED_UNTIL_BACKEND_AUTHORIZED"
+  },
+  "artifacts": [
+    "eucons/leads/lead_contract.json",
+    "eucons/leads/forms.json",
+    "eucons/leads/storage_contract.json",
+    "eucons/leads/process_lead.py",
+    "eucons/validation/validate_lead_engine.py",
+    "eucons/validation/test_lead_engine_fail_closed.py",
+    ".github/workflows/eucons-quality.yml"
+  ],
+  "next_phase": "E12"
+}
