@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "contract": "LOCAL_NEWS_OS_VNEXT_VALCEA_READINESS_RECEIPT",
+  "instance_id": "valcea",
+  "observed_at": "2026-08-19T20:32:18+03:00",
+  "status": "PRE_MIGRATION_READINESS_ONLY",
+  "cutover_authorized": false,
+  "public_runtime_mutated": false,
+  "observed_main_head": "098b7e4e4b4bf4e01655d15961873bf4cad1d5d8",
+  "vnext_gate": {
+    "state_path": "local-news-os/vnext/VNEXT_STATE.json",
+    "state_sha": "e50694898314785fe89b6cc863a6824150053b19",
+    "build_status": "BUILD_ACTIVE",
+    "production_cutover": false,
+    "closed_through": "P16_DEVELOPMENT_PRODUCTION_RELEASE_SEPARATION",
+    "canonical_next_phase": "P17_INSTANCE_BOOTSTRAP_SECOND_INSTANCE_TEST",
+    "required_before_migration": "BUILD_READY_FOR_MIGRATION"
+  },
+  "material_progress": [
+    "P15_RETRY_SELF_HEAL_UNIFIED_SCHEDULER is CLOSED with site-owned leases, jobs, attempts, ticks, cursors, health, orphan recovery, bounded retries, circuit cooldown and private newsroom visibility.",
+    "P16_DEVELOPMENT_PRODUCTION_RELEASE_SEPARATION is CLOSED with immutable release candidates, mandatory validation gates, atomic promotion, rollback and site-owned release state.",
+    "P17 generic instance bootstrap implementation is present on main and emits instance.json plus the eight versioned packs from configuration only.",
+    "P17 bootstrap enforces SITE_OWNS_RUNTIME, repository_runtime_state_enabled=false, source candidates default to DISCOVERY rather than asserted PRIMARY authority, channels default closed, and entity/photo seeds default empty rather than fabricated.",
+    "A neutral bootstrap self-test initializes a site-owned runtime and release state without locality-specific material."
+  ],
+  "p17_acceptance_assessment": {
+    "implementation_commit": "0a6a4154d9b64e5a6bcd57597eae14485fb2b3ee",
+    "bootstrap_path": "local-news-os/vnext/core/instance_bootstrap.py",
+    "bootstrap_sha": "a4d251ee82b102d0dc74e97e8f28ef44c3e4941b",
+    "workflow_path": ".github/workflows/local-news-os-vnext-instance-bootstrap.yml",
+    "bootstrap_self_test_scope": [
+      "generic instance spec validation",
+      "eight pack generation",
+      "site-owned runtime initialization",
+      "release-state initialization",
+      "repository runtime disabled",
+      "no asserted PRIMARY authority from bootstrap source candidates",
+      "empty social, entity and photo defaults"
+    ],
+    "required_but_not_yet_canonically_proven": [
+      "fresh second-instance signal materialization",
+      "resolver verification-task creation and validated primary routing",
+      "supported primary evidence recording",
+      "fact-kernel materialization",
+      "configured newsworthiness scoring",
+      "story drafting",
+      "editorial QA",
+      "site publication",
+      "media fallback/selection",
+      "distribution product materialization",
+      "scheduler idempotency and orphan recovery",
+      "release-control promotion/rollback on the same neutral instance"
+    ],
+    "conclusion": "P17 implementation exists but canonical VNEXT_STATE still marks P17 NEXT. Do not infer BUILD_READY_FOR_MIGRATION until the full second-instance end-to-end acceptance is evidenced and the build state closes P17."
+  },
+  "public_compatibility_snapshot": {
+    "publication_event_path": "valcea-clar/site/story_publication_event.json",
+    "publication_event_sha": "709af6f8b7f8bcdab9d3530f06523b51aa2ed276",
+    "published_story_ids": 23,
+    "publication_event_published_at": "2026-08-19T06:12:49+03:00",
+    "publication_event_new_story_ids": 0,
+    "live_feed_sha": "fc47648a0b228d43293348e445d5d613072d3f32",
+    "people_sha": "a99562617891720a0e211bc8f0341f4435eab5b8",
+    "artists_sha": "1751e1b9069ca904afde8787592342ef6b78d9b4",
+    "public_shell_sha": "d6bb904a060d0301fc8982d6e592430ad446721f",
+    "runtime_status_sha": "aae6adb5e8a2289f351fd6d618cdae09f9da1531",
+    "remote_http_probe": {
+      "status": "UNVERIFIED_SEARCH_DISCOVERY",
+      "detail": "Public web search did not return valceaclar.ro and direct open could not be grounded through the search tool. This is not promoted to a downtime claim; repository runtime compatibility remains unchanged in this run."
+    }
+  },
+  "legacy_single_writer_risk": {
+    "workflow_path": ".github/workflows/valcea-clar-social-publishing.yml",
+    "workflow_sha": "c76969dc5bea18386990ebc70716d14093474728",
+    "schedule": "7,22,37,52 * * * *",
+    "status": "STILL_ACTIVE_IN_REPOSITORY_CONTRACT",
+    "cutover_requirement": "Fence the legacy direct social writer atomically before first vNext direct apply, only after shadow delivery parity and remote credential/readback checks. Never run legacy and vNext direct publishers concurrently."
+  },
+  "acceptance_blockers": [
+    "Canonical VNEXT_STATE has not closed P17.",
+    "Full second-instance end-to-end acceptance across P5-P16 has not yet been evidenced in canonical state.",
+    "BUILD_READY_FOR_MIGRATION has not been asserted.",
+    "Legacy social direct writer fencing must occur atomically at cutover, not during readiness-only mode."
+  ],
+  "next_acceptance_action": "Remain readiness-only. When P17 is canonically CLOSED and BUILD_READY_FOR_MIGRATION is asserted, initialize the Vâlcea shadow database from migration inputs, verify story/profile/place/media URL and identity parity, exercise site-owned publication projections without public cutover, then proceed to controlled live only after single-writer social fencing can be executed atomically with rollback.",
+  "safety": {
+    "legacy_civora_lanes_reactivated": false,
+    "public_urls_changed": false,
+    "public_story_state_changed": false,
+    "social_external_state_changed": false,
+    "rollback_required_now": false
+  }
+}
