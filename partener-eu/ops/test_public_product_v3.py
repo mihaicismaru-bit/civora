@@ -23,6 +23,20 @@ assert "[data-r=\"changes\"]" in ui
 assert 'placeholder="Ex.: Sunt IMM' in ui
 assert 'value="Am firmă din industria alimentară' not in ui
 
+# Baseline public shell must remain useful and fail-closed without progressive enhancements.
+nav_chunk=function_chunk(app,'nav')
+ask_chunk=function_chunk(app,'ask')
+answer_chunk=function_chunk(app,'answer')
+assert 'data-r="changes"' not in nav_chunk
+assert 'value="Am firmă din industria alimentară' not in ask_chunk
+assert 'autocomplete="off"' in ask_chunk
+assert 'placeholder="Ex.: IMM din Vâlcea' in ask_chunk
+assert 'D.calls.slice(0,2)' not in answer_chunk
+assert 'Nu afișăm apeluri aleatoriu' in answer_chunk
+assert 'De ce apare:' in answer_chunk
+assert 'Eligibilitate cunoscută:' in answer_chunk
+assert 'Vezi dosarul' in answer_chunk
+
 # "Ce spun decidenții" belongs to the explicit decision-home projection only.
 assert 'isHome()' in people
 assert 'data-decision-home="1"' in people
