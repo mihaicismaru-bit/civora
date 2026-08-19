@@ -106,6 +106,10 @@ jobs:
         run: python eucons/validation/validate_email_engine.py
       - name: Test EUCONS Commercial Email Engine fail-closed behavior
         run: python eucons/validation/test_email_engine_fail_closed.py
+      - name: Validate EUCONS Analytics Engine
+        run: python eucons/validation/validate_analytics_engine.py
+      - name: Test EUCONS Analytics Engine fail-closed behavior
+        run: python eucons/validation/test_analytics_engine_fail_closed.py
       - name: Reject committed secret-like assignments
         shell: bash
         run: |
