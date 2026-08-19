@@ -1,0 +1,75 @@
+name: LOCAL NEWS OS vNext Release Control
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/vnext/core/release_control.py"
+      - "local-news-os/vnext/core/release_runtime.py"
+      - "local-news-os/vnext/runtime/release_schema.sql"
+      - ".github/workflows/local-news-os-vnext-release-control.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/vnext/core/release_control.py"
+      - "local-news-os/vnext/core/release_runtime.py"
+      - "local-news-os/vnext/runtime/release_schema.sql"
+      - ".github/workflows/local-news-os-vnext-release-control.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-release-control:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile release control
+        run: |
+          python -m py_compile \
+            local-news-os/vnext/core/release_control.py \
+            local-news-os/vnext/core/release_runtime.py
+
+      - name: Validate atomic candidate promotion and rollback
+        run: python local-news-os/vnext/core/release_control.py --self-test
+
+      - name: Validate private release-health newsroom
+        run: python local-news-os/vnext/core/release_runtime.py --self-test
+
+      - name: Validate production and neutral instance contracts
+        run: |
+          python local-news-os/vnext/core/instance_model.py valcea >/tmp/valcea.json
+          python local-news-os/vnext/core/instance_model.py test-county >/tmp/test-county.json
+
+      - name: Assert development cannot stop validated runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'candidate registered without affecting validated runtime' local-news-os/vnext/core/release_control.py
+          grep -q 'only a VALIDATED candidate may be promoted' local-news-os/vnext/core/release_control.py
+          grep -q 'previous_engine_version' local-news-os/vnext/runtime/release_schema.sql
+          grep -q 'ROLLBACK' local-news-os/vnext/core/release_control.py
+          grep -q 'db_migration_compatibility' local-news-os/vnext/core/release_control.py
+          grep -q '/newsroom/releases' local-news-os/vnext/core/release_runtime.py
+          ! grep -Eiq 'git_state_path|state_root|live-feed|current_edition|output_root|story_publication_event' \
+            local-news-os/vnext/core/release_control.py \
+            local-news-os/vnext/core/release_runtime.py \
+            local-news-os/vnext/runtime/release_schema.sql
+          echo 'VNEXT_P16_RELEASE_SEPARATION_PASS'
+
+      - name: Enforce CORE_KNOWS_NO_LOCALITY for release control
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -niE 'vâlcea|valcea|râmnicu|ramnicu|valceaclar\.ro' \
+            local-news-os/vnext/core/release_control.py \
+            local-news-os/vnext/core/release_runtime.py \
+            local-news-os/vnext/runtime/release_schema.sql; then
+            echo 'P16 release control contains locality-specific material' >&2
+            exit 1
+          fi
+          echo 'VNEXT_P16_CORE_NO_LOCALITY_PASS'
