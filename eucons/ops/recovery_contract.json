@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "engine_id": "EUCONS_E24_RECOVERY",
+  "product": "EUCONS_COMMERCIAL_OS",
+  "depends_on": "EUCONS_E23_PERSISTENCE",
+  "runtime_side_effects_enabled": false,
+  "recovery_domains": [
+    "PUBLICATION",
+    "LINKEDIN",
+    "FACEBOOK",
+    "OPPORTUNITY_RECONCILE",
+    "OFFER_REPLAY"
+  ],
+  "operation_statuses": ["PENDING", "RUNNING", "FAILED", "SUCCEEDED"],
+  "decision_actions": [
+    "START",
+    "NOOP_ACTIVE_LEASE",
+    "RESUME_AFTER_STALE_LEASE",
+    "RETRY",
+    "HOLD_RETRY_EXHAUSTED",
+    "HOLD_NON_RETRYABLE",
+    "NOOP_COMPLETED",
+    "NOOP_ALREADY_DELIVERED",
+    "RECONCILE_TO_HOLD",
+    "DISCARD_ORPHAN_PREPARE",
+    "HOLD_CORRUPT_STATE",
+    "HOLD_MISSING_RECEIPT",
+    "HOLD_DUPLICATE_CONFLICT"
+  ],
+  "lease_policy": {
+    "stale_when_expires_at_lte_reference_time": true,
+    "active_lease_never_stolen": true,
+    "stale_lease_requires_same_expected_state_hash": true,
+    "missing_running_lease_fails_closed": true
+  },
+  "duplicate_policy": {
+    "idempotency_key": ["operation_id", "input_hash"],
+    "same_key_collapses_to_one_canonical_attempt": true,
+    "same_operation_id_different_input_hash_fails_closed": true,
+    "existing_delivery_receipt_prevents_repeat_side_effect": true
+  },
+  "domain_rules": {
+    "PUBLICATION": {
+      "side_effect_receipt_required": true,
+      "retry_requires_retryable_error": true
+    },
+    "LINKEDIN": {
+      "side_effect_receipt_required": true,
+      "retry_requires_retryable_error": true
+    },
+    "FACEBOOK": {
+      "side_effect_receipt_required": true,
+      "retry_requires_retryable_error": true
+    },
+    "OPPORTUNITY_RECONCILE": {
+      "side_effect_receipt_required": false,
+      "stale_or_withdrawn_projects_to_hold": true
+    },
+    "OFFER_REPLAY": {
+      "side_effect_receipt_required": true,
+      "existing_delivery_receipt_blocks_replay": true,
+      "replay_requires_unchanged_input_hash": true
+    }
+  },
+  "persistence_rules": {
+    "orphan_prepare_never_promoted": true,
+    "canonical_hash_mismatch_fails_closed": true,
+    "recovery_plan_is_pure_and_deterministic": true,
+    "recovery_plan_has_sha256_digest": true,
+    "rollback_requires_valid_receipt_lineage": true,
+    "rollback_never_infers_missing_preimage": true,
+    "resume_order_is_stable": true
+  },
+  "forbidden": {
+    "implicit_orphan_promotion": true,
+    "blind_retry_after_non_retryable_error": true,
+    "retry_after_attempt_budget_exhausted": true,
+    "duplicate_social_or_offer_delivery": true,
+    "rollback_without_receipt_lineage": true,
+    "production_provider_credentials": true,
+    "real_pii_fixtures": true
+  }
+}
