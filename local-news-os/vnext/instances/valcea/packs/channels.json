@@ -3,7 +3,37 @@
   "pack_type": "channels",
   "instance_id": "valcea",
   "channels": [
-    {"id": "facebook", "mode": "direct_capable"},
-    {"id": "instagram", "mode": "direct_capable"}
+    {
+      "id": "facebook",
+      "mode": "direct_capable",
+      "enabled": true,
+      "adapter_id": "meta_facebook",
+      "product_type": "LINK_POST",
+      "media_usage_scope": "SOCIAL_FACEBOOK",
+      "require_visual": false,
+      "account": {
+        "id": "1234360446430980"
+      },
+      "credential_refs": {
+        "access_token": "VALCEA_META_PAGE_ACCESS_TOKEN"
+      },
+      "apply_gate_ref": "VALCEA_FB_EDITORIAL_LIVE_ENABLED"
+    },
+    {
+      "id": "instagram",
+      "mode": "direct_capable",
+      "enabled": true,
+      "adapter_id": "meta_instagram",
+      "product_type": "SINGLE_VISUAL",
+      "media_usage_scope": "SOCIAL_INSTAGRAM",
+      "require_visual": true,
+      "account": {
+        "id_ref": "VALCEA_IG_ACCOUNT_ID"
+      },
+      "credential_refs": {
+        "access_token": "VALCEA_META_PAGE_ACCESS_TOKEN"
+      },
+      "apply_gate_ref": "VALCEA_IG_TEXT_CARD_LIVE_ENABLED"
+    }
   ]
 }
