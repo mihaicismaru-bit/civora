@@ -103,6 +103,22 @@ assert 'De ce apare:' in answer_chunk
 assert 'Eligibilitate cunoscută:' in answer_chunk
 assert 'Vezi dosarul' in answer_chunk
 
+# "Ce spun decidenții" keeps the strict editorial gate but labels source provenance by tier.
+assert 'officialIngested' in function_chunk(people,'isMaterial')
+official_people_source_chunk=function_chunk(people,'officialSource')
+primary_people_source_chunk=function_chunk(people,'primarySource')
+people_source_label_chunk=function_chunk(people,'sourceLabel')
+people_card_chunk=function_chunk(people,'card')
+assert r'^T1(?:B)?\b' in official_people_source_chunk
+assert 'rows.find(officialSource)||rows[0]||null' in primary_people_source_chunk
+assert "officialSource(s)?'Sursa oficială':'Evidență publică'" in people_source_label_chunk
+assert "sourceKind=officialSource(src)?'sursa oficială':'evidența publică'" in people_card_chunk
+assert "label=src?sourceLabel(src):'Proveniență neconfirmată'" in people_card_chunk
+assert 'deschide ${esc(sourceKind)}' in people_card_chunk
+assert 'Vezi semnalul și ${esc(sourceKind)} ↗' in people_card_chunk
+assert "x.institution||'Sursă oficială'" not in people_card_chunk
+assert "x.person||x.institution||'Sursă oficială'" not in people_card_chunk
+
 # "Ce spun decidenții" belongs to the explicit decision-home projection only.
 assert 'isHome()' in people
 assert 'data-decision-home="1"' in people
@@ -119,7 +135,6 @@ for view in ('renderHub','renderNews','renderDossier'):
 
 assert 'document.addEventListener(\'click\'' not in people
 assert 'data-peopleall' not in people
-assert 'Sursa oficială' in people
 assert 'ask-partener-v2.js' in index
 assert 'public-product-v3.js' in index
 assert 'public-product-v3.css' in index
