@@ -86,6 +86,10 @@ jobs:
         run: python eucons/validation/validate_knowledge_engine.py
       - name: Test EUCONS Knowledge Engine fail-closed behavior
         run: python eucons/validation/test_knowledge_engine_fail_closed.py
+      - name: Validate EUCONS Autonomous Editorial Loop
+        run: python eucons/validation/validate_editorial_loop.py
+      - name: Test EUCONS Autonomous Editorial Loop fail-closed behavior
+        run: python eucons/validation/test_editorial_loop_fail_closed.py
       - name: Reject committed secret-like assignments
         shell: bash
         run: |
