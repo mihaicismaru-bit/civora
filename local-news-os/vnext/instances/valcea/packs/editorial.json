@@ -17,5 +17,22 @@
     "verified_facts_only": true,
     "title_only_publishable": false,
     "one_held_story_blocks_publication": false
+  },
+  "newsworthiness": {
+    "weights": {
+      "local_impact": 20,
+      "public_utility": 16,
+      "urgency": 14,
+      "money": 12,
+      "affected_people": 12,
+      "novelty": 10,
+      "accountability": 10,
+      "proximity": 6
+    },
+    "routing_thresholds": {
+      "BUILD_PRIORITY": 80,
+      "BUILD": 55,
+      "MONITOR": 30
+    }
   }
 }
