@@ -26,9 +26,17 @@
       ]
     },
     "P2_RUNTIME_DATABASE_EVENT_LEDGER": {
-      "status": "NEXT"
+      "status": "CLOSED",
+      "evidence": [
+        "site-owned database schema",
+        "multi-instance runtime isolation",
+        "story fingerprint dedupe constraint",
+        "optimistic story revision control",
+        "append-only runtime event ledger",
+        "event ledger tamper rejection CI"
+      ]
     },
-    "P3_SITE_RUNTIME_PRIVATE_NEWSROOM": {"status": "PENDING"},
+    "P3_SITE_RUNTIME_PRIVATE_NEWSROOM": {"status": "NEXT"},
     "P4_GENERIC_SOURCE_ADAPTER_CORE": {"status": "PENDING"},
     "P5_SIGNAL_ENGINE": {"status": "PENDING"},
     "P6_DYNAMIC_PRIMARY_RESOLVER": {"status": "PENDING"},
@@ -45,5 +53,5 @@
     "P17_INSTANCE_BOOTSTRAP_SECOND_INSTANCE_TEST": {"status": "PENDING"},
     "P18_MIGRATION_SHADOW_LIVE_SOAK_PRODUCTION_LOCK": {"status": "PENDING"}
   },
-  "next_action": "Implement the site-owned runtime database schema and append-only event ledger without repository-owned editorial runtime state."
+  "next_action": "Implement the private site newsroom surface over the site-owned runtime store, without repository-owned editorial state."
 }
