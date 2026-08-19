@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "instance_id": "craiova",
+  "sources": [
+    {
+      "id": "cao-anunturi-comunicate",
+      "name": "Compania de Apa Oltenia",
+      "url": "https://www.apaoltenia.ro/index.php/category/anunturi-si-comunicate/",
+      "authority": "primary",
+      "vertical": "UTILITY",
+      "priority": 100,
+      "enabled": true
+    },
+    {
+      "id": "isu-dolj-comunicate",
+      "name": "ISU Dolj",
+      "url": "https://isudj.igsu.ro/comunicate-de-presa",
+      "authority": "primary",
+      "vertical": "PUBLIC_SAFETY",
+      "priority": 90,
+      "enabled": false,
+      "enable_after": "UTILITY_PASS"
+    }
+  ]
+}
