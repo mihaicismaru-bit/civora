@@ -33,7 +33,7 @@ class UtilityLaneTest(unittest.TestCase):
             ),
         )
 
-    def test_extract_compose_render(self) -> None:
+    def _story(self):
         packet = WaterUtilityExtractor(
             allowed_localities=["Craiova", "craiovean"], area_prefixes=["craiovean"]
         )(self.item)
@@ -46,6 +46,10 @@ class UtilityLaneTest(unittest.TestCase):
         story = UtilityStoryComposer(product_name="CRAIOVA CLAR", source_name="Operatorul oficial")(packet)
         self.assertIsNotNone(story)
         assert story is not None
+        return story
+
+    def test_extract_compose_render(self) -> None:
+        story = self._story()
         self.assertIn("20 august 2026", story.headline)
         self.assertIn("Valea Roșie", story.headline)
         with tempfile.TemporaryDirectory() as tmp:
@@ -55,6 +59,18 @@ class UtilityLaneTest(unittest.TestCase):
             page = (Path(tmp) / "stiri" / story.slug / "index.html").read_text(encoding="utf-8")
             self.assertIn("application/ld+json", page)
             self.assertIn("Sursa oficială", page)
+
+    def test_configured_public_url_is_not_live_proof(self) -> None:
+        story = self._story()
+        with tempfile.TemporaryDirectory() as tmp:
+            receipt = StaticSitePublisher(
+                root=tmp,
+                product_name="CRAIOVA CLAR",
+                base_url="https://news.example",
+            )(story)
+            self.assertEqual(receipt.status, "rendered")
+            self.assertEqual(receipt.canonical_url, f"https://news.example/stiri/{story.slug}/")
+            self.assertEqual(receipt.metadata["public_url_candidate"], receipt.canonical_url)
 
     def test_rejects_other_locality_when_scope_is_craiova(self) -> None:
         item = SourceItem(
