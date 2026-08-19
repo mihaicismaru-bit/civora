@@ -42,7 +42,7 @@ def evidence_with_public_case_claims():
             "claim_class": "TESTIMONIAL",
             "publication_state": "PUBLISHABLE",
             "confidentiality_review": "PUBLIC_APPROVED",
-            "consent_verified": true
+            "consent_verified": True
         }
     ])
     return evidence
