@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E23",
+  "unit": "E23_PERSISTENCE",
+  "status": "PASS",
+  "validated_at": "2026-08-19T12:48:00Z",
+  "validation": {
+    "quality": {"run_id": 32254197496, "run_number": 113, "conclusion": "success"},
+    "build": {"run_id": 32254197508, "run_number": 5, "conclusion": "success"},
+    "reconciliation": {"run_id": 32254197440, "run_number": 3, "conclusion": "success"},
+    "health": {"run_id": 32254197594, "run_number": 3, "conclusion": "success"},
+    "validated_head": "8c0665ea90435d531a8561ea23f919e64d39ec4c",
+    "merged_commit": "d4e2746118c344883d128f4ce67b08fb9b90a513",
+    "exact_head_gate_passed": true
+  },
+  "coverage": {
+    "prepare_validate_atomic_commit_receipt": "PASS",
+    "fsync_replace_atomicity": "PASS",
+    "compare_and_swap": "PASS",
+    "sha256_lineage": "PASS",
+    "append_only_receipts": "PASS",
+    "orphan_prepare_detection": "PASS",
+    "completed_phase_receipt_reconciliation": "PASS",
+    "artifact_registry_v2": "PASS",
+    "production_database": "DISABLED"
+  },
+  "artifacts": [
+    "eucons/ops/persistence_contract.json",
+    "eucons/ops/persistence.py",
+    "eucons/ops/artifact_registry.json",
+    "eucons/validation/validate_persistence.py",
+    "eucons/validation/test_persistence_fail_closed.py",
+    ".github/workflows/eucons-quality.yml"
+  ],
+  "next_phase": "E24"
+}
