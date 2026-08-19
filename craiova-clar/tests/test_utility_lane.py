@@ -25,10 +25,11 @@ class UtilityLaneTest(unittest.TestCase):
             published_at=datetime(2026, 8, 19, 9, 0, tzinfo=timezone.utc),
             body_text=(
                 "În vederea executării unor lucrări esențiale de reparații armături în zona PT1 Revoluției, "
-                "se anunță întreruperea alimentării cu apă potabilă JOI, 20.08.2026, în intervalul orar 11.00-15.00. "
-                "Afectați fiind: utilizatorii din zona cuprinsă în perimetrul străzilor Caracal – Henri Coandă – Împăratul Traian. "
-                "Atenționăm utilizatorii că se pot produce modificări temporare ale calității apei din punct de vedere al turbidității, "
-                "iar consumul trebuie evitat până la limpezire."
+                "S.C. Operatorul anunță întreruperea alimentării cu apă potabilă JOI, 20.08.2026, "
+                "în intervalul orar 11.00-15.00. Afectați fiind: utilizatorii din zona cuprinsă "
+                "în perimetrul străzilor Caracal – Henri Coandă – Împăratul Traian. "
+                "Atenționăm utilizatorii că se pot produce modificări temporare ale calității apei "
+                "din punct de vedere al turbidității, iar consumul trebuie evitat până la limpezire."
             ),
         )
 
@@ -45,7 +46,8 @@ class UtilityLaneTest(unittest.TestCase):
         story = UtilityStoryComposer(product_name="CRAIOVA CLAR", source_name="Operatorul oficial")(packet)
         self.assertIsNotNone(story)
         assert story is not None
-        self.assertIn("2026-08-20", story.headline)
+        self.assertIn("20 august 2026", story.headline)
+        self.assertIn("Valea Roșie", story.headline)
         with tempfile.TemporaryDirectory() as tmp:
             receipt = StaticSitePublisher(root=tmp, product_name="CRAIOVA CLAR")(story)
             self.assertEqual(receipt.status, "rendered")
