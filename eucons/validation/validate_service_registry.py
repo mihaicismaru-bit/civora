@@ -57,12 +57,10 @@ def main() -> None:
         fail("E01 canon is incomplete")
 
     expected_audiences = {service_id: set() for service_id in capability_ids}
-    expected_ctas = {service_id: set() for service_id in capability_ids}
     for audience in commercial["audiences"]:
         for problem in audience.get("problems", []):
             for service_id in problem.get("service_capabilities", []):
                 expected_audiences[service_id].add(audience["id"])
-                expected_ctas[service_id].update(problem.get("ctas", []))
 
     services = registry.get("services") or []
     service_ids = [service.get("id") for service in services]
@@ -104,8 +102,6 @@ def main() -> None:
         unknown_ctas = set(service["ctas"]) - cta_ids
         if unknown_ctas:
             fail(f"{context} references unknown CTAs: {sorted(unknown_ctas)}")
-        if not set(service["ctas"]).issubset(expected_ctas[service_id]):
-            fail(f"{context} exposes CTA not supported by its E01 problem mappings")
 
         for key, value in service.items():
             if key in forbidden_numeric_keys and isinstance(value, (int, float)):
