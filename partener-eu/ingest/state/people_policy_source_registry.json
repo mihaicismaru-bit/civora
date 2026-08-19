@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "policy": {
+    "directOfficialOnly": true,
+    "generalPressExcludedAsAuthority": true,
+    "signalDiscoveryDoesNotChangeCanonicalCalls": true,
+    "sourceFailurePreservesHistory": true
+  },
+  "sources": [
+    {
+      "id": "GOV_RO_NEWS",
+      "publisher": "Guvernul României",
+      "institution": "Guvernul României",
+      "url": "https://gov.ro/ro/stiri",
+      "tier": "T1_DIRECT_OFFICIAL",
+      "allowedHosts": ["gov.ro", "www.gov.ro"],
+      "pathHints": ["/ro/stiri/", "/ro/media/"],
+      "maxLinks": 20,
+      "enabled": true
+    },
+    {
+      "id": "MIPE_PRIMARY",
+      "publisher": "Ministerul Investițiilor și Proiectelor Europene",
+      "institution": "MIPE",
+      "url": "https://mfe.gov.ro/",
+      "tier": "T1_DIRECT_OFFICIAL",
+      "allowedHosts": ["mfe.gov.ro", "www.mfe.gov.ro"],
+      "pathHints": ["/", "comunicat", "stiri", "noutati"],
+      "maxLinks": 18,
+      "enabled": true
+    },
+    {
+      "id": "EC_RO_NEWS",
+      "publisher": "Comisia Europeană — Reprezentanța în România",
+      "institution": "Comisia Europeană",
+      "url": "https://romania.representation.ec.europa.eu/stiri-evenimente-si-resurse-pentru-presa_ro",
+      "tier": "T1_DIRECT_OFFICIAL_EU",
+      "allowedHosts": ["romania.representation.ec.europa.eu"],
+      "pathHints": ["/stiri-evenimente-si-resurse-pentru-presa/stiri/"],
+      "maxLinks": 20,
+      "enabled": true
+    },
+    {
+      "id": "MS_PRESS",
+      "publisher": "Ministerul Sănătății",
+      "institution": "Ministerul Sănătății",
+      "url": "https://www.ms.gov.ro/ro/centrul-de-presa/",
+      "tier": "T1_DIRECT_OFFICIAL",
+      "allowedHosts": ["ms.gov.ro", "www.ms.gov.ro"],
+      "pathHints": ["/centrul-de-presa/"],
+      "maxLinks": 16,
+      "enabled": true
+    },
+    {
+      "id": "AFIR_COMMUNICATES",
+      "publisher": "Agenția pentru Finanțarea Investițiilor Rurale",
+      "institution": "AFIR",
+      "url": "https://www.afir.ro/comunicate/",
+      "tier": "T1_DIRECT_OFFICIAL",
+      "allowedHosts": ["afir.ro", "www.afir.ro"],
+      "pathHints": ["/comunicate/"],
+      "maxLinks": 18,
+      "enabled": true
+    },
+    {
+      "id": "ADR_SV_OLTENIA_NEWS",
+      "publisher": "ADR Sud-Vest Oltenia",
+      "institution": "ADR Sud-Vest Oltenia",
+      "url": "https://www.pr2021-2027.adroltenia.ro/news_all.php",
+      "tier": "T1_DIRECT_MANAGING_AUTHORITY",
+      "allowedHosts": ["pr2021-2027.adroltenia.ro", "www.pr2021-2027.adroltenia.ro", "adroltenia.ro", "www.adroltenia.ro"],
+      "pathHints": ["news.php", "/noutati", "/stiri"],
+      "maxLinks": 20,
+      "enabled": true
+    },
+    {
+      "id": "FED_MAI",
+      "publisher": "Ministerul Afacerilor Interne — Direcția Fonduri Externe Nerambursabile",
+      "institution": "FED MAI",
+      "url": "https://fed.mai.gov.ro/in/apeluri/",
+      "tier": "T1_DIRECT_MANAGING_AUTHORITY",
+      "allowedHosts": ["fed.mai.gov.ro"],
+      "pathHints": ["fed.mai.gov.ro/"],
+      "maxLinks": 12,
+      "enabled": true
+    },
+    {
+      "id": "ADR_DIGITAL",
+      "publisher": "Autoritatea pentru Digitalizarea României",
+      "institution": "ADR",
+      "url": "https://www.adr.gov.ro/articole",
+      "tier": "T1_DIRECT_OFFICIAL",
+      "allowedHosts": ["adr.gov.ro", "www.adr.gov.ro"],
+      "pathHints": ["/articole/"],
+      "maxLinks": 14,
+      "enabled": true
+    },
+    {
+      "id": "ANC_COMMUNICATES",
+      "publisher": "Autoritatea Națională pentru Cercetare",
+      "institution": "ANC",
+      "url": "https://www.research.gov.ro/",
+      "tier": "T1_DIRECT_OFFICIAL",
+      "allowedHosts": ["research.gov.ro", "www.research.gov.ro"],
+      "pathHints": ["/comunicate", "/pnrr", "/fonduri"],
+      "maxLinks": 14,
+      "enabled": true
+    }
+  ]
+}
