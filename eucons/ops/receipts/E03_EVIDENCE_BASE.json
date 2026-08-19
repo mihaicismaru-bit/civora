@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E03",
+  "unit": "E03_EVIDENCE_BASE",
+  "status": "PASS",
+  "validated_at": "2026-08-19T08:00:00Z",
+  "validation": {
+    "workflow": "EUCONS Quality",
+    "run_id": 32230338727,
+    "run_number": 18,
+    "conclusion": "success",
+    "validated_head": "cd56e5063c887c32d87df5b18919cf5ab0428360",
+    "final_head_revalidation_required_before_merge": true
+  },
+  "coverage": {
+    "evidence_items": 2,
+    "claims": 16,
+    "publishable_service_claims": 8,
+    "unsupported_sensitive_claim_classes_held": 8,
+    "unsupported_promotion_rejected": true,
+    "wrong_source_evidence_rejected": true,
+    "testimonial_without_consent_rejected": true,
+    "hold_fallback_leakage_rejected": true,
+    "service_claim_coverage_exact": true
+  },
+  "artifacts": [
+    "eucons/evidence/EVIDENCE_POLICY.md",
+    "eucons/evidence/evidence_registry.json",
+    "eucons/validation/validate_evidence_base.py",
+    "eucons/validation/test_evidence_fail_closed.py",
+    ".github/workflows/eucons-quality.yml",
+    "eucons/ops/artifact_registry.json",
+    "eucons/ops/checkpoint.json"
+  ],
+  "next_phase": "E04"
+}
