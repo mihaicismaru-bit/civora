@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E04",
+  "unit": "E04_PEOPLE_REGISTRY",
+  "status": "PASS",
+  "validated_at": "2026-08-19T08:06:00Z",
+  "validation": {
+    "workflow": "EUCONS Quality",
+    "run_id": 32230848502,
+    "run_number": 23,
+    "conclusion": "success",
+    "validated_head": "9a581feeb54e1f04fb2dcd409a5631be773a4852",
+    "final_head_revalidation_required_before_merge": true
+  },
+  "coverage": {
+    "people_records": 0,
+    "public_projection_count": 0,
+    "empty_projection_is_explicit_fail_closed": true,
+    "identity_claim_required": true,
+    "current_role_claim_required": true,
+    "competence_claim_required": true,
+    "service_association_validation": true,
+    "invented_profile_forbidden": true,
+    "invented_portrait_forbidden": true,
+    "hold_fallback_leakage_rejected": true
+  },
+  "artifacts": [
+    "eucons/people/PEOPLE_POLICY.md",
+    "eucons/people/people_registry.json",
+    "eucons/validation/validate_people_registry.py",
+    "eucons/validation/test_people_fail_closed.py",
+    ".github/workflows/eucons-quality.yml",
+    "eucons/ops/artifact_registry.json",
+    "eucons/ops/checkpoint.json"
+  ],
+  "next_phase": "E05"
+}
