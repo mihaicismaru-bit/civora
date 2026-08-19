@@ -95,13 +95,11 @@ jobs:
       - name: Validate source packs through the same adapter core
         run: |
           python - <<'PY'
-          import importlib.util
           import json
+          import sys
           from pathlib import Path
-          module_path = Path('local-news-os/vnext/core/source_adapters.py')
-          spec = importlib.util.spec_from_file_location('vnext_source_adapters', module_path)
-          module = importlib.util.module_from_spec(spec)
-          spec.loader.exec_module(module)
+          sys.path.insert(0, str(Path('local-news-os/vnext/core').resolve()))
+          import source_adapters as module
           schema = json.loads(Path('local-news-os/vnext/schemas/source_pack.schema.json').read_text(encoding='utf-8'))
           adapter_enum = schema['properties']['sources']['items']['properties']['adapter']['enum']
           assert set(adapter_enum) == module.SUPPORTED_ADAPTERS
