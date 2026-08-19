@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E02",
+  "unit": "E02_SERVICE_REGISTRY",
+  "status": "PASS",
+  "validated_at": "2026-08-19T07:00:00Z",
+  "validation": {
+    "workflow": "EUCONS Quality",
+    "run_id": 32225686318,
+    "run_number": 13,
+    "conclusion": "success",
+    "validated_head": "a566f9210953bd87139f3afa161ab51895a86aa0",
+    "final_head_revalidation_required_before_merge": true
+  },
+  "coverage": {
+    "services": 8,
+    "exactly_materializes_e01_capabilities": true,
+    "deliverables_complete": true,
+    "process_complete": true,
+    "boundaries_complete": true,
+    "evidence_requirements_complete": true,
+    "cta_coverage_complete": true,
+    "numeric_pricing_terms": 0,
+    "pricing_fail_closed": true
+  },
+  "artifacts": [
+    "eucons/services/service_registry.json",
+    "eucons/validation/validate_service_registry.py",
+    ".github/workflows/eucons-quality.yml",
+    "eucons/ops/artifact_registry.json",
+    "eucons/ops/checkpoint.json"
+  ],
+  "next_phase": "E03"
+}
