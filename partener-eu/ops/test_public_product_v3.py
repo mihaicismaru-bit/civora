@@ -117,13 +117,13 @@ for view in ('renderHub','renderNews','renderDossier'):
     assert 'main.innerHTML=' in chunk, view
     assert 'data-decision-home' not in chunk, view
 
-# Decision-maker promo is fresh, T1/T1B-only, and disappears instead of showing filler.
+# Decision-maker promo is fresh, official-family-only, and disappears instead of showing filler.
 assert 'function freshnessDays(' in people
 fresh_chunk=function_chunk(people,'isFresh')
 assert 'Date.now()' in fresh_chunk
 assert 'age>=-1&&age<=freshnessDays()' in fresh_chunk
 source_gate_chunk=function_chunk(people,'isOfficialSource')
-assert r'^T1(?:B)?\b' in source_gate_chunk
+assert r'^T1(?:B)?(?:\b|_)' in source_gate_chunk
 primary_source_chunk=function_chunk(people,'primarySource')
 assert 'isOfficialSource(s)' in primary_source_chunk
 material_chunk=function_chunk(people,'isMaterial')
@@ -132,7 +132,10 @@ inject_chunk=function_chunk(people,'inject')
 assert 'hideWhenNoFreshOfficialSignals' in inject_chunk
 assert 'if(!chosen.length' in inject_chunk
 assert 'removePromo();return' in inject_chunk
-assert 'Ce fapt oficial lipsește:' in people
+card_chunk=function_chunk(people,'card')
+assert 'Ce fapt oficial lipsește:' in card_chunk
+assert 'Sursă oficială verificată' in card_chunk
+assert "tier||'T1/T1B'" not in card_chunk
 assert 'proaspete și suficient de concrete' in people
 
 assert 'document.addEventListener(\'click\'' not in people
