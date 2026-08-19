@@ -1,0 +1,57 @@
+name: LOCAL NEWS OS vNext Instance Bootstrap
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/vnext/core/instance_bootstrap.py"
+      - "local-news-os/vnext/core/instance_model.py"
+      - "local-news-os/vnext/core/runtime_store.py"
+      - "local-news-os/vnext/core/release_control.py"
+      - "local-news-os/vnext/runtime/**"
+      - ".github/workflows/local-news-os-vnext-instance-bootstrap.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/vnext/core/instance_bootstrap.py"
+      - "local-news-os/vnext/core/instance_model.py"
+      - "local-news-os/vnext/core/runtime_store.py"
+      - "local-news-os/vnext/core/release_control.py"
+      - "local-news-os/vnext/runtime/**"
+      - ".github/workflows/local-news-os-vnext-instance-bootstrap.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-bootstrap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile generic bootstrap
+        run: |
+          python -m py_compile \
+            local-news-os/vnext/core/instance_bootstrap.py \
+            local-news-os/vnext/core/instance_model.py \
+            local-news-os/vnext/core/runtime_store.py \
+            local-news-os/vnext/core/release_control.py
+
+      - name: Validate generic instance bootstrap and site-owned runtime initialization
+        run: python local-news-os/vnext/core/instance_bootstrap.py --self-test
+
+      - name: Enforce no locality or repository-owned runtime in bootstrap
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -niE 'vâlcea|valcea|râmnicu|ramnicu|valceaclar\.ro' local-news-os/vnext/core/instance_bootstrap.py; then
+            echo 'P17 generic bootstrap contains locality-specific material' >&2
+            exit 1
+          fi
+          ! grep -Eiq 'git_state_path|state_root|live-feed|current_edition|output_root' local-news-os/vnext/core/instance_bootstrap.py
+          grep -q 'repository_runtime_state_enabled' local-news-os/vnext/core/instance_bootstrap.py
+          grep -q 'site_application' local-news-os/vnext/core/instance_bootstrap.py
+          echo 'VNEXT_P17_BOOTSTRAP_BOUNDARY_PASS'
