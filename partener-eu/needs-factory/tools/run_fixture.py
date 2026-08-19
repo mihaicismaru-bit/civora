@@ -10,6 +10,7 @@ from typing import Any, Dict
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from core.narrative import compile_analysis
 from core.pipeline import PipelineRun
 
 
@@ -74,10 +75,16 @@ def main() -> int:
         return 6
 
     pack = run.package(ranked, needs_by_id, evidence, causal, trace, release)
+    compiled = compile_analysis(pack)
     rendered = render_manifest(run, {
         "release_gate": release,
         "narrative_pack_sha256": pack["pack_sha256"],
         "narrative_claim_count": len(pack["claim_ledger"]),
+        "compiled_narrative_valid": compiled["validation"]["valid"],
+        "compiled_narrative_sha256": compiled["markdown_sha256"],
+        "compiled_source_register_sha256": compiled["source_register_sha256"],
+        "compiled_need_count": compiled["validation"]["need_count"],
+        "compiled_evidence_count": compiled["validation"]["evidence_count"],
     })
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
