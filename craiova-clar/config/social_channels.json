@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "channels": {
+    "facebook": {
+      "enabled": true,
+      "publisher": "clar_core.social.facebook.FacebookPagePublisher",
+      "single_writer": "craiova-clar-facebook-publisher",
+      "page_id_env": "CRAIOVA_FB_PAGE_ID",
+      "access_token_env": "CRAIOVA_META_PAGE_ACCESS_TOKEN",
+      "graph_version_env": "CRAIOVA_FB_GRAPH_VERSION",
+      "graph_version_default": "v26.0",
+      "max_posts_per_run": 1,
+      "requires_site_status": "published_verified",
+      "requires_media_rights_status": "VERIFIED_REUSABLE"
+    }
+  }
+}
