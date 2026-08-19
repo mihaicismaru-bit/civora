@@ -49,7 +49,7 @@ function inject(){
   const chosen=(P.homeIds||[]).map(id=>byId.get(id)).filter(Boolean).filter(isMaterial).slice(0,3);
   if(!chosen.length&&P.policy?.hideWhenNoFreshOfficialSignals!==false){removePromo();return}
   const section=document.createElement('section');section.className='section peoplePromo';section.dataset.peoplepromo='1';
-  section.innerHTML=`<div class="peopleHead"><div><div class="eyebrow">Monitorizare decizională</div><h2>Ce spun decidenții</h2><div class="peopleSub">Afișăm numai informații proaspete, cu sursă oficială și o explicație concretă a impactului. Dacă nu putem spune de ce contează pentru o decizie de finanțare, semnalul nu intră pe homepage.</div></div></div>${chosen.length?`<div class="peopleGrid">${chosen.map(card).join('')}</div>`:'<div class="peopleEmpty"><strong>Niciun semnal material confirmat acum.</strong><p>Nu există un semnal proaspăt și suficient de concret pentru afișare.</p></div>'}`;
+  section.innerHTML=`<div class="peopleHead"><div><div class="eyebrow">Monitorizare decizională</div><h2>Ce spun decidenții</h2><div class="peopleSub">Afișăm numai informații proaspete și suficient de concrete, cu sursă oficială și o explicație concretă a impactului. Dacă nu putem spune de ce contează pentru o decizie de finanțare, semnalul nu intră pe homepage.</div></div></div>${chosen.length?`<div class="peopleGrid">${chosen.map(card).join('')}</div>`:'<div class="peopleEmpty"><strong>Niciun semnal material confirmat acum.</strong><p>Nu există un semnal proaspăt și suficient de concret pentru afișare.</p></div>'}`;
   main.appendChild(section);
 }
 let timer=null;function sync(){clearTimeout(timer);timer=setTimeout(()=>{if(isHome())inject();else removePromo()},80)}
