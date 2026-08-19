@@ -1,0 +1,46 @@
+name: VÂLCEA CLAR Facebook Single Writer Guard
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '5 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/**'
+      - 'valcea-clar/social/*.py'
+      - 'valcea-clar/social/social_network_doctrine.json'
+      - 'valcea-clar/social/social_brand_system.json'
+      - 'valcea-clar/social/facebook_visual_system.json'
+      - 'valcea-clar/social/channel_registry.json'
+  pull_request:
+    paths:
+      - '.github/workflows/**'
+      - 'valcea-clar/social/*.py'
+      - 'valcea-clar/social/social_network_doctrine.json'
+      - 'valcea-clar/social/social_brand_system.json'
+      - 'valcea-clar/social/facebook_visual_system.json'
+      - 'valcea-clar/social/channel_registry.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-facebook-single-writer-${{ github.event.pull_request.number || 'main' }}
+  cancel-in-progress: true
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Enforce persisted Facebook doctrine and single writer
+        run: |
+          python -m py_compile valcea-clar/social/validate_facebook_single_writer.py
+          python valcea-clar/social/validate_facebook_single_writer.py
