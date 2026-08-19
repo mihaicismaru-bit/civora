@@ -1,0 +1,40 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "^/$",
+      "destination": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/craiova-clar-build/craiova-clar/site/index.html"
+    },
+    {
+      "source": "^/stories\\.json$",
+      "destination": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/craiova-clar-build/craiova-clar/site/stories.json"
+    },
+    {
+      "source": "^/stiri/([^/]+)/?$",
+      "destination": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/craiova-clar-build/craiova-clar/site/stiri/$1/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/",
+      "headers": [
+        {"key": "Content-Type", "value": "text/html; charset=utf-8"},
+        {"key": "Cache-Control", "value": "public, max-age=0, s-maxage=60"}
+      ]
+    },
+    {
+      "source": "/stiri/:path*",
+      "headers": [
+        {"key": "Content-Type", "value": "text/html; charset=utf-8"},
+        {"key": "Cache-Control", "value": "public, max-age=0, s-maxage=60"}
+      ]
+    },
+    {
+      "source": "/stories.json",
+      "headers": [
+        {"key": "Content-Type", "value": "application/json; charset=utf-8"},
+        {"key": "Cache-Control", "value": "public, max-age=0, s-maxage=60"}
+      ]
+    }
+  ]
+}
