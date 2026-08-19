@@ -1,0 +1,218 @@
+{
+  "schema_version": "2.0",
+  "contract": "LOCAL_NEWS_OS_VNEXT_PRODUCT_CONTRACT_V2",
+  "status": "FROZEN",
+  "product_goal": "A self-operating local publication whose complete editorial runtime belongs to the site application and whose core can be replicated to another locality through configuration rather than a code fork.",
+  "non_negotiable_rules": {
+    "SITE_OWNS_RUNTIME": {
+      "required": true,
+      "runtime_authority": "site_application_database",
+      "repository_role": [
+        "source_code",
+        "tests",
+        "release_artifacts",
+        "deployment_configuration"
+      ],
+      "forbidden_runtime_authorities": [
+        "git_commit_stream",
+        "repository_json_state",
+        "chatgpt_automation",
+        "scheduled_chat_task"
+      ],
+      "site_owned_domains": [
+        "editorial_state",
+        "newsroom_state",
+        "story_lifecycle",
+        "source_health",
+        "media_state",
+        "knowledge_graph",
+        "publication_events",
+        "distribution_state",
+        "retry_state",
+        "health_state"
+      ]
+    },
+    "CORE_KNOWS_NO_LOCALITY": {
+      "required": true,
+      "core_may_read_locality_only_from_instance_config": true,
+      "forbidden_in_generic_core": [
+        "publication_names",
+        "locality_names",
+        "institution_names",
+        "local_domains",
+        "local_source_urls",
+        "local_social_accounts",
+        "local_editorial_exceptions"
+      ],
+      "instance_owned_packs": [
+        "publication",
+        "geography",
+        "brand",
+        "sources",
+        "editorial",
+        "channels",
+        "entities",
+        "photos"
+      ]
+    }
+  },
+  "architecture": {
+    "production_plane": {
+      "owner": "site_application",
+      "must_remain_available_during_development": true,
+      "pipeline": [
+        "DISCOVER",
+        "RESOLVE",
+        "VERIFY",
+        "EXTRACT",
+        "SCORE",
+        "WRITE",
+        "QA",
+        "PUBLISH",
+        "MEDIA",
+        "DISTRIBUTE",
+        "OBSERVE"
+      ]
+    },
+    "development_release_plane": {
+      "owner": "versioned_source_repository",
+      "may_block_new_release": true,
+      "may_block_validated_production_runtime": false,
+      "required_release_controls": [
+        "tests",
+        "replication_test",
+        "migration_test",
+        "rollback_target"
+      ]
+    },
+    "persistence_control_plane": {
+      "purpose": [
+        "audit",
+        "release_safety",
+        "rollback",
+        "migration_integrity"
+      ],
+      "may_block_new_release": true,
+      "may_block_validated_production_runtime": false
+    }
+  },
+  "publication_model": {
+    "primary_unit": "story",
+    "mode": "continuous_story_first",
+    "edition_is_publication_gate": false,
+    "story_states": [
+      "DISCOVERED",
+      "RESOLVING",
+      "VERIFIED",
+      "FACT_KERNEL_READY",
+      "STORY_DRAFTED",
+      "QA_PASSED",
+      "PUBLISHED",
+      "MEDIA_READY",
+      "DISTRIBUTED"
+    ],
+    "side_states": [
+      "HOLD",
+      "RETRY",
+      "REJECTED",
+      "BLOCKED_EXTERNAL",
+      "HUMAN_REVIEW"
+    ]
+  },
+  "knowledge_graph": {
+    "required": true,
+    "node_types": [
+      "person",
+      "artist",
+      "organization",
+      "company",
+      "institution",
+      "event",
+      "venue",
+      "place",
+      "project",
+      "public_money_item",
+      "document",
+      "story",
+      "media_asset"
+    ],
+    "every_material_edge_requires_provenance": true,
+    "unsupported_relationship_inference_forbidden": true
+  },
+  "media_policy": {
+    "priority": [
+      "USER_OWNED",
+      "OFFICIAL_EVENT",
+      "OFFICIAL_ENTITY",
+      "LICENSED_OR_OPEN",
+      "CONTEXTUAL_REAL",
+      "DOCUMENT_VISUAL",
+      "EDITORIAL_CARD"
+    ],
+    "missing_photo_must_not_block_valid_story": true,
+    "synthetic_image_may_not_be_presented_as_factual_photography": true,
+    "provenance_required": true
+  },
+  "replication_contract": {
+    "code_fork_allowed": false,
+    "new_instance_inputs": [
+      "publication_pack",
+      "geography_pack",
+      "brand_pack",
+      "source_pack",
+      "editorial_pack",
+      "channel_pack",
+      "entity_seed_pack",
+      "photo_pack"
+    ],
+    "second_instance_acceptance_required": true,
+    "core_change_required_for_second_instance_means_failure": true
+  },
+  "editorial_safety": {
+    "no_evidence_no_material_claim": true,
+    "title_only_is_not_publishable": true,
+    "reputational_or_ambiguous_high_risk_claims": "HUMAN_REVIEW",
+    "one_held_story_must_not_block_publication": true,
+    "duplicate_publication_forbidden": true
+  },
+  "product_kpis": {
+    "primary": "autonomous_stories_published_24h",
+    "secondary": [
+      "discovery_to_publish_latency",
+      "verification_yield",
+      "photo_coverage",
+      "facebook_delivery_rate",
+      "instagram_delivery_rate",
+      "orphan_count",
+      "duplicate_count",
+      "fabricated_claims_count"
+    ],
+    "hard_acceptance": {
+      "soak_hours_without_routine_intervention": 48,
+      "duplicate_count": 0,
+      "fabricated_claims_count": 0,
+      "second_instance_without_code_fork": true
+    }
+  },
+  "backlog": [
+    "P0_PRODUCT_CONTRACT_FREEZE",
+    "P1_TENANT_INSTANCE_MODEL",
+    "P2_RUNTIME_DATABASE_EVENT_LEDGER",
+    "P3_SITE_RUNTIME_PRIVATE_NEWSROOM",
+    "P4_GENERIC_SOURCE_ADAPTER_CORE",
+    "P5_SIGNAL_ENGINE",
+    "P6_DYNAMIC_PRIMARY_RESOLVER",
+    "P7_FACT_KERNEL_ENGINE",
+    "P8_NEWSWORTHINESS_ENGINE",
+    "P9_STORY_ENGINE",
+    "P10_EDITORIAL_QA",
+    "P11_SITE_PUBLICATION_ENGINE",
+    "P12_LOCAL_KNOWLEDGE_GRAPH",
+    "P13_MEDIA_INTELLIGENCE",
+    "P14_DISTRIBUTION_ENGINE",
+    "P15_RETRY_SELF_HEAL_UNIFIED_SCHEDULER",
+    "P16_DEVELOPMENT_PRODUCTION_RELEASE_SEPARATION",
+    "P17_INSTANCE_BOOTSTRAP_SECOND_INSTANCE_TEST",
+    "P18_MIGRATION_SHADOW_LIVE_SOAK_PRODUCTION_LOCK"
+  ]
+}
