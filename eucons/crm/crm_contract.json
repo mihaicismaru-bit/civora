@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "engine_id": "EUCONS_E12_CRM_LITE",
+  "production_persistence_enabled": false,
+  "entities": ["organizations", "contacts", "leads", "opportunities", "offers", "activities"],
+  "lead_lifecycle": ["NEW", "QUALIFIED", "OPPORTUNITY", "OFFER", "NEGOTIATION", "WON", "LOST"],
+  "allowed_transitions": {
+    "NEW": ["QUALIFIED", "LOST"],
+    "QUALIFIED": ["OPPORTUNITY", "LOST"],
+    "OPPORTUNITY": ["OFFER", "LOST"],
+    "OFFER": ["NEGOTIATION", "WON", "LOST"],
+    "NEGOTIATION": ["OFFER", "WON", "LOST"],
+    "WON": [],
+    "LOST": []
+  },
+  "id_strategy": {
+    "organization": "sha256_normalized_organization_name",
+    "contact": "sha256_normalized_email",
+    "lead": "sha256_e11_dedupe_key",
+    "opportunity": "sha256_lead_id_plus_source_opportunity_id",
+    "offer": "sha256_lead_id_plus_offer_version"
+  },
+  "ownership": {
+    "default_owner": "UNASSIGNED",
+    "owner_required_from_stage": "OPPORTUNITY",
+    "next_action_required_non_terminal": true
+  },
+  "audit": {
+    "activities_append_only": true,
+    "sequence_starts_at": 1,
+    "required_fields": ["sequence", "event_type", "entity_type", "entity_id", "at", "details"]
+  },
+  "idempotency": {
+    "lead_key": "dedupe_key",
+    "duplicate_intake_behavior": "RETURN_EXISTING_AND_APPEND_SEEN_ACTIVITY"
+  },
+  "repository_policy": {
+    "real_pii_records_forbidden": true,
+    "synthetic_fixtures_allowed": true,
+    "runtime_output_under_repository_root_forbidden": true
+  },
+  "rules": {
+    "stage_skips_forbidden": true,
+    "terminal_stage_reopen_forbidden": true,
+    "unknown_entities_fail_closed": true,
+    "e11_consent_state_must_be_preserved": true,
+    "e10_matching_provenance_must_be_preserved_when_opportunity_created": true
+  }
+}
