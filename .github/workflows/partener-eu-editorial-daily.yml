@@ -17,8 +17,10 @@ on:
       - 'partener-eu/ingest/people_policy_official_ingest.py'
       - 'partener-eu/ingest/refine_people_policy.py'
       - 'partener-eu/ingest/state/people_policy_registry.json'
+      - 'partener-eu/ingest/state/people_policy_source_registry.json'
       - 'partener-eu/ingest/state/people_policy_seed.json'
       - 'partener-eu/ops/test_editorial_automation.py'
+      - 'partener-eu/ops/test_people_policy_source_intelligence.py'
       - 'partener-eu/web/daily-brief.js'
       - 'partener-eu/web/people-policy-v1.js'
       - 'partener-eu/web/daily-brief.css'
@@ -60,6 +62,7 @@ jobs:
         run: |
           node --check partener-eu/web/daily-brief.js
           node --check partener-eu/web/people-policy-v1.js
+          python partener-eu/ops/test_people_policy_source_intelligence.py
           python partener-eu/ops/test_editorial_automation.py
 
       - name: Persist generated editorial products and official-source ledger

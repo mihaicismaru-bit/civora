@@ -1,10 +1,12 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "policy": {
     "statementIsNotAdministrativeFact": true,
     "homepageMaxItems": 3,
     "officialEffectRequiresT1Evidence": true,
-    "photoFallback": "initials"
+    "photoFallback": "initials",
+    "personSignalsRequireVerifiedRoleSnapshot": true,
+    "unverifiedRoleFallsBackClosed": true
   },
   "people": [
     {
@@ -15,7 +17,14 @@
       "institution": "MIPE",
       "topics": ["PEO", "PoIDS", "PDDS", "PNRR", "politica de coeziune", "fonduri europene"],
       "priority": 100,
-      "active": true
+      "active": true,
+      "roleVerification": {
+        "status": "VERIFIED",
+        "verifiedAt": "2026-08-19",
+        "sourceUrl": "https://amepip.gov.ro/en/conferinta-de-presa-q1-2026/",
+        "sourceTier": "T1_DIRECT_OFFICIAL",
+        "evidence": "Sursă oficială guvernamentală îl identifică explicit drept ministrul Investițiilor și Proiectelor Europene."
+      }
     },
     {
       "id": "ilie-bolojan",
@@ -25,17 +34,31 @@
       "institution": "Guvernul României",
       "topics": ["fonduri europene", "PNRR", "investiții publice", "energie", "competitivitate", "buget"],
       "priority": 98,
-      "active": true
+      "active": true,
+      "roleVerification": {
+        "status": "VERIFIED",
+        "verifiedAt": "2026-08-19",
+        "sourceUrl": "https://www.mai.gov.ro/comunicat-de-presa-1229/",
+        "sourceTier": "T1_DIRECT_OFFICIAL",
+        "evidence": "Comunicat oficial MAI îl identifică explicit drept premier/prim-ministru."
+      }
     },
     {
       "id": "cseke-attila",
       "name": "Cseke Attila",
-      "aliases": ["Cseke Attila"],
-      "role": "Ministrul Dezvoltării, Lucrărilor Publice și Administrației",
-      "institution": "MDLPA",
-      "topics": ["PNRR", "UAT", "dezvoltare locală", "investiții publice"],
+      "aliases": ["Cseke Attila", "Cseke Attila Zoltán"],
+      "role": "Ministrul interimar al Sănătății",
+      "institution": "Ministerul Sănătății",
+      "topics": ["PNRR", "sănătate", "investiții publice", "plăți", "infrastructură medicală"],
       "priority": 90,
-      "active": true
+      "active": true,
+      "roleVerification": {
+        "status": "VERIFIED",
+        "verifiedAt": "2026-08-19",
+        "sourceUrl": "https://www.ms.gov.ro/ro/minister/conducere/",
+        "sourceTier": "T1_DIRECT_OFFICIAL",
+        "evidence": "Pagina oficială de conducere a Ministerului Sănătății îl indică drept ministru interimar."
+      }
     },
     {
       "id": "oana-toiu",
@@ -45,7 +68,14 @@
       "institution": "MAE",
       "topics": ["CFM 2028–2034", "coeziune", "competitivitate", "buget UE"],
       "priority": 65,
-      "active": true
+      "active": true,
+      "roleVerification": {
+        "status": "NEEDS_REVERIFY",
+        "verifiedAt": null,
+        "sourceUrl": null,
+        "sourceTier": null,
+        "evidence": "Nicio dovadă oficială curentă suficientă nu a fost confirmată în această rulare; semnalele noi de persoană rămân fail-closed."
+      }
     }
   ]
 }
