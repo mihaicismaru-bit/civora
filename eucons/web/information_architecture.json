@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E06",
+  "status": "CANONICAL",
+  "canonical_origin": "https://eucons.ro",
+  "path_policy": {
+    "trailing_slash": true,
+    "lowercase": true,
+    "canonical_origin_required": true,
+    "internal_links_use_paths": true,
+    "hold_objects_never_materialize_routes": true
+  },
+  "core_routes": [
+    {"id":"home","path":"/","surface":"HOME","indexable":true},
+    {"id":"services_index","path":"/servicii/","surface":"SERVICE_INDEX","indexable":true},
+    {"id":"funding_index","path":"/finantari/","surface":"OPPORTUNITY_INDEX","indexable":true},
+    {"id":"companies","path":"/pentru-companii/","surface":"AUDIENCE","audience_id":"companies_entrepreneurs","indexable":true},
+    {"id":"public_authorities","path":"/pentru-autoritati-publice/","surface":"AUDIENCE","audience_id":"public_authorities_institutions","indexable":true},
+    {"id":"ngos","path":"/pentru-ong/","surface":"AUDIENCE","audience_id":"ngos_eligible_organizations","indexable":true},
+    {"id":"projects_index","path":"/proiecte/","surface":"CASE_INDEX","indexable":true},
+    {"id":"team_index","path":"/echipa/","surface":"PEOPLE_INDEX","indexable":true},
+    {"id":"expertise","path":"/expertiza/","surface":"KNOWLEDGE_INDEX","indexable":true},
+    {"id":"guides_index","path":"/ghiduri/","surface":"GUIDE_INDEX","indexable":true},
+    {"id":"articles_index","path":"/articole/","surface":"ARTICLE_INDEX","indexable":true},
+    {"id":"resources","path":"/resurse/","surface":"RESOURCE_INDEX","indexable":true},
+    {"id":"about","path":"/despre/","surface":"ABOUT","indexable":true},
+    {"id":"project_evaluation","path":"/evaluare-proiect/","surface":"LEAD_JOURNEY","indexable":true},
+    {"id":"request_offer","path":"/solicita-oferta/","surface":"LEAD_JOURNEY","indexable":true},
+    {"id":"contact","path":"/contact/","surface":"CONTACT","indexable":true},
+    {"id":"terms","path":"/termeni/","surface":"LEGAL","indexable":true},
+    {"id":"privacy","path":"/confidentialitate/","surface":"LEGAL","indexable":true}
+  ],
+  "service_routes": [
+    {"service_id":"funding_strategy_and_eligibility","slug":"strategie-finantare-eligibilitate","path":"/servicii/strategie-finantare-eligibilitate/"},
+    {"service_id":"application_design_and_submission","slug":"pregatire-depunere-proiect","path":"/servicii/pregatire-depunere-proiect/"},
+    {"service_id":"implementation_and_reporting","slug":"implementare-raportare","path":"/servicii/implementare-raportare/"},
+    {"service_id":"procurement_support","slug":"achizitii-proiecte-finantate","path":"/servicii/achizitii-proiecte-finantate/"},
+    {"service_id":"financial_management_and_reimbursement","slug":"management-financiar-plati-rambursari","path":"/servicii/management-financiar-plati-rambursari/"},
+    {"service_id":"project_recovery_and_corrections","slug":"remediere-recuperare-proiect","path":"/servicii/remediere-recuperare-proiect/"},
+    {"service_id":"monitoring_and_compliance","slug":"monitorizare-conformitate","path":"/servicii/monitorizare-conformitate/"},
+    {"service_id":"project_management_capacity","slug":"capacitate-management-proiect","path":"/servicii/capacitate-management-proiect/"}
+  ],
+  "conditional_route_families": [
+    {"id":"person_profile","pattern":"/echipa/{slug}/","source":"E04_PEOPLE_REGISTRY","required_state":"PUBLISHABLE","active_when_available":true},
+    {"id":"case_profile","pattern":"/proiecte/{slug}/","source":"E05_CASE_STUDY_REGISTRY","required_state":"PUBLISHABLE","active_when_available":true},
+    {"id":"opportunity_profile","pattern":"/finantari/{slug}/","source":"E09_OPPORTUNITY_BRIDGE","required_state":"PUBLISHABLE","active_when_available":true},
+    {"id":"guide_profile","pattern":"/ghiduri/{slug}/","source":"E14_KNOWLEDGE_ENGINE","required_state":"PUBLISHABLE","active_when_available":true},
+    {"id":"article_profile","pattern":"/articole/{slug}/","source":"E15_EDITORIAL_LOOP","required_state":"PUBLISHABLE","active_when_available":true}
+  ],
+  "cta_destinations": [
+    {"cta_id":"request_project_evaluation","path":"/evaluare-proiect/","journey":"project_evaluation"},
+    {"cta_id":"request_funding_consultation","path":"/evaluare-proiect/","journey":"funding_consultation"},
+    {"cta_id":"request_implementation_review","path":"/evaluare-proiect/","journey":"implementation_review"},
+    {"cta_id":"request_recovery_assessment","path":"/evaluare-proiect/","journey":"project_recovery"},
+    {"cta_id":"request_offer","path":"/solicita-oferta/","journey":"proposal_request"}
+  ],
+  "navigation": {
+    "primary": ["services_index","funding_index","projects_index","team_index","expertise","about"],
+    "utility": ["project_evaluation","request_offer","contact"],
+    "footer": ["services_index","funding_index","companies","public_authorities","ngos","projects_index","team_index","guides_index","articles_index","about","contact","terms","privacy"]
+  },
+  "internal_link_contract": {
+    "home_must_link": ["services_index","funding_index","project_evaluation","request_offer"],
+    "service_pages_link_to": ["services_index","project_evaluation","request_offer"],
+    "audience_pages_link_to": ["services_index","funding_index","project_evaluation"],
+    "case_pages_link_to": ["projects_index","services_index","project_evaluation"],
+    "knowledge_pages_link_to": ["services_index","funding_index","project_evaluation"],
+    "legal_pages_must_not_be_primary_navigation": true
+  }
+}
