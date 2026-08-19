@@ -1,0 +1,223 @@
+{
+  "schema_version": "1.0",
+  "contract": "LOCAL_NEWS_OS_VNEXT_VALCEA_MIGRATION_READINESS_V1",
+  "instance_id": "valcea",
+  "status": "PRE_MIGRATION_READYNESS_ONLY",
+  "observed_at": "2026-08-19T12:35:25+03:00",
+  "cutover_authorized": false,
+  "reason": "LOCAL NEWS OS vNext is BUILD_ACTIVE. P0-P2 are CLOSED, P3_SITE_RUNTIME_PRIVATE_NEWSROOM is NEXT, and P4-P18 are not yet closed. This snapshot prepares migration inputs only and MUST NOT mutate the current public runtime.",
+  "vnext_gate": {
+    "state_path": "local-news-os/vnext/VNEXT_STATE.json",
+    "state_sha": "a92b44b9d3526f2852451d0017a7332eddbf1440",
+    "observed_build_commit": "3558827759ece9e166f87f53230151364c9ddd2a",
+    "required_before_migration": "BUILD_READY_FOR_MIGRATION",
+    "current_next_phase": "P3_SITE_RUNTIME_PRIVATE_NEWSROOM",
+    "production_cutover": false
+  },
+  "url_preservation": {
+    "required": true,
+    "story_route_pattern": "/stiri/{story_id}/",
+    "people_route_pattern": "/oameni/{profile_id}/",
+    "artist_route_pattern": "/artisti/{profile_id}/",
+    "leisure_route": "/unde-iesim/",
+    "redirect_only_when_exact_legacy_url_cannot_be_preserved": true,
+    "sitemap_must_preserve_canonical_urls": true
+  },
+  "inventory_snapshot": {
+    "published_story_ids": 23,
+    "people_profiles": 6,
+    "artist_profiles": 172,
+    "approved_story_visual_bindings": 4,
+    "public_runtime_last_updated_local": "2026-08-19T06:12:48+03:00",
+    "publication_event_last_published_local": "2026-08-19T06:12:49+03:00",
+    "publication_event_new_story_ids": 0
+  },
+  "migration_sources": [
+    {
+      "domain": "stories_and_urls",
+      "source_path": "valcea-clar/site/story_publication_event.json",
+      "source_sha": "709af6f8b7f8bcdab9d3530f06523b51aa2ed276",
+      "target": ["stories", "publication_events"],
+      "requirements": ["preserve_story_id", "preserve_canonical_url", "preserve_published_at", "idempotent_import"]
+    },
+    {
+      "domain": "story_content_and_public_projection",
+      "source_path": "valcea-clar/site/runtime/live-feed.json",
+      "source_sha": "fc47648a0b228d43293348e445d5d613072d3f32",
+      "target": ["stories", "story_revisions"],
+      "requirements": ["do_not_treat_repository_json_as_future_runtime_authority", "import_once_then_database_owns_runtime"]
+    },
+    {
+      "domain": "people",
+      "source_path": "valcea-clar/site/runtime/people.json",
+      "source_sha": "a99562617891720a0e211bc8f0341f4435eab5b8",
+      "target": ["knowledge_nodes", "knowledge_edges", "entity_sources"],
+      "requirements": ["preserve_profile_id", "preserve_public_path", "preserve_role_source_urls", "unsupported_relationships_remain_absent"]
+    },
+    {
+      "domain": "artists",
+      "source_path": "valcea-clar/site/runtime/artists.json",
+      "source_sha": "b4cc261d3632f6c71ad2d9b4be51a659d7df71fa",
+      "target": ["knowledge_nodes", "knowledge_edges", "entity_sources"],
+      "requirements": ["preserve_profile_id", "preserve_public_path", "preserve_festival_appearance_edges", "preserve_identity_resolution_status"]
+    },
+    {
+      "domain": "festival_history",
+      "source_path": "valcea-clar/editorial/festival_dossiers_2026.json",
+      "source_sha": "84ff4e5b1bae39f63d349b1a7d79d1083e03c62c",
+      "target": ["knowledge_nodes", "knowledge_edges", "evidence"],
+      "requirements": ["preserve_organizers", "preserve_sponsors_when_evidenced", "preserve_public_money_provenance", "preserve_historical_context"]
+    },
+    {
+      "domain": "festival_lineups",
+      "source_path": "valcea-clar/editorial/festival_lineups_2026.json",
+      "source_sha": "c0c7a4e834c3ce24aa4640ed8ed2f2962974fb81",
+      "target": ["knowledge_edges", "evidence"],
+      "requirements": ["artist_event_edges_are_provenance_bound"]
+    },
+    {
+      "domain": "performing_arts_people",
+      "source_path": "valcea-clar/editorial/performing_arts_people_2026.json",
+      "source_sha": "05d8fce762d124ad01977d55b2e9c8ae5e5f9734",
+      "target": ["knowledge_nodes", "knowledge_edges", "evidence"],
+      "requirements": ["preserve_identity_evidence", "preserve_appearance_context"]
+    },
+    {
+      "domain": "public_money_and_decisions",
+      "source_path": "valcea-clar/editorial/council_decision_graph.json",
+      "source_sha": "d06e273ea733f88b4095a594df2196a726f04a43",
+      "target": ["knowledge_nodes", "knowledge_edges", "evidence"],
+      "requirements": ["decision_amount_beneficiary_edges_require_primary_evidence", "calculations_remain_labeled_as_calculations"]
+    },
+    {
+      "domain": "facts",
+      "source_path": "valcea-clar/editorial/facts_registry.json",
+      "source_sha": "1eb7ca3ef7715557ed0c9efe11e4d14c8dc73d25",
+      "target": ["evidence", "fact_kernels"],
+      "requirements": ["no_evidence_no_material_claim", "preserve_source_urls", "deduplicate_by_fingerprint"]
+    },
+    {
+      "domain": "fact_kernels",
+      "source_path": "valcea-clar/editorial/fact_kernel_registry.json",
+      "source_sha": "9995c80c49c7eb80ebc2da9541780cc204a44aef",
+      "target": ["fact_kernels"],
+      "requirements": ["preserve_claim_provenance", "legacy_kernel_is_import_evidence_not_future_runtime_authority"]
+    },
+    {
+      "domain": "source_registry",
+      "source_path": "valcea-clar/editorial/news_sources.json",
+      "source_sha": "a885b64334e3848d83e894800d13fc6a149d99d7",
+      "target": ["sources"],
+      "requirements": ["map_to_generic_adapter_class", "preserve_tier", "preserve_health_or_quarantine_status"]
+    },
+    {
+      "domain": "manual_watch_sources",
+      "source_path": "valcea-clar/editorial/manual_watch_sources.json",
+      "source_sha": "0bcff3f7a1715543181d219b460326c2bfe8f11f",
+      "target": ["sources"],
+      "requirements": ["deduplicate_against_primary_registry", "convert_manual_watch_to_configured_source_or_explicit_hold"]
+    },
+    {
+      "domain": "source_intelligence_seed",
+      "source_path": "valcea-clar/editorial/source_intelligence_seed_registry.json",
+      "source_sha": "30604a2cb9c3aaf73a7c68d09b1e87b930a8a6b6",
+      "target": ["sources", "entity_sources"],
+      "requirements": ["retain_discovery_provenance", "do_not_promote_discovery_only_sources_to_fact_authority"]
+    },
+    {
+      "domain": "media_bindings",
+      "source_path": "valcea-clar/social/story_visuals.json",
+      "source_sha": "52a2f1eb83ce442a750f3f63df2ffc5ced2005d2",
+      "target": ["media_assets", "story_media"],
+      "requirements": ["preserve_source_url", "preserve_credit", "preserve_rights_basis", "preserve_license_url_when_present", "preserve_archive_disclosure", "missing_media_must_not_block_story"]
+    },
+    {
+      "domain": "facebook_delivery_history",
+      "source_path": "valcea-clar/social/facebook_state.json",
+      "source_sha": "948c69d597a6df153a34b884aef24cd9219634af",
+      "target": ["social_deliveries"],
+      "requirements": ["preserve_external_post_id", "preserve_published_at", "historical_state_is_read_only_after_import"]
+    },
+    {
+      "domain": "instagram_delivery_history",
+      "source_path": "valcea-clar/social/instagram_state.json",
+      "source_sha": "8abe114a14415cfcd28ddb0a57ed9a278ada62b7",
+      "target": ["social_deliveries", "media_assets"],
+      "requirements": ["preserve_media_id", "preserve_container_status", "preserve_product_fingerprint", "preserve_fact_card_non_synthetic_semantics"]
+    },
+    {
+      "domain": "leisure_public_route",
+      "source_path": "valcea-clar/site/runtime/unde-iesim/index.html",
+      "source_sha": "c6b017c042463198408a27451a630c4f7f7b17ac",
+      "target": ["public_route_compatibility"],
+      "requirements": ["preserve_/unde-iesim/", "future_venue_data_must_move_to_site_database", "rendered_html_is_not_entity_authority"]
+    },
+    {
+      "domain": "public_runtime_shell",
+      "source_path": "valcea-clar/site/runtime/index.html",
+      "source_sha": "d6bb904a060d0301fc8982d6e592430ad446721f",
+      "target": ["public_route_compatibility"],
+      "requirements": ["preserve_brand_and_valid_public_routes", "future_story_projection_must_read_site_database"]
+    },
+    {
+      "domain": "sitemap",
+      "source_path": "valcea-clar/site/runtime/sitemap.xml",
+      "source_sha": "9d1722ea68749ebf627ec6c586cb5dcc085d4192",
+      "target": ["sitemap_generator"],
+      "requirements": ["preserve_existing_indexable_canonical_urls", "generate_from_database_after_cutover"]
+    }
+  ],
+  "social_capability_snapshot": {
+    "facebook": {
+      "historical_direct_publication_evidence_present": true,
+      "state_import_required": true
+    },
+    "instagram": {
+      "historical_direct_publication_evidence_present": true,
+      "real_photo_and_editorial_fact_card_products_present": true,
+      "state_import_required": true
+    },
+    "cutover_rule": "Do not claim or activate direct delivery in vNext until P14 Distribution Engine and remote delivery verification pass."
+  },
+  "known_migration_gaps": [
+    {
+      "id": "GAP_VNEXT_BUILD_NOT_READY",
+      "severity": "BLOCKING_CUTOVER",
+      "resolution": "Close P3-P17 and reach BUILD_READY_FOR_MIGRATION before any production migration."
+    },
+    {
+      "id": "GAP_VENUE_ENTITY_SOURCE",
+      "severity": "PREP_REQUIRED",
+      "resolution": "The public /unde-iesim/ route exists, but the rendered HTML is not sufficient as canonical venue/entity data. Resolve the underlying venue/restaurant registries before P12 knowledge-graph import."
+    },
+    {
+      "id": "GAP_USER_OWNED_PHOTO_IMPORT",
+      "severity": "PREP_REQUIRED",
+      "resolution": "P13 must provide a site-owned import path and provenance model before user-owned photos can be migrated into Photo Atlas as first-class assets. Existing approved CC/public-domain story visuals can be imported immediately once P13 exists."
+    },
+    {
+      "id": "GAP_SOCIAL_RUNTIME_OWNERSHIP",
+      "severity": "BLOCKING_DIRECT_CUTOVER",
+      "resolution": "Historical FB/IG state can be imported, but vNext direct publishing must be owned by the site runtime and verified after P14; repository state must become read-only migration evidence."
+    }
+  ],
+  "pre_cutover_checks": [
+    "Re-read VNEXT_STATE and require BUILD_READY_FOR_MIGRATION.",
+    "Re-read every migration source and compare its blob SHA to this snapshot; if changed, refresh the snapshot before import.",
+    "Run migration in a shadow database first.",
+    "Assert story/profile canonical URL parity.",
+    "Assert duplicate story/profile IDs = 0.",
+    "Assert knowledge-graph material edges without provenance = 0.",
+    "Assert fabricated_claims_count = 0.",
+    "Assert legacy public runtime remains rollback target until controlled-live acceptance passes."
+  ],
+  "acceptance_state": {
+    "migration_started": false,
+    "shadow_started": false,
+    "controlled_live_started": false,
+    "full_autonomous_started": false,
+    "soak_48h_started": false,
+    "clone_acceptance_started": false,
+    "production_lock": false
+  }
+}
