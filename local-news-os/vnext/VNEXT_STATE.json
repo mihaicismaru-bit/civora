@@ -1,5 +1,5 @@
 {
-  "schema_version": "2.1",
+  "schema_version": "2.2",
   "state_contract": "LOCAL_NEWS_OS_VNEXT_BUILD_STATE_V1",
   "status": "BUILD_READY_FOR_MIGRATION",
   "product_contract": "local-news-os/vnext/PRODUCT_CONTRACT_V2.json",
@@ -43,7 +43,8 @@
       "completed_gates": [
         "SHADOW_MIGRATION_PASS",
         "SHADOW_PROJECTION_PASS",
-        "CONTROLLED_LIVE_PREFLIGHT"
+        "CONTROLLED_LIVE_PREFLIGHT",
+        "POSTGRESQL_DEPLOYABILITY_CODE_REPAIR_PASS"
       ],
       "blocking_gate": "EXTERNAL_RUNTIME_BINDING_THEN_CONTROLLED_LIVE",
       "build_defect": false,
@@ -57,15 +58,25 @@
     "shadow_migration_status": "SHADOW_MIGRATION_PASS",
     "shadow_projection_status": "SHADOW_PROJECTION_PASS",
     "controlled_live_status": "BLOCKED_EXTERNAL_RUNTIME_BINDING",
-    "build_defects_open": []
+    "build_defects_open": [],
+    "deployability_repair": {
+      "status": "PASS_CODE_EXTERNAL_INTEGRATION_UNVERIFIED",
+      "pr": 538,
+      "merge_commit": "92cf4e7a20290c29a539b1bf8614788d9bc5c7a8",
+      "runtime_db_ci_run": 32297566467,
+      "vnext_validation_ci_run": 32297566400,
+      "real_postgresql_binding_verified": false,
+      "bound_host_verified": false
+    }
   },
   "external_runtime_requirements": [
-    "production hosting target capable of serving the vNext site application for valceaclar.ro",
-    "PostgreSQL runtime binding via LOCAL_NEWS_RUNTIME_DATABASE_URL",
-    "private newsroom authentication secret binding",
-    "health and canonical-route readback on the deployed target before DNS/cutover",
+    "external hosting target for the deployable vNext Python site application; connected Vercel surface currently has zero projects",
+    "real PostgreSQL runtime binding via LOCAL_NEWS_RUNTIME_DATABASE_URL",
+    "private LOCAL_NEWS_NEWSROOM_TOKEN binding",
+    "health and canonical-route readback on the isolated deployed target before DNS/cutover",
     "atomic fencing of the legacy scheduled Facebook/Instagram direct writer before first vNext direct apply",
-    "one low-risk controlled-live story with independent public/social readback and rollback armed"
+    "one low-risk controlled-live story with independent public/social readback and rollback armed",
+    "48-hour autonomous soak before production lock"
   ],
-  "next_action": "Do not reopen P0-P17. Build task monitors acceptance for concrete implementation defects and repairs only those defects. P18 remains owned by Vâlcea vNext Acceptance. Current acceptance evidence shows no build defect; controlled live is blocked only by external production runtime/PostgreSQL/newsroom-secret binding. Preserve production_cutover=false until the acceptance task proves the deployment target healthy and promotes through release control."
+  "next_action": "Do not reopen P0-P17. The PostgreSQL/deployment code defect discovered by P18 is repaired and validated in PR #538 / merge 92cf4e7a20290c29a539b1bf8614788d9bc5c7a8. P18 now remains blocked only on real external hosting, PostgreSQL and newsroom-secret binding. Preserve production_cutover=false and the legacy direct writer until the isolated target passes real deployment_preflight + /healthz + route parity; then continue controlled-live through release control."
 }

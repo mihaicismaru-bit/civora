@@ -1,17 +1,20 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "contract": "LOCAL_NEWS_OS_VNEXT_VALCEA_P18_CONTROLLED_LIVE_PREFLIGHT_V1",
   "instance_id": "valcea",
   "status": "BLOCKED_EXTERNAL_RUNTIME_BINDING",
   "production_cutover": false,
   "public_runtime_mutated": false,
   "network_publication_attempted": false,
-  "observed_main_sha": "808e5c4dfc45d77bacda07b7351c8c3f25456ef6",
+  "observed_main_sha": "92cf4e7a20290c29a539b1bf8614788d9bc5c7a8",
   "build": {
     "status": "BUILD_READY_FOR_MIGRATION",
-    "build_ready_blob_sha": "34b86b4cc398c0e04038ca046304ab7077c7f077",
+    "build_ready_blob_sha": "ba6c724a7c2e219206f2c5df56ecd98b109706ef",
     "site_owns_runtime": true,
-    "core_knows_no_locality": true
+    "core_knows_no_locality": true,
+    "deployability_code_gap_closed": true,
+    "deployability_repair_pr": 538,
+    "deployability_repair_merge_commit": "92cf4e7a20290c29a539b1bf8614788d9bc5c7a8"
   },
   "shadow_acceptance": {
     "migration_status": "SHADOW_MIGRATION_PASS",
@@ -36,14 +39,29 @@
     "newsroom_path": "/newsroom",
     "repository_runtime_state_enabled": false
   },
+  "deployability_code_evidence": {
+    "database_backend_adapter": "local-news-os/vnext/core/database_backend.py",
+    "composite_site_runtime": "local-news-os/vnext/core/production_app.py",
+    "deployment_preflight": "local-news-os/vnext/core/deployment_preflight.py",
+    "python_web_entrypoint": "local-news-os/vnext/vercel_app.py",
+    "dependency_manifest": "local-news-os/vnext/pyproject.toml",
+    "sqlite_regression_verified": true,
+    "postgresql_schema_contract_verified": true,
+    "postgresql_real_server_integration_verified": false,
+    "runtime_db_ci": {"run_id": 32297566467, "conclusion": "PASS"},
+    "vnext_validation_ci": {"run_id": 32297566400, "conclusion": "PASS"},
+    "truth_boundary": "The code can bind PostgreSQL and exposes a deployable Python web entrypoint, but no real PostgreSQL server or hosting target is claimed until external binding and readback succeed."
+  },
   "deployment_evidence": {
     "bound_vnext_production_target_verified": false,
     "vercel_connected_team_projects_count": 0,
     "vercel_project_for_valceaclar_verified": false,
-    "repo_vercel_config_found": false,
+    "repo_deployment_package_verified": true,
+    "postgres_runtime_code_support_verified": true,
     "postgres_runtime_binding_verified": false,
     "newsroom_runtime_secret_binding_verified": false,
-    "note": "No production target capable of serving the vNext site application plus its PostgreSQL runtime is evidenced by the currently connected deployment surface. This is not a code-quality failure and does not invalidate shadow acceptance."
+    "build_gap_closed": true,
+    "note": "The prior SQLite-only deployability gap is closed in code. The remaining blocker is external: no production/preview target with a real PostgreSQL binding and newsroom secret is evidenced by the connected deployment surface."
   },
   "social_single_writer_preflight": {
     "legacy_workflow_path": ".github/workflows/valcea-clar-social-publishing.yml",
@@ -59,7 +77,7 @@
   "public_host_verification": {
     "status": "UNVERIFIED_FROM_THIS_EXECUTION_ENVIRONMENT",
     "downtime_claimed": false,
-    "note": "Public-host browsing could not produce a fresh independent readback in this execution. Shadow WSGI projection is PASS, but that is not treated as proof that the new runtime is deployed at valceaclar.ro."
+    "note": "Shadow WSGI projection is PASS, but no deployed vNext target has yet been independently read back."
   },
   "non_blocking_media_gap": {
     "user_owned_photo_inventory_bound_to_vnext": false,
@@ -67,15 +85,15 @@
     "policy": "Missing user-owned assets does not block controlled-live because editorial-card/no-visual fallback is valid; user-owned photos remain migration/media debt and must retain ownership provenance when imported."
   },
   "blocking_requirements_before_controlled_live": [
-    "Bind a production hosting target for the LOCAL NEWS OS vNext site application serving valceaclar.ro.",
-    "Provision and bind the PostgreSQL runtime secret LOCAL_NEWS_RUNTIME_DATABASE_URL to that production target.",
-    "Bind the private newsroom authentication secret required by the site runtime.",
-    "Deploy the already-validated vNext artifact without changing public DNS until health/readback passes on the target.",
-    "Run health and canonical-route parity against the deployed target.",
+    "Create or bind a preview/production hosting target for the LOCAL NEWS OS vNext site application without changing public DNS.",
+    "Provision and bind a real PostgreSQL database through LOCAL_NEWS_RUNTIME_DATABASE_URL.",
+    "Bind a private LOCAL_NEWS_NEWSROOM_TOKEN of sufficient entropy to the hosting target.",
+    "Deploy merge commit 92cf4e7a20290c29a539b1bf8614788d9bc5c7a8 or a validated successor to the isolated target.",
+    "Run real deployment preflight, /healthz and canonical-route parity against that target.",
     "Fence the legacy scheduled Facebook/Instagram direct writer atomically immediately before first vNext direct apply.",
     "Perform one low-risk controlled-live story publication and independent public/social readback with rollback armed."
   ],
   "next_gate": "EXTERNAL_RUNTIME_BINDING_THEN_CONTROLLED_LIVE",
   "intervention_required": true,
-  "intervention_scope": "Provide or authorize a production runtime target and PostgreSQL binding for valceaclar.ro; no editorial decision or code redesign is required."
+  "intervention_scope": "Provide or authorize the external hosting target, PostgreSQL resource and runtime secrets. No remaining code redesign or editorial decision is required before deployment preflight."
 }
