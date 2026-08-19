@@ -1,6 +1,11 @@
 name: EUCONS Health
 
 on:
+  pull_request:
+    paths:
+      - 'eucons/ops/**'
+      - 'eucons/security/**'
+      - '.github/workflows/eucons-health.yml'
   schedule:
     - cron: '41 */6 * * *'
   workflow_dispatch:
@@ -9,7 +14,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: eucons-health
+  group: eucons-health-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
