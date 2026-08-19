@@ -1,10 +1,9 @@
 name: PARTENER.EU MIPE Romania v3 Scheduler
 
 on:
+  # Manual bounded recovery only. The recurring owner is
+  # PARTENER.EU MIPE Windows Crawl v3 (`17 */3 * * *`).
   workflow_dispatch:
-  schedule:
-    # Keep the authoritative Romanian corpus inside the 4h freshness gate.
-    - cron: '11 */3 * * *'
 
 permissions:
   actions: write
