@@ -1,0 +1,161 @@
+name: LOCAL NEWS OS vNext Vâlcea Shadow Projection
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "local-news-os/vnext/instances/valcea/migration/p18_shadow_migration.py"
+      - "local-news-os/vnext/instances/valcea/migration/p18_shadow_projection_diff.py"
+      - "local-news-os/vnext/instances/valcea/packs/publication.json"
+      - "local-news-os/vnext/core/public_route_compat.py"
+      - "local-news-os/vnext/core/knowledge_runtime.py"
+      - "local-news-os/vnext/core/site_publication.py"
+      - "local-news-os/vnext/core/knowledge_graph.py"
+      - "local-news-os/vnext/runtime/**"
+      - "valcea-clar/site/story_publication_event.json"
+      - "valcea-clar/site/runtime/live-feed.json"
+      - "valcea-clar/site/runtime/people.json"
+      - "valcea-clar/site/runtime/artists.json"
+      - "valcea-clar/data/places.json"
+      - ".github/workflows/local-news-os-vnext-valcea-shadow-projection.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  projection-parity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Compile projection compatibility modules
+        run: |
+          python -m py_compile \
+            local-news-os/vnext/core/public_route_compat.py \
+            local-news-os/vnext/instances/valcea/migration/p18_shadow_projection_diff.py
+
+      - name: Enforce config-driven route boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -Eiq 'vâlcea|valcea|râmnicu|ramnicu|valceaclar\.ro|/oameni|/artisti|/unde-iesim' local-news-os/vnext/core/public_route_compat.py
+          grep -q 'profile_route_aliases' local-news-os/vnext/instances/valcea/packs/publication.json
+          grep -q '/oameni' local-news-os/vnext/instances/valcea/packs/publication.json
+          grep -q '/artisti' local-news-os/vnext/instances/valcea/packs/publication.json
+          grep -q '/unde-iesim/' local-news-os/vnext/instances/valcea/packs/publication.json
+          echo 'VNEXT_P18_ROUTE_COMPAT_BOUNDARY_PASS'
+
+      - name: Run shadow projection parity with diagnostic capture
+        id: projection
+        shell: bash
+        run: |
+          set +e
+          python local-news-os/vnext/instances/valcea/migration/p18_shadow_projection_diff.py \
+            --db /tmp/valcea-vnext-projection.sqlite3 \
+            --report /tmp/valcea-vnext-projection-report.json \
+            > /tmp/valcea-vnext-projection.log 2>&1
+          code=$?
+          cat /tmp/valcea-vnext-projection.log
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Materialize projection receipt
+        shell: bash
+        env:
+          PROJECTION_EXIT_CODE: ${{ steps.projection.outputs.exit_code }}
+        run: |
+          set -euo pipefail
+          mkdir -p local-news-os/vnext/acceptance
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          report = Path('/tmp/valcea-vnext-projection-report.json')
+          log = Path('/tmp/valcea-vnext-projection.log')
+          dest = Path('local-news-os/vnext/acceptance/valcea-p18-projection-latest.json')
+          exit_code = int(os.environ.get('PROJECTION_EXIT_CODE', '99'))
+          if report.is_file():
+              try:
+                  data = json.loads(report.read_text(encoding='utf-8'))
+              except Exception as exc:
+                  data = {
+                      'schema_version': '1.0',
+                      'contract': 'LOCAL_NEWS_OS_VNEXT_VALCEA_P18_SHADOW_PROJECTION_DIFF_V1',
+                      'status': 'SHADOW_PROJECTION_FAIL',
+                      'report_parse_error': f'{type(exc).__name__}: {exc}',
+                  }
+          else:
+              text = log.read_text(encoding='utf-8', errors='replace') if log.is_file() else ''
+              data = {
+                  'schema_version': '1.0',
+                  'contract': 'LOCAL_NEWS_OS_VNEXT_VALCEA_P18_SHADOW_PROJECTION_DIFF_V1',
+                  'status': 'SHADOW_PROJECTION_FAIL',
+                  'failure': {'class': 'PROJECTION_EXECUTION_FAILED_BEFORE_REPORT', 'log_tail': text[-8000:]},
+                  'production_cutover': False,
+              }
+          data['ci'] = {
+              'workflow': 'LOCAL NEWS OS vNext Vâlcea Shadow Projection',
+              'run_id': '${{ github.run_id }}',
+              'head_sha': '${{ github.sha }}',
+              'execution_exit_code': exit_code,
+              'conclusion': 'PASS' if exit_code == 0 and data.get('status') == 'SHADOW_PROJECTION_PASS' else 'FAIL',
+          }
+          dest.write_text(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+          PY
+
+      - name: Upload projection evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: valcea-vnext-shadow-projection
+          path: |
+            /tmp/valcea-vnext-projection-report.json
+            /tmp/valcea-vnext-projection.log
+            /tmp/valcea-vnext-projection.sqlite3
+            local-news-os/vnext/acceptance/valcea-p18-projection-latest.json
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Persist latest projection receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add local-news-os/vnext/acceptance/valcea-p18-projection-latest.json
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          status=$(python -c "import json; print(json.load(open('local-news-os/vnext/acceptance/valcea-p18-projection-latest.json', encoding='utf-8'))['status'])")
+          git commit -m "P18: persist Vâlcea shadow projection ${status}"
+          git pull --rebase origin main
+          git push origin HEAD:main
+
+      - name: Enforce projection acceptance result
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('local-news-os/vnext/acceptance/valcea-p18-projection-latest.json').read_text(encoding='utf-8'))
+          if data.get('status') != 'SHADOW_PROJECTION_PASS':
+              raise SystemExit(f"projection status is {data.get('status')}: {data.get('failures') or data.get('failure')}")
+          checks = data.get('checks') or {}
+          required_true = [
+              'shadow_migration_pass', 'homepage_200', 'homepage_contains_all_legacy_story_links',
+              'all_legacy_story_routes_200_with_content', 'all_people_routes_preserved',
+              'all_artist_routes_preserved', 'leisure_route_200', 'leisure_verified_places_projected',
+              'sitemap_200', 'sitemap_preserves_required_public_urls'
+          ]
+          bad = [key for key in required_true if checks.get(key) is not True]
+          if bad or checks.get('network_publication_attempted') is not False or checks.get('public_runtime_mutated') is not False:
+              raise SystemExit(f"projection acceptance checks failed: {bad}")
+          print('VNEXT_P18_SHADOW_PROJECTION_PASS')
+          PY
