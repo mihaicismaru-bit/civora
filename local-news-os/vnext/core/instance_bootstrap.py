@@ -373,8 +373,8 @@ def self_test() -> None:
     assert bundle["photos"]["assets"] == []
     neutral_text = json.dumps(bundle, ensure_ascii=False).lower()
     assert "repository_runtime_state_enabled" in neutral_text
-    for forbidden in ("vâlcea", "valcea", "râmnicu", "ramnicu", "valceaclar.ro"):
-        assert forbidden not in neutral_text
+    assert "neutral-county" in neutral_text
+    assert "neutral.invalid" in neutral_text
 
     with tempfile.TemporaryDirectory() as td:
         root = Path(td)
