@@ -25,7 +25,7 @@ from knowledge_graph import (
     upsert_entity,
 )
 from runtime_store import connect, initialize, list_events, register_instance
-from site_publication import PublicSiteApp
+from site_publication import PublicSiteApp, ensure_publication_schema
 from site_runtime import SiteRuntimeApp, StartResponse, _safe_int
 
 
@@ -274,6 +274,7 @@ def self_test() -> None:
         db = Path(tmp) / "runtime.sqlite3"
         conn = connect(db)
         initialize(conn)
+        ensure_publication_schema(conn)
         ensure_knowledge_schema(conn)
         register_instance(conn, _manifest("alpha-local", "alpha.invalid", "a"), engine_version="p12-web-test")
         entity, _ = upsert_entity(
