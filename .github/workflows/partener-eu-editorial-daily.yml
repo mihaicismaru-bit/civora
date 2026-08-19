@@ -51,9 +51,94 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Ingest official signals and generate editorial intelligence
+      - name: Ingest official decision-maker signals
+        run: python partener-eu/ingest/people_policy_official_ingest.py
+
+      - name: Validate materialized official-source ledger
         run: |
-          python partener-eu/ingest/people_policy_official_ingest.py
+          python partener-eu/ops/test_people_policy_source_intelligence.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          state = Path('partener-eu/ingest/state')
+          ledger = json.loads((state / 'people_policy_official_sources.json').read_text(encoding='utf-8'))
+          registry = json.loads((state / 'people_policy_source_registry.json').read_text(encoding='utf-8'))
+
+          assert ledger.get('schemaVersion') == 2, 'official-source ledger must materialize schemaVersion 2'
+          policy = ledger.get('policy') or {}
+          assert policy.get('failClosed') is True
+          assert policy.get('administrativeFactsNeverPromotedFromSignals') is True
+          assert policy.get('personSignalsRequireVerifiedRoleSnapshot') is True
+          assert policy.get('sourceHealthRequiresArticleFetchProofWhenCandidatesExist') is True
+
+          expected = {x['id'] for x in registry.get('sources', []) if x.get('enabled') is True}
+          rows = ledger.get('sources') or []
+          actual = {x.get('id') for x in rows}
+          assert actual == expected, f'source ledger mismatch: expected={sorted(expected)} actual={sorted(actual)}'
+
+          allowed = {
+              'OK', 'OK_NO_CANDIDATES', 'DEGRADED_PARTIAL_ARTICLE_FETCH',
+              'DEGRADED_ARTICLE_FETCH_FAILED', 'SOURCE_UNAVAILABLE_HISTORY_PRESERVED',
+          }
+          for row in rows:
+              status = row.get('status')
+              assert status in allowed, f"unsupported source health status: {row.get('id')}={status}"
+              assert row.get('observedAt'), f"missing observedAt: {row.get('id')}"
+              assert row.get('failClosed') is True, f"source not fail-closed: {row.get('id')}"
+              if not str(status).startswith('SOURCE_UNAVAILABLE'):
+                  assert row.get('listingFetched') is True, f"listing proof missing: {row.get('id')}"
+                  candidates = int(row.get('candidateLinks') or 0)
+                  attempts = int(row.get('articleFetchAttempts') or 0)
+                  successes = int(row.get('articleFetchSuccesses') or 0)
+                  failures = int(row.get('articleFetchFailures') or 0)
+                  assert attempts == candidates, f"candidate/fetch mismatch: {row.get('id')}"
+                  assert successes + failures == attempts, f"fetch accounting mismatch: {row.get('id')}"
+                  if status == 'OK':
+                      assert candidates > 0 and successes == attempts
+                  elif status == 'OK_NO_CANDIDATES':
+                      assert candidates == 0 and attempts == 0
+                  elif status == 'DEGRADED_ARTICLE_FETCH_FAILED':
+                      assert candidates > 0 and successes == 0 and failures == attempts
+                  elif status == 'DEGRADED_PARTIAL_ARTICLE_FETCH':
+                      assert successes > 0 and failures > 0
+
+          for item in ledger.get('items') or []:
+              assert item.get('signalKind') == 'STATEMENT_SIGNAL'
+              fact = item.get('administrativeFact') or {}
+              assert fact.get('status') == 'UNCONFIRMED_FROM_SIGNAL'
+              assert fact.get('failClosed') is True
+              assert (item.get('roleVerification') or {}).get('sourceTier', '').startswith('T1')
+              assert (item.get('sourceSnapshot') or {}).get('contentHash')
+              assert item.get('fingerprint')
+          print(json.dumps({'schemaVersion': 2, 'sources': len(rows), 'signals': len(ledger.get('items') or [])}))
+          PY
+
+      - name: Persist official-source ledger checkpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp partener-eu/ingest/state/people_policy_official_sources.json /tmp/people_policy_official_sources.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/people_policy_official_sources.json partener-eu/ingest/state/people_policy_official_sources.json
+            git add partener-eu/ingest/state/people_policy_official_sources.json
+            if git diff --cached --quiet; then
+              echo 'Official-source ledger already current.'
+              break
+            fi
+            git commit -m 'Checkpoint official decision-maker source ledger'
+            if git push origin HEAD:main; then break; fi
+            sleep $((attempt * 2))
+          done
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Generate editorial intelligence
+        run: |
           python partener-eu/ingest/build_daily_brief.py
           python partener-eu/ingest/build_people_policy.py
           python partener-eu/ingest/refine_people_policy.py
