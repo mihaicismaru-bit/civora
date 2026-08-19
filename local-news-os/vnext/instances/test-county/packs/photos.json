@@ -5,5 +5,35 @@
   "migration": {
     "status": "NONE"
   },
+  "resolver_policy": {
+    "allowed_usage_scopes": [
+      "ARCHIVE",
+      "PROFILE",
+      "SITE_CARD",
+      "SITE_HERO",
+      "SOCIAL_FACEBOOK",
+      "SOCIAL_INSTAGRAM"
+    ],
+    "allowed_rights_bases": [
+      "CC0",
+      "CC_BY",
+      "CC_BY_SA",
+      "DOCUMENT_DERIVATIVE",
+      "EDITORIAL_CARD",
+      "EXPLICIT_LICENSE",
+      "OFFICIAL_PRESS_USE",
+      "PUBLIC_DOMAIN",
+      "USER_OWNED"
+    ],
+    "specificity_order": [
+      "EVENT_DIRECT",
+      "SUBJECT_DIRECT",
+      "PLACE_DIRECT",
+      "CONTEXT_CURRENT",
+      "CONTEXT_ARCHIVE",
+      "DOCUMENT_VISUAL"
+    ],
+    "fallback": "EDITORIAL_CARD"
+  },
   "assets": []
 }

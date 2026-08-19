@@ -1,0 +1,83 @@
+name: LOCAL NEWS OS vNext Media Intelligence
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/vnext/core/media_intelligence.py"
+      - "local-news-os/vnext/core/media_runtime.py"
+      - "local-news-os/vnext/runtime/media_schema.sql"
+      - "local-news-os/vnext/instances/*/packs/photos.json"
+      - ".github/workflows/local-news-os-vnext-media-intelligence.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/vnext/core/media_intelligence.py"
+      - "local-news-os/vnext/core/media_runtime.py"
+      - "local-news-os/vnext/runtime/media_schema.sql"
+      - "local-news-os/vnext/instances/*/packs/photos.json"
+      - ".github/workflows/local-news-os-vnext-media-intelligence.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-media-intelligence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile P13 media core and projections
+        run: |
+          python -m py_compile \
+            local-news-os/vnext/core/media_intelligence.py \
+            local-news-os/vnext/core/media_runtime.py
+
+      - name: Validate rights-safe Photo Atlas and resolver
+        run: python local-news-os/vnext/core/media_intelligence.py --self-test
+
+      - name: Validate private newsroom and public media projection
+        run: python local-news-os/vnext/core/media_runtime.py --self-test
+
+      - name: Validate instance packs still satisfy vNext contract
+        run: |
+          python local-news-os/vnext/core/instance_model.py valcea >/tmp/valcea-instance.json
+          python local-news-os/vnext/core/instance_model.py test-county >/tmp/test-county-instance.json
+
+      - name: Assert P13 site-owned media contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'CREATE TABLE IF NOT EXISTS media_assets' local-news-os/vnext/runtime/media_schema.sql
+          grep -q 'CREATE TABLE IF NOT EXISTS media_bindings' local-news-os/vnext/runtime/media_schema.sql
+          grep -q 'CREATE TABLE IF NOT EXISTS media_derivatives' local-news-os/vnext/runtime/media_schema.sql
+          grep -q 'CREATE TABLE IF NOT EXISTS story_media_selections' local-news-os/vnext/runtime/media_schema.sql
+          grep -q 'CREATE TABLE IF NOT EXISTS media_debt' local-news-os/vnext/runtime/media_schema.sql
+          grep -q 'synthetic media cannot be registered as factual photography' local-news-os/vnext/core/media_intelligence.py
+          grep -q 'contextual media requires explicit context disclosure' local-news-os/vnext/core/media_intelligence.py
+          grep -q 'EVENT_DIRECT' local-news-os/vnext/core/media_intelligence.py
+          grep -q 'EDITORIAL_CARD' local-news-os/vnext/core/media_intelligence.py
+          grep -q 'no rights-safe relevant real asset' local-news-os/vnext/core/media_intelligence.py
+          grep -q '/newsroom/media' local-news-os/vnext/core/media_runtime.py
+          grep -q '/newsroom/api/media' local-news-os/vnext/core/media_runtime.py
+          ! grep -Eiq 'git_state_path|state_root|live-feed|current_edition|output_root|repository_runtime_state' \
+            local-news-os/vnext/core/media_intelligence.py \
+            local-news-os/vnext/core/media_runtime.py \
+            local-news-os/vnext/runtime/media_schema.sql
+          echo 'VNEXT_P13_SITE_OWNED_MEDIA_PASS'
+
+      - name: Enforce CORE_KNOWS_NO_LOCALITY for P13
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -niE 'vâlcea|valcea|râmnicu|ramnicu|valceaclar\.ro' \
+            local-news-os/vnext/core/media_intelligence.py \
+            local-news-os/vnext/core/media_runtime.py \
+            local-news-os/vnext/runtime/media_schema.sql; then
+            echo 'P13 generic media code contains locality-specific material' >&2
+            exit 1
+          fi
+          echo 'VNEXT_P13_CORE_NO_LOCALITY_PASS'
