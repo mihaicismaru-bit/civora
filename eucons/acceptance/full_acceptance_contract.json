@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "engine_id": "EUCONS_E27_FULL_ACCEPTANCE",
+  "product": "EUCONS_COMMERCIAL_OS",
+  "production_side_effects_enabled": false,
+  "required_completed_phases": [
+    "E00",
+    "E01",
+    "E02",
+    "E03",
+    "E04",
+    "E05",
+    "E06",
+    "E07",
+    "E08",
+    "E09",
+    "E10",
+    "E11",
+    "E12",
+    "E13",
+    "E14",
+    "E15",
+    "E16",
+    "E17",
+    "E18",
+    "E19",
+    "E20",
+    "E21",
+    "E22",
+    "E23",
+    "E24",
+    "E25",
+    "E26"
+  ],
+  "required_analytics_events": [
+    "page_view",
+    "opportunity_view",
+    "evaluation_completed",
+    "lead_created",
+    "lead_qualified",
+    "offer_generated"
+  ],
+  "external_gates": {
+    "production_hosting": "CLOSED",
+    "linkedin": "CLOSED",
+    "facebook": "CLOSED",
+    "commercial_mailbox": "CLOSED"
+  },
+  "determinism": {
+    "commercial_replay": true,
+    "distribution_replay": true,
+    "analytics_replay": true,
+    "adversarial_replay": true,
+    "receipt_sha256": true
+  },
+  "forbidden": {
+    "production_deployment": true,
+    "live_social_dispatch": true,
+    "live_email_sending": true,
+    "analytics_transport": true,
+    "real_personal_data": true,
+    "unverified_opportunity_promotion": true,
+    "invented_numeric_pricing": true
+  }
+}
