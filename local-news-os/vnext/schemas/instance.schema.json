@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local-news-os.invalid/schemas/vnext-instance.schema.json",
+  "title": "LOCAL NEWS OS vNext Instance",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "instance_id",
+    "environment",
+    "publication",
+    "locale",
+    "timezone",
+    "runtime",
+    "packs",
+    "policies"
+  ],
+  "properties": {
+    "schema_version": {"const": "2.0"},
+    "instance_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{1,62}$"},
+    "environment": {"enum": ["test", "staging", "production"]},
+    "publication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "canonical_domain"],
+      "properties": {
+        "name": {"type": "string", "minLength": 2},
+        "short_name": {"type": "string"},
+        "canonical_domain": {"type": "string", "minLength": 3}
+      }
+    },
+    "locale": {"type": "string", "minLength": 2},
+    "timezone": {"type": "string", "minLength": 3},
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner",
+        "state_backend",
+        "repository_runtime_state_enabled",
+        "public_base_url",
+        "newsroom"
+      ],
+      "properties": {
+        "owner": {"const": "site_application"},
+        "state_backend": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "connection_secret_ref"],
+          "properties": {
+            "kind": {"enum": ["postgresql", "sqlite", "database"]},
+            "connection_secret_ref": {"type": "string", "minLength": 3}
+          }
+        },
+        "repository_runtime_state_enabled": {"const": false},
+        "public_base_url": {"type": "string", "pattern": "^https://"},
+        "newsroom": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "private"],
+          "properties": {
+            "path": {"const": "/newsroom"},
+            "private": {"const": true}
+          }
+        }
+      }
+    },
+    "packs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "publication",
+        "geography",
+        "brand",
+        "sources",
+        "editorial",
+        "channels",
+        "entities",
+        "photos"
+      ],
+      "properties": {
+        "publication": {"type": "string", "minLength": 1},
+        "geography": {"type": "string", "minLength": 1},
+        "brand": {"type": "string", "minLength": 1},
+        "sources": {"type": "string", "minLength": 1},
+        "editorial": {"type": "string", "minLength": 1},
+        "channels": {"type": "string", "minLength": 1},
+        "entities": {"type": "string", "minLength": 1},
+        "photos": {"type": "string", "minLength": 1}
+      }
+    },
+    "policies": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "verified_facts_only",
+        "title_only_publishable",
+        "held_story_blocks_publication",
+        "development_gate_may_stop_validated_runtime"
+      ],
+      "properties": {
+        "verified_facts_only": {"const": true},
+        "title_only_publishable": {"const": false},
+        "held_story_blocks_publication": {"const": false},
+        "development_gate_may_stop_validated_runtime": {"const": false}
+      }
+    }
+  }
+}
