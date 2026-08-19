@@ -1,0 +1,166 @@
+{
+  "schema_version": "1.0",
+  "contract": "LOCAL_NEWS_OS_VNEXT_VALCEA_READINESS_RECEIPT_V1",
+  "instance_id": "valcea",
+  "observed_at": "2026-08-19T16:32:34+03:00",
+  "mode": "PRE_MIGRATION_READINESS_ONLY",
+  "cutover_authorized": false,
+  "build_gate": {
+    "status": "BUILD_ACTIVE",
+    "state_path": "local-news-os/vnext/VNEXT_STATE.json",
+    "state_sha": "5f885b4218c08c6e429f6c5b1ad05d7badde2ec1",
+    "observed_build_commit": "725eafcc8c762a9bcdf391e5b36765c99f956503",
+    "closed_through": "P8_NEWSWORTHINESS_ENGINE",
+    "next_phase": "P9_STORY_ENGINE",
+    "required_before_migration": "BUILD_READY_FOR_MIGRATION",
+    "production_cutover": false,
+    "p8_validation": {
+      "local_news_os_vnext_validation": "PASS",
+      "closure_run": 32257145117,
+      "scope_drift_on_closure_commit": "success",
+      "persistence_reconciliation_on_closure_commit": "success"
+    }
+  },
+  "canonical_migration_snapshot": {
+    "path": "local-news-os/vnext/instances/valcea/MIGRATION_READINESS_V1.json",
+    "snapshot_sha": "a918daf8e75a0f426c7306d636822cf12ce995f5",
+    "snapshot_schema_version": "1.3",
+    "snapshot_is_stale_only_for_build_phase": true,
+    "migration_inputs_sampled": "STABLE"
+  },
+  "inventory": {
+    "published_story_ids": 23,
+    "people_profiles": 6,
+    "artist_profiles": 172,
+    "approved_story_visual_bindings": 4,
+    "approved_photo_atlas_assets": 4,
+    "structured_places_registry_present": true,
+    "creator_public_profiles": 0,
+    "creator_hidden_candidates": 1
+  },
+  "compatibility_checks": [
+    {
+      "domain": "stories_and_urls",
+      "path": "valcea-clar/site/story_publication_event.json",
+      "sha": "709af6f8b7f8bcdab9d3530f06523b51aa2ed276",
+      "result": "STABLE",
+      "observed_published_at": "2026-08-19T06:12:49+03:00",
+      "new_story_ids": 0
+    },
+    {
+      "domain": "story_content_and_public_projection",
+      "path": "valcea-clar/site/runtime/live-feed.json",
+      "sha": "fc47648a0b228d43293348e445d5d613072d3f32",
+      "result": "STABLE"
+    },
+    {
+      "domain": "people",
+      "path": "valcea-clar/site/runtime/people.json",
+      "sha": "a99562617891720a0e211bc8f0341f4435eab5b8",
+      "result": "STABLE"
+    },
+    {
+      "domain": "artists",
+      "path": "valcea-clar/site/runtime/artists.json",
+      "sha": "b4cc261d3632f6c71ad2d9b4be51a659d7df71fa",
+      "result": "STABLE"
+    },
+    {
+      "domain": "places_and_venues",
+      "path": "valcea-clar/data/places.json",
+      "sha": "83f236a8d344769b370db643d7681789c9f55a9d",
+      "result": "STABLE"
+    },
+    {
+      "domain": "public_money_and_decisions",
+      "path": "valcea-clar/editorial/council_decision_graph.json",
+      "sha": "a8048187172941bedf6caf753cfc0bbd6639fc85",
+      "result": "STABLE"
+    },
+    {
+      "domain": "facts",
+      "path": "valcea-clar/editorial/facts_registry.json",
+      "sha": "67bc6f8b9f2f6c5c32626d07577e4feb6e02c16a",
+      "result": "STABLE"
+    },
+    {
+      "domain": "fact_kernels",
+      "path": "valcea-clar/editorial/fact_kernel_registry.json",
+      "sha": "10a1fe8ea3d4a0841546ddd2434e358901e5740e",
+      "result": "STABLE"
+    },
+    {
+      "domain": "media_bindings",
+      "path": "valcea-clar/social/story_visuals.json",
+      "sha": "52a2f1eb83ce442a750f3f63df2ffc5ced2005d2",
+      "result": "STABLE"
+    },
+    {
+      "domain": "photo_atlas",
+      "path": "valcea-clar/social/photo_atlas.json",
+      "sha": "55edc3ee416f24ea2d8ddcad12ae2d6fe9ea40f0",
+      "result": "STABLE"
+    },
+    {
+      "domain": "facebook_delivery_history",
+      "path": "valcea-clar/social/facebook_state.json",
+      "sha": "d90b89dd6ec868d2c8e5a0dafbc2543c7830310b",
+      "result": "STABLE"
+    },
+    {
+      "domain": "instagram_delivery_history",
+      "path": "valcea-clar/social/instagram_state.json",
+      "sha": "4ffc683a276b9e368bc46e33c09ab4fabd1d1812",
+      "result": "STABLE"
+    }
+  ],
+  "legacy_runtime_observation": {
+    "old_chatgpt_civora_lanes_reactivated": false,
+    "repository_owned_outbox_churn_observed": true,
+    "observed_noncanonical_churn_paths": [
+      "valcea-clar/social/linkedin_outbox.json",
+      "valcea-clar/social/telegram_outbox.json",
+      "valcea-clar/social/threads_outbox.json",
+      "valcea-clar/social/youtube_outbox.json",
+      "X credential-link state"
+    ],
+    "migration_source_facebook_state_changed": false,
+    "migration_source_instagram_state_changed": false,
+    "assessment": "Non-blocking before migration. P14/P16 must retire repository-owned publication/outbox writers when vNext site-owned distribution and release separation become authoritative."
+  },
+  "public_site_probe": {
+    "attempted": true,
+    "result": "UNVERIFIED_ENVIRONMENT_DNS_RESOLUTION_FAILURE",
+    "homepage": "https://valceaclar.ro/",
+    "leisure_route": "https://valceaclar.ro/unde-iesim/",
+    "sample_story": "https://valceaclar.ro/stiri/rm-valcea-hcl-306-20260814/",
+    "interpretation": "The execution environment could not resolve valceaclar.ro. This is not promoted to a site-down claim. Repository public-runtime artifacts remain the last verified compatibility evidence for this run."
+  },
+  "blocking_gaps": [
+    {
+      "id": "GAP_VNEXT_BUILD_NOT_READY",
+      "severity": "BLOCKING_CUTOVER",
+      "resolution": "Close P9-P17 and reach BUILD_READY_FOR_MIGRATION before production migration."
+    },
+    {
+      "id": "GAP_USER_OWNED_PHOTO_IMPORT",
+      "severity": "PREP_REQUIRED",
+      "resolution": "P13 Media Intelligence must provide the site-owned import and provenance path for user-owned photos."
+    },
+    {
+      "id": "GAP_SOCIAL_RUNTIME_OWNERSHIP",
+      "severity": "BLOCKING_DIRECT_CUTOVER",
+      "resolution": "P14 Distribution Engine plus P16 release separation must make the site runtime the single writer before direct social cutover."
+    }
+  ],
+  "acceptance_state": {
+    "migration_started": false,
+    "shadow_started": false,
+    "controlled_live_started": false,
+    "full_autonomous_started": false,
+    "soak_48h_started": false,
+    "clone_acceptance_started": false,
+    "production_lock": false
+  },
+  "next_acceptance_action": "Continue readiness-only checks while P9-P17 build. On BUILD_READY_FOR_MIGRATION, re-read every migration source SHA, refresh the canonical migration manifest, import into a shadow site-owned database, assert canonical URL and ID parity, and only then authorize controlled migration."
+}
