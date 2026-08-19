@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "state": "EXTERNAL_AUTHORIZATION_ONLY",
+  "owner_development_actions_required": false,
+  "allowed_external_actions": [
+    {
+      "id": "domain_and_hosting",
+      "state": "OWNER_AUTHORIZATION_REQUIRED",
+      "purpose": "Connect the production-ready EUCONS artifact and provider-neutral runtime to eucons.ro.",
+      "owner_action": "Authorize the final hosting account/environment and DNS/domain connection.",
+      "system_will_complete_after_authorization": [
+        "deploy production-ready static artifact",
+        "bind POST /api/leads to the E11 lead runtime and downstream commercial engines",
+        "apply E21 HTTPS and security-header contract",
+        "activate retention/deletion/recovery jobs",
+        "verify canonical https://eucons.ro, robots, sitemap, forms and runtime health"
+      ],
+      "secrets_in_repository": false
+    },
+    {
+      "id": "linkedin",
+      "state": "OWNER_AUTHORIZATION_REQUIRED",
+      "purpose": "Authorize the Euroconsult LinkedIn publishing identity for E17.",
+      "owner_action": "Approve the LinkedIn account/page authorization when requested.",
+      "system_will_complete_after_authorization": [
+        "bind E17 credentials through the authorized secret store",
+        "execute dry-run-to-live gate",
+        "publish only eligible canonical derivatives",
+        "persist publication receipts and retry state"
+      ],
+      "secrets_in_repository": false
+    },
+    {
+      "id": "facebook",
+      "state": "OWNER_AUTHORIZATION_REQUIRED",
+      "purpose": "Authorize the Euroconsult Facebook Page publishing identity for E18.",
+      "owner_action": "Approve the Facebook Page authorization when requested.",
+      "system_will_complete_after_authorization": [
+        "bind E18 credentials through the authorized secret store",
+        "execute dry-run-to-live gate",
+        "publish only eligible Facebook derivatives",
+        "persist publication receipts and retry state"
+      ],
+      "secrets_in_repository": false
+    },
+    {
+      "id": "commercial_mailbox",
+      "state": "OWNER_AUTHORIZATION_REQUIRED",
+      "purpose": "Authorize the Euroconsult commercial mailbox used by E19 for requested service communications and separately consented marketing.",
+      "owner_action": "Approve the commercial mailbox/provider authorization when requested.",
+      "system_will_complete_after_authorization": [
+        "bind E19 mailbox credentials through the authorized secret store",
+        "reconcile the public contact/privacy notice with the active mailbox",
+        "verify acknowledgement, offer and follow-up delivery",
+        "verify unsubscribe/suppression before promotional dispatch"
+      ],
+      "secrets_in_repository": false
+    }
+  ],
+  "forbidden_handoff_items": [
+    "write or repair application code",
+    "configure GitHub workflows",
+    "populate service content",
+    "invent or manually approve claims",
+    "manually operate CRM state",
+    "manually compose routine social posts",
+    "manually recover failed autonomous runs"
+  ]
+}
