@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E12",
+  "unit": "E12_CRM_LITE",
+  "status": "PASS",
+  "validated_at": "2026-08-19T10:26:40Z",
+  "validation": {
+    "workflow": "EUCONS Quality",
+    "run_id": 32241948919,
+    "run_number": 67,
+    "conclusion": "success",
+    "validated_head": "29a803f9e4a0cad74ae4c603f9b5aba289b4f214",
+    "merged_commit": "e57016d5e75b190ae74a8fcc76551a20c2cf9880",
+    "exact_head_gate_passed": true
+  },
+  "coverage": {
+    "organizations": 1,
+    "contacts": 1,
+    "leads": 1,
+    "opportunities": 1,
+    "offers": 1,
+    "activities": 12,
+    "terminal_stage": "WON",
+    "idempotent_lead_upsert": "PASS",
+    "append_only_activity_audit": "PASS",
+    "ownership_and_next_action": "PASS",
+    "source_provenance_preserved": "PASS",
+    "pii_repository_boundary": "PASS",
+    "production_persistence": "DISABLED_UNTIL_BACKEND_AUTHORIZED"
+  },
+  "artifacts": [
+    "eucons/crm/crm_contract.json",
+    "eucons/crm/storage_contract.json",
+    "eucons/crm/crm_engine.py",
+    "eucons/validation/validate_crm_lite.py",
+    "eucons/validation/test_crm_lite_fail_closed.py",
+    ".github/workflows/eucons-quality.yml"
+  ],
+  "next_phase": "E13"
+}

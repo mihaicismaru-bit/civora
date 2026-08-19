@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "product": "EUCONS_COMMERCIAL_OS",
-  "updated_at": "2026-08-19T10:11:19Z",
+  "updated_at": "2026-08-19T10:26:40Z",
   "overall": "GREEN_DEVELOPMENT",
   "checks": {
     "canonical_contracts": "PASS",
@@ -33,6 +33,12 @@
     "lead_antispam": "PASS",
     "lead_dedupe": "PASS",
     "lead_pii_repository_guard": "PASS",
+    "crm_lite": "PASS",
+    "crm_idempotent_upsert": "PASS",
+    "crm_append_only_audit": "PASS",
+    "crm_lifecycle_guard": "PASS",
+    "crm_pii_repository_guard": "PASS",
+    "crm_production_persistence": "DISABLED_UNTIL_BACKEND_AUTHORIZED",
     "external_credentials": "NOT_REQUIRED_YET"
   },
   "critical_failures": []
