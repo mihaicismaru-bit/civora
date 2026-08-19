@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-19T19:16:28Z",
+  "generatedAt": "2026-08-19T19:36:29Z",
   "policy": {
     "lifecycleFirst": true,
     "consultantIsDownstreamConsumer": true,
@@ -11,19 +11,19 @@
   },
   "summary": {
     "DISCOVERED": 44,
-    "CONSULTATION": 18,
+    "CONSULTATION": 12,
     "FINAL_GUIDE": 1,
-    "ANNOUNCED": 12,
+    "ANNOUNCED": 13,
     "OPEN": 5,
-    "CLOSED": 9,
+    "CLOSED": 10,
     "EVALUATION": 0,
     "RESULTS": 0,
     "CONTRACTING": 7,
     "COMPLETED": 4,
-    "callCount": 100,
-    "activelyMonitored": 96,
+    "callCount": 96,
+    "activelyMonitored": 92,
     "withMySMISEvidence": 4,
-    "withWinnerSources": 4,
+    "withWinnerSources": 3,
     "confirmedWinnerLists": 0
   },
   "calls": [
@@ -77,7 +77,77 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
+    },
+    {
+      "id": "b57fc958331d23be6b",
+      "dossierId": "mipe-9518a3c73f126e4e81",
+      "title": "Dezvoltarea serviciilor de sprijin în comunitate, prin echipe de servicii mobile",
+      "programme": "Programul Incluziune și Demnitate Socială",
+      "code": "—",
+      "region": "România",
+      "stage": "OPEN",
+      "stageLabel": "Deschis",
+      "maturityRank": 4,
+      "publicationState": "PUBLISHABLE",
+      "dossierCompleteness": 100,
+      "stageEvidence": [
+        {
+          "type": "DOSSIER_STATUS",
+          "value": "OPEN"
+        },
+        {
+          "type": "OFFICIAL_EVENT",
+          "kind": "DEADLINE_EXTENDED",
+          "date": "2026-08-19T19:36:29.824068+00:00",
+          "text": "PoIDS: Actualizează Ghidul Solicitantului Dezvoltarea serviciilor de sprijin în comunitate, prin echipe de servicii mobile"
+        }
+      ],
+      "transitions": [
+        {
+          "observedAt": "2026-08-18T16:57:51Z",
+          "from": null,
+          "to": "CONSULTATION",
+          "reason": "INITIAL_CANONICAL_PROJECTION"
+        },
+        {
+          "observedAt": "2026-08-19T19:36:29Z",
+          "from": "CONSULTATION",
+          "to": "OPEN",
+          "reason": "NEW_OFFICIAL_EVIDENCE"
+        }
+      ],
+      "results": {
+        "winnerListConfirmed": false,
+        "winnerSources": [],
+        "mysmis": null
+      },
+      "monitoring": {
+        "active": true,
+        "priority": "HIGH",
+        "nextExpectedEvents": [
+          "corrigendum",
+          "prelungire termen",
+          "clarificări",
+          "închiderea depunerii"
+        ],
+        "officialSources": [
+          "https://mfe.gov.ro/poids-actualizeaza-ghidul-solicitantului-dezvoltarea-serviciilor-de-sprijin-in-comunitate-prin-echipe-de-servicii-mobile/",
+          "https://mfe.gov.ro/ghidul-solicitantului-dezvoltarea-serviciilor-de-sprijin-in-comunitate-prin-echipe-de-servicii-mobile/",
+          "https://mfe.gov.ro/am-poids-consultare-publica-ghidul-solicitantului-conditii-specifice-dezvoltarea-serviciilor-de-sprijin-in-comunitate-prin-echipe-de-servicii-mobile/",
+          "https://mfe.gov.ro/poids-raspunsurile-la-propunerile-si-observatiile-formulate-in-cadrul-procesului-de-consultare-publica-pentru-ghidul-solicitantului-dezvoltarea-serviciilor-de-sprijin-in-comunitate-prin-echipe-de-se/",
+          "https://mfe.gov.ro/wp-content/uploads/2026/06/0969b5af7afc64508b56b17b9a300767.pdf",
+          "https://mfe.gov.ro/wp-content/uploads/2026/02/b6c4e4bf47a316a23365cec2f92d1ba8.zip",
+          "https://mfe.gov.ro/wp-content/uploads/2025/10/a3fee67cdf3ef28731e6d75c42904555.zip",
+          "https://mfe.gov.ro/wp-content/uploads/2026/07/742f0a35cc484bdc54e62206578157dc.pdf"
+        ],
+        "officialHosts": [
+          "mfe.gov.ro"
+        ],
+        "failClosed": true,
+        "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
+      },
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "4b10978f5bd105f7e2",
@@ -131,7 +201,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "3a4ae97a51c2e6dc24",
@@ -140,15 +210,17 @@
       "programme": "PIDS",
       "code": "P07 / ESO4.11 / 7.2 C1",
       "region": "România",
-      "stage": "OPEN",
-      "stageLabel": "Deschis",
-      "maturityRank": 4,
+      "stage": "CONTRACTING",
+      "stageLabel": "În contractare",
+      "maturityRank": 8,
       "publicationState": "PUBLISHABLE",
       "dossierCompleteness": 100,
       "stageEvidence": [
         {
-          "type": "DOSSIER_STATUS",
-          "value": "OPEN"
+          "type": "OFFICIAL_EVENT",
+          "kind": "CONTRACTING_UPDATE",
+          "date": "2026-08-18T16:57:51.415320+00:00",
+          "text": "Ghidul Solicitantului Condiții Generale"
         }
       ],
       "transitions": [
@@ -157,26 +229,51 @@
           "from": null,
           "to": "OPEN",
           "reason": "INITIAL_CANONICAL_PROJECTION"
+        },
+        {
+          "observedAt": "2026-08-19T19:36:29Z",
+          "from": "OPEN",
+          "to": "CONTRACTING",
+          "reason": "NEW_OFFICIAL_EVIDENCE"
         }
       ],
       "results": {
         "winnerListConfirmed": false,
-        "winnerSources": [],
+        "winnerSources": [
+          {
+            "label": "Anexa 2 Procedura de selecție a partenerilor entități private;",
+            "url": "https://mfe.gov.ro/wp-content/uploads/2025/08/01facb6c8e516d7aac74ae476cacb2c4.docx",
+            "tier": "T1",
+            "observedAt": "2026-08-18T16:57:51.415320+00:00"
+          },
+          {
+            "label": "Anexa 2 Procedura de selecție a partenerilor entități private",
+            "url": "https://mfe.gov.ro/wp-content/uploads/2025/08/b01c7542d11427ac0da0d89bd7f98d7f.docx",
+            "tier": "T1",
+            "observedAt": "2026-08-19T19:36:29.824068+00:00"
+          }
+        ],
         "mysmis": null
       },
       "monitoring": {
         "active": true,
-        "priority": "HIGH",
+        "priority": "MEDIUM",
         "nextExpectedEvents": [
-          "corrigendum",
-          "prelungire termen",
-          "clarificări",
-          "închiderea depunerii"
+          "contracte semnate",
+          "beneficiari contractați",
+          "stadiu implementare"
         ],
         "officialSources": [
           "https://mfe.gov.ro/programul-incluziune-si-demnitate-sociala-pids-2021-2027-ghidul-solicitantului-conditii-generale/",
           "https://mfe.gov.ro/ghiduri_pids/servicii-de-asistenta-si-suport-in-luarea-deciziei-pentru-persoane-fara-sau-cu-capacitate-restransa-de-exercitiu/",
-          "https://www.oirbi.ro/pids-2021-2027/"
+          "https://www.oirbi.ro/pids-2021-2027/",
+          "https://mfe.gov.ro/programul-educatie-si-ocupare-peo-2021-2027-ghidul-solicitantului-conditii-generale/",
+          "https://mfe.gov.ro/wp-content/uploads/2025/08/f6e18cc890fbcc845721704e967de442.doc",
+          "https://mfe.gov.ro/wp-content/uploads/2025/08/01facb6c8e516d7aac74ae476cacb2c4.docx",
+          "https://mfe.gov.ro/wp-content/uploads/2025/08/1da3a39509e3e1ce3baaa1fce9928832.docx",
+          "https://mfe.gov.ro/wp-content/uploads/2025/08/6e76bcf5b6b39a2fd10b8ec62c1719f8.doc",
+          "https://mfe.gov.ro/wp-content/uploads/2025/08/b01c7542d11427ac0da0d89bd7f98d7f.docx",
+          "https://mfe.gov.ro/wp-content/uploads/2025/08/0a6bf775f5a01277af83f28af2bd5f31.docx"
         ],
         "officialHosts": [
           "mfe.gov.ro",
@@ -185,7 +282,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "64539c7cadceb67b0d",
@@ -198,7 +295,7 @@
       "stageLabel": "Deschis",
       "maturityRank": 4,
       "publicationState": "PUBLISHABLE",
-      "dossierCompleteness": 29,
+      "dossierCompleteness": 43,
       "stageEvidence": [
         {
           "type": "DOSSIER_STATUS",
@@ -230,6 +327,9 @@
         "officialSources": [
           "https://oportunitati-ue.gov.ro/apel/step-lll-competente-pentru-viitor-formare-la-locul-de-munca-si-educatia-adultilor-in-tehnologiile-critice-adulti/",
           "https://www.runv.ro/anunturi.html",
+          "https://mfe.gov.ro/peo-actualizeaza-ghidul-solicitantului-step-lll-competente-pentru-viitor-formare-la-locul-de-munca-si-educatia-adultilor-in-tehnologiile-critice-adulti/",
+          "https://mfe.gov.ro/wp-content/uploads/2026/08/fd5aba1f3322c3dbe40b7f0b7c7de9c7-1.pdf",
+          "https://mfe.gov.ro/wp-content/uploads/2026/08/f4085e5b0e4eadc8b1678e4fa470e130.docx",
           "https://mfe.gov.ro/peo-lista-de-raspunsuri-la-propunerile-observatiile-si-intrebarile-formulate-de-solicitantii-finantarii-nerambursabile-in-cadrul-procesului-de-consultare-publica-aferent-ghidului-solicitantului-cond-3/",
           "https://mfe.gov.ro/consultare-publica-peo-ghidul-solicitantului-step-lll-competente-pentru-viitor-formare-la-locul-de-munca-si-educatia-adultilor-in-tehnologiile-critice-adulti/",
           "https://mfe.gov.ro/peo-varianta-consolidata-a-ghidului-solicitantului-step-lll-competente-pentru-viitor-formare-la-locul-de-munca-si-educatia-adultilor-in-tehnologiile-critice-adulti/",
@@ -247,7 +347,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "ac2a8d9d22d5211488",
@@ -299,7 +399,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "1dbb2d1bbffb9eabdf",
@@ -350,7 +450,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "6cd84cb654eaae43bf",
@@ -406,7 +506,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "bff04f9c9156c25466",
@@ -462,7 +562,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "c625d9ed6a5fb7c000",
@@ -517,12 +617,12 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
-      "id": "1db2918a51b8230a54",
-      "dossierId": "mipe-620909d4b9fa10aea4",
-      "title": "PoIDS: Ghidul Solicitantului Cluster național de inovare socială și incluziune",
+      "id": "c3642e937401a2d09e",
+      "dossierId": "mipe-8ecb655ec9c23d5741",
+      "title": "PoIDS: Ghidul Solicitantului Centre multifuncționale pentru protejarea și reintegrarea socială a victimelor violenței domestice",
       "programme": "MIPE",
       "code": "—",
       "region": "România",
@@ -530,7 +630,7 @@
       "stageLabel": "Anunțat",
       "maturityRank": 3,
       "publicationState": "PROVISIONAL_FAIL_CLOSED",
-      "dossierCompleteness": 71,
+      "dossierCompleteness": 57,
       "stageEvidence": [
         {
           "type": "DOSSIER_STATUS",
@@ -539,7 +639,7 @@
       ],
       "transitions": [
         {
-          "observedAt": "2026-08-19T19:16:28Z",
+          "observedAt": "2026-08-19T19:36:29Z",
           "from": null,
           "to": "ANNOUNCED",
           "reason": "INITIAL_CANONICAL_PROJECTION"
@@ -560,11 +660,12 @@
           "corrigendum"
         ],
         "officialSources": [
-          "https://mfe.gov.ro/poids-ghidul-solicitantului-cluster-national-de-inovare-sociala-si-incluziune/",
-          "https://mfe.gov.ro/wp-content/uploads/2026/03/694fee38c13fa17c6ecc7647201771c5.zip",
-          "https://mfe.gov.ro/wp-content/uploads/2026/03/379f0f1efa0d529fd20827fd26b7e5a3.pdf",
-          "https://mfe.gov.ro/consultare-publica-poids-ghidul-cluster-national-de-inovare-sociala-si-incluziune/",
-          "https://mfe.gov.ro/wp-content/uploads/2025/12/2c0e377d8812c5e832a2b7996134426e.zip"
+          "https://mfe.gov.ro/poids-ghidul-solicitantului-centre-multifunctionale-pentru-protejarea-si-reintegrarea-sociala-a-victimelor-violentei-domestice/",
+          "https://mfe.gov.ro/wp-content/uploads/2026/06/5df2e98ce221f4c26801e30d3fca0f27.zip",
+          "https://mfe.gov.ro/poids-centralizatorul-raspunsurilor-la-propunerile-si-observatiile-formulate-privind-ghidul-solicitantului-centre-multifunctionale-pentru-protejarea-si-reintegrarea-sociala-a-victimelor-violentei-dom/",
+          "https://mfe.gov.ro/wp-content/uploads/2026/06/a9eb40b99268353f82783177cacebebb.pdf",
+          "https://mfe.gov.ro/poids-ghidul-solicitantului-conditii-specifice-centre-multifunctionale-pentru-protejarea-si-reintegrarea-sociala-a-victimelor-violentei-domestice/",
+          "https://mfe.gov.ro/wp-content/uploads/2026/05/5af0df92041933304073a8d155229037.zip"
         ],
         "officialHosts": [
           "mfe.gov.ro"
@@ -572,7 +673,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "1accf30256b2be8d3e",
@@ -626,7 +727,61 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
+    },
+    {
+      "id": "fefa351cd54f41821d",
+      "dossierId": "mipe-e846765073beed0ff9",
+      "title": "PoIDS: Varianta consolidată a documentului Orientări pentru Grupurile de Acțiune Locală în vederea implementării componentei cu finanțare din Fondul Social European Plus a Strategiilor de Dezvoltare Locală din mediul rural și din orașe și municipii cu mai puțin de 20.000 de locuitori",
+      "programme": "MIPE",
+      "code": "20.000",
+      "region": "România",
+      "stage": "ANNOUNCED",
+      "stageLabel": "Anunțat",
+      "maturityRank": 3,
+      "publicationState": "PROVISIONAL_FAIL_CLOSED",
+      "dossierCompleteness": 47,
+      "stageEvidence": [
+        {
+          "type": "DOSSIER_STATUS",
+          "value": "EXPECTED"
+        }
+      ],
+      "transitions": [
+        {
+          "observedAt": "2026-08-19T19:36:29Z",
+          "from": null,
+          "to": "ANNOUNCED",
+          "reason": "INITIAL_CANONICAL_PROJECTION"
+        }
+      ],
+      "results": {
+        "winnerListConfirmed": false,
+        "winnerSources": [],
+        "mysmis": null
+      },
+      "monitoring": {
+        "active": true,
+        "priority": "HIGH",
+        "nextExpectedEvents": [
+          "ghid final",
+          "deschiderea apelului",
+          "MySMIS",
+          "corrigendum"
+        ],
+        "officialSources": [
+          "https://mfe.gov.ro/poids-varianta-consolidata-a-documentului-orientari-pentru-grupurile-de-actiune-locala-in-vederea-implementarii-componentei-cu-finantare-din-fondul-social-european-plus-a-strategiilor-de-dezvoltare-l/",
+          "https://mfe.gov.ro/wp-content/uploads/2026/06/d9b050f048c38c652061400f57247f04.7z",
+          "https://mfe.gov.ro/poids-actualzieaza-documentul-orientari-pentru-grupurile-de-actiune-locala-in-vederea-implementarii-componentei-cu-finantare-din-fondul-social-european-plus-a-strategiilor-de-dezvoltare-loca/",
+          "https://mfe.gov.ro/wp-content/uploads/2026/04/b0af55fbe8836f2745f401c6a5387635.pdf"
+        ],
+        "officialHosts": [
+          "mfe.gov.ro"
+        ],
+        "failClosed": true,
+        "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
+      },
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "6e6841fbd5c18f96a0",
@@ -678,7 +833,71 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
+    },
+    {
+      "id": "1dfb52f7e98c892d29",
+      "dossierId": "mipe-ce5fbed8a7bd830af5",
+      "title": "Sprijin pentru persoanele cu dizabilități",
+      "programme": "Programul Incluziune și Demnitate Socială",
+      "code": "—",
+      "region": "România",
+      "stage": "OPEN",
+      "stageLabel": "Deschis",
+      "maturityRank": 4,
+      "publicationState": "PROVISIONAL_FAIL_CLOSED",
+      "dossierCompleteness": 29,
+      "stageEvidence": [
+        {
+          "type": "OFFICIAL_EVENT",
+          "kind": "DEADLINE_EXTENDED",
+          "date": "2026-08-19T19:16:28.209439+00:00",
+          "text": "AM PoIDS: Corrigendum la Ghidul Solicitantului – Condiții Specifice „Măsuri de formare continuă a personalului care lucrează cu și pentru persoanele cu dizabilități”, aferent PoIDS 2021-2027, Prioritatea P07, Obiectiv specific ESO4.11"
+        }
+      ],
+      "transitions": [
+        {
+          "observedAt": "2026-08-19T19:36:29Z",
+          "from": null,
+          "to": "OPEN",
+          "reason": "INITIAL_CANONICAL_PROJECTION"
+        }
+      ],
+      "results": {
+        "winnerListConfirmed": false,
+        "winnerSources": [],
+        "mysmis": null
+      },
+      "monitoring": {
+        "active": true,
+        "priority": "HIGH",
+        "nextExpectedEvents": [
+          "corrigendum",
+          "prelungire termen",
+          "clarificări",
+          "închiderea depunerii"
+        ],
+        "officialSources": [
+          "https://mfe.gov.ro/poids-ghidul-solicitantului-masuri-de-formare-continua-a-personalului-care-lucreaza-cu-si-pentru-persoanele-cu-dizabilitati/",
+          "https://mfe.gov.ro/wp-content/uploads/2025/11/89c86835ebc805c99137f7553c02c163.zip",
+          "https://mfe.gov.ro/consultare-publica-poids-ghidul-solicitantului-conditii-specifice-masuri-de-formare-continua-a-personalului-care-lucreaza-cu-si-pentru-persoanele-cu-dizabilitati/",
+          "https://mfe.gov.ro/wp-content/uploads/2025/10/b2320078eee181814579ef8b8a860e81.zip",
+          "https://mfe.gov.ro/poids-varianta-consolidata-a-ghidului-solicitantului-masuri-de-formare-continua-a-personalului-care-lucreaza-cu-si-pentru-persoanele-cu-dizabilitati/",
+          "https://mfe.gov.ro/wp-content/uploads/2026/02/fb1f0d7fb67745d5190fd25b2c0c1f2a.zip",
+          "https://mfe.gov.ro/poids-actualizeaza-ghidul-solicitantului-masuri-de-formare-continua-a-personalului-care-lucreaza-cu-si-pentru-persoanele-cu-dizabilitati/",
+          "https://mfe.gov.ro/wp-content/uploads/2026/02/7901aa8f51ed729a9c9b864be7f43ec5.pdf",
+          "https://mfe.gov.ro/poids-varianta-consolidata-a-ghidului-solicitantului-conditii-specifice-masuri-de-formare-continua-a-personalului-care-lucreaza-cu-si-pentru-persoanele-cu-dizabilitati/",
+          "https://mfe.gov.ro/wp-content/uploads/2026/01/e9f0df8724b4ffa4e2f383f894af1a30.zip",
+          "https://mfe.gov.ro/am-poids-corrigendum-la-ghidul-solicitantului-conditii-specifice-masuri-de-formare-continua-a-personalului-care-lucreaza-cu-si-pentru-persoanele-cu-dizabilitati-aferent-poids-202/",
+          "https://mfe.gov.ro/wp-content/uploads/2025/10/859093c2cd8d98193bca3e01d50b14ec.pdf"
+        ],
+        "officialHosts": [
+          "mfe.gov.ro"
+        ],
+        "failClosed": true,
+        "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
+      },
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "d2941f66fa74387eae",
@@ -730,7 +949,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "9d2d2493ee5efdc467",
@@ -774,7 +993,9 @@
         ],
         "officialSources": [
           "https://mfe.gov.ro/pddtj-ghidul-solicitantului-pentru-actiunea-energie-verde-accesibila-si-mobilitate-nepoluanta/",
-          "https://mfe.gov.ro/wp-content/uploads/2026/08/10da0c0013cc3cc4daf4beba909922b0.zip"
+          "https://mfe.gov.ro/wp-content/uploads/2026/08/10da0c0013cc3cc4daf4beba909922b0.zip",
+          "https://mfe.gov.ro/pddtj-actualizeaza-ghidul-solicitantului-pentru-actiunea-energie-verde-accesibila-si-mobilitate-nepoluanta-componenta-dezvoltarea-surselor-de-energie-regenerabila-in-persp/",
+          "https://mfe.gov.ro/wp-content/uploads/2026/08/de5b615790a52fe84a653529e02ca5f5.pdf"
         ],
         "officialHosts": [
           "mfe.gov.ro"
@@ -782,7 +1003,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "390dbbc2e9587b8614",
@@ -833,7 +1054,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "715953d7670cd9c234",
@@ -890,7 +1111,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "6dced31d1a0a0ebb2a",
@@ -942,73 +1163,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
-    },
-    {
-      "id": "b57fc958331d23be6b",
-      "dossierId": "mipe-9518a3c73f126e4e81",
-      "title": "Dezvoltarea serviciilor de sprijin în comunitate, prin echipe de servicii mobile",
-      "programme": "Programul Incluziune și Demnitate Socială",
-      "code": "—",
-      "region": "România",
-      "stage": "CONSULTATION",
-      "stageLabel": "În consultare",
-      "maturityRank": 1,
-      "publicationState": "PUBLISHABLE",
-      "dossierCompleteness": 100,
-      "stageEvidence": [
-        {
-          "type": "DOSSIER_STATUS",
-          "value": "PUBLIC_CONSULTATION"
-        },
-        {
-          "type": "OFFICIAL_EVENT",
-          "kind": "CONSULTATION_OPENED",
-          "date": "2026-08-19T19:16:28.209439+00:00",
-          "text": "AM PoIDS, consultare publică: Ghidul Solicitantului Condiții Specifice „Dezvoltarea serviciilor de sprijin în comunitate, prin echipe de servicii mobile”"
-        },
-        {
-          "type": "OFFICIAL_EVENT",
-          "kind": "CONSULTATION_OPENED",
-          "date": "2026-08-18T16:57:51.415320+00:00",
-          "text": "PoIDS: Răspunsurile la propunerile și observațiile formulate în cadrul procesului de consultare publică pentru Ghidul Solicitantului Dezvoltarea serviciilor de sprijin în comunitate, prin echipe de servicii mobile"
-        }
-      ],
-      "transitions": [
-        {
-          "observedAt": "2026-08-18T16:57:51Z",
-          "from": null,
-          "to": "CONSULTATION",
-          "reason": "INITIAL_CANONICAL_PROJECTION"
-        }
-      ],
-      "results": {
-        "winnerListConfirmed": false,
-        "winnerSources": [],
-        "mysmis": null
-      },
-      "monitoring": {
-        "active": true,
-        "priority": "HIGH",
-        "nextExpectedEvents": [
-          "închiderea consultării",
-          "ghid final",
-          "ordin de aprobare",
-          "lansarea apelului"
-        ],
-        "officialSources": [
-          "https://mfe.gov.ro/am-poids-consultare-publica-ghidul-solicitantului-conditii-specifice-dezvoltarea-serviciilor-de-sprijin-in-comunitate-prin-echipe-de-servicii-mobile/",
-          "https://mfe.gov.ro/poids-raspunsurile-la-propunerile-si-observatiile-formulate-in-cadrul-procesului-de-consultare-publica-pentru-ghidul-solicitantului-dezvoltarea-serviciilor-de-sprijin-in-comunitate-prin-echipe-de-se/",
-          "https://mfe.gov.ro/wp-content/uploads/2025/10/a3fee67cdf3ef28731e6d75c42904555.zip",
-          "https://mfe.gov.ro/wp-content/uploads/2026/07/742f0a35cc484bdc54e62206578157dc.pdf"
-        ],
-        "officialHosts": [
-          "mfe.gov.ro"
-        ],
-        "failClosed": true,
-        "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
-      },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "a17bf0c3617a08617d",
@@ -1023,6 +1178,24 @@
       "publicationState": "PUBLISHABLE",
       "dossierCompleteness": 100,
       "stageEvidence": [
+        {
+          "type": "OFFICIAL_EVENT",
+          "kind": "CONTRACTING_UPDATE",
+          "date": "2026-08-19T19:36:29.824068+00:00",
+          "text": "Ghidul Solicitantului Sprijin pentru familii monoparentale – ITI Moții Țara de Piatră"
+        },
+        {
+          "type": "OFFICIAL_EVENT",
+          "kind": "CONTRACTING_UPDATE",
+          "date": "2026-08-18T16:57:51.415320+00:00",
+          "text": "PoIDS: Lista finală a proiectelor selectate la finanțare în cadrul apelului de proiecte „Dezvoltarea de servicii de îngrijire și suport de calitate pentru persoanele cu dizabilități și îngrijitorii acestora, în centre respiro”"
+        },
+        {
+          "type": "OFFICIAL_EVENT",
+          "kind": "CONTRACTING_UPDATE",
+          "date": "2026-08-19T19:16:28.209439+00:00",
+          "text": "PoIDS: Listele intermediare privind cererile de finanțare aprobate în etapa de evaluare tehnică și financiară calitativă (ETFC) pentru apelul de proiecte"
+        },
         {
           "type": "OFFICIAL_EVENT",
           "kind": "CONTRACTING_UPDATE",
@@ -1232,7 +1405,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "dd5db87d4e2891f7da",
@@ -1286,7 +1459,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "34ad736ddccdde01ac",
@@ -1338,7 +1511,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "825ad953a0ec2d029c",
@@ -1390,7 +1563,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "a6190d8a45beb82d0b",
@@ -1442,61 +1615,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
-    },
-    {
-      "id": "f38980795f89614c13",
-      "dossierId": "mipe-7a8a88463ef3e33798",
-      "title": "Sprijin pentru familii monoparentale – ITI Moții Țara de Piatră",
-      "programme": "Programul Incluziune și Demnitate Socială",
-      "code": "—",
-      "region": "România",
-      "stage": "CONSULTATION",
-      "stageLabel": "În consultare",
-      "maturityRank": 1,
-      "publicationState": "PROVISIONAL_FAIL_CLOSED",
-      "dossierCompleteness": 43,
-      "stageEvidence": [
-        {
-          "type": "DOSSIER_STATUS",
-          "value": "PUBLIC_CONSULTATION"
-        }
-      ],
-      "transitions": [
-        {
-          "observedAt": "2026-08-18T16:57:51Z",
-          "from": null,
-          "to": "CONSULTATION",
-          "reason": "INITIAL_CANONICAL_PROJECTION"
-        }
-      ],
-      "results": {
-        "winnerListConfirmed": false,
-        "winnerSources": [],
-        "mysmis": null
-      },
-      "monitoring": {
-        "active": true,
-        "priority": "HIGH",
-        "nextExpectedEvents": [
-          "închiderea consultării",
-          "ghid final",
-          "ordin de aprobare",
-          "lansarea apelului"
-        ],
-        "officialSources": [
-          "https://mfe.gov.ro/consultare-publica-poids-ghidul-solicitantului-sprijin-pentru-familii-monoparentale-iti-tara-fagarasului/",
-          "https://mfe.gov.ro/consultare-publica-poids-ghidul-solicitantului-sprijin-pentru-familii-monoparentale-iti-motii-tara-de-piatra/",
-          "https://mfe.gov.ro/wp-content/uploads/2026/08/717ba3e33320359ef3f307eb31ce9638.7z",
-          "https://mfe.gov.ro/wp-content/uploads/2026/08/05627d6fe9df04f2c76ae595c36bb52e.7z"
-        ],
-        "officialHosts": [
-          "mfe.gov.ro"
-        ],
-        "failClosed": true,
-        "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
-      },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "163db2cade53939128",
@@ -1546,7 +1665,9 @@
         ],
         "officialSources": [
           "https://mfe.gov.ro/poids-ghidul-solicitantului-servicii-de-asistenta-si-suport-in-luarea-deciziei-pentru-persoane-fara-sau-cu-capacitate-restransa-de-exercitiu/",
-          "https://mfe.gov.ro/wp-content/uploads/2026/05/75b6b61f3fe9b66c57d5b52d5aab98c5.zip"
+          "https://mfe.gov.ro/wp-content/uploads/2026/05/75b6b61f3fe9b66c57d5b52d5aab98c5.zip",
+          "https://mfe.gov.ro/poids-ghidul-solicitantului-servicii-de-asistenta-si-suport-in-luarea-deciziei-pentru-persoane-fara-sau-cu-capacitate-restransa-de-exercitiu-2/",
+          "https://mfe.gov.ro/wp-content/uploads/2026/06/0c65ef5b7b09aeac6c4c664d15f69d3e.7z"
         ],
         "officialHosts": [
           "mfe.gov.ro"
@@ -1554,7 +1675,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "aadfac9fc630fbcf35",
@@ -1612,7 +1733,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "35c378a9824ecc4404",
@@ -1664,111 +1785,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
-    },
-    {
-      "id": "0bf3ea3141c0dfa100",
-      "dossierId": "mipe-abf3d7daf43efe3158",
-      "title": "Centre multifuncționale pentru protejarea și reintegrarea socială a victimelor violenței domestice",
-      "programme": "Programul Incluziune și Demnitate Socială",
-      "code": "—",
-      "region": "România",
-      "stage": "CONSULTATION",
-      "stageLabel": "În consultare",
-      "maturityRank": 1,
-      "publicationState": "PROVISIONAL_FAIL_CLOSED",
-      "dossierCompleteness": 29,
-      "stageEvidence": [
-        {
-          "type": "DOSSIER_STATUS",
-          "value": "PUBLIC_CONSULTATION"
-        }
-      ],
-      "transitions": [
-        {
-          "observedAt": "2026-08-19T19:16:28Z",
-          "from": null,
-          "to": "CONSULTATION",
-          "reason": "INITIAL_CANONICAL_PROJECTION"
-        }
-      ],
-      "results": {
-        "winnerListConfirmed": false,
-        "winnerSources": [],
-        "mysmis": null
-      },
-      "monitoring": {
-        "active": true,
-        "priority": "HIGH",
-        "nextExpectedEvents": [
-          "închiderea consultării",
-          "ghid final",
-          "ordin de aprobare",
-          "lansarea apelului"
-        ],
-        "officialSources": [
-          "https://mfe.gov.ro/poids-ghidul-solicitantului-conditii-specifice-centre-multifunctionale-pentru-protejarea-si-reintegrarea-sociala-a-victimelor-violentei-domestice/",
-          "https://mfe.gov.ro/wp-content/uploads/2026/05/5af0df92041933304073a8d155229037.zip"
-        ],
-        "officialHosts": [
-          "mfe.gov.ro"
-        ],
-        "failClosed": true,
-        "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
-      },
-      "updatedAt": "2026-08-19T19:16:28Z"
-    },
-    {
-      "id": "19b949924f1a4b1e2a",
-      "dossierId": "mipe-a5b151dcba07ddcc47",
-      "title": "Formarea profesională a specialiștilor care lucrează cu grupuri vulnerabile",
-      "programme": "Programul Incluziune și Demnitate Socială",
-      "code": "—",
-      "region": "România",
-      "stage": "CONSULTATION",
-      "stageLabel": "În consultare",
-      "maturityRank": 1,
-      "publicationState": "PROVISIONAL_FAIL_CLOSED",
-      "dossierCompleteness": 29,
-      "stageEvidence": [
-        {
-          "type": "DOSSIER_STATUS",
-          "value": "PUBLIC_CONSULTATION"
-        }
-      ],
-      "transitions": [
-        {
-          "observedAt": "2026-08-19T19:16:28Z",
-          "from": null,
-          "to": "CONSULTATION",
-          "reason": "INITIAL_CANONICAL_PROJECTION"
-        }
-      ],
-      "results": {
-        "winnerListConfirmed": false,
-        "winnerSources": [],
-        "mysmis": null
-      },
-      "monitoring": {
-        "active": true,
-        "priority": "HIGH",
-        "nextExpectedEvents": [
-          "închiderea consultării",
-          "ghid final",
-          "ordin de aprobare",
-          "lansarea apelului"
-        ],
-        "officialSources": [
-          "https://mfe.gov.ro/consultare-publica-poids-ghidul-solicitantului-formarea-profesionala-a-specialistilor-care-lucreaza-cu-grupuri-vulnerabile/",
-          "https://mfe.gov.ro/wp-content/uploads/2026/06/544726eab9194991da438159ec8a9d95.zip"
-        ],
-        "officialHosts": [
-          "mfe.gov.ro"
-        ],
-        "failClosed": true,
-        "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
-      },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "269b7cbcaabb9af517",
@@ -1827,7 +1844,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "8e7f22cce2250e62c0",
@@ -1885,105 +1902,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
-    },
-    {
-      "id": "06bb5e257d4942ed31",
-      "dossierId": "mipe-13e52a365829c5f149",
-      "title": "Sprijin pentru autoritățile publice locale in vederea gestionării situației așezărilor informale și asigurarea de locuințe sociale pentru persoanele vulnerabile cu accent pe persoanele provenite din așezările informale",
-      "programme": "Programul Incluziune și Demnitate Socială",
-      "code": "—",
-      "region": "România",
-      "stage": "CONSULTATION",
-      "stageLabel": "În consultare",
-      "maturityRank": 1,
-      "publicationState": "PROVISIONAL_FAIL_CLOSED",
-      "dossierCompleteness": 29,
-      "stageEvidence": [
-        {
-          "type": "DOSSIER_STATUS",
-          "value": "PUBLIC_CONSULTATION"
-        },
-        {
-          "type": "OFFICIAL_EVENT",
-          "kind": "CONSULTATION_OPENED",
-          "date": "2026-08-19T19:16:28.209439+00:00",
-          "text": "Consultare publică, PoIDS: Ghidul Solicitantului Sprijin pentru autoritățile publice locale in vederea asigurării de locuințe sociale pentru persoanele vulnerabile – ITI Valea Jiului"
-        },
-        {
-          "type": "OFFICIAL_EVENT",
-          "kind": "CONSULTATION_OPENED",
-          "date": "2026-08-19T19:16:28.209439+00:00",
-          "text": "Consultare publică, PoIDS: Ghidul Solicitantului Sprijin pentru autoritățile publice locale in vederea asigurării de locuințe sociale pentru persoanele vulnerabile – ITI Moții Țara de Piatră"
-        },
-        {
-          "type": "OFFICIAL_EVENT",
-          "kind": "CONSULTATION_OPENED",
-          "date": "2026-08-19T19:16:28.209439+00:00",
-          "text": "Consultare publică, PoIDS: Ghidul Solicitantului Sprijin pentru autoritățile publice locale in vederea asigurării de locuințe sociale pentru persoanele vulnerabile – ITI Țara Făgărașului"
-        },
-        {
-          "type": "OFFICIAL_EVENT",
-          "kind": "CONSULTATION_OPENED",
-          "date": "2026-08-19T19:16:28.209439+00:00",
-          "text": "Consultare publică, PoIDS: Ghidul Solicitantului Sprijin pentru autoritățile publice locale in vederea asigurării de locuințe sociale pentru persoanele vulnerabile – ITI Delta Dunării"
-        },
-        {
-          "type": "OFFICIAL_EVENT",
-          "kind": "CONSULTATION_OPENED",
-          "date": "2026-08-19T19:16:28.209439+00:00",
-          "text": "AM PoIDS, consultare publică: Ghidul Solicitantului Condiții Specifice “Sprijin pentru autoritățile publice locale in vederea gestionării situației așezărilor informale și asigurarea de locuințe sociale pentru persoanele vulnerabile cu accent pe persoanele provenite din așezările informale”"
-        },
-        {
-          "type": "OFFICIAL_EVENT",
-          "kind": "CONSULTATION_OPENED",
-          "date": "2026-08-18T16:57:51.415320+00:00",
-          "text": "PoIDS: Lista de răspunsuri la propunerile, observațiile și întrebările formulate de solicitanții finanțării nerambursabile aferente Ghidului Solicitantului „Sprijin pentru autoritățile publice locale in vederea asigurării de locuințe sociale pentru persoanele vulnerabile – ITI Delta Dunării”"
-        }
-      ],
-      "transitions": [
-        {
-          "observedAt": "2026-08-19T19:16:28Z",
-          "from": null,
-          "to": "CONSULTATION",
-          "reason": "INITIAL_CANONICAL_PROJECTION"
-        }
-      ],
-      "results": {
-        "winnerListConfirmed": false,
-        "winnerSources": [],
-        "mysmis": null
-      },
-      "monitoring": {
-        "active": true,
-        "priority": "HIGH",
-        "nextExpectedEvents": [
-          "închiderea consultării",
-          "ghid final",
-          "ordin de aprobare",
-          "lansarea apelului"
-        ],
-        "officialSources": [
-          "https://mfe.gov.ro/am-poids-consultare-publica-ghidul-solicitantului-conditii-specifice-sprijin-pentru-autoritatile-publice-locale-in-vederea-gestionarii-situatiei-asezarilor-informale-si-asigurarea-de-locui/",
-          "https://mfe.gov.ro/wp-content/uploads/2025/10/cdc7b4daa0a01550d26d4fc02b24cc46.7z",
-          "https://mfe.gov.ro/consultare-publica-poids-ghidul-solicitantului-sprijin-pentru-autoritatile-publice-locale-in-vederea-asigurarii-de-locuinte-sociale-pentru-persoanele-vulnerabile-iti-valea-jiului/",
-          "https://mfe.gov.ro/wp-content/uploads/2026/03/c1229c6c58409c293fba2c9383c42886.zip",
-          "https://mfe.gov.ro/consultare-publica-poids-ghidul-solicitantului-sprijin-pentru-autoritatile-publice-locale-in-vederea-asigurarii-de-locuinte-sociale-pentru-persoanele-vulnerabile-iti-motii-tara-de-pi/",
-          "https://mfe.gov.ro/wp-content/uploads/2026/03/ea781e9f7fda84bc7f888697459901d0.zip",
-          "https://mfe.gov.ro/consultare-publica-poids-ghidul-solicitantului-sprijin-pentru-autoritatile-publice-locale-in-vederea-asigurarii-de-locuinte-sociale-pentru-persoanele-vulnerabile-iti-tara-fagarasului/",
-          "https://mfe.gov.ro/wp-content/uploads/2026/03/1e9185e4be37f039d60d2037b629e073-1.zip",
-          "https://mfe.gov.ro/consultare-publica-poids-ghidul-solicitantului-sprijin-pentru-autoritatile-publice-locale-in-vederea-asigurarii-de-locuinte-sociale-pentru-persoanele-vulnerabile-iti-delta-dunarii/",
-          "https://mfe.gov.ro/wp-content/uploads/2026/03/cc9d417a1802dfd9c287c7cef7325281.zip",
-          "https://mfe.gov.ro/poids-lista-de-raspunsuri-la-propunerile-observatiile-si-intrebarile-formulate-de-solicitantii-finantarii-nerambursabile-aferente-ghidului-solicitantului-sprijin-pentru-autoritatile-publice/",
-          "https://mfe.gov.ro/wp-content/uploads/2026/03/7ad1c1f8451234bb2e86ec9387b0085b.pdf"
-        ],
-        "officialHosts": [
-          "mfe.gov.ro"
-        ],
-        "failClosed": true,
-        "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
-      },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "ad4a09985afc4a0f15",
@@ -2037,7 +1956,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "929fc68440968418c3",
@@ -2089,7 +2008,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "21327585a5397c824e",
@@ -2141,69 +2060,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
-    },
-    {
-      "id": "afd2b1bd794cf4aaad",
-      "dossierId": "mipe-e6a0832912c6f4a0fe",
-      "title": "Ghidul Solicitantului Condiții Generale",
-      "programme": "PEO",
-      "code": "—",
-      "region": "România",
-      "stage": "CONTRACTING",
-      "stageLabel": "În contractare",
-      "maturityRank": 8,
-      "publicationState": "PROVISIONAL_FAIL_CLOSED",
-      "dossierCompleteness": 68,
-      "stageEvidence": [
-        {
-          "type": "OFFICIAL_EVENT",
-          "kind": "CONTRACTING_UPDATE",
-          "date": "2026-08-18T16:57:51.415320+00:00",
-          "text": "Ghidul Solicitantului Condiții Generale"
-        }
-      ],
-      "transitions": [
-        {
-          "observedAt": "2026-08-18T16:57:51Z",
-          "from": null,
-          "to": "CONTRACTING",
-          "reason": "INITIAL_CANONICAL_PROJECTION"
-        }
-      ],
-      "results": {
-        "winnerListConfirmed": false,
-        "winnerSources": [
-          {
-            "label": "Anexa 2 Procedura de selecție a partenerilor entități private;",
-            "url": "https://mfe.gov.ro/wp-content/uploads/2025/08/01facb6c8e516d7aac74ae476cacb2c4.docx",
-            "tier": "T1",
-            "observedAt": "2026-08-18T16:57:51.415320+00:00"
-          }
-        ],
-        "mysmis": null
-      },
-      "monitoring": {
-        "active": true,
-        "priority": "MEDIUM",
-        "nextExpectedEvents": [
-          "contracte semnate",
-          "beneficiari contractați",
-          "stadiu implementare"
-        ],
-        "officialSources": [
-          "https://mfe.gov.ro/programul-educatie-si-ocupare-peo-2021-2027-ghidul-solicitantului-conditii-generale/",
-          "https://mfe.gov.ro/wp-content/uploads/2025/08/f6e18cc890fbcc845721704e967de442.doc",
-          "https://mfe.gov.ro/wp-content/uploads/2025/08/01facb6c8e516d7aac74ae476cacb2c4.docx",
-          "https://mfe.gov.ro/wp-content/uploads/2025/08/1da3a39509e3e1ce3baaa1fce9928832.docx"
-        ],
-        "officialHosts": [
-          "mfe.gov.ro"
-        ],
-        "failClosed": true,
-        "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
-      },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "1a31ce483b32afc8b2",
@@ -2253,7 +2110,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "d204f3af096b5f1fe6",
@@ -2304,7 +2161,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "d15c00e93053678ede",
@@ -2355,7 +2212,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "86e56799f2a22fe8d8",
@@ -2405,7 +2262,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "4f52dde1061c6084a9",
@@ -2455,7 +2312,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "bd04ac5ab1419bed98",
@@ -2505,7 +2362,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "19d4242ec6aa276076",
@@ -2555,7 +2412,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "66f88d601e638db02d",
@@ -2608,7 +2465,60 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
+    },
+    {
+      "id": "b9f5ff84e9816c3d3a",
+      "dossierId": "mipe-bb451a43914e6bc4cb",
+      "title": "PoIDS: Lista intermediară a proiectelor aprobate în urma finalizării procesului de evaluare tehnică şi financiară calitativă pentru apelul de proiecte „Cluster național de inovare socială și incluziune”",
+      "programme": "PoIDS",
+      "code": "—",
+      "region": "România",
+      "stage": "CONTRACTING",
+      "stageLabel": "În contractare",
+      "maturityRank": 8,
+      "publicationState": "PROVISIONAL_FAIL_CLOSED",
+      "dossierCompleteness": 47,
+      "stageEvidence": [
+        {
+          "type": "OFFICIAL_EVENT",
+          "kind": "CONTRACTING_UPDATE",
+          "date": "2026-08-19T19:36:29.824068+00:00",
+          "text": "PoIDS: Lista intermediară a proiectelor aprobate în urma finalizării procesului de evaluare tehnică şi financiară calitativă pentru apelul de proiecte „Cluster național de inovare socială și incluziune”"
+        }
+      ],
+      "transitions": [
+        {
+          "observedAt": "2026-08-19T19:36:29Z",
+          "from": null,
+          "to": "CONTRACTING",
+          "reason": "INITIAL_CANONICAL_PROJECTION"
+        }
+      ],
+      "results": {
+        "winnerListConfirmed": false,
+        "winnerSources": [],
+        "mysmis": null
+      },
+      "monitoring": {
+        "active": true,
+        "priority": "MEDIUM",
+        "nextExpectedEvents": [
+          "contracte semnate",
+          "beneficiari contractați",
+          "stadiu implementare"
+        ],
+        "officialSources": [
+          "https://mfe.gov.ro/poids-lista-intermediara-a-proiectelor-aprobate-in-urma-finalizarii-procesului-de-evaluare-tehnica-si-financiara-calitativa-pentru-apelul-de-proiecte-cluster-national-de-inovare-sociala-si-i/",
+          "https://mfe.gov.ro/wp-content/uploads/2026/05/e69520ada16a1245a9651b0dff04f92f.pdf"
+        ],
+        "officialHosts": [
+          "mfe.gov.ro"
+        ],
+        "failClosed": true,
+        "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
+      },
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "14d47153fe463138b0",
@@ -2658,7 +2568,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "06dcdc40d966a05805",
@@ -2708,7 +2618,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "489b47a3daf91ee463",
@@ -2758,7 +2668,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "855886af42e99f0715",
@@ -2810,7 +2720,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "db69134be0333012d0",
@@ -2860,7 +2770,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "c77d8a44fe01a04e85",
@@ -2910,7 +2820,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "74830a992a6d801f49",
@@ -2960,7 +2870,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "3a57b28295cc9e3d44",
@@ -3010,7 +2920,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "7ac647b77ac66cf2f7",
@@ -3060,7 +2970,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "0b75f0f781ab0adeac",
@@ -3110,7 +3020,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "03a8fa6208a0a8dbda",
@@ -3160,7 +3070,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "a857ab30d9a97f1ca6",
@@ -3210,7 +3120,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "f441953e52ddcb1b6f",
@@ -3263,7 +3173,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "070ef7ed1da33a397a",
@@ -3315,117 +3225,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
-    },
-    {
-      "id": "ae104c02db843f7600",
-      "dossierId": "mipe-b8cbc853375e0f36d4",
-      "title": "AM PoIDS: Corrigendum la Ghidul Solicitantului – Condiții Specifice „Măsuri de formare continuă a personalului care lucrează cu și pentru persoanele cu dizabilități”, aferent PoIDS 2021-2027, Prioritatea P07, Obiectiv specific ESO4.11",
-      "programme": "PoIDS",
-      "code": "—",
-      "region": "România",
-      "stage": "OPEN",
-      "stageLabel": "Deschis",
-      "maturityRank": 4,
-      "publicationState": "PROVISIONAL_FAIL_CLOSED",
-      "dossierCompleteness": 39,
-      "stageEvidence": [
-        {
-          "type": "OFFICIAL_EVENT",
-          "kind": "DEADLINE_EXTENDED",
-          "date": "2026-08-19T19:16:28.209439+00:00",
-          "text": "AM PoIDS: Corrigendum la Ghidul Solicitantului – Condiții Specifice „Măsuri de formare continuă a personalului care lucrează cu și pentru persoanele cu dizabilități”, aferent PoIDS 2021-2027, Prioritatea P07, Obiectiv specific ESO4.11"
-        }
-      ],
-      "transitions": [
-        {
-          "observedAt": "2026-08-19T19:16:28Z",
-          "from": null,
-          "to": "OPEN",
-          "reason": "INITIAL_CANONICAL_PROJECTION"
-        }
-      ],
-      "results": {
-        "winnerListConfirmed": false,
-        "winnerSources": [],
-        "mysmis": null
-      },
-      "monitoring": {
-        "active": true,
-        "priority": "HIGH",
-        "nextExpectedEvents": [
-          "corrigendum",
-          "prelungire termen",
-          "clarificări",
-          "închiderea depunerii"
-        ],
-        "officialSources": [
-          "https://mfe.gov.ro/am-poids-corrigendum-la-ghidul-solicitantului-conditii-specifice-masuri-de-formare-continua-a-personalului-care-lucreaza-cu-si-pentru-persoanele-cu-dizabilitati-aferent-poids-202/",
-          "https://mfe.gov.ro/wp-content/uploads/2025/10/859093c2cd8d98193bca3e01d50b14ec.pdf"
-        ],
-        "officialHosts": [
-          "mfe.gov.ro"
-        ],
-        "failClosed": true,
-        "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
-      },
-      "updatedAt": "2026-08-19T19:16:28Z"
-    },
-    {
-      "id": "1996af5dc61274db63",
-      "dossierId": "mipe-422c71f058c35d7e6f",
-      "title": "Consultare publică, PoIDS: Ghidul Solicitantului Condiții Specifice „Măsuri de formare continuă a personalului care lucrează cu și pentru persoanele cu dizabilități”",
-      "programme": "MIPE",
-      "code": "—",
-      "region": "România",
-      "stage": "CONSULTATION",
-      "stageLabel": "În consultare",
-      "maturityRank": 1,
-      "publicationState": "PROVISIONAL_FAIL_CLOSED",
-      "dossierCompleteness": 39,
-      "stageEvidence": [
-        {
-          "type": "OFFICIAL_EVENT",
-          "kind": "CONSULTATION_OPENED",
-          "date": "2026-08-19T19:16:28.209439+00:00",
-          "text": "Consultare publică, PoIDS: Ghidul Solicitantului Condiții Specifice „Măsuri de formare continuă a personalului care lucrează cu și pentru persoanele cu dizabilități”"
-        }
-      ],
-      "transitions": [
-        {
-          "observedAt": "2026-08-19T19:16:28Z",
-          "from": null,
-          "to": "CONSULTATION",
-          "reason": "INITIAL_CANONICAL_PROJECTION"
-        }
-      ],
-      "results": {
-        "winnerListConfirmed": false,
-        "winnerSources": [],
-        "mysmis": null
-      },
-      "monitoring": {
-        "active": true,
-        "priority": "HIGH",
-        "nextExpectedEvents": [
-          "închiderea consultării",
-          "ghid final",
-          "ordin de aprobare",
-          "lansarea apelului"
-        ],
-        "officialSources": [
-          "https://mfe.gov.ro/consultare-publica-poids-ghidul-solicitantului-conditii-specifice-masuri-de-formare-continua-a-personalului-care-lucreaza-cu-si-pentru-persoanele-cu-dizabilitati/",
-          "https://mfe.gov.ro/wp-content/uploads/2025/10/b2320078eee181814579ef8b8a860e81.zip",
-          "https://mfe.gov.ro/am-poids-corrigendum-la-ghidul-solicitantului-conditii-specifice-masuri-de-formare-continua-a-personalului-care-lucreaza-cu-si-pentru-persoanele-cu-dizabilitati-aferent-poids-202/",
-          "https://mfe.gov.ro/wp-content/uploads/2025/10/859093c2cd8d98193bca3e01d50b14ec.pdf"
-        ],
-        "officialHosts": [
-          "mfe.gov.ro"
-        ],
-        "failClosed": true,
-        "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
-      },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "c62323342edc0a3740",
@@ -3477,7 +3277,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "ed99a28c566f897ed3",
@@ -3529,7 +3329,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "05a6489944c451d7d2",
@@ -3607,7 +3407,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "c505268c8d71a44d3b",
@@ -3657,7 +3457,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "ff10fd3a929960bf25",
@@ -3707,7 +3507,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "32c08758dd5d631966",
@@ -3758,7 +3558,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "0076c924f0e2c01c5b",
@@ -3810,7 +3610,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "bbdd2fa14a98e8341f",
@@ -3862,7 +3662,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "ea3cd8f81b159058e0",
@@ -3908,7 +3708,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "14d2ef71fa0eb7cb39",
@@ -3954,7 +3754,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "a7a17351f70e7e1c9b",
@@ -4000,7 +3800,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "6da7fdd7f6f6054ab9",
@@ -4046,7 +3846,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "2f46071e0600f94c48",
@@ -4092,7 +3892,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "d81ef311b02670a9ca",
@@ -4138,7 +3938,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "9e4951e380b4c38c0c",
@@ -4184,7 +3984,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "f8e4a949503204ae61",
@@ -4230,7 +4030,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "fe93fea4b958e353ac",
@@ -4276,7 +4076,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "9b41b09976699b2643",
@@ -4322,7 +4122,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "f478bfa0552afe4030",
@@ -4368,7 +4168,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "0ce5a500aaa500e71b",
@@ -4414,7 +4214,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "e4bf5cad4317795323",
@@ -4460,7 +4260,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "460f1d0e49f7154031",
@@ -4506,7 +4306,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "2c1bdc6fcfefacf447",
@@ -4552,7 +4352,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "cc93f59c78e0bf6ab9",
@@ -4598,7 +4398,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "81d91bda5da4ba7435",
@@ -4644,7 +4444,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "0a9850932b108e445d",
@@ -4706,7 +4506,70 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
+    },
+    {
+      "id": "1db2918a51b8230a54",
+      "dossierId": "mipe-620909d4b9fa10aea4",
+      "title": "PoIDS: Ghidul Solicitantului Cluster național de inovare socială și incluziune",
+      "programme": "MIPE",
+      "code": "—",
+      "region": "România",
+      "stage": "CLOSED",
+      "stageLabel": "Închis pentru depunere",
+      "maturityRank": 5,
+      "publicationState": "PROVISIONAL_FAIL_CLOSED",
+      "dossierCompleteness": 86,
+      "stageEvidence": [
+        {
+          "type": "DOSSIER_STATUS",
+          "value": "CLOSED"
+        }
+      ],
+      "transitions": [
+        {
+          "observedAt": "2026-08-19T19:16:28Z",
+          "from": null,
+          "to": "ANNOUNCED",
+          "reason": "INITIAL_CANONICAL_PROJECTION"
+        },
+        {
+          "observedAt": "2026-08-19T19:36:29Z",
+          "from": "ANNOUNCED",
+          "to": "CLOSED",
+          "reason": "NEW_OFFICIAL_EVIDENCE"
+        }
+      ],
+      "results": {
+        "winnerListConfirmed": false,
+        "winnerSources": [],
+        "mysmis": null
+      },
+      "monitoring": {
+        "active": true,
+        "priority": "MEDIUM",
+        "nextExpectedEvents": [
+          "începerea evaluării",
+          "liste intermediare",
+          "contestații",
+          "rezultate"
+        ],
+        "officialSources": [
+          "https://mfe.gov.ro/poids-ghidul-solicitantului-cluster-national-de-inovare-sociala-si-incluziune/",
+          "https://mfe.gov.ro/wp-content/uploads/2026/03/694fee38c13fa17c6ecc7647201771c5.zip",
+          "https://mfe.gov.ro/wp-content/uploads/2026/03/379f0f1efa0d529fd20827fd26b7e5a3.pdf",
+          "https://mfe.gov.ro/consultare-publica-poids-ghidul-cluster-national-de-inovare-sociala-si-incluziune/",
+          "https://mfe.gov.ro/wp-content/uploads/2025/12/2c0e377d8812c5e832a2b7996134426e.zip",
+          "https://mfe.gov.ro/poids-lista-intermediara-a-proiectelor-aprobate-in-urma-finalizarii-procesului-de-evaluare-tehnica-si-financiara-calitativa-pentru-apelul-de-proiecte-cluster-national-de-inovare-sociala-si-i/",
+          "https://mfe.gov.ro/wp-content/uploads/2026/05/e69520ada16a1245a9651b0dff04f92f.pdf"
+        ],
+        "officialHosts": [
+          "mfe.gov.ro"
+        ],
+        "failClosed": true,
+        "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
+      },
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "3691277362ce7a77b3",
@@ -4759,7 +4622,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "b57d1ea93faed2e6ce",
@@ -4813,7 +4676,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "d7d6014cd9c684f39b",
@@ -4869,7 +4732,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "838dfd7ab3bb4afbf0",
@@ -4926,7 +4789,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "7e53f5373979cc1d53",
@@ -4980,7 +4843,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "55b67653670733d6ac",
@@ -5032,7 +4895,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "97089548c3da78c271",
@@ -5085,7 +4948,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "944829638644e43586",
@@ -5137,7 +5000,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "dd430f9a283e6759b5",
@@ -5205,7 +5068,26 @@
           "https://mfe.gov.ro/wp-content/uploads/2025/10/3c38d4ad920cd1e541b6368a93c17254.zip",
           "https://mfe.gov.ro/am-poids-consultare-publica-ghidul-solicitantului-conditii-specifice-servicii-comunitare-pentru-copii-si-familii-in-vederea-prevenirii-separarii-si-in-vederea-sustinerii-reintegrarii/",
           "https://mfe.gov.ro/wp-content/uploads/2025/10/8b52b395a55bc3e48a7e9304bd9a0f34.zip",
-          "https://mfe.gov.ro/poids-informeaza-beneficiarii-ca-vor-primi-rezultatul-procesului-de-evaluare-tehnica-si-financiara-calitativa-pentru-proiectele-depuse-in-cadrul-apelului-servicii-comunitare-pentru-copii-si/"
+          "https://mfe.gov.ro/poids-varianta-consolidata-a-ghidului-solicitantului-servicii-comunitare-pentru-copii-si-familii-in-vederea-prevenirii-separarii-si-in-vederea-sustinerii-reintegrarii-in-familie-a-copiilor-p/",
+          "https://mfe.gov.ro/wp-content/uploads/2026/05/4d0feb70d65d89c2ddf450ed9921183f.zip",
+          "https://mfe.gov.ro/poids-ghidul-solicitantului-servicii-comunitare-pentru-copii-si-familii-in-vederea-prevenirii-separarii-si-in-vederea-sustinerii-reintegrarii-in-familie-a-copiilor-proveniti-din-sistemul-de-protecti-5/",
+          "https://mfe.gov.ro/wp-content/uploads/2026/04/cbf842d0115104eddff4961577ffaf06.pdf",
+          "https://mfe.gov.ro/poids-varianta-consolidata-a-ghidului-solicitantului-servicii-comunitare-pentru-copii-si-familii-in-vederea-prevenirii-separarii-si-in-vederea-sustinerii-reintegrarii-in-familie-a-copiilor-proveniti-2/",
+          "https://mfe.gov.ro/wp-content/uploads/2026/03/efc919b5a111602f3673655084068746.zip",
+          "https://mfe.gov.ro/poids-varianta-consolidata-a-ghidului-solicitantului-servicii-comunitare-pentru-copii-si-familii-in-vederea-prevenirii-separarii-si-in-vederea-sustinerii-reintegrarii-in-familie-a-copiilor-proveniti/",
+          "https://mfe.gov.ro/wp-content/uploads/2026/03/f047028f43032d8a36d8921a6acdbdba-1.zip",
+          "https://mfe.gov.ro/poids-actualizeaza-ghidul-solicitantului-conditii-specifice-servicii-comunitare-pentru-copii-si-familii-in-vederea-prevenirii-separarii-si-in-vederea-sustinerii-reintegrarii-in-familie-a-c/",
+          "https://mfe.gov.ro/wp-content/uploads/2026/03/f047028f43032d8a36d8921a6acdbdba.zip",
+          "https://mfe.gov.ro/poids-actualizeaza-ghidul-solicitantului-servicii-comunitare-pentru-copii-si-familii-in-vederea-prevenirii-separarii-si-in-vederea-sustinerii-reintegrarii-in-familie-a-copiilor-proveniti-din-sistemu-3/",
+          "https://mfe.gov.ro/wp-content/uploads/2026/03/20ca74593eedccc93ff9cbe86195d3e2.pdf",
+          "https://mfe.gov.ro/poids-actualizeaza-ghidul-solicitantului-servicii-comunitare-pentru-copii-si-familii-in-vederea-prevenirii-separarii-si-in-vederea-sustinerii-reintegrarii-in-familie-a-copiilor-proveniti-din-sistemu-2/",
+          "https://mfe.gov.ro/wp-content/uploads/2026/03/08e4c742167d2050e0c8de883170be80.pdf",
+          "https://mfe.gov.ro/poids-ghidul-solicitantului-servicii-comunitare-pentru-copii-si-familii-in-vederea-prevenirii-separarii-si-in-vederea-sustinerii-reintegrarii-in-familie-a-copiilor-proveniti-din-sistemul-de-protecti-4/",
+          "https://mfe.gov.ro/wp-content/uploads/2026/01/ed5172406ca61c9ad01a7bab571d0167.zip",
+          "https://mfe.gov.ro/poids-ghidul-solicitantului-servicii-comunitare-pentru-copii-si-familii-in-vederea-prevenirii-separarii-si-in-vederea-sustinerii-reintegrarii-in-familie-a-copiilor-proveniti-din-sistemul-de-protecti-3/",
+          "https://mfe.gov.ro/wp-content/uploads/2026/01/4909c191d20f5c5ec4f461deb2a94b3e.zip",
+          "https://mfe.gov.ro/poids-ghidul-solicitantului-servicii-comunitare-pentru-copii-si-familii-in-vederea-prevenirii-separarii-si-in-vederea-sustinerii-reintegrarii-in-familie-a-copiilor-proveniti-din-sistemul-de-protecti-2/",
+          "https://mfe.gov.ro/wp-content/uploads/2026/01/e82b7e1bfab6bcee4d0f9b43db23bb24.zip"
         ],
         "officialHosts": [
           "mfe.gov.ro"
@@ -5213,131 +5095,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
-    },
-    {
-      "id": "9762532a32dd08fcf8",
-      "dossierId": "mipe-5a1d6be265d8fb565d",
-      "title": "Servicii de îngrijire la domiciliu pentru persoanele vârstnice – ITI Delta Dunării",
-      "programme": "Programul Incluziune și Demnitate Socială",
-      "code": "PIDS/739/PIDS_P6/OP4/ESO4.11/PIDS_A26",
-      "region": "România",
-      "stage": "CONTRACTING",
-      "stageLabel": "În contractare",
-      "maturityRank": 8,
-      "publicationState": "PROVISIONAL_FAIL_CLOSED",
-      "dossierCompleteness": 43,
-      "stageEvidence": [
-        {
-          "type": "OFFICIAL_EVENT",
-          "kind": "CONTRACTING_UPDATE",
-          "date": "2026-08-18T16:57:51.415320+00:00",
-          "text": "PoIDS: Lista finală a proiectelor selectate la finanțare în cadrul apelului de proiecte „Dezvoltarea de servicii de îngrijire și suport de calitate pentru persoanele cu dizabilități și îngrijitorii acestora, în centre respiro”"
-        },
-        {
-          "type": "OFFICIAL_EVENT",
-          "kind": "CONTRACTING_UPDATE",
-          "date": "2026-08-19T19:16:28.209439+00:00",
-          "text": "PoIDS: Listele intermediare privind cererile de finanțare aprobate în etapa de evaluare tehnică și financiară calitativă (ETFC) pentru apelul de proiecte"
-        }
-      ],
-      "transitions": [
-        {
-          "observedAt": "2026-08-19T19:16:28Z",
-          "from": null,
-          "to": "CONTRACTING",
-          "reason": "INITIAL_CANONICAL_PROJECTION"
-        }
-      ],
-      "results": {
-        "winnerListConfirmed": false,
-        "winnerSources": [
-          {
-            "label": "MIPE — PoIDS: Listele finale cu cererile de finanțare care au fost respinse după soluționarea contestațiilor, în etapa de evaluare tehnică și financiară preliminară pentru apelurile de proiecte Servicii de îngrijire la domiciliu pentru persoanele vârstnice",
-            "url": "https://mfe.gov.ro/poids-listele-finale-cu-cererile-de-finantare-care-au-fost-respinse-dupa-solutionarea-contestatiilor-in-etapa-de-evaluare-tehnica-si-financiara-preliminara-pentru-apelurile-de-proiecte-servicii-de-i/",
-            "tier": "T1",
-            "observedAt": "2026-08-19T19:16:28.209439+00:00"
-          },
-          {
-            "label": "MIPE — PoIDS: Lista finală a cererilor de finanțare care au fost respinse după soluționarea contestațiilor în etapa de evaluare tehnică și financiară preliminară pentru apelul de proiecte Dezvoltarea de servicii de îngrijire și suport de calitate pentru persoanele cu dizabilități și îngrijitorii acestora, în centre respiro",
-            "url": "https://mfe.gov.ro/poids-lista-finala-a-cererilor-de-finantare-care-au-fost-respinse-dupa-solutionarea-contestatiilor-in-etapa-de-evaluare-tehnica-si-financiara-preliminara-pentru-apelul-de-proiecte-dezvoltarea-de-serv/",
-            "tier": "T1",
-            "observedAt": "2026-08-19T19:16:28.209439+00:00"
-          },
-          {
-            "label": "Lista finală a cererilor de finanțare care au fost respinse după soluționarea contestațiilorPDF, 376,43 Ko",
-            "url": "https://mfe.gov.ro/wp-content/uploads/2025/12/e0a2b14706c812df069862bf9fe79ed0.pdf",
-            "tier": "T1",
-            "observedAt": "2026-08-19T19:16:28.209439+00:00"
-          },
-          {
-            "label": "MIPE — sursă oficială",
-            "url": "https://mfe.gov.ro/poids-listele-finale-ale-proiectelor-selectate-la-finantare-si-rezerva-ca-urmare-a-finalizarii-procesului-de-solutionare-a-contestatiilor-pentru-etapa-de-evaluare-tehnica-si-financiara-calitativa-e/",
-            "tier": "T1",
-            "observedAt": "2026-08-18T16:57:51.415320+00:00"
-          },
-          {
-            "label": "Lista finală a proiectelor selectate la finanțare după soluționarea contestațiilor în etapa de evaluare tehnică și financiară calitativă (ETFC) – Apel 632PDF, 695,69 Ko",
-            "url": "https://mfe.gov.ro/wp-content/uploads/2026/07/01218615de8c76e83575a2974c6767df.pdf",
-            "tier": "T1",
-            "observedAt": "2026-08-18T16:57:51.415320+00:00"
-          },
-          {
-            "label": "Lista finală de rezervă a proiectelor aprobate după soluționarea contestațiilor în etapa de evaluare tehnică și financiară calitativă (ETFC) – Apel 632PDF, 764,34 Ko",
-            "url": "https://mfe.gov.ro/wp-content/uploads/2026/07/57e276a102971c8b7f8716e1b71f6fce.pdf",
-            "tier": "T1",
-            "observedAt": "2026-08-18T16:57:51.415320+00:00"
-          }
-        ],
-        "mysmis": null
-      },
-      "monitoring": {
-        "active": true,
-        "priority": "MEDIUM",
-        "nextExpectedEvents": [
-          "contracte semnate",
-          "beneficiari contractați",
-          "stadiu implementare"
-        ],
-        "officialSources": [
-          "https://mfe.gov.ro/poids-lista-finala-a-cererilor-de-finantare-respinse-dupa-solutionarea-contestatiilor-in-etapa-tehnica-si-financiara-preliminara-pentru-apelul-servicii-de-ingrijire-la-domiciliu-pentru-persoanele-var/",
-          "https://mfe.gov.ro/poids-lista-intermediara-a-cererilor-de-finantare-respinse-ca-urmare-a-finalizarii-procesului-de-evaluare-tehnica-si-financiara-preliminara-etfp-pentru-apelul-de-proiecte-servicii-de-ingrijir/",
-          "https://mfe.gov.ro/wp-content/uploads/2026/04/4f2618b394b12d5b5d354861984ea134.pdf",
-          "https://mfe.gov.ro/wp-content/uploads/2026/02/40eb1dde76f2c252144249275f043023.pdf",
-          "https://mfe.gov.ro/poids-lista-intermediara-nr-1-a-cererilor-de-finantare-care-au-fost-aprobate-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-etfc-pentru-apelul-de-proiecte-servicii-de-ingrijire-la/",
-          "https://mfe.gov.ro/poids-lista-intermediara-a-cererilor-de-finantare-care-au-fost-respinse-in-etapa-de-evaluare-tehnica-si-financiara-preliminara-etfp-depuse-in-cadrul-apelului-servicii-de-ingrijire-la-dom/",
-          "https://mfe.gov.ro/poids-lista-finala-a-proiectelor-selectate-la-finantare-dupa-solutionarea-contestatiilor-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-etfc-pentru-apelul-de-proiecte-servicii-de-in/",
-          "https://mfe.gov.ro/wp-content/uploads/2026/05/d2e8ee5c5b83fcabc7b9e1be198140dc.pdf",
-          "https://mfe.gov.ro/wp-content/uploads/2026/05/ab3e9f3033e7a64c7498e23b6cab5f3b.pdf",
-          "https://mfe.gov.ro/wp-content/uploads/2026/07/59eed8e70c61788d73f15c5aacc490fe.pdf",
-          "https://mfe.gov.ro/poids-lista-finala-a-cererilor-de-finantare-care-au-fost-respinse-dupa-solutionarea-contestatiilor-in-etapa-de-evaluare-tehnica-si-financiara-preliminara-pentru-apelul-de-proiecte-ervicii-de-ingrij/",
-          "https://mfe.gov.ro/poids-lista-intermediara-nr-1-a-cererilor-de-finantare-aprobate-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-in-cadrul-apelului-servicii-de-ingrijire-la-domiciliu-pentru-persoanele-varstnic/",
-          "https://mfe.gov.ro/poids-lista-intermediara-a-cererilor-de-finantare-care-au-fost-respinse-in-etapa-de-evaluare-tehnica-si-financiara-preliminara-etfp-depuse-in-cadrul-apelului-servicii-de-ingrijire-la/",
-          "https://mfe.gov.ro/poids-lista-finala-a-proiectelor-selectate-la-finantare-dupa-solutionarea-contestatiilor-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-entru-apelul-de-proiecte-servicii-de-ingrijire/",
-          "https://mfe.gov.ro/wp-content/uploads/2026/05/d6bf8882c58fb1090d087a4efdaa1e2d.pdf",
-          "https://mfe.gov.ro/wp-content/uploads/2026/05/940042bf91aa7ea39d5db6168925274b.pdf",
-          "https://mfe.gov.ro/wp-content/uploads/2026/03/ab3e9f3033e7a64c7498e23b6cab5f3b.pdf",
-          "https://mfe.gov.ro/wp-content/uploads/2026/06/b0efeead789b82ad3fafeeb3dc9d666a.pdf",
-          "https://mfe.gov.ro/poids-lista-intermediara-a-cererilor-de-finantare-care-au-fost-respinse-in-etapa-de-evaluare-tehnica-si-financiara-preliminara-etfp-depuse-in-cadrul-apelului-servicii-de-ingrijire-la-domicili/",
-          "https://mfe.gov.ro/wp-content/uploads/2026/03/12d2adfb9ae786aeab03c5c3843471d4.pdf",
-          "https://mfe.gov.ro/poids-listele-finale-cu-cererile-de-finantare-care-au-fost-respinse-dupa-solutionarea-contestatiilor-in-etapa-de-evaluare-tehnica-si-financiara-preliminara-pentru-apelurile-de-proiecte-servicii-de-i/",
-          "https://mfe.gov.ro/wp-content/uploads/2026/02/9d58183819154d7a0e14bd2a9c9a0f12.pdf",
-          "https://mfe.gov.ro/wp-content/uploads/2026/02/9136707b90d01f61fd1ec064c4a6dd6c.pdf",
-          "https://mfe.gov.ro/poids-lista-finala-a-cererilor-de-finantare-care-au-fost-respinse-dupa-solutionarea-contestatiilor-in-etapa-de-evaluare-tehnica-si-financiara-preliminara-pentru-apelul-de-proiecte-dezvoltarea-de-serv/",
-          "https://mfe.gov.ro/wp-content/uploads/2025/12/e0a2b14706c812df069862bf9fe79ed0.pdf",
-          "https://mfe.gov.ro/poids-listele-intermediare-privind-cererile-de-finantare-aprobate-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-etfc-pentru-apelul-de-proiecte/",
-          "https://mfe.gov.ro/poids-lista-finala-a-proiectelor-selectate-la-finantare-in-cadrul-apelului-de-proiecte-dezvoltarea-de-servicii-de-ingrijire-si-suport-de-calitate-pentru-persoanele-cu-dizabilitati-si-ingriji/",
-          "https://mfe.gov.ro/wp-content/uploads/2025/11/991a19f6f8b674693cbbe40582e61a0e.pdf",
-          "https://mfe.gov.ro/wp-content/uploads/2025/11/4e3526129712ceb1af7b975cd3466f1d.pdf",
-          "https://mfe.gov.ro/wp-content/uploads/2026/02/44e0bbdea3daf79420b27db8c69d8f44.pdf"
-        ],
-        "officialHosts": [
-          "mfe.gov.ro"
-        ],
-        "failClosed": true,
-        "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
-      },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "a4678e431a5e164a06",
@@ -5393,7 +5151,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "aeb52f0f3b287f12ab",
@@ -5458,7 +5216,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "8b52dad1c6ab911ec2",
@@ -5526,7 +5284,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     },
     {
       "id": "d0b7d1e27a885b3d4f",
@@ -5577,7 +5335,7 @@
         "failClosed": true,
         "rule": "Etapa avansează numai pe evidență oficială explicită sau pe registrul public MySMIS cu potrivire de titlu peste pragul conservator."
       },
-      "updatedAt": "2026-08-19T19:16:28Z"
+      "updatedAt": "2026-08-19T19:36:29Z"
     }
   ]
 }
