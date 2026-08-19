@@ -68,6 +68,20 @@ def fold(value: Any) -> str:
     return clean(value).lower().translate(str.maketrans("ăâîșşțţ", "aaisstt"))
 
 
+def actor_alias_matches(text: str, alias: str) -> bool:
+    """Match a person alias only as complete normalized tokens.
+
+    Surname aliases remain useful, but they must not match inside unrelated words
+    such as `maximizeaza` or `maximum`. Multi-token aliases tolerate punctuation
+    or hyphens between their tokens while preserving Unicode word boundaries.
+    """
+    tokens = re.findall(r"\w+", fold(alias), flags=re.UNICODE)
+    if not tokens:
+        return False
+    pattern = r"(?<!\w)" + r"[\W_]+".join(re.escape(token) for token in tokens) + r"(?!\w)"
+    return re.search(pattern, fold(text), flags=re.UNICODE) is not None
+
+
 def official_host(url: str, allowed_hosts: list[str]) -> bool:
     host = (urlparse(url).hostname or "").lower()
     return bool(host) and host in {str(x).lower() for x in allowed_hosts}
@@ -220,13 +234,12 @@ def first_relevant_sentence(text: str) -> str:
 
 
 def actor_alias(person: dict[str, Any], text: str) -> str | None:
-    value = fold(text)
     aliases = [clean(alias) for alias in person.get("aliases") or [] if clean(alias)]
     name = clean(person.get("name"))
     if name:
         aliases.append(name)
     for alias in sorted(set(aliases), key=len, reverse=True):
-        if fold(alias) in value:
+        if actor_alias_matches(text, alias):
             return alias
     return None
 
@@ -292,11 +305,10 @@ def statement_window_for(person: dict[str, Any], text: str) -> dict[str, Any] | 
 
 
 def actor_for(text: str, registry: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]] | None:
-    value = fold(text)
     for person in registry.get("people") or []:
         if not person.get("active"):
             continue
-        if not any(fold(alias) in value for alias in person.get("aliases") or []):
+        if not actor_alias(person, text):
             continue
         snapshot = verified_role(person)
         if snapshot:
