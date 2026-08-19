@@ -336,16 +336,22 @@ def _insert_entity(
     public_requested: bool,
     source_path: Path,
 ) -> bool:
-    evidence_backed = bool(source_urls)
+    now = utc_now()
+    http_sources = sorted({str(url).strip() for url in source_urls if str(url).startswith(("http://", "https://"))})
+    provenance = [
+        {
+            "source_url": url,
+            "evidence_fingerprint": _sha({"migration_source": str(source_path.relative_to(REPO_ROOT)), "source_url": url}),
+            "observed_at": now,
+            "source_kind": "LEGACY_MIGRATION",
+            "note": "Imported from already-public legacy VÂLCEA CLAR intelligence; no fresh authority inferred.",
+        }
+        for url in http_sources
+    ]
+    evidence_backed = bool(provenance)
     is_public = bool(public_requested and evidence_backed)
     status = "EVIDENCE_BACKED" if evidence_backed else "CANDIDATE"
-    provenance = {
-        "migration_source": str(source_path.relative_to(REPO_ROOT)),
-        "source_urls": source_urls,
-        "legacy_import": True,
-    }
-    fp = _sha({"type": entity_type, "id": entity_id, "name": name, "sources": source_urls})
-    now = utc_now()
+    fp = _sha({"type": entity_type, "id": entity_id, "name": name, "sources": http_sources})
     conn.execute(
         """
         INSERT INTO knowledge_entities(
