@@ -2,19 +2,275 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-19T06:14:51+03:00",
+  "generated_at": "2026-08-19T08:06:39+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-19T02:49:04+03:00",
-  "task_count": 58,
+  "queue_generated_at": "2026-08-19T08:04:48+03:00",
+  "task_count": 66,
   "primary_match_count": 0,
-  "no_match_count": 30,
-  "unrouted_count": 28,
-  "target_count": 18,
-  "targets_ok": 16,
+  "no_match_count": 35,
+  "unrouted_count": 31,
+  "target_count": 21,
+  "targets_ok": 17,
   "results": [
+    {
+      "signal_id": "ea3bdd06ceb36afb657bfea6",
+      "signal_title": "Consiliul Județean Vâlcea are patru finanțări rambursabile. Cel mai nou împrumut, de peste 10,8 milioane de lei, se rambursează până în 2036",
+      "signal_url": "https://ziaruldevalcea.ro/2026/08/consiliul-judetean-valcea-are-patru-finantari-rambursabile-cel-mai-nou-imprumut-de-peste-108-milioane-de-lei-se-ramburseaza-pana-in-2036/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-19T04:49:36+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "49416ffb7635eb22c787b36c",
+      "signal_title": "Căminul pentru Persoane Vârstnice din Râmnicu Vâlcea face angajări. Patru posturi de infirmieră, pe perioadă nedeterminată",
+      "signal_url": "https://ziaruldevalcea.ro/2026/08/caminul-pentru-persoane-varstnice-din-ramnicu-valcea-face-angajari-patru-posturi-de-infirmiera-pe-perioada-nedeterminata/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_published_at": "2026-08-19T04:45:25+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 65
+    },
+    {
+      "signal_id": "ab72a9acd0c19f4a5048743e",
+      "signal_title": "Investiție de peste 3,5 milioane de lei la Băile Olănești. Blocurile H și K, complet renovate energetic",
+      "signal_url": "https://ziaruldevalcea.ro/2026/08/investitie-de-peste-35-milioane-de-lei-la-baile-olanesti-blocurile-h-si-k-complet-renovate-energetic/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-19T04:43:06+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 72
+    },
+    {
+      "signal_id": "dd884101207aaca1b3f4bc57",
+      "signal_title": "Investiție pentru oameni la Orlești: Centrul „Sfânta Marie” se deschide pe 8 septembrie. Peste 100 de persoane vor beneficia de servicii gratuite",
+      "signal_url": "https://ziaruldevalcea.ro/2026/08/investitie-pentru-oameni-la-orlesti-centrul-sfanta-marie-se-deschide-pe-8-septembrie-peste-100-de-persoane-vor-beneficia-de-servicii-gratuite/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-19T04:40:47+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 55
+    },
+    {
+      "signal_id": "d3f692714a3a381b70de1c2c",
+      "signal_title": "Performanță de excepție pentru Vâlcea! Darius Dobre, medalie de argint la Olimpiada Internațională de Inteligență Artificială",
+      "signal_url": "https://ziaruldevalcea.ro/2026/08/performanta-de-exceptie-pentru-valcea-darius-dobre-medalie-de-argint-la-olimpiada-internationala-de-inteligenta-artificiala/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_published_at": "2026-08-19T04:36:56+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "f0773be2abf8b8c25d4fe58e",
+      "signal_title": "Mănăstirea Surpatele, locul unui puternic mesaj al IPS Varsanufie: „Iertarea eliberează inima de robia răului”",
+      "signal_url": "https://ziaruldevalcea.ro/2026/08/manastirea-surpatele-locul-unui-puternic-mesaj-al-ips-varsanufie-iertarea-elibereaza-inima-de-robia-raului/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_published_at": "2026-08-19T04:19:21+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "1f4d2cfe1c7db40d43f4ff7a",
+      "signal_title": "Școala de vară de la Parohia Teiu – un timp al formării duhovnicești și al comuniunii",
+      "signal_url": "https://ziaruldevalcea.ro/2026/08/scoala-de-vara-de-la-parohia-teiu-un-timp-al-formarii-duhovnicesti-si-al-comuniunii/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-19T04:15:11+03:00",
+      "verification_route_id": "education",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "ccd-valcea-noutati",
+            "name": "Casa Corpului Didactic Vâlcea",
+            "url": "https://ccdvl.ro/category/noutati/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "isj-valcea-comunicate",
+            "name": "Inspectoratul Școlar Județean Vâlcea",
+            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 3
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "8dedd8410afd8c09b35f5240",
+      "signal_title": "Horezu, la ceas aniversar: 539 de ani de istorie, tradiție și comunitate. Trei zile de sărbătoare pregătite de Primărie",
+      "signal_url": "https://ziaruldevalcea.ro/2026/08/horezu-la-ceas-aniversar-539-de-ani-de-istorie-traditie-si-comunitate-trei-zile-de-sarbatoare-pregatite-de-primarie/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-19T04:10:52+03:00",
+      "verification_route_id": "horezu_administration",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-horezu-anunturi",
+            "name": "Primăria Orașului Horezu",
+            "url": "https://www.orasul-horezu.ro/anunturi"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
+    },
     {
       "signal_id": "3d4d520c90e26cff3313b364",
       "signal_title": "Centrul „Sfânta Marie” din Orlești se deschide pe 8 septembrie. Peste 100 de persoane vor beneficia de servicii medicale și sociale",
