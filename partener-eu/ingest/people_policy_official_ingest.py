@@ -348,8 +348,26 @@ def main() -> int:
                 "error": clean(exc)[:260], "failClosed": True,
             })
 
+    trusted_history: list[dict[str, Any]] = []
+    quarantine: list[dict[str, Any]] = list(previous.get("quarantine") or [])
+    for item in previous.get("items") or []:
+        role = item.get("roleVerification")
+        if isinstance(role, dict) and str(role.get("sourceTier") or "").startswith("T1") and role.get("sourceUrl"):
+            trusted_history.append(item)
+            continue
+        sources = item.get("sources") or []
+        first = sources[0] if sources and isinstance(sources[0], dict) else {}
+        quarantine.append({
+            "id": item.get("id"),
+            "sourceId": item.get("sourceId"),
+            "observedAt": item.get("observedAt"),
+            "url": first.get("url"),
+            "fingerprint": item.get("fingerprint"),
+            "reason": "PRE_V2_ROLE_NOT_VERIFIED",
+        })
+
     dedup: dict[str, dict[str, Any]] = {}
-    for item in [*(previous.get("items") or []), *fresh_items]:
+    for item in [*trusted_history, *fresh_items]:
         key = str(item.get("fingerprint") or item.get("id"))
         if key:
             dedup[key] = item
@@ -358,6 +376,11 @@ def main() -> int:
         key=lambda x: (str(x.get("date") or ""), str(x.get("observedAt") or ""), int(x.get("priority") or 0)),
         reverse=True,
     )[:320]
+    quarantine_dedup = {
+        str(x.get("fingerprint") or x.get("id") or f"legacy-{i}"): x
+        for i, x in enumerate(quarantine)
+    }
+    quarantine = list(quarantine_dedup.values())[-320:]
     payload = {
         "schemaVersion": 2,
         "generatedAt": NOW.replace(microsecond=0).isoformat().replace("+00:00", "Z"),
@@ -366,17 +389,20 @@ def main() -> int:
             "personSignalsRequireVerifiedRoleSnapshot": True,
             "administrativeFactsNeverPromotedFromSignals": True,
             "historyDeduplicatedByFingerprint": True,
+            "legacyUnverifiedSignalsQuarantined": True,
             "canonicalLinkRequiresExplicitCodeMatch": True,
             "failClosed": True,
         },
         "sources": statuses,
         "items": items,
+        "quarantine": quarantine,
     }
     STATE.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({
         "sources": len(statuses),
         "freshItems": len(fresh_items),
         "historyItems": len(items),
+        "quarantinedLegacy": len(quarantine),
         "ok": sum(1 for x in statuses if x.get("status") == "OK"),
         "failed": sum(1 for x in statuses if str(x.get("status", "")).startswith("SOURCE_UNAVAILABLE")),
     }, ensure_ascii=False, indent=2))
