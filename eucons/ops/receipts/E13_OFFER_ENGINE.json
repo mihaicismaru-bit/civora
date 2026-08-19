@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E13",
+  "unit": "E13_OFFER_ENGINE",
+  "status": "PASS",
+  "validated_at": "2026-08-19T10:34:00Z",
+  "validation": {
+    "workflow": "EUCONS Quality",
+    "run_id": 32243237173,
+    "run_number": 71,
+    "conclusion": "success",
+    "validated_head": "44a5a72a6736bc4a9f769f4930c0a2f5e675e6b1",
+    "merged_commit": "eba9f1b501205cfbade3beb04b372dcc0688ad92",
+    "exact_head_gate_passed": true
+  },
+  "coverage": {
+    "versions_validated": [1, 2],
+    "services_v2": 2,
+    "scope_from_e02_registry": "PASS",
+    "crm_and_source_provenance": "PASS",
+    "immutable_version_lineage": "PASS",
+    "pricing_state": "HUMAN_REQUIRED",
+    "numeric_price_without_approved_rule": "REJECTED",
+    "automatic_send_allowed": false,
+    "html_pdf_ready_projection": "PASS",
+    "runtime_repository_write_guard": "PASS",
+    "production_sending": "DISABLED_UNTIL_EXTERNAL_AUTHORIZATION_AND_APPROVED_PRICING_POLICY"
+  },
+  "artifacts": [
+    "eucons/offers/offer_contract.json",
+    "eucons/offers/offer_engine.py",
+    "eucons/validation/validate_offer_engine.py",
+    "eucons/validation/test_offer_engine_fail_closed.py",
+    ".github/workflows/eucons-quality.yml"
+  ],
+  "next_phase": "E14"
+}
