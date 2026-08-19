@@ -46,8 +46,16 @@ for person in people["people"]:
     else:
         assert snap is None
 
-assert {"dragos-pislaru", "ilie-bolojan", "cseke-attila"} <= set(verified)
+assert {
+    "dragos-pislaru",
+    "ilie-bolojan",
+    "cseke-attila",
+    "adrian-ionut-chesnoiu",
+    "dragos-cristian-vlad",
+} <= set(verified)
 assert builder.role_snapshot(next(x for x in people["people"] if x["id"] == "oana-toiu")) is None
+assert verified["adrian-ionut-chesnoiu"]["roleVerification"]["sourceUrl"].startswith("https://www.afir.ro/")
+assert verified["dragos-cristian-vlad"]["roleVerification"]["sourceUrl"].startswith("https://www.adr.gov.ro/")
 
 sample = {
     "people": [
@@ -69,27 +77,54 @@ link = collector.canonical_link_for("Apel PEO/311/PEO_P9/OP4/ESO4.7/PEO_A34 intr
 assert link["status"] == "MATCHED_EXPLICIT_CODE" and link["callId"] == "call-1"
 assert collector.canonical_link_for("Un apel PEO fără cod explicit.", canonical)["status"] == "UNRESOLVED"
 
-source = next(x for x in sources["sources"] if x["id"] == "AFIR_COMMUNICATES")
-listing = '<a href="/comunicate/test-signal">Fonduri europene PNRR</a>'
-article = """<html><head><title>Dragoș Pîslaru: finanțare europeană</title></head><body>
-19 august 2026. Dragoș Pîslaru a anunțat că fondurile europene pentru investiții rămân o prioritate.
+# AFIR already has a direct-official communiqué source. A verified AFIR leader
+# must now be materializable as a person signal without promoting admin facts.
+afir_source = next(x for x in sources["sources"] if x["id"] == "AFIR_COMMUNICATES")
+afir_listing = '<a href="/comunicate/test-signal">Fonduri europene pentru investiții rurale</a>'
+afir_article = """<html><head><title>Adrian Chesnoiu: finanțări europene pentru mediul rural</title></head><body>
+19 august 2026. Adrian-Ionuț Chesnoiu a anunțat că AFIR pregătește finanțări FEADR pentru investiții rurale.
 </body></html>"""
 old_fetch = collector.fetch
 try:
-    collector.fetch = lambda url, limit=900_000: listing if url == source["url"] else article
-    status, items = collector.ingest_source(source, people, canonical)
+    collector.fetch = lambda url, limit=900_000: afir_listing if url == afir_source["url"] else afir_article
+    afir_status, afir_items = collector.ingest_source(afir_source, people, canonical)
 finally:
     collector.fetch = old_fetch
-assert status["status"] == "OK"
-assert len(items) == 1
-item = items[0]
+assert afir_status["status"] == "OK"
+assert len(afir_items) == 1
+item = afir_items[0]
+assert item["personId"] == "adrian-ionut-chesnoiu"
+assert item["person"] == "Adrian-Ionuț Chesnoiu"
+assert item["institution"] == "AFIR"
 assert item["signalKind"] == "STATEMENT_SIGNAL"
 assert item["administrativeFact"]["status"] == "UNCONFIRMED_FROM_SIGNAL"
 assert item["administrativeFact"]["failClosed"] is True
 assert item["roleVerification"]["sourceTier"].startswith("T1")
+assert item["sourceSnapshot"]["sourceId"] == "AFIR_COMMUNICATES"
 assert item["sourceSnapshot"]["contentHash"]
 assert item["canonicalLink"]["status"] == "UNRESOLVED"
-assert item["person"] == "Dragoș Pîslaru"
+
+# ADR's direct-official articles are likewise productive only after the current
+# president is role-verified in the tracked decision-maker registry.
+adr_source = next(x for x in sources["sources"] if x["id"] == "ADR_ARTICLES")
+adr_listing = '<a href="/articole/test-signal">Programul Europa Digitală și fonduri europene</a>'
+adr_article = """<html><head><title>Dragoș-Cristian Vlad: Programul Europa Digitală</title></head><body>
+19 august 2026. Dragoș-Cristian Vlad a anunțat instruiri pentru accesarea fondurilor europene prin Programul Europa Digitală.
+</body></html>"""
+old_fetch = collector.fetch
+try:
+    collector.fetch = lambda url, limit=900_000: adr_listing if url == adr_source["url"] else adr_article
+    adr_status, adr_items = collector.ingest_source(adr_source, people, canonical)
+finally:
+    collector.fetch = old_fetch
+assert adr_status["status"] == "OK"
+assert len(adr_items) == 1
+adr_item = adr_items[0]
+assert adr_item["personId"] == "dragos-cristian-vlad"
+assert adr_item["institution"] == "ADR"
+assert adr_item["signalKind"] == "STATEMENT_SIGNAL"
+assert adr_item["administrativeFact"]["status"] == "UNCONFIRMED_FROM_SIGNAL"
+assert adr_item["sourceSnapshot"]["sourceId"] == "ADR_ARTICLES"
 
 tracked = {p["id"]: p for p in people["people"] if p.get("active")}
 accepted = builder.trusted_official_item(item, tracked)
@@ -111,14 +146,16 @@ assert builder.trusted_official_item(bad, tracked) is None
 # Historical observations keep their verified role-at-observation snapshot even
 # if the live registry later changes; history is not silently rewritten.
 changed_registry = copy.deepcopy(tracked)
-changed_registry["dragos-pislaru"]["role"] = "Altă funcție ulterioară"
+changed_registry["adrian-ionut-chesnoiu"]["role"] = "Altă funcție ulterioară"
 accepted = builder.trusted_official_item(item, changed_registry)
 assert accepted is not None
 assert accepted["roleVerification"]["role"] == item["roleVerification"]["role"]
 
 hosts = refiner.official_hosts(sources)
 assert "www.afir.ro" in hosts
+assert "www.adr.gov.ro" in hosts
 assert refiner.direct_official(item, hosts) is True
+assert refiner.direct_official(adr_item, hosts) is True
 assert refiner.fail_closed_signal(item) is True
 unsafe = copy.deepcopy(item)
 unsafe["administrativeFact"]["failClosed"] = False
@@ -127,6 +164,7 @@ assert refiner.fail_closed_signal(unsafe) is False
 print(json.dumps({
     "officialSources": len(sources["sources"]),
     "verifiedRoles": len(verified),
+    "productiveVerifiedActors": ["AFIR", "ADR"],
     "failClosedSignalContract": True,
     "explicitCodeCanonicalLink": True,
     "canonicalOfficialLedgerBoundary": True,
