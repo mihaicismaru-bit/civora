@@ -4,7 +4,8 @@
 Persistence is not enough unless it is enforced. This guard makes the persisted
 social doctrine executable: exactly one workflow may publish Facebook feed
 content, and that workflow must use the canonical story-first editorial adapter.
-Metadata-only Page maintenance remains an explicit non-content exception.
+Metadata-only Page maintenance and a credential-free live-gate test are explicit
+non-content exceptions.
 """
 from __future__ import annotations
 
@@ -20,6 +21,7 @@ CANONICAL_WORKFLOW = ".github/workflows/valcea-clar-social-publishing.yml"
 CANONICAL_ADAPTER = "valcea-clar/social/facebook_editorial_publish.py"
 PROFILE_WORKFLOW = ".github/workflows/valcea-clar-facebook-profile-sync.yml"
 PROFILE_ADAPTER = "valcea-clar/social/facebook_profile_sync.py"
+VALIDATION_WORKFLOW = ".github/workflows/valcea-clar-facebook-editorial-adapter.yml"
 FORBIDDEN_WORKFLOWS = {
     ".github/workflows/valcea-clar-facebook-backlog.yml",
     ".github/workflows/valcea-clar-facebook-intro-photo.yml",
@@ -140,6 +142,12 @@ def validate_workflow_single_writer(violations: list[str]) -> None:
                 continue
             if rel == PROFILE_WORKFLOW and adapter == PROFILE_ADAPTER:
                 continue
+            if rel == VALIDATION_WORKFLOW and adapter == CANONICAL_ADAPTER:
+                # This workflow deliberately proves --apply fails closed. It must
+                # never receive live enablement or a Meta credential.
+                require("VALCEA_FB_EDITORIAL_LIVE_ENABLED" not in text, "Facebook validation workflow may not enable live publication", violations)
+                require("VALCEA_META_PAGE_ACCESS_TOKEN" not in text and "VALCEA_FB_PAGE_ACCESS_TOKEN" not in text, "Facebook validation workflow may not receive Meta credentials", violations)
+                continue
             violations.append(f"unauthorized Facebook --apply writer: {rel} -> {adapter}")
         for adapter in FORBIDDEN_APPLY_ADAPTERS:
             if f"{adapter} --apply" in text:
@@ -164,6 +172,7 @@ def main() -> int:
         "canonical_workflow": CANONICAL_WORKFLOW,
         "canonical_adapter": CANONICAL_ADAPTER,
         "profile_metadata_exception": PROFILE_WORKFLOW,
+        "credential_free_validation_exception": VALIDATION_WORKFLOW,
         "violations": violations,
     }
     print(json.dumps(report, ensure_ascii=False, indent=2))
