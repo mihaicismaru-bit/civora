@@ -167,6 +167,33 @@ unsafe = copy.deepcopy(item)
 unsafe["administrativeFact"]["failClosed"] = False
 assert refiner.fail_closed_signal(unsafe) is False
 
+# The durable source ledger and the verified people projection are independent
+# checkpoints. A failure in daily-brief generation must not strand a fresh
+# source ledger behind a stale people_policy projection.
+workflow_path = ROOT / ".github" / "workflows" / "partener-eu-editorial-daily.yml"
+workflow = workflow_path.read_text(encoding="utf-8")
+ordered_markers = [
+    "- name: Ingest official decision-maker signals",
+    "- name: Persist official-source ledger checkpoint",
+    "- name: Generate verified decision-maker projection",
+    "- name: Validate verified decision-maker projection",
+    "- name: Persist verified decision-maker projection checkpoint",
+    "- name: Generate daily briefing",
+]
+positions = [workflow.index(marker) for marker in ordered_markers]
+assert positions == sorted(positions)
+projection_block = workflow.split("- name: Generate verified decision-maker projection", 1)[1].split("- name:", 1)[0]
+assert "build_people_policy.py" in projection_block
+assert "refine_people_policy.py" in projection_block
+projection_persist_block = workflow.split("- name: Persist verified decision-maker projection checkpoint", 1)[1].split("- name:", 1)[0]
+assert "partener-eu/ingest/state/people_policy.json" in projection_persist_block
+assert "partener-eu/web/people-policy-data.js" in projection_persist_block
+assert "daily_brief.json" not in projection_persist_block
+daily_block = workflow.split("- name: Generate daily briefing", 1)[1].split("- name:", 1)[0]
+assert "build_daily_brief.py" in daily_block
+assert "build_people_policy.py" not in daily_block
+assert "refine_people_policy.py" not in daily_block
+
 print(json.dumps({
     "officialSources": len(sources["sources"]),
     "verifiedRoles": len(verified),
@@ -176,5 +203,6 @@ print(json.dumps({
     "historicalRoleSnapshotPreserved": True,
     "sourceHealthRequiresArticleFetchProof": True,
     "boundedConcurrentSourceIngest": True,
+    "durableVerifiedProjectionCheckpoint": True,
     "worstCaseNetworkBudgetSeconds": network_budget_seconds,
 }, ensure_ascii=False, indent=2))
