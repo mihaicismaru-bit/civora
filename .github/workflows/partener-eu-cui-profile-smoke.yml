@@ -100,13 +100,27 @@ jobs:
           assert by_year[2024]['employeesNonProfit']['value'] == 0
           assert by_year[2024]['employeesEconomic']['value'] == 23
           assert by_year[2024]['employeesTotal']['value'] == 23
+          PY
+      - name: Resolve CUI 41279108 live
+        run: |
+          python partener-eu/ingest/cui_profile_resolver.py \
+            --cui 41279108 --years 2025,2024,2023,2022,2021 --date 2026-08-19 \
+            --cache-dir /tmp/cui-profile-cache --force-refresh --pretty \
+            > /tmp/cui-41279108.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/cui-41279108.json'))
+          assert p['status'] in {'OK','PARTIAL'}
+          assert p['identity']['cui']=='41279108'
+          assert p['addresses']['registered']['locality']
+          assert p['financials']['statementCount'] >= 1
           print(json.dumps(p, ensure_ascii=False, indent=2))
           PY
       - name: Show compact receipts
         run: |
           python - <<'PY'
           import json
-          for path in ['/tmp/ngo-live.json','/tmp/ngo-cache.json','/tmp/company-live.json','/tmp/cui-2536421.json']:
+          for path in ['/tmp/ngo-live.json','/tmp/ngo-cache.json','/tmp/company-live.json','/tmp/cui-2536421.json','/tmp/cui-41279108.json']:
               p=json.load(open(path))
               print({'cui':p['cui'],'status':p['status'],'type':p['entityType'],'sources':p['sourceStatus'],'financialYears':[r['year'] for r in p['financials']['summary']]})
           PY
