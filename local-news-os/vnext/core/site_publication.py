@@ -12,12 +12,11 @@ import argparse
 import hashlib
 import html
 import json
-import re
 import sqlite3
 import tempfile
 from pathlib import Path
 from typing import Any, Callable, Iterable
-from urllib.parse import quote
+from urllib.parse import quote, unquote
 
 from editorial_qa import get_latest_qa_decision
 from runtime_store import connect, get_story, initialize, register_instance, utc_now
@@ -187,7 +186,7 @@ def publish_story(
     policy = validate_publication_policy(publication_pack, instance_id=instance_id)
     ensure_publication_schema(conn)
     story = get_story(conn, instance_id=instance_id, story_id=story_id)
-    _require(story["state"] == "QA_PASSED", "site publication requires QA_PASSED story")
+    _require(story["state"] in {"QA_PASSED", "PUBLISHED"}, "site publication requires QA_PASSED story")
     draft = get_story_draft(conn, instance_id=instance_id, story_id=story_id)
     qa = get_latest_qa_decision(conn, instance_id=instance_id, story_id=story_id)
     _require(qa is not None and qa["outcome"] == "QA_PASSED", "latest Editorial QA must be QA_PASSED")
@@ -206,7 +205,9 @@ def publish_story(
     ).fetchone()
     if existing is not None:
         _require(existing["current_content_fingerprint"] == content_fingerprint, "P11 refuses unreviewed publication revision")
+        _require(story["state"] == "PUBLISHED", "publication record exists for non-published story")
         return get_publication(conn, instance_id=instance_id, story_id=story_id), False
+    _require(story["state"] == "QA_PASSED", "new publication requires QA_PASSED story")
 
     publication_id = _hash_id(instance_id, story_id, canonical_path)
     revision_id = _hash_id(instance_id, publication_id, "1", content_fingerprint)
@@ -346,7 +347,7 @@ class PublicSiteApp:
                 return self._xml(start_response, f"<?xml version=\"1.0\" encoding=\"UTF-8\"?><urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">{urls}</urlset>")
             category_prefix = self.policy["category_path_prefix"] + "/"
             if path.startswith(category_prefix):
-                section = path[len(category_prefix):].strip("/")
+                section = unquote(path[len(category_prefix):].strip("/"))
                 items = list_publications(conn, instance_id=self.instance_id, section=section, limit=self.policy["homepage_limit"])
                 return self._html(start_response, "200 OK", self._listing_html(items, title=section or self.policy["name"]))
             item = get_publication_by_path(conn, instance_id=self.instance_id, canonical_path=path)
