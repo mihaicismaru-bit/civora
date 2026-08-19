@@ -1,0 +1,32 @@
+name: EUCONS Health
+
+on:
+  schedule:
+    - cron: '41 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-health
+  cancel-in-progress: true
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Validate canonical health and closed production gates
+        run: python eucons/ops/github_automation.py health --output /tmp/eucons-health-receipt.json --generated-at "${{ github.event.repository.updated_at }}"
+      - name: Upload health receipt
+        uses: actions/upload-artifact@v7
+        with:
+          name: eucons-health-receipt
+          path: /tmp/eucons-health-receipt.json
+          retention-days: 14
+          if-no-files-found: error
