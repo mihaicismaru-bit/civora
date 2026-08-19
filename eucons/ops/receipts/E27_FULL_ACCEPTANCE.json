@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E27",
+  "unit": "E27_FULL_ACCEPTANCE",
+  "status": "PASS",
+  "validated_at": "2026-08-19T13:32:00Z",
+  "validation": {
+    "quality": {"run_id": 32258586537, "run_number": 131, "conclusion": "success"},
+    "build": {"run_id": 32258586992, "run_number": 23, "conclusion": "success"},
+    "validated_head": "8ebe905726b044c63a625e87ff6deef8768f081c",
+    "merged_commit": "20e224e4e9fc686a38e0b32c6fddd5e3c748c99d",
+    "exact_head_gate_passed": true
+  },
+  "coverage": {
+    "prerequisite_phase_receipts": 27,
+    "verified_opportunity_to_match": "PASS",
+    "match_to_crm_lineage": "PASS",
+    "crm_to_offer_lineage": "PASS",
+    "source_provenance_preserved": "PASS",
+    "offer_pricing_state": "HUMAN_REQUIRED",
+    "offer_automatic_send": "DISABLED",
+    "editorial_distribution": "PASS",
+    "linkedin_outbox": "PASS_DRY_RUN",
+    "facebook_outbox": "PASS_DRY_RUN",
+    "commercial_email_outbox": "PASS_DRY_RUN",
+    "analytics_events": 6,
+    "analytics_transport": "DRY_RUN_ONLY",
+    "adversarial_scenarios": 16,
+    "deterministic_replay": "PASS",
+    "external_gates": "CLOSED",
+    "production_side_effects": "DISABLED"
+  },
+  "artifacts": [
+    "eucons/acceptance/full_acceptance_contract.json",
+    "eucons/acceptance/full_acceptance.py",
+    "eucons/validation/validate_full_acceptance.py",
+    "eucons/validation/test_full_acceptance_fail_closed.py",
+    ".github/workflows/eucons-quality.yml"
+  ],
+  "next_phase": "E28"
+}
