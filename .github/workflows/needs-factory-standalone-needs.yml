@@ -1,0 +1,78 @@
+name: Needs Factory Standalone Needs Analysis
+
+on:
+  push:
+    branches:
+      - 'needs-factory/**'
+    paths:
+      - 'partener-eu/needs-factory/**'
+      - '.github/workflows/needs-factory-standalone-needs.yml'
+  pull_request:
+    paths:
+      - 'partener-eu/needs-factory/**'
+      - '.github/workflows/needs-factory-standalone-needs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  needs-analysis-mode:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Needs Factory dependencies
+        run: python -m pip install --disable-pip-version-check -r partener-eu/needs-factory/requirements-docx.txt
+      - name: Run full regression suite
+        run: python -m unittest discover -s partener-eu/needs-factory/tests -v
+      - name: Prove standalone needs mode reaches final DOCX without solution leakage
+        run: |
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, 'partener-eu/needs-factory')
+          from core.product_mode import build_product_narrative_pack, validate_mode_inputs
+          from core.narrative import compile_analysis
+          from exporters.docx_exporter import export_final_package
+
+          project = {'project_id':'SYNTH-STANDALONE','territory':'Synthetic County','target_group':'synthetic students'}
+          evidence = {
+              'E1': {'id':'E1','source':'Synthetic direct research','tier':'A','scope':'school','territory':'Synthetic School','constructs':['practice_quality'],'direct_measurement':True,'territory_fit':1.0,'population_fit':1.0,'recency_score':1.0,'directness':1.0,'measures':[{'name':'metric','measure_type':'count','value':10,'unit':'responses','calculated':False}]}
+          }
+          need = {'id':'N1','title':'Practică relevantă','statement':'Este necesară o experiență practică relevantă.','scope':'school','priority':True,'evidence_ids':['E1'],'confidence':0.8,'ranking_dimensions':{'magnitude':0.7,'severity':0.6,'gap_strength':0.7,'call_relevance':0.9},'prohibited_overclaim':'Nu extrapola dincolo de școala măsurată.'}
+          ranked = {'blocked':False,'ranked':[{'need_id':'N1','rank':1,'score':60.0,'confidence_used':0.8}]}
+          release = {'ready_for_narrative':True,'blocking_failures':[],'blocking_evidence_gaps':[]}
+          mode = validate_mode_inputs('NEEDS_ANALYSIS', has_activity_plan=False, has_indicator_plan=False, need_count=1)
+          assert mode['valid'] is True
+          pack = build_product_narrative_pack('NEEDS_ANALYSIS', project, ranked, {'N1':need}, evidence, None, None, release)
+          assert pack['product_mode'] == 'NEEDS_ANALYSIS'
+          assert pack['solution_leakage_guard']['activities_may_create_needs'] is False
+          assert pack['solution_leakage_guard']['indicators_may_create_needs'] is False
+          assert pack['traceability_validation']['mode'] == 'NOT_REQUIRED_FOR_NEEDS_ANALYSIS'
+          compiled = compile_analysis(pack, title='Analiza de nevoi')
+          assert compiled['validation']['valid'] is True
+          exported = export_final_package(compiled, Path('/tmp/nf-standalone'), basename='ANALIZA_NEVOI')
+          assert exported['docx_validation']['ANALIZA_NEVOI.docx']['valid'] is True
+          assert (Path('/tmp/nf-standalone') / 'ANALIZA_NEVOI.docx').exists()
+          assert len(exported['package_zip']['sha256']) == 64
+          print(pack['pack_sha256'])
+          print(compiled['markdown_sha256'])
+          print(exported['files']['ANALIZA_NEVOI.docx']['sha256'])
+          PY
+      - name: Real 310224 still cannot bypass research gate
+        run: |
+          python partener-eu/needs-factory/tools/run_research_gate_fixture.py \
+            partener-eu/needs-factory/benchmarks/310224/CP08_PRODUCT_RUN_INPUT.json \
+            --output /tmp/nf-310224-blocked.json
+          python - <<'PY'
+          import json
+          result = json.load(open('/tmp/nf-310224-blocked.json', encoding='utf-8'))
+          assert result['state'] == 'BLOCKED_RESEARCH'
+          assert 'NF07_NEED_DISCOVERY' not in set(result['run_manifest']['closed_checkpoints'])
+          PY
