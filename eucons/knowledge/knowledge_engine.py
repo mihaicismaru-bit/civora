@@ -177,6 +177,7 @@ def _case_records(case_registry: dict[str, Any], evidence: dict[str, Any], contr
             "provenance": {
                 "source_kind": "E05_CASE_REGISTRY",
                 "source_ref": cid,
+                "claim_refs": copy.deepcopy(claim_ids),
                 "claim_ids": claim_ids,
                 "evidence_ids": evidence_ids,
             },
