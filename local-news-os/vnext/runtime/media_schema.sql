@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS media_assets (
     license_code TEXT NOT NULL,
     credit TEXT NOT NULL,
     rights_evidence TEXT NOT NULL,
+    provenance_json TEXT NOT NULL,
     synthetic INTEGER NOT NULL DEFAULT 0 CHECK (synthetic IN (0,1)),
     depicts_real_scene INTEGER NOT NULL DEFAULT 1 CHECK (depicts_real_scene IN (0,1)),
     freshness_class TEXT NOT NULL CHECK (freshness_class IN ('EVERGREEN','SLOW_DECAY','FAST_DECAY','EVENT_ONLY')),
@@ -18,11 +19,13 @@ CREATE TABLE IF NOT EXISTS media_assets (
     usage_scopes_json TEXT NOT NULL,
     metadata_json TEXT NOT NULL DEFAULT '{}',
     content_fingerprint TEXT NOT NULL,
+    registration_fingerprint TEXT NOT NULL,
     status TEXT NOT NULL CHECK (status IN ('READY','HELD','RETIRED')),
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
     PRIMARY KEY (instance_id, asset_id),
     UNIQUE (instance_id, content_fingerprint),
+    UNIQUE (instance_id, registration_fingerprint),
     FOREIGN KEY (instance_id) REFERENCES publication_instances(instance_id) ON DELETE RESTRICT
 );
 
