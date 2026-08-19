@@ -1,0 +1,17 @@
+{
+  "ci": {
+    "conclusion": "FAIL",
+    "execution_exit_code": 1,
+    "head_sha": "32c1309f08715c9ac95e2cd98bc5168938a024ed",
+    "run_id": "32289276080",
+    "workflow": "LOCAL NEWS OS vNext Vâlcea Shadow Projection"
+  },
+  "contract": "LOCAL_NEWS_OS_VNEXT_VALCEA_P18_SHADOW_PROJECTION_DIFF_V1",
+  "failure": {
+    "class": "PROJECTION_EXECUTION_FAILED_BEFORE_REPORT",
+    "log_tail": "Traceback (most recent call last):\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/instances/valcea/migration/p18_shadow_projection_diff.py\", line 179, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/instances/valcea/migration/p18_shadow_projection_diff.py\", line 165, in main\n    result = run_projection_diff(db)\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/instances/valcea/migration/p18_shadow_projection_diff.py\", line 86, in run_projection_diff\n    status, _, body = _call(app, path)\n                      ~~~~~^^^^^^^^^^^\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/instances/valcea/migration/p18_shadow_projection_diff.py\", line 44, in _call\n    body = b\"\".join(app(environ, start_response)).decode(\"utf-8\", errors=\"replace\")\n                    ~~~^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/core/public_route_compat.py\", line 206, in __call__\n    profile = self._alias_profile(path, start_response)\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/core/public_route_compat.py\", line 121, in _alias_profile\n    body = self._profile_html(profile)\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/core/knowledge_runtime.py\", line 198, in _profile_html\n    sources = \"\".join(\n        f\"<li><a rel=\\\"nofollow\\\" href=\\\"{html.escape(str(item['source_url']))}\\\">Sursă</a></li>\"\n        for item in entity[\"provenance\"]\n    )\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/core/knowledge_runtime.py\", line 199, in <genexpr>\n    f\"<li><a rel=\\\"nofollow\\\" href=\\\"{html.escape(str(item['source_url']))}\\\">Sursă</a></li>\"\n                                                      ~~~~^^^^^^^^^^^^^^\nTypeError: string indices must be integers, not 'str'\n"
+  },
+  "production_cutover": false,
+  "schema_version": "1.0",
+  "status": "SHADOW_PROJECTION_FAIL"
+}
