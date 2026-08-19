@@ -27,7 +27,7 @@ STATE = ROOT / "partener-eu" / "ingest" / "state" / "people_policy_official_sour
 REGISTRY = ROOT / "partener-eu" / "ingest" / "state" / "people_policy_registry.json"
 SOURCE_REGISTRY = ROOT / "partener-eu" / "ingest" / "state" / "people_policy_source_registry.json"
 CANONICAL_CALLS = ROOT / "partener-eu" / "ingest" / "state" / "mipe_canonical_calls.json"
-UA = "PARTENER.EU-DecisionMakerOfficialIngest/2.4 (+https://partener.eu)"
+UA = "PARTENER.EU-DecisionMakerOfficialIngest/2.5 (+https://partener.eu)"
 NOW = dt.datetime.now(dt.timezone.utc)
 FETCH_TIMEOUT_SECONDS = 18
 MAX_SOURCE_FETCH_WORKERS = 9
@@ -392,6 +392,139 @@ def canonical_link_for(text: str, canonical: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def canonical_article_url(value: Any) -> str:
+    """Normalize only transport-irrelevant URL variance for stable signal identity."""
+    return clean(value).split("#", 1)[0].rstrip("/")
+
+
+def normalized_statement_identity(value: Any) -> str:
+    """Normalize punctuation/diacritics without changing statement semantics."""
+    return re.sub(r"[^a-z0-9]+", " ", fold(value)).strip()
+
+
+def logical_signal_key(item: dict[str, Any]) -> str:
+    """Return a stable identity for the same attributed statement across re-fetches.
+
+    Page bytes, observation timestamps and content hashes are deliberately absent
+    from the identity. They are observation-version provenance, not signal identity.
+    """
+    snapshot = item.get("sourceSnapshot") if isinstance(item.get("sourceSnapshot"), dict) else {}
+    sources = item.get("sources") or []
+    first_source = sources[0] if sources and isinstance(sources[0], dict) else {}
+    parts = (
+        clean(item.get("sourceId") or snapshot.get("sourceId")),
+        canonical_article_url(snapshot.get("url") or first_source.get("url")),
+        clean(item.get("personId")),
+        clean(item.get("date"))[:10],
+        normalized_statement_identity(item.get("statement")),
+    )
+    if not all(parts):
+        return ""
+    return hashlib.sha256("|".join(parts).encode("utf-8")).hexdigest()
+
+
+def observation_records(item: dict[str, Any]) -> list[dict[str, Any]]:
+    """Return versioned observations, collapsing repeated identical page bytes."""
+    existing = item.get("observations")
+    if isinstance(existing, list) and existing:
+        records: list[dict[str, Any]] = []
+        for row in existing:
+            if not isinstance(row, dict):
+                continue
+            fingerprint = clean(row.get("fingerprint"))
+            content_hash = clean(row.get("contentHash"))
+            first_seen = clean(row.get("firstObservedAt") or row.get("observedAt"))
+            last_seen = clean(row.get("lastObservedAt") or row.get("observedAt") or first_seen)
+            if not fingerprint or not content_hash or not first_seen:
+                continue
+            records.append({
+                "fingerprint": fingerprint,
+                "contentHash": content_hash,
+                "firstObservedAt": first_seen,
+                "lastObservedAt": last_seen,
+                "observationCount": max(1, int(row.get("observationCount") or 1)),
+            })
+        if records:
+            return records
+    snapshot = item.get("sourceSnapshot") if isinstance(item.get("sourceSnapshot"), dict) else {}
+    fingerprint = clean(item.get("fingerprint"))
+    content_hash = clean(snapshot.get("contentHash"))
+    observed = clean(item.get("observedAt") or snapshot.get("observedAt"))
+    if not fingerprint or not content_hash or not observed:
+        return []
+    return [{
+        "fingerprint": fingerprint,
+        "contentHash": content_hash,
+        "firstObservedAt": observed,
+        "lastObservedAt": observed,
+        "observationCount": 1,
+    }]
+
+
+def merge_observation_records(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    versions: dict[str, dict[str, Any]] = {}
+    for item in items:
+        for row in observation_records(item):
+            fingerprint = row["fingerprint"]
+            current = versions.get(fingerprint)
+            if current is None:
+                versions[fingerprint] = dict(row)
+                continue
+            current["firstObservedAt"] = min(current["firstObservedAt"], row["firstObservedAt"])
+            current["lastObservedAt"] = max(current["lastObservedAt"], row["lastObservedAt"])
+            current["observationCount"] += int(row.get("observationCount") or 1)
+    return sorted(versions.values(), key=lambda row: (row["firstObservedAt"], row["fingerprint"]))
+
+
+def deduplicate_signal_history(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Merge logical duplicates while retaining every distinct source observation version."""
+    groups: dict[str, list[dict[str, Any]]] = {}
+    order: list[str] = []
+    for index, item in enumerate(history):
+        logical = logical_signal_key(item)
+        fallback = clean(item.get("fingerprint") or item.get("id") or f"legacy-{index}")
+        key = f"logical:{logical}" if logical else f"fallback:{fallback}"
+        if key not in groups:
+            groups[key] = []
+            order.append(key)
+        groups[key].append(item)
+
+    merged: list[dict[str, Any]] = []
+    for key in order:
+        rows = groups[key]
+        base = dict(rows[0])
+        logical = logical_signal_key(base)
+        if logical:
+            stable_id = "official-signal-" + logical[:18]
+            legacy_ids = {
+                clean(value)
+                for row in rows
+                for value in [row.get("id"), *((row.get("legacyIds") or []) if isinstance(row.get("legacyIds"), list) else [])]
+                if clean(value) and clean(value) != stable_id
+            }
+            base["id"] = stable_id
+            base["logicalSignalKey"] = logical
+            if legacy_ids:
+                base["legacyIds"] = sorted(legacy_ids)
+        observations = merge_observation_records(rows)
+        if observations:
+            base["observations"] = observations
+            base["firstObservedAt"] = min(row["firstObservedAt"] for row in observations)
+            base["lastObservedAt"] = max(row["lastObservedAt"] for row in observations)
+            base["observationCount"] = sum(int(row["observationCount"]) for row in observations)
+        # Preserve the earliest trusted role/source snapshot represented by the
+        # first historical row; only explicit canonical evidence may improve.
+        if str((base.get("canonicalLink") or {}).get("status")) != "MATCHED_EXPLICIT_CODE":
+            matched = next(
+                (row.get("canonicalLink") for row in rows if str((row.get("canonicalLink") or {}).get("status")) == "MATCHED_EXPLICIT_CODE"),
+                None,
+            )
+            if matched:
+                base["canonicalLink"] = matched
+        merged.append(base)
+    return merged
+
+
 def ingest_source(source: dict[str, Any], registry: dict[str, Any], canonical: dict[str, Any]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     observed = NOW.replace(microsecond=0).isoformat().replace("+00:00", "Z")
     allowed = source.get("allowedHosts") or []
@@ -443,7 +576,7 @@ def ingest_source(source: dict[str, Any], registry: dict[str, Any], canonical: d
         content_hash = hashlib.sha256(clean(text[:30000]).encode("utf-8")).hexdigest()
         fingerprint = hashlib.sha256(f"{person['id']}|{url}|{content_hash}".encode("utf-8")).hexdigest()
         canonical_link = canonical_link_for(f"{headline} {statement} {text[:12000]}", canonical)
-        items.append({
+        item = {
             "id": "official-" + fingerprint[:18],
             "personId": person["id"],
             "person": person["name"],
@@ -482,7 +615,16 @@ def ingest_source(source: dict[str, Any], registry: dict[str, Any], canonical: d
             "observedAt": observed,
             "sourceId": source["id"],
             "fingerprint": fingerprint,
-        })
+        }
+        logical = logical_signal_key(item)
+        if logical:
+            item["logicalSignalKey"] = logical
+            item["id"] = "official-signal-" + logical[:18]
+        item["observations"] = observation_records(item)
+        item["firstObservedAt"] = observed
+        item["lastObservedAt"] = observed
+        item["observationCount"] = 1
+        items.append(item)
     if not urls:
         source_status = "OK_NO_CANDIDATES"
     elif article_fetch_successes == 0:
@@ -557,14 +699,13 @@ def main() -> int:
             "reason": "PRE_V2_ROLE_NOT_VERIFIED",
         })
 
-    dedup: dict[str, dict[str, Any]] = {}
-    for item in [*trusted_history, *fresh_items]:
-        key = str(item.get("fingerprint") or item.get("id"))
-        if key:
-            dedup[key] = item
     items = sorted(
-        dedup.values(),
-        key=lambda x: (str(x.get("date") or ""), str(x.get("observedAt") or ""), int(x.get("priority") or 0)),
+        deduplicate_signal_history([*trusted_history, *fresh_items]),
+        key=lambda x: (
+            str(x.get("date") or ""),
+            str(x.get("lastObservedAt") or x.get("observedAt") or ""),
+            int(x.get("priority") or 0),
+        ),
         reverse=True,
     )[:320]
     quarantine_dedup = {
@@ -580,7 +721,9 @@ def main() -> int:
             **(source_registry.get("policy") or {}),
             "personSignalsRequireVerifiedRoleSnapshot": True,
             "administrativeFactsNeverPromotedFromSignals": True,
-            "historyDeduplicatedByFingerprint": True,
+            "historyDeduplicatedByFingerprint": False,
+            "historyDeduplicatedByLogicalSignalIdentity": True,
+            "sourceObservationVersionsPreserved": True,
             "legacyUnverifiedSignalsQuarantined": True,
             "canonicalLinkRequiresExplicitCodeMatch": True,
             "sourceHealthRequiresArticleFetchProofWhenCandidatesExist": True,
@@ -601,6 +744,8 @@ def main() -> int:
         "sources": len(statuses),
         "freshItems": len(fresh_items),
         "historyItems": len(items),
+        "logicalSignalItems": sum(1 for x in items if x.get("logicalSignalKey")),
+        "observationVersions": sum(len(x.get("observations") or []) for x in items),
         "quarantinedLegacy": len(quarantine),
         "sourceFetchWorkers": workers,
         "worstCaseNetworkBudgetSeconds": network_budget_seconds,
