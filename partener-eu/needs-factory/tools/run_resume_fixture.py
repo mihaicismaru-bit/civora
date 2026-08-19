@@ -10,6 +10,7 @@ from typing import Any, Dict
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from core.narrative import compile_analysis
 from core.pipeline import PipelineRun
 from core.research_evidence import attach_matching_research_evidence
 from core.resume import validate_resume_plan
@@ -107,6 +108,9 @@ def main() -> int:
         return 12
     needs_by_id = {str(need["id"]): need for need in fixture["needs"]}
     pack = successor.package(ranked, needs_by_id, combined_evidence, causal, trace, release)
+    compiled = compile_analysis(pack)
+    if not compiled["validation"]["valid"]:
+        return 13
 
     result = {
         "schema_version": "nf.resume_acceptance.v0.1",
@@ -122,6 +126,11 @@ def main() -> int:
         "primary_evidence_count": len(promoted["evidence"]),
         "unresolved_local_gaps": claim_resolution["unresolved_gaps"],
         "narrative_pack_sha256": pack["pack_sha256"],
+        "compiled_narrative_valid": compiled["validation"]["valid"],
+        "compiled_narrative_sha256": compiled["markdown_sha256"],
+        "compiled_source_register_sha256": compiled["source_register_sha256"],
+        "compiled_need_count": compiled["validation"]["need_count"],
+        "compiled_evidence_count": compiled["validation"]["evidence_count"],
         "successor_manifest": successor.manifest(),
     }
     rendered = json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
