@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E25",
+  "unit": "E25_PREVIEW_PRODUCTION",
+  "status": "PASS",
+  "validated_at": "2026-08-19T13:08:00Z",
+  "validation": {
+    "quality": {"run_id": 32256279515, "run_number": 121, "conclusion": "success"},
+    "build": {"run_id": 32256279513, "run_number": 13, "conclusion": "success"},
+    "validated_head": "9427eda1ec6fc186c22c1d0bd9af663d2efa0632",
+    "merged_commit": "b2aaa1476f93e1c1a680b7e690ca7a3410ee47cc",
+    "exact_head_gate_passed": true
+  },
+  "coverage": {
+    "complete_static_build": "PASS",
+    "route_canonical_manifest": "PASS",
+    "preview_noindex": "PASS",
+    "robots_disallow_all": "PASS",
+    "sitemap_materialization": "PASS",
+    "responsive_css_smoke": "PASS",
+    "accessibility_landmark_smoke": "PASS",
+    "local_http_route_probe": "PASS",
+    "synthetic_lead_match_crm_offer": "PASS",
+    "synthetic_editorial_social_email": "PASS",
+    "immutable_preview_receipt": "PASS",
+    "production_deployment": "DISABLED",
+    "external_credentials": "NOT_USED"
+  },
+  "artifacts": [
+    "eucons/preview/preview_contract.json",
+    "eucons/preview/preview_engine.py",
+    "eucons/validation/validate_preview_production.py",
+    "eucons/validation/test_preview_production_fail_closed.py",
+    ".github/workflows/eucons-build.yml",
+    ".github/workflows/eucons-quality.yml"
+  ],
+  "next_phase": "E26"
+}
