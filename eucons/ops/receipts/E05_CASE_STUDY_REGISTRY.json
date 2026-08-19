@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E05",
+  "unit": "E05_CASE_STUDY_REGISTRY",
+  "status": "PASS",
+  "validated_at": "2026-08-19T08:11:00Z",
+  "validation": {
+    "workflow": "EUCONS Quality",
+    "run_id": 32231266782,
+    "run_number": 29,
+    "conclusion": "success",
+    "validated_head": "d013ae995fd9d2cc2d51663e8dba95bc602b005f",
+    "final_head_revalidation_required_before_merge": true
+  },
+  "coverage": {
+    "case_records": 0,
+    "public_projection_count": 0,
+    "empty_projection_is_explicit_fail_closed": true,
+    "project_result_evidence_required": true,
+    "named_client_evidence_required": true,
+    "confidentiality_classification_required": true,
+    "anonymized_identifier_leakage_rejected": true,
+    "testimonial_consent_required": true,
+    "outcome_claim_traceability_required": true,
+    "invented_cases_forbidden": true,
+    "invented_metrics_forbidden": true,
+    "hold_fallback_leakage_rejected": true
+  },
+  "artifacts": [
+    "eucons/cases/CASE_STUDY_POLICY.md",
+    "eucons/cases/case_study_registry.json",
+    "eucons/validation/validate_case_study_registry.py",
+    "eucons/validation/test_case_study_fail_closed.py",
+    ".github/workflows/eucons-quality.yml",
+    "eucons/ops/artifact_registry.json",
+    "eucons/ops/checkpoint.json"
+  ],
+  "next_phase": "E06"
+}
