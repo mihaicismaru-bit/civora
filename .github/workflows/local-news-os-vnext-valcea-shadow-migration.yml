@@ -50,54 +50,119 @@ jobs:
           ! grep -Eiq 'requests\.(post|put|patch|delete)|urllib\.request|http\.client|subprocess.*curl|subprocess.*wget' local-news-os/vnext/instances/valcea/migration/p18_shadow_migration.py
           echo 'VNEXT_P18_SHADOW_SAFETY_BOUNDARY_PASS'
 
-      - name: Run Vâlcea shadow migration
+      - name: Run Vâlcea shadow migration with diagnostic capture
+        id: shadow
+        shell: bash
         run: |
+          set +e
           python local-news-os/vnext/instances/valcea/migration/p18_shadow_migration.py \
             --db /tmp/valcea-vnext-shadow.sqlite3 \
-            --report /tmp/valcea-vnext-shadow-report.json
-          cat /tmp/valcea-vnext-shadow-report.json
-          grep -q '"status": "SHADOW_MIGRATION_PASS"' /tmp/valcea-vnext-shadow-report.json
-          grep -q '"canonical_url_parity": true' /tmp/valcea-vnext-shadow-report.json
-          grep -q '"story_id_parity": true' /tmp/valcea-vnext-shadow-report.json
-          grep -q '"duplicate_canonical_paths_zero": true' /tmp/valcea-vnext-shadow-report.json
-          grep -q '"network_publication_attempted": false' /tmp/valcea-vnext-shadow-report.json
-          grep -q '"public_runtime_mutated": false' /tmp/valcea-vnext-shadow-report.json
+            --report /tmp/valcea-vnext-shadow-report.json \
+            > /tmp/valcea-vnext-shadow.log 2>&1
+          code=$?
+          cat /tmp/valcea-vnext-shadow.log
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Materialize diagnostic receipt
+        shell: bash
+        env:
+          SHADOW_EXIT_CODE: ${{ steps.shadow.outputs.exit_code }}
+        run: |
+          set -euo pipefail
+          mkdir -p local-news-os/vnext/acceptance
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          report = Path('/tmp/valcea-vnext-shadow-report.json')
+          log = Path('/tmp/valcea-vnext-shadow.log')
+          dest = Path('local-news-os/vnext/acceptance/valcea-p18-shadow-latest.json')
+          exit_code = int(os.environ.get('SHADOW_EXIT_CODE', '99'))
+          if report.is_file():
+              try:
+                  data = json.loads(report.read_text(encoding='utf-8'))
+              except Exception as exc:
+                  data = {
+                      'schema_version': '1.0',
+                      'contract': 'LOCAL_NEWS_OS_VNEXT_VALCEA_P18_SHADOW_MIGRATION_V1',
+                      'status': 'SHADOW_MIGRATION_FAIL',
+                      'report_parse_error': f'{type(exc).__name__}: {exc}',
+                  }
+          else:
+              text = log.read_text(encoding='utf-8', errors='replace') if log.is_file() else ''
+              data = {
+                  'schema_version': '1.0',
+                  'contract': 'LOCAL_NEWS_OS_VNEXT_VALCEA_P18_SHADOW_MIGRATION_V1',
+                  'status': 'SHADOW_MIGRATION_FAIL',
+                  'failure': {
+                      'class': 'HARNESS_EXECUTION_FAILED_BEFORE_REPORT',
+                      'log_tail': text[-8000:],
+                  },
+                  'production_cutover': False,
+                  'public_runtime_mutated': False,
+                  'network_publication_attempted': False,
+              }
+          data['ci'] = {
+              'workflow': 'LOCAL NEWS OS vNext Vâlcea Shadow Migration',
+              'run_id': '${{ github.run_id }}',
+              'head_sha': '${{ github.sha }}',
+              'execution_exit_code': exit_code,
+              'conclusion': 'PASS' if exit_code == 0 and data.get('status') == 'SHADOW_MIGRATION_PASS' else 'FAIL',
+          }
+          dest.write_text(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+          PY
 
       - name: Upload shadow evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: valcea-vnext-shadow-migration
           path: |
             /tmp/valcea-vnext-shadow-report.json
+            /tmp/valcea-vnext-shadow.log
             /tmp/valcea-vnext-shadow.sqlite3
-          if-no-files-found: error
+            local-news-os/vnext/acceptance/valcea-p18-shadow-latest.json
+          if-no-files-found: warn
           retention-days: 14
 
       - name: Persist latest shadow acceptance receipt
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p local-news-os/vnext/acceptance
-          cp /tmp/valcea-vnext-shadow-report.json local-news-os/vnext/acceptance/valcea-p18-shadow-latest.json
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          p = Path('local-news-os/vnext/acceptance/valcea-p18-shadow-latest.json')
-          data = json.loads(p.read_text(encoding='utf-8'))
-          data['ci'] = {
-              'workflow': 'LOCAL NEWS OS vNext Vâlcea Shadow Migration',
-              'run_id': '${{ github.run_id }}',
-              'head_sha': '${{ github.sha }}',
-              'conclusion': 'PASS'
-          }
-          p.write_text(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True) + '\n', encoding='utf-8')
-          PY
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add local-news-os/vnext/acceptance/valcea-p18-shadow-latest.json
           if git diff --cached --quiet; then
             exit 0
           fi
-          git commit -m "P18: persist Vâlcea shadow migration PASS"
+          status=$(python -c "import json; print(json.load(open('local-news-os/vnext/acceptance/valcea-p18-shadow-latest.json', encoding='utf-8'))['status'])")
+          git commit -m "P18: persist Vâlcea shadow migration ${status}"
           git pull --rebase origin main
           git push origin HEAD:main
+
+      - name: Enforce shadow acceptance result
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('local-news-os/vnext/acceptance/valcea-p18-shadow-latest.json')
+          data = json.loads(p.read_text(encoding='utf-8'))
+          required = {
+              'story_id_parity': True,
+              'canonical_url_parity': True,
+              'duplicate_canonical_paths_zero': True,
+              'legacy_social_history_did_not_mutate_active_delivery_ledger': True,
+              'network_publication_attempted': False,
+              'public_runtime_mutated': False,
+          }
+          if data.get('status') != 'SHADOW_MIGRATION_PASS':
+              raise SystemExit(f"shadow migration status is {data.get('status')}")
+          checks = (data.get('validation') or {}).get('checks') or {}
+          bad = {k: (checks.get(k), v) for k, v in required.items() if checks.get(k) is not v}
+          if bad:
+              raise SystemExit(f"shadow acceptance checks failed: {bad}")
+          print('VNEXT_P18_SHADOW_MIGRATION_PASS')
+          PY
