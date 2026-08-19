@@ -46,6 +46,41 @@ def html_to_text(value: str) -> str:
     return parser.text()
 
 
+class _ArticleExtractor(HTMLParser):
+    CONTENT_HINTS = ("entry-content", "post-content", "article-content", "single-content")
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.parts: list[str] = []
+        self.depth = 0
+
+    def handle_starttag(self, tag: str, attrs) -> None:
+        attrs_dict = {str(k): str(v or "") for k, v in attrs}
+        marker = " ".join((attrs_dict.get("class", ""), attrs_dict.get("id", ""))).lower()
+        if self.depth == 0 and (tag == "article" or any(h in marker for h in self.CONTENT_HINTS)):
+            self.depth = 1
+            return
+        if self.depth:
+            self.depth += 1
+            if tag in {"p", "br", "li", "h1", "h2", "h3"}:
+                self.parts.append("\n")
+
+    def handle_endtag(self, tag: str) -> None:
+        if self.depth:
+            if tag in {"p", "li"}:
+                self.parts.append("\n")
+            self.depth -= 1
+
+    def handle_data(self, data: str) -> None:
+        if self.depth:
+            self.parts.append(data)
+
+    def text(self) -> str:
+        value = html.unescape("".join(self.parts))
+        lines = [re.sub(r"\s+", " ", line).strip() for line in value.splitlines()]
+        return "\n".join(line for line in lines if line)
+
+
 def _fetch(url: str, timeout: int = 20) -> bytes:
     request = Request(
         url,
@@ -56,6 +91,12 @@ def _fetch(url: str, timeout: int = 20) -> bytes:
     )
     with urlopen(request, timeout=timeout) as response:
         return response.read()
+
+
+def fetch_article_text(url: str) -> str:
+    parser = _ArticleExtractor()
+    parser.feed(_fetch(url).decode("utf-8", errors="replace"))
+    return parser.text()
 
 
 def _published(value: str | None) -> datetime | None:
@@ -74,8 +115,8 @@ class WordPressFeedDiscoverer:
     """Discover SourceItems from a WordPress/RSS feed.
 
     The adapter is site-agnostic. Site identity, feed URL, freshness and limits
-    are provided by instance configuration. It prefers full ``content:encoded``
-    text and falls back to the RSS description.
+    are provided by instance configuration. It uses RSS content when complete
+    and fetches the canonical article when the feed only exposes an excerpt.
     """
 
     def __init__(
@@ -104,6 +145,13 @@ class WordPressFeedDiscoverer:
             encoded = node.findtext("{http://purl.org/rss/1.0/modules/content/}encoded")
             description = node.findtext("description") or ""
             body = html_to_text(encoded or description)
+            if len(body) < 500 or "read more" in body.casefold():
+                try:
+                    full_body = fetch_article_text(link)
+                    if len(full_body) > len(body):
+                        body = full_body
+                except Exception:
+                    pass
             published_at = _published(node.findtext("pubDate"))
             if self.max_age_hours is not None and published_at is not None:
                 if now - published_at.astimezone(timezone.utc) > timedelta(hours=self.max_age_hours):
