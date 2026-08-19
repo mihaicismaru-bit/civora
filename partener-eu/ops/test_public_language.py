@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Public-language regression for PARTENER.EU decision products."""
+"""Public-language regression for PARTENER.EU decision products and Ask."""
 from __future__ import annotations
 
 import json
@@ -9,6 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "partener-eu" / "ingest" / "state" / "decision_products.json"
 UI = ROOT / "partener-eu" / "web" / "decision-intelligence-v2.js"
+ASK = ROOT / "partener-eu" / "web" / "ask-partener-v2.js"
 
 payload = json.loads(DATA.read_text(encoding="utf-8"))
 assert payload.get("policy", {}).get("romanianPublicLanguage") is True
@@ -59,13 +60,19 @@ for dossier in payload.get("dossiers") or []:
         assert region == "Regiunea Centru", f"regional geography mismatch: {programme} / {region}"
 
 ui = UI.read_text(encoding="utf-8")
-for phrase in forbidden_phrases:
-    assert phrase not in ui, f"English UI phrase remains: {phrase}"
+ask = ASK.read_text(encoding="utf-8")
+for surface_name, surface in (("decision UI", ui), ("Ask", ask)):
+    for phrase in forbidden_phrases:
+        assert phrase not in surface, f"English UI phrase remains in {surface_name}: {phrase}"
+
 for token in ("eventLabel", "statusText", "fundingFact", "Finanțări europene · decizie și acțiune", "Utilitate pentru decizie"):
     assert token in ui, f"localized UI helper missing: {token}"
+for token in ("Am înțeles întrebarea astfel:", "Cea mai bună potrivire", "Încă neconfirmat", "Deschide dosarul verificat"):
+    assert token in ask, f"localized Ask copy missing: {token}"
 
 print(json.dumps({
     "status": "PASS",
     "dossiersChecked": len(payload.get("dossiers") or []),
+    "surfacesChecked": ["decision-intelligence-v2.js", "ask-partener-v2.js"],
     "policy": payload.get("policy"),
 }, ensure_ascii=False, indent=2))
