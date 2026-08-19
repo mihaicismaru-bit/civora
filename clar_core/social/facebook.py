@@ -149,6 +149,56 @@ def format_caption(story: Story, site_receipt: PublicationReceipt) -> str:
     return "\n\n".join(bit.strip() for bit in bits if bit and bit.strip())
 
 
+def _verify_with_page_token(
+    *,
+    story_id: str,
+    canonical_url: str,
+    external_id: str,
+    token: str,
+    version: str,
+    request_fn: Callable[..., Any],
+    auth_resolution: Mapping[str, Any],
+) -> PublicationReceipt:
+    try:
+        value = _graph_get(
+            path=f"{urllib.parse.quote(external_id, safe='')}?fields=id,permalink_url",
+            token=token,
+            version=version,
+            request_fn=request_fn,
+        )
+    except FacebookPublishError as exc:
+        return PublicationReceipt(
+            story_id=story_id,
+            canonical_url=canonical_url,
+            published_at=_now(),
+            destination="facebook_page",
+            status="submitted_unverified",
+            external_id=external_id,
+            metadata={"verification_error": str(exc), "auth_resolution": dict(auth_resolution)},
+        )
+    verified_id = str(value.get("id") or "").strip()
+    permalink = str(value.get("permalink_url") or "").strip()
+    if verified_id != external_id or not permalink:
+        return PublicationReceipt(
+            story_id=story_id,
+            canonical_url=canonical_url,
+            published_at=_now(),
+            destination="facebook_page",
+            status="submitted_unverified",
+            external_id=external_id,
+            metadata={"auth_resolution": dict(auth_resolution)},
+        )
+    return PublicationReceipt(
+        story_id=story_id,
+        canonical_url=canonical_url,
+        published_at=_now(),
+        destination="facebook_page",
+        status="published_verified",
+        external_id=external_id,
+        metadata={"permalink_url": permalink, "auth_resolution": dict(auth_resolution)},
+    )
+
+
 class FacebookPagePublisher:
     """Single-path, fail-closed Facebook Page publisher.
 
@@ -181,43 +231,14 @@ class FacebookPagePublisher:
             version=self.graph_version,
             request_fn=self.request_fn,
         )
-        try:
-            value = _graph_get(
-                path=f"{urllib.parse.quote(external_id, safe='')}?fields=id,permalink_url",
-                token=token,
-                version=self.graph_version,
-                request_fn=self.request_fn,
-            )
-        except FacebookPublishError as exc:
-            return PublicationReceipt(
-                story_id=story_id,
-                canonical_url=canonical_url,
-                published_at=_now(),
-                destination="facebook_page",
-                status="submitted_unverified",
-                external_id=external_id,
-                metadata={"verification_error": str(exc), "auth_resolution": dict(resolution)},
-            )
-        verified_id = str(value.get("id") or "").strip()
-        permalink = str(value.get("permalink_url") or "").strip()
-        if verified_id != external_id or not permalink:
-            return PublicationReceipt(
-                story_id=story_id,
-                canonical_url=canonical_url,
-                published_at=_now(),
-                destination="facebook_page",
-                status="submitted_unverified",
-                external_id=external_id,
-                metadata={"auth_resolution": dict(resolution)},
-            )
-        return PublicationReceipt(
+        return _verify_with_page_token(
             story_id=story_id,
             canonical_url=canonical_url,
-            published_at=_now(),
-            destination="facebook_page",
-            status="published_verified",
             external_id=external_id,
-            metadata={"permalink_url": permalink, "auth_resolution": dict(resolution)},
+            token=token,
+            version=self.graph_version,
+            request_fn=self.request_fn,
+            auth_resolution=resolution,
         )
 
     def __call__(self, story: Story, site_receipt: PublicationReceipt) -> PublicationReceipt:
@@ -256,10 +277,17 @@ class FacebookPagePublisher:
         external_id = str(payload.get("post_id") or payload.get("id") or "").strip()
         if not external_id:
             raise FacebookPublishError("Meta photo POST returned no object id")
-        receipt = self.verify_existing(
+
+        # Important idempotency boundary: once Meta has accepted the POST, never
+        # issue a second POST merely because verification is temporarily down.
+        receipt = _verify_with_page_token(
             story_id=story.story_id,
             canonical_url=site_receipt.canonical_url,
             external_id=external_id,
+            token=page_token,
+            version=self.graph_version,
+            request_fn=self.request_fn,
+            auth_resolution=resolution,
         )
         metadata = dict(receipt.metadata)
         metadata.update({
