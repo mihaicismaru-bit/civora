@@ -13,6 +13,17 @@ def _esc(value: object) -> str:
     return html.escape(str(value), quote=True)
 
 
+def _safe_media(story: Story) -> dict | None:
+    media = story.metadata.get("media") if story.metadata else None
+    if not isinstance(media, dict):
+        return None
+    if media.get("rights_status") != "VERIFIED_REUSABLE":
+        return None
+    if not media.get("image_url") or not media.get("source_page"):
+        return None
+    return media
+
+
 class StaticSitePublisher:
     """Materialize a Story as a static article route plus a tiny index.
 
@@ -36,6 +47,29 @@ class StaticSitePublisher:
             f'<li><a href="{_esc(url)}" rel="noopener noreferrer">Sursa oficială</a></li>' for url in story.source_urls
         )
         paragraphs = "".join(f"<p>{_esc(p)}</p>" for p in story.paragraphs)
+        media = _safe_media(story)
+        media_html = ""
+        og_image = ""
+        if media:
+            creator = _esc(media.get("creator") or "sursă indicată")
+            license_name = _esc(media.get("license") or "licență verificată")
+            license_url = media.get("license_url")
+            license_html = (
+                f'<a href="{_esc(license_url)}" rel="license noopener noreferrer">{license_name}</a>'
+                if license_url
+                else license_name
+            )
+            media_html = (
+                '<figure class="story-media">'
+                f'<img src="{_esc(media["image_url"])}" alt="{_esc(media.get("alt") or story.headline)}" '
+                'loading="eager" decoding="async">'
+                '<figcaption>'
+                f'{_esc(media.get("caption") or "Imagine de context.")} '
+                f'Foto: <a href="{_esc(media["source_page"])}" rel="noopener noreferrer">{creator}</a> · {license_html}.'
+                '</figcaption></figure>'
+            )
+            og_image = f'<meta property="og:image" content="{_esc(media["image_url"])}">\n'
+
         schema = {
             "@context": "https://schema.org",
             "@type": "NewsArticle",
@@ -45,6 +79,8 @@ class StaticSitePublisher:
             "mainEntityOfPage": canonical,
             "publisher": {"@type": "Organization", "name": self.product_name},
         }
+        if media:
+            schema["image"] = [media["image_url"]]
         document = f"""<!doctype html>
 <html lang="ro">
 <head>
@@ -57,9 +93,9 @@ class StaticSitePublisher:
 <meta property="og:title" content="{_esc(story.headline)}">
 <meta property="og:description" content="{_esc(story.dek)}">
 <meta property="og:url" content="{_esc(canonical)}">
-<script type="application/ld+json">{json.dumps(schema, ensure_ascii=False)}</script>
+{og_image}<script type="application/ld+json">{json.dumps(schema, ensure_ascii=False)}</script>
 <style>
-body{{font-family:Arial,sans-serif;margin:0;color:#171717;background:#fff}}main{{max-width:760px;margin:auto;padding:32px 20px 64px}}header.site{{border-bottom:1px solid #ddd;padding:18px 20px;font-weight:800;letter-spacing:.04em}}.section{{font-size:.78rem;font-weight:700;letter-spacing:.08em}}h1{{font-size:clamp(2rem,7vw,3.8rem);line-height:1.02;margin:.35em 0}}.dek{{font-size:1.2rem;line-height:1.5;color:#444}}article p{{font-size:1.08rem;line-height:1.7}}.meta,.sources{{color:#666;font-size:.9rem}}a{{color:inherit}}
+body{{font-family:Arial,sans-serif;margin:0;color:#171717;background:#fff}}main{{max-width:760px;margin:auto;padding:32px 20px 64px}}header.site{{border-bottom:1px solid #ddd;padding:18px 20px;font-weight:800;letter-spacing:.04em}}.section{{font-size:.78rem;font-weight:700;letter-spacing:.08em}}h1{{font-size:clamp(2rem,7vw,3.8rem);line-height:1.02;margin:.35em 0}}.dek{{font-size:1.2rem;line-height:1.5;color:#444}}article p{{font-size:1.08rem;line-height:1.7}}.meta,.sources{{color:#666;font-size:.9rem}}a{{color:inherit}}.story-media{{margin:24px 0}}.story-media img{{display:block;width:100%;height:auto;max-height:520px;object-fit:cover}}.story-media figcaption{{font-size:.82rem;line-height:1.45;color:#666;margin-top:8px}}
 </style>
 </head>
 <body>
@@ -69,7 +105,7 @@ body{{font-family:Arial,sans-serif;margin:0;color:#171717;background:#fff}}main{
 <h1>{_esc(story.headline)}</h1>
 <p class="dek">{_esc(story.dek)}</p>
 <p class="meta">Publicat: {_esc(story.published_at.isoformat())}</p>
-<article>{paragraphs}</article>
+{media_html}<article>{paragraphs}</article>
 <section class="sources"><h2>Surse</h2><ul>{source_links}</ul></section>
 </main>
 </body>
@@ -85,18 +121,30 @@ body{{font-family:Arial,sans-serif;margin:0;color:#171717;background:#fff}}main{
             except json.JSONDecodeError:
                 manifest = {"stories": []}
         rows = [row for row in manifest.get("stories", []) if row.get("story_id") != story.story_id]
-        rows.append(
-            {
-                "story_id": story.story_id,
-                "slug": story.slug,
-                "headline": story.headline,
-                "dek": story.dek,
-                "canonical_url": canonical,
-                "published_at": story.published_at.isoformat(),
-                "section": story.section,
+        row = {
+            "story_id": story.story_id,
+            "slug": story.slug,
+            "headline": story.headline,
+            "dek": story.dek,
+            "canonical_url": canonical,
+            "published_at": story.published_at.isoformat(),
+            "section": story.section,
+        }
+        if media:
+            row["media"] = {
+                "asset_id": media.get("asset_id"),
+                "image_url": media.get("image_url"),
+                "source_page": media.get("source_page"),
+                "creator": media.get("creator"),
+                "license": media.get("license"),
+                "license_url": media.get("license_url"),
+                "alt": media.get("alt"),
+                "caption": media.get("caption"),
+                "specificity": media.get("specificity"),
+                "rights_status": media.get("rights_status"),
             }
-        )
-        rows.sort(key=lambda row: row.get("published_at", ""), reverse=True)
+        rows.append(row)
+        rows.sort(key=lambda item: item.get("published_at", ""), reverse=True)
         previous_rows = manifest.get("stories", []) if isinstance(manifest, dict) else []
         generated_at = (
             manifest.get("generated_at")
