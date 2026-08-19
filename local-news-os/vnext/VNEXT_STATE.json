@@ -69,8 +69,24 @@
         "LOCAL NEWS OS vNext Validation run 32246572918 PASS"
       ]
     },
-    "P5_SIGNAL_ENGINE": {"status": "NEXT"},
-    "P6_DYNAMIC_PRIMARY_RESOLVER": {"status": "PENDING"},
+    "P5_SIGNAL_ENGINE": {
+      "status": "CLOSED",
+      "evidence": [
+        "site-owned signals table",
+        "deterministic signal identity and dedupe",
+        "normalized SourceItem to SignalCandidate materialization",
+        "non-authoritative deterministic claim hints",
+        "unresolved entity mention hints",
+        "publication_authority hard locked to NONE",
+        "material_fact_ready and fact_kernel_ready hard locked false",
+        "append-only SIGNAL_DISCOVERED event",
+        "cross-instance signal isolation",
+        "private newsroom signal summary/list/detail API",
+        "private newsroom visible recent-signal table",
+        "LOCAL NEWS OS vNext Validation run 32247133056 PASS"
+      ]
+    },
+    "P6_DYNAMIC_PRIMARY_RESOLVER": {"status": "NEXT"},
     "P7_FACT_KERNEL_ENGINE": {"status": "PENDING"},
     "P8_NEWSWORTHINESS_ENGINE": {"status": "PENDING"},
     "P9_STORY_ENGINE": {"status": "PENDING"},
@@ -84,5 +100,5 @@
     "P17_INSTANCE_BOOTSTRAP_SECOND_INSTANCE_TEST": {"status": "PENDING"},
     "P18_MIGRATION_SHADOW_LIVE_SOAK_PRODUCTION_LOCK": {"status": "PENDING"}
   },
-  "next_action": "Implement P5 Signal Engine: transform normalized SourceItems into site-owned signals with deterministic claim/entity hints, instance isolation, dedupe and no publication authority."
+  "next_action": "Implement P6 Dynamic Primary Resolver: turn unresolved signal claims/entities into site-owned verification tasks and dynamically discover/configure primary targets without granting publication authority."
 }
