@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Build automated 'Ce spun decidenții' data for PARTENER.EU.
 
-The builder combines the tracked decision-maker registry, verified seed signals
-and new mentions discovered in MIPE / decision products. Statements remain
-signals until corroborated by T1/T1B administrative evidence.
+The builder combines verified seeds and canonical decision products, but emits
+person-level items only for tracked people with a verified role snapshot.
+Statements remain signals until separately corroborated by T1/T1B evidence.
 """
 from __future__ import annotations
 
@@ -24,12 +24,14 @@ MIPE = ROOT / "partener-eu" / "ingest" / "state" / "mipe_state.json"
 DECISIONS = ROOT / "partener-eu" / "ingest" / "state" / "decision_products.json"
 OUT_JSON = ROOT / "partener-eu" / "ingest" / "state" / "people_policy.json"
 OUT_JS = ROOT / "partener-eu" / "web" / "people-policy-data.js"
-UA = "PARTENER.EU-PeoplePolicy/1.0 (+https://partener.eu)"
+UA = "PARTENER.EU-PeoplePolicy/2.0 (+https://partener.eu)"
 
 
 def load(path: Path, default: Any) -> Any:
-    try: return json.loads(path.read_text(encoding="utf-8"))
-    except Exception: return default
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return default
 
 
 def clean(s: Any) -> str:
@@ -37,7 +39,7 @@ def clean(s: Any) -> str:
 
 
 def norm(s: Any) -> str:
-    return clean(s).lower().replace("ț","t").replace("ș","s").replace("ă","a").replace("â","a").replace("î","i")
+    return clean(s).lower().translate(str.maketrans("ăâîșşțţ", "aaisstt"))
 
 
 def date_key(value: Any) -> str:
@@ -48,90 +50,159 @@ def date_key(value: Any) -> str:
 
 def type_for(text: str) -> str:
     t = norm(text)
-    if any(x in t for x in ("prelung", "termen", "modific", "ghid", "calendar")): return "PROGRAMME_CHANGE_SIGNAL"
-    if any(x in t for x in ("buget", "aloc", "finant", "grant", "milioane", "miliarde")): return "FUNDING_COMMITMENT"
+    if any(x in t for x in ("prelung", "termen", "modific", "ghid", "calendar")):
+        return "PROGRAMME_CHANGE_SIGNAL"
+    if any(x in t for x in ("buget", "aloc", "finant", "grant", "milioane", "miliarde")):
+        return "FUNDING_COMMITMENT"
     return "POLICY_SIGNAL"
 
 
+def role_snapshot(person: dict[str, Any]) -> dict[str, Any] | None:
+    verification = person.get("roleVerification")
+    if not isinstance(verification, dict) or verification.get("status") != "VERIFIED":
+        return None
+    url = str(verification.get("sourceUrl") or "")
+    tier = str(verification.get("sourceTier") or "")
+    verified_at = str(verification.get("verifiedAt") or "")
+    if not url.startswith("https://") or not verified_at or not tier.startswith("T1"):
+        return None
+    return {
+        "role": person.get("role"),
+        "institution": person.get("institution"),
+        "verifiedAt": verified_at,
+        "sourceUrl": url,
+        "sourceTier": tier,
+    }
+
+
 def fetch_og_image(url: str) -> str | None:
-    if not url or not url.startswith("http"): return None
+    if not url or not url.startswith("http"):
+        return None
     try:
-        req=urllib.request.Request(url,headers={"User-Agent":UA,"Accept":"text/html,*/*;q=.8"})
-        with urllib.request.urlopen(req,timeout=10,context=ssl.create_default_context()) as r:
-            body=r.read(500_000).decode("utf-8","ignore")
-        for pat in (r'<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)',r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image["\']'):
-            m=re.search(pat,body,re.I)
-            if m:return m.group(1)
+        req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept": "text/html,*/*;q=.8"})
+        with urllib.request.urlopen(req, timeout=10, context=ssl.create_default_context()) as r:
+            body = r.read(500_000).decode("utf-8", "ignore")
+        for pat in (
+            r'<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)',
+            r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image["\']',
+        ):
+            m = re.search(pat, body, re.I)
+            if m:
+                return m.group(1)
     except Exception:
         return None
     return None
 
 
-def nested_source(source: dict[str,Any]) -> dict[str,Any]:
-    value=source.get("source")
-    return value if isinstance(value,dict) else {}
+def nested_source(source: dict[str, Any]) -> dict[str, Any]:
+    value = source.get("source")
+    return value if isinstance(value, dict) else {}
 
 
-def mention_item(person: dict[str,Any], source: dict[str,Any], source_kind: str) -> dict[str,Any] | None:
-    hay=clean(" ".join(str(source.get(k) or "") for k in ("title","headline","summary","standfirst","meaning")))
-    if not hay:return None
-    if not any(norm(alias) in norm(hay) for alias in person.get("aliases") or []):return None
-    nested=nested_source(source)
-    url=source.get("url") or nested.get("url")
-    day=date_key(source.get("date") or source.get("observedAt") or source.get("updatedAt"))
-    typ=type_for(hay)
-    token=hashlib.sha1(f"{person['id']}|{day}|{hay}|{url or ''}".encode("utf-8")).hexdigest()[:10]
-    tier=nested.get("tier") or source.get("tier") or "T1/T1B de verificat"
+def mention_item(person: dict[str, Any], source: dict[str, Any], source_kind: str) -> dict[str, Any] | None:
+    snapshot = role_snapshot(person)
+    if not snapshot:
+        return None
+    hay = clean(" ".join(str(source.get(k) or "") for k in ("title", "headline", "summary", "standfirst", "meaning")))
+    if not hay or not any(norm(alias) in norm(hay) for alias in person.get("aliases") or []):
+        return None
+    nested = nested_source(source)
+    url = source.get("url") or nested.get("url")
+    day = date_key(source.get("date") or source.get("observedAt") or source.get("updatedAt"))
+    typ = type_for(hay)
+    token = hashlib.sha1(f"{person['id']}|{day}|{hay}|{url or ''}".encode("utf-8")).hexdigest()[:10]
+    tier = nested.get("tier") or source.get("tier") or "T1/T1B de verificat"
     return {
-        "id":f"auto-{person['id']}-{day}-{token}",
-        "personId":person["id"],"date":day,"type":typ,"topic":source.get("programme") or source.get("tag") or person.get("institution"),
-        "headline":clean(source.get("headline") or source.get("title"))[:220],
-        "statement":clean(source.get("standfirst") or source.get("summary") or source.get("meaning"))[:500],
-        "officialFact":"Semnalul este păstrat separat de efectul administrativ. Orice modificare de apel, termen, buget sau eligibilitate necesită document oficial T1/T1B.",
-        "analysis":"Declarația este relevantă pentru monitorizare; impactul concret se stabilește numai după legarea de documentul sau apelul canonic aplicabil.",
-        "watch":"Documentul oficial, ghidul, corrigendumul sau actul normativ care poate transforma semnalul într-un fapt operațional.",
-        "audiences":["Beneficiari", "Consultanți"],
-        "sources":[{"label":f"{source_kind} — sursă observată","url":url,"tier":tier}] if url else [],
-        "autoGenerated":True
+        "id": f"auto-{person['id']}-{day}-{token}",
+        "personId": person["id"],
+        "person": person["name"],
+        "role": snapshot["role"],
+        "institution": snapshot["institution"],
+        "roleVerification": snapshot,
+        "date": day,
+        "type": typ,
+        "signalKind": "STATEMENT_SIGNAL",
+        "topic": source.get("programme") or source.get("tag") or person.get("institution"),
+        "headline": clean(source.get("headline") or source.get("title"))[:220],
+        "statement": clean(source.get("standfirst") or source.get("summary") or source.get("meaning"))[:500],
+        "officialFact": "Semnalul este păstrat separat de efectul administrativ. Orice modificare de apel, termen, buget sau eligibilitate necesită document oficial T1/T1B.",
+        "administrativeFact": {"status": "UNCONFIRMED_FROM_SIGNAL", "failClosed": True},
+        "analysis": "Declarația este relevantă pentru monitorizare; impactul concret se stabilește numai după legarea de documentul sau apelul canonic aplicabil.",
+        "watch": "Documentul oficial, ghidul, corrigendumul sau actul normativ care poate transforma semnalul într-un fapt operațional.",
+        "audiences": ["Beneficiari", "Consultanți"],
+        "sources": [{"label": f"{source_kind} — sursă observată", "url": url, "tier": tier}] if url else [],
+        "autoGenerated": True,
     }
 
 
-def main()->int:
-    registry=load(REGISTRY,{"people":[],"policy":{}})
-    people={p["id"]:p for p in registry.get("people") or [] if p.get("active")}
-    items=list(load(SEED,{"items":[]}).get("items") or [])
-    mipe=load(MIPE,{"items":[]})
-    decisions=load(DECISIONS,{"news":[]})
+def main() -> int:
+    registry = load(REGISTRY, {"people": [], "policy": {}})
+    people = {
+        p["id"]: p for p in registry.get("people") or []
+        if p.get("active") and role_snapshot(p)
+    }
+    raw_seed = list(load(SEED, {"items": []}).get("items") or [])
+    items = [x for x in raw_seed if x.get("personId") in people]
+    mipe = load(MIPE, {"items": []})
+    decisions = load(DECISIONS, {"news": []})
 
-    existing={(x.get("personId"),norm(x.get("headline"))) for x in items}
+    existing = {(x.get("personId"), norm(x.get("headline"))) for x in items}
     for person in people.values():
-        for source,kind in [*((x,"MIPE") for x in mipe.get("items") or []), *((x,"PARTENER.EU / sursă oficială") for x in decisions.get("news") or [])]:
-            row=mention_item(person,source,kind)
-            if row and (row["personId"],norm(row["headline"])) not in existing:
-                items.append(row);existing.add((row["personId"],norm(row["headline"])))
+        for source, kind in [
+            *((x, "MIPE") for x in mipe.get("items") or []),
+            *((x, "PARTENER.EU / sursă oficială") for x in decisions.get("news") or []),
+        ]:
+            row = mention_item(person, source, kind)
+            if row and (row["personId"], norm(row["headline"])) not in existing:
+                items.append(row)
+                existing.add((row["personId"], norm(row["headline"])))
 
     for item in items:
-        person=people.get(item.get("personId"))
-        if not person:continue
-        item["person"]=person["name"];item["role"]=person["role"];item["institution"]=person["institution"];item["priority"]=person.get("priority",50)
-        item["initials"]="".join(part[0] for part in person["name"].split()[:2]).upper()
+        person = people.get(item.get("personId"))
+        if not person:
+            continue
+        snapshot = role_snapshot(person)
+        item["person"] = person["name"]
+        item["role"] = snapshot["role"]
+        item["institution"] = snapshot["institution"]
+        item["roleVerification"] = snapshot
+        item["priority"] = person.get("priority", 50)
+        item["initials"] = "".join(part[0] for part in person["name"].split()[:2]).upper()
+        item.setdefault("signalKind", "STATEMENT_SIGNAL")
+        item.setdefault("administrativeFact", {"status": "UNCONFIRMED_FROM_SIGNAL", "failClosed": True})
         if not item.get("photoUrl"):
             for src in item.get("sources") or []:
-                img=fetch_og_image(src.get("url") or "")
-                if img: item["photoUrl"]=img;break
-        item["whyItMatters"]=item.get("analysis") or item.get("officialFact") or "Semnal relevant pentru monitorizare."
+                img = fetch_og_image(src.get("url") or "")
+                if img:
+                    item["photoUrl"] = img
+                    break
+        item["whyItMatters"] = item.get("analysis") or item.get("officialFact") or "Semnal relevant pentru monitorizare."
 
-    items=[x for x in items if x.get("personId") in people]
-    items.sort(key=lambda x:(date_key(x.get("date")),int(x.get("priority") or 0)),reverse=True)
-    home=[];seen=set()
+    items = [x for x in items if x.get("personId") in people and x.get("roleVerification")]
+    items.sort(key=lambda x: (date_key(x.get("date")), int(x.get("priority") or 0)), reverse=True)
+    home: list[str] = []
+    seen: set[str] = set()
     for x in items:
-        if x["personId"] in seen:continue
-        home.append(x["id"]);seen.add(x["personId"])
-        if len(home)==3:break
-    out={"schemaVersion":1,"asOf":dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00","Z"),"mode":"AUTO","policy":registry.get("policy") or {},"homeIds":home,"people":list(people.values()),"items":items}
-    OUT_JSON.write_text(json.dumps(out,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
-    OUT_JS.write_text("window.PARTENER_PEOPLE_POLICY="+json.dumps(out,ensure_ascii=False,separators=(",",":"))+";\n",encoding="utf-8")
-    print(json.dumps({"items":len(items),"homeIds":home},ensure_ascii=False,indent=2))
+        if x["personId"] in seen:
+            continue
+        home.append(x["id"])
+        seen.add(x["personId"])
+        if len(home) == 3:
+            break
+    out = {
+        "schemaVersion": 2,
+        "asOf": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "mode": "AUTO",
+        "policy": registry.get("policy") or {},
+        "homeIds": home,
+        "people": list(people.values()),
+        "items": items,
+    }
+    OUT_JSON.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    OUT_JS.write_text("window.PARTENER_PEOPLE_POLICY=" + json.dumps(out, ensure_ascii=False, separators=(",", ":")) + ";\n", encoding="utf-8")
+    print(json.dumps({"items": len(items), "homeIds": home, "verifiedPeople": len(people)}, ensure_ascii=False, indent=2))
     return 0
 
-if __name__=="__main__":raise SystemExit(main())
+
+if __name__ == "__main__":
+    raise SystemExit(main())
