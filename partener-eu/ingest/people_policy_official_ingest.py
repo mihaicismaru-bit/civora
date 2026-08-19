@@ -27,7 +27,7 @@ STATE = ROOT / "partener-eu" / "ingest" / "state" / "people_policy_official_sour
 REGISTRY = ROOT / "partener-eu" / "ingest" / "state" / "people_policy_registry.json"
 SOURCE_REGISTRY = ROOT / "partener-eu" / "ingest" / "state" / "people_policy_source_registry.json"
 CANONICAL_CALLS = ROOT / "partener-eu" / "ingest" / "state" / "mipe_canonical_calls.json"
-UA = "PARTENER.EU-DecisionMakerOfficialIngest/2.2 (+https://partener.eu)"
+UA = "PARTENER.EU-DecisionMakerOfficialIngest/2.3 (+https://partener.eu)"
 NOW = dt.datetime.now(dt.timezone.utc)
 FETCH_TIMEOUT_SECONDS = 18
 MAX_SOURCE_FETCH_WORKERS = 9
@@ -43,6 +43,13 @@ SIGNAL_TERMS = (
     "comisia european", "a declarat", "a anuntat", "a anunțat", "prioritate",
     "prelung", "acceler", "negocier", "decizie", "aprobat", "adoptat", "semnat",
     "lans", "rezultat", "contract", "plătește", "plateste", "propune", "alocă", "aloca",
+)
+STATEMENT_CUES = (
+    "a declarat", "a anuntat", "a anunțat", "a precizat", "a spus", "a afirmat",
+    "a explicat", "a subliniat", "a mentionat", "a menționat", "a transmis",
+    "a aratat", "a arătat", "a adaugat", "a adăugat", "anunta", "anunță",
+    "declara", "declară", "precizeaza", "precizează", "spune", "afirma", "afirmă",
+    "explica", "explică", "subliniaza", "subliniază", "propune",
 )
 
 
@@ -135,9 +142,10 @@ class TextParser(HTMLParser):
         value = clean(data)
         if not value:
             return
-        self.parts.append(value)
         if self._in_title:
             self.title_parts.append(value)
+        else:
+            self.parts.append(value)
 
 
 def fetch(url: str, limit: int = 900_000) -> str:
@@ -208,6 +216,78 @@ def first_relevant_sentence(text: str) -> str:
     return clean(text)[:500]
 
 
+def actor_alias(person: dict[str, Any], text: str) -> str | None:
+    value = fold(text)
+    aliases = [clean(alias) for alias in person.get("aliases") or [] if clean(alias)]
+    name = clean(person.get("name"))
+    if name:
+        aliases.append(name)
+    for alias in sorted(set(aliases), key=len, reverse=True):
+        if fold(alias) in value:
+            return alias
+    return None
+
+
+def sentence_units(text: str) -> list[str]:
+    return [
+        sentence for sentence in re.split(r"(?<=[.!?])\s+", clean(text))
+        if 25 <= len(sentence) <= 700
+    ]
+
+
+def statement_window_for(person: dict[str, Any], text: str) -> dict[str, Any] | None:
+    """Bind actor + speech cue + funding context to one compact article window.
+
+    The actor and speech/announcement cue must occur in the same sentence. Funding
+    context may be in that sentence or one immediately adjacent sentence. This
+    rejects articles where a tracked person is merely mentioned somewhere while a
+    separate generic funding paragraph happens to exist elsewhere on the page.
+    """
+    sentences = sentence_units(text)
+    actor_speech: list[tuple[int, str, str, str]] = []
+    for index, sentence in enumerate(sentences):
+        alias = actor_alias(person, sentence)
+        if not alias:
+            continue
+        cue = next((term for term in STATEMENT_CUES if fold(term) in fold(sentence)), None)
+        if cue:
+            actor_speech.append((index, sentence, alias, cue))
+
+    for index, sentence, alias, cue in actor_speech:
+        funding = next((term for term in FUNDING_TERMS if fold(term) in fold(sentence)), None)
+        if funding:
+            return {
+                "statement": sentence,
+                "actorAlias": alias,
+                "signalCue": cue,
+                "fundingCue": funding,
+                "scope": "SENTENCE",
+                "sentenceIndex": index,
+            }
+
+    for index, sentence, alias, cue in actor_speech:
+        for neighbor_index in (index - 1, index + 1):
+            if neighbor_index < 0 or neighbor_index >= len(sentences):
+                continue
+            neighbor = sentences[neighbor_index]
+            funding = next((term for term in FUNDING_TERMS if fold(term) in fold(neighbor)), None)
+            if not funding:
+                continue
+            ordered = [neighbor, sentence] if neighbor_index < index else [sentence, neighbor]
+            window = clean(" ".join(ordered))
+            if len(window) > 1100:
+                continue
+            return {
+                "statement": window,
+                "actorAlias": alias,
+                "signalCue": cue,
+                "fundingCue": funding,
+                "scope": "ADJACENT_SENTENCES",
+                "sentenceIndex": min(index, neighbor_index),
+            }
+    return None
+
+
 def actor_for(text: str, registry: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]] | None:
     value = fold(text)
     for person in registry.get("people") or []:
@@ -220,6 +300,31 @@ def actor_for(text: str, registry: dict[str, Any]) -> tuple[dict[str, Any], dict
             return person, snapshot
         return None
     return None
+
+
+def actor_statement_for(text: str, registry: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]] | None:
+    candidates: list[tuple[int, int, dict[str, Any], dict[str, Any], dict[str, Any]]] = []
+    for person in registry.get("people") or []:
+        if not person.get("active"):
+            continue
+        snapshot = verified_role(person)
+        if not snapshot:
+            continue
+        evidence = statement_window_for(person, text)
+        if not evidence:
+            continue
+        candidates.append((
+            int(evidence.get("sentenceIndex") or 0),
+            -int(person.get("priority") or 50),
+            person,
+            snapshot,
+            evidence,
+        ))
+    if not candidates:
+        return None
+    candidates.sort(key=lambda row: (row[0], row[1]))
+    _, _, person, snapshot, evidence = candidates[0]
+    return person, snapshot, evidence
 
 
 def candidate_links(source: dict[str, Any], body: str) -> list[str]:
@@ -285,6 +390,7 @@ def ingest_source(source: dict[str, Any], registry: dict[str, Any], canonical: d
     urls = candidate_links(source, listing)
     items: list[dict[str, Any]] = []
     unverified_roles = 0
+    statement_evidence_rejections = 0
     article_fetch_attempts = 0
     article_fetch_successes = 0
     article_fetch_failures = 0
@@ -303,15 +409,21 @@ def ingest_source(source: dict[str, Any], registry: dict[str, Any], canonical: d
         combined = f"{title} {text}"
         if not relevant(combined):
             continue
-        actor = actor_for(f"{title} {text[:10000]}", registry)
+        actor = actor_statement_for(text[:30_000], registry)
         if not actor:
-            if any(fold(alias) in fold(combined) for person in registry.get("people") or [] for alias in person.get("aliases") or []):
+            mentioned_people = [
+                person for person in registry.get("people") or []
+                if person.get("active") and actor_alias(person, combined)
+            ]
+            if any(verified_role(person) for person in mentioned_people):
+                statement_evidence_rejections += 1
+            elif mentioned_people:
                 unverified_roles += 1
             continue
-        person, role_snapshot = actor
+        person, role_snapshot, statement_evidence = actor
         date = parse_date(text[:10000]) or NOW.date().isoformat()
-        headline = re.sub(r"\s*[-|–—]\s*[^-|–—]{2,80}$", "", title).strip() or first_relevant_sentence(text)[:220]
-        statement = first_relevant_sentence(text)
+        statement = clean(statement_evidence["statement"])
+        headline = re.sub(r"\s*[-|–—]\s*[^-|–—]{2,80}$", "", title).strip() or statement[:220]
         content_hash = hashlib.sha256(clean(text[:30000]).encode("utf-8")).hexdigest()
         fingerprint = hashlib.sha256(f"{person['id']}|{url}|{content_hash}".encode("utf-8")).hexdigest()
         canonical_link = canonical_link_for(f"{headline} {statement} {text[:12000]}", canonical)
@@ -328,6 +440,13 @@ def ingest_source(source: dict[str, Any], registry: dict[str, Any], canonical: d
             "topic": source.get("institution") or "Fonduri europene",
             "headline": headline[:220],
             "statement": statement[:600],
+            "statementExtraction": {
+                "status": "ACTOR_SPEECH_FUNDING_BOUND",
+                "scope": statement_evidence["scope"],
+                "actorAlias": statement_evidence["actorAlias"],
+                "signalCue": statement_evidence["signalCue"],
+                "fundingCue": statement_evidence["fundingCue"],
+            },
             "officialFact": "Niciun efect administrativ nu este promovat din această declarație. Orice termen, buget, eligibilitate, deschidere sau modificare de apel cere dovadă T1/T1B separată în dosarul canonic.",
             "administrativeFact": {"status": "UNCONFIRMED_FROM_SIGNAL", "failClosed": True},
             "analysis": "Semnalul este relevant pentru monitorizare; impactul operațional se stabilește numai după legarea de documentul oficial aplicabil.",
@@ -365,6 +484,7 @@ def ingest_source(source: dict[str, Any], registry: dict[str, Any], canonical: d
         "articleFetchSuccesses": article_fetch_successes,
         "articleFetchFailures": article_fetch_failures,
         "acceptedItems": len(items),
+        "statementEvidenceRejected": statement_evidence_rejections,
         "unverifiedRoleMentionsRejected": unverified_roles, "failClosed": True,
     }
     return status, items
@@ -448,6 +568,7 @@ def main() -> int:
             "legacyUnverifiedSignalsQuarantined": True,
             "canonicalLinkRequiresExplicitCodeMatch": True,
             "sourceHealthRequiresArticleFetchProofWhenCandidatesExist": True,
+            "actorSpeechFundingEvidenceRequired": True,
             "boundedConcurrentSourceIngest": True,
             "maxSourceFetchWorkers": MAX_SOURCE_FETCH_WORKERS,
             "fetchTimeoutSeconds": FETCH_TIMEOUT_SECONDS,
