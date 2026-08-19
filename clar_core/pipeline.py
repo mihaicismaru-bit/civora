@@ -36,6 +36,11 @@ class Pipeline:
     No orchestration state machine lives here. A source adapter discovers
     SourceItems, a vertical extractor emits FactPackets, a composer emits
     Stories, and the canonical publisher returns PublicationReceipts.
+
+    ``rendered`` is a successful local/materialization outcome and is safe to
+    deduplicate, but it is deliberately not counted as a live publication.
+    Only a publisher/verification boundary that explicitly returns a
+    ``published*`` status contributes to ``publications``.
     """
 
     def __init__(
@@ -71,7 +76,8 @@ class Pipeline:
                 continue
             result.stories += 1
             receipt = self.publish(story)
-            if receipt.status == "published":
-                result.publications += 1
+            if receipt.status in {"rendered", "published", "published_verified"}:
                 self.mark_seen(item)
+            if receipt.status.startswith("published"):
+                result.publications += 1
         return result
