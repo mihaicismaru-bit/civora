@@ -1,16 +1,85 @@
 {
+  "checks": {
+    "all_artist_routes_preserved": false,
+    "all_legacy_story_routes_200_with_content": false,
+    "all_people_routes_preserved": true,
+    "homepage_200": true,
+    "homepage_contains_all_legacy_story_links": true,
+    "leisure_route_200": true,
+    "leisure_verified_places_projected": true,
+    "network_publication_attempted": false,
+    "public_runtime_mutated": false,
+    "shadow_migration_pass": true,
+    "sitemap_200": true,
+    "sitemap_preserves_required_public_urls": true
+  },
   "ci": {
     "conclusion": "FAIL",
     "execution_exit_code": 1,
-    "head_sha": "32c1309f08715c9ac95e2cd98bc5168938a024ed",
-    "run_id": "32289276080",
+    "head_sha": "0bbdf6dbab37f74b364b42ed1a6c330ef1cfc835",
+    "run_id": "32289613399",
     "workflow": "LOCAL NEWS OS vNext Vâlcea Shadow Projection"
   },
   "contract": "LOCAL_NEWS_OS_VNEXT_VALCEA_P18_SHADOW_PROJECTION_DIFF_V1",
-  "failure": {
-    "class": "PROJECTION_EXECUTION_FAILED_BEFORE_REPORT",
-    "log_tail": "Traceback (most recent call last):\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/instances/valcea/migration/p18_shadow_projection_diff.py\", line 179, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/instances/valcea/migration/p18_shadow_projection_diff.py\", line 165, in main\n    result = run_projection_diff(db)\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/instances/valcea/migration/p18_shadow_projection_diff.py\", line 86, in run_projection_diff\n    status, _, body = _call(app, path)\n                      ~~~~~^^^^^^^^^^^\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/instances/valcea/migration/p18_shadow_projection_diff.py\", line 44, in _call\n    body = b\"\".join(app(environ, start_response)).decode(\"utf-8\", errors=\"replace\")\n                    ~~~^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/core/public_route_compat.py\", line 206, in __call__\n    profile = self._alias_profile(path, start_response)\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/core/public_route_compat.py\", line 121, in _alias_profile\n    body = self._profile_html(profile)\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/core/knowledge_runtime.py\", line 198, in _profile_html\n    sources = \"\".join(\n        f\"<li><a rel=\\\"nofollow\\\" href=\\\"{html.escape(str(item['source_url']))}\\\">Sursă</a></li>\"\n        for item in entity[\"provenance\"]\n    )\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/core/knowledge_runtime.py\", line 199, in <genexpr>\n    f\"<li><a rel=\\\"nofollow\\\" href=\\\"{html.escape(str(item['source_url']))}\\\">Sursă</a></li>\"\n                                                      ~~~~^^^^^^^^^^^^^^\nTypeError: string indices must be integers, not 'str'\n"
+  "counts": {
+    "artists_checked": 172,
+    "people_checked": 6,
+    "sitemap_required_urls": 203,
+    "stories_checked": 23,
+    "verified_places_checked": 4
   },
+  "failures": {
+    "artists": [
+      {
+        "id": "azur-nelu-vlad",
+        "path": "/artisti/azur-nelu-vlad/",
+        "status": "200 OK"
+      },
+      {
+        "id": "hanno-hoefer-raul-kusak",
+        "path": "/artisti/hanno-hoefer-raul-kusak/",
+        "status": "200 OK"
+      },
+      {
+        "id": "kevin-burt-big-medicine",
+        "path": "/artisti/kevin-burt-big-medicine/",
+        "status": "200 OK"
+      },
+      {
+        "id": "kitty-daisy-lewis",
+        "path": "/artisti/kitty-daisy-lewis/",
+        "status": "200 OK"
+      },
+      {
+        "id": "koszika-the-hotshots",
+        "path": "/artisti/koszika-the-hotshots/",
+        "status": "200 OK"
+      },
+      {
+        "id": "marcel-stefanet-ethno-republic",
+        "path": "/artisti/marcel-stefanet-ethno-republic/",
+        "status": "200 OK"
+      },
+      {
+        "id": "sllash-doppe",
+        "path": "/artisti/sllash-doppe/",
+        "status": "200 OK"
+      }
+    ],
+    "artists_failure_count": 7,
+    "missing_place_names": [],
+    "missing_sitemap_url_count": 0,
+    "missing_sitemap_urls": [],
+    "people": [],
+    "stories": [
+      {
+        "path": "/stiri/rm-valcea-hcl-312-20260814/",
+        "status": "200 OK",
+        "story_id": "rm-valcea-hcl-312-20260814"
+      }
+    ]
+  },
+  "next_gate": "REPAIR_PUBLIC_PROJECTION",
   "production_cutover": false,
   "schema_version": "1.0",
   "status": "SHADOW_PROJECTION_FAIL"
