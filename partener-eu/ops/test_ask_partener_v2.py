@@ -24,6 +24,11 @@ assert 'const canonicalByCode=uniqueIndex' in js
 assert 'const canonicalByOfficialUrl=uniqueIndex' in js
 assert 'function canonicalCall(' in js
 assert 'canonicalCall(d)' in js
+assert 'const candidates=new Set()' in js
+assert 'candidates.size===1' in js
+assert 'if(direct)return direct' not in js
+assert 'return canonicalByCode.get(code)' not in js
+assert 'return canonicalByOfficialUrl.get(key)' not in js
 assert 'function uniqueIndex(' in js
 assert 'function isMipeLinked(' in js
 assert 'function urlKey(' in js and 'function canonicalOfficialUrls(' in js
