@@ -18,6 +18,13 @@ def load_json(path: Path) -> Dict[str, Any]:
         return json.load(handle)
 
 
+def render_manifest(run: PipelineRun, extra: Dict[str, Any] | None = None) -> str:
+    manifest = run.manifest()
+    if extra:
+        manifest.update(extra)
+    return json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run a deterministic Needs Factory fixture")
     parser.add_argument("fixture", type=Path)
@@ -35,10 +42,22 @@ def main() -> int:
 
     evidence = fixture.get("evidence", {})
     needs = fixture.get("needs", [])
+    needs_by_id = {str(need["id"]): need for need in needs}
+
     validation = run.validate_needs(needs, evidence)
     if validation["failures"]:
-        print(json.dumps(run.manifest(), ensure_ascii=False, indent=2, sort_keys=True))
+        print(render_manifest(run), end="")
         return 2
+
+    ranked = run.rank_needs(needs, evidence)
+    if ranked["blocked"]:
+        print(render_manifest(run, {"ranked_needs": ranked}), end="")
+        return 3
+
+    causal = run.causal_model(fixture.get("causal_graph", {}))
+    if not causal["valid"]:
+        print(render_manifest(run, {"causal_validation": causal}), end="")
+        return 4
 
     trace = run.traceability(
         fixture.get("chains", []),
@@ -46,20 +65,26 @@ def main() -> int:
         fixture.get("indicator_ids", []),
     )
     if not trace["valid"]:
-        print(json.dumps(run.manifest(), ensure_ascii=False, indent=2, sort_keys=True))
-        return 3
+        print(render_manifest(run, {"traceability_validation": trace}), end="")
+        return 5
 
     release = run.release_gate({"failures": [], "evidence_gaps": []})
-    manifest = run.manifest()
-    manifest["release_gate"] = release
+    if not release["ready_for_narrative"]:
+        print(render_manifest(run, {"release_gate": release}), end="")
+        return 6
 
-    rendered = json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+    pack = run.package(ranked, needs_by_id, evidence, causal, trace, release)
+    rendered = render_manifest(run, {
+        "release_gate": release,
+        "narrative_pack_sha256": pack["pack_sha256"],
+        "narrative_claim_count": len(pack["claim_ledger"]),
+    })
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(rendered, encoding="utf-8")
     else:
         print(rendered, end="")
-    return 0 if release["ready_for_narrative"] else 4
+    return 0
 
 
 if __name__ == "__main__":
