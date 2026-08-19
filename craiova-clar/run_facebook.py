@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import sys
@@ -40,6 +41,10 @@ def parse_dt(value: str) -> datetime:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--apply", action="store_true", help="perform the external Facebook write")
+    args = parser.parse_args()
+
     config = load(CONFIG)["channels"]["facebook"]
     if not config.get("enabled"):
         print(json.dumps({"status": "DISABLED"}))
@@ -91,6 +96,19 @@ def main() -> int:
             "reason": "already_published_verified",
             "facebook_post_id": current.get("external_id"),
         }, ensure_ascii=False))
+        return 0
+
+    if not args.apply:
+        print(json.dumps({
+            "status": "DRY_RUN",
+            "eligible": [{
+                "story_id": story.story_id,
+                "headline": story.headline,
+                "canonical_url": site_receipt.canonical_url,
+                "media_asset_id": media.get("asset_id"),
+            }],
+            "already_submitted_external_id": current.get("external_id") if isinstance(current, dict) else None,
+        }, ensure_ascii=False, indent=2))
         return 0
 
     page_id = os.getenv(str(config["page_id_env"]), "").strip()
