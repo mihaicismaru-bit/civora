@@ -197,7 +197,10 @@ def parse_date(text: str) -> str | None:
 
 def relevant(text: str) -> bool:
     value = fold(text)
-    return any(fold(x) in value for x in FUNDING_TERMS) and any(fold(x) in value for x in SIGNAL_TERMS)
+    return (
+        any(fold(x) in value for x in FUNDING_TERMS)
+        and any(fold(x) in value for x in (*SIGNAL_TERMS, *STATEMENT_CUES))
+    )
 
 
 def classify(text: str) -> str:
