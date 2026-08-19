@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Preserve canonical story SEO/cross-linking under the public UX shell."""
+"""Preserve canonical story SEO/cross-linking under the public UX shell.
+
+The durable published story archive is an input to this presentation layer, not
+an output. Public UX may decide which archived stories belong in the reader
+news surface, but it must never delete or rewrite durable publication history.
+"""
 from __future__ import annotations
 
 import json
@@ -98,23 +103,21 @@ def render_story(nav: dict, story: dict, stories: list[dict], published_at: str,
     return page.replace("</head>", extra + "</head>")
 
 
+def reader_stories(feed: dict, archive: dict) -> list[dict]:
+    """Return the safe presentation subset without mutating durable inputs."""
+    stories, _live_ids = ux.union_stories(feed, archive)
+    return stories
+
+
 def build() -> dict:
     nav = load(NAV)
     feed = load(FEED)
     archive = load(ARCHIVE, {"stories": []})
     previous_manifest = load(MANIFEST, {"stories": []})
     previous = {str(row.get("id")): row for row in previous_manifest.get("stories") or [] if isinstance(row, dict) and row.get("id")}
-    stories, _live_ids = ux.union_stories(feed, archive)
+    stories = reader_stories(feed, archive)
     if not stories:
         raise SystemExit("Story integrity has no safe stories")
-
-    archive["publication_model"] = "continuous_story_first"
-    archive["recap_editions_may_delete_published_stories"] = False
-    archive["operational_records_public"] = False
-    archive["retention_policy"] = "published_full_stories_persist_after_recap_or_validity_window_expires"
-    archive["story_count"] = len(stories)
-    archive["stories"] = stories
-    write(ARCHIVE, archive)
 
     rows = []
     for story in stories:
@@ -146,8 +149,6 @@ def build() -> dict:
             row["image"] = image
         rows.append(row)
 
-    archive["stories"] = stories
-    write(ARCHIVE, archive)
     manifest = {
         "schema_version": "2.1",
         "publication_model": "continuous_story_first",
@@ -171,12 +172,13 @@ def build() -> dict:
 
 
 def check() -> None:
-    archive = load(ARCHIVE)
+    feed = load(FEED)
+    archive = load(ARCHIVE, {"stories": []})
     manifest = load(MANIFEST)
-    archive_ids = {str(row.get("id")) for row in archive.get("stories") or []}
-    manifest_ids = {str(row.get("id")) for row in manifest.get("stories") or []}
-    if archive_ids != manifest_ids:
-        raise SystemExit("Story integrity archive/manifest drift")
+    expected_ids = {str(row.get("id")) for row in reader_stories(feed, archive) if row.get("id")}
+    manifest_ids = {str(row.get("id")) for row in manifest.get("stories") or [] if row.get("id")}
+    if expected_ids != manifest_ids:
+        raise SystemExit("Story integrity reader-set/manifest drift")
     for row in manifest.get("stories") or []:
         text = (RUNTIME / str(row["path"]).strip("/") / "index.html").read_text(encoding="utf-8")
         if '<script type="application/ld+json">' not in text:
@@ -193,6 +195,12 @@ def self_test() -> None:
     other = {"id":"b","section":"SPORT","headline":"Altul","dek":"D","sources":[{"url":"https://example.test/b"}]}
     assert rank_related(sample, [sample, other])[0]["id"] == "b"
     assert "NewsArticle" in jsonld(sample, BASE+"/stiri/a/", "2026-08-18T00:00:00+03:00", None)
+    archive = {"stories": [dict(sample)]}
+    feed = {"stories": [dict(other)]}
+    archive_before = json.loads(json.dumps(archive))
+    selected = reader_stories(feed, archive)
+    assert {row["id"] for row in selected} == {"a", "b"}
+    assert archive == archive_before, "reader selection must not mutate durable archive input"
     print("VÂLCEA CLAR public UX story-integrity self-test: PASS")
 
 
