@@ -27,7 +27,7 @@ STATE = ROOT / "partener-eu" / "ingest" / "state" / "people_policy_official_sour
 REGISTRY = ROOT / "partener-eu" / "ingest" / "state" / "people_policy_registry.json"
 SOURCE_REGISTRY = ROOT / "partener-eu" / "ingest" / "state" / "people_policy_source_registry.json"
 CANONICAL_CALLS = ROOT / "partener-eu" / "ingest" / "state" / "mipe_canonical_calls.json"
-UA = "PARTENER.EU-DecisionMakerOfficialIngest/2.2 (+https://partener.eu)"
+UA = "PARTENER.EU-DecisionMakerOfficialIngest/2.3 (+https://partener.eu)"
 NOW = dt.datetime.now(dt.timezone.utc)
 FETCH_TIMEOUT_SECONDS = 18
 MAX_SOURCE_FETCH_WORKERS = 9
@@ -43,6 +43,13 @@ SIGNAL_TERMS = (
     "comisia european", "a declarat", "a anuntat", "a anunțat", "prioritate",
     "prelung", "acceler", "negocier", "decizie", "aprobat", "adoptat", "semnat",
     "lans", "rezultat", "contract", "plătește", "plateste", "propune", "alocă", "aloca",
+)
+REPORTING_TERMS = (
+    "a declarat", "a anuntat", "a anunțat", "a precizat", "a afirmat", "a explicat",
+    "a spus", "a subliniat", "a mentionat", "a menționat", "a aratat", "a arătat",
+    "a informat", "declară", "declara", "anunță", "anunta", "precizează", "precizeaza",
+    "afirmă", "afirma", "explică", "explica", "spune", "subliniază", "subliniaza",
+    "menționează", "mentioneaza", "arată", "arata",
 )
 
 
@@ -135,9 +142,10 @@ class TextParser(HTMLParser):
         value = clean(data)
         if not value:
             return
-        self.parts.append(value)
         if self._in_title:
             self.title_parts.append(value)
+            return
+        self.parts.append(value)
 
 
 def fetch(url: str, limit: int = 900_000) -> str:
@@ -147,14 +155,7 @@ def fetch(url: str, limit: int = 900_000) -> str:
 
 
 def source_fetch_budget_seconds(sources: list[dict[str, Any]]) -> int:
-    """Conservative network wait budget for the bounded source pool.
-
-    Each source keeps its own sequential listing/article contract so source-health
-    accounting is unchanged. Sources execute concurrently in bounded waves.
-    The estimate intentionally assumes every configured candidate consumes the
-    full socket timeout and therefore fails safe when registry growth would no
-    longer fit the workflow envelope.
-    """
+    """Conservative network wait budget for the bounded source pool."""
     enabled = [s for s in sources if s.get("enabled", True)]
     if not enabled:
         return 0
@@ -201,13 +202,6 @@ def classify(text: str) -> str:
     return "POLICY_SIGNAL"
 
 
-def first_relevant_sentence(text: str) -> str:
-    for sentence in re.split(r"(?<=[.!?])\s+", clean(text)):
-        if 45 <= len(sentence) <= 520 and any(fold(x) in fold(sentence) for x in FUNDING_TERMS):
-            return sentence
-    return clean(text)[:500]
-
-
 def actor_for(text: str, registry: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]] | None:
     value = fold(text)
     for person in registry.get("people") or []:
@@ -219,6 +213,27 @@ def actor_for(text: str, registry: dict[str, Any]) -> tuple[dict[str, Any], dict
         if snapshot:
             return person, snapshot
         return None
+    return None
+
+
+def strict_statement_sentence(text: str, person: dict[str, Any]) -> str | None:
+    """Return only article-body evidence tying actor + reporting cue + funding context."""
+    aliases = [clean(x) for x in person.get("aliases") or [] if clean(x)]
+    name = clean(person.get("name"))
+    if name and name not in aliases:
+        aliases.append(name)
+    for raw in re.split(r"(?<=[.!?])\s+", clean(text)):
+        sentence = clean(raw)
+        if not 45 <= len(sentence) <= 700:
+            continue
+        value = fold(sentence)
+        if not any(fold(alias) in value for alias in aliases):
+            continue
+        if not any(fold(cue) in value for cue in REPORTING_TERMS):
+            continue
+        if not any(fold(term) in value for term in FUNDING_TERMS):
+            continue
+        return sentence
     return None
 
 
@@ -285,6 +300,7 @@ def ingest_source(source: dict[str, Any], registry: dict[str, Any], canonical: d
     urls = candidate_links(source, listing)
     items: list[dict[str, Any]] = []
     unverified_roles = 0
+    non_statement_actor_mentions = 0
     article_fetch_attempts = 0
     article_fetch_successes = 0
     article_fetch_failures = 0
@@ -309,9 +325,12 @@ def ingest_source(source: dict[str, Any], registry: dict[str, Any], canonical: d
                 unverified_roles += 1
             continue
         person, role_snapshot = actor
+        statement = strict_statement_sentence(text, person)
+        if not statement:
+            non_statement_actor_mentions += 1
+            continue
         date = parse_date(text[:10000]) or NOW.date().isoformat()
-        headline = re.sub(r"\s*[-|–—]\s*[^-|–—]{2,80}$", "", title).strip() or first_relevant_sentence(text)[:220]
-        statement = first_relevant_sentence(text)
+        headline = re.sub(r"\s*[-|–—]\s*[^-|–—]{2,80}$", "", title).strip() or statement[:220]
         content_hash = hashlib.sha256(clean(text[:30000]).encode("utf-8")).hexdigest()
         fingerprint = hashlib.sha256(f"{person['id']}|{url}|{content_hash}".encode("utf-8")).hexdigest()
         canonical_link = canonical_link_for(f"{headline} {statement} {text[:12000]}", canonical)
@@ -339,6 +358,11 @@ def ingest_source(source: dict[str, Any], registry: dict[str, Any], canonical: d
                 "sourceId": source["id"], "publisher": source["publisher"], "tier": source["tier"],
                 "url": url, "observedAt": observed, "contentHash": content_hash,
             },
+            "statementExtraction": {
+                "version": "ACTOR_REPORTING_FUNDING_SENTENCE_V1",
+                "scope": "ARTICLE_BODY",
+                "titleExcluded": True,
+            },
             "priority": int(person.get("priority") or 50),
             "initials": "".join(x[0] for x in person["name"].split()[:2]).upper(),
             "whyItMatters": "Semnal public observat direct pe o sursă oficială; efectul administrativ rămâne separat și fail-closed.",
@@ -365,7 +389,9 @@ def ingest_source(source: dict[str, Any], registry: dict[str, Any], canonical: d
         "articleFetchSuccesses": article_fetch_successes,
         "articleFetchFailures": article_fetch_failures,
         "acceptedItems": len(items),
-        "unverifiedRoleMentionsRejected": unverified_roles, "failClosed": True,
+        "unverifiedRoleMentionsRejected": unverified_roles,
+        "nonStatementActorMentionsRejected": non_statement_actor_mentions,
+        "failClosed": True,
     }
     return status, items
 
@@ -449,6 +475,8 @@ def main() -> int:
             "canonicalLinkRequiresExplicitCodeMatch": True,
             "sourceHealthRequiresArticleFetchProofWhenCandidatesExist": True,
             "boundedConcurrentSourceIngest": True,
+            "actorReportingFundingSentenceRequired": True,
+            "statementEvidenceUsesArticleBodyOnly": True,
             "maxSourceFetchWorkers": MAX_SOURCE_FETCH_WORKERS,
             "fetchTimeoutSeconds": FETCH_TIMEOUT_SECONDS,
             "worstCaseNetworkBudgetSeconds": network_budget_seconds,

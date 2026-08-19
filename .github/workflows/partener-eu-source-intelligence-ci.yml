@@ -9,6 +9,7 @@ on:
       - 'partener-eu/ingest/state/people_policy_registry.json'
       - 'partener-eu/ingest/state/people_policy_source_registry.json'
       - 'partener-eu/ops/test_people_policy_source_intelligence.py'
+      - 'partener-eu/ops/test_people_policy_actor_statement_extraction.py'
       - '.github/workflows/partener-eu-editorial-daily.yml'
       - '.github/workflows/partener-eu-source-intelligence-ci.yml'
   workflow_dispatch:
@@ -37,4 +38,6 @@ jobs:
             partener-eu/ingest/refine_people_policy.py
 
       - name: Validate source intelligence contract
-        run: python partener-eu/ops/test_people_policy_source_intelligence.py
+        run: |
+          python partener-eu/ops/test_people_policy_source_intelligence.py
+          python partener-eu/ops/test_people_policy_actor_statement_extraction.py
