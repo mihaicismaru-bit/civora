@@ -45,10 +45,27 @@ assert "if(ev.kind==='OFFICIAL')" in askui
 assert 'provenanceBlock(d)' in askui
 assert 'Proveniență' in askui
 assert 'Deschide dosarul verificat' in askui
-assert 'openDossier(d.id,d.title)' in askui
+assert 'openDossier(d.id)' in askui
+assert 'openDossier(d.id,d.title)' not in askui
 assert "addEventListener('keydown'" in askui
 assert "e.key==='Enter'" in askui
 assert 'Nu îți afișăm apeluri aleatorii' in askui
+
+# Ask routes directly through the decision-product UI contract; no timed DOM choreography.
+assert 'PARTENER_DECISION_UI' in askui
+assert 'PARTENER_DECISION_UI' in decision
+assert "openHub:(tab='news')" in decision
+assert 'openDossier:id=>' in decision
+assert 'byDossier.has(id)' in decision
+open_hub_chunk=function_chunk(askui,'openHub')
+open_dossier_chunk=function_chunk(askui,'openDossier')
+assert "ui.openHub('dossiers')" in open_hub_chunk
+assert 'ui.openDossier(id)' in open_dossier_chunk
+assert 'setTimeout' not in open_hub_chunk
+assert 'setTimeout' not in open_dossier_chunk
+assert '[data-decisionnav]' not in open_hub_chunk
+assert '[data-decisionnav]' not in open_dossier_chunk
+assert '[data-di-dossier' not in open_dossier_chunk
 
 # Baseline public shell must remain useful and fail-closed without progressive enhancements.
 nav_chunk=function_chunk(app,'nav')
