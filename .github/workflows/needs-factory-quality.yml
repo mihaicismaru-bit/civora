@@ -57,6 +57,27 @@ jobs:
           assert receipt['source_snapshot_id'].startswith('SRC-MYSMIS-CALLS@')
           print(receipt['source_snapshot_id'])
           PY
+      - name: Run real 310224 historical research gate
+        run: |
+          python partener-eu/needs-factory/tools/run_research_gate_fixture.py \
+            partener-eu/needs-factory/benchmarks/310224/CP08_PRODUCT_RUN_INPUT.json \
+            --output /tmp/needs-factory-310224-research-gate.json
+          python - <<'PY'
+          import json
+          result = json.load(open('/tmp/needs-factory-310224-research-gate.json', encoding='utf-8'))
+          assert result['state'] == 'BLOCKED_RESEARCH'
+          blocking = [g for g in result['evidence_gaps']['gaps'] if g.get('blocking')]
+          assert len(blocking) == 5
+          assert len(result['primary_research_plan']['questions']) == 6
+          assert result['primary_research_plan']['sampling_strategy'] == 'population_snapshot_required'
+          closed = set(result['run_manifest']['closed_checkpoints'])
+          assert 'NF05_GAP_DETECTION' in closed
+          assert 'NF06_PRIMARY_RESEARCH' in closed
+          assert 'NF07_NEED_DISCOVERY' not in closed
+          assert 'NF12_PACKAGE' not in closed
+          print(result['run_manifest']['run_id'])
+          print([g['gap_id'] for g in blocking])
+          PY
       - name: Run deterministic pipeline smoke fixture through NF12
         run: |
           python partener-eu/needs-factory/tools/run_fixture.py \
