@@ -1,0 +1,45 @@
+name: EUCONS Build
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/**'
+      - '.github/workflows/eucons-*.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/**'
+      - '.github/workflows/eucons-*.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Validate public site before build
+        run: python eucons/validation/validate_public_site.py
+      - name: Build provider-neutral static site
+        run: python eucons/web/build_public_site.py --target /tmp/eucons-site
+      - name: Create immutable build receipt
+        run: python eucons/ops/github_automation.py build-receipt --build-dir /tmp/eucons-site --output /tmp/eucons-build-receipt.json --generated-at "${{ github.event.repository.updated_at }}"
+      - name: Upload build artifact only
+        uses: actions/upload-artifact@v7
+        with:
+          name: eucons-static-build
+          path: |
+            /tmp/eucons-site
+            /tmp/eucons-build-receipt.json
+          retention-days: 14
+          if-no-files-found: error

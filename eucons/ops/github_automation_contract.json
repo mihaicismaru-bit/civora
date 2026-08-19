@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "engine_id": "EUCONS_E22_GITHUB_AUTOMATION",
+  "product": "EUCONS_COMMERCIAL_OS",
+  "production_side_effects_enabled": false,
+  "workflows": {
+    "quality": {
+      "path": ".github/workflows/eucons-quality.yml",
+      "required_triggers": ["pull_request", "push", "workflow_dispatch"],
+      "scheduled": false,
+      "purpose": "Run the complete deterministic EUCONS acceptance chain for changed code and contracts."
+    },
+    "build": {
+      "path": ".github/workflows/eucons-build.yml",
+      "required_triggers": ["pull_request", "push", "workflow_dispatch"],
+      "scheduled": false,
+      "purpose": "Build the static EUCONS preview artifact without deploying it."
+    },
+    "scheduler": {
+      "path": ".github/workflows/eucons-scheduler.yml",
+      "required_triggers": ["schedule", "workflow_dispatch"],
+      "scheduled": true,
+      "purpose": "Exercise safe local-source opportunity/editorial/analytics/privacy validation on a recurring cadence without external publication."
+    },
+    "reconciliation": {
+      "path": ".github/workflows/eucons-reconciliation.yml",
+      "required_triggers": ["schedule", "workflow_dispatch"],
+      "scheduled": true,
+      "purpose": "Detect checkpoint, acceptance-receipt and durable-state drift without mutating canonical state."
+    },
+    "health": {
+      "path": ".github/workflows/eucons-health.yml",
+      "required_triggers": ["schedule", "workflow_dispatch"],
+      "scheduled": true,
+      "purpose": "Evaluate canonical EUCONS health and production-gate state without activating any provider."
+    }
+  },
+  "execution_policy": {
+    "permissions": {"contents": "read"},
+    "write_permissions_forbidden": true,
+    "concurrency_required": true,
+    "cancel_in_progress_required": true,
+    "external_publication_forbidden": true,
+    "external_mail_send_forbidden": true,
+    "external_social_send_forbidden": true,
+    "git_push_from_workflow_forbidden": true,
+    "repository_state_mutation_from_scheduled_workflow_forbidden": true,
+    "production_deployment_from_e22_forbidden": true,
+    "artifacts_may_be_uploaded": true
+  },
+  "official_actions": {
+    "checkout": "actions/checkout@v7",
+    "setup_python": "actions/setup-python@v6",
+    "upload_artifact": "actions/upload-artifact@v7"
+  },
+  "scheduler": {
+    "cadence": "17 */6 * * *",
+    "timezone_semantics": "UTC_POSIX_CRON",
+    "development_reference_time": "2026-08-19T10:00:00Z",
+    "network_access_required": false,
+    "provider_credentials_required": false
+  },
+  "reconciliation": {
+    "cadence": "29 2 * * *",
+    "completed_phase_receipt_required": true,
+    "current_phase_must_not_be_completed": true,
+    "health_critical_failures_must_be_empty": true
+  },
+  "health": {
+    "cadence": "41 */6 * * *",
+    "overall_required": "GREEN_DEVELOPMENT",
+    "production_gates_must_remain_closed": true
+  },
+  "artifacts": {
+    "build": "eucons-static-build",
+    "scheduler": "eucons-scheduler-receipt",
+    "reconciliation": "eucons-reconciliation-receipt",
+    "health": "eucons-health-receipt",
+    "retention_days": 14
+  }
+}

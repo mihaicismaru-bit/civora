@@ -1,0 +1,36 @@
+name: EUCONS Reconciliation
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/ops/**'
+      - '.github/workflows/eucons-reconciliation.yml'
+  schedule:
+    - cron: '29 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-reconciliation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Reconcile checkpoint and acceptance receipts read-only
+        run: python eucons/ops/github_automation.py reconcile --output /tmp/eucons-reconciliation-receipt.json --generated-at "${{ github.event.repository.updated_at }}"
+      - name: Upload reconciliation receipt
+        uses: actions/upload-artifact@v7
+        with:
+          name: eucons-reconciliation-receipt
+          path: /tmp/eucons-reconciliation-receipt.json
+          retention-days: 14
+          if-no-files-found: error

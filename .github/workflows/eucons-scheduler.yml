@@ -1,0 +1,55 @@
+name: EUCONS Scheduler
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/opportunities/**'
+      - 'eucons/editorial/**'
+      - 'eucons/email/**'
+      - 'eucons/analytics/**'
+      - 'eucons/security/**'
+      - 'eucons/ops/github_automation*'
+      - '.github/workflows/eucons-scheduler.yml'
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-scheduler-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dry-run-cycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Validate opportunity bridge
+        run: python eucons/validation/validate_opportunity_bridge.py
+      - name: Materialize local stale-safe opportunity projection
+        run: python eucons/opportunities/build_projection.py --reference-time 2026-08-19T10:00:00Z --output /tmp/eucons-opportunity-projection.json
+      - name: Validate editorial loop
+        run: python eucons/validation/validate_editorial_loop.py
+      - name: Validate commercial email dry-run
+        run: python eucons/validation/validate_email_engine.py
+      - name: Validate analytics dry-run
+        run: python eucons/validation/validate_analytics_engine.py
+      - name: Validate privacy/security gates
+        run: python eucons/validation/validate_privacy_security.py
+      - name: Emit scheduler receipt without publication
+        run: python eucons/ops/github_automation.py schedule --reference-time 2026-08-19T10:00:00Z --output /tmp/eucons-scheduler-receipt.json --generated-at "${{ github.event.repository.updated_at }}"
+      - name: Upload scheduler receipt
+        uses: actions/upload-artifact@v7
+        with:
+          name: eucons-scheduler-receipt
+          path: |
+            /tmp/eucons-opportunity-projection.json
+            /tmp/eucons-scheduler-receipt.json
+          retention-days: 14
+          if-no-files-found: error
