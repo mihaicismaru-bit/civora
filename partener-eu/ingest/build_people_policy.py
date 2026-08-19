@@ -37,7 +37,10 @@ FUNDING_EVIDENCE_TERMS = (
 )
 SIGNAL_EVIDENCE_TERMS = (
     "a declarat", "a anuntat", "a anunțat", "a precizat", "a spus", "a afirmat",
-    "anunta", "anunță", "declara", "declară", "propune", "prelung", "acceler",
+    "a explicat", "a subliniat", "a mentionat", "a menționat", "a transmis",
+    "a aratat", "a arătat", "a adaugat", "a adăugat", "anunta", "anunță",
+    "declara", "declară", "precizeaza", "precizează", "spune", "afirma", "afirmă",
+    "explica", "explică", "subliniaza", "subliniază", "propune", "prelung", "acceler",
     "negocier", "aprobat", "adoptat", "semnat", "lans", "prioritate", "decizie",
 )
 DIRECT_QUOTE_SIGNAL_CUE = "DIRECT_QUOTE_ATTRIBUTION"
