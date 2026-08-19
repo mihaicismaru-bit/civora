@@ -66,6 +66,10 @@ jobs:
         run: python eucons/validation/test_opportunity_bridge_fail_closed.py
       - name: Materialize EUCONS stale-safe opportunity projection
         run: python eucons/opportunities/build_projection.py --reference-time 2026-08-19T10:00:00Z --output /tmp/eucons-opportunity-projection.json
+      - name: Validate EUCONS opportunity matching
+        run: python eucons/validation/validate_opportunity_matching.py
+      - name: Test EUCONS opportunity matching fail-closed behavior
+        run: python eucons/validation/test_opportunity_matching_fail_closed.py
       - name: Reject committed secret-like assignments
         shell: bash
         run: |
