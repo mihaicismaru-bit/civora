@@ -52,7 +52,7 @@
       ]
     },
     "P4_GENERIC_SOURCE_ADAPTER_CORE": {
-      "status": "IN_REVIEW",
+      "status": "CLOSED",
       "evidence": [
         "configuration-driven adapter contract",
         "normalized SourceItem contract",
@@ -65,10 +65,11 @@
         "source-pack schema",
         "transport-free adapter boundary",
         "fail-closed unsupported adapter rejection",
-        "neutral second-instance adapter fixture"
+        "neutral second-instance adapter fixture",
+        "LOCAL NEWS OS vNext Validation run 32246572918 PASS"
       ]
     },
-    "P5_SIGNAL_ENGINE": {"status": "PENDING"},
+    "P5_SIGNAL_ENGINE": {"status": "NEXT"},
     "P6_DYNAMIC_PRIMARY_RESOLVER": {"status": "PENDING"},
     "P7_FACT_KERNEL_ENGINE": {"status": "PENDING"},
     "P8_NEWSWORTHINESS_ENGINE": {"status": "PENDING"},
@@ -83,5 +84,5 @@
     "P17_INSTANCE_BOOTSTRAP_SECOND_INSTANCE_TEST": {"status": "PENDING"},
     "P18_MIGRATION_SHADOW_LIVE_SOAK_PRODUCTION_LOCK": {"status": "PENDING"}
   },
-  "next_action": "Validate P4 on the dedicated vNext CI; on PASS close P4 and advance P5 Signal Engine."
+  "next_action": "Implement P5 Signal Engine: transform normalized SourceItems into site-owned signals with deterministic claim/entity hints, instance isolation, dedupe and no publication authority."
 }
