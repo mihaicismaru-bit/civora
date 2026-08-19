@@ -10,6 +10,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from clar_core.adapters.wordpress_feed import WordPressFeedDiscoverer
+from clar_core.media import MediaPackResolver
 from clar_core.pipeline import Pipeline
 from clar_core.publishers.static_site import StaticSitePublisher
 from clar_core.verticals.utility import UtilityStoryComposer, WaterUtilityExtractor
@@ -25,6 +26,8 @@ def load_json(path: Path) -> dict:
 def main() -> int:
     instance = load_json(HERE / "config" / "instance.json")
     source_pack = load_json(HERE / "config" / "source_pack.json")
+    media_pack_path = HERE / "config" / "media_pack.json"
+    media_pack = load_json(media_pack_path) if media_pack_path.exists() else {"assets": []}
     source = next(s for s in source_pack["sources"] if s.get("enabled") and s.get("vertical") == "UTILITY")
 
     discover = WordPressFeedDiscoverer(
@@ -37,7 +40,15 @@ def main() -> int:
         allowed_localities=source.get("allowed_localities", []),
         area_prefixes=source.get("area_prefixes", []),
     )
-    compose = UtilityStoryComposer(product_name=instance["product_name"], source_name=source["name"])
+    base_compose = UtilityStoryComposer(product_name=instance["product_name"], source_name=source["name"])
+    editorial_scope = instance.get("editorial_scope") or {}
+    context_terms = tuple(editorial_scope.get("primary") or ()) + tuple(editorial_scope.get("secondary") or ())
+    media = MediaPackResolver(media_pack.get("assets") or (), context_terms=context_terms)
+
+    def compose(packet):
+        story = base_compose(packet)
+        return media(story) if story is not None else None
+
     base_url = instance.get("domain") or os.environ.get("CRAIOVA_CLAR_BASE_URL")
     publish = StaticSitePublisher(root=HERE / "site", product_name=instance["product_name"], base_url=base_url)
 
