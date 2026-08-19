@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "adapter_id": "EUCONS_CRM_STORAGE_V1",
+  "production_enabled": false,
+  "interface": {
+    "operations": ["load_state", "commit_transaction"],
+    "transaction_requires": ["idempotency_key", "expected_revision", "entities", "activities", "receipt_requested"],
+    "receipt_requires": ["provider", "transaction_id", "revision", "status", "written_at"]
+  },
+  "concurrency": {
+    "optimistic_revision_required": true,
+    "stale_revision_result": "CONFLICT_RETRY_REQUIRED"
+  },
+  "repository_policy": {
+    "runtime_crm_state_under_repository_root_forbidden": true,
+    "real_pii_under_repository_root_forbidden": true,
+    "synthetic_validation_state_allowed": true,
+    "secrets_in_repository_forbidden": true
+  },
+  "activation_requirements": [
+    "production_backend_authorized",
+    "privacy_retention_policy_active",
+    "secret_store_configured",
+    "transaction_receipt_verified",
+    "backup_recovery_verified"
+  ]
+}
