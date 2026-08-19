@@ -28,6 +28,29 @@ jobs:
         with:
           python-version: '3.11'
       - name: Compile Needs Factory core
-        run: python -m compileall -q partener-eu/needs-factory/core
+        run: python -m compileall -q partener-eu/needs-factory/core partener-eu/needs-factory/tools
+      - name: Parse canonical JSON schemas
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          paths = sorted(Path('partener-eu/needs-factory/schemas').glob('*.json'))
+          assert paths, 'No Needs Factory schemas found'
+          for path in paths:
+              json.loads(path.read_text(encoding='utf-8'))
+              print(f'OK {path}')
+          PY
       - name: Run Needs Factory regression suite
         run: python -m unittest discover -s partener-eu/needs-factory/tests -v
+      - name: Run deterministic pipeline smoke fixture
+        run: |
+          python partener-eu/needs-factory/tools/run_fixture.py \
+            partener-eu/needs-factory/tests/fixtures/pipeline_smoke.json \
+            --output /tmp/needs-factory-smoke-manifest.json
+          python - <<'PY'
+          import json
+          manifest = json.load(open('/tmp/needs-factory-smoke-manifest.json', encoding='utf-8'))
+          assert manifest['release_gate']['ready_for_narrative'] is True
+          assert manifest['run_id'].startswith('NF-')
+          print(manifest['run_id'])
+          PY
