@@ -13,6 +13,7 @@ index = (WEB / "index.html").read_text(encoding="utf-8")
 public_copy = (WEB / "public-product-copy-v1.js").read_text(encoding="utf-8")
 home_novice = (WEB / "home-novice-v1.js").read_text(encoding="utf-8")
 home_goto = (WEB / "home-go-to-v2.js").read_text(encoding="utf-8")
+people_policy = (WEB / "people-policy-v1.js").read_text(encoding="utf-8")
 
 errors = []
 
@@ -56,6 +57,24 @@ for required in (
 ):
     if required not in home_goto:
         errors.append(f"go-to homepage utility missing: {required}")
+
+# Decision-maker promotion is a homepage-only, fail-closed decision aid. A
+# verified source and fresh statement are not enough: the frontend must also
+# have a specific explanation of why the signal matters, and must not render
+# Source Intelligence boilerplate as useful analysis.
+for required in (
+    'function isHome(){return !!document.querySelector(\'.main [data-decision-home="1"]\')}',
+    'if(!isHome()){removePromo();return}',
+    'function impactText(x)',
+    'x.whyItMatters||x.analysis',
+    'genericImpact.test(s)',
+    'return !!cleanStatement(x)&&!!impactText(x)',
+    '<h2>Ce spun decidenții</h2>',
+    '<b>De ce contează:</b>',
+    '<b>Ce fapt oficial lipsește:</b>',
+):
+    if required not in people_policy:
+        errors.append(f"decision-maker homepage contract missing: {required}")
 
 # Critical path is deliberately bounded.
 data_pos = index.find('src="data.js')
