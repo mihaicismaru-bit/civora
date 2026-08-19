@@ -134,6 +134,24 @@ def validate_instance(cfg: dict[str, Any]) -> dict[str, Any]:
     return cfg
 
 
+def validate_pack_bindings(cfg: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    """Validate that every configured pack exists and belongs to this instance."""
+    instance_id = cfg["instance_id"]
+    loaded: dict[str, dict[str, Any]] = {}
+    root_resolved = ROOT.resolve()
+    for pack_type, rel in cfg["packs"].items():
+        path = (ROOT / rel).resolve()
+        _require(path == root_resolved or root_resolved in path.parents, f"pack escapes repository: {pack_type}")
+        _require(path.is_file(), f"pack file missing: {pack_type}: {rel}")
+        value = json.loads(path.read_text(encoding="utf-8"))
+        _require(isinstance(value, dict), f"pack must be an object: {pack_type}")
+        _require(value.get("schema_version") == "2.0", f"pack schema mismatch: {pack_type}")
+        _require(value.get("pack_type") == pack_type, f"pack type mismatch: {pack_type}")
+        _require(value.get("instance_id") == instance_id, f"pack instance mismatch: {pack_type}")
+        loaded[pack_type] = value
+    return loaded
+
+
 def build_release_manifest(cfg: dict[str, Any]) -> dict[str, Any]:
     validate_instance(cfg)
     return {
@@ -164,7 +182,9 @@ def load_instance(instance_id: str) -> dict[str, Any]:
         raise InstanceContractError(f"unknown instance: {instance_id}")
     cfg = json.loads(path.read_text(encoding="utf-8"))
     _require(cfg.get("instance_id") == instance_id, "instance directory/id mismatch")
-    return validate_instance(cfg)
+    validate_instance(cfg)
+    validate_pack_bindings(cfg)
+    return cfg
 
 
 def _fixture(instance_id: str, domain: str, secret_ref: str) -> dict[str, Any]:
