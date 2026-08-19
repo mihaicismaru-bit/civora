@@ -6,7 +6,8 @@ public feed plus the durable published archive and enforces reader-facing
 structure:
 - one masthead/navigation contract everywhere;
 - /stiri/ is a real news index, never a legacy passthrough;
-- monitoring/investigation/explainer-only records are not news;
+- operational/monitoring records are not news, while already-published full
+  dossiers, investigations and explainers remain reader-facing stories;
 - category sections never borrow stories from another category to fill space;
 - the homepage stays useful when the live desk has only one or two fresh items
   by clearly separating current stories from verified recent archive material.
@@ -74,13 +75,11 @@ def is_news(story: dict[str, Any], held: set[str]) -> bool:
     if story.get("news_eligible") is False or story.get("operational_only") is True:
         return False
     section = str(story.get("section") or "").upper()
-    if any(token in section for token in ("INVESTIGA", "MONITOR", "DOSAR", "DOCUMENTARE", "OPERAȚIONAL", "OPERATIONAL")):
-        return False
-    if str(story.get("material_fact_gate") or "").upper() == "PASS_EXPLAINER_ONLY":
+    if any(token in section for token in ("MONITOR", "OPERAȚIONAL", "OPERATIONAL")):
         return False
     product = story.get("editorial_product") or {}
     fmt = str(product.get("format") or "").lower()
-    if fmt in {"investigation", "monitoring", "dossier", "explainer_only"}:
+    if fmt in {"monitoring", "explainer_only"}:
         return False
     if not str(story.get("headline") or "").strip() or not (story.get("sources") or []):
         return False
@@ -345,8 +344,11 @@ def validate(nav: dict[str, Any] | None = None, stories: list[dict[str, Any]] | 
 def self_test() -> None:
     held = {"held"}
     assert is_news({"id":"held","headline":"x","sources":[{"url":"https://x"}]}, held) is False
-    assert is_news({"id":"d","section":"INVESTIGAȚII","headline":"x","sources":[{"url":"https://x"}]}, set()) is False
-    assert is_news({"id":"e","section":"MOBILITATE","headline":"x","sources":[{"url":"https://x"}]}, set()) is True
+    assert is_news({"id":"monitor","section":"MONITOR","headline":"x","sources":[{"url":"https://x"}]}, set()) is False
+    assert is_news({"id":"op","section":"MOBILITATE","operational_only":True,"headline":"x","sources":[{"url":"https://x"}]}, set()) is False
+    assert is_news({"id":"d","section":"INVESTIGAȚII","headline":"x","sources":[{"url":"https://x"}]}, set()) is True
+    assert is_news({"id":"e","section":"EVENIMENTE","material_fact_gate":"PASS_EXPLAINER_ONLY","headline":"x","sources":[{"url":"https://x"}]}, set()) is True
+    assert is_news({"id":"f","section":"MOBILITATE","editorial_product":{"format":"explainer_only"},"headline":"x","sources":[{"url":"https://x"}]}, set()) is False
     assert bucket({"section":"CULTURĂ"}) == "cultura-evenimente"
     assert bucket({"section":"MOBILITATE"}) == "servicii"
     assert bucket({"section":"SPORT"}) == "sport"
