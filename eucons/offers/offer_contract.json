@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "engine_id": "EUCONS_E13_OFFER_ENGINE",
+  "production_sending_enabled": false,
+  "allowed_lead_stages": ["OPPORTUNITY", "OFFER", "NEGOTIATION"],
+  "required_crm_entities": ["leads", "opportunities"],
+  "pricing": {
+    "default_state": "HUMAN_REQUIRED",
+    "allowed_states": ["HUMAN_REQUIRED", "DETERMINED"],
+    "approved_pricing_rule_ids": [],
+    "numeric_price_requires_approved_rule": true,
+    "undefined_price_behavior": "HOLD_HUMAN_REVIEW",
+    "public_or_outbound_numeric_price_without_rule_forbidden": true
+  },
+  "scope": {
+    "services_must_exist_in_e02_registry": true,
+    "duplicate_services_forbidden": true,
+    "deliverables_source": "eucons/services/service_registry.json",
+    "boundaries_source": "eucons/services/service_registry.json",
+    "assumptions_required": true,
+    "exclusions_required": true
+  },
+  "versioning": {
+    "first_version": 1,
+    "parent_required_after_first": true,
+    "previous_offer_immutable": true,
+    "lineage_must_preserve_lead_and_opportunity": true
+  },
+  "provenance": {
+    "crm_owner_required": true,
+    "crm_opportunity_source_provenance_required": true,
+    "source_product_required": true,
+    "source_opportunity_id_required": true
+  },
+  "projection": {
+    "html_enabled": true,
+    "pdf_ready_html": true,
+    "automatic_send_enabled": false,
+    "human_price_placeholder": "Prețul se stabilește după validarea comercială a ariei și condițiilor ofertei."
+  },
+  "repository_policy": {
+    "real_pii_records_forbidden": true,
+    "synthetic_fixtures_allowed": true,
+    "runtime_output_under_repository_root_forbidden": true
+  }
+}
