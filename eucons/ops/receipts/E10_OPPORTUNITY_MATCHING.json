@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E10",
+  "unit": "E10_OPPORTUNITY_MATCHING",
+  "status": "PASS",
+  "validated_at": "2026-08-19T10:05:58Z",
+  "validation": {
+    "workflow": "EUCONS Quality",
+    "run_id": 32240975726,
+    "run_number": 59,
+    "conclusion": "success",
+    "validated_head": "0ea1388725749d6d2c6e99c96612edbb39e5bba4",
+    "merged_commit": "2640127166b52e3b1adfdc6db5cc54c7eb1c1450",
+    "exact_head_gate_passed": true
+  },
+  "coverage": {
+    "real_verified_opportunities_evaluated": 6,
+    "synthetic_profile_candidates": 1,
+    "stale_source_held": 6,
+    "score_semantics": "RELEVANCE_NOT_APPROVAL_PROBABILITY",
+    "source_provenance": "PASS",
+    "verified_activity_code_exclusion": "PASS",
+    "verified_grant_cap_exclusion": "PASS",
+    "missing_data_behavior": "REQUIRES_DATA",
+    "pii_rejection": "PASS",
+    "deterministic_sort": "PASS"
+  },
+  "artifacts": [
+    "eucons/opportunities/matching_contract.json",
+    "eucons/opportunities/match_opportunities.py",
+    "eucons/validation/validate_opportunity_matching.py",
+    "eucons/validation/test_opportunity_matching_fail_closed.py",
+    ".github/workflows/eucons-quality.yml"
+  ],
+  "next_phase": "E11"
+}
