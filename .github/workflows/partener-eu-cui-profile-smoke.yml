@@ -5,6 +5,8 @@ on:
     branches:
       - main
     paths:
+      - 'partener-eu/ingest/anaf_company_identity.py'
+      - 'partener-eu/ingest/anaf_company_financials.py'
       - 'partener-eu/ingest/cui_profile_resolver.py'
       - 'partener-eu/ingest/cui_profile_sources.json'
       - '.github/workflows/partener-eu-cui-profile-smoke.yml'
@@ -24,6 +26,8 @@ jobs:
           python-version: '3.12'
       - name: Compile resolver
         run: |
+          python -m py_compile partener-eu/ingest/anaf_company_identity.py
+          python -m py_compile partener-eu/ingest/anaf_company_financials.py
           python -m py_compile partener-eu/ingest/cui_profile_resolver.py
           python -m json.tool partener-eu/ingest/cui_profile_sources.json >/dev/null
       - name: Resolve NGO live and persist cache
