@@ -1,18 +1,31 @@
 {
-  "schema_version": "1.1",
+  "schema_version": "1.2",
   "contract": "LOCAL_NEWS_OS_VNEXT_VALCEA_MIGRATION_READINESS_V1",
   "instance_id": "valcea",
   "status": "PRE_MIGRATION_READINESS_ONLY",
-  "observed_at": "2026-08-19T13:36:02+03:00",
+  "observed_at": "2026-08-19T14:36:16+03:00",
   "cutover_authorized": false,
-  "reason": "LOCAL NEWS OS vNext is BUILD_ACTIVE. P0-P3 are CLOSED, P4_GENERIC_SOURCE_ADAPTER_CORE is NEXT, and P5-P18 are not yet closed. This snapshot refreshes migration inputs only and MUST NOT mutate the current public runtime.",
+  "reason": "LOCAL NEWS OS vNext is BUILD_ACTIVE. P0-P5 are CLOSED, P6_DYNAMIC_PRIMARY_RESOLVER is NEXT, and P7-P18 are not yet closed. This snapshot refreshes migration inputs only and MUST NOT mutate the current public runtime.",
   "vnext_gate": {
     "state_path": "local-news-os/vnext/VNEXT_STATE.json",
-    "state_sha": "39977acb88f4ee197390d6b5e727b179b0c0c8b5",
-    "observed_build_commit": "f18121bbb4941e1d5c44a98f3fb075b657e00f0b",
+    "state_sha": "1d535c188a30f88cb269e36d02a92198546d32ed",
+    "observed_build_commit": "067070c9adbc64f1d8c699b1469acf78d9eac3e4",
     "required_before_migration": "BUILD_READY_FOR_MIGRATION",
-    "current_next_phase": "P4_GENERIC_SOURCE_ADAPTER_CORE",
+    "current_next_phase": "P6_DYNAMIC_PRIMARY_RESOLVER",
     "production_cutover": false
+  },
+  "readiness_delta": {
+    "build_progress": "P4_GENERIC_SOURCE_ADAPTER_CORE and P5_SIGNAL_ENGINE are now CLOSED with validation evidence; P6 is next.",
+    "legacy_source_drift_detected": true,
+    "refreshed_domains": [
+      "public_money_and_decisions",
+      "facts",
+      "fact_kernels",
+      "facebook_delivery_history",
+      "instagram_delivery_history"
+    ],
+    "public_url_contract_changed": false,
+    "publication_event_changed": false
   },
   "url_preservation": {
     "required": true,
@@ -110,21 +123,21 @@
     {
       "domain": "public_money_and_decisions",
       "source_path": "valcea-clar/editorial/council_decision_graph.json",
-      "source_sha": "4f05d7777bf246beebef2967f8444da98fa7d6fb",
+      "source_sha": "0ec1f95f44a913db74b2effae982eb6783a4e019",
       "target": ["knowledge_nodes", "knowledge_edges", "evidence"],
       "requirements": ["decision_amount_beneficiary_edges_require_primary_evidence", "calculations_remain_labeled_as_calculations"]
     },
     {
       "domain": "facts",
       "source_path": "valcea-clar/editorial/facts_registry.json",
-      "source_sha": "90e5d005ea069c3fe48d034f58cefeb2f17a52bf",
+      "source_sha": "6b411dbae46ad45adfc00c2f4fde18e9975778fd",
       "target": ["evidence", "fact_kernels"],
       "requirements": ["no_evidence_no_material_claim", "preserve_source_urls", "deduplicate_by_fingerprint"]
     },
     {
       "domain": "fact_kernels",
       "source_path": "valcea-clar/editorial/fact_kernel_registry.json",
-      "source_sha": "9995c80c49c7eb80ebc2da9541780cc204a44aef",
+      "source_sha": "8e04b78a5e6de23aa3f03914a95e6fd39db78f78",
       "target": ["fact_kernels"],
       "requirements": ["preserve_claim_provenance", "legacy_kernel_is_import_evidence_not_future_runtime_authority"]
     },
@@ -166,14 +179,14 @@
     {
       "domain": "facebook_delivery_history",
       "source_path": "valcea-clar/social/facebook_state.json",
-      "source_sha": "0cc2a3b892897ebeb7e97fea6cdc9f7b89de1aba",
+      "source_sha": "52865f984d7b7d7a0973b679fa05f384b6446eeb",
       "target": ["social_deliveries"],
       "requirements": ["preserve_external_post_id", "preserve_published_at", "historical_state_is_read_only_after_import"]
     },
     {
       "domain": "instagram_delivery_history",
       "source_path": "valcea-clar/social/instagram_state.json",
-      "source_sha": "842bbec08fc94f8f246c663f7f77291ed2241a6d",
+      "source_sha": "9078d1c02d9850f19503be75c2c56840ad6d1be4",
       "target": ["social_deliveries", "media_assets"],
       "requirements": ["preserve_media_id", "preserve_container_status", "preserve_product_fingerprint", "preserve_fact_card_non_synthetic_semantics"]
     },
@@ -215,7 +228,7 @@
     {
       "id": "GAP_VNEXT_BUILD_NOT_READY",
       "severity": "BLOCKING_CUTOVER",
-      "resolution": "Close P4-P17 and reach BUILD_READY_FOR_MIGRATION before any production migration."
+      "resolution": "Close P6-P17 and reach BUILD_READY_FOR_MIGRATION before any production migration."
     },
     {
       "id": "GAP_VENUE_ENTITY_SOURCE",
