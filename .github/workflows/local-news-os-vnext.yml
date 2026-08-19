@@ -34,7 +34,8 @@ jobs:
             local-news-os/vnext/core/signal_engine.py \
             local-news-os/vnext/core/primary_resolver.py \
             local-news-os/vnext/core/fact_kernel_engine.py \
-            local-news-os/vnext/core/newsworthiness_engine.py
+            local-news-os/vnext/core/newsworthiness_engine.py \
+            local-news-os/vnext/core/story_engine.py
 
       - name: Validate frozen product contract
         run: |
@@ -105,6 +106,9 @@ jobs:
       - name: Validate Newsworthiness Engine
         run: python local-news-os/vnext/core/newsworthiness_engine.py --self-test
 
+      - name: Validate Story Engine
+        run: python local-news-os/vnext/core/story_engine.py --self-test
+
       - name: Validate private site newsroom and fail-closed authentication
         run: python local-news-os/vnext/core/site_runtime.py --self-test
 
@@ -129,21 +133,26 @@ jobs:
           print('VNEXT_SOURCE_PACK_CONTRACT_PASS')
           PY
 
-      - name: Validate configuration-driven newsworthiness policies
+      - name: Validate configuration-driven editorial policies
         run: |
           python - <<'PY'
           import json
           import sys
           from pathlib import Path
           sys.path.insert(0, str(Path('local-news-os/vnext/core').resolve()))
-          import newsworthiness_engine as module
-          policies = []
+          import newsworthiness_engine
+          import story_engine
+          scores = []
+          stories = []
           for instance_id in ('valcea', 'test-county'):
               pack = json.loads(Path(f'local-news-os/vnext/instances/{instance_id}/packs/editorial.json').read_text(encoding='utf-8'))
-              policies.append(module.validate_newsworthiness_policy(pack, instance_id=instance_id))
-          assert policies[0]['weights'] != policies[1]['weights']
-          assert set(policies[0]['weights']) == set(module.DIMENSIONS)
-          print('VNEXT_NEWSWORTHINESS_POLICY_PASS')
+              scores.append(newsworthiness_engine.validate_newsworthiness_policy(pack, instance_id=instance_id))
+              stories.append(story_engine.validate_story_policy(pack, instance_id=instance_id))
+          assert scores[0]['weights'] != scores[1]['weights']
+          assert set(scores[0]['weights']) == set(newsworthiness_engine.DIMENSIONS)
+          assert stories[0]['default_section'] != stories[1]['default_section']
+          assert stories[0]['follow_up_label'] != stories[1]['follow_up_label']
+          print('VNEXT_EDITORIAL_POLICY_REPLICATION_PASS')
           PY
 
       - name: Assert runtime schema is database-only
@@ -213,6 +222,20 @@ jobs:
           grep -q 'affected_people' local-news-os/vnext/core/newsworthiness_engine.py
           ! grep -Eiq 'requests\.|urllib\.request|httpx|aiohttp|subprocess.*curl|git_state_path|state_root|live-feed|current_edition|output_root' local-news-os/vnext/core/newsworthiness_engine.py
           echo 'VNEXT_NEWSWORTHINESS_BOUNDARY_PASS'
+
+      - name: Assert Story Engine drafts but never publishes
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'CREATE TABLE IF NOT EXISTS story_drafts' local-news-os/vnext/runtime/schema.sql
+          grep -q "state TEXT NOT NULL CHECK (state = 'DRAFTED')" local-news-os/vnext/runtime/schema.sql
+          grep -q "publication_authority TEXT NOT NULL CHECK (publication_authority = 'NONE')" local-news-os/vnext/runtime/schema.sql
+          grep -q 'STORY_DRAFT_MATERIALIZED' local-news-os/vnext/core/story_engine.py
+          grep -q 'ELIGIBLE_ROUTES = {"BUILD", "BUILD_PRIORITY"}' local-news-os/vnext/core/story_engine.py
+          grep -q 'title-only fact kernel cannot materialize a story draft' local-news-os/vnext/core/story_engine.py
+          grep -q '"public_claim_allowed": False' local-news-os/vnext/core/story_engine.py
+          ! grep -Eiq 'PUBLISHED|publish_story|requests\.|urllib\.request|httpx|aiohttp|subprocess.*curl|git_state_path|state_root|live-feed|current_edition|output_root' local-news-os/vnext/core/story_engine.py
+          echo 'VNEXT_STORY_ENGINE_BOUNDARY_PASS'
 
       - name: Assert newsroom is private and site-owned
         shell: bash
