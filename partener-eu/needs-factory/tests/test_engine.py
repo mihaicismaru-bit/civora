@@ -73,6 +73,13 @@ class PrimaryResearchTests(unittest.TestCase):
         self.assertEqual(self.plan["sampling_strategy"], "census_preferred")
         self.assertGreaterEqual(len(self.plan["questions"]), 2)
 
+    def test_plan_requires_population_snapshot_count_when_missing(self):
+        plan = primary_research.generate_primary_research_plan(
+            [{"gap_id": "G1", "gap_type": "career_guidance"}],
+            {"snapshot_id": "POP-UNKNOWN"},
+        )
+        self.assertEqual(plan["sampling_strategy"], "population_snapshot_required")
+
     def test_duplicate_response_fails(self):
         qid = self.plan["questions"][0]["question_id"]
         rows = [
