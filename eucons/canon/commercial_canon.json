@@ -1,0 +1,217 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E01",
+  "status": "CANONICAL",
+  "priority_audiences": [
+    "companies_entrepreneurs",
+    "public_authorities_institutions",
+    "ngos_eligible_organizations",
+    "existing_beneficiaries"
+  ],
+  "service_capabilities": [
+    {
+      "id": "funding_strategy_and_eligibility",
+      "label": "Strategie de finanțare și eligibilitate",
+      "commercial_outcome": "Identificarea unei rute de finanțare potrivite și a condițiilor care trebuie îndeplinite înainte de investiție."
+    },
+    {
+      "id": "application_design_and_submission",
+      "label": "Pregătire și depunere proiect",
+      "commercial_outcome": "Transformarea investiției într-o cerere de finanțare coerentă, completă și pregătită pentru depunere."
+    },
+    {
+      "id": "implementation_and_reporting",
+      "label": "Implementare și raportare",
+      "commercial_outcome": "Executarea proiectului conform contractului de finanțare, cu documentație și raportare controlate."
+    },
+    {
+      "id": "procurement_support",
+      "label": "Achiziții în proiecte finanțate",
+      "commercial_outcome": "Planificarea și documentarea achizițiilor astfel încât cheltuielile să rămână justificabile și verificabile."
+    },
+    {
+      "id": "financial_management_and_reimbursement",
+      "label": "Management financiar, plăți și rambursări",
+      "commercial_outcome": "Controlul fluxului financiar al proiectului și pregătirea documentației pentru cereri de plată sau rambursare."
+    },
+    {
+      "id": "project_recovery_and_corrections",
+      "label": "Remediere și recuperare proiect",
+      "commercial_outcome": "Diagnosticarea blocajelor, neconformităților sau întârzierilor și pregătirea unui plan documentat de remediere."
+    },
+    {
+      "id": "monitoring_and_compliance",
+      "label": "Monitorizare și conformitate",
+      "commercial_outcome": "Urmărirea obligațiilor, termenelor, indicatorilor și documentelor care pot afecta conformitatea proiectului."
+    },
+    {
+      "id": "project_management_capacity",
+      "label": "Capacitate de management de proiect",
+      "commercial_outcome": "Structurarea rolurilor, procedurilor și instrumentelor de lucru necesare pentru gestionarea proiectului."
+    }
+  ],
+  "ctas": [
+    {
+      "id": "request_project_evaluation",
+      "label": "Cere evaluarea proiectului",
+      "journey": "project_evaluation",
+      "intent": "qualification"
+    },
+    {
+      "id": "request_funding_consultation",
+      "label": "Programează o discuție despre finanțare",
+      "journey": "funding_consultation",
+      "intent": "qualification"
+    },
+    {
+      "id": "request_implementation_review",
+      "label": "Cere o evaluare a implementării",
+      "journey": "implementation_review",
+      "intent": "diagnostic"
+    },
+    {
+      "id": "request_recovery_assessment",
+      "label": "Cere evaluarea unui proiect cu probleme",
+      "journey": "project_recovery",
+      "intent": "urgent_diagnostic"
+    },
+    {
+      "id": "request_offer",
+      "label": "Solicită ofertă",
+      "journey": "proposal_request",
+      "intent": "commercial"
+    }
+  ],
+  "audiences": [
+    {
+      "id": "companies_entrepreneurs",
+      "label": "Companii și antreprenori",
+      "definition": "Companii, IMM-uri, microîntreprinderi, start-up-uri și antreprenori care urmăresc investiții sau dezvoltare cu finanțare europeană ori publică.",
+      "primary_goal": "Să determine rapid dacă o investiție are o rută de finanțare realistă și ce suport este necesar până la implementare.",
+      "problems": [
+        {
+          "id": "company_find_funding",
+          "problem": "Nu știu ce program de finanțare se potrivește investiției sau momentului în care vor să o facă.",
+          "service_capabilities": ["funding_strategy_and_eligibility"],
+          "ctas": ["request_project_evaluation", "request_funding_consultation"]
+        },
+        {
+          "id": "company_prepare_application",
+          "problem": "Au o idee de investiție, dar nu au capacitatea internă de a structura și depune corect proiectul.",
+          "service_capabilities": ["application_design_and_submission", "funding_strategy_and_eligibility"],
+          "ctas": ["request_project_evaluation", "request_offer"]
+        },
+        {
+          "id": "company_implement_project",
+          "problem": "Au obținut finanțare și trebuie să gestioneze implementarea, documentele, achizițiile și raportarea.",
+          "service_capabilities": ["implementation_and_reporting", "procurement_support", "financial_management_and_reimbursement", "monitoring_and_compliance"],
+          "ctas": ["request_implementation_review", "request_offer"]
+        },
+        {
+          "id": "company_project_at_risk",
+          "problem": "Proiectul are întârzieri, neconformități, cheltuieli contestate sau alte riscuri de implementare.",
+          "service_capabilities": ["project_recovery_and_corrections", "monitoring_and_compliance", "financial_management_and_reimbursement"],
+          "ctas": ["request_recovery_assessment"]
+        }
+      ]
+    },
+    {
+      "id": "public_authorities_institutions",
+      "label": "Autorități și instituții publice",
+      "definition": "Unități administrativ-teritoriale, instituții și entități publice care pregătesc sau implementează investiții finanțate.",
+      "primary_goal": "Să transforme prioritățile publice în proiecte finanțabile și să reducă riscurile operaționale și de conformitate în implementare.",
+      "problems": [
+        {
+          "id": "public_build_pipeline",
+          "problem": "Au mai multe nevoi de investiții și trebuie să le coreleze cu programe, calendare și condiții de eligibilitate.",
+          "service_capabilities": ["funding_strategy_and_eligibility", "project_management_capacity"],
+          "ctas": ["request_funding_consultation", "request_project_evaluation"]
+        },
+        {
+          "id": "public_prepare_application",
+          "problem": "Trebuie să pregătească o cerere de finanțare complexă și să coordoneze contribuțiile tehnice, financiare și administrative.",
+          "service_capabilities": ["application_design_and_submission", "project_management_capacity"],
+          "ctas": ["request_project_evaluation", "request_offer"]
+        },
+        {
+          "id": "public_implementation_capacity",
+          "problem": "Echipa internă trebuie să gestioneze simultan implementarea, achizițiile, raportarea, plățile și indicatorii.",
+          "service_capabilities": ["implementation_and_reporting", "procurement_support", "financial_management_and_reimbursement", "monitoring_and_compliance", "project_management_capacity"],
+          "ctas": ["request_implementation_review", "request_offer"]
+        },
+        {
+          "id": "public_corrective_action",
+          "problem": "Un proiect este întârziat, blocat sau expus unor constatări și are nevoie de diagnostic și măsuri corective documentate.",
+          "service_capabilities": ["project_recovery_and_corrections", "monitoring_and_compliance"],
+          "ctas": ["request_recovery_assessment"]
+        }
+      ]
+    },
+    {
+      "id": "ngos_eligible_organizations",
+      "label": "ONG-uri și alte organizații eligibile",
+      "definition": "Organizații neguvernamentale, parteneriate și alte entități eligibile care urmăresc finanțare pentru servicii, dezvoltare organizațională sau investiții.",
+      "primary_goal": "Să identifice finanțări compatibile cu misiunea și capacitatea organizației și să poată implementa proiectul fără supraîncărcarea echipei.",
+      "problems": [
+        {
+          "id": "ngo_find_programme",
+          "problem": "Nu au o imagine clară a apelurilor compatibile cu tipul organizației, activitățile și grupurile țintă.",
+          "service_capabilities": ["funding_strategy_and_eligibility"],
+          "ctas": ["request_funding_consultation", "request_project_evaluation"]
+        },
+        {
+          "id": "ngo_application_capacity",
+          "problem": "Au expertiză de domeniu, dar resurse limitate pentru proiectare, bugetare și pregătirea cererii de finanțare.",
+          "service_capabilities": ["application_design_and_submission", "project_management_capacity"],
+          "ctas": ["request_project_evaluation", "request_offer"]
+        },
+        {
+          "id": "ngo_implementation_reporting",
+          "problem": "Au nevoie de procese clare pentru activități, achiziții, documente justificative, indicatori și raportare.",
+          "service_capabilities": ["implementation_and_reporting", "procurement_support", "financial_management_and_reimbursement", "monitoring_and_compliance"],
+          "ctas": ["request_implementation_review", "request_offer"]
+        }
+      ]
+    },
+    {
+      "id": "existing_beneficiaries",
+      "label": "Beneficiari cu proiecte în implementare",
+      "definition": "Organizații care au deja un contract de finanțare și caută suport operațional, financiar, de achiziții, raportare sau remediere.",
+      "primary_goal": "Să protejeze implementarea proiectului, eligibilitatea cheltuielilor și capacitatea de a respecta obligațiile contractuale.",
+      "problems": [
+        {
+          "id": "beneficiary_operational_overload",
+          "problem": "Echipa nu poate susține intern toate obligațiile de implementare și raportare.",
+          "service_capabilities": ["implementation_and_reporting", "project_management_capacity", "monitoring_and_compliance"],
+          "ctas": ["request_implementation_review", "request_offer"]
+        },
+        {
+          "id": "beneficiary_procurement_finance",
+          "problem": "Achizițiile, documentele financiare, cererile de plată sau rambursare necesită suport specializat.",
+          "service_capabilities": ["procurement_support", "financial_management_and_reimbursement", "monitoring_and_compliance"],
+          "ctas": ["request_implementation_review", "request_offer"]
+        },
+        {
+          "id": "beneficiary_change_or_delay",
+          "problem": "Intervin modificări, întârzieri sau deviații față de planul aprobat și este necesară o abordare controlată.",
+          "service_capabilities": ["project_recovery_and_corrections", "monitoring_and_compliance", "implementation_and_reporting"],
+          "ctas": ["request_recovery_assessment", "request_implementation_review"]
+        },
+        {
+          "id": "beneficiary_find_next_funding",
+          "problem": "Beneficiarul vrea să pregătească următoarea investiție fără să piardă controlul proiectului curent.",
+          "service_capabilities": ["funding_strategy_and_eligibility", "project_management_capacity"],
+          "ctas": ["request_funding_consultation", "request_project_evaluation"]
+        }
+      ]
+    }
+  ],
+  "rules": {
+    "public_claims_require_evidence": true,
+    "funding_facts_require_verified_projection": true,
+    "undefined_price_fails_closed": true,
+    "marketing_consent_must_be_explicit": true,
+    "audience_problem_service_cta_mapping_required": true
+  }
+}
