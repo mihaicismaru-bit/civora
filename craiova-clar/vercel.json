@@ -2,16 +2,20 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
-      "source": "^/$",
+      "source": "/",
       "destination": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/craiova-clar-build/craiova-clar/site/index.html"
     },
     {
-      "source": "^/stories\\.json$",
+      "source": "/stories.json",
       "destination": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/craiova-clar-build/craiova-clar/site/stories.json"
     },
     {
-      "source": "^/stiri/([^/]+)/?$",
-      "destination": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/craiova-clar-build/craiova-clar/site/stiri/$1/index.html"
+      "source": "/stiri/:slug",
+      "destination": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/craiova-clar-build/craiova-clar/site/stiri/:slug/index.html"
+    },
+    {
+      "source": "/stiri/:slug/",
+      "destination": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/craiova-clar-build/craiova-clar/site/stiri/:slug/index.html"
     }
   ],
   "headers": [
