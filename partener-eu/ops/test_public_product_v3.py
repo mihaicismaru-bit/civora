@@ -51,6 +51,18 @@ assert "addEventListener('keydown'" in askui
 assert "e.key==='Enter'" in askui
 assert 'Nu îți afișăm apeluri aleatorii' in askui
 
+# Dossier/article source rendering must use the same fail-closed provenance contract.
+source_chunk=function_chunk(decision,'sourceList')
+assert r'^T1(?:B)?\b' in source_chunk
+assert "s.tier||'T1'" not in source_chunk
+assert "s.label||'Sursă oficială'" not in source_chunk
+assert "tier||'tier neprecizat'" in source_chunk
+assert "official?'Sursă oficială':'Evidență publică'" in source_chunk
+assert "official?'sursă oficială':'evidență publică'" in source_chunk
+assert r'surs[ăa]\s+oficial[ăa]' in source_chunk
+assert 'sourceList(n.source?[n.source]:[])' in function_chunk(decision,'renderNews')
+assert 'sourceList(d.sources)' in function_chunk(decision,'renderDossier')
+
 # Ask routes directly through the decision-product UI contract; no timed DOM choreography.
 assert 'PARTENER_DECISION_UI' in askui
 assert 'PARTENER_DECISION_UI' in decision
