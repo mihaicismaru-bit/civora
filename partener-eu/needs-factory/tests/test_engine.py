@@ -1,6 +1,10 @@
+import sys
 import unittest
+from pathlib import Path
 
-from partener_eu_needs_factory_compat import engine, primary_research
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from core import engine, primary_research
 
 
 class NeedsFactoryEngineTests(unittest.TestCase):
