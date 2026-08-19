@@ -30,6 +30,14 @@ assert sources["policy"]["generalPressExcludedAsAuthority"] is True
 ids = {x["id"] for x in sources["sources"]}
 assert {"GOV_RO_NEWS", "MIPE_PRIMARY", "EC_RO_NEWS", "MS_PRESS", "AFIR_COMMUNICATES", "ADR_SV_OLTENIA_NEWS", "FED_MAI"} <= ids
 
+enabled_sources = [x for x in sources["sources"] if x.get("enabled", True)]
+network_budget_seconds = collector.source_fetch_budget_seconds(enabled_sources)
+assert collector.MAX_SOURCE_FETCH_WORKERS >= 2
+assert collector.FETCH_TIMEOUT_SECONDS <= 18
+# The editorial workflow has a 10-minute wall-clock envelope. Keep a full
+# minute of headroom for parsing, validation and durable checkpointing.
+assert network_budget_seconds < 540
+
 for source in sources["sources"]:
     assert source["url"].startswith("https://")
     assert collector.official_host(source["url"], source["allowedHosts"])
@@ -167,4 +175,6 @@ print(json.dumps({
     "canonicalOfficialLedgerBoundary": True,
     "historicalRoleSnapshotPreserved": True,
     "sourceHealthRequiresArticleFetchProof": True,
+    "boundedConcurrentSourceIngest": True,
+    "worstCaseNetworkBudgetSeconds": network_budget_seconds,
 }, ensure_ascii=False, indent=2))

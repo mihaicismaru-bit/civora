@@ -12,9 +12,11 @@ import datetime as dt
 import hashlib
 import html
 import json
+import math
 import re
 import ssl
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
@@ -25,8 +27,10 @@ STATE = ROOT / "partener-eu" / "ingest" / "state" / "people_policy_official_sour
 REGISTRY = ROOT / "partener-eu" / "ingest" / "state" / "people_policy_registry.json"
 SOURCE_REGISTRY = ROOT / "partener-eu" / "ingest" / "state" / "people_policy_source_registry.json"
 CANONICAL_CALLS = ROOT / "partener-eu" / "ingest" / "state" / "mipe_canonical_calls.json"
-UA = "PARTENER.EU-DecisionMakerOfficialIngest/2.1 (+https://partener.eu)"
+UA = "PARTENER.EU-DecisionMakerOfficialIngest/2.2 (+https://partener.eu)"
 NOW = dt.datetime.now(dt.timezone.utc)
+FETCH_TIMEOUT_SECONDS = 18
+MAX_SOURCE_FETCH_WORKERS = 9
 
 FUNDING_TERMS = (
     "fonduri europene", "finantare", "finanțare", "pnrr", "programul", "apel",
@@ -138,8 +142,28 @@ class TextParser(HTMLParser):
 
 def fetch(url: str, limit: int = 900_000) -> str:
     req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept": "text/html,*/*;q=.8"})
-    with urllib.request.urlopen(req, timeout=18, context=ssl.create_default_context()) as response:
+    with urllib.request.urlopen(req, timeout=FETCH_TIMEOUT_SECONDS, context=ssl.create_default_context()) as response:
         return response.read(limit).decode("utf-8", "ignore")
+
+
+def source_fetch_budget_seconds(sources: list[dict[str, Any]]) -> int:
+    """Conservative network wait budget for the bounded source pool.
+
+    Each source keeps its own sequential listing/article contract so source-health
+    accounting is unchanged. Sources execute concurrently in bounded waves.
+    The estimate intentionally assumes every configured candidate consumes the
+    full socket timeout and therefore fails safe when registry growth would no
+    longer fit the workflow envelope.
+    """
+    enabled = [s for s in sources if s.get("enabled", True)]
+    if not enabled:
+        return 0
+    workers = min(MAX_SOURCE_FETCH_WORKERS, len(enabled))
+    longest_source = max(
+        FETCH_TIMEOUT_SECONDS * (1 + max(0, int(s.get("maxLinks") or 10)))
+        for s in enabled
+    )
+    return math.ceil(len(enabled) / workers) * longest_source
 
 
 def parse_date(text: str) -> str | None:
@@ -352,20 +376,32 @@ def main() -> int:
     source_registry = load(SOURCE_REGISTRY, {"sources": [], "policy": {}})
     canonical = load(CANONICAL_CALLS, {"calls": []})
 
+    configured_sources = list(source_registry.get("sources") or [])
+    results: dict[str, tuple[dict[str, Any], list[dict[str, Any]]]] = {}
+    workers = min(MAX_SOURCE_FETCH_WORKERS, max(1, len(configured_sources)))
+    with ThreadPoolExecutor(max_workers=workers, thread_name_prefix="partener-source") as pool:
+        futures = {
+            pool.submit(ingest_source, source, registry, canonical): source
+            for source in configured_sources
+        }
+        for future in as_completed(futures):
+            source = futures[future]
+            try:
+                results[str(source.get("id"))] = future.result()
+            except Exception as exc:
+                results[str(source.get("id"))] = ({
+                    "id": source.get("id"), "publisher": source.get("publisher"), "url": source.get("url"),
+                    "tier": source.get("tier"), "status": "SOURCE_UNAVAILABLE_HISTORY_PRESERVED",
+                    "observedAt": NOW.replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+                    "error": clean(exc)[:260], "failClosed": True,
+                }, [])
+
     statuses: list[dict[str, Any]] = []
     fresh_items: list[dict[str, Any]] = []
-    for source in source_registry.get("sources") or []:
-        try:
-            status, fresh = ingest_source(source, registry, canonical)
-            statuses.append(status)
-            fresh_items.extend(fresh)
-        except Exception as exc:
-            statuses.append({
-                "id": source.get("id"), "publisher": source.get("publisher"), "url": source.get("url"),
-                "tier": source.get("tier"), "status": "SOURCE_UNAVAILABLE_HISTORY_PRESERVED",
-                "observedAt": NOW.replace(microsecond=0).isoformat().replace("+00:00", "Z"),
-                "error": clean(exc)[:260], "failClosed": True,
-            })
+    for source in configured_sources:
+        status, fresh = results[str(source.get("id"))]
+        statuses.append(status)
+        fresh_items.extend(fresh)
 
     trusted_history: list[dict[str, Any]] = []
     quarantine: list[dict[str, Any]] = list(previous.get("quarantine") or [])
@@ -400,6 +436,7 @@ def main() -> int:
         for i, x in enumerate(quarantine)
     }
     quarantine = list(quarantine_dedup.values())[-320:]
+    network_budget_seconds = source_fetch_budget_seconds(configured_sources)
     payload = {
         "schemaVersion": 2,
         "generatedAt": NOW.replace(microsecond=0).isoformat().replace("+00:00", "Z"),
@@ -411,6 +448,10 @@ def main() -> int:
             "legacyUnverifiedSignalsQuarantined": True,
             "canonicalLinkRequiresExplicitCodeMatch": True,
             "sourceHealthRequiresArticleFetchProofWhenCandidatesExist": True,
+            "boundedConcurrentSourceIngest": True,
+            "maxSourceFetchWorkers": MAX_SOURCE_FETCH_WORKERS,
+            "fetchTimeoutSeconds": FETCH_TIMEOUT_SECONDS,
+            "worstCaseNetworkBudgetSeconds": network_budget_seconds,
             "failClosed": True,
         },
         "sources": statuses,
@@ -423,6 +464,8 @@ def main() -> int:
         "freshItems": len(fresh_items),
         "historyItems": len(items),
         "quarantinedLegacy": len(quarantine),
+        "sourceFetchWorkers": workers,
+        "worstCaseNetworkBudgetSeconds": network_budget_seconds,
         "ok": sum(1 for x in statuses if x.get("status") == "OK"),
         "reachableNoCandidates": sum(1 for x in statuses if x.get("status") == "OK_NO_CANDIDATES"),
         "degraded": sum(1 for x in statuses if str(x.get("status", "")).startswith("DEGRADED_")),
