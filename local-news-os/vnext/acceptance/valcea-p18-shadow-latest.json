@@ -1,0 +1,19 @@
+{
+  "ci": {
+    "conclusion": "FAIL",
+    "execution_exit_code": 1,
+    "head_sha": "785bdc510d5200e41a91fa4942fdcfebd8919e5c",
+    "run_id": "32288756762",
+    "workflow": "LOCAL NEWS OS vNext Vâlcea Shadow Migration"
+  },
+  "contract": "LOCAL_NEWS_OS_VNEXT_VALCEA_P18_SHADOW_MIGRATION_V1",
+  "failure": {
+    "class": "HARNESS_EXECUTION_FAILED_BEFORE_REPORT",
+    "log_tail": "Traceback (most recent call last):\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/instances/valcea/migration/p18_shadow_migration.py\", line 844, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/instances/valcea/migration/p18_shadow_migration.py\", line 830, in main\n    result = run_shadow(db_path)\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/instances/valcea/migration/p18_shadow_migration.py\", line 788, in run_shadow\n    publications = import_publications(conn)\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/instances/valcea/migration/p18_shadow_migration.py\", line 231, in import_publications\n    conn.execute(\n    ~~~~~~~~~~~~^\n        \"\"\"\n        ^^^\n    ...<3 lines>...\n        (INSTANCE_ID, story_id, story_fp, snapshot[\"headline\"], canonical_path, published_at, now),\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\nsqlite3.OperationalError: 10 values for 9 columns\n"
+  },
+  "network_publication_attempted": false,
+  "production_cutover": false,
+  "public_runtime_mutated": false,
+  "schema_version": "1.0",
+  "status": "SHADOW_MIGRATION_FAIL"
+}
