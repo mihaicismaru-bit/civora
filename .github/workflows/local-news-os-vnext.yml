@@ -25,7 +25,10 @@ jobs:
           python-version: "3.13"
 
       - name: Compile generic vNext core
-        run: python -m py_compile local-news-os/vnext/core/instance_model.py
+        run: |
+          python -m py_compile \
+            local-news-os/vnext/core/instance_model.py \
+            local-news-os/vnext/core/runtime_store.py
 
       - name: Validate frozen product contract
         run: |
@@ -78,11 +81,24 @@ jobs:
           print('VNEXT_DUAL_INSTANCE_ISOLATION_PASS')
           PY
 
+      - name: Validate site-owned runtime database and append-only event ledger
+        run: python local-news-os/vnext/core/runtime_store.py --self-test
+
+      - name: Assert runtime schema is database-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f local-news-os/vnext/runtime/schema.sql
+          ! grep -Eiq 'git_state_path|state_root|live-feed|current_edition|output_root' local-news-os/vnext/runtime/schema.sql
+          grep -q "runtime_owner TEXT NOT NULL CHECK (runtime_owner = 'site_application')" local-news-os/vnext/runtime/schema.sql
+          grep -q "runtime_events is append-only" local-news-os/vnext/runtime/schema.sql
+          echo 'VNEXT_RUNTIME_DATABASE_CONTRACT_PASS'
+
       - name: Enforce CORE_KNOWS_NO_LOCALITY in generic vNext code
         shell: bash
         run: |
           set -euo pipefail
-          if grep -RniE 'vâlcea|valcea|râmnicu|ramnicu|valceaclar\.ro' local-news-os/vnext/core local-news-os/vnext/schemas; then
+          if grep -RniE 'vâlcea|valcea|râmnicu|ramnicu|valceaclar\.ro' local-news-os/vnext/core local-news-os/vnext/schemas local-news-os/vnext/runtime; then
             echo 'Generic vNext core contains locality-specific material' >&2
             exit 1
           fi
