@@ -5,7 +5,9 @@ on:
   push:
     paths:
       - "local-news-os/vnext/BUILD_READY_FOR_MIGRATION.json"
-      - "local-news-os/vnext/instances/valcea/**"
+      - "local-news-os/vnext/instances/valcea/instance.json"
+      - "local-news-os/vnext/instances/valcea/packs/**"
+      - "local-news-os/vnext/instances/valcea/migration/**"
       - "local-news-os/vnext/core/**"
       - "local-news-os/vnext/runtime/**"
       - "valcea-clar/site/story_publication_event.json"
@@ -20,13 +22,15 @@ on:
       - ".github/workflows/local-news-os-vnext-valcea-shadow-migration.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   shadow-migration:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
@@ -68,3 +72,32 @@ jobs:
             /tmp/valcea-vnext-shadow.sqlite3
           if-no-files-found: error
           retention-days: 14
+
+      - name: Persist latest shadow acceptance receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p local-news-os/vnext/acceptance
+          cp /tmp/valcea-vnext-shadow-report.json local-news-os/vnext/acceptance/valcea-p18-shadow-latest.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('local-news-os/vnext/acceptance/valcea-p18-shadow-latest.json')
+          data = json.loads(p.read_text(encoding='utf-8'))
+          data['ci'] = {
+              'workflow': 'LOCAL NEWS OS vNext Vâlcea Shadow Migration',
+              'run_id': '${{ github.run_id }}',
+              'head_sha': '${{ github.sha }}',
+              'conclusion': 'PASS'
+          }
+          p.write_text(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add local-news-os/vnext/acceptance/valcea-p18-shadow-latest.json
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "P18: persist Vâlcea shadow migration PASS"
+          git pull --rebase origin main
+          git push origin HEAD:main
