@@ -77,7 +77,7 @@ jobs:
           assert 'ONRC_RECOM' in p['accessPlan']['authorised']
           assert p['financials']['statementCount'] >= 1
           PY
-      - name: Resolve CUI 2536421 live
+      - name: Resolve chamber of commerce live
         run: |
           python partener-eu/ingest/cui_profile_resolver.py \
             --cui 2536421 --years 2025,2024,2023,2022,2021 --date 2026-08-19 \
@@ -88,8 +88,18 @@ jobs:
           p=json.load(open('/tmp/cui-2536421.json'))
           assert p['status'] in {'OK','PARTIAL'}
           assert p['identity']['cui']=='2536421'
+          assert p['entityType']=='CHAMBER_OF_COMMERCE'
+          assert p['governance']['status']=='STATUTORY_SOURCE_REQUIRED'
+          assert p['governance']['shareholdersOrAssociates']=='NOT_APPLICABLE'
           assert p['addresses']['registered']['locality']
-          assert p['financials']['statementCount'] >= 1
+          assert p['financials']['statementCount'] == 5
+          by_year={row['year']: row for row in p['financials']['summary']}
+          assert by_year[2025]['employeesNonProfit']['value'] == 43
+          assert by_year[2025]['employeesEconomic']['value'] == 0
+          assert by_year[2025]['employeesTotal']['value'] == 43
+          assert by_year[2024]['employeesNonProfit']['value'] == 0
+          assert by_year[2024]['employeesEconomic']['value'] == 23
+          assert by_year[2024]['employeesTotal']['value'] == 23
           print(json.dumps(p, ensure_ascii=False, indent=2))
           PY
       - name: Show compact receipts
