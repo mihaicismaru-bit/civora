@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E20",
+  "unit": "E20_ANALYTICS_ENGINE",
+  "status": "PASS",
+  "validated_at": "2026-08-19T12:16:00Z",
+  "validation": {
+    "workflow": "EUCONS Quality",
+    "run_id": 32251716175,
+    "run_number": 99,
+    "conclusion": "success",
+    "validated_head": "f99cff51c60287bcf737c0069ba2414de0b6e53c",
+    "merged_commit": "1e4be6ed4c281161f1df80e2638d5ec94500341d",
+    "exact_head_gate_passed": true
+  },
+  "coverage": {
+    "provider_neutral_engine": "PASS",
+    "canonical_event_count": 12,
+    "funnel_stage_count": 7,
+    "first_touch_attribution": "PASS",
+    "last_touch_attribution": "PASS",
+    "data_minimization": "PASS",
+    "raw_pii_guard": "PASS",
+    "query_and_full_referrer_guard": "PASS",
+    "pseudonymous_lead_and_session_ids": "PASS",
+    "idempotency": "PASS",
+    "deterministic_replay": "PASS",
+    "immutable_receipts": "PASS",
+    "direct_transport": "DISABLED_UNTIL_ANALYTICS_DESTINATION_SELECTED"
+  },
+  "artifacts": [
+    "eucons/analytics/analytics_contract.json",
+    "eucons/analytics/analytics_engine.py",
+    "eucons/validation/validate_analytics_engine.py",
+    "eucons/validation/test_analytics_engine_fail_closed.py",
+    ".github/workflows/eucons-quality.yml"
+  ],
+  "next_phase": "E21"
+}
