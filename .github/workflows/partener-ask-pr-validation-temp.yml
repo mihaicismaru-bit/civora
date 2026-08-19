@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - partener/frontend-ask-beneficiary-guard-20260820-0042
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'partener-eu/web/ask-partener-v2.js'
+      - 'partener-eu/ops/test_ask_partener_v2.py'
+      - '.github/workflows/partener-ask-pr-validation-temp.yml'
 
 permissions:
   contents: read
