@@ -67,6 +67,18 @@ assert '[data-decisionnav]' not in open_hub_chunk
 assert '[data-decisionnav]' not in open_dossier_chunk
 assert '[data-di-dossier' not in open_dossier_chunk
 
+# Full articles/dossiers must never upgrade weak or missing provenance to official/T1.
+source_meta_chunk=function_chunk(decision,'sourceMeta')
+source_list_chunk=function_chunk(decision,'sourceList')
+assert "tier||'tier neclasificat'" in source_meta_chunk
+assert "official=/^T1(?:B)?" in source_meta_chunk
+assert "genericOfficial=/^sursă oficială$/i" in source_meta_chunk
+assert "official?'Sursă oficială':'Evidență publică'" in source_meta_chunk
+assert "sourceAvailable===false?'sursa indisponibilă':'sursă disponibilă'" in source_list_chunk
+assert 'nu este clasificată T1/T1B' in source_list_chunk
+assert "s.label||'Sursă oficială'" not in source_list_chunk
+assert "s.tier||'T1'" not in source_list_chunk
+
 # Baseline public shell must remain useful and fail-closed without progressive enhancements.
 nav_chunk=function_chunk(app,'nav')
 ask_chunk=function_chunk(app,'ask')
