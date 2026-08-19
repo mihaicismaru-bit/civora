@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "engine_id": "EUCONS_E23_PERSISTENCE",
+  "product": "EUCONS_COMMERCIAL_OS",
+  "backend": "PROVIDER_NEUTRAL_FILE_STATE",
+  "production_database_enabled": false,
+  "transaction_protocol": ["PREPARE", "VALIDATE", "ATOMIC_COMMIT", "RECEIPT"],
+  "atomic_commit": {
+    "same_directory_temp_file": true,
+    "fsync_file_before_replace": true,
+    "os_replace_required": true,
+    "fsync_parent_directory_after_replace": true,
+    "compare_and_swap_supported": true,
+    "partial_target_visibility_forbidden": true
+  },
+  "integrity": {
+    "hash_algorithm": "sha256",
+    "canonical_json": "UTF8_SORT_KEYS_COMPACT",
+    "preimage_hash_recorded": true,
+    "postimage_hash_recorded": true,
+    "receipt_hash_recorded": true,
+    "version_monotonic_per_state_key": true
+  },
+  "state_classes": {
+    "checkpoint": {"path": "eucons/ops/checkpoint.json", "canonical": true},
+    "health": {"path": "eucons/ops/health.json", "canonical": true},
+    "artifact_registry": {"path": "eucons/ops/artifact_registry.json", "canonical": true},
+    "acceptance_receipts": {"path_glob": "eucons/ops/receipts/E[0-9][0-9]_*.json", "append_only": true}
+  },
+  "artifact_registry_model": {
+    "version": 2,
+    "model": "RECEIPT_INDEXED_TRANSITIVE_ARTIFACTS",
+    "core_artifacts_explicit": true,
+    "phase_acceptance_receipts_explicit": true,
+    "receipt_artifact_arrays_are_transitive_manifests": true,
+    "completed_phase_receipt_coverage_required": true,
+    "missing_receipt_artifact_fails_closed": true
+  },
+  "write_guards": {
+    "real_pii_forbidden": true,
+    "credentials_forbidden": true,
+    "unvalidated_payload_forbidden": true,
+    "stale_expected_hash_fails_closed": true,
+    "receipt_overwrite_forbidden": true,
+    "state_key_path_escape_forbidden": true
+  },
+  "recovery": {
+    "orphan_temp_files_detectable": true,
+    "orphan_temp_files_never_promoted_implicitly": true,
+    "last_known_good_hash_available_from_receipt": true,
+    "deterministic_replay_supported": true
+  }
+}
