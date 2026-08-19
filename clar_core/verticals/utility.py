@@ -27,12 +27,34 @@ def _slugify(value: str) -> str:
     return slug[:90] or "stire"
 
 
-def _sentence_with(text: str, needles: Iterable[str]) -> str | None:
-    for sentence in re.split(r"(?<=[.!?])\s+|\n+", text):
-        lower = sentence.lower()
-        if all(needle.lower() in lower for needle in needles):
-            return _clean(sentence)
+def _extract_reason(text: str) -> str | None:
+    match = re.search(
+        r"În vederea\s+(.+?)(?=,\s*(?:S\.?C\.?|Compania|operatorul)\b)",
+        text,
+        re.IGNORECASE | re.DOTALL,
+    )
+    if match:
+        return _clean(match.group(1))[:500]
+    for sentence in re.split(r"(?<=[!?])\s+|\n+", text):
+        if "lucr" in sentence.lower():
+            return _clean(sentence)[:500]
     return None
+
+
+def _display_date(value: str) -> str:
+    months = {
+        1: "ianuarie", 2: "februarie", 3: "martie", 4: "aprilie", 5: "mai", 6: "iunie",
+        7: "iulie", 8: "august", 9: "septembrie", 10: "octombrie", 11: "noiembrie", 12: "decembrie",
+    }
+    try:
+        year, month, day = map(int, value.split("-"))
+        return f"{day} {months[month]} {year}"
+    except (ValueError, KeyError):
+        return value
+
+
+def _human_case(value: str) -> str:
+    return value.title() if value and value == value.upper() else value
 
 
 def _extract_area_hint(title: str, area_prefixes: Iterable[str] = ()) -> str | None:
@@ -104,7 +126,7 @@ class WaterUtilityExtractor:
         event_date = _extract_date(text)
         area_hint = _extract_area_hint(item.title, self.area_prefixes)
         affected = _extract_affected(item.body_text or "")
-        reason = _sentence_with(item.body_text or "", ("lucr",))
+        reason = _extract_reason(item.body_text or "")
         turbidity = bool(re.search(r"turbid|limpez", lower))
 
         if not event_date or not (area_hint or affected):
@@ -141,22 +163,23 @@ class UtilityStoryComposer:
             return None
         f = packet.facts
         event_date = str(f.get("event_date") or "")
-        area = _clean(str(f.get("area_hint") or ""))
+        display_date = _display_date(event_date)
+        area = _human_case(_clean(str(f.get("area_hint") or "")))
         affected = _clean(str(f.get("affected") or ""))
         start = f.get("start_time")
         end = f.get("end_time")
         interval = f"{start}–{end}" if start and end else None
 
         if packet.kind == "water_supply_restriction":
-            headline = f"Furnizarea apei va fi restricționată pe {event_date}"
+            headline = f"Furnizarea apei va fi restricționată pe {display_date}"
         else:
-            headline = f"Apa va fi oprită pe {event_date}"
+            headline = f"Apa va fi oprită pe {display_date}"
         if area:
             headline += f" în {area}"
         if interval:
             headline += f": intervalul {interval}"
 
-        dek_bits = [f"{self.source_name} a anunțat măsura pentru {event_date}."]
+        dek_bits = [f"{self.source_name} a anunțat măsura pentru {display_date}."]
         if interval:
             dek_bits.append(f"Intervalul anunțat este {interval}.")
         if area:
@@ -166,7 +189,7 @@ class UtilityStoryComposer:
         paragraphs: list[str] = []
         first = f"{self.source_name} anunță "
         first += "restricționarea furnizării apei" if packet.kind == "water_supply_restriction" else "întreruperea alimentării cu apă"
-        first += f" pentru {event_date}"
+        first += f" pentru {display_date}"
         if interval:
             first += f", în intervalul {interval}"
         if area:
@@ -175,7 +198,7 @@ class UtilityStoryComposer:
         if affected:
             paragraphs.append("Potrivit anunțului oficial, sunt afectați: " + affected + ".")
         if f.get("reason"):
-            paragraphs.append("Motivul indicat de operator: " + _clean(str(f["reason"])) + ".")
+            paragraphs.append("Oprirea este legată de " + _clean(str(f["reason"])) + ".")
         if f.get("turbidity_advisory"):
             paragraphs.append(
                 "Operatorul avertizează că, după golirea și reumplerea rețelei, apa poate avea temporar turbiditate; consumul trebuie evitat până la limpezire dacă apare acest fenomen."
