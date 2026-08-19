@@ -2,7 +2,8 @@
 """Refine 'Ce spun decidenții' into a homepage-only, fresh, official-source product.
 
 The canonical builder is the trust boundary. This stage never re-imports raw
-official-ledger rows; it only selects from builder-validated items.
+official-ledger rows; it only selects from builder-validated items. Homepage
+signals additionally require explicit article-level statement evidence.
 """
 from __future__ import annotations
 
@@ -66,6 +67,20 @@ def fail_closed_signal(item: dict[str, Any]) -> bool:
     )
 
 
+def article_statement_evidence(item: dict[str, Any]) -> bool:
+    evidence = item.get("statementEvidence")
+    if not isinstance(evidence, dict) or evidence.get("status") != "VERIFIED_ARTICLE_STATEMENT":
+        return False
+    article_url = str(evidence.get("articleUrl") or "")
+    statement = str(evidence.get("statement") or "").strip()
+    content_hash = str(evidence.get("contentHash") or "")
+    observed_at = str(evidence.get("observedAt") or "")
+    if not article_url.startswith("https://") or not statement or len(content_hash) != 64 or not observed_at:
+        return False
+    source_urls = {str(src.get("url") or "") for src in item.get("sources") or [] if isinstance(src, dict)}
+    return article_url in source_urls
+
+
 def main() -> int:
     people = load(PEOPLE, {"items": [], "policy": {}})
     source_registry = load(SOURCE_REGISTRY, {"sources": []})
@@ -82,6 +97,8 @@ def main() -> int:
         if not direct_official(item, allowed_hosts):
             continue
         if not fail_closed_signal(item):
+            continue
+        if not article_statement_evidence(item):
             continue
         if not item.get("headline") or not item.get("officialFact"):
             continue
@@ -105,6 +122,7 @@ def main() -> int:
         "homepageOnly": True,
         "officialSourceIngestion": True,
         "directOfficialHomepageOnly": True,
+        "articleStatementEvidenceRequiredOnHomepage": True,
         "homeFreshnessDays": FRESH_DAYS,
         "hideWhenNoFreshOfficialSignals": True,
         "statementIsNotAdministrativeFact": True,
