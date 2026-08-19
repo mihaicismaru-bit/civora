@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "engine_id": "EUCONS_E20_ANALYTICS_ENGINE",
+  "product": "EUCONS_COMMERCIAL_OS",
+  "events": {
+    "page_view": {"stage": "AWARENESS", "required": ["path"]},
+    "service_view": {"stage": "CONSIDERATION", "required": ["service_id", "path"]},
+    "opportunity_view": {"stage": "CONSIDERATION", "required": ["opportunity_id", "path"]},
+    "case_view": {"stage": "CONSIDERATION", "required": ["case_id", "path"]},
+    "cta_click": {"stage": "INTENT", "required": ["cta_id", "path"]},
+    "evaluation_started": {"stage": "INTENT", "required": ["form_id"]},
+    "evaluation_completed": {"stage": "LEAD", "required": ["form_id"]},
+    "lead_created": {"stage": "LEAD", "required": ["lead_id"]},
+    "lead_qualified": {"stage": "OPPORTUNITY", "required": ["lead_id", "lead_score"]},
+    "offer_generated": {"stage": "OFFER", "required": ["lead_id", "offer_id"]},
+    "offer_sent": {"stage": "OFFER", "required": ["lead_id", "offer_id"]},
+    "client_won": {"stage": "WON", "required": ["lead_id", "opportunity_id"]}
+  },
+  "allowed_properties": [
+    "path", "service_id", "opportunity_id", "case_id", "cta_id", "form_id", "lead_id", "offer_id",
+    "lead_score", "audience_id", "content_type", "channel", "result"
+  ],
+  "attribution": {
+    "allowed_fields": ["source", "medium", "campaign", "content", "term", "referrer_domain", "landing_path"],
+    "first_touch_preserved": true,
+    "last_touch_preserved": true,
+    "query_strings_forbidden": true,
+    "full_referrer_urls_forbidden": true
+  },
+  "privacy": {
+    "data_minimization": true,
+    "raw_pii_forbidden": true,
+    "forbidden_keys": ["email", "phone", "contact_name", "organization_name", "message", "ip", "ip_address", "user_agent", "full_url", "referrer_url"],
+    "pseudonymous_id_pattern": "^[0-9a-f]{64}$",
+    "entity_ids_must_be_pseudonymous_for": ["lead_id"],
+    "max_text_length": 300,
+    "max_path_length": 500
+  },
+  "dedupe": {
+    "event_id_is_sha256": true,
+    "idempotent": true,
+    "canonical_basis": ["event_name", "occurred_at", "session_id", "properties", "attribution"]
+  },
+  "transport": {
+    "mode": "DRY_RUN_ONLY",
+    "provider": null,
+    "production_transport_enabled": false,
+    "dry_run_state": "ANALYTICS_EVENT_READY_PROVIDER_SELECTION_REQUIRED",
+    "immutable_receipts": true
+  },
+  "repository_policy": {
+    "runtime_event_stream_under_repository_root_forbidden": true,
+    "synthetic_fixtures_allowed": true
+  },
+  "output": {
+    "schema_version": 1,
+    "provider_neutral": true,
+    "direct_transport_enabled": false
+  }
+}
