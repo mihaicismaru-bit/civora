@@ -63,6 +63,16 @@ assert r'surs[ăa]\s+oficial[ăa]' in source_chunk
 assert 'sourceList(n.source?[n.source]:[])' in function_chunk(decision,'renderNews')
 assert 'sourceList(d.sources)' in function_chunk(decision,'renderDossier')
 
+# News-list fallback action must not imply an official source without T1/T1B provenance.
+news_source_action_chunk=function_chunk(decision,'newsSourceAction')
+news_row_chunk=function_chunk(decision,'newsRow')
+assert r'^T1(?:B)?\b' in news_source_action_chunk
+assert "if(!s.url)return 'Verifică proveniența înainte de a acționa.'" in news_source_action_chunk
+assert "'Verifică sursa oficială atașată.'" in news_source_action_chunk
+assert "'Verifică evidența publică atașată și proveniența.'" in news_source_action_chunk
+assert 'n.actions?.[0]||newsSourceAction(n)' in news_row_chunk
+assert "'Verifică sursa oficială.'" not in news_row_chunk
+
 # Ask routes directly through the decision-product UI contract; no timed DOM choreography.
 assert 'PARTENER_DECISION_UI' in askui
 assert 'PARTENER_DECISION_UI' in decision
