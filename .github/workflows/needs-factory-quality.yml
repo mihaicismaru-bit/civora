@@ -27,8 +27,10 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Compile Needs Factory domain and adapters
-        run: python -m compileall -q partener-eu/needs-factory/core partener-eu/needs-factory/adapters partener-eu/needs-factory/tools
+      - name: Install Needs Factory DOCX exporter dependency
+        run: python -m pip install --disable-pip-version-check -r partener-eu/needs-factory/requirements-docx.txt
+      - name: Compile Needs Factory domain, adapters and exporters
+        run: python -m compileall -q partener-eu/needs-factory/core partener-eu/needs-factory/adapters partener-eu/needs-factory/exporters partener-eu/needs-factory/tools
       - name: Parse canonical JSON schemas
         run: |
           python - <<'PY'
@@ -78,7 +80,7 @@ jobs:
           print(result['run_manifest']['run_id'])
           print([g['gap_id'] for g in blocking])
           PY
-      - name: Prove deterministic resume after validated primary research
+      - name: Prove deterministic resume and constrained narrative after primary research
         run: |
           python partener-eu/needs-factory/tools/run_resume_fixture.py \
             partener-eu/needs-factory/tests/fixtures/primary_research_resume.json \
@@ -97,6 +99,11 @@ jobs:
           assert 'NF12_PACKAGE' in plan['invalidated_stages']
           assert result['primary_evidence_count'] == 6
           assert result['unresolved_local_gaps'] == []
+          assert result['compiled_narrative_valid'] is True
+          assert result['compiled_need_count'] == 4
+          assert result['compiled_evidence_count'] >= 6
+          assert len(result['compiled_narrative_sha256']) >= 32
+          assert len(result['compiled_source_register_sha256']) >= 32
           closed = set(result['successor_manifest']['closed_checkpoints'])
           assert 'NF05_GAP_DETECTION' in closed
           assert 'NF06_PRIMARY_RESEARCH' in closed
@@ -105,20 +112,44 @@ jobs:
           print(result['predecessor_run_id'])
           print(result['successor_run_id'])
           print(result['narrative_pack_sha256'])
+          print(result['compiled_narrative_sha256'])
           PY
-      - name: Run deterministic pipeline smoke fixture through NF12
+      - name: Run deterministic pipeline through NF12, narrative and DOCX package export
         run: |
+          rm -rf /tmp/needs-factory-export
           python partener-eu/needs-factory/tools/run_fixture.py \
             partener-eu/needs-factory/tests/fixtures/pipeline_smoke.json \
-            --output /tmp/needs-factory-smoke-manifest.json
+            --output /tmp/needs-factory-smoke-manifest.json \
+            --export-dir /tmp/needs-factory-export
           python - <<'PY'
           import json
+          from pathlib import Path
           manifest = json.load(open('/tmp/needs-factory-smoke-manifest.json', encoding='utf-8'))
           assert manifest['release_gate']['ready_for_narrative'] is True
           assert manifest['run_id'].startswith('NF-')
           assert 'NF12_PACKAGE' in manifest['closed_checkpoints']
           assert manifest['narrative_claim_count'] == 2
           assert len(manifest['narrative_pack_sha256']) >= 32
+          assert manifest['compiled_narrative_valid'] is True
+          assert manifest['compiled_need_count'] == 2
+          assert manifest['compiled_evidence_count'] == 2
+          assert len(manifest['compiled_narrative_sha256']) >= 32
+          assert len(manifest['compiled_source_register_sha256']) >= 32
+          export_manifest = manifest['export_manifest']
+          assert export_manifest is not None
+          analysis_validation = export_manifest['docx_validation']['ANALIZA_NEVOI.docx']
+          assert analysis_validation['valid'] is True
+          assert analysis_validation['need_marker_count'] == 2
+          assert analysis_validation['evidence_marker_count'] == 4
+          assert analysis_validation['interpretation_limit_count'] == 2
+          assert export_manifest['docx_validation']['SOURCE_REGISTER.docx']['valid'] is True
+          assert len(export_manifest['files']['ANALIZA_NEVOI.docx']['sha256']) == 64
+          assert len(export_manifest['files']['SOURCE_REGISTER.docx']['sha256']) == 64
+          assert len(export_manifest['package_zip']['sha256']) == 64
+          for name in ['ANALIZA_NEVOI.md','ANALIZA_NEVOI.docx','SOURCE_REGISTER.md','SOURCE_REGISTER.docx','PACKAGE_MANIFEST.json','ANALIZA_NEVOI_PACKAGE.zip']:
+              assert (Path('/tmp/needs-factory-export') / name).exists(), name
           print(manifest['run_id'])
-          print(manifest['narrative_pack_sha256'])
+          print(export_manifest['files']['ANALIZA_NEVOI.docx']['sha256'])
+          print(export_manifest['files']['SOURCE_REGISTER.docx']['sha256'])
+          print(export_manifest['package_zip']['sha256'])
           PY
