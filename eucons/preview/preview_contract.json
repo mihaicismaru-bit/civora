@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "engine_id": "EUCONS_E25_PREVIEW_PRODUCTION",
+  "product": "EUCONS_COMMERCIAL_OS",
+  "hosting_mode": "GITHUB_ACTIONS_ARTIFACT_LOCAL_HTTP_SMOKE",
+  "production_deployment_enabled": false,
+  "external_credentials_required": false,
+  "preview": {
+    "artifact_name": "eucons-static-build",
+    "canonical_origin": "https://eucons.ro",
+    "minimum_route_count": 26,
+    "required_files": ["robots.txt", "sitemap.xml", "assets/eucons.css"],
+    "robots_policy": "DISALLOW_ALL_UNTIL_PRODUCTION_GATE",
+    "page_robots": "noindex,nofollow",
+    "local_http_host": "127.0.0.1",
+    "remote_font_dependencies_forbidden": true
+  },
+  "page_invariants": {
+    "lang_ro_required": true,
+    "viewport_required": true,
+    "canonical_required": true,
+    "skip_link_required": true,
+    "main_landmark_required": true,
+    "primary_nav_label_required": true,
+    "preview_form_collection_forbidden": true,
+    "responsive_css_media_query_required": true
+  },
+  "commercial_journey": {
+    "fixture_class": "SYNTHETIC_ONLY",
+    "fixture_email_domain": "example.invalid",
+    "stages": ["LEAD", "MATCH", "CRM", "OFFER"],
+    "required_match_state": "MATCH_CANDIDATE",
+    "offer_numeric_price_forbidden_without_approved_rule": true,
+    "offer_auto_send_required_false": true,
+    "repository_runtime_pii_write_forbidden": true
+  },
+  "distribution_journey": {
+    "stages": ["EDITORIAL", "LINKEDIN", "FACEBOOK", "EMAIL"],
+    "editorial_dispatch_required_false": true,
+    "linkedin_direct_publication_required_false": true,
+    "facebook_direct_publication_required_false": true,
+    "email_direct_sending_required_false": true,
+    "authorization_gates_must_remain_closed": true,
+    "cross_platform_verbatim_reuse_forbidden": true
+  },
+  "receipt": {
+    "hash_algorithm": "sha256",
+    "route_hash_manifest_required": true,
+    "journey_hashes_required": true,
+    "credential_free": true
+  },
+  "forbidden": {
+    "github_pages_cutover": true,
+    "production_dns_change": true,
+    "linkedin_live_dispatch": true,
+    "facebook_live_dispatch": true,
+    "email_live_dispatch": true,
+    "analytics_live_transport": true,
+    "real_personal_data_fixture": true,
+    "unverified_opportunity_fixture": true,
+    "indexable_preview": true
+  }
+}

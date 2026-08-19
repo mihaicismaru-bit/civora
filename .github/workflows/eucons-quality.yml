@@ -126,6 +126,10 @@ jobs:
         run: python eucons/validation/validate_recovery.py
       - name: Test EUCONS recovery fail-closed behavior
         run: python eucons/validation/test_recovery_fail_closed.py
+      - name: Validate EUCONS preview production
+        run: python eucons/validation/validate_preview_production.py
+      - name: Test EUCONS preview production fail-closed behavior
+        run: python eucons/validation/test_preview_production_fail_closed.py
       - name: Reject committed secret-like assignments
         shell: bash
         run: |
