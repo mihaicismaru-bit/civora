@@ -6,12 +6,19 @@ fully verified, socially useful story is not silenced on Facebook merely because
 no story-specific rights-cleared photograph is available. It publishes only
 new canonical story-publication-event stories, only when the newsroom story-ready
 gate passes, and only when no approved story visual exists.
+
+Before a link is handed to Meta, the public canonical page must already expose
+article-specific Open Graph metadata. This prevents Facebook from caching the
+homepage/fallback card during the short deploy window between newsroom commit
+and public-site propagation.
 """
 from __future__ import annotations
 
 import argparse
 import datetime as dt
 import hashlib
+import html
+from html.parser import HTMLParser
 import json
 import os
 import sys
@@ -39,11 +46,31 @@ VISUALS = SOCIAL / "story_visuals.json"
 DEFAULT_PAGE_ID = "1234360446430980"
 DEFAULT_GRAPH_VERSION = "v26.0"
 LIVE_ENABLE_ENV = "VALCEA_FB_TEXT_LIVE_ENABLED"
-ADAPTER_VERSION = "facebook-editorial-text-v1.0"
+ADAPTER_VERSION = "facebook-editorial-text-v1.1"
+PUBLIC_PAGE_TIMEOUT_SECONDS = 20
+PUBLIC_PAGE_MAX_BYTES = 750_000
 
 
 class FacebookTextPublishError(RuntimeError):
     pass
+
+
+class SocialMetaParser(HTMLParser):
+    """Collect the small set of static metadata Facebook must see pre-publish."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.meta: dict[str, str] = {}
+        self.canonical = ""
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        values = {str(key).lower(): str(value or "") for key, value in attrs}
+        if tag.lower() == "meta":
+            key = values.get("property") or values.get("name")
+            if key:
+                self.meta[key.lower()] = values.get("content", "").strip()
+        elif tag.lower() == "link" and "canonical" in values.get("rel", "").lower().split():
+            self.canonical = values.get("href", "").strip()
 
 
 def load(path: Path, default: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -106,19 +133,20 @@ def clean_paragraphs(story: dict[str, Any]) -> list[str]:
 
 def build_text_product(story: dict[str, Any], event: dict[str, Any]) -> dict[str, Any]:
     story_id = str(story["id"])
-    section = str(story.get("section") or "ȘTIRI").replace("_", " ").upper()
     headline = " ".join(str(story.get("headline") or "").split())
     dek = " ".join(str(story.get("dek") or "").split())
     paragraphs = clean_paragraphs(story)
 
-    body: list[str] = [f"{section} | VÂLCEA CLAR", headline]
+    # Facebook is an editorial surface, not an RSS dump. Lead with the actual
+    # news instead of a mechanical "CATEGORY | VÂLCEA CLAR" label.
+    body: list[str] = [headline]
     if dek and dek.lower() != headline.lower():
         body.append(dek)
     if paragraphs:
         first = paragraphs[0]
         if first.lower() not in {headline.lower(), dek.lower()}:
             body.append(first)
-    body.append("Contextul complet și sursele verificate sunt în articol.")
+    body.append("Detalii, context și surse verificate în articol.")
     link = canonical_link(story_id, event)
     product = {
         "status": "READY",
@@ -127,6 +155,7 @@ def build_text_product(story: dict[str, Any], event: dict[str, Any]) -> dict[str
         "native_format": "text_link",
         "publication_product": ADAPTER_VERSION,
         "message": "\n\n".join(part for part in body if part).strip(),
+        "headline": headline,
         "canonical_url": link,
         "visual_used": False,
         "synthetic_media_used": False,
@@ -135,6 +164,68 @@ def build_text_product(story: dict[str, Any], event: dict[str, Any]) -> dict[str
     }
     product["product_fingerprint_sha256"] = digest(product)
     return product
+
+
+def _normal_url(value: str) -> str:
+    value = html.unescape(str(value or "").strip()).rstrip("/")
+    value = value.replace("https://www.valceaclar.ro", "https://valceaclar.ro", 1)
+    return value
+
+
+def _normal_text(value: str) -> str:
+    return " ".join(html.unescape(str(value or "")).split()).casefold()
+
+
+def public_story_page_ready(
+    product: dict[str, Any],
+    request_fn: Callable[..., Any] = urllib.request.urlopen,
+) -> tuple[bool, str]:
+    """Require public, story-specific OG metadata before Meta can cache the URL."""
+
+    canonical = str(product.get("canonical_url") or "").strip()
+    headline = str(product.get("headline") or "").strip()
+    if not canonical or not headline:
+        return False, "missing_canonical_or_headline"
+
+    request = urllib.request.Request(
+        canonical,
+        method="GET",
+        headers={
+            "Accept": "text/html,application/xhtml+xml",
+            "User-Agent": "ValceaClar-Facebook-Preflight/1.1",
+            "Cache-Control": "no-cache",
+        },
+    )
+    try:
+        with request_fn(request, timeout=PUBLIC_PAGE_TIMEOUT_SECONDS) as response:
+            status = int(getattr(response, "status", 200) or 200)
+            if status != 200:
+                return False, f"public_http_{status}"
+            raw = response.read(PUBLIC_PAGE_MAX_BYTES)
+    except urllib.error.HTTPError as exc:
+        return False, f"public_http_{exc.code}"
+    except urllib.error.URLError as exc:
+        return False, f"public_transport:{str(exc.reason)[:160]}"
+    except Exception as exc:
+        return False, f"public_transport:{str(exc)[:160]}"
+
+    parser = SocialMetaParser()
+    try:
+        parser.feed(raw.decode("utf-8", errors="replace"))
+    except Exception as exc:
+        return False, f"public_html_parse:{str(exc)[:160]}"
+
+    if parser.meta.get("og:type", "").casefold() != "article":
+        return False, "og_type_not_article"
+    if _normal_url(parser.meta.get("og:url", "")) != _normal_url(canonical):
+        return False, "og_url_mismatch"
+    if _normal_url(parser.canonical) != _normal_url(canonical):
+        return False, "canonical_mismatch"
+    if _normal_text(parser.meta.get("og:title", "")) != _normal_text(headline):
+        return False, "og_title_mismatch"
+    if not _normal_text(parser.meta.get("og:description", "")):
+        return False, "og_description_missing"
+    return True, "ready"
 
 
 def current_event_stories() -> tuple[list[dict[str, Any]], dict[str, Any]]:
@@ -217,7 +308,7 @@ def graph_text_post(
         method="POST",
         headers={
             "Content-Type": "application/x-www-form-urlencoded",
-            "User-Agent": "ValceaClar-Facebook-Text/1.0",
+            "User-Agent": "ValceaClar-Facebook-Text/1.1",
         },
     )
     try:
@@ -263,9 +354,38 @@ def apply(max_items: int) -> dict[str, Any]:
     preview = plan_products()
     products = preview["eligible"][: max(0, max_items)]
     if not products:
-        return {**preview, "status": "NO_ELIGIBLE_POSTS", "published": []}
+        return {**preview, "status": "NO_ELIGIBLE_POSTS", "published": [], "deferred": []}
     if os.environ.get(LIVE_ENABLE_ENV, "").strip().lower() != "true":
         raise FacebookTextPublishError(f"{LIVE_ENABLE_ENV} must be true for --apply")
+
+    # Public-page preflight deliberately runs before Meta identity/token work.
+    # A page still propagating is a normal retry condition, not a publishing
+    # failure and must never consume the durable Facebook delivery ledger.
+    ready_products: list[dict[str, Any]] = []
+    deferred: list[dict[str, Any]] = []
+    state = load(STATE, {"schema_version": "3.0", "published": {}})
+    for product in products:
+        page_ready, page_reason = public_story_page_ready(product)
+        if page_ready:
+            ready_products.append(product)
+            continue
+        deferred.append({"story_id": product["story_id"], "reason": page_reason})
+        state["last_text_attempt"] = {
+            "at": utc_now(),
+            "status": "deferred_public_page_not_ready",
+            "story_id": product["story_id"],
+            "state_key": product["state_key"],
+            "reason": page_reason,
+        }
+        write(STATE, state)
+
+    if not ready_products:
+        return {
+            **preview,
+            "status": "DEFERRED_PUBLIC_PAGE_NOT_READY",
+            "published": [],
+            "deferred": deferred,
+        }
 
     supplied = token_from_env()
     page_id = os.environ.get("VALCEA_FB_PAGE_ID", DEFAULT_PAGE_ID).strip() or DEFAULT_PAGE_ID
@@ -275,9 +395,8 @@ def apply(max_items: int) -> dict[str, Any]:
     except Exception as exc:
         raise FacebookTextPublishError(f"Facebook Page identity/token validation failed: {exc}") from exc
 
-    state = load(STATE, {"schema_version": "3.0", "published": {}})
     completed: list[dict[str, Any]] = []
-    for product in products:
+    for product in ready_products:
         try:
             post_id = graph_text_post(
                 page_id=page_id,
@@ -306,7 +425,7 @@ def apply(max_items: int) -> dict[str, Any]:
         "token_value_logged": False,
     }
     write(STATE, state)
-    return {**preview, "status": "PUBLISHED", "published": completed}
+    return {**preview, "status": "PUBLISHED", "published": completed, "deferred": deferred}
 
 
 def self_test() -> int:
@@ -323,6 +442,47 @@ def self_test() -> int:
     assert product["native_format"] == "text_link"
     assert product["visual_used"] is False
     assert product["canonical_url"].endswith("/stiri/x/")
+    assert product["message"].startswith(story["headline"])
+    assert "MOBILITATE | VÂLCEA CLAR" not in product["message"]
+
+    class FakeStoryResponse:
+        status = 200
+        def __enter__(self):
+            return self
+        def __exit__(self, exc_type, exc, tb):
+            return False
+        def read(self, size=-1):
+            return (
+                '<!doctype html><html><head>'
+                '<link rel="canonical" href="https://valceaclar.ro/stiri/x/">'
+                '<meta property="og:type" content="article">'
+                '<meta property="og:title" content="DN 7: două victime într-un incident rutier">'
+                '<meta property="og:description" content="Descriere verificată">'
+                '<meta property="og:url" content="https://valceaclar.ro/stiri/x/">'
+                '</head></html>'
+            ).encode("utf-8")
+
+    def fake_story_open(request, timeout=0):
+        assert request.full_url == "https://valceaclar.ro/stiri/x/"
+        return FakeStoryResponse()
+
+    page_ready, page_reason = public_story_page_ready(product, request_fn=fake_story_open)
+    assert page_ready is True and page_reason == "ready"
+
+    class FakeGenericResponse(FakeStoryResponse):
+        def read(self, size=-1):
+            return (
+                '<!doctype html><html><head>'
+                '<link rel="canonical" href="https://valceaclar.ro/">'
+                '<meta property="og:type" content="website">'
+                '<meta property="og:title" content="VÂLCEA CLAR — Ce se întâmplă. Ce știm. Ce contează.">'
+                '<meta property="og:description" content="Homepage">'
+                '<meta property="og:url" content="https://valceaclar.ro/">'
+                '</head></html>'
+            ).encode("utf-8")
+
+    generic_ready, generic_reason = public_story_page_ready(product, request_fn=lambda request, timeout=0: FakeGenericResponse())
+    assert generic_ready is False and generic_reason == "og_type_not_article"
 
     captured: dict[str, Any] = {}
 
