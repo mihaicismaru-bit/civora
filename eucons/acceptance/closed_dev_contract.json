@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "engine_id": "EUCONS_E28_CLOSED_DEV",
+  "product": "EUCONS_COMMERCIAL_OS",
+  "target_state": "BLOCKED_EXTERNAL_ONLY",
+  "production_side_effects_enabled": false,
+  "required_completed_phases": [
+    "E00","E01","E02","E03","E04","E05","E06","E07","E08","E09","E10","E11","E12","E13","E14","E15","E16","E17","E18","E19","E20","E21","E22","E23","E24","E25","E26","E27"
+  ],
+  "minimum_public_content": {
+    "services": 8,
+    "people": 2,
+    "cases": 2
+  },
+  "production_build": {
+    "contract": "eucons/deployment/production_build_contract.json",
+    "builder": "eucons/deployment/build_production_ready.py",
+    "expected_pages": 26,
+    "required_files": ["robots.txt","sitemap.xml","assets/eucons.css","assets/forms.js"],
+    "required_robots_meta": "index,follow,max-image-preview:large",
+    "forbidden_public_phrases": [
+      "Versiune de dezvoltare",
+      "se activează în E09",
+      "va fi activat înainte de producție",
+      "Această versiune noindex",
+      "nu colectăm date"
+    ]
+  },
+  "external_handoff": {
+    "manifest": "eucons/deployment/external_handoff_manifest.json",
+    "allowed_ids": ["domain_and_hosting","linkedin","facebook","commercial_mailbox"],
+    "required_state": "OWNER_AUTHORIZATION_REQUIRED",
+    "owner_development_actions_required": false
+  },
+  "required_runtime_contract": "eucons/deployment/runtime_activation_contract.json",
+  "required_terminal_checks": [
+    "E00_E27_RECEIPTS_PASS",
+    "FULL_ACCEPTANCE_REPLAY_PASS",
+    "PRODUCTION_READY_BUILD_PASS",
+    "PUBLIC_CONTENT_NONEMPTY",
+    "PUBLIC_CLAIMS_RESOLVE_TO_ACTIVE_EVIDENCE",
+    "LEGAL_PRIVACY_SURFACES_MATERIALIZED",
+    "LEAD_FORMS_WIRED_TO_PROVIDER_NEUTRAL_RUNTIME",
+    "EXTERNAL_HANDOFF_ONLY",
+    "PRODUCTION_SIDE_EFFECTS_DISABLED"
+  ]
+}

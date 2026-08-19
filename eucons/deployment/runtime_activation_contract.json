@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "provider_neutral": true,
+  "production_enabled": false,
+  "lead_route": {
+    "method": "POST",
+    "path": "/api/leads",
+    "content_type": "application/x-www-form-urlencoded_or_equivalent_adapter",
+    "contract": "eucons/leads/lead_contract.json",
+    "required_processing_order": [
+      "validate_and_normalize_E11",
+      "persist_outside_repository",
+      "create_or_update_E12_CRM",
+      "run_E10_matching_when_profile_sufficient",
+      "prepare_E13_offer_when_commercially_applicable",
+      "prepare_E19_requested-service acknowledgement"
+    ],
+    "failure_semantics": "FAIL_CLOSED_NO_PARTIAL_COMMIT",
+    "pii_repository_write": "FORBIDDEN"
+  },
+  "scheduled_jobs": [
+    "verified_opportunity_refresh",
+    "matching_refresh",
+    "editorial_and_social_outbox_refresh",
+    "retention_and_suppression",
+    "health_and_reconciliation"
+  ],
+  "host_requirements": [
+    "HTTPS",
+    "server_side_secret_store_or_equivalent",
+    "persistent_storage_outside_git_for_real_leads_and_crm",
+    "scheduled_execution_or_GitHub_Actions_bridge",
+    "security_headers_from_E21",
+    "logs_with_sensitive_field_redaction"
+  ],
+  "activation_requires": [
+    "domain_and_hosting_authorized",
+    "active_privacy_notice_reconciled",
+    "runtime_storage_configured",
+    "HTTPS_verified",
+    "lead_smoke_test_passed"
+  ]
+}

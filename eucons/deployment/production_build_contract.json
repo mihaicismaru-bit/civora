@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "state": "PRODUCTION_READY_ARTIFACT_CONTRACT",
+  "canonical_origin": "https://eucons.ro",
+  "provider_neutral": true,
+  "build": {
+    "command": "python eucons/deployment/build_production_ready.py --target <target>",
+    "expected_core_routes": 18,
+    "expected_service_routes": 8,
+    "expected_total_pages": 26,
+    "required_files": ["robots.txt", "sitemap.xml", "assets/eucons.css", "assets/forms.js"],
+    "robots_meta": "index,follow,max-image-preview:large",
+    "production_deployed_by_build": false
+  },
+  "runtime_bindings": {
+    "lead_endpoint": {
+      "method": "POST",
+      "path": "/api/leads",
+      "input_contract": "eucons/leads/lead_contract.json",
+      "engine": "EUCONS_E11_LEAD_ENGINE",
+      "handoff": ["EUCONS_E12_CRM_LITE", "EUCONS_E10_OPPORTUNITY_MATCHING", "EUCONS_E13_OFFER_ENGINE"],
+      "requires_external_host_runtime": true
+    },
+    "commercial_mail": {
+      "engine": "EUCONS_E19_COMMERCIAL_EMAIL_ENGINE",
+      "requires_external_mailbox_authorization": true
+    },
+    "linkedin": {
+      "engine": "EUCONS_E17_LINKEDIN_ADAPTER",
+      "requires_external_authorization": true
+    },
+    "facebook": {
+      "engine": "EUCONS_E18_FACEBOOK_ADAPTER",
+      "requires_external_authorization": true
+    }
+  },
+  "security": {
+    "contract": "eucons/security/privacy_security_contract.json",
+    "https_required": true,
+    "headers_must_be_applied_by_host": true,
+    "credentials_in_repository_forbidden": true,
+    "real_pii_in_repository_forbidden": true
+  },
+  "activation_rule": "The artifact may be connected to production only after the external handoff manifest is satisfied and the active privacy notice is reconciled with the chosen host/mail/social providers."
+}
