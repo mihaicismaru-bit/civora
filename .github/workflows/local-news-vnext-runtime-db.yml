@@ -1,0 +1,65 @@
+name: LOCAL NEWS OS vNext Runtime DB
+
+on:
+  pull_request:
+    paths:
+      - 'local-news-os/vnext/**'
+      - '.github/workflows/local-news-vnext-runtime-db.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'local-news-os/vnext/**'
+      - '.github/workflows/local-news-vnext-runtime-db.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  runtime-db-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile deployability modules
+        run: |
+          python -m py_compile \
+            local-news-os/vnext/core/database_backend.py \
+            local-news-os/vnext/core/runtime_store.py \
+            local-news-os/vnext/core/production_app.py \
+            local-news-os/vnext/core/deployment_preflight.py \
+            local-news-os/vnext/vercel_app.py
+      - name: Database adapter self-test
+        run: python local-news-os/vnext/core/database_backend.py
+      - name: SQLite regression
+        run: python local-news-os/vnext/core/runtime_store.py --self-test
+      - name: PostgreSQL schema contract — static only
+        run: python local-news-os/vnext/core/deployment_preflight.py --instance valcea --static
+      - name: No direct database bypass
+        shell: bash
+        run: |
+          if grep -R --line-number --include='*.py' 'sqlite3\.connect' local-news-os/vnext/core | grep -v 'database_backend.py'; then
+            echo 'Direct sqlite3.connect bypasses the generic runtime backend.' >&2
+            exit 1
+          fi
+      - name: Generic core locality guard
+        shell: bash
+        run: |
+          if grep -Ein 'vâlcea|valcea|râmnicu|ramnicu' \
+            local-news-os/vnext/core/database_backend.py \
+            local-news-os/vnext/core/runtime_store.py \
+            local-news-os/vnext/core/production_app.py; then
+            echo 'CORE_KNOWS_NO_LOCALITY violation.' >&2
+            exit 1
+          fi
+      - name: External PostgreSQL integration remains fail-closed
+        run: |
+          python - <<'PY'
+          import json, pathlib
+          path = pathlib.Path('local-news-os/vnext/acceptance/valcea-p18-controlled-live-preflight-latest.json')
+          data = json.loads(path.read_text(encoding='utf-8'))
+          assert data['production_cutover'] is False
+          assert data['network_publication_attempted'] is False
+          PY
