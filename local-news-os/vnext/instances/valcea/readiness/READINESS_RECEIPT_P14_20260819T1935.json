@@ -1,0 +1,164 @@
+{
+  "schema_version": "1.0",
+  "contract": "LOCAL_NEWS_OS_VNEXT_VALCEA_READINESS_RECEIPT",
+  "instance_id": "valcea",
+  "observed_at": "2026-08-19T19:35:03+03:00",
+  "status": "PRE_MIGRATION_READINESS_ONLY",
+  "cutover_authorized": false,
+  "public_runtime_mutated": false,
+  "reason": "LOCAL NEWS OS vNext remains BUILD_ACTIVE. P0-P14 are CLOSED, P15_RETRY_SELF_HEAL_UNIFIED_SCHEDULER is NEXT, and P16-P18 remain pending. Migration, shadow production and controlled-live are not authorized before BUILD_READY_FOR_MIGRATION.",
+  "vnext_gate": {
+    "state_path": "local-news-os/vnext/VNEXT_STATE.json",
+    "state_sha": "96a512a5b9246f842d2aae3f8400825e028296d9",
+    "latest_relevant_build_commit": "60ac64d45cafc24763ac864a3077f72c510a3cf2",
+    "closed_through": "P14_DISTRIBUTION_ENGINE",
+    "current_next_phase": "P15_RETRY_SELF_HEAL_UNIFIED_SCHEDULER",
+    "required_before_migration": "BUILD_READY_FOR_MIGRATION",
+    "production_cutover": false
+  },
+  "material_progress_since_prior_readiness": [
+    "P13_MEDIA_INTELLIGENCE is CLOSED with site-owned media_assets, media bindings, derivatives, story media selection, photo debt, rights/provenance enforcement and editorial-card/no-visual fallback.",
+    "P14_DISTRIBUTION_ENGINE is CLOSED with site-owned channel products, delivery ledger, attempts, remote verification receipts, per-story/per-channel revision identity and fail-closed external LIVE semantics.",
+    "Vâlcea Channel Pack now binds Facebook and Instagram through reference-only credentials and apply-gate references; no credential value is stored in the pack.",
+    "Acceptance preparation is now focused on P15 retry/self-heal/unified scheduling, P16 release separation and P17 instance bootstrap/second-instance proof before any migration cutover."
+  ],
+  "public_compatibility_snapshot": {
+    "publication_event_path": "valcea-clar/site/story_publication_event.json",
+    "publication_event_sha": "709af6f8b7f8bcdab9d3530f06523b51aa2ed276",
+    "published_story_ids": 23,
+    "publication_event_published_at": "2026-08-19T06:12:49+03:00",
+    "publication_event_new_story_ids": 0,
+    "live_feed_sha": "fc47648a0b228d43293348e445d5d613072d3f32",
+    "people_sha": "a99562617891720a0e211bc8f0341f4435eab5b8",
+    "artists_sha": "1751e1b9069ca904afde8787592342ef6b78d9b4",
+    "public_shell_sha": "d6bb904a060d0301fc8982d6e592430ad446721f",
+    "runtime_status_sha": "aae6adb5e8a2289f351fd6d618cdae09f9da1531",
+    "runtime_status_updated_local": "2026-08-19T06:12:48+03:00",
+    "remote_http_probe": {
+      "status": "UNVERIFIED_ENVIRONMENT_DNS_RESOLUTION_FAILURE",
+      "detail": "curl could not resolve host valceaclar.ro from this execution environment; this is not promoted to a public-site downtime claim"
+    }
+  },
+  "migration_input_drift_against_migration_readiness_1_3": {
+    "artists": {
+      "status": "CHANGED",
+      "current_sha": "1751e1b9069ca904afde8787592342ef6b78d9b4"
+    },
+    "public_money_and_decisions": {
+      "status": "CHANGED",
+      "current_sha": "f665a0d81af915045df143c2f23c4dd0e9fbfd68"
+    },
+    "facts": {
+      "status": "CHANGED",
+      "current_sha": "12165f56aa08b805f11502f439ae8c73de82d617"
+    },
+    "fact_kernels": {
+      "status": "CHANGED",
+      "current_sha": "0cb918fd4541e5aae549307ce9f07b15d99d797e"
+    },
+    "story_visuals": {
+      "status": "STABLE",
+      "current_sha": "52a2f1eb83ce442a750f3f63df2ffc5ced2005d2"
+    },
+    "photo_atlas": {
+      "status": "STABLE",
+      "current_sha": "55edc3ee416f24ea2d8ddcad12ae2d6fe9ea40f0"
+    },
+    "photo_candidates": {
+      "status": "CHANGED",
+      "current_sha": "6bbff7aa491ef7f9c7006e7714f3408098833951"
+    },
+    "real_photo_replacement_queue": {
+      "status": "STABLE",
+      "current_sha": "ecbe331c50e9fa1a8351b12a143e81160b3d6535"
+    },
+    "facebook_delivery_history": {
+      "status": "STABLE",
+      "current_sha": "d90b89dd6ec868d2c8e5a0dafbc2543c7830310b"
+    },
+    "instagram_delivery_history": {
+      "status": "STABLE",
+      "current_sha": "4ffc683a276b9e368bc46e33c09ab4fabd1d1812"
+    },
+    "source_registry": {
+      "status": "STABLE",
+      "current_sha": "a885b64334e3848d83e894800d13fc6a149d99d7"
+    },
+    "places": {
+      "status": "STABLE",
+      "current_sha": "83f236a8d344769b370db643d7681789c9f55a9d"
+    },
+    "place_sources": {
+      "status": "STABLE",
+      "current_sha": "96d33e842bfbda12c2b72bdc78db45e3fdacd1bd"
+    },
+    "creator_intelligence": {
+      "status": "STABLE",
+      "current_sha": "89e6dd1d9b4a84b62221c9fab1197a6726568af1"
+    }
+  },
+  "media_readiness": {
+    "p13_status": "CLOSED",
+    "vnext_photo_pack_path": "local-news-os/vnext/instances/valcea/packs/photos.json",
+    "vnext_photo_pack_sha": "26dfd04197836463af4c7028d67d2042a70e5358",
+    "vnext_photo_pack_assets_currently_embedded": 0,
+    "legacy_approved_story_visuals_sha": "52a2f1eb83ce442a750f3f63df2ffc5ced2005d2",
+    "legacy_photo_atlas_sha": "55edc3ee416f24ea2d8ddcad12ae2d6fe9ea40f0",
+    "legacy_candidate_registry_sha": "6bbff7aa491ef7f9c7006e7714f3408098833951",
+    "user_owned_policy": "Supported by P13 only with explicit ownership evidence and provenance. No USER_OWNED asset was found embedded in the current vNext Photo Pack during this readiness run; do not invent a migrated user-owned inventory.",
+    "cutover_rule": "Import only rights-safe/provenanced approved assets as READY. Keep unapproved candidates candidate-only. Missing photography must fall back to EDITORIAL_CARD or NO_VISUAL and must not block a publishable story."
+  },
+  "social_readiness": {
+    "p14_status": "CLOSED",
+    "channel_pack_path": "local-news-os/vnext/instances/valcea/packs/channels.json",
+    "channel_pack_sha": "aef0b38a5ed3d99868fcd180d139ef939557e02e",
+    "facebook": {
+      "mode": "direct_capable",
+      "enabled": true,
+      "adapter_id": "meta_facebook",
+      "account_id": "1234360446430980",
+      "credential_ref": "VALCEA_META_PAGE_ACCESS_TOKEN",
+      "apply_gate_ref": "VALCEA_FB_EDITORIAL_LIVE_ENABLED",
+      "historical_state_sha": "d90b89dd6ec868d2c8e5a0dafbc2543c7830310b"
+    },
+    "instagram": {
+      "mode": "direct_capable",
+      "enabled": true,
+      "adapter_id": "meta_instagram",
+      "account_id_ref": "VALCEA_IG_ACCOUNT_ID",
+      "credential_ref": "VALCEA_META_PAGE_ACCESS_TOKEN",
+      "apply_gate_ref": "VALCEA_IG_TEXT_CARD_LIVE_ENABLED",
+      "historical_state_sha": "4ffc683a276b9e368bc46e33c09ab4fabd1d1812"
+    },
+    "direct_cutover_status": "NOT_AUTHORIZED_YET",
+    "remote_live_rule": "Do not promote a vNext delivery to PUBLISHED/LIVE without independent provider readback, external object id and remote receipt fingerprint."
+  },
+  "legacy_single_writer_risk": {
+    "confirmed_conflicting_workflow": ".github/workflows/valcea-clar-social-publishing.yml",
+    "workflow_sha": "c76969dc5bea18386990ebc70716d14093474728",
+    "schedule": "7,22,37,52 * * * *",
+    "confirmed_direct_writes": [
+      "Facebook Meta Graph API",
+      "Instagram Meta Graph API",
+      "TikTok Content Posting API when eligible"
+    ],
+    "confirmed_repository_state_writes": true,
+    "cutover_requirement": "Fence this legacy workflow atomically before the first vNext direct apply, after shadow delivery-product parity and credential/readback checks pass. Preserve it as rollback evidence until controlled-live is accepted; do not run it concurrently with vNext direct delivery."
+  },
+  "acceptance_blockers": [
+    "P15_RETRY_SELF_HEAL_UNIFIED_SCHEDULER is not closed.",
+    "P16_DEVELOPMENT_PRODUCTION_RELEASE_SEPARATION is not closed.",
+    "P17_INSTANCE_BOOTSTRAP_SECOND_INSTANCE_TEST is not closed.",
+    "BUILD_READY_FOR_MIGRATION has not been asserted by the build state.",
+    "vNext direct Facebook/Instagram remote delivery has not been exercised because production cutover is still forbidden.",
+    "Legacy social direct writer fencing must be part of the atomic cutover transaction, not executed during readiness-only mode."
+  ],
+  "next_acceptance_action": "Remain in readiness-only mode. Re-read vNext after P15 closes; refresh drifted migration-input SHAs, keep the legacy single-writer fencing plan ready, and begin shadow database migration only after BUILD_READY_FOR_MIGRATION.",
+  "safety": {
+    "legacy_civora_lanes_reactivated": false,
+    "public_urls_changed": false,
+    "public_story_state_changed": false,
+    "social_external_state_changed": false,
+    "rollback_required_now": false
+  }
+}
