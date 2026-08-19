@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E06",
+  "unit": "E06_INFORMATION_ARCHITECTURE",
+  "status": "PASS",
+  "validated_at": "2026-08-19T08:16:00Z",
+  "validation": {
+    "workflow": "EUCONS Quality",
+    "run_id": 32231616066,
+    "run_number": 34,
+    "conclusion": "success",
+    "validated_head": "a1c9a53e34f607063a6662b6c076b2b7c1e4e373",
+    "final_head_revalidation_required_before_merge": true
+  },
+  "coverage": {
+    "core_routes": 18,
+    "service_routes": 8,
+    "conditional_route_families": 5,
+    "cta_destinations": 5,
+    "canonical_origin": "https://eucons.ro",
+    "duplicate_paths_rejected": true,
+    "service_route_drift_rejected": true,
+    "cta_journey_drift_rejected": true,
+    "hold_route_materialization_rejected": true,
+    "legal_primary_navigation_rejected": true,
+    "orphan_cta_rejected": true
+  },
+  "artifacts": [
+    "eucons/web/information_architecture.json",
+    "eucons/validation/validate_information_architecture.py",
+    "eucons/validation/test_information_architecture.py",
+    ".github/workflows/eucons-quality.yml",
+    "eucons/ops/artifact_registry.json",
+    "eucons/ops/checkpoint.json"
+  ],
+  "next_phase": "E07"
+}
