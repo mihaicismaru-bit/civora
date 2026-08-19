@@ -159,18 +159,31 @@ def resolve_source(
 
 
 def classify_entity(general: dict[str, Any] | None) -> str:
+    """Classify legal entity without treating every J-number as a company.
+
+    Romanian chambers and other statutory bodies can carry historic registry
+    numbers while not having shareholders/associates. Strong name/legal-form
+    signals therefore take precedence over the registry-number shape.
+    """
     if not general or not general.get("available"):
         return "UNKNOWN"
     entity = general.get("entity") or {}
     name = norm_text(entity.get("name"))
     legal = norm_text(entity.get("legalForm"))
-    reg = str(entity.get("registrationNumber") or "").strip()
-    if any(token in name for token in (" FUNDATIA ", " ASOCIATIA ", " FEDERATIA ", " UNIUNEA ")) or name.startswith(("FUNDATIA ", "ASOCIATIA ", "FEDERATIA ", "UNIUNEA ")):
+
+    if "CAMERA DE COMERT SI INDUSTRIE" in name or "CAMERA DE COMERT" in name:
+        return "CHAMBER_OF_COMMERCE"
+
+    ngo_prefixes = ("FUNDATIA ", "ASOCIATIA ", "FEDERATIA ", "UNIUNEA ")
+    if name.startswith(ngo_prefixes) or any(f" {prefix}" in name for prefix in ngo_prefixes):
         return "NGO"
-    if reg or any(token in name for token in (" SRL", " S R L", " SA", " S A", " SNC", " SCS", " SCA")):
+
+    company_tokens = (" SRL", " S R L", " SA", " S A", " SNC", " SCS", " SCA")
+    if any(token in name for token in company_tokens):
         return "COMMERCIAL"
     if any(token in legal for token in ("SOCIETATE", "REGIE", "COOPERATIVA")):
         return "COMMERCIAL"
+
     return "OTHER_LEGAL_ENTITY"
 
 
@@ -183,6 +196,15 @@ def find_indicator(statement: dict[str, Any], patterns: list[str]) -> dict[str, 
     return None
 
 
+def indicator_number(item: dict[str, Any] | None) -> int | float | None:
+    if not item:
+        return None
+    value = item.get("value")
+    if isinstance(value, bool):
+        return int(value)
+    return value if isinstance(value, (int, float)) else None
+
+
 def summarize_financials(series: dict[str, Any] | None) -> list[dict[str, Any]]:
     if not series:
         return []
@@ -193,14 +215,43 @@ def summarize_financials(series: dict[str, Any] | None) -> list[dict[str, Any]]:
         expenses = find_indicator(statement, ["Cheltuieli totale - la 31.12"])
         profit = find_indicator(statement, ["Profit net", "Excedent/Profit - la 31.12", "Excedent din activitatile fara scop patrimonial - la 31.12"])
         loss = find_indicator(statement, ["Pierdere neta", "Deficit/Pierdere - la 31.12", "Deficit din activitatile fara scop patrimonial - la 31.12"])
-        employees = find_indicator(statement, ["Numar mediu de salariati", "Efectivul de personal"])
+
+        employee_average = find_indicator(statement, ["Numar mediu de salariati"])
+        employees_nonprofit = find_indicator(
+            statement,
+            ["Efectivul de personal privind activitatile fara scop patrimonial"],
+        )
+        employees_economic = find_indicator(
+            statement,
+            ["Efectivul de personal privind activitatile economice"],
+        )
+        personnel_values = [
+            value
+            for value in (
+                indicator_number(employees_nonprofit),
+                indicator_number(employees_economic),
+            )
+            if value is not None
+        ]
+        employees_total = sum(personnel_values) if personnel_values else None
+
         rows.append({
             "year": year,
             "revenueOrTurnover": revenue,
             "expenses": expenses,
             "profitOrSurplus": profit,
             "lossOrDeficit": loss,
-            "employees": employees,
+            "employeeAverage": employee_average,
+            "employeesNonProfit": employees_nonprofit,
+            "employeesEconomic": employees_economic,
+            "employeesTotal": {
+                "value": employees_total,
+                "derivedFrom": [
+                    item.get("code")
+                    for item in (employees_nonprofit, employees_economic)
+                    if item is not None
+                ],
+            } if employees_total is not None else None,
         })
     return rows
 
@@ -219,6 +270,9 @@ def access_plan(entity_type: str, policy: dict[str, Any]) -> dict[str, Any]:
     elif entity_type == "NGO":
         plan["extendedPublic"].append("MJ_NGO_REGISTER")
         plan["notes"].append("Registrul ONG public are set redus; conducerea curenta nu se inventeaza daca nu este publicata.")
+    elif entity_type == "CHAMBER_OF_COMMERCE":
+        plan["authorised"] = ["ONRC_RECOM"]
+        plan["notes"].append("Camera de comert nu are model de actionariat/asociati de tip societate. ONRC poate completa reprezentarea si istoricul registral; conducerea trebuie reconciliata cu sursele statutare oficiale ale camerei.")
     plan["capabilities"] = {
         sid: {
             "access": cfg.get("access"),
@@ -229,6 +283,36 @@ def access_plan(entity_type: str, policy: dict[str, Any]) -> dict[str, Any]:
         if sid in set(plan["core"] + plan["extendedPublic"] + plan["authorised"])
     }
     return plan
+
+
+def governance_stub(entity_type: str) -> dict[str, Any]:
+    if entity_type == "COMMERCIAL":
+        return {
+            "shareholdersOrAssociates": None,
+            "administratorsOrLegalRepresentatives": None,
+            "beneficialOwners": None,
+            "status": "AUTHORISED_SOURCE_REQUIRED",
+        }
+    if entity_type == "NGO":
+        return {
+            "foundersOrMembers": None,
+            "governingBoardOrLegalRepresentatives": None,
+            "beneficialOwners": None,
+            "status": "PUBLIC_REDUCED_OR_REQUEST_REQUIRED",
+        }
+    if entity_type == "CHAMBER_OF_COMMERCE":
+        return {
+            "shareholdersOrAssociates": "NOT_APPLICABLE",
+            "administratorsOrLegalRepresentatives": None,
+            "beneficialOwners": "NOT_APPLICABLE_AS_SHAREHOLDER_MODEL",
+            "status": "STATUTORY_SOURCE_REQUIRED",
+        }
+    return {
+        "shareholdersOrAssociates": None,
+        "administratorsOrLegalRepresentatives": None,
+        "beneficialOwners": None,
+        "status": "NOT_RESOLVED",
+    }
 
 
 def build_profile(
@@ -285,7 +369,7 @@ def build_profile(
 
     entity = (general or {}).get("entity") or {}
     profile = {
-        "schemaVersion": "1.0",
+        "schemaVersion": "1.1",
         "generatedAt": iso(now),
         "cui": cui,
         "status": "UNAVAILABLE" if len(unavailable) == 2 else ("STALE_CACHE" if stale_count and not live_count else ("PARTIAL" if unavailable else "OK")),
@@ -309,12 +393,7 @@ def build_profile(
             "statements": (financials or {}).get("statements", []),
             "errors": (financials or {}).get("errors", []),
         },
-        "governance": {
-            "shareholdersOrAssociates": None,
-            "administratorsOrLegalRepresentatives": None,
-            "beneficialOwners": None,
-            "status": "AUTHORISED_SOURCE_REQUIRED" if entity_type == "COMMERCIAL" else ("PUBLIC_REDUCED_OR_REQUEST_REQUIRED" if entity_type == "NGO" else "NOT_RESOLVED"),
-        },
+        "governance": governance_stub(entity_type),
         "accessPlan": access_plan(entity_type, policy),
         "sourceStatus": statuses,
         "fieldSources": {
@@ -325,6 +404,7 @@ def build_profile(
             "governance.commercial": "ONRC_RECOM",
             "governance.beneficialOwners": "ONRC_RBR",
             "governance.ngo": "MJ_NGO_REGISTER",
+            "governance.chamber": "ONRC_RECOM_AND_STATUTORY_OFFICIAL_SOURCES",
         },
         "cache": {
             "path": str(path),
