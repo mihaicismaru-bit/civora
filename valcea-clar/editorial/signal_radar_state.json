@@ -2,13 +2,13 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_SIGNAL_RADAR_STATE_V1",
   "instance_id": "valcea",
-  "observed_at": "2026-08-19T14:56:58+03:00",
+  "observed_at": "2026-08-19T17:07:29+03:00",
   "publication_authority": "NONE",
   "health": "PASS",
   "source_count": 14,
   "sources_ok": 12,
-  "current_signal_count": 27,
-  "today_signal_count": 17,
+  "current_signal_count": 32,
+  "today_signal_count": 21,
   "observations": [
     {
       "seed_id": "press-curierul-de-ramnic",
@@ -28,7 +28,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-18T12:30:56+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-19T14:56:58+03:00",
+          "observed_at": "2026-08-19T17:07:29+03:00",
           "verification_route_id": "apavil_employment",
           "verification_targets": [
             {
@@ -122,7 +122,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-08-19T14:56:58+03:00",
+          "observed_at": "2026-08-19T17:07:29+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -142,7 +142,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-08-19T14:56:58+03:00",
+          "observed_at": "2026-08-19T17:07:29+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -176,7 +176,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-19T12:56:37+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-19T14:56:58+03:00",
+          "observed_at": "2026-08-19T17:07:29+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -196,7 +196,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-18T22:06:52+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-19T14:56:58+03:00",
+          "observed_at": "2026-08-19T17:07:29+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -254,7 +254,66 @@
       "family": "LOCAL_PRESS",
       "status": "PASS",
       "error": null,
-      "signals": [],
+      "signals": [
+        {
+          "signal_id": "5e6a347c3f172d6a7aac2975",
+          "signal_title": "Ultima oră 59 de minute in urma Horezu marchează 539 de ani de istorie prin trei zile dedicate comunității Horezu, la 539 de ani de la prima atestare documentară Orașul Horezu se pregătește pentru trei zile de sărbătoare dedicate...",
+          "signal_url": "https://www.primplanpress.ro/horezu-marcheaza-539-de-ani-de-istorie-prin-trei-zile-dedicate-comunitatii/",
+          "signal_publisher": "Primplan Press",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-19T16:08:29+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-08-19T17:07:29+03:00",
+          "verification_route_id": "horezu_administration",
+          "verification_targets": [
+            {
+              "ref_type": "news_source_id",
+              "id": "primaria-horezu-anunturi"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-primplan"
+        },
+        {
+          "signal_id": "0dbc674a7143a3b238535f9b",
+          "signal_title": "Ultima oră 22 de ore in urma Microbuze electrice pentru elevii din Vâlcea: 20 de primării le-au primit deja, alte 5 sunt incluse în etapa din august",
+          "signal_url": "https://www.primplanpress.ro/microbuze-electrice-pentru-elevii-din-valcea-20-de-primarii-le-au-primit-deja-alte-5-sunt-incluse-in-etapa-din-august/",
+          "signal_publisher": "Primplan Press",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-18T18:50:17+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-08-19T17:07:29+03:00",
+          "verification_route_id": "utilities",
+          "verification_targets": [
+            {
+              "ref_type": "news_source_id",
+              "id": "apavil-comunicate"
+            },
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "apavil-opriri-programate"
+            },
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "cet-govora-termoficare-advisories"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-primplan"
+        }
+      ],
       "final_url": "https://www.primplanpress.ro/",
       "links_examined": 14,
       "hygiene_dropped_count": 0,
@@ -278,7 +337,7 @@
           "signal_sensitive": true,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-08-19T14:56:58+03:00",
+          "observed_at": "2026-08-19T17:07:29+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -298,7 +357,7 @@
           "signal_sensitive": true,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-08-19T14:56:58+03:00",
+          "observed_at": "2026-08-19T17:07:29+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -350,7 +409,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-19T13:40:31+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-19T14:56:58+03:00",
+          "observed_at": "2026-08-19T17:07:29+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -375,7 +434,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-18T10:35:07+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-19T14:56:58+03:00",
+          "observed_at": "2026-08-19T17:07:29+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -400,7 +459,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-18T08:10:39+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-19T14:56:58+03:00",
+          "observed_at": "2026-08-19T17:07:29+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -439,7 +498,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-19T14:14:46+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-19T14:56:58+03:00",
+          "observed_at": "2026-08-19T17:07:29+03:00",
           "verification_route_id": "utilities",
           "verification_targets": [
             {
@@ -472,7 +531,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-19T04:49:36+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-19T14:56:58+03:00",
+          "observed_at": "2026-08-19T17:07:29+03:00",
           "verification_route_id": "administration_projects",
           "verification_targets": [
             {
@@ -505,7 +564,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-19T04:45:25+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-19T14:56:58+03:00",
+          "observed_at": "2026-08-19T17:07:29+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -525,7 +584,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-19T04:43:06+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-19T14:56:58+03:00",
+          "observed_at": "2026-08-19T17:07:29+03:00",
           "verification_route_id": "administration_projects",
           "verification_targets": [
             {
@@ -558,7 +617,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-19T04:40:47+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-19T14:56:58+03:00",
+          "observed_at": "2026-08-19T17:07:29+03:00",
           "verification_route_id": "administration_projects",
           "verification_targets": [
             {
@@ -591,7 +650,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-19T04:36:56+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-19T14:56:58+03:00",
+          "observed_at": "2026-08-19T17:07:29+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -611,7 +670,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-19T04:19:21+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-19T14:56:58+03:00",
+          "observed_at": "2026-08-19T17:07:29+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -631,7 +690,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-19T04:15:11+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-19T14:56:58+03:00",
+          "observed_at": "2026-08-19T17:07:29+03:00",
           "verification_route_id": "education",
           "verification_targets": [
             {
@@ -665,6 +724,26 @@
       "error": null,
       "signals": [
         {
+          "signal_id": "431960b6d9ecb6ec25d9a993",
+          "signal_title": "VIDEO Autostrada Sibiu–Pitești avansează pe Valea Oltului: 19,3 kilometri de șantier, patru tuneluri și 25 de viaducte",
+          "signal_url": "https://evenimentvalcean.ro/video-autostrada-sibiu-pitesti-avanseaza-pe-valea-oltului-193-kilometri-de-santier-patru-tuneluri-si-25-de-viaducte/",
+          "signal_publisher": "Eveniment Vâlcean",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-19T16:15:10+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-08-19T17:07:29+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-eveniment-valcean"
+        },
+        {
           "signal_id": "650243aae22a873ba383dd84",
           "signal_title": "Transalpina, în topul celor mai spectaculoase șosele din Europa. Drumul din Vâlcea urcă pe locul 5",
           "signal_url": "https://evenimentvalcean.ro/transalpina-in-topul-celor-mai-spectaculoase-sosele-din-europa-drumul-din-valcea-urca-pe-locul-5/",
@@ -674,7 +753,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-18T08:17:37+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-19T14:56:58+03:00",
+          "observed_at": "2026-08-19T17:07:29+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -694,7 +773,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-19T13:19:03+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-19T14:56:58+03:00",
+          "observed_at": "2026-08-19T17:07:29+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -714,7 +793,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-18T08:08:10+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-19T14:56:58+03:00",
+          "observed_at": "2026-08-19T17:07:29+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -739,6 +818,51 @@
       "error": null,
       "signals": [
         {
+          "signal_id": "561c53da2ae10ecca8453e79",
+          "signal_title": "ALERTĂ! Explozie într-o gospodărie din Vâlcea. Două victime…",
+          "signal_url": "https://seintamplainvalcea.ro/2026/08/19/alerta-explozie-intr-o-gospodarie-din-valcea-doua-victime/",
+          "signal_publisher": "Se întâmplă în Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-19T16:11:49+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-08-19T17:07:29+03:00",
+          "verification_route_id": "police_public_safety",
+          "verification_targets": [
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "ipj-valcea-stiri"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-se-intampla-in-valcea"
+        },
+        {
+          "signal_id": "167da886c016f13578cec80e",
+          "signal_title": "FOTO. Fânarul, vegetația uscată și alte anexe au luat foc într-o gospodărie din Berbești",
+          "signal_url": "https://seintamplainvalcea.ro/2026/08/19/foto-fanarul-vegetatia-uscata-si-alte-anexe-au-luat-foc-intr-o-gospodarie-din-berbesti/",
+          "signal_publisher": "Se întâmplă în Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-19T15:26:23+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-08-19T17:07:29+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-se-intampla-in-valcea"
+        },
+        {
           "signal_id": "6a1c875df50e19cd5509e6f6",
           "signal_title": "“Hai că murim… haaaaai…”. Reacția lui Constantin Rădulescu la zvonurile despre o nouă majoritate parlamentară: mesajul care spune multe despre starea de spirit din teritoriu",
           "signal_url": "https://seintamplainvalcea.ro/2026/08/19/hai-ca-murim-haaaaai-reactia-lui-constantin-radulescu-la-zvonurile-despre-o-noua-majoritate-parlamentara-mesajul-care-spune-multe-despre-starea-de-spirit-din-teri/",
@@ -748,7 +872,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-19T14:16:03+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-19T14:56:58+03:00",
+          "observed_at": "2026-08-19T17:07:29+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -768,7 +892,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-19T13:29:02+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-19T14:56:58+03:00",
+          "observed_at": "2026-08-19T17:07:29+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -793,7 +917,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-19T11:54:44+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-19T14:56:58+03:00",
+          "observed_at": "2026-08-19T17:07:29+03:00",
           "verification_route_id": "administration_projects",
           "verification_targets": [
             {
@@ -817,26 +941,6 @@
           "signal_seed_id": "signal-se-intampla-in-valcea"
         },
         {
-          "signal_id": "de2480703f28306d4dc66189",
-          "signal_title": "Patru tuia au încins spiritele la Râmnicu Vâlcea. Primarul Gutău îl face praf pe Vicențiu Mocanu",
-          "signal_url": "https://seintamplainvalcea.ro/2026/08/19/patru-tuia-au-incins-spiritele-la-ramnicu-valcea-primarul-gutau-il-face-praf-pe-vicentiu-mocanu/",
-          "signal_publisher": "Se întâmplă în Vâlcea",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-08-19T11:29:51+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-19T14:56:58+03:00",
-          "verification_route_id": "general_local_signal",
-          "verification_targets": [],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "signal-se-intampla-in-valcea"
-        },
-        {
           "signal_id": "b83d8c49b09e0dd2870e5074",
           "signal_title": "FOTO – Gospodărie distrusă de flăcări, noaptea trecută, într-o comună din Vâlcea",
           "signal_url": "https://seintamplainvalcea.ro/2026/08/19/foto-gospodarie-distrusa-de-flacari-noaptea-trecuta-intr-o-comuna-din-valcea/",
@@ -846,7 +950,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-19T08:35:35+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-19T14:56:58+03:00",
+          "observed_at": "2026-08-19T17:07:29+03:00",
           "verification_route_id": "fire_rescue_alert",
           "verification_targets": [
             {
@@ -879,7 +983,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-18T12:03:39+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-19T14:56:58+03:00",
+          "observed_at": "2026-08-19T17:07:29+03:00",
           "verification_route_id": "fire_rescue_alert",
           "verification_targets": [
             {
@@ -895,6 +999,26 @@
               "id": "inhga-avertizari-hidrologice-valcea"
             }
           ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-se-intampla-in-valcea"
+        },
+        {
+          "signal_id": "712ddef7cfb604ef9d748874",
+          "signal_title": "ANAF a descoperit o fraudă de peste 26 de milioane de lei cu mașini second-hand",
+          "signal_url": "https://seintamplainvalcea.ro/2026/08/18/anaf-a-descoperit-o-frauda-de-peste-26-de-milioane-de-lei-cu-masini-second-hand/",
+          "signal_publisher": "Se întâmplă în Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-18T17:32:48+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-08-19T17:07:29+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
           "required_authority": "T1_OR_T1B_PRIMARY",
           "publication_authority": "NONE",
