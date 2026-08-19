@@ -5,5 +5,33 @@
   "migration": {
     "status": "NONE"
   },
-  "sources": []
+  "sources": [
+    {
+      "source_id": "neutral-feed",
+      "adapter": "RSS_ATOM",
+      "role": "DISCOVERY",
+      "url": "https://news.example.test/feed.xml",
+      "enabled": true,
+      "max_items": 100,
+      "config": {}
+    },
+    {
+      "source_id": "neutral-primary-api",
+      "adapter": "JSON_API",
+      "role": "PRIMARY",
+      "url": "https://authority.example.test/api/notices",
+      "enabled": true,
+      "max_items": 100,
+      "config": {
+        "item_path": "results",
+        "fields": {
+          "id": "id",
+          "url": "url",
+          "title": "title",
+          "published_at": "published_at",
+          "summary": "summary"
+        }
+      }
+    }
+  ]
 }
