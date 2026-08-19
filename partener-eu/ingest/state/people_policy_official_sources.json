@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-08-19T18:39:23Z",
+  "generatedAt": "2026-08-19T19:24:54Z",
   "policy": {
     "directOfficialOnly": true,
     "generalPressExcludedAsAuthority": true,
@@ -13,7 +13,9 @@
     "genericListingRowsCannotBecomePersonSignals": true,
     "personSignalsRequireVerifiedRoleSnapshot": true,
     "administrativeFactsNeverPromotedFromSignals": true,
-    "historyDeduplicatedByFingerprint": true,
+    "historyDeduplicatedByFingerprint": false,
+    "historyDeduplicatedByLogicalSignalIdentity": true,
+    "sourceObservationVersionsPreserved": true,
     "legacyUnverifiedSignalsQuarantined": true,
     "canonicalLinkRequiresExplicitCodeMatch": true,
     "sourceHealthRequiresArticleFetchProofWhenCandidatesExist": true,
@@ -32,7 +34,7 @@
       "url": "https://gov.ro/ro/stiri",
       "tier": "T1_DIRECT_OFFICIAL",
       "status": "SOURCE_UNAVAILABLE_HISTORY_PRESERVED",
-      "observedAt": "2026-08-19T18:39:23Z",
+      "observedAt": "2026-08-19T19:24:54Z",
       "error": "<urlopen error timed out>",
       "failClosed": true
     },
@@ -42,7 +44,7 @@
       "url": "https://mfe.gov.ro/",
       "tier": "T1_DIRECT_OFFICIAL",
       "status": "SOURCE_UNAVAILABLE_HISTORY_PRESERVED",
-      "observedAt": "2026-08-19T18:39:23Z",
+      "observedAt": "2026-08-19T19:24:54Z",
       "error": "<urlopen error [Errno 101] Network is unreachable>",
       "failClosed": true
     },
@@ -52,7 +54,7 @@
       "url": "https://romania.representation.ec.europa.eu/stiri-evenimente-si-resurse-pentru-presa_ro",
       "tier": "T1_DIRECT_OFFICIAL_EU",
       "status": "OK",
-      "observedAt": "2026-08-19T18:39:23Z",
+      "observedAt": "2026-08-19T19:24:54Z",
       "listingFetched": true,
       "candidateLinks": 6,
       "articleFetchAttempts": 6,
@@ -69,7 +71,7 @@
       "url": "https://www.ms.gov.ro/ro/centrul-de-presa/",
       "tier": "T1_DIRECT_OFFICIAL",
       "status": "SOURCE_UNAVAILABLE_HISTORY_PRESERVED",
-      "observedAt": "2026-08-19T18:39:23Z",
+      "observedAt": "2026-08-19T19:24:54Z",
       "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'www.ms.gov.ro'. (_ssl.c:1010)>",
       "failClosed": true
     },
@@ -79,7 +81,7 @@
       "url": "https://www.afir.ro/comunicate/",
       "tier": "T1_DIRECT_OFFICIAL",
       "status": "OK",
-      "observedAt": "2026-08-19T18:39:23Z",
+      "observedAt": "2026-08-19T19:24:54Z",
       "listingFetched": true,
       "candidateLinks": 13,
       "articleFetchAttempts": 13,
@@ -96,7 +98,7 @@
       "url": "https://www.pr2021-2027.adroltenia.ro/news_all.php",
       "tier": "T1_DIRECT_MANAGING_AUTHORITY",
       "status": "OK",
-      "observedAt": "2026-08-19T18:39:23Z",
+      "observedAt": "2026-08-19T19:24:54Z",
       "listingFetched": true,
       "candidateLinks": 13,
       "articleFetchAttempts": 13,
@@ -113,7 +115,7 @@
       "url": "https://www.adrcentru.ro/comunicare-cat-adrc/evenimente-si-comunicate/",
       "tier": "T1_DIRECT_MANAGING_AUTHORITY",
       "status": "OK",
-      "observedAt": "2026-08-19T18:39:23Z",
+      "observedAt": "2026-08-19T19:24:54Z",
       "listingFetched": true,
       "candidateLinks": 13,
       "articleFetchAttempts": 13,
@@ -130,7 +132,7 @@
       "url": "https://www.adrbi.ro/comunicare/",
       "tier": "T1_DIRECT_MANAGING_AUTHORITY",
       "status": "OK",
-      "observedAt": "2026-08-19T18:39:23Z",
+      "observedAt": "2026-08-19T19:24:54Z",
       "listingFetched": true,
       "candidateLinks": 13,
       "articleFetchAttempts": 13,
@@ -147,7 +149,7 @@
       "url": "https://adrvest.ro/noutati/",
       "tier": "T1_DIRECT_MANAGING_AUTHORITY",
       "status": "OK",
-      "observedAt": "2026-08-19T18:39:23Z",
+      "observedAt": "2026-08-19T19:24:54Z",
       "listingFetched": true,
       "candidateLinks": 13,
       "articleFetchAttempts": 13,
@@ -164,7 +166,7 @@
       "url": "https://newadrnv.regionordvest.ro/noutati/",
       "tier": "T1_DIRECT_MANAGING_AUTHORITY",
       "status": "OK",
-      "observedAt": "2026-08-19T18:39:23Z",
+      "observedAt": "2026-08-19T19:24:54Z",
       "listingFetched": true,
       "candidateLinks": 13,
       "articleFetchAttempts": 13,
@@ -181,7 +183,7 @@
       "url": "https://www.adrse.ro/ADR/Anunturi",
       "tier": "T1_DIRECT_MANAGING_AUTHORITY",
       "status": "OK",
-      "observedAt": "2026-08-19T18:39:23Z",
+      "observedAt": "2026-08-19T19:24:54Z",
       "listingFetched": true,
       "candidateLinks": 13,
       "articleFetchAttempts": 13,
@@ -198,7 +200,7 @@
       "url": "https://2021-2027.adrmuntenia.ro/stiri",
       "tier": "T1_DIRECT_MANAGING_AUTHORITY",
       "status": "OK",
-      "observedAt": "2026-08-19T18:39:23Z",
+      "observedAt": "2026-08-19T19:24:54Z",
       "listingFetched": true,
       "candidateLinks": 13,
       "articleFetchAttempts": 13,
@@ -215,7 +217,7 @@
       "url": "https://regionordest.ro/",
       "tier": "T1_DIRECT_MANAGING_AUTHORITY",
       "status": "SOURCE_UNAVAILABLE_HISTORY_PRESERVED",
-      "observedAt": "2026-08-19T18:39:23Z",
+      "observedAt": "2026-08-19T19:24:54Z",
       "error": "HTTP Error 403: Forbidden",
       "failClosed": true
     },
@@ -225,7 +227,7 @@
       "url": "https://fed.mai.gov.ro/in/apeluri/",
       "tier": "T1_DIRECT_MANAGING_AUTHORITY",
       "status": "OK",
-      "observedAt": "2026-08-19T18:39:23Z",
+      "observedAt": "2026-08-19T19:24:54Z",
       "listingFetched": true,
       "candidateLinks": 12,
       "articleFetchAttempts": 12,
@@ -242,7 +244,7 @@
       "url": "https://www.adr.gov.ro/articole",
       "tier": "T1_DIRECT_OFFICIAL",
       "status": "OK",
-      "observedAt": "2026-08-19T18:39:23Z",
+      "observedAt": "2026-08-19T19:24:54Z",
       "listingFetched": true,
       "candidateLinks": 11,
       "articleFetchAttempts": 11,
@@ -259,14 +261,14 @@
       "url": "https://www.research.gov.ro/",
       "tier": "T1_DIRECT_OFFICIAL",
       "status": "SOURCE_UNAVAILABLE_HISTORY_PRESERVED",
-      "observedAt": "2026-08-19T18:39:23Z",
+      "observedAt": "2026-08-19T19:24:54Z",
       "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1010)>",
       "failClosed": true
     }
   ],
   "items": [
     {
-      "id": "official-0471d4a30edd6ac90a",
+      "id": "official-signal-af9b3a5a89d4718092",
       "personId": "stelian-baragan",
       "person": "Stelian Bărăgan",
       "role": "Director general",
@@ -327,10 +329,26 @@
       "officialIngested": true,
       "observedAt": "2026-08-19T18:39:23Z",
       "sourceId": "ADR_SV_OLTENIA_NEWS",
-      "fingerprint": "0471d4a30edd6ac90a8f4a43895bb48655f62155436f3721a5a0c57c6669f22c"
+      "fingerprint": "0471d4a30edd6ac90a8f4a43895bb48655f62155436f3721a5a0c57c6669f22c",
+      "logicalSignalKey": "af9b3a5a89d471809297a427eca2985ec37b9f5a3975e57826d7f5b5a4101e08",
+      "legacyIds": [
+        "official-0471d4a30edd6ac90a"
+      ],
+      "observations": [
+        {
+          "fingerprint": "0471d4a30edd6ac90a8f4a43895bb48655f62155436f3721a5a0c57c6669f22c",
+          "contentHash": "8b46edd8fb5fa9c834cc501b8aa9e339147ea1ccc56e7f59616b56f41473cafc",
+          "firstObservedAt": "2026-08-19T18:39:23Z",
+          "lastObservedAt": "2026-08-19T19:24:54Z",
+          "observationCount": 2
+        }
+      ],
+      "firstObservedAt": "2026-08-19T18:39:23Z",
+      "lastObservedAt": "2026-08-19T19:24:54Z",
+      "observationCount": 2
     },
     {
-      "id": "official-97b6487f37224fcf1f",
+      "id": "official-signal-a581ddb9bd40742aaf",
       "personId": "stelian-baragan",
       "person": "Stelian Bărăgan",
       "role": "Director general",
@@ -391,10 +409,26 @@
       "officialIngested": true,
       "observedAt": "2026-08-19T18:39:23Z",
       "sourceId": "ADR_SV_OLTENIA_NEWS",
-      "fingerprint": "97b6487f37224fcf1fca9f3ff8c044939e5bb347de203f7af06cc4f12b795f3f"
+      "fingerprint": "97b6487f37224fcf1fca9f3ff8c044939e5bb347de203f7af06cc4f12b795f3f",
+      "logicalSignalKey": "a581ddb9bd40742aaf5fb4499f013ca511babe3b077c7805af8a49198f1c2c4a",
+      "legacyIds": [
+        "official-97b6487f37224fcf1f"
+      ],
+      "observations": [
+        {
+          "fingerprint": "97b6487f37224fcf1fca9f3ff8c044939e5bb347de203f7af06cc4f12b795f3f",
+          "contentHash": "492dd6ddc72bb78c0b0ea2a8424bc76b19169838c6216d19140aa102f0a78e02",
+          "firstObservedAt": "2026-08-19T18:39:23Z",
+          "lastObservedAt": "2026-08-19T19:24:54Z",
+          "observationCount": 2
+        }
+      ],
+      "firstObservedAt": "2026-08-19T18:39:23Z",
+      "lastObservedAt": "2026-08-19T19:24:54Z",
+      "observationCount": 2
     },
     {
-      "id": "official-e775589de18cb3d1c5",
+      "id": "official-signal-4cea03f7c7163e28c6",
       "personId": "stelian-baragan",
       "person": "Stelian Bărăgan",
       "role": "Director general",
@@ -455,10 +489,26 @@
       "officialIngested": true,
       "observedAt": "2026-08-19T18:39:23Z",
       "sourceId": "ADR_SV_OLTENIA_NEWS",
-      "fingerprint": "e775589de18cb3d1c5e12566127e07d96f32dd52ecda59132263a55acc290ba1"
+      "fingerprint": "e775589de18cb3d1c5e12566127e07d96f32dd52ecda59132263a55acc290ba1",
+      "logicalSignalKey": "4cea03f7c7163e28c6bdd8fb7cd1bcbe8c8f84813bf2c190263eef3d9c2bd4d0",
+      "legacyIds": [
+        "official-e775589de18cb3d1c5"
+      ],
+      "observations": [
+        {
+          "fingerprint": "e775589de18cb3d1c5e12566127e07d96f32dd52ecda59132263a55acc290ba1",
+          "contentHash": "ff331f6e8e4dc3866b5e2e153e82d56381ef33c27815f5ff4031adb3ae80758d",
+          "firstObservedAt": "2026-08-19T18:39:23Z",
+          "lastObservedAt": "2026-08-19T19:24:54Z",
+          "observationCount": 2
+        }
+      ],
+      "firstObservedAt": "2026-08-19T18:39:23Z",
+      "lastObservedAt": "2026-08-19T19:24:54Z",
+      "observationCount": 2
     },
     {
-      "id": "official-56eba1d37a0c8d7e90",
+      "id": "official-signal-d13fe07daad5cac0bb",
       "personId": "sorin-maxim",
       "person": "Sorin Maxim",
       "role": "Director general",
@@ -519,10 +569,26 @@
       "officialIngested": true,
       "observedAt": "2026-08-19T17:33:31Z",
       "sourceId": "ADR_CENTRU_NEWS",
-      "fingerprint": "56eba1d37a0c8d7e90f553bd0e62706b463ebda808c71858088045b9264bcc2f"
+      "fingerprint": "56eba1d37a0c8d7e90f553bd0e62706b463ebda808c71858088045b9264bcc2f",
+      "logicalSignalKey": "d13fe07daad5cac0bbbaafb22494c56ecf7128d33c3de6584a2debd338f5f82b",
+      "legacyIds": [
+        "official-56eba1d37a0c8d7e90"
+      ],
+      "observations": [
+        {
+          "fingerprint": "56eba1d37a0c8d7e90f553bd0e62706b463ebda808c71858088045b9264bcc2f",
+          "contentHash": "84a12e718793cf9a7c231a7b845b3c21f08a52e6981d7d0e1b393e981534fae2",
+          "firstObservedAt": "2026-08-19T17:33:31Z",
+          "lastObservedAt": "2026-08-19T17:33:31Z",
+          "observationCount": 1
+        }
+      ],
+      "firstObservedAt": "2026-08-19T17:33:31Z",
+      "lastObservedAt": "2026-08-19T17:33:31Z",
+      "observationCount": 1
     },
     {
-      "id": "official-6296149430320c6d03",
+      "id": "official-signal-d4c0051469f2733a95",
       "personId": "liviu-gabriel-musat",
       "person": "Liviu-Gabriel Mușat",
       "role": "Director general",
@@ -583,74 +649,34 @@
       "officialIngested": true,
       "observedAt": "2026-08-19T18:39:23Z",
       "sourceId": "ADR_SUD_MUNTENIA_NEWS",
-      "fingerprint": "6296149430320c6d03a52ccf4e0a42468e2aaab0f811d18530b2b97d4f926e28"
-    },
-    {
-      "id": "official-de03d3ecff59492533",
-      "personId": "liviu-gabriel-musat",
-      "person": "Liviu-Gabriel Mușat",
-      "role": "Director general",
-      "institution": "Agenția pentru Dezvoltare Regională Sud-Muntenia",
-      "roleVerification": {
-        "role": "Director general",
-        "institution": "Agenția pentru Dezvoltare Regională Sud-Muntenia",
-        "verifiedAt": "2026-08-19",
-        "sourceUrl": "https://2021-2027.adrmuntenia.ro/agricultura-industria-alimentara-si-bioeconomia-au-fost-in-centrul-ultimei-reuni/news/653",
-        "sourceTier": "T1_DIRECT_OFFICIAL"
-      },
-      "date": "2026-08-12",
-      "type": "FUNDING_COMMITMENT",
-      "signalKind": "STATEMENT_SIGNAL",
-      "topic": "ADR Sud-Muntenia / AM Programul Regional Sud-Muntenia",
-      "headline": "Oltenița se modernizează cu fonduri europene: şase proiecte, peste 75,4 de milioane de lei",
-      "statement": "Liviu-Gabriel Mușat, directorul general al ADR Sud-Muntenia, a subliniat importanța acestor investiții pentru dezvoltarea comunității locale: „ Semnarea acestor şase contracte de finanțare reprezintă un pas important pentru dezvoltarea Municipiului Oltenița și demonstrează, încă o dată, impactul concret pe care fondurile europene îl au asupra comunităților din Sud-Muntenia.",
-      "statementExtraction": {
-        "status": "ACTOR_SPEECH_FUNDING_BOUND",
-        "scope": "SENTENCE",
-        "actorAlias": "Liviu-Gabriel Musat",
-        "signalCue": "a subliniat",
-        "fundingCue": "finantare"
-      },
-      "officialFact": "Niciun efect administrativ nu este promovat din această declarație. Orice termen, buget, eligibilitate, deschidere sau modificare de apel cere dovadă T1/T1B separată în dosarul canonic.",
-      "administrativeFact": {
-        "status": "UNCONFIRMED_FROM_SIGNAL",
-        "failClosed": true
-      },
-      "analysis": "Semnalul este relevant pentru monitorizare; impactul operațional se stabilește numai după legarea de documentul oficial aplicabil.",
-      "watch": "Ghidul, ordinul, corrigendumul, lista de rezultate sau actul administrativ care poate materializa semnalul.",
-      "audiences": [
-        "Beneficiari",
-        "Consultanți"
+      "fingerprint": "6296149430320c6d03a52ccf4e0a42468e2aaab0f811d18530b2b97d4f926e28",
+      "logicalSignalKey": "d4c0051469f2733a95d8c3fbbfe1515450fc48ee0e2a2d620b3c7921a0f78401",
+      "legacyIds": [
+        "official-6296149430320c6d03",
+        "official-de03d3ecff59492533"
       ],
-      "canonicalLink": {
-        "status": "UNRESOLVED"
-      },
-      "sources": [
+      "observations": [
         {
-          "label": "ADR Sud-Muntenia",
-          "url": "https://2021-2027.adrmuntenia.ro/oltenita-se-modernizeaza-cu-fonduri-europene-sase-proiecte-peste-754-de-milioane/news/679",
-          "tier": "T1_DIRECT_MANAGING_AUTHORITY"
+          "fingerprint": "de03d3ecff59492533338b0cd8b84771beef9cec1d4a1b0eb98fedaa38f20b01",
+          "contentHash": "0aceec4fa10ad442803c41965d71a02f9a4f8344ca8d827be3eb126a3eab4e84",
+          "firstObservedAt": "2026-08-19T18:35:05Z",
+          "lastObservedAt": "2026-08-19T19:24:54Z",
+          "observationCount": 2
+        },
+        {
+          "fingerprint": "6296149430320c6d03a52ccf4e0a42468e2aaab0f811d18530b2b97d4f926e28",
+          "contentHash": "8130831db02ec6b39532f14afa1904596aeb77d58065b5776daa86fa7692e2cf",
+          "firstObservedAt": "2026-08-19T18:39:23Z",
+          "lastObservedAt": "2026-08-19T18:39:23Z",
+          "observationCount": 1
         }
       ],
-      "sourceSnapshot": {
-        "sourceId": "ADR_SUD_MUNTENIA_NEWS",
-        "publisher": "ADR Sud-Muntenia",
-        "tier": "T1_DIRECT_MANAGING_AUTHORITY",
-        "url": "https://2021-2027.adrmuntenia.ro/oltenita-se-modernizeaza-cu-fonduri-europene-sase-proiecte-peste-754-de-milioane/news/679",
-        "observedAt": "2026-08-19T18:35:05Z",
-        "contentHash": "0aceec4fa10ad442803c41965d71a02f9a4f8344ca8d827be3eb126a3eab4e84"
-      },
-      "priority": 86,
-      "initials": "LM",
-      "whyItMatters": "Semnal public observat direct pe o sursă oficială; efectul administrativ rămâne separat și fail-closed.",
-      "autoGenerated": true,
-      "officialIngested": true,
-      "observedAt": "2026-08-19T18:35:05Z",
-      "sourceId": "ADR_SUD_MUNTENIA_NEWS",
-      "fingerprint": "de03d3ecff59492533338b0cd8b84771beef9cec1d4a1b0eb98fedaa38f20b01"
+      "firstObservedAt": "2026-08-19T18:35:05Z",
+      "lastObservedAt": "2026-08-19T19:24:54Z",
+      "observationCount": 3
     },
     {
-      "id": "official-08930ab6f5e9b28118",
+      "id": "official-signal-a1e0a65d4b90a95671",
       "personId": "sorin-maxim",
       "person": "Sorin Maxim",
       "role": "Director general",
@@ -711,71 +737,31 @@
       "officialIngested": true,
       "observedAt": "2026-08-19T17:33:31Z",
       "sourceId": "ADR_SUD_MUNTENIA_NEWS",
-      "fingerprint": "08930ab6f5e9b2811899ddbee900450676c6c342054fb7f6cebaf35541bb24f4"
-    },
-    {
-      "id": "official-ee108a4dd679b8de33",
-      "personId": "sorin-maxim",
-      "person": "Sorin Maxim",
-      "role": "Director general",
-      "institution": "Agenția pentru Dezvoltare Regională Vest",
-      "roleVerification": {
-        "role": "Director general",
-        "institution": "Agenția pentru Dezvoltare Regională Vest",
-        "verifiedAt": "2026-08-19",
-        "sourceUrl": "https://adrvest.ro/22-de-startup-uri-au-absolvit-cohorta-2-a-programului-de-pre-accelerare-vest-ventures/",
-        "sourceTier": "T1_DIRECT_OFFICIAL"
-      },
-      "date": "2026-08-05",
-      "type": "PROGRAMME_CHANGE_SIGNAL",
-      "signalKind": "STATEMENT_SIGNAL",
-      "topic": "ADR Sud-Muntenia / AM Programul Regional Sud-Muntenia",
-      "headline": "Instrucțiunea AM PR Sud Muntenia nr. 50/03.08.2026: Reglementări privind contractarea în contextul inoperabilității platformei ANCPI",
-      "statement": "Principalele prevederi: Depunerea unei declarații pe propria răspundere prin care beneficiarul se angajează să transmită documentele cadastrale în termen de maximum 15 zile lucrătoare de la repunerea în funcțiune a platformei ANCPI; Suspendarea plăților: până la depunerea documentelor și confirmarea îndeplinirii condițiilor de eligibilitate, în cadrul proiectelor respective nu vor fi efectuate plăți; Clauză rezolutorie: neîndeplinirea condițiilor de eligibilitate sau netransmiterea documentelor atrage rezilierea contractului și recuperarea finanțării.",
-      "statementExtraction": {
-        "status": "ACTOR_SPEECH_FUNDING_BOUND",
-        "scope": "SENTENCE",
-        "actorAlias": "Maxim",
-        "signalCue": "declara",
-        "fundingCue": "plati"
-      },
-      "officialFact": "Niciun efect administrativ nu este promovat din această declarație. Orice termen, buget, eligibilitate, deschidere sau modificare de apel cere dovadă T1/T1B separată în dosarul canonic.",
-      "administrativeFact": {
-        "status": "UNCONFIRMED_FROM_SIGNAL",
-        "failClosed": true
-      },
-      "analysis": "Semnalul este relevant pentru monitorizare; impactul operațional se stabilește numai după legarea de documentul oficial aplicabil.",
-      "watch": "Ghidul, ordinul, corrigendumul, lista de rezultate sau actul administrativ care poate materializa semnalul.",
-      "audiences": [
-        "Beneficiari",
-        "Consultanți"
+      "fingerprint": "08930ab6f5e9b2811899ddbee900450676c6c342054fb7f6cebaf35541bb24f4",
+      "logicalSignalKey": "a1e0a65d4b90a95671c49b257da4c855eafbff04a4418d4e6f1b3aaaf4f4501b",
+      "legacyIds": [
+        "official-08930ab6f5e9b28118",
+        "official-ee108a4dd679b8de33"
       ],
-      "canonicalLink": {
-        "status": "UNRESOLVED"
-      },
-      "sources": [
+      "observations": [
         {
-          "label": "ADR Sud-Muntenia",
-          "url": "https://2021-2027.adrmuntenia.ro/instructiunea-am-pr-sud-muntenia-nr-5003082026-reglementari-privind-contractarea/news/674",
-          "tier": "T1_DIRECT_MANAGING_AUTHORITY"
+          "fingerprint": "ee108a4dd679b8de33392fc75e16c6f243b706d4a74f73a9c0123517dcb69962",
+          "contentHash": "35ede438b3c357c41337dbef518e594bab6ef3073027d0831546702eea38fc73",
+          "firstObservedAt": "2026-08-19T17:31:18Z",
+          "lastObservedAt": "2026-08-19T17:31:18Z",
+          "observationCount": 1
+        },
+        {
+          "fingerprint": "08930ab6f5e9b2811899ddbee900450676c6c342054fb7f6cebaf35541bb24f4",
+          "contentHash": "1ff83e9746d5facf3cffe66b7908f1bed8094046500e29c829bff3a348d29d87",
+          "firstObservedAt": "2026-08-19T17:33:31Z",
+          "lastObservedAt": "2026-08-19T17:33:31Z",
+          "observationCount": 1
         }
       ],
-      "sourceSnapshot": {
-        "sourceId": "ADR_SUD_MUNTENIA_NEWS",
-        "publisher": "ADR Sud-Muntenia",
-        "tier": "T1_DIRECT_MANAGING_AUTHORITY",
-        "url": "https://2021-2027.adrmuntenia.ro/instructiunea-am-pr-sud-muntenia-nr-5003082026-reglementari-privind-contractarea/news/674",
-        "observedAt": "2026-08-19T17:31:18Z",
-        "contentHash": "35ede438b3c357c41337dbef518e594bab6ef3073027d0831546702eea38fc73"
-      },
-      "priority": 86,
-      "initials": "SM",
-      "whyItMatters": "Semnal public observat direct pe o sursă oficială; efectul administrativ rămâne separat și fail-closed.",
-      "autoGenerated": true,
-      "officialIngested": true,
-      "observedAt": "2026-08-19T17:31:18Z",
-      "sourceId": "ADR_SUD_MUNTENIA_NEWS",
-      "fingerprint": "ee108a4dd679b8de33392fc75e16c6f243b706d4a74f73a9c0123517dcb69962"
+      "firstObservedAt": "2026-08-19T17:31:18Z",
+      "lastObservedAt": "2026-08-19T17:33:31Z",
+      "observationCount": 2
     }
   ],
   "quarantine": [
