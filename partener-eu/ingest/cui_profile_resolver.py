@@ -26,7 +26,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from anaf_company_financials import fetch_series, normalize_cui, parse_years
-from organisation_profile_probe_v2 import anaf_general
+from anaf_company_identity import fetch_identity
 
 HERE = Path(__file__).resolve().parent
 SOURCE_POLICY = HERE / "cui_profile_sources.json"
@@ -249,7 +249,7 @@ def build_profile(
 
     general, st = resolve_source(
         source_id="ANAF_GENERAL",
-        fetcher=lambda: anaf_general(cui, query_date),
+        fetcher=lambda: fetch_identity(cui, query_date),
         ttl_hours=int(policy["sources"]["ANAF_GENERAL"]["refreshHours"]),
         cache=cache,
         now=now,
@@ -297,7 +297,9 @@ def build_profile(
         },
         "fiscal": {
             "vat": (general or {}).get("vat"),
+            "vatOnReceipt": (general or {}).get("vatOnReceipt"),
             "inactive": (general or {}).get("inactive"),
+            "splitVat": (general or {}).get("splitVat"),
             "taxAuthority": entity.get("taxAuthority"),
             "eFactura": entity.get("eFactura"),
         },
