@@ -74,7 +74,13 @@ def generate_primary_research_plan(
         questions.append(item)
 
     population_n = population_snapshot.get("eligible_population_n")
-    strategy = "census_preferred" if isinstance(population_n, int) and population_n <= 1000 else "sampling_plan_required"
+    if not isinstance(population_n, int) or population_n <= 0:
+        strategy = "population_snapshot_required"
+    elif population_n <= 1000:
+        strategy = "census_preferred"
+    else:
+        strategy = "sampling_plan_required"
+
     plan = {
         "schema_version": "nf.primary_research_plan.v0.1",
         "population_snapshot_id": population_snapshot.get("snapshot_id"),
