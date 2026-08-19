@@ -36,7 +36,13 @@ assert 'De ce apare:' in askui
 assert 'Cine poate aplica' in askui
 assert 'Încă neconfirmat' in askui
 assert 'sourceEvidence' in askui
+assert "kind:'OFFICIAL'" in askui
+assert "kind:'PUBLIC_EVIDENCE'" in askui
 assert 'Sursa oficială ↗' in askui
+assert 'Evidență publică ↗' in askui
+assert 'Nu este clasificată T1/T1B' in askui
+assert "if(ev.kind==='OFFICIAL')" in askui
+assert 'provenanceBlock(d)' in askui
 assert 'Proveniență' in askui
 assert 'Deschide dosarul verificat' in askui
 assert 'openDossier(d.id,d.title)' in askui
