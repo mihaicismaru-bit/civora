@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "bridge_id": "PARTENER_P11_TO_EUCONS_E09",
+  "mode": "READ_ONLY",
+  "source": {
+    "product": "PARTENER.EU",
+    "path": "partener-eu/web/p11-public-data.js",
+    "expected_prefix": "window.PARTENER_P11=",
+    "required_integrity_gate": "STRICT_FAIL_CLOSED",
+    "required_policy": {
+      "unverifiedMaterialFactsVisible": false,
+      "verificationProvenanceVisible": true
+    }
+  },
+  "freshness": {
+    "max_age_hours": 72,
+    "future_skew_tolerance_minutes": 15,
+    "stale_behavior": "HOLD_ALL_PUBLICATION",
+    "invalid_time_behavior": "HOLD_ALL_PUBLICATION"
+  },
+  "admission": {
+    "required_publication_state": "PUBLISHABLE",
+    "required_decision": "ALLOW_VERIFIED_FACTS",
+    "allowed_material_fact_classes": [
+      "status",
+      "deadline",
+      "budget",
+      "grant",
+      "beneficiaries",
+      "eligibility",
+      "scoring"
+    ],
+    "open_actionable_requires": ["status", "deadline"],
+    "minimum_verified_evidence": 1
+  },
+  "output": {
+    "schema_version": 1,
+    "retains_non_actionable_verified_records": true,
+    "stale_record_state": "HOLD_STALE_SOURCE",
+    "fresh_record_state": "VERIFIED_AVAILABLE",
+    "source_policy_rejected_state": "SOURCE_POLICY_REJECTED",
+    "source_mutation_allowed": false
+  }
+}
