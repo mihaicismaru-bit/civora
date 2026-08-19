@@ -12,6 +12,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 CHECKS = [
     ("recovery", [sys.executable, str(ROOT / "ops" / "test_recovery.py")]),
     ("frontend", [sys.executable, str(ROOT / "ops" / "test_frontend_regression.py")]),
+    ("ask_v2", [sys.executable, str(ROOT / "ops" / "test_ask_partener_v2.py")]),
     ("p10_policy", [sys.executable, str(ROOT / "ops" / "test_p10_policy_regression.py")]),
     ("afir_policy", [sys.executable, str(ROOT / "ops" / "test_afir_ingest_policy.py")]),
     ("afir_lkg", [sys.executable, str(ROOT / "ops" / "test_afir_lkg.py")]),
@@ -26,6 +27,7 @@ CHECKS = [
     ("p11_projection_replay", [sys.executable, str(ROOT / "p11" / "build_public_projection.py"), "--check"]),
     ("p11_projection", [sys.executable, str(ROOT / "ops" / "test_p11_public_projection.py")]),
     ("app_syntax", ["node", "--check", str(ROOT / "web" / "app.js")]),
+    ("ask_v2_syntax", ["node", "--check", str(ROOT / "web" / "ask-partener-v2.js")]),
     ("adapter_syntax", ["node", "--check", str(ROOT / "web" / "p11-public-adapter.js")]),
     ("projection_syntax", ["node", "--check", str(ROOT / "web" / "p11-public-data.js")]),
 ]
