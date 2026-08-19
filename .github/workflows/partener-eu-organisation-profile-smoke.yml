@@ -5,13 +5,13 @@ on:
     branches:
       - agent/anaf-company-financials
     paths:
-      - 'partener-eu/ingest/organisation_profile_probe.py'
+      - 'partener-eu/ingest/organisation_profile_probe_v2.py'
       - '.github/workflows/partener-eu-organisation-profile-smoke.yml'
   pull_request:
     branches:
       - main
     paths:
-      - 'partener-eu/ingest/organisation_profile_probe.py'
+      - 'partener-eu/ingest/organisation_profile_probe_v2.py'
       - '.github/workflows/partener-eu-organisation-profile-smoke.yml'
   workflow_dispatch:
 
@@ -30,10 +30,10 @@ jobs:
         with:
           python-version: '3.12'
       - name: Compile probe
-        run: python -m py_compile partener-eu/ingest/organisation_profile_probe.py
+        run: python -m py_compile partener-eu/ingest/organisation_profile_probe_v2.py
       - name: Probe CUI 9293117 from official sources
         run: |
-          python partener-eu/ingest/organisation_profile_probe.py \
+          python partener-eu/ingest/organisation_profile_probe_v2.py \
             --cui 9293117 \
             --name 'FUNDATIA ANTREPRENORIAT SOCIAL' \
             --date 2026-08-19
