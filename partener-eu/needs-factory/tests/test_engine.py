@@ -4,7 +4,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from core import engine, pipeline, primary_research
+from core import causal, engine, package as nf_package, pipeline, primary_research, ranking
 
 
 class NeedsFactoryEngineTests(unittest.TestCase):
@@ -179,6 +179,116 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(manifest["run_id"], run.run_id)
         self.assertIn("NF11_ADVERSARIAL_QA", manifest["closed_checkpoints"])
         self.assertTrue(any(event["event"] == "NF_QA_PASSED" for event in manifest["events"]))
+
+
+class RankingTests(unittest.TestCase):
+    def _need(self):
+        return {
+            "id": "N1",
+            "scope": "county",
+            "evidence_ids": ["E1", "E2", "E3"],
+            "confidence": 1.0,
+            "ranking_dimensions": {
+                "magnitude": 0.8,
+                "severity": 0.7,
+                "gap_strength": 0.6,
+                "call_relevance": 1.0,
+            },
+        }
+
+    def test_duplicate_source_does_not_inflate_evidence_count(self):
+        evidence = {
+            "E1": {"tier":"A1","scope":"county","source_url":"https://example/a","territory_fit":1,"population_fit":1,"recency_score":1,"directness":1},
+            "E2": {"tier":"A1","scope":"county","source_url":"https://example/a","territory_fit":1,"population_fit":1,"recency_score":1,"directness":1},
+            "E3": {"tier":"A2","scope":"county","source_url":"https://example/b","territory_fit":1,"population_fit":1,"recency_score":1,"directness":1},
+        }
+        confidence = ranking.evidence_confidence(self._need()["evidence_ids"], evidence, "county")
+        self.assertEqual(confidence["independent_evidence_count"], 2)
+        self.assertLessEqual(confidence["confidence_cap"], 1.0)
+
+    def test_missing_ranking_dimension_blocks_need(self):
+        need = self._need()
+        del need["ranking_dimensions"]["gap_strength"]
+        result = ranking.score_need(need, {})
+        self.assertFalse(result["rankable"])
+        self.assertIn("gap_strength", result["missing_dimensions"])
+
+    def test_evidence_confidence_caps_final_score(self):
+        evidence = {
+            "E1": {"tier":"A1","scope":"county","source_url":"https://example/a","territory_fit":1,"population_fit":1,"recency_score":1,"directness":1},
+            "E2": {"tier":"A2","scope":"county","source_url":"https://example/b","territory_fit":1,"population_fit":1,"recency_score":1,"directness":1},
+            "E3": {"tier":"B","scope":"national","source_url":"https://example/c","territory_fit":0.5,"population_fit":0.5,"recency_score":0.5,"directness":0.5},
+        }
+        result = ranking.score_need(self._need(), evidence)
+        self.assertTrue(result["rankable"])
+        self.assertLess(result["score"], result["substantive_score"])
+        self.assertEqual(result["confidence_used"], result["confidence_cap"])
+
+
+class CausalGraphTests(unittest.TestCase):
+    def _valid_graph(self):
+        return {
+            "nodes": [
+                {"id":"C1","type":"cause"},
+                {"id":"N1","type":"need","priority":True},
+                {"id":"I1","type":"intervention"},
+                {"id":"O1","type":"output"},
+                {"id":"R1","type":"result"},
+                {"id":"IND1","type":"indicator"},
+            ],
+            "edges": [
+                {"source":"C1","target":"N1","relation":"CAUSES","evidence_ids":["E1"]},
+                {"source":"I1","target":"N1","relation":"TARGETS"},
+                {"source":"I1","target":"O1","relation":"PRODUCES"},
+                {"source":"O1","target":"R1","relation":"CONTRIBUTES_TO"},
+                {"source":"R1","target":"IND1","relation":"MEASURED_BY"},
+            ],
+        }
+
+    def test_valid_causal_graph_passes(self):
+        result = causal.validate_causal_graph(self._valid_graph())
+        self.assertTrue(result["valid"])
+
+    def test_causal_claim_without_evidence_fails(self):
+        graph = self._valid_graph()
+        graph["edges"][0].pop("evidence_ids")
+        result = causal.validate_causal_graph(graph)
+        self.assertFalse(result["valid"])
+        self.assertTrue(any(item["failure"] == "causal_edge_without_evidence" for item in result["failures"]))
+
+    def test_cycle_is_detected(self):
+        graph = self._valid_graph()
+        graph["nodes"].append({"id":"EFFECT1","type":"effect"})
+        graph["edges"].extend([
+            {"source":"N1","target":"EFFECT1","relation":"LEADS_TO","evidence_ids":["E2"]},
+            {"source":"EFFECT1","target":"C1","relation":"CAUSES","evidence_ids":["E3"]},
+        ])
+        result = causal.validate_causal_graph(graph)
+        self.assertFalse(result["valid"])
+        self.assertTrue(any(item["failure"] == "causal_graph_cycle" for item in result["failures"]))
+
+
+class NarrativePackTests(unittest.TestCase):
+    def test_package_requires_release_gate(self):
+        with self.assertRaises(engine.NeedsFactoryValidationError):
+            nf_package.build_narrative_ready_pack({}, {"ranked":[],"blocked":[]}, {}, {}, {"valid":True}, {"valid":True}, {"ready_for_narrative":False})
+
+    def test_package_builds_from_validated_claim_ledger(self):
+        ranked = {"ranked":[{"need_id":"N1","rank":1,"score":72.0,"confidence_used":0.8}],"blocked":[]}
+        needs = {"N1":{"id":"N1","title":"Practică relevantă","statement":"Este necesară expunerea practică relevantă.","scope":"county","evidence_ids":["E1"],"prohibited_overclaim":"Nu extrapola la nivel de școală."}}
+        evidence = {"E1":{"source":"AJOFM","source_url":"https://example/e1","territory":"Vâlcea","period":"2023","tier":"A1"}}
+        pack = nf_package.build_narrative_ready_pack(
+            {"project_id":"310224","territory":"Vâlcea","target_group":"elevi IPT"},
+            ranked,
+            needs,
+            evidence,
+            {"valid":True,"failures":[]},
+            {"valid":True,"failures":[]},
+            {"ready_for_narrative":True},
+        )
+        self.assertEqual(pack["claim_ledger"][0]["need_id"], "N1")
+        self.assertTrue(pack["pack_sha256"])
+        self.assertTrue(pack["narrative_policy"]["do_not_fill_evidence_gaps"])
 
 
 if __name__ == "__main__":
