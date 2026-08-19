@@ -9,6 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "partener-eu" / "ingest" / "state" / "decision_products.json"
 UI = ROOT / "partener-eu" / "web" / "decision-intelligence-v2.js"
+ASK_UI = ROOT / "partener-eu" / "web" / "ask-partener-v2.js"
 
 payload = json.loads(DATA.read_text(encoding="utf-8"))
 assert payload.get("policy", {}).get("romanianPublicLanguage") is True
@@ -63,6 +64,13 @@ for phrase in forbidden_phrases:
     assert phrase not in ui, f"English UI phrase remains: {phrase}"
 for token in ("eventLabel", "statusText", "fundingFact", "Finanțări europene · decizie și acțiune", "Utilitate pentru decizie"):
     assert token in ui, f"localized UI helper missing: {token}"
+
+ask_ui = ASK_UI.read_text(encoding="utf-8")
+for phrase in forbidden_phrases:
+    assert phrase not in ask_ui, f"English Ask UI phrase remains: {phrase}"
+for token in ("T1/T1B", "tier neprecizat"):
+    assert token not in ask_ui, f"Internal provenance token remains public in Ask: {token}"
+assert "sursă oficială primară" in ask_ui
 
 print(json.dumps({
     "status": "PASS",
