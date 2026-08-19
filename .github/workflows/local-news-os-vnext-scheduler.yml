@@ -1,0 +1,87 @@
+name: LOCAL NEWS OS vNext Scheduler
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/vnext/core/scheduler_engine.py"
+      - "local-news-os/vnext/core/scheduler_runtime.py"
+      - "local-news-os/vnext/runtime/scheduler_schema.sql"
+      - ".github/workflows/local-news-os-vnext-scheduler.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/vnext/core/scheduler_engine.py"
+      - "local-news-os/vnext/core/scheduler_runtime.py"
+      - "local-news-os/vnext/runtime/scheduler_schema.sql"
+      - ".github/workflows/local-news-os-vnext-scheduler.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-scheduler:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile P15 scheduler
+        run: |
+          python -m py_compile \
+            local-news-os/vnext/core/scheduler_engine.py \
+            local-news-os/vnext/core/scheduler_runtime.py
+
+      - name: Run retry self-heal scheduler regressions
+        run: python local-news-os/vnext/core/scheduler_engine.py --self-test
+
+      - name: Run private scheduler newsroom regressions
+        run: python local-news-os/vnext/core/scheduler_runtime.py --self-test
+
+      - name: Validate both instance packs with unchanged generic core
+        run: |
+          python local-news-os/vnext/core/instance_model.py valcea >/tmp/valcea.json
+          python local-news-os/vnext/core/instance_model.py test-county >/tmp/test-county.json
+
+      - name: Assert site-owned scheduler contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'CREATE TABLE IF NOT EXISTS scheduler_leases' local-news-os/vnext/runtime/scheduler_schema.sql
+          grep -q 'CREATE TABLE IF NOT EXISTS scheduler_jobs' local-news-os/vnext/runtime/scheduler_schema.sql
+          grep -q 'CREATE TABLE IF NOT EXISTS scheduler_attempts' local-news-os/vnext/runtime/scheduler_schema.sql
+          grep -q 'CREATE TABLE IF NOT EXISTS scheduler_ticks' local-news-os/vnext/runtime/scheduler_schema.sql
+          grep -q 'CREATE TABLE IF NOT EXISTS scheduler_health' local-news-os/vnext/runtime/scheduler_schema.sql
+          grep -q 'NEEDS_ATTENTION' local-news-os/vnext/core/scheduler_engine.py
+          grep -q 'base_backoff_seconds' local-news-os/vnext/core/scheduler_engine.py
+          grep -q 'circuit:' local-news-os/vnext/core/scheduler_engine.py
+          grep -q 'discover_missing_work' local-news-os/vnext/core/scheduler_engine.py
+          grep -q '/newsroom/scheduler' local-news-os/vnext/core/scheduler_runtime.py
+          grep -q '/newsroom/api/scheduler' local-news-os/vnext/core/scheduler_runtime.py
+          ! grep -Eiq 'git_state_path|state_root|live-feed|current_edition|output_root|story_publication_event' \
+            local-news-os/vnext/core/scheduler_engine.py \
+            local-news-os/vnext/core/scheduler_runtime.py \
+            local-news-os/vnext/runtime/scheduler_schema.sql
+          echo 'VNEXT_P15_SITE_OWNS_RUNTIME_PASS'
+
+      - name: Enforce one site-owned tick and no locality hardcoding
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'def run_tick' local-news-os/vnext/core/scheduler_engine.py
+          grep -q 'VERIFY_SIGNAL' local-news-os/vnext/core/scheduler_engine.py
+          grep -q 'BUILD_KERNEL' local-news-os/vnext/core/scheduler_engine.py
+          grep -q 'SCORE_KERNEL' local-news-os/vnext/core/scheduler_engine.py
+          grep -q 'PUBLISH_STORY' local-news-os/vnext/core/scheduler_engine.py
+          grep -q 'SELECT_MEDIA' local-news-os/vnext/core/scheduler_engine.py
+          grep -q 'DISTRIBUTE_STORY' local-news-os/vnext/core/scheduler_engine.py
+          if grep -niE 'vâlcea|valcea|râmnicu|ramnicu|valceaclar\.ro' \
+            local-news-os/vnext/core/scheduler_engine.py \
+            local-news-os/vnext/core/scheduler_runtime.py \
+            local-news-os/vnext/runtime/scheduler_schema.sql; then
+            echo 'P15 generic scheduler contains locality-specific material' >&2
+            exit 1
+          fi
+          echo 'VNEXT_P15_CORE_NO_LOCALITY_PASS'
