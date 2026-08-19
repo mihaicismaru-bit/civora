@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E17",
+  "unit": "E17_LINKEDIN_ADAPTER",
+  "status": "PASS",
+  "validated_at": "2026-08-19T11:58:10Z",
+  "validation": {
+    "workflow": "EUCONS Quality",
+    "run_id": 32250175643,
+    "run_number": 87,
+    "conclusion": "success",
+    "validated_head": "2a569d390807bc374242199613e438ba7795ccb7",
+    "merged_commit": "e67c517f35adbcef26e678df20414da5e11f30b8",
+    "exact_head_gate_passed": true
+  },
+  "coverage": {
+    "provider_neutral_adapter": "PASS",
+    "e15_ready_only": "PASS",
+    "e14_knowledge_identity_binding": "PASS",
+    "eucons_canonical_urls": "PASS",
+    "cross_platform_verbatim_reuse": "DISABLED",
+    "default_hashtags": "DISABLED",
+    "idempotency": "PASS",
+    "immutable_receipts": "PASS",
+    "retry_limit": 3,
+    "direct_publication": "DISABLED_UNTIL_LINKEDIN_ORGANIZATION_AND_APP_AUTHORIZATION",
+    "external_authorization_required": ["LINKEDIN_ORGANIZATION", "LINKEDIN_APP"]
+  },
+  "artifacts": [
+    "eucons/social/linkedin_contract.json",
+    "eucons/social/linkedin_adapter.py",
+    "eucons/validation/validate_linkedin_adapter.py",
+    "eucons/validation/test_linkedin_adapter_fail_closed.py",
+    ".github/workflows/eucons-quality.yml"
+  ],
+  "next_phase": "E18"
+}
