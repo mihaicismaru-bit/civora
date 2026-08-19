@@ -231,7 +231,7 @@ def import_publications(conn: sqlite3.Connection) -> dict[str, Any]:
         conn.execute(
             """
             INSERT INTO stories(instance_id,story_id,fingerprint,state,revision,headline,canonical_path,created_at,updated_at)
-            VALUES (?,?,?,'PUBLISHED',1,?,?,?,?,?)
+            VALUES (?,?,?,'PUBLISHED',1,?,?,?,?)
             """,
             (INSTANCE_ID, story_id, story_fp, snapshot["headline"], canonical_path, published_at, now),
         )
