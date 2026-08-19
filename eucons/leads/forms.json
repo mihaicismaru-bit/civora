@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "forms": [
+    {"id":"project_evaluation","cta_id":"request_project_evaluation","required":["organization_name","audience_id","investment_terms","project_stage"],"progressive_optional":["activity_codes","county","requested_grant_eur","timeline","message"]},
+    {"id":"funding_consultation","cta_id":"request_funding_consultation","required":["organization_name","audience_id","investment_terms"],"progressive_optional":["activity_codes","county","requested_grant_eur","timeline","project_stage","message"]},
+    {"id":"implementation_review","cta_id":"request_implementation_review","required":["organization_name","audience_id","project_stage","message"],"progressive_optional":["county","timeline"]},
+    {"id":"project_recovery","cta_id":"request_recovery_assessment","required":["organization_name","audience_id","project_stage","message"],"progressive_optional":["county","timeline"]},
+    {"id":"proposal_request","cta_id":"request_offer","required":["organization_name","audience_id","message"],"progressive_optional":["investment_terms","activity_codes","county","requested_grant_eur","timeline","project_stage"]}
+  ]
+}
