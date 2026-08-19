@@ -1,0 +1,167 @@
+name: PARTENER.EU MIPE Persistent Source Replay
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'partener-eu/ingest/state/mipe_ro_corpus.json'
+      - 'partener-eu/ingest/people_policy_mipe_corpus_replay.py'
+      - 'partener-eu/ops/test_people_policy_mipe_corpus_replay.py'
+      - '.github/workflows/partener-eu-mipe-source-replay.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: partener-eu-mipe-source-replay
+  cancel-in-progress: true
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Validate MIPE replay contract
+        run: |
+          python -m py_compile \
+            partener-eu/ingest/people_policy_official_ingest.py \
+            partener-eu/ingest/people_policy_mipe_corpus_replay.py \
+            partener-eu/ingest/build_people_policy.py \
+            partener-eu/ingest/refine_people_policy.py
+          python partener-eu/ops/test_people_policy_mipe_corpus_replay.py
+
+      - name: Replay verified MIPE corpus and persist source ledger
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          checkpointed=false
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            python partener-eu/ingest/people_policy_mipe_corpus_replay.py
+            python partener-eu/ops/test_people_policy_mipe_corpus_replay.py
+            python - <<'PY'
+          import json
+          from pathlib import Path
+          from urllib.parse import urlparse
+
+          path = Path('partener-eu/ingest/state/people_policy_official_sources.json')
+          ledger = json.loads(path.read_text(encoding='utf-8'))
+          assert ledger.get('schemaVersion') == 2
+          assert (ledger.get('policy') or {}).get('failClosed') is True
+          assert (ledger.get('policy') or {}).get('administrativeFactsNeverPromotedFromSignals') is True
+          replay = (ledger.get('persistentReplays') or {}).get('MIPE_PRIMARY') or {}
+          assert replay.get('status') in {'REPLAY_OK', 'REPLAY_NO_ACCEPTED_SIGNALS', 'SKIPPED_DIRECT_SOURCE_HEALTHY'}
+          assert replay.get('directSourceHealthUnchanged') is True
+          direct = next(x for x in ledger.get('sources') or [] if x.get('id') == 'MIPE_PRIMARY')
+          assert direct.get('status') == replay.get('directSourceStatus')
+          if replay.get('status') != 'SKIPPED_DIRECT_SOURCE_HEALTHY':
+              assert int(replay.get('pagesSeen') or 0) >= int(replay.get('pagesIntegrityAccepted') or 0) > 0
+              assert replay.get('retrievalTransportRequired') == 'playwright-edge-direct-romania-v3'
+              assert replay.get('verificationRequired') == 'CANONICAL_OFFICIAL_FETCH'
+          for item in ledger.get('items') or []:
+              snap = item.get('sourceSnapshot') or {}
+              if snap.get('acquisitionPath') != 'PERSISTED_MIPE_WINDOWS_CORPUS_REPLAY':
+                  continue
+              assert (urlparse(snap.get('url') or '').hostname or '').lower() in {'mfe.gov.ro', 'www.mfe.gov.ro'}
+              assert snap.get('retrievalTransport') == 'playwright-edge-direct-romania-v3'
+              assert snap.get('verification') == 'CANONICAL_OFFICIAL_FETCH'
+              assert len(snap.get('contentHash') or '') == 64
+              assert item.get('signalKind') == 'STATEMENT_SIGNAL'
+              assert (item.get('administrativeFact') or {}).get('status') == 'UNCONFIRMED_FROM_SIGNAL'
+              assert (item.get('administrativeFact') or {}).get('failClosed') is True
+          print(json.dumps({
+              'replayStatus': replay.get('status'),
+              'directStatus': direct.get('status'),
+              'pagesSeen': replay.get('pagesSeen', 0),
+              'integrityAccepted': replay.get('pagesIntegrityAccepted', 0),
+              'acceptedItems': replay.get('acceptedItems', 0),
+          }))
+          PY
+            git add partener-eu/ingest/state/people_policy_official_sources.json
+            if git diff --cached --quiet; then
+              echo 'MIPE replay ledger already current.'
+              checkpointed=true
+              break
+            fi
+            git commit -m 'Checkpoint verified MIPE persistent source replay'
+            if git push origin HEAD:main; then
+              checkpointed=true
+              break
+            fi
+            sleep $((attempt * 2))
+          done
+          if [ "$checkpointed" != true ]; then
+            echo 'Failed to persist MIPE replay ledger after retries.' >&2
+            exit 1
+          fi
+
+      - name: Rebuild verified decision-maker projection from latest ledger
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          checkpointed=false
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            python partener-eu/ingest/build_people_policy.py
+            python partener-eu/ingest/refine_people_policy.py
+            python - <<'PY'
+          import json
+          from pathlib import Path
+
+          state = Path('partener-eu/ingest/state')
+          ledger = json.loads((state / 'people_policy_official_sources.json').read_text(encoding='utf-8'))
+          projection = json.loads((state / 'people_policy.json').read_text(encoding='utf-8'))
+          assert projection.get('schemaVersion') == 3
+          policy = projection.get('policy') or {}
+          assert policy.get('statementIsNotAdministrativeFact') is True
+          assert policy.get('officialEffectRequiresT1Evidence') is True
+          summary = projection.get('officialIngestion') or {}
+          assert summary.get('generatedAt') == ledger.get('generatedAt')
+          assert summary.get('ledgerSchemaVersion') == 2
+          for item in projection.get('items') or []:
+              if item.get('officialIngested') is not True:
+                  continue
+              assert item.get('signalKind') == 'STATEMENT_SIGNAL'
+              assert (item.get('administrativeFact') or {}).get('status') == 'UNCONFIRMED_FROM_SIGNAL'
+              assert (item.get('administrativeFact') or {}).get('failClosed') is True
+          js_text = Path('partener-eu/web/people-policy-data.js').read_text(encoding='utf-8').strip()
+          prefix = 'window.PARTENER_PEOPLE_POLICY='
+          assert js_text.startswith(prefix) and js_text.endswith(';')
+          assert json.loads(js_text[len(prefix):-1]) == projection
+          print(json.dumps({'items': len(projection.get('items') or []), 'home': len(projection.get('homeIds') or [])}))
+          PY
+            git add \
+              partener-eu/ingest/state/people_policy.json \
+              partener-eu/web/people-policy-data.js
+            if git diff --cached --quiet; then
+              echo 'Verified decision-maker projection already current.'
+              checkpointed=true
+              break
+            fi
+            git commit -m 'Checkpoint decision-maker projection after MIPE replay'
+            if git push origin HEAD:main; then
+              checkpointed=true
+              break
+            fi
+            sleep $((attempt * 2))
+          done
+          if [ "$checkpointed" != true ]; then
+            echo 'Failed to persist MIPE replay projection after retries.' >&2
+            exit 1
+          fi
