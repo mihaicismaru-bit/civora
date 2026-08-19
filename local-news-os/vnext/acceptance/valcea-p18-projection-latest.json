@@ -1,7 +1,7 @@
 {
   "checks": {
-    "all_artist_routes_preserved": false,
-    "all_legacy_story_routes_200_with_content": false,
+    "all_artist_routes_preserved": true,
+    "all_legacy_story_routes_200_with_content": true,
     "all_people_routes_preserved": true,
     "homepage_200": true,
     "homepage_contains_all_legacy_story_links": true,
@@ -14,10 +14,10 @@
     "sitemap_preserves_required_public_urls": true
   },
   "ci": {
-    "conclusion": "FAIL",
-    "execution_exit_code": 1,
-    "head_sha": "0bbdf6dbab37f74b364b42ed1a6c330ef1cfc835",
-    "run_id": "32289613399",
+    "conclusion": "PASS",
+    "execution_exit_code": 0,
+    "head_sha": "9f8e99cf169420e6462c211c868483b3319b68a2",
+    "run_id": "32289773885",
     "workflow": "LOCAL NEWS OS vNext Vâlcea Shadow Projection"
   },
   "contract": "LOCAL_NEWS_OS_VNEXT_VALCEA_P18_SHADOW_PROJECTION_DIFF_V1",
@@ -29,58 +29,16 @@
     "verified_places_checked": 4
   },
   "failures": {
-    "artists": [
-      {
-        "id": "azur-nelu-vlad",
-        "path": "/artisti/azur-nelu-vlad/",
-        "status": "200 OK"
-      },
-      {
-        "id": "hanno-hoefer-raul-kusak",
-        "path": "/artisti/hanno-hoefer-raul-kusak/",
-        "status": "200 OK"
-      },
-      {
-        "id": "kevin-burt-big-medicine",
-        "path": "/artisti/kevin-burt-big-medicine/",
-        "status": "200 OK"
-      },
-      {
-        "id": "kitty-daisy-lewis",
-        "path": "/artisti/kitty-daisy-lewis/",
-        "status": "200 OK"
-      },
-      {
-        "id": "koszika-the-hotshots",
-        "path": "/artisti/koszika-the-hotshots/",
-        "status": "200 OK"
-      },
-      {
-        "id": "marcel-stefanet-ethno-republic",
-        "path": "/artisti/marcel-stefanet-ethno-republic/",
-        "status": "200 OK"
-      },
-      {
-        "id": "sllash-doppe",
-        "path": "/artisti/sllash-doppe/",
-        "status": "200 OK"
-      }
-    ],
-    "artists_failure_count": 7,
+    "artists": [],
+    "artists_failure_count": 0,
     "missing_place_names": [],
     "missing_sitemap_url_count": 0,
     "missing_sitemap_urls": [],
     "people": [],
-    "stories": [
-      {
-        "path": "/stiri/rm-valcea-hcl-312-20260814/",
-        "status": "200 OK",
-        "story_id": "rm-valcea-hcl-312-20260814"
-      }
-    ]
+    "stories": []
   },
-  "next_gate": "REPAIR_PUBLIC_PROJECTION",
+  "next_gate": "CONTROLLED_LIVE_DEPLOYMENT_PREFLIGHT",
   "production_cutover": false,
   "schema_version": "1.0",
-  "status": "SHADOW_PROJECTION_FAIL"
+  "status": "SHADOW_PROJECTION_PASS"
 }

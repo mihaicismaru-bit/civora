@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import html
 import json
 import sys
 import tempfile
@@ -75,7 +76,7 @@ def run_projection_diff(db: Path) -> dict[str, Any]:
         path = expected_story_paths[sid]
         status, _, body = _call(app, path)
         story = story_by_id[sid]
-        if not _ok(status) or str(story.get("headline") or "") not in body or str(story.get("dek") or "") not in body:
+        if not _ok(status) or html.escape(str(story.get("headline") or "")) not in body or html.escape(str(story.get("dek") or "")) not in body:
             story_failures.append({"story_id": sid, "path": path, "status": status})
 
     people_failures: list[dict[str, str]] = []
@@ -85,7 +86,7 @@ def run_projection_diff(db: Path) -> dict[str, Any]:
         path = str(profile.get("path") or "")
         status, _, body = _call(app, path)
         canonical = f"https://valceaclar.ro{path}"
-        if not _ok(status) or str(profile.get("name") or "") not in body or canonical not in body:
+        if not _ok(status) or html.escape(str(profile.get("name") or "")) not in body or canonical not in body:
             people_failures.append({"id": str(profile.get("id")), "path": path, "status": status})
 
     artist_failures: list[dict[str, str]] = []
@@ -95,7 +96,7 @@ def run_projection_diff(db: Path) -> dict[str, Any]:
         path = str(profile.get("path") or "")
         status, _, body = _call(app, path)
         canonical = f"https://valceaclar.ro{path}"
-        if not _ok(status) or str(profile.get("name") or "") not in body or canonical not in body:
+        if not _ok(status) or html.escape(str(profile.get("name") or "")) not in body or canonical not in body:
             artist_failures.append({"id": str(profile.get("id")), "path": path, "status": status})
 
     leisure_status, _, leisure_body = _call(app, "/unde-iesim/")
@@ -103,7 +104,7 @@ def run_projection_diff(db: Path) -> dict[str, Any]:
         item for item in places.get("places") or []
         if item.get("publication_status") == "public" and item.get("verification_level") == "verified"
     ]
-    missing_place_names = [str(item.get("name")) for item in expected_public_places if str(item.get("name")) not in leisure_body]
+    missing_place_names = [str(item.get("name")) for item in expected_public_places if html.escape(str(item.get("name"))) not in leisure_body]
 
     sitemap_status, _, sitemap = _call(app, "/sitemap.xml")
     sitemap_required = ["https://valceaclar.ro/"]
