@@ -1,0 +1,70 @@
+name: LOCAL NEWS OS vNext Vâlcea Shadow Migration
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "local-news-os/vnext/BUILD_READY_FOR_MIGRATION.json"
+      - "local-news-os/vnext/instances/valcea/**"
+      - "local-news-os/vnext/core/**"
+      - "local-news-os/vnext/runtime/**"
+      - "valcea-clar/site/story_publication_event.json"
+      - "valcea-clar/site/runtime/live-feed.json"
+      - "valcea-clar/site/runtime/people.json"
+      - "valcea-clar/site/runtime/artists.json"
+      - "valcea-clar/data/places.json"
+      - "valcea-clar/data/creators.json"
+      - "valcea-clar/social/story_visuals.json"
+      - "valcea-clar/social/facebook_state.json"
+      - "valcea-clar/social/instagram_state.json"
+      - ".github/workflows/local-news-os-vnext-valcea-shadow-migration.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  shadow-migration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Compile shadow migration harness
+        run: python -m py_compile local-news-os/vnext/instances/valcea/migration/p18_shadow_migration.py
+
+      - name: Enforce P18 shadow safety boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f local-news-os/vnext/BUILD_READY_FOR_MIGRATION.json
+          grep -q 'BUILD_READY_FOR_MIGRATION' local-news-os/vnext/instances/valcea/migration/p18_shadow_migration.py
+          grep -q 'network_publication_attempted' local-news-os/vnext/instances/valcea/migration/p18_shadow_migration.py
+          grep -q 'public_runtime_mutated' local-news-os/vnext/instances/valcea/migration/p18_shadow_migration.py
+          ! grep -Eiq 'requests\.(post|put|patch|delete)|urllib\.request|http\.client|subprocess.*curl|subprocess.*wget' local-news-os/vnext/instances/valcea/migration/p18_shadow_migration.py
+          echo 'VNEXT_P18_SHADOW_SAFETY_BOUNDARY_PASS'
+
+      - name: Run Vâlcea shadow migration
+        run: |
+          python local-news-os/vnext/instances/valcea/migration/p18_shadow_migration.py \
+            --db /tmp/valcea-vnext-shadow.sqlite3 \
+            --report /tmp/valcea-vnext-shadow-report.json
+          cat /tmp/valcea-vnext-shadow-report.json
+          grep -q '"status": "SHADOW_MIGRATION_PASS"' /tmp/valcea-vnext-shadow-report.json
+          grep -q '"canonical_url_parity": true' /tmp/valcea-vnext-shadow-report.json
+          grep -q '"story_id_parity": true' /tmp/valcea-vnext-shadow-report.json
+          grep -q '"duplicate_canonical_paths_zero": true' /tmp/valcea-vnext-shadow-report.json
+          grep -q '"network_publication_attempted": false' /tmp/valcea-vnext-shadow-report.json
+          grep -q '"public_runtime_mutated": false' /tmp/valcea-vnext-shadow-report.json
+
+      - name: Upload shadow evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: valcea-vnext-shadow-migration
+          path: |
+            /tmp/valcea-vnext-shadow-report.json
+            /tmp/valcea-vnext-shadow.sqlite3
+          if-no-files-found: error
+          retention-days: 14
