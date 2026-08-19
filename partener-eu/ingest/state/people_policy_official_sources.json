@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-08-19T19:24:54Z",
+  "generatedAt": "2026-08-19T20:23:47Z",
   "policy": {
     "directOfficialOnly": true,
     "generalPressExcludedAsAuthority": true,
@@ -25,7 +25,12 @@
     "maxSourceFetchWorkers": 9,
     "fetchTimeoutSeconds": 18,
     "worstCaseNetworkBudgetSeconds": 504,
-    "failClosed": true
+    "failClosed": true,
+    "mipePersistentReplayRequiresOfficialHost": true,
+    "mipePersistentReplayRequiresContentHash": true,
+    "mipePersistentReplayRequiresCanonicalWindowsTransport": true,
+    "mipePersistentReplayRequiresRoleAtObservation": true,
+    "mipeDirectHealthIndependentFromPersistentReplay": true
   },
   "sources": [
     {
@@ -933,5 +938,28 @@
       "fingerprint": "e08d749791475d78a69ee8b8c7f8dbf4c8eae1234b1d3d513cd7a5da8c36cdd0",
       "reason": "PRE_V2_ROLE_NOT_VERIFIED"
     }
-  ]
+  ],
+  "persistentReplays": {
+    "MIPE_PRIMARY": {
+      "status": "REPLAY_NO_ACCEPTED_SIGNALS",
+      "acquisitionPath": "PERSISTED_MIPE_WINDOWS_CORPUS_REPLAY",
+      "corpusSchemaVersion": 3,
+      "corpusGeneratedAt": "2026-08-19T19:36:29.824068+00:00",
+      "corpusStatus": "PASS",
+      "pagesSeen": 257,
+      "pagesIntegrityAccepted": 257,
+      "pagesRejected": 0,
+      "acceptedItems": 0,
+      "rejections": {
+        "NO_VERIFIED_ACTOR_STATEMENT_EVIDENCE": 215,
+        "NOT_FUNDING_SIGNAL_RELEVANT": 42
+      },
+      "retrievalTransportRequired": "playwright-edge-direct-romania-v3",
+      "verificationRequired": "CANONICAL_OFFICIAL_FETCH",
+      "failClosed": true,
+      "directSourceStatus": "SOURCE_UNAVAILABLE_HISTORY_PRESERVED",
+      "directSourceHealthUnchanged": true,
+      "replayedAt": "2026-08-19T20:23:47Z"
+    }
+  }
 }
