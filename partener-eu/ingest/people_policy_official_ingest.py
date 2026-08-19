@@ -51,6 +51,12 @@ STATEMENT_CUES = (
     "declara", "declară", "precizeaza", "precizează", "spune", "afirma", "afirmă",
     "explica", "explică", "subliniaza", "subliniază", "propune",
 )
+DIRECT_QUOTE_SIGNAL_CUE = "DIRECT_QUOTE_ATTRIBUTION"
+DIRECT_QUOTE_ROLE_TERMS = (
+    "ministr", "președ", "presed", "director", "secretar de stat",
+    "comisar", "premier", "prim-ministr",
+)
+DIRECT_QUOTE_CLOSERS = {"„": "”", "“": "”", "«": "»", '"': '"'}
 
 
 def load(path: Path, default: Any) -> Any:
@@ -245,6 +251,64 @@ def actor_alias(person: dict[str, Any], text: str) -> str | None:
     return None
 
 
+def direct_quote_window_for(person: dict[str, Any], text: str) -> dict[str, Any] | None:
+    """Accept only explicit actor + role + colon + bounded direct-quote attribution.
+
+    The role phrase must sit between the tracked actor and the colon, the quote
+    must be explicitly delimited in article body text, and funding context must
+    occur inside the quote itself. This is intentionally stricter than generic
+    quotation detection and never infers the verified role from article wording.
+    """
+    value = clean(text)
+    folded = fold(value)
+    aliases = [clean(alias) for alias in person.get("aliases") or [] if clean(alias)]
+    name = clean(person.get("name"))
+    if name:
+        aliases.append(name)
+    for alias in sorted(set(aliases), key=len, reverse=True):
+        needle = fold(alias)
+        if not needle:
+            continue
+        pattern = rf"(?<![a-z0-9]){re.escape(needle)}(?![a-z0-9])"
+        for match in re.finditer(pattern, folded):
+            colon = folded.find(":", match.end(), min(len(folded), match.end() + 180))
+            if colon < 0:
+                continue
+            attribution = folded[match.end():colon]
+            if not any(fold(term) in attribution for term in DIRECT_QUOTE_ROLE_TERMS):
+                continue
+            tail = value[colon + 1:colon + 951]
+            stripped = tail.lstrip()
+            leading = len(tail) - len(stripped)
+            if not stripped or stripped[0] not in DIRECT_QUOTE_CLOSERS:
+                continue
+            opener = stripped[0]
+            quote_start = leading + 1
+            closer = DIRECT_QUOTE_CLOSERS[opener]
+            quote_end = tail.find(closer, quote_start)
+            if quote_end < 0:
+                continue
+            quote = clean(tail[quote_start:quote_end])
+            if len(quote) < 45 or len(quote.split()) < 8:
+                continue
+            funding = next((term for term in FUNDING_TERMS if fold(term) in fold(quote)), None)
+            if not funding:
+                continue
+            statement_end = colon + 1 + quote_end + 1
+            statement = clean(value[match.start():statement_end])
+            if len(statement) > 900:
+                continue
+            return {
+                "statement": statement,
+                "actorAlias": alias,
+                "signalCue": DIRECT_QUOTE_SIGNAL_CUE,
+                "fundingCue": funding,
+                "scope": "ACTOR_ROLE_COLON_QUOTE",
+                "sentenceIndex": len(sentence_units(value[:match.start()])),
+            }
+    return None
+
+
 def sentence_units(text: str) -> list[str]:
     return [
         sentence for sentence in re.split(r"(?<=[.!?])\s+", clean(text))
@@ -302,6 +366,9 @@ def statement_window_for(person: dict[str, Any], text: str) -> dict[str, Any] | 
                 "scope": "ADJACENT_SENTENCES",
                 "sentenceIndex": min(index, neighbor_index),
             }
+    direct_quote = direct_quote_window_for(person, text)
+    if direct_quote:
+        return direct_quote
     return None
 
 
@@ -728,6 +795,8 @@ def main() -> int:
             "canonicalLinkRequiresExplicitCodeMatch": True,
             "sourceHealthRequiresArticleFetchProofWhenCandidatesExist": True,
             "actorSpeechFundingEvidenceRequired": True,
+            "attributedDirectQuoteEvidenceSupported": True,
+            "directQuoteRequiresActorRoleColonAndFundingInQuote": True,
             "actorAliasesRequireTokenBoundaries": True,
             "boundedConcurrentSourceIngest": True,
             "maxSourceFetchWorkers": MAX_SOURCE_FETCH_WORKERS,
