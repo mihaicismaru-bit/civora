@@ -94,6 +94,10 @@ jobs:
         run: python eucons/validation/validate_seo_engine.py
       - name: Test EUCONS SEO Engine fail-closed behavior
         run: python eucons/validation/test_seo_engine_fail_closed.py
+      - name: Validate EUCONS LinkedIn Adapter
+        run: python eucons/validation/validate_linkedin_adapter.py
+      - name: Test EUCONS LinkedIn Adapter fail-closed behavior
+        run: python eucons/validation/test_linkedin_adapter_fail_closed.py
       - name: Reject committed secret-like assignments
         shell: bash
         run: |

@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "engine_id": "EUCONS_E17_LINKEDIN_ADAPTER",
+  "input": {
+    "required_product": "EUCONS_COMMERCIAL_OS",
+    "required_editorial_engine_id": "EUCONS_E15_AUTONOMOUS_EDITORIAL_LOOP",
+    "required_knowledge_engine_id": "EUCONS_E14_KNOWLEDGE_ENGINE",
+    "required_editorial_decision": "READY",
+    "allowed_types": [
+      "GUIDE",
+      "ANALYSIS",
+      "OPPORTUNITY",
+      "CASE",
+      "FAQ"
+    ]
+  },
+  "doctrine": {
+    "purpose": "B2B authority, opportunity relevance and commercial conversion without inventing facts.",
+    "site_is_canonical": true,
+    "no_cross_platform_verbatim_reuse": true,
+    "unverified_claims_fail_closed": true
+  },
+  "presentation": {
+    "canonical_base": "https://eucons.ro",
+    "route_templates": {
+      "GUIDE": "/ghiduri/{source_ref}/",
+      "ANALYSIS": "/articole/{source_ref}/",
+      "OPPORTUNITY": "/finantari/{source_ref}/",
+      "CASE": "/proiecte/{source_ref}/",
+      "FAQ": "/resurse/{source_ref}/"
+    },
+    "cta_by_type": {
+      "GUIDE": "Vezi ghidul complet:",
+      "ANALYSIS": "Vezi analiza completă:",
+      "OPPORTUNITY": "Verifică oportunitatea și solicită o evaluare:",
+      "CASE": "Vezi studiul de caz:",
+      "FAQ": "Vezi răspunsul complet:"
+    },
+    "max_body_chars": 2800,
+    "hashtags_default": false
+  },
+  "dispatch": {
+    "mode": "DRY_RUN_ONLY",
+    "dry_run_state": "OUTBOX_READY_AUTH_REQUIRED",
+    "real_publication_enabled": false,
+    "external_authorization_required": [
+      "LINKEDIN_ORGANIZATION",
+      "LINKEDIN_APP"
+    ],
+    "max_attempts": 3,
+    "idempotent": true,
+    "immutable_receipts": true
+  },
+  "output": {
+    "schema_version": 1,
+    "product": "EUCONS_COMMERCIAL_OS",
+    "platform": "linkedin",
+    "direct_publication_enabled": false
+  }
+}
