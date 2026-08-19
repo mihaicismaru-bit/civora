@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "nf.primary_research_evidence.v0.1",
+  "title": "Needs Factory Primary Research Evidence Bundle",
+  "type": "object",
+  "required": ["schema_version", "population_snapshot_id", "population_snapshot_sha256", "raw_response_sha256", "aggregate_sha256", "raw_validation", "strata_validation", "aggregates", "evidence"],
+  "properties": {
+    "schema_version": {"const": "nf.primary_research_evidence.v0.1"},
+    "population_snapshot_id": {"type": "string", "minLength": 1},
+    "population_snapshot_sha256": {"type": "string", "minLength": 32},
+    "raw_response_sha256": {"type": "string", "minLength": 32},
+    "aggregate_sha256": {"type": "string", "minLength": 32},
+    "canonical_raw_rows": {"type": "array"},
+    "raw_validation": {"type": "object"},
+    "strata_validation": {"type": "object"},
+    "aggregates": {"type": "object"},
+    "evidence": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["id", "source_type", "tier", "scope", "constructs", "direct_measurement", "population_snapshot_id", "raw_sha256", "semantic_sha256", "measures"],
+        "properties": {
+          "id": {"type": "string"},
+          "source_type": {"const": "primary_research"},
+          "tier": {"const": "A"},
+          "scope": {"const": "school"},
+          "constructs": {"type": "array", "minItems": 1, "items": {"type": "string"}, "uniqueItems": true},
+          "direct_measurement": {"const": true},
+          "population_snapshot_id": {"type": "string"},
+          "raw_sha256": {"type": "string"},
+          "semantic_sha256": {"type": "string"},
+          "measures": {"type": "array", "minItems": 1}
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}
