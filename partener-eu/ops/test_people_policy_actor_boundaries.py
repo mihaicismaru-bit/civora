@@ -23,10 +23,12 @@ registry = json.loads((STATE / "people_policy_registry.json").read_text(encoding
 sorin = next(person for person in registry["people"] if person["id"] == "sorin-maxim")
 assert (sorin.get("roleVerification") or {}).get("status") == "VERIFIED"
 
-# Explicit full-name and surname mentions remain discoverable.
-assert collector.actor_alias(sorin, "Sorin Maxim a declarat că finanțarea europeană rămâne prioritară.") == "Sorin Maxim"
-assert collector.actor_alias(sorin, "Maxim: finanțarea PNRR trebuie accelerată.") == "Maxim"
-assert collector.actor_alias(sorin, "Potrivit lui Maxim, granturile trebuie urmărite atent.") == "Maxim"
+# Explicit full-name and surname mentions remain discoverable. Multiple registry
+# spellings may fold to the same entity, so assert identity rather than one raw alias.
+full_alias = collector.actor_alias(sorin, "Sorin Maxim a declarat că finanțarea europeană rămâne prioritară.")
+assert full_alias is not None and collector.fold(full_alias) == "sorin maxim"
+assert collector.fold(collector.actor_alias(sorin, "Maxim: finanțarea PNRR trebuie accelerată.")) == "maxim"
+assert collector.fold(collector.actor_alias(sorin, "Potrivit lui Maxim, granturile trebuie urmărite atent.")) == "maxim"
 
 # A surname alias must never match inside another lexical token.
 for text in (
@@ -47,7 +49,7 @@ assert collector.actor_statement_for(false_statement, {"people": [sorin]}) is No
 valid_statement = "Sorin Maxim a declarat că finanțarea prin Programul Regional Vest va continua pentru investiții."
 evidence = collector.statement_window_for(sorin, valid_statement)
 assert evidence is not None
-assert evidence["actorAlias"] == "Sorin Maxim"
+assert collector.fold(evidence["actorAlias"]) == "sorin maxim"
 assert evidence["scope"] == "SENTENCE"
 assert evidence["signalCue"] in collector.STATEMENT_CUES
 assert evidence["fundingCue"] in collector.FUNDING_TERMS
