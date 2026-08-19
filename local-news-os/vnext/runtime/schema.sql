@@ -102,6 +102,48 @@ CREATE TABLE IF NOT EXISTS verification_task_targets (
     FOREIGN KEY (instance_id, target_id) REFERENCES primary_targets(instance_id, target_id) ON DELETE RESTRICT
 );
 
+CREATE TABLE IF NOT EXISTS verification_results (
+    instance_id TEXT NOT NULL,
+    result_id TEXT NOT NULL,
+    task_id TEXT NOT NULL,
+    signal_id TEXT NOT NULL,
+    target_id TEXT NOT NULL,
+    verdict TEXT NOT NULL CHECK (verdict IN ('SUPPORTS', 'CONTRADICTS', 'INCONCLUSIVE')),
+    evidence_url TEXT NOT NULL,
+    evidence_fingerprint TEXT NOT NULL,
+    evidence_summary TEXT NOT NULL,
+    normalized_claim_json TEXT NOT NULL DEFAULT '{}',
+    confidence INTEGER NOT NULL CHECK (confidence BETWEEN 0 AND 100),
+    source_observed_at TEXT,
+    publication_authority TEXT NOT NULL CHECK (publication_authority = 'NONE'),
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (instance_id, result_id),
+    UNIQUE (instance_id, task_id, target_id, evidence_fingerprint, verdict),
+    FOREIGN KEY (instance_id, task_id) REFERENCES verification_tasks(instance_id, task_id) ON DELETE RESTRICT,
+    FOREIGN KEY (instance_id, target_id) REFERENCES primary_targets(instance_id, target_id) ON DELETE RESTRICT,
+    FOREIGN KEY (instance_id, signal_id) REFERENCES signals(instance_id, signal_id) ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS fact_kernels (
+    instance_id TEXT NOT NULL,
+    kernel_id TEXT NOT NULL,
+    signal_id TEXT NOT NULL,
+    fingerprint TEXT NOT NULL,
+    state TEXT NOT NULL CHECK (state = 'READY'),
+    material_fact_ready INTEGER NOT NULL CHECK (material_fact_ready = 1),
+    fact_kernel_ready INTEGER NOT NULL CHECK (fact_kernel_ready = 1),
+    publication_authority TEXT NOT NULL CHECK (publication_authority = 'NONE'),
+    facts_json TEXT NOT NULL,
+    provenance_json TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    PRIMARY KEY (instance_id, kernel_id),
+    UNIQUE (instance_id, signal_id),
+    UNIQUE (instance_id, fingerprint),
+    FOREIGN KEY (instance_id, signal_id) REFERENCES signals(instance_id, signal_id) ON DELETE RESTRICT,
+    FOREIGN KEY (instance_id) REFERENCES publication_instances(instance_id) ON DELETE RESTRICT
+);
+
 CREATE TABLE IF NOT EXISTS runtime_events (
     event_id INTEGER PRIMARY KEY AUTOINCREMENT,
     instance_id TEXT NOT NULL,
@@ -137,6 +179,15 @@ CREATE INDEX IF NOT EXISTS idx_verification_tasks_signal
 
 CREATE INDEX IF NOT EXISTS idx_primary_targets_status
     ON primary_targets(instance_id, status, updated_at);
+
+CREATE INDEX IF NOT EXISTS idx_verification_results_signal
+    ON verification_results(instance_id, signal_id, created_at);
+
+CREATE INDEX IF NOT EXISTS idx_verification_results_task
+    ON verification_results(instance_id, task_id, created_at);
+
+CREATE INDEX IF NOT EXISTS idx_fact_kernels_signal
+    ON fact_kernels(instance_id, signal_id, created_at);
 
 CREATE TRIGGER IF NOT EXISTS runtime_events_no_update
 BEFORE UPDATE ON runtime_events
