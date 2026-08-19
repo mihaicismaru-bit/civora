@@ -2,19 +2,69 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-19T08:06:39+03:00",
+  "generated_at": "2026-08-19T09:04:35+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-19T08:04:48+03:00",
-  "task_count": 66,
+  "queue_generated_at": "2026-08-19T09:02:45+03:00",
+  "task_count": 67,
   "primary_match_count": 0,
-  "no_match_count": 35,
+  "no_match_count": 36,
   "unrouted_count": 31,
   "target_count": 21,
   "targets_ok": 17,
   "results": [
+    {
+      "signal_id": "b83d8c49b09e0dd2870e5074",
+      "signal_title": "FOTO – Gospodărie distrusă de flăcări, noaptea trecută, într-o comună din Vâlcea",
+      "signal_url": "https://seintamplainvalcea.ro/2026/08/19/foto-gospodarie-distrusa-de-flacari-noaptea-trecuta-intr-o-comuna-din-valcea/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-19T08:35:35+03:00",
+      "verification_route_id": "fire_rescue_alert",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "isu-valcea-stiri-locale",
+            "name": "ISU Vâlcea — Știri locale",
+            "url": "https://isuvl.igsu.ro/stiri-locale"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 7
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "isu-valcea-comunicate",
+            "name": "ISU Vâlcea",
+            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
+    },
     {
       "signal_id": "ea3bdd06ceb36afb657bfea6",
       "signal_title": "Consiliul Județean Vâlcea are patru finanțări rambursabile. Cel mai nou împrumut, de peste 10,8 milioane de lei, se rambursează până în 2036",
