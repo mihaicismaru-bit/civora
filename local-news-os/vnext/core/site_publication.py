@@ -256,7 +256,7 @@ def publish_story(
             INSERT INTO runtime_events(
                 instance_id,aggregate_type,aggregate_id,event_type,from_state,to_state,
                 reason,payload_json,engine_version,created_at
-            ) VALUES (?,'story',?,?,'QA_PASSED','PUBLISHED',?,?,?,?,?)
+            ) VALUES (?,'story',?,?,'QA_PASSED','PUBLISHED',?,?,?,?)
             """,
             (
                 instance_id, story_id, PUBLIC_EVENT, "QA-passed story published by site runtime",
