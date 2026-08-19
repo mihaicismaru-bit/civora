@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E15",
+  "unit": "E15_AUTONOMOUS_EDITORIAL_LOOP",
+  "status": "PASS",
+  "validated_at": "2026-08-19T10:56:38Z",
+  "validation": {
+    "workflow": "EUCONS Quality",
+    "run_id": 32245126655,
+    "run_number": 79,
+    "conclusion": "success",
+    "validated_head": "e0aa33f0fe697e6765ae9846287871b5663338a3",
+    "merged_commit": "2fa3e8803e71dcf202e66a7c58f51e8392299076",
+    "exact_head_gate_passed": true
+  },
+  "coverage": {
+    "synthetic_records_considered": 26,
+    "cycle_ready": 12,
+    "cycle_held": 14,
+    "deterministic_candidate_selection": "PASS",
+    "duplicate_source_suppression": "PASS",
+    "fact_provenance_kernel": "PASS",
+    "editorial_commercial_preflight": "PASS",
+    "funding_provenance_guard": "PASS",
+    "stale_and_invalid_hold": "PASS",
+    "immutable_sha256_receipts": "PASS",
+    "reconciliation_states": ["NEW", "UNCHANGED", "SUPERSEDED", "WITHDRAWN"],
+    "deterministic_replay": "PASS",
+    "runtime_publication": "DISABLED",
+    "dispatch": "DISABLED_RUNTIME_GATE"
+  },
+  "artifacts": [
+    "eucons/editorial/editorial_loop_contract.json",
+    "eucons/editorial/editorial_loop.py",
+    "eucons/validation/validate_editorial_loop.py",
+    "eucons/validation/test_editorial_loop_fail_closed.py",
+    ".github/workflows/eucons-quality.yml"
+  ],
+  "next_phase": "E16"
+}
