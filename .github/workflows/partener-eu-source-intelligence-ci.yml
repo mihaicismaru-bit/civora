@@ -4,14 +4,17 @@ on:
   pull_request:
     paths:
       - 'partener-eu/ingest/people_policy_official_ingest.py'
+      - 'partener-eu/ingest/people_policy_mipe_corpus_replay.py'
       - 'partener-eu/ingest/build_people_policy.py'
       - 'partener-eu/ingest/refine_people_policy.py'
       - 'partener-eu/ingest/state/people_policy_registry.json'
       - 'partener-eu/ingest/state/people_policy_source_registry.json'
       - 'partener-eu/ops/test_people_policy_source_intelligence.py'
+      - 'partener-eu/ops/test_people_policy_mipe_corpus_replay.py'
       - 'partener-eu/ops/test_people_policy_actor_boundaries.py'
       - 'partener-eu/ops/test_people_policy_signal_history.py'
       - '.github/workflows/partener-eu-editorial-daily.yml'
+      - '.github/workflows/partener-eu-mipe-source-replay.yml'
       - '.github/workflows/partener-eu-source-intelligence-ci.yml'
   workflow_dispatch:
 
@@ -35,11 +38,15 @@ jobs:
         run: |
           python -m py_compile \
             partener-eu/ingest/people_policy_official_ingest.py \
+            partener-eu/ingest/people_policy_mipe_corpus_replay.py \
             partener-eu/ingest/build_people_policy.py \
             partener-eu/ingest/refine_people_policy.py
 
       - name: Validate source intelligence contract
         run: python partener-eu/ops/test_people_policy_source_intelligence.py
+
+      - name: Validate MIPE persistent corpus replay contract
+        run: python partener-eu/ops/test_people_policy_mipe_corpus_replay.py
 
       - name: Validate decision-maker actor boundaries
         run: python partener-eu/ops/test_people_policy_actor_boundaries.py
