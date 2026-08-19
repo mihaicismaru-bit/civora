@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "engine_id": "EUCONS_E26_ADVERSARIAL_QA",
+  "product": "EUCONS_COMMERCIAL_OS",
+  "production_side_effects_enabled": false,
+  "fail_closed_required": true,
+  "fixture_policy": "SYNTHETIC_ONLY",
+  "required_scenarios": [
+    "STALE_OPEN_OPPORTUNITY_HOLD",
+    "SPAM_HONEYPOT_REJECTED",
+    "INVALID_EMAIL_REJECTED",
+    "MISSING_PROVENANCE_OFFER_REJECTED",
+    "MISSING_PRICING_HUMAN_REQUIRED",
+    "DUPLICATE_CONFLICT_HOLD",
+    "DUPLICATE_SAME_KEY_COLLAPSED",
+    "ORPHAN_PREPARE_DISCARDED",
+    "STALE_LEASE_RESUME",
+    "LINKEDIN_OUTAGE_RETRY",
+    "FACEBOOK_OUTAGE_EXHAUSTED_HOLD",
+    "INDEXABLE_PREVIEW_REJECTED",
+    "PRODUCTION_DEPLOYMENT_REJECTED",
+    "SOCIAL_LIVE_GATES_CLOSED",
+    "EMAIL_LIVE_GATE_CLOSED",
+    "PII_REPOSITORY_WRITE_REJECTED"
+  ],
+  "safe_outcomes": [
+    "HOLD_SOURCE_STATE",
+    "REJECTED",
+    "HUMAN_REQUIRED",
+    "HOLD_DUPLICATE_CONFLICT",
+    "COLLAPSED",
+    "DISCARD_ORPHAN_PREPARE",
+    "RESUME_AFTER_STALE_LEASE",
+    "RETRY",
+    "HOLD_RETRY_EXHAUSTED",
+    "CLOSED"
+  ],
+  "determinism": {
+    "same_fixture_same_result": true,
+    "scenario_order_stable": true,
+    "suite_sha256_required": true
+  },
+  "forbidden": {
+    "live_network_provider_calls": true,
+    "production_data_collection": true,
+    "real_personal_data": true,
+    "invented_numeric_pricing": true,
+    "unverified_opportunity_promotion": true,
+    "duplicate_external_delivery": true,
+    "implicit_orphan_promotion": true,
+    "indexable_preview": true,
+    "production_deployment": true,
+    "social_live_dispatch": true,
+    "email_live_sending": true
+  }
+}
