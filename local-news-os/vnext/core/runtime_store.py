@@ -2,7 +2,9 @@
 """Site-owned runtime database primitives for LOCAL NEWS OS vNext.
 
 This module intentionally writes runtime state only to a database connection.
-It has no repository-state writer and no locality-specific behavior.
+It has no repository-state writer and no locality-specific behavior. SQLite is
+retained for deterministic local/test execution; PostgreSQL is supported through
+the database backend adapter for durable production runtime state.
 """
 from __future__ import annotations
 
@@ -13,6 +15,8 @@ import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+from database_backend import connect_database
 
 ROOT = Path(__file__).resolve().parents[3]
 SCHEMA_PATH = ROOT / "local-news-os" / "vnext" / "runtime" / "schema.sql"
@@ -47,20 +51,17 @@ def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
-def connect(path: str | Path) -> sqlite3.Connection:
-    conn = sqlite3.connect(str(path))
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON")
-    return conn
+def connect(path: str | Path):
+    return connect_database(path)
 
 
-def initialize(conn: sqlite3.Connection) -> None:
+def initialize(conn) -> None:
     conn.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
     conn.commit()
 
 
 def register_instance(
-    conn: sqlite3.Connection,
+    conn,
     manifest: dict[str, Any],
     *,
     engine_version: str,
@@ -96,7 +97,7 @@ def register_instance(
 
 
 def _append_event(
-    conn: sqlite3.Connection,
+    conn,
     *,
     instance_id: str,
     aggregate_type: str,
@@ -128,11 +129,13 @@ def _append_event(
             utc_now(),
         ),
     )
+    if cursor.lastrowid is None:
+        raise RuntimeStoreError("runtime event insert did not return an event id")
     return int(cursor.lastrowid)
 
 
 def create_story(
-    conn: sqlite3.Connection,
+    conn,
     *,
     instance_id: str,
     story_id: str,
@@ -172,7 +175,7 @@ def create_story(
 
 
 def get_story(
-    conn: sqlite3.Connection,
+    conn,
     *,
     instance_id: str,
     story_id: str,
@@ -187,7 +190,7 @@ def get_story(
 
 
 def transition_story(
-    conn: sqlite3.Connection,
+    conn,
     *,
     instance_id: str,
     story_id: str,
@@ -244,7 +247,7 @@ def transition_story(
 
 
 def list_events(
-    conn: sqlite3.Connection,
+    conn,
     *,
     instance_id: str,
     aggregate_type: str,
