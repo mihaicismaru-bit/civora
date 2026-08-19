@@ -1,0 +1,89 @@
+name: LOCAL NEWS OS vNext Validation
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/vnext/**"
+      - ".github/workflows/local-news-os-vnext.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/vnext/**"
+      - ".github/workflows/local-news-os-vnext.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-vnext:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile generic vNext core
+        run: python -m py_compile local-news-os/vnext/core/instance_model.py
+
+      - name: Validate frozen product contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          c = json.loads(Path('local-news-os/vnext/PRODUCT_CONTRACT_V2.json').read_text(encoding='utf-8'))
+          assert c['status'] == 'FROZEN'
+          rules = c['non_negotiable_rules']
+          assert rules['SITE_OWNS_RUNTIME']['runtime_authority'] == 'site_application_database'
+          assert rules['SITE_OWNS_RUNTIME']['forbidden_runtime_authorities']
+          assert rules['CORE_KNOWS_NO_LOCALITY']['core_may_read_locality_only_from_instance_config'] is True
+          assert c['architecture']['development_release_plane']['may_block_validated_production_runtime'] is False
+          assert c['architecture']['persistence_control_plane']['may_block_validated_production_runtime'] is False
+          assert c['replication_contract']['code_fork_allowed'] is False
+          assert c['product_kpis']['hard_acceptance']['soak_hours_without_routine_intervention'] == 48
+          print('VNEXT_PRODUCT_CONTRACT_PASS')
+          PY
+
+      - name: Validate tenant instance model invariants
+        run: python local-news-os/vnext/core/instance_model.py --self-test
+
+      - name: Build production and second-instance manifests with the same core
+        run: |
+          python local-news-os/vnext/core/instance_model.py valcea --output /tmp/first.json
+          python local-news-os/vnext/core/instance_model.py test-county --output /tmp/second.json
+          cat /tmp/first.json
+          cat /tmp/second.json
+
+      - name: Prove site-owned runtime and instance isolation
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          a = json.loads(Path('/tmp/first.json').read_text(encoding='utf-8'))
+          b = json.loads(Path('/tmp/second.json').read_text(encoding='utf-8'))
+          for item in (a, b):
+              assert item['runtime']['owner'] == 'site_application'
+              assert item['runtime']['repository_runtime_state_enabled'] is False
+              assert item['runtime']['newsroom'] == {'path': '/newsroom', 'private': True}
+              assert 'state_root' not in item['runtime']
+              assert 'output_root' not in item['runtime']
+              assert 'live_feed' not in item['runtime']
+          assert a['instance_id'] != b['instance_id']
+          assert a['publication']['canonical_domain'] != b['publication']['canonical_domain']
+          assert a['config_sha256'] != b['config_sha256']
+          second = json.dumps(b, ensure_ascii=False).lower()
+          for forbidden in ('vâlcea', 'valcea', 'râmnicu', 'ramnicu', 'valceaclar.ro'):
+              assert forbidden not in second, forbidden
+          print('VNEXT_DUAL_INSTANCE_ISOLATION_PASS')
+          PY
+
+      - name: Enforce CORE_KNOWS_NO_LOCALITY in generic vNext code
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RniE 'vâlcea|valcea|râmnicu|ramnicu|valceaclar\.ro' local-news-os/vnext/core local-news-os/vnext/schemas; then
+            echo 'Generic vNext core contains locality-specific material' >&2
+            exit 1
+          fi
+          echo 'VNEXT_CORE_NO_LOCALITY_PASS'
