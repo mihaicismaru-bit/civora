@@ -1,0 +1,68 @@
+{
+  "schema_version": "1.0",
+  "contract": "LOCAL_NEWS_OS_VNEXT_BUILD_READY_FOR_MIGRATION_V1",
+  "status": "BUILD_READY_FOR_MIGRATION",
+  "production_cutover": false,
+  "site_owns_runtime": true,
+  "core_knows_no_locality": true,
+  "completed_build_phases": [
+    "P0_PRODUCT_CONTRACT_FREEZE",
+    "P1_TENANT_INSTANCE_MODEL",
+    "P2_RUNTIME_DATABASE_EVENT_LEDGER",
+    "P3_SITE_RUNTIME_PRIVATE_NEWSROOM",
+    "P4_GENERIC_SOURCE_ADAPTER_CORE",
+    "P5_SIGNAL_ENGINE",
+    "P6_DYNAMIC_PRIMARY_RESOLVER",
+    "P7_FACT_KERNEL_ENGINE",
+    "P8_NEWSWORTHINESS_ENGINE",
+    "P9_STORY_ENGINE",
+    "P10_EDITORIAL_QA",
+    "P11_SITE_PUBLICATION_ENGINE",
+    "P12_LOCAL_KNOWLEDGE_GRAPH",
+    "P13_MEDIA_INTELLIGENCE",
+    "P14_DISTRIBUTION_ENGINE",
+    "P15_RETRY_SELF_HEAL_UNIFIED_SCHEDULER",
+    "P16_DEVELOPMENT_PRODUCTION_RELEASE_SEPARATION",
+    "P17_INSTANCE_BOOTSTRAP_SECOND_INSTANCE_TEST"
+  ],
+  "p17_acceptance": {
+    "bootstrap_merge_commit": "0a6a4154d9b64e5a6bcd57597eae14485fb2b3ee",
+    "full_acceptance_merge_commit": "ec45ac5fca6f4dbf90c012fd8c44ecb277610334",
+    "acceptance_head": "019c309839da41769a7fc8b6a61bae7bf759779a",
+    "instance_bootstrap_ci": {
+      "run_id": 32285742712,
+      "conclusion": "PASS"
+    },
+    "vnext_validation_ci": {
+      "run_id": 32285742961,
+      "conclusion": "PASS"
+    },
+    "legacy_guard_note": "VÂLCEA CLAR Facebook Single Writer Guard failure is pre-existing legacy scope outside the P17 two-file diff and is not build authority for vNext replication acceptance.",
+    "same_core_acceptance": [
+      "configuration-only neutral instance bootstrap",
+      "eight instance packs plus instance.json",
+      "site-owned runtime database and release state",
+      "SourceItem to Signal",
+      "primary verification task routing",
+      "supported primary evidence",
+      "READY Fact Kernel",
+      "configured Newsworthiness scoring",
+      "Story draft",
+      "Editorial QA PASS",
+      "site-owned publication",
+      "EDITORIAL_CARD media fallback",
+      "outbox-only distribution product without external LIVE claim",
+      "idempotent second scheduler tick",
+      "release candidate validation and atomic promotion",
+      "rollback restores prior validated runtime",
+      "no network publication",
+      "zero locality edits to local-news-os/vnext/core"
+    ]
+  },
+  "handoff": {
+    "next_phase": "P18_MIGRATION_SHADOW_LIVE_SOAK_PRODUCTION_LOCK",
+    "owner": "Vâlcea vNext Acceptance",
+    "build_task_role": "repair acceptance-discovered build defects without extending legacy CIVORA orchestration",
+    "promotion_rule": "P18 may migrate and promote only through the validated release-control path; the existing validated production runtime remains independent until cutover passes acceptance."
+  }
+}
