@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import html
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from email.utils import parsedate_to_datetime
 from html.parser import HTMLParser
 from typing import Iterable
@@ -73,15 +73,23 @@ def _published(value: str | None) -> datetime | None:
 class WordPressFeedDiscoverer:
     """Discover SourceItems from a WordPress/RSS feed.
 
-    The adapter is site-agnostic. Site identity, feed URL, and limits are
-    provided by instance configuration. It prefers full ``content:encoded``
+    The adapter is site-agnostic. Site identity, feed URL, freshness and limits
+    are provided by instance configuration. It prefers full ``content:encoded``
     text and falls back to the RSS description.
     """
 
-    def __init__(self, *, source_id: str, feed_url: str, max_items: int = 12) -> None:
+    def __init__(
+        self,
+        *,
+        source_id: str,
+        feed_url: str,
+        max_items: int = 12,
+        max_age_hours: int | None = None,
+    ) -> None:
         self.source_id = source_id
         self.feed_url = feed_url
         self.max_items = max_items
+        self.max_age_hours = max_age_hours
 
     def __call__(self) -> Iterable[SourceItem]:
         payload = _fetch(self.feed_url)
@@ -96,12 +104,16 @@ class WordPressFeedDiscoverer:
             encoded = node.findtext("{http://purl.org/rss/1.0/modules/content/}encoded")
             description = node.findtext("description") or ""
             body = html_to_text(encoded or description)
+            published_at = _published(node.findtext("pubDate"))
+            if self.max_age_hours is not None and published_at is not None:
+                if now - published_at.astimezone(timezone.utc) > timedelta(hours=self.max_age_hours):
+                    continue
             yield SourceItem(
                 source_id=self.source_id,
                 canonical_url=link,
                 title=html.unescape(title),
                 discovered_at=now,
-                published_at=_published(node.findtext("pubDate")),
+                published_at=published_at,
                 body_text=body or None,
                 source_type="official",
                 metadata={"feed_url": self.feed_url, "adapter": "wordpress_rss"},
