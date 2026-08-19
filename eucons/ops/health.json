@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "product": "EUCONS_COMMERCIAL_OS",
-  "updated_at": "2026-08-19T12:03:40Z",
+  "updated_at": "2026-08-19T12:10:00Z",
   "overall": "GREEN_DEVELOPMENT",
   "checks": {
     "canonical_contracts": "PASS",
@@ -83,6 +83,17 @@
     "facebook_idempotency": "PASS",
     "facebook_immutable_receipts": "PASS",
     "facebook_direct_publication": "DISABLED_UNTIL_FACEBOOK_PAGE_AND_META_APP_AUTHORIZATION",
+    "commercial_email_engine": "PASS",
+    "email_privacy_ack_guard": "PASS",
+    "email_marketing_consent_guard": "PASS",
+    "email_suppression_hold": "PASS",
+    "email_unsubscribe_contract": "PASS",
+    "email_opportunity_provenance": "PASS",
+    "email_offer_pricing_fail_closed": "PASS",
+    "email_recipient_hash_only": "PASS",
+    "email_idempotency": "PASS",
+    "email_immutable_receipts": "PASS",
+    "email_direct_sending": "DISABLED_UNTIL_COMMERCIAL_MAILBOX_AND_PROVIDER_AUTHORIZATION",
     "external_credentials": "NOT_REQUIRED_FOR_DEVELOPMENT"
   },
   "critical_failures": []

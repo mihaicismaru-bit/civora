@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E19",
+  "unit": "E19_COMMERCIAL_EMAIL_ENGINE",
+  "status": "PASS",
+  "validated_at": "2026-08-19T12:10:00Z",
+  "validation": {
+    "workflow": "EUCONS Quality",
+    "run_id": 32251209575,
+    "run_number": 95,
+    "conclusion": "success",
+    "validated_head": "f3e92acce71a5ea28bd954f8f39d6036ecd0ec07",
+    "merged_commit": "bf474f680909bb12333ebbd47fd9f2cef45d9dc6",
+    "exact_head_gate_passed": true
+  },
+  "coverage": {
+    "provider_neutral_engine": "PASS",
+    "message_types": 6,
+    "privacy_ack_guard": "PASS",
+    "marketing_consent_guard": "PASS",
+    "suppression_hold": "PASS",
+    "marketing_unsubscribe_contract": "PASS",
+    "partener_opportunity_provenance": "PASS",
+    "offer_pricing_fail_closed": "PASS",
+    "raw_recipient_in_outbox": "HASH_ONLY",
+    "repository_pii_runtime_output_guard": "PASS",
+    "idempotency": "PASS",
+    "immutable_receipts": "PASS",
+    "retry_limit": 3,
+    "direct_sending": "DISABLED_UNTIL_COMMERCIAL_MAILBOX_AND_PROVIDER_AUTHORIZATION",
+    "external_authorization_required": ["COMMERCIAL_MAILBOX", "MAIL_PROVIDER_API_OR_SMTP"]
+  },
+  "artifacts": [
+    "eucons/email/email_contract.json",
+    "eucons/email/email_engine.py",
+    "eucons/validation/validate_email_engine.py",
+    "eucons/validation/test_email_engine_fail_closed.py",
+    ".github/workflows/eucons-quality.yml"
+  ],
+  "next_phase": "E20"
+}
