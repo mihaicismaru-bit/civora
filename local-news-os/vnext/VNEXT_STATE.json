@@ -51,7 +51,23 @@
         "LOCAL NEWS OS vNext Validation run 32241275942 PASS"
       ]
     },
-    "P4_GENERIC_SOURCE_ADAPTER_CORE": {"status": "NEXT"},
+    "P4_GENERIC_SOURCE_ADAPTER_CORE": {
+      "status": "IN_REVIEW",
+      "evidence": [
+        "configuration-driven adapter contract",
+        "normalized SourceItem contract",
+        "RSS/Atom adapter",
+        "HTML list/article regex adapters",
+        "WordPress REST adapter",
+        "generic JSON API adapter",
+        "sitemap adapter",
+        "PDF-register text adapter",
+        "source-pack schema",
+        "transport-free adapter boundary",
+        "fail-closed unsupported adapter rejection",
+        "neutral second-instance adapter fixture"
+      ]
+    },
     "P5_SIGNAL_ENGINE": {"status": "PENDING"},
     "P6_DYNAMIC_PRIMARY_RESOLVER": {"status": "PENDING"},
     "P7_FACT_KERNEL_ENGINE": {"status": "PENDING"},
@@ -67,5 +83,5 @@
     "P17_INSTANCE_BOOTSTRAP_SECOND_INSTANCE_TEST": {"status": "PENDING"},
     "P18_MIGRATION_SHADOW_LIVE_SOAK_PRODUCTION_LOCK": {"status": "PENDING"}
   },
-  "next_action": "Implement the generic source adapter core as configuration-driven adapters with no locality-specific parser in generic code."
+  "next_action": "Validate P4 on the dedicated vNext CI; on PASS close P4 and advance P5 Signal Engine."
 }
