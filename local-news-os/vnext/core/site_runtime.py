@@ -26,6 +26,8 @@ from runtime_store import (
     register_instance,
     transition_story,
 )
+from signal_engine import get_signal, list_signals, materialize_source_item
+from source_adapters import SourceDefinition, SourceItem
 
 StartResponse = Callable[[str, list[tuple[str, str]]], Any]
 
@@ -166,8 +168,20 @@ class SiteRuntimeApp:
             """,
             (self.instance_id,),
         ).fetchall()
-        counts = {str(row["state"]): int(row["count"]) for row in state_rows}
-        total = sum(counts.values())
+        story_counts = {str(row["state"]): int(row["count"]) for row in state_rows}
+        story_total = sum(story_counts.values())
+        signal_rows = conn.execute(
+            """
+            SELECT state, COUNT(*) AS count
+            FROM signals
+            WHERE instance_id=?
+            GROUP BY state
+            ORDER BY state
+            """,
+            (self.instance_id,),
+        ).fetchall()
+        signal_counts = {str(row["state"]): int(row["count"]) for row in signal_rows}
+        signal_total = sum(signal_counts.values())
         recent_events = conn.execute(
             """
             SELECT event_id, aggregate_type, aggregate_id, event_type,
@@ -181,8 +195,10 @@ class SiteRuntimeApp:
         ).fetchall()
         return {
             "instance": instance,
-            "story_counts": counts,
-            "story_total": total,
+            "story_counts": story_counts,
+            "story_total": story_total,
+            "signal_counts": signal_counts,
+            "signal_total": signal_total,
             "recent_events": [dict(row) for row in recent_events],
         }
 
@@ -209,13 +225,30 @@ class SiteRuntimeApp:
             ).fetchall()
         return [dict(row) for row in rows]
 
-    def _render_newsroom(self, summary: dict[str, Any], stories: list[dict[str, Any]]) -> bytes:
+    def _list_signals(self, conn, *, state: str | None, limit: int) -> list[dict[str, Any]]:
+        return list_signals(
+            conn,
+            instance_id=self.instance_id,
+            state=state,
+            limit=limit,
+        )
+
+    def _render_newsroom(
+        self,
+        summary: dict[str, Any],
+        stories: list[dict[str, Any]],
+        signals: list[dict[str, Any]],
+    ) -> bytes:
         instance = summary["instance"]
         counts = summary["story_counts"]
         count_items = "".join(
             f"<li><strong>{html.escape(state)}</strong>: {count}</li>"
             for state, count in sorted(counts.items())
         ) or "<li>No stories yet</li>"
+        signal_count_items = "".join(
+            f"<li><strong>{html.escape(state)}</strong>: {count}</li>"
+            for state, count in sorted(summary["signal_counts"].items())
+        ) or "<li>No signals yet</li>"
         story_rows = "".join(
             "<tr>"
             f"<td><a href=\"/newsroom/stories/{quote(str(story['story_id']), safe='')}\">{html.escape(str(story['story_id']))}</a></td>"
@@ -225,6 +258,17 @@ class SiteRuntimeApp:
             "</tr>"
             for story in stories
         ) or '<tr><td colspan="4">No stories yet</td></tr>'
+        signal_rows = "".join(
+            "<tr>"
+            f"<td>{html.escape(str(signal['signal_id']))}</td>"
+            f"<td>{html.escape(str(signal.get('state') or ''))}</td>"
+            f"<td>{html.escape(str(signal.get('source_id') or ''))}</td>"
+            f"<td>{html.escape(str(signal.get('source_title') or ''))}</td>"
+            f"<td>{html.escape(str(signal.get('publication_authority') or ''))}</td>"
+            f"<td>{html.escape(str(signal.get('updated_at') or ''))}</td>"
+            "</tr>"
+            for signal in signals
+        ) or '<tr><td colspan="6">No signals yet</td></tr>'
         document = f"""<!doctype html>
 <html lang="en">
 <head>
@@ -242,6 +286,8 @@ ul{{display:flex;flex-wrap:wrap;gap:1rem;list-style:none;padding:0}} a{{color:in
 <body>
 <header><h1>Newsroom</h1><small>{html.escape(str(instance['canonical_domain']))}</small></header>
 <p>Runtime owner: <strong>{html.escape(str(instance['runtime_owner']))}</strong> · Engine: {html.escape(str(instance['engine_version']))}</p>
+<h2>Signals</h2><ul>{signal_count_items}</ul>
+<table><thead><tr><th>ID</th><th>State</th><th>Source</th><th>Title</th><th>Authority</th><th>Updated</th></tr></thead><tbody>{signal_rows}</tbody></table>
 <h2>Story lifecycle</h2><ul>{count_items}</ul>
 <h2>Recent stories</h2>
 <table><thead><tr><th>ID</th><th>State</th><th>Headline</th><th>Updated</th></tr></thead><tbody>{story_rows}</tbody></table>
@@ -319,10 +365,11 @@ code{{overflow-wrap:anywhere}}
                 if path == "/newsroom":
                     summary = self._summary(conn)
                     stories = self._list_stories(conn, state=None, limit=100)
+                    signals = self._list_signals(conn, state=None, limit=100)
                     return self._response(
                         start_response,
                         "200 OK",
-                        self._render_newsroom(summary, stories),
+                        self._render_newsroom(summary, stories, signals),
                         content_type="text/html; charset=utf-8",
                         private=True,
                     )
@@ -332,6 +379,42 @@ code{{overflow-wrap:anywhere}}
                         start_response,
                         "200 OK",
                         self._summary(conn),
+                        private=True,
+                    )
+
+                if path == "/newsroom/api/signals":
+                    query = parse_qs(str(environ.get("QUERY_STRING") or ""))
+                    state = (query.get("state") or [None])[0]
+                    limit = _safe_int((query.get("limit") or [None])[0], default=100, minimum=1, maximum=500)
+                    return self._json_response(
+                        start_response,
+                        "200 OK",
+                        {"signals": self._list_signals(conn, state=state, limit=limit)},
+                        private=True,
+                    )
+
+                signal_api_prefix = "/newsroom/api/signals/"
+                if path.startswith(signal_api_prefix):
+                    signal_id = unquote(path[len(signal_api_prefix) :])
+                    try:
+                        signal = get_signal(conn, instance_id=self.instance_id, signal_id=signal_id)
+                    except Exception:
+                        return self._json_response(
+                            start_response,
+                            "404 Not Found",
+                            {"error": "signal_not_found"},
+                            private=True,
+                        )
+                    events = list_events(
+                        conn,
+                        instance_id=self.instance_id,
+                        aggregate_type="signal",
+                        aggregate_id=signal_id,
+                    )
+                    return self._json_response(
+                        start_response,
+                        "200 OK",
+                        {"signal": signal, "events": events},
                         private=True,
                     )
 
@@ -478,6 +561,41 @@ def self_test() -> None:
             engine_version="2.0.0-test",
             headline="Beta isolated story",
         )
+        source = SourceDefinition.from_dict(
+            {
+                "source_id": "fixture-feed",
+                "adapter": "RSS_ATOM",
+                "role": "DISCOVERY",
+                "url": "https://example.test/feed",
+                "config": {},
+            }
+        )
+        alpha_signal, _ = materialize_source_item(
+            conn,
+            instance_id="alpha-local",
+            source=source,
+            item=SourceItem(
+                source_id="fixture-feed",
+                external_id="alpha-signal",
+                url="https://example.test/alpha",
+                title="Alpha signal headline",
+                fingerprint="alpha-signal-fingerprint",
+            ),
+            engine_version="2.0.0-test",
+        )
+        materialize_source_item(
+            conn,
+            instance_id="beta-local",
+            source=source,
+            item=SourceItem(
+                source_id="fixture-feed",
+                external_id="beta-signal",
+                url="https://example.test/beta",
+                title="Beta isolated signal",
+                fingerprint="beta-signal-fingerprint",
+            ),
+            engine_version="2.0.0-test",
+        )
         conn.close()
 
         app = SiteRuntimeApp(
@@ -504,6 +622,8 @@ def self_test() -> None:
         text = body.decode("utf-8")
         assert "Alpha public-interest story" in text
         assert "Beta isolated story" not in text
+        assert "Alpha signal headline" in text
+        assert "Beta isolated signal" not in text
         assert headers["Cache-Control"] == "no-store, private"
 
         status, _, body = _invoke(app, "/newsroom/api/summary", token="test-secret")
@@ -511,7 +631,27 @@ def self_test() -> None:
         summary = json.loads(body)
         assert summary["story_total"] == 1
         assert summary["story_counts"] == {"VERIFIED": 1}
+        assert summary["signal_total"] == 1
+        assert summary["signal_counts"] == {"DISCOVERED": 1}
         assert summary["instance"]["runtime_owner"] == "site_application"
+
+        status, _, body = _invoke(app, "/newsroom/api/signals", token="test-secret", query="state=DISCOVERED")
+        assert status.startswith("200")
+        signals = json.loads(body)["signals"]
+        assert [item["signal_id"] for item in signals] == [alpha_signal["signal_id"]]
+        assert signals[0]["publication_authority"] == "NONE"
+        assert signals[0]["material_fact_ready"] is False
+        assert signals[0]["fact_kernel_ready"] is False
+
+        status, _, body = _invoke(
+            app,
+            f"/newsroom/api/signals/{alpha_signal['signal_id']}",
+            token="test-secret",
+        )
+        assert status.startswith("200")
+        signal_detail = json.loads(body)
+        assert signal_detail["signal"]["source_title"] == "Alpha signal headline"
+        assert [event["event_type"] for event in signal_detail["events"]] == ["SIGNAL_DISCOVERED"]
 
         status, _, body = _invoke(app, "/newsroom/api/stories", token="test-secret", query="state=VERIFIED")
         assert status.startswith("200")
