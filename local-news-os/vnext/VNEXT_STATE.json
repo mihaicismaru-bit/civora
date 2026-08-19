@@ -6,107 +6,15 @@
   "production_cutover": false,
   "validated_production_runtime_must_remain_independent_of_development_gates": true,
   "phases": {
-    "P0_PRODUCT_CONTRACT_FREEZE": {
-      "status": "CLOSED",
-      "evidence": [
-        "machine-readable frozen product contract",
-        "SITE_OWNS_RUNTIME invariant",
-        "CORE_KNOWS_NO_LOCALITY invariant"
-      ]
-    },
-    "P1_TENANT_INSTANCE_MODEL": {
-      "status": "CLOSED",
-      "evidence": [
-        "generic instance validator",
-        "database-backed site runtime boundary",
-        "eight instance pack bindings",
-        "production instance configuration",
-        "neutral second-instance fixture",
-        "dual-instance isolation CI"
-      ]
-    },
-    "P2_RUNTIME_DATABASE_EVENT_LEDGER": {
-      "status": "CLOSED",
-      "evidence": [
-        "site-owned database schema",
-        "multi-instance runtime isolation",
-        "story fingerprint dedupe constraint",
-        "optimistic story revision control",
-        "append-only runtime event ledger",
-        "event ledger tamper rejection CI"
-      ]
-    },
-    "P3_SITE_RUNTIME_PRIVATE_NEWSROOM": {
-      "status": "CLOSED",
-      "evidence": [
-        "generic WSGI site runtime",
-        "public /healthz backed only by site database",
-        "private /newsroom HTML surface",
-        "private newsroom summary and story APIs",
-        "per-instance story and event isolation",
-        "Bearer authentication with constant-time comparison",
-        "fail-closed newsroom when auth secret is absent",
-        "private no-store and noindex response policy",
-        "repository-runtime dependency rejection in CI",
-        "LOCAL NEWS OS vNext Validation run 32241275942 PASS"
-      ]
-    },
-    "P4_GENERIC_SOURCE_ADAPTER_CORE": {
-      "status": "CLOSED",
-      "evidence": [
-        "configuration-driven adapter contract",
-        "normalized SourceItem contract",
-        "RSS/Atom adapter",
-        "HTML list/article regex adapters",
-        "WordPress REST adapter",
-        "generic JSON API adapter",
-        "sitemap adapter",
-        "PDF-register text adapter",
-        "source-pack schema",
-        "transport-free adapter boundary",
-        "fail-closed unsupported adapter rejection",
-        "neutral second-instance adapter fixture",
-        "LOCAL NEWS OS vNext Validation run 32246572918 PASS"
-      ]
-    },
-    "P5_SIGNAL_ENGINE": {
-      "status": "CLOSED",
-      "evidence": [
-        "site-owned signals table",
-        "deterministic signal identity and dedupe",
-        "normalized SourceItem to SignalCandidate materialization",
-        "non-authoritative deterministic claim hints",
-        "unresolved entity mention hints",
-        "publication_authority hard locked to NONE",
-        "material_fact_ready and fact_kernel_ready hard locked false",
-        "append-only SIGNAL_DISCOVERED event",
-        "cross-instance signal isolation",
-        "private newsroom signal summary/list/detail API",
-        "private newsroom visible recent-signal table",
-        "LOCAL NEWS OS vNext Validation run 32247133056 PASS"
-      ]
-    },
-    "P6_DYNAMIC_PRIMARY_RESOLVER": {
-      "status": "CLOSED",
-      "evidence": [
-        "site-owned verification_tasks table",
-        "site-owned primary_targets and task-target routing tables",
-        "deterministic per-claim verification task materialization",
-        "source-pack PRIMARY/BOTH target registration",
-        "NEEDS_DISCOVERY state replaces unrouted dead-end",
-        "dynamic primary-target candidate proposal",
-        "authority_confirmed plus canonical_url_confirmed validation gate",
-        "unvalidated candidates forbidden from routing",
-        "deterministic validated-target scoring and routing",
-        "publication_authority hard locked to NONE for tasks and targets",
-        "cross-instance target and verification-task isolation",
-        "private newsroom verification-task and primary-target visibility",
-        "LOCAL NEWS OS vNext Validation run 32251816597 PASS",
-        "merged PR #458 at 29695b3fdb98a0ca8209c42e21ad8634ae458d06"
-      ]
-    },
-    "P7_FACT_KERNEL_ENGINE": {"status": "NEXT"},
-    "P8_NEWSWORTHINESS_ENGINE": {"status": "PENDING"},
+    "P0_PRODUCT_CONTRACT_FREEZE": {"status": "CLOSED", "evidence": ["machine-readable frozen product contract", "SITE_OWNS_RUNTIME invariant", "CORE_KNOWS_NO_LOCALITY invariant"]},
+    "P1_TENANT_INSTANCE_MODEL": {"status": "CLOSED", "evidence": ["generic instance validator", "database-backed site runtime boundary", "eight instance pack bindings", "production instance configuration", "neutral second-instance fixture", "dual-instance isolation CI"]},
+    "P2_RUNTIME_DATABASE_EVENT_LEDGER": {"status": "CLOSED", "evidence": ["site-owned database schema", "multi-instance runtime isolation", "story fingerprint dedupe constraint", "optimistic story revision control", "append-only runtime event ledger", "event ledger tamper rejection CI"]},
+    "P3_SITE_RUNTIME_PRIVATE_NEWSROOM": {"status": "CLOSED", "evidence": ["generic WSGI site runtime", "public /healthz backed only by site database", "private /newsroom HTML surface", "private newsroom summary and story APIs", "per-instance story and event isolation", "Bearer authentication with constant-time comparison", "fail-closed newsroom when auth secret is absent", "private no-store and noindex response policy", "repository-runtime dependency rejection in CI", "LOCAL NEWS OS vNext Validation run 32241275942 PASS"]},
+    "P4_GENERIC_SOURCE_ADAPTER_CORE": {"status": "CLOSED", "evidence": ["configuration-driven adapter contract", "normalized SourceItem contract", "RSS/Atom adapter", "HTML list/article regex adapters", "WordPress REST adapter", "generic JSON API adapter", "sitemap adapter", "PDF-register text adapter", "source-pack schema", "transport-free adapter boundary", "fail-closed unsupported adapter rejection", "neutral second-instance adapter fixture", "LOCAL NEWS OS vNext Validation run 32246572918 PASS"]},
+    "P5_SIGNAL_ENGINE": {"status": "CLOSED", "evidence": ["site-owned signals table", "deterministic signal identity and dedupe", "normalized SourceItem to SignalCandidate materialization", "non-authoritative deterministic claim hints", "unresolved entity mention hints", "publication_authority hard locked to NONE", "material_fact_ready and fact_kernel_ready hard locked false", "append-only SIGNAL_DISCOVERED event", "cross-instance signal isolation", "private newsroom signal summary/list/detail API", "private newsroom visible recent-signal table", "LOCAL NEWS OS vNext Validation run 32247133056 PASS"]},
+    "P6_DYNAMIC_PRIMARY_RESOLVER": {"status": "CLOSED", "evidence": ["site-owned verification_tasks table", "site-owned primary_targets and task-target routing tables", "deterministic per-claim verification task materialization", "source-pack PRIMARY/BOTH target registration", "NEEDS_DISCOVERY state replaces unrouted dead-end", "dynamic primary-target candidate proposal", "authority_confirmed plus canonical_url_confirmed validation gate", "unvalidated candidates forbidden from routing", "deterministic validated-target scoring and routing", "publication_authority hard locked to NONE for tasks and targets", "cross-instance target and verification-task isolation", "private newsroom verification-task and primary-target visibility", "LOCAL NEWS OS vNext Validation run 32251816597 PASS", "merged PR #458 at 29695b3fdb98a0ca8209c42e21ad8634ae458d06"]},
+    "P7_FACT_KERNEL_ENGINE": {"status": "CLOSED", "evidence": ["site-owned verification_results table", "site-owned fact_kernels table", "verification results require TARGETS_READY tasks and validated routed primary targets", "claim-level evidence URL fingerprint summary and normalized claim provenance", "SUPPORTS CONTRADICTS INCONCLUSIVE verdict contract", "missing inconclusive or contradicted evidence blocks fact-kernel materialization", "all verification tasks must be supported before READY", "fact-kernel identity and idempotent re-materialization", "material_fact_ready and fact_kernel_ready true only on READY kernel", "publication_authority hard locked to NONE", "cross-instance verification-result and fact-kernel isolation", "append-only PRIMARY_EVIDENCE_RECORDED and FACT_KERNEL_READY events", "LOCAL NEWS OS vNext Validation run 32252552761 PASS", "merged PR #463 at f5330c75c2b04c0f23f4c3d91c83be3dbee59c23"]},
+    "P8_NEWSWORTHINESS_ENGINE": {"status": "NEXT"},
     "P9_STORY_ENGINE": {"status": "PENDING"},
     "P10_EDITORIAL_QA": {"status": "PENDING"},
     "P11_SITE_PUBLICATION_ENGINE": {"status": "PENDING"},
@@ -118,5 +26,5 @@
     "P17_INSTANCE_BOOTSTRAP_SECOND_INSTANCE_TEST": {"status": "PENDING"},
     "P18_MIGRATION_SHADOW_LIVE_SOAK_PRODUCTION_LOCK": {"status": "PENDING"}
   },
-  "next_action": "Implement P7 Fact Kernel Engine: consume primary verification results into source-bound material facts and fact kernels while retaining claim-level provenance and fail-closed publication authority."
+  "next_action": "Implement P8 Newsworthiness Engine: score READY fact kernels with configuration-driven local impact, public utility, urgency, money, affected people, novelty, accountability and proximity signals; produce editorial routing without granting publication authority."
 }
