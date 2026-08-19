@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "contract": "LOCAL_NEWS_OS_VNEXT_SOCIAL_SINGLE_WRITER_CUTOVER_PLAN_V1",
+  "instance_id": "valcea",
+  "prepared_at": "2026-08-19T19:35:03+03:00",
+  "status": "PREPARED_NOT_EXECUTED",
+  "purpose": "Prevent duplicate or racing external social publication when Vâlcea moves from the repository-owned legacy publisher to the site-owned LOCAL NEWS OS vNext Distribution Engine.",
+  "vnext_distribution": {
+    "phase": "P14_DISTRIBUTION_ENGINE",
+    "status": "CLOSED",
+    "channel_pack": "local-news-os/vnext/instances/valcea/packs/channels.json",
+    "channel_pack_sha": "aef0b38a5ed3d99868fcd180d139ef939557e02e",
+    "direct_capable_channels": ["facebook", "instagram"],
+    "external_live_requires_remote_receipt": true
+  },
+  "legacy_writer": {
+    "workflow": ".github/workflows/valcea-clar-social-publishing.yml",
+    "workflow_sha": "c76969dc5bea18386990ebc70716d14093474728",
+    "schedule": "7,22,37,52 * * * *",
+    "direct_publish_steps": [
+      "Publish eligible Facebook editorial story through Meta Graph API",
+      "Publish eligible Instagram editorial story through Meta Graph API",
+      "Publish eligible TikTok story through Content Posting API"
+    ],
+    "repository_state_write": "Persist canonical social state and public media conflict-safe",
+    "current_cutover_guard": "NONE_VERIFIED",
+    "risk": "If legacy and vNext direct apply are simultaneously enabled, the same story/revision may race or duplicate across external channels even though each engine is internally idempotent."
+  },
+  "required_preconditions": [
+    "VNEXT_STATE.status is BUILD_READY_FOR_MIGRATION or later.",
+    "P15 retry/self-heal/unified scheduler is CLOSED.",
+    "P16 development/production release separation is CLOSED and provides atomic release/rollback control.",
+    "P17 instance bootstrap/second-instance acceptance is CLOSED.",
+    "Shadow migration imported legacy Facebook and Instagram delivery history as read-only evidence.",
+    "Shadow vNext channel products match the current site publication revision and media selection for representative stories.",
+    "Meta credential health is verified through credential references without persisting credential values.",
+    "A last-known-good snapshot of facebook_state.json and instagram_state.json is recorded immediately before fencing.",
+    "No unresolved legacy direct publish job is in-flight at the cutover boundary."
+  ],
+  "required_build_change_before_cutover": {
+    "owner": "P16_OR_P17_BUILD",
+    "requirement": "Add an explicit fail-closed legacy social writer fence/kill-switch that can disable scheduled/direct apply before vNext direct delivery is enabled, without deleting historical workflow evidence.",
+    "acceptable_forms": [
+      "workflow-level cutover variable checked before all direct apply and repository state write steps",
+      "deployment-level workflow disable action executed atomically by the release transaction"
+    ],
+    "forbidden": [
+      "rely on timing between two independent schedulers",
+      "enable vNext direct apply first and disable legacy later",
+      "delete historical facebook_state.json or instagram_state.json",
+      "copy credential values into repository configuration"
+    ]
+  },
+  "atomic_cutover_sequence": [
+    "1. Freeze external social apply for the legacy writer using the verified fence; allow read-only audit only.",
+    "2. Read back legacy writer fenced state and verify no in-flight direct publish run remains.",
+    "3. Snapshot final legacy Facebook/Instagram delivery history and bind its hashes into the shadow migration receipt.",
+    "4. Promote the tested vNext runtime release while keeping vNext direct apply gates false.",
+    "5. Verify site-owned story publication, media selection and channel products from the production database.",
+    "6. Verify Meta account identity and credential health through references only.",
+    "7. Enable exactly one vNext direct channel at a time for a bounded controlled-live story/revision.",
+    "8. Require independent provider readback, external object id and remote receipt fingerprint before marking delivery PUBLISHED.",
+    "9. Enable the second direct channel only after the first channel passes controlled-live.",
+    "10. Keep the legacy writer fenced for the duration of controlled-live and soak; never run both writers concurrently."
+  ],
+  "rollback_sequence": [
+    "1. Disable vNext direct apply gates immediately; do not delete already verified external posts.",
+    "2. Roll back the vNext runtime release/database projection only if the release rollback gate requires it.",
+    "3. Restore the last-known-good legacy writer only after confirming vNext direct workers are stopped and leases are released.",
+    "4. Reconcile delivery ledgers against provider readback before any resumed publication to prevent duplicates."
+  ],
+  "acceptance_assertions": {
+    "simultaneous_direct_writers": 0,
+    "duplicate_external_delivery_for_same_story_channel_revision": 0,
+    "external_live_without_remote_receipt": 0,
+    "credential_values_persisted_in_repo": 0,
+    "legacy_history_deleted": 0
+  },
+  "executed": false
+}
