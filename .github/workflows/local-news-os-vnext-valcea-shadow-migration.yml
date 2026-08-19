@@ -36,6 +36,25 @@ jobs:
         with:
           python-version: "3.13"
 
+      - name: Repair known shadow harness arity defect
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('local-news-os/vnext/instances/valcea/migration/p18_shadow_migration.py')
+          text = p.read_text(encoding='utf-8')
+          old = "VALUES (?,?,?,'PUBLISHED',1,?,?,?,?,?)"
+          new = "VALUES (?,?,?,'PUBLISHED',1,?,?,?,?)"
+          if old in text:
+              text = text.replace(old, new, 1)
+              p.write_text(text, encoding='utf-8')
+              print('VNEXT_P18_SHADOW_ARITY_REPAIRED')
+          elif new in text:
+              print('VNEXT_P18_SHADOW_ARITY_ALREADY_REPAIRED')
+          else:
+              raise SystemExit('expected shadow INSERT signature not found')
+          PY
+
       - name: Compile shadow migration harness
         run: python -m py_compile local-news-os/vnext/instances/valcea/migration/p18_shadow_migration.py
 
@@ -127,18 +146,20 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-      - name: Persist latest shadow acceptance receipt
+      - name: Persist harness repair and latest shadow acceptance receipt
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add local-news-os/vnext/acceptance/valcea-p18-shadow-latest.json
+          git add \
+            local-news-os/vnext/instances/valcea/migration/p18_shadow_migration.py \
+            local-news-os/vnext/acceptance/valcea-p18-shadow-latest.json
           if git diff --cached --quiet; then
             exit 0
           fi
           status=$(python -c "import json; print(json.load(open('local-news-os/vnext/acceptance/valcea-p18-shadow-latest.json', encoding='utf-8'))['status'])")
-          git commit -m "P18: persist Vâlcea shadow migration ${status}"
+          git commit -m "P18: repair shadow import and persist ${status}"
           git pull --rebase origin main
           git push origin HEAD:main
 
