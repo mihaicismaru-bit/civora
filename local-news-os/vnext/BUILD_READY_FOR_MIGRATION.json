@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "contract": "LOCAL_NEWS_OS_VNEXT_BUILD_READY_FOR_MIGRATION_V1",
   "status": "BUILD_READY_FOR_MIGRATION",
   "production_cutover": false,
@@ -58,6 +58,32 @@
       "no network publication",
       "zero locality edits to local-news-os/vnext/core"
     ]
+  },
+  "deployability_repair": {
+    "defect": "production instance declared PostgreSQL while runtime_store still used SQLite-only connection semantics",
+    "status": "CODE_REPAIRED_EXTERNAL_BINDING_UNVERIFIED",
+    "repair_pr": 538,
+    "repair_merge_commit": "92cf4e7a20290c29a539b1bf8614788d9bc5c7a8",
+    "runtime_database_contract": {
+      "local_test_backend": "sqlite",
+      "production_backend": "postgresql",
+      "production_secret_ref": "LOCAL_NEWS_RUNTIME_DATABASE_URL",
+      "repository_runtime_state_enabled": false,
+      "real_postgresql_binding_verified": false
+    },
+    "deployment_package": {
+      "python_entrypoint": "local-news-os/vnext/vercel_app.py",
+      "dependency_manifest": "local-news-os/vnext/pyproject.toml",
+      "composite_site_runtime": "local-news-os/vnext/core/production_app.py",
+      "real_host_binding_verified": false
+    },
+    "ci": {
+      "runtime_db_contract": {"run_id": 32297566467, "conclusion": "PASS"},
+      "vnext_validation": {"run_id": 32297566400, "conclusion": "PASS"},
+      "build_state": {"run_id": 32297566250, "conclusion": "PASS"},
+      "instance_bootstrap": {"run_id": 32297566149, "conclusion": "PASS"}
+    },
+    "truth_boundary": "Static PostgreSQL schema/adapter/deployment support is validated. A real PostgreSQL server, hosting target and newsroom secret are not claimed until externally bound and read back."
   },
   "handoff": {
     "next_phase": "P18_MIGRATION_SHADOW_LIVE_SOAK_PRODUCTION_LOCK",
