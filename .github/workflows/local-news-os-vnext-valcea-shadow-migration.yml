@@ -36,23 +36,35 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Repair known shadow harness arity defect
+      - name: Repair known shadow harness defects
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
           p = Path('local-news-os/vnext/instances/valcea/migration/p18_shadow_migration.py')
           text = p.read_text(encoding='utf-8')
-          old = "VALUES (?,?,?,'PUBLISHED',1,?,?,?,?,?)"
-          new = "VALUES (?,?,?,'PUBLISHED',1,?,?,?,?)"
-          if old in text:
-              text = text.replace(old, new, 1)
-              p.write_text(text, encoding='utf-8')
+
+          old_arity = "VALUES (?,?,?,'PUBLISHED',1,?,?,?,?,?)"
+          new_arity = "VALUES (?,?,?,'PUBLISHED',1,?,?,?,?)"
+          if old_arity in text:
+              text = text.replace(old_arity, new_arity, 1)
               print('VNEXT_P18_SHADOW_ARITY_REPAIRED')
-          elif new in text:
+          elif new_arity in text:
               print('VNEXT_P18_SHADOW_ARITY_ALREADY_REPAIRED')
           else:
               raise SystemExit('expected shadow INSERT signature not found')
+
+          old_provenance = '''    evidence_backed = bool(source_urls)\n    is_public = bool(public_requested and evidence_backed)\n    status = "EVIDENCE_BACKED" if evidence_backed else "CANDIDATE"\n    provenance = {\n        "migration_source": str(source_path.relative_to(REPO_ROOT)),\n        "source_urls": source_urls,\n        "legacy_import": True,\n    }\n    fp = _sha({"type": entity_type, "id": entity_id, "name": name, "sources": source_urls})\n    now = utc_now()\n'''
+          new_provenance = '''    now = utc_now()\n    http_sources = sorted({str(url).strip() for url in source_urls if str(url).startswith(("http://", "https://"))})\n    provenance = [\n        {\n            "source_url": url,\n            "evidence_fingerprint": _sha({"migration_source": str(source_path.relative_to(REPO_ROOT)), "source_url": url}),\n            "observed_at": now,\n            "source_kind": "LEGACY_MIGRATION",\n            "note": "Imported from already-public legacy VÂLCEA CLAR intelligence; no fresh authority inferred.",\n        }\n        for url in http_sources\n    ]\n    evidence_backed = bool(provenance)\n    is_public = bool(public_requested and evidence_backed)\n    status = "EVIDENCE_BACKED" if evidence_backed else "CANDIDATE"\n    fp = _sha({"type": entity_type, "id": entity_id, "name": name, "sources": http_sources})\n'''
+          if old_provenance in text:
+              text = text.replace(old_provenance, new_provenance, 1)
+              print('VNEXT_P18_SHADOW_PROVENANCE_REPAIRED')
+          elif 'http_sources = sorted({' in text and '"source_kind": "LEGACY_MIGRATION"' in text:
+              print('VNEXT_P18_SHADOW_PROVENANCE_ALREADY_REPAIRED')
+          else:
+              raise SystemExit('expected migrated knowledge provenance block not found')
+
+          p.write_text(text, encoding='utf-8')
           PY
 
       - name: Compile shadow migration harness
