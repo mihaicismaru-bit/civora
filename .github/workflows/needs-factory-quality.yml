@@ -42,7 +42,7 @@ jobs:
           PY
       - name: Run Needs Factory regression suite
         run: python -m unittest discover -s partener-eu/needs-factory/tests -v
-      - name: Run deterministic pipeline smoke fixture
+      - name: Run deterministic pipeline smoke fixture through NF12
         run: |
           python partener-eu/needs-factory/tools/run_fixture.py \
             partener-eu/needs-factory/tests/fixtures/pipeline_smoke.json \
@@ -52,5 +52,9 @@ jobs:
           manifest = json.load(open('/tmp/needs-factory-smoke-manifest.json', encoding='utf-8'))
           assert manifest['release_gate']['ready_for_narrative'] is True
           assert manifest['run_id'].startswith('NF-')
+          assert 'NF12_PACKAGE' in manifest['closed_checkpoints']
+          assert manifest['narrative_claim_count'] == 2
+          assert len(manifest['narrative_pack_sha256']) >= 32
           print(manifest['run_id'])
+          print(manifest['narrative_pack_sha256'])
           PY
