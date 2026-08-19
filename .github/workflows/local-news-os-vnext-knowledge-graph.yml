@@ -1,0 +1,81 @@
+name: LOCAL NEWS OS vNext Knowledge Graph Validation
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/vnext/core/knowledge_graph.py"
+      - "local-news-os/vnext/runtime/knowledge_graph_schema.sql"
+      - "local-news-os/vnext/instances/**/packs/entities.json"
+      - ".github/workflows/local-news-os-vnext-knowledge-graph.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/vnext/core/knowledge_graph.py"
+      - "local-news-os/vnext/runtime/knowledge_graph_schema.sql"
+      - "local-news-os/vnext/instances/**/packs/entities.json"
+      - ".github/workflows/local-news-os-vnext-knowledge-graph.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-knowledge-graph:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile knowledge dependency chain
+        run: |
+          python -m py_compile \
+            local-news-os/vnext/core/runtime_store.py \
+            local-news-os/vnext/core/story_engine.py \
+            local-news-os/vnext/core/editorial_qa.py \
+            local-news-os/vnext/core/site_publication.py \
+            local-news-os/vnext/core/knowledge_graph.py
+
+      - name: Run Knowledge Graph self-test
+        run: python local-news-os/vnext/core/knowledge_graph.py --self-test
+
+      - name: Validate per-instance profile policies through same core
+        run: |
+          python - <<'PY'
+          import json, sys
+          from pathlib import Path
+          sys.path.insert(0, str(Path('local-news-os/vnext/core').resolve()))
+          import knowledge_graph
+          policies=[]
+          for instance_id in ('valcea','test-county'):
+              pack=json.loads(Path(f'local-news-os/vnext/instances/{instance_id}/packs/entities.json').read_text(encoding='utf-8'))
+              policies.append(knowledge_graph.validate_entity_pack(pack, instance_id=instance_id))
+          assert policies[0]['profile_paths']['person'] != policies[1]['profile_paths']['person']
+          assert policies[0]['profile_paths']['artist'] != policies[1]['profile_paths']['artist']
+          print('VNEXT_KNOWLEDGE_PROFILE_POLICY_REPLICATION_PASS')
+          PY
+
+      - name: Enforce provenance and site-owned graph boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'CREATE TABLE IF NOT EXISTS knowledge_entities' local-news-os/vnext/runtime/knowledge_graph_schema.sql
+          grep -q 'CREATE TABLE IF NOT EXISTS knowledge_edges' local-news-os/vnext/runtime/knowledge_graph_schema.sql
+          grep -q 'knowledge_entity_provenance is append-only' local-news-os/vnext/runtime/knowledge_graph_schema.sql
+          grep -q "assertion_basis = 'DIRECT_EVIDENCE'" local-news-os/vnext/runtime/knowledge_graph_schema.sql
+          grep -q 'verified graph material requires provenance' local-news-os/vnext/core/knowledge_graph.py
+          grep -q 'knowledge enrichment requires PUBLISHED story' local-news-os/vnext/core/knowledge_graph.py
+          grep -q '/newsroom/knowledge' local-news-os/vnext/core/knowledge_graph.py
+          ! grep -Eiq 'requests\.|urllib\.request|httpx|aiohttp|subprocess.*curl|git_state_path|state_root|live-feed|current_edition|story_publication_event|git commit|git push' local-news-os/vnext/core/knowledge_graph.py
+          echo 'VNEXT_KNOWLEDGE_SITE_OWNED_BOUNDARY_PASS'
+
+      - name: Enforce CORE_KNOWS_NO_LOCALITY
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -niE 'vâlcea|valcea|râmnicu|ramnicu|valceaclar\.ro' local-news-os/vnext/core/knowledge_graph.py; then
+            echo 'Knowledge Graph core contains locality-specific material' >&2
+            exit 1
+          fi
+          echo 'VNEXT_KNOWLEDGE_NO_LOCALITY_PASS'
