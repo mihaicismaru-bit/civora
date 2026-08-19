@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sys
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -23,6 +24,10 @@ from typing import Any, Callable
 ROOT = Path(__file__).resolve().parents[2]
 VC = ROOT / "valcea-clar"
 SOCIAL = VC / "social"
+sys.path.insert(0, str(SOCIAL))
+
+import facebook_publish as legacy  # noqa: E402
+
 PROFILE = SOCIAL / "profile_presence_system.json"
 LEGAL = VC / "site" / "legal" / "legal_pages.json"
 STATE = SOCIAL / "facebook_profile_state.json"
@@ -86,7 +91,7 @@ def graph_request(
 ) -> dict[str, Any]:
     encoded = None
     method = "GET"
-    headers = {"User-Agent": "ValceaClar-Facebook-Profile/1.0"}
+    headers = {"User-Agent": "ValceaClar-Facebook-Profile/1.1"}
     if data is not None:
         encoded = urllib.parse.urlencode(data).encode("utf-8")
         method = "POST"
@@ -166,14 +171,29 @@ def comparable(field: str, value: Any) -> Any:
     return " ".join(str(value or "").split()).strip().casefold()
 
 
-def run(*, apply: bool, request_fn: Callable[..., Any] = urllib.request.urlopen) -> dict[str, Any]:
+def run(
+    *,
+    apply: bool,
+    request_fn: Callable[..., Any] = urllib.request.urlopen,
+    token_resolver: Callable[[str, str, str], tuple[str, dict[str, Any]]] = legacy.resolve_page_token,
+) -> dict[str, Any]:
     desired = targets()
     page_id = os.environ.get("VALCEA_FB_PAGE_ID", DEFAULT_PAGE_ID).strip() or DEFAULT_PAGE_ID
     version = os.environ.get("VALCEA_FB_GRAPH_VERSION", DEFAULT_GRAPH_VERSION).strip() or DEFAULT_GRAPH_VERSION
-    token = supplied_token()
+    supplied = supplied_token()
 
     if apply and os.environ.get(LIVE_ENV, "").strip().lower() != "true":
         raise ProfileSyncError(f"{LIVE_ENV} must be true for --apply")
+
+    # The durable Meta secret can be a user/identity token. Publishing already
+    # resolves it to the actual Page token; profile metadata mutations must do
+    # the same or Meta correctly rejects them with OAuth error #210.
+    try:
+        page_token, identity = token_resolver(page_id, supplied, version)
+    except Exception as exc:
+        raise ProfileSyncError(f"Facebook Page identity/token validation failed: {exc}") from exc
+    if not page_token:
+        raise ProfileSyncError("Facebook Page token resolver returned an empty token")
 
     fields: dict[str, Any] = {}
     changed = 0
@@ -182,7 +202,7 @@ def run(*, apply: bool, request_fn: Callable[..., Any] = urllib.request.urlopen)
 
     for field, target in desired.items():
         readable, before, read_reason = read_field(
-            page_id=page_id, token=token, version=version, field=field, request_fn=request_fn
+            page_id=page_id, token=page_token, version=version, field=field, request_fn=request_fn
         )
         row: dict[str, Any] = {
             "target": target,
@@ -207,7 +227,7 @@ def run(*, apply: bool, request_fn: Callable[..., Any] = urllib.request.urlopen)
         row["mutation_attempted"] = True
         accepted, reason = apply_field(
             page_id=page_id,
-            token=token,
+            token=page_token,
             version=version,
             field=field,
             value=target,
@@ -222,7 +242,7 @@ def run(*, apply: bool, request_fn: Callable[..., Any] = urllib.request.urlopen)
             continue
 
         readable_after, after, after_reason = read_field(
-            page_id=page_id, token=token, version=version, field=field, request_fn=request_fn
+            page_id=page_id, token=page_token, version=version, field=field, request_fn=request_fn
         )
         row["after"] = after if readable_after else None
         row["verify_reason"] = after_reason
@@ -243,9 +263,11 @@ def run(*, apply: bool, request_fn: Callable[..., Any] = urllib.request.urlopen)
     else:
         status = "SYNCED"
     result = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "status": status,
         "page_id": page_id,
+        "page_name": identity.get("page_name"),
+        "token_source": identity.get("source"),
         "graph_version": version,
         "fields": fields,
         "updated_fields": changed,
@@ -295,10 +317,17 @@ def self_test() -> int:
 
     old_env = dict(os.environ)
     try:
-        os.environ["VALCEA_META_PAGE_ACCESS_TOKEN"] = "fixture-token-never-logged"
+        os.environ["VALCEA_META_PAGE_ACCESS_TOKEN"] = "fixture-identity-token-never-logged"
         os.environ["VALCEA_FB_PAGE_ID"] = DEFAULT_PAGE_ID
         os.environ[LIVE_ENV] = "true"
-        result = run(apply=True, request_fn=fake_open)
+        result = run(
+            apply=True,
+            request_fn=fake_open,
+            token_resolver=lambda page_id, supplied, version: (
+                "fixture-page-token-never-logged",
+                {"page_name": "Vâlcea Clar", "source": "fixture_resolved_page"},
+            ),
+        )
     finally:
         os.environ.clear()
         os.environ.update(old_env)
@@ -306,6 +335,7 @@ def self_test() -> int:
     assert result["verified_fields"] == 4
     assert len(calls) == 4
     assert result["credentials_logged"] is False
+    assert result["token_source"] == "fixture_resolved_page"
     print("VÂLCEA CLAR Facebook profile sync self-test: PASS")
     return 0
 
@@ -324,7 +354,7 @@ def main() -> int:
         return 0
     except ProfileSyncError as exc:
         result = {
-            "schema_version": "1.0",
+            "schema_version": "1.1",
             "status": "FAIL",
             "error": str(exc),
             "credentials_logged": False,
