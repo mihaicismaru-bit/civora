@@ -1,0 +1,88 @@
+{
+  "schemaVersion": "1.0",
+  "profileId": "PARTENER-EU-CUI-PROFILE",
+  "policy": {
+    "responseMode": "LAST_KNOWN_GOOD_WITH_PROVENANCE",
+    "noSyntheticValues": true,
+    "coreMustNotDependOnPaidSources": true,
+    "sensitivePersonalData": "DO_NOT_COLLECT_CNP_OR_PRIVATE_HOME_ADDRESS",
+    "fieldPrecedence": ["ONRC_AUTHORISED", "ANAF_PUBLIC", "MJ_OFFICIAL", "JUSTICE_PORTAL", "MYSMIS_OFFICIAL", "ANAF_BULK", "SECONDARY_FALLBACK"]
+  },
+  "sources": {
+    "ANAF_GENERAL": {
+      "authority": "ANAF",
+      "access": "PUBLIC_LIVE",
+      "refreshHours": 24,
+      "core": true,
+      "fields": ["name", "registration_state", "registration_date", "registration_number", "legal_form", "organisation_form", "ownership_form", "caen", "tax_authority", "registered_address", "fiscal_address", "vat", "inactive", "ro_e_factura"]
+    },
+    "ANAF_FINANCIALS": {
+      "authority": "ANAF",
+      "access": "PUBLIC_LIVE",
+      "refreshHours": 24,
+      "core": true,
+      "fields": ["annual_financial_statements", "turnover_or_total_income", "expenses", "profit_or_surplus", "loss_or_deficit", "assets", "receivables", "cash", "debts", "equity", "employees", "raw_indicators"]
+    },
+    "ANAF_BULK_FALLBACK": {
+      "authority": "ANAF via data.gov.ro",
+      "access": "PUBLIC_BULK",
+      "refreshHours": 168,
+      "core": false,
+      "purpose": "offline fallback for taxpayer identity and annual financial statements"
+    },
+    "ONRC_RECOM": {
+      "authority": "ONRC",
+      "access": "AUTHORISED_PAID",
+      "refreshHours": 24,
+      "core": false,
+      "integration": "credentialled adapter; never scrape anonymously",
+      "fields": ["current_legal_status", "registered_office", "capital", "shareholders_or_associates", "share_percentages", "administrators", "legal_representatives", "auditors", "company_history"]
+    },
+    "ONRC_RBR": {
+      "authority": "ONRC",
+      "access": "LEGITIMATE_INTEREST_AND_PAID",
+      "refreshHours": 168,
+      "core": false,
+      "fields": ["beneficial_owners"],
+      "policy": "only query after authorised access and legitimate-interest approval"
+    },
+    "MJ_NGO_REGISTER": {
+      "authority": "Ministerul Justitiei",
+      "access": "PUBLIC_BULK_REDUCED",
+      "refreshHours": 168,
+      "core": false,
+      "fields": ["ngo_registry_number", "ngo_registered_office", "ngo_public_status_fields"],
+      "restrictedFields": ["current_founders_or_members_when_not_in_public_extract", "current_governing_board_when_not_in_public_extract"]
+    },
+    "JUSTICE_PORTAL": {
+      "authority": "Ministerul Justitiei / Portal instante",
+      "access": "PUBLIC_WEB_SERVICE",
+      "refreshHours": 24,
+      "core": false,
+      "join": "entity canonical name",
+      "fields": ["court_cases", "case_roles", "hearings"]
+    },
+    "ONRC_BPI": {
+      "authority": "ONRC",
+      "access": "PUBLIC_OR_AUTHORISED_SERVICE_DEPENDING_DOCUMENT",
+      "refreshHours": 24,
+      "core": false,
+      "fields": ["insolvency_events", "insolvency_publications"]
+    },
+    "ANAF_DEBTORS": {
+      "authority": "ANAF via data.gov.ro",
+      "access": "PUBLIC_BULK_THRESHOLD_BASED",
+      "refreshHours": 168,
+      "core": false,
+      "fields": ["published_tax_debt_status", "published_tax_debt_amounts"]
+    },
+    "MYSMIS_BENEFICIAR": {
+      "authority": "MIPE / MySMIS open data",
+      "access": "PUBLIC_OPEN_DATA",
+      "refreshHours": 24,
+      "core": false,
+      "join": "CUI",
+      "fields": ["eu_funded_projects", "smis_codes", "programme", "project_value", "eu_cofinancing", "implementation_period"]
+    }
+  }
+}
