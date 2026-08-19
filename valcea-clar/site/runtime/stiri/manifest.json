@@ -1,14 +1,10 @@
 {
-  "schema_version": "2.1",
+  "schema_version": "1.5",
   "publication_model": "continuous_story_first",
-  "homepage_presentation": "reader_newsroom",
-  "news_index": "/stiri/",
-  "operational_records_public": false,
-  "cross_linking": {
-    "enabled": true,
-    "eligible_scope": "publishable_full_story_only",
-    "people_intelligence": "resolved_public_profiles_inline_and_index"
-  },
+  "homepage_presentation": "live_newsroom",
+  "edition_is_canonical_story_url": false,
+  "story_materialization_source": "decision_approved_full_editorial_writer_products",
+  "public_recap_embeds_fact_kernel": false,
   "structured_data": {
     "enabled": true,
     "type": "NewsArticle",
@@ -17,488 +13,298 @@
     "verified_image_policy": "provenance_backed_real_photograph_only",
     "unverified_image_policy": "omit"
   },
+  "cross_linking": {
+    "enabled": true,
+    "ranking": "same_section_then_priority",
+    "max_links_per_story": 3,
+    "eligible_scope": "publishable_full_story_only"
+  },
   "stories": [
-    {
-      "id": "filarmonica-valcea-septembrie-2026-program-20260818",
-      "path": "/stiri/filarmonica-valcea-septembrie-2026-program-20260818/",
-      "canonical": "https://valceaclar.ro/stiri/filarmonica-valcea-septembrie-2026-program-20260818/",
-      "published_at": "2026-08-18T22:48:27+03:00",
-      "archive_status": "published_archive",
-      "active_now": false,
-      "related_story_ids": [
-        "teatrele-valcii-ariel-anton-pann-2026-dosar-20260818",
-        "florile-govorei-20260816",
-        "musiclover-festival-2026-dosar-complet-20260818",
-        "open-air-blues-brezoi-2026-review-bani-publici-20260818"
-      ],
-      "structured_data_type": "NewsArticle",
-      "public_ux_authorized": true
-    },
-    {
-      "id": "teatrele-valcii-ariel-anton-pann-2026-dosar-20260818",
-      "path": "/stiri/teatrele-valcii-ariel-anton-pann-2026-dosar-20260818/",
-      "canonical": "https://valceaclar.ro/stiri/teatrele-valcii-ariel-anton-pann-2026-dosar-20260818/",
-      "published_at": "2026-08-18T22:48:27+03:00",
-      "archive_status": "published_archive",
-      "active_now": false,
-      "related_story_ids": [
-        "filarmonica-valcea-septembrie-2026-program-20260818",
-        "florile-govorei-20260816",
-        "musiclover-festival-2026-dosar-complet-20260818",
-        "open-air-blues-brezoi-2026-review-bani-publici-20260818"
-      ],
-      "structured_data_type": "NewsArticle",
-      "public_ux_authorized": true
-    },
     {
       "id": "musiclover-festival-2026-dosar-complet-20260818",
       "path": "/stiri/musiclover-festival-2026-dosar-complet-20260818/",
       "canonical": "https://valceaclar.ro/stiri/musiclover-festival-2026-dosar-complet-20260818/",
-      "published_at": "2026-08-18T19:19:16.434677Z",
-      "archive_status": "published_archive",
-      "active_now": false,
       "related_story_ids": [
         "open-air-blues-brezoi-2026-review-bani-publici-20260818",
         "bikers-for-humanity-rock-fest-2026-review-20260818",
-        "deep-forest-fest-2026-review-bani-publici-20260818",
-        "jazz-cave-festival-2026-review-bani-publici-20260818"
+        "deep-forest-fest-2026-review-bani-publici-20260818"
       ],
       "structured_data_type": "NewsArticle",
-      "public_ux_authorized": true,
-      "person_profile_ids": [
-        "marius-china"
-      ],
-      "person_profile_paths": [
-        "/oameni/marius-china/"
-      ],
-      "person_inline_links": true
+      "published_at": "2026-08-18T19:19:16.434677Z"
     },
     {
       "id": "open-air-blues-brezoi-2026-review-bani-publici-20260818",
       "path": "/stiri/open-air-blues-brezoi-2026-review-bani-publici-20260818/",
       "canonical": "https://valceaclar.ro/stiri/open-air-blues-brezoi-2026-review-bani-publici-20260818/",
-      "published_at": "2026-08-18T19:19:16.434677Z",
-      "archive_status": "published_archive",
-      "active_now": false,
       "related_story_ids": [
         "musiclover-festival-2026-dosar-complet-20260818",
         "bikers-for-humanity-rock-fest-2026-review-20260818",
-        "deep-forest-fest-2026-review-bani-publici-20260818",
-        "jazz-cave-festival-2026-review-bani-publici-20260818"
+        "deep-forest-fest-2026-review-bani-publici-20260818"
       ],
       "structured_data_type": "NewsArticle",
-      "public_ux_authorized": true,
-      "person_profile_ids": [
-        "marius-matache",
-        "mihai-razvan-mugescu",
-        "robert-schell"
-      ],
-      "person_profile_paths": [
-        "/oameni/marius-matache/",
-        "/oameni/mihai-razvan-mugescu/",
-        "/oameni/robert-schell/"
-      ],
-      "person_inline_links": true
+      "published_at": "2026-08-18T19:19:16.434677Z"
     },
     {
       "id": "bikers-for-humanity-rock-fest-2026-review-20260818",
       "path": "/stiri/bikers-for-humanity-rock-fest-2026-review-20260818/",
       "canonical": "https://valceaclar.ro/stiri/bikers-for-humanity-rock-fest-2026-review-20260818/",
-      "published_at": "2026-08-18T19:19:16.434677Z",
-      "archive_status": "published_archive",
-      "active_now": false,
       "related_story_ids": [
         "musiclover-festival-2026-dosar-complet-20260818",
         "open-air-blues-brezoi-2026-review-bani-publici-20260818",
-        "deep-forest-fest-2026-review-bani-publici-20260818",
-        "jazz-cave-festival-2026-review-bani-publici-20260818"
+        "deep-forest-fest-2026-review-bani-publici-20260818"
       ],
       "structured_data_type": "NewsArticle",
-      "public_ux_authorized": true
+      "published_at": "2026-08-18T19:19:16.434677Z"
     },
     {
       "id": "deep-forest-fest-2026-review-bani-publici-20260818",
       "path": "/stiri/deep-forest-fest-2026-review-bani-publici-20260818/",
       "canonical": "https://valceaclar.ro/stiri/deep-forest-fest-2026-review-bani-publici-20260818/",
-      "published_at": "2026-08-18T19:19:16.434677Z",
-      "archive_status": "published_archive",
-      "active_now": false,
       "related_story_ids": [
         "musiclover-festival-2026-dosar-complet-20260818",
         "open-air-blues-brezoi-2026-review-bani-publici-20260818",
-        "bikers-for-humanity-rock-fest-2026-review-20260818",
-        "jazz-cave-festival-2026-review-bani-publici-20260818"
+        "bikers-for-humanity-rock-fest-2026-review-20260818"
       ],
       "structured_data_type": "NewsArticle",
-      "public_ux_authorized": true
+      "published_at": "2026-08-18T19:19:16.434677Z"
     },
     {
       "id": "jazz-cave-festival-2026-review-bani-publici-20260818",
       "path": "/stiri/jazz-cave-festival-2026-review-bani-publici-20260818/",
       "canonical": "https://valceaclar.ro/stiri/jazz-cave-festival-2026-review-bani-publici-20260818/",
-      "published_at": "2026-08-18T19:19:16.434677Z",
-      "archive_status": "published_archive",
-      "active_now": false,
       "related_story_ids": [
         "musiclover-festival-2026-dosar-complet-20260818",
         "open-air-blues-brezoi-2026-review-bani-publici-20260818",
-        "bikers-for-humanity-rock-fest-2026-review-20260818",
-        "deep-forest-fest-2026-review-bani-publici-20260818"
+        "bikers-for-humanity-rock-fest-2026-review-20260818"
       ],
       "structured_data_type": "NewsArticle",
-      "public_ux_authorized": true
+      "published_at": "2026-08-18T19:19:16.434677Z"
     },
     {
       "id": "fii-cool-la-cule-2026-review-bani-publici-20260818",
       "path": "/stiri/fii-cool-la-cule-2026-review-bani-publici-20260818/",
       "canonical": "https://valceaclar.ro/stiri/fii-cool-la-cule-2026-review-bani-publici-20260818/",
-      "published_at": "2026-08-18T19:19:16.434677Z",
-      "archive_status": "published_archive",
-      "active_now": false,
       "related_story_ids": [
-        "musiclover-festival-2026-dosar-complet-20260818",
-        "open-air-blues-brezoi-2026-review-bani-publici-20260818",
-        "bikers-for-humanity-rock-fest-2026-review-20260818",
-        "deep-forest-fest-2026-review-bani-publici-20260818"
-      ],
-      "structured_data_type": "NewsArticle",
-      "public_ux_authorized": true
-    },
-    {
-      "id": "cocosul-de-hurez-2026-dosar-20260818",
-      "path": "/stiri/cocosul-de-hurez-2026-dosar-20260818/",
-      "canonical": "https://valceaclar.ro/stiri/cocosul-de-hurez-2026-dosar-20260818/",
-      "published_at": "2026-08-18T22:02:45+03:00",
-      "archive_status": "published_archive",
-      "active_now": false,
-      "related_story_ids": [
-        "musiclover-festival-2026-dosar-complet-20260818",
-        "open-air-blues-brezoi-2026-review-bani-publici-20260818",
-        "bikers-for-humanity-rock-fest-2026-review-20260818",
-        "deep-forest-fest-2026-review-bani-publici-20260818"
-      ],
-      "structured_data_type": "NewsArticle",
-      "public_ux_authorized": true
-    },
-    {
-      "id": "invartita-dorului-2026-dosar-20260818",
-      "path": "/stiri/invartita-dorului-2026-dosar-20260818/",
-      "canonical": "https://valceaclar.ro/stiri/invartita-dorului-2026-dosar-20260818/",
-      "published_at": "2026-08-18T22:02:45+03:00",
-      "archive_status": "published_archive",
-      "active_now": false,
-      "related_story_ids": [
-        "musiclover-festival-2026-dosar-complet-20260818",
-        "open-air-blues-brezoi-2026-review-bani-publici-20260818",
-        "bikers-for-humanity-rock-fest-2026-review-20260818",
-        "deep-forest-fest-2026-review-bani-publici-20260818"
-      ],
-      "structured_data_type": "NewsArticle",
-      "public_ux_authorized": true
-    },
-    {
-      "id": "apavil-joburi-fara-experienta-20260818",
-      "path": "/stiri/apavil-joburi-fara-experienta-20260818/",
-      "canonical": "https://valceaclar.ro/stiri/apavil-joburi-fara-experienta-20260818/",
-      "published_at": "2026-08-18T17:32:36.966819Z",
-      "archive_status": "published_archive",
-      "active_now": false,
-      "related_story_ids": [
-        "bujoreni-11-zidari-4582-6000-20260818",
         "musiclover-festival-2026-dosar-complet-20260818",
         "open-air-blues-brezoi-2026-review-bani-publici-20260818",
         "bikers-for-humanity-rock-fest-2026-review-20260818"
       ],
       "structured_data_type": "NewsArticle",
-      "public_ux_authorized": true
+      "published_at": "2026-08-18T19:19:16.434677Z"
     },
     {
-      "id": "cj-valcea-cocos-rajdp-mandat-guvernanta-20260818",
-      "path": "/stiri/cj-valcea-cocos-rajdp-mandat-guvernanta-20260818/",
-      "canonical": "https://valceaclar.ro/stiri/cj-valcea-cocos-rajdp-mandat-guvernanta-20260818/",
-      "published_at": "2026-08-18T20:32:36+03:00",
-      "archive_status": "published_archive",
-      "active_now": false,
+      "id": "filarmonica-valcea-septembrie-2026-program-20260818",
+      "path": "/stiri/filarmonica-valcea-septembrie-2026-program-20260818/",
+      "canonical": "https://valceaclar.ro/stiri/filarmonica-valcea-septembrie-2026-program-20260818/",
       "related_story_ids": [
-        "rm-valcea-gambling-authorizations-20260723",
-        "rm-valcea-hcl-310-20260814",
-        "rm-valcea-hcl-311-20260814",
-        "musiclover-festival-2026-dosar-complet-20260818"
-      ],
-      "structured_data_type": "NewsArticle",
-      "public_ux_authorized": true
-    },
-    {
-      "id": "bujoreni-11-zidari-4582-6000-20260818",
-      "path": "/stiri/bujoreni-11-zidari-4582-6000-20260818/",
-      "canonical": "https://valceaclar.ro/stiri/bujoreni-11-zidari-4582-6000-20260818/",
-      "published_at": "2026-08-18T20:29:43+03:00",
-      "archive_status": "published_archive",
-      "active_now": false,
-      "related_story_ids": [
-        "apavil-joburi-fara-experienta-20260818",
-        "musiclover-festival-2026-dosar-complet-20260818",
-        "open-air-blues-brezoi-2026-review-bani-publici-20260818",
-        "bikers-for-humanity-rock-fest-2026-review-20260818"
-      ],
-      "structured_data_type": "NewsArticle",
-      "public_ux_authorized": true
-    },
-    {
-      "id": "rm-valcea-hcl-305-20260814",
-      "path": "/stiri/rm-valcea-hcl-305-20260814/",
-      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-305-20260814/",
-      "published_at": "2026-08-18T15:18:10.668481Z",
-      "archive_status": "published_archive",
-      "active_now": false,
-      "related_story_ids": [
-        "rm-valcea-hcl-306-20260814",
-        "musiclover-festival-2026-dosar-complet-20260818",
-        "open-air-blues-brezoi-2026-review-bani-publici-20260818",
-        "bikers-for-humanity-rock-fest-2026-review-20260818"
-      ],
-      "structured_data_type": "NewsArticle",
-      "public_ux_authorized": true
-    },
-    {
-      "id": "rm-valcea-hcl-306-20260814",
-      "path": "/stiri/rm-valcea-hcl-306-20260814/",
-      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-306-20260814/",
-      "published_at": "2026-08-18T15:18:10.668481Z",
-      "archive_status": "published_archive",
-      "active_now": false,
-      "related_story_ids": [
-        "rm-valcea-hcl-305-20260814",
-        "musiclover-festival-2026-dosar-complet-20260818",
-        "open-air-blues-brezoi-2026-review-bani-publici-20260818",
-        "bikers-for-humanity-rock-fest-2026-review-20260818"
-      ],
-      "structured_data_type": "NewsArticle",
-      "public_ux_authorized": true
-    },
-    {
-      "id": "rm-valcea-hcl-307-20260814",
-      "path": "/stiri/rm-valcea-hcl-307-20260814/",
-      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-307-20260814/",
-      "published_at": "2026-08-18T15:18:10.668481Z",
-      "archive_status": "published_archive",
-      "active_now": false,
-      "related_story_ids": [
-        "rm-valcea-hcl-308-20260814",
-        "rm-valcea-hcl-309-20260814",
-        "musiclover-festival-2026-dosar-complet-20260818",
-        "open-air-blues-brezoi-2026-review-bani-publici-20260818"
-      ],
-      "structured_data_type": "NewsArticle",
-      "public_ux_authorized": true
-    },
-    {
-      "id": "rm-valcea-hcl-308-20260814",
-      "path": "/stiri/rm-valcea-hcl-308-20260814/",
-      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-308-20260814/",
-      "published_at": "2026-08-18T15:18:10.668481Z",
-      "archive_status": "published_archive",
-      "active_now": false,
-      "related_story_ids": [
-        "rm-valcea-hcl-307-20260814",
-        "rm-valcea-hcl-309-20260814",
-        "musiclover-festival-2026-dosar-complet-20260818",
-        "open-air-blues-brezoi-2026-review-bani-publici-20260818"
-      ],
-      "structured_data_type": "NewsArticle",
-      "public_ux_authorized": true
-    },
-    {
-      "id": "rm-valcea-hcl-309-20260814",
-      "path": "/stiri/rm-valcea-hcl-309-20260814/",
-      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-309-20260814/",
-      "published_at": "2026-08-18T15:18:10.668481Z",
-      "archive_status": "published_archive",
-      "active_now": false,
-      "related_story_ids": [
-        "rm-valcea-hcl-307-20260814",
-        "rm-valcea-hcl-308-20260814",
-        "musiclover-festival-2026-dosar-complet-20260818",
-        "open-air-blues-brezoi-2026-review-bani-publici-20260818"
-      ],
-      "structured_data_type": "NewsArticle",
-      "public_ux_authorized": true
-    },
-    {
-      "id": "rm-valcea-hcl-310-20260814",
-      "path": "/stiri/rm-valcea-hcl-310-20260814/",
-      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-310-20260814/",
-      "published_at": "2026-08-18T15:18:10.668481Z",
-      "archive_status": "published_archive",
-      "active_now": false,
-      "related_story_ids": [
-        "rm-valcea-gambling-authorizations-20260723",
-        "rm-valcea-hcl-311-20260814",
-        "cj-valcea-cocos-rajdp-mandat-guvernanta-20260818",
-        "musiclover-festival-2026-dosar-complet-20260818"
-      ],
-      "structured_data_type": "NewsArticle",
-      "public_ux_authorized": true
-    },
-    {
-      "id": "rm-valcea-hcl-311-20260814",
-      "path": "/stiri/rm-valcea-hcl-311-20260814/",
-      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-311-20260814/",
-      "published_at": "2026-08-18T15:18:10.668481Z",
-      "archive_status": "published_archive",
-      "active_now": false,
-      "related_story_ids": [
-        "rm-valcea-gambling-authorizations-20260723",
-        "rm-valcea-hcl-310-20260814",
-        "cj-valcea-cocos-rajdp-mandat-guvernanta-20260818",
-        "musiclover-festival-2026-dosar-complet-20260818"
-      ],
-      "structured_data_type": "NewsArticle",
-      "public_ux_authorized": true
-    },
-    {
-      "id": "rm-valcea-hcl-312-20260814",
-      "path": "/stiri/rm-valcea-hcl-312-20260814/",
-      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-312-20260814/",
-      "published_at": "2026-08-18T15:18:10.668481Z",
-      "archive_status": "published_archive",
-      "active_now": false,
-      "related_story_ids": [
-        "alert-1cd2159b942ec2b672f7",
-        "alert-fdfdb85a579432f385f7",
-        "musiclover-festival-2026-dosar-complet-20260818",
-        "open-air-blues-brezoi-2026-review-bani-publici-20260818"
-      ],
-      "structured_data_type": "NewsArticle",
-      "public_ux_authorized": true
-    },
-    {
-      "id": "rm-valcea-gambling-authorizations-20260723",
-      "path": "/stiri/rm-valcea-gambling-authorizations-20260723/",
-      "canonical": "https://valceaclar.ro/stiri/rm-valcea-gambling-authorizations-20260723/",
-      "published_at": "2026-08-18T16:10:21+03:00",
-      "archive_status": "published_archive",
-      "active_now": false,
-      "related_story_ids": [
-        "rm-valcea-hcl-310-20260814",
-        "rm-valcea-hcl-311-20260814",
-        "cj-valcea-cocos-rajdp-mandat-guvernanta-20260818",
-        "musiclover-festival-2026-dosar-complet-20260818"
-      ],
-      "structured_data_type": "NewsArticle",
-      "public_ux_authorized": true
-    },
-    {
-      "id": "scm-program-fdbf66a4a5bb7ef4f69b",
-      "path": "/stiri/scm-program-fdbf66a4a5bb7ef4f69b/",
-      "canonical": "https://valceaclar.ro/stiri/scm-program-fdbf66a4a5bb7ef4f69b/",
-      "published_at": "2026-08-18T16:10:21+03:00",
-      "archive_status": "published_archive",
-      "active_now": false,
-      "related_story_ids": [
-        "scm-valcea-slatina-20260815",
-        "musiclover-festival-2026-dosar-complet-20260818",
-        "open-air-blues-brezoi-2026-review-bani-publici-20260818",
-        "bikers-for-humanity-rock-fest-2026-review-20260818"
-      ],
-      "structured_data_type": "NewsArticle",
-      "public_ux_authorized": true
-    },
-    {
-      "id": "alert-1cd2159b942ec2b672f7",
-      "path": "/stiri/alert-1cd2159b942ec2b672f7/",
-      "canonical": "https://valceaclar.ro/stiri/alert-1cd2159b942ec2b672f7/",
-      "published_at": "2026-08-18T00:02:39+03:00",
-      "archive_status": "active",
-      "active_now": true,
-      "related_story_ids": [
-        "rm-valcea-hcl-312-20260814",
-        "alert-fdfdb85a579432f385f7",
-        "musiclover-festival-2026-dosar-complet-20260818",
-        "open-air-blues-brezoi-2026-review-bani-publici-20260818"
-      ],
-      "structured_data_type": "NewsArticle",
-      "public_ux_authorized": true
-    },
-    {
-      "id": "alert-fdfdb85a579432f385f7",
-      "path": "/stiri/alert-fdfdb85a579432f385f7/",
-      "canonical": "https://valceaclar.ro/stiri/alert-fdfdb85a579432f385f7/",
-      "published_at": "2026-08-18T00:02:39+03:00",
-      "archive_status": "active",
-      "active_now": true,
-      "related_story_ids": [
-        "alert-1cd2159b942ec2b672f7",
-        "rm-valcea-hcl-312-20260814",
-        "musiclover-festival-2026-dosar-complet-20260818",
-        "open-air-blues-brezoi-2026-review-bani-publici-20260818"
-      ],
-      "structured_data_type": "NewsArticle",
-      "public_ux_authorized": true
-    },
-    {
-      "id": "luminos-fest-zavoi-20260815",
-      "path": "/stiri/luminos-fest-zavoi-20260815/",
-      "canonical": "https://valceaclar.ro/stiri/luminos-fest-zavoi-20260815/",
-      "published_at": "2026-08-15T20:57:49+03:00",
-      "archive_status": "published_archive",
-      "active_now": false,
-      "related_story_ids": [
-        "musiclover-festival-2026-dosar-complet-20260818",
-        "open-air-blues-brezoi-2026-review-bani-publici-20260818",
-        "bikers-for-humanity-rock-fest-2026-review-20260818",
-        "deep-forest-fest-2026-review-bani-publici-20260818"
-      ],
-      "structured_data_type": "NewsArticle",
-      "public_ux_authorized": true
-    },
-    {
-      "id": "florile-govorei-20260816",
-      "path": "/stiri/florile-govorei-20260816/",
-      "canonical": "https://valceaclar.ro/stiri/florile-govorei-20260816/",
-      "published_at": "2026-08-16T19:06:48+03:00",
-      "archive_status": "published_archive",
-      "active_now": false,
-      "related_story_ids": [
-        "filarmonica-valcea-septembrie-2026-program-20260818",
         "teatrele-valcii-ariel-anton-pann-2026-dosar-20260818",
         "musiclover-festival-2026-dosar-complet-20260818",
         "open-air-blues-brezoi-2026-review-bani-publici-20260818"
       ],
       "structured_data_type": "NewsArticle",
-      "public_ux_authorized": true
+      "published_at": "2026-08-18T22:48:27+03:00"
     },
     {
-      "id": "musiclover-green-day-20260815",
-      "path": "/stiri/musiclover-green-day-20260815/",
-      "canonical": "https://valceaclar.ro/stiri/musiclover-green-day-20260815/",
-      "published_at": "2026-08-15T20:57:49+03:00",
-      "archive_status": "published_archive",
-      "active_now": false,
+      "id": "rm-valcea-gambling-authorizations-20260723",
+      "path": "/stiri/rm-valcea-gambling-authorizations-20260723/",
+      "canonical": "https://valceaclar.ro/stiri/rm-valcea-gambling-authorizations-20260723/",
       "related_story_ids": [
-        "musiclover-festival-2026-dosar-complet-20260818",
-        "open-air-blues-brezoi-2026-review-bani-publici-20260818",
-        "bikers-for-humanity-rock-fest-2026-review-20260818",
-        "deep-forest-fest-2026-review-bani-publici-20260818"
+        "rm-valcea-hcl-310-20260814",
+        "rm-valcea-hcl-311-20260814",
+        "cj-valcea-cocos-rajdp-mandat-guvernanta-20260818"
       ],
       "structured_data_type": "NewsArticle",
-      "public_ux_authorized": true
+      "published_at": "2026-08-18T16:10:21+03:00"
     },
     {
-      "id": "scm-valcea-slatina-20260815",
-      "path": "/stiri/scm-valcea-slatina-20260815/",
-      "canonical": "https://valceaclar.ro/stiri/scm-valcea-slatina-20260815/",
-      "published_at": "2026-08-15T13:25:34+03:00",
-      "archive_status": "published_archive",
-      "active_now": false,
+      "id": "cocosul-de-hurez-2026-dosar-20260818",
+      "path": "/stiri/cocosul-de-hurez-2026-dosar-20260818/",
+      "canonical": "https://valceaclar.ro/stiri/cocosul-de-hurez-2026-dosar-20260818/",
       "related_story_ids": [
-        "scm-program-fdbf66a4a5bb7ef4f69b",
         "musiclover-festival-2026-dosar-complet-20260818",
         "open-air-blues-brezoi-2026-review-bani-publici-20260818",
         "bikers-for-humanity-rock-fest-2026-review-20260818"
       ],
       "structured_data_type": "NewsArticle",
-      "public_ux_authorized": true
+      "published_at": "2026-08-18T22:02:45+03:00"
+    },
+    {
+      "id": "invartita-dorului-2026-dosar-20260818",
+      "path": "/stiri/invartita-dorului-2026-dosar-20260818/",
+      "canonical": "https://valceaclar.ro/stiri/invartita-dorului-2026-dosar-20260818/",
+      "related_story_ids": [
+        "musiclover-festival-2026-dosar-complet-20260818",
+        "open-air-blues-brezoi-2026-review-bani-publici-20260818",
+        "bikers-for-humanity-rock-fest-2026-review-20260818"
+      ],
+      "structured_data_type": "NewsArticle",
+      "published_at": "2026-08-18T22:02:45+03:00"
+    },
+    {
+      "id": "teatrele-valcii-ariel-anton-pann-2026-dosar-20260818",
+      "path": "/stiri/teatrele-valcii-ariel-anton-pann-2026-dosar-20260818/",
+      "canonical": "https://valceaclar.ro/stiri/teatrele-valcii-ariel-anton-pann-2026-dosar-20260818/",
+      "related_story_ids": [
+        "filarmonica-valcea-septembrie-2026-program-20260818",
+        "musiclover-festival-2026-dosar-complet-20260818",
+        "open-air-blues-brezoi-2026-review-bani-publici-20260818"
+      ],
+      "structured_data_type": "NewsArticle",
+      "published_at": "2026-08-18T22:48:27+03:00"
+    },
+    {
+      "id": "rm-valcea-hcl-305-20260814",
+      "path": "/stiri/rm-valcea-hcl-305-20260814/",
+      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-305-20260814/",
+      "related_story_ids": [
+        "rm-valcea-hcl-306-20260814",
+        "musiclover-festival-2026-dosar-complet-20260818",
+        "open-air-blues-brezoi-2026-review-bani-publici-20260818"
+      ],
+      "structured_data_type": "NewsArticle",
+      "published_at": "2026-08-18T15:18:10.668481Z"
+    },
+    {
+      "id": "rm-valcea-hcl-306-20260814",
+      "path": "/stiri/rm-valcea-hcl-306-20260814/",
+      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-306-20260814/",
+      "related_story_ids": [
+        "rm-valcea-hcl-305-20260814",
+        "musiclover-festival-2026-dosar-complet-20260818",
+        "open-air-blues-brezoi-2026-review-bani-publici-20260818"
+      ],
+      "structured_data_type": "NewsArticle",
+      "published_at": "2026-08-18T15:18:10.668481Z"
+    },
+    {
+      "id": "rm-valcea-hcl-307-20260814",
+      "path": "/stiri/rm-valcea-hcl-307-20260814/",
+      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-307-20260814/",
+      "related_story_ids": [
+        "rm-valcea-hcl-308-20260814",
+        "rm-valcea-hcl-309-20260814",
+        "musiclover-festival-2026-dosar-complet-20260818"
+      ],
+      "structured_data_type": "NewsArticle",
+      "published_at": "2026-08-18T15:18:10.668481Z"
+    },
+    {
+      "id": "rm-valcea-hcl-308-20260814",
+      "path": "/stiri/rm-valcea-hcl-308-20260814/",
+      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-308-20260814/",
+      "related_story_ids": [
+        "rm-valcea-hcl-307-20260814",
+        "rm-valcea-hcl-309-20260814",
+        "musiclover-festival-2026-dosar-complet-20260818"
+      ],
+      "structured_data_type": "NewsArticle",
+      "published_at": "2026-08-18T15:18:10.668481Z"
+    },
+    {
+      "id": "rm-valcea-hcl-309-20260814",
+      "path": "/stiri/rm-valcea-hcl-309-20260814/",
+      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-309-20260814/",
+      "related_story_ids": [
+        "rm-valcea-hcl-307-20260814",
+        "rm-valcea-hcl-308-20260814",
+        "musiclover-festival-2026-dosar-complet-20260818"
+      ],
+      "structured_data_type": "NewsArticle",
+      "published_at": "2026-08-18T15:18:10.668481Z"
+    },
+    {
+      "id": "rm-valcea-hcl-310-20260814",
+      "path": "/stiri/rm-valcea-hcl-310-20260814/",
+      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-310-20260814/",
+      "related_story_ids": [
+        "rm-valcea-gambling-authorizations-20260723",
+        "rm-valcea-hcl-311-20260814",
+        "cj-valcea-cocos-rajdp-mandat-guvernanta-20260818"
+      ],
+      "structured_data_type": "NewsArticle",
+      "published_at": "2026-08-18T15:18:10.668481Z",
+      "image": {
+        "public_url": "https://valceaclar.ro/media/social/primaria-ramnicu-valcea.jpg",
+        "source_url": "https://commons.wikimedia.org/wiki/File:R-Valcea_Primarie_1.JPG",
+        "credit": "Stoschmidt / Wikimedia Commons — CC BY-SA 4.0",
+        "rights_basis": "creative_commons",
+        "contextual_archive": false,
+        "captured_at": null,
+        "synthetic": false,
+        "provenance_status": "VERIFIED"
+      }
+    },
+    {
+      "id": "rm-valcea-hcl-311-20260814",
+      "path": "/stiri/rm-valcea-hcl-311-20260814/",
+      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-311-20260814/",
+      "related_story_ids": [
+        "rm-valcea-gambling-authorizations-20260723",
+        "rm-valcea-hcl-310-20260814",
+        "cj-valcea-cocos-rajdp-mandat-guvernanta-20260818"
+      ],
+      "structured_data_type": "NewsArticle",
+      "published_at": "2026-08-18T15:18:10.668481Z"
+    },
+    {
+      "id": "rm-valcea-hcl-312-20260814",
+      "path": "/stiri/rm-valcea-hcl-312-20260814/",
+      "canonical": "https://valceaclar.ro/stiri/rm-valcea-hcl-312-20260814/",
+      "related_story_ids": [
+        "musiclover-festival-2026-dosar-complet-20260818",
+        "open-air-blues-brezoi-2026-review-bani-publici-20260818",
+        "bikers-for-humanity-rock-fest-2026-review-20260818"
+      ],
+      "structured_data_type": "NewsArticle",
+      "published_at": "2026-08-18T15:18:10.668481Z"
+    },
+    {
+      "id": "apavil-joburi-fara-experienta-20260818",
+      "path": "/stiri/apavil-joburi-fara-experienta-20260818/",
+      "canonical": "https://valceaclar.ro/stiri/apavil-joburi-fara-experienta-20260818/",
+      "related_story_ids": [
+        "bujoreni-11-zidari-4582-6000-20260818",
+        "musiclover-festival-2026-dosar-complet-20260818",
+        "open-air-blues-brezoi-2026-review-bani-publici-20260818"
+      ],
+      "structured_data_type": "NewsArticle",
+      "published_at": "2026-08-18T17:32:36.966819Z"
+    },
+    {
+      "id": "cj-valcea-cocos-rajdp-mandat-guvernanta-20260818",
+      "path": "/stiri/cj-valcea-cocos-rajdp-mandat-guvernanta-20260818/",
+      "canonical": "https://valceaclar.ro/stiri/cj-valcea-cocos-rajdp-mandat-guvernanta-20260818/",
+      "related_story_ids": [
+        "rm-valcea-gambling-authorizations-20260723",
+        "rm-valcea-hcl-310-20260814",
+        "rm-valcea-hcl-311-20260814"
+      ],
+      "structured_data_type": "NewsArticle",
+      "published_at": "2026-08-18T20:32:36+03:00"
+    },
+    {
+      "id": "bujoreni-11-zidari-4582-6000-20260818",
+      "path": "/stiri/bujoreni-11-zidari-4582-6000-20260818/",
+      "canonical": "https://valceaclar.ro/stiri/bujoreni-11-zidari-4582-6000-20260818/",
+      "related_story_ids": [
+        "apavil-joburi-fara-experienta-20260818",
+        "musiclover-festival-2026-dosar-complet-20260818",
+        "open-air-blues-brezoi-2026-review-bani-publici-20260818"
+      ],
+      "structured_data_type": "NewsArticle",
+      "published_at": "2026-08-18T20:29:43+03:00"
+    },
+    {
+      "id": "scm-program-fdbf66a4a5bb7ef4f69b",
+      "path": "/stiri/scm-program-fdbf66a4a5bb7ef4f69b/",
+      "canonical": "https://valceaclar.ro/stiri/scm-program-fdbf66a4a5bb7ef4f69b/",
+      "related_story_ids": [
+        "musiclover-festival-2026-dosar-complet-20260818",
+        "open-air-blues-brezoi-2026-review-bani-publici-20260818",
+        "bikers-for-humanity-rock-fest-2026-review-20260818"
+      ],
+      "structured_data_type": "NewsArticle",
+      "published_at": "2026-08-18T16:10:21+03:00"
     }
   ]
 }
