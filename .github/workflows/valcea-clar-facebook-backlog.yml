@@ -9,6 +9,7 @@ on:
     paths:
       - 'valcea-clar/site/story_publication_event.json'
       - 'valcea-clar/site/newsroom_decision.json'
+      - 'valcea-clar/site/runtime/stiri/manifest.json'
       - 'valcea-clar/editions/**'
       - 'valcea-clar/social/facebook_text_publish.py'
       - 'valcea-clar/social/facebook_text_publish_v2.py'
@@ -16,6 +17,7 @@ on:
       - '.github/workflows/valcea-clar-facebook-backlog.yml'
   pull_request:
     paths:
+      - 'valcea-clar/site/runtime/stiri/manifest.json'
       - 'valcea-clar/social/facebook_text_publish.py'
       - 'valcea-clar/social/facebook_text_publish_v2.py'
       - 'valcea-clar/social/merge_text_first_social_state.py'
