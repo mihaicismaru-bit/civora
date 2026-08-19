@@ -78,6 +78,34 @@ jobs:
           print(result['run_manifest']['run_id'])
           print([g['gap_id'] for g in blocking])
           PY
+      - name: Prove deterministic resume after validated primary research
+        run: |
+          python partener-eu/needs-factory/tools/run_resume_fixture.py \
+            partener-eu/needs-factory/tests/fixtures/primary_research_resume.json \
+            --output /tmp/needs-factory-resume.json
+          python - <<'PY'
+          import json
+          result = json.load(open('/tmp/needs-factory-resume.json', encoding='utf-8'))
+          assert result['fixture_type'] == 'SYNTHETIC_ACCEPTANCE_ONLY_NOT_PROJECT_EVIDENCE'
+          assert result['predecessor_state'] == 'BLOCKED_RESEARCH'
+          assert result['successor_state'] == 'READY_FOR_NARRATIVE'
+          assert result['predecessor_run_id'] != result['successor_run_id']
+          plan = result['resume_plan']
+          assert plan['restart_stage'] == 'NF06_PRIMARY_RESEARCH'
+          assert plan['reusable_closed_checkpoints'] == ['NF05_GAP_DETECTION']
+          assert 'NF06_PRIMARY_RESEARCH' in plan['invalidated_stages']
+          assert 'NF12_PACKAGE' in plan['invalidated_stages']
+          assert result['primary_evidence_count'] == 6
+          assert result['unresolved_local_gaps'] == []
+          closed = set(result['successor_manifest']['closed_checkpoints'])
+          assert 'NF05_GAP_DETECTION' in closed
+          assert 'NF06_PRIMARY_RESEARCH' in closed
+          assert 'NF12_PACKAGE' in closed
+          assert result['successor_manifest']['predecessor_run_id'] == result['predecessor_run_id']
+          print(result['predecessor_run_id'])
+          print(result['successor_run_id'])
+          print(result['narrative_pack_sha256'])
+          PY
       - name: Run deterministic pipeline smoke fixture through NF12
         run: |
           python partener-eu/needs-factory/tools/run_fixture.py \
