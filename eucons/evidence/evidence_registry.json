@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "product": "EUCONS_COMMERCIAL_OS",
   "phase": "E03",
   "status": "CANONICAL",
@@ -16,14 +16,14 @@
     "SERVICE_OFFERING": ["OWNER_AUTHORIZED_CANON"],
     "SERVICE_PROCESS": ["OWNER_AUTHORIZED_CANON"],
     "CTA_AVAILABILITY": ["OWNER_AUTHORIZED_CANON"],
-    "COMPANY_IDENTITY": ["PRIMARY_OFFICIAL"],
-    "COMPANY_EXPERIENCE": ["PRIMARY_OFFICIAL", "EUROCONS_CONTROLLED_RECORD"],
+    "COMPANY_IDENTITY": ["PRIMARY_OFFICIAL", "MULTISOURCE_REGISTRY_CORROBORATION"],
+    "COMPANY_EXPERIENCE": ["PRIMARY_OFFICIAL", "EUROCONS_CONTROLLED_RECORD", "EUROCONS_CONTROLLED_PROJECT_RECORD"],
     "CLIENT_RELATIONSHIP": ["CLIENT_CONTROLLED_RECORD"],
-    "PROJECT_RESULT": ["CLIENT_CONTROLLED_RECORD"],
+    "PROJECT_RESULT": ["CLIENT_CONTROLLED_RECORD", "EUROCONS_CONTROLLED_PROJECT_RECORD"],
     "TESTIMONIAL": ["CLIENT_CONTROLLED_RECORD"],
-    "EXPERT_IDENTITY": ["PUBLIC_PRIMARY_ORGANIZATION_SOURCE"],
-    "EXPERT_ROLE": ["PUBLIC_PRIMARY_ORGANIZATION_SOURCE"],
-    "EXPERT_CREDENTIAL": ["PUBLIC_PRIMARY_ORGANIZATION_SOURCE"],
+    "EXPERT_IDENTITY": ["PUBLIC_PRIMARY_ORGANIZATION_SOURCE", "MULTISOURCE_PUBLIC_PROFESSIONAL_RECORD"],
+    "EXPERT_ROLE": ["PUBLIC_PRIMARY_ORGANIZATION_SOURCE", "MULTISOURCE_PUBLIC_PROFESSIONAL_RECORD"],
+    "EXPERT_CREDENTIAL": ["PUBLIC_PRIMARY_ORGANIZATION_SOURCE", "MULTISOURCE_PUBLIC_PROFESSIONAL_RECORD"],
     "FUNDING_FACT": ["VERIFIED_PARTENER_PROJECTION", "PRIMARY_OFFICIAL"],
     "PRICE_TERM": ["APPROVED_PRICING_RULE"]
   },
@@ -47,6 +47,46 @@
       "confidentiality": "PUBLIC_INTERNAL_CANON",
       "allowed_claim_classes": ["SERVICE_OFFERING", "SERVICE_PROCESS", "CTA_AVAILABILITY"],
       "notes": "Defines the eight currently authorized EUCONS service offerings, processes, boundaries and CTA coverage."
+    },
+    {
+      "id": "EV-E28-CURRENT-COMPANY-IDENTITY",
+      "evidence_class": "MULTISOURCE_REGISTRY_CORROBORATION",
+      "source_type": "SANITIZED_PUBLIC_SOURCE_RECEIPT",
+      "source_path": "eucons/evidence/sources/euroconsult_current_registry_corroboration_2026.json",
+      "status": "ACTIVE",
+      "confidentiality": "PUBLIC",
+      "allowed_claim_classes": ["COMPANY_IDENTITY"],
+      "notes": "Four current registry mirrors agree on the same CUI, registration number, address and consulting activity. Any later primary-official conflict forces HOLD."
+    },
+    {
+      "id": "EV-E28-EUROCONS-2013-PROJECT-RECORD",
+      "evidence_class": "EUROCONS_CONTROLLED_PROJECT_RECORD",
+      "source_type": "SANITIZED_CONTROLLED_SOURCE_RECEIPT",
+      "source_path": "eucons/evidence/sources/euroconsult_controlled_partner_record_2013.json",
+      "status": "ACTIVE",
+      "confidentiality": "PUBLIC_SANITIZED",
+      "allowed_claim_classes": ["COMPANY_EXPERIENCE", "PROJECT_RESULT", "EXPERT_ROLE"],
+      "notes": "Historical Euroconsult partner record. It authorizes only Euroconsult's own documented project role/results and no named-client relationship or testimonial."
+    },
+    {
+      "id": "EV-E28-VALENTIN-PROFESSIONAL",
+      "evidence_class": "MULTISOURCE_PUBLIC_PROFESSIONAL_RECORD",
+      "source_type": "SANITIZED_CONTROLLED_CV_PLUS_PUBLIC_PRIMARY_ORGANIZATION",
+      "source_path": "eucons/evidence/sources/valentin_cismaru_professional_record.json",
+      "status": "ACTIVE",
+      "confidentiality": "PUBLIC_SANITIZED",
+      "allowed_claim_classes": ["EXPERT_IDENTITY", "EXPERT_ROLE", "EXPERT_CREDENTIAL"],
+      "notes": "Uses only professional facts; personal CV data and unverified photo are excluded."
+    },
+    {
+      "id": "EV-E28-MIHAI-PROFESSIONAL",
+      "evidence_class": "MULTISOURCE_PUBLIC_PROFESSIONAL_RECORD",
+      "source_type": "PUBLIC_PRIMARY_ORGANIZATION_PLUS_PROFESSIONAL_MEDIA",
+      "source_path": "eucons/evidence/sources/mihai_cismaru_public_professional_record.json",
+      "status": "ACTIVE",
+      "confidentiality": "PUBLIC",
+      "allowed_claim_classes": ["EXPERT_IDENTITY", "EXPERT_ROLE", "EXPERT_CREDENTIAL"],
+      "notes": "Verifies professional expertise and project-management roles. Public copy uses conservative expertise language rather than an unsupported employment title."
     }
   ],
   "claims": [
@@ -139,6 +179,96 @@
       "confidentiality_review": "NOT_APPLICABLE"
     },
     {
+      "id": "CLM-COMPANY-LEGAL-IDENTITY-VERIFIED",
+      "claim_class": "COMPANY_IDENTITY",
+      "subject": "EUROCONS",
+      "public_statement": "EUROCONSULT SRL, CUI 14250864, este înregistrată în județul Vâlcea, cu numărul J38/389/2001, pentru activități de consultanță pentru afaceri și management.",
+      "publication_state": "PUBLISHABLE",
+      "evidence_ids": ["EV-E28-CURRENT-COMPANY-IDENTITY"],
+      "confidentiality_review": "PUBLIC_APPROVED"
+    },
+    {
+      "id": "CLM-COMPANY-PROJECT-EXPERIENCE-VERIFIED",
+      "claim_class": "COMPANY_EXPERIENCE",
+      "subject": "EUROCONS",
+      "public_statement": "Arhiva controlată Euroconsult documentează participarea companiei ca partener în proiecte POSDRU de dezvoltare rurală și formare profesională.",
+      "publication_state": "PUBLISHABLE",
+      "evidence_ids": ["EV-E28-EUROCONS-2013-PROJECT-RECORD"],
+      "confidentiality_review": "PUBLIC_APPROVED"
+    },
+    {
+      "id": "CLM-PROJECT-RURALBIZ-RESULT",
+      "claim_class": "PROJECT_RESULT",
+      "subject": "POSDRU/83/5.2/S/47717",
+      "public_statement": "În evidența Euroconsult pentru proiectul RO4 RURALBIZ, compania este consemnată ca partener, iar indicatorii erau raportați ca îndepliniți la termenele prevăzute de graficul de activități.",
+      "publication_state": "PUBLISHABLE",
+      "evidence_ids": ["EV-E28-EUROCONS-2013-PROJECT-RECORD"],
+      "confidentiality_review": "PUBLIC_APPROVED"
+    },
+    {
+      "id": "CLM-PROJECT-COMPETENTA-RESULT",
+      "claim_class": "PROJECT_RESULT",
+      "subject": "POSDRU/108/2.3/G/83018",
+      "public_statement": "În evidența Euroconsult pentru proiectul «Competență prin calificare – șanse și stabilitate pe piața muncii», compania este consemnată ca partener, iar indicatorii erau raportați ca îndepliniți la termen.",
+      "publication_state": "PUBLISHABLE",
+      "evidence_ids": ["EV-E28-EUROCONS-2013-PROJECT-RECORD"],
+      "confidentiality_review": "PUBLIC_APPROVED"
+    },
+    {
+      "id": "CLM-VALENTIN-IDENTITY",
+      "claim_class": "EXPERT_IDENTITY",
+      "subject": "VALENTIN_CISMARU",
+      "public_statement": "Valentin Cismaru",
+      "publication_state": "PUBLISHABLE",
+      "evidence_ids": ["EV-E28-VALENTIN-PROFESSIONAL"],
+      "confidentiality_review": "PUBLIC_APPROVED"
+    },
+    {
+      "id": "CLM-VALENTIN-ROLE",
+      "claim_class": "EXPERT_ROLE",
+      "subject": "VALENTIN_CISMARU",
+      "public_statement": "Coordonare, antreprenoriat și management de proiect",
+      "publication_state": "PUBLISHABLE",
+      "evidence_ids": ["EV-E28-VALENTIN-PROFESSIONAL", "EV-E28-EUROCONS-2013-PROJECT-RECORD"],
+      "confidentiality_review": "PUBLIC_APPROVED"
+    },
+    {
+      "id": "CLM-VALENTIN-CREDENTIAL",
+      "claim_class": "EXPERT_CREDENTIAL",
+      "subject": "VALENTIN_CISMARU",
+      "public_statement": "Experiență profesională documentată în management de proiect, afaceri internaționale și consultanță pentru mediul de afaceri.",
+      "publication_state": "PUBLISHABLE",
+      "evidence_ids": ["EV-E28-VALENTIN-PROFESSIONAL"],
+      "confidentiality_review": "PUBLIC_APPROVED"
+    },
+    {
+      "id": "CLM-MIHAI-IDENTITY",
+      "claim_class": "EXPERT_IDENTITY",
+      "subject": "MIHAI_CISMARU",
+      "public_statement": "Mihai Cismaru",
+      "publication_state": "PUBLISHABLE",
+      "evidence_ids": ["EV-E28-MIHAI-PROFESSIONAL"],
+      "confidentiality_review": "PUBLIC_APPROVED"
+    },
+    {
+      "id": "CLM-MIHAI-ROLE",
+      "claim_class": "EXPERT_ROLE",
+      "subject": "MIHAI_CISMARU",
+      "public_statement": "Consultanță în finanțări europene și management de proiect",
+      "publication_state": "PUBLISHABLE",
+      "evidence_ids": ["EV-E28-MIHAI-PROFESSIONAL"],
+      "confidentiality_review": "PUBLIC_APPROVED"
+    },
+    {
+      "id": "CLM-MIHAI-CREDENTIAL",
+      "claim_class": "EXPERT_CREDENTIAL",
+      "subject": "MIHAI_CISMARU",
+      "public_statement": "Experiență profesională documentată în proiecte finanțate din fonduri UE și în managementul proiectelor.",
+      "publication_state": "PUBLISHABLE",
+      "evidence_ids": ["EV-E28-MIHAI-PROFESSIONAL"],
+      "confidentiality_review": "PUBLIC_APPROVED"
+    },
+    {
       "id": "CLM-COMPANY-LEGAL-IDENTITY",
       "claim_class": "COMPANY_IDENTITY",
       "subject": "EUROCONS",
@@ -146,7 +276,7 @@
       "publication_state": "HOLD",
       "evidence_ids": [],
       "required_evidence_classes": ["PRIMARY_OFFICIAL"],
-      "hold_reason": "No official legal-identity evidence has been ingested into EUCONS yet."
+      "hold_reason": "Identity facts outside the corroborated CUI/registration/activity set remain HOLD until primary official evidence is ingested."
     },
     {
       "id": "CLM-COMPANY-EXPERIENCE",
@@ -156,7 +286,7 @@
       "publication_state": "HOLD",
       "evidence_ids": [],
       "required_evidence_classes": ["PRIMARY_OFFICIAL", "EUROCONS_CONTROLLED_RECORD"],
-      "hold_reason": "No verified duration or quantified experience evidence has been ingested; no years-of-experience claim may be published."
+      "hold_reason": "Generic quantified years-of-experience or success-rate claims remain HOLD; only specifically evidenced project experience is public."
     },
     {
       "id": "CLM-PROJECT-RESULT",
@@ -166,7 +296,7 @@
       "publication_state": "HOLD",
       "evidence_ids": [],
       "required_evidence_classes": ["CLIENT_CONTROLLED_RECORD"],
-      "hold_reason": "No client/project result has passed evidence and confidentiality review."
+      "hold_reason": "Client-specific project results remain HOLD; only Euroconsult's own historical project records explicitly cleared above may be published."
     },
     {
       "id": "CLM-CLIENT-RELATIONSHIP",
@@ -196,8 +326,8 @@
       "value": null,
       "publication_state": "HOLD",
       "evidence_ids": [],
-      "required_evidence_classes": ["PUBLIC_PRIMARY_ORGANIZATION_SOURCE"],
-      "hold_reason": "Expert identities, roles and credentials are deferred to E04 and remain non-public until verified."
+      "required_evidence_classes": ["PUBLIC_PRIMARY_ORGANIZATION_SOURCE", "MULTISOURCE_PUBLIC_PROFESSIONAL_RECORD"],
+      "hold_reason": "Any expert profile beyond the explicitly verified Mihai Cismaru and Valentin Cismaru records remains HOLD."
     },
     {
       "id": "CLM-FUNDING-MATERIAL-FACT",
@@ -207,7 +337,7 @@
       "publication_state": "HOLD",
       "evidence_ids": [],
       "required_evidence_classes": ["VERIFIED_PARTENER_PROJECTION", "PRIMARY_OFFICIAL"],
-      "hold_reason": "The E09 verified PARTENER-to-EUCONS bridge is not yet active; no funding status/deadline/budget fact is publishable from E03."
+      "hold_reason": "Live funding facts are published only through the E09 verified PARTENER projection; static E03 fallback facts remain HOLD."
     },
     {
       "id": "CLM-NUMERIC-PRICE",
@@ -217,7 +347,7 @@
       "publication_state": "HOLD",
       "evidence_ids": [],
       "required_evidence_classes": ["APPROVED_PRICING_RULE"],
-      "hold_reason": "No E13 approved pricing rule exists; numeric prices, discounts and binding commercial terms remain HOLD."
+      "hold_reason": "No approved numeric pricing rule exists; prices, discounts and binding commercial terms remain HOLD."
     }
   ]
 }

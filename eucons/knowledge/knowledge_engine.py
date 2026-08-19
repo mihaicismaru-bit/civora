@@ -129,8 +129,10 @@ def _opportunity_records(projection: dict[str, Any], contract: dict[str, Any]) -
     return records
 
 
-def _case_records(case_registry: dict[str, Any], contract: dict[str, Any]) -> list[dict[str, Any]]:
+def _case_records(case_registry: dict[str, Any], evidence: dict[str, Any], contract: dict[str, Any]) -> list[dict[str, Any]]:
     policy = contract["case_content"]
+    evidence_items, evidence_claim_rows = evidence_indexes(evidence)
+    claims = {str(row.get("id") or ""): row for row in evidence_claim_rows}
     records = []
     seen = set()
     for case in case_registry.get("cases") or []:
@@ -139,13 +141,46 @@ def _case_records(case_registry: dict[str, Any], contract: dict[str, Any]) -> li
             raise KnowledgeError("duplicate or missing case id")
         seen.add(cid)
         publishable = case.get("publication_state") == policy["required_registry_state"]
+        claim_ids = list(dict.fromkeys([
+            *(case.get("result_claim_ids") or []),
+            *(case.get("outcome_claim_ids") or []),
+        ]))
+        evidence_ids: list[str] = []
+        if publishable:
+            if not claim_ids:
+                raise KnowledgeError("publishable case requires result claim lineage")
+            for claim_id in claim_ids:
+                claim = claims.get(str(claim_id))
+                if not claim or claim.get("claim_class") != "PROJECT_RESULT" or claim.get("publication_state") != "PUBLISHABLE":
+                    raise KnowledgeError("publishable case references invalid project-result claim")
+                for evidence_id in claim.get("evidence_ids") or []:
+                    item = evidence_items.get(str(evidence_id))
+                    if not item or item.get("status") != "ACTIVE":
+                        raise KnowledgeError("publishable case references inactive or missing evidence")
+                    if evidence_id not in evidence_ids:
+                        evidence_ids.append(evidence_id)
+            problem = str(case.get("public_problem") or "").strip()
+            intervention = str(case.get("public_intervention") or "").strip()
+            outcomes = copy.deepcopy(case.get("public_outcomes") or [])
+            if not problem or not intervention or not outcomes:
+                raise KnowledgeError("publishable case requires public problem, intervention and outcomes")
+        else:
+            problem, intervention, outcomes = "", "", []
+            claim_ids, evidence_ids = [], []
         records.append({
             "id": record_id("CASE", cid), "type": "CASE",
             "publication_state": "PUBLISHABLE" if publishable else "HOLD",
             "source_ref": cid, "title": case.get("title") or "",
-            "summary": case.get("summary") or "",
+            "summary": intervention,
+            "sections": {"problema": problem, "interventie": intervention, "rezultate": outcomes} if publishable else {},
             "semantics": "VERIFIED_CASE_REGISTRY" if publishable else "WITHHELD_CASE",
-            "provenance": {"source_kind": "E05_CASE_REGISTRY", "source_ref": cid, "claim_refs": copy.deepcopy(case.get("claim_refs") or [])},
+            "provenance": {
+                "source_kind": "E05_CASE_REGISTRY",
+                "source_ref": cid,
+                "claim_refs": copy.deepcopy(claim_ids),
+                "claim_ids": claim_ids,
+                "evidence_ids": evidence_ids,
+            },
         })
     return records
 
@@ -158,7 +193,7 @@ def build_knowledge(
     for service in service_registry.get("services") or []:
         records.extend(_service_records(service, evidence, contract))
     records.extend(_opportunity_records(opportunity_projection, contract))
-    records.extend(_case_records(case_registry, contract))
+    records.extend(_case_records(case_registry, evidence, contract))
     ids = [row["id"] for row in records]
     if len(ids) != len(set(ids)):
         raise KnowledgeError("duplicate knowledge record id")

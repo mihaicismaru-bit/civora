@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "product": "EUCONS_COMMERCIAL_OS",
   "phase": "E04",
   "status": "CANONICAL",
@@ -15,9 +15,49 @@
     "empty_public_projection_allowed_during_development": true
   },
   "discovery_state": {
-    "status": "NO_VERIFIED_EUROCONS_PEOPLE_INGESTED",
-    "public_projection_count": 0,
-    "rule": "Do not publish a placeholder person. Later discovery must add E03 evidence/claims first, then E04 people records may become PUBLISHABLE."
+    "status": "VERIFIED_PUBLIC_PEOPLE_INGESTED",
+    "public_projection_count": 2,
+    "verified_at": "2026-08-19T13:48:00Z",
+    "rule": "Only profiles backed by publishable E03 identity, role and credential claims may appear. Photos remain NONE until a separately verified reusable image is registered."
   },
-  "people": []
+  "people": [
+    {
+      "id": "PERSON-VALENTIN-CISMARU",
+      "publication_state": "PUBLISHABLE",
+      "display_name": "Valentin Cismaru",
+      "public_headline": "Coordonare, antreprenoriat și management de proiect",
+      "public_bio": "Experiență profesională documentată în management de proiect, afaceri internaționale și consultanță pentru mediul de afaceri.",
+      "identity_claim_id": "CLM-VALENTIN-IDENTITY",
+      "role_claim_ids": ["CLM-VALENTIN-ROLE"],
+      "competence_claim_ids": ["CLM-VALENTIN-CREDENTIAL"],
+      "public_bio_claim_ids": ["CLM-VALENTIN-IDENTITY", "CLM-VALENTIN-ROLE", "CLM-VALENTIN-CREDENTIAL"],
+      "service_ids": [
+        "funding_strategy_and_eligibility",
+        "application_design_and_submission",
+        "implementation_and_reporting",
+        "project_management_capacity"
+      ],
+      "photo": {"state": "NONE"}
+    },
+    {
+      "id": "PERSON-MIHAI-CISMARU",
+      "publication_state": "PUBLISHABLE",
+      "display_name": "Mihai Cismaru",
+      "public_headline": "Consultanță în finanțări europene și management de proiect",
+      "public_bio": "Experiență profesională documentată în proiecte finanțate din fonduri UE și în managementul proiectelor.",
+      "identity_claim_id": "CLM-MIHAI-IDENTITY",
+      "role_claim_ids": ["CLM-MIHAI-ROLE"],
+      "competence_claim_ids": ["CLM-MIHAI-CREDENTIAL"],
+      "public_bio_claim_ids": ["CLM-MIHAI-IDENTITY", "CLM-MIHAI-ROLE", "CLM-MIHAI-CREDENTIAL"],
+      "service_ids": [
+        "funding_strategy_and_eligibility",
+        "application_design_and_submission",
+        "implementation_and_reporting",
+        "project_recovery_and_corrections",
+        "monitoring_and_compliance",
+        "project_management_capacity"
+      ],
+      "photo": {"state": "NONE"}
+    }
+  ]
 }

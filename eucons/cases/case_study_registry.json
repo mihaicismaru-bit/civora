@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "product": "EUCONS_COMMERCIAL_OS",
   "phase": "E05",
   "status": "CANONICAL",
@@ -17,9 +17,49 @@
     "empty_public_projection_allowed_during_development": true
   },
   "discovery_state": {
-    "status": "NO_VERIFIED_PUBLIC_CASES_INGESTED",
-    "public_projection_count": 0,
-    "rule": "Do not create demo clients, fictional case studies or inferred results. Add E03 client/result/testimonial evidence and publication classification before promoting a case."
+    "status": "VERIFIED_PUBLIC_CASES_INGESTED",
+    "public_projection_count": 2,
+    "verified_at": "2026-08-19T13:49:00Z",
+    "rule": "Publish only Euroconsult project experience tied to PUBLISHABLE E03 result claims. Named client relationships and testimonials remain HOLD unless separately cleared."
   },
-  "cases": []
+  "cases": [
+    {
+      "id": "CASE-RURALBIZ-47717",
+      "publication_state": "PUBLISHABLE",
+      "title": "RO4 RURALBIZ — dezvoltare rurală și antreprenoriat",
+      "confidentiality_mode": "ANONYMIZED_PUBLIC",
+      "client_attribution": "ANONYMIZED",
+      "result_claim_ids": ["CLM-PROJECT-RURALBIZ-RESULT"],
+      "outcome_claim_ids": ["CLM-PROJECT-RURALBIZ-RESULT"],
+      "service_ids": ["implementation_and_reporting", "monitoring_and_compliance", "project_management_capacity"],
+      "people_ids": [],
+      "testimonial_claim_ids": [],
+      "public_problem": "Un proiect multiregional de dezvoltare rurală a necesitat coordonarea activităților și a indicatorilor într-un cadru POSDRU cu mai mulți parteneri.",
+      "public_intervention": "Documentația Euroconsult din proiect consemnează rolul companiei ca partener, cu activități de consultanță antreprenorială și urmărirea propriilor obligații de implementare.",
+      "public_outcomes": [
+        "În evidența Euroconsult, indicatorii proiectului erau consemnați ca îndepliniți la termenele prevăzute de graficul de activități."
+      ],
+      "source_project_id": "POSDRU/83/5.2/S/47717",
+      "evidence_note": "Exemplu istoric documentat din arhiva controlată Euroconsult; nu este prezentat ca testimonial sau relație comercială cu un client."
+    },
+    {
+      "id": "CASE-COMPETENTA-83018",
+      "publication_state": "PUBLISHABLE",
+      "title": "Competență prin calificare — formare profesională în turism",
+      "confidentiality_mode": "ANONYMIZED_PUBLIC",
+      "client_attribution": "ANONYMIZED",
+      "result_claim_ids": ["CLM-PROJECT-COMPETENTA-RESULT"],
+      "outcome_claim_ids": ["CLM-PROJECT-COMPETENTA-RESULT"],
+      "service_ids": ["implementation_and_reporting", "monitoring_and_compliance", "project_management_capacity"],
+      "people_ids": [],
+      "testimonial_claim_ids": [],
+      "public_problem": "Proiectul de formare profesională a urmărit calificarea angajaților din sectorul turismului într-un cadru POSDRU cu obligații de implementare și raportare.",
+      "public_intervention": "Evidența controlată Euroconsult consemnează participarea companiei ca partener în proiect și contribuția la activitățile aferente implementării.",
+      "public_outcomes": [
+        "În evidența Euroconsult, indicatorii proiectului erau consemnați ca îndepliniți la termen, conform graficului de activități."
+      ],
+      "source_project_id": "POSDRU/108/2.3/G/83018",
+      "evidence_note": "Exemplu istoric documentat; clientul nu este atribuit, iar rezultatul este limitat strict la ceea ce consemnează sursa controlată."
+    }
+  ]
 }
