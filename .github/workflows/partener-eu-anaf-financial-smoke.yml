@@ -1,0 +1,47 @@
+name: PARTENER.EU ANAF Financial Smoke
+
+on:
+  push:
+    branches:
+      - agent/anaf-company-financials
+    paths:
+      - 'partener-eu/ingest/anaf_company_financials.py'
+      - '.github/workflows/partener-eu-anaf-financial-smoke.yml'
+  workflow_dispatch:
+    inputs:
+      cui:
+        description: 'Public Romanian CUI/CIF'
+        required: true
+        default: '9293117'
+      years:
+        description: 'Comma-separated financial years'
+        required: true
+        default: '2025,2024,2023,2022,2021'
+
+permissions:
+  contents: read
+
+jobs:
+  live-anaf-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile client
+        run: python -m py_compile partener-eu/ingest/anaf_company_financials.py
+      - name: Query official ANAF balance sheet endpoint
+        env:
+          CUI: ${{ github.event.inputs.cui || '9293117' }}
+          YEARS: ${{ github.event.inputs.years || '2025,2024,2023,2022,2021' }}
+        shell: bash
+        run: |
+          set +e
+          python partener-eu/ingest/anaf_company_financials.py \
+            --cui "$CUI" --years "$YEARS" --pretty --attempts 3 --pace 1 \
+            > /tmp/anaf-financial-result.json
+          code=$?
+          cat /tmp/anaf-financial-result.json
+          test $code -eq 0
