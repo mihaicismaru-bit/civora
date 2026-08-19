@@ -28,7 +28,8 @@ jobs:
         run: |
           python -m py_compile \
             local-news-os/vnext/core/instance_model.py \
-            local-news-os/vnext/core/runtime_store.py
+            local-news-os/vnext/core/runtime_store.py \
+            local-news-os/vnext/core/site_runtime.py
 
       - name: Validate frozen product contract
         run: |
@@ -84,6 +85,9 @@ jobs:
       - name: Validate site-owned runtime database and append-only event ledger
         run: python local-news-os/vnext/core/runtime_store.py --self-test
 
+      - name: Validate private site newsroom and fail-closed authentication
+        run: python local-news-os/vnext/core/site_runtime.py --self-test
+
       - name: Assert runtime schema is database-only
         shell: bash
         run: |
@@ -93,6 +97,17 @@ jobs:
           grep -q "runtime_owner TEXT NOT NULL CHECK (runtime_owner = 'site_application')" local-news-os/vnext/runtime/schema.sql
           grep -q "runtime_events is append-only" local-news-os/vnext/runtime/schema.sql
           echo 'VNEXT_RUNTIME_DATABASE_CONTRACT_PASS'
+
+      - name: Assert newsroom is private and site-owned
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'LOCAL_NEWS_NEWSROOM_TOKEN' local-news-os/vnext/core/site_runtime.py
+          grep -q 'newsroom_auth_not_configured' local-news-os/vnext/core/site_runtime.py
+          grep -q 'no-store, private' local-news-os/vnext/core/site_runtime.py
+          grep -q 'noindex, nofollow, noarchive' local-news-os/vnext/core/site_runtime.py
+          ! grep -Eiq 'git_state_path|state_root|live-feed|current_edition|output_root' local-news-os/vnext/core/site_runtime.py
+          echo 'VNEXT_PRIVATE_NEWSROOM_CONTRACT_PASS'
 
       - name: Enforce CORE_KNOWS_NO_LOCALITY in generic vNext code
         shell: bash
