@@ -25,11 +25,13 @@ FORBIDDEN_WORKFLOWS = {
     ".github/workflows/valcea-clar-facebook-intro-photo.yml",
     ".github/workflows/valcea-clar-facebook-featured.yml",
 }
-FORBIDDEN_APPLY_ADAPTERS = {
+FORBIDDEN_SCRIPT_FILES = {
     "valcea-clar/social/facebook_text_publish.py",
     "valcea-clar/social/facebook_text_publish_v2.py",
     "valcea-clar/social/facebook_intro_photo_publish.py",
     "valcea-clar/social/facebook_featured_setup.py",
+}
+FORBIDDEN_APPLY_ADAPTERS = FORBIDDEN_SCRIPT_FILES | {
     "valcea-clar/social/facebook_publish.py",
 }
 APPLY_RE = re.compile(
@@ -121,16 +123,20 @@ def validate_workflow_single_writer(violations: list[str]) -> None:
     if canonical.is_file():
         text = canonical.read_text(encoding="utf-8")
         require(f"python {CANONICAL_ADAPTER} --apply" in text, "canonical workflow does not invoke canonical Facebook adapter", violations)
-        require("python valcea-clar/social/validate_facebook_single_writer.py" in text, "canonical workflow does not run the single-writer guard", violations)
+        require("python valcea-clar/social/validate_social_engine.py" in text, "canonical workflow does not enforce social-engine ownership", violations)
 
     for forbidden in sorted(FORBIDDEN_WORKFLOWS):
         require(not (ROOT / forbidden).exists(), f"forbidden Facebook bypass workflow still exists: {forbidden}", violations)
+    for forbidden in sorted(FORBIDDEN_SCRIPT_FILES):
+        require(not (ROOT / forbidden).exists(), f"forbidden Facebook bypass script still exists: {forbidden}", violations)
 
+    writers: list[tuple[str, str]] = []
     for path in sorted(WORKFLOWS.glob("*.yml")):
         rel = path.relative_to(ROOT).as_posix()
         text = path.read_text(encoding="utf-8")
         for adapter in APPLY_RE.findall(text):
             if rel == CANONICAL_WORKFLOW and adapter == CANONICAL_ADAPTER:
+                writers.append((rel, adapter))
                 continue
             if rel == PROFILE_WORKFLOW and adapter == PROFILE_ADAPTER:
                 continue
@@ -140,6 +146,8 @@ def validate_workflow_single_writer(violations: list[str]) -> None:
                 violations.append(f"forbidden Facebook bypass adapter referenced by workflow: {rel} -> {adapter}")
         if "graph.facebook.com" in text and ("/feed" in text or "/photos" in text):
             violations.append(f"workflow contains direct Facebook feed/photo Graph endpoint: {rel}")
+
+    require(writers == [(CANONICAL_WORKFLOW, CANONICAL_ADAPTER)], f"Facebook content writer set must be exactly canonical; found {writers}", violations)
 
 
 def main() -> int:
