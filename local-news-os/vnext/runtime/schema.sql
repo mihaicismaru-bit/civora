@@ -159,6 +159,36 @@ CREATE TABLE IF NOT EXISTS runtime_events (
     FOREIGN KEY (instance_id) REFERENCES publication_instances(instance_id) ON DELETE RESTRICT
 );
 
+CREATE TABLE IF NOT EXISTS story_drafts (
+    instance_id TEXT NOT NULL,
+    story_id TEXT NOT NULL,
+    kernel_id TEXT NOT NULL,
+    newsworthiness_event_id INTEGER NOT NULL,
+    fingerprint TEXT NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1 CHECK (revision >= 1),
+    state TEXT NOT NULL CHECK (state = 'DRAFTED'),
+    headline TEXT NOT NULL,
+    dek TEXT NOT NULL,
+    body_blocks_json TEXT NOT NULL,
+    factbox_json TEXT NOT NULL,
+    context_json TEXT NOT NULL,
+    source_references_json TEXT NOT NULL,
+    follow_up_json TEXT NOT NULL,
+    section TEXT NOT NULL,
+    tags_json TEXT NOT NULL DEFAULT '[]',
+    entity_bindings_json TEXT NOT NULL DEFAULT '[]',
+    publication_authority TEXT NOT NULL CHECK (publication_authority = 'NONE'),
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    PRIMARY KEY (instance_id, story_id),
+    UNIQUE (instance_id, kernel_id),
+    UNIQUE (instance_id, fingerprint),
+    FOREIGN KEY (instance_id, story_id) REFERENCES stories(instance_id, story_id) ON DELETE RESTRICT,
+    FOREIGN KEY (instance_id, kernel_id) REFERENCES fact_kernels(instance_id, kernel_id) ON DELETE RESTRICT,
+    FOREIGN KEY (newsworthiness_event_id) REFERENCES runtime_events(event_id) ON DELETE RESTRICT,
+    FOREIGN KEY (instance_id) REFERENCES publication_instances(instance_id) ON DELETE RESTRICT
+);
+
 CREATE INDEX IF NOT EXISTS idx_runtime_events_aggregate
     ON runtime_events(instance_id, aggregate_type, aggregate_id, event_id);
 
@@ -188,6 +218,9 @@ CREATE INDEX IF NOT EXISTS idx_verification_results_task
 
 CREATE INDEX IF NOT EXISTS idx_fact_kernels_signal
     ON fact_kernels(instance_id, signal_id, created_at);
+
+CREATE INDEX IF NOT EXISTS idx_story_drafts_kernel
+    ON story_drafts(instance_id, kernel_id, updated_at);
 
 CREATE TRIGGER IF NOT EXISTS runtime_events_no_update
 BEFORE UPDATE ON runtime_events
