@@ -46,7 +46,14 @@ assert '!x.geoConflict' in js
 assert "return 'NATIONAL'" in js
 assert 'score-=8' not in js
 assert 'acoperirea geografică a acestui dosar nu este încă suficient de structurată pentru confirmare' in js
-assert 'zonă structurată incompatibilă' in js
+assert 'function beneficiaryCompatibility(' in js
+assert 'const actual=detectedKeys(p.audience,BENEFICIARY_KEYS)' in js
+assert "interpretation.beneficiary.some(key=>actual.includes(key))?'MATCH':'MISMATCH'" in js
+assert 'beneficiaryConflict:true' in js
+assert '!x.beneficiaryConflict' in js
+assert 'Tipul de beneficiar cerut a fost înțeles, dar eligibilitatea acestui dosar nu este încă suficient de structurată pentru confirmarea potrivirii.' in js
+assert 'beneficiar ori zonă structurată incompatibilă' in js
+assert 'beneficiar sau zonă structurată incompatibilă' in js
 assert 'Am înțeles întrebarea astfel:' in js
 assert 'Beneficiar:' in js and 'Investiție:' in js and 'Zonă:' in js
 assert 'P.dossiers.map(d=>rank(d,ts,interpretation))' in js
