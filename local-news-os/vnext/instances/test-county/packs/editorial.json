@@ -2,7 +2,7 @@
   "schema_version": "2.0",
   "pack_type": "editorial",
   "instance_id": "test-county",
-  "auto_publish_classes": ["service_news"],
+  "auto_publish_classes": ["straight_news", "service_news"],
   "human_review_classes": ["reputational_claim", "investigation", "legal_ambiguity"],
   "rules": {
     "verified_facts_only": true,
@@ -37,5 +37,17 @@
       "HEADLINE_ASSERTION": "COMMUNITY"
     },
     "follow_up_label": "Next check"
+  },
+  "editorial_qa": {
+    "default_editorial_class": "straight_news",
+    "minimum_body_blocks": 2,
+    "minimum_primary_sources": 1,
+    "duplicate_headline_similarity_threshold": 0.9,
+    "max_source_future_skew_hours": 4,
+    "risk_term_classes": [
+      {"editorial_class": "reputational_claim", "terms": ["accused", "alleged", "fraud", "corruption"]},
+      {"editorial_class": "investigation", "terms": ["investigation", "raid", "prosecutor"]},
+      {"editorial_class": "legal_ambiguity", "terms": ["lawsuit", "court", "criminal case", "civil case"]}
+    ]
   }
 }
