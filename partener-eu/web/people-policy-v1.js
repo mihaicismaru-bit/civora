@@ -10,7 +10,7 @@ const byId=new Map(P.items.map(x=>[x.id,x]));
 const rawUrl=/^https?:\/\/\S+\/?$/i;
 const materialTerms=/(apel|ghid|termen|calendar|buget|alocar|realoc|finanț|finant|depun|eligibil|consultare|prelung|contract|rezultat|selec|lansar|deschider|închider|inchider|corrigend|ordin)/i;
 const noisyChrome=/(Despre instituție.*Transparență|Media Articole Descoper|Transparență instituțională.*Informații de interes public)/i;
-function isHome(){return !!document.querySelector('.main .hero')&&!document.querySelector('.main .ask')}
+function isHome(){return !!document.querySelector('.main [data-decision-home="1"]')}
 function primarySource(x){return (x.sources||[]).find(s=>safeUrl(s?.url))||null}
 function safeUrl(v){try{const u=new URL(String(v||''),location.href);return /^https?:$/.test(u.protocol)?u.href:''}catch{return ''}}
 function cleanStatement(x){const s=compact(x.statement||x.officialFact||'');if(!s||rawUrl.test(s)||noisyChrome.test(s))return '';return s.length>230?s.slice(0,227).trim()+'…':s}
