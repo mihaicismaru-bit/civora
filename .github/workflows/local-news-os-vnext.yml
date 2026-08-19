@@ -31,7 +31,8 @@ jobs:
             local-news-os/vnext/core/runtime_store.py \
             local-news-os/vnext/core/site_runtime.py \
             local-news-os/vnext/core/source_adapters.py \
-            local-news-os/vnext/core/signal_engine.py
+            local-news-os/vnext/core/signal_engine.py \
+            local-news-os/vnext/core/primary_resolver.py
 
       - name: Validate frozen product contract
         run: |
@@ -93,6 +94,9 @@ jobs:
       - name: Validate site-owned Signal Engine
         run: python local-news-os/vnext/core/signal_engine.py --self-test
 
+      - name: Validate Dynamic Primary Resolver
+        run: python local-news-os/vnext/core/primary_resolver.py --self-test
+
       - name: Validate private site newsroom and fail-closed authentication
         run: python local-news-os/vnext/core/site_runtime.py --self-test
 
@@ -139,6 +143,22 @@ jobs:
           grep -q '/newsroom/api/signals' local-news-os/vnext/core/site_runtime.py
           ! grep -Eiq 'git_state_path|state_root|live-feed|current_edition|output_root' local-news-os/vnext/core/signal_engine.py
           echo 'VNEXT_SIGNAL_BOUNDARY_PASS'
+
+      - name: Assert primary resolver is site-owned and fail-closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'CREATE TABLE IF NOT EXISTS verification_tasks' local-news-os/vnext/runtime/schema.sql
+          grep -q 'CREATE TABLE IF NOT EXISTS primary_targets' local-news-os/vnext/runtime/schema.sql
+          grep -q "origin TEXT NOT NULL CHECK (origin IN ('SOURCE_PACK', 'DYNAMIC_DISCOVERY'))" local-news-os/vnext/runtime/schema.sql
+          grep -q "status TEXT NOT NULL CHECK (status IN ('CANDIDATE', 'VALIDATED', 'DISABLED'))" local-news-os/vnext/runtime/schema.sql
+          grep -q 'candidate_must_be_validated_before_routing' local-news-os/vnext/core/primary_resolver.py
+          grep -q 'authority_confirmed' local-news-os/vnext/core/primary_resolver.py
+          grep -q 'canonical_url_confirmed' local-news-os/vnext/core/primary_resolver.py
+          grep -q '/newsroom/api/verification-tasks' local-news-os/vnext/core/site_runtime.py
+          grep -q '/newsroom/api/primary-targets' local-news-os/vnext/core/site_runtime.py
+          ! grep -Eiq 'requests\.|urllib\.request|httpx|aiohttp|subprocess.*curl|git_state_path|state_root|live-feed|current_edition|output_root' local-news-os/vnext/core/primary_resolver.py
+          echo 'VNEXT_PRIMARY_RESOLVER_BOUNDARY_PASS'
 
       - name: Assert newsroom is private and site-owned
         shell: bash
