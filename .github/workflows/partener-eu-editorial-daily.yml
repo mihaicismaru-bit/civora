@@ -121,6 +121,7 @@ jobs:
           cp partener-eu/ingest/state/people_policy_official_sources.json /tmp/people_policy_official_sources.json
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          checkpointed=false
           for attempt in 1 2 3 4 5; do
             git fetch origin main
             git reset --hard origin/main
@@ -128,12 +129,20 @@ jobs:
             git add partener-eu/ingest/state/people_policy_official_sources.json
             if git diff --cached --quiet; then
               echo 'Official-source ledger already current.'
+              checkpointed=true
               break
             fi
             git commit -m 'Checkpoint official decision-maker source ledger'
-            if git push origin HEAD:main; then break; fi
+            if git push origin HEAD:main; then
+              checkpointed=true
+              break
+            fi
             sleep $((attempt * 2))
           done
+          if [ "$checkpointed" != true ]; then
+            echo 'Failed to persist official-source ledger after retries.' >&2
+            exit 1
+          fi
           git fetch origin main
           git reset --hard origin/main
 
