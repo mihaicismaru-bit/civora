@@ -96,6 +96,7 @@ assert status["listingFetched"] is True
 assert status["articleFetchAttempts"] == 1
 assert status["articleFetchSuccesses"] == 1
 assert status["articleFetchFailures"] == 0
+assert status["statementEvidenceRejected"] == 0
 assert len(items) == 1
 item = items[0]
 assert item["signalKind"] == "STATEMENT_SIGNAL"
@@ -105,6 +106,58 @@ assert item["roleVerification"]["sourceTier"].startswith("T1")
 assert item["sourceSnapshot"]["contentHash"]
 assert item["canonicalLink"]["status"] == "UNRESOLVED"
 assert item["person"] == "Dragoș Pîslaru"
+assert item["statementExtraction"]["status"] == "ACTOR_SPEECH_FUNDING_BOUND"
+assert item["statementExtraction"]["scope"] == "SENTENCE"
+assert "Dragoș Pîslaru a anunțat" in item["statement"]
+
+preface_article = """<html><head><title>Fonduri europene pentru investiții</title></head><body>
+19 august 2026. Finanțarea europeană este importantă pentru economie. Dragoș Pîslaru a anunțat că fondurile europene pentru proiectele de investiții vor rămâne o prioritate.
+</body></html>"""
+try:
+    collector.fetch = lambda url, limit=900_000: listing if url == source["url"] else preface_article
+    preface_status, preface_items = collector.ingest_source(source, people, canonical)
+finally:
+    collector.fetch = old_fetch
+assert preface_status["statementEvidenceRejected"] == 0
+assert len(preface_items) == 1
+assert preface_items[0]["statement"].startswith("Dragoș Pîslaru a anunțat")
+assert "Finanțarea europeană este importantă" not in preface_items[0]["statement"]
+
+adjacent_article = """<html><head><title>Declarație privind prioritățile</title></head><body>
+19 august 2026. Dragoș Pîslaru a declarat că măsura va începe în această toamnă. Aceasta privește finanțarea prin PNRR pentru proiectele selectate.
+</body></html>"""
+try:
+    collector.fetch = lambda url, limit=900_000: listing if url == source["url"] else adjacent_article
+    adjacent_status, adjacent_items = collector.ingest_source(source, people, canonical)
+finally:
+    collector.fetch = old_fetch
+assert adjacent_status["statementEvidenceRejected"] == 0
+assert len(adjacent_items) == 1
+assert adjacent_items[0]["statementExtraction"]["scope"] == "ADJACENT_SENTENCES"
+assert "Dragoș Pîslaru a declarat" in adjacent_items[0]["statement"]
+assert "PNRR" in adjacent_items[0]["statement"]
+
+headline_only_article = """<html><head><title>Dragoș Pîslaru anunță finanțare PNRR</title></head><body>
+19 august 2026. Materialul prezintă contextul general al programului fără o declarație atribuită în corpul articolului.
+</body></html>"""
+try:
+    collector.fetch = lambda url, limit=900_000: listing if url == source["url"] else headline_only_article
+    headline_only_status, headline_only_items = collector.ingest_source(source, people, canonical)
+finally:
+    collector.fetch = old_fetch
+assert headline_only_items == []
+assert headline_only_status["statementEvidenceRejected"] == 1
+
+detached_article = """<html><head><title>Ministrul și finanțările europene</title></head><body>
+19 august 2026. Dragoș Pîslaru a participat la reuniunea de lucru. Programul de finanțare PNRR are mai multe proiecte în pregătire și rămâne pe agenda instituției.
+</body></html>"""
+try:
+    collector.fetch = lambda url, limit=900_000: listing if url == source["url"] else detached_article
+    detached_status, detached_items = collector.ingest_source(source, people, canonical)
+finally:
+    collector.fetch = old_fetch
+assert detached_items == []
+assert detached_status["statementEvidenceRejected"] == 1
 
 try:
     def fetch_failure(url, limit=900_000):
@@ -251,6 +304,9 @@ print(json.dumps({
     "historicalSeedsRequireRoleAtObservation": True,
     "genericListingRowsRejected": True,
     "articleStatementEvidenceRequired": True,
+    "actorSpeechFundingWindowRequired": True,
+    "titleOnlyStatementRejected": True,
+    "detachedActorFundingRejected": True,
     "sourceHealthRequiresArticleFetchProof": True,
     "boundedConcurrentSourceIngest": True,
     "durableVerifiedProjectionCheckpoint": True,
