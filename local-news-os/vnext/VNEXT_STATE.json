@@ -70,7 +70,7 @@
       ]
     },
     "P5_SIGNAL_ENGINE": {
-      "status": "IN_REVIEW",
+      "status": "CLOSED",
       "evidence": [
         "site-owned signals table",
         "deterministic signal identity and dedupe",
@@ -82,10 +82,11 @@
         "append-only SIGNAL_DISCOVERED event",
         "cross-instance signal isolation",
         "private newsroom signal summary/list/detail API",
-        "private newsroom visible recent-signal table"
+        "private newsroom visible recent-signal table",
+        "LOCAL NEWS OS vNext Validation run 32247133056 PASS"
       ]
     },
-    "P6_DYNAMIC_PRIMARY_RESOLVER": {"status": "PENDING"},
+    "P6_DYNAMIC_PRIMARY_RESOLVER": {"status": "NEXT"},
     "P7_FACT_KERNEL_ENGINE": {"status": "PENDING"},
     "P8_NEWSWORTHINESS_ENGINE": {"status": "PENDING"},
     "P9_STORY_ENGINE": {"status": "PENDING"},
@@ -99,5 +100,5 @@
     "P17_INSTANCE_BOOTSTRAP_SECOND_INSTANCE_TEST": {"status": "PENDING"},
     "P18_MIGRATION_SHADOW_LIVE_SOAK_PRODUCTION_LOCK": {"status": "PENDING"}
   },
-  "next_action": "Validate P5 on dedicated vNext CI; on PASS close P5 and advance P6 Dynamic Primary Resolver."
+  "next_action": "Implement P6 Dynamic Primary Resolver: turn unresolved signal claims/entities into site-owned verification tasks and dynamically discover/configure primary targets without granting publication authority."
 }
