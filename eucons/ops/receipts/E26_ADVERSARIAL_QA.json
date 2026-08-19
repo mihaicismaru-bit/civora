@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E26",
+  "unit": "E26_ADVERSARIAL_QA",
+  "status": "PASS",
+  "validated_at": "2026-08-19T13:20:30Z",
+  "validation": {
+    "quality": {"run_id": 32257021033, "run_number": 125, "conclusion": "success"},
+    "build": {"run_id": 32257020967, "run_number": 17, "conclusion": "success"},
+    "validated_head": "80bfb68b93581764ab84d5c16d033aa849864e70",
+    "merged_commit": "b054f499d5fee9487476ed9730dee14e88287efd",
+    "exact_head_gate_passed": true
+  },
+  "coverage": {
+    "adversarial_scenarios": 16,
+    "deterministic_replay": "PASS",
+    "stale_opportunity_contradiction": "HOLD_SOURCE_STATE",
+    "spam_honeypot": "REJECTED",
+    "invalid_email": "REJECTED",
+    "missing_offer_provenance": "REJECTED",
+    "missing_pricing": "HUMAN_REQUIRED",
+    "duplicate_conflict": "HOLD_DUPLICATE_CONFLICT",
+    "duplicate_same_key": "COLLAPSED",
+    "orphan_prepare": "DISCARD_ORPHAN_PREPARE",
+    "stale_lease": "RESUME_AFTER_STALE_LEASE",
+    "linkedin_outage": "RETRY",
+    "facebook_retry_exhaustion": "HOLD_RETRY_EXHAUSTED",
+    "indexable_preview": "REJECTED",
+    "production_deployment": "REJECTED",
+    "social_live_gate": "CLOSED",
+    "email_live_gate": "CLOSED",
+    "pii_repository_write": "REJECTED",
+    "production_side_effects": "DISABLED"
+  },
+  "artifacts": [
+    "eucons/adversarial/adversarial_contract.json",
+    "eucons/adversarial/adversarial_suite.py",
+    "eucons/validation/validate_adversarial_qa.py",
+    "eucons/validation/test_adversarial_qa_fail_closed.py",
+    ".github/workflows/eucons-quality.yml"
+  ],
+  "next_phase": "E27"
+}
