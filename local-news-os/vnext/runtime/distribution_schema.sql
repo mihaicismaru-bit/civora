@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS delivery_ledger (
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
     PRIMARY KEY (instance_id, delivery_id),
-    UNIQUE (instance_id, story_id, channel_id),
+    UNIQUE (instance_id, story_id, channel_id, desired_revision),
     FOREIGN KEY (instance_id, product_id) REFERENCES channel_products(instance_id, product_id) ON DELETE RESTRICT,
     FOREIGN KEY (instance_id, story_id) REFERENCES stories(instance_id, story_id) ON DELETE RESTRICT
 );
@@ -76,6 +76,8 @@ CREATE INDEX IF NOT EXISTS idx_channel_products_story
     ON channel_products(instance_id, story_id, channel_id, desired_revision DESC);
 CREATE INDEX IF NOT EXISTS idx_delivery_ledger_status
     ON delivery_ledger(instance_id, status, updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_delivery_ledger_story
+    ON delivery_ledger(instance_id, story_id, channel_id, desired_revision DESC);
 CREATE INDEX IF NOT EXISTS idx_delivery_attempts_delivery
     ON delivery_attempts(instance_id, delivery_id, attempt_number DESC);
 CREATE INDEX IF NOT EXISTS idx_delivery_receipts_delivery
