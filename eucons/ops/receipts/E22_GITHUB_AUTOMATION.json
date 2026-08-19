@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E22",
+  "unit": "E22_GITHUB_AUTOMATION",
+  "status": "PASS",
+  "validated_at": "2026-08-19T12:42:00Z",
+  "validation": {
+    "validated_head": "b33f40a23e4b39eda8ad53cf7bd824fcaa2bb1f9",
+    "merged_commit": "3d00a471a4d62caf174263e60ee65e7894263d2f",
+    "exact_head_gate_passed": true,
+    "workflows": {
+      "quality": {"run_id": 32253634901, "run_number": 109, "conclusion": "success"},
+      "build": {"run_id": 32253634904, "run_number": 1, "conclusion": "success"},
+      "scheduler": {"run_id": 32253634918, "run_number": 1, "conclusion": "success"},
+      "reconciliation": {"run_id": 32253634910, "run_number": 1, "conclusion": "success"},
+      "health": {"run_id": 32253634916, "run_number": 1, "conclusion": "success"}
+    }
+  },
+  "coverage": {
+    "quality_workflow": "PASS",
+    "static_build_workflow": "PASS",
+    "scheduled_dry_run_workflow": "PASS",
+    "read_only_reconciliation_workflow": "PASS",
+    "closed_gate_health_workflow": "PASS",
+    "explicit_contents_read_permissions": "PASS",
+    "concurrency_boundaries": "PASS",
+    "artifact_only_outputs": "PASS",
+    "provider_credentials": "NOT_USED",
+    "git_push_from_workflows": "FORBIDDEN",
+    "external_social_mail_publication": "FORBIDDEN",
+    "production_deployment": "DISABLED"
+  },
+  "artifacts": [
+    "eucons/ops/github_automation_contract.json",
+    "eucons/ops/github_automation.py",
+    "eucons/validation/validate_github_automation.py",
+    "eucons/validation/test_github_automation_fail_closed.py",
+    ".github/workflows/eucons-quality.yml",
+    ".github/workflows/eucons-build.yml",
+    ".github/workflows/eucons-scheduler.yml",
+    ".github/workflows/eucons-reconciliation.yml",
+    ".github/workflows/eucons-health.yml"
+  ],
+  "next_phase": "E23"
+}
