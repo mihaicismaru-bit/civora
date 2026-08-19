@@ -1,15 +1,19 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "instance_id": "craiova",
   "sources": [
     {
       "id": "cao-anunturi-comunicate",
-      "name": "Compania de Apa Oltenia",
-      "url": "https://www.apaoltenia.ro/index.php/category/anunturi-si-comunicate/",
+      "name": "Compania de Apă Oltenia",
+      "url": "https://www.apaoltenia.ro/index.php/category/anunturi/",
+      "feed_url": "https://www.apaoltenia.ro/index.php/category/anunturi/feed/",
       "authority": "primary",
       "vertical": "UTILITY",
       "priority": 100,
-      "enabled": true
+      "enabled": true,
+      "allowed_localities": ["Craiova", "craiovean", "craioveană"],
+      "area_prefixes": ["craiovean", "craioveană"],
+      "max_items": 12
     },
     {
       "id": "isu-dolj-comunicate",
