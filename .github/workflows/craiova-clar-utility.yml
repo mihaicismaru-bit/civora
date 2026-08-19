@@ -65,7 +65,7 @@ jobs:
             git push origin HEAD:craiova-clar-build
           fi
 
-      - name: Verify public utility publication and write PublicationReceipt
+      - name: Probe public utility publication
         env:
           BASE_URL: https://craiova-clar-mihaicismaru-6634s-projects.vercel.app
         run: |
@@ -78,14 +78,24 @@ jobs:
           story = doc['stories'][0]
           url = story['canonical_url']
           expected = story['headline']
-          last_error = None
+          outcome = {
+              'story_id': story['story_id'],
+              'canonical_url': url,
+              'checked_at': datetime.now(timezone.utc).isoformat(),
+              'status': 'verification_failed',
+              'http_status': None,
+              'error': None,
+          }
           for attempt in range(12):
               try:
                   req = urllib.request.Request(url, headers={'User-Agent':'CRAIOVA-CLAR-live-check/1.0'})
                   with urllib.request.urlopen(req, timeout=12) as response:
                       body = response.read().decode('utf-8', errors='replace')
                       status = response.status
+                  outcome['http_status'] = status
                   if status == 200 and expected in body and 'CRAIOVA CLAR' in body:
+                      outcome['status'] = 'published_verified'
+                      outcome['error'] = None
                       receipt = {
                           'story_id': story['story_id'],
                           'canonical_url': url,
@@ -103,23 +113,39 @@ jobs:
                       Path('craiova-clar/site/utility_publication_receipt.json').write_text(
                           json.dumps(receipt, ensure_ascii=False, indent=2) + '\n', encoding='utf-8'
                       )
-                      print(json.dumps(receipt, ensure_ascii=False))
-                      raise SystemExit(0)
-                  last_error = f'HTTP {status}; expected live headline not found'
+                      break
+                  outcome['error'] = f'HTTP {status}; expected live headline not found'
               except Exception as exc:
-                  last_error = repr(exc)
-              time.sleep(5)
-          raise SystemExit(f'Public publication verification failed for {url}: {last_error}')
+                  outcome['error'] = repr(exc)
+              if attempt < 11:
+                  time.sleep(5)
+          outcome['checked_at'] = datetime.now(timezone.utc).isoformat()
+          Path('craiova-clar/state/utility_live_probe.json').write_text(
+              json.dumps(outcome, ensure_ascii=False, indent=2) + '\n', encoding='utf-8'
+          )
+          print(json.dumps(outcome, ensure_ascii=False))
           PY
 
-      - name: Persist verified PublicationReceipt
+      - name: Persist live verification evidence
         run: |
           git config user.name 'craiova-clar[bot]'
           git config user.email 'craiova-clar@users.noreply.github.com'
-          git add craiova-clar/site/utility_publication_receipt.json
-          if git diff --cached --quiet; then
-            echo 'Verified publication receipt already current.'
-            exit 0
+          git add craiova-clar/state/utility_live_probe.json
+          if test -f craiova-clar/site/utility_publication_receipt.json; then
+            git add craiova-clar/site/utility_publication_receipt.json
           fi
-          git commit -m 'Verify CRAIOVA CLAR utility publication live'
-          git push origin HEAD:craiova-clar-build
+          if git diff --cached --quiet; then
+            echo 'Live verification evidence already current.'
+          else
+            git commit -m 'Record CRAIOVA CLAR utility live verification'
+            git push origin HEAD:craiova-clar-build
+          fi
+
+      - name: Require verified public publication
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          probe = json.loads(Path('craiova-clar/state/utility_live_probe.json').read_text(encoding='utf-8'))
+          assert probe['status'] == 'published_verified', probe
+          PY
