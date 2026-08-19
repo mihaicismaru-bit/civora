@@ -4,7 +4,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from core import engine, primary_research
+from core import engine, pipeline, primary_research
 
 
 class NeedsFactoryEngineTests(unittest.TestCase):
@@ -107,6 +107,78 @@ class PrimaryResearchTests(unittest.TestCase):
         self.assertEqual(aggregate["coverage"], 1.0)
         for record in aggregate["aggregates"].values():
             self.assertEqual(record["valid_n"], 2)
+
+
+class PipelineTests(unittest.TestCase):
+    def _run(self):
+        return pipeline.PipelineRun(
+            project_input={"project_id": "310224", "target": 251},
+            call_snapshot={"call_code": "PEO/76", "indicators": ["EECO06+07", "EECR03"]},
+            ruleset_version="0.2",
+            source_snapshot_ids=["SRC-B", "SRC-A"],
+            historical_cutoff="2024-01-12",
+        )
+
+    def test_run_id_is_deterministic_and_source_order_independent(self):
+        first = self._run()
+        second = pipeline.PipelineRun(
+            project_input={"project_id": "310224", "target": 251},
+            call_snapshot={"call_code": "PEO/76", "indicators": ["EECO06+07", "EECR03"]},
+            ruleset_version="0.2",
+            source_snapshot_ids=["SRC-A", "SRC-B"],
+            historical_cutoff="2024-01-12",
+        )
+        self.assertEqual(first.run_id, second.run_id)
+
+    def test_local_gap_adds_population_snapshot_gate(self):
+        run = self._run()
+        gaps = run.gap_detection(
+            claims=[{
+                "id": "C1",
+                "scope": "school",
+                "requires_direct_local": True,
+                "evidence_ids": ["E1"],
+                "gap_type": "career_guidance",
+                "priority": True,
+            }],
+            evidence_by_id={"E1": {"scope": "national"}},
+            population_snapshot={"snapshot_id": "POP-UNRESOLVED"},
+        )
+        gap_ids = {item["gap_id"] for item in gaps["gaps"]}
+        self.assertIn("GAP-C1", gap_ids)
+        self.assertIn("GAP-POPULATION-SNAPSHOT", gap_ids)
+        plan = run.primary_research_plan(gaps, {"snapshot_id": "POP-UNRESOLVED"})
+        self.assertEqual(plan["sampling_strategy"], "population_snapshot_required")
+
+    def test_end_to_end_pre_narrative_pass(self):
+        run = self._run()
+        evidence = {
+            "E1": {"id": "E1", "tier": "A1", "scope": "county"},
+            "E2": {"id": "E2", "tier": "A2", "scope": "national"},
+        }
+        needs = [
+            {"id": "N1", "priority": True, "evidence_ids": ["E1"]},
+            {"id": "N2", "priority": True, "evidence_ids": ["E1", "E2"]},
+        ]
+        need_validation = run.validate_needs(needs, evidence)
+        self.assertFalse(need_validation["failures"])
+
+        trace = run.traceability(
+            chains=[
+                {"need_id":"N1","evidence_ids":["E1"],"intervention":"work-based learning","indicator_id":"EECO06+07"},
+                {"need_id":"N2","evidence_ids":["E1","E2"],"intervention":"practice at employers","indicator_id":"EECR03"},
+            ],
+            need_ids=["N1", "N2"],
+            indicator_ids=["EECO06+07", "EECR03"],
+        )
+        self.assertTrue(trace["valid"])
+
+        release = run.release_gate({"failures": [], "evidence_gaps": []})
+        self.assertTrue(release["ready_for_narrative"])
+        manifest = run.manifest()
+        self.assertEqual(manifest["run_id"], run.run_id)
+        self.assertIn("NF11_ADVERSARIAL_QA", manifest["closed_checkpoints"])
+        self.assertTrue(any(event["event"] == "NF_QA_PASSED" for event in manifest["events"]))
 
 
 if __name__ == "__main__":
