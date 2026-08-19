@@ -1,0 +1,76 @@
+name: LOCAL NEWS OS vNext Knowledge Graph
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "local-news-os/vnext/core/knowledge_graph.py"
+      - "local-news-os/vnext/core/knowledge_runtime.py"
+      - "local-news-os/vnext/runtime/knowledge_schema.sql"
+      - ".github/workflows/local-news-os-vnext-knowledge-graph.yml"
+  push:
+    branches: [main]
+    paths:
+      - "local-news-os/vnext/core/knowledge_graph.py"
+      - "local-news-os/vnext/core/knowledge_runtime.py"
+      - "local-news-os/vnext/runtime/knowledge_schema.sql"
+      - ".github/workflows/local-news-os-vnext-knowledge-graph.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-knowledge-graph:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile P12 core and site projections
+        run: |
+          python -m py_compile \
+            local-news-os/vnext/core/knowledge_graph.py \
+            local-news-os/vnext/core/knowledge_runtime.py
+
+      - name: Validate provenance-bound knowledge graph
+        run: python local-news-os/vnext/core/knowledge_graph.py --self-test
+
+      - name: Validate private newsroom and public evidence-backed profiles
+        run: python local-news-os/vnext/core/knowledge_runtime.py --self-test
+
+      - name: Assert P12 site-owned database contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'CREATE TABLE IF NOT EXISTS knowledge_entities' local-news-os/vnext/runtime/knowledge_schema.sql
+          grep -q 'CREATE TABLE IF NOT EXISTS knowledge_edges' local-news-os/vnext/runtime/knowledge_schema.sql
+          grep -q 'CREATE TABLE IF NOT EXISTS story_entity_links' local-news-os/vnext/runtime/knowledge_schema.sql
+          grep -q 'CREATE TABLE IF NOT EXISTS public_money_items' local-news-os/vnext/runtime/knowledge_schema.sql
+          grep -q 'CREATE TABLE IF NOT EXISTS knowledge_timeline_events' local-news-os/vnext/runtime/knowledge_schema.sql
+          grep -q 'EVIDENCE_BACKED' local-news-os/vnext/core/knowledge_graph.py
+          grep -q 'ambiguous alias cannot be auto-merged' local-news-os/vnext/core/knowledge_graph.py
+          grep -q 'published story' local-news-os/vnext/core/knowledge_graph.py
+          grep -q 'PUBLIC_MONEY_RECORDED' local-news-os/vnext/core/knowledge_graph.py
+          grep -q '/newsroom/api/entities' local-news-os/vnext/core/knowledge_runtime.py
+          grep -q '/newsroom/knowledge' local-news-os/vnext/core/knowledge_runtime.py
+          grep -q 'profile_path_prefix' local-news-os/vnext/core/knowledge_runtime.py
+          ! grep -Eiq 'git_state_path|state_root|live-feed|current_edition|output_root' \
+            local-news-os/vnext/core/knowledge_graph.py \
+            local-news-os/vnext/core/knowledge_runtime.py \
+            local-news-os/vnext/runtime/knowledge_schema.sql
+          echo 'VNEXT_P12_SITE_OWNED_KNOWLEDGE_PASS'
+
+      - name: Enforce CORE_KNOWS_NO_LOCALITY for P12
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -niE 'vâlcea|valcea|râmnicu|ramnicu|valceaclar\.ro' \
+            local-news-os/vnext/core/knowledge_graph.py \
+            local-news-os/vnext/core/knowledge_runtime.py \
+            local-news-os/vnext/runtime/knowledge_schema.sql; then
+            echo 'P12 generic code contains locality-specific material' >&2
+            exit 1
+          fi
+          echo 'VNEXT_P12_CORE_NO_LOCALITY_PASS'
