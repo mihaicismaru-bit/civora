@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E08",
+  "unit": "E08_HOMEPAGE_CORE_PUBLIC_SITE",
+  "status": "PASS",
+  "validated_at": "2026-08-19T09:55:00Z",
+  "validation": {
+    "workflow": "EUCONS Quality",
+    "run_id": 32235852978,
+    "run_number": 51,
+    "conclusion": "success",
+    "validated_head": "48771ef2896f0df8a1436255f6c925b756b122dd",
+    "merged_commit": "bdf6cbc0795c1ca9ad6ba6e84e91f812f77e6500",
+    "exact_head_gate_passed": true
+  },
+  "coverage": {
+    "core_routes": 18,
+    "publishable_service_routes": 8,
+    "visitor_qa": "PASS",
+    "trust_qa": "PASS",
+    "commercial_qa": "PASS",
+    "development_preview_noindex": true,
+    "lead_collection_disabled_until_E11": true,
+    "funding_projection_fail_closed_until_E09": true,
+    "unverified_people_cases_omitted": true,
+    "numeric_price_claims_forbidden_without_rule": true
+  },
+  "artifacts": [
+    "eucons/web/build_public_site.py",
+    "eucons/web/index.html",
+    "eucons/validation/validate_public_site.py",
+    "eucons/validation/test_public_site_fail_closed.py",
+    "eucons/validation/validate_bootstrap.py",
+    ".github/workflows/eucons-quality.yml"
+  ],
+  "next_phase": "E09"
+}
