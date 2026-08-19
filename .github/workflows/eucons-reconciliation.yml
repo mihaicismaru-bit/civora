@@ -1,6 +1,10 @@
 name: EUCONS Reconciliation
 
 on:
+  pull_request:
+    paths:
+      - 'eucons/ops/**'
+      - '.github/workflows/eucons-reconciliation.yml'
   schedule:
     - cron: '29 2 * * *'
   workflow_dispatch:
@@ -9,7 +13,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: eucons-reconciliation
+  group: eucons-reconciliation-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
