@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E08",
+  "status": "CANONICAL",
+  "build_state": "DEVELOPMENT_NOINDEX",
+  "brand": {
+    "name": "EUROCONSULT",
+    "descriptor": "Consultanță pentru finanțare, pregătire și implementare de proiecte",
+    "logo_mode": "TEXT_WORDMARK_UNTIL_VERIFIED_ASSET"
+  },
+  "homepage": {
+    "eyebrow": "Euroconsult · consultanță proiecte finanțate",
+    "headline": "De la investiție la proiect implementat, cu decizii documentate la fiecare etapă.",
+    "lead": "Euroconsult oferă servicii pentru identificarea rutelor de finanțare, pregătirea cererilor, implementare, achiziții, management financiar, conformitate și remedierea proiectelor cu probleme.",
+    "primary_cta": "request_project_evaluation",
+    "secondary_cta": "request_offer",
+    "service_limit": 8,
+    "audience_ids": ["companies_entrepreneurs", "public_authorities_institutions", "ngos_eligible_organizations", "existing_beneficiaries"],
+    "conditional_sections": {
+      "funding_opportunities": "ONLY_PUBLISHABLE_E09",
+      "people": "ONLY_PUBLISHABLE_E04",
+      "cases": "ONLY_PUBLISHABLE_E05",
+      "numeric_proof": "ONLY_PUBLISHABLE_E03_CLAIM"
+    }
+  },
+  "empty_states": {
+    "funding_index": {
+      "title": "Finanțări și oportunități",
+      "body": "Publicăm oportunități numai după verificarea statutului, termenelor și sursei. În această proiecție de dezvoltare nu există încă oportunități publicabile."
+    },
+    "team_index": {
+      "title": "Echipa Euroconsult",
+      "body": "Profilurile individuale sunt publicate numai după verificarea identității, rolului și competențelor din surse admise. În această proiecție nu există încă profiluri publicabile."
+    },
+    "projects_index": {
+      "title": "Proiecte și studii de caz",
+      "body": "Publicăm exemple numai după verificarea rezultatului și a dreptului de publicare. În această proiecție nu există încă studii de caz publicabile."
+    }
+  },
+  "audience_page": {
+    "eyebrow": "Pentru cine lucrăm",
+    "problem_heading": "Situații în care putem ajuta",
+    "service_heading": "Servicii relevante",
+    "cta": "request_project_evaluation"
+  },
+  "service_page": {
+    "eyebrow": "Serviciu Euroconsult",
+    "deliverables_heading": "Ce poate include serviciul",
+    "process_heading": "Cum lucrăm",
+    "boundaries_heading": "Limite și condiții",
+    "evidence_heading": "De ce avem nevoie pentru analiză"
+  },
+  "journey_pages": {
+    "project_evaluation": {
+      "title": "Evaluare proiect",
+      "lead": "Descrie investiția, organizația și stadiul proiectului. Fluxul de transmitere este încă în validare E11; E08 verifică doar structura paginii și accesibilitatea controalelor.",
+      "dry_run": true
+    },
+    "request_offer": {
+      "title": "Solicită ofertă",
+      "lead": "Alege aria de servicii și oferă contextul necesar pentru definirea scopului. Prețurile și condițiile numerice nu sunt generate fără o regulă aprobată.",
+      "dry_run": true
+    }
+  },
+  "about": {
+    "title": "Despre Euroconsult",
+    "body": "Euroconsult oferă serviciile publicate în registrul EUCONS pentru pregătirea și gestionarea proiectelor finanțate. Istoricul companiei, experiența cuantificată și rezultatele sunt afișate numai după ce există dovezi publicabile în registrul de proveniență."
+  },
+  "contact": {
+    "title": "Contact și evaluare",
+    "body": "Pentru această etapă de dezvoltare, site-ul direcționează solicitările către fluxurile interne de evaluare și ofertă. Datele de contact nu sunt inventate și vor fi publicate numai dintr-o sursă verificată."
+  },
+  "legal_placeholders": {
+    "terms": "Suprafață juridică rezervată. Conținutul final este blocat până la E21 Privacy & Security.",
+    "privacy": "Suprafață de confidențialitate rezervată. Conținutul final este blocat până la E21 Privacy & Security."
+  },
+  "hard_rules": {
+    "all_e08_pages_noindex": true,
+    "external_stylesheets_forbidden": true,
+    "unsupported_claims_omitted": true,
+    "hold_records_omitted": true,
+    "fake_metrics_forbidden": true,
+    "fake_testimonials_forbidden": true,
+    "fake_clients_forbidden": true,
+    "numeric_prices_forbidden_until_e13": true,
+    "forms_must_be_dry_run_until_e11": true
+  }
+}
