@@ -9,6 +9,30 @@
   "public_runtime": {
     "story_path_prefix": "/stiri",
     "category_path_prefix": "/sectiune",
+    "profile_path_prefix": "/profiles",
+    "profile_route_aliases": [
+      {
+        "entity_type": "PERSON",
+        "path_prefix": "/oameni"
+      },
+      {
+        "entity_type": "ARTIST",
+        "path_prefix": "/artisti"
+      }
+    ],
+    "collection_routes": [
+      {
+        "path": "/unde-iesim/",
+        "title": "Unde ieșim",
+        "entity_types": [
+          "PLACE",
+          "VENUE"
+        ]
+      }
+    ],
+    "sitemap_static_routes": [
+      "/"
+    ],
     "homepage_limit": 30,
     "feed_limit": 50,
     "sitemap_limit": 20000
