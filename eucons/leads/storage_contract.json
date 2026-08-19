@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "adapter_id": "EUCONS_LEAD_STORAGE_V1",
+  "production_enabled": false,
+  "modes": ["DRY_RUN", "PROVIDER_ADAPTER_REQUIRED"],
+  "interface": {
+    "operation": "write_lead",
+    "input": "normalized_lead_record",
+    "required_receipt_fields": ["provider", "operation_id", "status", "written_at"],
+    "idempotency_key": "dedupe_key"
+  },
+  "repository_policy": {
+    "pii_writes_under_repository_root_forbidden": true,
+    "synthetic_fixtures_allowed": true,
+    "secrets_in_repository_forbidden": true
+  },
+  "activation_requirements": ["production_backend_authorized", "privacy_retention_policy_active", "secret_store_configured", "write_receipt_verified"]
+}
