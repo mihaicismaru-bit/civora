@@ -1,0 +1,20 @@
+{
+  "project_input": {"project_id": "SMOKE-001", "territory": "Vâlcea", "target": 251},
+  "call_snapshot": {"call_code": "PEO/76", "indicators": ["EECO06+07", "EECR03"]},
+  "ruleset_version": "0.2",
+  "historical_cutoff": "2024-01-12",
+  "source_snapshot_ids": ["SRC-SMOKE-A", "SRC-SMOKE-B"],
+  "evidence": {
+    "E1": {"id": "E1", "tier": "A1", "scope": "county", "territory": "Vâlcea"},
+    "E2": {"id": "E2", "tier": "A2", "scope": "national", "territory": "România"}
+  },
+  "needs": [
+    {"id": "N1", "title": "Practică relevantă", "statement": "Expunere practică relevantă", "scope": "county", "priority": true, "evidence_ids": ["E1"]},
+    {"id": "N2", "title": "Orientare profesională", "statement": "Orientare legată de traseul profesional", "scope": "national", "priority": true, "evidence_ids": ["E1", "E2"]}
+  ],
+  "chains": [
+    {"need_id": "N1", "evidence_ids": ["E1"], "intervention": "work-based learning", "indicator_id": "EECO06+07"},
+    {"need_id": "N2", "evidence_ids": ["E1", "E2"], "intervention": "practice at employers", "indicator_id": "EECR03"}
+  ],
+  "indicator_ids": ["EECO06+07", "EECR03"]
+}
