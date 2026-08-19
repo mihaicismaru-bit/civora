@@ -13,13 +13,13 @@ permissions:
   contents: write
 
 concurrency:
-  group: craiova-clar-utility-scheduler
+  group: craiova-clar-runtime-writer
   cancel-in-progress: false
 
 jobs:
   utility:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
       - name: Check out CRAIOVA CLAR build branch
         uses: actions/checkout@v6
@@ -176,3 +176,26 @@ jobs:
           if probe.get('media_expected'):
               assert probe.get('media_verified') is True, probe
           PY
+
+      - name: Plan canonical Facebook product
+        run: python craiova-clar/run_facebook.py | tee /tmp/craiova-clar-facebook-plan.json
+
+      - name: Run canonical Facebook publisher after site verification
+        env:
+          CRAIOVA_FB_PAGE_ID: ${{ secrets.CRAIOVA_FB_PAGE_ID }}
+          CRAIOVA_META_PAGE_ACCESS_TOKEN: ${{ secrets.CRAIOVA_META_PAGE_ACCESS_TOKEN }}
+        run: python craiova-clar/run_facebook.py --apply | tee /tmp/craiova-clar-facebook-result.json
+
+      - name: Persist Facebook truth state
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'craiova-clar[bot]'
+          git config user.email 'craiova-clar@users.noreply.github.com'
+          git add craiova-clar/state/facebook.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo 'Facebook truth state already current or no external attempt was made.'
+          else
+            git commit -m 'Record CRAIOVA CLAR Facebook publication state'
+            git push origin HEAD:craiova-clar-build
+          fi
