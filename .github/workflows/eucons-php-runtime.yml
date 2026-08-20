@@ -1,0 +1,46 @@
+name: EUCONS PHP Runtime
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/runtime/php/**'
+      - 'eucons/deployment/activate_php_runtime.py'
+      - 'eucons/validation/validate_php_runtime.py'
+      - 'eucons/validation/test_php_runtime.php'
+      - 'eucons/leads/lead_contract.json'
+      - 'eucons/leads/forms.json'
+      - '.github/workflows/eucons-php-runtime.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/runtime/php/**'
+      - 'eucons/deployment/activate_php_runtime.py'
+      - 'eucons/validation/validate_php_runtime.py'
+      - 'eucons/validation/test_php_runtime.php'
+      - 'eucons/leads/lead_contract.json'
+      - 'eucons/leads/forms.json'
+      - '.github/workflows/eucons-php-runtime.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Require PHP CLI
+        run: php -v
+      - name: Lint PHP runtime
+        run: |
+          php -l eucons/runtime/php/src/LeadRuntime.php
+          php -l eucons/runtime/php/public/index.php
+          php -l eucons/validation/test_php_runtime.php
+      - name: Test PHP runtime fail-closed behavior
+        run: php eucons/validation/test_php_runtime.php
+      - name: Validate PHP runtime and activated public build
+        run: python eucons/validation/validate_php_runtime.py

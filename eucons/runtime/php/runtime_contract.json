@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "engine_id": "EUCONS_E29_PHP_RUNTIME_ADAPTER",
+  "runtime": "PHP_8_PLUS_SHARED_HOSTING",
+  "canonical_source": "mihaicismaru-bit/civora/eucons",
+  "public_origin": "https://eucons.ro",
+  "api_origin": "https://api.eucons.ro",
+  "lead_route": "/api/leads",
+  "allowed_origins": ["https://eucons.ro", "https://www.eucons.ro"],
+  "storage": {
+    "strategy": "FILESYSTEM_ATOMIC_JSON_OUTSIDE_WEBROOT",
+    "default_root": "/home/eucons/eucons-data",
+    "real_pii_in_git": false,
+    "atomic_rename_required": true,
+    "file_lock_required": true
+  },
+  "request": {
+    "methods": ["POST", "OPTIONS"],
+    "content_types": ["application/x-www-form-urlencoded", "multipart/form-data"],
+    "canonical_lead_contract": "eucons/leads/lead_contract.json",
+    "canonical_forms_contract": "eucons/leads/forms.json",
+    "origin_required_for_browser_post": true,
+    "unknown_fields_rejected": true,
+    "raw_script_markup_rejected": true
+  },
+  "response": {
+    "accepted_status": 202,
+    "expose_pii": false,
+    "fields": ["status", "request_id", "next_action"]
+  },
+  "security": {
+    "https_required": true,
+    "cors_exact_origin_only": true,
+    "credentials_allowed": false,
+    "sensitive_logs_redacted": true,
+    "repository_credentials_forbidden": true
+  },
+  "activation": {
+    "production_enabled": false,
+    "requires": [
+      "api.eucons.ro DNS points to authorized hosting",
+      "api.eucons.ro HTTPS valid",
+      "runtime deployed from validated CIVORA head",
+      "storage root writable outside document root",
+      "synthetic live smoke passes",
+      "privacy notice names active hosting role"
+    ]
+  }
+}
