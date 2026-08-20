@@ -24,15 +24,17 @@ permissions:
   pages: write
   id-token: write
 
+# Every PARTENER.EU workflow that calls actions/deploy-pages must queue on the
+# same repository-wide lock. Never cancel an in-flight valid deployment.
 concurrency:
-  group: partener-eu-pages-v2
-  cancel-in-progress: true
+  group: partener-eu-pages
+  cancel-in-progress: false
 
 jobs:
   deploy:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     environment:
-      name: partener-eu-pages
+      name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:

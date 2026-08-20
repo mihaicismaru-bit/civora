@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Static guard for P10 orchestration and fail-closed publication policy."""
+import re
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
@@ -48,6 +49,13 @@ if "ref: main" not in validation:
 # GitHub Pages accepts only one active deployment per repository. Every workflow
 # that invokes deploy-pages must queue on the same repository-wide lock; using
 # separate groups or cancelling an in-flight deployment can race the Pages API.
+def has_exact_yaml_scalar(workflow: str, key: str, value: str) -> bool:
+    return bool(re.search(
+        rf"(?m)^[ \\t]*{re.escape(key)}:[ \\t]*{re.escape(value)}[ \\t]*(?:#.*)?$",
+        workflow,
+    ))
+
+
 for workflow_name, workflow in [
     ("PARTENER.EU Pages", pages_workflow),
     ("PARTENER.EU Auto Deploy", auto_deploy_workflow),
@@ -55,10 +63,12 @@ for workflow_name, workflow in [
 ]:
     if "uses: actions/deploy-pages@v4" not in workflow:
         errors.append(f"{workflow_name} no longer exposes its expected Pages deployment step")
-    if "group: partener-eu-pages" not in workflow:
-        errors.append(f"{workflow_name} does not share the repository-wide Pages deployment lock")
-    if "cancel-in-progress: false" not in workflow:
+    if not has_exact_yaml_scalar(workflow, "group", "partener-eu-pages"):
+        errors.append(f"{workflow_name} does not share the exact repository-wide Pages deployment lock")
+    if not has_exact_yaml_scalar(workflow, "cancel-in-progress", "false"):
         errors.append(f"{workflow_name} can cancel an in-flight Pages deployment")
+    if not has_exact_yaml_scalar(workflow, "name", "github-pages"):
+        errors.append(f"{workflow_name} does not use the canonical GitHub Pages environment")
 
 # Scheduled PEO calendar changes are candidate evidence only during P10. The
 # workflow may persist state but must not update the public JS feed automatically.
