@@ -1,0 +1,40 @@
+{
+  "schema_version": "nf.checkpoint_status.v0.1",
+  "benchmark_id": "NF-BENCH-001",
+  "project_code": "310224",
+  "checkpoint": "NF-CP10",
+  "name": "Constrained Evidence-Tagged Narrative Compiler",
+  "branch": "needs-factory/nf-cp10-narrative-compiler",
+  "draft_pr": 471,
+  "verified_head": "d1aaf575dd698ef5c80c053d1a96e0c23a57f83f",
+  "ci": {
+    "workflow_run": 32254398152,
+    "job": 96072430224,
+    "conclusion": "success",
+    "regression_tests": 45,
+    "real_310224_research_gate": "success_blocked_as_expected",
+    "synthetic_resume_and_compiler": "success",
+    "synthetic_nf12_and_compiler": "success"
+  },
+  "compiled_outputs": {
+    "resume_fixture_narrative_sha256": "26f96d3514c140d4895202459f7c176383cb53eb6305504ac6f1332137140e51",
+    "smoke_fixture_narrative_sha256": "343ba5b55fa0474400afbbf97fb1022790b3e19b63a10fe1e829636868911f2a",
+    "need_and_evidence_tags_required": true,
+    "source_register_separate": true,
+    "interpretation_limits_required": true
+  },
+  "guards_verified": [
+    "unknown evidence tag fails validation",
+    "unknown or missing need marker fails validation",
+    "duplicate need marker fails validation",
+    "unrelated evidence in a need section fails validation",
+    "removing a prohibited-overclaim limit fails validation",
+    "release-gate failure blocks compilation",
+    "same narrative-ready pack compiles deterministically"
+  ],
+  "real_310224_state": "BLOCKED_RESEARCH",
+  "decision": "CLOSED_PASS",
+  "next_checkpoint": "NF-CP11",
+  "next_action": "Implement final-document exporters and package manifest from the validated compiled analysis. Exporters must remain downstream-only and may not alter evidence, need ranking or narrative claims.",
+  "status": "CLOSED_PASS"
+}

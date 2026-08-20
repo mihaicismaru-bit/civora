@@ -1,0 +1,97 @@
+{
+  "schema_version": "nf.engine_reuse_contract.v0.1",
+  "product": "NEEDS_FACTORY",
+  "principle": "reuse_not_duplicate",
+  "engines": {
+    "PARTENER_EU": {
+      "role": [
+        "call and guide intelligence",
+        "source registry and source health",
+        "programme/domain semantics",
+        "last-known-good material-fact policy"
+      ],
+      "existing_contracts": [
+        "partener-eu/ingest/data_plane_contract.json",
+        "partener-eu/validation/source_state.checkpoint.json"
+      ],
+      "acceptance_policy": {
+        "source_health": "PASS preferred for material facts",
+        "quarantined": false,
+        "material_fact_change": "reconciliation required; no silent auto-promotion",
+        "last_known_good": "preserve and block dependent facts only"
+      },
+      "needs_factory_adapter_output": [
+        "source_id",
+        "tier",
+        "health",
+        "quarantined",
+        "raw_sha256",
+        "semantic_sha256",
+        "final_url",
+        "observed_at",
+        "historical_availability"
+      ]
+    },
+    "CIVORA": {
+      "role": [
+        "source discovery patterns",
+        "provenance capture",
+        "deduplication/reconciliation patterns",
+        "external evidence retrieval"
+      ],
+      "boundary": "Needs Factory may request/reuse discovered source material but stores only evidence records and source references required for the analysis; it does not create a parallel crawler fleet."
+    },
+    "DAPE": {
+      "role": [
+        "orchestration",
+        "checkpoint semantics",
+        "artifact registry",
+        "deterministic resume",
+        "QA release gate",
+        "versioning and rollback"
+      ],
+      "integration_mode": "artifact-and-event contract; no code copy required",
+      "events_emitted_by_needs_factory": [
+        "NF_CHECKPOINT_STARTED",
+        "NF_ARTIFACT_READY",
+        "NF_EVIDENCE_GAP",
+        "NF_QA_FAILED",
+        "NF_QA_PASSED",
+        "NF_CHECKPOINT_CLOSED"
+      ],
+      "event_fields": [
+        "run_id",
+        "project_id",
+        "checkpoint",
+        "artifact_path",
+        "artifact_sha256",
+        "status",
+        "blocking",
+        "timestamp"
+      ],
+      "idempotency_key": "sha256(project_input + call_snapshot + historical_cutoff + ruleset_version + source_snapshot_ids)",
+      "resume_rule": "Resume from the last closed checkpoint whose input hash still matches; otherwise invalidate only dependent downstream checkpoints.",
+      "rollback_rule": "Never overwrite a closed checkpoint artifact in place; create a new run/version and preserve predecessor linkage."
+    }
+  },
+  "needs_factory_owned_components": [
+    "EU-funds needs ontology",
+    "evidence applicability scoring",
+    "evidence-gap detector",
+    "primary research planner and validator",
+    "need discovery and deduplication",
+    "need scoring/ranking",
+    "causal graph",
+    "need-to-intervention traceability",
+    "needs-specific adversarial QA",
+    "narrative-ready evidence pack"
+  ],
+  "forbidden_duplication": [
+    "generic source health monitor",
+    "generic artifact registry",
+    "generic checkpoint persistence engine",
+    "generic crawler scheduler",
+    "generic rollback/version store"
+  ],
+  "status": "active"
+}

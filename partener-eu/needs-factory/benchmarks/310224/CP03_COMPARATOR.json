@@ -1,0 +1,120 @@
+{
+  "schema_version": "nf.comparator.v0.1",
+  "benchmark_id": "NF-BENCH-001",
+  "project_code": "310224",
+  "checkpoint": "NF-CP03",
+  "comparison_policy": "semantic/evidentiary comparison; no textual similarity scoring",
+  "blind_source": "CP02_BLIND_NEEDS.json frozen before ground-truth access",
+  "ground_truth_source": "NEEDS_GROUND_TRUTH.json",
+  "need_level_comparison": [
+    {
+      "ground_truth_id": "NEED-GT-01",
+      "ground_truth": "Nevoia de resurse umane calificate",
+      "blind_matches": ["BN-04", "BN-05"],
+      "semantic_coverage": 0.90,
+      "verdict": "RECOVERED_WITH_HIGHER_SPECIFICITY",
+      "note": "Blind run replaces a generic qualified-human-resources statement with county hiring demand plus school qualification fit."
+    },
+    {
+      "ground_truth_id": "NEED-GT-02",
+      "ground_truth": "Corelarea competențelor dobândite în școală cu cerințele pieței muncii",
+      "blind_matches": ["BN-01", "BN-02", "BN-05"],
+      "semantic_coverage": 1.0,
+      "verdict": "FULLY_RECOVERED_AND_DECOMPOSED",
+      "note": "Blind run decomposes the broad need into work-based exposure, school-employer linkage and qualification/technology alignment."
+    },
+    {
+      "ground_truth_id": "NEED-GT-03",
+      "ground_truth": "Nivel scăzut al ocupării în rândul tinerilor din Sud-Vest Oltenia",
+      "blind_matches": ["BN-04"],
+      "semantic_coverage": 0.90,
+      "verdict": "RECOVERED_WITH_SEMANTIC_CORRECTION",
+      "note": "Blind run uses Vâlcea registered-unemployment context and avoids calling a share of registered unemployed a youth unemployment rate."
+    },
+    {
+      "ground_truth_id": "NEED-GT-04",
+      "ground_truth": "Consiliere și orientare în carieră",
+      "blind_matches": ["BN-03"],
+      "semantic_coverage": 1.0,
+      "verdict": "FULLY_RECOVERED_WITH_SCOPE_GUARD",
+      "note": "National official evidence supports the need; blind run refuses to claim Pleșoianu-specific indecision without student-level research."
+    },
+    {
+      "ground_truth_id": "NEED-GT-05",
+      "ground_truth": "Grad ridicat de discriminare în rândul tinerilor / lipsa educației pentru nediscriminare",
+      "blind_matches": [],
+      "semantic_coverage": 0.0,
+      "verdict": "INTENTIONALLY_REJECTED_UNSUPPORTED",
+      "note": "Ground truth labels evidence strength low. Blind run correctly keeps nondiscrimination as a horizontal/compliance theme unless direct prevalence evidence is produced. This is not counted as a benchmark failure."
+    },
+    {
+      "ground_truth_id": "NEED-GT-06",
+      "ground_truth": "Pregătire timpurie pentru cerințele pieței muncii",
+      "blind_matches": ["BN-01", "BN-03", "BN-04", "BN-05"],
+      "semantic_coverage": 1.0,
+      "verdict": "RECOVERED_BUT_DEDUPLICATED",
+      "note": "Blind run models early preparation as a dependency/outcome of practice, guidance and labour-market alignment rather than a duplicate standalone need."
+    }
+  ],
+  "canonical_family_comparison": [
+    {"family_id":"NFAM-01","label":"Gap de competențe practice / work-based learning","blind_matches":["BN-01","BN-05"],"coverage":1.0,"verdict":"FULL"},
+    {"family_id":"NFAM-02","label":"Gap de aliniere școală-angajator / relevanța calificărilor","blind_matches":["BN-02","BN-05"],"coverage":1.0,"verdict":"FULL"},
+    {"family_id":"NFAM-03","label":"Tranziție educație-piața muncii și orientare de carieră","blind_matches":["BN-03","BN-04","BN-06"],"coverage":1.0,"verdict":"FULL"},
+    {"family_id":"NFAM-04","label":"Acces și finalizare a stagiilor/certificării pentru GT eligibil","blind_matches":["BN-01","BN-04"],"coverage":0.55,"verdict":"PARTIAL_BY_DESIGN","note":"Indicators and qualification outcome are traceable, but no independent blind evidence demonstrates a Pleșoianu-specific completion/certification deficit. Factory must not invent one merely because EECR03 is an indicator."}
+  ],
+  "quality_comparison": {
+    "legacy_approved": {
+      "strengths": [
+        "contains primary student research",
+        "was accepted at full evaluator score for the formal needs-analysis criteria",
+        "contains broad national/regional rationale for work-based learning"
+      ],
+      "weaknesses": [
+        "sample/entity/chart inconsistencies",
+        "substantial reliance on older 2017-2019 labour/economic evidence",
+        "weak local Vâlcea corroboration",
+        "mixed applicability of external research",
+        "unsupported discrimination need",
+        "no atomic evidence-to-indicator traceability"
+      ]
+    },
+    "blind_factory": {
+      "strengths": [
+        "official-first evidence",
+        "2023 county-level labour evidence",
+        "actual 2023-2024 school qualification offer",
+        "explicit claim-scope limitations",
+        "atomic Need-Evidence-Intervention-Indicator traceability",
+        "unsupported candidate-needs are rejected rather than narrated",
+        "historical cutoff preserved"
+      ],
+      "weaknesses": [
+        "no student-level primary research",
+        "no school-level practice-quality baseline",
+        "no school-level employment/retention baseline",
+        "one important county forecast has an unresolved original publication-receipt caveat"
+      ]
+    }
+  },
+  "defect_avoidance_against_known_defects": [
+    {"defect_ids":["KD-001","KD-002","KD-003","KD-004","KD-005","KD-006","KD-009","KD-015"],"result":"AVOIDED_BY_BLIND_ISOLATION_AND_NO_UNVERIFIED_PRIMARY_DATA_IMPORT"},
+    {"defect_ids":["KD-007","KD-008"],"result":"IMPROVED_BY_2023_COUNTY_AND_SCHOOL_EVIDENCE"},
+    {"defect_ids":["KD-010"],"result":"CORRECTED_BY_REJECT_UNSUPPORTED_NEED"},
+    {"defect_ids":["KD-011"],"result":"CORRECTED_BY_OFFICIAL_FIRST_AND_APPLICABILITY_GUARD"},
+    {"defect_ids":["KD-012","KD-013","KD-014"],"result":"CORRECTED_BY_TRACEABILITY_AND_SOURCE_MANIFEST"},
+    {"defect_ids":["KD-016","KD-017"],"result":"CORRECTED_BY_CAUSAL_GUARD_AND_DEDUPLICATION"},
+    {"defect_ids":["KD-018"],"result":"CORRECTED_BY_HISTORICAL_CUTOFF"}
+  ],
+  "scores": {
+    "raw_labelled_need_recovery_excluding_unsupported_gt05_pct": 96.0,
+    "canonical_need_family_coverage_pct": 88.75,
+    "official_evidence_coverage_primary_needs_pct": 100.0,
+    "school_or_county_specific_evidence_primary_needs_pct": 80.0,
+    "atomic_traceability_pct": 100.0,
+    "known_critical_high_defect_classes_avoided_or_guarded_pct": 100.0,
+    "school_level_primary_research_completeness_pct": 0.0
+  },
+  "benchmark_interpretation": "The blind engine reproduces the defensible core of the accepted analysis while materially improving evidence freshness, territorial fit and claim discipline. The main remaining production gap is not web research but primary-research orchestration when school-specific claims are required.",
+  "decision": "PASS_WITH_PRIMARY_RESEARCH_GAP",
+  "status": "complete"
+}
