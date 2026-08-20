@@ -13,6 +13,7 @@ CHECKS = [
     ("recovery", [sys.executable, str(ROOT / "ops" / "test_recovery.py")]),
     ("frontend", [sys.executable, str(ROOT / "ops" / "test_frontend_regression.py")]),
     ("ask_v2", [sys.executable, str(ROOT / "ops" / "test_ask_partener_v2.py")]),
+    ("ask_eligibility_projection", ["node", str(ROOT / "ops" / "test_ask_eligibility_projection.js")]),
     ("p10_policy", [sys.executable, str(ROOT / "ops" / "test_p10_policy_regression.py")]),
     ("afir_policy", [sys.executable, str(ROOT / "ops" / "test_afir_ingest_policy.py")]),
     ("afir_lkg", [sys.executable, str(ROOT / "ops" / "test_afir_lkg.py")]),
