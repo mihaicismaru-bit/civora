@@ -46,6 +46,15 @@ def validate_discovery_receipt(
         failures.append("source_health_not_pass")
     if receipt.get("quarantined") is True:
         failures.append("source_quarantined")
+
+    source_registry_gate = receipt.get("source_registry_gate")
+    if isinstance(source_registry_gate, Mapping) and source_registry_gate.get("valid") is not True:
+        gate_failures = [str(item) for item in (source_registry_gate.get("failures") or []) if str(item)]
+        if gate_failures:
+            failures.extend(f"source_registry_gate:{item}" for item in gate_failures)
+        else:
+            failures.append("source_registry_gate:invalid")
+
     if not _scope_allowed(str(receipt.get("scope") or ""), task.get("preferred_scopes") or [], bool(task.get("direct_local_required"))):
         failures.append("scope_not_acceptable_for_task")
     construct = str(task.get("construct") or "")
@@ -138,6 +147,9 @@ def promote_discovery_receipt(
                 "requirement_id": receipt.get("requirement_id"),
                 "last_success": receipt.get("last_success"),
                 "material_fact_state": receipt.get("material_fact_state"),
+                "source_registry_gate": dict(source_registry_gate)
+                if isinstance((source_registry_gate := receipt.get("source_registry_gate")), Mapping)
+                else None,
             },
         })
     return {
