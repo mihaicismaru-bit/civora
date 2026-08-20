@@ -123,9 +123,10 @@ def reconcile_receipt_with_source_registry(
 ) -> Dict[str, Any]:
     """Reconcile provider claims against PARTENER.EU's canonical source-health snapshot.
 
-    The provider remains responsible for discovery. This gate only authorizes whether
-    a returned receipt can proceed to Needs Factory evidence validation. Unknown,
-    stale, quarantined, low-quality or reconciliation-pending sources fail closed.
+    The provider remains responsible for discovery and document-level provenance.
+    This gate only authorizes whether a returned receipt may proceed to Needs Factory
+    evidence validation. Unknown, stale, quarantined, low-quality or
+    reconciliation-pending sources fail closed.
     """
 
     output = dict(receipt)
@@ -133,6 +134,7 @@ def reconcile_receipt_with_source_registry(
         registry, now=now, max_age_hours=max_registry_age_hours
     )
     source = _match_registry_source(receipt, registry)
+    registry_provenance: Dict[str, Any] = {}
     if source is None:
         failures.append("unregistered_source")
         output["source_registry_id"] = None
@@ -148,11 +150,14 @@ def reconcile_receipt_with_source_registry(
             failures.append("registry_resolution_required")
         if source.get("material_fact_use") is True and source.get("semantic_hash_changed") is True:
             failures.append("material_fact_reconciliation_required")
-
-        # Central source-health state is authoritative for health and content hashes.
-        for field in ("raw_sha256", "semantic_sha256", "tier", "final_url"):
-            if source.get(field):
-                output[field] = source.get(field)
+        registry_provenance = {
+            "registry_url": source.get("url"),
+            "registry_final_url": source.get("final_url"),
+            "registry_tier": source.get("tier"),
+            "registry_class": source.get("class"),
+            "registry_raw_sha256": source.get("raw_sha256"),
+            "registry_semantic_sha256": source.get("semantic_sha256"),
+        }
 
     failures = sorted(set(failures))
     if failures:
@@ -172,6 +177,7 @@ def reconcile_receipt_with_source_registry(
         "valid": not failures,
         "failures": failures,
         "policy": "fail_closed_no_unregistered_or_unhealthy_evidence",
+        **registry_provenance,
     }
     return output
 
