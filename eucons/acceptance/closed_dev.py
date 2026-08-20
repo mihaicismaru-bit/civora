@@ -52,11 +52,25 @@ def validate_contract(contract: dict[str, Any]) -> None:
         raise ClosedDevError("E28 may not enable production side effects")
     if contract.get("required_completed_phases") != expected:
         raise ClosedDevError("E28 prerequisite phase list drift")
-    allowed = contract.get("external_handoff", {}).get("allowed_ids") or []
+    handoff = contract.get("external_handoff", {})
+    allowed = handoff.get("allowed_ids") or []
     if allowed != ["domain_and_hosting", "linkedin", "facebook", "commercial_mailbox"]:
         raise ClosedDevError("E28 external handoff scope drift")
-    if contract.get("external_handoff", {}).get("owner_development_actions_required") is not False:
+    if handoff.get("owner_development_actions_required") is not False:
         raise ClosedDevError("E28 cannot defer development work to owner")
+    allowed_states = handoff.get("allowed_states") or []
+    if allowed_states != ["OWNER_AUTHORIZATION_REQUIRED", "AUTHORIZED_AND_VALIDATED"]:
+        raise ClosedDevError("E28 external handoff allowed states drift")
+    if handoff.get("pre_authorization_state") != "OWNER_AUTHORIZATION_REQUIRED":
+        raise ClosedDevError("E28 pre-authorization state drift")
+    if handoff.get("validated_state") != "AUTHORIZED_AND_VALIDATED":
+        raise ClosedDevError("E28 validated state drift")
+    if handoff.get("validated_receipt_required") is not True:
+        raise ClosedDevError("E28 validated handoff receipt requirement drift")
+    if handoff.get("validated_receipt_phase") != "E29":
+        raise ClosedDevError("E28 validated handoff receipt phase drift")
+    if handoff.get("validated_receipt_statuses") != ["PASS", "PASS_EXTERNAL_BINDING"]:
+        raise ClosedDevError("E28 validated handoff receipt statuses drift")
 
 
 def receipt_manifest(contract: dict[str, Any]) -> list[dict[str, str]]:
@@ -162,21 +176,65 @@ def verify_artifact_registry(receipts: list[dict[str, str]]) -> dict[str, Any]:
     return {"active_artifacts": len(active_paths), "receipt_manifests": len(receipts)}
 
 
-def verify_handoff(contract: dict[str, Any]) -> dict[str, Any]:
-    handoff = load_json(ROOT / contract["external_handoff"]["manifest"])
+def validate_handoff_document(handoff: dict[str, Any], contract: dict[str, Any]) -> dict[str, Any]:
+    handoff_contract = contract["external_handoff"]
     if handoff.get("state") != "EXTERNAL_AUTHORIZATION_ONLY":
         raise ClosedDevError("external handoff state drift")
     if handoff.get("owner_development_actions_required") is not False:
         raise ClosedDevError("external handoff defers development work")
     rows = handoff.get("allowed_external_actions") or []
     ids = [row.get("id") for row in rows]
-    if ids != contract["external_handoff"]["allowed_ids"]:
+    if ids != handoff_contract["allowed_ids"]:
         raise ClosedDevError("external handoff contains missing, extra or reordered actions")
-    if not all(row.get("state") == contract["external_handoff"]["required_state"] for row in rows):
-        raise ClosedDevError("external handoff action state drift")
-    if any(row.get("secrets_in_repository") is not False for row in rows):
-        raise ClosedDevError("external handoff permits secrets in repository")
-    return {"actions": ids, "owner_development_actions_required": False}
+    allowed_states = set(handoff_contract["allowed_states"])
+    pending_state = handoff_contract["pre_authorization_state"]
+    validated_state = handoff_contract["validated_state"]
+    validated_statuses = set(handoff_contract["validated_receipt_statuses"])
+    validated_phase = handoff_contract["validated_receipt_phase"]
+    pending = 0
+    validated = 0
+
+    for row in rows:
+        if row.get("secrets_in_repository") is not False:
+            raise ClosedDevError("external handoff permits secrets in repository")
+        state = row.get("state")
+        if state not in allowed_states:
+            raise ClosedDevError("external handoff action state drift")
+        if state == pending_state:
+            if row.get("owner_action") == "COMPLETED" or row.get("validation_receipt"):
+                raise ClosedDevError("pending external handoff claims completion without validation")
+            pending += 1
+            continue
+        if state != validated_state:
+            raise ClosedDevError("external handoff action state drift")
+        if row.get("owner_action") != "COMPLETED":
+            raise ClosedDevError("validated external handoff lacks completed owner action")
+        receipt_rel = str(row.get("validation_receipt") or "").strip()
+        if handoff_contract.get("validated_receipt_required") is True and not receipt_rel:
+            raise ClosedDevError("validated external handoff lacks receipt")
+        receipt_path = (ROOT / receipt_rel).resolve()
+        try:
+            receipt_path.relative_to(ROOT.resolve())
+        except ValueError as exc:
+            raise ClosedDevError("validated external handoff receipt escapes repository") from exc
+        if not receipt_path.is_file():
+            raise ClosedDevError("validated external handoff receipt missing")
+        receipt = load_json(receipt_path)
+        if receipt.get("phase") != validated_phase or receipt.get("status") not in validated_statuses:
+            raise ClosedDevError("validated external handoff receipt is not an approved E29 PASS receipt")
+        validated += 1
+
+    return {
+        "actions": ids,
+        "pending": pending,
+        "validated": validated,
+        "owner_development_actions_required": False,
+    }
+
+
+def verify_handoff(contract: dict[str, Any]) -> dict[str, Any]:
+    handoff = load_json(ROOT / contract["external_handoff"]["manifest"])
+    return validate_handoff_document(handoff, contract)
 
 
 def verify_runtime(contract: dict[str, Any]) -> dict[str, Any]:
