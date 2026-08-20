@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: valcea-clar-manual-publish
@@ -114,3 +115,12 @@ jobs:
 
           echo 'Could not promote manual publication after five attempts.' >&2
           exit 1
+
+      - name: Dispatch canonical live newsroom explicitly
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh workflow run valcea-clar-newsroom-live.yml --repo "${{ github.repository }}" --ref main
+          echo 'Canonical VÂLCEA CLAR live newsroom dispatch accepted.'
