@@ -1,25 +1,25 @@
 {
   "schema_version": "1.7",
-  "observed_at": "2026-08-20T22:02:14Z",
-  "status": "PASS",
+  "observed_at": "2026-08-20T22:03:18Z",
+  "status": "FAIL",
   "public_content_verified": true,
   "https_verified": true,
-  "secure_transport_verified": true,
-  "http_redirects_to_https": true,
+  "secure_transport_verified": false,
+  "http_redirects_to_https": false,
   "pages_https_preserved": true,
   "http_content_verified": true,
-  "https_closure_gate": "PASS",
+  "https_closure_gate": "PENDING_HTTPS_ENFORCEMENT_AND_SECURE_REDIRECTS",
   "content_origin": "custom_https",
   "old_origin_detected": false,
   "endpoints": [
     {
       "id": "custom_https",
       "url": "https://partener.eu/",
-      "requested_url": "https://partener.eu/?p10_probe=20260820T220214Z",
+      "requested_url": "https://partener.eu/?p10_probe=20260820T220318Z",
       "ok": true,
       "content_verified": true,
       "http_status": 200,
-      "final_url": "https://partener.eu/?p10_probe=20260820T220214Z",
+      "final_url": "https://partener.eu/?p10_probe=20260820T220318Z",
       "final_scheme": "https",
       "redirect_chain": [],
       "content_type": "text/html; charset=utf-8",
@@ -108,17 +108,17 @@
     {
       "id": "custom_http",
       "url": "http://partener.eu/",
-      "requested_url": "http://partener.eu/?p10_probe=20260820T220214Z",
-      "ok": true,
-      "content_verified": true,
+      "requested_url": "http://partener.eu/?p10_probe=20260820T220318Z",
+      "ok": false,
+      "content_verified": false,
       "http_status": 200,
-      "final_url": "https://partener.eu/?p10_probe=20260820T220214Z",
+      "final_url": "https://partener.eu/?p10_probe=20260820T220318Z",
       "final_scheme": "https",
       "redirect_chain": [
         {
           "http_status": 301,
-          "from_url": "http://partener.eu/?p10_probe=20260820T220214Z",
-          "to_url": "https://partener.eu/?p10_probe=20260820T220214Z"
+          "from_url": "http://partener.eu/?p10_probe=20260820T220318Z",
+          "to_url": "https://partener.eu/?p10_probe=20260820T220318Z"
         }
       ],
       "content_type": "text/html; charset=utf-8",
@@ -139,7 +139,7 @@
       },
       "marker_ok": true,
       "legacy_origin_detected": false,
-      "critical_assets_ok": true,
+      "critical_assets_ok": false,
       "assets": {
         "data.js": {
           "url": "https://partener.eu/data.js?v=20260813-1500",
@@ -183,13 +183,12 @@
         },
         "home-novice-v1.js": {
           "url": "https://partener.eu/home-novice-v1.js?v=20260816-0933",
-          "ok": true,
-          "http_status": 200,
-          "final_url": "https://partener.eu/home-novice-v1.js?v=20260816-0933",
-          "bytes": 8091,
-          "sha256": "dc00f634b9c1e4774ecde3be8fd335fdcec6f2e0c4aa752adaeabbfb99deab21",
-          "error": null,
-          "expected_marker_found": true
+          "ok": false,
+          "http_status": null,
+          "final_url": null,
+          "bytes": 0,
+          "sha256": null,
+          "error": "URLError: <urlopen error [Errno 104] Connection reset by peer>"
         },
         "home-go-to-v2.js": {
           "url": "https://partener.eu/home-go-to-v2.js?v=20260818-1114",
@@ -207,17 +206,17 @@
     {
       "id": "pages_origin",
       "url": "https://mihaicismaru-bit.github.io/civora/",
-      "requested_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260820T220214Z",
+      "requested_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260820T220318Z",
       "ok": true,
       "content_verified": true,
       "http_status": 200,
-      "final_url": "https://partener.eu/?p10_probe=20260820T220214Z",
+      "final_url": "https://partener.eu/?p10_probe=20260820T220318Z",
       "final_scheme": "https",
       "redirect_chain": [
         {
           "http_status": 301,
-          "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260820T220214Z",
-          "to_url": "https://partener.eu/?p10_probe=20260820T220214Z"
+          "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260820T220318Z",
+          "to_url": "https://partener.eu/?p10_probe=20260820T220318Z"
         }
       ],
       "content_type": "text/html; charset=utf-8",
@@ -319,11 +318,11 @@
     "novice_ui_ref": true,
     "goto_ui_ref": true
   },
-  "final_url": "https://partener.eu/?p10_probe=20260820T220214Z",
+  "final_url": "https://partener.eu/?p10_probe=20260820T220318Z",
   "content_type": "text/html; charset=utf-8",
   "bytes": 5788,
   "body_sha256": "e847ac2c9b95300bb61055f149acb743dfe65b1a16385c5517c8a1051b54ebf3",
   "title": "PARTENER.EU — Găsește finanțări europene pentru investiția ta",
   "critical_assets_ok": true,
-  "error": null
+  "error": "public content is current, but HTTP/Pages transport is not fully HTTPS-closed"
 }
