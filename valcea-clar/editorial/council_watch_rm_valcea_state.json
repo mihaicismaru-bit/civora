@@ -2,7 +2,7 @@
   "schema_version": "1.1",
   "instance_id": "valcea",
   "monitor_id": "council-watch-rm-valcea",
-  "generated_at": "2026-08-20T19:19:08Z",
+  "generated_at": "2026-08-20T19:50:47Z",
   "source": {
     "publisher": "Primăria Municipiului Râmnicu Vâlcea",
     "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
@@ -14,14 +14,12 @@
     "date": "2026-08-14",
     "weekday": "vineri",
     "status": "OFFICIAL_ADOPTED_DECISIONS_PUBLISHED_FOR_TARGET_DATE",
-    "publication_allowed_from_this_state": false,
-    "selection": "LATEST_OFFICIAL_ADOPTED_DECISION_DATE_V1",
-    "selection_rule": "newest date present in official adopted-HCL register"
+    "publication_allowed_from_this_state": false
   },
   "register_health": {
     "reachable": true,
     "http_status": 200,
-    "source_sha256": "38b0c65fed0ea6e6d7333e6d423a04766bdc39e75bd4709d9502701b750a4f0f",
+    "source_sha256": "75e8a9f2d09000bdbf76903b98f6610c032278580d8e82808b6235427cec2658",
     "entries_parsed": 310,
     "official_html_attachments_indexed": 0
   },
@@ -221,16 +219,6 @@
     "agenda_item_is_not_adopted_decision": true,
     "meeting_occurrence_not_inferred_from_missing_hcl": true,
     "missing_target_hcl_does_not_mean_rejected_or_postponed": true,
-    "normal_story_ready_gate_required": true,
-    "target_meeting_is_latest_official_adopted_date": true,
-    "static_target_date_required": false
-  },
-  "target_selection": {
-    "selector_id": "LATEST_OFFICIAL_ADOPTED_DECISION_DATE_V1",
-    "previous_static_recovery_target": "2026-08-14",
-    "selected_date": "2026-08-14",
-    "selected_only_after_official_adoption": true,
-    "future_meeting_date_inference_forbidden": true,
-    "agenda_date_is_not_selection_evidence": true
+    "normal_story_ready_gate_required": true
   }
 }
