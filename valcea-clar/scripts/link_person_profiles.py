@@ -56,7 +56,9 @@ def inline(fragment,rows):
 def patch_static(path,rows):
     if not path.is_file(): return False
     before=path.read_text(encoding="utf-8")
-    text=re.sub(re.escape(START)+r".*?"+re.escape(END),"",before,flags=re.S)
+    # Consume whitespace left by the previous generated block so repeated
+    # runs are byte-stable instead of adding a blank line on every schedule.
+    text=re.sub(r"\s*"+re.escape(START)+r".*?"+re.escape(END),"",before,flags=re.S)
     m=re.search(r"<article>(.*?)</article>",text,re.S)
     if m and rows:
         body=inline(m.group(1),rows)

@@ -83,6 +83,9 @@ def main() -> int:
             "city": (p.get("location") or {}).get("city"),
             "summary": (p.get("editorial") or {}).get("dek") or (p.get("offer") or {}).get("summary"),
             "badges": p.get("badges", [])[:2],
+            # Only explicitly approved, exact-subject documentary media reaches
+            # the public feed. Candidate and held photographs remain absent.
+            "media": p.get("media") if (p.get("media") or {}).get("hero", {}).get("subject_match") == "verified" else None,
         }
         for p in places
     ]

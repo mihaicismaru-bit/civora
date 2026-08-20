@@ -135,6 +135,20 @@ def main() -> int:
         if place_hours.get("status", "").startswith("verified") and not place_hours.get("source_ids"):
             errors.append(f"{pid}: program verificat fără sursă")
 
+        hero = (place.get("media") or {}).get("hero")
+        if hero:
+            if place.get("publication_status") != "public":
+                errors.append(f"{pid}: imaginea publică nu poate fi legată de o fișă nepublică")
+            if hero.get("subject_match") != "verified":
+                errors.append(f"{pid}: imagine publică fără potrivire exactă de subiect")
+            if hero.get("rights_basis") not in {"first_party", "public_domain", "creative_commons", "licensed"}:
+                errors.append(f"{pid}: drepturile imaginii publice nu sunt documentate")
+            if not str(hero.get("path") or "").startswith("/media/venues/"):
+                errors.append(f"{pid}: calea imaginii publice trebuie să fie în /media/venues/")
+            if not hero.get("alt") or not hero.get("credit") or not hero.get("captured_on"):
+                errors.append(f"{pid}: imagine publică fără alt, credit sau dată")
+            as_date(hero.get("captured_on"), f"{pid}.media.hero.captured_on", errors)
+
     public_creators = [c for c in creator_doc.get("creators", []) if c.get("publication_status") == "public"]
     threshold = creator_doc.get("policy", {}).get("public_threshold", 75)
     minimum = creator_doc.get("policy", {}).get("minimum_independent_evidence", 2)

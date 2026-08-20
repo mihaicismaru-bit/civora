@@ -66,8 +66,10 @@ def visual(item: dict, *, hero=False) -> str:
 
 
 def story_card(item: dict) -> str:
+    image = visual(item)
+    image_line = f"      {image}\n" if image else ""
     return f'''<article class="story-card">
-      {visual(item)}
+{image_line.rstrip()}
       <div class="kicker">{esc(item.get("section", "ȘTIRI").replace("_", " "))}</div>
       <h3>{esc(item.get("headline"))}</h3>
       <p>{esc(item.get("dek"))}</p>

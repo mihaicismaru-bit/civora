@@ -243,6 +243,10 @@ def render_story_archive(stories: list[dict[str, Any]], updated_local: str) -> l
             "related_story_ids": [story.get("id") for story in related],
             "structured_data_type": "NewsArticle",
         }
+        if item.get("person_profiles"):
+            row["person_profile_ids"] = [p.get("id") for p in item["person_profiles"] if p.get("id")]
+            row["person_profile_paths"] = [p.get("path") for p in item["person_profiles"] if p.get("path")]
+            row["person_inline_links"] = True
         if published_at:
             row["published_at"] = published_at
         if media:
@@ -266,6 +270,19 @@ def render_story_archive(stories: list[dict[str, Any]], updated_local: str) -> l
         "persistence_policy": "published_story_routes_survive_recap_turnover",
         "operational_records_public": False,
         "stories": routes,
+        "cross_linking": {
+            "enabled": True,
+            "eligible_scope": "publishable_full_story_only",
+            "people_intelligence": "resolved_public_profiles_inline_and_index",
+        },
+        "structured_data": {
+            "enabled": True,
+            "type": "NewsArticle",
+            "eligible_scope": "publishable_full_story_only",
+            "date_published_policy": "stable_publication_ledger_only",
+            "verified_image_policy": "provenance_backed_real_photograph_only",
+            "unverified_image_policy": "omit",
+        },
     }
     (story_root / "manifest.json").write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
@@ -284,8 +301,9 @@ def venue_rows(places: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "city": (p.get("location") or {}).get("city"),
             "summary": (p.get("editorial") or {}).get("dek") or (p.get("offer") or {}).get("summary"),
             "badges": p.get("badges", [])[:2],
+            "media": p.get("media") if (p.get("media") or {}).get("hero", {}).get("subject_match") == "verified" else None,
         }
-        for p in places[:8]
+        for p in places
     ]
 
 
@@ -301,7 +319,7 @@ def write_live_feed(
     feed_stories = []
     for item in stories:
         route = route_index.get(str(item.get("id"))) or {}
-        feed_stories.append({
+        row = {
             "id": item.get("id"),
             "section": item.get("section"),
             "priority": item.get("priority"),
@@ -314,7 +332,10 @@ def write_live_feed(
             "archive_status": item.get("archive_status"),
             "active_now": bool(item.get("active_now")),
             "visual": item.get("visual"),
-        })
+        }
+        if item.get("person_profiles"):
+            row["person_profiles"] = item["person_profiles"]
+        feed_stories.append(row)
     payload = {
         "schema_version": "2.2",
         "generated_at": now.astimezone(ZoneInfo("UTC")).isoformat().replace("+00:00", "Z"),
@@ -327,6 +348,7 @@ def write_live_feed(
         "compatibility_snapshot": snapshot,
         "compatibility_pointer": pointer,
         "unde_iesim": venue_rows(places),
+        "unde_iesim_count": len(places),
         "policy": {
             "verified_facts_only": True,
             "candidate_records_hidden": True,
@@ -338,6 +360,18 @@ def write_live_feed(
             "published_story_persistence": True,
             "recap_render_may_not_remove_story_routes": True,
             "expired_event_story_remains_archived_not_deleted": True,
+            "unde_iesim_full_verified_catalogue": True,
+        },
+        "extensions": {
+            "people_intelligence": {
+                "enabled": True,
+                "profile_directory": "/oameni/",
+                "story_links_bidirectional": True,
+                "inline_story_mentions_linked": True,
+                "identity_resolution_fail_closed": True,
+                "sensitive_claims_fail_closed": True,
+                "private_evidence_public_projection": False,
+            }
         },
     }
     (RUNTIME / "live-feed.json").write_text(
