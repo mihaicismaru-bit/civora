@@ -1,4 +1,4 @@
-# Triggered explicitly after workflow materialization: 2026-08-20T20:47+03:00
+# Triggered explicitly after workflow materialization: 2026-08-20T20:52+03:00
 name: VÂLCEA CLAR Arutela Publish Now
 
 on:
@@ -13,8 +13,8 @@ permissions:
   actions: write
 
 concurrency:
-  group: valcea-clar-live-newsroom
-  cancel-in-progress: false
+  group: valcea-clar-arutela-one-shot
+  cancel-in-progress: true
 
 jobs:
   publish:
@@ -42,10 +42,14 @@ jobs:
           d=json.loads(Path('valcea-clar/site/newsroom_decision.json').read_text(encoding='utf-8'))
           sid='arutela-restaurare-controversa-pnrr-20260820'
           assert sid in d['publishable_story_ids'], f'{sid} did not pass canonical newsroom gates'
-          assert sid in d['new_story_ids'], f'{sid} is not recognized as a new durable story'
-          assert d['changed'] is True, 'canonical newsroom state did not change'
+          if sid not in d['new_story_ids']:
+              route=Path('valcea-clar/site/runtime/stiri')/sid/'index.html'
+              assert route.is_file(), f'{sid} is not new and is not already materialized'
+              print('ready=false')
+          else:
+              assert d['changed'] is True, 'canonical newsroom state did not change'
+              print('ready=true')
           print(f"slot={d['slot_for_legacy_snapshot_compatibility']}")
-          print('ready=true')
           PY
 
       - name: Remove title/date-only automatic candidates
@@ -116,11 +120,12 @@ jobs:
           (root/'site/story_publication_event.json').write_text(json.dumps(event,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
           PY
 
-      - name: Persist canonical Arutela publication
+      - name: Persist canonical Arutela publication without stale overwrite
         if: steps.decision.outputs.ready == 'true'
         shell: bash
         run: |
           set -euo pipefail
+          sid='arutela-restaurare-controversa-pnrr-20260820'
           tx=/tmp/valcea-arutela-publication
           rm -rf "$tx" && mkdir -p "$tx"
           paths=(
@@ -141,31 +146,35 @@ jobs:
 
           git config user.name 'vâlcea-clar-live-newsroom[bot]'
           git config user.email 'valcea-clar-live-newsroom@users.noreply.github.com'
-          for attempt in 1 2 3 4 5; do
-            git fetch origin main
-            git reset --hard origin/main
-            git clean -fd
-            for path in "${paths[@]}"; do
-              if [ -e "$tx/$path" ]; then
-                mkdir -p "$(dirname "$path")"
-                if [ -d "$tx/$path" ]; then
-                  mkdir -p "$path" && cp -a "$tx/$path/." "$path/"
-                else
-                  cp -a "$tx/$path" "$path"
-                fi
+          git fetch origin main
+          if git cat-file -e "origin/main:valcea-clar/site/runtime/stiri/${sid}/index.html" 2>/dev/null; then
+            echo 'Arutela route already persisted by canonical newsroom.'
+            exit 0
+          fi
+          git reset --hard origin/main
+          git clean -fd
+          for path in "${paths[@]}"; do
+            if [ -e "$tx/$path" ]; then
+              mkdir -p "$(dirname "$path")"
+              if [ -d "$tx/$path" ]; then
+                mkdir -p "$path" && cp -a "$tx/$path/." "$path/"
+              else
+                cp -a "$tx/$path" "$path"
               fi
-            done
-            git add valcea-clar/editions valcea-clar/site/current_edition.json valcea-clar/site/last_edition_attempt.json valcea-clar/site/newsroom_decision.json valcea-clar/site/newsroom_state.json valcea-clar/site/story_publication_event.json valcea-clar/site/runtime
-            if git diff --cached --quiet; then
-              echo 'Canonical Arutela publication already persisted.'
-              exit 0
             fi
-            git commit -m 'Publish VÂLCEA CLAR Arutela story live'
-            if git push origin HEAD:main; then
-              exit 0
-            fi
-            sleep $((attempt * 2))
           done
+          git add valcea-clar/editions valcea-clar/site/current_edition.json valcea-clar/site/last_edition_attempt.json valcea-clar/site/newsroom_decision.json valcea-clar/site/newsroom_state.json valcea-clar/site/story_publication_event.json valcea-clar/site/runtime
+          git commit -m 'Publish VÂLCEA CLAR Arutela story live'
+          if git push origin HEAD:main; then
+            exit 0
+          fi
+
+          git fetch origin main
+          if git cat-file -e "origin/main:valcea-clar/site/runtime/stiri/${sid}/index.html" 2>/dev/null; then
+            echo 'Concurrent canonical newsroom won the race and published Arutela.'
+            exit 0
+          fi
+          echo 'Main advanced during Arutela publication; refusing stale overwrite.' >&2
           exit 1
 
       - name: Upload current site payload
