@@ -1,0 +1,95 @@
+name: VÂLCEA CLAR Live HTTP Verification
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/site/runtime/**'
+      - 'valcea-clar/site/current_edition.json'
+      - '.github/workflows/valcea-clar-live-http.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-live-http-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Verify canonical public HTTP routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://valceaclar.ro'
+          lead='/stiri/musiclover-festival-2026-dosar-complet-20260818/'
+          tmp="${RUNNER_TEMP}/valcea-live-http"
+          mkdir -p "$tmp"
+
+          probe() {
+            local label="$1"
+            local path="$2"
+            local marker="$3"
+            local out="$tmp/${label}.html"
+            local meta="$tmp/${label}.meta"
+
+            http_code=$(curl \
+              --location \
+              --fail-with-body \
+              --silent \
+              --show-error \
+              --retry 3 \
+              --retry-delay 2 \
+              --connect-timeout 10 \
+              --max-time 30 \
+              --output "$out" \
+              --write-out '%{http_code}' \
+              "$base$path")
+
+            test "$http_code" = '200'
+            grep -Fq "$marker" "$out"
+            printf '%s\t%s\t%s\t%s\n' "$label" "$path" "$http_code" "$marker" > "$meta"
+          }
+
+          probe homepage '/' 'VÂLCEA CLAR'
+          probe news '/stiri/' 'Știri'
+          probe lead "$lead" 'Musiclover Festival 2026'
+
+          python - <<'PY'
+          import json
+          import os
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          tmp = Path(os.environ['RUNNER_TEMP']) / 'valcea-live-http'
+          rows = []
+          for name in ('homepage', 'news', 'lead'):
+              label, path, code, marker = (tmp / f'{name}.meta').read_text(encoding='utf-8').rstrip('\n').split('\t', 3)
+              rows.append({'id': label, 'path': path, 'http_status': int(code), 'required_marker': marker, 'marker_present': True})
+          receipt = {
+              'schema_version': '1.0',
+              'status': 'PASS',
+              'canonical_domain': 'valceaclar.ro',
+              'verified_at_utc': datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
+              'runner': 'github-hosted',
+              'routes': rows,
+          }
+          path = tmp / 'receipt.json'
+          path.write_text(json.dumps(receipt, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          print(json.dumps(receipt, ensure_ascii=False))
+          PY
+
+      - name: Upload external HTTP verification receipt
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-live-http-${{ github.sha }}
+          path: ${{ runner.temp }}/valcea-live-http
+          if-no-files-found: warn
+          retention-days: 14
