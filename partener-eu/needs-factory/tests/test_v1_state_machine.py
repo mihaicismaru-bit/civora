@@ -80,9 +80,15 @@ class NeedsFactoryV1StateMachineTests(unittest.TestCase):
             for artifact in handoff["artifacts"]:
                 self.assertTrue((dape_dir / artifact).exists(), artifact)
 
-            self.assertIn("NF12_PACKAGE", set(result["run_manifest"]["closed_checkpoints"]))
-            self.assertEqual(result["run_manifest"]["checkpoint_status"]["NF09_CAUSAL_MODEL"], "NOT_REQUIRED")
-            self.assertEqual(result["run_manifest"]["checkpoint_status"]["NF10_INTERVENTION_TRACEABILITY"], "NOT_REQUIRED")
+            manifest = result["run_manifest"]
+            self.assertIn("NF12_PACKAGE", set(manifest["closed_checkpoints"]))
+            closed_status = {
+                event["checkpoint"]: event["status"]
+                for event in manifest["events"]
+                if event.get("event") == "NF_CHECKPOINT_CLOSED"
+            }
+            self.assertEqual(closed_status["NF09_CAUSAL_MODEL"], "NOT_REQUIRED")
+            self.assertEqual(closed_status["NF10_INTERVENTION_TRACEABILITY"], "NOT_REQUIRED")
 
     def test_invalid_primary_research_never_reaches_semantic_or_release(self):
         intake = self._load_json(FIXTURES / "research_intake_synthetic.json")
