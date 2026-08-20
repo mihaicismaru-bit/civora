@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import importlib.util
 import json
-import re
 import tempfile
 from pathlib import Path
 
@@ -74,8 +73,10 @@ def main() -> None:
     for forbidden in ["API_KEY=", "PASSWORD=", "CLIENT_SECRET=", "ACCESS_TOKEN="]:
         if forbidden in source or forbidden in public:
             raise SystemExit("secret-like assignment committed in PHP runtime")
-    if re.search(r"error_log\([^\n]*(email|contact_name|phone|message)", public, flags=re.I):
-        raise SystemExit("PHP runtime logs sensitive field")
+    sensitive_log_tokens = ["$_POST", "$payload", "$processed", "['email']", "['contact_name']", "['phone']", "['message']"]
+    for line in public.splitlines():
+        if "error_log(" in line and any(token in line for token in sensitive_log_tokens):
+            raise SystemExit("PHP runtime logs sensitive field")
 
     builder = load_module("e29_prod_builder", EUCONS / "deployment" / "build_production_ready.py")
     activator = load_module("e29_php_activator", EUCONS / "deployment" / "activate_php_runtime.py")
