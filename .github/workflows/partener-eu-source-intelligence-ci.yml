@@ -14,6 +14,7 @@ on:
       - 'partener-eu/ops/test_people_policy_actor_boundaries.py'
       - 'partener-eu/ops/test_people_policy_signal_history.py'
       - 'partener-eu/ops/test_people_policy_anre_source.py'
+      - 'partener-eu/ops/test_people_policy_ec_fitto_source.py'
       - 'partener-eu/ops/test_people_policy_statement_cue_parity.py'
       - '.github/workflows/partener-eu-editorial-daily.yml'
       - '.github/workflows/partener-eu-mipe-source-replay.yml'
@@ -58,6 +59,9 @@ jobs:
 
       - name: Validate ANRE official source and tracked actor
         run: python partener-eu/ops/test_people_policy_anre_source.py
+
+      - name: Validate EC cohesion source and tracked actor
+        run: python partener-eu/ops/test_people_policy_ec_fitto_source.py
 
       - name: Validate collector and canonical statement-cue parity
         run: python partener-eu/ops/test_people_policy_statement_cue_parity.py
