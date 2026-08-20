@@ -11,8 +11,19 @@ on:
       - 'partener-eu/ingest/build_decision_products.py'
       - 'partener-eu/ingest/polish_decision_products.py'
       - 'partener-eu/ingest/finalize_decision_products.py'
+      - 'partener-eu/ingest/localize_decision_products.py'
       - 'partener-eu/ops/fix_afir_decision_extraction.py'
       - 'partener-eu/ops/test_decision_products.py'
+      - 'partener-eu/ops/test_public_language.py'
+      - '.github/workflows/partener-eu-afir-ingest.yml'
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/build_decision_products.py'
+      - 'partener-eu/ingest/polish_decision_products.py'
+      - 'partener-eu/ingest/finalize_decision_products.py'
+      - 'partener-eu/ingest/localize_decision_products.py'
+      - 'partener-eu/ops/test_decision_products.py'
+      - 'partener-eu/ops/test_public_language.py'
       - '.github/workflows/partener-eu-afir-ingest.yml'
 
 permissions:
@@ -23,7 +34,23 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  preflight:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - name: Rebuild and validate the deterministic public-language boundary
+        run: |
+          python partener-eu/ingest/build_decision_products.py
+          python partener-eu/ingest/polish_decision_products.py
+          python partener-eu/ingest/finalize_decision_products.py
+          python partener-eu/ingest/localize_decision_products.py
+          python partener-eu/ops/test_decision_products.py
+          python partener-eu/ops/test_public_language.py
+
   ingest:
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -47,9 +74,12 @@ jobs:
           python partener-eu/ingest/build_decision_products.py
           python partener-eu/ingest/polish_decision_products.py
           python partener-eu/ingest/finalize_decision_products.py
+          python partener-eu/ingest/localize_decision_products.py
 
-      - name: Validate decision products
-        run: python partener-eu/ops/test_decision_products.py
+      - name: Validate decision products and Romanian public language
+        run: |
+          python partener-eu/ops/test_decision_products.py
+          python partener-eu/ops/test_public_language.py
 
       - name: Persist AFIR corpus, enriched source and decision products conflict-safe
         shell: bash
