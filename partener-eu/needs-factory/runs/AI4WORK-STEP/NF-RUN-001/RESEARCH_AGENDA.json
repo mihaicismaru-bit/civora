@@ -1,0 +1,86 @@
+{
+  "schema_version": "nf.research_agenda.v0.2",
+  "run_id": "AI4WORK-STEP/NF-RUN-001",
+  "principle": "Research questions are derived from call requirements and target population; they do not encode the desired project solution.",
+  "tasks": [
+    {
+      "id": "RA-01",
+      "construct": "digital_skills_baseline",
+      "question": "Care este deficitul actual de competențe digitale al adulților din România și ce diferențe relevante există pentru populația activă/adulții >29?",
+      "required_scopes": ["national", "regional_if_available"],
+      "preferred_sources": ["Eurostat", "European Commission Digital Decade"],
+      "direct_local_required": false
+    },
+    {
+      "id": "RA-02",
+      "construct": "ai_adoption_and_use",
+      "question": "Care este nivelul actual de adopție/utilizare AI în întreprinderi și în rândul persoanelor și ce indică acesta despre expunerea reală la AI?",
+      "required_scopes": ["national", "regional_context"],
+      "preferred_sources": ["Eurostat", "European Commission"],
+      "direct_local_required": false,
+      "guard": "Low adoption is context; it does not by itself prove a training need or a particular curriculum."
+    },
+    {
+      "id": "RA-03",
+      "construct": "business_digital_maturity",
+      "question": "Care este maturitatea digitală a întreprinderilor și folosirea tehnologiilor avansate relevante pentru transformarea proceselor?",
+      "required_scopes": ["national", "Sud-Vest Oltenia", "Sud-Muntenia", "Centru"],
+      "preferred_sources": ["European Commission", "ADR/RIS3/evaluări regionale"],
+      "direct_local_required": false
+    },
+    {
+      "id": "RA-04",
+      "construct": "adult_learning_participation",
+      "question": "Care este participarea adulților la educație și formare continuă și cât de pronunțat este decalajul în cele trei regiuni?",
+      "required_scopes": ["national", "Sud-Vest Oltenia", "Sud-Muntenia", "Centru"],
+      "preferred_sources": ["Eurostat EU-LFS", "ADR monitoring reports"],
+      "direct_local_required": false
+    },
+    {
+      "id": "RA-05",
+      "construct": "labour_market_skill_demand",
+      "question": "Ce dovezi actuale există privind cererea de competențe digitale/AI/tehnologii critice și dificultățile de recrutare sau adaptare a forței de muncă?",
+      "required_scopes": ["national", "regional"],
+      "preferred_sources": ["Eurostat", "ANOFM/AJOFM", "INS", "strategii regionale", "surse oficiale sectoriale"],
+      "direct_local_required": false,
+      "guard": "Strategic priority is not equivalent to measured labour-market shortage."
+    },
+    {
+      "id": "RA-06",
+      "construct": "responsible_ai_literacy_context",
+      "question": "Ce cerințe normative și riscuri documentate fac relevante alfabetizarea AI, verificarea rezultatelor, protecția datelor, securitatea și supravegherea umană?",
+      "required_scopes": ["EU", "national_context"],
+      "preferred_sources": ["Regulation (EU) 2024/1689", "European Commission Digital Decade"],
+      "direct_local_required": false,
+      "guard": "AI Act Article 4 is regulatory context and cannot alone establish empirical need magnitude."
+    },
+    {
+      "id": "RA-07",
+      "construct": "regional_interest_and_population_fit",
+      "question": "Există în fiecare din cele trei regiuni o populație eligibilă și interes/deficit observabil suficient pentru a justifica includerea regiunii?",
+      "required_scopes": ["Sud-Vest Oltenia", "Sud-Muntenia", "Centru"],
+      "preferred_sources": ["official statistics", "regional agencies", "primary research"],
+      "direct_local_required": true,
+      "blocking_if_missing": true
+    },
+    {
+      "id": "RA-08",
+      "construct": "eligible_adult_skill_gap_primary",
+      "question": "În populația eligibilă >29 din cele trei regiuni, ce competențe concrete lipsesc și la ce nivel?",
+      "required_scopes": ["three-region primary research"],
+      "preferred_sources": ["primary survey", "employer/stakeholder validation"],
+      "direct_local_required": true,
+      "blocking_if_secondary_evidence_insufficient": true
+    },
+    {
+      "id": "RA-09",
+      "construct": "scale_and_distribution",
+      "question": "Poate fi justificat independent volumul de 160 și există dovezi pentru distribuția teritorială propusă, fără a folosi 160 sau 80/40/40 ca propria lor justificare?",
+      "required_scopes": ["three regions"],
+      "preferred_sources": ["eligible population estimates", "primary interest survey", "recruitment feasibility evidence"],
+      "direct_local_required": true,
+      "blocking_if_claiming_exact_distribution": true
+    }
+  ],
+  "status": "ACTIVE"
+}
