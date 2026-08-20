@@ -1,0 +1,54 @@
+{
+  "schema_version": "nf.need_hypotheses.v0.1",
+  "run_id": "AI4WORK-STEP/NF-RUN-001",
+  "policy": "Hypotheses are not promoted needs. Promotion requires NF07 evidence-bound semantic validation after blocking research gaps are resolved or explicitly scoped out.",
+  "hypotheses": [
+    {
+      "id": "HYP-01",
+      "construct": "digital_skills_baseline",
+      "statement": "Adulții din România se confruntă cu un deficit structural de competențe digitale de bază/funcționale față de nivelul UE, ceea ce poate limita adaptarea la procese de muncă tot mai digitalizate.",
+      "evidence_ids": ["EV-RO-DIGSK-2025"],
+      "current_support": "STRONG_NATIONAL",
+      "promotion_blockers": ["population fit to eligible >29 group", "three-region direct corroboration if written as target-group-specific"],
+      "prohibited_overclaim": "Nu se afirmă că 68% din GT AI4WORK are deficit sau că deficitul este AI-specific."
+    },
+    {
+      "id": "HYP-02",
+      "construct": "ai_workplace_readiness",
+      "statement": "Nivelul redus de adopție AI și maturitate digitală în România sugerează un decalaj de pregătire organizațională și umană pentru utilizarea și integrarea AI în procese de lucru, dar natura exactă a competențelor lipsă trebuie măsurată direct.",
+      "evidence_ids": ["EV-RO-AI-ENTERPRISE-2025", "EV-RO-SME-DIGITAL-2025", "EV-CENTRU-ADVTECH-2022"],
+      "current_support": "STRONG_CONTEXT_MEDIUM_NEED",
+      "promotion_blockers": ["direct eligible-adult skill evidence", "employer/workflow evidence in three regions"],
+      "prohibited_overclaim": "Adopția scăzută AI nu este tratată automat drept cauzată de lipsa formării și nu justifică module/ore prestabilite."
+    },
+    {
+      "id": "HYP-03",
+      "construct": "adult_learning_participation",
+      "statement": "Participarea redusă la educație și formare continuă creează o barieră de actualizare a competențelor, cu semnale regionale foarte slabe în Centru și Sud-Vest Oltenia și nevoie de completare pentru Sud-Muntenia.",
+      "evidence_ids": ["EV-RO-ONLINE-LEARNING-2025", "EV-CENTRU-ADULT-LEARNING-2023"],
+      "current_support": "STRONG_FOR_CENTRU_SVO_INCOMPLETE_FOR_SM",
+      "promotion_blockers": ["direct current Sud-Muntenia adult-learning value or equivalent official evidence", "careful separation of online-learning share from LFS training participation rate"],
+      "prohibited_overclaim": "Indicatorii cu denominatori diferiți nu sunt combinați sau prezentați ca aceeași rată."
+    },
+    {
+      "id": "HYP-04",
+      "construct": "responsible_ai_literacy",
+      "statement": "Extinderea utilizării AI creează o nevoie potențială de alfabetizare AI adaptată contextului de muncă, inclusiv înțelegerea limitelor, verificarea rezultatelor și gestionarea riscurilor de confidențialitate/protecția datelor.",
+      "evidence_ids": ["EV-EU-AI-ACT-ART4", "EV-RO-AI-LITERACY-CONCERNS-2026", "EV-RO-GENAI-2025"],
+      "current_support": "REGULATORY_PLUS_NATIONAL_PERCEPTION",
+      "promotion_blockers": ["direct evidence of skill gaps among eligible adults/employers"],
+      "prohibited_overclaim": "Articolul 4 AI Act nu este folosit ca dovadă că GT are un deficit și nici ca justificare automată a unui curriculum."
+    },
+    {
+      "id": "HYP-05",
+      "construct": "regional_access_and_scale",
+      "statement": "Intervenția multiregională poate fi relevantă, dar intensitatea nevoii și capacitatea de recrutare trebuie demonstrate separat pentru Sud-Vest Oltenia, Sud-Muntenia și Centru.",
+      "evidence_ids": ["EV-SVO-RIS3-2021-2027", "EV-SM-RIS3-2021-2027", "EV-CENTRU-ADULT-LEARNING-2023", "EV-SM-HIGHTECH-EMP-2023"],
+      "current_support": "REGIONAL_CONTEXT_ONLY",
+      "promotion_blockers": ["eligible-population/recruitment feasibility", "primary expressions of interest or equivalent direct evidence", "no evidence yet for 80/40/40 as need-weight"],
+      "prohibited_overclaim": "160 și 80/40/40 nu sunt prezentate ca mărimea sau distribuția nevoii."
+    }
+  ],
+  "promoted_needs": [],
+  "status": "HYPOTHESES_FROZEN_PENDING_NF06"
+}
