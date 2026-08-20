@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "nf.resume_plan.v0.1",
+  "title": "Needs Factory Resume Plan",
+  "type": "object",
+  "required": ["predecessor_run_id", "successor_run_id", "changed_inputs", "restart_stage", "reusable_closed_checkpoints", "invalidated_stages", "preserved_artifact_hashes", "policy"],
+  "properties": {
+    "predecessor_run_id": {"type": "string", "minLength": 1},
+    "successor_run_id": {"type": "string", "minLength": 1},
+    "changed_inputs": {"type": "array", "minItems": 1, "items": {"type": "string"}, "uniqueItems": true},
+    "restart_stage": {"type": "string", "pattern": "^NF(0[0-9]|1[0-2])_"},
+    "reusable_closed_checkpoints": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "invalidated_stages": {"type": "array", "minItems": 1, "items": {"type": "string"}, "uniqueItems": true},
+    "preserved_artifact_hashes": {"type": "object", "additionalProperties": {"type": "string"}},
+    "policy": {
+      "type": "object",
+      "required": ["overwrite_predecessor", "preserve_predecessor_manifest", "rerun_unaffected_checkpoints", "rollback_supported"],
+      "properties": {
+        "overwrite_predecessor": {"const": false},
+        "preserve_predecessor_manifest": {"const": true},
+        "rerun_unaffected_checkpoints": {"const": false},
+        "rollback_supported": {"const": true}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true
+}

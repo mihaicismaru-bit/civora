@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "nf.need_ranking.v0.1",
+  "title": "Needs Factory Need Ranking",
+  "type": "object",
+  "required": ["schema_version", "method", "ranked", "blocked"],
+  "properties": {
+    "schema_version": {"const": "nf.need_ranking.v0.1"},
+    "method": {"type": "string"},
+    "ranked": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["need_id", "rankable", "score", "substantive_score", "confidence_used", "confidence_cap", "rank"],
+        "properties": {
+          "need_id": {"type": "string"},
+          "rankable": {"const": true},
+          "score": {"type": "number", "minimum": 0, "maximum": 100},
+          "substantive_score": {"type": "number", "minimum": 0, "maximum": 100},
+          "confidence_used": {"type": "number", "minimum": 0, "maximum": 1},
+          "confidence_cap": {"type": "number", "minimum": 0, "maximum": 1},
+          "rank": {"type": "integer", "minimum": 1}
+        },
+        "additionalProperties": true
+      }
+    },
+    "blocked": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["need_id", "rankable", "blocking_reason"],
+        "properties": {
+          "need_id": {"type": ["string", "null"]},
+          "rankable": {"const": false},
+          "blocking_reason": {"type": "string"}
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}
