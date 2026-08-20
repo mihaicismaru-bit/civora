@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "nf.evidence_record.v0.1",
+  "title": "Needs Factory Evidence Record",
+  "type": "object",
+  "required": ["id", "source", "tier", "territory", "scope"],
+  "properties": {
+    "id": {"type": "string", "minLength": 1},
+    "source": {"type": "string", "minLength": 1},
+    "source_url": {"type": "string"},
+    "source_document_id": {"type": "string"},
+    "tier": {"type": "string"},
+    "health": {"enum": ["PASS", "FAIL", null]},
+    "quarantined": {"type": "boolean"},
+    "territory": {"type": "string", "minLength": 1},
+    "scope": {"enum": ["school", "beneficiary", "uat", "locality", "county", "region", "national", "eu"]},
+    "population": {"type": ["string", "null"]},
+    "period": {"type": ["string", "null"]},
+    "source_date": {"type": ["string", "null"]},
+    "publication_date": {"type": ["string", "null"]},
+    "historical_availability": {"enum": ["verified", "conditional", "excluded", null]},
+    "raw_sha256": {"type": ["string", "null"]},
+    "semantic_sha256": {"type": ["string", "null"]},
+    "territory_fit": {"type": "number", "minimum": 0, "maximum": 1},
+    "population_fit": {"type": "number", "minimum": 0, "maximum": 1},
+    "recency_score": {"type": "number", "minimum": 0, "maximum": 1},
+    "directness": {"type": "number", "minimum": 0, "maximum": 1},
+    "measures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["measure_type"],
+        "properties": {
+          "measure_type": {"enum": ["count", "share", "rate", "index", "currency", "qualitative", "score"]},
+          "source_measure_type": {"type": ["string", "null"]},
+          "value": {},
+          "numerator": {},
+          "denominator_universe": {},
+          "unit": {"type": ["string", "null"]},
+          "calculated": {"type": "boolean"}
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "anyOf": [
+    {"required": ["period"]},
+    {"required": ["source_date"]},
+    {"required": ["publication_date"]}
+  ],
+  "additionalProperties": true
+}
