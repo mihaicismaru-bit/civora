@@ -1,0 +1,75 @@
+{
+  "schema_version": "nf.gdpr_online_form_spec.v0.1",
+  "run_id": "AI4WORK-STEP/NF-RUN-001",
+  "mode": "ANONYMOUS_BY_DESIGN_PREFERRED",
+  "forms": [
+    {
+      "id": "FORM-ADULTS",
+      "source_questionnaire": "QUESTIONNAIRE_ADULTS.md",
+      "collect_email": false,
+      "require_login": false,
+      "collect_name": false,
+      "collect_phone": false,
+      "collect_exact_address": false,
+      "collect_cnp_or_id": false,
+      "file_upload": false,
+      "marketing_tracking": false,
+      "direct_identifiers_forbidden": true,
+      "respondent_id_policy": "GENERATE_AFTER_SUBMISSION_OR_AT_EXPORT_NO_IDENTITY_MAPPING",
+      "allowed_metadata": ["region", "employment_status", "age_band", "broad_occupational_family"],
+      "regions": ["Sud-Vest Oltenia", "Sud-Muntenia", "Centru"],
+      "free_text_warning_required": true,
+      "privacy_notice_before_questions": true,
+      "participation_checkbox_required": true
+    },
+    {
+      "id": "FORM-EMPLOYERS",
+      "source_questionnaire": "QUESTIONNAIRE_EMPLOYERS.md",
+      "collect_email": false,
+      "require_login": false,
+      "collect_contact_name": false,
+      "collect_company_name": false,
+      "collect_cui": false,
+      "collect_phone": false,
+      "file_upload": false,
+      "marketing_tracking": false,
+      "direct_identifiers_forbidden": true,
+      "organisation_id_policy": "GENERATE_AFTER_SUBMISSION_OR_AT_EXPORT_NO_IDENTITY_MAPPING",
+      "allowed_metadata": ["region", "aggregated_sector_or_CAEN", "organisation_size_band", "respondent_role_category"],
+      "regions": ["Sud-Vest Oltenia", "Sud-Muntenia", "Centru"],
+      "follow_up_contact": "SEPARATE_FORM_SEPARATE_PURPOSE_SEPARATE_NOTICE",
+      "free_text_warning_required": true,
+      "privacy_notice_before_questions": true,
+      "participation_checkbox_required": true
+    }
+  ],
+  "platform_controls": {
+    "https_required": true,
+    "admin_mfa_required": true,
+    "need_to_know_access": true,
+    "DPA_or_processor_terms_required": true,
+    "subprocessor_review_required": true,
+    "prefer_EU_EEA_hosting": true,
+    "disable_IP_collection_if_configurable": true,
+    "if_IP_or_login_or_email_is_unavoidable": "SWITCH_TO_PSEUDONYMOUS_MODE_AND_DOCUMENT_ART6_LEGAL_BASIS_PLUS_ART13_NOTICE_AND_WITHDRAWAL_MECHANISM",
+    "advertising_cookies_forbidden": true,
+    "response_results_public_link_forbidden": true
+  },
+  "free_text_control": {
+    "warning": "Nu introduceți nume de persoane, numele angajatorului/organizației, clienți, adrese, e-mailuri, telefoane sau alte informații care pot identifica o persoană.",
+    "manual_redaction_before_analytics": true
+  },
+  "retention": {
+    "identifiable_or_pseudonymous_technical_data": "MINIMUM_REQUIRED_MAX_90_DAYS_AFTER_COLLECTION_CLOSE_UNLESS_DOCUMENTED_LEGAL_REQUIREMENT",
+    "anonymous_analytic_dataset": "PROJECT_JUSTIFICATION_AND_AUDIT_RETENTION_RULES",
+    "identity_mapping_table": "FORBIDDEN"
+  },
+  "release_gate": {
+    "operator_identity_completed": false,
+    "gdpr_dpo_contact_completed": false,
+    "platform_verified": false,
+    "processor_terms_verified": false,
+    "technical_tracking_checked": false,
+    "final_status": "NO_GO_UNTIL_OPERATOR_AND_PLATFORM_FIELDS_ARE_COMPLETED"
+  }
+}
