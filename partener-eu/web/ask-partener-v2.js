@@ -5,7 +5,7 @@ const C=window.PARTENER_MIPE_CANONICAL_CALLS;
 if(!P||!Array.isArray(P.dossiers))return;
 const canonicalCalls=Array.isArray(C?.calls)?C.calls:[];
 const canonicalById=new Map(canonicalCalls.map(c=>[c.id,c]));
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fold=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
 const officialTier=v=>/^T1(?:B)?(?:\b|_)/i.test(String(v||'').trim());
 const codeKey=v=>{const raw=String(v||'').trim(),key=fold(raw).replace(/\s+/g,'');return key&&!/^(?:-|—|n\/?a|unknown|necunoscut|neconfirmat)$/i.test(raw)?key:''};
