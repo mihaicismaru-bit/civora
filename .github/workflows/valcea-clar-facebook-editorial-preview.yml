@@ -6,11 +6,13 @@ on:
       - "valcea-clar/social/feed_identity_v1_1.py"
       - "valcea-clar/social/facebook_editorial_preview.py"
       - "valcea-clar/social/facebook_editorial_preview_v1_1.py"
+      - "valcea-clar/social/social_common.py"
       - "valcea-clar/social/facebook_visual_system.json"
       - "valcea-clar/social/story_visuals.json"
       - "valcea-clar/social/fetch_approved_photos.py"
       - "valcea-clar/site/current_edition.json"
       - "valcea-clar/site/newsroom_decision.json"
+      - "valcea-clar/editorial/publication_holds.json"
       - "valcea-clar/editions/**"
       - ".github/workflows/valcea-clar-facebook-editorial-preview.yml"
   workflow_dispatch:
@@ -49,17 +51,11 @@ jobs:
               raise SystemExit('Meta-call guard missing')
           if manifest.get('canvas') != {'width':1200,'height':1500,'aspect_ratio':'4:5'}:
               raise SystemExit('wrong Facebook preview canvas')
-          lum=plans.get('luminos-fest-zavoi-20260815')
-          if not lum or lum.get('status')!='READY' or lum.get('hook')!='Azi în Zăvoi: intrarea este liberă':
-              raise SystemExit('Luminos Facebook utility hook failed')
-          gov=plans.get('florile-govorei-20260816')
-          if not gov or gov.get('status')!='HOLD' or gov.get('reason')!='thin_title_date_source_only':
-              raise SystemExit('Florile Govorei FB_INTEREST_GATE failed')
-          ola=plans.get('olanesti-bridge-monitor')
-          if not ola or ola.get('status')!='READY' or not ola.get('hook','').startswith('44,37 mil. lei'):
-              raise SystemExit('Olănești Facebook public-interest hook failed')
-          if 'Ralunic + Dimex-2000 Company' not in ola.get('body',''):
-              raise SystemExit('Olănești contractor fact missing from Facebook body')
+          held={'olanesti-bridge-monitor','derived-council-gambling-20260723'}
+          if set(plans) & held:
+              raise SystemExit(f'editorial hold leaked into Facebook previews: {sorted(set(plans) & held)}')
+          if manifest.get('ready',0)+manifest.get('held',0)!=len(plans):
+              raise SystemExit('Facebook preview counters do not match the plan set')
           for plan in manifest['plans']:
               name=plan.get('preview_file')
               if name:

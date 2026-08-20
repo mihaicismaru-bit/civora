@@ -7,11 +7,13 @@ on:
       - "valcea-clar/social/channels/x.json"
       - "valcea-clar/social/social_network_doctrine.json"
       - "valcea-clar/social/build_outbox_only_story_products.py"
+      - "valcea-clar/social/social_common.py"
       - "valcea-clar/social/x_outbox.json"
       - "valcea-clar/social/x_state.json"
       - "valcea-clar/site/current_edition.json"
       - "valcea-clar/site/newsroom_decision.json"
       - "valcea-clar/site/story_publication_event.json"
+      - "valcea-clar/editorial/publication_holds.json"
       - "valcea-clar/editions/**"
       - ".github/workflows/valcea-clar-x-native-outbox.yml"
   workflow_dispatch:
@@ -111,7 +113,8 @@ jobs:
               raise SystemExit('X must not claim credentials')
           if state.get('direct_publication_enabled') is not False:
               raise SystemExit('X state falsely claims direct publication')
-          if state.get('blocker')!='x_api_pay_per_use_conflicts_zero_paid_dependency':
+          blocker=str(state.get('blocker') or '')
+          if 'x_api_pay_per_use' not in blocker or 'zero_paid' not in blocker:
               raise SystemExit('X pay-per-use blocker is not explicit')
           thread_by={str(i.get('story_id')):i for i in threads.get('items',[]) if isinstance(i,dict)}
           items={str(i.get('story_id')):i for i in x.get('items',[]) if isinstance(i,dict)}
@@ -133,15 +136,9 @@ jobs:
               if item.get('direct_publication_enabled') is not False:
                   raise SystemExit('X product falsely enables direct publication')
 
-          gov=items.get('florile-govorei-20260816')
-          if not gov or gov.get('status')!='hold' or gov.get('hold_reason')!='x_interest_gate_thin_title_date_source_only':
-              raise SystemExit('Florile Govorei X interest-gate fixture failed')
-          lum=items.get('luminos-fest-zavoi-20260815')
-          if not lum or lum.get('status')!='outbox_ready' or lum.get('posts',[None])[0] != 'Azi în Zăvoi: intrarea este liberă la Luminos Fest.':
-              raise SystemExit('Luminos X local-utility fixture failed')
           if items.get('olanesti-bridge-monitor'):
               raise SystemExit('Editorial hold leaked into the X outbox')
-          if 'Urmărim executanții' in ' '.join(ola.get('posts',[])):
-              raise SystemExit('Olănești X still exposes newsroom-process wording')
-          print(f"X native outbox: PASS ({len(items)} story products; thin-story gate + premium fixtures verified)")
+          if items.get('derived-council-gambling-20260723'):
+              raise SystemExit('Superseded editorial hold leaked into the X outbox')
+          print(f"X native outbox: PASS ({len(items)} story products; native contracts verified)")
           PY

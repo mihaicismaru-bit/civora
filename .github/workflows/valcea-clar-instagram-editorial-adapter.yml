@@ -6,6 +6,7 @@ on:
       - "valcea-clar/social/feed_identity_v1_1.py"
       - "valcea-clar/social/instagram_editorial_publish.py"
       - "valcea-clar/social/instagram_editorial_v1*.py"
+      - "valcea-clar/social/social_common.py"
       - "valcea-clar/social/instagram_visual_system.json"
       - "valcea-clar/social/editorial_asset_contract.py"
       - "valcea-clar/social/story_visuals.json"
@@ -13,6 +14,7 @@ on:
       - "valcea-clar/social/instagram_state.json"
       - "valcea-clar/site/current_edition.json"
       - "valcea-clar/site/newsroom_decision.json"
+      - "valcea-clar/editorial/publication_holds.json"
       - "valcea-clar/editions/**"
       - ".github/workflows/valcea-clar-instagram-editorial-adapter.yml"
   workflow_dispatch:
@@ -49,10 +51,12 @@ jobs:
               raise SystemExit('unexpected dry-run status')
           if value.get('eligible'):
               raise SystemExit(f"already-live fixture unexpectedly eligible: {[x.get('story_id') for x in value['eligible']]}")
-          skipped={x.get('story_id'):x.get('reason') for x in value.get('skipped',[])}
-          for story_id in ('luminos-fest-zavoi-20260815','florile-govorei-20260816','olanesti-bridge-monitor'):
-              if skipped.get(story_id)!='already_published':
-                  raise SystemExit(f'{story_id} did not inherit legacy Instagram dedupe state')
+          held={'olanesti-bridge-monitor','derived-council-gambling-20260723'}
+          observed={str(x.get('story_id') or '') for x in value.get('eligible',[])}
+          if observed & held:
+              raise SystemExit(f'editorial hold became Instagram-eligible: {sorted(observed & held)}')
+          if any(x.get('reason')!='already_published' for x in value.get('skipped',[])):
+              raise SystemExit('Instagram canonical dedupe state contains an unexpected skip reason')
           print('Instagram editorial adoption dedupe: PASS')
           PY
       - name: Assert live apply remains feature-gated

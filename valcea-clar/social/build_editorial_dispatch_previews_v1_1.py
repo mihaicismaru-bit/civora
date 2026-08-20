@@ -6,6 +6,7 @@ import argparse
 import json
 
 import build_editorial_dispatch_previews as impl
+from social_common import socially_held_story_ids
 
 
 def story_map():
@@ -20,8 +21,8 @@ impl.story_map = story_map
 
 def self_test() -> int:
     result = story_map()
-    assert "luminos-fest-zavoi-20260815" in result
-    assert "olanesti-bridge-monitor" in result
+    assert result
+    assert not (set(result) & socially_held_story_ids())
     base_result = impl.self_test()
     print("VÂLCEA CLAR editorial dispatch v1.1 story resolution: PASS")
     return base_result

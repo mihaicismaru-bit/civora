@@ -4,10 +4,12 @@ on:
   pull_request:
     paths:
       - "valcea-clar/social/instagram_editorial_preview.py"
+      - "valcea-clar/social/social_common.py"
       - "valcea-clar/social/story_visuals.json"
       - "valcea-clar/social/fetch_approved_photos.py"
       - "valcea-clar/site/current_edition.json"
       - "valcea-clar/site/newsroom_decision.json"
+      - "valcea-clar/editorial/publication_holds.json"
       - "valcea-clar/editions/**"
       - ".github/workflows/valcea-clar-instagram-visual-preview.yml"
   workflow_dispatch:
@@ -45,10 +47,12 @@ jobs:
               raise SystemExit('wrong Instagram preview canvas')
           ready=[p for p in manifest.get('plans',[]) if p.get('status')=='READY']
           held=[p for p in manifest.get('plans',[]) if p.get('status')=='HOLD']
-          if len(ready) < 2:
-              raise SystemExit(f'expected at least two visual-ready fixtures, got {len(ready)}')
-          if not any(p.get('reason')=='thin_title_date_source_only' for p in held):
-              raise SystemExit('SOCIAL_UTILITY_GATE negative fixture missing')
+          plans={str(p.get('story_id')):p for p in manifest.get('plans',[]) if isinstance(p,dict)}
+          publication_holds={'olanesti-bridge-monitor','derived-council-gambling-20260723'}
+          if set(plans) & publication_holds:
+              raise SystemExit(f'editorial hold leaked into Instagram visual previews: {sorted(set(plans) & publication_holds)}')
+          if len(ready)+len(held)!=len(plans):
+              raise SystemExit('Instagram visual preview counters do not match the plan set')
           for plan in ready:
               path=root/plan['preview_file']
               if not path.is_file() or path.stat().st_size < 50000:

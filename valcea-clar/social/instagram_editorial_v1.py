@@ -15,6 +15,8 @@ from typing import Any
 
 from PIL import Image, ImageDraw, ImageEnhance, ImageFont
 
+from social_common import is_socially_held
+
 ROOT = Path(__file__).resolve().parents[2]
 VC = ROOT / "valcea-clar"
 CURRENT = VC / "site" / "current_edition.json"
@@ -60,7 +62,15 @@ def stories() -> list[dict[str, Any]]:
     pointer = load(CURRENT)
     edition = load(VC / str(pointer["json_source"]))
     allowed = set(load(DECISION).get("publishable_story_ids") or [])
-    return [row for row in edition.get("items", []) if isinstance(row, dict) and row.get("id") in allowed]
+    return [
+        row
+        for row in edition.get("items", [])
+        if (
+            isinstance(row, dict)
+            and row.get("id") in allowed
+            and not is_socially_held(str(row.get("id") or ""))
+        )
+    ]
 
 
 def visual_for(story_id: str, registry: dict[str, Any]) -> dict[str, Any] | None:

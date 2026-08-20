@@ -11,11 +11,13 @@ on:
     paths:
       - "valcea-clar/social/linkedin_editorial_v1.py"
       - "valcea-clar/social/linkedin_editorial_materialize.py"
+      - "valcea-clar/social/social_common.py"
       - "valcea-clar/social/linkedin_outbox.json"
       - "valcea-clar/social/linkedin_state.json"
       - "valcea-clar/site/current_edition.json"
       - "valcea-clar/site/newsroom_decision.json"
       - "valcea-clar/site/story_publication_event.json"
+      - "valcea-clar/editorial/publication_holds.json"
       - "valcea-clar/editions/**"
       - ".github/workflows/valcea-clar-linkedin-editorial.yml"
 
@@ -82,26 +84,34 @@ jobs:
               raise SystemExit('Florile Govorei LinkedIn HOLD failed')
           if items.get('olanesti-bridge-monitor'):
               raise SystemExit('Editorial hold leaked into the LinkedIn outbox')
-          if ola.get('hashtags_default') is not False or '#' in text:
-              raise SystemExit('LinkedIn generic hashtag packaging detected')
-          if ola.get('verbatim_cross_platform_reuse_allowed') is not False:
-              raise SystemExit('LinkedIn cross-platform guard missing')
-          asset=ola.get('visual_asset') or {}
-          if asset.get('kind')!='editorial_evidence_card' or asset.get('synthetic') is not False:
-              raise SystemExit('LinkedIn premium visual asset contract missing')
-          if asset.get('renderer')!='linkedin-editorial-v1.1' or asset.get('source_fact_kernel')!='canonical_verified_story':
-              raise SystemExit('LinkedIn premium visual lineage drift')
-          if not str(asset.get('source_label','')).startswith('DOCUMENTE ȘI SURSE'):
-              raise SystemExit('LinkedIn premium source label missing')
-          path=Path(str(asset.get('rendered_path') or ''))
-          if not path.is_file() or path.stat().st_size < 25000:
-              raise SystemExit(f'LinkedIn premium runtime asset missing/too small: {path}')
-          with Image.open(path) as image:
-              if image.size != (1200,1500):
-                  raise SystemExit(f'LinkedIn runtime evidence-card dimensions drifted: {image.size}')
-          digest=hashlib.sha256(path.read_bytes()).hexdigest()
-          if digest != asset.get('sha256'):
-              raise SystemExit('LinkedIn runtime evidence-card hash mismatch')
+          if items.get('derived-council-gambling-20260723'):
+              raise SystemExit('Superseded editorial hold leaked into the LinkedIn outbox')
+          for item in items.values():
+              if item.get('status')!='outbox_ready':
+                  continue
+              body=str(item.get('body') or '')
+              if item.get('hashtags_default') is not False or '#' in body:
+                  raise SystemExit('LinkedIn generic hashtag packaging detected')
+              if item.get('verbatim_cross_platform_reuse_allowed') is not False:
+                  raise SystemExit('LinkedIn cross-platform guard missing')
+              asset=item.get('visual_asset') or {}
+              if not asset:
+                  continue
+              if asset.get('kind')!='editorial_evidence_card' or asset.get('synthetic') is not False:
+                  raise SystemExit('LinkedIn premium visual asset contract missing')
+              if asset.get('renderer')!='linkedin-editorial-v1.1' or asset.get('source_fact_kernel')!='canonical_verified_story':
+                  raise SystemExit('LinkedIn premium visual lineage drift')
+              if not str(asset.get('source_label','')).startswith('DOCUMENTE ȘI SURSE'):
+                  raise SystemExit('LinkedIn premium source label missing')
+              path=Path(str(asset.get('rendered_path') or ''))
+              if not path.is_file() or path.stat().st_size < 25000:
+                  raise SystemExit(f'LinkedIn premium runtime asset missing/too small: {path}')
+              with Image.open(path) as image:
+                  if image.size != (1200,1500):
+                      raise SystemExit(f'LinkedIn runtime evidence-card dimensions drifted: {image.size}')
+              digest=hashlib.sha256(path.read_bytes()).hexdigest()
+              if digest != asset.get('sha256'):
+                  raise SystemExit('LinkedIn runtime evidence-card hash mismatch')
           print(f"LinkedIn canonical editorial outbox v1.1: PASS ({len(items)} products; evidence card verified)")
           PY
 

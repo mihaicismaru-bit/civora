@@ -303,7 +303,15 @@ def build() -> dict[str, Any]:
     photo_registry = base.load(VISUALS, {"stories": {}})
     video_registry = base.load(VIDEO_VISUALS, {"stories": {}})
     allowed = set(event.get("story_ids") or decision.get("publishable_story_ids") or [])
-    stories = [item for item in snapshot.get("items", []) if item.get("id") in allowed and base.story_ready(item)[0]]
+    stories = [
+        item
+        for item in snapshot.get("items", [])
+        if (
+            item.get("id") in allowed
+            and base.story_ready(item)[0]
+            and not base.is_socially_held(str(item.get("id") or ""))
+        )
+    ]
     products = [
         package(story, visual_for(str(story["id"]), photo_registry, video_registry))
         for story in stories

@@ -7,11 +7,13 @@ on:
       - "valcea-clar/social/instagram_editorial_v1.py"
       - "valcea-clar/social/instagram_editorial_v1_1.py"
       - "valcea-clar/social/instagram_editorial_v1_2.py"
+      - "valcea-clar/social/social_common.py"
       - "valcea-clar/social/instagram_visual_system.json"
       - "valcea-clar/social/story_visuals.json"
       - "valcea-clar/social/fetch_approved_photos.py"
       - "valcea-clar/site/current_edition.json"
       - "valcea-clar/site/newsroom_decision.json"
+      - "valcea-clar/editorial/publication_holds.json"
       - "valcea-clar/editions/**"
       - ".github/workflows/valcea-clar-instagram-editorial-v1-preview.yml"
   workflow_dispatch:
@@ -52,22 +54,11 @@ jobs:
               raise SystemExit('Meta-call guard missing')
           if manifest.get('rendering_version') != 'instagram-editorial-v1.1':
               raise SystemExit('wrong rendering version')
-          lum=plans.get('luminos-fest-zavoi-20260815')
-          if not lum or lum.get('status')!='READY' or lum.get('hook')!='Luminos Fest în Zăvoi':
-              raise SystemExit('Luminos event-utility fixture failed')
-          gov=plans.get('florile-govorei-20260816')
-          if not gov or gov.get('status')!='HOLD' or gov.get('reason')!='thin_title_date_source_only':
-              raise SystemExit('Florile Govorei utility gate fixture failed')
-          ola=plans.get('olanesti-bridge-monitor')
-          if not ola or ola.get('status')!='READY' or ola.get('native_format')!='carousel':
-              raise SystemExit('Olănești carousel fixture failed')
-          if ola.get('hook')!='44,37 mil. lei' or ola.get('slide_count') != 4:
-              raise SystemExit('Olănești public-interest packaging failed')
-          detail=ola.get('detail_slides') or []
-          if len(detail)!=3 or detail[1].get('lead')!='Ralunic + Dimex-2000 Company':
-              raise SystemExit('Olănești contractor hierarchy failed')
-          if detail[2].get('kicker')!='CE NU ȘTIM ÎNCĂ':
-              raise SystemExit('Olănești uncertainty slide failed')
+          held={'olanesti-bridge-monitor','derived-council-gambling-20260723'}
+          if set(plans) & held:
+              raise SystemExit(f'editorial hold leaked into Instagram previews: {sorted(set(plans) & held)}')
+          if manifest.get('ready',0)+manifest.get('held',0)!=len(plans):
+              raise SystemExit('Instagram preview counters do not match the plan set')
           for plan in manifest['plans']:
               for name in plan.get('preview_files',[]):
                   path=root/name

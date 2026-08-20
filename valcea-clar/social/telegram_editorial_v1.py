@@ -162,7 +162,11 @@ def build() -> dict[str, Any]:
     allowed = set(event.get("story_ids") or decision.get("publishable_story_ids") or [])
     stories = [
         item for item in snapshot.get("items", [])
-        if item.get("id") in allowed and base.story_ready(item)[0]
+        if (
+            item.get("id") in allowed
+            and base.story_ready(item)[0]
+            and not base.is_socially_held(str(item.get("id") or ""))
+        )
     ]
     products = [package(story) for story in stories]
     PREVIEW.mkdir(parents=True, exist_ok=True)
