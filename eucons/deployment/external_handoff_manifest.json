@@ -6,16 +6,18 @@
   "allowed_external_actions": [
     {
       "id": "domain_and_hosting",
-      "state": "OWNER_AUTHORIZATION_REQUIRED",
+      "state": "AUTHORIZED_AND_VALIDATED",
       "purpose": "Connect the production-ready EUCONS artifact and provider-neutral runtime to eucons.ro.",
-      "owner_action": "Authorize the final hosting account/environment and DNS/domain connection.",
-      "system_will_complete_after_authorization": [
-        "deploy production-ready static artifact",
-        "bind POST /api/leads to the E11 lead runtime and downstream commercial engines",
-        "apply E21 HTTPS and security-header contract",
-        "activate retention/deletion/recovery jobs",
-        "verify canonical https://eucons.ro, robots, sitemap, forms and runtime health"
+      "owner_action": "COMPLETED",
+      "validation_receipt": "eucons/ops/receipts/E29_HOSTING_API_ACTIVATION.json",
+      "system_completed": [
+        "deployed production-ready static artifact",
+        "bound https://api.eucons.ro/api/leads to the E11 PHP runtime adapter",
+        "applied E21 HTTPS and security-header contract",
+        "verified canonical https://eucons.ro, API HTTPS, CORS and fail-closed routing",
+        "verified synthetic persistence, idempotent replay and conflict rejection"
       ],
+      "public_collection_state": "FAIL_CLOSED_PENDING_RETENTION_AND_CRM_RUNTIME_CLOSURE",
       "secrets_in_repository": false
     },
     {
