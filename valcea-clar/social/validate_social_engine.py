@@ -19,6 +19,16 @@ FORBIDDEN_MARKERS = {
     "GEMINI_API_KEY": "Gemini API secret",
 }
 
+DEPRECATED_PARALLEL_WORKFLOWS = {
+    ".github/workflows/valcea-clar-text-first-social.yml": (
+        "superseded by the canonical multi-channel social publisher and the "
+        "dedicated Threads publisher"
+    ),
+    ".github/workflows/valcea-clar-instagram-backlog.yml": (
+        "superseded by the canonical Instagram editorial publisher"
+    ),
+}
+
 
 def utc_now() -> str:
     return (
@@ -61,6 +71,17 @@ def validate(repo_root: Path) -> dict[str, Any]:
     automation_path = repo_root / "valcea-clar" / "engine" / "automation_registry.json"
     errors: list[str] = []
     checks: list[dict[str, Any]] = []
+
+    for rel, reason in sorted(DEPRECATED_PARALLEL_WORKFLOWS.items()):
+        present = (repo_root / rel).exists()
+        checks.append(
+            {
+                "check": f"deprecated_parallel_workflow_absent:{rel}",
+                "passed": not present,
+            }
+        )
+        if present:
+            errors.append(f"Deprecated parallel social workflow still exists: {rel} ({reason})")
 
     if not registry_path.is_file():
         return {
