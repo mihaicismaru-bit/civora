@@ -1,0 +1,78 @@
+{
+  "schema_version": "nf.traceability.v0.1",
+  "benchmark_id": "NF-BENCH-001",
+  "project_code": "310224",
+  "checkpoint": "NF-CP02",
+  "mode": "blind_historical",
+  "chains": [
+    {
+      "need_id": "BN-01",
+      "evidence_ids": ["EV-H-002", "EV-H-003", "EV-H-004"],
+      "causal_hypothesis": "Contactul insuficient dintre pregătirea școlară și contexte reale de lucru poate reduce transferul competențelor către ocupații; proiectul poate interveni legitim prin experiențe de învățare la locul de muncă, fără a pretinde că deficitul individual de competențe a fost măsurat.",
+      "allowed_intervention_family": ["programe de învățare la locul de muncă", "stagii de practică"],
+      "allowed_output_link": "participanți sprijiniți prin programe de învățare la locul de muncă",
+      "programme_indicator": "EECO06+07",
+      "target": 251,
+      "result_link": "dobândirea unei calificări la încetarea calității de participant",
+      "result_indicator": "EECR03",
+      "result_target": 226
+    },
+    {
+      "need_id": "BN-02",
+      "evidence_ids": ["EV-H-002", "EV-H-003", "EV-H-004"],
+      "causal_hypothesis": "Implicarea operatorilor economici în curriculumul practic, resurse și evaluare este mecanismul instituțional prin care ÎPT poate răspunde mai bine cererii de competențe.",
+      "allowed_intervention_family": ["stagii la angajatori", "cooperare școală–operator economic în jurul învățării la locul de muncă"],
+      "programme_indicator": "EECO06+07",
+      "target": 251,
+      "constraint": "Baseline-ul privind numărul/calitatea parteneriatelor existente la Pleșoianu este EVIDENCE_GAP; nu se setează din blind un deficit numeric de parteneriate."
+    },
+    {
+      "need_id": "BN-03",
+      "evidence_ids": ["EV-H-003", "EV-H-006"],
+      "causal_hypothesis": "Informarea privind calificările, competențele și perspectivele profesionale poate susține decizii educaționale mai informate și participarea la trasee profesionale/duale.",
+      "allowed_intervention_family": ["informare asociată programelor de învățare la locul de muncă", "orientare asupra traseului profesional în legătură cu experiența practică"],
+      "programme_indicator": "EECO06+07",
+      "target": 251,
+      "constraint": "Nu se inventează un rezultat de consiliere separat și nu se afirmă indecizia elevilor fără cercetare primară."
+    },
+    {
+      "need_id": "BN-04",
+      "evidence_ids": ["EV-H-001", "EV-H-002", "EV-H-003"],
+      "causal_hypothesis": "Expunerea practică, calificarea și contactul cu angajatori pot întări pregătirea pentru tranziția către muncă; statisticile județene justifică relevanța tranziției, nu demonstrează efectul individual al proiectului.",
+      "allowed_intervention_family": ["stagii de practică", "învățare la locul de muncă"],
+      "programme_indicator": "EECO06+07",
+      "target": 251,
+      "result_indicator": "EECR03",
+      "result_target": 226,
+      "constraint": "Nu se transformă ponderea sub-30 în stocul șomerilor înregistrați într-o rată a șomajului și nu se promite ocupare dacă indicatorul contractual este calificarea."
+    },
+    {
+      "need_id": "BN-05",
+      "evidence_ids": ["EV-H-002", "EV-H-003", "EV-H-004", "EV-H-005"],
+      "causal_hypothesis": "Corelarea calificărilor efectiv oferite de școală cu sectoarele/ocupațiile locale și cu schimbările tehnologice crește relevanța conținutului practic pentru piața muncii.",
+      "allowed_intervention_family": ["stagii de practică specifice calificării", "învățare la locul de muncă adaptată domeniului"],
+      "programme_indicator": "EECO06+07",
+      "target": 251,
+      "result_indicator": "EECR03",
+      "result_target": 226
+    },
+    {
+      "need_id": "BN-06",
+      "evidence_ids": ["EV-H-003"],
+      "causal_hypothesis": "Experiențele practice relevante și informarea pot susține atractivitatea traseului profesional, dar datele naționale nu permit estimarea efectului la nivelul școlii.",
+      "allowed_intervention_family": ["informare", "experiențe de învățare la locul de muncă"],
+      "programme_indicator": "EECO06+07",
+      "classification": "supporting_context_only"
+    }
+  ],
+  "unresolved_evidence_gaps": [
+    "baseline school-level practice quality and employer-placement coverage",
+    "student-level primary research on career intentions and perceived practice needs",
+    "school-level transition-to-employment outcomes",
+    "school-level dropout/retention baseline",
+    "baseline number and quality of active practice partnerships",
+    "original publication timestamp/hash receipt for AJOFM 2023 forecast",
+    "captured official binary/hash for ISJ 2023-2024 admission brochure"
+  ],
+  "status": "complete"
+}

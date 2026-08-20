@@ -1,0 +1,71 @@
+{
+  "gaps_addressed": [
+    "GAP-PR-001",
+    "GAP-PR-002",
+    "GAP-PR-003",
+    "GAP-PR-004"
+  ],
+  "plan_sha256": "acbe2300380bf5fb09e33b96dee6f8b102a47e48a0a2c9bece759a510dca3a3d",
+  "population_n": null,
+  "population_snapshot_id": "POP-310224-HISTORICAL-UNRESOLVED",
+  "questions": [
+    {
+      "construct": "career_guidance_need",
+      "labels": {"1":"deloc","2":"în mică măsură","3":"moderat","4":"în mare măsură","5":"în foarte mare măsură"},
+      "prompt": "În ce măsură aveți nevoie de informații sau orientare suplimentară despre ocupațiile și traseele profesionale asociate calificării?",
+      "question_id": "Q01",
+      "response_type": "likert_1_5",
+      "template_key": "career_guidance_need"
+    },
+    {
+      "construct": "career_intention",
+      "labels": {"1":"deloc","2":"în mică măsură","3":"moderat","4":"în mare măsură","5":"în foarte mare măsură"},
+      "prompt": "În ce măsură intenționați să profesați într-un domeniu asociat calificării pe care o urmați?",
+      "question_id": "Q02",
+      "response_type": "likert_1_5",
+      "template_key": "career_intention"
+    },
+    {
+      "construct": "employer_exposure",
+      "labels": {"no":"nu","yes":"da"},
+      "prompt": "Ați desfășurat până în prezent activități de practică într-un mediu real de lucru la un operator economic?",
+      "question_id": "Q03",
+      "response_type": "yes_no",
+      "template_key": "employer_exposure"
+    },
+    {
+      "construct": "practice_quality",
+      "labels": {"1":"deloc","2":"în mică măsură","3":"moderat","4":"în mare măsură","5":"în foarte mare măsură"},
+      "prompt": "Dacă ați participat la practică la un operator economic, în ce măsură sarcinile realizate au fost relevante pentru calificarea urmată?",
+      "question_id": "Q04",
+      "response_type": "likert_1_5_optional",
+      "template_key": "practice_quality"
+    },
+    {
+      "construct": "practice_relevance",
+      "labels": {"1":"deloc","2":"în mică măsură","3":"moderat","4":"în mare măsură","5":"în foarte mare măsură"},
+      "prompt": "În ce măsură considerați că experiența practică la un angajator vă ajută să dobândiți competențe relevante pentru calificarea urmată?",
+      "question_id": "Q05",
+      "response_type": "likert_1_5",
+      "template_key": "practice_relevance"
+    },
+    {
+      "construct": "skills_confidence",
+      "labels": {"1":"deloc pregătit(ă)","2":"puțin","3":"moderat","4":"bine","5":"foarte bine"},
+      "prompt": "Cât de pregătit(ă) vă considerați să realizați sarcini practice de bază specifice calificării pe care o urmați?",
+      "question_id": "Q06",
+      "response_type": "likert_1_5",
+      "template_key": "skills_confidence"
+    }
+  ],
+  "raw_response_contract": {
+    "format": "long",
+    "one_value_per_respondent_question": true,
+    "raw_data_is_canonical": true,
+    "required_fields": ["respondent_id","population_snapshot_id","grade","qualification","question_id","value"]
+  },
+  "required_strata": ["grade","qualification"],
+  "sampling_strategy": "population_snapshot_required",
+  "schema_version": "nf.primary_research_plan.v0.1",
+  "release_note": "Question instrument may be prepared now; collection/sampling cannot be released until CP04_POPULATION_SNAPSHOT_GATE is resolved."
+}

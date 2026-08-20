@@ -1,0 +1,96 @@
+name: Needs Factory Release Handoff
+
+on:
+  push:
+    branches:
+      - 'needs-factory/**'
+    paths:
+      - 'partener-eu/needs-factory/**'
+      - '.github/workflows/needs-factory-release-handoff.yml'
+  pull_request:
+    paths:
+      - 'partener-eu/needs-factory/**'
+      - '.github/workflows/needs-factory-release-handoff.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  final-release-handoff:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install deterministic DOCX exporter dependency
+        run: python -m pip install --disable-pip-version-check -r partener-eu/needs-factory/requirements-docx.txt
+      - name: Run full Needs Factory regression suite
+        run: python -m unittest discover -s partener-eu/needs-factory/tests -v
+      - name: Produce final artifacts and DAPE seven-artifact handoff
+        run: |
+          rm -rf /tmp/nf-release
+          python partener-eu/needs-factory/tools/run_release_fixture.py \
+            partener-eu/needs-factory/tests/fixtures/pipeline_smoke.json \
+            --output-root /tmp/nf-release \
+            --result /tmp/nf-release-result.json
+      - name: Validate final package and DAPE handoff
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.load(open('/tmp/nf-release-result.json', encoding='utf-8'))
+          assert result['release_state'] == 'HANDOFF_READY_NOT_CANONICAL'
+          final = result['final_export_manifest']
+          assert final['downstream_only'] is True
+          assert final['claim_mutation_allowed'] is False
+          assert final['docx_validation']['ANALIZA_NEVOI.docx']['valid'] is True
+          assert final['docx_validation']['SOURCE_REGISTER.docx']['valid'] is True
+          assert len(final['files']['ANALIZA_NEVOI.docx']['sha256']) == 64
+          assert len(final['files']['SOURCE_REGISTER.docx']['sha256']) == 64
+          assert len(final['package_zip']['sha256']) == 64
+          handoff = result['dape_handoff']
+          assert handoff['artifact_count'] == 7
+          assert handoff['canonical'] is False
+          assert handoff['host_action_required'] is True
+          expected = {
+              'CHECKPOINT_MANIFEST.json','EVIDENCE_LEDGER.json','ARTIFACT_BUNDLE.json',
+              'TEST_REPORT.json','BACKLOG_SNAPSHOT.json','RESUME_MANIFEST.json','RELEASE_PACKAGE.json'
+          }
+          assert set(handoff['artifacts']) == expected
+          assert set(handoff['file_hashes']) == expected
+          for name in expected:
+              path = Path('/tmp/nf-release/dape_checkpoint') / name
+              assert path.exists(), name
+              assert len(handoff['file_hashes'][name]) == 64
+          release_package = json.load(open('/tmp/nf-release/dape_checkpoint/RELEASE_PACKAGE.json', encoding='utf-8'))
+          assert release_package['canonical'] is False
+          assert release_package['merge_allowed'] is False
+          assert release_package['host_action_required'] is True
+          checkpoint = json.load(open('/tmp/nf-release/dape_checkpoint/CHECKPOINT_MANIFEST.json', encoding='utf-8'))
+          assert checkpoint['classification'] == 'DOMAIN_SPECIFIC'
+          assert checkpoint['integration']['single_control_plane_preserved'] is True
+          assert checkpoint['separation_guards']['generic_duplication_allowed'] is False
+          print(result['run_id'])
+          print(final['files']['ANALIZA_NEVOI.docx']['sha256'])
+          print(final['package_zip']['sha256'])
+          print(handoff['file_hashes']['CHECKPOINT_MANIFEST.json'])
+          PY
+      - name: Reassert real 310224 remains blocked before final-document generation
+        run: |
+          python partener-eu/needs-factory/tools/run_research_gate_fixture.py \
+            partener-eu/needs-factory/benchmarks/310224/CP08_PRODUCT_RUN_INPUT.json \
+            --output /tmp/nf-310224-blocked.json
+          python - <<'PY'
+          import json
+          result = json.load(open('/tmp/nf-310224-blocked.json', encoding='utf-8'))
+          assert result['state'] == 'BLOCKED_RESEARCH'
+          assert len([g for g in result['evidence_gaps']['gaps'] if g.get('blocking')]) == 5
+          closed = set(result['run_manifest']['closed_checkpoints'])
+          assert 'NF12_PACKAGE' not in closed
+          print(result['run_manifest']['run_id'])
+          PY
