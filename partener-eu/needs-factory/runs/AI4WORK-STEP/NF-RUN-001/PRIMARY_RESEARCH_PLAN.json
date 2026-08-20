@@ -1,0 +1,71 @@
+{
+  "schema_version": "nf.primary_research_plan.v0.2",
+  "run_id": "AI4WORK-STEP/NF-RUN-001",
+  "purpose": "Close direct target-group, employer-demand and scale/distribution evidence gaps without using project activities as evidence.",
+  "streams": [
+    {
+      "id": "PR-ADULTS",
+      "population": "potentially eligible adults >29 from Sud-Vest Oltenia, Sud-Muntenia and Centru",
+      "sampling_strategy": "FRAME_REQUIRED_THEN_TRANSPARENT_PURPOSIVE_OR_CENSUS_OF_ACCESSIBLE_PIPELINE",
+      "precondition": "document the recruitment/research frame, channels, dates, region and eligibility screening; do not call results representative of regional population unless a probability frame exists",
+      "required_strata": ["region", "labour_status", "age_band"],
+      "optional_strata": ["sector_or_job_family", "education_level"],
+      "constructs": [
+        "digital_skills_baseline",
+        "ai_use_exposure",
+        "ai_output_verification",
+        "data_privacy_security",
+        "workflow_integration_readiness",
+        "adult_learning_participation",
+        "training_barriers",
+        "reskilling_interest"
+      ],
+      "privacy": {
+        "direct_identifiers_prohibited": ["name", "CNP", "phone", "email", "exact employer"],
+        "respondent_id": "pseudonymous sequential/random ID",
+        "raw_data_canonical": true
+      },
+      "claim_limits": [
+        "self-assessment is not objective competence certification",
+        "interest in training is not proof of skill deficit",
+        "non-probability sample cannot estimate prevalence for all adults in a region",
+        "project target of 160 cannot be used as sample universe"
+      ]
+    },
+    {
+      "id": "PR-EMPLOYERS",
+      "population": "employers / business associations / relevant organisations in the three project regions",
+      "sampling_strategy": "PURPOSIVE_MULTI_REGION_WITH_RECORDED_FRAME",
+      "required_strata": ["region", "sector", "organisation_size_band"],
+      "constructs": [
+        "current_AI_use",
+        "workflow_change",
+        "observed_employee_skill_gaps",
+        "recruitment_or_reskilling_difficulty",
+        "verification_and_quality_control_need",
+        "data_privacy_security_need",
+        "AI_integration_capability",
+        "training_provision_and_barriers"
+      ],
+      "privacy": {
+        "named_expression_of_interest": "stored separately from analytical raw dataset if collected",
+        "analysis_dataset": "organisation ID only unless explicit publication consent"
+      },
+      "claim_limits": [
+        "strategic interest does not equal shortage",
+        "one employer cannot establish regional prevalence",
+        "demand for a tool/vendor does not establish a general competency need"
+      ]
+    }
+  ],
+  "acceptance_gates": [
+    "all three regions represented or missing region explicitly remains an evidence gap",
+    "response counts and denominators reported for every quantitative claim",
+    "raw responses reconcile exactly to aggregates",
+    "no duplicate respondent/question records",
+    "construct and scale semantics preserved",
+    "adult and employer evidence stored separately before triangulation",
+    "exact 160 and 80/40/40 remain design values unless independently supported"
+  ],
+  "status": "PLAN_READY_DATA_NOT_COLLECTED"
+}
