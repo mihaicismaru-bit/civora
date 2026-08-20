@@ -17,6 +17,7 @@ from typing import Any
 
 import whatsapp_editorial_v1 as editorial
 from native_identity import product_identity
+from social_common import is_socially_held, remove_socially_held_items
 
 ROOT = Path(__file__).resolve().parents[2]
 VC = ROOT / "valcea-clar"
@@ -136,7 +137,10 @@ def demote_previous_ready(item: dict[str, Any]) -> dict[str, Any]:
 
 def build() -> dict[str, Any]:
     preview = editorial.build()
-    source_products = [p for p in preview.get("products", []) if isinstance(p, dict)]
+    source_products = [
+        p for p in preview.get("products", [])
+        if isinstance(p, dict) and not is_socially_held(str(p.get("story_id") or ""))
+    ]
     ranked = ranked_ready(source_products)
     selected_ids = {
         str(product["story_id"])
@@ -162,6 +166,7 @@ def build() -> dict[str, Any]:
         "publication_model": "continuous_story_first",
         "items": [],
     })
+    remove_socially_held_items(outbox)
     existing = {
         str(item.get("id")): demote_previous_ready(item)
         for item in outbox.get("items", [])

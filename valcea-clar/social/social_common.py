@@ -12,6 +12,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 SOCIAL_ROOT = ROOT / "valcea-clar" / "social"
 OUTBOX = SOCIAL_ROOT / "facebook_outbox.json"
+PUBLICATION_HOLDS = ROOT / "valcea-clar" / "editorial" / "publication_holds.json"
 PHOTO_ROOT = (SOCIAL_ROOT / "photos" / "approved").resolve()
 
 CANONICAL_HOSTS = {"valceaclar.ro", "www.valceaclar.ro"}
@@ -61,6 +62,60 @@ def write_json(path: Path, value: dict[str, Any]) -> None:
         json.dumps(value, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
+
+
+def socially_held_story_ids() -> set[str]:
+    """Return every story barred from social distribution by editorial policy.
+
+    The hold registry is a mandatory safety input for social adapters. A
+    missing or malformed registry is therefore an error, never an implicit
+    authorization to publish.
+    """
+    document = load_json(PUBLICATION_HOLDS)
+    held: set[str] = set()
+    for row in document.get("holds") or []:
+        if not isinstance(row, dict):
+            continue
+        story_id = str(row.get("story_id") or "").strip()
+        status = str(row.get("status") or "").strip().upper()
+        if (
+            story_id
+            and status not in {"RELEASED", "CLOSED", "RESOLVED"}
+            and (
+                row.get("social_distribution_allowed") is False
+                or row.get("public_projection") is False
+            )
+        ):
+            held.add(story_id)
+    return held
+
+
+def social_story_id(item: dict[str, Any]) -> str:
+    return str(item.get("source_story_id") or item.get("story_id") or "").strip()
+
+
+def is_socially_held(value: str | dict[str, Any]) -> bool:
+    story_id = social_story_id(value) if isinstance(value, dict) else str(value).strip()
+    return bool(story_id and story_id in socially_held_story_ids())
+
+
+def remove_socially_held_items(document: dict[str, Any]) -> list[str]:
+    items = document.get("items")
+    if not isinstance(items, list):
+        document["items"] = []
+        return []
+    held = socially_held_story_ids()
+    removed = [
+        str(item.get("id") or social_story_id(item))
+        for item in items
+        if isinstance(item, dict) and social_story_id(item) in held
+    ]
+    document["items"] = [
+        item
+        for item in items
+        if not (isinstance(item, dict) and social_story_id(item) in held)
+    ]
+    return removed
 
 
 def canonical_link(item: dict[str, Any]) -> str:
@@ -141,6 +196,8 @@ def platform_selected(item: dict[str, Any], platform: str) -> bool:
 
 
 def platform_ready(item: dict[str, Any], platform: str) -> bool:
+    if is_socially_held(item):
+        return False
     config = platform_config(item, platform)
     return (
         item.get("status") == "ready"

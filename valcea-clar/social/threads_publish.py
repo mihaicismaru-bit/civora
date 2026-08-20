@@ -20,7 +20,7 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
-from social_common import utc_now
+from social_common import is_socially_held, utc_now
 
 ROOT = Path(__file__).resolve().parents[2]
 VC = ROOT / "valcea-clar"
@@ -158,6 +158,8 @@ def eligible_items(outbox: dict[str, Any], state: dict[str, Any], event: dict[st
     result: list[dict[str, Any]] = []
     for item in outbox.get("items", []):
         if not isinstance(item, dict) or str(item.get("story_id")) not in wanted:
+            continue
+        if is_socially_held(item):
             continue
         if item.get("status") != "outbox_ready":
             continue

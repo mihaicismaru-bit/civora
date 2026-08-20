@@ -9,6 +9,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from social_common import social_story_id, socially_held_story_ids
+
 FORBIDDEN_MARKERS = {
     "OPENAI_API_KEY": "OpenAI API secret",
     "api.openai.com": "OpenAI API endpoint",
@@ -71,6 +73,29 @@ def validate(repo_root: Path) -> dict[str, Any]:
     automation_path = repo_root / "valcea-clar" / "engine" / "automation_registry.json"
     errors: list[str] = []
     checks: list[dict[str, Any]] = []
+
+    held_ids = socially_held_story_ids()
+    outbox_paths = sorted(social_root.glob("*_outbox.json"))
+    leaked_holds: list[str] = []
+    for path in outbox_paths:
+        document = load_json(path)
+        for item in document.get("items") or []:
+            if not isinstance(item, dict):
+                continue
+            story_id = social_story_id(item)
+            if story_id in held_ids:
+                leaked_holds.append(f"{path.name}:{item.get('id') or story_id}")
+    checks.append({
+        "check": "publication_holds_absent_from_all_social_outboxes",
+        "passed": not leaked_holds,
+        "held_story_count": len(held_ids),
+        "outboxes_checked": len(outbox_paths),
+    })
+    if leaked_holds:
+        errors.append(
+            "Editorial publication holds leaked into social outboxes: "
+            + ", ".join(leaked_holds)
+        )
 
     for rel, reason in sorted(DEPRECATED_PARALLEL_WORKFLOWS.items()):
         present = (repo_root / rel).exists()

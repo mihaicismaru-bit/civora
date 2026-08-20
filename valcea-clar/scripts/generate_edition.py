@@ -35,11 +35,26 @@ EDITIONS = ROOT / "editions"
 SITE = ROOT / "site"
 POINTER = SITE / "current_edition.json"
 LAST_ATTEMPT = SITE / "last_edition_attempt.json"
+PUBLICATION_HOLDS = ROOT / "editorial" / "publication_holds.json"
 TZ = ZoneInfo("Europe/Bucharest")
 ALLOWED_GATES = {"PASS", "PASS_DATE_ONLY", "PASS_TITLE_DATE_ONLY", "PASS_EXPLAINER_ONLY", "PASS_WITH_CAUTION"}
 ALLOWED_STATUSES = {"verified", "approved_carry_forward"}
 PUBLISHABLE_STATUSES = {"auto_approved", "editor_approved"}
 MIN_CONFIDENCE = 90
+
+
+def active_publication_holds() -> set[str]:
+    """Return unreleased story IDs barred from every public projection."""
+    document = load_json(PUBLICATION_HOLDS)
+    held: set[str] = set()
+    for row in document.get("holds") or []:
+        if not isinstance(row, dict):
+            continue
+        story_id = str(row.get("story_id") or "").strip()
+        status = str(row.get("status") or "").strip().upper()
+        if story_id and row.get("public_projection") is False and status not in {"RELEASED", "CLOSED", "RESOLVED"}:
+            held.add(story_id)
+    return held
 
 
 def load_json(path: Path, default=None):
@@ -79,7 +94,10 @@ def merged_registry() -> tuple[dict, int]:
 
 def eligible_facts(registry: dict, now: datetime, slot: str) -> list[dict]:
     output = []
+    held = active_publication_holds()
     for fact in registry.get("facts", []):
+        if str(fact.get("id") or "") in held:
+            continue
         if fact.get("status") not in ALLOWED_STATUSES:
             continue
         if int(fact.get("confidence") or 0) < MIN_CONFIDENCE:
@@ -271,6 +289,8 @@ def self_test() -> int:
     relative = {"facts": [{**sample_fact, "id": "relative", "headline": "Azi are loc programul verificat"}]}
     assert eligible_facts(relative, now, "morning") == []
     assert all(item.get("id") not in {"unde-iesim-operational", "source-radar-operational"} for item in eligible)
+    held_fact = {"facts": [{**sample_fact, "id": "olanesti-bridge-monitor"}]}
+    assert eligible_facts(held_fact, now, "morning") == []
     assert pointer_is_publishable({"edition_id": "x", "status": "auto_approved", "publication_intent": "publish"})
     assert not pointer_is_publishable({"edition_id": "x", "status": "auto_hold", "publication_intent": "hold"})
     editorial_writer.self_test()

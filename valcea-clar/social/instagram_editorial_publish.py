@@ -23,6 +23,7 @@ from typing import Any, Callable
 import editorial_asset_contract as asset_contract
 import instagram_editorial_v1_2 as patch
 import instagram_publish as legacy
+from social_common import is_socially_held
 
 ig = patch.impl
 ROOT = Path(__file__).resolve().parents[2]
@@ -31,6 +32,7 @@ STATE = VC / "social" / "instagram_state.json"
 OUTBOX = VC / "social" / "facebook_outbox.json"
 VISUALS = VC / "social" / "story_visuals.json"
 SYSTEM = VC / "social" / "instagram_visual_system.json"
+FACTS = VC / "editorial" / "facts_registry.json"
 RUNTIME = VC / "site" / "runtime" / "media" / "social" / "editorial" / "instagram"
 DIST = VC / "dist" / "chatgpt-sites" / "media" / "social" / "editorial" / "instagram"
 PUBLIC_BASE = "https://valceaclar.ro/media/social/editorial/instagram/"
@@ -79,7 +81,7 @@ def canonical_story_ready_ids() -> set[str]:
         if instagram.get("status") != "ready":
             continue
         story_id = str(item.get("source_story_id") or "").strip()
-        if story_id:
+        if story_id and not is_socially_held(story_id):
             ready.add(story_id)
     return ready
 
@@ -409,6 +411,11 @@ def _fixture_product(story_id: str) -> dict[str, Any]:
     system = load(SYSTEM)
     story = next((row for row in ig.base.stories() if str(row.get("id")) == story_id), None)
     if not isinstance(story, dict):
+        story = next(
+            (row for row in load(FACTS, {"facts": []}).get("facts", []) if str(row.get("id")) == story_id),
+            None,
+        )
+    if not isinstance(story, dict):
         raise AssertionError(f"fixture story missing: {story_id}")
     visual = ig.base.visual_for(story_id, visuals)
     if not isinstance(visual, dict):
@@ -421,7 +428,7 @@ def _fixture_product(story_id: str) -> dict[str, Any]:
 
 def self_test() -> int:
     assert state_key("x") == "story-x"
-    assert "olanesti-bridge-monitor" in canonical_story_ready_ids()
+    assert "olanesti-bridge-monitor" not in canonical_story_ready_ids()
     product = _fixture_product("olanesti-bridge-monitor")
     assert product["native_format"] == "carousel"
     assert len(product["assets"]) == 4

@@ -21,6 +21,7 @@ from typing import Any, Callable
 import editorial_asset_contract as asset_contract
 import facebook_editorial_preview_v1_1 as patch
 import facebook_publish as legacy
+from social_common import is_socially_held
 
 fb = patch.impl
 ROOT = Path(__file__).resolve().parents[2]
@@ -29,6 +30,7 @@ STATE = VC / "social" / "facebook_state.json"
 OUTBOX = VC / "social" / "facebook_outbox.json"
 VISUALS = VC / "social" / "story_visuals.json"
 SYSTEM = VC / "social" / "facebook_visual_system.json"
+FACTS = VC / "editorial" / "facts_registry.json"
 # Persist inside the canonical site runtime media tree. The social workflow
 # already conflict-safely persists this subtree after every production run.
 RUNTIME = VC / "site" / "runtime" / "media" / "social" / "editorial" / "facebook"
@@ -79,7 +81,7 @@ def legacy_ready_story_ids() -> set[str]:
         if facebook.get("status") != "ready":
             continue
         story_id = str(item.get("source_story_id") or "").strip()
-        if story_id:
+        if story_id and not is_socially_held(story_id):
             ready.add(story_id)
     return ready
 
@@ -241,6 +243,11 @@ def _fixture_product(story_id: str) -> dict[str, Any]:
     system = load(SYSTEM)
     story = next((row for row in fb.stories() if str(row.get("id")) == story_id), None)
     if not isinstance(story, dict):
+        story = next(
+            (row for row in load(FACTS, {"facts": []}).get("facts", []) if str(row.get("id")) == story_id),
+            None,
+        )
+    if not isinstance(story, dict):
         raise AssertionError(f"fixture story missing: {story_id}")
     visual = fb.visual_for(story_id, visuals)
     if not isinstance(visual, dict):
@@ -254,7 +261,7 @@ def _fixture_product(story_id: str) -> dict[str, Any]:
 def self_test() -> int:
     assert state_key("abc") == "story-abc"
     assert "editorial_composite" != "photograph"
-    assert "olanesti-bridge-monitor" in legacy_ready_story_ids()
+    assert "olanesti-bridge-monitor" not in legacy_ready_story_ids()
     product = _fixture_product("olanesti-bridge-monitor")
     assert product["state_key"] == "story-olanesti-bridge-monitor"
     assert product["asset"]["kind"] == "editorial_composite"

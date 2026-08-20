@@ -37,6 +37,7 @@ import feed_identity_v1_1 as feed_identity  # noqa: E402
 import instagram_publish as legacy  # noqa: E402
 import story_social_policy as social_policy  # noqa: E402
 from newsroom_decide import story_ready  # noqa: E402
+from social_common import is_socially_held  # noqa: E402
 
 CURRENT = VC / "site" / "current_edition.json"
 EVENT = VC / "site" / "story_publication_event.json"
@@ -96,7 +97,9 @@ def event_stories() -> tuple[list[dict[str, Any]], dict[str, Any]]:
     wanted = {str(value) for value in event.get("new_story_ids", []) if str(value).strip()}
     stories = [
         row for row in snapshot.get("items", [])
-        if isinstance(row, dict) and str(row.get("id") or "") in wanted
+        if isinstance(row, dict)
+        and str(row.get("id") or "") in wanted
+        and not is_socially_held(str(row.get("id") or ""))
     ]
     return stories, event
 

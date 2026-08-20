@@ -16,6 +16,7 @@ POINTER = ROOT / "site" / "current_edition.json"
 PLACES = ROOT / "web" / "data" / "places.json"
 OUT = ROOT / "site" / "runtime" / "live-feed.json"
 STORY_MANIFEST = ROOT / "site" / "runtime" / "stiri" / "manifest.json"
+STORY_ARCHIVE = ROOT / "site" / "story_archive.json"
 PUBLISHABLE = {"auto_approved", "editor_approved"}
 
 
@@ -37,6 +38,12 @@ def ensure_story_runtime() -> None:
 
 def story_feed(snapshot: dict) -> list[dict]:
     manifest = load(STORY_MANIFEST)
+    archive = load(STORY_ARCHIVE)
+    published_at = {
+        str(item.get("id")): str(item.get("first_published_at") or "").strip()
+        for item in archive.get("stories", [])
+        if isinstance(item, dict) and item.get("id") and item.get("first_published_at")
+    }
     routes = {
         str(item.get("id")): item
         for item in manifest.get("stories", [])
@@ -48,6 +55,9 @@ def story_feed(snapshot: dict) -> list[dict]:
         route = routes.get(story_id)
         if not route:
             continue
+        first_published_at = published_at.get(story_id)
+        if not first_published_at:
+            raise SystemExit(f"Refusing live feed: missing first_published_at for {story_id}")
         stories.append({
             "id": story_id,
             "section": item.get("section"),
@@ -59,6 +69,7 @@ def story_feed(snapshot: dict) -> list[dict]:
             "canonical_url": route.get("canonical"),
             "sources": item.get("sources", []),
             "visual": item.get("visual"),
+            "first_published_at": first_published_at,
         })
     stories.sort(key=lambda item: (-int(item.get("priority") or 0), item["id"]))
     return stories

@@ -29,6 +29,7 @@ sys.path.insert(0, str(SOCIAL))
 from newsroom_decide import story_ready  # noqa: E402
 import generate_edition  # noqa: E402
 import tiktok_editorial_v1 as tiktok_editorial  # noqa: E402
+from social_common import is_socially_held, remove_socially_held_items  # noqa: E402
 
 CURRENT = VC / "site" / "current_edition.json"
 DECISION = VC / "site" / "newsroom_decision.json"
@@ -291,9 +292,13 @@ def main() -> int:
     outbox = load(OUTBOX, {"schema_version": "4.0", "items": []})
     visuals = load(VISUALS, {"stories": {}})
 
-    stories = decision_approved_full_stories(decision, snapshot)
+    stories = [
+        story for story in decision_approved_full_stories(decision, snapshot)
+        if not is_socially_held(str(story.get("id") or ""))
+    ]
 
     removed_recaps = remove_recap_items(outbox)
+    removed_holds = remove_socially_held_items(outbox)
     existing_by_id = {
         str(item.get("id")): item
         for item in outbox.get("items", [])
@@ -331,6 +336,7 @@ def main() -> int:
         "ready_now": ready,
         "held_for_story_specific_media": held,
         "removed_recap_items": removed_recaps,
+        "removed_publication_holds": removed_holds,
     }
     print(json.dumps(result, ensure_ascii=False))
     return 0

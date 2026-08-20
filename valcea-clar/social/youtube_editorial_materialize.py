@@ -17,6 +17,7 @@ from PIL import Image
 
 import youtube_editorial_v1 as editorial
 from native_identity import product_identity
+from social_common import is_socially_held, remove_socially_held_items
 
 ROOT = Path(__file__).resolve().parents[2]
 VC = ROOT / "valcea-clar"
@@ -212,6 +213,8 @@ def build() -> dict[str, Any]:
     for product in preview.get("products", []):
         if not isinstance(product, dict):
             continue
+        if is_socially_held(str(product.get("story_id") or "")):
+            continue
         if product.get("status") == "READY":
             source = ready_video_source(product)
             thumb = thumbnail_asset(product, source)
@@ -236,6 +239,7 @@ def build() -> dict[str, Any]:
         "edition_recaps_are_publication_gates": False,
         "items": list(existing.values()),
     })
+    remove_socially_held_items(outbox)
     write(OUTBOX, outbox)
 
     state = load(STATE, {

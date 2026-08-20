@@ -85,6 +85,7 @@ jobs:
           feed_ids = [str(item['id']) for item in feed.get('stories', [])]
           route_ids = [str(item['id']) for item in manifest.get('stories', [])]
           archive_set = set(archive_ids)
+          archive_published = {str(item['id']): str(item.get('first_published_at') or '') for item in archive.get('stories', [])}
 
           assert archive.get('publication_model') == 'continuous_story_first'
           assert archive.get('recap_editions_may_delete_published_stories') is False
@@ -93,6 +94,8 @@ jobs:
           assert feed.get('policy', {}).get('published_story_persistence') is True
           assert feed.get('policy', {}).get('edition_fields_are_compatibility_only') is True
           assert feed.get('policy', {}).get('operational_records_hidden') is True
+          assert all(item.get('first_published_at') for item in feed.get('stories', []))
+          assert all(str(item['first_published_at']) == archive_published[str(item['id'])] for item in feed.get('stories', []))
           assert len(archive_ids) == len(archive_set)
           assert archive.get('story_count') == len(archive_ids)
           assert feed.get('story_count') == len(feed_ids) == len(archive_ids)

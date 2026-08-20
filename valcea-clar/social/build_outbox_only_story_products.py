@@ -18,6 +18,7 @@ VC = ROOT / "valcea-clar"
 sys.path.insert(0, str(VC / "scripts"))
 from newsroom_decide import story_ready  # noqa: E402
 from native_identity import product_identity  # noqa: E402
+from social_common import is_socially_held, remove_socially_held_items  # noqa: E402
 
 POINTER = VC / "site" / "current_edition.json"
 DECISION = VC / "site" / "newsroom_decision.json"
@@ -365,6 +366,7 @@ def output_specs():
 
 
 def upsert(doc: dict, products: list[dict]) -> dict:
+    remove_socially_held_items(doc)
     existing = {
         str(item.get("id")): item
         for item in doc.get("items", [])
@@ -386,7 +388,9 @@ def main() -> int:
     allowed = set(event.get("story_ids") or decision.get("publishable_story_ids") or [])
     stories = [
         item for item in snapshot.get("items", [])
-        if item.get("id") in allowed and story_ready(item)[0]
+        if item.get("id") in allowed
+        and story_ready(item)[0]
+        and not is_socially_held(str(item.get("id") or ""))
     ]
 
     counts = {}

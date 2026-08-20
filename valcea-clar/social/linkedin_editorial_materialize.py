@@ -16,6 +16,7 @@ from typing import Any
 
 import linkedin_editorial_v1 as editorial
 from native_identity import product_identity
+from social_common import is_socially_held, remove_socially_held_items
 
 ROOT = Path(__file__).resolve().parents[2]
 VC = ROOT / "valcea-clar"
@@ -158,6 +159,8 @@ def build() -> dict[str, Any]:
     for product in preview.get("products", []):
         if not isinstance(product, dict):
             continue
+        if is_socially_held(str(product.get("story_id") or "")):
+            continue
         asset = render_asset(product) if product.get("status") == "READY" else None
         products.append(canonical_item(product, asset))
     outbox = load(OUTBOX, {
@@ -166,6 +169,7 @@ def build() -> dict[str, Any]:
         "publication_model": "continuous_story_first",
         "items": [],
     })
+    remove_socially_held_items(outbox)
     existing = {
         str(item.get("id")): item
         for item in outbox.get("items", [])

@@ -76,13 +76,8 @@ jobs:
               raise SystemExit('Luminos Telegram canonical utility failed')
           if not lum.get('message','').startswith('Zăvoi, azi: intrare liberă la Luminos Fest'):
               raise SystemExit('Luminos Telegram canonical title failed')
-          ola=items.get('olanesti-bridge-monitor')
-          if not ola or ola.get('status')!='outbox_ready' or ola.get('format_family')!='public_interest_update':
-              raise SystemExit('Olănești Telegram canonical public-interest product failed')
-          text=ola.get('message','')
-          for expected in ('44,37 mil. lei','Ralunic + Dimex-2000 Company','SMIS 334436'):
-              if expected not in text:
-                  raise SystemExit(f'Olănești Telegram missing {expected}')
+          if items.get('olanesti-bridge-monitor'):
+              raise SystemExit('Editorial hold leaked into the Telegram outbox')
           for item in items.values():
               if item.get('status')=='outbox_ready':
                   if item.get('verbatim_cross_platform_reuse_allowed') is not False:

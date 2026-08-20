@@ -24,7 +24,10 @@ def current_publishable_backlog() -> tuple[list[dict[str, Any]], dict[str, Any]]
         for row in registry.get("facts") or []
         if isinstance(row, dict) and row.get("id")
     }
-    stories = [by_id[story_id] for story_id in allowed_order if story_id in by_id]
+    stories = [
+        by_id[story_id] for story_id in allowed_order
+        if story_id in by_id and not base.is_socially_held(story_id)
+    ]
     urls = event.get("canonical_urls") if isinstance(event.get("canonical_urls"), dict) else {}
     for story_id in allowed_order:
         urls.setdefault(story_id, f"https://valceaclar.ro/stiri/{story_id}/")

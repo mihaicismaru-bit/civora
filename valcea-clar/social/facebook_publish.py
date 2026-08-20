@@ -25,6 +25,8 @@ import uuid
 from pathlib import Path
 from typing import Any
 
+from social_common import is_socially_held
+
 ROOT = Path(__file__).resolve().parents[2]
 OUTBOX = ROOT / "valcea-clar" / "social" / "facebook_outbox.json"
 STATE = ROOT / "valcea-clar" / "social" / "facebook_state.json"
@@ -115,7 +117,7 @@ def eligible(items: list[dict[str, Any]], published: dict[str, Any]) -> list[dic
     now = dt.datetime.now(dt.timezone.utc)
     for item in items:
         validate_item(item)
-        if item["status"] != "ready" or item["id"] in published:
+        if is_socially_held(item) or item["status"] != "ready" or item["id"] in published:
             continue
         image_file(item)
         publish_after = item.get("publish_after")

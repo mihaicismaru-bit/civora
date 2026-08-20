@@ -332,10 +332,15 @@ def write_live_feed(
             "archive_status": item.get("archive_status"),
             "active_now": bool(item.get("active_now")),
             "visual": item.get("visual"),
+            "first_published_at": item.get("first_published_at"),
         }
         if item.get("person_profiles"):
             row["person_profiles"] = item["person_profiles"]
         feed_stories.append(row)
+        if not row["first_published_at"]:
+            raise SystemExit(
+                f"Refusing live feed: missing first_published_at for {item.get('id')}"
+            )
     payload = {
         "schema_version": "2.2",
         "generated_at": now.astimezone(ZoneInfo("UTC")).isoformat().replace("+00:00", "Z"),

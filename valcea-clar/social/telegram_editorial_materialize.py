@@ -14,6 +14,7 @@ from typing import Any
 
 import telegram_editorial_v1 as editorial
 from native_identity import product_identity
+from social_common import is_socially_held, remove_socially_held_items
 
 ROOT = Path(__file__).resolve().parents[2]
 VC = ROOT / "valcea-clar"
@@ -75,13 +76,17 @@ def canonical_item(product: dict[str, Any]) -> dict[str, Any]:
 
 def build() -> dict[str, Any]:
     preview = editorial.build()
-    products = [canonical_item(product) for product in preview.get("products", [])]
+    products = [
+        canonical_item(product) for product in preview.get("products", [])
+        if not is_socially_held(str(product.get("story_id") or ""))
+    ]
     outbox = load(OUTBOX, {
         "schema_version": "1.0",
         "platform": "telegram",
         "publication_model": "continuous_story_first",
         "items": [],
     })
+    remove_socially_held_items(outbox)
     existing = {
         str(item.get("id")): item
         for item in outbox.get("items", [])
