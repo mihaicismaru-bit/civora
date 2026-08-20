@@ -2,18 +2,18 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-20T02:54:53+03:00",
+  "generated_at": "2026-08-20T06:14:20+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-20T02:50:12+03:00",
-  "task_count": 69,
+  "queue_generated_at": "2026-08-20T06:11:39+03:00",
+  "task_count": 66,
   "primary_match_count": 0,
-  "no_match_count": 37,
-  "unrouted_count": 32,
-  "target_count": 21,
-  "targets_ok": 17,
+  "no_match_count": 35,
+  "unrouted_count": 31,
+  "target_count": 20,
+  "targets_ok": 15,
   "results": [
     {
       "signal_id": "521b4f7952818054d71c50f6",
@@ -203,7 +203,7 @@
     },
     {
       "signal_id": "5e6a347c3f172d6a7aac2975",
-      "signal_title": "Ultima oră 11 ore in urma Horezu marchează 539 de ani de istorie prin trei zile dedicate comunității",
+      "signal_title": "Ultima oră 14 ore in urma Horezu marchează 539 de ani de istorie prin trei zile dedicate comunității",
       "signal_url": "https://www.primplanpress.ro/horezu-marcheaza-539-de-ani-de-istorie-prin-trei-zile-dedicate-comunitatii/",
       "signal_publisher": "Primplan Press",
       "signal_published_at": "2026-08-19T16:08:29+03:00",
@@ -729,9 +729,9 @@
             "name": "Primăria Orașului Horezu",
             "url": "https://www.orasul-horezu.ro/anunturi"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 1
+          "status": "DEGRADED",
+          "error": "no_primary_documents_retrieved",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -1004,9 +1004,9 @@
             "name": "Primăria Orașului Horezu",
             "url": "https://www.orasul-horezu.ro/anunturi"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 1
+          "status": "DEGRADED",
+          "error": "no_primary_documents_retrieved",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -1123,34 +1123,6 @@
       "listing_title_identity_rejections": 80
     },
     {
-      "signal_id": "aa7cc6b9f5f579afba60c375",
-      "signal_title": "Zeci de școli din Vâlcea își caută directori. Lista completă a posturilor vacante",
-      "signal_url": "https://seintamplainvalcea.ro/2026/08/18/zeci-de-scoli-din-valcea-isi-cauta-directori-lista-completa-a-posturilor-vacante/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-08-18T09:26:44+03:00",
-      "verification_route_id": "education_directors",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "isj-valcea-directori",
-            "name": "Inspectoratul Școlar Județean Vâlcea — Management",
-            "url": "https://www.isjvalcea.ro/management/management"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 4
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
-    },
-    {
       "signal_id": "650243aae22a873ba383dd84",
       "signal_title": "Transalpina, în topul celor mai spectaculoase șosele din Europa. Drumul din Vâlcea urcă pe locul 5",
       "signal_url": "https://evenimentvalcean.ro/transalpina-in-topul-celor-mai-spectaculoase-sosele-din-europa-drumul-din-valcea-urca-pe-locul-5/",
@@ -1233,7 +1205,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
+          "documents_examined": 2
         },
         {
           "target": {
@@ -1471,19 +1443,6 @@
       "listing_title_identity_rejections": 80
     },
     {
-      "signal_id": "eda2a89c4ac01f81551a85be",
-      "signal_title": "Suspect de tâlhărie din Mureș, arestat la Sibiu și încarcerat la Vâlcea",
-      "signal_url": "https://seintamplainvalcea.ro/2026/08/17/suspect-de-talharie-din-mures-arestat-la-sibiu-si-incarcerat-la-valcea/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_published_at": "2026-08-17T15:26:16+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
-    },
-    {
       "signal_id": "6b39d8f1c11e5abd66926215",
       "signal_title": "Percheziții în Vâlcea într-un dosar privind deținerea ilegală de arme și muniții",
       "signal_url": "https://vocea-valcii.ro/dezvaluiri/perchezitii-in-valcea-intr-un-dosar-privind-detinerea-ilegala-de-arme-si-munitii/",
@@ -1579,7 +1538,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
+          "documents_examined": 2
         },
         {
           "target": {
@@ -1591,34 +1550,6 @@
           "status": "DEGRADED",
           "error": "HTTPError: HTTP Error 403: Forbidden",
           "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
-    },
-    {
-      "signal_id": "38b49939884afa6745f8c0d3",
-      "signal_title": "FOTO. ACCIDENT în fața Casei de Pensii din Râmnicu Vâlcea. Biciclist rănit…",
-      "signal_url": "https://seintamplainvalcea.ro/2026/08/17/foto-accident-in-fata-casei-de-pensii-din-ramnicu-valcea-biciclist-ranit/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-08-17T12:56:59+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
