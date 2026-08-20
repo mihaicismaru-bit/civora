@@ -240,8 +240,14 @@ def main() -> int:
     state = build(args.live, previous)
 
     if args.check:
-        if state.get("monitor_count") != 7:
-            raise SystemExit(f"expected 7 recovered monitors, found {state.get('monitor_count')}")
+        registry = load(REGISTRY, {}) or {}
+        expected_ids = [str(row.get("id") or "") for row in registry.get("monitors") or []]
+        actual_ids = [str(row.get("id") or "") for row in state.get("monitors") or []]
+        if state.get("monitor_count") != len(expected_ids) or actual_ids != expected_ids:
+            raise SystemExit(
+                "monitor ledger does not materialize the complete canonical registry "
+                f"(expected {len(expected_ids)}, found {state.get('monitor_count')})"
+            )
         if any(row.get("public_projection") is not False for row in state.get("monitors") or []):
             raise SystemExit("monitor ledger attempted public projection")
         print("VÂLCEA CLAR monitor ledger offline contract: PASS")

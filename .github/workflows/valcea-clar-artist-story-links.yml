@@ -2,6 +2,10 @@ name: VÂLCEA CLAR Artist Story Links
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'valcea-clar/scripts/link_artist_profiles.py'
+      - '.github/workflows/valcea-clar-artist-story-links.yml'
   workflow_run:
     workflows: ["VÂLCEA CLAR Live Newsroom", "VÂLCEA CLAR Artist Intelligence"]
     types: [completed]
@@ -33,9 +37,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Validate linker shell compatibility and idempotency
+        run: python valcea-clar/scripts/link_artist_profiles.py --self-test
       - name: Validate linker against checked-out newsroom state
         run: python valcea-clar/scripts/link_artist_profiles.py
       - name: Persist bidirectional festival artist links from latest main
+        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
