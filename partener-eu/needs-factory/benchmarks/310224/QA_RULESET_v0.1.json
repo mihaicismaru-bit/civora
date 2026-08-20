@@ -1,0 +1,37 @@
+{
+  "schema_version":"nf.qa_ruleset.v0.1",
+  "benchmark_id":"NF-BENCH-001",
+  "mode":"fail_closed",
+  "rules":[
+    {"id":"QAR-001","name":"SourceRequired","severity":"critical","rule":"Every material factual claim must reference at least one evidence record.","on_fail":"block_claim"},
+    {"id":"QAR-002","name":"SourceDateRequired","severity":"high","rule":"Statistical and strategic evidence must carry observation/publication period.","on_fail":"block_quantified_claim"},
+    {"id":"QAR-003","name":"TerritorialFit","severity":"high","rule":"Evidence geography must fit the target geography; national/regional evidence used for local need requires explicit corroboration or extrapolation label.","on_fail":"penalize_and_require_corroboration"},
+    {"id":"QAR-004","name":"PopulationFit","severity":"critical","rule":"Evidence population must match target age, education route, cohorts and qualifications sufficiently to support the need.","on_fail":"block_need_priority"},
+    {"id":"QAR-005","name":"SampleConsistency","severity":"critical","rule":"Survey N must be identical across methodology, narrative, charts and project form unless versioned and explained.","fixture":"241 vs 200","on_fail":"block_primary_research"},
+    {"id":"QAR-006","name":"EntityConsistency","severity":"critical","rule":"Project, school, beneficiary and partner identities must be globally consistent.","fixtures":["Colegiul Energetic","Liceul Constantin Brancoveanu"],"on_fail":"block_document"},
+    {"id":"QAR-007","name":"ChartTextConsistency","severity":"critical","rule":"Chart values, totals, legends and narrative values must reconcile exactly.","fixture":"144/82/15 vs repeated 86/105/50","on_fail":"block_affected_evidence"},
+    {"id":"QAR-008","name":"SurveyPopulationCoverage","severity":"high","rule":"Surveyed cohorts must overlap funded cohorts and coverage/response rate must be reported.","fixture":"IX-XI surveyed vs X-XII selection base","on_fail":"require_coverage_justification"},
+    {"id":"QAR-009","name":"Freshness","severity":"high","rule":"For labour-market and education-flow indicators, evidence older than three years at submission must trigger a newer-source search and explicit stale-data justification if retained.","on_fail":"stale_flag_and_search"},
+    {"id":"QAR-010","name":"SourceTraceability","severity":"critical","rule":"Every evidence item must retain source institution, document/dataset identity, table/page when applicable, period, retrieval status and URL/document pointer.","on_fail":"block_evidence"},
+    {"id":"QAR-011","name":"NeedEvidenceMinimum","severity":"critical","rule":"Every priority need needs at least one direct supporting evidence item; high-priority needs should have an official or primary corroborating source.","on_fail":"cannot_rank_priority"},
+    {"id":"QAR-012","name":"NeedInterventionTrace","severity":"critical","rule":"Every funded activity maps to one or more evidenced needs, and every priority need maps to an activity/result/indicator or is explicitly out of scope.","on_fail":"block_final_analysis"},
+    {"id":"QAR-013","name":"UnsupportedNormativeNeed","severity":"high","rule":"Horizontal principles such as nondiscrimination cannot be presented as empirically observed target-group needs without direct evidence; otherwise classify them as compliance/cross-cutting requirements.","fixture":"legacy discrimination need","on_fail":"reclassify_or_add_evidence"},
+    {"id":"QAR-014","name":"ContradictionResolver","severity":"critical","rule":"Conflicting values are preserved as contradictions and never silently selected or averaged.","on_fail":"fail_closed_until_resolved"},
+    {"id":"QAR-015","name":"TemplateContamination","severity":"critical","rule":"Stray institutions, projects, education levels or demographic groups from unrelated templates are detected and rejected.","fixtures":["Colegiul Energetic","Constantin Brancoveanu","preschool prose"],"on_fail":"block_document"},
+    {"id":"QAR-016","name":"BenchmarkCompatibility","severity":"high","rule":"Comparisons require compatible indicator definitions, denominators, age bands, geographies and time windows.","on_fail":"block_comparison"},
+    {"id":"QAR-017","name":"SurveyQuestionResultIntegrity","severity":"critical","rule":"Response labels and scale semantics must match the exact question; totals must equal sample/valid-response count or missing data must be reported.","on_fail":"block_survey_inference"},
+    {"id":"QAR-018","name":"EvidenceApplicabilityScore","severity":"high","rule":"Compute applicability from source tier, territory fit, population fit, recency and directness; weakly applicable evidence cannot independently support a priority need.","on_fail":"confidence_cap"},
+    {"id":"QAR-019","name":"CausalityGuard","severity":"high","rule":"Descriptive association cannot be written as causal evidence without an appropriate design or external causal evidence.","on_fail":"rewrite_as_association"},
+    {"id":"QAR-020","name":"EvaluatorCoverage","severity":"critical","rule":"Output must explicitly satisfy ETF 1.3-A/B/C and 1.4 requirements recovered from the approved evaluation scorecard.","on_fail":"block_package"},
+    {"id":"QAR-021","name":"HistoricalCutoff","severity":"critical","rule":"Historical blind run cannot consume post-submission amendments, later implementation outcomes or later statistics as if they were available at submission.","on_fail":"tainted_run"},
+    {"id":"QAR-022","name":"SolutionLeakage","severity":"high","rule":"Need discovery must precede solution selection; a desired activity cannot be used as its own proof of need.","on_fail":"downgrade_need_and_rerun_discovery"},
+    {"id":"QAR-023","name":"NeedDeduplication","severity":"medium","rule":"Semantically overlapping needs are merged or represented as dependency unless distinct evidence and causal paths justify separation.","on_fail":"deduplicate_before_ranking"},
+    {"id":"QAR-024","name":"VersionedPopulation","severity":"critical","rule":"Changes in school cohorts, qualifications or base population must be versioned; current population data cannot retroactively rewrite historical evidence.","on_fail":"block_cross_version_inference"}
+  ],
+  "release_gate": {
+    "critical_rule_failures_allowed":0,
+    "high_rule_failures_allowed_without_explicit_waiver":0,
+    "required_evaluator_coverage":["ETF-1.3-A","ETF-1.3-B","ETF-1.3-C","ETF-1.4"],
+    "status":"active_for_blind"
+  }
+}

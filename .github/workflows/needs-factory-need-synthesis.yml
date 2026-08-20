@@ -1,0 +1,79 @@
+name: Needs Factory Need Synthesis
+
+on:
+  push:
+    branches:
+      - 'needs-factory/**'
+    paths:
+      - 'partener-eu/needs-factory/**'
+      - '.github/workflows/needs-factory-need-synthesis.yml'
+  pull_request:
+    paths:
+      - 'partener-eu/needs-factory/**'
+      - '.github/workflows/needs-factory-need-synthesis.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  semantic-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Needs Factory dependencies
+        run: python -m pip install --disable-pip-version-check -r partener-eu/needs-factory/requirements-docx.txt
+      - name: Run full regression suite
+        run: python -m unittest discover -s partener-eu/needs-factory/tests -v
+      - name: Build synthetic research request
+        run: |
+          python partener-eu/needs-factory/tools/build_research_request.py \
+            partener-eu/needs-factory/tests/fixtures/research_intake_synthetic.json \
+            --output /tmp/nf-synth-request.json
+      - name: Run evidence-bound semantic need synthesis
+        run: |
+          python partener-eu/needs-factory/tools/run_need_synthesis.py \
+            /tmp/nf-synth-request.json \
+            partener-eu/needs-factory/tests/fixtures/semantic_evidence_synthetic.json \
+            partener-eu/needs-factory/profiles/peo_ipt_need_synthesis.json \
+            --provider-command-json '["python","partener-eu/needs-factory/tests/fixtures/fake_semantic_need_provider.py"]' \
+            --output /tmp/nf-synth-needs.json
+          python - <<'PY'
+          import json
+          result = json.load(open('/tmp/nf-synth-needs.json', encoding='utf-8'))
+          hypotheses = result['hypotheses']['hypotheses']
+          decisions = result['decision_set']
+          assert len(hypotheses) == 4
+          assert {h['construct'] for h in hypotheses} == {'career_guidance_need','practice_quality','skills_baseline','career_intention'}
+          assert all(h['status'] == 'EVIDENCE_AVAILABLE' for h in hypotheses)
+          assert decisions['state'] == 'READY_FOR_RANKING'
+          assert decisions['provider_errors'] == []
+          assert len(decisions['needs']) == 4
+          assert len(decisions['provider_calls']) == 4
+          for need in decisions['needs']:
+              assert need['id'].startswith('NEED-')
+              assert need['created_from_indicator'] is False
+              assert need['compliance_only'] is False
+              assert 'causes' not in need
+              assert need['evidence_ids']
+              assert need['prohibited_overclaim']
+              assert set(need['ranking_dimensions']) == {'magnitude','severity','gap_strength','call_relevance'}
+          print([need['id'] for need in decisions['needs']])
+          PY
+      - name: Reassert real 310224 cannot synthesize needs before primary research
+        run: |
+          python partener-eu/needs-factory/tools/run_research_gate_fixture.py \
+            partener-eu/needs-factory/benchmarks/310224/CP08_PRODUCT_RUN_INPUT.json \
+            --output /tmp/nf-310224-blocked.json
+          python - <<'PY'
+          import json
+          result = json.load(open('/tmp/nf-310224-blocked.json', encoding='utf-8'))
+          assert result['state'] == 'BLOCKED_RESEARCH'
+          assert 'NF07_NEED_DISCOVERY' not in set(result['run_manifest']['closed_checkpoints'])
+          PY

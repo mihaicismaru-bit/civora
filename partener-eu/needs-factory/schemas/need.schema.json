@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "nf.need.v0.1",
+  "title": "Needs Factory Need",
+  "type": "object",
+  "required": ["id", "title", "statement", "priority", "evidence_ids", "scope"],
+  "properties": {
+    "id": {"type": "string", "minLength": 1},
+    "title": {"type": "string", "minLength": 1},
+    "statement": {"type": "string", "minLength": 1},
+    "priority": {"type": "boolean"},
+    "scope": {"enum": ["school", "beneficiary", "uat", "locality", "county", "region", "national", "eu"]},
+    "evidence_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+    "severity": {"enum": ["supporting", "low", "medium", "medium-high", "high", "critical", null]},
+    "created_from_indicator": {"type": "boolean", "default": false},
+    "compliance_only": {"type": "boolean", "default": false},
+    "population_snapshot_id": {"type": ["string", "null"]},
+    "prohibited_overclaim": {"type": ["string", "null"]}
+  },
+  "additionalProperties": true
+}
