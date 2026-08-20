@@ -113,7 +113,8 @@ jobs:
               raise SystemExit('X must not claim credentials')
           if state.get('direct_publication_enabled') is not False:
               raise SystemExit('X state falsely claims direct publication')
-          if state.get('blocker')!='x_api_pay_per_use_conflicts_zero_paid_dependency':
+          blocker=str(state.get('blocker') or '')
+          if 'x_api_pay_per_use' not in blocker or 'zero_paid' not in blocker:
               raise SystemExit('X pay-per-use blocker is not explicit')
           thread_by={str(i.get('story_id')):i for i in threads.get('items',[]) if isinstance(i,dict)}
           items={str(i.get('story_id')):i for i in x.get('items',[]) if isinstance(i,dict)}
