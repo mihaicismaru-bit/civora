@@ -30,6 +30,7 @@ jobs:
           set -euo pipefail
           base='https://valceaclar.ro'
           lead='/stiri/musiclover-festival-2026-dosar-complet-20260818/'
+          arutela='/stiri/arutela-restaurare-controversa-pnrr-20260820/'
           tmp="${RUNNER_TEMP}/valcea-live-http"
           mkdir -p "$tmp"
 
@@ -61,6 +62,7 @@ jobs:
           probe homepage '/' 'VÂLCEA CLAR'
           probe news '/stiri/' 'Știri'
           probe lead "$lead" 'Musiclover Festival 2026'
+          probe arutela "$arutela" 'Arutela, după proiectul de 12,4 milioane lei'
 
           python - <<'PY'
           import json
@@ -70,11 +72,11 @@ jobs:
 
           tmp = Path(os.environ['RUNNER_TEMP']) / 'valcea-live-http'
           rows = []
-          for name in ('homepage', 'news', 'lead'):
+          for name in ('homepage', 'news', 'lead', 'arutela'):
               label, path, code, marker = (tmp / f'{name}.meta').read_text(encoding='utf-8').rstrip('\n').split('\t', 3)
               rows.append({'id': label, 'path': path, 'http_status': int(code), 'required_marker': marker, 'marker_present': True})
           receipt = {
-              'schema_version': '1.0',
+              'schema_version': '1.1',
               'status': 'PASS',
               'canonical_domain': 'valceaclar.ro',
               'verified_at_utc': datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
@@ -97,7 +99,7 @@ jobs:
               sha: context.sha,
               state: 'success',
               context: 'valcea-clar/live-http',
-              description: 'Homepage, /stiri/ and lead verified HTTP 200'
+              description: 'Homepage, /stiri/, lead and Arutela verified HTTP 200'
             })
 
       - name: Publish failed live HTTP status
