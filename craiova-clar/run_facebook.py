@@ -53,6 +53,11 @@ def _persist_block_once(state: dict, block: dict) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--apply", action="store_true", help="perform the external Facebook write")
+    parser.add_argument(
+        "--site-receipt",
+        default=str(SITE_RECEIPT),
+        help="verified site PublicationReceipt JSON to use; defaults to the utility receipt",
+    )
     args = parser.parse_args()
 
     config = load(CONFIG)["channels"]["facebook"]
@@ -60,7 +65,7 @@ def main() -> int:
         print(json.dumps({"status": "DISABLED"}))
         return 0
 
-    site = load(SITE_RECEIPT)
+    site = load(Path(args.site_receipt))
     if site.get("status") != config.get("requires_site_status", "published_verified"):
         print(json.dumps({"status": "BLOCKED_SITE_NOT_VERIFIED", "site_status": site.get("status")}))
         return 0
@@ -107,6 +112,19 @@ def main() -> int:
             "facebook_post_id": current.get("external_id"),
         }, ensure_ascii=False))
         return 0
+
+    max_age_hours = config.get("max_story_age_hours")
+    if max_age_hours is not None:
+        age_hours = (datetime.now(timezone.utc) - story.published_at.astimezone(timezone.utc)).total_seconds() / 3600
+        if age_hours > float(max_age_hours):
+            print(json.dumps({
+                "status": "BLOCKED_STALE_STORY",
+                "story_id": story.story_id,
+                "age_hours": round(age_hours, 2),
+                "max_story_age_hours": float(max_age_hours),
+                "external_write": False,
+            }, ensure_ascii=False))
+            return 0
 
     if not args.apply:
         print(json.dumps({
