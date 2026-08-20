@@ -16,6 +16,8 @@ from typing import Any
 
 from PIL import Image, ImageDraw, ImageEnhance, ImageFont
 
+from social_common import is_socially_held
+
 ROOT = Path(__file__).resolve().parents[2]
 VC = ROOT / "valcea-clar"
 CURRENT = VC / "site" / "current_edition.json"
@@ -62,7 +64,11 @@ def story_snapshot() -> list[dict[str, Any]]:
     allowed = set(decision.get("publishable_story_ids") or [])
     return [
         item for item in edition.get("items", [])
-        if isinstance(item, dict) and item.get("id") in allowed
+        if (
+            isinstance(item, dict)
+            and item.get("id") in allowed
+            and not is_socially_held(str(item.get("id") or ""))
+        )
     ]
 
 
