@@ -58,24 +58,89 @@ jobs:
       - name: Regression tests
         run: python -m unittest discover -s craiova-clar/tests -p 'test_*.py' -v
 
-      - name: Discover official ISU public-safety item and render story
-        env:
-          CRAIOVA_CLAR_BASE_URL: https://craiova-clar-live-public-mihaicismaru-6634s-projects.vercel.app
-        run: python craiova-clar/run_public_safety.py
-
-      - name: Persist public-safety material
+      - name: Record public-safety regression gate once
         shell: bash
         run: |
           set -euo pipefail
+          marker='craiova-clar/state/public_safety_regression_gate.json'
+          if test ! -f "$marker"; then
+            cat > "$marker" <<'JSON'
+          {
+            "schema_version": 1,
+            "status": "PASS",
+            "scope": "craiova-clar/tests/test_*.py"
+          }
+          JSON
+            git config user.name 'craiova-clar[bot]'
+            git config user.email 'craiova-clar@users.noreply.github.com'
+            git add "$marker"
+            git commit -m 'Record CRAIOVA CLAR public safety regression gate'
+            git push origin HEAD:craiova-clar-build
+          else
+            echo 'Public-safety regression gate already recorded.'
+          fi
+
+      - name: Discover official ISU public-safety item and render story
+        id: public_safety_pipeline
+        shell: bash
+        env:
+          CRAIOVA_CLAR_BASE_URL: https://craiova-clar-live-public-mihaicismaru-6634s-projects.vercel.app
+        run: |
+          set +e
+          python craiova-clar/run_public_safety.py > /tmp/craiova-clar-public-safety-run.log 2>&1
+          rc=$?
+          set -e
+          cat /tmp/craiova-clar-public-safety-run.log
+          echo "exit_code=$rc" >> "$GITHUB_OUTPUT"
+
+      - name: Persist and require source-to-story pipeline gate
+        shell: bash
+        env:
+          PIPELINE_EXIT_CODE: ${{ steps.public_safety_pipeline.outputs.exit_code }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+
+          raw = Path('/tmp/craiova-clar-public-safety-run.log').read_text(encoding='utf-8', errors='replace')
+          result = None
+          for line in reversed(raw.splitlines()):
+              try:
+                  candidate = json.loads(line)
+              except json.JSONDecodeError:
+                  continue
+              if isinstance(candidate, dict):
+                  result = candidate
+                  break
+          exit_code = int(os.environ.get('PIPELINE_EXIT_CODE') or 0)
+          material = bool(result and int(result.get('fact_packets', 0)) > 0 and int(result.get('stories', 0)) > 0)
+          gate = {
+              'schema_version': 1,
+              'status': 'PASS' if exit_code == 0 and material else 'FAIL',
+              'exit_code': exit_code,
+              'result': result,
+              'error_tail': None if exit_code == 0 else raw[-1600:],
+          }
+          Path('craiova-clar/state/public_safety_pipeline_gate.json').write_text(
+              json.dumps(gate, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          print(json.dumps(gate, ensure_ascii=False))
+          PY
           git config user.name 'craiova-clar[bot]'
           git config user.email 'craiova-clar@users.noreply.github.com'
-          git add craiova-clar/site craiova-clar/state/public_safety_seen.json 2>/dev/null || true
+          git add craiova-clar/site craiova-clar/state/public_safety_seen.json craiova-clar/state/public_safety_pipeline_gate.json 2>/dev/null || true
           if git diff --cached --quiet; then
-            echo 'No new CRAIOVA CLAR public-safety material.'
+            echo 'Public-safety pipeline state already current.'
           else
-            git commit -m 'Publish CRAIOVA CLAR public safety story snapshot'
+            git commit -m 'Record CRAIOVA CLAR public safety pipeline gate'
             git push origin HEAD:craiova-clar-build
           fi
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          gate = json.loads(Path('craiova-clar/state/public_safety_pipeline_gate.json').read_text(encoding='utf-8'))
+          assert gate['status'] == 'PASS', gate
+          PY
 
       - name: Probe public publication
         run: |
