@@ -21,12 +21,15 @@ jobs:
           origin='https://eucons.ro'
           submission_id='e29-live-smoke-v1'
 
-          preflight_code=$(curl --fail-with-body -sS -D /tmp/preflight.headers -o /dev/null -w '%{http_code}' \
+          preflight_code=$(curl -sS -D /tmp/preflight.headers -o /dev/null -w '%{http_code}' \
             -X OPTIONS -H "Origin: ${origin}" "${endpoint}")
+          echo "preflight=${preflight_code}"
+          sed -n '1,20p' /tmp/preflight.headers
           test "${preflight_code}" = '204'
           grep -i -q '^Access-Control-Allow-Origin: https://eucons.ro' /tmp/preflight.headers
 
           get_code=$(curl -sS -o /tmp/get.json -w '%{http_code}' "${endpoint}")
+          echo "get=${get_code} body=$(cat /tmp/get.json)"
           test "${get_code}" = '405'
 
           post_once() {
@@ -49,10 +52,13 @@ jobs:
           }
 
           first_code=$(post_once 'Synthetic E29 live smoke; no real person.' /tmp/first.json)
+          echo "first=${first_code} body=$(cat /tmp/first.json)"
           test "${first_code}" = '202'
           second_code=$(post_once 'Synthetic E29 live smoke; no real person.' /tmp/second.json)
+          echo "second=${second_code} body=$(cat /tmp/second.json)"
           test "${second_code}" = '202'
           conflict_code=$(post_once 'Synthetic E29 live smoke conflict probe.' /tmp/conflict.json)
+          echo "conflict=${conflict_code} body=$(cat /tmp/conflict.json)"
           test "${conflict_code}" = '409'
 
           python - <<'PY'
