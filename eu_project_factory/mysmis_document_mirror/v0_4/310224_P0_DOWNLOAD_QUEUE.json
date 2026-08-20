@@ -1,0 +1,17 @@
+{
+  "artifact": "310224_MYSMIS_P0_DOWNLOAD_MANIFEST_v0.1",
+  "project": "310224",
+  "project_uuid": "370bf40f-8283-4537-9377-6ac31bbdcf93",
+  "mode": "READ_ONLY_DIRECT_GET_ONLY",
+  "rule": "Candidate filename/version/route is not promoted to operational truth until the downloaded binary is hashed and body-reviewed.",
+  "targets": [
+    {"priority":1,"target":"SIGNED_FINANCING_CONTRACT_BODY","strategy":"DOSAR_CONTRACT","candidate_names":[],"note":"Resolve from DOSAR_CONTRACT detail pages; do not substitute monitoring-plan annex."},
+    {"priority":2,"target":"ACT_ADDITIONAL_1_ACCEPTED_CHAIN","strategy":"FILENAME_OR_ROUTE","candidate_names":["AA_1_310224.DOC.pdf","ANEXA_15_Act_aditional_1__suspendare.pdf","SolicitareActAditional_310224_2025-04-02_15-07-53.pdf"]},
+    {"priority":3,"target":"NOTIFICATION_2_ACCEPTED_BODY","strategy":"FILENAME_OR_ROUTE","candidate_names":["Notificare 2 v3 + anexe.pdf","Notificare 2 v2 310224 final.pdf","Notificare 2 310224.pdf"]},
+    {"priority":4,"target":"NOTIFICATION_3_ACCEPTED_BODY","strategy":"FILENAME_OR_ROUTE","candidate_names":["Notificare 3 + anexe.pdf","Notificarea 3 + anexe.pdf"]},
+    {"priority":5,"target":"NOTIFICATION_4_ACCEPTED_FINAL_BODY","strategy":"FILENAME_OR_ROUTE","candidate_names":["Notificare 4 310224 SI ANEXA v4.pdf","Notificare 4 310224 SI ANEXA v3.pdf","Notificare 4 310224 SI ANEXA v2.pdf","Notificare 4 310224 SI ANEXA.pdf","Notificare 4 310224 +anexe.pdf"]},
+    {"priority":6,"target":"MONITORING_PLAN_BODY","strategy":"FILENAME_OR_ROUTE","candidate_names":["Anexa nr 2 Contract de finantare - Plan de monitorizare.pdf"]},
+    {"priority":7,"target":"REPORT_PROGRESS_1_FINAL","strategy":"FILENAME_OR_ROUTE","candidate_names":["RaportProgres_1_310224_2026-02-27_15-32-37.pdf"]}
+  ],
+  "safety": {"server_writes":false,"button_clicks":false,"form_submits":false,"same_origin_get_only":true,"body_promotion_before_hash":false}
+}
