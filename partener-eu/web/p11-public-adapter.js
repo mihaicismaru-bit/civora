@@ -32,9 +32,11 @@
     call.p11PublicationState=item.publicationState;
     call.p11VerifiedFactClasses=item.verifiedFactClasses||[];
     call.p11VerificationEvidence=item.verificationEvidence||[];
+    call.p11VerificationSourceCoverage=item.verificationSourceCoverage||null;
     call.sourceFacts=call.p11VerificationEvidence.map(evidence=>({
-      label:`Evidență verificată pentru ${(evidence.supportedFactClasses||[]).join(', ')} · observată ${String(evidence.observedAt||'necunoscut').slice(0,10)}`,
+      label:`Evidență verificată ${evidence.sourceHost||'sursă oficială'} pentru ${(evidence.supportedFactClasses||[]).join(', ')} · observată ${String(evidence.observedAt||'necunoscut').slice(0,10)}`,
       url:evidence.sourceUrl,
+      sourceHost:evidence.sourceHost,
       tier:evidence.sourceTier,
       checkedAt:evidence.observedAt,
       ageSecondsAtProjection:evidence.ageSecondsAtProjection

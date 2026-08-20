@@ -27,10 +27,10 @@ Actualizat: 14 august 2026
 
 ## Ultimul increment validat
 
-- P11-R07 — prospețime deterministă pentru evidența verificată din proiecția publică;
-- fiecare legătură de evidență expune vârsta exactă față de `projection.asOf`, iar sumarul public include intervalul observat și extremele de vârstă;
-- timestampurile viitoare, vârstele incoerente și deriva sumarului de prospețime sunt respinse de gate;
-- data observării este vizibilă în sursele din interfață, dar telemetria de prospețime nu poate autoriza publicarea;
+- P11-R08 — acoperire deterministă a surselor autoritative din proiecția publică;
+- fiecare evidență verificată expune hostul derivat strict din URL-ul HTTPS, iar fiecare oportunitate are un sumar verificabil pe hosturi și niveluri T1/T1B;
+- sumarul public arată 17 legături din șapte hosturi: 15 T1 și două T1B; patru oportunități depind de un singur host și două au hosturi multiple;
+- gate-ul respinge deriva hostului, acoperirii pe oportunitate ori sumarului agregat, iar această telemetrie nu poate autoriza publicarea;
 - corpusul și faptele materiale nu sunt modificate: 26 oportunități, șase publicabile și 20 taskuri deschise sau în review.
 
 ## Reguli de închidere
