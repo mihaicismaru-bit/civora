@@ -29,7 +29,12 @@
   "external_handoff": {
     "manifest": "eucons/deployment/external_handoff_manifest.json",
     "allowed_ids": ["domain_and_hosting","linkedin","facebook","commercial_mailbox"],
-    "required_state": "OWNER_AUTHORIZATION_REQUIRED",
+    "allowed_states": ["OWNER_AUTHORIZATION_REQUIRED","AUTHORIZED_AND_VALIDATED"],
+    "pre_authorization_state": "OWNER_AUTHORIZATION_REQUIRED",
+    "validated_state": "AUTHORIZED_AND_VALIDATED",
+    "validated_receipt_required": true,
+    "validated_receipt_phase": "E29",
+    "validated_receipt_statuses": ["PASS","PASS_EXTERNAL_BINDING"],
     "owner_development_actions_required": false
   },
   "required_runtime_contract": "eucons/deployment/runtime_activation_contract.json",
