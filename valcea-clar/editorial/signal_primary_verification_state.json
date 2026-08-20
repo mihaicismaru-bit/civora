@@ -2,19 +2,60 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-20T13:58:05+03:00",
+  "generated_at": "2026-08-20T14:04:49+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-20T12:55:55+03:00",
-  "task_count": 69,
+  "queue_generated_at": "2026-08-20T14:03:04+03:00",
+  "task_count": 70,
   "primary_match_count": 0,
   "no_match_count": 35,
-  "unrouted_count": 34,
+  "unrouted_count": 35,
   "target_count": 20,
-  "targets_ok": 16,
+  "targets_ok": 15,
   "results": [
+    {
+      "signal_id": "154b534f997f945a2df0e8a8",
+      "signal_title": "INFORMARE SOLICITARE AVIZ DE GOSPODĂRIRE A APELOR",
+      "signal_url": "https://ziaruldevalcea.ro/2026/08/informare-solicitare-aviz-de-gospodarire-a-apelor/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_published_at": "2026-08-20T13:34:59+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "7cd941e5742062a63082afe3",
+      "signal_title": "FOTO – Descinderi la o locuință din Nicolae Bălcescu: o pușcă neletală, ridicată de polițiști",
+      "signal_url": "https://seintamplainvalcea.ro/2026/08/20/foto-descinderi-la-o-locuinta-din-nicolae-balcescu-o-pusca-neletala-ridicata-de-politisti/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-20T13:32:40+03:00",
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
+    },
     {
       "signal_id": "89685e6be8159e902215c532",
       "signal_title": "Măsurători cadastrale în zona Obreji – Podul Obrejii, la Vaideeni",
@@ -354,7 +395,7 @@
     },
     {
       "signal_id": "5e6a347c3f172d6a7aac2975",
-      "signal_title": "Ultima oră 21 de ore in urma Horezu marchează 539 de ani de istorie prin trei zile dedicate comunității",
+      "signal_title": "Ultima oră 22 de ore in urma Horezu marchează 539 de ani de istorie prin trei zile dedicate comunității",
       "signal_url": "https://www.primplanpress.ro/horezu-marcheaza-539-de-ani-de-istorie-prin-trei-zile-dedicate-comunitatii/",
       "signal_publisher": "Primplan Press",
       "signal_published_at": "2026-08-19T16:08:29+03:00",
@@ -880,9 +921,9 @@
             "name": "Primăria Orașului Horezu",
             "url": "https://www.orasul-horezu.ro/anunturi"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 1
+          "status": "DEGRADED",
+          "error": "no_primary_documents_retrieved",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -1289,7 +1330,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
+          "documents_examined": 2
         },
         {
           "target": {
@@ -1545,45 +1586,6 @@
           "status": "PASS",
           "error": null,
           "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
-    },
-    {
-      "signal_id": "e751bb7c327394e3f515bb9e",
-      "signal_title": "Ultima oră o zi in urma Budești pregătește un cabinet stomatologic la Școala Gimnazială, cu dotări achiziționate printr-un proiect european",
-      "signal_url": "https://www.primplanpress.ro/budesti-pregateste-un-cabinet-stomatologic-la-scoala-gimnaziala-cu-dotari-achizitionate-printr-un-proiect-european/",
-      "signal_publisher": "Primplan Press",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-08-17T14:47:28+03:00",
-      "verification_route_id": "education",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "ccd-valcea-noutati",
-            "name": "Casa Corpului Didactic Vâlcea",
-            "url": "https://ccdvl.ro/category/noutati/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "isj-valcea-comunicate",
-            "name": "Inspectoratul Școlar Județean Vâlcea",
-            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 3
         }
       ],
       "publication_authority": "NONE",
