@@ -212,15 +212,14 @@ def export_dape_checkpoint(
     if failures:
         raise DapeReleaseError(";".join(failures))
 
-    root = output_dir.as_posix()
     required_paths = {
-        "checkpoint_manifest": f"{root}/CHECKPOINT_MANIFEST.json",
-        "evidence_ledger": f"{root}/EVIDENCE_LEDGER.json",
-        "artifact_bundle": f"{root}/ARTIFACT_BUNDLE.json",
-        "test_report": f"{root}/TEST_REPORT.json",
-        "backlog_snapshot": f"{root}/BACKLOG_SNAPSHOT.json",
-        "resume_manifest": f"{root}/RESUME_MANIFEST.json",
-        "release_package": f"{root}/RELEASE_PACKAGE.json",
+        "checkpoint_manifest": "CHECKPOINT_MANIFEST.json",
+        "evidence_ledger": "EVIDENCE_LEDGER.json",
+        "artifact_bundle": "ARTIFACT_BUNDLE.json",
+        "test_report": "TEST_REPORT.json",
+        "backlog_snapshot": "BACKLOG_SNAPSHOT.json",
+        "resume_manifest": "RESUME_MANIFEST.json",
+        "release_package": "RELEASE_PACKAGE.json",
     }
     checkpoint_manifest = dape.build_checkpoint_manifest(
         run_manifest,
