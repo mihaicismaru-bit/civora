@@ -46,17 +46,37 @@ jobs:
         run: python -m unittest discover -s partener-eu/needs-factory/tests -v
       - name: Verify PARTENER source-state adapter against repository state
         run: |
-          python partener-eu/needs-factory/tools/source_receipt.py \
-            partener-eu/validation/source_state.checkpoint.json \
-            SRC-MYSMIS-CALLS \
-            --output /tmp/partener-source-receipt.json
           python - <<'PY'
           import json
-          receipt = json.load(open('/tmp/partener-source-receipt.json', encoding='utf-8'))
+          import sys
+          from pathlib import Path
+
+          sys.path.insert(0, 'partener-eu/needs-factory')
+          from adapters.partener import PartenerSourceError, material_fact_receipt
+
+          checkpoint = json.load(
+              open('partener-eu/validation/source_state.checkpoint.json', encoding='utf-8')
+          )
+          eligible = []
+          rejected = {}
+          for source_id in sorted(checkpoint.get('sources', {})):
+              try:
+                  eligible.append(
+                      (source_id, material_fact_receipt(checkpoint, source_id))
+                  )
+              except PartenerSourceError as exc:
+                  rejected[source_id] = str(exc)
+
+          assert eligible, f'No material-fact-ready PARTENER source: {rejected}'
+          source_id, receipt = eligible[0]
           assert receipt['health'] == 'PASS'
           assert receipt['quarantined'] is False
           assert receipt['material_fact_state'] in {'STABLE_LAST_KNOWN_GOOD', 'LAST_KNOWN_GOOD_PENDING_RECONCILIATION'}
-          assert receipt['source_snapshot_id'].startswith('SRC-MYSMIS-CALLS@')
+          assert receipt['source_snapshot_id'].startswith(f'{source_id}@')
+          Path('/tmp/partener-source-receipt.json').write_text(
+              json.dumps(receipt, ensure_ascii=False, indent=2, sort_keys=True) + '\n',
+              encoding='utf-8',
+          )
           print(receipt['source_snapshot_id'])
           PY
       - name: Run real 310224 historical research gate
