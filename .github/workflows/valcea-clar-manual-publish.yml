@@ -1,0 +1,116 @@
+name: VÂLCEA CLAR Manual Publish Bridge
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/editorial/manual_publish_queue.json'
+      - '.github/workflows/valcea-clar-manual-publish.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-manual-publish
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Validate manual publication queue
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          q = Path('valcea-clar/editorial/manual_publish_queue.json')
+          if not q.is_file():
+              print('No manual publication queue present; nothing to promote.')
+              raise SystemExit(0)
+          doc = json.loads(q.read_text(encoding='utf-8'))
+          facts = doc.get('facts') or []
+          if not facts:
+              raise SystemExit('manual publish queue has no facts')
+          required = {'id','status','section','priority','confidence','valid_from','valid_until','slots','headline','dek','paragraphs','material_fact_gate','sources'}
+          seen = set()
+          for fact in facts:
+              missing = sorted(required - set(fact))
+              if missing:
+                  raise SystemExit(f"{fact.get('id')}: missing {missing}")
+              if fact['id'] in seen:
+                  raise SystemExit(f"duplicate manual fact id: {fact['id']}")
+              seen.add(fact['id'])
+              if fact['status'] not in {'verified','approved_carry_forward'}:
+                  raise SystemExit(f"{fact['id']}: non-publishable status")
+              if int(fact['confidence']) < 90:
+                  raise SystemExit(f"{fact['id']}: confidence below newsroom threshold")
+              if not fact.get('paragraphs') or not fact.get('sources'):
+                  raise SystemExit(f"{fact['id']}: body or sources missing")
+              if any(not row.get('url') for row in fact['sources']):
+                  raise SystemExit(f"{fact['id']}: source URL missing")
+          print({'status':'PASS','manual_facts':len(facts),'ids':sorted(seen)})
+          PY
+
+      - name: Upsert approved manual stories into canonical facts registry
+        shell: bash
+        run: |
+          set -euo pipefail
+          queue=/tmp/valcea-manual-publish-queue.json
+          cp valcea-clar/editorial/manual_publish_queue.json "$queue"
+          git config user.name 'vâlcea-clar-manual-publish[bot]'
+          git config user.email 'valcea-clar-manual-publish@users.noreply.github.com'
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp "$queue" /tmp/manual-queue.json
+
+            python - <<'PY'
+          import json
+          from pathlib import Path
+
+          registry_path = Path('valcea-clar/editorial/facts_registry.json')
+          queue_path = Path('/tmp/manual-queue.json')
+          registry = json.loads(registry_path.read_text(encoding='utf-8'))
+          queue = json.loads(queue_path.read_text(encoding='utf-8'))
+          existing = {str(row.get('id')): row for row in registry.get('facts', []) if row.get('id')}
+          for fact in queue.get('facts') or []:
+              existing[str(fact['id'])] = fact
+          registry['facts'] = list(existing.values())
+          registry['manual_publish_bridge'] = {
+              'enabled': True,
+              'source': 'editorial/manual_publish_queue.json',
+              'policy': 'human-requested verified stories are upserted by id; newsroom gates still apply'
+          }
+          registry_path.write_text(json.dumps(registry, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          print({'status':'UPSERTED','fact_count':len(registry['facts']),'manual_ids':[f['id'] for f in queue.get('facts') or []]})
+          PY
+
+            git add -- valcea-clar/editorial/facts_registry.json
+            if git diff --cached --quiet; then
+              echo 'Manual story already present in canonical registry.'
+              exit 0
+            fi
+            git commit -m 'Publish approved VÂLCEA CLAR manual story'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "main advanced during manual publication; retrying ${attempt}/5"
+            sleep $((attempt * 2))
+          done
+
+          echo 'Could not promote manual publication after five attempts.' >&2
+          exit 1
