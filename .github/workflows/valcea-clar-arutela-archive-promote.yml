@@ -1,0 +1,136 @@
+name: VÂLCEA CLAR Arutela Archive Promote
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/valcea-clar-arutela-archive-promote.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-arutela-archive-promote
+  cancel-in-progress: true
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Promote verified Arutela story and render canonical public snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'valcea-clar-arutela-publish[bot]'
+          git config user.email 'valcea-clar-arutela-publish@users.noreply.github.com'
+          sid='arutela-restaurare-controversa-pnrr-20260820'
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            git clean -fd
+
+            python - <<'PY'
+          import json
+          from datetime import datetime, timezone, timedelta
+          from pathlib import Path
+
+          root = Path('valcea-clar')
+          sid = 'arutela-restaurare-controversa-pnrr-20260820'
+          registry = json.loads((root/'editorial/facts_registry.json').read_text(encoding='utf-8'))
+          archive_path = root/'site/story_archive.json'
+          archive = json.loads(archive_path.read_text(encoding='utf-8'))
+          holds = json.loads((root/'editorial/publication_holds.json').read_text(encoding='utf-8'))
+
+          facts = {str(x.get('id')): x for x in registry.get('facts', []) if x.get('id')}
+          fact = facts.get(sid)
+          assert fact is not None, 'Arutela fact missing from canonical registry'
+          assert fact.get('status') in {'verified','approved_carry_forward'}, fact.get('status')
+          assert int(fact.get('confidence') or 0) >= 90
+          assert fact.get('material_fact_gate') in {'PASS','PASS_EXPLAINER_ONLY'}
+          assert fact.get('paragraphs') and fact.get('sources')
+          held = {str(x.get('story_id')) for x in holds.get('holds', []) if x.get('public_projection') is False}
+          assert sid not in held, 'Arutela is explicitly held from public projection'
+
+          stories = archive.setdefault('stories', [])
+          by_id = {str(x.get('id')): x for x in stories if x.get('id')}
+          now_local = datetime.now(timezone(timedelta(hours=3))).isoformat(timespec='seconds')
+          if sid not in by_id:
+              row = {
+                  'id': sid,
+                  'section': fact['section'],
+                  'priority': int(fact['priority']),
+                  'headline': fact['headline'],
+                  'dek': fact['dek'],
+                  'paragraphs': fact['paragraphs'],
+                  'path': f'/stiri/{sid}/',
+                  'canonical_url': f'https://valceaclar.ro/stiri/{sid}/',
+                  'sources': fact['sources'],
+                  'visual': fact.get('visual'),
+                  'artist_profiles': fact.get('artist_profiles') or [],
+                  'first_published_at': now_local,
+                  'confidence': int(fact['confidence']),
+                  'material_fact_gate': fact['material_fact_gate'],
+                  'last_seen_at': now_local,
+                  'last_seen_edition': 'manual-2026-08-20-arutela',
+                  'archive_status': 'active',
+                  'active_now': True,
+              }
+              stories.insert(0, row)
+          else:
+              row = by_id[sid]
+              row['last_seen_at'] = now_local
+              row['archive_status'] = 'active'
+              row['active_now'] = True
+          archive['story_count'] = len(stories)
+          archive['generated_at'] = now_local
+          archive_path.write_text(json.dumps(archive, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          print({'status':'PROMOTED','story_id':sid,'story_count':len(stories)})
+          PY
+
+            python valcea-clar/scripts/repair_continuous_frontpage.py --self-test
+            python valcea-clar/scripts/repair_continuous_frontpage.py
+            python valcea-clar/scripts/build_sites_export.py
+            python valcea-clar/scripts/overlay_runtime_export.py
+
+            python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('valcea-clar')
+          sid='arutela-restaurare-controversa-pnrr-20260820'
+          route=root/'site/runtime/stiri'/sid/'index.html'
+          assert route.is_file() and route.stat().st_size > 0
+          html=route.read_text(encoding='utf-8')
+          assert 'Arutela' in html
+          assert '12,4 milioane lei' in html
+          assert 'DE CE E FAȚADA REFLECTORIZANTĂ' in html
+          manifest=json.loads((root/'site/runtime/stiri/manifest.json').read_text(encoding='utf-8'))
+          assert sid in {str(x.get('id')) for x in manifest.get('stories', [])}
+          feed=json.loads((root/'site/runtime/live-feed.json').read_text(encoding='utf-8'))
+          assert sid in {str(x.get('id')) for x in feed.get('stories', [])}
+          print({'status':'PASS','canonical_url':f'https://valceaclar.ro/stiri/{sid}/'})
+          PY
+
+            git add valcea-clar/site/story_archive.json valcea-clar/site/runtime
+            if git diff --cached --quiet; then
+              echo 'Arutela is already materialized in canonical runtime.'
+              exit 0
+            fi
+            git commit -m 'Publish VÂLCEA CLAR Arutela restoration explainer'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "main advanced; retrying Arutela promotion ${attempt}/5"
+            sleep $((attempt * 2))
+          done
+
+          echo 'Arutela promotion could not be persisted safely.' >&2
+          exit 1
