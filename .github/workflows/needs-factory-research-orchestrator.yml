@@ -41,6 +41,7 @@ jobs:
           python partener-eu/needs-factory/tools/run_research_cycle.py \
             /tmp/nf-synth-request.json \
             --provider-command-json '["python","partener-eu/needs-factory/tests/fixtures/fake_civora_provider.py"]' \
+            --fixture-provider-no-source-gate \
             --output /tmp/nf-synth-cycle.json
           python - <<'PY'
           import json
@@ -55,6 +56,7 @@ jobs:
           assert result['counts']['evidence_records'] == 5
           assert result['counts']['primary_research_queue'] == 4
           assert result['policy']['provider_failure_never_fabricates_evidence'] is True
+          assert result['provider_binding']['partener_source_registry_gate'] == 'BYPASSED_FIXTURE_ONLY'
           print(result['request_sha256'])
           print(sorted(result['evidence']))
           print(sorted(queue))
