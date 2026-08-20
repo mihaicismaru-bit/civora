@@ -23,6 +23,7 @@ ROOT = Path(__file__).resolve().parents[2]
 REGISTRY = ROOT / "partener-eu" / "ingest" / "state" / "people_policy_registry.json"
 SEED = ROOT / "partener-eu" / "ingest" / "state" / "people_policy_seed.json"
 OFFICIAL = ROOT / "partener-eu" / "ingest" / "state" / "people_policy_official_sources.json"
+SOURCE_REGISTRY = ROOT / "partener-eu" / "ingest" / "state" / "people_policy_source_registry.json"
 MIPE = ROOT / "partener-eu" / "ingest" / "state" / "mipe_state.json"
 DECISIONS = ROOT / "partener-eu" / "ingest" / "state" / "decision_products.json"
 OUT_JSON = ROOT / "partener-eu" / "ingest" / "state" / "people_policy.json"
@@ -64,6 +65,19 @@ def clean(s: Any) -> str:
 
 def norm(s: Any) -> str:
     return clean(s).lower().translate(str.maketrans("ăâîșşțţ", "aaisstt"))
+
+
+def canonical_source_url(value: Any) -> str:
+    return clean(value).split("#", 1)[0].rstrip("/")
+
+
+def configured_listing_roots() -> set[str]:
+    registry = load(SOURCE_REGISTRY, {"sources": []})
+    return {
+        canonical_source_url(source.get("url"))
+        for source in registry.get("sources") or []
+        if source.get("enabled", True) and canonical_source_url(source.get("url"))
+    }
 
 
 def date_key(value: Any) -> str:
@@ -306,6 +320,8 @@ def trusted_official_item(item: Any, tracked_people: dict[str, dict[str, Any]]) 
     source_url = clean(source.get("url"))
     source_tier = clean(source.get("tier"))
     if not source_url.startswith("https://") or not source_tier.startswith("T1"):
+        return None
+    if canonical_source_url(source_url) in configured_listing_roots():
         return None
     snapshot = item.get("sourceSnapshot")
     if not isinstance(snapshot, dict) or clean(snapshot.get("url")) != source_url:
@@ -552,6 +568,7 @@ def main() -> int:
         "directQuoteRequiresActorRoleColonAndFundingInQuote": True,
         "historicalSignalsRequireRoleAtObservation": True,
         "actorAliasesRequireTokenBoundaries": True,
+        "configuredListingRootsExcludedFromProjection": True,
     })
     out = {
         "schemaVersion": 3,

@@ -41,6 +41,7 @@ assert collector.official_host("https://www.ms.gov.ro/ro/centrul-de-presa/exampl
 assert source["tier"] == "T1_DIRECT_OFFICIAL"
 assert source["pathHints"] == ["/centrul-de-presa/"]
 assert collector.source_fetch_budget_seconds([x for x in sources["sources"] if x.get("enabled", True)]) < 540
+assert builder.canonical_source_url(source["url"]) in builder.configured_listing_roots()
 
 snapshot = builder.role_snapshot(person)
 assert snapshot is not None
@@ -94,10 +95,18 @@ assert trusted is not None
 assert trusted["statementEvidence"]["status"] == "VERIFIED_ARTICLE_STATEMENT"
 assert trusted["administrativeFact"]["failClosed"] is True
 
+# A durable historical row whose provenance URL is the configured category root
+# must remain in history but can never cross the canonical projection boundary.
+listing_row = dict(item)
+listing_row["sources"] = [dict(item["sources"][0], url=source["url"])]
+listing_row["sourceSnapshot"] = dict(item["sourceSnapshot"], url=source["url"])
+assert builder.trusted_official_item(listing_row, tracked) is None
+
 print(json.dumps({
     "source": source["id"],
     "transportRoot": source["url"],
     "listingExcluded": source["url"] not in candidates,
+    "historicalListingProjectionRejected": True,
     "candidate": candidates[0],
     "status": status["status"],
     "signalKind": trusted["signalKind"],
