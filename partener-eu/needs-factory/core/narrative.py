@@ -158,7 +158,7 @@ def render_analysis_markdown(pack: Mapping[str, Any], *, title: str = "Analiza d
         "",
         "## 5. Trasabilitate și surse",
         "",
-        "Identificatorii `[NEED:…]` și `[EV:…]` sunt parte a mecanismului de audit. Registrul complet al surselor este livrat separat în `SOURCE_REGISTER.md`.",
+        "Marcajele de audit `NEED:<id>` și `EV:<id>` sunt parte a mecanismului de audit. În corpul analizei, marcajele efective folosesc exclusiv identificatori validați; registrul complet al surselor este livrat separat în `SOURCE_REGISTER.md`.",
         "",
     ])
     return "\n".join(lines).rstrip() + "\n"
