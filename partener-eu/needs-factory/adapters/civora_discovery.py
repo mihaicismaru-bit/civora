@@ -65,6 +65,9 @@ def validate_discovery_receipt(
         failures.append("direct_local_measurement_required")
 
     source_family = str(receipt.get("source_family") or "")
+    preferred_source_families = {str(item) for item in (task.get("preferred_source_families") or [])}
+    if source_family and preferred_source_families and source_family not in preferred_source_families:
+        failures.append("source_family_not_preferred_for_task")
     if task.get("priority") == "primary" and source_family.lower() in {"media", "press", "news"}:
         if not media_may_support_priority_need:
             failures.append("media_cannot_support_priority_requirement")
