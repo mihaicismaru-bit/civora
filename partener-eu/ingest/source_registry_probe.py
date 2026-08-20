@@ -29,7 +29,6 @@ def semantic_bytes(raw: bytes, content_type: str) -> bytes:
     text = re.sub(r"<style\b[^>]*>.*?</style>", " ", text, flags=re.I | re.S)
     text = re.sub(r"<!--.*?-->", " ", text, flags=re.S)
     text = re.sub(r"<[^>]+>", " ", text)
-    # Remove common volatile presentation fragments while retaining substantive text.
     text = re.sub(r"\b(?:[0-2]?\d:[0-5]\d(?::[0-5]\d)?|\d+\s+(?:seconds?|minutes?)\s+ago)\b", " ", text, flags=re.I)
     text = re.sub(r"\s+", " ", text).strip()
     return text.encode("utf-8")
@@ -89,9 +88,6 @@ def task_baseline_hash(source_id: str, old: dict):
     old_hash = old.get("semantic_sha256") or old.get("last_known_semantic_sha256")
     if not old_hash:
         return None
-    # Heal state polluted by the pre-quality-gate probe: if the persisted row is
-    # itself a low-information shell and its task records the previous canonical
-    # hash, compare future observations against that canonical hash instead.
     semantic_size = int(old.get("semantic_chars") or old.get("semantic_bytes") or 0)
     raw_size = int(old.get("bytes") or 0)
     if semantic_size >= MIN_SEMANTIC_CHARS or raw_size < MIN_HTML_BYTES_FOR_LOW_INFO:
@@ -157,7 +153,14 @@ def main():
 
     for src in registry.get("sources", []):
         old = previous.get(src["id"], {})
-        row = {"id": src["id"], "tier": src["tier"], "class": src["class"], "url": src["url"], "material_fact_use": bool(src.get("material_fact_use"))}
+        row = {
+            "id": src["id"],
+            "tier": src["tier"],
+            "class": src["class"],
+            "url": src["url"],
+            "material_fact_use": bool(src.get("material_fact_use")),
+            "source_families": list(src.get("source_families") or []),
+        }
         try:
             row.update(fetch(src["url"]))
             baseline_hash = task_baseline_hash(src["id"], old)
