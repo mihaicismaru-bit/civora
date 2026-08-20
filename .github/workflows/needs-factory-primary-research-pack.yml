@@ -1,0 +1,78 @@
+name: Needs Factory Primary Research Pack
+
+on:
+  push:
+    branches:
+      - 'needs-factory/**'
+    paths:
+      - 'partener-eu/needs-factory/**'
+      - '.github/workflows/needs-factory-primary-research-pack.yml'
+  pull_request:
+    paths:
+      - 'partener-eu/needs-factory/**'
+      - '.github/workflows/needs-factory-primary-research-pack.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  collection-pack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Needs Factory dependencies
+        run: python -m pip install --disable-pip-version-check -r partener-eu/needs-factory/requirements-docx.txt
+      - name: Run full regression suite
+        run: python -m unittest discover -s partener-eu/needs-factory/tests -v
+      - name: Run real 310224 research gate
+        run: |
+          python partener-eu/needs-factory/tools/run_research_gate_fixture.py \
+            partener-eu/needs-factory/benchmarks/310224/CP08_PRODUCT_RUN_INPUT.json \
+            --output /tmp/nf-310224-gate.json
+          python - <<'PY'
+          import json
+          result = json.load(open('/tmp/nf-310224-gate.json', encoding='utf-8'))
+          assert result['state'] == 'BLOCKED_RESEARCH'
+          assert result['primary_research_plan']['sampling_strategy'] == 'population_snapshot_required'
+          assert len(result['primary_research_plan']['questions']) == 6
+          PY
+      - name: Export real 310224 collection pack without fabricating responses
+        run: |
+          rm -rf /tmp/nf-310224-research-pack
+          python partener-eu/needs-factory/tools/export_primary_research_pack.py \
+            /tmp/nf-310224-gate.json \
+            --output-dir /tmp/nf-310224-research-pack \
+            --project-id 310224 \
+            --manifest /tmp/nf-310224-pack-result.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.load(open('/tmp/nf-310224-pack-result.json', encoding='utf-8'))
+          assert result['project_id'] == '310224'
+          assert result['question_count'] == 6
+          assert result['sampling_strategy'] == 'population_snapshot_required'
+          assert result['policy']['no_direct_identifiers'] is True
+          assert result['policy']['population_snapshot_before_collection'] is True
+          expected = {
+              'CHESTIONAR_ELEVI.md','CHESTIONAR_ELEVI.docx','POPULATION_SNAPSHOT_TEMPLATE.csv',
+              'POPULATION_SNAPSHOT_METADATA.json','RAW_RESPONSES_TEMPLATE.csv','README_RESEARCH.md',
+              'RESEARCH_PACK_MANIFEST.json','PRIMARY_RESEARCH_PACK.zip'
+          }
+          for name in expected:
+              assert (Path('/tmp/nf-310224-research-pack') / name).exists(), name
+          questionnaire = (Path('/tmp/nf-310224-research-pack') / 'CHESTIONAR_ELEVI.md').read_text(encoding='utf-8')
+          for qid in ['Q01','Q02','Q03','Q04','Q05','Q06']:
+              assert qid in questionnaire
+          raw_header = (Path('/tmp/nf-310224-research-pack') / 'RAW_RESPONSES_TEMPLATE.csv').read_text(encoding='utf-8').splitlines()[0]
+          assert 'respondent_id' in raw_header
+          assert 'cnp' not in raw_header.lower()
+          assert len(result['package_zip']['sha256']) == 64
+          print(result['package_zip']['sha256'])
+          PY

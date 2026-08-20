@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "nf.narrative_ready_pack.v0.1",
+  "title": "Needs Factory Narrative Ready Pack",
+  "type": "object",
+  "required": ["schema_version", "project_id", "claim_ledger", "causal_validation", "traceability_validation", "release_gate", "narrative_policy", "pack_sha256"],
+  "properties": {
+    "schema_version": {"const": "nf.narrative_ready_pack.v0.1"},
+    "project_id": {"type": ["string", "number", "null"]},
+    "territory": {"type": ["string", "null"]},
+    "target_group": {},
+    "claim_ledger": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["need_id", "rank", "score", "confidence_used", "title", "statement", "scope", "evidence_refs"],
+        "properties": {
+          "need_id": {"type": "string"},
+          "rank": {"type": "integer", "minimum": 1},
+          "score": {"type": "number", "minimum": 0, "maximum": 100},
+          "confidence_used": {"type": "number", "minimum": 0, "maximum": 1},
+          "title": {"type": "string"},
+          "statement": {"type": "string"},
+          "scope": {"type": "string"},
+          "evidence_refs": {"type": "array", "minItems": 1},
+          "prohibited_overclaim": {"type": ["string", "null"]}
+        },
+        "additionalProperties": true
+      }
+    },
+    "causal_validation": {"type": "object"},
+    "traceability_validation": {"type": "object"},
+    "release_gate": {"type": "object"},
+    "narrative_policy": {"type": "object"},
+    "pack_sha256": {"type": "string", "minLength": 32}
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,71 @@
+name: Needs Factory Research Adapters
+
+on:
+  push:
+    branches:
+      - 'needs-factory/**'
+    paths:
+      - 'partener-eu/needs-factory/**'
+      - '.github/workflows/needs-factory-research-adapters.yml'
+  pull_request:
+    paths:
+      - 'partener-eu/needs-factory/**'
+      - '.github/workflows/needs-factory-research-adapters.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  research-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Needs Factory dependencies
+        run: python -m pip install --disable-pip-version-check -r partener-eu/needs-factory/requirements-docx.txt
+      - name: Run full regression suite
+        run: python -m unittest discover -s partener-eu/needs-factory/tests -v
+      - name: Build 310224 research request from minimal intake
+        run: |
+          python partener-eu/needs-factory/tools/build_research_request.py \
+            partener-eu/needs-factory/benchmarks/310224/CP14_RESEARCH_INTAKE.json \
+            --output /tmp/nf-310224-research-request.json
+          python - <<'PY'
+          import json
+          result = json.load(open('/tmp/nf-310224-research-request.json', encoding='utf-8'))
+          call = result['call_intelligence']
+          req = result['research_request']
+          assert call['provider'] == 'PARTENER.EU'
+          assert call['call_code'] == 'PEO/76/PEO_P8/OP4/ESO4.5/PEO_A3'
+          assert len(call['source_snapshot_ids']) == 2
+          assert req['profile_id'] == 'PEO_IPT_WORK_BASED_LEARNING'
+          assert req['historical_cutoff'] == '2024-01-12'
+          assert len(req['requirements']) == 9
+          assert len(req['tasks']) == 9
+          direct_local = [t for t in req['tasks'] if t['direct_local_required']]
+          assert len(direct_local) == 5
+          pure_primary = [t for t in req['tasks'] if t['task_type'] == 'PRIMARY_RESEARCH']
+          hybrid = [t for t in req['tasks'] if t['task_type'] == 'DISCOVERY_THEN_PRIMARY_IF_GAP']
+          assert len(pure_primary) == 3
+          assert len(hybrid) == 1
+          assert len(req['request_sha256']) == 64
+          print(req['request_sha256'])
+          print([t['requirement_id'] for t in direct_local])
+          PY
+      - name: Reassert real 310224 product run remains evidence-gap blocked
+        run: |
+          python partener-eu/needs-factory/tools/run_research_gate_fixture.py \
+            partener-eu/needs-factory/benchmarks/310224/CP08_PRODUCT_RUN_INPUT.json \
+            --output /tmp/nf-310224-blocked.json
+          python - <<'PY'
+          import json
+          result = json.load(open('/tmp/nf-310224-blocked.json', encoding='utf-8'))
+          assert result['state'] == 'BLOCKED_RESEARCH'
+          assert len([g for g in result['evidence_gaps']['gaps'] if g.get('blocking')]) == 5
+          PY
