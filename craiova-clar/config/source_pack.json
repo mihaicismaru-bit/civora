@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.1",
+  "schema_version": "1.2",
   "instance_id": "craiova",
   "sources": [
     {
@@ -19,12 +19,17 @@
     {
       "id": "isu-dolj-comunicate",
       "name": "ISU Dolj",
-      "url": "https://isudj.igsu.ro/comunicate-de-presa",
+      "url": "https://isudj.igsu.ro/stiri-locale",
+      "listing_url": "https://isudj.igsu.ro/stiri-locale",
+      "link_prefixes": ["/stiri-locale/"],
       "authority": "primary",
       "vertical": "PUBLIC_SAFETY",
       "priority": 90,
-      "enabled": false,
-      "enable_after": "UTILITY_PASS"
+      "enabled": true,
+      "max_items": 1,
+      "max_age_hours": 720,
+      "facebook_max_age_hours": 72,
+      "enabled_after": "UTILITY_PASS"
     }
   ]
 }
