@@ -1,0 +1,175 @@
+{
+  "schema_version": "nf.evidence_registry.v0.2",
+  "run_id": "AI4WORK-STEP/NF-RUN-001",
+  "policy": {
+    "official_first": true,
+    "prior_Q023_denied": true,
+    "project_solution_not_evidence": true,
+    "regional_context_cannot_substitute_direct_target_group_measurement": true
+  },
+  "evidence": [
+    {
+      "id": "EV-RO-DIGSK-2025",
+      "source": "Eurostat – Skills for the digital age / Digitalisation in Europe 2026",
+      "source_url": "https://ec.europa.eu/eurostat/web/interactive-publications/digitalisation-2026",
+      "tier": "A1",
+      "territory": "Romania",
+      "scope": "national",
+      "period": "2025",
+      "population": "individuals aged 16-74",
+      "constructs": ["digital_skills_baseline"],
+      "direct_measurement": true,
+      "measures": [
+        {"name":"at_least_basic_digital_skills_RO","measure_type":"share","source_measure_type":"share","value":32.0,"denominator_universe":"individuals aged 16-74 in Romania","unit":"percent","precision_note":"rounded value in Eurostat 2026 publication"},
+        {"name":"at_least_basic_digital_skills_EU","measure_type":"share","source_measure_type":"share","value":60.0,"denominator_universe":"individuals aged 16-74 in EU","unit":"percent","precision_note":"rounded value in Eurostat 2026 publication"}
+      ],
+      "use": "strong national baseline; does not measure AI-specific competence or the >29 project-eligible population directly"
+    },
+    {
+      "id": "EV-RO-AI-ENTERPRISE-2025",
+      "source": "Eurostat – 20% of EU enterprises use AI technologies",
+      "source_url": "https://ec.europa.eu/eurostat/web/products-eurostat-news/w/ddn-20251211-2",
+      "tier": "A1",
+      "territory": "Romania",
+      "scope": "national",
+      "period": "2025",
+      "population": "enterprises with 10 or more employees/self-employed persons in covered NACE activities",
+      "constructs": ["ai_adoption_and_use", "business_digital_maturity"],
+      "direct_measurement": true,
+      "dataset": "isoc_eb_ai",
+      "measures": [
+        {"name":"enterprises_using_AI_RO","measure_type":"share","source_measure_type":"share","value":5.2,"denominator_universe":"covered Romanian enterprises with 10+ employees/self-employed persons","unit":"percent"},
+        {"name":"enterprises_using_AI_EU","measure_type":"share","source_measure_type":"share","value":20.0,"denominator_universe":"covered EU enterprises with 10+ employees/self-employed persons","unit":"percent"}
+      ],
+      "use": "strong evidence of low observed AI adoption; cannot alone establish a training need or programme content"
+    },
+    {
+      "id": "EV-RO-GENAI-2025",
+      "source": "Eurostat – Use of generative AI tools in 2025",
+      "source_url": "https://ec.europa.eu/eurostat/en/web/products-eurostat-news/w/ddn-20251216-3",
+      "tier": "A1",
+      "territory": "Romania",
+      "scope": "national",
+      "period": "2025",
+      "population": "individuals aged 16-74",
+      "constructs": ["ai_adoption_and_use"],
+      "direct_measurement": true,
+      "dataset": "isoc_ai_iaiu",
+      "measures": [
+        {"name":"generative_AI_use_RO","measure_type":"share","source_measure_type":"share","value":17.8,"denominator_universe":"individuals aged 16-74 in Romania","unit":"percent"},
+        {"name":"generative_AI_use_EU","measure_type":"share","source_measure_type":"share","value":32.7,"denominator_universe":"individuals aged 16-74 in EU","unit":"percent"}
+      ],
+      "use": "observed use, not competence; not specific to eligible adults >29"
+    },
+    {
+      "id": "EV-RO-SME-DIGITAL-2025",
+      "source": "European Commission – 2026 Country Report Romania",
+      "source_url": "https://economy-finance.ec.europa.eu/economic-surveillance-eu-member-states/country-pages-including-country-reports/country-report-romania_en",
+      "tier": "A1",
+      "territory": "Romania",
+      "scope": "national",
+      "period": "2025",
+      "population": "SMEs",
+      "constructs": ["business_digital_maturity"],
+      "direct_measurement": true,
+      "measures": [
+        {"name":"SMEs_at_least_basic_digital_intensity_RO","measure_type":"share","source_measure_type":"share","value":44.0,"denominator_universe":"Romanian SMEs","unit":"percent","precision_note":"around 44% in Commission report"},
+        {"name":"SMEs_high_or_very_high_digital_intensity_RO","measure_type":"share","source_measure_type":"share","value":21.7,"denominator_universe":"Romanian SMEs","unit":"percent"},
+        {"name":"SMEs_high_or_very_high_digital_intensity_EU","measure_type":"share","source_measure_type":"share","value":32.7,"denominator_universe":"EU SMEs","unit":"percent"}
+      ],
+      "use": "business maturity context; direct target-group skill deficit still requires separate evidence"
+    },
+    {
+      "id": "EV-RO-ONLINE-LEARNING-2025",
+      "source": "Eurostat – Online learning increasingly popular in the EU",
+      "source_url": "https://ec.europa.eu/eurostat/web/products-eurostat-news/w/edn-20260319-1",
+      "tier": "A1",
+      "territory": "Romania",
+      "scope": "national",
+      "period": "2025",
+      "population": "internet users",
+      "constructs": ["adult_learning_participation"],
+      "direct_measurement": true,
+      "dataset": "isoc_ci_ac_i",
+      "measures": [
+        {"name":"online_learning_or_materials_RO","measure_type":"share","source_measure_type":"share","value":11.8,"denominator_universe":"internet users in Romania","unit":"percent"},
+        {"name":"online_learning_or_materials_EU","measure_type":"share","source_measure_type":"share","value":34.8,"denominator_universe":"internet users in EU","unit":"percent"}
+      ],
+      "use": "learning-behaviour context; denominator is internet users and must not be relabelled as adult-learning participation rate"
+    },
+    {
+      "id": "EV-CENTRU-ADULT-LEARNING-2023",
+      "source": "ADR Centru – Primul raport de monitorizare PDR Centru 2021-2027, citing Eurostat trng_lfse_04",
+      "source_url": "https://www.adrcentru.ro/wp-content/uploads/2025/03/PRIMUL-RAPORT-DE-MONITORIZARE-PDR-CENTRU-2021-2027.pdf",
+      "tier": "A2",
+      "territory": "Centru",
+      "scope": "region",
+      "period": "2023",
+      "population": "population aged 25-64",
+      "constructs": ["adult_learning_participation"],
+      "direct_measurement": true,
+      "measures": [
+        {"name":"participation_in_education_training_last_4_weeks_Centru","measure_type":"rate","source_measure_type":"rate","value":3.7,"denominator_universe":"population aged 25-64 in Centru region","unit":"percent"},
+        {"name":"participation_in_education_training_last_4_weeks_SudVest_Oltenia","measure_type":"rate","source_measure_type":"rate","value":3.1,"denominator_universe":"population aged 25-64 in Sud-Vest Oltenia region","unit":"percent","provenance_note":"reported comparatively in ADR Centru monitoring report from Eurostat"},
+        {"name":"participation_in_education_training_last_4_weeks_EU","measure_type":"rate","source_measure_type":"rate","value":12.8,"denominator_universe":"population aged 25-64 in EU","unit":"percent"}
+      ],
+      "use": "strong regional adult-learning signal for Centru and corroborating value for Sud-Vest Oltenia; Sud-Muntenia still unresolved"
+    },
+    {
+      "id": "EV-CENTRU-ADVTECH-2022",
+      "source": "ADR Centru – regional digitalisation study reported in 2023 business-digitalisation call",
+      "source_url": "https://www.adrcentru.ro/comunicare/digitalizarea-mediului-afaceri/",
+      "tier": "A2",
+      "territory": "Centru",
+      "scope": "region",
+      "period": "2022",
+      "population": "firms surveyed in ADR Centru regional study",
+      "constructs": ["business_digital_maturity"],
+      "direct_measurement": true,
+      "measures": [
+        {"name":"firms_implementing_advanced_technology_solutions","measure_type":"share","source_measure_type":"share","value":4.0,"denominator_universe":"firms in ADR Centru 2022 study","unit":"percent","definition_note":"advanced technologies cited include automation, IoT, robotics/Industry 4.0, cloud and PLM"}
+      ],
+      "use": "regional contextual evidence; stale for precise 2026 magnitude and not AI-specific"
+    },
+    {
+      "id": "EV-SVO-RIS3-2021-2027",
+      "source": "ADR Sud-Vest Oltenia – RIS3 2021-2027",
+      "source_url": "https://pr2021-2027.adroltenia.ro/page.php?id=49",
+      "tier": "A2",
+      "territory": "Sud-Vest Oltenia",
+      "scope": "region",
+      "period": "2021-2027",
+      "constructs": ["regional_technology_context"],
+      "direct_measurement": false,
+      "measures": [{"name":"TIC_and_digitalisation_is_RIS3_domain","measure_type":"qualitative","value":"yes","unit":null}],
+      "use": "strategic context only; does not quantify a skills deficit"
+    },
+    {
+      "id": "EV-SM-RIS3-2021-2027",
+      "source": "ADR Sud-Muntenia – RIS3 2021-2027",
+      "source_url": "https://www.adrmuntenia.ro/strategia-de-specializare-inteligenta-a-regiunii-sud--muntenia-20212027-aprobata/news/1431",
+      "tier": "A2",
+      "territory": "Sud-Muntenia",
+      "scope": "region",
+      "period": "2021-2027",
+      "constructs": ["regional_technology_context"],
+      "direct_measurement": false,
+      "measures": [{"name":"advanced_technology_and_innovation_capacity_is_strategic_priority","measure_type":"qualitative","value":"yes","unit":null}],
+      "use": "strategic context only; no direct quantitative adult-skill evidence yet"
+    },
+    {
+      "id": "EV-EU-AI-ACT-ART4",
+      "source": "Regulation (EU) 2024/1689 – Article 4 AI literacy, consolidated 2026 text",
+      "source_url": "https://eur-lex.europa.eu/eli/reg/2024/1689/2026-07-27/eng",
+      "tier": "A1",
+      "territory": "European Union",
+      "scope": "eu",
+      "period": "2026-07-27 consolidated text",
+      "constructs": ["responsible_ai_literacy_context"],
+      "direct_measurement": false,
+      "measures": [{"name":"AI_literacy_requirement_context","measure_type":"qualitative","value":"providers and deployers shall take measures supporting AI literacy appropriate to knowledge, experience, education/training and use context","unit":null}],
+      "use": "regulatory context only; cannot establish empirical need prevalence or target volume"
+    }
+  ],
+  "status": "INITIAL_EXTERNAL_EVIDENCE_FROZEN"
+}
