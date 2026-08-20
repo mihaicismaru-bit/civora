@@ -1,0 +1,75 @@
+{
+  "schema_version": "nf.evidence_gaps.v0.2",
+  "run_id": "AI4WORK-STEP/NF-RUN-001",
+  "gaps": [
+    {
+      "gap_id": "GAP-CALL-CODE",
+      "class": "call_identity",
+      "blocking": false,
+      "finding": "Full live technical call code has not yet been independently captured.",
+      "resolution": "Read official MySMIS/MIPE call registry; do not infer from neighboring calls."
+    },
+    {
+      "gap_id": "GAP-GSCS-BINARY",
+      "class": "source_version",
+      "blocking": true,
+      "finding": "Exact official GSCS/annex binary version and hash are not yet captured in this run.",
+      "resolution": "Capture approved 27.05.2026 package plus corrigendum and annexes before final call-compliance QA."
+    },
+    {
+      "gap_id": "GAP-REG-SM-ADULT-LEARNING",
+      "class": "regional_quantitative_evidence",
+      "blocking": true,
+      "construct": "adult_learning_participation",
+      "territory": "Sud-Muntenia",
+      "finding": "No current direct regional participation rate has yet been frozen for Sud-Muntenia.",
+      "resolution": "Retrieve Eurostat trng_lfse_04 or equivalent official regional series."
+    },
+    {
+      "gap_id": "GAP-REG-SVO-DIGITAL-MATURITY",
+      "class": "regional_quantitative_evidence",
+      "blocking": false,
+      "construct": "business_digital_maturity",
+      "territory": "Sud-Vest Oltenia",
+      "finding": "RIS3 confirms TIC/digitalisation strategic relevance but does not quantify current firm maturity/AI uptake.",
+      "resolution": "Search ADR/INS/EDIH/current programme evaluations; otherwise retain as context only."
+    },
+    {
+      "gap_id": "GAP-REG-SM-DIGITAL-MATURITY",
+      "class": "regional_quantitative_evidence",
+      "blocking": false,
+      "construct": "business_digital_maturity",
+      "territory": "Sud-Muntenia",
+      "finding": "RIS3 provides strategic context but no current quantitative maturity baseline frozen in the run.",
+      "resolution": "Search official regional evaluation/statistics; do not promote RIS3 priority into an empirical deficit."
+    },
+    {
+      "gap_id": "GAP-PRIMARY-ELIGIBLE-ADULTS",
+      "class": "direct_target_group_evidence",
+      "blocking": true,
+      "construct": "eligible_adult_skill_gap_primary",
+      "territory": "Sud-Vest Oltenia / Sud-Muntenia / Centru",
+      "finding": "National/regional macro evidence does not directly measure the AI/digital skill profile of the actual eligible >29 population intended for recruitment.",
+      "resolution": "Generate and run a three-region primary survey with population/coverage metadata."
+    },
+    {
+      "gap_id": "GAP-PRIMARY-EMPLOYERS",
+      "class": "direct_labour_market_evidence",
+      "blocking": true,
+      "construct": "labour_market_skill_demand",
+      "territory": "Sud-Vest Oltenia / Sud-Muntenia / Centru",
+      "finding": "No current employer-level evidence has yet been frozen showing which AI/digital capabilities are lacking in roles/workflows relevant to the three regions.",
+      "resolution": "Employer/stakeholder survey or structured interviews; official vacancy/skill-shortage data used where definitions permit."
+    },
+    {
+      "gap_id": "GAP-SCALE-160",
+      "class": "scale_justification",
+      "blocking": true,
+      "construct": "scale_and_distribution",
+      "finding": "160 and 80/40/40 are project design values, not independently demonstrated need magnitudes.",
+      "resolution": "Use eligible-population/recruitment-feasibility evidence plus expressions of interest/primary research; exact regional allocation cannot be claimed as need-weight without evidence."
+    }
+  ],
+  "release_rule": "No final need analysis may claim direct three-region target-group need, exact volume 160 or relative need 80/40/40 while the corresponding blocking gaps remain open.",
+  "status": "BLOCKED_FOR_FINAL_NEEDS_ANALYSIS_READY_FOR_PRIMARY_RESEARCH_DESIGN"
+}
