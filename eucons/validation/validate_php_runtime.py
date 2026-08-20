@@ -68,8 +68,15 @@ def main() -> None:
     ]:
         if token not in public:
             raise SystemExit(f"PHP endpoint missing {token}")
-    if "Options -Indexes" not in htaccess or "RewriteRule ^ index.php" not in htaccess:
-        raise SystemExit("PHP runtime htaccess guard incomplete")
+    for token in [
+        "Options -Indexes",
+        "RewriteRule ^ index.php",
+        "RewriteCond %{HTTPS} !=on",
+        "RewriteCond %{HTTP:X-Forwarded-Proto} !https",
+        "https://api.eucons.ro%{REQUEST_URI}",
+    ]:
+        if token not in htaccess:
+            raise SystemExit(f"PHP runtime htaccess guard incomplete: {token}")
     for forbidden in ["API_KEY=", "PASSWORD=", "CLIENT_SECRET=", "ACCESS_TOKEN="]:
         if forbidden in source or forbidden in public:
             raise SystemExit("secret-like assignment committed in PHP runtime")
@@ -123,6 +130,7 @@ def main() -> None:
         "production_pages": 26,
         "activated_forms": activated["forms"],
         "pii_storage": "OUTSIDE_WEBROOT",
+        "https_redirect": "CANONICAL_HTACCESS",
         "production_enabled": False,
     }, ensure_ascii=False))
 
