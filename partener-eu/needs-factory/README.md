@@ -12,11 +12,21 @@ It does **not** duplicate source crawling, generic source health, persistence, c
 
 ## Reuse contract
 
-- **PARTENER.EU** supplies call/domain intelligence and source-state/health. Material facts should consume last-known-good, non-quarantined sources and retain raw/semantic hashes when available.
+- **PARTENER.EU** supplies call/domain intelligence and source-state/health. Material facts consume only current, non-quarantined, quality-approved source state and preserve provider document provenance.
 - **CIVORA** supplies discovery/provenance patterns and external-source retrieval capability.
 - **DAPE** supplies the production semantics: deterministic resume, checkpoints, artifact registry, QA gates, versioning and rollback. Needs Factory emits deterministic artifacts that can be registered by DAPE instead of maintaining a second registry.
 
 See `contracts/ENGINE_REUSE_CONTRACT.json`.
+
+## Live discovery binding
+
+`tools/run_research_cycle.py` is the live research boundary. It sends canonical research tasks to an existing CIVORA discovery command and, by default, decorates the provider with `PartenerSourceGateProvider`.
+
+The source gate reads the canonical PARTENER.EU `ingest/state/source_registry_health.json` snapshot. It does not crawl. A discovery receipt is blocked before evidence promotion when the registry snapshot is stale, the source is unregistered, unhealthy, quarantined, low-quality, awaiting resolution, has a material semantic change that still requires reconciliation, or attempts to borrow a healthy trust anchor from a different source family. Provider-reported document URL and raw/semantic hashes remain intact; registry hashes are attached separately as source-health provenance.
+
+The PARTENER registry now contains explicit Needs Factory trust anchors for INS/TEMPO, AJOFM/ANOFM Vâlcea, ISJ Vâlcea, ARACIP school registries and the Ministry/CNDIPT vocational-technical policy source. `source_registry_probe.py` propagates optional `source_families` into the health snapshot so the gate can bind a provider receipt to the correct authoritative family without maintaining a second health system.
+
+The `--fixture-provider-no-source-gate` switch exists only for deterministic synthetic CI fixtures. Production invocations are fail-closed through the PARTENER source registry.
 
 ## Canonical stages
 
@@ -47,19 +57,16 @@ No narrative document may be released before `NF11_ADVERSARIAL_QA` passes.
 - contradictions remain contradictions until resolved;
 - evidence gaps are first-class outputs and can trigger primary research;
 - raw primary-research responses are canonical; charts and narrative are generated from raw data;
-- historical reconstruction is cutoff-locked.
+- historical reconstruction is cutoff-locked;
+- source-provider PASS claims cannot override PARTENER source-health state;
+- a healthy source in the wrong source family cannot satisfy a research requirement.
 
 ## Benchmark
 
-`benchmarks/310224` is `NF-BENCH-001`. The blind historical run recovered the defensible core of the evaluator-accepted analysis while rejecting an unsupported discrimination need and exposing the missing primary-research layer. The benchmark therefore defines the initial production acceptance suite.
+`benchmarks/310224` is `NF-BENCH-001`. The blind historical run recovered the defensible core of the evaluator-accepted analysis while rejecting an unsupported discrimination need and exposing the missing primary-research layer. The benchmark therefore defines the initial production acceptance suite. It remains intentionally `BLOCKED_RESEARCH` where authoritative historical/local evidence is missing; no fixture may be promoted as real 310224 evidence.
 
-## Current release target
+## v1 release boundary
 
-`v0.1-alpha` is reached when the deterministic validators and primary-research planner can:
+The unified lifecycle covers plan -> discovery -> blocked/research pack -> resume -> need synthesis -> standalone needs analysis -> QA -> DOCX -> DAPE handoff. DAPE handoff remains non-canonical until explicit owner approval.
 
-1. read the canonical JSON artifacts;
-2. emit blocking/non-blocking evidence gaps;
-3. generate a research instrument specification for unresolved school-specific gaps;
-4. validate imported response rows and deterministic aggregates;
-5. validate Need -> Evidence -> Intervention -> Result -> Indicator traceability;
-6. fail on the known 310224 defect fixtures.
+Static socioeconomic trust-anchor coverage is part of the CP21 candidate. The remaining live-production gate is to refresh/prove those new roots through the existing PARTENER source-health probe, exercise the CIVORA provider against real child documents carrying the matching `source_registry_id`, and then run the blind end-to-end benchmark on a project whose needs analysis is not already known. Until live health/provenance succeeds, the affected requirements remain fail-closed rather than fabricating evidence.
