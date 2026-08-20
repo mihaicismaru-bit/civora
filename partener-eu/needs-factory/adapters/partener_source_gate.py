@@ -125,8 +125,8 @@ def reconcile_receipt_with_source_registry(
 
     The provider remains responsible for discovery and document-level provenance.
     This gate only authorizes whether a returned receipt may proceed to Needs Factory
-    evidence validation. Unknown, stale, quarantined, low-quality or
-    reconciliation-pending sources fail closed.
+    evidence validation. Unknown, stale, quarantined, low-quality, source-family
+    mismatched or reconciliation-pending sources fail closed.
     """
 
     output = dict(receipt)
@@ -150,11 +150,18 @@ def reconcile_receipt_with_source_registry(
             failures.append("registry_resolution_required")
         if source.get("material_fact_use") is True and source.get("semantic_hash_changed") is True:
             failures.append("material_fact_reconciliation_required")
+
+        anchored_families = {str(item) for item in (source.get("source_families") or []) if str(item)}
+        provider_family = str(receipt.get("source_family") or "")
+        if anchored_families and provider_family not in anchored_families:
+            failures.append("registry_source_family_mismatch")
+
         registry_provenance = {
             "registry_url": source.get("url"),
             "registry_final_url": source.get("final_url"),
             "registry_tier": source.get("tier"),
             "registry_class": source.get("class"),
+            "registry_source_families": sorted(anchored_families),
             "registry_raw_sha256": source.get("raw_sha256"),
             "registry_semantic_sha256": source.get("semantic_sha256"),
         }
@@ -170,13 +177,13 @@ def reconcile_receipt_with_source_registry(
         output["material_fact_state"] = "PARTENER_REGISTRY_VERIFIED"
 
     output["source_registry_gate"] = {
-        "schema_version": "nf.partener_source_gate.v0.1",
+        "schema_version": "nf.partener_source_gate.v0.2",
         "registry_schema_version": registry.get("schema_version"),
         "registry_observed_at": registry.get("observed_at"),
         "source_registry_id": output.get("source_registry_id"),
         "valid": not failures,
         "failures": failures,
-        "policy": "fail_closed_no_unregistered_or_unhealthy_evidence",
+        "policy": "fail_closed_no_unregistered_unhealthy_or_family_mismatched_evidence",
         **registry_provenance,
     }
     return output
