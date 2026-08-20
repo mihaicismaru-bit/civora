@@ -1,0 +1,46 @@
+{
+  "schema_version": "nf.checkpoint_status.v0.1",
+  "benchmark_id": "NF-BENCH-001",
+  "project_code": "310224",
+  "checkpoint": "NF-CP08",
+  "name": "Real 310224 Product Research Gate",
+  "branch": "needs-factory/nf-cp08-310224-product-run",
+  "draft_pr": 462,
+  "verified_head": "14c61d04e5da580fab1521b7ee975927e2192509",
+  "ci": {
+    "workflow_run": 32252476679,
+    "job": 96066442648,
+    "conclusion": "success",
+    "regression_tests": 31,
+    "partener_source_state_adapter": "success",
+    "real_310224_research_gate": "success",
+    "synthetic_nf12_smoke": "success"
+  },
+  "real_product_run": {
+    "run_id": "NF-711ebf6b34ca12942434",
+    "state": "BLOCKED_RESEARCH",
+    "blocking_gap_count": 5,
+    "blocking_gaps": [
+      "GAP-PR-001",
+      "GAP-PR-002",
+      "GAP-PR-003",
+      "GAP-PR-004",
+      "GAP-POPULATION-SNAPSHOT"
+    ],
+    "primary_research_question_count": 6,
+    "sampling_strategy": "population_snapshot_required",
+    "last_closed_stage": "NF06_PRIMARY_RESEARCH",
+    "nf07_executed": false,
+    "nf12_executed": false
+  },
+  "hardening": [
+    "evidence geography alone can no longer satisfy a claim",
+    "local direct claims require construct-compatible direct measurement",
+    "school qualification offer cannot satisfy practice-quality, skills-baseline or career-intention gaps",
+    "real benchmark refuses narrative generation while research data is unresolved"
+  ],
+  "decision": "CLOSED_PASS__RUN_STATE_BLOCKED_RESEARCH_EXPECTED",
+  "next_checkpoint": "NF-CP09",
+  "next_action": "Implement authoritative population snapshot validation, primary-research evidence promotion and deterministic resume from NF06 onward using synthetic acceptance fixtures only. Preserve the real 310224 run as BLOCKED_RESEARCH until authoritative historical school data exists.",
+  "status": "CLOSED_PASS"
+}

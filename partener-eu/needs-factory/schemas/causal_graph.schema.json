@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "nf.causal_graph.v0.1",
+  "title": "Needs Factory Causal Graph",
+  "type": "object",
+  "required": ["nodes", "edges"],
+  "properties": {
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "type": {"enum": ["cause", "need", "effect", "intervention", "output", "result", "indicator"]},
+          "label": {"type": ["string", "null"]},
+          "priority": {"type": "boolean"},
+          "cause_status": {"enum": ["established", "not_established", null]}
+        },
+        "additionalProperties": true
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["source", "target", "relation"],
+        "properties": {
+          "source": {"type": "string"},
+          "target": {"type": "string"},
+          "relation": {"enum": ["CAUSES", "LEADS_TO", "TARGETS", "PRODUCES", "CONTRIBUTES_TO", "MEASURED_BY"]},
+          "evidence_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

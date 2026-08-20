@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "nf.research_request.v0.1",
+  "title": "Needs Factory Research Request",
+  "type": "object",
+  "required": ["schema_version", "project_id", "call_code", "profile_id", "territory", "target_group", "requirements", "tasks", "source_policy", "request_sha256"],
+  "properties": {
+    "schema_version": {"const": "nf.research_request.v0.1"},
+    "project_id": {"type": "string", "minLength": 1},
+    "call_code": {"type": "string", "minLength": 1},
+    "profile_id": {"type": "string", "minLength": 1},
+    "historical_cutoff": {"type": ["string", "null"]},
+    "territory": {"type": "string", "minLength": 1},
+    "target_group": {},
+    "requirements": {"type": "array", "minItems": 1},
+    "tasks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["task_id", "requirement_id", "construct", "task_type", "priority", "preferred_scopes", "preferred_source_families", "direct_local_required", "allowed_measure_types", "query_context", "prohibited_overclaim"],
+        "properties": {
+          "task_id": {"type": "string"},
+          "requirement_id": {"type": "string"},
+          "construct": {"type": "string"},
+          "task_type": {"enum": ["EXTERNAL_DISCOVERY", "PRIMARY_RESEARCH", "DISCOVERY_THEN_PRIMARY_IF_GAP"]},
+          "priority": {"enum": ["primary", "supporting"]},
+          "preferred_scopes": {"type": "array", "minItems": 1},
+          "preferred_source_families": {"type": "array", "minItems": 1},
+          "direct_local_required": {"type": "boolean"},
+          "allowed_measure_types": {"type": "array"},
+          "query_context": {"type": "object"},
+          "prohibited_overclaim": {"type": "string", "minLength": 1}
+        },
+        "additionalProperties": true
+      }
+    },
+    "source_policy": {"type": "object"},
+    "request_sha256": {"type": "string", "minLength": 32}
+  },
+  "additionalProperties": true
+}

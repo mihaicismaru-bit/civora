@@ -1,0 +1,38 @@
+{
+  "schema_version":"nf.source_manifest.v0.1",
+  "benchmark_id":"NF-BENCH-001",
+  "generated_on":"2026-08-19",
+  "historical_research_cutoff":"2024-01-12",
+  "sources":[
+    {"id":"SRC-GT-001","name":"7. ANALIZA DE NEVOI FINALA plesoianu.pdf","publisher":"project attachment","type":"ground_truth_document","date":"2024-01-04 upload","status":"available_full","tier":"A-ground-truth"},
+    {"id":"SRC-GT-002","name":"FormularDepunereFinal_310224_2026-01-29_09-36-09 (4).pdf","publisher":"MySMIS export","type":"ground_truth_document","date":"2026-01-29 export, CF v28","status":"available_full","tier":"A-ground-truth","warning":"post-award/current version"},
+    {"id":"SRC-CALL-001","name":"GSCS Adaptarea serviciilor educaționale ... Stagii de practică pentru elevi","publisher":"AM PEO / MIPE","type":"call_guide","period":"2023","status":"metadata_verified; direct historic MIPE binary not required for CP01 because formal evaluator criteria are embedded in approved CF","tier":"A"},
+    {"id":"SRC-CALL-002","name":"Corrigendum GSCS – Stagii de practică pentru elevi","publisher":"AM PEO / OIR PECU archives","type":"corrigendum","date":"2023-09-28","url":"https://oirvest.ro/ghidul-solicitantului-adaptarea-serviciilor-educationale-adresate-elevilor-si-personalului-didactic-din-ipt-stagii-de-practica-pentru-elevi/","status":"verified","tier":"A"},
+    {"id":"SRC-CALL-003","name":"FAQ apel – Stagii de practică pentru elevi","publisher":"AM PEO / OIR PECU Nord-Vest archive","type":"faq","date":"2023-11-02","url":"https://www.runv.ro/anunturi2023.html","status":"verified_archive_entry","tier":"A"},
+    {"id":"SRC-CALL-004","name":"Corrigendum / prelungire – Stagii de practică pentru elevi","publisher":"AM PEO / OIR PECU Nord-Vest archive","type":"corrigendum","date":"2023-11-20/21","url":"https://www.runv.ro/anunturi2023.html","status":"verified_archive_entry; final close date 2024-01-12 verified","tier":"A"},
+    {"id":"SRC-CALL-005","name":"MySMIS 2021-2027 financing registry","publisher":"MIPE","type":"official_call_registry","url":"https://dwh4smis.fonduri-ue.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027","status":"verified","tier":"A"},
+    {"id":"SRC-EDU-001","name":"Rapoarte anuale privind starea învățământului preuniversitar","publisher":"Ministerul Educației și Cercetării","type":"official_report_archive","url":"https://www.edu.ro/rapoarte-publice-periodice","status":"verified; includes 2021-2022 and 2022-2023 reports relevant to historical run","tier":"A"},
+    {"id":"SRC-INS-001","name":"TEMPO Online – education series SCL103E/SCL103F","publisher":"Institutul Național de Statistică","type":"official_statistics","url":"https://statistici.insse.ro/tempoins/","status":"verified_source_capability","tier":"A"},
+    {"id":"SRC-INS-002","name":"TEMPO Online – labour series FOM103D/SOM101E and related","publisher":"Institutul Național de Statistică","type":"official_statistics","url":"https://statistici.insse.ro/tempoins/","status":"verified_source_capability","tier":"A"},
+    {"id":"SRC-ANOFM-001","name":"Statistică șomaj Vâlcea","publisher":"AJOFM Vâlcea / ANOFM","type":"official_statistics","url":"https://www.anofm.ro/valcea/statistica-somaj/","status":"verified","tier":"A"},
+    {"id":"SRC-ANOFM-002","name":"Situație șomeri ianuarie 2023 / Bilanț ocupare 2023","publisher":"ANOFM / AJOFM Vâlcea","type":"official_statistics","period":"2023","status":"verified; provides county- and age-specific evidence unavailable in historical narrative","tier":"A"},
+    {"id":"SRC-ADR-001","name":"Strategia de Specializare Inteligentă RIS3 Sud-Vest Oltenia 2021-2027","publisher":"ADR Sud-Vest Oltenia","type":"regional_strategy","url":"https://pr2021-2027.adroltenia.ro/page.php?id=49","status":"verified","tier":"A"},
+    {"id":"SRC-ADR-002","name":"Plan/strategii și studii regionale 2021-2027","publisher":"ADR Sud-Vest Oltenia","type":"regional_evidence_hub","url":"https://www.adroltenia.ro/informatii-de-interes-public/","status":"verified","tier":"A"},
+    {"id":"SRC-CRPE-001","name":"De ce avem nevoie de învățare la locul de muncă în învățământul profesional și tehnic românesc?","publisher":"Centrul Român de Politici Europene","type":"research_report","url":"https://www.crpe.ro/ro/de-ce-avem-nevoie-de-invatare-la-locul-de-munca-in-invatamantul-profesional-si-tehnic-romanesc/","status":"verified_source; applicability constrained by agricultural-school model where used","tier":"B"},
+    {"id":"SRC-BNR-001","name":"Investițiile străine directe în România","publisher":"Banca Națională a României","type":"official_research_statistics","status":"source_family_verified; historical analysis's exact 2022 regional value should be rechecked before reuse","tier":"A"}
+  ],
+  "source_policy": {
+    "official_first":true,
+    "record_url_or_document_identity":true,
+    "record_period":true,
+    "record_retrieval_status":true,
+    "never_silently_replace_changed_source":true,
+    "historic_run_uses_only_sources_available_by_cutoff":true
+  },
+  "open_source_gaps_nonblocking_for_cp01":[
+    "Exact original binary/hash of each 2023 MIPE GSCS version should be captured by PARTENER ingestion when accessible.",
+    "Exact BNR 2022 table/page for the 1.9% Sud-Vest Oltenia FDI share should be revalidated before the claim can enter blind narrative.",
+    "Every historical chart copied into the legacy analysis should receive a source/table ID before being eligible for reuse."
+  ],
+  "status":"complete_for_blind_research"
+}

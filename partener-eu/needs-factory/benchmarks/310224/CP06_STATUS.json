@@ -1,0 +1,35 @@
+{
+  "schema_version": "nf.checkpoint_status.v0.1",
+  "benchmark_id": "NF-BENCH-001",
+  "project_code": "310224",
+  "checkpoint": "NF-CP06",
+  "name": "Evidence-Capped Ranking, Causal Model and NF12 Package",
+  "branch": "needs-factory/nf-cp06-ranking-causal",
+  "draft_pr": 456,
+  "verified_head": "7a583107aaf2b88e395932d0d639c94fb63c8711",
+  "ci": {
+    "workflow": "Needs Factory Quality",
+    "run_id": 32251649779,
+    "conclusion": "success",
+    "regression_tests": 20,
+    "compile": "success",
+    "schema_parse": "success",
+    "nf12_smoke": "success"
+  },
+  "features_verified": [
+    "transparent weighted need scoring",
+    "evidence-confidence cap",
+    "duplicate-source confidence deduplication",
+    "missing ranking dimensions block ranking",
+    "causal relation ontology",
+    "causal claims require evidence",
+    "causal cycles fail closed",
+    "narrative-ready package requires valid causal model, traceability and release gate",
+    "pipeline orchestrates NF08, NF09 and NF12",
+    "canonical NF12 pack is hashable and deterministic for identical semantic inputs"
+  ],
+  "decision": "CLOSED_PASS",
+  "next_checkpoint": "NF-CP07",
+  "next_action": "Implement concrete PARTENER.EU source-state adapter and DAPE checkpoint/artifact handoff adapter so the vertical consumes existing engines instead of only declaring reuse contracts.",
+  "status": "CLOSED_PASS"
+}
