@@ -1,0 +1,60 @@
+name: Needs Factory Quality
+
+on:
+  push:
+    branches:
+      - 'needs-factory/**'
+    paths:
+      - 'partener-eu/needs-factory/**'
+      - '.github/workflows/needs-factory-quality.yml'
+  pull_request:
+    paths:
+      - 'partener-eu/needs-factory/**'
+      - '.github/workflows/needs-factory-quality.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deterministic-quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile Needs Factory core
+        run: python -m compileall -q partener-eu/needs-factory/core partener-eu/needs-factory/tools
+      - name: Parse canonical JSON schemas
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          paths = sorted(Path('partener-eu/needs-factory/schemas').glob('*.json'))
+          assert paths, 'No Needs Factory schemas found'
+          for path in paths:
+              json.loads(path.read_text(encoding='utf-8'))
+              print(f'OK {path}')
+          PY
+      - name: Run Needs Factory regression suite
+        run: python -m unittest discover -s partener-eu/needs-factory/tests -v
+      - name: Run deterministic pipeline smoke fixture through NF12
+        run: |
+          python partener-eu/needs-factory/tools/run_fixture.py \
+            partener-eu/needs-factory/tests/fixtures/pipeline_smoke.json \
+            --output /tmp/needs-factory-smoke-manifest.json
+          python - <<'PY'
+          import json
+          manifest = json.load(open('/tmp/needs-factory-smoke-manifest.json', encoding='utf-8'))
+          assert manifest['release_gate']['ready_for_narrative'] is True
+          assert manifest['run_id'].startswith('NF-')
+          assert 'NF12_PACKAGE' in manifest['closed_checkpoints']
+          assert manifest['narrative_claim_count'] == 2
+          assert len(manifest['narrative_pack_sha256']) >= 32
+          print(manifest['run_id'])
+          print(manifest['narrative_pack_sha256'])
+          PY

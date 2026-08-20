@@ -1,0 +1,48 @@
+{
+  "schema_version": "nf.checkpoint_status.v0.1",
+  "benchmark_id": "NF-BENCH-001",
+  "project_code": "310224",
+  "checkpoint": "NF-CP05",
+  "name": "Executable Pipeline and CI",
+  "branch": "needs-factory/nf-cp05-pipeline",
+  "draft_pr": 453,
+  "verified_head_before_status_commit": "ab010f2fa604f3e1203599c74a20b1f5b5c98a8d",
+  "ci": {
+    "workflow": "Needs Factory Quality",
+    "run_id": 32251035323,
+    "conclusion": "success",
+    "job": "deterministic-quality",
+    "steps": {
+      "compile_core": "success",
+      "parse_canonical_json_schemas": "success",
+      "regression_suite": "success",
+      "deterministic_pipeline_smoke_fixture": "success"
+    },
+    "regression_tests": 14
+  },
+  "artifacts_added": [
+    "core/pipeline.py",
+    "schemas/evidence_record.schema.json",
+    "schemas/population_snapshot.schema.json",
+    "schemas/need.schema.json",
+    "schemas/traceability_chain.schema.json",
+    "schemas/pipeline_event.schema.json",
+    "tests/fixtures/pipeline_smoke.json",
+    "tools/run_fixture.py",
+    ".github/workflows/needs-factory-quality.yml"
+  ],
+  "product_properties_verified": [
+    "deterministic run id",
+    "DAPE-compatible checkpoint/event emission",
+    "evidence-gap and population-snapshot gating",
+    "need validation",
+    "traceability validation",
+    "release gating",
+    "canonical artifact hashing",
+    "end-to-end pre-narrative smoke path"
+  ],
+  "decision": "CLOSED_PASS",
+  "next_checkpoint": "NF-CP06",
+  "next_action": "Implement evidence-weighted need ranking, causal graph validation and narrative-ready package generation without relaxing unresolved evidence gaps.",
+  "status": "CLOSED_PASS"
+}

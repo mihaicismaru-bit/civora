@@ -1,0 +1,53 @@
+{
+  "schema_version": "nf.cp02_research_plan.v0.1",
+  "benchmark_id": "NF-BENCH-001",
+  "project_code": "310224",
+  "checkpoint": "NF-CP02",
+  "mode": "blind_historical",
+  "historical_cutoff": "2024-01-12",
+  "input_policy": {
+    "allow": [
+      "call code and title",
+      "programme / priority / specific objective",
+      "leader and partner identities",
+      "territory",
+      "eligible target-group definition",
+      "target volume 251",
+      "intervention family: work-based learning / practice",
+      "programme indicators EECO06+07 and EECR03"
+    ],
+    "deny": [
+      "historical needs-analysis narrative",
+      "legacy labelled-needs list",
+      "legacy questionnaire results",
+      "KNOWN_DEFECTS",
+      "post-award narrative amendments",
+      "evaluator conclusions except formal acceptance requirements"
+    ]
+  },
+  "research_questions": [
+    "What documented labour-market demand existed in Vâlcea before the historical cutoff for occupations/sectors compatible with the partner school's vocational offer?",
+    "What documented evidence showed a need for meaningful work-based learning and employer involvement in Romanian IPT?",
+    "What evidence showed a need for career information/orientation for students choosing or progressing through vocational pathways?",
+    "What evidence existed on transition/employability risks for young people in Vâlcea without attributing outcomes to the project school without school-level proof?",
+    "Was the partner school's 2023-2024 educational offer demonstrably aligned with economic sectors where local employers forecast hiring?",
+    "Which candidate needs can be supported by official and historically admissible evidence without using the legacy needs analysis?"
+  ],
+  "source_hierarchy": [
+    {"tier": "A1", "type": "official local/county statistics and official school offer", "role": "primary"},
+    {"tier": "A2", "type": "official national education reports and regulations", "role": "primary/context"},
+    {"tier": "B", "type": "research reports from credible non-governmental bodies", "role": "supporting only"},
+    {"tier": "C", "type": "media/reposts/unofficial mirrors", "role": "discovery/cross-check only; cannot establish a primary need"}
+  ],
+  "quality_gates": {
+    "historic_cutoff_required": true,
+    "main_need_requires_official_evidence": true,
+    "local_claim_requires_local_or_explicitly_limited_evidence": true,
+    "no_causal_claim_from_cross_sectional_statistics": true,
+    "no_school_level_deficit_without_school_level_evidence": true,
+    "no_reuse_of_ground_truth_narrative": true,
+    "uncertain_historical_publication_timestamp_must_be_flagged": true,
+    "data_source_and_period_required": true
+  },
+  "status": "executed"
+}
