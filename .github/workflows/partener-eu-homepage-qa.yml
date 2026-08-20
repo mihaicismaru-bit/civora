@@ -17,6 +17,7 @@ on:
       - 'partener-eu/ops/test_home_novice.py'
       - 'partener-eu/ops/test_public_product_v3.py'
       - 'partener-eu/ops/test_ask_partener_v2.py'
+      - 'partener-eu/ops/test_ask_eligibility_projection.js'
       - '.github/workflows/partener-eu-homepage-qa.yml'
 
 concurrency:
@@ -49,3 +50,4 @@ jobs:
           python partener-eu/ops/test_home_novice.py
           python partener-eu/ops/test_public_product_v3.py
           python partener-eu/ops/test_ask_partener_v2.py
+          node partener-eu/ops/test_ask_eligibility_projection.js
