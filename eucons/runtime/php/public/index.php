@@ -2,6 +2,9 @@
 declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/src/LeadRuntime.php';
+require_once dirname(__DIR__) . '/src/CrmRuntime.php';
+require_once dirname(__DIR__) . '/src/RetentionRuntime.php';
+require_once dirname(__DIR__) . '/src/MailRuntime.php';
 
 function eucons_security_headers(?string $origin = null): void
 {
@@ -70,6 +73,28 @@ if (!in_array($contentType, ['application/x-www-form-urlencoded', 'multipart/for
 try {
     $processed = $runtime->process($_POST);
     $receipt = $runtime->persist($processed);
+    $dataRoot = $runtime->storageRoot();
+
+    $crm = new EuconsCrmRuntime($dataRoot);
+    $crmReceipt = $crm->ingest($processed);
+    if (($crmReceipt['status'] ?? '') !== 'accepted') {
+        throw new RuntimeException('CRM_PERSISTENCE_NOT_CONFIRMED');
+    }
+
+    $mail = new EuconsMailRuntime($dataRoot);
+    $mail->queueAcknowledgement($processed, $receipt['request_id']);
+    try {
+        $mail->dispatch($receipt['request_id']);
+    } catch (RuntimeException $mailError) {
+        error_log('EUCONS_MAIL_HELD code=' . preg_replace('/[^A-Z0-9_]/', '', strtoupper($mailError->getMessage())));
+    }
+
+    try {
+        (new EuconsRetentionRuntime($dataRoot))->sweep();
+    } catch (Throwable $retentionError) {
+        error_log('EUCONS_RETENTION_HOLD code=RETENTION_SWEEP_FAILED');
+    }
+
     eucons_json(202, [
         'status' => $receipt['status'],
         'request_id' => $receipt['request_id'],
