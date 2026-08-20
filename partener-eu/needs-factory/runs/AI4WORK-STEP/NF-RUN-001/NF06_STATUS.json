@@ -1,0 +1,31 @@
+{
+  "schema_version": "nf.checkpoint_status.v0.1",
+  "run_id": "AI4WORK-STEP/NF-RUN-001",
+  "checkpoint": "NF06_PRIMARY_RESEARCH",
+  "status": "PLAN_READY_DATA_REQUIRED",
+  "inputs_ready": [
+    "RESEARCH_AGENDA.json",
+    "EVIDENCE_REGISTRY.json",
+    "EVIDENCE_ADDENDUM_001.json",
+    "EVIDENCE_GAPS.json",
+    "NEED_HYPOTHESES.json"
+  ],
+  "outputs_ready": [
+    "PRIMARY_RESEARCH_PLAN.json",
+    "QUESTIONNAIRE_ADULTS.md",
+    "QUESTIONNAIRE_EMPLOYERS.md"
+  ],
+  "blocking_data": [
+    "adult raw responses with region/status/age-band metadata and no direct identifiers",
+    "employer/organisation responses with region/sector/size metadata",
+    "documented research frames/coverage for all three regions",
+    "if claiming exact project scale: independent feasibility/interest evidence for 160 and territorial allocation"
+  ],
+  "nonblocking_secondary_research_still_open": [
+    "direct current Eurostat adult-learning value for Sud-Muntenia",
+    "newer regional digital-maturity evidence for Sud-Vest Oltenia and Sud-Muntenia",
+    "exact official GSCS binary/hash and live technical call code"
+  ],
+  "resume_rule": "When primary data are available, create a successor run version and resume at NF06; do not mutate the frozen blind predecessor evidence.",
+  "final_narrative_allowed": false
+}
