@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "E29",
+  "unit": "DOMAIN_HOSTING_API",
+  "status": "PASS_EXTERNAL_BINDING",
+  "public_origin": "https://eucons.ro",
+  "api_origin": "https://api.eucons.ro",
+  "hosting": {
+    "provider_environment": "romania-webhosting.com shared cPanel",
+    "runtime": "PHP_8_PLUS_SHARED_HOSTING",
+    "document_root": "/home/eucons/civora-runtime/eucons/runtime/php/public",
+    "pii_storage_root": "/home/eucons/eucons-data",
+    "pii_in_git": false
+  },
+  "validation": {
+    "github_pages_https": "PASS",
+    "api_https": "PASS",
+    "cors_preflight": "204_PASS",
+    "get_fail_closed": "405_METHOD_NOT_ALLOWED",
+    "synthetic_post": "202_ACCEPTED",
+    "idempotent_replay": "202_SAME_REQUEST_ID",
+    "conflicting_replay": "409_SUBMISSION_ID_CONFLICT",
+    "pii_in_response": false,
+    "live_smoke_actions_run": 32335383744,
+    "http_to_https_policy": "CANONICAL_HTACCESS_MERGED_AND_MANUAL_PROVIDER_FALLBACK_APPLIED"
+  },
+  "public_collection_state": "FAIL_CLOSED_PENDING_RETENTION_AND_CRM_RUNTIME_CLOSURE",
+  "remaining_external_authorizations": ["commercial_mailbox", "linkedin", "facebook"]
+}
