@@ -59,9 +59,28 @@ candidates = collector.candidate_links(source, listing)
 assert source["url"] not in candidates
 assert candidates == ["https://ms.ro/centrul-de-presa/cseke-attila-investitii-pnrr-test/"]
 
+# Site chrome deliberately contains a higher-priority generic funding term.
+# Evidence must come from the semantic article body, not from nav/footer text.
 article = """<html><head><title>Ministerul Sănătății — investiții PNRR</title></head><body>
-20 august 2026. Cseke Attila a declarat că investițiile în spitalele finanțate prin PNRR trebuie accelerate, iar fiecare termen de implementare trebuie urmărit cu atenție.
+<header><nav>Ministerul Sănătății · Buget Anual · Achiziții · Contact</nav></header>
+<main>
+  <article>
+    <h1>Investițiile PNRR din sănătate trebuie accelerate</h1>
+    <p>20 august 2026.</p>
+    <p>Cseke Attila a declarat că investițiile în spitalele finanțate prin PNRR trebuie accelerate, iar fiecare termen de implementare trebuie urmărit cu atenție.</p>
+    <p>Ministerul va urmări recepția lucrărilor și stadiul proiectelor împreună cu beneficiarii.</p>
+  </article>
+</main>
+<footer>Buget Anual · Hartă site · Termeni</footer>
 </body></html>"""
+
+parser = collector.TextParser()
+parser.feed(article)
+evidence_text, evidence_scope = collector.semantic_article_text(parser)
+assert evidence_scope == "ARTICLE"
+assert "Buget Anual" not in evidence_text
+assert "Hartă site" not in evidence_text
+assert "Cseke Attila a declarat" in evidence_text
 
 old_fetch = collector.fetch
 try:
@@ -85,8 +104,15 @@ assert item["signalKind"] == "STATEMENT_SIGNAL"
 assert item["administrativeFact"] == {"status": "UNCONFIRMED_FROM_SIGNAL", "failClosed": True}
 assert item["statementExtraction"]["status"] == "ACTOR_SPEECH_FUNDING_BOUND"
 assert item["statementExtraction"]["scope"] == "SENTENCE"
+assert item["statementExtraction"]["articleTextScope"] == "ARTICLE"
+assert collector.fold(item["statementExtraction"]["fundingCue"]) == "pnrr"
 assert item["sourceSnapshot"]["url"] == candidates[0]
 assert item["sourceSnapshot"]["contentHash"]
+assert item["sourceSnapshot"]["contentExtraction"] == {
+    "scope": "ARTICLE",
+    "structuralBoilerplateExcluded": True,
+    "evidenceChars": len(evidence_text),
+}
 assert item["roleVerification"]["role"] == "Ministrul interimar al Sănătății"
 
 tracked = {p["id"]: p for p in people["people"] if p.get("active")}
@@ -107,6 +133,9 @@ print(json.dumps({
     "transportRoot": source["url"],
     "listingExcluded": source["url"] not in candidates,
     "historicalListingProjectionRejected": True,
+    "semanticEvidenceScope": evidence_scope,
+    "structuralBoilerplateExcluded": True,
+    "fundingCue": item["statementExtraction"]["fundingCue"],
     "candidate": candidates[0],
     "status": status["status"],
     "signalKind": trusted["signalKind"],
