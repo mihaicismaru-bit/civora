@@ -12,6 +12,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 CHECKS = [
     ("recovery", [sys.executable, str(ROOT / "ops" / "test_recovery.py")]),
     ("frontend", [sys.executable, str(ROOT / "ops" / "test_frontend_regression.py")]),
+    ("public_language", [sys.executable, str(ROOT / "ops" / "test_public_language.py")]),
     ("ask_v2", [sys.executable, str(ROOT / "ops" / "test_ask_partener_v2.py")]),
     ("ask_eligibility_projection", ["node", str(ROOT / "ops" / "test_ask_eligibility_projection.js")]),
     ("p10_policy", [sys.executable, str(ROOT / "ops" / "test_p10_policy_regression.py")]),
