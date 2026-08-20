@@ -34,9 +34,9 @@ function affectedText(x){
   const topic=compact(x.topic);
   if(topic&&topic.toLowerCase()!=='fonduri europene / decizie publică')return topic;
   const audiences=(x.audiences||[]).map(compact).filter(Boolean);
-  return audiences.length?audiences.join(' · '):'beneficiarii și proiectele din aria semnalului';
+  return audiences.length?audiences.join(' · '):'Nu este încă suficient structurată în datele verificate.';
 }
-function watchText(x){const w=compact(x.watch);if(w&&!rawUrl.test(w))return w;return 'Ghidul, ordinul, corrigendumul, calendarul sau alt act oficial care transformă semnalul într-o regulă aplicabilă.'}
+function watchText(x){const w=compact(x.watch);if(w&&!rawUrl.test(w))return w;return 'Faptul oficial lipsă nu este încă identificat suficient de precis în datele verificate.'}
 function card(x){
   const src=primarySource(x),href=safeUrl(src?.url),statement=cleanStatement(x),impact=impactText(x),label=src?sourceLabel(src):'Proveniență neconfirmată',sourceKind=officialSource(src)?'sursa oficială':'evidența publică';
   return `<a class="personSignalCard" href="${esc(href)}" target="_blank" rel="noreferrer" aria-label="${esc(x.headline)} — deschide ${esc(sourceKind)}"><div class="personSignalTop"><span class="signalBadge ${typeClass(x.type)}">${esc(typeLabel(x.type))}</span><span>${esc(x.institution||'Instituție neprecizată')} · ${esc(dateText(x.date))}</span></div><div class="personName">${esc(x.person||x.institution||'Reprezentant al autorității')}</div>${x.role?`<div class="personRole">${esc(x.role)}</div>`:''}<h3>${esc(x.headline)}</h3><p class="personSignalText"><b>Ce s-a anunțat:</b> ${esc(statement)}</p><p class="personImpact"><b>De ce contează:</b> ${esc(impact)}</p><p class="personImpact"><b>Aria afectată:</b> ${esc(affectedText(x))}</p><p class="personWatch"><b>Ce fapt oficial lipsește:</b> ${esc(watchText(x))}</p><div class="personCardFoot"><span>Analiză PARTENER.EU · ${esc(label)}</span><strong>Vezi semnalul și ${esc(sourceKind)} ↗</strong></div></a>`;
