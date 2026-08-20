@@ -2,9 +2,9 @@
 """Compatibility entry point for the semantic-quality MIPE browser collector.
 
 Before importing the collector, apply the small dossier-readiness extension
-idempotently. This keeps the Windows runner workflow simple while ensuring every
-future MIPE page carries enough page-specific evidence for the site engine to
-build a useful news item and a universal funding dossier.
+idempotently. Then extend the Romanian browser frontier with the official MIPE
+consolidated calls calendar while preserving the collector's existing semantic
+quality and provenance gates.
 """
 from pathlib import Path
 
@@ -34,7 +34,11 @@ def ensure_decision_evidence() -> None:
 
 
 ensure_decision_evidence()
-from mipe_browser_ingest_v2 import main  # noqa: E402  (import after patch)
+import mipe_browser_ingest_v2 as collector  # noqa: E402  (import after patch)
+from mipe_frontier_config import extend_frontier  # noqa: E402
+
+extend_frontier(collector)
+main = collector.main
 
 
 if __name__ == "__main__":
