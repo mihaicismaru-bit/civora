@@ -1,0 +1,24 @@
+{
+  "schema_version": "nf.checkpoint_status.v0.1",
+  "benchmark_id": "NF-BENCH-001",
+  "project_code": "310224",
+  "checkpoint": "NF-CP02",
+  "name": "Blind Historical Research and Need Discovery",
+  "branch": "needs-factory/nf-cp02-310224",
+  "artifacts": [
+    "CP02_RESEARCH_PLAN.json",
+    "CP02_EXTERNAL_EVIDENCE.json",
+    "CP02_BLIND_NEEDS.json",
+    "CP02_TRACEABILITY.json",
+    "CP02_QA_REPORT.json",
+    "CP02_STATUS.json"
+  ],
+  "blind_freeze": true,
+  "ground_truth_access_before_freeze": false,
+  "primary_needs": ["BN-01","BN-02","BN-03","BN-04","BN-05"],
+  "supporting_needs": ["BN-06"],
+  "qa_decision": "READY_FOR_COMPARATOR",
+  "next_checkpoint": "NF-CP03",
+  "next_action": "Open frozen ground truth and known defects only after this checkpoint, perform semantic comparator, derive learned rules and score blind run against accepted project benchmark.",
+  "status": "CLOSED_PASS"
+}

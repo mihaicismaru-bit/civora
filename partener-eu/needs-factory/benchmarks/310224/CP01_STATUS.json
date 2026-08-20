@@ -1,0 +1,40 @@
+{
+  "schema_version":"nf.checkpoint_status.v0.1",
+  "checkpoint":"NF-CP01",
+  "benchmark_id":"NF-BENCH-001",
+  "project_code":"310224",
+  "completed_on":"2026-08-19",
+  "artifacts":{
+    "CALL_REQUIREMENTS.json":"present",
+    "PROJECT_INPUT.json":"present",
+    "EVIDENCE_REGISTRY.json":"present",
+    "NEEDS_GROUND_TRUTH.json":"present",
+    "KNOWN_DEFECTS.json":"present",
+    "SOURCE_MANIFEST.json":"present",
+    "QA_RULESET_v0.1.json":"present"
+  },
+  "validation":{
+    "formal_evaluator_requirements_recovered":true,
+    "approved_scorecard_ground_truth_recovered":true,
+    "historical_submission_cutoff_defined":true,
+    "post_award_cf_contamination_guard_defined":true,
+    "critical_legacy_defects_registered":true,
+    "official_source_manifest_seeded":true,
+    "contradictions_preserved_fail_closed":true,
+    "qa_rules_cover_known_critical_defects":true
+  },
+  "known_nonblocking_gaps":[
+    "Capture exact binary/hash of every historical 2023 MIPE guide/corrigendum version when the legacy MIPE file endpoint is reachable.",
+    "Revalidate individual legacy statistical claims before they are allowed into the new narrative; unverified/stale claims remain blocked by QA."
+  ],
+  "blind_run_contract":{
+    "historical_mode":true,
+    "ground_truth_needs_hidden_from_discovery":true,
+    "legacy_questionnaire_results_hidden_from_discovery":true,
+    "post_award_changes_hidden_from_historical_discovery":true,
+    "output_comparison_semantic_not_textual":true,
+    "release_gate":"zero critical QA failures"
+  },
+  "decision":"GO_BLIND",
+  "next_checkpoint":"NF-CP02 – Blind Historical Research and Need Discovery"
+}

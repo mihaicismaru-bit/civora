@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "nf.pipeline_event.v0.1",
+  "title": "Needs Factory Pipeline Event",
+  "type": "object",
+  "required": ["event", "run_id", "project_id", "checkpoint", "status", "blocking", "timestamp"],
+  "properties": {
+    "event": {"enum": ["NF_CHECKPOINT_STARTED", "NF_ARTIFACT_READY", "NF_EVIDENCE_GAP", "NF_QA_FAILED", "NF_QA_PASSED", "NF_CHECKPOINT_CLOSED"]},
+    "run_id": {"type": "string", "minLength": 1},
+    "project_id": {"type": "string", "minLength": 1},
+    "checkpoint": {"type": "string", "minLength": 1},
+    "artifact_path": {"type": ["string", "null"]},
+    "artifact_sha256": {"type": ["string", "null"]},
+    "status": {"type": "string", "minLength": 1},
+    "blocking": {"type": "boolean"},
+    "detail": {"type": ["string", "null"]},
+    "timestamp": {"type": "string"}
+  },
+  "additionalProperties": false
+}

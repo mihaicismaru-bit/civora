@@ -1,0 +1,38 @@
+{
+  "schema_version": "nf.population_snapshot_gate.v0.1",
+  "benchmark_id": "NF-BENCH-001",
+  "project_code": "310224",
+  "snapshot_id": "POP-310224-HISTORICAL-UNRESOLVED",
+  "school_year": "2023-2024",
+  "school": "Liceul Tehnologic Căpitan Nicolae Pleșoianu",
+  "known_not_equivalent": {
+    "contractual_target": 251,
+    "legacy_analysis_base": 348,
+    "later_cf_base": 274
+  },
+  "why_blocked": [
+    "The project target is not automatically the eligible research universe.",
+    "Legacy 348 population is tied to a qualification/cohort description that conflicts with the actual school offer and later project population.",
+    "Later CF v28 value 274 is post-award/current and cannot retroactively overwrite the historical snapshot without a dated source.",
+    "A valid primary research sample requires a dated roster/count by grade and qualification."
+  ],
+  "required_snapshot_fields": [
+    "as_of_date",
+    "school_year",
+    "school_identity",
+    "eligible_population_n",
+    "grades_in_scope",
+    "qualifications_in_scope",
+    "count_by_grade_and_qualification",
+    "source_document_id",
+    "source_date",
+    "source_hash_or_receipt"
+  ],
+  "resolution_sources_preferred": [
+    "dated school student database/official statistical report",
+    "official school/ISJ enrollment record with counts by grade and qualification",
+    "other authoritative dated roster/count accepted by the call"
+  ],
+  "sampling_release_gate": "eligible_population_n and strata counts must be authoritative and population-version consistent",
+  "status": "BLOCKED_INPUT_REQUIRED"
+}
