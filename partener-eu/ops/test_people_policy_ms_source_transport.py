@@ -27,11 +27,8 @@ canonical = json.loads((STATE / "mipe_canonical_calls.json").read_text(encoding=
 source = next(x for x in sources["sources"] if x["id"] == "MS_PRESS")
 person = next(x for x in people["people"] if x["id"] == "cseke-attila")
 
-# Both ms.gov.ro spellings fail TLS hostname validation from the hosted runner.
-# The same official Ministry site is served on ms.ro/www.ms.ro. Use the actual
-# canonical listing root exposed there so candidate discovery cannot re-ingest
-# that category page as if it were a press article. Legacy .gov.ro hosts remain
-# allowlisted only for historical absolute links and provenance.
+# The canonical Ministry listing is served on ms.ro. Legacy .gov.ro spellings
+# remain allowlisted only for historical absolute links and provenance.
 assert source["url"] == "https://ms.ro/centrul-de-presa/"
 assert source["url"].startswith("https://ms.ro/")
 assert collector.official_host(source["url"], source["allowedHosts"])
@@ -59,9 +56,41 @@ candidates = collector.candidate_links(source, listing)
 assert source["url"] not in candidates
 assert candidates == ["https://ms.ro/centrul-de-presa/cseke-attila-investitii-pnrr-test/"]
 
-article = """<html><head><title>Ministerul Sănătății — investiții PNRR</title></head><body>
-20 august 2026. Cseke Attila a declarat că investițiile în spitalele finanțate prin PNRR trebuie accelerate, iar fiecare termen de implementare trebuie urmărit cu atenție.
+# Structural chrome intentionally contains an older date and a stronger funding
+# keyword. Neither may become evidence for the statement inside <main>/<article>.
+article = """<html><head><title>Ministerul Sănătății — investiții</title></head><body>
+<header>
+  <div>1 ianuarie 2020</div>
+  <nav role="navigation">Buget Anual · Programe · Contact</nav>
+</header>
+<main>
+  <article>
+    <p>20 august 2026. Cseke Attila a declarat că proiectele din Mecanismul de redresare trebuie accelerate, iar fiecare termen de implementare trebuie urmărit cu atenție.</p>
+  </article>
+</main>
+<aside role="complementary">Apeluri și bugete istorice</aside>
+<footer>Buget · Contact · 2019</footer>
 </body></html>"""
+
+parser = collector.TextParser()
+parser.feed(article)
+parsed_text = " ".join(parser.parts)
+assert parser.extraction_mode == "SEMANTIC_MAIN_OR_ARTICLE"
+assert "Cseke Attila" in parsed_text
+assert "Mecanismul de redresare" in parsed_text
+assert "Buget Anual" not in parsed_text
+assert "Apeluri și bugete istorice" not in parsed_text
+assert "Contact" not in parsed_text
+
+# Sources without semantic main/article markup retain a safe fallback rather than
+# losing recall, while structural navigation is still excluded.
+fallback_parser = collector.TextParser()
+fallback_parser.feed("""<html><body><nav>Buget Anual</nav><p>Cseke Attila a declarat că finanțarea europeană trebuie accelerată pentru spitale.</p><footer>Contact</footer></body></html>""")
+fallback_text = " ".join(fallback_parser.parts)
+assert fallback_parser.extraction_mode == "BODY_EXCLUDING_STRUCTURAL_BOILERPLATE"
+assert "Cseke Attila" in fallback_text
+assert "Buget Anual" not in fallback_text
+assert "Contact" not in fallback_text
 
 old_fetch = collector.fetch
 try:
@@ -81,10 +110,13 @@ assert len(items) == 1
 
 item = items[0]
 assert item["personId"] == "cseke-attila"
+assert item["date"] == "2026-08-20"
 assert item["signalKind"] == "STATEMENT_SIGNAL"
 assert item["administrativeFact"] == {"status": "UNCONFIRMED_FROM_SIGNAL", "failClosed": True}
 assert item["statementExtraction"]["status"] == "ACTOR_SPEECH_FUNDING_BOUND"
 assert item["statementExtraction"]["scope"] == "SENTENCE"
+assert collector.fold(item["statementExtraction"]["fundingCue"]) == "mecanism"
+assert "Buget Anual" not in item["statement"]
 assert item["sourceSnapshot"]["url"] == candidates[0]
 assert item["sourceSnapshot"]["contentHash"]
 assert item["roleVerification"]["role"] == "Ministrul interimar al Sănătății"
@@ -107,6 +139,10 @@ print(json.dumps({
     "transportRoot": source["url"],
     "listingExcluded": source["url"] not in candidates,
     "historicalListingProjectionRejected": True,
+    "articleEvidenceMode": parser.extraction_mode,
+    "fallbackEvidenceMode": fallback_parser.extraction_mode,
+    "structuralBoilerplateExcluded": True,
+    "fundingCue": item["statementExtraction"]["fundingCue"],
     "candidate": candidates[0],
     "status": status["status"],
     "signalKind": trusted["signalKind"],

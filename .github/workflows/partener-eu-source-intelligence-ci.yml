@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'partener-eu/ingest/people_policy_official_ingest.py'
+      - 'partener-eu/ingest/people_policy_official_ingest_core.py'
       - 'partener-eu/ingest/people_policy_mipe_corpus_replay.py'
       - 'partener-eu/ingest/build_people_policy.py'
       - 'partener-eu/ingest/refine_people_policy.py'
@@ -42,6 +43,7 @@ jobs:
         run: |
           python -m py_compile \
             partener-eu/ingest/people_policy_official_ingest.py \
+            partener-eu/ingest/people_policy_official_ingest_core.py \
             partener-eu/ingest/people_policy_mipe_corpus_replay.py \
             partener-eu/ingest/build_people_policy.py \
             partener-eu/ingest/refine_people_policy.py
