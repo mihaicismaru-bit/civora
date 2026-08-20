@@ -31,6 +31,30 @@ jobs:
         with:
           python-version: '3.13'
 
+      - name: Record public-safety scheduler activation once
+        shell: bash
+        run: |
+          set -euo pipefail
+          marker='craiova-clar/state/public_safety_scheduler_activation.json'
+          if test ! -f "$marker"; then
+            mkdir -p "$(dirname "$marker")"
+            cat > "$marker" <<'JSON'
+          {
+            "schema_version": 1,
+            "status": "ACTIVE",
+            "workflow": "CRAIOVA CLAR Public Safety Scheduler",
+            "runtime_branch": "craiova-clar-build"
+          }
+          JSON
+            git config user.name 'craiova-clar[bot]'
+            git config user.email 'craiova-clar@users.noreply.github.com'
+            git add "$marker"
+            git commit -m 'Record CRAIOVA CLAR public safety scheduler activation'
+            git push origin HEAD:craiova-clar-build
+          else
+            echo 'Public-safety scheduler activation already recorded.'
+          fi
+
       - name: Regression tests
         run: python -m unittest discover -s craiova-clar/tests -p 'test_*.py' -v
 
