@@ -27,7 +27,7 @@ STATE = ROOT / "partener-eu" / "ingest" / "state" / "people_policy_official_sour
 REGISTRY = ROOT / "partener-eu" / "ingest" / "state" / "people_policy_registry.json"
 SOURCE_REGISTRY = ROOT / "partener-eu" / "ingest" / "state" / "people_policy_source_registry.json"
 CANONICAL_CALLS = ROOT / "partener-eu" / "ingest" / "state" / "mipe_canonical_calls.json"
-UA = "PARTENER.EU-DecisionMakerOfficialIngest/2.5 (+https://partener.eu)"
+UA = "PARTENER.EU-DecisionMakerOfficialIngest/2.6 (+https://partener.eu)"
 NOW = dt.datetime.now(dt.timezone.utc)
 FETCH_TIMEOUT_SECONDS = 18
 MAX_SOURCE_FETCH_WORKERS = 9
@@ -121,37 +121,84 @@ class LinkParser(HTMLParser):
 
 
 class TextParser(HTMLParser):
+    """Collect semantic article/main text while excluding structural boilerplate.
+
+    Evidence must come from content, not navigation. We therefore retain separate
+    article and main scopes and keep a visible-body fallback that omits structural
+    elements such as nav/footer/aside/form controls. Script/style/template content
+    is never evidence.
+    """
+
+    HARD_SKIP_TAGS = {"script", "style", "svg", "noscript", "template"}
+    BOILERPLATE_TAGS = {"nav", "footer", "aside", "form", "menu", "button", "select", "option"}
+
     def __init__(self) -> None:
         super().__init__()
         self.parts: list[str] = []
+        self.main_parts: list[str] = []
+        self.article_blocks: list[list[str]] = []
         self.title_parts: list[str] = []
         self._in_title = False
-        self._skip = 0
+        self._hard_skip = 0
+        self._boilerplate_skip = 0
+        self._main_depth = 0
+        self._article_stack: list[int] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         t = tag.lower()
-        if t in {"script", "style", "svg", "noscript"}:
-            self._skip += 1
+        if t in self.HARD_SKIP_TAGS:
+            self._hard_skip += 1
         if t == "title":
             self._in_title = True
+        if t == "main":
+            self._main_depth += 1
+        if t == "article":
+            self.article_blocks.append([])
+            self._article_stack.append(len(self.article_blocks) - 1)
+        if t in self.BOILERPLATE_TAGS:
+            self._boilerplate_skip += 1
 
     def handle_endtag(self, tag: str) -> None:
         t = tag.lower()
-        if t in {"script", "style", "svg", "noscript"} and self._skip:
-            self._skip -= 1
+        if t in self.BOILERPLATE_TAGS and self._boilerplate_skip:
+            self._boilerplate_skip -= 1
+        if t == "article" and self._article_stack:
+            self._article_stack.pop()
+        if t == "main" and self._main_depth:
+            self._main_depth -= 1
         if t == "title":
             self._in_title = False
+        if t in self.HARD_SKIP_TAGS and self._hard_skip:
+            self._hard_skip -= 1
 
     def handle_data(self, data: str) -> None:
-        if self._skip:
+        if self._hard_skip:
             return
         value = clean(data)
         if not value:
             return
         if self._in_title:
             self.title_parts.append(value)
-        else:
-            self.parts.append(value)
+            return
+        if self._boilerplate_skip:
+            return
+        self.parts.append(value)
+        if self._main_depth:
+            self.main_parts.append(value)
+        if self._article_stack:
+            self.article_blocks[self._article_stack[-1]].append(value)
+
+
+def semantic_article_text(parser: TextParser) -> tuple[str, str]:
+    """Return the narrowest substantive semantic scope available for evidence."""
+    article_candidates = [clean(" ".join(parts)) for parts in parser.article_blocks]
+    article_candidates = [text for text in article_candidates if len(text) >= 120 and len(text.split()) >= 16]
+    if article_candidates:
+        return max(article_candidates, key=len), "ARTICLE"
+    main_text = clean(" ".join(parser.main_parts))
+    if len(main_text) >= 120 and len(main_text.split()) >= 16:
+        return main_text, "MAIN"
+    return clean(" ".join(parser.parts)), "VISIBLE_BODY"
 
 
 def fetch(url: str, limit: int = 900_000) -> str:
@@ -620,7 +667,8 @@ def ingest_source(source: dict[str, Any], registry: dict[str, Any], canonical: d
             continue
         parser = TextParser()
         parser.feed(body)
-        text = clean(" ".join(parser.parts))[:45_000]
+        extracted_text, extraction_scope = semantic_article_text(parser)
+        text = extracted_text[:45_000]
         title = clean(" ".join(parser.title_parts))
         combined = f"{title} {text}"
         if not relevant(combined):
@@ -659,6 +707,7 @@ def ingest_source(source: dict[str, Any], registry: dict[str, Any], canonical: d
             "statementExtraction": {
                 "status": "ACTOR_SPEECH_FUNDING_BOUND",
                 "scope": statement_evidence["scope"],
+                "articleTextScope": extraction_scope,
                 "actorAlias": statement_evidence["actorAlias"],
                 "signalCue": statement_evidence["signalCue"],
                 "fundingCue": statement_evidence["fundingCue"],
@@ -673,6 +722,11 @@ def ingest_source(source: dict[str, Any], registry: dict[str, Any], canonical: d
             "sourceSnapshot": {
                 "sourceId": source["id"], "publisher": source["publisher"], "tier": source["tier"],
                 "url": url, "observedAt": observed, "contentHash": content_hash,
+                "contentExtraction": {
+                    "scope": extraction_scope,
+                    "structuralBoilerplateExcluded": True,
+                    "evidenceChars": len(text),
+                },
             },
             "priority": int(person.get("priority") or 50),
             "initials": "".join(x[0] for x in person["name"].split()[:2]).upper(),
@@ -798,6 +852,8 @@ def main() -> int:
             "attributedDirectQuoteEvidenceSupported": True,
             "directQuoteRequiresActorRoleColonAndFundingInQuote": True,
             "actorAliasesRequireTokenBoundaries": True,
+            "semanticArticleBodyPreferredForStatementEvidence": True,
+            "structuralBoilerplateExcludedFromStatementEvidence": True,
             "boundedConcurrentSourceIngest": True,
             "maxSourceFetchWorkers": MAX_SOURCE_FETCH_WORKERS,
             "fetchTimeoutSeconds": FETCH_TIMEOUT_SECONDS,
