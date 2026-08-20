@@ -1,0 +1,132 @@
+{
+  "schema_version": "nf.product_run_input.v0.1",
+  "benchmark_id": "NF-BENCH-001",
+  "project_input": {
+    "project_id": "310224",
+    "territory": "Vâlcea / Râmnicu Vâlcea",
+    "target": 251,
+    "target_group": "elevi înmatriculați în învățământul profesional și tehnic inclusiv dual",
+    "partner_school": "Liceul Tehnologic Căpitan Nicolae Pleșoianu"
+  },
+  "call_snapshot": {
+    "call_code": "PEO/76/PEO_P8/OP4/ESO4.5/PEO_A3",
+    "specific_objective": "ESO4.5",
+    "indicators": ["EECO06+07", "EECR03"]
+  },
+  "ruleset_version": "0.2",
+  "historical_cutoff": "2024-01-12",
+  "source_snapshot_ids": ["EV-H-001", "EV-H-002", "EV-H-003", "EV-H-004", "EV-H-005", "EV-H-006"],
+  "evidence": {
+    "EV-H-001": {
+      "id": "EV-H-001",
+      "source": "AJOFM Vâlcea – situația șomajului înregistrat, ianuarie 2023",
+      "source_url": "https://www.anofm.ro/upload2/V%C3%A2lcea/24058/Ian_2023.pdf",
+      "tier": "A1",
+      "territory": "Vâlcea",
+      "scope": "county",
+      "period": "2023-01",
+      "constructs": ["youth_registered_unemployment_context", "education_level_unemployment"],
+      "direct_measurement": true
+    },
+    "EV-H-002": {
+      "id": "EV-H-002",
+      "source": "AJOFM Vâlcea – Prognoza angajărilor pe termen scurt 2023",
+      "source_url": "https://www.anofm.ro/upload2/V%C3%A2lcea/27988/PROGNOZA_PENTRU_ANUL_2023.pdf",
+      "tier": "A1-with-provenance-caveat",
+      "territory": "Vâlcea",
+      "scope": "county",
+      "period": "2023",
+      "constructs": ["labour_demand", "occupation_demand", "sector_hiring_demand"],
+      "direct_measurement": true,
+      "historical_availability": "conditional"
+    },
+    "EV-H-003": {
+      "id": "EV-H-003",
+      "source": "Ministerul Educației – Raport privind starea învățământului preuniversitar 2022–2023",
+      "source_url": "https://www.edu.ro/sites/default/files/_fi%C8%99iere/Minister/2023/Transparenta/Rapoarte_sistem/Raport-Starea-invatamantului-preuniversitar-2022-2023.pdf",
+      "tier": "A2",
+      "territory": "România",
+      "scope": "national",
+      "period": "2022-2023",
+      "constructs": ["ipt_system_context", "employer_partnerships", "career_guidance_policy", "professional_path_attractiveness"],
+      "direct_measurement": false
+    },
+    "EV-H-004": {
+      "id": "EV-H-004",
+      "source": "ISJ Vâlcea – Oferta educațională profesional și dual 2023–2024",
+      "source_url": "https://www.isjvalcea.ro/examene/admitere-profesional-dual",
+      "tier": "A1",
+      "territory": "Liceul Tehnologic Căpitan Nicolae Pleșoianu / Vâlcea",
+      "scope": "school",
+      "period": "2023-2024",
+      "constructs": ["qualification_offer"],
+      "direct_measurement": true
+    },
+    "EV-H-005": {
+      "id": "EV-H-005",
+      "source": "ARACIP / OM 4898 din 26.06.2023",
+      "source_url": "https://aracip.eu/categorii-documente/info-autorizare-provizorie?page=74",
+      "tier": "A1",
+      "territory": "Liceul Tehnologic Căpitan Nicolae Pleșoianu",
+      "scope": "school",
+      "source_date": "2023-06-26",
+      "constructs": ["qualification_authorization"],
+      "direct_measurement": true
+    },
+    "EV-H-006": {
+      "id": "EV-H-006",
+      "source": "Ministerul Educației – repartizarea a 1.200 posturi de consilieri școlari",
+      "source_url": "https://www.edu.ro/comunicat_presa_08_2023_repartizare_1200_posturi_consilieri_scolari",
+      "tier": "A2",
+      "territory": "România",
+      "scope": "national",
+      "source_date": "2023-02-09",
+      "constructs": ["career_guidance_capacity_policy"],
+      "direct_measurement": false
+    }
+  },
+  "claims_requiring_local_validation": [
+    {
+      "id": "PR-001",
+      "scope": "school",
+      "construct": "career_guidance_need",
+      "requires_direct_local": true,
+      "priority": true,
+      "gap_type": "career_guidance",
+      "evidence_ids": ["EV-H-003", "EV-H-006"]
+    },
+    {
+      "id": "PR-002",
+      "scope": "school",
+      "construct": "practice_quality",
+      "requires_direct_local": true,
+      "priority": true,
+      "gap_type": "practice_quality",
+      "evidence_ids": ["EV-H-003", "EV-H-004"]
+    },
+    {
+      "id": "PR-003",
+      "scope": "school",
+      "construct": "skills_baseline",
+      "requires_direct_local": true,
+      "priority": true,
+      "gap_type": "skills_baseline",
+      "evidence_ids": ["EV-H-003", "EV-H-004", "EV-H-005"]
+    },
+    {
+      "id": "PR-004",
+      "scope": "school",
+      "construct": "career_intention",
+      "requires_direct_local": true,
+      "priority": true,
+      "gap_type": "career_intention",
+      "evidence_ids": ["EV-H-003", "EV-H-004"]
+    }
+  ],
+  "population_snapshot": {
+    "snapshot_id": "POP-310224-HISTORICAL-UNRESOLVED"
+  },
+  "expected_state": "BLOCKED_RESEARCH",
+  "expected_blocking_gap_count": 5,
+  "expected_primary_research_question_count": 6
+}

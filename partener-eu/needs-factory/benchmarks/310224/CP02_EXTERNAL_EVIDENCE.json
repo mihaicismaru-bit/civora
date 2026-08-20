@@ -1,0 +1,171 @@
+{
+  "schema_version": "nf.external_evidence.v0.1",
+  "benchmark_id": "NF-BENCH-001",
+  "project_code": "310224",
+  "mode": "blind_historical",
+  "historical_cutoff": "2024-01-12",
+  "evidence": [
+    {
+      "id": "EV-H-001",
+      "source": "AJOFM Vâlcea – Buletin informativ, situația șomajului înregistrat, ianuarie 2023",
+      "publisher": "AJOFM Vâlcea / ANOFM",
+      "source_url": "https://www.anofm.ro/upload2/V%C3%A2lcea/24058/Ian_2023.pdf",
+      "source_date": "2023-02-08",
+      "territory": "Vâlcea",
+      "population": "registered unemployed persons",
+      "facts": {
+        "registered_unemployment_rate_pct": 3.47,
+        "registered_unemployed_total": 4828,
+        "registered_unemployed_under_25": 754,
+        "registered_unemployed_25_29": 440,
+        "registered_unemployed_under_30_total": 1194,
+        "registered_unemployed_under_30_share_pct_calculated": 24.73,
+        "gimnazial_no_school_professional_total": 3072,
+        "gimnazial_no_school_professional_share_pct": 63.63
+      },
+      "interpretation_limit": "Registered-unemployment data cannot be presented as a youth unemployment rate and cannot prove outcomes for Pleșoianu students specifically.",
+      "tier": "A1",
+      "historically_admissible": true
+    },
+    {
+      "id": "EV-H-002",
+      "source": "Prognoza angajărilor pe termen scurt – Județul Vâlcea – anul 2023",
+      "publisher": "AJOFM Vâlcea / eSPOR",
+      "source_url": "https://www.anofm.ro/upload2/V%C3%A2lcea/27988/PROGNOZA_PENTRU_ANUL_2023.pdf",
+      "period": "2023 forecast",
+      "territory": "Vâlcea",
+      "methodology": {
+        "responding_employers": 1240,
+        "employers_universe": 8484,
+        "method": "online employer questionnaire plus extrapolation by economic branch and similar occupation groups"
+      },
+      "facts": {
+        "direct_estimated_hires": 2616,
+        "private_estimated_hires": 2493,
+        "manufacturing_direct_hires": 624,
+        "construction_direct_hires": 293,
+        "trade_vehicle_repair_direct_hires": 405,
+        "transport_storage_direct_hires": 235,
+        "manufacturing_extrapolated_hires": 1588,
+        "manufacturing_extrapolated_no_experience": 1108,
+        "construction_extrapolated_hires": 1261,
+        "construction_extrapolated_no_experience": 984,
+        "trade_vehicle_repair_extrapolated_hires": 1181,
+        "trade_vehicle_repair_extrapolated_no_experience": 938,
+        "transport_storage_extrapolated_hires": 961,
+        "transport_storage_extrapolated_no_experience": 502,
+        "machine_mechanics_forecast_hires": 32,
+        "electrical_equipment_assemblers_forecast_hires": 40,
+        "electrical_equipment_assemblers_no_experience": 12,
+        "construction_workers_forecast_hires": 96,
+        "construction_workers_no_experience": 67,
+        "vehicle_drivers_forecast_hires": 137,
+        "vehicle_drivers_no_experience": 93
+      },
+      "publication_provenance": "The official AJOFM repository identifies the document as the 2023 forecast and the document states it was produced to build the 2023 employment/training programme. The migrated webpage does not preserve a reliable original publication timestamp.",
+      "interpretation_limit": "Use as strong historical local labour-demand evidence, but retain a provenance caveat until an original publication timestamp/archive receipt is captured. It must not be the sole evidence for a high-severity need.",
+      "tier": "A1-with-provenance-caveat",
+      "historically_admissible": "conditional"
+    },
+    {
+      "id": "EV-H-003",
+      "source": "Raport privind starea învățământului preuniversitar din România 2022–2023",
+      "publisher": "Ministerul Educației",
+      "source_url": "https://www.edu.ro/sites/default/files/_fi%C8%99iere/Minister/2023/Transparenta/Rapoarte_sistem/Raport-Starea-invatamantului-preuniversitar-2022-2023.pdf",
+      "source_date": "2023-12",
+      "territory": "Romania",
+      "facts": {
+        "upper_secondary_enrolment_rate_pct_2022_2023": 79.8,
+        "transition_to_professional_pct_2022_2023": 18.2,
+        "professional_dropout_pct_2021_2022": 2.8,
+        "economic_operator_requests_included_in_professional_plan_pct_over": 87.5,
+        "economic_operator_requests_included_in_dual_plan_pct_over": 92,
+        "professional_dual_plan_realisation_pct": 78.87,
+        "dual_plan_realisation_pct": 75.2,
+        "professional_operator_partnerships_2022_2023": 4207,
+        "professional_operator_partnerships_2021_2022": 4180,
+        "professional_operator_partnerships_2019_2020": 6120,
+        "dual_operators_2022_2023": 740
+      },
+      "qualitative_findings": [
+        "Non-realisation of the professional/dual schooling plan was attributed mainly to graduates choosing liceal education rather than professional/dual pathways.",
+        "Employer involvement in professional training includes human/material resources for practice, work/protection equipment, joint development of practice curriculum and ongoing student assessment.",
+        "The Ministry maintained a dedicated strand of information and counselling for increasing participation in professional education.",
+        "The career-orientation guide included professional and technological qualifications and career outcomes.",
+        "2024 development directions included updated qualifications linked to new technologies and labour-market demand, plus improved information/counselling for professional and dual education."
+      ],
+      "tier": "A2",
+      "historically_admissible": true
+    },
+    {
+      "id": "EV-H-004",
+      "source": "Broșura Admitere Vâlcea 2023–2024 / Oferta educațională profesional și dual",
+      "publisher": "Inspectoratul Școlar Județean Vâlcea",
+      "source_url": "https://www.isjvalcea.ro/examene/admitere-profesional-dual",
+      "period": "2023-2024",
+      "territory": "Vâlcea / Liceul Tehnologic Căpitan Nicolae Pleșoianu",
+      "facts": {
+        "liceal_technological": [
+          {"domain": "mecanică", "qualification": "tehnician transporturi", "places": 24}
+        ],
+        "dual": [
+          {"domain": "mecanică", "qualification": "mașinist utilaje cale și terasamente", "places": 14},
+          {"domain": "mecanică", "qualification": "operator la mașini cu comandă numerică", "places": 12},
+          {"domain": "mecanică", "qualification": "mecanic auto", "places": 24},
+          {"domain": "construcții, instalații și lucrări publice", "qualification": "instalator instalații tehnico-sanitare și de gaze", "places": 12},
+          {"domain": "electric", "qualification": "electrician auto", "places": 12}
+        ]
+      },
+      "relevance": "Establishes the actual historical educational offer of the partner school without using the legacy needs-analysis questionnaire.",
+      "tier": "A1",
+      "historically_admissible": true
+    },
+    {
+      "id": "EV-H-005",
+      "source": "OM nr. 4898/26.06.2023 – autorizare Liceul Tehnologic Căpitan Nicolae Pleșoianu",
+      "publisher": "Ministerul Educației / ARACIP",
+      "source_url": "https://aracip.eu/categorii-documente/info-autorizare-provizorie?page=74",
+      "source_date": "2023-06-26",
+      "territory": "Liceul Tehnologic Căpitan Nicolae Pleșoianu, Râmnicu Vâlcea",
+      "facts": [
+        "Official ARACIP registry contains OM 4898/26.06.2023 authorising programmes at Pleșoianu.",
+        "The 2023 authorisation record provides independent official confirmation of active vocational offer development at the school."
+      ],
+      "tier": "A1",
+      "historically_admissible": true
+    },
+    {
+      "id": "EV-H-006",
+      "source": "Ministerul Educației – repartizarea a 1.200 de posturi de consilieri școlari",
+      "publisher": "Ministerul Educației",
+      "source_url": "https://www.edu.ro/comunicat_presa_08_2023_repartizare_1200_posturi_consilieri_scolari",
+      "source_date": "2023-02-09",
+      "territory": "Romania",
+      "facts": {
+        "new_school_counsellor_posts": 1200,
+        "national_average_after_allocation": "approximately 1 counsellor per 800 pupils/preschoolers",
+        "counsellors_before_allocation_context": 2288,
+        "pupils_preschoolers_context": 2751233
+      },
+      "policy_goal": "Increase access to psycho-pedagogical assistance, school and vocational guidance, and information/counselling support.",
+      "interpretation_limit": "National service-capacity evidence; it does not prove a counsellor shortage at Pleșoianu specifically.",
+      "tier": "A2",
+      "historically_admissible": true
+    }
+  ],
+  "excluded_or_limited": [
+    {
+      "source": "AJOFM Vâlcea annual activity report for 2023",
+      "reason": "Published 2024-09-18, after historical cutoff; excluded from historical run."
+    },
+    {
+      "source": "Current/post-2024 school or labour-market information",
+      "reason": "Post-cutoff; may be used only later in NF-CURRENT, never in NF-HISTORICAL."
+    },
+    {
+      "source": "Unofficial mirrors of the ISJ admission brochure",
+      "reason": "Useful for discovery only; replaced by the official ISJ Vâlcea source."
+    }
+  ],
+  "status": "frozen_before_ground_truth_comparison"
+}

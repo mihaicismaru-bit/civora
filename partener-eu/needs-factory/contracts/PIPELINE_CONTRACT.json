@@ -1,0 +1,23 @@
+{
+  "schema_version": "nf.pipeline_contract.v0.1",
+  "product": "NEEDS_FACTORY",
+  "stages": [
+    {"id":"NF00","name":"INTAKE","input":["project_input"],"output":["PROJECT_INPUT.json","POPULATION_SNAPSHOT.json"],"gate":"identity, territory, target population and call reference are explicit"},
+    {"id":"NF01","name":"CALL_INTELLIGENCE","input":["PROJECT_INPUT.json","PARTENER call snapshot"],"output":["CALL_REQUIREMENTS.json"],"gate":"eligibility, evaluator requirements and indicators are versioned"},
+    {"id":"NF02","name":"RESEARCH_PLAN","input":["PROJECT_INPUT.json","CALL_REQUIREMENTS.json"],"output":["RESEARCH_PLAN.json"],"gate":"questions are need-discovery questions, not solution confirmation prompts"},
+    {"id":"NF03","name":"EXTERNAL_EVIDENCE","input":["RESEARCH_PLAN.json","CIVORA/PARTENER source plane"],"output":["EVIDENCE_REGISTRY.json","SOURCE_MANIFEST.json"],"gate":"official-first, provenance retained, historical cutoff respected when applicable"},
+    {"id":"NF04","name":"EVIDENCE_VALIDATION","input":["EVIDENCE_REGISTRY.json","QA_RULESET"],"output":["VALIDATED_EVIDENCE.json","CONTRADICTIONS.json"],"gate":"material claims use admissible evidence; unresolved contradictions are preserved"},
+    {"id":"NF05","name":"GAP_DETECTION","input":["VALIDATED_EVIDENCE.json","PROJECT_INPUT.json"],"output":["EVIDENCE_GAPS.json"],"gate":"school/UAT-specific claims without direct evidence become gaps"},
+    {"id":"NF06","name":"PRIMARY_RESEARCH","conditional":true,"input":["EVIDENCE_GAPS.json","POPULATION_SNAPSHOT.json"],"output":["PRIMARY_RESEARCH_PLAN.json","PRIMARY_RESEARCH_RAW.json","PRIMARY_RESEARCH_AGGREGATES.json"],"gate":"raw responses canonical; sample/coverage/missingness and population fit validated"},
+    {"id":"NF07","name":"NEED_DISCOVERY","input":["VALIDATED_EVIDENCE.json","PRIMARY_RESEARCH_AGGREGATES.json?"],"output":["NEEDS.json"],"gate":"each priority need has an evidence chain; indicators/compliance cannot create needs"},
+    {"id":"NF08","name":"NEED_RANKING","input":["NEEDS.json"],"output":["NEEDS_RANKED.json"],"gate":"ranking exposes evidence confidence and applicability; unsupported needs cannot rank"},
+    {"id":"NF09","name":"CAUSAL_MODEL","input":["NEEDS_RANKED.json"],"output":["CAUSAL_GRAPH.json"],"gate":"association is not represented as causality without support"},
+    {"id":"NF10","name":"INTERVENTION_TRACEABILITY","input":["CAUSAL_GRAPH.json","CALL_REQUIREMENTS.json"],"output":["TRACEABILITY_MATRIX.json"],"gate":"Need -> Evidence -> Cause -> Intervention -> Output -> Result -> Indicator is explicit"},
+    {"id":"NF11","name":"ADVERSARIAL_QA","input":["all upstream artifacts","QA_RULESET"],"output":["QA_REPORT.json"],"gate":"zero critical failures and zero unwaived high failures"},
+    {"id":"NF12","name":"PACKAGE","input":["QA_REPORT.json","all validated artifacts"],"output":["NARRATIVE_READY_PACK.json","RUN_MANIFEST.json"],"gate":"QA pass required; unresolved blocking gaps prevent narrative-ready status"}
+  ],
+  "release_states": ["BLOCKED_RESEARCH","BLOCKED_CONTRADICTION","READY_FOR_NEED_DISCOVERY","READY_FOR_TRACEABILITY","READY_FOR_NARRATIVE","RELEASED"],
+  "default_state": "BLOCKED_RESEARCH",
+  "determinism": "Every stage output is canonical JSON and is hashable; rerun with identical inputs/rules/source snapshots must produce semantically identical output.",
+  "status": "active"
+}

@@ -1,0 +1,42 @@
+{
+  "schema_version": "nf.qa_report.v0.1",
+  "benchmark_id": "NF-BENCH-001",
+  "project_code": "310224",
+  "checkpoint": "NF-CP02",
+  "mode": "blind_historical",
+  "checks": [
+    {"id":"CP02-QA-001","name":"ground_truth_isolation","result":"PASS","detail":"Historical needs-analysis narrative, legacy questionnaire results, legacy needs list and KNOWN_DEFECTS were not opened during blind derivation."},
+    {"id":"CP02-QA-002","name":"historical_cutoff","result":"PASS","detail":"Evidence admitted to need derivation is dated/period-correct for <= 2024-01-12; a post-cutoff AJOFM 2023 activity report was explicitly excluded."},
+    {"id":"CP02-QA-003","name":"official_first","result":"PASS","detail":"Primary chains use AJOFM/ANOFM, Ministry of Education, ISJ Vâlcea and ARACIP evidence. Unofficial mirrors are discovery-only."},
+    {"id":"CP02-QA-004","name":"territorial_specificity","result":"PASS_WITH_GAPS","detail":"School offer and county labour-market evidence are available. No school-level outcomes survey or practice-quality baseline is available in blind corpus."},
+    {"id":"CP02-QA-005","name":"rate_share_semantics","result":"PASS","detail":"Under-30 registered unemployed are expressed as a share/count of registered unemployed, never as a youth unemployment rate."},
+    {"id":"CP02-QA-006","name":"school_level_non_projection","result":"PASS","detail":"National dropout, counselling, infrastructure or practice-system findings are not silently attributed to Pleșoianu."},
+    {"id":"CP02-QA-007","name":"need_evidence_chain","result":"PASS","detail":"Every primary blind need has at least two evidence items and at least one official evidence chain; BN-06 is explicitly supporting context only."},
+    {"id":"CP02-QA-008","name":"unsupported_discrimination_need","result":"PASS","detail":"Discrimination was rejected as a primary blind need because compliance obligations do not establish prevalence in the target group."},
+    {"id":"CP02-QA-009","name":"causal_restraint","result":"PASS","detail":"Cross-sectional statistics are used to establish context/relevance, not project causality or individual outcomes."},
+    {"id":"CP02-QA-010","name":"indicator_traceability","result":"PASS","detail":"Primary intervention chains are traceable to EECO06+07=251 and, where logically applicable, EECR03=226 without inventing an employment indicator."},
+    {"id":"CP02-QA-011","name":"publication_provenance","result":"PASS_WITH_CAVEAT","detail":"AJOFM Vâlcea 2023 forecast is official and explicitly a 2023 programme-planning document, but migrated-page publication timestamp is not independently frozen; it is therefore conditional evidence and not sole support for any high-severity need."},
+    {"id":"CP02-QA-012","name":"primary_research_gap_detection","result":"PASS","detail":"The run explicitly requests student-level primary research before making school-specific statements about career indecision, perceived practice deficits or skills gaps."}
+  ],
+  "metrics": {
+    "primary_needs": 5,
+    "supporting_needs": 1,
+    "rejected_unsupported_candidate_needs": 3,
+    "primary_needs_with_official_evidence_pct": 100,
+    "primary_needs_with_school_or_county_specific_evidence_pct": 80,
+    "ground_truth_leak_detected": false,
+    "historical_cutoff_violation_detected": false,
+    "unsupported_school_specific_claims": 0
+  },
+  "blocking_defects": [],
+  "nonblocking_gaps": [
+    "school-level student primary research",
+    "school-level practice-quality and employer-placement baseline",
+    "school-level transition/retention outcome baseline",
+    "baseline active practice-partnership inventory",
+    "AJOFM forecast original publication timestamp/hash receipt",
+    "official ISJ brochure binary/hash receipt"
+  ],
+  "decision": "READY_FOR_COMPARATOR",
+  "status": "PASS"
+}

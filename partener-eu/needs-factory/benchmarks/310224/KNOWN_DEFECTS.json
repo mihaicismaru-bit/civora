@@ -1,0 +1,26 @@
+{
+  "schema_version":"nf.known_defects.v0.1",
+  "benchmark_id":"NF-BENCH-001",
+  "defects":[
+    {"id":"KD-001","severity":"critical","class":"sample_consistency","finding":"Survey sample is 241 in the needs analysis and detailed CF activity narrative, but 200 in the CF target-group section.","expected_gate":"fail_closed"},
+    {"id":"KD-002","severity":"critical","class":"entity_consistency","finding":"Needs-analysis intro names 'Colegiul Energetic' although the benchmark project is Pleșoianu.","expected_gate":"fail_closed"},
+    {"id":"KD-003","severity":"critical","class":"entity_consistency","finding":"CF justification names 'Liceul Constantin Brancoveanu' as study-case school although the partner is Pleșoianu.","expected_gate":"fail_closed"},
+    {"id":"KD-004","severity":"critical","class":"survey_integrity","finding":"Adjacent chart values are repeatedly 86/105/50 while narrative for at least one question states 144/82/15.","expected_gate":"fail_closed"},
+    {"id":"KD-005","severity":"high","class":"population_fit","finding":"Survey methodology states grades IX-XI while funded selection base is described as grades X-XII.","expected_gate":"fail_closed_until_justified"},
+    {"id":"KD-006","severity":"critical","class":"population_drift","finding":"Historical analysis states 348 pupils and different specializations than current CF base of 274 pupils/qualifications; applicability must be versioned by submission date.","expected_gate":"version_required"},
+    {"id":"KD-007","severity":"high","class":"freshness","finding":"Key labour/economic evidence uses 2017-2019 observations even though the application was prepared in 2023-2024 and more recent official series existed.","expected_gate":"freshness_warning_or_replace"},
+    {"id":"KD-008","severity":"high","class":"territorial_fit","finding":"Many national/region-wide claims are used to support a school-specific intervention without Vâlcea/Râmnicu Vâlcea corroboration.","expected_gate":"local_corroboration_required"},
+    {"id":"KD-009","severity":"high","class":"template_contamination","finding":"Generic preschool-focused prose appears in an analysis for IPT high-school pupils.","expected_gate":"reject_section"},
+    {"id":"KD-010","severity":"high","class":"unsupported_need","finding":"'High discrimination among Romanian youth' is promoted to a diagnosed need without direct measurement in the displayed primary questionnaire.","expected_gate":"downgrade_to_cross_cutting_or_add_evidence"},
+    {"id":"KD-011","severity":"high","class":"source_applicability","finding":"CRPE agricultural-high-school evidence is generalized to Pleșoianu technical profiles without an explicit transferability test.","expected_gate":"applicability_penalty"},
+    {"id":"KD-012","severity":"high","class":"traceability","finding":"No atomic Need -> Evidence -> Cause -> Activity -> Output -> Result -> Indicator traceability matrix exists.","expected_gate":"required_for_nf_output"},
+    {"id":"KD-013","severity":"high","class":"source_traceability","finding":"Many figures/charts lack precise table/dataset IDs, URLs, access dates or page-level provenance.","expected_gate":"source_manifest_required"},
+    {"id":"KD-014","severity":"medium","class":"source_identity","finding":"Some contextual claims cite broad entities/studies (e.g. GEA) without enough bibliographic identity to reproduce the claim.","expected_gate":"untraceable_status"},
+    {"id":"KD-015","severity":"medium","class":"questionnaire_design","finding":"Questionnaire conclusions are not stratified by grade/qualification and do not report coverage/response rate against the actual eligible base.","expected_gate":"coverage_metadata_required"},
+    {"id":"KD-016","severity":"high","class":"solution_leakage","finding":"Some 'needs' are formulated as a justification of the preselected solution (stages/practice) rather than independently diagnosed deficits.","expected_gate":"causal_guard"},
+    {"id":"KD-017","severity":"medium","class":"overlap","finding":"Need for competency alignment and need for early labour-market preparation overlap substantially and should be tested for duplication before ranking.","expected_gate":"deduplicate_or_model_dependency"},
+    {"id":"KD-018","severity":"high","class":"benchmark_definition","finding":"Current CF is version 28 from 2026, while historical needs analysis was uploaded 04.01.2024; post-award state must never contaminate historical blind reconstruction.","expected_gate":"historical_cutoff_enforced"}
+  ],
+  "acceptance":"All critical/high defect classes have a corresponding QA rule in QA_RULESET_v0.1.",
+  "status":"complete"
+}

@@ -1,0 +1,82 @@
+{
+  "schema_version": "nf.learned_rules.v0.2",
+  "benchmark_id": "NF-BENCH-001",
+  "project_code": "310224",
+  "derived_from": ["CP02_BLIND_NEEDS.json", "CP02_QA_REPORT.json", "CP03_COMPARATOR.json", "KNOWN_DEFECTS.json"],
+  "rules": [
+    {
+      "id": "LR-001",
+      "name": "PrimaryResearchTrigger",
+      "rule": "If a priority need requires a school/UAT-specific perception, skills, practice-quality, career-intention or service-access claim and no direct local evidence exists, the system must generate a primary-research requirement rather than generalize national evidence.",
+      "implementation": "emit EVIDENCE_GAP + PRIMARY_RESEARCH_TASK; block school-specific wording until data is validated"
+    },
+    {
+      "id": "LR-002",
+      "name": "OfficialLocalBeforeGeneric",
+      "rule": "Before using national/regional labour evidence for a local project, search official county/UAT sources and the actual school educational offer. Local official evidence outranks generic contextual material.",
+      "implementation": "research planner order: school/ISJ -> AJOFM/INS county -> regional -> national -> EU"
+    },
+    {
+      "id": "LR-003",
+      "name": "QualificationDemandJoin",
+      "rule": "For IPT projects, build an explicit join between school qualification/domain offer and local employer sector/occupation demand before ranking labour-market alignment needs.",
+      "implementation": "qualification/domain -> COR/ISCO family when possible -> CAEN/NACE sector -> local demand evidence"
+    },
+    {
+      "id": "LR-004",
+      "name": "RateShareSemanticGuard",
+      "rule": "Never relabel a composition share, stock count or registered-unemployment measure as an unemployment/employment rate. Preserve numerator, denominator and universe.",
+      "implementation": "evidence schema must store measure_type, numerator, denominator/universe and calculation flag"
+    },
+    {
+      "id": "LR-005",
+      "name": "PublicationReceiptGate",
+      "rule": "Historical reconstruction requires both observation period and evidence that the source was available by the historical cutoff. If migrated pages lose original publication metadata, mark evidence conditional until archive/hash/receipt is captured.",
+      "implementation": "historical_availability in {verified, conditional, excluded}; conditional evidence cannot be sole support for a high-priority need"
+    },
+    {
+      "id": "LR-006",
+      "name": "ComplianceIsNotNeed",
+      "rule": "Horizontal obligations such as nondiscrimination, DNSH or equality are not diagnosed needs merely because the guide requires them. Promote them to a need only when target-group evidence demonstrates a relevant problem.",
+      "implementation": "separate compliance_requirements from empirical_needs"
+    },
+    {
+      "id": "LR-007",
+      "name": "IndicatorDoesNotCreateNeed",
+      "rule": "A programme indicator or preselected project result cannot itself establish a need. If no independent evidence shows a certification/completion deficit, qualification outcome remains an intervention/result target, not a diagnosed problem.",
+      "implementation": "need discovery excludes indicator text from evidence pool; indicators enter only at traceability stage"
+    },
+    {
+      "id": "LR-008",
+      "name": "NeedDecompositionAndDedup",
+      "rule": "Broad legacy formulations such as 'early preparation for labour-market requirements' should be decomposed into independently evidenced mechanisms (practice exposure, career guidance, employer linkage, qualification-demand fit) and deduplicated before ranking.",
+      "implementation": "semantic clustering + causal dependency graph before final need IDs"
+    },
+    {
+      "id": "LR-009",
+      "name": "AcceptedDoesNotEqualTrue",
+      "rule": "Evaluator acceptance is benchmark metadata, not factual validation. Unsupported or internally inconsistent accepted claims remain defects and must not be learned as truth.",
+      "implementation": "ground_truth records accepted_by_evaluator and evidence_strength separately"
+    },
+    {
+      "id": "LR-010",
+      "name": "PrimaryResearchIntegrity",
+      "rule": "When primary research is used, raw response table is the canonical source. Narrative, charts and conclusions are generated from it; manual chart values or duplicated visual series are prohibited.",
+      "implementation": "raw_responses -> deterministic aggregation -> charts/narrative; sample N and missingness assertions in QA"
+    },
+    {
+      "id": "LR-011",
+      "name": "PopulationVersionLock",
+      "rule": "Qualification/cohort/base-population changes are versioned. A later CF population cannot be used to silently rewrite the historical needs-analysis population.",
+      "implementation": "population_snapshot_id attached to every school-level evidence item and need"
+    },
+    {
+      "id": "LR-012",
+      "name": "EvidenceGapIsValidOutput",
+      "rule": "A high-quality needs analysis may explicitly state that a plausible school-specific claim is not yet demonstrated. Evidence gaps must trigger research tasks, not filler prose.",
+      "implementation": "EVIDENCE_GAP is a first-class artifact and can block final narrative release"
+    }
+  ],
+  "product_implication": "The next required product component is a Primary Research Engine that is invoked by evidence gaps before narrative generation.",
+  "status": "adopt_for_v0.2"
+}
