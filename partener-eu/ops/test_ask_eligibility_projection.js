@@ -7,7 +7,7 @@ const vm=require('vm');
 const scriptPath=process.argv[2]||path.resolve(__dirname,'../web/ask-partener-v2.js');
 const source=fs.readFileSync(scriptPath,'utf8');
 
-function render(audience){
+function render(audience,options={}){
   const input={value:'energie',autocomplete:'',addEventListener(){}};
   const output={innerHTML:'',querySelector(){return null},querySelectorAll(){return []}};
   const button={textContent:'',onclick:null};
@@ -31,11 +31,11 @@ function render(audience){
     title:'Finanțare pentru energie regenerabilă',
     programme:'Program test',
     region:'România',
-    status:'OPEN',
+    status:Object.prototype.hasOwnProperty.call(options,'status')?options.status:'OPEN',
     audience,
     standfirst:'Investiții în energie',
     decisionAction:'Verifică dosarul înainte de depunere.',
-    quickFacts:[],
+    quickFacts:options.quickFacts||[],
     sections:[],
     sources:[],
     sourceLinks:[],
@@ -43,7 +43,7 @@ function render(audience){
   };
   const window={
     PARTENER_DECISION_PRODUCTS:{dossiers:[dossier]},
-    PARTENER_MIPE_CANONICAL_CALLS:{calls:[]},
+    PARTENER_MIPE_CANONICAL_CALLS:{calls:options.canonicalCalls||[]},
     PARTENER_DECISION_UI:{openHub(){return true},openDossier(){return true}},
     addEventListener(){}
   };
@@ -76,4 +76,23 @@ assert(structured.includes('<b>Cine poate aplica</b>'),'structured audience must
 assert(structured.includes('IMM eligibile'),'structured audience content must be preserved');
 assert(!structured.includes('Eligibilitatea solicitantului nu este încă confirmată'),'structured audience must not be mislabeled unknown');
 
-console.log(JSON.stringify({status:'PASS',cases:2,contract:'Ask eligibility projection is fail-closed'}));
+const canonicalStatus=render(['IMM eligibile'],{
+  status:'CLOSED',
+  canonicalCalls:[{id:'TEST-ENERGY',status:'OPEN',verificationEvidence:[]}]
+});
+assert(canonicalStatus.includes('askV2Status OPEN">DESCHIS'),'deterministic canonical status must take precedence over a conflicting dossier status');
+assert(!canonicalStatus.includes('askV2Status CLOSED">ÎNCHIS'),'stale dossier status must not override the deterministic canonical status');
+
+const unknownStatus=render(['IMM eligibile'],{status:''});
+assert(unknownStatus.includes('askV2Status UNKNOWN">NECONFIRMAT'),'missing status must be projected explicitly as unconfirmed');
+assert(unknownStatus.includes('Statutul apelului nu este încă confirmat.'),'missing status must remain in the unknown-facts block');
+assert(!unknownStatus.includes('askV2Status REVIEW">ÎN VERIFICARE'),'missing status must not be fabricated as review');
+
+const factStatus=render(['IMM eligibile'],{
+  status:'',
+  quickFacts:[{label:'Status',value:'Deschis pentru depunere',confidence:'VERIFIED'}]
+});
+assert(factStatus.includes('askV2Status VERIFIED_FACT">Deschis pentru depunere'),'a verified status fact may be displayed when no structured status exists');
+assert(!factStatus.includes('Statutul apelului nu este încă confirmat.'),'verified status fact must not be mislabeled unknown');
+
+console.log(JSON.stringify({status:'PASS',cases:5,contract:'Ask eligibility and status projection are fail-closed'}));
