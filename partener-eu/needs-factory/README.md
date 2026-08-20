@@ -12,11 +12,19 @@ It does **not** duplicate source crawling, generic source health, persistence, c
 
 ## Reuse contract
 
-- **PARTENER.EU** supplies call/domain intelligence and source-state/health. Material facts should consume last-known-good, non-quarantined sources and retain raw/semantic hashes when available.
+- **PARTENER.EU** supplies call/domain intelligence and source-state/health. Material facts consume only current, non-quarantined, quality-approved source state and preserve provider document provenance.
 - **CIVORA** supplies discovery/provenance patterns and external-source retrieval capability.
 - **DAPE** supplies the production semantics: deterministic resume, checkpoints, artifact registry, QA gates, versioning and rollback. Needs Factory emits deterministic artifacts that can be registered by DAPE instead of maintaining a second registry.
 
 See `contracts/ENGINE_REUSE_CONTRACT.json`.
+
+## Live discovery binding
+
+`tools/run_research_cycle.py` is the live research boundary. It sends canonical research tasks to an existing CIVORA discovery command and, by default, decorates the provider with `PartenerSourceGateProvider`.
+
+The source gate reads the canonical PARTENER.EU `ingest/state/source_registry_health.json` snapshot. It does not crawl. A discovery receipt is blocked before evidence promotion when the registry snapshot is stale, the source is unregistered, unhealthy, quarantined, low-quality, awaiting resolution, or has a material semantic change that still requires reconciliation. Provider-reported document URL and raw/semantic hashes remain intact; registry hashes are attached separately as source-health provenance.
+
+The `--fixture-provider-no-source-gate` switch exists only for deterministic synthetic CI fixtures. Production invocations are fail-closed through the PARTENER source registry.
 
 ## Canonical stages
 
@@ -47,19 +55,15 @@ No narrative document may be released before `NF11_ADVERSARIAL_QA` passes.
 - contradictions remain contradictions until resolved;
 - evidence gaps are first-class outputs and can trigger primary research;
 - raw primary-research responses are canonical; charts and narrative are generated from raw data;
-- historical reconstruction is cutoff-locked.
+- historical reconstruction is cutoff-locked;
+- source-provider PASS claims cannot override PARTENER source-health state.
 
 ## Benchmark
 
-`benchmarks/310224` is `NF-BENCH-001`. The blind historical run recovered the defensible core of the evaluator-accepted analysis while rejecting an unsupported discrimination need and exposing the missing primary-research layer. The benchmark therefore defines the initial production acceptance suite.
+`benchmarks/310224` is `NF-BENCH-001`. The blind historical run recovered the defensible core of the evaluator-accepted analysis while rejecting an unsupported discrimination need and exposing the missing primary-research layer. The benchmark therefore defines the initial production acceptance suite. It remains intentionally `BLOCKED_RESEARCH` where authoritative historical/local evidence is missing; no fixture may be promoted as real 310224 evidence.
 
-## Current release target
+## v1 release boundary
 
-`v0.1-alpha` is reached when the deterministic validators and primary-research planner can:
+The unified lifecycle covers plan -> discovery -> blocked/research pack -> resume -> need synthesis -> standalone needs analysis -> QA -> DOCX -> DAPE handoff. DAPE handoff remains non-canonical until explicit owner approval.
 
-1. read the canonical JSON artifacts;
-2. emit blocking/non-blocking evidence gaps;
-3. generate a research instrument specification for unresolved school-specific gaps;
-4. validate imported response rows and deterministic aggregates;
-5. validate Need -> Evidence -> Intervention -> Result -> Indicator traceability;
-6. fail on the known 310224 defect fixtures.
+The remaining v1 production gate is live socioeconomic source coverage: the PARTENER registry must expose the authoritative source families required by the selected research profile (for example INS/TEMPO, AJOFM/ANOFM, ISJ and beneficiary/school official evidence where applicable). Until those sources are registered and healthy, discovery for those requirements fails closed rather than fabricating evidence.
