@@ -12,6 +12,7 @@ sys.path.insert(0, str(ROOT))
 
 from core.narrative import compile_analysis
 from core.pipeline import PipelineRun
+from exporters.docx_exporter import export_final_package
 
 
 def load_json(path: Path) -> Dict[str, Any]:
@@ -30,6 +31,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Run a deterministic Needs Factory fixture")
     parser.add_argument("fixture", type=Path)
     parser.add_argument("--output", type=Path)
+    parser.add_argument(
+        "--export-dir",
+        type=Path,
+        help="Optionally export the validated deterministic final DOCX package.",
+    )
     args = parser.parse_args()
 
     fixture = load_json(args.fixture)
@@ -76,6 +82,10 @@ def main() -> int:
 
     pack = run.package(ranked, needs_by_id, evidence, causal, trace, release)
     compiled = compile_analysis(pack)
+    export_manifest = None
+    if args.export_dir:
+        export_manifest = export_final_package(compiled, args.export_dir)
+
     rendered = render_manifest(run, {
         "release_gate": release,
         "narrative_pack_sha256": pack["pack_sha256"],
@@ -85,6 +95,7 @@ def main() -> int:
         "compiled_source_register_sha256": compiled["source_register_sha256"],
         "compiled_need_count": compiled["validation"]["need_count"],
         "compiled_evidence_count": compiled["validation"]["evidence_count"],
+        "export_manifest": export_manifest,
     })
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
