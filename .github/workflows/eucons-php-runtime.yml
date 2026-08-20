@@ -7,8 +7,12 @@ on:
       - 'eucons/deployment/activate_php_runtime.py'
       - 'eucons/validation/validate_php_runtime.py'
       - 'eucons/validation/test_php_runtime.php'
+      - 'eucons/validation/test_php_commercial_runtime.php'
       - 'eucons/leads/lead_contract.json'
       - 'eucons/leads/forms.json'
+      - 'eucons/crm/**'
+      - 'eucons/email/**'
+      - 'eucons/security/privacy_security_contract.json'
       - '.github/workflows/eucons-php-runtime.yml'
   push:
     branches: [main]
@@ -17,8 +21,12 @@ on:
       - 'eucons/deployment/activate_php_runtime.py'
       - 'eucons/validation/validate_php_runtime.py'
       - 'eucons/validation/test_php_runtime.php'
+      - 'eucons/validation/test_php_commercial_runtime.php'
       - 'eucons/leads/lead_contract.json'
       - 'eucons/leads/forms.json'
+      - 'eucons/crm/**'
+      - 'eucons/email/**'
+      - 'eucons/security/privacy_security_contract.json'
       - '.github/workflows/eucons-php-runtime.yml'
   workflow_dispatch:
 
@@ -38,9 +46,16 @@ jobs:
       - name: Lint PHP runtime
         run: |
           php -l eucons/runtime/php/src/LeadRuntime.php
+          php -l eucons/runtime/php/src/CrmRuntime.php
+          php -l eucons/runtime/php/src/RetentionRuntime.php
+          php -l eucons/runtime/php/src/MailRuntime.php
           php -l eucons/runtime/php/public/index.php
+          php -l eucons/runtime/php/maintenance.php
           php -l eucons/validation/test_php_runtime.php
-      - name: Test PHP runtime fail-closed behavior
+          php -l eucons/validation/test_php_commercial_runtime.php
+      - name: Test PHP lead runtime fail-closed behavior
         run: php eucons/validation/test_php_runtime.php
+      - name: Test PHP commercial runtime fail-closed behavior
+        run: php eucons/validation/test_php_commercial_runtime.php
       - name: Validate PHP runtime and activated public build
         run: python eucons/validation/validate_php_runtime.py
