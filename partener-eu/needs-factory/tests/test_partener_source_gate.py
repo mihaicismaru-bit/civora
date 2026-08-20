@@ -60,29 +60,38 @@ def receipt(**overrides):
 
 
 class PartenerSourceGateTests(unittest.TestCase):
-    def test_healthy_registered_source_is_authorized_and_central_hashes_win(self):
+    def test_healthy_registered_source_is_authorized_without_rewriting_document_provenance(self):
         result = reconcile_receipt_with_source_registry(
             receipt(), registry(registry_source()), now=NOW
         )
         self.assertEqual(result["source_registry_id"], "SRC-AUTH-TEST")
         self.assertEqual(result["health"], "PASS")
         self.assertFalse(result["quarantined"])
-        self.assertEqual(result["raw_sha256"], "a" * 64)
-        self.assertEqual(result["semantic_sha256"], "b" * 64)
-        self.assertTrue(result["source_registry_gate"]["valid"])
+        self.assertEqual(result["raw_sha256"], "x" * 64)
+        self.assertEqual(result["semantic_sha256"], "y" * 64)
+        gate = result["source_registry_gate"]
+        self.assertTrue(gate["valid"])
+        self.assertEqual(gate["registry_raw_sha256"], "a" * 64)
+        self.assertEqual(gate["registry_semantic_sha256"], "b" * 64)
         self.assertEqual(result["material_fact_state"], "PARTENER_REGISTRY_VERIFIED")
 
-    def test_explicit_registry_id_can_authorize_discovered_child_document(self):
+    def test_explicit_registry_id_can_authorize_discovered_child_document_without_rewriting_url(self):
+        child_url = "https://official.example/source/document.pdf"
         result = reconcile_receipt_with_source_registry(
             receipt(
                 source_registry_id="SRC-AUTH-TEST",
-                final_url="https://official.example/source/document.pdf",
+                final_url=child_url,
             ),
             registry(registry_source()),
             now=NOW,
         )
         self.assertTrue(result["source_registry_gate"]["valid"])
         self.assertEqual(result["source_registry_id"], "SRC-AUTH-TEST")
+        self.assertEqual(result["final_url"], child_url)
+        self.assertEqual(
+            result["source_registry_gate"]["registry_final_url"],
+            "https://official.example/source",
+        )
 
     def test_unregistered_source_fails_closed_even_if_provider_says_pass(self):
         result = reconcile_receipt_with_source_registry(
