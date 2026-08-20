@@ -29,6 +29,7 @@ person = next(x for x in people["people"] if x["id"] == "raffaele-fitto")
 
 assert source["url"] == "https://commission.europa.eu/about/organisation/college-commissioners/raffaele-fitto_en"
 assert source["tier"] == "T1_DIRECT_OFFICIAL_EU"
+assert source["pathHints"] == ["/commission/presscorner/detail/", "/commission/presscorner/home/"]
 assert collector.official_host(source["url"], source["allowedHosts"])
 assert collector.official_host("https://ec.europa.eu/commission/presscorner/detail/en/speech_test", source["allowedHosts"])
 assert source["maxLinks"] <= 8
@@ -40,6 +41,21 @@ assert snapshot["role"] == "Executive Vice-President for Cohesion and Reforms"
 assert snapshot["institution"] == "European Commission"
 assert snapshot["sourceUrl"] == source["url"]
 assert snapshot["sourceTier"] == "T1_DIRECT_OFFICIAL_EU"
+
+# The commissioner profile contains many administrative/profile links before the
+# actual speech/news evidence. Those broad profile links must no longer consume
+# the bounded article budget merely because they sit under the commissioner path.
+mixed_listing = """
+<a href="https://commission.europa.eu/about/organisation/college-commissioners/raffaele-fitto/team_en">Team</a>
+<a href="https://commission.europa.eu/about/organisation/college-commissioners/raffaele-fitto/calendar_en">Calendar</a>
+<a href="https://ec.europa.eu/commission/presscorner/detail/en/speech_test">Speech on cohesion policy and EU funding</a>
+<a href="https://ec.europa.eu/commission/presscorner/detail/en/ip_test">Commission press release</a>
+"""
+candidates = collector.candidate_links(source, mixed_listing)
+assert "https://commission.europa.eu/about/organisation/college-commissioners/raffaele-fitto/team_en" not in candidates
+assert "https://commission.europa.eu/about/organisation/college-commissioners/raffaele-fitto/calendar_en" not in candidates
+assert "https://ec.europa.eu/commission/presscorner/detail/en/speech_test" in candidates
+assert "https://ec.europa.eu/commission/presscorner/detail/en/ip_test" in candidates
 
 listing = '<a href="https://ec.europa.eu/commission/presscorner/detail/en/speech_test">Speech on cohesion policy and EU funding</a>'
 article = """<html><head><title>European Commission — cohesion policy</title></head><body>
@@ -85,6 +101,7 @@ print(json.dumps({
     "source": source["id"],
     "person": person["id"],
     "status": status["status"],
+    "candidateSelection": candidates,
     "signalKind": trusted["signalKind"],
     "failClosed": trusted["administrativeFact"]["failClosed"],
 }, ensure_ascii=False, indent=2))
