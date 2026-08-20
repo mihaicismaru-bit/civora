@@ -1,6 +1,6 @@
 {
   "schema_version": "1.1",
-  "generated_at": "2026-08-20T03:27:11.027471+00:00",
+  "generated_at": "2026-08-20T08:08:45.678472+00:00",
   "policy": {
     "canonical_catalogue_mutated": false,
     "auto_publish": false,
@@ -9,13 +9,13 @@
     "reconciliation_reads_fresh_ingest_state": true
   },
   "summary": {
-    "canonical_records": 16,
+    "canonical_records": 18,
     "ingest_records": 22,
-    "matched": 10,
-    "new_editorial_candidates": 7,
+    "matched": 13,
+    "new_editorial_candidates": 4,
     "unmatched_discovery_only": 5,
     "conflicts": 1,
-    "review_queue": 15
+    "review_queue": 12
   },
   "records": [
     {
@@ -93,10 +93,10 @@
     {
       "ingest_id": "gallo-nero",
       "ingest_name": "Gallo Nero",
-      "canonical_id": null,
-      "match_method": null,
-      "status": "NEW_EDITORIAL_CANDIDATE",
-      "action": "CREATE_CANONICAL_DRAFT",
+      "canonical_id": "gallo-nero",
+      "match_method": "same_id",
+      "status": "MATCHED_PUBLIC",
+      "action": "NO_ACTION",
       "editorial_eligibility": "DRAFT_REVIEW_REQUIRED",
       "verification": "PARTIALLY_VERIFIED",
       "publication_effect": "NONE",
@@ -141,10 +141,10 @@
     {
       "ingest_id": "la-trattoria-valcea",
       "ingest_name": "La Trattoria Vâlcea",
-      "canonical_id": null,
-      "match_method": null,
-      "status": "NEW_EDITORIAL_CANDIDATE",
-      "action": "CREATE_CANONICAL_DRAFT",
+      "canonical_id": "la-trattoria-valcea",
+      "match_method": "same_id",
+      "status": "MATCHED_PUBLIC",
+      "action": "NO_ACTION",
       "editorial_eligibility": "DRAFT_REVIEW_REQUIRED",
       "verification": "PARTIALLY_VERIFIED",
       "publication_effect": "NONE",
@@ -214,7 +214,7 @@
       "ingest_id": "restaurant-queen",
       "ingest_name": "Restaurant Queen",
       "canonical_id": "queens-pub",
-      "match_method": "unique_normalized_name",
+      "match_method": "explicit_alias",
       "status": "MATCHED_PUBLIC",
       "action": "NO_ACTION",
       "editorial_eligibility": "DRAFT_ELIGIBLE",
@@ -255,11 +255,11 @@
     {
       "ingest_id": "street-pub-ramnicu-valcea",
       "ingest_name": "Street Pub",
-      "canonical_id": null,
-      "match_method": null,
-      "status": "NEW_EDITORIAL_CANDIDATE",
-      "action": "CREATE_CANONICAL_DRAFT",
-      "editorial_eligibility": "DRAFT_REVIEW_REQUIRED",
+      "canonical_id": "street-pub-ramnicu-valcea",
+      "match_method": "same_id",
+      "status": "MATCHED_PUBLIC",
+      "action": "NO_ACTION",
+      "editorial_eligibility": "DRAFT_ELIGIBLE",
       "verification": "VERIFIED_OFFICIAL",
       "publication_effect": "NONE",
       "differences": []
