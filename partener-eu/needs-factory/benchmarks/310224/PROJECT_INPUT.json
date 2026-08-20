@@ -1,0 +1,56 @@
+{
+  "schema_version":"nf.project_input.v0.1",
+  "benchmark_id":"NF-BENCH-001",
+  "project_code":"310224",
+  "project_title":"Liceul Tehnologic Căpitan Nicolae Pleșoianu - Stagii de practica pentru elevi",
+  "leader":"Camera de Comerț și Industrie a județului Vâlcea",
+  "partner_school":"Liceul Tehnologic Căpitan Nicolae Pleșoianu, Râmnicu Vâlcea",
+  "region":"Sud-Vest Oltenia",
+  "county":"Vâlcea",
+  "locality":"Râmnicu Vâlcea",
+  "intervention_type":"programe de învățare la locul de muncă / stagii de practică pentru elevi ÎPT",
+  "targets":{"participants":251,"qualification_at_exit":226,"practice_partnerships":12},
+  "ground_truth_documents":[
+    {
+      "id":"DOC-GT-001",
+      "name":"7. ANALIZA DE NEVOI FINALA plesoianu.pdf",
+      "role":"historical needs-analysis ground truth",
+      "known_upload_date":"2024-01-04",
+      "pages":33,
+      "blind_access":"DENY"
+    },
+    {
+      "id":"DOC-GT-002",
+      "name":"FormularDepunereFinal_310224_2026-01-29_09-36-09 (4).pdf",
+      "role":"approved/current MySMIS CF plus embedded evaluator scorecard",
+      "cf_version":28,
+      "pages":132,
+      "blind_access":"ALLOW_INPUT_FIELDS_ONLY",
+      "warning":"This is a post-award 2026 version and must not be treated as the original submission state."
+    }
+  ],
+  "historical_freeze": {
+    "analysis_document_date":"2024-01-04",
+    "call_close_date":"2024-01-12",
+    "rule":"Historical blind reconstruction may use only information demonstrably available no later than the original submission window. Later CF amendments, implementation data and later statistics are excluded from historical discovery."
+  },
+  "blind_input_allowlist":[
+    "call code and title",
+    "programme / priority / specific objective",
+    "leader and partner identities",
+    "territory",
+    "eligible target-group definition",
+    "target volume 251",
+    "intervention family: work-based learning / practice",
+    "programme indicators EECO06+07 and EECR03"
+  ],
+  "blind_input_denylist":[
+    "wording of the historical needs analysis",
+    "historical document's six labelled needs",
+    "historical questionnaire results",
+    "known defects list",
+    "post-award narrative amendments",
+    "evaluator conclusions other than formal acceptance requirements"
+  ],
+  "status":"frozen_for_blind"
+}

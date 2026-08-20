@@ -1,0 +1,41 @@
+{
+  "schema_version": "nf.checkpoint_status.v0.1",
+  "benchmark_id": "NF-BENCH-001",
+  "project_code": "310224",
+  "checkpoint": "NF-CP07",
+  "name": "PARTENER Source-State and DAPE Handoff Adapters",
+  "branch": "needs-factory/nf-cp07-adapters",
+  "draft_pr": 460,
+  "verified_head": "c75d0c8c1aefc8e87c67e891612ba9ab97d3573f",
+  "ci": {
+    "workflow_run": 32252022476,
+    "job": 96064993252,
+    "conclusion": "success",
+    "regression_tests": 28,
+    "partener_repository_state_adapter": "success",
+    "partener_receipt": "SRC-MYSMIS-CALLS@0499f71bd3b6b2dd",
+    "nf12_smoke": "success",
+    "smoke_run_id": "NF-f7a70b5607170d8d2710",
+    "smoke_pack_sha256": "94a133953cd72f3e8a19e852b73205a60ccc0c1e0d0de3acf009540fdaa9e413"
+  },
+  "partener_integration": {
+    "source_state_contract": "partener-eu/validation/source_state.checkpoint.json",
+    "fail_closed_health": true,
+    "quarantine_respected": true,
+    "last_known_good_semantic_hash_preserved": true,
+    "pending_semantic_change_not_promoted": true
+  },
+  "dape_compatibility": {
+    "reference_project_manifest": "registry/PROJECT_MANIFEST.json in mihaicismaru-bit/kdp-v3-ape",
+    "reference_checkpoint": "CP-0010-BOOK-COMPLETION-CONTRACT",
+    "seven_artifact_contract_preserved": true,
+    "domain_specific_adapter": true,
+    "single_control_plane_preserved": true,
+    "generic_duplication": false,
+    "host_validation_required_before_canonical": true
+  },
+  "decision": "CLOSED_PASS",
+  "next_checkpoint": "NF-CP08",
+  "next_action": "Execute the actual 310224 external-evidence benchmark through the product. Expected release state is BLOCKED_RESEARCH because the historical school population snapshot and clean primary research are unresolved.",
+  "status": "CLOSED_PASS"
+}

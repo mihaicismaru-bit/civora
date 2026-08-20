@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "nf.compiled_analysis.v0.1",
+  "title": "Needs Factory Compiled Analysis",
+  "type": "object",
+  "required": ["schema_version", "markdown", "source_register_markdown", "validation", "markdown_sha256", "source_register_sha256", "source_pack_sha256"],
+  "properties": {
+    "schema_version": {"const": "nf.compiled_analysis.v0.1"},
+    "markdown": {"type": "string", "minLength": 1},
+    "source_register_markdown": {"type": "string", "minLength": 1},
+    "validation": {
+      "type": "object",
+      "required": ["schema_version", "valid", "failures", "warnings", "need_count", "evidence_count", "rendered_need_tags", "rendered_evidence_tags"],
+      "properties": {
+        "schema_version": {"const": "nf.narrative_validation.v0.1"},
+        "valid": {"type": "boolean"},
+        "failures": {"type": "array"},
+        "warnings": {"type": "array"},
+        "need_count": {"type": "integer", "minimum": 0},
+        "evidence_count": {"type": "integer", "minimum": 0},
+        "rendered_need_tags": {"type": "integer", "minimum": 0},
+        "rendered_evidence_tags": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": true
+    },
+    "markdown_sha256": {"type": "string", "minLength": 32},
+    "source_register_sha256": {"type": "string", "minLength": 32},
+    "source_pack_sha256": {"type": ["string", "null"]}
+  },
+  "additionalProperties": true
+}
