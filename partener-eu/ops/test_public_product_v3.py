@@ -89,6 +89,15 @@ assert '[data-decisionnav]' not in open_hub_chunk
 assert '[data-decisionnav]' not in open_dossier_chunk
 assert '[data-di-dossier' not in open_dossier_chunk
 
+# The Ask route has one progressive runtime owner. Keep the older v2 asset dormant
+# so MutationObserver/onkeydown handlers and answer rendering cannot race each other.
+assert index.count('public-product-v3.js') == 1
+assert 'ask-partener-v2.js' not in index
+assert 'ask-partener-v2.css' not in index
+assert 'function enhanceAsk()' in ui
+assert "e.key==='Enter'" in function_chunk(ui,'enhanceAsk')
+assert 'data-ask-open' in function_chunk(ui,'resultCard')
+
 # Baseline public shell must remain useful and fail-closed without progressive enhancements.
 nav_chunk=function_chunk(app,'nav')
 ask_chunk=function_chunk(app,'ask')
