@@ -1,0 +1,42 @@
+{
+  "schema_version": "nf.evidence_addendum.v0.1",
+  "run_id": "AI4WORK-STEP/NF-RUN-001",
+  "extends": "EVIDENCE_REGISTRY.json",
+  "evidence": [
+    {
+      "id": "EV-RO-AI-LITERACY-CONCERNS-2026",
+      "source": "European Commission – Romania 2026 Digital Decade Country Report / special 2026 Digital Decade Eurobarometer",
+      "source_url": "https://digital-strategy.ec.europa.eu/en/factpages/romanias-2026-digital-decade-country-report",
+      "tier": "A1",
+      "territory": "Romania",
+      "scope": "national",
+      "period": "2026",
+      "population": "Romanian respondents to special 2026 Digital Decade Eurobarometer",
+      "constructs": ["responsible_ai_literacy_context", "ai_skill_concern"],
+      "direct_measurement": true,
+      "measures": [
+        {"name":"GenAI_concern_lack_of_training_or_relevant_skills","measure_type":"share","source_measure_type":"share","value":28.0,"denominator_universe":"Romanian respondents in the reported GenAI concerns question","unit":"percent"},
+        {"name":"GenAI_concern_privacy_and_data_protection","measure_type":"share","source_measure_type":"share","value":26.0,"denominator_universe":"Romanian respondents in the reported GenAI concerns question","unit":"percent"}
+      ],
+      "use": "national direct perception signal relevant to AI literacy; not a measure of the eligible >29 population and not proof of a particular course design"
+    },
+    {
+      "id": "EV-SM-HIGHTECH-EMP-2023",
+      "source": "ADR Sud-Muntenia – Raport de evaluare intermediară PR Sud-Muntenia 2021-2027",
+      "source_url": "https://2021-2027.adrmuntenia.ro/download_file/article/149/PRSM-RaportulMTR-21mar2025-final.pdf",
+      "tier": "A2",
+      "territory": "Sud-Muntenia",
+      "scope": "region",
+      "period": "2023",
+      "population": "employed labour force in Sud-Muntenia",
+      "constructs": ["labour_market_skill_demand", "regional_technology_context"],
+      "direct_measurement": true,
+      "measures": [
+        {"name":"employment_in_high_technology_sectors","measure_type":"share","source_measure_type":"share","value":1.4,"denominator_universe":"employed labour force in Sud-Muntenia","unit":"percent"},
+        {"name":"unemployment_rate","measure_type":"rate","source_measure_type":"rate","value":7.8,"denominator_universe":"labour force in Sud-Muntenia","unit":"percent"}
+      ],
+      "use": "regional labour-market context; low high-tech employment is not equivalent to a measured AI skills shortage"
+    }
+  ],
+  "status": "FROZEN"
+}
