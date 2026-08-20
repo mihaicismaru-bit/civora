@@ -1,0 +1,31 @@
+{
+  "schema_version": "nf.source_manifest.v0.2",
+  "run_id": "AI4WORK-STEP/NF-RUN-001",
+  "generated_on": "2026-08-20",
+  "sources": [
+    {"id":"SRC-IN-001","type":"project_input","name":"Simulare_Cerere_Finantare_MySMIS_AI4WORK_STEP_Q028_v1.0.pdf","status":"ALLOW_INPUT_FIELDS_ONLY","warning":"simulation, not official MySMIS export; M08 needs narrative denied for blind discovery"},
+    {"id":"SRC-IN-002","type":"project_audit","name":"Audit_general_grile_AI4WORK_STEP_367944_Q029_v1.0.xlsx","status":"ALLOW_CALL_AND_PROJECT_METADATA_ONLY","warning":"internal audit/scoring cannot upgrade evidence strength"},
+    {"id":"SRC-DENY-001","type":"prior_needs_analysis","name":"Analiza_nevoi_AI4WORK_STEP_Q023","status":"DENY_UNTIL_COMPARATOR"},
+    {"id":"SRC-CALL-001","publisher":"AM PEO / OIR PECU Nord-Vest","type":"official_call_announcement","url":"https://www.runv.ro/anunturi.html","status":"VERIFIED","facts":["competitive STEP-LLL Adults call","P11","ESO4.7","Action 11.g.1","MySMIS opening 29.05.2026 16:00","original close 28.08.2026 16:00","corrigendum extends to 30.09.2026 16:00"]},
+    {"id":"SRC-EUROSTAT-001","publisher":"Eurostat","type":"official_statistics","url":"https://ec.europa.eu/eurostat/web/interactive-publications/digitalisation-2026","status":"VERIFIED","datasets":["digital skills / DSI source family"]},
+    {"id":"SRC-EUROSTAT-002","publisher":"Eurostat","type":"official_statistics","url":"https://ec.europa.eu/eurostat/web/products-eurostat-news/w/ddn-20251211-2","status":"VERIFIED","datasets":["isoc_eb_ai"]},
+    {"id":"SRC-EUROSTAT-003","publisher":"Eurostat","type":"official_statistics","url":"https://ec.europa.eu/eurostat/en/web/products-eurostat-news/w/ddn-20251216-3","status":"VERIFIED","datasets":["isoc_ai_iaiu"]},
+    {"id":"SRC-EC-001","publisher":"European Commission","type":"country_report","url":"https://economy-finance.ec.europa.eu/economic-surveillance-eu-member-states/country-pages-including-country-reports/country-report-romania_en","status":"VERIFIED","period":"2026 report / 2025 observations"},
+    {"id":"SRC-EC-002","publisher":"European Commission","type":"digital_decade_country_report","url":"https://digital-strategy.ec.europa.eu/en/factpages/romanias-2026-digital-decade-country-report","status":"VERIFIED","period":"2026"},
+    {"id":"SRC-EUROSTAT-004","publisher":"Eurostat","type":"official_statistics","url":"https://ec.europa.eu/eurostat/web/products-eurostat-news/w/edn-20260319-1","status":"VERIFIED","datasets":["isoc_ci_ac_i"]},
+    {"id":"SRC-ADR-C-001","publisher":"ADR Centru","type":"regional_monitoring_report","url":"https://www.adrcentru.ro/wp-content/uploads/2025/03/PRIMUL-RAPORT-DE-MONITORIZARE-PDR-CENTRU-2021-2027.pdf","status":"VERIFIED","upstream_dataset":"Eurostat trng_lfse_04"},
+    {"id":"SRC-ADR-C-002","publisher":"ADR Centru","type":"regional_digitalisation_study_summary","url":"https://www.adrcentru.ro/comunicare/digitalizarea-mediului-afaceri/","status":"VERIFIED","period":"2022 study / 2023 publication"},
+    {"id":"SRC-ADR-SVO-001","publisher":"ADR Sud-Vest Oltenia","type":"RIS3","url":"https://pr2021-2027.adroltenia.ro/page.php?id=49","status":"VERIFIED","period":"2021-2027"},
+    {"id":"SRC-ADR-SM-001","publisher":"ADR Sud-Muntenia","type":"RIS3","url":"https://www.adrmuntenia.ro/strategia-de-specializare-inteligenta-a-regiunii-sud--muntenia-20212027-aprobata/news/1431","status":"VERIFIED","period":"2021-2027"},
+    {"id":"SRC-EURLEX-001","publisher":"EUR-Lex","type":"EU_regulation","url":"https://eur-lex.europa.eu/eli/reg/2024/1689/2026-07-27/eng","status":"VERIFIED","reference":"Article 4 AI literacy"}
+  ],
+  "open_capture_tasks": [
+    "capture exact GSCS STEP-LLL binary/version/hash and official annexes",
+    "verify live full technical call code from MySMIS/official registry",
+    "retrieve direct Eurostat trng_lfse_04 values for all three project regions where available",
+    "find current quantitative Sud-Muntenia digital/adult-learning evidence",
+    "find current quantitative Sud-Vest Oltenia business digital maturity evidence",
+    "resolve direct eligible-adult and employer evidence through primary research if secondary evidence remains insufficient"
+  ],
+  "status": "INITIAL_SOURCE_MANIFEST_FROZEN"
+}
