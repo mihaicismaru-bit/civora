@@ -1,0 +1,116 @@
+{
+  "schema_version": "nf.research_profile.v0.1",
+  "profile_id": "PEO_IPT_WORK_BASED_LEARNING",
+  "program_family": "PEO",
+  "intervention_family": "IPT_WORK_BASED_LEARNING",
+  "description": "Research agenda for needs analyses supporting work-based learning interventions for vocational and technical education students.",
+  "requirements": [
+    {
+      "requirement_id": "REQ-LM-001",
+      "construct": "labour_demand",
+      "purpose": "Establish current/near-term employer demand relevant to the qualifications and territory.",
+      "priority": "primary",
+      "preferred_scopes": ["county", "region", "national"],
+      "preferred_source_families": ["AJOFM", "ANOFM", "INS", "Eurostat"],
+      "direct_local_required": false,
+      "allowed_measure_types": ["count", "share", "rate", "qualitative"],
+      "prohibited_overclaim": "Employer demand at county/regional level does not prove an individual student's skill deficit."
+    },
+    {
+      "requirement_id": "REQ-LM-002",
+      "construct": "youth_labour_market_context",
+      "purpose": "Describe labour-market participation/unemployment context for young people without substituting it for school-level evidence.",
+      "priority": "supporting",
+      "preferred_scopes": ["county", "region", "national", "eu"],
+      "preferred_source_families": ["AJOFM", "ANOFM", "INS", "Eurostat"],
+      "direct_local_required": false,
+      "allowed_measure_types": ["count", "share", "rate"],
+      "prohibited_overclaim": "Youth unemployment context does not by itself prove the need for a specific intervention at one school."
+    },
+    {
+      "requirement_id": "REQ-EDU-001",
+      "construct": "ipt_system_relevance",
+      "purpose": "Establish system-level evidence on vocational education relevance, work-based learning and school-employer links.",
+      "priority": "primary",
+      "preferred_scopes": ["national", "region"],
+      "preferred_source_families": ["Ministerul Educatiei", "CNDIPT", "INS", "Eurostat"],
+      "direct_local_required": false,
+      "allowed_measure_types": ["count", "share", "rate", "qualitative"],
+      "prohibited_overclaim": "System-level challenges cannot be presented as measured conditions at the beneficiary school."
+    },
+    {
+      "requirement_id": "REQ-EDU-002",
+      "construct": "qualification_offer",
+      "purpose": "Verify the actual beneficiary-school qualification offer and its fit to the intervention population.",
+      "priority": "primary",
+      "preferred_scopes": ["school", "county"],
+      "preferred_source_families": ["ISJ", "ARACIP", "unitate_scolara"],
+      "direct_local_required": true,
+      "allowed_measure_types": ["count", "qualitative"],
+      "prohibited_overclaim": "Qualification authorization/offer does not prove practice quality, career intention or skill level."
+    },
+    {
+      "requirement_id": "REQ-PR-001",
+      "construct": "career_guidance_need",
+      "purpose": "Measure the beneficiary students' need for career information/guidance linked to their qualifications.",
+      "priority": "primary",
+      "preferred_scopes": ["school"],
+      "preferred_source_families": ["primary_research"],
+      "direct_local_required": true,
+      "allowed_measure_types": ["score", "share", "count"],
+      "prohibited_overclaim": "Perceived need for guidance is not an employment outcome."
+    },
+    {
+      "requirement_id": "REQ-PR-002",
+      "construct": "practice_quality",
+      "purpose": "Measure prior exposure to and perceived relevance of practice at economic operators.",
+      "priority": "primary",
+      "preferred_scopes": ["school"],
+      "preferred_source_families": ["primary_research"],
+      "direct_local_required": true,
+      "allowed_measure_types": ["score", "share", "count"],
+      "prohibited_overclaim": "Perceived practice quality cannot be presented as an objective technical competence test."
+    },
+    {
+      "requirement_id": "REQ-PR-003",
+      "construct": "skills_baseline",
+      "purpose": "Create a school-level baseline relevant to practical readiness using an explicitly defined measurement method.",
+      "priority": "primary",
+      "preferred_scopes": ["school"],
+      "preferred_source_families": ["primary_research", "validated_assessment"],
+      "direct_local_required": true,
+      "allowed_measure_types": ["score", "share", "count"],
+      "prohibited_overclaim": "Self-assessed readiness must not be relabelled as objectively tested competence."
+    },
+    {
+      "requirement_id": "REQ-PR-004",
+      "construct": "career_intention",
+      "purpose": "Measure students' stated intention to pursue work related to their qualification.",
+      "priority": "primary",
+      "preferred_scopes": ["school"],
+      "preferred_source_families": ["primary_research"],
+      "direct_local_required": true,
+      "allowed_measure_types": ["score", "share", "count"],
+      "prohibited_overclaim": "Stated career intention is not a certain prediction of later employment."
+    },
+    {
+      "requirement_id": "REQ-CTX-001",
+      "construct": "demographic_context",
+      "purpose": "Provide territorial demographic context only where it materially affects the intervention logic.",
+      "priority": "supporting",
+      "preferred_scopes": ["county", "region", "national"],
+      "preferred_source_families": ["INS", "Eurostat", "ADR"],
+      "direct_local_required": false,
+      "allowed_measure_types": ["count", "share", "rate"],
+      "prohibited_overclaim": "Demographic decline is context, not automatically an empirical need of the target group."
+    }
+  ],
+  "source_policy": {
+    "prefer_official_primary": true,
+    "media_may_support_discovery_only": true,
+    "media_alone_cannot_support_priority_need": true,
+    "source_health_required_for_material_fact": true,
+    "quarantined_source_forbidden": true,
+    "historical_cutoff_must_be_enforced": true
+  }
+}

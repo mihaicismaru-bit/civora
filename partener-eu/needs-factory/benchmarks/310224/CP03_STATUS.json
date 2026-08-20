@@ -1,0 +1,32 @@
+{
+  "schema_version": "nf.checkpoint_status.v0.1",
+  "benchmark_id": "NF-BENCH-001",
+  "project_code": "310224",
+  "checkpoint": "NF-CP03",
+  "name": "Semantic Comparator and Learning",
+  "branch": "needs-factory/nf-cp03-310224",
+  "artifacts": [
+    "CP03_COMPARATOR.json",
+    "LEARNED_RULES_v0.2.json",
+    "QA_RULESET_v0.2.json",
+    "CP03_STATUS.json"
+  ],
+  "result": {
+    "decision": "PASS_WITH_PRIMARY_RESEARCH_GAP",
+    "defensible_ground_truth_recovery_pct": 96.0,
+    "canonical_family_coverage_pct": 88.75,
+    "official_evidence_primary_need_coverage_pct": 100.0,
+    "school_or_county_specific_evidence_primary_need_coverage_pct": 80.0,
+    "atomic_traceability_pct": 100.0,
+    "critical_high_known_defect_guard_pct": 100.0,
+    "school_level_primary_research_completeness_pct": 0.0
+  },
+  "learning": {
+    "unsupported_legacy_need_rejected": "discrimination as empirical primary need",
+    "legacy_duplicate_need_decomposed": "early labour-market preparation",
+    "principal_remaining_gap": "primary research engine for school-specific claims"
+  },
+  "next_checkpoint": "NF-CP04",
+  "next_action": "Productize the Primary Research Engine and evidence-gap workflow, then rerun the benchmark as a full pre-narrative production pipeline.",
+  "status": "CLOSED_PASS"
+}
