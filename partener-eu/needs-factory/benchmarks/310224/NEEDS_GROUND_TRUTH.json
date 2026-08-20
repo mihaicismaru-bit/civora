@@ -1,0 +1,26 @@
+{
+  "schema_version":"nf.needs_ground_truth.v0.1",
+  "benchmark_id":"NF-BENCH-001",
+  "ground_truth_policy":"Accepted by the evaluator is recorded separately from factual/evidentiary strength. Approval is not treated as proof that every claim is correct.",
+  "accepted_labelled_needs":[
+    {"id":"NEED-GT-01","label":"Nevoia de resurse umane calificate","accepted_by_evaluator":true,"evidence_strength":"medium","notes":"Broad labour-market need; requires local/qualification-level evidence in blind run."},
+    {"id":"NEED-GT-02","label":"Nevoia de corelare a competențelor dobândite în timpul școlii cu cerințele pieței muncii","accepted_by_evaluator":true,"evidence_strength":"medium-high","notes":"Supported directionally by VET/work-based-learning literature and pupil perceptions, but local employer evidence is weak in the historical analysis."},
+    {"id":"NEED-GT-03","label":"Nivelul scăzut al ocupării în rândul tinerilor din Regiunea Sud-Vest Oltenia","accepted_by_evaluator":true,"evidence_strength":"medium","notes":"Historical analysis relies heavily on 2019 national/regional data; 2023 Vâlcea ANOFM data should have been used for local corroboration."},
+    {"id":"NEED-GT-04","label":"Nevoia de consiliere și orientare în carieră a tinerilor","accepted_by_evaluator":true,"evidence_strength":"medium-high","notes":"Pupil questionnaire shows perceived importance, but result integrity and exact response distributions must be checked."},
+    {"id":"NEED-GT-05","label":"Gradul ridicat de discriminare în rândul tinerilor din România și lipsa educației în promovarea nediscriminării","accepted_by_evaluator":true,"evidence_strength":"low","notes":"Displayed primary questionnaire does not measure discrimination directly; treat as cross-cutting compliance theme unless direct evidence is found."},
+    {"id":"NEED-GT-06","label":"Nevoia de pregătire timpurie a tinerilor pentru cerințele pieței forței de muncă","accepted_by_evaluator":true,"evidence_strength":"medium-high","notes":"Closely overlaps NEED-GT-02 and practice-stage rationale; blind engine should test whether this is a distinct need or a solution framing."}
+  ],
+  "canonical_need_families_for_comparator":[
+    {"id":"NFAM-01","label":"Gap de competențe practice / work-based learning","maps_to":["NEED-GT-02","NEED-GT-06"]},
+    {"id":"NFAM-02","label":"Gap de aliniere școală-angajator / relevanța calificărilor","maps_to":["NEED-GT-01","NEED-GT-02"]},
+    {"id":"NFAM-03","label":"Tranziție educație-piața muncii și orientare de carieră","maps_to":["NEED-GT-03","NEED-GT-04","NEED-GT-06"]},
+    {"id":"NFAM-04","label":"Acces și finalizare a stagiilor/certificării pentru GT eligibil","maps_to":["NEED-GT-02","NEED-GT-06"]}
+  ],
+  "intervention_ground_truth": {
+    "activities":["identificare/recrutare GT","programe de învățare la locul de muncă/stagii","parteneriate școală-angajatori","sistem de informare coordonată"],
+    "outputs":{"stagii":251,"portofolii_practica":251,"burse":251,"parteneriate_practica":12,"qualification_target":226},
+    "programme_indicators":["EECO06+07","EECR03"]
+  },
+  "comparator_rule":"Blind output is scored semantically against need families, not by textual similarity to the approved analysis.",
+  "status":"ready"
+}
