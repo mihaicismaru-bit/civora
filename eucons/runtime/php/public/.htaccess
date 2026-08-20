@@ -2,6 +2,13 @@ Options -Indexes
 
 <IfModule mod_rewrite.c>
 RewriteEngine On
+
+# Enforce HTTPS independently of cPanel's disabled Force HTTPS feature.
+# Use a fixed canonical host to avoid Host-header based redirect injection.
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
+RewriteRule ^ https://api.eucons.ro%{REQUEST_URI} [R=301,L,NE]
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php [QSA,L]
