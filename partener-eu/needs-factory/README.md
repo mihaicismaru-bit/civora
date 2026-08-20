@@ -22,7 +22,9 @@ See `contracts/ENGINE_REUSE_CONTRACT.json`.
 
 `tools/run_research_cycle.py` is the live research boundary. It sends canonical research tasks to an existing CIVORA discovery command and, by default, decorates the provider with `PartenerSourceGateProvider`.
 
-The source gate reads the canonical PARTENER.EU `ingest/state/source_registry_health.json` snapshot. It does not crawl. A discovery receipt is blocked before evidence promotion when the registry snapshot is stale, the source is unregistered, unhealthy, quarantined, low-quality, awaiting resolution, or has a material semantic change that still requires reconciliation. Provider-reported document URL and raw/semantic hashes remain intact; registry hashes are attached separately as source-health provenance.
+The source gate reads the canonical PARTENER.EU `ingest/state/source_registry_health.json` snapshot. It does not crawl. A discovery receipt is blocked before evidence promotion when the registry snapshot is stale, the source is unregistered, unhealthy, quarantined, low-quality, awaiting resolution, has a material semantic change that still requires reconciliation, or attempts to borrow a healthy trust anchor from a different source family. Provider-reported document URL and raw/semantic hashes remain intact; registry hashes are attached separately as source-health provenance.
+
+The PARTENER registry now contains explicit Needs Factory trust anchors for INS/TEMPO, AJOFM/ANOFM Vâlcea, ISJ Vâlcea, ARACIP school registries and the Ministry/CNDIPT vocational-technical policy source. `source_registry_probe.py` propagates optional `source_families` into the health snapshot so the gate can bind a provider receipt to the correct authoritative family without maintaining a second health system.
 
 The `--fixture-provider-no-source-gate` switch exists only for deterministic synthetic CI fixtures. Production invocations are fail-closed through the PARTENER source registry.
 
@@ -56,7 +58,8 @@ No narrative document may be released before `NF11_ADVERSARIAL_QA` passes.
 - evidence gaps are first-class outputs and can trigger primary research;
 - raw primary-research responses are canonical; charts and narrative are generated from raw data;
 - historical reconstruction is cutoff-locked;
-- source-provider PASS claims cannot override PARTENER source-health state.
+- source-provider PASS claims cannot override PARTENER source-health state;
+- a healthy source in the wrong source family cannot satisfy a research requirement.
 
 ## Benchmark
 
@@ -66,4 +69,4 @@ No narrative document may be released before `NF11_ADVERSARIAL_QA` passes.
 
 The unified lifecycle covers plan -> discovery -> blocked/research pack -> resume -> need synthesis -> standalone needs analysis -> QA -> DOCX -> DAPE handoff. DAPE handoff remains non-canonical until explicit owner approval.
 
-The remaining v1 production gate is live socioeconomic source coverage: the PARTENER registry must expose the authoritative source families required by the selected research profile (for example INS/TEMPO, AJOFM/ANOFM, ISJ and beneficiary/school official evidence where applicable). Until those sources are registered and healthy, discovery for those requirements fails closed rather than fabricating evidence.
+Static socioeconomic trust-anchor coverage is now present on the CP21 branch. The remaining live-production gate is to refresh/prove those new roots through the existing PARTENER source-health probe, exercise the CIVORA provider against real child documents carrying the matching `source_registry_id`, and then run the blind end-to-end benchmark on a project whose needs analysis is not already known. Until live health/provenance succeeds, the affected requirements remain fail-closed rather than fabricating evidence.
