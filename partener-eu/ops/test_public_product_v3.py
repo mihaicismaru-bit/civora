@@ -120,6 +120,16 @@ assert 'Vezi semnalul și ${esc(sourceKind)} ↗' in people_card_chunk
 assert "x.institution||'Sursă oficială'" not in people_card_chunk
 assert "x.person||x.institution||'Sursă oficială'" not in people_card_chunk
 
+# Decision-maker cards must expose unknown context explicitly instead of generic filler.
+affected_people_chunk=function_chunk(people,'affectedText')
+watch_people_chunk=function_chunk(people,'watchText')
+assert 'beneficiarii și proiectele din aria semnalului' not in affected_people_chunk
+assert 'Nu este încă suficient structurată în datele verificate.' in affected_people_chunk
+assert 'Ghidul, ordinul, corrigendumul, calendarul sau alt act oficial' not in watch_people_chunk
+assert 'Faptul oficial lipsă nu este încă identificat suficient de precis în datele verificate.' in watch_people_chunk
+assert 'affectedText(x)' in people_card_chunk
+assert 'watchText(x)' in people_card_chunk
+
 # Decision-maker promo is fresh and disappears instead of showing an empty/filler module.
 assert 'function freshnessDays(' in people
 fresh_chunk=function_chunk(people,'isFresh')
