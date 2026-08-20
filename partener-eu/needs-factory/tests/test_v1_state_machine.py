@@ -69,7 +69,7 @@ class NeedsFactoryV1StateMachineTests(unittest.TestCase):
 
             final_dir = tmp_root / "release" / "final"
             self.assertTrue((final_dir / "ANALIZA_NEVOI.docx").exists())
-            self.assertTrue((final_dir / "FINAL_PACKAGE.zip").exists())
+            self.assertTrue((final_dir / "ANALIZA_NEVOI_PACKAGE.zip").exists())
 
             handoff = result["dape_handoff"]
             self.assertEqual(handoff["state"], "HANDOFF_READY_NOT_CANONICAL")
