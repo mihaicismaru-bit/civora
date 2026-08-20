@@ -1,0 +1,72 @@
+name: Needs Factory Research Orchestrator
+
+on:
+  push:
+    branches:
+      - 'needs-factory/**'
+    paths:
+      - 'partener-eu/needs-factory/**'
+      - '.github/workflows/needs-factory-research-orchestrator.yml'
+  pull_request:
+    paths:
+      - 'partener-eu/needs-factory/**'
+      - '.github/workflows/needs-factory-research-orchestrator.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  provider-bridge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Needs Factory dependencies
+        run: python -m pip install --disable-pip-version-check -r partener-eu/needs-factory/requirements-docx.txt
+      - name: Run full regression suite
+        run: python -m unittest discover -s partener-eu/needs-factory/tests -v
+      - name: Build synthetic research request
+        run: |
+          python partener-eu/needs-factory/tools/build_research_request.py \
+            partener-eu/needs-factory/tests/fixtures/research_intake_synthetic.json \
+            --output /tmp/nf-synth-request.json
+      - name: Execute research agenda through CIVORA command-provider bridge
+        run: |
+          python partener-eu/needs-factory/tools/run_research_cycle.py \
+            /tmp/nf-synth-request.json \
+            --provider-command-json '["python","partener-eu/needs-factory/tests/fixtures/fake_civora_provider.py"]' \
+            --output /tmp/nf-synth-cycle.json
+          python - <<'PY'
+          import json
+          result = json.load(open('/tmp/nf-synth-cycle.json', encoding='utf-8'))
+          assert result['state'] == 'READY_FOR_PRIMARY_RESEARCH'
+          assert result['provider_errors'] == []
+          assert result['unresolved_external_primary'] == []
+          assert result['unresolved_external_supporting'] == []
+          queue = {item['requirement_id'] for item in result['primary_research_queue']}
+          assert queue == {'REQ-PR-001','REQ-PR-002','REQ-PR-003','REQ-PR-004'}
+          assert result['counts']['accepted_candidates'] == 5
+          assert result['counts']['evidence_records'] == 5
+          assert result['counts']['primary_research_queue'] == 4
+          assert result['policy']['provider_failure_never_fabricates_evidence'] is True
+          print(result['request_sha256'])
+          print(sorted(result['evidence']))
+          print(sorted(queue))
+          PY
+      - name: Reassert 310224 remains blocked until authoritative primary data exists
+        run: |
+          python partener-eu/needs-factory/tools/run_research_gate_fixture.py \
+            partener-eu/needs-factory/benchmarks/310224/CP08_PRODUCT_RUN_INPUT.json \
+            --output /tmp/nf-310224-blocked.json
+          python - <<'PY'
+          import json
+          result = json.load(open('/tmp/nf-310224-blocked.json', encoding='utf-8'))
+          assert result['state'] == 'BLOCKED_RESEARCH'
+          assert len([g for g in result['evidence_gaps']['gaps'] if g.get('blocking')]) == 5
+          PY

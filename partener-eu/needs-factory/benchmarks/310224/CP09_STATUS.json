@@ -1,0 +1,51 @@
+{
+  "schema_version": "nf.checkpoint_status.v0.1",
+  "benchmark_id": "NF-BENCH-001",
+  "project_code": "310224",
+  "checkpoint": "NF-CP09",
+  "name": "Authoritative Population, Primary Research Evidence and Deterministic Resume",
+  "branch": "needs-factory/nf-cp09-resume-primary-research",
+  "draft_pr": 467,
+  "verified_head": "0c8fb7d75b1603a3583a57f02a8937c42f49427f",
+  "ci": {
+    "workflow_run": 32253425360,
+    "job": 96069482551,
+    "conclusion": "success",
+    "regression_tests": 40,
+    "real_310224_research_gate": "success_blocked_as_expected",
+    "synthetic_blocked_to_resume_acceptance": "success",
+    "synthetic_nf12_smoke": "success"
+  },
+  "real_310224_run": {
+    "run_id": "NF-711ebf6b34ca12942434",
+    "state": "BLOCKED_RESEARCH",
+    "blocking_gaps": ["GAP-PR-001", "GAP-PR-002", "GAP-PR-003", "GAP-PR-004", "GAP-POPULATION-SNAPSHOT"]
+  },
+  "resume_acceptance_fixture": {
+    "classification": "SYNTHETIC_ACCEPTANCE_ONLY_NOT_PROJECT_EVIDENCE",
+    "predecessor_run_id": "NF-3c657db76c0378a3a0ad",
+    "successor_run_id": "NF-9eb1bffe997cf017603c",
+    "restart_stage": "NF06_PRIMARY_RESEARCH",
+    "reused_checkpoint": "NF05_GAP_DETECTION",
+    "primary_evidence_count": 6,
+    "unresolved_local_gaps": 0,
+    "successor_state": "READY_FOR_NARRATIVE",
+    "narrative_pack_sha256": "df9515eb0218d4fabf9fbf6efcf7ac93a9fe67f655efffface77d3c63e64f96b"
+  },
+  "guards_verified": [
+    "contractual target alone is not accepted as population snapshot",
+    "population snapshot requires authoritative source receipt/date and grade×qualification strata",
+    "strata total must equal eligible population",
+    "respondents cannot exceed population stratum",
+    "respondent stratum cannot change across answers",
+    "canonical raw response hash is row-order independent",
+    "validated aggregates are promoted to direct school-level evidence",
+    "predecessor run is never overwritten",
+    "only affected checkpoints are invalidated",
+    "rollback remains possible"
+  ],
+  "decision": "CLOSED_PASS",
+  "next_checkpoint": "NF-CP10",
+  "next_action": "Implement a constrained narrative compiler that renders only validated claim-ledger content, preserves Evidence/Need IDs, exposes limitations, and validates that no unknown evidence references or unsupported need sections enter the final analysis artifact.",
+  "status": "CLOSED_PASS"
+}

@@ -1,0 +1,51 @@
+{
+  "schema_version": "nf.call_requirements.v0.1",
+  "benchmark_id": "NF-BENCH-001",
+  "project_code": "310224",
+  "call_code": "PEO/76/PEO_P8/OP4/ESO4.5/PEO_A3",
+  "call_title": "Adaptarea serviciilor educaționale adresate elevilor și personalului didactic din ÎPT – Stagii de practică pentru elevi_Regiuni mai puțin dezvoltate",
+  "programme": "Program Educație și Ocupare 2021-2027",
+  "priority": "P08 – Creșterea accesibilității, atractivității și calității învățământului profesional și tehnic",
+  "specific_objective": "ESO4.5",
+  "fund": "FSE+",
+  "historical_timeline": [
+    {"date":"2023-05-08","event":"public consultation launched","status":"verified_official_archive"},
+    {"date":"2023-08-02","event":"competitive calls announced","status":"verified_official_archive"},
+    {"date":"2023-08-18","event":"MySMIS submission window opened","status":"verified_official_archive"},
+    {"date":"2023-09-28","event":"corrigendum published","status":"verified_official_archive"},
+    {"date":"2023-11-02","event":"FAQ list published","status":"verified_official_archive"},
+    {"date":"2023-11-20","event":"second corrigendum / extension announced; archive page may display 21 Nov depending on publication mirror","status":"verified_multi_source"},
+    {"date":"2024-01-12","event":"submission window closed","status":"verified_official_archive"}
+  ],
+  "needs_analysis_acceptance_contract": {
+    "source": "approved CF v28 embedded ETF evaluation, pages 105-108",
+    "criterion_1": {"name":"Relevanță strategică","max_points":30,"project_points":30},
+    "requirements": [
+      {"id":"ETF-1.3-A","requirement":"Natura și dimensiunea grupului țintă sunt definite clar și cuantificate în raport cu activitățile și resursele proiectului.","max_points":4,"project_points":4},
+      {"id":"ETF-1.3-B","requirement":"Nevoile grupului țintă sunt identificate prin analiză proprie bazată pe studii, analize, date statistice și/sau cercetare proprie.","max_points":5,"project_points":5},
+      {"id":"ETF-1.3-C","requirement":"Categoriile grupului țintă sunt clar delimitate inclusiv geografic și din perspectiva nevoilor.","max_points":3,"project_points":3},
+      {"id":"ETF-1.4","requirement":"Analiza de nevoi pe baza căreia sunt fundamentate măsurile propuse este atașată cererii de finanțare.","max_points":1,"project_points":1}
+    ],
+    "minimum_direct_need_analysis_points": 13,
+    "efficacy_link": "Activitățile trebuie să genereze realizări imediate, clar formulate și cuantificate, corelate cu natura și dimensiunea grupului țintă."
+  },
+  "target_group_eligibility_from_approved_cf": {
+    "categories":["elevi din învățământul profesional și tehnic","elevi din învățământul dual"],
+    "age_max_at_entry":29,
+    "must_be_enrolled_at_partner_school":true,
+    "domicile_in_target_region":true,
+    "legal_domicile_in_romania":true,
+    "school_in_project_region":true,
+    "practice_may_take_place_in_other_romanian_regions":true
+  },
+  "program_indicators_from_approved_cf": {
+    "EECO06+07":{"label":"Copii și tineri","target":251},
+    "EECR03":{"label":"Persoane care dobândesc o calificare la încetarea calității de participant","target":226}
+  },
+  "blind_run_gate": {
+    "must_cover":["ETF-1.3-A","ETF-1.3-B","ETF-1.3-C","ETF-1.4"],
+    "must_preserve_historical_cutoff":true,
+    "must_not_use_ground_truth_narrative_as_research_input":true,
+    "status":"ready"
+  }
+}
