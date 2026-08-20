@@ -4,7 +4,7 @@
   "product": "VÂLCEA CLAR market intelligence state",
   "execution_owner": "CIVORA_SITE_ENGINE",
   "state_owner": "GITHUB_REPOSITORY",
-  "generated_at": "2026-08-20T11:15:06Z",
+  "generated_at": "2026-08-20T17:02:00Z",
   "mode": "LIVE_SOURCE_HEALTH",
   "monitor_count": 3,
   "monitors": [
@@ -181,7 +181,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://posturi.gov.ro/judet/valcea/",
-          "fingerprint": "db80b02cd1c7b60deccac561e56d12a8e809ea8b98a6418a3c7e099260f6fe04",
+          "fingerprint": "c1b7003211cfcdca21b821fc71ab1178ada27fe97169b290d24aa4cfdafc34f5",
           "match_count": 16,
           "matched_terms": [
             "Vâlcea",
@@ -201,8 +201,8 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.ejobs.ro/locuri-de-munca/ramnicu-valcea",
-          "fingerprint": "fa8171b584facbbf9e5c9b448ad0848a008e4d20cac96d2180bbd9a4baa6e94d",
-          "match_count": 20,
+          "fingerprint": "7a3d0d15e64117420bd6f3633b7faeb73cd325e3851eec64eed99f9e8b92996d",
+          "match_count": 19,
           "matched_terms": [
             "Joburi",
             "locuri de munca",
@@ -228,7 +228,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.bestjobs.eu/locuri-de-munca-in-valcea",
-          "fingerprint": "d95efa2fa773c9780425c1d5fb5d0a386f87dbb61f23ecae97aa1a5753d4029e",
+          "fingerprint": "c5a7e7c3dd5e67913f1dfaa6935e10c8de57f66a9a599175957147f8e48448bd",
           "match_count": 19,
           "matched_terms": [
             "locuri de munca",
@@ -250,7 +250,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://ro.linkedin.com/jobs/jobs-in-v%C3%AElcea",
-          "fingerprint": "d7f45ce94e07fa3aaff99e8f1e05092f83f674288f7fcefe3fea1341abea32c0",
+          "fingerprint": "f106a2cacd0675fac9492bda5b50df5e34c3bbbcf398319ccb7e9b2514c4fc11",
           "match_count": 24,
           "matched_terms": [
             "joburi",
@@ -277,8 +277,8 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.olx.ro/locuri-de-munca/valcea-judet/",
-          "fingerprint": "f0b4e6d5fc4247b2aead746652efde700ce3533e82d10221fb581f77394d9f5f",
-          "match_count": 22,
+          "fingerprint": "82e647ebcfcae2c8e36fe96c8b8a2a9a4947bbcb64c798fdd4fe307ceafc968f",
+          "match_count": 23,
           "matched_terms": [
             "locuri de munca",
             "Râmnicu Vâlcea",
@@ -314,7 +314,10 @@
         "termene-top50-valcea"
       ],
       "official_changed_sources": [],
-      "degraded_sources": [],
+      "degraded_sources": [
+        "data-gov-onrc-datasets",
+        "data-gov-finance-datasets"
+      ],
       "sources": [
         {
           "id": "data-gov-onrc-datasets",
@@ -322,27 +325,15 @@
           "url": "https://data.gov.ro/dataset?organization=onrc",
           "source_class": "T1_OFFICIAL_OPEN_DATA",
           "publication_authority": true,
-          "reachable": true,
-          "http_status": 200,
-          "final_url": "https://data.gov.ro/dataset?organization=onrc",
-          "fingerprint": "478b1e74a0e3cc4205bfccca1975a82792b1b1493b1e7d20a93706dd0fa34d6e",
-          "match_count": 8,
-          "matched_terms": [
-            "Firme înregistrate la Registrul Comerțului"
-          ],
-          "numeric_signals": [
-            {
-              "kind": "companies",
-              "value_text": "3"
-            },
-            {
-              "kind": "companies",
-              "value_text": "1"
-            }
-          ],
-          "health": "OK",
-          "error": null,
-          "change": "NEW_BASELINE"
+          "reachable": false,
+          "http_status": null,
+          "fingerprint": null,
+          "match_count": 0,
+          "matched_terms": [],
+          "numeric_signals": [],
+          "health": "UNREACHABLE",
+          "error": "URLError: <urlopen error timed out>",
+          "change": "PROBE_FAILED"
         },
         {
           "id": "data-gov-finance-datasets",
@@ -350,19 +341,15 @@
           "url": "https://data.gov.ro/organization/mfp",
           "source_class": "T1_OFFICIAL_OPEN_DATA",
           "publication_authority": true,
-          "reachable": true,
-          "http_status": 200,
-          "final_url": "https://data.gov.ro/organization/mfp",
-          "fingerprint": "8d5a70f4183671e9e460519747ddbcf1034cfc4919b5f0f1b2fb935ba80711d3",
-          "match_count": 6,
-          "matched_terms": [
-            "Situații financiare",
-            "CSV"
-          ],
+          "reachable": false,
+          "http_status": null,
+          "fingerprint": null,
+          "match_count": 0,
+          "matched_terms": [],
           "numeric_signals": [],
-          "health": "OK",
-          "error": null,
-          "change": "NEW_BASELINE"
+          "health": "UNREACHABLE",
+          "error": "URLError: <urlopen error timed out>",
+          "change": "PROBE_FAILED"
         },
         {
           "id": "onrc-services",
@@ -461,8 +448,8 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://termene.ro/articole/top-50-companii-din-valcea-de-la-oltchim-damila-si-cet-govora-la-faurecia-vel-pitar-si-avicarvil-cum-s-a-schimbat-varful-clasamentului-in-perioada-2008-2024-timeline",
-          "fingerprint": "595090d6b093c032a2986925a3ddcb55beb44277d8463099536d1397f74480f7",
-          "match_count": 25,
+          "fingerprint": "de61b89889022391c0f062f665944eb377efc96bff2a56e4784d812cf04d9bd9",
+          "match_count": 24,
           "matched_terms": [
             "Top 50 companii din Vâlcea",
             "cifră de afaceri",
