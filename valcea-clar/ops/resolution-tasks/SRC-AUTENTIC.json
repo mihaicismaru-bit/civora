@@ -1,20 +1,21 @@
 {
   "schema_version": "1.0",
   "type": "VENUE_SOURCE_CHANGE_REVIEW",
-  "source_id": "petros-official-contact",
-  "source_url": "https://gyrospetros.ro/contact/",
+  "source_id": "SRC-AUTENTIC",
+  "source_url": "https://www.autenticrestaurant.ro/",
   "source_kind": "official_site",
   "status": "OPEN",
-  "first_observed_at": "2026-08-15T06:34:39.659244Z",
+  "first_observed_at": "2026-08-20T08:19:10.279672Z",
   "last_observed_at": "2026-08-20T08:19:10.279672Z",
-  "previous_semantic_sha256": "7e537de4a191fcfba2c46d9612e61bc00ed06df6c871a96ae9a35df6c51ad305",
-  "current_semantic_sha256": "3692df7dce087c41522405657b099745f75867f656157f697e7ec8312dde04ba",
+  "previous_semantic_sha256": "c55ce68613afac47cf5151d94e05e419814b31bf84347fc58da2e685fad2de28",
+  "current_semantic_sha256": "4dab1cc5d12911a6af6ad6aec1cfd54d9b64209d99bddb4519e6a435626b43aa",
   "potentially_impacted_fields": [
     "address",
-    "phone",
-    "email",
-    "opening_hours",
-    "delivery_hours"
+    "contact",
+    "hours",
+    "menu",
+    "price",
+    "grammage"
   ],
   "material_fact_autoupdate_allowed": false,
   "required_resolution": "Reverify the changed address, hours, menu, prices, operator or other supported facts against the source before rebuilding the public projection."
