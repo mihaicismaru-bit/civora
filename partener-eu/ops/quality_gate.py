@@ -14,6 +14,7 @@ CHECKS = [
     ("frontend", [sys.executable, str(ROOT / "ops" / "test_frontend_regression.py")]),
     ("public_language", [sys.executable, str(ROOT / "ops" / "test_public_language.py")]),
     ("ask_v2", [sys.executable, str(ROOT / "ops" / "test_ask_partener_v2.py")]),
+    ("ask_canonical_failclosed", ["node", str(ROOT / "ops" / "test_ask_canonical_failclosed.js")]),
     ("ask_eligibility_projection", ["node", str(ROOT / "ops" / "test_ask_eligibility_projection.js")]),
     ("p10_policy", [sys.executable, str(ROOT / "ops" / "test_p10_policy_regression.py")]),
     ("afir_policy", [sys.executable, str(ROOT / "ops" / "test_afir_ingest_policy.py")]),
