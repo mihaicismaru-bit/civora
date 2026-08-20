@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: read
+  statuses: write
 
 concurrency:
   group: valcea-clar-live-http-${{ github.ref }}
@@ -84,6 +85,34 @@ jobs:
           path.write_text(json.dumps(receipt, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
           print(json.dumps(receipt, ensure_ascii=False))
           PY
+
+      - name: Publish successful live HTTP status
+        if: success()
+        uses: actions/github-script@v8
+        with:
+          script: |
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: 'success',
+              context: 'valcea-clar/live-http',
+              description: 'Homepage, /stiri/ and lead verified HTTP 200'
+            })
+
+      - name: Publish failed live HTTP status
+        if: failure()
+        uses: actions/github-script@v8
+        with:
+          script: |
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: 'failure',
+              context: 'valcea-clar/live-http',
+              description: 'External HTTP verification failed'
+            })
 
       - name: Upload external HTTP verification receipt
         if: always()
