@@ -1,0 +1,87 @@
+name: EUCONS E29 Live Smoke v2
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/eucons-e29-live-smoke-v2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify HTTPS, CORS, persistence and idempotency
+        shell: bash
+        run: |
+          set -euo pipefail
+          endpoint='https://api.eucons.ro/api/leads'
+          origin='https://eucons.ro'
+          submission_id='e29-live-smoke-v2'
+
+          preflight_code=$(curl -sS -D /tmp/preflight.headers -o /dev/null -w '%{http_code}' \
+            -X OPTIONS -H "Origin: ${origin}" "${endpoint}")
+          echo "preflight=${preflight_code}"
+          test "${preflight_code}" = '204'
+          grep -i -q '^Access-Control-Allow-Origin: https://eucons.ro' /tmp/preflight.headers
+
+          get_code=$(curl -sS -o /tmp/get.json -w '%{http_code}' "${endpoint}")
+          echo "get=${get_code} body=$(cat /tmp/get.json)"
+          test "${get_code}" = '405'
+
+          post_once() {
+            local message="$1"
+            local output="$2"
+            curl -sS -o "${output}" -w '%{http_code}' \
+              -H "Origin: ${origin}" \
+              -H 'Content-Type: application/x-www-form-urlencoded' \
+              --data-urlencode 'form_id=proposal_request' \
+              --data-urlencode "submission_id=${submission_id}" \
+              --data-urlencode 'submission_age_ms=1500' \
+              --data-urlencode 'privacy_ack=true' \
+              --data-urlencode 'marketing_consent=false' \
+              --data-urlencode 'contact_name=EUCONS Synthetic Smoke v2' \
+              --data-urlencode 'email=synthetic-smoke-v2@eucons.invalid' \
+              --data-urlencode 'organization_name=EUCONS Synthetic QA v2' \
+              --data-urlencode 'audience_id=companies_entrepreneurs' \
+              --data-urlencode "message=${message}" \
+              "${endpoint}"
+          }
+
+          first_code=$(post_once 'Synthetic E29 live smoke v2; no real person.' /tmp/first.json)
+          echo "first=${first_code} body=$(cat /tmp/first.json)"
+          test "${first_code}" = '202'
+          second_code=$(post_once 'Synthetic E29 live smoke v2; no real person.' /tmp/second.json)
+          echo "second=${second_code} body=$(cat /tmp/second.json)"
+          test "${second_code}" = '202'
+          conflict_code=$(post_once 'Synthetic E29 live smoke v2 conflict probe.' /tmp/conflict.json)
+          echo "conflict=${conflict_code} body=$(cat /tmp/conflict.json)"
+          test "${conflict_code}" = '409'
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          get = json.loads(Path('/tmp/get.json').read_text())
+          first = json.loads(Path('/tmp/first.json').read_text())
+          second = json.loads(Path('/tmp/second.json').read_text())
+          conflict = json.loads(Path('/tmp/conflict.json').read_text())
+          assert get == {'status': 'rejected', 'code': 'METHOD_NOT_ALLOWED'}, get
+          assert first.get('status') == 'accepted', first
+          assert second.get('status') == 'accepted', second
+          assert first.get('request_id') and first.get('request_id') == second.get('request_id'), (first, second)
+          assert first.get('next_action') == second.get('next_action'), (first, second)
+          assert conflict.get('status') == 'unavailable' and conflict.get('code') == 'SUBMISSION_ID_CONFLICT', conflict
+          forbidden = {'email','phone','contact_name','organization_name','message'}
+          assert not (forbidden & set(first)), first
+          print(json.dumps({
+              'status': 'PASS',
+              'https': True,
+              'cors': 'PASS',
+              'post': '202_ACCEPTED',
+              'idempotent_replay': '202_SAME_REQUEST_ID',
+              'conflicting_replay': '409_SUBMISSION_ID_CONFLICT',
+              'pii_in_response': False,
+          }))
+          PY
