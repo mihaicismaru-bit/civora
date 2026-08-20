@@ -61,6 +61,30 @@ jobs:
           print(sorted(result['evidence']))
           print(sorted(queue))
           PY
+      - name: Prove production gate blocks unregistered provider evidence
+        run: |
+          set +e
+          python partener-eu/needs-factory/tools/run_research_cycle.py \
+            /tmp/nf-synth-request.json \
+            --provider-command-json '["python","partener-eu/needs-factory/tests/fixtures/fake_civora_provider.py"]' \
+            --output /tmp/nf-synth-gated.json
+          rc=$?
+          set -e
+          test "$rc" -eq 2
+          python - <<'PY'
+          import json
+          result = json.load(open('/tmp/nf-synth-gated.json', encoding='utf-8'))
+          assert result['state'] == 'BLOCKED_DISCOVERY'
+          assert result['counts']['accepted_candidates'] == 0
+          assert result['counts']['evidence_records'] == 0
+          assert result['counts']['rejected_candidates'] == 5
+          assert result['provider_binding']['partener_source_registry_gate'] == 'ENABLED'
+          assert all(
+              'source_registry_gate:unregistered_source' in item['failures']
+              for item in result['rejected_candidates']
+          )
+          print(sorted(item['candidate_id'] for item in result['rejected_candidates']))
+          PY
       - name: Reassert 310224 remains blocked until authoritative primary data exists
         run: |
           python partener-eu/needs-factory/tools/run_research_gate_fixture.py \
