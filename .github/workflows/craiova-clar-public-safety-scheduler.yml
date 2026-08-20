@@ -1,0 +1,216 @@
+name: CRAIOVA CLAR Public Safety Scheduler
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '3,13,23,33,43,53 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/craiova-clar-public-safety-scheduler.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: craiova-clar-runtime-writer
+  cancel-in-progress: false
+
+jobs:
+  public-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out CRAIOVA CLAR build branch
+        uses: actions/checkout@v6
+        with:
+          ref: craiova-clar-build
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Regression tests
+        run: python -m unittest discover -s craiova-clar/tests -p 'test_*.py' -v
+
+      - name: Discover official ISU public-safety item and render story
+        env:
+          CRAIOVA_CLAR_BASE_URL: https://craiova-clar-live-public-mihaicismaru-6634s-projects.vercel.app
+        run: python craiova-clar/run_public_safety.py
+
+      - name: Persist public-safety material
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'craiova-clar[bot]'
+          git config user.email 'craiova-clar@users.noreply.github.com'
+          git add craiova-clar/site craiova-clar/state/public_safety_seen.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo 'No new CRAIOVA CLAR public-safety material.'
+          else
+            git commit -m 'Publish CRAIOVA CLAR public safety story snapshot'
+            git push origin HEAD:craiova-clar-build
+          fi
+
+      - name: Probe public publication
+        run: |
+          python - <<'PY'
+          import hashlib, json, os, re, time, urllib.request
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          manifest = Path('craiova-clar/site/stories.json')
+          if not manifest.exists():
+              raise SystemExit('No CRAIOVA CLAR story manifest exists yet.')
+          rows = json.loads(manifest.read_text(encoding='utf-8')).get('stories', [])
+          story = next((row for row in rows if row.get('section') == 'SIGURANȚĂ PUBLICĂ'), None)
+          if not story:
+              raise SystemExit('No CRAIOVA CLAR public-safety story exists yet.')
+          url = story['canonical_url']
+          expected = story['headline']
+          expected_source = 'github:craiova-clar-build'
+          media = story.get('media') if isinstance(story.get('media'), dict) else None
+          outcome = {
+              'story_id': story['story_id'], 'canonical_url': url,
+              'checked_at': datetime.now(timezone.utc).isoformat(),
+              'status': 'verification_failed', 'http_status': None,
+              'source_header': None, 'content_type': None, 'server': None,
+              'final_url': None, 'body_sha256': None, 'body_prefix': None,
+              'run_id': os.environ.get('GITHUB_RUN_ID'),
+              'media_expected': bool(media), 'media_verified': None, 'error': None,
+          }
+          for attempt in range(12):
+              try:
+                  req = urllib.request.Request(url, headers={'User-Agent':'CRAIOVA-CLAR-live-check/1.0'})
+                  with urllib.request.urlopen(req, timeout=12) as response:
+                      raw = response.read()
+                      body = raw.decode('utf-8', errors='replace')
+                      status = response.status
+                      source_header = response.headers.get('X-CRAIOVA-CLAR-Source')
+                      outcome.update({
+                          'http_status': status,
+                          'source_header': source_header,
+                          'content_type': response.headers.get('Content-Type'),
+                          'server': response.headers.get('Server'),
+                          'final_url': response.geturl(),
+                          'body_sha256': hashlib.sha256(raw).hexdigest(),
+                          'body_prefix': re.sub(r'\s+', ' ', body[:400]).strip(),
+                      })
+                  media_ok = True
+                  if media:
+                      expected_media_bits = [str(media.get('image_url') or ''), str(media.get('creator') or ''), str(media.get('license') or '')]
+                      media_ok = all(bit and bit in body for bit in expected_media_bits)
+                  outcome['media_verified'] = media_ok if media else None
+                  if status == 200 and source_header == expected_source and expected in body and 'CRAIOVA CLAR' in body and media_ok:
+                      outcome['status'] = 'published_verified'
+                      outcome['error'] = None
+                      receipt = {
+                          'story_id': story['story_id'], 'canonical_url': url,
+                          'published_at': story['published_at'], 'destination': 'public_web',
+                          'status': 'published_verified', 'external_id': None,
+                          'metadata': {'verified_at': datetime.now(timezone.utc).isoformat(),
+                                       'http_status': status, 'headline_verified': True,
+                                       'product_verified': True, 'source_header': source_header,
+                                       'run_id': os.environ.get('GITHUB_RUN_ID'),
+                                       'media_expected': bool(media),
+                                       'media_verified': media_ok if media else None},
+                      }
+                      Path('craiova-clar/site/public_safety_publication_receipt.json').write_text(
+                          json.dumps(receipt, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+                      break
+                  outcome['error'] = f'HTTP {status}; source={source_header!r}; headline/product/media verification failed'
+              except Exception as exc:
+                  outcome['error'] = repr(exc)
+              if attempt < 11:
+                  time.sleep(5)
+          outcome['checked_at'] = datetime.now(timezone.utc).isoformat()
+          Path('craiova-clar/state/public_safety_live_probe.json').write_text(
+              json.dumps(outcome, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          print(json.dumps(outcome, ensure_ascii=False))
+          PY
+
+      - name: Persist public verification evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'craiova-clar[bot]'
+          git config user.email 'craiova-clar@users.noreply.github.com'
+          git add craiova-clar/state/public_safety_live_probe.json
+          if test -f craiova-clar/site/public_safety_publication_receipt.json; then git add craiova-clar/site/public_safety_publication_receipt.json; fi
+          if git diff --cached --quiet; then
+            echo 'Public-safety verification evidence already current.'
+          else
+            git commit -m 'Record CRAIOVA CLAR public safety live verification'
+            git push origin HEAD:craiova-clar-build
+          fi
+
+      - name: Require verified public publication
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          probe = json.loads(Path('craiova-clar/state/public_safety_live_probe.json').read_text(encoding='utf-8'))
+          assert probe['status'] == 'published_verified', probe
+          if probe.get('media_expected'):
+              assert probe.get('media_verified') is True, probe
+          PY
+
+      - name: Plan Facebook publication with stale-story fail-safe
+        run: |
+          python craiova-clar/run_facebook.py --site-receipt craiova-clar/site/public_safety_publication_receipt.json | tee /tmp/craiova-clar-public-safety-facebook-plan.json
+
+      - name: Publish fresh eligible story to Facebook
+        env:
+          CRAIOVA_FB_PAGE_ID: ${{ secrets.CRAIOVA_FB_PAGE_ID }}
+          CRAIOVA_META_PAGE_ACCESS_TOKEN: ${{ secrets.CRAIOVA_META_PAGE_ACCESS_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          status=$(python - <<'PY'
+          import json
+          print(json.load(open('/tmp/craiova-clar-public-safety-facebook-plan.json', encoding='utf-8'))['status'])
+          PY
+          )
+          if test "$status" = "DRY_RUN"; then
+            python craiova-clar/run_facebook.py --apply --site-receipt craiova-clar/site/public_safety_publication_receipt.json | tee /tmp/craiova-clar-public-safety-facebook-result.json
+          else
+            cp /tmp/craiova-clar-public-safety-facebook-plan.json /tmp/craiova-clar-public-safety-facebook-result.json
+            echo "Facebook external write skipped safely: $status"
+          fi
+
+      - name: Persist and validate Facebook gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+          result = json.load(open('/tmp/craiova-clar-public-safety-facebook-result.json', encoding='utf-8'))
+          status = result.get('status')
+          if status == 'BLOCKED_STALE_STORY':
+              gate_status = 'NOT_APPLICABLE_STALE_SOURCE'
+          elif status in {'published_verified', 'NO_ELIGIBLE_POSTS'}:
+              gate_status = status
+          else:
+              raise SystemExit(f'Facebook public-safety gate did not close safely: {result}')
+          gate = {
+              'checked_at': datetime.now(timezone.utc).isoformat(),
+              'status': gate_status,
+              'facebook_result': result,
+              'external_write_performed': status == 'published_verified',
+          }
+          Path('craiova-clar/state/public_safety_facebook_gate.json').write_text(
+              json.dumps(gate, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          print(json.dumps(gate, ensure_ascii=False))
+          PY
+          git config user.name 'craiova-clar[bot]'
+          git config user.email 'craiova-clar@users.noreply.github.com'
+          git add craiova-clar/state/public_safety_facebook_gate.json craiova-clar/state/facebook.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo 'Facebook public-safety truth state already current.'
+          else
+            git commit -m 'Record CRAIOVA CLAR public safety Facebook gate'
+            git push origin HEAD:craiova-clar-build
+          fi
