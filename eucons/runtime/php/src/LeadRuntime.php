@@ -119,9 +119,6 @@ final class EuconsLeadRuntime
         }
         $payload['privacy_ack'] = self::boolValue($payload['privacy_ack'] ?? false);
         $payload['marketing_consent'] = self::boolValue($payload['marketing_consent'] ?? false);
-        if (!isset($payload['submitted_at']) || trim((string)$payload['submitted_at']) === '') {
-            $payload['submitted_at'] = gmdate('c');
-        }
         return $payload;
     }
 
