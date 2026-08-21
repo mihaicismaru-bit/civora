@@ -8,6 +8,14 @@ on:
         required: false
         default: false
         type: boolean
+  workflow_run:
+    workflows:
+      - 'VÂLCEA CLAR Live Newsroom'
+      - 'VÂLCEA CLAR Publication Reconcile'
+      - 'VÂLCEA CLAR Continuous Frontpage Invariant'
+      - 'VÂLCEA CLAR Premium Presentation'
+    types: [completed]
+    branches: [main]
   schedule:
     - cron: '17,47 * * * *'
   push:
@@ -36,6 +44,26 @@ jobs:
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Resolve public acceptance target
+        id: target
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = 'pull_request' ]; then
+            echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+            echo 'ref=pull-request' >> "$GITHUB_OUTPUT"
+          else
+            # Bot-authored pushes made with GITHUB_TOKEN do not recursively
+            # emit push-triggered workflow runs. For workflow_run/schedule/manual
+            # acceptance we therefore validate the actual current main head.
+            git fetch origin main
+            git checkout --detach origin/main
+            echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+            echo 'ref=main' >> "$GITHUB_OUTPUT"
+          fi
 
       - uses: actions/setup-python@v6
         with:
@@ -49,15 +77,15 @@ jobs:
         run: |
           set -euo pipefail
           EXTRA=''
-          if [ "${{ github.event_name }}" = 'push' ]; then
+          if [ "${{ github.event_name }}" = 'push' ] || [ "${{ github.event_name }}" = 'workflow_run' ]; then
             EXTRA='--require-ready'
           elif [ "${{ github.event_name }}" = 'workflow_dispatch' ] && [ "${{ inputs.require_ready }}" = 'true' ]; then
             EXTRA='--require-ready'
           fi
 
           # The installed site bridge refreshes the canonical feed every 60s.
-          # A main push therefore gets a bounded retry window before strict
-          # acceptance fails; scheduled/PR observations stay non-mutating.
+          # Main publication events therefore get a bounded retry window before
+          # strict acceptance fails; scheduled/PR observations stay non-mutating.
           for attempt in 1 2 3 4; do
             if python valcea-clar/scripts/probe_public_site.py $EXTRA --output /tmp/valcea-clar-public-health.json | tee /tmp/valcea-clar-public-health.log; then
               exit 0
@@ -72,6 +100,8 @@ jobs:
         if: always()
         shell: bash
         run: |
+          echo "Acceptance target: ${{ steps.target.outputs.ref }} @ ${{ steps.target.outputs.sha }}" >> "$GITHUB_STEP_SUMMARY"
+          echo '' >> "$GITHUB_STEP_SUMMARY"
           if [ -s /tmp/valcea-clar-public-health.json ]; then
             python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
           import json
@@ -100,7 +130,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           STATUS_REPOSITORY: ${{ github.repository }}
-          STATUS_SHA: ${{ github.sha }}
+          STATUS_SHA: ${{ steps.target.outputs.sha }}
           STATUS_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           python - <<'PY'
