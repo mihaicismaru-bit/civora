@@ -1,0 +1,161 @@
+name: VÂLCEA CLAR Manual Social Bridge
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/editorial/manual_publish_queue.json"
+      - "valcea-clar/social/manual_social_bridge.py"
+      - "valcea-clar/social/story_visuals.json"
+      - ".github/workflows/valcea-clar-manual-social-bridge.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-manual-social-bridge
+  cancel-in-progress: false
+
+jobs:
+  distribute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install deterministic editorial renderer dependency
+        run: python -m pip install --disable-pip-version-check Pillow==11.3.0
+
+      - name: Validate manual social candidate fail-closed
+        run: python valcea-clar/social/manual_social_bridge.py --check | tee /tmp/manual-social-check.json
+
+      - name: Materialize manual story into canonical social outboxes
+        run: python valcea-clar/social/manual_social_bridge.py | tee /tmp/manual-social-materialize.json
+
+      - name: Build public social media assets
+        run: python valcea-clar/social/build_social_media_assets.py
+
+      - name: Preview Facebook queue
+        run: python valcea-clar/social/facebook_editorial_publish.py | tee /tmp/facebook-preview.json
+
+      - name: Publish one eligible Facebook story
+        id: facebook_apply
+        continue-on-error: true
+        env:
+          VALCEA_FB_PAGE_ID: "1234360446430980"
+          VALCEA_META_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_META_PAGE_ACCESS_TOKEN }}
+          VALCEA_FB_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_FB_PAGE_ACCESS_TOKEN }}
+          VALCEA_FB_GRAPH_VERSION: v26.0
+          VALCEA_FB_EDITORIAL_LIVE_ENABLED: "true"
+          VALCEA_FB_EDITORIAL_MAX_PER_RUN: "1"
+        run: python valcea-clar/social/facebook_editorial_publish.py --apply | tee /tmp/facebook-apply.json
+
+      - name: Preview Instagram queue
+        run: python valcea-clar/social/instagram_editorial_publish.py | tee /tmp/instagram-preview.json
+
+      - name: Publish one eligible Instagram story
+        id: instagram_apply
+        continue-on-error: true
+        env:
+          VALCEA_IG_ACCOUNT_ID: ${{ vars.VALCEA_IG_ACCOUNT_ID }}
+          VALCEA_IG_ACCESS_TOKEN: ${{ secrets.VALCEA_META_PAGE_ACCESS_TOKEN || secrets.VALCEA_IG_ACCESS_TOKEN || secrets.VALCEA_FB_PAGE_ACCESS_TOKEN }}
+          VALCEA_IG_GRAPH_VERSION: v26.0
+          VALCEA_IG_GRAPH_HOST: graph.facebook.com
+          VALCEA_IG_EDITORIAL_LIVE_ENABLED: "true"
+          VALCEA_IG_EDITORIAL_MAX_PER_RUN: "1"
+        run: python valcea-clar/social/instagram_editorial_publish.py --apply | tee /tmp/instagram-apply.json
+
+      - name: Preview Threads queue
+        run: python valcea-clar/social/threads_publish.py | tee /tmp/threads-preview.json
+
+      - name: Verify Threads identity
+        id: threads_auth
+        continue-on-error: true
+        env:
+          VALCEA_THREADS_ACCESS_TOKEN: ${{ secrets.VALCEA_THREADS_ACCESS_TOKEN }}
+          VALCEA_THREADS_EXPECTED_USERNAME: valceaclar
+        run: python valcea-clar/social/threads_publish.py --health-check | tee /tmp/threads-auth.json
+
+      - name: Publish one eligible Threads story
+        id: threads_apply
+        if: steps.threads_auth.outcome == 'success'
+        continue-on-error: true
+        env:
+          VALCEA_THREADS_ACCESS_TOKEN: ${{ secrets.VALCEA_THREADS_ACCESS_TOKEN }}
+          VALCEA_THREADS_EXPECTED_USERNAME: valceaclar
+          VALCEA_THREADS_LIVE_ENABLED: "true"
+          VALCEA_THREADS_MAX_PER_RUN: "1"
+        run: python valcea-clar/social/threads_publish.py --apply | tee /tmp/threads-apply.json
+
+      - name: Persist social outboxes and publication state conflict-safe
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/manual-social-state
+          mkdir -p /tmp/manual-social-state/valcea-clar/social
+          for file in \
+            facebook_outbox.json \
+            facebook_state.json \
+            instagram_state.json \
+            threads_outbox.json \
+            threads_state.json; do
+            if [ -f "valcea-clar/social/$file" ]; then
+              cp "valcea-clar/social/$file" "/tmp/manual-social-state/valcea-clar/social/$file"
+            fi
+          done
+          if [ -d valcea-clar/site/runtime/media ]; then
+            mkdir -p /tmp/manual-social-state/valcea-clar/site/runtime
+            cp -R valcea-clar/site/runtime/media /tmp/manual-social-state/valcea-clar/site/runtime/media
+          fi
+          git config user.name "valcea-clar-manual-social[bot]"
+          git config user.email "valcea-clar-manual-social@users.noreply.github.com"
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp -R /tmp/manual-social-state/valcea-clar/social/. valcea-clar/social/
+            if [ -d /tmp/manual-social-state/valcea-clar/site/runtime/media ]; then
+              mkdir -p valcea-clar/site/runtime
+              cp -R /tmp/manual-social-state/valcea-clar/site/runtime/media valcea-clar/site/runtime/media
+            fi
+            git add \
+              valcea-clar/social/facebook_outbox.json \
+              valcea-clar/social/facebook_state.json \
+              valcea-clar/social/instagram_state.json \
+              valcea-clar/social/threads_outbox.json \
+              valcea-clar/social/threads_state.json \
+              valcea-clar/site/runtime/media || true
+            if git diff --cached --quiet; then
+              echo "No manual social state changes to persist."
+              exit 0
+            fi
+            git commit -m "Distribute VÂLCEA CLAR verified manual story"
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1
+
+      - name: Upload manual distribution audit
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-manual-social-${{ github.run_id }}
+          path: |
+            /tmp/manual-social-check.json
+            /tmp/manual-social-materialize.json
+            /tmp/facebook-preview.json
+            /tmp/facebook-apply.json
+            /tmp/instagram-preview.json
+            /tmp/instagram-apply.json
+            /tmp/threads-preview.json
+            /tmp/threads-auth.json
+            /tmp/threads-apply.json
+          if-no-files-found: warn
+          retention-days: 14
