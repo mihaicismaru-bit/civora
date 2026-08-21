@@ -4,7 +4,7 @@
   "product": "VÂLCEA CLAR market intelligence state",
   "execution_owner": "CIVORA_SITE_ENGINE",
   "state_owner": "GITHUB_REPOSITORY",
-  "generated_at": "2026-08-21T08:10:54Z",
+  "generated_at": "2026-08-21T10:01:35Z",
   "mode": "LIVE_SOURCE_HEALTH",
   "monitor_count": 3,
   "monitors": [
@@ -179,7 +179,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://posturi.gov.ro/judet/valcea/",
-          "fingerprint": "72edca84a16a1c10d6e8c53ac9e5bf1a988e44c85d08225905503b3126155a3a",
+          "fingerprint": "28e3301b70ecf7c68f45b3dc5040837f931f92f853871a0f7b4d938043a162a9",
           "match_count": 16,
           "matched_terms": [
             "Vâlcea",
@@ -199,8 +199,8 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.ejobs.ro/locuri-de-munca/ramnicu-valcea",
-          "fingerprint": "ed37de652cf9d0ffeda9689dbcb8019b213668ea8002acba3906d67e320a1574",
-          "match_count": 16,
+          "fingerprint": "967d472f18aa16c838613d23a44cfc307d8777617438707bd6fe0fc3ee0690c8",
+          "match_count": 17,
           "matched_terms": [
             "Joburi",
             "locuri de munca",
@@ -210,7 +210,7 @@
           "numeric_signals": [
             {
               "kind": "jobs",
-              "value_text": "1143"
+              "value_text": "1144"
             }
           ],
           "health": "OK",
@@ -226,7 +226,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.bestjobs.eu/locuri-de-munca-in-valcea",
-          "fingerprint": "df790a53e50632af6386eb00c521178abff5ece5b7b264652d3db4afc0722ca6",
+          "fingerprint": "0cefc952b04ecd39a604bdb9621d341922b2e7397897a8a0a252de2c128d1a10",
           "match_count": 19,
           "matched_terms": [
             "locuri de munca",
@@ -248,8 +248,8 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://ro.linkedin.com/jobs/jobs-in-v%C3%AElcea",
-          "fingerprint": "6be9223a2dd5daafad4ff9a8b3d68f80ebf2f41ce37d1a193d249215135a01d1",
-          "match_count": 18,
+          "fingerprint": "368b4e93757168380c27b600a40303a7bf1bfb924001bea26295fce312970049",
+          "match_count": 20,
           "matched_terms": [
             "joburi",
             "Vîlcea",
@@ -259,7 +259,7 @@
           "numeric_signals": [
             {
               "kind": "jobs",
-              "value_text": "4"
+              "value_text": "10"
             }
           ],
           "health": "OK",
@@ -275,7 +275,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.olx.ro/locuri-de-munca/valcea-judet/",
-          "fingerprint": "c38b67d8b0f7b9edc113914e8ee60c4c1a6bf51dd812eeeca567b5cdf1b76711",
+          "fingerprint": "d79aafa87e0da766e9aacc22eab4f45a0e98a315beffaa60070f90564b8b43cf",
           "match_count": 22,
           "matched_terms": [
             "locuri de munca",
@@ -314,8 +314,7 @@
       "official_changed_sources": [],
       "degraded_sources": [
         "data-gov-onrc-datasets",
-        "data-gov-finance-datasets",
-        "ccivl-members"
+        "data-gov-finance-datasets"
       ],
       "sources": [
         {
@@ -511,15 +510,20 @@
           "url": "https://www.ccivl.ro/lista-membri/",
           "source_class": "T1B_INSTITUTIONAL_SIGNAL",
           "publication_authority": true,
-          "reachable": false,
-          "http_status": 403,
-          "fingerprint": null,
-          "match_count": 0,
-          "matched_terms": [],
+          "reachable": true,
+          "http_status": 200,
+          "final_url": "https://www.ccivl.ro/lista-membri/",
+          "fingerprint": "e23e24ba7e83f40d0f8bd682f69b25e848900314fe1340256e3a194fb54a3d8f",
+          "match_count": 20,
+          "matched_terms": [
+            "membri",
+            "SRL",
+            "SA"
+          ],
           "numeric_signals": [],
-          "health": "UNREACHABLE",
-          "error": "HTTP 403",
-          "change": "PROBE_FAILED"
+          "health": "OK",
+          "error": null,
+          "change": "NEW_BASELINE"
         },
         {
           "id": "seap-business-contracts",
