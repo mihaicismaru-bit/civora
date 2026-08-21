@@ -1,0 +1,209 @@
+name: VÂLCEA CLAR Edition Recovery
+
+on:
+  workflow_dispatch:
+    inputs:
+      slot:
+        description: "Edition slot"
+        required: true
+        default: "auto"
+        type: choice
+        options: [auto, morning, evening]
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/ops/edition-recovery-trigger.json"
+      - ".github/workflows/valcea-clar-edition-recovery.yml"
+  pull_request:
+    paths:
+      - "valcea-clar/ops/edition-recovery-trigger.json"
+      - ".github/workflows/valcea-clar-edition-recovery.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-edition-recovery-${{ github.event.pull_request.number || 'main' }}
+  cancel-in-progress: false
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Resolve recovery slot
+        id: slot
+        shell: bash
+        env:
+          REQUESTED_SLOT: ${{ github.event.inputs.slot || 'auto' }}
+        run: |
+          set -euo pipefail
+          slot="$REQUESTED_SLOT"
+          if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+            slot=$(python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path('valcea-clar/ops/edition-recovery-trigger.json')
+          try:
+              value = json.loads(path.read_text(encoding='utf-8')).get('slot', 'auto')
+          except Exception:
+              value = 'auto'
+          print(value if value in {'auto', 'morning', 'evening'} else 'auto')
+          PY
+            )
+          fi
+          if [ "$slot" = "auto" ]; then
+            hour=$(TZ=Europe/Bucharest date +%H)
+            if [ "$hour" -lt 15 ]; then slot=morning; else slot=evening; fi
+          fi
+          echo "slot=$slot" >> "$GITHUB_OUTPUT"
+          echo "Recovery slot: $slot"
+
+      - name: Validate deterministic recovery inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            valcea-clar/scripts/generate_edition.py \
+            valcea-clar/scripts/editorial_writer.py \
+            valcea-clar/scripts/render_frontpage.py \
+            valcea-clar/scripts/build_live_feed.py \
+            valcea-clar/scripts/build_sites_export.py \
+            valcea-clar/scripts/overlay_runtime_export.py
+          python valcea-clar/scripts/generate_edition.py --self-test
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('valcea-clar')
+          facts = json.loads((root/'editorial/facts_registry.json').read_text(encoding='utf-8'))
+          auto = json.loads((root/'editorial/auto_facts.json').read_text(encoding='utf-8'))
+          pointer = json.loads((root/'site/current_edition.json').read_text(encoding='utf-8'))
+          assert isinstance(facts.get('facts'), list) and facts['facts'], 'verified facts registry is empty'
+          assert auto.get('policy', {}).get('llm_required') is False
+          assert auto.get('policy', {}).get('external_paid_api_required') is False
+          assert auto.get('source_contract') == 'SOURCE_PACK_V1'
+          assert auto.get('publication_date_guard') == 'LOCAL_NEWS_OS_STRICT_PUBLICATION_METADATA_V2'
+          assert pointer.get('edition_id')
+          pointed = root / pointer['json_source']
+          assert pointed.is_file(), pointed
+          print(json.dumps({
+              'verified_fact_count': len(facts['facts']),
+              'auto_fact_count': len(auto.get('facts', [])),
+              'lkg_edition': pointer['edition_id'],
+              'recovery_policy': 'verified_LKG_only_no_network_refresh'
+          }))
+          PY
+
+      - name: Generate and render recovery edition
+        shell: bash
+        run: |
+          set -euo pipefail
+          python valcea-clar/scripts/generate_edition.py --slot "${{ steps.slot.outputs.slot }}"
+          python valcea-clar/scripts/render_frontpage.py
+          python valcea-clar/scripts/build_live_feed.py
+          python valcea-clar/scripts/build_sites_export.py
+          python valcea-clar/scripts/overlay_runtime_export.py
+
+      - name: Validate recovery result
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from datetime import datetime
+          from pathlib import Path
+          from zoneinfo import ZoneInfo
+          root = Path('valcea-clar')
+          slot = '${{ steps.slot.outputs.slot }}'
+          today = datetime.now(ZoneInfo('Europe/Bucharest')).date().isoformat()
+          attempt = json.loads((root/'site/last_edition_attempt.json').read_text(encoding='utf-8'))
+          pointer = json.loads((root/'site/current_edition.json').read_text(encoding='utf-8'))
+          assert attempt['edition_id'] == f'{today}-{slot}', attempt
+          assert attempt['slot'] == slot
+          assert attempt['status'] in {'auto_approved', 'auto_hold'}
+          assert attempt['publication_intent'] in {'publish', 'hold'}
+          if attempt['publication_intent'] == 'publish':
+              assert attempt['editorial_fact_count'] >= 1
+              assert pointer['edition_id'] == attempt['edition_id']
+              assert pointer['status'] == 'auto_approved'
+              assert pointer['homepage_role'] == 'primary_lead'
+          else:
+              assert attempt['status'] == 'auto_hold'
+              assert pointer['publication_intent'] == 'publish', 'recovery must preserve the last-known-good public pointer on hold'
+              assert pointer['edition_id'] != attempt['edition_id']
+          feed = json.loads((root/'site/runtime/live-feed.json').read_text(encoding='utf-8'))
+          manifest = json.loads((root/'dist/chatgpt-sites/manifest.json').read_text(encoding='utf-8'))
+          assert feed['policy']['paid_llm_api_required'] is False
+          assert manifest['target']['autonomous_frontpage'] is True
+          assert manifest['routes'][0]['path'] == '/'
+          print(json.dumps({
+              'attempt': attempt,
+              'public_pointer': pointer['edition_id'],
+              'runtime_edition': feed['edition']['edition_id'],
+              'routes': manifest['counts']['routes']
+          }, ensure_ascii=False))
+          PY
+
+      - name: Persist recovery edition conflict-safe
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "vâlcea-clar-recovery[bot]"
+          git config user.email "valcea-clar-recovery@users.noreply.github.com"
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            git clean -fd
+
+            python valcea-clar/scripts/generate_edition.py --self-test
+            python valcea-clar/scripts/generate_edition.py --slot "${{ steps.slot.outputs.slot }}"
+            python valcea-clar/scripts/render_frontpage.py
+            python valcea-clar/scripts/build_live_feed.py
+            python valcea-clar/scripts/build_sites_export.py
+            python valcea-clar/scripts/overlay_runtime_export.py
+
+            git add \
+              valcea-clar/editions \
+              valcea-clar/site/current_edition.json \
+              valcea-clar/site/last_edition_attempt.json \
+              valcea-clar/site/runtime
+
+            if git diff --cached --quiet; then
+              echo "Recovery output is already current on main."
+              exit 0
+            fi
+
+            git commit -m "Recover autonomous VÂLCEA CLAR ${{ steps.slot.outputs.slot }} edition and frontpage"
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "main advanced during recovery; retrying ${attempt}/5."
+            sleep $((attempt * 2))
+          done
+
+          echo "Could not persist recovery edition after five attempts." >&2
+          exit 1
+
+      - name: Upload recovery evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-edition-recovery-${{ github.run_id }}
+          path: |
+            valcea-clar/site/current_edition.json
+            valcea-clar/site/last_edition_attempt.json
+            valcea-clar/site/runtime/index.html
+            valcea-clar/site/runtime/live-feed.json
+            valcea-clar/dist/chatgpt-sites
+          if-no-files-found: warn
+          retention-days: 7
