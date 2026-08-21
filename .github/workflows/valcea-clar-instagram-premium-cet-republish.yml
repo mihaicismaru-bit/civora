@@ -1,4 +1,4 @@
-# One-shot operational workflow; canonical Meta credential path; retrigger 2026-08-21T16:40+03:00.
+# One-shot operational workflow; canonical Meta credential path; diagnostic retrigger 2026-08-21T16:45+03:00.
 name: VÂLCEA CLAR Instagram Premium CET Republish
 
 on:
@@ -41,6 +41,7 @@ jobs:
           git reset --hard origin/main
 
       - name: Verify targeted CET source photograph
+        id: photo
         shell: bash
         run: |
           set -euo pipefail
@@ -70,6 +71,7 @@ jobs:
           python valcea-clar/social/meta_auth_health.py | tee /tmp/meta-auth.json
 
       - name: Validate premium CET carousel
+        id: validate
         run: |
           set -euo pipefail
           python -m py_compile \
@@ -90,6 +92,7 @@ jobs:
           PY
 
       - name: Persist premium carousel assets before Meta fetches them
+        id: persist_assets
         shell: bash
         run: |
           set -euo pipefail
@@ -124,6 +127,7 @@ jobs:
           test "$pushed" = true
 
       - name: Preflight six public carousel images
+        id: preflight
         shell: bash
         run: |
           set -euo pipefail
@@ -153,6 +157,7 @@ jobs:
           echo 'Instagram public-media preflight: PASS (6/6)'
 
       - name: Publish premium CET carousel
+        id: publish
         env:
           VALCEA_IG_EDITORIAL_LIVE_ENABLED: 'true'
           VALCEA_IG_ACCOUNT_ID: ${{ steps.meta_auth.outputs.ig_account_id || vars.VALCEA_IG_ACCOUNT_ID }}
@@ -179,6 +184,7 @@ jobs:
           PY
 
       - name: Persist Instagram replacement ledger
+        id: persist_state
         shell: bash
         run: |
           set -euo pipefail
@@ -206,6 +212,58 @@ jobs:
           done
           test "$pushed" = true
 
+      - name: Persist diagnostic outcomes
+        if: always()
+        env:
+          PHOTO_OUTCOME: ${{ steps.photo.outcome }}
+          META_OUTCOME: ${{ steps.meta_auth.outcome }}
+          VALIDATE_OUTCOME: ${{ steps.validate.outcome }}
+          ASSETS_OUTCOME: ${{ steps.persist_assets.outcome }}
+          PREFLIGHT_OUTCOME: ${{ steps.preflight.outcome }}
+          PUBLISH_OUTCOME: ${{ steps.publish.outcome }}
+          STATE_OUTCOME: ${{ steps.persist_state.outcome }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+          HEAD_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          out={
+            'schema_version':'1.0',
+            'workflow':'VÂLCEA CLAR Instagram Premium CET Republish',
+            'run_id':os.environ.get('RUN_ID'),
+            'run_attempt':os.environ.get('RUN_ATTEMPT'),
+            'trigger_head_sha':os.environ.get('HEAD_SHA'),
+            'steps':{
+              'photo':os.environ.get('PHOTO_OUTCOME'),
+              'meta_auth':os.environ.get('META_OUTCOME'),
+              'validate':os.environ.get('VALIDATE_OUTCOME'),
+              'persist_assets':os.environ.get('ASSETS_OUTCOME'),
+              'preflight':os.environ.get('PREFLIGHT_OUTCOME'),
+              'publish':os.environ.get('PUBLISH_OUTCOME'),
+              'persist_state':os.environ.get('STATE_OUTCOME'),
+            }
+          }
+          Path('/tmp/instagram_premium_cet_diagnostic.json').write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+          git config user.name 'vâlcea-clar-instagram-premium[bot]'
+          git config user.email 'valcea-clar-instagram-premium@users.noreply.github.com'
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/instagram_premium_cet_diagnostic.json valcea-clar/social/instagram_premium_cet_diagnostic.json
+            git add -- valcea-clar/social/instagram_premium_cet_diagnostic.json
+            if git diff --cached --quiet; then exit 0; fi
+            git commit -m 'Persist VÂLCEA CLAR Instagram premium CET diagnostic'
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1
+
       - name: Upload replacement evidence
         if: always()
         uses: actions/upload-artifact@v7
@@ -216,6 +274,7 @@ jobs:
             /tmp/cet-instagram-premium-plan.json
             /tmp/cet-instagram-premium-result.json
             /tmp/cet-instagram-urls.txt
+            /tmp/instagram_premium_cet_diagnostic.json
             valcea-clar/site/runtime/media/social/editorial/instagram
           if-no-files-found: warn
           retention-days: 14
