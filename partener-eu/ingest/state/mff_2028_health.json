@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "observed_at": "2026-08-21T14:09:49.320269Z",
+  "observed_at": "2026-08-21T19:34:05.164714Z",
   "policy": "health-hash-stage-only-no-auto-adoption",
   "sources": [
     {
@@ -103,21 +103,18 @@
       "class": "romania_sectoral_preparation",
       "stage": "ROMANIA_PREPARATION",
       "url": "https://fed.mai.gov.ro/in/eu-2028-2034/",
-      "ok": true,
-      "http_status": 200,
-      "final_url": "https://fed.mai.gov.ro/in/eu-2028-2034/",
-      "bytes": 126142,
-      "semantic_sha256": "2136f9cf332cd9eb28513260ef823778905ac8fde57497344f9d46fa81436e6d",
+      "ok": false,
+      "health": "FAIL",
+      "error": "HTTPError: HTTP Error 403: Forbidden",
       "semantic_hash_changed": false,
       "review_required": false,
-      "auto_promote_legislative_stage": false,
-      "health": "PASS"
+      "auto_promote_legislative_stage": false
     }
   ],
   "summary": {
     "total": 8,
-    "pass": 2,
-    "fail": 6,
+    "pass": 1,
+    "fail": 7,
     "review_required": 0
   }
 }
