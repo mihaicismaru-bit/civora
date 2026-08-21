@@ -7,8 +7,9 @@ keeps that path fail-closed: only a queue with publication_intent=publish, a
 human editor marker, a story that passes the canonical story_ready gate, and an
 approved story-specific visual can become ready on visual channels.
 
-The bridge only materializes canonical outbox products. Network publication is
-owned by the GitHub Actions site engine and existing platform adapters.
+The bridge materializes both direct-channel queues and every durable outbox-only
+sister product. Network publication remains owned by the GitHub Actions site
+engine and verified platform adapters.
 """
 from __future__ import annotations
 
@@ -18,7 +19,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-BRIDGE_VERSION = "1.0.1"
+BRIDGE_VERSION = "1.1.0"
 
 ROOT = Path(__file__).resolve().parents[2]
 VC = ROOT / "valcea-clar"
@@ -27,6 +28,8 @@ SCRIPTS = VC / "scripts"
 sys.path.insert(0, str(SOCIAL))
 sys.path.insert(0, str(SCRIPTS))
 
+import build_outbox_only_story_products as sister  # noqa: E402
+from native_identity import product_identity  # noqa: E402
 from newsroom_decide import story_ready  # noqa: E402
 from build_live_story_outbox import find_visual, story_item  # noqa: E402
 from social_common import is_socially_held  # noqa: E402
@@ -73,6 +76,46 @@ def eligible_stories() -> tuple[list[dict[str, Any]], dict[str, Any]]:
         if ok:
             accepted.append(story)
     return accepted, visuals
+
+
+def materialize_outbox_only(stories: list[dict[str, Any]]) -> dict[str, Any]:
+    summary: dict[str, Any] = {}
+    for outbox_path, state_path, platform, factory in sister.output_specs():
+        # Threads direct publishing uses its richer editorial-native outbox above.
+        if platform == "threads":
+            continue
+        identity = product_identity(platform)
+        products: list[dict[str, Any]] = []
+        for story in stories:
+            product = factory(story)
+            product["identity"] = identity
+            product["manual_distribution_source"] = "verified_human_editor_queue"
+            products.append(product)
+
+        outbox = sister.upsert(
+            sister.load(outbox_path, {"schema_version": "1.0", "platform": platform, "items": []}),
+            products,
+        )
+        outbox["identity_source"] = sister.IDENTITY_SOURCE
+        outbox["identity_channel_id"] = identity["channel_id"]
+        sister.write(outbox_path, outbox)
+
+        state = sister.load(state_path, {
+            "schema_version": "1.0",
+            "platform": platform,
+            "execution_owner": "civora_site_engine",
+            "published": {},
+            "failures": {},
+        })
+        state["publication_model"] = "continuous_story_first"
+        state["identity_source"] = sister.IDENTITY_SOURCE
+        state["identity_channel_id"] = identity["channel_id"]
+        sister.write(state_path, state)
+        summary[platform] = [
+            {"story_id": str(story["id"]), "status": str(product.get("status"))}
+            for story, product in zip(stories, products)
+        ]
+    return summary
 
 
 def materialize() -> dict[str, Any]:
@@ -137,6 +180,7 @@ def materialize() -> dict[str, Any]:
 
     write(FACEBOOK_OUTBOX, facebook)
     write(THREADS_OUTBOX, threads)
+    outbox_only = materialize_outbox_only(stories)
 
     return {
         "status": "PASS",
@@ -147,6 +191,7 @@ def materialize() -> dict[str, Any]:
         "visual_channels_held": visual_held,
         "threads_ready": threads_ready,
         "threads_held": threads_held,
+        "outbox_only": outbox_only,
         "network_calls": False,
     }
 
