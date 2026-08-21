@@ -18,6 +18,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+BRIDGE_VERSION = "1.0.1"
+
 ROOT = Path(__file__).resolve().parents[2]
 VC = ROOT / "valcea-clar"
 SOCIAL = VC / "social"
@@ -138,6 +140,7 @@ def materialize() -> dict[str, Any]:
 
     return {
         "status": "PASS",
+        "bridge_version": BRIDGE_VERSION,
         "source": "manual_publish_queue",
         "stories_seen": len(stories),
         "visual_channels_ready": visual_ready,
@@ -160,7 +163,7 @@ def check() -> dict[str, Any]:
             "approved_visual_present": bool(visual),
             "threads_status": threads_package(story).get("status"),
         })
-    return {"status": "PASS", "eligible": rows, "network_calls": False}
+    return {"status": "PASS", "bridge_version": BRIDGE_VERSION, "eligible": rows, "network_calls": False}
 
 
 def main() -> int:
