@@ -40,8 +40,22 @@ jobs:
           git fetch origin main
           git reset --hard origin/main
 
-      - name: Fetch approved photographs
-        run: python valcea-clar/social/fetch_approved_photos.py
+      - name: Verify targeted CET source photograph
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          path=Path('valcea-clar/social/photos/approved/cet-govora-context-2011.jpg')
+          if not path.is_file():
+              raise SystemExit(f'missing targeted CET photograph: {path}')
+          if path.stat().st_size < 50_000:
+              raise SystemExit(f'CET photograph unexpectedly small: {path.stat().st_size} bytes')
+          with Image.open(path) as image:
+              image.verify()
+          print(f'CET targeted photograph: PASS ({path.stat().st_size} bytes)')
+          PY
 
       - name: Probe canonical shared Meta credential
         id: meta_auth
@@ -57,12 +71,23 @@ jobs:
 
       - name: Validate premium CET carousel
         run: |
+          set -euo pipefail
           python -m py_compile \
             valcea-clar/social/instagram_editorial_v1_2.py \
             valcea-clar/social/instagram_premium_cet_republish.py
           python valcea-clar/social/instagram_premium_cet_republish.py --self-test
           python valcea-clar/social/instagram_premium_cet_republish.py > /tmp/cet-instagram-premium-plan.json
-          cat /tmp/cet-instagram-premium-plan.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          plan=json.loads(Path('/tmp/cet-instagram-premium-plan.json').read_text(encoding='utf-8'))
+          assert plan['status']=='PREPARED', plan
+          assert plan['template_id']=='investigation_card', plan
+          assert plan['native_format']=='carousel', plan
+          assert plan['hook']=='31 AUGUST 2026', plan
+          assert plan['asset_count']==6, plan
+          print(json.dumps(plan, ensure_ascii=False, indent=2))
+          PY
 
       - name: Persist premium carousel assets before Meta fetches them
         shell: bash
@@ -98,6 +123,35 @@ jobs:
           done
           test "$pushed" = true
 
+      - name: Preflight six public carousel images
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY' > /tmp/cet-instagram-urls.txt
+          import json
+          from pathlib import Path
+          plan=json.loads(Path('/tmp/cet-instagram-premium-plan.json').read_text(encoding='utf-8'))
+          base='https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/'
+          for path in plan['assets']:
+              print(base + path)
+          PY
+          count=0
+          while IFS= read -r url; do
+            count=$((count+1))
+            ok=false
+            for attempt in 1 2 3 4 5 6; do
+              if curl -fsSL --max-time 30 -o "/tmp/cet-ig-${count}.jpg" "$url"; then
+                test -s "/tmp/cet-ig-${count}.jpg"
+                ok=true
+                break
+              fi
+              sleep $((attempt * 2))
+            done
+            test "$ok" = true
+          done < /tmp/cet-instagram-urls.txt
+          test "$count" -eq 6
+          echo 'Instagram public-media preflight: PASS (6/6)'
+
       - name: Publish premium CET carousel
         env:
           VALCEA_IG_EDITORIAL_LIVE_ENABLED: 'true'
@@ -105,7 +159,24 @@ jobs:
           VALCEA_IG_ACCESS_TOKEN: ${{ secrets.VALCEA_META_PAGE_ACCESS_TOKEN || secrets.VALCEA_IG_ACCESS_TOKEN || secrets.VALCEA_FB_PAGE_ACCESS_TOKEN }}
           VALCEA_IG_GRAPH_VERSION: v26.0
           VALCEA_IG_GRAPH_HOST: graph.facebook.com
-        run: python valcea-clar/social/instagram_premium_cet_republish.py --apply | tee /tmp/cet-instagram-premium-result.json
+        shell: bash
+        run: |
+          set -euo pipefail
+          python valcea-clar/social/instagram_premium_cet_republish.py --apply | tee /tmp/cet-instagram-premium-result.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result=json.loads(Path('/tmp/cet-instagram-premium-result.json').read_text(encoding='utf-8'))
+          if result.get('status') == 'PREMIUM_REPUBLISHED':
+              media_id=str(((result.get('result') or {}).get('instagram_media_id')) or '')
+          elif result.get('status') == 'ALREADY_PREMIUM_REPUBLISHED':
+              media_id=str(result.get('instagram_media_id') or '')
+          else:
+              raise SystemExit(f'premium Instagram republish incomplete: {result}')
+          if not media_id or media_id == '17970262158145891':
+              raise SystemExit(f'new premium Instagram media id not proven: {result}')
+          print(f'Premium Instagram media id: {media_id}')
+          PY
 
       - name: Persist Instagram replacement ledger
         shell: bash
@@ -114,6 +185,7 @@ jobs:
           cp valcea-clar/social/instagram_state.json /tmp/cet-instagram-state.json
           git config user.name 'vâlcea-clar-instagram-premium[bot]'
           git config user.email 'valcea-clar-instagram-premium@users.noreply.github.com'
+          pushed=false
           for attempt in 1 2 3 4 5; do
             git fetch origin main
             git reset --hard origin/main
@@ -121,17 +193,18 @@ jobs:
             git add -- valcea-clar/social/instagram_state.json
             if git diff --cached --quiet; then
               echo 'Instagram replacement ledger already persisted.'
-              exit 0
+              pushed=true
+              break
             fi
             git commit -m 'Persist VÂLCEA CLAR premium Instagram replacement state'
             if git push origin HEAD:main; then
-              exit 0
+              pushed=true
+              break
             fi
             echo "main advanced while persisting Instagram state; retrying ${attempt}/5"
             sleep $((attempt * 2))
           done
-          echo 'Could not persist Instagram replacement state after five attempts.' >&2
-          exit 1
+          test "$pushed" = true
 
       - name: Upload replacement evidence
         if: always()
@@ -142,6 +215,7 @@ jobs:
             /tmp/meta-auth.json
             /tmp/cet-instagram-premium-plan.json
             /tmp/cet-instagram-premium-result.json
+            /tmp/cet-instagram-urls.txt
             valcea-clar/site/runtime/media/social/editorial/instagram
           if-no-files-found: warn
           retention-days: 14
