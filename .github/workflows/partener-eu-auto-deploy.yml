@@ -7,32 +7,20 @@ on:
     paths:
       - 'partener-eu/web/**'
       - '.github/workflows/partener-eu-auto-deploy.yml'
-  workflow_run:
-    workflows:
-      - 'PARTENER.EU MIPE Ingestion'
-      - 'PARTENER.EU MIPE Romania Collector'
-      - 'PARTENER.EU MIPE Dual Relay'
-      - 'PARTENER.EU MIPE Dual Cache'
-      - 'PARTENER.EU AFIR Ingestion'
-      - 'PARTENER.EU Decision Products'
-      - 'PARTENER.EU Consultant Workspace v3 QA'
-      - 'PARTENER.EU Editorial Daily Products'
-    types: [completed]
 
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Every PARTENER.EU workflow that calls actions/deploy-pages must queue on the
-# same repository-wide lock. Never cancel an in-flight valid deployment.
+# Pages deployment is atomic: keep the public last-known-good until the newest
+# main snapshot succeeds, while superseding stale queued snapshots.
 concurrency:
   group: partener-eu-pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   deploy:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -41,9 +29,11 @@ jobs:
       - uses: actions/checkout@v6
         with:
           ref: main
-      - name: Validate public STEP-LLL dossier bridge
+      - name: Validate fail-closed public projection and STEP-LLL bridge
         run: |
+          node --check partener-eu/web/decision-intelligence-v2.js
           node --check partener-eu/web/step-lll-dossier-bridge-v2.js
+          python partener-eu/ops/test_public_language.py
           grep -F 'step-lll-dossier-bridge-v2.js' partener-eu/web/index.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4

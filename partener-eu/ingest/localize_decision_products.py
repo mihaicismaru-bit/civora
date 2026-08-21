@@ -151,7 +151,8 @@ def compact_financial(label: str, raw: Any) -> tuple[str, str]:
                 bits.append(f"până la {fmt_number(value['eligible_cost_intensity_percent'])}%")
             return "Grant", " · ".join(bits)
         if value.get("maximum_total_project_value_eur") is not None:
-            return "Valoare proiect", f"max. {money(value['maximum_total_project_value_eur'], currency)}"
+            suffix = f" · buget exprimat în {currency}" if currency != "EUR" else ""
+            return "Valoare proiect", f"max. {money(value['maximum_total_project_value_eur'], 'EUR')}{suffix}"
         if value.get("form"):
             return "Finanțare", localize_text(str(value.get("form")))
     if label == "Buget":
@@ -223,6 +224,9 @@ def clean_dossier(dossier: dict[str, Any]) -> None:
     for fact in dossier.get("quickFacts") or []:
         row = dict(fact)
         label, value = compact_financial(str(row.get("label") or ""), row.get("value"))
+        executive_value = str((dossier.get("executiveSummary") or {}).get("projectValue") or "")
+        if label == "Valoare proiect" and "EUR" in executive_value and "RON" in str(value):
+            value = f"{executive_value} · buget exprimat în RON"
         row["label"] = label
         row["value"] = localize_text(value)
         quick.append(row)
