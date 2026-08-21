@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-21T17:10:04+03:00",
+  "generated_at": "2026-08-21T18:56:25+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-21T17:08:35+03:00",
+  "queue_generated_at": "2026-08-21T18:53:53+03:00",
   "task_count": 70,
   "primary_match_count": 0,
   "no_match_count": 33,
@@ -15,6 +15,55 @@
   "target_count": 17,
   "targets_ok": 14,
   "results": [
+    {
+      "signal_id": "de8bc60375c5263acc1efe32",
+      "signal_title": "Strigăt de ajutor pentru bărbatul grav rănit în explozia din Vâlcea. Familia speră la o șansă la viață",
+      "signal_url": "https://seintamplainvalcea.ro/2026/08/21/strigat-de-ajutor-pentru-barbatul-grav-ranit-in-explozia-din-valcea-familia-spera-la-o-sansa-la-viata/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-21T17:46:30+03:00",
+      "verification_route_id": "fire_rescue_alert",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "isu-valcea-stiri-locale",
+            "name": "ISU Vâlcea — Știri locale",
+            "url": "https://isuvl.igsu.ro/stiri-locale"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "isu-valcea-comunicate",
+            "name": "ISU Vâlcea",
+            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "756b04d0575ca8245fea6c9a",
       "signal_title": "Râmnicul riscă să rămână fără apă caldă: pentru CET Govora se cer 40 de milioane de lei, Prefectura spune că a aflat despre sumă din presă",
@@ -1506,55 +1555,6 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "0dbc674a7143a3b238535f9b",
-      "signal_title": "Ultima oră o zi in urma Microbuze electrice pentru elevii din Vâlcea: 20 de primării le-au primit deja, alte 5 sunt incluse în etapa din august",
-      "signal_url": "https://www.primplanpress.ro/microbuze-electrice-pentru-elevii-din-valcea-20-de-primarii-le-au-primit-deja-alte-5-sunt-incluse-in-etapa-din-august/",
-      "signal_publisher": "Primplan Press",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-08-18T18:50:17+03:00",
-      "verification_route_id": "utilities",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "apavil-comunicate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=1178"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "apavil-opriri-programate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=962"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 2
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "cet-govora-termoficare-advisories",
-            "name": "CET Govora S.A. — Termoficare Vâlcea",
-            "url": "https://www.termoficarevalcea.ro/blog/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 1
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "608f84316cb4f5d63ef780f5",
