@@ -4,7 +4,7 @@
   "product": "VÂLCEA CLAR market intelligence state",
   "execution_owner": "CIVORA_SITE_ENGINE",
   "state_owner": "GITHUB_REPOSITORY",
-  "generated_at": "2026-08-21T05:54:29Z",
+  "generated_at": "2026-08-21T08:10:54Z",
   "mode": "LIVE_SOURCE_HEALTH",
   "monitor_count": 3,
   "monitors": [
@@ -199,7 +199,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.ejobs.ro/locuri-de-munca/ramnicu-valcea",
-          "fingerprint": "6f614994599c86c315615fc4c567c940180021234d3edf8d543deb3a14e7d943",
+          "fingerprint": "ed37de652cf9d0ffeda9689dbcb8019b213668ea8002acba3906d67e320a1574",
           "match_count": 16,
           "matched_terms": [
             "Joburi",
@@ -226,7 +226,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.bestjobs.eu/locuri-de-munca-in-valcea",
-          "fingerprint": "404aacce5c0cd262b72704dcdc9fb058846d9abb9ff51034bdd1c4923fdbb345",
+          "fingerprint": "df790a53e50632af6386eb00c521178abff5ece5b7b264652d3db4afc0722ca6",
           "match_count": 19,
           "matched_terms": [
             "locuri de munca",
@@ -248,8 +248,8 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://ro.linkedin.com/jobs/jobs-in-v%C3%AElcea",
-          "fingerprint": "e01268be4f1e66eb48c83956a142acf3497b34c6eafe245bbff7312ef5af165d",
-          "match_count": 20,
+          "fingerprint": "6be9223a2dd5daafad4ff9a8b3d68f80ebf2f41ce37d1a193d249215135a01d1",
+          "match_count": 18,
           "matched_terms": [
             "joburi",
             "Vîlcea",
@@ -259,7 +259,7 @@
           "numeric_signals": [
             {
               "kind": "jobs",
-              "value_text": "11"
+              "value_text": "4"
             }
           ],
           "health": "OK",
@@ -275,8 +275,8 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.olx.ro/locuri-de-munca/valcea-judet/",
-          "fingerprint": "76d4a95cb73130c55fa2c3ffa5c3321e80d18ad0438f2280ed7123a5754f3716",
-          "match_count": 24,
+          "fingerprint": "c38b67d8b0f7b9edc113914e8ee60c4c1a6bf51dd812eeeca567b5cdf1b76711",
+          "match_count": 22,
           "matched_terms": [
             "locuri de munca",
             "Râmnicu Vâlcea",
@@ -314,7 +314,8 @@
       "official_changed_sources": [],
       "degraded_sources": [
         "data-gov-onrc-datasets",
-        "data-gov-finance-datasets"
+        "data-gov-finance-datasets",
+        "ccivl-members"
       ],
       "sources": [
         {
@@ -510,20 +511,15 @@
           "url": "https://www.ccivl.ro/lista-membri/",
           "source_class": "T1B_INSTITUTIONAL_SIGNAL",
           "publication_authority": true,
-          "reachable": true,
-          "http_status": 200,
-          "final_url": "https://www.ccivl.ro/lista-membri/",
-          "fingerprint": "e23e24ba7e83f40d0f8bd682f69b25e848900314fe1340256e3a194fb54a3d8f",
-          "match_count": 20,
-          "matched_terms": [
-            "membri",
-            "SRL",
-            "SA"
-          ],
+          "reachable": false,
+          "http_status": 403,
+          "fingerprint": null,
+          "match_count": 0,
+          "matched_terms": [],
           "numeric_signals": [],
-          "health": "OK",
-          "error": null,
-          "change": "UNCHANGED"
+          "health": "UNREACHABLE",
+          "error": "HTTP 403",
+          "change": "PROBE_FAILED"
         },
         {
           "id": "seap-business-contracts",
