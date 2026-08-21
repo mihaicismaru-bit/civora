@@ -2,13 +2,13 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_SIGNAL_RADAR_STATE_V1",
   "instance_id": "valcea",
-  "observed_at": "2026-08-21T15:01:22+03:00",
+  "observed_at": "2026-08-21T17:08:35+03:00",
   "publication_authority": "NONE",
   "health": "PASS",
   "source_count": 14,
   "sources_ok": 12,
   "current_signal_count": 29,
-  "today_signal_count": 8,
+  "today_signal_count": 13,
   "observations": [
     {
       "seed_id": "press-curierul-de-ramnic",
@@ -62,7 +62,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-20T20:00:00+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-21T15:01:22+03:00",
+          "observed_at": "2026-08-21T17:08:35+03:00",
           "verification_route_id": "environment_weather",
           "verification_targets": [
             {
@@ -114,7 +114,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-08-21T15:01:22+03:00",
+          "observed_at": "2026-08-21T17:08:35+03:00",
           "verification_route_id": "administration_projects",
           "verification_targets": [
             {
@@ -147,7 +147,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-08-21T15:01:22+03:00",
+          "observed_at": "2026-08-21T17:08:35+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -172,18 +172,64 @@
       "error": null,
       "signals": [
         {
-          "signal_id": "e8965d2df5dc9917ef666e11",
-          "signal_title": "Râmnicul, amenințat de o criză gravă. Cele opt milioane de euro promise pentru CET Govora nu au ajuns încă în Vâlcea, deși termenul de 31 august se apropie",
-          "signal_url": "https://www.impactreal.ro/2026/08/21/ramnicul-amenintat-de-o-criza-grava-cele-opt-milioane-de-euro-promise-pentru-cet-govora-nu-au-ajuns-inca-in-valcea-desi-termenul-de-31-august-se-apropie/",
+          "signal_id": "756b04d0575ca8245fea6c9a",
+          "signal_title": "Râmnicul riscă să rămână fără apă caldă: pentru CET Govora se cer 40 de milioane de lei, Prefectura spune că a aflat despre sumă din presă",
+          "signal_url": "https://www.impactreal.ro/2026/08/21/ramnicul-risca-sa-ramana-fara-apa-calda-pentru-cet-govora-se-cer-40-de-milioane-de-lei-prefectura-spune-ca-a-aflat-despre-suma-din-presa/",
           "signal_publisher": "Impact Real",
           "signal_tier": "T2",
           "signal_family": "LOCAL_PRESS",
           "signal_sensitive": false,
-          "published_at": "2026-08-21T10:34:48+03:00",
+          "published_at": "2026-08-21T16:53:36+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-21T15:01:22+03:00",
-          "verification_route_id": "general_local_signal",
-          "verification_targets": [],
+          "observed_at": "2026-08-21T17:08:35+03:00",
+          "verification_route_id": "utilities",
+          "verification_targets": [
+            {
+              "ref_type": "news_source_id",
+              "id": "apavil-comunicate"
+            },
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "apavil-opriri-programate"
+            },
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "cet-govora-termoficare-advisories"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-impact-real"
+        },
+        {
+          "signal_id": "e1464e2f17d3917570d02b62",
+          "signal_title": "La Păușești-Măglași, rețeaua de apă ajunge în zona La Sică, se construiește un pod peste râul Cheia, iar gazele sunt urmate de asfalt",
+          "signal_url": "https://www.impactreal.ro/2026/08/21/la-pausesti-maglasi-reteaua-de-apa-ajunge-in-zona-la-sica-se-construieste-un-pod-peste-raul-cheia-iar-gazele-sunt-urmate-de-asfalt/",
+          "signal_publisher": "Impact Real",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-21T15:04:13+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-08-21T17:08:35+03:00",
+          "verification_route_id": "utilities",
+          "verification_targets": [
+            {
+              "ref_type": "news_source_id",
+              "id": "apavil-comunicate"
+            },
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "apavil-opriri-programate"
+            },
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "cet-govora-termoficare-advisories"
+            }
+          ],
           "status": "NEEDS_PRIMARY_VERIFICATION",
           "required_authority": "T1_OR_T1B_PRIMARY",
           "publication_authority": "NONE",
@@ -201,7 +247,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-20T19:57:47+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-21T15:01:22+03:00",
+          "observed_at": "2026-08-21T17:08:35+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -221,7 +267,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-20T18:48:17+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-21T15:01:22+03:00",
+          "observed_at": "2026-08-21T17:08:35+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -241,27 +287,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-20T18:34:24+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-21T15:01:22+03:00",
-          "verification_route_id": "general_local_signal",
-          "verification_targets": [],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "press-impact-real"
-        },
-        {
-          "signal_id": "c68619d6cc5b32be23d95080",
-          "signal_title": "Două zile de cântec și petrecere la Mălaia! Nineta Popa, Mariana Ionescu Căpitănescu, Ionela Petrea și frații Gaciu urcă pe scenă la sărbătoarea comunei",
-          "signal_url": "https://www.impactreal.ro/2026/08/20/doua-zile-de-cantec-si-petrecere-la-malaia-nineta-popa-mariana-ionescu-capitanescu-ionela-petrea-si-fratii-gaciu-urca-pe-scena-la-sarbatoarea-comunei/",
-          "signal_publisher": "Impact Real",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-08-20T18:11:19+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-21T15:01:22+03:00",
+          "observed_at": "2026-08-21T17:08:35+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -343,7 +369,7 @@
           "signal_sensitive": true,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-08-21T15:01:22+03:00",
+          "observed_at": "2026-08-21T17:08:35+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -363,7 +389,7 @@
           "signal_sensitive": true,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-08-21T15:01:22+03:00",
+          "observed_at": "2026-08-21T17:08:35+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -415,7 +441,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-21T12:48:01+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-21T15:01:22+03:00",
+          "observed_at": "2026-08-21T17:08:35+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -435,7 +461,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-20T10:56:07+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-21T15:01:22+03:00",
+          "observed_at": "2026-08-21T17:08:35+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -474,7 +500,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-20T23:27:55+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-21T15:01:22+03:00",
+          "observed_at": "2026-08-21T17:08:35+03:00",
           "verification_route_id": "education",
           "verification_targets": [
             {
@@ -503,7 +529,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-20T17:16:44+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-21T15:01:22+03:00",
+          "observed_at": "2026-08-21T17:08:35+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -523,7 +549,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-20T17:14:48+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-21T15:01:22+03:00",
+          "observed_at": "2026-08-21T17:08:35+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -543,7 +569,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-20T17:12:53+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-21T15:01:22+03:00",
+          "observed_at": "2026-08-21T17:08:35+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -563,7 +589,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-20T16:56:17+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-21T15:01:22+03:00",
+          "observed_at": "2026-08-21T17:08:35+03:00",
           "verification_route_id": "health",
           "verification_targets": [
             {
@@ -592,7 +618,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-20T13:34:59+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-21T15:01:22+03:00",
+          "observed_at": "2026-08-21T17:08:35+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -617,6 +643,26 @@
       "error": null,
       "signals": [
         {
+          "signal_id": "181447e74e01505181ff62a8",
+          "signal_title": "Mălaia se pregătește de sărbătoare. Două zile de muzică, tradiție și voie bună pe Valea Lotrului",
+          "signal_url": "https://evenimentvalcean.ro/malaia-se-pregateste-de-sarbatoare-doua-zile-de-muzica-traditie-si-voie-buna-pe-valea-lotrului/",
+          "signal_publisher": "Eveniment Vâlcean",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-21T15:33:45+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-08-21T17:08:35+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-eveniment-valcean"
+        },
+        {
           "signal_id": "1b98f1676b11cba21a6d478f",
           "signal_title": "A început reabilitarea dispensarului medical din Stoenești",
           "signal_url": "https://evenimentvalcean.ro/a-inceput-reabilitarea-dispensarului-medical-din-stoenesti/",
@@ -626,7 +672,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-21T07:37:14+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-21T15:01:22+03:00",
+          "observed_at": "2026-08-21T17:08:35+03:00",
           "verification_route_id": "health",
           "verification_targets": [
             {
@@ -655,7 +701,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-20T19:37:34+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-21T15:01:22+03:00",
+          "observed_at": "2026-08-21T17:08:35+03:00",
           "verification_route_id": "utilities",
           "verification_targets": [
             {
@@ -671,26 +717,6 @@
               "id": "cet-govora-termoficare-advisories"
             }
           ],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "signal-eveniment-valcean"
-        },
-        {
-          "signal_id": "89685e6be8159e902215c532",
-          "signal_title": "Măsurători cadastrale în zona Obreji – Podul Obrejii, la Vaideeni",
-          "signal_url": "https://evenimentvalcean.ro/masuratori-cadastrale-in-zona-obreji-podul-obrejii-la-vaideeni/",
-          "signal_publisher": "Eveniment Vâlcean",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-08-20T11:12:21+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-21T15:01:22+03:00",
-          "verification_route_id": "general_local_signal",
-          "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
           "required_authority": "T1_OR_T1B_PRIMARY",
           "publication_authority": "NONE",
@@ -713,6 +739,51 @@
       "error": null,
       "signals": [
         {
+          "signal_id": "2d01ee26cece88bbea3b0db9",
+          "signal_title": "Incertitudine privind termoficarea din Râmnicu Vâlcea după 31 august. Subprefectul Stănculescu caută soluții…",
+          "signal_url": "https://seintamplainvalcea.ro/2026/08/21/incertitudine-privind-termoficarea-din-ramnicu-valcea-dupa-31-august-subprefectul-stanculescu-cauta-solutii/",
+          "signal_publisher": "Se întâmplă în Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-21T16:46:16+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-08-21T17:08:35+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-se-intampla-in-valcea"
+        },
+        {
+          "signal_id": "c3ac32e93be24e4348f79897",
+          "signal_title": "FOTO – ACCIDENT pe VALEA OLTULUI. Impact între un TIR și o mașină",
+          "signal_url": "https://seintamplainvalcea.ro/2026/08/21/foto-accident-pe-valea-oltului-impact-intre-un-tir-si-o-masina/",
+          "signal_publisher": "Se întâmplă în Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-21T16:10:05+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-08-21T17:08:35+03:00",
+          "verification_route_id": "police_public_safety",
+          "verification_targets": [
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "ipj-valcea-stiri"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-se-intampla-in-valcea"
+        },
+        {
           "signal_id": "b7e3092efd9d7c2c2c3dd52e",
           "signal_title": "8 incendii de vegetație în doar 48 de ore în Vâlcea. Nouă hectare de teren au fost mistuite",
           "signal_url": "https://seintamplainvalcea.ro/2026/08/21/8-incendii-de-vegetatie-in-doar-48-de-ore-in-valcea-noua-hectare-de-teren-au-fost-mistuite/",
@@ -722,7 +793,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-21T15:01:06+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-21T15:01:22+03:00",
+          "observed_at": "2026-08-21T17:08:35+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -742,7 +813,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-21T13:30:53+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-21T15:01:22+03:00",
+          "observed_at": "2026-08-21T17:08:35+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -762,52 +833,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-21T11:31:39+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-21T15:01:22+03:00",
-          "verification_route_id": "general_local_signal",
-          "verification_targets": [],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "signal-se-intampla-in-valcea"
-        },
-        {
-          "signal_id": "7fd2c8ccfbed4e5d5af6f230",
-          "signal_title": "Cod portocaliu de caniculă în Vâlcea: urmează două zile cu până la 37 de grade și nopți tropicale",
-          "signal_url": "https://seintamplainvalcea.ro/2026/08/21/cod-portocaliu-de-canicula-in-valcea-urmeaza-doua-zile-cu-pana-la-37-de-grade-si-nopti-tropicale/",
-          "signal_publisher": "Se întâmplă în Vâlcea",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-08-21T10:33:21+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-21T15:01:22+03:00",
-          "verification_route_id": "environment_weather",
-          "verification_targets": [
-            {
-              "ref_type": "manual_watch_source_id",
-              "id": "inhga-avertizari-hidrologice-valcea"
-            }
-          ],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "signal-se-intampla-in-valcea"
-        },
-        {
-          "signal_id": "43c772a2aaf4e611b29a1239",
-          "signal_title": "Pensiile din septembrie: când ajung banii la pensionari",
-          "signal_url": "https://seintamplainvalcea.ro/2026/08/21/pensiile-din-septembrie-cand-ajung-banii-la-pensionari/",
-          "signal_publisher": "Se întâmplă în Vâlcea",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-08-21T09:50:22+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-21T15:01:22+03:00",
+          "observed_at": "2026-08-21T17:08:35+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -827,32 +853,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-20T10:07:03+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-21T15:01:22+03:00",
-          "verification_route_id": "police_public_safety",
-          "verification_targets": [
-            {
-              "ref_type": "manual_watch_source_id",
-              "id": "ipj-valcea-stiri"
-            }
-          ],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "signal-se-intampla-in-valcea"
-        },
-        {
-          "signal_id": "035786940f6e4b120064eb57",
-          "signal_title": "FOTO. ACCIDENT cu o victimă la CĂZĂNEȘTI, în această dimineață",
-          "signal_url": "https://seintamplainvalcea.ro/2026/08/20/foto-accident-cu-o-victima-la-cazanesti-in-aceasta-dimineata/",
-          "signal_publisher": "Se întâmplă în Vâlcea",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-08-20T09:46:20+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-21T15:01:22+03:00",
+          "observed_at": "2026-08-21T17:08:35+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -877,7 +878,32 @@
           "signal_sensitive": false,
           "published_at": "2026-08-20T17:07:49+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-21T15:01:22+03:00",
+          "observed_at": "2026-08-21T17:08:35+03:00",
+          "verification_route_id": "police_public_safety",
+          "verification_targets": [
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "ipj-valcea-stiri"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-se-intampla-in-valcea"
+        },
+        {
+          "signal_id": "7cd941e5742062a63082afe3",
+          "signal_title": "FOTO – Descinderi la o locuință din Nicolae Bălcescu: o pușcă neletală, ridicată de polițiști",
+          "signal_url": "https://seintamplainvalcea.ro/2026/08/20/foto-descinderi-la-o-locuinta-din-nicolae-balcescu-o-pusca-neletala-ridicata-de-politisti/",
+          "signal_publisher": "Se întâmplă în Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-20T13:32:40+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-08-21T17:08:35+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
