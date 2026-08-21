@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-21T08:19:07+03:00",
+  "generated_at": "2026-08-21T10:56:27+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-21T08:17:31+03:00",
+  "queue_generated_at": "2026-08-21T10:54:52+03:00",
   "task_count": 63,
   "primary_match_count": 0,
   "no_match_count": 31,
@@ -15,6 +15,47 @@
   "target_count": 18,
   "targets_ok": 15,
   "results": [
+    {
+      "signal_id": "7fd2c8ccfbed4e5d5af6f230",
+      "signal_title": "Cod portocaliu de caniculă în Vâlcea: urmează două zile cu până la 37 de grade și nopți tropicale",
+      "signal_url": "https://seintamplainvalcea.ro/2026/08/21/cod-portocaliu-de-canicula-in-valcea-urmeaza-doua-zile-cu-pana-la-37-de-grade-si-nopti-tropicale/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-21T10:33:21+03:00",
+      "verification_route_id": "environment_weather",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "43c772a2aaf4e611b29a1239",
+      "signal_title": "Pensiile din septembrie: când ajung banii la pensionari",
+      "signal_url": "https://seintamplainvalcea.ro/2026/08/21/pensiile-din-septembrie-cand-ajung-banii-la-pensionari/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_published_at": "2026-08-21T09:50:22+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
     {
       "signal_id": "1b98f1676b11cba21a6d478f",
       "signal_title": "A început reabilitarea dispensarului medical din Stoenești",
@@ -1426,19 +1467,6 @@
       "listing_title_identity_rejections": 80
     },
     {
-      "signal_id": "cf7bcde1946885414907e82d",
-      "signal_title": "Un bărbat din Râmnicu Vâlcea a sfidat ordinul de protecție și a ajuns după gratii",
-      "signal_url": "https://seintamplainvalcea.ro/2026/08/18/un-barbat-din-ramnicu-valcea-a-sfidat-ordinul-de-protectie-si-a-ajuns-dupa-gratii/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_published_at": "2026-08-18T16:49:22+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
-    },
-    {
       "signal_id": "7c57bd7e501417326af16511",
       "signal_title": "APAVIL SA – ANUNȚ privind scoaterea la concurs a unui post de încasator-cititor în cadrul Sectorului Govora, subzona Pietrari",
       "signal_url": "https://curierulderamnic.ro/2026/08/18/apavil-sa-anunt-privind-scoaterea-la-concurs-a-unui-post-de-incasator-cititor-in-cadrul-sectorului-govora-subzona-pietrari/",
@@ -1465,34 +1493,6 @@
       "fact_kernel_ready": false,
       "status": "NO_PRIMARY_MATCH",
       "listing_title_identity_rejections": 74
-    },
-    {
-      "signal_id": "9c52090ed6ee485ca6ec5d2b",
-      "signal_title": "Reacția IPJ Vâlcea la bătaia din Călimănești: trei persoane agresate și patru ordine de protecție emise",
-      "signal_url": "https://vocea-valcii.ro/dezvaluiri/reactia-ipj-valcea-la-bataia-din-calimanesti-trei-persoane-agresate-si-patru-ordine-de-protectie-emise/",
-      "signal_publisher": "Vocea Vâlcii",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-08-18T10:35:07+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "3aa1b371615995761d30a9af",
@@ -1523,6 +1523,19 @@
       "listing_title_identity_rejections": 80
     },
     {
+      "signal_id": "0a9f0e5efa5edfde1c95a354",
+      "signal_title": "Declaratie de accesibilitate",
+      "signal_url": "http://www.realitateavalceana.ro/declaratie-de-accesibilitate/",
+      "signal_publisher": "Realitatea Vâlceană",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
       "signal_id": "280d9ec643c994be1c02b7c0",
       "signal_title": "Datoria României a trecut de pragul critic de 60% din PIB. Urmează restricții bugetare, iar nivelul va continua să crească",
       "signal_url": "https://www.eurovalcea.ro/2026/08/19/datoria-romaniei-a-trecut-de-pragul-critic-de-60-din-pib-urmeaza-restrictii-bugetare-iar-nivelul-va-continua-sa-creasca/",
@@ -1540,19 +1553,6 @@
       "signal_title": "Guvernul a aprobat noi măsuri pentru economie, infrastructură și PNRR",
       "signal_url": "https://www.eurovalcea.ro/2026/08/20/guvernul-a-aprobat-noi-masuri-pentru-economie-infrastructura-si-pnrr/",
       "signal_publisher": "EuroVâlcea",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
-    },
-    {
-      "signal_id": "0a9f0e5efa5edfde1c95a354",
-      "signal_title": "Declaratie de accesibilitate",
-      "signal_url": "http://www.realitateavalceana.ro/declaratie-de-accesibilitate/",
-      "signal_publisher": "Realitatea Vâlceană",
       "signal_published_at": null,
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
