@@ -1,19 +1,131 @@
 {
+  "build_ready_sha": "ba6c724a7c2e219206f2c5df56ecd98b109706ef",
   "ci": {
-    "conclusion": "FAIL",
-    "execution_exit_code": 1,
-    "head_sha": "5a43dbe4904d60a7b01eb0a2e8cd3f5e136f8091",
-    "run_id": "32467617909",
+    "conclusion": "PASS",
+    "execution_exit_code": 0,
+    "head_sha": "55abd6bd73e494d87552d4cdeccaac18618790ce",
+    "run_id": "32485157729",
     "workflow": "LOCAL NEWS OS vNext Vâlcea Shadow Migration"
   },
   "contract": "LOCAL_NEWS_OS_VNEXT_VALCEA_P18_SHADOW_MIGRATION_V1",
-  "failure": {
-    "class": "HARNESS_EXECUTION_FAILED_BEFORE_REPORT",
-    "log_tail": "Traceback (most recent call last):\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/instances/valcea/migration/p18_shadow_migration.py\", line 850, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/instances/valcea/migration/p18_shadow_migration.py\", line 836, in main\n    result = run_shadow(db_path)\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/instances/valcea/migration/p18_shadow_migration.py\", line 798, in run_shadow\n    media = import_media(conn)\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/instances/valcea/migration/p18_shadow_migration.py\", line 586, in import_media\n    data = _load(LEGACY[\"story_visuals\"])\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/instances/valcea/migration/p18_shadow_migration.py\", line 68, in _load\n    value = json.loads(path.read_text(encoding=\"utf-8\"))\n  File \"/opt/hostedtoolcache/Python/3.13.15/x64/lib/python3.13/json/__init__.py\", line 352, in loads\n    return _default_decoder.decode(s)\n           ~~~~~~~~~~~~~~~~~~~~~~~^^^\n  File \"/opt/hostedtoolcache/Python/3.13.15/x64/lib/python3.13/json/decoder.py\", line 345, in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/hostedtoolcache/Python/3.13.15/x64/lib/python3.13/json/decoder.py\", line 363, in raw_decode\n    raise JSONDecodeError(\"Expecting value\", s, err.value) from None\njson.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)\n"
+  "engine_version": "p18-shadow-migration-1",
+  "imports": {
+    "artists": {
+      "imported": 172,
+      "public": 172,
+      "story_links": 175
+    },
+    "legacy_social_history": {
+      "facebook": 38,
+      "instagram": 24
+    },
+    "local_knowledge": {
+      "creators_imported": 0,
+      "creators_public": 0,
+      "places_imported": 19,
+      "places_public": 5
+    },
+    "media": {
+      "assets_imported": 5,
+      "held": 0,
+      "story_bindings": 1
+    },
+    "people": {
+      "imported": 7,
+      "public": 7,
+      "story_links": 6
+    },
+    "publications": {
+      "count": 25
+    }
   },
+  "instance_id": "valcea",
   "network_publication_attempted": false,
+  "next_gate": "SHADOW_RUNTIME_PROJECTION_AND_DIFF",
   "production_cutover": false,
   "public_runtime_mutated": false,
   "schema_version": "1.0",
-  "status": "SHADOW_MIGRATION_FAIL"
+  "source_drift": {
+    "artists": {
+      "changed_since_readiness": true,
+      "current_git_blob_sha": "34347098a2d1b88e5a8d2c48b346aec11d6fb09c",
+      "path": "valcea-clar/site/runtime/artists.json",
+      "readiness_git_blob_sha": "b4cc261d3632f6c71ad2d9b4be51a659d7df71fa"
+    },
+    "creators": {
+      "changed_since_readiness": false,
+      "current_git_blob_sha": "89e6dd1d9b4a84b62221c9fab1197a6726568af1",
+      "path": "valcea-clar/data/creators.json",
+      "readiness_git_blob_sha": "89e6dd1d9b4a84b62221c9fab1197a6726568af1"
+    },
+    "facebook": {
+      "changed_since_readiness": true,
+      "current_git_blob_sha": "6875ca1ac624087313e8f542d1cebba8f815b723",
+      "path": "valcea-clar/social/facebook_state.json",
+      "readiness_git_blob_sha": "d90b89dd6ec868d2c8e5a0dafbc2543c7830310b"
+    },
+    "instagram": {
+      "changed_since_readiness": true,
+      "current_git_blob_sha": "3a66fad8de41fabeca3c31009942945b25196500",
+      "path": "valcea-clar/social/instagram_state.json",
+      "readiness_git_blob_sha": "4ffc683a276b9e368bc46e33c09ab4fabd1d1812"
+    },
+    "live_feed": {
+      "changed_since_readiness": true,
+      "current_git_blob_sha": "9f05703461730397d4ec30ad0c36d242be994d0f",
+      "path": "valcea-clar/site/runtime/live-feed.json",
+      "readiness_git_blob_sha": "fc47648a0b228d43293348e445d5d613072d3f32"
+    },
+    "people": {
+      "changed_since_readiness": true,
+      "current_git_blob_sha": "c42378ef3e819aa1129252b8fb44312a002faef8",
+      "path": "valcea-clar/site/runtime/people.json",
+      "readiness_git_blob_sha": "a99562617891720a0e211bc8f0341f4435eab5b8"
+    },
+    "places": {
+      "changed_since_readiness": true,
+      "current_git_blob_sha": "21ed87af825fa755808353162f22e94faa3b810f",
+      "path": "valcea-clar/data/places.json",
+      "readiness_git_blob_sha": "83f236a8d344769b370db643d7681789c9f55a9d"
+    },
+    "publication_event": {
+      "changed_since_readiness": true,
+      "current_git_blob_sha": "7480a0a6ba86f39067edd9f197a1edd97770a813",
+      "path": "valcea-clar/site/story_publication_event.json",
+      "readiness_git_blob_sha": "709af6f8b7f8bcdab9d3530f06523b51aa2ed276"
+    },
+    "story_visuals": {
+      "changed_since_readiness": true,
+      "current_git_blob_sha": "a0f1747bed97c8b0ec0660da6bdaed0e13e7ea37",
+      "path": "valcea-clar/social/story_visuals.json",
+      "readiness_git_blob_sha": "52a2f1eb83ce442a750f3f63df2ffc5ced2005d2"
+    }
+  },
+  "status": "SHADOW_MIGRATION_PASS",
+  "validation": {
+    "checks": {
+      "canonical_url_parity": true,
+      "duplicate_canonical_paths_zero": true,
+      "legacy_social_history_did_not_mutate_active_delivery_ledger": true,
+      "network_publication_attempted": false,
+      "public_artists_parity": true,
+      "public_people_parity": true,
+      "public_runtime_mutated": false,
+      "story_id_parity": true
+    },
+    "counts": {
+      "legacy_social_history": 62,
+      "media_assets": 5,
+      "media_bindings": 1,
+      "public_artists": 172,
+      "public_people": 7,
+      "stories": 25
+    },
+    "expected": {
+      "public_artists": 172,
+      "public_people": 7,
+      "stories": 25
+    },
+    "pass": true
+  }
 }
