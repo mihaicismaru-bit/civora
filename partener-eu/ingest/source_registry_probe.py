@@ -157,7 +157,14 @@ def main():
 
     for src in registry.get("sources", []):
         old = previous.get(src["id"], {})
-        row = {"id": src["id"], "tier": src["tier"], "class": src["class"], "url": src["url"], "material_fact_use": bool(src.get("material_fact_use"))}
+        row = {
+            "id": src["id"],
+            "tier": src["tier"],
+            "class": src["class"],
+            "url": src["url"],
+            "material_fact_use": bool(src.get("material_fact_use")),
+            "source_families": list(src.get("source_families") or []),
+        }
         try:
             row.update(fetch(src["url"]))
             baseline_hash = task_baseline_hash(src["id"], old)
