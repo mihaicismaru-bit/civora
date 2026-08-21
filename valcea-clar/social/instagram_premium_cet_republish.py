@@ -29,6 +29,29 @@ def load_story() -> dict[str, Any]:
     return story
 
 
+def existing_premium_publication() -> dict[str, Any] | None:
+    """Return the durable premium CET publication if it already exists.
+
+    This is the idempotency barrier for retries and overlapping workflow
+    triggers. Once a premium carousel is recorded, no retry may create a second
+    Instagram post for the same story.
+    """
+    state = pub.load(pub.STATE, {"schema_version": "1.0", "published": {}})
+    published = state.get("published") if isinstance(state.get("published"), dict) else {}
+    row = published.get(STATE_KEY) if isinstance(published.get(STATE_KEY), dict) else None
+    if not row:
+        return None
+    media_id = str(row.get("instagram_media_id") or "").strip()
+    if (
+        media_id
+        and row.get("template_id") == "investigation_card"
+        and row.get("native_format") == "carousel"
+        and row.get("hook") == "31 AUGUST 2026"
+    ):
+        return row
+    return None
+
+
 def build_product() -> dict[str, Any]:
     story = load_story()
     visuals = pub.load(pub.VISUALS, {"stories": {}})
@@ -108,6 +131,15 @@ def persist_replacement(product: dict[str, Any], result: dict[str, Any]) -> dict
 
 
 def apply(product: dict[str, Any]) -> dict[str, Any]:
+    existing = existing_premium_publication()
+    if existing:
+        return {
+            "status": "ALREADY_PREMIUM_REPUBLISHED",
+            "instagram_media_id": existing["instagram_media_id"],
+            "template_id": existing["template_id"],
+            "native_format": existing["native_format"],
+            "hook": existing["hook"],
+        }
     if os.getenv(pub.LIVE_ENABLE_ENV, "").strip().lower() != "true":
         raise RuntimeError(f"{pub.LIVE_ENABLE_ENV}=true required")
     account_id = os.getenv("VALCEA_IG_ACCOUNT_ID", "").strip()
