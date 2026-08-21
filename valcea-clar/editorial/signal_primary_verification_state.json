@@ -2,16 +2,16 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-22T00:56:54+03:00",
+  "generated_at": "2026-08-22T01:57:01+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-22T00:54:38+03:00",
-  "task_count": 68,
+  "queue_generated_at": "2026-08-22T01:55:26+03:00",
+  "task_count": 66,
   "primary_match_count": 0,
   "no_match_count": 34,
-  "unrouted_count": 34,
+  "unrouted_count": 32,
   "target_count": 17,
   "targets_ok": 14,
   "results": [
@@ -855,7 +855,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 2
+          "documents_examined": 1
         },
         {
           "target": {
@@ -1119,18 +1119,6 @@
       "material_fact_ready": false,
       "fact_kernel_ready": false,
       "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "536711b6760a9e0c433cb6fe",
-      "signal_title": "Lidl retrage de la vânzare o budincă proteică cu ciocolată. Clienții sunt sfătuiți să nu o consume",
-      "signal_url": "https://seintamplainvalcea.ro/2026/08/19/lidl-retrage-de-la-vanzare-o-budinca-proteica-cu-ciocolata-clientii-sunt-sfatuiti-sa-nu-o-consume/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_published_at": "2026-08-19T21:49:41+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
     },
     {
       "signal_id": "e067be144c81aadfafea8bc0",
@@ -1547,11 +1535,38 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "d3f692714a3a381b70de1c2c",
-      "signal_title": "Performanță de excepție pentru Vâlcea! Darius Dobre, medalie de argint la Olimpiada Internațională de Inteligență Artificială",
-      "signal_url": "https://ziaruldevalcea.ro/2026/08/performanta-de-exceptie-pentru-valcea-darius-dobre-medalie-de-argint-la-olimpiada-internationala-de-inteligenta-artificiala/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_published_at": "2026-08-19T04:36:56+03:00",
+      "signal_id": "3aa1b371615995761d30a9af",
+      "signal_title": "Primăria Municipiului mulțumește tuturor celor care au făcut posibilă organizarea deosebită a Zilelor Imnului Național 2026 »",
+      "signal_url": "http://www.realitateavalceana.ro/primaria-municipiului-mul%c8%9bume%c8%99te-tuturor-celor-care-au-facut-posibila-organizarea-deosebita-a-zilelor-imnului-na%c8%9bional-2026/",
+      "signal_publisher": "Realitatea Vâlceană",
+      "signal_tier": "T2",
+      "signal_published_at": null,
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "0a9f0e5efa5edfde1c95a354",
+      "signal_title": "Declaratie de accesibilitate",
+      "signal_url": "http://www.realitateavalceana.ro/declaratie-de-accesibilitate/",
+      "signal_publisher": "Realitatea Vâlceană",
+      "signal_published_at": null,
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
@@ -1608,49 +1623,10 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "3aa1b371615995761d30a9af",
-      "signal_title": "Primăria Municipiului mulțumește tuturor celor care au făcut posibilă organizarea deosebită a Zilelor Imnului Național 2026 »",
-      "signal_url": "http://www.realitateavalceana.ro/primaria-municipiului-mul%c8%9bume%c8%99te-tuturor-celor-care-au-facut-posibila-organizarea-deosebita-a-zilelor-imnului-na%c8%9bional-2026/",
-      "signal_publisher": "Realitatea Vâlceană",
-      "signal_tier": "T2",
-      "signal_published_at": null,
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
       "signal_id": "1587ac11f5de637e1bab2f5a",
       "signal_title": "Guvernul a aprobat noi măsuri pentru economie, infrastructură și PNRR",
       "signal_url": "https://www.eurovalcea.ro/2026/08/20/guvernul-a-aprobat-noi-masuri-pentru-economie-infrastructura-si-pnrr/",
       "signal_publisher": "EuroVâlcea",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "0a9f0e5efa5edfde1c95a354",
-      "signal_title": "Declaratie de accesibilitate",
-      "signal_url": "http://www.realitateavalceana.ro/declaratie-de-accesibilitate/",
-      "signal_publisher": "Realitatea Vâlceană",
       "signal_published_at": null,
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
