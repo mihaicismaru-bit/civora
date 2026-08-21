@@ -15,6 +15,8 @@ on:
       - 'partener-eu/ops/fix_afir_decision_extraction.py'
       - 'partener-eu/ops/test_decision_products.py'
       - 'partener-eu/ops/test_public_language.py'
+      - 'partener-eu/ops/recover_decision_products_lkg.py'
+      - 'partener-eu/ops/validate_decision_products_lkg.py'
       - '.github/workflows/partener-eu-afir-ingest.yml'
   pull_request:
     paths:
@@ -24,6 +26,8 @@ on:
       - 'partener-eu/ingest/localize_decision_products.py'
       - 'partener-eu/ops/test_decision_products.py'
       - 'partener-eu/ops/test_public_language.py'
+      - 'partener-eu/ops/recover_decision_products_lkg.py'
+      - 'partener-eu/ops/validate_decision_products_lkg.py'
       - '.github/workflows/partener-eu-afir-ingest.yml'
 
 permissions:
@@ -42,12 +46,26 @@ jobs:
       - uses: actions/checkout@v6
       - name: Rebuild and validate the deterministic public-language boundary
         run: |
+          python partener-eu/ops/recover_decision_products_lkg.py
+          cp partener-eu/ingest/state/decision_products.json /tmp/decision-products-lkg.json
+          cp partener-eu/web/decision-products.js /tmp/decision-products-lkg.js
+          python partener-eu/ops/test_decision_products.py
+          python partener-eu/ops/test_public_language.py
           python partener-eu/ingest/build_decision_products.py
           python partener-eu/ingest/polish_decision_products.py
           python partener-eu/ingest/finalize_decision_products.py
           python partener-eu/ingest/localize_decision_products.py
           python partener-eu/ops/test_decision_products.py
           python partener-eu/ops/test_public_language.py
+          if python partener-eu/ops/validate_decision_products_lkg.py \
+              --baseline /tmp/decision-products-lkg.json \
+              --candidate partener-eu/ingest/state/decision_products.json; then
+            echo 'Fresh AFIR projection is admissible over the public LKG.'
+          else
+            echo 'Fresh AFIR projection is correctly blocked; the checked-in public LKG remains publishable.'
+            cp /tmp/decision-products-lkg.json partener-eu/ingest/state/decision_products.json
+            cp /tmp/decision-products-lkg.js partener-eu/web/decision-products.js
+          fi
 
   ingest:
     if: github.event_name != 'pull_request'
@@ -69,6 +87,12 @@ jobs:
       - name: Discover and fingerprint official AFIR corpus fail-closed
         run: python partener-eu/ingest/afir_ingest.py
 
+      - name: Preserve the current public last-known-good projection
+        run: |
+          python partener-eu/ops/recover_decision_products_lkg.py
+          cp partener-eu/ingest/state/decision_products.json /tmp/decision-products-lkg.json
+          cp partener-eu/web/decision-products.js /tmp/decision-products-lkg.js
+
       - name: Build, polish and deduplicate dossiers from fresh AFIR evidence
         run: |
           python partener-eu/ingest/build_decision_products.py
@@ -76,10 +100,19 @@ jobs:
           python partener-eu/ingest/finalize_decision_products.py
           python partener-eu/ingest/localize_decision_products.py
 
-      - name: Validate decision products and Romanian public language
+      - name: Validate decision products, Romanian public language and LKG continuity
         run: |
           python partener-eu/ops/test_decision_products.py
           python partener-eu/ops/test_public_language.py
+          if python partener-eu/ops/validate_decision_products_lkg.py \
+              --baseline /tmp/decision-products-lkg.json \
+              --candidate partener-eu/ingest/state/decision_products.json; then
+            echo 'Fresh AFIR projection supersedes the public LKG.'
+          else
+            echo 'Fresh AFIR projection blocked; persisting the recovered public LKG.'
+            cp /tmp/decision-products-lkg.json partener-eu/ingest/state/decision_products.json
+            cp /tmp/decision-products-lkg.js partener-eu/web/decision-products.js
+          fi
 
       - name: Persist AFIR corpus, enriched source and decision products conflict-safe
         shell: bash
@@ -96,6 +129,10 @@ jobs:
           for attempt in 1 2 3 4 5; do
             git fetch origin main
             git reset --hard origin/main
+            cp partener-eu/ingest/state/decision_products.json /tmp/current-main-decision-products.json
+            python partener-eu/ops/validate_decision_products_lkg.py \
+              --baseline /tmp/current-main-decision-products.json \
+              --candidate /tmp/decision_products.json
             cp /tmp/afir_ingest.py partener-eu/ingest/afir_ingest.py
             cp /tmp/afir_state.json partener-eu/ingest/state/afir_state.json
             cp /tmp/afir_corpus.json partener-eu/ingest/state/afir_corpus.json

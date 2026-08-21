@@ -59,10 +59,18 @@ for dossier in payload.get("dossiers") or []:
     if re.search(r"Regiunea\s+Centru|Regional\s+Centru", programme, re.I):
         assert region == "Regiunea Centru", f"regional geography mismatch: {programme} / {region}"
 
+pids = next(d for d in payload.get("dossiers") or [] if d.get("id") == "pids-supported-decision")
+pids_value = next(
+    str(f.get("value") or "")
+    for f in pids.get("quickFacts") or []
+    if f.get("label") in {"Grant", "Valoare proiect", "Finanțare"}
+)
+assert pids_value == "max. 11.804.343 EUR · buget exprimat în RON", pids_value
+
 ui = UI.read_text(encoding="utf-8")
 for phrase in forbidden_phrases:
     assert phrase not in ui, f"English UI phrase remains: {phrase}"
-for token in ("eventLabel", "statusText", "fundingFact", "Finanțări europene · decizie și acțiune", "Utilitate pentru decizie"):
+for token in ("eventLabel", "statusText", "fundingFact", "structuredFact", "displayFact(x)", "Finanțări europene · decizie și acțiune", "Utilitate pentru decizie"):
     assert token in ui, f"localized UI helper missing: {token}"
 
 ask_ui = ASK_UI.read_text(encoding="utf-8")
