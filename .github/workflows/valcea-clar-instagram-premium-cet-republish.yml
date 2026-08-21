@@ -1,0 +1,120 @@
+name: VÂLCEA CLAR Instagram Premium CET Republish
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/social/instagram_editorial_v1_2.py'
+      - 'valcea-clar/social/instagram_premium_cet_republish.py'
+      - '.github/workflows/valcea-clar-instagram-premium-cet-republish.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-instagram-premium-cet-republish
+  cancel-in-progress: false
+
+jobs:
+  republish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Install deterministic renderer
+        run: python -m pip install --disable-pip-version-check Pillow==11.3.0
+
+      - name: Fetch approved photographs
+        run: python valcea-clar/social/fetch_approved_photos.py
+
+      - name: Validate premium CET carousel
+        run: |
+          python -m py_compile \
+            valcea-clar/social/instagram_editorial_v1_2.py \
+            valcea-clar/social/instagram_premium_cet_republish.py
+          python valcea-clar/social/instagram_premium_cet_republish.py --self-test
+          python valcea-clar/social/instagram_premium_cet_republish.py > /tmp/cet-instagram-premium-plan.json
+          cat /tmp/cet-instagram-premium-plan.json
+
+      - name: Persist premium carousel assets before Meta fetches them
+        shell: bash
+        run: |
+          set -euo pipefail
+          rt='valcea-clar/site/runtime/media/social/editorial/instagram'
+          dist='valcea-clar/dist/chatgpt-sites/media/social/editorial/instagram'
+          cp -a "$rt" /tmp/cet-ig-runtime
+          cp -a "$dist" /tmp/cet-ig-dist
+
+          git config user.name 'vâlcea-clar-instagram-premium[bot]'
+          git config user.email 'valcea-clar-instagram-premium@users.noreply.github.com'
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p "$rt" "$dist"
+            cp -a /tmp/cet-ig-runtime/. "$rt/"
+            cp -a /tmp/cet-ig-dist/. "$dist/"
+            git add -- "$rt" "$dist"
+            if git diff --cached --quiet; then
+              echo 'Premium CET Instagram assets already on main.'
+              break
+            fi
+            git commit -m 'Persist VÂLCEA CLAR CET premium Instagram carousel assets'
+            if git push origin HEAD:main; then
+              break
+            fi
+            echo "main advanced while persisting Instagram assets; retrying ${attempt}/5"
+            sleep $((attempt * 2))
+          done
+
+      - name: Publish premium CET carousel
+        env:
+          VALCEA_IG_EDITORIAL_LIVE_ENABLED: 'true'
+          VALCEA_IG_ACCOUNT_ID: ${{ secrets.VALCEA_IG_ACCOUNT_ID }}
+          VALCEA_IG_ACCESS_TOKEN: ${{ secrets.VALCEA_IG_ACCESS_TOKEN }}
+        run: python valcea-clar/social/instagram_premium_cet_republish.py --apply | tee /tmp/cet-instagram-premium-result.json
+
+      - name: Persist Instagram replacement ledger
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp valcea-clar/social/instagram_state.json /tmp/cet-instagram-state.json
+          git config user.name 'vâlcea-clar-instagram-premium[bot]'
+          git config user.email 'valcea-clar-instagram-premium@users.noreply.github.com'
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/cet-instagram-state.json valcea-clar/social/instagram_state.json
+            git add -- valcea-clar/social/instagram_state.json
+            if git diff --cached --quiet; then
+              echo 'Instagram replacement ledger already persisted.'
+              exit 0
+            fi
+            git commit -m 'Persist VÂLCEA CLAR premium Instagram replacement state'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "main advanced while persisting Instagram state; retrying ${attempt}/5"
+            sleep $((attempt * 2))
+          done
+          echo 'Could not persist Instagram replacement state after five attempts.' >&2
+          exit 1
+
+      - name: Upload replacement evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-instagram-premium-cet-${{ github.run_id }}
+          path: |
+            /tmp/cet-instagram-premium-plan.json
+            /tmp/cet-instagram-premium-result.json
+            valcea-clar/site/runtime/media/social/editorial/instagram
+          if-no-files-found: warn
+          retention-days: 14
