@@ -124,6 +124,42 @@ jobs:
           VALCEA_THREADS_LIVE_ENABLED: "true"
         run: python valcea-clar/social/manual_social_apply.py --platform threads | tee /tmp/threads-apply.json
 
+      - name: Collect durable manual distribution audit
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import datetime as dt
+          import json
+          from pathlib import Path
+
+          def read(name):
+              p=Path('/tmp')/name
+              if not p.exists():
+                  return {'status':'NO_OUTPUT'}
+              raw=p.read_text(encoding='utf-8', errors='replace').strip()
+              try:
+                  return json.loads(raw)
+              except Exception:
+                  return {'status':'NON_JSON_OUTPUT','tail':raw[-1200:]}
+
+          audit={
+              'schema_version':'1.0',
+              'generated_at':dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),
+              'source':'manual_publish_queue',
+              'story_ids':['cet-govora-cine-a-decis-oprirea-20260821'],
+              'platforms':{
+                  'facebook':read('facebook-apply.json'),
+                  'instagram':read('instagram-apply.json'),
+                  'threads':read('threads-apply.json'),
+                  'tiktok':{'status':'HOLD','reason':'explicit_consent_and_platform_audit_gate_not_satisfied'}
+              }
+          }
+          out=Path('valcea-clar/social/manual_distribution_audit.json')
+          out.write_text(json.dumps(audit,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps(audit,ensure_ascii=False,indent=2))
+          PY
+
       - name: Persist social outboxes, rights-cleared media and publication state conflict-safe
         if: always()
         shell: bash
@@ -137,7 +173,8 @@ jobs:
             instagram_state.json \
             threads_outbox.json \
             threads_state.json \
-            story_visuals.json; do
+            story_visuals.json \
+            manual_distribution_audit.json; do
             if [ -f "valcea-clar/social/$file" ]; then
               cp "valcea-clar/social/$file" "/tmp/manual-social-state/valcea-clar/social/$file"
             fi
@@ -161,6 +198,7 @@ jobs:
               valcea-clar/social/threads_outbox.json \
               valcea-clar/social/threads_state.json \
               valcea-clar/social/story_visuals.json \
+              valcea-clar/social/manual_distribution_audit.json \
               valcea-clar/social/photos/approved/cet-govora-context-2011.jpg || true
             if git diff --cached --quiet; then
               echo "No manual social state changes to persist."
@@ -184,5 +222,6 @@ jobs:
             /tmp/facebook-apply.json
             /tmp/instagram-apply.json
             /tmp/threads-apply.json
+            valcea-clar/social/manual_distribution_audit.json
           if-no-files-found: warn
           retention-days: 14
