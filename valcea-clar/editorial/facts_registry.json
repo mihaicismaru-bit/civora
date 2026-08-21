@@ -707,7 +707,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "d724f0fdaeac8ef34149390b403c33e666cb77b6780c607317cd202bbce84a2d"
+          "sha256": "815e7e31730f56a7c91d6edda8c02e79ad945de71e9e287bf397de6ee74a418f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 304/2026-07-23",
@@ -1017,7 +1017,7 @@
         "source_monitor": "council-watch-rm-valcea",
         "cluster_date": "2026-07-23",
         "register_url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
-        "register_sha256": "d724f0fdaeac8ef34149390b403c33e666cb77b6780c607317cd202bbce84a2d",
+        "register_sha256": "815e7e31730f56a7c91d6edda8c02e79ad945de71e9e287bf397de6ee74a418f",
         "latest_decision_window": 25,
         "matching_decisions": 11,
         "verified_official_documents": 11,
@@ -3774,74 +3774,6 @@
       "publication_lifecycle": "evergreen"
     },
     {
-      "id": "scm-program-fdbf66a4a5bb7ef4f69b",
-      "status": "verified",
-      "section": "SPORT",
-      "priority": 88,
-      "confidence": 99,
-      "valid_from": "2026-08-15T11:00+03:00",
-      "valid_until": "2026-08-22T15:00+03:00",
-      "slots": [
-        "morning",
-        "evening"
-      ],
-      "editorial_type": "service",
-      "material_fact_gate": "PASS",
-      "sources": [
-        {
-          "name": "SCM Râmnicu Vâlcea — program oficial",
-          "url": "https://scmramnicuvalcea.ro/program/",
-          "tier": "T1B"
-        }
-      ],
-      "auto_generated": true,
-      "auto_scope": "scm_official_program_fact_kernel",
-      "official_event": {
-        "start": "2026-08-22T11:00+03:00",
-        "start_provenance": "SEMANTIC_TABLE_HEADER_DATE_TIME",
-        "home": "CSM Ramnicu Valcea",
-        "away": "FC Bacau",
-        "venue": "Stadionul Municipal",
-        "source_url": "https://scmramnicuvalcea.ro/program/",
-        "parser": "SCM_SEMANTIC_PROGRAM_TABLE_V4"
-      },
-      "fact_kernel": {
-        "format_hint": "service_news",
-        "headline": {
-          "text": "CSM Ramnicu Valcea – FC Bacau: meci programat pe 22 august 2026, de la 11:00",
-          "source_urls": [
-            "https://scmramnicuvalcea.ro/program/"
-          ]
-        },
-        "dek": {
-          "text": "Programul oficial al SCM Râmnicu Vâlcea listează partida la Stadionul Municipal. Informația este verificată direct în calendarul clubului.",
-          "source_urls": [
-            "https://scmramnicuvalcea.ro/program/"
-          ]
-        },
-        "claims": [
-          {
-            "id": "fixture",
-            "role": "who_what_when_where",
-            "kind": "fact",
-            "text": "În programul oficial al SCM Râmnicu Vâlcea, partida CSM Ramnicu Valcea – FC Bacau este programată pe 22 august 2026, la ora 11:00.",
-            "source_urls": [
-              "https://scmramnicuvalcea.ro/program/"
-            ]
-          },
-          {
-            "id": "venue",
-            "role": "reader_service",
-            "kind": "reader_service",
-            "text": "Programul oficial indică pentru această partidă locația Stadionul Municipal.",
-            "source_urls": [
-              "https://scmramnicuvalcea.ro/program/"
-            ]
-          }
-        ]
-      }
-    },
-    {
       "id": "scm-valcea-slatina-20260815",
       "status": "verified",
       "section": "SPORT",
@@ -3932,6 +3864,74 @@
             "text": "La momentul emiterii alertei, sursa oficială indica trafic îngreunat pe DN 7, în sectorul descris în informarea INFOTRAFIC.",
             "source_urls": [
               "https://politiaromana.ro/ro/info-trafic/judetul-valcea-trafic-ingreunat-pe-dn-71787314349"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "scm-program-fdbf66a4a5bb7ef4f69b",
+      "status": "verified",
+      "section": "SPORT",
+      "priority": 88,
+      "confidence": 99,
+      "valid_from": "2026-08-15T11:00+03:00",
+      "valid_until": "2026-08-22T15:00+03:00",
+      "slots": [
+        "morning",
+        "evening"
+      ],
+      "editorial_type": "service",
+      "material_fact_gate": "PASS",
+      "sources": [
+        {
+          "name": "SCM Râmnicu Vâlcea — program oficial",
+          "url": "https://scmramnicuvalcea.ro/program/",
+          "tier": "T1B"
+        }
+      ],
+      "auto_generated": true,
+      "auto_scope": "scm_official_program_fact_kernel",
+      "official_event": {
+        "start": "2026-08-22T11:00+03:00",
+        "start_provenance": "SEMANTIC_TABLE_HEADER_DATE_TIME",
+        "home": "CSM Ramnicu Valcea",
+        "away": "FC Bacau",
+        "venue": "Stadionul Municipal",
+        "source_url": "https://scmramnicuvalcea.ro/program/",
+        "parser": "SCM_SEMANTIC_PROGRAM_TABLE_V4"
+      },
+      "fact_kernel": {
+        "format_hint": "service_news",
+        "headline": {
+          "text": "CSM Ramnicu Valcea – FC Bacau: meci programat pe 22 august 2026, de la 11:00",
+          "source_urls": [
+            "https://scmramnicuvalcea.ro/program/"
+          ]
+        },
+        "dek": {
+          "text": "Programul oficial al SCM Râmnicu Vâlcea listează partida la Stadionul Municipal. Informația este verificată direct în calendarul clubului.",
+          "source_urls": [
+            "https://scmramnicuvalcea.ro/program/"
+          ]
+        },
+        "claims": [
+          {
+            "id": "fixture",
+            "role": "who_what_when_where",
+            "kind": "fact",
+            "text": "În programul oficial al SCM Râmnicu Vâlcea, partida CSM Ramnicu Valcea – FC Bacau este programată pe 22 august 2026, la ora 11:00.",
+            "source_urls": [
+              "https://scmramnicuvalcea.ro/program/"
+            ]
+          },
+          {
+            "id": "venue",
+            "role": "reader_service",
+            "kind": "reader_service",
+            "text": "Programul oficial indică pentru această partidă locația Stadionul Municipal.",
+            "source_urls": [
+              "https://scmramnicuvalcea.ro/program/"
             ]
           }
         ]
