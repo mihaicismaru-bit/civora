@@ -40,6 +40,10 @@ APPLY_RE = re.compile(
     r"python(?:3)?(?:\s+-u)?\s+(valcea-clar/social/[A-Za-z0-9_.-]*facebook[A-Za-z0-9_.-]*\.py)\s+--apply\b",
     re.IGNORECASE,
 )
+DIRECT_FACEBOOK_GRAPH_RE = re.compile(
+    r"graph\.facebook\.com[^\r\n]*(?:/feed\b|/photos\b)",
+    re.IGNORECASE,
+)
 
 
 class GuardFailure(RuntimeError):
@@ -152,7 +156,11 @@ def validate_workflow_single_writer(violations: list[str]) -> None:
         for adapter in FORBIDDEN_APPLY_ADAPTERS:
             if f"{adapter} --apply" in text:
                 violations.append(f"forbidden Facebook bypass adapter referenced by workflow: {rel} -> {adapter}")
-        if "graph.facebook.com" in text and ("/feed" in text or "/photos" in text):
+        # Detect a literal Facebook feed/photo Graph endpoint only when the host
+        # and endpoint appear in the same command/expression. The previous
+        # repository-wide substring conjunction falsely combined Instagram's
+        # graph.facebook.com host with unrelated local /photos paths.
+        if DIRECT_FACEBOOK_GRAPH_RE.search(text):
             violations.append(f"workflow contains direct Facebook feed/photo Graph endpoint: {rel}")
 
     require(writers == [(CANONICAL_WORKFLOW, CANONICAL_ADAPTER)], f"Facebook content writer set must be exactly canonical; found {writers}", violations)
