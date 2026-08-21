@@ -8,6 +8,7 @@ on:
       - 'partener-eu/ingest/mipe_windows_crawl_v3.py'
       - 'partener-eu/ingest/mipe_corpus_enrich.py'
       - '.github/workflows/partener-eu-mipe-ro-crawl-v3.yml'
+      - '.github/workflows/partener-eu-mipe-ro-v3-scheduler.yml'
       - '.github/workflows/partener-eu-mipe-ro-crawl-v3-qa.yml'
 
 jobs:
@@ -29,6 +30,7 @@ jobs:
           from pathlib import Path
           crawler=Path('partener-eu/ingest/mipe_windows_crawl_v3.py').read_text(encoding='utf-8')
           workflow=Path('.github/workflows/partener-eu-mipe-ro-crawl-v3.yml').read_text(encoding='utf-8')
+          dispatcher=Path('.github/workflows/partener-eu-mipe-ro-v3-scheduler.yml').read_text(encoding='utf-8')
           required=[
             'schemaVersion": 3','playwright-edge-direct-romania-v3','MAX_DOCUMENTS',
             'extract_pdf','parse_docx','CALL_LIFECYCLE_EVENT','RESULTS_PUBLISHED',
@@ -40,5 +42,9 @@ jobs:
           assert 'build_call_lifecycle.py' in workflow
           assert 'mipe_ro_corpus.json' in workflow
           assert 'actions/upload-artifact@v4' in workflow
+          assert "cron: '17 */3 * * *'" in workflow
+          assert 'schedule:' not in dispatcher
+          assert 'partener-eu-mipe-ro-crawl-v3.yml/dispatches' in dispatcher
+          assert '\"max_pages\":\"60\"' in dispatcher
           print('MIPE Windows crawler v3 static contract: PASS')
           PY
