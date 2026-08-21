@@ -1,0 +1,125 @@
+name: VÂLCEA CLAR Premium CET Facebook Republish
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/social/facebook_editorial_preview_v1_1.py"
+      - "valcea-clar/social/facebook_premium_replace.py"
+      - ".github/workflows/valcea-clar-facebook-premium-cet-republish.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-premium-cet-facebook-republish
+  cancel-in-progress: false
+
+jobs:
+  replace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      STORY_ID: cet-govora-cine-a-decis-oprirea-20260821
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install deterministic renderer dependency
+        run: python -m pip install --disable-pip-version-check Pillow==11.3.0
+
+      - name: Validate premium Facebook packaging
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            valcea-clar/social/facebook_editorial_preview_v1_1.py \
+            valcea-clar/social/facebook_premium_replace.py
+          python valcea-clar/social/facebook_premium_replace.py --self-test
+          python valcea-clar/social/facebook_premium_replace.py --story-id "$STORY_ID" | tee /tmp/facebook-premium-dry-run.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result=json.loads(Path('/tmp/facebook-premium-dry-run.json').read_text(encoding='utf-8'))
+          assert result['status'] in {'READY_TO_REPLACE','ALREADY_PREMIUM'}, result
+          assert result['template_id']=='fb_investigation_card', result
+          assert result['hook']=='Cine a decis, de fapt, oprirea CET Govora?', result
+          print('Premium CET Facebook gate: PASS')
+          PY
+
+      - name: Publish premium replacement and remove previous post
+        if: github.event_name != 'pull_request'
+        env:
+          VALCEA_FB_PAGE_ID: "1234360446430980"
+          VALCEA_META_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_META_PAGE_ACCESS_TOKEN }}
+          VALCEA_FB_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_FB_PAGE_ACCESS_TOKEN }}
+          VALCEA_FB_GRAPH_VERSION: v26.0
+          VALCEA_FB_EDITORIAL_LIVE_ENABLED: "true"
+        run: |
+          set -euo pipefail
+          python valcea-clar/social/facebook_premium_replace.py \
+            --story-id "$STORY_ID" --apply | tee /tmp/facebook-premium-replace.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result=json.loads(Path('/tmp/facebook-premium-replace.json').read_text(encoding='utf-8'))
+          if result.get('status') not in {'PREMIUM_REPUBLISHED','ALREADY_PREMIUM'}:
+              raise SystemExit(f"Premium republish did not complete: {result}")
+          if result.get('status')=='PREMIUM_REPUBLISHED':
+              cleanup=(result.get('old_cleanup') or {}).get('status')
+              if cleanup not in {'deleted','already_absent'}:
+                  raise SystemExit(f"Replacement published but previous post cleanup is unresolved: {result}")
+          print(json.dumps(result, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Persist premium publication state and asset conflict-safe
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/valcea-premium-facebook
+          mkdir -p /tmp/valcea-premium-facebook/valcea-clar/social
+          mkdir -p /tmp/valcea-premium-facebook/valcea-clar/site/runtime/media/social/editorial/facebook
+          cp valcea-clar/social/facebook_state.json /tmp/valcea-premium-facebook/valcea-clar/social/facebook_state.json
+          if [ -d valcea-clar/site/runtime/media/social/editorial/facebook ]; then
+            cp -R valcea-clar/site/runtime/media/social/editorial/facebook/. \
+              /tmp/valcea-premium-facebook/valcea-clar/site/runtime/media/social/editorial/facebook/
+          fi
+
+          git config user.name "valcea-clar-facebook-premium[bot]"
+          git config user.email "valcea-clar-facebook-premium@users.noreply.github.com"
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p valcea-clar/social valcea-clar/site/runtime/media/social/editorial/facebook
+            cp /tmp/valcea-premium-facebook/valcea-clar/social/facebook_state.json valcea-clar/social/facebook_state.json
+            cp -R /tmp/valcea-premium-facebook/valcea-clar/site/runtime/media/social/editorial/facebook/. \
+              valcea-clar/site/runtime/media/social/editorial/facebook/ || true
+            git add \
+              valcea-clar/social/facebook_state.json \
+              valcea-clar/site/runtime/media/social/editorial/facebook
+            if git diff --cached --quiet; then
+              echo "Premium Facebook state already persisted."
+              exit 0
+            fi
+            git commit -m "Replace CET Govora Facebook post with premium editorial product"
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1
+
+      - name: Upload replacement evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-premium-cet-facebook-${{ github.run_id }}
+          path: |
+            /tmp/facebook-premium-dry-run.json
+            /tmp/facebook-premium-replace.json
+            valcea-clar/social/facebook_state.json
+          if-no-files-found: warn
+          retention-days: 14
