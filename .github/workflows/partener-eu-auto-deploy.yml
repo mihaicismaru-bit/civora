@@ -29,8 +29,10 @@ jobs:
       - uses: actions/checkout@v6
         with:
           ref: main
+          fetch-depth: 0
       - name: Validate fail-closed public projection and STEP-LLL bridge
         run: |
+          python partener-eu/ops/recover_decision_products_lkg.py
           node --check partener-eu/web/decision-intelligence-v2.js
           node --check partener-eu/web/step-lll-dossier-bridge-v2.js
           python partener-eu/ops/test_public_language.py
