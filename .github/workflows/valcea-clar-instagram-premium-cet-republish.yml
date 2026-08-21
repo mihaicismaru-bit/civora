@@ -1,4 +1,4 @@
-# One-shot operational workflow; canonical Meta credential path; diagnostic retrigger 2026-08-21T16:45+03:00.
+# One-shot operational workflow; canonical Meta credential path; runtime-only asset persistence.
 name: VÂLCEA CLAR Instagram Premium CET Republish
 
 on:
@@ -97,9 +97,7 @@ jobs:
         run: |
           set -euo pipefail
           rt='valcea-clar/site/runtime/media/social/editorial/instagram'
-          dist='valcea-clar/dist/chatgpt-sites/media/social/editorial/instagram'
           cp -a "$rt" /tmp/cet-ig-runtime
-          cp -a "$dist" /tmp/cet-ig-dist
 
           git config user.name 'vâlcea-clar-instagram-premium[bot]'
           git config user.email 'valcea-clar-instagram-premium@users.noreply.github.com'
@@ -107,12 +105,11 @@ jobs:
           for attempt in 1 2 3 4 5; do
             git fetch origin main
             git reset --hard origin/main
-            mkdir -p "$rt" "$dist"
+            mkdir -p "$rt"
             cp -a /tmp/cet-ig-runtime/. "$rt/"
-            cp -a /tmp/cet-ig-dist/. "$dist/"
-            git add -- "$rt" "$dist"
+            git add -- "$rt"
             if git diff --cached --quiet; then
-              echo 'Premium CET Instagram assets already on main.'
+              echo 'Premium CET Instagram runtime assets already on main.'
               pushed=true
               break
             fi
