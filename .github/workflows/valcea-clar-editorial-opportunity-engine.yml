@@ -17,6 +17,7 @@ on:
       - 'valcea-clar/scripts/editorial_opportunity_engine.py'
       - 'valcea-clar/scripts/performing_arts_opportunity_adapter.py'
       - 'valcea-clar/scripts/prune_volatile_json_changes.py'
+      - 'valcea-clar/scripts/persistence_profiles.json'
       - '.github/workflows/valcea-clar-editorial-opportunity-engine.yml'
   pull_request:
     paths:
@@ -24,6 +25,7 @@ on:
       - 'valcea-clar/scripts/editorial_opportunity_engine.py'
       - 'valcea-clar/scripts/performing_arts_opportunity_adapter.py'
       - 'valcea-clar/scripts/prune_volatile_json_changes.py'
+      - 'valcea-clar/scripts/persistence_profiles.json'
       - '.github/workflows/valcea-clar-editorial-opportunity-engine.yml'
 
 permissions:
@@ -80,9 +82,7 @@ jobs:
             git reset --hard origin/main
             cp /tmp/editorial-opportunity-queue.json "$path"
             python valcea-clar/scripts/prune_volatile_json_changes.py \
-              --ignore-key generated_at \
-              --ignore-key detected_at \
-              --ignore-key observed_at \
+              --profile editorial_opportunity \
               "$path"
             git add "$path"
             if git diff --cached --quiet; then
