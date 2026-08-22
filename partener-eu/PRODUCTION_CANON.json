@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "product": "PARTENER.EU",
+  "release": "2026-08-22",
+  "status": "CANONICAL_PRODUCTION",
+  "publicUrl": "https://partener.eu/",
+  "liveArtifactGitSha": "c49b2d7842ca21c89ad8b5496089238d023d8a2e",
+  "productionRecord": "partener-eu/deployment/latest.json",
+  "productionRecordStatus": "LIVE",
+  "canonicalScope": {
+    "publicFundingDiscovery": true,
+    "decisionProductsAndDossiers": true,
+    "askPartener": {
+      "canonicalDataOnly": true,
+      "failClosedNoRandomFallback": true,
+      "canonicalCallCrossCheck": true,
+      "unknownFactsRemainVisible": true
+    },
+    "decisionMakerIntelligence": {
+      "homepageOnly": true,
+      "directOfficialSourceIngestion": true,
+      "configuredOfficialSources": 18,
+      "statementNeverEqualsAdministrativeFact": true,
+      "materialFreshSignalsOnlyOnHomepage": true,
+      "failClosed": true
+    },
+    "consultantWorkspace": true,
+    "regionalRadars": true,
+    "calendar": true,
+    "perCallVersionHistory": true
+  },
+  "removedFromPrimaryNavigation": [
+    "Modificări"
+  ],
+  "qualityEvidence": [
+    "partener-eu/ops/test_editorial_automation.py",
+    "partener-eu/ops/test_people_policy_source_intelligence.py",
+    ".github/workflows/partener-eu-editorial-daily.yml",
+    "partener-eu/deployment/latest.json"
+  ],
+  "sourcePolicy": {
+    "officialT1T1BPreferred": true,
+    "socialOrPublicStatementsAreSignalsOnly": true,
+    "noSilentOverwrite": true,
+    "unknownMaterialFactsAreNotInferred": true
+  },
+  "releaseBoundary": {
+    "partenerProductIsProduction": true,
+    "civoraP10Closure": false,
+    "note": "Canonizarea produsului PARTENER.EU nu închide criteriul longitudinal CIVORA P10. P10 continuă separat până la îndeplinirea propriilor criterii de acceptanță."
+  }
+}
