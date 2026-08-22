@@ -2,7 +2,7 @@
 """Apply PARTENER.EU MIPE immutable-runtime cleanup on a development branch.
 
 This migration is fail-closed: it edits only exact expected workflow fragments,
-retire the redundant Access Bridge, proves no executable callers remain for the
+retires the redundant Access Bridge, proves no executable callers remain for the
 five active source patchers, and only then removes those patchers. Canonical
 hosted publication remains routed through mipe_direct_only_ingest.py.
 """
@@ -15,6 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SELF = Path(__file__).resolve()
+MIGRATION_DRIVER = ".github/workflows/partener-eu-cleanup-phase7.yml"
 SOURCE = ROOT / "partener-eu/ingest/mipe_resilient_ingest.py"
 CANONICAL_SOURCE_SHA = "ad82649456a2aced555ffd43ae768ab275e4b02fb6a32acd6e152097280e500b"
 
@@ -66,7 +67,7 @@ def executable_references(names: tuple[str, ...]) -> list[dict]:
         if path.suffix.lower() not in TEXT_CODE_SUFFIXES:
             continue
         rel = path.relative_to(ROOT).as_posix()
-        if rel in FIXERS:
+        if rel in FIXERS or rel == MIGRATION_DRIVER:
             continue
         try:
             lines = path.read_text(encoding="utf-8").splitlines()
