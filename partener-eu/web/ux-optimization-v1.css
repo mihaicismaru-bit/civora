@@ -17,6 +17,19 @@
 .badge{line-height:1.2}
 [data-ux-status-translated="1"]{text-transform:none;letter-spacing:.025em}
 
+/* Fix intrinsic grid growth in the decision-intelligence news section. Using
+   minmax(0,...) preserves the intended column ratios while allowing cards to
+   shrink inside the public content width instead of expanding the page. */
+.diHome,.diSection,.diNewsGrid,.diNewsCard{min-width:0;max-width:100%}
+.diNewsGrid{width:100%;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr) minmax(0,.85fr)}
+.diNewsCard{overflow-wrap:anywhere;word-break:normal}
+.diNewsCard>*{min-width:0;max-width:100%}
+
+@media(max-width:1080px){
+  .diNewsGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .diNewsGrid .diNewsCard:first-child{grid-column:1/-1}
+}
+
 @media(max-width:900px){
   .topbar{backdrop-filter:blur(16px)}
   .nav{height:auto;min-height:64px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 12px;padding-top:9px;padding-bottom:9px}
@@ -43,6 +56,11 @@
   .tabs::-webkit-scrollbar{display:none}
   .tab{flex:0 0 auto;min-height:var(--ux-tap)}
   .source{align-items:flex-start;flex-direction:column}
+}
+
+@media(max-width:720px){
+  .diNewsGrid{grid-template-columns:minmax(0,1fr)}
+  .diNewsGrid .diNewsCard:first-child{grid-column:auto}
 }
 
 @media(max-width:560px){
