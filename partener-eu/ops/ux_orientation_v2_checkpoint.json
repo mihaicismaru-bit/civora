@@ -1,0 +1,52 @@
+{
+  "schema": "PARTENER_UX_ORIENTATION_CHECKPOINT_V2",
+  "checkpoint": "PARTENER-UX-V2-CP03",
+  "status": "PASS",
+  "verifiedAt": "2026-08-22T15:12:08Z",
+  "branch": "agent/partener-ux-optimization-v2-orientation-20260822",
+  "testedHeadSha": "7fda73f748cd488645ecc30cfefc22c810fdee2d",
+  "workflowRunId": 32580961987,
+  "artifact": {
+    "id": 9477779092,
+    "name": "partener-ux-orientation-v2-proof",
+    "sha256": "039458a459f1f9e31fc67df0ad5332986213b88c25b6bb9526865169e5a763a1"
+  },
+  "desktop": {
+    "viewport": "1365x900",
+    "railLabels": ["Profil", "Deschise", "Pregătește", "Schimbări"],
+    "railTouchTargetsPx": [44, 44, 44, 44],
+    "decisionSections": 3,
+    "hiddenDecisionSections": 0,
+    "extraKeyboardTargets": 5,
+    "newsActionHints": 5,
+    "pageHorizontalOverflowPx": 0,
+    "changesJump": "PASS",
+    "failedResponses": 0,
+    "consoleErrors": 0
+  },
+  "mobile": {
+    "viewport": "390x844",
+    "railPosition": "sticky",
+    "railLabels": ["Profil", "Deschise", "Pregătește", "Schimbări"],
+    "railTouchTargetsPx": [44, 44, 44, 44],
+    "decisionSections": 3,
+    "hiddenDecisionSections": 0,
+    "extraKeyboardTargets": 5,
+    "newsActionHints": 5,
+    "pageHorizontalOverflowPx": 0,
+    "changesJump": {
+      "status": "PASS",
+      "targetTopPx": 185.64,
+      "headerHeightPx": 120
+    },
+    "failedResponses": 0,
+    "consoleErrors": 0
+  },
+  "canonicalDataChanged": false,
+  "materialSectionsCollapsed": false,
+  "eligibilityLogicChanged": false,
+  "ingestionChanged": false,
+  "publicationPolicyChanged": false,
+  "rollback": "Revert the six UX v2 commits; UX v1 and canonical data remain intact.",
+  "integrationRule": "Stacked on UX v1. Integrate UX v1 first, retarget/reconcile, rerun QA, and merge only after explicit approval."
+}
