@@ -1,33 +1,50 @@
 name: VÂLCEA CLAR Public UX Archive Invariant
 
-# PR/manual compatibility guard. Continuous story/archive invariants are already
-# enforced by VÂLCEA CLAR Quality and Canonical Export Acceptance.
+# Derived presentation projector. Editorial/publication authority remains in
+# VÂLCEA CLAR Live Newsroom; this workflow only rebuilds the reader-facing shell
+# from the already-published live feed and durable archive.
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: ['VÂLCEA CLAR Live Newsroom']
+    types: [completed]
+    branches: [main]
   pull_request:
     paths:
       - 'valcea-clar/scripts/public_ux_reset.py'
       - 'valcea-clar/scripts/public_ux_story_integrity.py'
       - 'valcea-clar/scripts/public_ux_manifest.py'
       - 'valcea-clar/site/story_archive.json'
+      - 'valcea-clar/engine/automation_registry.json'
       - '.github/workflows/valcea-clar-public-ux-archive-invariant.yml'
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
-  group: valcea-clar-public-ux-archive-invariant-${{ github.event.pull_request.number || 'manual' }}
-  cancel-in-progress: true
+  group: valcea-clar-public-ux-archive-invariant-${{ github.event.pull_request.number || 'main' }}
+  cancel-in-progress: false
 
 jobs:
   validate:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
-          python-version: '3.12'
-      - name: Run Public UX without mutating durable archive
+          python-version: '3.13'
+
+      - name: Self-test derived presentation layer
+        run: |
+          python valcea-clar/scripts/public_ux_reset.py --self-test
+          python valcea-clar/scripts/public_ux_story_integrity.py --self-test
+
+      - name: Exercise Public UX without mutating durable archive
+        if: github.event_name == 'pull_request'
         run: |
           set -euo pipefail
           archive='valcea-clar/site/story_archive.json'
@@ -40,8 +57,6 @@ jobs:
           PY
           )"
 
-          python valcea-clar/scripts/public_ux_reset.py --self-test
-          python valcea-clar/scripts/public_ux_story_integrity.py --self-test
           python valcea-clar/scripts/public_ux_reset.py
           python valcea-clar/scripts/public_ux_story_integrity.py
           python valcea-clar/scripts/public_ux_manifest.py
@@ -62,3 +77,81 @@ jobs:
           test "$before_count" = "$after_count"
           git diff --exit-code -- "$archive"
           echo "Public UX durable archive invariant: PASS (${before_count} stories unchanged)"
+
+      - name: Persist canonical reader presentation from current main
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'vâlcea-clar-public-ux[bot]'
+          git config user.email 'valcea-clar-public-ux@users.noreply.github.com'
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            git clean -fd
+
+            archive='valcea-clar/site/story_archive.json'
+            before="$(sha256sum "$archive" | cut -d' ' -f1)"
+
+            python valcea-clar/scripts/public_ux_reset.py
+            python valcea-clar/scripts/public_ux_story_integrity.py
+            python valcea-clar/scripts/public_ux_manifest.py
+            python valcea-clar/scripts/public_ux_reset.py --check
+            python valcea-clar/scripts/public_ux_story_integrity.py --check
+            python valcea-clar/scripts/public_ux_manifest.py --check
+
+            after="$(sha256sum "$archive" | cut -d' ' -f1)"
+            test "$before" = "$after"
+            git diff --exit-code -- "$archive"
+
+            python - <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, 'valcea-clar/scripts')
+          import public_ux_reset as ux
+
+          root=Path('valcea-clar')
+          feed=json.loads((root/'site/runtime/live-feed.json').read_text(encoding='utf-8'))
+          archive=json.loads((root/'site/story_archive.json').read_text(encoding='utf-8'))
+          state=json.loads((root/'site/public_ux_state.json').read_text(encoding='utf-8'))
+          stories, live_ids=ux.union_stories(feed, archive)
+          reader_ids={str(row.get('id')) for row in stories if row.get('id')}
+          expected_live={sid for sid in live_ids if sid in reader_ids}
+          actual_story_ids=set(state.get('story_ids') or [])
+          assert state.get('live_story_count') == len(expected_live), (state.get('live_story_count'), len(expected_live))
+          assert expected_live <= actual_story_ids
+          if feed.get('stories'):
+              assert expected_live, 'public live feed has stories but Public UX resolved zero live reader stories'
+          home=(root/'site/runtime/index.html').read_text(encoding='utf-8')
+          if expected_live:
+              assert '0 materiale în fluxul curent' not in home
+              marker=f"{len(expected_live)} materiale în fluxul curent"
+              assert marker in home, marker
+          manifest=json.loads((root/'site/runtime/stiri/manifest.json').read_text(encoding='utf-8'))
+          for row in manifest.get('stories') or []:
+              if row.get('image'):
+                  sid=str(row.get('id'))
+                  page=(root/'site/runtime'/str(row['path']).strip('/')/'index.html').read_text(encoding='utf-8')
+                  public_url=str((row.get('image') or {}).get('public_url') or '')
+                  assert public_url and f'<meta property="og:image" content="{public_url}">' in page, sid
+          print(json.dumps({'status':'PASS','safe_story_count':len(stories),'live_story_count':len(expected_live)}, ensure_ascii=False))
+          PY
+
+            git add valcea-clar/site/public_ux_state.json valcea-clar/site/runtime
+            if git diff --cached --quiet; then
+              echo 'Canonical Public UX is already current on main.'
+              exit 0
+            fi
+
+            git commit -m 'Refresh VÂLCEA CLAR canonical public presentation'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "main advanced during Public UX projection; retrying ${attempt}/5."
+            sleep $((attempt * 2))
+          done
+
+          echo 'Could not persist canonical Public UX after five attempts.' >&2
+          exit 1
