@@ -1,0 +1,1 @@
+The operator bridge may only dispatch and observe the canonical VÂLCEA CLAR Live Newsroom workflow. It must not implement an alternate facts writer, story renderer, runtime writer, social publisher, or editorial bypass.
