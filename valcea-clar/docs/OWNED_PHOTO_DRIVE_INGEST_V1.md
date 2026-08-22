@@ -1,16 +1,16 @@
 # VÂLCEA CLAR — Owned Photo Drive Ingest v1
 
-Status: `IMPLEMENTED_CANDIDATE_MATCHING_AND_EXPLICIT_MATERIALIZATION_GATE`
+Status: `SEMANTIC_BARRIER_1_CLOSED_FOR_CURRENT_48_PHOTO_SNAPSHOT`
 
 ## Scope
 
-Adds the missing Google Drive → CIVORA bridge for VÂLCEA CLAR's curated photo archive, a fail-closed story candidate matcher, and an explicit-only materialization gate. None of these layers grants autonomous publication authority.
+Adds the Google Drive → CIVORA bridge for VÂLCEA CLAR's curated photo archive, fail-closed story candidate matching, exact semantic identity for the current owned-photo snapshot, and an explicit-only materialization gate. None of these layers grants autonomous publication authority.
 
 Pipeline:
 
-`GOOGLE DRIVE CURATED FOLDERS -> METADATA SNAPSHOT -> OWNED PHOTO REGISTRY -> CATEGORY/STORY CANDIDATE MATCHING -> VISUAL SUBJECT CONFIRMATION -> RIGHTS/PRIVACY/EDITOR GATES -> EXPLICIT MATERIALIZATION REQUEST -> story_visuals.json`
+`GOOGLE DRIVE CURATED FOLDERS -> METADATA SNAPSHOT -> OWNED PHOTO REGISTRY -> EXACT SEMANTIC IDENTITY -> CATEGORY/STORY RETRIEVAL -> STORY-LEVEL VISUAL SUBJECT CONFIRMATION -> RIGHTS/PRIVACY/EDITOR GATES -> EXPLICIT MATERIALIZATION REQUEST -> story_visuals.json`
 
-## Current bootstrap inventory
+## Current curated inventory
 
 The connected Drive snapshot contains 48 JPEG photographs across 7 curated categories:
 
@@ -22,13 +22,34 @@ The connected Drive snapshot contains 48 JPEG photographs across 7 curated categ
 - `06_SANTIERE_DEZVOLTARE`: 2
 - `07_PARKING_MOBILITATE`: 1
 
-The committed snapshot is a bootstrap/fallback. The workflow is PR/manual-only until a read-only Drive credential is configured. After that gate is satisfied, the same runtime can be registered for hourly refresh without changing the candidate or publication-safety contract.
+The committed snapshot is a bootstrap/fallback. The workflow remains PR/manual-only until a read-only Drive credential is configured.
+
+## Semantic identity layer
+
+`owned_photo_semantic_labels.json` is the curated semantic source for the current 48-photo snapshot. `owned_photo_semantic_registry.py` resolves those labels against the Drive snapshot and requires a one-to-one filename → `drive_file_id` binding.
+
+Current acceptance target and validated source state:
+
+- 48/48 snapshot photographs have a semantic label;
+- 48 are `confirmed`;
+- 0 are `ambiguous`;
+- 0 are `reject`;
+- every confirmed asset has confidence ≥ 0.85;
+- every asset retains `subject_match=false`, `editor_approved=false`, `publication_eligible=false`, `publication_authority=NONE`.
+
+The semantic registry distinguishes exact entities, exact places/scenes, scene types, editorial uses, privacy-review status, quality tier and owned-rights basis. Evidence must include both visual review and raw JPEG/EXIF review. Additional evidence may include visible signage, distinctive facade, cross-frame landmark confirmation, public-address cross-check or visible project/business signage.
+
+Examples now represented at exact-asset level include the Râul Olănești promenade, River Plaza Mall, Primăria Râmnicu Vâlcea, Consiliul Județean Vâlcea, Prefectura Vâlcea, Tribunalul/Palatul de Justiție, AJPIS, UniCredit, Banca Transilvania, Romprest, Camera de Comerț, RAZ Tower/Ramada, Carrefour Market, Arbusto Coffee, D’AMICI, Street Pub, Hotel Castel, Cash Pot, NOVA Luxury Apartments and central public parking.
+
+Semantic identity is **not** event identity. A photograph confirmed as the Primăria building may be retrieved for a Primăria story, but it does not automatically become the photograph of a specific council meeting or event. Story-level subject match remains a separate explicit gate.
+
+`owned_photo_ambiguous_review_queue.json` is generated from the semantic source when `--write` runs. For the current curated snapshot the expected queue size is zero. Any future Drive file without a semantic label fails closed rather than entering story matching silently.
 
 ## Candidate matching
 
 `owned_photo_story_matcher.py` compares published story identity/headline/dek/section against conservative category rules in `owned_photo_match_policy.json`.
 
-A category match is only retrieval assistance. It is explicitly **not** a claim that any specific image depicts the story. Every candidate remains:
+A category match is retrieval assistance only. Every candidate remains:
 
 - `subject_match=false`
 - `editor_approved=false`
@@ -37,46 +58,33 @@ A category match is only retrieval assistance. It is explicitly **not** a claim 
 - `requires_visual_confirmation=true`
 - `rights_reconfirmation_required=true`
 
-The matcher avoids using article body/source text for scoring so that a source citation such as HCL/Primăria does not make an unrelated story look like an institutional-photo match. It also carries negative terms for known false-positive patterns, e.g. a Buila/Băile Olănești accident must not inherit the Râul Olănești/promenadă photo category merely because the word “Olănești” appears.
+The matcher avoids article-body/source text for scoring so a source citation cannot make an unrelated story look like an institutional-photo match. Known false-positive patterns are penalized, e.g. a Buila/Băile Olănești accident must not inherit the Râul Olănești/promenadă category merely because “Olănești” appears.
 
-The output `owned_photo_story_candidates.json` distinguishes:
-
-- `missing_visual_candidate` — published story has no known visual;
-- `replacement_candidate` — an owned-photo category may be more appropriate than an existing visual, but replacement still requires explicit review.
-
-No queue entry mutates `story_visuals.json`.
+`owned_photo_story_candidates.json` distinguishes `missing_visual_candidate` from `replacement_candidate`. No queue entry mutates `story_visuals.json`.
 
 ## Explicit materialization gate
 
-`materialize_owned_photo_story.py` is the only owned-photo path that may create a real story visual assignment, and it is deliberately inactive unless an explicit request row has status `approved_for_materialization`.
+`materialize_owned_photo_story.py` is the only owned-photo path that may create a real story visual assignment, and it is inactive unless an explicit request row has status `approved_for_materialization`.
 
-Every active request must independently confirm:
+Every active request must independently confirm exact story/asset identity, story-level subject match, editor approval, rights reconfirmation, privacy review, approved alt text, and explicit replacement approval when a story already has a visual.
 
-- exact `story_id` and `asset_id`;
-- `subject_match_confirmed=true`;
-- `editor_approved=true`;
-- `rights_reconfirmed=true`;
-- `privacy_reviewed=true` plus a review note;
-- `alt_text_approved=true` plus non-trivial alt text;
-- explicit replacement approval when a story already has a visual.
+The selected story/asset pair must already appear in the candidate queue unless a written explicit override is supplied. An override never bypasses subject, rights, privacy or editor approval.
 
-The selected story/asset pair must already appear in the candidate queue. A reviewer may override that retrieval gate only with `override_candidate_queue=true` **and** a written `override_reason`; the override still does not bypass subject, rights, privacy or editor approval.
+When eventually run with `--apply`, the materializer downloads the exact Drive JPEG using a read-only Drive credential, validates the binary, writes it under `valcea-clar/social/photos/approved/`, records SHA-256 provenance, and creates the normal `story_visuals.json` entry with `rights_basis=owned`.
 
-When eventually run with `--apply`, the materializer downloads the exact Drive JPEG using a read-only Drive credential, validates the binary, writes it under `valcea-clar/social/photos/approved/`, records SHA-256 provenance, and creates the normal `story_visuals.json` entry with `rights_basis=owned`. No active requests are committed in this PR, so current validation performs no publication or binary materialization.
+No active materialization requests are committed in this PR, so current validation performs no publication or binary materialization.
 
 ## Safety and rights model
 
-Discovery and matching are candidate-only. Every Drive asset enters with:
+The Drive archive and semantic registry are metadata/candidate layers. Owned-rights status does not bypass privacy or story relevance review. Original binaries remain in Google Drive until an explicit materialization request clears all gates.
 
-- `subject_match=false`
-- `editor_approved=false`
-- `publication_eligible=false`
-- `publication_authority=NONE`
-- `rights_reconfirmation_required=true`
+The semantic source and validator deliberately enforce:
 
-The category/folder placement is useful retrieval metadata, not evidence that a photograph depicts a specific story event. No automatic story assignment is permitted.
-
-The original binary remains in Google Drive until an explicit materialization request clears all gates. This avoids repository bloat and prevents unreviewed Drive files from leaking into publication.
+- semantic identity ≠ story subject match;
+- exact place/entity ≠ exact event;
+- owned rights ≠ automatic publishability;
+- category match ≠ exact asset match;
+- no photo is better than false relevance.
 
 ## Runtime
 
@@ -84,7 +92,11 @@ Implementation:
 
 - `valcea-clar/social/owned_photo_drive_config.json`
 - `valcea-clar/social/owned_photo_drive_snapshot.json`
-- `valcea-clar/social/owned_photo_registry.json` (generated output)
+- `valcea-clar/social/owned_photo_registry.json` (generated ingest output)
+- `valcea-clar/social/owned_photo_semantic_labels.json`
+- `valcea-clar/social/owned_photo_semantic_registry.py`
+- `valcea-clar/social/owned_photo_semantic_registry.json` (ephemeral/generated validation output)
+- `valcea-clar/social/owned_photo_ambiguous_review_queue.json` (ephemeral/generated validation output)
 - `valcea-clar/social/owned_photo_match_policy.json`
 - `valcea-clar/social/owned_photo_story_candidates.json` (generated output)
 - `valcea-clar/social/owned_photo_materialization_requests.json`
@@ -93,23 +105,23 @@ Implementation:
 - `valcea-clar/social/materialize_owned_photo_story.py`
 - `.github/workflows/valcea-clar-owned-photo-ingest.yml`
 
-Authentication supports either:
-
-- `VALCEA_DRIVE_SERVICE_ACCOUNT_JSON` (preferred, read-only scope), or
-- `VALCEA_DRIVE_BEARER_TOKEN` (temporary/manual fallback).
-
-If neither secret exists, PR validation rebuilds the registry and candidate queue from the committed snapshot and validates the explicit materialization contract without attempting Drive access.
+Authentication supports either `VALCEA_DRIVE_SERVICE_ACCOUNT_JSON` (preferred, read-only scope) or `VALCEA_DRIVE_BEARER_TOKEN` (temporary/manual fallback). If neither secret exists, PR validation rebuilds the registry from the committed snapshot and validates semantics/matching/materialization without inventing Drive runtime access.
 
 ## Acceptance
 
-`OWNED_PHOTO_DRIVE_INGEST_V1 = OPERATIONAL_CANDIDATE_MATCHING_WITH_EXPLICIT_MATERIALIZATION_GATE` when:
+`SEMANTIC_BARRIER_1 = CLOSED_FOR_CURRENT_48_PHOTO_SNAPSHOT` when:
 
-1. the 48-photo bootstrap snapshot deterministically builds the registry;
-2. ingest, matching and materialization-gate self-tests pass offline;
-3. candidate queue validation proves category match never becomes subject match;
-4. the materializer rejects any request missing subject, rights, privacy, alt-text or editor approval;
-5. live Drive sync can replace the snapshot when read credentials are configured;
-6. unchanged live inventory causes no repository churn;
-7. no automatic story assignment or autonomous materialization authority is introduced.
+1. the 48-photo bootstrap snapshot deterministically builds the owned registry;
+2. semantic labels cover exactly the same 48 unique files/Drive IDs;
+3. all 48 semantic identities are confirmed and the ambiguous queue is empty;
+4. semantic validation proves no asset inherits story subject match, editor approval or publication authority;
+5. ingest, matching and materialization-gate self-tests pass;
+6. current site-engine ownership, quality, canonical export and social acceptance gates remain green.
 
-The remaining functional gap is **asset-level semantic labeling / visual confirmation of specific Drive files**. Once exact images are confirmed, approved request rows can be created and materialized without changing this safety architecture. Hourly Drive refresh remains a separate activation step after Drive credentials exist.
+After this barrier, first owned-photo replacements may be proposed at exact-asset level, but each still needs story-specific visual confirmation and the existing explicit materialization gate.
+
+## Next barrier
+
+`SEMANTIC_BARRIER_2 = LIVE_DRIVE_READ_ONLY_RUNTIME_ACCESS`.
+
+GitHub Actions currently has no usable `VALCEA_DRIVE_SERVICE_ACCOUNT_JSON` or `VALCEA_DRIVE_BEARER_TOKEN`, so live Drive refresh stays explicit/manual and unscheduled. The next activation task is to configure a least-privilege read-only Drive credential, prove live snapshot parity, and only then register a bounded hourly refresh. No merge or autonomous activation is implied by this document.
