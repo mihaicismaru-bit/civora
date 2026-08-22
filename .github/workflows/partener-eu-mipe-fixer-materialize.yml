@@ -1,0 +1,57 @@
+name: PARTENER.EU MIPE Fixer Materialization
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'agent/partener-cleanup-phase6-fixer-proof-20260822'
+    paths:
+      - 'partener-eu/ops/materialize_mipe_fixer_state.py'
+      - '.github/workflows/partener-eu-mipe-fixer-materialize.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: partener-eu-mipe-fixer-materialize-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Compile migration helper
+        run: python -m py_compile partener-eu/ops/materialize_mipe_fixer_state.py
+      - name: Materialize active runtime fixer chain
+        run: python partener-eu/ops/materialize_mipe_fixer_state.py
+      - name: Validate materialized source
+        run: |
+          python -m py_compile partener-eu/ingest/mipe_resilient_ingest.py
+          python -m py_compile partener-eu/ingest/mipe_direct_only_ingest.py
+          python partener-eu/ops/test_mipe_resilient_ingest.py
+      - name: Commit only tested source and materialization proof to cleanup branch
+        run: |
+          set -euo pipefail
+          git config user.name 'partener-cleanup-audit[bot]'
+          git config user.email 'partener-cleanup-audit@users.noreply.github.com'
+          git add \
+            partener-eu/ingest/mipe_resilient_ingest.py \
+            partener-eu/ops/mipe_fixer_materialization.json
+          if git diff --cached --quiet; then
+            echo 'MIPE fixer state already materialized.'
+            exit 0
+          fi
+          git commit -m 'PARTENER cleanup: materialize tested MIPE fixer state'
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: partener-mipe-fixer-materialization
+          path: partener-eu/ops/mipe_fixer_materialization.json
+          if-no-files-found: error
