@@ -1,9 +1,10 @@
 name: VÂLCEA CLAR SCM Newsroom Acceptance Diagnostic
 
+# Acceptance probe only. Candidate diagnostics have no publication authority and
+# are emitted as artifacts instead of being committed into canonical state.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
+  pull_request:
     paths:
       - 'valcea-clar/editorial/facts_registry.json'
       - 'valcea-clar/scripts/newsroom_candidate_diagnostic.py'
@@ -11,10 +12,10 @@ on:
       - '.github/workflows/valcea-clar-scm-newsroom-diagnostic.yml'
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: valcea-clar-scm-newsroom-diagnostic
+  group: valcea-clar-scm-newsroom-diagnostic-${{ github.event.pull_request.number || 'manual' }}
   cancel-in-progress: true
 
 jobs:
@@ -45,36 +46,20 @@ jobs:
         run: |
           python valcea-clar/scripts/newsroom_candidate_diagnostic.py \
             --story-id "${{ steps.fact.outputs.story_id }}" \
-            > valcea-clar/editorial/scm_newsroom_candidate_diagnostic.json
+            > /tmp/scm_newsroom_candidate_diagnostic.json
           python - <<'PY'
           import json
           from pathlib import Path
-          doc=json.loads(Path('valcea-clar/editorial/scm_newsroom_candidate_diagnostic.json').read_text(encoding='utf-8'))
+          doc=json.loads(Path('/tmp/scm_newsroom_candidate_diagnostic.json').read_text(encoding='utf-8'))
           assert doc.get('publication_authority') == 'NONE'
           assert doc.get('candidate_count') == 1
           print(json.dumps(doc, ensure_ascii=False))
           PY
-      - name: Persist diagnostic safely
-        if: steps.fact.outputs.story_id != ''
-        shell: bash
-        run: |
-          set -euo pipefail
-          cp valcea-clar/editorial/scm_newsroom_candidate_diagnostic.json /tmp/scm-newsroom-candidate-diagnostic.json
-          git config user.name 'vâlcea-clar-newsroom-diagnostic[bot]'
-          git config user.email 'valcea-clar-newsroom-diagnostic@users.noreply.github.com'
-          for attempt in 1 2 3 4; do
-            git fetch origin main
-            git reset --hard origin/main
-            mkdir -p valcea-clar/editorial
-            cp /tmp/scm-newsroom-candidate-diagnostic.json valcea-clar/editorial/scm_newsroom_candidate_diagnostic.json
-            git add valcea-clar/editorial/scm_newsroom_candidate_diagnostic.json
-            if git diff --cached --quiet; then
-              exit 0
-            fi
-            git commit -m 'Refresh VÂLCEA CLAR SCM newsroom acceptance diagnostic'
-            if git push origin HEAD:main; then
-              exit 0
-            fi
-            sleep $((attempt * 2))
-          done
-          exit 1
+      - name: Upload diagnostic result
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-scm-newsroom-diagnostic-${{ github.run_id }}
+          path: /tmp/scm_newsroom_candidate_diagnostic.json
+          if-no-files-found: warn
+          retention-days: 7

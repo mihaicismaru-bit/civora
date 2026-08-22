@@ -1,5 +1,7 @@
 name: VÂLCEA CLAR Public UX Archive Invariant
 
+# PR/manual compatibility guard. Continuous story/archive invariants are already
+# enforced by VÂLCEA CLAR Quality and Canonical Export Acceptance.
 on:
   workflow_dispatch:
   pull_request:
@@ -9,19 +11,12 @@ on:
       - 'valcea-clar/scripts/public_ux_manifest.py'
       - 'valcea-clar/site/story_archive.json'
       - '.github/workflows/valcea-clar-public-ux-archive-invariant.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'valcea-clar/scripts/public_ux_reset.py'
-      - 'valcea-clar/scripts/public_ux_story_integrity.py'
-      - 'valcea-clar/scripts/public_ux_manifest.py'
-      - '.github/workflows/valcea-clar-public-ux-archive-invariant.yml'
 
 permissions:
   contents: read
 
 concurrency:
-  group: valcea-clar-public-ux-archive-invariant-${{ github.ref }}
+  group: valcea-clar-public-ux-archive-invariant-${{ github.event.pull_request.number || 'manual' }}
   cancel-in-progress: true
 
 jobs:

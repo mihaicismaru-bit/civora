@@ -1,20 +1,20 @@
 name: VÂLCEA CLAR Live Newsroom Transaction Diagnostic
 
-# Read-only production-path probe; this workflow never publishes.
+# Explicit read-only production-path probe. Results are workflow artifacts only;
+# diagnostics never mutate canonical repository state.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
+  pull_request:
     paths:
       - 'valcea-clar/scripts/newsroom_transaction_diagnostic.py'
       - 'valcea-clar/scripts/overlay_runtime_export.py'
       - '.github/workflows/valcea-clar-newsroom-transaction-diagnostic.yml'
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: valcea-clar-newsroom-transaction-diagnostic
+  group: valcea-clar-newsroom-transaction-diagnostic-${{ github.event.pull_request.number || 'manual' }}
   cancel-in-progress: true
 
 jobs:
@@ -44,28 +44,12 @@ jobs:
         run: |
           python valcea-clar/scripts/newsroom_transaction_diagnostic.py \
             --story-id "${{ steps.fact.outputs.story_id }}" \
-            --output valcea-clar/editorial/newsroom_transaction_diagnostic.json
-      - name: Persist diagnostic result
-        if: steps.fact.outputs.story_id != ''
-        shell: bash
-        run: |
-          set -euo pipefail
-          cp valcea-clar/editorial/newsroom_transaction_diagnostic.json /tmp/newsroom-transaction-diagnostic.json
-          git config user.name 'vâlcea-clar-transaction-diagnostic[bot]'
-          git config user.email 'valcea-clar-transaction-diagnostic@users.noreply.github.com'
-          for attempt in 1 2 3 4; do
-            git fetch origin main
-            git reset --hard origin/main
-            mkdir -p valcea-clar/editorial
-            cp /tmp/newsroom-transaction-diagnostic.json valcea-clar/editorial/newsroom_transaction_diagnostic.json
-            git add valcea-clar/editorial/newsroom_transaction_diagnostic.json
-            if git diff --cached --quiet; then
-              exit 0
-            fi
-            git commit -m 'Refresh VÂLCEA CLAR newsroom transaction diagnostic'
-            if git push origin HEAD:main; then
-              exit 0
-            fi
-            sleep $((attempt * 2))
-          done
-          exit 1
+            --output /tmp/newsroom_transaction_diagnostic.json
+      - name: Upload diagnostic result
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-newsroom-transaction-diagnostic-${{ github.run_id }}
+          path: /tmp/newsroom_transaction_diagnostic.json
+          if-no-files-found: warn
+          retention-days: 7

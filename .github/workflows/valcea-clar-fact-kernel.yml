@@ -1,54 +1,54 @@
 name: VÂLCEA CLAR Fact Kernel Builder
 
+# Single production writer for editorial/facts_registry.json. Adapter sequencing
+# lives in fact_kernel_orchestrator.py; this workflow only schedules, validates
+# and persists one verified transaction.
 on:
   workflow_dispatch:
   schedule:
     - cron: '4,19,34,49 * * * *'
   pull_request:
     paths:
-      - 'valcea-clar/scripts/council_fact_kernel.py'
-      - 'valcea-clar/scripts/council_docmanager_row_resolver.py'
-      - 'valcea-clar/scripts/council_docmanager_embedded_resolver.py'
-      - 'valcea-clar/scripts/council_docmanager_diagnostic.py'
-      - 'valcea-clar/scripts/council_docmanager_document_diagnostic.py'
-      - 'valcea-clar/scripts/promote_fact_kernels.py'
-      - 'valcea-clar/scripts/council_watch_rm_valcea.py'
-      - 'valcea-clar/scripts/council_watch_rm_valcea_v2.py'
-      - 'valcea-clar/scripts/gambling_dossier_enricher.py'
-      - 'valcea-clar/scripts/gambling_dossier_enricher_v2.py'
+      - 'valcea-clar/scripts/fact_kernel_orchestrator.py'
+      - 'valcea-clar/scripts/council_*.py'
+      - 'valcea-clar/scripts/*kernel*.py'
+      - 'valcea-clar/scripts/primary_source_*.py'
+      - 'valcea-clar/scripts/gambling_dossier_*.py'
+      - 'valcea-clar/scripts/compose_structured_alerts.py'
+      - 'valcea-clar/scripts/promote_manual_publish_queue.py'
+      - 'valcea-clar/scripts/merge_supplemental_facts.py'
       - 'valcea-clar/scripts/editorial_lifecycle_normalizer.py'
+      - 'valcea-clar/editorial/structured_alert_events.json'
+      - 'valcea-clar/editorial/manual_publish_queue.json'
+      - 'valcea-clar/editorial/supplemental_facts_registry.json'
+      - 'valcea-clar/editorial/festival_dossiers_*.json'
+      - 'valcea-clar/editorial/performing_arts_dossiers_*.json'
       - 'valcea-clar/editorial/gambling_ramnicu_2026_dossier.json'
-      - 'valcea-clar/scripts/scm_program_fact_kernel.py'
-      - 'valcea-clar/scripts/scm_program_structure_diagnostic.py'
       - 'valcea-clar/editorial/editorial_manual.json'
-      - 'valcea-clar/site/indexing_routes.json'
-      - 'local-news-os/core/indexing_assets.py'
       - '.github/workflows/valcea-clar-fact-kernel.yml'
   push:
     branches: [main]
     paths:
-      - 'valcea-clar/scripts/council_fact_kernel.py'
-      - 'valcea-clar/scripts/council_docmanager_row_resolver.py'
-      - 'valcea-clar/scripts/council_docmanager_embedded_resolver.py'
-      - 'valcea-clar/scripts/council_docmanager_diagnostic.py'
-      - 'valcea-clar/scripts/council_docmanager_document_diagnostic.py'
-      - 'valcea-clar/scripts/promote_fact_kernels.py'
-      - 'valcea-clar/scripts/council_watch_rm_valcea.py'
-      - 'valcea-clar/scripts/council_watch_rm_valcea_v2.py'
-      - 'valcea-clar/scripts/gambling_dossier_enricher.py'
-      - 'valcea-clar/scripts/gambling_dossier_enricher_v2.py'
+      - 'valcea-clar/scripts/fact_kernel_orchestrator.py'
+      - 'valcea-clar/scripts/council_*.py'
+      - 'valcea-clar/scripts/*kernel*.py'
+      - 'valcea-clar/scripts/primary_source_*.py'
+      - 'valcea-clar/scripts/gambling_dossier_*.py'
+      - 'valcea-clar/scripts/compose_structured_alerts.py'
+      - 'valcea-clar/scripts/promote_manual_publish_queue.py'
+      - 'valcea-clar/scripts/merge_supplemental_facts.py'
       - 'valcea-clar/scripts/editorial_lifecycle_normalizer.py'
+      - 'valcea-clar/editorial/structured_alert_events.json'
+      - 'valcea-clar/editorial/manual_publish_queue.json'
+      - 'valcea-clar/editorial/supplemental_facts_registry.json'
+      - 'valcea-clar/editorial/festival_dossiers_*.json'
+      - 'valcea-clar/editorial/performing_arts_dossiers_*.json'
       - 'valcea-clar/editorial/gambling_ramnicu_2026_dossier.json'
-      - 'valcea-clar/scripts/scm_program_fact_kernel.py'
-      - 'valcea-clar/scripts/scm_program_structure_diagnostic.py'
       - 'valcea-clar/editorial/editorial_manual.json'
-      - 'valcea-clar/site/indexing_routes.json'
-      - 'local-news-os/core/indexing_assets.py'
       - '.github/workflows/valcea-clar-fact-kernel.yml'
 
 permissions:
   contents: write
-  actions: write
 
 concurrency:
   group: valcea-clar-fact-kernel-${{ github.event.pull_request.number || 'main' }}
@@ -57,7 +57,7 @@ concurrency:
 jobs:
   fact-kernel:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v6
         with:
@@ -67,157 +67,74 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Compile kernel runtime
+      - name: Validate canonical fact orchestrator
         run: |
           python -m py_compile \
-            valcea-clar/scripts/council_fact_kernel.py \
-            valcea-clar/scripts/council_docmanager_row_resolver.py \
-            valcea-clar/scripts/council_docmanager_embedded_resolver.py \
-            valcea-clar/scripts/council_docmanager_diagnostic.py \
-            valcea-clar/scripts/council_docmanager_document_diagnostic.py \
-            valcea-clar/scripts/promote_fact_kernels.py \
-            valcea-clar/scripts/council_watch_rm_valcea.py \
-            valcea-clar/scripts/council_watch_rm_valcea_v2.py \
-            valcea-clar/scripts/gambling_dossier_enricher.py \
-            valcea-clar/scripts/gambling_dossier_enricher_v2.py \
-            valcea-clar/scripts/editorial_lifecycle_normalizer.py \
-            valcea-clar/scripts/scm_program_fact_kernel.py \
-            valcea-clar/scripts/scm_program_structure_diagnostic.py \
-            local-news-os/core/indexing_assets.py
+            valcea-clar/scripts/fact_kernel_orchestrator.py \
+            valcea-clar/scripts/promote_manual_publish_queue.py
+          python valcea-clar/scripts/fact_kernel_orchestrator.py --self-test
+          python valcea-clar/scripts/fact_kernel_orchestrator.py --check
 
-      - name: Test Fact Kernel contracts
-        run: |
-          python valcea-clar/scripts/council_watch_rm_valcea.py --self-test
-          python valcea-clar/scripts/council_watch_rm_valcea_v2.py --self-test
-          python valcea-clar/scripts/council_fact_kernel.py --self-test
-          python valcea-clar/scripts/council_docmanager_embedded_resolver.py --resolver-self-test
-          python valcea-clar/scripts/council_docmanager_embedded_resolver.py --self-test
-          python valcea-clar/scripts/council_docmanager_diagnostic.py --self-test
-          python valcea-clar/scripts/council_docmanager_document_diagnostic.py --self-test
-          python valcea-clar/scripts/promote_fact_kernels.py --self-test
-          python valcea-clar/scripts/gambling_dossier_enricher_v2.py --self-test
-          python valcea-clar/scripts/editorial_lifecycle_normalizer.py --self-test
-          python valcea-clar/scripts/scm_program_fact_kernel.py --self-test
-          python valcea-clar/scripts/scm_program_structure_diagnostic.py --self-test
-
-      - name: Validate current offline kernel state
-        run: python valcea-clar/scripts/council_docmanager_embedded_resolver.py --check
-
-      - name: Refresh Council Watch at latest official adopted date
+      - name: Build one verified fact transaction
         if: github.event_name != 'pull_request'
-        run: python valcea-clar/scripts/council_watch_rm_valcea_v2.py
+        run: python valcea-clar/scripts/fact_kernel_orchestrator.py --build
 
-      - name: Capture bounded official DocManager structure diagnostic
-        if: github.event_name != 'pull_request'
-        run: python valcea-clar/scripts/council_docmanager_diagnostic.py
-
-      - name: Verify official documents and build Council kernels
-        if: github.event_name != 'pull_request'
-        run: python valcea-clar/scripts/council_docmanager_embedded_resolver.py --live
-
-      - name: Diagnose failed official DocManager document pages
-        if: github.event_name != 'pull_request'
-        run: python valcea-clar/scripts/council_docmanager_document_diagnostic.py
-
-      - name: Promote only complete verified Council kernels
-        id: promote
-        if: github.event_name != 'pull_request'
-        shell: bash
-        run: |
-          set -euo pipefail
-          python valcea-clar/scripts/promote_fact_kernels.py --apply | tee /tmp/kernel-promotion.json
-          python - <<'PY'
-          import json, os
-          from pathlib import Path
-          row=json.loads(Path('/tmp/kernel-promotion.json').read_text(encoding='utf-8'))
-          count=int(row.get('promoted') or 0)+int(row.get('updated') or 0)
-          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
-              f.write(f'changed={"true" if count else "false"}\n')
-              f.write(f'count={count}\n')
-          PY
-
-      - name: Reapply durable gambling dossier and evergreen lifecycle
-        if: github.event_name != 'pull_request'
-        run: |
-          python valcea-clar/scripts/gambling_dossier_enricher_v2.py
-          python valcea-clar/scripts/gambling_dossier_enricher_v2.py --check
-          python valcea-clar/scripts/editorial_lifecycle_normalizer.py --apply
-
-      - name: Capture SCM live markup structure
-        if: github.event_name != 'pull_request'
-        run: python valcea-clar/scripts/scm_program_structure_diagnostic.py
-
-      - name: Build next SCM official-program service kernel
-        id: scm
-        if: github.event_name != 'pull_request'
-        shell: bash
-        run: |
-          set -euo pipefail
-          python valcea-clar/scripts/scm_program_fact_kernel.py | tee /tmp/scm-program-kernel.json
-          python - <<'PY'
-          import json, os
-          from pathlib import Path
-          row=json.loads(Path('/tmp/scm-program-kernel.json').read_text(encoding='utf-8'))
-          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
-              f.write(f'changed={"true" if row.get("changed") else "false"}\n')
-              f.write(f'events_parsed={int(row.get("events_parsed") or 0)}\n')
-              if row.get('fact_id'):
-                  f.write(f'fact_id={row["fact_id"]}\n')
-          PY
-
-      - name: Validate promoted registry through Editorial Writer
-        if: github.event_name != 'pull_request'
-        run: python valcea-clar/scripts/editorial_writer.py --check
-
-      - name: Persist kernel and diagnostic state conflict-safe
+      - name: Persist verified fact products once
         if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'vâlcea-clar-fact-kernel[bot]'
           git config user.email 'valcea-clar-fact-kernel@users.noreply.github.com'
-          git add \
-            valcea-clar/editorial/council_watch_rm_valcea_state.json \
-            valcea-clar/editorial/council_docmanager_structure.json \
-            valcea-clar/editorial/council_docmanager_document_structure.json \
-            valcea-clar/editorial/fact_kernel_registry.json \
-            valcea-clar/editorial/facts_registry.json \
+
+          files=(
+            valcea-clar/editorial/facts_registry.json
+            valcea-clar/editorial/fact_kernel_registry.json
+            valcea-clar/editorial/council_watch_rm_valcea_state.json
+            valcea-clar/editorial/council_docmanager_structure.json
+            valcea-clar/editorial/council_docmanager_document_structure.json
+            valcea-clar/editorial/council_decision_document_corpus.json
+            valcea-clar/editorial/council_decision_graph.json
+            valcea-clar/editorial/council_investigation_leads.json
             valcea-clar/editorial/scm_program_structure.json
+          )
+          for file in "${files[@]}"; do
+            if [ -e "$file" ]; then git add "$file"; fi
+          done
+
           if git diff --cached --quiet; then
-            echo 'No fact-kernel or diagnostic state change to persist.'
-          else
-            git commit -m 'Refresh VÂLCEA CLAR verified fact kernels'
-            for attempt in 1 2 3; do
-              if git pull --rebase origin main && git push origin HEAD:main; then
-                break
-              fi
-              git rebase --abort || true
-              if [ "$attempt" -eq 3 ]; then
-                echo 'Could not persist fact-kernel state without conflict.' >&2
-                exit 1
-              fi
-              sleep $((attempt*2))
-            done
+            echo 'No verified fact change to persist.'
+            exit 0
           fi
 
-      - name: Upload bounded structure diagnostics
-        if: always() && github.event_name != 'pull_request'
+          git commit -m 'Refresh VÂLCEA CLAR verified fact products'
+          for attempt in 1 2 3; do
+            if git pull --rebase origin main && git push origin HEAD:main; then
+              exit 0
+            fi
+            git rebase --abort || true
+            if [ "$attempt" -eq 3 ]; then
+              echo 'Could not persist fact transaction without conflict.' >&2
+              exit 1
+            fi
+            sleep $((attempt * 2))
+          done
+
+      - name: Upload bounded fact diagnostics
+        if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: valcea-clar-structure-diagnostics-${{ github.run_id }}
+          name: valcea-clar-fact-kernel-${{ github.run_id }}
           path: |
             valcea-clar/editorial/council_docmanager_structure.json
             valcea-clar/editorial/council_docmanager_document_structure.json
+            valcea-clar/editorial/council_decision_document_corpus.json
             valcea-clar/editorial/scm_program_structure.json
           if-no-files-found: warn
           retention-days: 7
 
-      - name: Report downstream handoff
-        if: github.event_name != 'pull_request'
+      - name: Report ownership
+        if: always()
         run: |
-          echo "Council target selector: latest official adopted-decision date"
-          echo "Council registry changed: ${{ steps.promote.outputs.changed }}"
-          echo "SCM program registry changed: ${{ steps.scm.outputs.changed }}"
-          echo "SCM program events parsed: ${{ steps.scm.outputs.events_parsed }}"
-          echo 'Durable explainers are normalized after any kernel regeneration so old workflows cannot reintroduce relative-time copy or transient expiry.'
-          echo 'The durable Fact Kernel → Live Newsroom workflow_run handoff owns downstream dispatch.'
+          echo 'Fact ownership: one orchestrator / one facts writer / one persist boundary.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Live Newsroom consumes successful Fact Kernel completion; no fact adapter publishes directly.' >> "$GITHUB_STEP_SUMMARY"

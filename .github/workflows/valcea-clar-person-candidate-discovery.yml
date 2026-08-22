@@ -1,11 +1,10 @@
 name: VÂLCEA CLAR Person Candidate Discovery
 
+# Candidate discovery is a deterministic projection of facts + explicit seeds.
+# Rebuild only when those inputs change; newsroom completion and a 6-hour cron
+# add no new evidence.
 on:
   workflow_dispatch:
-  workflow_run:
-    workflows: ["VÂLCEA CLAR Live Newsroom"]
-    types: [completed]
-    branches: [main]
   push:
     branches: [main]
     paths:
@@ -13,19 +12,21 @@ on:
       - 'valcea-clar/editorial/person_profile_seeds.json'
       - 'valcea-clar/scripts/discover_person_candidates.py'
       - '.github/workflows/valcea-clar-person-candidate-discovery.yml'
-  schedule:
-    - cron: '17 */6 * * *'
+  pull_request:
+    paths:
+      - 'valcea-clar/editorial/person_profile_seeds.json'
+      - 'valcea-clar/scripts/discover_person_candidates.py'
+      - '.github/workflows/valcea-clar-person-candidate-discovery.yml'
 
 permissions:
   contents: write
 
 concurrency:
-  group: valcea-clar-person-candidate-discovery
+  group: valcea-clar-person-candidate-discovery-${{ github.event.pull_request.number || 'main' }}
   cancel-in-progress: true
 
 jobs:
   discover:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -57,6 +58,7 @@ jobs:
           print('PERSON_CANDIDATE_FAIL_CLOSED_PASS')
           PY
       - name: Persist candidate queue conflict-safe
+        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail

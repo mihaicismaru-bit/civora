@@ -1,5 +1,8 @@
 name: VÂLCEA CLAR Structured Primary Alerts
 
+# Rapid T1 ingest owns only the verified event stream. It must never mutate the
+# canonical facts registry directly. A changed structured_alert_events.json push
+# triggers Fact Kernel, which is the single facts writer, then Live Newsroom.
 on:
   workflow_dispatch:
   schedule:
@@ -22,7 +25,6 @@ on:
 
 permissions:
   contents: write
-  actions: write
 
 concurrency:
   group: valcea-clar-structured-alerts-${{ github.event.pull_request.number || 'main' }}
@@ -54,20 +56,12 @@ jobs:
             --instance valcea \
             --output valcea-clar/editorial/structured_alert_events.json
 
-      - name: Build and validate canonical fact kernels
-        if: github.event_name == 'pull_request'
+      - name: Validate event-to-fact composition without writing facts
         run: |
           python valcea-clar/scripts/compose_structured_alerts.py \
             --events valcea-clar/editorial/structured_alert_events.json \
             --facts-registry valcea-clar/editorial/facts_registry.json \
             --no-write
-
-      - name: Build canonical fact kernels for persistence
-        if: github.event_name != 'pull_request'
-        run: |
-          python valcea-clar/scripts/compose_structured_alerts.py \
-            --events valcea-clar/editorial/structured_alert_events.json \
-            --facts-registry valcea-clar/editorial/facts_registry.json
 
       - name: Validate runtime output contract
         run: |
@@ -86,12 +80,11 @@ jobs:
           print({'status':'PASS','events':events.get('event_count',0)})
           PY
 
-      - name: Persist structured fact kernels without stale overwrite
+      - name: Persist only the verified structured event stream
         if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
-          cp valcea-clar/editorial/facts_registry.json /tmp/valcea-facts-with-structured-alerts.json
           cp valcea-clar/editorial/structured_alert_events.json /tmp/valcea-structured-alert-events.json
           git config user.name 'vâlcea-clar-structured-alerts[bot]'
           git config user.email 'valcea-clar-structured-alerts@users.noreply.github.com'
@@ -99,24 +92,18 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             mkdir -p valcea-clar/editorial
-            cp /tmp/valcea-facts-with-structured-alerts.json valcea-clar/editorial/facts_registry.json
             cp /tmp/valcea-structured-alert-events.json valcea-clar/editorial/structured_alert_events.json
-            git add valcea-clar/editorial/facts_registry.json valcea-clar/editorial/structured_alert_events.json
+            git add valcea-clar/editorial/structured_alert_events.json
             if git diff --cached --quiet; then
-              echo 'Structured alert fact kernels already current.'
+              echo 'Structured primary event stream already current.'
               exit 0
             fi
-            git commit -m 'Refresh VÂLCEA CLAR structured primary alerts'
+            git commit -m 'Refresh VÂLCEA CLAR structured primary events'
             if git push origin HEAD:main; then
+              echo 'Fact Kernel will consume this durable event change via its push trigger.'
               exit 0
             fi
             sleep $((attempt * 2))
           done
-          echo 'Could not persist structured primary alerts without conflict.' >&2
+          echo 'Could not persist structured primary events without conflict.' >&2
           exit 1
-
-      - name: Dispatch canonical Live Newsroom
-        if: github.event_name != 'pull_request'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh workflow run valcea-clar-newsroom-live.yml --ref main

@@ -1,5 +1,7 @@
 name: VÂLCEA CLAR Public HTTP Health
 
+# Canonical external availability observer. Health telemetry must never mutate
+# canonical publication state or create timestamp-only commits on main.
 on:
   workflow_dispatch:
     inputs:
@@ -11,9 +13,6 @@ on:
   workflow_run:
     workflows:
       - 'VÂLCEA CLAR Live Newsroom'
-      - 'VÂLCEA CLAR Publication Reconcile'
-      - 'VÂLCEA CLAR Continuous Frontpage Invariant'
-      - 'VÂLCEA CLAR Premium Presentation'
     types: [completed]
     branches: [main]
   schedule:
@@ -31,12 +30,12 @@ on:
       - '.github/workflows/valcea-clar-public-health.yml'
 
 permissions:
-  contents: write
+  contents: read
   statuses: write
 
 concurrency:
   group: valcea-clar-public-http-health-${{ github.event.pull_request.number || 'main' }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   probe:
@@ -56,9 +55,6 @@ jobs:
             echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
             echo 'ref=pull-request' >> "$GITHUB_OUTPUT"
           else
-            # Bot-authored pushes made with GITHUB_TOKEN do not recursively
-            # emit push-triggered workflow runs. For workflow_run/schedule/manual
-            # acceptance we therefore validate the actual current main head.
             git fetch origin main
             git checkout --detach origin/main
             echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
@@ -83,9 +79,7 @@ jobs:
             EXTRA='--require-ready'
           fi
 
-          # The installed site bridge refreshes the canonical feed every 60s.
-          # Main publication events therefore get a bounded retry window before
-          # strict acceptance fails; scheduled/PR observations stay non-mutating.
+          # The installed bridge may need one refresh cycle after publication.
           for attempt in 1 2 3 4; do
             if python valcea-clar/scripts/probe_public_site.py $EXTRA --output /tmp/valcea-clar-public-health.json | tee /tmp/valcea-clar-public-health.log; then
               exit 0
@@ -124,7 +118,7 @@ jobs:
             echo '## VÂLCEA CLAR public HTTP: probe did not produce a report' >> "$GITHUB_STEP_SUMMARY"
           fi
 
-      - name: Publish durable public HTTP commit status
+      - name: Publish public HTTP commit status
         if: always() && github.event_name != 'pull_request'
         shell: bash
         env:
@@ -178,100 +172,6 @@ jobs:
               if response.status not in (200, 201):
                   raise SystemExit(f'Could not publish commit status: HTTP {response.status}')
           print(json.dumps(payload, ensure_ascii=False))
-          PY
-
-      - name: Persist canonical public HTTP receipt
-        if: always() && github.event_name != 'pull_request'
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-          STATUS_REPOSITORY: ${{ github.repository }}
-          TARGET_SHA: ${{ steps.target.outputs.sha }}
-          TRIGGER_NAME: ${{ github.event_name }}
-          SOURCE_WORKFLOW: ${{ github.event.workflow_run.name }}
-          SOURCE_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
-          STATUS_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: |
-          python - <<'PY'
-          import base64
-          import json
-          import os
-          import urllib.error
-          import urllib.request
-          from datetime import datetime, timezone
-          from pathlib import Path
-
-          report_path = Path('/tmp/valcea-clar-public-health.json')
-          report = {}
-          if report_path.is_file() and report_path.stat().st_size:
-              try:
-                  report = json.loads(report_path.read_text(encoding='utf-8'))
-              except Exception:
-                  report = {}
-
-          checks = []
-          for row in report.get('checks') or []:
-              if isinstance(row, dict):
-                  checks.append({
-                      'path': row.get('path'),
-                      'http_status': row.get('http_status'),
-                      'ok': bool(row.get('ok')),
-                  })
-
-          receipt = {
-              'schema_version': '1.0',
-              'product': 'VÂLCEA CLAR public HTTP acceptance',
-              'observed_at_utc': datetime.now(timezone.utc).isoformat(),
-              'validated_sha': os.environ.get('TARGET_SHA') or None,
-              'trigger': os.environ.get('TRIGGER_NAME') or None,
-              'source_workflow': os.environ.get('SOURCE_WORKFLOW') or None,
-              'source_conclusion': os.environ.get('SOURCE_CONCLUSION') or None,
-              'run_url': os.environ.get('STATUS_RUN_URL') or None,
-              'status': report.get('status') or 'ERROR',
-              'ready': bool(report.get('ready')),
-              'expected_story_count': report.get('expected_story_count'),
-              'blockers': list(report.get('blockers') or []),
-              'checks': checks,
-          }
-          content = (json.dumps(receipt, ensure_ascii=False, indent=2) + '\n').encode('utf-8')
-
-          repo = os.environ['STATUS_REPOSITORY']
-          path = 'valcea-clar/validation/public_http_latest.json'
-          api = f'https://api.github.com/repos/{repo}/contents/{path}'
-          headers = {
-              'Authorization': f"Bearer {os.environ['GH_TOKEN']}",
-              'Accept': 'application/vnd.github+json',
-              'X-GitHub-Api-Version': '2022-11-28',
-              'Content-Type': 'application/json',
-          }
-
-          current_sha = None
-          try:
-              req = urllib.request.Request(api + '?ref=main', headers=headers)
-              with urllib.request.urlopen(req, timeout=20) as response:
-                  current_sha = json.loads(response.read().decode('utf-8')).get('sha')
-          except urllib.error.HTTPError as exc:
-              if exc.code != 404:
-                  raise
-
-          payload = {
-              'message': 'Persist VÂLCEA CLAR public HTTP health',
-              'content': base64.b64encode(content).decode('ascii'),
-              'branch': 'main',
-          }
-          if current_sha:
-              payload['sha'] = current_sha
-
-          req = urllib.request.Request(
-              api,
-              data=json.dumps(payload).encode('utf-8'),
-              method='PUT',
-              headers=headers,
-          )
-          with urllib.request.urlopen(req, timeout=30) as response:
-              if response.status not in (200, 201):
-                  raise SystemExit(f'Could not persist public HTTP receipt: HTTP {response.status}')
-          print(json.dumps(receipt, ensure_ascii=False))
           PY
 
       - name: Upload health evidence

@@ -1,21 +1,17 @@
-name: VÂLCEA CLAR Live HTTP Verification
+name: VÂLCEA CLAR Live HTTP Verification (manual diagnostic)
 
+# Legacy narrow HTTP diagnostic retained only for explicit troubleshooting.
+# Canonical autonomous external availability monitoring is owned by
+# valcea-clar-public-health.yml.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'valcea-clar/site/runtime/**'
-      - 'valcea-clar/site/current_edition.json'
-      - 'valcea-clar/editorial/manual_publish_queue.json'
-      - '.github/workflows/valcea-clar-live-http.yml'
 
 permissions:
   contents: read
   statuses: write
 
 concurrency:
-  group: valcea-clar-live-http-${{ github.ref }}
+  group: valcea-clar-live-http-manual-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -40,20 +36,7 @@ jobs:
             local marker="$3"
             local out="$tmp/${label}.html"
             local meta="$tmp/${label}.meta"
-
-            http_code=$(curl \
-              --location \
-              --fail-with-body \
-              --silent \
-              --show-error \
-              --retry 4 \
-              --retry-delay 3 \
-              --connect-timeout 10 \
-              --max-time 40 \
-              --output "$out" \
-              --write-out '%{http_code}' \
-              "$base$path")
-
+            http_code=$(curl --location --fail-with-body --silent --show-error --retry 4 --retry-delay 3 --connect-timeout 10 --max-time 40 --output "$out" --write-out '%{http_code}' "$base$path")
             test "$http_code" = '200'
             grep -Fq "$marker" "$out"
             printf '%s\t%s\t%s\t%s\n' "$label" "$path" "$http_code" "$marker" > "$meta"
@@ -63,50 +46,8 @@ jobs:
           probe news '/stiri/' 'Știri'
           probe lead "$lead" 'Musiclover Festival 2026'
 
-          python - <<'PY' > "$tmp/manual.tsv"
-          import json
-          from pathlib import Path
-          q=Path('valcea-clar/editorial/manual_publish_queue.json')
-          if q.is_file():
-              doc=json.loads(q.read_text(encoding='utf-8'))
-              for fact in doc.get('facts') or []:
-                  sid=str(fact.get('id') or '').strip()
-                  headline=str(fact.get('headline') or '').replace('\t',' ').replace('\n',' ').strip()
-                  if sid and headline:
-                      print(f"manual-{sid}\t/stiri/{sid}/\t{headline}")
-          PY
-
-          while IFS=$'\t' read -r label path marker; do
-            test -n "$label" || continue
-            probe "$label" "$path" "$marker"
-          done < "$tmp/manual.tsv"
-
-          python - <<'PY'
-          import json
-          import os
-          from datetime import datetime, timezone
-          from pathlib import Path
-
-          tmp = Path(os.environ['RUNNER_TEMP']) / 'valcea-live-http'
-          rows = []
-          for meta in sorted(tmp.glob('*.meta')):
-              label, path, code, marker = meta.read_text(encoding='utf-8').rstrip('\n').split('\t', 3)
-              rows.append({'id': label, 'path': path, 'http_status': int(code), 'required_marker': marker, 'marker_present': True})
-          receipt = {
-              'schema_version': '1.2',
-              'status': 'PASS',
-              'canonical_domain': 'valceaclar.ro',
-              'verified_at_utc': datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
-              'runner': 'github-hosted',
-              'routes': rows,
-          }
-          path = tmp / 'receipt.json'
-          path.write_text(json.dumps(receipt, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-          print(json.dumps(receipt, ensure_ascii=False))
-          PY
-
-      - name: Publish successful live HTTP status
-        if: success()
+      - name: Publish diagnostic status
+        if: always()
         uses: actions/github-script@v8
         with:
           script: |
@@ -114,30 +55,16 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: context.sha,
-              state: 'success',
-              context: 'valcea-clar/live-http',
-              description: 'Canonical routes and manual stories verified HTTP 200'
+              state: '${{ job.status }}' === 'success' ? 'success' : 'failure',
+              context: 'valcea-clar/live-http-manual',
+              description: '${{ job.status }}' === 'success' ? 'Manual HTTP diagnostic passed' : 'Manual HTTP diagnostic failed'
             })
 
-      - name: Publish failed live HTTP status
-        if: failure()
-        uses: actions/github-script@v8
-        with:
-          script: |
-            await github.rest.repos.createCommitStatus({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              sha: context.sha,
-              state: 'failure',
-              context: 'valcea-clar/live-http',
-              description: 'External HTTP verification failed'
-            })
-
-      - name: Upload external HTTP verification receipt
+      - name: Upload diagnostic receipt
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: valcea-clar-live-http-${{ github.sha }}
+          name: valcea-clar-live-http-manual-${{ github.sha }}
           path: ${{ runner.temp }}/valcea-live-http
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 7

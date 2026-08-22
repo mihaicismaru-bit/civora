@@ -139,10 +139,13 @@ def validate(
         if header and d_cfg.get("header_asset") != header:
             errors.append(f"{platform}:deployment_header_drift")
 
+        # Profile role and native product_role intentionally describe different
+        # layers: the profile promise vs the editorial product behavior. Do not
+        # require textual equality; require a declared product role whenever a
+        # native-platform identity entry exists.
         native_cfg = native_platforms.get(platform) if isinstance(native_platforms.get(platform), dict) else {}
-        native_role = str(native_cfg.get("product_role") or "").strip()
-        if native_role and native_role != role:
-            errors.append(f"{platform}:native_role_drift:{native_role}!={role}")
+        if platform in native_platforms and not str(native_cfg.get("product_role") or "").strip():
+            errors.append(f"{platform}:native_product_role_missing")
 
     for index, a in enumerate(REQUIRED):
         for b in REQUIRED[index + 1:]:

@@ -8,6 +8,7 @@ on:
       - "valcea-clar/social/channel_registry.json"
       - "valcea-clar/social/validate_social_engine.py"
       - "valcea-clar/scripts/validate_site_engine_ownership.py"
+      - "valcea-clar/scripts/audit_automation_surface.py"
       - ".github/workflows/valcea-clar-*.yml"
   push:
     branches: [main]
@@ -16,6 +17,7 @@ on:
       - "valcea-clar/social/channel_registry.json"
       - "valcea-clar/social/validate_social_engine.py"
       - "valcea-clar/scripts/validate_site_engine_ownership.py"
+      - "valcea-clar/scripts/audit_automation_surface.py"
       - ".github/workflows/valcea-clar-*.yml"
   schedule:
     - cron: "11 2 * * *"
@@ -33,15 +35,21 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
-
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
 
-      - name: Enforce site-engine-only execution
+      - name: Enforce registered site-engine ownership
         run: |
           python valcea-clar/scripts/validate_site_engine_ownership.py \
             --report /tmp/site-engine-ownership-report.json
+
+      - name: Enforce complete automation surface strictly
+        run: |
+          python valcea-clar/scripts/audit_automation_surface.py --self-test
+          python valcea-clar/scripts/audit_automation_surface.py \
+            --strict \
+            --report /tmp/automation-surface-report.json
 
       - name: Enforce site-engine-only social publishing
         run: |
@@ -61,22 +69,34 @@ jobs:
               return json.loads(target.read_text(encoding='utf-8')) if target.exists() else {}
 
           site = read('/tmp/site-engine-ownership-report.json')
+          surface = read('/tmp/automation-surface-report.json')
           social = read('/tmp/social-engine-ownership-report.json')
           summary_path = Path(os.environ['GITHUB_STEP_SUMMARY'])
           lines = [
               '# VÂLCEA CLAR — site engine ownership',
               '',
-              f"- Core ownership: **{site.get('status', 'UNAVAILABLE')}**",
+              f"- Registered ownership gate: **{site.get('status', 'UNAVAILABLE')}**",
+              f"- Full automation surface: **{surface.get('status', 'UNAVAILABLE')}**",
               f"- Social ownership: **{social.get('status', 'UNAVAILABLE')}**",
               f"- Execution owner: `{site.get('execution_owner', social.get('execution_owner'))}`",
               f"- Scheduler: `{site.get('scheduler')}`",
               f"- Registered jobs: **{site.get('registered_jobs', 0)}**",
+              f"- VÂLCEA workflow files: **{surface.get('workflow_count', 0)}**",
+              f"- Unregistered autonomous writers: **{surface.get('unregistered_autonomous_writer_count', 0)}**",
+              f"- Unregistered autonomous dispatchers: **{surface.get('unregistered_autonomous_dispatcher_count', 0)}**",
+              f"- Unregistered autonomous observers: **{surface.get('unregistered_autonomous_observer_count', 0)}**",
+              f"- Manual/PR-only unregistered workflows: **{surface.get('unregistered_manual_or_pr_only_count', 0)}**",
               f"- Active direct social channels: `{', '.join(social.get('active_direct_channels', []))}`",
               '- ChatGPT scheduled/direct publishing: **disabled**',
+              '- Automation surface enforcement: **STRICT**',
           ]
+          blockers = surface.get('strict_blockers') or []
+          if blockers:
+              lines.extend(['', '## Strict automation blockers'])
+              lines.extend(f"- `{path}`" for path in blockers)
           errors = (site.get('errors') or []) + (social.get('errors') or [])
           if errors:
-              lines.extend(['', '## Errors'])
+              lines.extend(['', '## Enforced errors'])
               lines.extend(f"- {error}" for error in errors)
           summary_path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
           PY
@@ -88,6 +108,7 @@ jobs:
           name: valcea-clar-site-engine-ownership-${{ github.run_id }}
           path: |
             /tmp/site-engine-ownership-report.json
+            /tmp/automation-surface-report.json
             /tmp/social-engine-ownership-report.json
           if-no-files-found: warn
           retention-days: 14

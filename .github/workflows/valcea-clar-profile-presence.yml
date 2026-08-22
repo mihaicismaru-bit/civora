@@ -1,6 +1,9 @@
 name: VÂLCEA CLAR Profile Presence
 
+# PR/manual profile-copy acceptance. Profile presence has no runtime publication
+# authority and does not need an autonomous main-branch observer.
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - "valcea-clar/social/profile_presence_system.json"
@@ -10,17 +13,6 @@ on:
       - "valcea-clar/social/social_brand_system.json"
       - "valcea-clar/social/native_platform_identity_system.json"
       - ".github/workflows/valcea-clar-profile-presence.yml"
-  push:
-    branches: [main]
-    paths:
-      - "valcea-clar/social/profile_presence_system.json"
-      - "valcea-clar/social/validate_profile_presence.py"
-      - "valcea-clar/social/profile_identity_system.json"
-      - "valcea-clar/social/profile_identity_deployment.json"
-      - "valcea-clar/social/social_brand_system.json"
-      - "valcea-clar/social/native_platform_identity_system.json"
-      - ".github/workflows/valcea-clar-profile-presence.yml"
-  workflow_dispatch:
 
 permissions:
   contents: read

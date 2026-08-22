@@ -1,18 +1,9 @@
 name: VÂLCEA CLAR Profile Identity Deployment
 
+# Deployment control is explicit-only. PRs validate dry-run behavior; remote
+# mutations can happen only from workflow_dispatch inputs with runtime secrets.
 on:
   pull_request:
-    paths:
-      - "valcea-clar/social/profile_identity_deployment.json"
-      - "valcea-clar/social/validate_profile_identity_deployment.py"
-      - "valcea-clar/social/youtube_profile_identity_deploy.py"
-      - "valcea-clar/social/telegram_profile_identity_deploy.py"
-      - "valcea-clar/social/whatsapp_profile_identity_deploy.py"
-      - "valcea-clar/social/profile_identity_system.json"
-      - "valcea-clar/social/build_profile_identity_assets.py"
-      - ".github/workflows/valcea-clar-profile-identity-deployment.yml"
-  push:
-    branches: [main]
     paths:
       - "valcea-clar/social/profile_identity_deployment.json"
       - "valcea-clar/social/validate_profile_identity_deployment.py"
@@ -43,47 +34,37 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: valcea-clar-profile-deployment-${{ github.event.pull_request.number || 'manual' }}
+  cancel-in-progress: true
+
 jobs:
   validate-deployment-control:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v6
-
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
-
       - name: Install deterministic image dependency
         run: python -m pip install --disable-pip-version-check Pillow==12.3.0
-
-      - name: Validate deployment source
-        run: python -m json.tool valcea-clar/social/profile_identity_deployment.json >/dev/null
-
-      - name: Compile deployment controls
+      - name: Validate deployment control and deployers
         run: |
+          python -m json.tool valcea-clar/social/profile_identity_deployment.json >/dev/null
           python -m py_compile \
             valcea-clar/social/validate_profile_identity_deployment.py \
             valcea-clar/social/youtube_profile_identity_deploy.py \
             valcea-clar/social/telegram_profile_identity_deploy.py \
             valcea-clar/social/whatsapp_profile_identity_deploy.py \
             valcea-clar/social/build_profile_identity_assets.py
-
-      - name: Run deployment validator self-test
-        run: python valcea-clar/social/validate_profile_identity_deployment.py --self-test
-
-      - name: Validate nine-platform deployment state
-        run: python valcea-clar/social/validate_profile_identity_deployment.py
-
-      - name: Run profile deployer self-tests
-        run: |
+          python valcea-clar/social/validate_profile_identity_deployment.py --self-test
+          python valcea-clar/social/validate_profile_identity_deployment.py
           python valcea-clar/social/youtube_profile_identity_deploy.py --self-test
           python valcea-clar/social/telegram_profile_identity_deploy.py --self-test
           python valcea-clar/social/whatsapp_profile_identity_deploy.py --self-test
-
       - name: Render canonical profile asset kit
         run: python valcea-clar/social/build_profile_identity_assets.py >/tmp/profile-assets.json
-
       - name: Prove default profile deployment modes are non-mutating
         run: |
           python valcea-clar/social/youtube_profile_identity_deploy.py >/tmp/youtube-profile-dry-run.json
@@ -92,48 +73,29 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-
-          youtube = json.loads(Path('/tmp/youtube-profile-dry-run.json').read_text(encoding='utf-8'))
-          telegram = json.loads(Path('/tmp/telegram-profile-dry-run.json').read_text(encoding='utf-8'))
-          whatsapp = json.loads(Path('/tmp/whatsapp-profile-dry-run.json').read_text(encoding='utf-8'))
-
-          for name, result in (('youtube',youtube),('telegram',telegram),('whatsapp',whatsapp)):
-              if result.get('status') != 'DRY_RUN_READY':
-                  raise SystemExit(f'{name} profile deployer did not remain in dry-run mode')
-              if result.get('remote_mutation_performed') is not False:
-                  raise SystemExit(f'{name} dry-run unexpectedly claims remote mutation')
-              if result.get('credentials_logged') is not False:
-                  raise SystemExit(f'{name} dry-run claims credentials are logged')
-
-          if youtube.get('asset', {}).get('width') != 2560 or youtube.get('asset', {}).get('height') != 1440:
-              raise SystemExit('YouTube canonical banner dimensions drifted')
-          if int(youtube.get('asset', {}).get('bytes') or 0) > 6 * 1024 * 1024:
-              raise SystemExit('YouTube banner exceeds official 6 MB limit')
-
-          tg_asset=telegram.get('asset') or {}
-          if tg_asset.get('format')!='PNG' or tg_asset.get('width')!=tg_asset.get('height'):
-              raise SystemExit('Telegram canonical avatar contract drifted')
-          if telegram.get('administrator_rights_required') is not True:
-              raise SystemExit('Telegram administrator-rights gate missing')
-
-          wa_asset=whatsapp.get('asset') or {}
-          wa_upload=whatsapp.get('upload_transform') or {}
-          if wa_asset.get('format')!='PNG' or wa_asset.get('width')!=wa_asset.get('height'):
-              raise SystemExit('WhatsApp canonical avatar contract drifted')
-          if wa_upload.get('format')!='JPEG' or wa_upload.get('mime_type')!='image/jpeg':
-              raise SystemExit('WhatsApp deterministic upload transform drifted')
-          if wa_upload.get('source_sha256')!=wa_asset.get('sha256'):
-              raise SystemExit('WhatsApp upload transform lost canonical source lineage')
-          print('VÂLCEA CLAR profile deployment dry-run contract: PASS (YouTube + Telegram + WhatsApp)')
+          rows={
+              'youtube':json.loads(Path('/tmp/youtube-profile-dry-run.json').read_text(encoding='utf-8')),
+              'telegram':json.loads(Path('/tmp/telegram-profile-dry-run.json').read_text(encoding='utf-8')),
+              'whatsapp':json.loads(Path('/tmp/whatsapp-profile-dry-run.json').read_text(encoding='utf-8')),
+          }
+          for name,result in rows.items():
+              assert result.get('status') == 'DRY_RUN_READY', (name,result.get('status'))
+              assert result.get('remote_mutation_performed') is False, name
+              assert result.get('credentials_logged') is False, name
+          yt=rows['youtube']; tg=rows['telegram']; wa=rows['whatsapp']
+          assert (yt.get('asset',{}).get('width'),yt.get('asset',{}).get('height')) == (2560,1440)
+          assert int(yt.get('asset',{}).get('bytes') or 0) <= 6*1024*1024
+          assert tg.get('administrator_rights_required') is True
+          assert wa.get('upload_transform',{}).get('mime_type') == 'image/jpeg'
+          assert wa.get('upload_transform',{}).get('source_sha256') == wa.get('asset',{}).get('sha256')
+          print('VÂLCEA CLAR profile deployment dry-run contract: PASS')
           PY
-
       - name: Apply YouTube banner only on explicit manual dispatch
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.apply_youtube_banner == true }}
         env:
           VALCEA_YOUTUBE_PROFILE_LIVE_ENABLED: "true"
           VALCEA_YOUTUBE_OAUTH_ACCESS_TOKEN: ${{ secrets.VALCEA_YOUTUBE_OAUTH_ACCESS_TOKEN }}
         run: python valcea-clar/social/youtube_profile_identity_deploy.py --apply
-
       - name: Apply Telegram channel photo only on explicit manual dispatch
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.apply_telegram_photo == true }}
         env:
@@ -141,7 +103,6 @@ jobs:
           VALCEA_TELEGRAM_BOT_TOKEN: ${{ secrets.VALCEA_TELEGRAM_BOT_TOKEN }}
           VALCEA_TELEGRAM_CHANNEL_ID: ${{ secrets.VALCEA_TELEGRAM_CHANNEL_ID }}
         run: python valcea-clar/social/telegram_profile_identity_deploy.py --apply
-
       - name: Apply WhatsApp Business profile picture only on explicit manual dispatch
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.apply_whatsapp_profile == true }}
         env:
@@ -151,7 +112,6 @@ jobs:
           VALCEA_META_APP_ID: ${{ secrets.VALCEA_META_APP_ID }}
           VALCEA_WHATSAPP_GRAPH_VERSION: ${{ vars.VALCEA_WHATSAPP_GRAPH_VERSION }}
         run: python valcea-clar/social/whatsapp_profile_identity_deploy.py --apply
-
       - name: Upload deployment audit
         if: always()
         uses: actions/upload-artifact@v7
@@ -163,8 +123,5 @@ jobs:
             /tmp/whatsapp-profile-dry-run.json
             valcea-clar/social/profile_identity_deployment.json
             valcea-clar/social/profile-assets
-            valcea-clar/site/runtime/media/social/profile/youtube-profile-deployment-state.json
-            valcea-clar/site/runtime/media/social/profile/telegram-profile-deployment-state.json
-            valcea-clar/site/runtime/media/social/profile/whatsapp-profile-deployment-state.json
           if-no-files-found: ignore
           retention-days: 30

@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Overlay the rendered live newsroom runtime into the deterministic site export."""
+"""Overlay the rendered live newsroom runtime into the deterministic site export.
+
+This is the canonical final presentation boundary. Reader-facing UX normalization
+runs here so publication workflows do not need a second scheduled presentation
+writer after the newsroom has already persisted the story state.
+"""
 from __future__ import annotations
 
 import hashlib
@@ -37,6 +42,56 @@ def sha256(path: Path) -> str:
     return h.hexdigest()
 
 
+def run_script(script: str, *args: str) -> None:
+    """Run one canonical reader-presentation stage fail-closed."""
+    subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / script), *args],
+        cwd=REPO,
+        check=True,
+        timeout=180,
+    )
+
+
+def apply_reader_presentation() -> None:
+    """Fold post-render presentation writers into the canonical export.
+
+    Presentation transforms operate only on already-authorized public state.
+    Running them here guarantees that every newsroom or recap export gets the
+    same reader UX without a later workflow rewriting the runtime tree.
+    """
+    # Structured fact boxes/sections used to be applied by a separate 5-minute
+    # writer. Apply them once, immediately after the canonical story renderer.
+    run_script("render_rich_story_sections.py")
+
+    # The gambling explainer is a bespoke presentation over an already verified
+    # fact kernel. Apply it in the same transaction instead of a separate cron/
+    # workflow_run writer. WAITING states are non-fatal and the script exits 0.
+    run_script("gambling_story_presentation.py")
+
+    stages = (
+        "public_ux_currentness.py",
+        "public_ux_story_integrity.py",
+        "public_ux_manifest.py",
+    )
+    for script in stages:
+        run_script(script)
+    for script in stages:
+        run_script(script, "--check")
+
+    # Legal pages are generated independently from the story renderer, so apply
+    # their shared masthead/navigation shell explicitly inside the same canonical
+    # presentation transaction. This replaces the post-render Premium writer.
+    run_script("public_ux_legal.py")
+
+    # Profile intelligence is data; linking it into story HTML/feed is a
+    # presentation concern. Do it here, once, instead of running independent
+    # person/artist writer workflows after every intelligence refresh.
+    if (RUNTIME / "people.json").is_file():
+        run_script("link_person_profiles.py")
+    if (RUNTIME / "artists.json").is_file():
+        run_script("link_artist_profiles.py")
+
+
 def route_index(root: Path, route: str) -> Path:
     if route == "/":
         return root / "index.html"
@@ -54,15 +109,7 @@ def configured_static_routes() -> list[str]:
 
 
 def restore_committed_runtime_route(route: str, target: Path) -> bool:
-    """Restore a committed static runtime product erased by the dynamic renderer.
-
-    `render_frontpage.py` intentionally rebuilds `site/runtime` from scratch.
-    Some independently maintained static products (`/despre/`, for example) are
-    canonical committed runtime pages rather than outputs of `build_sites_export`.
-    During the live transaction we may safely recover exactly the version pinned
-    at the checked-out commit. This is deterministic and cannot introduce newer
-    unreviewed content.
-    """
+    """Restore a committed static runtime product erased by the dynamic renderer."""
     try:
         relative = target.relative_to(REPO).as_posix()
     except ValueError:
@@ -82,14 +129,7 @@ def restore_committed_runtime_route(route: str, target: Path) -> bool:
 
 
 def materialize_static_runtime_routes() -> list[str]:
-    """Materialize independent static products before final sitemap validation.
-
-    `/stiri/` is rebuilt from the canonical live feed before this function runs.
-    Legal pages are rendered directly into runtime by build_legal_pages. Other
-    configured static products are built first in DIST or restored from the exact
-    committed same-revision runtime artifact. The static-route gate remains
-    fail-closed.
-    """
+    """Materialize independent static products before final sitemap validation."""
     materialized: list[str] = []
     for route in configured_static_routes():
         target = route_index(RUNTIME, route)
@@ -143,12 +183,12 @@ def main() -> int:
     if not (RUNTIME / "live-feed.json").is_file():
         raise SystemExit("Refusing runtime overlay: canonical live feed missing")
 
-    # `/stiri/` is a live newsroom index, not an independently stale static page.
-    # Rebuild it from the exact feed that is about to be exported, while reusing
-    # the committed same-revision shell for branding/navigation/CSS.
+    # Build compatibility/static products first, then apply the one canonical
+    # reader presentation before copying runtime to the deployed export.
     news_index_report = render_news_index.build()
     legal_report = build_legal_pages.build()
     static_materialized = materialize_static_runtime_routes()
+    apply_reader_presentation()
 
     for source in sorted(RUNTIME.rglob("*")):
         if source.is_dir():
@@ -158,12 +198,13 @@ def main() -> int:
         shutil.copy2(source, target)
 
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
-    manifest["schema_version"] = "1.8"
+    manifest["schema_version"] = "1.9"
     manifest["target"]["autonomous_frontpage"] = True
     manifest["target"]["frontpage_source"] = "site/runtime/index.html"
     manifest["target"]["publication_model"] = "continuous_story_first"
     manifest["target"]["public_legal_pages"] = True
     manifest["target"]["news_index_source"] = "site/runtime/live-feed.json"
+    manifest["target"]["reader_presentation_owner"] = "overlay_runtime_export"
     routes = manifest.setdefault("routes", [])
     routes = [
         route for route in routes
@@ -235,8 +276,6 @@ def main() -> int:
     }
     manifest["news_index"] = news_index_report
 
-    # Finalize indexing only after all independently built static products have
-    # been materialized into the same runtime snapshot as the story pages.
     indexing = write_indexing_assets(RUNTIME, BASE_URL, ["/"] + story_paths)
     if indexing.get("status") != "PASS":
         raise RuntimeError(f"refusing export with deferred indexing: {indexing}")
@@ -272,6 +311,7 @@ def main() -> int:
         "routes": len(routes),
         "files": len(files),
         "autonomous_frontpage": True,
+        "reader_presentation_owner": "overlay_runtime_export",
         "static_routes_materialized": static_materialized,
         "indexing_status": indexing.get("status"),
         "indexing_routes": indexing.get("route_count"),
