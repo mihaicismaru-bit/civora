@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "checkpoint": "PARTENER-MIPE-FINAL-CLEANUP-CP01",
+  "room": "🟠30 INGESTION",
+  "state": "PASS",
+  "integrationState": "READY_FOR_MERGE_APPROVAL",
+  "candidate": {
+    "pr": 625,
+    "branch": "agent/partener-mipe-final-cleanup-v2-20260822",
+    "baseMainSha": "52b7560fda00728f2b53ea51facaf5b61eef33d0",
+    "testedRuntimeHeadSha": "2b2a2f852b120e15967f5cfc06954d435d77a69e",
+    "testedMergeRefSha": "b6216e0b36d4f794f7335adff322df8dce4c6bef",
+    "mergeable": true,
+    "changedFiles": 31,
+    "additions": 1280,
+    "deletions": 2697
+  },
+  "architecture": {
+    "surfacemc": "ACQUISITION_ONLY",
+    "surfacemcPermissions": "contents: read",
+    "handoffSchema": "PARTENER_MIPE_ACQUISITION_HANDOFF_V1",
+    "partenerEngine": "PARTENER.EU MIPE Engine v3",
+    "engineOwnsProcessingAndPersistence": true,
+    "pagesTriggeredByEngineNotRawAcquisition": true,
+    "hostedCanonicalRoute": "DIRECT_ONLY_FAIL_CLOSED",
+    "runtimeSourcePatching": false
+  },
+  "cleanup": {
+    "retiredPathCount": 16,
+    "retiredPaths": [
+      ".github/workflows/partener-eu-mipe-access-bridge.yml",
+      ".github/workflows/partener-eu-mipe-ro-runner.yml",
+      "partener-eu/ingest/mipe_browser_ingest.py",
+      "partener-eu/ingest/mipe_browser_ingest_v2.py",
+      "partener-eu/ingest/state/mipe_ro_trigger.txt",
+      "partener-eu/ingest/mipe_ingest.py",
+      "partener-eu/ingest/mipe_ingest_ipv4.py",
+      "partener-eu/ingest/mipe_known_seed_ingest.py",
+      "partener-eu/ingest/mipe_pdds_ingest.py",
+      "partener-eu/ops/fix_mipe_decision_extraction.py",
+      "partener-eu/ops/fix_mipe_dual_reporting.py",
+      "partener-eu/ops/fix_mipe_content_quality.py",
+      "partener-eu/ops/fix_mipe_dual_relay.py",
+      "partener-eu/ops/fix_mipe_first_party_relay.py",
+      "partener-eu/ops/fix_mipe_resilient_classifier.py",
+      "partener-eu/ops/fix_mipe_resilient_runtime.py"
+    ],
+    "materializedResilientSha256": "ad82649456a2aced555ffd43ae768ab275e4b02fb6a32acd6e152097280e500b"
+  },
+  "qa": {
+    "finalCleanupRunId": 32583940526,
+    "finalCleanupStatus": "PASS",
+    "windowsBoundaryRunId": 32583940539,
+    "windowsBoundaryStatus": "PASS",
+    "artifactId": 9478539938,
+    "artifactName": "partener-mipe-final-cleanup-proof",
+    "artifactSha256": "54d2b17fca833df907588ffcaf1dfa2a928de7fbe53a8ace2e4b48ede14b223b",
+    "callerAudit": {
+      "scannedTextFiles": 2768,
+      "activeCallerFound": 7,
+      "referencedWithoutExecutableCaller": 0,
+      "zeroCallerCandidates": 0,
+      "absent": 13
+    },
+    "regressions": {
+      "compile": "PASS",
+      "architectureContract": "PASS",
+      "resilientIngest": "PASS",
+      "routeArbitration": "PASS",
+      "v3CorpusProjection": "PASS",
+      "currentCorpusReplay": "PASS",
+      "canonicalPipeline": "PASS",
+      "dossierAutonomy": "PASS",
+      "enrichmentSeedQuality": "PASS",
+      "frontendRegression": "PASS",
+      "postReplayImmutability": "PASS"
+    },
+    "replayCorpus": {
+      "corpusPages": 497,
+      "corpusDocuments": 800,
+      "canonicalCalls": 165,
+      "finalDossiers": 184,
+      "lifecycleCalls": 184
+    }
+  },
+  "drift": {
+    "checkedAfterQa": true,
+    "materialOverlapWithMain": false,
+    "revalidationRequired": false
+  },
+  "replay": {
+    "finalCleanupQa": "workflow_dispatch .github/workflows/partener-eu-mipe-final-cleanup-qa.yml",
+    "windowsBoundaryQa": "workflow_dispatch .github/workflows/partener-eu-mipe-ro-crawl-v3-qa.yml"
+  },
+  "rollback": {
+    "strategy": "Revert the eventual PR #625 merge commit, or restore base main SHA 52b7560fda00728f2b53ea51facaf5b61eef33d0 through a reviewed rollback PR.",
+    "lkgPreservedUntilMerge": true
+  },
+  "remaining": [
+    "explicit merge approval",
+    "fresh-main overlap check immediately before merge",
+    "post-merge engine/deployment/production validation"
+  ],
+  "blocker": "MERGE_APPROVAL_ONLY"
+}
