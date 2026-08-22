@@ -2,7 +2,8 @@ name: VÂLCEA CLAR Story Social Metadata
 
 # Derived presentation projector. It never authorizes editorial facts. After the
 # canonical Live Newsroom completes, this workflow rebuilds the reader-facing
-# Public UX and article social metadata from the already-published live feed.
+# Public UX, article social metadata and the verified-media projection consumed
+# by the installed live bridge.
 on:
   workflow_dispatch:
   workflow_run:
@@ -15,6 +16,8 @@ on:
       - 'valcea-clar/social/story_visuals.json'
       - 'valcea-clar/social/social_media_manifest.json'
       - 'valcea-clar/social/contextual_story_media.json'
+      - 'valcea-clar/site/chatgpt-sites-live-bridge.js'
+      - 'valcea-clar/scripts/build_live_feed.py'
       - 'valcea-clar/scripts/render_story_pages.py'
       - 'valcea-clar/scripts/public_ux_reset.py'
       - 'valcea-clar/scripts/public_ux_fresh_rank.py'
@@ -30,6 +33,8 @@ on:
       - 'valcea-clar/social/story_visuals.json'
       - 'valcea-clar/social/social_media_manifest.json'
       - 'valcea-clar/social/contextual_story_media.json'
+      - 'valcea-clar/site/chatgpt-sites-live-bridge.js'
+      - 'valcea-clar/scripts/build_live_feed.py'
       - 'valcea-clar/scripts/render_story_pages.py'
       - 'valcea-clar/scripts/public_ux_reset.py'
       - 'valcea-clar/scripts/public_ux_fresh_rank.py'
@@ -65,11 +70,13 @@ jobs:
 
       - name: Self-test derived presentation contracts
         run: |
+          python valcea-clar/scripts/build_live_feed.py --self-test
           python valcea-clar/scripts/public_ux_reset.py --self-test
           python valcea-clar/scripts/public_ux_fresh_rank.py --self-test
           python valcea-clar/scripts/public_ux_media.py --self-test
           python valcea-clar/scripts/public_ux_media_integrity.py --self-test
           python valcea-clar/scripts/validate_public_ux_freshness.py --self-test
+          node --check valcea-clar/site/chatgpt-sites-live-bridge.js
 
       - name: Exercise canonical reader presentation on pull request
         if: github.event_name == 'pull_request'
@@ -82,11 +89,35 @@ jobs:
           python valcea-clar/scripts/render_story_pages.py | tee /tmp/story-social-metadata.json
           python valcea-clar/scripts/public_ux_media.py
           python valcea-clar/scripts/public_ux_media_integrity.py
+          python valcea-clar/scripts/build_live_feed.py --refresh-media-only
           python valcea-clar/scripts/public_ux_manifest.py
           python valcea-clar/scripts/public_ux_media.py --check
           python valcea-clar/scripts/public_ux_media_integrity.py --check
           python valcea-clar/scripts/public_ux_manifest.py --check
           python valcea-clar/scripts/validate_public_ux_freshness.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('valcea-clar')
+          feed = json.loads((root/'site/runtime/live-feed.json').read_text(encoding='utf-8'))
+          manifest = json.loads((root/'site/runtime/stiri/manifest.json').read_text(encoding='utf-8'))
+          feed_rows = {str(x.get('id')): x for x in feed.get('stories', []) if isinstance(x, dict) and x.get('id')}
+          expected = {
+              str(x.get('id')) for x in manifest.get('stories', [])
+              if isinstance(x, dict) and x.get('id') in feed_rows
+              and isinstance(x.get('image'), dict)
+              and x['image'].get('provenance_status') == 'VERIFIED'
+              and x['image'].get('public_url')
+          }
+          missing = sorted(sid for sid in expected if not isinstance(feed_rows[sid].get('visual'), dict) or not feed_rows[sid]['visual'].get('public_url'))
+          if missing:
+              raise SystemExit('Verified story media missing from live feed: ' + ', '.join(missing))
+          for sid in expected:
+              visual = feed_rows[sid]['visual']
+              if visual.get('contextual_archive') is True and not visual.get('editorial_note'):
+                  raise SystemExit('Contextual disclosure missing from live feed: ' + sid)
+          print(json.dumps({'status':'PASS','live_feed_verified_media':len(expected)}, ensure_ascii=False))
+          PY
 
           after="$(sha256sum "$archive" | cut -d' ' -f1)"
           test "$before" = "$after"
@@ -111,11 +142,35 @@ jobs:
             python valcea-clar/scripts/render_story_pages.py | tee /tmp/story-social-metadata.json
             python valcea-clar/scripts/public_ux_media.py
             python valcea-clar/scripts/public_ux_media_integrity.py
+            python valcea-clar/scripts/build_live_feed.py --refresh-media-only
             python valcea-clar/scripts/public_ux_manifest.py
             python valcea-clar/scripts/public_ux_media.py --check
             python valcea-clar/scripts/public_ux_media_integrity.py --check
             python valcea-clar/scripts/public_ux_manifest.py --check
             python valcea-clar/scripts/validate_public_ux_freshness.py
+            python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('valcea-clar')
+          feed = json.loads((root/'site/runtime/live-feed.json').read_text(encoding='utf-8'))
+          manifest = json.loads((root/'site/runtime/stiri/manifest.json').read_text(encoding='utf-8'))
+          feed_rows = {str(x.get('id')): x for x in feed.get('stories', []) if isinstance(x, dict) and x.get('id')}
+          expected = {
+              str(x.get('id')) for x in manifest.get('stories', [])
+              if isinstance(x, dict) and x.get('id') in feed_rows
+              and isinstance(x.get('image'), dict)
+              and x['image'].get('provenance_status') == 'VERIFIED'
+              and x['image'].get('public_url')
+          }
+          missing = sorted(sid for sid in expected if not isinstance(feed_rows[sid].get('visual'), dict) or not feed_rows[sid]['visual'].get('public_url'))
+          if missing:
+              raise SystemExit('Verified story media missing from live feed: ' + ', '.join(missing))
+          for sid in expected:
+              visual = feed_rows[sid]['visual']
+              if visual.get('contextual_archive') is True and not visual.get('editorial_note'):
+                  raise SystemExit('Contextual disclosure missing from live feed: ' + sid)
+          print(json.dumps({'status':'PASS','live_feed_verified_media':len(expected)}, ensure_ascii=False))
+          PY
 
             after="$(sha256sum "$archive" | cut -d' ' -f1)"
             test "$before" = "$after"
@@ -123,7 +178,7 @@ jobs:
 
             git add valcea-clar/site/public_ux_state.json valcea-clar/site/runtime
             if git diff --cached --quiet; then
-              echo 'Canonical Public UX and story social metadata already current.'
+              echo 'Canonical Public UX, live-feed media and story social metadata already current.'
               exit 0
             fi
 
@@ -142,5 +197,5 @@ jobs:
         if: always()
         run: |
           echo '## VÂLCEA CLAR Story Social Metadata + Public UX' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Derived presentation is rebuilt from the canonical live feed; exact verified media wins, explicit contextual photographs are disclosed, and freshness remains based on first publication.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Derived presentation is rebuilt from the canonical live feed; exact verified media wins, explicit contextual photographs are disclosed, and the same visual contract is projected back into the feed consumed by the installed bridge.' >> "$GITHUB_STEP_SUMMARY"
           cat /tmp/story-social-metadata.json >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
