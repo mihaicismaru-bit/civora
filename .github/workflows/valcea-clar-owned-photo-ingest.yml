@@ -1,8 +1,9 @@
 name: VÂLCEA CLAR Owned Photo Drive Ingest
 
 # Candidate-only Drive ingest is explicit until a read-only Drive credential is
-# configured. PRs validate the deterministic snapshot, candidate matching and
-# explicit materialization gate; workflow_dispatch refreshes candidate metadata.
+# configured. PRs validate the deterministic snapshot, exact semantic identity,
+# candidate matching and explicit materialization gate; workflow_dispatch
+# refreshes candidate metadata only when credentials exist.
 on:
   workflow_dispatch:
   pull_request:
@@ -10,6 +11,8 @@ on:
       - 'valcea-clar/social/owned_photo_drive_config.json'
       - 'valcea-clar/social/owned_photo_drive_snapshot.json'
       - 'valcea-clar/social/owned_photo_registry.json'
+      - 'valcea-clar/social/owned_photo_semantic_labels.json'
+      - 'valcea-clar/social/owned_photo_semantic_registry.py'
       - 'valcea-clar/social/owned_photo_match_policy.json'
       - 'valcea-clar/social/owned_photo_story_candidates.json'
       - 'valcea-clar/social/owned_photo_materialization_requests.json'
@@ -42,17 +45,21 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Validate owned-photo ingest, matching and materialization gate offline
+      - name: Validate owned-photo ingest, semantics, matching and materialization gate offline
         run: |
+          set -euo pipefail
           python -m py_compile \
             valcea-clar/social/drive_owned_photo_ingest.py \
+            valcea-clar/social/owned_photo_semantic_registry.py \
             valcea-clar/social/owned_photo_story_matcher.py \
             valcea-clar/social/materialize_owned_photo_story.py
           python valcea-clar/social/drive_owned_photo_ingest.py --self-test
+          python valcea-clar/social/owned_photo_semantic_registry.py --self-test
           python valcea-clar/social/owned_photo_story_matcher.py --self-test
           python valcea-clar/social/materialize_owned_photo_story.py --self-test
           python valcea-clar/social/drive_owned_photo_ingest.py --from-snapshot
           python valcea-clar/social/drive_owned_photo_ingest.py --validate-only
+          python valcea-clar/social/owned_photo_semantic_registry.py --write
           python valcea-clar/social/owned_photo_story_matcher.py
           python valcea-clar/social/owned_photo_story_matcher.py --validate-only
           python valcea-clar/social/materialize_owned_photo_story.py --validate-only
@@ -76,20 +83,27 @@ jobs:
       - name: Refresh inventory from Google Drive
         if: github.event_name != 'pull_request' && steps.credential.outputs.configured == 'true'
         run: |
+          set -euo pipefail
           python valcea-clar/social/drive_owned_photo_ingest.py
           python valcea-clar/social/drive_owned_photo_ingest.py --validate-only
+          # Semantic coverage is deliberately fail-closed: an unknown new Drive
+          # image cannot silently enter story matching before it is identified.
+          python valcea-clar/social/owned_photo_semantic_registry.py --write
           python valcea-clar/social/owned_photo_story_matcher.py
           python valcea-clar/social/owned_photo_story_matcher.py --validate-only
           python valcea-clar/social/materialize_owned_photo_story.py --validate-only
 
-      - name: Enforce candidate-only publication contract
+      - name: Enforce candidate-only and semantic identity contracts
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
           registry=json.loads(Path('valcea-clar/social/owned_photo_registry.json').read_text(encoding='utf-8'))
+          semantic=json.loads(Path('valcea-clar/social/owned_photo_semantic_registry.json').read_text(encoding='utf-8'))
+          ambiguous=json.loads(Path('valcea-clar/social/owned_photo_ambiguous_review_queue.json').read_text(encoding='utf-8'))
           queue=json.loads(Path('valcea-clar/social/owned_photo_story_candidates.json').read_text(encoding='utf-8'))
           requests=json.loads(Path('valcea-clar/social/owned_photo_materialization_requests.json').read_text(encoding='utf-8'))
+
           assert registry['publication_authority'] == 'NONE'
           assert registry['candidate_only'] is True
           assert registry['automatic_story_assignment_forbidden'] is True
@@ -100,6 +114,33 @@ jobs:
               assert asset['editor_approved'] is False
               assert asset['publication_eligible'] is False
               assert asset['publication_authority'] == 'NONE'
+
+          assert semantic['publication_authority'] == 'NONE'
+          assert semantic['automatic_story_assignment_allowed'] is False
+          assert semantic['semantic_label_is_not_story_assignment'] is True
+          assert semantic['story_subject_match_inherited_from_semantics'] is False
+          assert semantic['summary']['asset_count'] == registry['summary']['asset_count'] == 48
+          assert semantic['summary']['confirmed'] == 48
+          assert semantic['summary']['ambiguous'] == 0
+          assert semantic['summary']['rejected'] == 0
+          assert ambiguous['summary']['ambiguous_count'] == 0
+          assert ambiguous['items'] == []
+          semantic_ids=set()
+          for asset in semantic['assets']:
+              assert asset['drive_file_id'] not in semantic_ids
+              semantic_ids.add(asset['drive_file_id'])
+              assert asset['review_status'] == 'confirmed'
+              assert asset['semantic_confidence'] >= 0.85
+              assert asset['rights_basis'] == 'owned_by_valcea_clar'
+              assert asset['subject_match'] is False
+              assert asset['editor_approved'] is False
+              assert asset['publication_eligible'] is False
+              assert asset['publication_authority'] == 'NONE'
+              assert asset['automatic_story_assignment'] is False
+              assert 'visual_review' in asset['evidence']
+              assert 'raw_jpeg_exif' in asset['evidence']
+          assert semantic_ids == {asset['drive_file_id'] for asset in registry['assets']}
+
           assert queue['publication_authority'] == 'NONE'
           assert queue['candidate_only'] is True
           assert queue['automatic_story_assignment_forbidden'] is True
@@ -114,12 +155,15 @@ jobs:
                   assert candidate['publication_authority'] == 'NONE'
                   assert candidate['requires_visual_confirmation'] is True
                   assert candidate['rights_reconfirmation_required'] is True
+
           assert requests['publication_authority'] == 'EXPLICIT_EDITOR_REQUEST_ONLY'
           assert requests['automatic_materialization_allowed'] is False
           assert requests['automatic_story_assignment_allowed'] is False
           print({
               'status':'PASS',
               'asset_count':registry['summary']['asset_count'],
+              'semantic_summary':semantic['summary'],
+              'ambiguous_count':ambiguous['summary']['ambiguous_count'],
               'story_candidate_summary':queue['summary'],
               'active_materialization_requests':sum(
                   1 for row in requests['requests']
