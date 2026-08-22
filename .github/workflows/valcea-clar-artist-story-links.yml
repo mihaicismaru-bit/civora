@@ -1,68 +1,32 @@
-name: VÂLCEA CLAR Artist Story Links
+name: VÂLCEA CLAR Artist Story Links Compatibility Check
 
-# Maintenance linker, not a newsroom heartbeat.
-# Live Newsroom polls every 5 minutes; subscribing to every completed newsroom
-# run caused a ping-pong loop where regenerated story pages were repeatedly
-# relinked to festival/artist profiles. Relink only after Artist Intelligence
-# has refreshed the verified profile graph, or on explicit/manual code changes.
+# Story/profile linking now runs inside overlay_runtime_export.py, the canonical
+# final presentation boundary. Keep only an explicit compatibility check here.
 on:
   workflow_dispatch:
   pull_request:
     paths:
       - 'valcea-clar/scripts/link_artist_profiles.py'
-      - '.github/workflows/valcea-clar-artist-story-links.yml'
-  workflow_run:
-    workflows: ["VÂLCEA CLAR Artist Intelligence"]
-    types: [completed]
-    branches: [main]
-  push:
-    branches: [main]
-    paths:
-      - 'valcea-clar/scripts/link_artist_profiles.py'
+      - 'valcea-clar/scripts/overlay_runtime_export.py'
       - '.github/workflows/valcea-clar-artist-story-links.yml'
 
 permissions:
-  contents: write
-
-concurrency:
-  group: valcea-clar-artist-story-links
-  cancel-in-progress: false
+  contents: read
 
 jobs:
-  link:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+  check:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
-          fetch-depth: 0
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: Validate linker shell compatibility and idempotency
-        run: python valcea-clar/scripts/link_artist_profiles.py --self-test
-      - name: Validate linker against checked-out newsroom state
-        run: python valcea-clar/scripts/link_artist_profiles.py
-      - name: Persist bidirectional artist links from latest main
-        if: github.event_name != 'pull_request'
-        shell: bash
+          python-version: '3.13'
+      - name: Validate artist linker
         run: |
-          set -euo pipefail
-          git config user.name 'vâlcea-clar-artist-links[bot]'
-          git config user.email 'valcea-clar-artist-links@users.noreply.github.com'
-          for attempt in 1 2 3 4 5; do
-            git fetch origin main
-            git reset --hard origin/main
-            python valcea-clar/scripts/link_artist_profiles.py
-            git add valcea-clar/site/runtime/live-feed.json valcea-clar/site/runtime/stiri
-            if git diff --cached --quiet; then
-              echo 'Artist-to-story links already current.'
-              exit 0
-            fi
-            git commit -m 'Link VÂLCEA CLAR stories to artist profiles'
-            if git push origin HEAD:main; then exit 0; fi
-            sleep $((attempt * 2))
-          done
-          echo 'Could not persist artist story links.' >&2
-          exit 1
+          python -m py_compile valcea-clar/scripts/link_artist_profiles.py
+          python valcea-clar/scripts/link_artist_profiles.py --self-test
+      - name: Validate canonical ownership
+        run: |
+          grep -Fq 'link_artist_profiles.py' valcea-clar/scripts/overlay_runtime_export.py
+          echo 'Artist story linking is owned by overlay_runtime_export.py.'
