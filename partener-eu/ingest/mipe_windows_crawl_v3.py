@@ -554,6 +554,15 @@ def main() -> int:
     CORPUS_PATH.parent.mkdir(parents=True, exist_ok=True)
     CORPUS_PATH.write_text(json.dumps(corpus, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+    if os.getenv("MIPE_ACQUISITION_ONLY", "").strip().lower() in {"1", "true", "yes"}:
+        print(json.dumps({
+            "status": corpus["status"], "acquisitionOnly": True,
+            "pagesVisited": len(seen), "freshPages": len(pages),
+            "corpusPages": len(corpus["pages"]), "documents": len(corpus["documents"]),
+            "frontierPersisted": len(frontier),
+        }, ensure_ascii=False, indent=2))
+        return 0 if source_available else 2
+
     prior_items = {i.get("url"): i for i in previous_state.get("items", []) if i.get("url")}
     for page in pages:
         prior_items[page["url"]] = {
