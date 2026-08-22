@@ -74,7 +74,9 @@ jobs:
           print('PARTENER MIPE immutable runtime cleanup: PASS')
           PY
       - name: Commit tested cleanup and proof to branch
-        if: ${{ github.event_name == 'push' }}
+        if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.head_ref == 'agent/partener-cleanup-phase7-immutable-runtime-20260822') }}
+        env:
+          TARGET_BRANCH: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
         run: |
           set -euo pipefail
           git config user.name 'partener-cleanup-audit[bot]'
@@ -99,7 +101,7 @@ jobs:
             exit 0
           fi
           git commit -m 'PARTENER cleanup: seal immutable MIPE runtime'
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+          git push origin "HEAD:${TARGET_BRANCH}"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
