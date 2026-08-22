@@ -1,0 +1,198 @@
+name: VÂLCEA CLAR Publish Recovery
+
+# Operator recovery lane for a verified fact already present in the canonical
+# registry when the normal Live Newsroom orchestration is delayed. It does not
+# discover, invent or weaken evidence. The same newsroom, writer and rendering
+# gates remain authoritative.
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/valcea-clar-publish-recovery.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: valcea-clar-publish-recovery
+  cancel-in-progress: true
+
+jobs:
+  publish-verified-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Validate canonical newsroom contracts
+        run: |
+          set -euo pipefail
+          python valcea-clar/scripts/newsroom_decide.py --self-test
+          python -m py_compile \
+            valcea-clar/scripts/newsroom_decide.py \
+            valcea-clar/scripts/generate_edition.py \
+            valcea-clar/scripts/render_frontpage.py \
+            valcea-clar/scripts/render_story_pages.py \
+            valcea-clar/scripts/build_live_feed.py
+
+      - name: Decide from current verified registry
+        id: decision
+        shell: bash
+        run: |
+          set -euo pipefail
+          python valcea-clar/scripts/newsroom_decide.py
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          from pathlib import Path
+          d=json.loads(Path('valcea-clar/site/newsroom_decision.json').read_text(encoding='utf-8'))
+          expected='buila-vanturarita-accident-20260822'
+          assert d['changed'] is True, d
+          assert expected in d['publishable_story_ids'], d
+          assert expected in d['new_story_ids'], d
+          print('slot='+d['slot_for_legacy_snapshot_compatibility'])
+          print('story_count='+str(d['publishable_story_count']))
+          print('expected_story='+expected)
+          PY
+
+      - name: Build and validate current publication snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          python valcea-clar/scripts/build_public_data.py
+          python valcea-clar/scripts/generate_edition.py --slot "${{ steps.decision.outputs.slot }}"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('valcea-clar')
+          expected='buila-vanturarita-accident-20260822'
+          pointer=json.loads((root/'site/current_edition.json').read_text(encoding='utf-8'))
+          doc=json.loads((root/pointer['json_source']).read_text(encoding='utf-8'))
+          decision=json.loads((root/'site/newsroom_decision.json').read_text(encoding='utf-8'))
+          assert pointer['publication_intent'] == 'publish'
+          assert doc['publication_intent'] == 'publish'
+          assert doc['status'] in {'auto_approved','editor_approved'}
+          ids=[str(item.get('id')) for item in doc.get('items', [])]
+          assert expected in ids, ids
+          assert expected in decision['new_story_ids'], decision
+          print({'status':'PASS','stories':len(ids),'expected':expected})
+          PY
+
+      - name: Render canonical public runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          python valcea-clar/scripts/render_frontpage.py
+          python valcea-clar/scripts/render_story_pages.py
+          python valcea-clar/scripts/build_live_feed.py
+          python valcea-clar/scripts/build_sites_export.py
+          python valcea-clar/scripts/overlay_runtime_export.py
+          python valcea-clar/scripts/newsroom_decide.py --commit-state
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('valcea-clar')
+          expected='buila-vanturarita-accident-20260822'
+          decision=json.loads((root/'site/newsroom_decision.json').read_text(encoding='utf-8'))
+          manifest=json.loads((root/'site/runtime/stiri/manifest.json').read_text(encoding='utf-8'))
+          feed=json.loads((root/'site/runtime/live-feed.json').read_text(encoding='utf-8'))
+          routes={item['id']: item['canonical'] for item in manifest.get('stories', [])}
+          feed_ids=[str(item.get('id')) for item in feed.get('stories', [])]
+          assert expected in routes, routes.keys()
+          assert expected in feed_ids, feed_ids
+          event={
+              'schema_version':'1.0',
+              'event':'story_publication',
+              'publication_model':'continuous_story_first',
+              'published_at':decision['evaluated_local'],
+              'fingerprint':decision['fingerprint'],
+              'story_ids':decision['publishable_story_ids'],
+              'new_story_ids':decision['new_story_ids'],
+              'canonical_urls':{sid:routes.get(sid) for sid in decision['publishable_story_ids'] if routes.get(sid)},
+              'editions_are_publication_gates':False,
+              'recovery_lane':True,
+          }
+          (root/'site/story_publication_event.json').write_text(json.dumps(event,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print({'status':'PASS','canonical':routes[expected],'feed_story_count':len(feed_ids)})
+          PY
+
+      - name: Persist recovery publication atomically
+        shell: bash
+        run: |
+          set -euo pipefail
+          tx=/tmp/valcea-publish-recovery
+          rm -rf "$tx"
+          mkdir -p "$tx"
+          paths=(
+            valcea-clar/editions
+            valcea-clar/editorial/editorial_products.json
+            valcea-clar/site/current_edition.json
+            valcea-clar/site/last_edition_attempt.json
+            valcea-clar/site/newsroom_decision.json
+            valcea-clar/site/newsroom_state.json
+            valcea-clar/site/story_publication_event.json
+            valcea-clar/site/runtime
+            valcea-clar/dist/chatgpt-sites
+          )
+          for path in "${paths[@]}"; do
+            if [ -e "$path" ]; then
+              mkdir -p "$tx/$(dirname "$path")"
+              cp -a "$path" "$tx/$path"
+            fi
+          done
+
+          git config user.name 'vâlcea-clar-publish-recovery[bot]'
+          git config user.email 'valcea-clar-publish-recovery@users.noreply.github.com'
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            git clean -fd
+            for path in "${paths[@]}"; do
+              if [ -e "$tx/$path" ]; then
+                mkdir -p "$(dirname "$path")"
+                if [ -d "$tx/$path" ]; then
+                  mkdir -p "$path"
+                  cp -a "$tx/$path/." "$path/"
+                else
+                  cp -a "$tx/$path" "$path"
+                fi
+              fi
+            done
+            git add \
+              valcea-clar/editions \
+              valcea-clar/editorial/editorial_products.json \
+              valcea-clar/site/current_edition.json \
+              valcea-clar/site/last_edition_attempt.json \
+              valcea-clar/site/newsroom_decision.json \
+              valcea-clar/site/newsroom_state.json \
+              valcea-clar/site/story_publication_event.json \
+              valcea-clar/site/runtime \
+              valcea-clar/dist/chatgpt-sites || true
+            if git diff --cached --quiet; then
+              echo 'Recovery publication already present on main.'
+              exit 0
+            fi
+            git commit -m 'Publish VÂLCEA CLAR verified recovery story'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "main advanced during recovery publication; retrying ${attempt}/5."
+            sleep $((attempt * 2))
+          done
+          echo 'Could not persist recovery publication after five attempts.' >&2
+          exit 1
+
+      - name: Dispatch social publication after canonical recovery
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run valcea-clar-social-publishing.yml --repo "$GITHUB_REPOSITORY" --ref main
+          echo 'Social Publication Engine dispatch accepted.'
