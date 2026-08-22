@@ -1,0 +1,60 @@
+{
+  "schema": "PARTENER_UX_CARD_SCANNABILITY_CHECKPOINT_V4",
+  "checkpoint": "PARTENER-UX-V4-CP05",
+  "status": "PASS",
+  "verifiedAt": "2026-08-22T15:22:11Z",
+  "branch": "agent/partener-ux-optimization-v4-card-scan-20260822",
+  "testedHeadSha": "fe70dfdd0445cc5587be2850405a6c3f267af8c0",
+  "workflowRunId": 32581463860,
+  "artifact": {
+    "id": 9477908204,
+    "name": "partener-ux-card-scannability-v4-proof",
+    "sha256": "89c473abc17424e3c1e381afe6e31c10c1f21663360686336af72aa5ba41670b"
+  },
+  "desktop": {
+    "viewport": "1365x900",
+    "activeScrollHeightPx": 5939,
+    "withoutV4ScrollHeightPx": 6480,
+    "heightReductionPx": 541,
+    "dossierCards": 10,
+    "hiddenDossierCards": 0,
+    "newsCards": 5,
+    "hiddenNewsCards": 0,
+    "clampedDossierFooters": 7,
+    "clampedNewsStandfirsts": 5,
+    "pageHorizontalOverflowPx": 0,
+    "failedResponses": 0,
+    "consoleErrors": 0
+  },
+  "mobile": {
+    "viewport": "390x844",
+    "activeScrollHeightPx": 10200,
+    "withoutV4ScrollHeightPx": 11162,
+    "heightReductionPx": 962,
+    "dossierCards": 10,
+    "hiddenDossierCards": 4,
+    "newsCards": 5,
+    "hiddenNewsCards": 2,
+    "clampedDossierFooters": 5,
+    "clampedNewsStandfirsts": 3,
+    "domTextUnchangedWhenStylesheetDisabled": true,
+    "v3DisclosureStateUnchangedWhenStylesheetDisabled": true,
+    "stylesheetDisableEnableRoundTrip": "PASS",
+    "pageHorizontalOverflowPx": 0,
+    "failedResponses": 0,
+    "consoleErrors": 0
+  },
+  "regressions": {
+    "uxV1StaticBaseline": "PASS",
+    "uxV2BrowserOnSameHead": "PASS",
+    "uxV3BrowserOnSameHead": "PASS"
+  },
+  "canonicalDataChanged": false,
+  "domTextChanged": false,
+  "cardsDeletedOrReordered": false,
+  "eligibilityLogicChanged": false,
+  "ingestionChanged": false,
+  "publicationPolicyChanged": false,
+  "rollback": "Revert UX v4 commits; canonical data and UX v1-v3 remain intact.",
+  "integrationRule": "Stacked after UX v1-v3. Retarget/reconcile and rerun all gates before any approved merge."
+}
