@@ -78,6 +78,14 @@ def apply_reader_presentation() -> None:
     # presentation transaction. This replaces the post-render Premium writer.
     run_script("public_ux_legal.py")
 
+    # Profile intelligence is data; linking it into story HTML/feed is a
+    # presentation concern. Do it here, once, instead of running independent
+    # person/artist writer workflows after every intelligence refresh.
+    if (RUNTIME / "people.json").is_file():
+        run_script("link_person_profiles.py")
+    if (RUNTIME / "artists.json").is_file():
+        run_script("link_artist_profiles.py")
+
 
 def route_index(root: Path, route: str) -> Path:
     if route == "/":
