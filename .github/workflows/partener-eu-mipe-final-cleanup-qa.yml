@@ -1,0 +1,140 @@
+name: PARTENER.EU MIPE Final Cleanup QA
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'partener-eu/ingest/mipe_*.py'
+      - 'partener-eu/ingest/project_mipe_v3_corpus.py'
+      - 'partener-eu/ingest/normalize_mipe_health.py'
+      - 'partener-eu/ops/audit_mipe_legacy.py'
+      - 'partener-eu/ops/test_mipe_*.py'
+      - '.github/workflows/partener-eu-mipe-*.yml'
+      - '.github/workflows/partener-eu-validation.yml'
+      - '.github/workflows/partener-eu-pages.yml'
+  push:
+    branches:
+      - 'agent/partener-mipe-final-cleanup-v2-20260822'
+    paths:
+      - 'partener-eu/ingest/mipe_*.py'
+      - 'partener-eu/ingest/project_mipe_v3_corpus.py'
+      - 'partener-eu/ingest/normalize_mipe_health.py'
+      - 'partener-eu/ops/audit_mipe_legacy.py'
+      - 'partener-eu/ops/test_mipe_*.py'
+      - '.github/workflows/partener-eu-mipe-*.yml'
+      - '.github/workflows/partener-eu-validation.yml'
+      - '.github/workflows/partener-eu-pages.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: partener-eu-mipe-final-cleanup-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile final runtime and cleanup guards
+        run: |
+          python -m py_compile partener-eu/ingest/mipe_resilient_ingest.py
+          python -m py_compile partener-eu/ingest/mipe_direct_only_ingest.py
+          python -m py_compile partener-eu/ingest/normalize_mipe_health.py
+          python -m py_compile partener-eu/ingest/mipe_windows_crawl_v3.py
+          python -m py_compile partener-eu/ingest/project_mipe_v3_corpus.py
+          python -m py_compile partener-eu/ops/audit_mipe_legacy.py
+          python -m py_compile partener-eu/ops/test_mipe_final_cleanup.py
+
+      - name: Full-checkout caller audit and architecture contract
+        run: |
+          python partener-eu/ops/audit_mipe_legacy.py
+          python partener-eu/ops/test_mipe_final_cleanup.py
+
+      - name: Provenance, immutable-runtime and route arbitration regressions
+        run: |
+          python partener-eu/ops/test_mipe_resilient_ingest.py
+          python partener-eu/ops/test_mipe_route_arbitration.py
+          python partener-eu/ops/test_mipe_v3_projection.py
+
+      - name: Replay current MIPE corpus through PARTENER engine pipeline
+        run: |
+          python partener-eu/ingest/project_mipe_v3_corpus.py
+          python partener-eu/ops/fix_call_lifecycle_event_aliases.py
+          python partener-eu/ingest/build_mipe_canonical_calls.py
+          python partener-eu/ingest/refine_mipe_canonical_calls.py
+          python partener-eu/ingest/enrich_mipe_canonical_facts.py
+          python partener-eu/ingest/build_decision_products.py
+          python partener-eu/ingest/merge_mipe_canonical_dossiers.py
+          python partener-eu/ingest/polish_decision_products.py
+          python partener-eu/ingest/finalize_decision_products.py
+          python partener-eu/ingest/localize_decision_products.py
+          python partener-eu/ingest/refine_afir_public_dossiers.py
+          python partener-eu/ingest/score_dossier_depth.py
+          python partener-eu/ingest/build_mipe_enrichment_seeds.py
+          python partener-eu/ingest/build_call_lifecycle.py
+          python partener-eu/ingest/intelligence_index.py
+          python partener-eu/ops/test_mipe_canonical_pipeline.py
+          python partener-eu/ops/test_dossier_autonomy.py
+          python partener-eu/ops/test_mipe_enrichment_seed_quality.py
+          python partener-eu/ops/test_frontend_regression.py
+
+      - name: Assert cleanup remains immutable after replay
+        run: python partener-eu/ops/test_mipe_final_cleanup.py
+
+      - name: Build evidence receipt
+        if: always()
+        run: |
+          python - <<'PY'
+          import datetime as dt
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          root=Path('.')
+          audit_path=root/'partener-eu/ops/mipe_legacy_audit.json'
+          try:
+              audit=json.loads(audit_path.read_text(encoding='utf-8'))
+          except Exception:
+              audit={}
+          resilient=root/'partener-eu/ingest/mipe_resilient_ingest.py'
+          receipt={
+              'schema':'PARTENER_MIPE_FINAL_CLEANUP_PROOF_V1',
+              'status':'EVIDENCE_CAPTURED',
+              'capturedAt':dt.datetime.now(dt.timezone.utc).isoformat(),
+              'gitSha':os.environ.get('GITHUB_SHA'),
+              'runId':os.environ.get('GITHUB_RUN_ID'),
+              'runAttempt':os.environ.get('GITHUB_RUN_ATTEMPT'),
+              'auditSummary':audit.get('summary'),
+              'materializedResilientSha256':hashlib.sha256(resilient.read_bytes()).hexdigest(),
+              'policy':{
+                  'surfacemcAcquisitionOnly':True,
+                  'partenerEngineOwnsProcessing':True,
+                  'runtimeSourcePatching':False,
+                  'failClosed':True,
+              },
+          }
+          out=root/'partener-eu/ops/mipe_final_cleanup_proof.json'
+          out.write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps(receipt,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Upload final cleanup evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-mipe-final-cleanup-proof
+          path: |
+            partener-eu/ops/mipe_legacy_audit.json
+            partener-eu/ops/mipe_final_cleanup_proof.json
+          if-no-files-found: error
