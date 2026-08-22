@@ -28,6 +28,7 @@ on:
       - 'valcea-clar/editorial/source_intelligence_seed_supplement_v1.json'
       - 'valcea-clar/scripts/validate_source_intelligence_seed_registry.py'
       - 'valcea-clar/scripts/source_intelligence_discover.py'
+      - 'valcea-clar/scripts/prune_volatile_json_changes.py'
       - '.github/workflows/valcea-clar-source-radar.yml'
   pull_request:
     paths:
@@ -47,6 +48,7 @@ on:
       - 'valcea-clar/editorial/source_intelligence_seed_supplement_v1.json'
       - 'valcea-clar/scripts/validate_source_intelligence_seed_registry.py'
       - 'valcea-clar/scripts/source_intelligence_discover.py'
+      - 'valcea-clar/scripts/prune_volatile_json_changes.py'
       - '.github/workflows/valcea-clar-source-radar.yml'
 
 permissions:
@@ -89,7 +91,8 @@ jobs:
             local-news-os/core/primary_signal_verifier_routed_strict.py \
             valcea-clar/scripts/validate_signal_routing_regressions.py \
             valcea-clar/scripts/validate_source_intelligence_seed_registry.py \
-            valcea-clar/scripts/source_intelligence_discover.py
+            valcea-clar/scripts/source_intelligence_discover.py \
+            valcea-clar/scripts/prune_volatile_json_changes.py
           python local-news-os/core/signal_radar_routed.py --self-test
           python local-news-os/core/signal_radar_routed.py --instance valcea --validate-only
           python local-news-os/core/primary_signal_verifier_routed_strict.py --self-test
@@ -97,6 +100,7 @@ jobs:
           python valcea-clar/scripts/validate_signal_routing_regressions.py
           python valcea-clar/scripts/validate_source_intelligence_seed_registry.py
           python valcea-clar/scripts/source_intelligence_discover.py --self-test
+          python valcea-clar/scripts/prune_volatile_json_changes.py --self-test
 
       - name: Exercise routed signal and verifier read-only for PR
         if: github.event_name == 'pull_request'
@@ -142,8 +146,19 @@ jobs:
             mkdir -p valcea-clar/state valcea-clar/ops/resolution_tasks
             cp /tmp/valcea-source-health.json valcea-clar/state/source_health.json
             cp -a /tmp/valcea-resolution-tasks/. valcea-clar/ops/resolution_tasks/ || true
+            shopt -s nullglob
+            hygiene_paths=(valcea-clar/state/source_health.json valcea-clar/ops/resolution_tasks/*.json)
+            python valcea-clar/scripts/prune_volatile_json_changes.py \
+              --ignore-key observed_at \
+              --ignore-key last_observed_at \
+              --ignore-key checked_at \
+              --ignore-key updated_at \
+              "${hygiene_paths[@]}"
             git add valcea-clar/state/source_health.json valcea-clar/ops/resolution_tasks
-            if git diff --cached --quiet; then break; fi
+            if git diff --cached --quiet; then
+              echo 'Source health has no semantic change.'
+              break
+            fi
             git commit -m 'Persist VÂLCEA CLAR source health'
             if git push origin HEAD:main; then break; fi
             if [ "$attempt" -eq 5 ]; then exit 1; fi
@@ -154,61 +169,46 @@ jobs:
         if: github.event_name != 'pull_request' && (github.event_name != 'schedule' || github.event.schedule == '*/10 * * * *')
         run: python local-news-os/core/signal_radar_routed.py --instance valcea
 
-      - name: Persist signal radar and verification queue
+      - name: Verify generated signal queue against ranked primary sources
+        if: github.event_name != 'pull_request' && (github.event_name != 'schedule' || github.event.schedule == '*/10 * * * *')
+        run: python local-news-os/core/primary_signal_verifier_routed_strict.py --instance valcea
+
+      - name: Persist signal radar and primary verification transaction
         if: github.event_name != 'pull_request' && (github.event_name != 'schedule' || github.event.schedule == '*/10 * * * *')
         shell: bash
         run: |
           set -euo pipefail
           cp valcea-clar/editorial/signal_radar_state.json /tmp/valcea-signal-radar-state.json
           cp valcea-clar/editorial/signal_verification_queue.json /tmp/valcea-signal-verification-queue.json
-          git config user.name 'vâlcea-clar-source-radar[bot]'
-          git config user.email 'valcea-clar-source-radar@users.noreply.github.com'
-          for attempt in 1 2 3 4 5; do
-            git fetch origin main && git reset --hard origin/main
-            mkdir -p valcea-clar/editorial
-            cp /tmp/valcea-signal-radar-state.json valcea-clar/editorial/signal_radar_state.json
-            cp /tmp/valcea-signal-verification-queue.json valcea-clar/editorial/signal_verification_queue.json
-            git add valcea-clar/editorial/signal_radar_state.json valcea-clar/editorial/signal_verification_queue.json
-            if git diff --cached --quiet; then break; fi
-            git commit -m 'Refresh VÂLCEA CLAR signal radar queue'
-            if git push origin HEAD:main; then break; fi
-            if [ "$attempt" -eq 5 ]; then exit 1; fi
-            sleep $((attempt * 2))
-          done
-
-      - name: Verify current signal queue against ranked primary sources
-        if: github.event_name != 'pull_request' && (github.event_name != 'schedule' || github.event.schedule == '*/10 * * * *')
-        run: python local-news-os/core/primary_signal_verifier_routed_strict.py --instance valcea
-
-      - name: Persist primary verification evidence
-        if: github.event_name != 'pull_request' && (github.event_name != 'schedule' || github.event.schedule == '*/10 * * * *')
-        shell: bash
-        run: |
-          set -euo pipefail
           cp valcea-clar/editorial/signal_primary_verification_state.json /tmp/valcea-primary-signal-state.json
-          state_queue_generated_at=$(python - <<'PY'
-          import json
-          print(json.load(open('/tmp/valcea-primary-signal-state.json',encoding='utf-8'))['queue_generated_at'])
-          PY
-          )
           git config user.name 'vâlcea-clar-source-radar[bot]'
           git config user.email 'valcea-clar-source-radar@users.noreply.github.com'
           for attempt in 1 2 3 4 5; do
             git fetch origin main
-            latest_queue_generated_at=$(git show origin/main:valcea-clar/editorial/signal_verification_queue.json | python -c "import json,sys; print(json.load(sys.stdin)['generated_at'])")
-            if [ "$state_queue_generated_at" != "$latest_queue_generated_at" ]; then
-              echo 'Verification result is stale against a newer queue; refusing stale persistence.'
+            git reset --hard origin/main
+            mkdir -p valcea-clar/editorial
+            cp /tmp/valcea-signal-radar-state.json valcea-clar/editorial/signal_radar_state.json
+            cp /tmp/valcea-signal-verification-queue.json valcea-clar/editorial/signal_verification_queue.json
+            cp /tmp/valcea-primary-signal-state.json valcea-clar/editorial/signal_primary_verification_state.json
+            python valcea-clar/scripts/prune_volatile_json_changes.py \
+              --ignore-key generated_at \
+              --ignore-key observed_at \
+              valcea-clar/editorial/signal_radar_state.json \
+              valcea-clar/editorial/signal_verification_queue.json \
+              valcea-clar/editorial/signal_primary_verification_state.json
+            git add \
+              valcea-clar/editorial/signal_radar_state.json \
+              valcea-clar/editorial/signal_verification_queue.json \
+              valcea-clar/editorial/signal_primary_verification_state.json
+            if git diff --cached --quiet; then
+              echo 'Signal radar transaction has no semantic change.'
               exit 0
             fi
-            git reset --hard origin/main
-            cp /tmp/valcea-primary-signal-state.json valcea-clar/editorial/signal_primary_verification_state.json
-            git add valcea-clar/editorial/signal_primary_verification_state.json
-            if git diff --cached --quiet; then exit 0; fi
-            git commit -m 'Refresh VÂLCEA CLAR primary signal verification state'
+            git commit -m 'Refresh VÂLCEA CLAR signal intelligence transaction'
             if git push origin HEAD:main; then exit 0; fi
+            if [ "$attempt" -eq 5 ]; then exit 1; fi
             sleep $((attempt * 2))
           done
-          exit 1
 
       - name: Probe bounded source discovery frontier
         if: github.event_name != 'pull_request' && (github.event_name != 'schedule' || github.event.schedule == '23 * * * *')
@@ -237,8 +237,17 @@ jobs:
           for attempt in 1 2 3; do
             git fetch origin main && git reset --hard origin/main
             cp /tmp/valcea-source-discovery-state.json "$path"
+            python valcea-clar/scripts/prune_volatile_json_changes.py \
+              --ignore-key checked_at_epoch \
+              --ignore-key generated_at \
+              --ignore-key observed_at \
+              --ignore-key updated_at \
+              "$path"
             git add "$path"
-            if git diff --cached --quiet; then exit 0; fi
+            if git diff --cached --quiet; then
+              echo 'Source discovery state has no semantic change.'
+              exit 0
+            fi
             git commit -m 'Refresh VÂLCEA CLAR source discovery state'
             if git push origin HEAD:main; then exit 0; fi
             sleep $((attempt * 2))
