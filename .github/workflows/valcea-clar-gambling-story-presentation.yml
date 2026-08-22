@@ -1,13 +1,15 @@
 name: VÂLCEA CLAR Gambling Story Presentation Compatibility Check
 
 # Bespoke gambling presentation now runs inside overlay_runtime_export.py, the
-# canonical final presentation boundary. Keep this workflow only for explicit QA.
+# canonical final presentation boundary. Fact enrichment is sequenced by the
+# canonical Fact Kernel orchestrator. Keep this workflow only for explicit QA.
 on:
   workflow_dispatch:
   pull_request:
     paths:
       - 'valcea-clar/scripts/gambling_story_presentation.py'
       - 'valcea-clar/scripts/overlay_runtime_export.py'
+      - 'valcea-clar/scripts/fact_kernel_orchestrator.py'
       - '.github/workflows/valcea-clar-gambling-story-presentation.yml'
 
 permissions:
@@ -27,5 +29,5 @@ jobs:
       - name: Validate canonical ownership
         run: |
           grep -Fq 'gambling_story_presentation.py' valcea-clar/scripts/overlay_runtime_export.py
-          grep -Fq 'gambling_dossier_enricher_v2.py' .github/workflows/valcea-clar-fact-kernel.yml
-          echo 'Gambling enrichment is owned by Fact Kernel; presentation is owned by overlay_runtime_export.py.'
+          grep -Fq 'gambling_dossier_enricher_v2.py' valcea-clar/scripts/fact_kernel_orchestrator.py
+          echo 'Gambling enrichment is owned by Fact Kernel orchestration; presentation is owned by overlay_runtime_export.py.'
