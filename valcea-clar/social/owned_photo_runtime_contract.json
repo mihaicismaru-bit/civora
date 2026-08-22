@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.1",
+  "product": "VÂLCEA CLAR OWNED PHOTO CONNECTED RUNTIME",
+  "status": "LIVE_SEMANTIC_INGEST_ACTIVE",
+  "publication_authority": "NONE",
+  "drive_access": {
+    "mode": "connected_google_drive_read_plus_bounded_parent_move",
+    "public_sharing_required": false,
+    "service_account_secret_required": false,
+    "binary_fetch_for_visual_review": true,
+    "binary_copy_during_discovery": false,
+    "file_delete_allowed": false,
+    "file_content_replace_allowed": false,
+    "parent_move_allowed": true,
+    "parent_move_scope": "curated_root_children_only",
+    "curated_root_folder_id": "1Uw3y3p0zi-G-2i1g0lxWhKbjFt1pprJ3",
+    "inbox_folder_id": "1EjSE-oakJGwjjtHM4wramn_ZPog-aHeG"
+  },
+  "scheduler": {
+    "mode": "hourly_connected_runtime",
+    "enabled": true,
+    "minimum_interval_minutes": 60,
+    "no_change_no_write": true,
+    "no_change_no_notification": true
+  },
+  "semantic_ingest": {
+    "enabled": true,
+    "policy_file": "valcea-clar/social/owned_photo_semantic_auto_policy.json",
+    "auto_confirm_minimum_confidence": 0.95,
+    "visual_review_required": true,
+    "person_identity_inference_allowed": false,
+    "story_event_identity_inference_allowed": false,
+    "confirmed_asset_auto_move_to_curated_category": true,
+    "ambiguous_asset_stays_or_moves_to_inbox": true,
+    "automatic_delete_allowed": false,
+    "automatic_story_subject_match_allowed": false,
+    "automatic_editor_approval_allowed": false,
+    "automatic_publication_eligibility_allowed": false
+  },
+  "github_write_scope": {
+    "repository": "mihaicismaru-bit/civora",
+    "while_pr_619_open": "feature/valcea-owned-photo-drive-ingest-20260822",
+    "main_direct_write_allowed": false,
+    "post_merge_strategy": "dedicated_sync_branch_and_draft_pr",
+    "allowed_paths": [
+      "valcea-clar/social/owned_photo_drive_snapshot.json",
+      "valcea-clar/social/owned_photo_semantic_labels.json"
+    ]
+  },
+  "fail_closed": {
+    "new_unlabeled_assets_may_publish": false,
+    "ambiguous_assets_may_enter_story_matching": false,
+    "automatic_story_assignment_allowed": false,
+    "automatic_materialization_allowed": false,
+    "story_visuals_write_allowed": false,
+    "materialization_requests_write_allowed": false,
+    "semantic_review_or_high_confidence_auto_gate_required_for_new_assets": true
+  },
+  "parity_checkpoint": {
+    "verified_on": "2026-08-22",
+    "live_jpeg_count": 48,
+    "inbox_count": 0,
+    "curated_category_counts": {
+      "01_RAU_OLANESTI_PROMENADA": 6,
+      "02_CENTRU_RIVER_PLAZA_URBAN": 15,
+      "03_INSTITUTII_ADMINISTRATIE": 9,
+      "04_BUSINESS_BANCI_SERVICII": 10,
+      "05_UNDE_IESIM": 5,
+      "06_SANTIERE_DEZVOLTARE": 2,
+      "07_PARKING_MOBILITATE": 1
+    },
+    "result": "LIVE_COUNTS_MATCH_COMMITTED_CURATED_SNAPSHOT"
+  },
+  "native_github_drive_auth": {
+    "status": "OPTIONAL_FUTURE_OPTIMIZATION",
+    "supported_envs": [
+      "VALCEA_DRIVE_SERVICE_ACCOUNT_JSON",
+      "VALCEA_DRIVE_BEARER_TOKEN"
+    ],
+    "required_for_current_hourly_bridge": false
+  }
+}

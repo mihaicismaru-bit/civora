@@ -1,0 +1,68 @@
+{
+  "schema_version": "1.0",
+  "product": "VÂLCEA CLAR OWNED PHOTO SEMANTIC AUTO-INGEST",
+  "enabled": true,
+  "publication_authority": "NONE",
+  "story_assignment_authority": "NONE",
+  "source_inbox_category": "00_INBOX_NEW_PHOTOS",
+  "auto_confirm_threshold": 0.95,
+  "ambiguous_threshold_below": 0.95,
+  "policy": {
+    "visual_review_required": true,
+    "raw_jpeg_exif_review_required_when_available": true,
+    "exact_entity_requires_independent_anchor": true,
+    "exact_place_requires_location_or_landmark_anchor": true,
+    "person_identity_inference_forbidden": true,
+    "biometric_identification_forbidden": true,
+    "people_may_only_set_privacy_flags": true,
+    "story_event_identity_inference_forbidden": true,
+    "semantic_identity_does_not_imply_story_subject_match": true,
+    "auto_confirmed_assets_remain_candidate_only": true,
+    "auto_move_confirmed_asset_to_curated_category": true,
+    "ambiguous_assets_stay_in_inbox": true,
+    "ambiguous_assets_never_enter_story_matching": true,
+    "delete_on_reject_forbidden": true,
+    "no_photo_is_better_than_false_relevance": true
+  },
+  "allowed_target_categories": [
+    "01_RAU_OLANESTI_PROMENADA",
+    "02_CENTRU_RIVER_PLAZA_URBAN",
+    "03_INSTITUTII_ADMINISTRATIE",
+    "04_BUSINESS_BANCI_SERVICII",
+    "05_UNDE_IESIM",
+    "06_SANTIERE_DEZVOLTARE",
+    "07_PARKING_MOBILITATE"
+  ],
+  "confirmation_evidence": {
+    "exact_entity": {
+      "minimum": ["visual_review"],
+      "one_of": [
+        "visible_signage",
+        "distinctive_facade_plus_location",
+        "public_address_crosscheck",
+        "visible_project_banner",
+        "public_business_crosscheck"
+      ]
+    },
+    "exact_place": {
+      "minimum": ["visual_review"],
+      "one_of": [
+        "raw_jpeg_exif",
+        "cross_frame_landmark_confirmation",
+        "parking_signage",
+        "public_address_crosscheck"
+      ]
+    }
+  },
+  "ambiguous_fallback": {
+    "review_status": "ambiguous",
+    "scope": "ambiguous_entity",
+    "category": "00_INBOX_NEW_PHOTOS",
+    "depicts": ["UNRESOLVED_OWNED_PHOTO"],
+    "publication_authority": "NONE",
+    "subject_match": false,
+    "editor_approved": false,
+    "publication_eligible": false,
+    "next_gate": "semantic_review"
+  }
+}
