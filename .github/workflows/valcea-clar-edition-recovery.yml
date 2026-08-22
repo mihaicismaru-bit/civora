@@ -1,5 +1,7 @@
 name: VÂLCEA CLAR Edition Recovery
 
+# Recovery is an explicit operator action. Pull requests exercise the deterministic
+# recovery path without persisting; no repository push can trigger production recovery.
 on:
   workflow_dispatch:
     inputs:
@@ -9,21 +11,17 @@ on:
         default: "auto"
         type: choice
         options: [auto, morning, evening]
-  push:
-    branches: [main]
-    paths:
-      - "valcea-clar/ops/edition-recovery-trigger.json"
-      - ".github/workflows/valcea-clar-edition-recovery.yml"
   pull_request:
     paths:
-      - "valcea-clar/ops/edition-recovery-trigger.json"
+      - "valcea-clar/scripts/generate_edition.py"
+      - "valcea-clar/scripts/overlay_runtime_export.py"
       - ".github/workflows/valcea-clar-edition-recovery.yml"
 
 permissions:
   contents: write
 
 concurrency:
-  group: valcea-clar-edition-recovery-${{ github.event.pull_request.number || 'main' }}
+  group: valcea-clar-edition-recovery-${{ github.event.pull_request.number || 'manual' }}
   cancel-in-progress: false
 
 jobs:
@@ -47,19 +45,6 @@ jobs:
         run: |
           set -euo pipefail
           slot="$REQUESTED_SLOT"
-          if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
-            slot=$(python - <<'PY'
-          import json
-          from pathlib import Path
-          path = Path('valcea-clar/ops/edition-recovery-trigger.json')
-          try:
-              value = json.loads(path.read_text(encoding='utf-8')).get('slot', 'auto')
-          except Exception:
-              value = 'auto'
-          print(value if value in {'auto', 'morning', 'evening'} else 'auto')
-          PY
-            )
-          fi
           if [ "$slot" = "auto" ]; then
             hour=$(TZ=Europe/Bucharest date +%H)
             if [ "$hour" -lt 15 ]; then slot=morning; else slot=evening; fi
@@ -137,60 +122,39 @@ jobs:
               assert pointer['homepage_role'] == 'primary_lead'
           else:
               assert attempt['status'] == 'auto_hold'
-              assert pointer['publication_intent'] == 'publish', 'recovery must preserve the last-known-good public pointer on hold'
+              assert pointer['publication_intent'] == 'publish'
               assert pointer['edition_id'] != attempt['edition_id']
           feed = json.loads((root/'site/runtime/live-feed.json').read_text(encoding='utf-8'))
           manifest = json.loads((root/'dist/chatgpt-sites/manifest.json').read_text(encoding='utf-8'))
           assert feed['policy']['paid_llm_api_required'] is False
           assert manifest['target']['autonomous_frontpage'] is True
           assert manifest['routes'][0]['path'] == '/'
-          print(json.dumps({
-              'attempt': attempt,
-              'public_pointer': pointer['edition_id'],
-              'runtime_edition': feed['edition']['edition_id'],
-              'routes': manifest['counts']['routes']
-          }, ensure_ascii=False))
+          print(json.dumps({'attempt': attempt, 'public_pointer': pointer['edition_id'], 'runtime_edition': feed['edition']['edition_id'], 'routes': manifest['counts']['routes']}, ensure_ascii=False))
           PY
 
       - name: Persist recovery edition conflict-safe
-        if: github.event_name != 'pull_request'
+        if: github.event_name == 'workflow_dispatch'
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "vâlcea-clar-recovery[bot]"
           git config user.email "valcea-clar-recovery@users.noreply.github.com"
-
           for attempt in 1 2 3 4 5; do
             git fetch origin main
             git reset --hard origin/main
             git clean -fd
-
             python valcea-clar/scripts/generate_edition.py --self-test
             python valcea-clar/scripts/generate_edition.py --slot "${{ steps.slot.outputs.slot }}"
             python valcea-clar/scripts/render_frontpage.py
             python valcea-clar/scripts/build_live_feed.py
             python valcea-clar/scripts/build_sites_export.py
             python valcea-clar/scripts/overlay_runtime_export.py
-
-            git add \
-              valcea-clar/editions \
-              valcea-clar/site/current_edition.json \
-              valcea-clar/site/last_edition_attempt.json \
-              valcea-clar/site/runtime
-
-            if git diff --cached --quiet; then
-              echo "Recovery output is already current on main."
-              exit 0
-            fi
-
-            git commit -m "Recover autonomous VÂLCEA CLAR ${{ steps.slot.outputs.slot }} edition and frontpage"
-            if git push origin HEAD:main; then
-              exit 0
-            fi
-            echo "main advanced during recovery; retrying ${attempt}/5."
+            git add valcea-clar/editions valcea-clar/site/current_edition.json valcea-clar/site/last_edition_attempt.json valcea-clar/site/runtime
+            if git diff --cached --quiet; then echo "Recovery output is already current on main."; exit 0; fi
+            git commit -m "Recover VÂLCEA CLAR ${{ steps.slot.outputs.slot }} edition and frontpage"
+            if git push origin HEAD:main; then exit 0; fi
             sleep $((attempt * 2))
           done
-
           echo "Could not persist recovery edition after five attempts." >&2
           exit 1
 
