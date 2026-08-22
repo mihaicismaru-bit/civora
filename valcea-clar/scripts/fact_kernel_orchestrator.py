@@ -56,7 +56,8 @@ def self_test() -> dict:
         ("scm_program_structure_diagnostic.py", "--self-test"),
     )
     run_many(commands)
-    result = {"status": "PASS", "mode": "self_test", "contracts": len(commands)}
+    run("merge_supplemental_facts.py", "--check")
+    result = {"status": "PASS", "mode": "self_test", "contracts": len(commands) + 1}
     print(json.dumps(result, ensure_ascii=False))
     return result
 
@@ -64,6 +65,7 @@ def self_test() -> dict:
 def check() -> dict:
     run("council_docmanager_embedded_resolver.py", "--check")
     run("council_decision_article_engine.py")
+    run("merge_supplemental_facts.py", "--check")
 
     structured = EDITORIAL / "structured_alert_events.json"
     if structured.is_file() and structured.stat().st_size:
@@ -117,6 +119,12 @@ def build() -> dict:
     run("primary_source_service_kernels.py", "--apply")
     run("primary_source_admin_kernels.py", "--apply")
 
+    # Verified supplemental festival / performing-arts dossiers are another
+    # fact source, not a publication path. Merge them inside the same transaction.
+    supplemental = EDITORIAL / "supplemental_facts_registry.json"
+    if supplemental.is_file() and supplemental.stat().st_size:
+        run("merge_supplemental_facts.py")
+
     # Human-approved intake is still only fact intake; it never renders or
     # publishes directly. Live Newsroom sees the resulting canonical facts.
     manual = EDITORIAL / "manual_publish_queue.json"
@@ -138,6 +146,7 @@ def build() -> dict:
         "mode": "build",
         "facts_single_writer": True,
         "structured_events_consumed": structured.is_file(),
+        "supplemental_facts_consumed": supplemental.is_file(),
         "manual_queue_consumed": manual.is_file(),
         "council_document_corpus_present": corpus.is_file(),
     }
