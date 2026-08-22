@@ -8,6 +8,7 @@ on:
     paths:
       - 'partener-eu/ops/materialize_mipe_fixer_state.py'
       - 'partener-eu/ops/audit_mipe_fixer_idempotence.py'
+      - 'partener-eu/ops/audit_mipe_workflow_chain_equivalence.py'
       - '.github/workflows/partener-eu-mipe-fixer-materialize.yml'
 
 permissions:
@@ -32,6 +33,7 @@ jobs:
         run: |
           python -m py_compile partener-eu/ops/materialize_mipe_fixer_state.py
           python -m py_compile partener-eu/ops/audit_mipe_fixer_idempotence.py
+          python -m py_compile partener-eu/ops/audit_mipe_workflow_chain_equivalence.py
       - name: Materialize active runtime fixer chain
         run: python partener-eu/ops/materialize_mipe_fixer_state.py
       - name: Validate materialized source
@@ -39,9 +41,11 @@ jobs:
           python -m py_compile partener-eu/ingest/mipe_resilient_ingest.py
           python -m py_compile partener-eu/ingest/mipe_direct_only_ingest.py
           python partener-eu/ops/test_mipe_resilient_ingest.py
-      - name: Prove materialized source makes fixers no-op
+      - name: Prove full fixer-chain idempotence
         run: python partener-eu/ops/audit_mipe_fixer_idempotence.py
-      - name: Enforce immutable-source equivalence
+      - name: Audit each workflow fixer chain independently
+        run: python partener-eu/ops/audit_mipe_workflow_chain_equivalence.py
+      - name: Enforce full-chain immutable-source equivalence
         run: |
           python - <<'PY'
           import json
@@ -52,9 +56,9 @@ jobs:
           assert p['mutated'] is False, p
           assert p['restorationVerified'] is True, p
           assert p['allFixersRan'] is True, p
-          print('MIPE fixer materialization equivalence: PASS', p['beforeSha256'])
+          print('MIPE full fixer-chain equivalence: PASS', p['beforeSha256'])
           PY
-      - name: Commit tested source and both proofs to cleanup branch
+      - name: Persist tested source and proof receipts before chain gate
         run: |
           set -euo pipefail
           git config user.name 'partener-cleanup-audit[bot]'
@@ -62,17 +66,32 @@ jobs:
           git add \
             partener-eu/ingest/mipe_resilient_ingest.py \
             partener-eu/ops/mipe_fixer_materialization.json \
-            partener-eu/ops/mipe_fixer_idempotence.json
-          if git diff --cached --quiet; then
-            echo 'MIPE fixer state and proofs already materialized.'
-            exit 0
+            partener-eu/ops/mipe_fixer_idempotence.json \
+            partener-eu/ops/mipe_workflow_chain_equivalence.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'PARTENER cleanup: persist MIPE workflow-chain proof'
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          else
+            echo 'MIPE source and proof receipts unchanged.'
           fi
-          git commit -m 'PARTENER cleanup: seal tested MIPE fixer materialization'
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+      - name: Enforce per-workflow immutable-source equivalence
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('partener-eu/ops/mipe_workflow_chain_equivalence.json').read_text(encoding='utf-8'))
+          assert p['restorationVerified'] is True, p
+          failures=[row for row in p['chains'] if row['status']!='PASS']
+          assert not failures, failures
+          assert p['status']=='PASS', p
+          print('MIPE workflow-chain equivalence: PASS')
+          PY
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: partener-mipe-fixer-materialization
           path: |
             partener-eu/ops/mipe_fixer_materialization.json
             partener-eu/ops/mipe_fixer_idempotence.json
-          if-no-files-found: error
+            partener-eu/ops/mipe_workflow_chain_equivalence.json
+          if-no-files-found: warn
