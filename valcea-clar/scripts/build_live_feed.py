@@ -10,10 +10,11 @@ win; a newly admitted story may use the `published_at` value just reconciled and
 validated in the canonical story manifest. This closes the first-publication
 handoff without inventing a second clock or weakening any publication gate.
 
-Verified story photographs are also projected from the canonical story
-manifest. The feed never invents a visual: only provenance-backed real media
-with a public URL is admitted, and contextual photographs must retain their
-editorial disclosure.
+Verified story photographs are projected from the canonical story manifest.
+The feed never invents a visual: only provenance-backed real media with a public
+URL is admitted, and contextual photographs must retain their disclosure. A
+media-only refresh mode updates that projection without changing generated_at
+or any editorial timestamp.
 """
 from __future__ import annotations
 
@@ -36,6 +37,11 @@ def load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def write(path: Path, payload: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 def ensure_story_runtime() -> None:
     # render_frontpage.py recreates site/runtime. Recap workflows still call it
     # for compatibility, so immediately restore canonical story routes and the
@@ -53,12 +59,7 @@ def resolve_first_published_at(
     route: dict,
     archive_dates: dict[str, str],
 ) -> str:
-    """Resolve a stable publication timestamp without creating a new clock.
-
-    Durable archive state is authoritative for already-published stories. For a
-    newly admitted story, render_story_pages has already reconciled the stable
-    publication ledger and written it to the current manifest as `published_at`.
-    """
+    """Resolve a stable publication timestamp without creating a new clock."""
     archived = str(archive_dates.get(story_id) or "").strip()
     if archived:
         return archived
@@ -66,13 +67,7 @@ def resolve_first_published_at(
 
 
 def verified_visual(value: object) -> dict | None:
-    """Return a safe public visual or fail closed.
-
-    Media never authorizes publication. It is accepted only when an upstream
-    projection has already marked it VERIFIED, real/non-synthetic and publicly
-    addressable. Contextual/archive media additionally requires the disclosure
-    that explains what the photograph does *not* depict.
-    """
+    """Return a safe public visual or fail closed."""
     if not isinstance(value, dict):
         return None
     if value.get("provenance_status") != "VERIFIED":
@@ -94,18 +89,22 @@ def resolve_story_visual(item: dict, route: dict) -> dict | None:
     return verified_visual(item.get("visual"))
 
 
-def story_feed(snapshot: dict) -> list[dict]:
+def manifest_routes() -> dict[str, dict]:
     manifest = load(STORY_MANIFEST)
+    return {
+        str(item.get("id")): item
+        for item in manifest.get("stories", [])
+        if isinstance(item, dict) and item.get("id") and item.get("canonical")
+    }
+
+
+def story_feed(snapshot: dict) -> list[dict]:
+    routes = manifest_routes()
     archive = load(STORY_ARCHIVE)
     published_at = {
         str(item.get("id")): str(item.get("first_published_at") or "").strip()
         for item in archive.get("stories", [])
         if isinstance(item, dict) and item.get("id") and item.get("first_published_at")
-    }
-    routes = {
-        str(item.get("id")): item
-        for item in manifest.get("stories", [])
-        if isinstance(item, dict) and item.get("id") and item.get("canonical")
     }
     stories = []
     for item in snapshot.get("items", []):
@@ -131,6 +130,56 @@ def story_feed(snapshot: dict) -> list[dict]:
         })
     stories.sort(key=lambda item: (-int(item.get("priority") or 0), item["id"]))
     return stories
+
+
+def refresh_media_only() -> int:
+    """Reconcile feed visuals from the already-authorized story manifest.
+
+    This is intentionally timestamp-stable. It is run after the derived media
+    projector has finished enriching the manifest, so the public bridge receives
+    the same verified photograph and disclosure as the canonical article page.
+    """
+    if not OUT.is_file():
+        raise SystemExit("Refusing media-only refresh: live feed is missing")
+    ensure_story_runtime()
+    feed = load(OUT)
+    if feed.get("publication_model") != "continuous_story_first" or not isinstance(feed.get("stories"), list):
+        raise SystemExit("Refusing media-only refresh: invalid story-first feed")
+    routes = manifest_routes()
+    changed = 0
+    projected = 0
+    for story in feed["stories"]:
+        if not isinstance(story, dict) or not story.get("id"):
+            continue
+        route = routes.get(str(story["id"]))
+        if not route:
+            continue
+        # The post-projection manifest is canonical for presentation. If it has
+        # no eligible image, remove any stale feed visual instead of carrying it.
+        resolved = verified_visual(route.get("image"))
+        if story.get("visual") != resolved:
+            story["visual"] = resolved
+            changed += 1
+        if resolved:
+            projected += 1
+    feed["schema_version"] = "2.3"
+    policy = feed.setdefault("policy", {})
+    policy["story_visual_source"] = "verified_story_manifest"
+    policy["contextual_visual_disclosure_required"] = True
+    policy["synthetic_story_media_allowed"] = False
+    before_generated_at = feed.get("generated_at")
+    write(OUT, feed)
+    if feed.get("generated_at") != before_generated_at:
+        raise SystemExit("Media-only refresh illegally changed generated_at")
+    print(json.dumps({
+        "status": "PASS",
+        "mode": "media_only",
+        "changed_story_visuals": changed,
+        "stories_with_verified_visual": projected,
+        "generated_at_preserved": True,
+        "feed": str(OUT.relative_to(ROOT)),
+    }, ensure_ascii=False))
+    return 0
 
 
 def self_test() -> int:
@@ -187,8 +236,6 @@ def main() -> int:
             "city": (p.get("location") or {}).get("city"),
             "summary": (p.get("editorial") or {}).get("dek") or (p.get("offer") or {}).get("summary"),
             "badges": p.get("badges", [])[:2],
-            # Only explicitly approved, exact-subject documentary media reaches
-            # the public feed. Candidate and held photographs remain absent.
             "media": p.get("media") if (p.get("media") or {}).get("hero", {}).get("subject_match") == "verified" else None,
         }
         for p in places
@@ -200,15 +247,10 @@ def main() -> int:
         "publication_model": "continuous_story_first",
         "stories": stories,
         "story_count": len(stories),
-        # Compatibility aliases for existing consumers. They are explicitly not
-        # the publication model or canonical identity of an individual story.
         "edition": snapshot,
         "pointer": pointer,
         "compatibility_snapshot": snapshot,
         "compatibility_pointer": pointer,
-        # The section route consumes the complete verified catalogue. Homepage
-        # consumers apply their own small display cap, so the section itself can
-        # keep growing autonomously without silently truncating at eight venues.
         "unde_iesim": venue_feed,
         "unde_iesim_count": len(venue_feed),
         "policy": {
@@ -229,8 +271,7 @@ def main() -> int:
             "synthetic_story_media_allowed": False,
         },
     }
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    write(OUT, payload)
     print(json.dumps({
         "status": "PASS",
         "publication_model": payload["publication_model"],
@@ -246,4 +287,6 @@ def main() -> int:
 if __name__ == "__main__":
     if "--self-test" in sys.argv:
         raise SystemExit(self_test())
+    if "--refresh-media-only" in sys.argv:
+        raise SystemExit(refresh_media_only())
     raise SystemExit(main())
