@@ -1,11 +1,11 @@
 {
   "schema_version": "1.4",
-  "evaluated_local": "2026-08-22T23:47:55+03:00",
+  "evaluated_local": "2026-08-22T23:56:19+03:00",
   "mode": "continuous_story_first",
   "edition_windows_are_publication_gates": false,
   "recap_editions_retained": true,
   "slot_for_legacy_snapshot_compatibility": "evening",
-  "changed": true,
+  "changed": false,
   "publishable_story_count": 28,
   "publishable_story_ids": [
     "buila-vanturarita-accident-20260822",
@@ -39,7 +39,7 @@
   ],
   "new_story_ids": [],
   "fingerprint": "27827335cd18b9939c1f1308d14ae385dedfddcafd1105d80f18c47343b1312c",
-  "auto_fact_registry_count": 0,
+  "auto_fact_registry_count": 3,
   "editorial_writer": {
     "writer_id": "manual_journalism_v1",
     "status": "ACTIVE",
@@ -47,7 +47,7 @@
     "fact_kernel_composed": 17,
     "legacy_passthrough": 21,
     "editorial_holds": 0,
-    "registry_fingerprint_sha256": "4f1999c5a8d8e05f08b82d447e7a37cd05af58d148ebccad71b03223c94e4211"
+    "registry_fingerprint_sha256": "a11641072f5794dfc177e48d57ddf715e2041d8429549044f06e411a2cacbe7c"
   },
   "editorial_integrity": {
     "gate_id": "editorial_integrity_v1",
@@ -57,8 +57,21 @@
     "held": 1,
     "failed": 0
   },
-  "rejected_candidate_count": 0,
-  "rejected": [],
+  "rejected_candidate_count": 3,
+  "rejected": [
+    {
+      "id": "auto-bjai-valcea-evenimente-6e9802de76ac",
+      "reason": "title_date_only_not_full_story"
+    },
+    {
+      "id": "auto-scm-rm-valcea-50cd73e7ba46",
+      "reason": "title_date_only_not_full_story"
+    },
+    {
+      "id": "auto-scm-rm-valcea-8dd87429b937",
+      "reason": "title_date_only_not_full_story"
+    }
+  ],
   "active_publication_holds": [
     "derived-council-gambling-20260723",
     "olanesti-bridge-monitor"
