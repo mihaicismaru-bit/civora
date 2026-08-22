@@ -2,9 +2,19 @@ name: PARTENER.EU MIPE Windows Crawl v3 QA
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/mipe_browser_ingest.py'
+      - 'partener-eu/ingest/mipe_browser_ingest_v2.py'
+      - 'partener-eu/ingest/mipe_windows_crawl_v3.py'
+      - 'partener-eu/ingest/mipe_corpus_enrich.py'
+      - '.github/workflows/partener-eu-mipe-ro-crawl-v3.yml'
+      - '.github/workflows/partener-eu-mipe-ro-crawl-v3-qa.yml'
   push:
     branches: [main]
     paths:
+      - 'partener-eu/ingest/mipe_browser_ingest.py'
+      - 'partener-eu/ingest/mipe_browser_ingest_v2.py'
       - 'partener-eu/ingest/mipe_windows_crawl_v3.py'
       - 'partener-eu/ingest/mipe_corpus_enrich.py'
       - '.github/workflows/partener-eu-mipe-ro-crawl-v3.yml'
@@ -21,6 +31,8 @@ jobs:
           python-version: '3.12'
       - name: Python syntax
         run: |
+          python -m py_compile partener-eu/ingest/mipe_browser_ingest.py
+          python -m py_compile partener-eu/ingest/mipe_browser_ingest_v2.py
           python -m py_compile partener-eu/ingest/mipe_windows_crawl_v3.py
           python -m py_compile partener-eu/ingest/mipe_corpus_enrich.py
       - name: Static crawler contract
@@ -29,6 +41,8 @@ jobs:
           from pathlib import Path
           crawler=Path('partener-eu/ingest/mipe_windows_crawl_v3.py').read_text(encoding='utf-8')
           workflow=Path('.github/workflows/partener-eu-mipe-ro-crawl-v3.yml').read_text(encoding='utf-8')
+          shim=Path('partener-eu/ingest/mipe_browser_ingest.py').read_text(encoding='utf-8')
+          legacy=Path('partener-eu/ingest/mipe_browser_ingest_v2.py').read_text(encoding='utf-8')
           required=[
             'schemaVersion": 3','playwright-edge-direct-romania-v3','MAX_DOCUMENTS',
             'extract_pdf','parse_docx','CALL_LIFECYCLE_EVENT','RESULTS_PUBLISHED',
@@ -40,5 +54,10 @@ jobs:
           assert 'build_call_lifecycle.py' in workflow
           assert 'mipe_ro_corpus.json' in workflow
           assert 'actions/upload-artifact@v4' in workflow
-          print('MIPE Windows crawler v3 static contract: PASS')
+          assert 'from mipe_browser_ingest_v2 import main' in shim
+          assert 'write_text' not in shim
+          assert 'MODULE_PATH' not in shim
+          assert '"textPreview": article_text[:80000]' in legacy
+          assert '"pageClass": "CALL_OR_GUIDE"' in legacy
+          print('MIPE Windows crawler v3 + legacy compatibility contract: PASS')
           PY
