@@ -1,5 +1,8 @@
 name: VÂLCEA CLAR Owned Photo Drive Ingest
 
+# Candidate-only Drive ingest is explicit until a read-only Drive credential is
+# configured. PRs validate the deterministic snapshot; workflow_dispatch can
+# refresh from Drive and persist the registry after credentials exist.
 on:
   workflow_dispatch:
   pull_request:
@@ -9,20 +12,12 @@ on:
       - 'valcea-clar/social/owned_photo_registry.json'
       - 'valcea-clar/social/drive_owned_photo_ingest.py'
       - '.github/workflows/valcea-clar-owned-photo-ingest.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'valcea-clar/social/owned_photo_drive_config.json'
-      - 'valcea-clar/social/drive_owned_photo_ingest.py'
-      - '.github/workflows/valcea-clar-owned-photo-ingest.yml'
-  schedule:
-    - cron: '41 * * * *'
 
 permissions:
   contents: write
 
 concurrency:
-  group: valcea-clar-owned-photo-drive-ingest
+  group: valcea-clar-owned-photo-drive-ingest-${{ github.event.pull_request.number || 'manual' }}
   cancel-in-progress: true
 
 jobs:
@@ -89,7 +84,7 @@ jobs:
           PY
 
       - name: Persist Drive snapshot and owned-photo registry conflict-safe
-        if: github.event_name != 'pull_request'
+        if: github.event_name == 'workflow_dispatch'
         shell: bash
         run: |
           set -euo pipefail
