@@ -1,5 +1,5 @@
 {
-  "schema_version": 8,
+  "schema_version": 9,
   "product": "CIVORA / VÂLCEA CLAR",
   "canonical_domain": "valceaclar.ro",
   "execution_owner": "civora_site_engine",
@@ -69,8 +69,8 @@
       "workflow": ".github/workflows/valcea-clar-fact-kernel.yml",
       "schedule": ["4,19,34,49 * * * *"],
       "schedule_role": "bounded_polling_fallback",
-      "event_triggers": ["structured_alert_events", "kernel_code_or_policy_change"],
-      "adapters": ["council", "adopted_hcl_articles", "structured_t1_alerts", "primary_source_service", "primary_source_admin", "gambling_dossier", "scm_program"],
+      "event_triggers": ["structured_alert_events", "manual_publish_queue", "supplemental_facts", "kernel_code_or_policy_change"],
+      "adapters": ["council", "adopted_hcl_articles", "structured_t1_alerts", "primary_source_service", "primary_source_admin", "manual_intake", "supplemental_dossiers", "gambling_dossier", "scm_program"],
       "promotion_target": "valcea-clar/editorial/facts_registry.json",
       "promotion_rule": "verified_source_specific_contracts_only",
       "single_writer": true,
@@ -98,14 +98,15 @@
     },
     {
       "id": "source_radar",
-      "kind": "canonical_source_health_signal_and_discovery_control_plane",
+      "kind": "canonical_source_health_signal_verification_and_discovery_control_plane",
       "workflow": ".github/workflows/valcea-clar-source-radar.yml",
       "schedule": ["*/10 * * * *", "23 * * * *", "47 */6 * * *"],
       "cadences": {
-        "signal_radar": "*/10 * * * *",
+        "signal_radar_and_primary_verification": "*/10 * * * *",
         "bounded_discovery": "23 * * * *",
         "source_health": "47 */6 * * *"
       },
+      "primary_verification_output": "valcea-clar/editorial/signal_primary_verification_state.json",
       "resolution_task_directory": "valcea-clar/ops/resolution_tasks",
       "owner": "site_engine"
     },
@@ -117,6 +118,15 @@
       "writes": "valcea-clar/editorial/structured_alert_events.json",
       "facts_registry_write_allowed": false,
       "downstream_fact_writer": ".github/workflows/valcea-clar-fact-kernel.yml",
+      "owner": "site_engine"
+    },
+    {
+      "id": "editorial_opportunity_queue",
+      "kind": "event_driven_ranked_editorial_candidate_queue",
+      "workflow": ".github/workflows/valcea-clar-editorial-opportunity-engine.yml",
+      "schedule": [],
+      "event_driven": true,
+      "publication_authority": "none",
       "owner": "site_engine"
     },
     {
@@ -138,6 +148,26 @@
       "schedule": ["29 */6 * * *"],
       "shared_indexing_transaction": true,
       "public_projection_requires_resolved_identity": true,
+      "owner": "site_engine"
+    },
+    {
+      "id": "person_candidate_discovery",
+      "kind": "event_driven_unresolved_public_person_candidate_queue",
+      "workflow": ".github/workflows/valcea-clar-person-candidate-discovery.yml",
+      "schedule": [],
+      "event_driven": true,
+      "publication_authority": "none",
+      "auto_profile_creation": false,
+      "owner": "site_engine"
+    },
+    {
+      "id": "photo_candidate_discovery",
+      "kind": "event_driven_rights_candidate_discovery",
+      "workflow": ".github/workflows/valcea-clar-photo-candidate-discovery.yml",
+      "schedule": [],
+      "event_driven": true,
+      "publication_authority": "none",
+      "automatic_promotion": false,
       "owner": "site_engine"
     },
     {
@@ -183,6 +213,16 @@
       "edition_window_gate": false,
       "site_story_may_precede_social_media_readiness": true,
       "channel_registry": "valcea-clar/social/channel_registry.json",
+      "owner": "site_engine"
+    },
+    {
+      "id": "story_social_metadata_projection",
+      "kind": "event_driven_story_open_graph_and_social_metadata_projection",
+      "workflow": ".github/workflows/valcea-clar-story-social-metadata.yml",
+      "schedule": [],
+      "event_driven": true,
+      "derived_only": true,
+      "facts_registry_write_allowed": false,
       "owner": "site_engine"
     },
     {
