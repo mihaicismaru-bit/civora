@@ -55,10 +55,9 @@ def run_script(script: str, *args: str) -> None:
 def apply_reader_presentation() -> None:
     """Fold the former Premium Presentation writer into the canonical export.
 
-    The three stages are deterministic presentation transforms over already
-    authorized public state. Running them here guarantees that every newsroom or
-    recap export gets the same reader UX without a later workflow rewriting the
-    same runtime tree.
+    Presentation transforms operate only on already-authorized public state.
+    Running them here guarantees that every newsroom or recap export gets the
+    same reader UX without a later workflow rewriting the runtime tree.
     """
     stages = (
         "public_ux_currentness.py",
@@ -69,6 +68,11 @@ def apply_reader_presentation() -> None:
         run_script(script)
     for script in stages:
         run_script(script, "--check")
+
+    # Legal pages are generated independently from the story renderer, so apply
+    # their shared masthead/navigation shell explicitly inside the same canonical
+    # presentation transaction. This replaces the post-render Premium writer.
+    run_script("public_ux_legal.py")
 
 
 def route_index(root: Path, route: str) -> Path:
@@ -88,15 +92,7 @@ def configured_static_routes() -> list[str]:
 
 
 def restore_committed_runtime_route(route: str, target: Path) -> bool:
-    """Restore a committed static runtime product erased by the dynamic renderer.
-
-    `render_frontpage.py` intentionally rebuilds `site/runtime` from scratch.
-    Some independently maintained static products (`/despre/`, for example) are
-    canonical committed runtime pages rather than outputs of `build_sites_export`.
-    During the live transaction we may safely recover exactly the version pinned
-    at the checked-out commit. This is deterministic and cannot introduce newer
-    unreviewed content.
-    """
+    """Restore a committed static runtime product erased by the dynamic renderer."""
     try:
         relative = target.relative_to(REPO).as_posix()
     except ValueError:
@@ -116,14 +112,7 @@ def restore_committed_runtime_route(route: str, target: Path) -> bool:
 
 
 def materialize_static_runtime_routes() -> list[str]:
-    """Materialize independent static products before final sitemap validation.
-
-    `/stiri/` is rebuilt from the canonical live feed before this function runs.
-    Legal pages are rendered directly into runtime by build_legal_pages. Other
-    configured static products are built first in DIST or restored from the exact
-    committed same-revision runtime artifact. The static-route gate remains
-    fail-closed.
-    """
+    """Materialize independent static products before final sitemap validation."""
     materialized: list[str] = []
     for route in configured_static_routes():
         target = route_index(RUNTIME, route)
