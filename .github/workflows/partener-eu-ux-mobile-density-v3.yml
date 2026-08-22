@@ -1,0 +1,73 @@
+name: PARTENER.EU UX Mobile Density v3 QA
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'partener-eu/web/index.html'
+      - 'partener-eu/web/ux-mobile-density-v3.css'
+      - 'partener-eu/web/ux-mobile-density-v3.js'
+      - 'partener-eu/ops/test_ux_mobile_density_v3.py'
+      - 'partener-eu/ops/test_ux_mobile_density_browser_v3.py'
+      - '.github/workflows/partener-eu-ux-mobile-density-v3.yml'
+  push:
+    branches:
+      - 'agent/partener-ux-optimization-v3-mobile-density-20260822'
+    paths:
+      - 'partener-eu/web/index.html'
+      - 'partener-eu/web/ux-mobile-density-v3.css'
+      - 'partener-eu/web/ux-mobile-density-v3.js'
+      - 'partener-eu/ops/test_ux_mobile_density_v3.py'
+      - 'partener-eu/ops/test_ux_mobile_density_browser_v3.py'
+      - '.github/workflows/partener-eu-ux-mobile-density-v3.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: partener-eu-ux-v3-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: JavaScript syntax
+        run: node --check partener-eu/web/ux-mobile-density-v3.js
+      - name: Preserve V1/V2 baseline
+        run: |
+          node --check partener-eu/web/ux-optimization-v1.js
+          node --check partener-eu/web/ux-orientation-v2.js
+          python partener-eu/ops/test_ux_optimization_v1.py
+          python partener-eu/ops/test_ux_orientation_v2.py
+      - name: V3 mobile density contract
+        run: python partener-eu/ops/test_ux_mobile_density_v3.py
+      - name: Install browser harness
+        run: python -m pip install --disable-pip-version-check playwright
+      - name: Start isolated PARTENER.EU branch server
+        run: |
+          python -m http.server 4175 --bind 127.0.0.1 --directory partener-eu/web >/tmp/partener-ux-v3-http.log 2>&1 &
+          echo $! >/tmp/partener-ux-v3-http.pid
+          for i in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:4175/index.html >/dev/null; then exit 0; fi
+            sleep 0.5
+          done
+          cat /tmp/partener-ux-v3-http.log
+          exit 1
+      - name: Desktop/mobile density proof
+        run: python partener-eu/ops/test_ux_mobile_density_browser_v3.py
+      - name: Upload density evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-ux-mobile-density-v3-proof
+          path: |
+            partener-eu/ops/ux-mobile-density-v3-browser-proof.json
+            partener-eu/ops/ux-mobile-density-v3-screenshots/*.png
+            /tmp/partener-ux-v3-http.log
+          if-no-files-found: warn
