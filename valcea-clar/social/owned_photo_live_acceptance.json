@@ -1,11 +1,11 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "product": "VÂLCEA CLAR OWNED PHOTO LIVE ACCEPTANCE",
   "tested_at_utc": "2026-08-22T17:52:00Z",
-  "mode": "connected_runtime_controlled_canary",
+  "mode": "connected_runtime_controlled_canary_plus_natural_scheduler_observation",
   "publication_authority": "NONE",
   "result": "PASS_DATA_PLANE",
-  "scheduler_result": "ARMED_NOT_YET_OBSERVED",
+  "scheduler_result": "PASS_FIRST_NATURAL_SCHEDULED_RUN_NO_CHANGE",
   "canary": {
     "source_file_id": "1WQ4uvbHT0N-dns0HVSH1gAnRWWv_9a_l",
     "source_filename": "PXL_20260819_065310171.jpg",
@@ -25,6 +25,18 @@
     "editor_approved": false,
     "publication_eligible": false
   },
+  "scheduler_observation": {
+    "schedule_timezone": "Europe/Bucharest",
+    "schedule_minute": 31,
+    "first_observed_last_run_time_utc": "2026-08-22T18:31:52.505689Z",
+    "first_observed_local_window": "2026-08-22T21:31 Europe/Bucharest",
+    "run_type": "natural_scheduled_hourly_run",
+    "drive_change_detected": false,
+    "repository_write_expected": false,
+    "notification_expected": false,
+    "inbox_verified_empty_after_run": true,
+    "result": "PASS_NO_CHANGE_IDEMPOTENT"
+  },
   "observed_steps": [
     "copy_created_unique_drive_file_id_in_00_inbox",
     "inbox_listing_detected_canary",
@@ -33,7 +45,9 @@
     "bounded_parent_move_to_curated_category_succeeded",
     "test_canary_deleted_after_acceptance",
     "inbox_verified_empty_after_cleanup",
-    "target_category_verified_back_to_original_five_assets"
+    "target_category_verified_back_to_original_five_assets",
+    "first_natural_hourly_scheduler_run_observed",
+    "no_change_run_produced_no_drive_or_repository_mutation"
   ],
   "safety_assertions": {
     "no_story_visual_write": true,
@@ -42,7 +56,8 @@
     "no_main_write": true,
     "no_existing_original_deleted": true,
     "only_test_canary_deleted": true,
-    "archive_postcondition_restored": true
+    "archive_postcondition_restored": true,
+    "scheduled_no_change_run_idempotent": true
   },
   "postconditions": {
     "live_owned_photo_count": 48,
@@ -50,5 +65,5 @@
     "05_UNDE_IESIM_count": 5,
     "original_source_file_present": true
   },
-  "next_acceptance_gate": "observe_first_scheduled_hourly_run_and_record_scheduler_receipt"
+  "next_acceptance_gate": "explicit_story_level_editor_approval_before_any_materialization"
 }
