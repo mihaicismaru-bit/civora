@@ -1,7 +1,7 @@
 name: VÂLCEA CLAR Cultural Sources Monitor
 
 # Festival and performing-arts sources are distinct inputs but share one control
-# plane: probe -> persist candidate state -> trigger editorial opportunities.
+# plane: probe -> candidate state -> monitor promotion -> editorial opportunities.
 # Each source family keeps its original cadence inside this workflow.
 on:
   workflow_dispatch:
@@ -13,6 +13,7 @@ on:
       - 'valcea-clar/editorial/performing_arts_monitor_registry.json'
       - 'valcea-clar/scripts/monitor_festival_sources.py'
       - 'valcea-clar/scripts/monitor_performing_arts_sources.py'
+      - 'valcea-clar/scripts/promote_performing_arts_monitors.py'
       - '.github/workflows/valcea-clar-festival-intelligence-monitor.yml'
   pull_request:
     paths:
@@ -21,6 +22,7 @@ on:
       - 'valcea-clar/editorial/performing_arts_monitor_registry.json'
       - 'valcea-clar/scripts/monitor_festival_sources.py'
       - 'valcea-clar/scripts/monitor_performing_arts_sources.py'
+      - 'valcea-clar/scripts/promote_performing_arts_monitors.py'
       - '.github/workflows/valcea-clar-festival-intelligence-monitor.yml'
   schedule:
     - cron: '13 */2 * * *'
@@ -53,10 +55,11 @@ jobs:
           git fetch origin main
           git reset --hard origin/main
 
-      - name: Validate cultural source monitors
+      - name: Validate cultural source contracts
         run: |
           python valcea-clar/scripts/monitor_festival_sources.py --self-test
           python valcea-clar/scripts/monitor_performing_arts_sources.py --self-test
+          python valcea-clar/scripts/promote_performing_arts_monitors.py --check
 
       - name: Monitor festival sources on festival cadence
         id: festival
@@ -80,7 +83,11 @@ jobs:
           set -e
           if [ "$rc" -eq 3 ]; then echo 'new_candidates=true' >> "$GITHUB_OUTPUT"; elif [ "$rc" -eq 0 ]; then echo 'new_candidates=false' >> "$GITHUB_OUTPUT"; else exit "$rc"; fi
 
-      - name: Persist cultural monitor state once
+      - name: Promote performing-arts candidates into general monitor registry
+        if: github.event_name != 'pull_request'
+        run: python valcea-clar/scripts/promote_performing_arts_monitors.py
+
+      - name: Persist cultural source and monitor state once
         if: github.event_name != 'pull_request'
         shell: bash
         run: |
@@ -90,6 +97,7 @@ jobs:
             valcea-clar/editorial/festival_update_candidates.json
             valcea-clar/state/performing_arts_source_state.json
             valcea-clar/editorial/performing_arts_update_candidates.json
+            valcea-clar/editorial/monitor_registry.json
           )
           changed=false
           for p in "${paths[@]}"; do
@@ -97,7 +105,7 @@ jobs:
             if [ -e "$p" ] && ! git ls-files --error-unmatch "$p" >/dev/null 2>&1; then changed=true; fi
           done
           if [ "$changed" != true ]; then
-            echo 'No material cultural monitor state change.'
+            echo 'No material cultural source or monitor change.'
             exit 0
           fi
 
@@ -119,7 +127,7 @@ jobs:
             if git push origin HEAD:main; then exit 0; fi
             sleep $((attempt * 2))
           done
-          echo 'Could not persist cultural monitor state.' >&2
+          echo 'Could not persist cultural source intelligence.' >&2
           exit 1
 
       - name: Dispatch editorial opportunities once for new cultural signals
