@@ -1,8 +1,8 @@
 name: VÂLCEA CLAR Owned Photo Drive Ingest
 
 # Candidate-only Drive ingest is explicit until a read-only Drive credential is
-# configured. PRs validate the deterministic snapshot; workflow_dispatch can
-# refresh from Drive and persist the registry after credentials exist.
+# configured. PRs validate the deterministic snapshot and candidate matching;
+# workflow_dispatch can refresh from Drive and persist candidate metadata.
 on:
   workflow_dispatch:
   pull_request:
@@ -10,7 +10,12 @@ on:
       - 'valcea-clar/social/owned_photo_drive_config.json'
       - 'valcea-clar/social/owned_photo_drive_snapshot.json'
       - 'valcea-clar/social/owned_photo_registry.json'
+      - 'valcea-clar/social/owned_photo_match_policy.json'
+      - 'valcea-clar/social/owned_photo_story_candidates.json'
       - 'valcea-clar/social/drive_owned_photo_ingest.py'
+      - 'valcea-clar/social/owned_photo_story_matcher.py'
+      - 'valcea-clar/site/story_archive.json'
+      - 'valcea-clar/social/story_visuals.json'
       - '.github/workflows/valcea-clar-owned-photo-ingest.yml'
 
 permissions:
@@ -35,12 +40,17 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Validate owned-photo ingest offline
+      - name: Validate owned-photo ingest and matching offline
         run: |
-          python -m py_compile valcea-clar/social/drive_owned_photo_ingest.py
+          python -m py_compile \
+            valcea-clar/social/drive_owned_photo_ingest.py \
+            valcea-clar/social/owned_photo_story_matcher.py
           python valcea-clar/social/drive_owned_photo_ingest.py --self-test
+          python valcea-clar/social/owned_photo_story_matcher.py --self-test
           python valcea-clar/social/drive_owned_photo_ingest.py --from-snapshot
           python valcea-clar/social/drive_owned_photo_ingest.py --validate-only
+          python valcea-clar/social/owned_photo_story_matcher.py
+          python valcea-clar/social/owned_photo_story_matcher.py --validate-only
 
       - name: Detect Drive credential
         id: credential
@@ -63,6 +73,8 @@ jobs:
         run: |
           python valcea-clar/social/drive_owned_photo_ingest.py
           python valcea-clar/social/drive_owned_photo_ingest.py --validate-only
+          python valcea-clar/social/owned_photo_story_matcher.py
+          python valcea-clar/social/owned_photo_story_matcher.py --validate-only
 
       - name: Enforce candidate-only publication contract
         run: |
@@ -70,6 +82,7 @@ jobs:
           import json
           from pathlib import Path
           registry=json.loads(Path('valcea-clar/social/owned_photo_registry.json').read_text(encoding='utf-8'))
+          queue=json.loads(Path('valcea-clar/social/owned_photo_story_candidates.json').read_text(encoding='utf-8'))
           assert registry['publication_authority'] == 'NONE'
           assert registry['candidate_only'] is True
           assert registry['automatic_story_assignment_forbidden'] is True
@@ -80,18 +93,38 @@ jobs:
               assert asset['editor_approved'] is False
               assert asset['publication_eligible'] is False
               assert asset['publication_authority'] == 'NONE'
-          print({'status':'PASS','asset_count':registry['summary']['asset_count']})
+          assert queue['publication_authority'] == 'NONE'
+          assert queue['candidate_only'] is True
+          assert queue['automatic_story_assignment_forbidden'] is True
+          assert queue['category_match_is_not_subject_match'] is True
+          for story in queue['stories'].values():
+              assert story['automatic_story_assignment'] is False
+              assert story['publication_authority'] == 'NONE'
+              for candidate in story['candidates']:
+                  assert candidate['subject_match'] is False
+                  assert candidate['editor_approved'] is False
+                  assert candidate['publication_eligible'] is False
+                  assert candidate['publication_authority'] == 'NONE'
+                  assert candidate['requires_visual_confirmation'] is True
+                  assert candidate['rights_reconfirmation_required'] is True
+          print({
+              'status':'PASS',
+              'asset_count':registry['summary']['asset_count'],
+              'story_candidate_summary':queue['summary'],
+          })
           PY
 
-      - name: Persist Drive snapshot and owned-photo registry conflict-safe
+      - name: Persist Drive inventory and candidate queue conflict-safe
         if: github.event_name == 'workflow_dispatch'
         shell: bash
         run: |
           set -euo pipefail
           snapshot='valcea-clar/social/owned_photo_drive_snapshot.json'
           registry='valcea-clar/social/owned_photo_registry.json'
+          queue='valcea-clar/social/owned_photo_story_candidates.json'
           cp "$snapshot" /tmp/owned-photo-drive-snapshot.json
           cp "$registry" /tmp/owned-photo-registry.json
+          cp "$queue" /tmp/owned-photo-story-candidates.json
           git config user.name 'valcea-clar-owned-photos[bot]'
           git config user.email 'valcea-clar-owned-photos@users.noreply.github.com'
           for attempt in 1 2 3 4 5; do
@@ -99,11 +132,12 @@ jobs:
             git reset --hard origin/main
             cp /tmp/owned-photo-drive-snapshot.json "$snapshot"
             cp /tmp/owned-photo-registry.json "$registry"
-            git add "$snapshot" "$registry"
+            cp /tmp/owned-photo-story-candidates.json "$queue"
+            git add "$snapshot" "$registry" "$queue"
             if git diff --cached --quiet; then exit 0; fi
-            git commit -m 'Refresh VÂLCEA CLAR owned photo inventory'
+            git commit -m 'Refresh VÂLCEA CLAR owned photo candidate inventory'
             if git push origin HEAD:main; then exit 0; fi
             sleep $((attempt * 2))
           done
-          echo 'Could not persist owned-photo inventory after five attempts.' >&2
+          echo 'Could not persist owned-photo candidate inventory after five attempts.' >&2
           exit 1
