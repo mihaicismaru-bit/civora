@@ -26,7 +26,7 @@ on:
 jobs:
   qa:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -96,3 +96,24 @@ jobs:
           assert 'replay' in projector.lower()
           print('SURFACEMC acquisition-only -> PARTENER engine boundary: PASS')
           PY
+
+      - name: Replay current MIPE corpus through PARTENER engine pipeline
+        run: |
+          python partener-eu/ingest/project_mipe_v3_corpus.py
+          python partener-eu/ops/fix_call_lifecycle_event_aliases.py
+          python partener-eu/ingest/build_mipe_canonical_calls.py
+          python partener-eu/ingest/refine_mipe_canonical_calls.py
+          python partener-eu/ingest/enrich_mipe_canonical_facts.py
+          python partener-eu/ingest/build_decision_products.py
+          python partener-eu/ingest/merge_mipe_canonical_dossiers.py
+          python partener-eu/ingest/polish_decision_products.py
+          python partener-eu/ingest/finalize_decision_products.py
+          python partener-eu/ingest/localize_decision_products.py
+          python partener-eu/ingest/refine_afir_public_dossiers.py
+          python partener-eu/ingest/score_dossier_depth.py
+          python partener-eu/ingest/build_mipe_enrichment_seeds.py
+          python partener-eu/ingest/build_call_lifecycle.py
+          python partener-eu/ingest/intelligence_index.py
+          python partener-eu/ops/test_mipe_canonical_pipeline.py
+          python partener-eu/ops/test_dossier_autonomy.py
+          python partener-eu/ops/test_mipe_enrichment_seed_quality.py
