@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "checkpoint": "PARTENER-MIPE-FINAL-CLEANUP-CP09",
+  "room": "🟠30 INGESTION",
+  "state": "PASS",
+  "integrationState": "READY_FOR_MERGE_APPROVAL",
+  "publishable": false,
+  "mergeAuthorized": false,
+  "pr": 624,
+  "base": {
+    "mainSha": "52b7560fda00728f2b53ea51facaf5b61eef33d0",
+    "observedCurrentMainSha": "52b7560fda00728f2b53ea51facaf5b61eef33d0",
+    "drift": "NONE_AT_CHECKPOINT"
+  },
+  "candidate": {
+    "runtimeHeadSha": "71453c00240105ae57db673ec65a57bc839b5a56",
+    "runtimeCommitCount": 1,
+    "changedFiles": 30,
+    "additions": 1051,
+    "deletions": 2724,
+    "stateOrPublicFeedFilesChanged": false,
+    "canonicalFundingFactsChanged": false,
+    "uxFilesChanged": false
+  },
+  "architecture": {
+    "surfacemc": "MIPE_ROMANIA_ACQUISITION_ONLY",
+    "surfacemcPermissions": "CONTENTS_READ",
+    "handoff": "PARTENER_MIPE_ACQUISITION_HANDOFF_V1_SHA256",
+    "partenerEngine": "VERIFY_PROJECT_CANONICALIZE_DOSSIER_LIFECYCLE_INTELLIGENCE_PERSIST",
+    "pagesTrigger": "PARTENER.EU MIPE Engine v3",
+    "hostedCanonical": "DIRECT_ONLY_FAIL_CLOSED",
+    "dualRelay": "MANUAL_READ_ONLY_DIAGNOSTIC",
+    "dualCache": "MANUAL_READ_ONLY_DIAGNOSTIC",
+    "romaniaRecurringOwner": "PARTENER.EU MIPE Windows Crawl v3 @ 17 */3 * * *"
+  },
+  "immutableRuntime": {
+    "mipeResilientSha256": "ad82649456a2aced555ffd43ae768ab275e4b02fb6a32acd6e152097280e500b",
+    "runtimePatchersRemoved": true
+  },
+  "legacyRetirement": {
+    "accessBridgeRemoved": true,
+    "legacyRomaniaRunnerRemoved": true,
+    "browserCollectorsRemoved": true,
+    "genericIpv4SeedPddsIngestorsRemoved": true,
+    "sourcePatchersRemoved": true,
+    "orphanTriggerRemoved": true,
+    "residualExecutableLegacyRefs": 0
+  },
+  "qa": {
+    "finalCleanup": {
+      "runId": 32583826325,
+      "conclusion": "success",
+      "compile": "PASS",
+      "resilientRuntime": "PASS",
+      "routeArbitration": "PASS",
+      "projection": "PASS",
+      "architectureAudit": "PASS",
+      "frontendRegression": "PASS",
+      "diffCheck": "PASS",
+      "artifactId": 9478493914,
+      "artifactName": "partener-mipe-final-cleanup-proof",
+      "artifactSha256": "12889db77861f4ecb741062dbe8c02964f7887eca6b0d58cb17703ed2fa75e53"
+    },
+    "engineReplay": {
+      "runId": 32583826309,
+      "conclusion": "success",
+      "syntaxProjection": "PASS",
+      "surfacemcPartenerBoundary": "PASS",
+      "currentCorpusFullEngineReplay": "PASS",
+      "canonicalPipelineTests": "PASS"
+    }
+  },
+  "replay": {
+    "finalCleanupQa": "workflow_dispatch .github/workflows/partener-eu-mipe-final-cleanup.yml",
+    "engineQa": "workflow_dispatch .github/workflows/partener-eu-mipe-ro-crawl-v3-qa.yml",
+    "manualRomaniaRecovery": "workflow_dispatch .github/workflows/partener-eu-mipe-ro-v3-scheduler.yml"
+  },
+  "rollback": {
+    "strategy": "revert runtime cleanup commit 71453c00240105ae57db673ec65a57bc839b5a56",
+    "restoreParent": "52b7560fda00728f2b53ea51facaf5b61eef33d0",
+    "deletedBlobsRecoverableFromGitHistory": true,
+    "lkgDataPlaneUntouchedByCandidate": true
+  },
+  "remaining": [
+    "close superseded draft cleanup PRs #608-#616",
+    "fresh-main reconciliation immediately before any authorized merge",
+    "merge only after explicit owner approval",
+    "post-merge acquisition/engine/deployment validation"
+  ]
+}
