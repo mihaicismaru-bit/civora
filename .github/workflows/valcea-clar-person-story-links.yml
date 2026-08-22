@@ -1,70 +1,30 @@
-name: VÂLCEA CLAR Person Story Links
+name: VÂLCEA CLAR Person Story Links Compatibility Check
 
-# Maintenance linker, not a newsroom heartbeat.
-# Live Newsroom is the sole canonical runtime writer. Relink people only after
-# People Intelligence has materially refreshed the verified profile graph, or
-# when the linker itself is explicitly changed/tested.
+# Story/profile linking now runs inside overlay_runtime_export.py, the canonical
+# final presentation boundary. Keep only an explicit compatibility check here.
 on:
   workflow_dispatch:
   pull_request:
     paths:
       - 'valcea-clar/scripts/link_person_profiles.py'
-      - '.github/workflows/valcea-clar-person-story-links.yml'
-  workflow_run:
-    workflows: ["VÂLCEA CLAR People Intelligence"]
-    types: [completed]
-    branches: [main]
-  push:
-    branches: [main]
-    paths:
-      - 'valcea-clar/scripts/link_person_profiles.py'
+      - 'valcea-clar/scripts/overlay_runtime_export.py'
       - '.github/workflows/valcea-clar-person-story-links.yml'
 
 permissions:
-  contents: write
-
-concurrency:
-  group: valcea-clar-person-story-links
-  cancel-in-progress: false
+  contents: read
 
 jobs:
-  link:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+  check:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
           python-version: '3.13'
-
-      - name: Validate person story linker
+      - name: Validate person linker
         run: python -m py_compile valcea-clar/scripts/link_person_profiles.py
-
-      - name: Persist bidirectional person links from latest main
-        shell: bash
+      - name: Validate canonical ownership
         run: |
-          set -euo pipefail
-          git config user.name 'vâlcea-clar-person-links[bot]'
-          git config user.email 'valcea-clar-person-links@users.noreply.github.com'
-          for attempt in 1 2 3 4 5; do
-            git fetch origin main
-            git reset --hard origin/main
-            if [ ! -s valcea-clar/site/runtime/people.json ] || [ ! -s valcea-clar/site/runtime/live-feed.json ]; then
-              echo 'People Intelligence or live feed is not materialized yet.'
-              exit 0
-            fi
-            python valcea-clar/scripts/link_person_profiles.py
-            git add valcea-clar/site/runtime/live-feed.json valcea-clar/site/runtime/stiri
-            if git diff --cached --quiet; then
-              echo 'Story-to-person links already current.'
-              exit 0
-            fi
-            git commit -m 'Link VÂLCEA CLAR stories to public person profiles'
-            if git push origin HEAD:main; then exit 0; fi
-            sleep $((attempt * 2))
-          done
-          echo 'Could not persist person story links.' >&2
-          exit 1
+          grep -Fq 'link_person_profiles.py' valcea-clar/scripts/overlay_runtime_export.py
+          echo 'Person story linking is owned by overlay_runtime_export.py.'
