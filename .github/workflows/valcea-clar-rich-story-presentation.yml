@@ -1,75 +1,33 @@
-name: VÂLCEA CLAR Rich Story Presentation
+name: VÂLCEA CLAR Rich Story Presentation Compatibility Check
 
+# Compatibility validator only. Structured fact boxes/sections are now applied
+# inside overlay_runtime_export.py, the single canonical presentation boundary.
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '4-59/5 * * * *'
-  push:
-    branches: [main]
-    paths:
-      - 'valcea-clar/editorial/facts_registry.json'
-      - 'valcea-clar/site/runtime/stiri/manifest.json'
-      - 'valcea-clar/scripts/render_rich_story_sections.py'
-      - '.github/workflows/valcea-clar-rich-story-presentation.yml'
   pull_request:
     paths:
+      - 'valcea-clar/editorial/facts_registry.json'
       - 'valcea-clar/scripts/render_rich_story_sections.py'
+      - 'valcea-clar/scripts/overlay_runtime_export.py'
       - '.github/workflows/valcea-clar-rich-story-presentation.yml'
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: valcea-clar-rich-story-presentation
+  group: valcea-clar-rich-story-presentation-check-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  render:
+  check:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
           python-version: '3.13'
-
-      - name: Validate rich article renderer
+      - name: Validate structured story renderer
         run: |
           python -m py_compile valcea-clar/scripts/render_rich_story_sections.py
           python valcea-clar/scripts/render_rich_story_sections.py --self-test
-
-      - name: Project fact boxes and article sections
-        if: github.event_name != 'pull_request'
-        run: python valcea-clar/scripts/render_rich_story_sections.py
-
-      - name: Persist presentation-only runtime changes
-        if: github.event_name != 'pull_request'
-        shell: bash
-        run: |
-          set -euo pipefail
-          if git diff --quiet -- valcea-clar/site/runtime/stiri; then
-            echo 'Rich story presentation already current.'
-            exit 0
-          fi
-          rm -rf /tmp/rich-story-pages
-          cp -a valcea-clar/site/runtime/stiri /tmp/rich-story-pages
-          git config user.name 'valcea-clar-rich-presentation[bot]'
-          git config user.email 'valcea-clar-rich-presentation@users.noreply.github.com'
-          for attempt in 1 2 3 4 5; do
-            git fetch origin main
-            git reset --hard origin/main
-            cp -a /tmp/rich-story-pages/. valcea-clar/site/runtime/stiri/
-            git add valcea-clar/site/runtime/stiri
-            if git diff --cached --quiet; then
-              echo 'Rich story pages already present on main.'
-              exit 0
-            fi
-            git commit -m 'Render VÂLCEA CLAR structured story presentation'
-            if git push origin HEAD:main; then
-              exit 0
-            fi
-            sleep $((attempt * 2))
-          done
-          exit 1
