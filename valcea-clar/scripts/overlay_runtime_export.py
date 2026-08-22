@@ -63,6 +63,11 @@ def apply_reader_presentation() -> None:
     # writer. Apply them once, immediately after the canonical story renderer.
     run_script("render_rich_story_sections.py")
 
+    # The gambling explainer is a bespoke presentation over an already verified
+    # fact kernel. Apply it in the same transaction instead of a separate cron/
+    # workflow_run writer. WAITING states are non-fatal and the script exits 0.
+    run_script("gambling_story_presentation.py")
+
     stages = (
         "public_ux_currentness.py",
         "public_ux_story_integrity.py",
