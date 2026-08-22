@@ -1,75 +1,31 @@
-name: VÂLCEA CLAR Gambling Story Presentation
+name: VÂLCEA CLAR Gambling Story Presentation Compatibility Check
 
+# Bespoke gambling presentation now runs inside overlay_runtime_export.py, the
+# canonical final presentation boundary. Keep this workflow only for explicit QA.
 on:
   workflow_dispatch:
-  workflow_run:
-    workflows: ["VÂLCEA CLAR Live Newsroom"]
-    types: [completed]
-    branches: [main]
-  push:
-    branches: [main]
+  pull_request:
     paths:
       - 'valcea-clar/scripts/gambling_story_presentation.py'
+      - 'valcea-clar/scripts/overlay_runtime_export.py'
       - '.github/workflows/valcea-clar-gambling-story-presentation.yml'
-  schedule:
-    - cron: '13,43 * * * *'
 
 permissions:
-  contents: write
-
-concurrency:
-  group: valcea-clar-gambling-story-presentation
-  cancel-in-progress: true
+  contents: read
 
 jobs:
-  present:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+  check:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          ref: main
       - uses: actions/setup-python@v6
         with:
           python-version: '3.13'
-      - name: Compile presentation patch
+      - name: Validate presentation module
         run: python -m py_compile valcea-clar/scripts/gambling_story_presentation.py
-      - name: Apply reader presentation when enriched route exists
-        id: present
-        shell: bash
+      - name: Validate canonical ownership
         run: |
-          set -euo pipefail
-          python valcea-clar/scripts/gambling_story_presentation.py | tee /tmp/presentation.json
-          python - <<'PY' >> "$GITHUB_OUTPUT"
-          import json
-          row=json.load(open('/tmp/presentation.json',encoding='utf-8'))
-          print('updated=' + ('true' if row.get('status') == 'UPDATED' else 'false'))
-          PY
-      - name: Persist presented canonical route
-        if: steps.present.outputs.updated == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          page=valcea-clar/site/runtime/stiri/rm-valcea-gambling-authorizations-20260723/index.html
-          cp "$page" /tmp/valcea-gambling-story.html
-          git config user.name 'vâlcea-clar-story-presentation[bot]'
-          git config user.email 'valcea-clar-story-presentation@users.noreply.github.com'
-          for attempt in 1 2 3 4 5; do
-            git fetch origin main
-            git reset --hard origin/main
-            mkdir -p "$(dirname "$page")"
-            cp /tmp/valcea-gambling-story.html "$page"
-            git add "$page"
-            if git diff --cached --quiet; then
-              echo 'Presented gambling route already current.'
-              exit 0
-            fi
-            git commit -m 'Present VÂLCEA CLAR gambling explainer'
-            if git push origin HEAD:main; then
-              exit 0
-            fi
-            sleep $((attempt * 2))
-          done
-          exit 1
+          grep -Fq 'gambling_story_presentation.py' valcea-clar/scripts/overlay_runtime_export.py
+          grep -Fq 'gambling_dossier_enricher_v2.py' .github/workflows/valcea-clar-fact-kernel.yml
+          echo 'Gambling enrichment is owned by Fact Kernel; presentation is owned by overlay_runtime_export.py.'
