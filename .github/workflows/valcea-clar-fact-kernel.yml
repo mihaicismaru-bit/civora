@@ -53,6 +53,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: valcea-clar-fact-kernel-${{ github.event.pull_request.number || 'main' }}
@@ -137,6 +138,14 @@ jobs:
             sleep $((attempt * 2))
           done
 
+      - name: Dispatch Live Newsroom after verified fact transaction
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run valcea-clar-newsroom-live.yml --repo "$GITHUB_REPOSITORY" --ref main
+          echo 'Canonical Live Newsroom dispatch accepted after Fact Kernel.'
+
       - name: Upload bounded fact diagnostics
         if: always()
         uses: actions/upload-artifact@v7
@@ -154,4 +163,4 @@ jobs:
         if: always()
         run: |
           echo 'Fact ownership: one orchestrator / one facts writer / one persist boundary.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Live Newsroom consumes successful Fact Kernel completion; no fact adapter publishes directly.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Live Newsroom is explicitly dispatched after a successful Fact Kernel transaction; its own story gate remains authoritative and idempotent.' >> "$GITHUB_STEP_SUMMARY"
