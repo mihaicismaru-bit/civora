@@ -1,6 +1,8 @@
 name: PARTENER.EU MIPE Romania Collector
 
 on:
+  # Legacy bounded recovery only. Autonomous Romanian MIPE acquisition is owned
+  # by PARTENER.EU MIPE Windows Crawl v3.
   workflow_dispatch:
     inputs:
       persist:
@@ -8,15 +10,9 @@ on:
         required: true
         default: true
         type: boolean
-  push:
-    branches: [main]
-    paths:
-      - 'partener-eu/ingest/mipe_browser_ingest.py'
-      - 'partener-eu/ingest/state/mipe_ro_trigger.txt'
-      - '.github/workflows/partener-eu-mipe-ro-runner.yml'
 
-# Romanian-egress collector. It runs only on a repository-owned Windows x64
-# self-hosted runner and never on pull_request events.
+# Romanian-egress recovery collector. It runs only on a repository-owned Windows
+# x64 self-hosted runner and never runs automatically from source-code pushes.
 
 permissions:
   contents: write
