@@ -1,0 +1,10 @@
+/* PARTENER.EU UX Card Scannability v4 — homepage-only visual compaction. */
+.diHome .diDossierCard .diCardFoot{align-items:flex-end;gap:12px}
+.diHome .diDossierCard .diCardFoot>span{min-width:0;flex:1;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;line-height:1.4}
+.diHome .diDossierCard .diCardFoot>strong{flex:0 0 auto;white-space:nowrap;align-self:flex-end}
+.diHome .diNewsCard>p{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden}
+
+@media(max-width:720px){
+  .diHome .diDossierCard .diCardFoot>span{-webkit-line-clamp:2}
+  .diHome .diNewsCard>p{-webkit-line-clamp:3}
+}

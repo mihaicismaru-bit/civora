@@ -1,0 +1,89 @@
+/* PARTENER.EU UX Optimization v1 — progressive, presentation-only layer. */
+:root{--ux-tap:44px;--ux-focus:#0b6b47;--ux-focus-ring:0 0 0 3px rgba(11,107,71,.18)}
+
+.uxSkip{position:fixed;left:14px;top:10px;z-index:1000;transform:translateY(-160%);background:#13263f;color:#fff;padding:10px 14px;border-radius:10px;font-weight:850;text-decoration:none;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.uxSkip:focus{transform:translateY(0)}
+:where(button,a,input,select,[role="button"]):focus-visible{outline:3px solid var(--ux-focus);outline-offset:2px;box-shadow:var(--ux-focus-ring)}
+:where(button,.navlink,.modebtn,.gotoSearch button,.noviceHeroActions button,.gotoPopular button,.gotoReturn button){min-height:var(--ux-tap)}
+:where(.brand,.card.clickable,.callrow,.diDossierCard)[role="button"]{outline:none}
+:where(.brand,.card.clickable,.callrow,.diDossierCard)[role="button"]:focus-visible{outline:3px solid var(--ux-focus);outline-offset:3px}
+
+.hero h1{font-size:clamp(38px,5vw,58px);text-wrap:balance}
+.hero p,.sectionDesc{max-width:72ch}
+.card h3,.callrow .title,.diDossierCard h3{text-wrap:balance}
+.callrow{min-height:78px}
+.resultbar{padding:7px 2px;border-bottom:1px solid var(--line)}
+.input,.select,.searchBox input,.gotoSearch input{min-height:var(--ux-tap)}
+.badge{line-height:1.2}
+[data-ux-status-translated="1"]{text-transform:none;letter-spacing:.025em}
+
+/* Fix intrinsic grid growth in the decision-intelligence news section. Using
+   minmax(0,...) preserves the intended column ratios while allowing cards to
+   shrink inside the public content width instead of expanding the page. */
+.diHome,.diSection,.diNewsGrid,.diNewsCard{min-width:0;max-width:100%}
+.diNewsGrid{width:100%;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr) minmax(0,.85fr)}
+.diNewsCard{overflow-wrap:anywhere;word-break:normal}
+.diNewsCard>*{min-width:0;max-width:100%}
+
+@media(max-width:1080px){
+  .diNewsGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .diNewsGrid .diNewsCard:first-child{grid-column:1/-1}
+}
+
+@media(max-width:900px){
+  .topbar{backdrop-filter:blur(16px)}
+  .nav{height:auto;min-height:64px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 12px;padding-top:9px;padding-bottom:9px}
+  .brand{align-self:center}
+  .modebtn{justify-self:end;padding:9px 11px;white-space:nowrap;font-size:12px}
+  .navlinks{display:flex!important;grid-column:1/-1;order:3;width:100%;gap:6px;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x proximity;padding:2px 0 3px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .navlinks::-webkit-scrollbar{display:none}
+  .navlink{flex:0 0 auto;scroll-snap-align:start;white-space:nowrap;background:#f5f7f6;border:1px solid #e2e8e4;padding:9px 12px}
+  .main{padding-top:22px}
+  .hero{padding-top:26px;gap:18px}
+  .hero h1{font-size:clamp(36px,9vw,46px);line-height:1.04;margin-top:9px}
+  .hero p{font-size:16px;line-height:1.5}
+  .noviceHeroActions{gap:8px}
+  .noviceHeroActions button{flex:1 1 180px}
+  .facts{gap:8px}
+  .callrow{gap:9px;padding:15px}
+  .callrow>div:nth-child(3),.callrow>div:nth-child(4){display:inline-flex;align-items:center;min-height:28px}
+  .gotoOrientation{display:none}
+  .gotoPromise{margin-top:18px}
+  .gotoPromiseGrid{gap:8px}
+  .detailHeader{padding:22px;border-radius:19px}
+  .detailHeader h1{font-size:clamp(28px,7.5vw,36px)}
+  .tabs{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none;padding-bottom:2px}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{flex:0 0 auto;min-height:var(--ux-tap)}
+  .source{align-items:flex-start;flex-direction:column}
+}
+
+@media(max-width:720px){
+  .diNewsGrid{grid-template-columns:minmax(0,1fr)}
+  .diNewsGrid .diNewsCard:first-child{grid-column:auto}
+}
+
+@media(max-width:560px){
+  .nav{padding-left:14px;padding-right:14px}
+  .main{padding-left:14px;padding-right:14px}
+  .brand{font-size:21px}
+  .hero{padding-bottom:20px}
+  .hero h1{font-size:clamp(33px,10vw,42px)}
+  .noviceProof{gap:6px}
+  .noviceProof span{flex:1 1 100%}
+  .gotoSearch{margin-top:12px}
+  .gotoSearch small{font-size:11px;line-height:1.45}
+  .stats{grid-template-columns:1fr 1fr}
+  .stat{padding:14px}
+  .stat .n{font-size:24px}
+  .sectionHead{align-items:flex-start;flex-direction:column}
+  .sectionHead .btn{width:100%}
+  .facts{grid-template-columns:1fr 1fr}
+  .fact{min-width:0}
+  .fact .v{overflow-wrap:anywhere}
+  .gotoPopular button{min-height:40px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;transition-duration:.001ms!important;animation-duration:.001ms!important;animation-iteration-count:1!important}
+}
