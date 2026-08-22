@@ -1,0 +1,46 @@
+{
+  "schema": "PARTENER_MIPE_FIXER_IDEMPOTENCE_V1",
+  "generatedAt": "2026-08-22T13:20:19.213690Z",
+  "target": "partener-eu/ingest/mipe_resilient_ingest.py",
+  "beforeSha256": "ad82649456a2aced555ffd43ae768ab275e4b02fb6a32acd6e152097280e500b",
+  "afterSha256": "ad82649456a2aced555ffd43ae768ab275e4b02fb6a32acd6e152097280e500b",
+  "mutated": false,
+  "restorationVerified": true,
+  "allFixersRan": true,
+  "fixerCount": 5,
+  "results": [
+    {
+      "fixer": "partener-eu/ops/fix_mipe_resilient_classifier.py",
+      "returnCode": 0,
+      "stdout": "MIPE classifier already patched\n",
+      "stderr": ""
+    },
+    {
+      "fixer": "partener-eu/ops/fix_mipe_resilient_runtime.py",
+      "returnCode": 0,
+      "stdout": "MIPE runtime bounded concurrency import: already applied\nMIPE runtime index cache-bust path: already applied\nMIPE runtime candidate bound: already applied\nMIPE runtime search result bound: already applied\nMIPE runtime direct timeout: already applied\nMIPE runtime reader timeout: transport retired by direct-only policy\nMIPE runtime search timeout: already applied\nMIPE runtime legacy feed provenance normalization: already applied\nMIPE runtime parallel candidate fetch: already applied\nMIPE runtime MIPE asset cache bust: already applied\n",
+      "stderr": ""
+    },
+    {
+      "fixer": "partener-eu/ops/fix_mipe_content_quality.py",
+      "returnCode": 0,
+      "stdout": "MIPE direct-provenance policy: updated\n",
+      "stderr": ""
+    },
+    {
+      "fixer": "partener-eu/ops/fix_mipe_first_party_relay.py",
+      "returnCode": 0,
+      "stdout": "MIPE first-party relay base64 import: already applied\nMIPE first-party relay os import: already applied\nMIPE first-party relay relay URL: already applied\nMIPE first-party relay relay validator: already applied\nMIPE first-party relay relay fallback: applied\nMIPE first-party relay relay provenance tier: applied\n",
+      "stderr": ""
+    },
+    {
+      "fixer": "partener-eu/ops/fix_mipe_dual_relay.py",
+      "returnCode": 0,
+      "stdout": "MIPE dual relay helper: already applied\nMIPE dual relay fetch path: inserted before first-party relay\n",
+      "stderr": ""
+    }
+  ],
+  "unexpectedError": null,
+  "status": "PASS",
+  "policy": "Runtime fixer removal is permitted only when status=PASS, beforeSha256=afterSha256, and restorationVerified=true."
+}
