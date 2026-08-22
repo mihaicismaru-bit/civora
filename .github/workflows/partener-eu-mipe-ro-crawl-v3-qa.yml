@@ -2,43 +2,118 @@ name: PARTENER.EU MIPE Windows Crawl v3 QA
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'partener-eu/ingest/mipe_windows_crawl_v3.py'
+      - 'partener-eu/ingest/project_mipe_v3_corpus.py'
+      - 'partener-eu/ops/test_mipe_v3_projection.py'
+      - '.github/workflows/partener-eu-mipe-ro-crawl-v3.yml'
+      - '.github/workflows/partener-eu-mipe-engine-v3.yml'
+      - '.github/workflows/partener-eu-pages.yml'
+      - '.github/workflows/partener-eu-mipe-ro-crawl-v3-qa.yml'
   push:
     branches: [main]
     paths:
       - 'partener-eu/ingest/mipe_windows_crawl_v3.py'
-      - 'partener-eu/ingest/mipe_corpus_enrich.py'
+      - 'partener-eu/ingest/project_mipe_v3_corpus.py'
+      - 'partener-eu/ops/test_mipe_v3_projection.py'
       - '.github/workflows/partener-eu-mipe-ro-crawl-v3.yml'
+      - '.github/workflows/partener-eu-mipe-engine-v3.yml'
+      - '.github/workflows/partener-eu-pages.yml'
       - '.github/workflows/partener-eu-mipe-ro-crawl-v3-qa.yml'
 
 jobs:
   qa:
     runs-on: ubuntu-latest
-    timeout-minutes: 4
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - name: Python syntax
+
+      - name: Python syntax and corpus projection regression
         run: |
           python -m py_compile partener-eu/ingest/mipe_windows_crawl_v3.py
-          python -m py_compile partener-eu/ingest/mipe_corpus_enrich.py
-      - name: Static crawler contract
+          python -m py_compile partener-eu/ingest/project_mipe_v3_corpus.py
+          python partener-eu/ops/test_mipe_v3_projection.py
+
+      - name: Static SURFACEMC -> PARTENER boundary contract
         run: |
           python - <<'PY'
           from pathlib import Path
+
           crawler=Path('partener-eu/ingest/mipe_windows_crawl_v3.py').read_text(encoding='utf-8')
-          workflow=Path('.github/workflows/partener-eu-mipe-ro-crawl-v3.yml').read_text(encoding='utf-8')
-          required=[
-            'schemaVersion": 3','playwright-edge-direct-romania-v3','MAX_DOCUMENTS',
-            'extract_pdf','parse_docx','CALL_LIFECYCLE_EVENT','RESULTS_PUBLISHED',
-            'CONTRACTING_UPDATE','textPreview','CANONICAL_OFFICIAL_FETCH',
-          ]
-          for token in required: assert token in crawler, token
-          assert 'runs-on: [self-hosted, Windows, X64]' in workflow
-          assert 'pypdf' in workflow and 'playwright' in workflow
-          assert 'build_call_lifecycle.py' in workflow
-          assert 'mipe_ro_corpus.json' in workflow
-          assert 'actions/upload-artifact@v4' in workflow
-          print('MIPE Windows crawler v3 static contract: PASS')
+          acquisition=Path('.github/workflows/partener-eu-mipe-ro-crawl-v3.yml').read_text(encoding='utf-8')
+          engine=Path('.github/workflows/partener-eu-mipe-engine-v3.yml').read_text(encoding='utf-8')
+          pages=Path('.github/workflows/partener-eu-pages.yml').read_text(encoding='utf-8')
+          projector=Path('partener-eu/ingest/project_mipe_v3_corpus.py').read_text(encoding='utf-8')
+
+          for token in (
+              'schemaVersion": 3','playwright-edge-direct-romania-v3','MAX_DOCUMENTS',
+              'extract_pdf','parse_docx','CALL_LIFECYCLE_EVENT','RESULTS_PUBLISHED',
+              'CONTRACTING_UPDATE','textPreview','CANONICAL_OFFICIAL_FETCH',
+          ):
+              assert token in crawler, token
+
+          guard='if os.getenv("MIPE_ACQUISITION_ONLY", "").strip().lower() in {"1", "true", "yes"}:'
+          assert crawler.count(guard) == 1
+          assert crawler.index(guard) > crawler.index('CORPUS_PATH.write_text')
+          assert crawler.index(guard) < crawler.index('prior_items = {i.get("url")')
+
+          assert 'runs-on: [self-hosted, Windows, X64]' in acquisition
+          assert "MIPE_ACQUISITION_ONLY: '1'" in acquisition
+          assert 'permissions:\n  contents: read' in acquisition
+          assert 'mipe-ro-acquisition-v3' in acquisition
+          assert 'PARTENER_MIPE_ACQUISITION_HANDOFF_V1' in acquisition
+          assert 'MIPE_STATE_BEFORE_SHA' in acquisition and 'MIPE_FEED_BEFORE_SHA' in acquisition
+          for forbidden in (
+              'build_mipe_canonical_calls.py', 'build_decision_products.py',
+              'build_call_lifecycle.py', 'intelligence_index.py',
+              'Refresh MIPE Romanian corpus, targeted deep dossiers and lifecycle',
+          ):
+              assert forbidden not in acquisition, forbidden
+          assert 'contents: write' not in acquisition
+
+          assert "- 'PARTENER.EU MIPE Windows Crawl v3'" in engine
+          assert 'actions/download-artifact@v4' in engine
+          assert 'PARTENER_MIPE_ACQUISITION_HANDOFF_V1' in engine
+          assert 'corpusSha256' in engine
+          assert 'project_mipe_v3_corpus.py' in engine
+          for required in (
+              'build_mipe_canonical_calls.py','build_decision_products.py',
+              'build_call_lifecycle.py','intelligence_index.py',
+              'mipe_engine_v3_checkpoint.json','Process MIPE Romanian corpus through PARTENER engine v3',
+          ):
+              assert required in engine, required
+          assert 'actions: read' in engine and 'contents: write' in engine
+
+          assert 'PARTENER.EU MIPE Engine v3' in pages
+          assert "- 'PARTENER.EU MIPE Windows Crawl v3'" not in pages
+          assert 'def build_projection(' in projector
+          assert 'CANONICAL_OFFICIAL_FETCH' in projector
+          assert 'replay' in projector.lower()
+          print('SURFACEMC acquisition-only -> PARTENER engine boundary: PASS')
           PY
+
+      - name: Replay current MIPE corpus through PARTENER engine pipeline
+        run: |
+          python partener-eu/ingest/project_mipe_v3_corpus.py
+          python partener-eu/ops/fix_call_lifecycle_event_aliases.py
+          python partener-eu/ingest/build_mipe_canonical_calls.py
+          python partener-eu/ingest/refine_mipe_canonical_calls.py
+          python partener-eu/ingest/enrich_mipe_canonical_facts.py
+          python partener-eu/ingest/build_decision_products.py
+          python partener-eu/ingest/merge_mipe_canonical_dossiers.py
+          python partener-eu/ingest/polish_decision_products.py
+          python partener-eu/ingest/finalize_decision_products.py
+          python partener-eu/ingest/localize_decision_products.py
+          python partener-eu/ingest/refine_afir_public_dossiers.py
+          python partener-eu/ingest/score_dossier_depth.py
+          python partener-eu/ingest/build_mipe_enrichment_seeds.py
+          python partener-eu/ingest/build_call_lifecycle.py
+          python partener-eu/ingest/intelligence_index.py
+          python partener-eu/ops/test_mipe_canonical_pipeline.py
+          python partener-eu/ops/test_dossier_autonomy.py
+          python partener-eu/ops/test_mipe_enrichment_seed_quality.py
