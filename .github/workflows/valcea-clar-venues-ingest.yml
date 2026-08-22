@@ -19,7 +19,6 @@ on:
       - "valcea-clar/scripts/promote_verified_venues.py"
       - "valcea-clar/scripts/quarantine_venue_identity_collisions.py"
       - "valcea-clar/scripts/build_public_data.py"
-      - "valcea-clar/scripts/build_live_feed.py"
       - "valcea-clar/ops/ingest_aliases.json"
       - ".github/workflows/valcea-clar-venues-ingest.yml"
   schedule:
@@ -99,10 +98,6 @@ jobs:
         if: github.event_name != 'pull_request' && steps.promotion.outputs.changed == 'true'
         run: python valcea-clar/scripts/build_public_data.py
 
-      - name: Rebuild live site feed with complete verified venue catalogue
-        if: github.event_name != 'pull_request' && steps.promotion.outputs.changed == 'true'
-        run: python valcea-clar/scripts/build_live_feed.py
-
       - name: Reconcile fresh ingestion with the curated public catalogue
         run: python valcea-clar/scripts/reconcile_ingest.py
 
@@ -141,11 +136,16 @@ jobs:
           )
           PY
 
-      - name: Persist validated ingestion, discovery, promotion and live projection conflict-safe
+      - name: Persist validated ingestion, discovery and venue projection conflict-safe
         if: success() && github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
+          # This workflow intentionally does NOT own site/runtime/live-feed.json.
+          # Newsroom publication is a separate serialization boundary; persisting
+          # a feed captured before main advances can roll back newly published
+          # stories. Venue state is persisted independently and is projected into
+          # the public feed by the newsroom on its next canonical render.
           files=(
             valcea-clar/ingest/state/venues.json
             valcea-clar/ingest/state/source_health.json
@@ -165,7 +165,6 @@ jobs:
             valcea-clar/data/sources.json
             valcea-clar/web/data/places.json
             valcea-clar/web/data/meta.json
-            valcea-clar/site/runtime/live-feed.json
           )
           rm -rf /tmp/valcea-clar-ingest-state
           mkdir -p /tmp/valcea-clar-ingest-state
