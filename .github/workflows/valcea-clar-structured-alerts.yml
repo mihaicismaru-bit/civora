@@ -1,41 +1,42 @@
-name: VÂLCEA CLAR Structured Primary Alerts
+name: VÂLCEA CLAR Editorial Opportunity Engine
 
-# Rapid T1 ingest owns only the verified event stream. It must never mutate the
-# canonical facts registry directly. A changed structured_alert_events.json push
-# triggers Fact Kernel, which is the single facts writer, then Live Newsroom.
+# The queue is a deterministic projection of durable monitor/fact state. Rebuild
+# it when those inputs change; a separate 30-minute polling loop adds no signal.
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '2-57/5 * * * *'
   push:
     branches: [main]
     paths:
-      - 'local-news-os/core/structured_alert_ingest.py'
-      - 'local-news-os/instances/valcea/structured_alert_pack.json'
-      - 'local-news-os/instances/valcea/source_pack.json'
-      - 'valcea-clar/scripts/compose_structured_alerts.py'
+      - 'valcea-clar/editorial/editorial_product_policy.json'
+      - 'valcea-clar/editorial/monitor_registry.json'
+      - 'valcea-clar/editorial/monitor_state.json'
+      - 'valcea-clar/editorial/infrastructure_monitor_registry.json'
+      - 'valcea-clar/editorial/market_intelligence_registry.json'
+      - 'valcea-clar/editorial/fact_kernel_registry.json'
+      - 'valcea-clar/editorial/facts_registry.json'
+      - 'valcea-clar/scripts/editorial_opportunity_engine.py'
+      - 'valcea-clar/scripts/performing_arts_opportunity_adapter.py'
       - 'valcea-clar/scripts/prune_volatile_json_changes.py'
-      - '.github/workflows/valcea-clar-structured-alerts.yml'
+      - '.github/workflows/valcea-clar-editorial-opportunity-engine.yml'
   pull_request:
     paths:
-      - 'local-news-os/core/structured_alert_ingest.py'
-      - 'local-news-os/instances/valcea/structured_alert_pack.json'
-      - 'local-news-os/instances/valcea/source_pack.json'
-      - 'valcea-clar/scripts/compose_structured_alerts.py'
+      - 'valcea-clar/editorial/editorial_product_policy.json'
+      - 'valcea-clar/scripts/editorial_opportunity_engine.py'
+      - 'valcea-clar/scripts/performing_arts_opportunity_adapter.py'
       - 'valcea-clar/scripts/prune_volatile_json_changes.py'
-      - '.github/workflows/valcea-clar-structured-alerts.yml'
+      - '.github/workflows/valcea-clar-editorial-opportunity-engine.yml'
 
 permissions:
   contents: write
 
 concurrency:
-  group: valcea-clar-structured-alerts-${{ github.event.pull_request.number || 'main' }}
+  group: valcea-clar-editorial-opportunity-engine-${{ github.event.pull_request.number || 'main' }}
   cancel-in-progress: true
 
 jobs:
-  structured-alerts:
+  opportunities:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v6
         with:
@@ -44,73 +45,53 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Validate structured-alert contracts offline
+      - name: Validate opportunity contracts
         run: |
           python -m py_compile \
-            local-news-os/core/structured_alert_ingest.py \
-            valcea-clar/scripts/compose_structured_alerts.py \
+            valcea-clar/scripts/editorial_opportunity_engine.py \
+            valcea-clar/scripts/performing_arts_opportunity_adapter.py \
             valcea-clar/scripts/prune_volatile_json_changes.py
-          python local-news-os/core/structured_alert_ingest.py --self-test
-          python valcea-clar/scripts/compose_structured_alerts.py --self-test
+          python valcea-clar/scripts/editorial_opportunity_engine.py --self-test
+          python valcea-clar/scripts/editorial_opportunity_engine.py --check
+          python valcea-clar/scripts/performing_arts_opportunity_adapter.py --self-test
           python valcea-clar/scripts/prune_volatile_json_changes.py --self-test
 
-      - name: Ingest current geo-scoped INFOTRAFIC alerts
+      - name: Materialize ranked editorial opportunity queue
         run: |
-          python local-news-os/core/structured_alert_ingest.py \
-            --instance valcea \
-            --output valcea-clar/editorial/structured_alert_events.json
+          python valcea-clar/scripts/editorial_opportunity_engine.py
+          python valcea-clar/scripts/performing_arts_opportunity_adapter.py
+          python valcea-clar/scripts/performing_arts_opportunity_adapter.py --check
 
-      - name: Validate event-to-fact composition without writing facts
-        run: |
-          python valcea-clar/scripts/compose_structured_alerts.py \
-            --events valcea-clar/editorial/structured_alert_events.json \
-            --facts-registry valcea-clar/editorial/facts_registry.json \
-            --no-write
-
-      - name: Validate runtime output contract
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          events=json.loads(Path('valcea-clar/editorial/structured_alert_events.json').read_text(encoding='utf-8'))
-          assert events['contract']=='LOCAL_NEWS_OS_STRUCTURED_ALERT_EVENTS_V1'
-          assert events['events_are_reader_stories'] is False
-          assert events['publication_authority']=='PRIMARY_STRUCTURED_EVENT_ONLY'
-          for row in events.get('events',[]):
-              assert row.get('source_tier')=='T1'
-              assert row.get('issued_at')
-              assert row.get('source_url')
-              assert row.get('body_sha256')
-          print({'status':'PASS','events':events.get('event_count',0)})
-          PY
-
-      - name: Persist only the verified structured event stream
+      - name: Persist opportunity queue conflict-safe
         if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
-          cp valcea-clar/editorial/structured_alert_events.json /tmp/valcea-structured-alert-events.json
-          git config user.name 'vâlcea-clar-structured-alerts[bot]'
-          git config user.email 'valcea-clar-structured-alerts@users.noreply.github.com'
-          for attempt in 1 2 3 4 5; do
+          path='valcea-clar/editorial/editorial_opportunity_queue.json'
+          if [ ! -s "$path" ]; then
+            echo 'Opportunity queue was not materialized.' >&2
+            exit 1
+          fi
+          cp "$path" /tmp/editorial-opportunity-queue.json
+          git config user.name 'valcea-clar-opportunity-engine[bot]'
+          git config user.email 'valcea-clar-opportunity-engine@users.noreply.github.com'
+          for attempt in 1 2 3 4; do
             git fetch origin main
             git reset --hard origin/main
-            mkdir -p valcea-clar/editorial
-            cp /tmp/valcea-structured-alert-events.json valcea-clar/editorial/structured_alert_events.json
+            cp /tmp/editorial-opportunity-queue.json "$path"
             python valcea-clar/scripts/prune_volatile_json_changes.py \
               --ignore-key generated_at \
-              valcea-clar/editorial/structured_alert_events.json
-            git add valcea-clar/editorial/structured_alert_events.json
+              --ignore-key detected_at \
+              --ignore-key observed_at \
+              "$path"
+            git add "$path"
             if git diff --cached --quiet; then
-              echo 'Structured primary event stream has no semantic change.'
+              echo 'Editorial opportunity queue has no semantic change.'
               exit 0
             fi
-            git commit -m 'Refresh VÂLCEA CLAR structured primary events'
-            if git push origin HEAD:main; then
-              echo 'Fact Kernel will consume this durable event change via its push trigger.'
-              exit 0
-            fi
+            git commit -m 'Refresh VÂLCEA CLAR editorial opportunity queue'
+            if git push origin HEAD:main; then exit 0; fi
             sleep $((attempt * 2))
           done
-          echo 'Could not persist structured primary events without conflict.' >&2
+          echo 'Could not persist editorial opportunity queue after four attempts.' >&2
           exit 1
