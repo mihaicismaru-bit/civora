@@ -27,15 +27,7 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Assemble ephemeral diagnostic runtime
-        run: |
-          python partener-eu/ops/fix_mipe_resilient_classifier.py
-          python partener-eu/ops/fix_mipe_resilient_runtime.py
-          python partener-eu/ops/fix_mipe_content_quality.py
-          python partener-eu/ops/fix_mipe_first_party_relay.py
-          python partener-eu/ops/fix_mipe_dual_relay.py
-
-      - name: Syntax and parser regression
+      - name: Validate immutable diagnostic runtime
         run: |
           python -m py_compile partener-eu/ingest/mipe_resilient_ingest.py
           python partener-eu/ops/test_mipe_resilient_ingest.py

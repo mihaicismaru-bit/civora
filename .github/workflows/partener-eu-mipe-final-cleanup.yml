@@ -1,0 +1,73 @@
+name: PARTENER.EU MIPE Final Cleanup QA
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/partener-eu-mipe-*.yml'
+      - '.github/workflows/partener-eu-pages.yml'
+      - '.github/workflows/partener-eu-validation.yml'
+      - 'partener-eu/ingest/mipe_*.py'
+      - 'partener-eu/ingest/project_mipe_v3_corpus.py'
+      - 'partener-eu/ops/test_mipe_*.py'
+  push:
+    branches:
+      - 'agent/partener-mipe-final-cleanup-20260822'
+    paths:
+      - '.github/workflows/partener-eu-mipe-*.yml'
+      - '.github/workflows/partener-eu-pages.yml'
+      - '.github/workflows/partener-eu-validation.yml'
+      - 'partener-eu/ingest/mipe_*.py'
+      - 'partener-eu/ingest/project_mipe_v3_corpus.py'
+      - 'partener-eu/ops/test_mipe_*.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: partener-eu-mipe-final-cleanup-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile active MIPE runtime
+        run: |
+          python -m py_compile partener-eu/ingest/mipe_resilient_ingest.py
+          python -m py_compile partener-eu/ingest/mipe_direct_only_ingest.py
+          python -m py_compile partener-eu/ingest/mipe_windows_crawl_v3.py
+          python -m py_compile partener-eu/ingest/project_mipe_v3_corpus.py
+          python -m py_compile partener-eu/ops/test_mipe_final_cleanup.py
+
+      - name: Runtime and route arbitration regressions
+        run: |
+          python partener-eu/ops/test_mipe_resilient_ingest.py
+          python partener-eu/ops/test_mipe_route_arbitration.py
+          python partener-eu/ops/test_mipe_v3_projection.py
+
+      - name: Final cleanup architecture audit
+        run: python partener-eu/ops/test_mipe_final_cleanup.py
+
+      - name: Existing frontend fail-closed regression
+        run: python partener-eu/ops/test_frontend_regression.py
+
+      - name: Diff hygiene
+        run: git diff --check
+
+      - name: Upload final cleanup proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-mipe-final-cleanup-proof
+          path: partener-eu/ops/mipe_final_cleanup_proof.json
+          if-no-files-found: warn

@@ -318,6 +318,53 @@ def fetch_dual_relay(canonical: str) -> tuple[dict[str, Any] | None, dict[str, A
     return parsed_reader, evidence
 
 
+def fetch_first_party_relay(canonical: str) -> dict[str, Any]:
+    """Fetch raw official bytes through a controlled PARTENER.EU relay.
+
+    The relay cannot turn a third-party page into an official source. Both the
+    requested canonical URL and the relay-reported final URL must remain on the
+    official allowlist, and the body hash is recomputed locally.
+    """
+    if not MIPE_RELAY_URL:
+        return {"ok": False, "error": "relay_disabled"}
+    relay_target = MIPE_RELAY_URL + ("&" if "?" in MIPE_RELAY_URL else "?") + urllib.parse.urlencode({"url": canonical})
+    response = fetch(relay_target, timeout=30, attempts=1, accept="application/json")
+    if not response.get("ok"):
+        return {"ok": False, "error": response.get("error", "relay_unavailable"), "relay": MIPE_RELAY_URL}
+    try:
+        payload = json.loads(response["data"].decode("utf-8", errors="strict"))
+        requested = canonicalize(str(payload.get("canonicalUrl") or ""))
+        final_url = canonicalize(str(payload.get("finalUrl") or payload.get("canonicalUrl") or ""))
+        upstream_status = int(payload.get("upstreamStatus") or payload.get("status") or 0)
+        encoded = str(payload.get("bodyBase64") or "")
+        body = base64.b64decode(encoded, validate=True)
+        claimed_hash = str(payload.get("sha256") or "").lower()
+        local_hash = hashlib.sha256(body).hexdigest()
+        if requested != canonical:
+            raise ValueError("relay_canonical_mismatch")
+        if not final_url or not is_official(final_url):
+            raise ValueError("relay_final_url_not_official")
+        if not 200 <= upstream_status < 400:
+            raise ValueError(f"relay_upstream_status_{upstream_status}")
+        if not body or len(body) > MAX_BYTES:
+            raise ValueError("relay_body_size_invalid")
+        if not claimed_hash or claimed_hash != local_hash:
+            raise ValueError("relay_sha256_mismatch")
+        return {
+            "ok": True,
+            "status": upstream_status,
+            "url": final_url,
+            "content_type": str(payload.get("contentType") or "application/octet-stream"),
+            "data": body,
+            "relay": MIPE_RELAY_URL,
+            "relay_region": payload.get("relayRegion"),
+            "relay_fetched_at": payload.get("fetchedAt"),
+            "relay_sha256": local_hash,
+        }
+    except Exception as exc:  # noqa: BLE001 - persisted as transport evidence
+        return {"ok": False, "error": f"relay_validation:{type(exc).__name__}:{exc}", "relay": MIPE_RELAY_URL}
+
+
 def reader_url(target: str) -> str:
     # Reader accepts the original URL after the prefix. http is intentionally
     # tried because Reader handles the upstream redirect itself and some MIPE
