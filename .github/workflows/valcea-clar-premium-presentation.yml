@@ -1,38 +1,31 @@
-name: VÂLCEA CLAR Premium Presentation
+name: VÂLCEA CLAR Premium Presentation Compatibility Check
 
+# Compatibility validator only.
+# Reader-facing presentation is now part of overlay_runtime_export.py, the
+# canonical final runtime/export boundary. This workflow must not run on a clock
+# or mutate main.
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '29 * * * *'
-  push:
-    branches: [main]
+  pull_request:
     paths:
-      - 'valcea-clar/site/runtime/**'
-      - 'valcea-clar/site/story_archive.json'
       - 'valcea-clar/site/navigation.json'
-      - 'valcea-clar/site/indexing_routes.json'
       - 'valcea-clar/site/legal/legal_pages.json'
-      - 'valcea-clar/editorial/publication_holds.json'
       - 'valcea-clar/scripts/public_ux_*.py'
       - 'valcea-clar/scripts/build_sites_export.py'
       - 'valcea-clar/scripts/overlay_runtime_export.py'
       - '.github/workflows/valcea-clar-premium-presentation.yml'
-  pull_request:
-    paths:
-      - 'valcea-clar/**'
-      - '.github/workflows/valcea-clar-premium-presentation.yml'
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: valcea-clar-premium-presentation-${{ github.event.pull_request.number || 'main' }}
-  cancel-in-progress: false
+  group: valcea-clar-premium-presentation-check-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  presentation:
+  presentation-check:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
         with:
@@ -42,137 +35,48 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Validate public UX engines
+      - name: Validate public UX compatibility modules
         run: |
           python -m py_compile \
             valcea-clar/scripts/public_ux_reset.py \
             valcea-clar/scripts/public_ux_currentness.py \
             valcea-clar/scripts/public_ux_story_integrity.py \
             valcea-clar/scripts/public_ux_manifest.py \
-            valcea-clar/scripts/public_ux_overlay.py \
             valcea-clar/scripts/public_ux_legal.py \
-            valcea-clar/scripts/public_ux_export_contract.py
+            valcea-clar/scripts/public_ux_export_contract.py \
+            valcea-clar/scripts/overlay_runtime_export.py
           python valcea-clar/scripts/public_ux_currentness.py --self-test
           python valcea-clar/scripts/public_ux_story_integrity.py --self-test
 
-      - name: Build canonical reader presentation
+      - name: Verify canonical export owns reader presentation
         run: |
           set -euo pipefail
-          python valcea-clar/scripts/public_ux_currentness.py
-          python valcea-clar/scripts/public_ux_story_integrity.py
-          python valcea-clar/scripts/public_ux_manifest.py
-          python valcea-clar/scripts/public_ux_currentness.py --check
-          python valcea-clar/scripts/public_ux_story_integrity.py --check
-          python valcea-clar/scripts/public_ux_manifest.py --check
-
-      - name: Preserve canonical story web integrity
-        run: python valcea-clar/scripts/smoke_web.py
-
-      - name: Build synchronized existing-site payload
-        run: |
-          set -euo pipefail
+          python valcea-clar/scripts/build_public_data.py
+          python valcea-clar/scripts/repair_continuous_frontpage.py
           python valcea-clar/scripts/build_sites_export.py
-          python valcea-clar/scripts/public_ux_overlay.py
-          python valcea-clar/scripts/public_ux_legal.py
+          python valcea-clar/scripts/overlay_runtime_export.py
           python valcea-clar/scripts/public_ux_export_contract.py
-
-      - name: Validate public structure and export contract
-        run: |
+          python valcea-clar/scripts/smoke_web.py
           python - <<'PY'
           import json
           from pathlib import Path
           root=Path('valcea-clar')
           runtime=root/'site/runtime'
-          nav=json.loads((root/'site/navigation.json').read_text(encoding='utf-8'))
-          state=json.loads((root/'site/public_ux_state.json').read_text(encoding='utf-8'))
           manifest=json.loads((root/'dist/chatgpt-sites/manifest.json').read_text(encoding='utf-8'))
-          assert nav['contract_id'] == 'valcea-clar-primary-v2'
-          assert state['policy']['monitoring_is_news'] is False
-          assert state['policy']['cross_category_fill'] is False
-          assert (runtime/'stiri/index.html').is_file()
-          assert (runtime/'despre/index.html').is_file()
-          home=(runtime/'index.html').read_text(encoding='utf-8')
-          news=(runtime/'stiri/index.html').read_text(encoding='utf-8')
-          assert 'REDACTIE STORY-FIRST' not in home.upper()
-          assert 'olanesti-bridge-monitor' not in home
-          assert 'olanesti-bridge-monitor' not in news
-          assert 'data-nav-contract="valcea-clar-primary-v2"' in home
-          assert 'data-nav-contract="valcea-clar-primary-v2"' in news
-          for page in ('termeni/index.html','confidentialitate/index.html','despre/index.html'):
+          assert manifest['target']['reader_presentation_owner'] == 'overlay_runtime_export'
+          for page in ('index.html','stiri/index.html','despre/index.html','termeni/index.html','confidentialitate/index.html'):
               text=(runtime/page).read_text(encoding='utf-8')
               assert 'data-nav-contract="valcea-clar-primary-v2"' in text, page
-          culture=state['story_ids']
-          story_manifest=json.loads((runtime/'stiri/manifest.json').read_text(encoding='utf-8'))
-          assert {row['id'] for row in story_manifest['stories']} == set(culture)
-          routes={row['path'] for row in manifest['routes']}
-          assert '/stiri/' in routes
-          assert '/despre/' in routes
-          assert '/stiri/ansambluri-rezidentiale-ramnicu-valcea/' in routes
-          redirect=(runtime/'stiri/ansambluri-rezidentiale-ramnicu-valcea/index.html').read_text(encoding='utf-8')
-          assert 'noindex,follow' in redirect and 'url=/stiri/' in redirect
-          print('VÂLCEA CLAR public structure contract: PASS')
+          print('VÂLCEA CLAR premium compatibility: PASS')
           PY
 
-      - name: Persist canonical presentation conflict-safe
-        if: github.event_name != 'pull_request'
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name 'valcea-clar-presentation[bot]'
-          git config user.email 'valcea-clar-presentation@users.noreply.github.com'
-
-          for attempt in 1 2 3 4 5; do
-            git fetch origin main
-            git reset --hard origin/main
-            git clean -fd
-
-            python valcea-clar/scripts/public_ux_currentness.py --self-test
-            python valcea-clar/scripts/public_ux_story_integrity.py --self-test
-            python valcea-clar/scripts/public_ux_currentness.py
-            python valcea-clar/scripts/public_ux_story_integrity.py
-            python valcea-clar/scripts/public_ux_manifest.py
-            python valcea-clar/scripts/public_ux_currentness.py --check
-            python valcea-clar/scripts/public_ux_story_integrity.py --check
-            python valcea-clar/scripts/public_ux_manifest.py --check
-            python valcea-clar/scripts/smoke_web.py
-            python valcea-clar/scripts/build_sites_export.py
-            python valcea-clar/scripts/public_ux_overlay.py
-            python valcea-clar/scripts/public_ux_legal.py
-            python valcea-clar/scripts/public_ux_export_contract.py
-
-            git add \
-              valcea-clar/site/story_archive.json \
-              valcea-clar/site/runtime \
-              valcea-clar/site/public_ux_state.json
-
-            if git diff --cached --quiet; then
-              echo 'Canonical public presentation already current on main.'
-              exit 0
-            fi
-
-            git commit -m 'Refresh VÂLCEA CLAR canonical public presentation'
-            if git push origin HEAD:main; then
-              exit 0
-            fi
-
-            echo "main advanced during presentation refresh; retrying ${attempt}/5."
-            sleep $((attempt * 2))
-          done
-
-          echo 'Could not persist public presentation after five attempts.' >&2
-          exit 1
-
-      - name: Upload public UX evidence
+      - name: Upload compatibility evidence
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: valcea-clar-public-ux-${{ github.run_id }}
+          name: valcea-clar-premium-compat-${{ github.run_id }}
           path: |
             valcea-clar/site/public_ux_state.json
-            valcea-clar/site/runtime/index.html
-            valcea-clar/site/runtime/stiri
-            valcea-clar/site/runtime/despre
-            valcea-clar/site/runtime/unde-iesim
-            valcea-clar/dist/chatgpt-sites
+            valcea-clar/dist/chatgpt-sites/manifest.json
           if-no-files-found: warn
           retention-days: 7
