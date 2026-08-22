@@ -1,18 +1,9 @@
 name: VÂLCEA CLAR Facebook Single Writer Guard
 
-# This is a configuration invariant, not a heartbeat. Validate when workflows,
-# social code or doctrine change; the ownership guard covers the full surface.
+# PR/manual compatibility guard. Canonical continuous enforcement is owned by
+# Quality + Site Engine Ownership Guard, which both validate social ownership.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/**'
-      - 'valcea-clar/social/*.py'
-      - 'valcea-clar/social/social_network_doctrine.json'
-      - 'valcea-clar/social/social_brand_system.json'
-      - 'valcea-clar/social/facebook_visual_system.json'
-      - 'valcea-clar/social/channel_registry.json'
   pull_request:
     paths:
       - '.github/workflows/**'
@@ -26,7 +17,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: valcea-clar-facebook-single-writer-${{ github.event.pull_request.number || 'main' }}
+  group: valcea-clar-facebook-single-writer-${{ github.event.pull_request.number || 'manual' }}
   cancel-in-progress: true
 
 jobs:
