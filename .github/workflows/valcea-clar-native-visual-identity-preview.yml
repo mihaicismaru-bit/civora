@@ -1,6 +1,9 @@
 name: VÂLCEA CLAR Native Visual Identity Preview
 
+# PR/manual visual identity acceptance. This workflow is design-only and has no
+# publication authority, so it must not run autonomously on main.
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - "valcea-clar/social/render_native_visual_identity_previews.py"
@@ -11,24 +14,12 @@ on:
       - "valcea-clar/social/profile_identity_system.json"
       - "valcea-clar/social/social_network_doctrine.json"
       - ".github/workflows/valcea-clar-native-visual-identity-preview.yml"
-  push:
-    branches: [main]
-    paths:
-      - "valcea-clar/social/render_native_visual_identity_previews.py"
-      - "valcea-clar/social/native_platform_identity_system.json"
-      - "valcea-clar/social/native_identity.py"
-      - "valcea-clar/social/validate_native_platform_identity.py"
-      - "valcea-clar/social/social_brand_system.json"
-      - "valcea-clar/social/profile_identity_system.json"
-      - "valcea-clar/social/social_network_doctrine.json"
-      - ".github/workflows/valcea-clar-native-visual-identity-preview.yml"
-  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: valcea-clar-native-visual-identity-${{ github.ref }}
+  group: valcea-clar-native-visual-identity-${{ github.event.pull_request.number || 'manual' }}
   cancel-in-progress: true
 
 jobs:
@@ -37,49 +28,38 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
-
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
-
       - name: Install deterministic renderer
         run: python -m pip install --disable-pip-version-check Pillow==12.3.0
-
       - name: Compile native identity stack
         run: |
           python -m py_compile \
             valcea-clar/social/native_identity.py \
             valcea-clar/social/validate_native_platform_identity.py \
             valcea-clar/social/render_native_visual_identity_previews.py
-
       - name: Validate canonical identity JSON
         run: |
           python -m json.tool valcea-clar/social/native_platform_identity_system.json >/dev/null
           python -m json.tool valcea-clar/social/social_brand_system.json >/dev/null
           python -m json.tool valcea-clar/social/profile_identity_system.json >/dev/null
           python -m json.tool valcea-clar/social/social_network_doctrine.json >/dev/null
-
       - name: Run premium native identity validator self-test
         run: python valcea-clar/social/validate_native_platform_identity.py --self-test
-
       - name: Enforce premium native identity contract
         run: python valcea-clar/social/validate_native_platform_identity.py
-
       - name: Run native identity helper self-test
         run: python valcea-clar/social/native_identity.py
-
       - name: Run renderer self-test
         run: python valcea-clar/social/render_native_visual_identity_previews.py --self-test
-
       - name: Render native visual identity proofs
         run: python valcea-clar/social/render_native_visual_identity_previews.py > /tmp/native-visual-preview.json
-
       - name: Assert design-only output contract
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-
           root = Path('valcea-clar/social/previews/native-identity-v1')
           manifest = json.loads((root / 'manifest.json').read_text(encoding='utf-8'))
           if manifest.get('execution_mode') != 'DESIGN_PREVIEW_ONLY_NOT_FOR_PUBLICATION':
@@ -111,7 +91,6 @@ jobs:
               raise SystemExit('fixture publication flag drifted')
           print('VÂLCEA CLAR native visual identity proof contract: PASS')
           PY
-
       - name: Upload native visual identity proofs
         uses: actions/upload-artifact@v7
         with:
