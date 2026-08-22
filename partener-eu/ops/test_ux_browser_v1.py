@@ -12,19 +12,17 @@ BASE_URL = 'http://127.0.0.1:4173/index.html'
 SHOT_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def px(page, selector: str, prop: str) -> float:
-    value = page.locator(selector).first.evaluate(
-        "(el, prop) => parseFloat(getComputedStyle(el)[prop]) || 0", prop
-    )
-    return float(value)
-
-
 def audit_viewport(browser, name: str, width: int, height: int) -> dict:
     page = browser.new_page(viewport={"width": width, "height": height})
     errors: list[str] = []
     console_errors: list[str] = []
+    failed_responses: list[dict] = []
     page.on('console', lambda msg: console_errors.append(msg.text) if msg.type == 'error' else None)
     page.on('pageerror', lambda exc: console_errors.append(str(exc)))
+    page.on('response', lambda response: failed_responses.append({
+        'status': response.status,
+        'url': response.url,
+    }) if response.status >= 400 else None)
     page.goto(BASE_URL, wait_until='networkidle', timeout=60000)
     page.wait_for_timeout(900)
 
@@ -60,6 +58,27 @@ def audit_viewport(browser, name: str, width: int, height: int) -> dict:
       clientHeight: document.documentElement.clientHeight
     })''')
     horizontal_overflow = body_metrics['scrollWidth'] - body_metrics['clientWidth']
+    overflow_offenders = page.evaluate('''() => {
+      const vw = document.documentElement.clientWidth;
+      return Array.from(document.querySelectorAll('body *')).map((el) => {
+        const r = el.getBoundingClientRect();
+        if (!r.width || !r.height) return null;
+        const rightOverflow = Math.max(0, r.right - vw);
+        const leftOverflow = Math.max(0, -r.left);
+        if (rightOverflow <= 2 && leftOverflow <= 2 && r.width <= vw + 2) return null;
+        return {
+          tag: el.tagName.toLowerCase(),
+          id: el.id || '',
+          className: typeof el.className === 'string' ? el.className.slice(0,180) : '',
+          left: Math.round(r.left),
+          right: Math.round(r.right),
+          width: Math.round(r.width),
+          rightOverflow: Math.round(rightOverflow),
+          leftOverflow: Math.round(leftOverflow),
+          text: (el.textContent || '').replace(/\\s+/g,' ').trim().slice(0,120)
+        };
+      }).filter(Boolean).sort((a,b) => Math.max(b.rightOverflow,b.leftOverflow,b.width-vw) - Math.max(a.rightOverflow,a.leftOverflow,a.width-vw)).slice(0,18);
+    }''')
     if horizontal_overflow > 2:
         errors.append(f'page horizontal overflow: {horizontal_overflow}px')
 
@@ -72,20 +91,17 @@ def audit_viewport(browser, name: str, width: int, height: int) -> dict:
         if first.get_attribute('tabindex') not in ('0', None):
             errors.append('keyboard target has invalid tabindex')
 
-    # Skip link must become visible on keyboard focus and target the enhanced main landmark.
     page.locator('.uxSkip').focus()
     skip_box = page.locator('.uxSkip').bounding_box()
     if not skip_box or skip_box['y'] < -2:
         errors.append('skip link is not visible on focus')
 
-    # Statuses shown by the base product should be human-readable after enhancement.
     raw_statuses = page.locator('.badge').all_inner_texts()
     forbidden_raw = {'OPEN', 'EXPECTED', 'PUBLIC CONSULTATION', 'PUBLIC_CONSULTATION', 'DISCOVERED', 'CLOSED'}
     untranslated = [s.strip() for s in raw_statuses if s.strip().upper() in forbidden_raw]
     if untranslated:
         errors.append(f'untranslated status badges remain: {untranslated[:5]}')
 
-    # Avoid invalid nested interactive controls inside generic role=button wrappers.
     nested_interactive = page.locator('[role="button"] button, [role="button"] a, [role="button"] input, [role="button"] select').count()
     if nested_interactive:
         errors.append(f'nested interactive controls inside role=button: {nested_interactive}')
@@ -99,9 +115,11 @@ def audit_viewport(browser, name: str, width: int, height: int) -> dict:
         'navLabels': labels,
         'navTouchTargetHeights': nav_heights,
         'horizontalOverflowPx': horizontal_overflow,
+        'overflowOffenders': overflow_offenders,
         'unlabeledFormControls': aria_missing,
         'keyboardTargetCount': keyboard_count,
         'nestedInteractiveInRoleButton': nested_interactive,
+        'failedResponses': failed_responses,
         'consoleErrors': console_errors,
         'errors': errors,
         'screenshot': shot.relative_to(ROOT).as_posix(),
