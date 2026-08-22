@@ -4,6 +4,8 @@
 The fixers are executed in the same order as the dual-relay recovery workflow.
 The target source is always restored byte-for-byte before exit. PASS requires
 all fixers to exit successfully and the final SHA-256 to equal the initial one.
+This proof is rerun after materialization so runtime patch removal remains
+strictly gated by immutable-source equivalence.
 """
 from __future__ import annotations
 
