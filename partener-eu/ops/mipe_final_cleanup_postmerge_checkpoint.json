@@ -1,0 +1,84 @@
+{
+  "schema": "PARTENER_MIPE_FINAL_CLEANUP_POSTMERGE_V1",
+  "checkpoint": "PARTENER-MIPE-FINAL-CLEANUP-CP02",
+  "room": "🟠30 INGESTION",
+  "state": "PASS",
+  "result": "MERGED_LIVE_VERIFIED",
+  "integration": {
+    "pr": 625,
+    "merged": true,
+    "mergeCommit": "9caa3d6bd0e1ca4a5574e39e85afee48542dcbd6",
+    "baseCommit": "52b7560fda00728f2b53ea51facaf5b61eef33d0",
+    "mergedHead": "1ab2dc5fa56f7db6213033cd8b5e5dd8844006ac",
+    "runtimeHeadTested": "2b2a2f852b120e15967f5cfc06954d435d77a69e",
+    "mergeRefTested": "b6216e0b36d4f794f7335adff322df8dce4c6bef",
+    "mergeSignatureVerified": true
+  },
+  "preMergeQa": {
+    "checkpoint": "PARTENER-MIPE-FINAL-CLEANUP-CP01",
+    "primaryRunId": 32583940526,
+    "primaryStatus": "PASS",
+    "independentBoundaryRunId": 32583940539,
+    "independentBoundaryStatus": "PASS",
+    "artifactId": 9478539938,
+    "artifactSha256": "54d2b17fca833df907588ffcaf1dfa2a928de7fbe53a8ace2e4b48ede14b223b",
+    "callerAuditScannedTextFiles": 2768,
+    "retiredPaths": 16,
+    "materializedResilientSha256": "ad82649456a2aced555ffd43ae768ab275e4b02fb6a32acd6e152097280e500b",
+    "corpusReplay": {
+      "corpusPages": 497,
+      "documents": 800,
+      "canonicalCalls": 165,
+      "finalDossiers": 184,
+      "lifecycleCalls": 184
+    }
+  },
+  "postMerge": {
+    "pages": {
+      "status": "LIVE",
+      "pageUrl": "https://partener.eu/",
+      "deployedGitSha": "9caa3d6bd0e1ca4a5574e39e85afee48542dcbd6",
+      "observedAtUtc": "2026-08-22T16:16:23.511327+00:00",
+      "configureOutcome": "success",
+      "uploadOutcome": "success",
+      "deployOutcome": "success",
+      "httpsEnforced": true
+    },
+    "productionValidation": {
+      "checkpoint": "PARTENER-EU-CIVORA-P10-0020",
+      "runStartedUtc": "2026-08-22T16:17:04Z",
+      "live": true,
+      "frontendPass": 10,
+      "frontendTotal": 10,
+      "sourcePass": 5,
+      "sourceFail": 2,
+      "sourceQuarantined": 2,
+      "criticalFail": false,
+      "changeDetected": 0,
+      "validationLedgerCommitObserved": "ab42c9159cf5d886d9df698f41ff20103b782157"
+    },
+    "engineBoundary": {
+      "engineWorkflowPresentOnMain": true,
+      "engineWorkflow": "PARTENER.EU MIPE Engine v3",
+      "surfacemcContentsPermission": "read",
+      "surfacemcAcquisitionOnly": true,
+      "pagesConsumesEngineCompletion": true,
+      "hostedCanonicalDirectOnly": true,
+      "postMergeEngineLiveRunObserved": false,
+      "postMergeEngineRunNote": "Engine v3 is armed on main and triggers after a successful Windows Crawl v3 completion. Exact merged behavior was replayed PASS in CP01 before integration."
+    }
+  },
+  "supersededPullRequests": {
+    "closedUnmerged": [608, 609, 610, 611, 612, 613, 614, 615, 616],
+    "replacementMergedPr": 625
+  },
+  "replay": {
+    "finalCleanupQa": ".github/workflows/partener-eu-mipe-final-cleanup-qa.yml",
+    "windowsBoundaryQa": ".github/workflows/partener-eu-mipe-ro-crawl-v3-qa.yml",
+    "engineManualReplay": "PARTENER.EU MIPE Engine v3 workflow_dispatch with source_run_id and persist=false"
+  },
+  "rollback": {
+    "strategy": "Revert merge commit 9caa3d6bd0e1ca4a5574e39e85afee48542dcbd6 through a reviewed rollback commit/PR; first parent is 52b7560fda00728f2b53ea51facaf5b61eef33d0.",
+    "lkgPreserved": true
+  }
+}
