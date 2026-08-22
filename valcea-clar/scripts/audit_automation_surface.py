@@ -3,7 +3,7 @@
 
 The canonical automation registry is an allow-list for production orchestration.
 This auditor does not assume that an unregistered workflow is dead: it classifies
-its triggers and permissions so cleanup can retire writers safely and gradually.
+triggers and permissions so cleanup can retire writers safely and gradually.
 
 Default mode is report-only. ``--strict`` fails when an unregistered autonomous
 writer/dispatcher remains; strict mode is intended to become the final cleanup
@@ -19,7 +19,8 @@ from pathlib import Path
 from typing import Any
 
 WORKFLOW_GLOB = "valcea-clar-*.yml"
-AUTONOMOUS_TRIGGERS = ("schedule", "workflow_run", "push", "repository_dispatch")
+BACKGROUND_TRIGGERS = ("schedule", "workflow_run", "repository_dispatch")
+AUTONOMOUS_TRIGGERS = BACKGROUND_TRIGGERS + ("push",)
 TRIGGER_NAMES = (
     "workflow_dispatch",
     "pull_request",
@@ -58,6 +59,8 @@ def classify(path: Path, registered: set[str], retired: set[str], repo_root: Pat
     triggers = {name: declared_trigger(text, name) for name in TRIGGER_NAMES}
     permissions = workflow_permissions(text)
     autonomous = any(triggers[name] for name in AUTONOMOUS_TRIGGERS)
+    background_autonomous = any(triggers[name] for name in BACKGROUND_TRIGGERS)
+    push_only_autonomous = bool(triggers["push"] and not background_autonomous)
 
     if rel in registered:
         classification = "REGISTERED"
@@ -76,6 +79,8 @@ def classify(path: Path, registered: set[str], retired: set[str], repo_root: Pat
         "path": rel,
         "classification": classification,
         "autonomous": autonomous,
+        "background_autonomous": background_autonomous,
+        "push_only_autonomous": push_only_autonomous,
         "triggers": [name for name, enabled in triggers.items() if enabled],
         "permissions": permissions,
     }
@@ -108,6 +113,27 @@ def audit(repo_root: Path) -> dict[str, Any]:
     for row in rows:
         by_class.setdefault(str(row["classification"]), []).append(str(row["path"]))
 
+    unregistered_background_writers = sorted(
+        str(row["path"])
+        for row in rows
+        if row["classification"] == "UNREGISTERED_AUTONOMOUS_WRITER" and row["background_autonomous"]
+    )
+    unregistered_push_only_writers = sorted(
+        str(row["path"])
+        for row in rows
+        if row["classification"] == "UNREGISTERED_AUTONOMOUS_WRITER" and row["push_only_autonomous"]
+    )
+    unregistered_background_dispatchers = sorted(
+        str(row["path"])
+        for row in rows
+        if row["classification"] == "UNREGISTERED_AUTONOMOUS_DISPATCHER" and row["background_autonomous"]
+    )
+    unregistered_background_observers = sorted(
+        str(row["path"])
+        for row in rows
+        if row["classification"] == "UNREGISTERED_AUTONOMOUS_OBSERVER" and row["background_autonomous"]
+    )
+
     dangerous = (
         by_class.get("UNREGISTERED_AUTONOMOUS_WRITER", [])
         + by_class.get("UNREGISTERED_AUTONOMOUS_DISPATCHER", [])
@@ -116,19 +142,29 @@ def audit(repo_root: Path) -> dict[str, Any]:
     missing_registered = sorted(path for path in registered if not (repo_root / path).is_file())
 
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "status": "WARN" if dangerous or missing_registered else "PASS",
         "workflow_glob": WORKFLOW_GLOB,
         "workflow_count": len(rows),
         "registered_count": len(registered),
         "registered_present_count": sum(1 for row in rows if row["classification"] == "REGISTERED"),
         "unregistered_autonomous_writer_count": len(by_class.get("UNREGISTERED_AUTONOMOUS_WRITER", [])),
+        "unregistered_background_writer_count": len(unregistered_background_writers),
+        "unregistered_push_only_writer_count": len(unregistered_push_only_writers),
         "unregistered_autonomous_dispatcher_count": len(by_class.get("UNREGISTERED_AUTONOMOUS_DISPATCHER", [])),
+        "unregistered_background_dispatcher_count": len(unregistered_background_dispatchers),
         "unregistered_autonomous_observer_count": len(by_class.get("UNREGISTERED_AUTONOMOUS_OBSERVER", [])),
+        "unregistered_background_observer_count": len(unregistered_background_observers),
         "unregistered_manual_or_pr_only_count": len(by_class.get("UNREGISTERED_MANUAL_OR_PR_ONLY", [])),
         "retired_but_present_count": len(by_class.get("RETIRED_BUT_PRESENT", [])),
         "missing_registered": missing_registered,
         "by_class": by_class,
+        "priority_cleanup": {
+            "background_writers": unregistered_background_writers,
+            "background_dispatchers": unregistered_background_dispatchers,
+            "background_observers": unregistered_background_observers,
+            "push_only_writers": unregistered_push_only_writers,
+        },
         "workflows": rows,
         "strict_blockers": dangerous + missing_registered,
     }
@@ -154,6 +190,10 @@ def self_test() -> None:
             "on:\n  workflow_run:\n    workflows: ['x']\npermissions:\n  contents: write\n",
             encoding="utf-8",
         )
+        (root / ".github" / "workflows" / "valcea-clar-push.yml").write_text(
+            "on:\n  push:\n    branches: [main]\npermissions:\n  contents: write\n",
+            encoding="utf-8",
+        )
         (root / ".github" / "workflows" / "valcea-clar-manual.yml").write_text(
             "on:\n  workflow_dispatch:\npermissions:\n  contents: read\n",
             encoding="utf-8",
@@ -164,7 +204,9 @@ def self_test() -> None:
         )
         result = audit(root)
         assert result["registered_present_count"] == 1
-        assert result["unregistered_autonomous_writer_count"] == 1
+        assert result["unregistered_autonomous_writer_count"] == 2
+        assert result["unregistered_background_writer_count"] == 1
+        assert result["unregistered_push_only_writer_count"] == 1
         assert result["unregistered_manual_or_pr_only_count"] == 1
         assert result["retired_but_present_count"] == 1
         assert result["status"] == "WARN"
