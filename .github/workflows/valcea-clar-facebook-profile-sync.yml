@@ -1,14 +1,9 @@
 name: VÂLCEA CLAR Facebook Profile Sync
 
+# External Page-profile mutation is an explicit maintenance action, never an
+# automatic consequence of a repository push.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'valcea-clar/social/facebook_profile_sync.py'
-      - 'valcea-clar/social/profile_presence_system.json'
-      - 'valcea-clar/site/legal/legal_pages.json'
-      - '.github/workflows/valcea-clar-facebook-profile-sync.yml'
 
 permissions:
   contents: write
@@ -65,9 +60,7 @@ jobs:
               exit 0
             fi
             git commit -m 'Persist VÂLCEA CLAR Facebook profile sync state'
-            if git push origin HEAD:main; then
-              exit 0
-            fi
+            if git push origin HEAD:main; then exit 0; fi
             sleep $((attempt * 2))
           done
           exit 1
@@ -76,5 +69,5 @@ jobs:
         if: always()
         run: |
           echo '## VÂLCEA CLAR Facebook Profile Sync' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Only canonical bio/about, website and editorial email are eligible for automated mutation. Phone, address, Page name, category and cover stay fail-closed.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Explicit-only maintenance: bio/about, website and editorial email may change; phone, address, Page name, category and cover stay fail-closed.' >> "$GITHUB_STEP_SUMMARY"
           cat /tmp/facebook-profile-sync.json >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
