@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "checkpoint": "PARTENER-UX-CONSOLIDATED-CP07",
+  "room": "🟢40 PRODUCT",
+  "state": "PASS",
+  "integration": {
+    "pr": 623,
+    "merged": true,
+    "mergeCommit": "269054e2b065f803cea9335151f4c7b93ece7129",
+    "mergedAtUtc": "2026-08-22T15:46:01Z",
+    "mergeHead": "6e91d2d72d6c9662133bb1619b0ebeeb7187cc8d",
+    "rollbackParent": "a057a816e4ddb50b49d409bcd0e29747c26ccdd7",
+    "mergeSignatureVerified": true
+  },
+  "qa": {
+    "workflow": "PARTENER.EU UX Consolidated v1-v4 QA",
+    "runId": 32582544212,
+    "headSha": "6e91d2d72d6c9662133bb1619b0ebeeb7187cc8d",
+    "status": "PASS",
+    "javascriptSyntax": "PASS",
+    "staticContractsV1V4": "PASS",
+    "frontendRegression": "PASS",
+    "browserV1": "PASS",
+    "browserV2": "PASS",
+    "browserV3": "PASS",
+    "browserV4": "PASS",
+    "artifactId": 9478181901,
+    "artifactName": "partener-ux-consolidated-v1-v4-proof",
+    "artifactSha256": "495d251de33b5f671ad8ffc61cac8e6ee50acb8c94a1df72a2cf4e6198e7c630"
+  },
+  "deployment": {
+    "status": "LIVE",
+    "pageUrl": "https://partener.eu/",
+    "deployedGitSha": "269054e2b065f803cea9335151f4c7b93ece7129",
+    "observedAtUtc": "2026-08-22T15:46:56.064217+00:00",
+    "configureOutcome": "success",
+    "uploadOutcome": "success",
+    "deployOutcome": "success",
+    "httpsEnforced": true,
+    "externalDependency": null
+  },
+  "postDeployValidation": {
+    "runStartedUtc": "2026-08-22T15:48:07Z",
+    "verifiedAtUtc": "2026-08-22T15:48:34Z",
+    "status": "PASS",
+    "publicContentVerified": true,
+    "httpsVerified": true,
+    "httpRedirectsToHttps": true,
+    "criticalAssetsOk": true,
+    "oldOriginDetected": false,
+    "frontendRegression": "10/10_PASS"
+  },
+  "runtimeMarkersOnMain": {
+    "css": [
+      "ux-optimization-v1.css?v=20260822-ux01",
+      "ux-orientation-v2.css?v=20260822-ux02",
+      "ux-mobile-density-v3.css?v=20260822-ux03",
+      "ux-card-scannability-v4.css?v=20260822-ux04"
+    ],
+    "js": [
+      "ux-optimization-v1.js?v=20260822-ux01",
+      "ux-orientation-v2.js?v=20260822-ux02",
+      "ux-mobile-density-v3.js?v=20260822-ux03"
+    ]
+  },
+  "replay": {
+    "qa": "workflow_dispatch .github/workflows/partener-eu-ux-consolidated-v1-v4.yml",
+    "productionValidation": ".github/workflows/partener-eu-validation.yml"
+  },
+  "rollback": {
+    "strategy": "revert merge commit 269054e2b065f803cea9335151f4c7b93ece7129 or restore first parent a057a816e4ddb50b49d409bcd0e29747c26ccdd7 through a reviewed rollback PR",
+    "lkgPreserved": true
+  },
+  "result": "MERGED_LIVE_VERIFIED"
+}
