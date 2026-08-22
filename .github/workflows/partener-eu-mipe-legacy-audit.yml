@@ -1,0 +1,42 @@
+name: PARTENER.EU MIPE Legacy Caller Audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'agent/partener-cleanup-phase4-audit-20260822'
+    paths:
+      - 'partener-eu/ops/audit_mipe_legacy.py'
+      - '.github/workflows/partener-eu-mipe-legacy-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Compile audit tool
+        run: python -m py_compile partener-eu/ops/audit_mipe_legacy.py
+      - name: Scan full checkout for MIPE callers
+        run: python partener-eu/ops/audit_mipe_legacy.py
+      - name: Emit concise cleanup summary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('partener-eu/ops/mipe_legacy_audit.json').read_text(encoding='utf-8'))
+          print('summary=', p['summary'])
+          for row in p['candidates']:
+              print(f"{row['status']:36} strong={row['strongCallerCount']:2} refs={row['referenceCount']:2} {row['file']}")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: partener-mipe-legacy-audit
+          path: partener-eu/ops/mipe_legacy_audit.json
+          if-no-files-found: error
