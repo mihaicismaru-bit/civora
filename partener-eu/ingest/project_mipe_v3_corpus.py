@@ -82,14 +82,17 @@ def build_projection(corpus: dict[str, Any], previous_state: dict[str, Any]) -> 
     if not observed_at:
         raise ValueError("MIPE v3 corpus has no observedAt")
 
+    # The crawler counts raw accepted page observations before it canonicalizes
+    # the corpus by URL. The legacy state kept that raw counter while its items
+    # dictionary was URL-deduplicated. Preserve both semantics exactly.
     fresh_pages = [
         page for page in (corpus.get("pages") or [])
         if str(page.get("observedAt") or "") == observed_at
     ]
-    expected_fresh = int(run.get("acceptedPages") or 0)
-    if expected_fresh and len(fresh_pages) < expected_fresh:
+    reported_accepted = int(run.get("acceptedPages") or len(fresh_pages))
+    if reported_accepted < len(fresh_pages):
         raise ValueError(
-            f"MIPE corpus lost fresh pages: expected at least {expected_fresh}, found {len(fresh_pages)}"
+            f"MIPE acceptedPages lower than unique fresh pages: {reported_accepted} < {len(fresh_pages)}"
         )
 
     prior_items = {
@@ -102,7 +105,7 @@ def build_projection(corpus: dict[str, Any], previous_state: dict[str, Any]) -> 
     items = list(prior_items.values())[:300]
 
     source_available = bool(run.get("sourceAvailable"))
-    if source_available and fresh_pages:
+    if source_available and reported_accepted:
         status = "OK"
     elif source_available:
         status = "OK_NO_NEW_RELEVANT_ITEMS"
@@ -118,7 +121,7 @@ def build_projection(corpus: dict[str, Any], previous_state: dict[str, Any]) -> 
         "roots": run.get("roots") or [],
         "sourceAvailable": source_available,
         "candidateCount": int(run.get("pagesVisited") or 0),
-        "parsedRelevantCount": len(fresh_pages),
+        "parsedRelevantCount": reported_accepted,
         "documentCount": int(run.get("documentsObserved") or 0),
         "transport": run.get("transport") or "playwright-edge-direct-romania-v3",
         "runtimeSeconds": run.get("runtimeSeconds"),
@@ -176,7 +179,8 @@ def main() -> int:
     print(json.dumps({
         "status": state["status"],
         "observedAt": state["lastRun"]["observedAt"],
-        "freshPages": state["lastRun"]["parsedRelevantCount"],
+        "acceptedPages": state["lastRun"]["parsedRelevantCount"],
+        "freshUniquePages": sum(1 for item in (corpus.get("pages") or []) if str(item.get("observedAt") or "") == state["lastRun"]["observedAt"]),
         "items": len(state.get("items") or []),
         "corpusPages": meta["corpusPages"],
         "corpusDocuments": meta["corpusDocuments"],
