@@ -1,0 +1,114 @@
+name: VÂLCEA CLAR Owned Photo Drive Ingest
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'valcea-clar/social/owned_photo_drive_config.json'
+      - 'valcea-clar/social/owned_photo_drive_snapshot.json'
+      - 'valcea-clar/social/owned_photo_registry.json'
+      - 'valcea-clar/social/drive_owned_photo_ingest.py'
+      - '.github/workflows/valcea-clar-owned-photo-ingest.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/social/owned_photo_drive_config.json'
+      - 'valcea-clar/social/drive_owned_photo_ingest.py'
+      - '.github/workflows/valcea-clar-owned-photo-ingest.yml'
+  schedule:
+    - cron: '41 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-owned-photo-drive-ingest
+  cancel-in-progress: true
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VALCEA_DRIVE_SERVICE_ACCOUNT_JSON: ${{ secrets.VALCEA_DRIVE_SERVICE_ACCOUNT_JSON }}
+      VALCEA_DRIVE_BEARER_TOKEN: ${{ secrets.VALCEA_DRIVE_BEARER_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Validate owned-photo ingest offline
+        run: |
+          python -m py_compile valcea-clar/social/drive_owned_photo_ingest.py
+          python valcea-clar/social/drive_owned_photo_ingest.py --self-test
+          python valcea-clar/social/drive_owned_photo_ingest.py --from-snapshot
+          python valcea-clar/social/drive_owned_photo_ingest.py --validate-only
+
+      - name: Detect Drive credential
+        id: credential
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          if [[ -n "${VALCEA_DRIVE_SERVICE_ACCOUNT_JSON:-}" || -n "${VALCEA_DRIVE_BEARER_TOKEN:-}" ]]; then
+            echo 'configured=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'configured=false' >> "$GITHUB_OUTPUT"
+            echo 'Drive credential absent; retaining the validated committed snapshot.'
+          fi
+
+      - name: Install service-account authentication dependency
+        if: github.event_name != 'pull_request' && steps.credential.outputs.configured == 'true' && env.VALCEA_DRIVE_SERVICE_ACCOUNT_JSON != ''
+        run: python -m pip install --disable-pip-version-check google-auth==2.40.3
+
+      - name: Refresh inventory from Google Drive
+        if: github.event_name != 'pull_request' && steps.credential.outputs.configured == 'true'
+        run: |
+          python valcea-clar/social/drive_owned_photo_ingest.py
+          python valcea-clar/social/drive_owned_photo_ingest.py --validate-only
+
+      - name: Enforce candidate-only publication contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          registry=json.loads(Path('valcea-clar/social/owned_photo_registry.json').read_text(encoding='utf-8'))
+          assert registry['publication_authority'] == 'NONE'
+          assert registry['candidate_only'] is True
+          assert registry['automatic_story_assignment_forbidden'] is True
+          for asset in registry['assets']:
+              assert asset['kind'] == 'photograph'
+              assert asset['synthetic'] is False
+              assert asset['subject_match'] is False
+              assert asset['editor_approved'] is False
+              assert asset['publication_eligible'] is False
+              assert asset['publication_authority'] == 'NONE'
+          print({'status':'PASS','asset_count':registry['summary']['asset_count']})
+          PY
+
+      - name: Persist Drive snapshot and owned-photo registry conflict-safe
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          snapshot='valcea-clar/social/owned_photo_drive_snapshot.json'
+          registry='valcea-clar/social/owned_photo_registry.json'
+          cp "$snapshot" /tmp/owned-photo-drive-snapshot.json
+          cp "$registry" /tmp/owned-photo-registry.json
+          git config user.name 'valcea-clar-owned-photos[bot]'
+          git config user.email 'valcea-clar-owned-photos@users.noreply.github.com'
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/owned-photo-drive-snapshot.json "$snapshot"
+            cp /tmp/owned-photo-registry.json "$registry"
+            git add "$snapshot" "$registry"
+            if git diff --cached --quiet; then exit 0; fi
+            git commit -m 'Refresh VÂLCEA CLAR owned photo inventory'
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          echo 'Could not persist owned-photo inventory after five attempts.' >&2
+          exit 1
