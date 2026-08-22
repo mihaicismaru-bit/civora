@@ -8,6 +8,11 @@ on:
     paths:
       - 'partener-eu/ops/audit_mipe_legacy.py'
       - '.github/workflows/partener-eu-mipe-legacy-audit.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'partener-eu/ops/audit_mipe_legacy.py'
+      - '.github/workflows/partener-eu-mipe-legacy-audit.yml'
 
 permissions:
   contents: write
@@ -38,6 +43,7 @@ jobs:
               print(f"{row['status']:36} strong={row['strongCallerCount']:2} refs={row['referenceCount']:2} {row['file']}")
           PY
       - name: Persist audit proof to cleanup branch
+        if: ${{ github.event_name != 'pull_request' }}
         run: |
           set -euo pipefail
           git config user.name 'partener-cleanup-audit[bot]'
