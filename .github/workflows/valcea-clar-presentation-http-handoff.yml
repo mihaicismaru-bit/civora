@@ -1,0 +1,37 @@
+name: VÂLCEA CLAR Presentation HTTP Handoff
+
+# Derived presentation workflows commit reader-facing runtime with GITHUB_TOKEN.
+# Those bot commits do not reliably emit a second push event, so external HTTP
+# acceptance must be dispatched explicitly after the presentation workflow ends.
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows:
+      - 'VÂLCEA CLAR Story Social Metadata'
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: valcea-clar-presentation-http-handoff
+  cancel-in-progress: true
+
+jobs:
+  dispatch-public-http:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Dispatch strict public HTTP acceptance
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh workflow run valcea-clar-public-health.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref main \
+            -f require_ready=true
+          echo 'VÂLCEA CLAR strict Public HTTP validation dispatch accepted.'
