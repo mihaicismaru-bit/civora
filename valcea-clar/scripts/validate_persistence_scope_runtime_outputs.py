@@ -14,8 +14,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 SCOPE = ROOT / "local-news-os/persistence/repository_scope.json"
 
+# Source Radar now owns both source health and signal-radar runtime state.
 GENERATED_RUNTIME_OUTPUTS = {
-    "valcea-clar/editorial/signal_verification_queue.json": ROOT / ".github/workflows/valcea-clar-signal-radar.yml",
+    "valcea-clar/editorial/signal_verification_queue.json": ROOT / ".github/workflows/valcea-clar-source-radar.yml",
     "valcea-clar/editorial/structured_alert_events.json": ROOT / ".github/workflows/valcea-clar-structured-alerts.yml",
 }
 
@@ -41,6 +42,8 @@ def main() -> int:
     for output_path, workflow_path in GENERATED_RUNTIME_OUTPUTS.items():
         if not matches(output_path, refresh_only):
             raise SystemExit(f"generated runtime output is structural: {output_path}")
+        if not workflow_path.is_file():
+            raise SystemExit(f"registered runtime producer missing: {workflow_path.relative_to(ROOT)}")
         workflow = workflow_path.read_text(encoding="utf-8")
         if output_path not in workflow:
             raise SystemExit(f"runtime producer no longer persists expected output: {output_path}")
