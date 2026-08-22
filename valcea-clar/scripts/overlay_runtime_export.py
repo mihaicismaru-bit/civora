@@ -53,12 +53,16 @@ def run_script(script: str, *args: str) -> None:
 
 
 def apply_reader_presentation() -> None:
-    """Fold the former Premium Presentation writer into the canonical export.
+    """Fold post-render presentation writers into the canonical export.
 
     Presentation transforms operate only on already-authorized public state.
     Running them here guarantees that every newsroom or recap export gets the
     same reader UX without a later workflow rewriting the runtime tree.
     """
+    # Structured fact boxes/sections used to be applied by a separate 5-minute
+    # writer. Apply them once, immediately after the canonical story renderer.
+    run_script("render_rich_story_sections.py")
+
     stages = (
         "public_ux_currentness.py",
         "public_ux_story_integrity.py",
@@ -259,8 +263,6 @@ def main() -> int:
     }
     manifest["news_index"] = news_index_report
 
-    # Finalize indexing only after all independently built static products have
-    # been materialized into the same runtime snapshot as the story pages.
     indexing = write_indexing_assets(RUNTIME, BASE_URL, ["/"] + story_paths)
     if indexing.get("status") != "PASS":
         raise RuntimeError(f"refusing export with deferred indexing: {indexing}")
