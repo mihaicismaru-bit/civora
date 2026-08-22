@@ -1,7 +1,7 @@
 name: VÂLCEA CLAR Public HTTP Health
 
-# Observer only. Health telemetry must never mutate canonical publication state
-# or create timestamp-only commits on main.
+# Canonical external availability observer. Health telemetry must never mutate
+# canonical publication state or create timestamp-only commits on main.
 on:
   workflow_dispatch:
     inputs:
@@ -13,8 +13,6 @@ on:
   workflow_run:
     workflows:
       - 'VÂLCEA CLAR Live Newsroom'
-      - 'VÂLCEA CLAR Continuous Frontpage Invariant'
-      - 'VÂLCEA CLAR Premium Presentation'
     types: [completed]
     branches: [main]
   schedule:
