@@ -1,0 +1,63 @@
+{
+  "schema": "PARTENER_UX_OPTIMIZATION_CHECKPOINT_V1",
+  "checkpoint": "PARTENER-UX-V1-CP02",
+  "status": "PASS",
+  "verifiedAt": "2026-08-22T15:06:32Z",
+  "branch": "agent/partener-ux-optimization-v1-20260822",
+  "testedHeadSha": "c016dbcb8200d2254873c238ba07e0972eb152c8",
+  "workflowRunId": 32580682408,
+  "artifact": {
+    "id": 9477704553,
+    "name": "partener-ux-browser-proof-v1",
+    "sha256": "7fdeb4d9f67070257747aa931b8f9558f9b86affaab41b90f63768881701bde4"
+  },
+  "verified": {
+    "javascriptSyntax": "PASS",
+    "staticUxContract": "PASS",
+    "progressiveEnhancementBoundary": "PASS",
+    "desktopBrowser": {
+      "viewport": "1365x900",
+      "primaryNavigationVisible": true,
+      "navigationTouchTargetsPx": [44, 44, 44, 44, 44],
+      "horizontalOverflowPx": 0,
+      "unlabeledFormControls": 0,
+      "keyboardTargets": 15,
+      "nestedInteractiveRoleButtons": 0,
+      "failedResponses": 0,
+      "consoleErrors": 0
+    },
+    "mobileBrowser": {
+      "viewport": "390x844",
+      "primaryNavigationVisible": true,
+      "navigationTouchTargetsPx": [44, 44, 44, 44, 44],
+      "horizontalOverflowPx": 0,
+      "unlabeledFormControls": 0,
+      "keyboardTargets": 15,
+      "nestedInteractiveRoleButtons": 0,
+      "failedResponses": 0,
+      "consoleErrors": 0,
+      "navigationOverflowPolicy": "Horizontal overflow exists only inside the intentional scrollable primary-nav container; page-level overflow is zero."
+    }
+  },
+  "defectsFoundAndClosed": [
+    {
+      "id": "UX-V1-OVERFLOW-DINEWSGRID",
+      "observed": "228px desktop and 428px mobile page-level horizontal overflow",
+      "rootCause": "Intrinsic sizing of .diNewsGrid tracks allowed .diNewsCard content to expand beyond the viewport.",
+      "resolution": "Use minmax(0,...) grid tracks plus min-width:0/max-width:100% on the news grid/cards; no overflow hiding.",
+      "status": "CLOSED"
+    },
+    {
+      "id": "UX-V1-FAVICON-404",
+      "observed": "Automatic /favicon.ico request produced browser console noise in isolated QA.",
+      "resolution": "Neutral data-URI favicon prevents a missing-resource request without inventing a branded icon.",
+      "status": "CLOSED"
+    }
+  ],
+  "canonicalDataChanged": false,
+  "eligibilityLogicChanged": false,
+  "ingestionChanged": false,
+  "publicationPolicyChanged": false,
+  "rollback": "Revert the UX v1 branch commits; canonical source/state data is unaffected.",
+  "integrationRule": "Draft only. Reconcile with current main and rerun QA immediately before any approved merge."
+}
