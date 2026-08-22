@@ -1,0 +1,269 @@
+name: PARTENER.EU MIPE Engine v3
+
+on:
+  workflow_run:
+    workflows:
+      - 'PARTENER.EU MIPE Windows Crawl v3'
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: 'GitHub Actions run id al achiziției Windows v3 de rejucat'
+        required: true
+        type: string
+      persist:
+        description: 'Persistă rezultatul replay în main (implicit false)'
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: partener-eu-mipe-engine-v3
+  cancel-in-progress: false
+
+jobs:
+  process:
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SOURCE_RUN_ID: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.id || inputs.source_run_id }}
+      ENGINE_RUN_ID: ${{ github.run_id }}
+      ENGINE_RUN_ATTEMPT: ${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Download immutable SURFACEMC acquisition handoff
+        uses: actions/download-artifact@v4
+        with:
+          name: mipe-ro-acquisition-v3
+          path: _mipe_handoff
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.SOURCE_RUN_ID }}
+
+      - name: Verify handoff hash, provenance and persistence intent
+        id: handoff
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          MANUAL_PERSIST: ${{ inputs.persist }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+
+          root=Path('_mipe_handoff')
+          corpus_path=root/'mipe_ro_corpus.json'
+          manifest_path=root/'mipe_ro_acquisition_manifest.json'
+          assert corpus_path.exists(), corpus_path
+          assert manifest_path.exists(), manifest_path
+          corpus_bytes=corpus_path.read_bytes()
+          corpus=json.loads(corpus_bytes)
+          manifest=json.loads(manifest_path.read_text(encoding='utf-8'))
+          digest=hashlib.sha256(corpus_bytes).hexdigest()
+          assert manifest.get('schema') == 'PARTENER_MIPE_ACQUISITION_HANDOFF_V1', manifest
+          assert str(manifest.get('acquisitionRunId')) == str(os.environ['SOURCE_RUN_ID']), manifest
+          assert manifest.get('corpusSha256') == digest, (manifest.get('corpusSha256'), digest)
+          assert corpus.get('schemaVersion') == 3
+          assert corpus.get('source') == 'MIPE'
+          assert corpus.get('lastRun',{}).get('collectorVersion') == '3.0'
+          assert corpus.get('lastRun',{}).get('transport') == 'playwright-edge-direct-romania-v3'
+          assert corpus.get('lastRun',{}).get('sourceAvailable') is True
+          for page in corpus.get('pages',[]):
+              assert page.get('url','').startswith('https://mfe.gov.ro/')
+              assert page.get('verification') == 'CANONICAL_OFFICIAL_FETCH'
+              assert page.get('textPreview')
+          if os.environ.get('EVENT_NAME') == 'workflow_dispatch':
+              persist=os.environ.get('MANUAL_PERSIST','false').lower() == 'true'
+          else:
+              persist=bool(manifest.get('persistRequested'))
+          Path('partener-eu/ingest/state/mipe_ro_corpus.json').write_bytes(corpus_bytes)
+          Path('_mipe_handoff/verified.json').write_text(json.dumps({
+              'sourceRunId': str(os.environ['SOURCE_RUN_ID']),
+              'corpusSha256': digest,
+              'persistRequested': persist,
+              'acquisitionCommit': manifest.get('acquisitionCommit'),
+              'observedAt': corpus.get('lastRun',{}).get('observedAt'),
+          }, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as out:
+              out.write(f"persist={'true' if persist else 'false'}\n")
+              out.write(f"corpus_sha256={digest}\n")
+              out.write(f"acquisition_commit={manifest.get('acquisitionCommit','')}\n")
+          print(json.dumps({'sourceRunId':os.environ['SOURCE_RUN_ID'],'corpusSha256':digest,'persistRequested':persist},indent=2))
+          PY
+
+      - name: Project raw corpus into PARTENER runtime state
+        run: |
+          python -m py_compile partener-eu/ingest/project_mipe_v3_corpus.py
+          python partener-eu/ops/test_mipe_v3_projection.py
+          python partener-eu/ingest/project_mipe_v3_corpus.py
+
+      - name: Canonicalize evidence and construct deep dossiers
+        run: |
+          python partener-eu/ops/fix_call_lifecycle_event_aliases.py
+          python partener-eu/ingest/build_mipe_canonical_calls.py
+          python partener-eu/ingest/refine_mipe_canonical_calls.py
+          python partener-eu/ingest/enrich_mipe_canonical_facts.py
+          python partener-eu/ingest/build_decision_products.py
+          python partener-eu/ingest/merge_mipe_canonical_dossiers.py
+          python partener-eu/ingest/polish_decision_products.py
+          python partener-eu/ingest/finalize_decision_products.py
+          python partener-eu/ingest/localize_decision_products.py
+          python partener-eu/ingest/refine_afir_public_dossiers.py
+          python partener-eu/ingest/score_dossier_depth.py
+          python partener-eu/ingest/build_mipe_enrichment_seeds.py
+          python partener-eu/ingest/build_call_lifecycle.py
+          python partener-eu/ingest/intelligence_index.py
+
+      - name: Validate canonical pipeline, dossier depth and lifecycle
+        run: |
+          python partener-eu/ops/test_mipe_canonical_pipeline.py
+          python partener-eu/ops/test_dossier_autonomy.py
+          python partener-eu/ops/test_mipe_enrichment_seed_quality.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          corpus=json.loads(Path('partener-eu/ingest/state/mipe_ro_corpus.json').read_text(encoding='utf-8'))
+          state=json.loads(Path('partener-eu/ingest/state/mipe_state.json').read_text(encoding='utf-8'))
+          canonical=json.loads(Path('partener-eu/ingest/state/mipe_canonical_calls.json').read_text(encoding='utf-8'))
+          queue=json.loads(Path('partener-eu/ingest/state/dossier_enrichment_queue.json').read_text(encoding='utf-8'))
+          seeds=json.loads(Path('partener-eu/ingest/state/mipe_enrichment_seeds.json').read_text(encoding='utf-8'))
+          lifecycle=json.loads(Path('partener-eu/ingest/state/call_lifecycle.json').read_text(encoding='utf-8'))
+          assert corpus.get('schemaVersion') == 3
+          assert corpus.get('lastRun',{}).get('sourceAvailable') is True
+          assert state.get('lastRun',{}).get('collectorVersion') == '3.0'
+          assert canonical.get('calls')
+          assert canonical.get('precisionGate',{}).get('failClosed') is True
+          assert canonical.get('policy',{}).get('deepDossierFactExtraction') is True
+          assert queue.get('policy',{}).get('officialEvidenceOnly') is True
+          assert seeds.get('policy',{}).get('officialHostOnly') is True
+          assert all(seed.get('url') != 'https://mfe.gov.ro/ghiduri-' for seed in seeds.get('seeds',[]))
+          assert lifecycle.get('policy',{}).get('lifecycleFirst') is True
+          print(json.dumps({
+              'canonicalCalls':canonical.get('summary',{}).get('canonicalCalls'),
+              'highDepth':canonical.get('summary',{}).get('highDepth'),
+              'queuedDossiers':queue.get('summary',{}).get('queued'),
+              'targetedSeeds':seeds.get('summary',{}).get('targetedSeeds'),
+              'lifecycleCalls':lifecycle.get('summary',{}).get('callCount'),
+          },ensure_ascii=False,indent=2))
+          PY
+
+      - name: Write PARTENER engine checkpoint
+        env:
+          CORPUS_SHA256: ${{ steps.handoff.outputs.corpus_sha256 }}
+          ACQUISITION_COMMIT: ${{ steps.handoff.outputs.acquisition_commit }}
+          PERSIST_REQUESTED: ${{ steps.handoff.outputs.persist }}
+        run: |
+          python - <<'PY'
+          import datetime as dt, json, os
+          from pathlib import Path
+          canonical=json.loads(Path('partener-eu/ingest/state/mipe_canonical_calls.json').read_text(encoding='utf-8'))
+          lifecycle=json.loads(Path('partener-eu/ingest/state/call_lifecycle.json').read_text(encoding='utf-8'))
+          state=json.loads(Path('partener-eu/ingest/state/mipe_state.json').read_text(encoding='utf-8'))
+          receipt={
+              'schema':'PARTENER_MIPE_ENGINE_V3_CHECKPOINT_V1',
+              'status':'PASS',
+              'processedAt':dt.datetime.now(dt.timezone.utc).isoformat(),
+              'engineRunId':os.environ['ENGINE_RUN_ID'],
+              'engineRunAttempt':os.environ['ENGINE_RUN_ATTEMPT'],
+              'sourceRunId':os.environ['SOURCE_RUN_ID'],
+              'acquisitionCommit':os.environ.get('ACQUISITION_COMMIT'),
+              'corpusSha256':os.environ['CORPUS_SHA256'],
+              'persistRequested':os.environ.get('PERSIST_REQUESTED') == 'true',
+              'collectorVersion':state.get('lastRun',{}).get('collectorVersion'),
+              'canonicalCalls':canonical.get('summary',{}).get('canonicalCalls'),
+              'lifecycleCalls':lifecycle.get('summary',{}).get('callCount'),
+              'policy':{
+                  'surfacemcAcquisitionOnly':True,
+                  'officialEvidenceOnly':True,
+                  'failClosed':True,
+              },
+          }
+          Path('partener-eu/ingest/state/mipe_engine_v3_checkpoint.json').write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps(receipt,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Upload processed PARTENER evidence artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mipe-engine-v3-${{ github.run_id }}
+          path: |
+            partener-eu/ingest/state/mipe_ro_corpus.json
+            partener-eu/ingest/state/mipe_state.json
+            partener-eu/ingest/state/mipe_canonical_calls.json
+            partener-eu/ingest/state/decision_products.json
+            partener-eu/ingest/state/dossier_enrichment_queue.json
+            partener-eu/ingest/state/mipe_enrichment_seeds.json
+            partener-eu/ingest/state/call_lifecycle.json
+            partener-eu/ingest/state/intelligence_index.json
+            partener-eu/ingest/state/mipe_engine_v3_checkpoint.json
+            partener-eu/web/mipe-news.js
+            partener-eu/web/mipe-canonical-calls.js
+            partener-eu/web/decision-products.js
+            partener-eu/web/call-lifecycle.js
+          retention-days: 14
+
+      - name: Persist corpus and PARTENER products through GitHub API
+        if: ${{ steps.handoff.outputs.persist == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPOSITORY: ${{ github.repository }}
+        run: |
+          python - <<'PY'
+          import base64,json,os,time,urllib.error,urllib.request
+          from pathlib import Path
+          token=os.environ['GH_TOKEN'];repo=os.environ['GH_REPOSITORY'];api=f'https://api.github.com/repos/{repo}'
+          paths=[
+            'partener-eu/ingest/state/mipe_ro_corpus.json',
+            'partener-eu/ingest/state/mipe_state.json',
+            'partener-eu/ingest/state/mipe_canonical_calls.json',
+            'partener-eu/ingest/state/decision_products.json',
+            'partener-eu/ingest/state/dossier_enrichment_queue.json',
+            'partener-eu/ingest/state/mipe_enrichment_seeds.json',
+            'partener-eu/ingest/state/call_lifecycle.json',
+            'partener-eu/ingest/state/intelligence_index.json',
+            'partener-eu/ingest/state/mipe_engine_v3_checkpoint.json',
+            'partener-eu/web/mipe-news.js',
+            'partener-eu/web/mipe-canonical-calls.js',
+            'partener-eu/web/decision-products.js',
+            'partener-eu/web/call-lifecycle.js',
+          ]
+          contents={p:Path(p).read_bytes() for p in paths}
+          headers={'Authorization':f'Bearer {token}','Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','User-Agent':'PARTENER.EU-MIPE-Engine-v3'}
+          def req(method,url,payload=None):
+              data=None if payload is None else json.dumps(payload).encode()
+              request=urllib.request.Request(url,data=data,method=method,headers=headers)
+              with urllib.request.urlopen(request,timeout=60) as response:
+                  raw=response.read();return json.loads(raw) if raw else {}
+          for attempt in range(1,6):
+              try:
+                  ref=req('GET',f'{api}/git/ref/heads/main');parent=ref['object']['sha'];commit=req('GET',f'{api}/git/commits/{parent}')
+                  entries=[]
+                  for path,raw in contents.items():
+                      blob=req('POST',f'{api}/git/blobs',{'content':base64.b64encode(raw).decode(),'encoding':'base64'})
+                      entries.append({'path':path,'mode':'100644','type':'blob','sha':blob['sha']})
+                  tree=req('POST',f'{api}/git/trees',{'base_tree':commit['tree']['sha'],'tree':entries})
+                  new=req('POST',f'{api}/git/commits',{
+                      'message':'Process MIPE Romanian corpus through PARTENER engine v3',
+                      'tree':tree['sha'],'parents':[parent],
+                  })
+                  req('PATCH',f'{api}/git/refs/heads/main',{'sha':new['sha'],'force':False})
+                  print(json.dumps({'persisted':True,'commit':new['sha'],'files':len(paths)},indent=2));break
+              except urllib.error.HTTPError as exc:
+                  if exc.code not in (409,422) or attempt==5: raise
+                  time.sleep(attempt*2)
+          PY
