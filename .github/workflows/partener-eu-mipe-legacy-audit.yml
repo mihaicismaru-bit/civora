@@ -10,7 +10,7 @@ on:
       - '.github/workflows/partener-eu-mipe-legacy-audit.yml'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   audit:
@@ -18,6 +18,8 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
@@ -35,6 +37,18 @@ jobs:
           for row in p['candidates']:
               print(f"{row['status']:36} strong={row['strongCallerCount']:2} refs={row['referenceCount']:2} {row['file']}")
           PY
+      - name: Persist audit proof to cleanup branch
+        run: |
+          set -euo pipefail
+          git config user.name 'partener-cleanup-audit[bot]'
+          git config user.email 'partener-cleanup-audit@users.noreply.github.com'
+          git add partener-eu/ops/mipe_legacy_audit.json
+          if git diff --cached --quiet; then
+            echo 'Audit proof unchanged.'
+            exit 0
+          fi
+          git commit -m 'PARTENER cleanup: persist MIPE caller audit proof'
+          git push origin HEAD:agent/partener-cleanup-phase4-audit-20260822
       - uses: actions/upload-artifact@v4
         with:
           name: partener-mipe-legacy-audit
