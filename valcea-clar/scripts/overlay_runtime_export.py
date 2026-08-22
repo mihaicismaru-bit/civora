@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Overlay the rendered live newsroom runtime into the deterministic site export."""
+"""Overlay the rendered live newsroom runtime into the deterministic site export.
+
+This is the canonical final presentation boundary. Reader-facing UX normalization
+runs here so publication workflows do not need a second scheduled presentation
+writer after the newsroom has already persisted the story state.
+"""
 from __future__ import annotations
 
 import hashlib
@@ -35,6 +40,35 @@ def sha256(path: Path) -> str:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
     return h.hexdigest()
+
+
+def run_script(script: str, *args: str) -> None:
+    """Run one canonical reader-presentation stage fail-closed."""
+    subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / script), *args],
+        cwd=REPO,
+        check=True,
+        timeout=180,
+    )
+
+
+def apply_reader_presentation() -> None:
+    """Fold the former Premium Presentation writer into the canonical export.
+
+    The three stages are deterministic presentation transforms over already
+    authorized public state. Running them here guarantees that every newsroom or
+    recap export gets the same reader UX without a later workflow rewriting the
+    same runtime tree.
+    """
+    stages = (
+        "public_ux_currentness.py",
+        "public_ux_story_integrity.py",
+        "public_ux_manifest.py",
+    )
+    for script in stages:
+        run_script(script)
+    for script in stages:
+        run_script(script, "--check")
 
 
 def route_index(root: Path, route: str) -> Path:
@@ -143,12 +177,12 @@ def main() -> int:
     if not (RUNTIME / "live-feed.json").is_file():
         raise SystemExit("Refusing runtime overlay: canonical live feed missing")
 
-    # `/stiri/` is a live newsroom index, not an independently stale static page.
-    # Rebuild it from the exact feed that is about to be exported, while reusing
-    # the committed same-revision shell for branding/navigation/CSS.
+    # Build compatibility/static products first, then apply the one canonical
+    # reader presentation before copying runtime to the deployed export.
     news_index_report = render_news_index.build()
     legal_report = build_legal_pages.build()
     static_materialized = materialize_static_runtime_routes()
+    apply_reader_presentation()
 
     for source in sorted(RUNTIME.rglob("*")):
         if source.is_dir():
@@ -158,12 +192,13 @@ def main() -> int:
         shutil.copy2(source, target)
 
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
-    manifest["schema_version"] = "1.8"
+    manifest["schema_version"] = "1.9"
     manifest["target"]["autonomous_frontpage"] = True
     manifest["target"]["frontpage_source"] = "site/runtime/index.html"
     manifest["target"]["publication_model"] = "continuous_story_first"
     manifest["target"]["public_legal_pages"] = True
     manifest["target"]["news_index_source"] = "site/runtime/live-feed.json"
+    manifest["target"]["reader_presentation_owner"] = "overlay_runtime_export"
     routes = manifest.setdefault("routes", [])
     routes = [
         route for route in routes
@@ -272,6 +307,7 @@ def main() -> int:
         "routes": len(routes),
         "files": len(files),
         "autonomous_frontpage": True,
+        "reader_presentation_owner": "overlay_runtime_export",
         "static_routes_materialized": static_materialized,
         "indexing_status": indexing.get("status"),
         "indexing_routes": indexing.get("route_count"),
