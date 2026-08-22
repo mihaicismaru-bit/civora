@@ -1,0 +1,140 @@
+{
+  "schema": "PARTENER_UX_CONSOLIDATED_CHECKPOINT_V1",
+  "checkpoint": "PARTENER-UX-CONSOLIDATED-CP06",
+  "state": "PASS",
+  "publishable": false,
+  "mergeAuthorized": false,
+  "branch": "agent/partener-ux-consolidated-v1-v4-20260822",
+  "pr": 623,
+  "baseMainAtBranchCreation": "1fb6190f0091e52e059a657ba5b3720e064dea7e",
+  "testedHead": "204e14faa66f9af0bb6b3b29a189f136d45dc333",
+  "qaMergeRefSha": "f21c6b83f3359a58b0b3239c5985dbf20ef1465c",
+  "qaBaseMainSha": "47243d63f4e778f33f81c9236cee7185e9e82094",
+  "currentMainObservedAfterQa": "def8af3ef198be0f1077c8c5670ee368a79d7a58",
+  "workflow": {
+    "name": "PARTENER.EU UX Consolidated v1-v4 QA",
+    "runId": 32582445203,
+    "conclusion": "success",
+    "replay": "workflow_dispatch .github/workflows/partener-eu-ux-consolidated-v1-v4.yml"
+  },
+  "artifact": {
+    "id": 9478159061,
+    "name": "partener-ux-consolidated-v1-v4-proof",
+    "sha256": "14a39e4ecc16a174963612e3e099bc9a07ed847e640d6bde8fe56dc24e09f8b4",
+    "filesUploaded": 18
+  },
+  "gates": {
+    "javascriptSyntax": "PASS",
+    "uxV1Static": "PASS",
+    "uxV2Static": "PASS",
+    "uxV3Static": "PASS",
+    "uxV4Static": "PASS",
+    "frontendRegression": "PASS",
+    "uxV1Browser": "PASS",
+    "uxV2Browser": "PASS",
+    "uxV3Browser": "PASS",
+    "uxV4Browser": "PASS"
+  },
+  "evidence": {
+    "v1": {
+      "desktop": {
+        "viewport": "1365x900",
+        "pageHorizontalOverflowPx": 0,
+        "navTargets": 5,
+        "navTargetHeightPx": 44,
+        "unlabeledFormControls": 0,
+        "failedResponses": 0,
+        "consoleErrors": 0
+      },
+      "mobile": {
+        "viewport": "390x844",
+        "pageHorizontalOverflowPx": 0,
+        "navTargets": 5,
+        "navTargetHeightPx": 44,
+        "unlabeledFormControls": 0,
+        "failedResponses": 0,
+        "consoleErrors": 0
+      },
+      "keyboardTargetCount": 20
+    },
+    "v2": {
+      "railLabels": ["Profil", "Deschise", "Pregătește", "Schimbări"],
+      "railTargetHeightPx": 44,
+      "decisionSectionsVisible": 3,
+      "decisionSectionsHidden": 0,
+      "extraKeyboardTargets": 5,
+      "newsCardActionHints": 5,
+      "desktopChangesJumpPass": true,
+      "mobileChangesJumpPass": true,
+      "mobileTargetTopPx": 186.06,
+      "mobileHeaderHeightPx": 120,
+      "pageHorizontalOverflowPx": 0,
+      "failedResponses": 0,
+      "consoleErrors": 0
+    },
+    "v3": {
+      "desktop": {
+        "open": {"visible": 4, "total": 4},
+        "prepare": {"visible": 6, "total": 6},
+        "changes": {"visible": 5, "total": 5},
+        "toggleCount": 0
+      },
+      "mobileCompact": {
+        "open": {"visible": 3, "hidden": 1, "total": 4},
+        "prepare": {"visible": 3, "hidden": 3, "total": 6},
+        "changes": {"visible": 3, "hidden": 2, "total": 5},
+        "toggleCount": 3,
+        "toggleTargetHeightPx": 44,
+        "scrollHeightPx": 10200
+      },
+      "mobileExpandedScrollHeightPx": 12559,
+      "initialHeightReductionPx": 2359,
+      "collapseRoundTripPass": true,
+      "pageHorizontalOverflowCompactPx": 0,
+      "pageHorizontalOverflowExpandedPx": 0,
+      "failedResponses": 0,
+      "consoleErrors": 0
+    },
+    "v4": {
+      "desktop": {
+        "activeScrollHeightPx": 5939,
+        "withoutV4ScrollHeightPx": 6480,
+        "heightReductionPx": 541,
+        "clampedFooters": 7,
+        "clampedNews": 5
+      },
+      "mobile": {
+        "activeScrollHeightPx": 10200,
+        "withoutV4ScrollHeightPx": 11162,
+        "heightReductionPx": 962,
+        "clampedFooters": 5,
+        "clampedNews": 3,
+        "hiddenDossierCardsPreservedFromV3": 4,
+        "hiddenNewsCardsPreservedFromV3": 2
+      },
+      "domTextUnchanged": true,
+      "roundTripPass": true,
+      "pageHorizontalOverflowPx": 0,
+      "failedResponses": 0,
+      "consoleErrors": 0
+    }
+  },
+  "safety": {
+    "canonicalFundingFactsChanged": false,
+    "eligibilityRulesChanged": false,
+    "ingestionStateChangedByCandidate": false,
+    "sourceStateChangedByCandidate": false,
+    "publicationPolicyChanged": false,
+    "criticalBootPathChanged": false,
+    "uxRuntimeWritesCanonicalData": false,
+    "postQaDriftClassification": "NO_UX_OVERLAP_VALIDATION_STATE_AND_VALCEA_ONLY"
+  },
+  "rollback": "Revert the consolidated UX PR commits; main remains the LKG until explicit merge approval.",
+  "remaining": [
+    "Re-check latest main immediately before any approved merge.",
+    "If PARTENER frontend/runtime overlaps appear, reconcile and rerun the consolidated gate.",
+    "Verify the deployed public output after integration authorization."
+  ],
+  "blocker": null,
+  "nextAction": "Hold PR #623 as draft integration candidate until explicit merge approval."
+}
