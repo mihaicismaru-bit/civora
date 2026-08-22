@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["requested_at", "requested_by", "reason", "expected_story_ids"],
+  "properties": {
+    "requested_at": {"type": "string", "minLength": 20},
+    "requested_by": {"type": "string", "minLength": 1},
+    "reason": {"type": "string", "minLength": 20},
+    "expected_story_ids": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+  },
+  "additionalProperties": false
+}

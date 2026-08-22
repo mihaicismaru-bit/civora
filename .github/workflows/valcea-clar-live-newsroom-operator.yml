@@ -1,0 +1,90 @@
+name: VÂLCEA CLAR Live Newsroom Operator Bridge
+
+# Explicit operator bridge only. This workflow never writes editorial facts,
+# story pages or runtime state. It dispatches the canonical Live Newsroom and
+# waits for that canonical writer to finish, preserving every existing gate.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/ops/live-newsroom-trigger.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: valcea-clar-live-newsroom-operator-bridge
+  cancel-in-progress: false
+
+jobs:
+  dispatch-and-wait:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Dispatch canonical Live Newsroom
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          before=$(date -u +%s)
+          gh workflow run valcea-clar-newsroom-live.yml --repo "$GITHUB_REPOSITORY" --ref main
+          echo "dispatch_epoch=$before" >> "$GITHUB_ENV"
+          echo 'Canonical Live Newsroom dispatch accepted.'
+
+      - name: Resolve dispatched run
+        id: run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          run_id=''
+          for attempt in $(seq 1 20); do
+            row=$(gh run list \
+              --repo "$GITHUB_REPOSITORY" \
+              --workflow valcea-clar-newsroom-live.yml \
+              --event workflow_dispatch \
+              --limit 5 \
+              --json databaseId,createdAt,status,conclusion \
+              --jq 'sort_by(.createdAt) | reverse | .[0] // empty')
+            if [ -n "$row" ]; then
+              created=$(printf '%s' "$row" | jq -r '.createdAt')
+              created_epoch=$(date -u -d "$created" +%s)
+              if [ "$created_epoch" -ge "$dispatch_epoch" ]; then
+                run_id=$(printf '%s' "$row" | jq -r '.databaseId')
+                break
+              fi
+            fi
+            sleep 3
+          done
+          if [ -z "$run_id" ]; then
+            echo 'Could not resolve the dispatched canonical Live Newsroom run.' >&2
+            exit 1
+          fi
+          echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
+          echo "Canonical run: $run_id"
+
+      - name: Wait for canonical writer
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ steps.run.outputs.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh run watch "$RUN_ID" --repo "$GITHUB_REPOSITORY" --exit-status
+
+      - name: Report canonical run
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ steps.run.outputs.run_id }}
+        shell: bash
+        run: |
+          if [ -n "$RUN_ID" ]; then
+            gh run view "$RUN_ID" --repo "$GITHUB_REPOSITORY" --json databaseId,status,conclusion,url,name --jq '.' >> "$GITHUB_STEP_SUMMARY" || true
+          fi
