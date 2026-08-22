@@ -1,47 +1,33 @@
-name: VÂLCEA CLAR Live Bridge Person Profiles
+name: VÂLCEA CLAR Live Bridge Person Profiles Compatibility Check
 
+# Historical bridge patcher retained for compatibility checks only. Public person
+# profile projection is owned by Identity Intelligence + canonical site export.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
+  pull_request:
     paths:
       - 'valcea-clar/scripts/patch_live_bridge_person_profiles.py'
+      - 'valcea-clar/site/chatgpt-sites-live-bridge.js'
       - '.github/workflows/valcea-clar-live-bridge-person-profiles.yml'
 
 permissions:
-  contents: write
-
-concurrency:
-  group: valcea-clar-live-bridge-person-profiles
-  cancel-in-progress: false
+  contents: read
 
 jobs:
-  patch:
+  check:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
           python-version: '3.13'
-      - name: Patch and validate People Intelligence live bridge
+      - name: Validate historical bridge contract without persistence
         run: |
           python -m py_compile valcea-clar/scripts/patch_live_bridge_person_profiles.py
           python valcea-clar/scripts/patch_live_bridge_person_profiles.py
           python valcea-clar/scripts/patch_live_bridge_person_profiles.py --check
-      - name: Persist live bridge extension
-        shell: bash
+      - name: Validate canonical profile ownership
         run: |
-          set -euo pipefail
-          if git diff --quiet -- valcea-clar/site/chatgpt-sites-live-bridge.js; then
-            echo 'Live bridge already renders public person profiles.'
-            exit 0
-          fi
-          git config user.name 'vâlcea-clar-live-bridge[bot]'
-          git config user.email 'valcea-clar-live-bridge@users.noreply.github.com'
-          git add valcea-clar/site/chatgpt-sites-live-bridge.js
-          git commit -m 'Render public person profiles in VÂLCEA CLAR stories'
-          git pull --rebase origin main
-          git push origin HEAD:main
+          grep -Fq 'link_person_profiles.py' valcea-clar/scripts/overlay_runtime_export.py
+          echo 'Person story/profile projection is owned by canonical export.'
