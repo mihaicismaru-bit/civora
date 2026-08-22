@@ -106,5 +106,9 @@ jobs:
         if: always()
         with:
           name: partener-mipe-immutable-runtime-cleanup
-          path: partener-eu/ops/mipe_immutable_runtime_cleanup.json
+          path: |
+            partener-eu/ops/mipe_immutable_runtime_cleanup.json
+            .github/workflows/partener-eu-validation.yml
+            .github/workflows/partener-eu-mipe-dual-relay.yml
+          include-hidden-files: true
           if-no-files-found: warn
