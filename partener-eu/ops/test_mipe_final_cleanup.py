@@ -53,7 +53,7 @@ def main() -> int:
     for fixer in DELETED_FIXERS:
         assert fixer not in validation, f"runtime fixer still invoked by validation: {fixer}"
         assert fixer not in dual_relay, f"runtime fixer still invoked by dual relay: {fixer}"
-    assert "partener-eu/ingest/mipe_resilient_ingest.py \\\" not in validation
+    assert "partener-eu/ingest/mipe_resilient_ingest.py" not in validation
     assert "Validate immutable diagnostic runtime" in dual_relay
 
     assert "cron: '11 */3 * * *'" not in scheduler
