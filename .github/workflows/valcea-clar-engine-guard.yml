@@ -35,7 +35,6 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
-
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
@@ -45,10 +44,11 @@ jobs:
           python valcea-clar/scripts/validate_site_engine_ownership.py \
             --report /tmp/site-engine-ownership-report.json
 
-      - name: Audit the complete automation surface
+      - name: Enforce complete automation surface strictly
         run: |
           python valcea-clar/scripts/audit_automation_surface.py --self-test
           python valcea-clar/scripts/audit_automation_surface.py \
+            --strict \
             --report /tmp/automation-surface-report.json
 
       - name: Enforce site-engine-only social publishing
@@ -88,21 +88,16 @@ jobs:
               f"- Manual/PR-only unregistered workflows: **{surface.get('unregistered_manual_or_pr_only_count', 0)}**",
               f"- Active direct social channels: `{', '.join(social.get('active_direct_channels', []))}`",
               '- ChatGPT scheduled/direct publishing: **disabled**',
+              '- Automation surface enforcement: **STRICT**',
           ]
           blockers = surface.get('strict_blockers') or []
           if blockers:
-              lines.extend(['', '## Cleanup inventory — autonomous surface outside canon'])
-              lines.extend(f"- `{path}`" for path in blockers[:40])
-              if len(blockers) > 40:
-                  lines.append(f"- … and {len(blockers) - 40} more; see artifact report")
+              lines.extend(['', '## Strict automation blockers'])
+              lines.extend(f"- `{path}`" for path in blockers)
           errors = (site.get('errors') or []) + (social.get('errors') or [])
           if errors:
               lines.extend(['', '## Enforced errors'])
               lines.extend(f"- {error}" for error in errors)
-          lines.extend([
-              '',
-              '> Automation-surface findings are report-only during cleanup. The final phase will enable strict mode.',
-          ])
           summary_path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
           PY
 
