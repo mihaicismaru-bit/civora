@@ -14,10 +14,13 @@ on:
     paths:
       - 'valcea-clar/social/story_visuals.json'
       - 'valcea-clar/social/social_media_manifest.json'
+      - 'valcea-clar/social/contextual_story_media.json'
       - 'valcea-clar/scripts/render_story_pages.py'
       - 'valcea-clar/scripts/public_ux_reset.py'
       - 'valcea-clar/scripts/public_ux_fresh_rank.py'
+      - 'valcea-clar/scripts/public_ux_media.py'
       - 'valcea-clar/scripts/public_ux_story_integrity.py'
+      - 'valcea-clar/scripts/public_ux_media_integrity.py'
       - 'valcea-clar/scripts/public_ux_manifest.py'
       - 'valcea-clar/scripts/validate_public_ux_freshness.py'
       - 'local-news-os/core/verified_story_media.py'
@@ -26,10 +29,13 @@ on:
     paths:
       - 'valcea-clar/social/story_visuals.json'
       - 'valcea-clar/social/social_media_manifest.json'
+      - 'valcea-clar/social/contextual_story_media.json'
       - 'valcea-clar/scripts/render_story_pages.py'
       - 'valcea-clar/scripts/public_ux_reset.py'
       - 'valcea-clar/scripts/public_ux_fresh_rank.py'
+      - 'valcea-clar/scripts/public_ux_media.py'
       - 'valcea-clar/scripts/public_ux_story_integrity.py'
+      - 'valcea-clar/scripts/public_ux_media_integrity.py'
       - 'valcea-clar/scripts/public_ux_manifest.py'
       - 'valcea-clar/scripts/validate_public_ux_freshness.py'
       - 'local-news-os/core/verified_story_media.py'
@@ -61,7 +67,8 @@ jobs:
         run: |
           python valcea-clar/scripts/public_ux_reset.py --self-test
           python valcea-clar/scripts/public_ux_fresh_rank.py --self-test
-          python valcea-clar/scripts/public_ux_story_integrity.py --self-test
+          python valcea-clar/scripts/public_ux_media.py --self-test
+          python valcea-clar/scripts/public_ux_media_integrity.py --self-test
           python valcea-clar/scripts/validate_public_ux_freshness.py --self-test
 
       - name: Exercise canonical reader presentation on pull request
@@ -73,11 +80,11 @@ jobs:
           before="$(sha256sum "$archive" | cut -d' ' -f1)"
 
           python valcea-clar/scripts/render_story_pages.py | tee /tmp/story-social-metadata.json
-          python valcea-clar/scripts/public_ux_fresh_rank.py
-          python valcea-clar/scripts/public_ux_story_integrity.py
+          python valcea-clar/scripts/public_ux_media.py
+          python valcea-clar/scripts/public_ux_media_integrity.py
           python valcea-clar/scripts/public_ux_manifest.py
-          python valcea-clar/scripts/public_ux_fresh_rank.py --check
-          python valcea-clar/scripts/public_ux_story_integrity.py --check
+          python valcea-clar/scripts/public_ux_media.py --check
+          python valcea-clar/scripts/public_ux_media_integrity.py --check
           python valcea-clar/scripts/public_ux_manifest.py --check
           python valcea-clar/scripts/validate_public_ux_freshness.py
 
@@ -102,11 +109,11 @@ jobs:
             before="$(sha256sum "$archive" | cut -d' ' -f1)"
 
             python valcea-clar/scripts/render_story_pages.py | tee /tmp/story-social-metadata.json
-            python valcea-clar/scripts/public_ux_fresh_rank.py
-            python valcea-clar/scripts/public_ux_story_integrity.py
+            python valcea-clar/scripts/public_ux_media.py
+            python valcea-clar/scripts/public_ux_media_integrity.py
             python valcea-clar/scripts/public_ux_manifest.py
-            python valcea-clar/scripts/public_ux_fresh_rank.py --check
-            python valcea-clar/scripts/public_ux_story_integrity.py --check
+            python valcea-clar/scripts/public_ux_media.py --check
+            python valcea-clar/scripts/public_ux_media_integrity.py --check
             python valcea-clar/scripts/public_ux_manifest.py --check
             python valcea-clar/scripts/validate_public_ux_freshness.py
 
@@ -135,5 +142,5 @@ jobs:
         if: always()
         run: |
           echo '## VÂLCEA CLAR Story Social Metadata + Public UX' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Derived presentation is rebuilt from the canonical live feed after Live Newsroom completes; freshness is based on first publication, not merely re-seen activity.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Derived presentation is rebuilt from the canonical live feed; exact verified media wins, explicit contextual photographs are disclosed, and freshness remains based on first publication.' >> "$GITHUB_STEP_SUMMARY"
           cat /tmp/story-social-metadata.json >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
