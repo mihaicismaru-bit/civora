@@ -53,7 +53,7 @@ Strict Phase-4 audit on PR merge-ref against current `main`:
 
 The cleanup branch remains historically diverged because production continued to persist generated editorial/runtime/state commits while cleanup was developed. The behind-side drift is dominated by generated state rather than competing automation architecture.
 
-No forced rebase is used. GitHub PR checks validate the synthetic merge ref combining current `main` with the cleanup branch. Phase-4 head `f8c98b6742e6c5e5e8ddfd778d9e32491eec4c7a` is mergeable and is validated through merge-ref `444ce0aac21337d1019014d073efdd13c2ff1ddf`.
+No forced rebase is used. GitHub PR checks validate the synthetic merge ref combining current `main` with the cleanup branch. Phase-4 functional head `f8c98b6742e6c5e5e8ddfd778d9e32491eec4c7a` passed the strict ownership and core acceptance gates against current `main`. The following commit `a75cc41942387778c58050a038b6a06f4bc745d1` changes this audit document only.
 
 ## Gate
 
