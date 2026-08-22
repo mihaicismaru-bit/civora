@@ -1,9 +1,8 @@
 name: VÂLCEA CLAR LinkedIn Editorial Compatibility Check
 
-# LinkedIn is OUTBOX_ONLY in the canonical channel registry. The canonical
-# Social Publication Engine materializes durable LinkedIn products. Keep this
-# workflow only as a product-specific regression check; it must not run on a
-# clock or write generated state back to main.
+# LinkedIn is OUTBOX_ONLY. One QA contract owns native packaging, inspectable
+# preview generation and durable outbox materialization; no separate preview
+# workflow or production writer is required.
 on:
   workflow_dispatch:
   pull_request:
@@ -12,6 +11,8 @@ on:
       - 'valcea-clar/social/linkedin_editorial_materialize.py'
       - 'valcea-clar/social/build_outbox_only_story_products.py'
       - 'valcea-clar/social/channel_registry.json'
+      - 'valcea-clar/social/social_common.py'
+      - 'valcea-clar/editorial/publication_holds.json'
       - '.github/workflows/valcea-clar-linkedin-editorial.yml'
 
 permissions:
@@ -24,7 +25,7 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -32,9 +33,35 @@ jobs:
           python-version: '3.13'
       - name: Install deterministic renderer dependency
         run: python -m pip install --disable-pip-version-check Pillow==12.3.0
-      - name: Validate LinkedIn editorial product
+      - name: Validate native LinkedIn preview contract
         run: |
           python valcea-clar/social/linkedin_editorial_v1.py --self-test
+          python valcea-clar/social/linkedin_editorial_v1.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from PIL import Image
+          root=Path('valcea-clar/social/previews/linkedin-v1')
+          value=json.loads((root/'manifest.json').read_text(encoding='utf-8'))
+          assert value.get('execution_mode') == 'PREVIEW_ONLY_NO_NETWORK_CALLS'
+          assert value.get('rendering_version') == 'linkedin-editorial-v1.1'
+          products={p['story_id']:p for p in value.get('products',[]) if isinstance(p,dict)}
+          held={'olanesti-bridge-monitor','derived-council-gambling-20260723'}
+          assert not set(products) & held
+          for product in products.values():
+              text=str(product.get('body') or '')
+              assert '#' not in text
+              assert product.get('verbatim_cross_platform_reuse_allowed') is False
+              name=product.get('preview_file')
+              if name:
+                  path=root/str(name)
+                  assert path.is_file() and path.stat().st_size >= 25000
+                  with Image.open(path) as image:
+                      assert image.size == (1200,1500)
+          print(f"LinkedIn preview: PASS ({value['ready']} READY / {value['held']} HOLD)")
+          PY
+      - name: Validate durable OUTBOX_ONLY materialization
+        run: |
           python valcea-clar/social/linkedin_editorial_materialize.py --self-test
           python valcea-clar/social/linkedin_editorial_materialize.py
           python - <<'PY'
@@ -44,5 +71,13 @@ jobs:
           outbox=json.loads(Path('valcea-clar/social/linkedin_outbox.json').read_text(encoding='utf-8'))
           assert state.get('direct_publication_enabled') is False
           assert outbox.get('platform') == 'linkedin'
-          print(f"LinkedIn OUTBOX_ONLY compatibility: PASS ({len(outbox.get('items', []))} products)")
+          print(f"LinkedIn OUTBOX_ONLY: PASS ({len(outbox.get('items', []))} products)")
           PY
+      - name: Upload inspectable QA product
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-linkedin-compat-${{ github.run_id }}
+          path: valcea-clar/social/previews/linkedin-v1
+          if-no-files-found: warn
+          retention-days: 14
