@@ -1,7 +1,8 @@
 name: VÂLCEA CLAR Fact Kernel Builder
 
-# Single canonical writer for verified editorial facts. Council, primary-source,
-# gambling and SCM kernels are materialized in one transaction before Writer QA.
+# Single canonical writer for verified editorial facts. Council decisions,
+# primary-source, gambling and SCM kernels are materialized in one transaction
+# before one Writer QA and one persistence boundary.
 on:
   workflow_dispatch:
   schedule:
@@ -13,6 +14,11 @@ on:
       - 'valcea-clar/scripts/council_docmanager_embedded_resolver.py'
       - 'valcea-clar/scripts/council_docmanager_diagnostic.py'
       - 'valcea-clar/scripts/council_docmanager_document_diagnostic.py'
+      - 'valcea-clar/scripts/council_decision_document_resolver.py'
+      - 'valcea-clar/scripts/council_decision_article_engine.py'
+      - 'valcea-clar/scripts/council_decision_fulltext_enricher.py'
+      - 'valcea-clar/scripts/council_decision_fulltext_enricher_v2.py'
+      - 'valcea-clar/scripts/council_claim_attribution_normalizer.py'
       - 'valcea-clar/scripts/promote_fact_kernels.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea_v2.py'
@@ -36,6 +42,11 @@ on:
       - 'valcea-clar/scripts/council_docmanager_embedded_resolver.py'
       - 'valcea-clar/scripts/council_docmanager_diagnostic.py'
       - 'valcea-clar/scripts/council_docmanager_document_diagnostic.py'
+      - 'valcea-clar/scripts/council_decision_document_resolver.py'
+      - 'valcea-clar/scripts/council_decision_article_engine.py'
+      - 'valcea-clar/scripts/council_decision_fulltext_enricher.py'
+      - 'valcea-clar/scripts/council_decision_fulltext_enricher_v2.py'
+      - 'valcea-clar/scripts/council_claim_attribution_normalizer.py'
       - 'valcea-clar/scripts/promote_fact_kernels.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea_v2.py'
@@ -63,7 +74,7 @@ concurrency:
 jobs:
   fact-kernel:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v6
         with:
@@ -81,6 +92,11 @@ jobs:
             valcea-clar/scripts/council_docmanager_embedded_resolver.py \
             valcea-clar/scripts/council_docmanager_diagnostic.py \
             valcea-clar/scripts/council_docmanager_document_diagnostic.py \
+            valcea-clar/scripts/council_decision_document_resolver.py \
+            valcea-clar/scripts/council_decision_article_engine.py \
+            valcea-clar/scripts/council_decision_fulltext_enricher.py \
+            valcea-clar/scripts/council_decision_fulltext_enricher_v2.py \
+            valcea-clar/scripts/council_claim_attribution_normalizer.py \
             valcea-clar/scripts/promote_fact_kernels.py \
             valcea-clar/scripts/council_watch_rm_valcea.py \
             valcea-clar/scripts/council_watch_rm_valcea_v2.py \
@@ -102,6 +118,11 @@ jobs:
           python valcea-clar/scripts/council_docmanager_embedded_resolver.py --self-test
           python valcea-clar/scripts/council_docmanager_diagnostic.py --self-test
           python valcea-clar/scripts/council_docmanager_document_diagnostic.py --self-test
+          python valcea-clar/scripts/council_decision_document_resolver.py --self-test
+          python valcea-clar/scripts/council_decision_article_engine.py --self-test
+          python valcea-clar/scripts/council_decision_fulltext_enricher.py --self-test
+          python valcea-clar/scripts/council_decision_fulltext_enricher_v2.py --self-test
+          python valcea-clar/scripts/council_claim_attribution_normalizer.py --self-test
           python valcea-clar/scripts/promote_fact_kernels.py --self-test
           python valcea-clar/scripts/primary_source_admin_kernels.py --self-test
           python valcea-clar/scripts/primary_source_service_kernels.py --self-test
@@ -113,9 +134,16 @@ jobs:
       - name: Validate current offline kernel state
         run: python valcea-clar/scripts/council_docmanager_embedded_resolver.py --check
 
+      - name: Preview current adopted-HCL article set
+        run: python valcea-clar/scripts/council_decision_article_engine.py
+
       - name: Refresh Council Watch at latest official adopted date
         if: github.event_name != 'pull_request'
         run: python valcea-clar/scripts/council_watch_rm_valcea_v2.py
+
+      - name: Resolve latest adopted-HCL official documents
+        if: github.event_name != 'pull_request'
+        run: python valcea-clar/scripts/council_decision_document_resolver.py --live --apply
 
       - name: Capture bounded official DocManager structure diagnostic
         if: github.event_name != 'pull_request'
@@ -145,6 +173,22 @@ jobs:
               f.write(f'changed={"true" if count else "false"}\n')
               f.write(f'count={count}\n')
           PY
+
+      - name: Materialize adopted-HCL article facts and investigation graph
+        if: github.event_name != 'pull_request'
+        run: python valcea-clar/scripts/council_decision_article_engine.py --apply
+
+      - name: Upgrade adopted-HCL articles from resolved official documents
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -s valcea-clar/editorial/council_decision_document_corpus.json ]; then
+            python valcea-clar/scripts/council_decision_fulltext_enricher_v2.py --apply
+            python valcea-clar/scripts/council_claim_attribution_normalizer.py --apply
+          else
+            echo 'Full official HCL corpus not materialized yet; register-safe articles remain valid.'
+          fi
 
       - name: Build verified primary-source service and administration kernels
         if: github.event_name != 'pull_request'
@@ -182,28 +226,37 @@ jobs:
                   f.write(f'fact_id={row["fact_id"]}\n')
           PY
 
-      - name: Validate promoted registry through Editorial Writer
+      - name: Validate complete facts registry through Editorial Writer
         if: github.event_name != 'pull_request'
         run: python valcea-clar/scripts/editorial_writer.py --check
 
-      - name: Persist kernel and diagnostic state conflict-safe
+      - name: Persist all fact-kernel products once
         if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'vâlcea-clar-fact-kernel[bot]'
           git config user.email 'valcea-clar-fact-kernel@users.noreply.github.com'
-          git add \
-            valcea-clar/editorial/council_watch_rm_valcea_state.json \
-            valcea-clar/editorial/council_docmanager_structure.json \
-            valcea-clar/editorial/council_docmanager_document_structure.json \
-            valcea-clar/editorial/fact_kernel_registry.json \
-            valcea-clar/editorial/facts_registry.json \
+          files=(
+            valcea-clar/editorial/council_watch_rm_valcea_state.json
+            valcea-clar/editorial/council_docmanager_structure.json
+            valcea-clar/editorial/council_docmanager_document_structure.json
+            valcea-clar/editorial/fact_kernel_registry.json
+            valcea-clar/editorial/facts_registry.json
+            valcea-clar/editorial/council_decision_graph.json
+            valcea-clar/editorial/council_investigation_leads.json
             valcea-clar/editorial/scm_program_structure.json
+          )
+          for file in "${files[@]}"; do
+            if [ -e "$file" ]; then git add "$file"; fi
+          done
+          if [ -s valcea-clar/editorial/council_decision_document_corpus.json ]; then
+            git add valcea-clar/editorial/council_decision_document_corpus.json
+          fi
           if git diff --cached --quiet; then
-            echo 'No fact-kernel or diagnostic state change to persist.'
+            echo 'No verified fact-kernel product change to persist.'
           else
-            git commit -m 'Refresh VÂLCEA CLAR verified fact kernels'
+            git commit -m 'Refresh VÂLCEA CLAR verified fact products'
             for attempt in 1 2 3; do
               if git pull --rebase origin main && git push origin HEAD:main; then
                 break
@@ -233,9 +286,8 @@ jobs:
         if: github.event_name != 'pull_request'
         run: |
           echo "Council target selector: latest official adopted-decision date"
-          echo "Council registry changed: ${{ steps.promote.outputs.changed }}"
+          echo "Council kernel promotion changed: ${{ steps.promote.outputs.changed }}"
           echo "SCM program registry changed: ${{ steps.scm.outputs.changed }}"
           echo "SCM program events parsed: ${{ steps.scm.outputs.events_parsed }}"
-          echo 'Primary-source service and administration kernels share the canonical facts transaction.'
-          echo 'Durable explainers are normalized after kernel regeneration so old workflows cannot reintroduce transient expiry.'
+          echo 'All facts_registry mutation is owned by this Fact Kernel transaction.'
           echo 'Live Newsroom listens directly to successful Fact Kernel Builder completion; no handoff dispatcher exists.'
