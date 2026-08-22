@@ -4,11 +4,11 @@ Status: `SEMANTIC_BARRIER_1_CLOSED_FOR_CURRENT_48_PHOTO_SNAPSHOT`
 
 ## Scope
 
-Adds the Google Drive → CIVORA bridge for VÂLCEA CLAR's curated photo archive, fail-closed story candidate matching, exact semantic identity for the current owned-photo snapshot, and an explicit-only materialization gate. None of these layers grants autonomous publication authority.
+Adds the Google Drive → CIVORA bridge for VÂLCEA CLAR's curated photo archive, fail-closed story candidate matching, exact semantic identity for the current owned-photo snapshot, semantic exact-asset ranking, and an explicit-only materialization gate. None of these layers grants autonomous publication authority.
 
 Pipeline:
 
-`GOOGLE DRIVE CURATED FOLDERS -> METADATA SNAPSHOT -> OWNED PHOTO REGISTRY -> EXACT SEMANTIC IDENTITY -> CATEGORY/STORY RETRIEVAL -> STORY-LEVEL VISUAL SUBJECT CONFIRMATION -> RIGHTS/PRIVACY/EDITOR GATES -> EXPLICIT MATERIALIZATION REQUEST -> story_visuals.json`
+`GOOGLE DRIVE CURATED FOLDERS -> METADATA SNAPSHOT -> OWNED PHOTO REGISTRY -> EXACT SEMANTIC IDENTITY -> BROAD CATEGORY RETRIEVAL -> EXACT-ASSET SEMANTIC RANKING -> STORY-LEVEL VISUAL SUBJECT CONFIRMATION -> RIGHTS/PRIVACY/EDITOR GATES -> EXPLICIT MATERIALIZATION REQUEST -> story_visuals.json`
 
 ## Current curated inventory
 
@@ -28,28 +28,33 @@ The committed snapshot is a bootstrap/fallback. The workflow remains PR/manual-o
 
 `owned_photo_semantic_labels.json` is the curated semantic source for the current 48-photo snapshot. `owned_photo_semantic_registry.py` resolves those labels against the Drive snapshot and requires a one-to-one filename → `drive_file_id` binding.
 
-Current acceptance target and validated source state:
+Current validated state:
 
 - 48/48 snapshot photographs have a semantic label;
 - 48 are `confirmed`;
 - 0 are `ambiguous`;
 - 0 are `reject`;
+- 31 are exact-entity labels;
+- 17 are exact-place/scene labels;
 - every confirmed asset has confidence ≥ 0.85;
 - every asset retains `subject_match=false`, `editor_approved=false`, `publication_eligible=false`, `publication_authority=NONE`.
 
 The semantic registry distinguishes exact entities, exact places/scenes, scene types, editorial uses, privacy-review status, quality tier and owned-rights basis. Evidence must include both visual review and raw JPEG/EXIF review. Additional evidence may include visible signage, distinctive facade, cross-frame landmark confirmation, public-address cross-check or visible project/business signage.
 
-Examples now represented at exact-asset level include the Râul Olănești promenade, River Plaza Mall, Primăria Râmnicu Vâlcea, Consiliul Județean Vâlcea, Prefectura Vâlcea, Tribunalul/Palatul de Justiție, AJPIS, UniCredit, Banca Transilvania, Romprest, Camera de Comerț, RAZ Tower/Ramada, Carrefour Market, Arbusto Coffee, D’AMICI, Street Pub, Hotel Castel, Cash Pot, NOVA Luxury Apartments and central public parking.
+Examples represented at exact-asset level include the Râul Olănești promenade, River Plaza Mall, Primăria Râmnicu Vâlcea, Consiliul Județean Vâlcea, Prefectura Vâlcea, Tribunalul/Palatul de Justiție, AJPIS, UniCredit, Banca Transilvania, Romprest, Camera de Comerț, RAZ Tower/Ramada, Carrefour Market, Arbusto Coffee, D’AMICI, Street Pub, Hotel Castel, Cash Pot, NOVA Luxury Apartments and central public parking.
 
-Semantic identity is **not** event identity. A photograph confirmed as the Primăria building may be retrieved for a Primăria story, but it does not automatically become the photograph of a specific council meeting or event. Story-level subject match remains a separate explicit gate.
+Semantic identity is **not** event identity. A photograph confirmed as the Primăria building may be retrieved and ranked highly for a Primăria story, but it does not automatically become the photograph of a specific council meeting or event. Story-level subject match remains a separate explicit gate.
 
-`owned_photo_ambiguous_review_queue.json` is generated from the semantic source when `--write` runs. For the current curated snapshot the expected queue size is zero. Any future Drive file without a semantic label fails closed rather than entering story matching silently.
+`owned_photo_ambiguous_review_queue.json` is generated from the semantic source when `--write` runs. For the current curated snapshot the validated queue size is zero. Any future Drive file without a semantic label fails closed rather than entering story matching silently.
 
-## Candidate matching
+## Candidate matching and exact-asset ranking
 
-`owned_photo_story_matcher.py` compares published story identity/headline/dek/section against conservative category rules in `owned_photo_match_policy.json`.
+`owned_photo_story_matcher.py` now uses two deliberately separate layers:
 
-A category match is retrieval assistance only. Every candidate remains:
+1. conservative category rules in `owned_photo_match_policy.json` produce a broad retrieval set from published story identity/headline/dek/section;
+2. `owned_photo_semantic_registry.json` ranks individual assets inside that retrieval set by confirmed exact entity/place identity, semantic confidence and quality tier.
+
+The matcher never uses semantic ranking as proof that the image depicts the specific event. It emits `semantic_match_is_not_subject_match=true`; every candidate still remains:
 
 - `subject_match=false`
 - `editor_approved=false`
@@ -57,6 +62,8 @@ A category match is retrieval assistance only. Every candidate remains:
 - `publication_authority=NONE`
 - `requires_visual_confirmation=true`
 - `rights_reconfirmation_required=true`
+
+The current PR merge-ref validation scans 32 published stories and 48 owned assets. It returns 20 stories with owned-photo candidates: 19 stories currently missing a visual and 1 replacement candidate. There are 147 broad retrieval links, of which 23 are exact semantic text-match links where the confirmed entity/place identity is also present in the story identity/headline/dek. Those 23 links are higher-confidence retrieval suggestions, not approved story-photo assignments.
 
 The matcher avoids article-body/source text for scoring so a source citation cannot make an unrelated story look like an institutional-photo match. Known false-positive patterns are penalized, e.g. a Buila/Băile Olănești accident must not inherit the Râul Olănești/promenadă category merely because “Olănești” appears.
 
@@ -78,12 +85,13 @@ No active materialization requests are committed in this PR, so current validati
 
 The Drive archive and semantic registry are metadata/candidate layers. Owned-rights status does not bypass privacy or story relevance review. Original binaries remain in Google Drive until an explicit materialization request clears all gates.
 
-The semantic source and validator deliberately enforce:
+The source, validator and matcher deliberately enforce:
 
 - semantic identity ≠ story subject match;
+- semantic text match ≠ story subject match;
 - exact place/entity ≠ exact event;
 - owned rights ≠ automatic publishability;
-- category match ≠ exact asset match;
+- broad category retrieval ≠ exact asset approval;
 - no photo is better than false relevance.
 
 ## Runtime
@@ -115,8 +123,9 @@ Authentication supports either `VALCEA_DRIVE_SERVICE_ACCOUNT_JSON` (preferred, r
 2. semantic labels cover exactly the same 48 unique files/Drive IDs;
 3. all 48 semantic identities are confirmed and the ambiguous queue is empty;
 4. semantic validation proves no asset inherits story subject match, editor approval or publication authority;
-5. ingest, matching and materialization-gate self-tests pass;
-6. current site-engine ownership, quality, canonical export and social acceptance gates remain green.
+5. exact semantic ranking works while `semantic_match_is_not_subject_match=true` remains enforced;
+6. ingest, semantic registry, matcher and materialization-gate self-tests pass;
+7. current site-engine ownership, quality, canonical export and social acceptance gates remain green.
 
 After this barrier, first owned-photo replacements may be proposed at exact-asset level, but each still needs story-specific visual confirmation and the existing explicit materialization gate.
 
