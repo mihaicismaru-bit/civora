@@ -2,19 +2,68 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-22T20:50:56+03:00",
+  "generated_at": "2026-08-22T22:03:35+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-22T20:49:39+03:00",
-  "task_count": 56,
+  "queue_generated_at": "2026-08-22T22:02:21+03:00",
+  "task_count": 57,
   "primary_match_count": 0,
-  "no_match_count": 28,
+  "no_match_count": 29,
   "unrouted_count": 28,
   "target_count": 14,
   "targets_ok": 12,
   "results": [
+    {
+      "signal_id": "ab64b3ab0ec0ca1ef2435f2b",
+      "signal_title": "VIDEO. Autocar cuprins de flăcări lângă Shopping City Râmnicu Vâlcea. Focul s-a extins la două autoutilitare",
+      "signal_url": "https://seintamplainvalcea.ro/2026/08/22/video-autocar-cuprins-de-flacari-langa-shopping-city-ramnicu-valcea-focul-s-a-extins-la-doua-autoutilitare/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-22T21:34:12+03:00",
+      "verification_route_id": "fire_rescue_alert",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "isu-valcea-stiri-locale",
+            "name": "ISU Vâlcea — Știri locale",
+            "url": "https://isuvl.igsu.ro/stiri-locale"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "isu-valcea-comunicate",
+            "name": "ISU Vâlcea",
+            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "7bc709c764608c834b0e13f3",
       "signal_title": "Controale în Vâlcea: amenzi, țigări confiscate și un dosar de evaziune fiscală",
