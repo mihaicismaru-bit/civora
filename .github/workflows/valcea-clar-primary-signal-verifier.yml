@@ -1,13 +1,10 @@
 name: VÂLCEA CLAR Primary Signal Verifier
 
+# Signal Radar persists signal_verification_queue.json only when the queue
+# changes. Verify that durable event once; do not also poll and workflow-run the
+# same queue on a second cadence.
 on:
   workflow_dispatch:
-  workflow_run:
-    workflows: ["VÂLCEA CLAR Signal Radar"]
-    types: [completed]
-    branches: [main]
-  schedule:
-    - cron: '5-55/10 * * * *'
   push:
     branches: [main]
     paths:
@@ -52,7 +49,6 @@ concurrency:
 
 jobs:
   verify-signals:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
@@ -78,10 +74,10 @@ jobs:
       - name: Rebuild routed signal queue locally for PR verification
         if: github.event_name == 'pull_request'
         run: python local-news-os/core/signal_radar_routed.py --instance valcea
-      - name: Exercise routed ranked strict primary verification against freshly routed queue
+      - name: Exercise routed ranked strict primary verification for PR
         if: github.event_name == 'pull_request'
         run: python local-news-os/core/primary_signal_verifier_routed_strict.py --instance valcea --no-write
-      - name: Verify current persisted radar queue against routed ranked primary sources
+      - name: Verify current persisted radar queue
         if: github.event_name != 'pull_request'
         run: python local-news-os/core/primary_signal_verifier_routed_strict.py --instance valcea
       - name: Persist primary verification evidence safely
@@ -101,7 +97,7 @@ jobs:
             git fetch origin main
             latest_queue_generated_at=$(git show origin/main:valcea-clar/editorial/signal_verification_queue.json | python -c "import json,sys; print(json.load(sys.stdin)['generated_at'])")
             if [ "$state_queue_generated_at" != "$latest_queue_generated_at" ]; then
-              echo "Verifier result is stale (${state_queue_generated_at}); latest persisted queue is ${latest_queue_generated_at}. The next successful radar workflow_run or schedule fallback will verify the newer queue."
+              echo "Verifier result is stale; a newer queue will trigger its own push verification."
               exit 0
             fi
             git reset --hard origin/main
@@ -113,9 +109,7 @@ jobs:
               exit 0
             fi
             git commit -m 'Refresh VÂLCEA CLAR primary signal verification state'
-            if git push origin HEAD:main; then
-              exit 0
-            fi
+            if git push origin HEAD:main; then exit 0; fi
             sleep $((attempt * 2))
           done
           echo 'Could not persist primary verification state without conflict.' >&2
