@@ -2,19 +2,80 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-22T12:05:53+03:00",
+  "generated_at": "2026-08-22T12:57:22+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-22T12:04:44+03:00",
-  "task_count": 55,
+  "queue_generated_at": "2026-08-22T12:56:14+03:00",
+  "task_count": 57,
   "primary_match_count": 0,
-  "no_match_count": 27,
-  "unrouted_count": 28,
+  "no_match_count": 28,
+  "unrouted_count": 29,
   "target_count": 14,
   "targets_ok": 12,
   "results": [
+    {
+      "signal_id": "7a5e692afa3659801199edab",
+      "signal_title": "Râmnicu Vâlcea își construiește candidatura pentru Capitala Tineretului din România 2028. „ouR Vision” prinde contur",
+      "signal_url": "https://evenimentvalcean.ro/ramnicu-valcea-isi-construieste-candidatura-pentru-capitala-tineretului-din-romania-2028-our-vision-prinde-contur/",
+      "signal_publisher": "Eveniment Vâlcean",
+      "signal_published_at": "2026-08-22T12:33:02+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "03515e60cd53fefeeedd4c2f",
+      "signal_title": "Consiliul Județean Vâlcea: „Vom avea apă caldă și căldură!” Instituția cere Guvernului 40 de milioane de lei pentru CET Govora",
+      "signal_url": "https://evenimentvalcean.ro/consiliul-judetean-valcea-vom-avea-apa-calda-si-caldura-institutia-cere-guvernului-40-de-milioane-de-lei-pentru-cet-govora/",
+      "signal_publisher": "Eveniment Vâlcean",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-22T12:29:07+03:00",
+      "verification_route_id": "utilities",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "apavil-comunicate",
+            "name": "APAVIL S.A.",
+            "url": "https://apavil.ro/?page_id=1178"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "apavil-opriri-programate",
+            "name": "APAVIL S.A.",
+            "url": "https://apavil.ro/?page_id=962"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 2
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "cet-govora-termoficare-advisories",
+            "name": "CET Govora S.A. — Termoficare Vâlcea",
+            "url": "https://www.termoficarevalcea.ro/blog/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 1
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "4c826896a5eef64130e300ee",
       "signal_title": "Doru Diaconu, o poveste de administrație care nu s-a încheiat. Două mandate de viceprimar, unul de primar și experiența adunată în peste 20 de ani",
@@ -95,7 +156,7 @@
     },
     {
       "signal_id": "bd211bb1fcfc6b8426dc3490",
-      "signal_title": "ACCIDENT MORTAL la Băile Olănești: o persoană a decedat după ce un autoturism a căzut într-o prăpastie și a luat foc",
+      "signal_title": "FOTO/UPDATE. ACCIDENT MORTAL la Băile Olănești: o persoană a decedat după ce un autoturism a căzut într-o prăpastie și a luat foc",
       "signal_url": "https://seintamplainvalcea.ro/2026/08/22/accident-mortal-la-baile-olanesti-o-persoana-a-decedat-dupa-ce-un-autoturism-a-cazut-intr-o-prapastie-si-a-luat-foc/",
       "signal_publisher": "Se întâmplă în Vâlcea",
       "signal_tier": "T2",
