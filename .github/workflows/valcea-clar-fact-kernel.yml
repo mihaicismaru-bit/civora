@@ -1,5 +1,7 @@
 name: VÂLCEA CLAR Fact Kernel Builder
 
+# Single canonical writer for verified editorial facts. Council, primary-source,
+# gambling and SCM kernels are materialized in one transaction before Writer QA.
 on:
   workflow_dispatch:
   schedule:
@@ -14,6 +16,8 @@ on:
       - 'valcea-clar/scripts/promote_fact_kernels.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea_v2.py'
+      - 'valcea-clar/scripts/primary_source_admin_kernels.py'
+      - 'valcea-clar/scripts/primary_source_service_kernels.py'
       - 'valcea-clar/scripts/gambling_dossier_enricher.py'
       - 'valcea-clar/scripts/gambling_dossier_enricher_v2.py'
       - 'valcea-clar/scripts/editorial_lifecycle_normalizer.py'
@@ -35,6 +39,8 @@ on:
       - 'valcea-clar/scripts/promote_fact_kernels.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea_v2.py'
+      - 'valcea-clar/scripts/primary_source_admin_kernels.py'
+      - 'valcea-clar/scripts/primary_source_service_kernels.py'
       - 'valcea-clar/scripts/gambling_dossier_enricher.py'
       - 'valcea-clar/scripts/gambling_dossier_enricher_v2.py'
       - 'valcea-clar/scripts/editorial_lifecycle_normalizer.py'
@@ -57,7 +63,7 @@ concurrency:
 jobs:
   fact-kernel:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v6
         with:
@@ -78,6 +84,8 @@ jobs:
             valcea-clar/scripts/promote_fact_kernels.py \
             valcea-clar/scripts/council_watch_rm_valcea.py \
             valcea-clar/scripts/council_watch_rm_valcea_v2.py \
+            valcea-clar/scripts/primary_source_admin_kernels.py \
+            valcea-clar/scripts/primary_source_service_kernels.py \
             valcea-clar/scripts/gambling_dossier_enricher.py \
             valcea-clar/scripts/gambling_dossier_enricher_v2.py \
             valcea-clar/scripts/editorial_lifecycle_normalizer.py \
@@ -95,6 +103,8 @@ jobs:
           python valcea-clar/scripts/council_docmanager_diagnostic.py --self-test
           python valcea-clar/scripts/council_docmanager_document_diagnostic.py --self-test
           python valcea-clar/scripts/promote_fact_kernels.py --self-test
+          python valcea-clar/scripts/primary_source_admin_kernels.py --self-test
+          python valcea-clar/scripts/primary_source_service_kernels.py --self-test
           python valcea-clar/scripts/gambling_dossier_enricher_v2.py --self-test
           python valcea-clar/scripts/editorial_lifecycle_normalizer.py --self-test
           python valcea-clar/scripts/scm_program_fact_kernel.py --self-test
@@ -135,6 +145,13 @@ jobs:
               f.write(f'changed={"true" if count else "false"}\n')
               f.write(f'count={count}\n')
           PY
+
+      - name: Build verified primary-source service and administration kernels
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          python valcea-clar/scripts/primary_source_service_kernels.py --apply
+          python valcea-clar/scripts/primary_source_admin_kernels.py --apply
 
       - name: Reapply durable gambling dossier and evergreen lifecycle
         if: github.event_name != 'pull_request'
@@ -219,5 +236,6 @@ jobs:
           echo "Council registry changed: ${{ steps.promote.outputs.changed }}"
           echo "SCM program registry changed: ${{ steps.scm.outputs.changed }}"
           echo "SCM program events parsed: ${{ steps.scm.outputs.events_parsed }}"
-          echo 'Durable explainers are normalized after any kernel regeneration so old workflows cannot reintroduce relative-time copy or transient expiry.'
-          echo 'The durable Fact Kernel → Live Newsroom workflow_run handoff owns downstream dispatch.'
+          echo 'Primary-source service and administration kernels share the canonical facts transaction.'
+          echo 'Durable explainers are normalized after kernel regeneration so old workflows cannot reintroduce transient expiry.'
+          echo 'Live Newsroom listens directly to successful Fact Kernel Builder completion; no handoff dispatcher exists.'
