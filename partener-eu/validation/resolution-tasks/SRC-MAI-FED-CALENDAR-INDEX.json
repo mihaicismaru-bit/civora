@@ -1,14 +1,19 @@
 {
-  "schema_version": "1.1",
-  "type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
-  "source_id": "SRC-MAI-FED-CALENDAR-INDEX",
-  "source_tier": "T1",
+  "source_name": "managing_authority_calendar_index",
   "source_url": "https://fed.mai.gov.ro/despre/lansare-apeluri/",
-  "status": "OPEN",
+  "source_tier": "T1",
+  "previous_semantic_sha256": "e9954d3e3d5737b8d39eb03f0781d4c372935e03391390346c75e9e9dddbe225",
+  "candidate_semantic_sha256": "c2de2cbe2c0088b7a913aa67d3bbf237f3a87dc5effd644e900239248b9db58a",
+  "current_semantic_sha256": "c2de2cbe2c0088b7a913aa67d3bbf237f3a87dc5effd644e900239248b9db58a",
   "first_observed_at": "2026-08-13T05:19:22.391140Z",
   "last_observed_at": "2026-08-22T03:12:11.647135Z",
-  "previous_semantic_sha256": "e9954d3e3d5737b8d39eb03f0781d4c372935e03391390346c75e9e9dddbe225",
-  "current_semantic_sha256": "c2de2cbe2c0088b7a913aa67d3bbf237f3a87dc5effd644e900239248b9db58a",
+  "registry_class": "managing_authority_calendar_index",
+  "schema_version": "1.2",
+  "task_type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
+  "source_id": "SRC-MAI-FED-CALENDAR-INDEX",
+  "status": "OPEN",
+  "policy": "Do not automatically change deadline, eligibility, budget, scoring, beneficiaries, call status, or any other material fact. Resolve only from authoritative evidence and record provenance before publication.",
+  "automatic_material_fact_update_allowed": false,
   "material_fact_autoupdate_allowed": false,
   "blocked_fact_classes": [
     "deadline",
@@ -18,6 +23,5 @@
     "beneficiaries",
     "material_call_status",
     "other_material_facts"
-  ],
-  "required_resolution": "Re-establish authoritative evidence and provenance before any material fact update."
+  ]
 }

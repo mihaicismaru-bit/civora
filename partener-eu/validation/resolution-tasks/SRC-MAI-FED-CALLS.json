@@ -1,14 +1,19 @@
 {
-  "schema_version": "1.1",
-  "type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
-  "source_id": "SRC-MAI-FED-CALLS",
-  "source_tier": "T1",
+  "source_name": "managing_authority_call_registry",
   "source_url": "https://fed.mai.gov.ro/in/apeluri/",
-  "status": "OPEN",
+  "source_tier": "T1",
+  "previous_semantic_sha256": "1fc3c448e157f74bacd97c9285665de148c5fd82641386b16b649b723fdb429b",
+  "candidate_semantic_sha256": "765497be34ff128bcc5ba0c579778b950d5d2e45238528abd564c17170305398",
+  "current_semantic_sha256": "765497be34ff128bcc5ba0c579778b950d5d2e45238528abd564c17170305398",
   "first_observed_at": "2026-08-13T05:19:22.391140Z",
   "last_observed_at": "2026-08-22T03:12:11.647135Z",
-  "previous_semantic_sha256": "1fc3c448e157f74bacd97c9285665de148c5fd82641386b16b649b723fdb429b",
-  "current_semantic_sha256": "765497be34ff128bcc5ba0c579778b950d5d2e45238528abd564c17170305398",
+  "registry_class": "managing_authority_call_registry",
+  "schema_version": "1.2",
+  "task_type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
+  "source_id": "SRC-MAI-FED-CALLS",
+  "status": "OPEN",
+  "policy": "Do not automatically change deadline, eligibility, budget, scoring, beneficiaries, call status, or any other material fact. Resolve only from authoritative evidence and record provenance before publication.",
+  "automatic_material_fact_update_allowed": false,
   "material_fact_autoupdate_allowed": false,
   "blocked_fact_classes": [
     "deadline",
@@ -18,6 +23,5 @@
     "beneficiaries",
     "material_call_status",
     "other_material_facts"
-  ],
-  "required_resolution": "Re-establish authoritative evidence and provenance before any material fact update."
+  ]
 }
