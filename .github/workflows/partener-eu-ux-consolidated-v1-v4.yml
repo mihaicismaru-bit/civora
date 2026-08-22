@@ -1,0 +1,99 @@
+name: PARTENER.EU UX Consolidated v1-v4 QA
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'partener-eu/web/index.html'
+      - 'partener-eu/web/ux-optimization-v1.css'
+      - 'partener-eu/web/ux-optimization-v1.js'
+      - 'partener-eu/web/ux-orientation-v2.css'
+      - 'partener-eu/web/ux-orientation-v2.js'
+      - 'partener-eu/web/ux-mobile-density-v3.css'
+      - 'partener-eu/web/ux-mobile-density-v3.js'
+      - 'partener-eu/web/ux-card-scannability-v4.css'
+      - 'partener-eu/ops/test_ux_*.py'
+      - '.github/workflows/partener-eu-ux-consolidated-v1-v4.yml'
+  push:
+    branches:
+      - 'agent/partener-ux-consolidated-v1-v4-20260822'
+    paths:
+      - 'partener-eu/web/index.html'
+      - 'partener-eu/web/ux-optimization-v1.css'
+      - 'partener-eu/web/ux-optimization-v1.js'
+      - 'partener-eu/web/ux-orientation-v2.css'
+      - 'partener-eu/web/ux-orientation-v2.js'
+      - 'partener-eu/web/ux-mobile-density-v3.css'
+      - 'partener-eu/web/ux-mobile-density-v3.js'
+      - 'partener-eu/web/ux-card-scannability-v4.css'
+      - 'partener-eu/ops/test_ux_*.py'
+      - '.github/workflows/partener-eu-ux-consolidated-v1-v4.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: partener-eu-ux-consolidated-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: JavaScript syntax
+        run: |
+          node --check partener-eu/web/ux-optimization-v1.js
+          node --check partener-eu/web/ux-orientation-v2.js
+          node --check partener-eu/web/ux-mobile-density-v3.js
+
+      - name: Consolidated static contracts
+        run: |
+          python partener-eu/ops/test_ux_optimization_v1.py
+          python partener-eu/ops/test_ux_orientation_v2.py
+          python partener-eu/ops/test_ux_mobile_density_v3.py
+          python partener-eu/ops/test_ux_card_scannability_v4.py
+          python partener-eu/ops/test_frontend_regression.py
+
+      - name: Install browser harness
+        run: python -m pip install --disable-pip-version-check playwright
+
+      - name: Start isolated PARTENER.EU branch server
+        run: |
+          python -m http.server 4173 --bind 127.0.0.1 --directory partener-eu/web >/tmp/partener-ux-http.log 2>&1 &
+          echo $! >/tmp/partener-ux-http.pid
+          for i in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then exit 0; fi
+            sleep 0.5
+          done
+          cat /tmp/partener-ux-http.log
+          exit 1
+
+      - name: V1 browser proof
+        run: python partener-eu/ops/test_ux_browser_v1.py
+
+      - name: V2 browser proof
+        run: python partener-eu/ops/test_ux_orientation_browser_v2.py
+
+      - name: V3 browser proof
+        run: python partener-eu/ops/test_ux_mobile_density_browser_v3.py
+
+      - name: V4 browser proof
+        run: python partener-eu/ops/test_ux_card_scannability_browser_v4.py
+
+      - name: Upload consolidated UX evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-ux-consolidated-v1-v4-proof
+          path: |
+            partener-eu/ops/*ux*proof*.json
+            partener-eu/ops/ux-*-screenshots/*.png
+            /tmp/partener-ux-http.log
+          if-no-files-found: warn
