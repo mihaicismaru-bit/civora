@@ -1,0 +1,41 @@
+{
+  "checkpoint": "0040",
+  "title": "CI package discovery fix",
+  "status": "CODE_COMPLETE_CI_RUNNING",
+  "artifacts": [
+    "pyproject.toml",
+    "docs/checkpoints/0040-ci-package-discovery-fix.md"
+  ],
+  "evidence": [
+    {
+      "claim": "GitHub Actions is operational for the PR",
+      "source": "workflow run 31133901528"
+    },
+    {
+      "claim": "Initial CI failure occurred during editable install",
+      "source": "unit-tests (3.12) job 92728894482"
+    },
+    {
+      "claim": "Failure was caused by ambiguous setuptools flat-layout discovery of civora and schemas",
+      "source": "unit-tests (3.12) job log"
+    },
+    {
+      "claim": "Python package discovery is now restricted to civora*",
+      "artifact": "pyproject.toml"
+    }
+  ],
+  "gates": {
+    "ci_triggering": "PASS",
+    "ci_root_cause_identified": "PASS",
+    "package_discovery_explicit": "PASS_IMPLEMENTATION_REVIEW",
+    "editable_install": "PENDING_CI",
+    "unit_tests_py311": "PENDING_CI",
+    "unit_tests_py312": "PENDING_CI",
+    "unit_tests_py313": "PENDING_CI"
+  },
+  "blockers": [
+    "Awaiting current GitHub Actions matrix result",
+    "Native Windows validation remains pending"
+  ],
+  "next_action": "Inspect current matrix results and repair any runtime test failures before advancing"
+}

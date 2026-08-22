@@ -1,0 +1,23 @@
+{
+  "checkpoint_id": "0073",
+  "project": "CIVORA",
+  "title": "Operator Remediation Runbooks",
+  "state": "CLOSED_VALIDATED",
+  "canonical_branch": "agent/import-core-runtime-v0-2",
+  "validation": {"workflow_run_id":31236694328,"head_sha":"37c4c312ef4e979d07b9567d8dadc17703cb6725","conclusion":"success"},
+  "gates": [
+    {"gate":"CANONICAL_OPERATOR_RUNBOOK","status":"PASS"},
+    {"gate":"REMEDIATION_DECISION_TREE","status":"PASS"},
+    {"gate":"EVIDENCE_PRESERVATION_RULES","status":"PASS"},
+    {"gate":"PREPARED_ONLY_AUTOMATIC_RECOVERY","status":"PASS"},
+    {"gate":"INTERNAL_BACKUP_RECOVERY_PROCEDURE","status":"PASS"},
+    {"gate":"EXTERNAL_BACKUP_VALIDATION_PROCEDURE","status":"PASS"},
+    {"gate":"DEAD_LETTER_AUDITED_PROCEDURE","status":"PASS"},
+    {"gate":"EDITORIAL_APPROVAL_REENTRY_PROCEDURE","status":"PASS"},
+    {"gate":"CLI_DOCUMENTATION_CONTRACT_TEST","status":"PASS"},
+    {"gate":"CROSS_PLATFORM_CI","status":"PASS"}
+  ],
+  "remaining_backlog": ["release governance only; feature work deferred until after v1.0"],
+  "blockers": [],
+  "next_action": "Proceed through production-readiness remediation and release-candidate closure."
+}

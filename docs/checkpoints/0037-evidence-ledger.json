@@ -1,0 +1,41 @@
+{
+  "checkpoint": "0037",
+  "status": "CODE_COMPLETE_VALIDATION_PENDING",
+  "objective": "Migrate SignalStore to the shared AtomicJsonStore persistence primitive.",
+  "evidence": [
+    {
+      "artifact": "civora/ingestion.py",
+      "claim": "SignalStore delegates persistence to AtomicJsonStore while retaining signal-specific validation and rollback semantics."
+    },
+    {
+      "artifact": "tests/test_registry_ingestion.py",
+      "claim": "Tests assert common-store usage, checksum compatibility, backup recovery, fail-closed behavior and record-id consistency."
+    },
+    {
+      "artifact": "civora/persistence.py",
+      "claim": "AtomicJsonStore supplies checksum validation, atomic fsync replacement, backup recovery and cross-process locking."
+    }
+  ],
+  "completed_gates": [
+    "COMMON_PERSISTENCE_PRIMITIVE",
+    "SIGNAL_REFERENTIAL_INTEGRITY",
+    "SIGNAL_BACKUP_RECOVERY_PRESERVED",
+    "SIGNAL_FAIL_CLOSED_PRESERVED",
+    "CROSS_PROCESS_LOCKING_INHERITED"
+  ],
+  "pending_gates": [
+    "AUTOMATED_TEST_EXECUTION",
+    "WINDOWS_NATIVE_VALIDATION",
+    "MULTI_STORE_TRANSACTION_RECOVERY"
+  ],
+  "backlog": [
+    "Implement prepare/commit/abort transaction journal",
+    "Coordinate story and review persistence through transactions",
+    "Add deterministic replay after interrupted transactions",
+    "Emit recovery events into unified health reporting",
+    "Add multi-process contention tests",
+    "Validate on Windows runner",
+    "Continue Fact Kernel and editorial state-machine work"
+  ],
+  "next_action": "Implement the multi-store transaction journal and recovery protocol."
+}

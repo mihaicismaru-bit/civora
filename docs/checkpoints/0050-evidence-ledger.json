@@ -1,0 +1,51 @@
+{
+  "checkpoint": "0050",
+  "title": "Multiprocess Crash/Recovery Validation",
+  "status": "CODE_COMPLETE_CI_PENDING",
+  "evidence": [
+    {
+      "artifact": "tests/test_multiprocess_recovery.py",
+      "proves": [
+        "prepare-before-review crash recovery across independent processes",
+        "post-review/pre-commit idempotent recovery across independent processes",
+        "cross-process ReviewQueue no-lost-update behavior",
+        "cross-process TransactionJournal no-lost-update behavior"
+      ]
+    },
+    {
+      "artifact": "civora/transactions.py",
+      "proves": [
+        "durable prepared transaction state",
+        "bounded replay state machine",
+        "atomic journal mutation"
+      ]
+    },
+    {
+      "artifact": "civora/review.py",
+      "proves": [
+        "idempotent review enqueue by story id",
+        "atomic queue read-modify-write"
+      ]
+    },
+    {
+      "artifact": "civora/orchestrator.py",
+      "proves": [
+        "startup recovery before new work",
+        "transaction replay and post-recovery health gate"
+      ]
+    }
+  ],
+  "gates": {
+    "MULTIPROCESS_PREPARE_CRASH_RECOVERY": "TEST_ADDED",
+    "MULTIPROCESS_POST_QUEUE_PRECOMMIT_RECOVERY": "TEST_ADDED",
+    "MULTIPROCESS_REPLAY_IDEMPOTENCE": "TEST_ADDED",
+    "REVIEW_QUEUE_CROSS_PROCESS_NO_LOST_UPDATE": "TEST_ADDED",
+    "TRANSACTION_JOURNAL_CROSS_PROCESS_NO_LOST_UPDATE": "TEST_ADDED",
+    "PYTHON_3_11_3_12_3_13_CI": "PENDING_CURRENT_HEAD",
+    "WINDOWS_NATIVE": "PENDING"
+  },
+  "blockers": [
+    "Windows-native validation requires a Windows runner/environment"
+  ],
+  "next_action": "Wire Source Registry and Signal Store into default startup health composition and validate their corruption/recovery participation in the fail-closed startup gate."
+}

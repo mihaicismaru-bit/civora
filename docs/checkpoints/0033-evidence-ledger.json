@@ -1,0 +1,57 @@
+{
+  "project_id": "CIVORA",
+  "checkpoint_id": "0033",
+  "state": "CODE_COMPLETE_CI_PENDING",
+  "completed_gates": [
+    {
+      "gate": "SIGNAL_STORE_SCHEMA_V2",
+      "result": "PASS",
+      "evidence": "civora/ingestion.py"
+    },
+    {
+      "gate": "PAYLOAD_CHECKSUM",
+      "result": "PASS",
+      "evidence": "civora/ingestion.py; tests/test_registry_ingestion.py"
+    },
+    {
+      "gate": "ATOMIC_REPLACEMENT",
+      "result": "PASS",
+      "evidence": "civora/ingestion.py"
+    },
+    {
+      "gate": "BACKUP_RECOVERY",
+      "result": "PASS",
+      "evidence": "tests/test_registry_ingestion.py"
+    },
+    {
+      "gate": "DUAL_CORRUPTION_FAIL_CLOSED",
+      "result": "PASS",
+      "evidence": "tests/test_registry_ingestion.py"
+    },
+    {
+      "gate": "FINGERPRINT_REFERENTIAL_INTEGRITY",
+      "result": "PASS",
+      "evidence": "tests/test_registry_ingestion.py"
+    },
+    {
+      "gate": "GITHUB_ACTIONS_MATRIX",
+      "result": "PENDING",
+      "evidence": ".github/workflows/test.yml"
+    }
+  ],
+  "remaining_backlog": [
+    "Complete GitHub Actions validation on Python 3.11, 3.12 and 3.13",
+    "Extract a shared AtomicJsonStore",
+    "Migrate Source Registry persistence",
+    "Migrate Review Queue persistence",
+    "Add process-level locking",
+    "Add coordinated cross-store transactions",
+    "Add structured recovery events and unified health reporting"
+  ],
+  "blockers": [
+    "No GitHub Actions workflow run has been emitted yet",
+    "Native Windows validation environment is unavailable",
+    "Repository is public, so operational secrets cannot be stored"
+  ],
+  "next_action": "Create a shared AtomicJsonStore and migrate Source Registry and Review Queue to it."
+}

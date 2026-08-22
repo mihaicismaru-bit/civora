@@ -1,0 +1,50 @@
+{
+  "checkpoint": "0042",
+  "title": "Unified Recovery & Health Report",
+  "status": "CLOSED_VALIDATED",
+  "artifacts": [
+    {
+      "path": "civora/health.py",
+      "purpose": "Runtime-wide recovery-aware health aggregation"
+    },
+    {
+      "path": "tests/test_health.py",
+      "purpose": "Automated coverage for healthy, recovered, pending, degraded/corrupt reporting and serialization"
+    },
+    {
+      "path": "docs/checkpoints/0042-unified-recovery-health-report.md",
+      "purpose": "Checkpoint manifest and implementation record"
+    }
+  ],
+  "validation": {
+    "github_actions_run_id": 31140192038,
+    "python_3_11": "PASS",
+    "python_3_12": "PASS",
+    "python_3_13": "PASS"
+  },
+  "gates": {
+    "UNIFIED_RUNTIME_HEALTH_VIEW": "PASS",
+    "COMPONENT_HEALTH_CLASSIFICATION": "PASS",
+    "RECOVERY_VISIBILITY": "PASS",
+    "PENDING_TRANSACTION_DEGRADATION": "PASS",
+    "FAIL_CLOSED_CORRUPTION_REPORTING": "PASS",
+    "HEALTH_REPORT_SERIALIZATION": "PASS",
+    "AUTOMATED_TEST_EXECUTION_PYTHON_3_11": "PASS",
+    "AUTOMATED_TEST_EXECUTION_PYTHON_3_12": "PASS",
+    "AUTOMATED_TEST_EXECUTION_PYTHON_3_13": "PASS",
+    "WINDOWS_NATIVE_VALIDATION": "PENDING"
+  },
+  "remaining_backlog": [
+    "Durable append-only recovery event ledger",
+    "Orchestrator startup integration and stable health command",
+    "Multiprocess integration tests for story-to-review transactions",
+    "Bounded retry and dead-letter/escalation policy",
+    "Fact Kernel and claim/evidence aggregation",
+    "Editorial approval state machine",
+    "Publication adapters after runtime recovery gates close"
+  ],
+  "blockers": [
+    "Native Windows validation requires a Windows runner"
+  ],
+  "next_action": "Add a durable append-only recovery event ledger and wire UnifiedHealthInspector into orchestrator startup."
+}

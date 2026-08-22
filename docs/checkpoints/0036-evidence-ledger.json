@@ -1,0 +1,25 @@
+{
+  "checkpoint": "0036",
+  "title": "Cross-process locking",
+  "status": "CODE_COMPLETE_CI_PENDING",
+  "artifacts": [
+    "civora/locking.py",
+    "civora/persistence.py",
+    "tests/test_locking.py",
+    "docs/checkpoints/0036-cross-process-locking.md"
+  ],
+  "gates": {
+    "cross_process_exclusion": "PASS_IMPLEMENTATION_REVIEW",
+    "bounded_lock_wait": "PASS_IMPLEMENTATION_REVIEW",
+    "abandoned_lock_recovery": "PASS_IMPLEMENTATION_REVIEW",
+    "foreign_lock_fail_closed": "PASS_IMPLEMENTATION_REVIEW",
+    "lock_ownership_safe_release": "PASS_IMPLEMENTATION_REVIEW",
+    "automated_test_execution": "PENDING_CI",
+    "windows_native_validation": "PENDING"
+  },
+  "known_blockers": [
+    "GitHub Actions has not emitted a validated run",
+    "Windows-native runner evidence is unavailable"
+  ],
+  "next_action": "Refactor SignalStore onto AtomicJsonStore and design a coordinated transaction journal for signal, story, and review transitions."
+}

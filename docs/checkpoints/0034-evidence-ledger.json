@@ -1,0 +1,14 @@
+{
+  "project_id": "CIVORA",
+  "checkpoint_id": "0034",
+  "state": "CODE_COMPLETE_INTEGRATION_PENDING",
+  "completed_gates": [
+    {"gate": "REUSABLE_PERSISTENCE_PRIMITIVE", "result": "PASS", "evidence": "civora/persistence.py"},
+    {"gate": "CHECKSUM_INTEGRITY", "result": "PASS_IMPLEMENTATION_REVIEW", "evidence": "AtomicJsonStore.checksum and validate"},
+    {"gate": "ATOMIC_REPLACEMENT", "result": "PASS_IMPLEMENTATION_REVIEW", "evidence": "AtomicJsonStore._atomic_write"},
+    {"gate": "BACKUP_RECOVERY", "result": "PASS_IMPLEMENTATION_REVIEW", "evidence": "AtomicJsonStore.load"},
+    {"gate": "FAIL_CLOSED_INVALID_GENERATIONS", "result": "PASS_IMPLEMENTATION_REVIEW", "evidence": "AtomicJsonStore.load"}
+  ],
+  "pending_gates": ["SOURCE_REGISTRY_MIGRATION", "REVIEW_QUEUE_MIGRATION", "SIGNAL_STORE_REFACTOR", "AUTOMATED_TESTS", "GITHUB_ACTIONS_MATRIX"],
+  "next_action": "Migrate SourceRegistry and ReviewQueue to AtomicJsonStore and add recovery tests."
+}

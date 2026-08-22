@@ -1,0 +1,47 @@
+{
+  "checkpoint": "0047",
+  "title": "dead-letter resolution global audit reconciliation",
+  "status": "CODE_COMPLETE_CI_PENDING",
+  "evidence": [
+    {
+      "artifact": "civora/recovery.py",
+      "claim": "RecoveryEventLedger supports stable idempotent event identities and the resolution event type"
+    },
+    {
+      "artifact": "civora/transactions.py",
+      "claim": "dead-letter resolution history is assigned deterministic audit identity and can be mirrored/reconciled to the global ledger"
+    },
+    {
+      "artifact": "tests/test_recovery.py",
+      "claim": "tests cover identical-event idempotency and fail-closed identity collisions"
+    },
+    {
+      "artifact": "tests/test_resolution_audit.py",
+      "claim": "tests cover direct mirroring, crash-window reconciliation, repeated reconciliation, and legacy history compatibility"
+    }
+  ],
+  "completed_gates": [
+    "GLOBAL_RESOLUTION_AUDIT_WIRING",
+    "IDEMPOTENT_AUDIT_EVENT_IDENTITY",
+    "AUDIT_ID_COLLISION_FAIL_CLOSED",
+    "CROSS_STORE_CRASH_GAP_RECONCILIATION",
+    "LEGACY_RESOLUTION_HISTORY_COMPATIBILITY"
+  ],
+  "pending_gates": [
+    "PYTHON_3_11_3_13_CI",
+    "WINDOWS_NATIVE"
+  ],
+  "remaining_backlog": [
+    "invoke resolution audit reconciliation automatically in orchestrator startup health gate",
+    "deduplicate repetitive health and recovery observations with stable identities",
+    "multiprocess end-to-end crash/recovery test",
+    "complete Source Registry and Signal Store startup health composition",
+    "Windows-native validation",
+    "Fact Kernel and claim/evidence reconciliation"
+  ],
+  "blockers": [
+    "current-head GitHub Actions validation pending",
+    "Windows-native runner not yet validated"
+  ],
+  "next_action": "integrate resolution-audit reconciliation into orchestrator startup before final health authorization"
+}

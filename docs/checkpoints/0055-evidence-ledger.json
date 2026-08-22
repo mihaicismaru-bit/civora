@@ -1,0 +1,48 @@
+{
+  "checkpoint": "0055",
+  "title": "Resolution Audit Inspection",
+  "status": "CLOSED_VALIDATED",
+  "canonical_branch": "agent/import-core-runtime-v0-2",
+  "evidence": [
+    {
+      "type": "implementation",
+      "path": "civora/transactions.py",
+      "claim": "TransactionJournal exposes read-only resolution audit status and idempotent programmatic reconciliation without deleting orphan audit evidence."
+    },
+    {
+      "type": "implementation",
+      "path": "civora/cli.py",
+      "claim": "Operational CLI exposes recovery event inspection, transaction detail inspection, and read-only resolution audit consistency checks."
+    },
+    {
+      "type": "test",
+      "path": "tests/test_cli.py",
+      "claim": "Tests cover event filtering, transaction detail inspection, missing mirror detection, reconciliation, and orphan-event visibility."
+    },
+    {
+      "type": "ci_validation",
+      "workflow_run_id": 31181149845,
+      "head_sha": "8d1cf32c6b6f510ebdb1aa268eedc853ecfe1c78",
+      "conclusion": "success",
+      "claim": "Checkpoint 0055 passed the full GitHub Actions matrix."
+    }
+  ],
+  "gates": {
+    "RECOVERY_EVENT_INSPECTION": "PASS",
+    "TRANSACTION_DETAIL_INSPECTION": "PASS",
+    "RESOLUTION_AUDIT_READ_ONLY_STATUS": "PASS",
+    "MISSING_MIRROR_DETECTION": "PASS",
+    "ORPHAN_AUDIT_VISIBILITY": "PASS",
+    "IDEMPOTENT_PROGRAMMATIC_RECONCILIATION": "PASS",
+    "SILENT_AUDIT_DELETION": "ABSENT",
+    "CROSS_PLATFORM_TEST_MATRIX": "PASS"
+  },
+  "blockers": [],
+  "remaining_backlog_at_closure": [
+    "Durable Fact Kernel",
+    "Claim/evidence reconciliation",
+    "Editorial approval state machine",
+    "Expanded operator runbooks"
+  ],
+  "next_action": "Proceed to checkpoint 0056 Durable Fact Kernel."
+}
