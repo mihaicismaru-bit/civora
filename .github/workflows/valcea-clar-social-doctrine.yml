@@ -1,6 +1,9 @@
 name: VÂLCEA CLAR Social Doctrine
 
+# PR/manual contract validator. Continuous social ownership is enforced by
+# Quality + Site Engine Ownership Guard + Social Publication Engine.
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - "valcea-clar/social/social_network_doctrine.json"
@@ -9,16 +12,6 @@ on:
       - "local-news-os/social/channel_config.schema.json"
       - "local-news-os/social/validate_channel_config.py"
       - ".github/workflows/valcea-clar-social-doctrine.yml"
-  push:
-    branches: [main]
-    paths:
-      - "valcea-clar/social/social_network_doctrine.json"
-      - "valcea-clar/social/validate_social_doctrine.py"
-      - "valcea-clar/social/channels/**"
-      - "local-news-os/social/channel_config.schema.json"
-      - "local-news-os/social/validate_channel_config.py"
-      - ".github/workflows/valcea-clar-social-doctrine.yml"
-  workflow_dispatch:
 
 permissions:
   contents: read
