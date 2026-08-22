@@ -7,6 +7,7 @@ on:
       - 'agent/partener-cleanup-phase6-fixer-proof-20260822'
     paths:
       - 'partener-eu/ops/materialize_mipe_fixer_state.py'
+      - 'partener-eu/ops/audit_mipe_fixer_idempotence.py'
       - '.github/workflows/partener-eu-mipe-fixer-materialize.yml'
 
 permissions:
@@ -27,8 +28,10 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - name: Compile migration helper
-        run: python -m py_compile partener-eu/ops/materialize_mipe_fixer_state.py
+      - name: Compile migration and proof helpers
+        run: |
+          python -m py_compile partener-eu/ops/materialize_mipe_fixer_state.py
+          python -m py_compile partener-eu/ops/audit_mipe_fixer_idempotence.py
       - name: Materialize active runtime fixer chain
         run: python partener-eu/ops/materialize_mipe_fixer_state.py
       - name: Validate materialized source
@@ -36,22 +39,40 @@ jobs:
           python -m py_compile partener-eu/ingest/mipe_resilient_ingest.py
           python -m py_compile partener-eu/ingest/mipe_direct_only_ingest.py
           python partener-eu/ops/test_mipe_resilient_ingest.py
-      - name: Commit only tested source and materialization proof to cleanup branch
+      - name: Prove materialized source makes fixers no-op
+        run: python partener-eu/ops/audit_mipe_fixer_idempotence.py
+      - name: Enforce immutable-source equivalence
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('partener-eu/ops/mipe_fixer_idempotence.json').read_text(encoding='utf-8'))
+          assert p['status']=='PASS', p
+          assert p['beforeSha256']==p['afterSha256'], p
+          assert p['mutated'] is False, p
+          assert p['restorationVerified'] is True, p
+          assert p['allFixersRan'] is True, p
+          print('MIPE fixer materialization equivalence: PASS', p['beforeSha256'])
+          PY
+      - name: Commit tested source and both proofs to cleanup branch
         run: |
           set -euo pipefail
           git config user.name 'partener-cleanup-audit[bot]'
           git config user.email 'partener-cleanup-audit@users.noreply.github.com'
           git add \
             partener-eu/ingest/mipe_resilient_ingest.py \
-            partener-eu/ops/mipe_fixer_materialization.json
+            partener-eu/ops/mipe_fixer_materialization.json \
+            partener-eu/ops/mipe_fixer_idempotence.json
           if git diff --cached --quiet; then
-            echo 'MIPE fixer state already materialized.'
+            echo 'MIPE fixer state and proofs already materialized.'
             exit 0
           fi
-          git commit -m 'PARTENER cleanup: materialize tested MIPE fixer state'
+          git commit -m 'PARTENER cleanup: seal tested MIPE fixer materialization'
           git push origin "HEAD:${GITHUB_REF_NAME}"
       - uses: actions/upload-artifact@v4
         with:
           name: partener-mipe-fixer-materialization
-          path: partener-eu/ops/mipe_fixer_materialization.json
+          path: |
+            partener-eu/ops/mipe_fixer_materialization.json
+            partener-eu/ops/mipe_fixer_idempotence.json
           if-no-files-found: error
