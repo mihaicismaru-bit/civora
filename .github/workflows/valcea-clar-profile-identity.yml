@@ -1,6 +1,9 @@
-name: VÂLCEA CLAR Profile Identity
+name: VÂLCEA CLAR Profile Identity Acceptance
 
+# PR/manual identity-kit acceptance. Channel-specific materialization is tested
+# by the canonical social engine and per-channel compatibility contracts.
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - "valcea-clar/social/social_brand_system.json"
@@ -8,58 +11,19 @@ on:
       - "valcea-clar/social/social_network_doctrine.json"
       - "valcea-clar/social/native_platform_identity_system.json"
       - "valcea-clar/social/native_identity.py"
-      - "valcea-clar/social/feed_identity_v1_1.py"
-      - "valcea-clar/social/stamp_native_identity_outboxes.py"
-      - "valcea-clar/social/build_outbox_only_story_products.py"
-      - "valcea-clar/social/threads_editorial_materialize.py"
-      - "valcea-clar/social/linkedin_editorial_materialize.py"
-      - "valcea-clar/social/telegram_editorial_materialize.py"
-      - "valcea-clar/social/whatsapp_editorial_materialize.py"
-      - "valcea-clar/social/youtube_editorial_materialize.py"
-      - "valcea-clar/social/tiktok_editorial_v1.py"
-      - "valcea-clar/social/facebook_visual_system.json"
-      - "valcea-clar/social/facebook_editorial_preview_v1_1.py"
-      - "valcea-clar/social/instagram_visual_system.json"
-      - "valcea-clar/social/instagram_editorial_v1_1.py"
-      - "valcea-clar/social/instagram_editorial_v1_2.py"
       - "valcea-clar/social/validate_profile_identity.py"
       - "valcea-clar/social/validate_visual_identity_contract.py"
       - "valcea-clar/social/validate_native_platform_identity.py"
       - "valcea-clar/social/build_profile_identity_assets.py"
       - "valcea-clar/social/channels/**"
       - ".github/workflows/valcea-clar-profile-identity.yml"
-  push:
-    branches: [main]
-    paths:
-      - "valcea-clar/social/social_brand_system.json"
-      - "valcea-clar/social/profile_identity_system.json"
-      - "valcea-clar/social/social_network_doctrine.json"
-      - "valcea-clar/social/native_platform_identity_system.json"
-      - "valcea-clar/social/native_identity.py"
-      - "valcea-clar/social/feed_identity_v1_1.py"
-      - "valcea-clar/social/stamp_native_identity_outboxes.py"
-      - "valcea-clar/social/build_outbox_only_story_products.py"
-      - "valcea-clar/social/threads_editorial_materialize.py"
-      - "valcea-clar/social/linkedin_editorial_materialize.py"
-      - "valcea-clar/social/telegram_editorial_materialize.py"
-      - "valcea-clar/social/whatsapp_editorial_materialize.py"
-      - "valcea-clar/social/youtube_editorial_materialize.py"
-      - "valcea-clar/social/tiktok_editorial_v1.py"
-      - "valcea-clar/social/facebook_visual_system.json"
-      - "valcea-clar/social/facebook_editorial_preview_v1_1.py"
-      - "valcea-clar/social/instagram_visual_system.json"
-      - "valcea-clar/social/instagram_editorial_v1_1.py"
-      - "valcea-clar/social/instagram_editorial_v1_2.py"
-      - "valcea-clar/social/validate_profile_identity.py"
-      - "valcea-clar/social/validate_visual_identity_contract.py"
-      - "valcea-clar/social/validate_native_platform_identity.py"
-      - "valcea-clar/social/build_profile_identity_assets.py"
-      - "valcea-clar/social/channels/**"
-      - ".github/workflows/valcea-clar-profile-identity.yml"
-  workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: valcea-clar-profile-identity-${{ github.event.pull_request.number || 'manual' }}
+  cancel-in-progress: true
 
 jobs:
   validate-and-render:
@@ -67,119 +31,58 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
-
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
-
       - name: Install deterministic renderer
         run: python -m pip install --disable-pip-version-check Pillow==12.3.0
-
-      - name: Validate JSON sources
+      - name: Validate identity sources
         run: |
           python -m json.tool valcea-clar/social/social_brand_system.json >/dev/null
           python -m json.tool valcea-clar/social/profile_identity_system.json >/dev/null
           python -m json.tool valcea-clar/social/social_network_doctrine.json >/dev/null
           python -m json.tool valcea-clar/social/native_platform_identity_system.json >/dev/null
-          python -m json.tool valcea-clar/social/facebook_visual_system.json >/dev/null
-          python -m json.tool valcea-clar/social/instagram_visual_system.json >/dev/null
-
-      - name: Compile identity tools and bound products
-        run: |
           python -m py_compile \
             valcea-clar/social/validate_profile_identity.py \
             valcea-clar/social/validate_visual_identity_contract.py \
             valcea-clar/social/validate_native_platform_identity.py \
             valcea-clar/social/native_identity.py \
-            valcea-clar/social/feed_identity_v1_1.py \
-            valcea-clar/social/stamp_native_identity_outboxes.py \
-            valcea-clar/social/build_outbox_only_story_products.py \
-            valcea-clar/social/threads_editorial_materialize.py \
-            valcea-clar/social/linkedin_editorial_materialize.py \
-            valcea-clar/social/telegram_editorial_materialize.py \
-            valcea-clar/social/whatsapp_editorial_materialize.py \
-            valcea-clar/social/youtube_editorial_materialize.py \
-            valcea-clar/social/tiktok_editorial_v1.py \
-            valcea-clar/social/build_profile_identity_assets.py \
-            valcea-clar/social/facebook_editorial_preview_v1_1.py \
-            valcea-clar/social/instagram_editorial_v1_1.py \
-            valcea-clar/social/instagram_editorial_v1_2.py
-
-      - name: Run profile identity validator self-test
-        run: python valcea-clar/social/validate_profile_identity.py --self-test
-
-      - name: Validate profile identity against configured channels
-        run: python valcea-clar/social/validate_profile_identity.py
-
-      - name: Run profile-post visual contract self-test
-        run: python valcea-clar/social/validate_visual_identity_contract.py --self-test
-
-      - name: Validate profile-post visual contract
-        run: python valcea-clar/social/validate_visual_identity_contract.py
-
-      - name: Run native identity helper self-test
-        run: python valcea-clar/social/native_identity.py
-
-      - name: Run secondary-platform identity validator self-test
-        run: python valcea-clar/social/validate_native_platform_identity.py --self-test
-
-      - name: Validate seven native secondary channels
-        run: python valcea-clar/social/validate_native_platform_identity.py
-
-      - name: Prove durable outbox identity stamping
-        run: python valcea-clar/social/stamp_native_identity_outboxes.py --self-test
-
-      - name: Prove native identity reaches final platform products
+            valcea-clar/social/build_profile_identity_assets.py
+      - name: Validate profile and native identity contracts
         run: |
-          python valcea-clar/social/threads_editorial_materialize.py --self-test
-          python valcea-clar/social/linkedin_editorial_materialize.py --self-test
-          python valcea-clar/social/telegram_editorial_materialize.py --self-test
-          python valcea-clar/social/whatsapp_editorial_materialize.py --self-test
-          python valcea-clar/social/youtube_editorial_materialize.py --self-test
-          python valcea-clar/social/tiktok_editorial_v1.py --self-test
-
-      - name: Run Facebook and Instagram premium renderer self-tests
-        working-directory: valcea-clar/social
-        run: |
-          python facebook_editorial_preview_v1_1.py --self-test
-          python instagram_editorial_v1_2.py --self-test
-
-      - name: Run asset generator self-test
-        run: python valcea-clar/social/build_profile_identity_assets.py --self-test
-
+          python valcea-clar/social/validate_profile_identity.py --self-test
+          python valcea-clar/social/validate_profile_identity.py
+          python valcea-clar/social/validate_visual_identity_contract.py --self-test
+          python valcea-clar/social/validate_visual_identity_contract.py
+          python valcea-clar/social/validate_native_platform_identity.py --self-test
+          python valcea-clar/social/validate_native_platform_identity.py
+          python valcea-clar/social/native_identity.py
       - name: Render canonical profile identity kit
-        run: python valcea-clar/social/build_profile_identity_assets.py > /tmp/profile-identity-manifest.json
-
+        run: |
+          python valcea-clar/social/build_profile_identity_assets.py --self-test
+          python valcea-clar/social/build_profile_identity_assets.py > /tmp/profile-identity-manifest.json
       - name: Assert output contract
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-
-          profile = json.loads(Path("valcea-clar/social/profile_identity_system.json").read_text(encoding="utf-8"))
-          manifest = json.loads(Path("valcea-clar/social/profile-assets/manifest.json").read_text(encoding="utf-8"))
-          assets = {row["asset_id"]: row for row in manifest["assets"]}
-          if manifest.get("photo_free_headers") is not True:
-              raise SystemExit("profile headers must remain photography-free")
-          if assets.get("avatar-master", {}).get("width") != 1024:
-              raise SystemExit("master avatar contract failed")
-          for platform, cfg in profile["platforms"].items():
-              avatar = assets.get(f"{platform}-avatar")
-              expected = cfg["avatar_export"]
-              if not avatar or (avatar["width"], avatar["height"]) != (expected["width"], expected["height"]):
-                  raise SystemExit(f"{platform}: avatar dimensions mismatch")
-              header_cfg = cfg.get("header_export")
+          profile = json.loads(Path('valcea-clar/social/profile_identity_system.json').read_text(encoding='utf-8'))
+          manifest = json.loads(Path('valcea-clar/social/profile-assets/manifest.json').read_text(encoding='utf-8'))
+          assets = {row['asset_id']: row for row in manifest['assets']}
+          assert manifest.get('photo_free_headers') is True
+          assert assets.get('avatar-master', {}).get('width') == 1024
+          for platform, cfg in profile['platforms'].items():
+              avatar = assets.get(f'{platform}-avatar')
+              expected = cfg['avatar_export']
+              assert avatar and (avatar['width'], avatar['height']) == (expected['width'], expected['height']), platform
+              header_cfg = cfg.get('header_export')
               if header_cfg:
-                  header = assets.get(f"{platform}-header")
-                  if not header or (header["width"], header["height"]) != (header_cfg["width"], header_cfg["height"]):
-                      raise SystemExit(f"{platform}: header dimensions mismatch")
-                  if header["bytes"] > 3 * 1024 * 1024:
-                      raise SystemExit(f"{platform}: header exceeds conservative 3 MB envelope")
-          if len(assets) != 14:
-              raise SystemExit(f"unexpected asset count: {len(assets)}")
-          print("VÂLCEA CLAR profile identity output contract: PASS")
+                  header = assets.get(f'{platform}-header')
+                  assert header and (header['width'], header['height']) == (header_cfg['width'], header_cfg['height']), platform
+                  assert header['bytes'] <= 3 * 1024 * 1024
+          assert len(assets) == 14, len(assets)
+          print('VÂLCEA CLAR profile identity acceptance: PASS')
           PY
-
       - name: Upload rendered identity kit
         uses: actions/upload-artifact@v7
         with:
