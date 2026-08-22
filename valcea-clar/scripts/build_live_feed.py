@@ -9,9 +9,15 @@ Publication timestamps are stable state. Existing archive timestamps always
 win; a newly admitted story may use the `published_at` value just reconciled and
 validated in the canonical story manifest. This closes the first-publication
 handoff without inventing a second clock or weakening any publication gate.
+
+Verified story photographs are also projected from the canonical story
+manifest. The feed never invents a visual: only provenance-backed real media
+with a public URL is admitted, and contextual photographs must retain their
+editorial disclosure.
 """
 from __future__ import annotations
 
+import copy
 import json
 import sys
 from datetime import datetime, timezone
@@ -59,6 +65,35 @@ def resolve_first_published_at(
     return str(route.get("published_at") or "").strip()
 
 
+def verified_visual(value: object) -> dict | None:
+    """Return a safe public visual or fail closed.
+
+    Media never authorizes publication. It is accepted only when an upstream
+    projection has already marked it VERIFIED, real/non-synthetic and publicly
+    addressable. Contextual/archive media additionally requires the disclosure
+    that explains what the photograph does *not* depict.
+    """
+    if not isinstance(value, dict):
+        return None
+    if value.get("provenance_status") != "VERIFIED":
+        return None
+    if value.get("synthetic") is True:
+        return None
+    if not str(value.get("public_url") or "").strip():
+        return None
+    if value.get("contextual_archive") is True and not str(value.get("editorial_note") or "").strip():
+        return None
+    return copy.deepcopy(value)
+
+
+def resolve_story_visual(item: dict, route: dict) -> dict | None:
+    """Prefer the canonical story-manifest image over legacy snapshot media."""
+    manifest_visual = verified_visual(route.get("image"))
+    if manifest_visual:
+        return manifest_visual
+    return verified_visual(item.get("visual"))
+
+
 def story_feed(snapshot: dict) -> list[dict]:
     manifest = load(STORY_MANIFEST)
     archive = load(STORY_ARCHIVE)
@@ -91,7 +126,7 @@ def story_feed(snapshot: dict) -> list[dict]:
             "path": route.get("path"),
             "canonical_url": route.get("canonical"),
             "sources": item.get("sources", []),
-            "visual": item.get("visual"),
+            "visual": resolve_story_visual(item, route),
             "first_published_at": first_published_at,
         })
     stories.sort(key=lambda item: (-int(item.get("priority") or 0), item["id"]))
@@ -111,7 +146,25 @@ def self_test() -> int:
         archive_dates,
     ) == "2026-08-22T09:28:15+03:00"
     assert resolve_first_published_at("missing", {}, archive_dates) == ""
-    print("VÂLCEA CLAR live-feed publication timestamp handoff self-test: PASS")
+
+    exact = {
+        "public_url": "https://example.test/exact.jpg",
+        "provenance_status": "VERIFIED",
+        "synthetic": False,
+    }
+    contextual = {
+        "public_url": "https://example.test/context.jpg",
+        "provenance_status": "VERIFIED",
+        "synthetic": False,
+        "contextual_archive": True,
+        "editorial_note": "Foto de context; nu surprinde evenimentul descris.",
+    }
+    assert resolve_story_visual({"visual": contextual}, {"image": exact})["public_url"].endswith("exact.jpg")
+    assert resolve_story_visual({"visual": contextual}, {})["public_url"].endswith("context.jpg")
+    assert verified_visual({**contextual, "editorial_note": ""}) is None
+    assert verified_visual({**exact, "synthetic": True}) is None
+    assert verified_visual({"public_url": "https://example.test/no-proof.jpg"}) is None
+    print("VÂLCEA CLAR live-feed publication + verified-media handoff self-test: PASS")
     return 0
 
 
@@ -141,7 +194,7 @@ def main() -> int:
         for p in places
     ]
     payload = {
-        "schema_version": "2.2",
+        "schema_version": "2.3",
         "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "canonical_domain": "valceaclar.ro",
         "publication_model": "continuous_story_first",
@@ -171,6 +224,9 @@ def main() -> int:
             "edition_fields_are_compatibility_only": True,
             "unde_iesim_full_verified_catalogue": True,
             "first_publication_timestamp_source": "archive_then_reconciled_story_manifest",
+            "story_visual_source": "verified_story_manifest_then_existing_snapshot_visual",
+            "contextual_visual_disclosure_required": True,
+            "synthetic_story_media_allowed": False,
         },
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
@@ -179,6 +235,7 @@ def main() -> int:
         "status": "PASS",
         "publication_model": payload["publication_model"],
         "stories": len(stories),
+        "stories_with_verified_visual": sum(1 for row in stories if row.get("visual")),
         "venues": len(venue_feed),
         "compatibility_snapshot": snapshot["edition_id"],
         "feed": str(OUT.relative_to(ROOT)),
