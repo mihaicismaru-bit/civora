@@ -14,6 +14,7 @@ on:
       - 'local-news-os/instances/valcea/structured_alert_pack.json'
       - 'local-news-os/instances/valcea/source_pack.json'
       - 'valcea-clar/scripts/compose_structured_alerts.py'
+      - 'valcea-clar/scripts/prune_volatile_json_changes.py'
       - '.github/workflows/valcea-clar-structured-alerts.yml'
   pull_request:
     paths:
@@ -21,6 +22,7 @@ on:
       - 'local-news-os/instances/valcea/structured_alert_pack.json'
       - 'local-news-os/instances/valcea/source_pack.json'
       - 'valcea-clar/scripts/compose_structured_alerts.py'
+      - 'valcea-clar/scripts/prune_volatile_json_changes.py'
       - '.github/workflows/valcea-clar-structured-alerts.yml'
 
 permissions:
@@ -46,9 +48,11 @@ jobs:
         run: |
           python -m py_compile \
             local-news-os/core/structured_alert_ingest.py \
-            valcea-clar/scripts/compose_structured_alerts.py
+            valcea-clar/scripts/compose_structured_alerts.py \
+            valcea-clar/scripts/prune_volatile_json_changes.py
           python local-news-os/core/structured_alert_ingest.py --self-test
           python valcea-clar/scripts/compose_structured_alerts.py --self-test
+          python valcea-clar/scripts/prune_volatile_json_changes.py --self-test
 
       - name: Ingest current geo-scoped INFOTRAFIC alerts
         run: |
@@ -93,9 +97,12 @@ jobs:
             git reset --hard origin/main
             mkdir -p valcea-clar/editorial
             cp /tmp/valcea-structured-alert-events.json valcea-clar/editorial/structured_alert_events.json
+            python valcea-clar/scripts/prune_volatile_json_changes.py \
+              --ignore-key generated_at \
+              valcea-clar/editorial/structured_alert_events.json
             git add valcea-clar/editorial/structured_alert_events.json
             if git diff --cached --quiet; then
-              echo 'Structured primary event stream already current.'
+              echo 'Structured primary event stream has no semantic change.'
               exit 0
             fi
             git commit -m 'Refresh VÂLCEA CLAR structured primary events'
