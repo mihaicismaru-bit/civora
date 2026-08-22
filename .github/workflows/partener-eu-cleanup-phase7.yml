@@ -8,6 +8,12 @@ on:
     paths:
       - 'partener-eu/ops/apply_mipe_immutable_runtime_cleanup.py'
       - '.github/workflows/partener-eu-cleanup-phase7.yml'
+  pull_request:
+    branches:
+      - 'agent/partener-cleanup-phase6-fixer-proof-20260822'
+    paths:
+      - 'partener-eu/ops/apply_mipe_immutable_runtime_cleanup.py'
+      - '.github/workflows/partener-eu-cleanup-phase7.yml'
 
 permissions:
   contents: write
@@ -40,7 +46,7 @@ jobs:
       - name: Enforce cleanup contract
         run: |
           python - <<'PY'
-          import hashlib, json
+          import json
           from pathlib import Path
           root=Path('.')
           proof=json.loads((root/'partener-eu/ops/mipe_immutable_runtime_cleanup.json').read_text(encoding='utf-8'))
@@ -68,6 +74,7 @@ jobs:
           print('PARTENER MIPE immutable runtime cleanup: PASS')
           PY
       - name: Commit tested cleanup and proof to branch
+        if: ${{ github.event_name == 'push' }}
         run: |
           set -euo pipefail
           git config user.name 'partener-cleanup-audit[bot]'
@@ -94,7 +101,8 @@ jobs:
           git commit -m 'PARTENER cleanup: seal immutable MIPE runtime'
           git push origin "HEAD:${GITHUB_REF_NAME}"
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: partener-mipe-immutable-runtime-cleanup
           path: partener-eu/ops/mipe_immutable_runtime_cleanup.json
-          if-no-files-found: error
+          if-no-files-found: warn
