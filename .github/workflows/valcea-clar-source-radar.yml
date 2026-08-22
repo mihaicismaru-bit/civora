@@ -29,6 +29,7 @@ on:
       - 'valcea-clar/scripts/validate_source_intelligence_seed_registry.py'
       - 'valcea-clar/scripts/source_intelligence_discover.py'
       - 'valcea-clar/scripts/prune_volatile_json_changes.py'
+      - 'valcea-clar/scripts/persistence_profiles.json'
       - '.github/workflows/valcea-clar-source-radar.yml'
   pull_request:
     paths:
@@ -49,6 +50,7 @@ on:
       - 'valcea-clar/scripts/validate_source_intelligence_seed_registry.py'
       - 'valcea-clar/scripts/source_intelligence_discover.py'
       - 'valcea-clar/scripts/prune_volatile_json_changes.py'
+      - 'valcea-clar/scripts/persistence_profiles.json'
       - '.github/workflows/valcea-clar-source-radar.yml'
 
 permissions:
@@ -149,10 +151,7 @@ jobs:
             shopt -s nullglob
             hygiene_paths=(valcea-clar/state/source_health.json valcea-clar/ops/resolution_tasks/*.json)
             python valcea-clar/scripts/prune_volatile_json_changes.py \
-              --ignore-key observed_at \
-              --ignore-key last_observed_at \
-              --ignore-key checked_at \
-              --ignore-key updated_at \
+              --profile source_health \
               "${hygiene_paths[@]}"
             git add valcea-clar/state/source_health.json valcea-clar/ops/resolution_tasks
             if git diff --cached --quiet; then
@@ -191,9 +190,7 @@ jobs:
             cp /tmp/valcea-signal-verification-queue.json valcea-clar/editorial/signal_verification_queue.json
             cp /tmp/valcea-primary-signal-state.json valcea-clar/editorial/signal_primary_verification_state.json
             python valcea-clar/scripts/prune_volatile_json_changes.py \
-              --ignore-key generated_at \
-              --ignore-key queue_generated_at \
-              --ignore-key observed_at \
+              --profile source_signal_transaction \
               valcea-clar/editorial/signal_radar_state.json \
               valcea-clar/editorial/signal_verification_queue.json \
               valcea-clar/editorial/signal_primary_verification_state.json
@@ -239,10 +236,7 @@ jobs:
             git fetch origin main && git reset --hard origin/main
             cp /tmp/valcea-source-discovery-state.json "$path"
             python valcea-clar/scripts/prune_volatile_json_changes.py \
-              --ignore-key checked_at_epoch \
-              --ignore-key generated_at \
-              --ignore-key observed_at \
-              --ignore-key updated_at \
+              --profile source_discovery \
               "$path"
             git add "$path"
             if git diff --cached --quiet; then
