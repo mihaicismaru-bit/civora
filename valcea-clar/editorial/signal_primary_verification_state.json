@@ -2,19 +2,68 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-22T16:23:04+03:00",
+  "generated_at": "2026-08-22T17:56:23+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-22T16:21:59+03:00",
-  "task_count": 58,
+  "queue_generated_at": "2026-08-22T17:55:21+03:00",
+  "task_count": 59,
   "primary_match_count": 0,
-  "no_match_count": 30,
+  "no_match_count": 31,
   "unrouted_count": 28,
   "target_count": 14,
   "targets_ok": 12,
   "results": [
+    {
+      "signal_id": "c9d88f00ba3b77f943df0d3d",
+      "signal_title": "FOTO/UPDATE: RO-ALERT la HOREZU Urs într-o gospodărie din Olari. Patru capre au fost ucise",
+      "signal_url": "https://seintamplainvalcea.ro/2026/08/22/ro-alert-la-horezu-urs-semnalat-intr-o-gospodarie-din-olari-patru-capre-au-fost-ucise/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-22T17:13:11+03:00",
+      "verification_route_id": "fire_rescue_alert",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "isu-valcea-stiri-locale",
+            "name": "ISU Vâlcea — Știri locale",
+            "url": "https://isuvl.igsu.ro/stiri-locale"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "isu-valcea-comunicate",
+            "name": "ISU Vâlcea",
+            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "9a60938620233a4eb47ee9ba",
       "signal_title": "Vâlcea a trimis cinci pompieri în misiunea din Serbia pentru stingerea incendiilor de pădure",
@@ -1336,6 +1385,45 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
+      "signal_id": "3aa1b371615995761d30a9af",
+      "signal_title": "Primăria Municipiului mulțumește tuturor celor care au făcut posibilă organizarea deosebită a Zilelor Imnului Național 2026 »",
+      "signal_url": "http://www.realitateavalceana.ro/primaria-municipiului-mul%c8%9bume%c8%99te-tuturor-celor-care-au-facut-posibila-organizarea-deosebita-a-zilelor-imnului-na%c8%9bional-2026/",
+      "signal_publisher": "Realitatea Vâlceană",
+      "signal_tier": "T2",
+      "signal_published_at": null,
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "0a9f0e5efa5edfde1c95a354",
+      "signal_title": "Declaratie de accesibilitate",
+      "signal_url": "http://www.realitateavalceana.ro/declaratie-de-accesibilitate/",
+      "signal_publisher": "Realitatea Vâlceană",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
       "signal_id": "608f84316cb4f5d63ef780f5",
       "signal_title": "PNRR și eficiența energetică: Curtea de Conturi Europeană cere rezultate mai clare pentru miliardele investite în renovarea clădirilor",
       "signal_url": "https://www.eurovalcea.ro/2026/08/21/pnrr-si-eficienta-energetica-curtea-de-conturi-europeana-cere-rezultate-mai-clare-pentru-miliardele-investite-in-renovarea-cladirilor/",
@@ -1385,49 +1473,10 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "3aa1b371615995761d30a9af",
-      "signal_title": "Primăria Municipiului mulțumește tuturor celor care au făcut posibilă organizarea deosebită a Zilelor Imnului Național 2026 »",
-      "signal_url": "http://www.realitateavalceana.ro/primaria-municipiului-mul%c8%9bume%c8%99te-tuturor-celor-care-au-facut-posibila-organizarea-deosebita-a-zilelor-imnului-na%c8%9bional-2026/",
-      "signal_publisher": "Realitatea Vâlceană",
-      "signal_tier": "T2",
-      "signal_published_at": null,
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
       "signal_id": "1587ac11f5de637e1bab2f5a",
       "signal_title": "Guvernul a aprobat noi măsuri pentru economie, infrastructură și PNRR",
       "signal_url": "https://www.eurovalcea.ro/2026/08/20/guvernul-a-aprobat-noi-masuri-pentru-economie-infrastructura-si-pnrr/",
       "signal_publisher": "EuroVâlcea",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "0a9f0e5efa5edfde1c95a354",
-      "signal_title": "Declaratie de accesibilitate",
-      "signal_url": "http://www.realitateavalceana.ro/declaratie-de-accesibilitate/",
-      "signal_publisher": "Realitatea Vâlceană",
       "signal_published_at": null,
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
