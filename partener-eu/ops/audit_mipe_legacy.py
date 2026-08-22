@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Repository-local caller audit for legacy MIPE ingestion modules.
+"""Repository-local caller audit for legacy MIPE modules and source fixers.
 
-This script is intentionally conservative: a module is a deletion candidate only
-when the full checkout contains no executable/import caller outside the module
-itself. Documentation/path-trigger mentions are reported separately so cleanup
-can remain fail-closed and evidence-backed.
+The audit is deliberately conservative. A file can become a deletion candidate
+only after a full-checkout scan finds no executable/import caller outside that
+file. Documentation and path-trigger mentions are reported separately so code
+cleanup stays fail-closed, reproducible and evidence-backed.
 """
 from __future__ import annotations
 
@@ -19,19 +19,26 @@ SELF = Path(__file__).resolve()
 OUT = ROOT / "partener-eu" / "ops" / "mipe_legacy_audit.json"
 
 CANDIDATES = (
-    "mipe_browser_ingest.py",
-    "mipe_browser_ingest_v2.py",
-    "mipe_direct_only_ingest.py",
-    "mipe_discovery_ingest.py",
-    "mipe_dual_cache.py",
-    "mipe_ingest.py",
-    "mipe_ingest_ipv4.py",
-    "mipe_known_seed_ingest.py",
-    "mipe_pdds_ingest.py",
-    "mipe_resilient_ingest.py",
-    "mipe_transport_scout.py",
-    "mipe_windows_crawl_v3.py",
-    "mipe_windows_crawl_v3_entry.py",
+    "partener-eu/ingest/mipe_browser_ingest.py",
+    "partener-eu/ingest/mipe_browser_ingest_v2.py",
+    "partener-eu/ingest/mipe_direct_only_ingest.py",
+    "partener-eu/ingest/mipe_discovery_ingest.py",
+    "partener-eu/ingest/mipe_dual_cache.py",
+    "partener-eu/ingest/mipe_ingest.py",
+    "partener-eu/ingest/mipe_ingest_ipv4.py",
+    "partener-eu/ingest/mipe_known_seed_ingest.py",
+    "partener-eu/ingest/mipe_pdds_ingest.py",
+    "partener-eu/ingest/mipe_resilient_ingest.py",
+    "partener-eu/ingest/mipe_transport_scout.py",
+    "partener-eu/ingest/mipe_windows_crawl_v3.py",
+    "partener-eu/ingest/mipe_windows_crawl_v3_entry.py",
+    "partener-eu/ops/fix_mipe_content_quality.py",
+    "partener-eu/ops/fix_mipe_decision_extraction.py",
+    "partener-eu/ops/fix_mipe_dual_relay.py",
+    "partener-eu/ops/fix_mipe_dual_reporting.py",
+    "partener-eu/ops/fix_mipe_first_party_relay.py",
+    "partener-eu/ops/fix_mipe_resilient_classifier.py",
+    "partener-eu/ops/fix_mipe_resilient_runtime.py",
 )
 
 TEXT_SUFFIXES = {
@@ -51,7 +58,7 @@ class Ref:
 
 def iter_text_files():
     for path in ROOT.rglob("*"):
-        if not path.is_file() or path.resolve() == SELF or path.resolve() == OUT.resolve():
+        if not path.is_file() or path.resolve() in {SELF, OUT.resolve()}:
             continue
         if any(part in SKIP_DIRS for part in path.parts):
             continue
@@ -60,17 +67,26 @@ def iter_text_files():
         yield path
 
 
+def yaml_executes(stripped: str, basename: str) -> bool:
+    if basename not in stripped:
+        return False
+    if "PYTHON_EXE" in stripped:
+        return True
+    return bool(
+        re.search(
+            r"(?:^|\brun:\s*|[;&|]\s*)(?:python(?:3)?(?:\.exe)?|py(?:\.exe)?)(?:\s|$)",
+            stripped,
+            re.I,
+        )
+    )
+
+
 def classify_line(path: Path, line: str, basename: str, stem: str) -> str:
     stripped = line.strip()
     if path.suffix == ".py" and re.search(rf"\b(?:from|import)\s+{re.escape(stem)}\b", stripped):
         return "PYTHON_IMPORT"
     if path.suffix in {".yml", ".yaml"}:
-        executable = (
-            re.search(r"\bpython(?:3)?\b", stripped, re.I)
-            or "PYTHON_EXE" in stripped
-            or re.search(r"\bpy(?:\.exe)?\b", stripped, re.I)
-        )
-        if basename in stripped and executable:
+        if yaml_executes(stripped, basename):
             return "WORKFLOW_EXECUTION"
         if basename in stripped and stripped.startswith("-"):
             return "WORKFLOW_PATH_TRIGGER_OR_LIST"
@@ -79,14 +95,19 @@ def classify_line(path: Path, line: str, basename: str, stem: str) -> str:
         if re.search(r"subprocess|run\(|Popen|os\.system|exec", stripped):
             return "PYTHON_EXECUTION_REFERENCE"
         return "PYTHON_REFERENCE"
+    if path.suffix in {".sh", ".ps1"} and basename in stripped:
+        if re.search(r"python|PYTHON_EXE|(?:^|\s)py(?:\.exe)?(?:\s|$)", stripped, re.I):
+            return "SHELL_EXECUTION"
+        return "SHELL_REFERENCE"
     if path.suffix in {".md", ".txt"}:
         return "DOCUMENTATION_REFERENCE"
     return "OTHER_REFERENCE"
 
 
-def audit_candidate(basename: str, files: list[Path]) -> dict:
-    stem = basename[:-3]
-    target = ROOT / "partener-eu" / "ingest" / basename
+def audit_candidate(candidate: str, files: list[Path]) -> dict:
+    target = ROOT / candidate
+    basename = target.name
+    stem = target.stem
     refs: list[Ref] = []
     import_re = re.compile(rf"\b(?:from|import)\s+{re.escape(stem)}\b")
 
@@ -111,7 +132,12 @@ def audit_candidate(basename: str, files: list[Path]) -> dict:
                 )
             )
 
-    strong_kinds = {"PYTHON_IMPORT", "WORKFLOW_EXECUTION", "PYTHON_EXECUTION_REFERENCE"}
+    strong_kinds = {
+        "PYTHON_IMPORT",
+        "WORKFLOW_EXECUTION",
+        "PYTHON_EXECUTION_REFERENCE",
+        "SHELL_EXECUTION",
+    }
     strong = [r for r in refs if r.kind in strong_kinds]
     workflow_refs = [r for r in refs if r.kind.startswith("WORKFLOW_")]
     docs = [r for r in refs if r.kind == "DOCUMENTATION_REFERENCE"]
@@ -126,7 +152,7 @@ def audit_candidate(basename: str, files: list[Path]) -> dict:
         status = "ZERO_CALLER_CANDIDATE"
 
     return {
-        "file": target.relative_to(ROOT).as_posix(),
+        "file": candidate,
         "exists": target.exists(),
         "bytes": target.stat().st_size if target.exists() else 0,
         "status": status,
@@ -140,9 +166,9 @@ def audit_candidate(basename: str, files: list[Path]) -> dict:
 
 def main() -> int:
     files = list(iter_text_files())
-    rows = [audit_candidate(name, files) for name in CANDIDATES]
+    rows = [audit_candidate(candidate, files) for candidate in CANDIDATES]
     payload = {
-        "schema": "PARTENER_MIPE_LEGACY_CALLER_AUDIT_V1",
+        "schema": "PARTENER_MIPE_LEGACY_CALLER_AUDIT_V2",
         "generatedAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "root": ".",
         "scannedTextFiles": len(files),
