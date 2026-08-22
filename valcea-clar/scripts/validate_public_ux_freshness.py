@@ -17,6 +17,10 @@ def load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def live_count_marker(count: int) -> str:
+    return f"{count} materiale în fluxul curent"
+
+
 def validate() -> dict:
     feed = load(RUNTIME / "live-feed.json")
     archive = load(SITE / "story_archive.json")
@@ -38,9 +42,7 @@ def validate() -> dict:
 
     home = (RUNTIME / "index.html").read_text(encoding="utf-8")
     if expected_live:
-        if "0 materiale în fluxul curent" in home:
-            raise SystemExit("Public UX homepage still reports zero live stories")
-        marker = f"{len(expected_live)} materiale în fluxul curent"
+        marker = live_count_marker(len(expected_live))
         if marker not in home:
             raise SystemExit(f"Public UX homepage live-count marker missing: {marker}")
 
@@ -68,9 +70,9 @@ def validate() -> dict:
 
 
 def self_test() -> int:
-    # Pure contract checks are covered by public_ux_reset/public_ux_story_integrity;
-    # this gate is intentionally an integration assertion over rendered state.
-    assert "0 materiale în fluxul curent" != "1 materiale în fluxul curent"
+    assert live_count_marker(0) == "0 materiale în fluxul curent"
+    assert live_count_marker(30) == "30 materiale în fluxul curent"
+    assert live_count_marker(0) not in f">{live_count_marker(30)}<"
     print("VÂLCEA CLAR Public UX freshness gate self-test: PASS")
     return 0
 
