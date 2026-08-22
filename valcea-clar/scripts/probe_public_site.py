@@ -5,6 +5,10 @@ CIVORA owns newsroom state and publication. The public site is accepted only if
 critical routes are reachable and the homepage can project the durable
 continuous-story feed rather than collapsing to a recap snapshot.
 
+When an explicit HTTP revalidation trigger names a story, that exact story must
+be present in the canonical feed and its public route must pass HTTP/canonical
+checks. This prevents a stale but otherwise healthy site from reporting READY.
+
 When a live-feed story carries verified ``artist_profiles``, its public story
 route must also expose the Artist Intelligence UI contract. Repository data is
 not sufficient publication proof.
@@ -22,7 +26,8 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_BASE = "https://valceaclar.ro"
 FEED_URL = "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json"
-USER_AGENT = "VALCEA-CLAR-Public-Health/1.2 (+https://valceaclar.ro/)"
+REVALIDATION_TRIGGER = ROOT / "site" / "http_revalidation_trigger.json"
+USER_AGENT = "VALCEA-CLAR-Public-Health/1.3 (+https://valceaclar.ro/)"
 BRIDGE_MARKERS = (
     "chatgpt-sites-live-bridge",
     "data-valcea-clar-live",
@@ -80,19 +85,44 @@ def artist_ui_present(html: str) -> bool:
     return any(marker in html for marker in ARTIST_UI_MARKERS)
 
 
+def required_revalidation_story_id() -> str:
+    if not REVALIDATION_TRIGGER.is_file():
+        return ""
+    try:
+        trigger = json.loads(REVALIDATION_TRIGGER.read_text(encoding="utf-8"))
+    except Exception:
+        return ""
+    if trigger.get("require_current_live_feed") is not True:
+        return ""
+    return str(trigger.get("expected_story_id") or "").strip()
+
+
 def story_contracts(limit: int = 5) -> list[tuple[str, str]]:
     manifest_path = ROOT / "site" / "runtime" / "stiri" / "manifest.json"
     if not manifest_path.is_file():
         return []
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    rows: list[tuple[str, str]] = []
+    valid: list[tuple[str, str, str]] = []
     for row in manifest.get("stories") or []:
+        story_id = str(row.get("id") or "")
         path = str(row.get("path") or "")
         canonical = str(row.get("canonical") or "")
-        if path.startswith("/stiri/") and path.endswith("/") and canonical == f"https://valceaclar.ro{path}":
-            rows.append((path, canonical))
-        if len(rows) >= limit:
-            break
+        if story_id and path.startswith("/stiri/") and path.endswith("/") and canonical == f"https://valceaclar.ro{path}":
+            valid.append((story_id, path, canonical))
+
+    rows = [(path, canonical) for _story_id, path, canonical in valid[:limit]]
+    expected_id = required_revalidation_story_id()
+    if expected_id:
+        expected = next((row for row in valid if row[0] == expected_id), None)
+        if expected is None:
+            # Preserve a deliberately impossible contract so acceptance fails
+            # instead of silently ignoring a requested publication.
+            expected_path = f"/stiri/{expected_id}/"
+            expected_contract = (expected_path, f"https://valceaclar.ro{expected_path}")
+        else:
+            expected_contract = (expected[1], expected[2])
+        if expected_contract not in rows:
+            rows.append(expected_contract)
     return rows
 
 
@@ -120,16 +150,23 @@ def remote_feed_contract() -> tuple[dict[str, Any] | None, dict[str, Any]]:
     minimum = min(3, len(story_contracts()))
     publication_ok = feed.get("publication_model") == "continuous_story_first"
     count_ok = len(paths) >= minimum and int(feed.get("story_count") or 0) == len(paths)
+    expected_id = required_revalidation_story_id()
+    expected_path = f"/stiri/{expected_id}/" if expected_id else ""
+    expected_ok = not expected_path or expected_path in paths
     artist_story_count = sum(1 for row in (stories or []) if isinstance(row, dict) and row.get("artist_profiles"))
     details["feed_story_count"] = len(paths)
     details["artist_profile_story_count"] = artist_story_count
     details["feed_story_paths"] = paths[:10]
     details["publication_model"] = feed.get("publication_model")
-    details["ok"] = bool(publication_ok and count_ok)
+    details["required_story_id"] = expected_id or None
+    details["required_story_present"] = expected_ok
+    details["ok"] = bool(publication_ok and count_ok and expected_ok)
     if not publication_ok:
         details["missing_markers"].append("publication_model=continuous_story_first")
     if not count_ok:
         details["missing_markers"].append(f"at_least_{minimum}_durable_stories")
+    if not expected_ok:
+        details["missing_markers"].append(f"required_story={expected_id}")
     return feed, details
 
 
@@ -233,9 +270,12 @@ def evaluate(base_url: str) -> dict[str, Any]:
     if contracts:
         for path, canonical in contracts:
             row = remote_rows.get(path) or {}
+            required = ["VÂLCEA CLAR"]
+            if path == f"/stiri/{required_revalidation_story_id()}/":
+                required.append("Accident mortal în Buila–Vânturarița")
             check(
                 path,
-                ["VÂLCEA CLAR"],
+                required,
                 canonical=canonical,
                 require_artist_ui=bool(row.get("artist_profiles")),
             )
@@ -255,7 +295,7 @@ def evaluate(base_url: str) -> dict[str, Any]:
 
     blockers = [item["path"] for item in checks if not item["ok"]]
     return {
-        "schema_version": "1.3",
+        "schema_version": "1.4",
         "product": "VÂLCEA CLAR public HTTP acceptance",
         "base_url": base,
         "status": "READY" if not blockers else "BLOCKED",
@@ -264,6 +304,7 @@ def evaluate(base_url: str) -> dict[str, Any]:
         "blockers": blockers,
         "publication_model": "continuous_story_first",
         "expected_story_count": len(expected_paths),
+        "required_revalidation_story_id": required_revalidation_story_id() or None,
         "homepage_collapse_guard": True,
         "artist_profile_ui_guard": True,
         "repository_is_not_publication_proof": True,
@@ -280,6 +321,9 @@ def self_test() -> None:
     contracts = story_contracts()
     assert contracts
     assert all(path.startswith("/stiri/") and canonical == f"https://valceaclar.ro{path}" for path, canonical in contracts)
+    expected = required_revalidation_story_id()
+    if expected:
+        assert f"/stiri/{expected}/" in {path for path, _canonical in contracts}
     print("VÂLCEA CLAR public-site probe self-test: PASS")
 
 
