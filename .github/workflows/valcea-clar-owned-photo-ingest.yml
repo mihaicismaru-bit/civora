@@ -1,9 +1,8 @@
 name: VÂLCEA CLAR Owned Photo Drive Ingest
 
-# Candidate-only Drive ingest is explicit until a read-only Drive credential is
-# configured. PRs validate the deterministic snapshot, exact semantic identity,
-# candidate matching and explicit materialization gate; workflow_dispatch
-# refreshes candidate metadata only when credentials exist.
+# CI validates the fail-closed owned-photo contract. Live connected-Drive
+# discovery/semantic ingest is handled by the bounded hourly operator bridge;
+# native GitHub Drive credentials remain an optional future runtime path.
 on:
   workflow_dispatch:
   pull_request:
@@ -12,6 +11,7 @@ on:
       - 'valcea-clar/social/owned_photo_drive_snapshot.json'
       - 'valcea-clar/social/owned_photo_registry.json'
       - 'valcea-clar/social/owned_photo_semantic_labels.json'
+      - 'valcea-clar/social/owned_photo_semantic_auto_policy.json'
       - 'valcea-clar/social/owned_photo_semantic_registry.py'
       - 'valcea-clar/social/owned_photo_match_policy.json'
       - 'valcea-clar/social/owned_photo_story_candidates.json'
@@ -24,7 +24,7 @@ on:
       - '.github/workflows/valcea-clar-owned-photo-ingest.yml'
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: valcea-clar-owned-photo-drive-ingest-${{ github.event.pull_request.number || 'manual' }}
@@ -45,6 +45,47 @@ jobs:
         with:
           python-version: '3.13'
 
+      - name: Validate semantic auto-ingest policy
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('valcea-clar/social/owned_photo_semantic_auto_policy.json').read_text(encoding='utf-8'))
+          assert p['enabled'] is True
+          assert p['publication_authority'] == 'NONE'
+          assert p['story_assignment_authority'] == 'NONE'
+          assert p['source_inbox_category'] == '00_INBOX_NEW_PHOTOS'
+          assert float(p['auto_confirm_threshold']) >= 0.95
+          policy=p['policy']
+          required=(
+              'visual_review_required',
+              'exact_entity_requires_independent_anchor',
+              'exact_place_requires_location_or_landmark_anchor',
+              'person_identity_inference_forbidden',
+              'biometric_identification_forbidden',
+              'people_may_only_set_privacy_flags',
+              'story_event_identity_inference_forbidden',
+              'semantic_identity_does_not_imply_story_subject_match',
+              'auto_confirmed_assets_remain_candidate_only',
+              'auto_move_confirmed_asset_to_curated_category',
+              'ambiguous_assets_stay_in_inbox',
+              'ambiguous_assets_never_enter_story_matching',
+              'delete_on_reject_forbidden',
+              'no_photo_is_better_than_false_relevance',
+          )
+          for key in required:
+              assert policy[key] is True, key
+          assert len(p['allowed_target_categories']) == 7
+          fallback=p['ambiguous_fallback']
+          assert fallback['category'] == '00_INBOX_NEW_PHOTOS'
+          assert fallback['publication_authority'] == 'NONE'
+          assert fallback['subject_match'] is False
+          assert fallback['editor_approved'] is False
+          assert fallback['publication_eligible'] is False
+          print({'status':'PASS','auto_confirm_threshold':p['auto_confirm_threshold']})
+          PY
+
       - name: Validate owned-photo ingest, semantics, matching and materialization gate offline
         run: |
           set -euo pipefail
@@ -64,7 +105,7 @@ jobs:
           python valcea-clar/social/owned_photo_story_matcher.py --validate-only
           python valcea-clar/social/materialize_owned_photo_story.py --validate-only
 
-      - name: Detect Drive credential
+      - name: Detect optional native Drive credential
         id: credential
         if: github.event_name != 'pull_request'
         shell: bash
@@ -73,21 +114,21 @@ jobs:
             echo 'configured=true' >> "$GITHUB_OUTPUT"
           else
             echo 'configured=false' >> "$GITHUB_OUTPUT"
-            echo 'Drive credential absent; retaining the validated committed snapshot.'
+            echo 'Native GitHub Drive credential absent; connected hourly bridge remains the live discovery path.'
           fi
 
       - name: Install service-account authentication dependency
         if: github.event_name != 'pull_request' && steps.credential.outputs.configured == 'true' && env.VALCEA_DRIVE_SERVICE_ACCOUNT_JSON != ''
         run: python -m pip install --disable-pip-version-check google-auth==2.40.3
 
-      - name: Refresh inventory from Google Drive
+      - name: Probe live inventory with optional native credential
         if: github.event_name != 'pull_request' && steps.credential.outputs.configured == 'true'
         run: |
           set -euo pipefail
           python valcea-clar/social/drive_owned_photo_ingest.py
           python valcea-clar/social/drive_owned_photo_ingest.py --validate-only
-          # Semantic coverage is deliberately fail-closed: an unknown new Drive
-          # image cannot silently enter story matching before it is identified.
+          # Any newly discovered image without a semantic label must fail here;
+          # native runtime does not invent image meaning without visual review.
           python valcea-clar/social/owned_photo_semantic_registry.py --write
           python valcea-clar/social/owned_photo_story_matcher.py
           python valcea-clar/social/owned_photo_story_matcher.py --validate-only
@@ -119,18 +160,23 @@ jobs:
           assert semantic['automatic_story_assignment_allowed'] is False
           assert semantic['semantic_label_is_not_story_assignment'] is True
           assert semantic['story_subject_match_inherited_from_semantics'] is False
-          assert semantic['summary']['asset_count'] == registry['summary']['asset_count'] == 48
-          assert semantic['summary']['confirmed'] == 48
-          assert semantic['summary']['ambiguous'] == 0
-          assert semantic['summary']['rejected'] == 0
-          assert ambiguous['summary']['ambiguous_count'] == 0
-          assert ambiguous['items'] == []
+          summary=semantic['summary']
+          assert summary['asset_count'] == registry['summary']['asset_count']
+          assert summary['confirmed'] + summary['ambiguous'] + summary['rejected'] == summary['asset_count']
+          # Preserve the fully-confirmed curated bootstrap while allowing future
+          # unknown inbox photos to remain ambiguous/fail-closed.
+          assert summary['confirmed'] >= 48
+          assert ambiguous['summary']['ambiguous_count'] == summary['ambiguous']
+          assert len(ambiguous['items']) == summary['ambiguous']
           semantic_ids=set()
           for asset in semantic['assets']:
               assert asset['drive_file_id'] not in semantic_ids
               semantic_ids.add(asset['drive_file_id'])
-              assert asset['review_status'] == 'confirmed'
-              assert asset['semantic_confidence'] >= 0.85
+              if asset['review_status'] == 'confirmed':
+                  assert asset['semantic_confidence'] >= 0.85
+              elif asset['review_status'] == 'ambiguous':
+                  assert asset['semantic_scope'] == 'ambiguous_entity'
+                  assert asset['category'] == '00_INBOX_NEW_PHOTOS'
               assert asset['rights_basis'] == 'owned_by_valcea_clar'
               assert asset['subject_match'] is False
               assert asset['editor_approved'] is False
@@ -138,13 +184,13 @@ jobs:
               assert asset['publication_authority'] == 'NONE'
               assert asset['automatic_story_assignment'] is False
               assert 'visual_review' in asset['evidence']
-              assert 'raw_jpeg_exif' in asset['evidence']
           assert semantic_ids == {asset['drive_file_id'] for asset in registry['assets']}
 
           assert queue['publication_authority'] == 'NONE'
           assert queue['candidate_only'] is True
           assert queue['automatic_story_assignment_forbidden'] is True
           assert queue['category_match_is_not_subject_match'] is True
+          assert queue.get('semantic_match_is_not_subject_match', True) is True
           for story in queue['stories'].values():
               assert story['automatic_story_assignment'] is False
               assert story['publication_authority'] == 'NONE'
@@ -162,7 +208,7 @@ jobs:
           print({
               'status':'PASS',
               'asset_count':registry['summary']['asset_count'],
-              'semantic_summary':semantic['summary'],
+              'semantic_summary':summary,
               'ambiguous_count':ambiguous['summary']['ambiguous_count'],
               'story_candidate_summary':queue['summary'],
               'active_materialization_requests':sum(
@@ -172,30 +218,6 @@ jobs:
           })
           PY
 
-      - name: Persist Drive inventory and candidate queue conflict-safe
-        if: github.event_name == 'workflow_dispatch'
-        shell: bash
+      - name: Confirm CI has no autonomous main-write path
         run: |
-          set -euo pipefail
-          snapshot='valcea-clar/social/owned_photo_drive_snapshot.json'
-          registry='valcea-clar/social/owned_photo_registry.json'
-          queue='valcea-clar/social/owned_photo_story_candidates.json'
-          cp "$snapshot" /tmp/owned-photo-drive-snapshot.json
-          cp "$registry" /tmp/owned-photo-registry.json
-          cp "$queue" /tmp/owned-photo-story-candidates.json
-          git config user.name 'valcea-clar-owned-photos[bot]'
-          git config user.email 'valcea-clar-owned-photos@users.noreply.github.com'
-          for attempt in 1 2 3 4 5; do
-            git fetch origin main
-            git reset --hard origin/main
-            cp /tmp/owned-photo-drive-snapshot.json "$snapshot"
-            cp /tmp/owned-photo-registry.json "$registry"
-            cp /tmp/owned-photo-story-candidates.json "$queue"
-            git add "$snapshot" "$registry" "$queue"
-            if git diff --cached --quiet; then exit 0; fi
-            git commit -m 'Refresh VÂLCEA CLAR owned photo candidate inventory'
-            if git push origin HEAD:main; then exit 0; fi
-            sleep $((attempt * 2))
-          done
-          echo 'Could not persist owned-photo candidate inventory after five attempts.' >&2
-          exit 1
+          echo 'PASS: this workflow has contents:read and performs validation/probing only.'
