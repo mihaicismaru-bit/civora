@@ -15,6 +15,7 @@ on:
       - "valcea-clar/social/threads_state.json"
       - "valcea-clar/site/story_publication_event.json"
       - "valcea-clar/editorial/publication_holds.json"
+      - "valcea-clar/scripts/prune_volatile_json_changes.py"
       - ".github/workflows/valcea-clar-threads-editorial.yml"
   push:
     branches: [main]
@@ -25,6 +26,7 @@ on:
       - "valcea-clar/social/threads_editorial_materialize.py"
       - "valcea-clar/social/threads_publish.py"
       - "valcea-clar/social/channels/threads.json"
+      - "valcea-clar/scripts/prune_volatile_json_changes.py"
       - ".github/workflows/valcea-clar-threads-editorial.yml"
 
 permissions:
@@ -59,10 +61,12 @@ jobs:
           python -m py_compile \
             valcea-clar/social/threads_editorial_v1.py \
             valcea-clar/social/threads_editorial_materialize.py \
-            valcea-clar/social/threads_publish.py
+            valcea-clar/social/threads_publish.py \
+            valcea-clar/scripts/prune_volatile_json_changes.py
           python valcea-clar/social/threads_editorial_v1.py --self-test
           python valcea-clar/social/threads_editorial_materialize.py --self-test
           python valcea-clar/social/threads_publish.py --self-test
+          python valcea-clar/scripts/prune_volatile_json_changes.py --self-test
 
       - name: Materialize canonical Threads editorial outbox
         run: python valcea-clar/social/threads_editorial_materialize.py | tee /tmp/threads-editorial-materialize.json
@@ -129,9 +133,12 @@ jobs:
             git reset --hard origin/main
             cp /tmp/threads-outbox.json valcea-clar/social/threads_outbox.json
             cp /tmp/threads-state.json valcea-clar/social/threads_state.json
+            python valcea-clar/scripts/prune_volatile_json_changes.py \
+              --ignore-key last_auth_verified_at \
+              valcea-clar/social/threads_state.json
             git add valcea-clar/social/threads_outbox.json valcea-clar/social/threads_state.json
             if git diff --cached --quiet; then
-              echo "No Threads state changes to persist."
+              echo "No semantic Threads state changes to persist."
               exit 0
             fi
             git commit -m "Persist VÂLCEA CLAR Threads publication state"
