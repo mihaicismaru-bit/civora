@@ -1,15 +1,10 @@
 name: VÂLCEA CLAR Photo Atlas
 
+# PR/manual contract validator. Photo Atlas has zero publication authority and
+# does not need an autonomous main-branch observer.
 on:
   workflow_dispatch:
   pull_request:
-    paths:
-      - 'valcea-clar/social/story_visuals.json'
-      - 'valcea-clar/social/photo_atlas.py'
-      - 'valcea-clar/social/photo_atlas.json'
-      - '.github/workflows/valcea-clar-photo-atlas.yml'
-  push:
-    branches: [main]
     paths:
       - 'valcea-clar/social/story_visuals.json'
       - 'valcea-clar/social/photo_atlas.py'
@@ -20,7 +15,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: valcea-clar-photo-atlas-${{ github.ref }}
+  group: valcea-clar-photo-atlas-${{ github.event.pull_request.number || 'manual' }}
   cancel-in-progress: true
 
 jobs:
@@ -41,7 +36,6 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-
           atlas = json.loads(Path('valcea-clar/social/photo_atlas.json').read_text(encoding='utf-8'))
           assert atlas['product'] == 'VÂLCEA CLAR PHOTO ATLAS'
           assert atlas['publication_authority'] == 'NONE'
