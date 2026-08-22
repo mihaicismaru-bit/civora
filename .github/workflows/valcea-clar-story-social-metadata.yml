@@ -1,13 +1,24 @@
 name: VÂLCEA CLAR Story Social Metadata
 
+# Derived presentation projector. It never authorizes editorial facts. After the
+# canonical Live Newsroom completes, this workflow rebuilds the reader-facing
+# Public UX and article social metadata from the already-published live feed.
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: ['VÂLCEA CLAR Live Newsroom']
+    types: [completed]
+    branches: [main]
   push:
     branches: [main]
     paths:
       - 'valcea-clar/social/story_visuals.json'
       - 'valcea-clar/social/social_media_manifest.json'
       - 'valcea-clar/scripts/render_story_pages.py'
+      - 'valcea-clar/scripts/public_ux_reset.py'
+      - 'valcea-clar/scripts/public_ux_story_integrity.py'
+      - 'valcea-clar/scripts/public_ux_manifest.py'
+      - 'valcea-clar/scripts/validate_public_ux_freshness.py'
       - 'local-news-os/core/verified_story_media.py'
       - '.github/workflows/valcea-clar-story-social-metadata.yml'
   pull_request:
@@ -15,6 +26,10 @@ on:
       - 'valcea-clar/social/story_visuals.json'
       - 'valcea-clar/social/social_media_manifest.json'
       - 'valcea-clar/scripts/render_story_pages.py'
+      - 'valcea-clar/scripts/public_ux_reset.py'
+      - 'valcea-clar/scripts/public_ux_story_integrity.py'
+      - 'valcea-clar/scripts/public_ux_manifest.py'
+      - 'valcea-clar/scripts/validate_public_ux_freshness.py'
       - 'local-news-os/core/verified_story_media.py'
       - '.github/workflows/valcea-clar-story-social-metadata.yml'
 
@@ -22,13 +37,15 @@ permissions:
   contents: write
 
 concurrency:
+  # Derived presentation must never race the canonical live writer.
   group: valcea-clar-live-newsroom
   cancel-in-progress: false
 
 jobs:
   refresh:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
         with:
@@ -38,95 +55,82 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Refresh canonical main
-        if: github.event_name != 'pull_request'
+      - name: Self-test derived presentation contracts
         run: |
-          git fetch origin main
-          git reset --hard origin/main
+          python valcea-clar/scripts/public_ux_reset.py --self-test
+          python valcea-clar/scripts/public_ux_story_integrity.py --self-test
+          python valcea-clar/scripts/validate_public_ux_freshness.py --self-test
 
-      - name: Re-render canonical story pages with current verified media
-        run: python valcea-clar/scripts/render_story_pages.py | tee /tmp/story-social-metadata.json
-
-      - name: Validate static Facebook/Open Graph contract
+      - name: Exercise canonical reader presentation on pull request
+        if: github.event_name == 'pull_request'
+        shell: bash
         run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
+          set -euo pipefail
+          archive='valcea-clar/site/story_archive.json'
+          before="$(sha256sum "$archive" | cut -d' ' -f1)"
 
-          root = Path('valcea-clar/site/runtime')
-          manifest = json.loads((root / 'stiri/manifest.json').read_text(encoding='utf-8'))
-          checked = 0
-          imaged = 0
-          for row in manifest.get('stories', []):
-              route = str(row.get('path') or '').strip('/')
-              if not route:
-                  raise SystemExit('story manifest row has no route')
-              page = root / route / 'index.html'
-              text = page.read_text(encoding='utf-8')
-              canonical = str(row.get('canonical') or '')
-              required = [
-                  '<meta property="og:type" content="article">',
-                  '<meta property="og:title"',
-                  '<meta property="og:description"',
-                  f'<meta property="og:url" content="{canonical}">',
-                  f'<link rel="canonical" href="{canonical}">',
-              ]
-              missing = [token for token in required if token not in text]
-              if missing:
-                  raise SystemExit(f'{route}: missing static social metadata: {missing}')
-              image = row.get('image') if isinstance(row.get('image'), dict) else None
-              if image:
-                  public_url = str(image.get('public_url') or '')
-                  if not public_url or f'<meta property="og:image" content="{public_url}">' not in text:
-                      raise SystemExit(f'{route}: verified image not projected to og:image')
-                  imaged += 1
-              checked += 1
-          print({'status': 'PASS', 'story_pages_checked': checked, 'og_image_pages': imaged})
-          PY
+          python valcea-clar/scripts/render_story_pages.py | tee /tmp/story-social-metadata.json
+          python valcea-clar/scripts/public_ux_reset.py
+          python valcea-clar/scripts/public_ux_story_integrity.py
+          python valcea-clar/scripts/public_ux_manifest.py
+          python valcea-clar/scripts/public_ux_reset.py --check
+          python valcea-clar/scripts/public_ux_story_integrity.py --check
+          python valcea-clar/scripts/public_ux_manifest.py --check
+          python valcea-clar/scripts/validate_public_ux_freshness.py
 
-      - name: Persist refreshed static story metadata conflict-safe
+          after="$(sha256sum "$archive" | cut -d' ' -f1)"
+          test "$before" = "$after"
+          git diff --exit-code -- "$archive"
+
+      - name: Persist canonical reader presentation conflict-safe
         if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf /tmp/valcea-story-meta
-          mkdir -p /tmp/valcea-story-meta/valcea-clar/site/runtime
-          cp -a valcea-clar/site/runtime/stiri /tmp/valcea-story-meta/valcea-clar/site/runtime/stiri
-          cp valcea-clar/site/runtime/sitemap.xml /tmp/valcea-story-meta/valcea-clar/site/runtime/sitemap.xml
-          cp valcea-clar/site/runtime/robots.txt /tmp/valcea-story-meta/valcea-clar/site/runtime/robots.txt
-          cp valcea-clar/site/runtime/index.html /tmp/valcea-story-meta/valcea-clar/site/runtime/index.html
-
           git config user.name 'valcea-clar-story-meta[bot]'
           git config user.email 'valcea-clar-story-meta@users.noreply.github.com'
+
           for attempt in 1 2 3 4 5; do
             git fetch origin main
             git reset --hard origin/main
-            rm -rf valcea-clar/site/runtime/stiri
-            cp -a /tmp/valcea-story-meta/valcea-clar/site/runtime/stiri valcea-clar/site/runtime/stiri
-            cp /tmp/valcea-story-meta/valcea-clar/site/runtime/sitemap.xml valcea-clar/site/runtime/sitemap.xml
-            cp /tmp/valcea-story-meta/valcea-clar/site/runtime/robots.txt valcea-clar/site/runtime/robots.txt
-            cp /tmp/valcea-story-meta/valcea-clar/site/runtime/index.html valcea-clar/site/runtime/index.html
-            git add \
-              valcea-clar/site/runtime/stiri \
-              valcea-clar/site/runtime/sitemap.xml \
-              valcea-clar/site/runtime/robots.txt \
-              valcea-clar/site/runtime/index.html
+            git clean -fd
+
+            archive='valcea-clar/site/story_archive.json'
+            before="$(sha256sum "$archive" | cut -d' ' -f1)"
+
+            python valcea-clar/scripts/render_story_pages.py | tee /tmp/story-social-metadata.json
+            python valcea-clar/scripts/public_ux_reset.py
+            python valcea-clar/scripts/public_ux_story_integrity.py
+            python valcea-clar/scripts/public_ux_manifest.py
+            python valcea-clar/scripts/public_ux_reset.py --check
+            python valcea-clar/scripts/public_ux_story_integrity.py --check
+            python valcea-clar/scripts/public_ux_manifest.py --check
+            python valcea-clar/scripts/validate_public_ux_freshness.py
+
+            after="$(sha256sum "$archive" | cut -d' ' -f1)"
+            test "$before" = "$after"
+            git diff --exit-code -- "$archive"
+
+            git add valcea-clar/site/public_ux_state.json valcea-clar/site/runtime
             if git diff --cached --quiet; then
-              echo 'Canonical story social metadata already current.'
+              echo 'Canonical Public UX and story social metadata already current.'
               exit 0
             fi
-            git commit -m 'Refresh VÂLCEA CLAR story social metadata'
+
+            git commit -m 'Refresh VÂLCEA CLAR canonical public presentation'
             if git push origin HEAD:main; then
               exit 0
             fi
+            echo "main advanced during Public UX projection; retrying ${attempt}/5."
             sleep $((attempt * 2))
           done
-          echo 'Could not persist story social metadata after five attempts.' >&2
+
+          echo 'Could not persist canonical Public UX after five attempts.' >&2
           exit 1
 
       - name: Write audit summary
         if: always()
         run: |
-          echo '## VÂLCEA CLAR Story Social Metadata' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Canonical story pages are re-rendered whenever verified social media changes so Facebook never depends on stale article metadata.' >> "$GITHUB_STEP_SUMMARY"
+          echo '## VÂLCEA CLAR Story Social Metadata + Public UX' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Derived presentation is rebuilt from the canonical live feed after Live Newsroom completes; no editorial authority is duplicated.' >> "$GITHUB_STEP_SUMMARY"
           cat /tmp/story-social-metadata.json >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
