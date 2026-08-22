@@ -35,6 +35,11 @@ KEY_TERMS = (
     "trafic", "transport", "utilitat", "avar", "intrerup", "întrerup", "alert", "avertiz",
     "mediu", "padur", "pădur", "turism", "trase", "sport", "meci", "educa", "sanat", "sănăt",
 )
+VOLATILE_QUERY_KEYS = frozenset({
+    "fbclid", "gclid", "dclid", "msclkid", "mc_cid", "mc_eid",
+    "session", "sessionid", "sid", "phpsessid", "nonce", "token",
+})
+NON_CONTENT_PATH_SEGMENTS = frozenset({"login", "logout", "signin", "sign-in", "auth"})
 
 
 class LinkParser(html.parser.HTMLParser):
@@ -107,10 +112,31 @@ def load_seed_registries(paths: tuple[Path, ...] = REGISTRIES) -> tuple[list[dic
     return merge_seed_documents(documents), origins
 
 
+def stable_query(query: str) -> str:
+    pairs = urllib.parse.parse_qsl(query, keep_blank_values=True)
+    stable = []
+    for key, value in pairs:
+        lower = key.lower()
+        if lower.startswith("utm_") or lower in VOLATILE_QUERY_KEYS:
+            continue
+        stable.append((key, value))
+    return urllib.parse.urlencode(stable, doseq=True)
+
+
 def norm(url: str) -> str:
     p = urllib.parse.urlsplit(url)
     path = re.sub(r"/{2,}", "/", p.path or "/")
-    return urllib.parse.urlunsplit((p.scheme.lower(), p.netloc.lower(), path, p.query, ""))
+    return urllib.parse.urlunsplit((p.scheme.lower(), p.netloc.lower(), path, stable_query(p.query), ""))
+
+
+def content_candidate_allowed(url: str) -> bool:
+    p = urllib.parse.urlsplit(url)
+    segments = [segment.lower() for segment in p.path.split("/") if segment]
+    for segment in segments:
+        stem = segment.rsplit(".", 1)[0]
+        if stem in NON_CONTENT_PATH_SEGMENTS or stem.startswith("login_") or stem.startswith("login-"):
+            return False
+    return True
 
 
 def fetch(url: str, timeout: int = 18) -> tuple[str, bytes, str]:
@@ -173,7 +199,7 @@ def discover(seed: dict) -> dict:
                 except Exception:
                     continue
                 p = urllib.parse.urlsplit(url)
-                if p.scheme not in {"http", "https"} or not p.netloc:
+                if p.scheme not in {"http", "https"} or not p.netloc or not content_candidate_allowed(url):
                     continue
                 host = p.netloc.lower().removeprefix("www.")
                 hay = (p.path + " " + p.query + " " + label).lower()
@@ -196,6 +222,11 @@ def self_test() -> int:
     assert candidate["public_projection"] is False
     assert candidate["auto_publication"] is False
     assert candidate["lifecycle"] == "DISCOVERED_UNRATED"
+    assert norm("HTTPS://Example.COM//news/?utm_source=x&token=abc&id=7#frag") == "https://example.com/news/?id=7"
+    assert norm("https://example.com/path?b=2&a=1") == "https://example.com/path?b=2&a=1"
+    assert content_candidate_allowed("https://example.com/news/article") is True
+    assert content_candidate_allowed("https://example.com/stiri/login.php?token=abc") is False
+    assert content_candidate_allowed("https://example.com/login_arbitri/login.php?token=abc") is False
     docs = [
         {"defaults": defaults, "seed_sources": [["a", "A", "https://a.example/", "T2", "LOCAL_PRESS", False]]},
         {"defaults": defaults, "seed_sources": [["b", "B", "https://b.example/", "T1", "PUBLIC_RECORD", False]]},

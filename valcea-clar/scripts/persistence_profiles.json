@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0",
+  "product": "VÂLCEA CLAR semantic persistence profiles",
+  "policy": "Only explicitly listed volatile metadata may be ignored. Source hashes, statuses, counters, candidate sets and list ordering remain semantic.",
+  "profiles": {
+    "structured_alerts": [
+      "generated_at"
+    ],
+    "editorial_opportunity": [
+      "generated_at",
+      "detected_at",
+      "observed_at"
+    ],
+    "threads_state": [
+      "last_auth_verified_at"
+    ],
+    "fact_kernel_products": [
+      "generated_at",
+      "generated_at_utc",
+      "observed_at",
+      "updated_at",
+      "checked_at",
+      "detected_at"
+    ],
+    "cultural_sources": [
+      "generated_at",
+      "generated_at_utc",
+      "detected_at",
+      "observed_at",
+      "updated_at",
+      "checked_at"
+    ],
+    "source_signal_transaction": [
+      "generated_at",
+      "queue_generated_at",
+      "observed_at",
+      "last_seen_at"
+    ],
+    "source_health": [
+      "observed_at",
+      "last_observed_at",
+      "checked_at",
+      "updated_at"
+    ],
+    "source_discovery": [
+      "checked_at_epoch",
+      "generated_at",
+      "observed_at",
+      "updated_at"
+    ]
+  }
+}

@@ -15,6 +15,7 @@ on:
       - 'valcea-clar/scripts/monitor_performing_arts_sources.py'
       - 'valcea-clar/scripts/promote_performing_arts_monitors.py'
       - 'valcea-clar/scripts/prune_volatile_json_changes.py'
+      - 'valcea-clar/scripts/persistence_profiles.json'
       - '.github/workflows/valcea-clar-festival-intelligence-monitor.yml'
   pull_request:
     paths:
@@ -25,6 +26,7 @@ on:
       - 'valcea-clar/scripts/monitor_performing_arts_sources.py'
       - 'valcea-clar/scripts/promote_performing_arts_monitors.py'
       - 'valcea-clar/scripts/prune_volatile_json_changes.py'
+      - 'valcea-clar/scripts/persistence_profiles.json'
       - '.github/workflows/valcea-clar-festival-intelligence-monitor.yml'
   schedule:
     - cron: '13 */2 * * *'
@@ -94,12 +96,7 @@ jobs:
         if: github.event_name != 'pull_request'
         run: |
           python valcea-clar/scripts/prune_volatile_json_changes.py \
-            --ignore-key generated_at \
-            --ignore-key generated_at_utc \
-            --ignore-key detected_at \
-            --ignore-key observed_at \
-            --ignore-key updated_at \
-            --ignore-key checked_at \
+            --profile cultural_sources \
             valcea-clar/state/festival_source_state.json \
             valcea-clar/editorial/festival_update_candidates.json \
             valcea-clar/state/performing_arts_source_state.json \
@@ -142,12 +139,7 @@ jobs:
               if [ -f "/tmp/cultural-monitor/$p" ]; then mkdir -p "$(dirname "$p")"; cp "/tmp/cultural-monitor/$p" "$p"; fi
             done
             python valcea-clar/scripts/prune_volatile_json_changes.py \
-              --ignore-key generated_at \
-              --ignore-key generated_at_utc \
-              --ignore-key detected_at \
-              --ignore-key observed_at \
-              --ignore-key updated_at \
-              --ignore-key checked_at \
+              --profile cultural_sources \
               "${paths[@]}"
             for p in "${paths[@]}"; do if [ -f "$p" ]; then git add "$p"; fi; done
             if git diff --cached --quiet; then exit 0; fi
