@@ -14,6 +14,7 @@ on:
       - 'valcea-clar/scripts/monitor_festival_sources.py'
       - 'valcea-clar/scripts/monitor_performing_arts_sources.py'
       - 'valcea-clar/scripts/promote_performing_arts_monitors.py'
+      - 'valcea-clar/scripts/prune_volatile_json_changes.py'
       - '.github/workflows/valcea-clar-festival-intelligence-monitor.yml'
   pull_request:
     paths:
@@ -23,6 +24,7 @@ on:
       - 'valcea-clar/scripts/monitor_festival_sources.py'
       - 'valcea-clar/scripts/monitor_performing_arts_sources.py'
       - 'valcea-clar/scripts/promote_performing_arts_monitors.py'
+      - 'valcea-clar/scripts/prune_volatile_json_changes.py'
       - '.github/workflows/valcea-clar-festival-intelligence-monitor.yml'
   schedule:
     - cron: '13 */2 * * *'
@@ -60,6 +62,7 @@ jobs:
           python valcea-clar/scripts/monitor_festival_sources.py --self-test
           python valcea-clar/scripts/monitor_performing_arts_sources.py --self-test
           python valcea-clar/scripts/promote_performing_arts_monitors.py --check
+          python valcea-clar/scripts/prune_volatile_json_changes.py --self-test
 
       - name: Monitor festival sources on festival cadence
         id: festival
@@ -87,6 +90,22 @@ jobs:
         if: github.event_name != 'pull_request'
         run: python valcea-clar/scripts/promote_performing_arts_monitors.py
 
+      - name: Prune volatile-only cultural refreshes
+        if: github.event_name != 'pull_request'
+        run: |
+          python valcea-clar/scripts/prune_volatile_json_changes.py \
+            --ignore-key generated_at \
+            --ignore-key generated_at_utc \
+            --ignore-key detected_at \
+            --ignore-key observed_at \
+            --ignore-key updated_at \
+            --ignore-key checked_at \
+            valcea-clar/state/festival_source_state.json \
+            valcea-clar/editorial/festival_update_candidates.json \
+            valcea-clar/state/performing_arts_source_state.json \
+            valcea-clar/editorial/performing_arts_update_candidates.json \
+            valcea-clar/editorial/monitor_registry.json
+
       - name: Persist cultural source and monitor state once
         if: github.event_name != 'pull_request'
         shell: bash
@@ -105,7 +124,7 @@ jobs:
             if [ -e "$p" ] && ! git ls-files --error-unmatch "$p" >/dev/null 2>&1; then changed=true; fi
           done
           if [ "$changed" != true ]; then
-            echo 'No material cultural source or monitor change.'
+            echo 'No semantic cultural source or monitor change.'
             exit 0
           fi
 
@@ -120,8 +139,17 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             for p in "${paths[@]}"; do
-              if [ -f "/tmp/cultural-monitor/$p" ]; then mkdir -p "$(dirname "$p")"; cp "/tmp/cultural-monitor/$p" "$p"; git add "$p"; fi
+              if [ -f "/tmp/cultural-monitor/$p" ]; then mkdir -p "$(dirname "$p")"; cp "/tmp/cultural-monitor/$p" "$p"; fi
             done
+            python valcea-clar/scripts/prune_volatile_json_changes.py \
+              --ignore-key generated_at \
+              --ignore-key generated_at_utc \
+              --ignore-key detected_at \
+              --ignore-key observed_at \
+              --ignore-key updated_at \
+              --ignore-key checked_at \
+              "${paths[@]}"
+            for p in "${paths[@]}"; do if [ -f "$p" ]; then git add "$p"; fi; done
             if git diff --cached --quiet; then exit 0; fi
             git commit -m 'Refresh VÂLCEA CLAR cultural source intelligence'
             if git push origin HEAD:main; then exit 0; fi
