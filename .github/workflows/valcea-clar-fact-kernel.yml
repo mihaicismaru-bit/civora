@@ -19,6 +19,7 @@ on:
       - 'valcea-clar/scripts/merge_supplemental_facts.py'
       - 'valcea-clar/scripts/editorial_lifecycle_normalizer.py'
       - 'valcea-clar/scripts/prune_volatile_json_changes.py'
+      - 'valcea-clar/scripts/persistence_profiles.json'
       - 'valcea-clar/editorial/structured_alert_events.json'
       - 'valcea-clar/editorial/manual_publish_queue.json'
       - 'valcea-clar/editorial/supplemental_facts_registry.json'
@@ -40,6 +41,7 @@ on:
       - 'valcea-clar/scripts/merge_supplemental_facts.py'
       - 'valcea-clar/scripts/editorial_lifecycle_normalizer.py'
       - 'valcea-clar/scripts/prune_volatile_json_changes.py'
+      - 'valcea-clar/scripts/persistence_profiles.json'
       - 'valcea-clar/editorial/structured_alert_events.json'
       - 'valcea-clar/editorial/manual_publish_queue.json'
       - 'valcea-clar/editorial/supplemental_facts_registry.json'
@@ -109,12 +111,7 @@ jobs:
           done
           if [ "${#json_files[@]}" -gt 0 ]; then
             python valcea-clar/scripts/prune_volatile_json_changes.py \
-              --ignore-key generated_at \
-              --ignore-key generated_at_utc \
-              --ignore-key observed_at \
-              --ignore-key updated_at \
-              --ignore-key checked_at \
-              --ignore-key detected_at \
+              --profile fact_kernel_products \
               "${json_files[@]}"
           fi
 
