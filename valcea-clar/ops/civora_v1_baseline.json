@@ -1,0 +1,23 @@
+{
+  "product": "CIVORA / VALCEA CLAR",
+  "version": "1.0.0",
+  "status": "FROZEN_PRODUCTION_BASELINE",
+  "repository": "mihaicismaru-bit/civora",
+  "production_branch": "main",
+  "snapshot_branch": "release/civora-v1",
+  "baseline_commit": "e2d83c280e98ce15f5e2a0c2ab47fb6719b0d423",
+  "captured_at": "2026-08-22T08:08:00+03:00",
+  "production_domain": "https://valceaclar.ro",
+  "development_successor": {
+    "version": "2.0.0-dev.0",
+    "branch": "develop/civora-v2"
+  },
+  "invariants": [
+    "release/civora-v1 is an immutable rollback and regression reference",
+    "development work does not target release/civora-v1",
+    "production keeps serving the last validated version until a v2 promotion passes all gates",
+    "multi-instance isolation remains mandatory",
+    "editorial and social flows remain fail-closed",
+    "runtime state is never overwritten by stale development state"
+  ]
+}
