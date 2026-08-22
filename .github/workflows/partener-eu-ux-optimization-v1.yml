@@ -1,0 +1,52 @@
+name: PARTENER.EU UX Optimization v1 QA
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'partener-eu/web/index.html'
+      - 'partener-eu/web/ux-optimization-v1.css'
+      - 'partener-eu/web/ux-optimization-v1.js'
+      - 'partener-eu/ops/test_ux_optimization_v1.py'
+      - '.github/workflows/partener-eu-ux-optimization-v1.yml'
+  push:
+    branches:
+      - 'agent/partener-ux-optimization-v1-20260822'
+    paths:
+      - 'partener-eu/web/index.html'
+      - 'partener-eu/web/ux-optimization-v1.css'
+      - 'partener-eu/web/ux-optimization-v1.js'
+      - 'partener-eu/ops/test_ux_optimization_v1.py'
+      - '.github/workflows/partener-eu-ux-optimization-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: partener-eu-ux-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: JavaScript syntax
+        run: node --check partener-eu/web/ux-optimization-v1.js
+      - name: UX contract
+        run: python partener-eu/ops/test_ux_optimization_v1.py
+      - name: Confirm progressive-enhancement boundary
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          index=Path('partener-eu/web/index.html').read_text(encoding='utf-8')
+          assert index.index('app.js?') < index.index('ux-optimization-v1.js?')
+          assert index.index('public-product-v3.js?') < index.index('ux-optimization-v1.js?')
+          assert index.index('ask-partener-v2.css?') < index.index('ux-optimization-v1.css?')
+          print('Progressive UX boundary: PASS')
+          PY
