@@ -1,13 +1,13 @@
 {
-  "schema": "PARTENER_MIPE_LEGACY_CALLER_AUDIT_V1",
-  "generatedAt": "2026-08-22T13:05:55.371571Z",
+  "schema": "PARTENER_MIPE_LEGACY_CALLER_AUDIT_V2",
+  "generatedAt": "2026-08-22T13:09:15.871746Z",
   "root": ".",
   "scannedTextFiles": 2737,
   "policy": "Deletion is fail-closed: ZERO_CALLER_CANDIDATE is necessary but not sufficient. Replay/rollback and workflow/product validation are still required before deletion.",
   "summary": {
-    "activeCallerFound": 10,
+    "activeCallerFound": 15,
     "referencedWithoutExecutableCaller": 0,
-    "zeroCallerCandidates": 3,
+    "zeroCallerCandidates": 5,
     "absent": 0
   },
   "candidates": [
@@ -16,7 +16,7 @@
       "exists": true,
       "bytes": 1704,
       "status": "ACTIVE_CALLER_FOUND",
-      "strongCallerCount": 2,
+      "strongCallerCount": 1,
       "workflowReferenceCount": 2,
       "documentationReferenceCount": 0,
       "referenceCount": 2,
@@ -24,7 +24,7 @@
         {
           "path": ".github/workflows/partener-eu-mipe-ro-runner.yml",
           "line": 14,
-          "kind": "WORKFLOW_EXECUTION",
+          "kind": "WORKFLOW_PATH_TRIGGER_OR_LIST",
           "excerpt": "- 'partener-eu/ingest/mipe_browser_ingest.py'"
         },
         {
@@ -70,7 +70,7 @@
       "exists": true,
       "bytes": 8648,
       "status": "ACTIVE_CALLER_FOUND",
-      "strongCallerCount": 3,
+      "strongCallerCount": 2,
       "workflowReferenceCount": 3,
       "documentationReferenceCount": 0,
       "referenceCount": 3,
@@ -78,7 +78,7 @@
         {
           "path": ".github/workflows/partener-eu-mipe-ingest.yml",
           "line": 10,
-          "kind": "WORKFLOW_EXECUTION",
+          "kind": "WORKFLOW_PATH_TRIGGER_OR_LIST",
           "excerpt": "- 'partener-eu/ingest/mipe_direct_only_ingest.py'"
         },
         {
@@ -100,7 +100,7 @@
       "exists": true,
       "bytes": 11466,
       "status": "ACTIVE_CALLER_FOUND",
-      "strongCallerCount": 2,
+      "strongCallerCount": 1,
       "workflowReferenceCount": 2,
       "documentationReferenceCount": 0,
       "referenceCount": 3,
@@ -114,7 +114,7 @@
         {
           "path": ".github/workflows/partener-eu-mipe-ingest.yml",
           "line": 12,
-          "kind": "WORKFLOW_EXECUTION",
+          "kind": "WORKFLOW_PATH_TRIGGER_OR_LIST",
           "excerpt": "- 'partener-eu/ingest/mipe_discovery_ingest.py'"
         },
         {
@@ -130,7 +130,7 @@
       "exists": true,
       "bytes": 6673,
       "status": "ACTIVE_CALLER_FOUND",
-      "strongCallerCount": 2,
+      "strongCallerCount": 1,
       "workflowReferenceCount": 2,
       "documentationReferenceCount": 0,
       "referenceCount": 2,
@@ -138,7 +138,7 @@
         {
           "path": ".github/workflows/partener-eu-mipe-dual-cache.yml",
           "line": 10,
-          "kind": "WORKFLOW_EXECUTION",
+          "kind": "WORKFLOW_PATH_TRIGGER_OR_LIST",
           "excerpt": "- 'partener-eu/ingest/mipe_dual_cache.py'"
         },
         {
@@ -205,7 +205,7 @@
       "exists": true,
       "bytes": 48776,
       "status": "ACTIVE_CALLER_FOUND",
-      "strongCallerCount": 16,
+      "strongCallerCount": 10,
       "workflowReferenceCount": 15,
       "documentationReferenceCount": 0,
       "referenceCount": 23,
@@ -285,7 +285,7 @@
         {
           "path": ".github/workflows/partener-eu-validation.yml",
           "line": 175,
-          "kind": "WORKFLOW_EXECUTION",
+          "kind": "WORKFLOW_REFERENCE",
           "excerpt": "partener-eu/ingest/mipe_resilient_ingest.py \\"
         },
         {
@@ -309,31 +309,31 @@
         {
           "path": ".github/workflows/partener-eu-mipe-access-bridge.yml",
           "line": 90,
-          "kind": "WORKFLOW_EXECUTION",
+          "kind": "WORKFLOW_REFERENCE",
           "excerpt": "cp partener-eu/ingest/mipe_resilient_ingest.py /tmp/mipe_resilient_ingest.py"
         },
         {
           "path": ".github/workflows/partener-eu-mipe-access-bridge.yml",
           "line": 101,
-          "kind": "WORKFLOW_EXECUTION",
+          "kind": "WORKFLOW_REFERENCE",
           "excerpt": "cp /tmp/mipe_resilient_ingest.py partener-eu/ingest/mipe_resilient_ingest.py"
         },
         {
           "path": ".github/workflows/partener-eu-mipe-access-bridge.yml",
           "line": 108,
-          "kind": "WORKFLOW_EXECUTION",
+          "kind": "WORKFLOW_REFERENCE",
           "excerpt": "partener-eu/ingest/mipe_resilient_ingest.py \\"
         },
         {
           "path": ".github/workflows/partener-eu-mipe-ingest.yml",
           "line": 11,
-          "kind": "WORKFLOW_EXECUTION",
+          "kind": "WORKFLOW_PATH_TRIGGER_OR_LIST",
           "excerpt": "- 'partener-eu/ingest/mipe_resilient_ingest.py'"
         },
         {
           "path": ".github/workflows/partener-eu-mipe-ingest.yml",
           "line": 15,
-          "kind": "WORKFLOW_EXECUTION",
+          "kind": "WORKFLOW_PATH_TRIGGER_OR_LIST",
           "excerpt": "- 'partener-eu/ops/test_mipe_resilient_ingest.py'"
         },
         {
@@ -355,7 +355,7 @@
       "exists": true,
       "bytes": 9540,
       "status": "ACTIVE_CALLER_FOUND",
-      "strongCallerCount": 2,
+      "strongCallerCount": 1,
       "workflowReferenceCount": 2,
       "documentationReferenceCount": 0,
       "referenceCount": 2,
@@ -363,7 +363,7 @@
         {
           "path": ".github/workflows/partener-eu-mipe-transport-scout.yml",
           "line": 8,
-          "kind": "WORKFLOW_EXECUTION",
+          "kind": "WORKFLOW_PATH_TRIGGER_OR_LIST",
           "excerpt": "- 'partener-eu/ingest/mipe_transport_scout.py'"
         },
         {
@@ -379,7 +379,7 @@
       "exists": true,
       "bytes": 26069,
       "status": "ACTIVE_CALLER_FOUND",
-      "strongCallerCount": 5,
+      "strongCallerCount": 2,
       "workflowReferenceCount": 4,
       "documentationReferenceCount": 0,
       "referenceCount": 6,
@@ -399,7 +399,7 @@
         {
           "path": ".github/workflows/partener-eu-mipe-ro-crawl-v3-qa.yml",
           "line": 8,
-          "kind": "WORKFLOW_EXECUTION",
+          "kind": "WORKFLOW_PATH_TRIGGER_OR_LIST",
           "excerpt": "- 'partener-eu/ingest/mipe_windows_crawl_v3.py'"
         },
         {
@@ -411,13 +411,13 @@
         {
           "path": ".github/workflows/partener-eu-mipe-ro-crawl-v3-qa.yml",
           "line": 30,
-          "kind": "WORKFLOW_EXECUTION",
+          "kind": "WORKFLOW_REFERENCE",
           "excerpt": "crawler=Path('partener-eu/ingest/mipe_windows_crawl_v3.py').read_text(encoding='utf-8')"
         },
         {
           "path": ".github/workflows/partener-eu-mipe-ro-crawl-v3.yml",
           "line": 27,
-          "kind": "WORKFLOW_EXECUTION",
+          "kind": "WORKFLOW_PATH_TRIGGER_OR_LIST",
           "excerpt": "- 'partener-eu/ingest/mipe_windows_crawl_v3.py'"
         }
       ]
@@ -427,7 +427,7 @@
       "exists": true,
       "bytes": 1159,
       "status": "ACTIVE_CALLER_FOUND",
-      "strongCallerCount": 2,
+      "strongCallerCount": 1,
       "workflowReferenceCount": 2,
       "documentationReferenceCount": 0,
       "referenceCount": 2,
@@ -435,7 +435,7 @@
         {
           "path": ".github/workflows/partener-eu-mipe-ro-crawl-v3.yml",
           "line": 28,
-          "kind": "WORKFLOW_EXECUTION",
+          "kind": "WORKFLOW_PATH_TRIGGER_OR_LIST",
           "excerpt": "- 'partener-eu/ingest/mipe_windows_crawl_v3_entry.py'"
         },
         {
@@ -443,6 +443,154 @@
           "line": 122,
           "kind": "WORKFLOW_EXECUTION",
           "excerpt": "& $env:PYTHON_EXE partener-eu/ingest/mipe_windows_crawl_v3_entry.py"
+        }
+      ]
+    },
+    {
+      "file": "partener-eu/ops/fix_mipe_content_quality.py",
+      "exists": true,
+      "bytes": 6757,
+      "status": "ACTIVE_CALLER_FOUND",
+      "strongCallerCount": 2,
+      "workflowReferenceCount": 2,
+      "documentationReferenceCount": 0,
+      "referenceCount": 2,
+      "references": [
+        {
+          "path": ".github/workflows/partener-eu-mipe-dual-relay.yml",
+          "line": 34,
+          "kind": "WORKFLOW_EXECUTION",
+          "excerpt": "python partener-eu/ops/fix_mipe_content_quality.py"
+        },
+        {
+          "path": ".github/workflows/partener-eu-mipe-access-bridge.yml",
+          "line": 39,
+          "kind": "WORKFLOW_EXECUTION",
+          "excerpt": "python partener-eu/ops/fix_mipe_content_quality.py"
+        }
+      ]
+    },
+    {
+      "file": "partener-eu/ops/fix_mipe_decision_extraction.py",
+      "exists": true,
+      "bytes": 1317,
+      "status": "ZERO_CALLER_CANDIDATE",
+      "strongCallerCount": 0,
+      "workflowReferenceCount": 0,
+      "documentationReferenceCount": 0,
+      "referenceCount": 0,
+      "references": []
+    },
+    {
+      "file": "partener-eu/ops/fix_mipe_dual_relay.py",
+      "exists": true,
+      "bytes": 10379,
+      "status": "ACTIVE_CALLER_FOUND",
+      "strongCallerCount": 1,
+      "workflowReferenceCount": 1,
+      "documentationReferenceCount": 0,
+      "referenceCount": 1,
+      "references": [
+        {
+          "path": ".github/workflows/partener-eu-mipe-dual-relay.yml",
+          "line": 36,
+          "kind": "WORKFLOW_EXECUTION",
+          "excerpt": "python partener-eu/ops/fix_mipe_dual_relay.py"
+        }
+      ]
+    },
+    {
+      "file": "partener-eu/ops/fix_mipe_dual_reporting.py",
+      "exists": true,
+      "bytes": 3516,
+      "status": "ZERO_CALLER_CANDIDATE",
+      "strongCallerCount": 0,
+      "workflowReferenceCount": 0,
+      "documentationReferenceCount": 0,
+      "referenceCount": 0,
+      "references": []
+    },
+    {
+      "file": "partener-eu/ops/fix_mipe_first_party_relay.py",
+      "exists": true,
+      "bytes": 6453,
+      "status": "ACTIVE_CALLER_FOUND",
+      "strongCallerCount": 2,
+      "workflowReferenceCount": 3,
+      "documentationReferenceCount": 0,
+      "referenceCount": 3,
+      "references": [
+        {
+          "path": ".github/workflows/partener-eu-mipe-dual-relay.yml",
+          "line": 35,
+          "kind": "WORKFLOW_EXECUTION",
+          "excerpt": "python partener-eu/ops/fix_mipe_first_party_relay.py"
+        },
+        {
+          "path": ".github/workflows/partener-eu-mipe-access-bridge.yml",
+          "line": 10,
+          "kind": "WORKFLOW_PATH_TRIGGER_OR_LIST",
+          "excerpt": "- 'partener-eu/ops/fix_mipe_first_party_relay.py'"
+        },
+        {
+          "path": ".github/workflows/partener-eu-mipe-access-bridge.yml",
+          "line": 40,
+          "kind": "WORKFLOW_EXECUTION",
+          "excerpt": "python partener-eu/ops/fix_mipe_first_party_relay.py"
+        }
+      ]
+    },
+    {
+      "file": "partener-eu/ops/fix_mipe_resilient_classifier.py",
+      "exists": true,
+      "bytes": 2439,
+      "status": "ACTIVE_CALLER_FOUND",
+      "strongCallerCount": 3,
+      "workflowReferenceCount": 3,
+      "documentationReferenceCount": 0,
+      "referenceCount": 3,
+      "references": [
+        {
+          "path": ".github/workflows/partener-eu-mipe-dual-relay.yml",
+          "line": 32,
+          "kind": "WORKFLOW_EXECUTION",
+          "excerpt": "python partener-eu/ops/fix_mipe_resilient_classifier.py"
+        },
+        {
+          "path": ".github/workflows/partener-eu-validation.yml",
+          "line": 92,
+          "kind": "WORKFLOW_EXECUTION",
+          "excerpt": "python partener-eu/ops/fix_mipe_resilient_classifier.py"
+        },
+        {
+          "path": ".github/workflows/partener-eu-mipe-access-bridge.yml",
+          "line": 37,
+          "kind": "WORKFLOW_EXECUTION",
+          "excerpt": "python partener-eu/ops/fix_mipe_resilient_classifier.py"
+        }
+      ]
+    },
+    {
+      "file": "partener-eu/ops/fix_mipe_resilient_runtime.py",
+      "exists": true,
+      "bytes": 6441,
+      "status": "ACTIVE_CALLER_FOUND",
+      "strongCallerCount": 2,
+      "workflowReferenceCount": 2,
+      "documentationReferenceCount": 0,
+      "referenceCount": 2,
+      "references": [
+        {
+          "path": ".github/workflows/partener-eu-mipe-dual-relay.yml",
+          "line": 33,
+          "kind": "WORKFLOW_EXECUTION",
+          "excerpt": "python partener-eu/ops/fix_mipe_resilient_runtime.py"
+        },
+        {
+          "path": ".github/workflows/partener-eu-mipe-access-bridge.yml",
+          "line": 38,
+          "kind": "WORKFLOW_EXECUTION",
+          "excerpt": "python partener-eu/ops/fix_mipe_resilient_runtime.py"
         }
       ]
     }
