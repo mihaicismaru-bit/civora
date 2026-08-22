@@ -1,9 +1,10 @@
 name: PARTENER.EU MIPE Access Bridge
 
 on:
+  # Manual recovery only. Canonical Romanian MIPE acquisition is owned by
+  # the repository self-hosted Windows v3 collector; relay transport must not
+  # run as an autonomous publication path.
   workflow_dispatch:
-  schedule:
-    - cron: '37 * * * *'
   push:
     branches: [main]
     paths:
