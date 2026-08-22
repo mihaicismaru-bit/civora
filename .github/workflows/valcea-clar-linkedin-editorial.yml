@@ -1,163 +1,48 @@
-name: VÂLCEA CLAR LinkedIn Editorial Outbox
+name: VÂLCEA CLAR LinkedIn Editorial Compatibility Check
 
+# LinkedIn is OUTBOX_ONLY in the canonical channel registry. The canonical
+# Social Publication Engine materializes durable LinkedIn products. Keep this
+# workflow only as a product-specific regression check; it must not run on a
+# clock or write generated state back to main.
 on:
-  workflow_run:
-    workflows: ["VÂLCEA CLAR Social Publication Engine"]
-    types: [completed]
-  schedule:
-    - cron: "13,28,43,58 * * * *"
   workflow_dispatch:
   pull_request:
     paths:
-      - "valcea-clar/social/linkedin_editorial_v1.py"
-      - "valcea-clar/social/linkedin_editorial_materialize.py"
-      - "valcea-clar/social/social_common.py"
-      - "valcea-clar/social/linkedin_outbox.json"
-      - "valcea-clar/social/linkedin_state.json"
-      - "valcea-clar/site/current_edition.json"
-      - "valcea-clar/site/newsroom_decision.json"
-      - "valcea-clar/site/story_publication_event.json"
-      - "valcea-clar/editorial/publication_holds.json"
-      - "valcea-clar/editions/**"
-      - ".github/workflows/valcea-clar-linkedin-editorial.yml"
+      - 'valcea-clar/social/linkedin_editorial_v1.py'
+      - 'valcea-clar/social/linkedin_editorial_materialize.py'
+      - 'valcea-clar/social/build_outbox_only_story_products.py'
+      - 'valcea-clar/social/channel_registry.json'
+      - '.github/workflows/valcea-clar-linkedin-editorial.yml'
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: valcea-clar-linkedin-editorial-outbox
-  cancel-in-progress: false
+  group: valcea-clar-linkedin-editorial-check-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  materialize:
-    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+  check:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.13"
-
-      - name: Install deterministic editorial renderer
+          python-version: '3.13'
+      - name: Install deterministic renderer dependency
         run: python -m pip install --disable-pip-version-check Pillow==12.3.0
-
-      - name: Refresh canonical main for non-PR runs
-        if: github.event_name != 'pull_request'
-        run: |
-          set -euo pipefail
-          git fetch origin main
-          git reset --hard origin/main
-
-      - name: Self-test LinkedIn editorial product and evidence asset
+      - name: Validate LinkedIn editorial product
         run: |
           python valcea-clar/social/linkedin_editorial_v1.py --self-test
           python valcea-clar/social/linkedin_editorial_materialize.py --self-test
-
-      - name: Materialize canonical LinkedIn editorial outbox
-        run: python valcea-clar/social/linkedin_editorial_materialize.py | tee /tmp/linkedin-editorial-materialize.json
-
-      - name: Validate canonical LinkedIn fixtures and asset lineage
-        run: |
+          python valcea-clar/social/linkedin_editorial_materialize.py
           python - <<'PY'
-          import hashlib
           import json
           from pathlib import Path
-          from PIL import Image
-
-          outbox=json.loads(Path('valcea-clar/social/linkedin_outbox.json').read_text(encoding='utf-8'))
           state=json.loads(Path('valcea-clar/social/linkedin_state.json').read_text(encoding='utf-8'))
-          items={str(i.get('story_id')):i for i in outbox.get('items',[]) if isinstance(i,dict)}
-          if outbox.get('platform')!='linkedin' or outbox.get('editorial_product_version')!='linkedin-editorial-v1.1':
-              raise SystemExit('LinkedIn canonical editorial outbox version mismatch')
-          if state.get('editorial_product_version')!='linkedin-editorial-v1.1':
-              raise SystemExit('LinkedIn canonical state version mismatch')
-          if state.get('direct_publication_enabled') is not False:
-              raise SystemExit('LinkedIn state falsely claims direct publication')
-          lum=items.get('luminos-fest-zavoi-20260815')
-          if not lum or lum.get('status')!='hold':
-              raise SystemExit('Luminos LinkedIn professional relevance HOLD failed')
-          gov=items.get('florile-govorei-20260816')
-          if not gov or gov.get('status')!='hold':
-              raise SystemExit('Florile Govorei LinkedIn HOLD failed')
-          if items.get('olanesti-bridge-monitor'):
-              raise SystemExit('Editorial hold leaked into the LinkedIn outbox')
-          if items.get('derived-council-gambling-20260723'):
-              raise SystemExit('Superseded editorial hold leaked into the LinkedIn outbox')
-          for item in items.values():
-              if item.get('status')!='outbox_ready':
-                  continue
-              body=str(item.get('body') or '')
-              if item.get('hashtags_default') is not False or '#' in body:
-                  raise SystemExit('LinkedIn generic hashtag packaging detected')
-              if item.get('verbatim_cross_platform_reuse_allowed') is not False:
-                  raise SystemExit('LinkedIn cross-platform guard missing')
-              asset=item.get('visual_asset') or {}
-              if not asset:
-                  continue
-              if asset.get('kind')!='editorial_evidence_card' or asset.get('synthetic') is not False:
-                  raise SystemExit('LinkedIn premium visual asset contract missing')
-              if asset.get('renderer')!='linkedin-editorial-v1.1' or asset.get('source_fact_kernel')!='canonical_verified_story':
-                  raise SystemExit('LinkedIn premium visual lineage drift')
-              if not str(asset.get('source_label','')).startswith('DOCUMENTE ȘI SURSE'):
-                  raise SystemExit('LinkedIn premium source label missing')
-              path=Path(str(asset.get('rendered_path') or ''))
-              if not path.is_file() or path.stat().st_size < 25000:
-                  raise SystemExit(f'LinkedIn premium runtime asset missing/too small: {path}')
-              with Image.open(path) as image:
-                  if image.size != (1200,1500):
-                      raise SystemExit(f'LinkedIn runtime evidence-card dimensions drifted: {image.size}')
-              digest=hashlib.sha256(path.read_bytes()).hexdigest()
-              if digest != asset.get('sha256'):
-                  raise SystemExit('LinkedIn runtime evidence-card hash mismatch')
-          print(f"LinkedIn canonical editorial outbox v1.1: PASS ({len(items)} products; evidence card verified)")
+          outbox=json.loads(Path('valcea-clar/social/linkedin_outbox.json').read_text(encoding='utf-8'))
+          assert state.get('direct_publication_enabled') is False
+          assert outbox.get('platform') == 'linkedin'
+          print(f"LinkedIn OUTBOX_ONLY compatibility: PASS ({len(outbox.get('items', []))} products)")
           PY
-
-      - name: Persist LinkedIn editorial state and evidence cards conflict-safe
-        if: github.event_name != 'pull_request'
-        run: |
-          set -euo pipefail
-          rm -rf /tmp/linkedin-editorial-state
-          mkdir -p /tmp/linkedin-editorial-state/valcea-clar/social
-          mkdir -p /tmp/linkedin-editorial-state/valcea-clar/site/runtime/media/social/editorial
-          cp valcea-clar/social/linkedin_outbox.json /tmp/linkedin-editorial-state/valcea-clar/social/linkedin_outbox.json
-          cp valcea-clar/social/linkedin_state.json /tmp/linkedin-editorial-state/valcea-clar/social/linkedin_state.json
-          if [ -d valcea-clar/site/runtime/media/social/editorial/linkedin ]; then
-            cp -R valcea-clar/site/runtime/media/social/editorial/linkedin /tmp/linkedin-editorial-state/valcea-clar/site/runtime/media/social/editorial/
-          fi
-          git config user.name "valcea-clar-linkedin-engine[bot]"
-          git config user.email "valcea-clar-linkedin-engine@users.noreply.github.com"
-          for attempt in 1 2 3 4 5; do
-            git fetch origin main
-            git reset --hard origin/main
-            cp /tmp/linkedin-editorial-state/valcea-clar/social/linkedin_outbox.json valcea-clar/social/linkedin_outbox.json
-            cp /tmp/linkedin-editorial-state/valcea-clar/social/linkedin_state.json valcea-clar/social/linkedin_state.json
-            mkdir -p valcea-clar/site/runtime/media/social/editorial
-            if [ -d /tmp/linkedin-editorial-state/valcea-clar/site/runtime/media/social/editorial/linkedin ]; then
-              cp -R /tmp/linkedin-editorial-state/valcea-clar/site/runtime/media/social/editorial/linkedin valcea-clar/site/runtime/media/social/editorial/
-            fi
-            git add valcea-clar/social/linkedin_outbox.json valcea-clar/social/linkedin_state.json valcea-clar/site/runtime/media/social/editorial/linkedin
-            if git diff --cached --quiet; then
-              echo "No LinkedIn editorial changes to persist."
-              exit 0
-            fi
-            git commit -m "Persist VÂLCEA CLAR LinkedIn editorial outbox"
-            if git push origin HEAD:main; then exit 0; fi
-            sleep $((attempt * 2))
-          done
-          exit 1
-
-      - name: Upload LinkedIn editorial audit
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: valcea-clar-linkedin-editorial-v1-1-${{ github.run_id }}
-          path: |
-            /tmp/linkedin-editorial-materialize.json
-            valcea-clar/social/linkedin_outbox.json
-            valcea-clar/social/linkedin_state.json
-            valcea-clar/site/runtime/media/social/editorial/linkedin
-          if-no-files-found: warn
-          retention-days: 14
