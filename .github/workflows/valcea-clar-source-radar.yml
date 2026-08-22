@@ -1,8 +1,8 @@
 name: VÂLCEA CLAR Source Radar
 
 # Canonical source-intelligence control plane. Health probes, local/regional
-# signal scanning and bounded source discovery keep independent cadences but
-# share one workflow, one concurrency boundary and one source ownership model.
+# signal scanning, strict primary verification and bounded source discovery keep
+# independent cadences but share one workflow and one ownership boundary.
 on:
   workflow_dispatch:
   schedule:
@@ -17,11 +17,13 @@ on:
       - 'local-news-os/core/signal_radar.py'
       - 'local-news-os/core/signal_radar_routed.py'
       - 'local-news-os/core/signal_routing_contract.py'
+      - 'local-news-os/core/primary_signal_verifier*.py'
       - 'local-news-os/instances/valcea/source_pack.json'
       - 'valcea-clar/scripts/validate_signal_routing_regressions.py'
       - 'valcea-clar/editorial/signal_radar_config.json'
-      - 'valcea-clar/editorial/signal_routing_regressions.json'
       - 'valcea-clar/editorial/primary_signal_targets.json'
+      - 'valcea-clar/editorial/news_sources.json'
+      - 'valcea-clar/editorial/manual_watch_sources.json'
       - 'valcea-clar/editorial/source_intelligence_seed_registry.json'
       - 'valcea-clar/editorial/source_intelligence_seed_supplement_v1.json'
       - 'valcea-clar/scripts/validate_source_intelligence_seed_registry.py'
@@ -34,11 +36,13 @@ on:
       - 'local-news-os/core/signal_radar.py'
       - 'local-news-os/core/signal_radar_routed.py'
       - 'local-news-os/core/signal_routing_contract.py'
+      - 'local-news-os/core/primary_signal_verifier*.py'
       - 'local-news-os/instances/valcea/source_pack.json'
       - 'valcea-clar/scripts/validate_signal_routing_regressions.py'
       - 'valcea-clar/editorial/signal_radar_config.json'
-      - 'valcea-clar/editorial/signal_routing_regressions.json'
       - 'valcea-clar/editorial/primary_signal_targets.json'
+      - 'valcea-clar/editorial/news_sources.json'
+      - 'valcea-clar/editorial/manual_watch_sources.json'
       - 'valcea-clar/editorial/source_intelligence_seed_registry.json'
       - 'valcea-clar/editorial/source_intelligence_seed_supplement_v1.json'
       - 'valcea-clar/scripts/validate_source_intelligence_seed_registry.py'
@@ -55,7 +59,7 @@ concurrency:
 jobs:
   source-intelligence:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v6
         with:
@@ -78,18 +82,27 @@ jobs:
             local-news-os/core/signal_radar.py \
             local-news-os/core/signal_routing_contract.py \
             local-news-os/core/signal_radar_routed.py \
+            local-news-os/core/primary_signal_verifier.py \
+            local-news-os/core/primary_signal_verifier_strict.py \
+            local-news-os/core/primary_signal_verifier_ranked.py \
+            local-news-os/core/primary_signal_verifier_ranked_strict.py \
+            local-news-os/core/primary_signal_verifier_routed_strict.py \
             valcea-clar/scripts/validate_signal_routing_regressions.py \
             valcea-clar/scripts/validate_source_intelligence_seed_registry.py \
             valcea-clar/scripts/source_intelligence_discover.py
           python local-news-os/core/signal_radar_routed.py --self-test
           python local-news-os/core/signal_radar_routed.py --instance valcea --validate-only
+          python local-news-os/core/primary_signal_verifier_routed_strict.py --self-test
+          python local-news-os/core/primary_signal_verifier_routed_strict.py --instance valcea --validate-only
           python valcea-clar/scripts/validate_signal_routing_regressions.py
           python valcea-clar/scripts/validate_source_intelligence_seed_registry.py
           python valcea-clar/scripts/source_intelligence_discover.py --self-test
 
-      - name: Exercise routed signal radar read-only for PR
+      - name: Exercise routed signal and verifier read-only for PR
         if: github.event_name == 'pull_request'
-        run: python local-news-os/core/signal_radar_routed.py --instance valcea --no-write
+        run: |
+          python local-news-os/core/signal_radar_routed.py --instance valcea
+          python local-news-os/core/primary_signal_verifier_routed_strict.py --instance valcea --no-write
 
       - name: Probe registered source health
         if: github.event_name != 'pull_request' && (github.event_name != 'schedule' || github.event.schedule == '47 */6 * * *')
@@ -120,14 +133,12 @@ jobs:
         run: |
           set -euo pipefail
           cp valcea-clar/state/source_health.json /tmp/valcea-source-health.json
-          rm -rf /tmp/valcea-resolution-tasks
-          mkdir -p /tmp/valcea-resolution-tasks
+          rm -rf /tmp/valcea-resolution-tasks && mkdir -p /tmp/valcea-resolution-tasks
           cp -a valcea-clar/ops/resolution_tasks/. /tmp/valcea-resolution-tasks/ || true
           git config user.name 'vâlcea-clar-source-radar[bot]'
           git config user.email 'valcea-clar-source-radar@users.noreply.github.com'
           for attempt in 1 2 3 4 5; do
-            git fetch origin main
-            git reset --hard origin/main
+            git fetch origin main && git reset --hard origin/main
             mkdir -p valcea-clar/state valcea-clar/ops/resolution_tasks
             cp /tmp/valcea-source-health.json valcea-clar/state/source_health.json
             cp -a /tmp/valcea-resolution-tasks/. valcea-clar/ops/resolution_tasks/ || true
@@ -153,8 +164,7 @@ jobs:
           git config user.name 'vâlcea-clar-source-radar[bot]'
           git config user.email 'valcea-clar-source-radar@users.noreply.github.com'
           for attempt in 1 2 3 4 5; do
-            git fetch origin main
-            git reset --hard origin/main
+            git fetch origin main && git reset --hard origin/main
             mkdir -p valcea-clar/editorial
             cp /tmp/valcea-signal-radar-state.json valcea-clar/editorial/signal_radar_state.json
             cp /tmp/valcea-signal-verification-queue.json valcea-clar/editorial/signal_verification_queue.json
@@ -165,6 +175,40 @@ jobs:
             if [ "$attempt" -eq 5 ]; then exit 1; fi
             sleep $((attempt * 2))
           done
+
+      - name: Verify current signal queue against ranked primary sources
+        if: github.event_name != 'pull_request' && (github.event_name != 'schedule' || github.event.schedule == '*/10 * * * *')
+        run: python local-news-os/core/primary_signal_verifier_routed_strict.py --instance valcea
+
+      - name: Persist primary verification evidence
+        if: github.event_name != 'pull_request' && (github.event_name != 'schedule' || github.event.schedule == '*/10 * * * *')
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp valcea-clar/editorial/signal_primary_verification_state.json /tmp/valcea-primary-signal-state.json
+          state_queue_generated_at=$(python - <<'PY'
+          import json
+          print(json.load(open('/tmp/valcea-primary-signal-state.json',encoding='utf-8'))['queue_generated_at'])
+          PY
+          )
+          git config user.name 'vâlcea-clar-source-radar[bot]'
+          git config user.email 'valcea-clar-source-radar@users.noreply.github.com'
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            latest_queue_generated_at=$(git show origin/main:valcea-clar/editorial/signal_verification_queue.json | python -c "import json,sys; print(json.load(sys.stdin)['generated_at'])")
+            if [ "$state_queue_generated_at" != "$latest_queue_generated_at" ]; then
+              echo 'Verification result is stale against a newer queue; refusing stale persistence.'
+              exit 0
+            fi
+            git reset --hard origin/main
+            cp /tmp/valcea-primary-signal-state.json valcea-clar/editorial/signal_primary_verification_state.json
+            git add valcea-clar/editorial/signal_primary_verification_state.json
+            if git diff --cached --quiet; then exit 0; fi
+            git commit -m 'Refresh VÂLCEA CLAR primary signal verification state'
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1
 
       - name: Probe bounded source discovery frontier
         if: github.event_name != 'pull_request' && (github.event_name != 'schedule' || github.event.schedule == '23 * * * *')
@@ -191,8 +235,7 @@ jobs:
           git config user.name 'vâlcea-clar-source-radar[bot]'
           git config user.email 'valcea-clar-source-radar@users.noreply.github.com'
           for attempt in 1 2 3; do
-            git fetch origin main
-            git reset --hard origin/main
+            git fetch origin main && git reset --hard origin/main
             cp /tmp/valcea-source-discovery-state.json "$path"
             git add "$path"
             if git diff --cached --quiet; then exit 0; fi
@@ -200,5 +243,4 @@ jobs:
             if git push origin HEAD:main; then exit 0; fi
             sleep $((attempt * 2))
           done
-          echo 'Could not persist source discovery state without conflict.' >&2
           exit 1
