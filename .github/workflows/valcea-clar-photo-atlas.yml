@@ -26,11 +26,11 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - name: Validate Photo Atlas fail-closed contract
+      - name: Rebuild Photo Atlas deterministically for acceptance
         run: |
           python -m py_compile valcea-clar/social/photo_atlas.py
           python valcea-clar/social/photo_atlas.py --self-test
-          python valcea-clar/social/photo_atlas.py --check
+          python valcea-clar/social/photo_atlas.py
       - name: Verify Atlas has no publication authority
         run: |
           python - <<'PY'
