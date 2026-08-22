@@ -1,0 +1,126 @@
+name: PARTENER.EU Persistent CUI Profile
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'partener-eu/ingest/anaf_company_identity.py'
+      - 'partener-eu/ingest/anaf_company_financials.py'
+      - 'partener-eu/ingest/cui_profile_resolver.py'
+      - 'partener-eu/ingest/cui_profile_sources.json'
+      - '.github/workflows/partener-eu-cui-profile-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  persistent-profile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile resolver
+        run: |
+          python -m py_compile partener-eu/ingest/anaf_company_identity.py
+          python -m py_compile partener-eu/ingest/anaf_company_financials.py
+          python -m py_compile partener-eu/ingest/cui_profile_resolver.py
+          python -m json.tool partener-eu/ingest/cui_profile_sources.json >/dev/null
+      - name: Resolve NGO live and persist cache
+        run: |
+          rm -rf /tmp/cui-profile-cache
+          python partener-eu/ingest/cui_profile_resolver.py \
+            --cui 9293117 --years 2025,2024,2023 --date 2026-08-19 \
+            --cache-dir /tmp/cui-profile-cache --force-refresh --pretty \
+            > /tmp/ngo-live.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/ngo-live.json'))
+          assert p['status'] in {'OK','PARTIAL'}
+          assert p['entityType']=='NGO'
+          assert p['identity']['cui']=='9293117'
+          assert p['addresses']['registered']['locality']
+          assert p['financials']['statementCount'] >= 1
+          assert any(s['mode']=='LIVE' for s in p['sourceStatus'])
+          PY
+      - name: Prove NGO cache-only replay without network
+        run: |
+          python partener-eu/ingest/cui_profile_resolver.py \
+            --cui 9293117 --years 2025,2024,2023 --date 2026-08-19 \
+            --cache-dir /tmp/cui-profile-cache --cache-only --pretty \
+            > /tmp/ngo-cache.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/ngo-cache.json'))
+          assert p['status'] in {'OK','STALE_CACHE'}
+          assert p['identity']['cui']=='9293117'
+          assert p['financials']['statementCount'] >= 1
+          assert all(s['mode'].startswith('CACHE') for s in p['sourceStatus'])
+          PY
+      - name: Resolve commercial company live
+        run: |
+          python partener-eu/ingest/cui_profile_resolver.py \
+            --cui 14833728 --years 2025,2024,2023 --date 2026-08-19 \
+            --cache-dir /tmp/cui-profile-cache --force-refresh --pretty \
+            > /tmp/company-live.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/company-live.json'))
+          assert p['status'] in {'OK','PARTIAL'}
+          assert p['entityType']=='COMMERCIAL'
+          assert p['identity']['cui']=='14833728'
+          assert p['governance']['status']=='AUTHORISED_SOURCE_REQUIRED'
+          assert 'ONRC_RECOM' in p['accessPlan']['authorised']
+          assert p['financials']['statementCount'] >= 1
+          PY
+      - name: Resolve chamber of commerce live
+        run: |
+          python partener-eu/ingest/cui_profile_resolver.py \
+            --cui 2536421 --years 2025,2024,2023,2022,2021 --date 2026-08-19 \
+            --cache-dir /tmp/cui-profile-cache --force-refresh --pretty \
+            > /tmp/cui-2536421.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/cui-2536421.json'))
+          assert p['status'] in {'OK','PARTIAL'}
+          assert p['identity']['cui']=='2536421'
+          assert p['entityType']=='CHAMBER_OF_COMMERCE'
+          assert p['governance']['status']=='STATUTORY_SOURCE_REQUIRED'
+          assert p['governance']['shareholdersOrAssociates']=='NOT_APPLICABLE'
+          assert p['addresses']['registered']['locality']
+          assert p['financials']['statementCount'] == 5
+          by_year={row['year']: row for row in p['financials']['summary']}
+          assert by_year[2025]['employeesNonProfit']['value'] == 43
+          assert by_year[2025]['employeesEconomic']['value'] == 0
+          assert by_year[2025]['employeesTotal']['value'] == 43
+          assert by_year[2024]['employeesNonProfit']['value'] == 0
+          assert by_year[2024]['employeesEconomic']['value'] == 23
+          assert by_year[2024]['employeesTotal']['value'] == 23
+          PY
+      - name: Resolve CUI 41279108 live
+        run: |
+          python partener-eu/ingest/cui_profile_resolver.py \
+            --cui 41279108 --years 2025,2024,2023,2022,2021 --date 2026-08-19 \
+            --cache-dir /tmp/cui-profile-cache --force-refresh --pretty \
+            > /tmp/cui-41279108.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/cui-41279108.json'))
+          assert p['status'] in {'OK','PARTIAL'}
+          assert p['identity']['cui']=='41279108'
+          assert p['addresses']['registered']['locality']
+          assert p['financials']['statementCount'] >= 1
+          print(json.dumps(p, ensure_ascii=False, indent=2))
+          PY
+      - name: Show compact receipts
+        run: |
+          python - <<'PY'
+          import json
+          for path in ['/tmp/ngo-live.json','/tmp/ngo-cache.json','/tmp/company-live.json','/tmp/cui-2536421.json','/tmp/cui-41279108.json']:
+              p=json.load(open(path))
+              print({'cui':p['cui'],'status':p['status'],'type':p['entityType'],'sources':p['sourceStatus'],'financialYears':[r['year'] for r in p['financials']['summary']]})
+          PY
