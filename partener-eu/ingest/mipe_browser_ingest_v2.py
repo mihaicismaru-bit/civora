@@ -513,6 +513,8 @@ def main() -> int:
                             "dateLabel": date_label(published),
                             "dateConfidence": "OFFICIAL_PAGE" if published else "OBSERVED_ONLY",
                             "summary": summary,
+                            "textPreview": article_text[:80000],
+                            "pageClass": "CALL_OR_GUIDE" if classify_kind(title, article_text) != "OFFICIAL_UPDATE" else "OFFICIAL_UPDATE",
                             "tag": classify_tag(f"{final} {title} {summary}"),
                             "kind": classify_kind(title, article_text),
                             "tier": "T1",
