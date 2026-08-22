@@ -16,12 +16,14 @@ on:
       - 'valcea-clar/editorial/facts_registry.json'
       - 'valcea-clar/scripts/editorial_opportunity_engine.py'
       - 'valcea-clar/scripts/performing_arts_opportunity_adapter.py'
+      - 'valcea-clar/scripts/prune_volatile_json_changes.py'
       - '.github/workflows/valcea-clar-editorial-opportunity-engine.yml'
   pull_request:
     paths:
       - 'valcea-clar/editorial/editorial_product_policy.json'
       - 'valcea-clar/scripts/editorial_opportunity_engine.py'
       - 'valcea-clar/scripts/performing_arts_opportunity_adapter.py'
+      - 'valcea-clar/scripts/prune_volatile_json_changes.py'
       - '.github/workflows/valcea-clar-editorial-opportunity-engine.yml'
 
 permissions:
@@ -47,10 +49,12 @@ jobs:
         run: |
           python -m py_compile \
             valcea-clar/scripts/editorial_opportunity_engine.py \
-            valcea-clar/scripts/performing_arts_opportunity_adapter.py
+            valcea-clar/scripts/performing_arts_opportunity_adapter.py \
+            valcea-clar/scripts/prune_volatile_json_changes.py
           python valcea-clar/scripts/editorial_opportunity_engine.py --self-test
           python valcea-clar/scripts/editorial_opportunity_engine.py --check
           python valcea-clar/scripts/performing_arts_opportunity_adapter.py --self-test
+          python valcea-clar/scripts/prune_volatile_json_changes.py --self-test
 
       - name: Materialize ranked editorial opportunity queue
         run: |
@@ -75,9 +79,14 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             cp /tmp/editorial-opportunity-queue.json "$path"
+            python valcea-clar/scripts/prune_volatile_json_changes.py \
+              --ignore-key generated_at \
+              --ignore-key detected_at \
+              --ignore-key observed_at \
+              "$path"
             git add "$path"
             if git diff --cached --quiet; then
-              echo 'Editorial opportunity queue already current.'
+              echo 'Editorial opportunity queue has no semantic change.'
               exit 0
             fi
             git commit -m 'Refresh VÂLCEA CLAR editorial opportunity queue'
