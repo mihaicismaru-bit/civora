@@ -1,8 +1,8 @@
 name: VÂLCEA CLAR Owned Photo Drive Ingest
 
 # Candidate-only Drive ingest is explicit until a read-only Drive credential is
-# configured. PRs validate the deterministic snapshot and candidate matching;
-# workflow_dispatch can refresh from Drive and persist candidate metadata.
+# configured. PRs validate the deterministic snapshot, candidate matching and
+# explicit materialization gate; workflow_dispatch refreshes candidate metadata.
 on:
   workflow_dispatch:
   pull_request:
@@ -12,8 +12,10 @@ on:
       - 'valcea-clar/social/owned_photo_registry.json'
       - 'valcea-clar/social/owned_photo_match_policy.json'
       - 'valcea-clar/social/owned_photo_story_candidates.json'
+      - 'valcea-clar/social/owned_photo_materialization_requests.json'
       - 'valcea-clar/social/drive_owned_photo_ingest.py'
       - 'valcea-clar/social/owned_photo_story_matcher.py'
+      - 'valcea-clar/social/materialize_owned_photo_story.py'
       - 'valcea-clar/site/story_archive.json'
       - 'valcea-clar/social/story_visuals.json'
       - '.github/workflows/valcea-clar-owned-photo-ingest.yml'
@@ -40,17 +42,20 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Validate owned-photo ingest and matching offline
+      - name: Validate owned-photo ingest, matching and materialization gate offline
         run: |
           python -m py_compile \
             valcea-clar/social/drive_owned_photo_ingest.py \
-            valcea-clar/social/owned_photo_story_matcher.py
+            valcea-clar/social/owned_photo_story_matcher.py \
+            valcea-clar/social/materialize_owned_photo_story.py
           python valcea-clar/social/drive_owned_photo_ingest.py --self-test
           python valcea-clar/social/owned_photo_story_matcher.py --self-test
+          python valcea-clar/social/materialize_owned_photo_story.py --self-test
           python valcea-clar/social/drive_owned_photo_ingest.py --from-snapshot
           python valcea-clar/social/drive_owned_photo_ingest.py --validate-only
           python valcea-clar/social/owned_photo_story_matcher.py
           python valcea-clar/social/owned_photo_story_matcher.py --validate-only
+          python valcea-clar/social/materialize_owned_photo_story.py --validate-only
 
       - name: Detect Drive credential
         id: credential
@@ -75,6 +80,7 @@ jobs:
           python valcea-clar/social/drive_owned_photo_ingest.py --validate-only
           python valcea-clar/social/owned_photo_story_matcher.py
           python valcea-clar/social/owned_photo_story_matcher.py --validate-only
+          python valcea-clar/social/materialize_owned_photo_story.py --validate-only
 
       - name: Enforce candidate-only publication contract
         run: |
@@ -83,6 +89,7 @@ jobs:
           from pathlib import Path
           registry=json.loads(Path('valcea-clar/social/owned_photo_registry.json').read_text(encoding='utf-8'))
           queue=json.loads(Path('valcea-clar/social/owned_photo_story_candidates.json').read_text(encoding='utf-8'))
+          requests=json.loads(Path('valcea-clar/social/owned_photo_materialization_requests.json').read_text(encoding='utf-8'))
           assert registry['publication_authority'] == 'NONE'
           assert registry['candidate_only'] is True
           assert registry['automatic_story_assignment_forbidden'] is True
@@ -107,10 +114,17 @@ jobs:
                   assert candidate['publication_authority'] == 'NONE'
                   assert candidate['requires_visual_confirmation'] is True
                   assert candidate['rights_reconfirmation_required'] is True
+          assert requests['publication_authority'] == 'EXPLICIT_EDITOR_REQUEST_ONLY'
+          assert requests['automatic_materialization_allowed'] is False
+          assert requests['automatic_story_assignment_allowed'] is False
           print({
               'status':'PASS',
               'asset_count':registry['summary']['asset_count'],
               'story_candidate_summary':queue['summary'],
+              'active_materialization_requests':sum(
+                  1 for row in requests['requests']
+                  if isinstance(row,dict) and row.get('status')=='approved_for_materialization'
+              ),
           })
           PY
 
