@@ -1,9 +1,9 @@
 name: PARTENER.EU MIPE Dual Cache
 
 on:
+  # Manual diagnostic cache only. It is not part of the canonical data plane
+  # and must not create autonomous hourly repository writes.
   workflow_dispatch:
-  schedule:
-    - cron: '7 * * * *'
   push:
     branches: [main]
     paths:
