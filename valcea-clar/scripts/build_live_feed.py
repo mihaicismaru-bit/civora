@@ -6,7 +6,9 @@ public feed exposes individual stories and canonical story URLs as the primary
 publication model. Edition windows never authorize or delay story publication.
 
 Publication timestamps are stable state. Existing archive timestamps always
-win; a newly admitted story may use the `published_at` value just reconciled and
+win. When the archive has not yet absorbed a same-day publication, the last
+persisted live feed from Git HEAD is the next source of truth. Only a genuinely
+newly admitted story may use the `published_at` value just reconciled and
 validated in the canonical story manifest. This closes the first-publication
 handoff without inventing a second clock or weakening any publication gate.
 
@@ -20,11 +22,13 @@ from __future__ import annotations
 
 import copy
 import json
+import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+REPO = ROOT.parent
 POINTER = ROOT / "site" / "current_edition.json"
 PLACES = ROOT / "web" / "data" / "places.json"
 OUT = ROOT / "site" / "runtime" / "live-feed.json"
@@ -54,15 +58,63 @@ def ensure_story_runtime() -> None:
         raise SystemExit("Refusing live feed: canonical story runtime was not rendered")
 
 
+def published_feed_dates_from_doc(doc: dict) -> dict[str, str]:
+    if doc.get("publication_model") != "continuous_story_first":
+        return {}
+    return {
+        str(item.get("id")): str(item.get("first_published_at") or "").strip()
+        for item in doc.get("stories", [])
+        if isinstance(item, dict) and item.get("id") and item.get("first_published_at")
+    }
+
+
+def previous_published_feed_dates() -> dict[str, str]:
+    """Read stable timestamps from the last persisted feed, even after runtime reset.
+
+    render_frontpage.py intentionally recreates site/runtime before this builder
+    runs. The worktree copy of live-feed.json can therefore be gone while Git
+    HEAD still contains the exact feed that was publicly projected before the
+    current transaction. Reading that committed object preserves publication
+    history without inventing timestamps or trusting a volatile working file.
+    """
+    if OUT.is_file():
+        try:
+            dates = published_feed_dates_from_doc(load(OUT))
+            if dates:
+                return dates
+        except (OSError, ValueError, TypeError, json.JSONDecodeError):
+            pass
+
+    try:
+        rel = OUT.relative_to(REPO).as_posix()
+        raw = subprocess.check_output(
+            ["git", "show", f"HEAD:{rel}"],
+            cwd=REPO,
+            text=True,
+            stderr=subprocess.DEVNULL,
+            timeout=8,
+        )
+        doc = json.loads(raw)
+        if isinstance(doc, dict):
+            return published_feed_dates_from_doc(doc)
+    except (OSError, ValueError, TypeError, json.JSONDecodeError, subprocess.SubprocessError):
+        pass
+    return {}
+
+
 def resolve_first_published_at(
     story_id: str,
     route: dict,
     archive_dates: dict[str, str],
+    previous_feed_dates: dict[str, str] | None = None,
 ) -> str:
     """Resolve a stable publication timestamp without creating a new clock."""
     archived = str(archive_dates.get(story_id) or "").strip()
     if archived:
         return archived
+    previous = str((previous_feed_dates or {}).get(story_id) or "").strip()
+    if previous:
+        return previous
     return str(route.get("published_at") or "").strip()
 
 
@@ -101,18 +153,24 @@ def manifest_routes() -> dict[str, dict]:
 def story_feed(snapshot: dict) -> list[dict]:
     routes = manifest_routes()
     archive = load(STORY_ARCHIVE)
-    published_at = {
+    archive_dates = {
         str(item.get("id")): str(item.get("first_published_at") or "").strip()
         for item in archive.get("stories", [])
         if isinstance(item, dict) and item.get("id") and item.get("first_published_at")
     }
+    previous_feed_dates = previous_published_feed_dates()
     stories = []
     for item in snapshot.get("items", []):
         story_id = str(item.get("id") or "")
         route = routes.get(story_id)
         if not route:
             continue
-        first_published_at = resolve_first_published_at(story_id, route, published_at)
+        first_published_at = resolve_first_published_at(
+            story_id,
+            route,
+            archive_dates,
+            previous_feed_dates,
+        )
         if not first_published_at:
             raise SystemExit(f"Refusing live feed: missing first_published_at for {story_id}")
         stories.append({
@@ -184,17 +242,29 @@ def refresh_media_only() -> int:
 
 def self_test() -> int:
     archive_dates = {"existing": "2026-08-20T10:00:00+03:00"}
+    previous_feed_dates = {
+        "same-day-existing": "2026-08-22T12:03:59+03:00",
+        "existing": "2026-08-21T11:11:11+03:00",
+    }
     assert resolve_first_published_at(
         "existing",
         {"published_at": "2026-08-22T09:28:15+03:00"},
         archive_dates,
+        previous_feed_dates,
     ) == "2026-08-20T10:00:00+03:00"
     assert resolve_first_published_at(
-        "new-story",
-        {"published_at": "2026-08-22T09:28:15+03:00"},
+        "same-day-existing",
+        {},
         archive_dates,
-    ) == "2026-08-22T09:28:15+03:00"
-    assert resolve_first_published_at("missing", {}, archive_dates) == ""
+        previous_feed_dates,
+    ) == "2026-08-22T12:03:59+03:00"
+    assert resolve_first_published_at(
+        "new-story",
+        {"published_at": "2026-08-22T17:07:00+03:00"},
+        archive_dates,
+        previous_feed_dates,
+    ) == "2026-08-22T17:07:00+03:00"
+    assert resolve_first_published_at("missing", {}, archive_dates, previous_feed_dates) == ""
 
     exact = {
         "public_url": "https://example.test/exact.jpg",
@@ -213,7 +283,7 @@ def self_test() -> int:
     assert verified_visual({**contextual, "editorial_note": ""}) is None
     assert verified_visual({**exact, "synthetic": True}) is None
     assert verified_visual({"public_url": "https://example.test/no-proof.jpg"}) is None
-    print("VÂLCEA CLAR live-feed publication + verified-media handoff self-test: PASS")
+    print("VÂLCEA CLAR live-feed publication + persisted-timestamp + verified-media handoff self-test: PASS")
     return 0
 
 
@@ -265,7 +335,7 @@ def main() -> int:
             "recap_render_may_not_remove_story_routes": True,
             "edition_fields_are_compatibility_only": True,
             "unde_iesim_full_verified_catalogue": True,
-            "first_publication_timestamp_source": "archive_then_reconciled_story_manifest",
+            "first_publication_timestamp_source": "archive_then_last_persisted_feed_then_reconciled_story_manifest",
             "story_visual_source": "verified_story_manifest_then_existing_snapshot_visual",
             "contextual_visual_disclosure_required": True,
             "synthetic_story_media_allowed": False,
