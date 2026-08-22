@@ -1,44 +1,69 @@
-name: VÂLCEA CLAR People Intelligence
+name: VÂLCEA CLAR Identity Intelligence
 
+# People and artist intelligence share the public identity/indexing surface.
+# Build both in one transaction so no independent workflow can overwrite
+# site/indexing_routes.json or a sibling profile projection with stale state.
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '29 */6 * * *'
   push:
     branches: [main]
     paths:
       - 'valcea-clar/editorial/person_profile_policy.json'
       - 'valcea-clar/editorial/person_profile_seeds.json'
       - 'valcea-clar/editorial/person_profile_overrides.json'
+      - 'valcea-clar/editorial/festival_lineups_2026.json'
+      - 'valcea-clar/editorial/performing_arts_people_2026.json'
       - 'valcea-clar/scripts/build_person_profiles.py'
       - 'valcea-clar/scripts/discover_person_sources.py'
       - 'valcea-clar/scripts/render_person_pages.py'
+      - 'valcea-clar/scripts/enrich_festival_artists.py'
+      - 'valcea-clar/scripts/render_artist_pages.py'
       - '.github/workflows/valcea-clar-people-intelligence.yml'
-  schedule:
-    - cron: '29 */6 * * *'
+  pull_request:
+    paths:
+      - 'valcea-clar/editorial/person_profile_policy.json'
+      - 'valcea-clar/editorial/person_profile_seeds.json'
+      - 'valcea-clar/editorial/person_profile_overrides.json'
+      - 'valcea-clar/editorial/festival_lineups_2026.json'
+      - 'valcea-clar/editorial/performing_arts_people_2026.json'
+      - 'valcea-clar/scripts/build_person_profiles.py'
+      - 'valcea-clar/scripts/discover_person_sources.py'
+      - 'valcea-clar/scripts/render_person_pages.py'
+      - 'valcea-clar/scripts/enrich_festival_artists.py'
+      - 'valcea-clar/scripts/render_artist_pages.py'
+      - '.github/workflows/valcea-clar-people-intelligence.yml'
 
 permissions:
   contents: write
 
 concurrency:
-  group: valcea-clar-people-intelligence
-  cancel-in-progress: false
+  group: valcea-clar-identity-intelligence-${{ github.event.pull_request.number || 'main' }}
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     env:
-      # Public automation is structurally forbidden from reading newsroom-only evidence.
       VALCEA_CLAR_PRIVATE_EVIDENCE_MANIFEST: ''
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-
       - uses: actions/setup-python@v6
         with:
           python-version: '3.13'
 
-      - name: Validate People Intelligence contracts
+      - name: Refresh newest canonical state
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Validate identity intelligence contracts
         run: |
           python -m json.tool valcea-clar/editorial/person_profile_policy.json >/dev/null
           python -m json.tool valcea-clar/editorial/person_profile_seeds.json >/dev/null
@@ -46,98 +71,104 @@ jobs:
           python -m py_compile \
             valcea-clar/scripts/build_person_profiles.py \
             valcea-clar/scripts/discover_person_sources.py \
-            valcea-clar/scripts/render_person_pages.py
+            valcea-clar/scripts/render_person_pages.py \
+            valcea-clar/scripts/enrich_festival_artists.py \
+            valcea-clar/scripts/render_artist_pages.py
           python valcea-clar/scripts/build_person_profiles.py --self-test
           python valcea-clar/scripts/discover_person_sources.py --self-test
+          python valcea-clar/scripts/enrich_festival_artists.py --self-test
+          python valcea-clar/scripts/enrich_festival_artists.py --check
 
-      - name: Build resolved public profiles and research queue
+      - name: Build public person identities
+        if: github.event_name != 'pull_request'
         run: |
           python valcea-clar/scripts/build_person_profiles.py
           python valcea-clar/scripts/build_person_profiles.py --check
+          python valcea-clar/scripts/render_person_pages.py
+          python valcea-clar/scripts/discover_person_sources.py --limit 8
 
-      - name: Enforce private-evidence air gap
+      - name: Build public artist identities
+        if: github.event_name != 'pull_request'
+        run: |
+          python valcea-clar/scripts/enrich_festival_artists.py
+          python valcea-clar/scripts/render_artist_pages.py
+
+      - name: Enforce identity publication boundaries
+        if: github.event_name != 'pull_request'
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-          doc=json.loads(Path('valcea-clar/site/runtime/people.json').read_text(encoding='utf-8'))
-          for p in doc.get('profiles', []):
+          people=json.loads(Path('valcea-clar/site/runtime/people.json').read_text(encoding='utf-8'))
+          for p in people.get('profiles', []):
               if p.get('private_evidence_receipts'):
                   raise SystemExit(f"private evidence receipt reached public projection: {p.get('id')}")
-          raw=json.dumps(doc,ensure_ascii=False).lower()
+          raw=json.dumps(people,ensure_ascii=False).lower()
           for forbidden in ('raw_content','private-only claim','cnp','ci_number','home_address'):
-              if forbidden in raw:
-                  raise SystemExit(f"forbidden private token in public People Intelligence: {forbidden}")
-          print('PEOPLE_PRIVATE_EVIDENCE_AIR_GAP_PASS')
+              if forbidden in raw: raise SystemExit(f"forbidden private token: {forbidden}")
+          discovery=json.loads(Path('valcea-clar/editorial/person_source_discovery_state.json').read_text(encoding='utf-8'))
+          assert discovery['publication_authority']=='NONE'
+          assert discovery['policy']['auto_publication'] is False
+          for row in discovery.get('candidates',[]):
+              assert row['publication_authority']=='NONE' and row['public_projection'] is False and row['auto_publication'] is False
+          artists=json.loads(Path('valcea-clar/site/runtime/artists.json').read_text(encoding='utf-8'))
+          if not isinstance(artists.get('artists') if 'artists' in artists else artists.get('profiles', []), list):
+              raise SystemExit('artist projection contract invalid')
+          print('IDENTITY_PUBLICATION_BOUNDARY_PASS')
           PY
 
-      - name: Render /oameni/ directory and canonical profile pages
-        run: python valcea-clar/scripts/render_person_pages.py
-
-      - name: Discover historical public source candidates
-        run: python valcea-clar/scripts/discover_person_sources.py --limit 8
-
-      - name: Validate publication boundary after discovery
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          state=json.loads(Path('valcea-clar/editorial/person_source_discovery_state.json').read_text(encoding='utf-8'))
-          assert state['publication_authority']=='NONE'
-          assert state['policy']['auto_publication'] is False
-          for row in state.get('candidates',[]):
-              assert row['publication_authority']=='NONE'
-              assert row['public_projection'] is False
-              assert row['auto_publication'] is False
-          print('PEOPLE_DISCOVERY_NO_PUBLICATION_AUTHORITY_PASS')
-          PY
-
-      - name: Persist People Intelligence conflict-safe
+      - name: Persist identity intelligence once
+        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
-          tx=/tmp/valcea-people-intelligence
-          rm -rf "$tx" && mkdir -p "$tx/site/runtime" "$tx/editorial"
+          tx=/tmp/valcea-identity-intelligence
+          rm -rf "$tx"
+          mkdir -p "$tx/site/runtime" "$tx/editorial" "$tx/site"
           cp valcea-clar/site/runtime/people.json "$tx/site/runtime/people.json"
           cp -a valcea-clar/site/runtime/oameni "$tx/site/runtime/oameni"
+          cp valcea-clar/site/runtime/artists.json "$tx/site/runtime/artists.json"
+          cp -a valcea-clar/site/runtime/artisti "$tx/site/runtime/artisti"
           cp valcea-clar/site/indexing_routes.json "$tx/site/indexing_routes.json"
           cp valcea-clar/editorial/person_source_discovery_queue.json "$tx/editorial/person_source_discovery_queue.json"
           cp valcea-clar/editorial/person_source_discovery_state.json "$tx/editorial/person_source_discovery_state.json"
 
-          git config user.name 'vâlcea-clar-people-intelligence[bot]'
-          git config user.email 'valcea-clar-people-intelligence@users.noreply.github.com'
+          git config user.name 'vâlcea-clar-identity-intelligence[bot]'
+          git config user.email 'valcea-clar-identity-intelligence@users.noreply.github.com'
           for attempt in 1 2 3 4 5; do
             git fetch origin main
             git reset --hard origin/main
             mkdir -p valcea-clar/site/runtime valcea-clar/editorial
-            rm -rf valcea-clar/site/runtime/oameni
+            rm -rf valcea-clar/site/runtime/oameni valcea-clar/site/runtime/artisti
             cp "$tx/site/runtime/people.json" valcea-clar/site/runtime/people.json
             cp -a "$tx/site/runtime/oameni" valcea-clar/site/runtime/oameni
+            cp "$tx/site/runtime/artists.json" valcea-clar/site/runtime/artists.json
+            cp -a "$tx/site/runtime/artisti" valcea-clar/site/runtime/artisti
             cp "$tx/site/indexing_routes.json" valcea-clar/site/indexing_routes.json
             cp "$tx/editorial/person_source_discovery_queue.json" valcea-clar/editorial/person_source_discovery_queue.json
             cp "$tx/editorial/person_source_discovery_state.json" valcea-clar/editorial/person_source_discovery_state.json
             git add \
               valcea-clar/site/runtime/people.json \
               valcea-clar/site/runtime/oameni \
+              valcea-clar/site/runtime/artists.json \
+              valcea-clar/site/runtime/artisti \
               valcea-clar/site/indexing_routes.json \
               valcea-clar/editorial/person_source_discovery_queue.json \
               valcea-clar/editorial/person_source_discovery_state.json
             if git diff --cached --quiet; then
-              echo 'People Intelligence already current.'
+              echo 'Identity Intelligence already current.'
               exit 0
             fi
-            git commit -m 'Refresh VÂLCEA CLAR public person profiles'
+            git commit -m 'Refresh VÂLCEA CLAR public identity intelligence'
             if git push origin HEAD:main; then exit 0; fi
             sleep $((attempt * 2))
           done
-          echo 'Could not persist People Intelligence after five attempts.' >&2
+          echo 'Could not persist Identity Intelligence after five attempts.' >&2
           exit 1
 
-      - name: Report People Intelligence boundary
+      - name: Report identity boundary
         if: always()
         run: |
-          echo 'Public profiles require resolved identity.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Historical discovery has zero publication authority and is ordered toward older evidence.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Legal status, imprisonment, kinship and company-interest claims fail closed unless their dedicated evidence gates pass.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Public automation cannot read the private-evidence manifest; ONRC/editorial evidence is not committed or exposed as a public source.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Manual overrides are applied after autonomous generation and survive later regeneration.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'People and artist profiles now share one public identity/indexing transaction.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Public profiles require resolved identity; research candidates have zero publication authority.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Public automation cannot read the private-evidence manifest.' >> "$GITHUB_STEP_SUMMARY"
