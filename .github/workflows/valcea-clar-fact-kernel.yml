@@ -18,6 +18,7 @@ on:
       - 'valcea-clar/scripts/promote_manual_publish_queue.py'
       - 'valcea-clar/scripts/merge_supplemental_facts.py'
       - 'valcea-clar/scripts/editorial_lifecycle_normalizer.py'
+      - 'valcea-clar/scripts/prune_volatile_json_changes.py'
       - 'valcea-clar/editorial/structured_alert_events.json'
       - 'valcea-clar/editorial/manual_publish_queue.json'
       - 'valcea-clar/editorial/supplemental_facts_registry.json'
@@ -38,6 +39,7 @@ on:
       - 'valcea-clar/scripts/promote_manual_publish_queue.py'
       - 'valcea-clar/scripts/merge_supplemental_facts.py'
       - 'valcea-clar/scripts/editorial_lifecycle_normalizer.py'
+      - 'valcea-clar/scripts/prune_volatile_json_changes.py'
       - 'valcea-clar/editorial/structured_alert_events.json'
       - 'valcea-clar/editorial/manual_publish_queue.json'
       - 'valcea-clar/editorial/supplemental_facts_registry.json'
@@ -71,9 +73,11 @@ jobs:
         run: |
           python -m py_compile \
             valcea-clar/scripts/fact_kernel_orchestrator.py \
-            valcea-clar/scripts/promote_manual_publish_queue.py
+            valcea-clar/scripts/promote_manual_publish_queue.py \
+            valcea-clar/scripts/prune_volatile_json_changes.py
           python valcea-clar/scripts/fact_kernel_orchestrator.py --self-test
           python valcea-clar/scripts/fact_kernel_orchestrator.py --check
+          python valcea-clar/scripts/prune_volatile_json_changes.py --self-test
 
       - name: Build one verified fact transaction
         if: github.event_name != 'pull_request'
@@ -98,12 +102,28 @@ jobs:
             valcea-clar/editorial/council_investigation_leads.json
             valcea-clar/editorial/scm_program_structure.json
           )
+
+          json_files=()
+          for file in "${files[@]}"; do
+            if [ -f "$file" ]; then json_files+=("$file"); fi
+          done
+          if [ "${#json_files[@]}" -gt 0 ]; then
+            python valcea-clar/scripts/prune_volatile_json_changes.py \
+              --ignore-key generated_at \
+              --ignore-key generated_at_utc \
+              --ignore-key observed_at \
+              --ignore-key updated_at \
+              --ignore-key checked_at \
+              --ignore-key detected_at \
+              "${json_files[@]}"
+          fi
+
           for file in "${files[@]}"; do
             if [ -e "$file" ]; then git add "$file"; fi
           done
 
           if git diff --cached --quiet; then
-            echo 'No verified fact change to persist.'
+            echo 'No semantic verified fact change to persist.'
             exit 0
           fi
 
