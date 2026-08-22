@@ -1,8 +1,7 @@
 name: VÂLCEA CLAR YouTube Editorial Compatibility Check
 
-# YouTube is OUTBOX_ONLY in the canonical channel registry. The canonical
-# Social Publication Engine materializes durable YouTube state. This workflow
-# is regression-only: no schedule, no workflow-run cascade, no main writes.
+# YouTube is OUTBOX_ONLY. One QA contract owns real-video policy, truthful
+# preview/thumbnail behavior and durable outbox materialization.
 on:
   workflow_dispatch:
   pull_request:
@@ -11,7 +10,9 @@ on:
       - 'valcea-clar/social/youtube_editorial_materialize.py'
       - 'valcea-clar/social/build_outbox_only_story_products.py'
       - 'valcea-clar/social/story_video_media.json'
+      - 'valcea-clar/social/story_visuals.json'
       - 'valcea-clar/social/channel_registry.json'
+      - 'valcea-clar/editorial/publication_holds.json'
       - '.github/workflows/valcea-clar-youtube-editorial.yml'
 
 permissions:
@@ -24,7 +25,7 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -32,10 +33,50 @@ jobs:
           python-version: '3.13'
       - name: Install deterministic thumbnail dependency
         run: python -m pip install --disable-pip-version-check Pillow==12.3.0
-      - name: Validate YouTube editorial product
+      - name: Validate real-video registry and native preview
         run: |
           python -m json.tool valcea-clar/social/story_video_media.json >/dev/null
           python valcea-clar/social/youtube_editorial_v1.py --self-test
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          value=json.loads(Path('valcea-clar/social/story_video_media.json').read_text(encoding='utf-8'))
+          policy=value.get('policy') or {}
+          required=(
+              'story_specific_only','real_video_only','synthetic_video_forbidden',
+              'editor_approval_required','subject_match_required','rights_metadata_required',
+              'poster_frame_must_come_from_same_real_video_package',
+              'thumbnail_may_not_exist_without_ready_video',
+          )
+          assert all(policy.get(key) is True for key in required)
+          print(f"YouTube real-video registry: PASS ({len(value.get('stories',{}))} packages)")
+          PY
+          python valcea-clar/social/youtube_editorial_v1.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          value=json.loads(Path('valcea-clar/social/previews/youtube-v1/manifest.json').read_text(encoding='utf-8'))
+          assert value.get('execution_mode') == 'PREVIEW_ONLY_NO_NETWORK_CALLS'
+          assert value.get('rendering_version') == 'youtube-editorial-v1.1'
+          assert value.get('video_registry') == 'valcea-clar/social/story_video_media.json'
+          products={p['story_id']:p for p in value.get('products',[]) if isinstance(p,dict)}
+          held={'olanesti-bridge-monitor','derived-council-gambling-20260723'}
+          assert not set(products) & held
+          for product in products.values():
+              assert product.get('real_video_required') is True
+              assert product.get('synthetic_filler_forbidden') is True
+              assert product.get('thumbnail_requires_ready_video') is True
+              assert product.get('truthful_thumbnail_required') is True
+              assert product.get('verbatim_cross_platform_reuse_allowed') is False
+              if product.get('status') != 'READY':
+                  assert not product.get('preview_file')
+          jpgs=list(Path('valcea-clar/social/previews/youtube-v1').glob('*.jpg'))
+          if value.get('ready') == 0:
+              assert not jpgs
+          print(f"YouTube preview: PASS ({value['ready']} READY / {value['held']} HOLD)")
+          PY
+      - name: Validate durable OUTBOX_ONLY materialization
+        run: |
           python valcea-clar/social/youtube_editorial_materialize.py --self-test
           python valcea-clar/social/youtube_editorial_materialize.py
           python - <<'PY'
@@ -48,5 +89,13 @@ jobs:
           for item in outbox.get('items', []):
               if isinstance(item, dict) and item.get('status') != 'outbox_ready':
                   assert 'thumbnail_asset' not in item and 'video_source' not in item
-          print(f"YouTube OUTBOX_ONLY compatibility: PASS ({len(outbox.get('items', []))} products)")
+          print(f"YouTube OUTBOX_ONLY: PASS ({len(outbox.get('items', []))} products)")
           PY
+      - name: Upload inspectable QA product
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-youtube-compat-${{ github.run_id }}
+          path: valcea-clar/social/previews/youtube-v1
+          if-no-files-found: warn
+          retention-days: 14
