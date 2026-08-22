@@ -13,6 +13,7 @@ on:
 permissions:
   contents: read
   actions: write
+  statuses: write
 
 concurrency:
   group: valcea-clar-live-newsroom-operator-bridge
@@ -24,6 +25,20 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v6
+
+      - name: Mark operator bridge pending
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          gh api --method POST \
+            -H 'Accept: application/vnd.github+json' \
+            "/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state='pending' \
+            -f context='valcea-clar/live-newsroom-operator' \
+            -f description='Dispatching canonical VÂLCEA CLAR Live Newsroom' \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >/dev/null
 
       - name: Dispatch canonical Live Newsroom
         env:
@@ -69,6 +84,21 @@ jobs:
           echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
           echo "Canonical run: $run_id"
 
+      - name: Point status to canonical writer
+        if: github.event_name == 'push' && steps.run.outputs.run_id != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ steps.run.outputs.run_id }}
+        shell: bash
+        run: |
+          gh api --method POST \
+            -H 'Accept: application/vnd.github+json' \
+            "/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state='pending' \
+            -f context='valcea-clar/live-newsroom-operator' \
+            -f description="Canonical Live Newsroom run $RUN_ID in progress" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" >/dev/null
+
       - name: Wait for canonical writer
         env:
           GH_TOKEN: ${{ github.token }}
@@ -88,3 +118,35 @@ jobs:
           if [ -n "$RUN_ID" ]; then
             gh run view "$RUN_ID" --repo "$GITHUB_REPOSITORY" --json databaseId,status,conclusion,url,name --jq '.' >> "$GITHUB_STEP_SUMMARY" || true
           fi
+
+      - name: Publish final operator status
+        if: always() && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ steps.run.outputs.run_id }}
+        shell: bash
+        run: |
+          state='error'
+          description='Operator bridge failed before canonical run resolved'
+          target="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          if [ -n "$RUN_ID" ]; then
+            target="https://github.com/$GITHUB_REPOSITORY/actions/runs/$RUN_ID"
+            conclusion=$(gh run view "$RUN_ID" --repo "$GITHUB_REPOSITORY" --json conclusion --jq '.conclusion // ""' 2>/dev/null || true)
+            if [ "$conclusion" = 'success' ]; then
+              state='success'
+              description="Canonical Live Newsroom run $RUN_ID succeeded"
+            elif [ -n "$conclusion" ]; then
+              state='failure'
+              description="Canonical Live Newsroom run $RUN_ID: $conclusion"
+            else
+              state='error'
+              description="Canonical Live Newsroom run $RUN_ID has no conclusion"
+            fi
+          fi
+          gh api --method POST \
+            -H 'Accept: application/vnd.github+json' \
+            "/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='valcea-clar/live-newsroom-operator' \
+            -f description="$description" \
+            -f target_url="$target" >/dev/null
