@@ -1,7 +1,9 @@
 name: VÂLCEA CLAR Edition Recovery
 
-# Recovery is an explicit operator action. Pull requests exercise the deterministic
-# recovery path without persisting; no repository push can trigger production recovery.
+# Recovery is an explicit operator action. It can be invoked either through
+# workflow_dispatch or by changing the dedicated operator trigger file. There is
+# deliberately no schedule and no broad push trigger: only the recovery control
+# file may start a production recovery run.
 on:
   workflow_dispatch:
     inputs:
@@ -11,6 +13,10 @@ on:
         default: "auto"
         type: choice
         options: [auto, morning, evening]
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/ops/edition-recovery-trigger.json"
   pull_request:
     paths:
       - "valcea-clar/scripts/generate_edition.py"
@@ -45,6 +51,19 @@ jobs:
         run: |
           set -euo pipefail
           slot="$REQUESTED_SLOT"
+          if [ "${{ github.event_name }}" = "push" ]; then
+            slot=$(python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path('valcea-clar/ops/edition-recovery-trigger.json')
+          try:
+              value = json.loads(path.read_text(encoding='utf-8')).get('slot', 'auto')
+          except Exception:
+              value = 'auto'
+          print(value if value in {'auto', 'morning', 'evening'} else 'auto')
+          PY
+            )
+          fi
           if [ "$slot" = "auto" ]; then
             hour=$(TZ=Europe/Bucharest date +%H)
             if [ "$hour" -lt 15 ]; then slot=morning; else slot=evening; fi
@@ -133,7 +152,7 @@ jobs:
           PY
 
       - name: Persist recovery edition conflict-safe
-        if: github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
         shell: bash
         run: |
           set -euo pipefail
