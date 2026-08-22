@@ -1,8 +1,8 @@
 name: VÂLCEA CLAR Fact Kernel Builder
 
 # Single canonical writer for verified editorial facts. Council decisions,
-# primary-source, gambling and SCM kernels are materialized in one transaction
-# before one Writer QA and one persistence boundary.
+# structured T1 alerts, primary-source, gambling and SCM kernels are materialized
+# in one transaction before one Writer QA and one persistence boundary.
 on:
   workflow_dispatch:
   schedule:
@@ -19,6 +19,8 @@ on:
       - 'valcea-clar/scripts/council_decision_fulltext_enricher.py'
       - 'valcea-clar/scripts/council_decision_fulltext_enricher_v2.py'
       - 'valcea-clar/scripts/council_claim_attribution_normalizer.py'
+      - 'valcea-clar/scripts/compose_structured_alerts.py'
+      - 'valcea-clar/editorial/structured_alert_events.json'
       - 'valcea-clar/scripts/promote_fact_kernels.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea_v2.py'
@@ -47,6 +49,8 @@ on:
       - 'valcea-clar/scripts/council_decision_fulltext_enricher.py'
       - 'valcea-clar/scripts/council_decision_fulltext_enricher_v2.py'
       - 'valcea-clar/scripts/council_claim_attribution_normalizer.py'
+      - 'valcea-clar/scripts/compose_structured_alerts.py'
+      - 'valcea-clar/editorial/structured_alert_events.json'
       - 'valcea-clar/scripts/promote_fact_kernels.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea.py'
       - 'valcea-clar/scripts/council_watch_rm_valcea_v2.py'
@@ -97,6 +101,7 @@ jobs:
             valcea-clar/scripts/council_decision_fulltext_enricher.py \
             valcea-clar/scripts/council_decision_fulltext_enricher_v2.py \
             valcea-clar/scripts/council_claim_attribution_normalizer.py \
+            valcea-clar/scripts/compose_structured_alerts.py \
             valcea-clar/scripts/promote_fact_kernels.py \
             valcea-clar/scripts/council_watch_rm_valcea.py \
             valcea-clar/scripts/council_watch_rm_valcea_v2.py \
@@ -123,6 +128,7 @@ jobs:
           python valcea-clar/scripts/council_decision_fulltext_enricher.py --self-test
           python valcea-clar/scripts/council_decision_fulltext_enricher_v2.py --self-test
           python valcea-clar/scripts/council_claim_attribution_normalizer.py --self-test
+          python valcea-clar/scripts/compose_structured_alerts.py --self-test
           python valcea-clar/scripts/promote_fact_kernels.py --self-test
           python valcea-clar/scripts/primary_source_admin_kernels.py --self-test
           python valcea-clar/scripts/primary_source_service_kernels.py --self-test
@@ -136,6 +142,15 @@ jobs:
 
       - name: Preview current adopted-HCL article set
         run: python valcea-clar/scripts/council_decision_article_engine.py
+
+      - name: Validate current structured T1 event composition
+        run: |
+          if [ -s valcea-clar/editorial/structured_alert_events.json ]; then
+            python valcea-clar/scripts/compose_structured_alerts.py \
+              --events valcea-clar/editorial/structured_alert_events.json \
+              --facts-registry valcea-clar/editorial/facts_registry.json \
+              --no-write
+          fi
 
       - name: Refresh Council Watch at latest official adopted date
         if: github.event_name != 'pull_request'
@@ -188,6 +203,15 @@ jobs:
             python valcea-clar/scripts/council_claim_attribution_normalizer.py --apply
           else
             echo 'Full official HCL corpus not materialized yet; register-safe articles remain valid.'
+          fi
+
+      - name: Compose current structured T1 events into canonical facts
+        if: github.event_name != 'pull_request'
+        run: |
+          if [ -s valcea-clar/editorial/structured_alert_events.json ]; then
+            python valcea-clar/scripts/compose_structured_alerts.py \
+              --events valcea-clar/editorial/structured_alert_events.json \
+              --facts-registry valcea-clar/editorial/facts_registry.json
           fi
 
       - name: Build verified primary-source service and administration kernels
@@ -289,5 +313,6 @@ jobs:
           echo "Council kernel promotion changed: ${{ steps.promote.outputs.changed }}"
           echo "SCM program registry changed: ${{ steps.scm.outputs.changed }}"
           echo "SCM program events parsed: ${{ steps.scm.outputs.events_parsed }}"
+          echo 'Structured T1 events are composed here; no other workflow mutates facts_registry.'
           echo 'All facts_registry mutation is owned by this Fact Kernel transaction.'
           echo 'Live Newsroom listens directly to successful Fact Kernel Builder completion; no handoff dispatcher exists.'
