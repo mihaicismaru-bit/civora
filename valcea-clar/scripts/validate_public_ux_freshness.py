@@ -72,7 +72,8 @@ def validate() -> dict:
 def self_test() -> int:
     assert live_count_marker(0) == "0 materiale în fluxul curent"
     assert live_count_marker(30) == "30 materiale în fluxul curent"
-    assert live_count_marker(0) not in f">{live_count_marker(30)}<"
+    assert live_count_marker(0) != live_count_marker(30)
+    assert live_count_marker(30).startswith("30 ")
     print("VÂLCEA CLAR Public UX freshness gate self-test: PASS")
     return 0
 
