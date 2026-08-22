@@ -1,0 +1,71 @@
+name: PARTENER.EU UX Card Scannability v4 QA
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'partener-eu/web/index.html'
+      - 'partener-eu/web/ux-card-scannability-v4.css'
+      - 'partener-eu/ops/test_ux_card_scannability_v4.py'
+      - 'partener-eu/ops/test_ux_card_scannability_browser_v4.py'
+      - '.github/workflows/partener-eu-ux-card-scannability-v4.yml'
+  push:
+    branches:
+      - 'agent/partener-ux-optimization-v4-card-scan-20260822'
+    paths:
+      - 'partener-eu/web/index.html'
+      - 'partener-eu/web/ux-card-scannability-v4.css'
+      - 'partener-eu/ops/test_ux_card_scannability_v4.py'
+      - 'partener-eu/ops/test_ux_card_scannability_browser_v4.py'
+      - '.github/workflows/partener-eu-ux-card-scannability-v4.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: partener-eu-ux-v4-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Preserve V1-V3 baseline
+        run: |
+          node --check partener-eu/web/ux-optimization-v1.js
+          node --check partener-eu/web/ux-orientation-v2.js
+          node --check partener-eu/web/ux-mobile-density-v3.js
+          python partener-eu/ops/test_ux_optimization_v1.py
+          python partener-eu/ops/test_ux_orientation_v2.py
+          python partener-eu/ops/test_ux_mobile_density_v3.py
+      - name: V4 scannability contract
+        run: python partener-eu/ops/test_ux_card_scannability_v4.py
+      - name: Install browser harness
+        run: python -m pip install --disable-pip-version-check playwright
+      - name: Start isolated PARTENER.EU branch server
+        run: |
+          python -m http.server 4176 --bind 127.0.0.1 --directory partener-eu/web >/tmp/partener-ux-v4-http.log 2>&1 &
+          echo $! >/tmp/partener-ux-v4-http.pid
+          for i in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:4176/index.html >/dev/null; then exit 0; fi
+            sleep 0.5
+          done
+          cat /tmp/partener-ux-v4-http.log
+          exit 1
+      - name: Card scannability browser proof
+        run: python partener-eu/ops/test_ux_card_scannability_browser_v4.py
+      - name: Upload scannability evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-ux-card-scannability-v4-proof
+          path: |
+            partener-eu/ops/ux-card-scannability-v4-browser-proof.json
+            partener-eu/ops/ux-card-scannability-v4-screenshots/*.png
+            /tmp/partener-ux-v4-http.log
+          if-no-files-found: warn
