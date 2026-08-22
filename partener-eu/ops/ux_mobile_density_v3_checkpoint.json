@@ -1,0 +1,52 @@
+{
+  "schema": "PARTENER_UX_MOBILE_DENSITY_CHECKPOINT_V3",
+  "checkpoint": "PARTENER-UX-V3-CP04",
+  "status": "PASS",
+  "verifiedAt": "2026-08-22T15:17:30Z",
+  "branch": "agent/partener-ux-optimization-v3-mobile-density-20260822",
+  "testedHeadSha": "c574ddc5ba86371db180ad06e8da2e9cf2db0669",
+  "workflowRunId": 32581226708,
+  "artifact": {
+    "id": 9477849385,
+    "name": "partener-ux-mobile-density-v3-proof",
+    "sha256": "7dc5d3cc91828aa48d3c3f661badbb7ea38077b28920d305d4dc5d677b1e5b05"
+  },
+  "desktop": {
+    "openCards": {"total": 4, "visible": 4, "hidden": 0},
+    "prepareCards": {"total": 6, "visible": 6, "hidden": 0},
+    "changeCards": {"total": 5, "visible": 5, "hidden": 0},
+    "disclosureControls": 0,
+    "pageHorizontalOverflowPx": 0,
+    "failedResponses": 0,
+    "consoleErrors": 0
+  },
+  "mobile": {
+    "compact": {
+      "openCards": {"total": 4, "visible": 3, "hidden": 1},
+      "prepareCards": {"total": 6, "visible": 3, "hidden": 3},
+      "changeCards": {"total": 5, "visible": 3, "hidden": 2}
+    },
+    "expanded": {
+      "openCards": {"total": 4, "visible": 4, "hidden": 0},
+      "prepareCards": {"total": 6, "visible": 6, "hidden": 0},
+      "changeCards": {"total": 5, "visible": 5, "hidden": 0}
+    },
+    "disclosureControls": 3,
+    "disclosureTouchTargetsPx": [44, 44, 44],
+    "compactScrollHeightPx": 11162,
+    "expandedScrollHeightPx": 14589,
+    "initialHeightReductionPx": 3427,
+    "collapseRoundTrip": "PASS",
+    "pageHorizontalOverflowCompactPx": 0,
+    "pageHorizontalOverflowExpandedPx": 0,
+    "failedResponses": 0,
+    "consoleErrors": 0
+  },
+  "v2RegressionOnSameHead": "PASS",
+  "canonicalDataChanged": false,
+  "cardsDeletedOrReordered": false,
+  "desktopContentCollapsed": false,
+  "statePersistenceAdded": false,
+  "rollback": "Revert UX v3 commits; all canonical data and UX v1/v2 remain intact.",
+  "integrationRule": "Stacked after UX v1 and v2. Retarget/reconcile and rerun all gates before any approved merge."
+}
