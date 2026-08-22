@@ -22,7 +22,7 @@ The connected Drive snapshot contains 48 JPEG photographs across 7 curated categ
 - `06_SANTIERE_DEZVOLTARE`: 2
 - `07_PARKING_MOBILITATE`: 1
 
-The committed snapshot is a bootstrap/fallback. When a Drive read credential is configured, the canonical workflow refreshes the inventory hourly and persists only material changes.
+The committed snapshot is a bootstrap/fallback. The workflow is PR/manual-only until a read-only Drive credential is configured. After that gate is satisfied, the same runtime can be registered for hourly refresh without changing the candidate or publication-safety contract.
 
 ## Safety and rights model
 
@@ -40,11 +40,11 @@ The original binary remains in Google Drive. CIVORA stores metadata first; a pho
 
 ## Runtime
 
-Canonical implementation:
+Implementation:
 
 - `valcea-clar/social/owned_photo_drive_config.json`
 - `valcea-clar/social/owned_photo_drive_snapshot.json`
-- `valcea-clar/social/owned_photo_registry.json`
+- `valcea-clar/social/owned_photo_registry.json` (generated output)
 - `valcea-clar/social/drive_owned_photo_ingest.py`
 - `.github/workflows/valcea-clar-owned-photo-ingest.yml`
 
@@ -53,7 +53,7 @@ Authentication supports either:
 - `VALCEA_DRIVE_SERVICE_ACCOUNT_JSON` (preferred, read-only scope), or
 - `VALCEA_DRIVE_BEARER_TOKEN` (temporary/manual fallback).
 
-If neither secret exists, the workflow validates and retains the committed snapshot rather than failing or inventing access.
+If neither secret exists, PR validation rebuilds and validates the registry from the committed snapshot rather than failing or inventing access.
 
 ## Acceptance
 
@@ -66,4 +66,4 @@ If neither secret exists, the workflow validates and retains the committed snaps
 5. every discovered asset remains candidate-only;
 6. no automatic story assignment or publication authority is introduced.
 
-The next layer is explicit candidate → story materialization with subject-match, rights confirmation, crop/alt-text and final editor approval.
+The next layer is explicit candidate → story materialization with subject-match, rights confirmation, crop/alt-text and final editor approval. Hourly registration is a separate activation step after Drive credentials exist.
