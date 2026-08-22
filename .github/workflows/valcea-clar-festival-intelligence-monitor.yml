@@ -1,14 +1,29 @@
-name: VÂLCEA CLAR Festival Intelligence Monitor
+name: VÂLCEA CLAR Cultural Sources Monitor
 
+# Festival and performing-arts sources are distinct inputs but share one control
+# plane: probe -> persist candidate state -> trigger editorial opportunities.
+# Each source family keeps its original cadence inside this workflow.
 on:
   workflow_dispatch:
   push:
     branches: [main]
     paths:
       - 'valcea-clar/editorial/festival_source_registry.json'
+      - 'valcea-clar/editorial/performing_arts_source_registry.json'
+      - 'valcea-clar/editorial/performing_arts_monitor_registry.json'
       - 'valcea-clar/scripts/monitor_festival_sources.py'
+      - 'valcea-clar/scripts/monitor_performing_arts_sources.py'
+      - '.github/workflows/valcea-clar-festival-intelligence-monitor.yml'
+  pull_request:
+    paths:
+      - 'valcea-clar/editorial/festival_source_registry.json'
+      - 'valcea-clar/editorial/performing_arts_source_registry.json'
+      - 'valcea-clar/editorial/performing_arts_monitor_registry.json'
+      - 'valcea-clar/scripts/monitor_festival_sources.py'
+      - 'valcea-clar/scripts/monitor_performing_arts_sources.py'
       - '.github/workflows/valcea-clar-festival-intelligence-monitor.yml'
   schedule:
+    - cron: '13 */2 * * *'
     - cron: '29 */6 * * *'
 
 permissions:
@@ -16,91 +31,101 @@ permissions:
   actions: write
 
 concurrency:
-  group: valcea-clar-festival-intelligence-monitor
-  cancel-in-progress: false
+  group: valcea-clar-cultural-sources-${{ github.event.pull_request.number || 'main' }}
+  cancel-in-progress: true
 
 jobs:
   monitor:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
-          python-version: '3.12'
-      - name: Validate monitor
-        run: python valcea-clar/scripts/monitor_festival_sources.py --self-test
-      - name: Monitor festival sources
-        id: monitor
+          python-version: '3.13'
+
+      - name: Refresh newest canonical state
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Validate cultural source monitors
+        run: |
+          python valcea-clar/scripts/monitor_festival_sources.py --self-test
+          python valcea-clar/scripts/monitor_performing_arts_sources.py --self-test
+
+      - name: Monitor festival sources on festival cadence
+        id: festival
+        if: github.event_name != 'pull_request' && (github.event_name != 'schedule' || github.event.schedule == '29 */6 * * *')
         shell: bash
         run: |
           set +e
           python valcea-clar/scripts/monitor_festival_sources.py
           rc=$?
           set -e
-          if [ "$rc" -eq 3 ]; then
-            echo 'new_candidates=true' >> "$GITHUB_OUTPUT"
-          elif [ "$rc" -eq 0 ]; then
-            echo 'new_candidates=false' >> "$GITHUB_OUTPUT"
-          else
-            exit "$rc"
-          fi
-      - name: Persist material monitor state and update queue
+          if [ "$rc" -eq 3 ]; then echo 'new_candidates=true' >> "$GITHUB_OUTPUT"; elif [ "$rc" -eq 0 ]; then echo 'new_candidates=false' >> "$GITHUB_OUTPUT"; else exit "$rc"; fi
+
+      - name: Monitor performing arts sources on performing cadence
+        id: performing
+        if: github.event_name != 'pull_request' && (github.event_name != 'schedule' || github.event.schedule == '13 */2 * * *')
+        shell: bash
+        run: |
+          set +e
+          python valcea-clar/scripts/monitor_performing_arts_sources.py
+          rc=$?
+          set -e
+          if [ "$rc" -eq 3 ]; then echo 'new_candidates=true' >> "$GITHUB_OUTPUT"; elif [ "$rc" -eq 0 ]; then echo 'new_candidates=false' >> "$GITHUB_OUTPUT"; else exit "$rc"; fi
+
+      - name: Persist cultural monitor state once
+        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
-          paths=(valcea-clar/state/festival_source_state.json valcea-clar/editorial/festival_update_candidates.json)
+          paths=(
+            valcea-clar/state/festival_source_state.json
+            valcea-clar/editorial/festival_update_candidates.json
+            valcea-clar/state/performing_arts_source_state.json
+            valcea-clar/editorial/performing_arts_update_candidates.json
+          )
           changed=false
           for p in "${paths[@]}"; do
             if [ -e "$p" ] && ! git diff --quiet -- "$p"; then changed=true; fi
-            if [ -e "$p" ] && git ls-files --error-unmatch "$p" >/dev/null 2>&1; then :; elif [ -e "$p" ]; then changed=true; fi
+            if [ -e "$p" ] && ! git ls-files --error-unmatch "$p" >/dev/null 2>&1; then changed=true; fi
           done
           if [ "$changed" != true ]; then
-            echo 'No material festival monitor state change.'
+            echo 'No material cultural monitor state change.'
             exit 0
           fi
-          rm -rf /tmp/festival-monitor
-          mkdir -p /tmp/festival-monitor/state /tmp/festival-monitor/editorial
-          [ ! -f valcea-clar/state/festival_source_state.json ] || cp valcea-clar/state/festival_source_state.json /tmp/festival-monitor/state/
-          [ ! -f valcea-clar/editorial/festival_update_candidates.json ] || cp valcea-clar/editorial/festival_update_candidates.json /tmp/festival-monitor/editorial/
-          git config user.name 'vâlcea-clar-festival-monitor[bot]'
-          git config user.email 'valcea-clar-festival-monitor@users.noreply.github.com'
+
+          rm -rf /tmp/cultural-monitor
+          mkdir -p /tmp/cultural-monitor
+          for p in "${paths[@]}"; do
+            if [ -f "$p" ]; then mkdir -p "/tmp/cultural-monitor/$(dirname "$p")"; cp "$p" "/tmp/cultural-monitor/$p"; fi
+          done
+          git config user.name 'vâlcea-clar-cultural-monitor[bot]'
+          git config user.email 'valcea-clar-cultural-monitor@users.noreply.github.com'
           for attempt in 1 2 3 4 5; do
             git fetch origin main
             git reset --hard origin/main
-            mkdir -p valcea-clar/state valcea-clar/editorial
-            [ ! -f /tmp/festival-monitor/state/festival_source_state.json ] || cp /tmp/festival-monitor/state/festival_source_state.json valcea-clar/state/
-            [ ! -f /tmp/festival-monitor/editorial/festival_update_candidates.json ] || cp /tmp/festival-monitor/editorial/festival_update_candidates.json valcea-clar/editorial/
-            git add valcea-clar/state/festival_source_state.json valcea-clar/editorial/festival_update_candidates.json 2>/dev/null || true
-            if git diff --cached --quiet; then
-              echo 'Festival monitor state already present on main.'
-              exit 0
-            fi
-            git commit -m 'Refresh VÂLCEA CLAR festival intelligence monitor'
+            for p in "${paths[@]}"; do
+              if [ -f "/tmp/cultural-monitor/$p" ]; then mkdir -p "$(dirname "$p")"; cp "/tmp/cultural-monitor/$p" "$p"; git add "$p"; fi
+            done
+            if git diff --cached --quiet; then exit 0; fi
+            git commit -m 'Refresh VÂLCEA CLAR cultural source intelligence'
             if git push origin HEAD:main; then exit 0; fi
             sleep $((attempt * 2))
           done
-          echo 'Could not persist festival monitor state.' >&2
+          echo 'Could not persist cultural monitor state.' >&2
           exit 1
-      - name: Dispatch editorial opportunity engine for new festival signals
-        if: steps.monitor.outputs.new_candidates == 'true'
+
+      - name: Dispatch editorial opportunities once for new cultural signals
+        if: github.event_name != 'pull_request' && (steps.festival.outputs.new_candidates == 'true' || steps.performing.outputs.new_candidates == 'true')
         env:
-          GITHUB_TOKEN: ${{ github.token }}
-        shell: bash
+          GH_TOKEN: ${{ github.token }}
         run: |
-          set -euo pipefail
-          payload='{"ref":"main"}'
-          http_code=$(curl -sS -o /tmp/editorial-dispatch.txt -w '%{http_code}' -L -X POST \
-            -H 'Accept: application/vnd.github+json' \
-            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-            -H 'X-GitHub-Api-Version: 2022-11-28' \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/valcea-clar-editorial-opportunity-engine.yml/dispatches" \
-            -d "$payload")
-          if [ "$http_code" != '204' ]; then
-            echo "Editorial opportunity dispatch failed with HTTP ${http_code}." >&2
-            cat /tmp/editorial-dispatch.txt >&2 || true
-            exit 1
-          fi
-          echo 'Festival source changes handed to editorial opportunity engine.'
+          gh workflow run valcea-clar-editorial-opportunity-engine.yml --repo "$GITHUB_REPOSITORY" --ref main
+          echo 'Cultural source changes handed to Editorial Opportunity Engine.'
