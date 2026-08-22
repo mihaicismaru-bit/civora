@@ -1,5 +1,5 @@
 {
-  "schema_version": 9,
+  "schema_version": 10,
   "product": "CIVORA / VÂLCEA CLAR",
   "canonical_domain": "valceaclar.ro",
   "execution_owner": "civora_site_engine",
@@ -61,6 +61,30 @@
       "emits": "valcea-clar/site/story_publication_event.json",
       "post_persist_dispatch": ".github/workflows/valcea-clar-social-publishing.yml",
       "post_persist_dispatch_mode": "explicit_workflow_dispatch",
+      "owner": "site_engine"
+    },
+    {
+      "id": "live_newsroom_operator_bridge",
+      "kind": "explicit_operator_dispatch_bridge_to_canonical_live_newsroom",
+      "workflow": ".github/workflows/valcea-clar-live-newsroom-operator.yml",
+      "schedule": [],
+      "event_driven": true,
+      "trigger": "valcea-clar/ops/live-newsroom-trigger.json",
+      "dispatch_target": ".github/workflows/valcea-clar-newsroom-live.yml",
+      "publication_authority": "none",
+      "runtime_write_allowed": false,
+      "editorial_write_allowed": false,
+      "owner": "site_engine"
+    },
+    {
+      "id": "edition_recovery_operator",
+      "kind": "explicit_operator_verified_lkg_recovery",
+      "workflow": ".github/workflows/valcea-clar-edition-recovery.yml",
+      "schedule": [],
+      "event_driven": true,
+      "trigger": "valcea-clar/ops/edition-recovery-trigger.json",
+      "recovery_policy": "verified_LKG_only_no_network_refresh",
+      "publication_gate": "existing_provenance_editorial_integrity_and_fail_closed_gates",
       "owner": "site_engine"
     },
     {
