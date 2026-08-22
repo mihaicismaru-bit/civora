@@ -1,14 +1,14 @@
 {
   "schema": "PARTENER_MIPE_LEGACY_CALLER_AUDIT_V2",
-  "generatedAt": "2026-08-22T13:12:04.861825Z",
+  "generatedAt": "2026-08-22T13:14:45.163636Z",
   "root": ".",
-  "scannedTextFiles": 2737,
+  "scannedTextFiles": 2732,
   "policy": "Deletion is fail-closed: ZERO_CALLER_CANDIDATE is necessary but not sufficient. Replay/rollback and workflow/product validation are still required before deletion.",
   "summary": {
-    "activeCallerFound": 15,
+    "activeCallerFound": 14,
     "referencedWithoutExecutableCaller": 0,
-    "zeroCallerCandidates": 5,
-    "absent": 0
+    "zeroCallerCandidates": 1,
+    "absent": 5
   },
   "candidates": [
     {
@@ -151,9 +151,9 @@
     },
     {
       "file": "partener-eu/ingest/mipe_ingest.py",
-      "exists": true,
-      "bytes": 17390,
-      "status": "ZERO_CALLER_CANDIDATE",
+      "exists": false,
+      "bytes": 0,
+      "status": "ABSENT",
       "strongCallerCount": 0,
       "workflowReferenceCount": 0,
       "documentationReferenceCount": 0,
@@ -162,27 +162,20 @@
     },
     {
       "file": "partener-eu/ingest/mipe_ingest_ipv4.py",
-      "exists": true,
-      "bytes": 9393,
-      "status": "ACTIVE_CALLER_FOUND",
-      "strongCallerCount": 1,
+      "exists": false,
+      "bytes": 0,
+      "status": "ABSENT",
+      "strongCallerCount": 0,
       "workflowReferenceCount": 0,
       "documentationReferenceCount": 0,
-      "referenceCount": 1,
-      "references": [
-        {
-          "path": "partener-eu/ingest/mipe_pdds_ingest.py",
-          "line": 6,
-          "kind": "PYTHON_IMPORT",
-          "excerpt": "import mipe_ingest_ipv4 as base"
-        }
-      ]
+      "referenceCount": 0,
+      "references": []
     },
     {
       "file": "partener-eu/ingest/mipe_known_seed_ingest.py",
-      "exists": true,
-      "bytes": 6699,
-      "status": "ZERO_CALLER_CANDIDATE",
+      "exists": false,
+      "bytes": 0,
+      "status": "ABSENT",
       "strongCallerCount": 0,
       "workflowReferenceCount": 0,
       "documentationReferenceCount": 0,
@@ -191,9 +184,9 @@
     },
     {
       "file": "partener-eu/ingest/mipe_pdds_ingest.py",
-      "exists": true,
-      "bytes": 3539,
-      "status": "ZERO_CALLER_CANDIDATE",
+      "exists": false,
+      "bytes": 0,
+      "status": "ABSENT",
       "strongCallerCount": 0,
       "workflowReferenceCount": 0,
       "documentationReferenceCount": 0,
@@ -208,19 +201,13 @@
       "strongCallerCount": 10,
       "workflowReferenceCount": 15,
       "documentationReferenceCount": 0,
-      "referenceCount": 23,
+      "referenceCount": 22,
       "references": [
         {
           "path": "partener-eu/ingest/mipe_direct_only_ingest.py",
           "line": 19,
           "kind": "PYTHON_IMPORT",
           "excerpt": "import mipe_resilient_ingest as base"
-        },
-        {
-          "path": "partener-eu/ops/fix_mipe_dual_reporting.py",
-          "line": 6,
-          "kind": "PYTHON_REFERENCE",
-          "excerpt": "PATH = ROOT / \"partener-eu\" / \"ingest\" / \"mipe_resilient_ingest.py\""
         },
         {
           "path": "partener-eu/ops/fix_mipe_resilient_runtime.py",
@@ -501,9 +488,9 @@
     },
     {
       "file": "partener-eu/ops/fix_mipe_dual_reporting.py",
-      "exists": true,
-      "bytes": 3516,
-      "status": "ZERO_CALLER_CANDIDATE",
+      "exists": false,
+      "bytes": 0,
+      "status": "ABSENT",
       "strongCallerCount": 0,
       "workflowReferenceCount": 0,
       "documentationReferenceCount": 0,
