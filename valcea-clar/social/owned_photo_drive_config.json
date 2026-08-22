@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0",
+  "product": "VÂLCEA CLAR OWNED PHOTO DRIVE INGEST",
+  "publication_authority": "NONE",
+  "source": {
+    "provider": "google_drive",
+    "media_root_folder_id": "1aleLmqXk4CRxbcdTlr1Qpc7INbQdiuXU",
+    "curated_snapshot_folder_id": "1Uw3y3p0zi-G-2i1g0lxWhKbjFt1pprJ3",
+    "source_type": "owned_archive_candidate",
+    "rights_basis": "owned_pending_story_assignment",
+    "creator_or_owner": "VÂLCEA CLAR"
+  },
+  "policy": {
+    "real_photographs_only": true,
+    "synthetic_assets_forbidden": true,
+    "generic_substitution_forbidden": true,
+    "candidate_only": true,
+    "automatic_story_assignment_allowed": false,
+    "subject_match_required_before_promotion": true,
+    "editor_approval_required_before_promotion": true,
+    "rights_reconfirmation_required_before_first_publication": true,
+    "repository_may_store_metadata_without_copying_original_binary": true,
+    "original_binary_stays_in_drive_until_explicit_story_materialization": true,
+    "no_photo_is_better_than_false_relevance": true
+  },
+  "accepted_mime_types": ["image/jpeg"],
+  "categories": [
+    {"id": "01_RAU_OLANESTI_PROMENADA", "folder_id": "1SlPwq6qzESFKlldJ35pQaa6XQc-ntwcx", "expected_snapshot_count": 6},
+    {"id": "02_CENTRU_RIVER_PLAZA_URBAN", "folder_id": "1o1RBzqpet6Nwu6gcp-OQNtMoRzTzIBmX", "expected_snapshot_count": 15},
+    {"id": "03_INSTITUTII_ADMINISTRATIE", "folder_id": "1ToEtrChgz2SuTo749q2vaUdSmeolzxIV", "expected_snapshot_count": 9},
+    {"id": "04_BUSINESS_BANCI_SERVICII", "folder_id": "1Y2hprAuhI6QIaBC8FTY6FA5aOKQJKTtQ", "expected_snapshot_count": 10},
+    {"id": "05_UNDE_IESIM", "folder_id": "1aufYVs9ksWgRFPooT8DEIxXkoN9eEanv", "expected_snapshot_count": 5},
+    {"id": "06_SANTIERE_DEZVOLTARE", "folder_id": "1IWW6EikjGwsVYhj0_Celvw7BNKErsHFO", "expected_snapshot_count": 2},
+    {"id": "07_PARKING_MOBILITATE", "folder_id": "1cuGbwdxAUJQSlQLYnuV-BzIFJSbNJZFL", "expected_snapshot_count": 1}
+  ],
+  "credentials": {
+    "service_account_json_env": "VALCEA_DRIVE_SERVICE_ACCOUNT_JSON",
+    "bearer_token_env": "VALCEA_DRIVE_BEARER_TOKEN",
+    "scope": "https://www.googleapis.com/auth/drive.readonly"
+  },
+  "outputs": {
+    "snapshot": "valcea-clar/social/owned_photo_drive_snapshot.json",
+    "registry": "valcea-clar/social/owned_photo_registry.json"
+  }
+}
