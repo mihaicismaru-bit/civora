@@ -4,10 +4,16 @@
 The current edition document is retained as a compatibility snapshot, but the
 public feed exposes individual stories and canonical story URLs as the primary
 publication model. Edition windows never authorize or delay story publication.
+
+Publication timestamps are stable state. Existing archive timestamps always
+win; a newly admitted story may use the `published_at` value just reconciled and
+validated in the canonical story manifest. This closes the first-publication
+handoff without inventing a second clock or weakening any publication gate.
 """
 from __future__ import annotations
 
 import json
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -36,6 +42,23 @@ def ensure_story_runtime() -> None:
         raise SystemExit("Refusing live feed: canonical story runtime was not rendered")
 
 
+def resolve_first_published_at(
+    story_id: str,
+    route: dict,
+    archive_dates: dict[str, str],
+) -> str:
+    """Resolve a stable publication timestamp without creating a new clock.
+
+    Durable archive state is authoritative for already-published stories. For a
+    newly admitted story, render_story_pages has already reconciled the stable
+    publication ledger and written it to the current manifest as `published_at`.
+    """
+    archived = str(archive_dates.get(story_id) or "").strip()
+    if archived:
+        return archived
+    return str(route.get("published_at") or "").strip()
+
+
 def story_feed(snapshot: dict) -> list[dict]:
     manifest = load(STORY_MANIFEST)
     archive = load(STORY_ARCHIVE)
@@ -55,7 +78,7 @@ def story_feed(snapshot: dict) -> list[dict]:
         route = routes.get(story_id)
         if not route:
             continue
-        first_published_at = published_at.get(story_id)
+        first_published_at = resolve_first_published_at(story_id, route, published_at)
         if not first_published_at:
             raise SystemExit(f"Refusing live feed: missing first_published_at for {story_id}")
         stories.append({
@@ -73,6 +96,23 @@ def story_feed(snapshot: dict) -> list[dict]:
         })
     stories.sort(key=lambda item: (-int(item.get("priority") or 0), item["id"]))
     return stories
+
+
+def self_test() -> int:
+    archive_dates = {"existing": "2026-08-20T10:00:00+03:00"}
+    assert resolve_first_published_at(
+        "existing",
+        {"published_at": "2026-08-22T09:28:15+03:00"},
+        archive_dates,
+    ) == "2026-08-20T10:00:00+03:00"
+    assert resolve_first_published_at(
+        "new-story",
+        {"published_at": "2026-08-22T09:28:15+03:00"},
+        archive_dates,
+    ) == "2026-08-22T09:28:15+03:00"
+    assert resolve_first_published_at("missing", {}, archive_dates) == ""
+    print("VÂLCEA CLAR live-feed publication timestamp handoff self-test: PASS")
+    return 0
 
 
 def main() -> int:
@@ -130,6 +170,7 @@ def main() -> int:
             "recap_render_may_not_remove_story_routes": True,
             "edition_fields_are_compatibility_only": True,
             "unde_iesim_full_verified_catalogue": True,
+            "first_publication_timestamp_source": "archive_then_reconciled_story_manifest",
         },
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
@@ -146,4 +187,6 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    if "--self-test" in sys.argv:
+        raise SystemExit(self_test())
     raise SystemExit(main())
