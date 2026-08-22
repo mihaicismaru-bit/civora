@@ -1,9 +1,17 @@
 name: VÂLCEA CLAR Person Story Links
 
+# Maintenance linker, not a newsroom heartbeat.
+# Live Newsroom is the sole canonical runtime writer. Relink people only after
+# People Intelligence has materially refreshed the verified profile graph, or
+# when the linker itself is explicitly changed/tested.
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'valcea-clar/scripts/link_person_profiles.py'
+      - '.github/workflows/valcea-clar-person-story-links.yml'
   workflow_run:
-    workflows: ["VÂLCEA CLAR Live Newsroom", "VÂLCEA CLAR People Intelligence"]
+    workflows: ["VÂLCEA CLAR People Intelligence"]
     types: [completed]
     branches: [main]
   push:
@@ -11,8 +19,6 @@ on:
     paths:
       - 'valcea-clar/scripts/link_person_profiles.py'
       - '.github/workflows/valcea-clar-person-story-links.yml'
-  schedule:
-    - cron: '47 */6 * * *'
 
 permissions:
   contents: write
