@@ -12,6 +12,7 @@ on:
       - 'valcea-clar/social/owned_photo_registry.json'
       - 'valcea-clar/social/owned_photo_semantic_labels.json'
       - 'valcea-clar/social/owned_photo_semantic_auto_policy.json'
+      - 'valcea-clar/social/owned_photo_live_acceptance.json'
       - 'valcea-clar/social/owned_photo_semantic_registry.py'
       - 'valcea-clar/social/owned_photo_match_policy.json'
       - 'valcea-clar/social/owned_photo_story_candidates.json'
@@ -84,6 +85,47 @@ jobs:
           assert fallback['editor_approved'] is False
           assert fallback['publication_eligible'] is False
           print({'status':'PASS','auto_confirm_threshold':p['auto_confirm_threshold']})
+          PY
+
+      - name: Validate controlled live data-plane acceptance receipt
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('valcea-clar/social/owned_photo_live_acceptance.json').read_text(encoding='utf-8'))
+          assert r['publication_authority'] == 'NONE'
+          assert r['result'] == 'PASS_DATA_PLANE'
+          assert r['mode'] == 'connected_runtime_controlled_canary'
+          assert r['scheduler_result'] in {'ARMED_NOT_YET_OBSERVED','PASS_SCHEDULED_RUN'}
+          c=r['canary']
+          assert c['source_file_id'] != c['canary_file_id']
+          assert c['ingest_folder_id']
+          assert c['target_category'] == '05_UNDE_IESIM'
+          assert c['semantic_scope'] == 'exact_entity'
+          assert float(c['semantic_confidence']) >= 0.95
+          assert c['story_subject_match'] is False
+          assert c['editor_approved'] is False
+          assert c['publication_eligible'] is False
+          assert 'visible_signage' in c['evidence']
+          required_steps={
+              'copy_created_unique_drive_file_id_in_00_inbox',
+              'inbox_listing_detected_canary',
+              'raw_jpeg_fetch_succeeded',
+              'visual_semantic_identity_confirmed',
+              'bounded_parent_move_to_curated_category_succeeded',
+              'test_canary_deleted_after_acceptance',
+              'inbox_verified_empty_after_cleanup',
+              'target_category_verified_back_to_original_five_assets',
+          }
+          assert required_steps <= set(r['observed_steps'])
+          assert all(r['safety_assertions'].values())
+          post=r['postconditions']
+          assert post['live_owned_photo_count'] == 48
+          assert post['inbox_count'] == 0
+          assert post['05_UNDE_IESIM_count'] == 5
+          assert post['original_source_file_present'] is True
+          print({'status':'PASS','result':r['result'],'scheduler_result':r['scheduler_result']})
           PY
 
       - name: Validate owned-photo ingest, semantics, matching and materialization gate offline
