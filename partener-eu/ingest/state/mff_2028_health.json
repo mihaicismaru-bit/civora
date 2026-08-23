@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "observed_at": "2026-08-23T07:52:22.180333Z",
+  "observed_at": "2026-08-23T13:48:43.648476Z",
   "policy": "health-hash-stage-only-no-auto-adoption",
   "sources": [
     {
@@ -87,15 +87,12 @@
       "class": "official_commission_proposal_context",
       "stage": "COMMISSION_PROPOSAL",
       "url": "https://digital-strategy.ec.europa.eu/en/news/ambitious-budget-stronger-europe-2028-2034",
-      "ok": true,
-      "http_status": 200,
-      "final_url": "https://digital-strategy.ec.europa.eu/en/news/ambitious-budget-stronger-europe-2028-2034",
-      "bytes": 48550,
-      "semantic_sha256": "375c2dda7c6f9f612cfe6a3b91b0f5bda030af44fd0e28b8b5478baf68739b79",
+      "ok": false,
+      "health": "FAIL",
+      "error": "TimeoutError: The read operation timed out",
       "semantic_hash_changed": false,
       "review_required": false,
-      "auto_promote_legislative_stage": false,
-      "health": "PASS"
+      "auto_promote_legislative_stage": false
     },
     {
       "id": "SRC-RO-MAI-EU-2028",
@@ -116,8 +113,8 @@
   ],
   "summary": {
     "total": 8,
-    "pass": 2,
-    "fail": 6,
+    "pass": 1,
+    "fail": 7,
     "review_required": 0
   }
 }
