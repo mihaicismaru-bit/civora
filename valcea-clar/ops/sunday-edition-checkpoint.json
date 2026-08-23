@@ -1,13 +1,14 @@
 {
-  "schema_version": "1.8",
-  "checkpoint_id": "VALCEA-CLAR-SUNDAY-2026-08-23-1559",
-  "observed_local": "2026-08-23T15:59:12+03:00",
+  "schema_version": "1.9",
+  "checkpoint_id": "VALCEA-CLAR-SUNDAY-2026-08-23-1701",
+  "observed_local": "2026-08-23T17:01:29+03:00",
   "status": "EXTERNAL_PRESENTATION_BLOCKER",
   "current_publication": {
     "edition_id": "2026-08-23-morning",
     "status": "auto_approved",
     "publication_intent": "publish",
     "publishable_story_count_last_decision": 28,
+    "newsroom_evaluated_local": "2026-08-23T16:47:56+03:00",
     "newsroom_changed_this_cycle": false,
     "new_canonical_story_ids": []
   },
@@ -18,34 +19,40 @@
       "cantecele-oltului-2026-parada-concurs-20260822",
       "cet-govora-cine-a-decis-oprirea-20260821"
     ],
-    "reason": "No newly verified material has completed the normal Fact Kernel, writer, integrity and newsroom-selection gates. The handball small final is still in progress and Cantecele Oltului awards are not yet verifiably available."
+    "reason": "The 16:47 newsroom evaluation retained 28 publishable stories and admitted no new canonical story. The handball small-final result is not yet verifiable from accessible reliable evidence, and the Cantecele Oltului award ceremony is in progress without verified laureates."
   },
   "delta": {
-    "anm": {
-      "status": "T1_PRIMARY_REFRESHED",
-      "checked_local": "2026-08-23T15:59:00+03:00",
-      "yellow_heat_current": "23 Aug 10:00 -> 24 Aug 10:00; Oltenia included; maxima 35-37 C; ITU around/above 80",
-      "yellow_storm_current": "23 Aug 13:00 -> 22:00; coded area only mountain zones of Arges, Dambovita, Prahova and Buzau; isolated instability note for Oltenia/Muntenia",
-      "valcea_storm_code_yellow": false,
-      "next_heat_warning": "24 Aug 10:00 -> 22:00; south Banat, south and west Oltenia, south Muntenia",
-      "next_heat_valcea_inclusion": "NOT_INFERRED_FROM_REGIONAL_WORDING",
-      "ramnicu_valcea_observation_15_00": "31.5 C, partly cloudy, relative humidity 36%",
-      "voineasa_observation_15_00": "28.2 C, relative humidity 41%"
+    "newsroom_refresh": {
+      "status": "NO_CANONICAL_CHANGE",
+      "evaluated_local": "2026-08-23T16:47:56+03:00",
+      "publishable_story_count": 28,
+      "new_story_ids": [],
+      "source_discovery_total": 17,
+      "source_discovery_ok_last_refresh": 15,
+      "auto_fact_registry_count": 2,
+      "rejected_title_date_only_candidates": 2,
+      "repo_refresh_commit": "a5e511287f1fd2508c550c0d26b8980382ca4b6f",
+      "repo_state_is_not_external_publication_or_media_proof": true
     },
     "scm_valcea_csm_bucuresti_supercup": {
-      "status": "LIVE_T2_AWAIT_FINAL",
+      "status": "AWAIT_FINAL_RESULT_VERIFICATION",
       "scheduled_local": "2026-08-23T15:00:00+03:00",
-      "latest_verifiable_live_update": "SCM Ramnicu Valcea 12-11 CSM Bucuresti",
-      "source_updated_local": "2026-08-23T15:30:00+03:00",
       "final_score_verified": false,
-      "publication_rule": "Do not publish a post-match result or reorder the edition until a final score is verifiable; prefer primary FRH/club confirmation when available."
+      "evidence_this_cycle": "FRH/Digi scheduling confirms the small final; the accessible Digi page and current search surface do not expose a verified final score. Do not convert an earlier live score into a final result.",
+      "publication_rule": "Do not publish a post-match result or reorder the edition until a final score is verifiable; prefer FRH/SCM primary confirmation, otherwise use strong explicitly attributed secondary evidence."
     },
     "cantecele_oltului": {
-      "status": "AWARDS_PENDING",
-      "award_ceremony_scheduled_local": "2026-08-23T16:30:00+03:00",
+      "status": "AWARDS_CEREMONY_IN_PROGRESS_RESULTS_UNVERIFIED",
+      "award_ceremony_window_local": "2026-08-23T16:30:00+03:00/2026-08-23T17:30:00+03:00",
       "laureates_verified": false,
-      "search_result": "No credible laureate/result evidence available before the scheduled ceremony.",
-      "next_gate": "ORGANIZER_OR_OTHER_VERIFIABLE_RESULT_EVIDENCE"
+      "evidence_this_cycle": "The published Sunday programme places the awards ceremony at 16:30-17:30. Fresh searches did not surface a credible 2026 laureates list. Older 2025 results were explicitly rejected as stale evidence.",
+      "next_gate": "ORGANIZER_PRIMARY_OR_OTHER_STRONG_VERIFIABLE_2026_RESULT_EVIDENCE"
+    },
+    "anm": {
+      "status": "NO_MATERIAL_VERIFIED_CHANGE",
+      "last_verified_current_rule": "Heat warning for Oltenia remains the working T1 state; do not infer a Valcea storm yellow code from generic isolated-instability wording.",
+      "new_explicit_valcea_nowcast_found_this_cycle": false,
+      "publication_rule": "Only change the warning story when a fresh ANM primary notice explicitly supports the geographic claim."
     },
     "sensitive_signals": {
       "stabbing_signal": "HOLD_NEEDS_PRIMARY_VERIFICATION",
@@ -55,42 +62,35 @@
     },
     "remus_bellu_fire": {
       "status": "UNCHANGED_T2_MULTI_SOURCE",
-      "primary_isu_anchor_found": false,
-      "facts_safe_attribution": "Secondary reporting corroborates intervention, no injuries and affected vehicles; cause must not be inferred.",
-      "editorial_rule": "Keep T2 attribution explicit unless a primary ISU anchor appears."
+      "primary_isu_anchor_found_this_cycle": false,
+      "editorial_rule": "Keep explicit secondary attribution; do not infer cause."
     },
-    "new_low_verification_leads": [
-      {
-        "id": "ramnicu-valcea-playground-safety-20260823",
-        "status": "HOLD_NEEDS_DOCUMENTS_OR_PRIMARY_RESPONSE"
-      },
-      {
-        "id": "ramnicu-valcea-asphalt-utilities-20260823",
-        "status": "HOLD_NEEDS_DOCUMENTS_OR_PRIMARY_RESPONSE"
-      }
-    ],
     "public_surface": {
-      "checked_local": "2026-08-23T15:59:00+03:00",
-      "status": "STALE_EXTERNAL_SURFACE",
-      "observed_public_timestamp": "2026-08-23T00:42:00+03:00",
-      "observed_story_count": 27,
-      "observed_lead": "cantecele-oltului-2026-parada-concurs-20260822",
-      "observed_active_story_message": "No active material",
+      "checked_local": "2026-08-23T17:01:29+03:00",
+      "direct_homepage_readback_this_cycle": "CACHE_MISS_NO_NEW_POSITIVE_EVIDENCE",
+      "search_index_readback_for_key_sunday_story_urls": "NO_RESULTS",
+      "last_known_external_surface_status": "STALE_EXTERNAL_SURFACE",
+      "last_known_observed_public_timestamp": "2026-08-23T00:42:00+03:00",
+      "last_known_observed_story_count": 27,
+      "last_known_observed_lead": "cantecele-oltului-2026-parada-concurs-20260822",
       "canonical_expected_story_count": 28,
       "canonical_expected_lead": "buila-vanturarita-accident-20260822",
-      "recent_repo_public_presentation_commit": "aba58fcb25cd965eb2e531d5b16260d7d55423d2",
-      "repo_refresh_is_not_public_projection_proof": true
+      "rule": "Absence of a fresh readback is not evidence that the stale public bridge has recovered."
     }
   },
   "quality_and_legal": {
-    "editorial_integrity_last_known": {
+    "editorial_integrity_current_repo_decision": {
       "story_count": 38,
       "passed": 37,
       "held": 1,
       "failed": 0,
-      "fail_closed": true
+      "fail_closed": true,
+      "active_publication_holds": [
+        "derived-council-gambling-20260723",
+        "olanesti-bridge-monitor"
+      ]
     },
-    "latest_strict_public_http_probe": {
+    "latest_strict_public_http_probe_last_known": {
       "run_id": 32637941403,
       "acceptance_target_commit": "be658e93463b1b8383ea9b88da39c12b97ee7536",
       "probe_status": "BLOCKED",
@@ -101,39 +101,25 @@
       "homepage_story_links_found": 28,
       "homepage_story_count_projection_ok": false,
       "non_media_routes_last_probe": "PASS",
-      "routes_last_probe": [
-        "/robots.txt",
-        "/sitemap.xml",
-        "/stiri/",
-        "/despre/",
-        "/termeni/",
-        "/confidentialitate/",
-        "/unde-iesim/",
-        "/stiri/buila-vanturarita-accident-20260822/",
-        "/stiri/scm-program-325f43f031d04fb63516/",
-        "/stiri/cantecele-oltului-2026-parada-concurs-20260822/",
-        "/stiri/cet-govora-cine-a-decis-oprirea-20260821/",
-        "/stiri/arutela-restaurare-controversa-pnrr-20260820/"
-      ],
       "workflow_job_conclusion": "success",
       "published_commit_status": "failure BLOCKED /",
-      "interpretation": "The Actions job completing successfully is not a green acceptance result; its own public probe reported BLOCKED and published failure status."
+      "interpretation": "CI/job completion is not an acceptance green and is not public media proof."
     },
     "external_route_readback_this_cycle": {
-      "homepage": "FETCHED_STALE",
-      "musiclover_story": "FETCHED_TEXTUAL_ARTICLE",
-      "stiri_despre_termeni_confidentialitate": "CACHE_MISS_IN_EXTERNAL_CRAWLER_NO_NEW_POSITIVE_EVIDENCE",
+      "homepage": "CACHE_MISS_NO_NEW_POSITIVE_EVIDENCE",
+      "non_media_routes": "NO_NEW_DIRECT_EXTERNAL_GREEN_CLAIM",
       "last_known_good_non_media_routes_preserved": true
     }
   },
   "media": {
     "NO_FALSE_GREEN": true,
-    "repository_runtime_or_ci": "INFORMATIONAL_ONLY_NOT_PUBLIC_PHOTO_PROOF",
+    "repository_live_feed_runtime_html_or_ci": "INFORMATIONAL_ONLY_NOT_PUBLIC_PHOTO_PROOF",
     "public_photo_visibility": "NOT_DEMONSTRATED",
     "photo_visible": false,
     "classification": "EXTERNAL_PRESENTATION_BLOCKER",
-    "stale_text_only_bridge": true,
-    "direct_public_surface_evidence_this_cycle": "The public homepage is still the stale 00:42/27-story surface; a publicly fetched article exposed article text but no positive rendered-photo projection evidence. Article fetches for the key Sunday stories were cache misses. No public valceaclar.ro surface positively demonstrated a visible story image.",
+    "bridge_recovery_demonstrated": false,
+    "direct_public_surface_evidence_this_cycle": "Direct valceaclar.ro homepage readback returned no usable public surface, key-story index searches returned no valceaclar.ro result, and no public valceaclar.ro page positively demonstrated rendered story imagery.",
+    "third_party_image_search_is_photo_proof": false,
     "media_mutations_this_cycle": 0,
     "review_or_materialization_loops_reopened": false,
     "repair_loop_policy": "CLOSED_UNTIL_STRUCTURAL_PUBLIC_BRIDGE_REPUBLISH_AND_DIRECT_VALCEACLAR_RO_VISIBLE_PHOTO_READBACK",
@@ -176,22 +162,22 @@
     },
     {
       "id": "scm-valcea-csm-bucuresti-supercupa-20260823",
-      "status": "LIVE_T2_AWAIT_FINAL"
+      "status": "AWAIT_FINAL_RESULT_VERIFICATION"
     },
     {
       "id": "cantecele-oltului-2026-parada-concurs-20260822",
-      "status": "CANONICAL_SUNDAY_SERVICE_STORY_AWARDS_PENDING_16_30"
+      "status": "CANONICAL_SUNDAY_SERVICE_STORY_AWARDS_IN_PROGRESS_RESULTS_UNVERIFIED"
     }
   ],
   "action": {
     "publication_override": false,
     "media_repair_loop_stopped": true,
     "next_steps": [
-      "After the handball match ends, verify the final score from a reliable live source and preferably FRH or SCM before normal editorial ingestion.",
-      "After the scheduled 16:30 Cantecele Oltului award ceremony, verify laureates from organizer/primary or other strong evidence before naming winners.",
-      "Monitor ANM for a new explicit Valcea nowcasting warning; do not infer a storm code from the isolated-instability note.",
-      "Keep sensitive police signals and the two new civic leads on HOLD until primary/documentary evidence clears the relevant gates.",
-      "Do not touch media repair/materialization again until structural public bridge republication; then require positive public visible-photo readback.",
+      "Verify the SCM Ramnicu Valcea-CSM Bucuresti final score from FRH/SCM or strong attributable evidence before normal editorial ingestion.",
+      "After the 16:30-17:30 Cantecele Oltului awards window, verify the 2026 laureates from organizer/primary or other strong evidence; reject stale 2025 palmares results.",
+      "Monitor ANM for a fresh explicit Valcea warning or nowcast and do not infer geography.",
+      "Keep sensitive police signals and unresolved civic leads on HOLD until primary/documentary evidence clears the relevant gates.",
+      "Do not touch media repair/materialization again until structural public bridge republication; then require positive public visible-photo readback on valceaclar.ro.",
       "Do not claim distribution success without a new external delivery receipt."
     ]
   }
