@@ -48,6 +48,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   # Derived presentation must never race the canonical live writer.
@@ -188,6 +189,8 @@ jobs:
 
             git commit -m 'Refresh VÂLCEA CLAR canonical public presentation'
             if git push origin HEAD:main; then
+              python valcea-clar/scripts/build_sites_export.py
+              python valcea-clar/scripts/overlay_runtime_export.py
               exit 0
             fi
             echo "main advanced during Public UX projection; retrying ${attempt}/5."
@@ -196,6 +199,18 @@ jobs:
 
           echo 'Could not persist canonical Public UX after five attempts.' >&2
           exit 1
+
+      - name: Dispatch strict public HTTP acceptance
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh workflow run valcea-clar-public-health.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref main \
+            -f require_ready=true
+          echo 'VÂLCEA CLAR strict Public HTTP validation dispatch accepted after canonical presentation.'
 
       - name: Write audit summary
         if: always()
