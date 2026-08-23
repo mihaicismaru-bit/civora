@@ -189,8 +189,6 @@ jobs:
 
             git commit -m 'Refresh VÂLCEA CLAR canonical public presentation'
             if git push origin HEAD:main; then
-              python valcea-clar/scripts/build_sites_export.py
-              python valcea-clar/scripts/overlay_runtime_export.py
               exit 0
             fi
             echo "main advanced during Public UX projection; retrying ${attempt}/5."
