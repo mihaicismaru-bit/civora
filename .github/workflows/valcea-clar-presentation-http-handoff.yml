@@ -25,6 +25,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
       - name: Dispatch strict public HTTP acceptance
         env:
           GH_TOKEN: ${{ github.token }}
