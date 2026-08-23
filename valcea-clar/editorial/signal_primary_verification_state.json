@@ -2,19 +2,68 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-23T16:45:31+03:00",
+  "generated_at": "2026-08-23T17:53:17+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-23T16:44:13+03:00",
-  "task_count": 48,
+  "queue_generated_at": "2026-08-23T17:52:06+03:00",
+  "task_count": 49,
   "primary_match_count": 0,
-  "no_match_count": 26,
+  "no_match_count": 27,
   "unrouted_count": 22,
   "target_count": 17,
   "targets_ok": 14,
   "results": [
+    {
+      "signal_id": "5358a37b1110ee79d26d5a2e",
+      "signal_title": "Meciuri pe muchie de cuțit pentru Vâlcea în SuperCupă! SCM și CSM București au protestat împreună la adresa arbitrajelor dubioase de la Bistrița",
+      "signal_url": "https://www.impactreal.ro/2026/08/23/meciuri-pe-muchie-de-cutit-pentru-valcea-in-supercupa-scm-si-csm-bucuresti-au-protestat-impreuna-la-arbitrajele-dubioase-de-la-bistrita/",
+      "signal_publisher": "Impact Real",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-23T17:17:59+03:00",
+      "verification_route_id": "sport",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "scm-rm-valcea",
+            "name": "SCM Râmnicu Vâlcea",
+            "url": "https://scmramnicuvalcea.ro/category/stiri/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "cs-valcea-1924-social-feed",
+            "name": "Clubul Sportiv Vâlcea 1924",
+            "url": "https://www.csvalcea.ro/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 2
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ajf-valcea-comunicate",
+            "name": "Asociația Județeană de Fotbal Vâlcea",
+            "url": "https://www.frf-ajf.ro/valcea/stiri/comunicate-ajf-1"
+          },
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "ea0157b4cf4cac8c766bc4a4",
       "signal_title": "ȘOC în Râmnicu Vâlcea: femeie de 71 de ani, înjunghiată de soț în propria locuință",
