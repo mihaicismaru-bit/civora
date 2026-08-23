@@ -1,7 +1,7 @@
 {
-  "schema_version": "1.4",
-  "checkpoint_id": "VALCEA-CLAR-SUNDAY-2026-08-23-1200",
-  "observed_local": "2026-08-23T12:01:14+03:00",
+  "schema_version": "1.5",
+  "checkpoint_id": "VALCEA-CLAR-SUNDAY-2026-08-23-1303",
+  "observed_local": "2026-08-23T13:03:28+03:00",
   "status": "EXTERNAL_PRESENTATION_BLOCKER",
   "current_publication": {
     "edition_id": "2026-08-23-morning",
@@ -9,7 +9,7 @@
     "publication_intent": "publish",
     "live_feed_generated_at": "2026-08-23T06:47:12.223678Z",
     "publishable_story_count_last_decision": 28,
-    "newsroom_decision_evaluated_local": "2026-08-23T12:01:14+03:00",
+    "newsroom_decision_evaluated_local": "2026-08-23T12:57:53+03:00",
     "newsroom_changed": false,
     "new_story_ids": []
   },
@@ -22,97 +22,121 @@
     ],
     "working_priority_not_publication_authority": [
       "anm-yellow-heat-oltenia-20260823",
-      "anm-storm-scope-conflict-20260823",
+      "ramnicu-valcea-stabbing-signal-20260823",
       "remus-bellu-fire-20260822",
+      "ramnicu-valcea-missing-person-signal-20260823",
       "cantecele-oltului-2026-parada-concurs-20260822",
       "scm-valcea-csm-bucuresti-supercupa-20260823",
-      "cet-govora-cine-a-decis-oprirea-20260821",
       "baile-govora-serile-de-vara-20260823"
     ]
+  },
+  "delta": {
+    "anm_storm_scope": {
+      "status": "RESOLVED_CURRENT_T1_SUPERSEDES_OLDER_CONFLICT",
+      "current_codes": [
+        "Yellow heat: 23 Aug 10:00 - 24 Aug 10:00, includes Oltenia",
+        "Yellow instability: 23 Aug 13:00 - 22:00, only mountain areas of Arges, Dambovita, Prahova, Buzau"
+      ],
+      "valcea_storm_code_current": false,
+      "oltenia_isolated_instability_note": true,
+      "editorial_rule": "Do not publish the older claim that Valcea is under the current yellow storm-code area."
+    },
+    "new_sensitive_signals": [
+      {
+        "id": "ramnicu-valcea-stabbing-signal-20260823",
+        "tier": "T2",
+        "status": "HOLD_NEEDS_PRIMARY_VERIFICATION",
+        "privacy_rule": "Do not publish or amplify identifying details without primary confirmation and editorial review."
+      },
+      {
+        "id": "ramnicu-valcea-missing-person-signal-20260823",
+        "tier": "T2",
+        "status": "HOLD_NEEDS_PRIMARY_IPJ_VERIFICATION",
+        "privacy_rule": "Do not republish identity/description from secondary-only evidence."
+      }
+    ],
+    "source_target_health": {
+      "targets_ok": 14,
+      "target_count": 17,
+      "recovered_target": "CET Govora",
+      "status": "IMPROVED_BUT_NOT_ALL_TARGETS_HEALTHY"
+    },
+    "public_homepage": {
+      "public_http_status": "BLOCKED",
+      "public_http_blocker": "/",
+      "strict_probe_lead_projection_ok": true,
+      "strict_probe_story_link_projection_count": 28,
+      "strict_probe_visible_story_count": null,
+      "external_crawler_still_observes": {
+        "timestamp": "2026-08-23T00:42:00+03:00",
+        "story_count": 27,
+        "lead": "cantecele-oltului-2026-parada-concurs-20260822"
+      }
+    }
   },
   "material_candidates": [
     {
       "id": "anm-yellow-heat-oltenia-20260823",
       "status": "VERIFIED_T1_CANDIDATE_COVERAGE_GAP_NOT_PUBLICATION_AUTHORITY",
       "news_value": "ACTIVE_PUBLIC_SAFETY_SERVICE",
-      "source_tier": "T1",
       "source": "Administrația Națională de Meteorologie",
       "source_url": "https://www.meteoromania.ro/avertizari/",
       "issued_local": "2026-08-23T10:00:00+03:00",
       "valid_interval_local": "2026-08-23T10:00:00+03:00/2026-08-24T10:00:00+03:00",
-      "affected_area": "Oltenia, west/centre/south Muntenia, locally continental Dobrogea",
-      "valcea_relevance": "Vâlcea is in Oltenia",
       "verified_facts": [
-        "Maximum temperatures are forecast at 35–37°C in the affected area.",
-        "Heat/canicula and thermal discomfort are forecast, with ITU reaching or slightly exceeding 80.",
-        "Local tropical-night conditions around 20°C minimum are possible."
+        "Oltenia is in the yellow heat-warning area.",
+        "Forecast maxima in affected area: 35-37 C.",
+        "ITU may reach or slightly exceed 80; local tropical-night minima around 20 C are possible."
       ],
-      "ramnicu_valcea_station_2026_08_23_11_00": {
-        "temperature_c": 27.2,
-        "wind": "NNE 1.6 m/s",
-        "sky": "partly cloudy",
-        "pressure_mb": 989.3,
-        "pressure_trend": "rising",
-        "relative_humidity_percent": 37
-      },
-      "next_gate": "CANONICAL_ANM_SOURCE_ADAPTER_OR_FACT_KERNEL_WITHOUT_BYPASS"
+      "next_gate": "NORMAL_FACT_KERNEL_AND_EDITORIAL_WRITER_NO_BYPASS"
     },
     {
       "id": "anm-storm-scope-conflict-20260823",
-      "status": "SOURCE_CONFLICT_HOLD",
-      "news_value": "PUBLIC_SAFETY_REQUIRES_RECONCILIATION",
-      "current_anm_webpage_evidence": {
-        "source_url": "https://www.meteoromania.ro/avertizari/",
-        "issued_local": "2026-08-23T10:00:00+03:00",
-        "coded_interval": "2026-08-23T13:00:00+03:00/2026-08-23T22:00:00+03:00",
-        "coded_area": "mountain areas of Argeș, Dâmbovița, Prahova and Buzău",
-        "note": "isolated instability may also occur in Oltenia and Muntenia"
-      },
-      "conflicting_current_evidence": [
-        "Contemporaneous public reports citing ANM state that Vâlcea is under a yellow storm warning from 13:00.",
-        "The structured weather-alert feed available in this cycle reports a Vâlcea yellow storm warning from 13:00 to 01:00."
-      ],
-      "editorial_rule": "Do not state that the Vâlcea storm warning is definitively active, cancelled or superseded until the ANM alert feed/current bulletin is reconciled.",
-      "prior_checkpoint_storm_claim_status": "HOLD_PENDING_RECONCILIATION",
-      "next_gate": "RECHECK_ANM_PRIMARY_ALERT_FEED_AND_NOWCASTING_AT_OR_AFTER_13_00"
+      "status": "RESOLVED_NOT_A_CURRENT_VALCEA_YELLOW_STORM_CODE",
+      "source": "Administrația Națională de Meteorologie",
+      "source_url": "https://www.meteoromania.ro/avertizari/",
+      "current_warning_interval": "2026-08-23T13:00:00+03:00/2026-08-23T22:00:00+03:00",
+      "current_coded_area": "mountain areas of Arges, Dambovita, Prahova and Buzau",
+      "valcea_current_coded_area": false,
+      "note": "ANM notes isolated instability may occur in Oltenia and Muntenia.",
+      "next_gate": "NOWCASTING_ONLY_IF_NEW_PRIMARY_ALERT_EMERGES"
+    },
+    {
+      "id": "ramnicu-valcea-stabbing-signal-20260823",
+      "status": "T2_SIGNAL_HOLD_NEEDS_PRIMARY_VERIFICATION",
+      "news_value": "HIGH_SENSITIVE_PUBLIC_SAFETY",
+      "next_gate": "IPJ_OR_OTHER_COMPETENT_PRIMARY_CONFIRMATION_THEN_EDITORIAL_INTEGRITY"
     },
     {
       "id": "remus-bellu-fire-20260822",
       "status": "T2_MULTI_SOURCE_CANDIDATE_REQUIRES_PRIMARY_ANCHOR_OR_EXPLICIT_ATTRIBUTION",
       "news_value": "MATERIAL_LOCAL_INCIDENT",
-      "sources": [
-        {
-          "name": "Digi24",
-          "url": "https://www.digi24.ro/stiri/actualitate/incendiu-puternic-langa-shopping-city-ramnicu-valcea-3917317",
-          "published": "2026-08-23T07:27:00+03:00"
-        },
-        {
-          "name": "Mediafax",
-          "url": "https://www.mediafax.ro/social/incendiu-la-un-autocar-in-ramnicu-valcea-flacarile-s-au-extins-la-alte-doua-autoutilitare-23794496",
-          "published": "2026-08-22T22:32:00+03:00"
-        }
-      ],
+      "primary_isu_url_found": false,
       "verified_concordant_facts": [
-        "Fire occurred on Strada Remus Bellu in Râmnicu Vâlcea on the evening of 22 August 2026.",
-        "A bus/coach burned and fire spread to nearby vans/autoutilitare.",
-        "Râmnicu Vâlcea firefighters intervened with two water-and-foam fire engines.",
-        "No injuries were reported in the cited accounts.",
-        "Digi24 reports the fire was extinguished; one bus and one van were destroyed and two vans partially affected.",
-        "The probable cause remained to be established."
+        "Fire occurred on Strada Remus Bellu on evening 22 Aug.",
+        "A bus burned; fire spread to nearby vans.",
+        "Firefighters intervened with two fire engines.",
+        "No injuries were reported.",
+        "Digi24 reports bus plus one van destroyed and two vans partially affected.",
+        "Cause remained to be established."
       ],
       "do_not_infer": [
         "cause",
-        "vehicle_or_business_ownership",
+        "owner",
         "culpability",
         "commercial_loss"
       ],
-      "primary_isu_url_found": false,
       "next_gate": "PRIMARY_ISU_ANCHOR_IF_AVAILABLE_ELSE_EXPLICIT_T2_ATTRIBUTION_AND_EDITORIAL_INTEGRITY"
+    },
+    {
+      "id": "ramnicu-valcea-missing-person-signal-20260823",
+      "status": "T2_SIGNAL_HOLD_NEEDS_PRIMARY_IPJ_VERIFICATION",
+      "news_value": "TIME_SENSITIVE_PUBLIC_SAFETY",
+      "next_gate": "IPJ_PRIMARY_CONFIRMATION_AND_PRIVACY_REVIEW"
     },
     {
       "id": "cantecele-oltului-2026-parada-concurs-20260822",
       "status": "CANONICAL_SUNDAY_SERVICE_STORY_LAUREATES_HOLD",
-      "verified_state": "Sunday jury/awards/gala/recital framing is current in canonical feed; no verified 2026 laureate result found at this checkpoint.",
       "next_gate": "ORGANIZER_OR_OTHER_VERIFIABLE_CONFIRMATION_BEFORE_NAMING_WINNERS"
     },
     {
@@ -123,46 +147,34 @@
     {
       "id": "baile-govora-serile-de-vara-20260823",
       "status": "VERIFIED_T1_AGENDA_CANDIDATE_NOT_PUBLICATION_AUTHORITY",
-      "source": "Primăria Băile Govora",
-      "source_url": "https://www.primaria-govora.ro/serile-de-vara-continua-la-baile-govora/",
-      "verified_facts": {
-        "dates": [
-          "2026-08-23",
-          "2026-08-24"
-        ],
-        "time": "20:00",
-        "venue": "Amfiteatrul din Parcul Central Băile Govora",
-        "performers": [
-          "Saracino Band – Diana și Costel Vasile",
-          "Grupul vocal bărbătesc Doruri Muscelene",
-          "Grupul Mlădițe Muscelene"
-        ],
-        "master_of_ceremonies": "Sergiu Cicu",
-        "entry": "liberă"
-      },
-      "forbidden_inference": "Do not infer public-money expenditure from source-monitor keyword signals.",
       "next_gate": "CANONICAL_NEWSROOM_OR_UNDE_IESIM_EDITORIAL_MATERIALIZATION"
     }
   ],
   "media": {
-    "repository_runtime": "CURRENT_WITH_VERIFIED_VISUAL_OBJECTS_INFORMATIONAL_ONLY",
-    "buila_runtime_visual": "CONTEXTUAL_VERIFIED_IN_CANONICAL_RUNTIME",
+    "repository_runtime": "INFORMATIONAL_ONLY_NOT_PUBLIC_PROOF",
     "public_photo_visibility": "NOT_DEMONSTRATED",
     "photo_visible": false,
-    "public_surface_observation": "The directly crawled homepage still serves the old 00:42 presentation with 27 materials and Cântecele Oltului as lead; this surface does not demonstrate visible story photography.",
     "blocker": "EXTERNAL_PRESENTATION_BLOCKER_STALE_TEXT_ONLY_BRIDGE",
-    "repair_loop_policy": "NO_MORE_MEDIA_REGISTRY_OR_REVIEW_MATERIALIZATION_MUTATIONS_UNTIL_PUBLIC_STRUCTURAL_BRIDGE_REPUBLISH_AND_DIRECT_VISIBLE_PHOTO_READBACK",
-    "fire_candidate": "NO_EVENT_PHOTO_ASSIGNED_WITHOUT_VERIFIED_PROVENANCE",
-    "people_or_exact_event_identity": "MANUAL_REVIEW_REQUIRED"
+    "last_strict_public_media_evidence": {
+      "workflow_run_id": 32631023843,
+      "eligible_verified_visuals": 16,
+      "http_200": 16,
+      "visible_img_matches": 0
+    },
+    "repair_loop_policy": "CLOSED_UNTIL_STRUCTURAL_PUBLIC_BRIDGE_REPUBLISH_AND_DIRECT_VALCEACLAR_RO_VISIBLE_PHOTO_READBACK",
+    "mutations_this_cycle": 0
   },
   "source_health": {
     "status": "DEGRADED_PARTIAL_SOURCE_SUCCESS",
-    "observed_at_utc": "2026-08-23T07:58:48.869548Z",
-    "registered": 33,
-    "ok": 26,
-    "failed": 7,
-    "semantic_change_candidates": 3,
-    "last_known_good_preserved": true
+    "registered_last_full_snapshot": 33,
+    "ok_last_full_snapshot": 26,
+    "failed_last_full_snapshot": 7,
+    "last_known_good_preserved": true,
+    "current_target_verification": {
+      "ok": 14,
+      "total": 17,
+      "cet_govora_recovered": true
+    }
   },
   "quality_and_legal": {
     "editorial_integrity_story_count": 38,
@@ -174,48 +186,47 @@
       "olanesti-bridge-monitor"
     ],
     "rejected_title_date_only_candidates": 3,
-    "homepage_contains_legal_links": [
-      "/termeni/",
-      "/confidentialitate/"
-    ],
-    "direct_legal_route_recheck_this_cycle": "INCONCLUSIVE_CACHE_LAYER_NO_NEW_FAILURE_ASSERTED",
+    "public_routes": {
+      "robots": "PASS",
+      "sitemap": "PASS",
+      "stiri_index": "PASS",
+      "despre": "PASS",
+      "termeni": "PASS",
+      "confidentialitate": "PASS",
+      "unde_iesim": "PASS",
+      "sample_story_routes_and_canonicals": "PASS",
+      "homepage": "BLOCKED"
+    },
     "fail_closed": true
   },
   "external_public_projection": {
-    "status": "STALE_PUBLIC_PRESENTATION_AND_PHOTO_VISIBILITY_UNPROVEN",
-    "canonical_runtime_story_count": 28,
-    "canonical_runtime_lead": "buila-vanturarita-accident-20260822",
-    "served_homepage_last_visible_update": "2026-08-23T00:42:00+03:00",
-    "served_homepage_story_count": 27,
-    "served_homepage_lead": "cantecele-oltului-2026-parada-concurs-20260822",
-    "served_homepage_old_headline": "Cântecele Oltului 2026: parada portului popular și concursul ansamblurilor, pe 22 august la Călimănești",
-    "served_homepage_active_story_message": "Nu există acum un material activ.",
+    "status": "EXTERNAL_PRESENTATION_BLOCKER",
+    "strict_probe_partial_improvement": "Buila lead and 28 story links are projected in one HTTP probe, but required visible count marker is absent.",
+    "external_crawler_observation": "Still crawls old 00:42 surface with 27 materials and old Cantecele Oltului lead.",
     "photo_visible": false,
     "photo_visibility_proof": "ABSENT",
-    "drift_class": "EXTERNAL_PRESENTATION_BLOCKER_NOT_EDITORIAL_STATE",
     "publication_override": false
-  },
-  "public_health": {
-    "status": "BLOCKED_NO_FALSE_GREEN",
-    "canonical_feed_ok": true,
-    "canonical_newsroom_ok": true,
-    "public_surface_freshness_ok": false,
-    "public_photo_visibility_ok": false,
-    "rule": "Repository, live-feed, runtime HTML and CI are not proof of visible public photography."
   },
   "distribution": {
     "site": "CANONICAL_RUNTIME_READY_EXTERNAL_PRESENTATION_BLOCKED",
-    "social_state": "OUTBOX_PERSISTED_WITH_CHANNEL_SPECIFIC_HOLDS",
+    "outboxes": "PERSISTED",
     "known_media_holds": [
       "instagram",
       "tiktok"
     ],
-    "external_delivery_receipt": false,
-    "rule": "Do not clear social or media holds without direct external evidence."
+    "instagram_pending_public_media": 0,
+    "external_delivery_receipt_for_current_cycle": false,
+    "rule": "Do not clear channel/media holds without direct external evidence."
   },
   "action": {
     "publication_override": false,
     "media_repair_loop_stopped": true,
-    "next_step": "Keep EXTERNAL_PRESENTATION_BLOCKER until the public bridge is structurally republished and direct valceaclar.ro readback demonstrates current feed plus visible photography. Editorially, keep the verified ANM heat warning as a T1 candidate, reconcile the conflicting Vâlcea storm-alert scope at or after 13:00 without asserting a false state, keep Remus Bellu T2 unless a primary ISU anchor appears, and re-check SCM result after 15:00."
+    "next_steps": [
+      "Keep EXTERNAL_PRESENTATION_BLOCKER until structural public bridge republish and direct public visible-photo readback.",
+      "Route ANM heat warning through normal fact/editorial gates; do not publish the superseded Valcea yellow-storm claim.",
+      "Primary-verify the stabbing and missing-person signals before any publication or identifying detail amplification.",
+      "Keep Remus Bellu as T2 unless primary ISU anchor appears or normal editor explicitly approves attributed T2 treatment.",
+      "Re-check Cantecele Oltului laureates and SCM handball result only when verifiable post-event evidence exists."
+    ]
   }
 }
