@@ -15,7 +15,7 @@
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-08-23T09:02:26Z",
+    "utc": "2026-08-23T09:49:23Z",
     "source_pass": 5,
     "source_degraded": 0,
     "source_fail": 2,
@@ -26,7 +26,7 @@
     "quarantined_source": "SRC-AFIR-ENERGY-2026 — AFIR — Energie 2026; dependent material facts blocked fail-closed; SRC-LEGISLATIE — Portal Legislativ; dependent material facts blocked fail-closed"
   },
   "deployment_evidence": {
-    "utc": "2026-08-23T09:02:51Z",
+    "utc": "2026-08-23T09:49:48Z",
     "status": "PASS",
     "public_content_verified": true,
     "https_verified": true,
@@ -36,7 +36,7 @@
     "http_content_verified": true,
     "content_origin": "custom_https",
     "http_status": 200,
-    "final_url": "https://partener.eu/?p10_probe=20260823T090251Z",
+    "final_url": "https://partener.eu/?p10_probe=20260823T094948Z",
     "title": "PARTENER.EU — Găsește finanțări europene pentru investiția ta",
     "required_markers_present": true,
     "critical_assets_ok": true,
@@ -46,7 +46,7 @@
       {
         "id": "custom_https",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260823T090251Z",
+        "final_url": "https://partener.eu/?p10_probe=20260823T094948Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -57,12 +57,12 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260823T090251Z",
+        "final_url": "https://partener.eu/?p10_probe=20260823T094948Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "http://partener.eu/?p10_probe=20260823T090251Z",
-            "to_url": "https://partener.eu/?p10_probe=20260823T090251Z"
+            "from_url": "http://partener.eu/?p10_probe=20260823T094948Z",
+            "to_url": "https://partener.eu/?p10_probe=20260823T094948Z"
           }
         ],
         "content_verified": true,
@@ -74,12 +74,12 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260823T090251Z",
+        "final_url": "https://partener.eu/?p10_probe=20260823T094948Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260823T090251Z",
-            "to_url": "https://partener.eu/?p10_probe=20260823T090251Z"
+            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260823T094948Z",
+            "to_url": "https://partener.eu/?p10_probe=20260823T094948Z"
           }
         ],
         "content_verified": true,
@@ -125,35 +125,35 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-08-23T09:02:51Z",
-    "validation_run_started": "2026-08-23T09:02:26Z",
+    "utc": "2026-08-23T09:49:48Z",
+    "validation_run_started": "2026-08-23T09:49:23Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "97d451237d0d35ff7d074c5543f6dfac586ee28aa938e9f23c75fdf899756274",
-      "history_sha256": "97d451237d0d35ff7d074c5543f6dfac586ee28aa938e9f23c75fdf899756274",
-      "history_path": "validation/history/20260823T090226Z.json",
+      "latest_sha256": "432e4e5bb4d07d0ffbcd6811dfdefcb5e758326ee3697902d22f7a7f78236b79",
+      "history_sha256": "432e4e5bb4d07d0ffbcd6811dfdefcb5e758326ee3697902d22f7a7f78236b79",
+      "history_path": "validation/history/20260823T094923Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "69b3d3949685b8d8290e6c4e39db7a037735e75d32f93dffdd4b034b38f7a214",
-      "checkpoint_sha256": "69b3d3949685b8d8290e6c4e39db7a037735e75d32f93dffdd4b034b38f7a214",
+      "source_state_sha256": "64bf0b62d97571602f7976e08cad41b1b45decc832005c688ffe514db21b313b",
+      "checkpoint_sha256": "64bf0b62d97571602f7976e08cad41b1b45decc832005c688ffe514db21b313b",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
       "recovery_state_integrity": "PASS"
     },
     "source_registry": {
-      "observed_at": "2026-08-23T07:55:54.979658Z",
-      "age_seconds": 4016,
+      "observed_at": "2026-08-23T09:47:46.093112Z",
+      "age_seconds": 122,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
       "summary": {
         "total": 23,
-        "pass": 17,
-        "degraded": 0,
+        "pass": 16,
+        "degraded": 1,
         "fail": 6,
         "quarantined": 6,
         "low_information": 0,
-        "resolution_tasks_required": 0
+        "resolution_tasks_required": 1
       },
       "tier_counts": {
         "T1": {
@@ -162,30 +162,32 @@
           "degraded": 0,
           "fail": 1,
           "quarantined": 1,
-          "hash_changes": 0
+          "hash_changes": 1
         },
         "T1B": {
           "total": 13,
-          "pass": 10,
-          "degraded": 0,
+          "pass": 9,
+          "degraded": 1,
           "fail": 3,
           "quarantined": 3,
           "hash_changes": 0
         }
       },
-      "changed_source_ids": [],
+      "changed_source_ids": [
+        "SRC-MEC-CNDIPT"
+      ],
       "missing_resolution_tasks": [],
       "unsafe_material_updates": [],
       "fail_closed": true
     },
     "afir": {
-      "observed_at": "2026-08-23T07:57:17.593970+00:00",
+      "observed_at": "2026-08-23T09:48:52.131394+00:00",
       "status": "PASS",
-      "item_count": 30,
-      "error_count": 37,
+      "item_count": 29,
+      "error_count": 38,
       "hash_change_candidates": 0,
       "material_signal_candidates": 0,
-      "auth_dependency_count": 27,
+      "auth_dependency_count": 26,
       "auth_dependencies": [
         {
           "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2F&culture=ro",
@@ -302,13 +304,6 @@
         {
           "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Ffinantare%2Fmasuri-de-sprijin-sm171%2F&culture=ro",
           "sourcePage": "https://www.afir.ro/finantare/masuri-de-sprijin-sm171/",
-          "status": "AUTH_OR_ACCESS_DEPENDENT",
-          "materialFactAction": "NONE",
-          "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-        },
-        {
-          "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Ffinantare%2Ftransfer-de-cunostinte-dr37%2F&culture=ro",
-          "sourcePage": "https://www.afir.ro/finantare/transfer-de-cunostinte-dr37/",
           "status": "AUTH_OR_ACCESS_DEPENDENT",
           "materialFactAction": "NONE",
           "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
@@ -463,7 +458,7 @@
     "summary": {
       "integrity_pass": true,
       "registry_health": "DEGRADED",
-      "registry_hash_changes": 0,
+      "registry_hash_changes": 1,
       "afir_hash_changes": 0,
       "peo_calendar_changes": 0,
       "mipe_health": "PASS",
