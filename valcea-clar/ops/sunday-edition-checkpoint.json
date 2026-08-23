@@ -1,8 +1,8 @@
 {
-  "schema_version": "1.1",
+  "schema_version": "1.2",
   "checkpoint_id": "VALCEA-CLAR-SUNDAY-2026-08-23-1057",
-  "observed_local": "2026-08-23T11:09:16+03:00",
-  "status": "BLOCKED_EXTERNAL_PRESENTATION_DRIFT",
+  "observed_local": "2026-08-23T11:13:06+03:00",
+  "status": "BLOCKED_PUBLIC_PRESENTATION_ACCEPTANCE",
   "current_publication": {
     "edition_id": "2026-08-23-morning",
     "status": "auto_approved",
@@ -13,34 +13,61 @@
     "newsroom_changed": false
   },
   "editorial_order": {
-    "decision": "KEEP_UNTIL_STRONGER_VERIFIED_CHANGE",
+    "decision": "RETAIN_CURRENT_ORDER_PENDING_CANONICAL_REEVALUATION_OF_NEW_FIRE_CANDIDATE",
     "top_story_ids": [
       "buila-vanturarita-accident-20260822",
       "cantecele-oltului-2026-parada-concurs-20260822",
       "cet-govora-cine-a-decis-oprirea-20260821"
     ]
   },
-  "fresh_verified_candidate": {
-    "id": "baile-govora-serile-de-vara-20260823",
-    "status": "VERIFIED_T1_CANDIDATE_NOT_PUBLICATION_AUTHORITY",
-    "source_tier": "T1",
-    "source": "Primăria Băile Govora",
-    "source_url": "https://www.primaria-govora.ro/serile-de-vara-continua-la-baile-govora/",
-    "verified_facts": {
-      "dates": ["2026-08-23", "2026-08-24"],
-      "time": "20:00",
-      "venue": "Amfiteatrul din Parcul Central Băile Govora",
-      "performers": [
-        "Saracino Band – Diana și Costel Vasile",
-        "Grupul vocal bărbătesc Doruri Muscelene",
-        "Grupul Mlădițe Muscelene"
+  "material_candidates": [
+    {
+      "id": "remus-bellu-fire-20260822",
+      "status": "T2_MULTI_SOURCE_CANDIDATE_REQUIRES_PRIMARY_ANCHOR_OR_EXPLICIT_ATTRIBUTION",
+      "news_value": "MATERIAL_LOCAL_INCIDENT",
+      "sources": [
+        {
+          "name": "Digi24",
+          "url": "https://www.digi24.ro/stiri/actualitate/incendiu-puternic-langa-shopping-city-ramnicu-valcea-3917317",
+          "published": "2026-08-23T07:27:00+03:00"
+        },
+        {
+          "name": "Mediafax",
+          "url": "https://www.mediafax.ro/social/incendiu-la-un-autocar-in-ramnicu-valcea-flacarile-s-au-extins-la-alte-doua-autoutilitare-23794496",
+          "published": "2026-08-22T22:32:00+03:00"
+        }
       ],
-      "master_of_ceremonies": "Sergiu Cicu",
-      "entry": "liberă"
+      "verified_concordant_facts": [
+        "Fire occurred on Strada Remus Bellu in Râmnicu Vâlcea on the evening of 22 August 2026.",
+        "A bus/coach burned and fire spread to nearby vans/autoutilitare.",
+        "Râmnicu Vâlcea firefighters intervened with two water-and-foam fire engines.",
+        "No injuries were reported in the cited accounts.",
+        "The probable cause remained to be established."
+      ],
+      "do_not_infer": ["cause", "vehicle_or_business_ownership", "culpability", "commercial_loss"],
+      "next_gate": "PRIMARY_ISU_ANCHOR_IF_AVAILABLE_ELSE_EXPLICIT_T2_ATTRIBUTION_AND_EDITORIAL_INTEGRITY"
     },
-    "forbidden_inference": "Do not infer public-money expenditure from source-monitor keyword signals.",
-    "next_gate": "canonical_newsroom_or_unde_iesim_editorial_materialization"
-  },
+    {
+      "id": "baile-govora-serile-de-vara-20260823",
+      "status": "VERIFIED_T1_AGENDA_CANDIDATE_NOT_PUBLICATION_AUTHORITY",
+      "source": "Primăria Băile Govora",
+      "source_url": "https://www.primaria-govora.ro/serile-de-vara-continua-la-baile-govora/",
+      "verified_facts": {
+        "dates": ["2026-08-23", "2026-08-24"],
+        "time": "20:00",
+        "venue": "Amfiteatrul din Parcul Central Băile Govora",
+        "performers": [
+          "Saracino Band – Diana și Costel Vasile",
+          "Grupul vocal bărbătesc Doruri Muscelene",
+          "Grupul Mlădițe Muscelene"
+        ],
+        "master_of_ceremonies": "Sergiu Cicu",
+        "entry": "liberă"
+      },
+      "forbidden_inference": "Do not infer public-money expenditure from source-monitor keyword signals.",
+      "next_gate": "CANONICAL_NEWSROOM_OR_UNDE_IESIM_EDITORIAL_MATERIALIZATION"
+    }
+  ],
   "media": {
     "repository_runtime": "CURRENT_WITH_PHOTOS",
     "buila_hero": "CONTEXTUAL_VERIFIED_IN_CANONICAL_RUNTIME",
@@ -53,6 +80,7 @@
       "license": "CC BY-SA 3.0",
       "required_disclosure": "archive/context photo; does not depict the 2026 event"
     },
+    "fire_candidate": "NO_EVENT_PHOTO_ASSIGNED_WITHOUT_VERIFIED_PROVENANCE",
     "people_or_exact_event_identity": "MANUAL_REVIEW_REQUIRED"
   },
   "source_health": {
@@ -73,42 +101,50 @@
       "olanesti-bridge-monitor"
     ],
     "rejected_title_date_only_candidates": 3,
+    "legal_routes_http_ok": ["/termeni/", "/confidentialitate/"],
+    "robots_and_sitemap_http_ok": true,
     "fail_closed": true
   },
   "external_public_projection": {
-    "status": "STALE_HTTP_HOMEPAGE",
-    "direct_observation_local": "2026-08-23T11:08:00+03:00",
+    "status": "INCONSISTENT_PUBLIC_PRESENTATION",
     "canonical_runtime_story_count": 28,
     "canonical_runtime_lead": "buila-vanturarita-accident-20260822",
-    "served_homepage_story_count": 27,
-    "served_homepage_lead": "cantecele-oltului-2026-parada-concurs-20260822",
-    "served_homepage_last_visible_update": "2026-08-23T00:42:00+03:00",
-    "buila_route_exists": true,
-    "drift_class": "PRESENTATION_OR_DEPLOYMENT_DRIFT_NOT_EDITORIAL_STATE",
+    "strict_probe_http_status": 200,
+    "strict_probe_first_story": "buila-vanturarita-accident-20260822",
+    "strict_probe_visible_story_count": null,
+    "strict_probe_expected_story_count": 28,
+    "strict_probe_homepage_lead_ok": true,
+    "strict_probe_homepage_story_count_ok": false,
+    "independent_web_crawler_observation": "Older public presentation still observed with 27 materials and Cântecele Oltului as lead.",
+    "buila_route_http_ok": true,
+    "drift_class": "PUBLIC_PRESENTATION_OR_CACHE_BRIDGE_DRIFT_NOT_EDITORIAL_STATE",
     "publication_override": false
   },
   "public_health": {
     "previous_status": "FALSE_GREEN",
-    "previous_reason": "Probe accepted bridge presence plus canonical feed availability without requiring the served homepage lead and visible story count to match the feed.",
-    "previous_rerun_attempt": 2,
-    "previous_rerun_result": "SUCCESS_BUT_INSUFFICIENT_FRESHNESS_ASSERTION",
+    "previous_reason": "Probe accepted bridge presence plus canonical feed availability without requiring the served homepage projection to prove freshness.",
     "guard_fix_commit": "97f52209ffbe675723a5ad73ba3cffb7c83efcd6",
-    "guard_fix": "Require served HTTP homepage first story and visible material count to match canonical live feed; bridge presence is diagnostic only, not freshness proof.",
+    "guard_fix": "Bridge presence is diagnostic only; strict acceptance now requires served homepage projection checks against the canonical feed.",
+    "strict_revalidation_run_id": 32626700697,
     "strict_revalidation_attempt": 3,
-    "strict_revalidation_state_at_checkpoint": "PENDING"
+    "strict_revalidation_result": "FAILURE_EXPECTED_FAIL_CLOSED",
+    "strict_revalidation_blocker": "/",
+    "canonical_feed_ok": true,
+    "homepage_projection_ok": false,
+    "commit_status": "valcea-clar/public-http=failure"
   },
   "distribution": {
-    "site": "CANONICAL_RUNTIME_READY_EXTERNAL_HOMEPAGE_STALE",
+    "site": "CANONICAL_RUNTIME_READY_PUBLIC_HTTP_ACCEPTANCE_BLOCKED",
     "social_state": "OUTBOX_PERSISTED_WITH_CHANNEL_SPECIFIC_HOLDS",
     "known_media_holds": ["instagram", "tiktok"],
     "external_delivery_receipt": false,
     "rule": "Do not clear social media holds merely because contextual site media exists."
   },
   "action": {
-    "canonical_cycle_trigger_commit": "dc75efd080069467779d5ae7564c5148b86558b6",
-    "trigger_slot": "morning",
+    "initial_cycle_trigger_commit": "dc75efd080069467779d5ae7564c5148b86558b6",
+    "material_update_trigger_commit": "c2ab42b079301496d3e9b5e6bd64b3b2a8937c95",
     "health_guard_fix_commit": "97f52209ffbe675723a5ad73ba3cffb7c83efcd6",
     "publication_override": false,
-    "next_step": "Complete strict public-health revalidation. If the stale homepage is confirmed, refresh the installed presentation/deployment bridge from the already-correct canonical runtime, then require a direct external readback showing 28 materials and Buila as lead before declaring publication healthy."
+    "next_step": "Resolve the existing public presentation layer so direct external HTTP consistently projects the canonical feed; require a fresh readback before declaring the site healthy. In parallel, obtain a primary ISU anchor for the Remus Bellu fire or keep explicit T2 attribution through the canonical editorial gate."
   }
 }
