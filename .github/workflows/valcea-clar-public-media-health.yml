@@ -30,6 +30,7 @@ on:
 
 permissions:
   contents: read
+  statuses: write
 
 concurrency:
   group: valcea-clar-public-article-media-${{ github.event.pull_request.number || 'main' }}
@@ -103,3 +104,57 @@ jobs:
             /tmp/valcea-clar-public-story-media.log
           if-no-files-found: warn
           retention-days: 14
+
+      - name: Publish public media commit status
+        if: always() && github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STATUS_REPOSITORY: ${{ github.repository }}
+          STATUS_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+          STATUS_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import urllib.request
+          from pathlib import Path
+
+          report_path = Path('/tmp/valcea-clar-public-story-media.json')
+          state = 'error'
+          description = 'VÂLCEA CLAR public media probe produced no report'
+          if report_path.is_file() and report_path.stat().st_size:
+              try:
+                  report = json.loads(report_path.read_text(encoding='utf-8'))
+                  if bool(report.get('ready')):
+                      state = 'success'
+                      description = f"READY · {report.get('checked_count', 0)} verified story photos visible"
+                  else:
+                      state = 'failure'
+                      blockers = [str(x) for x in (report.get('blockers') or [])]
+                      description = 'BLOCKED · ' + (', '.join(blockers[:3]) or 'verified photo not visible')
+              except Exception as exc:
+                  description = f'ERROR · invalid media report ({type(exc).__name__})'
+
+          payload = {
+              'state': state,
+              'context': 'valcea-clar/public-media',
+              'description': description[:140],
+              'target_url': os.environ['STATUS_RUN_URL'],
+          }
+          url = f"https://api.github.com/repos/{os.environ['STATUS_REPOSITORY']}/statuses/{os.environ['STATUS_SHA']}"
+          request = urllib.request.Request(
+              url,
+              data=json.dumps(payload).encode('utf-8'),
+              method='POST',
+              headers={
+                  'Authorization': f"Bearer {os.environ['GH_TOKEN']}",
+                  'Accept': 'application/vnd.github+json',
+                  'X-GitHub-Api-Version': '2022-11-28',
+                  'Content-Type': 'application/json',
+              },
+          )
+          with urllib.request.urlopen(request, timeout=20) as response:
+              if response.status not in (200, 201):
+                  raise SystemExit(f'Could not publish media status: HTTP {response.status}')
+          print(json.dumps(payload, ensure_ascii=False))
+          PY
