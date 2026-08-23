@@ -2,12 +2,17 @@
 """Remote HTTP acceptance probe for the public VÂLCEA CLAR presentation layer.
 
 CIVORA owns newsroom state and publication. The public site is accepted only if
-critical routes are reachable and the homepage can project the durable
-continuous-story feed rather than collapsing to a recap snapshot.
+critical routes are reachable and the HTTP homepage itself projects the current
+durable continuous-story feed rather than a stale recap snapshot.
 
 When an explicit HTTP revalidation trigger names a story, that exact story must
 be present in the canonical feed and its public route must pass HTTP/canonical
 checks. This prevents a stale but otherwise healthy site from reporting READY.
+
+A live bridge is useful runtime capability, but its mere presence is not proof
+that the served homepage is fresh. Acceptance therefore also compares the first
+story link and visible story count in the fetched homepage with the canonical
+live feed. This keeps the public-health signal fail-closed on presentation drift.
 
 When a live-feed story carries verified ``artist_profiles``, its public story
 route must also expose the Artist Intelligence UI contract. Repository data is
@@ -27,7 +32,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_BASE = "https://valceaclar.ro"
 FEED_URL = "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json"
 REVALIDATION_TRIGGER = ROOT / "site" / "http_revalidation_trigger.json"
-USER_AGENT = "VALCEA-CLAR-Public-Health/1.3 (+https://valceaclar.ro/)"
+USER_AGENT = "VALCEA-CLAR-Public-Health/1.4 (+https://valceaclar.ro/)"
 BRIDGE_MARKERS = (
     "chatgpt-sites-live-bridge",
     "data-valcea-clar-live",
@@ -73,8 +78,17 @@ def canonical_present(html: str, canonical: str) -> bool:
     )
 
 
+def story_link_sequence(html: str) -> list[str]:
+    return re.findall(r'href=["\'](/stiri/[a-z0-9-]+/)["\']', html)
+
+
 def story_links(html: str) -> set[str]:
-    return set(re.findall(r'href=["\'](/stiri/[a-z0-9-]+/)["\']', html))
+    return set(story_link_sequence(html))
+
+
+def homepage_story_count(html: str) -> int | None:
+    match = re.search(r"\b(\d+)\s+materiale(?:\s+în\s+fluxul\s+curent|\s+publicabile)?\b", html, flags=re.IGNORECASE)
+    return int(match.group(1)) if match else None
 
 
 def bridge_present(html: str) -> bool:
@@ -178,21 +192,36 @@ def evaluate(base_url: str) -> dict[str, Any]:
 
     feed, feed_check = remote_feed_contract()
     checks.append(feed_check)
+    remote_story_rows = [row for row in ((feed or {}).get("stories") or []) if isinstance(row, dict)]
     remote_rows = {
         str(row.get("path") or ""): row
-        for row in ((feed or {}).get("stories") or [])
-        if isinstance(row, dict)
+        for row in remote_story_rows
     }
     remote_paths = set(remote_rows)
+    expected_lead_path = str(remote_story_rows[0].get("path") or "") if remote_story_rows else ""
+    expected_feed_count = len(remote_story_rows)
 
     status, homepage, error = fetch(base + "/")
-    found_links = story_links(homepage)
+    found_sequence = story_link_sequence(homepage)
+    found_links = set(found_sequence)
+    first_home_story_path = found_sequence[0] if found_sequence else ""
+    visible_story_count = homepage_story_count(homepage)
     bridge = bridge_present(homepage)
     minimum = min(3, len(expected_paths))
-    static_projection_ok = len(found_links.intersection(expected_paths)) >= minimum
+    minimum_projection_ok = len(found_links.intersection(expected_paths)) >= minimum
+    lead_projection_ok = bool(expected_lead_path) and first_home_story_path == expected_lead_path
+    count_projection_ok = visible_story_count == expected_feed_count
+    static_projection_ok = minimum_projection_ok and lead_projection_ok and count_projection_ok
+    # Bridge presence is diagnostic capability only. It must never make a stale
+    # HTTP document green by itself because crawlers, previews and no-JS clients
+    # consume the served document directly.
     bridge_projection_ok = bridge and feed_check["ok"] and all(path in remote_paths for path in expected_paths)
-    projection_ok = static_projection_ok or bridge_projection_ok
+    projection_ok = static_projection_ok
     home_missing = [marker for marker in ("VÂLCEA CLAR", "ACTUALIZAT LIVE") if marker not in homepage]
+    if not lead_projection_ok:
+        home_missing.append(f"homepage_lead={expected_lead_path or 'missing_feed_lead'}")
+    if not count_projection_ok:
+        home_missing.append(f"homepage_story_count={expected_feed_count}")
     if not projection_ok:
         home_missing.append("continuous_story_projection")
     checks.append({
@@ -206,10 +235,18 @@ def evaluate(base_url: str) -> dict[str, Any]:
         "error": error,
         "expected_story_paths": expected_paths,
         "story_links_found": sorted(found_links),
+        "first_story_link_found": first_home_story_path or None,
+        "expected_lead_story_path": expected_lead_path or None,
+        "visible_story_count": visible_story_count,
+        "expected_feed_story_count": expected_feed_count,
         "minimum_story_projection": minimum,
+        "minimum_static_projection_ok": minimum_projection_ok,
+        "homepage_lead_projection_ok": lead_projection_ok,
+        "homepage_story_count_projection_ok": count_projection_ok,
         "static_story_projection_ok": static_projection_ok,
         "live_bridge_detected": bridge,
-        "live_bridge_projection_ok": bridge_projection_ok,
+        "live_bridge_capability_ok": bridge_projection_ok,
+        "bridge_presence_is_not_freshness_proof": True,
     })
 
     def check(
@@ -295,7 +332,7 @@ def evaluate(base_url: str) -> dict[str, Any]:
 
     blockers = [item["path"] for item in checks if not item["ok"]]
     return {
-        "schema_version": "1.4",
+        "schema_version": "1.5",
         "product": "VÂLCEA CLAR public HTTP acceptance",
         "base_url": base,
         "status": "READY" if not blockers else "BLOCKED",
@@ -306,6 +343,8 @@ def evaluate(base_url: str) -> dict[str, Any]:
         "expected_story_count": len(expected_paths),
         "required_revalidation_story_id": required_revalidation_story_id() or None,
         "homepage_collapse_guard": True,
+        "homepage_freshness_guard": True,
+        "static_homepage_matches_canonical_feed_required": True,
         "artist_profile_ui_guard": True,
         "repository_is_not_publication_proof": True,
     }
@@ -314,7 +353,12 @@ def evaluate(base_url: str) -> dict[str, Any]:
 def self_test() -> None:
     assert canonical_present('<link rel="canonical" href="https://valceaclar.ro/termeni/">', "https://valceaclar.ro/termeni/")
     assert not canonical_present('<link rel="canonical" href="https://example.com/">', "https://valceaclar.ro/termeni/")
-    assert story_links('<a href="/stiri/a/"></a><a href="/stiri/b/"></a>') == {"/stiri/a/", "/stiri/b/"}
+    sample = '<span>28 materiale în fluxul curent</span><a href="/stiri/a/"></a><a href="/stiri/b/"></a>'
+    assert story_links(sample) == {"/stiri/a/", "/stiri/b/"}
+    assert story_link_sequence(sample) == ["/stiri/a/", "/stiri/b/"]
+    assert homepage_story_count(sample) == 28
+    assert homepage_story_count('<span>27 materiale publicabile</span>') == 27
+    assert homepage_story_count('<span>fără contor</span>') is None
     assert bridge_present('<script src="/chatgpt-sites-live-bridge.js"></script>')
     assert artist_ui_present('<a class="vc-artist-inline" href="/artisti/analia-selis/">Analia Selis</a>')
     assert not artist_ui_present('<p>Analia Selis</p>')
