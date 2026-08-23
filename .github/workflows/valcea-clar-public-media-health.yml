@@ -1,0 +1,105 @@
+name: VÂLCEA CLAR Public Article Media Health
+
+# A verified visual in the canonical feed is not considered published until the
+# public story HTML contains an actual <img> element for that visual. Metadata,
+# repository manifests and bridge source are diagnostic only.
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows:
+      - 'VÂLCEA CLAR Story Social Metadata'
+    types: [completed]
+    branches: [main]
+  schedule:
+    - cron: '12,42 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/site/runtime/live-feed.json'
+      - 'valcea-clar/site/runtime/stiri/**'
+      - 'valcea-clar/site/chatgpt-sites-live-bridge.js'
+      - 'valcea-clar/scripts/probe_public_story_media.py'
+      - '.github/workflows/valcea-clar-public-media-health.yml'
+  pull_request:
+    paths:
+      - 'valcea-clar/site/runtime/live-feed.json'
+      - 'valcea-clar/site/runtime/stiri/**'
+      - 'valcea-clar/site/chatgpt-sites-live-bridge.js'
+      - 'valcea-clar/scripts/probe_public_story_media.py'
+      - '.github/workflows/valcea-clar-public-media-health.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-public-article-media-${{ github.event.pull_request.number || 'main' }}
+  cancel-in-progress: true
+
+jobs:
+  visible-photo-probe:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Validate media probe offline
+        run: python valcea-clar/scripts/probe_public_story_media.py --self-test
+
+      - name: Require visible verified photographs in public articles
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4; do
+            if python valcea-clar/scripts/probe_public_story_media.py \
+              --output /tmp/valcea-clar-public-story-media.json \
+              | tee /tmp/valcea-clar-public-story-media.log; then
+              exit 0
+            fi
+            if [ "$attempt" -eq 4 ]; then
+              exit 1
+            fi
+            sleep 20
+          done
+
+      - name: Write media acceptance summary
+        if: always()
+        shell: bash
+        run: |
+          if [ -s /tmp/valcea-clar-public-story-media.json ]; then
+            python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+          d=json.loads(Path('/tmp/valcea-clar-public-story-media.json').read_text(encoding='utf-8'))
+          print(f"## VÂLCEA CLAR public article photos: {d['status']}")
+          print('')
+          print(f"Verified visuals checked: {d.get('checked_count', 0)}")
+          print('')
+          print('| Story | HTTP | Visible expected photo |')
+          print('|---|---:|---|')
+          for row in d.get('checks', []):
+              print(f"| `{row['path']}` | {row['http_status'] if row['http_status'] is not None else '—'} | {'PASS' if row['visible_img_match'] else 'BLOCKED'} |")
+          if d.get('blockers'):
+              print('')
+              print('Blockers: ' + ', '.join(f'`{x}`' for x in d['blockers']))
+          PY
+          else
+            echo '## VÂLCEA CLAR public article photos: probe produced no report' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload public media evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-public-story-media-${{ github.run_id }}
+          path: |
+            /tmp/valcea-clar-public-story-media.json
+            /tmp/valcea-clar-public-story-media.log
+          if-no-files-found: warn
+          retention-days: 14
