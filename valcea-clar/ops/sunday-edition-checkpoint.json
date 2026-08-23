@@ -1,8 +1,8 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "checkpoint_id": "VALCEA-CLAR-SUNDAY-2026-08-23-1057",
-  "observed_local": "2026-08-23T10:57:53+03:00",
-  "status": "CONTINUE_CANONICAL_CYCLE",
+  "observed_local": "2026-08-23T11:09:16+03:00",
+  "status": "BLOCKED_EXTERNAL_PRESENTATION_DRIFT",
   "current_publication": {
     "edition_id": "2026-08-23-morning",
     "status": "auto_approved",
@@ -42,7 +42,8 @@
     "next_gate": "canonical_newsroom_or_unde_iesim_editorial_materialization"
   },
   "media": {
-    "buila_hero": "LIVE_CONTEXTUAL_VERIFIED",
+    "repository_runtime": "CURRENT_WITH_PHOTOS",
+    "buila_hero": "CONTEXTUAL_VERIFIED_IN_CANONICAL_RUNTIME",
     "govora_candidate": {
       "status": "CONTEXTUAL_CANDIDATE_ONLY",
       "source_url": "https://commons.wikimedia.org/wiki/File:B%C4%83ile_Govora_-_Parcul_B%C4%83ilor.JPG",
@@ -74,17 +75,40 @@
     "rejected_title_date_only_candidates": 3,
     "fail_closed": true
   },
+  "external_public_projection": {
+    "status": "STALE_HTTP_HOMEPAGE",
+    "direct_observation_local": "2026-08-23T11:08:00+03:00",
+    "canonical_runtime_story_count": 28,
+    "canonical_runtime_lead": "buila-vanturarita-accident-20260822",
+    "served_homepage_story_count": 27,
+    "served_homepage_lead": "cantecele-oltului-2026-parada-concurs-20260822",
+    "served_homepage_last_visible_update": "2026-08-23T00:42:00+03:00",
+    "buila_route_exists": true,
+    "drift_class": "PRESENTATION_OR_DEPLOYMENT_DRIFT_NOT_EDITORIAL_STATE",
+    "publication_override": false
+  },
+  "public_health": {
+    "previous_status": "FALSE_GREEN",
+    "previous_reason": "Probe accepted bridge presence plus canonical feed availability without requiring the served homepage lead and visible story count to match the feed.",
+    "previous_rerun_attempt": 2,
+    "previous_rerun_result": "SUCCESS_BUT_INSUFFICIENT_FRESHNESS_ASSERTION",
+    "guard_fix_commit": "97f52209ffbe675723a5ad73ba3cffb7c83efcd6",
+    "guard_fix": "Require served HTTP homepage first story and visible material count to match canonical live feed; bridge presence is diagnostic only, not freshness proof.",
+    "strict_revalidation_attempt": 3,
+    "strict_revalidation_state_at_checkpoint": "PENDING"
+  },
   "distribution": {
-    "site": "LIVE",
-    "public_http_last_verified": "SUCCESS",
+    "site": "CANONICAL_RUNTIME_READY_EXTERNAL_HOMEPAGE_STALE",
     "social_state": "OUTBOX_PERSISTED_WITH_CHANNEL_SPECIFIC_HOLDS",
     "known_media_holds": ["instagram", "tiktok"],
+    "external_delivery_receipt": false,
     "rule": "Do not clear social media holds merely because contextual site media exists."
   },
   "action": {
     "canonical_cycle_trigger_commit": "dc75efd080069467779d5ae7564c5148b86558b6",
     "trigger_slot": "morning",
+    "health_guard_fix_commit": "97f52209ffbe675723a5ad73ba3cffb7c83efcd6",
     "publication_override": false,
-    "next_step": "Let canonical writers re-evaluate the Sunday edition; continue monitoring primary authorities and material festival/results updates, then refresh checkpoint."
+    "next_step": "Complete strict public-health revalidation. If the stale homepage is confirmed, refresh the installed presentation/deployment bridge from the already-correct canonical runtime, then require a direct external readback showing 28 materials and Buila as lead before declaring publication healthy."
   }
 }
