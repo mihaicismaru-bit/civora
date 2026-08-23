@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "observed_at": "2026-08-23T13:48:43.648476Z",
+  "observed_at": "2026-08-23T19:11:30.152782Z",
   "policy": "health-hash-stage-only-no-auto-adoption",
   "sources": [
     {
@@ -87,12 +87,15 @@
       "class": "official_commission_proposal_context",
       "stage": "COMMISSION_PROPOSAL",
       "url": "https://digital-strategy.ec.europa.eu/en/news/ambitious-budget-stronger-europe-2028-2034",
-      "ok": false,
-      "health": "FAIL",
-      "error": "TimeoutError: The read operation timed out",
+      "ok": true,
+      "http_status": 200,
+      "final_url": "https://digital-strategy.ec.europa.eu/en/news/ambitious-budget-stronger-europe-2028-2034",
+      "bytes": 48550,
+      "semantic_sha256": "375c2dda7c6f9f612cfe6a3b91b0f5bda030af44fd0e28b8b5478baf68739b79",
       "semantic_hash_changed": false,
       "review_required": false,
-      "auto_promote_legislative_stage": false
+      "auto_promote_legislative_stage": false,
+      "health": "PASS"
     },
     {
       "id": "SRC-RO-MAI-EU-2028",
@@ -100,15 +103,12 @@
       "class": "romania_sectoral_preparation",
       "stage": "ROMANIA_PREPARATION",
       "url": "https://fed.mai.gov.ro/in/eu-2028-2034/",
-      "ok": true,
-      "http_status": 200,
-      "final_url": "https://fed.mai.gov.ro/in/eu-2028-2034/",
-      "bytes": 126142,
-      "semantic_sha256": "32812f2fcaf62b5ced795963dbf2a2ccc95abfee9f1581b33e8eecee0b1bf03d",
+      "ok": false,
+      "health": "FAIL",
+      "error": "HTTPError: HTTP Error 403: Forbidden",
       "semantic_hash_changed": false,
       "review_required": false,
-      "auto_promote_legislative_stage": false,
-      "health": "PASS"
+      "auto_promote_legislative_stage": false
     }
   ],
   "summary": {
