@@ -1,15 +1,11 @@
 name: VÂLCEA CLAR Presentation HTTP Handoff
 
-# Derived presentation workflows commit reader-facing runtime with GITHUB_TOKEN.
-# Those bot commits do not reliably emit a second push event, so external HTTP
-# acceptance must be dispatched explicitly after the presentation workflow ends.
+# Manual recovery/operator bridge only. The registered Story Social Metadata
+# workflow dispatches strict public HTTP acceptance after a successful derived
+# presentation projection. Keeping this workflow manual-only prevents a second,
+# unregistered autonomous dispatcher from existing outside the site-engine registry.
 on:
   workflow_dispatch:
-  workflow_run:
-    workflows:
-      - 'VÂLCEA CLAR Story Social Metadata'
-    types: [completed]
-    branches: [main]
 
 permissions:
   contents: read
@@ -21,7 +17,6 @@ concurrency:
 
 jobs:
   dispatch-public-http:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
