@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0",
+  "checkpoint_id": "VALCEA-CLAR-SUNDAY-2026-08-23-1057",
+  "observed_local": "2026-08-23T10:57:53+03:00",
+  "status": "CONTINUE_CANONICAL_CYCLE",
+  "current_publication": {
+    "edition_id": "2026-08-23-morning",
+    "status": "auto_approved",
+    "publication_intent": "publish",
+    "updated_local": "2026-08-23T09:47:11+03:00",
+    "publishable_story_count_last_decision": 28,
+    "newsroom_decision_evaluated_local": "2026-08-23T10:22:24+03:00",
+    "newsroom_changed": false
+  },
+  "editorial_order": {
+    "decision": "KEEP_UNTIL_STRONGER_VERIFIED_CHANGE",
+    "top_story_ids": [
+      "buila-vanturarita-accident-20260822",
+      "cantecele-oltului-2026-parada-concurs-20260822",
+      "cet-govora-cine-a-decis-oprirea-20260821"
+    ]
+  },
+  "fresh_verified_candidate": {
+    "id": "baile-govora-serile-de-vara-20260823",
+    "status": "VERIFIED_T1_CANDIDATE_NOT_PUBLICATION_AUTHORITY",
+    "source_tier": "T1",
+    "source": "Primăria Băile Govora",
+    "source_url": "https://www.primaria-govora.ro/serile-de-vara-continua-la-baile-govora/",
+    "verified_facts": {
+      "dates": ["2026-08-23", "2026-08-24"],
+      "time": "20:00",
+      "venue": "Amfiteatrul din Parcul Central Băile Govora",
+      "performers": [
+        "Saracino Band – Diana și Costel Vasile",
+        "Grupul vocal bărbătesc Doruri Muscelene",
+        "Grupul Mlădițe Muscelene"
+      ],
+      "master_of_ceremonies": "Sergiu Cicu",
+      "entry": "liberă"
+    },
+    "forbidden_inference": "Do not infer public-money expenditure from source-monitor keyword signals.",
+    "next_gate": "canonical_newsroom_or_unde_iesim_editorial_materialization"
+  },
+  "media": {
+    "buila_hero": "LIVE_CONTEXTUAL_VERIFIED",
+    "govora_candidate": {
+      "status": "CONTEXTUAL_CANDIDATE_ONLY",
+      "source_url": "https://commons.wikimedia.org/wiki/File:B%C4%83ile_Govora_-_Parcul_B%C4%83ilor.JPG",
+      "depicts": "entrance to Parcul Băilor, Băile Govora",
+      "captured_at": "2012-08-25",
+      "credit": "BICasian / Wikimedia Commons",
+      "license": "CC BY-SA 3.0",
+      "required_disclosure": "archive/context photo; does not depict the 2026 event"
+    },
+    "people_or_exact_event_identity": "MANUAL_REVIEW_REQUIRED"
+  },
+  "source_health": {
+    "status": "DEGRADED_PARTIAL_SOURCE_SUCCESS",
+    "registered": 33,
+    "ok": 26,
+    "failed": 7,
+    "semantic_change_candidates": 3,
+    "last_known_good_preserved": true
+  },
+  "quality_and_legal": {
+    "editorial_integrity_story_count": 38,
+    "passed": 37,
+    "held": 1,
+    "failed": 0,
+    "active_publication_holds": [
+      "derived-council-gambling-20260723",
+      "olanesti-bridge-monitor"
+    ],
+    "rejected_title_date_only_candidates": 3,
+    "fail_closed": true
+  },
+  "distribution": {
+    "site": "LIVE",
+    "public_http_last_verified": "SUCCESS",
+    "social_state": "OUTBOX_PERSISTED_WITH_CHANNEL_SPECIFIC_HOLDS",
+    "known_media_holds": ["instagram", "tiktok"],
+    "rule": "Do not clear social media holds merely because contextual site media exists."
+  },
+  "action": {
+    "canonical_cycle_trigger_commit": "dc75efd080069467779d5ae7564c5148b86558b6",
+    "trigger_slot": "morning",
+    "publication_override": false,
+    "next_step": "Let canonical writers re-evaluate the Sunday edition; continue monitoring primary authorities and material festival/results updates, then refresh checkpoint."
+  }
+}
