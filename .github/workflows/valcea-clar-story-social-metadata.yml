@@ -48,6 +48,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   # Derived presentation must never race the canonical live writer.
@@ -86,11 +87,13 @@ jobs:
           archive='valcea-clar/site/story_archive.json'
           before="$(sha256sum "$archive" | cut -d' ' -f1)"
 
+          python valcea-clar/scripts/public_ux_fresh_rank.py
           python valcea-clar/scripts/render_story_pages.py | tee /tmp/story-social-metadata.json
           python valcea-clar/scripts/public_ux_media.py
           python valcea-clar/scripts/public_ux_media_integrity.py
           python valcea-clar/scripts/build_live_feed.py --refresh-media-only
           python valcea-clar/scripts/public_ux_manifest.py
+          python valcea-clar/scripts/public_ux_fresh_rank.py --check
           python valcea-clar/scripts/public_ux_media.py --check
           python valcea-clar/scripts/public_ux_media_integrity.py --check
           python valcea-clar/scripts/public_ux_manifest.py --check
@@ -139,11 +142,13 @@ jobs:
             archive='valcea-clar/site/story_archive.json'
             before="$(sha256sum "$archive" | cut -d' ' -f1)"
 
+            python valcea-clar/scripts/public_ux_fresh_rank.py
             python valcea-clar/scripts/render_story_pages.py | tee /tmp/story-social-metadata.json
             python valcea-clar/scripts/public_ux_media.py
             python valcea-clar/scripts/public_ux_media_integrity.py
             python valcea-clar/scripts/build_live_feed.py --refresh-media-only
             python valcea-clar/scripts/public_ux_manifest.py
+            python valcea-clar/scripts/public_ux_fresh_rank.py --check
             python valcea-clar/scripts/public_ux_media.py --check
             python valcea-clar/scripts/public_ux_media_integrity.py --check
             python valcea-clar/scripts/public_ux_manifest.py --check
@@ -192,6 +197,18 @@ jobs:
 
           echo 'Could not persist canonical Public UX after five attempts.' >&2
           exit 1
+
+      - name: Dispatch strict public HTTP acceptance
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh workflow run valcea-clar-public-health.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref main \
+            -f require_ready=true
+          echo 'VÂLCEA CLAR strict Public HTTP validation dispatch accepted after canonical presentation.'
 
       - name: Write audit summary
         if: always()
