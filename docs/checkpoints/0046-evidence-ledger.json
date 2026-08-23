@@ -1,0 +1,40 @@
+{
+  "checkpoint": "0046",
+  "title": "Audited Dead-Letter Resolution",
+  "status": "CODE_COMPLETE_CI_PENDING",
+  "artifacts": [
+    "civora/transactions.py",
+    "tests/test_transactions.py",
+    "docs/checkpoints/0046-audited-dead-letter-resolution.md",
+    "docs/checkpoints/0046-evidence-ledger.json"
+  ],
+  "evidence": {
+    "implementation_commit": "ccaf1ec585dd031f0feaa486dbce52f357054689",
+    "tests_commit": "54f7aa0721ad0aa48a1056b99a0f3833f7e9b3d4",
+    "checkpoint_doc_commit": "c4f2c943253a24c18e4f3a1eff4477bb19c2be85"
+  },
+  "gates": {
+    "EXPLICIT_DEAD_LETTER_RESOLUTION": "PASS_IMPLEMENTATION_REVIEW",
+    "DEAD_LETTER_REQUEUE": "PASS_IMPLEMENTATION_REVIEW",
+    "DEAD_LETTER_ABORT": "PASS_IMPLEMENTATION_REVIEW",
+    "DURABLE_RESOLUTION_HISTORY": "PASS_IMPLEMENTATION_REVIEW",
+    "RESOLUTION_ACTOR_REASON_REQUIRED": "PASS_IMPLEMENTATION_REVIEW",
+    "SILENT_DELETION_PATH": "ABSENT",
+    "PYTHON_3_11_3_13_CI": "PENDING_CURRENT_HEAD",
+    "WINDOWS_NATIVE": "PENDING"
+  },
+  "remaining_backlog": [
+    "mirror dead-letter resolution into RecoveryEventLedger with idempotent event identity",
+    "deduplicate repeated recovery/health events",
+    "health re-inspection after dead-letter resolution",
+    "multiprocess end-to-end crash/recovery test",
+    "implicit SourceRegistry and SignalStore startup-health wiring",
+    "Windows native validation",
+    "Fact Kernel and claim/evidence reconciliation"
+  ],
+  "blockers": [
+    "GitHub Actions validation pending for current head",
+    "Windows-native validation requires a Windows runner"
+  ],
+  "next_action": "Integrate dead-letter resolution with RecoveryEventLedger using an idempotent event key and re-inspect health after resolution."
+}

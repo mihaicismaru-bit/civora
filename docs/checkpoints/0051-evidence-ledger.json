@@ -1,0 +1,45 @@
+{
+  "checkpoint": "0051",
+  "title": "Source & Signal Startup Health Wiring",
+  "status": "CODE_COMPLETE_CI_PENDING",
+  "evidence": [
+    {
+      "artifact": "civora/orchestrator.py",
+      "claim": "Default Orchestrator health composition now includes canonical Source Registry and Signal Store paths, with explicit path overrides supported."
+    },
+    {
+      "artifact": "tests/test_startup_health.py",
+      "claim": "Tests cover default component inclusion, source corruption fail-closed startup, signal backup recovery with global audit, and explicit path overrides."
+    },
+    {
+      "artifact": "tests/test_health.py",
+      "claim": "Pre-existing checkpoint-0049 health transition regression repaired by treating TransactionJournal.prepare return value as the transaction id string."
+    },
+    {
+      "artifact": "tests/test_core.py",
+      "claim": "End-to-end test now asserts the four editorial checkpoint artifacts explicitly rather than relying on obsolete total JSON file count."
+    }
+  ],
+  "gates": {
+    "DEFAULT_SOURCE_REGISTRY_HEALTH_WIRING": "PASS_IMPLEMENTATION_REVIEW",
+    "DEFAULT_SIGNAL_STORE_HEALTH_WIRING": "PASS_IMPLEMENTATION_REVIEW",
+    "SOURCE_CORRUPTION_FAIL_CLOSED_STARTUP": "TEST_ADDED",
+    "SIGNAL_BACKUP_RECOVERY_STARTUP_PARTICIPATION": "TEST_ADDED",
+    "SIGNAL_RECOVERY_GLOBAL_AUDIT": "TEST_ADDED",
+    "EXPLICIT_SOURCE_SIGNAL_PATH_OVERRIDE": "TEST_ADDED",
+    "PREEXISTING_CI_REGRESSION_REPAIR": "PASS_IMPLEMENTATION_REVIEW",
+    "PYTHON_3_11_3_12_3_13_CI": "PENDING_CURRENT_HEAD",
+    "WINDOWS_NATIVE": "PENDING"
+  },
+  "remaining_backlog": [
+    "Windows-native persistence and process-locking validation",
+    "Operational CLI/command surface for unified health and dead-letter resolution",
+    "Fact Kernel claim/evidence aggregation",
+    "Temporal claim matching and contradiction reconciliation",
+    "Editorial approval state machine"
+  ],
+  "blockers": [
+    "Native Windows validation has not yet been recorded"
+  ],
+  "next_action": "Add Windows-native validation to CI if available without credentials; otherwise implement the operational health/dead-letter command surface before Fact Kernel work."
+}

@@ -1,0 +1,58 @@
+{
+  "checkpoint": "0078",
+  "title": "Windows errno-only contention remediation + release rebind",
+  "state": "RELEASE_METADATA_CLOSURE_CI_PENDING",
+  "runtime_head": "f65daa29b3ac4255653d39dd36f016c7ed2bda3b",
+  "runtime_workflow_run_id": 31256476768,
+  "runtime_workflow_conclusion": "success",
+  "prior_failed_run": 31247609116,
+  "defect": {
+    "job": "windows-native",
+    "test": "test_independent_review_queue_writers_do_not_lose_updates",
+    "exception": "PermissionError errno=13 during exclusive lock-file create with no usable winerror",
+    "root_cause": "Transient Windows lock contention was misclassified as a permanent permission failure when CPython exposed only errno=13."
+  },
+  "changes": [
+    {
+      "commit": "48e565d2c6a2df0480a999618297b8d3af279154",
+      "path": "civora/locking.py",
+      "purpose": "Bounded fallback for Windows errno-only EACCES contention while preserving fail-fast permission semantics."
+    },
+    {
+      "commit": "f65daa29b3ac4255653d39dd36f016c7ed2bda3b",
+      "path": "tests/test_windows_lock_race.py",
+      "purpose": "Regression coverage for transient retry and persistent fail-fast behavior."
+    }
+  ],
+  "validation": {
+    "linux_python_3_10": "PASS",
+    "linux_python_3_11": "PASS",
+    "linux_python_3_12": "PASS",
+    "linux_python_3_13": "PASS",
+    "windows_native_python_3_12": "PASS",
+    "package_smoke": "PASS",
+    "release_preflight": "PASS"
+  },
+  "completed_gates": [
+    "WINDOWS_ERRNO_ONLY_EACCES_CLASSIFICATION",
+    "WINDOWS_TRANSIENT_CONTENTION_BOUNDED_RETRY",
+    "PERSISTENT_PERMISSION_FAIL_FAST",
+    "WINDOWS_MULTIPROCESS_REVIEW_QUEUE",
+    "CROSS_PLATFORM_FULL_SUITE",
+    "PACKAGE_SMOKE",
+    "RELEASE_PREFLIGHT",
+    "RELEASE_RUNTIME_REBIND"
+  ],
+  "remaining_backlog": [
+    "P0 metadata-only closure head complete CI validation",
+    "Explicit human approval before irreversible release operations",
+    "Optional immutable SHA pinning for GitHub Actions",
+    "Optional dedicated static/secret/security scanning gate"
+  ],
+  "blockers": {
+    "technical": "NONE",
+    "closure": "CI_PENDING",
+    "governance": "HUMAN_RELEASE_APPROVAL_REQUIRED"
+  },
+  "next_action": "Validate the complete workflow on the final metadata-only closure head; on success classify RELEASE_READY_TECHNICAL without another repository mutation."
+}

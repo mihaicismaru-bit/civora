@@ -1,0 +1,82 @@
+{
+  "project": "CIVORA",
+  "checkpoint": "0035",
+  "state": "CODE_COMPLETE_CI_PENDING",
+  "evidence": [
+    {
+      "gate": "SOURCE_REGISTRY_ATOMIC_PERSISTENCE",
+      "result": "PASS",
+      "artifact": "civora/registry.py"
+    },
+    {
+      "gate": "SOURCE_REGISTRY_BACKUP_RECOVERY",
+      "result": "PASS",
+      "artifact": "tests/test_registry_ingestion.py"
+    },
+    {
+      "gate": "SOURCE_REGISTRY_FAIL_CLOSED",
+      "result": "PASS",
+      "artifact": "tests/test_registry_ingestion.py"
+    },
+    {
+      "gate": "REVIEW_QUEUE_ATOMIC_PERSISTENCE",
+      "result": "PASS",
+      "artifact": "civora/review.py"
+    },
+    {
+      "gate": "REVIEW_QUEUE_BACKUP_RECOVERY",
+      "result": "PASS",
+      "artifact": "tests/test_registry_ingestion.py"
+    },
+    {
+      "gate": "REVIEW_QUEUE_FAIL_CLOSED",
+      "result": "PASS",
+      "artifact": "tests/test_registry_ingestion.py"
+    },
+    {
+      "gate": "IN_MEMORY_ROLLBACK_ON_SAVE_FAILURE",
+      "result": "PASS_IMPLEMENTATION_REVIEW",
+      "artifacts": [
+        "civora/registry.py",
+        "civora/review.py"
+      ]
+    },
+    {
+      "gate": "GITHUB_CI_MATRIX",
+      "result": "PENDING",
+      "artifact": ".github/workflows/test.yml"
+    }
+  ],
+  "backlog": [
+    {
+      "priority": "P0",
+      "item": "Cross-process locking for AtomicJsonStore read-modify-write operations"
+    },
+    {
+      "priority": "P0",
+      "item": "Refactor SignalStore onto AtomicJsonStore"
+    },
+    {
+      "priority": "P0",
+      "item": "Coordinated transaction across signal, story, and review persistence"
+    },
+    {
+      "priority": "P1",
+      "item": "Unified recovery events and health report"
+    },
+    {
+      "priority": "P1",
+      "item": "Temporal claim matching and contested-cluster reconciliation"
+    },
+    {
+      "priority": "P1",
+      "item": "Editorial approval state machine"
+    }
+  ],
+  "blockers": [
+    "GitHub Actions has not yet emitted a run for the current PR branch.",
+    "Native Windows validation requires a Windows runner.",
+    "Repository visibility is public, so credentials and operational secrets must remain external."
+  ],
+  "next_action": "Implement cross-process locking with bounded timeout and stale-lock recovery in AtomicJsonStore."
+}

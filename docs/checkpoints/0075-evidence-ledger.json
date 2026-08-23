@@ -1,0 +1,23 @@
+{
+  "checkpoint_id": "0075",
+  "project": "CIVORA",
+  "title": "Release Blocker Remediation",
+  "state": "CLOSED_VALIDATED",
+  "canonical_branch": "agent/import-core-runtime-v0-2",
+  "validation": {"workflow_run_id":31236694328,"head_sha":"37c4c312ef4e979d07b9567d8dadc17703cb6725","conclusion":"success"},
+  "gates": [
+    {"gate":"PYTHON_3_10_LOWER_BOUND_CI","status":"PASS"},
+    {"gate":"PYTHON_3_11_3_13_CI_PRESERVED","status":"PASS"},
+    {"gate":"WINDOWS_NATIVE_CI_PRESERVED","status":"PASS"},
+    {"gate":"SDIST_WHEEL_BUILD","status":"PASS"},
+    {"gate":"CLEAN_WHEEL_INSTALL","status":"PASS"},
+    {"gate":"INSTALLED_CLI_SMOKE","status":"PASS"},
+    {"gate":"README_CURRENT_BASELINE","status":"PASS"},
+    {"gate":"IMPORT_PROVENANCE_CLARIFIED","status":"PASS"},
+    {"gate":"VERSION_METADATA_SYNC_CONTRACT","status":"PASS"},
+    {"gate":"CROSS_PLATFORM_AND_PACKAGE_CI","status":"PASS"}
+  ],
+  "remaining_release_blockers": ["R4 release governance: exact release-head validation and explicit human approval before merge/tag/release"],
+  "blockers": [],
+  "next_action": "Complete release-candidate preflight and final version lock."
+}

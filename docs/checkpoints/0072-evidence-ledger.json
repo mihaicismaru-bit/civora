@@ -1,0 +1,48 @@
+{
+  "checkpoint_id": "0072",
+  "project": "CIVORA",
+  "title": "Actionable Unified Health",
+  "state": "CLOSED_VALIDATED",
+  "canonical_branch": "agent/import-core-runtime-v0-2",
+  "validated_head_sha": "ed9506526bda9ed93587ef3faf850346c4520458",
+  "validation": {
+    "workflow_run_id": 31236264030,
+    "conclusion": "success",
+    "scope": "cross-platform GitHub Actions test workflow"
+  },
+  "evidence": [
+    {"type":"prior_validation","workflow_run_id":31234264345,"head_sha":"94906be7c1c19c32dcdddf265591866115b6b967","conclusion":"success","claim":"Checkpoint 0071 passed the complete cross-platform GitHub Actions workflow."},
+    {"type":"implementation","path":"civora/editorial_consistency.py","claim":"Canonical consistency reports include the existing EditorialRemediationPlanner output, making remediation visible to all consumers without a duplicate policy."},
+    {"type":"integration","path":"civora/health.py","claim":"Unified health propagates editorial consistency details including canonical remediation output."},
+    {"type":"integration","path":"civora/cli.py","claim":"Primary health and editorial-consistency commands consume the same consistency report and expose identical remediation policy output."},
+    {"type":"test","path":"tests/test_health_remediation.py","claim":"Covers healthy, prepared-recoverable and committed-divergent health guidance plus both primary CLI surfaces."},
+    {"type":"validation","workflow_run_id":31236264030,"head_sha":"ed9506526bda9ed93587ef3faf850346c4520458","conclusion":"success","claim":"Checkpoint 0072 passed the cross-platform GitHub Actions workflow."}
+  ],
+  "gates": [
+    {"gate":"SINGLE_REMEDIATION_POLICY","status":"PASS"},
+    {"gate":"UNIFIED_HEALTH_REMEDIATION_VISIBILITY","status":"PASS"},
+    {"gate":"PRIMARY_CONSISTENCY_REMEDIATION_VISIBILITY","status":"PASS"},
+    {"gate":"PREPARED_ONLY_AUTO_RECOVERY_GUIDANCE","status":"PASS"},
+    {"gate":"COMMITTED_DIVERGENCE_FAIL_CLOSED","status":"PASS"},
+    {"gate":"MACHINE_READABLE_OPERATOR_OUTPUT","status":"PASS"},
+    {"gate":"REGRESSION_TESTS","status":"PASS"},
+    {"gate":"CROSS_PLATFORM_CI","status":"PASS"}
+  ],
+  "completed_gates": [
+    "0071 closed validated",
+    "canonical consistency report enriched with remediation plan",
+    "unified health exposes remediation through existing component detail propagation",
+    "primary editorial-consistency output exposes the same remediation plan",
+    "no second recovery policy or repair mutation path introduced",
+    "healthy, recoverable and committed-divergent regression cases validated cross-platform"
+  ],
+  "remaining_backlog": [
+    "operator runbooks for evidence-preserving manual investigation, backup restore and verified repair",
+    "production-readiness review across crash recovery, durable health, editorial safety, operator UX, packaging, security assumptions and release gates",
+    "release-candidate remediation and full regression/preflight",
+    "version lock, release manifest and CIVORA v1.0 closure",
+    "optional evidence-preserving style rewrite layer deferred until after v1.0"
+  ],
+  "blockers": [],
+  "next_action": "Implement checkpoint 0073 Operator Remediation Runbooks with deterministic evidence-preserving recovery and manual-investigation decision trees."
+}

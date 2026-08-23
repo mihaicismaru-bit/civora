@@ -1,0 +1,38 @@
+{
+  "checkpoint": "0052",
+  "title": "Windows-Native Validation",
+  "status": "CODE_COMPLETE_CI_PENDING",
+  "evidence": [
+    {
+      "artifact": ".github/workflows/test.yml",
+      "claim": "Canonical CI now includes a windows-latest Python 3.12 job running the full test suite in addition to the existing Ubuntu Python 3.11-3.13 matrix."
+    },
+    {
+      "artifact": "tests/test_multiprocess_recovery.py",
+      "claim": "The Windows job will exercise the same process-level locking and crash/recovery suite used on Linux."
+    },
+    {
+      "artifact": "docs/checkpoints/0051-evidence-ledger.json",
+      "claim": "Source Registry and Signal Store are now part of default startup health composition before platform validation."
+    }
+  ],
+  "gates": {
+    "WINDOWS_NATIVE_WORKFLOW_JOB": "PASS_IMPLEMENTATION_REVIEW",
+    "FULL_TEST_SUITE_ON_WINDOWS": "PENDING_CI",
+    "PROCESS_LOCKING_ON_WINDOWS": "PENDING_CI",
+    "MULTIPROCESS_CRASH_RECOVERY_ON_WINDOWS": "PENDING_CI",
+    "PYTHON_3_12_WINDOWS_PACKAGE_INSTALL": "PENDING_CI",
+    "LINUX_PYTHON_3_11_3_12_3_13_REGRESSION": "PENDING_CURRENT_HEAD"
+  },
+  "remaining_backlog": [
+    "Repair any Windows-specific persistence or locking defect exposed by CI",
+    "Operational CLI for unified health inspection and dead-letter resolution",
+    "Fact Kernel claim/evidence aggregation",
+    "Temporal claim matching and contradiction reconciliation",
+    "Editorial approval state machine"
+  ],
+  "blockers": [
+    "Current hosted CI execution has not yet completed"
+  ],
+  "next_action": "Inspect current Linux and Windows CI results; repair platform defects if any, otherwise close the persistence/recovery platform gate and implement the operational health/dead-letter command surface."
+}

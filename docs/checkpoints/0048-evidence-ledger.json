@@ -1,0 +1,52 @@
+{
+  "checkpoint": "0048",
+  "title": "Startup Resolution Audit Reconciliation",
+  "status": "CODE_COMPLETE_CI_PENDING",
+  "canonical_branch": "agent/import-core-runtime-v0-2",
+  "evidence": [
+    {
+      "type": "implementation",
+      "path": "civora/orchestrator.py",
+      "claim": "Startup now reconciles transaction resolution history into the global recovery ledger before pending transaction replay and final health authorization."
+    },
+    {
+      "type": "test",
+      "path": "tests/test_startup_health.py",
+      "claim": "Crash-gap audit repair and repeated-startup idempotence are covered by regression tests."
+    },
+    {
+      "type": "inherited_capability",
+      "path": "civora/transactions.py",
+      "claim": "TransactionJournal.mirror_resolution_events provides deterministic idempotent reconciliation from durable resolution history."
+    },
+    {
+      "type": "inherited_capability",
+      "path": "civora/recovery.py",
+      "claim": "RecoveryEventLedger rejects conflicting duplicate event identities and treats identical deterministic events as idempotent."
+    }
+  ],
+  "completed_gates": [
+    "STARTUP_RESOLUTION_AUDIT_RECONCILIATION",
+    "RECONCILIATION_FAIL_CLOSED",
+    "PRE_WORK_STARTUP_ORDERING"
+  ],
+  "tests_added": [
+    "CRASH_GAP_AUDIT_REPAIR",
+    "RECONCILIATION_IDEMPOTENCE"
+  ],
+  "pending_gates": [
+    "PYTHON_3_11_3_12_3_13_CURRENT_HEAD",
+    "WINDOWS_NATIVE"
+  ],
+  "remaining_backlog": [
+    "health observation deduplication/coalescing",
+    "multiprocess end-to-end crash/recovery tests",
+    "Source Registry and Signal Store default startup health wiring",
+    "Windows-native validation",
+    "Fact Kernel and claim-evidence reconciliation"
+  ],
+  "blockers": [
+    "Current branch-head CI result is pending."
+  ],
+  "next_action": "Implement deterministic deduplication/coalescing of repetitive health observations while preserving true state transitions."
+}

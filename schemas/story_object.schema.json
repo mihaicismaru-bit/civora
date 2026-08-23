@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CIVORA Story Object",
+  "type": "object",
+  "required": ["id", "version", "state", "signal", "fact_kernel"],
+  "properties": {
+    "id": {"type": "string"},
+    "version": {"type": "integer", "minimum": 1},
+    "state": {"enum": ["signal", "verifying", "ready", "drafted", "packaged", "blocked"]},
+    "source_score": {"type": "number", "minimum": 0, "maximum": 100},
+    "opportunity_score": {"type": "number", "minimum": 0, "maximum": 100},
+    "trust_score": {"type": "number", "minimum": 0, "maximum": 100},
+    "viral_score": {"type": "number", "minimum": 0, "maximum": 100}
+  }
+}

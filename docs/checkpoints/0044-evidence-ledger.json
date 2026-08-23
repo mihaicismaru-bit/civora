@@ -1,0 +1,54 @@
+{
+  "checkpoint": "0044",
+  "title": "Orchestrator Startup Health Gate",
+  "status": "CODE_COMPLETE_CI_PENDING",
+  "branch": "agent/import-core-runtime-v0-2",
+  "artifacts": [
+    "civora/orchestrator.py",
+    "tests/test_startup_health.py",
+    "docs/checkpoints/0044-orchestrator-startup-health-gate.md",
+    "docs/checkpoints/0044-evidence-ledger.json"
+  ],
+  "evidence": [
+    {
+      "gate": "ORCHESTRATOR_STARTUP_HEALTH_GATE",
+      "status": "PASS_IMPLEMENTATION_REVIEW",
+      "evidence": "Orchestrator.run invokes startup_health_gate before the signal checkpoint is persisted."
+    },
+    {
+      "gate": "FAIL_CLOSED_CORRUPT_STARTUP",
+      "status": "PASS_IMPLEMENTATION_REVIEW",
+      "evidence": "Initial corrupt runtime health raises OrchestratorError before transaction recovery."
+    },
+    {
+      "gate": "RECOVER_THEN_REINSPECT",
+      "status": "PASS_IMPLEMENTATION_REVIEW",
+      "evidence": "Startup gate replays pending transactions and requires a second health inspection before accepting work."
+    },
+    {
+      "gate": "DEGRADED_AFTER_RECOVERY_BLOCK",
+      "status": "PASS_IMPLEMENTATION_REVIEW",
+      "evidence": "Final degraded state is rejected; only healthy and recovered_from_backup are accepted."
+    },
+    {
+      "gate": "AUTOMATED_TEST_EXECUTION",
+      "status": "PENDING_CI",
+      "evidence": "New startup health tests committed; final GitHub Actions result pending."
+    },
+    {
+      "gate": "WINDOWS_NATIVE",
+      "status": "PENDING",
+      "evidence": "No native Windows runner validation recorded yet."
+    }
+  ],
+  "remaining_backlog": [
+    "bounded transaction recovery retries and durable dead-letter state",
+    "multiprocess end-to-end crash/recovery test for story_to_review",
+    "full-runtime source/signal startup health wiring",
+    "recovery event deduplication and correlation",
+    "Windows-native validation",
+    "Fact Kernel and claim/evidence reconciliation",
+    "editorial approval state machine"
+  ],
+  "next_action": "Implement bounded transaction recovery retries with durable dead-letter state."
+}

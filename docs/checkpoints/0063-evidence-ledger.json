@@ -1,0 +1,49 @@
+{
+  "checkpoint_id": "0063",
+  "project": "CIVORA",
+  "title": "Review Queue Lifecycle Reconciliation",
+  "state": "CLOSED_VALIDATED",
+  "accelerated_editorial_phase": true,
+  "validation": {
+    "workflow_run_id": 31210211428,
+    "head_sha": "9facbc1c0a8dd4d1f90ced305db830893b878235",
+    "conclusion": "success",
+    "jobs": ["unit-tests (3.11)", "unit-tests (3.12)", "unit-tests (3.13)", "windows-native"]
+  },
+  "evidence": [
+    {"type": "implementation", "path": "civora/editorial_resolution.py", "claim": "Coordinates approval and Review Queue terminal resolution through durable write-ahead transactions and idempotent replay."},
+    {"type": "implementation", "path": "civora/review.py", "claim": "Review Queue supports audited approved/rejected/revision_required terminal states while retaining schema-2 compatibility."},
+    {"type": "integration", "path": "civora/orchestrator.py", "claim": "Startup transaction recovery replays editorial_review_resolution operations and approved re-entry verifies queue/approval consistency when queue is enabled."},
+    {"type": "integration", "path": "civora/cli.py", "claim": "decide-approval uses the transactional EditorialResolutionCoordinator rather than direct approval mutation."},
+    {"type": "test", "path": "tests/test_editorial_resolution.py", "claim": "Covers synchronized resolution, revision-required, crash-gap replay, conflict fail-closed behavior, queue-disabled operation, and backward compatibility."}
+  ],
+  "gates": [
+    {"gate": "TRANSACTIONAL_EDITORIAL_RESOLUTION", "status": "PASS_VALIDATED"},
+    {"gate": "REVIEW_QUEUE_TERMINAL_LIFECYCLE", "status": "PASS_VALIDATED"},
+    {"gate": "APPROVAL_QUEUE_AUDIT_PARITY", "status": "PASS_VALIDATED"},
+    {"gate": "CRASH_RECOVERY_REPLAY", "status": "PASS_VALIDATED"},
+    {"gate": "IDEMPOTENT_QUEUE_REPLAY", "status": "PASS_VALIDATED"},
+    {"gate": "CONFLICTING_TERMINAL_STATE_FAIL_CLOSED", "status": "PASS_VALIDATED"},
+    {"gate": "REVIEW_QUEUE_SCHEMA_COMPATIBILITY", "status": "PASS_VALIDATED"},
+    {"gate": "CLI_COORDINATOR_ROUTING", "status": "PASS_VALIDATED"},
+    {"gate": "APPROVED_REENTRY_QUEUE_GUARD", "status": "PASS_VALIDATED"},
+    {"gate": "CROSS_PLATFORM_CI", "status": "PASS", "workflow_run_id": 31210211428}
+  ],
+  "completed_gates": [
+    "approval and Review Queue lifecycle coupled by write-ahead transaction",
+    "prepared editorial resolution transactions recoverable after crash",
+    "queue resolution audit includes actor and reason",
+    "same-action replay is idempotent",
+    "different terminal queue state fails closed",
+    "legacy schema-2 queue remains readable",
+    "cross-platform matrix passed"
+  ],
+  "remaining_backlog": [
+    "approval/Review Queue consistency inspection and health wiring",
+    "crash/recovery validation through approved pipeline re-entry",
+    "Story Engine constrained to authorized/corroborated facts",
+    "operator runbooks"
+  ],
+  "blockers": [],
+  "next_action": "Implement approval/Review Queue/transaction consistency inspection and fail-closed health wiring."
+}

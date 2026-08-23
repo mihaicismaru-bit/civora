@@ -1,0 +1,54 @@
+{
+  "checkpoint": "0041",
+  "title": "Story checkpoint atomic persistence",
+  "status": "CODE_COMPLETE_CI_PENDING",
+  "artifacts": [
+    "civora/checkpoints.py",
+    "civora/orchestrator.py",
+    "tests/test_checkpoints.py",
+    "docs/checkpoints/0041-story-checkpoint-atomic-persistence.md"
+  ],
+  "evidence": [
+    {
+      "claim": "Orchestrator no longer writes editorial checkpoints with Path.write_text",
+      "artifact": "civora/orchestrator.py"
+    },
+    {
+      "claim": "Story checkpoints use the canonical AtomicJsonStore primitive",
+      "artifact": "civora/checkpoints.py"
+    },
+    {
+      "claim": "Checkpoint payloads are schema-versioned and SHA-256 checksum protected",
+      "artifact": "civora/checkpoints.py"
+    },
+    {
+      "claim": "Tests cover primary corruption recovery and dual-generation fail-closed behavior",
+      "artifact": "tests/test_checkpoints.py"
+    }
+  ],
+  "gates": {
+    "direct_checkpoint_write_removed": "PASS_IMPLEMENTATION_REVIEW",
+    "checkpoint_checksum": "PASS_IMPLEMENTATION_REVIEW",
+    "checkpoint_atomic_replacement": "PASS_IMPLEMENTATION_REVIEW",
+    "checkpoint_cross_process_locking": "PASS_IMPLEMENTATION_REVIEW",
+    "checkpoint_backup_recovery": "PASS_IMPLEMENTATION_REVIEW",
+    "checkpoint_fail_closed": "PASS_IMPLEMENTATION_REVIEW",
+    "unit_tests_py311": "PENDING_CI",
+    "unit_tests_py312": "PENDING_CI",
+    "unit_tests_py313": "PENDING_CI",
+    "windows_native": "PENDING"
+  },
+  "blockers": [
+    "Current GitHub Actions matrix must pass before checkpoint closure",
+    "Native Windows validation remains pending"
+  ],
+  "remaining_backlog": [
+    "Unified recovery and health report",
+    "Health events for backup recovery and corruption",
+    "Pending transaction recovery surfaced in runtime health",
+    "Native Windows validation",
+    "Fact Kernel conflict resolution and temporal claim matching",
+    "Editorial approval state machine"
+  ],
+  "next_action": "Implement unified recovery and health report after CI validates checkpoint 0041"
+}

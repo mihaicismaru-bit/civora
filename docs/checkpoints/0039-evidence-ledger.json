@@ -1,0 +1,47 @@
+{
+  "checkpoint": "0039",
+  "title": "Story to Review transactional handoff",
+  "status": "CODE_COMPLETE_VALIDATION_PENDING",
+  "artifacts": [
+    "civora/review.py",
+    "civora/orchestrator.py",
+    "tests/test_transactions.py",
+    "docs/checkpoints/0039-story-review-transactional-handoff.md"
+  ],
+  "evidence": [
+    {
+      "claim": "Blocked-story review handoff is journaled before queue mutation",
+      "artifact": "civora/orchestrator.py",
+      "mechanism": "TransactionJournal.prepare -> ReviewQueue.enqueue_payload -> TransactionJournal.commit"
+    },
+    {
+      "claim": "Prepared story_to_review transactions replay after restart",
+      "artifact": "civora/orchestrator.py",
+      "mechanism": "recover_pending_transactions at orchestrator run start"
+    },
+    {
+      "claim": "Replay is idempotent by story id",
+      "artifact": "civora/review.py",
+      "mechanism": "AtomicJsonStore.update replaces the same items[story_id] key"
+    },
+    {
+      "claim": "Both primary crash windows have regression tests",
+      "artifact": "tests/test_transactions.py",
+      "mechanism": "tests for crash before queue write and after queue write before commit"
+    }
+  ],
+  "gates": {
+    "story_to_review_write_ahead_journal": "PASS_IMPLEMENTATION_REVIEW",
+    "crash_recovery_before_queue_write": "TEST_ADDED",
+    "crash_recovery_after_queue_write": "TEST_ADDED",
+    "replay_idempotence": "PASS_IMPLEMENTATION_REVIEW",
+    "unsupported_transaction_fail_closed": "PASS_IMPLEMENTATION_REVIEW",
+    "full_automated_suite": "PENDING_CI",
+    "windows_native_validation": "PENDING"
+  },
+  "blockers": [
+    "GitHub Actions validation result not yet confirmed",
+    "Native Windows validation not yet confirmed"
+  ],
+  "next_action": "Atomically persist story checkpoints and then add unified recovery and health reporting"
+}
