@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.3",
+  "schema_version": "1.4",
   "checkpoint_id": "VALCEA-CLAR-SUNDAY-2026-08-23-1200",
   "observed_local": "2026-08-23T12:01:14+03:00",
   "status": "EXTERNAL_PRESENTATION_BLOCKER",
@@ -22,6 +22,7 @@
     ],
     "working_priority_not_publication_authority": [
       "anm-yellow-heat-oltenia-20260823",
+      "anm-storm-scope-conflict-20260823",
       "remus-bellu-fire-20260822",
       "cantecele-oltului-2026-parada-concurs-20260822",
       "scm-valcea-csm-bucuresti-supercupa-20260823",
@@ -54,12 +55,26 @@
         "pressure_trend": "rising",
         "relative_humidity_percent": 37
       },
-      "correction_to_prior_checkpoint": {
-        "status": "SUPERSEDED",
-        "incorrect_prior_claim": "Vâlcea-specific COD GALBEN storm warning for 23 August 13:00–24 August 01:00",
-        "current_official_state": "The 23 August 10:00 COD GALBEN instability bulletin is valid 13:00–22:00 only for mountain areas of Argeș, Dâmbovița, Prahova and Buzău. ANM notes isolated instability may also occur in Oltenia and Muntenia, but this is not a current Vâlcea-specific yellow-code storm designation."
-      },
       "next_gate": "CANONICAL_ANM_SOURCE_ADAPTER_OR_FACT_KERNEL_WITHOUT_BYPASS"
+    },
+    {
+      "id": "anm-storm-scope-conflict-20260823",
+      "status": "SOURCE_CONFLICT_HOLD",
+      "news_value": "PUBLIC_SAFETY_REQUIRES_RECONCILIATION",
+      "current_anm_webpage_evidence": {
+        "source_url": "https://www.meteoromania.ro/avertizari/",
+        "issued_local": "2026-08-23T10:00:00+03:00",
+        "coded_interval": "2026-08-23T13:00:00+03:00/2026-08-23T22:00:00+03:00",
+        "coded_area": "mountain areas of Argeș, Dâmbovița, Prahova and Buzău",
+        "note": "isolated instability may also occur in Oltenia and Muntenia"
+      },
+      "conflicting_current_evidence": [
+        "Contemporaneous public reports citing ANM state that Vâlcea is under a yellow storm warning from 13:00.",
+        "The structured weather-alert feed available in this cycle reports a Vâlcea yellow storm warning from 13:00 to 01:00."
+      ],
+      "editorial_rule": "Do not state that the Vâlcea storm warning is definitively active, cancelled or superseded until the ANM alert feed/current bulletin is reconciled.",
+      "prior_checkpoint_storm_claim_status": "HOLD_PENDING_RECONCILIATION",
+      "next_gate": "RECHECK_ANM_PRIMARY_ALERT_FEED_AND_NOWCASTING_AT_OR_AFTER_13_00"
     },
     {
       "id": "remus-bellu-fire-20260822",
@@ -201,6 +216,6 @@
   "action": {
     "publication_override": false,
     "media_repair_loop_stopped": true,
-    "next_step": "Keep EXTERNAL_PRESENTATION_BLOCKER until the public bridge is structurally republished and direct valceaclar.ro readback demonstrates current feed plus visible photography. Editorially, ingest the corrected ANM heat warning through a canonical source/fact path without bypass; keep Remus Bellu T2 unless a primary ISU anchor appears; re-check weather nowcasting after 13:00 and SCM result after 15:00."
+    "next_step": "Keep EXTERNAL_PRESENTATION_BLOCKER until the public bridge is structurally republished and direct valceaclar.ro readback demonstrates current feed plus visible photography. Editorially, keep the verified ANM heat warning as a T1 candidate, reconcile the conflicting Vâlcea storm-alert scope at or after 13:00 without asserting a false state, keep Remus Bellu T2 unless a primary ISU anchor appears, and re-check SCM result after 15:00."
   }
 }
