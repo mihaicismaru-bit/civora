@@ -86,11 +86,13 @@ jobs:
           archive='valcea-clar/site/story_archive.json'
           before="$(sha256sum "$archive" | cut -d' ' -f1)"
 
+          python valcea-clar/scripts/public_ux_fresh_rank.py
           python valcea-clar/scripts/render_story_pages.py | tee /tmp/story-social-metadata.json
           python valcea-clar/scripts/public_ux_media.py
           python valcea-clar/scripts/public_ux_media_integrity.py
           python valcea-clar/scripts/build_live_feed.py --refresh-media-only
           python valcea-clar/scripts/public_ux_manifest.py
+          python valcea-clar/scripts/public_ux_fresh_rank.py --check
           python valcea-clar/scripts/public_ux_media.py --check
           python valcea-clar/scripts/public_ux_media_integrity.py --check
           python valcea-clar/scripts/public_ux_manifest.py --check
@@ -139,11 +141,13 @@ jobs:
             archive='valcea-clar/site/story_archive.json'
             before="$(sha256sum "$archive" | cut -d' ' -f1)"
 
+            python valcea-clar/scripts/public_ux_fresh_rank.py
             python valcea-clar/scripts/render_story_pages.py | tee /tmp/story-social-metadata.json
             python valcea-clar/scripts/public_ux_media.py
             python valcea-clar/scripts/public_ux_media_integrity.py
             python valcea-clar/scripts/build_live_feed.py --refresh-media-only
             python valcea-clar/scripts/public_ux_manifest.py
+            python valcea-clar/scripts/public_ux_fresh_rank.py --check
             python valcea-clar/scripts/public_ux_media.py --check
             python valcea-clar/scripts/public_ux_media_integrity.py --check
             python valcea-clar/scripts/public_ux_manifest.py --check
