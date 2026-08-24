@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0",
+  "product": "VÂLCEA CLAR MEDIA PUBLICATION POLICY",
+  "status": "OWNER_APPROVED_RELAXED_GATES",
+  "effective_date": "2026-08-24",
+  "goal": "maximize relevant real-photo coverage while preserving provenance and avoiding false event depiction",
+  "publication_defaults": {
+    "owned_photo_contextual_reuse": "AUTO_ALLOWED",
+    "open_license_contextual_reuse": "AUTO_ALLOWED",
+    "official_primary_source_unknown_reuse_rights": "ALLOWED_WITH_ATTRIBUTION_AND_DISCLOSURE",
+    "generic_third_party_unknown_rights": "HOLD",
+    "event_direct_claim_without_event_evidence": "HOLD",
+    "person_identity_or_sensitive_incident": "MANUAL_REVIEW"
+  },
+  "contextual_match": {
+    "minimum_confidence": 0.9,
+    "allowed_relations": ["exact_place", "exact_institution", "same_canonical_place", "same_canonical_entity"],
+    "editor_approval_required": false,
+    "rights_reconfirmation_required_for_owned": false,
+    "privacy_review_required_when_no_salient_people_or_plates": false,
+    "disclosure_required": true,
+    "default_disclosure_template": "Foto de context: {subject}; imaginea nu surprinde în mod necesar evenimentul descris."
+  },
+  "official_source_unknown_rights": {
+    "owner_risk_acceptance": true,
+    "citation_is_not_a_license": true,
+    "publication_allowed": true,
+    "preferred_delivery_mode": "remote_reference",
+    "local_binary_copy_forbidden": true,
+    "source_name_required": true,
+    "source_url_required": true,
+    "visible_credit_required": true,
+    "rights_status_required": "UNVERIFIED_REUSE_RIGHTS",
+    "rights_note_required": "Sursa foto indicată; drepturile de reutilizare nu au fost confirmate explicit.",
+    "takedown_ready": true,
+    "event_or_person_false_implication_forbidden": true
+  },
+  "hard_stops": {
+    "synthetic_photo_presented_as_documentary": true,
+    "known_false_locality": true,
+    "known_wrong_subject": true,
+    "known_copyright_owner_objection_or_takedown": true,
+    "sensitive_person_identity_without_review": true,
+    "minor_or_private_person_as_story_subject_without_review": true
+  },
+  "priority_order": [
+    "owned_exact_or_contextual",
+    "open_license_exact_or_contextual",
+    "official_primary_source_attributed",
+    "no_photo"
+  ]
+}
