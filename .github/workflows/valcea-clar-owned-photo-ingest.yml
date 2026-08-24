@@ -20,6 +20,10 @@ on:
       - 'valcea-clar/social/drive_owned_photo_ingest.py'
       - 'valcea-clar/social/owned_photo_story_matcher.py'
       - 'valcea-clar/social/materialize_owned_photo_story.py'
+      - 'valcea-clar/social/photo_atlas_owned_source.json'
+      - 'valcea-clar/social/photo_atlas_owned_bridge.py'
+      - 'valcea-clar/social/photo_atlas.py'
+      - 'valcea-clar/social/photo_atlas.json'
       - 'valcea-clar/site/story_archive.json'
       - 'valcea-clar/social/story_visuals.json'
       - '.github/workflows/valcea-clar-owned-photo-ingest.yml'
@@ -128,21 +132,27 @@ jobs:
           print({'status':'PASS','result':r['result'],'scheduler_result':r['scheduler_result']})
           PY
 
-      - name: Validate owned-photo ingest, semantics, matching and materialization gate offline
+      - name: Validate owned-photo ingest, semantics, Atlas migration, matching and materialization gate offline
         run: |
           set -euo pipefail
           python -m py_compile \
             valcea-clar/social/drive_owned_photo_ingest.py \
             valcea-clar/social/owned_photo_semantic_registry.py \
+            valcea-clar/social/photo_atlas_owned_bridge.py \
+            valcea-clar/social/photo_atlas.py \
             valcea-clar/social/owned_photo_story_matcher.py \
             valcea-clar/social/materialize_owned_photo_story.py
           python valcea-clar/social/drive_owned_photo_ingest.py --self-test
           python valcea-clar/social/owned_photo_semantic_registry.py --self-test
+          python valcea-clar/social/photo_atlas_owned_bridge.py --self-test
+          python valcea-clar/social/photo_atlas.py --self-test
           python valcea-clar/social/owned_photo_story_matcher.py --self-test
           python valcea-clar/social/materialize_owned_photo_story.py --self-test
           python valcea-clar/social/drive_owned_photo_ingest.py --from-snapshot
           python valcea-clar/social/drive_owned_photo_ingest.py --validate-only
           python valcea-clar/social/owned_photo_semantic_registry.py --write
+          python valcea-clar/social/photo_atlas_owned_bridge.py
+          python valcea-clar/social/photo_atlas.py --check
           python valcea-clar/social/owned_photo_story_matcher.py
           python valcea-clar/social/owned_photo_story_matcher.py --validate-only
           python valcea-clar/social/materialize_owned_photo_story.py --validate-only
@@ -172,6 +182,7 @@ jobs:
           # Any newly discovered image without a semantic label must fail here;
           # native runtime does not invent image meaning without visual review.
           python valcea-clar/social/owned_photo_semantic_registry.py --write
+          python valcea-clar/social/photo_atlas_owned_bridge.py
           python valcea-clar/social/owned_photo_story_matcher.py
           python valcea-clar/social/owned_photo_story_matcher.py --validate-only
           python valcea-clar/social/materialize_owned_photo_story.py --validate-only
@@ -186,6 +197,8 @@ jobs:
           ambiguous=json.loads(Path('valcea-clar/social/owned_photo_ambiguous_review_queue.json').read_text(encoding='utf-8'))
           queue=json.loads(Path('valcea-clar/social/owned_photo_story_candidates.json').read_text(encoding='utf-8'))
           requests=json.loads(Path('valcea-clar/social/owned_photo_materialization_requests.json').read_text(encoding='utf-8'))
+          atlas=json.loads(Path('valcea-clar/social/photo_atlas.json').read_text(encoding='utf-8'))
+          owned_source=json.loads(Path('valcea-clar/social/photo_atlas_owned_source.json').read_text(encoding='utf-8'))
 
           assert registry['publication_authority'] == 'NONE'
           assert registry['candidate_only'] is True
@@ -205,8 +218,6 @@ jobs:
           summary=semantic['summary']
           assert summary['asset_count'] == registry['summary']['asset_count']
           assert summary['confirmed'] + summary['ambiguous'] + summary['rejected'] == summary['asset_count']
-          # Preserve the fully-confirmed curated bootstrap while allowing future
-          # unknown inbox photos to remain ambiguous/fail-closed.
           assert summary['confirmed'] >= 48
           assert ambiguous['summary']['ambiguous_count'] == summary['ambiguous']
           assert len(ambiguous['items']) == summary['ambiguous']
@@ -227,6 +238,20 @@ jobs:
               assert asset['automatic_story_assignment'] is False
               assert 'visual_review' in asset['evidence']
           assert semantic_ids == {asset['drive_file_id'] for asset in registry['assets']}
+
+          assert owned_source['status'] == 'MIGRATED_BY_REFERENCE'
+          assert owned_source['publication_authority'] == 'NONE'
+          assert owned_source['automatic_story_assignment_allowed'] is False
+          assert owned_source['bootstrap']['asset_count'] == 48
+          assert owned_source['storage']['repository_bulk_binary_copy'] is False
+          assert owned_source['storage']['story_specific_binary_materialization_only'] is True
+          assert atlas['publication_authority'] == 'NONE'
+          assert atlas['summary']['owned_candidate_asset_count'] == 48
+          assert atlas['summary']['approved_asset_count'] == len(atlas['assets'])
+          assert atlas['summary']['discoverable_asset_count'] == atlas['summary']['approved_asset_count'] + 48
+          assert atlas['candidate_sources'][0]['candidate_only'] is True
+          assert atlas['candidate_sources'][0]['approved_assets_listed_in_atlas_assets'] is False
+          assert atlas['candidate_sources'][0]['automatic_story_assignment_allowed'] is False
 
           assert queue['publication_authority'] == 'NONE'
           assert queue['candidate_only'] is True
@@ -251,6 +276,8 @@ jobs:
               'status':'PASS',
               'asset_count':registry['summary']['asset_count'],
               'semantic_summary':summary,
+              'owned_atlas_candidates':atlas['summary']['owned_candidate_asset_count'],
+              'approved_atlas_assets':atlas['summary']['approved_asset_count'],
               'ambiguous_count':ambiguous['summary']['ambiguous_count'],
               'story_candidate_summary':queue['summary'],
               'active_materialization_requests':sum(
