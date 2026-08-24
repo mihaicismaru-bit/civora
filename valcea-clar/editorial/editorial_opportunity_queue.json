@@ -2,19 +2,19 @@
   "schema_version": "1.1",
   "instance_id": "valcea",
   "product": "VÂLCEA CLAR Editorial Opportunity Queue",
-  "generated_at": "2026-08-24T08:32:09Z",
+  "generated_at": "2026-08-24T11:47:22Z",
   "publication_authority": "NONE",
   "public_projection": false,
   "publication_model": "continuous_publication_multi_product",
-  "monitor_count": 75,
-  "opportunity_count": 240,
+  "monitor_count": 76,
+  "opportunity_count": 243,
   "lane_counts": {
-    "knowledge": 138,
+    "knowledge": 140,
     "service": 6,
-    "monitor": 96
+    "monitor": 97
   },
   "product_counts": {
-    "EXPLAINER": 59,
+    "EXPLAINER": 60,
     "TIMELINE": 5,
     "DECISION_DIGEST": 2,
     "JOBS_ROUNDUP": 2,
@@ -27,11 +27,11 @@
     "ACTIVE_PERMITS_INDEX": 3,
     "ARCHIVE_REUSE": 1,
     "CULTURAL_AGENDA": 1,
-    "CAST_CREATOR_INDEX": 63,
-    "PREMIERE_REPERTOIRE_TRACKER": 63
+    "CAST_CREATOR_INDEX": 64,
+    "PREMIERE_REPERTOIRE_TRACKER": 64
   },
   "family_counts": {
-    "general": 59,
+    "general": 60,
     "infrastructure": 18,
     "council": 7,
     "jobs": 5,
@@ -39,7 +39,7 @@
     "real_estate_development": 11,
     "health": 5,
     "verified_archive": 1,
-    "performing_arts": 130,
+    "performing_arts": 132,
     "real_estate_market": 2
   },
   "policy": {
@@ -746,6 +746,41 @@
       ],
       "monitor_family": "general",
       "subject_id": "performing-arts-signal-1e908a0be037416605fc",
+      "subject_label": "Centrul Cultural Municipal Râmnicu Vâlcea — Teatrul Ariel — semnal nou: program/stagiune, bani publici",
+      "fact_recency_required": false,
+      "current_status_verification_required": false,
+      "why_now": "Monitor activ cu documente/registre reutilizabile; EXPLAINER este eligibil independent de data inițială a faptelor.",
+      "evidence_hint": "Use verified dated documents to explain the subject without inventing a fresh event hook.",
+      "evidence_status": "DOCUMENTARY_BASELINE_AVAILABLE",
+      "next_stage": "DOCUMENT_EXTRACTION_AND_FACT_KERNEL",
+      "source_bindings": [
+        {
+          "id": "ariel-valcea-programme",
+          "ref_type": "url",
+          "publisher": "Centrul Cultural Municipal Râmnicu Vâlcea — Teatrul Ariel",
+          "url": "https://www.arieltheatre.ro/teatru/program",
+          "tier": "T1",
+          "source_status": null
+        }
+      ],
+      "lead_verification_status": null,
+      "normal_story_ready_gate_required": true
+    },
+    {
+      "id": "opp-369144e0249c016df254",
+      "publication_authority": "NONE",
+      "public_projection": false,
+      "lane": "knowledge",
+      "product_type": "EXPLAINER",
+      "writer_format": "explainer",
+      "section": "CULTURĂ",
+      "priority_score": 100,
+      "monitor_id": "performing-arts-signal-c19805f675c5deda2b84",
+      "monitor_ids": [
+        "performing-arts-signal-c19805f675c5deda2b84"
+      ],
+      "monitor_family": "general",
+      "subject_id": "performing-arts-signal-c19805f675c5deda2b84",
       "subject_label": "Centrul Cultural Municipal Râmnicu Vâlcea — Teatrul Ariel — semnal nou: program/stagiune, bani publici",
       "fact_recency_required": false,
       "current_status_verification_required": false,
@@ -4850,6 +4885,41 @@
       "event_date_is_not_published_at": true
     },
     {
+      "id": "opp-033dd3de4d7cabe8f531",
+      "publication_authority": "NONE",
+      "public_projection": false,
+      "lane": "knowledge",
+      "product_type": "CAST_CREATOR_INDEX",
+      "writer_format": "explainer",
+      "section": "CULTURĂ",
+      "priority_score": 94,
+      "monitor_id": "performing-arts-signal-c19805f675c5deda2b84",
+      "monitor_ids": [
+        "performing-arts-signal-c19805f675c5deda2b84"
+      ],
+      "monitor_family": "performing_arts",
+      "subject_id": "performing-arts-signal-c19805f675c5deda2b84",
+      "subject_label": "Centrul Cultural Municipal Râmnicu Vâlcea — Teatrul Ariel — semnal nou: program/stagiune, bani publici",
+      "fact_recency_required": false,
+      "current_status_verification_required": false,
+      "why_now": "Monitor cultural permanent: CAST_CREATOR_INDEX reutilizează programul și documentele instituționale, dar orice afirmație despre programul curent, bilete, distribuție sau bani este reverificată înainte de publicare.",
+      "evidence_hint": "Connect productions and concerts to verified actors, directors, conductors, soloists, ensembles and creative teams, using Artist Intelligence without attaching ambiguous external identities.",
+      "evidence_status": "DOCUMENTARY_BASELINE_AVAILABLE",
+      "next_stage": "DOCUMENT_EXTRACTION_AND_FACT_KERNEL",
+      "source_bindings": [
+        {
+          "id": "ariel-valcea-programme",
+          "ref_type": "url",
+          "publisher": "Centrul Cultural Municipal Râmnicu Vâlcea — Teatrul Ariel",
+          "url": "https://www.arieltheatre.ro/teatru/program",
+          "tier": "T1"
+        }
+      ],
+      "lead_verification_status": null,
+      "normal_story_ready_gate_required": true,
+      "event_date_is_not_published_at": true
+    },
+    {
       "id": "opp-03dff01ceb2d3b5f84ad",
       "publication_authority": "NONE",
       "public_projection": false,
@@ -7106,6 +7176,41 @@
       ],
       "monitor_family": "performing_arts",
       "subject_id": "performing-arts-signal-fe045105caea36189259",
+      "subject_label": "Centrul Cultural Municipal Râmnicu Vâlcea — Teatrul Ariel — semnal nou: program/stagiune, bani publici",
+      "fact_recency_required": false,
+      "current_status_verification_required": true,
+      "why_now": "Monitor cultural permanent: PREMIERE_REPERTOIRE_TRACKER reutilizează programul și documentele instituționale, dar orice afirmație despre programul curent, bilete, distribuție sau bani este reverificată înainte de publicare.",
+      "evidence_hint": "Track premieres, repertory returns, guest productions, touring and festival selections; each current performance must be verified from the institution or another attributable primary source.",
+      "evidence_status": "CURRENT_REVERIFY_REQUIRED",
+      "next_stage": "CURRENT_PRIMARY_EVIDENCE_COLLECTION",
+      "source_bindings": [
+        {
+          "id": "ariel-valcea-programme",
+          "ref_type": "url",
+          "publisher": "Centrul Cultural Municipal Râmnicu Vâlcea — Teatrul Ariel",
+          "url": "https://www.arieltheatre.ro/teatru/program",
+          "tier": "T1"
+        }
+      ],
+      "lead_verification_status": null,
+      "normal_story_ready_gate_required": true,
+      "event_date_is_not_published_at": true
+    },
+    {
+      "id": "opp-a2b19750c8e712316e2f",
+      "publication_authority": "NONE",
+      "public_projection": false,
+      "lane": "monitor",
+      "product_type": "PREMIERE_REPERTOIRE_TRACKER",
+      "writer_format": "explainer",
+      "section": "CULTURĂ",
+      "priority_score": 94,
+      "monitor_id": "performing-arts-signal-c19805f675c5deda2b84",
+      "monitor_ids": [
+        "performing-arts-signal-c19805f675c5deda2b84"
+      ],
+      "monitor_family": "performing_arts",
+      "subject_id": "performing-arts-signal-c19805f675c5deda2b84",
       "subject_label": "Centrul Cultural Municipal Râmnicu Vâlcea — Teatrul Ariel — semnal nou: program/stagiune, bani publici",
       "fact_recency_required": false,
       "current_status_verification_required": true,
