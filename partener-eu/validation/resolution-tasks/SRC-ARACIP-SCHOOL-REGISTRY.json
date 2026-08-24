@@ -1,14 +1,19 @@
 {
-  "schema_version": "1.1",
-  "type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
-  "source_id": "SRC-ARACIP-SCHOOL-REGISTRY",
-  "source_tier": "T1",
+  "source_name": "official_school_accreditation_registry",
   "source_url": "https://aracip.eu/categorii-documente/info-unitati-invatamant-registre",
-  "status": "OPEN",
+  "source_tier": "T1",
+  "previous_semantic_sha256": "353ee432873e7508e050a6af667441ab2e7c018d636b15c86cd25fac1a82b295",
+  "candidate_semantic_sha256": "badd55e390aca7585c42f09bfdd48e7451ac902b5797fd1fae8acfaa72094ad7",
+  "current_semantic_sha256": "badd55e390aca7585c42f09bfdd48e7451ac902b5797fd1fae8acfaa72094ad7",
   "first_observed_at": "2026-08-24T06:06:15.451500Z",
   "last_observed_at": "2026-08-24T06:06:15.451500Z",
-  "previous_semantic_sha256": "353ee432873e7508e050a6af667441ab2e7c018d636b15c86cd25fac1a82b295",
-  "current_semantic_sha256": "badd55e390aca7585c42f09bfdd48e7451ac902b5797fd1fae8acfaa72094ad7",
+  "registry_class": "official_school_accreditation_registry",
+  "schema_version": "1.2",
+  "task_type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
+  "source_id": "SRC-ARACIP-SCHOOL-REGISTRY",
+  "status": "OPEN",
+  "policy": "Do not automatically change deadline, eligibility, budget, scoring, beneficiaries, call status, or any other material fact. Resolve only from authoritative evidence and record provenance before publication.",
+  "automatic_material_fact_update_allowed": false,
   "material_fact_autoupdate_allowed": false,
   "blocked_fact_classes": [
     "deadline",
@@ -18,6 +23,5 @@
     "beneficiaries",
     "material_call_status",
     "other_material_facts"
-  ],
-  "required_resolution": "Re-establish authoritative evidence and provenance before any material fact update."
+  ]
 }
