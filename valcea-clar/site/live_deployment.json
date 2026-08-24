@@ -1,44 +1,37 @@
 {
-  "schema_version": "2.1",
+  "schema_version": "2.2",
   "product": "VÂLCEA CLAR public site",
   "environment": "production",
-  "state": "READY_HTTP_ACCEPTED",
+  "state": "BLOCKED_EXTERNAL_PRESENTATION_STALE",
   "canonical_domain": "valceaclar.ro",
   "production_url": "https://valceaclar.ro/",
   "canonical_data_source": "https://github.com/mihaicismaru-bit/civora/tree/main/valcea-clar",
   "repository_runtime_ready": true,
-  "public_http_acceptance_ready": true,
-  "blocker": null,
+  "public_http_acceptance_ready": false,
+  "blocker": "ChatGPT Sites public presentation has not demonstrated the current canonical live-feed/runtime. Repository publication is not equivalent to public visibility.",
   "presentation_layer": {
     "provider": "ChatGPT Sites",
     "site": "existing valceaclar.ro site",
     "execution_owner": false,
     "content_source": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json",
-    "refresh_seconds": 60
+    "refresh_seconds": 60,
+    "status": "STALE_OR_FETCH_NOT_RUNNING",
+    "structural_republish_required": true
   },
   "last_public_http_acceptance": {
-    "status": "READY",
+    "status": "STALE_HISTORICAL_ONLY",
     "verified_at_utc": "2026-08-16T21:53:16Z",
     "workflow_run_id": 31974794296,
-    "http_200_routes": [
-      "/",
-      "/robots.txt",
-      "/sitemap.xml",
-      "/termeni/",
-      "/confidentialitate/",
-      "/unde-iesim/",
-      "/stiri/olanesti-bridge-monitor/"
-    ],
-    "blockers": []
+    "note": "Historical acceptance must not clear current publication/readback gates."
   },
   "historical_vercel": {
-    "status": "STALE_NONCANONICAL_NOT_REQUIRED",
+    "status": "NOT_CONFIGURED",
     "active_projects_observed": 0,
-    "note": "Vercel nu este o condiție pentru livrarea publică actuală și absența unui proiect Vercel nu trebuie tratată ca blocker."
+    "note": "Vercel is not currently serving valceaclar.ro."
   },
   "custom_domain": {
     "name": "valceaclar.ro",
-    "status": "ACTIVE_HTTP_200"
+    "status": "ACTIVE_BUT_STALE_PRESENTATION"
   },
   "required_public_acceptance": {
     "http_200_routes": [
@@ -54,6 +47,8 @@
     "canonical_required": true,
     "robots_index_follow_required_for_legal": true,
     "homepage_story_first_required": true,
+    "current_live_feed_readback_required": true,
+    "visible_story_media_required_when_verified_visual_exists": true,
     "source_of_truth": ".github/workflows/valcea-clar-public-health.yml"
   }
 }
