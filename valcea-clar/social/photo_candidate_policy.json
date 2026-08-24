@@ -1,20 +1,59 @@
 {
-  "schema_version": "1.2",
+  "schema_version": "1.3",
   "product": "VÂLCEA CLAR PHOTO CANDIDATE DISCOVERY",
-  "publication_authority": "NONE",
+  "publication_authority": "POLICY_GOVERNED",
   "principles": {
     "real_photographs_only": true,
     "synthetic_images_forbidden": true,
     "generic_stock_substitution_forbidden": true,
-    "candidate_only": true,
-    "automatic_story_assignment_allowed": false,
+    "candidate_only_by_default": true,
+    "automatic_story_assignment_allowed_for_contextual_media": true,
+    "automatic_story_assignment_scope": ["exact_place", "exact_institution", "same_canonical_place", "same_canonical_entity"],
     "rights_cleared_does_not_imply_subject_match": true,
-    "subject_match_required_before_promotion": true,
-    "editor_approval_required_before_promotion": true,
-    "openverse_original_source_reverification_required": true,
+    "contextual_subject_match_may_be_inferred_from_verified_entity_or_place": true,
+    "event_direct_match_still_requires_event_evidence": true,
+    "editor_approval_required_for_owned_or_explicitly_licensed_contextual_media": false,
+    "editor_approval_required_for_people_or_event_identity": true,
     "provider_failure_must_not_block_news_publication": true,
-    "no_photo_is_better_than_false_relevance": true
+    "contextual_disclosure_required": true,
+    "source_credit_required": true,
+    "missing_media_never_blocks_editorial_publication": true
   },
+  "rights_tiers": [
+    {
+      "id": "OWNED_OR_EXPLICIT_LICENSE",
+      "publication_allowed": true,
+      "local_cache_allowed": true,
+      "visible_credit_required": true,
+      "manual_rights_review_required": false
+    },
+    {
+      "id": "PUBLIC_DOMAIN_OR_OPEN_LICENSE",
+      "publication_allowed": true,
+      "local_cache_allowed": true,
+      "visible_credit_required": true,
+      "manual_rights_review_required": false
+    },
+    {
+      "id": "OFFICIAL_OR_PRIMARY_SOURCE_RIGHTS_UNVERIFIED",
+      "publication_allowed": true,
+      "delivery_mode": "remote_reference_preferred",
+      "local_cache_allowed": false,
+      "visible_credit_required": true,
+      "source_link_required": true,
+      "rights_status_label_required": true,
+      "rights_status_label": "Sursa foto indicată; drepturile de reutilizare nu au fost confirmate explicit.",
+      "takedown_ready": true,
+      "manual_rights_review_required": false,
+      "risk_class": "ELEVATED_OWNER_ACCEPTED"
+    },
+    {
+      "id": "THIRD_PARTY_RIGHTS_UNVERIFIED",
+      "publication_allowed": false,
+      "candidate_only": true,
+      "reason": "citation alone does not establish reuse rights; use only after a stronger source/rights basis is found"
+    }
+  ],
   "providers": [
     {
       "id": "wikimedia_commons",
@@ -22,7 +61,6 @@
       "priority": 100,
       "cost": "free",
       "auth": "none",
-      "candidate_only": true,
       "accepted_licenses": ["public-domain", "cc0", "cc-by", "cc-by-sa"]
     },
     {
@@ -31,15 +69,16 @@
       "priority": 80,
       "cost": "free",
       "auth": "none_required_for_bounded_public_search",
-      "candidate_only": true,
       "accepted_licenses": ["public-domain", "cc0", "cc-by", "cc-by-sa"],
-      "original_source_reverification_required": true
+      "original_source_reverification_required": false
     },
     {
       "id": "official_source_photo",
-      "enabled": false,
-      "candidate_only": true,
-      "reason": "activate only with an explicit reusable-rights record; publicly visible does not imply reusable"
+      "enabled": true,
+      "priority": 90,
+      "rights_tier": "OFFICIAL_OR_PRIMARY_SOURCE_RIGHTS_UNVERIFIED",
+      "candidate_only": false,
+      "requirements": ["source_url", "visible_credit", "contextual_disclosure", "remote_reference_preferred"]
     },
     {
       "id": "generic_stock",
@@ -50,9 +89,6 @@
   "candidate_contract": {
     "kind": "photograph",
     "synthetic": false,
-    "subject_match": false,
-    "editor_approved": false,
-    "publication_eligible": false,
-    "publication_authority": "NONE"
+    "publication_authority": "POLICY_GOVERNED"
   }
 }
