@@ -1,35 +1,35 @@
 {
   "schema_version": "1.0",
   "checkpoint": "PARTENER-EU-CIVORA-P10-0020",
-  "observed_at": "2026-08-24T08:36:44Z",
-  "validation_run_started": "2026-08-24T08:36:17Z",
+  "observed_at": "2026-08-24T09:11:41Z",
+  "validation_run_started": "2026-08-24T09:11:16Z",
   "integrity": {
     "latest_history_equal": true,
-    "latest_sha256": "c703e7aa25ab164c2d77268c329496e611bd0af605477970d38d5aef82e47551",
-    "history_sha256": "c703e7aa25ab164c2d77268c329496e611bd0af605477970d38d5aef82e47551",
-    "history_path": "validation/history/20260824T083617Z.json",
+    "latest_sha256": "7bb867c4475315a106d7cb38e561683a62dee7dd69386e50e11ce8ac8892d4eb",
+    "history_sha256": "7bb867c4475315a106d7cb38e561683a62dee7dd69386e50e11ce8ac8892d4eb",
+    "history_path": "validation/history/20260824T091116Z.json",
     "source_state_checkpoint_equal": true,
-    "source_state_sha256": "8256897e9ec28c9d49c40ef8a2f8ae97cc9fb37586eaf1c144630625c28ba594",
-    "checkpoint_sha256": "8256897e9ec28c9d49c40ef8a2f8ae97cc9fb37586eaf1c144630625c28ba594",
+    "source_state_sha256": "0ed0df04db45408744faa49c75f7da404dedf790369268f30e99e7f5cd8ff1b2",
+    "checkpoint_sha256": "0ed0df04db45408744faa49c75f7da404dedf790369268f30e99e7f5cd8ff1b2",
     "frontend_regression_pass": true,
     "frontend_pass": 10,
     "frontend_total": 10,
     "recovery_state_integrity": "PASS"
   },
   "source_registry": {
-    "observed_at": "2026-08-24T06:06:15.451500Z",
-    "age_seconds": 9028,
+    "observed_at": "2026-08-24T09:09:02.344490Z",
+    "age_seconds": 158,
     "stale_after_seconds": 28800,
     "stale": false,
     "health": "DEGRADED",
     "summary": {
       "total": 23,
-      "pass": 12,
-      "degraded": 5,
+      "pass": 17,
+      "degraded": 0,
       "fail": 6,
       "quarantined": 6,
-      "low_information": 5,
-      "resolution_tasks_required": 4
+      "low_information": 0,
+      "resolution_tasks_required": 7
     },
     "tier_counts": {
       "T1": {
@@ -38,35 +38,38 @@
         "degraded": 0,
         "fail": 1,
         "quarantined": 1,
-        "hash_changes": 4
+        "hash_changes": 1
       },
       "T1B": {
         "total": 13,
-        "pass": 5,
-        "degraded": 5,
+        "pass": 10,
+        "degraded": 0,
         "fail": 3,
         "quarantined": 3,
-        "hash_changes": 0
+        "hash_changes": 6
       }
     },
     "changed_source_ids": [
-      "SRC-MAI-FED-CALLS",
-      "SRC-MAI-FED-GENERAL-GUIDE",
-      "SRC-MAI-FED-CALENDAR-INDEX",
-      "SRC-ARACIP-SCHOOL-REGISTRY"
+      "SRC-OIRVEST-PEO-GUIDES",
+      "SRC-OIRVEST-PEO-MANUALS",
+      "SRC-OIRVEST-PEO",
+      "SRC-OIRCENTRU-PEO",
+      "SRC-OIRNE-PEO",
+      "SRC-ADRVEST-PTJ-ACTIVE",
+      "SRC-MEC-CNDIPT"
     ],
     "missing_resolution_tasks": [],
     "unsafe_material_updates": [],
     "fail_closed": true
   },
   "afir": {
-    "observed_at": "2026-08-24T06:07:06.539179+00:00",
+    "observed_at": "2026-08-24T09:10:23.817171+00:00",
     "status": "PASS",
-    "item_count": 30,
-    "error_count": 37,
+    "item_count": 29,
+    "error_count": 41,
     "hash_change_candidates": 0,
     "material_signal_candidates": 0,
-    "auth_dependency_count": 27,
+    "auth_dependency_count": 26,
     "auth_dependencies": [
       {
         "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2F&culture=ro",
@@ -216,13 +219,6 @@
         "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
       },
       {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Ffinantare%2Fmasuri-atipice-sm-192%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/finantare/masuri-atipice-sm-192/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
         "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finstrumente%2Fsesiuni%2Farhiva-anunturilor-de-primire-a-proiectelor-aferente-perioadei-2023-2027%2F&culture=ro",
         "sourcePage": "https://www.afir.ro/instrumente/sesiuni/arhiva-anunturilor-de-primire-a-proiectelor-aferente-perioadei-2023-2027/",
         "status": "AUTH_OR_ACCESS_DEPENDENT",
@@ -357,7 +353,7 @@
   "summary": {
     "integrity_pass": true,
     "registry_health": "DEGRADED",
-    "registry_hash_changes": 4,
+    "registry_hash_changes": 7,
     "afir_hash_changes": 0,
     "peo_calendar_changes": 0,
     "mipe_health": "PASS",
