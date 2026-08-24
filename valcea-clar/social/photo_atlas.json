@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.1",
+  "schema_version": "1.2",
   "product": "VÂLCEA CLAR PHOTO ATLAS",
   "source_of_truth": "valcea-clar/social/story_visuals.json",
   "publication_authority": "NONE",
@@ -13,14 +13,46 @@
     "new_story_subject_match_required": true,
     "new_story_editor_approval_required": true,
     "contextual_archive_requires_disclosure": true,
+    "owned_candidate_layer_separate_from_approved_assets": true,
+    "owned_originals_remain_in_drive_until_story_materialization": true,
     "no_photo_is_better_than_false_relevance": true
   },
   "summary": {
-    "approved_asset_count": 4,
-    "contextual_archive_candidate_count": 3,
-    "story_assignment_only_count": 1
+    "approved_asset_count": 5,
+    "contextual_archive_candidate_count": 4,
+    "story_assignment_only_count": 1,
+    "owned_candidate_asset_count": 48,
+    "discoverable_asset_count": 53
   },
   "assets": [
+    {
+      "asset_id": "photo-1f3163ae5c80467c18e7",
+      "kind": "photograph",
+      "synthetic": false,
+      "direct_source_url": "https://upload.wikimedia.org/wikipedia/commons/a/a8/CET_Govora_%28dinspre_nord-vest%29.JPG",
+      "source_type": "creative_commons",
+      "source_url": "https://commons.wikimedia.org/wiki/File:CET_Govora_(dinspre_nord-vest).JPG",
+      "credit": "Tudorcfr90 / Wikimedia Commons — CC BY-SA 3.0",
+      "rights_basis": "creative_commons",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+      "rights_note": "Fotografie reutilizabilă sub CC BY-SA 3.0, cu atribuire și păstrarea aceleiași licențe pentru reutilizarea imaginii.",
+      "captured_at": "2011-06-27",
+      "contextual_archive": true,
+      "editorial_note": "Foto de arhivă: CET Govora, 27 iunie 2011; imaginea nu surprinde situația operațională din 2026.",
+      "alt_text": "Termocentrala CET Govora văzută dinspre nord-vest, într-o fotografie de arhivă din 2011.",
+      "source_story_ids": [
+        "cet-govora-cine-a-decis-oprirea-20260821"
+      ],
+      "approved_paths": [
+        "valcea-clar/social/photos/approved/cet-govora-context-2011.jpg"
+      ],
+      "candidate_reuse_scope": "contextual_archive_candidate",
+      "automatic_story_assignment_allowed": false,
+      "new_story_subject_match_required": true,
+      "new_story_editor_approval_required": true,
+      "archive_disclosure_required_on_reuse": true,
+      "publication_authority": "NONE"
+    },
     {
       "asset_id": "photo-32f2142253dbedf66245",
       "kind": "photograph",
@@ -131,6 +163,22 @@
       "new_story_subject_match_required": true,
       "new_story_editor_approval_required": true,
       "archive_disclosure_required_on_reuse": false,
+      "publication_authority": "NONE"
+    }
+  ],
+  "candidate_sources": [
+    {
+      "kind": "owned_photo_candidate_layer",
+      "manifest_path": "valcea-clar/social/photo_atlas_owned_source.json",
+      "resolver_path": "valcea-clar/social/photo_atlas_owned_bridge.py",
+      "source_snapshot": "valcea-clar/social/owned_photo_drive_snapshot.json",
+      "source_semantics": "valcea-clar/social/owned_photo_semantic_labels.json",
+      "bootstrap_asset_count": 48,
+      "original_binary_location": "google_drive",
+      "candidate_only": true,
+      "approved_assets_listed_in_atlas_assets": false,
+      "story_materialization_required": true,
+      "automatic_story_assignment_allowed": false,
       "publication_authority": "NONE"
     }
   ]
