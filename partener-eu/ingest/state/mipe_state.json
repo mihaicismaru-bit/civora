@@ -1,7 +1,7 @@
 {
   "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
   "lastRun": {
-    "observedAt": "2026-08-24T14:07:48.488550+00:00",
+    "observedAt": "2026-08-24T16:09:13.313556+00:00",
     "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
     "roots": [
       {
@@ -168,7 +168,7 @@
     "publishedItemCount": 60,
     "transportMode": "primary-direct-unavailable",
     "lastKnownGoodPreserved": true,
-    "directSuccessCount": 1,
+    "directSuccessCount": 0,
     "proxySuccessCount": 0,
     "prioritySeed": "https://mfe.gov.ro/pdds/despre-program-programare/",
     "prioritySeedAvailable": false,
@@ -4296,298 +4296,6 @@
     }
   ],
   "runs": [
-    {
-      "observedAt": "2026-08-20T05:07:14.084152+00:00",
-      "sourceAvailable": true,
-      "roots": [
-        {
-          "root": "https://mfe.gov.ro/",
-          "ok": true,
-          "status": 200,
-          "finalUrl": "https://mfe.gov.ro/"
-        },
-        {
-          "root": "https://mfe.gov.ro/ghiduri_peos/",
-          "ok": true,
-          "status": 200,
-          "finalUrl": "https://mfe.gov.ro/ghiduri_peos/"
-        },
-        {
-          "root": "https://mfe.gov.ro/ghiduri_pids/",
-          "ok": true,
-          "status": 200,
-          "finalUrl": "https://mfe.gov.ro/ghiduri_pids/"
-        },
-        {
-          "root": "https://mfe.gov.ro/pdds/despre-program-programare/",
-          "ok": true,
-          "status": 200,
-          "finalUrl": "https://mfe.gov.ro/pdds/despre-program-programare/"
-        },
-        {
-          "root": "https://mfe.gov.ro/pnrr/",
-          "ok": true,
-          "status": 200,
-          "finalUrl": "https://mfe.gov.ro/pnrr/"
-        }
-      ],
-      "pagesVisited": 120,
-      "acceptedPages": 48,
-      "documentsObserved": 160,
-      "queuedRemaining": 636,
-      "resumedFrontier": 646,
-      "frontierPersisted": 635,
-      "failures": [
-        {
-          "url": "https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-sprijin-pentru-autoritatile-publice-locale-in-vederea-asigurarii-de-locuinte-sociale-pentru-persoanele-vulnerabile-iti-delta-dunarii/",
-          "error": "TimeoutError: Page.goto: Timeout 18000ms exceeded.\nCall log:\n  - navigating to \"https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-sprijin-pentru-autoritatile-publice-locale-in-vederea-asigurarii-de-locuinte-sociale-pentru-persoanele-vulnerabile-iti-delta-dunarii/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-dezvoltarea-de-servicii-de-ingrijire-si-suport-de-calitate-pentru-persoanele-cu-dizabilitati-si-ingrijitorii-acestora-in-centre-respiro-iti-delta-dunarii/",
-          "error": "Error: Page.goto: net::ERR_INTERNET_DISCONNECTED at https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-dezvoltarea-de-servicii-de-ingrijire-si-suport-de-calitate-pentru-persoanele-cu-dizabilitati-si-ingrijitorii-acestora-in-centre-respiro-iti-delta-dunarii/\nCall log:\n  - navigating to \"https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-dezvoltarea-de-servicii-de-ingrijire-si-suport-de-calitate-pentru-persoanele-cu-dizabilitati-si-ingrijitorii-acestora-in-centre-respiro-iti-delta-dunarii/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-servicii-de-ingrijire-de-zi-terapii-psihologice-pentru-copiii-cu-dizabilitati-iti-delta-dunarii/",
-          "error": "Error: Page.goto: net::ERR_INTERNET_DISCONNECTED at https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-servicii-de-ingrijire-de-zi-terapii-psihologice-pentru-copiii-cu-dizabilitati-iti-delta-dunarii/\nCall log:\n  - navigating to \"https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-servicii-de-ingrijire-de-zi-terapii-psihologice-pentru-copiii-cu-dizabilitati-iti-delta-dunarii/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-servicii-de-ingrijire-de-zi-terapii-psihologice-pentru-copiii-cu-dizabilitati-iti-tara-fagarasului/",
-          "error": "Error: Page.goto: net::ERR_INTERNET_DISCONNECTED at https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-servicii-de-ingrijire-de-zi-terapii-psihologice-pentru-copiii-cu-dizabilitati-iti-tara-fagarasului/\nCall log:\n  - navigating to \"https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-servicii-de-ingrijire-de-zi-terapii-psihologice-pentru-copiii-cu-dizabilitati-iti-tara-fagarasului/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-servicii-de-ingrijire-de-zi-terapii-psihologice-pentru-copiii-cu-dizabilitati-iti-valea-jiului/",
-          "error": "Error: Page.goto: net::ERR_INTERNET_DISCONNECTED at https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-servicii-de-ingrijire-de-zi-terapii-psihologice-pentru-copiii-cu-dizabilitati-iti-valea-jiului/\nCall log:\n  - navigating to \"https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-servicii-de-ingrijire-de-zi-terapii-psihologice-pentru-copiii-cu-dizabilitati-iti-valea-jiului/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-centre-multifunctionale-cu-dotari-sportive-si-culturale-pentru-copii-iti-delta-dunarii/",
-          "error": "Error: Page.goto: net::ERR_INTERNET_DISCONNECTED at https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-centre-multifunctionale-cu-dotari-sportive-si-culturale-pentru-copii-iti-delta-dunarii/\nCall log:\n  - navigating to \"https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-centre-multifunctionale-cu-dotari-sportive-si-culturale-pentru-copii-iti-delta-dunarii/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-centre-multifunctionale-cu-dotari-sportive-si-culturale-pentru-copii-iti-valea-jiului/",
-          "error": "Error: Page.goto: net::ERR_INTERNET_DISCONNECTED at https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-centre-multifunctionale-cu-dotari-sportive-si-culturale-pentru-copii-iti-valea-jiului/\nCall log:\n  - navigating to \"https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-centre-multifunctionale-cu-dotari-sportive-si-culturale-pentru-copii-iti-valea-jiului/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-conditii-specifice-sprijin-pentru-autoritatile-publice-locale-in-vederea-gestionarii-situatiei-asezarilor-informale-si-asigurarea-de-locuinte-sociale-pentru-persoanele-v/",
-          "error": "Error: Page.goto: net::ERR_INTERNET_DISCONNECTED at https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-conditii-specifice-sprijin-pentru-autoritatile-publice-locale-in-vederea-gestionarii-situatiei-asezarilor-informale-si-asigurarea-de-locuinte-sociale-pentru-persoanele-v/\nCall log:\n  - navigating to \"https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-conditii-specifice-sprijin-pentru-autoritatile-publice-locale-in-vederea-gestionarii-situatiei-asezarilor-informale-si-asigurarea-de-locuinte-sociale-pentru-persoanele-v/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/ghiduri_pids/dezvoltarea-serviciilor-de-sprijin-in-comunitate-prin-echipe-de-servicii-mobile/",
-          "error": "Error: Page.goto: net::ERR_INTERNET_DISCONNECTED at https://mfe.gov.ro/ghiduri_pids/dezvoltarea-serviciilor-de-sprijin-in-comunitate-prin-echipe-de-servicii-mobile/\nCall log:\n  - navigating to \"https://mfe.gov.ro/ghiduri_pids/dezvoltarea-serviciilor-de-sprijin-in-comunitate-prin-echipe-de-servicii-mobile/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/ghiduri_pids/servicii-comunitare-pentru-copii-si-familii-in-vederea-prevenirii-separarii-si-in-vederea-sustinerii-reintegrarii-in-familie-a-copiilor-proveniti-din-sistemul-de-protectie-speciala-in-teritoriul-iti-m/",
-          "error": "Error: Page.goto: net::ERR_INTERNET_DISCONNECTED at https://mfe.gov.ro/ghiduri_pids/servicii-comunitare-pentru-copii-si-familii-in-vederea-prevenirii-separarii-si-in-vederea-sustinerii-reintegrarii-in-familie-a-copiilor-proveniti-din-sistemul-de-protectie-speciala-in-teritoriul-iti-m/\nCall log:\n  - navigating to \"https://mfe.gov.ro/ghiduri_pids/servicii-comunitare-pentru-copii-si-familii-in-vederea-prevenirii-separarii-si-in-vederea-sustinerii-reintegrarii-in-familie-a-copiilor-proveniti-din-sistemul-de-protectie-speciala-in-teritoriul-iti-m/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-conditii-specifice-servicii-de-ingrijire-la-domiciliu-pentru-persoanele-varstnice-iti-motii-tara-de-piatra/",
-          "error": "Error: Page.goto: net::ERR_INTERNET_DISCONNECTED at https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-conditii-specifice-servicii-de-ingrijire-la-domiciliu-pentru-persoanele-varstnice-iti-motii-tara-de-piatra/\nCall log:\n  - navigating to \"https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-conditii-specifice-servicii-de-ingrijire-la-domiciliu-pentru-persoanele-varstnice-iti-motii-tara-de-piatra/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-conditii-specifice-servicii-de-ingrijire-la-domiciliu-pentru-persoanele-varstnice/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-conditii-specifice-servicii-de-ingrijire-la-domiciliu-pentru-persoanele-varstnice/\nCall log:\n  - navigating to \"https://mfe.gov.ro/ghiduri_pids/ghidul-solicitantului-conditii-specifice-servicii-de-ingrijire-la-domiciliu-pentru-persoanele-varstnice/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/calendar-apeluri-de-finantare?mca_month=2026-08&mca_view=list&ds=17082026-apeluri.json",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/calendar-apeluri-de-finantare?mca_month=2026-08&mca_view=list&ds=17082026-apeluri.json\nCall log:\n  - navigating to \"https://mfe.gov.ro/calendar-apeluri-de-finantare?mca_month=2026-08&mca_view=list&ds=17082026-apeluri.json\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-calitativa-aferente-apelului-de-proiecte-servicii-comunitare-pentru-copii-si-familii-in-vederea-pr/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-calitativa-aferente-apelului-de-proiecte-servicii-comunitare-pentru-copii-si-familii-in-vederea-pr/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-calitativa-aferente-apelului-de-proiecte-servicii-comunitare-pentru-copii-si-familii-in-vederea-pr/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-metodologia-de-verificare-evaluare-si-selectie-a-proiectelor-in-cadrul-poids-2021-2027/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-metodologia-de-verificare-evaluare-si-selectie-a-proiectelor-in-cadrul-poids-2021-2027/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-metodologia-de-verificare-evaluare-si-selectie-a-proiectelor-in-cadrul-poids-2021-2027/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-fisa-proiectului-de-importanta-strategica-cluster-national-de-inovare-sociala-si-incluziune/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-fisa-proiectului-de-importanta-strategica-cluster-national-de-inovare-sociala-si-incluziune/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-fisa-proiectului-de-importanta-strategica-cluster-national-de-inovare-sociala-si-incluziune/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-ghidul-solictantului-formarea-profesionala-a-specialistilor-care-lucreaza-cu-grupuri-vulnerabile/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-ghidul-solictantului-formarea-profesionala-a-specialistilor-care-lucreaza-cu-grupuri-vulnerabile/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-ghidul-solictantului-formarea-profesionala-a-specialistilor-care-lucreaza-cu-grupuri-vulnerabile/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-preliminara-in-cadrul-apelului-dezvoltarea-de-servicii-de-ingrijire-si-suport-de-calitate-pentru-p/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-preliminara-in-cadrul-apelului-dezvoltarea-de-servicii-de-ingrijire-si-suport-de-calitate-pentru-p/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-preliminara-in-cadrul-apelului-dezvoltarea-de-servicii-de-ingrijire-si-suport-de-calitate-pentru-p/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-preliminara-in-cadrul-apelului-servicii-de-ingrijire-de-zi-terapii-psihologice-pentru-copiii-cu/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-preliminara-in-cadrul-apelului-servicii-de-ingrijire-de-zi-terapii-psihologice-pentru-copiii-cu/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-preliminara-in-cadrul-apelului-servicii-de-ingrijire-de-zi-terapii-psihologice-pentru-copiii-cu/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/programul-incluziune-si-demnitate-sociala-2021-2027-versiunea-7-0/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/programul-incluziune-si-demnitate-sociala-2021-2027-versiunea-7-0/\nCall log:\n  - navigating to \"https://mfe.gov.ro/programul-incluziune-si-demnitate-sociala-2021-2027-versiunea-7-0/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-lista-intermediara-a-proiectelor-aprobate-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-in-cadrul-apelului-servicii-comunitare-pentru-copii-si-familii-in-vederea-prevenirii-separarii-si/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-lista-intermediara-a-proiectelor-aprobate-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-in-cadrul-apelului-servicii-comunitare-pentru-copii-si-familii-in-vederea-prevenirii-separarii-si/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-lista-intermediara-a-proiectelor-aprobate-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-in-cadrul-apelului-servicii-comunitare-pentru-copii-si-familii-in-vederea-prevenirii-separarii-si/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-privind-proiectele-depuse-in-cadrul-apelului-servicii-comunitare-pentru-copii-si-familii-in-vederea-prevenirii-separarii-si-in-vederea-sustinerii-re/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-privind-proiectele-depuse-in-cadrul-apelului-servicii-comunitare-pentru-copii-si-familii-in-vederea-prevenirii-separarii-si-in-vederea-sustinerii-re/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-privind-proiectele-depuse-in-cadrul-apelului-servicii-comunitare-pentru-copii-si-familii-in-vederea-prevenirii-separarii-si-in-vederea-sustinerii-re/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-lista-intermediara-nr-2-a-proiectelor-aprobate-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-aferenta-apelului-de-proiecte-servicii-de-ingrijire-de-zi-terapii-psihologice-pe/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-lista-intermediara-nr-2-a-proiectelor-aprobate-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-aferenta-apelului-de-proiecte-servicii-de-ingrijire-de-zi-terapii-psihologice-pe/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-lista-intermediara-nr-2-a-proiectelor-aprobate-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-aferenta-apelului-de-proiecte-servicii-de-ingrijire-de-zi-terapii-psihologice-pe/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-a-fost-actualizat-ghidul-sprijin-pentru-autoritatile-publice-locale-in-vederea-gestionarii-situatiei-asezarilor-informale-si-asigurarea-de-locuinte-sociale-pentru-persoanele-vulnerabil/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-a-fost-actualizat-ghidul-sprijin-pentru-autoritatile-publice-locale-in-vederea-gestionarii-situatiei-asezarilor-informale-si-asigurarea-de-locuinte-sociale-pentru-persoanele-vulnerabil/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-a-fost-actualizat-ghidul-sprijin-pentru-autoritatile-publice-locale-in-vederea-gestionarii-situatiei-asezarilor-informale-si-asigurarea-de-locuinte-sociale-pentru-persoanele-vulnerabil/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-lista-intermediara-a-proiectelor-aprobate-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-etfc-in-cadrul-apelului-servicii-comunitare-pentru-copii-si-familii-in-vederea-prevenirii-separ/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-lista-intermediara-a-proiectelor-aprobate-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-etfc-in-cadrul-apelului-servicii-comunitare-pentru-copii-si-familii-in-vederea-prevenirii-separ/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-lista-intermediara-a-proiectelor-aprobate-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-etfc-in-cadrul-apelului-servicii-comunitare-pentru-copii-si-familii-in-vederea-prevenirii-separ/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-lista-de-intrebari-si-raspunsuri-frecvente-aferente-apelului-de-proiecte-sprijin-pentru-autoritatile-publice-locale-in-vederea-gestionarii-situatiei-asezarilor-informale-si-asigurarea/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-lista-de-intrebari-si-raspunsuri-frecvente-aferente-apelului-de-proiecte-sprijin-pentru-autoritatile-publice-locale-in-vederea-gestionarii-situatiei-asezarilor-informale-si-asigurarea/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-lista-de-intrebari-si-raspunsuri-frecvente-aferente-apelului-de-proiecte-sprijin-pentru-autoritatile-publice-locale-in-vederea-gestionarii-situatiei-asezarilor-informale-si-asigurarea/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-preliminara-etfp-aferenta-apelului-apelului-de-proiecte-servicii-comunitare-pentru-copii-si-fami/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-preliminara-etfp-aferenta-apelului-apelului-de-proiecte-servicii-comunitare-pentru-copii-si-fami/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-preliminara-etfp-aferenta-apelului-apelului-de-proiecte-servicii-comunitare-pentru-copii-si-fami/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-listele-intermediare-ale-proiectelor-aprobate-si-de-rezerva-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-in-cadrul-apelului-de-proiecte-servicii-de-ingrijire-la-domiciliu-pentru-persoa/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-listele-intermediare-ale-proiectelor-aprobate-si-de-rezerva-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-in-cadrul-apelului-de-proiecte-servicii-de-ingrijire-la-domiciliu-pentru-persoa/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-listele-intermediare-ale-proiectelor-aprobate-si-de-rezerva-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-in-cadrul-apelului-de-proiecte-servicii-de-ingrijire-la-domiciliu-pentru-persoa/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-lista-intermediara-nr-1-a-proiectelor-aprobate-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-etfc-depuse-in-cadrul-apelului-servicii-de-ingrijire-la-domiciliu-pentru-persoanele-varst/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-lista-intermediara-nr-1-a-proiectelor-aprobate-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-etfc-depuse-in-cadrul-apelului-servicii-de-ingrijire-la-domiciliu-pentru-persoanele-varst/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-lista-intermediara-nr-1-a-proiectelor-aprobate-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-etfc-depuse-in-cadrul-apelului-servicii-de-ingrijire-la-domiciliu-pentru-persoanele-varst/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-listele-finale-cu-proiectele-respinse-dupa-solutionarea-contestatiilor-in-etapa-de-evaluarea-tehnica-si-financiara-preliminara-pentru-apelul-servicii-de-ingrijire-de-zi-terapii-psihologice-pe/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-listele-finale-cu-proiectele-respinse-dupa-solutionarea-contestatiilor-in-etapa-de-evaluarea-tehnica-si-financiara-preliminara-pentru-apelul-servicii-de-ingrijire-de-zi-terapii-psihologice-pe/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-listele-finale-cu-proiectele-respinse-dupa-solutionarea-contestatiilor-in-etapa-de-evaluarea-tehnica-si-financiara-preliminara-pentru-apelul-servicii-de-ingrijire-de-zi-terapii-psihologice-pe/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-calitativa-etfc-in-cadrul-apelului-servicii-comunitare-pentru-copii-si-familii-in-vederea-preven/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-calitativa-etfc-in-cadrul-apelului-servicii-comunitare-pentru-copii-si-familii-in-vederea-preven/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-calitativa-etfc-in-cadrul-apelului-servicii-comunitare-pentru-copii-si-familii-in-vederea-preven/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-decizia-de-recuperare-a-prefinanrii-privind-proiectul-start-in-antreprenoriat-social-cod-proiect-311763-beneficiar-asociatia-eurofed/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-decizia-de-recuperare-a-prefinanrii-privind-proiectul-start-in-antreprenoriat-social-cod-proiect-311763-beneficiar-asociatia-eurofed/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-decizia-de-recuperare-a-prefinanrii-privind-proiectul-start-in-antreprenoriat-social-cod-proiect-311763-beneficiar-asociatia-eurofed/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-pentru-proiectele-depuse-in-cadrul-apelului-servicii-comunitare-pentru-copii-si-familii-in-vederea-prevenirii-separarii-si-in-vederea-sustinerii-reintegrarii/",
-          "error": "Error: Page.goto: net::ERR_INTERNET_DISCONNECTED at https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-pentru-proiectele-depuse-in-cadrul-apelului-servicii-comunitare-pentru-copii-si-familii-in-vederea-prevenirii-separarii-si-in-vederea-sustinerii-reintegrarii/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-pentru-proiectele-depuse-in-cadrul-apelului-servicii-comunitare-pentru-copii-si-familii-in-vederea-prevenirii-separarii-si-in-vederea-sustinerii-reintegrarii/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-lista-intermediara-nr-1-a-proiectelor-aprobate-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-etfc-pentru-apelurile-de-proiecte-servicii-de-ingrijire-de-zi-terapii-psihologice-pentr/",
-          "error": "Error: Page.goto: net::ERR_INTERNET_DISCONNECTED at https://mfe.gov.ro/poids-lista-intermediara-nr-1-a-proiectelor-aprobate-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-etfc-pentru-apelurile-de-proiecte-servicii-de-ingrijire-de-zi-terapii-psihologice-pentr/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-lista-intermediara-nr-1-a-proiectelor-aprobate-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-etfc-pentru-apelurile-de-proiecte-servicii-de-ingrijire-de-zi-terapii-psihologice-pentr/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-trimite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-calitativa-etfc-formulate-de-comisia-de-evaluare-a-proiectelor-depuse-in-cadrul-apelului-de-proiecte-2/",
-          "error": "Error: Page.goto: net::ERR_INTERNET_DISCONNECTED at https://mfe.gov.ro/poids-trimite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-calitativa-etfc-formulate-de-comisia-de-evaluare-a-proiectelor-depuse-in-cadrul-apelului-de-proiecte-2/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-trimite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-calitativa-etfc-formulate-de-comisia-de-evaluare-a-proiectelor-depuse-in-cadrul-apelului-de-proiecte-2/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-trimite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-calitativa-etfc-formulate-de-comisia-de-evaluare-a-proiectelor-depuse-in-cadrul-apelului-de-proiecte/",
-          "error": "Error: Page.goto: net::ERR_INTERNET_DISCONNECTED at https://mfe.gov.ro/poids-trimite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-calitativa-etfc-formulate-de-comisia-de-evaluare-a-proiectelor-depuse-in-cadrul-apelului-de-proiecte/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-trimite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-calitativa-etfc-formulate-de-comisia-de-evaluare-a-proiectelor-depuse-in-cadrul-apelului-de-proiecte/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-lista-finala-a-proiectelor-care-au-fost-respinse-in-etapa-de-evaluare-tehnica-si-financiara-preliminara-aferenta-apelului-servicii-de-ingrijire-la-domiciliu-pentru-persoanele-varstnice/",
-          "error": "Error: Page.goto: net::ERR_INTERNET_DISCONNECTED at https://mfe.gov.ro/poids-lista-finala-a-proiectelor-care-au-fost-respinse-in-etapa-de-evaluare-tehnica-si-financiara-preliminara-aferenta-apelului-servicii-de-ingrijire-la-domiciliu-pentru-persoanele-varstnice/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-lista-finala-a-proiectelor-care-au-fost-respinse-in-etapa-de-evaluare-tehnica-si-financiara-preliminara-aferenta-apelului-servicii-de-ingrijire-la-domiciliu-pentru-persoanele-varstnice/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-listele-intermediare-privind-proiectele-aprobate-si-rezerva-dupa-finalizarea-etapei-de-evaluare-tehnica-si-financiara-calitativa-etfc-pentru-apelurile-de-proiecte-servicii-de-ingrijire-la-dom/",
-          "error": "Error: Page.goto: net::ERR_NETWORK_CHANGED at https://mfe.gov.ro/poids-listele-intermediare-privind-proiectele-aprobate-si-rezerva-dupa-finalizarea-etapei-de-evaluare-tehnica-si-financiara-calitativa-etfc-pentru-apelurile-de-proiecte-servicii-de-ingrijire-la-dom/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-listele-intermediare-privind-proiectele-aprobate-si-rezerva-dupa-finalizarea-etapei-de-evaluare-tehnica-si-financiara-calitativa-etfc-pentru-apelurile-de-proiecte-servicii-de-ingrijire-la-dom/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-lista-intermediara-a-proiectelor-aprobate-ca-urmare-a-finalizarii-procesului-de-evaluare-tehnica-si-financiara-calitativa-etfc-pentru-apelul-de-proiecte-masuri-de-formare-continua-a/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-lista-intermediara-a-proiectelor-aprobate-ca-urmare-a-finalizarii-procesului-de-evaluare-tehnica-si-financiara-calitativa-etfc-pentru-apelul-de-proiecte-masuri-de-formare-continua-a/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-lista-intermediara-a-proiectelor-aprobate-ca-urmare-a-finalizarii-procesului-de-evaluare-tehnica-si-financiara-calitativa-etfc-pentru-apelul-de-proiecte-masuri-de-formare-continua-a/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-va-trimite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-calitativa-etfc-formulate-de-comisia-de-evaluare-a-proiectelor-depuse-in-cadrul-apelului-de-proiecte-ser/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-va-trimite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-calitativa-etfc-formulate-de-comisia-de-evaluare-a-proiectelor-depuse-in-cadrul-apelului-de-proiecte-ser/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-va-trimite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-calitativa-etfc-formulate-de-comisia-de-evaluare-a-proiectelor-depuse-in-cadrul-apelului-de-proiecte-ser/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-va-trimite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-calitativa-in-cadrul-apelului-furnizarea-de-servicii-de-viata-independenta-pentru-persoanele-cu-d/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-va-trimite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-calitativa-in-cadrul-apelului-furnizarea-de-servicii-de-viata-independenta-pentru-persoanele-cu-d/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-va-trimite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-calitativa-in-cadrul-apelului-furnizarea-de-servicii-de-viata-independenta-pentru-persoanele-cu-d/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-lista-intermediara-a-proiectelor-aprobate-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-etfc-pentru-apelul-antreprenoriat-pentru-persoanele-cu-dizabilitati/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-lista-intermediara-a-proiectelor-aprobate-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-etfc-pentru-apelul-antreprenoriat-pentru-persoanele-cu-dizabilitati/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-lista-intermediara-a-proiectelor-aprobate-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-etfc-pentru-apelul-antreprenoriat-pentru-persoanele-cu-dizabilitati/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-lista-de-intrebari-si-raspunsuri-frecvente-aferente-apelului-de-proiecte-dezvoltarea-serviciilor-de-sprijin-in-comunitate-prin-echipe-de-servicii-mobile/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-lista-de-intrebari-si-raspunsuri-frecvente-aferente-apelului-de-proiecte-dezvoltarea-serviciilor-de-sprijin-in-comunitate-prin-echipe-de-servicii-mobile/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-lista-de-intrebari-si-raspunsuri-frecvente-aferente-apelului-de-proiecte-dezvoltarea-serviciilor-de-sprijin-in-comunitate-prin-echipe-de-servicii-mobile/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-preliminara-etfp-in-cadrul-apelului-de-proiecte-furnizarea-de-servicii-de-viata-independenta-pen/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-preliminara-etfp-in-cadrul-apelului-de-proiecte-furnizarea-de-servicii-de-viata-independenta-pen/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-preliminara-etfp-in-cadrul-apelului-de-proiecte-furnizarea-de-servicii-de-viata-independenta-pen/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-preliminara-in-cadrul-apelului/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-preliminara-in-cadrul-apelului/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-preliminara-in-cadrul-apelului/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-preliminara-in-cadrul-apelului-servicii-de-ingrijire-la-domiciliu-pentru-persoanele-varstnice-iti-delta-d/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-preliminara-in-cadrul-apelului-servicii-de-ingrijire-la-domiciliu-pentru-persoanele-varstnice-iti-delta-d/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-transmite-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-preliminara-in-cadrul-apelului-servicii-de-ingrijire-la-domiciliu-pentru-persoanele-varstnice-iti-delta-d/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-lista-intermediara-nr-2-a-proiectelor-aprobate-dupa-finalizarea-procesului-de-evaluare-tehnica-si-financiara-calitativa-etfc-pentru-apelul-de-proiecte-dezvoltarea-de-servicii-de-ing/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-lista-intermediara-nr-2-a-proiectelor-aprobate-dupa-finalizarea-procesului-de-evaluare-tehnica-si-financiara-calitativa-etfc-pentru-apelul-de-proiecte-dezvoltarea-de-servicii-de-ing/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-lista-intermediara-nr-2-a-proiectelor-aprobate-dupa-finalizarea-procesului-de-evaluare-tehnica-si-financiara-calitativa-etfc-pentru-apelul-de-proiecte-dezvoltarea-de-servicii-de-ing/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-calendarul-privind-evenimentele-de-informare-aferent-apelurilor-de-proiecte-sprijin-pentru-autoritatile-publice-locale-in-vederea-gestionarii-situatiei-asezarilor-informale-si-asigurar/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-calendarul-privind-evenimentele-de-informare-aferent-apelurilor-de-proiecte-sprijin-pentru-autoritatile-publice-locale-in-vederea-gestionarii-situatiei-asezarilor-informale-si-asigurar/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-calendarul-privind-evenimentele-de-informare-aferent-apelurilor-de-proiecte-sprijin-pentru-autoritatile-publice-locale-in-vederea-gestionarii-situatiei-asezarilor-informale-si-asigurar/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-lista-de-intrebari-si-raspunsuri-frecvente-aferente-apelului-de-proiecte-furnizarea-de-servicii-de-viata-independenta-pentru-persoanele-cu-dizabilitati-care-parasesc-sistemul-instituti/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-lista-de-intrebari-si-raspunsuri-frecvente-aferente-apelului-de-proiecte-furnizarea-de-servicii-de-viata-independenta-pentru-persoanele-cu-dizabilitati-care-parasesc-sistemul-instituti/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-lista-de-intrebari-si-raspunsuri-frecvente-aferente-apelului-de-proiecte-furnizarea-de-servicii-de-viata-independenta-pentru-persoanele-cu-dizabilitati-care-parasesc-sistemul-instituti/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-metodologia-de-verificare-evaluare-si-selectie-a-proiectelor-2/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-metodologia-de-verificare-evaluare-si-selectie-a-proiectelor-2/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-metodologia-de-verificare-evaluare-si-selectie-a-proiectelor-2/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/programul-incluziune-si-demnitate-sociala-versiunea-6-2-si-decizia-de-aprobare-a-comisiei-europene/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/programul-incluziune-si-demnitate-sociala-versiunea-6-2-si-decizia-de-aprobare-a-comisiei-europene/\nCall log:\n  - navigating to \"https://mfe.gov.ro/programul-incluziune-si-demnitate-sociala-versiunea-6-2-si-decizia-de-aprobare-a-comisiei-europene/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-listele-intermediare-privind-proiectele-care-au-fost-respinse-in-etapa-tehnica-si-financiara-preliminara-etfp-pentru-apelurile-de-proiecte-servicii-de-ingrijire-la-domiciliu-pentru-persoanele/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-listele-intermediare-privind-proiectele-care-au-fost-respinse-in-etapa-tehnica-si-financiara-preliminara-etfp-pentru-apelurile-de-proiecte-servicii-de-ingrijire-la-domiciliu-pentru-persoanele/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-listele-intermediare-privind-proiectele-care-au-fost-respinse-in-etapa-tehnica-si-financiara-preliminara-etfp-pentru-apelurile-de-proiecte-servicii-de-ingrijire-la-domiciliu-pentru-persoanele/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-lista-intermediara-nr-1-privind-proiectele-aprobate-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-etfc-pentru-apelul-de-proiecte-sprijinirea-copiilor-si-tinerilor-in-procesul-de-dezi/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-lista-intermediara-nr-1-privind-proiectele-aprobate-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-etfc-pentru-apelul-de-proiecte-sprijinirea-copiilor-si-tinerilor-in-procesul-de-dezi/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-lista-intermediara-nr-1-privind-proiectele-aprobate-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-etfc-pentru-apelul-de-proiecte-sprijinirea-copiilor-si-tinerilor-in-procesul-de-dezi/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-listele-intermediare-ale-proiectelor-aprobate-ca-urmare-a-finalizarii-procesului-de-evaluare-tehnica-si-financiara-calitativa-etfc-pentru-apelul-dezvoltarea-de-servicii-specializate-pentru-co/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-listele-intermediare-ale-proiectelor-aprobate-ca-urmare-a-finalizarii-procesului-de-evaluare-tehnica-si-financiara-calitativa-etfc-pentru-apelul-dezvoltarea-de-servicii-specializate-pentru-co/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-listele-intermediare-ale-proiectelor-aprobate-ca-urmare-a-finalizarii-procesului-de-evaluare-tehnica-si-financiara-calitativa-etfc-pentru-apelul-dezvoltarea-de-servicii-specializate-pentru-co/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-listele-finale-privind-proiectele-respinse-dupa-solutionarea-contestatiilor-etfp-pentru-apelul-sprijinirea-copiilor-si-tinerilor-in-procesul-de-dezinstitutionalizare/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-listele-finale-privind-proiectele-respinse-dupa-solutionarea-contestatiilor-etfp-pentru-apelul-sprijinirea-copiilor-si-tinerilor-in-procesul-de-dezinstitutionalizare/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-listele-finale-privind-proiectele-respinse-dupa-solutionarea-contestatiilor-etfp-pentru-apelul-sprijinirea-copiilor-si-tinerilor-in-procesul-de-dezinstitutionalizare/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poids-corrigendum-la-orientari-pentru-grupurile-de-actiune-locala-in-vederea-implementarii-strategiilor-de-dezvoltare-locala-la-nivelul-oraselor-si-municipiilor-cu-peste-20-000-locuitori/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poids-corrigendum-la-orientari-pentru-grupurile-de-actiune-locala-in-vederea-implementarii-strategiilor-de-dezvoltare-locala-la-nivelul-oraselor-si-municipiilor-cu-peste-20-000-locuitori/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poids-corrigendum-la-orientari-pentru-grupurile-de-actiune-locala-in-vederea-implementarii-strategiilor-de-dezvoltare-locala-la-nivelul-oraselor-si-municipiilor-cu-peste-20-000-locuitori/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/minister/perioade-de-programare/perioada-2021-2027/autoritatea-de-management-pentru-programul-sanatate/programare-ghiduri/prioritatea-10-sprijin-pentru-investitii-in-infrastructura-duala-respectiv-finantarea-spitalelor-militare/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/minister/perioade-de-programare/perioada-2021-2027/autoritatea-de-management-pentru-programul-sanatate/programare-ghiduri/prioritatea-10-sprijin-pentru-investitii-in-infrastructura-duala-respectiv-finantarea-spitalelor-militare/\nCall log:\n  - navigating to \"https://mfe.gov.ro/minister/perioade-de-programare/perioada-2021-2027/autoritatea-de-management-pentru-programul-sanatate/programare-ghiduri/prioritatea-10-sprijin-pentru-investitii-in-infrastructura-duala-respectiv-finantarea-spitalelor-militare/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/tehnologii-strategice-pentru-europa-step/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/tehnologii-strategice-pentru-europa-step/\nCall log:\n  - navigating to \"https://mfe.gov.ro/tehnologii-strategice-pentru-europa-step/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/programe/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/programe/\nCall log:\n  - navigating to \"https://mfe.gov.ro/programe/\", waiting until \"commit\"\n"
-        },
-        {
-          "url": "https://mfe.gov.ro/poats/prezentare-program-poat/",
-          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://mfe.gov.ro/poats/prezentare-program-poat/\nCall log:\n  - navigating to \"https://mfe.gov.ro/poats/prezentare-program-poat/\", waiting until \"commit\"\n"
-        }
-      ],
-      "runtimeSeconds": 1108.25,
-      "runtimeBudgetSeconds": 1200,
-      "deadlineReached": false,
-      "maxPages": 120,
-      "maxDepth": 3,
-      "collectorVersion": "3.0",
-      "frontierVersion": 1,
-      "transport": "playwright-edge-direct-romania-v3"
-    },
     {
       "observedAt": "2026-08-20T05:55:25.648317+00:00",
       "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
@@ -14787,6 +14495,182 @@
       "transportMode": "primary-direct-unavailable",
       "lastKnownGoodPreserved": true,
       "directSuccessCount": 1,
+      "proxySuccessCount": 0,
+      "prioritySeed": "https://mfe.gov.ro/pdds/despre-program-programare/",
+      "prioritySeedAvailable": false,
+      "primaryOfficialRootAvailable": false,
+      "sourceHealth": "PDDS_PRIORITY_SEED_UNAVAILABLE",
+      "healthNormalizationReason": "A direct success on an ancillary/previous candidate does not make the GitHub-hosted MIPE route healthy while the explicit PDDS priority seed or primary discovery roots are unavailable."
+    },
+    {
+      "observedAt": "2026-08-24T16:09:13.313556+00:00",
+      "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
+      "roots": [
+        {
+          "target": "https://mfe.gov.ro/",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://mfe.gov.ro/ghiduri_peos/",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://mfe.gov.ro/ghiduri_pids/",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://mfe.gov.ro/pdds/despre-program-programare/",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://mfe.gov.ro/pnrr/",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://oportunitati-ue.gov.ro/",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://mfe.gov.ro/wp-json/wp/v2/posts?per_page=50&orderby=modified&order=desc&_fields=link%2Cdate%2Cmodified%2Ctitle%2Cexcerpt",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://mfe.gov.ro/feed/",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://mfe.gov.ro/wp-sitemap.xml",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://mfe.gov.ro/sitemap.xml",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://oportunitati-ue.gov.ro/wp-json/wp/v2/posts?per_page=50&orderby=modified&order=desc&_fields=link%2Cdate%2Cmodified%2Ctitle%2Cexcerpt",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://oportunitati-ue.gov.ro/feed/",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://oportunitati-ue.gov.ro/wp-sitemap.xml",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        },
+        {
+          "target": "https://oportunitati-ue.gov.ro/sitemap.xml",
+          "ok": false,
+          "transport": "direct-canonical",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "policy": "search-discovery-only-on-direct-source-failure"
+        }
+      ],
+      "searchTransports": [
+        {
+          "query": "site:mfe.gov.ro apel ghid consultare corrigendum 2026",
+          "ok": false,
+          "transport": "jina-search-discovery-only",
+          "error": "HTTPError: HTTP Error 401: Unauthorized",
+          "publicationPolicy": "discovery-only; canonical direct fetch required",
+          "pddsDiscoveryPolicy": "PDDS candidates must originate from the explicit priority seed crawl",
+          "excludedPddsSearchCandidates": 0
+        },
+        {
+          "query": "site:mfe.gov.ro PEO PoIDS PDDS 2026",
+          "ok": false,
+          "transport": "jina-search-discovery-only",
+          "error": "HTTPError: HTTP Error 401: Unauthorized",
+          "publicationPolicy": "discovery-only; canonical direct fetch required",
+          "pddsDiscoveryPolicy": "PDDS candidates must originate from the explicit priority seed crawl",
+          "excludedPddsSearchCandidates": 0
+        },
+        {
+          "query": "site:oportunitati-ue.gov.ro finantare 2026",
+          "ok": false,
+          "transport": "jina-search-discovery-only",
+          "error": "HTTPError: HTTP Error 401: Unauthorized",
+          "publicationPolicy": "discovery-only; canonical direct fetch required",
+          "pddsDiscoveryPolicy": "PDDS candidates must originate from the explicit priority seed crawl",
+          "excludedPddsSearchCandidates": 0
+        },
+        {
+          "query": "site:mfe.gov.ro apel ghid consultare corrigendum 2026",
+          "ok": true,
+          "transport": "bing-rss-discovery-only",
+          "error": null,
+          "publicationPolicy": "discovery-only; canonical direct fetch required",
+          "pddsDiscoveryPolicy": "PDDS candidates must originate from the explicit priority seed crawl",
+          "discoveredOfficialUrlCount": 0,
+          "excludedPddsSearchCandidates": 0
+        },
+        {
+          "query": "site:mfe.gov.ro PEO PoIDS PDDS 2026",
+          "ok": true,
+          "transport": "bing-rss-discovery-only",
+          "error": null,
+          "publicationPolicy": "discovery-only; canonical direct fetch required",
+          "pddsDiscoveryPolicy": "PDDS candidates must originate from the explicit priority seed crawl",
+          "discoveredOfficialUrlCount": 0,
+          "excludedPddsSearchCandidates": 0
+        },
+        {
+          "query": "site:oportunitati-ue.gov.ro finantare 2026",
+          "ok": true,
+          "transport": "bing-rss-discovery-only",
+          "error": null,
+          "publicationPolicy": "discovery-only; canonical direct fetch required",
+          "pddsDiscoveryPolicy": "PDDS candidates must originate from the explicit priority seed crawl",
+          "discoveredOfficialUrlCount": 0,
+          "excludedPddsSearchCandidates": 0
+        }
+      ],
+      "candidateCount": 60,
+      "fetchedCandidateCount": 32,
+      "currentVerifiedCount": 0,
+      "publishedItemCount": 60,
+      "transportMode": "primary-direct-unavailable",
+      "lastKnownGoodPreserved": true,
+      "directSuccessCount": 0,
       "proxySuccessCount": 0,
       "prioritySeed": "https://mfe.gov.ro/pdds/despre-program-programare/",
       "prioritySeedAvailable": false,
