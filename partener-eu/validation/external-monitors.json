@@ -1,16 +1,16 @@
 {
   "schema_version": "1.0",
   "checkpoint": "PARTENER-EU-CIVORA-P10-0020",
-  "observed_at": "2026-08-24T11:04:07Z",
-  "validation_run_started": "2026-08-24T11:03:38Z",
+  "observed_at": "2026-08-24T11:06:06Z",
+  "validation_run_started": "2026-08-24T11:05:40Z",
   "integrity": {
     "latest_history_equal": true,
-    "latest_sha256": "e445a170217d0d6126855c250b8f06c0006a4ba34bce70775fc6e224ae21448b",
-    "history_sha256": "e445a170217d0d6126855c250b8f06c0006a4ba34bce70775fc6e224ae21448b",
-    "history_path": "validation/history/20260824T110338Z.json",
+    "latest_sha256": "6a19dbef1b9d6a5721431801138954284df15cc2cbd65cf910b212da496b41d5",
+    "history_sha256": "6a19dbef1b9d6a5721431801138954284df15cc2cbd65cf910b212da496b41d5",
+    "history_path": "validation/history/20260824T110540Z.json",
     "source_state_checkpoint_equal": true,
-    "source_state_sha256": "4564fce0480c0ee57bf6b573f9c64d1901e553426b8c7484a8e5d5bbfa1ab7d7",
-    "checkpoint_sha256": "4564fce0480c0ee57bf6b573f9c64d1901e553426b8c7484a8e5d5bbfa1ab7d7",
+    "source_state_sha256": "8ff5f9e4aef0540da2ad7a76c4291c0065f0f150b549cc03f14c3a478c74f2fc",
+    "checkpoint_sha256": "8ff5f9e4aef0540da2ad7a76c4291c0065f0f150b549cc03f14c3a478c74f2fc",
     "frontend_regression_pass": true,
     "frontend_pass": 10,
     "frontend_total": 10,
@@ -18,7 +18,7 @@
   },
   "source_registry": {
     "observed_at": "2026-08-24T09:09:02.344490Z",
-    "age_seconds": 6905,
+    "age_seconds": 7024,
     "stale_after_seconds": 28800,
     "stale": false,
     "health": "DEGRADED",
@@ -63,13 +63,13 @@
     "fail_closed": true
   },
   "afir": {
-    "observed_at": "2026-08-24T09:10:23.817171+00:00",
+    "observed_at": "2026-08-24T11:05:08.345630+00:00",
     "status": "PASS",
-    "item_count": 29,
-    "error_count": 41,
-    "hash_change_candidates": 0,
-    "material_signal_candidates": 0,
-    "auth_dependency_count": 26,
+    "item_count": 30,
+    "error_count": 37,
+    "hash_change_candidates": 1,
+    "material_signal_candidates": 1,
+    "auth_dependency_count": 27,
     "auth_dependencies": [
       {
         "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2F&culture=ro",
@@ -219,6 +219,13 @@
         "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
       },
       {
+        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Ffinantare%2Fmasuri-atipice-sm-192%2F&culture=ro",
+        "sourcePage": "https://www.afir.ro/finantare/masuri-atipice-sm-192/",
+        "status": "AUTH_OR_ACCESS_DEPENDENT",
+        "materialFactAction": "NONE",
+        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
+      },
+      {
         "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finstrumente%2Fsesiuni%2Farhiva-anunturilor-de-primire-a-proiectelor-aferente-perioadei-2023-2027%2F&culture=ro",
         "sourcePage": "https://www.afir.ro/instrumente/sesiuni/arhiva-anunturilor-de-primire-a-proiectelor-aferente-perioadei-2023-2027/",
         "status": "AUTH_OR_ACCESS_DEPENDENT",
@@ -254,12 +261,12 @@
         "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
       }
     ],
-    "resolution_task_required": false,
+    "resolution_task_required": true,
     "resolution_task_present_fail_closed": true,
     "material_facts_auto_promoted": false
   },
   "peo_calendar": {
-    "observed_at": "2026-08-24T09:12:53.814719+00:00",
+    "observed_at": "2026-08-24T11:04:58.232243+00:00",
     "status": "OK_OFFICIAL_OIR_COPY",
     "source": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
     "source_class": "OFFICIAL_INSTITUTIONAL_COPY_OIR_PECU_VEST",
@@ -354,7 +361,7 @@
     "integrity_pass": true,
     "registry_health": "DEGRADED",
     "registry_hash_changes": 7,
-    "afir_hash_changes": 0,
+    "afir_hash_changes": 1,
     "peo_calendar_changes": 0,
     "mipe_health": "PASS",
     "autonomous_orchestration_configured": true,
