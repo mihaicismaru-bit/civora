@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -112,6 +113,27 @@ def main():
         completed.append(final)
 
     assert len({row["session"]["resume"]["token"] for row in completed}) == 4
+
+    production = load_module("r05_production_builder", EUCONS / "deployment" / "build_production_ready.py")
+    with tempfile.TemporaryDirectory() as td:
+        target = Path(td) / "site"
+        build = production.build_site(target)
+        assert build["production_deployed"] is False
+        for journey_id, form_id in contract["journey_form_map"].items():
+            journey = journeys[journey_id]
+            page = (target / journey["path"].strip("/") / "index.html").read_text(encoding="utf-8")
+            assert page.count('action="/api/inbound/sessions"') == 3
+            assert page.count("data-eucons-inbound-form") == 3
+            assert 'data-step="PROFILE"' in page and 'data-step="CONTEXT"' in page and 'data-step="CONTACT"' in page
+            assert f'data-journey-id="{journey_id}"' in page
+            assert f'data-form-id="{form_id}"' in page
+            assert 'name="privacy_ack"' in page and 'name="marketing_consent"' in page
+            for field in journey["first_step_fields"] + journey["later_fields"]:
+                assert f'name="{field}"' in page
+        browser_adapter = (target / "assets" / "forms.js").read_text(encoding="utf-8")
+        assert 'fetch(form.action' in browser_adapter
+        assert 'Content-Type": "application/json"' in browser_adapter
+        assert "localStorage" not in browser_adapter
     print(json.dumps({
         "status": "PASS",
         "phase": "R05",
