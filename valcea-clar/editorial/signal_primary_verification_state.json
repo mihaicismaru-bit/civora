@@ -2,19 +2,92 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-25T08:10:09+03:00",
+  "generated_at": "2026-08-25T10:34:40+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-25T08:08:51+03:00",
-  "task_count": 46,
+  "queue_generated_at": "2026-08-25T10:33:25+03:00",
+  "task_count": 47,
   "primary_match_count": 0,
   "no_match_count": 20,
-  "unrouted_count": 26,
+  "unrouted_count": 27,
   "target_count": 17,
-  "targets_ok": 13,
+  "targets_ok": 14,
   "results": [
+    {
+      "signal_id": "08d6d930c83a84afd2707535",
+      "signal_title": "Prins DROGAT prin RÂMNICU VÂLCEA. Vezi ce a consumat!",
+      "signal_url": "https://seintamplainvalcea.ro/2026/08/25/prins-drogat-prin-ramnicu-valcea-vezi-ce-a-consumat/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_published_at": "2026-08-25T10:24:16+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "5988f5622cef0a55159daca1",
+      "signal_title": "Fanfară în concert la Băile Olănești. Muzică de promenadă în Parcul Unirii",
+      "signal_url": "https://evenimentvalcean.ro/fanfara-in-concert-la-baile-olanesti-muzica-de-promenada-in-parcul-unirii/",
+      "signal_publisher": "Eveniment Vâlcean",
+      "signal_published_at": "2026-08-25T10:05:32+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "f2d264bf19a7066fac09750c",
+      "signal_title": "FOTO – Casă mistuită de flăcări într-o comună din Vâlcea. Risc de explozie…",
+      "signal_url": "https://seintamplainvalcea.ro/2026/08/25/foto-casa-mistuita-de-flacari-intr-o-comuna-din-valcea-risc-de-explozie/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-25T09:38:46+03:00",
+      "verification_route_id": "fire_rescue_alert",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "isu-valcea-stiri-locale",
+            "name": "ISU Vâlcea — Știri locale",
+            "url": "https://isuvl.igsu.ro/stiri-locale"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "isu-valcea-comunicate",
+            "name": "ISU Vâlcea",
+            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "26585a0f9575b7c391b10e3b",
       "signal_title": "Vâlcea iese din zona județelor sărace. Puterea de cumpărare a crescut și județul părăsește coada clasamentului național",
@@ -166,9 +239,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "DEGRADED",
-          "error": "HTTPError: HTTP Error 403: Forbidden",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -205,9 +278,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "DEGRADED",
-          "error": "HTTPError: HTTP Error 403: Forbidden",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -292,9 +365,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "DEGRADED",
-          "error": "HTTPError: HTTP Error 403: Forbidden",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -551,9 +624,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "DEGRADED",
-          "error": "HTTPError: HTTP Error 403: Forbidden",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -602,9 +675,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "DEGRADED",
-          "error": "HTTPError: HTTP Error 403: Forbidden",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -993,45 +1066,6 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "4c826896a5eef64130e300ee",
-      "signal_title": "Doru Diaconu, o poveste de administrație care nu s-a încheiat. Două mandate de viceprimar, unul de primar și experiența adunată în peste 20 de ani",
-      "signal_url": "https://www.impactreal.ro/2026/08/22/doru-diaconu-o-poveste-de-administratie-care-nu-s-a-incheiat-doua-mandate-de-viceprimar-unul-de-primar-si-experienta-adunata-in-peste-20-de-ani/",
-      "signal_publisher": "Impact Real",
-      "signal_published_at": "2026-08-22T11:33:24+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "bd211bb1fcfc6b8426dc3490",
-      "signal_title": "FOTO/UPDATE. ACCIDENT MORTAL la Băile Olănești: o persoană a decedat după ce un autoturism a căzut într-o prăpastie și a luat foc",
-      "signal_url": "https://seintamplainvalcea.ro/2026/08/22/accident-mortal-la-baile-olanesti-o-persoana-a-decedat-dupa-ce-un-autoturism-a-cazut-intr-o-prapastie-si-a-luat-foc/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-08-22T09:29:36+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "DEGRADED",
-          "error": "HTTPError: HTTP Error 403: Forbidden",
-          "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
       "signal_id": "608f84316cb4f5d63ef780f5",
       "signal_title": "PNRR și eficiența energetică: Curtea de Conturi Europeană cere rezultate mai clare pentru miliardele investite în renovarea clădirilor",
       "signal_url": "https://www.eurovalcea.ro/2026/08/21/pnrr-si-eficienta-energetica-curtea-de-conturi-europeana-cere-rezultate-mai-clare-pentru-miliardele-investite-in-renovarea-cladirilor/",
@@ -1096,9 +1130,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "DEGRADED",
-          "error": "HTTPError: HTTP Error 403: Forbidden",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
