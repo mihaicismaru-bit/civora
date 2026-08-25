@@ -1,0 +1,913 @@
+{
+  "schema_version": 1,
+  "id": "R02-CDM-001",
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "R02_CUSTOMER_DEMAND_MODEL",
+  "status": "CANONICAL",
+  "checked_at": "2026-08-25T20:46:00+03:00",
+  "purpose": "Define who EUCONS should serve first, the real job each organization is trying to complete, which lawful public signals indicate timing, which canonical service fits, what must be verified, and how the organization may be acquired without presenting inference as eligibility.",
+  "truth_model": {
+    "allowed_classes": [
+      "FACT",
+      "INFERENCE",
+      "UNKNOWN",
+      "CONFLICT",
+      "HYPOTHESIS"
+    ],
+    "rule": "FACT requires evidence; material funding facts require an official source or a verified PARTENER projection. INFERENCE never becomes eligibility. HYPOTHESIS remains outside public claims and performance reporting until validated.",
+    "performance_rule": "No market-size, conversion, demand-volume or revenue metric is asserted without real telemetry or an authoritative source.",
+    "privacy_rule": "Prospecting begins at organization level. Prefer official/public organization and role-based business-contact surfaces; do not infer sensitive traits or use private-person data."
+  },
+  "market_facts": [
+    {
+      "id": "CDM-F01",
+      "classification": "FACT",
+      "publicability": "PUBLIC_VERIFIED",
+      "statement": "AFIR exposes public session, selection, contract and beneficiary surfaces that can support organization-level opportunity and post-award signals.",
+      "authority": "Agenția pentru Finanțarea Investițiilor Rurale",
+      "evidence_urls": [
+        "https://www.afir.ro/"
+      ],
+      "verified_at": "2026-08-25",
+      "material_claim": false
+    },
+    {
+      "id": "CDM-F02",
+      "classification": "FACT",
+      "publicability": "PUBLIC_VERIFIED",
+      "statement": "AFIR procedural material explicitly treats consulting, monitoring and project management as project preparation and implementation cost categories in the applicable rural-funding context.",
+      "authority": "Agenția pentru Finanțarea Investițiilor Rurale",
+      "evidence_urls": [
+        "https://www.afir.ro/api/file?filename=Manual+procedur%C4%83+evaluarea+selectarea+PS+2027+%28Edi%C5%A3ia+III%2C+Revizia+0%29&filetype=pdf&url=%2Fmedia%2Fxkxpgfaf%2Fmanual-procedur%C4%83-evaluarea-%C8%99i-selectarea-ps-2027-editia-iii-revizia-0.pdf"
+      ],
+      "verified_at": "2026-08-25",
+      "material_claim": true
+    },
+    {
+      "id": "CDM-F03",
+      "classification": "FACT",
+      "publicability": "PUBLIC_VERIFIED",
+      "statement": "Current SEAP public notices include EU-funded requirements for project management, implementation support, supervision or audit, demonstrating a lawful public signal surface for institutional demand.",
+      "authority": "Sistemul Electronic de Achiziții Publice",
+      "evidence_urls": [
+        "https://www.e-licitatie.ro/pub/notices/adv-notices/view/100728713",
+        "https://e-licitatie.ro/pub/notices/c-notice/v2/view/100211117",
+        "https://e-licitatie.ro/pub/direct-acquisition/view/122814088"
+      ],
+      "verified_at": "2026-08-25",
+      "material_claim": false
+    },
+    {
+      "id": "CDM-F04",
+      "classification": "FACT",
+      "publicability": "PUBLIC_VERIFIED",
+      "statement": "Eurostat reported Romania at 27% of SMEs reaching at least basic digital intensity in the referenced 2024 edition; the observation supports a digital-investment research lane but does not prove funding eligibility or purchase intent for any organization.",
+      "authority": "Eurostat",
+      "evidence_urls": [
+        "https://ec.europa.eu/eurostat/web/interactive-publications/digitalisation-2024"
+      ],
+      "verified_at": "2026-08-25",
+      "material_claim": true
+    },
+    {
+      "id": "CDM-F05",
+      "classification": "FACT",
+      "publicability": "PUBLIC_VERIFIED",
+      "statement": "The European Commission's 2025 Romania country-report process assesses investment, employment, skills, social and reform challenges; these are macro context only and cannot be used as organization-level intent.",
+      "authority": "European Commission",
+      "evidence_urls": [
+        "https://commission.europa.eu/document/download/ba3d44aa-c5f1-4e86-b437-12c64f6f685d_en?filename=COM_2025_223_1_EN_ACT_part1_v4.pdf"
+      ],
+      "verified_at": "2026-08-25",
+      "material_claim": false
+    },
+    {
+      "id": "CDM-F06",
+      "classification": "FACT",
+      "publicability": "PUBLIC_VERIFIED",
+      "statement": "The EU Funding & Tenders Portal organization and partner-search model uses public organization and funded-project context, supporting an organization-history signal lane for direct EU programmes.",
+      "authority": "European Commission",
+      "evidence_urls": [
+        "https://ec.europa.eu/info/funding-tenders/opportunities/docs/2021-2027/common/guidance/om_en.pdf"
+      ],
+      "verified_at": "2026-08-25",
+      "material_claim": false
+    }
+  ],
+  "customer_segments": [
+    {
+      "id": "SEG-SME",
+      "label": "IMM-uri, companii și antreprenori",
+      "canonical_audience_id": "companies_entrepreneurs",
+      "priority": "P0",
+      "inclusion": "Organization has a defined investment, growth, digitalization, energy, production, tourism, rural or workforce-development need.",
+      "exclusions": [
+        "No identifiable organization or investment context",
+        "Requested activity is outside EUCONS service registry"
+      ],
+      "core_objections": [
+        "Nu știu dacă investiția este eligibilă",
+        "Nu vreau să pregătesc documente înainte să existe o potrivire reală",
+        "Mă tem de cost, birocrație și obligațiile de după aprobare"
+      ]
+    },
+    {
+      "id": "SEG-PUBLIC",
+      "label": "Autorități și instituții publice",
+      "canonical_audience_id": "public_authorities_institutions",
+      "priority": "P0",
+      "inclusion": "Public organization has an evidenced investment pipeline, strategy, procurement, awarded project or implementation-capacity need.",
+      "exclusions": [
+        "Political targeting without an organizational service need",
+        "No public source or authorized internal evidence for the trigger"
+      ],
+      "core_objections": [
+        "Avem nevoie de traseu procedural și responsabilități clare",
+        "Achiziția și mandatul trebuie respectate",
+        "Capacitatea internă este limitată sau fragmentată"
+      ]
+    },
+    {
+      "id": "SEG-BENEFICIARY",
+      "label": "Beneficiari cu proiecte contractate",
+      "canonical_audience_id": "existing_beneficiaries",
+      "priority": "P0",
+      "inclusion": "Organization has public or authorized evidence of an awarded/contracted project and a plausible implementation, reporting, procurement, financial or recovery job.",
+      "exclusions": [
+        "Project award is unverified",
+        "A problem is inferred from silence or rumor"
+      ],
+      "core_objections": [
+        "Consultantul inițial ar trebui să se ocupe",
+        "Nu vreau să expun date confidențiale înainte de diagnostic",
+        "Problema poate necesita aprobare sau interpretare a autorității"
+      ]
+    },
+    {
+      "id": "SEG-NGO-SE",
+      "label": "ONG-uri și actori ai economiei sociale",
+      "canonical_audience_id": "ngos_eligible_organizations",
+      "priority": "P1",
+      "inclusion": "Nonprofit, foundation, association, social-economy entity or eligible partnership has a mission-aligned project, service, investment or awarded-project need.",
+      "exclusions": [
+        "Mission and proposed activity are not sufficiently described",
+        "Eligibility class is assumed from legal form alone"
+      ],
+      "core_objections": [
+        "Echipa este concentrată pe misiune, nu pe administrare",
+        "Cofinanțarea și cash-flow-ul sunt sensibile",
+        "Parteneriatele și grupul țintă complică proiectarea"
+      ]
+    },
+    {
+      "id": "SEG-TRAINING",
+      "label": "Furnizori de formare și organizații cu nevoi de competențe",
+      "canonical_audience_id": "ngos_eligible_organizations",
+      "priority": "P1",
+      "inclusion": "Authorized or potential training provider, employer, chamber, school or partnership has a documented workforce/skills need or a relevant funding/project trigger.",
+      "exclusions": [
+        "Authorization or delivery capacity is assumed",
+        "Learner demand is synthetic or unsupported"
+      ],
+      "core_objections": [
+        "Apelul poate cere parteneriate și indicatori greu de susținut",
+        "Recrutarea grupului țintă este riscantă",
+        "Documentarea orelor, rezultatelor și eligibilității este complexă"
+      ]
+    },
+    {
+      "id": "SEG-RURAL",
+      "label": "Actori agricoli, rurali și GAL",
+      "canonical_audience_id": "companies_entrepreneurs",
+      "priority": "P1",
+      "inclusion": "Farm, rural SME, cooperative, producer group, GAL or rural partnership has an evidenced AFIR/GAL/investment or implementation trigger.",
+      "exclusions": [
+        "Consultant-directory presence is treated as accreditation",
+        "An announced intervention is treated as an open call without official confirmation"
+      ],
+      "core_objections": [
+        "Condițiile tehnice și economice sunt greu de comparat",
+        "Calendarul și documentele se schimbă",
+        "Implementarea și achizițiile pot depăși capacitatea internă"
+      ]
+    }
+  ],
+  "trigger_taxonomy": [
+    {
+      "id": "TRG-OPPORTUNITY",
+      "label": "Oportunitate oficială relevantă",
+      "source_classes": [
+        "OFFICIAL_CALL",
+        "VERIFIED_PARTENER_PROJECTION"
+      ],
+      "default_expiry_days": 30,
+      "classification": "FACT_REQUIRED",
+      "allowed_inference": "Potential fit only; eligibility remains unknown until checked."
+    },
+    {
+      "id": "TRG-INVESTMENT",
+      "label": "Investiție sau extindere anunțată public",
+      "source_classes": [
+        "OFFICIAL_ORGANIZATION_SITE",
+        "PUBLIC_REGISTRY",
+        "PUBLIC_NEWS_WITH_PRIMARY_LINK"
+      ],
+      "default_expiry_days": 180,
+      "classification": "FACT_REQUIRED",
+      "allowed_inference": "Possible need for funding strategy or application support."
+    },
+    {
+      "id": "TRG-STRATEGY-BUDGET",
+      "label": "Strategie, buget sau plan public adoptat",
+      "source_classes": [
+        "OFFICIAL_PUBLIC_AUTHORITY"
+      ],
+      "default_expiry_days": 365,
+      "classification": "FACT_REQUIRED",
+      "allowed_inference": "Possible pipeline-planning need; procurement intent is not assumed."
+    },
+    {
+      "id": "TRG-AWARD",
+      "label": "Proiect selectat, contractat sau finanțat",
+      "source_classes": [
+        "OFFICIAL_AWARD_LIST",
+        "OFFICIAL_BENEFICIARY_DATA",
+        "EU_PORTAL"
+      ],
+      "default_expiry_days": 365,
+      "classification": "FACT_REQUIRED",
+      "allowed_inference": "Possible post-award service need; implementation problems are not inferred."
+    },
+    {
+      "id": "TRG-PROCUREMENT",
+      "label": "Plan sau anunț de achiziție relevant",
+      "source_classes": [
+        "SEAP",
+        "TED",
+        "OFFICIAL_BUYER_PROFILE"
+      ],
+      "default_expiry_days": 90,
+      "classification": "FACT_REQUIRED",
+      "allowed_inference": "Demand may exist only within the published procurement route and deadline."
+    },
+    {
+      "id": "TRG-DEADLINE",
+      "label": "Termen contractual sau de raportare apropiat",
+      "source_classes": [
+        "AUTHORIZED_INTERNAL_PROJECT_DATA",
+        "OFFICIAL_PROJECT_DOCUMENT"
+      ],
+      "default_expiry_days": 45,
+      "classification": "FACT_REQUIRED",
+      "allowed_inference": "Operational urgency only when the exact term and obligation are sourced."
+    },
+    {
+      "id": "TRG-CLARIFICATION",
+      "label": "Clarificare, constatare, modificare sau corecție documentată",
+      "source_classes": [
+        "AUTHORIZED_INTERNAL_PROJECT_DATA",
+        "OFFICIAL_CORRESPONDENCE"
+      ],
+      "default_expiry_days": 30,
+      "classification": "CONFIDENTIAL_OR_AUTHORIZED_FACT",
+      "allowed_inference": "Recovery need may be recommended; outcome cannot be promised."
+    },
+    {
+      "id": "TRG-SKILLS",
+      "label": "Nevoie publică de recrutare, formare sau competențe",
+      "source_classes": [
+        "OFFICIAL_STRATEGY",
+        "PUBLIC_JOB_DATA",
+        "OFFICIAL_ORGANIZATION_SITE",
+        "SEAP"
+      ],
+      "default_expiry_days": 120,
+      "classification": "FACT_REQUIRED",
+      "allowed_inference": "Possible training/project-capacity need; eligible target groups remain unknown."
+    },
+    {
+      "id": "TRG-DIGITAL-GAP",
+      "label": "Context sectorial de digitalizare redusă",
+      "source_classes": [
+        "EUROSTAT",
+        "INS",
+        "OFFICIAL_STUDY"
+      ],
+      "default_expiry_days": 365,
+      "classification": "CONTEXT_ONLY",
+      "allowed_inference": "Supports content and segment research, never account-level intent by itself."
+    },
+    {
+      "id": "TRG-REPEAT-BENEFICIARY",
+      "label": "Istoric public de proiecte sau finanțări",
+      "source_classes": [
+        "OFFICIAL_BENEFICIARY_DATA",
+        "EU_PORTAL"
+      ],
+      "default_expiry_days": 730,
+      "classification": "FACT_REQUIRED",
+      "allowed_inference": "May support organizational capability/next-project research, not current buying intent."
+    }
+  ],
+  "demand_matrix": [
+    {
+      "id": "JTBD-SME-01",
+      "segment_id": "SEG-SME",
+      "job": "Găsește o rută realistă de finanțare pentru o investiție definită.",
+      "moment": "before_programme_selection",
+      "trigger_ids": [
+        "TRG-INVESTMENT",
+        "TRG-OPPORTUNITY"
+      ],
+      "service_ids": [
+        "funding_strategy_and_eligibility"
+      ],
+      "evidence_needed": [
+        "organization legal/activity profile",
+        "investment scope, location, timing and financing capacity",
+        "official call or verified PARTENER projection"
+      ],
+      "search_intents": [
+        "finanțare investiție IMM",
+        "ce fonduri europene se potrivesc firmei mele"
+      ],
+      "acquisition_channels": [
+        "opportunity SEO",
+        "guided evaluation",
+        "partner/referral"
+      ],
+      "priority": "P0",
+      "recommended_next_action": "Preliminary fit assessment with unknowns and required documents."
+    },
+    {
+      "id": "JTBD-SME-02",
+      "segment_id": "SEG-SME",
+      "job": "Transformă investiția selectată într-o cerere coerentă și controlabilă.",
+      "moment": "programme_selected",
+      "trigger_ids": [
+        "TRG-OPPORTUNITY",
+        "TRG-INVESTMENT"
+      ],
+      "service_ids": [
+        "application_design_and_submission",
+        "funding_strategy_and_eligibility"
+      ],
+      "evidence_needed": [
+        "applicable guide and annexes",
+        "applicant legal/financial data",
+        "technical and budget inputs"
+      ],
+      "search_intents": [
+        "consultant scriere proiect fonduri europene",
+        "pregătire cerere finanțare"
+      ],
+      "acquisition_channels": [
+        "service SEO",
+        "evaluation completion",
+        "referral"
+      ],
+      "priority": "P0",
+      "recommended_next_action": "Readiness checklist and scoped application discovery."
+    },
+    {
+      "id": "JTBD-SME-03",
+      "segment_id": "SEG-SME",
+      "job": "Digitalizează sau modernizează fără a confunda contextul de piață cu eligibilitatea.",
+      "moment": "investment_discovery",
+      "trigger_ids": [
+        "TRG-DIGITAL-GAP",
+        "TRG-OPPORTUNITY",
+        "TRG-INVESTMENT"
+      ],
+      "service_ids": [
+        "funding_strategy_and_eligibility"
+      ],
+      "evidence_needed": [
+        "organization-specific digital baseline",
+        "investment outcome and budget",
+        "official eligibility conditions"
+      ],
+      "search_intents": [
+        "fonduri digitalizare IMM",
+        "finanțare echipamente software"
+      ],
+      "acquisition_channels": [
+        "evidence-backed guide",
+        "opportunity page",
+        "guided evaluation"
+      ],
+      "priority": "P1",
+      "recommended_next_action": "Digital-investment profile followed by opportunity verification."
+    },
+    {
+      "id": "JTBD-PUB-01",
+      "segment_id": "SEG-PUBLIC",
+      "job": "Corelează nevoile și proiectele din strategie cu oportunități verificabile.",
+      "moment": "pipeline_planning",
+      "trigger_ids": [
+        "TRG-STRATEGY-BUDGET",
+        "TRG-OPPORTUNITY"
+      ],
+      "service_ids": [
+        "funding_strategy_and_eligibility",
+        "project_management_capacity"
+      ],
+      "evidence_needed": [
+        "adopted strategy/budget/plan",
+        "project concepts and ownership",
+        "official programme sources"
+      ],
+      "search_intents": [
+        "finanțări UAT 2021-2027",
+        "portofoliu proiecte autoritate publică"
+      ],
+      "acquisition_channels": [
+        "official strategy research",
+        "institutional referral",
+        "decision guide"
+      ],
+      "priority": "P0",
+      "recommended_next_action": "Funding pipeline workshop and evidence-gap register."
+    },
+    {
+      "id": "JTBD-PUB-02",
+      "segment_id": "SEG-PUBLIC",
+      "job": "Pregătește o aplicație complexă și coordonează contribuțiile tehnice, financiare și administrative.",
+      "moment": "call_open_or_expected",
+      "trigger_ids": [
+        "TRG-OPPORTUNITY",
+        "TRG-STRATEGY-BUDGET"
+      ],
+      "service_ids": [
+        "application_design_and_submission",
+        "project_management_capacity"
+      ],
+      "evidence_needed": [
+        "official guide and corrigenda",
+        "technical-economic documents",
+        "institutional approvals and budget data"
+      ],
+      "search_intents": [
+        "consultanță proiecte UAT",
+        "documentație cerere finanțare instituție"
+      ],
+      "acquisition_channels": [
+        "public opportunity mapping",
+        "referral",
+        "human-approved account brief"
+      ],
+      "priority": "P0",
+      "recommended_next_action": "Application readiness diagnostic and responsibility map."
+    },
+    {
+      "id": "JTBD-PUB-03",
+      "segment_id": "SEG-PUBLIC",
+      "job": "Achiziționează și implementează suportul de proiect pe traseul procedural corect.",
+      "moment": "procurement_or_award",
+      "trigger_ids": [
+        "TRG-PROCUREMENT",
+        "TRG-AWARD"
+      ],
+      "service_ids": [
+        "implementation_and_reporting",
+        "procurement_support",
+        "project_management_capacity"
+      ],
+      "evidence_needed": [
+        "award/contract evidence",
+        "published procurement documents",
+        "project obligations and procurement framework"
+      ],
+      "search_intents": [
+        "servicii management proiect fonduri europene",
+        "asistență implementare achiziții"
+      ],
+      "acquisition_channels": [
+        "SEAP/TED monitoring",
+        "official award lists",
+        "institutional referral"
+      ],
+      "priority": "P0",
+      "recommended_next_action": "Procurement-aware capability response or implementation diagnostic; no off-route contact."
+    },
+    {
+      "id": "JTBD-BEN-01",
+      "segment_id": "SEG-BENEFICIARY",
+      "job": "Preia controlul implementării imediat după contractare.",
+      "moment": "post_award_onboarding",
+      "trigger_ids": [
+        "TRG-AWARD"
+      ],
+      "service_ids": [
+        "implementation_and_reporting",
+        "monitoring_and_compliance",
+        "project_management_capacity"
+      ],
+      "evidence_needed": [
+        "financing contract and current annexes",
+        "approved application, budget and indicators",
+        "team roles and first deadlines"
+      ],
+      "search_intents": [
+        "implementare proiect fonduri europene",
+        "management proiect după contractare"
+      ],
+      "acquisition_channels": [
+        "official award monitoring",
+        "implementation guide",
+        "referral"
+      ],
+      "priority": "P0",
+      "recommended_next_action": "30-day implementation control setup."
+    },
+    {
+      "id": "JTBD-BEN-02",
+      "segment_id": "SEG-BENEFICIARY",
+      "job": "Pregătește achizițiile, plățile și rambursările cu trasabilitate.",
+      "moment": "active_implementation",
+      "trigger_ids": [
+        "TRG-AWARD",
+        "TRG-PROCUREMENT",
+        "TRG-DEADLINE"
+      ],
+      "service_ids": [
+        "procurement_support",
+        "financial_management_and_reimbursement",
+        "monitoring_and_compliance"
+      ],
+      "evidence_needed": [
+        "current budget and procurement plan",
+        "applicable procurement rules",
+        "contracts, invoices, payments and acceptance evidence"
+      ],
+      "search_intents": [
+        "cerere rambursare proiect european",
+        "achiziții beneficiar privat fonduri"
+      ],
+      "acquisition_channels": [
+        "implementation content",
+        "official procurement monitoring",
+        "client/referral"
+      ],
+      "priority": "P0",
+      "recommended_next_action": "Document-control diagnostic scoped to the next procurement/payment milestone."
+    },
+    {
+      "id": "JTBD-BEN-03",
+      "segment_id": "SEG-BENEFICIARY",
+      "job": "Remediază o întârziere, neconcordanță sau solicitare oficială fără a reconstrui fictiv dovezi.",
+      "moment": "risk_or_correction",
+      "trigger_ids": [
+        "TRG-DEADLINE",
+        "TRG-CLARIFICATION"
+      ],
+      "service_ids": [
+        "project_recovery_and_corrections",
+        "monitoring_and_compliance",
+        "financial_management_and_reimbursement"
+      ],
+      "evidence_needed": [
+        "official correspondence and exact deadline",
+        "frozen current project version",
+        "chronology and supporting records"
+      ],
+      "search_intents": [
+        "proiect european blocat",
+        "răspuns clarificări corecție financiară"
+      ],
+      "acquisition_channels": [
+        "recovery SEO",
+        "existing relationship",
+        "professional referral"
+      ],
+      "priority": "P0",
+      "recommended_next_action": "Confidential recovery triage; external submissions remain human-approved."
+    },
+    {
+      "id": "JTBD-NGO-01",
+      "segment_id": "SEG-NGO-SE",
+      "job": "Găsește finanțare compatibilă cu misiunea, grupul țintă și capacitatea organizației.",
+      "moment": "programme_discovery",
+      "trigger_ids": [
+        "TRG-OPPORTUNITY",
+        "TRG-STRATEGY-BUDGET"
+      ],
+      "service_ids": [
+        "funding_strategy_and_eligibility"
+      ],
+      "evidence_needed": [
+        "legal form and mission",
+        "target group and intervention logic",
+        "cofinancing and delivery capacity",
+        "official programme conditions"
+      ],
+      "search_intents": [
+        "fonduri europene ONG",
+        "finanțare economie socială"
+      ],
+      "acquisition_channels": [
+        "topic-cluster SEO",
+        "network/referral",
+        "guided evaluation"
+      ],
+      "priority": "P1",
+      "recommended_next_action": "Mission-to-programme fit map with capacity unknowns."
+    },
+    {
+      "id": "JTBD-NGO-02",
+      "segment_id": "SEG-NGO-SE",
+      "job": "Proiectează și implementează o intervenție socială fără supraîncărcarea echipei.",
+      "moment": "application_or_implementation",
+      "trigger_ids": [
+        "TRG-OPPORTUNITY",
+        "TRG-AWARD"
+      ],
+      "service_ids": [
+        "application_design_and_submission",
+        "implementation_and_reporting",
+        "project_management_capacity"
+      ],
+      "evidence_needed": [
+        "official guide/contract",
+        "partnership and target-group evidence",
+        "staffing and operational capacity"
+      ],
+      "search_intents": [
+        "scriere proiect ONG",
+        "management proiect social"
+      ],
+      "acquisition_channels": [
+        "case-study adjacent content",
+        "referral",
+        "evaluation journey"
+      ],
+      "priority": "P1",
+      "recommended_next_action": "Capacity and evidence diagnostic before scoping."
+    },
+    {
+      "id": "JTBD-TRN-01",
+      "segment_id": "SEG-TRAINING",
+      "job": "Transformă o nevoie de competențe într-un proiect cu grup țintă și livrare demonstrabile.",
+      "moment": "skills_need_discovery",
+      "trigger_ids": [
+        "TRG-SKILLS",
+        "TRG-OPPORTUNITY"
+      ],
+      "service_ids": [
+        "funding_strategy_and_eligibility",
+        "application_design_and_submission"
+      ],
+      "evidence_needed": [
+        "skills-demand source",
+        "provider authorization/capability",
+        "target-group access",
+        "official programme rules"
+      ],
+      "search_intents": [
+        "finanțare cursuri angajați",
+        "proiect formare profesională"
+      ],
+      "acquisition_channels": [
+        "skills guide",
+        "CCI/employer networks",
+        "opportunity page"
+      ],
+      "priority": "P1",
+      "recommended_next_action": "Skills-demand and delivery-capacity assessment."
+    },
+    {
+      "id": "JTBD-TRN-02",
+      "segment_id": "SEG-TRAINING",
+      "job": "Controlează recrutarea, orele, rezultatele și raportarea într-un proiect de formare.",
+      "moment": "training_project_implementation",
+      "trigger_ids": [
+        "TRG-AWARD",
+        "TRG-DEADLINE"
+      ],
+      "service_ids": [
+        "implementation_and_reporting",
+        "monitoring_and_compliance",
+        "financial_management_and_reimbursement"
+      ],
+      "evidence_needed": [
+        "approved target group and indicators",
+        "training schedules and attendance evidence",
+        "financial and reporting rules"
+      ],
+      "search_intents": [
+        "implementare proiect formare PEO",
+        "raportare cursuri fonduri europene"
+      ],
+      "acquisition_channels": [
+        "implementation guide",
+        "award monitoring",
+        "professional referral"
+      ],
+      "priority": "P1",
+      "recommended_next_action": "Training-project control matrix and first deadline review."
+    },
+    {
+      "id": "JTBD-RUR-01",
+      "segment_id": "SEG-RURAL",
+      "job": "Compară intervențiile AFIR/GAL cu investiția și profilul rural real.",
+      "moment": "rural_opportunity_discovery",
+      "trigger_ids": [
+        "TRG-OPPORTUNITY",
+        "TRG-INVESTMENT"
+      ],
+      "service_ids": [
+        "funding_strategy_and_eligibility"
+      ],
+      "evidence_needed": [
+        "farm/company/cooperative profile",
+        "investment and economic data",
+        "official AFIR/GAL guide and session state"
+      ],
+      "search_intents": [
+        "fonduri AFIR 2026",
+        "finanțare afacere rurală"
+      ],
+      "acquisition_channels": [
+        "AFIR opportunity page",
+        "GAL ecosystem",
+        "guided evaluation"
+      ],
+      "priority": "P1",
+      "recommended_next_action": "Rural funding profile with official-source checks."
+    },
+    {
+      "id": "JTBD-RUR-02",
+      "segment_id": "SEG-RURAL",
+      "job": "Implementează proiectul rural și gestionează modificări, achiziții și plăți.",
+      "moment": "rural_post_award",
+      "trigger_ids": [
+        "TRG-AWARD",
+        "TRG-PROCUREMENT",
+        "TRG-DEADLINE"
+      ],
+      "service_ids": [
+        "implementation_and_reporting",
+        "procurement_support",
+        "financial_management_and_reimbursement",
+        "project_recovery_and_corrections"
+      ],
+      "evidence_needed": [
+        "AFIR contract and current procedures",
+        "approved budget and procurement evidence",
+        "official correspondence and deadlines"
+      ],
+      "search_intents": [
+        "implementare proiect AFIR",
+        "modificare contract AFIR"
+      ],
+      "acquisition_channels": [
+        "AFIR beneficiary data",
+        "implementation content",
+        "referral"
+      ],
+      "priority": "P1",
+      "recommended_next_action": "Post-award control/recovery diagnostic bound to the current AFIR documents."
+    },
+    {
+      "id": "JTBD-REP-01",
+      "segment_id": "SEG-BENEFICIARY",
+      "job": "Folosește istoricul verificat pentru următoarea investiție fără a pierde controlul proiectului curent.",
+      "moment": "repeat_funding",
+      "trigger_ids": [
+        "TRG-REPEAT-BENEFICIARY",
+        "TRG-OPPORTUNITY"
+      ],
+      "service_ids": [
+        "funding_strategy_and_eligibility",
+        "project_management_capacity"
+      ],
+      "evidence_needed": [
+        "official project history",
+        "current implementation load and obligations",
+        "new investment concept",
+        "official opportunity"
+      ],
+      "search_intents": [
+        "următorul proiect fonduri europene",
+        "strategie portofoliu proiecte"
+      ],
+      "acquisition_channels": [
+        "beneficiary-history research",
+        "account review",
+        "human-approved brief"
+      ],
+      "priority": "P1",
+      "recommended_next_action": "Portfolio capacity and next-investment fit review."
+    }
+  ],
+  "acquisition_hypotheses": [
+    {
+      "id": "HYP-CDM-01",
+      "classification": "HYPOTHESIS",
+      "statement": "Post-award implementation and recovery journeys will produce higher-intent leads than generic funding-discovery traffic.",
+      "validation_plan": "Compare real qualified-lead rate and time-to-next-action by journey after telemetry is active; do not publish a superiority claim before data exists."
+    },
+    {
+      "id": "HYP-CDM-02",
+      "classification": "HYPOTHESIS",
+      "statement": "A short organization/project-intent first step will improve evaluation completion relative to the current all-at-once journey.",
+      "validation_plan": "Run consent-safe funnel measurement after live intake activation; compare completion and qualification, not raw starts alone."
+    },
+    {
+      "id": "HYP-CDM-03",
+      "classification": "HYPOTHESIS",
+      "statement": "Award plus procurement or deadline signals will prioritize implementation prospects better than award evidence alone.",
+      "validation_plan": "Back-test on labeled non-evidence fixtures, then validate against human-reviewed prospect outcomes without treating score as eligibility."
+    },
+    {
+      "id": "HYP-CDM-04",
+      "classification": "HYPOTHESIS",
+      "statement": "Proof adjacent to the visitor's job will increase trust and qualified CTA conversion.",
+      "validation_plan": "Instrument case/service-assisted paths only after additional evidence objects are publishable; retain UNKNOWN if sample is insufficient."
+    },
+    {
+      "id": "HYP-CDM-05",
+      "classification": "HYPOTHESIS",
+      "statement": "CCI, professional and beneficiary networks may outperform broad social reach for institutional, training and implementation services.",
+      "validation_plan": "Track source-of-lead and qualified outcomes from real referrals/campaigns; no synthetic attribution."
+    }
+  ],
+  "product_implications": [
+    {
+      "rank": 1,
+      "id": "CDM-IMP-01",
+      "capability": "SIGNAL_TO_PLAY_TAXONOMY",
+      "decision": "Use the trigger taxonomy above as the demand-side input for Client Finder; preserve expiry and allowed-inference boundaries.",
+      "dependency": "R06 prospect contract"
+    },
+    {
+      "rank": 2,
+      "id": "CDM-IMP-02",
+      "capability": "POST_AWARD_FAST_PATH",
+      "decision": "Create a distinct implementation/recovery public journey and internal prospect lane; do not bury it under generic services.",
+      "dependency": "R03 service/proof and R04 UX"
+    },
+    {
+      "rank": 3,
+      "id": "CDM-IMP-03",
+      "capability": "PROGRESSIVE_INTENT_INTAKE",
+      "decision": "Start with organization, job and stage; request financial/technical detail only when needed for the selected path.",
+      "dependency": "R04 UX and R05 inbound runtime"
+    },
+    {
+      "rank": 4,
+      "id": "CDM-IMP-04",
+      "capability": "EVIDENCE_ADJACENT_PROOF",
+      "decision": "Map publishable case evidence to the specific jobs it supports; do not use unrelated portfolio logos as proof.",
+      "dependency": "R03 evidence architecture"
+    },
+    {
+      "rank": 5,
+      "id": "CDM-IMP-05",
+      "capability": "ORGANIZATION_FIRST_PROSPECTING",
+      "decision": "Prospect records must carry organization identity, trigger, source, service candidate, missing checks, expiry and human-approved next action.",
+      "dependency": "R06 Client Finder"
+    },
+    {
+      "rank": 6,
+      "id": "CDM-IMP-06",
+      "capability": "DEMAND_TELEMETRY",
+      "decision": "Measure qualified outcomes by job/segment/channel; all current commercial hypotheses remain UNKNOWN until real events exist.",
+      "dependency": "R11 analytics"
+    }
+  ],
+  "acceptance": {
+    "required_segment_lanes": [
+      "companies_entrepreneurs",
+      "public_authorities_institutions",
+      "ngos_eligible_organizations",
+      "existing_beneficiaries"
+    ],
+    "required_specialist_segments": [
+      "SEG-TRAINING",
+      "SEG-RURAL",
+      "SEG-BENEFICIARY"
+    ],
+    "minimum_jobs": 12,
+    "every_job_requires": [
+      "segment_id",
+      "trigger_ids",
+      "service_ids",
+      "evidence_needed",
+      "search_intents",
+      "acquisition_channels",
+      "recommended_next_action"
+    ],
+    "no_autonomous_contact": true,
+    "no_inferred_eligibility": true,
+    "no_synthetic_performance": true
+  },
+  "decision": {
+    "state": "PASS",
+    "summary": "Priority demand is organized into six operational segments and sixteen jobs. Client Finder should prioritize organization-level, time-bound signals, with the post-award beneficiary lane treated as a P0 commercial path.",
+    "next_unit": {
+      "id": "R03-SEA-001",
+      "description": "Reconcile the canonical service and evidence architecture against the demand model, identify missing service boundaries/proof mappings, and create provenance-addressable proof objects only where evidence supports them."
+    }
+  }
+}
