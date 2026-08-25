@@ -1,0 +1,226 @@
+{
+  "schema_version": 1,
+  "id": "R04-JTBD-UX-001",
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "R04_JOB_TO_BE_DONE_UX",
+  "status": "CANONICAL",
+  "checked_at": "2026-08-25T22:49:00+03:00",
+  "design_intent": "Replace catalogue-first entry with calm decision paths based on the visitor's current job, while preserving service detail, verified proof, accessibility and fail-closed funding language.",
+  "global_rules": {
+    "start_from_job_not_organization": true,
+    "primary_choice_count": 4,
+    "proof_must_overlap_journey_service": true,
+    "progressive_data_minimization": true,
+    "inferred_eligibility_forbidden": true,
+    "fake_urgency_forbidden": true,
+    "unavailable_submission_state_must_be_explicit": true,
+    "primary_language": "ro"
+  },
+  "journeys": [
+    {
+      "id": "JRN-FUNDING-FIT",
+      "route_id": "funding_fit",
+      "path": "/ce-finantare-mi-se-potriveste/",
+      "eyebrow": "Pentru o investiție nouă",
+      "question": "Ce finanțare mi se potrivește?",
+      "headline": "Pornește de la investiție, nu de la o listă de apeluri.",
+      "lead": "Descrie ce vrei să faci, unde și în ce etapă ești. Primești o orientare preliminară cu potrivirile posibile, condițiile care trebuie verificate și documentele necesare pentru o concluzie.",
+      "job_ids": [
+        "JTBD-SME-01",
+        "JTBD-SME-03",
+        "JTBD-PUB-01",
+        "JTBD-NGO-01",
+        "JTBD-RUR-01"
+      ],
+      "service_ids": [
+        "funding_strategy_and_eligibility"
+      ],
+      "steps": [
+        "Definim investiția și profilul organizației.",
+        "Verificăm numai oportunități cu sursă și stare controlate.",
+        "Separăm criteriile confirmate de necunoscute și conflicte.",
+        "Recomandăm ce merită aprofundat și următorul document necesar."
+      ],
+      "first_step_fields": [
+        "organization_name",
+        "audience_id",
+        "investment_terms"
+      ],
+      "later_fields": [
+        "activity_codes",
+        "county",
+        "requested_grant_eur",
+        "timeline"
+      ],
+      "cta_id": "request_funding_consultation",
+      "cta_label": "Verifică potrivirea investiției",
+      "secondary_path": "/finantari/",
+      "secondary_label": "Vezi finanțările verificate",
+      "boundary": "Evaluarea preliminară nu confirmă eligibilitatea și nu garantează finanțarea."
+    },
+    {
+      "id": "JRN-PROJECT-REVIEW",
+      "route_id": "project_review",
+      "path": "/verifica-proiectul/",
+      "eyebrow": "Pentru o idee sau aplicație",
+      "question": "Poți verifica proiectul meu?",
+      "headline": "Află ce este clar, ce lipsește și ce poate bloca depunerea.",
+      "lead": "Evaluarea urmărește coerența dintre beneficiar, investiție, activități, buget și regulile aplicabile. Nu mascăm lipsurile printr-un scor optimist.",
+      "job_ids": [
+        "JTBD-SME-02",
+        "JTBD-PUB-02",
+        "JTBD-NGO-02",
+        "JTBD-TRN-01"
+      ],
+      "service_ids": [
+        "funding_strategy_and_eligibility",
+        "application_design_and_submission",
+        "project_management_capacity"
+      ],
+      "steps": [
+        "Înghețăm versiunea și ghidul analizat.",
+        "Inventariem documentele și informațiile disponibile.",
+        "Verificăm criteriile eliminatorii și corelările materiale.",
+        "Livrăm un registru de lipsuri, riscuri și pași următori."
+      ],
+      "first_step_fields": [
+        "organization_name",
+        "audience_id",
+        "project_stage",
+        "investment_terms"
+      ],
+      "later_fields": [
+        "activity_codes",
+        "county",
+        "requested_grant_eur",
+        "timeline",
+        "message"
+      ],
+      "cta_id": "request_project_evaluation",
+      "cta_label": "Cere verificarea proiectului",
+      "secondary_path": "/servicii/pregatire-depunere-proiect/",
+      "secondary_label": "Vezi serviciul de pregătire",
+      "boundary": "O verificare nu înlocuiește documentele oficiale și nu promite punctajul sau aprobarea."
+    },
+    {
+      "id": "JRN-IMPLEMENTATION",
+      "route_id": "implementation_help",
+      "path": "/proiect-in-implementare/",
+      "eyebrow": "Pentru un proiect contractat",
+      "question": "Am proiect contractat. Cum țin implementarea sub control?",
+      "headline": "Termene, achiziții, plăți și indicatori într-un singur traseu de control.",
+      "lead": "Pornim de la contract și versiunea curentă a proiectului, apoi organizăm obligațiile, dovezile și următoarele acțiuni fără să presupunem conformitatea în lipsa documentelor.",
+      "job_ids": [
+        "JTBD-PUB-03",
+        "JTBD-BEN-01",
+        "JTBD-BEN-02",
+        "JTBD-NGO-02",
+        "JTBD-TRN-02",
+        "JTBD-RUR-02"
+      ],
+      "service_ids": [
+        "implementation_and_reporting",
+        "procurement_support",
+        "financial_management_and_reimbursement",
+        "monitoring_and_compliance",
+        "project_management_capacity"
+      ],
+      "steps": [
+        "Preluăm contractul, anexele și calendarul actual.",
+        "Mapăm obligațiile, achizițiile, plățile, indicatorii și responsabilitățile.",
+        "Stabilim evidențele necesare pentru următorul termen.",
+        "Configurăm registrul de implementare și ritmul de verificare."
+      ],
+      "first_step_fields": [
+        "organization_name",
+        "audience_id",
+        "project_stage",
+        "message"
+      ],
+      "later_fields": [
+        "county",
+        "timeline"
+      ],
+      "cta_id": "request_implementation_review",
+      "cta_label": "Cere evaluarea implementării",
+      "secondary_path": "/servicii/implementare-raportare/",
+      "secondary_label": "Vezi serviciul de implementare",
+      "boundary": "Nu validăm retroactiv activități sau cheltuieli fără dovezi și reguli aplicabile."
+    },
+    {
+      "id": "JRN-RECOVERY",
+      "route_id": "recovery_help",
+      "path": "/proiect-cu-probleme/",
+      "eyebrow": "Pentru un blocaj sau risc",
+      "question": "Proiectul este întârziat sau are probleme. Ce fac?",
+      "headline": "Reconstruim situația din documente și stabilim ce poate fi remediat.",
+      "lead": "Separăm faptele, ipotezele și necunoscutele, ordonăm riscurile și pregătim o cale de acțiune. Nu promitem anularea corecțiilor sau acceptarea unei modificări.",
+      "job_ids": [
+        "JTBD-BEN-03",
+        "JTBD-RUR-02"
+      ],
+      "service_ids": [
+        "project_recovery_and_corrections",
+        "monitoring_and_compliance",
+        "financial_management_and_reimbursement",
+        "implementation_and_reporting"
+      ],
+      "steps": [
+        "Înghețăm documentele și cronologia analizată.",
+        "Identificăm obligația, abaterea și dovezile disponibile.",
+        "Separăm remedierea operațională de escaladarea juridică sau către autoritate.",
+        "Pregătim planul, responsabilitățile și drafturile care pot fi aprobate."
+      ],
+      "first_step_fields": [
+        "organization_name",
+        "audience_id",
+        "project_stage",
+        "message"
+      ],
+      "later_fields": [
+        "county",
+        "timeline"
+      ],
+      "cta_id": "request_recovery_assessment",
+      "cta_label": "Cere diagnosticul proiectului",
+      "secondary_path": "/servicii/remediere-recuperare-proiect/",
+      "secondary_label": "Vezi serviciul de remediere",
+      "boundary": "Rezultatul depinde de documente, termene și deciziile autorităților competente."
+    }
+  ],
+  "homepage_contract": {
+    "hero_question": "În ce punct este proiectul tău?",
+    "hero_headline": "Finanțare, depunere și implementare — începe de la decizia pe care trebuie să o iei.",
+    "hero_lead": "EUCONS te conduce spre traseul potrivit și arată clar ce știm, ce trebuie verificat și care este următorul pas.",
+    "primary_journey_ids": [
+      "JRN-FUNDING-FIT",
+      "JRN-PROJECT-REVIEW",
+      "JRN-IMPLEMENTATION",
+      "JRN-RECOVERY"
+    ],
+    "trust_items": [
+      "Surse și versiuni urmărite",
+      "Necunoscutele rămân vizibile",
+      "Dovadă relevantă lângă serviciu",
+      "Contact extern numai după acord"
+    ],
+    "proof_section_title": "Exemple documentate, nu promisiuni",
+    "service_catalog_role": "SECONDARY_DISCOVERY"
+  },
+  "accessibility_acceptance": {
+    "single_h1_per_page": true,
+    "semantic_ordered_steps": true,
+    "skip_link_required": true,
+    "minimum_touch_target_px": 44,
+    "mobile_single_column_actions": true,
+    "no_color_only_meaning": true,
+    "reduced_motion_supported": true
+  },
+  "decision": {
+    "state": "PASS",
+    "next_unit": {
+      "id": "R05-INBOUND-001",
+      "description": "Turn the validated progressive journey fields into a real provider-neutral inbound runtime with GDPR separation, dedupe, spam controls and deterministic recovery."
+    }
+  }
+}
