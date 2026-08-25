@@ -91,5 +91,34 @@
       "id": "R06-CF-CONTRACT-001",
       "description": "Define the organization-first prospect record, lawful source signal and expiry contracts for Client Finder."
     }
+  },
+  "public_form_contract": {
+    "endpoint": {
+      "method": "POST",
+      "path": "/api/inbound/sessions",
+      "provider_adapter_required": true,
+      "production_binding_enabled": false
+    },
+    "browser_request": {
+      "fields": [
+        "session_id",
+        "journey_id",
+        "form_id",
+        "request"
+      ],
+      "content_type": "application/json",
+      "list_inputs_are_comma_normalized_by_adapter": true
+    },
+    "session_security": {
+      "server_side_state_required": true,
+      "raw_state_in_url_forbidden": true,
+      "raw_state_in_local_storage_forbidden": true,
+      "http_only_session_binding_recommended": true
+    },
+    "failure_behavior": {
+      "preserve_entered_values_in_page": true,
+      "show_retryable_unavailable_state": true,
+      "no_success_claim_before_2xx_response": true
+    }
   }
 }
