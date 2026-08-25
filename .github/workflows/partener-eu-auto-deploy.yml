@@ -17,7 +17,8 @@ permissions:
 # main snapshot succeeds, while superseding stale queued snapshots.
 concurrency:
   group: partener-eu-pages
-  cancel-in-progress: true
+  # Never cancel an active deploy-pages call; GitHub Pages accepts one writer.
+  cancel-in-progress: false
 
 jobs:
   deploy:

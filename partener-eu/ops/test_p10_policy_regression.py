@@ -45,6 +45,8 @@ if "cancel-in-progress: false" not in validation:
     errors.append("production validation ledger writers are not serialized")
 if "ref: main" not in validation:
     errors.append("queued production validation can check out a stale workflow event SHA")
+if "github.event.workflow_run.conclusion == 'success'" not in validation:
+    errors.append("production validation runs after unsuccessful upstream workflows")
 
 # GitHub Pages accepts only one active deployment per repository. Every workflow
 # that invokes deploy-pages must queue on the same repository-wide lock; using
