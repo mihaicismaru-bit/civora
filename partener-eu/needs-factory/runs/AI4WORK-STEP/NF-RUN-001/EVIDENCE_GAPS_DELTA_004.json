@@ -1,0 +1,57 @@
+{
+  "schema_version": "nf.evidence_gap_delta.v0.1",
+  "run_id": "AI4WORK-STEP/NF-RUN-001",
+  "research_date": "2026-08-25",
+  "supersedes": "EVIDENCE_GAPS_DELTA_003.json",
+  "evidence_extensions": ["EVIDENCE_ADDENDUM_002.json", "EVIDENCE_ADDENDUM_003.json"],
+  "correction_note": "A 19-August-2026 source explicitly states that AM PEO published a corrigendum that day. A separate article published 24 August reports a corrigendum and an updated Annex 4, but the available evidence does not establish that this was a distinct corrigendum event rather than later reporting of the 19-August change. Final version control therefore requires the current official MIPE package, without assuming two separate corrigenda.",
+  "gap_status": [
+    {
+      "gap_id": "GAP-CALL-CODE",
+      "status": "OPEN_NONBLOCKING",
+      "finding": "Guide identity, programme, priority, objective and action are independently confirmed, but the exact live MySMIS technical call code has not yet been frozen from an official registry."
+    },
+    {
+      "gap_id": "GAP-GSCS-BINARY",
+      "status": "NARROWED_BLOCKING_FOR_CALL_COMPLIANCE",
+      "finding": "Official OIR PECU Nord-Vest exposes the MIPE 13-August consolidated STEP-LLL package and confirms Order 767/2026. AM PEO then published a corrigendum on 19 August 2026. A 24-August article also reports an updated guide/Annex 4, but it is not yet proven to represent a separate later event. Final compliance QA must freeze and hash the current official MIPE guide/corrigendum/annex package as of submission time."
+    },
+    {
+      "gap_id": "GAP-REG-SM-ADULT-LEARNING",
+      "status": "CLOSED_FOR_NEEDS_BASELINE",
+      "finding": "Institutional Eurostat-based evidence provides a comparable Sud-Muntenia adult-learning baseline and recent trend. Direct Eurostat API capture remains a provenance enhancement, not a needs-analysis blocker."
+    },
+    {
+      "gap_id": "GAP-REG-SVO-DIGITAL-MATURITY",
+      "status": "CLOSED_FOR_REGIONAL_CONTEXT",
+      "finding": "Official ADR Centru evaluation reports Eurostat workplace internet use for 2023 at 22.5% in Sud-Vest Oltenia, below Romania 41.8% and EU27 61.3%. This supports a regional digital-use deficit context, not direct AI competence."
+    },
+    {
+      "gap_id": "GAP-REG-SM-DIGITAL-MATURITY",
+      "status": "CLOSED_FOR_REGIONAL_CONTEXT",
+      "finding": "Official ADR Centru evaluation reports Eurostat workplace internet use for 2023 at 28.4% in Sud-Muntenia, below Romania 41.8% and EU27 61.3%. This supports a regional digital-use deficit context, not direct AI competence."
+    },
+    {
+      "gap_id": "GAP-PRIMARY-ELIGIBLE-ADULTS",
+      "status": "OPEN_BLOCKING_FOR_DIRECT_TARGET_GROUP_CLAIMS",
+      "finding": "Secondary evidence establishes national/regional digital and learning deficits and a large recruitment pool, but does not directly measure AI/digital competence, barriers and perceived training needs among the actual accessible eligible >29 research frame in all three regions."
+    },
+    {
+      "gap_id": "GAP-PRIMARY-EMPLOYERS",
+      "status": "PARTIALLY_CLOSED_BLOCKING_FOR_COMPARABLE_THREE_REGION_DIRECT_CLAIMS",
+      "finding": "Centru has real 2025 organizational survey evidence: 52% of 67 respondents reported lack of internal digital skills as a barrier and 36% reported training/digital-skill needs not fully covered. Equivalent directly comparable employer/stakeholder measurements remain absent for Sud-Vest Oltenia and Sud-Muntenia."
+    },
+    {
+      "gap_id": "GAP-SCALE-160",
+      "status": "FEASIBILITY_CLOSED_NEED_MAGNITUDE_OPEN",
+      "finding": "Official ANOFM June-2026 counts yield a conservative 72,824 registered unemployed aged 30-55 across the three project regions; 160 is about 0.22% of that pool. Macro recruitment feasibility is supported, while 160 and 80/40/40 remain design values rather than measured need weights."
+    },
+    {
+      "gap_id": "GAP-ONLINE-COLLECTION-RUNTIME",
+      "status": "IMPLEMENTATION_BLOCKER_FOR_PRIMARY_COLLECTION",
+      "finding": "EUCONS production is built from canonical CIVORA and deployed on GitHub Pages. The current EUCONS runtime contract has production_enabled=false and GitHub Pages cannot persist survey POST data. A separate first-party API/storage runtime is therefore required before eucons.ro research forms can collect real responses. The survey contract and payload schema are now frozen, and analytical responses are explicitly isolated from commercial CRM/leads."
+    }
+  ],
+  "release_rule": "The macro/regional needs narrative and recruitment-feasibility chapter are evidence-ready. A final 10/10 release must not claim direct measurement of the actual eligible adults, equivalent direct employer evidence in all three regions, or measured need weighting for 160/80/40/40 until real primary data exist. Final call-compliance QA requires the current official MIPE package/hash, independent of the publication date of secondary reports about corrigenda.",
+  "status": "SECONDARY_EVIDENCE_SUBSTANTIALLY_COMPLETE_PRIMARY_COLLECTION_RUNTIME_AND_CURRENT_GSCS_STILL_REQUIRED"
+}
