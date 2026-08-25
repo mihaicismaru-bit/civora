@@ -1,11 +1,11 @@
 {
   "product": "EUCONS_COMMERCIAL_OS",
   "schema_version": 2,
-  "updated_at": "2026-08-26T01:53:00+03:00",
-  "checkpoint_id": "EUCONS-CP-2026-08-26-008",
+  "updated_at": "2026-08-26T02:48:00+03:00",
+  "checkpoint_id": "EUCONS-CP-2026-08-26-009",
   "development_state": "IN_PROGRESS",
   "current_phase": "R06_PROSPECT_DISCOVERY_CLIENT_FINDER",
-  "current_unit": "R06-CF-SOURCE-ADAPTER-001",
+  "current_unit": "R06-CF-SCORING-001",
   "previous_terminal_assessment": {
     "state": "BLOCKED_EXTERNAL_ONLY",
     "phase": "E29",
@@ -97,7 +97,8 @@
     "R04-JTBD-UX-001",
     "R05-INBOUND-001",
     "R06-CF-CONTRACT-001",
-    "R06-CF-ENGINE-001"
+    "R06-CF-ENGINE-001",
+    "R06-CF-SOURCE-ADAPTER-001"
   ],
   "market_intelligence_result": {
     "state": "PASS",
@@ -110,12 +111,12 @@
       "MI-CAP-005 PROSPECT_RESEARCH_AND_ACTION_PACK"
     ]
   },
-  "next_action": "Implement a provider-neutral lawful-public-source adapter boundary and first dry-run adapter that converts official/public observations into Client Finder records with provenance, rate/freshness controls and no production persistence or personal-contact extraction.",
+  "next_action": "Implement deterministic multi-signal priority scoring that separates source quality, freshness, service fit, timing and uncertainty; explain every contribution and never convert a score into proven eligibility.",
   "terminal_target": "PRODUCTION_READY",
   "owner_terminal_target": "PRODUCTION_GRADE_EUCONS_COMMERCIAL_OS",
   "external_handoff_allowed_only_after": "E28",
   "blocking_reason": null,
-  "last_good_checkpoint": "EUCONS-CP-2026-08-26-008",
+  "last_good_checkpoint": "EUCONS-CP-2026-08-26-009",
   "evidence": [
     "eucons/ops/EUCONS_REBASELINE_2026-08-25.json",
     "eucons/market_intelligence/EUCONS_MARKET_INTELLIGENCE_2026-08-25.json",
@@ -161,7 +162,12 @@
     "eucons/prospects/client_finder_engine.py",
     "eucons/prospects/fixtures/client_finder_queue_non_evidence.json",
     "eucons/validation/validate_client_finder_engine.py",
-    "eucons/validation/test_client_finder_engine_fail_closed.py"
+    "eucons/validation/test_client_finder_engine_fail_closed.py",
+    "eucons/prospects/source_adapter_contract.json",
+    "eucons/prospects/source_adapter.py",
+    "eucons/prospects/fixtures/source_adapter_snapshot_non_evidence.json",
+    "eucons/validation/validate_client_finder_source_adapter.py",
+    "eucons/validation/test_client_finder_source_adapter_fail_closed.py"
   ],
   "autonomy": {
     "enabled": true,
@@ -265,5 +271,30 @@
     "persistence": "ATOMIC_OUTSIDE_REPOSITORY_ONLY",
     "production_prospect_records": 0,
     "external_contact": false
+  },
+  "client_finder_source_adapter_result": {
+    "state": "PASS",
+    "model": "PREFETCHED_ORGANIZATION_SNAPSHOT_ONLY",
+    "adapter_profiles": 4,
+    "real_source_profiles_activated": 0,
+    "dry_run_adapter": "SYNTHETIC_OFFICIAL_SNAPSHOT",
+    "synthetic_observations": 2,
+    "deduplicated_organizations": 2,
+    "provenance": [
+      "ALLOWLISTED_ORIGIN",
+      "CONTENT_HASH",
+      "RETRIEVED_AT",
+      "PUBLIC_ACCESS",
+      "TERMS_CHECKED_AT",
+      "ROBOTS_CHECKED_AT",
+      "RATE_LIMIT_POLICY",
+      "FRESHNESS"
+    ],
+    "network_fetch": false,
+    "live_scraping": false,
+    "production_persistence": false,
+    "personal_contact_extraction": false,
+    "production_prospect_records": 0,
+    "activation_rule": "SOURCE_SPECIFIC_REVIEW_REQUIRED_BEFORE_REAL_SOURCE_USE"
   }
 }

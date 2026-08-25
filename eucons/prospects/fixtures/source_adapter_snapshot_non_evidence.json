@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "adapter_id": "SYNTHETIC_OFFICIAL_SNAPSHOT",
+  "evidence_label": "NON_EVIDENCE",
+  "reference_time": "2026-08-26T02:20:00+03:00",
+  "retrieved_at": "2026-08-26T02:10:00+03:00",
+  "content_hash": "106182f9ffe2b7a30d5ca5edbb8a90960befd41af26f78a62a71d723db269f15",
+  "public_access": true,
+  "terms_checked_at": "2026-08-26T02:00:00+03:00",
+  "robots_checked_at": "2026-08-26T02:00:00+03:00",
+  "rate_limit_policy": "MANUAL_SNAPSHOT_NO_NETWORK",
+  "source": {
+    "authority": "SYNTHETIC TEST AUTHORITY",
+    "url": "https://example.invalid/official-snapshot-do-not-fetch",
+    "title": "Synthetic official-source snapshot",
+    "source_type": "OFFICIAL_BENEFICIARY_OR_AWARD_LIST"
+  },
+  "records": [
+    {
+      "source_record_id": "SYNTH-AWARD-001",
+      "organization": {
+        "legal_name": "Organizație sintetică Gamma",
+        "country_code": "RO",
+        "organization_type": "PUBLIC_INSTITUTION",
+        "public_registration_id": "RO-SOURCE-SYNTH-GAMMA",
+        "region": "Sud-Vest Oltenia",
+        "official_domain": "gamma.synthetic.invalid"
+      },
+      "signal_type": "SIG-AWARDED-PROJECT",
+      "observed_at": "2026-08-26T02:05:00+03:00",
+      "expires_at": "2026-09-25T02:05:00+03:00",
+      "subject": "synthetic_award",
+      "statement": "Synthetic organization appears in a NON_EVIDENCE award fixture.",
+      "inference_statement": "The synthetic organization may require implementation support.",
+      "verification_question": "Is implementation support already contracted?",
+      "why_now": "Synthetic awarded-project signal is inside its revalidation window.",
+      "job_ids": ["JTBD-BEN-01"],
+      "service_ids": ["implementation_and_reporting"],
+      "confidence": 0.7,
+      "material_funding_claim": false
+    },
+    {
+      "source_record_id": "SYNTH-AWARD-002",
+      "organization": {
+        "legal_name": "Organizație sintetică Delta",
+        "country_code": "RO",
+        "organization_type": "COMPANY",
+        "public_registration_id": "RO-SOURCE-SYNTH-DELTA",
+        "region": "Sud-Vest Oltenia",
+        "official_domain": "delta.synthetic.invalid"
+      },
+      "signal_type": "SIG-AWARDED-PROJECT",
+      "observed_at": "2026-08-26T02:06:00+03:00",
+      "expires_at": "2026-09-25T02:06:00+03:00",
+      "subject": "synthetic_award",
+      "statement": "A second synthetic organization appears in a NON_EVIDENCE award fixture.",
+      "inference_statement": "The synthetic organization may require reimbursement and reporting support.",
+      "verification_question": "Which implementation obligations remain unsupported?",
+      "why_now": "Second synthetic awarded-project signal is inside its revalidation window.",
+      "job_ids": ["JTBD-BEN-03"],
+      "service_ids": ["financial_management_and_reimbursement"],
+      "confidence": 0.62,
+      "material_funding_claim": false
+    }
+  ]
+}
