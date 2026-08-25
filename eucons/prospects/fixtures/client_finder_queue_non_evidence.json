@@ -1,0 +1,259 @@
+{
+  "schema_version": 1,
+  "evidence_label": "NON_EVIDENCE",
+  "reference_time": "2026-08-26T01:20:00+03:00",
+  "observations": [
+    {
+      "request_id": "REQ-SYNTH-A-001",
+      "record": {
+        "prospect_id": "PROS-SYNTH-A",
+        "synthetic_label": "NON_EVIDENCE",
+        "organization": {
+          "legal_name": "Instituție sintetică Alfa",
+          "country_code": "RO",
+          "organization_type": "PUBLIC_INSTITUTION",
+          "public_registration_id": "RO-SYNTH-A",
+          "region": "Sud-Vest Oltenia",
+          "official_domain": "alfa.synthetic.invalid"
+        },
+        "sources": [
+          {
+            "source_id": "SRC-SYNTH-A",
+            "source_type": "OFFICIAL_BENEFICIARY_OR_AWARD_LIST",
+            "authority": "SYNTHETIC TEST AUTHORITY",
+            "url": "https://example.invalid/synthetic-award-a",
+            "title": "Synthetic award A",
+            "retrieved_at": "2026-08-26T01:00:00+03:00",
+            "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "official": true,
+            "public_access": true
+          }
+        ],
+        "assertions": [
+          {
+            "assertion_id": "AST-A-FACT",
+            "classification": "FACT",
+            "subject": "project_award",
+            "statement": "Synthetic institution appears in a synthetic award fixture.",
+            "source_refs": [
+              "SRC-SYNTH-A"
+            ],
+            "material_funding_claim": false
+          },
+          {
+            "assertion_id": "AST-A-INF",
+            "classification": "INFERENCE",
+            "subject": "service_need",
+            "statement": "The institution may require implementation support.",
+            "source_refs": [
+              "SRC-SYNTH-A"
+            ],
+            "supported_by_fact_ids": [
+              "AST-A-FACT"
+            ],
+            "confidence": 0.7,
+            "verification_question": "Is implementation support already contracted?"
+          }
+        ],
+        "signals": [
+          {
+            "signal_id": "SIGNAL-SYNTH-A",
+            "signal_type": "SIG-AWARDED-PROJECT",
+            "source_refs": [
+              "SRC-SYNTH-A"
+            ],
+            "observed_at": "2026-08-26T01:00:00+03:00",
+            "expires_at": "2026-09-25T01:00:00+03:00",
+            "fact_assertion_ids": [
+              "AST-A-FACT"
+            ],
+            "confidence": 0.7,
+            "why_now": "Synthetic awarded-project signal within its revalidation window.",
+            "job_ids": [
+              "JTBD-BEN-01"
+            ],
+            "service_ids": [
+              "implementation_and_reporting"
+            ]
+          }
+        ],
+        "state": "DISCOVERED",
+        "created_at": "2026-08-26T01:00:00+03:00",
+        "updated_at": "2026-08-26T01:00:00+03:00",
+        "expires_at": "2026-09-25T01:00:00+03:00",
+        "suppression": {
+          "active": false,
+          "reason": null
+        }
+      }
+    },
+    {
+      "request_id": "REQ-SYNTH-A-002",
+      "record": {
+        "prospect_id": "PROS-SYNTH-A",
+        "synthetic_label": "NON_EVIDENCE",
+        "organization": {
+          "legal_name": "Instituție sintetică Alfa",
+          "country_code": "RO",
+          "organization_type": "PUBLIC_INSTITUTION",
+          "public_registration_id": "RO-SYNTH-A",
+          "region": "Sud-Vest Oltenia",
+          "official_domain": "alfa.synthetic.invalid"
+        },
+        "sources": [
+          {
+            "source_id": "SRC-SYNTH-A",
+            "source_type": "OFFICIAL_BENEFICIARY_OR_AWARD_LIST",
+            "authority": "SYNTHETIC TEST AUTHORITY",
+            "url": "https://example.invalid/synthetic-award-a",
+            "title": "Synthetic award A",
+            "retrieved_at": "2026-08-26T01:10:00+03:00",
+            "content_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "official": true,
+            "public_access": true
+          }
+        ],
+        "assertions": [
+          {
+            "assertion_id": "AST-A-FACT",
+            "classification": "FACT",
+            "subject": "project_award",
+            "statement": "Synthetic institution appears in a synthetic award fixture.",
+            "source_refs": [
+              "SRC-SYNTH-A"
+            ],
+            "material_funding_claim": false
+          },
+          {
+            "assertion_id": "AST-A-INF",
+            "classification": "INFERENCE",
+            "subject": "service_need",
+            "statement": "The institution may require implementation support.",
+            "source_refs": [
+              "SRC-SYNTH-A"
+            ],
+            "supported_by_fact_ids": [
+              "AST-A-FACT"
+            ],
+            "confidence": 0.7,
+            "verification_question": "Is implementation support already contracted?"
+          }
+        ],
+        "signals": [
+          {
+            "signal_id": "SIGNAL-SYNTH-A",
+            "signal_type": "SIG-AWARDED-PROJECT",
+            "source_refs": [
+              "SRC-SYNTH-A"
+            ],
+            "observed_at": "2026-08-26T01:10:00+03:00",
+            "expires_at": "2026-09-25T01:10:00+03:00",
+            "fact_assertion_ids": [
+              "AST-A-FACT"
+            ],
+            "confidence": 0.7,
+            "why_now": "Synthetic source refresh confirms the test signal remains current.",
+            "job_ids": [
+              "JTBD-BEN-01"
+            ],
+            "service_ids": [
+              "implementation_and_reporting"
+            ]
+          }
+        ],
+        "state": "DISCOVERED",
+        "created_at": "2026-08-26T01:00:00+03:00",
+        "updated_at": "2026-08-26T01:10:00+03:00",
+        "expires_at": "2026-09-25T01:10:00+03:00",
+        "suppression": {
+          "active": false,
+          "reason": null
+        }
+      }
+    },
+    {
+      "request_id": "REQ-SYNTH-B-001",
+      "record": {
+        "prospect_id": "PROS-SYNTH-B",
+        "synthetic_label": "NON_EVIDENCE",
+        "organization": {
+          "legal_name": "Companie sintetică Beta",
+          "country_code": "RO",
+          "organization_type": "COMPANY",
+          "public_registration_id": "RO-SYNTH-B",
+          "region": "Sud-Vest Oltenia",
+          "official_domain": "beta.synthetic.invalid"
+        },
+        "sources": [
+          {
+            "source_id": "SRC-SYNTH-B",
+            "source_type": "ORGANIZATION_OFFICIAL_ANNOUNCEMENT",
+            "authority": "SYNTHETIC ORGANIZATION",
+            "url": "https://example.invalid/synthetic-investment-b",
+            "title": "Synthetic investment announcement",
+            "retrieved_at": "2026-08-26T01:15:00+03:00",
+            "content_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "official": true,
+            "public_access": true
+          }
+        ],
+        "assertions": [
+          {
+            "assertion_id": "AST-B-FACT",
+            "classification": "FACT",
+            "subject": "investment_announcement",
+            "statement": "Synthetic company published a synthetic investment announcement.",
+            "source_refs": [
+              "SRC-SYNTH-B"
+            ],
+            "material_funding_claim": false
+          },
+          {
+            "assertion_id": "AST-B-INF",
+            "classification": "INFERENCE",
+            "subject": "funding_service_need",
+            "statement": "The investment may justify a funding-route review.",
+            "source_refs": [
+              "SRC-SYNTH-B"
+            ],
+            "supported_by_fact_ids": [
+              "AST-B-FACT"
+            ],
+            "confidence": 0.55,
+            "verification_question": "Is external funding being considered for the investment?"
+          }
+        ],
+        "signals": [
+          {
+            "signal_id": "SIGNAL-SYNTH-B",
+            "signal_type": "SIG-INVESTMENT-ANNOUNCEMENT",
+            "source_refs": [
+              "SRC-SYNTH-B"
+            ],
+            "observed_at": "2026-08-26T01:15:00+03:00",
+            "expires_at": "2026-09-25T01:15:00+03:00",
+            "fact_assertion_ids": [
+              "AST-B-FACT"
+            ],
+            "confidence": 0.55,
+            "why_now": "Synthetic organization-announced investment inside its revalidation window.",
+            "job_ids": [
+              "JTBD-SME-01"
+            ],
+            "service_ids": [
+              "funding_strategy_and_eligibility"
+            ]
+          }
+        ],
+        "state": "DISCOVERED",
+        "created_at": "2026-08-26T01:15:00+03:00",
+        "updated_at": "2026-08-26T01:15:00+03:00",
+        "expires_at": "2026-09-25T01:15:00+03:00",
+        "suppression": {
+          "active": false,
+          "reason": null
+        }
+      }
+    }
+  ]
+}
