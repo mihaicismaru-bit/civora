@@ -1,0 +1,51 @@
+{
+  "schema_version": "nf.evidence_gap_delta.v0.1",
+  "run_id": "AI4WORK-STEP/NF-RUN-001",
+  "research_date": "2026-08-25",
+  "base": "EVIDENCE_GAPS.json",
+  "evidence_extensions": ["EVIDENCE_ADDENDUM_002.json", "EVIDENCE_ADDENDUM_003.json"],
+  "gap_status": [
+    {
+      "gap_id": "GAP-CALL-CODE",
+      "status": "OPEN_NONBLOCKING",
+      "finding": "Guide identity, programme, priority, objective and action are independently confirmed, but the exact live MySMIS technical call code has not yet been frozen from an official registry."
+    },
+    {
+      "gap_id": "GAP-GSCS-BINARY",
+      "status": "NARROWED_BLOCKING_FOR_CALL_COMPLIANCE",
+      "finding": "Official OIR PECU Nord-Vest now exposes the MIPE 13-August consolidated STEP-LLL package URL and confirms Order 767/2026. Subsequent corrigenda were reported on 19 and 24 August 2026, including an updated Annex 4, so final compliance QA must freeze the post-24-August official package. Binary hash is not yet captured."
+    },
+    {
+      "gap_id": "GAP-REG-SM-ADULT-LEARNING",
+      "status": "CLOSED_FOR_NEEDS_BASELINE",
+      "finding": "A1/A2 institutional evidence now provides a comparable Sud-Muntenia adult-learning baseline (OECD/Eurostat 2022: 6.1%) and a more recent institutional Eurostat-derived mirror (2025: 11.4%). The existence and direction of the regional measure no longer block needs analysis; direct Eurostat API freeze remains a provenance enhancement."
+    },
+    {
+      "gap_id": "GAP-REG-SVO-DIGITAL-MATURITY",
+      "status": "CLOSED_FOR_REGIONAL_CONTEXT",
+      "finding": "Official ADR Centru evaluation reports Eurostat regional workplace internet use for 2023: Sud-Vest Oltenia 22.5%, versus Romania 41.8% and EU27 61.3%. This supplies quantitative current-enough regional digital-use evidence, but not direct AI competence."
+    },
+    {
+      "gap_id": "GAP-REG-SM-DIGITAL-MATURITY",
+      "status": "CLOSED_FOR_REGIONAL_CONTEXT",
+      "finding": "Official ADR Centru evaluation reports Eurostat regional workplace internet use for 2023: Sud-Muntenia 28.4%, versus Romania 41.8% and EU27 61.3%. This supplies quantitative regional digital-use evidence, but not direct AI competence."
+    },
+    {
+      "gap_id": "GAP-PRIMARY-ELIGIBLE-ADULTS",
+      "status": "OPEN_BLOCKING_FOR_DIRECT_TARGET_GROUP_CLAIMS",
+      "finding": "Secondary evidence strongly establishes national/regional digital and learning deficits and a large recruitment pool, but it still does not directly measure AI/digital competence, barriers and training needs among the actual eligible >29 adults intended for recruitment across all three regions."
+    },
+    {
+      "gap_id": "GAP-PRIMARY-EMPLOYERS",
+      "status": "PARTIALLY_CLOSED_BLOCKING_FOR_THREE_REGION_DIRECT_CLAIMS",
+      "finding": "Centru now has real 2025 organizational survey evidence: 52% reported lack of internal digital skills as a barrier and 36% reported training/digital-skill needs not fully covered. Regional digital-use evidence exists for all three regions, but equivalent direct employer/stakeholder measurements remain absent for Sud-Vest Oltenia and Sud-Muntenia."
+    },
+    {
+      "gap_id": "GAP-SCALE-160",
+      "status": "FEASIBILITY_CLOSED_NEED_MAGNITUDE_OPEN",
+      "finding": "Official ANOFM June-2026 age-30-55 administrative counts total 72,824 registered unemployed across the three target regions; 160 equals about 0.22% of that conservative pool. Macro recruitment feasibility is therefore supported. The exact 160 and 80/40/40 split still cannot be presented as empirically measured need magnitude or regional need weighting without direct interest/coverage evidence."
+    }
+  ],
+  "release_rule": "A strong macro/regional needs narrative and recruitment-feasibility chapter can now be drafted from real secondary evidence. Final 10/10 release must not claim that the actual AI4WORK eligible adults were directly measured, must not claim equivalent direct employer evidence in all three regions, and must not present 160 or 80/40/40 as measured need weights until primary data are collected. Final call-compliance QA also requires the latest official post-24-August GSCS package/hash.",
+  "status": "SECONDARY_EVIDENCE_SUBSTANTIALLY_COMPLETE_PRIMARY_AND_LATEST_GSCS_STILL_REQUIRED"
+}
