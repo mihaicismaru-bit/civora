@@ -15,7 +15,7 @@
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-08-25T08:23:49Z",
+    "utc": "2026-08-25T08:30:11Z",
     "source_pass": 5,
     "source_degraded": 0,
     "source_fail": 2,
@@ -26,7 +26,7 @@
     "quarantined_source": "SRC-AFIR-ENERGY-2026 — AFIR — Energie 2026; dependent material facts blocked fail-closed; SRC-LEGISLATIE — Portal Legislativ; dependent material facts blocked fail-closed"
   },
   "deployment_evidence": {
-    "utc": "2026-08-25T08:24:16Z",
+    "utc": "2026-08-25T08:30:37Z",
     "status": "PASS",
     "public_content_verified": true,
     "https_verified": true,
@@ -36,7 +36,7 @@
     "http_content_verified": true,
     "content_origin": "custom_https",
     "http_status": 200,
-    "final_url": "https://partener.eu/?p10_probe=20260825T082416Z",
+    "final_url": "https://partener.eu/?p10_probe=20260825T083037Z",
     "title": "PARTENER.EU — Găsește finanțări europene pentru investiția ta",
     "required_markers_present": true,
     "critical_assets_ok": true,
@@ -46,7 +46,7 @@
       {
         "id": "custom_https",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260825T082416Z",
+        "final_url": "https://partener.eu/?p10_probe=20260825T083037Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -57,12 +57,12 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260825T082416Z",
+        "final_url": "https://partener.eu/?p10_probe=20260825T083037Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "http://partener.eu/?p10_probe=20260825T082416Z",
-            "to_url": "https://partener.eu/?p10_probe=20260825T082416Z"
+            "from_url": "http://partener.eu/?p10_probe=20260825T083037Z",
+            "to_url": "https://partener.eu/?p10_probe=20260825T083037Z"
           }
         ],
         "content_verified": true,
@@ -74,12 +74,12 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260825T082416Z",
+        "final_url": "https://partener.eu/?p10_probe=20260825T083037Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260825T082416Z",
-            "to_url": "https://partener.eu/?p10_probe=20260825T082416Z"
+            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260825T083037Z",
+            "to_url": "https://partener.eu/?p10_probe=20260825T083037Z"
           }
         ],
         "content_verified": true,
@@ -92,8 +92,8 @@
     "pages_workflow": {
       "status": "LIVE",
       "page_url": "https://partener.eu/",
-      "git_sha": "85d7789a5b2265a20463aa8b3b96c5783510e589",
-      "observed_at": "2026-08-25T08:04:22.943307+00:00",
+      "git_sha": "cbe15d835f731d66f91c2109124b7ebb817d7c19",
+      "observed_at": "2026-08-25T08:27:02.878804+00:00",
       "configure_outcome": "success",
       "upload_outcome": "success",
       "deploy_outcome": "success",
@@ -125,31 +125,31 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-08-25T08:24:16Z",
-    "validation_run_started": "2026-08-25T08:23:49Z",
+    "utc": "2026-08-25T08:30:37Z",
+    "validation_run_started": "2026-08-25T08:30:11Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "923425d2e7ce6514a3a009a8e1827ff576fb219630c640b0a65e87b71884f6d2",
-      "history_sha256": "923425d2e7ce6514a3a009a8e1827ff576fb219630c640b0a65e87b71884f6d2",
-      "history_path": "validation/history/20260825T082349Z.json",
+      "latest_sha256": "a6874cf79d6fbd00841f25416f7fde40f9e4e07e381b94c9b8ede74a67a8c830",
+      "history_sha256": "a6874cf79d6fbd00841f25416f7fde40f9e4e07e381b94c9b8ede74a67a8c830",
+      "history_path": "validation/history/20260825T083011Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "308ea93c38467fbc1230c363bb88189420daf28c4a35942fba0772e8ee547478",
-      "checkpoint_sha256": "308ea93c38467fbc1230c363bb88189420daf28c4a35942fba0772e8ee547478",
+      "source_state_sha256": "0deea0e5e5cb8a796a6cd9cb0260a7c1d83ab63552d13dbb3466017c809cb0f2",
+      "checkpoint_sha256": "0deea0e5e5cb8a796a6cd9cb0260a7c1d83ab63552d13dbb3466017c809cb0f2",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
       "recovery_state_integrity": "PASS"
     },
     "source_registry": {
-      "observed_at": "2026-08-25T05:57:28.635792Z",
-      "age_seconds": 8808,
+      "observed_at": "2026-08-25T08:24:03.094035Z",
+      "age_seconds": 393,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
       "summary": {
         "total": 23,
-        "pass": 16,
-        "degraded": 1,
+        "pass": 17,
+        "degraded": 0,
         "fail": 6,
         "quarantined": 6,
         "low_information": 0,
@@ -162,19 +162,19 @@
           "degraded": 0,
           "fail": 1,
           "quarantined": 1,
-          "hash_changes": 1
+          "hash_changes": 0
         },
         "T1B": {
           "total": 13,
-          "pass": 9,
-          "degraded": 1,
+          "pass": 10,
+          "degraded": 0,
           "fail": 3,
           "quarantined": 3,
-          "hash_changes": 0
+          "hash_changes": 1
         }
       },
       "changed_source_ids": [
-        "SRC-MEC-CNDIPT"
+        "SRC-OIRCENTRU-PEO"
       ],
       "missing_resolution_tasks": [],
       "unsafe_material_updates": [],
@@ -398,7 +398,7 @@
       "publication_policy": "candidate-state-only; web material facts are not auto-promoted on scheduled hash changes"
     },
     "mipe": {
-      "observed_at": "2026-08-25T05:56:49.285994+00:00",
+      "observed_at": "2026-08-25T08:26:24.687668+00:00",
       "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
       "source_available": false,
       "candidate_count": 60,
