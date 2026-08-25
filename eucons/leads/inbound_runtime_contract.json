@@ -120,5 +120,23 @@
       "show_retryable_unavailable_state": true,
       "no_success_claim_before_2xx_response": true
     }
+  },
+  "retention": {
+    "incomplete_session_ttl_hours": 168,
+    "completed_session_raw_answers_minimized_after_handoff": true,
+    "request_receipt_ttl_days": 30,
+    "provider_must_enforce_expiry": true,
+    "legal_hold_requires_explicit_authorized_policy": true
+  },
+  "telemetry": {
+    "events": [
+      "INBOUND_SESSION_STARTED",
+      "INBOUND_PROFILE_COMPLETED",
+      "INBOUND_CONTEXT_COMPLETED",
+      "INBOUND_QUALIFIED"
+    ],
+    "payload_values_forbidden": true,
+    "raw_contact_forbidden": true,
+    "production_transport_enabled": false
   }
 }
