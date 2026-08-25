@@ -2,19 +2,68 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-25T19:22:25+03:00",
+  "generated_at": "2026-08-25T20:58:17+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-25T19:21:09+03:00",
-  "task_count": 57,
+  "queue_generated_at": "2026-08-25T20:57:15+03:00",
+  "task_count": 55,
   "primary_match_count": 0,
-  "no_match_count": 25,
-  "unrouted_count": 32,
+  "no_match_count": 24,
+  "unrouted_count": 31,
   "target_count": 15,
-  "targets_ok": 11,
+  "targets_ok": 12,
   "results": [
+    {
+      "signal_id": "0bec08334f27e85b887c4e1f",
+      "signal_title": "32 de milioane de euro pentru Vâlcea! Constantin Rădulescu: „Aducem bani europeni în județ și nu puțini”. Investiții majore în 11 localități",
+      "signal_url": "https://www.impactreal.ro/2026/08/25/32-de-milioane-de-euro-pentru-valcea-constantin-radulescu-aducem-bani-europeni-in-judet-si-nu-putini-investitii-majore-in-11-localitati/",
+      "signal_publisher": "Impact Real",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-25T20:51:17+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "cfcf9053e0f09ebe004841af",
       "signal_title": "FOTO/VIDEO 32 de milioane de euro pentru dezvoltarea județului Vâlcea! 14 contracte europene pentru 11 localități",
@@ -131,9 +180,9 @@
             "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
             "url": "https://www.hidro.ro/warning/"
           },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error _ssl.c:1015: The handshake operation timed out>",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -267,9 +316,9 @@
             "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
             "url": "https://www.hidro.ro/warning/"
           },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error _ssl.c:1015: The handshake operation timed out>",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -352,9 +401,9 @@
             "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
             "url": "https://www.hidro.ro/warning/"
           },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error _ssl.c:1015: The handshake operation timed out>",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -1145,119 +1194,9 @@
             "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
             "url": "https://www.hidro.ro/warning/"
           },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error _ssl.c:1015: The handshake operation timed out>",
-          "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "de4bf6b0254aa7e8f3a48fc4",
-      "signal_title": "SCM Rm. Vâlcea, remiză spectaculoasă în Zăvoi cu FC Bacău. Schumacher anunță: ”Vor veni și victoriile”",
-      "signal_url": "https://www.impactreal.ro/2026/08/22/scm-rm-valcea-remiza-spectaculoasa-in-zavoi-cu-fc-bacau-schumacher-anunta-vor-veni-si-victoriile/",
-      "signal_publisher": "Impact Real",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-08-22T22:24:48+03:00",
-      "verification_route_id": "sport",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "scm-rm-valcea",
-            "name": "SCM Râmnicu Vâlcea",
-            "url": "https://scmramnicuvalcea.ro/category/stiri/"
-          },
           "status": "PASS",
           "error": null,
           "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "cs-valcea-1924-social-feed",
-            "name": "Clubul Sportiv Vâlcea 1924",
-            "url": "https://www.csvalcea.ro/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 2
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ajf-valcea-comunicate",
-            "name": "Asociația Județeană de Fotbal Vâlcea",
-            "url": "https://www.frf-ajf.ro/valcea/stiri/comunicate-ajf-1"
-          },
-          "status": "DEGRADED",
-          "error": "HTTPError: HTTP Error 403: Forbidden",
-          "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "c6a8328bc0ebcc86886d2e20",
-      "signal_title": "Cine se afla la volan? Imaginile apărute după tragedia din Băile Olănești ridică întrebări",
-      "signal_url": "https://vocea-valcii.ro/dezvaluiri/cine-se-afla-la-volan-imaginile-aparute-dupa-tragedia-din-baile-olanesti-ridica-intrebari/",
-      "signal_publisher": "Vocea Vâlcii",
-      "signal_published_at": "2026-08-22T22:23:24+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "ab64b3ab0ec0ca1ef2435f2b",
-      "signal_title": "VIDEO. Autocar cuprins de flăcări lângă Shopping City Râmnicu Vâlcea. Focul s-a extins la două autoutilitare",
-      "signal_url": "https://seintamplainvalcea.ro/2026/08/22/video-autocar-cuprins-de-flacari-langa-shopping-city-ramnicu-valcea-focul-s-a-extins-la-doua-autoutilitare/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-08-22T21:34:12+03:00",
-      "verification_route_id": "fire_rescue_alert",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "isu-valcea-stiri-locale",
-            "name": "ISU Vâlcea — Știri locale",
-            "url": "https://isuvl.igsu.ro/stiri-locale"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "isu-valcea-comunicate",
-            "name": "ISU Vâlcea",
-            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "inhga-avertizari-hidrologice-valcea",
-            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
-            "url": "https://www.hidro.ro/warning/"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error _ssl.c:1015: The handshake operation timed out>",
-          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
