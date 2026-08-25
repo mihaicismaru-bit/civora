@@ -8,80 +8,479 @@
     "receipt_manifest_paths_must_exist": true
   },
   "artifacts": [
-    {"id":"EUCONS-README","path":"eucons/README.md","class":"product-root","status":"ACTIVE"},
-    {"id":"EUCONS-CANON","path":"eucons/EUCONS_PRODUCT_CANON.md","class":"canonical-contract","status":"ACTIVE"},
-    {"id":"EUCONS-ARCH","path":"eucons/EUCONS_ARCHITECTURE.md","class":"canonical-contract","status":"ACTIVE"},
-    {"id":"EUCONS-AUTONOMY","path":"eucons/EUCONS_AUTONOMY_CONTRACT.md","class":"canonical-contract","status":"ACTIVE"},
-    {"id":"EUCONS-ROADMAP","path":"eucons/ROADMAP.md","class":"development-roadmap","status":"ACTIVE"},
-    {"id":"EUCONS-CHECKPOINT","path":"eucons/ops/checkpoint.json","class":"durable-state","status":"ACTIVE"},
-    {"id":"EUCONS-ARTIFACT-REGISTRY","path":"eucons/ops/artifact_registry.json","class":"durable-state","status":"ACTIVE"},
-    {"id":"EUCONS-HEALTH","path":"eucons/ops/health.json","class":"durable-state","status":"ACTIVE"},
-    {"id":"EUCONS-E23-PERSISTENCE-CONTRACT","path":"eucons/ops/persistence_contract.json","class":"canonical-persistence-contract","status":"ACTIVE"},
-    {"id":"EUCONS-E23-PERSISTENCE-ENGINE","path":"eucons/ops/persistence.py","class":"atomic-persistence-engine","status":"ACTIVE"},
-    {"id":"EUCONS-E23-VALIDATOR","path":"eucons/validation/validate_persistence.py","class":"acceptance-validator","status":"ACTIVE"},
-    {"id":"EUCONS-E23-FAIL-CLOSED-TEST","path":"eucons/validation/test_persistence_fail_closed.py","class":"regression-test","status":"ACTIVE"},
-    {"id":"EUCONS-E24-RECOVERY-CONTRACT","path":"eucons/ops/recovery_contract.json","class":"canonical-recovery-contract","status":"ACTIVE"},
-    {"id":"EUCONS-E24-RECOVERY-ENGINE","path":"eucons/ops/recovery.py","class":"deterministic-recovery-engine","status":"ACTIVE"},
-    {"id":"EUCONS-E24-VALIDATOR","path":"eucons/validation/validate_recovery.py","class":"acceptance-validator","status":"ACTIVE"},
-    {"id":"EUCONS-E24-FAIL-CLOSED-TEST","path":"eucons/validation/test_recovery_fail_closed.py","class":"regression-test","status":"ACTIVE"},
-    {"id":"EUCONS-E25-PREVIEW-CONTRACT","path":"eucons/preview/preview_contract.json","class":"canonical-preview-contract","status":"ACTIVE"},
-    {"id":"EUCONS-E25-PREVIEW-ENGINE","path":"eucons/preview/preview_engine.py","class":"preview-acceptance-engine","status":"ACTIVE"},
-    {"id":"EUCONS-E25-VALIDATOR","path":"eucons/validation/validate_preview_production.py","class":"acceptance-validator","status":"ACTIVE"},
-    {"id":"EUCONS-E25-FAIL-CLOSED-TEST","path":"eucons/validation/test_preview_production_fail_closed.py","class":"regression-test","status":"ACTIVE"},
-    {"id":"EUCONS-E26-ADVERSARIAL-CONTRACT","path":"eucons/adversarial/adversarial_contract.json","class":"canonical-adversarial-contract","status":"ACTIVE"},
-    {"id":"EUCONS-E26-ADVERSARIAL-SUITE","path":"eucons/adversarial/adversarial_suite.py","class":"adversarial-qa-engine","status":"ACTIVE"},
-    {"id":"EUCONS-E26-VALIDATOR","path":"eucons/validation/validate_adversarial_qa.py","class":"acceptance-validator","status":"ACTIVE"},
-    {"id":"EUCONS-E26-FAIL-CLOSED-TEST","path":"eucons/validation/test_adversarial_qa_fail_closed.py","class":"regression-test","status":"ACTIVE"},
-    {"id":"EUCONS-E27-ACCEPTANCE-CONTRACT","path":"eucons/acceptance/full_acceptance_contract.json","class":"canonical-full-acceptance-contract","status":"ACTIVE"},
-    {"id":"EUCONS-E27-ACCEPTANCE-ENGINE","path":"eucons/acceptance/full_acceptance.py","class":"full-acceptance-engine","status":"ACTIVE"},
-    {"id":"EUCONS-E27-VALIDATOR","path":"eucons/validation/validate_full_acceptance.py","class":"acceptance-validator","status":"ACTIVE"},
-    {"id":"EUCONS-E27-FAIL-CLOSED-TEST","path":"eucons/validation/test_full_acceptance_fail_closed.py","class":"regression-test","status":"ACTIVE"},
-    {"id":"EUCONS-E28-CLOSED-DEV-CONTRACT","path":"eucons/acceptance/closed_dev_contract.json","class":"canonical-closed-dev-contract","status":"ACTIVE"},
-    {"id":"EUCONS-E28-CLOSED-DEV-ENGINE","path":"eucons/acceptance/closed_dev.py","class":"closed-dev-acceptance-engine","status":"ACTIVE"},
-    {"id":"EUCONS-E28-PRODUCTION-BUILDER","path":"eucons/deployment/build_production_ready.py","class":"production-ready-builder","status":"ACTIVE"},
-    {"id":"EUCONS-E28-PRODUCTION-BUILD-CONTRACT","path":"eucons/deployment/production_build_contract.json","class":"production-ready-build-contract","status":"ACTIVE"},
-    {"id":"EUCONS-E28-RUNTIME-ACTIVATION","path":"eucons/deployment/runtime_activation_contract.json","class":"provider-neutral-runtime-contract","status":"ACTIVE"},
-    {"id":"EUCONS-E28-EXTERNAL-HANDOFF","path":"eucons/deployment/external_handoff_manifest.json","class":"external-authorization-handoff","status":"ACTIVE"},
-    {"id":"EUCONS-E28-VALIDATOR","path":"eucons/validation/validate_closed_dev.py","class":"acceptance-validator","status":"ACTIVE"},
-    {"id":"EUCONS-E28-FAIL-CLOSED-TEST","path":"eucons/validation/test_closed_dev_fail_closed.py","class":"regression-test","status":"ACTIVE"},
-    {"id":"EUCONS-E00-RECEIPT","path":"eucons/ops/receipts/E00_BOOTSTRAP.json","class":"acceptance-receipt","status":"ACTIVE"},
-    {"id":"EUCONS-E01-RECEIPT","path":"eucons/ops/receipts/E01_COMMERCIAL_CANON.json","class":"acceptance-receipt","status":"ACTIVE"},
-    {"id":"EUCONS-E02-RECEIPT","path":"eucons/ops/receipts/E02_SERVICE_REGISTRY.json","class":"acceptance-receipt","status":"ACTIVE"},
-    {"id":"EUCONS-E03-RECEIPT","path":"eucons/ops/receipts/E03_EVIDENCE_BASE.json","class":"acceptance-receipt","status":"ACTIVE"},
-    {"id":"EUCONS-E04-RECEIPT","path":"eucons/ops/receipts/E04_PEOPLE_REGISTRY.json","class":"acceptance-receipt","status":"ACTIVE"},
-    {"id":"EUCONS-E05-RECEIPT","path":"eucons/ops/receipts/E05_CASE_STUDY_REGISTRY.json","class":"acceptance-receipt","status":"ACTIVE"},
-    {"id":"EUCONS-E06-RECEIPT","path":"eucons/ops/receipts/E06_INFORMATION_ARCHITECTURE.json","class":"acceptance-receipt","status":"ACTIVE"},
-    {"id":"EUCONS-E07-RECEIPT","path":"eucons/ops/receipts/E07_DESIGN_SYSTEM.json","class":"acceptance-receipt","status":"ACTIVE"},
-    {"id":"EUCONS-E08-RECEIPT","path":"eucons/ops/receipts/E08_PUBLIC_SITE.json","class":"acceptance-receipt","status":"ACTIVE"},
-    {"id":"EUCONS-E09-RECEIPT","path":"eucons/ops/receipts/E09_OPPORTUNITY_BRIDGE.json","class":"acceptance-receipt","status":"ACTIVE"},
-    {"id":"EUCONS-E10-RECEIPT","path":"eucons/ops/receipts/E10_OPPORTUNITY_MATCHING.json","class":"acceptance-receipt","status":"ACTIVE"},
-    {"id":"EUCONS-E11-RECEIPT","path":"eucons/ops/receipts/E11_LEAD_ENGINE.json","class":"acceptance-receipt","status":"ACTIVE"},
-    {"id":"EUCONS-E12-RECEIPT","path":"eucons/ops/receipts/E12_CRM_LITE.json","class":"acceptance-receipt","status":"ACTIVE"},
-    {"id":"EUCONS-E13-RECEIPT","path":"eucons/ops/receipts/E13_OFFER_ENGINE.json","class":"acceptance-receipt","status":"ACTIVE"},
-    {"id":"EUCONS-E14-RECEIPT","path":"eucons/ops/receipts/E14_KNOWLEDGE_ENGINE.json","class":"acceptance-receipt","status":"ACTIVE"},
-    {"id":"EUCONS-E15-RECEIPT","path":"eucons/ops/receipts/E15_AUTONOMOUS_EDITORIAL_LOOP.json","class":"acceptance-receipt","status":"ACTIVE"},
-    {"id":"EUCONS-E16-RECEIPT","path":"eucons/ops/receipts/E16_SEO_ENGINE.json","class":"acceptance-receipt","status":"ACTIVE"},
-    {"id":"EUCONS-E17-RECEIPT","path":"eucons/ops/receipts/E17_LINKEDIN_ADAPTER.json","class":"acceptance-receipt","status":"ACTIVE"},
-    {"id":"EUCONS-E18-RECEIPT","path":"eucons/ops/receipts/E18_FACEBOOK_ADAPTER.json","class":"acceptance-receipt","status":"ACTIVE"},
-    {"id":"EUCONS-E19-RECEIPT","path":"eucons/ops/receipts/E19_COMMERCIAL_EMAIL_ENGINE.json","class":"acceptance-receipt","status":"ACTIVE"},
-    {"id":"EUCONS-E20-RECEIPT","path":"eucons/ops/receipts/E20_ANALYTICS_ENGINE.json","class":"acceptance-receipt","status":"ACTIVE"},
-    {"id":"EUCONS-E21-RECEIPT","path":"eucons/ops/receipts/E21_PRIVACY_SECURITY.json","class":"acceptance-receipt","status":"ACTIVE"},
-    {"id":"EUCONS-E22-RECEIPT","path":"eucons/ops/receipts/E22_GITHUB_AUTOMATION.json","class":"acceptance-receipt","status":"ACTIVE"},
-    {"id":"EUCONS-E23-RECEIPT","path":"eucons/ops/receipts/E23_PERSISTENCE.json","class":"acceptance-receipt","status":"ACTIVE"},
-    {"id":"EUCONS-E24-RECEIPT","path":"eucons/ops/receipts/E24_RECOVERY.json","class":"acceptance-receipt","status":"ACTIVE"},
-    {"id":"EUCONS-E25-RECEIPT","path":"eucons/ops/receipts/E25_PREVIEW_PRODUCTION.json","class":"acceptance-receipt","status":"ACTIVE"},
-    {"id":"EUCONS-E26-RECEIPT","path":"eucons/ops/receipts/E26_ADVERSARIAL_QA.json","class":"acceptance-receipt","status":"ACTIVE"},
-    {"id":"EUCONS-E27-RECEIPT","path":"eucons/ops/receipts/E27_FULL_ACCEPTANCE.json","class":"acceptance-receipt","status":"ACTIVE"},
-    {"id":"EUCONS-E28-RECEIPT","path":"eucons/ops/receipts/E28_CLOSED_DEV.json","class":"acceptance-receipt","status":"ACTIVE"},
-    {"id":"EUCONS-R02-CUSTOMER-DEMAND-MODEL","path":"eucons/market_intelligence/EUCONS_CUSTOMER_DEMAND_MODEL_2026-08-25.json","class":"canonical-customer-demand-model","status":"ACTIVE"},
-    {"id":"EUCONS-R02-CUSTOMER-DEMAND-VALIDATOR","path":"eucons/validation/validate_customer_demand_model.py","class":"acceptance-validator","status":"ACTIVE"},
-    {"id":"EUCONS-R02-CUSTOMER-DEMAND-FAIL-CLOSED-TEST","path":"eucons/validation/test_customer_demand_model_fail_closed.py","class":"regression-test","status":"ACTIVE"},
-    {"id":"EUCONS-R03-SERVICE-PROOF-ARCHITECTURE","path":"eucons/evidence/service_proof_architecture.json","class":"canonical-service-proof-architecture","status":"ACTIVE"},
-    {"id":"EUCONS-R03-PORTFOLIO-CANDIDATES","path":"eucons/evidence/portfolio_candidate_registry.json","class":"evidence-gated-portfolio-registry","status":"ACTIVE"},
-    {"id":"EUCONS-R03-SERVICE-PROOF-VALIDATOR","path":"eucons/validation/validate_service_proof_architecture.py","class":"acceptance-validator","status":"ACTIVE"},
-    {"id":"EUCONS-R03-SERVICE-PROOF-FAIL-CLOSED-TEST","path":"eucons/validation/test_service_proof_architecture_fail_closed.py","class":"regression-test","status":"ACTIVE"},
-    {"id":"EUCONS-R04-JTBD-UX-CONTRACT","path":"eucons/web/jtbd_ux_contract.json","class":"canonical-jtbd-ux-contract","status":"ACTIVE"},
-    {"id":"EUCONS-R04-JTBD-UX-VALIDATOR","path":"eucons/validation/validate_jtbd_ux.py","class":"acceptance-validator","status":"ACTIVE"},
-    {"id":"EUCONS-R04-JTBD-UX-FAIL-CLOSED-TEST","path":"eucons/validation/test_jtbd_ux_fail_closed.py","class":"regression-test","status":"ACTIVE"}
+    {
+      "id": "EUCONS-README",
+      "path": "eucons/README.md",
+      "class": "product-root",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-CANON",
+      "path": "eucons/EUCONS_PRODUCT_CANON.md",
+      "class": "canonical-contract",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-ARCH",
+      "path": "eucons/EUCONS_ARCHITECTURE.md",
+      "class": "canonical-contract",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-AUTONOMY",
+      "path": "eucons/EUCONS_AUTONOMY_CONTRACT.md",
+      "class": "canonical-contract",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-ROADMAP",
+      "path": "eucons/ROADMAP.md",
+      "class": "development-roadmap",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-CHECKPOINT",
+      "path": "eucons/ops/checkpoint.json",
+      "class": "durable-state",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-ARTIFACT-REGISTRY",
+      "path": "eucons/ops/artifact_registry.json",
+      "class": "durable-state",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-HEALTH",
+      "path": "eucons/ops/health.json",
+      "class": "durable-state",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E23-PERSISTENCE-CONTRACT",
+      "path": "eucons/ops/persistence_contract.json",
+      "class": "canonical-persistence-contract",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E23-PERSISTENCE-ENGINE",
+      "path": "eucons/ops/persistence.py",
+      "class": "atomic-persistence-engine",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E23-VALIDATOR",
+      "path": "eucons/validation/validate_persistence.py",
+      "class": "acceptance-validator",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E23-FAIL-CLOSED-TEST",
+      "path": "eucons/validation/test_persistence_fail_closed.py",
+      "class": "regression-test",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E24-RECOVERY-CONTRACT",
+      "path": "eucons/ops/recovery_contract.json",
+      "class": "canonical-recovery-contract",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E24-RECOVERY-ENGINE",
+      "path": "eucons/ops/recovery.py",
+      "class": "deterministic-recovery-engine",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E24-VALIDATOR",
+      "path": "eucons/validation/validate_recovery.py",
+      "class": "acceptance-validator",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E24-FAIL-CLOSED-TEST",
+      "path": "eucons/validation/test_recovery_fail_closed.py",
+      "class": "regression-test",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E25-PREVIEW-CONTRACT",
+      "path": "eucons/preview/preview_contract.json",
+      "class": "canonical-preview-contract",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E25-PREVIEW-ENGINE",
+      "path": "eucons/preview/preview_engine.py",
+      "class": "preview-acceptance-engine",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E25-VALIDATOR",
+      "path": "eucons/validation/validate_preview_production.py",
+      "class": "acceptance-validator",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E25-FAIL-CLOSED-TEST",
+      "path": "eucons/validation/test_preview_production_fail_closed.py",
+      "class": "regression-test",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E26-ADVERSARIAL-CONTRACT",
+      "path": "eucons/adversarial/adversarial_contract.json",
+      "class": "canonical-adversarial-contract",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E26-ADVERSARIAL-SUITE",
+      "path": "eucons/adversarial/adversarial_suite.py",
+      "class": "adversarial-qa-engine",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E26-VALIDATOR",
+      "path": "eucons/validation/validate_adversarial_qa.py",
+      "class": "acceptance-validator",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E26-FAIL-CLOSED-TEST",
+      "path": "eucons/validation/test_adversarial_qa_fail_closed.py",
+      "class": "regression-test",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E27-ACCEPTANCE-CONTRACT",
+      "path": "eucons/acceptance/full_acceptance_contract.json",
+      "class": "canonical-full-acceptance-contract",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E27-ACCEPTANCE-ENGINE",
+      "path": "eucons/acceptance/full_acceptance.py",
+      "class": "full-acceptance-engine",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E27-VALIDATOR",
+      "path": "eucons/validation/validate_full_acceptance.py",
+      "class": "acceptance-validator",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E27-FAIL-CLOSED-TEST",
+      "path": "eucons/validation/test_full_acceptance_fail_closed.py",
+      "class": "regression-test",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E28-CLOSED-DEV-CONTRACT",
+      "path": "eucons/acceptance/closed_dev_contract.json",
+      "class": "canonical-closed-dev-contract",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E28-CLOSED-DEV-ENGINE",
+      "path": "eucons/acceptance/closed_dev.py",
+      "class": "closed-dev-acceptance-engine",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E28-PRODUCTION-BUILDER",
+      "path": "eucons/deployment/build_production_ready.py",
+      "class": "production-ready-builder",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E28-PRODUCTION-BUILD-CONTRACT",
+      "path": "eucons/deployment/production_build_contract.json",
+      "class": "production-ready-build-contract",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E28-RUNTIME-ACTIVATION",
+      "path": "eucons/deployment/runtime_activation_contract.json",
+      "class": "provider-neutral-runtime-contract",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E28-EXTERNAL-HANDOFF",
+      "path": "eucons/deployment/external_handoff_manifest.json",
+      "class": "external-authorization-handoff",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E28-VALIDATOR",
+      "path": "eucons/validation/validate_closed_dev.py",
+      "class": "acceptance-validator",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E28-FAIL-CLOSED-TEST",
+      "path": "eucons/validation/test_closed_dev_fail_closed.py",
+      "class": "regression-test",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E00-RECEIPT",
+      "path": "eucons/ops/receipts/E00_BOOTSTRAP.json",
+      "class": "acceptance-receipt",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E01-RECEIPT",
+      "path": "eucons/ops/receipts/E01_COMMERCIAL_CANON.json",
+      "class": "acceptance-receipt",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E02-RECEIPT",
+      "path": "eucons/ops/receipts/E02_SERVICE_REGISTRY.json",
+      "class": "acceptance-receipt",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E03-RECEIPT",
+      "path": "eucons/ops/receipts/E03_EVIDENCE_BASE.json",
+      "class": "acceptance-receipt",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E04-RECEIPT",
+      "path": "eucons/ops/receipts/E04_PEOPLE_REGISTRY.json",
+      "class": "acceptance-receipt",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E05-RECEIPT",
+      "path": "eucons/ops/receipts/E05_CASE_STUDY_REGISTRY.json",
+      "class": "acceptance-receipt",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E06-RECEIPT",
+      "path": "eucons/ops/receipts/E06_INFORMATION_ARCHITECTURE.json",
+      "class": "acceptance-receipt",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E07-RECEIPT",
+      "path": "eucons/ops/receipts/E07_DESIGN_SYSTEM.json",
+      "class": "acceptance-receipt",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E08-RECEIPT",
+      "path": "eucons/ops/receipts/E08_PUBLIC_SITE.json",
+      "class": "acceptance-receipt",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E09-RECEIPT",
+      "path": "eucons/ops/receipts/E09_OPPORTUNITY_BRIDGE.json",
+      "class": "acceptance-receipt",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E10-RECEIPT",
+      "path": "eucons/ops/receipts/E10_OPPORTUNITY_MATCHING.json",
+      "class": "acceptance-receipt",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E11-RECEIPT",
+      "path": "eucons/ops/receipts/E11_LEAD_ENGINE.json",
+      "class": "acceptance-receipt",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E12-RECEIPT",
+      "path": "eucons/ops/receipts/E12_CRM_LITE.json",
+      "class": "acceptance-receipt",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E13-RECEIPT",
+      "path": "eucons/ops/receipts/E13_OFFER_ENGINE.json",
+      "class": "acceptance-receipt",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E14-RECEIPT",
+      "path": "eucons/ops/receipts/E14_KNOWLEDGE_ENGINE.json",
+      "class": "acceptance-receipt",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E15-RECEIPT",
+      "path": "eucons/ops/receipts/E15_AUTONOMOUS_EDITORIAL_LOOP.json",
+      "class": "acceptance-receipt",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E16-RECEIPT",
+      "path": "eucons/ops/receipts/E16_SEO_ENGINE.json",
+      "class": "acceptance-receipt",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E17-RECEIPT",
+      "path": "eucons/ops/receipts/E17_LINKEDIN_ADAPTER.json",
+      "class": "acceptance-receipt",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E18-RECEIPT",
+      "path": "eucons/ops/receipts/E18_FACEBOOK_ADAPTER.json",
+      "class": "acceptance-receipt",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E19-RECEIPT",
+      "path": "eucons/ops/receipts/E19_COMMERCIAL_EMAIL_ENGINE.json",
+      "class": "acceptance-receipt",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E20-RECEIPT",
+      "path": "eucons/ops/receipts/E20_ANALYTICS_ENGINE.json",
+      "class": "acceptance-receipt",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E21-RECEIPT",
+      "path": "eucons/ops/receipts/E21_PRIVACY_SECURITY.json",
+      "class": "acceptance-receipt",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E22-RECEIPT",
+      "path": "eucons/ops/receipts/E22_GITHUB_AUTOMATION.json",
+      "class": "acceptance-receipt",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E23-RECEIPT",
+      "path": "eucons/ops/receipts/E23_PERSISTENCE.json",
+      "class": "acceptance-receipt",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E24-RECEIPT",
+      "path": "eucons/ops/receipts/E24_RECOVERY.json",
+      "class": "acceptance-receipt",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E25-RECEIPT",
+      "path": "eucons/ops/receipts/E25_PREVIEW_PRODUCTION.json",
+      "class": "acceptance-receipt",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E26-RECEIPT",
+      "path": "eucons/ops/receipts/E26_ADVERSARIAL_QA.json",
+      "class": "acceptance-receipt",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E27-RECEIPT",
+      "path": "eucons/ops/receipts/E27_FULL_ACCEPTANCE.json",
+      "class": "acceptance-receipt",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-E28-RECEIPT",
+      "path": "eucons/ops/receipts/E28_CLOSED_DEV.json",
+      "class": "acceptance-receipt",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-R02-CUSTOMER-DEMAND-MODEL",
+      "path": "eucons/market_intelligence/EUCONS_CUSTOMER_DEMAND_MODEL_2026-08-25.json",
+      "class": "canonical-customer-demand-model",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-R02-CUSTOMER-DEMAND-VALIDATOR",
+      "path": "eucons/validation/validate_customer_demand_model.py",
+      "class": "acceptance-validator",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-R02-CUSTOMER-DEMAND-FAIL-CLOSED-TEST",
+      "path": "eucons/validation/test_customer_demand_model_fail_closed.py",
+      "class": "regression-test",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-R03-SERVICE-PROOF-ARCHITECTURE",
+      "path": "eucons/evidence/service_proof_architecture.json",
+      "class": "canonical-service-proof-architecture",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-R03-PORTFOLIO-CANDIDATES",
+      "path": "eucons/evidence/portfolio_candidate_registry.json",
+      "class": "evidence-gated-portfolio-registry",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-R03-SERVICE-PROOF-VALIDATOR",
+      "path": "eucons/validation/validate_service_proof_architecture.py",
+      "class": "acceptance-validator",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-R03-SERVICE-PROOF-FAIL-CLOSED-TEST",
+      "path": "eucons/validation/test_service_proof_architecture_fail_closed.py",
+      "class": "regression-test",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-R04-JTBD-UX-CONTRACT",
+      "path": "eucons/web/jtbd_ux_contract.json",
+      "class": "canonical-jtbd-ux-contract",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-R04-JTBD-UX-VALIDATOR",
+      "path": "eucons/validation/validate_jtbd_ux.py",
+      "class": "acceptance-validator",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-R04-JTBD-UX-FAIL-CLOSED-TEST",
+      "path": "eucons/validation/test_jtbd_ux_fail_closed.py",
+      "class": "regression-test",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-R05-INBOUND-RUNTIME-CONTRACT",
+      "path": "eucons/leads/inbound_runtime_contract.json",
+      "class": "canonical-progressive-inbound-runtime-contract",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-R05-INBOUND-RUNTIME",
+      "path": "eucons/leads/inbound_runtime.py",
+      "class": "provider-neutral-progressive-inbound-engine",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-R05-INBOUND-RUNTIME-VALIDATOR",
+      "path": "eucons/validation/validate_inbound_runtime.py",
+      "class": "acceptance-validator",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "EUCONS-R05-INBOUND-RUNTIME-FAIL-CLOSED-TEST",
+      "path": "eucons/validation/test_inbound_runtime_fail_closed.py",
+      "class": "regression-test",
+      "status": "ACTIVE"
+    }
   ]
 }
