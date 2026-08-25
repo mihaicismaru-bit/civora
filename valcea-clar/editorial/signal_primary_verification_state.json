@@ -2,16 +2,16 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-26T00:00:14+03:00",
+  "generated_at": "2026-08-26T02:59:07+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-25T23:59:08+03:00",
-  "task_count": 59,
+  "queue_generated_at": "2026-08-26T02:57:56+03:00",
+  "task_count": 54,
   "primary_match_count": 0,
-  "no_match_count": 28,
-  "unrouted_count": 31,
+  "no_match_count": 25,
+  "unrouted_count": 29,
   "target_count": 15,
   "targets_ok": 12,
   "results": [
@@ -1175,45 +1175,6 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "6608cbf87601238f6cb9b266",
-      "signal_title": "FOTO/VIDEO. O femeie din Râmnicu Vâlcea a fost înjunghiată de soțul septuagenar",
-      "signal_url": "https://seintamplainvalcea.ro/2026/08/23/foto-video-o-femeie-din-ramnicu-valcea-a-fost-injunghiata-de-sot/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_published_at": "2026-08-23T11:31:28+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "7ff83bf2a7e27e40a2a671af",
-      "signal_title": "Tânără plecată de acasă, din Râmnicu Vâlcea. Părinții au dat-o dispărută",
-      "signal_url": "https://seintamplainvalcea.ro/2026/08/23/tanara-plecata-de-acasa-din-ramnicu-valcea-parintii-au-dat-o-disparuta/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-08-23T10:15:00+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
       "signal_id": "1c22df15dfcb20f94ec73319",
       "signal_title": "Tot Oltul cântă la Călimănești. Șapte județe și-au adus portul, jocul și cântecul la festivalul ajuns la ediția a 58-a",
       "signal_url": "https://www.impactreal.ro/2026/08/23/tot-oltul-canta-la-calimanesti-sapte-judete-si-au-adus-portul-jocul-si-cantecul-la-festivalul-ajuns-la-editia-a-58-a/",
@@ -1224,116 +1185,6 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "3f93ee825aab27f7d5c97620",
-      "signal_title": "INVESTIGAȚIE | Asfalt și utilități „în câmp”, străzi cu case lăsate în noroi. Cine a stabilit prioritățile Primăriei Râmnicu Vâlcea?",
-      "signal_url": "https://ziaruldevalcea.ro/2026/08/investigatie-asfalt-si-utilitati-in-camp-strazi-cu-case-lasate-in-noroi-cine-a-stabilit-prioritatile-primariei-ramnicu-valcea/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-08-23T04:25:06+03:00",
-      "verification_route_id": "administration_projects",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "prefectura-valcea",
-            "name": "Instituția Prefectului — Județul Vâlcea",
-            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "cj-valcea-anunturi",
-            "name": "Consiliul Județean Vâlcea",
-            "url": "https://cjvalcea.ro/categorie/anunturi/"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "primaria-rm-valcea-comunicate",
-            "name": "Primăria Municipiului Râmnicu Vâlcea",
-            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-          "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "c30c264d6582df4d6cac3da7",
-      "signal_title": "Parcul de la Grădinița Nord 2 din Râmnicu Vâlcea, pericol public: „Copiii se accidentează zilnic”",
-      "signal_url": "https://ziaruldevalcea.ro/2026/08/parcul-de-la-gradinita-nord-2-din-ramnicu-valcea-pericol-public-copiii-se-accidenteaza-zilnic/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_published_at": "2026-08-23T04:16:17+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "21db9b504016516d92a4449c",
-      "signal_title": "Incendiu puternic lângă Shopping City Râmnicu Vâlcea: un autobuz și o autoutilitară, distruse de flăcări",
-      "signal_url": "https://ziaruldevalcea.ro/2026/08/incendiu-puternic-langa-shopping-city-ramnicu-valcea-un-autobuz-si-o-autoutilitara-distruse-de-flacari/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-08-23T04:08:45+03:00",
-      "verification_route_id": "fire_rescue_alert",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "isu-valcea-stiri-locale",
-            "name": "ISU Vâlcea — Știri locale",
-            "url": "https://isuvl.igsu.ro/stiri-locale"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "isu-valcea-comunicate",
-            "name": "ISU Vâlcea",
-            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "inhga-avertizari-hidrologice-valcea",
-            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
-            "url": "https://www.hidro.ro/warning/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "ca97ca9ed5698965fd60b9c5",
