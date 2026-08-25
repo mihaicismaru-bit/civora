@@ -25,6 +25,10 @@ def load_json(path: Path) -> dict:
 
 def main() -> None:
     contract = load_json(EUCONS / "runtime" / "php" / "runtime_contract.json")
+    production_contract = load_json(EUCONS / "deployment" / "production_build_contract.json")
+    expected_pages = production_contract.get("build", {}).get("expected_total_pages")
+    if not isinstance(expected_pages, int) or expected_pages < 1:
+        raise SystemExit("production build contract page count invalid")
     if contract.get("engine_id") != "EUCONS_E29_PHP_RUNTIME_ADAPTER":
         raise SystemExit("PHP runtime engine id drift")
     if contract.get("runtime") != "PHP_8_PLUS_SHARED_HOSTING":
@@ -90,7 +94,7 @@ def main() -> None:
     with tempfile.TemporaryDirectory() as td:
         target = Path(td) / "site"
         before = builder.build_site(target)
-        if before.get("pages") != 26:
+        if before.get("pages") != expected_pages:
             raise SystemExit("production build page count drift before PHP activation")
         activated = activator.activate(target)
         if activated.get("forms", 0) < 3 or activated.get("form_pages", 0) < 3:
@@ -122,7 +126,7 @@ def main() -> None:
         "phase": "E29",
         "runtime": "PHP_8_PLUS_SHARED_HOSTING",
         "lead_route": "https://api.eucons.ro/api/leads",
-        "production_pages": 26,
+        "production_pages": expected_pages,
         "activated_forms": activated["forms"],
         "pii_storage": "OUTSIDE_WEBROOT",
         "crm_persistence": "IMPLEMENTED_FAIL_CLOSED",
