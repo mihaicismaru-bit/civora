@@ -70,7 +70,17 @@ def main():
         assert_true("Solicită ofertă" in home, "Commercial QA: offer CTA missing")
         assert_true("Ce nu promitem" in home, "Trust QA: explicit boundaries missing")
         assert_true("Nu garantăm obținerea finanțării" in home, "Trust QA: guarantee boundary missing")
-        assert_true("apeluri demonstrative" in home, "Trust QA: funding fail-closed copy missing")
+        assert_true("O potrivire preliminară nu este eligibilitate confirmată" in home, "Trust QA: eligibility boundary missing")
+        assert_true("În ce punct este proiectul tău?" in home, "JTBD QA: decision-first hero missing")
+        assert_true("O recomandare utilă, fără certitudini inventate." in home, "Trust QA: uncertainty contract missing")
+        assert_true("Exemple documentate, nu promisiuni" in home, "Proof QA: bounded proof section missing")
+        for journey_path in (
+            "/ce-finantare-mi-se-potriveste/",
+            "/verifica-proiectul/",
+            "/proiect-in-implementare/",
+            "/proiect-cu-probleme/",
+        ):
+            assert_true(f'href="{journey_path}"' in home, f"JTBD QA: homepage missing {journey_path}")
         forbidden_price = re.compile(r"\b\d[\d\s.,]*\s*(?:€|EUR|RON|lei)\b", re.IGNORECASE)
         assert_true(not forbidden_price.search(home), "Homepage contains a numeric price/proof claim without an approved rule")
 
@@ -84,6 +94,14 @@ def main():
         root_preview = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
         assert_true("Development preview" not in root_preview, "Root preview still contains E00 bootstrap placeholder")
         assert_true("Cere evaluarea proiectului" in root_preview, "Root preview is not commercially actionable")
+        assert_true("În ce punct este proiectul tău?" in root_preview, "Root preview is not decision-first")
+        for journey_path in (
+            "/ce-finantare-mi-se-potriveste/",
+            "/verifica-proiectul/",
+            "/proiect-in-implementare/",
+            "/proiect-cu-probleme/",
+        ):
+            assert_true(f'href="{journey_path}"' in root_preview, f"Root preview missing {journey_path}")
         assert_true('<meta name="robots" content="noindex,nofollow">' in root_preview, "Root preview must remain noindex")
 
     print(json.dumps({
