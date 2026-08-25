@@ -1,0 +1,58 @@
+{
+  "schema_version": "nf.eucons_primary_collection.v0.1",
+  "run_id": "AI4WORK-STEP/NF-RUN-001",
+  "public_surface": {
+    "origin": "https://eucons.ro",
+    "landing_path": "/cercetare/ai4work-step/",
+    "adult_path": "/cercetare/ai4work-step/adulti/",
+    "employer_path": "/cercetare/ai4work-step/angajatori/",
+    "contact_followup_path": "/cercetare/ai4work-step/contact/",
+    "analytics_policy": "NO_MARKETING_ANALYTICS_ON_RESEARCH_ROUTES",
+    "login_required": false
+  },
+  "collection_api": {
+    "preferred_origin": "https://api.eucons.ro",
+    "adult_route": "/api/research/ai4work-step/adults",
+    "employer_route": "/api/research/ai4work-step/employers",
+    "followup_route": "/api/research/ai4work-step/followup",
+    "content_type": "application/json",
+    "cors_allow_origin": "https://eucons.ro",
+    "methods": ["POST"],
+    "credentials": "omit",
+    "failure_semantics": "FAIL_CLOSED_NO_PARTIAL_COMMIT",
+    "repository_write": "FORBIDDEN",
+    "crm_write": "FORBIDDEN_FOR_ANALYTICAL_RESPONSES",
+    "followup_linkage_to_analytical_response": "FORBIDDEN"
+  },
+  "privacy": {
+    "direct_identifiers_in_analytical_forms": "FORBIDDEN",
+    "prohibited_fields": ["name","first_name","last_name","CNP","national_id","email","phone","exact_address","exact_employer","employer_name","CUI","IP_as_analytical_field","device_fingerprint","advertising_id"],
+    "special_category_data": "NOT_REQUESTED",
+    "free_text_warning": "Do not enter names, email addresses, phone numbers, exact employer names or other identifying information.",
+    "server_metadata_policy": "retain only security metadata strictly necessary for abuse prevention, logically separated from the analytical dataset and deleted on the shortest documented schedule",
+    "respondent_id": "server-generated cryptographically random opaque ID with no identity lookup table",
+    "organisation_id": "server-generated cryptographically random opaque ID with no identity lookup table",
+    "followup_contacts": "separate purpose, separate dataset, separate privacy notice; never join to analytical response",
+    "legal_notice_source": "GDPR_ONLINE_DATA_COLLECTION_PROCEDURE.md",
+    "launch_gate": ["controller identity and GDPR contact frozen from current EUCONS legal notice", "privacy notice reconciled", "retention schedule approved", "processor/hosting terms recorded"]
+  },
+  "integrity": {
+    "server_side_validation": true,
+    "request_size_limit_bytes": 20000,
+    "rate_limit": "required but must not create persistent analytical identifiers",
+    "duplicate_policy": "do not silently deduplicate people; assign one response ID per accepted submission and detect exact payload replay separately",
+    "raw_export": "immutable timestamped export outside git",
+    "raw_export_hash": "SHA-256 mandatory before cleaning",
+    "analysis_copy": "derived from immutable raw export; transformations logged",
+    "percentage_rule": "every reported percentage must retain numerator, denominator and valid-response rule"
+  },
+  "deployment_observation": {
+    "production_repo": "mihaicismaru-bit/eucons-ro",
+    "canonical_source": "mihaicismaru-bit/civora/eucons",
+    "current_public_host": "GitHub Pages",
+    "current_commercial_runtime": "production_enabled=false in eucons/deployment/runtime_activation_contract.json",
+    "constraint": "GitHub Pages cannot persist survey POST data; a separately secured first-party API/storage runtime is required before collection can be enabled.",
+    "do_not_reuse": "commercial /api/leads pipeline because analytical responses must remain separate from CRM/marketing"
+  },
+  "status": "STATIC_FORM_CONTRACT_READY_BACKEND_STORAGE_NOT_ACTIVE"
+}
