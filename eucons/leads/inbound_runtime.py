@@ -83,6 +83,7 @@ def empty_session(session_id: str, journey_id: str, contract: dict[str, Any], fo
         "revision": 0,
         "answers": {},
         "request_receipts": {},
+        "events": [{"type": "INBOUND_SESSION_STARTED", "revision": 0}],
         "resume": {
             "token": recovery_token(session_id, journey_id, 0),
             "authentication_state": "PROVIDER_AUTH_REQUIRED",
@@ -263,6 +264,16 @@ def advance(
         "digest": request_digest,
         "revision": session["revision"],
     }
+    event_by_step = {
+        "PROFILE": "INBOUND_PROFILE_COMPLETED",
+        "CONTEXT": "INBOUND_CONTEXT_COMPLETED",
+        "CONTACT": "INBOUND_QUALIFIED",
+    }
+    session.setdefault("events", []).append({
+        "type": event_by_step[step],
+        "revision": session["revision"],
+        "request_receipt": request_id,
+    })
     return {
         "session": session,
         "response": response_for(session, contract, ux),
