@@ -1,16 +1,16 @@
 {
   "schema_version": "1.0",
   "checkpoint": "PARTENER-EU-CIVORA-P10-0020",
-  "observed_at": "2026-08-25T08:30:37Z",
-  "validation_run_started": "2026-08-25T08:30:11Z",
+  "observed_at": "2026-08-25T10:05:47Z",
+  "validation_run_started": "2026-08-25T10:05:18Z",
   "integrity": {
     "latest_history_equal": true,
-    "latest_sha256": "a6874cf79d6fbd00841f25416f7fde40f9e4e07e381b94c9b8ede74a67a8c830",
-    "history_sha256": "a6874cf79d6fbd00841f25416f7fde40f9e4e07e381b94c9b8ede74a67a8c830",
-    "history_path": "validation/history/20260825T083011Z.json",
+    "latest_sha256": "a4de2ea7f0766ab929cd532bdcc95c4bc9bd35e4f99f00f63ac424bea154ed5c",
+    "history_sha256": "a4de2ea7f0766ab929cd532bdcc95c4bc9bd35e4f99f00f63ac424bea154ed5c",
+    "history_path": "validation/history/20260825T100518Z.json",
     "source_state_checkpoint_equal": true,
-    "source_state_sha256": "0deea0e5e5cb8a796a6cd9cb0260a7c1d83ab63552d13dbb3466017c809cb0f2",
-    "checkpoint_sha256": "0deea0e5e5cb8a796a6cd9cb0260a7c1d83ab63552d13dbb3466017c809cb0f2",
+    "source_state_sha256": "0f7e6998f818c20979580e809504e0ba631395745c9c3c5751d001e19f519bad",
+    "checkpoint_sha256": "0f7e6998f818c20979580e809504e0ba631395745c9c3c5751d001e19f519bad",
     "frontend_regression_pass": true,
     "frontend_pass": 10,
     "frontend_total": 10,
@@ -18,7 +18,7 @@
   },
   "source_registry": {
     "observed_at": "2026-08-25T08:24:03.094035Z",
-    "age_seconds": 393,
+    "age_seconds": 6104,
     "stale_after_seconds": 28800,
     "stale": false,
     "health": "DEGRADED",
@@ -57,13 +57,13 @@
     "fail_closed": true
   },
   "afir": {
-    "observed_at": "2026-08-25T08:02:29.741848+00:00",
+    "observed_at": "2026-08-25T10:04:14.422802+00:00",
     "status": "PASS",
-    "item_count": 30,
-    "error_count": 37,
-    "hash_change_candidates": 0,
-    "material_signal_candidates": 0,
-    "auth_dependency_count": 27,
+    "item_count": 31,
+    "error_count": 41,
+    "hash_change_candidates": 1,
+    "material_signal_candidates": 1,
+    "auth_dependency_count": 28,
     "auth_dependencies": [
       {
         "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2F&culture=ro",
@@ -241,6 +241,13 @@
         "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
       },
       {
+        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Factualizare-cerere-de-finantare-dr-14%2F&culture=ro",
+        "sourcePage": "https://www.afir.ro/info-la-zi/actualizare-cerere-de-finantare-dr-14/",
+        "status": "AUTH_OR_ACCESS_DEPENDENT",
+        "materialFactAction": "NONE",
+        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
+      },
+      {
         "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Fsesiuni-depuneri-de-proiecte-dr-14-si-dr-18%2F&culture=ro",
         "sourcePage": "https://www.afir.ro/info-la-zi/sesiuni-depuneri-de-proiecte-dr-14-si-dr-18/",
         "status": "AUTH_OR_ACCESS_DEPENDENT",
@@ -248,19 +255,19 @@
         "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
       },
       {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Fghidul-si-anexele-dr-14%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/info-la-zi/ghidul-si-anexele-dr-14/",
+        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Fdomenii-de-interventie%2Fdetalii-si-anexe-dr-14%2F&culture=ro",
+        "sourcePage": "https://www.afir.ro/domenii-de-interventie/detalii-si-anexe-dr-14/",
         "status": "AUTH_OR_ACCESS_DEPENDENT",
         "materialFactAction": "NONE",
         "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
       }
     ],
-    "resolution_task_required": false,
+    "resolution_task_required": true,
     "resolution_task_present_fail_closed": true,
     "material_facts_auto_promoted": false
   },
   "peo_calendar": {
-    "observed_at": "2026-08-25T08:03:35.372437+00:00",
+    "observed_at": "2026-08-25T10:03:45.461586+00:00",
     "status": "OK_OFFICIAL_OIR_COPY",
     "source": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
     "source_class": "OFFICIAL_INSTITUTIONAL_COPY_OIR_PECU_VEST",
@@ -355,7 +362,7 @@
     "integrity_pass": true,
     "registry_health": "DEGRADED",
     "registry_hash_changes": 1,
-    "afir_hash_changes": 0,
+    "afir_hash_changes": 1,
     "peo_calendar_changes": 0,
     "mipe_health": "PASS",
     "autonomous_orchestration_configured": true,

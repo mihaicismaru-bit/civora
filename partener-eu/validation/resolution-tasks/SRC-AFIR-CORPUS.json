@@ -3,12 +3,20 @@
   "source_url": "https://www.afir.ro/",
   "source_tier": "T1",
   "criticality": "HIGH",
-  "candidate_fingerprint": "63ab27dc3f1f4c9872bb4c0afae6433e7b0510e992b5278c3e590671c125bab1",
+  "candidate_fingerprint": "da3e0ce54691543a3cf50930fac658f41e501400aafe4a89271429feda939b24",
   "previous_candidate_fingerprint": "63ab27dc3f1f4c9872bb4c0afae6433e7b0510e992b5278c3e590671c125bab1",
-  "candidate_count": 0,
-  "material_signal_count": 0,
-  "candidates": [],
-  "auth_dependency_count": 27,
+  "candidate_count": 1,
+  "material_signal_count": 1,
+  "candidates": [
+    {
+      "url": "https://www.afir.ro/info-la-zi/",
+      "title": "Info la zi",
+      "sha256": "5d821e8433505264ec60e597b1ce4d40ee26772eadaa1178edbd85703ce29f56",
+      "material_change_candidate": true,
+      "material_fact_action": "RESOLUTION_TASK_ONLY"
+    }
+  ],
+  "auth_dependency_count": 28,
   "auth_dependencies": [
     {
       "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2F&culture=ro",
@@ -186,6 +194,13 @@
       "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
     },
     {
+      "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Factualizare-cerere-de-finantare-dr-14%2F&culture=ro",
+      "sourcePage": "https://www.afir.ro/info-la-zi/actualizare-cerere-de-finantare-dr-14/",
+      "status": "AUTH_OR_ACCESS_DEPENDENT",
+      "materialFactAction": "NONE",
+      "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
+    },
+    {
       "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Fsesiuni-depuneri-de-proiecte-dr-14-si-dr-18%2F&culture=ro",
       "sourcePage": "https://www.afir.ro/info-la-zi/sesiuni-depuneri-de-proiecte-dr-14-si-dr-18/",
       "status": "AUTH_OR_ACCESS_DEPENDENT",
@@ -193,8 +208,8 @@
       "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
     },
     {
-      "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Fghidul-si-anexele-dr-14%2F&culture=ro",
-      "sourcePage": "https://www.afir.ro/info-la-zi/ghidul-si-anexele-dr-14/",
+      "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Fdomenii-de-interventie%2Fdetalii-si-anexe-dr-14%2F&culture=ro",
+      "sourcePage": "https://www.afir.ro/domenii-de-interventie/detalii-si-anexe-dr-14/",
       "status": "AUTH_OR_ACCESS_DEPENDENT",
       "materialFactAction": "NONE",
       "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
@@ -202,7 +217,7 @@
   ],
   "technical_classification": "AUTH_REDIRECTS_EXCLUDED_FROM_CHANGE_CANDIDATES",
   "first_observed_at": "2026-08-12T08:51:30.702569+00:00",
-  "last_observed_at": "2026-08-25T08:02:29.741848+00:00",
+  "last_observed_at": "2026-08-25T10:04:14.422802+00:00",
   "corpus_policy": {
     "failClosed": true,
     "materialFactsAutoPromoted": false,
