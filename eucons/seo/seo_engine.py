@@ -80,7 +80,7 @@ def schema_for(route: dict[str, Any], title: str, url: str) -> dict[str, Any]:
         return {"@context": "https://schema.org", "@type": "CollectionPage", "name": title, "url": url}
     if surface == "ABOUT":
         return {"@context": "https://schema.org", "@type": "AboutPage", "name": title, "url": url}
-    if surface in {"CONTACT", "LEAD_JOURNEY", "LEGAL"}:
+    if surface in {"CONTACT", "LEAD_JOURNEY", "JTBD_JOURNEY", "LEGAL"}:
         return {"@context": "https://schema.org", "@type": "WebPage", "name": title, "url": url}
     raise SEOError(f"unsupported schema surface {surface}")
 
