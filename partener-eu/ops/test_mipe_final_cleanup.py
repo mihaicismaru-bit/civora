@@ -35,6 +35,15 @@ def text(path: str) -> str:
     return (ROOT / path).read_text(encoding="utf-8")
 
 
+def assert_manual_read_only(workflow: str) -> None:
+    workflow_text = text(workflow)
+    assert "workflow_dispatch:" in workflow_text, workflow
+    assert "schedule:" not in workflow_text and "cron:" not in workflow_text, workflow
+    assert "push:\n" not in workflow_text, workflow
+    assert "permissions:\n  contents: read" in workflow_text, workflow
+    assert "git push" not in workflow_text and "git commit" not in workflow_text, workflow
+
+
 def main() -> int:
     for path in ABSENT:
         assert not (ROOT / path).exists(), f"retired MIPE path reappeared: {path}"
@@ -59,8 +68,8 @@ def main() -> int:
     assert "cron: '11 */3 * * *'" not in scheduler
     assert "workflow_dispatch:" in scheduler
     assert "17 */3 * * *" in acquisition
-    assert "cron: '7 * * * *'" not in dual_cache
-    assert "workflow_dispatch:" in dual_cache
+    assert_manual_read_only(".github/workflows/partener-eu-mipe-dual-relay.yml")
+    assert_manual_read_only(".github/workflows/partener-eu-mipe-dual-cache.yml")
 
     assert "permissions:\n  contents: read" in acquisition
     assert "MIPE_ACQUISITION_ONLY: '1'" in acquisition
