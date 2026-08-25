@@ -1,0 +1,167 @@
+{
+  "schema_version": "nf.evidence_addendum.v0.1",
+  "run_id": "AI4WORK-STEP/NF-RUN-001",
+  "extends": ["EVIDENCE_REGISTRY.json", "EVIDENCE_ADDENDUM_001.json"],
+  "research_date": "2026-08-25",
+  "evidence": [
+    {
+      "id": "EV-ANOFM-REGISTERED-UNEMPLOYED-REGIONS-AGE30-55-2026-06",
+      "source": "Agenția Națională pentru Ocuparea Forței de Muncă (ANOFM) – Tabele șomaj 30 iunie 2026, Repartizarea șomerilor înregistrați pe grupe de vârstă și niveluri de instruire",
+      "source_url": "https://www.anofm.ro/wp-content/uploads/2026/07/tabele-somaj-iunie-2026.pdf",
+      "tier": "A1",
+      "territory": ["Sud-Vest Oltenia", "Sud-Muntenia", "Centru"],
+      "scope": "regional aggregation from official county-level rows",
+      "period": "2026-06-30",
+      "population": "registered unemployed aged 30-55 in counties belonging to the three project NUTS2 regions",
+      "constructs": ["target_group_pool_feasibility", "regional_recruitment_capacity"],
+      "direct_measurement": true,
+      "measures": [
+        {
+          "name": "registered_unemployed_age_30_55_Sud_Vest_Oltenia",
+          "measure_type": "count",
+          "value": 26388,
+          "unit": "persons",
+          "derivation": "sum of ANOFM county rows for Dolj, Gorj, Mehedinți, Olt, Vâlcea; age columns 30-39 + 40-49 + 50-55"
+        },
+        {
+          "name": "registered_unemployed_age_30_55_Sud_Muntenia",
+          "measure_type": "count",
+          "value": 25470,
+          "unit": "persons",
+          "derivation": "sum of ANOFM county rows for Argeș, Călărași, Dâmbovița, Giurgiu, Ialomița, Prahova, Teleorman; age columns 30-39 + 40-49 + 50-55"
+        },
+        {
+          "name": "registered_unemployed_age_30_55_Centru",
+          "measure_type": "count",
+          "value": 20966,
+          "unit": "persons",
+          "derivation": "sum of ANOFM county rows for Alba, Brașov, Covasna, Harghita, Mureș, Sibiu; age columns 30-39 + 40-49 + 50-55"
+        },
+        {
+          "name": "registered_unemployed_age_30_55_three_regions_total",
+          "measure_type": "count",
+          "value": 72824,
+          "unit": "persons",
+          "derivation": "26388 + 25470 + 20966"
+        },
+        {
+          "name": "planned_160_as_share_of_age30_55_registered_unemployed_pool",
+          "measure_type": "derived_share",
+          "value": 0.2197,
+          "unit": "percent",
+          "derivation": "160 / 72824 * 100"
+        }
+      ],
+      "use": "strong lower-bound evidence that a numerically ample registered-unemployed recruitment pool aged >29 and <=55 exists in every project region. It supports feasibility of recruiting 160 at macro level, not the presence of an AI/digital skill deficit, willingness to participate, full GSCS eligibility, or the 80/40/40 allocation as a need-weight.",
+      "limitations": [
+        "persons aged over 55 are deliberately excluded from the lower-bound calculation to avoid retirement-age ambiguity",
+        "other GSCS eligibility/exclusion conditions are not applied to the administrative counts",
+        "registered unemployment counts do not measure AI/digital skills or training interest"
+      ]
+    },
+    {
+      "id": "EV-ANOFM-REGISTERED-UNEMPLOYED-REGIONAL-TOTALS-2026-06",
+      "source": "Agenția Națională pentru Ocuparea Forței de Muncă (ANOFM) – Situația șomajului înregistrat la 30 iunie 2026",
+      "source_url": "https://www.anofm.ro/wp-content/uploads/2026/07/tabele-somaj-iunie-2026.pdf",
+      "tier": "A1",
+      "territory": ["Sud-Vest Oltenia", "Sud-Muntenia", "Centru"],
+      "scope": "region",
+      "period": "2026-06-30",
+      "population": "registered unemployed, all ages",
+      "constructs": ["regional_labour_market_context", "target_group_pool_feasibility"],
+      "direct_measurement": true,
+      "measures": [
+        {"name": "registered_unemployed_Sud_Vest_Oltenia", "measure_type": "count", "value": 43886, "unit": "persons"},
+        {"name": "registered_unemployed_Sud_Muntenia", "measure_type": "count", "value": 42531, "unit": "persons"},
+        {"name": "registered_unemployed_Centru", "measure_type": "count", "value": 35780, "unit": "persons"},
+        {"name": "registered_unemployed_three_regions_total", "measure_type": "count", "value": 122197, "unit": "persons"}
+      ],
+      "use": "regional labour-market and recruitment-pool context only; age-specific lower-bound evidence is preferred for project-scale feasibility"
+    },
+    {
+      "id": "EV-OECD-EUROSTAT-ADULT-LEARNING-REGIONS-2022",
+      "source": "OECD Economic Surveys: Romania 2024, figure based on Eurostat EU-LFS",
+      "source_url": "https://www.oecd.org/en/publications/oecd-economic-surveys-romania-2024_106b32c4-en.html",
+      "tier": "A1",
+      "territory": ["Romania", "Sud-Vest Oltenia", "Sud-Muntenia", "Centru"],
+      "scope": "national and NUTS2",
+      "period": "2022",
+      "population": "people aged 25-64; participation in formal/non-formal education or training during the four weeks before the EU-LFS survey",
+      "constructs": ["adult_learning_participation"],
+      "direct_measurement": true,
+      "measures": [
+        {"name": "adult_learning_participation_Romania", "measure_type": "rate", "value": 5.4, "unit": "percent"},
+        {"name": "adult_learning_participation_Sud_Vest_Oltenia", "measure_type": "rate", "value": 3.0, "unit": "percent"},
+        {"name": "adult_learning_participation_Sud_Muntenia", "measure_type": "rate", "value": 6.1, "unit": "percent"},
+        {"name": "adult_learning_participation_Centru", "measure_type": "rate", "value": 2.5, "unit": "percent"}
+      ],
+      "use": "official institutional freeze of a directly comparable regional adult-learning indicator; resolves the missing Sud-Muntenia regional baseline for this construct. It is not interchangeable with 12-month adult-learning indicators."
+    },
+    {
+      "id": "EV-EUROSTAT-MIRROR-ADULT-LEARNING-REGIONS-2025",
+      "source": "Employment Institute (IZ Bratislava) – Europe and its regions in numbers; source declared as Eurostat table trng_lfse_04",
+      "source_url": "https://www.iz.sk/en/projects/EU-indicators/life-long-learning-participation",
+      "tier": "B1_OFFICIAL_DATA_MIRROR",
+      "territory": ["Sud-Vest Oltenia", "Sud-Muntenia", "Centru"],
+      "scope": "NUTS2",
+      "period": "2025",
+      "population": "Eurostat trng_lfse_04 population/definition as transcribed by the institutional mirror",
+      "constructs": ["adult_learning_participation", "recent_regional_trend"],
+      "direct_measurement": true,
+      "measures": [
+        {"name": "adult_learning_participation_Sud_Vest_Oltenia", "measure_type": "rate", "value": 3.0, "unit": "percent"},
+        {"name": "adult_learning_participation_Sud_Muntenia", "measure_type": "rate", "value": 11.4, "unit": "percent"},
+        {"name": "adult_learning_participation_Centru", "measure_type": "rate", "value": 7.8, "unit": "percent"}
+      ],
+      "use": "recent corroborative trend evidence. Because the frozen page is an institutional mirror rather than Eurostat hosting, it does not replace the A1 2022 OECD/Eurostat freeze for provenance-sensitive claims; direct Eurostat API/binary capture remains desirable but nonblocking for the existence of a Sud-Muntenia regional value."
+    },
+    {
+      "id": "EV-OIRNV-STEP-LLL-CONSOLIDATED-GUIDE-2026-08-13",
+      "source": "OIR PECU Nord-Vest announcement linking directly to MIPE/mfe.gov.ro consolidated STEP-LLL package",
+      "source_url": "https://www.runv.ro/anunturi.html",
+      "official_binary_url": "https://mfe.gov.ro/wp-content/uploads/2026/08/8d05374378497f808ae1535b84671949.7z",
+      "tier": "A2_LINKS_A1_BINARY",
+      "territory": "Romania",
+      "scope": "call",
+      "period": "2026-08-13",
+      "constructs": ["call_identity", "source_version"],
+      "direct_measurement": false,
+      "facts": {
+        "guide_title": "STEP-LLL – Competențe pentru viitor: formare la locul de muncă și educația adulților în tehnologiile critice – Adulți",
+        "approval_order": "Ordinul ministrului investițiilor și proiectelor europene nr. 767/2026",
+        "consolidation_status": "variantă consolidată prin integrarea corrigendumului aprobat",
+        "package_type": "7Z",
+        "published": "2026-08-13"
+      },
+      "use": "confirms exact current guide identity and exposes a direct official MIPE package URL. Binary download/hash capture failed in this research environment, so the source-version blocker is narrowed but not closed."
+    },
+    {
+      "id": "EV-STEP-LLL-CORRIGENDUM-2026-08-24",
+      "source": "GrantPress report citing MIPE/AM PEO – corrigendum to STEP-LLL guide and updated Annex 4 financing contract",
+      "source_url": "https://grantpress.ro/2026/08/24/peo-corrigendum-la-ghidul-step-lll-pentru-formarea-adultilor-in-tehnologii-critice/",
+      "tier": "B1_CURRENT_SECONDARY_TO_OFFICIAL",
+      "territory": "Romania",
+      "scope": "call",
+      "period": "2026-08-24",
+      "constructs": ["source_version", "call_compliance"],
+      "direct_measurement": false,
+      "facts": {
+        "corrigendum_reported": true,
+        "annex_4_updated": true
+      },
+      "use": "version-control alert only. It establishes that a change was reported after the 13 August consolidated package, so final call-compliance QA must freeze the post-24-August official files rather than relying only on the 13-August package."
+    }
+  ],
+  "derived_checks": {
+    "planned_total_160_vs_age30_55_registered_unemployed_pool": {
+      "three_region_share_percent": 0.2197,
+      "regional_design_shares_percent": {
+        "Sud-Vest Oltenia_80_of_26388": 0.3032,
+        "Sud-Muntenia_40_of_25470": 0.1570,
+        "Centru_40_of_20966": 0.1908
+      },
+      "interpretation": "The planned volume is small relative to the conservative age-defined registered-unemployed administrative pool in every region. This is evidence of macro recruitment feasibility only; it cannot be used to infer relative need or to validate the 80/40/40 design as empirically optimal."
+    }
+  },
+  "status": "FROZEN"
+}
