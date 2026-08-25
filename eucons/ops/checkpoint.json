@@ -1,11 +1,11 @@
 {
   "product": "EUCONS_COMMERCIAL_OS",
   "schema_version": 2,
-  "updated_at": "2026-08-26T00:56:00+03:00",
-  "checkpoint_id": "EUCONS-CP-2026-08-26-007",
+  "updated_at": "2026-08-26T01:53:00+03:00",
+  "checkpoint_id": "EUCONS-CP-2026-08-26-008",
   "development_state": "IN_PROGRESS",
   "current_phase": "R06_PROSPECT_DISCOVERY_CLIENT_FINDER",
-  "current_unit": "R06-CF-ENGINE-001",
+  "current_unit": "R06-CF-SOURCE-ADAPTER-001",
   "previous_terminal_assessment": {
     "state": "BLOCKED_EXTERNAL_ONLY",
     "phase": "E29",
@@ -96,7 +96,8 @@
     "R03-SEA-001",
     "R04-JTBD-UX-001",
     "R05-INBOUND-001",
-    "R06-CF-CONTRACT-001"
+    "R06-CF-CONTRACT-001",
+    "R06-CF-ENGINE-001"
   ],
   "market_intelligence_result": {
     "state": "PASS",
@@ -109,12 +110,12 @@
       "MI-CAP-005 PROSPECT_RESEARCH_AND_ACTION_PACK"
     ]
   },
-  "next_action": "Implement deterministic Client Finder record validation, organization dedupe, source versioning, signal expiry/state transitions and a synthetic NON_EVIDENCE research queue without production collection or external contact.",
+  "next_action": "Implement a provider-neutral lawful-public-source adapter boundary and first dry-run adapter that converts official/public observations into Client Finder records with provenance, rate/freshness controls and no production persistence or personal-contact extraction.",
   "terminal_target": "PRODUCTION_READY",
   "owner_terminal_target": "PRODUCTION_GRADE_EUCONS_COMMERCIAL_OS",
   "external_handoff_allowed_only_after": "E28",
   "blocking_reason": null,
-  "last_good_checkpoint": "EUCONS-CP-2026-08-26-007",
+  "last_good_checkpoint": "EUCONS-CP-2026-08-26-008",
   "evidence": [
     "eucons/ops/EUCONS_REBASELINE_2026-08-25.json",
     "eucons/market_intelligence/EUCONS_MARKET_INTELLIGENCE_2026-08-25.json",
@@ -156,7 +157,11 @@
     "eucons/validation/test_inbound_runtime_fail_closed.py",
     "eucons/prospects/client_finder_contract.json",
     "eucons/validation/validate_client_finder_contract.py",
-    "eucons/validation/test_client_finder_contract_fail_closed.py"
+    "eucons/validation/test_client_finder_contract_fail_closed.py",
+    "eucons/prospects/client_finder_engine.py",
+    "eucons/prospects/fixtures/client_finder_queue_non_evidence.json",
+    "eucons/validation/validate_client_finder_engine.py",
+    "eucons/validation/test_client_finder_engine_fail_closed.py"
   ],
   "autonomy": {
     "enabled": true,
@@ -241,5 +246,24 @@
     "production_prospect_records": 0,
     "maximum_external_state": "RESEARCH_READY",
     "autonomous_contact": false
+  },
+  "client_finder_engine_result": {
+    "state": "PASS",
+    "synthetic_observations": 3,
+    "deduplicated_organizations": 2,
+    "source_version_history": "PASS",
+    "signal_version_history": "PASS",
+    "idempotent_replay": "NOOP",
+    "state_transitions": [
+      "READY_FOR_SCORING",
+      "HOLD_STALE",
+      "HOLD_CONFLICT",
+      "HOLD_IDENTITY_AMBIGUOUS",
+      "SUPPRESSED"
+    ],
+    "audit_events": "PII_FREE",
+    "persistence": "ATOMIC_OUTSIDE_REPOSITORY_ONLY",
+    "production_prospect_records": 0,
+    "external_contact": false
   }
 }
