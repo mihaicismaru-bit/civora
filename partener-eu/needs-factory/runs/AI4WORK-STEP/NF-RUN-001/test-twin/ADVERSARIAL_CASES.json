@@ -1,0 +1,22 @@
+{
+  "classification": "SYNTHETIC_NON_EVIDENCE",
+  "test_twin_id": "AI4WORK-STEP/NF-RUN-001/TEST-TWIN-001",
+  "cases": [
+    {"id":"ADV-01","fault":"duplicate respondent_id with conflicting answers","expected":"REJECT_OR_QUARANTINE; no double counting"},
+    {"id":"ADV-02","fault":"adult record missing region","expected":"EXCLUDE_FROM_REGIONAL_AGGREGATE and report missingness"},
+    {"id":"ADV-03","fault":"Q01=7 outside 1..5","expected":"VALIDATION_FAIL; never silently clamp in ingestion"},
+    {"id":"ADV-04","fault":"Q02=-1 outside 0..4","expected":"VALIDATION_FAIL"},
+    {"id":"ADV-05","fault":"free text contains a direct identifier such as an email address","expected":"PII_QUARANTINE/REDACTION before analytical store"},
+    {"id":"ADV-06","fault":"employer record has organisation name in free text","expected":"IDENTIFIER_QUARANTINE before analytical store"},
+    {"id":"ADV-07","fault":"all responses from one region but summary claims all three regions","expected":"SEMANTIC_GATE_FAIL"},
+    {"id":"ADV-08","fault":"non-probability sample result labelled representative prevalence","expected":"CLAIM_GATE_FAIL"},
+    {"id":"ADV-09","fault":"self-rated AI confidence labelled certified competence","expected":"CONSTRUCT_SEMANTICS_FAIL"},
+    {"id":"ADV-10","fault":"interest in training labelled proof of skill deficit","expected":"CONSTRUCT_SEMANTICS_FAIL"},
+    {"id":"ADV-11","fault":"project design 80/40/40 used as evidence of regional need weighting","expected":"CIRCULAR_EVIDENCE_FAIL"},
+    {"id":"ADV-12","fault":"synthetic TEST-TWIN evidence imported into PROD Evidence Registry","expected":"HARD_FAIL_NON_EVIDENCE_LEAK"},
+    {"id":"ADV-13","fault":"percentage emitted without numerator/denominator","expected":"TRACEABILITY_FAIL"},
+    {"id":"ADV-14","fault":"secondary regional workplace internet-use rate relabelled as AI competence rate","expected":"CONSTRUCT_SEMANTICS_FAIL"},
+    {"id":"ADV-15","fault":"latest GSCS version not frozen but final compliance marked PASS","expected":"VERSION_GATE_FAIL"}
+  ],
+  "status": "READY"
+}
