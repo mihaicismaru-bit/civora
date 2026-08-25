@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema_version": "nf.primary_payload.v0.1",
+  "run_id": "AI4WORK-STEP/NF-RUN-001",
+  "common": {
+    "additionalProperties": false,
+    "regions": ["Sud-Vest Oltenia","Sud-Muntenia","Centru"]
+  },
+  "adult_payload": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["region","status","age_band","job_family","Q01","Q02","Q03","Q04","Q05","Q06","Q07","Q08","Q09","Q10_digital","Q10_AI","Q10_verification","Q10_privacy","Q10_workflow","Q11","privacy_ack"],
+    "properties": {
+      "region": {"enum":["Sud-Vest Oltenia","Sud-Muntenia","Centru"]},
+      "status": {"enum":["șomer înregistrat","persoană ocupată potențial eligibilă","alt statut / de verificat"]},
+      "age_band": {"enum":["30-39","40-49","50-59","60+"]},
+      "job_family": {"type":"string","minLength":1,"maxLength":120},
+      "Q01": {"type":"integer","minimum":1,"maximum":5},
+      "Q02": {"type":"integer","minimum":0,"maximum":4},
+      "Q03": {"type":"integer","minimum":1,"maximum":5},
+      "Q04": {"type":"integer","minimum":1,"maximum":5},
+      "Q05": {"type":"integer","minimum":1,"maximum":5},
+      "Q06": {"type":"integer","minimum":1,"maximum":5},
+      "Q07": {"enum":["da","nu"]},
+      "Q07_topic": {"type":"string","maxLength":160},
+      "Q08": {"type":"array","uniqueItems":true,"maxItems":3,"items":{"enum":["costul","lipsa timpului","program incompatibil","lipsa unei oferte relevante","distanța/deplasarea","lipsa informației","lipsa sprijinului angajatorului","nu am considerat necesar","altul"]}},
+      "Q08_other": {"type":"string","maxLength":160},
+      "Q09": {"type":"array","uniqueItems":true,"items":{"enum":["rezultate factual greșite","rezultate greu de verificat","probleme privind datele/confidențialitatea","nu am știut cum să formulez cererea","integrare dificilă în aplicațiile/procesele folosite","nu am putut evalua calitatea rezultatului","nu am întâlnit probleme","nu am folosit AI"]}},
+      "Q10_digital": {"type":"integer","minimum":1,"maximum":5},
+      "Q10_AI": {"type":"integer","minimum":1,"maximum":5},
+      "Q10_verification": {"type":"integer","minimum":1,"maximum":5},
+      "Q10_privacy": {"type":"integer","minimum":1,"maximum":5},
+      "Q10_workflow": {"type":"integer","minimum":1,"maximum":5},
+      "Q11": {"enum":["adaptare mai bună la postul actual","acces la un loc de muncă nou","schimbare de ocupație","productivitate/calitate mai bună","altul"]},
+      "Q11_other": {"type":"string","maxLength":160},
+      "Q12": {"type":"string","maxLength":600},
+      "privacy_ack": {"const":true}
+    }
+  },
+  "employer_payload": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["region","sector","size","respondent_type","E01","E03_prompt","E03_verification","E03_privacy","E03_limits","E03_integration","E03_workflow","E03_general_digital","E04","E05","E06","E07","E08","E10","privacy_ack"],
+    "properties": {
+      "region": {"enum":["Sud-Vest Oltenia","Sud-Muntenia","Centru"]},
+      "sector": {"type":"string","minLength":1,"maxLength":120},
+      "size": {"enum":["1-9","10-49","50-249","250+"]},
+      "respondent_type": {"enum":["management","HR","operațional/tehnic","altul"]},
+      "E01": {"enum":["da, în producție/activitate curentă","pilot/test","intenție în următoarele 12 luni","nu","nu știu"]},
+      "E02": {"type":"array","uniqueItems":true,"items":{"enum":["redactare/comunicare","analiză date","suport clienți","marketing/vânzări","programare/IT","operațiuni/producție","HR","documente/compliance","automatizare fluxuri","altul"]}},
+      "E03_prompt": {"type":"integer","minimum":1,"maximum":5},
+      "E03_verification": {"type":"integer","minimum":1,"maximum":5},
+      "E03_privacy": {"type":"integer","minimum":1,"maximum":5},
+      "E03_limits": {"type":"integer","minimum":1,"maximum":5},
+      "E03_integration": {"type":"integer","minimum":1,"maximum":5},
+      "E03_workflow": {"type":"integer","minimum":1,"maximum":5},
+      "E03_general_digital": {"type":"integer","minimum":1,"maximum":5},
+      "E04": {"enum":["da","nu","nu este relevant"]},
+      "E04_detail": {"type":"string","maxLength":600},
+      "E05": {"enum":["da, intern","da, extern","ambele","nu"]},
+      "E06": {"type":"array","uniqueItems":true,"maxItems":3,"items":{"enum":["cost","timp disponibil","lipsa furnizorilor/ofertei potrivite","conținut prea general","schimbare tehnologică rapidă","dificultate de măsurare a rezultatelor","lipsă interes intern","lipsa unei politici clare privind AI","altul"]}},
+      "E07": {"enum":["semnificativ","moderat","puțin","deloc","nu putem estima"]},
+      "E08": {"type":"array","uniqueItems":true,"maxItems":5,"items":{"enum":["formularea și rafinarea instrucțiunilor","verificarea factuală/calității","analiză și interpretare de date","protecția datelor","securitate digitală","automatizarea unor pași de lucru","integrarea AI în aplicații/procese","documentarea și trasabilitatea rezultatelor","supraveghere umană/decizie","altul"]}},
+      "E09": {"type":"string","maxLength":600},
+      "E10": {"enum":["da","posibil","nu"]},
+      "privacy_ack": {"const":true}
+    }
+  },
+  "server_enrichment": {
+    "allowed": ["response_id","received_at_utc","schema_version","form_version"],
+    "forbidden_in_analytical_export": ["ip","user_agent","cookie_id","login_id","email","phone","name","organisation_name","CUI"]
+  },
+  "status": "READY_FOR_IMPLEMENTATION"
+}
