@@ -31,22 +31,27 @@ def main() -> None:
     assert result["canonical_origin"] == "https://eucons.ro"
     assert result["production_indexing_enabled"] is False
     assert result["preview_robots"] == "noindex,nofollow"
-    assert result["summary"]["core_routes"] == 18
+    expected_core = len(ia["core_routes"])
+    expected_active = expected_core + 8
+    assert result["summary"]["core_routes"] == expected_core
     assert result["summary"]["service_routes"] == 8
-    assert result["summary"]["active_routes"] == 26
-    assert result["summary"]["sitemap_entries"] == 26
+    assert result["summary"]["active_routes"] == expected_active
+    assert result["summary"]["sitemap_entries"] == expected_active
     assert result["summary"]["orphan_routes"] == 0
     assert result["orphans"] == []
     assert len(result["conditional_families"]) == 5
     assert all(row["state"] == "CONDITIONAL_HOLD_UNTIL_ROUTE_EXISTS" for row in result["conditional_families"])
 
     routes = result["routes"]
-    assert len({row["path"] for row in routes}) == 26
-    assert len({row["canonical"] for row in routes}) == 26
-    assert len({row["title"] for row in routes}) == 26
+    assert len({row["path"] for row in routes}) == expected_active
+    assert len({row["canonical"] for row in routes}) == expected_active
+    assert len({row["title"] for row in routes}) == expected_active
     assert all(row["canonical"].startswith("https://eucons.ro/") or row["canonical"] == "https://eucons.ro/" for row in routes)
     assert all(row["description"].strip() for row in routes)
     assert all(row["schema"]["@context"] == "https://schema.org" for row in routes)
+    journey_routes = [row for row in routes if row["surface"] == "JTBD_JOURNEY"]
+    assert len(journey_routes) == 4
+    assert all(row["schema"]["@type"] == "WebPage" for row in journey_routes)
 
     service_routes = [row for row in routes if row["surface"] == "SERVICE"]
     assert len(service_routes) == 8
@@ -56,7 +61,8 @@ def main() -> None:
     home = next(row for row in routes if row["route_id"] == "home")
     assert home["schema"]["@type"] == "WebSite"
     assert "/servicii/" in result["internal_links"]["/"]
-    assert "/evaluare-proiect/" in result["internal_links"]["/"]
+    assert "/verifica-proiectul/" in result["internal_links"]["/"]
+    assert "/proiect-in-implementare/" in result["internal_links"]["/"]
     assert all(result["incoming_link_counts"][row["path"]] > 0 for row in routes if row["path"] != "/")
 
     expected_clusters = {"services", "funding", "audiences", "authority", "trust"}

@@ -39,7 +39,7 @@ def main() -> None:
         pages = builder.build_site(build_dir)
         receipt = preview.build_preview_receipt(build_dir, contract)
 
-        if receipt["static"]["route_count"] != len(pages) or len(pages) < 26:
+        if receipt["static"]["route_count"] != len(pages) or len(pages) < contract["preview"]["minimum_route_count"]:
             raise SystemExit("E25 complete route build mismatch")
         if receipt["http"]["probe_count"] != len(pages) + 3 or receipt["http"]["all_http_200"] is not True:
             raise SystemExit("E25 local HTTP smoke coverage mismatch")

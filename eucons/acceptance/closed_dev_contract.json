@@ -5,7 +5,34 @@
   "target_state": "BLOCKED_EXTERNAL_ONLY",
   "production_side_effects_enabled": false,
   "required_completed_phases": [
-    "E00","E01","E02","E03","E04","E05","E06","E07","E08","E09","E10","E11","E12","E13","E14","E15","E16","E17","E18","E19","E20","E21","E22","E23","E24","E25","E26","E27"
+    "E00",
+    "E01",
+    "E02",
+    "E03",
+    "E04",
+    "E05",
+    "E06",
+    "E07",
+    "E08",
+    "E09",
+    "E10",
+    "E11",
+    "E12",
+    "E13",
+    "E14",
+    "E15",
+    "E16",
+    "E17",
+    "E18",
+    "E19",
+    "E20",
+    "E21",
+    "E22",
+    "E23",
+    "E24",
+    "E25",
+    "E26",
+    "E27"
   ],
   "minimum_public_content": {
     "services": 8,
@@ -15,8 +42,13 @@
   "production_build": {
     "contract": "eucons/deployment/production_build_contract.json",
     "builder": "eucons/deployment/build_production_ready.py",
-    "expected_pages": 26,
-    "required_files": ["robots.txt","sitemap.xml","assets/eucons.css","assets/forms.js"],
+    "expected_pages": 30,
+    "required_files": [
+      "robots.txt",
+      "sitemap.xml",
+      "assets/eucons.css",
+      "assets/forms.js"
+    ],
     "required_robots_meta": "index,follow,max-image-preview:large",
     "forbidden_public_phrases": [
       "Versiune de dezvoltare",
@@ -28,13 +60,24 @@
   },
   "external_handoff": {
     "manifest": "eucons/deployment/external_handoff_manifest.json",
-    "allowed_ids": ["domain_and_hosting","linkedin","facebook","commercial_mailbox"],
-    "allowed_states": ["OWNER_AUTHORIZATION_REQUIRED","AUTHORIZED_AND_VALIDATED"],
+    "allowed_ids": [
+      "domain_and_hosting",
+      "linkedin",
+      "facebook",
+      "commercial_mailbox"
+    ],
+    "allowed_states": [
+      "OWNER_AUTHORIZATION_REQUIRED",
+      "AUTHORIZED_AND_VALIDATED"
+    ],
     "pre_authorization_state": "OWNER_AUTHORIZATION_REQUIRED",
     "validated_state": "AUTHORIZED_AND_VALIDATED",
     "validated_receipt_required": true,
     "validated_receipt_phase": "E29",
-    "validated_receipt_statuses": ["PASS","PASS_EXTERNAL_BINDING"],
+    "validated_receipt_statuses": [
+      "PASS",
+      "PASS_EXTERNAL_BINDING"
+    ],
     "owner_development_actions_required": false
   },
   "required_runtime_contract": "eucons/deployment/runtime_activation_contract.json",

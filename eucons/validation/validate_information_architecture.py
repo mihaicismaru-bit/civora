@@ -64,7 +64,8 @@ def validate_information_architecture(ia, services, commercial, people, cases):
             fail(f"path_policy.{key} must be true")
 
     required_core_ids = {
-        "home", "services_index", "funding_index", "companies", "public_authorities", "ngos",
+        "home", "services_index", "funding_index", "funding_fit", "project_review",
+        "implementation_help", "recovery_help", "companies", "public_authorities", "ngos",
         "projects_index", "team_index", "expertise", "guides_index", "articles_index", "resources",
         "about", "project_evaluation", "request_offer", "contact", "terms", "privacy"
     }
@@ -87,6 +88,8 @@ def validate_information_architecture(ia, services, commercial, people, cases):
             audience_id = require_text(route, "audience_id", f"core route {route_id}")
             if audience_id not in audience_ids:
                 fail(f"core route {route_id} references unknown audience {audience_id}")
+        if route.get("surface") == "JTBD_JOURNEY":
+            require_text(route, "journey_id", f"core route {route_id}")
         core_by_id[route_id] = route
     if set(core_by_id) != required_core_ids:
         fail(f"core route set mismatch; missing={sorted(required_core_ids-set(core_by_id))}, extra={sorted(set(core_by_id)-required_core_ids)}")

@@ -1,11 +1,11 @@
 {
   "product": "EUCONS_COMMERCIAL_OS",
   "schema_version": 2,
-  "updated_at": "2026-08-25T21:55:00+03:00",
-  "checkpoint_id": "EUCONS-CP-2026-08-25-004",
+  "updated_at": "2026-08-25T22:52:00+03:00",
+  "checkpoint_id": "EUCONS-CP-2026-08-25-005",
   "development_state": "IN_PROGRESS",
-  "current_phase": "R04_JOB_TO_BE_DONE_UX",
-  "current_unit": "R04-JTBD-UX-001",
+  "current_phase": "R05_INBOUND_RUNTIME",
+  "current_unit": "R05-INBOUND-001",
   "previous_terminal_assessment": {
     "state": "BLOCKED_EXTERNAL_ONLY",
     "phase": "E29",
@@ -93,7 +93,8 @@
     "R00_REBASE_AUDIT",
     "R01-MI-001",
     "R02-CDM-001",
-    "R03-SEA-001"
+    "R03-SEA-001",
+    "R04-JTBD-UX-001"
   ],
   "market_intelligence_result": {
     "state": "PASS",
@@ -106,12 +107,12 @@
       "MI-CAP-005 PROSPECT_RESEARCH_AND_ACTION_PACK"
     ]
   },
-  "next_action": "Rebuild priority public journeys around R02 jobs and R03 proof rules: funding fit, project evaluation, post-award implementation/recovery, relevant evidence, progressive CTA and transparent next step.",
+  "next_action": "Implement the validated progressive journey fields as a provider-neutral inbound runtime with consent/purpose separation, data minimization, dedupe, spam controls, deterministic recovery and useful fail-closed preliminary next steps.",
   "terminal_target": "PRODUCTION_READY",
   "owner_terminal_target": "PRODUCTION_GRADE_EUCONS_COMMERCIAL_OS",
   "external_handoff_allowed_only_after": "E28",
   "blocking_reason": null,
-  "last_good_checkpoint": "EUCONS-CP-2026-08-25-004",
+  "last_good_checkpoint": "EUCONS-CP-2026-08-25-005",
   "evidence": [
     "eucons/ops/EUCONS_REBASELINE_2026-08-25.json",
     "eucons/market_intelligence/EUCONS_MARKET_INTELLIGENCE_2026-08-25.json",
@@ -139,7 +140,12 @@
     "eucons/evidence/service_proof_architecture.json",
     "eucons/evidence/portfolio_candidate_registry.json",
     "eucons/validation/validate_service_proof_architecture.py",
-    "eucons/validation/test_service_proof_architecture_fail_closed.py"
+    "eucons/validation/test_service_proof_architecture_fail_closed.py",
+    "eucons/web/jtbd_ux_contract.json",
+    "eucons/web/information_architecture.json",
+    "eucons/web/build_public_site.py",
+    "eucons/validation/validate_jtbd_ux.py",
+    "eucons/validation/test_jtbd_ux_fail_closed.py"
   ],
   "autonomy": {
     "enabled": true,
@@ -172,5 +178,15 @@
     "public_verified_organizations": 1,
     "needs_evidence_organizations": 3,
     "strategy": "Place historical proof only beside jobs whose service mapping overlaps the validated case. Keep CCI Vâlcea and both foundations as evidence queues until relationship, role, result and publicability are independently proven."
+  },
+  "jtbd_ux_result": {
+    "state": "PASS",
+    "priority_journeys": 4,
+    "new_decision_routes": 4,
+    "model": "JOB_FIRST_WITH_SECONDARY_SERVICE_DISCOVERY",
+    "proof_rule": "PUBLISHABLE_AND_SERVICE_RELEVANT_ONLY",
+    "eligibility_rule": "PRELIMINARY_MATCH_IS_NOT_CONFIRMED_ELIGIBILITY",
+    "data_collection": "DISABLED_UNTIL_R05_RUNTIME",
+    "strategy": "Start from the visitor's decision point—funding fit, project review, implementation control or recovery—then reveal only the relevant services, evidence, unknowns and next step."
   }
 }
