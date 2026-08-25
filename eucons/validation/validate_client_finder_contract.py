@@ -68,6 +68,11 @@ def validate_contract(contract: dict[str, Any]) -> dict[str, int]:
         raise ValueError("privacy boundary incomplete")
     if privacy.get("private_database_enrichment_forbidden") is not True:
         raise ValueError("private enrichment must be forbidden")
+    identity_policy = contract.get("organization_identity", {}).get("deterministic_key", {})
+    if identity_policy.get("ambiguous_result") != "HOLD_IDENTITY_AMBIGUOUS":
+        raise ValueError("ambiguous identity must hold")
+    if "fuzzy" not in str(identity_policy.get("rule") or "").casefold():
+        raise ValueError("fuzzy name-only merge prohibition missing")
 
     source = contract.get("source_contract") or {}
     allowed = set(source.get("allowed_types") or [])
@@ -81,13 +86,9 @@ def validate_contract(contract: dict[str, Any]) -> dict[str, int]:
     services_doc = load_json(EUCONS / "services" / "service_registry.json")
     demand_doc = load_json(EUCONS / "market_intelligence" / "EUCONS_CUSTOMER_DEMAND_MODEL_2026-08-25.json")
     service_ids = {row["id"] for row in services_doc.get("services") or []}
-    job_ids = {
-        job["id"]
-        for segment in demand_doc.get("customer_segments") or []
-        for job in segment.get("jobs_to_be_done") or []
-    }
+    job_ids = {row["id"] for row in demand_doc.get("demand_matrix") or []}
     if not job_ids:
-        job_ids = {row["id"] for row in demand_doc.get("jobs_to_be_done") or []}
+        raise ValueError("customer demand model has no jobs")
 
     signals = contract.get("signal_taxonomy") or []
     signal_ids = [row.get("id") for row in signals]
