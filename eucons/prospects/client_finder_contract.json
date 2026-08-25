@@ -1,0 +1,389 @@
+{
+  "schema_version": 1,
+  "id": "R06-CF-CONTRACT-001",
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "R06_PROSPECT_DISCOVERY_CLIENT_FINDER",
+  "status": "CANONICAL",
+  "checked_at": "2026-08-26T00:49:00+03:00",
+  "purpose": "Define an organization-first, evidence-bound prospect record that turns lawful public signals into an auditable research queue without asserting eligibility, inferring sensitive traits, collecting private-person data, or contacting anyone autonomously.",
+  "canonical_dependencies": {
+    "customer_demand_model": "eucons/market_intelligence/EUCONS_CUSTOMER_DEMAND_MODEL_2026-08-25.json",
+    "service_registry": "eucons/services/service_registry.json",
+    "service_proof_architecture": "eucons/evidence/service_proof_architecture.json",
+    "opportunity_bridge": "eucons/opportunities/bridge_contract.json",
+    "opportunity_matching": "eucons/opportunities/matching_contract.json",
+    "privacy_security": "eucons/security/privacy_security_contract.json"
+  },
+  "truth_model": {
+    "classes": [
+      "FACT",
+      "INFERENCE",
+      "UNKNOWN",
+      "CONFLICT"
+    ],
+    "fact_rule": "Every FACT requires at least one source_ref. A material funding, eligibility, budget, deadline, indicator or obligation fact requires an OFFICIAL source.",
+    "inference_rule": "Every INFERENCE requires one or more supporting FACT assertion IDs, a bounded confidence value and an explicit verification question. It may never state eligibility, award probability or purchase intent as fact.",
+    "unknown_rule": "Missing qualification information remains UNKNOWN and becomes a verification question.",
+    "conflict_rule": "Conflicting source statements remain CONFLICT; the affected field is held from scoring and action preparation until resolved.",
+    "public_claim_rule": "Client Finder records are internal research objects. They do not become public claims or case-study evidence."
+  },
+  "organization_identity": {
+    "required": [
+      "legal_name",
+      "country_code",
+      "organization_type"
+    ],
+    "allowed": [
+      "legal_name",
+      "country_code",
+      "organization_type",
+      "public_registration_id",
+      "official_domain",
+      "region",
+      "locality",
+      "public_activity_codes",
+      "official_profile_url"
+    ],
+    "organization_types": [
+      "COMPANY",
+      "PUBLIC_AUTHORITY",
+      "PUBLIC_INSTITUTION",
+      "NGO",
+      "SOCIAL_ECONOMY",
+      "TRAINING_PROVIDER",
+      "RURAL_OPERATOR",
+      "OTHER_ORGANIZATION"
+    ],
+    "deterministic_key": {
+      "preferred": "SHA256(country_code + public_registration_id)",
+      "fallback": "SHA256(country_code + normalized_legal_name + official_domain + region)",
+      "ambiguous_result": "HOLD_IDENTITY_AMBIGUOUS",
+      "rule": "Fallback is allowed only when official_domain and region are both present; fuzzy name-only merging is forbidden."
+    }
+  },
+  "privacy_boundary": {
+    "mode": "ORGANIZATION_FIRST",
+    "allowed_public_business_surfaces": [
+      "organization_official_website",
+      "official_public_registry",
+      "official_procurement_profile",
+      "official_beneficiary_list",
+      "role_based_business_contact_page"
+    ],
+    "person_level_fields_forbidden": [
+      "person_name",
+      "personal_email",
+      "personal_phone",
+      "home_address",
+      "personal_social_profile",
+      "personal_identifier",
+      "date_of_birth",
+      "private_contact"
+    ],
+    "sensitive_or_protected_inference_forbidden": [
+      "health",
+      "ethnicity",
+      "religion",
+      "political_opinion",
+      "trade_union_membership",
+      "sexual_orientation",
+      "biometric_identity",
+      "criminal_history",
+      "household_or_family_status"
+    ],
+    "role_contact_rule": "R06 may retain only a URL to a public role-based business contact surface. Contact extraction and lawful-basis assessment belong to R08.",
+    "visitor_deanonymization_forbidden": true,
+    "private_database_enrichment_forbidden": true
+  },
+  "source_contract": {
+    "required_fields": [
+      "source_id",
+      "source_type",
+      "authority",
+      "url",
+      "title",
+      "retrieved_at",
+      "content_hash",
+      "official",
+      "public_access"
+    ],
+    "allowed_types": [
+      "OFFICIAL_FUNDING_SOURCE",
+      "OFFICIAL_PUBLIC_PROCUREMENT",
+      "OFFICIAL_BENEFICIARY_OR_AWARD_LIST",
+      "OFFICIAL_PUBLIC_STRATEGY_OR_PLAN",
+      "OFFICIAL_PUBLIC_REGISTRY",
+      "ORGANIZATION_OFFICIAL_SITE",
+      "ORGANIZATION_OFFICIAL_ANNOUNCEMENT",
+      "PUBLIC_NEWS_DISCOVERY",
+      "PARTENER_DISCOVERY_READ_ONLY"
+    ],
+    "official_types": [
+      "OFFICIAL_FUNDING_SOURCE",
+      "OFFICIAL_PUBLIC_PROCUREMENT",
+      "OFFICIAL_BENEFICIARY_OR_AWARD_LIST",
+      "OFFICIAL_PUBLIC_STRATEGY_OR_PLAN",
+      "OFFICIAL_PUBLIC_REGISTRY"
+    ],
+    "discovery_only_types": [
+      "PUBLIC_NEWS_DISCOVERY",
+      "PARTENER_DISCOVERY_READ_ONLY"
+    ],
+    "material_funding_authority_rule": "Discovery-only sources may locate a candidate, but material funding or eligibility facts require a linked OFFICIAL source before the signal is actionable.",
+    "retrieval_rule": "Automated collection must respect public access controls, applicable terms, robots directives where relevant, rate limits and source-specific reuse constraints. Authentication bypass and private areas are forbidden.",
+    "provenance_rule": "Store URL, authority, retrieval timestamp and content hash; preserve quoted snippets only when needed and within reuse constraints."
+  },
+  "signal_taxonomy": [
+    {
+      "id": "SIG-FUNDING-FIT",
+      "label": "Verified funding opportunity alignment",
+      "priority_lane": "P0",
+      "fact_basis": [
+        "official funding source",
+        "verified PARTENER projection"
+      ],
+      "job_ids": [
+        "JTBD-SME-01",
+        "JTBD-SME-02",
+        "JTBD-PUB-01",
+        "JTBD-NGO-01",
+        "JTBD-TRN-01",
+        "JTBD-RUR-01"
+      ],
+      "service_ids": [
+        "funding_strategy_and_eligibility",
+        "application_design_and_submission"
+      ],
+      "default_reverify_days": 7
+    },
+    {
+      "id": "SIG-AWARDED-PROJECT",
+      "label": "Awarded or contracted project requiring implementation capacity",
+      "priority_lane": "P0",
+      "fact_basis": [
+        "official beneficiary or award list"
+      ],
+      "job_ids": [
+        "JTBD-BEN-01",
+        "JTBD-BEN-02",
+        "JTBD-BEN-03",
+        "JTBD-PUB-03",
+        "JTBD-TRN-02",
+        "JTBD-RUR-02"
+      ],
+      "service_ids": [
+        "implementation_and_reporting",
+        "procurement_support",
+        "financial_management_and_reimbursement",
+        "monitoring_and_compliance",
+        "project_management_capacity"
+      ],
+      "default_reverify_days": 30
+    },
+    {
+      "id": "SIG-PROCUREMENT-NEED",
+      "label": "Public procurement or advance notice for relevant advisory work",
+      "priority_lane": "P0",
+      "fact_basis": [
+        "official public procurement"
+      ],
+      "job_ids": [
+        "JTBD-PUB-02",
+        "JTBD-PUB-03",
+        "JTBD-BEN-02"
+      ],
+      "service_ids": [
+        "procurement_support",
+        "implementation_and_reporting",
+        "project_management_capacity"
+      ],
+      "default_reverify_days": 7
+    },
+    {
+      "id": "SIG-IMPLEMENTATION-FRICTION",
+      "label": "Publicly evidenced implementation, reporting or correction need",
+      "priority_lane": "P0",
+      "fact_basis": [
+        "official notice, decision or organization announcement"
+      ],
+      "job_ids": [
+        "JTBD-BEN-01",
+        "JTBD-BEN-02",
+        "JTBD-BEN-03"
+      ],
+      "service_ids": [
+        "implementation_and_reporting",
+        "financial_management_and_reimbursement",
+        "project_recovery_and_corrections",
+        "monitoring_and_compliance"
+      ],
+      "default_reverify_days": 14
+    },
+    {
+      "id": "SIG-INVESTMENT-ANNOUNCEMENT",
+      "label": "Organization-announced investment or expansion",
+      "priority_lane": "P1",
+      "fact_basis": [
+        "organization official announcement"
+      ],
+      "job_ids": [
+        "JTBD-SME-01",
+        "JTBD-SME-02",
+        "JTBD-PUB-01",
+        "JTBD-NGO-01",
+        "JTBD-RUR-01"
+      ],
+      "service_ids": [
+        "funding_strategy_and_eligibility",
+        "application_design_and_submission",
+        "project_management_capacity"
+      ],
+      "default_reverify_days": 30
+    },
+    {
+      "id": "SIG-DEVELOPMENT-PLAN",
+      "label": "Published development plan or investment pipeline",
+      "priority_lane": "P1",
+      "fact_basis": [
+        "official public strategy or plan"
+      ],
+      "job_ids": [
+        "JTBD-PUB-01",
+        "JTBD-PUB-02",
+        "JTBD-REP-01"
+      ],
+      "service_ids": [
+        "funding_strategy_and_eligibility",
+        "application_design_and_submission",
+        "project_management_capacity"
+      ],
+      "default_reverify_days": 90
+    },
+    {
+      "id": "SIG-WORKFORCE-TRAINING",
+      "label": "Publicly evidenced workforce or training need",
+      "priority_lane": "P1",
+      "fact_basis": [
+        "official plan, procurement or organization announcement"
+      ],
+      "job_ids": [
+        "JTBD-TRN-01",
+        "JTBD-TRN-02",
+        "JTBD-SME-03"
+      ],
+      "service_ids": [
+        "funding_strategy_and_eligibility",
+        "implementation_and_reporting",
+        "monitoring_and_compliance"
+      ],
+      "default_reverify_days": 30
+    },
+    {
+      "id": "SIG-PROJECT-HISTORY",
+      "label": "Verified funded-project history relevant to a future service conversation",
+      "priority_lane": "P2",
+      "fact_basis": [
+        "official beneficiary or EU project database"
+      ],
+      "job_ids": [
+        "JTBD-REP-01",
+        "JTBD-BEN-01"
+      ],
+      "service_ids": [
+        "monitoring_and_compliance",
+        "project_management_capacity"
+      ],
+      "default_reverify_days": 90
+    }
+  ],
+  "prospect_record": {
+    "required": [
+      "prospect_id",
+      "organization",
+      "sources",
+      "assertions",
+      "signals",
+      "state",
+      "created_at",
+      "updated_at",
+      "expires_at",
+      "suppression"
+    ],
+    "states": [
+      "DISCOVERED",
+      "EVIDENCE_COMPLETE",
+      "READY_FOR_SCORING",
+      "HOLD_SOURCE_STATE",
+      "HOLD_STALE",
+      "HOLD_CONFLICT",
+      "HOLD_IDENTITY_AMBIGUOUS",
+      "SUPPRESSED"
+    ],
+    "signal_required_fields": [
+      "signal_id",
+      "signal_type",
+      "source_refs",
+      "observed_at",
+      "expires_at",
+      "fact_assertion_ids",
+      "confidence",
+      "why_now"
+    ],
+    "confidence_range": [
+      0,
+      1
+    ],
+    "expiry_rule": "Every active signal and prospect requires expires_at. A signal is inactive when now >= expires_at or a linked source is stale/held.",
+    "suppression_rule": "SUPPRESSED records cannot be scored, prepared for outreach or reactivated without a documented review event.",
+    "dedupe_rule": "One deterministic organization key; repeated source observations append provenance and refresh only after validation. Same source_id with a different content_hash is a new version, not silent overwrite.",
+    "storage_rule": "No real prospect records are committed to the public repository. Synthetic fixtures must be labelled NON_EVIDENCE."
+  },
+  "qualification_gate": {
+    "ready_for_scoring_requires": [
+      "deterministic organization identity not ambiguous",
+      "at least one unexpired signal",
+      "all signal FACT assertions have source references",
+      "material funding facts have an official source",
+      "no unresolved conflict on organization identity or why-now basis",
+      "at least one canonical job_id and service_id",
+      "suppression state is clear"
+    ],
+    "score_semantics": "COMMERCIAL_RESEARCH_PRIORITY_NOT_ELIGIBILITY_OR_PURCHASE_INTENT",
+    "eligibility_state": "NOT_ASSESSED",
+    "next_phase": "R06-CF-ENGINE-001"
+  },
+  "external_action_gate": {
+    "autonomous_send": false,
+    "autonomous_call": false,
+    "autonomous_social_dm": false,
+    "autonomous_offer": false,
+    "autonomous_price": false,
+    "maximum_state_from_r06": "RESEARCH_READY",
+    "downstream_outreach_state": "READY_FOR_APPROVAL",
+    "human_approval_required": true
+  },
+  "canonical_public_sources": [
+    {
+      "id": "AFIR",
+      "url": "https://www.afir.ro/",
+      "role": "official rural funding and beneficiary discovery"
+    },
+    {
+      "id": "SEAP",
+      "url": "https://www.e-licitatie.ro/",
+      "role": "official public procurement discovery"
+    },
+    {
+      "id": "EU_FUNDING_TENDERS",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/",
+      "role": "official direct-EU opportunity and project discovery"
+    }
+  ],
+  "decision": {
+    "state": "PASS",
+    "next_unit": {
+      "id": "R06-CF-ENGINE-001",
+      "description": "Implement deterministic prospect validation, dedupe, expiry and evidence-state transitions with synthetic NON_EVIDENCE fixtures."
+    }
+  }
+}
