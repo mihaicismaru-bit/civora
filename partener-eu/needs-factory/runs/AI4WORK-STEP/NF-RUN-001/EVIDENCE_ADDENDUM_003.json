@@ -1,0 +1,84 @@
+{
+  "schema_version": "nf.evidence_addendum.v0.1",
+  "run_id": "AI4WORK-STEP/NF-RUN-001",
+  "extends": ["EVIDENCE_REGISTRY.json", "EVIDENCE_ADDENDUM_001.json", "EVIDENCE_ADDENDUM_002.json"],
+  "research_date": "2026-08-25",
+  "evidence": [
+    {
+      "id": "EV-RO-NUTS2-WORK-INTERNET-2023",
+      "source": "ADR Centru – Evaluarea intervențiilor Priorității 2 / Studiu evaluare Tema 2, reporting Eurostat regional ICT data",
+      "source_url": "https://www.regiocentru.ro/wp-content/uploads/2026/01/ANEXE-Studiu-evaluare-Tema-2.pdf",
+      "tier": "A2",
+      "territory": ["Sud-Vest Oltenia", "Sud-Muntenia", "Centru"],
+      "scope": "NUTS2 regions",
+      "period": "2023",
+      "population": "employees in the Eurostat regional ICT business-statistics coverage",
+      "constructs": ["business_digital_maturity", "digital_use_at_work"],
+      "direct_measurement": true,
+      "provenance": "Official ADR Centru evaluation, table sourced to Eurostat: Use of computers and the internet by employees, by NACE Rev.2 activity and NUTS 2 region",
+      "measures": [
+        {"name":"employees_using_internet_professionally_Sud_Vest_Oltenia","measure_type":"share","value":22.5,"unit":"percent"},
+        {"name":"employees_using_internet_professionally_Sud_Muntenia","measure_type":"share","value":28.4,"unit":"percent"},
+        {"name":"employees_using_internet_professionally_Centru","measure_type":"share","value":34.8,"unit":"percent"},
+        {"name":"employees_using_internet_professionally_Romania","measure_type":"share","value":41.8,"unit":"percent"},
+        {"name":"employees_using_internet_professionally_EU27","measure_type":"share","value":61.3,"unit":"percent"}
+      ],
+      "use": "Quantitative regional digital-use baseline for all three target regions. It is evidence of weak workplace digital use, not a direct AI-skill test and not a substitute for target-group measurement."
+    },
+    {
+      "id": "EV-CENTRU-DIGITAL-NEEDS-SURVEY-2025",
+      "source": "ADR Centru – Evaluarea intervențiilor Priorității 2 / online survey of applicants and beneficiaries",
+      "source_url": "https://www.regiocentru.ro/wp-content/uploads/2026/01/ANEXE-Studiu-evaluare-Tema-2.pdf",
+      "tier": "A2",
+      "territory": "Centru",
+      "scope": "region",
+      "period": "August-September 2025",
+      "population": "67 Priority 2 applicants/potential beneficiaries across all six counties; 31.3% SMEs, 17.9% microenterprises, remainder local authorities/partnerships",
+      "constructs": ["employer_digital_skill_demand", "business_digital_maturity", "training_gap"],
+      "direct_measurement": true,
+      "measures": [
+        {"name":"respondents_reporting_internal_digital_skills_lack_as_barrier","measure_type":"share","value":52.0,"unit":"percent","denominator_universe":"67 survey respondents"},
+        {"name":"respondents_saying_calls_did_not_fully_cover_training_and_digital_skill_needs","measure_type":"share","value":36.0,"unit":"percent","denominator_universe":"67 survey respondents"},
+        {"name":"respondents_saying_digital_maturity_eligibility_limited_early_stage_firms","measure_type":"share","value":28.0,"unit":"percent","denominator_universe":"67 survey respondents"}
+      ],
+      "limitations": ["programme-related respondent frame", "mixed public/private sample", "invitation-frame denominator not reported", "not specific to AI4WORK eligible adults"],
+      "use": "Direct organizational perception evidence for Centru. It materially reduces the employer-evidence gap in Centru but does not substitute a three-region employer sample."
+    },
+    {
+      "id": "EV-CENTRU-ADULT-LEARNING-2024-UPDATE",
+      "source": "ADR Centru – Evaluarea intervențiilor Priorității 2, citing Eurostat trng_lfse_04",
+      "source_url": "https://www.regiocentru.ro/wp-content/uploads/2026/01/ANEXE-Studiu-evaluare-Tema-2.pdf",
+      "tier": "A2",
+      "territory": "Centru",
+      "scope": "region",
+      "period": "2024",
+      "population": "population aged 25-64 under Eurostat trng_lfse_04",
+      "constructs": ["adult_learning_participation"],
+      "direct_measurement": true,
+      "dataset": "Eurostat trng_lfse_04",
+      "measures": [
+        {"name":"adult_learning_participation_Centru","measure_type":"rate","value":5.6,"unit":"percent"},
+        {"name":"adult_learning_participation_Romania","measure_type":"rate","value":8.9,"unit":"percent"},
+        {"name":"adult_learning_participation_EU","measure_type":"rate","value":13.5,"unit":"percent"}
+      ],
+      "use": "Fresh official regional adult-learning update and triangulation; it does not measure AI competence."
+    },
+    {
+      "id": "EV-WB-SUBNATIONAL-SKILLS-DIGITAL-ADOPTION-2025",
+      "source": "World Bank – TIDES of Change: Igniting Productivity Growth in Europe and Central Asia",
+      "source_url": "https://documents1.worldbank.org/curated/en/099112425121530733/pdf/P507816-47fd70a7-26cb-4494-ad8a-5c3cdb478b27.pdf",
+      "tier": "A1",
+      "territory": "Romanian NUTS2 regions including Centru, Sud-Muntenia and Sud-Vest Oltenia",
+      "scope": "subnational comparative analysis",
+      "period": "2025 report; underlying Eurostat periods vary",
+      "constructs": ["skills_as_digital_adoption_enabler", "ai_adoption_and_use", "cloud_adoption"],
+      "direct_measurement": false,
+      "measures": [
+        {"name":"tertiary_education_vs_firm_AI_use_association","measure_type":"correlation","value":0.719,"unit":"Pearson R","significance":"p<0.001"},
+        {"name":"tertiary_education_vs_cloud_use_association","measure_type":"correlation","value":0.478,"unit":"Pearson R","significance":"p<0.001"}
+      ],
+      "use": "Mechanism/triangulation evidence: regions with more skilled working-age populations show higher firm digital adoption. Association is not causation and does not measure the AI4WORK target group directly."
+    }
+  ],
+  "status": "FROZEN_SECONDARY_EVIDENCE_EXTENSION_003"
+}
