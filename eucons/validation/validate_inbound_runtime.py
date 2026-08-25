@@ -59,6 +59,10 @@ def main():
     assert contract["privacy_and_purpose"]["repository_pii_writes_forbidden"] is True
     assert contract["idempotency"]["same_request_id_with_different_payload_is_conflict"] is True
     assert contract["recovery"]["resume_token_is_not_authentication"] is True
+    assert contract["retention"]["provider_must_enforce_expiry"] is True
+    assert contract["retention"]["completed_session_raw_answers_minimized_after_handoff"] is True
+    assert contract["telemetry"]["payload_values_forbidden"] is True
+    assert contract["telemetry"]["production_transport_enabled"] is False
 
     journeys = {row["id"]: row for row in ux["journeys"]}
     forms_by_id = {row["id"]: row for row in forms["forms"]}
@@ -107,6 +111,7 @@ def main():
         assert final["response"]["eligibility_state"] == "NOT_ASSESSED"
         assert final["lead_record"]["consent"]["marketing_allowed"] is False
         assert final["session"]["contact_receipt"]["raw_contact_retained_in_session"] is False
+        assert [event["type"] for event in final["session"]["events"]] == contract["telemetry"]["events"]
         serialized_session = json.dumps(final["session"], ensure_ascii=False)
         assert contact["email"] not in serialized_session
         assert contact["contact_name"] not in serialized_session
