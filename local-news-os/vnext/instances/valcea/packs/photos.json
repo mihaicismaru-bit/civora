@@ -3,12 +3,17 @@
   "pack_type": "photos",
   "instance_id": "valcea",
   "migration": {
-    "status": "IMPORT_REQUIRED",
-    "sources": [
-      "user_owned",
-      "official",
-      "licensed_or_open",
-      "legacy_story_visuals"
+    "status": "LEGACY_APPROVED_ASSETS_INDEXED_FOR_SHADOW_IMPORT",
+    "import_harness": "local-news-os/vnext/instances/valcea/migration/p18_shadow_migration.py",
+    "canonical_legacy_registry": "valcea-clar/social/story_visuals.json",
+    "publication_authority": "NONE",
+    "eligible_asset_count": 5,
+    "rules": [
+      "synthetic=false",
+      "editor_approved=true",
+      "credit required",
+      "rights_note required",
+      "unsupported rights fail closed"
     ]
   },
   "resolver_policy": {
@@ -41,5 +46,50 @@
     ],
     "fallback": "EDITORIAL_CARD"
   },
-  "assets": []
+  "assets": [
+    {
+      "legacy_story_id": "luminos-fest-zavoi-20260815",
+      "source_url": "https://commons.wikimedia.org/wiki/File:RamnicuValcea7.JPG",
+      "rights_basis": "CC_BY",
+      "license_code": "CC BY 3.0",
+      "credit": "L.Kenzel / Wikimedia Commons — CC BY 3.0",
+      "specificity_class": "CONTEXT_ARCHIVE",
+      "captured_at": "2010-04-07"
+    },
+    {
+      "legacy_story_id": "florile-govorei-20260816",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Baile_Govora_-_parcul.JPG",
+      "rights_basis": "PUBLIC_DOMAIN",
+      "license_code": "PUBLIC DOMAIN",
+      "credit": "Bunu vio / Wikimedia Commons — domeniu public",
+      "specificity_class": "CONTEXT_ARCHIVE",
+      "captured_at": "2006-08-31"
+    },
+    {
+      "legacy_story_id": "olanesti-bridge-monitor",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Ramnicu_Valcea_-_Ol%C4%83ne%C8%99ti.jpg",
+      "rights_basis": "CC_BY_SA",
+      "license_code": "CC BY-SA 4.0",
+      "credit": "Tiia Monto / Wikimedia Commons — CC BY-SA 4.0",
+      "specificity_class": "CONTEXT_ARCHIVE",
+      "captured_at": "2016-05-21"
+    },
+    {
+      "legacy_story_id": "rm-valcea-hcl-310-20260814",
+      "source_url": "https://commons.wikimedia.org/wiki/File:R-Valcea_Primarie_1.JPG",
+      "rights_basis": "CC_BY_SA",
+      "license_code": "CC BY-SA 4.0",
+      "credit": "Stoschmidt / Wikimedia Commons — CC BY-SA 4.0",
+      "specificity_class": "SUBJECT_DIRECT"
+    },
+    {
+      "legacy_story_id": "cet-govora-cine-a-decis-oprirea-20260821",
+      "source_url": "https://commons.wikimedia.org/wiki/File:CET_Govora_(dinspre_nord-vest).JPG",
+      "rights_basis": "CC_BY_SA",
+      "license_code": "CC BY-SA 3.0",
+      "credit": "Tudorcfr90 / Wikimedia Commons — CC BY-SA 3.0",
+      "specificity_class": "CONTEXT_ARCHIVE",
+      "captured_at": "2011-06-27"
+    }
+  ]
 }
