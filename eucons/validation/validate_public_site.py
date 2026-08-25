@@ -61,8 +61,10 @@ def main():
         for required in ia["internal_link_contract"]["home_must_link"]:
             path = next(item["path"] for item in ia["core_routes"] if item["id"] == required)
             assert_true(f'href="{path}"' in home, f"Homepage missing required internal link {path}")
+        assert_true('href="/servicii/"' in home, "Homepage missing secondary service catalogue")
         for route in service_routes.values():
-            assert_true(f'href="{route}"' in home, f"Homepage missing publishable service route {route}")
+            generated = builder.route_file(target, route)
+            assert_true(generated.exists(), f"Publishable service route is not generated: {route}")
         for path in ["/pentru-companii/", "/pentru-autoritati-publice/", "/pentru-ong/"]:
             assert_true(f'href="{path}"' in home, f"Homepage missing priority audience route {path}")
 
