@@ -8,8 +8,12 @@
   "preview": {
     "artifact_name": "eucons-static-build",
     "canonical_origin": "https://eucons.ro",
-    "minimum_route_count": 26,
-    "required_files": ["robots.txt", "sitemap.xml", "assets/eucons.css"],
+    "minimum_route_count": 30,
+    "required_files": [
+      "robots.txt",
+      "sitemap.xml",
+      "assets/eucons.css"
+    ],
     "robots_policy": "DISALLOW_ALL_UNTIL_PRODUCTION_GATE",
     "page_robots": "noindex,nofollow",
     "local_http_host": "127.0.0.1",
@@ -28,14 +32,24 @@
   "commercial_journey": {
     "fixture_class": "SYNTHETIC_ONLY",
     "fixture_email_domain": "example.invalid",
-    "stages": ["LEAD", "MATCH", "CRM", "OFFER"],
+    "stages": [
+      "LEAD",
+      "MATCH",
+      "CRM",
+      "OFFER"
+    ],
     "required_match_state": "MATCH_CANDIDATE",
     "offer_numeric_price_forbidden_without_approved_rule": true,
     "offer_auto_send_required_false": true,
     "repository_runtime_pii_write_forbidden": true
   },
   "distribution_journey": {
-    "stages": ["EDITORIAL", "LINKEDIN", "FACEBOOK", "EMAIL"],
+    "stages": [
+      "EDITORIAL",
+      "LINKEDIN",
+      "FACEBOOK",
+      "EMAIL"
+    ],
     "editorial_dispatch_required_false": true,
     "linkedin_direct_publication_required_false": true,
     "facebook_direct_publication_required_false": true,
