@@ -1,12 +1,11 @@
 {
   "schema_version": 2,
   "product": "EUCONS_COMMERCIAL_OS",
-  "updated_at": "2026-08-19T14:14:30Z",
-  "overall": "GREEN_BLOCKED_EXTERNAL_ONLY",
+  "updated_at": "2026-08-25T18:52:00+03:00",
+  "overall": "GREEN_DEVELOPMENT",
   "checks": {
     "canonical_contracts": "PASS",
     "durable_checkpoint": "PASS",
-    "artifact_registry": "PASS",
     "commercial_canon": "PASS",
     "service_registry": "PASS",
     "evidence_base": "PASS",
@@ -33,15 +32,18 @@
     "recovery": "PASS",
     "preview_production": "PASS",
     "adversarial_qa": "PASS",
-    "full_acceptance": "PASS",
-    "closed_dev": "PASS",
-    "production_ready_artifact": "PASS",
+    "full_acceptance": "PASS_HISTORICAL_SCOPE",
+    "closed_dev": "PASS_HISTORICAL_SCOPE_SUPERSEDED",
+    "production_ready_artifact": "PASS_HISTORICAL_SCOPE",
     "claim_to_active_evidence_lineage": "PASS",
     "legal_privacy_surfaces": "PASS",
-    "provider_neutral_lead_runtime": "PASS",
+    "provider_neutral_lead_runtime": "PASS_INTERNAL_NOT_LIVE",
+    "rebaseline_development": "IN_PROGRESS_R02_CUSTOMER_DEMAND_MODEL",
+    "market_intelligence_rebase": "PASS",
+    "prospect_discovery_client_finder": "OPEN_REBASE",
     "internal_development_blockers": "NONE",
-    "external_handoff_scope": "DOMAIN_HOSTING_LINKEDIN_FACEBOOK_MAILBOX_ONLY",
-    "production_activation": "BLOCKED_EXTERNAL_ONLY",
+    "external_handoff_scope": "DOMAIN_HOSTING_LINKEDIN_FACEBOOK_MAILBOX_ONLY_AFTER_EXPANDED_INTERNAL_GATES",
+    "production_activation": "BLOCKED_EXTERNAL_ONLY_FOR_PROVIDER_ACTIVATION_BUT_NOT_TERMINAL_DEVELOPMENT",
     "crm_production_persistence": "DISABLED_UNTIL_BACKEND_AUTHORIZED",
     "offer_automatic_send": "DISABLED_UNTIL_EXTERNAL_AUTHORIZATION_AND_APPROVED_PRICING_POLICY",
     "knowledge_runtime_publication": "DISABLED_UNTIL_DEPLOYMENT_GATES",
@@ -52,7 +54,7 @@
     "email_direct_sending": "DISABLED_UNTIL_COMMERCIAL_MAILBOX_AND_PROVIDER_AUTHORIZATION",
     "analytics_direct_transport": "DISABLED_UNTIL_ANALYTICS_DESTINATION_SELECTED",
     "production_personal_data_collection": "DISABLED_UNTIL_ACTIVATION_GATES",
-    "external_credentials": "OWNER_AUTHORIZATION_REQUIRED_AT_E29_ONLY"
+    "external_credentials": "OWNER_AUTHORIZATION_REQUIRED_ONLY_AT_EXTERNAL_ACTIVATION_GATES"
   },
   "critical_failures": []
 }
