@@ -398,11 +398,8 @@ jobs:
             valcea-clar/social/whatsapp_state.json
             valcea-clar/social/youtube_outbox.json
             valcea-clar/social/social_media_manifest.json
-            valcea-clar/site/runtime/media/social/editorial
-            valcea-clar/dist/chatgpt-sites/media/social/editorial/instagram
-            valcea-clar/dist/chatgpt-sites/media/social
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 1
 
       - name: Fail after persistence on hard platform errors
         if: always() && github.event_name != 'pull_request'
