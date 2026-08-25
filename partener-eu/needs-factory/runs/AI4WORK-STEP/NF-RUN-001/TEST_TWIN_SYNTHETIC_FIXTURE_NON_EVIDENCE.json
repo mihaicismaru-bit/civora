@@ -1,0 +1,73 @@
+{
+  "schema_version": "nf.test_twin_fixture.v0.1",
+  "classification": "NON_EVIDENCE_SYNTHETIC_TEST_ONLY",
+  "twin_id": "AI4WORK-STEP/NF-RUN-001-TEST-TWIN",
+  "warning": "All numbers in this file are deliberately synthetic and must never be used in the AI4WORK STEP needs analysis.",
+  "adult_fixture": {
+    "nominal_n": 360,
+    "regional_nominal": {"Sud-Vest Oltenia": 120, "Sud-Muntenia": 120, "Centru": 120},
+    "valid_after_quality_rules": {"Sud-Vest Oltenia": 111, "Sud-Muntenia": 78, "Centru": 116},
+    "injected_quality_failures": {
+      "duplicate_like": 14,
+      "impossible_category_combinations": 5,
+      "straight_line_low_information": 11,
+      "missing_region": 8,
+      "free_text_direct_identifier_leak": 7,
+      "overlapping_flags_allowed": true
+    },
+    "scenario_signals": {
+      "Sud-Vest Oltenia": {
+        "low_digital_self_efficacy_share": 0.62,
+        "weekly_or_daily_genai_use_share": 0.18,
+        "high_need_ai_verification_share": 0.71,
+        "high_need_data_confidentiality_share": 0.67
+      },
+      "Sud-Muntenia": {
+        "low_digital_self_efficacy_share": 0.31,
+        "weekly_or_daily_genai_use_share": 0.44,
+        "high_need_ai_verification_share": 0.38,
+        "high_need_data_confidentiality_share": 0.36
+      },
+      "Centru": {
+        "low_digital_self_efficacy_share": 0.45,
+        "weekly_or_daily_genai_use_share": 0.29,
+        "high_need_ai_verification_share": 0.59,
+        "high_need_data_confidentiality_share": 0.54
+      }
+    },
+    "injected_contradiction": "Sud-Muntenia has the highest synthetic AI-use frequency but comparatively low perceived need; engine must not force the same need rank across regions."
+  },
+  "employer_fixture": {
+    "nominal_n": 90,
+    "valid_after_quality_rules": {"Sud-Vest Oltenia": 27, "Sud-Muntenia": 25, "Centru": 28},
+    "scenario_signals": {
+      "Sud-Vest Oltenia": {"ai_in_production_or_pilot_share": 0.30, "high_skill_gap_verification_share": 0.70},
+      "Sud-Muntenia": {"ai_in_production_or_pilot_share": 0.48, "high_skill_gap_verification_share": 0.24},
+      "Centru": {"ai_in_production_or_pilot_share": 0.43, "high_skill_gap_verification_share": 0.57}
+    },
+    "injected_contradiction": "Employer and adult synthetic signals partially disagree; engine must preserve the contradiction rather than average it away."
+  },
+  "privacy_fixture": {
+    "small_cells": [
+      {"region": "Sud-Muntenia", "status": "other", "age_band": "60+", "n": 2},
+      {"region": "Centru", "sector": "rare_test_sector", "organisation_size": "250+", "n": 3}
+    ],
+    "expected_rule": "suppress or coarsen small cells in any public-facing output"
+  },
+  "solution_leakage_fixture": {
+    "forbidden_tokens": ["AI PRACTIC", "AI WORKFLOW", "100/60", "240 ore", "360 ore", "laborator mobil"],
+    "expected_rule": "none may become a discovered need solely because it exists in the project design"
+  },
+  "expected_engine_behavior": [
+    "preserve exact valid denominators by region",
+    "flag sample imbalance in Sud-Muntenia",
+    "keep adult and employer evidence streams separate before synthesis",
+    "create contradiction records",
+    "avoid universal regional ranking when evidence differs",
+    "suppress small cells",
+    "quarantine direct identifiers in free text",
+    "reject solution leakage",
+    "never copy any TWIN value into PROD artifacts"
+  ],
+  "status": "READY_FOR_ENGINE_STRESS_TEST"
+}
