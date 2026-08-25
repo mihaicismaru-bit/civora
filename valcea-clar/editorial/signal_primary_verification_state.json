@@ -2,19 +2,58 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-25T17:31:44+03:00",
+  "generated_at": "2026-08-25T19:22:25+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-25T17:30:48+03:00",
+  "queue_generated_at": "2026-08-25T19:21:09+03:00",
   "task_count": 57,
   "primary_match_count": 0,
-  "no_match_count": 24,
-  "unrouted_count": 33,
+  "no_match_count": 25,
+  "unrouted_count": 32,
   "target_count": 15,
-  "targets_ok": 12,
+  "targets_ok": 11,
   "results": [
+    {
+      "signal_id": "cfcf9053e0f09ebe004841af",
+      "signal_title": "FOTO/VIDEO 32 de milioane de euro pentru dezvoltarea județului Vâlcea! 14 contracte europene pentru 11 localități",
+      "signal_url": "https://evenimentvalcean.ro/foto-video-32-de-milioane-de-euro-pentru-dezvoltarea-judetului-valcea-14-contracte-europene-pentru-11-localitati/",
+      "signal_publisher": "Eveniment Vâlcean",
+      "signal_published_at": "2026-08-25T19:19:37+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "1c214c11f2a8efda88717ea5",
+      "signal_title": "FOTO – ACCIDENT GRAV pe VALEA OLTULUI: trafic blocat complet la ieșirea din Boița",
+      "signal_url": "https://seintamplainvalcea.ro/2026/08/25/foto-accident-grav-pe-valea-oltului-trafic-blocat-complet-la-iesirea-din-boita/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-25T18:07:55+03:00",
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "7e642b6517c27b561f3121b3",
       "signal_title": "Expoziție cu 15 artiști la Centrul Cultural Vâlcea. Vernisajul are loc joi",
@@ -92,9 +131,9 @@
             "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
             "url": "https://www.hidro.ro/warning/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error _ssl.c:1015: The handshake operation timed out>",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -228,9 +267,9 @@
             "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
             "url": "https://www.hidro.ro/warning/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error _ssl.c:1015: The handshake operation timed out>",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -313,9 +352,9 @@
             "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
             "url": "https://www.hidro.ro/warning/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error _ssl.c:1015: The handshake operation timed out>",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -1106,9 +1145,9 @@
             "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
             "url": "https://www.hidro.ro/warning/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error _ssl.c:1015: The handshake operation timed out>",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -1216,9 +1255,9 @@
             "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
             "url": "https://www.hidro.ro/warning/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error _ssl.c:1015: The handshake operation timed out>",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -1226,30 +1265,6 @@
       "material_fact_ready": false,
       "fact_kernel_ready": false,
       "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "7bc709c764608c834b0e13f3",
-      "signal_title": "Controale în Vâlcea: amenzi, țigări confiscate și un dosar de evaziune fiscală",
-      "signal_url": "https://seintamplainvalcea.ro/2026/08/22/controale-in-valcea-amenzi-tigari-confiscate-si-un-dosar-de-evaziune-fiscala/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_published_at": "2026-08-22T20:30:10+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "7fedeafc59eb4fcd5bd384b5",
-      "signal_title": "Tragedie la Băile Olănești: tânărul de 31 de ani din Budești, care și-a pierdut viața, era tatăl a trei copii",
-      "signal_url": "https://ziaruldevalcea.ro/2026/08/tragedie-la-baile-olanesti-tanarul-de-31-de-ani-din-budesti-care-si-a-pierdut-viata-era-tatal-a-trei-copii/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_published_at": "2026-08-22T19:12:38+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
     },
     {
       "signal_id": "ca97ca9ed5698965fd60b9c5",
