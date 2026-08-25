@@ -1,0 +1,73 @@
+{
+  "id": "R06-CF-SOURCE-ADAPTER-001",
+  "schema_version": 1,
+  "status": "CANONICAL",
+  "purpose": "Convert pre-fetched, lawful public-source snapshots into organization-first Client Finder observations without network access, person-level extraction or production persistence.",
+  "canonical_dependencies": {
+    "client_finder_contract": "eucons/prospects/client_finder_contract.json",
+    "client_finder_engine": "eucons/prospects/client_finder_engine.py",
+    "privacy_contract": "eucons/security/privacy_security_contract.json"
+  },
+  "runtime_boundary": {
+    "input_mode": "PREFETCHED_SNAPSHOT_ONLY",
+    "network_fetch_enabled": false,
+    "live_scraping_enabled": false,
+    "production_persistence_enabled": false,
+    "personal_contact_extraction_enabled": false,
+    "visitor_identification_enabled": false,
+    "external_contact_enabled": false
+  },
+  "snapshot_contract": {
+    "evidence_label": "NON_EVIDENCE",
+    "required_fields": ["schema_version", "adapter_id", "evidence_label", "reference_time", "retrieved_at", "content_hash", "public_access", "terms_checked_at", "robots_checked_at", "rate_limit_policy", "source", "records"],
+    "content_hash_rule": "SHA256_CANONICAL_RECORDS",
+    "max_records": 100,
+    "future_clock_skew_minutes": 15,
+    "governance_check_max_age_hours": 168,
+    "required_rate_limit_policy": "MANUAL_SNAPSHOT_NO_NETWORK"
+  },
+  "privacy_boundary": {
+    "organization_only": true,
+    "forbidden_field_names": ["person_name", "first_name", "last_name", "email", "personal_email", "phone", "personal_phone", "mobile", "contact_name", "contact_email", "contact_phone", "date_of_birth", "gender", "ethnicity", "religion", "health", "political_opinion"],
+    "role_business_contact_page_url_allowed": false
+  },
+  "profiles": [
+    {
+      "adapter_id": "SYNTHETIC_OFFICIAL_SNAPSHOT",
+      "activation_state": "DRY_RUN_ONLY",
+      "allowed_origins": ["https://example.invalid"],
+      "allowed_source_types": ["OFFICIAL_FUNDING_SOURCE", "OFFICIAL_PUBLIC_PROCUREMENT", "OFFICIAL_BENEFICIARY_OR_AWARD_LIST", "OFFICIAL_PUBLIC_STRATEGY_OR_PLAN", "OFFICIAL_PUBLIC_REGISTRY"],
+      "max_age_hours": 72,
+      "official": true
+    },
+    {
+      "adapter_id": "AFIR_OFFICIAL_SNAPSHOT",
+      "activation_state": "DISABLED_PENDING_SOURCE_SPECIFIC_REVIEW",
+      "allowed_origins": ["https://www.afir.ro"],
+      "allowed_source_types": ["OFFICIAL_FUNDING_SOURCE", "OFFICIAL_BENEFICIARY_OR_AWARD_LIST"],
+      "max_age_hours": 24,
+      "official": true
+    },
+    {
+      "adapter_id": "SEAP_OFFICIAL_SNAPSHOT",
+      "activation_state": "DISABLED_PENDING_SOURCE_SPECIFIC_REVIEW",
+      "allowed_origins": ["https://www.e-licitatie.ro", "https://e-licitatie.ro"],
+      "allowed_source_types": ["OFFICIAL_PUBLIC_PROCUREMENT"],
+      "max_age_hours": 24,
+      "official": true
+    },
+    {
+      "adapter_id": "EU_FUNDING_TENDERS_SNAPSHOT",
+      "activation_state": "DISABLED_PENDING_SOURCE_SPECIFIC_REVIEW",
+      "allowed_origins": ["https://ec.europa.eu"],
+      "allowed_source_types": ["OFFICIAL_FUNDING_SOURCE", "OFFICIAL_BENEFICIARY_OR_AWARD_LIST", "OFFICIAL_PUBLIC_REGISTRY"],
+      "max_age_hours": 24,
+      "official": true
+    }
+  ],
+  "activation_gate": {
+    "dry_run_adapter": "SYNTHETIC_OFFICIAL_SNAPSHOT",
+    "real_source_activation_requires": ["SOURCE_SPECIFIC_REVIEW", "TERMS_AND_ROBOTS_RECHECK", "RATE_POLICY_APPROVAL", "OFFICIAL_ORIGIN_TEST", "PROVENANCE_READBACK"],
+    "production_records_before_activation": 0
+  }
+}
