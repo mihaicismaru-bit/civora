@@ -1,0 +1,209 @@
+{
+  "schema_version": 1,
+  "id": "R03-SEA-001-PORTFOLIO",
+  "product": "EUCONS_COMMERCIAL_OS",
+  "status": "CANONICAL",
+  "checked_at": "2026-08-25T21:47:00+03:00",
+  "purpose": "Maintain the owner-designated historical organizations/projects as evidence candidates without asserting a client relationship, Euroconsult role, result or publication permission until each fact is supported.",
+  "classification_contract": {
+    "allowed": [
+      "PUBLIC_VERIFIED",
+      "INTERNAL_VERIFIED_NONPUBLIC",
+      "NEEDS_EVIDENCE",
+      "CONFIDENTIAL",
+      "HOLD"
+    ],
+    "public_rule": "Only PUBLIC_VERIFIED facts with compatible evidence and publication classification may feed public proof objects.",
+    "relationship_rule": "Public discoverability of an organization or project does not prove a Euroconsult client, partner, supplier or delivery relationship.",
+    "project_rule": "Every project must independently prove identity, organization relationship, Euroconsult role, result scope and publicability.",
+    "confidentiality_rule": "Client/MySMIS records remain outside public output and private by default."
+  },
+  "organization_candidates": [
+    {
+      "id": "PORT-ORG-EUROCONS",
+      "name": "EUROCONSULT SRL",
+      "classification": "PUBLIC_VERIFIED",
+      "publication_allowed": true,
+      "relationship_to_euroconsult": "SELF",
+      "evidence_ids": [
+        "EV-E28-CURRENT-COMPANY-IDENTITY",
+        "EV-E28-EUROCONS-2013-PROJECT-RECORD"
+      ],
+      "claim_ids": [
+        "CLM-COMPANY-LEGAL-IDENTITY-VERIFIED",
+        "CLM-COMPANY-PROJECT-EXPERIENCE-VERIFIED"
+      ],
+      "required_next_evidence": []
+    },
+    {
+      "id": "PORT-ORG-CCI-VALCEA",
+      "name": "Camera de Comerț și Industrie Vâlcea",
+      "classification": "NEEDS_EVIDENCE",
+      "publication_allowed": false,
+      "relationship_to_euroconsult": null,
+      "evidence_ids": [],
+      "claim_ids": [],
+      "required_next_evidence": [
+        "primary organization identity source",
+        "controlled contract/partnership/deliverable proving the exact Euroconsult relationship or role",
+        "project-by-project result evidence",
+        "explicit confidentiality/publication classification"
+      ]
+    },
+    {
+      "id": "PORT-ORG-FAS",
+      "name": "Fundația Antreprenoriat Social",
+      "classification": "NEEDS_EVIDENCE",
+      "publication_allowed": false,
+      "relationship_to_euroconsult": null,
+      "evidence_ids": [],
+      "claim_ids": [],
+      "required_next_evidence": [
+        "primary organization identity source",
+        "controlled contract/partnership/deliverable proving the exact Euroconsult relationship or role",
+        "project-by-project result evidence",
+        "explicit confidentiality/publication classification"
+      ]
+    },
+    {
+      "id": "PORT-ORG-FCPP-VALCEA",
+      "name": "Fundația Centrul de Pregătire Profesională Vâlcea",
+      "classification": "NEEDS_EVIDENCE",
+      "publication_allowed": false,
+      "relationship_to_euroconsult": null,
+      "evidence_ids": [],
+      "claim_ids": [],
+      "required_next_evidence": [
+        "primary organization identity source",
+        "controlled contract/partnership/deliverable proving the exact Euroconsult relationship or role",
+        "project-by-project result evidence",
+        "explicit confidentiality/publication classification"
+      ]
+    }
+  ],
+  "project_candidates": [
+    {
+      "id": "PORT-PROJ-RURALBIZ-47717",
+      "classification": "PUBLIC_VERIFIED",
+      "publication_allowed": true,
+      "project_ref": "POSDRU/83/5.2/S/47717",
+      "organization_candidate_ids": [
+        "PORT-ORG-EUROCONS"
+      ],
+      "euroconsult_role": "PARTNER_AS_DOCUMENTED",
+      "result_claim_ids": [
+        "CLM-PROJECT-RURALBIZ-RESULT"
+      ],
+      "case_id": "CASE-RURALBIZ-47717",
+      "service_ids": [
+        "implementation_and_reporting",
+        "monitoring_and_compliance",
+        "project_management_capacity"
+      ]
+    },
+    {
+      "id": "PORT-PROJ-COMPETENTA-83018",
+      "classification": "PUBLIC_VERIFIED",
+      "publication_allowed": true,
+      "project_ref": "POSDRU/108/2.3/G/83018",
+      "organization_candidate_ids": [
+        "PORT-ORG-EUROCONS"
+      ],
+      "euroconsult_role": "PARTNER_AS_DOCUMENTED",
+      "result_claim_ids": [
+        "CLM-PROJECT-COMPETENTA-RESULT"
+      ],
+      "case_id": "CASE-COMPETENTA-83018",
+      "service_ids": [
+        "implementation_and_reporting",
+        "monitoring_and_compliance",
+        "project_management_capacity"
+      ]
+    },
+    {
+      "id": "PORT-QUEUE-CCI-VALCEA",
+      "classification": "NEEDS_EVIDENCE",
+      "publication_allowed": false,
+      "project_ref": null,
+      "organization_candidate_ids": [
+        "PORT-ORG-CCI-VALCEA"
+      ],
+      "euroconsult_role": null,
+      "result_claim_ids": [],
+      "case_id": null,
+      "service_ids": [],
+      "required_action": "Inventory projects from official/public and controlled records, then classify each project separately."
+    },
+    {
+      "id": "PORT-QUEUE-FAS",
+      "classification": "NEEDS_EVIDENCE",
+      "publication_allowed": false,
+      "project_ref": null,
+      "organization_candidate_ids": [
+        "PORT-ORG-FAS"
+      ],
+      "euroconsult_role": null,
+      "result_claim_ids": [],
+      "case_id": null,
+      "service_ids": [],
+      "required_action": "Inventory projects from official/public and controlled records, then classify each project separately."
+    },
+    {
+      "id": "PORT-QUEUE-FCPP-VALCEA",
+      "classification": "NEEDS_EVIDENCE",
+      "publication_allowed": false,
+      "project_ref": null,
+      "organization_candidate_ids": [
+        "PORT-ORG-FCPP-VALCEA"
+      ],
+      "euroconsult_role": null,
+      "result_claim_ids": [],
+      "case_id": null,
+      "service_ids": [],
+      "required_action": "Inventory projects from official/public and controlled records, then classify each project separately."
+    }
+  ],
+  "ingestion_requirements": {
+    "organization": [
+      "stable organization id",
+      "name from a primary/public source",
+      "relationship claim or explicit null",
+      "evidence refs",
+      "classification",
+      "publication_allowed"
+    ],
+    "project": [
+      "stable project id",
+      "official project identity when available",
+      "organization links",
+      "exact Euroconsult role or null",
+      "result claims",
+      "service mapping",
+      "classification",
+      "publicability"
+    ],
+    "prohibited": [
+      "guessing that an associated project was an Euroconsult engagement",
+      "publishing a logo as a client badge without relationship evidence",
+      "deriving success metrics from the existence of a funded project",
+      "copying client/MySMIS confidential data into the public repository"
+    ]
+  },
+  "public_projection": [
+    "PORT-ORG-EUROCONS",
+    "PORT-PROJ-RURALBIZ-47717",
+    "PORT-PROJ-COMPETENTA-83018"
+  ],
+  "hold_projection": [
+    "PORT-ORG-CCI-VALCEA",
+    "PORT-ORG-FAS",
+    "PORT-ORG-FCPP-VALCEA",
+    "PORT-QUEUE-CCI-VALCEA",
+    "PORT-QUEUE-FAS",
+    "PORT-QUEUE-FCPP-VALCEA"
+  ],
+  "decision": {
+    "state": "PASS",
+    "summary": "The owner-designated portfolio is now inventoried. Only Euroconsult identity and the two already validated historical projects are public; the three associated organizations and their project inventories remain explicit evidence queues."
+  }
+}

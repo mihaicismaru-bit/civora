@@ -1,0 +1,211 @@
+{
+  "schema_version": 1,
+  "id": "R03-SEA-001",
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "R03_SERVICE_AND_EVIDENCE_ARCHITECTURE",
+  "status": "CANONICAL",
+  "checked_at": "2026-08-25T21:47:00+03:00",
+  "purpose": "Bind each canonical service to the demand jobs it serves, the publishable claim that proves EUCONS is configured to offer it, and any relevant public historical proof, while exposing proof gaps rather than filling them with generic marketing.",
+  "proof_policy": {
+    "offering_proof": "A PUBLISHABLE SERVICE_OFFERING claim proves the configured offer and its authorized copy only.",
+    "historical_proof": "A PUBLISHABLE historical proof object requires a PUBLISHABLE case and PUBLISHABLE PROJECT_RESULT claim whose service association includes the service.",
+    "gap_rule": "Absence of historical proof is a visible NEEDS_EVIDENCE gap, not a reason to invent years, clients, success rates, project values or outcomes.",
+    "job_relevance_rule": "A proof object may appear beside a journey only when the underlying case service IDs overlap the journey service IDs.",
+    "publication_rule": "Public renderers may consume only proof objects marked PUBLISHABLE."
+  },
+  "service_coverage": [
+    {
+      "service_id": "funding_strategy_and_eligibility",
+      "offering_claim_id": "CLM-SERVICE-FUNDING-STRATEGY",
+      "demand_job_ids": [
+        "JTBD-SME-01",
+        "JTBD-SME-02",
+        "JTBD-SME-03",
+        "JTBD-PUB-01",
+        "JTBD-NGO-01",
+        "JTBD-TRN-01",
+        "JTBD-RUR-01",
+        "JTBD-REP-01"
+      ],
+      "historical_proof_object_ids": [],
+      "proof_state": "OFFERING_VERIFIED_HISTORICAL_PROOF_GAP",
+      "gap_action": "Locate controlled/public records that demonstrate Euroconsult funding-strategy or eligibility work and classify role/result/publicability."
+    },
+    {
+      "service_id": "application_design_and_submission",
+      "offering_claim_id": "CLM-SERVICE-APPLICATION",
+      "demand_job_ids": [
+        "JTBD-SME-02",
+        "JTBD-PUB-02",
+        "JTBD-NGO-02",
+        "JTBD-TRN-01"
+      ],
+      "historical_proof_object_ids": [],
+      "proof_state": "OFFERING_VERIFIED_HISTORICAL_PROOF_GAP",
+      "gap_action": "Locate application-design/deposition records with exact Euroconsult role; keep named applicants private unless cleared."
+    },
+    {
+      "service_id": "implementation_and_reporting",
+      "offering_claim_id": "CLM-SERVICE-IMPLEMENTATION",
+      "demand_job_ids": [
+        "JTBD-PUB-03",
+        "JTBD-BEN-01",
+        "JTBD-NGO-02",
+        "JTBD-TRN-02",
+        "JTBD-RUR-02"
+      ],
+      "historical_proof_object_ids": [
+        "PROOF-CASE-RURALBIZ",
+        "PROOF-CASE-COMPETENTA"
+      ],
+      "proof_state": "OFFERING_AND_HISTORICAL_PROOF_PUBLISHABLE",
+      "gap_action": "Expand only from verified project records; do not infer client service relationships from partner history."
+    },
+    {
+      "service_id": "procurement_support",
+      "offering_claim_id": "CLM-SERVICE-PROCUREMENT",
+      "demand_job_ids": [
+        "JTBD-PUB-03",
+        "JTBD-BEN-02",
+        "JTBD-RUR-02"
+      ],
+      "historical_proof_object_ids": [],
+      "proof_state": "OFFERING_VERIFIED_HISTORICAL_PROOF_GAP",
+      "gap_action": "Locate procurement files showing Euroconsult's precise role and publicability; exclude confidential bids and personal contact data."
+    },
+    {
+      "service_id": "financial_management_and_reimbursement",
+      "offering_claim_id": "CLM-SERVICE-FINANCIAL",
+      "demand_job_ids": [
+        "JTBD-BEN-02",
+        "JTBD-BEN-03",
+        "JTBD-TRN-02",
+        "JTBD-RUR-02"
+      ],
+      "historical_proof_object_ids": [],
+      "proof_state": "OFFERING_VERIFIED_HISTORICAL_PROOF_GAP",
+      "gap_action": "Locate reconciliations/payment/reimbursement evidence that can prove work without exposing client financial data."
+    },
+    {
+      "service_id": "project_recovery_and_corrections",
+      "offering_claim_id": "CLM-SERVICE-RECOVERY",
+      "demand_job_ids": [
+        "JTBD-BEN-03",
+        "JTBD-RUR-02"
+      ],
+      "historical_proof_object_ids": [],
+      "proof_state": "OFFERING_VERIFIED_HISTORICAL_PROOF_GAP",
+      "gap_action": "Locate controlled recovery/correction records; public proof should normally be anonymized and outcome claims narrowly bounded."
+    },
+    {
+      "service_id": "monitoring_and_compliance",
+      "offering_claim_id": "CLM-SERVICE-COMPLIANCE",
+      "demand_job_ids": [
+        "JTBD-BEN-01",
+        "JTBD-BEN-02",
+        "JTBD-BEN-03",
+        "JTBD-TRN-02"
+      ],
+      "historical_proof_object_ids": [
+        "PROOF-CASE-RURALBIZ",
+        "PROOF-CASE-COMPETENTA"
+      ],
+      "proof_state": "OFFERING_AND_HISTORICAL_PROOF_PUBLISHABLE",
+      "gap_action": "Add newer evidence only when obligations, role and result are traceable."
+    },
+    {
+      "service_id": "project_management_capacity",
+      "offering_claim_id": "CLM-SERVICE-PM-CAPACITY",
+      "demand_job_ids": [
+        "JTBD-PUB-01",
+        "JTBD-PUB-02",
+        "JTBD-PUB-03",
+        "JTBD-BEN-01",
+        "JTBD-NGO-02",
+        "JTBD-REP-01"
+      ],
+      "historical_proof_object_ids": [
+        "PROOF-CASE-RURALBIZ",
+        "PROOF-CASE-COMPETENTA"
+      ],
+      "proof_state": "OFFERING_AND_HISTORICAL_PROOF_PUBLISHABLE",
+      "gap_action": "Expand with evidence of tools/process/capacity delivered, not generic experience claims."
+    }
+  ],
+  "historical_proof_objects": [
+    {
+      "id": "PROOF-CASE-RURALBIZ",
+      "publication_state": "PUBLISHABLE",
+      "case_id": "CASE-RURALBIZ-47717",
+      "result_claim_ids": [
+        "CLM-PROJECT-RURALBIZ-RESULT"
+      ],
+      "service_ids": [
+        "implementation_and_reporting",
+        "monitoring_and_compliance",
+        "project_management_capacity"
+      ],
+      "supported_job_ids": [
+        "JTBD-BEN-01",
+        "JTBD-NGO-02",
+        "JTBD-TRN-02",
+        "JTBD-PUB-03"
+      ],
+      "proof_message": "Exemplu documentat de participare Euroconsult ca partener într-un proiect multiregional, cu obligații de implementare și indicatori consemnați în arhiva controlată.",
+      "boundaries": [
+        "Nu dovedește o relație de client cu o organizație nominalizată.",
+        "Nu dovedește servicii de aplicație, achiziții, rambursare sau recovery.",
+        "Rezultatul este limitat la formularea exactă a claimului publicabil."
+      ]
+    },
+    {
+      "id": "PROOF-CASE-COMPETENTA",
+      "publication_state": "PUBLISHABLE",
+      "case_id": "CASE-COMPETENTA-83018",
+      "result_claim_ids": [
+        "CLM-PROJECT-COMPETENTA-RESULT"
+      ],
+      "service_ids": [
+        "implementation_and_reporting",
+        "monitoring_and_compliance",
+        "project_management_capacity"
+      ],
+      "supported_job_ids": [
+        "JTBD-TRN-02",
+        "JTBD-BEN-01",
+        "JTBD-NGO-02"
+      ],
+      "proof_message": "Exemplu documentat de participare Euroconsult ca partener într-un proiect de formare profesională cu obligații de implementare și raportare.",
+      "boundaries": [
+        "Nu constituie testimonial sau client atribuit.",
+        "Nu dovedește automat autorizări sau rezultate actuale de formare.",
+        "Nu susține valori, procente ori volume care nu apar în claimul publicabil."
+      ]
+    }
+  ],
+  "proof_gap_summary": {
+    "services_with_public_historical_proof": 3,
+    "services_with_only_offering_proof": 5,
+    "priority_gap_order": [
+      "project_recovery_and_corrections",
+      "financial_management_and_reimbursement",
+      "procurement_support",
+      "application_design_and_submission",
+      "funding_strategy_and_eligibility"
+    ],
+    "rationale": "Recovery/financial/procurement proof is closest to the P0 post-award demand lane; application/funding proof remains commercially important but should not displace the verified post-award differentiator."
+  },
+  "ux_projection_contract": {
+    "service_page": "Show current offering proof for every service; show historical proof only when service-relevant.",
+    "journey_page": "Select proof by overlap with that journey's service IDs; omit the proof block when none is publishable.",
+    "case_page": "Preserve existing anonymization and exact result-claim boundaries.",
+    "fallback": "Use transparent process/boundaries and a diagnostic CTA, never an invented client logo, number or success statement."
+  },
+  "decision": {
+    "state": "PASS",
+    "next_unit": {
+      "id": "R04-JTBD-UX-001",
+      "description": "Rebuild public information architecture and priority journeys around the validated jobs, placing only service-relevant publishable proof beside each CTA."
+    }
+  }
+}

@@ -1,11 +1,11 @@
 {
   "product": "EUCONS_COMMERCIAL_OS",
   "schema_version": 2,
-  "updated_at": "2026-08-25T20:50:00+03:00",
-  "checkpoint_id": "EUCONS-CP-2026-08-25-003",
+  "updated_at": "2026-08-25T21:55:00+03:00",
+  "checkpoint_id": "EUCONS-CP-2026-08-25-004",
   "development_state": "IN_PROGRESS",
-  "current_phase": "R03_SERVICE_AND_EVIDENCE_ARCHITECTURE",
-  "current_unit": "R03-SEA-001",
+  "current_phase": "R04_JOB_TO_BE_DONE_UX",
+  "current_unit": "R04-JTBD-UX-001",
   "previous_terminal_assessment": {
     "state": "BLOCKED_EXTERNAL_ONLY",
     "phase": "E29",
@@ -92,7 +92,8 @@
   "completed_rebase_units": [
     "R00_REBASE_AUDIT",
     "R01-MI-001",
-    "R02-CDM-001"
+    "R02-CDM-001",
+    "R03-SEA-001"
   ],
   "market_intelligence_result": {
     "state": "PASS",
@@ -105,12 +106,12 @@
       "MI-CAP-005 PROSPECT_RESEARCH_AND_ACTION_PACK"
     ]
   },
-  "next_action": "Reconcile service boundaries, service-to-job mappings and publishable proof coverage against R02-CDM-001; create or HOLD evidence objects without inventing portfolio relationships or outcomes.",
+  "next_action": "Rebuild priority public journeys around R02 jobs and R03 proof rules: funding fit, project evaluation, post-award implementation/recovery, relevant evidence, progressive CTA and transparent next step.",
   "terminal_target": "PRODUCTION_READY",
   "owner_terminal_target": "PRODUCTION_GRADE_EUCONS_COMMERCIAL_OS",
   "external_handoff_allowed_only_after": "E28",
   "blocking_reason": null,
-  "last_good_checkpoint": "EUCONS-CP-2026-08-25-003",
+  "last_good_checkpoint": "EUCONS-CP-2026-08-25-004",
   "evidence": [
     "eucons/ops/EUCONS_REBASELINE_2026-08-25.json",
     "eucons/market_intelligence/EUCONS_MARKET_INTELLIGENCE_2026-08-25.json",
@@ -134,7 +135,11 @@
     "https://ec.europa.eu/eurostat/web/interactive-publications/digitalisation-2024",
     "https://commission.europa.eu/document/download/ba3d44aa-c5f1-4e86-b437-12c64f6f685d_en?filename=COM_2025_223_1_EN_ACT_part1_v4.pdf",
     "https://www.afir.ro/",
-    "https://www.e-licitatie.ro/pub/notices/adv-notices/view/100728713"
+    "https://www.e-licitatie.ro/pub/notices/adv-notices/view/100728713",
+    "eucons/evidence/service_proof_architecture.json",
+    "eucons/evidence/portfolio_candidate_registry.json",
+    "eucons/validation/validate_service_proof_architecture.py",
+    "eucons/validation/test_service_proof_architecture_fail_closed.py"
   ],
   "autonomy": {
     "enabled": true,
@@ -156,5 +161,16 @@
       "P1 NGO/social-economy, training and rural specialist lanes"
     ],
     "strategy": "Use organization-level, time-bound public signals to map a real job to a canonical service. Preserve evidence gaps and never convert a trigger or score into proven eligibility."
+  },
+  "service_and_evidence_architecture_result": {
+    "state": "PASS",
+    "services_reconciled": 8,
+    "services_with_public_historical_proof": 3,
+    "explicit_historical_proof_gaps": 5,
+    "public_historical_proof_objects": 2,
+    "owner_designated_organizations_inventoried": 4,
+    "public_verified_organizations": 1,
+    "needs_evidence_organizations": 3,
+    "strategy": "Place historical proof only beside jobs whose service mapping overlaps the validated case. Keep CCI Vâlcea and both foundations as evidence queues until relationship, role, result and publicability are independently proven."
   }
 }
