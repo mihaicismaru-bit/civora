@@ -1,0 +1,37 @@
+{
+  "schema_version": "nf.test_twin_contract.v0.1",
+  "run_id": "AI4WORK-STEP/NF-RUN-001",
+  "twin_id": "AI4WORK-STEP/NF-RUN-001-TEST-TWIN",
+  "classification": "NON_EVIDENCE_SYNTHETIC_TEST_ONLY",
+  "purpose": "stress-test the Needs Factory pipeline without contaminating PROD evidence",
+  "hard_rules": [
+    "No synthetic value may be copied into EVIDENCE_REGISTRY, an evidence addendum, promoted PROD need, call-compliance finding, project narrative, target-size justification or public report.",
+    "Every twin artifact filename and internal record must carry NON_EVIDENCE or TEST_TWIN classification.",
+    "PROD and TEST_TWIN evidence IDs use disjoint namespaces: EV-* is reserved for PROD; TWIN-* is reserved for synthetic fixtures.",
+    "Any pipeline stage that cannot preserve provenance separation fails closed.",
+    "A successful synthetic test proves engine behavior only; it never upgrades empirical confidence in AI4WORK STEP."
+  ],
+  "stress_tests": [
+    "ingestion with missing values and invalid category combinations",
+    "regional sample imbalance",
+    "adult/employer evidence disagreement",
+    "high perceived need but high measured self-efficacy",
+    "low AI adoption with no reported skills barrier",
+    "small-cell suppression/privacy guardrail",
+    "denominator preservation for every percentage",
+    "duplicate-response detection without direct identifiers",
+    "outlier and straight-line response flags",
+    "need promotion threshold sensitivity",
+    "contradiction ledger generation",
+    "solution-leakage detection against quarantined AI PRACTIC/AI WORKFLOW design fields",
+    "scale inference guardrail preventing synthetic interest from validating PROD 160 or 80/40/40",
+    "adversarial QA confirming TEST_TWIN values cannot appear in final PROD narrative"
+  ],
+  "required_outputs": [
+    "TEST_TWIN_SYNTHETIC_FIXTURE_NON_EVIDENCE.json",
+    "TEST_TWIN_VALIDATION_REPORT_NON_EVIDENCE.json",
+    "TEST_TWIN_LEAKAGE_AUDIT_NON_EVIDENCE.json"
+  ],
+  "release_gate": "PROD release is independent of TEST_TWIN pass. TEST_TWIN contamination of any PROD artifact is a hard FAIL.",
+  "status": "ACTIVE"
+}
