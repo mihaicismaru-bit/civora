@@ -1,0 +1,55 @@
+{
+  "schema_version": "nf.checkpoint_progress.v0.1",
+  "run_id": "AI4WORK-STEP/NF-RUN-001",
+  "checkpoint": "NF06_PRIMARY_RESEARCH",
+  "research_date": "2026-08-25",
+  "status": "SECONDARY_EVIDENCE_STRENGTHENED_PRIMARY_RESEARCH_STILL_REQUIRED",
+  "completed_this_checkpoint": [
+    "resolved Sud-Muntenia adult-learning regional evidence gap with OECD/Eurostat 2022 evidence and a 2025 Eurostat-table institutional mirror for trend corroboration",
+    "derived a conservative official ANOFM lower-bound recruitment pool aged 30-55 for all three project regions",
+    "demonstrated macro feasibility of planned volume 160 relative to 72,824 registered unemployed aged 30-55, without treating 160 or 80/40/40 as measured need",
+    "identified direct official MIPE URL for 13-August consolidated STEP-LLL package through OIR PECU Nord-Vest and approval order 767/2026",
+    "detected a reported 24-August further STEP-LLL corrigendum/Annex 4 update, preserving source-version blocker until current official binaries are frozen",
+    "created isolated NON-EVIDENCE TEST_TWIN contract and synthetic stress fixture"
+  ],
+  "new_evidence_artifacts": [
+    "EVIDENCE_ADDENDUM_002.json",
+    "EVIDENCE_GAPS_ADDENDUM_002.json"
+  ],
+  "test_artifacts": [
+    "TEST_TWIN_CONTRACT.json",
+    "TEST_TWIN_SYNTHETIC_FIXTURE_NON_EVIDENCE.json"
+  ],
+  "resolved_or_materially_narrowed": {
+    "GAP-REG-SM-ADULT-LEARNING": "RESOLVED_FOR_CONSTRUCT",
+    "GAP-SCALE-160": "MACRO_RECRUITMENT_FEASIBILITY_SUBSTANTIALLY_RESOLVED_EXACT_NEED_AND_ALLOCATION_OPEN",
+    "GAP-GSCS-BINARY": "OFFICIAL_13_AUG_BINARY_URL_IDENTIFIED_LATEST_POST_24_AUG_BINARY_STILL_OPEN",
+    "GAP-PRIMARY-ELIGIBLE-ADULTS": "POOL_SIZE_NARROWED_SKILL_PROFILE_AND_INTEREST_OPEN"
+  },
+  "remaining_release_blockers": [
+    {
+      "id": "GAP-GSCS-BINARY",
+      "need": "freeze current post-24-August official GSCS/corrigendum/annex binaries and hashes"
+    },
+    {
+      "id": "GAP-PRIMARY-ELIGIBLE-ADULTS",
+      "need": "real direct three-region evidence of AI/digital skills, barriers and interest among eligible/admissible adults"
+    },
+    {
+      "id": "GAP-PRIMARY-EMPLOYERS",
+      "need": "real direct three-region employer/workflow evidence of missing AI/digital capabilities"
+    },
+    {
+      "id": "GAP-SCALE-160",
+      "need": "if exact 160 and 80/40/40 are claimed as measured need rather than project design, direct interest/need evidence is required; otherwise final narrative must frame them only as design values shown to be macro-feasible"
+    }
+  ],
+  "next_units": [
+    "continue attempting direct capture of current official STEP-LLL GSCS/corrigendum/annex files",
+    "implement or validate first-party eucons.ro adult/employer forms against GDPR procedure and raw-response schema",
+    "prepare deterministic import/quality rules so real responses can be processed immediately",
+    "run TEST_TWIN through available validators and perform leakage audit",
+    "do not promote hypotheses to PROD needs until NF06 direct-evidence blockers are resolved or final claim scope is explicitly narrowed"
+  ],
+  "final_narrative_allowed": false
+}
