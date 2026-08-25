@@ -36,7 +36,8 @@ def main() -> None:
         raise SystemExit("E28 prerequisite receipt chain incomplete")
     if receipt["public_content"] != {"services": 8, "people": 2, "cases": 2}:
         raise SystemExit(f"E28 public content closure drift: {receipt['public_content']}")
-    if receipt["production_build"]["pages"] != 26 or receipt["production_build"]["sitemap_entries"] != 26:
+    expected_pages = contract["production_build"]["expected_pages"]
+    if receipt["production_build"]["pages"] != expected_pages or receipt["production_build"]["sitemap_entries"] != expected_pages:
         raise SystemExit("E28 production build route closure failed")
     if receipt["production_build"]["production_deployed"] is not False:
         raise SystemExit("E28 may not deploy production")
