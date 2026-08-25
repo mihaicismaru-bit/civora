@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+WORKFLOWS = ROOT / ".github" / "workflows"
 
 ABSENT = (
     ".github/workflows/partener-eu-mipe-access-bridge.yml",
@@ -121,6 +122,24 @@ def main() -> int:
     assert resilient_sha == MATERIALIZED_RESILIENT_SHA256, (
         "immutable resilient runtime drifted", resilient_sha, MATERIALIZED_RESILIENT_SHA256
     )
+
+    executable_refs: list[str] = []
+    retired_names = tuple(Path(path).name for path in ABSENT)
+    for workflow in sorted(WORKFLOWS.glob("*.yml")):
+        workflow_text = workflow.read_text(encoding="utf-8")
+        if "fix_mipe_" in workflow_text:
+            executable_refs.append(str(workflow.relative_to(ROOT)) + ":fix_mipe_")
+        for retired_name in retired_names:
+            if retired_name in workflow_text:
+                executable_refs.append(str(workflow.relative_to(ROOT)) + ":" + retired_name)
+    for source in sorted((ROOT / "partener-eu/ingest").glob("*.py")):
+        source_text = source.read_text(encoding="utf-8")
+        if "fix_mipe_" in source_text:
+            executable_refs.append(str(source.relative_to(ROOT)) + ":fix_mipe_")
+        for retired_name in retired_names:
+            if retired_name in source_text:
+                executable_refs.append(str(source.relative_to(ROOT)) + ":" + retired_name)
+    assert not executable_refs, f"residual executable legacy refs: {executable_refs}"
 
     audit_path = ROOT / "partener-eu/ops/mipe_legacy_audit.json"
     audit_summary = None
