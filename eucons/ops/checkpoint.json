@@ -1,11 +1,11 @@
 {
   "product": "EUCONS_COMMERCIAL_OS",
   "schema_version": 2,
-  "updated_at": "2026-08-25T22:52:00+03:00",
-  "checkpoint_id": "EUCONS-CP-2026-08-25-005",
+  "updated_at": "2026-08-25T23:56:00+03:00",
+  "checkpoint_id": "EUCONS-CP-2026-08-25-006",
   "development_state": "IN_PROGRESS",
-  "current_phase": "R05_INBOUND_RUNTIME",
-  "current_unit": "R05-INBOUND-001",
+  "current_phase": "R06_PROSPECT_DISCOVERY_CLIENT_FINDER",
+  "current_unit": "R06-CF-CONTRACT-001",
   "previous_terminal_assessment": {
     "state": "BLOCKED_EXTERNAL_ONLY",
     "phase": "E29",
@@ -94,7 +94,8 @@
     "R01-MI-001",
     "R02-CDM-001",
     "R03-SEA-001",
-    "R04-JTBD-UX-001"
+    "R04-JTBD-UX-001",
+    "R05-INBOUND-001"
   ],
   "market_intelligence_result": {
     "state": "PASS",
@@ -107,12 +108,12 @@
       "MI-CAP-005 PROSPECT_RESEARCH_AND_ACTION_PACK"
     ]
   },
-  "next_action": "Implement the validated progressive journey fields as a provider-neutral inbound runtime with consent/purpose separation, data minimization, dedupe, spam controls, deterministic recovery and useful fail-closed preliminary next steps.",
+  "next_action": "Define the organization-first Client Finder contract: lawful public source and signal records, provenance, FACT/INFERENCE/UNKNOWN/CONFLICT separation, confidence and expiry, service-play mapping, deterministic dedupe and no person-first prospecting or autonomous contact.",
   "terminal_target": "PRODUCTION_READY",
   "owner_terminal_target": "PRODUCTION_GRADE_EUCONS_COMMERCIAL_OS",
   "external_handoff_allowed_only_after": "E28",
   "blocking_reason": null,
-  "last_good_checkpoint": "EUCONS-CP-2026-08-25-005",
+  "last_good_checkpoint": "EUCONS-CP-2026-08-25-006",
   "evidence": [
     "eucons/ops/EUCONS_REBASELINE_2026-08-25.json",
     "eucons/market_intelligence/EUCONS_MARKET_INTELLIGENCE_2026-08-25.json",
@@ -145,7 +146,13 @@
     "eucons/web/information_architecture.json",
     "eucons/web/build_public_site.py",
     "eucons/validation/validate_jtbd_ux.py",
-    "eucons/validation/test_jtbd_ux_fail_closed.py"
+    "eucons/validation/test_jtbd_ux_fail_closed.py",
+    "eucons/leads/inbound_runtime_contract.json",
+    "eucons/leads/inbound_runtime.py",
+    "eucons/leads/forms.json",
+    "eucons/deployment/build_production_ready.py",
+    "eucons/validation/validate_inbound_runtime.py",
+    "eucons/validation/test_inbound_runtime_fail_closed.py"
   ],
   "autonomy": {
     "enabled": true,
@@ -188,5 +195,26 @@
     "eligibility_rule": "PRELIMINARY_MATCH_IS_NOT_CONFIRMED_ELIGIBILITY",
     "data_collection": "DISABLED_UNTIL_R05_RUNTIME",
     "strategy": "Start from the visitor's decision point—funding fit, project review, implementation control or recovery—then reveal only the relevant services, evidence, unknowns and next step."
+  },
+  "inbound_runtime_result": {
+    "state": "PASS",
+    "priority_journeys": 4,
+    "progressive_steps": [
+      "PROFILE",
+      "CONTEXT",
+      "CONTACT"
+    ],
+    "canonical_lead_engine": "EUCONS_E11_LEAD_ENGINE",
+    "consent_rule": "OPERATIONAL_PRIVACY_ACK_SEPARATE_FROM_OPTIONAL_MARKETING",
+    "idempotency": "REQUEST_ID_AND_BODY_HASH_FAIL_CLOSED",
+    "spam_controls": [
+      "HONEYPOT",
+      "MINIMUM_COMPLETION_TIME"
+    ],
+    "recovery": "DETERMINISTIC_TOKEN_WITHOUT_RAW_ANSWERS",
+    "telemetry": "PII_FREE_EVENTS_TRANSPORT_DISABLED",
+    "eligibility_rule": "NOT_ASSESSED_UNTIL_VERIFIED_MATCH",
+    "public_forms": "IN_PRODUCTION_READY_ARTIFACT_NOT_DEPLOYED",
+    "production_collection": false
   }
 }

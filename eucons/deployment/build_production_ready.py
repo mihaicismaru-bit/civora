@@ -144,6 +144,97 @@ def render_funding(builder) -> str:
     return prod_shell(builder, "Finanțări", "Oportunități de finanțare publicate numai după verificarea statutului și provenienței.", "/finantari/", body)
 
 
+def progressive_input(field: str, *, required: bool = False) -> str:
+    labels = {
+        "organization_name": "Organizație",
+        "audience_id": "Tipul organizației",
+        "investment_terms": "Ce investiție sau nevoie ai?",
+        "project_stage": "Etapa proiectului",
+        "message": "Contextul relevant",
+        "activity_codes": "Coduri CAEN relevante",
+        "county": "Județ",
+        "requested_grant_eur": "Valoarea orientativă solicitată (EUR)",
+        "timeline": "Când este necesar următorul pas?",
+    }
+    label = labels.get(field, field.replace("_", " ").title())
+    required_attr = " required" if required else ""
+    if field == "audience_id":
+        control = (
+            f'<select name="{field}"{required_attr}><option value="">Alege</option>'
+            '<option value="companies_entrepreneurs">Companie / antreprenor</option>'
+            '<option value="public_authorities_institutions">Autoritate / instituție publică</option>'
+            '<option value="ngos_eligible_organizations">ONG / organizație eligibilă</option>'
+            '<option value="existing_beneficiaries">Beneficiar cu proiect contractat</option></select>'
+        )
+    elif field == "project_stage":
+        control = (
+            f'<select name="{field}"{required_attr}><option value="">Alege</option>'
+            '<option value="idea">Idee</option><option value="preparation">Pregătire</option>'
+            '<option value="application">Depunere</option><option value="contracted">Contractat</option>'
+            '<option value="implementation">Implementare</option><option value="at_risk">În risc / blocat</option>'
+            '<option value="unknown">Nu știu încă</option></select>'
+        )
+    elif field == "timeline":
+        control = (
+            f'<select name="{field}"{required_attr}><option value="">Alege</option>'
+            '<option value="now_30_days">În următoarele 30 de zile</option><option value="31_90_days">31–90 de zile</option>'
+            '<option value="91_180_days">91–180 de zile</option><option value="later">Mai târziu</option>'
+            '<option value="unknown">Nu știu încă</option></select>'
+        )
+    elif field == "message":
+        control = f'<textarea name="{field}" rows="5" maxlength="4000"{required_attr}></textarea>'
+    elif field == "requested_grant_eur":
+        control = f'<input name="{field}" type="number" min="1" step="1"{required_attr}>'
+    else:
+        list_attr = ' data-eucons-list="true"' if field in {"investment_terms", "activity_codes"} else ""
+        control = f'<input name="{field}" maxlength="300"{list_attr}{required_attr}>'
+    hint = '<span class="eu-hint">Separă valorile prin virgulă.</span>' if field in {"investment_terms", "activity_codes"} else ""
+    return f"<label>{esc(label)}{control}{hint}</label>"
+
+
+def progressive_form(journey: dict[str, Any], form_id: str, step: str, fields: list[str], *, hidden: bool = False) -> str:
+    required = step == "PROFILE"
+    controls = "".join(progressive_input(field, required=required) for field in fields)
+    hidden_attr = " hidden" if hidden else ""
+    step_labels = {"PROFILE": "1. Organizația și situația", "CONTEXT": "2. Detalii utile", "CONTACT": "3. Date pentru răspuns"}
+    if step == "CONTACT":
+        controls = '''<label>Nume și prenume<input name="contact_name" required maxlength="300" autocomplete="name"></label>
+<label>Email<input name="email" type="email" required maxlength="300" autocomplete="email"></label>
+<label>Telefon — opțional<input name="phone" maxlength="80" autocomplete="tel"></label>
+<label><input type="checkbox" name="privacy_ack" value="true" required> Am citit informarea privind prelucrarea datelor pentru această solicitare.</label>
+<label><input type="checkbox" name="marketing_consent" value="true"> Doresc separat comunicări comerciale. Alegerea nu condiționează răspunsul la solicitare.</label>'''
+    return f'''<form class="eu-card eu-stack" method="post" action="/api/inbound/sessions" data-eucons-inbound-form data-journey-id="{esc(journey["id"])}" data-form-id="{esc(form_id)}" data-step="{step}"{hidden_attr}>
+<input type="hidden" name="session_id" value="">
+<input type="hidden" name="request_id" value="">
+<input type="hidden" name="submission_age_ms" value="0">
+<input type="text" name="website" value="" tabindex="-1" autocomplete="off" aria-hidden="true" hidden>
+<h2 class="eu-heading-md">{step_labels[step]}</h2>
+{controls}
+<button class="eu-button eu-button--primary" type="submit">{"Trimite solicitarea" if step == "CONTACT" else "Continuă"}</button>
+<p class="eu-form-status eu-hint" role="status" aria-live="polite"></p>
+</form>'''
+
+
+def render_progressive_journey(builder, data: dict[str, Any], journey: dict[str, Any], form_id: str) -> str:
+    forms = "".join([
+        progressive_form(journey, form_id, "PROFILE", list(journey.get("first_step_fields") or [])),
+        progressive_form(journey, form_id, "CONTEXT", list(journey.get("later_fields") or []), hidden=True),
+        progressive_form(journey, form_id, "CONTACT", [], hidden=True),
+    ])
+    body = f'''<section class="eu-section eu-section--surface"><div class="eu-shell eu-reading eu-stack">
+<p class="eu-eyebrow">{esc(journey["eyebrow"])}</p><h1 class="eu-heading-lg">{esc(journey["headline"])}</h1>
+<p class="eu-lead">{esc(journey["lead"])}</p>
+<div class="eu-alert eu-alert--info" role="note"><strong>Limită:</strong> {esc(journey["boundary"])}</div>
+</div></section>
+<section class="eu-section"><div class="eu-shell eu-reading eu-stack">
+<p class="eu-eyebrow">Evaluare progresivă</p><h2 class="eu-heading-md">Cerem datele în trei pași</h2>
+<p>Primești un următor pas preliminar. Acesta nu confirmă eligibilitatea și nu înlocuiește verificarea sursei oficiale și a documentelor.</p>
+<div class="eu-progressive-forms" data-eucons-inbound>{forms}</div>
+<noscript><p class="eu-alert eu-alert--info">Evaluarea progresivă necesită JavaScript și un endpoint securizat activ. Poți folosi pagina de contact.</p></noscript>
+</div></section>'''
+    return prod_shell(builder, journey["question"], journey["lead"], journey["path"], body, form_script=True)
+
+
 def lead_form(form_id: str, heading: str) -> str:
     return f'''<form class="eu-card eu-stack" method="post" action="/api/leads" data-eucons-lead-form>
   <input type="hidden" name="form_id" value="{esc(form_id)}">
@@ -232,13 +323,74 @@ def render_privacy(builder, security: dict[str, Any]) -> str:
 def forms_js() -> str:
     return '''"use strict";
 (() => {
-  const forms = document.querySelectorAll("form[data-eucons-lead-form]");
-  for (const form of forms) {
+  const uuid = () => (globalThis.crypto && crypto.randomUUID)
+    ? crypto.randomUUID()
+    : `eucons-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+  for (const form of document.querySelectorAll("form[data-eucons-lead-form]")) {
     const started = Date.now();
     const id = form.querySelector('input[name="submission_id"]');
     const age = form.querySelector('input[name="submission_age_ms"]');
-    if (id) id.value = (globalThis.crypto && crypto.randomUUID) ? crypto.randomUUID() : `eucons-${started}-${Math.random().toString(36).slice(2)}`;
+    if (id) id.value = uuid();
     form.addEventListener("submit", () => { if (age) age.value = String(Math.max(0, Date.now() - started)); });
+  }
+
+  for (const group of document.querySelectorAll("[data-eucons-inbound]")) {
+    const forms = [...group.querySelectorAll("form[data-eucons-inbound-form]")];
+    const sessionId = uuid();
+    const started = Date.now();
+    for (const form of forms) {
+      const session = form.querySelector('input[name="session_id"]');
+      if (session) session.value = sessionId;
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const status = form.querySelector(".eu-form-status");
+        const formData = new FormData(form);
+        const requestId = uuid();
+        const age = Math.max(0, Date.now() - started);
+        const answers = {};
+        for (const element of form.elements) {
+          if (!element.name || ["session_id", "request_id", "submission_age_ms", "website"].includes(element.name)) continue;
+          if (element.type === "checkbox") {
+            answers[element.name] = element.checked;
+          } else if (element.dataset.euconsList === "true") {
+            answers[element.name] = element.value.split(",").map(value => value.trim()).filter(Boolean);
+          } else if (element.value !== "") {
+            answers[element.name] = element.type === "number" ? Number(element.value) : element.value;
+          }
+        }
+        const payload = {
+          session_id: sessionId,
+          journey_id: form.dataset.journeyId,
+          form_id: form.dataset.formId,
+          request: {
+            request_id: requestId,
+            submission_age_ms: age,
+            website: String(formData.get("website") || ""),
+            step: form.dataset.step,
+            answers,
+          },
+        };
+        if (status) status.textContent = "Se verifică datele…";
+        try {
+          const response = await fetch(form.action, {
+            method: "POST",
+            headers: {"Content-Type": "application/json", "Accept": "application/json"},
+            credentials: "same-origin",
+            body: JSON.stringify(payload),
+          });
+          if (!response.ok) throw new Error("unavailable");
+          const result = await response.json();
+          const next = result?.response?.next_stage;
+          form.hidden = true;
+          const nextForm = forms.find(item => item.dataset.step === next);
+          if (nextForm) nextForm.hidden = false;
+          if (!nextForm && status) status.textContent = result?.response?.message || "Solicitarea a fost structurată pentru analiză.";
+        } catch (_error) {
+          if (status) status.textContent = "Transmiterea nu este disponibilă acum. Datele rămân în pagină; încearcă din nou.";
+        }
+      });
+    }
   }
 })();
 '''
@@ -265,6 +417,15 @@ def build_site(target: Path) -> dict[str, Any]:
         "/ghiduri/": render_knowledge(builder, data, "GUIDE", "/ghiduri/", "Ghiduri pentru beneficiari", "Repere despre livrabile, pași și limite, derivate numai din serviciile comerciale aprobate."),
         "/articole/": render_knowledge(builder, data, "ANALYSIS", "/articole/", "Analize și bune practici", "Conținut orientat spre decizie și implementare, fără transformarea interpretărilor în reguli administrative."),
         "/resurse/": render_knowledge(builder, data, "FAQ", "/resurse/", "Resurse și întrebări utile", "Puncte de control pentru pregătire, implementare, conformitate și remediere."),
+        **{
+            journey["path"]: render_progressive_journey(
+                builder,
+                data,
+                journey,
+                load_json(EUCONS / "leads" / "inbound_runtime_contract.json")["journey_form_map"][journey["id"]],
+            )
+            for journey in data["ux"].get("journeys", [])
+        },
         "/despre/": render_about(builder, data),
         "/evaluare-proiect/": render_lead(builder, "Evaluare proiect", "/evaluare-proiect/", "project_evaluation", "Descrie investiția sau proiectul; motorul de calificare structurează solicitarea și o corelează cu serviciile și oportunitățile verificate."),
         "/solicita-oferta/": render_lead(builder, "Solicită ofertă", "/solicita-oferta/", "proposal_request", "Transmite contextul necesar pentru definirea serviciilor, livrabilelor și condițiilor comerciale. Prețurile nu sunt inventate de sistem."),
