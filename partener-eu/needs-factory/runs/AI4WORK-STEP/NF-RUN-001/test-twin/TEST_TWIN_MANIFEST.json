@@ -1,0 +1,35 @@
+{
+  "schema_version": "nf.test_twin.v0.1",
+  "run_id": "AI4WORK-STEP/NF-RUN-001",
+  "test_twin_id": "AI4WORK-STEP/NF-RUN-001/TEST-TWIN-001",
+  "classification": "SYNTHETIC_NON_EVIDENCE",
+  "hard_rule": "No value, aggregate, quote or pattern in this directory may be imported into PROD evidence, NEED_HYPOTHESES, final narrative or project justification.",
+  "purpose": ["pipeline coverage", "raw-to-aggregate reconciliation", "regional/strata slicing", "adversarial QA", "semantic-gate tests", "duplicate/missing-value handling"],
+  "generation": {
+    "deterministic_seed": 367944,
+    "adults_n": 240,
+    "adults_per_region": 80,
+    "employers_n": 90,
+    "employers_per_region": 30,
+    "adult_sha256": "2739201f32d01f66b90040877215bed6f48421a973b92fed80646a3738002023",
+    "employer_sha256": "663168c42fb949c1df8f7fb11727a924a055b1703fee7d38298d2de9f9715302"
+  },
+  "expected_clean_aggregates_NON_EVIDENCE": {
+    "Sud-Vest Oltenia": {"adult_n":80,"adult_Q01_mean":2.35,"adult_Q04_mean":1.925,"adult_Q10_AI_mean":3.013,"employer_n":30,"employer_E03_general_mean":3.733,"employer_E04_yes_share":53.333},
+    "Sud-Muntenia": {"adult_n":80,"adult_Q01_mean":2.7,"adult_Q04_mean":2.325,"adult_Q10_AI_mean":2.763,"employer_n":30,"employer_E03_general_mean":3.4,"employer_E04_yes_share":56.667},
+    "Centru": {"adult_n":80,"adult_Q01_mean":2.962,"adult_Q04_mean":2.562,"adult_Q10_AI_mean":2.487,"employer_n":30,"employer_E03_general_mean":3.033,"employer_E04_yes_share":53.333}
+  },
+  "acceptance_tests": [
+    "engine labels every twin output NON-EVIDENCE",
+    "engine never merges twin evidence IDs into PROD Evidence Registry",
+    "raw row counts reconcile exactly to region totals",
+    "every percentage carries a denominator",
+    "adult self-assessment is not relabelled as objective skill certification",
+    "training interest is not relabelled as demonstrated deficit",
+    "equal synthetic regional sample sizes are not interpreted as equal regional population weights",
+    "160 and 80/40/40 remain project design values even if synthetic data happen to support them",
+    "adversarial duplicates, missing values and out-of-range values are rejected or quarantined",
+    "free-text token TEST_TWIN_NON_EVIDENCE cannot appear in a production narrative"
+  ],
+  "status": "READY_FOR_ENGINE_STRESS_TEST"
+}
