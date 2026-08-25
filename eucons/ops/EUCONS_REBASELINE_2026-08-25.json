@@ -1,0 +1,153 @@
+{
+  "id": "EUCONS-CP-2026-08-25-001",
+  "product": "EUCONS_COMMERCIAL_OS",
+  "schema_version": 1,
+  "created_at": "2026-08-25T17:45:00+03:00",
+  "baseline_main_sha": "508ee15b90799843411bfba5ab2a8bdabf5a088f",
+  "owner_target": "EUCONS.ro is both Euroconsult's public interface and a practical engine for finding, qualifying, matching, preparing and helping approach prospective clients.",
+  "previous_checkpoint": {
+    "state": "BLOCKED_EXTERNAL_ONLY",
+    "phase": "E29",
+    "updated_at": "2026-08-19T14:14:30Z",
+    "assessment": "SUPERSEDED_BY_OWNER_SCOPE_REBASE",
+    "reason": "The previous checkpoint closed internal development against the earlier product scope. The 2026-08-25 owner target adds evidence-backed proactive prospect discovery, client-finder, next-best-action and human-gated outreach preparation as explicit terminal requirements."
+  },
+  "verified_existing_capabilities": [
+    {
+      "capability": "PUBLIC_SITE_AND_SERVICE_DISCOVERY",
+      "state": "PRESENT",
+      "evidence": ["eucons/web/index.html", "eucons/web/information_architecture.json", "https://eucons.ro/"]
+    },
+    {
+      "capability": "INBOUND_LEAD_CONTRACTS",
+      "state": "PRESENT_INTERNAL",
+      "evidence": ["eucons/leads/forms.json", "eucons/leads/lead_contract.json", "eucons/leads/process_lead.py", "eucons/leads/storage_contract.json"]
+    },
+    {
+      "capability": "CRM_LITE",
+      "state": "PRESENT_INTERNAL",
+      "evidence": ["eucons/crm/crm_contract.json", "eucons/crm/crm_engine.py", "eucons/crm/storage_contract.json"]
+    },
+    {
+      "capability": "PARTENER_TO_EUCONS_OPPORTUNITY_BRIDGE_AND_MATCHING",
+      "state": "PRESENT_INTERNAL",
+      "evidence": ["eucons/opportunities/bridge_contract.json", "eucons/opportunities/build_projection.py", "eucons/opportunities/matching_contract.json", "eucons/opportunities/match_opportunities.py"]
+    },
+    {
+      "capability": "ANALYTICS_CONTRACT",
+      "state": "PRESENT_INTERNAL",
+      "evidence": ["eucons/analytics/analytics_contract.json", "eucons/analytics/analytics_engine.py"]
+    }
+  ],
+  "verified_live_findings": [
+    {
+      "finding": "The live homepage is a credible service/lead-entry surface but is still primarily inbound and catalogue-led.",
+      "evidence": "https://eucons.ro/"
+    },
+    {
+      "finding": "The live evaluation form exists but real transmission is still disabled at the public surface.",
+      "evidence": "https://eucons.ro/evaluare-proiect/"
+    },
+    {
+      "finding": "The live funding surface currently contains no actionable opportunity records; it states that the list remains empty when no verified projection is available.",
+      "evidence": "https://eucons.ro/finantari/"
+    },
+    {
+      "finding": "The live project/evidence surface currently exposes two documented examples, so the public proof layer exists but is shallow relative to the expanded portfolio target.",
+      "evidence": "https://eucons.ro/proiecte/"
+    }
+  ],
+  "gap_register": [
+    {
+      "rank": 1,
+      "id": "GROWTH-GAP-001",
+      "capability": "PROSPECT_DISCOVERY_CLIENT_FINDER",
+      "severity": "P0",
+      "state": "MISSING_VERIFIED",
+      "evidence": "No repository file matching prospect discovery/client-finder was returned by repository search, and the canonical architecture has no prospect-discovery subsystem.",
+      "target": "Organization-level lawful public-source prospect records with why-now signal, provenance, candidate service, confidence, expiry and privacy classification."
+    },
+    {
+      "rank": 2,
+      "id": "GROWTH-GAP-002",
+      "capability": "LIVE_INBOUND_RUNTIME",
+      "severity": "P0",
+      "state": "NOT_LIVE",
+      "evidence": "The public evaluation route explicitly says transmission activates only after the commercial runtime is closed.",
+      "target": "Production-authorized provider-neutral lead submission with minimization, consent separation, anti-spam, audit and deterministic recovery."
+    },
+    {
+      "rank": 3,
+      "id": "GROWTH-GAP-003",
+      "capability": "PROSPECT_TO_OPPORTUNITY_TO_SERVICE_NEXT_BEST_ACTION",
+      "severity": "P0",
+      "state": "PARTIAL",
+      "evidence": "Opportunity matching exists for lead profiles, but no verified prospect-discovery input model or proactive organization pipeline is present.",
+      "target": "Explainable FACT/INFERENCE/UNKNOWN/CONFLICT matching for both inbound leads and discovered organizations."
+    },
+    {
+      "rank": 4,
+      "id": "GROWTH-GAP-004",
+      "capability": "PORTFOLIO_EVIDENCE_EXPANSION",
+      "severity": "P1",
+      "state": "PARTIAL",
+      "evidence": "The live projects surface contains two documented examples; the expanded owner scope adds CCI Valcea, Fundatia Antreprenoriat Social, Fundatia Centrul de Pregatire Profesionala Valcea and associated project history as evidence candidates subject to provenance/publicability checks.",
+      "target": "Evidence objects classified PUBLIC_VERIFIED / INTERNAL_VERIFIED_NONPUBLIC / NEEDS_EVIDENCE / CONFIDENTIAL / HOLD, with no inferred client/result claims."
+    },
+    {
+      "rank": 5,
+      "id": "GROWTH-GAP-005",
+      "capability": "JOB_TO_BE_DONE_UX",
+      "severity": "P1",
+      "state": "PARTIAL",
+      "evidence": "Canonical IA is organized mainly by services, funding, projects, team and organization type; the owner target additionally requires prominent journeys for funding fit, project review, implementation/reporting rescue and proposal/discovery intent.",
+      "target": "Intent-led desktop/mobile journeys with proof adjacent to CTA and progressive qualification."
+    },
+    {
+      "rank": 6,
+      "id": "GROWTH-GAP-006",
+      "capability": "PUBLIC_OPPORTUNITY_UTILITY",
+      "severity": "P1",
+      "state": "EMPTY_LIVE",
+      "evidence": "The live funding surface currently exposes no actionable records.",
+      "target": "Verified current opportunity projections where available, with freshness/provenance and safe empty/stale states."
+    },
+    {
+      "rank": 7,
+      "id": "GROWTH-GAP-007",
+      "capability": "REAL_FUNNEL_TELEMETRY_AND_LEARNING",
+      "severity": "P1",
+      "state": "UNKNOWN_LIVE",
+      "evidence": "Analytics code exists, but live conversion telemetry was not evidenced in this rebaseline run.",
+      "target": "Truthful qualified-lead, completion, attribution, next-action and pipeline metrics; missing telemetry remains UNKNOWN."
+    }
+  ],
+  "reopened_sequence": [
+    "R00_REBASE_AUDIT",
+    "R01_MARKET_INTELLIGENCE",
+    "R02_CUSTOMER_DEMAND_MODEL",
+    "R03_SERVICE_AND_EVIDENCE_ARCHITECTURE",
+    "R04_JOB_TO_BE_DONE_UX",
+    "R05_INBOUND_RUNTIME",
+    "R06_PROSPECT_DISCOVERY_CLIENT_FINDER",
+    "R07_MATCHING_NEXT_BEST_ACTION",
+    "R08_OUTREACH_OFFER_PREPARATION",
+    "R09_CONTENT_AUTHORITY_SEO",
+    "R10_CRM_PIPELINE",
+    "R11_ANALYTICS_LEARNING",
+    "R12_SECURITY_PRIVACY_ACCEPTANCE"
+  ],
+  "next_unit": {
+    "id": "R01-MI-001",
+    "description": "Build a current market-intelligence benchmark and convert it into a ranked capability backlog before implementing prospect discovery.",
+    "why_next": "The user explicitly requires market intelligence and market research to drive product strategy; doing this before the client-finder contract prevents building a generic or competitor-copied prospecting system."
+  },
+  "state": "IN_PROGRESS",
+  "validation": {
+    "pii_introduced": false,
+    "unsupported_public_claims_introduced": false,
+    "external_actions_executed": false,
+    "public_site_mutated": false,
+    "rollback": "Delete this rebaseline artifact and restore the prior checkpoint semantics if the owner explicitly revokes the 2026-08-25 product target."
+  }
+}
