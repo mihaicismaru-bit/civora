@@ -42,6 +42,10 @@ jobs:
         run: python eucons/validation/validate_service_proof_architecture.py
       - name: Test EUCONS service/proof fail-closed behavior
         run: python eucons/validation/test_service_proof_architecture_fail_closed.py
+      - name: Validate EUCONS JTBD UX
+        run: python eucons/validation/validate_jtbd_ux.py
+      - name: Test EUCONS JTBD UX fail-closed behavior
+        run: python eucons/validation/test_jtbd_ux_fail_closed.py
       - name: Validate EUCONS evidence base
         run: python eucons/validation/validate_evidence_base.py
       - name: Test EUCONS evidence fail-closed behavior
