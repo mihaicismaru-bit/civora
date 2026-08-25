@@ -1,20 +1,36 @@
 {
   "product": "EUCONS_COMMERCIAL_OS",
-  "schema_version": 1,
-  "updated_at": "2026-08-19T14:14:30Z",
-  "development_state": "BLOCKED_EXTERNAL_ONLY",
-  "current_phase": "E29",
-  "current_unit": "E29_EXTERNAL_HANDOFF",
-  "completed_phases": ["E00", "E01", "E02", "E03", "E04", "E05", "E06", "E07", "E08", "E09", "E10", "E11", "E12", "E13", "E14", "E15", "E16", "E17", "E18", "E19", "E20", "E21", "E22", "E23", "E24", "E25", "E26", "E27", "E28"],
-  "next_action": "Owner-authorize only domain/hosting, LinkedIn, Facebook and the commercial mailbox according to eucons/deployment/external_handoff_manifest.json. No further internal development action is required before those authorizations.",
-  "terminal_target": "PRODUCTION_READY",
-  "external_handoff_allowed_only_after": "E28",
-  "blocking_reason": "EXTERNAL_AUTHORIZATION_ONLY",
-  "last_good_checkpoint": "E28_PASS_quality_32262584729_build_32262584718",
+  "schema_version": 2,
+  "updated_at": "2026-08-25T17:45:00+03:00",
+  "checkpoint_id": "EUCONS-CP-2026-08-25-001",
+  "development_state": "IN_PROGRESS",
+  "current_phase": "R01_MARKET_INTELLIGENCE",
+  "current_unit": "R01-MI-001",
+  "previous_terminal_assessment": {
+    "state": "BLOCKED_EXTERNAL_ONLY",
+    "phase": "E29",
+    "checkpoint_date": "2026-08-19T14:14:30Z",
+    "status": "SUPERSEDED_BY_OWNER_SCOPE_REBASE"
+  },
+  "historically_completed_phases": ["E00", "E01", "E02", "E03", "E04", "E05", "E06", "E07", "E08", "E09", "E10", "E11", "E12", "E13", "E14", "E15", "E16", "E17", "E18", "E19", "E20", "E21", "E22", "E23", "E24", "E25", "E26", "E27", "E28"],
+  "reopened_sequence": ["R00_REBASE_AUDIT", "R01_MARKET_INTELLIGENCE", "R02_CUSTOMER_DEMAND_MODEL", "R03_SERVICE_AND_EVIDENCE_ARCHITECTURE", "R04_JOB_TO_BE_DONE_UX", "R05_INBOUND_RUNTIME", "R06_PROSPECT_DISCOVERY_CLIENT_FINDER", "R07_MATCHING_NEXT_BEST_ACTION", "R08_OUTREACH_OFFER_PREPARATION", "R09_CONTENT_AUTHORITY_SEO", "R10_CRM_PIPELINE", "R11_ANALYTICS_LEARNING", "R12_SECURITY_PRIVACY_ACCEPTANCE"],
+  "completed_rebase_units": ["R00_REBASE_AUDIT"],
+  "next_action": "Build a current market-intelligence benchmark and convert it into a ranked capability backlog, then implement the smallest evidence-backed product increment.",
+  "terminal_target": "PRODUCTION_GRADE_EUCONS_COMMERCIAL_OS",
+  "blocking_reason": null,
+  "last_good_checkpoint": "EUCONS-CP-2026-08-25-001",
+  "evidence": [
+    "eucons/ops/EUCONS_REBASELINE_2026-08-25.json",
+    "https://eucons.ro/",
+    "https://eucons.ro/evaluare-proiect/",
+    "https://eucons.ro/finantari/",
+    "https://eucons.ro/proiecte/"
+  ],
   "autonomy": {
     "enabled": true,
     "owner_intervention_required_for_routine_development": false,
     "merge_policy": "validated-eucons-only-or-tested-shared-change",
-    "fail_closed": true
+    "fail_closed": true,
+    "external_contact_requires_human_approval": true
   }
 }
