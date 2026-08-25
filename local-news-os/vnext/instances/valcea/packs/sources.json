@@ -4,7 +4,144 @@
   "instance_id": "valcea",
   "migration": {
     "legacy_registry": "local-news-os/instances/valcea/source_pack.json",
-    "status": "IMPORT_REQUIRED"
+    "legacy_catalogs": [
+      "valcea-clar/editorial/news_sources.json",
+      "valcea-clar/editorial/news_sources_expansion_v1.json"
+    ],
+    "status": "CONSOLIDATED_SHADOW_ONLY",
+    "publication_authority": "NONE",
+    "note": "Stable RSS/Atom sources are enabled. HTML/document surfaces remain registered but disabled until deterministic adapter contracts pass acceptance."
   },
-  "sources": []
+  "sources": [
+    {
+      "source_id": "cj-valcea-atom",
+      "adapter": "RSS_ATOM",
+      "role": "BOTH",
+      "url": "https://cjvalcea.ro/?format=feed&type=atom",
+      "enabled": true,
+      "max_items": 100,
+      "config": {
+        "tier": "T1",
+        "publisher": "Consiliul Județean Vâlcea",
+        "local_by_definition": true
+      }
+    },
+    {
+      "source_id": "ajofm-valcea-feed",
+      "adapter": "RSS_ATOM",
+      "role": "BOTH",
+      "url": "https://www.anofm.ro/valcea/categorie/comunicate-de-presa/feed/",
+      "enabled": true,
+      "max_items": 100,
+      "config": {
+        "tier": "T1",
+        "publisher": "AJOFM Vâlcea",
+        "local_by_definition": true
+      }
+    },
+    {
+      "source_id": "se-intampla-in-valcea",
+      "adapter": "RSS_ATOM",
+      "role": "DISCOVERY",
+      "url": "https://seintamplainvalcea.ro/feed/",
+      "enabled": true,
+      "max_items": 100,
+      "config": {
+        "tier": "T2",
+        "publisher": "Se întâmplă în Vâlcea",
+        "local_by_definition": true
+      }
+    },
+    {
+      "source_id": "eveniment-valcean",
+      "adapter": "RSS_ATOM",
+      "role": "DISCOVERY",
+      "url": "https://evenimentvalcean.ro/feed/",
+      "enabled": true,
+      "max_items": 100,
+      "config": {
+        "tier": "T2",
+        "publisher": "Eveniment Vâlcean",
+        "local_by_definition": true
+      }
+    },
+    {
+      "source_id": "ziarul-de-valcea",
+      "adapter": "RSS_ATOM",
+      "role": "DISCOVERY",
+      "url": "https://ziaruldevalcea.ro/feed/",
+      "enabled": true,
+      "max_items": 100,
+      "config": {
+        "tier": "T2",
+        "publisher": "Ziarul de Vâlcea",
+        "local_by_definition": true
+      }
+    },
+    {
+      "source_id": "cj-valcea-sedinte",
+      "adapter": "HTML_LIST",
+      "role": "PRIMARY",
+      "url": "https://cjvalcea.ro/avn_sedinte_cj/",
+      "enabled": false,
+      "max_items": 100,
+      "config": {
+        "tier": "T1",
+        "publisher": "Consiliul Județean Vâlcea",
+        "hold_reason": "SESSION_REGISTER_REQUIRES_DATE_SEMANTICS"
+      }
+    },
+    {
+      "source_id": "primaria-rm-valcea-hcl",
+      "adapter": "HTML_LIST",
+      "role": "PRIMARY",
+      "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=50",
+      "enabled": false,
+      "max_items": 100,
+      "config": {
+        "tier": "T1",
+        "publisher": "Primăria Râmnicu Vâlcea",
+        "hold_reason": "DECISION_REGISTER_REQUIRES_DOCUMENT_CONTRACT"
+      }
+    },
+    {
+      "source_id": "isu-valcea-comunicate",
+      "adapter": "HTML_LIST",
+      "role": "BOTH",
+      "url": "https://isuvl.igsu.ro/comunicate-de-presa",
+      "enabled": false,
+      "max_items": 100,
+      "config": {
+        "tier": "T1",
+        "publisher": "ISU Vâlcea",
+        "hold_reason": "PUBLIC_SAFETY_BODY_AND_PRIVACY_GATE_REQUIRED"
+      }
+    },
+    {
+      "source_id": "ipj-valcea-comunicate",
+      "adapter": "HTML_LIST",
+      "role": "BOTH",
+      "url": "https://vl.politiaromana.ro/ro/stiri-si-media/comunicate",
+      "enabled": false,
+      "max_items": 100,
+      "config": {
+        "tier": "T1",
+        "publisher": "IPJ Vâlcea",
+        "hold_reason": "INCIDENT_AND_SENSITIVE_CLAIM_GATE_REQUIRED"
+      }
+    },
+    {
+      "source_id": "isj-valcea-comunicate",
+      "adapter": "HTML_LIST",
+      "role": "PRIMARY",
+      "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83",
+      "enabled": false,
+      "max_items": 100,
+      "config": {
+        "tier": "T1",
+        "publisher": "ISJ Vâlcea",
+        "hold_reason": "MIXED_DOCUMENT_FEED_CONTRACT_REQUIRED"
+      }
+    }
+  ]
 }
