@@ -61,7 +61,8 @@ def main() -> None:
     home = next(row for row in routes if row["route_id"] == "home")
     assert home["schema"]["@type"] == "WebSite"
     assert "/servicii/" in result["internal_links"]["/"]
-    assert "/evaluare-proiect/" in result["internal_links"]["/"]
+    assert "/verifica-proiectul/" in result["internal_links"]["/"]
+    assert "/proiect-in-implementare/" in result["internal_links"]["/"]
     assert all(result["incoming_link_counts"][row["path"]] > 0 for row in routes if row["path"] != "/")
 
     expected_clusters = {"services", "funding", "audiences", "authority", "trust"}
