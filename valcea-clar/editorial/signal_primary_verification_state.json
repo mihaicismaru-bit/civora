@@ -2,19 +2,80 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-25T15:05:28+03:00",
+  "generated_at": "2026-08-25T17:31:44+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-25T15:04:10+03:00",
-  "task_count": 55,
+  "queue_generated_at": "2026-08-25T17:30:48+03:00",
+  "task_count": 57,
   "primary_match_count": 0,
-  "no_match_count": 23,
-  "unrouted_count": 32,
+  "no_match_count": 24,
+  "unrouted_count": 33,
   "target_count": 15,
   "targets_ok": 12,
   "results": [
+    {
+      "signal_id": "7e642b6517c27b561f3121b3",
+      "signal_title": "Expoziție cu 15 artiști la Centrul Cultural Vâlcea. Vernisajul are loc joi",
+      "signal_url": "https://seintamplainvalcea.ro/2026/08/25/expozitie-cu-15-artisti-la-centrul-cultural-valcea-vernisajul-are-loc-joi/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_published_at": "2026-08-25T16:51:04+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "5c1010dea686ebb353f29f6a",
+      "signal_title": "Investiții importante pentru comuna Costești! Canalizarea, infrastructura inteligentă și bugetul local, pe masa Consiliului Local",
+      "signal_url": "https://evenimentvalcean.ro/investitii-importante-pentru-comuna-costesti-canalizarea-infrastructura-inteligenta-si-bugetul-local-pe-masa-consiliului-local/",
+      "signal_publisher": "Eveniment Vâlcean",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-25T15:53:54+03:00",
+      "verification_route_id": "utilities",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "apavil-comunicate",
+            "name": "APAVIL S.A.",
+            "url": "https://apavil.ro/?page_id=1178"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "apavil-opriri-programate",
+            "name": "APAVIL S.A.",
+            "url": "https://apavil.ro/?page_id=962"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 2
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "cet-govora-termoficare-advisories",
+            "name": "CET Govora S.A. — Termoficare Vâlcea",
+            "url": "https://www.termoficarevalcea.ro/blog/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 1
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "5f7a1c5521eee8468ecd6f45",
       "signal_title": "Cod galben de viituri în Vâlcea. Râurile pot crește rapid până miercuri noapte",
@@ -33,7 +94,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 9
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -169,7 +230,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 9
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -254,7 +315,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 9
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -1047,7 +1108,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 9
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -1157,7 +1218,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 9
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
