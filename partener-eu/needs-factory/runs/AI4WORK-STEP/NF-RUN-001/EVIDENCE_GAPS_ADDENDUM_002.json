@@ -1,0 +1,76 @@
+{
+  "schema_version": "nf.evidence_gaps_addendum.v0.1",
+  "run_id": "AI4WORK-STEP/NF-RUN-001",
+  "extends": "EVIDENCE_GAPS.json",
+  "research_date": "2026-08-25",
+  "changes": [
+    {
+      "gap_id": "GAP-REG-SM-ADULT-LEARNING",
+      "prior_status": "BLOCKING_OPEN",
+      "new_status": "RESOLVED_FOR_CONSTRUCT",
+      "blocking": false,
+      "basis": ["EV-OECD-EUROSTAT-ADULT-LEARNING-REGIONS-2022", "EV-EUROSTAT-MIRROR-ADULT-LEARNING-REGIONS-2025"],
+      "finding": "A directly comparable NUTS2 adult-learning participation value is now frozen for Sud-Muntenia: 6.1% for 2022 in OECD Economic Survey Romania 2024 based on Eurostat EU-LFS. A recent institutional mirror of Eurostat trng_lfse_04 reports 11.4% for 2025, used only as corroborative trend evidence.",
+      "guardrail": "Do not combine the four-week EU-LFS indicator with 12-month adult-learning measures or interpret participation rate alone as an AI-specific skills deficit."
+    },
+    {
+      "gap_id": "GAP-SCALE-160",
+      "prior_status": "BLOCKING_OPEN",
+      "new_status": "PARTIALLY_RESOLVED_RECRUITMENT_FEASIBILITY_ONLY",
+      "blocking": true,
+      "basis": ["EV-ANOFM-REGISTERED-UNEMPLOYED-REGIONS-AGE30-55-2026-06", "EV-ANOFM-REGISTERED-UNEMPLOYED-REGIONAL-TOTALS-2026-06"],
+      "finding": "Current official ANOFM county data produce a conservative lower bound of 72,824 registered unemployed aged 30-55 across the three regions: 26,388 Sud-Vest Oltenia, 25,470 Sud-Muntenia and 20,966 Centru. Planned 160 equals about 0.22% of this administrative pool. Macro recruitment capacity is therefore strongly evidenced even before considering eligible employed persons.",
+      "remaining_blocker": "The evidence does not show that 160 people have the measured AI/digital skills deficit or willingness to participate, does not apply every GSCS exclusion, and does not justify 80/40/40 as relative need-weight. Primary/direct interest evidence remains required if the final narrative claims exact scale as need magnitude or empirically optimal allocation.",
+      "release_effect": "The final analysis may state that the planned scale is administratively plausible/feasible relative to the registered-unemployed pool; it may not state that 160 or 80/40/40 is the measured size/distribution of need."
+    },
+    {
+      "gap_id": "GAP-GSCS-BINARY",
+      "prior_status": "BLOCKING_OPEN",
+      "new_status": "NARROWED_CURRENT_BINARY_URL_IDENTIFIED_POST_CORRIGENDUM_REFRESH_REQUIRED",
+      "blocking": true,
+      "basis": ["EV-OIRNV-STEP-LLL-CONSOLIDATED-GUIDE-2026-08-13", "EV-STEP-LLL-CORRIGENDUM-2026-08-24"],
+      "finding": "OIR PECU Nord-Vest exposes a direct official MIPE URL for the 13-August consolidated 7Z package and confirms approval by MIPE Order 767/2026. A 24-August report citing MIPE indicates a further corrigendum and updated Annex 4, so final QA must capture the post-24-August official binaries.",
+      "remaining_blocker": "Exact current official guide/annex files and cryptographic hashes have not been captured. The direct official 13-August package timed out in the research environment and may no longer be the newest package after the 24-August corrigendum."
+    },
+    {
+      "gap_id": "GAP-PRIMARY-ELIGIBLE-ADULTS",
+      "prior_status": "BLOCKING_OPEN",
+      "new_status": "BLOCKING_OPEN_NARROWED_POOL_SIZE",
+      "blocking": true,
+      "basis": ["EV-ANOFM-REGISTERED-UNEMPLOYED-REGIONS-AGE30-55-2026-06"],
+      "finding": "The existence and macro size of an age-compatible registered-unemployed pool are now strongly evidenced for all three regions. What remains unmeasured is the actual AI/digital competency profile, barriers, and training interest of eligible adults.",
+      "resolution": "Collect real first-party survey responses through the GDPR-safe eucons.ro instrument or obtain an equivalent direct dataset with region/status/age-band metadata."
+    },
+    {
+      "gap_id": "GAP-PRIMARY-EMPLOYERS",
+      "prior_status": "BLOCKING_OPEN",
+      "new_status": "BLOCKING_OPEN",
+      "blocking": true,
+      "finding": "Secondary evidence can demonstrate technology-transition context and labour-market pressure but still does not directly identify which AI/digital capabilities employers in the three regions observe as insufficient in relevant workflows.",
+      "resolution": "Collect employer/organisation responses or structured interview evidence; keep contact details separate from the analytic dataset."
+    },
+    {
+      "gap_id": "GAP-REG-SVO-DIGITAL-MATURITY",
+      "prior_status": "NONBLOCKING_OPEN",
+      "new_status": "NONBLOCKING_OPEN_CONTEXT_STRENGTHENED",
+      "blocking": false,
+      "finding": "National digital-intensity and regional innovation evidence strengthen context but are not a direct current measure of firm AI/digital maturity in Sud-Vest Oltenia.",
+      "guardrail": "Do not promote innovation index, R&D intensity or national digital intensity into a regional employer skill-gap measure."
+    },
+    {
+      "gap_id": "GAP-REG-SM-DIGITAL-MATURITY",
+      "prior_status": "NONBLOCKING_OPEN",
+      "new_status": "NONBLOCKING_OPEN_CONTEXT_STRENGTHENED",
+      "blocking": false,
+      "finding": "Regional labour-market/education indicators and national digital-intensity evidence strengthen context but are not a direct current measure of firm AI/digital maturity in Sud-Muntenia.",
+      "guardrail": "Do not promote strategic priority or low high-tech employment automatically into an employer AI skills deficit."
+    }
+  ],
+  "remaining_blocking_set": [
+    "GAP-GSCS-BINARY",
+    "GAP-PRIMARY-ELIGIBLE-ADULTS",
+    "GAP-PRIMARY-EMPLOYERS",
+    "GAP-SCALE-160 exact-need/distribution component"
+  ],
+  "status": "SECONDARY_EVIDENCE_SUBSTANTIALLY_STRENGTHENED_NOT_READY_FOR_FINAL_RELEASE"
+}
