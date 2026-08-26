@@ -1,0 +1,61 @@
+{
+  "schema_version": "nf.checkpoint_status.v0.1",
+  "run_id": "AI4WORK-STEP/NF-RUN-001",
+  "checkpoint": "NF06_PRIMARY_RESEARCH",
+  "status": "NF06_FRESH_MAIN_SCHEMA_VALIDATOR_REBUILT_REAL_COLLECTION_STILL_GATED",
+  "supersedes": "NF06_STATUS_007.json",
+  "verified_delta": [
+    "The fresh EUCONS branch now contains the frozen adult/employer questionnaire definitions, fail-closed form contract and noindex form renderer.",
+    "A schema-driven fresh-main runtime validator was rebuilt from forms_definition.json and aligned to the NF06 raw envelope.",
+    "The validator expands forbidden-key coverage to the NF06 prohibited identifier aliases and screens email, Romanian-phone, CNP-like and URL-like free-text tokens.",
+    "The validator enforces exact profile/question field sets, option membership, rating ranges, matrix keys, multi-select limits, duplicate-selection rejection and inactive conditional-field emptiness.",
+    "Focused tests for the new validator were persisted and read back; execution on the new exact head remains pending and is not claimed as PASS.",
+    "Collection remains disabled and no merge/deploy/real-data write occurred."
+  ],
+  "fresh_main_integration": {
+    "branch": "eucons/ai4work-research-provider-v1",
+    "latest_readiness_commit": "f79a7492184214df663588d72e7f8163ea28bc30",
+    "compare_to_main_at_validation": {
+      "main": "ce5096ba38ed11a8979cf684d4ff6971e41b73de",
+      "state": "DIVERGED",
+      "ahead_by": 10,
+      "behind_by": 2,
+      "changed_files": 9,
+      "changed_scope": "eucons/research/ai4work-step only"
+    },
+    "collection_enabled": false,
+    "merge_authorized": false,
+    "deploy_authorized": false
+  },
+  "validation_boundary": {
+    "storage_adapter_local_tests_from_preceding_candidate": "PASS_4_OF_4",
+    "new_runtime_and_test_files_readback": "PASS",
+    "new_runtime_test_execution": "PENDING",
+    "new_renderer_ci": "NOT_RUN",
+    "browser_http_store_export_nf06_test_twin_smoke": "PENDING",
+    "real_primary_data_ingest": "PENDING_REAL_DATA"
+  },
+  "blocking_for_nf07": [
+    "real adult responses with documented recruitment frames and coverage across all three regions",
+    "real employer/organisation responses with documented recruitment channels and coverage across all three regions"
+  ],
+  "blocking_for_final_call_compliance": [
+    "exact current official MIPE STEP-LLL guide/corrigendum PDF bytes and SHA-256",
+    "exact current official MIPE updated Annex 4 DOCX bytes and SHA-256"
+  ],
+  "blocking_for_real_collection": [
+    "privacy/DPO contact and research-specific legal-basis/notice binding",
+    "production first-party HTTP endpoint",
+    "research-only durable database physically and credential-wise separated from CRM",
+    "hosting processor/subprocessor, transfer, server-log/IP-retention, encryption, access-control and retention execution review",
+    "exact-head runtime/form tests plus TEST TWIN browser -> HTTP -> isolated store -> immutable export -> NF06 smoke"
+  ],
+  "scale_rule": "160 and 80/40/40 remain project design values unless independent evidence and a transparent allocation rule support them as observed need; do not claim measured need magnitude from design values.",
+  "test_twin": {
+    "classification": "SYNTHETIC_NON_EVIDENCE",
+    "prod_promotion": "FORBIDDEN",
+    "engine_testing_allowed": true
+  },
+  "next_action": "Execute the exact-head fresh runtime/form tests when a runnable validation surface is available, then implement the injectable first-party HTTP boundary with production collection still disabled. Continue official MIPE binary capture and secondary research in parallel.",
+  "final_narrative_allowed": false
+}
