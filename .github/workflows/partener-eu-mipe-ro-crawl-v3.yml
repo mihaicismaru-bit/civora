@@ -138,6 +138,7 @@ jobs:
           if($state -ne $env:MIPE_STATE_BEFORE_SHA){throw 'SURFACEMC boundary violation: mipe_state.json changed during acquisition'}
           if($feed -ne $env:MIPE_FEED_BEFORE_SHA){throw 'SURFACEMC boundary violation: mipe-news.js changed during acquisition'}
           $commit=(git rev-parse HEAD).Trim()
+          $env:MIPE_ACQUISITION_COMMIT=$commit
           "MIPE_ACQUISITION_COMMIT=$commit" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
           @'
           import hashlib,json,os
