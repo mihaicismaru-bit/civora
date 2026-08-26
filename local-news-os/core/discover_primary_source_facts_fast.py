@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
-"""Low-latency, fail-closed primary-source discovery for live newsrooms.
+"""Low-latency primary-source discovery for live newsrooms.
 
-This is a bounded-parallel execution adapter over the same SOURCE_PACK_V1,
-publication-date guard and legacy discovery semantics used by
-`discover_primary_source_facts.py`. It changes latency only, never the
-publication scope: automatically discovered records remain title/date/source
-candidates and cannot become full stories by themselves.
+This is a bounded-parallel execution adapter over SOURCE_PACK_V1 and the strict
+publication-date guard. The underlying crawler still admits only source title,
+article publication date and canonical source URL. This adapter may turn that
+small verified kernel into a clearly labelled *source notice brief* so a live
+newsroom does not go silent merely because a primary source has not yet been
+expanded into a full reported story.
 
-Transport failures are also correlated by normalized source host. This lets a
-newsroom distinguish one host-level coverage incident from several unrelated
-source failures without weakening TLS, retrying through an untrusted transport,
-or changing editorial admission semantics.
+A source notice brief never imports or paraphrases material claims from the
+article body. It explicitly tells the reader what has been verified (publisher,
+publication date, source title and canonical URL) and what has not yet been
+editorially expanded. Transport failures remain correlated by source host for
+diagnostics and never weaken TLS or evidence semantics.
 """
 from __future__ import annotations
 
@@ -35,6 +37,25 @@ import discovery_health as discovery_health  # noqa: E402
 DEFAULT_WORKERS = 6
 MAX_WORKERS = 8
 HOST_INCIDENT_MIN_FAILURES = 2
+SOURCE_NOTICE_INPUT_SCOPES = {
+    "source_title_and_publication_date_only",
+    "title_date_source_only",
+}
+SOURCE_NOTICE_SCOPE = "verified_source_notice_brief"
+SOURCE_NOTICE_PRIORITY_FLOORS = {
+    "SIGURANȚĂ": 99,
+    "SĂNĂTATE": 96,
+    "INFRASTRUCTURĂ": 95,
+    "MOBILITATE": 94,
+    "ENERGIE": 94,
+    "ADMINISTRAȚIE": 92,
+    "ECONOMIE": 90,
+    "EDUCAȚIE": 88,
+    "MEDIU": 88,
+    "EVENIMENTE": 86,
+    "CULTURĂ": 84,
+    "SPORT": 84,
+}
 
 
 def normalized_source_host(url: str) -> str:
@@ -93,6 +114,67 @@ def correlate_host_failures(sources: list[dict], rows: list[dict]) -> list[dict]
     return incidents
 
 
+def _parse_fact_time(value: str, timezone: ZoneInfo) -> datetime:
+    parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone)
+    return parsed.astimezone(timezone)
+
+
+def source_notice_brief(fact: dict, timezone: ZoneInfo) -> dict:
+    """Promote a narrow primary-source candidate into transparent reader copy.
+
+    No source-body text is copied or summarized. The only factual payload is the
+    already admitted source title, exact article publication date, publisher and
+    canonical URL. This is intentionally a lower editorial form than a reported
+    article, but it is useful enough to keep a local newsroom current while the
+    stronger fact-kernel path catches up.
+    """
+    if fact.get("auto_scope") not in SOURCE_NOTICE_INPUT_SCOPES:
+        return fact
+    sources = [row for row in fact.get("sources", []) if isinstance(row, dict) and row.get("url")]
+    if not sources:
+        return fact
+    source = sources[0]
+    publisher = str(source.get("name") or "sursa oficială").strip()
+    headline = str(fact.get("headline") or "").strip()
+    if not headline:
+        return fact
+    try:
+        published = _parse_fact_time(str(fact.get("valid_from") or ""), timezone)
+    except Exception:
+        return fact
+    published_label = published.strftime("%d.%m.%Y")
+    section = str(fact.get("section") or "ȘTIRI").upper()
+    floor = SOURCE_NOTICE_PRIORITY_FLOORS.get(section, 86)
+
+    result = dict(fact)
+    result["source_title"] = headline
+    result["auto_scope"] = SOURCE_NOTICE_SCOPE
+    result["brief_kind"] = "primary_source_notice"
+    result["priority"] = max(int(fact.get("priority") or 0), floor)
+    result["dek"] = (
+        f"{publisher} a publicat această informare la {published_label}. "
+        "VÂLCEA CLAR o semnalează ca noutate din sursă primară și păstrează legătura directă către pagina oficială."
+    )
+    result["paragraphs"] = [
+        "INFORMARE DIN SURSĂ PRIMARĂ. "
+        f"La {published_label}, {publisher} a publicat materialul cu titlul „{headline}”. "
+        "În această etapă, VÂLCEA CLAR confirmă automat numai existența publicării, data, titlul furnizat de instituție și adresa sursei oficiale. "
+        "Detaliile din conținutul sursei nu sunt transformate automat în afirmații editoriale; pentru acestea rămâne necesară verificarea sau compunerea unui material complet."
+    ]
+    result["source_notice_contract"] = {
+        "verified_fields": ["source_title", "publication_date", "publisher", "source_url"],
+        "source_body_material_claims_autopublished": False,
+        "reader_label_required": True,
+    }
+    return result
+
+
+def materialize_source_notice_briefs(facts: list[dict], timezone: ZoneInfo) -> list[dict]:
+    return [source_notice_brief(fact, timezone) for fact in facts]
+
+
 def run(instance_id: str, output: Path, state: Path, workers: int) -> int:
     instance_path = ROOT / "local-news-os" / "instances" / instance_id / "instance.json"
     instance = base.load_json(instance_path)
@@ -138,7 +220,7 @@ def run(instance_id: str, output: Path, state: Path, workers: int) -> int:
                 source_id = str(source["id"])
                 try:
                     results[source_id] = future.result()
-                except Exception as exc:  # fail closed per source, preserving other sources
+                except Exception as exc:  # isolate one failing source, preserving the rest
                     errors[source_id] = exc
 
     # Deterministic fold in SOURCE_PACK order, independent of completion order.
@@ -159,19 +241,23 @@ def run(instance_id: str, output: Path, state: Path, workers: int) -> int:
                 "facts": 0,
             })
 
-    facts = legacy.dedupe_repeated_headlines(all_facts)
+    deduped_facts = legacy.dedupe_repeated_headlines(all_facts)
+    facts = materialize_source_notice_briefs(deduped_facts, timezone)
     result_doc = {
-        "schema_version": "1.2",
+        "schema_version": "1.3",
         "generated_at": now.isoformat(timespec="seconds"),
-        "generator": "primary_source_title_date_zero_llm_parallel_v1",
+        "generator": "primary_source_notice_parallel_v2",
         "facts": facts,
         "policy": {
             "llm_required": False,
             "external_paid_api_required": False,
-            "autopublished_fields": ["source_title", "publication_date", "source_url"],
+            "autopublished_fields": ["source_title", "publication_date", "source_url", "publisher"],
             "article_body_material_facts_autopublish": False,
+            "verified_source_notice_briefs_enabled": True,
+            "source_notice_scope": SOURCE_NOTICE_SCOPE,
             "repeated_headline_policy": "keep_newest",
-            "automatic_priority_ceiling": legacy.AUTO_PRIORITY_CEILING,
+            "automatic_priority_ceiling_before_notice_promotion": legacy.AUTO_PRIORITY_CEILING,
+            "notice_priority_floors": SOURCE_NOTICE_PRIORITY_FLOORS,
             "bounded_parallel_source_discovery": True,
             "max_parallel_sources": bounded_workers,
             "parallelism_changes_editorial_semantics": False,
@@ -181,13 +267,14 @@ def run(instance_id: str, output: Path, state: Path, workers: int) -> int:
 
     host_incidents = correlate_host_failures(sources, health)
     state_doc = {
-        "schema_version": "1.3",
+        "schema_version": "1.4",
         "observed_at": now.isoformat(timespec="seconds"),
         "execution_mode": "bounded_parallel",
         "max_parallel_sources": bounded_workers,
         "sources_total": len(health),
         "sources_ok": sum(1 for row in health if row.get("listing_ok")),
         "facts_admitted": len(facts),
+        "source_notice_briefs": sum(1 for fact in facts if fact.get("auto_scope") == SOURCE_NOTICE_SCOPE),
         "facts_before_cross_source_headline_dedupe": len(all_facts),
         "host_incident_count": len(host_incidents),
         "host_incidents": host_incidents,
@@ -204,6 +291,7 @@ def run(instance_id: str, output: Path, state: Path, workers: int) -> int:
         "sources_ok": state_doc["sources_ok"],
         "sources_total": state_doc["sources_total"],
         "facts_admitted": len(facts),
+        "source_notice_briefs": state_doc["source_notice_briefs"],
         "host_incidents": len(host_incidents),
     }, ensure_ascii=False))
     return 0
@@ -220,6 +308,27 @@ def self_test() -> int:
         '<h1>Eveniment 16.08.2026</h1>',
         ZoneInfo("Europe/Bucharest"),
     ) is None
+
+    tz = ZoneInfo("Europe/Bucharest")
+    candidate = {
+        "id": "auto-test",
+        "auto_generated": True,
+        "auto_scope": "source_title_and_publication_date_only",
+        "section": "ADMINISTRAȚIE",
+        "priority": 76,
+        "headline": "Primăria publică o informare nouă pentru locuitorii municipiului",
+        "dek": "candidate",
+        "paragraphs": [],
+        "valid_from": "2026-08-26T09:00:00+03:00",
+        "sources": [{"name": "Primăria Test", "url": "https://example.test/stire", "tier": "T1"}],
+    }
+    brief = source_notice_brief(candidate, tz)
+    assert brief["auto_scope"] == SOURCE_NOTICE_SCOPE
+    assert brief["brief_kind"] == "primary_source_notice"
+    assert brief["priority"] >= SOURCE_NOTICE_PRIORITY_FLOORS["ADMINISTRAȚIE"]
+    assert sum(len(p) for p in brief["paragraphs"]) > 120
+    assert brief["sources"][0]["url"] == candidate["sources"][0]["url"]
+    assert brief["source_notice_contract"]["source_body_material_claims_autopublished"] is False
 
     sources = [
         {"id": "one", "url": "https://example.test/news"},
