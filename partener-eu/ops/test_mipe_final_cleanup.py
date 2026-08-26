@@ -42,6 +42,7 @@ def main() -> int:
     validation = text(".github/workflows/partener-eu-validation.yml")
     dual_relay = text(".github/workflows/partener-eu-mipe-dual-relay.yml")
     dual_cache = text(".github/workflows/partener-eu-mipe-dual-cache.yml")
+    transport_scout = text(".github/workflows/partener-eu-mipe-transport-scout.yml")
     scheduler = text(".github/workflows/partener-eu-mipe-ro-v3-scheduler.yml")
     acquisition = text(".github/workflows/partener-eu-mipe-ro-crawl-v3.yml")
     acquisition_qa = text(".github/workflows/partener-eu-mipe-ro-crawl-v3-qa.yml")
@@ -61,6 +62,16 @@ def main() -> int:
     assert "17 */3 * * *" in acquisition
     assert "cron: '7 * * * *'" not in dual_cache
     assert "workflow_dispatch:" in dual_cache
+
+    # Diagnostic push validation must never have an autonomous repository writer.
+    # Explicit workflow_dispatch remains available for bounded operator recovery.
+    for diagnostic in (dual_cache, transport_scout):
+        assert "permissions:\n  contents: read" in diagnostic
+        assert "if: github.event_name == 'workflow_dispatch'" in diagnostic
+        assert diagnostic.count("contents: write") == 1
+        assert "[skip ci]" in diagnostic
+    assert "partener-mipe-dual-cache" in dual_cache
+    assert "partener-mipe-transport-matrix" in transport_scout
 
     assert "permissions:\n  contents: read" in acquisition
     assert "MIPE_ACQUISITION_ONLY: '1'" in acquisition
@@ -134,6 +145,7 @@ def main() -> int:
         "surfacemcAcquisitionOnly": True,
         "partenerEngineOwnsProcessing": True,
         "hostedCanonicalDirectOnly": True,
+        "diagnosticPushWriters": False,
         "auditSummary": audit_summary,
     }, ensure_ascii=False, indent=2))
     print("PARTENER.EU MIPE final cleanup contract: PASS")
