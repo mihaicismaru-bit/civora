@@ -31,7 +31,8 @@ assert 'P.dossiers' in askui
 assert 'D.calls.slice(0,2)' not in askui
 assert 'value="Am firmă din industria alimentară' not in askui
 assert "placeholder='Ex.: IMM din Vâlcea" in askui
-assert "x.d.status!=='CLOSED'" in askui
+assert "statusProjection(x.d).key!=='CLOSED'" in askui
+assert "const actionable=ranked.filter" in askui
 assert 'De ce apare:' in askui
 assert 'Cine poate aplica' in askui
 assert 'Încă neconfirmat' in askui
