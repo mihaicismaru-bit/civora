@@ -47,12 +47,15 @@ jobs:
         continue-on-error: true
         uses: actions/upload-pages-artifact@v4
         with:
+          name: github-pages-${{ github.run_attempt }}
           path: partener-eu/web
 
       - name: Deploy
         id: deployment
         continue-on-error: true
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages-${{ github.run_attempt }}
 
       - name: Attempt and verify HTTPS enforcement
         id: https_control
@@ -154,25 +157,36 @@ jobs:
               }
 
           ok = os.environ.get('DEPLOY_OUTCOME') == 'success' and bool(os.environ.get('PAGE_URL'))
-          payload = {
+          checkout_sha = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          attempt = {
               'status': 'LIVE' if ok else 'BLOCKED',
               'page_url': os.environ.get('PAGE_URL') or None,
               'configure_outcome': os.environ.get('CONFIGURE_OUTCOME'),
               'upload_outcome': os.environ.get('UPLOAD_OUTCOME'),
               'deploy_outcome': os.environ.get('DEPLOY_OUTCOME'),
               'observed_at': datetime.datetime.now(datetime.timezone.utc).isoformat(),
-              'git_sha': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
+              'git_sha': checkout_sha,
               'https_control': https_control,
+              'lkg_preserved': not ok,
           }
-          pathlib.Path('partener-eu/deployment/latest.json').write_text(
-              json.dumps(payload, ensure_ascii=False, indent=2) + '\n', encoding='utf-8'
+          deployment_dir = pathlib.Path('partener-eu/deployment')
+          (deployment_dir/'last-attempt.json').write_text(
+              json.dumps(attempt, ensure_ascii=False, indent=2) + '\n', encoding='utf-8'
           )
+          if ok:
+              latest = dict(attempt)
+              latest.pop('lkg_preserved', None)
+              (deployment_dir/'latest.json').write_text(
+                  json.dumps(latest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8'
+              )
+          else:
+              print('Pages deployment failed; preserving existing latest.json as LKG.')
           PY
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add partener-eu/deployment/latest.json
+          git add partener-eu/deployment/latest.json partener-eu/deployment/last-attempt.json
           if ! git diff --cached --quiet; then
-            git commit -m 'Record PARTENER.EU Pages deployment and HTTPS status'
+            git commit -m 'Record PARTENER.EU Pages deployment attempt'
             git pull --rebase origin main
             git push origin HEAD:main
           fi
