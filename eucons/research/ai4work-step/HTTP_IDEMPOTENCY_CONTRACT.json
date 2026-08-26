@@ -1,5 +1,5 @@
 {
-  "schema_version": "eucons.ai4work_http_idempotency.v1",
+  "schema_version": "eucons.ai4work_http_idempotency.v1.1",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "purpose": "Prevent duplicate analytical rows caused by browser/network retries without introducing identity tracking.",
   "production_gate": "MUST_PASS_BEFORE_HTTP_BINDING",
@@ -10,17 +10,18 @@
     "persistence": "memory or same-tab session state only; no cookie and no cross-site persistence"
   },
   "server": {
+    "implementation": "http_idempotency.py + research_storage.SQLiteResearchStorage.append_idempotent reference path",
     "response_id_derivation": "sha256(research_id + ':' + form_id + ':' + idempotency_key)",
     "stored_key_material": "store only the derived response_id; do not store the raw idempotency key in the analytical record or export",
-    "body_digest": "sha256 of canonical normalized submission body excluding transport metadata",
+    "body_digest": "sha256 of canonical normalized analytical submission body excluding transport metadata",
     "same_key_same_body": "return the original success receipt and do not append another row",
-    "same_key_different_body": "HTTP 409 / fail closed",
+    "same_key_different_body": "HTTP 409 semantic / fail closed before any second write",
     "new_key": "validate normally and append at most one row if all privacy and schema gates pass"
   },
   "privacy_constraints": [
     "MUST NOT derive the key from name, email, phone, CNP, employer identity, IP address or user-agent",
     "MUST NOT use browser fingerprinting, advertising identifiers, CRM IDs or analytics IDs",
-    "MUST NOT export the raw key to NF06 or any analysis dataset",
+    "MUST NOT export the raw key or body digest to NF06 or any analysis dataset",
     "MUST NOT weaken the PROD synthetic=false gate"
   ],
   "required_tests": [
@@ -28,9 +29,11 @@
     "same key + different normalized body => conflict / no write",
     "two different keys + identical answer bodies => two legitimate rows",
     "missing or malformed key => fail closed once production endpoint is enabled",
-    "TEST TWIN key namespace cannot be promoted to PROD evidence",
+    "synthetic=true cannot enter the PROD idempotent storage path",
     "idempotency metadata is absent from immutable NF06 analytical export"
   ],
-  "status": "DESIGN_FROZEN_IMPLEMENTATION_AND_TESTS_PENDING",
+  "test_file": "test_http_idempotency.py",
+  "ci_gate": ".github/workflows/eucons-ai4work-research.yml",
+  "status": "REFERENCE_IMPLEMENTATION_AND_TESTS_COMMITTED_EXACT_HEAD_EXECUTION_PENDING",
   "collection_enabled": false
 }
