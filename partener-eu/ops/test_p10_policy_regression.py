@@ -24,11 +24,9 @@ errors = []
 
 for marker in [
     "workflow_run:",
-    "PARTENER.EU MIPE Ingestion",
     "PARTENER.EU AFIR Ingestion",
     "PARTENER.EU Decision Products",
     "PARTENER.EU Verified Source Registry",
-    "PARTENER.EU PEO Calendar",
     "PARTENER.EU MFF 2028-2034 Monitor",
     "PARTENER.EU Pages",
     "p10_monitor_integrity.py",
@@ -43,6 +41,17 @@ if "ref: main" not in validation:
     errors.append("queued production validation can check out a stale workflow event SHA")
 if "github.event.workflow_run.conclusion == 'success'" not in validation:
     errors.append("production validation runs after unsuccessful upstream workflows")
+
+# A successful source workflow that already feeds the canonical Pages deployment
+# must have exactly one post-deploy validation path. Subscribing Production
+# Validation to the same source workflow creates a redundant pre-deploy ledger,
+# then Pages completion creates the intended post-deploy ledger.
+for upstream in ["PARTENER.EU MIPE Ingestion", "PARTENER.EU PEO Calendar"]:
+    workflow_line = f"      - '{upstream}'"
+    if workflow_line not in pages_workflow:
+        errors.append(f"canonical Pages handoff missing for: {upstream}")
+    if workflow_line in validation:
+        errors.append(f"redundant direct validation handoff duplicates Pages: {upstream}")
 
 # There must be one automatic Pages writer. The former Auto Deploy workflow
 # duplicated web/** pushes and deploy-pages with PARTENER.EU Pages.
