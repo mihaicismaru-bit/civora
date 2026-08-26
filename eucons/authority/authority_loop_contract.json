@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "engine_id": "EUCONS_R09_AUTHORITY_LOOP",
+  "input": {
+    "required_product": "EUCONS_COMMERCIAL_OS",
+    "required_demand_model_id": "R02-CDM-001",
+    "required_jtbd_ux_id": "R04-JTBD-UX-001",
+    "required_knowledge_engine": "EUCONS_E14_KNOWLEDGE_ENGINE",
+    "required_editorial_engine": "EUCONS_E15_AUTONOMOUS_EDITORIAL_LOOP",
+    "required_seo_engine": "EUCONS_E16_SEO_ENGINE",
+    "required_service_proof_id": "R03-SEA-001",
+    "editorial_ready_state": "READY",
+    "allowed_knowledge_types": [
+      "GUIDE",
+      "ANALYSIS",
+      "FAQ"
+    ]
+  },
+  "selection": {
+    "priority_order": [
+      "P0",
+      "P1",
+      "P2"
+    ],
+    "content_family_by_journey": {
+      "JRN-FUNDING-FIT": "FUNDING_DECISION_GUIDE",
+      "JRN-PROJECT-REVIEW": "APPLICATION_READINESS_GUIDE",
+      "JRN-IMPLEMENTATION": "IMPLEMENTATION_CONTROL_GUIDE",
+      "JRN-RECOVERY": "RECOVERY_DECISION_GUIDE"
+    },
+    "conditional_route_family": "guide_profile",
+    "planned_route_prefix": "/ghiduri/",
+    "maximum_ready_for_draft": 24,
+    "deterministic_order": true
+  },
+  "truth_and_proof": {
+    "required_offering_claim_class": "SERVICE_OFFERING",
+    "required_offering_claim_state": "PUBLISHABLE",
+    "required_evidence_state": "ACTIVE",
+    "historical_proof_state": "PUBLISHABLE",
+    "historical_proof_optional": true,
+    "material_funding_fact_source": "OFFICIAL_REQUIRED",
+    "service_or_process_claims_must_be_provenance_bound": true,
+    "unsupported_results_forbidden": true,
+    "eligibility_conclusion_forbidden": true,
+    "hypothesis_as_fact_forbidden": true
+  },
+  "conversion": {
+    "required_cta_route_id": "project_evaluation",
+    "allowed_cta_ids": [
+      "request_funding_consultation",
+      "request_project_evaluation",
+      "request_implementation_review",
+      "request_recovery_assessment"
+    ],
+    "required_measurement_events": [
+      "page_view",
+      "cta_click",
+      "evaluation_started"
+    ],
+    "telemetry_default_state": "UNKNOWN_UNTIL_REAL_EVENTS"
+  },
+  "states": {
+    "ready": "READY_FOR_DRAFT",
+    "hold_route": "HOLD_ROUTE_GAP",
+    "hold_evidence": "HOLD_EVIDENCE",
+    "hold_editorial": "HOLD_EDITORIAL_LINEAGE",
+    "hold_capacity": "HOLD_CYCLE_CAPACITY",
+    "maximum_state": "READY_FOR_DRAFT"
+  },
+  "publication": {
+    "runtime_drafting_enabled": false,
+    "runtime_publication_enabled": false,
+    "production_indexing_enabled": false,
+    "planned_routes_are_not_materialized_routes": true,
+    "human_review_required_before_publication": true
+  },
+  "output": {
+    "product": "EUCONS_COMMERCIAL_OS",
+    "schema_version": 1,
+    "provider_neutral": true,
+    "production_content_records": 0
+  }
+}

@@ -64,6 +64,10 @@ jobs:
         run: python eucons/validation/validate_action_pack.py
       - name: Test EUCONS action-pack fail-closed behavior
         run: python eucons/validation/test_action_pack_fail_closed.py
+      - name: Validate EUCONS authority loop
+        run: python eucons/validation/validate_authority_loop.py
+      - name: Test EUCONS authority-loop fail-closed behavior
+        run: python eucons/validation/test_authority_loop_fail_closed.py
       - name: Test EUCONS service/proof fail-closed behavior
         run: python eucons/validation/test_service_proof_architecture_fail_closed.py
       - name: Validate EUCONS JTBD UX
