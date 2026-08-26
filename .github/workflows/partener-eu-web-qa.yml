@@ -9,6 +9,10 @@ on:
       - 'partener-eu/ops/test_web_hygiene.py'
       - 'partener-eu/ops/test_public_boot_performance.py'
       - 'partener-eu/ops/test_frontend_regression.py'
+      - 'partener-eu/ops/test_home_novice.py'
+      - 'partener-eu/ops/test_public_product_v3.py'
+      - 'partener-eu/ops/test_ask_partener_v2.py'
+      - 'partener-eu/ops/test_ask_eligibility_projection.js'
       - 'partener-eu/ops/test_home_freshness_guard.mjs'
       - 'partener-eu/ops/test_public_language.py'
       - 'partener-eu/ops/test_decision_products.py'
@@ -43,6 +47,13 @@ jobs:
           python partener-eu/ops/test_public_boot_performance.py
           python partener-eu/ops/test_frontend_regression.py
 
+      - name: Homepage and Ask contracts
+        run: |
+          python partener-eu/ops/test_home_novice.py
+          python partener-eu/ops/test_public_product_v3.py
+          python partener-eu/ops/test_ask_partener_v2.py
+          node partener-eu/ops/test_ask_eligibility_projection.js
+
       - name: Consultant lazy-load and runtime contracts
         run: |
           python partener-eu/ops/test_consultant_workspace_v3.py
@@ -58,6 +69,7 @@ jobs:
       - name: Syntax-check active web control modules
         run: |
           node --check partener-eu/web/app.js
+          node --check partener-eu/web/ask-partener-v2.js
           node --check partener-eu/web/consultant-loader-v1.js
           node --check partener-eu/web/consultant-workspace-v3.js
           node --check partener-eu/web/consultant-onboarding-v3.js
@@ -66,3 +78,5 @@ jobs:
           node --check partener-eu/web/home-freshness-guard-v1.js
           node --check partener-eu/web/home-novice-v1.js
           node --check partener-eu/web/home-go-to-v2.js
+          node --check partener-eu/web/public-product-v3.js
+          node --check partener-eu/web/people-policy-v1.js

@@ -19,9 +19,26 @@ on:
       - 'partener-eu/ops/test_ask_partener_v2.py'
       - 'partener-eu/ops/test_ask_eligibility_projection.js'
       - '.github/workflows/partener-eu-homepage-qa.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'partener-eu/web/index.html'
+      - 'partener-eu/web/home-novice-v1.js'
+      - 'partener-eu/web/home-novice-v1.css'
+      - 'partener-eu/web/decision-intelligence-v2.js'
+      - 'partener-eu/web/public-product-v3.js'
+      - 'partener-eu/web/public-product-v3.css'
+      - 'partener-eu/web/people-policy-v1.js'
+      - 'partener-eu/web/ask-partener-v2.js'
+      - 'partener-eu/web/ask-partener-v2.css'
+      - 'partener-eu/ops/test_home_novice.py'
+      - 'partener-eu/ops/test_public_product_v3.py'
+      - 'partener-eu/ops/test_ask_partener_v2.py'
+      - 'partener-eu/ops/test_ask_eligibility_projection.js'
+      - '.github/workflows/partener-eu-homepage-qa.yml'
 
 concurrency:
-  group: partener-eu-homepage-qa
+  group: partener-eu-homepage-qa-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 permissions:
