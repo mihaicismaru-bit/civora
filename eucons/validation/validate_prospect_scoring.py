@@ -52,6 +52,23 @@ def main() -> None:
     if any(row["recommended_service_id"] not in {service["service_id"] for service in row["service_ranking"]} for row in baseline["results"]):
         raise SystemExit("recommended service is not signal-supported")
 
+    drift_contract = deepcopy(scorer.load_json(scorer.SCORING_CONTRACT_PATH))
+    drift_contract["positive_components"]["source_quality"]["max_points"] = 24
+    drift_contract["positive_components"]["freshness"]["max_points"] = 21
+    client_contract = scorer.load_json(scorer.CLIENT_CONTRACT_PATH)
+    drift_result = scorer.score_state(
+        state,
+        payload["reference_time"],
+        scoring_contract=drift_contract,
+        client_contract=client_contract,
+    )
+    for row in drift_result["results"]:
+        if row["score"] is None:
+            continue
+        explanation = " ".join(row["explanations"])
+        if "/24" not in explanation or "/21" not in explanation:
+            raise SystemExit("score explanation denominators drifted from scoring contract")
+
     multi = deepcopy(state)
     alfa_key = engine.VALIDATOR.organization_key(payload["observations"][0]["record"]["organization"])
     alfa = multi["records"][alfa_key]
