@@ -1,8 +1,8 @@
 name: PARTENER.EU MIPE Dual Cache
 
 on:
-  # Manual diagnostic cache only. It is not part of the canonical data plane
-  # and must not create autonomous hourly repository writes.
+  # Diagnostic validation may run automatically when this path changes, but
+  # repository persistence is allowed only for an explicit manual recovery.
   workflow_dispatch:
   push:
     branches: [main]
@@ -11,7 +11,7 @@ on:
       - '.github/workflows/partener-eu-mipe-dual-cache.yml'
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: partener-eu-mipe-dual-cache
@@ -21,6 +21,8 @@ jobs:
   cache:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v6
         with:
@@ -49,10 +51,36 @@ jobs:
               assert row.get('readerText')
           print({'status': data.get('status'), 'verifiedCount': data.get('verifiedCount')})
           PY
-      - name: Persist cache
+      - name: Upload diagnostic cache evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-mipe-dual-cache
+          path: partener-eu/ingest/state/mipe_dual_cache.json
+          retention-days: 7
+          if-no-files-found: error
+
+  persist:
+    if: github.event_name == 'workflow_dispatch'
+    needs: cache
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: partener-mipe-dual-cache
+          path: /tmp/partener-mipe-dual-cache
+      - name: Persist cache from explicit manual recovery
+        shell: bash
         run: |
           set -euo pipefail
-          cp partener-eu/ingest/state/mipe_dual_cache.json /tmp/mipe_dual_cache.json
+          SOURCE=$(find /tmp/partener-mipe-dual-cache -type f -name 'mipe_dual_cache.json' -print -quit)
+          test -n "$SOURCE"
+          cp "$SOURCE" /tmp/mipe_dual_cache.json
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           for attempt in 1 2 3 4 5; do
@@ -61,7 +89,7 @@ jobs:
             cp /tmp/mipe_dual_cache.json partener-eu/ingest/state/mipe_dual_cache.json
             git add partener-eu/ingest/state/mipe_dual_cache.json
             if git diff --cached --quiet; then exit 0; fi
-            git commit -m 'Refresh corroborated MIPE availability cache'
+            git commit -m 'Refresh corroborated MIPE availability cache [skip ci]'
             if git push origin HEAD:main; then exit 0; fi
             sleep $((attempt * 2))
           done
