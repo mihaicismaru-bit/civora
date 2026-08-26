@@ -1,0 +1,62 @@
+{
+  "schema_version": "nf.checkpoint_status.v0.1",
+  "run_id": "AI4WORK-STEP/NF-RUN-001",
+  "checkpoint": "NF06_PRIMARY_RESEARCH",
+  "status": "NF06_FRESH_MAIN_FORMS_REBUILT_CALL_CHRONOLOGY_RECONCILED_REAL_COLLECTION_STILL_GATED",
+  "supersedes": "NF06_STATUS_006.json",
+  "needs_run_head_before_this_snapshot": "07603e272f90aa90f10b13604b8d8de0a87032c2",
+  "call_version_control": {
+    "consolidated_package_date": "2026-08-13",
+    "second_corrigendum_date": "2026-08-19",
+    "secondary_report_publication_date": "2026-08-24",
+    "distinct_2026_08_24_amendment": "NOT_ESTABLISHED",
+    "current_deadline": "2026-09-30T16:00:00+03:00",
+    "exact_official_binary_urls_known": true,
+    "exact_binary_sha256_frozen": false,
+    "compliance_state": "FAIL_CLOSED_UNTIL_EXACT_OFFICIAL_BYTES_AND_HASHES"
+  },
+  "fresh_main_integration": {
+    "branch": "eucons/ai4work-research-provider-v1",
+    "latest_observed_candidate_head": "212425e5b0acd6cccfb55122aa8ecc159f3bf8aa",
+    "material_form_renderer_head": "a2385033d8856aedc8ee65c64b7f482c56c6c37f",
+    "state": "FORMS_REBUILT_COLLECTION_DISABLED_VALIDATION_PENDING",
+    "merge_authorized": false,
+    "deploy_authorized": false,
+    "collection_enabled": false,
+    "latest_renderer_ci": "NOT_RUN"
+  },
+  "verified_delta": [
+    "The STEP-LLL August version chronology was corrected: 19 August 2026 is the second corrigendum date; the 24 August article is later reporting about that corrigendum, not evidence of a separate third amendment.",
+    "EVIDENCE_GAPS now binds the source-version blocker to the exact current official MIPE PDF and Annex 4 DOCX URLs already frozen in EVIDENCE_ADDENDUM_006, while retaining fail-closed binary/hash QA.",
+    "The frozen adult and employer questionnaires were rebuilt on the current-lineage EUCONS integration branch rather than merged from the stale NF-RUN branch.",
+    "The fresh branch now carries a research form contract with CRM/commercial analytics forbidden, tracking disabled, EUROCONSULT SRL / CUI 14250864 frozen as operator, and privacy contact deliberately unresolved before collection.",
+    "The fresh branch now carries a noindex static research-page builder that renders landing/adult/employer pages but refuses to enable production collection without a separate HTTP/storage/privacy binding.",
+    "The research-only storage adapter remains separate from CRM, rejects synthetic PROD records and duplicates, persists raw/normalized SHA-256 and isolates adult/employer exports.",
+    "No merge, deploy or real-data collection was performed."
+  ],
+  "validation_boundary": {
+    "storage_adapter_local_tests_from_preceding_candidate": "PASS_4_OF_4",
+    "new_form_definitions_readback": "PASS",
+    "new_renderer_persistence_readback": "PASS",
+    "new_renderer_exact_head_ci": "NOT_RUN",
+    "browser_http_store_export_nf06_smoke": "PENDING",
+    "real_primary_data_ingest": "PENDING_REAL_DATA"
+  },
+  "blocking_for_10_of_10_release": [
+    "privacy/DPO contact and research-specific legal-basis/notice binding",
+    "actual first-party production HTTP endpoint and research-only durable database physically and credential-wise separated from CRM",
+    "hosting processor/subprocessor, transfer, reverse-proxy logging/IP-retention, encryption, access-control and retention execution review",
+    "exact-head validation of the rebuilt fresh-main form renderer and end-to-end synthetic smoke browser -> HTTP -> isolated store -> immutable export -> NF06 ingest",
+    "real adult responses from a documented accessible eligible >29 research frame across Sud-Vest Oltenia, Sud-Muntenia and Centru",
+    "real employer/organisation responses with documented recruitment channels and coverage across all three regions",
+    "current official MIPE STEP-LLL guide/corrigendum and Annex 4 exact binaries downloaded and SHA-256 frozen",
+    "independent interest/coverage evidence only if 160 or 80/40/40 is to be described as empirically measured need rather than a project design value"
+  ],
+  "test_twin": {
+    "classification": "SYNTHETIC_NON_EVIDENCE",
+    "prod_promotion": "FORBIDDEN",
+    "engine_testing_allowed": true
+  },
+  "next_action": "Add focused form-renderer/contract validation on the fresh EUCONS candidate, then implement an injectable first-party HTTP boundary without enabling collection; in parallel continue exact official MIPE binary capture. Do not advance NF07 until real primary coverage or equivalent direct evidence closes the target-group and employer gaps.",
+  "final_narrative_allowed": false
+}
