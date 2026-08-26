@@ -1,0 +1,35 @@
+{
+  "schema_version": "eucons.research_validation_receipt.v0.2",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "validated_at": "2026-08-26",
+  "validated_code_head": "02efe37df7a538364bda604ee2ea6a8c6fdf347c",
+  "scope": [
+    "EUCONS research runtime isolation",
+    "NF06 runtime-to-analysis canonical transform",
+    "PROD synthetic-data firewall",
+    "TEST TWIN NON-EVIDENCE separation",
+    "PII-like free-text fail-closed behavior",
+    "three-region technical coverage gate"
+  ],
+  "repository_ci": {
+    "Needs Factory Quality": "PASS",
+    "Needs Factory Primary Research Pack": "PASS",
+    "Needs Factory Standalone Needs Analysis": "PASS",
+    "Needs Factory Research Adapters": "PASS",
+    "Needs Factory Research Orchestrator": "PASS",
+    "Needs Factory Need Synthesis": "PASS",
+    "Needs Factory Release Handoff": "PASS",
+    "source": "GitHub Actions runs for exact head 02efe37df7a538364bda604ee2ea6a8c6fdf347c"
+  },
+  "new_test_file": "partener-eu/needs-factory/tests/test_ai4work_primary_ingest.py",
+  "validated_behaviors": [
+    "adult EUCONS runtime-shaped export transforms to NF06 analytical schema",
+    "employer EUCONS runtime-shaped export transforms to NF06 analytical schema",
+    "PROD rejects synthetic=true",
+    "TEST TWIN requires synthetic=true and cannot set promotion_allowed",
+    "PII-like text is rejected fail-closed"
+  ],
+  "evidence_rule": "All test fixtures are synthetic software fixtures only. They are NON-EVIDENCE and may not be counted, summarized or cited as AI4WORK empirical findings.",
+  "deployment_effect": "NONE. Validation makes the internal path technically ready for real data; public collection remains disabled until privacy/operator/storage bindings and a current-main integration candidate are separately validated.",
+  "status": "PASS_INTERNAL_NOT_DEPLOYED"
+}
