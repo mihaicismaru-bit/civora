@@ -1,16 +1,16 @@
 {
   "schema_version": "1.0",
   "checkpoint": "PARTENER-EU-CIVORA-P10-0020",
-  "observed_at": "2026-08-26T19:45:28Z",
-  "validation_run_started": "2026-08-26T19:44:57Z",
+  "observed_at": "2026-08-26T19:47:45Z",
+  "validation_run_started": "2026-08-26T19:47:20Z",
   "integrity": {
     "latest_history_equal": true,
-    "latest_sha256": "067f995968badd0e13a5efb987b9335d7def303370099eef8a60a0f5db1d7cb7",
-    "history_sha256": "067f995968badd0e13a5efb987b9335d7def303370099eef8a60a0f5db1d7cb7",
-    "history_path": "validation/history/20260826T194457Z.json",
+    "latest_sha256": "23a37beceacb88a1894b192084a8b575cee566f8ca2e28480cbfabb6bd1c28e3",
+    "history_sha256": "23a37beceacb88a1894b192084a8b575cee566f8ca2e28480cbfabb6bd1c28e3",
+    "history_path": "validation/history/20260826T194720Z.json",
     "source_state_checkpoint_equal": true,
-    "source_state_sha256": "23cb20c254161e4ad22f86100990ce73d6fbfff94b1a3ae344083c55f638647d",
-    "checkpoint_sha256": "23cb20c254161e4ad22f86100990ce73d6fbfff94b1a3ae344083c55f638647d",
+    "source_state_sha256": "5dc16484a0be16cc41de63604615c2e2b7c46a954a918a745285a999193a6cd8",
+    "checkpoint_sha256": "5dc16484a0be16cc41de63604615c2e2b7c46a954a918a745285a999193a6cd8",
     "frontend_regression_pass": true,
     "frontend_pass": 10,
     "frontend_total": 10,
@@ -18,7 +18,7 @@
   },
   "source_registry": {
     "observed_at": "2026-08-26T14:31:10.758482Z",
-    "age_seconds": 18858,
+    "age_seconds": 18994,
     "stale_after_seconds": 28800,
     "stale": false,
     "health": "DEGRADED",
@@ -295,15 +295,19 @@
   },
   "autonomous_orchestration": {
     "scheduled_validation_configured": true,
-    "workflow_run_integration_configured": false,
-    "monitored_workflows": [
-      "PARTENER.EU MIPE Ingestion",
+    "workflow_run_integration_configured": true,
+    "direct_validation_workflows": [
       "PARTENER.EU AFIR Ingestion",
+      "PARTENER.EU Decision Products",
       "PARTENER.EU Verified Source Registry",
-      "PARTENER.EU PEO Calendar",
       "PARTENER.EU MFF 2028-2034 Monitor",
       "PARTENER.EU Pages"
     ],
+    "pages_handoff_workflows": [
+      "PARTENER.EU MIPE Ingestion",
+      "PARTENER.EU PEO Calendar"
+    ],
+    "duplicate_direct_handoffs": [],
     "peo_candidate_state_only": true,
     "evidence_status": "CONFIGURED_AND_COLLECTING; NOT_SUFFICIENT_FOR_CLOSURE_BEFORE_30_DISTINCT_UTC_DAYS"
   },
@@ -356,10 +360,8 @@
     "afir_hash_changes": 0,
     "peo_calendar_changes": 0,
     "mipe_health": "PASS",
-    "autonomous_orchestration_configured": false,
-    "policy_errors": [
-      "autonomous monitor workflow_run integration is incomplete"
-    ],
-    "critical_policy_fail": true
+    "autonomous_orchestration_configured": true,
+    "policy_errors": [],
+    "critical_policy_fail": false
   }
 }
