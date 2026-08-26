@@ -1,0 +1,59 @@
+{
+  "schema_version": "eucons.ai4work_retention_schedule.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "date": "2026-08-27",
+  "status": "DRAFT_EXECUTION_BINDING_REQUIRED_BEFORE_COLLECTION",
+  "principle": "retain identifiable or potentially linkable research data for the shortest period needed to validate the needs analysis; preserve longer-term evidence only as genuinely anonymised aggregate outputs and integrity hashes",
+  "schedules": [
+    {
+      "data_class": "reverse-proxy/application access logs",
+      "allowed_content": "security/availability metadata only; request bodies, form answers and raw Idempotency-Key MUST NOT be logged",
+      "target_retention": "7 days maximum unless a documented security necessity requires shorter/exceptional retention",
+      "deletion": "automatic provider/application rotation",
+      "gate": "hosting configuration must be verified before collection"
+    },
+    {
+      "data_class": "raw and normalised analytical respondent records",
+      "store": "RESEARCH_ANALYTICS_ONLY",
+      "retention": "until needs-analysis validation and application evidence freeze, then delete no later than 180 days after primary collection closes",
+      "hard_stop": "2027-03-31 unless a documented legal claim/audit hold approved by the controller requires a narrower retained subset",
+      "post_deletion": "retain only anonymised aggregates, disclosure-controlled tables, source/provenance metadata and cryptographic integrity hashes that cannot be used to reconstruct respondent records"
+    },
+    {
+      "data_class": "idempotency receipts",
+      "content": "opaque derived response_id + canonical body digest only; no raw key",
+      "retention": "same lifecycle as the corresponding analytical respondent record",
+      "deletion": "delete atomically with respondent-level records"
+    },
+    {
+      "data_class": "optional follow-up contact records",
+      "store": "RESEARCH_CONTACT_SEPARATE_NO_RESPONSE_LINKAGE",
+      "retention": "delete after the requested follow-up is completed and in all cases no later than 90 days after primary collection closes",
+      "post_deletion": "no contact identifier is copied to NF06 or analysis evidence"
+    },
+    {
+      "data_class": "immutable primary export used for NF06 validation",
+      "retention": "same respondent-level hard stop as analytical records",
+      "control": "encrypted/restricted evidence location; SHA-256 retained after deletion; export itself deleted at hard stop"
+    },
+    {
+      "data_class": "TEST TWIN synthetic dataset",
+      "retention": "engineering lifecycle",
+      "classification": "NON_EVIDENCE / synthetic=true / no real personal data",
+      "separation": "must never share PROD evidence namespace or promotion path"
+    }
+  ],
+  "deletion_evidence_required": [
+    "timestamped deletion job/run receipt",
+    "row/object counts before and after deletion",
+    "confirmation that backups follow provider expiry and cannot silently restore live respondent records",
+    "confirmation that optional contact store and PROD analytical store were both checked",
+    "retained aggregate/source-register package identified separately"
+  ],
+  "exceptions": {
+    "legal_hold": "must be documented by controller with scope, reason, approver, start date and review date; blanket indefinite retention is forbidden",
+    "processor_backup_limit": "must be documented before go-live; if provider cannot meet the intended deletion lifecycle, collection remains NO_GO"
+  },
+  "controller_approval": false,
+  "collection_enabled": false
+}
