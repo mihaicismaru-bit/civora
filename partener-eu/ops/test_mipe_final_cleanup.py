@@ -43,6 +43,7 @@ def main() -> int:
     dual_relay = text(".github/workflows/partener-eu-mipe-dual-relay.yml")
     dual_cache = text(".github/workflows/partener-eu-mipe-dual-cache.yml")
     transport_scout = text(".github/workflows/partener-eu-mipe-transport-scout.yml")
+    pages_diagnostic = text(".github/workflows/partener-eu-pages-diagnostic.yml")
     scheduler = text(".github/workflows/partener-eu-mipe-ro-v3-scheduler.yml")
     acquisition = text(".github/workflows/partener-eu-mipe-ro-crawl-v3.yml")
     acquisition_qa = text(".github/workflows/partener-eu-mipe-ro-crawl-v3-qa.yml")
@@ -65,13 +66,14 @@ def main() -> int:
 
     # Diagnostic push validation must never have an autonomous repository writer.
     # Explicit workflow_dispatch remains available for bounded operator recovery.
-    for diagnostic in (dual_cache, transport_scout):
+    for diagnostic in (dual_cache, transport_scout, pages_diagnostic):
         assert "permissions:\n  contents: read" in diagnostic
         assert "if: github.event_name == 'workflow_dispatch'" in diagnostic
         assert diagnostic.count("contents: write") == 1
         assert "[skip ci]" in diagnostic
     assert "partener-mipe-dual-cache" in dual_cache
     assert "partener-mipe-transport-matrix" in transport_scout
+    assert "partener-pages-diagnostic" in pages_diagnostic
 
     assert "permissions:\n  contents: read" in acquisition
     assert "MIPE_ACQUISITION_ONLY: '1'" in acquisition
