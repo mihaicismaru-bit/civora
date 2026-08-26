@@ -70,7 +70,22 @@ replacements = [
     ),
 ]
 
+localized_helper_markers = (
+    "const eventLabels=",
+    "const eventLabel=",
+    "const statusLabels=",
+    "const statusText=",
+    "const fundingFact=",
+    "const displayFact=",
+)
+
 for old, new, label in replacements:
+    # Later, independent UI improvements may legitimately insert helpers between
+    # these declarations. Treat the localization as applied when every semantic
+    # marker exists instead of requiring one brittle, byte-contiguous block.
+    if label == "localized helpers" and all(marker in text for marker in localized_helper_markers):
+        print("Decision UI localized helpers: already fixed")
+        continue
     if new in text:
         print(f"Decision UI {label}: already fixed")
         continue
