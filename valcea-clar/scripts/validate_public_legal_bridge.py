@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail-closed contract for public VÂLCEA CLAR legal routes.
+"""Fail-closed contract for public VÂLCEA CLAR policy/legal routes.
 
 This validates repository artifacts only. It does not claim that an external Site
 has been published; remote HTTP acceptance remains a separate deployment check.
@@ -15,12 +15,13 @@ INSTALL = ROOT / "site" / "ONE_TIME_LIVE_BRIDGE_INSTALL.md"
 LEGAL = ROOT / "site" / "legal" / "legal_pages.json"
 NAVIGATION = ROOT / "site" / "navigation.json"
 RUNTIME = ROOT / "site" / "runtime"
+EXPECTED_PAGES = {"termeni", "confidentialitate", "corectii"}
 
 
 def main() -> int:
     doc = json.loads(LEGAL.read_text(encoding="utf-8"))
     assert doc.get("canonical_domain") == "valceaclar.ro"
-    assert set(doc.get("pages", {})) == {"termeni", "confidentialitate"}
+    assert set(doc.get("pages", {})) == EXPECTED_PAGES
 
     nav = json.loads(NAVIGATION.read_text(encoding="utf-8"))
     assert nav.get("contract_id") == "valcea-clar-primary-v2"
@@ -32,6 +33,7 @@ def main() -> int:
     assert ("Despre noi", "/despre/") in footer_links
     assert ("Termeni", "/termeni/") in footer_links
     assert ("Confidențialitate", "/confidentialitate/") in footer_links
+    assert ("Corecții", "/corectii/") in footer_links
     assert (nav.get("policy") or {}).get("legal_links_in_footer") is True
     assert (nav.get("policy") or {}).get("same_primary_navigation_on_every_public_page") is True
     assert (nav.get("policy") or {}).get("main_navigation_must_resolve_to_reader_content") is True
@@ -40,8 +42,9 @@ def main() -> int:
     bridge = BRIDGE.read_text(encoding="utf-8")
     install = INSTALL.read_text(encoding="utf-8")
 
-    # The bridge may render footer links from the canonical navigation contract;
-    # validators must not require those links to be hard-coded into JavaScript.
+    # The client bridge remains a fallback for the two original legal routes.
+    # /corectii/ is accepted as a first-class server-rendered/static policy route;
+    # it does not require client-side rendering to be public or indexable.
     required_bridge = (
         "site/legal/legal_pages.json",
         "site/navigation.json",
@@ -69,20 +72,25 @@ def main() -> int:
         expected_path = f"/{slug}/"
         assert page.get("path") == expected_path
         target = RUNTIME / slug / "index.html"
-        assert target.is_file(), f"Missing generated legal page: {target}"
+        assert target.is_file(), f"Missing generated public policy page: {target}"
         text = target.read_text(encoding="utf-8")
         assert page["title"] in text
         assert f"https://valceaclar.ro{expected_path}" in text
         assert 'name="robots" content="index,follow"' in text
         assert doc["contact_email"] in text
+        assert 'data-nav-contract="valcea-clar-primary-v2"' in text
+
+    corectii = doc["pages"]["corectii"]
+    assert corectii["title"] == "Corecții și drept la replică"
+    assert len(corectii.get("sections") or []) >= 5
 
     forbidden = ("CLIENT_SECRET", "ACCESS_TOKEN", "REFRESH_TOKEN", "github-actions-secret:")
     leaked = [value for value in forbidden if value in bridge or value in install]
     assert not leaked, f"Secret marker leaked into public bridge/install docs: {leaked}"
 
     print(
-        "VÂLCEA CLAR public legal bridge: PASS "
-        "(canonical navigation v2 + repository legal contract; remote HTTP remains separate)"
+        "VÂLCEA CLAR public policy bridge: PASS "
+        "(canonical navigation v2 + 3 repository policy routes; remote HTTP remains separate)"
     )
     return 0
 
