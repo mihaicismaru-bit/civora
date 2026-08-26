@@ -1,0 +1,78 @@
+{
+  "schema_version": "nf.primary_response_ingest.v0.1",
+  "run_id": "AI4WORK-STEP/NF-RUN-001",
+  "purpose": "Fail-closed intake of real primary-research exports into NF06 without contaminating evidence with identifiers or synthetic records.",
+  "source_schema": "EUCONS_PRIMARY_DATA_SCHEMA.json",
+  "streams": {
+    "adults": {
+      "schema_key": "adult_payload",
+      "id_field": "response_id",
+      "required_strata": ["region", "status", "age_band"]
+    },
+    "employers": {
+      "schema_key": "employer_payload",
+      "id_field": "response_id",
+      "required_strata": ["region", "sector", "size"]
+    }
+  },
+  "record_envelope": {
+    "required": ["response_id", "received_at_utc", "schema_version", "form_version", "answers"],
+    "response_id": "opaque cryptographically random server-generated identifier; no identity lookup table",
+    "received_at_utc": "RFC3339 UTC timestamp",
+    "schema_version": "must equal nf.primary_payload.v0.1 unless a later explicitly reconciled schema is frozen",
+    "form_version": "non-empty version string",
+    "answers": "object validated against the selected adult/employer payload schema"
+  },
+  "input_formats": ["json_array", "jsonl"],
+  "raw_evidence": {
+    "immutable": true,
+    "sha256_before_parse": true,
+    "repository_storage": "FORBIDDEN",
+    "identity_fields": "FORBIDDEN",
+    "synthetic_records": "FORBIDDEN_IN_PROD"
+  },
+  "prohibited_keys_recursive": [
+    "name", "first_name", "last_name", "cnp", "national_id", "email", "phone", "telephone",
+    "exact_address", "address", "exact_employer", "employer_name", "organisation_name", "organization_name",
+    "cui", "ip", "ip_address", "user_agent", "cookie_id", "login_id", "device_fingerprint", "advertising_id"
+  ],
+  "pii_text_screen": {
+    "fields": ["job_family", "Q07_topic", "Q08_other", "Q11_other", "Q12", "sector", "E04_detail", "E09"],
+    "fail_patterns": ["email_address", "romanian_phone_like", "cnp_like"],
+    "note": "Automated screening is a safety net, not proof of anonymity; free-text review remains required before publication of quotations."
+  },
+  "fail_closed_conditions": [
+    "raw SHA-256 not computed",
+    "invalid JSON or unsupported top-level structure",
+    "duplicate response_id",
+    "missing envelope metadata",
+    "schema version mismatch",
+    "forbidden key present anywhere in record",
+    "required field missing",
+    "unexpected field in answers",
+    "wrong type/range/enum",
+    "PII-like token found in free text",
+    "no valid records",
+    "any expected region absent when declaring the three-region gate closed"
+  ],
+  "outputs": {
+    "normalized_jsonl": "validated records only, still pseudonymous and not a public artifact",
+    "ingest_report_json": "raw hash, input/valid/rejected counts, duplicate count, region/strata counts, error list, gate state",
+    "evidence_promotion": "FORBIDDEN until report PASS, research frame/coverage metadata are attached, and raw export reconciliation is complete"
+  },
+  "test_twin": {
+    "allowed": true,
+    "classification": "NON-EVIDENCE",
+    "must_use_flag": "--mode test-twin",
+    "synthetic_marker_required": true,
+    "prod_promotion": "FORBIDDEN"
+  },
+  "validation_receipt": {
+    "local_compile": "PASS",
+    "synthetic_three_region_happy_path": "PASS",
+    "synthetic_PII_rejection": "PASS",
+    "test_twin_classification": "PASS",
+    "note": "Fixtures used only to validate software behavior and are NON-EVIDENCE; no fixture values are persisted as project evidence."
+  },
+  "status": "INGEST_TOOL_READY_REAL_DATA_NOT_YET_COLLECTED"
+}
