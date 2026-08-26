@@ -1,35 +1,35 @@
 {
   "schema_version": "1.0",
   "checkpoint": "PARTENER-EU-CIVORA-P10-0020",
-  "observed_at": "2026-08-26T05:20:47Z",
-  "validation_run_started": "2026-08-26T05:19:39Z",
+  "observed_at": "2026-08-26T06:04:41Z",
+  "validation_run_started": "2026-08-26T06:04:11Z",
   "integrity": {
     "latest_history_equal": true,
-    "latest_sha256": "ec5fe3ee814e446f9d10d8a616d8b6b65202feb025fd46bd00b974c601ee154e",
-    "history_sha256": "ec5fe3ee814e446f9d10d8a616d8b6b65202feb025fd46bd00b974c601ee154e",
-    "history_path": "validation/history/20260826T051939Z.json",
+    "latest_sha256": "cb795932d427fae2d2df1f675bddcd77d9bc424974b8b35c2523fa0d904f72f7",
+    "history_sha256": "cb795932d427fae2d2df1f675bddcd77d9bc424974b8b35c2523fa0d904f72f7",
+    "history_path": "validation/history/20260826T060411Z.json",
     "source_state_checkpoint_equal": true,
-    "source_state_sha256": "1ba303f9a27fc2c37665c82a6d94a917873e3e54a64e8e85ab5635503a74d17e",
-    "checkpoint_sha256": "1ba303f9a27fc2c37665c82a6d94a917873e3e54a64e8e85ab5635503a74d17e",
+    "source_state_sha256": "3bcb131eda20b81a4fe7aed39a3de4d436f1ef25cfa1d99bec6797fedbe9d9eb",
+    "checkpoint_sha256": "3bcb131eda20b81a4fe7aed39a3de4d436f1ef25cfa1d99bec6797fedbe9d9eb",
     "frontend_regression_pass": true,
     "frontend_pass": 10,
     "frontend_total": 10,
     "recovery_state_integrity": "PASS"
   },
   "source_registry": {
-    "observed_at": "2026-08-26T03:40:13.915171Z",
-    "age_seconds": 6033,
+    "observed_at": "2026-08-26T06:01:20.090689Z",
+    "age_seconds": 201,
     "stale_after_seconds": 28800,
     "stale": false,
     "health": "DEGRADED",
     "summary": {
       "total": 23,
-      "pass": 17,
-      "degraded": 0,
+      "pass": 12,
+      "degraded": 5,
       "fail": 6,
       "quarantined": 6,
-      "low_information": 0,
-      "resolution_tasks_required": 9
+      "low_information": 5,
+      "resolution_tasks_required": 0
     },
     "tier_counts": {
       "T1": {
@@ -38,40 +38,30 @@
         "degraded": 0,
         "fail": 1,
         "quarantined": 1,
-        "hash_changes": 4
+        "hash_changes": 0
       },
       "T1B": {
         "total": 13,
-        "pass": 10,
-        "degraded": 0,
+        "pass": 5,
+        "degraded": 5,
         "fail": 3,
         "quarantined": 3,
-        "hash_changes": 5
+        "hash_changes": 0
       }
     },
-    "changed_source_ids": [
-      "SRC-MYSMIS-CALLS",
-      "SRC-OIRVEST-PEO-GUIDES",
-      "SRC-OIRVEST-PEO-MANUALS",
-      "SRC-OIRVEST-PEO",
-      "SRC-OIRCENTRU-PEO",
-      "SRC-OIRNE-PEO",
-      "SRC-MAI-FED-CALLS",
-      "SRC-MAI-FED-GENERAL-GUIDE",
-      "SRC-MAI-FED-CALENDAR-INDEX"
-    ],
+    "changed_source_ids": [],
     "missing_resolution_tasks": [],
     "unsafe_material_updates": [],
     "fail_closed": true
   },
   "afir": {
-    "observed_at": "2026-08-26T03:40:37.620369+00:00",
+    "observed_at": "2026-08-26T06:03:22.333443+00:00",
     "status": "PASS",
-    "item_count": 31,
-    "error_count": 41,
+    "item_count": 30,
+    "error_count": 42,
     "hash_change_candidates": 0,
     "material_signal_candidates": 0,
-    "auth_dependency_count": 28,
+    "auth_dependency_count": 27,
     "auth_dependencies": [
       {
         "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2F&culture=ro",
@@ -167,13 +157,6 @@
       {
         "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Ffinantare%2Ffinantare-in-mediul-rural%2Fexploatatii-forestiere%2F&culture=ro",
         "sourcePage": "https://www.afir.ro/finantare/finantare-in-mediul-rural/exploatatii-forestiere/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Ffinantare%2Ffinantare-in-mediul-rural%2Fmediu-si-clima%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/finantare/finantare-in-mediul-rural/mediu-si-clima/",
         "status": "AUTH_OR_ACCESS_DEPENDENT",
         "materialFactAction": "NONE",
         "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
@@ -289,7 +272,7 @@
     "publication_policy": "candidate-state-only; web material facts are not auto-promoted on scheduled hash changes"
   },
   "mipe": {
-    "observed_at": "2026-08-26T03:42:03.903370+00:00",
+    "observed_at": "2026-08-26T06:02:36.860628+00:00",
     "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
     "source_available": false,
     "candidate_count": 60,
@@ -371,7 +354,7 @@
   "summary": {
     "integrity_pass": true,
     "registry_health": "DEGRADED",
-    "registry_hash_changes": 9,
+    "registry_hash_changes": 0,
     "afir_hash_changes": 0,
     "peo_calendar_changes": 0,
     "mipe_health": "PASS",
