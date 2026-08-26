@@ -1,0 +1,108 @@
+{
+  "schema_version": "eucons.research_form_contract.v0.2",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "purpose": "Primary research for an independent needs analysis; not lead generation, recruitment, marketing or project enrolment.",
+  "production_enabled": false,
+  "crm_integration": "FORBIDDEN",
+  "commercial_analytics": "FORBIDDEN",
+  "tracking": {
+    "advertising": false,
+    "marketing_pixels": false,
+    "fingerprinting": false,
+    "cross_site_tracking": false,
+    "analytics_default": false
+  },
+  "public_routes": {
+    "landing": "/cercetare/ai4work-step/",
+    "adults": "/cercetare/ai4work-step/adulti/",
+    "employers": "/cercetare/ai4work-step/angajatori/",
+    "optional_contact": "/cercetare/ai4work-step/contact/"
+  },
+  "separation_rules": {
+    "analytical_responses_store": "RESEARCH_ANALYTICS_ONLY",
+    "optional_contact_store": "RESEARCH_CONTACT_SEPARATE",
+    "link_key_between_response_and_contact": null,
+    "commercial_lead_store": "NOT_USED",
+    "eucons_leads_forms_json": "MUST_NOT_BE_REUSED"
+  },
+  "direct_identifiers_forbidden": [
+    "name",
+    "surname",
+    "cnp",
+    "identity_document",
+    "exact_address",
+    "phone",
+    "email",
+    "social_account",
+    "photo",
+    "signature",
+    "employer_name",
+    "organisation_name",
+    "cui"
+  ],
+  "special_category_data_forbidden": true,
+  "technical_identity": {
+    "login_required": false,
+    "email_collection": false,
+    "file_upload": false,
+    "client_generated_stable_identifier": false,
+    "response_id": "server-generated random UUID; no identity lookup table",
+    "ip_in_analytical_payload": false,
+    "user_agent_in_analytical_payload": false,
+    "server_log_policy": "Before production, document hosting/reverse-proxy logs, minimize retention and ensure no IP/device metadata enters the analytical export."
+  },
+  "pre_form_notice": {
+    "title": "Cercetare pentru fundamentarea analizei de nevoi AI4WORK STEP",
+    "required_before_questions": true,
+    "participation_voluntary": true,
+    "not_project_enrolment": true,
+    "not_training_offer": true,
+    "not_individual_decision": true,
+    "no_marketing": true,
+    "operator_legal_name": "EUROCONSULT SRL",
+    "operator_cui": "14250864",
+    "privacy_contact": "OPEN_BEFORE_PRODUCTION",
+    "warning": "Nu introduceți nume, date de contact, angajator, CNP, adresă sau alte date care vă pot identifica în câmpurile de text liber.",
+    "acknowledgement_field": "notice_read_and_voluntary_participation",
+    "acknowledgement_default": false,
+    "legal_basis": "TO_BE_DOCUMENTED_BY_OPERATOR_BEFORE_PRODUCTION; acknowledgement is not automatically treated as GDPR consent legal basis."
+  },
+  "adult_form": {
+    "source_instrument": "AI4WORK STEP QUESTIONNAIRE_ADULTS v1 frozen in NF-RUN-001",
+    "allowed_profile_fields": {
+      "region": ["Sud-Vest Oltenia", "Sud-Muntenia", "Centru"],
+      "status": ["șomer înregistrat", "persoană ocupată potențial eligibilă", "alt statut / de verificat"],
+      "age_band": ["30-39", "40-49", "50-59", "60+"],
+      "occupational_family": "broad_category_only_max_80_chars"
+    },
+    "question_ids": ["Q01", "Q02", "Q03", "Q04", "Q05", "Q06", "Q07", "Q08", "Q09", "Q10", "Q11", "Q12"]
+  },
+  "employer_form": {
+    "source_instrument": "AI4WORK STEP QUESTIONNAIRE_EMPLOYERS v1 frozen in NF-RUN-001",
+    "allowed_profile_fields": {
+      "region": ["Sud-Vest Oltenia", "Sud-Muntenia", "Centru"],
+      "sector_aggregated": "broad_sector_or_aggregated_CAEN_only_max_80_chars",
+      "size_band": ["1-9", "10-49", "50-249", "250+"],
+      "respondent_role": ["management", "HR", "operațional/tehnic", "altul"]
+    },
+    "question_ids": ["E01", "E02", "E03", "E04", "E05", "E06", "E07", "E08", "E09", "E10"],
+    "contact_rule": "E10 may record only yes/possible/no in the analytical form. Any contact detail must be entered separately and cannot carry response_id."
+  },
+  "disclosure_control": {
+    "public_or_reported_small_cells": "SUPPRESS_OR_COMBINE_WHEN_N_LT_5",
+    "free_text_quotes": "anonymize and review before use",
+    "exact_denominators_required": true
+  },
+  "go_no_go": {
+    "status": "NO_GO_UNTIL_RUNTIME_AND_PRIVACY_BINDING",
+    "required_before_enable": [
+      "privacy/DPO contact frozen",
+      "hosting and processor/subprocessor review completed",
+      "server/reverse-proxy logging policy verified",
+      "research-only production storage adapter bound and isolated from CRM",
+      "retention schedule approved and executable",
+      "form validation and PII rejection tests PASS",
+      "browser-to-HTTP-to-store-to-export-to-NF06 smoke PASS"
+    ]
+  }
+}
