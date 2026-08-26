@@ -1,32 +1,48 @@
 {
-  "schema_version": "eucons.ai4work_fresh_main_readiness.v0.1",
+  "schema_version": "eucons.ai4work_fresh_main_readiness.v0.2",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "base_main_sha": "56ca80db750c8f5445c4ac4e1f05a03d3a2ba4cc",
-  "candidate_head": "f3d57c05e8d2a215a70b0d5ba4276fc3b98ea370",
-  "state": "FRESH_MAIN_PROVIDER_INTERFACE_READY_COLLECTION_DISABLED",
+  "base_main_sha_at_branch_creation": "56ca80db750c8f5445c4ac4e1f05a03d3a2ba4cc",
+  "current_main_observed": "ce5096ba38ed11a8979cf684d4ff6971e41b73de",
+  "candidate_material_head_before_this_readiness_update": "a2385033d8856aedc8ee65c64b7f482c56c6c37f",
+  "state": "FRESH_MAIN_FORMS_REBUILT_COLLECTION_DISABLED_VALIDATION_PENDING",
   "verified_delta": [
-    "fresh branch created directly from current main instead of merging the stale NF-RUN branch",
-    "research-only storage Protocol added under eucons/research/ai4work-step",
+    "research-only storage Protocol remains isolated under eucons/research/ai4work-step",
     "reference SQLite adapter explicitly refuses production mode",
     "PROD envelope rejects synthetic rows and unsupported form identifiers",
     "raw and canonical-normalized SHA-256 are persisted for each accepted record",
-    "duplicate response_id fails closed",
-    "adult and employer exports remain form-isolated",
-    "local adapter tests passed 4/4 before publication to the branch"
+    "duplicate response_id fails closed and adult/employer exports remain form-isolated",
+    "the two frozen AI4WORK adult/employer questionnaire definitions were rebuilt on the fresh EUCONS branch",
+    "the research form contract freezes EUROCONSULT SRL / CUI 14250864 as operator while keeping the privacy contact unresolved and collection disabled",
+    "a noindex static research-page builder now renders landing/adult/employer surfaces but hard-fails if production collection is enabled without separate HTTP/storage/privacy bindings",
+    "all current branch changes remain isolated to seven eucons/research/ai4work-step files"
   ],
+  "validation_state": {
+    "storage_adapter_local_tests_from_preceding_candidate": "PASS_4_OF_4",
+    "latest_form_renderer_head_ci": "NOT_RUN",
+    "latest_form_renderer_runtime_smoke": "PENDING",
+    "production_collection_validation": "NOT_AUTHORIZED_AND_NOT_RUN"
+  },
+  "branch_drift": {
+    "compare_state": "DIVERGED",
+    "ahead_by": 7,
+    "behind_by": 2,
+    "behind_main_changes_class": "repository hygiene / Actions retention only at time of comparison",
+    "merge_rule": "Do not merge or deploy until fresh base-drift review and exact-head validation pass."
+  },
   "controller_binding": {
     "legal_name": "EUROCONSULT SRL",
     "cui": "14250864",
-    "state": "CLOSED_FROM_CURRENT_EUCONS_LEGAL_RENDERER_PLUS_PUBLIC_REGISTRY_CORROBORATION",
+    "state": "CLOSED",
     "privacy_contact": "OPEN_BEFORE_COLLECTION"
   },
   "still_open": [
-    "selectively transplant/rebuild the adult and employer form renderer onto this fresh branch",
     "bind an actual first-party HTTP endpoint on the authorized hosting target",
     "bind a production research-only database physically and credential-wise separated from CRM",
     "verify hosting processor/subprocessor terms, logging/IP retention, encryption and access control",
-    "freeze privacy/DPO contact and retention execution rule",
+    "freeze privacy/DPO contact, legal-basis wording and retention execution rule",
+    "run focused validation of the rebuilt form definitions and renderer on the latest candidate head",
     "run end-to-end synthetic smoke through browser -> HTTP -> isolated store -> immutable export -> NF06 ingest",
+    "reconcile the candidate onto fresh current main without importing unrelated/stale NF-RUN code",
     "collect real responses only after all previous items pass"
   ],
   "external_deploy_authorized": false,
