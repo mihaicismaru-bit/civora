@@ -7,6 +7,7 @@ on:
     paths:
       - 'partener-eu/web/**'
       - 'partener-eu/ops/test_web_hygiene.py'
+      - 'partener-eu/ops/test_public_boot_performance.py'
       - 'partener-eu/ops/test_frontend_regression.py'
       - 'partener-eu/ops/test_home_freshness_guard.mjs'
       - 'partener-eu/ops/test_public_language.py'
@@ -33,9 +34,10 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Repository and public-shell hygiene
+      - name: Repository, public-shell and boot-performance hygiene
         run: |
           python partener-eu/ops/test_web_hygiene.py
+          python partener-eu/ops/test_public_boot_performance.py
           python partener-eu/ops/test_frontend_regression.py
 
       - name: Public semantics and freshness
@@ -47,6 +49,7 @@ jobs:
       - name: Syntax-check active web control modules
         run: |
           node --check partener-eu/web/app.js
+          node --check partener-eu/web/consultant-loader-v1.js
           node --check partener-eu/web/consultant-workspace-v3.js
           node --check partener-eu/web/consultant-onboarding-v3.js
           node --check partener-eu/web/consultant-mysmis-v1.js
