@@ -41,7 +41,7 @@ assert "kind:'OFFICIAL'" in askui
 assert "kind:'PUBLIC_EVIDENCE'" in askui
 assert 'Sursa oficială ↗' in askui
 assert 'Evidență publică ↗' in askui
-assert 'Nu este clasificată T1/T1B' in askui
+assert 'Nu este clasificată drept sursă oficială primară' in askui
 assert "if(ev.kind==='OFFICIAL')" in askui
 assert 'provenanceBlock(d)' in askui
 assert 'Proveniență' in askui
