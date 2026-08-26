@@ -1,75 +1,93 @@
 {
-  "schema_version": "nf.evidence_gaps.v0.2",
+  "schema_version": "nf.evidence_gaps.v0.3",
   "run_id": "AI4WORK-STEP/NF-RUN-001",
+  "as_of": "2026-08-26",
   "gaps": [
     {
       "gap_id": "GAP-CALL-CODE",
       "class": "call_identity",
       "blocking": false,
-      "finding": "Full live technical call code has not yet been independently captured.",
-      "resolution": "Read official MySMIS/MIPE call registry; do not infer from neighboring calls."
+      "status": "CLOSED",
+      "finding": "The live technical call code was captured directly from the project-specific MySMIS schema state and corroborated against official notices for the exact STEP-LLL Adults call.",
+      "evidence": ["EV-STEP-MYSMIS-CALL-CODE-2026"],
+      "resolution": "PEO/1160/PEO_P11/OP4/ESO4.7/PEO_A66"
     },
     {
       "gap_id": "GAP-GSCS-BINARY",
       "class": "source_version",
       "blocking": true,
-      "finding": "Exact official GSCS/annex binary version and hash are not yet captured in this run.",
-      "resolution": "Capture approved 27.05.2026 package plus corrigendum and annexes before final call-compliance QA."
+      "status": "OPEN_EXTERNAL_SOURCE_CAPTURE",
+      "finding": "Official OIR notices and direct MIPE package URLs establish the guide/version chronology, including the consolidated 13 August package. A later 24 August change has also been reported by a secondary source. Exact current official GSCS/annex bytes and hashes have not been captured in this run because the MIPE binary endpoints time out in the available research environment.",
+      "evidence": ["EV-OIRNV-STEP-LLL-CONSOLIDATED-GUIDE-2026-08-13", "EV-STEP-LLL-CORRIGENDUM-2026-08-24"],
+      "resolution": "Freeze the latest official MIPE GSCS and annex binaries after confirming whether the reported 24 August corrigendum supersedes the 13 August consolidated package; hash every file before final call-compliance QA."
     },
     {
       "gap_id": "GAP-REG-SM-ADULT-LEARNING",
       "class": "regional_quantitative_evidence",
-      "blocking": true,
+      "blocking": false,
+      "status": "CLOSED",
       "construct": "adult_learning_participation",
       "territory": "Sud-Muntenia",
-      "finding": "No current direct regional participation rate has yet been frozen for Sud-Muntenia.",
-      "resolution": "Retrieve Eurostat trng_lfse_04 or equivalent official regional series."
+      "finding": "A directly comparable NUTS2 adult-learning baseline is now frozen: 6.1% in 2022 from OECD/Eurostat and 11.4% in 2025 from an institutional mirror declaring Eurostat trng_lfse_04 as source.",
+      "evidence": ["EV-OECD-EUROSTAT-ADULT-LEARNING-REGIONS-2022", "EV-EUROSTAT-MIRROR-ADULT-LEARNING-REGIONS-2025"],
+      "resolution": "Closed for regional adult-learning context. The indicator remains contextual and does not measure the AI/digital competence of the actual eligible >29 project population."
     },
     {
       "gap_id": "GAP-REG-SVO-DIGITAL-MATURITY",
       "class": "regional_quantitative_evidence",
       "blocking": false,
+      "status": "CLOSED_WITH_PROXY",
       "construct": "business_digital_maturity",
       "territory": "Sud-Vest Oltenia",
-      "finding": "RIS3 confirms TIC/digitalisation strategic relevance but does not quantify current firm maturity/AI uptake.",
-      "resolution": "Search ADR/INS/EDIH/current programme evaluations; otherwise retain as context only."
+      "finding": "Official quantitative evidence now exists for weak workplace digital use and a European Commission regional digitalisation proxy. In 2023, 22.5% of employees in the covered regional business-statistics universe used the internet professionally versus 41.8% nationally and 61.3% EU27; RIS 2025 also classifies cloud-computing performance as a severe relative weakness.",
+      "evidence": ["EV-RO-NUTS2-WORK-INTERNET-2023", "EV-EC-RIS2025-REGIONAL-DIGITAL-PROXY"],
+      "resolution": "Closed at regional digital-maturity/proxy level. Do not translate these measures into a direct regional AI-adoption rate or individual AI-skill deficit."
     },
     {
       "gap_id": "GAP-REG-SM-DIGITAL-MATURITY",
       "class": "regional_quantitative_evidence",
       "blocking": false,
+      "status": "CLOSED_WITH_PROXY",
       "construct": "business_digital_maturity",
       "territory": "Sud-Muntenia",
-      "finding": "RIS3 provides strategic context but no current quantitative maturity baseline frozen in the run.",
-      "resolution": "Search official regional evaluation/statistics; do not promote RIS3 priority into an empirical deficit."
+      "finding": "Official quantitative evidence now exists for weak workplace digital use and a European Commission regional digitalisation proxy. In 2023, 28.4% of employees in the covered regional business-statistics universe used the internet professionally versus 41.8% nationally and 61.3% EU27; RIS 2025 also classifies cloud-computing performance as a severe relative weakness.",
+      "evidence": ["EV-RO-NUTS2-WORK-INTERNET-2023", "EV-EC-RIS2025-REGIONAL-DIGITAL-PROXY"],
+      "resolution": "Closed at regional digital-maturity/proxy level. Do not translate these measures into a direct regional AI-adoption rate or individual AI-skill deficit."
     },
     {
       "gap_id": "GAP-PRIMARY-ELIGIBLE-ADULTS",
       "class": "direct_target_group_evidence",
       "blocking": true,
+      "status": "OPEN_PRIMARY_RESEARCH",
       "construct": "eligible_adult_skill_gap_primary",
       "territory": "Sud-Vest Oltenia / Sud-Muntenia / Centru",
-      "finding": "National/regional macro evidence does not directly measure the AI/digital skill profile of the actual eligible >29 population intended for recruitment.",
-      "resolution": "Generate and run a three-region primary survey with population/coverage metadata."
+      "finding": "National/regional macro evidence demonstrates weak digital-skills and adult-learning context but still does not directly measure the AI/digital skill profile, barriers and work-use practices of the actual eligible >29 population intended for recruitment.",
+      "resolution": "Run the three-region anonymous adult survey with documented recruitment frame and coverage metadata; ingest only real responses."
     },
     {
       "gap_id": "GAP-PRIMARY-EMPLOYERS",
       "class": "direct_labour_market_evidence",
       "blocking": true,
+      "status": "OPEN_PRIMARY_RESEARCH_PARTIALLY_TRIANGULATED",
       "construct": "labour_market_skill_demand",
       "territory": "Sud-Vest Oltenia / Sud-Muntenia / Centru",
-      "finding": "No current employer-level evidence has yet been frozen showing which AI/digital capabilities are lacking in roles/workflows relevant to the three regions.",
-      "resolution": "Employer/stakeholder survey or structured interviews; official vacancy/skill-shortage data used where definitions permit."
+      "finding": "Centru now has direct organizational survey evidence and all three regions have quantitative digital-use context, but there is still no comparable current employer evidence across all three regions identifying which AI/digital capabilities are insufficient in relevant workflows.",
+      "evidence": ["EV-CENTRU-DIGITAL-NEEDS-SURVEY-2025", "EV-RO-NUTS2-WORK-INTERNET-2023", "EV-WB-SUBNATIONAL-SKILLS-DIGITAL-ADOPTION-2025"],
+      "resolution": "Run the employer/stakeholder survey in all three regions or freeze comparable official employer skill-shortage evidence with compatible definitions."
     },
     {
       "gap_id": "GAP-SCALE-160",
       "class": "scale_justification",
       "blocking": true,
+      "status": "PARTIALLY_RESOLVED_FEASIBILITY_ONLY",
       "construct": "scale_and_distribution",
-      "finding": "160 and 80/40/40 are project design values, not independently demonstrated need magnitudes.",
-      "resolution": "Use eligible-population/recruitment-feasibility evidence plus expressions of interest/primary research; exact regional allocation cannot be claimed as need-weight without evidence."
+      "finding": "ANOFM administrative data demonstrate a conservative registered-unemployed pool aged 30-55 of 72,824 across the three regions, so recruiting 160 is small relative to the macro pool. This demonstrates numerical feasibility, not that 160 is the measured magnitude of need or that 80/40/40 is the empirically optimal need-weighted allocation.",
+      "evidence": ["EV-ANOFM-REGISTERED-UNEMPLOYED-REGIONS-AGE30-55-2026-06"],
+      "resolution": "Retain 160 and 80/40/40 as project design values unless primary research/expressions of interest and a transparent allocation rule independently support those exact magnitudes. Do not present them as observed need."
     }
   ],
-  "release_rule": "No final need analysis may claim direct three-region target-group need, exact volume 160 or relative need 80/40/40 while the corresponding blocking gaps remain open.",
-  "status": "BLOCKED_FOR_FINAL_NEEDS_ANALYSIS_READY_FOR_PRIMARY_RESEARCH_DESIGN"
+  "closed_gap_count": 4,
+  "blocking_open_gap_count": 4,
+  "release_rule": "No final needs analysis may claim direct three-region target-group need, direct comparable employer skill-demand across all three regions, exact need magnitude 160 or relative need 80/40/40 while the corresponding blocking primary/scale gaps remain open. Final call-compliance QA also remains blocked until the latest official GSCS/annex binaries are frozen and hashed.",
+  "status": "SECONDARY_RESEARCH_MATERIALLY_ADVANCED_PRIMARY_RESEARCH_AND_CURRENT_GSCS_BINARY_REMAIN_BLOCKING"
 }
