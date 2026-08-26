@@ -1,0 +1,79 @@
+{
+  "schema_version": "nf.evidence_addendum.v0.1",
+  "run_id": "AI4WORK-STEP/NF-RUN-001",
+  "extends": ["EVIDENCE_REGISTRY.json", "EVIDENCE_ADDENDUM_001.json", "EVIDENCE_ADDENDUM_002.json", "EVIDENCE_ADDENDUM_003.json"],
+  "research_date": "2026-08-26",
+  "evidence": [
+    {
+      "id": "EV-STEP-MYSMIS-CALL-CODE-2026",
+      "source": "AI4WORK STEP / 367944 project-specific MySMIS schema capture, corroborated by official OIR PECU notices for the same call",
+      "internal_source": "367944_CALL_SOURCE_ORIGIN_CAPTURE_2026-08-20 and 367944_MYSMIS_FORM_SCHEMA_DISCOVERY_v0.3",
+      "source_urls": [
+        "https://oirvest.ro/ghidul-solicitantului-conditii-specifice-step-lll-competente-pentru-viitor-formare-la-locul-de-munca-si-educatia-adultilor-in-tehnologiile-critice-adulti-lansa/",
+        "https://www.runv.ro/anunturi.html"
+      ],
+      "tier": "A1_PROJECT_LIVE_PLUS_OFFICIAL_CORROBORATION",
+      "territory": "Romania",
+      "scope": "call",
+      "period": "2026",
+      "constructs": ["call_identity", "call_version_history"],
+      "direct_measurement": true,
+      "facts": {
+        "call_code": "PEO/1160/PEO_P11/OP4/ESO4.7/PEO_A66",
+        "call_title": "STEP-LLL – Competențe pentru viitor: formare la locul de muncă și educația adulților în tehnologiile critice – Adulți",
+        "specific_objective": "ESO4.7",
+        "action": "11.g.1",
+        "project_state_when_captured": "Draft",
+        "current_deadline": "2026-09-30T16:00:00+03:00"
+      },
+      "use": "Closes the live technical call-code gap. The exact code is directly observed in the project-specific MySMIS capture. Official OIR pages independently corroborate the exact call title, P11/ESO4.7/action identity and launch/version chronology. This does not replace the current raw GSCS/annex binaries and hashes."
+    },
+    {
+      "id": "EV-EC-RIS2025-REGIONAL-DIGITAL-PROXY",
+      "source": "European Commission – Regional Innovation Scoreboard 2025, Romania regional profile",
+      "source_url": "https://ec.europa.eu/assets/rtd/ris/2025/ec_rtd_ris-regional-profile-ro.pdf",
+      "tier": "A1",
+      "territory": ["Sud-Vest Oltenia", "Sud-Muntenia", "Centru"],
+      "scope": "NUTS2 regional innovation/digitalisation proxy",
+      "period": "2025",
+      "constructs": ["business_digital_maturity_proxy", "regional_innovation_context"],
+      "direct_measurement": false,
+      "measures": [
+        {"territory":"Centru","nuts2":"RO12","name":"regional_innovation_index_relative_to_EU","value":33.6,"unit":"normalized_percent_of_EU_benchmark"},
+        {"territory":"Centru","nuts2":"RO12","name":"cloud_computing_in_enterprises_relative_to_EU27","value":20.4,"rank":215,"unit":"RIS_normalized_relative_score"},
+        {"territory":"Sud-Muntenia","nuts2":"RO31","name":"regional_innovation_index_relative_to_EU","value":28.0,"unit":"normalized_percent_of_EU_benchmark"},
+        {"territory":"Sud-Muntenia","nuts2":"RO31","name":"cloud_computing_in_enterprises_relative_to_EU27","value":0.0,"rank":222,"unit":"RIS_normalized_relative_score"},
+        {"territory":"Sud-Vest Oltenia","nuts2":"RO41","name":"regional_innovation_index_relative_to_EU","value":22.7,"unit":"normalized_percent_of_EU_benchmark"},
+        {"territory":"Sud-Vest Oltenia","nuts2":"RO41","name":"cloud_computing_in_enterprises_relative_to_EU27","value":0.0,"rank":222,"unit":"RIS_normalized_relative_score"}
+      ],
+      "limitations": [
+        "RIS scores are normalized benchmark indicators, not literal cloud-use percentages",
+        "the indicator is a digital-maturity proxy and not a direct regional AI-adoption rate",
+        "it does not measure the AI/digital skills of the project's actual eligible adults"
+      ],
+      "use": "Current official quantitative proxy that closes the two nonblocking regional digital-maturity evidence gaps at PROXY level."
+    },
+    {
+      "id": "EV-EC-RO-BUSINESS-DIGITAL-2026",
+      "source": "European Commission – Romania 2026 Country Report / Digital Decade reporting",
+      "source_urls": [
+        "https://economy-finance.ec.europa.eu/publications/2026-european-semester-country-reports_en",
+        "https://digital-strategy.ec.europa.eu/en/factpages/romanias-2026-digital-decade-country-report"
+      ],
+      "tier": "A1",
+      "territory": "Romania",
+      "scope": "national",
+      "period": "2025-2026 reporting",
+      "constructs": ["business_digital_maturity", "technology_adoption_context"],
+      "direct_measurement": true,
+      "measures": [
+        {"name":"SMEs_at_least_basic_digital_intensity_2025","value":44.0,"unit":"percent","qualifier":"approximately"},
+        {"name":"enterprises_high_or_very_high_digital_intensity_2025","value":21.7,"unit":"percent"},
+        {"name":"EU_enterprises_high_or_very_high_digital_intensity_2025","value":32.7,"unit":"percent"}
+      ],
+      "use": "National enterprise baseline supporting the digital-transition and skills-demand context. It does not substitute for direct employer evidence in the three target regions."
+    }
+  ],
+  "status": "FROZEN_REAL_EVIDENCE_ONLY",
+  "synthetic_data_used": false
+}
