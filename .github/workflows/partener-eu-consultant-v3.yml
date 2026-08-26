@@ -5,6 +5,7 @@ on:
   push:
     branches: [main]
     paths:
+      - 'partener-eu/web/consultant-loader-v1.js'
       - 'partener-eu/web/consultant-workspace-v3.js'
       - 'partener-eu/web/consultant-workspace-v3.css'
       - 'partener-eu/web/consultant-onboarding-v3.js'
@@ -13,22 +14,33 @@ on:
       - 'partener-eu/web/consultant-mysmis-v1.css'
       - 'partener-eu/web/mysmis-registry.js'
       - 'partener-eu/web/index.html'
-      - 'partener-eu/ingest/build_mysmis_consultant_registry.py'
-      - 'partener-eu/ingest/state/mipe_state.json'
       - 'partener-eu/ops/test_consultant_workspace_v3.py'
       - 'partener-eu/ops/test_consultant_crud_v4.py'
       - 'partener-eu/ops/test_consultant_runtime_v5.py'
-      - 'partener-eu/ops/fix_consultant_crud_v4.py'
-      - 'partener-eu/ops/fix_consultant_runtime_v5.py'
-      - 'partener-eu/ops/fix_consultant_polish_v6.py'
+      - '.github/workflows/partener-eu-consultant-v3.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'partener-eu/web/consultant-loader-v1.js'
+      - 'partener-eu/web/consultant-workspace-v3.js'
+      - 'partener-eu/web/consultant-workspace-v3.css'
+      - 'partener-eu/web/consultant-onboarding-v3.js'
+      - 'partener-eu/web/consultant-onboarding-v3.css'
+      - 'partener-eu/web/consultant-mysmis-v1.js'
+      - 'partener-eu/web/consultant-mysmis-v1.css'
+      - 'partener-eu/web/mysmis-registry.js'
+      - 'partener-eu/web/index.html'
+      - 'partener-eu/ops/test_consultant_workspace_v3.py'
+      - 'partener-eu/ops/test_consultant_crud_v4.py'
+      - 'partener-eu/ops/test_consultant_runtime_v5.py'
       - '.github/workflows/partener-eu-consultant-v3.yml'
 
 concurrency:
-  group: partener-eu-consultant-v3-qa
+  group: partener-eu-consultant-v3-qa-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   qa:
@@ -36,9 +48,6 @@ jobs:
     timeout-minutes: 6
     steps:
       - uses: actions/checkout@v6
-        with:
-          ref: main
-          fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
@@ -46,17 +55,9 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Apply canonical Consultant repair and Romanian UX polish
-        run: |
-          python partener-eu/ops/fix_consultant_crud_v4.py
-          python partener-eu/ops/fix_consultant_runtime_v5.py
-          python partener-eu/ops/fix_consultant_polish_v6.py
-
-      - name: Rebuild direct MySMIS Consultant evidence
-        run: python partener-eu/ingest/build_mysmis_consultant_registry.py
-
       - name: JavaScript syntax
         run: |
+          node --check partener-eu/web/consultant-loader-v1.js
           node --check partener-eu/web/consultant-workspace-v3.js
           node --check partener-eu/web/consultant-onboarding-v3.js
           node --check partener-eu/web/consultant-mysmis-v1.js
@@ -67,35 +68,3 @@ jobs:
           python partener-eu/ops/test_consultant_workspace_v3.py
           python partener-eu/ops/test_consultant_crud_v4.py
           python partener-eu/ops/test_consultant_runtime_v5.py
-
-      - name: Persist repaired Consultant runtime
-        shell: bash
-        run: |
-          set -euo pipefail
-          cp partener-eu/web/consultant-workspace-v3.js /tmp/consultant-workspace-v3.js
-          cp partener-eu/web/consultant-workspace-v3.css /tmp/consultant-workspace-v3.css
-          cp partener-eu/web/index.html /tmp/partener-index.html
-          cp partener-eu/web/mysmis-registry.js /tmp/mysmis-registry.js
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          for attempt in 1 2 3 4; do
-            git fetch origin main
-            git reset --hard origin/main
-            cp /tmp/consultant-workspace-v3.js partener-eu/web/consultant-workspace-v3.js
-            cp /tmp/consultant-workspace-v3.css partener-eu/web/consultant-workspace-v3.css
-            cp /tmp/partener-index.html partener-eu/web/index.html
-            cp /tmp/mysmis-registry.js partener-eu/web/mysmis-registry.js
-            git add \
-              partener-eu/web/consultant-workspace-v3.js \
-              partener-eu/web/consultant-workspace-v3.css \
-              partener-eu/web/index.html \
-              partener-eu/web/mysmis-registry.js
-            if git diff --cached --quiet; then
-              echo 'Consultant runtime already current.'
-              exit 0
-            fi
-            git commit -m 'Polish functional Consultant workspace UX'
-            if git push origin HEAD:main; then exit 0; fi
-            sleep $((attempt * 2))
-          done
-          exit 1
