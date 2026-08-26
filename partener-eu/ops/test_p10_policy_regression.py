@@ -19,6 +19,7 @@ acceptance = (PARTENER / "ops" / "p10_acceptance_sync.py").read_text(encoding="u
 recovery = (PARTENER / "ops" / "test_recovery.py").read_text(encoding="utf-8")
 afir = (PARTENER / "ingest" / "afir_ingest.py").read_text(encoding="utf-8")
 validator = (PARTENER / "ops" / "p10_validate.py").read_text(encoding="utf-8")
+stale_validation_trigger = PARTENER / "ops" / "p10-validation-trigger.txt"
 
 errors = []
 
@@ -43,6 +44,8 @@ if "github.event.workflow_run.conclusion == 'success'" not in validation:
     errors.append("production validation runs after unsuccessful upstream workflows")
 if "!partener-eu/deployment/**" not in validation:
     errors.append("production validation re-runs on Pages deployment evidence commits")
+if stale_validation_trigger.exists():
+    errors.append("stale one-shot P10 validation trigger file still exists")
 
 # A successful source workflow that already feeds the canonical Pages deployment
 # must have exactly one post-deploy validation path. Subscribing Production
