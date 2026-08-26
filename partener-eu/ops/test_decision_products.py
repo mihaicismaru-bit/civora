@@ -75,6 +75,25 @@ def fact_authorized(item: dict[str, Any], fact: str) -> bool:
     )
 
 
+def dossier_fact_authorized(dossier: dict[str, Any], fact: str) -> bool:
+    """Accept newer canonical evidence attached after the older P11 projection.
+
+    This is deliberately fail-closed: a fact must be marked verified by the
+    dossier quality gate and be supported by at least one HTTPS provenance row.
+    """
+    quality = dossier.get("quality") or {}
+    if fact not in set(quality.get("verifiedFactClasses") or []):
+        return False
+    for row in dossier.get("sources") or []:
+        if not isinstance(row, dict):
+            continue
+        supported = set(row.get("supports") or row.get("supportedFactClasses") or [])
+        url = str(row.get("url") or row.get("sourceUrl") or "")
+        if fact in supported and url.startswith("https://"):
+            return True
+    return False
+
+
 def non_applicant(value: str) -> bool:
     folded = norm(value)
     return any(norm(marker) in folded for marker in NON_APPLICANT_MARKERS)
@@ -195,8 +214,13 @@ for dossier in dossiers:
             assert {entity_key(row) for row in executive.get("applicants") or []} == {
                 entity_key(row) for row in expected
             }, f"executive applicant list diverges from guide for {dossier.get('id')}"
+        elif dossier_fact_authorized(dossier, "beneficiaries"):
+            assert {entity_key(row) for row in executive.get("applicants") or []} == {
+                entity_key(row) for row in actual_applicants
+            }, f"executive applicant list diverges from newer source-bound evidence: {dossier.get('id')}"
         elif not fact_authorized(source, "beneficiaries"):
             assert not actual_applicants, f"beneficiaries published without authorized evidence: {dossier.get('id')}"
+            assert not executive.get("applicants"), f"executive beneficiaries published without authorized evidence: {dossier.get('id')}"
 
     quality = dossier.get("quality") or {}
     assert quality.get("failClosed") is True
