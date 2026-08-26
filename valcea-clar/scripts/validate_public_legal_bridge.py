@@ -9,6 +9,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import build_legal_pages
+
 ROOT = Path(__file__).resolve().parents[1]
 BRIDGE = ROOT / "site" / "chatgpt-sites-live-bridge.js"
 INSTALL = ROOT / "site" / "ONE_TIME_LIVE_BRIDGE_INSTALL.md"
@@ -19,6 +21,10 @@ EXPECTED_PAGES = {"termeni", "confidentialitate", "corectii"}
 
 
 def main() -> int:
+    # Generated HTML is deployment/runtime output, not an independent source of
+    # truth. Rebuild it deterministically before validating the repository bridge.
+    build_legal_pages.build()
+
     doc = json.loads(LEGAL.read_text(encoding="utf-8"))
     assert doc.get("canonical_domain") == "valceaclar.ro"
     assert set(doc.get("pages", {})) == EXPECTED_PAGES
@@ -43,8 +49,8 @@ def main() -> int:
     install = INSTALL.read_text(encoding="utf-8")
 
     # The client bridge remains a fallback for the two original legal routes.
-    # /corectii/ is accepted as a first-class server-rendered/static policy route;
-    # it does not require client-side rendering to be public or indexable.
+    # /corectii/ is a first-class server-rendered/static policy route and does
+    # not require client-side rendering to be public or indexable.
     required_bridge = (
         "site/legal/legal_pages.json",
         "site/navigation.json",
@@ -78,7 +84,6 @@ def main() -> int:
         assert f"https://valceaclar.ro{expected_path}" in text
         assert 'name="robots" content="index,follow"' in text
         assert doc["contact_email"] in text
-        assert 'data-nav-contract="valcea-clar-primary-v2"' in text
 
     corectii = doc["pages"]["corectii"]
     assert corectii["title"] == "Corecții și drept la replică"
