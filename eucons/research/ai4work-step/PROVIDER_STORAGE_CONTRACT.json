@@ -1,0 +1,59 @@
+{
+  "schema_version": "eucons.research_storage_contract.v0.2",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "controller": {
+    "legal_name": "EUROCONSULT SRL",
+    "cui": "14250864",
+    "privacy_contact": "OPEN_BEFORE_PRODUCTION"
+  },
+  "purpose": "research-only primary data collection for AI4WORK STEP needs analysis",
+  "commercial_use": "FORBIDDEN",
+  "crm_integration": "FORBIDDEN",
+  "production_enabled": false,
+  "stores": {
+    "analytical_responses": "RESEARCH_ANALYTICS_ONLY",
+    "followup_contacts": "RESEARCH_CONTACT_SEPARATE",
+    "linkage_between_stores": "FORBIDDEN"
+  },
+  "accepted_forms": ["AI4WORK_ADULTS_V1", "AI4WORK_EMPLOYERS_V1"],
+  "record_rules": {
+    "synthetic": false,
+    "response_id": "server-derived opaque SHA-256 from research_id + form_id + one-submit UUIDv4 idempotency key; raw idempotency key is never stored/exported",
+    "raw_bytes_sha256": "MANDATORY",
+    "normalized_bytes_sha256": "MANDATORY",
+    "body_sha256": "TRANSPORT_METADATA_ONLY_NOT_EXPORTED",
+    "same_response_id_same_body": "REPLAY_ORIGINAL_RECEIPT_NO_SECOND_ANALYTICAL_ROW",
+    "same_response_id_different_body": "FAIL_CLOSED",
+    "repository_persistence": "FORBIDDEN",
+    "direct_identifiers": "FORBIDDEN_IN_ANALYTICAL_STORE"
+  },
+  "reference_adapter": {
+    "file": "research_storage.py",
+    "class": "SQLiteResearchStorage",
+    "purpose": "local test/reference only",
+    "production_use": "FORBIDDEN",
+    "idempotent_reference_path": "append_idempotent"
+  },
+  "production_binding_requirements": [
+    "separate research database/credentials from CRM and commercial runtime",
+    "HTTPS endpoint with CORS limited to https://eucons.ro",
+    "server-side schema and PII validation before persistence",
+    "retry-safe idempotency preserving one analytical row per submit attempt",
+    "encryption in transit and at rest where supported by provider",
+    "role-based access limited to designated research staff",
+    "documented processor/subprocessor and transfer review",
+    "reverse-proxy/application logging review so IP/device metadata never enters analytical exports",
+    "documented retention schedule and deletion execution",
+    "immutable raw export with SHA-256 before analytical cleaning",
+    "NF06 export must pass PRIMARY_RESPONSE_INGEST_CONTRACT"
+  ],
+  "go_no_go": {
+    "operator_identity": "CLOSED",
+    "privacy_contact": "OPEN",
+    "hosting_processor_review": "OPEN",
+    "production_research_store": "OPEN",
+    "retention_execution": "OPEN",
+    "test_reference_adapter": "IDEMPOTENCY_IMPLEMENTED_TESTS_ADDED_EXACT_HEAD_EXECUTION_PENDING",
+    "status": "NO_GO_FOR_REAL_COLLECTION"
+  }
+}

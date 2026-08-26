@@ -1,0 +1,50 @@
+{
+  "schema_version": "eucons.ai4work_fresh_main_readiness.v0.6",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "rebuilt_on_main_sha": "4209af975466865d750fbaf795ba74a3ca4aee5e",
+  "state": "CURRENT_MAIN_RESEARCH_PROVIDER_REBUILT_COLLECTION_DISABLED_EXACT_HEAD_GATE_PENDING",
+  "verified_delta": [
+    "the complete AI4WORK research-provider file set was rebuilt on main 4209af975466865d750fbaf795ba74a3ca4aee5e without importing stale branch history",
+    "research-only storage remains isolated under eucons/research/ai4work-step and the SQLite adapter explicitly refuses production mode",
+    "adult and employer questionnaire definitions plus the fail-closed static renderer are present on the current-main candidate",
+    "the form contract keeps EUROCONSULT SRL / CUI 14250864 as operator while privacy contact and retention remain unresolved and production collection remains disabled",
+    "the runtime validator rejects forbidden identifier fields and PII-like email, Romanian phone, CNP and URL text and validates schema/options/ranges/conditional fields",
+    "PROD storage rejects synthetic records and TEST TWIN remains NON_EVIDENCE",
+    "privacy-safe retry idempotency is implemented in a reference path: one-submit UUIDv4 keys derive opaque response IDs; raw keys and body digests are excluded from analytical export; same-key/different-body fails closed",
+    "a dedicated AI4WORK research workflow now gates runtime/storage/idempotency tests, preview rendering, tracking rejection and collection-disabled assertions"
+  ],
+  "validation_state": {
+    "current_main_transplant": "PASS_TREE_PREPARED_ON_4209AF975466865D750FBAF795BA74A3CA4AEE5E",
+    "fresh_runtime_test_execution": "PENDING_FIRST_DEDICATED_GATE_RUN",
+    "fresh_renderer_ci": "PENDING_FIRST_DEDICATED_GATE_RUN",
+    "retry_idempotency_execution": "PENDING_FIRST_DEDICATED_GATE_RUN",
+    "browser_http_store_export_nf06_smoke": "PENDING",
+    "production_collection_validation": "NOT_AUTHORIZED_AND_NOT_RUN"
+  },
+  "retry_idempotency_gate": {
+    "state": "REFERENCE_IMPLEMENTATION_AND_TESTS_COMMITTED_EXECUTION_PENDING",
+    "control_artifact": "HTTP_IDEMPOTENCY_CONTRACT.json",
+    "implementation": ["http_idempotency.py", "research_storage.py::append_idempotent", "test_http_idempotency.py"],
+    "required_behavior": "same first-party idempotency key plus same normalized body is replay-safe; same key plus different body fails closed; different keys may represent distinct submissions even when answers match",
+    "privacy_boundary": "no cookie, fingerprint, CRM identifier, email, phone, IP-derived identifier or cross-site identifier may be used as the idempotency key"
+  },
+  "controller_binding": {
+    "legal_name": "EUROCONSULT SRL",
+    "cui": "14250864",
+    "state": "IDENTITY_CLOSED_CONTACT_OPEN",
+    "privacy_contact": "OPEN_BEFORE_COLLECTION"
+  },
+  "still_open": [
+    "execute the dedicated runtime/form/storage/idempotency gate on this exact current-main candidate head",
+    "bind an actual first-party HTTP endpoint on the authorized hosting target",
+    "bind a production research-only database physically and credential-wise separated from CRM",
+    "verify hosting processor/subprocessor terms, logging/IP retention, encryption and access control",
+    "freeze privacy/DPO contact, Article 13 wording, lawful-basis decision and retention/deletion execution rule",
+    "perform DPIA screening and retain the decision record",
+    "run end-to-end synthetic TEST TWIN smoke through browser -> HTTP -> isolated non-evidence store -> immutable export -> NF06 test-twin ingest",
+    "collect real responses only after all production privacy/provider gates pass"
+  ],
+  "external_deploy_authorized": false,
+  "collection_enabled": false,
+  "merge_authorized": false
+}
