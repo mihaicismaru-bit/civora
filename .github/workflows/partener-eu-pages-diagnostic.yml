@@ -1,16 +1,26 @@
 name: PARTENER.EU Pages Diagnostic
+
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
       - '.github/workflows/partener-eu-pages-diagnostic.yml'
-  workflow_dispatch:
+
 permissions:
-  contents: write
+  contents: read
   pages: read
+
+concurrency:
+  group: partener-eu-pages-diagnostic
+  cancel-in-progress: true
+
 jobs:
   diagnose:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
     steps:
       - uses: actions/checkout@v6
       - name: Inspect Pages API
@@ -43,8 +53,46 @@ jobs:
           }
           json.dump(out,open('partener-eu/deployment/pages-diagnostic.json','w',encoding='utf-8'),indent=2)
           PY
+      - name: Upload Pages diagnostic evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-pages-diagnostic
+          path: partener-eu/deployment/pages-diagnostic.json
+          retention-days: 7
+          if-no-files-found: error
+
+  persist:
+    if: github.event_name == 'workflow_dispatch'
+    needs: diagnose
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: partener-pages-diagnostic
+          path: /tmp/partener-pages-diagnostic
+      - name: Persist Pages diagnostic from explicit manual recovery
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE=$(find /tmp/partener-pages-diagnostic -type f -name 'pages-diagnostic.json' -print -quit)
+          test -n "$SOURCE"
+          cp "$SOURCE" /tmp/pages-diagnostic.json
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add partener-eu/deployment/pages-diagnostic.json
-          git commit -m 'Record PARTENER.EU Pages diagnostic' || exit 0
-          git push
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p partener-eu/deployment
+            cp /tmp/pages-diagnostic.json partener-eu/deployment/pages-diagnostic.json
+            git add partener-eu/deployment/pages-diagnostic.json
+            if git diff --cached --quiet; then exit 0; fi
+            git commit -m 'Record PARTENER.EU Pages diagnostic [skip ci]'
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1

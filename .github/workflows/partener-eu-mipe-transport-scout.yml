@@ -9,7 +9,7 @@ on:
       - '.github/workflows/partener-eu-mipe-transport-scout.yml'
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: partener-eu-mipe-transport-scout
@@ -23,6 +23,8 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 8
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -43,6 +45,8 @@ jobs:
     needs: scout
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v6
         with:
@@ -81,11 +85,36 @@ jobs:
           out.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
           print(json.dumps({'verdict': payload['verdict'], 'workingTransports': working}, ensure_ascii=False, indent=2))
           PY
-      - name: Persist transport matrix
+      - name: Upload transport matrix evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-mipe-transport-matrix
+          path: partener-eu/ingest/state/mipe_transport_matrix.json
+          retention-days: 7
+          if-no-files-found: error
+
+  persist:
+    if: github.event_name == 'workflow_dispatch'
+    needs: aggregate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: partener-mipe-transport-matrix
+          path: /tmp/partener-mipe-transport-matrix
+      - name: Persist transport matrix from explicit manual recovery
         shell: bash
         run: |
           set -euo pipefail
-          cp partener-eu/ingest/state/mipe_transport_matrix.json /tmp/mipe_transport_matrix.json
+          SOURCE=$(find /tmp/partener-mipe-transport-matrix -type f -name 'mipe_transport_matrix.json' -print -quit)
+          test -n "$SOURCE"
+          cp "$SOURCE" /tmp/mipe_transport_matrix.json
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           for attempt in 1 2 3; do
@@ -94,7 +123,7 @@ jobs:
             cp /tmp/mipe_transport_matrix.json partener-eu/ingest/state/mipe_transport_matrix.json
             git add partener-eu/ingest/state/mipe_transport_matrix.json
             if git diff --cached --quiet; then exit 0; fi
-            git commit -m 'Record MIPE transport matrix'
+            git commit -m 'Record MIPE transport matrix [skip ci]'
             if git push origin HEAD:main; then exit 0; fi
             sleep $((attempt * 2))
           done
