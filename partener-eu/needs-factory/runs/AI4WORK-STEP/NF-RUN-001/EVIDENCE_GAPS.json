@@ -1,5 +1,5 @@
 {
-  "schema_version": "nf.evidence_gaps.v0.3",
+  "schema_version": "nf.evidence_gaps.v0.4",
   "run_id": "AI4WORK-STEP/NF-RUN-001",
   "as_of": "2026-08-26",
   "gaps": [
@@ -16,10 +16,10 @@
       "gap_id": "GAP-GSCS-BINARY",
       "class": "source_version",
       "blocking": true,
-      "status": "OPEN_EXTERNAL_SOURCE_CAPTURE",
-      "finding": "Official OIR notices and direct MIPE package URLs establish the guide/version chronology, including the consolidated 13 August package. A later 24 August change has also been reported by a secondary source. Exact current official GSCS/annex bytes and hashes have not been captured in this run because the MIPE binary endpoints time out in the available research environment.",
-      "evidence": ["EV-OIRNV-STEP-LLL-CONSOLIDATED-GUIDE-2026-08-13", "EV-STEP-LLL-CORRIGENDUM-2026-08-24"],
-      "resolution": "Freeze the latest official MIPE GSCS and annex binaries after confirming whether the reported 24 August corrigendum supersedes the 13 August consolidated package; hash every file before final call-compliance QA."
+      "status": "OPEN_EXTERNAL_SOURCE_CAPTURE_EXACT_URLS_KNOWN",
+      "finding": "The version chronology is reconciled: the consolidated STEP-LLL package was published on 13 August 2026 and a second corrigendum was published on 19 August 2026. A secondary article published on 24 August reports that 19 August corrigendum and updated Annex 4; it is not evidence of a distinct third amendment on 24 August. The exact current official MIPE PDF and Annex 4 DOCX URLs are known, but their binary bytes and SHA-256 hashes have not been captured because the MIPE endpoints are not retrievable in the available research environment.",
+      "evidence": ["EV-OIRNV-STEP-LLL-CONSOLIDATED-GUIDE-2026-08-13", "EV-STEP-LLL-CURRENT-CORRIGENDUM-LINKSET-2026-08-19"],
+      "resolution": "Download the exact current official MIPE guide/corrigendum PDF and updated Annex 4 DOCX from the frozen URLs in EVIDENCE_ADDENDUM_006.json, retain the exact bytes, calculate SHA-256 for both files, then run final call-compliance QA. Do not make binary-dependent assertions before capture."
     },
     {
       "gap_id": "GAP-REG-SM-ADULT-LEARNING",
@@ -88,6 +88,6 @@
   ],
   "closed_gap_count": 4,
   "blocking_open_gap_count": 4,
-  "release_rule": "No final needs analysis may claim direct three-region target-group need, direct comparable employer skill-demand across all three regions, exact need magnitude 160 or relative need 80/40/40 while the corresponding blocking primary/scale gaps remain open. Final call-compliance QA also remains blocked until the latest official GSCS/annex binaries are frozen and hashed.",
-  "status": "SECONDARY_RESEARCH_MATERIALLY_ADVANCED_PRIMARY_RESEARCH_AND_CURRENT_GSCS_BINARY_REMAIN_BLOCKING"
+  "release_rule": "No final needs analysis may claim direct three-region target-group need, direct comparable employer skill-demand across all three regions, exact need magnitude 160 or relative need 80/40/40 while the corresponding blocking primary/scale gaps remain open. Final call-compliance QA also remains blocked until the exact current official MIPE GSCS/corrigendum and Annex 4 binaries are frozen and hashed.",
+  "status": "SECONDARY_RESEARCH_MATERIALLY_ADVANCED_CALL_CHRONOLOGY_RECONCILED_PRIMARY_RESEARCH_AND_CURRENT_GSCS_BINARY_REMAIN_BLOCKING"
 }
