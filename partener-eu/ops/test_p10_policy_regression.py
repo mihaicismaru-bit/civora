@@ -56,6 +56,22 @@ for marker in [
     if marker not in pages_workflow:
         errors.append(f"canonical Pages fail-closed preflight missing: {marker}")
 
+# LKG recovery intentionally mutates generated files in the deployment workspace.
+# Before the workflow rebases/pushes the deployment ledger, those ephemeral
+# mutations must be discarded so evidence persistence cannot fail on a dirty tree
+# or accidentally publish generated product changes back to main.
+for marker in [
+    "/tmp/partener-pages-latest.json",
+    "/tmp/partener-pages-last-attempt.json",
+    "git reset --hard HEAD",
+]:
+    if marker not in pages_workflow:
+        errors.append(f"Pages evidence isolation missing: {marker}")
+reset_at = pages_workflow.find("git reset --hard HEAD")
+pull_at = pages_workflow.find("git pull --rebase origin main")
+if reset_at < 0 or pull_at < 0 or reset_at > pull_at:
+    errors.append("Pages evidence writer does not clean preflight mutations before rebase")
+
 def has_exact_yaml_scalar(workflow: str, key: str, value: str) -> bool:
     return bool(re.search(
         rf"(?m)^[ \\t]*{re.escape(key)}:[ \\t]*{re.escape(value)}[ \\t]*(?:#.*)?$",
