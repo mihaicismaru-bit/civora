@@ -13,6 +13,7 @@ ABSENT = (
     ".github/workflows/partener-eu-mipe-ro-runner.yml",
     "partener-eu/ingest/mipe_browser_ingest.py",
     "partener-eu/ingest/mipe_browser_ingest_v2.py",
+    # Legacy mutable-state discovery runtime; the canonical acquisition/engine boundary owns this path now.
     "partener-eu/ingest/mipe_discovery_ingest.py",
     "partener-eu/ingest/state/mipe_ro_trigger.txt",
     "partener-eu/ingest/mipe_ingest.py",
