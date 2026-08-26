@@ -1,0 +1,72 @@
+{
+  "schema_version": "nf.evidence_addendum.v0.1",
+  "run_id": "AI4WORK-STEP/NF-RUN-001",
+  "extends": [
+    "EVIDENCE_REGISTRY.json",
+    "EVIDENCE_ADDENDUM_001.json",
+    "EVIDENCE_ADDENDUM_002.json",
+    "EVIDENCE_ADDENDUM_003.json",
+    "EVIDENCE_ADDENDUM_004.json"
+  ],
+  "research_date": "2026-08-26",
+  "evidence": [
+    {
+      "id": "EV-ANOFM-TRAINING-PARTICIPATION-2026-07",
+      "source": "Agenția Națională pentru Ocuparea Forței de Muncă – Raport formare profesională iulie 2026 / comunicat 20 august 2026",
+      "source_urls": [
+        "https://www.anofm.ro/raport-formare-profesionala-iulie-2026/",
+        "https://www.anofm.ro/11-632-participanti-la-cursurile-organizate-de-anofm-in-primele-sapte-luni-ale-anului-2026/"
+      ],
+      "tier": "A1",
+      "territory": "Romania",
+      "scope": "national employment-service training throughput",
+      "period": "2026-01-01/2026-07-31",
+      "constructs": ["adult_training_participation_context", "public_training_delivery_capacity"],
+      "direct_measurement": true,
+      "measures": [
+        {
+          "name": "persons_in_ANOFM_training_or_competence_evaluation_Jan_Jul_2026",
+          "value": 11632,
+          "unit": "persons",
+          "denominator_universe": "participants included by ANOFM in vocational training programmes and competence-evaluation processes in January-July 2026"
+        }
+      ],
+      "limitations": [
+        "national aggregate, not a NUTS2 three-region estimate",
+        "does not identify AI-specific or digital-skill deficits",
+        "does not measure the project's eligible >29 target group directly"
+      ],
+      "use": "Fresh official 2026 context confirming material adult-training activity through the public employment service. It supports feasibility/context only and cannot close the direct target-group need gap."
+    },
+    {
+      "id": "EV-AJOFM-IALOMITA-DIGITAL-TRAINING-OFFER-2026",
+      "source": "AJOFM Ialomița – Cursuri de formare profesională organizate în anul 2026",
+      "source_url": "https://www.anofm.ro/ialomita/cursuri-de-formare-profesionala-organizate-in-anul-2026/",
+      "tier": "A1_LOCAL",
+      "territory": "Sud-Muntenia / Ialomița",
+      "scope": "county employment-service training offer",
+      "period": "2026",
+      "constructs": ["digital_training_availability", "local_reskilling_context"],
+      "direct_measurement": false,
+      "facts": {
+        "digital_course_in_2026_offer": true,
+        "course_scope": "competență digitală, inclusiv siguranță pe internet și securitate cibernetică",
+        "access_rule_reported": "free for registered unemployed persons in AJOFM Ialomița records"
+      },
+      "limitations": [
+        "course provision is not empirical proof of prevalence or severity of a digital-skill deficit",
+        "one county does not represent the whole Sud-Muntenia region",
+        "the offer does not establish AI-specific employer demand"
+      ],
+      "use": "Current local institutional signal that digital upskilling is an active employment-service response in Sud-Muntenia; contextual only."
+    }
+  ],
+  "gap_effect": {
+    "GAP-PRIMARY-ELIGIBLE-ADULTS": "REMAINS_OPEN",
+    "GAP-PRIMARY-EMPLOYERS": "REMAINS_OPEN",
+    "GAP-SCALE-160": "REMAINS_PARTIALLY_RESOLVED_FEASIBILITY_ONLY",
+    "GAP-GSCS-BINARY": "REMAINS_OPEN_EXTERNAL_SOURCE_CAPTURE"
+  },
+  "status": "FROZEN_REAL_EVIDENCE_ONLY",
+  "synthetic_data_used": false
+}
