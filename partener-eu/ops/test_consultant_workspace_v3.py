@@ -9,6 +9,7 @@ from urllib.parse import urlparse
 ROOT = Path(__file__).resolve().parents[2]
 WEB = ROOT / "partener-eu" / "web"
 index = (WEB / "index.html").read_text(encoding="utf-8")
+loader = (WEB / "consultant-loader-v1.js").read_text(encoding="utf-8")
 js = (WEB / "consultant-workspace-v3.js").read_text(encoding="utf-8")
 css = (WEB / "consultant-workspace-v3.css").read_text(encoding="utf-8")
 onboarding_js = (WEB / "consultant-onboarding-v3.js").read_text(encoding="utf-8")
@@ -17,19 +18,30 @@ mysmis_js = (WEB / "consultant-mysmis-v1.js").read_text(encoding="utf-8")
 mysmis_css = (WEB / "consultant-mysmis-v1.css").read_text(encoding="utf-8")
 registry_text = (WEB / "mysmis-registry.js").read_text(encoding="utf-8")
 
-required_index = [
+# Public boot is intentionally lightweight: consultant-only assets are loaded
+# on demand by the small loader, while MySMIS registry remains available on the
+# public data path. This contract prevents a regression back to eager loading.
+assert 'consultant-loader-v1.js' in index, "index missing consultant lazy loader"
+assert 'mysmis-registry.js' in index, "index missing MySMIS registry"
+assert index.index('mipe-news.js') < index.index('mysmis-registry.js')
+
+lazy_assets = [
     'consultant-workspace-v3.css','consultant-workspace-v3.js',
     'consultant-onboarding-v3.css','consultant-onboarding-v3.js',
-    'consultant-mysmis-v1.css','consultant-mysmis-v1.js','mysmis-registry.js',
+    'consultant-mysmis-v1.css','consultant-mysmis-v1.js',
 ]
-for token in required_index:
-    assert token in index, f"index missing {token}"
+for token in lazy_assets:
+    assert token not in index, f"consultant-only asset must not be eager in index: {token}"
+    assert token in loader, f"consultant loader missing {token}"
+assert "document.addEventListener('click'" in loader
+assert "window.PARTENER_LOAD_CONSULTANT=loadConsultantSuite" in loader
+assert loader.index('consultant-workspace-v3.js') < loader.index('consultant-onboarding-v3.js')
+assert loader.index('consultant-onboarding-v3.js') < loader.index('consultant-mysmis-v1.js')
 
 assert 'consultant-workspace-v2.js' not in index
 assert 'consultant-workspace-v2.css' not in index
-assert index.index('mipe-news.js') < index.index('mysmis-registry.js')
-assert index.index('mysmis-registry.js') < index.index('consultant-mysmis-v1.js')
-assert index.index('consultant-workspace-v3.js') < index.index('consultant-mysmis-v1.js')
+assert 'consultant-workspace-v2.js' not in loader
+assert 'consultant-workspace-v2.css' not in loader
 
 required_js = [
     "indexedDB","Radar de oportunități","Condiții eliminatorii verificate automat","Verificare consultant",
@@ -103,4 +115,4 @@ assert "cw3MySMISSnapshot" in mysmis_css and "cw3MySMISEvidence" in mysmis_css
 assert len(js) > 20000
 assert len(css) > 8000
 assert len(onboarding_js) > 2500
-print("Consultant Workspace v6 CRUD + Romanian UX + direct MySMIS evidence: PASS")
+print("Consultant Workspace v6 CRUD + Romanian UX + lazy-load + direct MySMIS evidence: PASS")
