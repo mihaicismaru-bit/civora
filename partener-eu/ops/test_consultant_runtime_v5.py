@@ -6,6 +6,7 @@ ROOT = Path(__file__).resolve().parents[2]
 js = (ROOT / 'partener-eu/web/consultant-workspace-v3.js').read_text(encoding='utf-8')
 css = (ROOT / 'partener-eu/web/consultant-workspace-v3.css').read_text(encoding='utf-8')
 index = (ROOT / 'partener-eu/web/index.html').read_text(encoding='utf-8')
+loader = (ROOT / 'partener-eu/web/consultant-loader-v1.js').read_text(encoding='utf-8')
 app = (ROOT / 'partener-eu/web/app.js').read_text(encoding='utf-8')
 
 assert "${S.consultant?'Site public':'Spațiu consultant'}" in app, 'top-level app mode label changed unexpectedly'
@@ -32,7 +33,8 @@ assert 'PREGĂTIRE RECOMANDATĂ' in js
 assert 'NU CONTINUA / BLOCAT' in js
 assert 'hard-gates explicabile' not in js
 
-version = re.search(r'consultant-workspace-v3\.js\?v=([^"\']+)', index)
-assert version and version.group(1) == '20260816-0931', f'unexpected consultant cache version: {version.group(1) if version else None}'
+assert 'consultant-workspace-v3.js' not in index, 'Consultant runtime must remain off the eager public path'
+version = re.search(r'consultant-workspace-v3\.js\?v=([^"\']+)', loader)
+assert version and version.group(1) == '20260816-0931', f'unexpected consultant lazy-loader cache version: {version.group(1) if version else None}'
 
-print('Consultant runtime v6 handoff + CRUD + Romanian UX: PASS')
+print('Consultant runtime v6 lazy handoff + CRUD + Romanian UX: PASS')

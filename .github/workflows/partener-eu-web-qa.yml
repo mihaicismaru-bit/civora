@@ -12,6 +12,9 @@ on:
       - 'partener-eu/ops/test_home_freshness_guard.mjs'
       - 'partener-eu/ops/test_public_language.py'
       - 'partener-eu/ops/test_decision_products.py'
+      - 'partener-eu/ops/test_consultant_workspace_v3.py'
+      - 'partener-eu/ops/test_consultant_crud_v4.py'
+      - 'partener-eu/ops/test_consultant_runtime_v5.py'
       - '.github/workflows/partener-eu-web-qa.yml'
 
 permissions:
@@ -39,6 +42,12 @@ jobs:
           python partener-eu/ops/test_web_hygiene.py
           python partener-eu/ops/test_public_boot_performance.py
           python partener-eu/ops/test_frontend_regression.py
+
+      - name: Consultant lazy-load and runtime contracts
+        run: |
+          python partener-eu/ops/test_consultant_workspace_v3.py
+          python partener-eu/ops/test_consultant_crud_v4.py
+          python partener-eu/ops/test_consultant_runtime_v5.py
 
       - name: Public semantics and freshness
         run: |
