@@ -1,0 +1,80 @@
+{
+  "schema_version": "eucons.ai4work_exact_head_validation.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "validation_date": "2026-08-27",
+  "pr_number": 691,
+  "candidate_branch": "eucons/ai4work-research-fresh-main-20260827-v2",
+  "candidate_head_sha": "a3152b8975e22c7dd358d47c910241740d4aacf4",
+  "base_main_sha": "4209af975466865d750fbaf795ba74a3ca4aee5e",
+  "workflow": {
+    "name": "EUCONS AI4WORK Research Gate",
+    "run_id": 33020847381,
+    "run_number": 2,
+    "status": "completed",
+    "conclusion": "success",
+    "job": "research-gate"
+  },
+  "unit_tests": {
+    "command": "python -m unittest -v test_runtime.py test_research_storage.py test_http_idempotency.py",
+    "python": "3.12.14",
+    "tests_run": 21,
+    "result": "PASS",
+    "coverage_intent": [
+      "pre-form acknowledgement required",
+      "production collection disabled by contract",
+      "schema/options/ranges/conditional-field validation",
+      "duplicate multi-selection rejection",
+      "direct-identifier alias rejection",
+      "email/phone/CNP/URL-like free-text rejection",
+      "NF06-compatible adult envelope",
+      "employer record excludes organisation identity",
+      "storage duplicate fail-closed",
+      "adult/employer form isolation",
+      "raw/normalised hash and export roundtrip",
+      "synthetic records rejected by PROD adapter",
+      "missing/non-UUIDv4 idempotency key rejection",
+      "same key + different body fail-closed",
+      "same key + same body replay without second row",
+      "synthetic cannot enter idempotent PROD storage",
+      "two different submit keys with identical answers remain distinct legitimate rows"
+    ]
+  },
+  "preview_gate": {
+    "result": "PASS_PREVIEW_ONLY",
+    "pages": 3,
+    "routes": [
+      "/cercetare/ai4work-step/",
+      "/cercetare/ai4work-step/adulti/",
+      "/cercetare/ai4work-step/angajatori/"
+    ],
+    "production_enabled": false
+  },
+  "tracking_gate": {
+    "result": "PASS",
+    "checked_signatures": [
+      "google-analytics",
+      "googletagmanager",
+      "gtag(",
+      "facebook.com/tr",
+      "fbq(",
+      "hotjar",
+      "clarity.ms",
+      "segment.com",
+      "mixpanel"
+    ]
+  },
+  "fail_closed_contract_gate": {
+    "result": "PASS",
+    "production_enabled": false,
+    "crm_integration": "FORBIDDEN",
+    "commercial_analytics": "FORBIDDEN"
+  },
+  "other_same_head_workflows": {
+    "EUCONS Quality": "success",
+    "EUCONS Build": "success"
+  },
+  "scope_boundary": "This proves the repository-level runtime/storage/idempotency/preview/tracking/fail-closed controls on the PR candidate. It does not prove the future production HTTP endpoint, hosting logs, processor/subprocessor facts, production database isolation, provider-side deletion, public deployment or browser-to-production-store-to-NF06 smoke.",
+  "merge_authorized": false,
+  "deploy_authorized": false,
+  "collection_enabled": false
+}
