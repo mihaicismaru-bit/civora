@@ -10,7 +10,7 @@ WORKFLOWS = REPO / ".github" / "workflows"
 validation = (WORKFLOWS / "partener-eu-validation.yml").read_text(encoding="utf-8")
 peo_workflow = (WORKFLOWS / "partener-eu-peo-calendar.yml").read_text(encoding="utf-8")
 pages_workflow = (WORKFLOWS / "partener-eu-pages.yml").read_text(encoding="utf-8")
-auto_deploy_workflow = (WORKFLOWS / "partener-eu-auto-deploy.yml").read_text(encoding="utf-8")
+auto_deploy_path = WORKFLOWS / "partener-eu-auto-deploy.yml"
 go_live_workflow = (WORKFLOWS / "partener-eu-go-live.yml").read_text(encoding="utf-8")
 tasks = (PARTENER / "ops" / "p10_resolution_tasks.py").read_text(encoding="utf-8")
 monitor = (PARTENER / "ops" / "p10_monitor_integrity.py").read_text(encoding="utf-8")
@@ -33,7 +33,6 @@ for marker in [
     "PARTENER.EU PEO Calendar",
     "PARTENER.EU MFF 2028-2034 Monitor",
     "PARTENER.EU Pages",
-    "PARTENER.EU Auto Deploy",
     "p10_monitor_integrity.py",
     "test_afir_ingest_policy.py",
 ]:
@@ -50,9 +49,22 @@ if "ref: main" not in validation:
 if "github.event.workflow_run.conclusion == 'success'" not in validation:
     errors.append("production validation runs after unsuccessful upstream workflows")
 
-# GitHub Pages accepts only one active deployment per repository. Every workflow
-# that invokes deploy-pages must queue on the same repository-wide lock; using
-# separate groups or cancelling an in-flight deployment can race the Pages API.
+# There must be one automatic Pages writer. The former Auto Deploy workflow
+# duplicated web/** pushes and deploy-pages with PARTENER.EU Pages, which caused
+# duplicate deployments and validation fan-out. The canonical Pages workflow
+# now owns the fail-closed preflight as well as deployment evidence persistence.
+if auto_deploy_path.exists():
+    errors.append("redundant PARTENER.EU Auto Deploy workflow still exists")
+for marker in [
+    "recover_decision_products_lkg.py",
+    "test_public_language.py",
+    "step-lll-dossier-bridge-v2.js",
+]:
+    if marker not in pages_workflow:
+        errors.append(f"canonical Pages fail-closed preflight missing: {marker}")
+
+# GitHub Pages accepts only one active deployment per repository. Every remaining
+# workflow that invokes deploy-pages must queue on the same repository-wide lock.
 def has_exact_yaml_scalar(workflow: str, key: str, value: str) -> bool:
     return bool(re.search(
         rf"(?m)^[ \\t]*{re.escape(key)}:[ \\t]*{re.escape(value)}[ \\t]*(?:#.*)?$",
@@ -62,7 +74,6 @@ def has_exact_yaml_scalar(workflow: str, key: str, value: str) -> bool:
 
 for workflow_name, workflow in [
     ("PARTENER.EU Pages", pages_workflow),
-    ("PARTENER.EU Auto Deploy", auto_deploy_workflow),
     ("PARTENER.EU Go Live", go_live_workflow),
 ]:
     if "uses: actions/deploy-pages@v4" not in workflow:
