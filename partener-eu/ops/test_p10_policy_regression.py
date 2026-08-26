@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Static guard for P10 orchestration and fail-closed publication policy."""
+import json
 import re
 from pathlib import Path
 
@@ -19,6 +20,7 @@ acceptance = (PARTENER / "ops" / "p10_acceptance_sync.py").read_text(encoding="u
 recovery = (PARTENER / "ops" / "test_recovery.py").read_text(encoding="utf-8")
 afir = (PARTENER / "ingest" / "afir_ingest.py").read_text(encoding="utf-8")
 validator = (PARTENER / "ops" / "p10_validate.py").read_text(encoding="utf-8")
+source_registry = json.loads((PARTENER / "ops" / "sources.json").read_text(encoding="utf-8"))
 stale_validation_trigger = PARTENER / "ops" / "p10-validation-trigger.txt"
 
 errors = []
@@ -137,10 +139,26 @@ for marker in [
     "observation_content_quality",
     "LOW_INFORMATION_HTML_SHELL",
     "observed_semantic=obs.get('semantic_sha256') if content_quality_ok else None",
-    "dependent_material_facts_publishable':(not quarantined and content_quality_ok)",
+    "health_ceiling",
+    "TRANSPORT_ONLY",
+    "material_facts_authority",
+    "material_facts_publishable=bool(material_facts_authority and not quarantined and content_quality_ok)",
 ]:
     if marker not in validator:
-        errors.append(f"low-information source guard missing: {marker}")
+        errors.append(f"source health/authority guard missing: {marker}")
+
+legislatie = next((row for row in source_registry.get("sources", []) if row.get("id") == "SRC-LEGISLATIE"), None)
+if not legislatie:
+    errors.append("Portal Legislativ source missing")
+else:
+    if legislatie.get("health_scope") != "TRANSPORT_ONLY":
+        errors.append("Portal Legislativ is not explicitly transport-only")
+    if legislatie.get("health_ceiling") != "DEGRADED":
+        errors.append("Portal Legislativ legacy HTTP transport can incorrectly become PASS")
+    if legislatie.get("material_facts_authority") is not False:
+        errors.append("Portal Legislativ transport probe can authorize material facts")
+    if not str(legislatie.get("url") or "").startswith("http://legislatie.just.ro/apiws/"):
+        errors.append("Portal Legislativ transport probe is not bound to the official service")
 
 for marker in [
     "https://partener.eu/",
