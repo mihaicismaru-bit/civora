@@ -1,40 +1,48 @@
 {
-  "schema_version": "eucons.ai4work_retention_schedule.v0.1",
+  "schema_version": "eucons.ai4work_retention_schedule.v0.2",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "date": "2026-08-27",
   "status": "DRAFT_EXECUTION_BINDING_REQUIRED_BEFORE_COLLECTION",
   "principle": "retain identifiable or potentially linkable research data for the shortest period needed to validate the needs analysis; preserve longer-term evidence only as genuinely anonymised aggregate outputs and integrity hashes",
+  "provider_context": {
+    "candidate_hosting_processor": "CLAUS WEB SRL / shared-hosting family, subject to account-order verification",
+    "public_dpa_version": "1.0 / 16.03.2026",
+    "public_dpa_note": "Annex 4 subprocessor list and Annex 5 backup/retention values must be operationally validated before final adoption",
+    "public_shared_hosting_backup_observation": "current public product information advertises daily backups with 7-day retention plus 3 monthly copies for shared hosting; the actual eucons.ro account/service policy must be verified before go-live",
+    "control_consequence": "live-store deletion deadlines do not by themselves prove physical disappearance from residual backups; provider backup rotation/restore controls must be documented and tested before collection"
+  },
   "schedules": [
     {
       "data_class": "reverse-proxy/application access logs",
       "allowed_content": "security/availability metadata only; request bodies, form answers and raw Idempotency-Key MUST NOT be logged",
       "target_retention": "7 days maximum unless a documented security necessity requires shorter/exceptional retention",
       "deletion": "automatic provider/application rotation",
-      "gate": "hosting configuration must be verified before collection"
+      "gate": "hosting configuration and actual provider retention must be verified before collection"
     },
     {
-      "data_class": "raw and normalised analytical respondent records",
+      "data_class": "raw and normalised analytical respondent records in live research storage",
       "store": "RESEARCH_ANALYTICS_ONLY",
-      "retention": "until needs-analysis validation and application evidence freeze, then delete no later than 180 days after primary collection closes",
-      "hard_stop": "2027-03-31 unless a documented legal claim/audit hold approved by the controller requires a narrower retained subset",
+      "retention": "until needs-analysis validation and application evidence freeze, then delete from live/application-accessible storage no later than 180 days after primary collection closes",
+      "live_store_hard_stop": "2027-03-31 unless a documented legal claim/audit hold approved by the controller requires a narrower retained subset",
+      "backup_residual_rule": "after live deletion, any residual provider backup copy may persist only through the validated pre-existing backup cycle; it must not be restored into live processing except for documented disaster recovery/legal necessity, and it must expire by provider rotation without creating a new retention cycle",
       "post_deletion": "retain only anonymised aggregates, disclosure-controlled tables, source/provenance metadata and cryptographic integrity hashes that cannot be used to reconstruct respondent records"
     },
     {
       "data_class": "idempotency receipts",
       "content": "opaque derived response_id + canonical body digest only; no raw key",
-      "retention": "same lifecycle as the corresponding analytical respondent record",
-      "deletion": "delete atomically with respondent-level records"
+      "retention": "same live lifecycle as the corresponding analytical respondent record",
+      "deletion": "delete atomically from live storage with respondent-level records; residual backup treatment follows the same validated provider cycle"
     },
     {
       "data_class": "optional follow-up contact records",
       "store": "RESEARCH_CONTACT_SEPARATE_NO_RESPONSE_LINKAGE",
-      "retention": "delete after the requested follow-up is completed and in all cases no later than 90 days after primary collection closes",
-      "post_deletion": "no contact identifier is copied to NF06 or analysis evidence"
+      "retention": "delete from live storage after the requested follow-up is completed and in all cases no later than 90 days after primary collection closes",
+      "post_deletion": "no contact identifier is copied to NF06 or analysis evidence; any residual backup follows only the verified provider rotation"
     },
     {
       "data_class": "immutable primary export used for NF06 validation",
-      "retention": "same respondent-level hard stop as analytical records",
-      "control": "encrypted/restricted evidence location; SHA-256 retained after deletion; export itself deleted at hard stop"
+      "retention": "same live respondent-level hard stop as analytical records",
+      "control": "encrypted/restricted evidence location; SHA-256 retained after export deletion; any backup residual is governed by the same verified non-renewing rotation"
     },
     {
       "data_class": "TEST TWIN synthetic dataset",
@@ -45,14 +53,16 @@
   ],
   "deletion_evidence_required": [
     "timestamped deletion job/run receipt",
-    "row/object counts before and after deletion",
-    "confirmation that backups follow provider expiry and cannot silently restore live respondent records",
+    "row/object counts before and after live deletion",
+    "documented account-specific backup schedule and maximum residual lifetime",
+    "confirmation that deleted respondent data cannot silently return to live processing through ordinary restore jobs",
+    "confirmation that backup rotation does not restart the retention clock for deleted research records",
     "confirmation that optional contact store and PROD analytical store were both checked",
     "retained aggregate/source-register package identified separately"
   ],
   "exceptions": {
     "legal_hold": "must be documented by controller with scope, reason, approver, start date and review date; blanket indefinite retention is forbidden",
-    "processor_backup_limit": "must be documented before go-live; if provider cannot meet the intended deletion lifecycle, collection remains NO_GO"
+    "processor_backup_limit": "Annex 5/account-specific backup terms and restore behavior must be validated before go-live; if provider cannot meet the intended non-renewing residual-backup lifecycle, collection remains NO_GO"
   },
   "controller_approval": false,
   "collection_enabled": false
