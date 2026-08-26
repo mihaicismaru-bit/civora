@@ -1,0 +1,36 @@
+{
+  "schema_version": "eucons.ai4work_http_idempotency.v1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "purpose": "Prevent duplicate analytical rows caused by browser/network retries without introducing identity tracking.",
+  "production_gate": "MUST_PASS_BEFORE_HTTP_BINDING",
+  "client": {
+    "header": "Idempotency-Key",
+    "generation": "cryptographically random UUIDv4 generated for one form-submission attempt",
+    "retry_rule": "reuse the same key for retries of the same attempted submission; generate a new key only for a deliberate new submission",
+    "persistence": "memory or same-tab session state only; no cookie and no cross-site persistence"
+  },
+  "server": {
+    "response_id_derivation": "sha256(research_id + ':' + form_id + ':' + idempotency_key)",
+    "stored_key_material": "store only the derived response_id; do not store the raw idempotency key in the analytical record or export",
+    "body_digest": "sha256 of canonical normalized submission body excluding transport metadata",
+    "same_key_same_body": "return the original success receipt and do not append another row",
+    "same_key_different_body": "HTTP 409 / fail closed",
+    "new_key": "validate normally and append at most one row if all privacy and schema gates pass"
+  },
+  "privacy_constraints": [
+    "MUST NOT derive the key from name, email, phone, CNP, employer identity, IP address or user-agent",
+    "MUST NOT use browser fingerprinting, advertising identifiers, CRM IDs or analytics IDs",
+    "MUST NOT export the raw key to NF06 or any analysis dataset",
+    "MUST NOT weaken the PROD synthetic=false gate"
+  ],
+  "required_tests": [
+    "same key + same normalized body => one stored row and replay-safe success",
+    "same key + different normalized body => conflict / no write",
+    "two different keys + identical answer bodies => two legitimate rows",
+    "missing or malformed key => fail closed once production endpoint is enabled",
+    "TEST TWIN key namespace cannot be promoted to PROD evidence",
+    "idempotency metadata is absent from immutable NF06 analytical export"
+  ],
+  "status": "DESIGN_FROZEN_IMPLEMENTATION_AND_TESTS_PENDING",
+  "collection_enabled": false
+}

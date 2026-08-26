@@ -1,0 +1,57 @@
+{
+  "schema_version": "eucons.ai4work_research_hosting_plan.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "state": "INTERNAL_BINDING_PLAN_NOT_DEPLOYED",
+  "verified_existing_eucons_runtime": {
+    "public_origin": "https://eucons.ro",
+    "api_origin": "https://api.eucons.ro",
+    "runtime": "PHP_8_PLUS_SHARED_HOSTING",
+    "commercial_lead_route": "/api/leads",
+    "allowed_origins": ["https://eucons.ro", "https://www.eucons.ro"],
+    "commercial_storage_root": "/home/eucons/eucons-data",
+    "commercial_storage_strategy": "FILESYSTEM_ATOMIC_JSON_OUTSIDE_WEBROOT",
+    "commercial_runtime_secrets_in_git": false,
+    "existing_external_handoff": "domain_and_hosting AUTHORIZED_AND_VALIDATED for the commercial EUCONS runtime; public commercial collection itself remains fail-closed pending its own gates"
+  },
+  "proposed_research_binding": {
+    "route": "/api/research/ai4work-step",
+    "methods": ["POST", "OPTIONS"],
+    "content_type": "application/json",
+    "allowed_origins": ["https://eucons.ro", "https://www.eucons.ro"],
+    "credentials_allowed": false,
+    "research_storage_root": "/home/eucons/eucons-research/ai4work-step",
+    "storage_rule": "OUTSIDE_WEBROOT_SEPARATE_NAMESPACE_NO_SHARED_FILES_OR_TABLES_WITH_COMMERCIAL_CRM",
+    "crm_calls": "FORBIDDEN",
+    "commercial_lead_calls": "FORBIDDEN",
+    "response_fields": ["status", "response_id"],
+    "expose_answers_or_profile_in_response": false,
+    "app_record_ip": "FORBIDDEN",
+    "app_record_user_agent": "FORBIDDEN",
+    "raw_and_normalized_sha256": "REQUIRED",
+    "duplicate_response_id": "FAIL_CLOSED",
+    "synthetic_prod_records": "FORBIDDEN",
+    "max_request_bytes": 65536
+  },
+  "privacy_and_security_requirements_before_activation": [
+    "freeze a public research privacy/contact channel for EUROCONSULT SRL",
+    "document research legal basis and Article 13 notice separately from acknowledgement of voluntary participation",
+    "verify the active hosting processor identity, DPA/subprocessor terms and any transfer mechanism",
+    "verify web-server/reverse-proxy access-log contents and retention; keep IP/device metadata out of the analytical export",
+    "apply filesystem permissions so research responses are not readable through document root and are not consumed by CRM jobs",
+    "define and test research retention/deletion independently from commercial lead retention",
+    "verify HTTPS and exact-origin CORS",
+    "run PII/schema rejection tests and TEST TWIN end-to-end smoke before any real collection"
+  ],
+  "hosting_provider_observation": {
+    "internal_activation_artifact": "eucons/deployment/activate_php_runtime.py identifies hosting associated with romania-webhosting.com",
+    "public_registry_observation": "romania-webhosting.com registration service is reported as CLAUS WEB SRL and hosting ASN evidence points to CLAUS WEB srl in Romania",
+    "processor_contract_status": "NOT_YET_VERIFIED",
+    "subprocessor_status": "NOT_YET_VERIFIED",
+    "log_retention_status": "NOT_YET_VERIFIED"
+  },
+  "authorization": {
+    "merge": false,
+    "deploy": false,
+    "real_collection": false
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "schema_version": "eucons.ai4work_fresh_main_readiness.v0.4",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "base_main_sha_at_branch_creation": "0f9a71d93ddbb229b3732b988217ebbacbb02cfd",
+  "candidate_initial_sha": "cb11a88fc56226b4f59d9f8a92daa3534ebeb102",
+  "state": "FRESH_MAIN_RESEARCH_PROVIDER_TRANSPLANTED_COLLECTION_DISABLED_EXACT_HEAD_VALIDATION_PENDING",
+  "verified_delta": [
+    "the complete ten-file AI4WORK research-provider delta was transplanted onto current main by reusing the previously reviewed blobs without importing the stale branch history",
+    "research-only storage remains isolated under eucons/research/ai4work-step and the reference SQLite adapter explicitly refuses production mode",
+    "the two frozen adult/employer questionnaire definitions and fail-closed static renderer are present on the fresh-main candidate",
+    "the form contract keeps EUROCONSULT SRL / CUI 14250864 as operator while privacy contact and retention remain unresolved and production collection remains disabled",
+    "the runtime validator rejects forbidden identifier fields and PII-like email, Romanian phone, CNP and URL text, and validates schema/options/ranges/conditional fields",
+    "PROD storage rejects synthetic records and TEST TWIN remains NON_EVIDENCE",
+    "current public EUCONS privacy page is still a pre-production placeholder stating that the complete privacy/retention policy will be activated before data collection"
+  ],
+  "validation_state": {
+    "fresh_main_transplant": "PASS_TREE_AND_COMMIT_CREATED",
+    "fresh_runtime_test_execution": "NOT_RUN",
+    "fresh_renderer_ci": "NOT_RUN",
+    "browser_http_store_export_nf06_smoke": "PENDING",
+    "production_collection_validation": "NOT_AUTHORIZED_AND_NOT_RUN"
+  },
+  "retry_idempotency_gate": {
+    "state": "OPEN_BEFORE_HTTP_BINDING",
+    "finding": "runtime currently creates a new UUIDv4 response_id for each validation call while storage deduplicates only on response_id; therefore an HTTP retry that revalidates the same respondent submission can create a second analytical row",
+    "required_control": "a first-party idempotency key must be generated per browser submission attempt, hashed server-side, excluded from analytical exports, and reused for retries; same key plus same normalized body must be replay-safe, same key plus different body must fail closed",
+    "privacy_boundary": "no cookie, fingerprint, CRM identifier, email, phone, IP-derived identifier or cross-site identifier may be used as the idempotency key"
+  },
+  "controller_binding": {
+    "legal_name": "EUROCONSULT SRL",
+    "cui": "14250864",
+    "state": "IDENTITY_CLOSED_CONTACT_OPEN",
+    "privacy_contact": "OPEN_BEFORE_COLLECTION"
+  },
+  "still_open": [
+    "execute runtime/form/storage tests on the exact fresh-main candidate head",
+    "implement and test retry-safe idempotency before binding the HTTP endpoint",
+    "bind an actual first-party HTTP endpoint on the authorized hosting target",
+    "bind a production research-only database physically and credential-wise separated from CRM",
+    "verify hosting processor/subprocessor terms, logging/IP retention, encryption and access control",
+    "freeze privacy/DPO contact, Article 13 wording, lawful-basis decision and retention/deletion execution rule",
+    "perform DPIA screening and retain the decision record",
+    "run end-to-end synthetic TEST TWIN smoke through browser -> HTTP -> isolated non-evidence store -> immutable export -> NF06 test-twin ingest",
+    "collect real responses only after all production privacy/provider gates pass"
+  ],
+  "external_deploy_authorized": false,
+  "collection_enabled": false,
+  "merge_authorized": false
+}
