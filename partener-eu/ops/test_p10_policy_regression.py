@@ -28,10 +28,12 @@ for marker in [
     "workflow_run:",
     "PARTENER.EU MIPE Ingestion",
     "PARTENER.EU AFIR Ingestion",
+    "PARTENER.EU Decision Products",
     "PARTENER.EU Verified Source Registry",
     "PARTENER.EU PEO Calendar",
     "PARTENER.EU MFF 2028-2034 Monitor",
     "PARTENER.EU Pages",
+    "PARTENER.EU Auto Deploy",
     "p10_monitor_integrity.py",
     "test_afir_ingest_policy.py",
 ]:
