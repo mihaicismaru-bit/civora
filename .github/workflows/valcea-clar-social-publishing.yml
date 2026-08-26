@@ -168,6 +168,7 @@ jobs:
             valcea-clar/social/facebook_editorial_preview.py \
             valcea-clar/social/facebook_editorial_preview_v1_1.py \
             valcea-clar/social/facebook_editorial_publish.py \
+            valcea-clar/social/facebook_text_fallback.py \
             valcea-clar/social/facebook_publish.py \
             valcea-clar/social/instagram_editorial_v1.py \
             valcea-clar/social/instagram_editorial_v1_1.py \
@@ -207,7 +208,8 @@ jobs:
           python - <<'PY'
           import json,os
           from pathlib import Path
-          p=json.loads(Path('/tmp/facebook-preview.json').read_text(encoding='utf-8')); e=p.get('eligible') or []
+          p=json.loads(Path('/tmp/facebook-preview.json').read_text(encoding='utf-8'))
+          e=(p.get('eligible') or [])+(p.get('text_fallbacks') or [])
           with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f: f.write(f"has_eligible={'true' if len(e) else 'false'}\n")
           PY
 
@@ -356,7 +358,7 @@ jobs:
               '# VÂLCEA CLAR — Story-first Social Publication Engine','',
               '- Publication unit: **individual story**',
               '- Edition/recap publication gate: **disabled**',
-              '- Facebook: **editorial-composite native packaging v1**',
+              '- Facebook: **editorial composite when media is ready; canonical text+link fallback for new missing-photo stories**',
               '- Instagram: **editorial cover/carousel native packaging v1; public-media preflight**',
               '- Threads: **story-first durable outbox**',
               '- X: **platform-native source-forward durable outbox; direct API disabled under zero-paid policy**',
@@ -369,7 +371,7 @@ jobs:
               f"- Facebook: **{fb.get('status','UNKNOWN')}**",
               f"- Instagram: **{ig.get('status','UNKNOWN')}**",
               f"- TikTok: **{tt.get('status','UNKNOWN')}**",
-              '- Missing story-specific media holds only the affected visual channel; it never delays the site story.'
+              '- Missing story-specific media never delays the site story; Facebook may use the canonical text+link fallback for new stories.'
           ]
           Path(os.environ['GITHUB_STEP_SUMMARY']).write_text('\n'.join(lines)+'\n',encoding='utf-8')
           PY
