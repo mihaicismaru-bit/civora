@@ -6,7 +6,6 @@ on:
       - "local-news-os/social/authorization_sealed_harvest_recovery.py"
       - "local-news-os/social/test_authorization_sealed_harvest_recovery.py"
       - "local-news-os/social/authorization_sealed_harvest_receipt.py"
-      - "local-news-os/social/test_authorization_sealed_harvest_receipt.py"
       - "local-news-os/social/metrics_harvest_runtime.py"
       - "local-news-os/social/observed_metrics_collector.py"
       - ".github/workflows/local-news-os-authorization-sealed-harvest-recovery.yml"
@@ -16,7 +15,6 @@ on:
       - "local-news-os/social/authorization_sealed_harvest_recovery.py"
       - "local-news-os/social/test_authorization_sealed_harvest_recovery.py"
       - "local-news-os/social/authorization_sealed_harvest_receipt.py"
-      - "local-news-os/social/test_authorization_sealed_harvest_receipt.py"
       - "local-news-os/social/metrics_harvest_runtime.py"
       - "local-news-os/social/observed_metrics_collector.py"
       - ".github/workflows/local-news-os-authorization-sealed-harvest-recovery.yml"
@@ -40,17 +38,15 @@ jobs:
           python-version: "3.13"
 
       - name: Compile sealed recovery boundary
+        # Receipt unit regressions are owned by the dedicated receipt workflow;
+        # recovery still compiles the receipt module because it imports it directly.
         run: |
           python -m py_compile \
             local-news-os/social/authorization_sealed_harvest_recovery.py \
             local-news-os/social/test_authorization_sealed_harvest_recovery.py \
             local-news-os/social/authorization_sealed_harvest_receipt.py \
-            local-news-os/social/test_authorization_sealed_harvest_receipt.py \
             local-news-os/social/metrics_harvest_runtime.py \
             local-news-os/social/observed_metrics_collector.py
 
       - name: Run authorization-sealed recovery acceptance tests
         run: python local-news-os/social/test_authorization_sealed_harvest_recovery.py
-
-      - name: Run sealed execution receipt regression tests
-        run: python local-news-os/social/test_authorization_sealed_harvest_receipt.py
