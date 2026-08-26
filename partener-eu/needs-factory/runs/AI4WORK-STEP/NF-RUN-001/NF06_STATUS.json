@@ -1,9 +1,9 @@
 {
-  "schema_version": "nf.checkpoint_status.v0.5",
+  "schema_version": "nf.checkpoint_status.v0.6",
   "run_id": "AI4WORK-STEP/NF-RUN-001",
   "checkpoint": "NF06_PRIMARY_RESEARCH",
-  "status": "NF06_FRESH_MAIN_FORMS_REBUILT_CALL_CHRONOLOGY_RECONCILED_REAL_COLLECTION_STILL_GATED",
-  "latest_immutable_status": "NF06_STATUS_007.json",
+  "status": "NF06_FRESH_MAIN_SCHEMA_VALIDATOR_REBUILT_REAL_COLLECTION_STILL_GATED",
+  "latest_immutable_status": "NF06_STATUS_008.json",
   "inputs_ready": [
     "RESEARCH_AGENDA.json",
     "EVIDENCE_REGISTRY.json",
@@ -17,62 +17,49 @@
     "NEED_HYPOTHESES.json",
     "CALL_REQUIREMENTS.json"
   ],
-  "outputs_ready": [
-    "PRIMARY_RESEARCH_PLAN.json",
-    "QUESTIONNAIRE_ADULTS.md",
-    "QUESTIONNAIRE_EMPLOYERS.md",
-    "PRIMARY_RESPONSE_INGEST_CONTRACT.json",
-    "partener-eu/needs-factory/tools/ingest_primary_responses.py",
-    "partener-eu/needs-factory/tests/test_ai4work_primary_ingest.py",
-    "stale-branch EUCONS runtime/ingest validation artifacts retained as evidence only",
-    "fresh EUCONS branch research_storage.py + test_research_storage.py + PROVIDER_STORAGE_CONTRACT.json",
-    "fresh EUCONS branch form_contract.json + forms_definition.json + build_research_pages.py + FRESH_MAIN_INTEGRATION_READINESS.json"
-  ],
   "secondary_research_state": [
     "adult-learning baseline available for all three regions",
     "regional workplace digital-use context available for all three regions",
     "digital-maturity gaps for Sud-Vest Oltenia and Sud-Muntenia closed at explicit proxy level",
-    "ANOFM macro recruitment feasibility evidence exists but is not direct need evidence",
-    "fresh 2026 ANOFM national training throughput and AJOFM Ialomița digital-training offer retained as context only",
-    "STEP-LLL August chronology reconciled to consolidated package 13 August + second corrigendum 19 August; 24 August is a secondary-report publication date, not an established third amendment"
+    "fresh 2026 ANOFM and regional training signals retained as context only",
+    "STEP-LLL August chronology reconciled: consolidated package 13 August + second corrigendum 19 August; 24 August is a secondary-report publication date, not an established third amendment"
   ],
   "blocking_data": [
     "real adult responses with region/status/age-band metadata from documented recruitment frames across all three regions",
-    "real employer/organisation responses with region/sector/size metadata and documented coverage across all three regions",
-    "if claiming 160 or 80/40/40 as observed need rather than design: independent interest/coverage and a transparent scale/allocation rule"
+    "real employer/organisation responses with region/sector/size metadata and documented coverage across all three regions"
   ],
+  "conditional_scale_rule": "160 and 80/40/40 are project design values unless independent interest/coverage evidence plus a transparent allocation rule support them as observed need; they must not be presented as measured need magnitude without that evidence.",
   "external_call_compliance_blocker": [
-    "exact current official MIPE STEP-LLL guide/corrigendum PDF and updated Annex 4 DOCX bytes must be captured and SHA-256 frozen for final call-compliance QA",
-    "exact official document URLs are frozen in EVIDENCE_ADDENDUM_006; binary retrieval remains unavailable in the current research environment"
+    "exact current official MIPE STEP-LLL guide/corrigendum PDF and updated Annex 4 DOCX bytes must be captured and SHA-256 frozen",
+    "exact official URLs are frozen in EVIDENCE_ADDENDUM_006; binary retrieval remains unavailable in the current research environment"
   ],
   "eucons_research_runtime": {
-    "state": "NO_GO_FRESH_MAIN_FORMS_REBUILT_COLLECTION_DISABLED_VALIDATION_PENDING",
+    "state": "NO_GO_FRESH_MAIN_FORMS_AND_SCHEMA_VALIDATOR_REBUILT_COLLECTION_DISABLED_TEST_EXECUTION_PENDING",
     "crm_isolation": "CONTRACTED_FORBIDDEN",
     "production_enabled": false,
     "operator_identity": "EUROCONSULT SRL / CUI 14250864 CLOSED",
     "privacy_contact": "OPEN_BEFORE_COLLECTION",
     "fresh_branch": "eucons/ai4work-research-provider-v1",
-    "fresh_branch_latest_observed_head": "212425e5b0acd6cccfb55122aa8ecc159f3bf8aa",
-    "fresh_branch_material_renderer_head": "a2385033d8856aedc8ee65c64b7f482c56c6c37f",
+    "fresh_branch_readiness_commit": "f79a7492184214df663588d72e7f8163ea28bc30",
     "storage_adapter_validation": "PASS_4_OF_4_ON_PRECEDING_CANDIDATE",
+    "fresh_runtime_and_tests_readback": "PASS",
+    "fresh_runtime_test_execution": "PENDING",
     "fresh_renderer_ci": "NOT_RUN",
-    "fresh_renderer_readback": "PASS",
-    "privacy_binding_required": [
-      "privacy/DPO contact and legal-basis wording",
-      "hosting/processor/subprocessor and server-log/IP-retention review",
-      "research-only durable storage provider binding physically and credential-wise separated from CRM",
-      "encryption/access controls",
-      "retention approval and executable deletion rule"
-    ],
-    "integration_guard": "Do not blindly merge either the stale NF-RUN branch or the current diverged EUCONS research branch. Reconcile only the seven isolated research files onto fresh main after exact-head validation.",
     "preview_state": "NOINDEX_DISABLED_FORM_SURFACES_REBUILT_NOT_DEPLOYED",
-    "nf06_ingest_state": "RUNTIME_TO_ANALYSIS_TRANSFORM_PREVIOUSLY_VALIDATED_FAIL_CLOSED",
-    "end_to_end_smoke": "PENDING_BROWSER_HTTP_STORE_EXPORT_NF06"
+    "end_to_end_smoke": "PENDING_BROWSER_HTTP_STORE_EXPORT_NF06_TEST_TWIN",
+    "integration_guard": "No blind merge/deploy. Reconcile only isolated eucons/research/ai4work-step files onto fresh main after exact-head validation."
   },
+  "privacy_binding_required": [
+    "privacy/DPO contact and research-specific legal-basis wording",
+    "hosting/processor/subprocessor and server-log/IP-retention review",
+    "research-only durable storage provider physically and credential-wise separated from CRM",
+    "encryption/access controls",
+    "retention approval and executable deletion rule"
+  ],
   "test_twin": {
     "classification": "SYNTHETIC_NON_EVIDENCE",
     "production_evidence_import": "FORBIDDEN"
   },
-  "resume_rule": "Validate the rebuilt fresh-main form contract/renderer, implement an injectable first-party HTTP boundary with collection still disabled, continue exact official binary capture, and prepare production research-only storage/privacy binding. When real primary data are available, freeze exact raw exports and manifests, run the validated NF06 ingest firewall, reconcile counts/coverage, then resume NF06 toward NF07. Synthetic TEST TWIN data remain NON-EVIDENCE.",
+  "resume_rule": "Execute exact-head fresh runtime/form tests when a runnable validation surface is available, implement an injectable first-party HTTP boundary with collection still disabled, continue official MIPE binary capture and secondary research, then collect real primary data only after all privacy/provider gates pass. Freeze raw exports and manifests, run NF06 ingest, reconcile coverage, and advance toward NF07 only on real evidence.",
   "final_narrative_allowed": false
 }
