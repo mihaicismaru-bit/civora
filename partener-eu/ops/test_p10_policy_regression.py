@@ -41,6 +41,8 @@ if "ref: main" not in validation:
     errors.append("queued production validation can check out a stale workflow event SHA")
 if "github.event.workflow_run.conclusion == 'success'" not in validation:
     errors.append("production validation runs after unsuccessful upstream workflows")
+if "!partener-eu/deployment/**" not in validation:
+    errors.append("production validation re-runs on Pages deployment evidence commits")
 
 # A successful source workflow that already feeds the canonical Pages deployment
 # must have exactly one post-deploy validation path. Subscribing Production
