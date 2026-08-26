@@ -1,27 +1,71 @@
 {
-  "schema_version": "nf.primary_response_ingest.v0.1",
+  "schema_version": "nf.primary_response_ingest.v0.2",
   "run_id": "AI4WORK-STEP/NF-RUN-001",
-  "purpose": "Fail-closed intake of real primary-research exports into NF06 without contaminating evidence with identifiers or synthetic records.",
-  "source_schema": "EUCONS_PRIMARY_DATA_SCHEMA.json",
+  "purpose": "Fail-closed handoff from the isolated EUCONS research runtime export into the NF06 analytical schema, without admitting identifiers or synthetic rows into PROD evidence.",
+  "raw_source_contract": "eucons/research/ai4work-step/ingest_contract.json",
+  "raw_runtime": "eucons/research/ai4work-step/runtime.py",
+  "target_schema": "EUCONS_PRIMARY_DATA_SCHEMA.json",
+  "tool": "partener-eu/needs-factory/tools/ingest_primary_responses.py",
   "streams": {
     "adults": {
-      "schema_key": "adult_payload",
-      "id_field": "response_id",
+      "raw_form_id": "AI4WORK_ADULTS_V1",
+      "target_schema_key": "adult_payload",
       "required_strata": ["region", "status", "age_band"]
     },
     "employers": {
-      "schema_key": "employer_payload",
-      "id_field": "response_id",
+      "raw_form_id": "AI4WORK_EMPLOYERS_V1",
+      "target_schema_key": "employer_payload",
       "required_strata": ["region", "sector", "size"]
     }
   },
-  "record_envelope": {
-    "required": ["response_id", "received_at_utc", "schema_version", "form_version", "answers"],
-    "response_id": "opaque cryptographically random server-generated identifier; no identity lookup table",
-    "received_at_utc": "RFC3339 UTC timestamp",
-    "schema_version": "must equal nf.primary_payload.v0.1 unless a later explicitly reconciled schema is frozen",
-    "form_version": "non-empty version string",
-    "answers": "object validated against the selected adult/employer payload schema"
+  "raw_record_envelope": {
+    "required_exact": [
+      "schema_version",
+      "research_id",
+      "form_id",
+      "form_version",
+      "response_id",
+      "received_at",
+      "profile",
+      "answers",
+      "synthetic"
+    ],
+    "schema_version": 1,
+    "research_id": "AI4WORK-STEP-NF-RUN-001",
+    "form_version": 1,
+    "response_id": "server-generated random opaque identifier with no identity lookup table",
+    "received_at": "timezone-aware server timestamp",
+    "synthetic_prod_required": false
+  },
+  "canonical_transform": {
+    "adult_profile": {
+      "profile.region": "answers.region",
+      "profile.status": "answers.status",
+      "profile.age_band": "answers.age_band",
+      "profile.occupational_family": "answers.job_family"
+    },
+    "adult_answers": {
+      "Q01-Q06": "preserve ratings",
+      "Q07_boolean": "map false/true to nu/da",
+      "Q08-Q09": "preserve bounded multi-select arrays",
+      "Q10_matrix": "split into Q10_digital/Q10_AI/Q10_verification/Q10_privacy/Q10_workflow",
+      "Q11-Q12": "preserve validated values",
+      "privacy_ack": "derive true only from the EUCONS runtime acceptance invariant: public submissions are rejected unless notice_read_and_voluntary_participation=true"
+    },
+    "employer_profile": {
+      "profile.region": "answers.region",
+      "profile.sector_aggregated": "answers.sector",
+      "profile.size_band": "answers.size",
+      "profile.respondent_role": "answers.respondent_type"
+    },
+    "employer_answers": {
+      "E01-E02": "preserve validated values",
+      "E03_matrix": "split into the seven E03 analytical dimensions",
+      "E04-E10": "preserve validated values",
+      "privacy_ack": "derive true only from the EUCONS runtime acceptance invariant"
+    },
+    "received_at": "normalize to RFC3339 UTC Z in received_at_utc",
+    "target_schema_version": "nf.primary_payload.v0.1"
   },
   "input_formats": ["json_array", "jsonl"],
   "raw_evidence": {
@@ -32,47 +76,50 @@
     "synthetic_records": "FORBIDDEN_IN_PROD"
   },
   "prohibited_keys_recursive": [
-    "name", "first_name", "last_name", "cnp", "national_id", "email", "phone", "telephone",
+    "name", "first_name", "last_name", "surname", "cnp", "national_id", "email", "phone", "telephone",
     "exact_address", "address", "exact_employer", "employer_name", "organisation_name", "organization_name",
-    "cui", "ip", "ip_address", "user_agent", "cookie_id", "login_id", "device_fingerprint", "advertising_id"
+    "cui", "ip", "ip_address", "user_agent", "cookie_id", "login_id", "account_id", "device_fingerprint", "advertising_id", "marketing_id"
   ],
   "pii_text_screen": {
-    "fields": ["job_family", "Q07_topic", "Q08_other", "Q11_other", "Q12", "sector", "E04_detail", "E09"],
-    "fail_patterns": ["email_address", "romanian_phone_like", "cnp_like"],
-    "note": "Automated screening is a safety net, not proof of anonymity; free-text review remains required before publication of quotations."
+    "raw_and_normalized_fields": ["occupational_family", "sector_aggregated", "Q07_topic", "Q12", "E04_detail", "E09", "job_family", "sector"],
+    "fail_patterns": ["email_address", "romanian_phone_like", "cnp_like", "url_like"],
+    "note": "Automated screening is a safety net, not proof of anonymity; free-text review remains required before quotation/publication."
   },
   "fail_closed_conditions": [
     "raw SHA-256 not computed",
     "invalid JSON or unsupported top-level structure",
     "duplicate response_id",
-    "missing envelope metadata",
-    "schema version mismatch",
-    "forbidden key present anywhere in record",
-    "required field missing",
-    "unexpected field in answers",
-    "wrong type/range/enum",
-    "PII-like token found in free text",
+    "missing or unexpected raw envelope field",
+    "wrong research_id/form_id/form_version/runtime schema",
+    "synthetic is not false in PROD",
+    "forbidden key present anywhere in raw record",
+    "PII-like token found in raw or normalized free text",
+    "canonical transform failure",
+    "required target field missing",
+    "unexpected target answer field",
+    "wrong target type/range/enum",
     "no valid records",
-    "any expected region absent when declaring the three-region gate closed"
+    "any expected region absent when declaring the three-region coverage gate closed"
   ],
   "outputs": {
-    "normalized_jsonl": "validated records only, still pseudonymous and not a public artifact",
-    "ingest_report_json": "raw hash, input/valid/rejected counts, duplicate count, region/strata counts, error list, gate state",
-    "evidence_promotion": "FORBIDDEN until report PASS, research frame/coverage metadata are attached, and raw export reconciliation is complete"
+    "normalized_jsonl": "validated transformed records only; pseudonymous research artifact outside public git",
+    "ingest_report_json": "raw hash, normalized hash, input/valid/rejected counts, region/strata counts, errors and coverage gate",
+    "evidence_promotion": "FORBIDDEN until technical PASS plus documented recruitment frame/coverage metadata, immutable raw manifest and raw-to-aggregate reconciliation"
   },
   "test_twin": {
     "allowed": true,
     "classification": "NON-EVIDENCE",
     "must_use_flag": "--mode test-twin",
-    "synthetic_marker_required": true,
+    "raw_synthetic_marker_required": true,
     "prod_promotion": "FORBIDDEN"
   },
   "validation_receipt": {
     "local_compile": "PASS",
-    "synthetic_three_region_happy_path": "PASS",
-    "synthetic_PII_rejection": "PASS",
-    "test_twin_classification": "PASS",
-    "note": "Fixtures used only to validate software behavior and are NON-EVIDENCE; no fixture values are persisted as project evidence."
+    "runtime-shaped_synthetic_three_region_transform": "PASS",
+    "synthetic_PII_rejection": "PASS_PREVIOUS_VALIDATOR_REVISION_AND_RETAINED_PATTERN_GATE",
+    "test_twin_separation": "PASS_BY_EXPLICIT_MODE_AND_SYNTHETIC_GATE",
+    "repository_CI": "PENDING",
+    "note": "Synthetic fixtures validate software behavior only and remain NON-EVIDENCE. No fixture values enter the PROD evidence registry."
   },
-  "status": "INGEST_TOOL_READY_REAL_DATA_NOT_YET_COLLECTED"
+  "status": "NF06_INGEST_TRANSFORM_READY_REAL_DATA_NOT_YET_COLLECTED"
 }
