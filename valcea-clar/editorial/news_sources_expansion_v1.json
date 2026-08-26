@@ -1,14 +1,14 @@
 {
-  "schema_version": "1.1",
+  "schema_version": "1.2",
   "instance_id": "valcea",
   "scope": "VALCEA_SPECIFIC",
   "policy": {
-    "purpose": "Incremental primary-source expansion for fresh county coverage without weakening the existing title/date/source-only and full-story gates.",
-    "automatic_publication_scope": "title_date_source_only",
+    "purpose": "Incremental primary-source expansion for fresh county coverage. Eligible official sources may feed transparent source-notice briefs while material claims remain attributable to the canonical source.",
+    "automatic_publication_scope": "verified_source_notice_brief",
     "detail_autopublish": false,
     "candidate_max_age_hours": 72,
     "supplement": true,
-    "promotion_rule": "STRICT_ARTICLE_DATE_THEN_NORMAL_STORY_GATE"
+    "promotion_rule": "STRICT_ARTICLE_DATE_THEN_SOURCE_NOTICE_OR_NORMAL_STORY_GATE"
   },
   "sources": [
     {
@@ -52,6 +52,36 @@
       "priority": 80,
       "path_hints": ["nout", "stiri", "știri", "eveniment", "avertiz", "trase", "turism", "biodivers", "conserv"],
       "generic_titles": ["parcul național cozia", "parcul national cozia", "acasa", "acasă"]
+    },
+    {
+      "id": "ipj-valcea-news",
+      "publisher": "Inspectoratul de Poliție Județean Vâlcea",
+      "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri",
+      "tier": "T1",
+      "section": "SIGURANȚĂ",
+      "priority": 95,
+      "path_hints": ["/ro/stiri-si-media/stiri/", "stiri-si-media/stiri"],
+      "generic_titles": ["știri", "stiri", "inspectoratul de poliție județean vâlcea", "inspectoratul de politie judetean valcea"]
+    },
+    {
+      "id": "primaria-dragasani-public-news",
+      "publisher": "Primăria Municipiului Drăgășani",
+      "url": "https://www.primariadragasani.ro/informatii-publice/anunturi-publice",
+      "tier": "T1",
+      "section": "ADMINISTRAȚIE",
+      "priority": 86,
+      "path_hints": ["informatii-publice/anunturi-publice", "anunturi-publice"],
+      "generic_titles": ["anunțuri publice", "anunturi publice", "primăria municipiului drăgășani", "primaria municipiului dragasani"]
+    },
+    {
+      "id": "ajf-valcea-official-news",
+      "publisher": "Asociația Județeană de Fotbal Vâlcea",
+      "url": "https://www.frf-ajf.ro/valcea/stiri/comunicate-ajf-1",
+      "tier": "T1B",
+      "section": "SPORT",
+      "priority": 82,
+      "path_hints": ["/valcea/stiri/", "comunicate-ajf"],
+      "generic_titles": ["comunicate ajf", "știri", "stiri", "asociația județeană de fotbal vâlcea", "asociatia judeteana de fotbal valcea"]
     }
   ]
 }
