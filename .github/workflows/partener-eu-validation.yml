@@ -40,6 +40,10 @@ permissions:
 
 jobs:
   validate:
+    # A completed workflow_run also includes failed, cancelled and skipped runs.
+    # Those outcomes carry no new canonical product state and must not create
+    # another timestamp-only validation ledger commit.
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
