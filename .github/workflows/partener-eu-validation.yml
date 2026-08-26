@@ -7,21 +7,21 @@ on:
       - 'partener-eu/**'
       - '.github/workflows/partener-eu-validation.yml'
       - '!partener-eu/validation/**'
+      - '!partener-eu/deployment/**'
       - '!partener-eu/P10_ACCEPTANCE.json'
   workflow_dispatch:
   schedule:
     - cron: '17 */6 * * *'
       timezone: 'Europe/Bucharest'
   # GITHUB_TOKEN commits made by autonomous ingestion workflows do not emit a
-  # downstream push workflow. Validate again after completed source and product
-  # workflows so the persistent P10 evidence covers both facts and presentation.
+  # downstream push workflow. Workflows that already feed PARTENER.EU Pages
+  # are validated through the Pages completion only, avoiding a pre-deploy and
+  # post-deploy duplicate ledger for the same source run.
   workflow_run:
     workflows:
-      - 'PARTENER.EU MIPE Ingestion'
       - 'PARTENER.EU AFIR Ingestion'
       - 'PARTENER.EU Decision Products'
       - 'PARTENER.EU Verified Source Registry'
-      - 'PARTENER.EU PEO Calendar'
       - 'PARTENER.EU MFF 2028-2034 Monitor'
       - 'PARTENER.EU Pages'
     types: [completed]
