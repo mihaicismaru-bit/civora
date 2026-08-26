@@ -1,0 +1,101 @@
+{
+  "id": "R08-ACTION-PACK-001",
+  "schema_version": 1,
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "R08_OUTREACH_OFFER_PREPARATION",
+  "status": "CANONICAL",
+  "purpose": "Generate an organization-level, fact-bound research and action pack from an R07 match while keeping contact, commercial terms and any external action behind explicit human approval.",
+  "canonical_dependencies": {
+    "client_finder_contract": "eucons/prospects/client_finder_contract.json",
+    "client_finder_engine": "eucons/prospects/client_finder_engine.py",
+    "prospect_match_contract": "eucons/prospects/prospect_opportunity_match_contract.json",
+    "prospect_match_engine": "eucons/prospects/prospect_opportunity_match.py",
+    "service_registry": "eucons/services/service_registry.json",
+    "offer_contract": "eucons/offers/offer_contract.json",
+    "privacy_security_contract": "eucons/security/privacy_security_contract.json"
+  },
+  "input_guards": {
+    "required_match_engine_id": "EUCONS_R07_PROSPECT_OPPORTUNITY_SERVICE_MATCH",
+    "required_match_semantics": "RESEARCH_RELEVANCE_NOT_ELIGIBILITY_AWARD_OR_BUYING_INTENT",
+    "required_match_state": "MATCHED_RESEARCH_CANDIDATE",
+    "required_r07_maximum_state": "RESEARCH_READY",
+    "required_eligibility_state": "NOT_ASSESSED",
+    "require_selected_opportunity": true,
+    "require_recommended_canonical_service": true,
+    "require_source_bound_facts": true,
+    "hold_nonmatched_records": true,
+    "hold_conflict_before_drafting": true,
+    "hold_suppression_before_drafting": true,
+    "hold_stale_source_before_drafting": true
+  },
+  "truth_policy": {
+    "classes": ["FACT", "INFERENCE", "UNKNOWN", "CONFLICT"],
+    "why_now_allowed_classes": ["FACT"],
+    "outreach_statement_allowed_classes": ["FACT"],
+    "inference_handling": "QUESTION_ONLY",
+    "unknown_handling": "QUESTION_ONLY",
+    "conflict_handling": "HOLD",
+    "fact_source_refs_required": true,
+    "material_funding_fact_official_source_required": true,
+    "never_claim_eligibility_award_probability_or_buying_intent": true
+  },
+  "pack_components": {
+    "why_now_brief": true,
+    "source_register": true,
+    "discovery_questions": true,
+    "outreach_draft": true,
+    "offer_skeleton": true,
+    "approval_checklist": true
+  },
+  "contact_governance": {
+    "mode": "ORGANIZATION_FIRST",
+    "person_targeting_allowed": false,
+    "private_contact_data_allowed": false,
+    "role_based_public_business_surface_only": true,
+    "contact_surface_extraction_enabled": false,
+    "lawful_basis_default_state": "REVIEW_REQUIRED",
+    "suppression_check_required": true,
+    "opt_out_mechanism_required_before_send": true,
+    "human_approval_required": true
+  },
+  "commercial_boundary": {
+    "offer_kind": "NON_BINDING_INTERNAL_SKELETON",
+    "numeric_price_allowed": false,
+    "discount_allowed": false,
+    "binding_terms_allowed": false,
+    "automatic_offer_allowed": false,
+    "pricing_state": "HUMAN_REQUIRED",
+    "scope_source": "eucons/services/service_registry.json"
+  },
+  "external_action_gate": {
+    "maximum_state": "READY_FOR_APPROVAL",
+    "human_approval_required": true,
+    "autonomous_send": false,
+    "autonomous_call": false,
+    "autonomous_social_dm": false,
+    "autonomous_offer": false,
+    "approval_requirements": [
+      "commercial reviewer approves the reason for contact and service hypothesis",
+      "lawful-basis and suppression review is complete",
+      "a lawful public role-based business contact surface is verified",
+      "outreach copy is reviewed against current source evidence",
+      "any commercial terms are supplied and approved by a human"
+    ]
+  },
+  "outputs": {
+    "ready": "READY_FOR_APPROVAL",
+    "hold_research": "HOLD_RESEARCH_INCOMPLETE",
+    "hold_source": "HOLD_SOURCE_STATE",
+    "hold_conflict": "HOLD_CONFLICT",
+    "suppressed": "SUPPRESSED",
+    "eligibility_state": "NOT_ASSESSED",
+    "external_contact_enabled": false,
+    "automatic_offer_enabled": false,
+    "automatic_send_enabled": false
+  },
+  "repository_policy": {
+    "real_prospect_or_contact_records_forbidden": true,
+    "synthetic_fixtures_allowed_only_with_label": "NON_EVIDENCE",
+    "runtime_output_under_repository_root_forbidden": true
+  }
+}
