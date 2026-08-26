@@ -1,0 +1,98 @@
+{
+  "id": "R07-PROSPECT-MATCH-001",
+  "schema_version": 1,
+  "status": "CANONICAL",
+  "engine_id": "EUCONS_R07_PROSPECT_OPPORTUNITY_SERVICE_MATCH",
+  "match_semantics": "RESEARCH_RELEVANCE_NOT_ELIGIBILITY_AWARD_OR_BUYING_INTENT",
+  "canonical_dependencies": {
+    "client_finder_contract": "eucons/prospects/client_finder_contract.json",
+    "client_finder_engine": "eucons/prospects/client_finder_engine.py",
+    "prospect_scoring_contract": "eucons/prospects/prospect_scoring_contract.json",
+    "prospect_scoring_engine": "eucons/prospects/prospect_scoring.py",
+    "opportunity_bridge_contract": "eucons/opportunities/bridge_contract.json",
+    "opportunity_matching_contract": "eucons/opportunities/matching_contract.json",
+    "opportunity_matching_engine": "eucons/opportunities/match_opportunities.py",
+    "service_registry": "eucons/services/service_registry.json"
+  },
+  "input_guards": {
+    "required_bridge_id": "PARTENER_P11_TO_EUCONS_E09",
+    "required_prospect_state": "READY_FOR_SCORING",
+    "required_bridge_state": "READY",
+    "required_opportunity_state": "VERIFIED_AVAILABLE",
+    "require_actionable_opportunity": true,
+    "hold_stale_or_rejected_bridge": true,
+    "hold_conflict_before_matching": true,
+    "suppress_before_matching": true,
+    "projection_read_only_required": true,
+    "projection_source_mutation_forbidden": true
+  },
+  "profile_projection": {
+    "organization_type_labels": {
+      "COMPANY": ["intreprindere", "companie"],
+      "PUBLIC_AUTHORITY": ["unitate administrativ teritoriala", "autoritate publica"],
+      "PUBLIC_INSTITUTION": ["institutie publica"],
+      "NGO": ["ong", "organizatie neguvernamentala"],
+      "SOCIAL_ECONOMY": ["intreprindere sociala", "economie sociala"],
+      "TRAINING_PROVIDER": ["furnizor formare", "formare profesionala"],
+      "RURAL_OPERATOR": ["operator rural", "agricol"],
+      "OTHER_ORGANIZATION": ["organizatie"]
+    },
+    "fact_term_minimum_length": 4,
+    "fact_term_limit": 24,
+    "fact_term_stopwords": [
+      "acest", "aceasta", "care", "companie", "conform", "este", "institutie", "organizatie",
+      "poate", "proiect", "public", "publica", "publicat", "publicata", "sintetic", "sintetica",
+      "sursa", "test", "unui", "unei"
+    ],
+    "person_level_fields_forbidden": [
+      "person_name", "personal_email", "personal_phone", "home_address", "personal_social_profile",
+      "personal_identifier", "date_of_birth", "private_contact"
+    ]
+  },
+  "opportunity_service_policy": {
+    "verified_funding_opportunity_services": [
+      "funding_strategy_and_eligibility",
+      "application_design_and_submission"
+    ],
+    "service_overlap_required_for_match": true,
+    "unmatched_post_award_services_remain_service_only_research": true
+  },
+  "truth_model": {
+    "classes": ["FACT", "INFERENCE", "UNKNOWN", "CONFLICT"],
+    "preserve_assertion_ids_by_class": true,
+    "fact_source_refs_required": true,
+    "inference_verification_question_required": true,
+    "unknowns_must_remain_questions": true,
+    "conflicts_block_matching": true,
+    "opportunity_material_facts_require_verified_projection_classes": true
+  },
+  "outputs": {
+    "matched": "MATCHED_RESEARCH_CANDIDATE",
+    "requires_verification": "REQUIRES_VERIFICATION",
+    "no_current_opportunity": "NO_CURRENT_OPPORTUNITY",
+    "held_source": "HOLD_SOURCE_STATE",
+    "held_conflict": "HOLD_CONFLICT",
+    "suppressed": "SUPPRESSED",
+    "eligibility_state": "NOT_ASSESSED",
+    "maximum_next_state": "RESEARCH_READY",
+    "external_contact_enabled": false,
+    "automatic_offer_enabled": false
+  },
+  "next_best_actions": {
+    "matched": "VERIFY_OPPORTUNITY_CONDITIONS_AND_PREPARE_RESEARCH_BRIEF",
+    "requires_verification": "COMPLETE_ORGANIZATION_AND_PROJECT_FACTS",
+    "no_current_opportunity": "RESEARCH_SERVICE_NEED_WITHOUT_CURRENT_OPPORTUNITY",
+    "held_source": "REVERIFY_OPPORTUNITY_SOURCE",
+    "held_conflict": "RESOLVE_EVIDENCE_CONFLICT",
+    "suppressed": "NO_ACTION_SUPPRESSED"
+  },
+  "rules": {
+    "deterministic_sort": ["prospect_priority_desc", "opportunity_relevance_desc", "opportunity_id_asc"],
+    "source_provenance_required": true,
+    "deadline_may_be_exposed_only_when_verified": true,
+    "never_claim_eligibility_award_probability_or_buying_intent": true,
+    "never_generate_person_level_output": true,
+    "never_prepare_or_send_external_contact": true,
+    "synthetic_results_are_non_evidence": true
+  }
+}

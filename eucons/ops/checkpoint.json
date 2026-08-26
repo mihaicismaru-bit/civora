@@ -1,11 +1,11 @@
 {
   "product": "EUCONS_COMMERCIAL_OS",
   "schema_version": 2,
-  "updated_at": "2026-08-26T03:50:00+03:00",
-  "checkpoint_id": "EUCONS-CP-2026-08-26-010",
+  "updated_at": "2026-08-26T04:58:00+03:00",
+  "checkpoint_id": "EUCONS-CP-2026-08-26-011",
   "development_state": "IN_PROGRESS",
-  "current_phase": "R07_MATCHING_NEXT_BEST_ACTION",
-  "current_unit": "R07-PROSPECT-MATCH-001",
+  "current_phase": "R08_OUTREACH_OFFER_PREPARATION",
+  "current_unit": "R08-ACTION-PACK-001",
   "previous_terminal_assessment": {
     "state": "BLOCKED_EXTERNAL_ONLY",
     "phase": "E29",
@@ -99,7 +99,8 @@
     "R06-CF-CONTRACT-001",
     "R06-CF-ENGINE-001",
     "R06-CF-SOURCE-ADAPTER-001",
-    "R06-CF-SCORING-001"
+    "R06-CF-SCORING-001",
+    "R07-PROSPECT-MATCH-001"
   ],
   "market_intelligence_result": {
     "state": "PASS",
@@ -112,12 +113,12 @@
       "MI-CAP-005 PROSPECT_RESEARCH_AND_ACTION_PACK"
     ]
   },
-  "next_action": "Implement deterministic prospect-to-opportunity-to-service matching against the verified read-only opportunity projection, preserving FACT/INFERENCE/UNKNOWN/CONFLICT, holding stale sources and producing an explainable next-best-action without eligibility claims.",
+  "next_action": "Generate a deterministic organization-level research and action pack from verified R07 matches: why-now brief, fact-bound discovery questions, outreach draft and offer skeleton, all held at READY_FOR_APPROVAL with no sending, binding price or person-level targeting.",
   "terminal_target": "PRODUCTION_READY",
   "owner_terminal_target": "PRODUCTION_GRADE_EUCONS_COMMERCIAL_OS",
   "external_handoff_allowed_only_after": "E28",
   "blocking_reason": null,
-  "last_good_checkpoint": "EUCONS-CP-2026-08-26-010",
+  "last_good_checkpoint": "EUCONS-CP-2026-08-26-011",
   "evidence": [
     "eucons/ops/EUCONS_REBASELINE_2026-08-25.json",
     "eucons/market_intelligence/EUCONS_MARKET_INTELLIGENCE_2026-08-25.json",
@@ -172,7 +173,11 @@
     "eucons/prospects/prospect_scoring_contract.json",
     "eucons/prospects/prospect_scoring.py",
     "eucons/validation/validate_prospect_scoring.py",
-    "eucons/validation/test_prospect_scoring_fail_closed.py"
+    "eucons/validation/test_prospect_scoring_fail_closed.py",
+    "eucons/prospects/prospect_opportunity_match_contract.json",
+    "eucons/prospects/prospect_opportunity_match.py",
+    "eucons/validation/validate_prospect_opportunity_match.py",
+    "eucons/validation/test_prospect_opportunity_match_fail_closed.py"
   ],
   "autonomy": {
     "enabled": true,
@@ -327,5 +332,28 @@
     "person_level_output": false,
     "production_prospect_records": 0,
     "external_contact": false
+  },
+  "prospect_opportunity_service_matching_result": {
+    "state": "PASS",
+    "semantics": "RESEARCH_RELEVANCE_NOT_ELIGIBILITY_AWARD_OR_BUYING_INTENT",
+    "truth_classes": [
+      "FACT",
+      "INFERENCE",
+      "UNKNOWN",
+      "CONFLICT"
+    ],
+    "synthetic_prospects_evaluated": 2,
+    "synthetic_aligned_matches": 1,
+    "validated_selected_opportunity": "SYNTH-OPP-SOLAR-CAEN10",
+    "validated_recommended_service": "funding_strategy_and_eligibility",
+    "stale_canonical_projection_behavior": "HOLD_ALL_PROSPECT_MATCHING",
+    "source_provenance_retained": true,
+    "verified_deadline_gate": "PASS",
+    "eligibility_state": "NOT_ASSESSED",
+    "maximum_next_state": "RESEARCH_READY",
+    "person_level_output": false,
+    "production_prospect_records": 0,
+    "external_contact": false,
+    "automatic_offer": false
   }
 }
