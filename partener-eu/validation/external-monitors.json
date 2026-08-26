@@ -1,16 +1,16 @@
 {
   "schema_version": "1.0",
   "checkpoint": "PARTENER-EU-CIVORA-P10-0020",
-  "observed_at": "2026-08-26T19:05:40Z",
-  "validation_run_started": "2026-08-26T19:05:15Z",
+  "observed_at": "2026-08-26T19:37:48Z",
+  "validation_run_started": "2026-08-26T19:37:20Z",
   "integrity": {
     "latest_history_equal": true,
-    "latest_sha256": "c1467882e6ebf2e55124a5addd1b27983c5ab5a60daabf836bea27a3ab92b49d",
-    "history_sha256": "c1467882e6ebf2e55124a5addd1b27983c5ab5a60daabf836bea27a3ab92b49d",
-    "history_path": "validation/history/20260826T190515Z.json",
+    "latest_sha256": "c1d9bde80d9fb5aed28a6ceed23fb7f18039ec147fb4908e88a57f3a6aef7089",
+    "history_sha256": "c1d9bde80d9fb5aed28a6ceed23fb7f18039ec147fb4908e88a57f3a6aef7089",
+    "history_path": "validation/history/20260826T193720Z.json",
     "source_state_checkpoint_equal": true,
-    "source_state_sha256": "ecc31479d9b12cb4ad5c0bb38d213478caded16cd7b1abd46ef275e9f1dc0dde",
-    "checkpoint_sha256": "ecc31479d9b12cb4ad5c0bb38d213478caded16cd7b1abd46ef275e9f1dc0dde",
+    "source_state_sha256": "90c0ffd0a58aa7c0fba58998ef954d705495ff19543501ed320f5d336e67a9a9",
+    "checkpoint_sha256": "90c0ffd0a58aa7c0fba58998ef954d705495ff19543501ed320f5d336e67a9a9",
     "frontend_regression_pass": true,
     "frontend_pass": 10,
     "frontend_total": 10,
@@ -18,7 +18,7 @@
   },
   "source_registry": {
     "observed_at": "2026-08-26T14:31:10.758482Z",
-    "age_seconds": 16469,
+    "age_seconds": 18397,
     "stale_after_seconds": 28800,
     "stale": false,
     "health": "DEGRADED",
@@ -295,7 +295,7 @@
   },
   "autonomous_orchestration": {
     "scheduled_validation_configured": true,
-    "workflow_run_integration_configured": true,
+    "workflow_run_integration_configured": false,
     "monitored_workflows": [
       "PARTENER.EU MIPE Ingestion",
       "PARTENER.EU AFIR Ingestion",
@@ -356,8 +356,10 @@
     "afir_hash_changes": 1,
     "peo_calendar_changes": 0,
     "mipe_health": "PASS",
-    "autonomous_orchestration_configured": true,
-    "policy_errors": [],
-    "critical_policy_fail": false
+    "autonomous_orchestration_configured": false,
+    "policy_errors": [
+      "autonomous monitor workflow_run integration is incomplete"
+    ],
+    "critical_policy_fail": true
   }
 }
