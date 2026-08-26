@@ -217,14 +217,54 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# Cross-platform editor / OS / transient junk
+# Node / JavaScript / frontend caches and build state
+node_modules/
+.npm/
+.yarn/cache/
+.yarn/unplugged/
+.pnpm-store/
+.eslintcache
+.stylelintcache
+.next/
+.nuxt/
+.svelte-kit/
+.turbo/
+.parcel-cache/
+.vite/
+storybook-static/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Deployment-provider local state
+.vercel/
+.netlify/
+
+# OS and editor junk
 .DS_Store
+.AppleDouble
+.LSOverride
 Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
 Desktop.ini
-*.tmp
-*.temp
-*.bak
-*.orig
+$RECYCLE.BIN/
 *.swp
 *.swo
 *~
+
+# Temporary, backup and patch leftovers
+*.tmp
+*.temp
+*.bak
+*.old
+*.orig
+*.rej
+tmp/
+temp/
+
+# Local IDE metadata (project settings should be committed only intentionally)
+.idea/
