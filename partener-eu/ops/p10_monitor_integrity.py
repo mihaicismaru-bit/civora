@@ -28,6 +28,7 @@ OUT = VALIDATION / "external-monitors.json"
 INTEGRATIONS = ROOT / "ops" / "integrations.json"
 REPO_ROOT = ROOT.parent
 VALIDATION_WORKFLOW = REPO_ROOT / ".github" / "workflows" / "partener-eu-validation.yml"
+PAGES_WORKFLOW = REPO_ROOT / ".github" / "workflows" / "partener-eu-pages.yml"
 PEO_WORKFLOW = REPO_ROOT / ".github" / "workflows" / "partener-eu-peo-calendar.yml"
 MAX_REGISTRY_AGE_SECONDS = 8 * 3600
 
@@ -100,6 +101,10 @@ def task_is_fail_closed(path: pathlib.Path) -> bool:
     if allowed is None:
         allowed = task.get("material_fact_autoupdate_allowed")
     return bool(task) and allowed is False
+
+
+def workflow_list_contains(text: str, name: str) -> bool:
+    return f"      - '{name}'" in text
 
 
 def main() -> int:
@@ -196,17 +201,33 @@ def main() -> int:
         errors.append("MFF monitor permits automatic stage promotion: " + ", ".join(x for x in mff_unsafe if x))
 
     validation_workflow_text = VALIDATION_WORKFLOW.read_text(encoding="utf-8", errors="ignore") if VALIDATION_WORKFLOW.exists() else ""
+    pages_workflow_text = PAGES_WORKFLOW.read_text(encoding="utf-8", errors="ignore") if PAGES_WORKFLOW.exists() else ""
     peo_workflow_text = PEO_WORKFLOW.read_text(encoding="utf-8", errors="ignore") if PEO_WORKFLOW.exists() else ""
-    monitored_workflows = [
-        "PARTENER.EU MIPE Ingestion",
+    direct_validation_workflows = [
         "PARTENER.EU AFIR Ingestion",
+        "PARTENER.EU Decision Products",
         "PARTENER.EU Verified Source Registry",
-        "PARTENER.EU PEO Calendar",
         "PARTENER.EU MFF 2028-2034 Monitor",
         "PARTENER.EU Pages",
     ]
-    workflow_run_integrated = "workflow_run:" in validation_workflow_text and all(
-        name in validation_workflow_text for name in monitored_workflows
+    pages_handoff_workflows = [
+        "PARTENER.EU MIPE Ingestion",
+        "PARTENER.EU PEO Calendar",
+    ]
+    direct_validation_integrated = all(
+        workflow_list_contains(validation_workflow_text, name) for name in direct_validation_workflows
+    )
+    pages_handoff_integrated = all(
+        workflow_list_contains(pages_workflow_text, name) for name in pages_handoff_workflows
+    )
+    duplicate_direct_handoffs = [
+        name for name in pages_handoff_workflows if workflow_list_contains(validation_workflow_text, name)
+    ]
+    workflow_run_integrated = (
+        "workflow_run:" in validation_workflow_text
+        and direct_validation_integrated
+        and pages_handoff_integrated
+        and not duplicate_direct_handoffs
     )
     scheduled_validation_configured = "schedule:" in validation_workflow_text and "17 */6 * * *" in validation_workflow_text
     peo_candidate_state_only = (
@@ -215,7 +236,7 @@ def main() -> int:
         and "cp partener-eu/web/peo-calendar.js" not in peo_workflow_text
     )
     if not workflow_run_integrated:
-        errors.append("autonomous monitor workflow_run integration is incomplete")
+        errors.append("autonomous monitor routing is incomplete or duplicates the post-deploy validation handoff")
     if not scheduled_validation_configured:
         errors.append("scheduled production validation is not configured")
     if not peo_candidate_state_only:
@@ -306,7 +327,9 @@ def main() -> int:
         "autonomous_orchestration": {
             "scheduled_validation_configured": scheduled_validation_configured,
             "workflow_run_integration_configured": workflow_run_integrated,
-            "monitored_workflows": monitored_workflows,
+            "direct_validation_workflows": direct_validation_workflows,
+            "pages_handoff_workflows": pages_handoff_workflows,
+            "duplicate_direct_handoffs": duplicate_direct_handoffs,
             "peo_candidate_state_only": peo_candidate_state_only,
             "evidence_status": "CONFIGURED_AND_COLLECTING; NOT_SUFFICIENT_FOR_CLOSURE_BEFORE_30_DISTINCT_UTC_DAYS",
         },
