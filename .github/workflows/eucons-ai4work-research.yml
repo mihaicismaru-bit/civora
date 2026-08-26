@@ -1,0 +1,64 @@
+name: EUCONS AI4WORK Research Gate
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/research/ai4work-step/**'
+      - '.github/workflows/eucons-ai4work-research.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/research/ai4work-step/**'
+      - '.github/workflows/eucons-ai4work-research.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-ai4work-research-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Run AI4WORK runtime, storage and idempotency tests
+        working-directory: eucons/research/ai4work-step
+        run: python -m unittest -v test_runtime.py test_research_storage.py test_http_idempotency.py
+      - name: Render preview-only research pages
+        working-directory: eucons/research/ai4work-step
+        run: python build_research_pages.py --target /tmp/ai4work-research-preview
+      - name: Verify three research preview pages exist
+        shell: bash
+        run: |
+          set -euo pipefail
+          count="$(find /tmp/ai4work-research-preview -name index.html -type f | wc -l | tr -d ' ')"
+          test "$count" = "3"
+      - name: Reject third-party commercial tracking in research preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RIE '(google-analytics|googletagmanager|gtag\(|facebook\.com/tr|fbq\(|hotjar|clarity\.ms|segment\.com|mixpanel)' /tmp/ai4work-research-preview; then
+            echo 'Third-party commercial tracking detected in AI4WORK research preview' >&2
+            exit 1
+          fi
+      - name: Verify collection remains disabled in contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('eucons/research/ai4work-step/form_contract.json')
+          contract = json.loads(p.read_text(encoding='utf-8'))
+          assert contract.get('production_enabled') is False
+          assert contract.get('crm_integration') == 'FORBIDDEN'
+          assert contract.get('commercial_analytics') == 'FORBIDDEN'
+          print('PASS: AI4WORK collection remains fail-closed')
+          PY
