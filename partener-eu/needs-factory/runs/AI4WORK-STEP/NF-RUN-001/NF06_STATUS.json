@@ -1,31 +1,58 @@
 {
-  "schema_version": "nf.checkpoint_status.v0.1",
+  "schema_version": "nf.checkpoint_status.v0.2",
   "run_id": "AI4WORK-STEP/NF-RUN-001",
   "checkpoint": "NF06_PRIMARY_RESEARCH",
-  "status": "PLAN_READY_DATA_REQUIRED",
+  "status": "PRIMARY_DATA_REQUIRED_SECONDARY_GAPS_MATERIALLY_CLOSED",
   "inputs_ready": [
     "RESEARCH_AGENDA.json",
     "EVIDENCE_REGISTRY.json",
     "EVIDENCE_ADDENDUM_001.json",
+    "EVIDENCE_ADDENDUM_002.json",
+    "EVIDENCE_ADDENDUM_003.json",
+    "EVIDENCE_ADDENDUM_004.json",
     "EVIDENCE_GAPS.json",
-    "NEED_HYPOTHESES.json"
+    "NEED_HYPOTHESES.json",
+    "CALL_REQUIREMENTS.json"
   ],
   "outputs_ready": [
     "PRIMARY_RESEARCH_PLAN.json",
     "QUESTIONNAIRE_ADULTS.md",
-    "QUESTIONNAIRE_EMPLOYERS.md"
+    "QUESTIONNAIRE_EMPLOYERS.md",
+    "eucons/research/ai4work-step/form_contract.json",
+    "eucons/research/ai4work-step/ingest_contract.json",
+    "eucons/research/ai4work-step/runtime.py",
+    "eucons/research/ai4work-step/test_runtime.py"
+  ],
+  "secondary_research_closed_this_stage": [
+    "live technical call code captured from project-specific MySMIS state",
+    "Sud-Muntenia direct comparable adult-learning baseline frozen",
+    "regional workplace digital-use baseline frozen for all three regions",
+    "Sud-Vest Oltenia and Sud-Muntenia digital-maturity gaps closed at explicit proxy level",
+    "macro numerical recruitment feasibility for 160 supported by ANOFM age-30-55 registered-unemployed pool"
   ],
   "blocking_data": [
-    "adult raw responses with region/status/age-band metadata and no direct identifiers",
-    "employer/organisation responses with region/sector/size metadata",
-    "documented research frames/coverage for all three regions",
-    "if claiming exact project scale: independent feasibility/interest evidence for 160 and territorial allocation"
+    "real adult responses with region/status/age-band metadata and no direct identifiers",
+    "real employer/organisation responses with region/sector/size metadata across all three regions",
+    "documented recruitment frames/channels and coverage for all three regions",
+    "if claiming 160 or 80/40/40 as observed need rather than design: independent interest/coverage and a transparent scale/allocation rule"
   ],
-  "nonblocking_secondary_research_still_open": [
-    "direct current Eurostat adult-learning value for Sud-Muntenia",
-    "newer regional digital-maturity evidence for Sud-Vest Oltenia and Sud-Muntenia",
-    "exact official GSCS binary/hash and live technical call code"
+  "external_call_compliance_blocker": [
+    "latest official GSCS and annex binaries must be captured and hashed; official metadata/direct MIPE URLs are known but binary retrieval remains unavailable in the current research environment",
+    "confirm whether the reported 24 August corrigendum supersedes the 13 August consolidated package before final compliance QA"
   ],
-  "resume_rule": "When primary data are available, create a successor run version and resume at NF06; do not mutate the frozen blind predecessor evidence.",
+  "eucons_research_runtime": {
+    "state": "IMPLEMENTATION_CANDIDATE_NOT_DEPLOYED",
+    "crm_isolation": "CONTRACTED_FORBIDDEN",
+    "production_enabled": false,
+    "privacy_binding_required": [
+      "operator legal identity",
+      "privacy/DPO contact",
+      "hosting/processor and server-log review",
+      "research-only storage provider binding",
+      "retention approval"
+    ],
+    "test_state": "TESTS_AUTHORED_NOT_YET_EXECUTED_IN_REPOSITORY_CI"
+  },
+  "resume_rule": "Continue secondary verification and EUCONS runtime validation without mutating evidence truth. When real primary data are available, freeze exact raw exports and manifests, then resume NF06 through the canonical ingest contract. Synthetic TEST TWIN data must remain NON-EVIDENCE and separate from PROD.",
   "final_narrative_allowed": false
 }
