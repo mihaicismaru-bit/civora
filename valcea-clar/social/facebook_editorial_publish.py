@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Fail-closed Facebook editorial-composite publisher for VÂLCEA CLAR.
+"""Canonical Facebook publisher for VÂLCEA CLAR.
 
-The adapter builds a Facebook-native visual/copy product from the verified story
-kernel and approved source photograph, renders a deterministic editorial
-composite, and can upload that binary to the Page. Existing legacy story IDs in
-facebook_state.json are respected so adoption never republishes already-live
-stories. Live apply additionally requires an explicit runtime enable flag.
+Preferred mode remains a Facebook-native editorial composite built from the
+verified story kernel and an approved source photograph. When a *new* canonical
+story is otherwise ready but its only Facebook blocker is the absence of a
+story-specific approved photo, the same canonical writer may publish a text +
+canonical-link fallback. This keeps the newsroom live without inventing imagery,
+weakening factual provenance, bypassing publication holds, or creating a second
+Facebook writer.
 """
 from __future__ import annotations
 
@@ -21,6 +23,7 @@ from typing import Any, Callable
 import editorial_asset_contract as asset_contract
 import facebook_editorial_preview_v1_1 as patch
 import facebook_publish as legacy
+import facebook_text_fallback as text_fallback
 from social_common import is_socially_held
 
 fb = patch.impl
@@ -31,12 +34,12 @@ OUTBOX = VC / "social" / "facebook_outbox.json"
 VISUALS = VC / "social" / "story_visuals.json"
 SYSTEM = VC / "social" / "facebook_visual_system.json"
 FACTS = VC / "editorial" / "facts_registry.json"
-# Persist inside the canonical site runtime media tree. The social workflow
-# already conflict-safely persists this subtree after every production run.
 RUNTIME = VC / "site" / "runtime" / "media" / "social" / "editorial" / "facebook"
 DEFAULT_GRAPH_VERSION = "v26.0"
 LIVE_ENABLE_ENV = "VALCEA_FB_EDITORIAL_LIVE_ENABLED"
-ADAPTER_VERSION = "facebook-editorial-v1.0"
+ADAPTER_VERSION = "facebook-editorial-v1.1"
+VISUAL_PRODUCT_VERSION = "facebook-editorial-v1.0"
+TEXT_FALLBACK_PRODUCT_VERSION = text_fallback.ADAPTER
 
 
 def load(path: Path, default: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -60,17 +63,11 @@ def utc_now() -> str:
 
 
 def state_key(story_id: str) -> str:
-    # Preserve legacy identity so the old and new adapters share one dedupe key.
     return f"story-{story_id}"
 
 
 def legacy_ready_story_ids() -> set[str]:
-    """Reuse the canonical newsroom/story-ready decision already materialized in outbox.
-
-    The editorial adapter adds Facebook-specific interest/visual gates, but it
-    must never broaden the set of stories accepted by the existing newsroom
-    readiness path.
-    """
+    """Reuse the canonical newsroom/story-ready decision already materialized in outbox."""
     outbox = load(OUTBOX, {"items": []})
     ready: set[str] = set()
     for item in outbox.get("items", []):
@@ -87,7 +84,6 @@ def legacy_ready_story_ids() -> set[str]:
 
 
 def render_product(story: dict[str, Any], visual: dict[str, Any], system: dict[str, Any]) -> dict[str, Any]:
-    # patch module installs the corrected contractor-name normalizer in fb.
     plan = fb.package(story, visual)
     errors = fb.validate(plan, system)
     if errors:
@@ -104,7 +100,7 @@ def render_product(story: dict[str, Any], visual: dict[str, Any], system: dict[s
     asset = asset_contract.build_asset(
         story_id=str(story["id"]),
         platform="facebook",
-        renderer="facebook-editorial-v1.0",
+        renderer=VISUAL_PRODUCT_VERSION,
         rendered_path=rendered,
         source_visual=visual,
         product_fingerprint=fingerprint,
@@ -115,6 +111,7 @@ def render_product(story: dict[str, Any], visual: dict[str, Any], system: dict[s
     alt_text = f"VÂLCEA CLAR: {plan['hook']}. {source['alt_text']}"
     return {
         "status": "READY",
+        "publication_mode": "editorial_composite",
         "story_id": str(story["id"]),
         "state_key": state_key(str(story["id"])),
         "template_id": plan["template_id"],
@@ -125,6 +122,27 @@ def render_product(story: dict[str, Any], visual: dict[str, Any], system: dict[s
         "asset": asset,
         "alt_text": alt_text[:1000],
     }
+
+
+def plan_text_fallbacks(state: dict[str, Any]) -> list[dict[str, Any]]:
+    """Return only current new stories whose sole Facebook blocker is media."""
+    outbox = load(OUTBOX, {"items": []})
+    new_ids = text_fallback.latest_new_story_ids()
+    items = text_fallback.eligible_items(outbox, state, new_ids)
+    result: list[dict[str, Any]] = []
+    for item in items:
+        story_id = str(item["source_story_id"])
+        result.append({
+            "status": "READY",
+            "publication_mode": "text_link_fallback",
+            "story_id": story_id,
+            "state_key": str(item["id"]),
+            "body": str(item["message"]),
+            "canonical_url": str(item["link"]),
+            "fallback_reason": text_fallback.MISSING_PHOTO_REASON,
+            "outbox_item": item,
+        })
+    return result
 
 
 def plan_products() -> dict[str, Any]:
@@ -156,10 +174,23 @@ def plan_products() -> dict[str, Any]:
             holds.append(product)
             continue
         products.append(product)
+
+    text_fallbacks = plan_text_fallbacks(state)
+    fallback_story_ids = {row["story_id"] for row in text_fallbacks}
+    # Missing-photo holds remain useful diagnostics, but explicitly annotate that
+    # they no longer block Facebook publication for the latest new story.
+    for row in holds:
+        if row.get("story_id") in fallback_story_ids and row.get("reason") in {
+            "story_specific_approved_photo_required",
+            "canonical_story_readiness_gate_not_ready",
+        }:
+            row["facebook_text_fallback_available"] = True
+
     return {
         "status": "DRY_RUN",
         "adapter": ADAPTER_VERSION,
         "eligible": products,
+        "text_fallbacks": text_fallbacks,
         "holds": holds,
         "skipped": skipped,
     }
@@ -189,7 +220,7 @@ def graph_editorial_photo_post(
         f"https://graph.facebook.com/{version}/{page_id}/photos",
         data=body,
         method="POST",
-        headers={"Content-Type": content_type, "User-Agent": "ValceaClar-Facebook-Editorial/1.0"},
+        headers={"Content-Type": content_type, "User-Agent": "ValceaClar-Facebook-Editorial/1.1"},
     )
     try:
         with request_fn(request, timeout=60) as response:
@@ -215,7 +246,7 @@ def persist_publication(state: dict[str, Any], product: dict[str, Any], post_id:
         "facebook_post_id": post_id,
         "published_at": utc_now(),
         "link": product["canonical_url"],
-        "publication_product": ADAPTER_VERSION,
+        "publication_product": VISUAL_PRODUCT_VERSION,
         "template_id": product["template_id"],
         "hook": product["hook"],
         "product_fingerprint_sha256": product["product_fingerprint_sha256"],
@@ -234,7 +265,16 @@ def persist_publication(state: dict[str, Any], product: dict[str, Any], post_id:
         "status": "published",
         "story_id": product["story_id"],
         "state_key": product["state_key"],
+        "publication_mode": "editorial_composite",
     }
+    write(STATE, state)
+
+
+def persist_text_fallback(state: dict[str, Any], product: dict[str, Any], post_id: str) -> None:
+    item = product.get("outbox_item")
+    if not isinstance(item, dict):
+        raise ValueError("Facebook text fallback is missing its canonical outbox item")
+    text_fallback.record_publication(state, item, post_id)
     write(STATE, state)
 
 
@@ -264,6 +304,7 @@ def self_test() -> int:
     assert "olanesti-bridge-monitor" not in legacy_ready_story_ids()
     product = _fixture_product("olanesti-bridge-monitor")
     assert product["state_key"] == "story-olanesti-bridge-monitor"
+    assert product["publication_mode"] == "editorial_composite"
     assert product["asset"]["kind"] == "editorial_composite"
     assert product["asset"]["synthetic"] is False
     assert product["asset"]["source_photo"]["kind"] == "photograph"
@@ -305,7 +346,10 @@ def self_test() -> int:
     assert b"fixture-token-never-logged" in captured["body"]
     runtime_path = ROOT / str(product["asset"]["rendered_path"])
     assert runtime_path.is_file() and runtime_path.stat().st_size > 30_000
-    print("VÂLCEA CLAR Facebook editorial adapter v1 self-test: PASS")
+
+    # The fallback helper has its own HTTP fixture and strict eligibility tests.
+    assert text_fallback.self_test() == 0
+    print("VÂLCEA CLAR Facebook canonical publisher v1.1 self-test: PASS")
     return 0
 
 
@@ -321,7 +365,9 @@ def main() -> int:
     if not args.apply:
         print(json.dumps(preview, ensure_ascii=False, indent=2))
         return 0
-    if not preview["eligible"]:
+
+    total_eligible = len(preview["text_fallbacks"]) + len(preview["eligible"])
+    if total_eligible == 0:
         print(json.dumps({**preview, "status": "NO_ELIGIBLE_POSTS"}, ensure_ascii=False, indent=2))
         return 0
     if os.getenv(LIVE_ENABLE_ENV, "").strip().lower() != "true":
@@ -354,8 +400,28 @@ def main() -> int:
         raise
 
     max_per_run = max(1, int(os.getenv("VALCEA_FB_EDITORIAL_MAX_PER_RUN", "1")))
-    results = []
-    for product in preview["eligible"][:max_per_run]:
+    # Current/new missing-photo stories come first. The fallback list is limited
+    # to durable new_story_ids, so this cannot dump the historical backlog.
+    queue = list(preview["text_fallbacks"]) + list(preview["eligible"])
+    results: list[dict[str, Any]] = []
+    for product in queue[:max_per_run]:
+        if product.get("publication_mode") == "text_link_fallback":
+            post_id = text_fallback.graph_feed_post(
+                page_id=page_id,
+                token=page_token,
+                version=version,
+                item=product["outbox_item"],
+            )
+            persist_text_fallback(state, product, post_id)
+            results.append({
+                "story_id": product["story_id"],
+                "state_key": product["state_key"],
+                "facebook_post_id": post_id,
+                "publication_product": TEXT_FALLBACK_PRODUCT_VERSION,
+                "publication_mode": "text_link_fallback",
+            })
+            continue
+
         post_id = graph_editorial_photo_post(
             page_id=page_id,
             token=page_token,
@@ -367,6 +433,8 @@ def main() -> int:
             "story_id": product["story_id"],
             "state_key": product["state_key"],
             "facebook_post_id": post_id,
+            "publication_product": VISUAL_PRODUCT_VERSION,
+            "publication_mode": "editorial_composite",
             "product_fingerprint_sha256": product["product_fingerprint_sha256"],
         })
 
@@ -375,7 +443,7 @@ def main() -> int:
         "adapter": ADAPTER_VERSION,
         "auth_resolution": resolution,
         "results": results,
-        "remaining": max(0, len(preview["eligible"]) - len(results)),
+        "remaining": max(0, total_eligible - len(results)),
         "holds": preview["holds"],
     }, ensure_ascii=False, indent=2))
     return 0
