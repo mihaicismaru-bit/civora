@@ -38,6 +38,8 @@ jobs:
           python-version: "3.13"
 
       - name: Compile sealed recovery boundary
+        # Receipt unit regressions are owned by the dedicated receipt workflow;
+        # recovery still compiles the receipt module because it imports it directly.
         run: |
           python -m py_compile \
             local-news-os/social/authorization_sealed_harvest_recovery.py \
