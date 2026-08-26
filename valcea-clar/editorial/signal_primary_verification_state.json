@@ -2,19 +2,31 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-26T11:03:32+03:00",
+  "generated_at": "2026-08-26T13:09:20+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-26T11:02:24+03:00",
-  "task_count": 54,
+  "queue_generated_at": "2026-08-26T13:08:21+03:00",
+  "task_count": 52,
   "primary_match_count": 0,
-  "no_match_count": 25,
-  "unrouted_count": 29,
-  "target_count": 15,
-  "targets_ok": 12,
+  "no_match_count": 24,
+  "unrouted_count": 28,
+  "target_count": 12,
+  "targets_ok": 10,
   "results": [
+    {
+      "signal_id": "6ebd379729657827bd33c6ee",
+      "signal_title": "Schitul Troianu, prădat de o hoața. A escaladat fereastra din zona altarului",
+      "signal_url": "https://seintamplainvalcea.ro/2026/08/26/schitul-troianu-pradat-de-o-hoata-a-escaladat-fereastra-din-zona-altarului/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_published_at": "2026-08-26T13:06:12+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
     {
       "signal_id": "cc151dcdd5c67f2554cbce4d",
       "signal_title": "32 de milioane de euro pentru investiții în Vâlcea. Ce proiecte au primit finanțare",
@@ -1134,79 +1146,6 @@
       "material_fact_ready": false,
       "fact_kernel_ready": false,
       "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "5358a37b1110ee79d26d5a2e",
-      "signal_title": "Meciuri pe muchie de cuțit pentru Vâlcea în SuperCupă! SCM și CSM București au protestat împreună la adresa arbitrajelor dubioase de la Bistrița",
-      "signal_url": "https://www.impactreal.ro/2026/08/23/meciuri-pe-muchie-de-cutit-pentru-valcea-in-supercupa-scm-si-csm-bucuresti-au-protestat-impreuna-la-arbitrajele-dubioase-de-la-bistrita/",
-      "signal_publisher": "Impact Real",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-08-23T17:17:59+03:00",
-      "verification_route_id": "sport",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "scm-rm-valcea",
-            "name": "SCM Râmnicu Vâlcea",
-            "url": "https://scmramnicuvalcea.ro/category/stiri/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "cs-valcea-1924-social-feed",
-            "name": "Clubul Sportiv Vâlcea 1924",
-            "url": "https://www.csvalcea.ro/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 2
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ajf-valcea-comunicate",
-            "name": "Asociația Județeană de Fotbal Vâlcea",
-            "url": "https://www.frf-ajf.ro/valcea/stiri/comunicate-ajf-1"
-          },
-          "status": "DEGRADED",
-          "error": "HTTPError: HTTP Error 403: Forbidden",
-          "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "ea0157b4cf4cac8c766bc4a4",
-      "signal_title": "ȘOC în Râmnicu Vâlcea: femeie de 71 de ani, înjunghiată de soț în propria locuință",
-      "signal_url": "https://ziaruldevalcea.ro/2026/08/soc-in-ramnicu-valcea-femeie-de-71-de-ani-injunghiata-de-sot-in-propria-locuinta/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_published_at": "2026-08-23T13:52:02+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "2f8592651b6858faa75f113b",
-      "signal_title": "23 August la Vâlcea! Ziua în care orașul era cuprins de defilări, lozinci și sărbătoare",
-      "signal_url": "https://evenimentvalcean.ro/23-august-la-valcea-ziua-in-care-orasul-era-cuprins-de-defilari-lozinci-si-sarbatoare/",
-      "signal_publisher": "Eveniment Vâlcean",
-      "signal_published_at": "2026-08-23T13:09:29+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
     },
     {
       "signal_id": "ca97ca9ed5698965fd60b9c5",
