@@ -36,12 +36,18 @@ jobs:
         run: python eucons/preview/preview_engine.py --build-dir /tmp/eucons-site --output /tmp/eucons-preview-receipt.json
       - name: Create immutable build receipt
         run: python eucons/ops/github_automation.py build-receipt --build-dir /tmp/eucons-site --output /tmp/eucons-build-receipt.json --generated-at "${{ github.event.repository.updated_at }}"
-      - name: Upload build artifact only
+      - name: Upload transient static build
         uses: actions/upload-artifact@v7
         with:
           name: eucons-static-build
+          path: /tmp/eucons-site
+          retention-days: 3
+          if-no-files-found: error
+      - name: Upload build evidence receipts
+        uses: actions/upload-artifact@v7
+        with:
+          name: eucons-build-receipts
           path: |
-            /tmp/eucons-site
             /tmp/eucons-build-receipt.json
             /tmp/eucons-preview-receipt.json
           retention-days: 14
