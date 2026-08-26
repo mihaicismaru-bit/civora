@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.2",
+  "schema_version": "1.3",
   "instance_id": "valcea",
   "scope": "VALCEA_SPECIFIC",
   "policy": {
@@ -8,7 +8,8 @@
     "detail_autopublish": false,
     "candidate_max_age_hours": 72,
     "supplement": true,
-    "promotion_rule": "STRICT_ARTICLE_DATE_THEN_SOURCE_NOTICE_OR_NORMAL_STORY_GATE"
+    "promotion_rule": "STRICT_ARTICLE_DATE_THEN_SOURCE_NOTICE_OR_NORMAL_STORY_GATE",
+    "health_rule": "do_not_count_persistently_unreachable_sources_as_active_coverage"
   },
   "sources": [
     {
@@ -21,9 +22,7 @@
       "enabled": false,
       "status": "QUARANTINED_LISTING_REACHABLE_ZERO_ARTICLE_LINKS",
       "checked_at": "2026-08-17",
-      "disable_reason": "The official Ocnele Mari municipal homepage exposes dated announcement summaries, but the current LOCAL NEWS OS discovery run reports listing_ok=true with 0 article links examined. Fresh independent verification also finds the dated listing surface while direct canonical-page retrieval is not deterministic enough to prove a stable per-item article identity. A reachable landing page must not be treated as a healthy ARTICLE_FEED when the generic adapter cannot enumerate any canonical article pages; search-index snippets, listing dates and crawl time are not substitutes for article-level publication provenance. The source remains high-value T1 for territorial discovery and verification, but automatic title + date + source admission is disabled until stable item links can be enumerated and fetched deterministically.",
-      "safe_use": ["manual discovery of Ocnele Mari municipal developments", "primary-source verification from the official municipal listing and linked public documents", "manual reporting after item identity, publication date and source content are verified"],
-      "core_feedback": "No Ocnele Mari-specific parser should be added. This reinforces the generic source-health contract already identified by the pilot: listing_reachable must be distinct from article_links_discovered/ARTICLE_FEED structural eligibility, and HTTP/listing success with zero canonical item links should surface an inert-feed incompatibility signal rather than a healthy automatic source.",
+      "safe_use": ["manual discovery of Ocnele Mari municipal developments", "primary-source verification from official documents"],
       "path_hints": ["consultare", "buget", "invest", "proiect", "hotar", "utilitat", "deseuri", "apa", "canal", "gaz"],
       "generic_titles": ["primăria orașului ocnele mari", "primaria orasului ocnele mari", "mai mult", "citește mai mult"]
     },
@@ -37,9 +36,7 @@
       "enabled": false,
       "status": "QUARANTINED_MIXED_DOCUMENT_LISTING_HIGH_ARTICLE_FAILURES",
       "checked_at": "2026-08-17",
-      "disable_reason": "The official Sutești announcements surface is a broad mixed listing that combines public-consultation notices, fiscal debtor publications, recruitment results, land/pre-emption records, budgets, procurement documents, environment notices, utility notices and direct document/PDF material. The current live discovery ledger examined 12 candidate links and recorded 10 article failures. LOCAL NEWS OS must not treat a listing item, document wrapper, file name or document-internal date as a trustworthy article published_at, so this source is disabled from automatic title + date + source projection until a deterministic article-feed subset can be proven.",
-      "safe_use": ["manual discovery of Sutești municipal developments", "primary-source verification of budgets, council projects, infrastructure and utility notices", "manual reporting after separating listing date, document date, decision date and event date"],
-      "core_feedback": "No Sutești-specific parser is justified. This reinforces the existing ARTICLE_FEED versus DOCUMENT_REGISTER/PDF_FEED boundary and the generic health signal that persistently high article-failure ratios should trigger structural-eligibility review without changing source authority or publication gates.",
+      "safe_use": ["manual discovery of Sutești municipal developments", "primary-source verification of budgets, infrastructure and utility notices"],
       "path_hints": ["proiect", "buget", "iluminat", "gaz", "apa", "canal", "deseuri", "hotarare", "consultare", "investitie", "drum"],
       "generic_titles": ["anunțuri", "anunturi", "site-ul oficial al primăriei comunei sutești"]
     },
@@ -64,12 +61,34 @@
       "generic_titles": ["știri", "stiri", "inspectoratul de poliție județean vâlcea", "inspectoratul de politie judetean valcea"]
     },
     {
+      "id": "isu-valcea-specific-releases",
+      "publisher": "ISU Vâlcea",
+      "url": "https://isuvl.igsu.ro/comunicate-de-presa",
+      "tier": "T1",
+      "section": "SIGURANȚĂ",
+      "priority": 94,
+      "path_hints": ["comunicate-de-presa/"],
+      "generic_titles": [
+        "comunicate de presă",
+        "buletin informativ",
+        "misiunile pompierilor vâlceni în ultimele 24 de ore",
+        "misiunile pompierilor vâlceni în ultimele 48 de ore",
+        "misiunile pompierilor vâlceni în ultimele 72 de ore",
+        "misiunile pompierilor vâlceni în ultimele 3 zile"
+      ],
+      "automatic_scope_note": "Only specifically titled official releases are eligible. Repetitive generic incident bulletins remain filtered from automatic source notices."
+    },
+    {
       "id": "primaria-dragasani-public-news",
       "publisher": "Primăria Municipiului Drăgășani",
       "url": "https://www.primariadragasani.ro/informatii-publice/anunturi-publice",
       "tier": "T1",
       "section": "ADMINISTRAȚIE",
       "priority": 86,
+      "enabled": false,
+      "status": "QUARANTINED_RUNTIME_TIMEOUT_20260826",
+      "checked_at": "2026-08-26",
+      "safe_use": ["signal discovery", "manual primary-source verification when reachable"],
       "path_hints": ["informatii-publice/anunturi-publice", "anunturi-publice"],
       "generic_titles": ["anunțuri publice", "anunturi publice", "primăria municipiului drăgășani", "primaria municipiului dragasani"]
     },
@@ -80,6 +99,10 @@
       "tier": "T1B",
       "section": "SPORT",
       "priority": 82,
+      "enabled": false,
+      "status": "QUARANTINED_RUNTIME_HTTP_403_20260826",
+      "checked_at": "2026-08-26",
+      "safe_use": ["signal discovery", "manual verification of county football schedules and AJF decisions"],
       "path_hints": ["/valcea/stiri/", "comunicate-ajf"],
       "generic_titles": ["comunicate ajf", "știri", "stiri", "asociația județeană de fotbal vâlcea", "asociatia judeteana de fotbal valcea"]
     }
