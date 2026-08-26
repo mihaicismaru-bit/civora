@@ -1,0 +1,49 @@
+{
+  "schema_version": "nf.checkpoint_status.v0.1",
+  "run_id": "AI4WORK-STEP/NF-RUN-001",
+  "checkpoint": "NF06_PRIMARY_RESEARCH",
+  "status": "NF06_INGEST_FIREWALL_VALIDATED_REAL_PRIMARY_DATA_STILL_REQUIRED",
+  "supersedes": "NF06_STATUS_004.json",
+  "validated_head": "02efe37df7a538364bda604ee2ea6a8c6fdf347c",
+  "new_outputs": [
+    "EVIDENCE_ADDENDUM_005.json",
+    "PRIMARY_RESPONSE_INGEST_CONTRACT.json",
+    "partener-eu/needs-factory/tools/ingest_primary_responses.py",
+    "partener-eu/needs-factory/tests/test_ai4work_primary_ingest.py",
+    "eucons/research/ai4work-step/VALIDATION_RECEIPT_002.json",
+    "eucons/research/ai4work-step/DEPLOYMENT_READINESS.json v0.3"
+  ],
+  "verified_delta": [
+    "EUCONS runtime-shaped adult and employer exports now have a deterministic fail-closed transform into the frozen NF06 analytical schema",
+    "raw and normalized exact-byte SHA-256 are captured by the ingest tool",
+    "PROD rejects synthetic rows; TEST TWIN requires synthetic=true and remains NON-EVIDENCE",
+    "duplicate response IDs, forbidden identifier keys, PII-like free text, schema/range/enum violations and missing raw envelope fields fail closed",
+    "all three regions are explicitly checked before the technical coverage gate can PASS",
+    "seven Needs Factory GitHub Actions workflows completed successfully at the exact validated code head",
+    "fresh official 2026 ANOFM evidence was added only as contextual secondary evidence, without promoting it to direct proof of AI4WORK target-group need"
+  ],
+  "fresh_secondary_context": [
+    "ANOFM reports 11,632 people included in vocational training/competence-evaluation activity in January-July 2026; national feasibility/context only",
+    "AJOFM Ialomița lists a 2026 digital-competence course including internet safety and cybersecurity; local Sud-Muntenia response context only"
+  ],
+  "blocking_for_10_of_10_release": [
+    "real adult responses from a documented accessible eligible >29 research frame across Sud-Vest Oltenia, Sud-Muntenia and Centru",
+    "real employer/organisation responses with documented recruitment channels and coverage across all three regions",
+    "production binding of EUCONS research-only HTTP/storage path after operator/privacy/DPO, hosting/logging, processor/subprocessor, encryption/access and retention review",
+    "fresh-main reconciliation of the research lane before any eucons.ro deployment; the dedicated NF-RUN branch is materially behind current main and must not be merged blindly",
+    "current official MIPE STEP-LLL guide/corrigendum/Annex 4 exact binaries frozen and hashed for final compliance QA",
+    "independent interest/coverage evidence only if 160 or 80/40/40 will be presented as empirically measured need rather than project design/feasibility"
+  ],
+  "call_compliance_state": {
+    "technical_call_code": "CLOSED",
+    "latest_current_official_binary": "OPEN",
+    "note": "Secondary current reporting corroborates a post-13-August 2026 STEP-LLL update/corrigendum, but the exact latest official MIPE guide and Annex 4 bytes are not yet captured and hashed. Final compliance remains fail-closed."
+  },
+  "test_twin": {
+    "classification": "SYNTHETIC_NON_EVIDENCE",
+    "engine_testing_allowed": true,
+    "prod_promotion": "FORBIDDEN"
+  },
+  "next_action": "Prepare the research-only provider/storage interface and fresh-main EUCONS integration candidate without deployment; continue official GSCS binary capture; once real responses exist, freeze raw exports/manifests and resume NF06 evidence promotion toward NF07 synthesis.",
+  "final_narrative_allowed": false
+}
