@@ -222,7 +222,10 @@ def main() -> int:
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps(payload, ensure_ascii=False, indent=2))
+    # Stdout encoding differs across GitHub-hosted OS images (Windows may use
+    # cp1252). Keep the evidence file UTF-8, but escape console-only Unicode so
+    # diagnostic success never depends on the runner's locale.
+    print(json.dumps(payload, ensure_ascii=True, indent=2))
     return 0
 
 
