@@ -1,0 +1,57 @@
+{
+  "schema_version": "nf.primary_data_manifest.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "dataset_id": "TO_BE_ASSIGNED_AT_FREEZE",
+  "data_class": "PROD_REAL_RESPONSES_ONLY",
+  "form_id": "AI4WORK_ADULTS_V1_OR_AI4WORK_EMPLOYERS_V1",
+  "form_version": 1,
+  "collection_start": null,
+  "collection_end": null,
+  "exported_at": null,
+  "response_count_received": null,
+  "response_count_valid": null,
+  "response_count_rejected": null,
+  "counts_by_region": {
+    "Sud-Vest Oltenia": null,
+    "Sud-Muntenia": null,
+    "Centru": null
+  },
+  "coverage": {
+    "recruitment_frame_description": null,
+    "recruitment_channels": [],
+    "known_invitation_denominator": null,
+    "coverage_notes": null,
+    "probability_sample": false,
+    "representativeness_claim_allowed": false
+  },
+  "privacy_and_integrity": {
+    "direct_identifiers_in_analytic_export": false,
+    "pii_scan_result": null,
+    "free_text_review_result": null,
+    "crm_linkage_detected": false,
+    "contact_linkage_detected": false,
+    "synthetic_data_used": false,
+    "raw_export_sha256": null,
+    "analytic_export_sha256": null
+  },
+  "files": {
+    "raw_export": null,
+    "analytic_export": null,
+    "cleaning_log": null,
+    "distribution_log": null
+  },
+  "release_gate": {
+    "status": "NOT_READY",
+    "requirements": [
+      "real responses only",
+      "exact counts reconcile raw to valid/rejected totals",
+      "all percentages retain exact denominator",
+      "region is present for every valid analytical record",
+      "no direct identifiers in analytical export",
+      "synthetic_data_used=false",
+      "SHA-256 hashes frozen for exact bytes",
+      "coverage and recruitment channels documented",
+      "adult and employer datasets remain separate before triangulation"
+    ]
+  }
+}
