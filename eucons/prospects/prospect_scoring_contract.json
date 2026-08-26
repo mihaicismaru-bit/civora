@@ -1,0 +1,78 @@
+{
+  "id": "R06-CF-SCORING-001",
+  "schema_version": 1,
+  "status": "CANONICAL",
+  "engine_id": "EUCONS_R06_PROSPECT_PRIORITY_SCORING",
+  "score_semantics": "COMMERCIAL_RESEARCH_PRIORITY_NOT_ELIGIBILITY_OR_CONVERSION_PROBABILITY",
+  "canonical_dependencies": {
+    "client_finder_contract": "eucons/prospects/client_finder_contract.json",
+    "client_finder_engine": "eucons/prospects/client_finder_engine.py",
+    "service_registry": "eucons/services/service_registry.json"
+  },
+  "guards": {
+    "scorable_record_state": "READY_FOR_SCORING",
+    "held_result": "HOLD_SOURCE_OR_RECORD_STATE",
+    "conflict_result": "HOLD_CONFLICT",
+    "suppressed_result": "SUPPRESSED",
+    "active_signal_required": true,
+    "organization_key_must_match": true
+  },
+  "positive_components": {
+    "source_quality": {
+      "max_points": 25,
+      "basis_points_by_source_type": {
+        "OFFICIAL_FUNDING_SOURCE": 1000,
+        "OFFICIAL_PUBLIC_PROCUREMENT": 1000,
+        "OFFICIAL_BENEFICIARY_OR_AWARD_LIST": 1000,
+        "OFFICIAL_PUBLIC_STRATEGY_OR_PLAN": 1000,
+        "OFFICIAL_PUBLIC_REGISTRY": 1000,
+        "ORGANIZATION_OFFICIAL_SITE": 750,
+        "ORGANIZATION_OFFICIAL_ANNOUNCEMENT": 750,
+        "PUBLIC_NEWS_DISCOVERY": 350,
+        "PARTENER_DISCOVERY_READ_ONLY": 350
+      }
+    },
+    "freshness": {"max_points": 20, "rule": "MEAN_REMAINING_FRACTION_WITHIN_SIGNAL_WINDOW"},
+    "signal_strength": {
+      "max_points": 25,
+      "lane_points": {"P0": 10, "P1": 7, "P2": 4},
+      "confidence_points_max": 10,
+      "multi_signal_bonus_per_additional_type": 5,
+      "multi_signal_bonus_max": 5
+    },
+    "service_coherence": {"max_points": 20, "rule": "DOMINANT_SERVICE_ACTIVE_SIGNAL_SHARE"},
+    "actionability": {"max_points": 10, "fact_coverage_points": 5, "why_now_coverage_points": 5}
+  },
+  "uncertainty_penalties": {
+    "unknown_assertion_points": 8,
+    "unknown_assertion_max": 24,
+    "low_confidence_inference_threshold": 0.5,
+    "low_confidence_inference_points": 5,
+    "low_confidence_inference_max": 10,
+    "maximum_total_penalty": 34
+  },
+  "thresholds": {
+    "high_priority_min_score": 80,
+    "high_priority_min_distinct_signal_types": 2,
+    "high_priority_min_source_quality_points": 18,
+    "medium_priority_min_score": 55
+  },
+  "outputs": {
+    "high": "PRIORITY_HIGH_RESEARCH",
+    "medium": "PRIORITY_MEDIUM_RESEARCH",
+    "low": "PRIORITY_LOW_RESEARCH",
+    "eligibility_state": "NOT_ASSESSED",
+    "maximum_next_state": "RESEARCH_READY"
+  },
+  "rules": {
+    "component_breakdown_required": true,
+    "penalty_breakdown_required": true,
+    "source_and_signal_refs_required": true,
+    "verification_questions_required_when_unknown_or_inferred": true,
+    "recommended_service_must_be_signal_supported": true,
+    "deterministic_sort": ["score_desc_null_last", "organization_key_asc"],
+    "never_claim_eligibility_award_or_conversion_probability": true,
+    "no_person_level_output": true,
+    "synthetic_results_are_non_evidence": true
+  }
+}

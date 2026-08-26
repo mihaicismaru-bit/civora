@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "product": "EUCONS_COMMERCIAL_OS",
-  "updated_at": "2026-08-26T02:48:00+03:00",
+  "updated_at": "2026-08-26T03:50:00+03:00",
   "overall": "GREEN_DEVELOPMENT",
   "checks": {
     "canonical_contracts": "PASS",
@@ -38,9 +38,9 @@
     "claim_to_active_evidence_lineage": "PASS",
     "legal_privacy_surfaces": "PASS",
     "provider_neutral_lead_runtime": "PASS_INTERNAL_NOT_LIVE",
-    "rebaseline_development": "IN_PROGRESS_R06_CLIENT_FINDER_SCORING",
+    "rebaseline_development": "IN_PROGRESS_R07_PROSPECT_MATCHING_NEXT_BEST_ACTION",
     "market_intelligence_rebase": "PASS",
-    "prospect_discovery_client_finder": "SOURCE_ADAPTER_PASS_SCORING_OPEN",
+    "prospect_discovery_client_finder": "SCORING_PASS_INTERNAL_ARCHITECTURE_COMPLETE",
     "internal_development_blockers": "NONE",
     "external_handoff_scope": "DOMAIN_HOSTING_LINKEDIN_FACEBOOK_MAILBOX_ONLY_AFTER_EXPANDED_INTERNAL_GATES",
     "production_activation": "BLOCKED_EXTERNAL_ONLY_FOR_PROVIDER_ACTIVATION_BUT_NOT_TERMINAL_DEVELOPMENT",
@@ -94,7 +94,13 @@
     "client_finder_live_source_ingestion": "DISABLED_PENDING_SOURCE_SPECIFIC_ACTIVATION",
     "client_finder_network_fetch": "DISABLED",
     "client_finder_live_scraping": "DISABLED",
-    "client_finder_contact_extraction": "DISABLED"
+    "client_finder_contact_extraction": "DISABLED",
+    "client_finder_prospect_scoring": "PASS",
+    "client_finder_score_semantics": "PASS_RESEARCH_PRIORITY_NOT_ELIGIBILITY",
+    "client_finder_score_explainability": "PASS_COMPONENTS_AND_PENALTIES",
+    "client_finder_score_conflict_gate": "PASS_HOLD_BEFORE_RANKING",
+    "client_finder_score_person_level_output": "NONE",
+    "prospect_opportunity_service_matching": "OPEN"
   },
   "critical_failures": []
 }
