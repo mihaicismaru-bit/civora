@@ -1,0 +1,35 @@
+{
+  "schema_version": "eucons.ai4work_fresh_main_readiness.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "base_main_sha": "56ca80db750c8f5445c4ac4e1f05a03d3a2ba4cc",
+  "candidate_head": "f3d57c05e8d2a215a70b0d5ba4276fc3b98ea370",
+  "state": "FRESH_MAIN_PROVIDER_INTERFACE_READY_COLLECTION_DISABLED",
+  "verified_delta": [
+    "fresh branch created directly from current main instead of merging the stale NF-RUN branch",
+    "research-only storage Protocol added under eucons/research/ai4work-step",
+    "reference SQLite adapter explicitly refuses production mode",
+    "PROD envelope rejects synthetic rows and unsupported form identifiers",
+    "raw and canonical-normalized SHA-256 are persisted for each accepted record",
+    "duplicate response_id fails closed",
+    "adult and employer exports remain form-isolated",
+    "local adapter tests passed 4/4 before publication to the branch"
+  ],
+  "controller_binding": {
+    "legal_name": "EUROCONSULT SRL",
+    "cui": "14250864",
+    "state": "CLOSED_FROM_CURRENT_EUCONS_LEGAL_RENDERER_PLUS_PUBLIC_REGISTRY_CORROBORATION",
+    "privacy_contact": "OPEN_BEFORE_COLLECTION"
+  },
+  "still_open": [
+    "selectively transplant/rebuild the adult and employer form renderer onto this fresh branch",
+    "bind an actual first-party HTTP endpoint on the authorized hosting target",
+    "bind a production research-only database physically and credential-wise separated from CRM",
+    "verify hosting processor/subprocessor terms, logging/IP retention, encryption and access control",
+    "freeze privacy/DPO contact and retention execution rule",
+    "run end-to-end synthetic smoke through browser -> HTTP -> isolated store -> immutable export -> NF06 ingest",
+    "collect real responses only after all previous items pass"
+  ],
+  "external_deploy_authorized": false,
+  "collection_enabled": false,
+  "merge_authorized": false
+}
