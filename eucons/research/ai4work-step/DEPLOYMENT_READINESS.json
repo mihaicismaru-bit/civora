@@ -1,8 +1,8 @@
 {
-  "schema_version": "eucons.research_deployment_readiness.v0.2",
+  "schema_version": "eucons.research_deployment_readiness.v0.3",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "as_of": "2026-08-26",
-  "state": "NO_GO_PREVIEW_BUILDER_READY_NOT_DEPLOYED",
+  "state": "NO_GO_INTERNAL_RUNTIME_AND_NF06_INGEST_VALIDATED_NOT_DEPLOYED",
   "implemented": [
     "research forms are architecturally isolated from eucons/leads and CRM",
     "adult and employer route contract defined",
@@ -11,23 +11,38 @@
     "server-generated random response IDs specified",
     "NF06 research-only ingest/export contract defined",
     "privacy validation runtime candidate implemented",
-    "8 local-equivalent privacy/schema tests executed PASS",
     "frozen browser-form definitions generated from the NF06 questionnaires",
     "static noindex/nofollow preview-page builder implemented",
     "preview builder disables all collection controls while production_enabled=false",
     "preview builder fails closed if production is enabled with unresolved operator/privacy placeholders or without an HTTP/storage adapter",
-    "TEST TWIN explicitly isolated as NON-EVIDENCE"
+    "runtime-to-NF06 canonical transform implemented with exact raw SHA-256 and normalized SHA-256 receipts",
+    "PROD rejects synthetic records and TEST TWIN remains explicitly NON-EVIDENCE",
+    "duplicate response IDs, forbidden identifier keys, PII-like free text and target-schema violations fail closed",
+    "exact-head repository validation passed on the NF06 ingest firewall"
   ],
+  "repository_validation": {
+    "validated_head": "02efe37df7a538364bda604ee2ea6a8c6fdf347c",
+    "receipt": "VALIDATION_RECEIPT_002.json",
+    "workflows": {
+      "Needs Factory Quality": "PASS",
+      "Needs Factory Primary Research Pack": "PASS",
+      "Needs Factory Standalone Needs Analysis": "PASS",
+      "Needs Factory Research Adapters": "PASS",
+      "Needs Factory Research Orchestrator": "PASS",
+      "Needs Factory Need Synthesis": "PASS",
+      "Needs Factory Release Handoff": "PASS"
+    }
+  },
   "not_yet_implemented_or_bound": [
-    "integration of research preview pages into the canonical EUCONS public-site build",
-    "HTTP POST endpoint/provider adapter",
+    "reconcile this research lane onto a fresh current-main EUCONS integration candidate; the dedicated NF-RUN branch is materially behind current main and must not be merged blindly",
+    "integration of research pages into the canonical EUCONS public-site build",
+    "HTTP POST endpoint/provider adapter on the actual production hosting target",
     "research-only durable storage provider",
-    "immutable raw export and SHA-256 manifest job",
-    "repository/integration CI execution of the authored tests and page build",
+    "immutable raw export and SHA-256 manifest job against that provider",
     "production operator/privacy text binding"
   ],
   "privacy_external_bindings": [
-    {"item":"operator legal identity", "state":"UNRESOLVED", "note":"Euroconsult activity is established as the intended site context, but the exact legal operator identity must be frozen from authoritative company/project records before public collection."},
+    {"item":"operator legal identity", "state":"UNRESOLVED", "note":"The intended Euroconsult site context is established, but exact legal operator identity is not frozen from an authoritative legal/project record."},
     {"item":"privacy/DPO contact", "state":"UNRESOLVED"},
     {"item":"hosting/processor/subprocessor terms", "state":"UNRESOLVED"},
     {"item":"reverse-proxy/server logging and IP retention", "state":"UNRESOLVED"},
@@ -48,8 +63,11 @@
     "runtime.py",
     "test_runtime.py",
     "VALIDATION_RECEIPT_001.json",
-    "build_research_pages.py"
+    "VALIDATION_RECEIPT_002.json",
+    "build_research_pages.py",
+    "partener-eu/needs-factory/tools/ingest_primary_responses.py",
+    "partener-eu/needs-factory/tests/test_ai4work_primary_ingest.py"
   ],
-  "next_safe_unit": "Execute repository-level validation of the preview builder and runtime; then prepare a research-only provider adapter/storage contract without enabling or deploying public collection.",
+  "next_safe_unit": "Prepare the research-only storage/provider interface and a fresh-main EUCONS integration plan without enabling collection. Public collection may be enabled only after operator/privacy bindings, provider/logging review, storage isolation and current-main integration tests pass.",
   "external_deploy_authorized": false
 }
