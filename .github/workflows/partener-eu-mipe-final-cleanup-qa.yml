@@ -9,6 +9,7 @@ on:
       - 'partener-eu/ingest/project_mipe_v3_corpus.py'
       - 'partener-eu/ingest/normalize_mipe_health.py'
       - 'partener-eu/ops/audit_mipe_legacy.py'
+      - 'partener-eu/ops/p10_monitor_integrity.py'
       - 'partener-eu/ops/test_mipe_*.py'
       - '.github/workflows/partener-eu-mipe-*.yml'
       - '.github/workflows/partener-eu-validation.yml'
@@ -22,6 +23,7 @@ on:
       - 'partener-eu/ingest/project_mipe_v3_corpus.py'
       - 'partener-eu/ingest/normalize_mipe_health.py'
       - 'partener-eu/ops/audit_mipe_legacy.py'
+      - 'partener-eu/ops/p10_monitor_integrity.py'
       - 'partener-eu/ops/test_mipe_*.py'
       - '.github/workflows/partener-eu-mipe-*.yml'
       - '.github/workflows/partener-eu-validation.yml'
@@ -55,6 +57,7 @@ jobs:
           python -m py_compile partener-eu/ingest/mipe_windows_crawl_v3.py
           python -m py_compile partener-eu/ingest/project_mipe_v3_corpus.py
           python -m py_compile partener-eu/ops/audit_mipe_legacy.py
+          python -m py_compile partener-eu/ops/p10_monitor_integrity.py
           python -m py_compile partener-eu/ops/test_mipe_final_cleanup.py
           python -m py_compile partener-eu/ops/test_p10_policy_regression.py
 
