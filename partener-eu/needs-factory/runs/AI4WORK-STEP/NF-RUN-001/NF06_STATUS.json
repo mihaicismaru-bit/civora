@@ -1,8 +1,9 @@
 {
-  "schema_version": "nf.checkpoint_status.v0.3",
+  "schema_version": "nf.checkpoint_status.v0.4",
   "run_id": "AI4WORK-STEP/NF-RUN-001",
   "checkpoint": "NF06_PRIMARY_RESEARCH",
-  "status": "PRIMARY_DATA_REQUIRED_SECONDARY_GAPS_MATERIALLY_CLOSED",
+  "status": "NF06_INGEST_FIREWALL_VALIDATED_REAL_PRIMARY_DATA_STILL_REQUIRED",
+  "latest_immutable_status": "NF06_STATUS_005.json",
   "inputs_ready": [
     "RESEARCH_AGENDA.json",
     "EVIDENCE_REGISTRY.json",
@@ -10,6 +11,7 @@
     "EVIDENCE_ADDENDUM_002.json",
     "EVIDENCE_ADDENDUM_003.json",
     "EVIDENCE_ADDENDUM_004.json",
+    "EVIDENCE_ADDENDUM_005.json",
     "EVIDENCE_GAPS.json",
     "NEED_HYPOTHESES.json",
     "CALL_REQUIREMENTS.json"
@@ -18,46 +20,57 @@
     "PRIMARY_RESEARCH_PLAN.json",
     "QUESTIONNAIRE_ADULTS.md",
     "QUESTIONNAIRE_EMPLOYERS.md",
+    "PRIMARY_RESPONSE_INGEST_CONTRACT.json",
+    "partener-eu/needs-factory/tools/ingest_primary_responses.py",
+    "partener-eu/needs-factory/tests/test_ai4work_primary_ingest.py",
     "eucons/research/ai4work-step/form_contract.json",
     "eucons/research/ai4work-step/ingest_contract.json",
     "eucons/research/ai4work-step/forms_definition.json",
     "eucons/research/ai4work-step/runtime.py",
     "eucons/research/ai4work-step/test_runtime.py",
     "eucons/research/ai4work-step/VALIDATION_RECEIPT_001.json",
+    "eucons/research/ai4work-step/VALIDATION_RECEIPT_002.json",
     "eucons/research/ai4work-step/build_research_pages.py",
     "eucons/research/ai4work-step/DEPLOYMENT_READINESS.json"
   ],
-  "secondary_research_closed_this_stage": [
-    "live technical call code captured from project-specific MySMIS state",
-    "Sud-Muntenia direct comparable adult-learning baseline frozen",
-    "regional workplace digital-use baseline frozen for all three regions",
-    "Sud-Vest Oltenia and Sud-Muntenia digital-maturity gaps closed at explicit proxy level",
-    "macro numerical recruitment feasibility for 160 supported by ANOFM age-30-55 registered-unemployed pool"
+  "secondary_research_state": [
+    "adult-learning baseline available for all three regions",
+    "regional workplace digital-use context available for all three regions",
+    "digital-maturity gaps for Sud-Vest Oltenia and Sud-Muntenia closed at explicit proxy level",
+    "ANOFM macro recruitment feasibility evidence exists but is not direct need evidence",
+    "fresh 2026 ANOFM national training throughput and AJOFM Ialomița digital-training offer added as context only"
   ],
   "blocking_data": [
-    "real adult responses with region/status/age-band metadata and no direct identifiers",
-    "real employer/organisation responses with region/sector/size metadata across all three regions",
-    "documented recruitment frames/channels and coverage for all three regions",
+    "real adult responses with region/status/age-band metadata from documented recruitment frames across all three regions",
+    "real employer/organisation responses with region/sector/size metadata and documented coverage across all three regions",
     "if claiming 160 or 80/40/40 as observed need rather than design: independent interest/coverage and a transparent scale/allocation rule"
   ],
   "external_call_compliance_blocker": [
-    "latest official GSCS and annex binaries must be captured and hashed; official metadata/direct MIPE URLs are known but binary retrieval remains unavailable in the current research environment",
-    "confirm whether the reported 24 August corrigendum supersedes the 13 August consolidated package before final compliance QA"
+    "latest official GSCS and Annex 4 exact binaries must be captured and hashed for final call-compliance QA",
+    "current secondary reporting corroborates a post-13-August STEP-LLL change, but exact current official MIPE bytes remain unfrozen"
   ],
   "eucons_research_runtime": {
-    "state": "FAIL_CLOSED_PREVIEW_BUILDER_READY_NOT_DEPLOYED",
+    "state": "NO_GO_INTERNAL_RUNTIME_AND_NF06_INGEST_VALIDATED_NOT_DEPLOYED",
     "crm_isolation": "CONTRACTED_FORBIDDEN",
     "production_enabled": false,
+    "validated_code_head": "02efe37df7a538364bda604ee2ea6a8c6fdf347c",
+    "repository_ci": "SEVEN_WORKFLOWS_PASS_AT_EXACT_VALIDATED_HEAD",
     "privacy_binding_required": [
       "operator legal identity",
       "privacy/DPO contact",
-      "hosting/processor and server-log review",
-      "research-only storage provider binding",
+      "hosting/processor/subprocessor and server-log/IP-retention review",
+      "research-only durable storage provider binding",
+      "encryption/access controls",
       "retention approval"
     ],
-    "test_state": "LOCAL_EQUIVALENT_8_OF_8_PASS_REPOSITORY_CI_PENDING",
-    "preview_state": "NOINDEX_DISABLED_FORM_BUILDER_IMPLEMENTED_NOT_INTEGRATED_NOT_DEPLOYED"
+    "integration_guard": "Dedicated NF-RUN branch is materially behind current main; do not blindly merge/deploy. Reconcile onto fresh main in a separately validated integration candidate.",
+    "preview_state": "NOINDEX_DISABLED_FORM_BUILDER_IMPLEMENTED_NOT_DEPLOYED",
+    "nf06_ingest_state": "RUNTIME_TO_ANALYSIS_TRANSFORM_VALIDATED_FAIL_CLOSED"
   },
-  "resume_rule": "Continue secondary verification and EUCONS runtime validation without mutating evidence truth. When real primary data are available, freeze exact raw exports and manifests, then resume NF06 through the canonical ingest contract. Synthetic TEST TWIN data must remain NON-EVIDENCE and separate from PROD.",
+  "test_twin": {
+    "classification": "SYNTHETIC_NON_EVIDENCE",
+    "production_evidence_import": "FORBIDDEN"
+  },
+  "resume_rule": "Continue official-source verification and prepare provider/storage/current-main integration without enabling public collection. When real primary data are available, freeze exact raw exports and manifests, run the validated NF06 ingest firewall, reconcile counts/coverage, then resume NF06 toward NF07. Synthetic TEST TWIN data remain NON-EVIDENCE.",
   "final_narrative_allowed": false
 }
