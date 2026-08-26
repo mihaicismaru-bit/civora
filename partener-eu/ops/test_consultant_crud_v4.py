@@ -6,6 +6,7 @@ ROOT = Path(__file__).resolve().parents[2]
 js = (ROOT / 'partener-eu/web/consultant-workspace-v3.js').read_text(encoding='utf-8')
 css = (ROOT / 'partener-eu/web/consultant-workspace-v3.css').read_text(encoding='utf-8')
 index = (ROOT / 'partener-eu/web/index.html').read_text(encoding='utf-8')
+loader = (ROOT / 'partener-eu/web/consultant-loader-v1.js').read_text(encoding='utf-8')
 
 required = [
     'data-cw3-new-client',
@@ -30,8 +31,12 @@ assert "state.clients=state.clients.filter(c=>c.id!==removedId)" in js
 assert "state.selectedClientId=client.id" in js
 assert '.cw3AddClient{' in css, 'explicit add-client button has no styling'
 
-match = re.search(r'consultant-workspace-v3\.js\?v=([^"\']+)', index)
-assert match, 'Consultant runtime has no cache-busting version'
+# Consultant assets are deliberately lazy-loaded; cache-busting lives in the
+# loader rather than the public index.
+assert 'consultant-workspace-v3.js' not in index, 'Consultant runtime regressed to eager public loading'
+assert 'consultant-workspace-v3.css' not in index, 'Consultant CSS regressed to eager public loading'
+match = re.search(r'consultant-workspace-v3\.js\?v=([^"\']+)', loader)
+assert match, 'Consultant runtime has no cache-busting version in lazy loader'
 assert match.group(1) not in {'20260815-1006','20260815-2020'}, 'stale Consultant runtime cache version remains'
-assert re.search(r'consultant-workspace-v3\.css\?v=([^"\']+)', index), 'Consultant CSS has no cache-busting version'
-print(f"Consultant CRUD v4 regression: PASS (runtime {match.group(1)})")
+assert re.search(r'consultant-workspace-v3\.css\?v=([^"\']+)', loader), 'Consultant CSS has no cache-busting version in lazy loader'
+print(f"Consultant CRUD v4 regression: PASS (lazy runtime {match.group(1)})")
