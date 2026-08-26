@@ -115,23 +115,28 @@ QA_SUMMARY = [
     "Clarificările AM sunt utile pentru interpretarea modificărilor rezultate din consultare, dar ghidul final/consolidat și corrigendumurile ulterioare prevalează.",
 ]
 
+
 def norm(value: Any) -> str:
     text = unicodedata.normalize("NFKD", str(value or ""))
     text = "".join(ch for ch in text if not unicodedata.combining(ch)).lower()
     return re.sub(r"[^a-z0-9]+", " ", text).strip()
 
+
 def read(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
+
 
 def write(products: dict[str, Any]) -> None:
     PRODUCTS.write_text(json.dumps(products, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     OUT_JS.write_text("window.PARTENER_DECISION_PRODUCTS=" + json.dumps(products, ensure_ascii=False, separators=(",", ":")) + ";\nwindow.PARTENER_DATA=window.PARTENER_DATA||{};\nwindow.PARTENER_DATA.decisionProducts=window.PARTENER_DECISION_PRODUCTS;\n", encoding="utf-8")
+
 
 def canonical_calls(payload: dict[str, Any]) -> list[dict[str, Any]]:
     for key in ("calls", "items", "canonicalCalls"):
         if isinstance(payload.get(key), list):
             return payload[key]
     return []
+
 
 def canonical_target(payload: dict[str, Any]) -> dict[str, Any] | None:
     for row in canonical_calls(payload):
@@ -140,6 +145,7 @@ def canonical_target(payload: dict[str, Any]) -> dict[str, Any] | None:
             return row
     return None
 
+
 def dossier_target(products: dict[str, Any]) -> dict[str, Any] | None:
     for d in products.get("dossiers") or []:
         identity = norm(f"{d.get('id')} {d.get('title')}")
@@ -147,13 +153,16 @@ def dossier_target(products: dict[str, Any]) -> dict[str, Any] | None:
             return d
     return None
 
+
 def source_url(row: dict[str, Any]) -> str:
     nested = row.get("source") if isinstance(row.get("source"), dict) else {}
     return str(row.get("url") or row.get("sourceUrl") or nested.get("url") or "")
 
+
 def source_text(row: dict[str, Any]) -> str:
     nested = row.get("source") if isinstance(row.get("source"), dict) else {}
     return norm(" ".join(str(x or "") for x in (row.get("title"), row.get("label"), row.get("name"), row.get("kind"), row.get("eventType"), row.get("summary"), source_url(row), nested.get("label"))))
+
 
 def source_rows(call: dict[str, Any], dossier: dict[str, Any]) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
@@ -164,9 +173,11 @@ def source_rows(call: dict[str, Any], dossier: dict[str, Any]) -> list[dict[str,
                 rows.extend(x for x in value if isinstance(x, dict))
     return rows
 
+
 def is_official(row: dict[str, Any]) -> bool:
     url = source_url(row).lower(); tier = str(row.get("tier") or row.get("sourceTier") or "").upper()
     return ("mfe.gov.ro" in url or "mysmis2021.gov.ro" in url or "runv.ro" in url) and "relay" not in url and "RELAY" not in tier
+
 
 def pick(rows: list[dict[str, Any]], *tokens: str) -> dict[str, Any] | None:
     wanted = [norm(t) for t in tokens]
@@ -174,6 +185,7 @@ def pick(rows: list[dict[str, Any]], *tokens: str) -> dict[str, Any] | None:
         if is_official(row) and any(t in source_text(row) for t in wanted):
             return row
     return None
+
 
 def evidence_bundle(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     return {
@@ -183,8 +195,17 @@ def evidence_bundle(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
         "oir": pick(rows, "oir pecu", "runv ro") or KNOWN["oir"],
     }
 
-def replace_section(sections: list[dict[str, Any]], title: str, items: list[str], after: str | None = None) -> None:
+
+def replace_section(
+    sections: list[dict[str, Any]],
+    title: str,
+    items: list[str],
+    after: str | None = None,
+    metadata: dict[str, Any] | None = None,
+) -> None:
     row = {"title": title, "items": items, "empty": False}
+    if metadata:
+        row.update(metadata)
     idx = next((i for i, s in enumerate(sections) if s.get("title") == title), None)
     if idx is not None:
         sections[idx] = row; return
@@ -194,10 +215,12 @@ def replace_section(sections: list[dict[str, Any]], title: str, items: list[str]
             sections.insert(pos + 1, row); return
     sections.append(row)
 
+
 def set_fact(dossier: dict[str, Any], label: str, value: str, confidence: str = "CONFIRMED") -> None:
     facts = dossier.setdefault("quickFacts", []); row = next((x for x in facts if x.get("label") == label), None)
     if row: row.update(value=value, confidence=confidence)
     else: facts.append({"label": label, "value": value, "confidence": confidence})
+
 
 def add_source(dossier: dict[str, Any], row: dict[str, Any], label: str, supports: list[str], tier: str | None = None) -> None:
     url = source_url(row)
@@ -208,6 +231,7 @@ def add_source(dossier: dict[str, Any], row: dict[str, Any], label: str, support
     if observed: payload["observedAt"] = observed
     if existing: existing.update(payload)
     else: sources.append(payload)
+
 
 def main() -> int:
     products = read(PRODUCTS); canonical = read(CANONICAL); call = canonical_target(canonical); dossier = dossier_target(products)
@@ -223,24 +247,30 @@ def main() -> int:
         "decisionAction": "Depunerea este deschisă până la 30 septembrie 2026, ora 16:00. Verifică eligibilitatea solicitantului/parteneriatului, grupul țintă, activitățile STEP și bugetul pe documentația consolidată.",
         "publicationState": "PUBLISHABLE",
         "standfirst": "Apel PEO STEP-LLL pentru competențe în tehnologii critice: 92 milioane EUR, cofinanțare proprie 0%, minimum 25 participanți, minimum două regiuni și termen 30 septembrie 2026, ora 16:00. Dosarul integrează ghidul final, Corrigendum nr. 1 și Q&A-ul AM.",
-        "audience": ["Furnizori de formare profesională", "Furnizori de servicii pentru ocupare", "Organizații sindicale și patronale", "Asociații profesionale sectoriale", "Institute/centre de formare și cercetare"],
+        "audience": list(APPLICANTS),
     })
     set_fact(dossier, "Status", "DESCHIS"); set_fact(dossier, "Deschidere", "29 mai 2026, 16:00"); set_fact(dossier, "Termen", "30 septembrie 2026, 16:00")
     set_fact(dossier, "Grant", "Valoare eligibilă maximă dimensionată cu reperul de 7.974 EUR/participant"); set_fact(dossier, "Buget", "92.000.000 EUR"); set_fact(dossier, "Contribuție proprie", "0%")
     set_fact(dossier, "Durată maximă", "36 luni"); set_fact(dossier, "Arie", "Toate regiunile sau minimum 2 regiuni de dezvoltare")
     summary = [
-        "Stare apel: DESCHIS.", "Deschidere MySMIS: 29 mai 2026, ora 16:00.", "Închidere: 30 septembrie 2026, ora 16:00, după prelungirea prin Corrigendum nr. 1.",
-        "Solicitanți: furnizori FPC și servicii pentru ocupare, structuri sindicale/patronale, asociații sectoriale și institute/centre eligibile, în condițiile ghidului.",
+        "Stare apel: DESCHIS.",
+        "Deschidere: 29 mai 2026, ora 16:00.",
+        "Închidere: 30 septembrie 2026, ora 16:00, după prelungirea prin Corrigendum nr. 1.",
+        "Cine poate aplica: furnizori FPC și servicii pentru ocupare, structuri sindicale/patronale, asociații sectoriale și institute/centre eligibile, în condițiile ghidului.",
         "Parteneriat: solicitantul unic trebuie să fie furnizor FPC autorizat; în parteneriat trebuie să existe cel puțin un furnizor de formare profesională eligibil.",
-        "Grup țintă: angajați și/sau șomeri peste 29 de ani; minimum 25 participanți/proiect.", "Geografie: toate regiunile de dezvoltare sau minimum două regiuni, conform nevoilor și intervențiilor proiectului.",
-        "Activități: A1 opțională și doar pentru șomeri; A2.1 pentru angajați și/sau șomeri; A2.2, formarea la locul de muncă, doar pentru angajați.",
-        "Buget apel: 92.000.000 EUR; cofinanțare proprie beneficiar/parteneri: 0%.", "Valoare proiect: 7.974 EUR/participant este reper pentru plafonul valorii eligibile maxime, nu cost unitar.",
-        "Durată maximă de implementare: 36 luni.", "Evaluare: competitivă, pe grila din ghidul final/consolidat.",
+        "Grup țintă: angajați și/sau șomeri peste 29 de ani; minimum 25 participanți/proiect.",
+        "Geografie: toate regiunile de dezvoltare sau minimum două regiuni, conform nevoilor și intervențiilor proiectului.",
+        "Activități finanțate: A1 opțională și doar pentru șomeri; A2.1 pentru angajați și/sau șomeri; A2.2, formarea la locul de muncă, doar pentru angajați.",
+        "Valoarea apelului: 92.000.000 EUR.",
+        "Valoarea proiectului individual: 7.974 EUR/participant este reper pentru plafonul valorii eligibile maxime, nu cost unitar.",
+        "Cofinanțare / contribuție proprie: 0%.",
+        "Durată maximă de implementare: 36 luni.",
+        "Evaluare: competitivă, pe grila din ghidul final/consolidat.",
     ]
     sections = dossier.setdefault("sections", [])
-    replace_section(sections, "Rezumat executiv", summary)
+    replace_section(sections, "Rezumat executiv", summary, metadata={"schemaVersion": 1})
     replace_section(sections, "Decizia rapidă", [dossier["decisionAction"], "Nu folosi termenul vechi din pagina inițială a ghidului: Corrigendum nr. 1 prelungește depunerea până la 30 septembrie 2026, ora 16:00.", "Verifică din start furnizorul FPC, arhitectura parteneriatului, minimum două regiuni și delimitarea grupului țintă pe A1/A2.1/A2.2."])
-    replace_section(sections, "Cine poate aplica", APPLICANTS); replace_section(sections, "Condiții esențiale de eligibilitate", ELIGIBILITY, after="Cine poate aplica")
+    replace_section(sections, "Cine poate aplica", APPLICANTS, metadata={"policy": "GUIDE_EXPLICIT_ONLY"}); replace_section(sections, "Condiții esențiale de eligibilitate", ELIGIBILITY, after="Cine poate aplica")
     replace_section(sections, "Ce finanțează și în ce condiții", ACTIVITIES); replace_section(sections, "Costuri, cofinanțare și ajutor de stat", COSTS); replace_section(sections, "Documente de pregătit", DOCUMENTS)
     replace_section(sections, "Cum se punctează", SCORING); replace_section(sections, "Indicatori și obligații", INDICATORS + OBLIGATIONS); replace_section(sections, "Riscuri de respingere sau implementare", RISKS)
     replace_section(sections, "Corrigendum nr. 1 — rezumat", CORRIGENDUM_SUMMARY, after="Riscuri de respingere sau implementare"); replace_section(sections, "Q&A AM — clarificări esențiale", QA_SUMMARY, after="Corrigendum nr. 1 — rezumat")
@@ -250,8 +280,8 @@ def main() -> int:
     add_source(dossier, guide, "MIPE — Ghidul Solicitantului STEP-LLL Adulți / pagina oficială", ["status", "opening", "beneficiaries", "eligibility", "activities", "budget", "grant", "cofinancing", "documents", "scoring", "indicators"])
     add_source(dossier, corr, "MIPE — Corrigendum nr. 1 STEP-LLL Adulți", ["deadline"]); add_source(dossier, qa, "MIPE — Q&A / Lista de răspunsuri STEP-LLL Adulți", ["beneficiaries", "eligibility", "activities", "grant", "cofinancing", "geography", "scoring", "indicators", "implementation_period", "risks"]); add_source(dossier, oir, "OIR PECU Nord-Vest — anunț oficial de lansare și actualizare STEP-LLL", ["opening", "deadline"], "T1B OFFICIAL OIR")
     quality = dossier.setdefault("quality", {}); verified = set(quality.get("verifiedFactClasses") or []); verified.update(SUPPORTED_CLASSES)
-    quality["verifiedFactClasses"] = sorted(verified); quality["blockedFactClasses"] = [x for x in quality.get("blockedFactClasses") or [] if x not in SUPPORTED_CLASSES]; quality["completeness"] = 100; quality["evidenceCount"] = len(dossier.get("sources") or []); quality["failClosed"] = True; quality["stepLllAuthoritativeBundle"] = True
-    dossier["executiveSummary"] = {"status": "OPEN", "opens": "2026-05-29T16:00:00+03:00", "closes": "2026-09-30T16:00:00+03:00", "applicants": APPLICANTS, "targetGroup": ["Persoane angajate și/sau șomeri cu vârsta de peste 29 de ani.", "Minimum 25 participanți/proiect."], "activities": ACTIVITIES, "callBudget": "92.000.000 EUR", "projectValue": "Valoare eligibilă maximă dimensionată cu reperul de 7.974 EUR × numărul participanților; reperul nu este cost unitar.", "cofinancing": "0%", "geography": "Toate regiunile de dezvoltare sau minimum 2 regiuni.", "implementationPeriod": "Maximum 36 luni.", "evaluation": "Competitivă, conform grilei din ghidul final/consolidat.", "sourceBound": True}
+    quality["verifiedFactClasses"] = sorted(verified); quality["blockedFactClasses"] = [x for x in quality.get("blockedFactClasses") or [] if x not in SUPPORTED_CLASSES]; quality["completeness"] = 100; quality["evidenceCount"] = len(dossier.get("sources") or []); quality["failClosed"] = True; quality["stepLllAuthoritativeBundle"] = True; quality["applicantListPolicy"] = "GUIDE_EXPLICIT_ONLY"; quality["executiveSummaryPresent"] = True
+    dossier["executiveSummary"] = {"status": "OPEN", "opens": "2026-05-29T16:00:00+03:00", "closes": "2026-09-30T16:00:00+03:00", "applicants": APPLICANTS, "targetGroup": ["Persoane angajate și/sau șomeri cu vârsta de peste 29 de ani.", "Minimum 25 participanți/proiect."], "activities": ACTIVITIES, "callBudget": "92.000.000 EUR", "projectValue": "Valoare eligibilă maximă dimensionată cu reperul de 7.974 EUR × numărul participanților; reperul nu este cost unitar.", "cofinancing": "0%", "region": "Toate regiunile de dezvoltare sau minimum 2 regiuni.", "geography": "Toate regiunile de dezvoltare sau minimum 2 regiuni.", "implementationPeriod": "Maximum 36 luni.", "evaluation": "Competitivă, conform grilei din ghidul final/consolidat.", "sourcePolicy": "GUIDE_EXPLICIT_ONLY", "sourceBound": True}
     dossier["documentSummaries"] = [{"kind": "CORRIGENDUM", "title": "Corrigendum nr. 1", "items": CORRIGENDUM_SUMMARY, "sourceUrl": source_url(corr), "tier": corr.get("tier") or "T1"}, {"kind": "QA_AM", "title": "Q&A Autoritatea de Management", "items": QA_SUMMARY, "sourceUrl": source_url(qa), "tier": qa.get("tier") or "T1"}]
     timeline = dossier.setdefault("timeline", []); additions = [{"date": "2026-05-29", "kind": "CALL_OPENED", "text": "Deschiderea MySMIS pentru apelul STEP-LLL Adulți, ora 16:00."}, {"date": "2026-06-02", "kind": "GUIDE_FINAL_PUBLISHED", "text": "AM PEO publică ghidul final și lista de răspunsuri aferentă consultării."}, {"date": "2026-07-27", "kind": "DEADLINE_EXTENDED", "text": "Corrigendum nr. 1 prelungește depunerea până la 30 septembrie 2026, ora 16:00."}]
     keys = {(x.get("date"), x.get("kind"), x.get("text")) for x in timeline if isinstance(x, dict)}
@@ -260,6 +290,7 @@ def main() -> int:
     timeline.sort(key=lambda x: str(x.get("date") or ""), reverse=True)
     products.setdefault("policy", {})["stepLllSourceBoundDossier"] = True; write(products)
     print(json.dumps({"applied": True, "dossierId": dossier.get("id"), "quality": quality.get("completeness"), "sources": len(dossier.get("sources") or []), "bundle": {k: source_url(v) for k, v in evidence.items()}}, ensure_ascii=False, indent=2)); return 0
+
 
 if __name__ == "__main__":
     raise SystemExit(main())
