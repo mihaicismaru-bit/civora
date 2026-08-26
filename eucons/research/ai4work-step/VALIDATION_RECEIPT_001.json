@@ -1,0 +1,45 @@
+{
+  "schema_version": "eucons.research_validation_receipt.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "validated_at": "2026-08-26",
+  "scope": [
+    "form_contract.json",
+    "ingest_contract.json",
+    "runtime.py",
+    "test_runtime.py"
+  ],
+  "validation_environment": "isolated local-equivalent execution of the authored runtime logic; repository CI not invoked",
+  "results": {
+    "tests_executed": 8,
+    "passed": 8,
+    "failed": 0,
+    "cases": [
+      "valid adult payload accepted and marked synthetic=false",
+      "valid employer payload accepted and marked synthetic=false",
+      "direct email field rejected",
+      "email-like data in free text rejected",
+      "missing voluntary-participation acknowledgement rejected",
+      "out-of-scope region rejected",
+      "rating outside allowed range rejected",
+      "selection count above maximum rejected"
+    ]
+  },
+  "privacy_contract_checks": {
+    "crm_integration_forbidden": "PASS",
+    "commercial_analytics_forbidden": "PASS",
+    "direct_identifier_fields_forbidden": "PASS_CONTRACT",
+    "email_phone_cnp_url_pattern_scan_in_free_text": "PASS_IMPLEMENTED",
+    "response_id_server_generated_random": "PASS_IMPLEMENTED",
+    "synthetic_flag_false_for_prod_runtime": "PASS_IMPLEMENTED",
+    "contact_response_link_key": "ABSENT_BY_CONTRACT",
+    "special_category_collection": "FORBIDDEN_BY_CONTRACT"
+  },
+  "limitations": [
+    "No repository CI or deployed HTTP endpoint was executed in this validation receipt.",
+    "Automatic PII detection cannot reliably detect personal names or every indirect identifier; production remains NO_GO and open text requires warning plus review/anonymisation before quotation.",
+    "Hosting/reverse-proxy IP logs, processor/subprocessor terms, storage encryption and retention enforcement remain provider-binding checks.",
+    "Operator legal identity and privacy/DPO contact are not yet frozen in the public form text."
+  ],
+  "production_gate": "NO_GO",
+  "next_required_validation": "Bind research-only storage/HTTP adapter and run repository/integration tests with no CRM writes, then complete privacy/operator binding before any public collection."
+}
