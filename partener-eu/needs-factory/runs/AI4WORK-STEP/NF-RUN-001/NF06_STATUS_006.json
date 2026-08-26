@@ -1,0 +1,49 @@
+{
+  "schema_version": "nf.checkpoint_status.v0.1",
+  "run_id": "AI4WORK-STEP/NF-RUN-001",
+  "checkpoint": "NF06_PRIMARY_RESEARCH",
+  "status": "NF06_FRESH_MAIN_RESEARCH_PROVIDER_INTERFACE_READY_REAL_COLLECTION_STILL_GATED",
+  "supersedes": "NF06_STATUS_005.json",
+  "run_branch_head_after_status_predecessor_delta": "e4064152fc1e7f2d00831a206a629bc85346cde5",
+  "fresh_main_integration": {
+    "branch": "eucons/ai4work-research-provider-v1",
+    "base_main_sha": "56ca80db750c8f5445c4ac4e1f05a03d3a2ba4cc",
+    "latest_observed_candidate_head": "536d84b52a8e05acfa7e8c429f5d3538247cee30",
+    "merge_authorized": false,
+    "deploy_authorized": false,
+    "collection_enabled": false
+  },
+  "verified_delta": [
+    "A fresh EUCONS integration branch was created directly from current main; the heavily stale NF-RUN branch is not being merged into EUCONS.",
+    "A research-only storage Protocol and isolated reference adapter were added on fresh main lineage.",
+    "The reference adapter explicitly refuses production mode, rejects synthetic PROD rows and unsupported form identifiers, rejects duplicate response IDs, records raw and normalized SHA-256, and exports adult/employer data separately.",
+    "Four bounded storage-adapter tests passed locally before the fresh-main candidate artifacts were published: roundtrip/hash/export, duplicate fail-closed, synthetic rejection and form isolation.",
+    "The legal operator placeholder is now bound to EUROCONSULT SRL, CUI 14250864, from the current canonical EUCONS privacy renderer; the research privacy/DPO contact remains open.",
+    "The latest STEP-LLL source-version search narrowed the unresolved call binary gate to exact MIPE PDF and updated Annex 4 DOCX URLs. Current reporting dates the change to 19 August 2026, while GrantPress reported it on 24 August 2026.",
+    "Exact current MIPE binary bytes could not be retrieved in the research environment, therefore no SHA-256 or content-level compliance assertion was fabricated."
+  ],
+  "new_outputs": [
+    "EVIDENCE_ADDENDUM_006.json",
+    "eucons/ai4work-research-provider-v1:eucons/research/ai4work-step/research_storage.py",
+    "eucons/ai4work-research-provider-v1:eucons/research/ai4work-step/test_research_storage.py",
+    "eucons/ai4work-research-provider-v1:eucons/research/ai4work-step/PROVIDER_STORAGE_CONTRACT.json",
+    "eucons/ai4work-research-provider-v1:eucons/research/ai4work-step/FRESH_MAIN_INTEGRATION_READINESS.json"
+  ],
+  "blocking_for_10_of_10_release": [
+    "privacy/DPO contact and research-specific legal-basis/notice binding",
+    "actual first-party production HTTP endpoint and research-only durable database physically and credential-wise separated from CRM",
+    "hosting processor/subprocessor, transfer, reverse-proxy logging/IP-retention, encryption, access-control and retention execution review",
+    "selective fresh-main reconstruction of the adult and employer form renderer plus end-to-end synthetic smoke browser -> HTTP -> isolated store -> immutable export -> NF06 ingest",
+    "real adult responses from a documented accessible eligible >29 research frame across Sud-Vest Oltenia, Sud-Muntenia and Centru",
+    "real employer/organisation responses with documented recruitment channels and coverage across all three regions",
+    "current official MIPE STEP-LLL guide/corrigendum and Annex 4 exact binaries downloaded and SHA-256 frozen",
+    "independent interest/coverage evidence only if 160 or 80/40/40 is to be described as empirically measured need rather than a project design value"
+  ],
+  "test_twin": {
+    "classification": "SYNTHETIC_NON_EVIDENCE",
+    "prod_promotion": "FORBIDDEN",
+    "engine_testing_allowed": true
+  },
+  "next_action": "Rebuild the two research form surfaces on the fresh-main EUCONS branch, wire them only to an injectable research provider contract with collection disabled, add integration/security tests, and continue capture of the two exact MIPE binaries. Do not deploy or collect real data until the remaining privacy/provider gates pass.",
+  "final_narrative_allowed": false
+}
