@@ -1,5 +1,5 @@
 {
-  "schema_version": "nf.call_requirements.v0.3",
+  "schema_version": "nf.call_requirements.v0.4",
   "run_id": "AI4WORK-STEP/NF-RUN-001",
   "call_title": "STEP-LLL – Competențe pentru viitor: formare la locul de muncă și educația adulților în tehnologiile critice – Adulți",
   "call_code": "PEO/1160/PEO_P11/OP4/ESO4.7/PEO_A66",
@@ -14,9 +14,15 @@
     "opened": "2026-05-29T16:00:00+03:00",
     "original_close": "2026-08-28T16:00:00+03:00",
     "current_close": "2026-09-30T16:00:00+03:00",
-    "current_close_basis": "official corrigendum announced 2026-07-27",
-    "version_alert": "A further 2026-08-24 change has been reported by a secondary source; final compliance must use the latest official MIPE binary set."
+    "current_close_basis": "official July corrigendum extending the deadline; later 19 August corrigendum did not change the reported close date",
+    "version_alert": "A second corrigendum was issued on 2026-08-19 after the 2026-08-13 consolidated package. A 2026-08-24 secondary article reports that same corrigendum and updated Annex 4; it is not treated as evidence of a distinct 24 August amendment. Final compliance must use the latest official MIPE binary set."
   },
+  "version_chronology": [
+    {"date":"2026-05-29","event":"call opening in MySMIS"},
+    {"date":"2026-07-24/27","event":"first corrigendum reported; submission deadline extended to 2026-09-30 16:00"},
+    {"date":"2026-08-13","event":"consolidated GSCS package published"},
+    {"date":"2026-08-19","event":"second corrigendum published; secondary reporting states sections 3.18, 5.2.2 and 5.3.2 changed and Annex 4 replaced"}
+  ],
   "needs_analysis_contract": {
     "must_demonstrate": [
       "natura și dimensiunea grupului țintă în raport cu intervenția",
@@ -41,8 +47,10 @@
     "corrigendum_deadline": "VERIFIED",
     "internal_Q029_crosscheck": "MATCHES_OFFICIAL_ANNOUNCEMENT",
     "consolidated_2026_08_13_package_origin": "VERIFIED_METADATA_DIRECT_MIPE_URL_KNOWN",
-    "post_2026_08_24_version_state": "CURRENT_OFFICIAL_BINARY_RECHECK_REQUIRED",
-    "exact_current_GSCS_binary_hash": "PENDING_CAPTURE"
+    "second_corrigendum_2026_08_19": "VERIFIED_BY_CONTEMPORANEOUS_SECONDARY_REPORTING_ATTRIBUTED_TO_MIPE; EXACT_OFFICIAL_BINARY_PENDING",
+    "separate_2026_08_24_amendment": "NOT_ESTABLISHED; 24_AUGUST_IS_PUBLICATION_DATE_OF_A_SECONDARY_REPORT_ABOUT_THE_19_AUGUST_CORRIGENDUM",
+    "exact_current_GSCS_binary_hash": "PENDING_CAPTURE",
+    "exact_current_annex4_binary_hash": "PENDING_CAPTURE"
   },
-  "status": "READY_FOR_RESEARCH_CALL_CODE_CLOSED_CURRENT_GSCS_BINARY_PENDING"
+  "status": "READY_FOR_RESEARCH_CALL_CODE_AND_VERSION_CHRONOLOGY_CLOSED_CURRENT_GSCS_BINARY_PENDING"
 }
