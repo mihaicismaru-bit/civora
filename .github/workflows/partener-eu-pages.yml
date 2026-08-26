@@ -190,6 +190,17 @@ jobs:
           else:
               print('Pages deployment failed; preserving existing latest.json as LKG.')
           PY
+
+          # The fail-closed preflight deliberately works in-place so the uploaded
+          # artifact can recover an LKG projection. Those generated mutations are
+          # deployment-ephemeral; only deployment evidence is allowed to write back.
+          cp partener-eu/deployment/latest.json /tmp/partener-pages-latest.json
+          cp partener-eu/deployment/last-attempt.json /tmp/partener-pages-last-attempt.json
+          git reset --hard HEAD
+          mkdir -p partener-eu/deployment
+          cp /tmp/partener-pages-latest.json partener-eu/deployment/latest.json
+          cp /tmp/partener-pages-last-attempt.json partener-eu/deployment/last-attempt.json
+
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add partener-eu/deployment/latest.json partener-eu/deployment/last-attempt.json
