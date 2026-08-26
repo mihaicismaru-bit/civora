@@ -4,6 +4,7 @@ from __future__ import annotations
 import importlib.util
 import json
 from copy import deepcopy
+from datetime import timedelta
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -52,6 +53,10 @@ def main() -> None:
     unsafe_contact["outputs"]["external_contact_enabled"] = True
     must_fail("external contact enabled", lambda: matcher.match_state(state, projection, payload["reference_time"], unsafe_contact))
 
+    unsafe_selection = deepcopy(contract)
+    unsafe_selection["opportunity_service_policy"]["selection_preference"] = "SERVICE_ID_ASC"
+    must_fail("unsafe service selection policy", lambda: matcher.match_state(state, projection, payload["reference_time"], unsafe_selection))
+
     incomplete_types = deepcopy(contract)
     incomplete_types["profile_projection"]["organization_type_labels"].pop("NGO")
     must_fail("organization profile taxonomy incomplete", lambda: matcher.match_state(state, projection, payload["reference_time"], incomplete_types))
@@ -61,7 +66,8 @@ def main() -> None:
     must_fail("mutable opportunity projection", lambda: matcher.match_state(state, mutable_projection, payload["reference_time"]))
 
     future_projection = deepcopy(projection)
-    future_projection["generated_at"] = "2026-08-27T01:20:00+03:00"
+    reference_time = matcher.CLIENT_VALIDATOR.parse_time(payload["reference_time"])
+    future_projection["generated_at"] = (reference_time + timedelta(seconds=1)).isoformat()
     must_fail("future opportunity projection", lambda: matcher.match_state(state, future_projection, payload["reference_time"]))
 
     missing_provenance = deepcopy(projection)
@@ -93,6 +99,8 @@ def main() -> None:
     conflict_row = next(row for row in conflict["results"] if row["organization_key"] == conflict_key)
     if conflict_row["state"] != "HOLD_CONFLICT" or conflict_row["selected_opportunity_id"] is not None:
         raise AssertionError("conflict was matched instead of held")
+    if conflict_row["selected_service_id"] is not None:
+        raise AssertionError("conflict selected a service")
 
     suppressed_state = deepcopy(state)
     suppressed_key = next(iter(suppressed_state["records"]))
@@ -102,6 +110,8 @@ def main() -> None:
     suppressed_row = next(row for row in suppressed["results"] if row["organization_key"] == suppressed_key)
     if suppressed_row["state"] != "SUPPRESSED" or suppressed_row["next_best_action"] != "NO_ACTION_SUPPRESSED":
         raise AssertionError("suppressed prospect received an action")
+    if suppressed_row["selected_service_id"] is not None:
+        raise AssertionError("suppressed prospect selected a service")
 
     stale = deepcopy(projection)
     stale["bridge_state"] = "STALE_SOURCE_HOLD"
@@ -112,8 +122,10 @@ def main() -> None:
         raise AssertionError("stale bridge did not hold all prospects")
     if any(row["external_contact_enabled"] or row["automatic_offer_enabled"] for row in held["results"]):
         raise AssertionError("external action opened on held results")
+    if any(row["selected_service_id"] is not None for row in held["results"]):
+        raise AssertionError("stale bridge selected a service")
 
-    print("PASS: R07 rejects unsafe semantics, mutable/future/unproven projections and person data; conflicts, suppression and stale sources remain held before matching")
+    print("PASS: R07 rejects unsafe semantics, service-selection drift, mutable/future/unproven projections and person data; conflicts, suppression and stale sources remain held before matching")
 
 
 if __name__ == "__main__":
