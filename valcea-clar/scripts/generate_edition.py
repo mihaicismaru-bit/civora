@@ -41,6 +41,9 @@ ALLOWED_GATES = {"PASS", "PASS_DATE_ONLY", "PASS_TITLE_DATE_ONLY", "PASS_EXPLAIN
 ALLOWED_STATUSES = {"verified", "approved_carry_forward"}
 PUBLISHABLE_STATUSES = {"auto_approved", "editor_approved"}
 MIN_CONFIDENCE = 90
+# Fresh local reporting must not be buried indefinitely by a high-priority
+# dossier. Priority remains decisive *inside* a freshness band.
+FRESHNESS_BUCKET_HOURS = (36, 96, 168)
 
 
 def active_publication_holds() -> set[str]:
@@ -83,13 +86,38 @@ def merged_registry() -> tuple[dict, int]:
     curated = editorial_writer.materialize_curated_registry(write_output=True)
     automatic = load_json(AUTO_FACTS, {"facts": []})
     # Curated/editorial products win on id collisions. Automatic facts remain
-    # independently scoped and can only carry title/date/source data admitted by
-    # their discovery gate until they acquire a verified full fact kernel.
+    # independently scoped and can only carry the fields admitted by their
+    # discovery/brief contract until they acquire a verified full fact kernel.
     combined = {fact["id"]: fact for fact in automatic.get("facts", []) if fact.get("id")}
     for fact in curated.get("facts", []):
         if fact.get("id"):
             combined[fact["id"]] = fact
     return {"facts": list(combined.values())}, len(automatic.get("facts", []))
+
+
+def freshness_bucket(item: dict, now: datetime) -> int:
+    """Group current stories by age so a live homepage behaves like a newsroom.
+
+    The source publication/valid-from timestamp is already part of the verified
+    fact contract. Future timestamps are clamped to age zero for deterministic
+    manual backfills; eligibility separately prevents genuinely future facts.
+    """
+    started = parse_dt(str(item["valid_from"]))
+    age_hours = max(0.0, (now - started).total_seconds() / 3600.0)
+    for index, limit in enumerate(FRESHNESS_BUCKET_HOURS):
+        if age_hours <= limit:
+            return index
+    return len(FRESHNESS_BUCKET_HOURS)
+
+
+def editorial_sort_key(item: dict, now: datetime) -> tuple:
+    started = parse_dt(str(item["valid_from"]))
+    return (
+        freshness_bucket(item, now),
+        -int(item.get("priority") or 0),
+        -started.timestamp(),
+        str(item.get("id") or ""),
+    )
 
 
 def eligible_facts(registry: dict, now: datetime, slot: str) -> list[dict]:
@@ -117,7 +145,7 @@ def eligible_facts(registry: dict, now: datetime, slot: str) -> list[dict]:
         if durable_story_temporal_violations(fact, "ro-RO"):
             continue
         output.append(fact)
-    output.sort(key=lambda item: (-int(item.get("priority") or 0), item["id"]))
+    output.sort(key=lambda item: editorial_sort_key(item, now))
     return output
 
 
@@ -146,7 +174,7 @@ def render_markdown(now: datetime, slot: str, items: list[dict], status_note: st
                 continue
             seen.add(key)
             lines.append(f"- {source.get('name')} — {source.get('url')}\n")
-    lines.append("\n**Politică editorială:** această ediție este generată automat numai din fapte structurate care au trecut pragul de verificare. Materialele noi compuse de Editorial Writer folosesc exclusiv afirmații legate explicit de surse; materialele vechi sunt validate și păstrate fără rescriere. Pentru fluxul automat din surse primare, sistemul poate admite numai titlul, data publicării și linkul sursei până când există un fact kernel complet. Copia editorială durabilă folosește date absolute, nu formulări relative de tip «azi/mâine/ieri». Dacă datele verificate sunt insuficiente, ediția este mai scurtă.\n")
+    lines.append("\n**Politică editorială:** această ediție este generată automat numai din fapte structurate care au trecut pragul de verificare. Materialele noi compuse de Editorial Writer folosesc exclusiv afirmații legate explicit de surse; materialele vechi sunt validate și păstrate fără rescriere. Pentru fluxul automat din surse primare, sistemul poate publica și un brief transparent de sursă primară care confirmă numai titlul, data, editorul și linkul până când există un fact kernel complet. Copia editorială durabilă folosește date absolute, nu formulări relative de tip «azi/mâine/ieri». Dacă datele verificate sunt insuficiente, ediția este mai scurtă.\n")
     return "".join(lines)
 
 
@@ -161,7 +189,7 @@ def compact_item(item: dict) -> dict:
         "confidence": item["confidence"],
         "material_fact_gate": item["material_fact_gate"],
         "sources": item.get("sources", []),
-        **({"auto_generated": True, "auto_scope": item.get("auto_scope")} if item.get("auto_generated") else {}),
+        **({"auto_generated": True, "auto_scope": item.get("auto_scope"), "brief_kind": item.get("brief_kind")} if item.get("auto_generated") else {}),
         **({"visual": item["visual"]} if item.get("visual") else {}),
         **({"factbox": item["factbox"]} if item.get("factbox") else {}),
         **({"article_sections": item["article_sections"]} if item.get("article_sections") else {}),
@@ -176,8 +204,6 @@ def pointer_is_publishable(pointer: dict) -> bool:
 def write_outputs(now: datetime, slot: str, facts: list[dict], auto_registry_count: int) -> tuple[Path, Path, dict]:
     EDITIONS.mkdir(parents=True, exist_ok=True)
     SITE.mkdir(parents=True, exist_ok=True)
-    # LOCAL NEWS OS contract: public edition items are editorial facts only.
-    # Backend health/queue telemetry remains in its dedicated state files.
     items = facts
     editorial_count = len(items)
     included_auto = sum(1 for fact in items if fact.get("auto_generated"))
@@ -187,7 +213,7 @@ def write_outputs(now: datetime, slot: str, facts: list[dict], auto_registry_cou
     eid = edition_id(now, slot)
     title_slot = "dimineață" if slot == "morning" else "seară"
     payload = {
-        "schema_version": "2.5",
+        "schema_version": "2.6",
         "edition_id": eid,
         "slot": slot,
         "title": f"VÂLCEA CLAR — Ediția de {title_slot}",
@@ -208,12 +234,14 @@ def write_outputs(now: datetime, slot: str, facts: list[dict], auto_registry_cou
             "editorial_writer": editorial_writer.WRITER_ID,
             "new_kernel_claim_level_provenance_required": True,
             "legacy_copy_rewritten": False,
-            "primary_source_auto_scope": "title_date_source_only",
+            "primary_source_auto_scope": "verified_source_notice_brief",
             "article_body_material_facts_autopublish": False,
             "shorter_edition_when_evidence_is_sparse": True,
             "last_known_good_fallback": True,
             "human_override_available": True,
             "internal_operational_telemetry_public": False,
+            "ranking_policy": "freshness_bucket_then_priority_then_publication_time",
+            "freshness_bucket_hours": list(FRESHNESS_BUCKET_HOURS),
             "durable_temporal_language_contract": TEMPORAL_CONTRACT,
             "relative_time_words_in_durable_copy": False,
         },
@@ -224,7 +252,7 @@ def write_outputs(now: datetime, slot: str, facts: list[dict], auto_registry_cou
     md_path.write_text(render_markdown(now, slot, items, status_note), encoding="utf-8")
 
     attempt = {
-        "schema_version": "1.2",
+        "schema_version": "1.3",
         "edition_id": eid,
         "slot": slot,
         "status": payload["status"],
@@ -233,6 +261,7 @@ def write_outputs(now: datetime, slot: str, facts: list[dict], auto_registry_cou
         "editorial_writer_composed_count": writer_composed,
         "auto_facts_included": included_auto,
         "updated_local": payload["updated_local"],
+        "ranking_policy": payload["policy"]["ranking_policy"],
     }
     LAST_ATTEMPT.write_text(json.dumps(attempt, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
@@ -248,7 +277,7 @@ def write_outputs(now: datetime, slot: str, facts: list[dict], auto_registry_cou
             "markdown_source": f"editions/{md_path.name}",
             "path": "/editia-de-dimineata/" if slot == "morning" else "/editia-de-seara/",
             "homepage_role": "primary_lead",
-            "selection_reason": "latest_publishable_verified_edition",
+            "selection_reason": "freshest_publishable_verified_edition",
         }
         POINTER.write_text(json.dumps(pointer, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     else:
@@ -268,7 +297,6 @@ def write_outputs(now: datetime, slot: str, facts: list[dict], auto_registry_cou
                 "selection_reason": "no_publishable_edition_exists",
             }
             POINTER.write_text(json.dumps(hold_pointer, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        # Otherwise preserve the last-known-good public pointer unchanged.
     return json_path, md_path, payload
 
 
@@ -291,6 +319,32 @@ def self_test() -> int:
     assert all(item.get("id") not in {"unde-iesim-operational", "source-radar-operational"} for item in eligible)
     held_fact = {"facts": [{**sample_fact, "id": "olanesti-bridge-monitor"}]}
     assert eligible_facts(held_fact, now, "morning") == []
+
+    # Freshness is intentionally stronger than legacy priority across bands.
+    ranking_now = datetime(2026, 8, 26, 22, 30, tzinfo=TZ)
+    recent = {
+        **sample_fact,
+        "id": "recent",
+        "priority": 84,
+        "valid_from": "2026-08-26T15:00:00+03:00",
+        "valid_until": "2026-08-29T15:00:00+03:00",
+        "slots": ["evening"],
+        "headline": "Informare verificată publicată la 26 august 2026",
+    }
+    older = {
+        **sample_fact,
+        "id": "older",
+        "priority": 100,
+        "valid_from": "2026-08-21T10:00:00+03:00",
+        "valid_until": "2026-08-30T10:00:00+03:00",
+        "slots": ["evening"],
+        "headline": "Dosar verificat publicat la 21 august 2026",
+    }
+    ranked = eligible_facts({"facts": [older, recent]}, ranking_now, "evening")
+    assert [row["id"] for row in ranked] == ["recent", "older"]
+    assert freshness_bucket(recent, ranking_now) == 0
+    assert freshness_bucket(older, ranking_now) == 2
+
     assert pointer_is_publishable({"edition_id": "x", "status": "auto_approved", "publication_intent": "publish"})
     assert not pointer_is_publishable({"edition_id": "x", "status": "auto_hold", "publication_intent": "hold"})
     editorial_writer.self_test()
@@ -327,6 +381,7 @@ def main() -> int:
         "markdown": str(md_path.relative_to(ROOT)),
         "public_pointer_preserves_last_known_good_on_hold": True,
         "public_items_are_editorial_only": True,
+        "ranking_policy": payload["policy"]["ranking_policy"],
         "durable_temporal_language_contract": TEMPORAL_CONTRACT,
     }, ensure_ascii=False))
     return 0
