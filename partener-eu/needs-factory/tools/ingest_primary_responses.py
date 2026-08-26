@@ -10,18 +10,26 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-EXPECTED_SCHEMA_VERSION = "nf.primary_payload.v0.1"
-ENVELOPE_KEYS = {"response_id", "received_at_utc", "schema_version", "form_version", "answers", "synthetic"}
-FORBIDDEN_KEYS = {
-    "name", "first_name", "last_name", "cnp", "national_id", "email", "phone", "telephone",
-    "exact_address", "address", "exact_employer", "employer_name", "organisation_name",
-    "organization_name", "cui", "ip", "ip_address", "user_agent", "cookie_id", "login_id",
-    "device_fingerprint", "advertising_id",
+RESEARCH_ID = "AI4WORK-STEP-NF-RUN-001"
+TARGET_SCHEMA_VERSION = "nf.primary_payload.v0.1"
+RAW_KEYS = {
+    "schema_version", "research_id", "form_id", "form_version", "response_id",
+    "received_at", "profile", "answers", "synthetic",
 }
-FREE_TEXT_FIELDS = {"job_family", "Q07_topic", "Q08_other", "Q11_other", "Q12", "sector", "E04_detail", "E09"}
+FORBIDDEN_KEYS = {
+    "name", "first_name", "last_name", "surname", "cnp", "national_id", "email", "phone",
+    "telephone", "exact_address", "address", "exact_employer", "employer_name",
+    "organisation_name", "organization_name", "cui", "ip", "ip_address", "user_agent",
+    "cookie_id", "login_id", "account_id", "device_fingerprint", "advertising_id", "marketing_id",
+}
+FREE_TEXT_FIELDS = {
+    "occupational_family", "sector_aggregated", "Q07_topic", "Q12", "E04_detail", "E09",
+    "job_family", "sector", "Q08_other", "Q11_other",
+}
 EMAIL_RE = re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b")
 PHONE_RE = re.compile(r"(?<!\d)(?:\+?40[\s.-]?)?(?:0?7\d{2}|0?2\d{2}|0?3\d{2})[\s.-]?\d{3}[\s.-]?\d{3}(?!\d)")
 CNP_RE = re.compile(r"(?<!\d)[1-8]\d{12}(?!\d)")
+URL_RE = re.compile(r"(?i)\b(?:https?://|www\.)\S+")
 
 
 def sha256_bytes(raw: bytes) -> str:
@@ -44,14 +52,17 @@ def load_records(raw: bytes) -> list[dict[str, Any]]:
     return records
 
 
-def parse_utc(value: Any) -> bool:
-    if not isinstance(value, str) or not value.endswith("Z"):
-        return False
+def normalize_utc(value: Any) -> str | None:
+    if not isinstance(value, str):
+        return None
     try:
-        dt.datetime.fromisoformat(value[:-1] + "+00:00")
-        return True
+        parsed = dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
     except ValueError:
-        return False
+        return None
+    if parsed.tzinfo is None:
+        return None
+    parsed = parsed.astimezone(dt.timezone.utc)
+    return parsed.isoformat().replace("+00:00", "Z")
 
 
 def find_forbidden_keys(value: Any, path: str = "$") -> list[str]:
@@ -69,7 +80,7 @@ def find_forbidden_keys(value: Any, path: str = "$") -> list[str]:
     return hits
 
 
-def pii_hits(field: str, value: Any) -> list[str]:
+def text_pii_hits(field: str, value: Any) -> list[str]:
     if field not in FREE_TEXT_FIELDS or not isinstance(value, str):
         return []
     hits = []
@@ -79,17 +90,99 @@ def pii_hits(field: str, value: Any) -> list[str]:
         hits.append("romanian_phone_like")
     if CNP_RE.search(value):
         hits.append("cnp_like")
+    if URL_RE.search(value):
+        hits.append("url_like")
     return hits
+
+
+def scan_free_text(value: Any, path: str = "$") -> list[str]:
+    errors: list[str] = []
+    if isinstance(value, dict):
+        for key, child in value.items():
+            for hit in text_pii_hits(str(key), child):
+                errors.append(f"{path}.{key}: PII-like token detected ({hit})")
+            errors.extend(scan_free_text(child, f"{path}.{key}"))
+    elif isinstance(value, list):
+        for index, child in enumerate(value):
+            errors.extend(scan_free_text(child, f"{path}[{index}]"))
+    return errors
+
+
+def transform_record(record: dict[str, Any], stream: str) -> dict[str, Any]:
+    profile = record["profile"]
+    answers = record["answers"]
+    if stream == "adults":
+        q10 = answers["Q10"]
+        flat = {
+            "region": profile["region"],
+            "status": profile["status"],
+            "age_band": profile["age_band"],
+            "job_family": profile["occupational_family"],
+            "Q01": answers["Q01"],
+            "Q02": answers["Q02"],
+            "Q03": answers["Q03"],
+            "Q04": answers["Q04"],
+            "Q05": answers["Q05"],
+            "Q06": answers["Q06"],
+            "Q07": "da" if answers["Q07"] else "nu",
+            "Q08": answers["Q08"],
+            "Q09": answers["Q09"],
+            "Q10_digital": q10["utilizare_digitala_functionala"],
+            "Q10_AI": q10["utilizarea_instrumentelor_AI"],
+            "Q10_verification": q10["verificarea_rezultatelor_AI"],
+            "Q10_privacy": q10["protectia_datelor_confidentialitate"],
+            "Q10_workflow": q10["integrarea_AI_in_flux_de_lucru"],
+            "Q11": answers["Q11"],
+            "Q12": answers["Q12"],
+            "privacy_ack": True,
+        }
+        if answers.get("Q07_topic"):
+            flat["Q07_topic"] = answers["Q07_topic"]
+    else:
+        e03 = answers["E03"]
+        flat = {
+            "region": profile["region"],
+            "sector": profile["sector_aggregated"],
+            "size": profile["size_band"],
+            "respondent_type": profile["respondent_role"],
+            "E01": answers["E01"],
+            "E02": answers["E02"],
+            "E03_prompt": e03["formularea_cerintelor"],
+            "E03_verification": e03["verificarea_calitatii"],
+            "E03_privacy": e03["protectia_datelor"],
+            "E03_limits": e03["limitele_si_riscurile_AI"],
+            "E03_integration": e03["integrarea_in_procese"],
+            "E03_workflow": e03["definirea_fluxului_asistat_AI"],
+            "E03_general_digital": e03["competente_digitale_generale"],
+            "E04": answers["E04"],
+            "E05": answers["E05"],
+            "E06": answers["E06"],
+            "E07": answers["E07"],
+            "E08": answers["E08"],
+            "E09": answers["E09"],
+            "E10": answers["E10"],
+            "privacy_ack": True,
+        }
+        if answers.get("E04_detail"):
+            flat["E04_detail"] = answers["E04_detail"]
+    normalized = {
+        "response_id": record["response_id"],
+        "received_at_utc": normalize_utc(record["received_at"]),
+        "schema_version": TARGET_SCHEMA_VERSION,
+        "form_version": str(record["form_version"]),
+        "answers": flat,
+    }
+    if record.get("synthetic") is True:
+        normalized["synthetic"] = True
+    return normalized
 
 
 def validate_scalar(field: str, value: Any, spec: dict[str, Any]) -> list[str]:
     errors: list[str] = []
     if "enum" in spec and value not in spec["enum"]:
-        errors.append(f"{field}: value is outside enum")
-        return errors
+        return [f"{field}: value is outside enum"]
     if "const" in spec and value != spec["const"]:
-        errors.append(f"{field}: value must equal {spec['const']!r}")
-        return errors
+        return [f"{field}: value must equal {spec['const']!r}"]
     expected = spec.get("type")
     if expected == "integer":
         if isinstance(value, bool) or not isinstance(value, int):
@@ -121,10 +214,13 @@ def validate_scalar(field: str, value: Any, spec: dict[str, Any]) -> list[str]:
     return errors
 
 
-def validate_answers(answers: Any, payload_schema: dict[str, Any]) -> list[str]:
-    if not isinstance(answers, dict):
-        return ["answers: expected object"]
+def validate_normalized(record: dict[str, Any], payload_schema: dict[str, Any]) -> list[str]:
     errors: list[str] = []
+    if record.get("received_at_utc") is None:
+        errors.append("received_at: timezone-aware timestamp required")
+    answers = record.get("answers")
+    if not isinstance(answers, dict):
+        return errors + ["answers: expected object"]
     allowed = set((payload_schema.get("properties") or {}).keys())
     unexpected = sorted(set(answers) - allowed)
     if unexpected:
@@ -136,7 +232,7 @@ def validate_answers(answers: Any, payload_schema: dict[str, Any]) -> list[str]:
         spec = (payload_schema.get("properties") or {}).get(field)
         if spec:
             errors.extend(validate_scalar(f"answers.{field}", value, spec))
-        for hit in pii_hits(field, value):
+        for hit in text_pii_hits(field, value):
             errors.append(f"answers.{field}: PII-like token detected ({hit})")
     return errors
 
@@ -150,9 +246,9 @@ def stratum_counts(records: list[dict[str, Any]], fields: list[str]) -> dict[str
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Fail-closed ingest validator for AI4WORK STEP primary responses")
+    parser = argparse.ArgumentParser(description="Fail-closed NF06 ingest validator for EUCONS AI4WORK research exports")
     parser.add_argument("input", type=Path)
-    parser.add_argument("--schema", required=True, type=Path)
+    parser.add_argument("--schema", required=True, type=Path, help="EUCONS_PRIMARY_DATA_SCHEMA.json")
     parser.add_argument("--stream", required=True, choices=["adults", "employers"])
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--report", required=True, type=Path)
@@ -162,48 +258,60 @@ def main() -> int:
     raw = args.input.read_bytes()
     raw_hash = sha256_bytes(raw)
     schema = json.loads(args.schema.read_text(encoding="utf-8"))
-    schema_key = "adult_payload" if args.stream == "adults" else "employer_payload"
-    payload_schema = schema[schema_key]
+    payload_schema = schema["adult_payload" if args.stream == "adults" else "employer_payload"]
+    expected_form = "AI4WORK_ADULTS_V1" if args.stream == "adults" else "AI4WORK_EMPLOYERS_V1"
     records = load_records(raw)
 
     valid: list[dict[str, Any]] = []
     rejected: list[dict[str, Any]] = []
     seen_ids: set[str] = set()
 
-    for index, record in enumerate(records):
+    for index, raw_record in enumerate(records):
         errors: list[str] = []
-        unexpected_envelope = sorted(set(record) - ENVELOPE_KEYS)
-        if unexpected_envelope:
-            errors.append("envelope: unexpected fields: " + ", ".join(unexpected_envelope))
-        for required in ("response_id", "received_at_utc", "schema_version", "form_version", "answers"):
-            if required not in record:
-                errors.append(f"envelope.{required}: required field missing")
-        response_id = record.get("response_id")
-        if not isinstance(response_id, str) or not response_id.strip():
-            errors.append("envelope.response_id: non-empty opaque string required")
-        elif response_id in seen_ids:
-            errors.append("envelope.response_id: duplicate")
-        else:
-            seen_ids.add(response_id)
-        if not parse_utc(record.get("received_at_utc")):
-            errors.append("envelope.received_at_utc: RFC3339 UTC timestamp ending Z required")
-        if record.get("schema_version") != EXPECTED_SCHEMA_VERSION:
-            errors.append(f"envelope.schema_version: expected {EXPECTED_SCHEMA_VERSION}")
-        if not isinstance(record.get("form_version"), str) or not record.get("form_version", "").strip():
-            errors.append("envelope.form_version: non-empty string required")
-        forbidden = find_forbidden_keys(record)
+        unexpected = sorted(set(raw_record) - RAW_KEYS)
+        if unexpected:
+            errors.append("raw envelope: unexpected fields: " + ", ".join(unexpected))
+        missing = sorted(RAW_KEYS - set(raw_record))
+        if missing:
+            errors.append("raw envelope: missing fields: " + ", ".join(missing))
+        forbidden = find_forbidden_keys(raw_record)
         if forbidden:
             errors.append("forbidden identifier fields: " + ", ".join(sorted(forbidden)))
-        synthetic = record.get("synthetic")
-        if args.mode == "prod" and synthetic is not None:
-            errors.append("envelope.synthetic: marker is forbidden in PROD; synthetic records cannot enter PROD")
-        if args.mode == "test-twin" and synthetic is not True:
-            errors.append("envelope.synthetic: TEST TWIN requires synthetic=true")
-        errors.extend(validate_answers(record.get("answers"), payload_schema))
+        errors.extend(scan_free_text(raw_record))
+        if raw_record.get("schema_version") != 1:
+            errors.append("raw schema_version must be 1")
+        if raw_record.get("research_id") != RESEARCH_ID:
+            errors.append(f"research_id must be {RESEARCH_ID}")
+        if raw_record.get("form_id") != expected_form:
+            errors.append(f"form_id must be {expected_form}")
+        if raw_record.get("form_version") != 1:
+            errors.append("form_version must be 1")
+        response_id = raw_record.get("response_id")
+        if not isinstance(response_id, str) or not response_id.strip():
+            errors.append("response_id: non-empty opaque string required")
+        elif response_id in seen_ids:
+            errors.append("response_id: duplicate")
+        else:
+            seen_ids.add(response_id)
+        if normalize_utc(raw_record.get("received_at")) is None:
+            errors.append("received_at: timezone-aware ISO timestamp required")
+        if args.mode == "prod" and raw_record.get("synthetic") is not False:
+            errors.append("synthetic must be false in PROD")
+        if args.mode == "test-twin" and raw_record.get("synthetic") is not True:
+            errors.append("synthetic must be true in TEST TWIN")
+        if not isinstance(raw_record.get("profile"), dict) or not isinstance(raw_record.get("answers"), dict):
+            errors.append("profile and answers must be objects")
+        if not errors:
+            try:
+                normalized = transform_record(raw_record, args.stream)
+            except (KeyError, TypeError) as exc:
+                errors.append(f"canonical transform failed: {exc}")
+            else:
+                errors.extend(validate_normalized(normalized, payload_schema))
         if errors:
             rejected.append({"index": index, "response_id": response_id if isinstance(response_id, str) else None, "errors": errors})
         else:
-            valid.append(record)
+            valid.append(normalized)
 
     region_counts = Counter(str(row["answers"].get("region")) for row in valid)
     expected_regions = set((schema.get("common") or {}).get("regions") or [])
@@ -211,13 +319,13 @@ def main() -> int:
     strata_fields = ["region", "status", "age_band"] if args.stream == "adults" else ["region", "sector", "size"]
 
     status = "PASS"
-    gate = "THREE_REGION_COVERAGE_PASS"
+    coverage_gate = "THREE_REGION_COVERAGE_PASS"
     if rejected or not valid:
         status = "FAIL"
-        gate = "INGEST_FAIL_CLOSED"
+        coverage_gate = "INGEST_FAIL_CLOSED"
     elif missing_regions:
         status = "PASS_WITH_COVERAGE_GAP"
-        gate = "THREE_REGION_COVERAGE_OPEN"
+        coverage_gate = "THREE_REGION_COVERAGE_OPEN"
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.report.parent.mkdir(parents=True, exist_ok=True)
@@ -227,7 +335,7 @@ def main() -> int:
 
     normalized_hash = sha256_bytes(args.output.read_bytes())
     report = {
-        "schema_version": "nf.primary_ingest_report.v0.1",
+        "schema_version": "nf.primary_ingest_report.v0.2",
         "run_id": "AI4WORK-STEP/NF-RUN-001",
         "mode": args.mode,
         "evidence_classification": "PROD_REAL_DATA_CANDIDATE" if args.mode == "prod" else "TEST_TWIN_NON_EVIDENCE",
@@ -243,9 +351,10 @@ def main() -> int:
         "missing_regions": missing_regions,
         "errors": rejected,
         "status": status,
-        "coverage_gate": gate,
+        "coverage_gate": coverage_gate,
         "promotion_allowed": args.mode == "prod" and status == "PASS",
-        "promotion_note": "Even PASS requires documented recruitment frame/coverage metadata and raw-to-aggregate reconciliation before NF06 evidence promotion.",
+        "promotion_note": "PASS is only a technical ingest gate. NF06 promotion still requires documented recruitment frame/coverage, immutable raw export manifest, and raw-to-aggregate reconciliation.",
+        "privacy_ack_derivation": "true is derived only from the EUCONS runtime acceptance invariant; the public submission is rejected unless voluntary participation acknowledgement is true."
     }
     args.report.write_text(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True))
