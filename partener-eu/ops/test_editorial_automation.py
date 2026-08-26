@@ -43,6 +43,14 @@ def qf(label: str, value: str, confidence: str = 'CONFIRMED') -> dict[str, str]:
     return {'label': label, 'value': value, 'confidence': confidence}
 
 fixed_now = dt.datetime(2026, 8, 26, 12, 0, tzinfo=brief.TZ)
+assert brief.human_date('30 septembrie 2026, 16:00') == '30 septembrie 2026, 16:00'
+clock_probe = {
+    'id': 'clock-probe', 'status': 'OPEN', 'publicationState': 'PUBLISHABLE',
+    'quickFacts': [qf('Status', 'DESCHIS'), qf('Termen', '30 septembrie 2026, 16:00')],
+}
+assert brief.is_current_open(clock_probe, dt.datetime(2026, 9, 30, 15, 59, tzinfo=brief.TZ)) is True
+assert brief.is_current_open(clock_probe, dt.datetime(2026, 9, 30, 16, 1, tzinfo=brief.TZ)) is False
+
 fixture = {
     'news': [
         {
@@ -141,6 +149,7 @@ assert "document.addEventListener('click'" not in ui
 print(json.dumps({
     'dailyCards':len(daily.get('items') or []),
     'dailyFreshnessReplay':'PASS',
+    'explicitDeadlineClock':'PASS',
     'newsMaxAgeHours':brief.NEWS_MAX_AGE_HOURS,
     'peopleSignals':len(people.get('items') or []),
     'homePeople':len(people.get('homeIds') or []),
