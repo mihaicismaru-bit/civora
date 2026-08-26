@@ -4,10 +4,11 @@
 Individual stories are the unit of distribution. Morning/evening recap items are
 never allowed to become the trigger, queue item or canonical social product. A
 story that is publishable on the site but lacks an approved story-specific
-photograph is kept in HOLD_MEDIA for visual channels; the site publication is
-not delayed. Rights-cleared archival/context photographs are allowed only when
-they match the story subject and carry an explicit disclosure that is propagated
-into every visual-channel caption.
+photograph is kept in HOLD_MEDIA for visual channels; the canonical Facebook
+writer may subsequently use its deterministic text+link fallback for *new*
+stories. Rights-cleared archival/context photographs are allowed only when they
+match the story subject and carry an explicit disclosure that is propagated into
+every visual-channel caption.
 
 TikTok additionally has its own platform-native editorial/media gate. An image
 that is acceptable as disclosed context on Facebook/Instagram does not become
@@ -78,47 +79,37 @@ def facebook_copy(story: dict, visual: dict | None = None) -> str:
     section = str(story.get("section") or "ȘTIRI").replace("_", " ")
     headline = str(story.get("headline") or "").strip()
     dek = str(story.get("dek") or "").strip()
-    parts = [
-        f"{section} | VÂLCEA CLAR",
-        headline,
-        dek,
-    ]
+    parts = [f"{section} | VÂLCEA CLAR", headline, dek]
     disclosure = visual_disclosure(visual)
     if disclosure:
         parts.append(disclosure)
+    if story.get("brief_kind") == "primary_source_notice":
+        parts.append("Informare din sursă primară: publicăm numai ceea ce este confirmat în acest stadiu și păstrăm linkul către sursa oficială.")
     parts.extend([
         "Detaliile și sursele verificate sunt în articol.",
         "#ValceaClar #Valcea #RamnicuValcea #StiriValcea",
     ])
-    return "\n\n".join(parts)
+    return "\n\n".join(part for part in parts if part)
 
 
 def instagram_copy(story: dict, visual: dict | None = None) -> str:
     headline = str(story.get("headline") or "").strip()
     dek = str(story.get("dek") or "").strip()
     section = str(story.get("section") or "ȘTIRI").replace("_", " ")
-    parts = [
-        section,
-        headline,
-        dek,
-    ]
+    parts = [section, headline, dek]
     disclosure = visual_disclosure(visual)
     if disclosure:
         parts.append(disclosure)
+    if story.get("brief_kind") == "primary_source_notice":
+        parts.append("Informare din sursă primară; detaliile suplimentare rămân în verificare.")
     parts.extend([
         "Contextul complet și sursele: valceaclar.ro",
         "#ValceaClar #Valcea #RamnicuValcea #StiriLocale",
     ])
-    return "\n\n".join(parts)
+    return "\n\n".join(part for part in parts if part)
 
 
 def tiktok_copy(product: dict, visual: dict | None = None) -> tuple[str, str]:
-    """Reader-facing TikTok copy from the native editorial product.
-
-    No generic hashtag block. The platform product already encodes the verified
-    hook and storyboard; copy only carries the strongest verified fact, useful
-    context and canonical source boundary.
-    """
     hook = str(product.get("hook") or "").strip()
     title = hook[:90]
     parts: list[str] = []
@@ -149,19 +140,12 @@ def find_visual(story: dict, visual_registry: dict) -> dict | None:
 
 
 def remove_recap_items(outbox: dict) -> list[str]:
-    """Remove legacy recap snapshots from the active social queue entirely.
-
-    Historical remote-publication evidence is stored in the independent
-    platform state files, so keeping recap copies in the active outbox has no
-    audit value and risks accidental evaluation by a platform adapter.
-    """
     items = outbox.get("items", [])
     if not isinstance(items, list):
         outbox["items"] = []
         return []
     removed = [
-        str(item.get("id"))
-        for item in items
+        str(item.get("id")) for item in items
         if isinstance(item, dict) and str(item.get("id") or "").startswith("editia-de-")
     ]
     outbox["items"] = [
@@ -192,20 +176,11 @@ def tiktok_platform_config(story: dict, visual: dict | None) -> dict:
         "verbatim_cross_platform_reuse_allowed": False,
     }
     if product.get("status") != "READY":
-        return {
-            **common,
-            "reason": str(product.get("hold_reason") or "tiktok_editorial_gate_not_ready"),
-        }
+        return {**common, "reason": str(product.get("hold_reason") or "tiktok_editorial_gate_not_ready")}
     source_path = str(product.get("source_image_path") or "").strip()
     if source_path:
-        # Temporary source URL. build_social_media_assets.py replaces this with
-        # the canonical premium 1080x1920 composite URL before TikTok can ever
-        # become platform-ready.
         common["photo_url"] = f"{BASE}/media/social/{Path(source_path).name}"
-    return {
-        **common,
-        "reason": "site_consent_and_tiktok_app_audit_required",
-    }
+    return {**common, "reason": "site_consent_and_tiktok_app_audit_required"}
 
 
 def story_item(story: dict, visual: dict | None, existing: dict | None) -> dict:
@@ -223,6 +198,7 @@ def story_item(story: dict, visual: dict | None, existing: dict | None) -> dict:
         "message": fb,
         "link": link,
         "replace_post_ids": item.get("replace_post_ids", []),
+        **({"brief_kind": story.get("brief_kind"), "auto_scope": story.get("auto_scope")} if story.get("auto_generated") else {}),
     })
 
     if visual:
@@ -241,7 +217,11 @@ def story_item(story: dict, visual: dict | None, existing: dict | None) -> dict:
         item.pop("image_path", None)
         item.pop("image", None)
         item["platforms"] = {
-            "facebook": {"status": "hold", "reason": "story_specific_approved_photo_required"},
+            "facebook": {
+                "status": "hold",
+                "reason": "story_specific_approved_photo_required",
+                "text_link_fallback_allowed_for_new_story": True,
+            },
             "instagram": {"status": "hold", "reason": "story_specific_approved_photo_required", "caption": ig},
             "tiktok": tt,
         }
@@ -249,19 +229,23 @@ def story_item(story: dict, visual: dict | None, existing: dict | None) -> dict:
 
 
 def decision_approved_full_stories(decision: dict, snapshot: dict) -> list[dict]:
-    """Rehydrate decision-approved Fact Kernel stories before social readiness.
+    """Rehydrate all newsroom-approved stories, including ephemeral auto briefs.
 
-    The public edition snapshot intentionally omits the internal Fact Kernel.
-    Running ``story_ready`` directly on that compact projection drops otherwise
-    publishable FACT_KERNEL_COMPOSED stories from the social outbox. Resolve the
-    newsroom-approved IDs back to the canonical Writer registry, exactly as the
-    canonical story-page renderer does, and re-run the gate on the full product.
+    FACT_KERNEL_COMPOSED stories are normally restored from the canonical Writer
+    registry. Automatic primary-source briefs are generated inside the live run;
+    an older transaction did not persist ``auto_facts.json`` on the publish
+    branch, so they may exist in the public edition snapshot and decision while
+    being absent from the registry on a later social run. The edition snapshot
+    already contains the exact canonical copy that passed ``story_ready``. Use
+    that compact public projection as a safe fallback only for decision-approved
+    IDs missing from the full registry.
     """
-    allowed_order = [
-        str(value)
-        for value in decision.get("publishable_story_ids") or []
-        if str(value)
-    ]
+    allowed_order = [str(value) for value in decision.get("publishable_story_ids") or [] if str(value)]
+    compact_by_id = {
+        str(item.get("id") or ""): item
+        for item in snapshot.get("items", [])
+        if isinstance(item, dict) and str(item.get("id") or "")
+    }
     if allowed_order:
         registry, _ = generate_edition.merged_registry()
         full_by_id = {
@@ -271,16 +255,17 @@ def decision_approved_full_stories(decision: dict, snapshot: dict) -> list[dict]
         }
         stories: list[dict] = []
         for story_id in allowed_order:
-            item = full_by_id.get(story_id)
-            if item is not None and story_ready(item)[0]:
-                stories.append(item)
+            full = full_by_id.get(story_id)
+            if full is not None and story_ready(full)[0]:
+                stories.append(full)
+                continue
+            compact = compact_by_id.get(story_id)
+            if compact is not None and story_ready(compact)[0]:
+                stories.append(compact)
         return stories
 
-    # Backward-compatible fallback for historical/manual operation when no
-    # newsroom decision has been materialized yet.
     return [
-        story
-        for story in snapshot.get("items", [])
+        story for story in snapshot.get("items", [])
         if isinstance(story, dict) and story_ready(story)[0]
     ]
 
@@ -300,8 +285,7 @@ def main() -> int:
     removed_recaps = remove_recap_items(outbox)
     removed_holds = remove_socially_held_items(outbox)
     existing_by_id = {
-        str(item.get("id")): item
-        for item in outbox.get("items", [])
+        str(item.get("id")): item for item in outbox.get("items", [])
         if isinstance(item, dict) and item.get("id")
     }
 
@@ -318,14 +302,16 @@ def main() -> int:
         created_or_updated.append(item_id)
         (ready if item.get("status") == "ready" else held).append(item_id)
 
-    outbox.setdefault("policy", {})["publication_model"] = "continuous_story_first"
-    outbox["policy"]["edition_recaps_are_social_publication_gates"] = False
-    outbox["policy"]["edition_recaps_are_social_queue_items"] = False
-    outbox["policy"]["legacy_recap_outbox_policy"] = "removed_from_active_queue; historical evidence remains in platform state"
-    outbox["policy"]["site_story_may_publish_before_social_media_ready"] = True
-    outbox["policy"]["archival_context_requires_explicit_disclosure"] = True
-    outbox["policy"]["tiktok_archival_context_never_counts_as_current_media"] = True
-    outbox["policy"]["tiktok_ready_photo_requires_premium_editorial_composite"] = True
+    policy = outbox.setdefault("policy", {})
+    policy["publication_model"] = "continuous_story_first"
+    policy["edition_recaps_are_social_publication_gates"] = False
+    policy["edition_recaps_are_social_queue_items"] = False
+    policy["legacy_recap_outbox_policy"] = "removed_from_active_queue; historical evidence remains in platform state"
+    policy["site_story_may_publish_before_social_media_ready"] = True
+    policy["archival_context_requires_explicit_disclosure"] = True
+    policy["tiktok_archival_context_never_counts_as_current_media"] = True
+    policy["tiktok_ready_photo_requires_premium_editorial_composite"] = True
+    policy["facebook_missing_photo_is_soft_block_for_new_story"] = True
     write(OUTBOX, outbox)
 
     result = {
@@ -337,6 +323,7 @@ def main() -> int:
         "held_for_story_specific_media": held,
         "removed_recap_items": removed_recaps,
         "removed_publication_holds": removed_holds,
+        "decision_snapshot_fallback_enabled": True,
     }
     print(json.dumps(result, ensure_ascii=False))
     return 0
