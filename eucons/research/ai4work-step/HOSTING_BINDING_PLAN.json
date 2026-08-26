@@ -1,7 +1,7 @@
 {
-  "schema_version": "eucons.ai4work_research_hosting_plan.v0.1",
+  "schema_version": "eucons.ai4work_research_hosting_plan.v0.2",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "state": "INTERNAL_BINDING_PLAN_NOT_DEPLOYED",
+  "state": "PUBLIC_PROVIDER_DPA_VERIFIED_ACCOUNT_BINDING_AND_LOG_FACTS_STILL_OPEN",
   "verified_existing_eucons_runtime": {
     "public_origin": "https://eucons.ro",
     "api_origin": "https://api.eucons.ro",
@@ -34,9 +34,11 @@
   },
   "privacy_and_security_requirements_before_activation": [
     "freeze a public research privacy/contact channel for EUROCONSULT SRL",
-    "document research legal basis and Article 13 notice separately from acknowledgement of voluntary participation",
-    "verify the active hosting processor identity, DPA/subprocessor terms and any transfer mechanism",
-    "verify web-server/reverse-proxy access-log contents and retention; keep IP/device metadata out of the analytical export",
+    "document and approve the research legal basis and Article 13 notice separately from acknowledgement of voluntary participation",
+    "confirm the active EUROCONSULT hosting order is governed by the current Claus Web DPA and obtain/retain the account-specific contractual copy",
+    "obtain and review the current nominal subprocessor list from Claus Web DPA Annex 4 before activation",
+    "obtain and review the account-applicable backup/retention/deletion values from Claus Web DPA Annex 5 before activation",
+    "verify web-server/reverse-proxy access-log fields and retention for the actual account; keep IP/device metadata out of the analytical export",
     "apply filesystem permissions so research responses are not readable through document root and are not consumed by CRM jobs",
     "define and test research retention/deletion independently from commercial lead retention",
     "verify HTTPS and exact-origin CORS",
@@ -44,10 +46,27 @@
   ],
   "hosting_provider_observation": {
     "internal_activation_artifact": "eucons/deployment/activate_php_runtime.py identifies hosting associated with romania-webhosting.com",
-    "public_registry_observation": "romania-webhosting.com registration service is reported as CLAUS WEB SRL and hosting ASN evidence points to CLAUS WEB srl in Romania",
-    "processor_contract_status": "NOT_YET_VERIFIED",
-    "subprocessor_status": "NOT_YET_VERIFIED",
-    "log_retention_status": "NOT_YET_VERIFIED"
+    "provider_identity": "CLAUS WEB SRL / CUI RO17759260",
+    "provider_dpo_contact": "dpo@clausweb.ro",
+    "public_dpa": {
+      "url": "https://www.clausweb.ro/acord-prelucrare-date.html",
+      "version": "1.0",
+      "date": "2026-03-16",
+      "scope": "Shared Hosting, VPS, Dedicated Servers, cPanel/WHM administration, domains and Backup when Claus Web acts as processor or subprocessor",
+      "article_28_role": "PUBLIC_DPA_EXPLICITLY_IDENTIFIES_CLAUS_WEB_AS_PROCESSOR_FOR_BENEFICIARY_DATA_IN_SHARED_HOSTING",
+      "subprocessors": "GENERAL_AUTHORIZATION_PRESENT_BUT_NOMINAL_ANNEX_4_AVAILABLE_ON_REQUEST_AND_REQUIRES_OPERATIONAL_VALIDATION",
+      "international_transfers": "DPA_STATES_NO_BENEFICIARY_DATA_TRANSFER_OUTSIDE_EEA_WITHOUT_VALID_CHAPTER_V_MECHANISM",
+      "termination_deletion": "DPA_STATES_STANDARD_15_DAY_EXPORT_WINDOW_AND_PRODUCTION_DATA_DELETION_OR_IRREVERSIBLE_INACCESSIBILITY_GENERALLY_WITHIN_30_DAYS_AFTER_WINDOW_SUBJECT_TO_EXCEPTIONS",
+      "backup_retention": "RESIDUAL_ROTATIONAL_BACKUPS_MAY_PERSIST_UNTIL_NATURAL_RETENTION_EXPIRY; EXACT_VALUES_ARE_IN_ANNEX_5_AVAILABLE_ON_REQUEST",
+      "technical_logging": "DPA_ACKNOWLEDGES_OPERATIONAL_AND_SECURITY_LOGGING_BUT_PUBLIC_PAGE_DOES_NOT_FIX_ACCOUNT_SPECIFIC_FIELDS_OR_RETENTION",
+      "toms": "PUBLIC_DPA_LISTS_REFERENCE_CONTROLS_FOR_ACCESS, SEGREGATION, NETWORK SECURITY, LOGGING/MONITORING, BACKUP/RECOVERY, INCIDENT RESPONSE AND DELETION"
+    },
+    "provider_public_security_claim": "Claus Web publicly states ISO/IEC 27001 certification; certificate scope/current validity still requires documentary verification if relied upon as evidence",
+    "processor_contract_status": "PUBLIC_STANDARD_DPA_FOUND_ACCOUNT_SPECIFIC_ACCEPTANCE_NOT_YET_VERIFIED",
+    "subprocessor_status": "CATEGORIES_KNOWN_NOMINAL_LIST_OPEN_FROM_ANNEX_4",
+    "transfer_status": "STANDARD_DPA_RULE_KNOWN_ACCOUNT_SPECIFIC_SUBPROCESSOR_LOCATIONS_OPEN",
+    "log_retention_status": "OPEN_ACCOUNT_SPECIFIC_FIELDS_AND_DURATION_NOT_PUBLICLY_FIXED",
+    "backup_deletion_status": "STANDARD_DPA_RULE_KNOWN_EXACT_ANNEX_5_VALUES_OPEN"
   },
   "authorization": {
     "merge": false,
