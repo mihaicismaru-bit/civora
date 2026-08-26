@@ -1,0 +1,56 @@
+name: PARTENER.EU Web QA
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'partener-eu/web/**'
+      - 'partener-eu/ops/test_web_hygiene.py'
+      - 'partener-eu/ops/test_frontend_regression.py'
+      - 'partener-eu/ops/test_home_freshness_guard.mjs'
+      - 'partener-eu/ops/test_public_language.py'
+      - 'partener-eu/ops/test_decision_products.py'
+      - '.github/workflows/partener-eu-web-qa.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: partener-eu-web-qa-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Repository and public-shell hygiene
+        run: |
+          python partener-eu/ops/test_web_hygiene.py
+          python partener-eu/ops/test_frontend_regression.py
+
+      - name: Public semantics and freshness
+        run: |
+          python partener-eu/ops/test_public_language.py
+          node partener-eu/ops/test_home_freshness_guard.mjs
+          python partener-eu/ops/test_decision_products.py
+
+      - name: Syntax-check active web control modules
+        run: |
+          node --check partener-eu/web/app.js
+          node --check partener-eu/web/consultant-workspace-v3.js
+          node --check partener-eu/web/consultant-onboarding-v3.js
+          node --check partener-eu/web/consultant-mysmis-v1.js
+          node --check partener-eu/web/decision-intelligence-v2.js
+          node --check partener-eu/web/home-freshness-guard-v1.js
+          node --check partener-eu/web/home-novice-v1.js
+          node --check partener-eu/web/home-go-to-v2.js
