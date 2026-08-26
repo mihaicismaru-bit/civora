@@ -1,0 +1,94 @@
+{
+  "schema_version": "eucons.research_ingest_contract.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "production_enabled": false,
+  "input_contract": {
+    "accepted_form_ids": ["AI4WORK_ADULTS_V1", "AI4WORK_EMPLOYERS_V1"],
+    "transport": "HTTPS_POST_JSON",
+    "max_payload_bytes": 16384,
+    "server_generated_fields": ["response_id", "received_at", "form_version"],
+    "forbidden_fields": ["name", "surname", "cnp", "email", "phone", "address", "exact_address", "organisation_name", "employer_name", "cui", "ip", "user_agent", "account_id", "cookie_id", "marketing_id"],
+    "unknown_field_policy": "REJECT"
+  },
+  "validation_pipeline": [
+    "validate form id and schema version",
+    "reject unknown fields",
+    "validate enumerations and numeric ranges",
+    "normalize Unicode and trim whitespace",
+    "scan all free-text fields for direct identifiers and prohibited special-category content",
+    "reject or redact unsafe free text according to deterministic rules",
+    "generate random response_id with no identity lookup table",
+    "write only to research analytical storage",
+    "return generic receipt without echoing response content"
+  ],
+  "storage": {
+    "logical_store": "RESEARCH_ANALYTICS_ONLY",
+    "crm_write": false,
+    "lead_engine_write": false,
+    "contact_store_join": false,
+    "encryption_in_transit": true,
+    "encryption_at_rest": "REQUIRED_BY_PROVIDER_BINDING",
+    "access": "need-to-know research/analysis roles only",
+    "backup_policy": "provider-specific, must obey same retention/deletion policy",
+    "provider": "UNBOUND",
+    "region": "PREFER_EU_EEA"
+  },
+  "retention": {
+    "raw_pseudonymous_technical_layer": "maximum 90 days unless a documented legal/audit requirement requires otherwise",
+    "clean_analytical_dataset": "retain only for documented research/audit purpose and then anonymize/delete under operator schedule",
+    "server_logs": "minimum operational period; must not be copied into analytical dataset",
+    "contact_data": "separate purpose and separate schedule"
+  },
+  "nf06_export": {
+    "adult_file": "NF06_ADULT_RESPONSES_REAL.jsonl",
+    "employer_file": "NF06_EMPLOYER_RESPONSES_REAL.jsonl",
+    "manifest": "NF06_PRIMARY_DATA_MANIFEST.json",
+    "required_manifest_fields": [
+      "dataset_id",
+      "research_id",
+      "form_id",
+      "form_version",
+      "collection_start",
+      "collection_end",
+      "response_count_received",
+      "response_count_valid",
+      "response_count_rejected",
+      "counts_by_region",
+      "coverage_notes",
+      "recruitment_channels",
+      "sha256",
+      "pii_scan_result",
+      "synthetic_data_used"
+    ],
+    "synthetic_data_used": false,
+    "hash": "SHA-256 over exact canonical UTF-8 export bytes",
+    "raw_export_rule": "Freeze immutable exact export before analytical transformations; never commit respondent data to public repository."
+  },
+  "analysis_gates": {
+    "minimum_requirements": [
+      "all three regions have documented recruitment/coverage metadata",
+      "valid response denominator reported for every percentage",
+      "adult and employer datasets remain separate",
+      "no direct identifiers in analytical exports",
+      "no synthetic rows in PROD RUN",
+      "small cells protected before publication",
+      "open-text excerpts reviewed/anonymized before quotation"
+    ],
+    "fail_closed_conditions": [
+      "PII detected in canonical export",
+      "unknown form version",
+      "missing region for an analytical row",
+      "synthetic/test row in PROD dataset",
+      "dataset hash mismatch",
+      "CRM/contact linkage detected"
+    ]
+  },
+  "test_twin": {
+    "allowed": true,
+    "path_namespace": "TEST_TWIN_NON_EVIDENCE",
+    "must_be_marked": "NON-EVIDENCE",
+    "may_test": ["schema validation", "ranking", "gap detection", "aggregation", "small-cell suppression", "resume", "QA adversarial", "DOCX generation"],
+    "prohibited": ["promotion into PROD Evidence Registry", "use in project claims", "blending with real response counts"]
+  },
+  "status": "CONTRACT_READY_RUNTIME_UNBOUND"
+}
