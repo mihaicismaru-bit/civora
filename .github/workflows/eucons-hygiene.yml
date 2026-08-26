@@ -1,0 +1,34 @@
+name: EUCONS Hygiene
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/**'
+      - '.gitignore'
+      - '.github/workflows/eucons-hygiene.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/**'
+      - '.gitignore'
+      - '.github/workflows/eucons-hygiene.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-hygiene-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  hygiene:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Reject transient junk under eucons
+        run: python eucons/validation/validate_repo_hygiene.py
