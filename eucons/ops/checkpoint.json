@@ -1,11 +1,11 @@
 {
   "product": "EUCONS_COMMERCIAL_OS",
   "schema_version": 2,
-  "updated_at": "2026-08-26T06:50:00+03:00",
-  "checkpoint_id": "EUCONS-CP-2026-08-26-013",
+  "updated_at": "2026-08-26T07:50:00+03:00",
+  "checkpoint_id": "EUCONS-CP-2026-08-26-014",
   "development_state": "IN_PROGRESS",
-  "current_phase": "R10_CRM_PIPELINE",
-  "current_unit": "R10-PIPELINE-001",
+  "current_phase": "R11_ANALYTICS_LEARNING",
+  "current_unit": "R11-FUNNEL-ANALYTICS-001",
   "previous_terminal_assessment": {
     "state": "BLOCKED_EXTERNAL_ONLY",
     "phase": "E29",
@@ -102,7 +102,8 @@
     "R06-CF-SCORING-001",
     "R07-PROSPECT-MATCH-001",
     "R08-ACTION-PACK-001",
-    "R09-AUTHORITY-LOOP-001"
+    "R09-AUTHORITY-LOOP-001",
+    "R10-PIPELINE-001"
   ],
   "market_intelligence_result": {
     "state": "PASS",
@@ -115,12 +116,12 @@
       "MI-CAP-005 PROSPECT_RESEARCH_AND_ACTION_PACK"
     ]
   },
-  "next_action": "Reconcile inbound leads, organization prospects, opportunity/service matches and human-gated action packs into one deterministic CRM lifecycle with attribution, audit history, next action, stale-record detection and no fictitious contact or conversion state.",
+  "next_action": "Reconcile inbound, prospect, matching, outreach-approval and CRM lifecycle events into a fail-closed funnel analytics layer that reports UNKNOWN when real telemetry is absent and never turns NON_EVIDENCE fixtures into performance claims.",
   "terminal_target": "PRODUCTION_READY",
   "owner_terminal_target": "PRODUCTION_GRADE_EUCONS_COMMERCIAL_OS",
   "external_handoff_allowed_only_after": "E28",
   "blocking_reason": null,
-  "last_good_checkpoint": "EUCONS-CP-2026-08-26-013",
+  "last_good_checkpoint": "EUCONS-CP-2026-08-26-014",
   "evidence": [
     "eucons/ops/EUCONS_REBASELINE_2026-08-25.json",
     "eucons/market_intelligence/EUCONS_MARKET_INTELLIGENCE_2026-08-25.json",
@@ -187,7 +188,11 @@
     "eucons/authority/authority_loop_contract.json",
     "eucons/authority/authority_loop.py",
     "eucons/validation/validate_authority_loop.py",
-    "eucons/validation/test_authority_loop_fail_closed.py"
+    "eucons/validation/test_authority_loop_fail_closed.py",
+    "eucons/crm/pipeline_contract.json",
+    "eucons/crm/pipeline_engine.py",
+    "eucons/validation/validate_pipeline.py",
+    "eucons/validation/test_pipeline_fail_closed.py"
   ],
   "autonomy": {
     "enabled": true,
@@ -408,5 +413,31 @@
     "runtime_publication": false,
     "production_indexing": false,
     "production_content_records": 0
+  },
+  "unified_crm_pipeline_result": {
+    "state": "PASS",
+    "model": "INBOUND_AND_ORGANIZATION_PROSPECT_TO_EVIDENCE_GATED_COMMERCIAL_LIFECYCLE",
+    "entry_lanes": ["INBOUND", "PROSPECT_DISCOVERY"],
+    "lifecycle_stages": 15,
+    "synthetic_pipeline_records": 2,
+    "validated_prospect_terminal_stage": "CASE_STUDY_CANDIDATE",
+    "validated_inbound_entry_stage": "LEAD",
+    "r07_match_lineage": "PASS",
+    "r08_action_pack_lineage": "PASS",
+    "transition_evidence": "REQUIRED_PER_STAGE",
+    "contact_approval": "HUMAN_RECEIPT_REQUIRED",
+    "contact_execution": "EXTERNAL_RECEIPT_REQUIRED_NO_AUTOMATIC_SEND",
+    "offer_and_win": "HUMAN_EVIDENCE_REQUIRED",
+    "next_action_tasks": "REQUIRED_FOR_NON_TERMINAL_RECORDS",
+    "stale_record_detection": "PASS_NO_AUTOMATIC_CONTACT",
+    "attribution": "FIRST_TOUCH_SOURCE_AND_ASSISTED_CONTENT_REFS",
+    "raw_contact_data_in_pipeline": false,
+    "case_study_publication_state": "NEEDS_REVIEW",
+    "eligibility_state": "NOT_ASSESSED",
+    "production_persistence": false,
+    "production_records": 0,
+    "external_contact": false,
+    "automatic_offer": false,
+    "automatic_send": false
   }
 }

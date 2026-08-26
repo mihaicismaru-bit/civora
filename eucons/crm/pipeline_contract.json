@@ -1,0 +1,154 @@
+{
+  "schema_version": 1,
+  "id": "R10-PIPELINE-001",
+  "engine_id": "EUCONS_R10_UNIFIED_COMMERCIAL_PIPELINE",
+  "status": "CANONICAL",
+  "production_persistence_enabled": false,
+  "entry_lanes": ["INBOUND", "PROSPECT_DISCOVERY"],
+  "lifecycle": [
+    "PROSPECT",
+    "LEAD",
+    "QUALIFIED",
+    "MATCHED",
+    "OUTREACH_PREPARED",
+    "CONTACT_APPROVED",
+    "CONTACTED",
+    "DISCOVERY",
+    "OFFER",
+    "WON",
+    "LOST",
+    "ON_HOLD",
+    "CLIENT",
+    "PROJECT",
+    "CASE_STUDY_CANDIDATE"
+  ],
+  "entry_stage_by_lane": {
+    "INBOUND": "LEAD",
+    "PROSPECT_DISCOVERY": "PROSPECT"
+  },
+  "allowed_transitions": {
+    "PROSPECT": ["QUALIFIED", "LOST", "ON_HOLD"],
+    "LEAD": ["QUALIFIED", "LOST", "ON_HOLD"],
+    "QUALIFIED": ["MATCHED", "LOST", "ON_HOLD"],
+    "MATCHED": ["OUTREACH_PREPARED", "LOST", "ON_HOLD"],
+    "OUTREACH_PREPARED": ["CONTACT_APPROVED", "LOST", "ON_HOLD"],
+    "CONTACT_APPROVED": ["CONTACTED", "ON_HOLD"],
+    "CONTACTED": ["DISCOVERY", "LOST", "ON_HOLD"],
+    "DISCOVERY": ["OFFER", "LOST", "ON_HOLD"],
+    "OFFER": ["WON", "LOST", "ON_HOLD"],
+    "WON": ["CLIENT"],
+    "CLIENT": ["PROJECT"],
+    "PROJECT": ["CASE_STUDY_CANDIDATE"],
+    "ON_HOLD": ["PROSPECT", "LEAD", "QUALIFIED", "MATCHED", "OUTREACH_PREPARED", "CONTACT_APPROVED", "CONTACTED", "DISCOVERY", "OFFER"],
+    "LOST": [],
+    "CASE_STUDY_CANDIDATE": []
+  },
+  "transition_evidence": {
+    "QUALIFIED": ["QUALIFICATION_REVIEW"],
+    "MATCHED": ["R07_MATCH_RECORD"],
+    "OUTREACH_PREPARED": ["R08_ACTION_PACK"],
+    "CONTACT_APPROVED": ["HUMAN_CONTACT_APPROVAL"],
+    "CONTACTED": ["EXTERNAL_CONTACT_RECEIPT"],
+    "DISCOVERY": ["DISCOVERY_RECEIPT"],
+    "OFFER": ["HUMAN_APPROVED_OFFER"],
+    "WON": ["ACCEPTANCE_OR_CONTRACT_RECEIPT"],
+    "CLIENT": ["CLIENT_ACTIVATION_RECEIPT"],
+    "PROJECT": ["PROJECT_ACTIVATION_RECEIPT"],
+    "CASE_STUDY_CANDIDATE": ["CASE_STUDY_CANDIDACY_REVIEW"],
+    "LOST": ["LOSS_DECISION"],
+    "ON_HOLD": ["HOLD_DECISION"],
+    "RESUME": ["RESUME_REVIEW"]
+  },
+  "human_gated_receipts": [
+    "QUALIFICATION_REVIEW",
+    "HUMAN_CONTACT_APPROVAL",
+    "EXTERNAL_CONTACT_RECEIPT",
+    "DISCOVERY_RECEIPT",
+    "HUMAN_APPROVED_OFFER",
+    "ACCEPTANCE_OR_CONTRACT_RECEIPT",
+    "CLIENT_ACTIVATION_RECEIPT",
+    "PROJECT_ACTIVATION_RECEIPT",
+    "CASE_STUDY_CANDIDACY_REVIEW",
+    "LOSS_DECISION",
+    "HOLD_DECISION",
+    "RESUME_REVIEW"
+  ],
+  "upstream_gates": {
+    "R07_MATCH_RECORD": {
+      "engine_id": "EUCONS_R07_PROSPECT_OPPORTUNITY_SERVICE_MATCH",
+      "required_state": "MATCHED_RESEARCH_CANDIDATE",
+      "eligibility_state": "NOT_ASSESSED",
+      "maximum_next_state": "RESEARCH_READY"
+    },
+    "R08_ACTION_PACK": {
+      "engine_id": "EUCONS_R08_ORGANIZATION_ACTION_PACK",
+      "required_state": "READY_FOR_APPROVAL",
+      "eligibility_state": "NOT_ASSESSED",
+      "maximum_state": "READY_FOR_APPROVAL"
+    }
+  },
+  "contact_gate": {
+    "automatic_approval": false,
+    "automatic_send": false,
+    "person_targeting_default": false,
+    "suppression_must_be_clear": true,
+    "lawful_basis_must_be_human_reviewed": true,
+    "business_contact_surface_must_be_verified": true,
+    "contact_receipt_required_after_external_action": true
+  },
+  "commercial_gate": {
+    "automatic_offer": false,
+    "binding_price_generation": false,
+    "offer_requires_human_approval": true,
+    "won_requires_acceptance_or_contract_evidence": true
+  },
+  "ownership_and_tasks": {
+    "default_owner": "UNASSIGNED",
+    "owner_required_from_stage": "CONTACT_APPROVED",
+    "next_action_task_required_non_terminal": true,
+    "task_states": ["OPEN", "DONE", "CANCELLED"]
+  },
+  "stale_after_days": {
+    "PROSPECT": 14,
+    "LEAD": 7,
+    "QUALIFIED": 7,
+    "MATCHED": 7,
+    "OUTREACH_PREPARED": 5,
+    "CONTACT_APPROVED": 3,
+    "CONTACTED": 7,
+    "DISCOVERY": 7,
+    "OFFER": 7,
+    "WON": 3,
+    "CLIENT": 14,
+    "PROJECT": 30,
+    "ON_HOLD": 30
+  },
+  "attribution": {
+    "required_fields": ["origin", "first_touch_ref", "source_refs", "assisted_content_refs"],
+    "real_telemetry_missing_state": "UNKNOWN",
+    "synthetic_attribution_is_non_evidence": true
+  },
+  "privacy": {
+    "pipeline_stores_raw_contact_data": false,
+    "pipeline_stores_only_contact_reference": true,
+    "forbidden_keys": ["contact_name", "email", "phone", "personal_name", "private_contact", "cnp"],
+    "organization_first_prospecting": true
+  },
+  "audit": {
+    "append_only": true,
+    "receipt_idempotency": true,
+    "required_fields": ["sequence", "event_type", "record_id", "at", "details"]
+  },
+  "repository_policy": {
+    "real_records_forbidden": true,
+    "synthetic_fixtures_allowed": true,
+    "runtime_output_under_repository_root_forbidden": true
+  },
+  "outputs": {
+    "eligibility_state": "NOT_ASSESSED",
+    "external_contact_enabled": false,
+    "automatic_offer_enabled": false,
+    "automatic_send_enabled": false,
+    "case_study_publication_state": "NEEDS_REVIEW"
+  }
+}
