@@ -1,11 +1,11 @@
 {
   "product": "EUCONS_COMMERCIAL_OS",
   "schema_version": 2,
-  "updated_at": "2026-08-26T02:48:00+03:00",
-  "checkpoint_id": "EUCONS-CP-2026-08-26-009",
+  "updated_at": "2026-08-26T03:50:00+03:00",
+  "checkpoint_id": "EUCONS-CP-2026-08-26-010",
   "development_state": "IN_PROGRESS",
-  "current_phase": "R06_PROSPECT_DISCOVERY_CLIENT_FINDER",
-  "current_unit": "R06-CF-SCORING-001",
+  "current_phase": "R07_MATCHING_NEXT_BEST_ACTION",
+  "current_unit": "R07-PROSPECT-MATCH-001",
   "previous_terminal_assessment": {
     "state": "BLOCKED_EXTERNAL_ONLY",
     "phase": "E29",
@@ -98,7 +98,8 @@
     "R05-INBOUND-001",
     "R06-CF-CONTRACT-001",
     "R06-CF-ENGINE-001",
-    "R06-CF-SOURCE-ADAPTER-001"
+    "R06-CF-SOURCE-ADAPTER-001",
+    "R06-CF-SCORING-001"
   ],
   "market_intelligence_result": {
     "state": "PASS",
@@ -111,12 +112,12 @@
       "MI-CAP-005 PROSPECT_RESEARCH_AND_ACTION_PACK"
     ]
   },
-  "next_action": "Implement deterministic multi-signal priority scoring that separates source quality, freshness, service fit, timing and uncertainty; explain every contribution and never convert a score into proven eligibility.",
+  "next_action": "Implement deterministic prospect-to-opportunity-to-service matching against the verified read-only opportunity projection, preserving FACT/INFERENCE/UNKNOWN/CONFLICT, holding stale sources and producing an explainable next-best-action without eligibility claims.",
   "terminal_target": "PRODUCTION_READY",
   "owner_terminal_target": "PRODUCTION_GRADE_EUCONS_COMMERCIAL_OS",
   "external_handoff_allowed_only_after": "E28",
   "blocking_reason": null,
-  "last_good_checkpoint": "EUCONS-CP-2026-08-26-009",
+  "last_good_checkpoint": "EUCONS-CP-2026-08-26-010",
   "evidence": [
     "eucons/ops/EUCONS_REBASELINE_2026-08-25.json",
     "eucons/market_intelligence/EUCONS_MARKET_INTELLIGENCE_2026-08-25.json",
@@ -167,7 +168,11 @@
     "eucons/prospects/source_adapter.py",
     "eucons/prospects/fixtures/source_adapter_snapshot_non_evidence.json",
     "eucons/validation/validate_client_finder_source_adapter.py",
-    "eucons/validation/test_client_finder_source_adapter_fail_closed.py"
+    "eucons/validation/test_client_finder_source_adapter_fail_closed.py",
+    "eucons/prospects/prospect_scoring_contract.json",
+    "eucons/prospects/prospect_scoring.py",
+    "eucons/validation/validate_prospect_scoring.py",
+    "eucons/validation/test_prospect_scoring_fail_closed.py"
   ],
   "autonomy": {
     "enabled": true,
@@ -296,5 +301,31 @@
     "personal_contact_extraction": false,
     "production_prospect_records": 0,
     "activation_rule": "SOURCE_SPECIFIC_REVIEW_REQUIRED_BEFORE_REAL_SOURCE_USE"
+  },
+  "client_finder_scoring_result": {
+    "state": "PASS",
+    "semantics": "COMMERCIAL_RESEARCH_PRIORITY_NOT_ELIGIBILITY_OR_CONVERSION_PROBABILITY",
+    "positive_components": [
+      "SOURCE_QUALITY",
+      "FRESHNESS",
+      "SIGNAL_STRENGTH",
+      "SERVICE_COHERENCE",
+      "ACTIONABILITY"
+    ],
+    "uncertainty_penalties": [
+      "UNKNOWN_ASSERTIONS",
+      "LOW_CONFIDENCE_INFERENCES"
+    ],
+    "baseline_organizations": 2,
+    "validated_multi_signal_priority": "PRIORITY_HIGH_RESEARCH",
+    "validated_recommended_service": "implementation_and_reporting",
+    "unknown_assertion_penalty_points": 8,
+    "conflict_behavior": "HOLD_BEFORE_RANKING",
+    "suppression_behavior": "SUPPRESSED_BEFORE_RANKING",
+    "eligibility_state": "NOT_ASSESSED",
+    "maximum_next_state": "RESEARCH_READY",
+    "person_level_output": false,
+    "production_prospect_records": 0,
+    "external_contact": false
   }
 }
