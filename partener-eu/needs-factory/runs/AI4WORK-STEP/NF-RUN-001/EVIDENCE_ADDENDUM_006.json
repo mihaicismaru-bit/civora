@@ -1,0 +1,78 @@
+{
+  "schema_version": "nf.evidence_addendum.v0.1",
+  "run_id": "AI4WORK-STEP/NF-RUN-001",
+  "extends": [
+    "EVIDENCE_REGISTRY.json",
+    "EVIDENCE_ADDENDUM_001.json",
+    "EVIDENCE_ADDENDUM_002.json",
+    "EVIDENCE_ADDENDUM_003.json",
+    "EVIDENCE_ADDENDUM_004.json",
+    "EVIDENCE_ADDENDUM_005.json"
+  ],
+  "research_date": "2026-08-26",
+  "evidence": [
+    {
+      "id": "EV-STEP-LLL-CURRENT-CORRIGENDUM-LINKSET-2026-08-19",
+      "source": "Current STEP-LLL corrigendum reporting with direct MIPE document links",
+      "source_urls": [
+        "https://www.fonduri-structurale.ro/stiri/41053/peo-modificari-la-ghidul-solicitantului-step-lll-competente-pentru-viitor-formare-la-locul-de-munca-si-educatia-adultilor-in-tehnologiile-critice-adulti",
+        "https://grantpress.ro/2026/08/24/peo-corrigendum-la-ghidul-step-lll-pentru-formarea-adultilor-in-tehnologii-critice/"
+      ],
+      "official_document_urls": {
+        "guide_or_corrigendum_pdf": "https://mfe.gov.ro/wp-content/uploads/2026/08/fd5aba1f3322c3dbe40b7f0b7c7de9c7-1.pdf",
+        "updated_annex_4_docx": "https://mfe.gov.ro/wp-content/uploads/2026/08/f4085e5b0e4eadc8b1678e4fa470e130.docx"
+      },
+      "tier": "B1_CURRENT_REPORTING_WITH_DIRECT_A1_BINARY_LINKS",
+      "territory": "Romania",
+      "scope": "call source-version control",
+      "period": "2026-08-19/2026-08-24 reporting window",
+      "constructs": ["source_version", "call_compliance"],
+      "direct_measurement": false,
+      "facts": {
+        "fonduri_structurale_publication_date": "2026-08-19",
+        "grantpress_report_date": "2026-08-24",
+        "current_call_deadline_reported": "2026-09-30T16:00:00+03:00",
+        "updated_annex_4_reported": true,
+        "binary_links_resolve_to_mipe_mfe_domain": true
+      },
+      "binary_capture": {
+        "state": "OPEN_TIMEOUT",
+        "guide_sha256": null,
+        "annex_4_sha256": null,
+        "content_assertions_allowed": false,
+        "note": "The research environment could identify the direct official MIPE document URLs but could not retrieve exact binary bytes. Final call-compliance QA remains fail-closed until the current official files are downloaded and hashed."
+      },
+      "use": "Narrows the source-version blocker to two exact current official document URLs and reconciles publication chronology. It does not close the binary/hash gate."
+    },
+    {
+      "id": "EV-EUCONS-LEGAL-OPERATOR-MAIN-2026-08-26",
+      "source": "Current canonical EUCONS production renderer on civora/main",
+      "internal_source": "eucons/deployment/build_production_ready.py::render_privacy",
+      "tier": "A1_INTERNAL_CANONICAL_PRODUCT_SOURCE",
+      "territory": "Romania",
+      "scope": "GDPR controller binding for eucons.ro",
+      "period": "2026-08-26 current main",
+      "constructs": ["gdpr_controller_identity"],
+      "direct_measurement": true,
+      "facts": {
+        "legal_name": "EUROCONSULT SRL",
+        "cui": "14250864"
+      },
+      "limitations": [
+        "privacy/DPO contact is not yet frozen for the research form",
+        "research purpose/legal-basis wording remains separately gated before collection"
+      ],
+      "use": "Closes only the legal operator identity placeholder for the EUCONS research surface."
+    }
+  ],
+  "gap_effect": {
+    "GAP-GSCS-BINARY": "NARROWED_TO_EXACT_OFFICIAL_URLS_BUT_REMAINS_OPEN_UNTIL_BYTES_AND_SHA256_CAPTURED",
+    "EUCONS_OPERATOR_IDENTITY": "CLOSED",
+    "EUCONS_PRIVACY_CONTACT": "REMAINS_OPEN",
+    "GAP-PRIMARY-ELIGIBLE-ADULTS": "REMAINS_OPEN",
+    "GAP-PRIMARY-EMPLOYERS": "REMAINS_OPEN",
+    "GAP-SCALE-160": "REMAINS_PARTIALLY_RESOLVED_FEASIBILITY_ONLY"
+  },
+  "synthetic_data_used": false,
+  "status": "FROZEN_REAL_EVIDENCE_AND_VERSION_CONTROL_ONLY"
+}
