@@ -23,6 +23,13 @@ NEWS_MAX_AGE_HOURS = 72
 PREPARE_STATUSES = {"EXPECTED", "ANNOUNCED", "PUBLIC_CONSULTATION", "REVIEW", "PREPARE_NOW", "UPCOMING"}
 
 
+def fallback_clock(text: str) -> tuple[int, int]:
+    match = re.search(r"\b([01]?\d|2[0-3]):([0-5]\d)\b", text)
+    if match:
+        return int(match.group(1)), int(match.group(2))
+    return 23, 59
+
+
 def parse_date(value: Any) -> dt.datetime | None:
     if not value:
         return None
@@ -34,13 +41,14 @@ def parse_date(value: Any) -> dt.datetime | None:
     except Exception:
         pass
     text = str(value).lower()
+    hour, minute = fallback_clock(text)
     months = {name:i+1 for i,name in enumerate(MONTHS_RO)}
     m = re.search(r"(\d{1,2})\s+([a-zăâîșț]+)\s+(20\d{2})", text)
     if m and m.group(2) in months:
-        return dt.datetime(int(m.group(3)), months[m.group(2)], int(m.group(1)), 23, 59, tzinfo=TZ)
+        return dt.datetime(int(m.group(3)), months[m.group(2)], int(m.group(1)), hour, minute, tzinfo=TZ)
     m = re.search(r"(20\d{2})-(\d{2})-(\d{2})", text)
     if m:
-        return dt.datetime(int(m.group(1)),int(m.group(2)),int(m.group(3)),23,59,tzinfo=TZ)
+        return dt.datetime(int(m.group(1)),int(m.group(2)),int(m.group(3)),hour,minute,tzinfo=TZ)
     return None
 
 
