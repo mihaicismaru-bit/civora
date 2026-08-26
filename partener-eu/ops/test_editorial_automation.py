@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import datetime as dt
+import importlib.util
 import json
 from pathlib import Path
 from urllib.parse import urlparse
@@ -13,6 +15,11 @@ index = (WEB / 'index.html').read_text(encoding='utf-8')
 daily = json.loads((STATE / 'daily_brief.json').read_text(encoding='utf-8'))
 people = json.loads((STATE / 'people_policy.json').read_text(encoding='utf-8'))
 official = json.loads((STATE / 'people_policy_official_sources.json').read_text(encoding='utf-8'))
+
+spec = importlib.util.spec_from_file_location('partener_daily_brief', ROOT / 'partener-eu' / 'ingest' / 'build_daily_brief.py')
+assert spec and spec.loader
+brief = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(brief)
 
 assert 'daily-brief-data.js' in index and 'daily-brief.js' in index
 assert index.index('daily-brief-data.js') < index.index('daily-brief.js')
@@ -29,6 +36,70 @@ for item in daily.get('items') or []:
     public_text=' '.join(str(item.get(k) or '') for k in ('label','programme','title','summary','action'))
     assert "{'" not in public_text and 'FUNDING_COMMITMENT' not in public_text
     assert not public_text.lstrip().startswith('{')
+
+# Pure regression fixture: the homepage brief must replay deterministically and
+# must not promote stale news or ambiguous/expired OPEN dossiers.
+def qf(label: str, value: str, confidence: str = 'CONFIRMED') -> dict[str, str]:
+    return {'label': label, 'value': value, 'confidence': confidence}
+
+fixed_now = dt.datetime(2026, 8, 26, 12, 0, tzinfo=brief.TZ)
+fixture = {
+    'news': [
+        {
+            'id': 'fresh-news', 'kind': 'GUIDE_MODIFIED', 'programme': 'TEST',
+            'headline': 'Ghid modificat recent', 'standfirst': 'Actualizare oficială recentă pentru testul de freshness.',
+            'meaning': 'Trebuie reverificată documentația.', 'actions': ['Compară versiunile.'],
+            'date': '2026-08-25T12:00:00+03:00', 'utilityScore': 90,
+        },
+        {
+            'id': 'stale-2023', 'kind': 'CONSULTATION_OPENED', 'programme': 'TEST OLD',
+            'headline': 'Calendarul fondurilor europene 2023', 'standfirst': 'Eveniment istoric care nu are voie pe suprafața Ce este nou.',
+            'meaning': 'Doar referință istorică.', 'actions': ['Nu promova pe homepage.'],
+            'date': '2023-01-20', 'utilityScore': 100,
+        },
+    ],
+    'dossiers': [
+        {
+            'id': 'open-valid', 'status': 'OPEN', 'publicationState': 'PUBLISHABLE', 'programme': 'VALID',
+            'title': 'Apel deschis valid', 'quality': {'completeness': 100},
+            'quickFacts': [qf('Status', 'DESCHIS'), qf('Termen', '2026-09-05')],
+        },
+        {
+            'id': 'open-expired', 'status': 'OPEN', 'publicationState': 'PUBLISHABLE', 'programme': 'EXPIRED',
+            'title': 'Apel expirat', 'quality': {'completeness': 100},
+            'quickFacts': [qf('Status', 'DESCHIS'), qf('Termen', '2026-08-20')],
+        },
+        {
+            'id': 'open-undated', 'status': 'OPEN', 'publicationState': 'PUBLISHABLE', 'programme': 'UNDATED',
+            'title': 'Apel fără termen confirmat', 'quality': {'completeness': 100},
+            'quickFacts': [qf('Status', 'DESCHIS'), qf('Termen', 'Neconfirmat', 'UNKNOWN')],
+        },
+        {
+            'id': 'open-provisional', 'status': 'OPEN', 'publicationState': 'PROVISIONAL_FAIL_CLOSED', 'programme': 'PROVISIONAL',
+            'title': 'Apel provizoriu', 'quality': {'completeness': 100},
+            'quickFacts': [qf('Status', 'DESCHIS'), qf('Termen', '2026-09-10')],
+        },
+        {
+            'id': 'consult-current', 'status': 'PUBLIC_CONSULTATION', 'publicationState': 'PUBLISHABLE', 'programme': 'CONSULT',
+            'title': 'Consultare 2026', 'quality': {'completeness': 80},
+            'quickFacts': [qf('Status', 'ÎN CONSULTARE'), qf('Termen', '2026-09-15')],
+        },
+    ],
+}
+replay_a = brief.build_brief(fixture, fixed_now)
+replay_b = brief.build_brief(fixture, fixed_now)
+assert replay_a == replay_b, 'daily brief replay must be deterministic for the same payload and clock'
+selected = {item['id'] for item in replay_a['items']}
+assert 'brief-news-fresh-news' in selected
+assert 'brief-news-stale-2023' not in selected
+assert 'brief-dossier-open-valid' in selected
+assert 'brief-dossier-open-expired' not in selected
+assert 'brief-dossier-open-undated' not in selected
+assert 'brief-dossier-open-provisional' not in selected
+assert replay_a['policy']['newsMaxAgeHours'] == brief.NEWS_MAX_AGE_HOURS
+assert replay_a['policy']['undatedOpenExcluded'] is True
+assert replay_a['policy']['provisionalOpenExcluded'] is True
+assert replay_a['policy']['currentPrepareEvidenceRequired'] is True
 
 assert official.get('policy', {}).get('directOfficialOnly') is True
 assert official.get('policy', {}).get('signalsDoNotChangeCalls') is True
@@ -67,4 +138,11 @@ assert 'isHome()' in ui
 assert 'data-peopleall' not in ui
 assert "document.addEventListener('click'" not in ui
 
-print(json.dumps({'dailyCards':len(daily.get('items') or []),'peopleSignals':len(people.get('items') or []),'homePeople':len(people.get('homeIds') or []),'officialSources':len(sources)},ensure_ascii=False,indent=2))
+print(json.dumps({
+    'dailyCards':len(daily.get('items') or []),
+    'dailyFreshnessReplay':'PASS',
+    'newsMaxAgeHours':brief.NEWS_MAX_AGE_HOURS,
+    'peopleSignals':len(people.get('items') or []),
+    'homePeople':len(people.get('homeIds') or []),
+    'officialSources':len(sources),
+},ensure_ascii=False,indent=2))
