@@ -1,5 +1,5 @@
 {
-  "schema_version": "nf.checkpoint_status.v0.2",
+  "schema_version": "nf.checkpoint_status.v0.3",
   "run_id": "AI4WORK-STEP/NF-RUN-001",
   "checkpoint": "NF06_PRIMARY_RESEARCH",
   "status": "PRIMARY_DATA_REQUIRED_SECONDARY_GAPS_MATERIALLY_CLOSED",
@@ -20,8 +20,12 @@
     "QUESTIONNAIRE_EMPLOYERS.md",
     "eucons/research/ai4work-step/form_contract.json",
     "eucons/research/ai4work-step/ingest_contract.json",
+    "eucons/research/ai4work-step/forms_definition.json",
     "eucons/research/ai4work-step/runtime.py",
-    "eucons/research/ai4work-step/test_runtime.py"
+    "eucons/research/ai4work-step/test_runtime.py",
+    "eucons/research/ai4work-step/VALIDATION_RECEIPT_001.json",
+    "eucons/research/ai4work-step/build_research_pages.py",
+    "eucons/research/ai4work-step/DEPLOYMENT_READINESS.json"
   ],
   "secondary_research_closed_this_stage": [
     "live technical call code captured from project-specific MySMIS state",
@@ -41,7 +45,7 @@
     "confirm whether the reported 24 August corrigendum supersedes the 13 August consolidated package before final compliance QA"
   ],
   "eucons_research_runtime": {
-    "state": "IMPLEMENTATION_CANDIDATE_NOT_DEPLOYED",
+    "state": "FAIL_CLOSED_PREVIEW_BUILDER_READY_NOT_DEPLOYED",
     "crm_isolation": "CONTRACTED_FORBIDDEN",
     "production_enabled": false,
     "privacy_binding_required": [
@@ -51,7 +55,8 @@
       "research-only storage provider binding",
       "retention approval"
     ],
-    "test_state": "TESTS_AUTHORED_NOT_YET_EXECUTED_IN_REPOSITORY_CI"
+    "test_state": "LOCAL_EQUIVALENT_8_OF_8_PASS_REPOSITORY_CI_PENDING",
+    "preview_state": "NOINDEX_DISABLED_FORM_BUILDER_IMPLEMENTED_NOT_INTEGRATED_NOT_DEPLOYED"
   },
   "resume_rule": "Continue secondary verification and EUCONS runtime validation without mutating evidence truth. When real primary data are available, freeze exact raw exports and manifests, then resume NF06 through the canonical ingest contract. Synthetic TEST TWIN data must remain NON-EVIDENCE and separate from PROD.",
   "final_narrative_allowed": false
