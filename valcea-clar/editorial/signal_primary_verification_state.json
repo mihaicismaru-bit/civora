@@ -2,19 +2,129 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-26T08:19:22+03:00",
+  "generated_at": "2026-08-26T11:03:32+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-26T08:18:16+03:00",
-  "task_count": 52,
+  "queue_generated_at": "2026-08-26T11:02:24+03:00",
+  "task_count": 54,
   "primary_match_count": 0,
-  "no_match_count": 23,
+  "no_match_count": 25,
   "unrouted_count": 29,
   "target_count": 15,
   "targets_ok": 12,
   "results": [
+    {
+      "signal_id": "cc151dcdd5c67f2554cbce4d",
+      "signal_title": "32 de milioane de euro pentru investiții în Vâlcea. Ce proiecte au primit finanțare",
+      "signal_url": "https://seintamplainvalcea.ro/2026/08/26/32-de-milioane-de-euro-pentru-investitii-in-valcea-ce-proiecte-au-primit-finantare/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-26T10:20:36+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "d5ea607580075ecf1c2a802b",
+      "signal_title": "FOTO Vaideeni, șase motive de mândrie! „Miorița” se întoarce de la Cântecele Oltului cu tolba plină de premii",
+      "signal_url": "https://evenimentvalcean.ro/foto-vaideeni-sase-motive-de-mandrie-miorita-se-intoarce-de-la-cantecele-oltului-cu-tolba-plina-de-premii/",
+      "signal_publisher": "Eveniment Vâlcean",
+      "signal_published_at": "2026-08-26T09:37:07+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "dc472c8fa82cd0933ce5cf93",
+      "signal_title": "FOTO/VIDEO. Gospodărie mistuită de flăcări, noaptea trecută, într-o comună din Vâlcea",
+      "signal_url": "https://seintamplainvalcea.ro/2026/08/26/foto-video-gospodarie-mistuita-de-flacari-noaptea-trecuta-intr-o-comuna-din-valcea/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-26T08:37:34+03:00",
+      "verification_route_id": "fire_rescue_alert",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "isu-valcea-stiri-locale",
+            "name": "ISU Vâlcea — Știri locale",
+            "url": "https://isuvl.igsu.ro/stiri-locale"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "isu-valcea-comunicate",
+            "name": "ISU Vâlcea",
+            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "fafdb5053f75fdb0640f634c",
       "signal_title": "Vacanță de coșmar în Turcia, cumpărată prin Dertour. O familie din Vâlcea reclamă că a fost lăsată fără transfer la aeroport: „Nu mai aveam niciun ban disponibil”",
@@ -1092,18 +1202,6 @@
       "signal_url": "https://evenimentvalcean.ro/23-august-la-valcea-ziua-in-care-orasul-era-cuprins-de-defilari-lozinci-si-sarbatoare/",
       "signal_publisher": "Eveniment Vâlcean",
       "signal_published_at": "2026-08-23T13:09:29+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "1c22df15dfcb20f94ec73319",
-      "signal_title": "Tot Oltul cântă la Călimănești. Șapte județe și-au adus portul, jocul și cântecul la festivalul ajuns la ediția a 58-a",
-      "signal_url": "https://www.impactreal.ro/2026/08/23/tot-oltul-canta-la-calimanesti-sapte-judete-si-au-adus-portul-jocul-si-cantecul-la-festivalul-ajuns-la-editia-a-58-a/",
-      "signal_publisher": "Impact Real",
-      "signal_published_at": "2026-08-23T09:06:21+03:00",
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
