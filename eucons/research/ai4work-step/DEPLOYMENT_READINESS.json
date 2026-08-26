@@ -1,0 +1,42 @@
+{
+  "schema_version": "eucons.research_deployment_readiness.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "as_of": "2026-08-26",
+  "state": "NO_GO_NOT_DEPLOYED",
+  "implemented": [
+    "research forms are architecturally isolated from eucons/leads and CRM",
+    "adult and employer route contract defined",
+    "commercial analytics/tracking forbidden by contract",
+    "direct-identifier fields forbidden by contract",
+    "server-generated random response IDs specified",
+    "NF06 research-only ingest/export contract defined",
+    "privacy validation runtime candidate implemented",
+    "8 local-equivalent privacy/schema tests executed PASS",
+    "TEST TWIN explicitly isolated as NON-EVIDENCE"
+  ],
+  "not_yet_implemented_or_bound": [
+    "public HTML rendering of the two research forms",
+    "HTTP POST endpoint/provider adapter",
+    "research-only durable storage provider",
+    "immutable raw export and SHA-256 manifest job",
+    "repository/integration CI execution of the authored tests",
+    "production operator/privacy text binding"
+  ],
+  "privacy_external_bindings": [
+    {"item":"operator legal identity", "state":"UNRESOLVED", "note":"Euroconsult activity is established as the intended site context, but the exact legal operator identity must be frozen from authoritative company/project records before public collection."},
+    {"item":"privacy/DPO contact", "state":"UNRESOLVED"},
+    {"item":"hosting/processor/subprocessor terms", "state":"UNRESOLVED"},
+    {"item":"reverse-proxy/server logging and IP retention", "state":"UNRESOLVED"},
+    {"item":"research storage location/encryption/access policy", "state":"UNRESOLVED"},
+    {"item":"retention approval", "state":"UNRESOLVED"}
+  ],
+  "hard_separation": {
+    "commercial_form_registry": "eucons/leads/forms.json",
+    "research_namespace": "eucons/research/ai4work-step/",
+    "reuse_commercial_lead_schema": false,
+    "write_to_crm": false,
+    "join_optional_contact_to_response": false
+  },
+  "next_safe_unit": "Render static noindex research pages from the frozen questionnaires with forms disabled until an HTTP/storage provider is bound; then add adapter-level tests before any public deployment.",
+  "external_deploy_authorized": false
+}
