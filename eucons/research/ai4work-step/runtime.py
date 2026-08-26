@@ -17,24 +17,8 @@ ADULT_STATUS = {"șomer înregistrat", "persoană ocupată potențial eligibilă
 AGE_BANDS = {"30-39", "40-49", "50-59", "60+"}
 EMPLOYER_SIZE = {"1-9", "10-49", "50-249", "250+"}
 EMPLOYER_ROLE = {"management", "HR", "operațional/tehnic", "altul"}
-
-ADULT_Q08 = {"costul", "lipsa timpului", "program incompatibil", "lipsa unei oferte relevante", "distanța/deplasarea", "lipsa informației", "lipsa sprijinului angajatorului", "nu am considerat necesar", "altul"}
-ADULT_Q09 = {"rezultate factual greșite", "rezultate greu de verificat", "probleme privind datele/confidențialitatea", "nu am știut cum să formulez cererea", "integrare dificilă în aplicațiile/procesele folosite", "nu am putut evalua calitatea rezultatului", "nu am întâlnit probleme", "nu am folosit AI"}
-ADULT_Q11 = {"adaptare mai bună la postul actual", "acces la un loc de muncă nou", "schimbare de ocupație", "productivitate/calitate mai bună", "altul"}
-ADULT_Q10_KEYS = {"utilizare_digitala_functionala", "utilizarea_instrumentelor_AI", "verificarea_rezultatelor_AI", "protectia_datelor_confidentialitate", "integrarea_AI_in_flux_de_lucru"}
-
-EMPLOYER_E01 = {"da, în producție/activitate curentă", "pilot/test", "intenție în următoarele 12 luni", "nu", "nu știu"}
-EMPLOYER_E02 = {"redactare/comunicare", "analiză date", "suport clienți", "marketing/vânzări", "programare/IT", "operațiuni/producție", "HR", "documente/compliance", "automatizare fluxuri", "altul"}
-EMPLOYER_E03_KEYS = {"formularea_cerintelor", "verificarea_calitatii", "protectia_datelor", "limitele_si_riscurile_AI", "integrarea_in_procese", "definirea_fluxului_asistat_AI", "competente_digitale_generale"}
-EMPLOYER_E04 = {"da", "nu", "nu este relevant"}
-EMPLOYER_E05 = {"da, intern", "da, extern", "ambele", "nu"}
-EMPLOYER_E06 = {"cost", "timp disponibil", "lipsa furnizorilor/ofertei potrivite", "conținut prea general", "schimbare tehnologică rapidă", "dificultate de măsurare a rezultatelor", "lipsă interes intern", "lipsa unei politici clare privind AI", "altul"}
-EMPLOYER_E07 = {"semnificativ", "moderat", "puțin", "deloc", "nu putem estima"}
-EMPLOYER_E08 = {"formularea și rafinarea instrucțiunilor", "verificarea factuală/calității", "analiză și interpretare de date", "protecția datelor", "securitate digitală", "automatizarea unor pași de lucru", "integrarea AI în aplicații/procese", "documentarea și trasabilitatea rezultatelor", "supraveghere umană/decizie", "altul"}
-EMPLOYER_E10 = {"da", "posibil", "nu"}
-
-TOP_LEVEL_FIELDS = {"form_id", "notice_read_and_voluntary_participation", "profile", "answers"}
-FORBIDDEN_KEY_TOKENS = {"name", "surname", "cnp", "email", "phone", "address", "organisation_name", "organization_name", "employer_name", "cui", "ip", "user_agent", "cookie", "marketing_id", "account_id"}
+TOP_LEVEL = {"form_id", "notice_read_and_voluntary_participation", "profile", "answers"}
+FORBIDDEN_KEYS = {"name", "surname", "cnp", "email", "phone", "address", "exact_address", "organisation_name", "organization_name", "employer_name", "cui", "ip", "user_agent", "cookie_id", "marketing_id", "account_id"}
 PII_PATTERNS = {
     "email": re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b"),
     "phone": re.compile(r"(?<!\d)(?:\+?40|0)\s?7(?:[ .-]?\d){8}(?!\d)"),
@@ -42,16 +26,24 @@ PII_PATTERNS = {
     "url": re.compile(r"(?i)\b(?:https?://|www\.)\S+"),
 }
 
+ADULT_REQUIRED = {"Q01", "Q02", "Q03", "Q04", "Q05", "Q06", "Q07", "Q08", "Q09", "Q10", "Q11", "Q12"}
+ADULT_ALLOWED = ADULT_REQUIRED | {"Q07_topic"}
+EMPLOYER_REQUIRED = {"E01", "E02", "E03", "E04", "E05", "E06", "E07", "E08", "E09", "E10"}
+EMPLOYER_ALLOWED = EMPLOYER_REQUIRED | {"E04_detail"}
+ADULT_RATINGS = {"Q01", "Q03", "Q04", "Q05", "Q06"}
+ADULT_Q10_KEYS = {"utilizare_digitala_functionala", "utilizarea_instrumentelor_AI", "verificarea_rezultatelor_AI", "protectia_datelor_confidentialitate", "integrarea_AI_in_flux_de_lucru"}
+EMPLOYER_E03_KEYS = {"formularea_cerintelor", "verificarea_calitatii", "protectia_datelor", "limitele_si_riscurile_AI", "integrarea_in_procese", "definirea_fluxului_asistat_AI", "competente_digitale_generale"}
+
 
 class ResearchValidationError(ValueError):
     pass
 
 
-def load_contract(path: Path = CONTRACT_PATH) -> dict[str, Any]:
-    return json.loads(path.read_text(encoding="utf-8"))
+def load_contract() -> dict[str, Any]:
+    return json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
 
 
-def normalize_text(value: Any, limit: int) -> str:
+def clean_text(value: Any, limit: int) -> str:
     text = unicodedata.normalize("NFC", str(value or ""))
     text = re.sub(r"\s+", " ", text).strip()
     if len(text) > limit:
@@ -59,160 +51,128 @@ def normalize_text(value: Any, limit: int) -> str:
     return text
 
 
+def safe_text(value: Any, limit: int) -> str:
+    text = clean_text(value, limit)
+    hits = [label for label, pattern in PII_PATTERNS.items() if pattern.search(text)]
+    if hits:
+        raise ResearchValidationError(f"free text contains identifier-like data: {sorted(hits)}")
+    return text
+
+
 def reject_forbidden_keys(value: Any, path: str = "$") -> None:
     if isinstance(value, dict):
         for key, child in value.items():
-            key_l = str(key).lower()
-            if key_l in FORBIDDEN_KEY_TOKENS:
-                raise ResearchValidationError(f"forbidden identifier field at {path}.{key}")
+            if str(key).lower() in FORBIDDEN_KEYS:
+                raise ResearchValidationError(f"forbidden field at {path}.{key}")
             reject_forbidden_keys(child, f"{path}.{key}")
     elif isinstance(value, list):
         for idx, child in enumerate(value):
             reject_forbidden_keys(child, f"{path}[{idx}]")
 
 
-def scan_text_for_pii(text: str) -> list[str]:
-    return [label for label, pattern in PII_PATTERNS.items() if pattern.search(text)]
-
-
-def safe_free_text(value: Any, limit: int) -> str:
-    text = normalize_text(value, limit)
-    hits = scan_text_for_pii(text)
-    if hits:
-        raise ResearchValidationError(f"free text contains prohibited identifier-like data: {sorted(hits)}")
-    return text
-
-
-def require_int(value: Any, low: int, high: int, field: str) -> int:
+def rating(value: Any, low: int, high: int, field: str) -> int:
     if isinstance(value, bool) or not isinstance(value, int) or not low <= value <= high:
         raise ResearchValidationError(f"{field} must be integer {low}..{high}")
     return value
 
 
-def enum(value: Any, allowed: set[str], field: str) -> str:
-    text = normalize_text(value, 160)
-    if text not in allowed:
-        raise ResearchValidationError(f"invalid {field}")
-    return text
-
-
-def string_list(value: Any, allowed: set[str], field: str, max_items: int | None = None) -> list[str]:
-    if not isinstance(value, list):
-        raise ResearchValidationError(f"{field} must be a list")
-    if max_items is not None and len(value) > max_items:
-        raise ResearchValidationError(f"{field} allows at most {max_items} selections")
-    result: list[str] = []
-    for raw in value:
-        item = enum(raw, allowed, field)
-        if item not in result:
-            result.append(item)
-    return result
-
-
-def rating_map(value: Any, keys: set[str], field: str) -> dict[str, int]:
+def exact_rating_map(value: Any, keys: set[str], field: str) -> dict[str, int]:
     if not isinstance(value, dict) or set(value) != keys:
         raise ResearchValidationError(f"{field} must contain exactly {sorted(keys)}")
-    return {key: require_int(value[key], 1, 5, f"{field}.{key}") for key in sorted(keys)}
+    return {key: rating(value[key], 1, 5, f"{field}.{key}") for key in sorted(keys)}
+
+
+def bounded_list(value: Any, field: str, maximum: int | None = None) -> list[str]:
+    if not isinstance(value, list):
+        raise ResearchValidationError(f"{field} must be a list")
+    if maximum is not None and len(value) > maximum:
+        raise ResearchValidationError(f"{field} allows at most {maximum} selections")
+    out: list[str] = []
+    for raw in value:
+        item = safe_text(raw, 160)
+        if item and item not in out:
+            out.append(item)
+    return out
 
 
 def validate_profile(profile: Any, form_id: str) -> dict[str, Any]:
     if not isinstance(profile, dict):
         raise ResearchValidationError("profile must be an object")
     if form_id == "AI4WORK_ADULTS_V1":
-        allowed = {"region", "status", "age_band", "occupational_family"}
-        if set(profile) - allowed:
-            raise ResearchValidationError("adult profile contains unsupported fields")
+        required = {"region", "status", "age_band", "occupational_family"}
+        if set(profile) != required:
+            raise ResearchValidationError(f"adult profile fields must be exactly {sorted(required)}")
+        if profile["region"] not in REGIONS or profile["status"] not in ADULT_STATUS or profile["age_band"] not in AGE_BANDS:
+            raise ResearchValidationError("invalid adult profile category")
         return {
-            "region": enum(profile.get("region"), REGIONS, "profile.region"),
-            "status": enum(profile.get("status"), ADULT_STATUS, "profile.status"),
-            "age_band": enum(profile.get("age_band"), AGE_BANDS, "profile.age_band"),
-            "occupational_family": safe_free_text(profile.get("occupational_family"), 80),
+            "region": profile["region"],
+            "status": profile["status"],
+            "age_band": profile["age_band"],
+            "occupational_family": safe_text(profile["occupational_family"], 80),
         }
-    allowed = {"region", "sector_aggregated", "size_band", "respondent_role"}
-    if set(profile) - allowed:
-        raise ResearchValidationError("employer profile contains unsupported fields")
+    required = {"region", "sector_aggregated", "size_band", "respondent_role"}
+    if set(profile) != required:
+        raise ResearchValidationError(f"employer profile fields must be exactly {sorted(required)}")
+    if profile["region"] not in REGIONS or profile["size_band"] not in EMPLOYER_SIZE or profile["respondent_role"] not in EMPLOYER_ROLE:
+        raise ResearchValidationError("invalid employer profile category")
     return {
-        "region": enum(profile.get("region"), REGIONS, "profile.region"),
-        "sector_aggregated": safe_free_text(profile.get("sector_aggregated"), 80),
-        "size_band": enum(profile.get("size_band"), EMPLOYER_SIZE, "profile.size_band"),
-        "respondent_role": enum(profile.get("respondent_role"), EMPLOYER_ROLE, "profile.respondent_role"),
+        "region": profile["region"],
+        "sector_aggregated": safe_text(profile["sector_aggregated"], 80),
+        "size_band": profile["size_band"],
+        "respondent_role": profile["respondent_role"],
     }
 
 
 def validate_adult_answers(answers: Any) -> dict[str, Any]:
-    if not isinstance(answers, dict):
-        raise ResearchValidationError("answers must be an object")
-    allowed = {"Q01", "Q02", "Q03", "Q04", "Q05", "Q06", "Q07", "Q07_topic", "Q08", "Q09", "Q10", "Q11", "Q12"}
-    unknown = set(answers) - allowed
-    if unknown:
-        raise ResearchValidationError(f"unsupported adult answers: {sorted(unknown)}")
-    required = {"Q01", "Q02", "Q03", "Q04", "Q05", "Q06", "Q07", "Q08", "Q09", "Q10", "Q11", "Q12"}
-    missing = required - set(answers)
-    if missing:
-        raise ResearchValidationError(f"missing adult answers: {sorted(missing)}")
+    if not isinstance(answers, dict) or not ADULT_REQUIRED.issubset(answers) or set(answers) - ADULT_ALLOWED:
+        raise ResearchValidationError("adult answer schema mismatch")
+    out = dict(answers)
+    for field in ADULT_RATINGS:
+        out[field] = rating(answers[field], 1, 5, field)
+    out["Q02"] = rating(answers["Q02"], 0, 4, "Q02")
     if not isinstance(answers["Q07"], bool):
         raise ResearchValidationError("Q07 must be boolean")
-    normalized = {
-        "Q01": require_int(answers["Q01"], 1, 5, "Q01"),
-        "Q02": require_int(answers["Q02"], 0, 4, "Q02"),
-        "Q03": require_int(answers["Q03"], 1, 5, "Q03"),
-        "Q04": require_int(answers["Q04"], 1, 5, "Q04"),
-        "Q05": require_int(answers["Q05"], 1, 5, "Q05"),
-        "Q06": require_int(answers["Q06"], 1, 5, "Q06"),
-        "Q07": answers["Q07"],
-        "Q07_topic": safe_free_text(answers.get("Q07_topic"), 120) if answers["Q07"] else "",
-        "Q08": string_list(answers["Q08"], ADULT_Q08, "Q08", 3),
-        "Q09": string_list(answers["Q09"], ADULT_Q09, "Q09"),
-        "Q10": rating_map(answers["Q10"], ADULT_Q10_KEYS, "Q10"),
-        "Q11": enum(answers["Q11"], ADULT_Q11, "Q11"),
-        "Q12": safe_free_text(answers["Q12"], 500),
-    }
-    return normalized
+    out["Q07_topic"] = safe_text(answers.get("Q07_topic"), 120) if answers["Q07"] else ""
+    out["Q08"] = bounded_list(answers["Q08"], "Q08", 3)
+    out["Q09"] = bounded_list(answers["Q09"], "Q09")
+    out["Q10"] = exact_rating_map(answers["Q10"], ADULT_Q10_KEYS, "Q10")
+    out["Q11"] = safe_text(answers["Q11"], 160)
+    out["Q12"] = safe_text(answers["Q12"], 500)
+    return out
 
 
 def validate_employer_answers(answers: Any) -> dict[str, Any]:
-    if not isinstance(answers, dict):
-        raise ResearchValidationError("answers must be an object")
-    allowed = {"E01", "E02", "E03", "E04", "E04_detail", "E05", "E06", "E07", "E08", "E09", "E10"}
-    unknown = set(answers) - allowed
-    if unknown:
-        raise ResearchValidationError(f"unsupported employer answers: {sorted(unknown)}")
-    required = {"E01", "E02", "E03", "E04", "E05", "E06", "E07", "E08", "E09", "E10"}
-    missing = required - set(answers)
-    if missing:
-        raise ResearchValidationError(f"missing employer answers: {sorted(missing)}")
-    e04 = enum(answers["E04"], EMPLOYER_E04, "E04")
-    return {
-        "E01": enum(answers["E01"], EMPLOYER_E01, "E01"),
-        "E02": string_list(answers["E02"], EMPLOYER_E02, "E02"),
-        "E03": rating_map(answers["E03"], EMPLOYER_E03_KEYS, "E03"),
-        "E04": e04,
-        "E04_detail": safe_free_text(answers.get("E04_detail"), 350) if e04 == "da" else "",
-        "E05": enum(answers["E05"], EMPLOYER_E05, "E05"),
-        "E06": string_list(answers["E06"], EMPLOYER_E06, "E06", 3),
-        "E07": enum(answers["E07"], EMPLOYER_E07, "E07"),
-        "E08": string_list(answers["E08"], EMPLOYER_E08, "E08", 5),
-        "E09": safe_free_text(answers["E09"], 500),
-        "E10": enum(answers["E10"], EMPLOYER_E10, "E10"),
-    }
+    if not isinstance(answers, dict) or not EMPLOYER_REQUIRED.issubset(answers) or set(answers) - EMPLOYER_ALLOWED:
+        raise ResearchValidationError("employer answer schema mismatch")
+    out = dict(answers)
+    out["E01"] = safe_text(answers["E01"], 160)
+    out["E02"] = bounded_list(answers["E02"], "E02")
+    out["E03"] = exact_rating_map(answers["E03"], EMPLOYER_E03_KEYS, "E03")
+    out["E04"] = safe_text(answers["E04"], 80)
+    out["E04_detail"] = safe_text(answers.get("E04_detail"), 350) if answers["E04"] == "da" else ""
+    out["E05"] = safe_text(answers["E05"], 80)
+    out["E06"] = bounded_list(answers["E06"], "E06", 3)
+    out["E07"] = safe_text(answers["E07"], 80)
+    out["E08"] = bounded_list(answers["E08"], "E08", 5)
+    out["E09"] = safe_text(answers["E09"], 500)
+    out["E10"] = safe_text(answers["E10"], 80)
+    return out
 
 
 def validate_submission(payload: Any, contract: dict[str, Any] | None = None) -> dict[str, Any]:
     contract = contract or load_contract()
-    if contract.get("crm_integration") != "FORBIDDEN":
-        raise ResearchValidationError("research contract must forbid CRM integration")
-    if not isinstance(payload, dict):
-        raise ResearchValidationError("payload must be an object")
-    if set(payload) != TOP_LEVEL_FIELDS:
-        raise ResearchValidationError(f"top-level fields must be exactly {sorted(TOP_LEVEL_FIELDS)}")
+    if contract.get("crm_integration") != "FORBIDDEN" or contract.get("commercial_analytics") != "FORBIDDEN":
+        raise ResearchValidationError("research isolation contract is not fail-closed")
+    if not isinstance(payload, dict) or set(payload) != TOP_LEVEL:
+        raise ResearchValidationError(f"top-level fields must be exactly {sorted(TOP_LEVEL)}")
     reject_forbidden_keys(payload)
-    if payload.get("notice_read_and_voluntary_participation") is not True:
+    if payload["notice_read_and_voluntary_participation"] is not True:
         raise ResearchValidationError("voluntary participation acknowledgement is required")
-    form_id = payload.get("form_id")
+    form_id = payload["form_id"]
     if form_id not in {"AI4WORK_ADULTS_V1", "AI4WORK_EMPLOYERS_V1"}:
         raise ResearchValidationError("unknown form_id")
-    profile = validate_profile(payload.get("profile"), form_id)
-    answers = validate_adult_answers(payload.get("answers")) if form_id == "AI4WORK_ADULTS_V1" else validate_employer_answers(payload.get("answers"))
+    profile = validate_profile(payload["profile"], form_id)
+    answers = validate_adult_answers(payload["answers"]) if form_id == "AI4WORK_ADULTS_V1" else validate_employer_answers(payload["answers"])
     return {
         "schema_version": 1,
         "research_id": contract["research_id"],
@@ -222,13 +182,13 @@ def validate_submission(payload: Any, contract: dict[str, Any] | None = None) ->
         "received_at": datetime.now(timezone.utc).isoformat(),
         "profile": profile,
         "answers": answers,
-        "synthetic": false if False else False
+        "synthetic": False,
     }
 
 
 def main() -> int:
     import argparse
-    parser = argparse.ArgumentParser(description="Validate one AI4WORK research submission and emit the canonical analytical record.")
+    parser = argparse.ArgumentParser(description="Validate one AI4WORK research submission and emit a research-only analytical record.")
     parser.add_argument("payload", type=Path)
     args = parser.parse_args()
     try:
