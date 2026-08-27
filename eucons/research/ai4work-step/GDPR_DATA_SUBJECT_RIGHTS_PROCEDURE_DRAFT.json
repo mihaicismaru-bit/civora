@@ -1,5 +1,5 @@
 {
-  "schema_version": "eucons.ai4work_data_subject_rights.v0.4",
+  "schema_version": "eucons.ai4work_data_subject_rights.v0.5",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "date": "2026-08-27",
   "status": "DRAFT_BINDING_REQUIRED_BEFORE_COLLECTION",
@@ -36,8 +36,10 @@
     "lookup": "Locate only by opaque response_id in the isolated research store; do not search CRM, optional-contact records, IP logs, user-agent logs or device data.",
     "access": "Return only the respondent-level analytical record associated with the receipt after the controller applies the approved request-authentication procedure; do not expose internal idempotency digests or other respondents.",
     "rectification": "If applicable and technically safe, replace only the validated preset analytical values for that response_id and regenerate integrity metadata; otherwise document why rectification cannot be performed without undermining integrity and offer erasure/re-submission where appropriate.",
-    "erasure": "Delete the analytical row, any active analysis hold and its idempotency receipt atomically from live research storage. To prevent a delayed transport retry from recreating data that the respondent already erased, the reference adapter retains only the opaque response_id as a non-analytical replay-suppression marker. The marker contains no questionnaire answers, body digest, raw Idempotency-Key, identity, contact, IP, user-agent, device, CRM or employer data. Its live PROD lifecycle must be separately bounded and approved in the retention schedule before collection. Residual backups follow the validated non-renewing backup rotation in the retention schedule.",
+    "erasure": "Delete the analytical row, any active analysis hold and its idempotency receipt atomically from live research storage. To prevent a delayed transport retry from recreating data that the respondent already erased, the reference adapter retains only the opaque response_id as a non-analytical replay-suppression marker. The reference adapter has no default retention and refuses an erasure that would create this marker unless a finite UTC not-after boundary is explicitly injected. At or after that boundary, replay markers are purged automatically before replay checks. The marker contains no questionnaire answers, body digest, raw Idempotency-Key, identity, contact, IP, user-agent, device, CRM or employer data. The live PROD boundary must be separately bounded and approved in the retention schedule before collection. Residual backups follow the validated non-renewing backup rotation in the retention schedule.",
     "erasure_replay_suppression": "OPAQUE_RESPONSE_ID_ONLY_NO_ANSWERS_NO_BODY_DIGEST_NOT_ANALYTICAL",
+    "erasure_replay_marker_reference_adapter_boundary": "REQUIRED_FINITE_UTC_NOT_AFTER_NO_DEFAULT",
+    "erasure_replay_marker_reference_adapter_expiry": "AUTO_PURGE_AT_OR_AFTER_CONFIGURED_BOUNDARY_BEFORE_REPLAY_CHECK",
     "erased_records_replay_blocked": true,
     "erasure_replay_marker_export": "FORBIDDEN",
     "erasure_replay_marker_prod_retention": "UNRESOLVED_UNTIL_CONTROLLER_APPROVES_MINIMUM_NECESSARY_BOUND",
@@ -63,7 +65,7 @@
   },
   "backup_and_deletion": {
     "retention_reference": "GDPR_RETENTION_SCHEDULE_DRAFT.json",
-    "rule": "Live erasure must be evidenced by row/object counts and a timestamped deletion receipt. The minimal replay-suppression marker is not analytical evidence, must never enter NF06/export and requires its own controller-approved bounded lifecycle. Provider backups may retain residual encrypted copies only for the validated pre-existing rotation and must not silently restore deleted or held records into active analysis."
+    "rule": "Live erasure must be evidenced by row/object counts and a timestamped deletion receipt. The minimal replay-suppression marker is not analytical evidence, must never enter NF06/export and requires its own controller-approved bounded lifecycle. The reference adapter proves the fail-closed shape by requiring an explicit finite boundary and providing deterministic expiry/purge behavior; it does not select the PROD duration. Provider backups may retain residual encrypted copies only for the validated pre-existing rotation and must not silently restore deleted or held records into active analysis."
   },
   "required_before_prod": [
     "controller determination approved",
@@ -72,9 +74,9 @@
     "privacy notice updated with the final rights procedure",
     "processor/subprocessor and provider logging/backup/deletion facts frozen",
     "production research-only adapter supports receipt lookup, bounded analysis holds, atomic erasure and anti-replay suppression so erased data cannot be recreated by a delayed retry",
-    "controller approves the minimum necessary retention bound and deletion evidence for non-analytical erasure replay markers",
+    "controller approves the minimum necessary replay-marker retention bound and the live binding injects a finite UTC not-after boundary with automatic purge/deletion evidence",
     "restriction/objection handling is operationally approved for the live adapter",
-    "provider-bound TEST TWIN rights smoke proves held records cannot enter analytical/NF06 export and erased records cannot be resurrected by retry",
+    "provider-bound TEST TWIN rights smoke proves held records cannot enter analytical/NF06 export, erased records cannot be resurrected before the approved replay boundary, and replay markers expire at the approved boundary",
     "procedure approval reference and SHA-256 are frozen in the PROD activation manifest"
   ],
   "test_twin": {
