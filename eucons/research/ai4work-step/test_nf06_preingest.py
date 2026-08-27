@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import copy
 import hashlib
 import unittest
 
@@ -8,10 +7,14 @@ import nf06_preingest as NF06
 import runtime as RUNTIME
 from test_runtime import adult_payload, employer_payload
 
+ADULT_CHANNEL = "CH-ADULT001"
+EMPLOYER_CHANNEL = "CH-EMPLOY01"
+CHANNEL_REGISTER_SHA = "a" * 64
+
 
 def normalized_records(*, synthetic: bool = False) -> list[dict]:
-    adult = RUNTIME.validate_submission(adult_payload())
-    employer = RUNTIME.validate_submission(employer_payload())
+    adult = RUNTIME.validate_submission(adult_payload(), recruitment_channel_id=ADULT_CHANNEL)
+    employer = RUNTIME.validate_submission(employer_payload(), recruitment_channel_id=EMPLOYER_CHANNEL)
     adult["response_id"] = "resp-adult-001"
     adult["received_at"] = "2026-08-28T09:00:00+00:00"
     employer["response_id"] = "resp-employer-001"
@@ -34,7 +37,8 @@ def collection_frame(records: list[dict], *, prod: bool) -> tuple[dict, bytes]:
         },
         "collection_started_at": "2026-08-28T08:00:00+00:00",
         "collection_closed_at": "2026-08-28T18:00:00+00:00",
-        "collection_channels": ["eucons.ro first-party research forms"],
+        "collection_channels": [ADULT_CHANNEL, EMPLOYER_CHANNEL],
+        "collection_channel_register_sha256": CHANNEL_REGISTER_SHA,
         "source_system": "eucons.ro",
         "source_export_sha256": hashlib.sha256(source_bytes).hexdigest(),
         "direct_identifiers_collected": False,
@@ -68,6 +72,9 @@ class NF06PreingestTests(unittest.TestCase):
         self.assertEqual(manifest["record_count"], 2)
         self.assertEqual(manifest["form_counts"]["AI4WORK_ADULTS_V1"], 1)
         self.assertEqual(manifest["form_counts"]["AI4WORK_EMPLOYERS_V1"], 1)
+        self.assertEqual(manifest["channel_counts"], {ADULT_CHANNEL: 1, EMPLOYER_CHANNEL: 1})
+        self.assertEqual(manifest["dominant_channel_share"], 0.5)
+        self.assertTrue(manifest["channel_membership_validated_against_collection_frame"])
         rendered = NF06.manifest_json_bytes(manifest).decode("utf-8")
         self.assertNotIn("redactare și documente", rendered)
         self.assertNotIn("compliance/verificare documente", rendered)
@@ -121,6 +128,20 @@ class NF06PreingestTests(unittest.TestCase):
                 del frame[field]
                 with self.assertRaises(NF06.NF06PreingestError):
                     NF06.build_preingest_manifest(records, collection_frame=frame, source_bytes=source_bytes, prod=True)
+
+    def test_channel_register_hash_and_record_membership_are_required(self):
+        records = normalized_records()
+        frame, source_bytes = collection_frame(records, prod=True)
+        del frame["collection_channel_register_sha256"]
+        with self.assertRaises(NF06.NF06PreingestError):
+            NF06.build_preingest_manifest(records, collection_frame=frame, source_bytes=source_bytes, prod=True)
+
+        records2 = normalized_records()
+        records2[0]["recruitment_channel_id"] = "CH-OTHER001"
+        frame2, source_bytes2 = collection_frame(records2, prod=True)
+        frame2["collection_channels"] = [ADULT_CHANNEL, EMPLOYER_CHANNEL]
+        with self.assertRaises(NF06.NF06PreingestError):
+            NF06.build_preingest_manifest(records2, collection_frame=frame2, source_bytes=source_bytes2, prod=True)
 
     def test_duplicate_response_id_is_rejected(self):
         records = normalized_records()
