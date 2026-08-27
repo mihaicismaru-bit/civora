@@ -4,6 +4,7 @@ from __future__ import annotations
 import importlib.util
 import json
 from copy import deepcopy
+from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -12,6 +13,7 @@ CONTRACT = json.loads((EUCONS / "leads" / "lead_contract.json").read_text(encodi
 FORMS = json.loads((EUCONS / "leads" / "forms.json").read_text(encoding="utf-8"))
 EVALUATION_CONTRACT = json.loads((EUCONS / "leads" / "research_evaluation_handoff_contract.json").read_text(encoding="utf-8"))
 COMMERCIAL_REVIEW_CONTRACT = json.loads((EUCONS / "crm" / "research_evaluation_review_contract.json").read_text(encoding="utf-8"))
+PIPELINE_INGEST_REQUEST_CONTRACT = json.loads((EUCONS / "crm" / "pipeline_ingest_request_contract.json").read_text(encoding="utf-8"))
 PIPELINE_CONTRACT = json.loads((EUCONS / "crm" / "pipeline_contract.json").read_text(encoding="utf-8"))
 
 
@@ -36,6 +38,15 @@ def load_evaluation_handoff():
 def load_commercial_review():
     path = EUCONS / "crm" / "research_evaluation_review.py"
     spec = importlib.util.spec_from_file_location("e11_r10_commercial_review_tests", path)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_pipeline_ingest_request():
+    path = EUCONS / "crm" / "pipeline_ingest_request.py"
+    spec = importlib.util.spec_from_file_location("e11_r10_pipeline_ingest_request_tests", path)
     module = importlib.util.module_from_spec(spec)
     assert spec.loader is not None
     spec.loader.exec_module(module)
@@ -79,6 +90,16 @@ def valid_research_match():
     }
 
 
+def valid_human_decision():
+    return {
+        "decision": "APPROVE_PIPELINE_ENTRY",
+        "decision_source": "HUMAN",
+        "scope": "NON_WRITING_INGEST_REQUEST_ONLY",
+        "reviewer_ref": "HUMAN-SYNTH-E11-TEST",
+        "decided_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+    }
+
+
 def must_fail(engine, payload, fragment: str):
     try:
         engine.process(payload, CONTRACT, FORMS)
@@ -110,10 +131,25 @@ def review_must_fail(review, evaluation, fragment: str, contract=None, pipeline_
     raise AssertionError(f"expected commercial review failure containing {fragment!r}")
 
 
+def ingest_must_fail(ingest, review, decision, fragment: str, contract=None, pipeline_contract=None):
+    try:
+        ingest.build_pipeline_ingest_request(
+            review,
+            decision,
+            contract or PIPELINE_INGEST_REQUEST_CONTRACT,
+            pipeline_contract or PIPELINE_CONTRACT,
+        )
+    except ValueError as exc:
+        assert fragment.lower() in str(exc).lower(), (fragment, str(exc))
+        return
+    raise AssertionError(f"expected pipeline ingest request failure containing {fragment!r}")
+
+
 def main() -> None:
     engine = load_engine()
     handoff = load_evaluation_handoff()
     review = load_commercial_review()
+    ingest = load_pipeline_ingest_request()
     base = valid_payload()
 
     spam = dict(base, website="filled-by-bot")
@@ -181,6 +217,26 @@ def main() -> None:
     assert commercial_review["crm_write_enabled"] is False
     assert review.build_commercial_review(evaluation, COMMERCIAL_REVIEW_CONTRACT, PIPELINE_CONTRACT)["review_id"] == commercial_review["review_id"]
 
+    decision = valid_human_decision()
+    ingest_request = ingest.build_pipeline_ingest_request(
+        commercial_review, decision, PIPELINE_INGEST_REQUEST_CONTRACT, PIPELINE_CONTRACT
+    )
+    assert ingest_request["record_state"] == "HUMAN_APPROVED_PIPELINE_INGEST_REQUEST"
+    assert ingest_request["source_review_id"] == commercial_review["review_id"]
+    assert ingest_request["requested_pipeline_entry"] == commercial_review["proposed_pipeline_entry"]
+    assert ingest_request["approval_receipt"]["decision_source"] == "HUMAN"
+    assert ingest_request["human_approval_recorded"] is True
+    assert ingest_request["persistence_executed"] is False
+    assert ingest_request["requires_separate_persistence_step"] is True
+    assert ingest_request["pipeline_write_enabled"] is False
+    assert ingest_request["crm_write_enabled"] is False
+    assert ingest_request["external_contact_enabled"] is False
+    assert ingest_request["automatic_offer_enabled"] is False
+    assert ingest_request["automatic_send_enabled"] is False
+    assert ingest.build_pipeline_ingest_request(
+        commercial_review, decision, PIPELINE_INGEST_REQUEST_CONTRACT, PIPELINE_CONTRACT
+    )["request_id"] == ingest_request["request_id"]
+
     not_matched = deepcopy(research)
     not_matched["state"] = "REQUIRES_VERIFICATION"
     handoff_must_fail(handoff, not_matched, "not evaluation-ready")
@@ -241,7 +297,35 @@ def main() -> None:
     automatic_offer_pipeline["commercial_gate"]["automatic_offer"] = True
     review_must_fail(review, evaluation, "automatic offer", pipeline_contract=automatic_offer_pipeline)
 
-    print("PASS: E11 lead, research evaluation and commercial review boundaries fail closed")
+    source_pipeline_write = deepcopy(commercial_review)
+    source_pipeline_write["pipeline_write_enabled"] = True
+    ingest_must_fail(ingest, source_pipeline_write, decision, "pipeline_write_enabled")
+
+    machine_decision = deepcopy(decision)
+    machine_decision["decision_source"] = "AUTOMATION"
+    ingest_must_fail(ingest, commercial_review, machine_decision, "decision source")
+
+    writing_scope = deepcopy(decision)
+    writing_scope["scope"] = "WRITE_PIPELINE_NOW"
+    ingest_must_fail(ingest, commercial_review, writing_scope, "scope")
+
+    naive_timestamp = deepcopy(decision)
+    naive_timestamp["decided_at"] = datetime.now().replace(microsecond=0).isoformat()
+    ingest_must_fail(ingest, commercial_review, naive_timestamp, "timezone")
+
+    person_decision = deepcopy(decision)
+    person_decision["reviewer_email"] = "synthetic@example.invalid"
+    ingest_must_fail(ingest, commercial_review, person_decision, "person-level")
+
+    ingest_contract_failed_open = deepcopy(PIPELINE_INGEST_REQUEST_CONTRACT)
+    ingest_contract_failed_open["output"]["pipeline_write_enabled"] = True
+    ingest_must_fail(ingest, commercial_review, decision, "pipeline_write_enabled", ingest_contract_failed_open)
+
+    persistent_pipeline_for_ingest = deepcopy(PIPELINE_CONTRACT)
+    persistent_pipeline_for_ingest["production_persistence_enabled"] = True
+    ingest_must_fail(ingest, commercial_review, decision, "production persistence", pipeline_contract=persistent_pipeline_for_ingest)
+
+    print("PASS: E11 lead, research evaluation, commercial review and non-writing ingest request boundaries fail closed")
 
 
 if __name__ == "__main__":
