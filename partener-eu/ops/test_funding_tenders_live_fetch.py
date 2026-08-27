@@ -73,16 +73,21 @@ def main():
     assert_true(len(flat) == 3, "corporate Search wrapper should flatten to three records")
     assert_true(flat[0]["identifier"] == [OPEN_ID] and flat[0]["title"] == "Open fixture topic", "Search wrapper metadata/content binding drift")
 
+    # Mirrors the observed official Facet payload shape: rawValue holds the
+    # reference code and value holds the human-readable Commission label.
     facet_payloads = {
         "broad": {
-            "facets": [
-                {"code": "31094502", "label": "Open"},
-                {"code": "31094501", "label": "Forthcoming"},
-            ]
+            "facets": [{
+                "name": "status",
+                "values": [
+                    {"count": 2, "rawValue": "31094502", "value": "Open for submission"},
+                    {"count": 1, "rawValue": "31094501", "value": "Forthcoming"},
+                ],
+            }]
         }
     }
-    assert_true(mod.resolve_reference_label(facet_payloads.values(), "31094502") == "Open", "OPEN label must come from Facet payload")
-    assert_true(mod.resolve_reference_label(facet_payloads.values(), "31094501") == "Forthcoming", "forthcoming label must come from Facet payload")
+    assert_true(mod.resolve_reference_label(facet_payloads.values(), "31094502") == "Open", "OPEN label must be resolved from official rawValue/value Facet evidence")
+    assert_true(mod.resolve_reference_label(facet_payloads.values(), "31094501") == "Forthcoming", "forthcoming label must be resolved from official rawValue/value Facet evidence")
     assert_true(mod.resolve_reference_label(facet_payloads.values(), "99999999") is None, "unknown reference code must not be guessed")
 
     open_url = mod.topic_url(OPEN_ID)
@@ -106,15 +111,13 @@ def main():
     )
     mod.validate_live_evidence(evidence)
     rows = {row["identifier"]: row for row in evidence["batch"]["records"]}
-    assert_true(rows[OPEN_ID]["observation_state"] == "OPEN_CALL", "Facet-resolved OPEN plus exact readback should classify OPEN_CALL")
-    assert_true(rows[UPCOMING_ID]["observation_state"] == "FORTHCOMING_CALL", "Facet-resolved forthcoming must remain distinct")
+    assert_true(rows[OPEN_ID]["observation_state"] == "OPEN_CALL", "official Facet OPEN plus exact readback should classify OPEN_CALL")
+    assert_true(rows[UPCOMING_ID]["observation_state"] == "FORTHCOMING_CALL", "official Facet forthcoming must remain distinct")
     assert_true(rows[UNKNOWN_ID]["observation_state"] == "UNKNOWN", "unresolved status code must fail closed despite successful topic readback")
     assert_true(evidence["stats"]["unresolved_status_codes"] == ["99999999"], "unresolved status evidence must be explicit")
     assert_true(evidence["publication_effect"] == "NONE" and evidence["canonical_corpus_mutation"] is False, "live fetch must remain non-publishing")
     assert_true(all(row["publish_authorized"] is False and row["material_fact_use"] is False for row in rows.values()), "no live record may self-authorize publication")
 
-    # Pipeline semantics remain higher-priority than an OPEN label when the
-    # existing normalizer receives a pipeline observation.
     pipeline = dict(flat[0])
     pipeline["statusLabel"] = "Open"
     pipeline["observationState"] = "PROPOSAL"
@@ -123,7 +126,7 @@ def main():
     planned = normalize_payload([pipeline], fetched_at=FETCHED_AT, run_id=RUN_ID, verified_authority_urls=[open_url])
     assert_true(planned["records"][0]["observation_state"] == "PROGRAMMING_PIPELINE", "proposal/programming record must never become OPEN_CALL")
 
-    print("PASS Funding & Tenders live boundary: multipart Search/Facet, official label resolution, exact topic readback and zero publication")
+    print("PASS Funding & Tenders live boundary: official rawValue/value Facet labels, exact topic readback and zero publication")
 
 
 if __name__ == "__main__":
