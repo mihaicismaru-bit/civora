@@ -1,8 +1,8 @@
 name: VÂLCEA CLAR Public Article Media Health
 
 # A verified visual in the canonical feed is not considered published until the
-# public story HTML contains an actual <img> element for that visual. Metadata,
-# repository manifests and bridge source are diagnostic only.
+# public story HTML contains an actual <img> element for that visual. Metadata
+# and repository manifests are diagnostic only.
 on:
   workflow_dispatch:
   workflow_run:
@@ -17,14 +17,12 @@ on:
     paths:
       - 'valcea-clar/site/runtime/live-feed.json'
       - 'valcea-clar/site/runtime/stiri/**'
-      - 'valcea-clar/site/chatgpt-sites-live-bridge.js'
       - 'valcea-clar/scripts/probe_public_story_media.py'
       - '.github/workflows/valcea-clar-public-media-health.yml'
   pull_request:
     paths:
       - 'valcea-clar/site/runtime/live-feed.json'
       - 'valcea-clar/site/runtime/stiri/**'
-      - 'valcea-clar/site/chatgpt-sites-live-bridge.js'
       - 'valcea-clar/scripts/probe_public_story_media.py'
       - '.github/workflows/valcea-clar-public-media-health.yml'
 
