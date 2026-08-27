@@ -1,5 +1,5 @@
 {
-  "schema_version": "eucons.research_storage_contract.v0.4",
+  "schema_version": "eucons.research_storage_contract.v0.5",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "controller": {
     "legal_name": null,
@@ -21,11 +21,13 @@
   "record_rules": {
     "synthetic": false,
     "response_id": "server-derived opaque SHA-256 from research_id + form_id + one-submit UUIDv4 idempotency key; raw idempotency key is never stored/exported",
+    "recruitment_channel_id": "MANDATORY_OPAQUE_FIRST_PARTY_BATCH_ID_CH_FORMAT; must identify only a documented dissemination batch and must never encode respondent, organisation, device, CRM/contact or tracking identity",
+    "recruitment_channel_forbidden_derivations": ["referrer URL", "UTM payload", "cookie", "IP address", "user agent", "device fingerprint", "CRM/contact id"],
     "raw_bytes_sha256": "MANDATORY",
     "normalized_bytes_sha256": "MANDATORY",
     "body_sha256": "TRANSPORT_METADATA_ONLY_NOT_EXPORTED",
     "same_response_id_same_body": "REPLAY_ORIGINAL_RECEIPT_NO_SECOND_ANALYTICAL_ROW",
-    "same_response_id_different_body": "FAIL_CLOSED",
+    "same_response_id_different_body_or_channel": "FAIL_CLOSED",
     "repository_persistence": "FORBIDDEN",
     "direct_identifiers": "FORBIDDEN_IN_ANALYTICAL_STORE",
     "analytical_free_text": "NOT_COLLECTED_IN_CURRENT_PREPRODUCTION_INSTRUMENT"
@@ -64,6 +66,7 @@
     "HTTPS endpoint with CORS limited to https://eucons.ro and https://www.eucons.ro",
     "server-side schema and direct-identifier validation before persistence",
     "retry-safe idempotency preserving one analytical row per submit attempt",
+    "bind each accepted response to an opaque recruitment_channel_id from the frozen approved channel register without using referrer/UTM/cookie/IP/device/CRM tracking",
     "encryption in transit and at rest where supported by provider",
     "role-based access limited to designated research staff",
     "verify actual reverse-proxy/application logging and retention so request bodies/raw idempotency keys are not logged and IP/device metadata never enters analytical exports",
@@ -72,11 +75,9 @@
     "NF06 export must pass PRIMARY_RESPONSE_INGEST_CONTRACT"
   ],
   "repository_validation": {
-    "pr": 695,
-    "validated_head": "7b3101cc5492b004eaf9af184b0a2d2a48901334",
-    "research_gate_run_id": 33051519175,
-    "result": "PASS",
-    "scope": "runtime/storage/idempotency/preview/tracking/fail-closed repository gate only; not provider production binding"
+    "candidate_pr": 724,
+    "status_rule": "exact-head CI must be green after the last code change; repository success never substitutes for provider-bound production validation",
+    "result": "PENDING_EXACT_HEAD_AFTER_CHANNEL_PROVENANCE_CHANGE"
   },
   "go_no_go": {
     "operator_identity": "OPEN_FAIL_CLOSED",
@@ -87,7 +88,8 @@
     "actual_server_log_retention": "OPEN",
     "production_research_store": "OPEN",
     "retention_execution": "OPEN",
-    "test_reference_adapter": "EXACT_HEAD_RESEARCH_GATE_PASS_AT_RECORDED_IMPLEMENTATION_HEAD",
+    "channel_provenance_model": "IMPLEMENTED_IN_REFERENCE_CANDIDATE_PENDING_EXACT_HEAD_CI",
+    "test_reference_adapter": "PENDING_EXACT_HEAD_CI_AFTER_CHANNEL_PROVENANCE_CHANGE",
     "status": "NO_GO_FOR_REAL_COLLECTION"
   }
 }
