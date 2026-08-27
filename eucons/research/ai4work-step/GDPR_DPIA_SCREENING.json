@@ -1,0 +1,51 @@
+{
+  "schema_version": "eucons.ai4work_gdpr_dpia_screening.v0.2",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "screening_date": "2026-08-27",
+  "controller": null,
+  "controller_role_state": "UNRESOLVED_BEFORE_COLLECTION",
+  "purpose": "needs-analysis primary research on digital and AI skills among adults and employers in three Romanian NUTS-2 regions",
+  "authority_basis": {
+    "edpb_dpia_page": "https://www.edpb.europa.eu/topics/accountability-and-compliance-tools/data-protection-impact-assessment_en",
+    "edpb_sme_guidance": "https://www.edpb.europa.eu/sme/be-compliant/be-compliant_en",
+    "edpb_2026_template": "https://www.edpb.europa.eu/public-consultations/template-for-data-protection-impact-assessment_en"
+  },
+  "design_assumptions_required_for_this_screening": [
+    "controller identity remains unresolved until documented and approved from actual purpose/essential-means authority",
+    "no direct identifiers in analytical forms",
+    "no free-text fields in analytical forms; respondent input is restricted to controlled categories, booleans, ratings and matrices",
+    "no special-category or criminal-conviction data",
+    "no employee monitoring or systematic tracking",
+    "no advertising, fingerprinting, cross-site tracking or CRM linkage",
+    "no automated decision about a respondent and no legal or similarly significant effect",
+    "no matching with external datasets",
+    "no raw IP address or user-agent in analytical records or NF06 exports",
+    "raw respondent-level records are not sent to third-party generative-AI/LLM services; any AI-assisted analysis operates only on sufficiently de-identified/aggregated material",
+    "small reported cells are suppressed/combined when n < 5"
+  ],
+  "edpb_high_risk_criteria_screen": {
+    "evaluation_or_scoring_of_individuals": false,
+    "automated_decision_with_legal_or_similar_effect": false,
+    "systematic_monitoring": false,
+    "sensitive_or_highly_personal_data": false,
+    "large_scale_personal_data_processing": "NOT_EXPECTED; re-screen if sample volume/scope materially expands",
+    "matching_or_combining_datasets": false,
+    "vulnerable_data_subjects": "POSSIBLE_CONTEXTUAL_ONLY; unemployed adults may warrant added care but the form does not make decisions about them",
+    "innovative_technology_on_raw_personal_data": false,
+    "prevents_right_or_service_access": false
+  },
+  "provisional_result": "NO_HIGH_RISK_TRIGGER_IDENTIFIED_UNDER_CURRENT_MINIMISED_DESIGN",
+  "mandatory_re_screen_triggers": [
+    "free-text response fields are reintroduced",
+    "raw respondent records or profiles are sent to an external AI/LLM provider",
+    "special-category data are introduced",
+    "direct identifiers or stable respondent tracking are introduced",
+    "respondent data are matched to CRM, employment, public-register or other datasets",
+    "individual scoring/profiling is used for eligibility, recruitment, training access or other decisions",
+    "sample scale or monitoring changes enough to plausibly qualify as large-scale/high-risk processing",
+    "hosting/logging architecture makes analytical records routinely linkable to IP/device identity"
+  ],
+  "decision_state": "SCREENING_PREPARED_CONTROLLER_SIGNOFF_REQUIRED_BEFORE_COLLECTION",
+  "production_collection_enabled": false,
+  "note": "This is an engineering/compliance screening record, not external legal advice. If any design assumption is false, the screening fails closed and must be repeated before collection."
+}

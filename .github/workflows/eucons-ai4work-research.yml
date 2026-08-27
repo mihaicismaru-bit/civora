@@ -1,0 +1,87 @@
+name: EUCONS AI4WORK Research Gate
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/research/ai4work-step/**'
+      - '.github/workflows/eucons-ai4work-research.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/research/ai4work-step/**'
+      - '.github/workflows/eucons-ai4work-research.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-ai4work-research-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  research-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Run AI4WORK runtime, storage, idempotency, HTTP, NF06, TEST TWIN chain, controller, preview-minimization and collection-frame tests
+        working-directory: eucons/research/ai4work-step
+        run: python -m unittest -v test_runtime.py test_research_storage.py test_http_idempotency.py test_http_endpoint.py test_nf06_preingest.py test_e2e_test_twin_chain.py test_controller_determination.py test_preview_minimization.py test_collection_frame.py
+      - name: Render preview-only research pages
+        working-directory: eucons/research/ai4work-step
+        run: python build_research_pages.py --target /tmp/ai4work-research-preview
+      - name: Verify three research preview pages exist
+        shell: bash
+        run: |
+          set -euo pipefail
+          count="$(find /tmp/ai4work-research-preview -name index.html -type f | wc -l | tr -d ' ')"
+          test "$count" = "3"
+      - name: Reject third-party commercial tracking in research preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RIE '(google-analytics|googletagmanager|gtag\(|facebook\.com/tr|fbq\(|hotjar|clarity\.ms|segment\.com|mixpanel)' /tmp/ai4work-research-preview; then
+            echo 'Third-party commercial tracking detected in AI4WORK research preview' >&2
+            exit 1
+          fi
+      - name: Reject unproven controller identity in research preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RIE 'Operator:</strong>[[:space:]]*EUROCONSULT SRL' /tmp/ai4work-research-preview; then
+            echo 'Unproven GDPR controller identity leaked into AI4WORK research preview' >&2
+            exit 1
+          fi
+      - name: Verify collection, controller and collection-frame remain fail-closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('eucons/research/ai4work-step')
+          contract = json.loads((root / 'form_contract.json').read_text(encoding='utf-8'))
+          assert contract.get('production_enabled') is False
+          assert contract.get('crm_integration') == 'FORBIDDEN'
+          assert contract.get('commercial_analytics') == 'FORBIDDEN'
+          notice = contract.get('pre_form_notice') or {}
+          assert notice.get('operator_status') == 'UNRESOLVED_BEFORE_COLLECTION'
+          assert notice.get('operator_legal_name') is None
+          assert notice.get('operator_cui') is None
+          controller_record = json.loads((root / 'CONTROLLER_DETERMINATION_DRAFT.json').read_text(encoding='utf-8'))
+          assert controller_record.get('controller') is None
+          assert controller_record.get('approved') is False
+          assert controller_record.get('collection_enabled') is False
+          assert controller_record.get('nf06_reference_eligible') is False
+          frame = json.loads((root / 'COLLECTION_FRAME_DRAFT.json').read_text(encoding='utf-8'))
+          assert frame.get('frame_status') == 'DRAFT_NOT_APPROVED_FOR_PROD'
+          assert frame.get('evidence_class') == 'METHOD_PLAN_NOT_EVIDENCE'
+          assert frame.get('collection_enabled') is False
+          assert frame.get('approval', {}).get('approved_for_prod') is False
+          assert frame.get('nf06_handoff', {}).get('eligible_now') is False
+          print('PASS: AI4WORK collection, controller identity and collection frame remain fail-closed')
+          PY

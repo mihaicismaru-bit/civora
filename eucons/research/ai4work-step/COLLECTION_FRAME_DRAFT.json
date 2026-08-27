@@ -1,0 +1,160 @@
+{
+  "schema_version": "eucons.ai4work_collection_frame.v0.3",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "collection_frame_id": "AI4WORK-STEP-PROD-FRAME-DRAFT-001",
+  "frame_status": "DRAFT_NOT_APPROVED_FOR_PROD",
+  "evidence_class": "METHOD_PLAN_NOT_EVIDENCE",
+  "purpose": "Pre-production sampling, recruitment and provenance plan for real adult and employer responses. This file is a method plan, not evidence and not proof that any respondent has been recruited.",
+  "collection_enabled": false,
+  "approval": {
+    "approved": false,
+    "approved_for_prod": false,
+    "controller_determination_reference": null,
+    "controller_approval_reference": null,
+    "privacy_notice_version": null,
+    "processor_binding_reference": null,
+    "server_log_profile_reference": null,
+    "retention_schedule_reference": null,
+    "production_store_binding_reference": null,
+    "collection_channel_register_sha256": null
+  },
+  "populations": {
+    "adults": {
+      "instrument": "AI4WORK_ADULTS_V1",
+      "eligibility_alignment": {
+        "age": "over 29 years",
+        "status": ["registered unemployed", "employed person potentially eligible"],
+        "geography": ["Sud-Vest Oltenia", "Sud-Muntenia", "Centru"]
+      },
+      "claim_boundary": "Research responses describe respondents only. They are not automatically project participants and cannot prove future project eligibility without the separate official group-target procedure."
+    },
+    "employers": {
+      "instrument": "AI4WORK_EMPLOYERS_V1",
+      "geography": ["Sud-Vest Oltenia", "Sud-Muntenia", "Centru"],
+      "claim_boundary": "Employer responses are organisational perceptions and reported practices; they do not establish population-wide prevalence without an appropriate probability sample."
+    }
+  },
+  "sampling_design": {
+    "type": "targeted multi-channel non-probability research with explicit coverage controls",
+    "representativeness_claim_allowed": false,
+    "weighting_allowed": false,
+    "project_activity_as_need_evidence": false,
+    "synthetic_records_allowed_in_prod": false,
+    "primary_objective": "triangulate secondary evidence with direct, real respondent evidence on skill gaps, AI use, barriers, task/process fit and preferred development needs",
+    "coverage_dimensions": {
+      "adults": ["region", "status", "age_band", "occupational_family"],
+      "employers": ["region", "sector_aggregated", "size_band", "respondent_role"]
+    },
+    "provisional_readiness_thresholds": {
+      "status": "METHOD_RULE_NOT_EVIDENCE",
+      "adults_total_valid_min": 120,
+      "adults_valid_min_per_region": 30,
+      "employers_total_valid_min": 45,
+      "employers_valid_min_per_region": 10,
+      "independent_recruitment_channels_min_per_region": 2,
+      "single_channel_share_max": 0.70,
+      "note": "Thresholds are operational adequacy gates for a non-probability needs study, not statistical power or representativeness claims. QA may require more responses when coverage is materially imbalanced."
+    }
+  },
+  "collection_channels_policy": {
+    "allowed_examples": [
+      "public institutional dissemination",
+      "employer/professional association dissemination",
+      "employment-service or training-network dissemination",
+      "direct neutral invitation through documented research partners"
+    ],
+    "forbidden": [
+      "commercial advertising tracking audiences",
+      "CRM retargeting or lead scoring",
+      "incentives conditional on project enrolment",
+      "coercive workplace participation",
+      "fabricated or synthetic responses"
+    ],
+    "channel_register_required": true,
+    "channel_register_sha256_required_before_prod": true,
+    "analytic_record_field": "recruitment_channel_id",
+    "analytic_record_field_format": "CH-[A-Z0-9]{8,32}",
+    "analytic_record_field_meaning": "opaque first-party dissemination-batch identifier; never a respondent, organisation, device, CRM-contact or tracking identifier",
+    "record_to_frame_membership_required": true,
+    "forbidden_channel_derivations": [
+      "referrer URL",
+      "UTM payload",
+      "cookie",
+      "IP address",
+      "user agent",
+      "device fingerprint",
+      "CRM/contact identifier"
+    ],
+    "per_invitation_batch_fields": [
+      "channel_id",
+      "channel_type",
+      "region_scope",
+      "audience_scope",
+      "invitation_version",
+      "opened_at",
+      "closed_at",
+      "distributor_role",
+      "non_coercion_confirmed"
+    ]
+  },
+  "privacy_and_separation": {
+    "direct_identifiers_collected": false,
+    "crm_linkage": "FORBIDDEN",
+    "commercial_tracking": "FORBIDDEN",
+    "storage_class": "RESEARCH_ONLY_SEPARATE_FROM_CRM",
+    "raw_ip_in_analytic_dataset": false,
+    "user_agent_in_analytic_dataset": false,
+    "free_text_in_analytic_forms": false,
+    "optional_contact_collection": "NOT_PART_OF_ANALYTIC_FORM; if later needed, must be a separate unlinked system with its own purpose, notice and retention"
+  },
+  "duplicate_and_fraud_boundary": {
+    "transport_retry_duplicates": "prevented by first-party idempotency contract",
+    "same_person_multiple_independent_submissions": "cannot be reliably detected without adding identity/device linkage and therefore must be disclosed as a residual limitation",
+    "mitigation": [
+      "neutral invitation asks for one response per person/organisation",
+      "channel monitoring for anomalous bursts or structurally identical records without using fingerprinting",
+      "sensitivity analysis excludes suspicious batches only when an objective documented rule is met"
+    ]
+  },
+  "qa_stop_rules": {
+    "may_close_collection_only_if": [
+      "all required GDPR/provider/live-path gates are approved and referenced",
+      "both instruments have real valid responses",
+      "all three regions meet the provisional minimum coverage thresholds or a documented QA exception explains why further collection is infeasible",
+      "the frozen channel register hash is present and every response carries a declared opaque recruitment channel id",
+      "no single recruitment channel exceeds the maximum share unless a documented sensitivity analysis shows conclusions are not channel-driven",
+      "coverage across major profile dimensions is reported, including empty or sparse cells",
+      "adversarial QA tests conclusions with and without dominant channels and sparse strata",
+      "source export is frozen, hashed and passes NF06 pre-ingest"
+    ],
+    "must_continue_collection_if": [
+      "a region or respondent population is absent",
+      "a material conclusion depends on a sparse cell",
+      "channel provenance is missing or a record channel is outside the frozen channel register",
+      "channel concentration materially changes the ranking",
+      "privacy or provenance controls are incomplete"
+    ]
+  },
+  "analysis_claims": {
+    "allowed": [
+      "descriptive distributions among respondents",
+      "cross-tabulated patterns with sparse-cell suppression",
+      "convergence or divergence between adult, employer and secondary evidence",
+      "ranked needs with explicit evidence-strength and uncertainty labels"
+    ],
+    "forbidden": [
+      "population prevalence estimates presented as representative",
+      "causal claims from cross-sectional survey responses",
+      "treating project activities, planned participant numbers or curricula as proof of need",
+      "treating TEST TWIN results as empirical evidence"
+    ]
+  },
+  "nf06_handoff": {
+    "eligible_now": false,
+    "required_frame_status_for_prod": "APPROVED_FOR_PROD",
+    "test_twin_frame_status": "TEST_TWIN_ONLY",
+    "test_twin_evidence_class": "TEST_TWIN_NON_EVIDENCE"
+  },
+  "merge_authorized": false,
+  "deploy_authorized": false
+}
