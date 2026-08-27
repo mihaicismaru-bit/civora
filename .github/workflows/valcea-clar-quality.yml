@@ -39,21 +39,29 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - name: Guard retired GPT Sites surface
+      - name: Guard retired static export surface
         shell: bash
         run: |
           set -euo pipefail
           active_paths=(.github/workflows valcea-clar/scripts valcea-clar/site valcea-clar/dist)
-          if git ls-files -- "${active_paths[@]}" | grep -Eiq 'chatgpt-sites|gpt-sites'; then
-            echo 'Retired GPT Sites path reintroduced into an active VÂLCEA CLAR surface.' >&2
-            git ls-files -- "${active_paths[@]}" | grep -Ei 'chatgpt-sites|gpt-sites' >&2 || true
+          legacy_path_a="chatgpt""-sites"
+          legacy_path_b="gpt""-sites"
+          legacy_label_a="ChatGPT"" Sites"
+          legacy_label_b="GPT"" Sites"
+          legacy_builder="build_""sites_export.py"
+          legacy_contract="public_ux_""export_contract.py"
+          legacy_path_regex="${legacy_path_a}|${legacy_path_b}"
+          legacy_content_regex="${legacy_label_a}|${legacy_label_b}|${legacy_path_a}|${legacy_path_b}|${legacy_builder}|${legacy_contract}"
+          if git ls-files -- "${active_paths[@]}" | grep -Eiq "$legacy_path_regex"; then
+            echo 'Retired static export path reintroduced into an active VÂLCEA CLAR surface.' >&2
+            git ls-files -- "${active_paths[@]}" | grep -Ei "$legacy_path_regex" >&2 || true
             exit 1
           fi
-          if git grep -nEi 'ChatGPT Sites|GPT Sites|chatgpt-sites|gpt-sites|build_sites_export\.py|public_ux_export_contract\.py' -- "${active_paths[@]}"; then
-            echo 'Retired GPT Sites reference reintroduced into an active VÂLCEA CLAR surface.' >&2
+          if git grep -nEi "$legacy_content_regex" -- "${active_paths[@]}"; then
+            echo 'Retired static export reference reintroduced into an active VÂLCEA CLAR surface.' >&2
             exit 1
           fi
-          echo 'Retired GPT Sites surface guard: PASS'
+          echo 'Retired static export surface guard: PASS'
       - name: Validate site-engine ownership
         run: python valcea-clar/scripts/validate_site_engine_ownership.py
       - name: Validate social-publication ownership
