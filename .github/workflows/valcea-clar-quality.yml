@@ -120,10 +120,7 @@ jobs:
       - name: Static web smoke test
         run: python valcea-clar/scripts/smoke_web.py
       - name: JavaScript syntax check
-        run: |
-          node --check valcea-clar/web/app.js
-          node --check valcea-clar/site/chatgpt-sites-live-bridge.js
-          node --check valcea-clar/site/chatgpt-sites-route-bridge.js
+        run: node --check valcea-clar/web/app.js
       - name: Validate public legal bridge
         run: python valcea-clar/scripts/validate_public_legal_bridge.py
       - name: Source radar deterministic self-test
@@ -140,71 +137,10 @@ jobs:
           python valcea-clar/scripts/public_ux_story_integrity.py --check
           python valcea-clar/scripts/public_ux_manifest.py --check
           python valcea-clar/scripts/smoke_web.py
-      - name: Build ChatGPT Sites synchronization payload
-        run: python valcea-clar/scripts/build_sites_export.py
-      - name: Overlay canonical runtime into synchronization payload
+      - name: Finalize canonical runtime presentation
         run: |
           set -euo pipefail
-          python valcea-clar/scripts/public_ux_overlay.py
-          python valcea-clar/scripts/public_ux_legal.py
-          python valcea-clar/scripts/public_ux_export_contract.py
-      - name: Validate synchronization manifest and site integration
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-
-          root = Path('valcea-clar/dist/chatgpt-sites')
-          manifest = json.loads((root / 'manifest.json').read_text(encoding='utf-8'))
-          assert manifest['target']['canonical_domain'] == 'valceaclar.ro'
-          assert manifest['target']['platform'] == 'ChatGPT Sites'
-          assert manifest['target']['create_parallel_site'] is False
-          assert manifest['target']['public_ux_contract'] == 'valcea-clar-public-ux-v1'
-          assert manifest['target']['navigation_contract'] == 'valcea-clar-primary-v2'
-          meta = json.loads(Path('valcea-clar/web/data/meta.json').read_text(encoding='utf-8'))
-          assert manifest['counts']['public_places'] == meta['place_count']
-          assert manifest['counts']['public_creators'] == meta['creator_count']
-          assert manifest['counts']['hidden_candidates'] == meta['candidate_count']
-          assert manifest['policy']['candidate_records_are_hidden'] is True
-          assert manifest['policy']['material_facts_autopublish'] is False
-          integration = manifest['site_integration']
-          assert integration['section']['path'] == '/unde-iesim/'
-          assert integration['section']['primary_nav']['enabled'] is True
-          assert integration['homepage_module']['enabled'] is True
-          assert integration['homepage_module']['items_source'] == 'site/homepage-module.json'
-          homepage = json.loads((root / 'site/homepage-module.json').read_text(encoding='utf-8'))
-          assert len(homepage['items']) <= integration['homepage_module']['max_items']
-          assert all(item['path'].startswith('/unde-iesim/local/') for item in homepage['items'])
-          assert (root / 'site/integration.json').is_file()
-
-          runtime_feed = json.loads(Path('valcea-clar/site/runtime/live-feed.json').read_text(encoding='utf-8'))
-          live_feed = json.loads((root / 'live-feed.json').read_text(encoding='utf-8'))
-          runtime_ids = [str(item['id']) for item in runtime_feed.get('stories', [])]
-          export_ids = [str(item['id']) for item in live_feed.get('stories', [])]
-          assert runtime_feed.get('publication_model') == 'continuous_story_first'
-          assert live_feed.get('publication_model') == 'continuous_story_first'
-          assert runtime_feed.get('story_count') == len(runtime_ids)
-          assert live_feed.get('story_count') == len(export_ids) == len(runtime_ids)
-          assert export_ids == runtime_ids
-          for story_id in runtime_ids:
-              assert (root / 'stiri' / story_id / 'index.html').is_file(), story_id
-          assert not (root / 'stiri' / 'olanesti-bridge-monitor' / 'index.html').is_file()
-          assert (root / 'stiri/index.html').is_file()
-          assert (root / 'despre/index.html').is_file()
-          assert (root / 'stiri/ansambluri-rezidentiale-ramnicu-valcea/index.html').is_file()
-          redirect = (root / 'stiri/ansambluri-rezidentiale-ramnicu-valcea/index.html').read_text(encoding='utf-8')
-          assert 'noindex,follow' in redirect and 'url=/stiri/' in redirect
-          assert manifest['public_ux']['same_navigation_everywhere'] is True
-          assert manifest['public_ux']['cross_category_fill'] is False
-          assert manifest['public_ux']['monitoring_is_news'] is False
-          for item in manifest['files']:
-              assert (root / item['path']).is_file(), item['path']
-          print('ChatGPT Sites synchronization and canonical public UX integration: PASS')
-          PY
-      - name: Upload ChatGPT Sites synchronization payload
-        uses: actions/upload-artifact@v7
-        with:
-          name: valcea-clar-chatgpt-sites-${{ github.sha }}
-          path: valcea-clar/dist/chatgpt-sites
-          if-no-files-found: error
-          retention-days: 14
+          python valcea-clar/scripts/build_legal_pages.py --self-test
+          python valcea-clar/scripts/overlay_runtime_export.py
+          python valcea-clar/scripts/build_legal_pages.py --check
+          python valcea-clar/scripts/smoke_web.py
