@@ -168,16 +168,23 @@ base.render_home = render_home
 base.render_news_index = render_news_index
 
 
+def ranked_reader_lead(feed: dict[str, Any]) -> dict[str, Any] | None:
+    """Resolve the same lead story that the freshness-first renderer uses."""
+    archive = load_json(base.ARCHIVE, {"stories": []})
+    stories, _live_ids = base.union_stories(feed, archive)
+    return next((row for row in stories if isinstance(row, dict) and row.get("id")), None)
+
+
 def validate_media_projection() -> dict[str, int]:
     home = (RUNTIME / "index.html").read_text(encoding="utf-8")
     news = (RUNTIME / "stiri" / "index.html").read_text(encoding="utf-8")
     feed = load_json(RUNTIME / "live-feed.json", {"stories": []})
-    first = next((row for row in feed.get("stories") or [] if isinstance(row, dict) and row.get("id")), None)
+    first = ranked_reader_lead(feed)
     if not first:
-        raise SystemExit("Media projection validation requires a live story")
+        raise SystemExit("Media projection validation requires a reader-facing story")
     expected = media_for_story(str(first["id"]))
     if expected and f'data-story-image="{first["id"]}"' not in home:
-        raise SystemExit(f"Homepage lead media missing: {first['id']}")
+        raise SystemExit(f"Homepage ranked-lead media missing: {first['id']}")
     if 'data-story-image=' not in home:
         raise SystemExit("Homepage contains no story photographs")
     if 'data-story-image=' not in news:
