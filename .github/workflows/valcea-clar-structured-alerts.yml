@@ -56,7 +56,7 @@ jobs:
           python valcea-clar/scripts/compose_structured_alerts.py --self-test
           python valcea-clar/scripts/prune_volatile_json_changes.py --self-test
 
-      - name: Ingest current geo-scoped INFOTRAFIC alerts
+      - name: Ingest current structured primary alerts
         run: |
           python local-news-os/core/structured_alert_ingest.py \
             --instance valcea \
@@ -80,9 +80,19 @@ jobs:
           assert events['publication_authority']=='PRIMARY_STRUCTURED_EVENT_ONLY'
           for row in events.get('events',[]):
               assert row.get('source_tier')=='T1'
-              assert row.get('issued_at')
               assert row.get('source_url')
               assert row.get('body_sha256')
+              parser=row.get('parser')
+              if parser == 'RO_INFOTRAFIC_DETAIL_V1':
+                  assert row.get('issued_at')
+                  assert row.get('source_time_basis') == 'official_issue_time'
+              elif parser == 'RO_UTILITY_WATER_INTERRUPTION_LISTING_V1':
+                  assert row.get('event_start') and row.get('event_end')
+                  assert row.get('source_time_basis') == 'official_service_window'
+                  assert (row.get('structured') or {}).get('utility') == 'water'
+                  assert row.get('reader_copy_generated') is False
+              else:
+                  raise AssertionError(f'unsupported structured alert parser: {parser}')
           print({'status':'PASS','events':events.get('event_count',0)})
           PY
 
