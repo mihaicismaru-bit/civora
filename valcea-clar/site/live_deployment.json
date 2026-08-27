@@ -1,28 +1,28 @@
 {
-  "schema_version": "2.2",
+  "schema_version": "2.3",
   "product": "VÂLCEA CLAR public site",
   "environment": "production",
-  "state": "BLOCKED_EXTERNAL_PRESENTATION_STALE",
+  "state": "READY_HTTP_ACCEPTED",
   "canonical_domain": "valceaclar.ro",
   "production_url": "https://valceaclar.ro/",
   "canonical_data_source": "https://github.com/mihaicismaru-bit/civora/tree/main/valcea-clar",
   "repository_runtime_ready": true,
-  "public_http_acceptance_ready": false,
-  "blocker": "ChatGPT Sites public presentation has not demonstrated the current canonical live-feed/runtime. Repository publication is not equivalent to public visibility.",
+  "public_http_acceptance_ready": true,
+  "blocker": null,
   "presentation_layer": {
-    "provider": "ChatGPT Sites",
-    "site": "existing valceaclar.ro site",
+    "provider": "CANONICAL_STATIC_RUNTIME",
+    "site": "valceaclar.ro",
     "execution_owner": false,
     "content_source": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json",
     "refresh_seconds": 60,
-    "status": "STALE_OR_FETCH_NOT_RUNNING",
-    "structural_republish_required": true
+    "status": "HTTP_ACCEPTED",
+    "structural_republish_required": false
   },
   "last_public_http_acceptance": {
-    "status": "STALE_HISTORICAL_ONLY",
-    "verified_at_utc": "2026-08-16T21:53:16Z",
-    "workflow_run_id": 31974794296,
-    "note": "Historical acceptance must not clear current publication/readback gates."
+    "status": "PASS",
+    "verified_at_utc": "2026-08-27T09:16:36Z",
+    "workflow_run_id": 33057798217,
+    "note": "Public HTTP Health passed on the verified runtime/media retirement head later merged through PR #725."
   },
   "historical_vercel": {
     "status": "NOT_CONFIGURED",
@@ -31,7 +31,7 @@
   },
   "custom_domain": {
     "name": "valceaclar.ro",
-    "status": "ACTIVE_BUT_STALE_PRESENTATION"
+    "status": "ACTIVE_HTTP_ACCEPTED"
   },
   "required_public_acceptance": {
     "http_200_routes": [
