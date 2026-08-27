@@ -48,7 +48,15 @@ jobs:
             echo 'Third-party commercial tracking detected in AI4WORK research preview' >&2
             exit 1
           fi
-      - name: Verify collection remains disabled in contract
+      - name: Reject unproven controller identity in research preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RIE 'Operator:</strong>[[:space:]]*EUROCONSULT SRL' /tmp/ai4work-research-preview; then
+            echo 'Unproven GDPR controller identity leaked into AI4WORK research preview' >&2
+            exit 1
+          fi
+      - name: Verify collection remains disabled and controller remains fail-closed in contract
         shell: bash
         run: |
           set -euo pipefail
@@ -60,5 +68,9 @@ jobs:
           assert contract.get('production_enabled') is False
           assert contract.get('crm_integration') == 'FORBIDDEN'
           assert contract.get('commercial_analytics') == 'FORBIDDEN'
-          print('PASS: AI4WORK collection remains fail-closed')
+          notice = contract.get('pre_form_notice') or {}
+          assert notice.get('operator_status') == 'UNRESOLVED_BEFORE_COLLECTION'
+          assert notice.get('operator_legal_name') is None
+          assert notice.get('operator_cui') is None
+          print('PASS: AI4WORK collection and controller identity remain fail-closed')
           PY
