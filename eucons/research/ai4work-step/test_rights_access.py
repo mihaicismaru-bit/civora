@@ -122,7 +122,7 @@ class RightsAccessTests(unittest.TestCase):
                 encoding="utf-8"
             )
         )
-        self.assertEqual(procedure["schema_version"], "eucons.ai4work_data_subject_rights.v0.7")
+        self.assertEqual(procedure["schema_version"], "eucons.ai4work_data_subject_rights.v0.8")
         self.assertIn("gdpr_article_15", procedure["legal_design_anchors"])
         operations = procedure["research_store_operations"]
         self.assertEqual(
@@ -135,6 +135,25 @@ class RightsAccessTests(unittest.TestCase):
             "NOT_IMPLEMENTED_CONTROLLER_OPERATION_REQUIRED",
         )
         self.assertEqual(procedure["test_twin"]["classification"], "TEST_TWIN_NON_EVIDENCE")
+        self.assertFalse(procedure["collection_enabled"])
+
+    def test_rights_applicability_remains_fail_closed_until_final_lawful_basis(self):
+        procedure = json.loads(
+            (Path(__file__).with_name("GDPR_DATA_SUBJECT_RIGHTS_PROCEDURE_DRAFT.json")).read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertIn("gdpr_article_20", procedure["legal_design_anchors"])
+        applicability = procedure["rights_applicability"]
+        self.assertEqual(applicability["lawful_basis_status"], "UNRESOLVED_BEFORE_PROD")
+        self.assertIn("LEGITIMATE_INTEREST", applicability["proposed_basis"])
+        self.assertIn("NOT_APPLICABLE_IF_FINAL_BASIS_IS_LEGITIMATE_INTEREST", applicability["portability"])
+        self.assertIn("MUST_BE_IMPLEMENTED_BEFORE_PROD", applicability["portability"])
+        self.assertIn("MUST_BE_IMPLEMENTED_BEFORE_PROD", applicability["consent_withdrawal"])
+        self.assertEqual(
+            procedure["research_store_operations"]["portability_reference_adapter"],
+            "NOT_ENABLED_PENDING_FINAL_LEGAL_BASIS_APPLICABILITY_DECISION",
+        )
         self.assertFalse(procedure["collection_enabled"])
 
 
