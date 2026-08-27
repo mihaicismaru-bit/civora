@@ -2,7 +2,6 @@
 """Render legal pages with the same public navigation and masthead."""
 from __future__ import annotations
 
-import shutil
 from pathlib import Path
 
 import public_ux_reset as ux
@@ -10,7 +9,6 @@ import public_ux_reset as ux
 ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "site"
 RUNTIME = SITE / "runtime"
-DIST = ROOT / "dist" / "chatgpt-sites"
 LEGAL = SITE / "legal" / "legal_pages.json"
 NAV = SITE / "navigation.json"
 BASE = "https://valceaclar.ro"
@@ -36,10 +34,7 @@ def main() -> int:
         runtime = RUNTIME / slug / "index.html"
         runtime.parent.mkdir(parents=True, exist_ok=True)
         runtime.write_text(html, encoding="utf-8")
-        dist = DIST / slug / "index.html"
-        dist.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(runtime, dist)
-    print("VÂLCEA CLAR public UX legal shell: PASS")
+    print("VÂLCEA CLAR public UX legal runtime: PASS")
     return 0
 
 
