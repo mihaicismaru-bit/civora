@@ -39,6 +39,21 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
+      - name: Guard retired GPT Sites surface
+        shell: bash
+        run: |
+          set -euo pipefail
+          active_paths=(.github/workflows valcea-clar/scripts valcea-clar/site valcea-clar/dist)
+          if git ls-files -- "${active_paths[@]}" | grep -Eiq 'chatgpt-sites|gpt-sites'; then
+            echo 'Retired GPT Sites path reintroduced into an active VÂLCEA CLAR surface.' >&2
+            git ls-files -- "${active_paths[@]}" | grep -Ei 'chatgpt-sites|gpt-sites' >&2 || true
+            exit 1
+          fi
+          if git grep -nEi 'ChatGPT Sites|GPT Sites|chatgpt-sites|gpt-sites|build_sites_export\.py|public_ux_export_contract\.py' -- "${active_paths[@]}"; then
+            echo 'Retired GPT Sites reference reintroduced into an active VÂLCEA CLAR surface.' >&2
+            exit 1
+          fi
+          echo 'Retired GPT Sites surface guard: PASS'
       - name: Validate site-engine ownership
         run: python valcea-clar/scripts/validate_site_engine_ownership.py
       - name: Validate social-publication ownership
