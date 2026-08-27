@@ -1,0 +1,75 @@
+{
+  "schema_version": "eucons.ai4work_gdpr_dpia_screening.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "status": "DRAFT_CONTROLLER_REVIEW_REQUIRED_BEFORE_COLLECTION",
+  "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
+  "approved": false,
+  "collection_enabled": false,
+  "screening_conclusion": "UNRESOLVED_BEFORE_CONTROLLER_AND_DPO_REVIEW",
+  "legal_basis_for_screening": {
+    "gdpr_article_35": "https://eur-lex.europa.eu/eli/reg/2016/679/oj",
+    "edpb_sme_dpia_guide": "https://www.edpb.europa.eu/sme/be-compliant/be-compliant_en",
+    "anspdcp_decision_174_2018": "https://www.dataprotection.ro/servlet/ViewDocument?id=1556",
+    "edpb_dpia_template_notice_2026_04_14": "https://www.edpb.europa.eu/news/enhancing-compliance-and-consistency-edpb-adopts-dpia-template_en"
+  },
+  "processing_design_facts": {
+    "purpose": "adult and employer needs research for AI4WORK STEP; aggregate needs analysis only",
+    "direct_identifiers": "FORBIDDEN_BY_CONTRACT",
+    "special_category_data": "FORBIDDEN_BY_CONTRACT",
+    "criminal_conviction_data": "FORBIDDEN_BY_CONTRACT",
+    "systematic_public_area_monitoring": false,
+    "profiling_or_person_level_scoring": false,
+    "automated_decisions_with_legal_or_similarly_significant_effect": false,
+    "crm_or_contact_dataset_matching": "FORBIDDEN",
+    "device_fingerprinting": "FORBIDDEN",
+    "commercial_tracking": "FORBIDDEN",
+    "individual_employment_decisions": "FORBIDDEN",
+    "respondent_level_results_to_employers": "FORBIDDEN",
+    "participation_tied_to_employment_or_service": false,
+    "research_store_separate_from_crm": true,
+    "test_twin_policy": "TEST_TWIN_NON_EVIDENCE_PERMANENTLY_NON_PROMOTABLE"
+  },
+  "edpb_screening_criteria": {
+    "evaluation_or_scoring": {"state": "NOT_TRIGGERED_BY_CURRENT_DESIGN", "reason": "only aggregate research synthesis; no person-level evaluation or scoring"},
+    "automated_decision_with_legal_or_similar_effect": {"state": "NOT_TRIGGERED_BY_CURRENT_DESIGN", "reason": "no decisions concerning an individual are permitted"},
+    "systematic_monitoring": {"state": "NOT_TRIGGERED_BY_CURRENT_DESIGN", "reason": "no monitoring of behaviour or publicly accessible areas"},
+    "sensitive_or_highly_personal_data": {"state": "NOT_TRIGGERED_BY_CURRENT_DESIGN", "reason": "special-category, criminal-conviction and direct-identifier fields are forbidden and PII-like free text is rejected"},
+    "large_scale_processing": {"state": "UNRESOLVED_CONTROLLER_JUDGMENT", "reason": "final respondent volume, duration and operational scope are not yet approved; repository planning thresholds are not a legal large-scale determination"},
+    "matching_or_combining_datasets": {"state": "NOT_TRIGGERED_BY_CURRENT_DESIGN", "reason": "CRM/contact linkage and cross-dataset identity matching are forbidden"},
+    "vulnerable_data_subjects": {"state": "POTENTIALLY_APPLICABLE_REQUIRES_SAFEGUARDS", "reason": "employee respondents may face power imbalance; collection must remain voluntary and individual responses/results must not be disclosed to employers"},
+    "innovative_technology_or_organisational_solution": {"state": "UNRESOLVED_CONTROLLER_JUDGMENT", "reason": "the survey topic is AI but the processing design is a conventional first-party research form; re-screen if AI/ML is introduced into respondent-level processing"},
+    "prevents_right_or_service_or_contract": {"state": "NOT_TRIGGERED_BY_CURRENT_DESIGN", "reason": "participation is optional and must not condition employment, a service or a contract"}
+  },
+  "anspdcp_decision_174_2018_check": {
+    "systematic_automated_personal_evaluation_with_significant_effect": false,
+    "large_scale_special_category_or_criminal_data": false,
+    "large_scale_public_area_monitoring": false,
+    "large_scale_vulnerable_person_data_with_systematic_monitoring_or_recording": "UNRESOLVED_VOLUME_BUT_MONITORING_RECORDING_NOT_PART_OF_CURRENT_DESIGN",
+    "large_scale_innovative_technology_limiting_rights": "NOT_TRIGGERED_BY_CURRENT_DESIGN",
+    "large_scale_iot_sensor_data": false,
+    "large_scale_or_systematic_traffic_or_location_data": false
+  },
+  "mandatory_before_prod": {
+    "controller_determination_approved": false,
+    "privacy_contact_or_dpo_review_reference": null,
+    "final_large_scale_assessment": null,
+    "employee_power_imbalance_safeguards_approved": false,
+    "anspdcp_decision_174_2018_final_check": false,
+    "final_dpia_decision": null,
+    "if_dpia_required_completed_dpia_reference": null,
+    "if_residual_high_risk_prior_consultation_assessed": false
+  },
+  "fail_closed_rule": "No PROD collection may be activated while DPIA screening is unresolved. If the controller concludes DPIA is required, collection remains disabled until the DPIA is completed and approved and any Article 36 prior-consultation requirement is resolved.",
+  "re_screen_triggers": [
+    "collection volume or geographic scope materially increases",
+    "special-category, criminal-conviction or direct-identifier data are proposed",
+    "respondent-level profiling, AI/ML scoring or automated decisions are introduced",
+    "CRM/contact/dataset matching is introduced",
+    "employer access to person-level responses is proposed",
+    "monitoring, location, device, biometric, sensor or fingerprint data are introduced",
+    "purpose, lawful basis, retention, processor chain or security model materially changes"
+  ],
+  "merge_authorized": false,
+  "deploy_authorized": false,
+  "real_collection_authorized": false
+}
