@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY = ROOT / "partener-eu" / "ingest" / "source_registry.json"
+DATA_PLANE = ROOT / "partener-eu" / "ingest" / "data_plane_contract.json"
 
 REQUIRED = {
     "SRC-EU-FUNDING-TENDERS-GATEWAY": {"EU_DIRECT", "BRUSSELS"},
@@ -47,7 +48,9 @@ def fail(msg):
 
 def main():
     data = json.loads(REGISTRY.read_text(encoding="utf-8"))
+    plane = json.loads(DATA_PLANE.read_text(encoding="utf-8"))
     by_id = {row["id"]: row for row in data.get("sources", [])}
+    programme_domains = plane.get("programmeDomains") or {}
 
     missing = sorted(set(REQUIRED) - set(by_id))
     if missing:
@@ -65,6 +68,10 @@ def main():
         host = (urlparse(row.get("url") or "").hostname or "").lower()
         if host != OFFICIAL_HOSTS[source_id]:
             fail(f"{source_id} host drift: {host!r} != {OFFICIAL_HOSTS[source_id]!r}")
+        for programme in row.get("programmes") or []:
+            domains = programme_domains.get(programme) or []
+            if not domains or "UNCLASSIFIED_PROGRAMME" in domains:
+                fail(f"{source_id} programme lacks data-plane domain mapping: {programme}")
 
     pipeline = [row for row in by_id.values() if "PROGRAMMING_PIPELINE" in set(row.get("source_families") or [])]
     if not pipeline:
@@ -76,6 +83,9 @@ def main():
             fail(f"pipeline source lacks explicit PROGRAMMING_PIPELINE state: {row['id']}")
         if row.get("authority_scope") not in PIPELINE_SCOPES:
             fail(f"pipeline source has unsafe authority scope: {row['id']}")
+        mapped = {domain for programme in row.get("programmes") or [] for domain in programme_domains.get(programme, [])}
+        if "PROGRAMMING_FUTURE" not in mapped and row["id"] != "SRC-EU-MFF-2028-2034":
+            fail(f"pipeline source lacks PROGRAMMING_FUTURE data-plane classification: {row['id']}")
 
     gateway = by_id["SRC-EU-FUNDING-TENDERS-GATEWAY"]
     if gateway.get("material_fact_use") is not False:
@@ -94,7 +104,7 @@ def main():
     print(
         "PASS external source expansion contract: "
         f"{len(REQUIRED)} roots; {len(pipeline)} programming-pipeline roots; "
-        "Funding & Tenders gateway fail-closed pending structured adapter"
+        "all programmes data-plane classified; Funding & Tenders gateway fail-closed pending structured adapter"
     )
 
 
