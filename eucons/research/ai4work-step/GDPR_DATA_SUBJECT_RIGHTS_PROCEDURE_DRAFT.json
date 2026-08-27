@@ -1,7 +1,7 @@
 {
-  "schema_version": "eucons.ai4work_data_subject_rights.v0.7",
+  "schema_version": "eucons.ai4work_data_subject_rights.v0.8",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "date": "2026-08-27",
+  "date": "2026-08-28",
   "status": "DRAFT_BINDING_REQUIRED_BEFORE_COLLECTION",
   "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
   "controller_approval": false,
@@ -12,7 +12,20 @@
     "gdpr_article_15": "The right of access includes confirmation whether personal data are processed, access to the personal data, a copy of the personal data undergoing processing and the contextual information required by Article 15. The reference adapter implements only the receipt-keyed respondent-record-copy component; requester authentication, confirmation and the controller-supplied processing context remain operational/controller responsibilities.",
     "gdpr_article_16": "Where a live response can be located by the opaque receipt and preset analytical values are inaccurate, rectification must be possible without introducing direct identifiers or mutating technical/provenance fields. The reference operation revalidates corrected profile/answer values against the frozen form definition and atomically advances integrity metadata.",
     "gdpr_article_18": "Where restriction applies, the record must not continue through ordinary analytical processing while the restriction is active. The reference design therefore permits storage for rights handling but excludes a held record from analytical export.",
+    "gdpr_article_20": "Data portability applies only where the processing is based on consent or contract, is carried out by automated means and concerns data provided by the data subject. Because the lawful basis for this research is not yet approved, portability applicability must remain an explicit pre-PROD decision. If legitimate interest is finally approved as proposed, Article 20 portability is not the applicable right for that processing; if the basis changes to consent or contract, a structured machine-readable portability path must be implemented and validated before collection.",
     "gdpr_article_21": "Where processing relies on legitimate interests and a data subject objects, processing must stop while the controller assesses the objection unless a lawful continuation ground is established. The reference design therefore applies a fail-closed analytical hold during review."
+  },
+  "rights_applicability": {
+    "lawful_basis_status": "UNRESOLVED_BEFORE_PROD",
+    "proposed_basis": "ARTICLE_6_1_F_LEGITIMATE_INTEREST_SUBJECT_TO_CONTROLLER_APPROVAL_AND_LIA",
+    "access": "APPLIES_SUBJECT_TO_ARTICLE_11_IDENTIFICATION_LIMITS",
+    "rectification": "APPLIES_WHERE_INACCURATE_PERSONAL_DATA_CAN_BE_LOCATED",
+    "erasure": "APPLIES_SUBJECT_TO_GDPR_EXCEPTIONS_AND_CONTROLLER_DECISION",
+    "restriction": "APPLIES_WHERE_ARTICLE_18_CONDITIONS_ARE_MET",
+    "objection": "APPLIES_IF_FINAL_BASIS_IS_LEGITIMATE_INTEREST_OR_PUBLIC_TASK",
+    "portability": "NOT_APPLICABLE_IF_FINAL_BASIS_IS_LEGITIMATE_INTEREST; MUST_BE_IMPLEMENTED_BEFORE_PROD_IF_FINAL_BASIS_CHANGES_TO_CONSENT_OR_CONTRACT_AND_ARTICLE_20_CONDITIONS_ARE_MET",
+    "consent_withdrawal": "NOT_APPLICABLE_UNDER_PROPOSED_LEGITIMATE_INTEREST_BASIS; MUST_BE_IMPLEMENTED_BEFORE_PROD_IF_CONSENT_BECOMES_A_LEGAL_BASIS",
+    "decision_rule": "The approved rights procedure and public notice must match the controller-approved final legal basis. A change of legal basis invalidates this draft applicability matrix until the affected rights and operational paths are re-reviewed and validated."
   },
   "identification_policy": {
     "direct_identity_registry": "FORBIDDEN",
@@ -27,7 +40,9 @@
     "rectification_where_applicable",
     "erasure",
     "restriction_where_applicable",
-    "objection_to_legitimate_interest_processing"
+    "objection_if_applicable_to_final_legal_basis",
+    "portability_if_applicable_to_final_legal_basis",
+    "consent_withdrawal_if_consent_is_final_legal_basis"
   ],
   "request_channel": {
     "privacy_contact": null,
@@ -58,7 +73,9 @@
       "OBJECTED_PENDING_REVIEW"
     ],
     "held_records_excluded_from_export": true,
-    "case_narrative_in_research_store": "FORBIDDEN"
+    "case_narrative_in_research_store": "FORBIDDEN",
+    "portability": "No separate portability export is enabled in the reference adapter while the legal basis remains unresolved. If the controller selects consent or contract and Article 20 conditions are met, implement a reviewed structured machine-readable export limited to data provided by the respondent and validate it provider-bound before PROD; do not repurpose NF06 or the analytical export as an unreviewed rights endpoint.",
+    "portability_reference_adapter": "NOT_ENABLED_PENDING_FINAL_LEGAL_BASIS_APPLICABILITY_DECISION"
   },
   "rights_case_logging": {
     "store": "PRIVACY_REQUEST_ADMIN_SEPARATE_FROM_RESEARCH_ANALYTICS",
@@ -79,13 +96,16 @@
     "controller determination approved",
     "privacy contact published",
     "lawful basis/LIA approved",
-    "privacy notice updated with the final rights procedure",
+    "rights applicability matrix reconciled to the final legal basis, including portability and consent-withdrawal applicability",
+    "privacy notice updated with the final rights procedure and legal-basis-dependent rights",
     "processor/subprocessor and provider logging/backup/deletion facts frozen",
     "production research-only adapter supports receipt lookup, receipt-keyed access copy with reviewed field allowlist and no storage/idempotency/hold/replay internals, validated preset-value rectification with immutable technical/provenance fields, bounded analysis holds, atomic erasure and anti-replay suppression so erased data cannot be recreated by a delayed retry",
+    "if Article 20 applies under the final legal basis, a reviewed structured machine-readable portability path is implemented and provider-bound validated before collection",
+    "if consent becomes a legal basis, an operational withdrawal path is implemented and reflected in the privacy notice before collection",
     "controller approves the requester-authentication procedure and the Article 15 confirmation/context response that supplements the reference data copy",
     "controller approves the minimum necessary replay-marker retention bound and the live binding injects a finite UTC not-after boundary with automatic purge/deletion evidence",
-    "restriction/objection handling is operationally approved for the live adapter",
-    "provider-bound TEST TWIN rights smoke proves access returns only the requester's approved record fields with no storage/internal rights state or other respondent data, rectification survives delayed transport retry without changing technical provenance, held records cannot enter analytical/NF06 export, erased records cannot be resurrected before the approved replay boundary, and replay markers expire at the approved boundary",
+    "restriction/objection handling is operationally approved for the live adapter where applicable to the final legal basis",
+    "provider-bound TEST TWIN rights smoke proves access returns only the requester's approved record fields with no storage/internal rights state or other respondent data, rectification survives delayed transport retry without changing technical provenance, held records cannot enter analytical/NF06 export, erased records cannot be resurrected before the approved replay boundary, and replay markers expire at the approved boundary; if portability is applicable, its export is separately tested and remains NON_EVIDENCE",
     "procedure approval reference and SHA-256 are frozen in the PROD activation manifest"
   ],
   "test_twin": {
