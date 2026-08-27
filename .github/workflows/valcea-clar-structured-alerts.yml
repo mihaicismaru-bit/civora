@@ -13,6 +13,7 @@ on:
       - 'local-news-os/core/structured_alert_ingest.py'
       - 'local-news-os/core/structured_alert_runtime.py'
       - 'local-news-os/core/structured_heat_interruption_parser.py'
+      - 'local-news-os/core/structured_electricity_interruption_parser.py'
       - 'local-news-os/instances/valcea/structured_alert_pack.json'
       - 'local-news-os/instances/valcea/source_pack.json'
       - 'valcea-clar/scripts/compose_structured_alerts.py'
@@ -24,6 +25,7 @@ on:
       - 'local-news-os/core/structured_alert_ingest.py'
       - 'local-news-os/core/structured_alert_runtime.py'
       - 'local-news-os/core/structured_heat_interruption_parser.py'
+      - 'local-news-os/core/structured_electricity_interruption_parser.py'
       - 'local-news-os/instances/valcea/structured_alert_pack.json'
       - 'local-news-os/instances/valcea/source_pack.json'
       - 'valcea-clar/scripts/compose_structured_alerts.py'
@@ -56,6 +58,7 @@ jobs:
             local-news-os/core/structured_alert_ingest.py \
             local-news-os/core/structured_alert_runtime.py \
             local-news-os/core/structured_heat_interruption_parser.py \
+            local-news-os/core/structured_electricity_interruption_parser.py \
             valcea-clar/scripts/compose_structured_alerts.py \
             valcea-clar/scripts/prune_volatile_json_changes.py
           python local-news-os/core/structured_alert_runtime.py --self-test
@@ -101,6 +104,14 @@ jobs:
                   assert row.get('event_start') and row.get('event_end')
                   assert row.get('source_time_basis') == 'official_service_window'
                   assert (row.get('structured') or {}).get('utility') == 'district_heat'
+                  assert row.get('reader_copy_generated') is False
+              elif parser == 'RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1':
+                  assert row.get('event_start') and row.get('event_end')
+                  assert row.get('source_time_basis') == 'official_service_window'
+                  structured=row.get('structured') or {}
+                  assert structured.get('utility') == 'electricity'
+                  assert structured.get('affected_locality')
+                  assert structured.get('affected_scope')
                   assert row.get('reader_copy_generated') is False
               else:
                   raise AssertionError(f'unsupported structured alert parser: {parser}')
