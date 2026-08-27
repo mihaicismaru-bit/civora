@@ -1,0 +1,67 @@
+{
+  "schema_version": "eucons.ai4work_gdpr_lia.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "date": "2026-08-27",
+  "controller": "EUROCONSULT SRL",
+  "candidate_legal_basis": "GDPR Article 6(1)(f) legitimate interests",
+  "status": "DRAFT_CONTROLLER_DECISION_REQUIRED_BEFORE_COLLECTION",
+  "authority_context": [
+    "https://commission.europa.eu/law/law-topic/data-protection/information-business-and-organisations/legal-grounds-processing-data_en",
+    "https://www.edpb.europa.eu/public-consultations/guidelines-12024-on-processing-of-personal-data-based-on-article-61f-gdpr_ro"
+  ],
+  "purpose_test": {
+    "interest": "produce a documented, evidence-based needs analysis concerning digital/AI skills and training needs for the AI4WORK STEP project concept and associated funding application",
+    "legitimate": true,
+    "specific": true,
+    "present_and_non_speculative": true,
+    "commercial_marketing_or_lead_generation": false
+  },
+  "necessity_test": {
+    "why_primary_research_is_needed": "secondary official evidence can establish structural context but cannot alone evidence respondent-level perceived skills gaps, barriers, use patterns and employer-reported capability needs",
+    "less_intrusive_design": [
+      "no names, contact details, CNP, exact address or employer identity",
+      "broad region/age/status/occupation categories only",
+      "no login, files, cookies, fingerprinting or cross-site tracking",
+      "no CRM or commercial analytics integration",
+      "no special-category data",
+      "separate optional follow-up contact mechanism with no response linkage",
+      "small-cell suppression and free-text PII rejection/review"
+    ],
+    "conclusion": "PROCESSING_CAN_BE_NECESSARY_IF_THE_MINIMISED_DESIGN_AND_SEPARATION_CONTROLS_ARE_ENFORCED"
+  },
+  "balancing_test": {
+    "reasonable_expectations": "participants are shown a pre-form research notice and make a voluntary positive choice to submit a needs-analysis questionnaire; the data are not reused for enrolment, marketing or individual decisions",
+    "data_nature": "low-granularity professional/demographic categories plus questionnaire answers; direct identifiers and Article 9/10 data are forbidden",
+    "impact": "low under the intended design; principal residual risks are accidental re-identification through free text/small cells and infrastructure logs",
+    "power_imbalance": "employed and unemployed adults may have contextual vulnerability; participation must not be requested by an employer in a way that creates pressure and refusal must have no disadvantage",
+    "safeguards": [
+      "voluntary participation and clear no-disadvantage language",
+      "right-to-object channel disclosed in Article 13 notice",
+      "PII-pattern rejection and human review of free text before quotation",
+      "n<5 suppression/combination",
+      "research-only credentials/database isolated from CRM",
+      "short retention and deletion execution",
+      "no raw response use with external LLM/AI providers",
+      "no automated decisions or respondent scoring",
+      "logging minimisation and no IP/user-agent in analytical exports"
+    ],
+    "provisional_outcome": "CONTROLLER_INTEREST_CAN_PREVAIL_ONLY_WHILE_ALL_SAFEGUARDS_REMAIN_TRUE"
+  },
+  "fail_closed_conditions": [
+    "privacy contact and right-to-object process not operational",
+    "Article 13 notice not delivered before data submission",
+    "processor/subprocessor or transfer review not completed",
+    "server logs make responses routinely linkable to identifiable IP/device data without a documented necessity/retention control",
+    "direct identifiers, special-category data, CRM linkage, marketing reuse or individual decision-making are introduced",
+    "raw responses are sent to an external AI/LLM processor without a new legal/privacy assessment",
+    "retention/deletion rule is not executable"
+  ],
+  "controller_signoff_fields": {
+    "approved": false,
+    "approver_name_or_role": null,
+    "approval_date": null,
+    "privacy_contact": null,
+    "notes": null
+  },
+  "collection_enabled": false
+}

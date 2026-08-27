@@ -1,0 +1,69 @@
+{
+  "schema_version": "eucons.ai4work_fresh_main_readiness.v0.8",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "rebuilt_on_main_sha": "4209af975466865d750fbaf795ba74a3ca4aee5e",
+  "state": "REPOSITORY_GATE_PASS_PROVIDER_DPA_FOUND_COLLECTION_STILL_FAIL_CLOSED",
+  "verified_delta": [
+    "the complete AI4WORK research-provider file set was rebuilt on main 4209af975466865d750fbaf795ba74a3ca4aee5e without importing stale branch history",
+    "research-only storage remains isolated under eucons/research/ai4work-step and the SQLite adapter explicitly refuses production mode",
+    "adult and employer questionnaire definitions plus the fail-closed static renderer are present on the current-main candidate",
+    "PROD storage rejects synthetic records and TEST TWIN remains NON_EVIDENCE",
+    "privacy-safe retry idempotency is implemented: one-submit UUIDv4 keys derive opaque response IDs; raw keys and body digests are excluded from analytical export; same-key/different-body fails closed",
+    "the dedicated AI4WORK research workflow has passed on exact PR heads and gates runtime/storage/idempotency tests, preview rendering, tracking rejection and collection-disabled assertions",
+    "GDPR_DPIA_SCREENING.json records a fail-closed EDPB/ANSPDCP-aware screen; under the current minimised design no mandatory/high-risk trigger is presently identified, but controller signoff and re-screen triggers remain mandatory",
+    "GDPR_LIA_DRAFT.json documents Article 6(1)(f) only as a candidate basis with purpose, necessity and balancing safeguards; controller approval remains mandatory before collection",
+    "GDPR_RETENTION_SCHEDULE_DRAFT.json defines short respondent/log/contact lifecycles and deletion evidence, but provider execution is not yet bound",
+    "RESEARCH_PRIVACY_NOTICE_DRAFT.md covers Article 13 content architecture while the operational EUROCONSULT privacy contact and final approvals remain open",
+    "Claus Web public DPA v1.0 dated 2026-03-16 was verified: it expressly covers shared hosting where Claus Web acts as processor for beneficiary data, includes Article 28-style obligations, reference TOMs, general subprocessor authorization, Chapter V transfer safeguards and termination/deletion rules",
+    "the same public DPA leaves nominal subprocessor Annex 4 and exact backup/retention Annex 5 available on request, so account-specific subprocessor/log/backup facts remain open rather than inferred"
+  ],
+  "validation_state": {
+    "current_main_transplant": "PASS_ON_4209AF975466865D750FBAF795BA74A3CA4AEE5E",
+    "repository_exact_head_gate": "PASS_MULTIPLE_PR_HEADS",
+    "last_observed_full_gate_head_before_provider_fact_docs": "188e69f353dbbb30472c99bc1d20ddf53c92d832",
+    "last_observed_workflows": {
+      "EUCONS AI4WORK Research Gate": "SUCCESS_RUN_4_33021520286",
+      "EUCONS Build": "SUCCESS_RUN_135_33021520199",
+      "EUCONS Quality": "SUCCESS_RUN_242_33021520193"
+    },
+    "fresh_runtime_test_execution": "PASS",
+    "fresh_renderer_ci": "PASS_PREVIEW_ONLY",
+    "retry_idempotency_exact_head_ci": "PASS",
+    "browser_http_store_export_nf06_smoke": "PENDING_PRODUCTION_BINDING",
+    "production_collection_validation": "NOT_AUTHORIZED_AND_NOT_RUN"
+  },
+  "privacy_design": {
+    "controller_identity": "CLOSED_EUROCONSULT_SRL_CUI_14250864",
+    "privacy_contact": "OPEN_BEFORE_COLLECTION",
+    "article_13_notice": "DRAFT_COMPLETE_FACT_BINDING_AND_APPROVAL_PENDING",
+    "candidate_lawful_basis": "ARTICLE_6_1_F_LIA_DRAFT_CONTROLLER_APPROVAL_PENDING",
+    "retention_schedule": "DRAFT_COMPLETE_PROVIDER_EXECUTION_BINDING_PENDING",
+    "dpia_screening": "PREPARED_NO_HIGH_RISK_TRIGGER_IDENTIFIED_UNDER_CURRENT_DESIGN_CONTROLLER_SIGNOFF_PENDING",
+    "processor_contract": "PUBLIC_CLAUS_WEB_DPA_FOUND_ACCOUNT_SPECIFIC_ACCEPTANCE_OPEN",
+    "processor_subprocessor_transfer_review": "PARTIAL_DPA_RULES_KNOWN_NOMINAL_ANNEX_4_AND_ACCOUNT_FACTS_OPEN",
+    "server_logging_ip_retention_review": "OPEN_ACCOUNT_SPECIFIC_FIELDS_AND_DURATION",
+    "provider_backup_deletion_review": "PARTIAL_STANDARD_RULES_KNOWN_EXACT_ANNEX_5_VALUES_OPEN"
+  },
+  "retry_idempotency_gate": {
+    "state": "IMPLEMENTATION_AND_EXACT_HEAD_CI_PASS",
+    "control_artifact": "HTTP_IDEMPOTENCY_CONTRACT.json",
+    "implementation": ["http_idempotency.py", "research_storage.py::append_idempotent", "test_http_idempotency.py"],
+    "required_behavior": "same first-party idempotency key plus same normalized body is replay-safe; same key plus different body fails closed; different keys may represent distinct submissions even when answers match",
+    "privacy_boundary": "no cookie, fingerprint, CRM identifier, email, phone, IP-derived identifier or cross-site identifier may be used as the idempotency key"
+  },
+  "still_open": [
+    "freeze an operational EUROCONSULT privacy contact and controller approvals for the LIA/Article 13 notice/retention/DPIA screen",
+    "confirm the active hosting order is governed by the verified Claus Web DPA and retain the account-specific contractual evidence",
+    "obtain and review Claus Web DPA Annex 4 nominal subprocessors and Annex 5 exact backup/retention/deletion values for the active account",
+    "verify actual account web-server/reverse-proxy log fields, IP/device retention, encryption and access-control configuration",
+    "bind an actual first-party HTTP endpoint on the authorized hosting target",
+    "bind a production research-only store physically/credential-wise separated from CRM",
+    "make research retention/deletion execution provable on the chosen provider and account",
+    "run end-to-end synthetic TEST TWIN smoke through browser -> HTTP -> isolated non-evidence store -> immutable export -> NF06 test-twin ingest",
+    "collect and ingest real adult/employer responses with provenance only after all production privacy/provider gates pass",
+    "capture and hash the official 2026-08-19 MIPE second-corrigendum PDF and replacement Annex 4 bytes for final call-package freeze"
+  ],
+  "external_deploy_authorized": false,
+  "collection_enabled": false,
+  "merge_authorized": false
+}
