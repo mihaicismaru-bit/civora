@@ -56,15 +56,15 @@ jobs:
             echo 'Unproven GDPR controller identity leaked into AI4WORK research preview' >&2
             exit 1
           fi
-      - name: Verify collection remains disabled and controller remains fail-closed in contract
+      - name: Verify collection and controller identity remain fail-closed across contracts and frozen forms
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
           import json
           from pathlib import Path
-          p = Path('eucons/research/ai4work-step/form_contract.json')
-          contract = json.loads(p.read_text(encoding='utf-8'))
+          root = Path('eucons/research/ai4work-step')
+          contract = json.loads((root / 'form_contract.json').read_text(encoding='utf-8'))
           assert contract.get('production_enabled') is False
           assert contract.get('crm_integration') == 'FORBIDDEN'
           assert contract.get('commercial_analytics') == 'FORBIDDEN'
@@ -72,10 +72,14 @@ jobs:
           assert notice.get('operator_status') == 'UNRESOLVED_BEFORE_COLLECTION'
           assert notice.get('operator_legal_name') is None
           assert notice.get('operator_cui') is None
-          controller_record = json.loads(Path('eucons/research/ai4work-step/CONTROLLER_DETERMINATION_DRAFT.json').read_text(encoding='utf-8'))
+          forms = json.loads((root / 'forms_definition.json').read_text(encoding='utf-8'))
+          forms_notice = forms.get('common_notice') or {}
+          assert forms_notice.get('operator_status') == 'UNRESOLVED_BEFORE_COLLECTION'
+          assert forms_notice.get('operator') is None
+          controller_record = json.loads((root / 'CONTROLLER_DETERMINATION_DRAFT.json').read_text(encoding='utf-8'))
           assert controller_record.get('controller') is None
           assert controller_record.get('approved') is False
           assert controller_record.get('collection_enabled') is False
           assert controller_record.get('nf06_reference_eligible') is False
-          print('PASS: AI4WORK collection and controller identity remain fail-closed')
+          print('PASS: AI4WORK collection and controller identity remain fail-closed across form contract, frozen forms and controller record')
           PY
