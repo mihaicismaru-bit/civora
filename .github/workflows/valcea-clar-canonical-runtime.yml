@@ -1,7 +1,7 @@
 name: VÂLCEA CLAR Canonical Runtime Acceptance
 
-# End-to-end acceptance boundary for the canonical reader runtime. The retired
-# GPT Sites export surface is intentionally outside the publication model.
+# End-to-end acceptance boundary for the canonical reader runtime. Retired
+# alternate export surfaces are intentionally outside the publication model.
 on:
   workflow_dispatch:
   pull_request:
@@ -28,8 +28,8 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Reject any active GPT Sites surface
-        run: python valcea-clar/scripts/validate_no_gpt_sites_surface.py
+      - name: Reject retired publication surfaces
+        run: python valcea-clar/scripts/validate_retired_surface.py
 
       - name: Validate canonical presentation component contracts
         run: |
