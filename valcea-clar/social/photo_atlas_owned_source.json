@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "product": "VÂLCEA CLAR PHOTO ATLAS OWNED SOURCE",
+  "status": "MIGRATED_BY_REFERENCE",
+  "publication_authority": "NONE",
+  "automatic_story_assignment_allowed": false,
+  "source_files": {
+    "drive_snapshot": "valcea-clar/social/owned_photo_drive_snapshot.json",
+    "semantic_labels": "valcea-clar/social/owned_photo_semantic_labels.json",
+    "materialization_requests": "valcea-clar/social/owned_photo_materialization_requests.json"
+  },
+  "bootstrap": {
+    "asset_count": 48,
+    "confirmed_semantic_count": 48,
+    "ambiguous_count": 0,
+    "rejected_count": 0,
+    "migration_date": "2026-08-24"
+  },
+  "storage": {
+    "original_binary_location": "google_drive",
+    "repository_bulk_binary_copy": false,
+    "story_specific_binary_materialization_only": true,
+    "approved_repository_root": "valcea-clar/social/photos/approved"
+  },
+  "policy": {
+    "all_drive_assets_are_atlas_discoverable_candidates": true,
+    "owned_candidate_is_not_approved_atlas_asset": true,
+    "semantic_identity_is_not_story_subject_match": true,
+    "subject_match_required_before_story_use": true,
+    "rights_reconfirmation_required_before_story_use": true,
+    "privacy_review_required_before_story_use": true,
+    "editor_approval_required_before_story_use": true,
+    "alt_text_required_before_story_use": true,
+    "automatic_publication_forbidden": true,
+    "no_photo_is_better_than_false_relevance": true
+  }
+}
