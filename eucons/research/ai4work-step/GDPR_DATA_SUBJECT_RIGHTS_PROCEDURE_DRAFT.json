@@ -1,5 +1,5 @@
 {
-  "schema_version": "eucons.ai4work_data_subject_rights.v0.5",
+  "schema_version": "eucons.ai4work_data_subject_rights.v0.6",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "date": "2026-08-27",
   "status": "DRAFT_BINDING_REQUIRED_BEFORE_COLLECTION",
@@ -9,6 +9,7 @@
   "legal_design_anchors": {
     "gdpr_article_11": "Do not acquire, maintain or process additional identifying information solely to identify a data subject when identification is not required for the research purpose; where the controller can demonstrate it cannot identify the data subject, rights that require identification are handled in accordance with Article 11 unless the data subject provides additional information enabling identification.",
     "gdpr_article_12": "The controller must provide transparent information and facilitate exercise of data-subject rights through the approved privacy contact and procedure.",
+    "gdpr_article_16": "Where a live response can be located by the opaque receipt and preset analytical values are inaccurate, rectification must be possible without introducing direct identifiers or mutating technical/provenance fields. The reference operation revalidates corrected profile/answer values against the frozen form definition and atomically advances integrity metadata.",
     "gdpr_article_18": "Where restriction applies, the record must not continue through ordinary analytical processing while the restriction is active. The reference design therefore permits storage for rights handling but excludes a held record from analytical export.",
     "gdpr_article_21": "Where processing relies on legitimate interests and a data subject objects, processing must stop while the controller assesses the objection unless a lawful continuation ground is established. The reference design therefore applies a fail-closed analytical hold during review."
   },
@@ -35,7 +36,10 @@
   "research_store_operations": {
     "lookup": "Locate only by opaque response_id in the isolated research store; do not search CRM, optional-contact records, IP logs, user-agent logs or device data.",
     "access": "Return only the respondent-level analytical record associated with the receipt after the controller applies the approved request-authentication procedure; do not expose internal idempotency digests or other respondents.",
-    "rectification": "If applicable and technically safe, replace only the validated preset analytical values for that response_id and regenerate integrity metadata; otherwise document why rectification cannot be performed without undermining integrity and offer erasure/re-submission where appropriate.",
+    "rectification": "The reference rights operation locates the live record by opaque response_id, revalidates only corrected preset profile/answer values against the frozen form definition, preserves schema/research/form/version/response receipt/received_at/recruitment-channel/synthetic provenance, regenerates raw and normalized integrity hashes atomically, and advances the idempotency receipt's normalized hash while preserving the original transport body digest. This makes a delayed same-body transport retry return the corrected receipt state rather than overwrite the correction. Active restriction/objection holds remain active. If a requested correction cannot pass the frozen form/minimisation rules, the controller must use the approved alternative (including erasure/re-submission where appropriate) rather than weaken validation or collect new identity linkage.",
+    "rectification_reference_adapter": "RECEIPT_KEYED_PRESET_VALUES_ONLY_REVALIDATE_FROZEN_FORM_PRESERVE_TECHNICAL_PROVENANCE",
+    "rectification_preserves_active_hold": true,
+    "rectification_stale_retry_safe": true,
     "erasure": "Delete the analytical row, any active analysis hold and its idempotency receipt atomically from live research storage. To prevent a delayed transport retry from recreating data that the respondent already erased, the reference adapter retains only the opaque response_id as a non-analytical replay-suppression marker. The reference adapter has no default retention and refuses an erasure that would create this marker unless a finite UTC not-after boundary is explicitly injected. At or after that boundary, replay markers are purged automatically before replay checks. The marker contains no questionnaire answers, body digest, raw Idempotency-Key, identity, contact, IP, user-agent, device, CRM or employer data. The live PROD boundary must be separately bounded and approved in the retention schedule before collection. Residual backups follow the validated non-renewing backup rotation in the retention schedule.",
     "erasure_replay_suppression": "OPAQUE_RESPONSE_ID_ONLY_NO_ANSWERS_NO_BODY_DIGEST_NOT_ANALYTICAL",
     "erasure_replay_marker_reference_adapter_boundary": "REQUIRED_FINITE_UTC_NOT_AFTER_NO_DEFAULT",
@@ -73,10 +77,10 @@
     "lawful basis/LIA approved",
     "privacy notice updated with the final rights procedure",
     "processor/subprocessor and provider logging/backup/deletion facts frozen",
-    "production research-only adapter supports receipt lookup, bounded analysis holds, atomic erasure and anti-replay suppression so erased data cannot be recreated by a delayed retry",
+    "production research-only adapter supports receipt lookup, validated preset-value rectification with immutable technical/provenance fields, bounded analysis holds, atomic erasure and anti-replay suppression so erased data cannot be recreated by a delayed retry",
     "controller approves the minimum necessary replay-marker retention bound and the live binding injects a finite UTC not-after boundary with automatic purge/deletion evidence",
     "restriction/objection handling is operationally approved for the live adapter",
-    "provider-bound TEST TWIN rights smoke proves held records cannot enter analytical/NF06 export, erased records cannot be resurrected before the approved replay boundary, and replay markers expire at the approved boundary",
+    "provider-bound TEST TWIN rights smoke proves rectification survives delayed transport retry without changing technical provenance, held records cannot enter analytical/NF06 export, erased records cannot be resurrected before the approved replay boundary, and replay markers expire at the approved boundary",
     "procedure approval reference and SHA-256 are frozen in the PROD activation manifest"
   ],
   "test_twin": {
