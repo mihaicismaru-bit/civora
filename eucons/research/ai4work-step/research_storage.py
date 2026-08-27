@@ -22,6 +22,8 @@ class ResearchStorageError(RuntimeError):
 class ResearchStorage(Protocol):
     def append(self, record: dict[str, Any], *, raw_bytes: bytes) -> str: ...
     def export(self, form_id: str) -> list[dict[str, Any]]: ...
+    def get_by_response_id(self, response_id: str) -> dict[str, Any] | None: ...
+    def delete_by_response_id(self, response_id: str) -> bool: ...
 
 
 def canonical_json_bytes(record: dict[str, Any]) -> bytes:
@@ -48,6 +50,12 @@ def validate_record_envelope(record: dict[str, Any]) -> None:
 def validate_body_sha256(value: str) -> None:
     if not isinstance(value, str) or not SHA256_RE.fullmatch(value):
         raise ResearchStorageError("body_sha256 must be lowercase SHA-256 hex")
+
+
+def validate_response_id(value: Any) -> str:
+    if not isinstance(value, str) or not value or len(value) > 256:
+        raise ResearchStorageError("response_id lookup value invalid")
+    return value
 
 
 @dataclass
@@ -188,6 +196,53 @@ class SQLiteResearchStorage:
             raise
 
         return normalized_sha, True
+
+    def get_by_response_id(self, response_id: str) -> dict[str, Any] | None:
+        """Locate one analytical record by its opaque technical receipt only.
+
+        This is a reference rights-operation primitive. It deliberately does
+        not search names, CRM/contact data, IP logs or device identifiers.
+        """
+        receipt = validate_response_id(response_id)
+        row = self.conn.execute(
+            """SELECT normalized_json FROM research_responses
+               WHERE research_id = ? AND response_id = ?""",
+            (RESEARCH_ID, receipt),
+        ).fetchone()
+        return None if row is None else json.loads(row[0])
+
+    def delete_by_response_id(self, response_id: str) -> bool:
+        """Atomically erase a live analytical row and its idempotency receipt.
+
+        The return value reports whether an analytical row existed. Provider
+        backup residuals are outside this reference adapter and remain governed
+        by the approved retention/deletion procedure before PROD activation.
+        """
+        receipt = validate_response_id(response_id)
+        try:
+            self.conn.execute("BEGIN IMMEDIATE")
+            exists = self.conn.execute(
+                "SELECT 1 FROM research_responses WHERE research_id = ? AND response_id = ?",
+                (RESEARCH_ID, receipt),
+            ).fetchone()
+            if exists is None:
+                self.conn.rollback()
+                return False
+            self.conn.execute(
+                "DELETE FROM idempotency_receipts WHERE response_id = ?",
+                (receipt,),
+            )
+            deleted = self.conn.execute(
+                "DELETE FROM research_responses WHERE research_id = ? AND response_id = ?",
+                (RESEARCH_ID, receipt),
+            ).rowcount
+            if deleted != 1:
+                raise ResearchStorageError("rights erasure did not delete exactly one analytical row")
+            self.conn.commit()
+            return True
+        except Exception:
+            self.conn.rollback()
+            raise
 
     def export(self, form_id: str) -> list[dict[str, Any]]:
         if form_id not in ALLOWED_FORMS:
