@@ -80,7 +80,6 @@ jobs:
             valcea-clar/scripts/editorial_writer.py \
             valcea-clar/scripts/render_frontpage.py \
             valcea-clar/scripts/build_live_feed.py \
-            valcea-clar/scripts/build_sites_export.py \
             valcea-clar/scripts/overlay_runtime_export.py
           python valcea-clar/scripts/generate_edition.py --self-test
           python - <<'PY'
@@ -113,7 +112,6 @@ jobs:
           python valcea-clar/scripts/generate_edition.py --slot "${{ steps.slot.outputs.slot }}"
           python valcea-clar/scripts/render_frontpage.py
           python valcea-clar/scripts/build_live_feed.py
-          python valcea-clar/scripts/build_sites_export.py
           python valcea-clar/scripts/overlay_runtime_export.py
 
       - name: Validate recovery result
@@ -126,6 +124,7 @@ jobs:
           from pathlib import Path
           from zoneinfo import ZoneInfo
           root = Path('valcea-clar')
+          runtime = root/'site/runtime'
           slot = '${{ steps.slot.outputs.slot }}'
           today = datetime.now(ZoneInfo('Europe/Bucharest')).date().isoformat()
           attempt = json.loads((root/'site/last_edition_attempt.json').read_text(encoding='utf-8'))
@@ -143,12 +142,21 @@ jobs:
               assert attempt['status'] == 'auto_hold'
               assert pointer['publication_intent'] == 'publish'
               assert pointer['edition_id'] != attempt['edition_id']
-          feed = json.loads((root/'site/runtime/live-feed.json').read_text(encoding='utf-8'))
-          manifest = json.loads((root/'dist/chatgpt-sites/manifest.json').read_text(encoding='utf-8'))
+          feed = json.loads((runtime/'live-feed.json').read_text(encoding='utf-8'))
+          stories = json.loads((runtime/'stiri/manifest.json').read_text(encoding='utf-8'))
           assert feed['policy']['paid_llm_api_required'] is False
-          assert manifest['target']['autonomous_frontpage'] is True
-          assert manifest['routes'][0]['path'] == '/'
-          print(json.dumps({'attempt': attempt, 'public_pointer': pointer['edition_id'], 'runtime_edition': feed['edition']['edition_id'], 'routes': manifest['counts']['routes']}, ensure_ascii=False))
+          assert feed['publication_model'] == 'continuous_story_first'
+          assert (runtime/'index.html').is_file()
+          assert (runtime/'robots.txt').is_file()
+          assert (runtime/'sitemap.xml').is_file()
+          assert len(stories.get('stories', [])) == feed.get('story_count')
+          print(json.dumps({
+              'attempt': attempt,
+              'public_pointer': pointer['edition_id'],
+              'runtime_edition': feed['edition']['edition_id'],
+              'stories': feed.get('story_count'),
+              'runtime': 'site/runtime'
+          }, ensure_ascii=False))
           PY
 
       - name: Persist recovery edition conflict-safe
@@ -166,7 +174,6 @@ jobs:
             python valcea-clar/scripts/generate_edition.py --slot "${{ steps.slot.outputs.slot }}"
             python valcea-clar/scripts/render_frontpage.py
             python valcea-clar/scripts/build_live_feed.py
-            python valcea-clar/scripts/build_sites_export.py
             python valcea-clar/scripts/overlay_runtime_export.py
             git add valcea-clar/editions valcea-clar/site/current_edition.json valcea-clar/site/last_edition_attempt.json valcea-clar/site/runtime
             if git diff --cached --quiet; then echo "Recovery output is already current on main."; exit 0; fi
@@ -187,6 +194,6 @@ jobs:
             valcea-clar/site/last_edition_attempt.json
             valcea-clar/site/runtime/index.html
             valcea-clar/site/runtime/live-feed.json
-            valcea-clar/dist/chatgpt-sites
+            valcea-clar/site/runtime/stiri/manifest.json
           if-no-files-found: warn
           retention-days: 7
