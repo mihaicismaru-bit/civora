@@ -26,6 +26,26 @@
         "generic_headline_body_facts_allowed_only_when_structured": true,
         "victim_names_auto_publish_forbidden": true
       }
+    },
+    {
+      "id": "apavil-programmed-water-interruptions",
+      "name": "APAVIL S.A. — opriri programate",
+      "url": "https://apavil.ro/?page_id=962",
+      "source_tier": "T1",
+      "parser": "RO_UTILITY_WATER_INTERRUPTION_LISTING_V1",
+      "section": "SERVICII",
+      "priority": 94,
+      "enabled": true,
+      "planning_horizon_hours": 336,
+      "expiry_grace_hours": 1,
+      "max_listing_candidates": 40,
+      "editorial_policy": {
+        "reader_copy_generated_by_ingest": false,
+        "service_window_must_be_explicit": true,
+        "crawl_time_freshness_forbidden": true,
+        "fact_kernel_required_for_reader_publication": true,
+        "claim_level_provenance_required": true
+      }
     }
   ]
 }
