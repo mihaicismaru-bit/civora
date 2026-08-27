@@ -66,6 +66,29 @@ class RetentionScheduleTests(unittest.TestCase):
         self.assertTrue(any("counts before and after" in item.lower() for item in evidence))
         self.assertTrue(any("backup schedule" in item.lower() for item in evidence))
         self.assertTrue(any("retention clock" in item.lower() for item in evidence))
+        self.assertTrue(any("stale idempotent retry" in item.lower() for item in evidence))
+
+    def test_erasure_replay_marker_is_minimal_non_analytical_and_not_yet_approved(self) -> None:
+        marker = self.rows["erasure replay-suppression markers"]
+        self.assertEqual(marker.get("store"), "RESEARCH_RIGHTS_CONTROL_ONLY_NOT_ANALYTICAL")
+        content = str(marker.get("content", "")).lower()
+        self.assertIn("opaque derived response_id only", content)
+        for forbidden in (
+            "no questionnaire answers",
+            "canonical body digest",
+            "raw idempotency-key",
+            "identity/contact data",
+            "ip",
+            "user-agent",
+            "device",
+            "crm",
+            "employer identifier",
+        ):
+            self.assertIn(forbidden, content)
+        self.assertTrue(str(marker.get("retention", "")).startswith("UNRESOLVED_BEFORE_CONTROLLER_APPROVAL"))
+        self.assertIn("FORBIDDEN", str(marker.get("export", "")))
+        self.assertIn("collection remains NO_GO", str(marker.get("gate", "")))
+        self.assertIn("automatic", str(marker.get("deletion", "")).lower())
 
     def test_contact_and_test_twin_remain_separate_from_prod_evidence(self) -> None:
         contact = self.rows["optional follow-up contact records"]
