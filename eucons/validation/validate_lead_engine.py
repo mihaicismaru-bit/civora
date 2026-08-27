@@ -23,12 +23,14 @@ def main() -> None:
     matcher = load_module("e11_match", EUCONS / "opportunities" / "match_opportunities.py")
     evaluation_handoff = load_module("e11_r07_evaluation", EUCONS / "leads" / "research_evaluation_handoff.py")
     commercial_review = load_module("e11_r10_commercial_review", EUCONS / "crm" / "research_evaluation_review.py")
+    pipeline_ingest_request = load_module("e11_r10_pipeline_ingest_request", EUCONS / "crm" / "pipeline_ingest_request.py")
     lead_contract = json.loads((EUCONS / "leads" / "lead_contract.json").read_text(encoding="utf-8"))
     forms_doc = json.loads((EUCONS / "leads" / "forms.json").read_text(encoding="utf-8"))
     storage = json.loads((EUCONS / "leads" / "storage_contract.json").read_text(encoding="utf-8"))
     matching_contract = json.loads((EUCONS / "opportunities" / "matching_contract.json").read_text(encoding="utf-8"))
     evaluation_contract = json.loads((EUCONS / "leads" / "research_evaluation_handoff_contract.json").read_text(encoding="utf-8"))
     commercial_review_contract = json.loads((EUCONS / "crm" / "research_evaluation_review_contract.json").read_text(encoding="utf-8"))
+    pipeline_ingest_request_contract = json.loads((EUCONS / "crm" / "pipeline_ingest_request_contract.json").read_text(encoding="utf-8"))
     pipeline_contract = json.loads((EUCONS / "crm" / "pipeline_contract.json").read_text(encoding="utf-8"))
     commercial = json.loads((EUCONS / "canon" / "commercial_canon.json").read_text(encoding="utf-8"))
 
@@ -40,6 +42,8 @@ def main() -> None:
     evaluation_handoff.validate_contract(evaluation_contract)
     commercial_review.validate_contract(commercial_review_contract)
     commercial_review.validate_pipeline_boundary(pipeline_contract, commercial_review_contract)
+    pipeline_ingest_request.validate_contract(pipeline_ingest_request_contract)
+    pipeline_ingest_request.validate_pipeline(pipeline_contract, pipeline_ingest_request_contract)
 
     form_ids = {form["id"] for form in forms_doc["forms"]}
     assert form_ids == set(lead_contract["scoring"]["form_intent"])
@@ -147,6 +151,33 @@ def main() -> None:
     assert review["automatic_send_enabled"] is False
     assert review["crm_write_enabled"] is False
 
+    decision = {
+        "decision": "APPROVE_PIPELINE_ENTRY",
+        "decision_source": "HUMAN",
+        "scope": "NON_WRITING_INGEST_REQUEST_ONLY",
+        "reviewer_ref": "HUMAN-SYNTH-E11-001",
+        "decided_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+    }
+    ingest_request = pipeline_ingest_request.build_pipeline_ingest_request(
+        review,
+        decision,
+        pipeline_ingest_request_contract,
+        pipeline_contract,
+    )
+    assert ingest_request["record_state"] == "HUMAN_APPROVED_PIPELINE_INGEST_REQUEST"
+    assert ingest_request["source_review_id"] == review["review_id"]
+    assert ingest_request["requested_pipeline_entry"] == review["proposed_pipeline_entry"]
+    assert ingest_request["approval_receipt"]["decision_source"] == "HUMAN"
+    assert ingest_request["approval_receipt"]["scope"] == "NON_WRITING_INGEST_REQUEST_ONLY"
+    assert ingest_request["human_approval_recorded"] is True
+    assert ingest_request["persistence_executed"] is False
+    assert ingest_request["requires_separate_persistence_step"] is True
+    assert ingest_request["pipeline_write_enabled"] is False
+    assert ingest_request["crm_write_enabled"] is False
+    assert ingest_request["external_contact_enabled"] is False
+    assert ingest_request["automatic_offer_enabled"] is False
+    assert ingest_request["automatic_send_enabled"] is False
+
     print(json.dumps({
         "status": "PASS",
         "phase": "E11",
@@ -158,6 +189,7 @@ def main() -> None:
         "next_action": final_record["next_action"],
         "research_evaluation_state": evaluation["record_state"],
         "commercial_review_state": review["record_state"],
+        "pipeline_ingest_request_state": ingest_request["record_state"],
         "selected_service_id": evaluation["selected_service_id"],
         "production_collection": "DISABLED_UNTIL_BACKEND_AUTHORIZED",
         "pipeline_write": False,
