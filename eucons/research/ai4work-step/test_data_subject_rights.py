@@ -25,8 +25,32 @@ def test_record(response_id: str = "receipt-test-001") -> dict:
         "response_id": response_id,
         "received_at": "2026-08-27T12:00:00+00:00",
         "recruitment_channel_id": "CH-RIGHTS001",
-        "profile": {"region": "Centru"},
-        "answers": {"Q01": 2},
+        "profile": {
+            "region": "Centru",
+            "status": "persoană ocupată potențial eligibilă",
+            "age_band": "40-49",
+            "occupational_family": "administrativ/back-office",
+        },
+        "answers": {
+            "Q01": 3,
+            "Q02": 2,
+            "Q03": 2,
+            "Q04": 2,
+            "Q05": 3,
+            "Q06": 2,
+            "Q07": False,
+            "Q08": ["lipsa timpului"],
+            "Q09": ["nu am folosit AI"],
+            "Q10": {
+                "utilizare_digitala_functionala": 3,
+                "utilizarea_instrumentelor_AI": 5,
+                "verificarea_rezultatelor_AI": 5,
+                "protectia_datelor_confidentialitate": 4,
+                "integrarea_AI_in_flux_de_lucru": 5,
+            },
+            "Q11": "adaptare mai bună la postul actual",
+            "Q12": ["redactare și documente", "căutare și verificare informații"],
+        },
         "synthetic": False,
     }
 
@@ -158,8 +182,10 @@ class DataSubjectRightsTests(unittest.TestCase):
                 (item["response_id"],),
             ).fetchone()
 
-            corrected_profile = {"region": "Sud-Muntenia"}
-            corrected_answers = {"Q01": 3}
+            corrected_profile = dict(item["profile"])
+            corrected_profile["region"] = "Sud-Muntenia"
+            corrected_answers = dict(item["answers"])
+            corrected_answers["Q01"] = 4
             correction_bytes = canonical_json_bytes(
                 {"rights_operation": "rectification", "receipt": item["response_id"]}
             )
@@ -215,18 +241,22 @@ class DataSubjectRightsTests(unittest.TestCase):
             append_test_record(store, item)
             self.assertTrue(store.set_analysis_hold(item["response_id"], "RESTRICTED_PENDING_REVIEW"))
 
+            corrected_profile = dict(item["profile"])
+            corrected_profile["region"] = "Sud-Vest Oltenia"
+            corrected_answers = dict(item["answers"])
+            corrected_answers["Q01"] = 4
             corrected_sha = rectify_by_response_id(
                 store,
                 item["response_id"],
-                profile={"region": "Sud-Vest Oltenia"},
-                answers={"Q01": 4},
+                profile=corrected_profile,
+                answers=corrected_answers,
                 raw_bytes=b"TEST_TWIN_NON_EVIDENCE rectification\n",
             )
             self.assertIsNotNone(corrected_sha)
             self.assertEqual(store.get_analysis_hold(item["response_id"]), "RESTRICTED_PENDING_REVIEW")
             self.assertEqual(store.export("AI4WORK_ADULTS_V1"), [])
             self.assertTrue(store.clear_analysis_hold(item["response_id"]))
-            self.assertEqual(store.export("AI4WORK_ADULTS_V1")[0]["answers"], {"Q01": 4})
+            self.assertEqual(store.export("AI4WORK_ADULTS_V1")[0]["answers"]["Q01"], 4)
 
     def test_rectification_rejects_invalid_or_identifier_like_values_and_unknown_receipt(self):
         with tempfile.TemporaryDirectory() as td:
@@ -234,28 +264,33 @@ class DataSubjectRightsTests(unittest.TestCase):
             item = test_record("receipt-test-rectify-invalid")
             append_test_record(store, item)
 
+            invalid_profile = dict(item["profile"])
+            invalid_profile["region"] = "Unsupported Region"
             with self.assertRaises(ResearchValidationError):
                 rectify_by_response_id(
                     store,
                     item["response_id"],
-                    profile={"region": "Unsupported Region"},
-                    answers={"Q01": 2},
+                    profile=invalid_profile,
+                    answers=dict(item["answers"]),
                     raw_bytes=b"invalid\n",
                 )
+
+            identifier_profile = dict(item["profile"])
+            identifier_profile["email"] = "person@example.org"
             with self.assertRaises(ResearchValidationError):
                 rectify_by_response_id(
                     store,
                     item["response_id"],
-                    profile={"region": "Centru", "email": "person@example.org"},
-                    answers={"Q01": 2},
+                    profile=identifier_profile,
+                    answers=dict(item["answers"]),
                     raw_bytes=b"invalid identifier\n",
                 )
             self.assertIsNone(
                 rectify_by_response_id(
                     store,
                     "unknown-receipt",
-                    profile={"region": "Centru"},
-                    answers={"Q01": 2},
+                    profile=dict(item["profile"]),
+                    answers=dict(item["answers"]),
                     raw_bytes=b"unknown\n",
                 )
             )
