@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[2]
 EUCONS = ROOT / "eucons"
 FIXTURE_PATH = EUCONS / "prospects" / "fixtures" / "client_finder_queue_non_evidence.json"
 CONTRACT_PATH = EUCONS / "prospects" / "prospect_opportunity_match_contract.json"
+VIEW_CONTRACT_PATH = EUCONS / "prospects" / "client_finder_priority_view_contract.json"
 
 
 def load_module(name: str, path: Path):
@@ -25,6 +26,7 @@ def load_module(name: str, path: Path):
 matcher = load_module("r07_match_fail_closed", EUCONS / "prospects" / "prospect_opportunity_match.py")
 engine = load_module("r07_engine_fail_closed", EUCONS / "prospects" / "client_finder_engine.py")
 validator = load_module("r07_validator_helpers", EUCONS / "validation" / "validate_prospect_opportunity_match.py")
+priority_view = load_module("r07_priority_view_fail_closed", EUCONS / "prospects" / "client_finder_priority_view.py")
 
 
 def must_fail(label: str, fn) -> None:
@@ -125,7 +127,73 @@ def main() -> None:
     if any(row["selected_service_id"] is not None for row in held["results"]):
         raise AssertionError("stale bridge selected a service")
 
-    print("PASS: R07 rejects unsafe semantics, service-selection drift, mutable/future/unproven projections and person data; conflicts, suppression and stale sources remain held before matching")
+    match_result = matcher.match_state(state, projection, payload["reference_time"])
+    view_contract = json.loads(VIEW_CONTRACT_PATH.read_text(encoding="utf-8"))
+    view = priority_view.build_priority_view(match_result, view_contract, contract)
+    beta_card = next(card for card in view["cards"] if card["prospect_id"] == "PROS-SYNTH-B")
+    if beta_card["state"] != "MATCHED_RESEARCH_CANDIDATE":
+        raise AssertionError("verified matched prospect lost matched state")
+    nonmatched_ranks = [
+        card["rank"] for card in view["cards"]
+        if card["state"] != "MATCHED_RESEARCH_CANDIDATE"
+    ]
+    if nonmatched_ranks and beta_card["rank"] >= min(nonmatched_ranks):
+        raise AssertionError("verified matched prospect was ranked behind a non-matched prospect")
+    if beta_card["selected_service_id"] != "funding_strategy_and_eligibility":
+        raise AssertionError("priority view lost selected service")
+    if beta_card["selected_opportunity"]["opportunity_id"] != "SYNTH-OPP-SOLAR-CAEN10":
+        raise AssertionError("priority view lost selected opportunity")
+    if any(view[flag] for flag in (
+        "external_contact_enabled",
+        "automatic_offer_enabled",
+        "automatic_send_enabled",
+        "crm_write_enabled",
+        "pipeline_write_enabled",
+    )):
+        raise AssertionError("priority view opened an external or persistence action")
+    if engine.canonical_hash(view) != engine.canonical_hash(priority_view.build_priority_view(match_result, view_contract, contract)):
+        raise AssertionError("Client Finder priority view is not deterministic")
+
+    unsafe_view_contract = deepcopy(view_contract)
+    unsafe_view_contract["output"]["external_contact_enabled"] = True
+    must_fail(
+        "priority view external contact",
+        lambda: priority_view.build_priority_view(match_result, unsafe_view_contract, contract),
+    )
+
+    person_match = deepcopy(match_result)
+    person_match["results"][0]["personal_email"] = "person@example.invalid"
+    must_fail(
+        "priority view person-level field",
+        lambda: priority_view.build_priority_view(person_match, view_contract, contract),
+    )
+
+    unsafe_deadline = deepcopy(match_result)
+    matched_row = next(row for row in unsafe_deadline["results"] if row["state"] == "MATCHED_RESEARCH_CANDIDATE")
+    selected = next(
+        row for row in matched_row["opportunity_matches"]
+        if row["opportunity_id"] == matched_row["selected_opportunity_id"]
+    )
+    selected["verified_fact_classes"] = [
+        value for value in selected["verified_fact_classes"] if value != "deadline"
+    ]
+    must_fail(
+        "priority view unsupported deadline",
+        lambda: priority_view.build_priority_view(unsafe_deadline, view_contract, contract),
+    )
+
+    unsafe_nonmatch_selection = deepcopy(match_result)
+    nonmatched = next(row for row in unsafe_nonmatch_selection["results"] if row["state"] != "MATCHED_RESEARCH_CANDIDATE")
+    nonmatched["selected_service_id"] = "funding_strategy_and_eligibility"
+    must_fail(
+        "priority view nonmatched service selection",
+        lambda: priority_view.build_priority_view(unsafe_nonmatch_selection, view_contract, contract),
+    )
+
+    print(
+        "PASS: R07 rejects unsafe matching and priority-view states; Client Finder ranking is deterministic, "
+        "person-safe, source-supported and non-writing"
+    )
 
 
 if __name__ == "__main__":
