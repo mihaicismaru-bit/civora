@@ -16,6 +16,9 @@ from test_runtime import adult_payload, employer_payload
 
 
 SUBMIT_PATH = "/research/ai4work/v1/submit"
+ADULT_CHANNEL = "CH-ADULT001"
+EMPLOYER_CHANNEL = "CH-EMPLOY01"
+CHANNEL_REGISTER_SHA = "b" * 64
 
 
 def enabled_reference_contract() -> dict:
@@ -33,18 +36,19 @@ def browser_like_body(payload: dict) -> bytes:
     return json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
 
 
-def browser_like_headers(key: str) -> dict[str, str]:
+def browser_like_headers(key: str, channel_id: str) -> dict[str, str]:
     return {
         "Content-Type": "application/json; charset=utf-8",
         "X-AI4WORK-Idempotency-Key": key,
+        "X-AI4WORK-Recruitment-Channel": channel_id,
     }
 
 
-def submit(payload: dict, store: SQLiteResearchStorage) -> tuple[int, dict[str, str], bytes]:
+def submit(payload: dict, store: SQLiteResearchStorage, channel_id: str) -> tuple[int, dict[str, str], bytes]:
     return handle_request(
         method="POST",
         path=SUBMIT_PATH,
-        headers=browser_like_headers(str(uuid.uuid4())),
+        headers=browser_like_headers(str(uuid.uuid4()), channel_id),
         body=browser_like_body(payload),
         store=store,
         contract=enabled_reference_contract(),
@@ -64,7 +68,8 @@ def test_twin_frame(records: list[dict]) -> tuple[dict, bytes]:
         },
         "collection_started_at": "2026-01-01T00:00:00+00:00",
         "collection_closed_at": "2026-12-31T23:59:59+00:00",
-        "collection_channels": ["repository reference browser-like HTTP smoke"],
+        "collection_channels": [ADULT_CHANNEL, EMPLOYER_CHANNEL],
+        "collection_channel_register_sha256": CHANNEL_REGISTER_SHA,
         "source_system": "eucons.ro",
         "source_export_sha256": hashlib.sha256(source_bytes).hexdigest(),
         "direct_identifiers_collected": False,
@@ -88,8 +93,8 @@ class EndToEndTestTwinChain(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             store = SQLiteResearchStorage(Path(td) / "ai4work-test-twin-chain.sqlite")
 
-            adult_response = submit(adult_payload(), store)
-            employer_response = submit(employer_payload(), store)
+            adult_response = submit(adult_payload(), store, ADULT_CHANNEL)
+            employer_response = submit(employer_payload(), store, EMPLOYER_CHANNEL)
             self.assertEqual(adult_response[0], 201)
             self.assertEqual(employer_response[0], 201)
 
@@ -99,6 +104,10 @@ class EndToEndTestTwinChain(unittest.TestCase):
             )
             self.assertEqual(len(exported_real_shape), 2)
             self.assertTrue(all(record["synthetic"] is False for record in exported_real_shape))
+            self.assertEqual(
+                {record["recruitment_channel_id"] for record in exported_real_shape},
+                {ADULT_CHANNEL, EMPLOYER_CHANNEL},
+            )
 
             # TEST TWIN is a distinct derived fixture, never the stored reference rows.
             test_twin_records = copy.deepcopy(exported_real_shape)
@@ -120,6 +129,8 @@ class EndToEndTestTwinChain(unittest.TestCase):
             self.assertEqual(manifest["record_count"], 2)
             self.assertEqual(manifest["form_counts"]["AI4WORK_ADULTS_V1"], 1)
             self.assertEqual(manifest["form_counts"]["AI4WORK_EMPLOYERS_V1"], 1)
+            self.assertEqual(manifest["channel_counts"], {ADULT_CHANNEL: 1, EMPLOYER_CHANNEL: 1})
+            self.assertEqual(manifest["dominant_channel_share"], 0.5)
             self.assertEqual(manifest["source_export_sha256"], hashlib.sha256(source_bytes).hexdigest())
 
             rendered_manifest = NF06.manifest_json_bytes(manifest).decode("utf-8")
