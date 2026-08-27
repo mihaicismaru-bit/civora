@@ -2,6 +2,24 @@ name: PARTENER.EU Web QA
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'partener-eu/web/**'
+      - 'partener-eu/ops/test_web_hygiene.py'
+      - 'partener-eu/ops/test_public_boot_performance.py'
+      - 'partener-eu/ops/test_frontend_regression.py'
+      - 'partener-eu/ops/test_home_novice.py'
+      - 'partener-eu/ops/test_public_product_v3.py'
+      - 'partener-eu/ops/test_ask_partener_v2.py'
+      - 'partener-eu/ops/test_ask_eligibility_projection.js'
+      - 'partener-eu/ops/test_home_freshness_guard.mjs'
+      - 'partener-eu/ops/test_public_language.py'
+      - 'partener-eu/ops/test_decision_products.py'
+      - 'partener-eu/ops/test_consultant_workspace_v3.py'
+      - 'partener-eu/ops/test_consultant_crud_v4.py'
+      - 'partener-eu/ops/test_consultant_runtime_v5.py'
+      - '.github/workflows/partener-eu-web-qa.yml'
   pull_request:
     branches: [main]
     paths:
