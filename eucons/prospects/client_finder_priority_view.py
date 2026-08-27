@@ -151,6 +151,22 @@ def _selected_opportunity(row: dict[str, Any], matched_state: str) -> dict[str, 
     verified_classes = set(selected.get("verified_fact_classes") or [])
     if deadline is not None:
         require("deadline" in verified_classes, "deadline exposed without verified source class")
+
+    provenance = selected.get("source_provenance")
+    require(isinstance(provenance, dict), "selected opportunity missing source provenance")
+    require(provenance.get("source_product") == "PARTENER.EU", "selected opportunity source product drift")
+    source_opportunity_id = provenance.get("source_opportunity_id")
+    require(isinstance(source_opportunity_id, str) and source_opportunity_id.strip(),
+            "selected opportunity missing source opportunity id")
+    require(source_opportunity_id == selected_id, "selected opportunity provenance id mismatch")
+    source_as_of = provenance.get("source_as_of")
+    require(isinstance(source_as_of, str) and source_as_of.strip(), "selected opportunity missing source as-of")
+    publication_decision = provenance.get("publication_decision") or {}
+    require(publication_decision.get("decision") == "ALLOW_VERIFIED_FACTS",
+            "selected opportunity lacks verified-facts publication decision")
+    verification_evidence = provenance.get("verification_evidence")
+    require(isinstance(verification_evidence, list) and verification_evidence,
+            "selected opportunity missing verification evidence")
     return selected
 
 
@@ -230,6 +246,13 @@ def build_priority_view(
                 "selected_service_id": row["selected_service_id"],
                 "source_supported_deadline": selected.get("source_supported_deadline"),
                 "verified_fact_classes": sorted(selected.get("verified_fact_classes") or []),
+                "source_trace": {
+                    "source_product": selected["source_provenance"]["source_product"],
+                    "source_opportunity_id": selected["source_provenance"]["source_opportunity_id"],
+                    "source_as_of": selected["source_provenance"]["source_as_of"],
+                    "source_projection_sha256": selected["source_provenance"].get("source_projection_sha256"),
+                    "verification_evidence_count": len(selected["source_provenance"]["verification_evidence"]),
+                },
             },
             "selected_service_id": row.get("selected_service_id"),
             "safe_next_action": safe_next_action,
