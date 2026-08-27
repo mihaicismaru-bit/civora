@@ -9,9 +9,9 @@ independent surfaces and requires them to agree:
 2. the public repository projection (state + ordered articles);
 3. the documents actually served from https://valceaclar.ro.
 
-The probe intentionally does not depend on legacy ChatGPT Sites markers, legacy
-route inventory, or the raw CIVORA feed order. The public presentation contract
-is freshness-first and is recorded by the public projection itself.
+The probe intentionally does not depend on retired presentation-layer markers,
+legacy route inventory, or the raw CIVORA feed order. The public presentation
+contract is freshness-first and is recorded by the public projection itself.
 """
 from __future__ import annotations
 
