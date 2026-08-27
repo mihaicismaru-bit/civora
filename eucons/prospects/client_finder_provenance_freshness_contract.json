@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "id": "EUCONS-R07-CLIENT-FINDER-PROVENANCE-FRESHNESS-001",
+  "status": "CANONICAL",
+  "purpose": "Expose deterministic source-age observability for matched Client Finder triage cards without inventing a stale/fresh threshold or authorizing any external action.",
+  "source_contract_id": "EUCONS-R07-CLIENT-FINDER-TRIAGE-VIEW-002",
+  "required_source_view_state": "CLIENT_FINDER_OPERATOR_TRIAGE_VIEW",
+  "required_eligibility_state": "NOT_ASSESSED",
+  "required_maximum_next_state": "RESEARCH_READY",
+  "provenance": {
+    "required_source_product": "PARTENER.EU",
+    "required_source_trace_fields": [
+      "source_product",
+      "source_opportunity_id",
+      "source_as_of",
+      "source_projection_sha256",
+      "verification_evidence_count"
+    ],
+    "source_as_of_format": "RFC3339_UTC_Z",
+    "stale_after_hours": null,
+    "future_freshness_threshold": null,
+    "raw_verification_evidence_exposed": false
+  },
+  "ordering": {
+    "mode": "OLDEST_SOURCE_AS_OF_FIRST",
+    "tie_breakers": [
+      "prospect_id",
+      "opportunity_id"
+    ]
+  },
+  "output": {
+    "view_state": "CLIENT_FINDER_PROVENANCE_FRESHNESS_VIEW",
+    "semantics": "OBSERVABILITY_ONLY_NO_STALE_THRESHOLD",
+    "eligibility_state": "NOT_ASSESSED",
+    "maximum_next_state": "RESEARCH_READY",
+    "human_review_required": true,
+    "external_contact_enabled": false,
+    "automatic_offer_enabled": false,
+    "automatic_send_enabled": false,
+    "crm_write_enabled": false,
+    "pipeline_write_enabled": false
+  },
+  "rules": {
+    "matched_cards_only": true,
+    "strict_rfc3339_utc_source_as_of": true,
+    "oldest_source_first_is_ordering_not_staleness": true,
+    "no_freshness_threshold_or_stale_claim": true,
+    "never_expose_person_level_fields": true,
+    "raw_verification_evidence_never_exposed": true,
+    "safe_output_whitelist_only": true,
+    "no_external_action_or_persistence": true
+  }
+}
