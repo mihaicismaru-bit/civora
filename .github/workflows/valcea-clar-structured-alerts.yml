@@ -1,8 +1,9 @@
 name: VÂLCEA CLAR Structured Primary Alerts
 
 # Rapid T1 ingest owns only the verified event stream. It must never mutate the
-# canonical facts registry directly. A changed structured_alert_events.json push
-# triggers Fact Kernel, which is the single facts writer, then Live Newsroom.
+# canonical facts registry directly. After a durable structured event change is
+# pushed, this workflow explicitly dispatches Fact Kernel because GitHub does not
+# recursively trigger push workflows from commits made with GITHUB_TOKEN.
 on:
   workflow_dispatch:
   schedule:
@@ -37,6 +38,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: valcea-clar-structured-alerts-${{ github.event.pull_request.number || 'main' }}
@@ -137,6 +139,8 @@ jobs:
       - name: Persist only the verified structured event stream
         if: github.event_name != 'pull_request'
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           cp valcea-clar/editorial/structured_alert_events.json /tmp/valcea-structured-alert-events.json
@@ -157,8 +161,16 @@ jobs:
             fi
             git commit -m 'Refresh VÂLCEA CLAR structured primary events'
             if git push origin HEAD:main; then
-              echo 'Fact Kernel will consume this durable event change via its push trigger.'
-              exit 0
+              for dispatch_attempt in 1 2 3 4 5; do
+                if gh workflow run valcea-clar-fact-kernel.yml --repo "$GITHUB_REPOSITORY" --ref main; then
+                  echo 'Fact Kernel dispatch accepted after durable structured event change.'
+                  exit 0
+                fi
+                echo "Fact Kernel dispatch failed; retrying ${dispatch_attempt}/5." >&2
+                sleep $((dispatch_attempt * 2))
+              done
+              echo 'Structured event change was persisted but Fact Kernel dispatch failed after five attempts.' >&2
+              exit 1
             fi
             sleep $((attempt * 2))
           done
