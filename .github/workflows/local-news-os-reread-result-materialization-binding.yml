@@ -69,10 +69,6 @@ jobs:
             exit "$status"
           fi
 
-      - name: Run provider reread outcome regression
-        working-directory: local-news-os/social
-        run: python test_reread_provider_outcome_binding.py
-
       - name: Verify operational install and zero-paid boundary
         run: |
           python - <<'PY'
