@@ -8,12 +8,14 @@ on:
       - 'partener-eu/ingest/data_plane_contract.json'
       - 'partener-eu/ingest/funding_tenders_api.py'
       - 'partener-eu/ingest/eea_civil_society_calls.py'
+      - 'partener-eu/ingest/eea_civil_society_fetch.py'
       - 'partener-eu/ops/test_source_registry_low_info.py'
       - 'partener-eu/ops/test_source_registry_current_hosts.py'
       - 'partener-eu/ops/test_source_registry_alias_fallback.py'
       - 'partener-eu/ops/test_source_registry_external_expansion.py'
       - 'partener-eu/ops/test_funding_tenders_structured_adapter.py'
       - 'partener-eu/ops/test_eea_civil_society_calls.py'
+      - 'partener-eu/ops/test_eea_civil_society_fetch.py'
       - '.github/workflows/partener-eu-source-registry-ci.yml'
   workflow_dispatch:
 
@@ -40,9 +42,11 @@ jobs:
           python -m py_compile partener-eu/ingest/source_registry_probe.py
           python -m py_compile partener-eu/ingest/funding_tenders_api.py
           python -m py_compile partener-eu/ingest/eea_civil_society_calls.py
+          python -m py_compile partener-eu/ingest/eea_civil_society_fetch.py
           python -m py_compile partener-eu/ops/test_source_registry_external_expansion.py
           python -m py_compile partener-eu/ops/test_funding_tenders_structured_adapter.py
           python -m py_compile partener-eu/ops/test_eea_civil_society_calls.py
+          python -m py_compile partener-eu/ops/test_eea_civil_society_fetch.py
 
       - name: Validate low-information fail-closed behavior
         run: python partener-eu/ops/test_source_registry_low_info.py
@@ -61,3 +65,6 @@ jobs:
 
       - name: Validate EEA Civil Society Fund Romania call normalization
         run: python partener-eu/ops/test_eea_civil_society_calls.py
+
+      - name: Validate EEA Civil Society Fund exact-page acquisition
+        run: python partener-eu/ops/test_eea_civil_society_fetch.py
