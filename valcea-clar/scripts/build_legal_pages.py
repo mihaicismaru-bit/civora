@@ -1,17 +1,10 @@
 #!/usr/bin/env python3
-"""Build public VÂLCEA CLAR policy/legal pages from a canonical structured source.
-
-The renderer is deterministic, dependency-free and deliberately contains no tracking,
-credentials or remote calls. It writes only the declared public policy routes unless
-export is requested.
-"""
+"""Build public VÂLCEA CLAR policy/legal pages into the canonical runtime."""
 from __future__ import annotations
 
 import argparse
-import hashlib
 import html
 import json
-import shutil
 from pathlib import Path
 from typing import Any
 
@@ -19,8 +12,6 @@ ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "site"
 SOURCE = SITE / "legal" / "legal_pages.json"
 RUNTIME = SITE / "runtime"
-DIST = ROOT / "dist" / "chatgpt-sites"
-MANIFEST = DIST / "manifest.json"
 EXPECTED = {
     "termeni": "/termeni/",
     "confidentialitate": "/confidentialitate/",
@@ -37,14 +28,6 @@ LEGAL_LINKS = (
 
 def esc(value: Any) -> str:
     return html.escape(str(value or ""), quote=True)
-
-
-def sha256(path: Path) -> str:
-    h = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            h.update(chunk)
-    return h.hexdigest()
 
 
 def load_source() -> dict[str, Any]:
@@ -135,65 +118,6 @@ def build() -> dict[str, Any]:
     return {"status": "PASS", "pages": outputs, "remote_mutation": False}
 
 
-def legal_routes(doc: dict[str, Any] | None = None) -> list[dict[str, Any]]:
-    doc = doc or load_source()
-    routes: list[dict[str, Any]] = []
-    for slug, path in EXPECTED.items():
-        title = str(doc["pages"][slug]["title"])
-        routes.append({
-            "path": path,
-            "source": f"{slug}/index.html",
-            "title": f"{title} — VÂLCEA CLAR",
-            "update_mode": "replace_legal_page",
-            "publication_unit": "legal_page",
-            "canonical_url": f"https://valceaclar.ro{path}",
-        })
-    return routes
-
-
-def export() -> dict[str, Any]:
-    report = build()
-    doc = load_source()
-    DIST.mkdir(parents=True, exist_ok=True)
-    for slug in EXPECTED:
-        source = RUNTIME / slug / "index.html"
-        target = DIST / slug / "index.html"
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(source, target)
-
-    route_report = {"manifest_updated": False, "legal_routes": len(EXPECTED)}
-    if MANIFEST.is_file():
-        manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
-        routes = [route for route in manifest.get("routes", []) if route.get("path") not in set(EXPECTED.values())]
-        insert_at = 1 if routes and routes[0].get("path") == "/" else 0
-        routes[insert_at:insert_at] = legal_routes(doc)
-        manifest["routes"] = routes
-        manifest["schema_version"] = "1.7"
-        manifest.setdefault("target", {})["public_legal_pages"] = True
-        manifest.setdefault("counts", {})["routes"] = len(routes)
-        manifest["counts"]["legal_routes"] = len(EXPECTED)
-        manifest["legal_pages"] = {
-            "source": "site/legal/legal_pages.json",
-            "effective_date": doc["effective_date"],
-            "contact": doc["contact_email"],
-            "routes": list(EXPECTED.values()),
-        }
-        files = []
-        for path in sorted(p for p in DIST.rglob("*") if p.is_file() and p != MANIFEST):
-            files.append({
-                "path": path.relative_to(DIST).as_posix(),
-                "bytes": path.stat().st_size,
-                "sha256": sha256(path),
-            })
-        manifest["files"] = files
-        MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        route_report["manifest_updated"] = True
-        route_report["routes"] = len(routes)
-        route_report["files"] = len(files)
-    validate_exported()
-    return {**report, **route_report, "exported": True}
-
-
 def validate_generated(doc: dict[str, Any] | None = None) -> None:
     doc = doc or load_source()
     public_routes = list(EXPECTED.values())
@@ -218,19 +142,6 @@ def validate_generated(doc: dict[str, Any] | None = None) -> None:
             raise ValueError(f"generated public policy page {slug} leaks secret marker: {leaked}")
 
 
-def validate_exported() -> None:
-    doc = load_source()
-    for slug in EXPECTED:
-        runtime = RUNTIME / slug / "index.html"
-        exported = DIST / slug / "index.html"
-        if not exported.is_file():
-            raise ValueError(f"missing exported public policy page: {exported}")
-        if exported.read_bytes() != runtime.read_bytes():
-            raise ValueError(f"exported public policy page differs from runtime source: {slug}")
-        if doc["pages"][slug]["title"] not in exported.read_text(encoding="utf-8"):
-            raise ValueError(f"exported public policy title missing: {slug}")
-
-
 def self_test() -> int:
     doc = load_source()
     for slug in EXPECTED:
@@ -239,7 +150,6 @@ def self_test() -> int:
         assert doc["contact_email"] in text
         assert all(route in text for route in EXPECTED.values())
         assert "CLIENT_SECRET" not in text
-    assert [row["path"] for row in legal_routes(doc)] == list(EXPECTED.values())
     print("VÂLCEA CLAR public policy pages self-test: PASS")
     return 0
 
@@ -248,7 +158,6 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--self-test", action="store_true")
     parser.add_argument("--check", action="store_true")
-    parser.add_argument("--export", action="store_true")
     args = parser.parse_args()
     if args.self_test:
         return self_test()
@@ -256,7 +165,7 @@ def main() -> int:
         validate_generated()
         print("VÂLCEA CLAR public policy pages validation: PASS")
         return 0
-    result = export() if args.export else build()
+    result = build()
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
 

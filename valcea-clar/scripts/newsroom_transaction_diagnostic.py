@@ -65,7 +65,6 @@ def diagnose(story_id: str | None) -> dict[str, Any]:
         ("render_frontpage", [py, "valcea-clar/scripts/render_frontpage.py"]),
         ("render_story_pages", [py, "valcea-clar/scripts/render_story_pages.py"]),
         ("build_live_feed", [py, "valcea-clar/scripts/build_live_feed.py"]),
-        ("build_sites_export", [py, "valcea-clar/scripts/build_sites_export.py"]),
         ("overlay_runtime_export", [py, "valcea-clar/scripts/overlay_runtime_export.py"]),
     ]
     for name, argv in commands:

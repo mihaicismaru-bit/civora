@@ -256,7 +256,6 @@ jobs:
           python valcea-clar/scripts/render_frontpage.py
           python valcea-clar/scripts/render_story_pages.py
           python valcea-clar/scripts/build_live_feed.py
-          python valcea-clar/scripts/build_sites_export.py
           python valcea-clar/scripts/overlay_runtime_export.py
           test -s valcea-clar/site/runtime/stiri/manifest.json
 
@@ -351,14 +350,12 @@ jobs:
 
             if git diff --cached --quiet; then
               echo 'Canonical story transaction is already present on main.'
-              python valcea-clar/scripts/build_sites_export.py
               python valcea-clar/scripts/overlay_runtime_export.py
               exit 0
             fi
 
             git commit -m "Publish VÂLCEA CLAR live story update"
             if git push origin HEAD:main; then
-              python valcea-clar/scripts/build_sites_export.py
               python valcea-clar/scripts/overlay_runtime_export.py
               exit 0
             fi
@@ -390,12 +387,3 @@ jobs:
             exit 1
           fi
           echo 'Social Publication Engine dispatched from canonical story publication event.'
-
-      - name: Upload current site payload
-        if: steps.decision.outputs.changed == 'true'
-        uses: actions/upload-artifact@v7
-        with:
-          name: valcea-clar-live-newsroom-${{ github.run_id }}
-          path: valcea-clar/dist/chatgpt-sites
-          if-no-files-found: error
-          retention-days: 7

@@ -41,7 +41,7 @@ jobs:
         run: python valcea-clar/social/instagram_editorial_publish.py --self-test
       - name: Dry-run canonical current state
         run: python valcea-clar/social/instagram_editorial_publish.py | tee /tmp/instagram-editorial-dry-run.json
-      - name: Assert adoption does not republish existing stories
+      - name: Assert existing Instagram state is not republished
         run: |
           python - <<'PY'
           import json
@@ -49,15 +49,20 @@ jobs:
           value=json.loads(Path('/tmp/instagram-editorial-dry-run.json').read_text(encoding='utf-8'))
           if value.get('status')!='DRY_RUN':
               raise SystemExit('unexpected dry-run status')
-          if value.get('eligible'):
-              raise SystemExit(f"already-live fixture unexpectedly eligible: {[x.get('story_id') for x in value['eligible']]}")
+          eligible=value.get('eligible') or []
+          skipped=value.get('skipped') or []
           held={'olanesti-bridge-monitor','derived-council-gambling-20260723'}
-          observed={str(x.get('story_id') or '') for x in value.get('eligible',[])}
-          if observed & held:
-              raise SystemExit(f'editorial hold became Instagram-eligible: {sorted(observed & held)}')
-          if any(x.get('reason')!='already_published' for x in value.get('skipped',[])):
+          eligible_ids={str(x.get('story_id') or '') for x in eligible}
+          if eligible_ids & held:
+              raise SystemExit(f'editorial hold became Instagram-eligible: {sorted(eligible_ids & held)}')
+          if any(x.get('reason')!='already_published' for x in skipped):
               raise SystemExit('Instagram canonical dedupe state contains an unexpected skip reason')
-          print('Instagram editorial adoption dedupe: PASS')
+          eligible_keys={str(x.get('state_key') or '') for x in eligible if x.get('state_key')}
+          skipped_keys={str(x.get('state_key') or '') for x in skipped if x.get('state_key')}
+          overlap=eligible_keys & skipped_keys
+          if overlap:
+              raise SystemExit(f'published Instagram state became eligible again: {sorted(overlap)}')
+          print(f'Instagram editorial adoption dedupe: PASS ({len(skipped)} existing skipped; {len(eligible)} new eligible)')
           PY
       - name: Assert live apply remains feature-gated
         run: |
@@ -72,19 +77,17 @@ jobs:
               raise SystemExit(f"unsafe apply result: {value.get('status')}")
           print('Instagram editorial live gate: PASS')
           PY
-      - name: Validate staged runtime/export parity
+      - name: Validate staged canonical runtime media
         run: |
           python - <<'PY'
           from pathlib import Path
           runtime=Path('valcea-clar/site/runtime/media/social/editorial/instagram')
-          dist=Path('valcea-clar/dist/chatgpt-sites/media/social/editorial/instagram')
-          if not runtime.is_dir() or not dist.is_dir():
-              raise SystemExit('editorial media staging directories missing')
-          r={p.name:p.read_bytes() for p in runtime.glob('*.jpg')}
-          d={p.name:p.read_bytes() for p in dist.glob('*.jpg')}
-          if not r or r != d:
-              raise SystemExit('runtime/export editorial media mismatch')
-          print(f'Instagram editorial staging parity: PASS ({len(r)} JPEGs)')
+          if not runtime.is_dir():
+              raise SystemExit('editorial runtime media staging directory missing')
+          media=list(runtime.glob('*.jpg'))
+          if not media:
+              raise SystemExit('editorial runtime media staging is empty')
+          print(f'Instagram editorial runtime staging: PASS ({len(media)} JPEGs)')
           PY
       - name: Upload adapter audit and staged media
         uses: actions/upload-artifact@v7
@@ -94,6 +97,5 @@ jobs:
             /tmp/instagram-editorial-dry-run.json
             /tmp/instagram-editorial-apply-gated.json
             valcea-clar/site/runtime/media/social/editorial/instagram
-            valcea-clar/dist/chatgpt-sites/media/social/editorial/instagram
           if-no-files-found: warn
           retention-days: 14
