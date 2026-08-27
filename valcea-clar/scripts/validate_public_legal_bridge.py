@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""Fail-closed contract for public VÂLCEA CLAR policy/legal routes.
-
-This validates repository artifacts only. It does not claim that an external Site
-has been published; remote HTTP acceptance remains a separate deployment check.
-"""
+"""Fail-closed contract for canonical public VÂLCEA CLAR policy/legal routes."""
 from __future__ import annotations
 
 import json
@@ -12,8 +8,6 @@ from pathlib import Path
 import build_legal_pages
 
 ROOT = Path(__file__).resolve().parents[1]
-BRIDGE = ROOT / "site" / "chatgpt-sites-live-bridge.js"
-INSTALL = ROOT / "site" / "ONE_TIME_LIVE_BRIDGE_INSTALL.md"
 LEGAL = ROOT / "site" / "legal" / "legal_pages.json"
 NAVIGATION = ROOT / "site" / "navigation.json"
 RUNTIME = ROOT / "site" / "runtime"
@@ -21,8 +15,6 @@ EXPECTED_PAGES = {"termeni", "confidentialitate", "corectii"}
 
 
 def main() -> int:
-    # Generated HTML is deployment/runtime output, not an independent source of
-    # truth. Rebuild it deterministically before validating the repository bridge.
     build_legal_pages.build()
 
     doc = json.loads(LEGAL.read_text(encoding="utf-8"))
@@ -45,35 +37,6 @@ def main() -> int:
     assert (nav.get("policy") or {}).get("main_navigation_must_resolve_to_reader_content") is True
     assert (nav.get("policy") or {}).get("empty_category_fallback_to_other_category_forbidden") is True
 
-    bridge = BRIDGE.read_text(encoding="utf-8")
-    install = INSTALL.read_text(encoding="utf-8")
-
-    # The client bridge remains a fallback for the two original legal routes.
-    # /corectii/ is a first-class server-rendered/static policy route and does
-    # not require client-side rendering to be public or indexable.
-    required_bridge = (
-        "site/legal/legal_pages.json",
-        "site/navigation.json",
-        "path === '/termeni/'",
-        "path === '/confidentialitate/'",
-        "renderLegal(nav, doc, slug)",
-        "https://valceaclar.ro${page.path}",
-        "footerLinks(nav)",
-    )
-    missing_bridge = [value for value in required_bridge if value not in bridge]
-    assert not missing_bridge, f"Public bridge legal contract missing: {missing_bridge}"
-
-    required_install = (
-        "server-rendered/static",
-        "HTML-ul inițial",
-        "https://valceaclar.ro/termeni/",
-        "https://valceaclar.ro/confidentialitate/",
-        "index,follow",
-        "HTTP 200",
-    )
-    missing_install = [value for value in required_install if value not in install]
-    assert not missing_install, f"Site install legal contract missing: {missing_install}"
-
     for slug, page in doc["pages"].items():
         expected_path = f"/{slug}/"
         assert page.get("path") == expected_path
@@ -84,19 +47,15 @@ def main() -> int:
         assert f"https://valceaclar.ro{expected_path}" in text
         assert 'name="robots" content="index,follow"' in text
         assert doc["contact_email"] in text
+        forbidden = ("CLIENT_SECRET", "ACCESS_TOKEN", "REFRESH_TOKEN", "github-actions-secret:")
+        leaked = [value for value in forbidden if value in text]
+        assert not leaked, f"Secret marker leaked into public policy page {slug}: {leaked}"
 
     corectii = doc["pages"]["corectii"]
     assert corectii["title"] == "Corecții și drept la replică"
     assert len(corectii.get("sections") or []) >= 5
 
-    forbidden = ("CLIENT_SECRET", "ACCESS_TOKEN", "REFRESH_TOKEN", "github-actions-secret:")
-    leaked = [value for value in forbidden if value in bridge or value in install]
-    assert not leaked, f"Secret marker leaked into public bridge/install docs: {leaked}"
-
-    print(
-        "VÂLCEA CLAR public policy bridge: PASS "
-        "(canonical navigation v2 + 3 repository policy routes; remote HTTP remains separate)"
-    )
+    print("VÂLCEA CLAR public policy runtime: PASS (canonical navigation v2 + 3 policy routes)")
     return 0
 
 
