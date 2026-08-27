@@ -9,7 +9,7 @@ from typing import Any
 
 from channel_provenance import ChannelProvenanceError, validate_channel_set, validate_recruitment_channel_id
 from research_storage import ALLOWED_FORMS, RESEARCH_ID, canonical_json_bytes, validate_record_envelope
-from runtime import PII_PATTERNS, _form_by_id, _validate_group, load_forms, reject_forbidden_keys
+from runtime import CONTRACT_PATH, FORMS_PATH, PII_PATTERNS, _form_by_id, _validate_group, load_forms, reject_forbidden_keys
 
 PROD_EVIDENCE_CLASS = "PROD_REAL_EVIDENCE"
 TEST_TWIN_EVIDENCE_CLASS = "TEST_TWIN_NON_EVIDENCE"
@@ -43,6 +43,8 @@ COMMON_FRAME_FIELDS = {
     "frame_status",
     "evidence_class",
     "instrument_versions",
+    "form_contract_sha256",
+    "forms_definition_sha256",
     "collection_started_at",
     "collection_closed_at",
     "collection_channels",
@@ -93,14 +95,24 @@ def canonical_export_bytes(records: list[dict[str, Any]]) -> bytes:
     return b"".join(canonical_json_bytes(row) for row in ordered)
 
 
+def instrument_definition_hashes() -> dict[str, str]:
+    return {
+        "form_contract_sha256": hashlib.sha256(CONTRACT_PATH.read_bytes()).hexdigest(),
+        "forms_definition_sha256": hashlib.sha256(FORMS_PATH.read_bytes()).hexdigest(),
+    }
+
+
 def validate_collection_frame(frame: Any, *, prod: bool) -> tuple[datetime, datetime, frozenset[str]]:
     if not isinstance(frame, dict):
         raise NF06PreingestError("collection frame must be an object")
-    missing = COMMON_FRAME_FIELDS - set(frame)
-    if prod:
-        missing |= PROD_ONLY_FRAME_FIELDS - set(frame)
+    expected_fields = COMMON_FRAME_FIELDS | (PROD_ONLY_FRAME_FIELDS if prod else set())
+    actual_fields = set(frame)
+    missing = expected_fields - actual_fields
+    extra = actual_fields - expected_fields
     if missing:
         raise NF06PreingestError(f"collection frame missing fields: {sorted(missing)}")
+    if extra:
+        raise NF06PreingestError(f"collection frame contains unreviewed fields: {sorted(extra)}")
 
     reject_forbidden_keys(frame)
     _scan_identifier_like_strings(frame)
@@ -123,6 +135,13 @@ def validate_collection_frame(frame: Any, *, prod: bool) -> tuple[datetime, date
         raise NF06PreingestError("source_export_sha256 must be lowercase SHA-256 hex")
     if not isinstance(frame.get("collection_channel_register_sha256"), str) or not SHA256_RE.fullmatch(frame["collection_channel_register_sha256"]):
         raise NF06PreingestError("collection_channel_register_sha256 must be lowercase SHA-256 hex")
+
+    current_instrument_hashes = instrument_definition_hashes()
+    for field, expected_hash in current_instrument_hashes.items():
+        if not isinstance(frame.get(field), str) or not SHA256_RE.fullmatch(frame[field]):
+            raise NF06PreingestError(f"{field} must be lowercase SHA-256 hex")
+        if frame[field] != expected_hash:
+            raise NF06PreingestError(f"{field} does not match the frozen repository instrument")
 
     instrument_versions = frame.get("instrument_versions")
     if not isinstance(instrument_versions, dict) or set(instrument_versions) != ALLOWED_FORMS:
@@ -253,15 +272,19 @@ def build_preingest_manifest(
 
     evidence_class = PROD_EVIDENCE_CLASS if prod else TEST_TWIN_EVIDENCE_CLASS
     dominant_channel_share = max(channel_counts.values()) / len(records)
+    frame_sha = hashlib.sha256(canonical_json_bytes(collection_frame)).hexdigest()
     return {
-        "schema_version": "eucons.ai4work_nf06_preingest_manifest.v0.2",
+        "schema_version": "eucons.ai4work_nf06_preingest_manifest.v0.3",
         "research_id": RESEARCH_ID,
         "handoff_stage": "NF06_SOURCE_PREFLIGHT",
         "evidence_class": evidence_class,
         "non_evidence": not prod,
         "collection_frame_id": collection_frame["collection_frame_id"],
+        "collection_frame_sha256": frame_sha,
         "source_export_sha256": source_sha,
         "collection_channel_register_sha256": collection_frame["collection_channel_register_sha256"],
+        "form_contract_sha256": collection_frame["form_contract_sha256"],
+        "forms_definition_sha256": collection_frame["forms_definition_sha256"],
         "record_count": len(records),
         "form_counts": form_counts,
         "channel_counts": dict(sorted(channel_counts.items())),
@@ -269,12 +292,14 @@ def build_preingest_manifest(
         "received_at_min": min(received_values).isoformat(),
         "received_at_max": max(received_values).isoformat(),
         "records_validated_against_frozen_forms": True,
+        "instrument_content_hashes_validated": True,
+        "collection_frame_exact_field_allowlist_validated": True,
         "channel_membership_validated_against_collection_frame": True,
         "direct_identifiers_collected": False,
         "crm_linkage": "FORBIDDEN",
         "commercial_tracking": "FORBIDDEN",
         "prod_promotion_eligible": prod,
-        "scope_boundary": "This manifest validates source-batch integrity, opaque recruitment-channel provenance and eligibility for NF06 handoff only; it does not claim that NF06 ingestion, synthesis, ranking or QA has executed.",
+        "scope_boundary": "This manifest validates source-batch integrity, exact collection-frame identity, frozen instrument content, opaque recruitment-channel provenance and eligibility for NF06 handoff only; it does not claim that NF06 ingestion, synthesis, ranking or QA has executed.",
     }
 
 
