@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -114,6 +115,27 @@ class RightsAccessTests(unittest.TestCase):
 
             with self.assertRaisesRegex(RightsAccessError, "not approved"):
                 build_receipt_keyed_access_copy(store, item["response_id"])
+
+    def test_rights_procedure_binds_article15_copy_without_claiming_full_access_workflow(self):
+        procedure = json.loads(
+            (Path(__file__).with_name("GDPR_DATA_SUBJECT_RIGHTS_PROCEDURE_DRAFT.json")).read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual(procedure["schema_version"], "eucons.ai4work_data_subject_rights.v0.7")
+        self.assertIn("gdpr_article_15", procedure["legal_design_anchors"])
+        operations = procedure["research_store_operations"]
+        self.assertEqual(
+            operations["access_reference_adapter"],
+            "RECEIPT_KEYED_RESPONDENT_RECORD_COPY_ALLOWLIST_FAIL_CLOSED_ON_NEW_FIELDS_NO_STORAGE_INTERNALS",
+        )
+        self.assertTrue(operations["access_controller_context_required"])
+        self.assertEqual(
+            operations["access_requester_authentication_reference_adapter"],
+            "NOT_IMPLEMENTED_CONTROLLER_OPERATION_REQUIRED",
+        )
+        self.assertEqual(procedure["test_twin"]["classification"], "TEST_TWIN_NON_EVIDENCE")
+        self.assertFalse(procedure["collection_enabled"])
 
 
 if __name__ == "__main__":
