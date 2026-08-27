@@ -5,10 +5,12 @@ on:
     paths:
       - 'partener-eu/ingest/source_registry.json'
       - 'partener-eu/ingest/source_registry_probe.py'
+      - 'partener-eu/ingest/funding_tenders_api.py'
       - 'partener-eu/ops/test_source_registry_low_info.py'
       - 'partener-eu/ops/test_source_registry_current_hosts.py'
       - 'partener-eu/ops/test_source_registry_alias_fallback.py'
       - 'partener-eu/ops/test_source_registry_external_expansion.py'
+      - 'partener-eu/ops/test_funding_tenders_structured_adapter.py'
       - '.github/workflows/partener-eu-source-registry-ci.yml'
   workflow_dispatch:
 
@@ -28,11 +30,13 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Validate registry JSON and probe syntax
+      - name: Validate registry JSON and adapter syntax
         run: |
           python -m json.tool partener-eu/ingest/source_registry.json >/dev/null
           python -m py_compile partener-eu/ingest/source_registry_probe.py
+          python -m py_compile partener-eu/ingest/funding_tenders_api.py
           python -m py_compile partener-eu/ops/test_source_registry_external_expansion.py
+          python -m py_compile partener-eu/ops/test_funding_tenders_structured_adapter.py
 
       - name: Validate low-information fail-closed behavior
         run: python partener-eu/ops/test_source_registry_low_info.py
@@ -45,3 +49,6 @@ jobs:
 
       - name: Validate EU/EEA/Interreg source and programming taxonomy
         run: python partener-eu/ops/test_source_registry_external_expansion.py
+
+      - name: Validate Funding & Tenders structured normalization
+        run: python partener-eu/ops/test_funding_tenders_structured_adapter.py
