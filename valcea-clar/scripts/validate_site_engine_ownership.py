@@ -25,6 +25,12 @@ POLICY_VALIDATORS = {
     "scripts/validate_site_engine_ownership.py",
     "social/validate_social_engine.py",
 }
+VERCEL_FORBIDDEN_EXECUTION_KEYS = {
+    "buildCommand",
+    "installCommand",
+    "functions",
+    "crons",
+}
 
 
 def utc_now() -> str:
@@ -81,6 +87,31 @@ def validate(repo_root: Path) -> dict[str, Any]:
         }
 
     registry = load_json(registry_path)
+
+    # Vercel is a static projection boundary only. Editorial/newsroom/social work
+    # remains owned by the GitHub-hosted CIVORA site engine and must never be
+    # introduced as Vercel build/runtime compute through deployment config drift.
+    vercel_path = site_root / "vercel.json"
+    if not vercel_path.is_file():
+        errors.append("Missing static projection contract: valcea-clar/vercel.json")
+    else:
+        try:
+            vercel = load_json(vercel_path)
+        except (OSError, json.JSONDecodeError) as exc:
+            errors.append(f"Invalid static projection contract: {exc}")
+        else:
+            projection_checks = {
+                "output_is_committed_runtime": vercel.get("outputDirectory") == "site/runtime",
+                "canonical_trailing_slash_enabled": vercel.get("trailingSlash") is True,
+                "no_vercel_build_or_runtime_compute": not any(
+                    key in vercel for key in VERCEL_FORBIDDEN_EXECUTION_KEYS
+                ),
+            }
+            for name, passed in projection_checks.items():
+                checks.append({"check": f"static_projection:{name}", "passed": passed})
+                if not passed:
+                    errors.append(f"Static projection policy failed: {name}")
+
     chatgpt = registry.get("chatgpt", {})
     ownership_checks = {
         "execution_owner": registry.get("execution_owner") == "civora_site_engine",
@@ -258,4 +289,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())
