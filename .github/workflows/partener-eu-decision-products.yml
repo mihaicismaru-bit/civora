@@ -21,7 +21,6 @@ on:
       - 'partener-eu/ingest/finalize_decision_products.py'
       - 'partener-eu/ingest/localize_decision_products.py'
       - 'partener-eu/ingest/state/mipe_ro_corpus.json'
-      - 'partener-eu/ops/fix_decision_ui_romanian.py'
       - 'partener-eu/ops/test_decision_products.py'
       - 'partener-eu/ops/test_mipe_canonical_pipeline.py'
       - 'partener-eu/ops/test_dossier_autonomy.py'
@@ -67,10 +66,6 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: '22'
-
-      - name: Apply Romanian UI rules
-        run: |
-          python partener-eu/ops/fix_decision_ui_romanian.py
 
       - name: Canonicalize evidence and construct deep funding dossiers
         run: |
