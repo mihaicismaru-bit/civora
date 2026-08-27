@@ -38,6 +38,8 @@ OFFICIAL_HOSTS = {
     "SRC-INTERREG-EUROPE": "www.interregeurope.eu",
 }
 
+PIPELINE_SCOPES = {"PROGRAMMING_FRAMEWORK", "PROGRAMME_FRAMEWORK"}
+
 
 def fail(msg):
     raise SystemExit(f"FAIL: {msg}")
@@ -72,7 +74,7 @@ def main():
             fail(f"pipeline source can authorize material facts: {row['id']}")
         if row.get("observation_state") != "PROGRAMMING_PIPELINE":
             fail(f"pipeline source lacks explicit PROGRAMMING_PIPELINE state: {row['id']}")
-        if row.get("authority_scope") not in {"PROGRAMMING_FRAMEWORK"}:
+        if row.get("authority_scope") not in PIPELINE_SCOPES:
             fail(f"pipeline source has unsafe authority scope: {row['id']}")
 
     gateway = by_id["SRC-EU-FUNDING-TENDERS-GATEWAY"]
