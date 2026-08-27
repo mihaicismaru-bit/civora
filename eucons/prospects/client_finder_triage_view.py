@@ -117,6 +117,7 @@ def _validated_card(card: dict[str, Any]) -> dict[str, Any]:
 
     selected_service_id = card.get("selected_service_id")
     selected = card.get("selected_opportunity")
+    safe_source_trace = None
     if selected_service_id is None:
         require(selected is None, "opportunity exposed without selected service")
         deadline = None
@@ -134,6 +135,28 @@ def _validated_card(card: dict[str, Any]) -> dict[str, Any]:
             require(isinstance(deadline, str) and deadline.strip(), "invalid source-supported deadline")
             require("deadline" in set(verified_classes), "deadline exposed without verified source class")
 
+        source_trace = selected.get("source_trace")
+        if source_trace is not None:
+            require(isinstance(source_trace, dict), "invalid selected-opportunity source trace")
+            require(source_trace.get("source_product") == "PARTENER.EU", "triage source product drift")
+            require(source_trace.get("source_opportunity_id") == selected.get("opportunity_id"),
+                    "triage source opportunity id mismatch")
+            source_as_of = source_trace.get("source_as_of")
+            require(isinstance(source_as_of, str) and source_as_of.strip(), "invalid triage source as-of")
+            projection_sha = source_trace.get("source_projection_sha256")
+            require(projection_sha is None or (isinstance(projection_sha, str) and len(projection_sha) == 64),
+                    "invalid triage source projection hash")
+            evidence_count = source_trace.get("verification_evidence_count")
+            require(isinstance(evidence_count, int) and not isinstance(evidence_count, bool) and evidence_count > 0,
+                    "invalid triage verification evidence count")
+            safe_source_trace = {
+                "source_product": "PARTENER.EU",
+                "source_opportunity_id": source_trace["source_opportunity_id"],
+                "source_as_of": source_as_of,
+                "source_projection_sha256": projection_sha,
+                "verification_evidence_count": evidence_count,
+            }
+
     questions = card.get("verification_questions") or []
     require(isinstance(questions, list) and all(isinstance(value, str) for value in questions),
             "triage verification questions must be strings")
@@ -148,6 +171,7 @@ def _validated_card(card: dict[str, Any]) -> dict[str, Any]:
             "selected_service_id": selected_service_id,
             "source_supported_deadline": deadline,
             "verified_fact_classes": sorted(set(verified_classes)),
+            "source_trace": safe_source_trace,
         }
 
     return {
