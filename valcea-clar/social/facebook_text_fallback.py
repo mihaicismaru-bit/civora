@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Publish a text+link Facebook fallback when a live story has no approved photo.
+"""Fail-closed Facebook text+link fallback for VÂLCEA CLAR.
 
-The canonical visual publisher remains preferred. This adapter is deliberately
-narrow: it only sees new story IDs from the latest durable publication event,
-only accepts items whose sole Facebook blocker is the missing story-specific
-photo, preserves publication holds, and shares the canonical `story-<id>` state
-key so a later visual workflow cannot duplicate the post.
+Facebook is photo-first. Missing story-specific media is a HOLD by default and
+must not silently degrade to a text+link post. A text fallback can run only when
+both the runtime env and the individual outbox item explicitly opt in, and only
+after a live public readback proves that the canonical story URL is HTTP 200 and
+contains its own canonical/OpenGraph URL. This prevents Facebook from caching a
+GitHub Pages 404 preview for a story that has not reached the public projection.
 """
 from __future__ import annotations
 
@@ -32,6 +33,14 @@ DEFAULT_GRAPH_VERSION = "v26.0"
 ADAPTER = "facebook-text-fallback-v1"
 MISSING_PHOTO_REASON = "story_specific_approved_photo_required"
 CANONICAL_HOSTS = {"valceaclar.ro", "www.valceaclar.ro"}
+ENABLE_ENV = "VALCEA_FB_TEXT_FALLBACK_ENABLED"
+PUBLIC_UA = "facebookexternalhit/1.1 (+https://www.facebook.com/externalhit_uatext.php)"
+GITHUB_404_MARKERS = (
+    "page not found · github pages",
+    "page not found - github pages",
+    "there isn't a github pages site here",
+    "file not found",
+)
 
 
 def utc_now() -> str:
@@ -66,7 +75,51 @@ def canonical_link_ok(value: str) -> bool:
     return parsed.scheme == "https" and parsed.hostname in CANONICAL_HOSTS and parsed.path.startswith("/stiri/")
 
 
+def text_fallback_enabled() -> bool:
+    return str(os.getenv(ENABLE_ENV) or "").strip().lower() == "true"
+
+
+def public_story_ready(
+    url: str,
+    request_fn: Callable[..., Any] = urllib.request.urlopen,
+) -> tuple[bool, str]:
+    """Require a real public story response before any Facebook link post."""
+    if not canonical_link_ok(url):
+        return False, "non_canonical_story_url"
+    request = urllib.request.Request(
+        url,
+        method="GET",
+        headers={"User-Agent": PUBLIC_UA, "Accept": "text/html,application/xhtml+xml"},
+    )
+    try:
+        with request_fn(request, timeout=30) as response:
+            status = int(getattr(response, "status", 0) or response.getcode() or 0)
+            body = response.read().decode("utf-8", errors="replace")
+    except urllib.error.HTTPError as exc:
+        return False, f"http_{exc.code}"
+    except urllib.error.URLError as exc:
+        return False, f"network_{getattr(exc, 'reason', 'error')}"
+    except Exception as exc:  # fail closed for DNS/TLS/transport surprises
+        return False, f"readback_{type(exc).__name__}"
+    if status != 200:
+        return False, f"http_{status}"
+    lower = body.lower()
+    if any(marker in lower for marker in GITHUB_404_MARKERS):
+        return False, "github_pages_404_body"
+    if "rel=\"canonical\"" not in lower and "rel='canonical'" not in lower:
+        return False, "canonical_tag_missing"
+    if url not in body:
+        return False, "canonical_url_missing_from_body"
+    if "og:url" not in lower:
+        return False, "og_url_missing"
+    return True, "ready"
+
+
 def eligible_items(outbox: dict[str, Any], state: dict[str, Any], new_story_ids: list[str]) -> list[dict[str, Any]]:
+    # Photo-first default: the global runtime switch is deliberately OFF unless
+    # an operator explicitly enables the exceptional fallback path.
+    if not text_fallback_enabled():
+        return []
     wanted = set(new_story_ids)
     published = state.get("published") if isinstance(state.get("published"), dict) else {}
     result: list[dict[str, Any]] = []
@@ -85,6 +138,8 @@ def eligible_items(outbox: dict[str, Any], state: dict[str, Any], new_story_ids:
         facebook = platforms.get("facebook") if isinstance(platforms.get("facebook"), dict) else {}
         if facebook.get("status") != "hold" or facebook.get("reason") != MISSING_PHOTO_REASON:
             continue
+        if facebook.get("text_link_fallback_allowed_for_new_story") is not True:
+            continue
         message = str(item.get("message") or "").strip()
         link = str(item.get("link") or "").strip()
         if not message or not canonical_link_ok(link):
@@ -93,17 +148,28 @@ def eligible_items(outbox: dict[str, Any], state: dict[str, Any], new_story_ids:
     return result
 
 
-def graph_feed_post(*, page_id: str, token: str, version: str, item: dict[str, Any], request_fn: Callable[..., Any] = urllib.request.urlopen) -> str:
+def graph_feed_post(
+    *,
+    page_id: str,
+    token: str,
+    version: str,
+    item: dict[str, Any],
+    request_fn: Callable[..., Any] = urllib.request.urlopen,
+) -> str:
+    link = str(item["link"]).strip()
+    ready, reason = public_story_ready(link, request_fn=request_fn)
+    if not ready:
+        raise RuntimeError(f"public story route not ready for Facebook fallback: {reason}")
     payload = urllib.parse.urlencode({
         "message": str(item["message"]).strip(),
-        "link": str(item["link"]).strip(),
+        "link": link,
         "access_token": token,
     }).encode("utf-8")
     request = urllib.request.Request(
         f"https://graph.facebook.com/{version}/{page_id}/feed",
         data=payload,
         method="POST",
-        headers={"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "ValceaClar-Facebook-Text-Fallback/1.0"},
+        headers={"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "ValceaClar-Facebook-Text-Fallback/1.1"},
     )
     try:
         with request_fn(request, timeout=45) as response:
@@ -151,39 +217,68 @@ def credentials() -> tuple[str, str, str]:
 
 
 def self_test() -> int:
+    previous = os.getenv(ENABLE_ENV)
+    os.environ[ENABLE_ENV] = "true"
     sample = {
         "id": "story-test-new", "source_story_id": "test-new", "status": "hold",
         "hold_reason": MISSING_PHOTO_REASON,
         "message": "ȘTIRI | VÂLCEA CLAR\n\nInformare verificată.",
         "link": "https://valceaclar.ro/stiri/test-new/",
-        "platforms": {"facebook": {"status": "hold", "reason": MISSING_PHOTO_REASON}},
+        "platforms": {"facebook": {
+            "status": "hold", "reason": MISSING_PHOTO_REASON,
+            "text_link_fallback_allowed_for_new_story": True,
+        }},
     }
-    assert eligible_items({"items": [sample]}, {"published": {}}, ["test-new"])[0]["id"] == sample["id"]
-    assert eligible_items({"items": [sample]}, {"published": {sample["id"]: {}}}, ["test-new"]) == []
-    assert eligible_items({"items": [sample]}, {"published": {}}, ["another-story"]) == []
-    assert canonical_link_ok(sample["link"])
-    assert not canonical_link_ok("https://example.com/stiri/test/")
+    try:
+        assert eligible_items({"items": [sample]}, {"published": {}}, ["test-new"])[0]["id"] == sample["id"]
+        no_opt_in = json.loads(json.dumps(sample))
+        no_opt_in["platforms"]["facebook"]["text_link_fallback_allowed_for_new_story"] = False
+        assert eligible_items({"items": [no_opt_in]}, {"published": {}}, ["test-new"]) == []
+        assert eligible_items({"items": [sample]}, {"published": {sample["id"]: {}}}, ["test-new"]) == []
+        assert canonical_link_ok(sample["link"])
+        assert not canonical_link_ok("https://example.com/stiri/test/")
 
-    captured: dict[str, Any] = {}
-    class FakeResponse:
-        def __enter__(self): return self
-        def __exit__(self, exc_type, exc, tb): return False
-        def read(self): return b'{"id":"123_page_456"}'
-    def fake_open(request, timeout=0):
-        captured["url"] = request.full_url
-        captured["method"] = request.get_method()
-        captured["data"] = urllib.parse.parse_qs(request.data.decode("utf-8"))
-        return FakeResponse()
-    post_id = graph_feed_post(page_id="123", token="fixture-token", version="v26.0", item=sample, request_fn=fake_open)
-    assert post_id == "123_page_456"
-    assert captured["method"] == "POST"
-    assert captured["url"].endswith("/v26.0/123/feed")
-    assert captured["data"]["link"] == [sample["link"]]
-    state = {"published": {}}
-    record_publication(state, sample, post_id)
-    assert state["published"][sample["id"]]["visual_used"] is False
-    assert state["published"][sample["id"]]["publication_product"] == ADAPTER
-    print("VÂLCEA CLAR Facebook text fallback self-test: PASS")
+        class FakePublicResponse:
+            status = 200
+            def __enter__(self): return self
+            def __exit__(self, exc_type, exc, tb): return False
+            def getcode(self): return 200
+            def read(self):
+                url = sample["link"]
+                return (f'<html><head><link rel="canonical" href="{url}"><meta property="og:url" content="{url}"></head></html>').encode()
+
+        class FakeGraphResponse:
+            status = 200
+            def __enter__(self): return self
+            def __exit__(self, exc_type, exc, tb): return False
+            def getcode(self): return 200
+            def read(self): return b'{"id":"123_page_456"}'
+
+        captured: dict[str, Any] = {}
+        def fake_open(request, timeout=0):
+            captured.setdefault("urls", []).append(request.full_url)
+            if request.full_url.startswith("https://valceaclar.ro/"):
+                return FakePublicResponse()
+            captured["method"] = request.get_method()
+            captured["data"] = urllib.parse.parse_qs(request.data.decode("utf-8"))
+            return FakeGraphResponse()
+
+        assert public_story_ready(sample["link"], request_fn=fake_open) == (True, "ready")
+        post_id = graph_feed_post(page_id="123", token="fixture-token", version="v26.0", item=sample, request_fn=fake_open)
+        assert post_id == "123_page_456"
+        assert captured["method"] == "POST"
+        assert captured["data"]["link"] == [sample["link"]]
+        state = {"published": {}}
+        record_publication(state, sample, post_id)
+        assert state["published"][sample["id"]]["visual_used"] is False
+        assert state["published"][sample["id"]]["publication_product"] == ADAPTER
+    finally:
+        if previous is None:
+            os.environ.pop(ENABLE_ENV, None)
+        else:
+            os.environ[ENABLE_ENV] = previous
+    assert eligible_items({"items": [sample]}, {"published": {}}, ["test-new"]) == []
+    print("VÂLCEA CLAR Facebook text fallback fail-closed self-test: PASS")
     return 0
 
 
@@ -204,12 +299,13 @@ def main() -> int:
 
     if not args.apply:
         print(json.dumps({
-            "status": "DRY_RUN", "adapter": ADAPTER, "new_story_ids": new_ids,
+            "status": "DRY_RUN", "adapter": ADAPTER, "enabled": text_fallback_enabled(),
+            "new_story_ids": new_ids,
             "eligible": [{"id": item.get("id"), "source_story_id": item.get("source_story_id"), "link": item.get("link")} for item in plan],
         }, ensure_ascii=False, indent=2))
         return 0
     if not plan:
-        print(json.dumps({"status": "NO_ELIGIBLE_TEXT_FALLBACK", "adapter": ADAPTER, "new_story_ids": new_ids}, ensure_ascii=False))
+        print(json.dumps({"status": "NO_ELIGIBLE_TEXT_FALLBACK", "adapter": ADAPTER, "enabled": text_fallback_enabled(), "new_story_ids": new_ids}, ensure_ascii=False))
         return 0
 
     page_id, supplied_token, version = credentials()
