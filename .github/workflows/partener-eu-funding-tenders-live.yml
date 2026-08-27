@@ -6,8 +6,10 @@ on:
     paths:
       - 'partener-eu/ingest/funding_tenders_api.py'
       - 'partener-eu/ingest/funding_tenders_fetch.py'
+      - 'partener-eu/ingest/funding_tenders_reconcile.py'
       - 'partener-eu/ops/test_funding_tenders_structured_adapter.py'
       - 'partener-eu/ops/test_funding_tenders_live_fetch.py'
+      - 'partener-eu/ops/test_funding_tenders_reconcile.py'
       - '.github/workflows/partener-eu-funding-tenders-live.yml'
   schedule:
     - cron: '41 */6 * * *'
@@ -36,14 +38,19 @@ jobs:
         run: |
           python -m py_compile partener-eu/ingest/funding_tenders_api.py
           python -m py_compile partener-eu/ingest/funding_tenders_fetch.py
+          python -m py_compile partener-eu/ingest/funding_tenders_reconcile.py
           python -m py_compile partener-eu/ops/test_funding_tenders_structured_adapter.py
           python -m py_compile partener-eu/ops/test_funding_tenders_live_fetch.py
+          python -m py_compile partener-eu/ops/test_funding_tenders_reconcile.py
 
       - name: Validate fail-closed structured normalization
         run: python partener-eu/ops/test_funding_tenders_structured_adapter.py
 
       - name: Validate Search/Facet and exact-topic evidence boundary
         run: python partener-eu/ops/test_funding_tenders_live_fetch.py
+
+      - name: Validate direct-call reconciliation boundary
+        run: python partener-eu/ops/test_funding_tenders_reconcile.py
 
       - name: Capture bounded official Search/Facet evidence
         run: |
@@ -71,6 +78,37 @@ jobs:
               assert row['material_fact_use'] is False
               if row['observation_state'] in ('OPEN_CALL','FORTHCOMING_CALL'):
                   assert row['authority_url_verified'] is True
+          print(json.dumps(d['stats'], ensure_ascii=False, sort_keys=True))
+          PY
+
+      - name: Reconcile direct EU calls and quarantine portal-only records
+        run: |
+          python partener-eu/ingest/funding_tenders_reconcile.py \
+            /tmp/partener-funding-tenders-evidence/evidence.json \
+            --search-response /tmp/partener-funding-tenders-evidence/search-response.json \
+            --output /tmp/partener-funding-tenders-evidence/reconciliation-receipt.json
+
+      - name: Validate reconciliation remains staging-only
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('/tmp/partener-funding-tenders-evidence/reconciliation-receipt.json')
+          d=json.loads(p.read_text(encoding='utf-8'))
+          assert d['schema'] == 'PARTENER_EU_FUNDING_TENDERS_RECONCILIATION_RECEIPT_V1'
+          assert d['publication_effect'] == 'NONE'
+          assert d['publish_authorized'] is False
+          assert d['canonical_corpus_mutation'] is False
+          assert d['material_fact_action'] == 'NONE'
+          for row in d['records']:
+              assert row['reconciliation_status'] == 'PASS'
+              assert row['ready_for_staging'] is True
+              assert row['publish_authorized'] is False
+              assert row['raw_search_types'] and set(row['raw_search_types']) <= {'1','2'}
+          for row in d['quarantined_records']:
+              assert row['ready_for_staging'] is False
+              assert row['material_fact_use'] is False
+              assert row['publish_authorized'] is False
           print(json.dumps(d['stats'], ensure_ascii=False, sort_keys=True))
           PY
 
