@@ -28,9 +28,9 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - name: Run AI4WORK runtime, storage, idempotency, HTTP, NF06, TEST TWIN, controller, minimization, collection-frame, retention, rights and PROD-activation tests
+      - name: Run AI4WORK runtime, storage, idempotency, HTTP, NF06, TEST TWIN, controller, minimization, collection-frame, retention, rights, DPIA and PROD-activation tests
         working-directory: eucons/research/ai4work-step
-        run: python -m unittest -v test_runtime.py test_research_storage.py test_http_idempotency.py test_http_endpoint.py test_nf06_preingest.py test_e2e_test_twin_chain.py test_controller_determination.py test_preview_minimization.py test_collection_frame.py test_retention_schedule.py test_data_subject_rights.py test_prod_activation_gate.py
+        run: python -m unittest -v test_runtime.py test_research_storage.py test_http_idempotency.py test_http_endpoint.py test_nf06_preingest.py test_e2e_test_twin_chain.py test_controller_determination.py test_preview_minimization.py test_collection_frame.py test_retention_schedule.py test_data_subject_rights.py test_dpia_screening.py test_prod_activation_gate.py
       - name: Enforce repository PROD activation state
         working-directory: eucons/research/ai4work-step
         run: python prod_activation_gate.py
@@ -59,7 +59,7 @@ jobs:
             echo 'Unproven GDPR controller identity leaked into AI4WORK research preview' >&2
             exit 1
           fi
-      - name: Verify collection, controller and collection-frame remain fail-closed
+      - name: Verify collection, controller, collection-frame, rights and DPIA remain fail-closed
         shell: bash
         run: |
           set -euo pipefail
@@ -92,6 +92,14 @@ jobs:
           assert rights.get('controller_approval') is False
           assert rights.get('collection_enabled') is False
           assert rights.get('identification_policy', {}).get('direct_identity_registry') == 'FORBIDDEN'
+          dpia = json.loads((root / 'GDPR_DPIA_SCREENING_DRAFT.json').read_text(encoding='utf-8'))
+          assert dpia.get('status') == 'DRAFT_CONTROLLER_REVIEW_REQUIRED_BEFORE_COLLECTION'
+          assert dpia.get('evidence_class') == 'CONTROL_ARTIFACT_NOT_EVIDENCE'
+          assert dpia.get('approved') is False
+          assert dpia.get('collection_enabled') is False
+          assert dpia.get('screening_conclusion') == 'UNRESOLVED_BEFORE_CONTROLLER_AND_DPO_REVIEW'
+          assert dpia.get('processing_design_facts', {}).get('crm_or_contact_dataset_matching') == 'FORBIDDEN'
+          assert dpia.get('processing_design_facts', {}).get('device_fingerprinting') == 'FORBIDDEN'
           activation = json.loads((root / 'PROD_ACTIVATION_MANIFEST_DRAFT.json').read_text(encoding='utf-8'))
           assert activation.get('state') == 'DRAFT_NOT_APPROVED_FOR_PROD'
           assert activation.get('approved_for_prod') is False
@@ -99,5 +107,6 @@ jobs:
           assert activation.get('explicit_user_approval_reference') is None
           assert activation.get('real_collection_authorized') is False
           assert activation.get('required_external_or_operational_evidence', {}).get('data_subject_rights_procedure', {}).get('status') == 'OPEN'
-          print('PASS: AI4WORK collection, controller identity, collection frame, rights procedure and PROD activation remain fail-closed')
+          assert activation.get('required_external_or_operational_evidence', {}).get('dpia_screening_or_completed_dpia', {}).get('status') == 'OPEN'
+          print('PASS: AI4WORK collection, controller identity, collection frame, rights, DPIA and PROD activation remain fail-closed')
           PY
