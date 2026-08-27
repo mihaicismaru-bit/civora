@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Fetch official weekly electricity schedules and parse evidence-only outages.
 
-The adapter is intentionally generic. It discovers only links whose visible text
-contains an explicit weekly date range, selects documents that intersect the
-configured planning window, extracts text from HTML/plain-text or PDF documents,
-and delegates row interpretation to ``structured_electricity_interruption_parser``.
-No crawl timestamp becomes source freshness and no reader-facing copy is made.
+The adapter is intentionally instance-agnostic. It discovers only links whose
+visible text contains an explicit weekly date range, selects documents that
+intersect the configured planning window, extracts text from HTML/plain-text or
+PDF documents, then delegates row interpretation to the generic electricity
+interruption parser. Crawl time never becomes source freshness and this layer
+never creates reader-facing copy.
 """
 from __future__ import annotations
 
@@ -20,6 +21,7 @@ from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from html.parser import HTMLParser
 from http.cookiejar import CookieJar
+from io import BytesIO
 from pathlib import Path
 from typing import Any
 from urllib.parse import urljoin
@@ -28,7 +30,7 @@ from zoneinfo import ZoneInfo
 
 import structured_electricity_interruption_parser as electricity
 
-USER_AGENT = "Mozilla/5.0 (compatible; LocalNewsOS/1.0; +https://valceaclar.ro/)"
+USER_AGENT = "Mozilla/5.0 (compatible; LocalNewsOS/1.0)"
 MAX_LISTING_BYTES = 2_500_000
 MAX_DOCUMENT_BYTES = 12_000_000
 WEEK_RANGE_RE = re.compile(
@@ -146,10 +148,6 @@ def fetch_bytes(url: str, *, max_bytes: int, timeout: int = 20) -> tuple[bytes, 
             "Cache-Control": "no-cache",
         },
     )
-    # Some primary-source CMSes issue a same-URL 302 while setting a locale or
-    # session cookie. Plain urlopen drops that state and sees an infinite loop;
-    # a per-fetch cookie jar preserves the server's redirect contract without
-    # weakening HTTPS, provenance, or freshness gates.
     opener = build_opener(HTTPCookieProcessor(CookieJar()))
     with opener.open(request, timeout=timeout) as response:
         body = response.read(max_bytes + 1)
@@ -174,10 +172,30 @@ def _html_text(body: bytes) -> str:
     return "\n".join(parser.parts)
 
 
-def _pdf_text(body: bytes) -> str:
+def _pdf_text_with_pypdf(body: bytes) -> str | None:
+    try:
+        from pypdf import PdfReader  # type: ignore[import-not-found]
+    except ImportError:
+        return None
+    reader = PdfReader(BytesIO(body), strict=True)
+    parts: list[str] = []
+    for page in reader.pages:
+        try:
+            text = page.extract_text(extraction_mode="layout")
+        except TypeError:
+            text = page.extract_text()
+        if clean(text):
+            parts.append(str(text))
+    result = "\n".join(parts)
+    if not clean(result):
+        raise RuntimeError("PDF text extractor returned empty text")
+    return result
+
+
+def _pdf_text_with_system_tool(body: bytes) -> str | None:
     executable = shutil.which("pdftotext")
     if not executable:
-        raise RuntimeError("pdftotext unavailable")
+        return None
     with tempfile.TemporaryDirectory(prefix="electricity-schedule-") as temp_dir:
         source = Path(temp_dir) / "schedule.pdf"
         source.write_bytes(body)
@@ -189,17 +207,27 @@ def _pdf_text(body: bytes) -> str:
         )
         if process.returncode != 0:
             stderr = process.stderr.decode("utf-8", errors="replace")[:500]
-            raise RuntimeError(f"pdftotext failed ({process.returncode}): {stderr}")
+            raise RuntimeError(f"PDF system extractor failed ({process.returncode}): {stderr}")
         text = process.stdout.decode("utf-8", errors="replace")
         if not clean(text):
-            raise RuntimeError("pdftotext returned empty text")
+            raise RuntimeError("PDF system extractor returned empty text")
         return text
+
+
+def _pdf_text(body: bytes) -> tuple[str, str]:
+    text = _pdf_text_with_pypdf(body)
+    if text is not None:
+        return text, "pdf_pypdf_layout"
+    text = _pdf_text_with_system_tool(body)
+    if text is not None:
+        return text, "pdf_system_layout"
+    raise RuntimeError("no supported PDF text extractor available")
 
 
 def extract_document_text(body: bytes, content_type: str, final_url: str) -> tuple[str, str]:
     lowered_url = final_url.casefold()
     if body.startswith(b"%PDF") or content_type == "application/pdf" or lowered_url.endswith(".pdf"):
-        return _pdf_text(body), "pdf_pdftotext_layout"
+        return _pdf_text(body)
     if content_type in {"text/html", "application/xhtml+xml"} or b"<html" in body[:1000].casefold():
         return _html_text(body), "html_text"
     if content_type.startswith("text/"):
@@ -207,13 +235,7 @@ def extract_document_text(body: bytes, content_type: str, final_url: str) -> tup
     raise RuntimeError(f"unsupported electricity schedule document type: {content_type or 'unknown'}")
 
 
-def normalize_events(
-    events: list[dict[str, Any]],
-    source: dict[str, Any],
-    document: WeeklyDocument,
-    final_url: str,
-    extraction_method: str,
-) -> list[dict[str, Any]]:
+def normalize_events(events: list[dict[str, Any]], source: dict[str, Any], document: WeeklyDocument, final_url: str, extraction_method: str) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for event in events:
         structured = event.get("structured") or {}
@@ -222,41 +244,36 @@ def normalize_events(
         event_key = str(event.get("event_key") or "").strip()
         if not event_key:
             continue
-        rows.append(
-            {
-                "event_id": event_key,
-                "source_id": source["id"],
-                "source_name": source["name"],
-                "source_tier": source["source_tier"],
-                "source_url": final_url,
-                "parser": electricity.PARSER_ID,
-                "event_start": event["event_start"],
-                "event_end": event["event_end"],
-                "source_time_basis": event["source_time_basis"],
-                "body_sha256": event["body_sha256"],
-                "structured": {
-                    **structured,
-                    "schedule_label": document.label,
-                    "schedule_start": document.start_date.isoformat(),
-                    "schedule_end": document.end_date.isoformat(),
-                    "document_extraction": extraction_method,
-                },
-                "publication_authority": "PRIMARY_STRUCTURED_EVENT_ONLY",
-                "reader_copy_generated": False,
-            }
-        )
+        rows.append({
+            "event_id": event_key,
+            "source_id": source["id"],
+            "source_name": source["name"],
+            "source_tier": source["source_tier"],
+            "source_url": final_url,
+            "parser": electricity.PARSER_ID,
+            "event_start": event["event_start"],
+            "event_end": event["event_end"],
+            "source_time_basis": event["source_time_basis"],
+            "body_sha256": event["body_sha256"],
+            "structured": {
+                **structured,
+                "schedule_label": document.label,
+                "schedule_start": document.start_date.isoformat(),
+                "schedule_end": document.end_date.isoformat(),
+                "document_extraction": extraction_method,
+            },
+            "publication_authority": "PRIMARY_STRUCTURED_EVENT_ONLY",
+            "reader_copy_generated": False,
+        })
     return rows
 
 
 def collect_electricity_source(source: dict[str, Any], tz: ZoneInfo, now: datetime) -> dict[str, Any]:
     try:
-        listing_body, listing_url, listing_type = fetch_bytes(
-            str(source["url"]), max_bytes=MAX_LISTING_BYTES, timeout=20
-        )
+        listing_body, listing_url, listing_type = fetch_bytes(str(source["url"]), max_bytes=MAX_LISTING_BYTES, timeout=20)
         if listing_type not in {"text/html", "application/xhtml+xml", ""} and b"<html" not in listing_body[:1000].casefold():
             raise RuntimeError(f"listing is not HTML: {listing_type}")
-        listing_html = _decode_text(listing_body)
-        discovered = discover_weekly_documents(listing_html, listing_url)
+        discovered = discover_weekly_documents(_decode_text(listing_body), listing_url)
         selected = relevant_documents(
             discovered,
             now,
@@ -265,25 +282,15 @@ def collect_electricity_source(source: dict[str, Any], tz: ZoneInfo, now: dateti
             max_documents=int(source.get("max_schedule_documents") or 3),
         )
         if not selected:
-            return {
-                "source_id": source.get("id"),
-                "status": "PASS_NO_RELEVANT_SCHEDULE",
-                "listing_url": listing_url,
-                "documents_discovered": len(discovered),
-                "documents_selected": 0,
-                "events": [],
-            }
+            return {"source_id": source.get("id"), "status": "PASS_NO_RELEVANT_SCHEDULE", "listing_url": listing_url, "documents_discovered": len(discovered), "documents_selected": 0, "events": []}
 
         events: list[dict[str, Any]] = []
         reports: list[dict[str, Any]] = []
         for document in selected:
             body, final_url, content_type = fetch_bytes(document.url, max_bytes=MAX_DOCUMENT_BYTES, timeout=25)
             text, extraction_method = extract_document_text(body, content_type, final_url)
-            # Prefix the explicit weekly label so rows that print only dd.mm can
-            # inherit a year from the source document rather than crawl time.
-            parse_text = document.label + "\n" + text
             parsed, candidates = electricity.parse_electricity_interruption_text(
-                parse_text,
+                document.label + "\n" + text,
                 tz,
                 now,
                 planning_horizon_hours=int(source.get("planning_horizon_hours") or 336),
@@ -292,59 +299,32 @@ def collect_electricity_source(source: dict[str, Any], tz: ZoneInfo, now: dateti
             )
             normalized = normalize_events(parsed, source, document, final_url, extraction_method)
             events.extend(normalized)
-            reports.append(
-                {
-                    "label": document.label,
-                    "url": final_url,
-                    "content_type": content_type,
-                    "extraction_method": extraction_method,
-                    "body_sha256": hashlib.sha256(body).hexdigest(),
-                    "candidates": candidates,
-                    "events": len(normalized),
-                }
-            )
+            reports.append({"label": document.label, "url": final_url, "content_type": content_type, "extraction_method": extraction_method, "body_sha256": hashlib.sha256(body).hexdigest(), "candidates": candidates, "events": len(normalized)})
 
         deduped = {str(row["event_id"]): row for row in events}
         rows = sorted(deduped.values(), key=lambda row: (row["event_start"], row["event_id"]))
-        return {
-            "source_id": source["id"],
-            "status": "PASS",
-            "listing_url": listing_url,
-            "documents_discovered": len(discovered),
-            "documents_selected": len(selected),
-            "documents": reports,
-            "events": rows,
-        }
+        return {"source_id": source["id"], "status": "PASS", "listing_url": listing_url, "documents_discovered": len(discovered), "documents_selected": len(selected), "documents": reports, "events": rows}
     except Exception as exc:
-        return {
-            "source_id": source.get("id"),
-            "status": "DEGRADED",
-            "error": f"{type(exc).__name__}: {exc}",
-            "events": [],
-        }
+        return {"source_id": source.get("id"), "status": "DEGRADED", "error": f"{type(exc).__name__}: {exc}", "events": []}
 
 
 def self_test() -> int:
     listing = """
     <html><body>
-      <a href="/docs/old.pdf">Valcea - Intreruperi 17.08 - 23.08.2026</a>
-      <a href="/docs/current.pdf"><span>Valcea - Intreruperi 24.08 - 30.08.2026</span></a>
-      <a href="https://files.example/next.pdf">Valcea - Intreruperi 31.08 - 06.09.2026</a>
+      <a href="/docs/old.pdf">District - Intreruperi 17.08 - 23.08.2026</a>
+      <a href="/docs/current.pdf"><span>District - Intreruperi 24.08 - 30.08.2026</span></a>
+      <a href="https://files.example/next.pdf">District - Intreruperi 31.08 - 06.09.2026</a>
       <a href="/other">Informatii generale</a>
     </body></html>
     """
-    docs = discover_weekly_documents(listing, "https://operator.example/valcea.html")
+    docs = discover_weekly_documents(listing, "https://operator.example/district.html")
     assert len(docs) == 3
     assert docs[0].start_date.isoformat() == "2026-08-31"
     assert docs[1].url == "https://operator.example/docs/current.pdf"
     now = datetime(2026, 8, 27, 18, 0, tzinfo=ZoneInfo("Europe/Bucharest"))
     selected = relevant_documents(docs, now, planning_horizon_hours=336, expiry_grace_hours=1)
     assert [row.start_date.isoformat() for row in selected] == ["2026-08-24", "2026-08-31"]
-
-    rollover = discover_weekly_documents(
-        '<a href="/x.pdf">Valcea - Intreruperi 29.12 - 04.01.2026</a>',
-        "https://operator.example/",
-    )
+    rollover = discover_weekly_documents('<a href="/x.pdf">District - Intreruperi 29.12 - 04.01.2026</a>', "https://operator.example/")
     assert rollover[0].start_date.isoformat() == "2025-12-29"
     assert rollover[0].end_date.isoformat() == "2026-01-04"
     print("STRUCTURED_ELECTRICITY_SCHEDULE_ADAPTER_SELF_TEST_PASS")
@@ -353,21 +333,7 @@ def self_test() -> int:
 
 def live_probe(source_url: str, *, source_name: str = "Electricity operator probe") -> int:
     tz = ZoneInfo("Europe/Bucharest")
-    now = datetime.now(tz)
-    result = collect_electricity_source(
-        {
-            "id": "electricity-live-probe",
-            "name": source_name,
-            "url": source_url,
-            "source_tier": "T1",
-            "planning_horizon_hours": 336,
-            "expiry_grace_hours": 1,
-            "max_listing_candidates": 120,
-            "max_schedule_documents": 3,
-        },
-        tz,
-        now,
-    )
+    result = collect_electricity_source({"id": "electricity-live-probe", "name": source_name, "url": source_url, "source_tier": "T1", "planning_horizon_hours": 336, "expiry_grace_hours": 1, "max_listing_candidates": 120, "max_schedule_documents": 3}, tz, datetime.now(tz))
     print(json.dumps(result, ensure_ascii=False, indent=2))
     if result.get("status") != "PASS":
         return 2
