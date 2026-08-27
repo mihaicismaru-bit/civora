@@ -12,6 +12,7 @@ from channel_provenance import ChannelProvenanceError, validate_recruitment_chan
 
 RESEARCH_ID = "AI4WORK-STEP-NF-RUN-001"
 ALLOWED_FORMS = {"AI4WORK_ADULTS_V1", "AI4WORK_EMPLOYERS_V1"}
+ALLOWED_RIGHTS_HOLDS = {"RESTRICTED_PENDING_REVIEW", "OBJECTED_PENDING_REVIEW"}
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 
 
@@ -24,6 +25,9 @@ class ResearchStorage(Protocol):
     def export(self, form_id: str) -> list[dict[str, Any]]: ...
     def get_by_response_id(self, response_id: str) -> dict[str, Any] | None: ...
     def delete_by_response_id(self, response_id: str) -> bool: ...
+    def set_analysis_hold(self, response_id: str, hold_state: str) -> bool: ...
+    def clear_analysis_hold(self, response_id: str) -> bool: ...
+    def get_analysis_hold(self, response_id: str) -> str | None: ...
 
 
 def canonical_json_bytes(record: dict[str, Any]) -> bytes:
@@ -56,6 +60,12 @@ def validate_response_id(value: Any) -> str:
     if not isinstance(value, str) or not value or len(value) > 256:
         raise ResearchStorageError("response_id lookup value invalid")
     return value
+
+
+def validate_hold_state(value: Any) -> str:
+    if value not in ALLOWED_RIGHTS_HOLDS:
+        raise ResearchStorageError("unsupported rights analysis hold")
+    return str(value)
 
 
 @dataclass
@@ -91,6 +101,17 @@ class SQLiteResearchStorage:
                 response_id TEXT PRIMARY KEY,
                 body_sha256 TEXT NOT NULL,
                 normalized_sha256 TEXT NOT NULL,
+                FOREIGN KEY(response_id) REFERENCES research_responses(response_id)
+            )
+            """
+        )
+        self.conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS rights_analysis_holds (
+                response_id TEXT PRIMARY KEY,
+                hold_state TEXT NOT NULL CHECK(
+                    hold_state IN ('RESTRICTED_PENDING_REVIEW', 'OBJECTED_PENDING_REVIEW')
+                ),
                 FOREIGN KEY(response_id) REFERENCES research_responses(response_id)
             )
             """
@@ -198,11 +219,7 @@ class SQLiteResearchStorage:
         return normalized_sha, True
 
     def get_by_response_id(self, response_id: str) -> dict[str, Any] | None:
-        """Locate one analytical record by its opaque technical receipt only.
-
-        This is a reference rights-operation primitive. It deliberately does
-        not search names, CRM/contact data, IP logs or device identifiers.
-        """
+        """Locate one analytical record by its opaque technical receipt only."""
         receipt = validate_response_id(response_id)
         row = self.conn.execute(
             """SELECT normalized_json FROM research_responses
@@ -211,13 +228,56 @@ class SQLiteResearchStorage:
         ).fetchone()
         return None if row is None else json.loads(row[0])
 
-    def delete_by_response_id(self, response_id: str) -> bool:
-        """Atomically erase a live analytical row and its idempotency receipt.
+    def set_analysis_hold(self, response_id: str, hold_state: str) -> bool:
+        """Exclude a live record from analytical export while a rights case is pending.
 
-        The return value reports whether an analytical row existed. Provider
-        backup residuals are outside this reference adapter and remain governed
-        by the approved retention/deletion procedure before PROD activation.
+        Only an opaque response receipt and a bounded state enum are stored in
+        the research database. Case narrative/identity belongs in the separate
+        privacy-request administration store, never in research analytics.
         """
+        receipt = validate_response_id(response_id)
+        state = validate_hold_state(hold_state)
+        try:
+            self.conn.execute("BEGIN IMMEDIATE")
+            exists = self.conn.execute(
+                "SELECT 1 FROM research_responses WHERE research_id = ? AND response_id = ?",
+                (RESEARCH_ID, receipt),
+            ).fetchone()
+            if exists is None:
+                self.conn.rollback()
+                return False
+            self.conn.execute(
+                """INSERT INTO rights_analysis_holds(response_id, hold_state)
+                   VALUES (?, ?)
+                   ON CONFLICT(response_id) DO UPDATE SET hold_state = excluded.hold_state""",
+                (receipt, state),
+            )
+            self.conn.commit()
+            return True
+        except Exception:
+            self.conn.rollback()
+            raise
+
+    def clear_analysis_hold(self, response_id: str) -> bool:
+        """Clear a previously approved restriction/objection hold by receipt."""
+        receipt = validate_response_id(response_id)
+        deleted = self.conn.execute(
+            "DELETE FROM rights_analysis_holds WHERE response_id = ?",
+            (receipt,),
+        ).rowcount
+        self.conn.commit()
+        return deleted == 1
+
+    def get_analysis_hold(self, response_id: str) -> str | None:
+        receipt = validate_response_id(response_id)
+        row = self.conn.execute(
+            "SELECT hold_state FROM rights_analysis_holds WHERE response_id = ?",
+            (receipt,),
+        ).fetchone()
+        return None if row is None else str(row[0])
+
+    def delete_by_response_id(self, response_id: str) -> bool:
+        """Atomically erase a live analytical row and associated receipt/hold."""
         receipt = validate_response_id(response_id)
         try:
             self.conn.execute("BEGIN IMMEDIATE")
@@ -228,6 +288,10 @@ class SQLiteResearchStorage:
             if exists is None:
                 self.conn.rollback()
                 return False
+            self.conn.execute(
+                "DELETE FROM rights_analysis_holds WHERE response_id = ?",
+                (receipt,),
+            )
             self.conn.execute(
                 "DELETE FROM idempotency_receipts WHERE response_id = ?",
                 (receipt,),
@@ -248,9 +312,11 @@ class SQLiteResearchStorage:
         if form_id not in ALLOWED_FORMS:
             raise ResearchStorageError("unsupported form_id")
         rows = self.conn.execute(
-            """SELECT normalized_json FROM research_responses
-               WHERE research_id = ? AND form_id = ?
-               ORDER BY received_at, response_id""",
+            """SELECT r.normalized_json
+               FROM research_responses AS r
+               LEFT JOIN rights_analysis_holds AS h ON h.response_id = r.response_id
+               WHERE r.research_id = ? AND r.form_id = ? AND h.response_id IS NULL
+               ORDER BY r.received_at, r.response_id""",
             (RESEARCH_ID, form_id),
         ).fetchall()
         return [json.loads(row[0]) for row in rows]
