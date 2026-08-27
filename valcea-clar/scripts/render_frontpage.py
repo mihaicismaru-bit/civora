@@ -9,6 +9,7 @@ from __future__ import annotations
 import html
 import json
 import shutil
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -18,6 +19,11 @@ PLACES = ROOT / "web" / "data" / "places.json"
 POINTER = SITE / "current_edition.json"
 RUNTIME = SITE / "runtime"
 PUBLISHABLE = {"auto_approved", "editor_approved"}
+PRESERVED_RUNTIME_PRODUCTS = (
+    Path("people.json"),
+    Path("artists.json"),
+    Path("media/social"),
+)
 
 
 def load(path: Path) -> dict:
@@ -160,14 +166,44 @@ def render_edition_page(doc: dict) -> str:
     return chrome(doc.get("title") or "VÂLCEA CLAR", body, f"Ediția de {slot_label} VÂLCEA CLAR.")
 
 
+def reset_runtime_preserving_auxiliary() -> None:
+    """Reset generated reader pages without deleting independent runtime products."""
+    if not RUNTIME.exists():
+        RUNTIME.mkdir(parents=True, exist_ok=True)
+        return
+
+    with tempfile.TemporaryDirectory(prefix="valcea-clar-runtime-") as tmp_raw:
+        tmp = Path(tmp_raw)
+        for relative in PRESERVED_RUNTIME_PRODUCTS:
+            source = RUNTIME / relative
+            target = tmp / relative
+            if source.is_dir():
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copytree(source, target)
+            elif source.is_file():
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(source, target)
+
+        shutil.rmtree(RUNTIME)
+        RUNTIME.mkdir(parents=True, exist_ok=True)
+
+        for relative in PRESERVED_RUNTIME_PRODUCTS:
+            source = tmp / relative
+            target = RUNTIME / relative
+            if source.is_dir():
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copytree(source, target)
+            elif source.is_file():
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(source, target)
+
+
 def main() -> int:
     pointer = public_pointer()
     doc = edition(pointer)
     places_doc = load(PLACES)
     places = places_doc.get("places", [])
-    if RUNTIME.exists():
-        shutil.rmtree(RUNTIME)
-    RUNTIME.mkdir(parents=True, exist_ok=True)
+    reset_runtime_preserving_auxiliary()
     (RUNTIME / "index.html").write_text(render_home(doc, pointer, places), encoding="utf-8")
 
     slot_dir = RUNTIME / ("editia-de-dimineata" if doc.get("slot") == "morning" else "editia-de-seara")
