@@ -1,5 +1,5 @@
 {
-  "schema_version": "eucons.ai4work_data_subject_rights.v0.1",
+  "schema_version": "eucons.ai4work_data_subject_rights.v0.2",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "date": "2026-08-27",
   "status": "DRAFT_BINDING_REQUIRED_BEFORE_COLLECTION",
@@ -34,8 +34,15 @@
     "lookup": "Locate only by opaque response_id in the isolated research store; do not search CRM, optional-contact records, IP logs, user-agent logs or device data.",
     "access": "Return only the respondent-level analytical record associated with the receipt after the controller applies the approved request-authentication procedure; do not expose internal idempotency digests or other respondents.",
     "rectification": "If applicable and technically safe, replace only the validated preset analytical values for that response_id and regenerate integrity metadata; otherwise document why rectification cannot be performed without undermining integrity and offer erasure/re-submission where appropriate.",
-    "erasure": "Delete the analytical row and its idempotency receipt atomically from live research storage. The deletion must not create or retain an identity link. Residual backups follow the validated non-renewing backup rotation in the retention schedule.",
-    "restriction_or_objection": "Before PROD, the live adapter must support a controller-approved operational treatment that prevents restricted/objected records from further analysis while the request is assessed, or erases them where that is the approved outcome."
+    "erasure": "Delete the analytical row, any active analysis hold and its idempotency receipt atomically from live research storage. The deletion must not create or retain an identity link. Residual backups follow the validated non-renewing backup rotation in the retention schedule.",
+    "restriction_or_objection": "The reference adapter now supports a receipt-keyed analysis hold. A restricted or objected record remains available for the controller's rights review but is excluded from analytical export while the hold is active. Any live implementation must preserve this fail-closed behavior and apply the controller-approved legal outcome.",
+    "restriction_or_objection_state_store": "BOUNDED_ENUM_ONLY_NO_CASE_NARRATIVE",
+    "allowed_hold_states": [
+      "RESTRICTED_PENDING_REVIEW",
+      "OBJECTED_PENDING_REVIEW"
+    ],
+    "held_records_excluded_from_export": true,
+    "case_narrative_in_research_store": "FORBIDDEN"
   },
   "rights_case_logging": {
     "store": "PRIVACY_REQUEST_ADMIN_SEPARATE_FROM_RESEARCH_ANALYTICS",
@@ -44,12 +51,13 @@
       "copying questionnaire answers into the rights-case log",
       "copying raw Idempotency-Key",
       "adding CRM/customer identifiers to analytical records",
-      "using a rights request to build an identity-to-response registry"
+      "using a rights request to build an identity-to-response registry",
+      "copying rights-case narrative into the research analysis-hold table"
     ]
   },
   "backup_and_deletion": {
     "retention_reference": "GDPR_RETENTION_SCHEDULE_DRAFT.json",
-    "rule": "Live erasure must be evidenced by row/object counts and a timestamped deletion receipt. Provider backups may retain residual encrypted copies only for the validated pre-existing rotation and must not silently restore deleted records into live processing."
+    "rule": "Live erasure must be evidenced by row/object counts and a timestamped deletion receipt. Provider backups may retain residual encrypted copies only for the validated pre-existing rotation and must not silently restore deleted or held records into active analysis."
   },
   "required_before_prod": [
     "controller determination approved",
@@ -57,9 +65,9 @@
     "lawful basis/LIA approved",
     "privacy notice updated with the final rights procedure",
     "processor/subprocessor and provider logging/backup/deletion facts frozen",
-    "production research-only adapter supports receipt lookup and atomic erasure",
-    "restriction/objection handling is operationally defined for the live adapter",
-    "provider-bound TEST TWIN rights smoke passes without creating direct identifiers",
+    "production research-only adapter supports receipt lookup, bounded analysis holds and atomic erasure",
+    "restriction/objection handling is operationally approved for the live adapter",
+    "provider-bound TEST TWIN rights smoke proves held records cannot enter analytical/NF06 export",
     "procedure approval reference and SHA-256 are frozen in the PROD activation manifest"
   ],
   "test_twin": {
