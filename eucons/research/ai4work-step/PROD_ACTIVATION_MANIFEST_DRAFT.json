@@ -1,0 +1,38 @@
+{
+  "schema_version": "eucons.ai4work_prod_activation_manifest.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "state": "DRAFT_NOT_APPROVED_FOR_PROD",
+  "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
+  "approved_for_prod": false,
+  "collection_enabled": false,
+  "explicit_user_approval_reference": null,
+  "approval_timestamp": null,
+  "activation_mode": "PROD_REAL_EVIDENCE_ONLY",
+  "test_twin_policy": "TEST_TWIN_NON_EVIDENCE_PERMANENTLY_NON_PROMOTABLE",
+  "required_internal_gates": {
+    "controller_determination": "CONTROLLER_DETERMINATION_DRAFT.json",
+    "collection_frame": "COLLECTION_FRAME_DRAFT.json",
+    "form_contract": "form_contract.json"
+  },
+  "required_external_or_operational_evidence": {
+    "privacy_notice": {"status": "OPEN", "reference": null, "sha256": null},
+    "lawful_basis_or_lia": {"status": "OPEN", "reference": null, "sha256": null},
+    "processor_chain": {"status": "OPEN", "reference": null, "sha256": null},
+    "provider_annex_4_5": {"status": "OPEN", "reference": null, "sha256": null},
+    "server_logging_profile": {"status": "OPEN", "reference": null, "sha256": null},
+    "retention_and_deletion": {"status": "OPEN", "reference": null, "sha256": null},
+    "research_only_store_binding": {"status": "OPEN", "reference": null, "sha256": null},
+    "provider_bound_test_twin_smoke": {"status": "OPEN", "reference": null, "sha256": null}
+  },
+  "activation_rule": "Real collection may be enabled only when this manifest is APPROVED_FOR_PROD, explicit user approval is referenced, all internal gates are approved and NF06-eligible, every external/operational evidence item has an immutable reference plus SHA-256 and approved/pass status, CRM/commercial analytics remain forbidden, and TEST TWIN remains NON-EVIDENCE.",
+  "forbidden_shortcuts": [
+    "setting form_contract.production_enabled=true by itself",
+    "treating a green repository unit test as proof of provider-bound live readiness",
+    "using TEST TWIN results as empirical evidence",
+    "deriving controller identity from site branding, project role, domain ownership or hosting billing alone",
+    "activating collection without explicit user approval"
+  ],
+  "merge_authorized": false,
+  "deploy_authorized": false,
+  "real_collection_authorized": false
+}
