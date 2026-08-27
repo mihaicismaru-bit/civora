@@ -1,5 +1,5 @@
 {
-  "schema_version": "eucons.ai4work_nf06_preingest_contract.v0.3",
+  "schema_version": "eucons.ai4work_nf06_preingest_contract.v0.4",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "purpose": "Fail-closed source-batch preflight before handoff to NF06. This contract does not redefine the internal NF06 schema; it proves that an immutable source export is eligible to be handed to NF06.",
   "prod_evidence_class": "PROD_REAL_EVIDENCE",
@@ -20,6 +20,8 @@
     "production research-only storage binding reference is present",
     "instrument versions are fixed",
     "source export SHA-256 matches the bytes actually parsed",
+    "collection-channel register SHA-256 is present",
+    "every record has an opaque recruitment_channel_id declared in the frozen collection frame",
     "all records validate against the frozen form definitions",
     "all record timestamps fall inside the declared collection window",
     "response_id values are unique within the batch",
@@ -33,6 +35,21 @@
     "evidence class is TEST_TWIN_NON_EVIDENCE",
     "test output is never eligible for PROD promotion"
   ],
+  "record_provenance": {
+    "required_field": "recruitment_channel_id",
+    "format": "CH-[A-Z0-9]{8,32}",
+    "meaning": "opaque first-party dissemination-batch identifier, never a respondent/device/CRM identifier",
+    "forbidden_substitutes": [
+      "referrer URL",
+      "UTM payload",
+      "cookie id",
+      "IP address",
+      "user agent",
+      "device fingerprint",
+      "CRM/contact id"
+    ],
+    "frame_membership_required": true
+  },
   "collection_frame_required_fields": [
     "research_id",
     "collection_frame_id",
@@ -42,6 +59,7 @@
     "collection_started_at",
     "collection_closed_at",
     "collection_channels",
+    "collection_channel_register_sha256",
     "source_system",
     "source_export_sha256",
     "direct_identifiers_collected",
@@ -59,7 +77,11 @@
     "production_store_binding_reference"
   ],
   "canonical_source_export": "UTF-8 NDJSON, one canonical JSON record per line, sorted by form_id / received_at / response_id, newline terminated",
-  "manifest_privacy_boundary": "The pre-ingest manifest contains counts, hashes, timestamps and provenance controls only. It must not contain questionnaire answers, free-text responses, raw idempotency keys, IP addresses, user agents, cookies, CRM identifiers or optional contact data.",
+  "manifest_privacy_boundary": "The pre-ingest manifest contains counts, hashes, timestamps and opaque channel provenance only. It must not contain questionnaire answers, free-text responses, raw idempotency keys, IP addresses, user agents, cookies, referrer/UTM payloads, CRM identifiers or optional contact data.",
+  "channel_qa_outputs": [
+    "channel_counts",
+    "dominant_channel_share"
+  ],
   "promotion_rule": "Only PROD_REAL_EVIDENCE batches that pass this contract may be offered to NF06. TEST_TWIN output is permanently NON_EVIDENCE.",
   "merge_authorized": false,
   "deploy_authorized": false,
