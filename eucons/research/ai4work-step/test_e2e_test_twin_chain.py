@@ -87,8 +87,8 @@ class EndToEndTestTwinChain(unittest.TestCase):
         The HTTP/store portion runs only through the local reference adapter and
         isolated SQLite test store. Its exported normalized records are copied
         into a separately labelled synthetic TEST TWIN batch before NF06
-        pre-ingest. The synthetic batch must remain permanently NON_EVIDENCE and
-        must fail if anyone attempts PROD promotion.
+        pre-ingest. Rights-held records must be absent from export. The synthetic
+        batch remains permanently NON_EVIDENCE and must fail PROD promotion.
         """
         with tempfile.TemporaryDirectory() as td:
             store = SQLiteResearchStorage(Path(td) / "ai4work-test-twin-chain.sqlite")
@@ -98,6 +98,17 @@ class EndToEndTestTwinChain(unittest.TestCase):
             self.assertEqual(adult_response[0], 201)
             self.assertEqual(employer_response[0], 201)
 
+            adult_receipt = json.loads(adult_response[2].decode("utf-8"))["response_id"]
+            self.assertTrue(store.set_analysis_hold(adult_receipt, "OBJECTED_PENDING_REVIEW"))
+            held_export = (
+                store.export("AI4WORK_ADULTS_V1")
+                + store.export("AI4WORK_EMPLOYERS_V1")
+            )
+            self.assertEqual(len(held_export), 1)
+            self.assertEqual(held_export[0]["form_id"], "AI4WORK_EMPLOYERS_V1")
+            self.assertNotEqual(held_export[0]["response_id"], adult_receipt)
+
+            self.assertTrue(store.clear_analysis_hold(adult_receipt))
             exported_real_shape = (
                 store.export("AI4WORK_ADULTS_V1")
                 + store.export("AI4WORK_EMPLOYERS_V1")
