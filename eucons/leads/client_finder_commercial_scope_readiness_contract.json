@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "id": "EUCONS-R07-CLIENT-FINDER-COMMERCIAL-SCOPE-READINESS-001",
+  "status": "CANONICAL",
+  "purpose": "Capture a separate, explicit human commercial-scope readiness decision only after research fit is confirmed, while keeping offer generation, CRM, pipeline, pricing, persistence and outreach disabled.",
+  "source_review": {
+    "contract_id": "EUCONS-R07-CLIENT-FINDER-RESEARCH-EVALUATION-REVIEW-001",
+    "record_state": "CLIENT_FINDER_RESEARCH_EVALUATION_REVIEW_ENVELOPE",
+    "required_research_outcome": "RESEARCH_FIT_CONFIRMED",
+    "required_research_review_state": "RESEARCH_COMPLETE_COMMERCIAL_GATE_REQUIRED",
+    "required_next_gate_hint": "SEPARATE_COMMERCIAL_SCOPE_GATE_REQUIRED",
+    "required_official_source_reverified": true
+  },
+  "required_boundaries": {
+    "eligibility_state": "NOT_ASSESSED",
+    "maximum_next_state": "RESEARCH_READY",
+    "human_review_required": true,
+    "external_contact_enabled": false,
+    "automatic_offer_enabled": false,
+    "automatic_send_enabled": false,
+    "crm_write_enabled": false,
+    "pipeline_write_enabled": false
+  },
+  "commercial_scope": {
+    "allowed_area_codes": [
+      "SELECTED_SERVICE_ONLY"
+    ],
+    "selected_service_must_match_source_review": true,
+    "projection_is_non_persistent": true
+  },
+  "decision": {
+    "decision_source": "HUMAN",
+    "allowed_readiness_outcomes": [
+      "MORE_COMMERCIAL_RESEARCH_REQUIRED",
+      "NO_COMMERCIAL_SCOPE",
+      "COMMERCIAL_SCOPE_READY"
+    ],
+    "outcome_state_map": {
+      "MORE_COMMERCIAL_RESEARCH_REQUIRED": "COMMERCIAL_SCOPE_RESEARCH_REQUIRED",
+      "NO_COMMERCIAL_SCOPE": "COMMERCIAL_SCOPE_CLOSED_NO_FIT",
+      "COMMERCIAL_SCOPE_READY": "COMMERCIAL_SCOPE_READY_FOR_SEPARATE_OFFER_GATE"
+    },
+    "outcome_next_gate_map": {
+      "MORE_COMMERCIAL_RESEARCH_REQUIRED": null,
+      "NO_COMMERCIAL_SCOPE": null,
+      "COMMERCIAL_SCOPE_READY": "SEPARATE_OFFER_AUTHORIZATION_GATE_REQUIRED"
+    },
+    "decided_at_format": "RFC3339_UTC_Z"
+  },
+  "output": {
+    "record_state": "CLIENT_FINDER_COMMERCIAL_SCOPE_READINESS_ENVELOPE",
+    "target_state_committed": false,
+    "persistence_executed": false,
+    "commercial_scope_persistence_allowed": false,
+    "offer_authorization_granted": false,
+    "offer_engine_invocation_allowed": false,
+    "pricing_decision_allowed": false,
+    "crm_context_materialization_allowed": false,
+    "human_review_required": true,
+    "external_contact_enabled": false,
+    "automatic_offer_enabled": false,
+    "automatic_send_enabled": false,
+    "crm_write_enabled": false,
+    "pipeline_write_enabled": false
+  },
+  "rules": {
+    "source_review_must_be_research_fit_confirmed": true,
+    "source_review_must_be_official_source_reverified": true,
+    "source_review_must_require_separate_commercial_scope_gate": true,
+    "source_review_must_not_have_committed_or_persisted_state": true,
+    "commercial_scope_decision_must_be_human_and_exact_identity": true,
+    "commercial_scope_is_limited_to_selected_service_projection": true,
+    "commercial_scope_ready_is_not_offer_authorization": true,
+    "commercial_scope_ready_is_not_eligibility_award_conversion_or_buying_intent": true,
+    "never_invoke_offer_engine_from_commercial_scope_review": true,
+    "never_materialize_crm_context_from_commercial_scope_review": true,
+    "never_decide_price_from_commercial_scope_review": true,
+    "never_enable_external_action_or_persistence": true,
+    "person_level_fields_forbidden": true,
+    "raw_evidence_hash_deadline_probability_and_pricing_fields_forbidden": true
+  }
+}
