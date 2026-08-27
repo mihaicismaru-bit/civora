@@ -5,7 +5,7 @@ from pathlib import Path
 from research_storage import ResearchStorageError, SQLiteResearchStorage, canonical_json_bytes
 
 
-def record(response_id="r-1", form_id="AI4WORK_ADULTS_V1", synthetic=False):
+def record(response_id="r-1", form_id="AI4WORK_ADULTS_V1", synthetic=False, channel_id="CH-TEST0001"):
     return {
         "schema_version": 1,
         "research_id": "AI4WORK-STEP-NF-RUN-001",
@@ -13,6 +13,7 @@ def record(response_id="r-1", form_id="AI4WORK_ADULTS_V1", synthetic=False):
         "form_version": 1,
         "response_id": response_id,
         "received_at": "2026-08-26T14:00:00+00:00",
+        "recruitment_channel_id": channel_id,
         "profile": {"region": "Sud-Vest Oltenia"},
         "answers": {"Q01": 3},
         "synthetic": synthetic,
@@ -42,6 +43,17 @@ class StorageTests(unittest.TestCase):
             store = SQLiteResearchStorage(Path(td) / "research.sqlite")
             with self.assertRaises(ResearchStorageError):
                 store.append(record(synthetic=True), raw_bytes=b"synthetic")
+
+    def test_invalid_or_missing_channel_provenance_is_rejected(self):
+        with tempfile.TemporaryDirectory() as td:
+            store = SQLiteResearchStorage(Path(td) / "research.sqlite")
+            bad = record(channel_id="facebook-campaign-person@example.org")
+            with self.assertRaises(ResearchStorageError):
+                store.append(bad, raw_bytes=b"bad-channel")
+            missing = record("r-2")
+            del missing["recruitment_channel_id"]
+            with self.assertRaises(ResearchStorageError):
+                store.append(missing, raw_bytes=b"missing-channel")
 
     def test_form_isolation(self):
         with tempfile.TemporaryDirectory() as td:
