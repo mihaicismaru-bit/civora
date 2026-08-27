@@ -1,0 +1,36 @@
+name: EUCONS Client Finder Offer Finalization Readiness
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/leads/client_finder_offer_finalization_readiness.py'
+      - 'eucons/leads/client_finder_offer_finalization_readiness_contract.json'
+      - 'eucons/validation/test_client_finder_offer_finalization_readiness_fail_closed.py'
+      - '.github/workflows/eucons-client-finder-offer-finalization-readiness.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/leads/client_finder_offer_finalization_readiness.py'
+      - 'eucons/leads/client_finder_offer_finalization_readiness_contract.json'
+      - 'eucons/validation/test_client_finder_offer_finalization_readiness_fail_closed.py'
+      - '.github/workflows/eucons-client-finder-offer-finalization-readiness.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-client-finder-offer-finalization-readiness-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fail-closed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Test Client Finder offer-finalization readiness fail-closed behavior
+        run: python eucons/validation/test_client_finder_offer_finalization_readiness_fail_closed.py
