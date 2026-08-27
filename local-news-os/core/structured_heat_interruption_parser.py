@@ -4,8 +4,9 @@
 This module is deliberately instance-agnostic and publication-neutral. It accepts
 plain text extracted from an official operator listing, admits only notices that
 contain an explicit thermal-service interruption phrase, a numeric service
-window and an explicit affected-consumer list, and returns structured evidence.
-Crawl time never becomes source freshness and no reader-facing copy is emitted.
+window and an explicit affected-consumer list or scope, and returns structured
+evidence. Crawl time never becomes source freshness and no reader-facing copy is
+emitted.
 """
 from __future__ import annotations
 
@@ -32,11 +33,67 @@ def _service_datetime(day: str, month: str, year: str, hour: str, minute: str, t
     try:
         h = int(hour)
         m = int(minute)
+        base = datetime(int(year), int(month), int(day), 0, 0, tzinfo=tz)
+        if h == 24 and m == 0:
+            return base + timedelta(days=1)
         if h > 23 or m > 59:
             return None
-        return datetime(int(year), int(month), int(day), h, m, tzinfo=tz)
+        return base.replace(hour=h, minute=m)
     except ValueError:
         return None
+
+
+def _clock_parts(token: str) -> tuple[str, str] | None:
+    value = re.sub(r"\s+", "", clean(token))
+    if not value:
+        return None
+    punct = re.fullmatch(r"([0-2]?\d)[:.]([0-5]\d)", value)
+    if punct:
+        return punct.group(1), punct.group(2)
+    if value.isdigit():
+        if len(value) <= 2:
+            return value, "00"
+        if len(value) in {3, 4}:
+            return value[:-2], value[-2:]
+    return None
+
+
+def _clock_datetime(day: str, month: str, year: str, token: str, tz: ZoneInfo) -> datetime | None:
+    parts = _clock_parts(token)
+    if not parts:
+        return None
+    return _service_datetime(day, month, year, parts[0], parts[1], tz)
+
+
+def _cross_day_window(text: str, tz: ZoneInfo) -> tuple[datetime, datetime, str] | None:
+    normalized = clean(text).replace("–", "-").replace("—", "-")
+    clock = r"([0-2]?\d(?:\s*[:.]\s*[0-5]\d|\s+[0-5]\d|[0-5]\d)?)"
+    patterns = (
+        re.compile(
+            r"\b(?:din\s+)?data\s+de\s+(\d{1,2})[./](\d{1,2})[./](20\d{2})\s*,?\s*ora\s*"
+            + clock
+            + r"\s*(?:pana|până)\s+(?:in|în)\s+data\s+de\s+(\d{1,2})[./](\d{1,2})[./](20\d{2})\s*,?\s*ora\s*"
+            + clock,
+            re.I,
+        ),
+        re.compile(
+            r"\b(?:in|în)\s+perioada\s+(\d{1,2})[./](\d{1,2})[./](20\d{2})\s*-?\s*ora\s*"
+            + clock
+            + r"\s*-\s*(\d{1,2})[./](\d{1,2})[./](20\d{2})\s*,?\s*ora\s*"
+            + clock,
+            re.I,
+        ),
+    )
+    for pattern in patterns:
+        match = pattern.search(normalized)
+        if not match:
+            continue
+        start = _clock_datetime(match.group(1), match.group(2), match.group(3), match.group(4), tz)
+        end = _clock_datetime(match.group(5), match.group(6), match.group(7), match.group(8), tz)
+        if start and end and end > start:
+            return start, end, clean(match.group(0))
+        return None
+    return None
 
 
 def _window_from_tail(tail: str, day: str, month: str, year: str, tz: ZoneInfo) -> tuple[datetime, datetime, str] | None:
@@ -68,8 +125,11 @@ def _window_from_tail(tail: str, day: str, month: str, year: str, tz: ZoneInfo) 
 
 
 def parse_heat_service_window(text: str, tz: ZoneInfo) -> tuple[datetime, datetime, str] | None:
-    """Extract an explicit same-day thermal-service window from official text."""
+    """Extract an explicit same-day or cross-day thermal-service window."""
     normalized = clean(text)
+    cross = _cross_day_window(normalized, tz)
+    if cross:
+        return cross
     date_match = re.search(r"\b(\d{1,2})[./](\d{1,2})[./](20\d{2})\b", normalized)
     if not date_match:
         return None
@@ -95,8 +155,21 @@ def _affected_consumers(block: str) -> list[str]:
     return [row for row in rows if row]
 
 
+def _affected_scope(block: str) -> str | None:
+    match = re.search(
+        r"\b(?:la|pentru)\s+(to(?:ti|ți)\s+consumatorii\s+[^,.;]+)(?=\s*,?\s*(?:din|in|în)\s+data\s+de\b)",
+        block,
+        re.I | re.S,
+    )
+    return clean(match.group(1)).strip(" .,-") if match else None
+
+
 def _service_forms(block: str) -> list[str]:
-    match = re.search(r"\bsub\s+forma\s+de\s+(.*?)(?=,\s*(?:in|în)\s+data\s+de\b)", block, re.I | re.S)
+    match = re.search(
+        r"\bsub\s+forma\s+de\s+(.*?)(?=\s*,?\s*(?:(?:in|în|din)\s+data\s+de|(?:la|pentru)\s+to(?:ti|ți)\s+consumatorii)\b)",
+        block,
+        re.I | re.S,
+    )
     if not match:
         return []
     text = clean(match.group(1))
@@ -132,6 +205,7 @@ def parse_heat_interruption_listing(
     *,
     planning_horizon_hours: int = 336,
     expiry_grace_hours: int = 1,
+    max_candidates: int = 40,
 ) -> tuple[list[dict[str, Any]], int]:
     """Return evidence-only heat interruption rows and candidate count."""
     if now.tzinfo is None:
@@ -143,6 +217,8 @@ def parse_heat_interruption_listing(
     seen: set[str] = set()
 
     for block in _candidate_blocks(text):
+        if candidates >= int(max_candidates):
+            break
         candidates += 1
         window = parse_heat_service_window(block, tz)
         if not window:
@@ -151,11 +227,12 @@ def parse_heat_interruption_listing(
         if event_end < now - grace or event_start > now + horizon:
             continue
         consumers = _affected_consumers(block)
-        if not consumers:
+        affected_scope = _affected_scope(block)
+        if not consumers and not affected_scope:
             continue
         forms = _service_forms(block)
         fingerprint_input = "\n".join(
-            [event_start.isoformat(), event_end.isoformat(), *consumers, clean(block)]
+            [event_start.isoformat(), event_end.isoformat(), affected_scope or "", *consumers, clean(block)]
         )
         fingerprint = hashlib.sha256(fingerprint_input.encode("utf-8")).hexdigest()
         if fingerprint in seen:
@@ -174,6 +251,7 @@ def parse_heat_interruption_listing(
                     "service_state": "interruption",
                     "service_forms": forms,
                     "affected_consumers": consumers,
+                    "affected_scope": affected_scope,
                     "service_window_text": window_text,
                     "reason": _reason(block),
                 },
@@ -214,6 +292,27 @@ def self_test() -> int:
     assert row["structured"]["affected_consumers"] == ["PT 1 Centru", "Spital Municipal", "strada Exemplu"]
     assert row["structured"]["service_forms"] == ["incalzire", "apa fierbinte", "apa calda de consum"]
     assert parse_heat_service_window("intr-o zi neprecizata, intre orele 9-18", tz) is None
+
+    cross = parse_heat_service_window(
+        "Operatorul anunta intreruperea din data de 13.07.2026, ora 0100 pana in data de 15.07.2026, ora 2400.",
+        tz,
+    )
+    assert cross is not None
+    assert cross[0].isoformat(timespec="minutes") == "2026-07-13T01:00+03:00"
+    assert cross[1].isoformat(timespec="minutes") == "2026-07-16T00:00+03:00"
+
+    future_cross = """
+    Operatorul anunta intreruperea furnizarii agentului termic sub forma de apa fierbinte
+    si apa calda de consum la toti consumatorii Municipiului Test, din data de 30.08.2026,
+    ora 22 00 pana in data de 31.08.2026, ora 24 00, pentru lucrari retea primara.
+    Ne cerem scuze pentru disconfort.
+    """
+    future_events, future_candidates = parse_heat_interruption_listing(future_cross, tz, now)
+    assert future_candidates == 1 and len(future_events) == 1
+    assert future_events[0]["event_start"] == "2026-08-30T22:00+03:00"
+    assert future_events[0]["event_end"] == "2026-09-01T00:00+03:00"
+    assert future_events[0]["structured"]["affected_scope"] == "toti consumatorii Municipiului Test"
+
     missing_consumers = """
     Operatorul anunta intreruperea furnizarii agentului termic in data de
     30.08.2026, intre orele 09-12, pentru lucrari.
