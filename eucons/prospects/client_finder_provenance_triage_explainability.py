@@ -232,6 +232,10 @@ def _validate_source(
     require(freshness_result.get("schema_version") == 1, "freshness source schema version drift")
     require(freshness_result.get("contract_id") == contract["source_contract_id"], "freshness source contract mismatch")
     require(
+        freshness_result.get("source_contract_id") == "EUCONS-R07-CLIENT-FINDER-TRIAGE-VIEW-002",
+        "freshness upstream source contract drift",
+    )
+    require(
         freshness_result.get("view_state") == contract["required_source_view_state"],
         "freshness source view mismatch",
     )
