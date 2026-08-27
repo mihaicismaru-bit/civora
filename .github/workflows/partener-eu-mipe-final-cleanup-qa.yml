@@ -8,12 +8,15 @@ on:
       - 'partener-eu/ingest/mipe_*.py'
       - 'partener-eu/ingest/project_mipe_v3_corpus.py'
       - 'partener-eu/ingest/normalize_mipe_health.py'
+      - 'partener-eu/ingest/build_decision_products.py'
       - 'partener-eu/ops/audit_mipe_legacy.py'
       - 'partener-eu/ops/p10_monitor_integrity.py'
       - 'partener-eu/ops/p10-validation-trigger.txt'
+      - 'partener-eu/ops/fix_decision_products_determinism.py'
       - 'partener-eu/ops/test_p10_policy_regression.py'
       - 'partener-eu/ops/test_mipe_*.py'
       - '.github/workflows/partener-eu-mipe-*.yml'
+      - '.github/workflows/partener-eu-decision-products.yml'
       - '.github/workflows/partener-eu-validation.yml'
       - '.github/workflows/partener-eu-pages.yml'
       - '.github/workflows/partener-eu-pages-diagnostic.yml'
@@ -24,12 +27,15 @@ on:
       - 'partener-eu/ingest/mipe_*.py'
       - 'partener-eu/ingest/project_mipe_v3_corpus.py'
       - 'partener-eu/ingest/normalize_mipe_health.py'
+      - 'partener-eu/ingest/build_decision_products.py'
       - 'partener-eu/ops/audit_mipe_legacy.py'
       - 'partener-eu/ops/p10_monitor_integrity.py'
       - 'partener-eu/ops/p10-validation-trigger.txt'
+      - 'partener-eu/ops/fix_decision_products_determinism.py'
       - 'partener-eu/ops/test_p10_policy_regression.py'
       - 'partener-eu/ops/test_mipe_*.py'
       - '.github/workflows/partener-eu-mipe-*.yml'
+      - '.github/workflows/partener-eu-decision-products.yml'
       - '.github/workflows/partener-eu-validation.yml'
       - '.github/workflows/partener-eu-pages.yml'
       - '.github/workflows/partener-eu-pages-diagnostic.yml'
@@ -60,12 +66,14 @@ jobs:
           python -m py_compile partener-eu/ingest/normalize_mipe_health.py
           python -m py_compile partener-eu/ingest/mipe_windows_crawl_v3.py
           python -m py_compile partener-eu/ingest/project_mipe_v3_corpus.py
+          python -m py_compile partener-eu/ingest/build_decision_products.py
           python -m py_compile partener-eu/ops/audit_mipe_legacy.py
           python -m py_compile partener-eu/ops/p10_monitor_integrity.py
           python -m py_compile partener-eu/ops/test_mipe_final_cleanup.py
           python -m py_compile partener-eu/ops/test_mipe_lifecycle_alias_cleanup.py
           python -m py_compile partener-eu/ops/test_mipe_lifecycle_monotonic_cleanup.py
           python -m py_compile partener-eu/ops/test_mipe_lifecycle_result_evidence_cleanup.py
+          python -m py_compile partener-eu/ops/test_mipe_decision_products_determinism_cleanup.py
           python -m py_compile partener-eu/ops/test_p10_policy_regression.py
 
       - name: Full-checkout caller audit and architecture contract
@@ -75,6 +83,7 @@ jobs:
           python partener-eu/ops/test_mipe_lifecycle_alias_cleanup.py
           python partener-eu/ops/test_mipe_lifecycle_monotonic_cleanup.py
           python partener-eu/ops/test_mipe_lifecycle_result_evidence_cleanup.py
+          python partener-eu/ops/test_mipe_decision_products_determinism_cleanup.py
           python partener-eu/ops/test_p10_policy_regression.py
 
       - name: Provenance, immutable-runtime and route arbitration regressions
@@ -110,6 +119,7 @@ jobs:
           python partener-eu/ops/test_mipe_lifecycle_alias_cleanup.py
           python partener-eu/ops/test_mipe_lifecycle_monotonic_cleanup.py
           python partener-eu/ops/test_mipe_lifecycle_result_evidence_cleanup.py
+          python partener-eu/ops/test_mipe_decision_products_determinism_cleanup.py
 
       - name: Build evidence receipt
         if: always()
