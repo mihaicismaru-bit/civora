@@ -19,6 +19,7 @@ REQUIRED_EXTERNAL_KEYS = {
     "provider_annex_4_5",
     "server_logging_profile",
     "retention_and_deletion",
+    "data_subject_rights_procedure",
     "research_only_store_binding",
     "provider_bound_test_twin_smoke",
 }
