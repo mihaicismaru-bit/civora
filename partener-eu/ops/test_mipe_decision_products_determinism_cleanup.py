@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""Regression guard for retiring the applied decision-product determinism fixer."""
+"""Regression guards for retired one-shot decision-product patchers."""
 from __future__ import annotations
 
 import importlib.util
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-FIXER = ROOT / "partener-eu" / "ops" / "fix_decision_products_determinism.py"
+DETERMINISM_FIXER = ROOT / "partener-eu" / "ops" / "fix_decision_products_determinism.py"
+SOURCE_COVERAGE_FIXER = ROOT / "partener-eu" / "ops" / "fix_decision_products_source_coverage.py"
 RUNTIME = ROOT / "partener-eu" / "ingest" / "build_decision_products.py"
 DECISION_PRODUCTS_WORKFLOW = ROOT / ".github" / "workflows" / "partener-eu-decision-products.yml"
 FINAL_CLEANUP_WORKFLOW = ROOT / ".github" / "workflows" / "partener-eu-mipe-final-cleanup-qa.yml"
@@ -14,7 +15,7 @@ SELF = "test_mipe_decision_products_determinism_cleanup.py"
 
 
 def load_runtime():
-    spec = importlib.util.spec_from_file_location("partener_decision_products_determinism_test", RUNTIME)
+    spec = importlib.util.spec_from_file_location("partener_decision_products_cleanup_test", RUNTIME)
     assert spec and spec.loader, "cannot load decision-products runtime"
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -22,16 +23,20 @@ def load_runtime():
 
 
 def main() -> int:
-    assert not FIXER.exists(), f"retired one-shot fixer reappeared: {FIXER.relative_to(ROOT)}"
+    for fixer in (DETERMINISM_FIXER, SOURCE_COVERAGE_FIXER):
+        assert not fixer.exists(), f"retired one-shot fixer reappeared: {fixer.relative_to(ROOT)}"
 
     decision_workflow = DECISION_PRODUCTS_WORKFLOW.read_text(encoding="utf-8")
     assert "fix_decision_products_determinism.py" not in decision_workflow, (
         "decision-products workflow still references the retired determinism fixer"
     )
+    assert "fix_decision_products_source_coverage.py" not in decision_workflow, (
+        "decision-products workflow still references the retired source-coverage fixer"
+    )
 
     final_cleanup_workflow = FINAL_CLEANUP_WORKFLOW.read_text(encoding="utf-8")
     assert SELF in final_cleanup_workflow, (
-        "decision-product determinism cleanup regression is not wired into the final cleanup gate"
+        "decision-product cleanup regression is not wired into the final cleanup gate"
     )
 
     runtime_text = RUNTIME.read_text(encoding="utf-8")
@@ -41,8 +46,13 @@ def main() -> int:
     assert "generated_at = utc_now()" not in runtime_text, (
         "wall-clock generatedAt would reintroduce nondeterministic product churn"
     )
+    assert 'explicit = str(item.get("pageClass") or "").upper()' in runtime_text, (
+        "explicit source pageClass handling disappeared from decision-products runtime"
+    )
 
     module = load_runtime()
+
+    # Determinism: identical authoritative snapshots must generate an identical timestamp.
     p11 = {"asOf": "2026-08-27T09:15:00+03:00"}
     mipe = {
         "lastRun": {"observedAt": "2026-08-27T06:30:00Z"},
@@ -61,7 +71,6 @@ def main() -> int:
     second = module.stable_generated_at(p11, mipe, afir)
     assert first == expected, (first, expected)
     assert second == first, "identical authoritative inputs must produce an identical generatedAt"
-
     assert module.stable_generated_at({}, {"items": []}, {"items": []}) == "1970-01-01T00:00:00Z"
     assert module.stable_generated_at(
         {"asOf": "not-a-date"},
@@ -69,7 +78,19 @@ def main() -> int:
         {"observedAt": None, "items": []},
     ) == "1970-01-01T00:00:00Z"
 
-    print("PARTENER.EU decision-product determinism cleanup regression: PASS")
+    # Source coverage: explicit upstream classification must remain authoritative without patching runtime.
+    assert module.afir_page_class({"pageClass": "SESSION", "title": "Acasă"}) == "SESSION"
+    assert module.afir_page_class({"pageClass": "DOCUMENT", "title": "Acasă"}) == "DOCUMENT"
+    assert module.afir_call_like({"pageClass": "GUIDE", "title": "Acasă"}) is True
+    assert module.afir_call_like({"title": "Portal informativ general"}) is False
+    assert module.mipe_call_like({"pageClass": "CALL_OR_GUIDE", "title": "Acasă"}) is True
+    assert module.mipe_call_like({"pageClass": "INTERVENTION_OR_CALL", "title": "Acasă"}) is True
+    assert module.mipe_call_like({"pageClass": "SESSION", "title": "Acasă"}) is True
+    assert module.mipe_call_like({"pageClass": "DOCUMENT", "title": "Acasă"}) is False
+    assert module.mipe_call_like({"kind": "CALL_OPENED", "title": "Acasă"}) is True
+    assert module.mipe_call_like({"title": "Portal informativ general"}) is False
+
+    print("PARTENER.EU decision-product patcher cleanup regressions: PASS")
     return 0
 
 
