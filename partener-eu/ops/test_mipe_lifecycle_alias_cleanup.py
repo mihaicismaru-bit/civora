@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[2]
 FIXER = ROOT / "partener-eu" / "ops" / "fix_call_lifecycle_event_aliases.py"
 LIFECYCLE = ROOT / "partener-eu" / "ingest" / "build_call_lifecycle.py"
 FINAL_CLEANUP_WORKFLOW = ROOT / ".github" / "workflows" / "partener-eu-mipe-final-cleanup-qa.yml"
+DECISION_PRODUCTS_WORKFLOW = ROOT / ".github" / "workflows" / "partener-eu-decision-products.yml"
 
 EXPECTED_EVENT_STAGE = {
     "DEADLINE_EXTENDED": "OPEN",
@@ -27,12 +28,17 @@ def main() -> int:
         actual_stage = event_stage.get(event)
         assert actual_stage == expected_stage, (event, actual_stage, expected_stage)
 
-    workflow = FINAL_CLEANUP_WORKFLOW.read_text(encoding="utf-8")
-    assert "fix_call_lifecycle_event_aliases.py" not in workflow, (
+    final_cleanup_workflow = FINAL_CLEANUP_WORKFLOW.read_text(encoding="utf-8")
+    assert "fix_call_lifecycle_event_aliases.py" not in final_cleanup_workflow, (
         "final cleanup replay still invokes the retired lifecycle alias fixer"
     )
-    assert "test_mipe_lifecycle_alias_cleanup.py" in workflow, (
+    assert "test_mipe_lifecycle_alias_cleanup.py" in final_cleanup_workflow, (
         "lifecycle alias cleanup regression is not wired into the final cleanup gate"
+    )
+
+    decision_products_workflow = DECISION_PRODUCTS_WORKFLOW.read_text(encoding="utf-8")
+    assert "fix_call_lifecycle_event_aliases.py" not in decision_products_workflow, (
+        "decision-products workflow still references the retired lifecycle alias fixer"
     )
 
     print("PARTENER.EU lifecycle alias cleanup regression: PASS")
