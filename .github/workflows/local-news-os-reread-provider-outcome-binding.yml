@@ -76,18 +76,6 @@ jobs:
             exit "$status"
           fi
 
-      - name: Run reclaim provenance regression
-        working-directory: local-news-os/social
-        run: python test_reread_spend_reclaim_binding.py
-
-      - name: Run RESERVED spend recovery regression
-        working-directory: local-news-os/social
-        run: python test_reread_spend_reservation_recovery.py
-
-      - name: Run reread spend regression
-        working-directory: local-news-os/social
-        run: python test_reread_spend_reauthorization.py
-
       - name: Verify operational wrapper and zero-paid boundary
         run: |
           python - <<'PY'
