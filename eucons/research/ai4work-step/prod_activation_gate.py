@@ -10,6 +10,7 @@ CONTRACT_PATH = HERE / "form_contract.json"
 MANIFEST_PATH = HERE / "PROD_ACTIVATION_MANIFEST_DRAFT.json"
 CONTROLLER_PATH = HERE / "CONTROLLER_DETERMINATION_DRAFT.json"
 COLLECTION_FRAME_PATH = HERE / "COLLECTION_FRAME_DRAFT.json"
+DPIA_SCREENING_PATH = HERE / "GDPR_DPIA_SCREENING_DRAFT.json"
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 APPROVED_EXTERNAL_STATUSES = {"APPROVED", "PASS", "FROZEN"}
 REQUIRED_EXTERNAL_KEYS = {
@@ -20,6 +21,7 @@ REQUIRED_EXTERNAL_KEYS = {
     "server_logging_profile",
     "retention_and_deletion",
     "data_subject_rights_procedure",
+    "dpia_screening_or_completed_dpia",
     "research_only_store_binding",
     "provider_bound_test_twin_smoke",
 }
@@ -54,6 +56,7 @@ def activation_errors(
     manifest: dict[str, Any],
     controller: dict[str, Any],
     collection_frame: dict[str, Any],
+    dpia_screening: dict[str, Any],
 ) -> list[str]:
     errors: list[str] = []
     research_ids = {
@@ -61,6 +64,7 @@ def activation_errors(
         manifest.get("research_id"),
         controller.get("research_id"),
         collection_frame.get("research_id"),
+        dpia_screening.get("research_id"),
     }
     if len(research_ids) != 1 or None in research_ids:
         errors.append("research_id_mismatch")
@@ -109,6 +113,35 @@ def activation_errors(
     if nf06_handoff.get("eligible_now") is not True:
         errors.append("collection_frame_not_nf06_eligible")
 
+    if dpia_screening.get("approved") is not True:
+        errors.append("dpia_screening_not_approved")
+    if dpia_screening.get("collection_enabled") is not True:
+        errors.append("dpia_screening_collection_disabled")
+    if dpia_screening.get("screening_conclusion") not in {
+        "DPIA_NOT_REQUIRED_APPROVED",
+        "DPIA_REQUIRED_COMPLETED_AND_APPROVED",
+    }:
+        errors.append("dpia_screening_conclusion_unresolved")
+    mandatory = dpia_screening.get("mandatory_before_prod") or {}
+    if mandatory.get("controller_determination_approved") is not True:
+        errors.append("dpia_controller_determination_not_approved")
+    if not isinstance(mandatory.get("privacy_contact_or_dpo_review_reference"), str) or not mandatory.get("privacy_contact_or_dpo_review_reference", "").strip():
+        errors.append("dpia_privacy_review_reference_missing")
+    if not isinstance(mandatory.get("final_large_scale_assessment"), str) or not mandatory.get("final_large_scale_assessment", "").strip():
+        errors.append("dpia_large_scale_assessment_missing")
+    if mandatory.get("employee_power_imbalance_safeguards_approved") is not True:
+        errors.append("dpia_employee_safeguards_not_approved")
+    if mandatory.get("anspdcp_decision_174_2018_final_check") is not True:
+        errors.append("dpia_anspdcp_check_not_approved")
+    if not isinstance(mandatory.get("final_dpia_decision"), str) or not mandatory.get("final_dpia_decision", "").strip():
+        errors.append("dpia_final_decision_missing")
+    if mandatory.get("if_residual_high_risk_prior_consultation_assessed") is not True:
+        errors.append("dpia_prior_consultation_assessment_missing")
+    if dpia_screening.get("screening_conclusion") == "DPIA_REQUIRED_COMPLETED_AND_APPROVED":
+        completed_ref = mandatory.get("if_dpia_required_completed_dpia_reference")
+        if not isinstance(completed_ref, str) or not completed_ref.strip():
+            errors.append("completed_dpia_reference_missing")
+
     evidence = manifest.get("required_external_or_operational_evidence")
     if not isinstance(evidence, dict):
         errors.append("external_evidence_map_missing")
@@ -134,16 +167,19 @@ def evaluate_repository_activation(
     manifest_path: Path = MANIFEST_PATH,
     controller_path: Path = CONTROLLER_PATH,
     collection_frame_path: Path = COLLECTION_FRAME_PATH,
+    dpia_screening_path: Path = DPIA_SCREENING_PATH,
 ) -> tuple[bool, list[str]]:
     contract = _load(contract_path)
     manifest = _load(manifest_path)
     controller = _load(controller_path)
     collection_frame = _load(collection_frame_path)
+    dpia_screening = _load(dpia_screening_path)
     errors = activation_errors(
         contract=contract,
         manifest=manifest,
         controller=controller,
         collection_frame=collection_frame,
+        dpia_screening=dpia_screening,
     )
     return not errors, errors
 
