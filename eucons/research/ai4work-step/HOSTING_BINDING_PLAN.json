@@ -1,7 +1,7 @@
 {
-  "schema_version": "eucons.ai4work_research_hosting_plan.v0.2",
+  "schema_version": "eucons.ai4work_research_hosting_plan.v0.3",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "state": "PUBLIC_PROVIDER_DPA_VERIFIED_ACCOUNT_BINDING_AND_LOG_FACTS_STILL_OPEN",
+  "state": "PUBLIC_PROVIDER_DPA_VERIFIED_CONTROLLER_ACCOUNT_CHAIN_AND_LOG_FACTS_STILL_OPEN",
   "verified_existing_eucons_runtime": {
     "public_origin": "https://eucons.ro",
     "api_origin": "https://api.eucons.ro",
@@ -35,7 +35,8 @@
   "privacy_and_security_requirements_before_activation": [
     "freeze a public research privacy/contact channel for EUROCONSULT SRL",
     "document and approve the research legal basis and Article 13 notice separately from acknowledgement of voluntary participation",
-    "confirm the active EUROCONSULT hosting order is governed by the current Claus Web DPA and obtain/retain the account-specific contractual copy",
+    "verify and document the legal/controller-processor relationship between EUROCONSULT SRL and the actual hosting-account holder; do not infer that account ownership, billing responsibility and controller identity are the same",
+    "confirm that the processing chain applicable to the research is governed by Article 28-compatible terms and retain the account-specific contractual evidence",
     "obtain and review the current nominal subprocessor list from Claus Web DPA Annex 4 before activation",
     "obtain and review the account-applicable backup/retention/deletion values from Claus Web DPA Annex 5 before activation",
     "verify web-server/reverse-proxy access-log fields and retention for the actual account; keep IP/device metadata out of the analytical export",
@@ -59,10 +60,11 @@
       "termination_deletion": "DPA_STATES_STANDARD_15_DAY_EXPORT_WINDOW_AND_PRODUCTION_DATA_DELETION_OR_IRREVERSIBLE_INACCESSIBILITY_GENERALLY_WITHIN_30_DAYS_AFTER_WINDOW_SUBJECT_TO_EXCEPTIONS",
       "backup_retention": "RESIDUAL_ROTATIONAL_BACKUPS_MAY_PERSIST_UNTIL_NATURAL_RETENTION_EXPIRY; EXACT_VALUES_ARE_IN_ANNEX_5_AVAILABLE_ON_REQUEST",
       "technical_logging": "DPA_ACKNOWLEDGES_OPERATIONAL_AND_SECURITY_LOGGING_BUT_PUBLIC_PAGE_DOES_NOT_FIX_ACCOUNT_SPECIFIC_FIELDS_OR_RETENTION",
-      "toms": "PUBLIC_DPA_LISTS_REFERENCE_CONTROLS_FOR_ACCESS, SEGREGATION, NETWORK SECURITY, LOGGING/MONITORING, BACKUP/RECOVERY, INCIDENT RESPONSE AND DELETION"
+      "toms": "PUBLIC_DPA_LISTS_REFERENCE_CONTROLS_FOR ACCESS, SEGREGATION, NETWORK SECURITY, LOGGING/MONITORING, BACKUP/RECOVERY, INCIDENT RESPONSE AND DELETION"
     },
     "provider_public_security_claim": "Claus Web publicly states ISO/IEC 27001 certification; certificate scope/current validity still requires documentary verification if relied upon as evidence",
-    "processor_contract_status": "PUBLIC_STANDARD_DPA_FOUND_ACCOUNT_SPECIFIC_ACCEPTANCE_NOT_YET_VERIFIED",
+    "processor_contract_status": "PUBLIC_STANDARD_DPA_FOUND_CONTROLLER_TO_ACCOUNT_HOLDER_CHAIN_NOT_YET_VERIFIED",
+    "account_holder_controller_alignment_status": "OPEN_DO_NOT_INFER",
     "subprocessor_status": "CATEGORIES_KNOWN_NOMINAL_LIST_OPEN_FROM_ANNEX_4",
     "transfer_status": "STANDARD_DPA_RULE_KNOWN_ACCOUNT_SPECIFIC_SUBPROCESSOR_LOCATIONS_OPEN",
     "log_retention_status": "OPEN_ACCOUNT_SPECIFIC_FIELDS_AND_DURATION_NOT_PUBLICLY_FIXED",
