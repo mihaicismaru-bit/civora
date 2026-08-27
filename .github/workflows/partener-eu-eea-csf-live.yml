@@ -6,6 +6,9 @@ on:
       - 'partener-eu/ingest/eea_civil_society_calls.py'
       - 'partener-eu/ingest/eea_civil_society_fetch.py'
       - 'partener-eu/ingest/eea_civil_society_reconcile.py'
+      - 'partener-eu/p11/candidate_staging.py'
+      - 'partener-eu/p11/eea_civil_society_stage.py'
+      - 'partener-eu/p11/test_eea_civil_society_stage.py'
       - 'partener-eu/ops/test_eea_civil_society_calls.py'
       - 'partener-eu/ops/test_eea_civil_society_fetch.py'
       - 'partener-eu/ops/test_eea_civil_society_reconcile.py'
@@ -101,7 +104,46 @@ jobs:
           print('PASS EEA CSF reconciliation receipt:', stats)
           PY
 
-      - name: Upload bounded live evidence and reconciliation receipt
+      - name: Admit reconciled calls to deterministic P11 staging
+        run: |
+          python partener-eu/p11/eea_civil_society_stage.py \
+            /tmp/partener-eea-csf/reconciliation-receipt.json \
+            --bundle partener-eu/p11/opportunity_bundle.json \
+            --output /tmp/partener-eea-csf/staging-admission.json
+
+      - name: Validate staging admission remains non-publishing and corpus-free
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          reconciliation = json.loads(Path('/tmp/partener-eea-csf/reconciliation-receipt.json').read_text(encoding='utf-8'))
+          admission = json.loads(Path('/tmp/partener-eea-csf/staging-admission.json').read_text(encoding='utf-8'))
+          stats = admission['stats']
+          if admission.get('schema') != 'PARTENER_EU_EEA_CSF_CANONICAL_STAGING_ADMISSION_V1':
+              raise SystemExit('FAIL: unexpected staging admission schema')
+          if admission.get('canonical_staging_admission') != 'PASS':
+              raise SystemExit('FAIL: canonical staging admission did not PASS')
+          if admission.get('publication_effect') != 'NONE' or admission.get('publish_authorized'):
+              raise SystemExit('FAIL: staging admission cannot publish')
+          if admission.get('canonical_corpus_mutation') is not False or admission.get('material_fact_action') != 'NONE':
+              raise SystemExit('FAIL: staging admission cannot mutate canonical material facts')
+          if admission.get('missing_proofs') != ['PUBLIC_PROJECTION_QUALITY_GATE']:
+              raise SystemExit('FAIL: public projection gate must remain the only downstream proof')
+          if stats.get('staging_admitted') != reconciliation['stats']['reconciled_calls']:
+              raise SystemExit('FAIL: staging admission must be all-or-nothing for reconciled calls')
+          if stats.get('ambiguous_review') or stats.get('errors') or stats.get('conflicts'):
+              raise SystemExit(f"FAIL: unsafe staging admission stats: {stats}")
+          if any(row.get('staging_admission') != 'PASS' for row in admission.get('records', [])):
+              raise SystemExit('FAIL: every call must have PASS staging admission')
+          if any(row.get('canonical_corpus_mutation') is not False or row.get('publish_authorized') for row in admission.get('records', [])):
+              raise SystemExit('FAIL: call-level staging admission attempted corpus/public mutation')
+          if any(row.get('missing_proofs') != ['PUBLIC_PROJECTION_QUALITY_GATE'] for row in admission.get('records', [])):
+              raise SystemExit('FAIL: call-level public projection gate drift')
+          print('PASS EEA CSF canonical staging admission:', stats)
+          PY
+
+      - name: Upload bounded live evidence, reconciliation and staging receipts
         if: always()
         uses: actions/upload-artifact@v4
         with:
