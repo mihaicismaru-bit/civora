@@ -8,6 +8,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol
 
+from channel_provenance import ChannelProvenanceError, validate_recruitment_channel_id
+
 RESEARCH_ID = "AI4WORK-STEP-NF-RUN-001"
 ALLOWED_FORMS = {"AI4WORK_ADULTS_V1", "AI4WORK_EMPLOYERS_V1"}
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -37,6 +39,10 @@ def validate_record_envelope(record: dict[str, Any]) -> None:
         raise ResearchStorageError("response_id required")
     if not isinstance(record.get("received_at"), str) or not record["received_at"]:
         raise ResearchStorageError("received_at required")
+    try:
+        validate_recruitment_channel_id(record.get("recruitment_channel_id"))
+    except ChannelProvenanceError as exc:
+        raise ResearchStorageError(str(exc)) from exc
 
 
 def validate_body_sha256(value: str) -> None:
