@@ -38,25 +38,19 @@ def page(title: str, body: str) -> str:
 </body></html>"""
 
 
-def warning() -> str:
-    return '<p class="eu-hint"><strong>Important:</strong> Nu introduceți nume, e-mail, telefon, CNP, adresă, numele angajatorului sau alte informații care pot identifica o persoană.</p>'
-
-
 def input_field(field: dict[str, Any], disabled: bool) -> str:
     fid = esc(field["id"])
     label = esc(field["label"])
     attrs = ' disabled' if disabled else ''
     required = ' required' if field.get("required", True) else ''
-    note = warning() if field.get("pii_warning") else ''
     ftype = field["type"]
-    if ftype == "select":
-        options = '<option value="">Selectați</option>' + ''.join(f'<option value="{esc(v)}">{esc(v)}</option>' for v in field["options"])
-        control = f'<select id="{fid}" name="{fid}"{required}{attrs}>{options}</select>'
-    elif ftype == "textarea":
-        control = f'<textarea id="{fid}" name="{fid}" maxlength="{int(field.get("max_chars",500))}"{required}{attrs}></textarea>'
-    else:
-        control = f'<input id="{fid}" name="{fid}" type="text" maxlength="{int(field.get("max_chars",160))}"{required}{attrs}>'
-    return f'<div class="eu-stack eu-stack--tight"><label for="{fid}"><strong>{label}</strong></label>{control}{note}</div>'
+    if ftype != "select":
+        raise RuntimeError(f"analytical profile field {field['id']} must be a controlled select, got {ftype}")
+    options = '<option value="">Selectați</option>' + ''.join(
+        f'<option value="{esc(v)}">{esc(v)}</option>' for v in field["options"]
+    )
+    control = f'<select id="{fid}" name="{fid}"{required}{attrs}>{options}</select>'
+    return f'<div class="eu-stack eu-stack--tight"><label for="{fid}"><strong>{label}</strong></label>{control}</div>'
 
 
 def question_field(question: dict[str, Any], disabled: bool) -> str:
@@ -65,22 +59,42 @@ def question_field(question: dict[str, Any], disabled: bool) -> str:
     attrs = ' disabled' if disabled else ''
     qtype = question["type"]
     if qtype == "rating":
-        controls = ''.join(f'<label><input type="radio" name="{qid}" value="{i}"{attrs}> {i}</label>' for i in range(int(question["min"]), int(question["max"]) + 1))
+        controls = ''.join(
+            f'<label><input type="radio" name="{qid}" value="{i}"{attrs}> {i}</label>'
+            for i in range(int(question["min"]), int(question["max"]) + 1)
+        )
     elif qtype in {"single", "boolean"}:
         options = question.get("options", ["da", "nu"])
-        controls = ''.join(f'<label><input type="radio" name="{qid}" value="{esc(v)}"{attrs}> {esc(v)}</label>' for v in options)
+        controls = ''.join(
+            f'<label><input type="radio" name="{qid}" value="{esc(v)}"{attrs}> {esc(v)}</label>'
+            for v in options
+        )
+    elif qtype == "select":
+        required = ' required' if question.get("required", True) else ''
+        options = '<option value="">Selectați</option>' + ''.join(
+            f'<option value="{esc(v)}">{esc(v)}</option>' for v in question["options"]
+        )
+        controls = f'<select id="{qid}" name="{qid}"{required}{attrs}>{options}</select>'
     elif qtype == "multi":
-        controls = ''.join(f'<label><input type="checkbox" name="{qid}" value="{esc(v)}"{attrs}> {esc(v)}</label>' for v in question["options"])
+        controls = ''.join(
+            f'<label><input type="checkbox" name="{qid}" value="{esc(v)}"{attrs}> {esc(v)}</label>'
+            for v in question["options"]
+        )
     elif qtype == "rating_matrix":
         rows = []
         for key, row_label in question["rows"].items():
-            ratings = ''.join(f'<label><input type="radio" name="{esc(qid)}__{esc(key)}" value="{i}"{attrs}> {i}</label>' for i in range(int(question["min"]), int(question["max"]) + 1))
-            rows.append(f'<div class="eu-stack eu-stack--tight"><span>{esc(row_label)}</span><div>{ratings}</div></div>')
+            ratings = ''.join(
+                f'<label><input type="radio" name="{esc(qid)}__{esc(key)}" value="{i}"{attrs}> {i}</label>'
+                for i in range(int(question["min"]), int(question["max"]) + 1)
+            )
+            rows.append(
+                f'<div class="eu-stack eu-stack--tight"><span>{esc(row_label)}</span><div>{ratings}</div></div>'
+            )
         controls = ''.join(rows)
-    elif qtype == "textarea":
-        controls = f'<textarea name="{qid}" maxlength="{int(question.get("max_chars",500))}"{attrs}></textarea>' + warning()
     else:
-        controls = f'<input type="text" name="{qid}" maxlength="{int(question.get("max_chars",160))}"{attrs}>' + (warning() if question.get("pii_warning") else '')
+        raise RuntimeError(
+            f"analytical question {question['id']} uses unsupported/non-minimised field type {qtype}"
+        )
     note = f'<p class="eu-hint">{esc(question["note"])}</p>' if question.get("note") else ''
     return f'<fieldset class="eu-card eu-stack"><legend><strong>{qid}</strong> — {label}</legend>{controls}{note}</fieldset>'
 
