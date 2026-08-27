@@ -46,6 +46,29 @@
         "fact_kernel_required_for_reader_publication": true,
         "claim_level_provenance_required": true
       }
+    },
+    {
+      "id": "cet-govora-thermal-interruptions",
+      "name": "CET Govora S.A. — întreruperi agent termic",
+      "url": "https://cetgovora.ro/anunturi-cet-govora",
+      "source_tier": "T1",
+      "parser": "RO_UTILITY_HEAT_INTERRUPTION_LISTING_V1",
+      "section": "SERVICII",
+      "priority": 95,
+      "enabled": false,
+      "status": "WAITING_GENERIC_HEAT_INTERRUPTION_PARSER",
+      "planning_horizon_hours": 336,
+      "expiry_grace_hours": 1,
+      "max_listing_candidates": 40,
+      "editorial_policy": {
+        "reader_copy_generated_by_ingest": false,
+        "service_window_must_be_explicit": true,
+        "affected_consumers_must_be_explicit": true,
+        "crawl_time_freshness_forbidden": true,
+        "mixed_non_service_announcements_must_be_rejected": true,
+        "fact_kernel_required_for_reader_publication": true,
+        "claim_level_provenance_required": true
+      }
     }
   ]
 }
