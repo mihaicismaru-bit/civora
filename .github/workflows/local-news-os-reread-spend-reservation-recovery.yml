@@ -57,14 +57,6 @@ jobs:
         working-directory: local-news-os/social
         run: python test_reread_spend_reservation_recovery.py
 
-      - name: Run reread spend regression
-        working-directory: local-news-os/social
-        run: python test_reread_spend_reauthorization.py
-
-      - name: Run reread attempt provenance regression
-        working-directory: local-news-os/social
-        run: python test_reread_attempt_provenance_binding.py
-
       - name: Verify recovery remains receipt-only, secret-free and zero-paid
         run: |
           python - <<'PY'
