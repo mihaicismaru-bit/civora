@@ -4,7 +4,7 @@
     "all_legacy_story_routes_200_with_content": true,
     "all_people_routes_preserved": true,
     "homepage_200": true,
-    "homepage_contains_all_legacy_story_links": false,
+    "homepage_contains_all_legacy_story_links": true,
     "leisure_route_200": true,
     "leisure_verified_places_projected": true,
     "network_publication_attempted": false,
@@ -14,15 +14,16 @@
     "sitemap_preserves_required_public_urls": true
   },
   "ci": {
-    "conclusion": "FAIL",
-    "execution_exit_code": 1,
-    "head_sha": "8a0259cf679d10e9efbd2bb333488cc812e8f437",
-    "run_id": "33069122036",
+    "conclusion": "PASS",
+    "execution_exit_code": 0,
+    "head_sha": "822d441b995bd2d39d495b353d71654e61949dd7",
+    "run_id": "33069501726",
     "workflow": "LOCAL NEWS OS vNext Vâlcea Shadow Projection"
   },
   "contract": "LOCAL_NEWS_OS_VNEXT_VALCEA_P18_SHADOW_PROJECTION_DIFF_V1",
   "counts": {
     "artists_checked": 172,
+    "homepage_story_links_expected": 30,
     "people_checked": 7,
     "sitemap_required_urls": 212,
     "stories_checked": 31,
@@ -31,14 +32,15 @@
   "failures": {
     "artists": [],
     "artists_failure_count": 0,
+    "missing_homepage_story_paths": [],
     "missing_place_names": [],
     "missing_sitemap_url_count": 0,
     "missing_sitemap_urls": [],
     "people": [],
     "stories": []
   },
-  "next_gate": "REPAIR_PUBLIC_PROJECTION",
+  "next_gate": "CONTROLLED_LIVE_DEPLOYMENT_PREFLIGHT",
   "production_cutover": false,
   "schema_version": "1.0",
-  "status": "SHADOW_PROJECTION_FAIL"
+  "status": "SHADOW_PROJECTION_PASS"
 }
