@@ -1,10 +1,22 @@
 {
-  "schema_version": "eucons.ai4work_gdpr_lia.v0.1",
+  "schema_version": "eucons.ai4work_gdpr_lia.v0.2",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "date": "2026-08-27",
-  "controller": "EUROCONSULT SRL",
-  "candidate_legal_basis": "GDPR Article 6(1)(f) legitimate interests",
-  "status": "DRAFT_CONTROLLER_DECISION_REQUIRED_BEFORE_COLLECTION",
+  "controller": null,
+  "controller_role_state": "UNRESOLVED_BEFORE_COLLECTION",
+  "controller_determination": {
+    "rule": "The controller must be the legal entity that actually determines the purposes and essential means of the AI4WORK needs-analysis research; website branding, consulting role, hosting-account ownership and project-applicant status must not be treated as interchangeable by assumption.",
+    "evidence_required": [
+      "current MySMIS applicant/leader identity and mandate for the needs analysis",
+      "documented decision identifying which legal entity determines the research purpose and essential means",
+      "documented role of the eucons.ro site/operator in questionnaire delivery and analysis",
+      "documented role of the hosting-account holder and Claus Web in the processing chain",
+      "Article 28-compatible instructions/terms for every processor or subprocessor role"
+    ],
+    "status": "FAIL_CLOSED_PENDING_ROLE_DETERMINATION"
+  },
+  "candidate_legal_basis": "GDPR Article 6(1)(f) legitimate interests — candidate only after controller determination and signoff",
+  "status": "DRAFT_CONTROLLER_AND_LEGAL_BASIS_DECISION_REQUIRED_BEFORE_COLLECTION",
   "authority_context": [
     "https://commission.europa.eu/law/law-topic/data-protection/information-business-and-organisations/legal-grounds-processing-data_en",
     "https://www.edpb.europa.eu/public-consultations/guidelines-12024-on-processing-of-personal-data-based-on-article-61f-gdpr_ro"
@@ -14,7 +26,8 @@
     "legitimate": true,
     "specific": true,
     "present_and_non_speculative": true,
-    "commercial_marketing_or_lead_generation": false
+    "commercial_marketing_or_lead_generation": false,
+    "controller_attribution": "PENDING_CONTROLLER_ROLE_DETERMINATION"
   },
   "necessity_test": {
     "why_primary_research_is_needed": "secondary official evidence can establish structural context but cannot alone evidence respondent-level perceived skills gaps, barriers, use patterns and employer-reported capability needs",
@@ -27,7 +40,7 @@
       "separate optional follow-up contact mechanism with no response linkage",
       "small-cell suppression and free-text PII rejection/review"
     ],
-    "conclusion": "PROCESSING_CAN_BE_NECESSARY_IF_THE_MINIMISED_DESIGN_AND_SEPARATION_CONTROLS_ARE_ENFORCED"
+    "conclusion": "PROCESSING_CAN_BE_NECESSARY_IF_CONTROLLER_ROLE_IS_FROZEN_AND_THE_MINIMISED_DESIGN_AND_SEPARATION_CONTROLS_ARE_ENFORCED"
   },
   "balancing_test": {
     "reasonable_expectations": "participants are shown a pre-form research notice and make a voluntary positive choice to submit a needs-analysis questionnaire; the data are not reused for enrolment, marketing or individual decisions",
@@ -45,12 +58,13 @@
       "no automated decisions or respondent scoring",
       "logging minimisation and no IP/user-agent in analytical exports"
     ],
-    "provisional_outcome": "CONTROLLER_INTEREST_CAN_PREVAIL_ONLY_WHILE_ALL_SAFEGUARDS_REMAIN_TRUE"
+    "provisional_outcome": "A LEGITIMATE-INTEREST OUTCOME MAY ONLY BE SIGNED AFTER CONTROLLER DETERMINATION AND WHILE ALL SAFEGUARDS REMAIN TRUE"
   },
   "fail_closed_conditions": [
-    "privacy contact and right-to-object process not operational",
-    "Article 13 notice not delivered before data submission",
-    "processor/subprocessor or transfer review not completed",
+    "controller legal entity and role are not documented",
+    "privacy contact and right-to-object process are not operational for the determined controller",
+    "Article 13 notice is not delivered before data submission",
+    "processor/subprocessor or transfer review is not completed",
     "server logs make responses routinely linkable to identifiable IP/device data without a documented necessity/retention control",
     "direct identifiers, special-category data, CRM linkage, marketing reuse or individual decision-making are introduced",
     "raw responses are sent to an external AI/LLM processor without a new legal/privacy assessment",
@@ -58,6 +72,8 @@
   ],
   "controller_signoff_fields": {
     "approved": false,
+    "legal_entity_name": null,
+    "role_basis_reference": null,
     "approver_name_or_role": null,
     "approval_date": null,
     "privacy_contact": null,
