@@ -5,6 +5,7 @@ on:
     paths:
       - 'partener-eu/ingest/source_registry.json'
       - 'partener-eu/ingest/source_registry_probe.py'
+      - 'partener-eu/ingest/data_plane_contract.json'
       - 'partener-eu/ingest/funding_tenders_api.py'
       - 'partener-eu/ingest/eea_civil_society_calls.py'
       - 'partener-eu/ops/test_source_registry_low_info.py'
@@ -35,6 +36,7 @@ jobs:
       - name: Validate registry JSON and adapter syntax
         run: |
           python -m json.tool partener-eu/ingest/source_registry.json >/dev/null
+          python -m json.tool partener-eu/ingest/data_plane_contract.json >/dev/null
           python -m py_compile partener-eu/ingest/source_registry_probe.py
           python -m py_compile partener-eu/ingest/funding_tenders_api.py
           python -m py_compile partener-eu/ingest/eea_civil_society_calls.py
