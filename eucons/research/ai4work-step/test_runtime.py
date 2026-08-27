@@ -11,6 +11,7 @@ SPEC = importlib.util.spec_from_file_location("ai4work_research_runtime", HERE /
 RUNTIME = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None
 SPEC.loader.exec_module(RUNTIME)
+CHANNEL_ID = "CH-TEST0001"
 
 
 def adult_payload():
@@ -80,30 +81,43 @@ def employer_payload():
     }
 
 
+def validate(payload):
+    return RUNTIME.validate_submission(payload, recruitment_channel_id=CHANNEL_ID)
+
+
 class ResearchRuntimeTests(unittest.TestCase):
     def test_valid_adult_record_matches_nf06_envelope(self):
-        record = RUNTIME.validate_submission(adult_payload())
-        self.assertEqual(set(record), {"schema_version", "research_id", "form_id", "form_version", "response_id", "received_at", "profile", "answers", "synthetic"})
+        record = validate(adult_payload())
+        self.assertEqual(set(record), {"schema_version", "research_id", "form_id", "form_version", "response_id", "received_at", "recruitment_channel_id", "profile", "answers", "synthetic"})
         self.assertEqual(record["form_id"], "AI4WORK_ADULTS_V1")
+        self.assertEqual(record["recruitment_channel_id"], CHANNEL_ID)
         self.assertFalse(record["synthetic"])
 
     def test_valid_employer_record_has_no_org_identity(self):
-        record = RUNTIME.validate_submission(employer_payload())
+        record = validate(employer_payload())
         self.assertEqual(record["form_id"], "AI4WORK_EMPLOYERS_V1")
         self.assertNotIn("organisation_name", str(record))
         self.assertNotIn("cui", str(record).lower())
+
+    def test_recruitment_channel_is_required_and_bounded(self):
+        with self.assertRaises(RUNTIME.ResearchValidationError):
+            RUNTIME.validate_submission(adult_payload(), recruitment_channel_id="")
+        with self.assertRaises(RUNTIME.ResearchValidationError):
+            RUNTIME.validate_submission(adult_payload(), recruitment_channel_id="CH-ORGANISATION-NAME")
+        with self.assertRaises(RUNTIME.ResearchValidationError):
+            RUNTIME.validate_submission(adult_payload(), recruitment_channel_id="utm_source=facebook")
 
     def test_expanded_direct_identifier_alias_is_rejected(self):
         payload = adult_payload()
         payload["profile"]["first_name"] = "Test"
         with self.assertRaises(RUNTIME.ResearchValidationError):
-            RUNTIME.validate_submission(payload)
+            validate(payload)
 
     def test_identifier_like_value_cannot_be_injected_into_controlled_category(self):
         payload = adult_payload()
         payload["profile"]["occupational_family"] = "contact@example.org"
         with self.assertRaises(RUNTIME.ResearchValidationError):
-            RUNTIME.validate_submission(payload)
+            validate(payload)
 
     def test_preproduction_instrument_has_no_free_text_fields(self):
         forms = json.loads((HERE / "forms_definition.json").read_text(encoding="utf-8"))
@@ -119,25 +133,25 @@ class ResearchRuntimeTests(unittest.TestCase):
         payload = adult_payload()
         payload["notice_read_and_voluntary_participation"] = False
         with self.assertRaises(RUNTIME.ResearchValidationError):
-            RUNTIME.validate_submission(payload)
+            validate(payload)
 
     def test_region_outside_scope_is_rejected(self):
         payload = employer_payload()
         payload["profile"]["region"] = "București-Ilfov"
         with self.assertRaises(RUNTIME.ResearchValidationError):
-            RUNTIME.validate_submission(payload)
+            validate(payload)
 
     def test_rating_out_of_range_is_rejected(self):
         payload = adult_payload()
         payload["answers"]["Q04"] = 6
         with self.assertRaises(RUNTIME.ResearchValidationError):
-            RUNTIME.validate_submission(payload)
+            validate(payload)
 
     def test_unsupported_option_is_rejected_not_just_length_checked(self):
         payload = employer_payload()
         payload["answers"]["E07"] = "foarte mult"
         with self.assertRaises(RUNTIME.ResearchValidationError):
-            RUNTIME.validate_submission(payload)
+            validate(payload)
 
     def test_selection_limit_is_enforced(self):
         payload = employer_payload()
@@ -150,19 +164,19 @@ class ResearchRuntimeTests(unittest.TestCase):
             "automatizarea unor pași de lucru",
         ]
         with self.assertRaises(RUNTIME.ResearchValidationError):
-            RUNTIME.validate_submission(payload)
+            validate(payload)
 
     def test_duplicate_multi_selection_is_rejected(self):
         payload = adult_payload()
         payload["answers"]["Q08"] = ["lipsa timpului", "lipsa timpului"]
         with self.assertRaises(RUNTIME.ResearchValidationError):
-            RUNTIME.validate_submission(payload)
+            validate(payload)
 
     def test_inactive_conditional_field_must_be_empty(self):
         payload = adult_payload()
         payload["answers"]["Q07_topic"] = "AI generativ"
         with self.assertRaises(RUNTIME.ResearchValidationError):
-            RUNTIME.validate_submission(payload)
+            validate(payload)
 
     def test_collection_remains_disabled_by_contract(self):
         self.assertFalse(RUNTIME.collection_enabled())
