@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "id": "EUCONS-R07-CLIENT-FINDER-PROVENANCE-TRIAGE-EXPLAINABILITY-001",
+  "status": "CANONICAL",
+  "purpose": "Turn provenance freshness ordering into deterministic operator re-verification cues without classifying a source as stale/fresh, changing eligibility, or enabling any external action.",
+  "source_contract_id": "EUCONS-R07-CLIENT-FINDER-PROVENANCE-FRESHNESS-001",
+  "required_source_view_state": "CLIENT_FINDER_PROVENANCE_FRESHNESS_VIEW",
+  "required_source_semantics": "OBSERVABILITY_ONLY_NO_STALE_THRESHOLD",
+  "required_eligibility_state": "NOT_ASSESSED",
+  "required_maximum_next_state": "RESEARCH_READY",
+  "thresholds": {
+    "stale_after_hours": null,
+    "fresh_after_hours": null
+  },
+  "triage": {
+    "queue_order": "OLDEST_SOURCE_AS_OF_FIRST",
+    "operator_next_step": "REVERIFY_OFFICIAL_SOURCE_BEFORE_MATERIAL_CLAIM",
+    "source_age_classification": "NOT_CLASSIFIED",
+    "allowed_relative_age_cues": [
+      "ONLY_MATCHED_SOURCE_SNAPSHOT",
+      "ALL_MATCHED_SNAPSHOTS_SHARE_SOURCE_AS_OF",
+      "EARLIEST_SOURCE_SNAPSHOT_IN_CURRENT_SET",
+      "LATEST_SOURCE_SNAPSHOT_IN_CURRENT_SET",
+      "INTERMEDIATE_SOURCE_SNAPSHOT_IN_CURRENT_SET",
+      "TIED_EARLIEST_SOURCE_SNAPSHOT_IN_CURRENT_SET",
+      "TIED_LATEST_SOURCE_SNAPSHOT_IN_CURRENT_SET",
+      "TIED_INTERMEDIATE_SOURCE_SNAPSHOT_IN_CURRENT_SET"
+    ],
+    "allowed_explanation_reasons": [
+      "RELATIVE_SOURCE_AS_OF_ORDER_ONLY",
+      "OFFICIAL_SOURCE_REVERIFICATION_REQUIRED_BEFORE_MATERIAL_CLAIM",
+      "VERIFICATION_REFERENCE_COUNT_PRESENT",
+      "SOURCE_PROJECTION_HASH_AVAILABLE",
+      "SOURCE_PROJECTION_HASH_NOT_AVAILABLE"
+    ],
+    "reason_semantics": "FACTUAL_OPERATOR_CUES_NOT_QUALITY_STALENESS_ELIGIBILITY_OR_BUYING_INTENT_VERDICTS"
+  },
+  "output": {
+    "view_state": "CLIENT_FINDER_PROVENANCE_TRIAGE_EXPLAINABILITY_VIEW",
+    "semantics": "REVERIFICATION_QUEUE_EXPLAINABILITY_ONLY",
+    "eligibility_state": "NOT_ASSESSED",
+    "maximum_next_state": "RESEARCH_READY",
+    "human_review_required": true,
+    "external_contact_enabled": false,
+    "automatic_offer_enabled": false,
+    "automatic_send_enabled": false,
+    "crm_write_enabled": false,
+    "pipeline_write_enabled": false
+  },
+  "rules": {
+    "matched_source_rows_only": true,
+    "strict_rfc3339_utc_source_as_of": true,
+    "freshness_rank_must_be_contiguous_and_oldest_first": true,
+    "relative_age_cues_are_current_set_comparisons_only": true,
+    "no_stale_or_fresh_classification": true,
+    "no_source_quality_inference_from_age_hash_or_evidence_count": true,
+    "official_source_reverification_before_material_claim": true,
+    "never_expose_person_level_fields": true,
+    "raw_verification_evidence_never_exposed": true,
+    "safe_output_whitelist_only": true,
+    "no_external_action_or_persistence": true
+  }
+}
