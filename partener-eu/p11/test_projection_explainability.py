@@ -37,10 +37,11 @@ class ProjectionExplainabilityTests(unittest.TestCase):
         return self.build_projection(opportunity, tasks, evidence)["opportunities"][0]
 
     def build_projection(self, opportunity=None, tasks=None, evidence=None):
+        evidence_rows = evidence if isinstance(evidence, list) else [evidence or self.evidence]
         return projection.build({
             "as_of": "2026-08-14T00:00:00Z",
             "opportunities": [opportunity or self.opportunity],
-            "evidence": [evidence or self.evidence],
+            "evidence": evidence_rows,
             "resolution_tasks": tasks or [],
         })
 
@@ -57,11 +58,18 @@ class ProjectionExplainabilityTests(unittest.TestCase):
             "evidenceId": "EV-1",
             "sourceTier": "T1",
             "sourceUrl": "https://example.test/call",
+            "sourceHost": "example.test",
             "observedAt": "2026-08-14T00:00:00Z",
             "ageSecondsAtProjection": 0,
             "supportedFactClasses": ["status"],
         }])
         self.assertEqual(row["verificationEvidence"][0]["ageSecondsAtProjection"], 0)
+        self.assertEqual(row["verificationSourceCoverage"], {
+            "verifiedEvidenceLinkCount": 1,
+            "uniqueSourceHostCount": 1,
+            "sourceHosts": ["example.test"],
+            "sourceTierCounts": {"T1": 1, "T1B": 0},
+        })
 
     def test_active_resolution_task_blocks_even_publishable_state(self):
         task = {
@@ -219,6 +227,52 @@ class ProjectionExplainabilityTests(unittest.TestCase):
         result = self.build_projection()
         result["summary"]["verificationFreshness"]["maximumAgeSeconds"] = 1
         with self.assertRaisesRegex(ValueError, "summary.verificationFreshness"):
+            projection.assert_projection_integrity(result)
+
+    def test_verification_source_coverage_is_derived_from_authoritative_hosts_and_tiers(self):
+        opportunity = copy.deepcopy(self.opportunity)
+        opportunity["fact_evidence"]["status"] = ["EV-2", "EV-1"]
+        opportunity["evidence_refs"] = ["EV-1", "EV-2"]
+        second_evidence = copy.deepcopy(self.evidence)
+        second_evidence.update({
+            "evidence_id": "EV-2",
+            "source_tier": "T1B",
+            "source_url": "https://other.example.test/notice",
+        })
+        result = self.build_projection(
+            opportunity=opportunity,
+            evidence=[second_evidence, self.evidence],
+        )
+        coverage = result["opportunities"][0]["verificationSourceCoverage"]
+        self.assertEqual(coverage, {
+            "verifiedEvidenceLinkCount": 2,
+            "uniqueSourceHostCount": 2,
+            "sourceHosts": ["example.test", "other.example.test"],
+            "sourceTierCounts": {"T1": 1, "T1B": 1},
+        })
+        self.assertEqual(result["summary"]["verificationSourceCoverage"], {
+            **coverage,
+            "verifiedOpportunityCount": 1,
+            "singleSourceHostOpportunityCount": 0,
+            "multipleSourceHostOpportunityCount": 1,
+        })
+
+    def test_integrity_gate_rejects_source_host_drift(self):
+        result = self.build_projection()
+        result["opportunities"][0]["verificationEvidence"][0]["sourceHost"] = "wrong.test"
+        with self.assertRaisesRegex(ValueError, "source host does not match URL"):
+            projection.assert_projection_integrity(result)
+
+    def test_integrity_gate_rejects_source_coverage_drift(self):
+        result = self.build_projection()
+        result["opportunities"][0]["verificationSourceCoverage"]["uniqueSourceHostCount"] = 2
+        with self.assertRaisesRegex(ValueError, "source coverage does not match provenance"):
+            projection.assert_projection_integrity(result)
+
+    def test_source_coverage_telemetry_cannot_authorize_publication(self):
+        result = self.build_projection()
+        result["policy"]["sourceCoverageTelemetryAuthorizesPublication"] = True
+        with self.assertRaisesRegex(ValueError, "source coverage telemetry must not authorize publication"):
             projection.assert_projection_integrity(result)
 
 
