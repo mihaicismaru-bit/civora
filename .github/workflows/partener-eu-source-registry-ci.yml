@@ -7,6 +7,7 @@ on:
       - 'partener-eu/ingest/source_registry_probe.py'
       - 'partener-eu/ingest/data_plane_contract.json'
       - 'partener-eu/ingest/funding_tenders_api.py'
+      - 'partener-eu/ingest/funding_tenders_fetch.py'
       - 'partener-eu/ingest/eea_civil_society_calls.py'
       - 'partener-eu/ingest/eea_civil_society_fetch.py'
       - 'partener-eu/ingest/eea_civil_society_reconcile.py'
@@ -18,6 +19,7 @@ on:
       - 'partener-eu/ops/test_source_registry_alias_fallback.py'
       - 'partener-eu/ops/test_source_registry_external_expansion.py'
       - 'partener-eu/ops/test_funding_tenders_structured_adapter.py'
+      - 'partener-eu/ops/test_funding_tenders_live_fetch.py'
       - 'partener-eu/ops/test_eea_civil_society_calls.py'
       - 'partener-eu/ops/test_eea_civil_society_fetch.py'
       - 'partener-eu/ops/test_eea_civil_society_reconcile.py'
@@ -46,6 +48,7 @@ jobs:
           python -m json.tool partener-eu/ingest/data_plane_contract.json >/dev/null
           python -m py_compile partener-eu/ingest/source_registry_probe.py
           python -m py_compile partener-eu/ingest/funding_tenders_api.py
+          python -m py_compile partener-eu/ingest/funding_tenders_fetch.py
           python -m py_compile partener-eu/ingest/eea_civil_society_calls.py
           python -m py_compile partener-eu/ingest/eea_civil_society_fetch.py
           python -m py_compile partener-eu/ingest/eea_civil_society_reconcile.py
@@ -54,6 +57,7 @@ jobs:
           python -m py_compile partener-eu/p11/test_eea_civil_society_stage.py
           python -m py_compile partener-eu/ops/test_source_registry_external_expansion.py
           python -m py_compile partener-eu/ops/test_funding_tenders_structured_adapter.py
+          python -m py_compile partener-eu/ops/test_funding_tenders_live_fetch.py
           python -m py_compile partener-eu/ops/test_eea_civil_society_calls.py
           python -m py_compile partener-eu/ops/test_eea_civil_society_fetch.py
           python -m py_compile partener-eu/ops/test_eea_civil_society_reconcile.py
@@ -72,6 +76,9 @@ jobs:
 
       - name: Validate Funding & Tenders structured normalization
         run: python partener-eu/ops/test_funding_tenders_structured_adapter.py
+
+      - name: Validate Funding & Tenders live Search/Facet boundary
+        run: python partener-eu/ops/test_funding_tenders_live_fetch.py
 
       - name: Validate EEA Civil Society Fund Romania call normalization
         run: python partener-eu/ops/test_eea_civil_society_calls.py
