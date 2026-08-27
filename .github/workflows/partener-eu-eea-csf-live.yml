@@ -1,0 +1,75 @@
+name: PARTENER.EU EEA Civil Society Live Evidence
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/eea_civil_society_calls.py'
+      - 'partener-eu/ingest/eea_civil_society_fetch.py'
+      - 'partener-eu/ops/test_eea_civil_society_calls.py'
+      - 'partener-eu/ops/test_eea_civil_society_fetch.py'
+      - '.github/workflows/partener-eu-eea-csf-live.yml'
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: partener-eu-eea-csf-live
+  cancel-in-progress: false
+
+jobs:
+  live-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Capture exact official call-page evidence
+        run: |
+          mkdir -p /tmp/partener-eea-csf
+          python partener-eu/ingest/eea_civil_society_fetch.py \
+            --minimum-calls 1 \
+            --output /tmp/partener-eea-csf/live-evidence.json
+
+      - name: Validate live evidence envelope fail-closed
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path('/tmp/partener-eea-csf/live-evidence.json')
+          data = json.loads(path.read_text(encoding='utf-8'))
+          stats = data['stats']
+          if data.get('publication_effect') != 'NONE':
+              raise SystemExit('FAIL: live source workflow must remain non-publishing')
+          if data.get('publish_authorized') or data.get('material_fact_use'):
+              raise SystemExit('FAIL: live source workflow cannot authorize material facts')
+          if stats['errors'] or stats['conflicts']:
+              raise SystemExit(f"FAIL: live evidence errors/conflicts: {stats}")
+          if stats['discovered_call_urls'] != stats['fetched_call_pages']:
+              raise SystemExit(f"FAIL: not every discovered call was read back: {stats}")
+          if stats['fetched_call_pages'] != stats['normalized_records']:
+              raise SystemExit(f"FAIL: not every fetched call normalized: {stats}")
+          if stats['unknown_evidence']:
+              raise SystemExit(f"FAIL: exact current call pages contain unresolved status evidence: {stats}")
+          if not data.get('records') or not all(row.get('authority_url_verified') for row in data['records']):
+              raise SystemExit('FAIL: exact official readback evidence is incomplete')
+          print('PASS live EEA CSF evidence:', stats)
+          PY
+
+      - name: Upload bounded live evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-eea-csf-live-evidence
+          path: /tmp/partener-eea-csf/live-evidence.json
+          if-no-files-found: warn
+          retention-days: 7
