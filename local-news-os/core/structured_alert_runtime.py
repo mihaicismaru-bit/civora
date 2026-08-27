@@ -2,12 +2,9 @@
 """Unified structured-primary-alert runtime with pluggable evidence parsers.
 
 This entrypoint keeps source-specific evidence extraction behind generic parser
-contracts. It reuses the established traffic/water collectors and adds the
-instance-agnostic district-heat interruption parser without granting reader-copy
-or publication authority. The electricity schedule parser is validated here but
-is deliberately not routed until its official weekly-document fetch/extraction
-adapter passes live acceptance. Disabled sources remain disabled and are never
-fetched.
+contracts. It reuses the established traffic/water collectors and adds generic
+district-heat and planned-electricity adapters without granting reader-copy or
+publication authority. Disabled sources remain disabled and are never fetched.
 """
 from __future__ import annotations
 
@@ -27,6 +24,7 @@ import primary_signal_verifier as primary  # noqa: E402
 import signal_radar as radar  # noqa: E402
 import structured_alert_ingest as base  # noqa: E402
 import structured_electricity_interruption_parser as electricity  # noqa: E402
+import structured_electricity_schedule_adapter as electricity_adapter  # noqa: E402
 import structured_heat_interruption_parser as heat  # noqa: E402
 
 
@@ -103,14 +101,13 @@ def collect_source(
     tz: ZoneInfo,
     now: datetime,
 ) -> dict[str, Any]:
-    # Preserve the existing fail-closed disabled-source contract before routing.
+    # Preserve the fail-closed disabled-source contract before any network I/O.
     if source.get("enabled") is not True:
         return {"source_id": source.get("id"), "status": "DISABLED", "events": []}
     if source.get("parser") == heat.PARSER_ID:
         return collect_heat_interruption_source(source, tz, now)
-    # Electricity sources stay disabled until the weekly-document adapter is
-    # present. If one is enabled prematurely, base.collect_source fails closed on
-    # the unsupported parser instead of interpreting a listing page as evidence.
+    if source.get("parser") == electricity.PARSER_ID:
+        return electricity_adapter.collect_electricity_source(source, tz, now)
     return base.collect_source(instance, source, tz, now)
 
 
@@ -136,10 +133,10 @@ def run(instance_id: str, output: Path) -> dict[str, Any]:
 
 
 def self_test() -> int:
-    # Existing traffic/water contracts must remain green under the unified runtime.
     assert base.self_test() == 0
     assert heat.self_test() == 0
     assert electricity.self_test() == 0
+    assert electricity_adapter.self_test() == 0
 
     tz = ZoneInfo("Europe/Bucharest")
     sample = """
