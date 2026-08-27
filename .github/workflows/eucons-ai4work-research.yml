@@ -28,9 +28,9 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - name: Run AI4WORK runtime, storage, idempotency, HTTP and NF06 pre-ingest tests
+      - name: Run AI4WORK runtime, storage, idempotency, HTTP, NF06 and controller-determination tests
         working-directory: eucons/research/ai4work-step
-        run: python -m unittest -v test_runtime.py test_research_storage.py test_http_idempotency.py test_http_endpoint.py test_nf06_preingest.py
+        run: python -m unittest -v test_runtime.py test_research_storage.py test_http_idempotency.py test_http_endpoint.py test_nf06_preingest.py test_controller_determination.py
       - name: Render preview-only research pages
         working-directory: eucons/research/ai4work-step
         run: python build_research_pages.py --target /tmp/ai4work-research-preview
@@ -72,5 +72,10 @@ jobs:
           assert notice.get('operator_status') == 'UNRESOLVED_BEFORE_COLLECTION'
           assert notice.get('operator_legal_name') is None
           assert notice.get('operator_cui') is None
+          controller_record = json.loads(Path('eucons/research/ai4work-step/CONTROLLER_DETERMINATION_DRAFT.json').read_text(encoding='utf-8'))
+          assert controller_record.get('controller') is None
+          assert controller_record.get('approved') is False
+          assert controller_record.get('collection_enabled') is False
+          assert controller_record.get('nf06_reference_eligible') is False
           print('PASS: AI4WORK collection and controller identity remain fail-closed')
           PY
