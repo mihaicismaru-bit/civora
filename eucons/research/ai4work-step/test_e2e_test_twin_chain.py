@@ -66,6 +66,7 @@ def test_twin_frame(records: list[dict]) -> tuple[dict, bytes]:
             "AI4WORK_ADULTS_V1": 1,
             "AI4WORK_EMPLOYERS_V1": 1,
         },
+        **NF06.instrument_definition_hashes(),
         "collection_started_at": "2026-01-01T00:00:00+00:00",
         "collection_closed_at": "2026-12-31T23:59:59+00:00",
         "collection_channels": [ADULT_CHANNEL, EMPLOYER_CHANNEL],
@@ -143,6 +144,9 @@ class EndToEndTestTwinChain(unittest.TestCase):
             self.assertEqual(manifest["channel_counts"], {ADULT_CHANNEL: 1, EMPLOYER_CHANNEL: 1})
             self.assertEqual(manifest["dominant_channel_share"], 0.5)
             self.assertEqual(manifest["source_export_sha256"], hashlib.sha256(source_bytes).hexdigest())
+            self.assertTrue(manifest["instrument_content_hashes_validated"])
+            self.assertEqual(manifest["form_contract_sha256"], frame["form_contract_sha256"])
+            self.assertEqual(manifest["forms_definition_sha256"], frame["forms_definition_sha256"])
 
             rendered_manifest = NF06.manifest_json_bytes(manifest).decode("utf-8")
             self.assertNotIn("Pregătirea rapidă", rendered_manifest)
