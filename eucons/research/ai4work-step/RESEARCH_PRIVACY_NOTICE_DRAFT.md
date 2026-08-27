@@ -1,14 +1,16 @@
 # Informare privind protecția datelor — cercetarea AI4WORK STEP
 
-**Stare:** DRAFT / NU SE PUBLICĂ ȘI NU SE ACTIVEAZĂ COLECTAREA până la completarea contactului de confidențialitate, aprobarea temeiului juridic, verificarea procesatorilor/logurilor și legarea retenției/ștergerii.
+**Stare:** DRAFT / NU SE PUBLICĂ ȘI NU SE ACTIVEAZĂ COLECTAREA până la stabilirea și documentarea operatorului, completarea contactului de confidențialitate, aprobarea temeiului juridic, verificarea procesatorilor/logurilor și legarea retenției/ștergerii.
 
 ## Cine prelucrează datele
 
-Operator: **EUROCONSULT SRL**, CUI **14250864**.
+Operator: **[OPERATORUL LEGAL TREBUIE STABILIT ȘI APROBAT ÎNAINTE DE GO-LIVE]**.
+
+În această etapă nu presupunem că solicitantul/liderul proiectului, operatorul site-ului `eucons.ro`, consultantul și titularul contului de găzduire sunt aceeași entitate juridică sau au același rol GDPR. Operatorul final va fi entitatea care stabilește în fapt scopurile și mijloacele esențiale ale cercetării; celelalte roluri vor fi documentate ca operator asociat, persoană împuternicită sau subîmputernicită, după caz și numai pe baza documentelor aplicabile.
 
 Contact pentru întrebări și exercitarea drepturilor privind protecția datelor: **[PRIVACY_CONTACT_REQUIRED_BEFORE_GO_LIVE]**.
 
-Dacă EUROCONSULT are desemnat un responsabil cu protecția datelor (DPO), datele acestuia vor fi publicate aici înainte de colectare. Existența unui DPO nu este presupusă prin acest document.
+Dacă operatorul stabilit are desemnat un responsabil cu protecția datelor (DPO), datele acestuia vor fi publicate aici înainte de colectare. Existența unui DPO nu este presupusă prin acest document.
 
 ## De ce facem cercetarea
 
@@ -24,15 +26,17 @@ Câmpurile de text sunt verificate pentru a respinge tipare uzuale de date de id
 
 ## Temeiul juridic
 
-**Propunere supusă aprobării operatorului înainte de colectare:** art. 6 alin. (1) lit. (f) GDPR — interesul legitim al EUROCONSULT SRL de a realiza o analiză de nevoi documentată și proporțională. Evaluarea interesului legitim este păstrată separat în `GDPR_LIA_DRAFT.json` și devine valabilă numai după aprobarea operatorului și menținerea tuturor măsurilor de minimizare.
+**Propunere supusă aprobării operatorului stabilit înainte de colectare:** art. 6 alin. (1) lit. (f) GDPR — interes legitim pentru realizarea unei analize de nevoi documentate și proporționale. Evaluarea interesului legitim este păstrată separat în `GDPR_LIA_DRAFT.json` și nu poate fi aprobată înainte de stabilirea operatorului și confirmarea faptului că toate măsurile de minimizare și separare sunt menținute.
 
 Bifarea faptului că ați citit informarea confirmă că informarea a fost afișată și participarea este voluntară; această bifă **nu este tratată automat ca temei de consimțământ GDPR**.
 
-Dacă operatorul nu aprobă temeiul propus sau dacă designul se schimbă material, colectarea rămâne oprită până la stabilirea și documentarea unui temei juridic adecvat.
+Dacă operatorul nu este stabilit, nu aprobă temeiul propus sau dacă designul se schimbă material, colectarea rămâne oprită până la stabilirea și documentarea unui temei juridic adecvat.
 
 ## Cine poate avea acces
 
 Accesul la răspunsurile la nivel de respondent trebuie limitat la personalul desemnat pentru cercetare și la furnizorii tehnici strict necesari, în baza rolurilor și contractelor verificate înainte de activare. Baza de cercetare trebuie să fie separată fizic/logic și prin credențiale de CRM și de infrastructura comercială.
+
+Rolurile dintre solicitantul/liderul proiectului, operatorul site-ului `eucons.ro`, titularul contului de găzduire și furnizorul tehnic trebuie documentate înainte de lansare. Nici proprietatea domeniului, nici brandingul site-ului, nici facturarea hostingului nu sunt folosite singure pentru a deduce calitatea de operator.
 
 Lista procesatorilor/subprocesatorilor și orice transfer în afara SEE trebuie verificată și documentată înainte de lansare. Dacă această verificare nu este închisă, colectarea nu se activează.
 
@@ -52,9 +56,9 @@ După ștergere pot fi păstrate pe termenul necesar proiectului numai rezultate
 
 ## Drepturile dumneavoastră
 
-În condițiile GDPR, puteți solicita acces, rectificare, ștergere sau restricționare, după caz, și vă puteți opune prelucrării bazate pe interes legitim. Solicitările se trimit la contactul de confidențialitate care trebuie completat înainte de lansare.
+În condițiile GDPR, puteți solicita acces, rectificare, ștergere sau restricționare, după caz, și vă puteți opune prelucrării bazate pe interes legitim. Solicitările se trimit la contactul de confidențialitate al operatorului care trebuie completat înainte de lansare.
 
-Deoarece formularul este proiectat să nu colecteze identitatea, EUROCONSULT poate să nu poată identifica un anumit răspuns numai după numele persoanei. Dacă implementarea finală oferă un cod/receipt tehnic al răspunsului, păstrarea acelui cod de către respondent poate permite localizarea răspunsului fără introducerea unui registru de identitate.
+Deoarece formularul este proiectat să nu colecteze identitatea, operatorul poate să nu poată identifica un anumit răspuns numai după numele persoanei. Dacă implementarea finală oferă un cod/receipt tehnic al răspunsului, păstrarea acelui cod de către respondent poate permite localizarea răspunsului fără introducerea unui registru de identitate.
 
 Aveți dreptul de a depune o plângere la autoritatea competentă de protecție a datelor. Pentru România, autoritatea de supraveghere este Autoritatea Națională de Supraveghere a Prelucrării Datelor cu Caracter Personal (ANSPDCP).
 
@@ -64,4 +68,4 @@ Puteți decide să nu completați sau să nu trimiteți formularul fără nicio 
 
 ---
 
-**GO-LIVE gate:** contact confidențialitate completat; LIA/temei juridic aprobat; informare finală publicată înainte de întrebări; procesatori/subprocesatori și transferuri verificate; logging verificat; retenție/ștergere executabilă; DPIA screening semnat; endpoint și research-only store validate; smoke TEST TWIN complet; producția rămâne `false` până la închiderea tuturor acestor condiții.
+**GO-LIVE gate:** operator legal și roluri controller/processor stabilite; contact confidențialitate completat; LIA/temei juridic aprobat; informare finală publicată înainte de întrebări; procesatori/subprocesatori și transferuri verificate; logging verificat; retenție/ștergere executabilă; DPIA screening semnat; endpoint și research-only store validate; smoke TEST TWIN complet; producția rămâne `false` până la închiderea tuturor acestor condiții.
