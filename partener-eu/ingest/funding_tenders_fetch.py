@@ -176,7 +176,6 @@ def flatten_search_payload(payload: Any) -> list[dict[str, Any]]:
     if not isinstance(payload, dict):
         return []
 
-    # The corporate Search API commonly wraps each hit as metadata + content + url.
     if isinstance(payload.get("metadata"), dict):
         flat = copy.deepcopy(payload["metadata"])
         if payload.get("content") not in (None, ""):
@@ -188,7 +187,6 @@ def flatten_search_payload(payload: Any) -> list[dict[str, Any]]:
                 flat.setdefault(key, value)
         return [flat]
 
-    # Already-flat call/topic record.
     if any(payload.get(key) not in (None, "", [], {}) for key in (
         "identifier", "topicIdentifier", "topicAbbreviation", "callIdentifier"
     )):
@@ -215,21 +213,35 @@ def _walk(value: Any) -> Iterable[Any]:
             yield from _walk(child)
 
 
+def normalize_official_status_label(label: str | None) -> str | None:
+    """Normalize official Facet wording without assigning meaning to raw codes."""
+    if not label:
+        return None
+    raw = re.sub(r"\s+", " ", label.strip())
+    token = raw.upper()
+    if token in {"OPEN", "OPEN FOR SUBMISSION"}:
+        return "Open"
+    if token in {"FORTHCOMING", "FORTHCOMING CALL"}:
+        return "Forthcoming"
+    if token in {"CLOSED", "CLOSED FOR SUBMISSION"}:
+        return "Closed"
+    return raw
+
+
 def resolve_reference_label(facet_payloads: Iterable[Any], code: str) -> str | None:
     """Resolve one reference code only from official Facet response payloads."""
     wanted = str(code).strip()
     if not wanted:
         return None
-    code_fields = ("code", "id", "key", "value", "refCode", "referenceCode")
-    label_fields = ("label", "name", "description", "displayValue", "text", "title")
+    code_fields = ("rawValue", "code", "id", "key", "refCode", "referenceCode")
+    label_fields = ("value", "label", "name", "description", "displayValue", "text", "title")
     for payload in facet_payloads:
         for node in _walk(payload):
             if not isinstance(node, dict):
                 continue
-            # Some Facet shapes are simple {"31094502": "Open"} mappings.
             direct = node.get(wanted)
             if isinstance(direct, str) and direct.strip() and direct.strip() != wanted:
-                return direct.strip()
+                return normalize_official_status_label(direct)
             matched = False
             for key in code_fields:
                 candidate = _scalar(node.get(key))
@@ -241,7 +253,7 @@ def resolve_reference_label(facet_payloads: Iterable[Any], code: str) -> str | N
             for key in label_fields:
                 label = _scalar(node.get(key))
                 if label and label != wanted and not label.isdigit():
-                    return label
+                    return normalize_official_status_label(label)
     return None
 
 
@@ -265,12 +277,8 @@ def _topic_readback(url: str, *, max_bytes: int = MAX_TOPIC_BYTES, opener=None) 
             status = getattr(response, "status", response.getcode())
             ctype = (response.headers.get("Content-Type") or "").lower()
             raw = response.read(max_bytes + 1)
-    except Exception as exc:  # network/readback failure is evidence, not authority
-        return {
-            "url": url,
-            "verified": False,
-            "error": f"{type(exc).__name__}: {exc}",
-        }
+    except Exception as exc:
+        return {"url": url, "verified": False, "error": f"{type(exc).__name__}: {exc}"}
     if len(raw) > max_bytes:
         return {"url": url, "final_url": final_url, "http_status": status, "verified": False, "error": "response too large"}
     verified = (
@@ -396,7 +404,6 @@ def collect_live(*, page_size: int, output_dir: pathlib.Path) -> dict[str, Any]:
 
     facet_payloads: dict[str, Any] = {}
     facet_receipts: dict[str, Any] = {}
-    # First capture broad facets using the exact same query, then narrow unresolved codes.
     broad_payload, broad_raw, broad_receipt = _safe_json_post(
         FACET_ENDPOINT,
         text="***",
