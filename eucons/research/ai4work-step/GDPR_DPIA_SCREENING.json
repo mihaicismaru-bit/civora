@@ -1,8 +1,9 @@
 {
-  "schema_version": "eucons.ai4work_gdpr_dpia_screening.v0.1",
+  "schema_version": "eucons.ai4work_gdpr_dpia_screening.v0.2",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "screening_date": "2026-08-27",
-  "controller": "EUROCONSULT SRL",
+  "controller": null,
+  "controller_role_state": "UNRESOLVED_BEFORE_COLLECTION",
   "purpose": "needs-analysis primary research on digital and AI skills among adults and employers in three Romanian NUTS-2 regions",
   "authority_basis": {
     "edpb_dpia_page": "https://www.edpb.europa.eu/topics/accountability-and-compliance-tools/data-protection-impact-assessment_en",
@@ -10,15 +11,16 @@
     "edpb_2026_template": "https://www.edpb.europa.eu/public-consultations/template-for-data-protection-impact-assessment_en"
   },
   "design_assumptions_required_for_this_screening": [
+    "controller identity remains unresolved until documented and approved from actual purpose/essential-means authority",
     "no direct identifiers in analytical forms",
+    "no free-text fields in analytical forms; respondent input is restricted to controlled categories, booleans, ratings and matrices",
     "no special-category or criminal-conviction data",
     "no employee monitoring or systematic tracking",
     "no advertising, fingerprinting, cross-site tracking or CRM linkage",
     "no automated decision about a respondent and no legal or similarly significant effect",
     "no matching with external datasets",
     "no raw IP address or user-agent in analytical records or NF06 exports",
-    "free text is PII-pattern rejected and reviewed before quotation",
-    "raw respondent free text is not sent to third-party generative-AI/LLM services; any AI-assisted analysis operates only on sufficiently de-identified/aggregated material",
+    "raw respondent-level records are not sent to third-party generative-AI/LLM services; any AI-assisted analysis operates only on sufficiently de-identified/aggregated material",
     "small reported cells are suppressed/combined when n < 5"
   ],
   "edpb_high_risk_criteria_screen": {
@@ -34,7 +36,8 @@
   },
   "provisional_result": "NO_HIGH_RISK_TRIGGER_IDENTIFIED_UNDER_CURRENT_MINIMISED_DESIGN",
   "mandatory_re_screen_triggers": [
-    "raw respondent text or profiles are sent to an external AI/LLM provider",
+    "free-text response fields are reintroduced",
+    "raw respondent records or profiles are sent to an external AI/LLM provider",
     "special-category data are introduced",
     "direct identifiers or stable respondent tracking are introduced",
     "respondent data are matched to CRM, employment, public-register or other datasets",
