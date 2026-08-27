@@ -178,6 +178,8 @@ def _validate_normalized_record(
         raise NF06PreingestError("unsupported form_id")
     if record.get("schema_version") != 1 or record.get("form_version") != 1:
         raise NF06PreingestError("unsupported record schema/form version")
+    if not isinstance(record.get("response_id"), str) or not SHA256_RE.fullmatch(record["response_id"]):
+        raise NF06PreingestError("response_id must be a lowercase 64-hex opaque receipt")
     try:
         channel_id = validate_recruitment_channel_id(record.get("recruitment_channel_id"))
     except ChannelProvenanceError as exc:
@@ -204,8 +206,6 @@ def _validate_normalized_record(
     received = _parse_ts(record.get("received_at"), field="received_at")
     if not start <= received <= end:
         raise NF06PreingestError("record received_at outside declared collection window")
-    if not isinstance(record.get("response_id"), str) or not record["response_id"].strip():
-        raise NF06PreingestError("response_id required")
     return received
 
 
