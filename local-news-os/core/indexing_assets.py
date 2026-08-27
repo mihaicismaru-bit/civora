@@ -3,14 +3,18 @@
 
 The caller supplies canonical dynamic/public routes. An instance may also keep a
 `site/indexing_routes.json` contract next to its runtime directory for durable
-static routes (legal pages, venue guides, future section landings).
+static routes (legal pages, venue guides, future section landings). Runtime
+products may additionally publish `runtime/indexing_extra_routes.json` when a
+secondary deterministic renderer owns dynamic routes that must survive later
+index-only refreshes.
 
 Dynamic routes supplied by the caller are always strict: a missing page raises.
-Configured static routes are also strict at finalization time, but an early
-story-render pass may legitimately run before those independent static products
-have been materialized. In that case this module returns an explicit DEFERRED
-state and writes no new indexing assets, rather than emitting a broken sitemap
-or blocking the remaining deterministic export steps.
+Runtime-owned extra routes are equally strict. Configured static routes are also
+strict at finalization time, but an early story-render pass may legitimately run
+before those independent static products have been materialized. In that case
+this module returns an explicit DEFERRED state and writes no new indexing assets,
+rather than emitting a broken sitemap or blocking the remaining deterministic
+export steps.
 """
 from __future__ import annotations
 
@@ -61,14 +65,33 @@ def _configured_static_routes(runtime_dir: Path) -> list[str]:
     return [str(route) for route in routes]
 
 
+def _runtime_extra_routes(runtime_dir: Path) -> list[str]:
+    """Read optional dynamic routes owned by deterministic runtime renderers."""
+    contract = runtime_dir / "indexing_extra_routes.json"
+    if not contract.is_file():
+        return []
+    try:
+        doc = json.loads(contract.read_text(encoding="utf-8"))
+    except Exception as exc:
+        raise RuntimeError(f"invalid runtime indexing route contract: {contract}: {exc}") from exc
+    routes = doc.get("routes")
+    if not isinstance(routes, list):
+        raise RuntimeError("runtime indexing route contract requires a routes list")
+    policy = doc.get("policy") or {}
+    if policy.get("require_static_index_html") is not True:
+        raise RuntimeError("runtime indexing route contract must require static index.html")
+    return [str(route) for route in routes]
+
+
 def write_indexing_assets(runtime_dir: Path, base_url: str, routes: list[str]) -> dict:
     """Write robots.txt and sitemap.xml for verified dynamic + static routes.
 
-    Caller-owned routes must already exist and remain fail-closed. Instance-level
-    configured static routes are appended after caller routes. If one of those
-    configured routes is not materialized yet, indexing is explicitly deferred
-    and existing robots/sitemap files are left untouched. A later finalization
-    pass must call this function again after all static products exist.
+    Caller-owned and runtime-owned extra routes must already exist and remain
+    fail-closed. Instance-level configured static routes are appended after
+    dynamic routes. If one of those configured routes is not materialized yet,
+    indexing is explicitly deferred and existing robots/sitemap files are left
+    untouched. A later finalization pass must call this function again after all
+    static products exist.
     """
     runtime = Path(runtime_dir).resolve()
     if not runtime.is_dir():
@@ -77,11 +100,13 @@ def write_indexing_assets(runtime_dir: Path, base_url: str, routes: list[str]) -
 
     caller_routes = [_route(raw) for raw in routes]
     caller_set = set(caller_routes)
+    runtime_extra_raw = _runtime_extra_routes(runtime)
+    runtime_extra_routes = [_route(raw) for raw in runtime_extra_raw]
     configured_raw = _configured_static_routes(runtime)
     configured_routes = [_route(raw) for raw in configured_raw]
     configured_set = set(configured_routes)
 
-    requested = caller_routes + configured_routes
+    requested = caller_routes + runtime_extra_routes + configured_routes
     admitted: list[str] = []
     seen: set[str] = set()
     missing_configured: list[str] = []
@@ -109,6 +134,7 @@ def write_indexing_assets(runtime_dir: Path, base_url: str, routes: list[str]) -
             "status": "DEFERRED_CONFIGURED_STATIC_MISSING",
             "routes": admitted,
             "route_count": len(admitted),
+            "runtime_extra_routes": runtime_extra_raw,
             "configured_static_routes": configured_raw,
             "missing_configured_static_routes": missing_configured,
             "robots": (runtime / "robots.txt").as_posix(),
@@ -140,6 +166,7 @@ def write_indexing_assets(runtime_dir: Path, base_url: str, routes: list[str]) -
         "status": "PASS",
         "routes": admitted,
         "route_count": len(admitted),
+        "runtime_extra_routes": runtime_extra_raw,
         "configured_static_routes": configured_raw,
         "missing_configured_static_routes": [],
         "robots": robots_path.as_posix(),
