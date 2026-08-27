@@ -1,0 +1,83 @@
+name: PARTENER.EU Funding & Tenders Live Evidence
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/funding_tenders_api.py'
+      - 'partener-eu/ingest/funding_tenders_fetch.py'
+      - 'partener-eu/ops/test_funding_tenders_structured_adapter.py'
+      - 'partener-eu/ops/test_funding_tenders_live_fetch.py'
+      - '.github/workflows/partener-eu-funding-tenders-live.yml'
+  schedule:
+    - cron: '41 */6 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: partener-eu-funding-tenders-live
+  cancel-in-progress: false
+
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile bounded structured acquisition
+        run: |
+          python -m py_compile partener-eu/ingest/funding_tenders_api.py
+          python -m py_compile partener-eu/ingest/funding_tenders_fetch.py
+          python -m py_compile partener-eu/ops/test_funding_tenders_structured_adapter.py
+          python -m py_compile partener-eu/ops/test_funding_tenders_live_fetch.py
+
+      - name: Validate fail-closed structured normalization
+        run: python partener-eu/ops/test_funding_tenders_structured_adapter.py
+
+      - name: Validate Search/Facet and exact-topic evidence boundary
+        run: python partener-eu/ops/test_funding_tenders_live_fetch.py
+
+      - name: Capture bounded official Search/Facet evidence
+        run: |
+          rm -rf /tmp/partener-funding-tenders-evidence
+          python partener-eu/ingest/funding_tenders_fetch.py \
+            --page-size 5 \
+            --output-dir /tmp/partener-funding-tenders-evidence
+
+      - name: Validate live evidence remains non-authorizing
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('/tmp/partener-funding-tenders-evidence/evidence.json')
+          d=json.loads(p.read_text(encoding='utf-8'))
+          assert d['schema'] == 'PARTENER_EU_FUNDING_TENDERS_LIVE_EVIDENCE_V1'
+          assert d['publication_effect'] == 'NONE'
+          assert d['publish_authorized'] is False
+          assert d['material_fact_use'] is False
+          assert d['canonical_corpus_mutation'] is False
+          assert d['stats']['search_records'] >= 1
+          assert d['stats']['normalized_records'] >= 1
+          for row in d['batch']['records']:
+              assert row['publish_authorized'] is False
+              assert row['material_fact_use'] is False
+              if row['observation_state'] in ('OPEN_CALL','FORTHCOMING_CALL'):
+                  assert row['authority_url_verified'] is True
+          print(json.dumps(d['stats'], ensure_ascii=False, sort_keys=True))
+          PY
+
+      - name: Upload replayable Funding & Tenders evidence
+        uses: actions/upload-artifact@v6
+        with:
+          name: partener-funding-tenders-live-evidence
+          path: /tmp/partener-funding-tenders-evidence/
+          if-no-files-found: error
+          retention-days: 7
