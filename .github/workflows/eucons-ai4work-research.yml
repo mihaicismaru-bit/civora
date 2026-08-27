@@ -40,6 +40,14 @@ jobs:
           set -euo pipefail
           count="$(find /tmp/ai4work-research-preview -name index.html -type f | wc -l | tr -d ' ')"
           test "$count" = "3"
+      - name: Reject analytical free-text controls in research preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RIE '(<textarea|type=["'"']text["'"'])' /tmp/ai4work-research-preview; then
+            echo 'Free-text control detected in privacy-minimised AI4WORK analytical preview' >&2
+            exit 1
+          fi
       - name: Reject third-party commercial tracking in research preview
         shell: bash
         run: |
