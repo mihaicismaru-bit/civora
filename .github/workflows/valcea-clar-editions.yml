@@ -94,13 +94,13 @@ jobs:
           case "$TRIGGER_SCHEDULE" in
             "45,55 4,5,6 * * *")
               slot=morning
-              window_start=450   # 07:30
-              window_end=899     # 14:59
+              window_start=450
+              window_end=899
               ;;
             "30,40 15,16,17 * * *")
               slot=evening
-              window_start=1095  # 18:15
-              window_end=1439    # 23:59
+              window_start=1095
+              window_end=1439
               ;;
             *)
               echo "run_generation=false" >> "$GITHUB_OUTPUT"
@@ -232,11 +232,9 @@ jobs:
           python valcea-clar/scripts/render_frontpage.py
           python valcea-clar/scripts/build_live_feed.py
 
-      - name: Build frontpage/site synchronization payload
+      - name: Finalize canonical runtime presentation
         if: steps.slot.outputs.run_generation == 'true'
-        run: |
-          python valcea-clar/scripts/build_sites_export.py
-          python valcea-clar/scripts/overlay_runtime_export.py
+        run: python valcea-clar/scripts/overlay_runtime_export.py
 
       - name: Validate rendered runtime
         if: steps.slot.outputs.run_generation == 'true'
@@ -245,18 +243,20 @@ jobs:
           set -euo pipefail
           test -s valcea-clar/site/runtime/index.html
           test -s valcea-clar/site/runtime/live-feed.json
-          test -s valcea-clar/dist/chatgpt-sites/index.html
-          test -s valcea-clar/dist/chatgpt-sites/live-feed.json
+          test -s valcea-clar/site/runtime/stiri/manifest.json
           python - <<'PY'
           import json
           from pathlib import Path
-          feed=json.loads(Path('valcea-clar/site/runtime/live-feed.json').read_text(encoding='utf-8'))
-          manifest=json.loads(Path('valcea-clar/dist/chatgpt-sites/manifest.json').read_text(encoding='utf-8'))
+          runtime=Path('valcea-clar/site/runtime')
+          feed=json.loads((runtime/'live-feed.json').read_text(encoding='utf-8'))
+          manifest=json.loads((runtime/'stiri/manifest.json').read_text(encoding='utf-8'))
           assert feed['policy']['paid_llm_api_required'] is False
           assert feed['edition']['generator'] == 'deterministic_zero_llm_v2'
-          assert manifest['target']['autonomous_frontpage'] is True
-          assert manifest['routes'][0]['path'] == '/'
-          print(json.dumps({'frontpage':'PASS','edition_id':feed['edition']['edition_id'],'routes':manifest['counts']['routes']}))
+          assert feed['publication_model'] == 'continuous_story_first'
+          feed_ids={str(row['id']) for row in feed.get('stories', [])}
+          route_ids={str(row['id']) for row in manifest.get('stories', [])}
+          assert feed_ids <= route_ids
+          print(json.dumps({'frontpage':'PASS','edition_id':feed['edition']['edition_id'],'routes':len(route_ids)}))
           PY
 
       - name: Persist autonomous edition and runtime state
@@ -296,11 +296,11 @@ jobs:
           echo "Could not persist autonomous edition after five attempts." >&2
           exit 1
 
-      - name: Upload site payload for runtime bridge
+      - name: Upload canonical runtime payload
         if: steps.slot.outputs.run_generation == 'true'
         uses: actions/upload-artifact@v7
         with:
           name: valcea-clar-autonomous-site-${{ steps.slot.outputs.slot }}-${{ github.run_id }}
-          path: valcea-clar/dist/chatgpt-sites
+          path: valcea-clar/site/runtime
           if-no-files-found: error
           retention-days: 7
