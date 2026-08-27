@@ -2,8 +2,7 @@ name: VÂLCEA CLAR Story Social Metadata
 
 # Derived presentation projector. It never authorizes editorial facts. After the
 # canonical Live Newsroom completes, this workflow rebuilds the reader-facing
-# Public UX, article social metadata and the verified-media projection consumed
-# by the installed live bridge.
+# Public UX, article social metadata and verified-media projection in runtime.
 on:
   workflow_dispatch:
   workflow_run:
@@ -16,7 +15,6 @@ on:
       - 'valcea-clar/social/story_visuals.json'
       - 'valcea-clar/social/social_media_manifest.json'
       - 'valcea-clar/social/contextual_story_media.json'
-      - 'valcea-clar/site/chatgpt-sites-live-bridge.js'
       - 'valcea-clar/scripts/build_live_feed.py'
       - 'valcea-clar/scripts/render_story_pages.py'
       - 'valcea-clar/scripts/public_ux_reset.py'
@@ -33,7 +31,6 @@ on:
       - 'valcea-clar/social/story_visuals.json'
       - 'valcea-clar/social/social_media_manifest.json'
       - 'valcea-clar/social/contextual_story_media.json'
-      - 'valcea-clar/site/chatgpt-sites-live-bridge.js'
       - 'valcea-clar/scripts/build_live_feed.py'
       - 'valcea-clar/scripts/render_story_pages.py'
       - 'valcea-clar/scripts/public_ux_reset.py'
@@ -77,7 +74,6 @@ jobs:
           python valcea-clar/scripts/public_ux_media.py --self-test
           python valcea-clar/scripts/public_ux_media_integrity.py --self-test
           python valcea-clar/scripts/validate_public_ux_freshness.py --self-test
-          node --check valcea-clar/site/chatgpt-sites-live-bridge.js
 
       - name: Exercise canonical reader presentation on pull request
         if: github.event_name == 'pull_request'
@@ -214,5 +210,5 @@ jobs:
         if: always()
         run: |
           echo '## VÂLCEA CLAR Story Social Metadata + Public UX' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Derived presentation is rebuilt from the canonical live feed; exact verified media wins, explicit contextual photographs are disclosed, and the same visual contract is projected back into the feed consumed by the installed bridge.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Derived presentation is rebuilt from the canonical live feed; exact verified media wins, explicit contextual photographs are disclosed, and the same visual contract is projected back into the canonical runtime.' >> "$GITHUB_STEP_SUMMARY"
           cat /tmp/story-social-metadata.json >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
