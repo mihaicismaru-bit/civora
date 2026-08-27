@@ -28,9 +28,9 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - name: Run AI4WORK runtime, storage, idempotency, HTTP, NF06, TEST TWIN chain, controller and preview-minimization tests
+      - name: Run AI4WORK runtime, storage, idempotency, HTTP, NF06, TEST TWIN chain, controller, preview-minimization and collection-frame tests
         working-directory: eucons/research/ai4work-step
-        run: python -m unittest -v test_runtime.py test_research_storage.py test_http_idempotency.py test_http_endpoint.py test_nf06_preingest.py test_e2e_test_twin_chain.py test_controller_determination.py test_preview_minimization.py
+        run: python -m unittest -v test_runtime.py test_research_storage.py test_http_idempotency.py test_http_endpoint.py test_nf06_preingest.py test_e2e_test_twin_chain.py test_controller_determination.py test_preview_minimization.py test_collection_frame.py
       - name: Render preview-only research pages
         working-directory: eucons/research/ai4work-step
         run: python build_research_pages.py --target /tmp/ai4work-research-preview
@@ -56,15 +56,15 @@ jobs:
             echo 'Unproven GDPR controller identity leaked into AI4WORK research preview' >&2
             exit 1
           fi
-      - name: Verify collection remains disabled and controller remains fail-closed in contract
+      - name: Verify collection, controller and collection-frame remain fail-closed
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
           import json
           from pathlib import Path
-          p = Path('eucons/research/ai4work-step/form_contract.json')
-          contract = json.loads(p.read_text(encoding='utf-8'))
+          root = Path('eucons/research/ai4work-step')
+          contract = json.loads((root / 'form_contract.json').read_text(encoding='utf-8'))
           assert contract.get('production_enabled') is False
           assert contract.get('crm_integration') == 'FORBIDDEN'
           assert contract.get('commercial_analytics') == 'FORBIDDEN'
@@ -72,10 +72,16 @@ jobs:
           assert notice.get('operator_status') == 'UNRESOLVED_BEFORE_COLLECTION'
           assert notice.get('operator_legal_name') is None
           assert notice.get('operator_cui') is None
-          controller_record = json.loads(Path('eucons/research/ai4work-step/CONTROLLER_DETERMINATION_DRAFT.json').read_text(encoding='utf-8'))
+          controller_record = json.loads((root / 'CONTROLLER_DETERMINATION_DRAFT.json').read_text(encoding='utf-8'))
           assert controller_record.get('controller') is None
           assert controller_record.get('approved') is False
           assert controller_record.get('collection_enabled') is False
           assert controller_record.get('nf06_reference_eligible') is False
-          print('PASS: AI4WORK collection and controller identity remain fail-closed')
+          frame = json.loads((root / 'COLLECTION_FRAME_DRAFT.json').read_text(encoding='utf-8'))
+          assert frame.get('frame_status') == 'DRAFT_NOT_APPROVED_FOR_PROD'
+          assert frame.get('evidence_class') == 'METHOD_PLAN_NOT_EVIDENCE'
+          assert frame.get('collection_enabled') is False
+          assert frame.get('approval', {}).get('approved_for_prod') is False
+          assert frame.get('nf06_handoff', {}).get('eligible_now') is False
+          print('PASS: AI4WORK collection, controller identity and collection frame remain fail-closed')
           PY
