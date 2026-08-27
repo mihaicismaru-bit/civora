@@ -15,7 +15,7 @@
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-08-27T12:20:04Z",
+    "utc": "2026-08-27T15:00:40Z",
     "source_pass": 6,
     "source_degraded": 1,
     "source_fail": 0,
@@ -26,7 +26,7 @@
     "quarantined_source": null
   },
   "deployment_evidence": {
-    "utc": "2026-08-27T12:20:24Z",
+    "utc": "2026-08-27T15:01:02Z",
     "status": "PASS",
     "public_content_verified": true,
     "https_verified": true,
@@ -36,7 +36,7 @@
     "http_content_verified": true,
     "content_origin": "custom_https",
     "http_status": 200,
-    "final_url": "https://partener.eu/?p10_probe=20260827T122024Z",
+    "final_url": "https://partener.eu/?p10_probe=20260827T150102Z",
     "title": "PARTENER.EU — Găsește finanțări europene pentru investiția ta",
     "required_markers_present": true,
     "critical_assets_ok": true,
@@ -46,7 +46,7 @@
       {
         "id": "custom_https",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260827T122024Z",
+        "final_url": "https://partener.eu/?p10_probe=20260827T150102Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -57,12 +57,12 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260827T122024Z",
+        "final_url": "https://partener.eu/?p10_probe=20260827T150102Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "http://partener.eu/?p10_probe=20260827T122024Z",
-            "to_url": "https://partener.eu/?p10_probe=20260827T122024Z"
+            "from_url": "http://partener.eu/?p10_probe=20260827T150102Z",
+            "to_url": "https://partener.eu/?p10_probe=20260827T150102Z"
           }
         ],
         "content_verified": true,
@@ -74,12 +74,12 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260827T122024Z",
+        "final_url": "https://partener.eu/?p10_probe=20260827T150102Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260827T122024Z",
-            "to_url": "https://partener.eu/?p10_probe=20260827T122024Z"
+            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260827T150102Z",
+            "to_url": "https://partener.eu/?p10_probe=20260827T150102Z"
           }
         ],
         "content_verified": true,
@@ -125,16 +125,16 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-08-27T12:20:24Z",
-    "validation_run_started": "2026-08-27T12:20:04Z",
+    "utc": "2026-08-27T15:01:02Z",
+    "validation_run_started": "2026-08-27T15:00:40Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "da051ee5ae5cfbd2e00be4b89363d72cffeed02415d57cc872be83b85506fcd4",
-      "history_sha256": "da051ee5ae5cfbd2e00be4b89363d72cffeed02415d57cc872be83b85506fcd4",
-      "history_path": "validation/history/20260827T122004Z.json",
+      "latest_sha256": "fbfd8337600ce28ee9b5c02a205286603c9fd76b0a14a5cef11c138a682ac325",
+      "history_sha256": "fbfd8337600ce28ee9b5c02a205286603c9fd76b0a14a5cef11c138a682ac325",
+      "history_path": "validation/history/20260827T150040Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "415302b09e774a59fd3617d13b00de49b032263f60873926eeba2c6a80885df9",
-      "checkpoint_sha256": "415302b09e774a59fd3617d13b00de49b032263f60873926eeba2c6a80885df9",
+      "source_state_sha256": "dd6d420b168aaca1b5288edc589f6b0464fb31c9228c7ec72e94ad64ae9bc40a",
+      "checkpoint_sha256": "dd6d420b168aaca1b5288edc589f6b0464fb31c9228c7ec72e94ad64ae9bc40a",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
@@ -142,7 +142,7 @@
     },
     "source_registry": {
       "observed_at": "2026-08-27T12:18:36.725008Z",
-      "age_seconds": 107,
+      "age_seconds": 9745,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
