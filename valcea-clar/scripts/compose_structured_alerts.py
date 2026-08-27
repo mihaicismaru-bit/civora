@@ -67,7 +67,7 @@ def compact_water_scope(raw_scope: object) -> str:
     prefix = re.compile(
         r"^anunț\s+întrerupere\s+furnizare\s+"
         r"(?:(?:alimentare\s+cu\s+)?ap[ăa]\s+potabil[ăa])\s+"
-        r"(?:(?:a|către|catre|la)\s+)?consumatorilor(?:\s+existenți|\s+existenti)?(?:\s+din|\s+în|\s+in)?\s*",
+        r"(?:(?:a|către|catre|la)\s+)?consumator(?:ilor|ii)(?:\s+existenți|\s+existenti)?(?:\s+din|\s+în|\s+in)?\s*",
         re.I,
     )
     cleaned = prefix.sub("", scope).strip(" ,.-")
