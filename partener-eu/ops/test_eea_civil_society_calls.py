@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 import copy
 import importlib.util
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 MODULE_PATH = ROOT / "partener-eu" / "ingest" / "eea_civil_society_calls.py"
+DATA_PLANE = ROOT / "partener-eu" / "ingest" / "data_plane_contract.json"
 spec = importlib.util.spec_from_file_location("eea_csf", MODULE_PATH)
 module = importlib.util.module_from_spec(spec)
 assert spec and spec.loader
@@ -38,6 +40,12 @@ def base_record():
 
 
 def main():
+    plane = json.loads(DATA_PLANE.read_text(encoding="utf-8"))
+    domains = set((plane.get("programmeDomains") or {}).get(module.PROGRAMME_FAMILY) or [])
+    required_domains = {"EEA_NORWAY_GRANTS", "CIVIL_SOCIETY"}
+    if not required_domains.issubset(domains):
+        fail(f"EEA CSF programme lacks data-plane domains: {sorted(required_domains - domains)}")
+
     open_row = module.normalize_record(
         base_record(),
         fetched_at=FETCHED,
@@ -149,7 +157,7 @@ def main():
     if not conflict_batch["records"][0]["requires_reconcile"]:
         fail("conflicting retained record must require reconcile")
 
-    print("PASS EEA Civil Society Fund Romania call adapter: exact EN/RO call gate, pipeline guard, authority guard, dedup and reconcile")
+    print("PASS EEA Civil Society Fund Romania call adapter: data-plane mapping, exact EN/RO call gate, pipeline guard, authority guard, dedup and reconcile")
 
 
 if __name__ == "__main__":
