@@ -12,6 +12,7 @@ spec.loader.exec_module(module)
 
 CALL1 = "https://eeagrants.org/en/eea-civil-society-fund-romania/calls/strengthening-democracy-and-rule-law-through-civil-society-initiatives"
 CALL4 = "https://eeagrants.org/en/eea-civil-society-fund-romania/calls/promoting-diversity-equality-and-combating-gender-based-violence"
+CALL6_RO = "https://eeagrants.org/ro/eea-civil-society-fund-romania/calls/call-6-protecting-human-rights-through-climate-and-environmental-actions"
 ROOT_CALLS = "https://eeagrants.org/en/eea-civil-society-fund-romania/calls"
 FETCHED = "2026-08-27T15:00:00+00:00"
 
@@ -56,6 +57,18 @@ def main():
         fail("deadline candidate not preserved")
     if open_row["authority_class"] != "EEA_FMO_CIVIL_SOCIETY_FUND_ROMANIA":
         fail("authority class drift")
+
+    ro_record = base_record()
+    ro_record.update({"callNumber": "6", "authorityUrl": CALL6_RO})
+    ro_row = module.normalize_record(
+        ro_record,
+        fetched_at=FETCHED,
+        run_id="TEST-RO",
+        raw_hash="raw-ro",
+        verified_authority_urls=[CALL6_RO],
+    )
+    if ro_row["observation_state"] != "OPEN_CALL" or ro_row["call_identifier"] != "EEA-CSF-RO-CALL-06":
+        fail("official Romanian-language call detail path must retain the same authority gate")
 
     unverified = module.normalize_record(
         base_record(),
@@ -136,7 +149,7 @@ def main():
     if not conflict_batch["records"][0]["requires_reconcile"]:
         fail("conflicting retained record must require reconcile")
 
-    print("PASS EEA Civil Society Fund Romania call adapter: exact-call OPEN gate, pipeline guard, authority guard, dedup and reconcile")
+    print("PASS EEA Civil Society Fund Romania call adapter: exact EN/RO call gate, pipeline guard, authority guard, dedup and reconcile")
 
 
 if __name__ == "__main__":
