@@ -22,7 +22,10 @@ SOURCE_FAMILY = "EEA_NORWAY"
 PROGRAMME_FAMILY = "EEA Civil Society Fund Romania 2021-2028"
 AUTHORITY_CLASS = "EEA_FMO_CIVIL_SOCIETY_FUND_ROMANIA"
 OFFICIAL_HOSTS = {"eeagrants.org", "www.eeagrants.org"}
-CALL_PATH_PREFIX = "/en/eea-civil-society-fund-romania/calls/"
+CALL_PATH_PREFIXES = (
+    "/en/eea-civil-society-fund-romania/calls/",
+    "/ro/eea-civil-society-fund-romania/calls/",
+)
 PIPELINE_STATES = {
     "PROGRAMMING_PIPELINE",
     "PROPOSAL",
@@ -75,9 +78,10 @@ def _official_call_url(value: Any) -> str | None:
     path = parsed.path or ""
     if parsed.scheme != "https" or host not in OFFICIAL_HOSTS:
         return None
-    if not path.startswith(CALL_PATH_PREFIX):
+    prefix = next((candidate for candidate in CALL_PATH_PREFIXES if path.startswith(candidate)), None)
+    if not prefix:
         return None
-    slug = path[len(CALL_PATH_PREFIX):].strip("/")
+    slug = path[len(prefix):].strip("/")
     if not slug:
         return None
     return url
