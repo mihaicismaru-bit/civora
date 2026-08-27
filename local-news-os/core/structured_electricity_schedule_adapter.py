@@ -19,10 +19,11 @@ import tempfile
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from html.parser import HTMLParser
+from http.cookiejar import CookieJar
 from pathlib import Path
 from typing import Any
 from urllib.parse import urljoin
-from urllib.request import Request, urlopen
+from urllib.request import HTTPCookieProcessor, Request, build_opener
 from zoneinfo import ZoneInfo
 
 import structured_electricity_interruption_parser as electricity
@@ -145,7 +146,12 @@ def fetch_bytes(url: str, *, max_bytes: int, timeout: int = 20) -> tuple[bytes, 
             "Cache-Control": "no-cache",
         },
     )
-    with urlopen(request, timeout=timeout) as response:
+    # Some primary-source CMSes issue a same-URL 302 while setting a locale or
+    # session cookie. Plain urlopen drops that state and sees an infinite loop;
+    # a per-fetch cookie jar preserves the server's redirect contract without
+    # weakening HTTPS, provenance, or freshness gates.
+    opener = build_opener(HTTPCookieProcessor(CookieJar()))
+    with opener.open(request, timeout=timeout) as response:
         body = response.read(max_bytes + 1)
         if len(body) > max_bytes:
             raise ValueError(f"response exceeds {max_bytes} bytes")
