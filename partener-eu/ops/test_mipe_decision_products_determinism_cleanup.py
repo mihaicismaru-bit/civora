@@ -64,7 +64,7 @@ def main() -> int:
         "const eventLabel=v=>",
         "const statusLabels=",
         "const statusText=v=>",
-        "const fundingFact=f=>",
+        "const fundingFact=d=>",
         "const displayFact=",
         "eventLabel(n.kind)",
     ):
