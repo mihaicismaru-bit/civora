@@ -1,5 +1,5 @@
 {
-  "schema_version": "eucons.ai4work_retention_schedule.v0.3",
+  "schema_version": "eucons.ai4work_retention_schedule.v0.4",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "date": "2026-08-27",
   "status": "DRAFT_EXECUTION_BINDING_REQUIRED_BEFORE_COLLECTION",
@@ -39,9 +39,11 @@
       "content": "opaque derived response_id only; no questionnaire answers, canonical body digest, raw Idempotency-Key, identity/contact data, IP, user-agent, device, CRM or employer identifier",
       "purpose": "prevent a delayed transport retry from recreating a respondent-level record after an approved live erasure",
       "retention": "UNRESOLVED_BEFORE_CONTROLLER_APPROVAL; the live binding must use the shortest documented period necessary to prevent stale retry resurrection and must define an automatic deletion condition",
+      "reference_adapter_control": "NO_DEFAULT_DURATION; erasure requiring a replay marker fails closed unless an explicit finite UTC not-after boundary is configured; markers are purged automatically at or after that boundary before replay checks",
+      "reference_adapter_policy_limit": "the engineering adapter proves enforceability only and MUST NOT choose or imply the PROD retention duration",
       "export": "FORBIDDEN from analytical export, NF06, source register and long-term need evidence",
       "deletion": "production adapter must delete the marker automatically at the approved bound and include marker counts in deletion evidence",
-      "gate": "collection remains NO_GO until the controller approves the minimum necessary bound and the production adapter proves automatic expiry/deletion"
+      "gate": "collection remains NO_GO until the controller approves the minimum necessary bound, the live binding injects that exact finite boundary, and provider-bound TEST TWIN proves automatic expiry/deletion"
     },
     {
       "data_class": "optional follow-up contact records",
@@ -66,8 +68,8 @@
     "row/object counts before and after live deletion",
     "documented account-specific backup schedule and maximum residual lifetime",
     "confirmation that deleted respondent data cannot silently return to live processing through ordinary restore jobs",
-    "confirmation that a stale idempotent retry cannot recreate an erased respondent record",
-    "confirmation that any non-analytical erasure replay marker follows its approved minimum-necessary expiry/deletion bound",
+    "confirmation that a stale idempotent retry cannot recreate an erased respondent record before the controller-approved replay boundary",
+    "confirmation that non-analytical erasure replay markers are automatically purged at the controller-approved finite boundary",
     "confirmation that backup rotation does not restart the retention clock for deleted research records",
     "confirmation that optional contact store and PROD analytical store were both checked",
     "retained aggregate/source-register package identified separately"
