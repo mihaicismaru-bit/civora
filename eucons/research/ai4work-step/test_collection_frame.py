@@ -54,8 +54,21 @@ class CollectionFrameTests(unittest.TestCase):
         rules = " ".join(self.frame["qa_stop_rules"]["may_close_collection_only_if"]).lower()
         self.assertIn("both instruments have real valid responses", rules)
         self.assertIn("all three regions", rules)
+        self.assertIn("channel register", rules)
         self.assertIn("adversarial qa", rules)
         self.assertIn("nf06 pre-ingest", rules)
+
+    def test_channel_provenance_is_opaque_and_non_tracking(self):
+        c = self.frame["collection_channels_policy"]
+        self.assertTrue(c["channel_register_required"])
+        self.assertTrue(c["channel_register_sha256_required_before_prod"])
+        self.assertEqual(c["analytic_record_field"], "recruitment_channel_id")
+        self.assertEqual(c["analytic_record_field_format"], "CH-[A-Z0-9]{8,32}")
+        self.assertTrue(c["record_to_frame_membership_required"])
+        forbidden = " ".join(c["forbidden_channel_derivations"]).lower()
+        for term in ("referrer", "utm", "cookie", "ip address", "user agent", "fingerprint", "crm"):
+            self.assertIn(term, forbidden)
+        self.assertIsNone(self.frame["approval"]["collection_channel_register_sha256"])
 
     def test_duplicate_boundary_does_not_smuggle_identity_tracking(self):
         d = self.frame["duplicate_and_fraud_boundary"]
