@@ -1,5 +1,5 @@
 {
-  "schema_version": "eucons.research_form_contract.v0.4",
+  "schema_version": "eucons.research_form_contract.v0.5",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "purpose": "Primary research for an independent needs analysis; not lead generation, recruitment, marketing or project enrolment.",
   "production_enabled": false,
@@ -64,35 +64,37 @@
     "operator_cui": null,
     "operator_status": "UNRESOLVED_BEFORE_COLLECTION",
     "privacy_contact": "OPEN_BEFORE_PRODUCTION",
-    "warning": "Nu introduceți nume, date de contact, angajator, CNP, adresă sau alte date care vă pot identifica în câmpurile de text liber.",
+    "warning": "Instrumentul analitic folosește numai categorii prestabilite și nu solicită câmpuri de text liber, nume, date de contact, numele angajatorului, CNP, adresă sau alți identificatori direcți.",
     "acknowledgement_field": "notice_read_and_voluntary_participation",
     "acknowledgement_default": false,
     "legal_basis": "TO_BE_DOCUMENTED_BY_DETERMINED_CONTROLLER_BEFORE_PRODUCTION; acknowledgement is not automatically treated as GDPR consent legal basis."
   },
   "adult_form": {
-    "source_instrument": "AI4WORK STEP QUESTIONNAIRE_ADULTS v1 frozen in NF-RUN-001",
+    "source_instrument": "AI4WORK STEP QUESTIONNAIRE_ADULTS v1.1 privacy-minimised pre-production",
     "allowed_profile_fields": {
       "region": ["Sud-Vest Oltenia", "Sud-Muntenia", "Centru"],
       "status": ["șomer înregistrat", "persoană ocupată potențial eligibilă", "alt statut / de verificat"],
       "age_band": ["30-39", "40-49", "50-59", "60+"],
-      "occupational_family": "broad_category_only_max_80_chars"
+      "occupational_family": ["administrativ/back-office","financiar-contabil","vânzări/relații cu clienții","producție/operațiuni","logistică/transport","tehnic/mentenanță","IT/date","educație/formare","sănătate/servicii sociale","construcții/instalații","HoReCa/turism","agricultură/mediu","alt domeniu / prefer să nu precizez"]
     },
-    "question_ids": ["Q01", "Q02", "Q03", "Q04", "Q05", "Q06", "Q07", "Q08", "Q09", "Q10", "Q11", "Q12"]
+    "question_ids": ["Q01", "Q02", "Q03", "Q04", "Q05", "Q06", "Q07", "Q08", "Q09", "Q10", "Q11", "Q12"],
+    "free_text_fields": []
   },
   "employer_form": {
-    "source_instrument": "AI4WORK STEP QUESTIONNAIRE_EMPLOYERS v1 frozen in NF-RUN-001",
+    "source_instrument": "AI4WORK STEP QUESTIONNAIRE_EMPLOYERS v1.1 privacy-minimised pre-production",
     "allowed_profile_fields": {
       "region": ["Sud-Vest Oltenia", "Sud-Muntenia", "Centru"],
-      "sector_aggregated": "broad_sector_or_aggregated_CAEN_only_max_80_chars",
+      "sector_aggregated": ["industrie/producție","construcții/instalații","comerț","transport/logistică","HoReCa/turism","IT/telecom/date","servicii profesionale/tehnice","servicii administrative/suport","educație/formare","sănătate/servicii sociale","agricultură/mediu","alte servicii / prefer să nu precizez"],
       "size_band": ["1-9", "10-49", "50-249", "250+"],
       "respondent_role": ["management", "HR", "operațional/tehnic", "altul"]
     },
     "question_ids": ["E01", "E02", "E03", "E04", "E05", "E06", "E07", "E08", "E09", "E10"],
+    "free_text_fields": [],
     "contact_rule": "E10 may record only yes/possible/no in the analytical form. Any contact detail must be entered separately and cannot carry response_id."
   },
   "disclosure_control": {
     "public_or_reported_small_cells": "SUPPRESS_OR_COMBINE_WHEN_N_LT_5",
-    "free_text_quotes": "anonymize and review before use",
+    "free_text_quotes": "NOT_COLLECTED_IN_ANALYTICAL_FORMS",
     "exact_denominators_required": true
   },
   "go_no_go": {
@@ -104,7 +106,7 @@
       "server/reverse-proxy logging policy verified",
       "research-only production storage adapter bound and isolated from CRM",
       "retention schedule approved and executable",
-      "form validation and PII rejection tests PASS",
+      "form validation and direct-identifier rejection/minimisation tests PASS",
       "retry idempotency tests PASS on the exact candidate head",
       "browser-to-HTTP-to-store-to-export-to-NF06 smoke PASS"
     ]
