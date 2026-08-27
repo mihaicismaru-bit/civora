@@ -71,6 +71,13 @@ def synthetic_priority_result(priority_contract: dict) -> dict:
                     "selected_service_id": "funding_strategy_and_eligibility",
                     "source_supported_deadline": "2026-09-30",
                     "verified_fact_classes": ["deadline", "programme"],
+                    "source_trace": {
+                        "source_product": "PARTENER.EU",
+                        "source_opportunity_id": "OPP-SYNTH-A",
+                        "source_as_of": "2026-08-27T08:00:00Z",
+                        "source_projection_sha256": "a" * 64,
+                        "verification_evidence_count": 2,
+                    },
                 },
                 "selected_service_id": "funding_strategy_and_eligibility",
                 "safe_next_action": "VERIFY_RESEARCH_CANDIDATE",
@@ -117,6 +124,19 @@ def main() -> None:
         "crm_write_enabled", "pipeline_write_enabled",
     )):
         raise AssertionError("triage view opened an external or persistence action")
+
+    trace = triage["cards"][0]["selected_opportunity"]["source_trace"]
+    expected_trace_keys = {
+        "source_product",
+        "source_opportunity_id",
+        "source_as_of",
+        "source_projection_sha256",
+        "verification_evidence_count",
+    }
+    if set(trace) != expected_trace_keys:
+        raise AssertionError("triage source trace is not minimized to the safe allowlist")
+    if trace["source_product"] != "PARTENER.EU" or trace["source_opportunity_id"] != "OPP-SYNTH-A":
+        raise AssertionError("triage source trace lost verified opportunity provenance")
 
     service_filtered = triage_view.build_triage_view(
         priority_result,
@@ -210,6 +230,34 @@ def main() -> None:
         ),
     )
 
+    unsafe_trace_id = deepcopy(priority_result)
+    unsafe_trace_id["cards"][0]["selected_opportunity"]["source_trace"]["source_opportunity_id"] = "OPP-OTHER"
+    must_fail(
+        "triage mismatched source trace opportunity",
+        lambda: triage_view.build_triage_view(
+            unsafe_trace_id, contract=triage_contract, priority_contract=priority_contract
+        ),
+    )
+
+    unsafe_trace_count = deepcopy(priority_result)
+    unsafe_trace_count["cards"][0]["selected_opportunity"]["source_trace"]["verification_evidence_count"] = 0
+    must_fail(
+        "triage empty verification evidence trace",
+        lambda: triage_view.build_triage_view(
+            unsafe_trace_count, contract=triage_contract, priority_contract=priority_contract
+        ),
+    )
+
+    noisy_trace = deepcopy(priority_result)
+    noisy_trace["cards"][0]["selected_opportunity"]["source_trace"]["verification_evidence"] = [
+        {"raw": "must not escape priority view"}
+    ]
+    sanitized = triage_view.build_triage_view(
+        noisy_trace, contract=triage_contract, priority_contract=priority_contract
+    )
+    if "verification_evidence" in sanitized["cards"][0]["selected_opportunity"]["source_trace"]:
+        raise AssertionError("triage source trace leaked raw verification evidence")
+
     unsafe_source_action = deepcopy(priority_result)
     unsafe_source_action["cards"][0]["crm_write_enabled"] = True
     must_fail(
@@ -228,7 +276,7 @@ def main() -> None:
         ),
     )
 
-    print("PASS: Client Finder triage filtering/sorting is deterministic, person-safe, source-supported and non-writing")
+    print("PASS: Client Finder triage filtering/sorting/source-trace is deterministic, person-safe, source-supported and non-writing")
 
 
 if __name__ == "__main__":
