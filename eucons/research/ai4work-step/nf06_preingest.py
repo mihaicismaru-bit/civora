@@ -27,6 +27,7 @@ EXPECTED_RECORD_KEYS = {
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 PROD_ONLY_FRAME_FIELDS = {
     "privacy_notice_version",
+    "controller_determination_reference",
     "controller_approval_reference",
     "processor_binding_reference",
     "server_log_profile_reference",
