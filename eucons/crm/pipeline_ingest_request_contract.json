@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "id": "EUCONS-E11-R10-PIPELINE-INGEST-REQUEST-001",
+  "status": "CANONICAL",
+  "source_review_contract": "EUCONS-E11-R10-COMMERCIAL-REVIEW-001",
+  "required_source_state": "COMMERCIAL_PIPELINE_REVIEW_PENDING_HUMAN_DECISION",
+  "required_source_decision": "HUMAN_COMMERCIAL_PIPELINE_ENTRY_REVIEW",
+  "required_eligibility_state": "NOT_ASSESSED",
+  "required_maximum_next_state": "RESEARCH_READY",
+  "pipeline_contract_id": "R10-PIPELINE-001",
+  "pipeline_engine_id": "EUCONS_R10_UNIFIED_COMMERCIAL_PIPELINE",
+  "approval": {
+    "decision": "APPROVE_PIPELINE_ENTRY",
+    "decision_source": "HUMAN",
+    "scope": "NON_WRITING_INGEST_REQUEST_ONLY",
+    "reviewer_ref_required": true,
+    "decided_at_timezone_required": true
+  },
+  "output": {
+    "record_state": "HUMAN_APPROVED_PIPELINE_INGEST_REQUEST",
+    "human_approval_recorded": true,
+    "persistence_executed": false,
+    "requires_separate_persistence_step": true,
+    "pipeline_write_enabled": false,
+    "crm_write_enabled": false,
+    "external_contact_enabled": false,
+    "automatic_offer_enabled": false,
+    "automatic_send_enabled": false
+  },
+  "rules": {
+    "source_human_review_must_still_be_required": true,
+    "source_pipeline_write_must_be_disabled": true,
+    "source_crm_write_must_be_disabled": true,
+    "source_external_actions_must_be_disabled": true,
+    "source_offer_actions_must_be_disabled": true,
+    "human_decision_must_be_explicit": true,
+    "decision_scope_must_be_non_writing_only": true,
+    "proposed_entry_must_match_source": true,
+    "pipeline_production_persistence_must_be_disabled": true,
+    "person_level_fields_forbidden": true,
+    "raw_contact_data_forbidden": true,
+    "never_claim_eligibility_award_probability_or_buying_intent": true
+  }
+}
