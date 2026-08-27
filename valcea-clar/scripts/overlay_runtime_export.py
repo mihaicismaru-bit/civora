@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 
 import build_legal_pages
+import render_editions_archive
 import render_news_index
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -134,8 +135,9 @@ def main() -> int:
     legal_report = build_legal_pages.build()
     static_materialized = materialize_static_runtime_routes()
     apply_reader_presentation()
+    editions_report = render_editions_archive.build()
 
-    routes = ["/"] + story_paths()
+    routes = list(dict.fromkeys(["/"] + story_paths() + list(editions_report.get("routes") or [])))
     indexing = write_indexing_assets(RUNTIME, BASE_URL, routes)
     if indexing.get("status") != "PASS":
         raise RuntimeError(f"refusing runtime with deferred indexing: {indexing}")
@@ -145,6 +147,8 @@ def main() -> int:
         "publication_model": "continuous_story_first",
         "runtime": "site/runtime",
         "news_index_stories": news_index_report.get("story_count"),
+        "edition_archive_count": editions_report.get("edition_count"),
+        "edition_archive_routes": len(editions_report.get("routes") or []),
         "legal_status": legal_report.get("status"),
         "static_routes_materialized": static_materialized,
         "indexing_status": indexing.get("status"),
