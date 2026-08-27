@@ -21,7 +21,6 @@ on:
       - 'partener-eu/ingest/finalize_decision_products.py'
       - 'partener-eu/ingest/localize_decision_products.py'
       - 'partener-eu/ingest/state/mipe_ro_corpus.json'
-      - 'partener-eu/ops/fix_decision_products_source_coverage.py'
       - 'partener-eu/ops/fix_decision_ui_romanian.py'
       - 'partener-eu/ops/test_decision_products.py'
       - 'partener-eu/ops/test_mipe_canonical_pipeline.py'
@@ -69,9 +68,8 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Apply source-coverage and Romanian UI rules
+      - name: Apply Romanian UI rules
         run: |
-          python partener-eu/ops/fix_decision_products_source_coverage.py
           python partener-eu/ops/fix_decision_ui_romanian.py
 
       - name: Canonicalize evidence and construct deep funding dossiers
