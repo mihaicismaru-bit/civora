@@ -28,9 +28,9 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - name: Run AI4WORK runtime, storage, idempotency, HTTP, NF06, TEST TWIN chain, controller, preview-minimization, collection-frame, retention and PROD-activation tests
+      - name: Run AI4WORK runtime, storage, idempotency, HTTP, NF06, TEST TWIN, controller, minimization, collection-frame, retention, rights and PROD-activation tests
         working-directory: eucons/research/ai4work-step
-        run: python -m unittest -v test_runtime.py test_research_storage.py test_http_idempotency.py test_http_endpoint.py test_nf06_preingest.py test_e2e_test_twin_chain.py test_controller_determination.py test_preview_minimization.py test_collection_frame.py test_retention_schedule.py test_prod_activation_gate.py
+        run: python -m unittest -v test_runtime.py test_research_storage.py test_http_idempotency.py test_http_endpoint.py test_nf06_preingest.py test_e2e_test_twin_chain.py test_controller_determination.py test_preview_minimization.py test_collection_frame.py test_retention_schedule.py test_data_subject_rights.py test_prod_activation_gate.py
       - name: Enforce repository PROD activation state
         working-directory: eucons/research/ai4work-step
         run: python prod_activation_gate.py
@@ -86,11 +86,18 @@ jobs:
           assert frame.get('collection_enabled') is False
           assert frame.get('approval', {}).get('approved_for_prod') is False
           assert frame.get('nf06_handoff', {}).get('eligible_now') is False
+          rights = json.loads((root / 'GDPR_DATA_SUBJECT_RIGHTS_PROCEDURE_DRAFT.json').read_text(encoding='utf-8'))
+          assert rights.get('status') == 'DRAFT_BINDING_REQUIRED_BEFORE_COLLECTION'
+          assert rights.get('evidence_class') == 'CONTROL_ARTIFACT_NOT_EVIDENCE'
+          assert rights.get('controller_approval') is False
+          assert rights.get('collection_enabled') is False
+          assert rights.get('identification_policy', {}).get('direct_identity_registry') == 'FORBIDDEN'
           activation = json.loads((root / 'PROD_ACTIVATION_MANIFEST_DRAFT.json').read_text(encoding='utf-8'))
           assert activation.get('state') == 'DRAFT_NOT_APPROVED_FOR_PROD'
           assert activation.get('approved_for_prod') is False
           assert activation.get('collection_enabled') is False
           assert activation.get('explicit_user_approval_reference') is None
           assert activation.get('real_collection_authorized') is False
-          print('PASS: AI4WORK collection, controller identity, collection frame and PROD activation remain fail-closed')
+          assert activation.get('required_external_or_operational_evidence', {}).get('data_subject_rights_procedure', {}).get('status') == 'OPEN'
+          print('PASS: AI4WORK collection, controller identity, collection frame, rights procedure and PROD activation remain fail-closed')
           PY
