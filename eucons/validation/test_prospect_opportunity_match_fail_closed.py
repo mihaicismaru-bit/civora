@@ -143,6 +143,13 @@ def main() -> None:
         raise AssertionError("priority view lost selected service")
     if beta_card["selected_opportunity"]["opportunity_id"] != "SYNTH-OPP-SOLAR-CAEN10":
         raise AssertionError("priority view lost selected opportunity")
+    source_trace = beta_card["selected_opportunity"].get("source_trace") or {}
+    if source_trace.get("source_product") != "PARTENER.EU":
+        raise AssertionError("priority view lost verified opportunity source product")
+    if source_trace.get("source_opportunity_id") != beta_card["selected_opportunity"]["opportunity_id"]:
+        raise AssertionError("priority view opportunity provenance id drift")
+    if source_trace.get("verification_evidence_count", 0) < 1:
+        raise AssertionError("priority view lost verification evidence trace")
     if any(view[flag] for flag in (
         "external_contact_enabled",
         "automatic_offer_enabled",
@@ -180,6 +187,18 @@ def main() -> None:
     must_fail(
         "priority view unsupported deadline",
         lambda: priority_view.build_priority_view(unsafe_deadline, view_contract, contract),
+    )
+
+    unsafe_provenance = deepcopy(match_result)
+    matched_row = next(row for row in unsafe_provenance["results"] if row["state"] == "MATCHED_RESEARCH_CANDIDATE")
+    selected = next(
+        row for row in matched_row["opportunity_matches"]
+        if row["opportunity_id"] == matched_row["selected_opportunity_id"]
+    )
+    selected["source_provenance"]["publication_decision"]["decision"] = "HOLD_UNVERIFIED"
+    must_fail(
+        "priority view unverified opportunity provenance",
+        lambda: priority_view.build_priority_view(unsafe_provenance, view_contract, contract),
     )
 
     unsafe_nonmatch_selection = deepcopy(match_result)
