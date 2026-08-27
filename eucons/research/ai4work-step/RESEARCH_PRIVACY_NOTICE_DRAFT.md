@@ -18,11 +18,11 @@ Chestionarele sunt folosite exclusiv pentru fundamentarea unei analize de nevoi 
 
 ## Ce date solicităm
 
-Formularele nu solicită nume, CNP, adresă exactă, telefon, e-mail, semnătură, fotografie, cont social, numele angajatorului, CUI sau documente. Nu solicităm categorii speciale de date și vă rugăm să nu introduceți astfel de informații în răspunsurile libere.
+Formularele analitice nu solicită nume, CNP, adresă exactă, telefon, e-mail, semnătură, fotografie, cont social, numele angajatorului, CUI sau documente. Nu solicităm categorii speciale de date.
 
-Sunt colectate numai categorii largi necesare analizei, precum regiunea, banda de vârstă/statutul și familia ocupațională pentru adulți, respectiv sectorul agregat, dimensiunea organizației și tipul respondentului pentru angajatori, împreună cu răspunsurile la întrebările despre competențe, utilizarea AI, formare și bariere.
+Sunt colectate numai categorii prestabilite și largi necesare analizei, precum regiunea, banda de vârstă/statutul și familia ocupațională pentru adulți, respectiv sectorul agregat, dimensiunea organizației și tipul respondentului pentru angajatori, împreună cu răspunsuri controlate la întrebările despre competențe, utilizarea AI, formare, bariere și tipuri de sarcini/procese.
 
-Câmpurile de text sunt verificate pentru a respinge tipare uzuale de date de identificare. Celulele statistice foarte mici sunt suprimate sau agregate în raportare.
+În designul pre-producție curent **nu există câmpuri de text liber în formularele analitice**. Răspunsurile sunt limitate la opțiuni prestabilite, scale, booleene și matrici. Aceasta reduce riscul introducerii accidentale a numelor, angajatorilor, datelor de contact sau altor identificatori prin text liber. Celulele statistice foarte mici sunt suprimate sau agregate în raportare.
 
 ## Temeiul juridic
 
@@ -40,7 +40,7 @@ Rolurile dintre solicitantul/liderul proiectului, operatorul site-ului `eucons.r
 
 Lista procesatorilor/subprocesatorilor și orice transfer în afara SEE trebuie verificată și documentată înainte de lansare. Dacă această verificare nu este închisă, colectarea nu se activează.
 
-Răspunsurile brute nu trebuie trimise către servicii externe de AI generativ/LLM. Orice utilizare AI în analiză se limitează la material suficient de de-identificat/agregat și necesită re-evaluare dacă această condiție se schimbă.
+Răspunsurile la nivel de respondent nu trebuie trimise către servicii externe de AI generativ/LLM. Orice utilizare AI în analiză se limitează la material suficient de de-identificat/agregat și necesită re-evaluare dacă această condiție se schimbă.
 
 ## Date tehnice și tracking
 
