@@ -1,10 +1,12 @@
 {
-  "schema_version": "eucons.research_storage_contract.v0.3",
+  "schema_version": "eucons.research_storage_contract.v0.4",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "controller": {
-    "legal_name": "EUROCONSULT SRL",
-    "cui": "14250864",
-    "privacy_contact": "OPEN_BEFORE_PRODUCTION"
+    "legal_name": null,
+    "cui": null,
+    "status": "UNRESOLVED_BEFORE_COLLECTION",
+    "privacy_contact": "OPEN_BEFORE_PRODUCTION",
+    "determination_reference": "CONTROLLER_DETERMINATION_DRAFT.json"
   },
   "purpose": "research-only primary data collection for AI4WORK STEP needs analysis",
   "commercial_use": "FORBIDDEN",
@@ -25,7 +27,8 @@
     "same_response_id_same_body": "REPLAY_ORIGINAL_RECEIPT_NO_SECOND_ANALYTICAL_ROW",
     "same_response_id_different_body": "FAIL_CLOSED",
     "repository_persistence": "FORBIDDEN",
-    "direct_identifiers": "FORBIDDEN_IN_ANALYTICAL_STORE"
+    "direct_identifiers": "FORBIDDEN_IN_ANALYTICAL_STORE",
+    "analytical_free_text": "NOT_COLLECTED_IN_CURRENT_PREPRODUCTION_INSTRUMENT"
   },
   "reference_adapter": {
     "file": "research_storage.py",
@@ -51,13 +54,15 @@
     "contract_binding_status": "FRAMEWORK_VERIFIED_ACCOUNT_ORDER_ANNEX4_ANNEX5_AND_ACTUAL_EUCONS_SERVICE_STILL_MUST_BE_MATCHED"
   },
   "production_binding_requirements": [
+    "freeze and approve the actual controller determination before any provider/controller binding is claimed",
     "prove the actual eucons.ro hosting account/order is the Claus Web service covered by the reviewed DPA",
-    "obtain/retain the applicable DPA/contract acceptance evidence for EUROCONSULT SRL",
+    "obtain/retain the applicable DPA/contract acceptance evidence for the determined controller or the legally documented party authorized to instruct the processor; do not assume EUROCONSULT SRL is that party",
+    "document the legal relationship between the determined controller, the hosting-account holder and Claus Web",
     "obtain and verify current nominal Annex 4 subprocessor list for the actual service",
     "obtain and verify Annex 5/account-specific backup retention and deletion/restore behavior",
     "separate research database/files and credentials from CRM and commercial runtime",
     "HTTPS endpoint with CORS limited to https://eucons.ro and https://www.eucons.ro",
-    "server-side schema and PII validation before persistence",
+    "server-side schema and direct-identifier validation before persistence",
     "retry-safe idempotency preserving one analytical row per submit attempt",
     "encryption in transit and at rest where supported by provider",
     "role-based access limited to designated research staff",
@@ -67,21 +72,22 @@
     "NF06 export must pass PRIMARY_RESPONSE_INGEST_CONTRACT"
   ],
   "repository_validation": {
-    "pr": 691,
-    "validated_head": "3b4333bd6048889a38f855cb7a48ef5150260965",
-    "research_gate_run_id": 33021142889,
+    "pr": 695,
+    "validated_head": "7b3101cc5492b004eaf9af184b0a2d2a48901334",
+    "research_gate_run_id": 33051519175,
     "result": "PASS",
     "scope": "runtime/storage/idempotency/preview/tracking/fail-closed repository gate only; not provider production binding"
   },
   "go_no_go": {
-    "operator_identity": "CLOSED",
+    "operator_identity": "OPEN_FAIL_CLOSED",
     "privacy_contact": "OPEN",
     "hosting_processor_public_framework": "CLOSED_AT_PUBLIC_DPA_LEVEL",
     "hosting_account_contract_and_annexes": "OPEN",
+    "controller_hosting_account_processor_role_chain": "OPEN",
     "actual_server_log_retention": "OPEN",
     "production_research_store": "OPEN",
     "retention_execution": "OPEN",
-    "test_reference_adapter": "EXACT_HEAD_RESEARCH_GATE_PASS",
+    "test_reference_adapter": "EXACT_HEAD_RESEARCH_GATE_PASS_AT_RECORDED_IMPLEMENTATION_HEAD",
     "status": "NO_GO_FOR_REAL_COLLECTION"
   }
 }
