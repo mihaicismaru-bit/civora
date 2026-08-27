@@ -1,5 +1,5 @@
 {
-  "schema_version": "eucons.ai4work_nf06_preingest_contract.v0.2",
+  "schema_version": "eucons.ai4work_nf06_preingest_contract.v0.3",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "purpose": "Fail-closed source-batch preflight before handoff to NF06. This contract does not redefine the internal NF06 schema; it proves that an immutable source export is eligible to be handed to NF06.",
   "prod_evidence_class": "PROD_REAL_EVIDENCE",
@@ -11,6 +11,7 @@
   "prod_requirements": [
     "all records synthetic=false",
     "collection frame is APPROVED_FOR_PROD",
+    "controller determination reference is present",
     "controller approval reference is present",
     "privacy notice version is present",
     "processor binding reference is present",
@@ -50,6 +51,7 @@
   ],
   "prod_only_required_fields": [
     "privacy_notice_version",
+    "controller_determination_reference",
     "controller_approval_reference",
     "processor_binding_reference",
     "server_log_profile_reference",
