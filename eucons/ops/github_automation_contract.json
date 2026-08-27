@@ -56,7 +56,11 @@
   "scheduler": {
     "cadence": "17 */6 * * *",
     "timezone_semantics": "UTC_POSIX_CRON",
-    "development_reference_time": "2026-08-19T10:00:00Z",
+    "reference_time_policy": {
+      "mode": "LIVE_UTC",
+      "source": "runner_clock",
+      "format": "RFC3339_SECONDS"
+    },
     "network_access_required": false,
     "provider_credentials_required": false
   },

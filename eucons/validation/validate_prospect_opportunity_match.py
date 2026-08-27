@@ -102,6 +102,10 @@ def main() -> None:
         raise SystemExit("prospect service recommendation drift")
     if beta["opportunity_matches"][0]["aligned_service_ids"] != ["funding_strategy_and_eligibility"]:
         raise SystemExit("opportunity-to-service overlap drift")
+    if beta["opportunity_matches"][0]["selected_service_id"] != "funding_strategy_and_eligibility":
+        raise SystemExit("opportunity-to-service selection drift")
+    if beta["selected_service_id"] != "funding_strategy_and_eligibility":
+        raise SystemExit("prospect-opportunity-service selection drift")
     if beta["eligibility_state"] != "NOT_ASSESSED" or beta["maximum_next_state"] != "RESEARCH_READY":
         raise SystemExit("match crossed eligibility or research boundary")
     if not beta["opportunity_matches"][0]["source_provenance"] or not beta["opportunity_matches"][0]["source_supported_deadline"]:
@@ -123,8 +127,8 @@ def main() -> None:
     held = matcher.match_state(state, current_projection, payload["reference_time"])
     if held["summary"]["held_source"] != held["summary"]["evaluated_prospects"]:
         raise SystemExit("stale canonical projection did not hold every prospect")
-    if any(row["selected_opportunity_id"] is not None for row in held["results"]):
-        raise SystemExit("stale projection selected an opportunity")
+    if any(row["selected_opportunity_id"] is not None or row["selected_service_id"] is not None for row in held["results"]):
+        raise SystemExit("stale projection selected an opportunity or service")
 
     repeated = matcher.match_state(state, fresh_projection, payload["reference_time"])
     if engine.canonical_hash(result) != engine.canonical_hash(repeated):
@@ -151,6 +155,7 @@ def main() -> None:
         "matched": result["summary"]["matched"],
         "selected_opportunity": beta["selected_opportunity_id"],
         "recommended_service": beta["recommended_service_id"],
+        "selected_service": beta["selected_service_id"],
         "stale_projection_held": held["summary"]["held_source"],
         "eligibility_state": result["eligibility_state"],
         "maximum_next_state": result["maximum_next_state"],

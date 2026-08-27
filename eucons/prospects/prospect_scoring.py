@@ -228,7 +228,7 @@ def score_record(
         },
         "explanations": [
             f"{len(active)} active signal(s), {len(signal_types)} distinct type(s).",
-            f"Source quality contributes {source_points}/25; freshness contributes {freshness_points}/20.",
+            f"Source quality contributes {source_points}/{weights['source_quality']['max_points']}; freshness contributes {freshness_points}/{weights['freshness']['max_points']}.",
             f"Dominant service {recommended_service} is supported by {service_rows[0]['support_count'] if service_rows else 0}/{len(active)} active signals.",
             f"Uncertainty subtracts {total_penalty} point(s); score remains research priority only.",
         ],

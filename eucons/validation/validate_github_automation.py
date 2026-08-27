@@ -30,6 +30,12 @@ FORBIDDEN_SIDE_EFFECT_MARKERS = [
     "smtp",
     "sendmail",
 ]
+LIVE_CLOCK_MARKERS = [
+    "id: clock",
+    "date -u +'%Y-%m-%dT%H:%M:%SZ'",
+    "steps.clock.outputs.value",
+]
+ISO_UTC_LITERAL = re.compile(r"20\d{2}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
 
 
 def fail(message: str) -> None:
@@ -40,6 +46,14 @@ def has_trigger(text: str, trigger: str) -> bool:
     if trigger == "schedule":
         return bool(re.search(r"(?m)^\s{2}schedule:\s*$", text))
     return bool(re.search(rf"(?m)^\s{{2}}{re.escape(trigger)}:\s*$", text))
+
+
+def require_live_reference_time(workflow_id: str, text: str) -> None:
+    for marker in LIVE_CLOCK_MARKERS:
+        if marker not in text:
+            fail(f"{workflow_id}: live UTC reference-time marker missing: {marker}")
+    if ISO_UTC_LITERAL.search(text):
+        fail(f"{workflow_id}: hard-coded UTC reference time forbidden")
 
 
 def main() -> None:
@@ -91,6 +105,7 @@ def main() -> None:
         fail("quality: E22 validator is not wired into canonical quality gate")
     if "'.github/workflows/eucons-*.yml'" not in quality:
         fail("quality: EUCONS workflow changes do not trigger the quality gate")
+    require_live_reference_time("quality", quality)
 
     build = workflows["build"]
     if "build_public_site.py --target /tmp/eucons-site" not in build or "github_automation.py build-receipt" not in build:
@@ -112,8 +127,14 @@ def main() -> None:
     for marker in required_scheduler_checks:
         if marker not in scheduler:
             fail(f"scheduler: missing safe dry-run check {marker}")
-    if contract["scheduler"]["development_reference_time"] not in scheduler:
-        fail("scheduler: deterministic development reference time missing")
+    reference_policy = contract["scheduler"].get("reference_time_policy")
+    if reference_policy != {
+        "mode": "LIVE_UTC",
+        "source": "runner_clock",
+        "format": "RFC3339_SECONDS",
+    }:
+        fail("scheduler: live UTC reference-time policy drift")
+    require_live_reference_time("scheduler", scheduler)
 
     reconciliation = workflows["reconciliation"]
     if f"cron: '{contract['reconciliation']['cadence']}'" not in reconciliation:

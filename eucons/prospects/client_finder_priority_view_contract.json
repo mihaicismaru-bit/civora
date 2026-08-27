@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "id": "EUCONS-R07-CLIENT-FINDER-PRIORITY-VIEW-001",
+  "status": "CANONICAL",
+  "source_contract_id": "R07-PROSPECT-MATCH-001",
+  "source_match_semantics": "RESEARCH_RELEVANCE_NOT_ELIGIBILITY_AWARD_OR_BUYING_INTENT",
+  "required_eligibility_state": "NOT_ASSESSED",
+  "required_maximum_next_state": "RESEARCH_READY",
+  "state_priority": {
+    "MATCHED_RESEARCH_CANDIDATE": 0,
+    "REQUIRES_VERIFICATION": 1,
+    "NO_CURRENT_OPPORTUNITY": 2,
+    "HOLD_SOURCE_STATE": 3,
+    "HOLD_CONFLICT": 4,
+    "SUPPRESSED": 5
+  },
+  "research_priority_order": {
+    "PRIORITY_HIGH_RESEARCH": 0,
+    "PRIORITY_MEDIUM_RESEARCH": 1,
+    "PRIORITY_LOW_RESEARCH": 2,
+    "HOLD_CONFLICT": 3,
+    "HOLD_SOURCE_STATE": 4,
+    "HOLD_SOURCE_OR_RECORD_STATE": 5,
+    "SUPPRESSED": 6
+  },
+  "attention_reason_by_state": {
+    "MATCHED_RESEARCH_CANDIDATE": "VERIFIED_OPPORTUNITY_SERVICE_OVERLAP",
+    "REQUIRES_VERIFICATION": "ORGANIZATION_OR_PROJECT_FACTS_INCOMPLETE",
+    "NO_CURRENT_OPPORTUNITY": "SERVICE_NEED_WITHOUT_CURRENT_VERIFIED_OPPORTUNITY",
+    "HOLD_SOURCE_STATE": "OPPORTUNITY_SOURCE_REVERIFICATION_REQUIRED",
+    "HOLD_CONFLICT": "EVIDENCE_CONFLICT_REQUIRES_RESOLUTION",
+    "SUPPRESSED": "NO_ACTION_SUPPRESSED"
+  },
+  "output": {
+    "view_state": "CLIENT_FINDER_RESEARCH_PRIORITY_VIEW",
+    "eligibility_state": "NOT_ASSESSED",
+    "maximum_next_state": "RESEARCH_READY",
+    "human_review_required": true,
+    "external_contact_enabled": false,
+    "automatic_offer_enabled": false,
+    "automatic_send_enabled": false,
+    "crm_write_enabled": false,
+    "pipeline_write_enabled": false
+  },
+  "rules": {
+    "deterministic_ranking": true,
+    "never_expose_person_level_fields": true,
+    "selected_opportunity_and_service_only_from_verified_match": true,
+    "deadline_only_when_source_supported": true,
+    "no_eligibility_award_probability_or_buying_intent_claim": true,
+    "no_external_action_or_persistence": true
+  }
+}

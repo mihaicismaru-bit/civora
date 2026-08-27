@@ -30,10 +30,14 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
+      - name: Resolve live reference time
+        id: clock
+        shell: bash
+        run: echo "value=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_OUTPUT"
       - name: Validate opportunity bridge
         run: python eucons/validation/validate_opportunity_bridge.py
       - name: Materialize local stale-safe opportunity projection
-        run: python eucons/opportunities/build_projection.py --reference-time 2026-08-19T10:00:00Z --output /tmp/eucons-opportunity-projection.json
+        run: python eucons/opportunities/build_projection.py --reference-time "${{ steps.clock.outputs.value }}" --output /tmp/eucons-opportunity-projection.json
       - name: Validate editorial loop
         run: python eucons/validation/validate_editorial_loop.py
       - name: Validate commercial email dry-run
@@ -43,7 +47,7 @@ jobs:
       - name: Validate privacy/security gates
         run: python eucons/validation/validate_privacy_security.py
       - name: Emit scheduler receipt without publication
-        run: python eucons/ops/github_automation.py schedule --reference-time 2026-08-19T10:00:00Z --output /tmp/eucons-scheduler-receipt.json --generated-at "${{ github.event.repository.updated_at }}"
+        run: python eucons/ops/github_automation.py schedule --reference-time "${{ steps.clock.outputs.value }}" --output /tmp/eucons-scheduler-receipt.json --generated-at "${{ steps.clock.outputs.value }}"
       - name: Upload scheduler receipt
         uses: actions/upload-artifact@v7
         with:

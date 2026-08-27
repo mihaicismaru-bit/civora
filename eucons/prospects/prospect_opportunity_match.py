@@ -88,10 +88,13 @@ def validate_match_contract(
     if set(contract["profile_projection"]["person_level_fields_forbidden"]) != forbidden:
         raise ValueError("person-level field boundary drift")
 
+    service_policy = contract.get("opportunity_service_policy") or {}
     service_ids = {row["id"] for row in service_registry.get("services") or []}
-    mapped_services = set(contract["opportunity_service_policy"]["verified_funding_opportunity_services"])
+    mapped_services = set(service_policy.get("verified_funding_opportunity_services") or [])
     if not mapped_services or not mapped_services.issubset(service_ids):
         raise ValueError("opportunity service policy references unknown service")
+    if service_policy.get("selection_preference") != "PROSPECT_RECOMMENDED_THEN_SERVICE_ID_ASC":
+        raise ValueError("opportunity service selection policy drift")
     next_actions = set((contract.get("next_best_actions") or {}).keys())
     if next_actions != {"matched", "requires_verification", "no_current_opportunity", "held_source", "held_conflict", "suppressed"}:
         raise ValueError("next-best-action taxonomy incomplete")
@@ -178,7 +181,18 @@ def _deadline_fact(opportunity: dict[str, Any]) -> Any:
     return deepcopy(material.get("deadline"))
 
 
-def _opportunity_summary(row: dict[str, Any], projection_rows: dict[str, dict[str, Any]], aligned_services: list[str]) -> dict[str, Any]:
+def _select_aligned_service(aligned_services: list[str], recommended_service_id: Any) -> str | None:
+    if recommended_service_id in aligned_services:
+        return str(recommended_service_id)
+    return aligned_services[0] if aligned_services else None
+
+
+def _opportunity_summary(
+    row: dict[str, Any],
+    projection_rows: dict[str, dict[str, Any]],
+    aligned_services: list[str],
+    recommended_service_id: Any,
+) -> dict[str, Any]:
     source = projection_rows.get(str(row.get("opportunity_id"))) or {}
     return {
         "opportunity_id": row.get("opportunity_id"),
@@ -189,6 +203,7 @@ def _opportunity_summary(row: dict[str, Any], projection_rows: dict[str, dict[st
         "confidence": row.get("confidence"),
         "state": row.get("state"),
         "aligned_service_ids": aligned_services,
+        "selected_service_id": _select_aligned_service(aligned_services, recommended_service_id),
         "explanations": list(row.get("explanations") or []),
         "hard_exclusion_reasons": list(row.get("hard_exclusion_reasons") or []),
         "verified_fact_classes": sorted(source.get("verified_fact_classes") or []),
@@ -222,6 +237,7 @@ def _base_result(organization_key: str, record: dict[str, Any], score: dict[str,
         "verification_questions": questions,
         "opportunity_matches": [],
         "selected_opportunity_id": None,
+        "selected_service_id": None,
         "next_best_action": contract["next_best_actions"]["requires_verification"],
         "external_contact_enabled": False,
         "automatic_offer_enabled": False,
@@ -263,7 +279,7 @@ def match_record(
     rows = []
     for row in matched["results"]:
         aligned = aligned_services if row.get("state") == opportunity_contract["outputs"]["candidate"] else []
-        rows.append(_opportunity_summary(row, projection_rows, aligned))
+        rows.append(_opportunity_summary(row, projection_rows, aligned, result["recommended_service_id"]))
     result["opportunity_matches"] = rows
 
     if matched["summary"]["evaluated"] and matched["summary"]["held_source_state"] == matched["summary"]["evaluated"]:
@@ -277,6 +293,7 @@ def match_record(
         result.update(
             state=outputs["matched"],
             selected_opportunity_id=selected["opportunity_id"],
+            selected_service_id=selected["selected_service_id"],
             next_best_action=actions["matched"],
         )
         result["verification_questions"] = sorted(set(result["verification_questions"] + [
