@@ -112,6 +112,7 @@ def collection_frame(records: list[dict], *, prod: bool) -> tuple[dict, bytes]:
         frame.update(
             {
                 "privacy_notice_version": "AI4WORK-PRIVACY-v1",
+                "controller_determination_reference": "CTRL-DETERMINATION-001",
                 "controller_approval_reference": "CTRL-APPROVAL-001",
                 "processor_binding_reference": "PROCESSOR-BINDING-001",
                 "server_log_profile_reference": "SERVER-LOG-REVIEW-001",
@@ -169,10 +170,11 @@ class NF06PreingestTests(unittest.TestCase):
         with self.assertRaises(NF06.NF06PreingestError):
             NF06.build_preingest_manifest(records, collection_frame=frame2, source_bytes=source_bytes2, prod=True)
 
-    def test_prod_requires_controller_provider_logging_retention_and_store_refs(self):
+    def test_prod_requires_controller_determination_approval_provider_logging_retention_and_store_refs(self):
         records = normalized_records()
         required = [
             "privacy_notice_version",
+            "controller_determination_reference",
             "controller_approval_reference",
             "processor_binding_reference",
             "server_log_profile_reference",
