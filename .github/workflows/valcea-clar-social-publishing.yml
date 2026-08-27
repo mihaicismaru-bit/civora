@@ -314,15 +314,15 @@ jobs:
             valcea-clar/social/social_media_manifest.json
           )
           media_dir="valcea-clar/site/runtime/media/social"
-          instagram_export_dir="valcea-clar/dist/chatgpt-sites/media/social/editorial/instagram"
           rm -rf /tmp/valcea-social-state
           mkdir -p /tmp/valcea-social-state
           for file in "${files[@]}"; do
             if [ -f "$file" ]; then mkdir -p "/tmp/valcea-social-state/$(dirname "$file")"; cp "$file" "/tmp/valcea-social-state/$file"; fi
           done
-          for dir in "$media_dir" "$instagram_export_dir"; do
-            if [ -d "$dir" ]; then mkdir -p "/tmp/valcea-social-state/$(dirname "$dir")"; cp -a "$dir" "/tmp/valcea-social-state/$dir"; fi
-          done
+          if [ -d "$media_dir" ]; then
+            mkdir -p "/tmp/valcea-social-state/$(dirname "$media_dir")"
+            cp -a "$media_dir" "/tmp/valcea-social-state/$media_dir"
+          fi
           git config user.name "valcea-clar-social-engine[bot]"
           git config user.email "valcea-clar-social-engine@users.noreply.github.com"
           for attempt in 1 2 3 4 5; do
@@ -331,9 +331,12 @@ jobs:
             for file in "${files[@]}"; do
               if [ -f "/tmp/valcea-social-state/$file" ]; then mkdir -p "$(dirname "$file")"; cp "/tmp/valcea-social-state/$file" "$file"; git add "$file"; fi
             done
-            for dir in "$media_dir" "$instagram_export_dir"; do
-              if [ -d "/tmp/valcea-social-state/$dir" ]; then rm -rf "$dir"; mkdir -p "$(dirname "$dir")"; cp -a "/tmp/valcea-social-state/$dir" "$dir"; git add "$dir"; fi
-            done
+            if [ -d "/tmp/valcea-social-state/$media_dir" ]; then
+              rm -rf "$media_dir"
+              mkdir -p "$(dirname "$media_dir")"
+              cp -a "/tmp/valcea-social-state/$media_dir" "$media_dir"
+              git add "$media_dir"
+            fi
             if git diff --cached --quiet; then echo "No VÂLCEA CLAR social-engine changes to persist."; exit 0; fi
             git commit -m "Persist VÂLCEA CLAR story-first social state"
             if git push origin HEAD:main; then exit 0; fi
