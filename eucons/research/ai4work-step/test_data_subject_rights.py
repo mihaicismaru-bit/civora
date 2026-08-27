@@ -8,6 +8,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from research_storage import ResearchStorageError, SQLiteResearchStorage, canonical_json_bytes
+from rights_rectification import rectify_by_response_id
+from runtime import ResearchValidationError
 
 
 FUTURE_REPLAY_BOUNDARY = "2099-01-01T00:00:00+00:00"
@@ -146,6 +148,119 @@ class DataSubjectRightsTests(unittest.TestCase):
             self.assertTrue(store.clear_analysis_hold(objected["response_id"]))
             self.assertEqual(store.export("AI4WORK_ADULTS_V1"), [restricted, objected])
 
+    def test_rectification_revalidates_preset_values_and_preserves_transport_provenance(self):
+        with tempfile.TemporaryDirectory() as td:
+            store = SQLiteResearchStorage(Path(td) / "rights.sqlite")
+            item = test_record("receipt-test-rectify")
+            body, body_sha = append_test_record(store, item)
+            before = store.conn.execute(
+                "SELECT raw_sha256, normalized_sha256 FROM research_responses WHERE response_id = ?",
+                (item["response_id"],),
+            ).fetchone()
+
+            corrected_profile = {"region": "Sud-Muntenia"}
+            corrected_answers = {"Q01": 3}
+            correction_bytes = canonical_json_bytes(
+                {"rights_operation": "rectification", "receipt": item["response_id"]}
+            )
+            corrected_sha = rectify_by_response_id(
+                store,
+                item["response_id"],
+                profile=corrected_profile,
+                answers=corrected_answers,
+                raw_bytes=correction_bytes,
+            )
+
+            corrected = store.get_by_response_id(item["response_id"])
+            self.assertIsNotNone(corrected_sha)
+            self.assertEqual(len(str(corrected_sha)), 64)
+            self.assertEqual(corrected["profile"], corrected_profile)
+            self.assertEqual(corrected["answers"], corrected_answers)
+            for field in (
+                "schema_version",
+                "research_id",
+                "form_id",
+                "form_version",
+                "response_id",
+                "received_at",
+                "recruitment_channel_id",
+                "synthetic",
+            ):
+                self.assertEqual(corrected[field], item[field])
+
+            after = store.conn.execute(
+                "SELECT raw_sha256, normalized_sha256 FROM research_responses WHERE response_id = ?",
+                (item["response_id"],),
+            ).fetchone()
+            self.assertNotEqual(before, after)
+            self.assertEqual(after[1], corrected_sha)
+            self.assertEqual(
+                store.conn.execute(
+                    "SELECT body_sha256, normalized_sha256 FROM idempotency_receipts WHERE response_id = ?",
+                    (item["response_id"],),
+                ).fetchone(),
+                (body_sha, corrected_sha),
+            )
+
+            # A delayed retry of the original submission cannot overwrite the correction.
+            replay_sha, inserted = store.append_idempotent(item, raw_bytes=body, body_sha256=body_sha)
+            self.assertFalse(inserted)
+            self.assertEqual(replay_sha, corrected_sha)
+            self.assertEqual(store.get_by_response_id(item["response_id"]), corrected)
+
+    def test_rectification_preserves_active_rights_hold(self):
+        with tempfile.TemporaryDirectory() as td:
+            store = SQLiteResearchStorage(Path(td) / "rights.sqlite")
+            item = test_record("receipt-test-rectify-held")
+            append_test_record(store, item)
+            self.assertTrue(store.set_analysis_hold(item["response_id"], "RESTRICTED_PENDING_REVIEW"))
+
+            corrected_sha = rectify_by_response_id(
+                store,
+                item["response_id"],
+                profile={"region": "Sud-Vest Oltenia"},
+                answers={"Q01": 4},
+                raw_bytes=b"TEST_TWIN_NON_EVIDENCE rectification\n",
+            )
+            self.assertIsNotNone(corrected_sha)
+            self.assertEqual(store.get_analysis_hold(item["response_id"]), "RESTRICTED_PENDING_REVIEW")
+            self.assertEqual(store.export("AI4WORK_ADULTS_V1"), [])
+            self.assertTrue(store.clear_analysis_hold(item["response_id"]))
+            self.assertEqual(store.export("AI4WORK_ADULTS_V1")[0]["answers"], {"Q01": 4})
+
+    def test_rectification_rejects_invalid_or_identifier_like_values_and_unknown_receipt(self):
+        with tempfile.TemporaryDirectory() as td:
+            store = SQLiteResearchStorage(Path(td) / "rights.sqlite")
+            item = test_record("receipt-test-rectify-invalid")
+            append_test_record(store, item)
+
+            with self.assertRaises(ResearchValidationError):
+                rectify_by_response_id(
+                    store,
+                    item["response_id"],
+                    profile={"region": "Unsupported Region"},
+                    answers={"Q01": 2},
+                    raw_bytes=b"invalid\n",
+                )
+            with self.assertRaises(ResearchValidationError):
+                rectify_by_response_id(
+                    store,
+                    item["response_id"],
+                    profile={"region": "Centru", "email": "person@example.org"},
+                    answers={"Q01": 2},
+                    raw_bytes=b"invalid identifier\n",
+                )
+            self.assertIsNone(
+                rectify_by_response_id(
+                    store,
+                    "unknown-receipt",
+                    profile={"region": "Centru"},
+                    answers={"Q01": 2},
+                    raw_bytes=b"unknown\n",
+                )
+            )
+            self.assertEqual(store.get_by_response_id(item["response_id"]), item)
+
     def test_unknown_receipt_does_not_mutate_other_records(self):
         with tempfile.TemporaryDirectory() as td:
             store = SQLiteResearchStorage(Path(td) / "rights.sqlite")
@@ -193,6 +308,12 @@ class DataSubjectRightsTests(unittest.TestCase):
             "REQUIRED_FINITE_UTC_NOT_AFTER_NO_DEFAULT",
         )
         self.assertTrue(procedure["research_store_operations"]["erased_records_replay_blocked"])
+        self.assertEqual(
+            procedure["research_store_operations"]["rectification_reference_adapter"],
+            "RECEIPT_KEYED_PRESET_VALUES_ONLY_REVALIDATE_FROZEN_FORM_PRESERVE_TECHNICAL_PROVENANCE",
+        )
+        self.assertTrue(procedure["research_store_operations"]["rectification_preserves_active_hold"])
+        self.assertTrue(procedure["research_store_operations"]["rectification_stale_retry_safe"])
         self.assertEqual(procedure["test_twin"]["classification"], "TEST_TWIN_NON_EVIDENCE")
         self.assertFalse(procedure["test_twin"]["prod_promotion_eligible"])
 
