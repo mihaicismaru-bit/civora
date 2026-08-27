@@ -5,6 +5,7 @@ import json
 import re
 import sqlite3
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Protocol
 
@@ -68,19 +69,38 @@ def validate_hold_state(value: Any) -> str:
     return str(value)
 
 
+def parse_utc_boundary(value: str | None) -> datetime | None:
+    if value is None:
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except (TypeError, ValueError) as exc:
+        raise ResearchStorageError("erasure replay retention boundary must be ISO-8601") from exc
+    if parsed.tzinfo is None:
+        raise ResearchStorageError("erasure replay retention boundary must include timezone")
+    return parsed.astimezone(timezone.utc)
+
+
 @dataclass
 class SQLiteResearchStorage:
     """
     Test/reference adapter only. Production binding must use a separately
     secured research-only database and MUST NOT point to CRM storage.
+
+    Erasure replay suppression has deliberately no default retention. A finite
+    UTC not-after boundary must be injected by the approved live binding before
+    an erasure can create a replay marker. The marker table itself remains
+    response_id-only, so retention metadata cannot become analytical metadata.
     """
 
     db_path: Path
     allow_production: bool = False
+    erasure_replay_not_after_utc: str | None = None
 
     def __post_init__(self) -> None:
         if self.allow_production:
             raise ResearchStorageError("SQLite adapter is test/reference only")
+        self._erasure_replay_not_after = parse_utc_boundary(self.erasure_replay_not_after_utc)
         self.conn = sqlite3.connect(str(self.db_path))
         self.conn.execute(
             """
@@ -125,7 +145,31 @@ class SQLiteResearchStorage:
         )
         self.conn.commit()
 
+    def _purge_expired_erasure_replay_blocks(self, *, now_utc: datetime | None = None) -> int:
+        boundary = self._erasure_replay_not_after
+        if boundary is None:
+            return 0
+        now = (now_utc or datetime.now(timezone.utc)).astimezone(timezone.utc)
+        if now < boundary:
+            return 0
+        return self.conn.execute("DELETE FROM erasure_replay_blocks").rowcount
+
+    def expire_erasure_replay_blocks(self, *, now_utc: datetime | None = None) -> int:
+        """Delete replay markers once the externally approved finite boundary is reached."""
+        if self._erasure_replay_not_after is None:
+            raise ResearchStorageError("erasure replay retention boundary not configured")
+        try:
+            self.conn.execute("BEGIN IMMEDIATE")
+            deleted = self._purge_expired_erasure_replay_blocks(now_utc=now_utc)
+            self.conn.commit()
+            return deleted
+        except Exception:
+            if self.conn.in_transaction:
+                self.conn.rollback()
+            raise
+
     def _erasure_replay_blocked(self, response_id: str) -> bool:
+        self._purge_expired_erasure_replay_blocks()
         return self.conn.execute(
             "SELECT 1 FROM erasure_replay_blocks WHERE response_id = ?",
             (response_id,),
@@ -175,9 +219,9 @@ class SQLiteResearchStorage:
 
         Returns (normalized_sha256, inserted). A reused response_id with a
         different canonical analytical body fails closed. A response_id that
-        was erased is permanently blocked by the reference adapter from being
-        recreated by a stale transport retry. The body digest and raw
-        idempotency key never enter analytical exports.
+        was erased is blocked until the explicitly configured finite replay-
+        suppression boundary. The body digest and raw idempotency key never
+        enter analytical exports.
         """
         validate_record_envelope(record)
         validate_body_sha256(body_sha256)
@@ -316,6 +360,10 @@ class SQLiteResearchStorage:
             if exists is None:
                 self.conn.rollback()
                 return False
+            if self._erasure_replay_not_after is None:
+                raise ResearchStorageError("erasure replay retention boundary required before erasure")
+            if datetime.now(timezone.utc) >= self._erasure_replay_not_after:
+                raise ResearchStorageError("erasure replay retention boundary already expired")
             self.conn.execute(
                 "INSERT OR IGNORE INTO erasure_replay_blocks(response_id) VALUES (?)",
                 (receipt,),
