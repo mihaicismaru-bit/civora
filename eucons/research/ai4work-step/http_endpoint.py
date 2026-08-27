@@ -9,6 +9,7 @@ from runtime import ResearchValidationError, collection_enabled, load_contract
 
 SUBMIT_PATH = "/research/ai4work/v1/submit"
 IDEMPOTENCY_HEADER = "x-ai4work-idempotency-key"
+RECRUITMENT_CHANNEL_HEADER = "x-ai4work-recruitment-channel"
 MAX_BODY_BYTES = 64 * 1024
 
 
@@ -52,8 +53,9 @@ def handle_request(
     """Transport-neutral, fail-closed adapter for the AI4WORK research submit route.
 
     This function deliberately does not bind a web server, database credential,
-    proxy configuration, or deployment target. It exists so the exact HTTP
-    semantics can be tested before any production route is enabled.
+    proxy configuration, or deployment target. Recruitment provenance is
+    supplied as a bounded first-party batch id; referrer, UTM, cookie, IP and
+    device identifiers are not used for this purpose.
     """
     if path != SUBMIT_PATH:
         return _json_response(404, {"error": "not_found"})
@@ -73,16 +75,23 @@ def handle_request(
         return _json_response(413, {"error": "payload_too_large"})
 
     idempotency_key = _header(headers, IDEMPOTENCY_HEADER)
+    recruitment_channel_id = _header(headers, RECRUITMENT_CHANNEL_HEADER)
     try:
         payload = json.loads(bytes(body).decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError):
         return _json_response(400, {"error": "invalid_json"})
 
     try:
-        record, body_sha256 = prepare_http_submission(payload, idempotency_key)
+        record, body_sha256 = prepare_http_submission(
+            payload,
+            idempotency_key,
+            recruitment_channel_id,
+        )
     except IdempotencyError:
         return _json_response(400, {"error": "invalid_idempotency_key"})
-    except ResearchValidationError:
+    except ResearchValidationError as exc:
+        if "recruitment_channel_id" in str(exc):
+            return _json_response(400, {"error": "invalid_recruitment_channel"})
         return _json_response(422, {"error": "submission_rejected"})
 
     try:
