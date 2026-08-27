@@ -64,6 +64,7 @@ jobs:
           python -m py_compile partener-eu/ops/p10_monitor_integrity.py
           python -m py_compile partener-eu/ops/test_mipe_final_cleanup.py
           python -m py_compile partener-eu/ops/test_mipe_lifecycle_alias_cleanup.py
+          python -m py_compile partener-eu/ops/test_mipe_lifecycle_monotonic_cleanup.py
           python -m py_compile partener-eu/ops/test_p10_policy_regression.py
 
       - name: Full-checkout caller audit and architecture contract
@@ -71,6 +72,7 @@ jobs:
           python partener-eu/ops/audit_mipe_legacy.py
           python partener-eu/ops/test_mipe_final_cleanup.py
           python partener-eu/ops/test_mipe_lifecycle_alias_cleanup.py
+          python partener-eu/ops/test_mipe_lifecycle_monotonic_cleanup.py
           python partener-eu/ops/test_p10_policy_regression.py
 
       - name: Provenance, immutable-runtime and route arbitration regressions
@@ -104,6 +106,7 @@ jobs:
         run: |
           python partener-eu/ops/test_mipe_final_cleanup.py
           python partener-eu/ops/test_mipe_lifecycle_alias_cleanup.py
+          python partener-eu/ops/test_mipe_lifecycle_monotonic_cleanup.py
 
       - name: Build evidence receipt
         if: always()
