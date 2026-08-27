@@ -12,6 +12,7 @@ class ControllerDeterminationContractTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.contract = json.loads((HERE / "CONTROLLER_DETERMINATION_DRAFT.json").read_text(encoding="utf-8"))
+        cls.forms = json.loads((HERE / "forms_definition.json").read_text(encoding="utf-8"))
 
     def test_unresolved_record_is_fail_closed(self):
         c = self.contract
@@ -55,6 +56,13 @@ class ControllerDeterminationContractTests(unittest.TestCase):
     def test_nf06_reference_requires_frozen_controller_determination(self):
         approvals = "\n".join(self.contract["approval_requirements"]).lower()
         self.assertIn("nf06 collection frame cites the frozen controller-determination record", approvals)
+
+    def test_frozen_forms_do_not_hardcode_unproven_controller(self):
+        notice = self.forms.get("common_notice") or {}
+        self.assertEqual(notice.get("operator_status"), "UNRESOLVED_BEFORE_COLLECTION")
+        self.assertIsNone(notice.get("operator"))
+        rendered = json.dumps(self.forms, ensure_ascii=False)
+        self.assertNotIn("EUROCONSULT SRL (CUI 14250864)", rendered)
 
 
 if __name__ == "__main__":
