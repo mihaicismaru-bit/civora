@@ -8,7 +8,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 DETERMINISM_FIXER = ROOT / "partener-eu" / "ops" / "fix_decision_products_determinism.py"
 SOURCE_COVERAGE_FIXER = ROOT / "partener-eu" / "ops" / "fix_decision_products_source_coverage.py"
+ROMANIAN_UI_FIXER = ROOT / "partener-eu" / "ops" / "fix_decision_ui_romanian.py"
 RUNTIME = ROOT / "partener-eu" / "ingest" / "build_decision_products.py"
+UI_RUNTIME = ROOT / "partener-eu" / "web" / "decision-intelligence-v2.js"
 DECISION_PRODUCTS_WORKFLOW = ROOT / ".github" / "workflows" / "partener-eu-decision-products.yml"
 FINAL_CLEANUP_WORKFLOW = ROOT / ".github" / "workflows" / "partener-eu-mipe-final-cleanup-qa.yml"
 SELF = "test_mipe_decision_products_determinism_cleanup.py"
@@ -23,7 +25,7 @@ def load_runtime():
 
 
 def main() -> int:
-    for fixer in (DETERMINISM_FIXER, SOURCE_COVERAGE_FIXER):
+    for fixer in (DETERMINISM_FIXER, SOURCE_COVERAGE_FIXER, ROMANIAN_UI_FIXER):
         assert not fixer.exists(), f"retired one-shot fixer reappeared: {fixer.relative_to(ROOT)}"
 
     decision_workflow = DECISION_PRODUCTS_WORKFLOW.read_text(encoding="utf-8")
@@ -32,6 +34,12 @@ def main() -> int:
     )
     assert "fix_decision_products_source_coverage.py" not in decision_workflow, (
         "decision-products workflow still references the retired source-coverage fixer"
+    )
+    assert "fix_decision_ui_romanian.py" not in decision_workflow, (
+        "decision-products workflow still references the retired Romanian UI fixer"
+    )
+    assert "Apply Romanian UI rules" not in decision_workflow, (
+        "decision-products workflow still contains the retired runtime UI patching step"
     )
 
     final_cleanup_workflow = FINAL_CLEANUP_WORKFLOW.read_text(encoding="utf-8")
@@ -49,6 +57,18 @@ def main() -> int:
     assert 'explicit = str(item.get("pageClass") or "").upper()' in runtime_text, (
         "explicit source pageClass handling disappeared from decision-products runtime"
     )
+
+    ui_text = UI_RUNTIME.read_text(encoding="utf-8")
+    for marker in (
+        "const eventLabels=",
+        "const eventLabel=v=>",
+        "const statusLabels=",
+        "const statusText=v=>",
+        "const fundingFact=d=>",
+        "const displayFact=",
+        "eventLabel(n.kind)",
+    ):
+        assert marker in ui_text, f"canonical Romanian UI behavior missing after patcher retirement: {marker}"
 
     module = load_runtime()
 
