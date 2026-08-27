@@ -4,7 +4,10 @@
 This entrypoint keeps source-specific evidence extraction behind generic parser
 contracts. It reuses the established traffic/water collectors and adds the
 instance-agnostic district-heat interruption parser without granting reader-copy
-or publication authority. Disabled sources remain disabled and are never fetched.
+or publication authority. The electricity schedule parser is validated here but
+is deliberately not routed until its official weekly-document fetch/extraction
+adapter passes live acceptance. Disabled sources remain disabled and are never
+fetched.
 """
 from __future__ import annotations
 
@@ -23,6 +26,7 @@ if str(CORE) not in sys.path:
 import primary_signal_verifier as primary  # noqa: E402
 import signal_radar as radar  # noqa: E402
 import structured_alert_ingest as base  # noqa: E402
+import structured_electricity_interruption_parser as electricity  # noqa: E402
 import structured_heat_interruption_parser as heat  # noqa: E402
 
 
@@ -104,6 +108,9 @@ def collect_source(
         return {"source_id": source.get("id"), "status": "DISABLED", "events": []}
     if source.get("parser") == heat.PARSER_ID:
         return collect_heat_interruption_source(source, tz, now)
+    # Electricity sources stay disabled until the weekly-document adapter is
+    # present. If one is enabled prematurely, base.collect_source fails closed on
+    # the unsupported parser instead of interpreting a listing page as evidence.
     return base.collect_source(instance, source, tz, now)
 
 
@@ -132,6 +139,7 @@ def self_test() -> int:
     # Existing traffic/water contracts must remain green under the unified runtime.
     assert base.self_test() == 0
     assert heat.self_test() == 0
+    assert electricity.self_test() == 0
 
     tz = ZoneInfo("Europe/Bucharest")
     sample = """
