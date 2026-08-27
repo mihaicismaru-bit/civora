@@ -10,14 +10,16 @@ from test_runtime import adult_payload, employer_payload
 ADULT_CHANNEL = "CH-ADULT001"
 EMPLOYER_CHANNEL = "CH-EMPLOY01"
 CHANNEL_REGISTER_SHA = "a" * 64
+ADULT_RECEIPT = "1" * 64
+EMPLOYER_RECEIPT = "2" * 64
 
 
 def normalized_records(*, synthetic: bool = False) -> list[dict]:
     adult = RUNTIME.validate_submission(adult_payload(), recruitment_channel_id=ADULT_CHANNEL)
     employer = RUNTIME.validate_submission(employer_payload(), recruitment_channel_id=EMPLOYER_CHANNEL)
-    adult["response_id"] = "resp-adult-001"
+    adult["response_id"] = ADULT_RECEIPT
     adult["received_at"] = "2026-08-28T09:00:00+00:00"
-    employer["response_id"] = "resp-employer-001"
+    employer["response_id"] = EMPLOYER_RECEIPT
     employer["received_at"] = "2026-08-28T10:00:00+00:00"
     adult["synthetic"] = synthetic
     employer["synthetic"] = synthetic
@@ -99,6 +101,21 @@ class NF06PreingestTests(unittest.TestCase):
         bad_frame, bad_bytes = collection_frame(real_record_in_test_twin, prod=False)
         with self.assertRaises(NF06.NF06PreingestError):
             NF06.build_preingest_manifest(real_record_in_test_twin, collection_frame=bad_frame, source_bytes=bad_bytes, prod=False)
+
+    def test_response_id_must_be_lowercase_64_hex_in_prod_and_test_twin(self):
+        for prod in (True, False):
+            with self.subTest(prod=prod):
+                records = normalized_records(synthetic=not prod)
+                records[0]["response_id"] = "respondent@example.org"
+                frame, source_bytes = collection_frame(records, prod=prod)
+                with self.assertRaises(NF06.NF06PreingestError):
+                    NF06.build_preingest_manifest(records, collection_frame=frame, source_bytes=source_bytes, prod=prod)
+
+                records = normalized_records(synthetic=not prod)
+                records[0]["response_id"] = "A" * 64
+                frame, source_bytes = collection_frame(records, prod=prod)
+                with self.assertRaises(NF06.NF06PreingestError):
+                    NF06.build_preingest_manifest(records, collection_frame=frame, source_bytes=source_bytes, prod=prod)
 
     def test_source_bytes_or_sha_mismatch_fails_closed(self):
         records = normalized_records()
