@@ -89,9 +89,12 @@ def render_form(form: dict[str, Any], schema: dict[str, Any], contract: dict[str
     enabled = contract.get("production_enabled") is True
     disabled = not enabled
     notice = schema["common_notice"]
+    pre_notice = contract.get("pre_form_notice") or {}
+    operator_name = pre_notice.get("operator_legal_name") or "DE STABILIT ÎNAINTE DE ACTIVAREA COLECTĂRII"
+    privacy_contact = pre_notice.get("privacy_contact") or "DE COMPLETAT ÎNAINTE DE ACTIVAREA COLECTĂRII"
     profile = ''.join(input_field(field, disabled) for field in form["profile"])
     questions = ''.join(question_field(q, disabled) for q in form["questions"])
-    gate = '' if enabled else '<div class="eu-alert eu-alert--warning" role="status"><strong>Colectarea nu este activată.</strong> Aceasta este versiunea de validare. Trimiterea răspunsurilor rămâne blocată până la completarea contactului GDPR, a storage-ului de cercetare și a testelor de integrare.</div>'
+    gate = '' if enabled else '<div class="eu-alert eu-alert--warning" role="status"><strong>Colectarea nu este activată.</strong> Aceasta este versiunea de validare. Trimiterea răspunsurilor rămâne blocată până la completarea identității operatorului, a contactului GDPR, a storage-ului de cercetare și a testelor de integrare.</div>'
     ack_disabled = ' disabled' if disabled else ''
     submit_disabled = ' disabled' if disabled else ''
     body = f"""
@@ -99,7 +102,7 @@ def render_form(form: dict[str, Any], schema: dict[str, Any], contract: dict[str
 <p class="eu-eyebrow">AI4WORK STEP · cercetare primară</p>
 <h1 class="eu-heading-lg">{esc(form['title'])}</h1>
 {gate}
-<div class="eu-card eu-stack"><h2 class="eu-heading-md">{esc(notice['title'])}</h2><p>{esc(notice['body'])}</p><p><strong>Operator:</strong> {esc(notice['operator'])}</p><p><strong>Contact protecția datelor:</strong> {esc(notice['privacy_contact'])}</p></div>
+<div class="eu-card eu-stack"><h2 class="eu-heading-md">{esc(notice['title'])}</h2><p>{esc(notice['body'])}</p><p><strong>Operator:</strong> {esc(operator_name)}</p><p><strong>Contact protecția datelor:</strong> {esc(privacy_contact)}</p></div>
 <form class="eu-stack" method="post">
 <label><input type="checkbox" name="notice_read_and_voluntary_participation" value="true"{ack_disabled}> {esc(notice['acknowledgement_label'])}</label>
 <h2 class="eu-heading-md">Profil statistic minim</h2>{profile}
