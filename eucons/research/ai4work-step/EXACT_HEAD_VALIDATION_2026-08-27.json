@@ -1,18 +1,21 @@
 {
-  "schema_version": "eucons.ai4work_exact_head_validation.v0.1",
+  "schema_version": "eucons.ai4work_exact_head_validation.v0.2",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "validation_date": "2026-08-27",
-  "pr_number": 691,
-  "candidate_branch": "eucons/ai4work-research-fresh-main-20260827-v2",
-  "candidate_head_sha": "a3152b8975e22c7dd358d47c910241740d4aacf4",
-  "base_main_sha": "4209af975466865d750fbaf795ba74a3ca4aee5e",
+  "validation_record_type": "CODE_HEAD_CI_OBSERVATION",
+  "pr_number": 695,
+  "candidate_branch": "eucons/ai4work-research-provider-fresh-20260827",
+  "validated_code_head_sha": "fa7d9c09364a984c3b8b9a356ec816ef0b7742d7",
+  "base_main_sha": "0c3e13e82a420fe307948590a1c326453bb74b37",
+  "pr_merge_test_sha": "5cde754291c6e9bd7689848aeb2d94c4050e4624",
   "workflow": {
     "name": "EUCONS AI4WORK Research Gate",
-    "run_id": 33020847381,
-    "run_number": 2,
+    "run_id": 33027622834,
+    "run_number": 6,
     "status": "completed",
     "conclusion": "success",
-    "job": "research-gate"
+    "job": "research-gate",
+    "job_id": 98372555795
   },
   "unit_tests": {
     "command": "python -m unittest -v test_runtime.py test_research_storage.py test_http_idempotency.py",
@@ -70,10 +73,17 @@
     "commercial_analytics": "FORBIDDEN"
   },
   "other_same_head_workflows": {
-    "EUCONS Quality": "success",
-    "EUCONS Build": "success"
+    "EUCONS Quality": {
+      "run_id": 33027622885,
+      "result": "SUCCESS"
+    },
+    "EUCONS Build": {
+      "run_id": 33027622863,
+      "result": "SUCCESS"
+    }
   },
-  "scope_boundary": "This proves the repository-level runtime/storage/idempotency/preview/tracking/fail-closed controls on the PR candidate. It does not prove the future production HTTP endpoint, hosting logs, processor/subprocessor facts, production database isolation, provider-side deletion, public deployment or browser-to-production-store-to-NF06 smoke.",
+  "scope_boundary": "This proves repository-level runtime/storage/idempotency/preview/tracking/fail-closed controls for validated code head fa7d9c09364a984c3b8b9a356ec816ef0b7742d7 tested through PR #695 against main 0c3e13e82a420fe307948590a1c326453bb74b37. It does not prove the future production HTTP endpoint, hosting logs, processor/subprocessor facts, production database isolation, provider-side deletion, public deployment or browser-to-production-store-to-NF06 smoke.",
+  "record_note": "This observation replaces stale PR/head/base references carried over from the superseded candidate. A later metadata-only commit may contain this record; the tested code blobs remain those of validated_code_head_sha unless separately changed.",
   "merge_authorized": false,
   "deploy_authorized": false,
   "collection_enabled": false

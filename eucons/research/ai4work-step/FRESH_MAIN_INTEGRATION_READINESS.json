@@ -1,15 +1,17 @@
 {
-  "schema_version": "eucons.ai4work_fresh_main_readiness.v0.8",
+  "schema_version": "eucons.ai4work_fresh_main_readiness.v0.9",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "rebuilt_on_main_sha": "4209af975466865d750fbaf795ba74a3ca4aee5e",
-  "state": "REPOSITORY_GATE_PASS_PROVIDER_DPA_FOUND_COLLECTION_STILL_FAIL_CLOSED",
+  "rebuilt_on_main_sha": "0c3e13e82a420fe307948590a1c326453bb74b37",
+  "state": "FRESH_MAIN_REPLAY_CI_PASS_PROVIDER_PRIVACY_BINDING_OPEN_REAL_DATA_OPEN",
   "verified_delta": [
-    "the complete AI4WORK research-provider file set was rebuilt on main 4209af975466865d750fbaf795ba74a3ca4aee5e without importing stale branch history",
+    "the complete 19-file AI4WORK research-provider candidate was replayed onto exact main 0c3e13e82a420fe307948590a1c326453bb74b37 without importing stale branch history",
+    "draft PR 695 is clean and mergeable but remains unmerged; no deployment or production collection has been authorized",
     "research-only storage remains isolated under eucons/research/ai4work-step and the SQLite adapter explicitly refuses production mode",
     "adult and employer questionnaire definitions plus the fail-closed static renderer are present on the current-main candidate",
     "PROD storage rejects synthetic records and TEST TWIN remains NON_EVIDENCE",
     "privacy-safe retry idempotency is implemented: one-submit UUIDv4 keys derive opaque response IDs; raw keys and body digests are excluded from analytical export; same-key/different-body fails closed",
-    "the dedicated AI4WORK research workflow has passed on exact PR heads and gates runtime/storage/idempotency tests, preview rendering, tracking rejection and collection-disabled assertions",
+    "EUCONS AI4WORK Research Gate, EUCONS Build and EUCONS Quality all passed for code head fa7d9c09364a984c3b8b9a356ec816ef0b7742d7 tested through PR 695 against exact current-main base",
+    "the research gate executed 21 runtime/storage/idempotency tests successfully, rendered exactly three preview pages, rejected third-party commercial tracking signatures and asserted production_enabled=false, CRM FORBIDDEN and commercial analytics FORBIDDEN",
     "GDPR_DPIA_SCREENING.json records a fail-closed EDPB/ANSPDCP-aware screen; under the current minimised design no mandatory/high-risk trigger is presently identified, but controller signoff and re-screen triggers remain mandatory",
     "GDPR_LIA_DRAFT.json documents Article 6(1)(f) only as a candidate basis with purpose, necessity and balancing safeguards; controller approval remains mandatory before collection",
     "GDPR_RETENTION_SCHEDULE_DRAFT.json defines short respondent/log/contact lifecycles and deletion evidence, but provider execution is not yet bound",
@@ -18,16 +20,17 @@
     "the same public DPA leaves nominal subprocessor Annex 4 and exact backup/retention Annex 5 available on request, so account-specific subprocessor/log/backup facts remain open rather than inferred"
   ],
   "validation_state": {
-    "current_main_transplant": "PASS_ON_4209AF975466865D750FBAF795BA74A3CA4AEE5E",
-    "repository_exact_head_gate": "PASS_MULTIPLE_PR_HEADS",
-    "last_observed_full_gate_head_before_provider_fact_docs": "188e69f353dbbb30472c99bc1d20ddf53c92d832",
+    "current_main_transplant": "PASS_ON_0C3E13E82A420FE307948590A1C326453BB74B37",
+    "repository_exact_head_gate": "PASS_PR_695_CODE_HEAD_FA7D9C09364A984C3B8B9A356EC816EF0B7742D7",
+    "validated_code_head_sha": "fa7d9c09364a984c3b8b9a356ec816ef0b7742d7",
+    "validated_pr_merge_test_sha": "5cde754291c6e9bd7689848aeb2d94c4050e4624",
     "last_observed_workflows": {
-      "EUCONS AI4WORK Research Gate": "SUCCESS_RUN_4_33021520286",
-      "EUCONS Build": "SUCCESS_RUN_135_33021520199",
-      "EUCONS Quality": "SUCCESS_RUN_242_33021520193"
+      "EUCONS AI4WORK Research Gate": "SUCCESS_RUN_6_33027622834",
+      "EUCONS Build": "SUCCESS_RUN_140_33027622863",
+      "EUCONS Quality": "SUCCESS_RUN_247_33027622885"
     },
-    "fresh_runtime_test_execution": "PASS",
-    "fresh_renderer_ci": "PASS_PREVIEW_ONLY",
+    "fresh_runtime_test_execution": "PASS_21_TESTS",
+    "fresh_renderer_ci": "PASS_PREVIEW_ONLY_3_PAGES",
     "retry_idempotency_exact_head_ci": "PASS",
     "browser_http_store_export_nf06_smoke": "PENDING_PRODUCTION_BINDING",
     "production_collection_validation": "NOT_AUTHORIZED_AND_NOT_RUN"
@@ -47,7 +50,11 @@
   "retry_idempotency_gate": {
     "state": "IMPLEMENTATION_AND_EXACT_HEAD_CI_PASS",
     "control_artifact": "HTTP_IDEMPOTENCY_CONTRACT.json",
-    "implementation": ["http_idempotency.py", "research_storage.py::append_idempotent", "test_http_idempotency.py"],
+    "implementation": [
+      "http_idempotency.py",
+      "research_storage.py::append_idempotent",
+      "test_http_idempotency.py"
+    ],
     "required_behavior": "same first-party idempotency key plus same normalized body is replay-safe; same key plus different body fails closed; different keys may represent distinct submissions even when answers match",
     "privacy_boundary": "no cookie, fingerprint, CRM identifier, email, phone, IP-derived identifier or cross-site identifier may be used as the idempotency key"
   },
