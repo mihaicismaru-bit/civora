@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "id": "EUCONS-R07-CLIENT-FINDER-RESEARCH-EVALUATION-REVIEW-001",
+  "status": "CANONICAL",
+  "purpose": "Capture the second, explicit human research-evaluation decision after the Client Finder evaluation-transition gate, without crossing into offer generation, CRM, pipeline, pricing, persistence, or outreach.",
+  "source_transition": {
+    "contract_id": "EUCONS-R07-CLIENT-FINDER-EVALUATION-TRANSITION-001",
+    "record_state": "CLIENT_FINDER_RESEARCH_EVALUATION_TRANSITION_ENVELOPE",
+    "required_transition_status": "READY_FOR_RESEARCH_EVALUATION_REVIEW",
+    "required_source_status": "OFFICIAL_SOURCE_REVERIFIED",
+    "required_transition_decision": "APPROVE_RESEARCH_EVALUATION_HANDOFF"
+  },
+  "source_evaluation": {
+    "contract_id": "EUCONS-E11-R07-EVALUATION-HANDOFF-001",
+    "record_state": "RESEARCH_EVALUATION_PENDING_HUMAN_REVIEW"
+  },
+  "required_boundaries": {
+    "eligibility_state": "NOT_ASSESSED",
+    "maximum_next_state": "RESEARCH_READY",
+    "human_review_required": true,
+    "external_contact_enabled": false,
+    "automatic_offer_enabled": false,
+    "automatic_send_enabled": false,
+    "crm_write_enabled": false,
+    "pipeline_write_enabled": false
+  },
+  "decision": {
+    "decision_source": "HUMAN",
+    "allowed_research_outcomes": [
+      "MORE_RESEARCH_REQUIRED",
+      "NO_RESEARCH_FIT",
+      "RESEARCH_FIT_CONFIRMED"
+    ],
+    "outcome_review_map": {
+      "MORE_RESEARCH_REQUIRED": "RESEARCH_CONTINUE",
+      "NO_RESEARCH_FIT": "RESEARCH_CLOSED_NO_FIT",
+      "RESEARCH_FIT_CONFIRMED": "RESEARCH_COMPLETE_COMMERCIAL_GATE_REQUIRED"
+    },
+    "outcome_next_gate_map": {
+      "MORE_RESEARCH_REQUIRED": null,
+      "NO_RESEARCH_FIT": null,
+      "RESEARCH_FIT_CONFIRMED": "SEPARATE_COMMERCIAL_SCOPE_GATE_REQUIRED"
+    },
+    "decided_at_format": "RFC3339_UTC_Z"
+  },
+  "output": {
+    "record_state": "CLIENT_FINDER_RESEARCH_EVALUATION_REVIEW_ENVELOPE",
+    "target_state_committed": false,
+    "persistence_executed": false,
+    "offer_engine_invocation_allowed": false,
+    "commercial_scope_write_enabled": false,
+    "pricing_decision_allowed": false,
+    "crm_context_materialization_allowed": false,
+    "human_review_required": true,
+    "external_contact_enabled": false,
+    "automatic_offer_enabled": false,
+    "automatic_send_enabled": false,
+    "crm_write_enabled": false,
+    "pipeline_write_enabled": false
+  },
+  "rules": {
+    "source_transition_must_be_human_approved_and_official_source_reverified": true,
+    "source_transition_must_not_have_committed_or_persisted_target_state": true,
+    "proposed_evaluation_identity_must_match_transition": true,
+    "evaluation_decision_must_be_human_and_exact_identity": true,
+    "research_fit_is_not_eligibility_award_conversion_or_buying_intent": true,
+    "commercial_scope_requires_a_separate_future_gate": true,
+    "never_invoke_offer_engine_from_research_review": true,
+    "never_materialize_crm_context_from_research_review": true,
+    "never_decide_price_from_research_review": true,
+    "never_enable_external_action_or_persistence": true,
+    "person_level_fields_forbidden": true,
+    "raw_evidence_hash_deadline_and_probability_fields_forbidden": true
+  }
+}
