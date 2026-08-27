@@ -3,9 +3,11 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from collections import Counter
 from datetime import datetime, timezone
 from typing import Any
 
+from channel_provenance import ChannelProvenanceError, validate_channel_set, validate_recruitment_channel_id
 from research_storage import ALLOWED_FORMS, RESEARCH_ID, canonical_json_bytes, validate_record_envelope
 from runtime import PII_PATTERNS, _form_by_id, _validate_group, load_forms, reject_forbidden_keys
 
@@ -20,6 +22,7 @@ EXPECTED_RECORD_KEYS = {
     "form_version",
     "response_id",
     "received_at",
+    "recruitment_channel_id",
     "profile",
     "answers",
     "synthetic",
@@ -43,6 +46,7 @@ COMMON_FRAME_FIELDS = {
     "collection_started_at",
     "collection_closed_at",
     "collection_channels",
+    "collection_channel_register_sha256",
     "source_system",
     "source_export_sha256",
     "direct_identifiers_collected",
@@ -89,7 +93,7 @@ def canonical_export_bytes(records: list[dict[str, Any]]) -> bytes:
     return b"".join(canonical_json_bytes(row) for row in ordered)
 
 
-def validate_collection_frame(frame: Any, *, prod: bool) -> tuple[datetime, datetime]:
+def validate_collection_frame(frame: Any, *, prod: bool) -> tuple[datetime, datetime, frozenset[str]]:
     if not isinstance(frame, dict):
         raise NF06PreingestError("collection frame must be an object")
     missing = COMMON_FRAME_FIELDS - set(frame)
@@ -117,6 +121,8 @@ def validate_collection_frame(frame: Any, *, prod: bool) -> tuple[datetime, date
         raise NF06PreingestError("storage_class mismatch")
     if not isinstance(frame.get("source_export_sha256"), str) or not SHA256_RE.fullmatch(frame["source_export_sha256"]):
         raise NF06PreingestError("source_export_sha256 must be lowercase SHA-256 hex")
+    if not isinstance(frame.get("collection_channel_register_sha256"), str) or not SHA256_RE.fullmatch(frame["collection_channel_register_sha256"]):
+        raise NF06PreingestError("collection_channel_register_sha256 must be lowercase SHA-256 hex")
 
     instrument_versions = frame.get("instrument_versions")
     if not isinstance(instrument_versions, dict) or set(instrument_versions) != ALLOWED_FORMS:
@@ -124,9 +130,10 @@ def validate_collection_frame(frame: Any, *, prod: bool) -> tuple[datetime, date
     if any(instrument_versions[form_id] != 1 for form_id in ALLOWED_FORMS):
         raise NF06PreingestError("instrument_versions must be 1 for both forms")
 
-    channels = frame.get("collection_channels")
-    if not isinstance(channels, list) or not channels or any(not isinstance(item, str) or not item.strip() for item in channels):
-        raise NF06PreingestError("collection_channels must be a non-empty string list")
+    try:
+        channels = frozenset(validate_channel_set(frame.get("collection_channels")))
+    except ChannelProvenanceError as exc:
+        raise NF06PreingestError(str(exc)) from exc
 
     start = _parse_ts(frame.get("collection_started_at"), field="collection_started_at")
     end = _parse_ts(frame.get("collection_closed_at"), field="collection_closed_at")
@@ -147,10 +154,18 @@ def validate_collection_frame(frame: Any, *, prod: bool) -> tuple[datetime, date
         if frame.get("evidence_class") != TEST_TWIN_EVIDENCE_CLASS:
             raise NF06PreingestError("TEST TWIN evidence_class mismatch")
 
-    return start, end
+    return start, end, channels
 
 
-def _validate_normalized_record(record: Any, *, prod: bool, start: datetime, end: datetime, forms: dict[str, Any]) -> datetime:
+def _validate_normalized_record(
+    record: Any,
+    *,
+    prod: bool,
+    start: datetime,
+    end: datetime,
+    forms: dict[str, Any],
+    allowed_channels: frozenset[str],
+) -> datetime:
     if not isinstance(record, dict) or set(record) != EXPECTED_RECORD_KEYS:
         raise NF06PreingestError(f"record fields must be exactly {sorted(EXPECTED_RECORD_KEYS)}")
     reject_forbidden_keys(record)
@@ -163,6 +178,12 @@ def _validate_normalized_record(record: Any, *, prod: bool, start: datetime, end
         raise NF06PreingestError("unsupported form_id")
     if record.get("schema_version") != 1 or record.get("form_version") != 1:
         raise NF06PreingestError("unsupported record schema/form version")
+    try:
+        channel_id = validate_recruitment_channel_id(record.get("recruitment_channel_id"))
+    except ChannelProvenanceError as exc:
+        raise NF06PreingestError(str(exc)) from exc
+    if channel_id not in allowed_channels:
+        raise NF06PreingestError("record recruitment_channel_id is not declared in collection frame")
     if prod:
         try:
             validate_record_envelope(record)
@@ -200,7 +221,7 @@ def build_preingest_manifest(
     if not isinstance(source_bytes, (bytes, bytearray)):
         raise NF06PreingestError("source_bytes must be bytes")
 
-    start, end = validate_collection_frame(collection_frame, prod=prod)
+    start, end, allowed_channels = validate_collection_frame(collection_frame, prod=prod)
     canonical = canonical_export_bytes(records)
     if bytes(source_bytes) != canonical:
         raise NF06PreingestError("source bytes do not match canonical parsed-record export")
@@ -211,35 +232,49 @@ def build_preingest_manifest(
     forms = load_forms()
     response_ids: set[str] = set()
     form_counts = {form_id: 0 for form_id in sorted(ALLOWED_FORMS)}
+    channel_counts: Counter[str] = Counter()
     received_values: list[datetime] = []
     for record in records:
-        received = _validate_normalized_record(record, prod=prod, start=start, end=end, forms=forms)
+        received = _validate_normalized_record(
+            record,
+            prod=prod,
+            start=start,
+            end=end,
+            forms=forms,
+            allowed_channels=allowed_channels,
+        )
         rid = record["response_id"]
         if rid in response_ids:
             raise NF06PreingestError("duplicate response_id inside batch")
         response_ids.add(rid)
         form_counts[record["form_id"]] += 1
+        channel_counts[record["recruitment_channel_id"]] += 1
         received_values.append(received)
 
     evidence_class = PROD_EVIDENCE_CLASS if prod else TEST_TWIN_EVIDENCE_CLASS
+    dominant_channel_share = max(channel_counts.values()) / len(records)
     return {
-        "schema_version": "eucons.ai4work_nf06_preingest_manifest.v0.1",
+        "schema_version": "eucons.ai4work_nf06_preingest_manifest.v0.2",
         "research_id": RESEARCH_ID,
         "handoff_stage": "NF06_SOURCE_PREFLIGHT",
         "evidence_class": evidence_class,
         "non_evidence": not prod,
         "collection_frame_id": collection_frame["collection_frame_id"],
         "source_export_sha256": source_sha,
+        "collection_channel_register_sha256": collection_frame["collection_channel_register_sha256"],
         "record_count": len(records),
         "form_counts": form_counts,
+        "channel_counts": dict(sorted(channel_counts.items())),
+        "dominant_channel_share": dominant_channel_share,
         "received_at_min": min(received_values).isoformat(),
         "received_at_max": max(received_values).isoformat(),
         "records_validated_against_frozen_forms": True,
+        "channel_membership_validated_against_collection_frame": True,
         "direct_identifiers_collected": False,
         "crm_linkage": "FORBIDDEN",
         "commercial_tracking": "FORBIDDEN",
         "prod_promotion_eligible": prod,
-        "scope_boundary": "This manifest validates source-batch integrity and eligibility for NF06 handoff only; it does not claim that NF06 ingestion, synthesis, ranking or QA has executed.",
+        "scope_boundary": "This manifest validates source-batch integrity, opaque recruitment-channel provenance and eligibility for NF06 handoff only; it does not claim that NF06 ingestion, synthesis, ranking or QA has executed.",
     }
 
 
