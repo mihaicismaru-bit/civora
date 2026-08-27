@@ -1,6 +1,6 @@
 # Informare privind protecția datelor — cercetarea AI4WORK STEP
 
-**Stare:** DRAFT / NU SE PUBLICĂ ȘI NU SE ACTIVEAZĂ COLECTAREA până la stabilirea și documentarea operatorului, completarea contactului de confidențialitate, aprobarea temeiului juridic, verificarea procesatorilor/logurilor și legarea retenției/ștergerii.
+**Stare:** DRAFT / NU SE PUBLICĂ ȘI NU SE ACTIVEAZĂ COLECTAREA până la stabilirea și documentarea operatorului, completarea contactului de confidențialitate, aprobarea temeiului juridic, verificarea procesatorilor/logurilor, legarea retenției/ștergerii și aprobarea procedurii de exercitare a drepturilor.
 
 ## Cine prelucrează datele
 
@@ -46,7 +46,7 @@ Răspunsurile la nivel de respondent nu trebuie trimise către servicii externe 
 
 Formularele nu folosesc advertising pixels, fingerprinting, cross-site tracking, identificatori CRM sau analytics comerciale. Adresa IP și user-agent-ul nu intră în setul analitic sau în exportul NF06. Înainte de activare trebuie verificată însă politica reală de logare a hostingului/reverse-proxy-ului, astfel încât corpurile cererilor, răspunsurile și cheia brută de idempotency să nu fie logate, iar metadatele tehnice să aibă retenție minimă.
 
-Pentru evitarea dublării unui răspuns în cazul unui retry de rețea se folosește o cheie aleatoare UUIDv4 pentru o singură tentativă de trimitere. Cheia brută nu este stocată în setul analitic și nu este derivată din identitatea, IP-ul, dispozitivul sau conturile respondentului.
+Pentru evitarea dublării unui răspuns în cazul unui retry de rețea se folosește o cheie aleatoare UUIDv4 pentru o singură tentativă de trimitere. Cheia brută nu este stocată în setul analitic și nu este derivată din identitatea, IP-ul, dispozitivul sau conturile respondentului. Adaptorul de referință întoarce după trimitere un `response_id` opac, distinct de cheia brută, care poate fi păstrat de respondent ca receipt tehnic. Binding-ul live trebuie să păstreze această proprietate fără să creeze un registru identitate–răspuns.
 
 ## Cât timp păstrăm datele
 
@@ -56,9 +56,9 @@ După ștergere pot fi păstrate pe termenul necesar proiectului numai rezultate
 
 ## Drepturile dumneavoastră
 
-În condițiile GDPR, puteți solicita acces, rectificare, ștergere sau restricționare, după caz, și vă puteți opune prelucrării bazate pe interes legitim. Solicitările se trimit la contactul de confidențialitate al operatorului care trebuie completat înainte de lansare.
+În condițiile GDPR, puteți solicita acces, rectificare, ștergere sau restricționare, după caz, și vă puteți opune prelucrării bazate pe interes legitim. Solicitările se trimit la contactul de confidențialitate al operatorului care trebuie completat înainte de lansare. Procedura operațională este menținută separat în `GDPR_DATA_SUBJECT_RIGHTS_PROCEDURE_DRAFT.json` și rămâne neaprobată până la stabilirea operatorului și a binding-ului live.
 
-Deoarece formularul este proiectat să nu colecteze identitatea, operatorul poate să nu poată identifica un anumit răspuns numai după numele persoanei. Dacă implementarea finală oferă un cod/receipt tehnic al răspunsului, păstrarea acelui cod de către respondent poate permite localizarea răspunsului fără introducerea unui registru de identitate.
+Deoarece formularul este proiectat să nu colecteze identitatea, operatorul poate să nu poată identifica un anumit răspuns numai după numele persoanei. Nu vom colecta și păstra date suplimentare exclusiv pentru a construi un registru identitate–răspuns. Dacă păstrați receipt-ul tehnic `response_id` primit la trimitere, implementarea live aprobată trebuie să permită localizarea răspunsului în baza de cercetare și, pentru ștergere, eliminarea atomică a rândului analitic și a receipt-ului intern de idempotency, fără consultarea CRM, a contactelor opționale, a IP-ului sau a dispozitivului. Dacă receipt-ul nu mai este disponibil și operatorul poate demonstra că nu poate identifica răspunsul, solicitarea va fi tratată conform procedurii aprobate și regulilor GDPR aplicabile, fără a introduce identificare disproporționată.
 
 Aveți dreptul de a depune o plângere la autoritatea competentă de protecție a datelor. Pentru România, autoritatea de supraveghere este Autoritatea Națională de Supraveghere a Prelucrării Datelor cu Caracter Personal (ANSPDCP).
 
@@ -68,4 +68,4 @@ Puteți decide să nu completați sau să nu trimiteți formularul fără nicio 
 
 ---
 
-**GO-LIVE gate:** operator legal și roluri controller/processor stabilite; contact confidențialitate completat; LIA/temei juridic aprobat; informare finală publicată înainte de întrebări; procesatori/subprocesatori și transferuri verificate; logging verificat; retenție/ștergere executabilă; DPIA screening semnat; endpoint și research-only store validate; smoke TEST TWIN complet; producția rămâne `false` până la închiderea tuturor acestor condiții.
+**GO-LIVE gate:** operator legal și roluri controller/processor stabilite; contact confidențialitate completat; LIA/temei juridic aprobat; informare finală publicată înainte de întrebări; procedură de exercitare a drepturilor aprobată și operațională; procesatori/subprocesatori și transferuri verificate; logging verificat; retenție/ștergere executabilă; DPIA screening semnat; endpoint și research-only store validate; smoke TEST TWIN complet; producția rămâne `false` până la închiderea tuturor acestor condiții.
