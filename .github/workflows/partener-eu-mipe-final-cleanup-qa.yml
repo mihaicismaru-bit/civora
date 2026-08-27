@@ -63,12 +63,14 @@ jobs:
           python -m py_compile partener-eu/ops/audit_mipe_legacy.py
           python -m py_compile partener-eu/ops/p10_monitor_integrity.py
           python -m py_compile partener-eu/ops/test_mipe_final_cleanup.py
+          python -m py_compile partener-eu/ops/test_mipe_lifecycle_alias_cleanup.py
           python -m py_compile partener-eu/ops/test_p10_policy_regression.py
 
       - name: Full-checkout caller audit and architecture contract
         run: |
           python partener-eu/ops/audit_mipe_legacy.py
           python partener-eu/ops/test_mipe_final_cleanup.py
+          python partener-eu/ops/test_mipe_lifecycle_alias_cleanup.py
           python partener-eu/ops/test_p10_policy_regression.py
 
       - name: Provenance, immutable-runtime and route arbitration regressions
@@ -80,7 +82,6 @@ jobs:
       - name: Replay current MIPE corpus through PARTENER engine pipeline
         run: |
           python partener-eu/ingest/project_mipe_v3_corpus.py
-          python partener-eu/ops/fix_call_lifecycle_event_aliases.py
           python partener-eu/ingest/build_mipe_canonical_calls.py
           python partener-eu/ingest/refine_mipe_canonical_calls.py
           python partener-eu/ingest/enrich_mipe_canonical_facts.py
@@ -100,7 +101,9 @@ jobs:
           python partener-eu/ops/test_frontend_regression.py
 
       - name: Assert cleanup remains immutable after replay
-        run: python partener-eu/ops/test_mipe_final_cleanup.py
+        run: |
+          python partener-eu/ops/test_mipe_final_cleanup.py
+          python partener-eu/ops/test_mipe_lifecycle_alias_cleanup.py
 
       - name: Build evidence receipt
         if: always()
