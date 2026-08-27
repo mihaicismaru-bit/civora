@@ -1,8 +1,8 @@
-name: VÂLCEA CLAR Canonical Export Acceptance
+name: VÂLCEA CLAR Canonical Runtime Acceptance
 
 # One end-to-end acceptance boundary for deterministic reader presentation.
 # Component self-tests live here; production rendering remains owned by Live
-# Newsroom + overlay_runtime_export.py.
+# Newsroom + overlay_runtime_export.py and targets site/runtime only.
 on:
   workflow_dispatch:
   pull_request:
@@ -14,11 +14,11 @@ permissions:
   contents: read
 
 concurrency:
-  group: valcea-clar-canonical-export-${{ github.ref }}
+  group: valcea-clar-canonical-runtime-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  canonical-export:
+  canonical-runtime:
     runs-on: ubuntu-latest
     timeout-minutes: 18
     steps:
@@ -42,7 +42,6 @@ jobs:
             valcea-clar/scripts/public_ux_story_integrity.py \
             valcea-clar/scripts/public_ux_manifest.py \
             valcea-clar/scripts/public_ux_legal.py \
-            valcea-clar/scripts/public_ux_export_contract.py \
             valcea-clar/scripts/overlay_runtime_export.py
           python valcea-clar/scripts/newsroom_decide.py --self-test
           python valcea-clar/scripts/repair_continuous_frontpage.py --self-test
@@ -61,15 +60,12 @@ jobs:
           python valcea-clar/scripts/build_public_data.py
           python valcea-clar/scripts/repair_continuous_frontpage.py
 
-      - name: Build deterministic export through single presentation boundary
-        run: |
-          python valcea-clar/scripts/build_sites_export.py
-          python valcea-clar/scripts/overlay_runtime_export.py
+      - name: Finalize deterministic canonical runtime
+        run: python valcea-clar/scripts/overlay_runtime_export.py
 
-      - name: Validate canonical export and continuous-story invariants
+      - name: Validate canonical runtime and continuous-story invariants
         run: |
           set -euo pipefail
-          python valcea-clar/scripts/public_ux_export_contract.py
           python valcea-clar/scripts/smoke_web.py
           python - <<'PY'
           import json
@@ -77,20 +73,17 @@ jobs:
 
           root = Path('valcea-clar')
           runtime = root / 'site' / 'runtime'
-          dist = root / 'dist' / 'chatgpt-sites'
           state = json.loads((root / 'site/public_ux_state.json').read_text(encoding='utf-8'))
-          manifest = json.loads((dist / 'manifest.json').read_text(encoding='utf-8'))
           feed = json.loads((runtime / 'live-feed.json').read_text(encoding='utf-8'))
           stories = json.loads((runtime / 'stiri/manifest.json').read_text(encoding='utf-8'))
           archive = json.loads((root / 'site/story_archive.json').read_text(encoding='utf-8'))
           holds = json.loads((root / 'editorial/publication_holds.json').read_text(encoding='utf-8'))
 
-          assert manifest['target']['publication_model'] == 'continuous_story_first'
-          assert manifest['target']['reader_presentation_owner'] == 'overlay_runtime_export'
           assert state['policy']['monitoring_is_news'] is False
           assert state['policy']['cross_category_fill'] is False
           assert archive['publication_model'] == 'continuous_story_first'
           assert archive['recap_editions_may_delete_published_stories'] is False
+          assert feed['publication_model'] == 'continuous_story_first'
 
           archive_ids = [str(row['id']) for row in archive.get('stories', [])]
           feed_ids = [str(row['id']) for row in feed.get('stories', [])]
@@ -108,7 +101,6 @@ jobs:
           )
           for rel in required:
               assert (runtime / rel).is_file(), rel
-              assert (dist / rel).is_file(), f'dist:{rel}'
 
           for rel in ('index.html','stiri/index.html','despre/index.html','termeni/index.html','confidentialitate/index.html'):
               text=(runtime/rel).read_text(encoding='utf-8')
@@ -125,8 +117,9 @@ jobs:
           print(json.dumps({
               'status':'PASS',
               'stories':feed.get('story_count'),
-              'routes':manifest.get('counts',{}).get('routes'),
+              'routes':len(route_ids),
               'held':len(held),
-              'reader_presentation_owner':manifest['target']['reader_presentation_owner'],
+              'reader_presentation_owner':'overlay_runtime_export',
+              'runtime':'site/runtime',
           }, ensure_ascii=False))
           PY
