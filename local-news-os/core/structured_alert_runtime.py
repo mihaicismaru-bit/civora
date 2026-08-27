@@ -134,11 +134,13 @@ def self_test() -> int:
     assert heat.self_test() == 0
 
     tz = ZoneInfo("Europe/Bucharest")
-    sample = (
-        "ANUNȚ CET Operatorul anunță întreruperea furnizării agentului termic "
-        "în perioada 29.08.2026 ora 09:00 - 30.08.2026 ora 18:00. "
-        "Consumatori afectați: PT 1, PT 2. Motiv: lucrări programate."
-    )
+    sample = """
+    Anunt public. Operatorul anunta intreruperea furnizarii agentului termic
+    sub forma de apa fierbinte si apa calda de consum, din data de 29.08.2026,
+    ora 0900 pana in data de 30.08.2026, ora 1800, pentru lucrari programate.
+    Consumatorii racordati si afectati de aceasta oprire sunt: PT 1; PT 2.
+    Ne cerem scuze pentru disconfort.
+    """
     parsed, candidates = heat.parse_heat_interruption_listing(
         sample,
         tz,
