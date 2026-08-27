@@ -9,6 +9,7 @@ on:
       - 'partener-eu/ingest/source_registry_probe.py'
       - 'partener-eu/ops/test_source_registry_low_info.py'
       - 'partener-eu/ops/test_source_registry_alias_fallback.py'
+      - 'partener-eu/ops/test_source_registry_external_expansion.py'
       - '.github/workflows/partener-eu-source-registry.yml'
   schedule:
     - cron: '23 */2 * * *'
@@ -34,6 +35,9 @@ jobs:
 
       - name: Regression — declared official aliases are transport-only fallbacks
         run: python partener-eu/ops/test_source_registry_alias_fallback.py
+
+      - name: Regression — external source and future-programming taxonomy stays fail-closed
+        run: python partener-eu/ops/test_source_registry_external_expansion.py
 
       - name: Probe classified official sources without changing facts
         run: python partener-eu/ingest/source_registry_probe.py
