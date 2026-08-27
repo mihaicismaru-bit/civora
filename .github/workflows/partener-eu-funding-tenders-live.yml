@@ -12,6 +12,8 @@ on:
       - 'partener-eu/ops/test_funding_tenders_reconcile.py'
       - 'partener-eu/p11/funding_tenders_stage.py'
       - 'partener-eu/p11/test_funding_tenders_stage.py'
+      - 'partener-eu/p11/funding_tenders_programme_resolution.py'
+      - 'partener-eu/p11/test_funding_tenders_programme_resolution.py'
       - '.github/workflows/partener-eu-funding-tenders-live.yml'
   schedule:
     - cron: '41 */6 * * *'
@@ -46,6 +48,8 @@ jobs:
           python -m py_compile partener-eu/ops/test_funding_tenders_reconcile.py
           python -m py_compile partener-eu/p11/funding_tenders_stage.py
           python -m py_compile partener-eu/p11/test_funding_tenders_stage.py
+          python -m py_compile partener-eu/p11/funding_tenders_programme_resolution.py
+          python -m py_compile partener-eu/p11/test_funding_tenders_programme_resolution.py
 
       - name: Validate fail-closed structured normalization
         run: python partener-eu/ops/test_funding_tenders_structured_adapter.py
@@ -58,6 +62,9 @@ jobs:
 
       - name: Validate deterministic direct-call staging boundary
         run: python partener-eu/p11/test_funding_tenders_stage.py
+
+      - name: Validate authoritative programme-resolution boundary
+        run: python partener-eu/p11/test_funding_tenders_programme_resolution.py
 
       - name: Capture bounded official Search/Facet evidence
         run: |
@@ -150,6 +157,42 @@ jobs:
               assert row['programme_label_authorized'] is False
               assert row['missing_proofs'] == ['PUBLIC_PROJECTION_QUALITY_GATE']
           print(json.dumps(d['stats'], ensure_ascii=False, sort_keys=True))
+          PY
+
+      - name: Resolve programme identity from exact official Facet bytes
+        run: |
+          python partener-eu/p11/funding_tenders_programme_resolution.py \
+            /tmp/partener-funding-tenders-evidence/staging-admission.json \
+            /tmp/partener-funding-tenders-evidence/evidence.json \
+            --facet-response /tmp/partener-funding-tenders-evidence/facet-response-broad.json \
+            --output /tmp/partener-funding-tenders-evidence/programme-resolution.json
+
+      - name: Validate programme resolution remains non-publishing
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('/tmp/partener-funding-tenders-evidence/programme-resolution.json')
+          d=json.loads(p.read_text(encoding='utf-8'))
+          assert d['schema'] == 'PARTENER_EU_FUNDING_TENDERS_PROGRAMME_RESOLUTION_V1'
+          assert d['programme_resolution_gate'] == 'PASS'
+          assert d['programme_label_authorized'] is True
+          assert d['publication_effect'] == 'NONE'
+          assert d['publish_authorized'] is False
+          assert d['canonical_corpus_mutation'] is False
+          assert d['material_fact_action'] == 'NONE'
+          assert d['missing_proofs'] == ['PUBLIC_PROJECTION_QUALITY_GATE']
+          assert d['stats']['programme_resolved'] == d['stats']['staging_records']
+          assert d['stats']['unresolved'] == 0
+          for row in d['records']:
+              assert row['programme_resolution'] == 'PASS'
+              assert row['programme_label_authorized'] is True
+              assert row['programme_identity'].startswith('EU_DIRECT::')
+              assert row['programme_label']
+              assert row['publish_authorized'] is False
+              assert row['canonical_corpus_mutation'] is False
+          print(json.dumps(d['stats'], ensure_ascii=False, sort_keys=True))
+          print(json.dumps(d['resolved_programmes'], ensure_ascii=False, sort_keys=True))
           PY
 
       - name: Upload replayable Funding & Tenders evidence
