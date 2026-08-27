@@ -69,6 +69,31 @@
         "fact_kernel_required_for_reader_publication": true,
         "claim_level_provenance_required": true
       }
+    },
+    {
+      "id": "distributie-oltenia-planned-electricity-interruptions",
+      "name": "Distribuție Oltenia — întreruperi programate Vâlcea",
+      "url": "https://www.distributieoltenia.ro/ro/suport/lucrari-pentru-prevenire-si-corectare-avarii/valcea.html",
+      "source_tier": "T1",
+      "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
+      "section": "SERVICII",
+      "priority": 95,
+      "enabled": false,
+      "status": "STAGED_EVIDENCE_ONLY_WEEKLY_DOCUMENT_ADAPTER_REQUIRED",
+      "planning_horizon_hours": 336,
+      "expiry_grace_hours": 1,
+      "max_listing_candidates": 120,
+      "editorial_policy": {
+        "reader_copy_generated_by_ingest": false,
+        "service_window_must_be_explicit": true,
+        "affected_locality_must_be_explicit": true,
+        "affected_scope_must_be_explicit": true,
+        "crawl_time_freshness_forbidden": true,
+        "weekly_document_date_range_must_be_explicit": true,
+        "weekly_document_adapter_live_acceptance_required_before_enable": true,
+        "fact_kernel_required_for_reader_publication": true,
+        "claim_level_provenance_required": true
+      }
     }
   ]
 }
