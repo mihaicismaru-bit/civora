@@ -11,6 +11,8 @@ EUCONS = ROOT / "eucons"
 CONTRACT = json.loads((EUCONS / "leads" / "lead_contract.json").read_text(encoding="utf-8"))
 FORMS = json.loads((EUCONS / "leads" / "forms.json").read_text(encoding="utf-8"))
 EVALUATION_CONTRACT = json.loads((EUCONS / "leads" / "research_evaluation_handoff_contract.json").read_text(encoding="utf-8"))
+COMMERCIAL_REVIEW_CONTRACT = json.loads((EUCONS / "crm" / "research_evaluation_review_contract.json").read_text(encoding="utf-8"))
+PIPELINE_CONTRACT = json.loads((EUCONS / "crm" / "pipeline_contract.json").read_text(encoding="utf-8"))
 
 
 def load_engine():
@@ -25,6 +27,15 @@ def load_engine():
 def load_evaluation_handoff():
     path = EUCONS / "leads" / "research_evaluation_handoff.py"
     spec = importlib.util.spec_from_file_location("e11_r07_evaluation_tests", path)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_commercial_review():
+    path = EUCONS / "crm" / "research_evaluation_review.py"
+    spec = importlib.util.spec_from_file_location("e11_r10_commercial_review_tests", path)
     module = importlib.util.module_from_spec(spec)
     assert spec.loader is not None
     spec.loader.exec_module(module)
@@ -86,9 +97,23 @@ def handoff_must_fail(handoff, record, fragment: str, contract=None):
     raise AssertionError(f"expected evaluation handoff failure containing {fragment!r}")
 
 
+def review_must_fail(review, evaluation, fragment: str, contract=None, pipeline_contract=None):
+    try:
+        review.build_commercial_review(
+            evaluation,
+            contract or COMMERCIAL_REVIEW_CONTRACT,
+            pipeline_contract or PIPELINE_CONTRACT,
+        )
+    except ValueError as exc:
+        assert fragment.lower() in str(exc).lower(), (fragment, str(exc))
+        return
+    raise AssertionError(f"expected commercial review failure containing {fragment!r}")
+
+
 def main() -> None:
     engine = load_engine()
     handoff = load_evaluation_handoff()
+    review = load_commercial_review()
     base = valid_payload()
 
     spam = dict(base, website="filled-by-bot")
@@ -141,6 +166,21 @@ def main() -> None:
     assert evaluation["crm_write_enabled"] is False
     assert handoff.build_evaluation_handoff(research, EVALUATION_CONTRACT)["evaluation_id"] == evaluation["evaluation_id"]
 
+    commercial_review = review.build_commercial_review(evaluation, COMMERCIAL_REVIEW_CONTRACT, PIPELINE_CONTRACT)
+    assert commercial_review["record_state"] == "COMMERCIAL_PIPELINE_REVIEW_PENDING_HUMAN_DECISION"
+    assert commercial_review["source_evaluation_id"] == evaluation["evaluation_id"]
+    assert commercial_review["selected_service_id"] == evaluation["selected_service_id"]
+    assert commercial_review["selected_opportunity_id"] == evaluation["selected_opportunity_id"]
+    assert commercial_review["proposed_pipeline_entry"]["lane"] == "PROSPECT_DISCOVERY"
+    assert commercial_review["proposed_pipeline_entry"]["stage"] == "PROSPECT"
+    assert commercial_review["human_review_required"] is True
+    assert commercial_review["pipeline_write_enabled"] is False
+    assert commercial_review["external_contact_enabled"] is False
+    assert commercial_review["automatic_offer_enabled"] is False
+    assert commercial_review["automatic_send_enabled"] is False
+    assert commercial_review["crm_write_enabled"] is False
+    assert review.build_commercial_review(evaluation, COMMERCIAL_REVIEW_CONTRACT, PIPELINE_CONTRACT)["review_id"] == commercial_review["review_id"]
+
     not_matched = deepcopy(research)
     not_matched["state"] = "REQUIRES_VERIFICATION"
     handoff_must_fail(handoff, not_matched, "not evaluation-ready")
@@ -173,7 +213,35 @@ def main() -> None:
     failed_open_contract["output"]["crm_write_enabled"] = True
     handoff_must_fail(handoff, research, "crm_write_enabled", failed_open_contract)
 
-    print("PASS: E11 lead engine and R07 research evaluation handoff fail-closed regressions")
+    source_review_removed = deepcopy(evaluation)
+    source_review_removed["human_review_required"] = False
+    review_must_fail(review, source_review_removed, "human review")
+
+    source_crm_enabled = deepcopy(evaluation)
+    source_crm_enabled["crm_write_enabled"] = True
+    review_must_fail(review, source_crm_enabled, "CRM write")
+
+    evaluation_person_level = deepcopy(evaluation)
+    evaluation_person_level["source_provenance"]["personal_email"] = "synthetic@example.invalid"
+    review_must_fail(review, evaluation_person_level, "person-level")
+
+    failed_open_review_contract = deepcopy(COMMERCIAL_REVIEW_CONTRACT)
+    failed_open_review_contract["output"]["pipeline_write_enabled"] = True
+    review_must_fail(review, evaluation, "pipeline_write_enabled", failed_open_review_contract)
+
+    persistent_pipeline = deepcopy(PIPELINE_CONTRACT)
+    persistent_pipeline["production_persistence_enabled"] = True
+    review_must_fail(review, evaluation, "production persistence", pipeline_contract=persistent_pipeline)
+
+    automatic_contact_pipeline = deepcopy(PIPELINE_CONTRACT)
+    automatic_contact_pipeline["contact_gate"]["automatic_send"] = True
+    review_must_fail(review, evaluation, "automatic send", pipeline_contract=automatic_contact_pipeline)
+
+    automatic_offer_pipeline = deepcopy(PIPELINE_CONTRACT)
+    automatic_offer_pipeline["commercial_gate"]["automatic_offer"] = True
+    review_must_fail(review, evaluation, "automatic offer", pipeline_contract=automatic_offer_pipeline)
+
+    print("PASS: E11 lead, research evaluation and commercial review boundaries fail closed")
 
 
 if __name__ == "__main__":
