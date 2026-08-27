@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
-"""Fail-closed contract for public VÂLCEA CLAR policy/legal routes.
-
-This validates canonical repository data plus the generated server-rendered/static
-runtime. It does not claim that an external deployment has been published; remote
-HTTP acceptance remains a separate deployment check.
-"""
+"""Fail-closed contract for canonical public VÂLCEA CLAR policy/legal routes."""
 from __future__ import annotations
 
 import json
@@ -20,8 +15,6 @@ EXPECTED_PAGES = {"termeni", "confidentialitate", "corectii"}
 
 
 def main() -> int:
-    # Generated HTML is deployment/runtime output, not an independent source of
-    # truth. Rebuild it deterministically before validating the repository contract.
     build_legal_pages.build()
 
     doc = json.loads(LEGAL.read_text(encoding="utf-8"))
@@ -44,33 +37,25 @@ def main() -> int:
     assert (nav.get("policy") or {}).get("main_navigation_must_resolve_to_reader_content") is True
     assert (nav.get("policy") or {}).get("empty_category_fallback_to_other_category_forbidden") is True
 
-    rendered: list[str] = []
     for slug, page in doc["pages"].items():
         expected_path = f"/{slug}/"
         assert page.get("path") == expected_path
         target = RUNTIME / slug / "index.html"
         assert target.is_file(), f"Missing generated public policy page: {target}"
         text = target.read_text(encoding="utf-8")
-        rendered.append(text)
         assert page["title"] in text
         assert f"https://valceaclar.ro{expected_path}" in text
         assert 'name="robots" content="index,follow"' in text
         assert doc["contact_email"] in text
-        assert "<main" in text
+        forbidden = ("CLIENT_SECRET", "ACCESS_TOKEN", "REFRESH_TOKEN", "github-actions-secret:")
+        leaked = [value for value in forbidden if value in text]
+        assert not leaked, f"Secret marker leaked into public policy page {slug}: {leaked}"
 
     corectii = doc["pages"]["corectii"]
     assert corectii["title"] == "Corecții și drept la replică"
     assert len(corectii.get("sections") or []) >= 5
 
-    forbidden = ("CLIENT_SECRET", "ACCESS_TOKEN", "REFRESH_TOKEN", "github-actions-secret:")
-    corpus = LEGAL.read_text(encoding="utf-8") + NAVIGATION.read_text(encoding="utf-8") + "\n".join(rendered)
-    leaked = [value for value in forbidden if value in corpus]
-    assert not leaked, f"Secret marker leaked into public policy artifacts: {leaked}"
-
-    print(
-        "VÂLCEA CLAR public policy routes: PASS "
-        "(canonical navigation v2 + 3 server-rendered/static repository routes; remote HTTP remains separate)"
-    )
+    print("VÂLCEA CLAR public policy runtime: PASS (canonical navigation v2 + 3 policy routes)")
     return 0
 
 

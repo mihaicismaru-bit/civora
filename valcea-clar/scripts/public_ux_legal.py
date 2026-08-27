@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-"""Render public policy/legal pages with the same VÂLCEA CLAR navigation and masthead."""
+"""Render public policy/legal pages with the canonical VÂLCEA CLAR navigation and masthead."""
 from __future__ import annotations
 
-import shutil
 from pathlib import Path
 
 import public_ux_reset as ux
@@ -10,7 +9,6 @@ import public_ux_reset as ux
 ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "site"
 RUNTIME = SITE / "runtime"
-DIST = ROOT / "dist" / "chatgpt-sites"
 LEGAL = SITE / "legal" / "legal_pages.json"
 NAV = SITE / "navigation.json"
 BASE = "https://valceaclar.ro"
@@ -57,10 +55,7 @@ def main() -> int:
         runtime = RUNTIME / slug / "index.html"
         runtime.parent.mkdir(parents=True, exist_ok=True)
         runtime.write_text(html, encoding="utf-8")
-        dist = DIST / slug / "index.html"
-        dist.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(runtime, dist)
-    print(f"VÂLCEA CLAR public UX policy shell: PASS ({len(pages)} routes)")
+    print(f"VÂLCEA CLAR public UX policy shell: PASS ({len(pages)} runtime routes)")
     return 0
 
 

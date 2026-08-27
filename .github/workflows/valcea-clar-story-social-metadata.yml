@@ -2,8 +2,7 @@ name: VÂLCEA CLAR Story Social Metadata
 
 # Derived presentation projector. It never authorizes editorial facts. After the
 # canonical Live Newsroom completes, this workflow rebuilds the reader-facing
-# Public UX, article social metadata and verified-media projection consumed by
-# the canonical public runtime.
+# Public UX, article social metadata and verified-media projection in runtime.
 on:
   workflow_dispatch:
   workflow_run:
@@ -211,5 +210,5 @@ jobs:
         if: always()
         run: |
           echo '## VÂLCEA CLAR Story Social Metadata + Public UX' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Derived presentation is rebuilt from the canonical live feed; exact verified media wins, explicit contextual photographs are disclosed, and the same visual contract is projected back into the canonical public runtime.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Derived presentation is rebuilt from the canonical live feed; exact verified media wins, explicit contextual photographs are disclosed, and the same visual contract is projected back into the canonical runtime.' >> "$GITHUB_STEP_SUMMARY"
           cat /tmp/story-social-metadata.json >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
