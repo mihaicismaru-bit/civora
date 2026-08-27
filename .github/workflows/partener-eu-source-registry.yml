@@ -8,6 +8,7 @@ on:
       - 'partener-eu/ingest/source_registry.json'
       - 'partener-eu/ingest/source_registry_probe.py'
       - 'partener-eu/ops/test_source_registry_low_info.py'
+      - 'partener-eu/ops/test_source_registry_alias_fallback.py'
       - '.github/workflows/partener-eu-source-registry.yml'
   schedule:
     - cron: '23 */2 * * *'
@@ -30,6 +31,9 @@ jobs:
 
       - name: Regression — low-information HTML shells fail closed
         run: python partener-eu/ops/test_source_registry_low_info.py
+
+      - name: Regression — declared official aliases are transport-only fallbacks
+        run: python partener-eu/ops/test_source_registry_alias_fallback.py
 
       - name: Probe classified official sources without changing facts
         run: python partener-eu/ingest/source_registry_probe.py

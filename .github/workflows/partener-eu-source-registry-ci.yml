@@ -7,6 +7,7 @@ on:
       - 'partener-eu/ingest/source_registry_probe.py'
       - 'partener-eu/ops/test_source_registry_low_info.py'
       - 'partener-eu/ops/test_source_registry_current_hosts.py'
+      - 'partener-eu/ops/test_source_registry_alias_fallback.py'
       - '.github/workflows/partener-eu-source-registry-ci.yml'
   workflow_dispatch:
 
@@ -33,6 +34,9 @@ jobs:
 
       - name: Validate low-information fail-closed behavior
         run: python partener-eu/ops/test_source_registry_low_info.py
+
+      - name: Validate official alias transport fallback
+        run: python partener-eu/ops/test_source_registry_alias_fallback.py
 
       - name: Validate current official OI Research hosts
         run: python partener-eu/ops/test_source_registry_current_hosts.py
