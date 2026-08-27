@@ -1,7 +1,7 @@
 {
-  "schema_version": "eucons.ai4work_nf06_preingest_contract.v0.5",
+  "schema_version": "eucons.ai4work_nf06_preingest_contract.v0.6",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "purpose": "Fail-closed source-batch preflight before handoff to NF06. This contract does not redefine the internal NF06 schema; it proves that an immutable source export is eligible to be handed to NF06.",
+  "purpose": "Fail-closed source-batch preflight before handoff to NF06. This contract does not redefine the internal NF06 schema; it proves that an immutable source export is eligible to be handed to NF06 and binds that export to the exact reviewed collection frame and frozen instrument content.",
   "prod_evidence_class": "PROD_REAL_EVIDENCE",
   "test_twin_evidence_class": "TEST_TWIN_NON_EVIDENCE",
   "allowed_forms": [
@@ -11,6 +11,7 @@
   "prod_requirements": [
     "all records synthetic=false",
     "collection frame is APPROVED_FOR_PROD",
+    "collection frame contains only the exact reviewed field allowlist; unknown extra fields fail closed",
     "controller determination reference is present",
     "controller approval reference is present",
     "privacy notice version is present",
@@ -19,6 +20,8 @@
     "retention schedule reference is present",
     "production research-only storage binding reference is present",
     "instrument versions are fixed",
+    "form_contract.json SHA-256 is frozen in the collection frame and matches the repository instrument used for pre-ingest",
+    "forms_definition.json SHA-256 is frozen in the collection frame and matches the repository instrument used for pre-ingest",
     "source export SHA-256 matches the bytes actually parsed",
     "collection-channel register SHA-256 is present",
     "every record has an opaque recruitment_channel_id declared in the frozen collection frame",
@@ -34,6 +37,7 @@
     "all records synthetic=true",
     "collection frame is TEST_TWIN_ONLY",
     "evidence class is TEST_TWIN_NON_EVIDENCE",
+    "the same exact collection-frame allowlist and frozen instrument-content hashes are required for schema parity",
     "response_id uses the same lowercase 64-hex opaque receipt shape as PROD for schema parity",
     "test output is never eligible for PROD promotion"
   ],
@@ -60,12 +64,23 @@
     "raw_idempotency_key_exported": false,
     "prod_and_test_twin_shape_parity_required": true
   },
+  "instrument_content_binding": {
+    "required_hash_fields": [
+      "form_contract_sha256",
+      "forms_definition_sha256"
+    ],
+    "hash_algorithm": "SHA-256 lowercase hex",
+    "validation_rule": "Both hashes must match the exact repository files used by the pre-ingest runtime. If the instrument changes without a matching frozen frame update, pre-ingest fails closed.",
+    "historical_reproducibility_rule": "A historical batch must be validated from the repository revision whose frozen instrument hashes match the collection frame; silently validating against a later instrument revision is forbidden."
+  },
   "collection_frame_required_fields": [
     "research_id",
     "collection_frame_id",
     "frame_status",
     "evidence_class",
     "instrument_versions",
+    "form_contract_sha256",
+    "forms_definition_sha256",
     "collection_started_at",
     "collection_closed_at",
     "collection_channels",
@@ -86,7 +101,15 @@
     "retention_schedule_reference",
     "production_store_binding_reference"
   ],
+  "collection_frame_field_policy": "Exact allowlist only. Extra fields are rejected so unreviewed semantic changes cannot ride along inside an otherwise valid frame.",
   "canonical_source_export": "UTF-8 NDJSON, one canonical JSON record per line, sorted by form_id / received_at / response_id, newline terminated",
+  "preingest_manifest_bindings": [
+    "source_export_sha256",
+    "collection_frame_sha256",
+    "collection_channel_register_sha256",
+    "form_contract_sha256",
+    "forms_definition_sha256"
+  ],
   "manifest_privacy_boundary": "The pre-ingest manifest contains counts, hashes, timestamps and opaque channel provenance only. It must not contain questionnaire answers, free-text responses, raw idempotency keys, IP addresses, user agents, cookies, referrer/UTM payloads, CRM identifiers or optional contact data.",
   "channel_qa_outputs": [
     "channel_counts",
