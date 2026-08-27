@@ -47,10 +47,10 @@ def main() -> int:
     pages_diagnostic = text(".github/workflows/partener-eu-pages-diagnostic.yml")
     scheduler = text(".github/workflows/partener-eu-mipe-ro-v3-scheduler.yml")
     acquisition = text(".github/workflows/partener-eu-mipe-ro-crawl-v3.yml")
-    acquisition_qa = text(".github/workflows/partener-eu-mipe-ro-crawl-v3-qa.yml")
     engine = text(".github/workflows/partener-eu-mipe-engine-v3.yml")
     pages = text(".github/workflows/partener-eu-pages.yml")
     crawler = text("partener-eu/ingest/mipe_windows_crawl_v3.py")
+    projector = text("partener-eu/ingest/project_mipe_v3_corpus.py")
     hosted_direct = text(".github/workflows/partener-eu-mipe-ingest.yml")
 
     for fixer in DELETED_FIXERS:
@@ -81,6 +81,23 @@ def main() -> int:
     assert 'OUT.write_text(json.dumps(payload, ensure_ascii=False' in transport_runtime
     assert 'print(json.dumps(payload, ensure_ascii=True, indent=2))' in transport_runtime
 
+    # Preserve all static acquisition-boundary assertions formerly owned by the
+    # standalone Windows Crawl v3 QA workflow, so consolidation cannot reduce coverage.
+    for token in (
+        'schemaVersion": 3',
+        'playwright-edge-direct-romania-v3',
+        'MAX_DOCUMENTS',
+        'extract_pdf',
+        'parse_docx',
+        'CALL_LIFECYCLE_EVENT',
+        'RESULTS_PUBLISHED',
+        'CONTRACTING_UPDATE',
+        'textPreview',
+        'CANONICAL_OFFICIAL_FETCH',
+    ):
+        assert token in crawler, token
+
+    assert "runs-on: [self-hosted, Windows, X64]" in acquisition
     assert "permissions:\n  contents: read" in acquisition
     assert "MIPE_ACQUISITION_ONLY: '1'" in acquisition
     assert "PARTENER_MIPE_ACQUISITION_HANDOFF_V1" in acquisition
@@ -118,7 +135,9 @@ def main() -> int:
 
     assert "PARTENER.EU MIPE Engine v3" in pages
     assert "- 'PARTENER.EU MIPE Windows Crawl v3'" not in pages
-    assert "SURFACEMC acquisition-only -> PARTENER engine boundary: PASS" in acquisition_qa
+    assert "def build_projection(" in projector
+    assert "CANONICAL_OFFICIAL_FETCH" in projector
+    assert "replay" in projector.lower()
 
     # The GitHub-hosted canonical route remains direct-only and fail-closed.
     assert "mipe_direct_only_ingest.py" in hosted_direct
