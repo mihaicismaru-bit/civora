@@ -1,6 +1,6 @@
 {
-  "schema_version": 1,
-  "id": "EUCONS-R07-CLIENT-FINDER-TRIAGE-VIEW-001",
+  "schema_version": 2,
+  "id": "EUCONS-R07-CLIENT-FINDER-TRIAGE-VIEW-002",
   "status": "CANONICAL",
   "source_contract_id": "EUCONS-R07-CLIENT-FINDER-PRIORITY-VIEW-001",
   "source_view_state": "CLIENT_FINDER_RESEARCH_PRIORITY_VIEW",
@@ -17,6 +17,19 @@
     "DEADLINE_ASC"
   ],
   "default_sort_mode": "RESEARCH_PRIORITY",
+  "provenance": {
+    "matched_selected_opportunity_source_trace_required": true,
+    "required_source_product": "PARTENER.EU",
+    "required_source_trace_fields": [
+      "source_product",
+      "source_opportunity_id",
+      "source_as_of",
+      "source_projection_sha256",
+      "verification_evidence_count"
+    ],
+    "raw_verification_evidence_exposed": false,
+    "unmatched_source_trace_required": false
+  },
   "output": {
     "view_state": "CLIENT_FINDER_OPERATOR_TRIAGE_VIEW",
     "eligibility_state": "NOT_ASSESSED",
@@ -34,6 +47,7 @@
     "never_expose_person_level_fields": true,
     "deadline_only_when_source_supported": true,
     "selected_service_must_match_selected_opportunity": true,
+    "matched_cards_require_minimized_verified_source_trace": true,
     "safe_output_whitelist_only": true,
     "no_external_action_or_persistence": true
   }

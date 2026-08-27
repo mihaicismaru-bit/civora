@@ -34,6 +34,14 @@ DISABLED_ACTION_FLAGS = (
     "pipeline_write_enabled",
 )
 
+EXPECTED_SOURCE_TRACE_FIELDS = {
+    "source_product",
+    "source_opportunity_id",
+    "source_as_of",
+    "source_projection_sha256",
+    "verification_evidence_count",
+}
+
 
 def load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
@@ -55,7 +63,8 @@ def recursive_keys(value: Any):
 
 
 def validate_contract(contract: dict[str, Any], priority_contract: dict[str, Any]) -> None:
-    require(contract.get("id") == "EUCONS-R07-CLIENT-FINDER-TRIAGE-VIEW-001", "triage contract id drift")
+    require(contract.get("schema_version") == 2, "triage contract schema version drift")
+    require(contract.get("id") == "EUCONS-R07-CLIENT-FINDER-TRIAGE-VIEW-002", "triage contract id drift")
     require(contract.get("status") == "CANONICAL", "triage contract is not canonical")
     require(contract.get("source_contract_id") == priority_contract.get("id"), "triage source contract mismatch")
     require(contract.get("source_view_state") == priority_contract.get("output", {}).get("view_state"),
@@ -69,6 +78,18 @@ def validate_contract(contract: dict[str, Any], priority_contract: dict[str, Any
         "RESEARCH_PRIORITY", "SCORE_DESC", "DEADLINE_ASC"
     }, "triage sort allowlist drift")
     require(contract.get("default_sort_mode") == "RESEARCH_PRIORITY", "triage default sort drift")
+
+    provenance = contract.get("provenance") or {}
+    require(provenance.get("matched_selected_opportunity_source_trace_required") is True,
+            "matched triage provenance requirement failed open")
+    require(provenance.get("required_source_product") == "PARTENER.EU",
+            "triage provenance source product drift")
+    require(set(provenance.get("required_source_trace_fields") or []) == EXPECTED_SOURCE_TRACE_FIELDS,
+            "triage provenance field allowlist drift")
+    require(provenance.get("raw_verification_evidence_exposed") is False,
+            "triage raw evidence exposure failed open")
+    require(provenance.get("unmatched_source_trace_required") is False,
+            "unmatched triage cards unexpectedly require provenance")
 
     source_output = priority_contract.get("output") or {}
     require(source_output.get("eligibility_state") == "NOT_ASSESSED", "priority eligibility boundary failed open")
@@ -92,13 +113,14 @@ def validate_contract(contract: dict[str, Any], priority_contract: dict[str, Any
         "never_expose_person_level_fields",
         "deadline_only_when_source_supported",
         "selected_service_must_match_selected_opportunity",
+        "matched_cards_require_minimized_verified_source_trace",
         "safe_output_whitelist_only",
         "no_external_action_or_persistence",
     ):
         require(rules.get(name) is True, f"triage rule failed open: {name}")
 
 
-def _validated_card(card: dict[str, Any]) -> dict[str, Any]:
+def _validated_card(card: dict[str, Any], contract: dict[str, Any]) -> dict[str, Any]:
     require(isinstance(card, dict), "triage source card must be an object")
     if FORBIDDEN_PERSON_KEYS & set(recursive_keys(card)):
         raise ValueError("person-level field entered Client Finder triage view")
@@ -135,22 +157,31 @@ def _validated_card(card: dict[str, Any]) -> dict[str, Any]:
             require(isinstance(deadline, str) and deadline.strip(), "invalid source-supported deadline")
             require("deadline" in set(verified_classes), "deadline exposed without verified source class")
 
+        provenance_contract = contract["provenance"]
         source_trace = selected.get("source_trace")
+        if provenance_contract["matched_selected_opportunity_source_trace_required"]:
+            require(isinstance(source_trace, dict), "matched selected opportunity missing required source trace")
         if source_trace is not None:
             require(isinstance(source_trace, dict), "invalid selected-opportunity source trace")
-            require(source_trace.get("source_product") == "PARTENER.EU", "triage source product drift")
+            required_fields = set(provenance_contract["required_source_trace_fields"])
+            require(required_fields <= set(source_trace), "selected-opportunity source trace is incomplete")
+            require(source_trace.get("source_product") == provenance_contract["required_source_product"],
+                    "triage source product drift")
             require(source_trace.get("source_opportunity_id") == selected.get("opportunity_id"),
                     "triage source opportunity id mismatch")
             source_as_of = source_trace.get("source_as_of")
             require(isinstance(source_as_of, str) and source_as_of.strip(), "invalid triage source as-of")
             projection_sha = source_trace.get("source_projection_sha256")
-            require(projection_sha is None or (isinstance(projection_sha, str) and len(projection_sha) == 64),
-                    "invalid triage source projection hash")
+            require(projection_sha is None or (
+                isinstance(projection_sha, str)
+                and len(projection_sha) == 64
+                and all(char in "0123456789abcdef" for char in projection_sha.lower())
+            ), "invalid triage source projection hash")
             evidence_count = source_trace.get("verification_evidence_count")
             require(isinstance(evidence_count, int) and not isinstance(evidence_count, bool) and evidence_count > 0,
                     "invalid triage verification evidence count")
             safe_source_trace = {
-                "source_product": "PARTENER.EU",
+                "source_product": provenance_contract["required_source_product"],
                 "source_opportunity_id": source_trace["source_opportunity_id"],
                 "source_as_of": source_as_of,
                 "source_projection_sha256": projection_sha,
@@ -277,7 +308,7 @@ def build_triage_view(
     applied_sort = sort_mode or contract["default_sort_mode"]
     require(applied_sort in contract["allowed_sort_modes"], "unsupported triage sort mode")
 
-    cards = [_validated_card(card) for card in raw_cards]
+    cards = [_validated_card(card, contract) for card in raw_cards]
     require(len({card["prospect_id"] for card in cards}) == len(cards), "duplicate triage prospect id")
     cards = [card for card in cards if _matches_filters(card, applied_filters)]
     _sort_cards(cards, applied_sort)

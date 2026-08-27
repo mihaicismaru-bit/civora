@@ -114,11 +114,18 @@ def main() -> None:
     triage_contract = json.loads(TRIAGE_CONTRACT_PATH.read_text(encoding="utf-8"))
     priority_result = synthetic_priority_result(priority_contract)
 
+    if triage_contract["schema_version"] != 2 or triage_contract["id"] != "EUCONS-R07-CLIENT-FINDER-TRIAGE-VIEW-002":
+        raise AssertionError("triage provenance contract was not versioned")
+
     triage = triage_view.build_triage_view(priority_result, contract=triage_contract, priority_contract=priority_contract)
+    if triage["schema_version"] != 1:
+        raise AssertionError("triage output schema changed during provenance contract versioning")
     if triage["view_state"] != "CLIENT_FINDER_OPERATOR_TRIAGE_VIEW":
         raise AssertionError("triage view state drift")
     if [card["prospect_id"] for card in triage["cards"]] != ["PROS-SYNTH-A", "PROS-SYNTH-B"]:
         raise AssertionError("default triage order no longer preserves research priority")
+    if triage["cards"][1]["selected_opportunity"] is not None:
+        raise AssertionError("unmatched triage card gained a selected opportunity")
     if any(triage[flag] for flag in (
         "external_contact_enabled", "automatic_offer_enabled", "automatic_send_enabled",
         "crm_write_enabled", "pipeline_write_enabled",
@@ -230,6 +237,24 @@ def main() -> None:
         ),
     )
 
+    missing_trace = deepcopy(priority_result)
+    del missing_trace["cards"][0]["selected_opportunity"]["source_trace"]
+    must_fail(
+        "matched triage card missing mandatory source trace",
+        lambda: triage_view.build_triage_view(
+            missing_trace, contract=triage_contract, priority_contract=priority_contract
+        ),
+    )
+
+    incomplete_trace = deepcopy(priority_result)
+    del incomplete_trace["cards"][0]["selected_opportunity"]["source_trace"]["verification_evidence_count"]
+    must_fail(
+        "matched triage card incomplete source trace",
+        lambda: triage_view.build_triage_view(
+            incomplete_trace, contract=triage_contract, priority_contract=priority_contract
+        ),
+    )
+
     unsafe_trace_id = deepcopy(priority_result)
     unsafe_trace_id["cards"][0]["selected_opportunity"]["source_trace"]["source_opportunity_id"] = "OPP-OTHER"
     must_fail(
@@ -258,6 +283,24 @@ def main() -> None:
     if "verification_evidence" in sanitized["cards"][0]["selected_opportunity"]["source_trace"]:
         raise AssertionError("triage source trace leaked raw verification evidence")
 
+    unsafe_provenance_contract = deepcopy(triage_contract)
+    unsafe_provenance_contract["provenance"]["matched_selected_opportunity_source_trace_required"] = False
+    must_fail(
+        "matched provenance requirement disabled",
+        lambda: triage_view.build_triage_view(
+            priority_result, contract=unsafe_provenance_contract, priority_contract=priority_contract
+        ),
+    )
+
+    unsafe_raw_evidence_contract = deepcopy(triage_contract)
+    unsafe_raw_evidence_contract["provenance"]["raw_verification_evidence_exposed"] = True
+    must_fail(
+        "raw verification evidence enabled",
+        lambda: triage_view.build_triage_view(
+            priority_result, contract=unsafe_raw_evidence_contract, priority_contract=priority_contract
+        ),
+    )
+
     unsafe_source_action = deepcopy(priority_result)
     unsafe_source_action["cards"][0]["crm_write_enabled"] = True
     must_fail(
@@ -276,7 +319,7 @@ def main() -> None:
         ),
     )
 
-    print("PASS: Client Finder triage filtering/sorting/source-trace is deterministic, person-safe, source-supported and non-writing")
+    print("PASS: Client Finder triage v2 requires minimized verified provenance for matched cards while preserving non-writing output compatibility")
 
 
 if __name__ == "__main__":
