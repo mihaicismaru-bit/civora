@@ -21,128 +21,48 @@ DISABLED_ACTION_FLAGS = (
 )
 
 PROVENANCE_TOP_LEVEL_FIELDS = {
-    "schema_version",
-    "contract_id",
-    "source_contract_id",
-    "view_state",
-    "semantics",
-    "eligibility_state",
-    "maximum_next_state",
-    "summary",
-    "rows",
-    "human_review_required",
+    "schema_version", "contract_id", "source_contract_id", "view_state", "semantics",
+    "eligibility_state", "maximum_next_state", "summary", "rows", "human_review_required",
     *DISABLED_ACTION_FLAGS,
 }
-
 PROVENANCE_SUMMARY_FIELDS = {
-    "review_queue_rows",
-    "distinct_source_as_of_values",
-    "source_as_of_ties_present",
-    "oldest_source_as_of",
-    "newest_source_as_of",
-    "threshold_applied",
-    "source_age_classification",
+    "review_queue_rows", "distinct_source_as_of_values", "source_as_of_ties_present",
+    "oldest_source_as_of", "newest_source_as_of", "threshold_applied", "source_age_classification",
 }
-
 PROVENANCE_ROW_FIELDS = {
-    "queue_rank",
-    "prospect_id",
-    "organization_key",
-    "opportunity_id",
-    "selected_service_id",
-    "source_as_of",
-    "relative_source_age_cue",
-    "source_projection_sha256_present",
-    "verification_evidence_count",
-    "explanation_reasons",
-    "operator_next_step",
-    "threshold_applied",
-    "source_age_classification",
-    "eligibility_state",
-    "maximum_next_state",
-    "human_review_required",
+    "queue_rank", "prospect_id", "organization_key", "opportunity_id", "selected_service_id",
+    "source_as_of", "relative_source_age_cue", "source_projection_sha256_present",
+    "verification_evidence_count", "explanation_reasons", "operator_next_step", "threshold_applied",
+    "source_age_classification", "eligibility_state", "maximum_next_state", "human_review_required",
     *DISABLED_ACTION_FLAGS,
 }
 
 MATCH_TOP_LEVEL_FIELDS = {
-    "schema_version",
-    "view_id",
-    "view_state",
-    "match_semantics",
-    "priority_score_semantics",
-    "eligibility_state",
-    "maximum_next_state",
-    "summary",
-    "results",
-    "human_review_required",
+    "schema_version", "view_id", "view_state", "match_semantics", "priority_score_semantics",
+    "eligibility_state", "maximum_next_state", "summary", "results", "human_review_required",
     *DISABLED_ACTION_FLAGS,
 }
-
-MATCH_SUMMARY_FIELDS = {
-    "evaluated",
-    "matched",
-    "requires_verification",
-    "held",
-    "suppressed",
-}
-
+MATCH_SUMMARY_FIELDS = {"evaluated", "matched", "requires_verification", "held", "suppressed"}
 MATCH_RESULT_FIELDS = {
-    "organization_key",
-    "prospect_id",
-    "state",
-    "priority_state",
-    "priority_score",
-    "priority_score_semantics",
-    "score_breakdown",
-    "recommended_service_id",
-    "selected_service_id",
-    "selected_service_support",
-    "selected_opportunity",
-    "reason_codes",
-    "verification_questions",
-    "source_ref_count",
-    "signal_ids",
-    "operator_next_step",
-    "official_source_reverification_required",
-    "material_claims_verified",
-    "eligibility_state",
-    "maximum_next_state",
-    "human_review_required",
-    *DISABLED_ACTION_FLAGS,
-    "evidence_label",
+    "organization_key", "prospect_id", "state", "priority_state", "priority_score",
+    "priority_score_semantics", "score_breakdown", "recommended_service_id", "selected_service_id",
+    "selected_service_support", "selected_opportunity", "reason_codes", "verification_questions",
+    "source_ref_count", "signal_ids", "operator_next_step", "official_source_reverification_required",
+    "material_claims_verified", "eligibility_state", "maximum_next_state", "human_review_required",
+    *DISABLED_ACTION_FLAGS, "evidence_label",
 }
-
 SELECTED_OPPORTUNITY_FIELDS = {
-    "opportunity_id",
-    "title",
-    "programme",
-    "relevance_score",
-    "relevance_semantics",
-    "confidence",
-    "verified_fact_classes",
-    "matching_explanations",
+    "opportunity_id", "title", "programme", "relevance_score", "relevance_semantics", "confidence",
+    "verified_fact_classes", "matching_explanations",
 }
-
-SELECTED_SERVICE_SUPPORT_FIELDS = {
-    "service_id",
-    "supporting_signal_ids",
-    "support_count",
-    "support_ratio",
-}
-
+SELECTED_SERVICE_SUPPORT_FIELDS = {"service_id", "supporting_signal_ids", "support_count", "support_ratio"}
 SCORE_BREAKDOWN_FIELDS = {"score", "gross_score", "components", "penalties", "semantics"}
 SCORE_COMPONENT_FIELDS = {"source_quality", "freshness", "signal_strength", "service_coherence", "actionability"}
 SCORE_PENALTY_FIELDS = {"unknown_assertions", "low_confidence_inferences", "total"}
-
 MATCH_STATES = {
-    "MATCHED_RESEARCH_CANDIDATE",
-    "REQUIRES_VERIFICATION",
-    "NO_CURRENT_OPPORTUNITY",
-    "HOLD_SOURCE_STATE",
-    "HOLD_CONFLICT",
-    "SUPPRESSED",
+    "MATCHED_RESEARCH_CANDIDATE", "REQUIRES_VERIFICATION", "NO_CURRENT_OPPORTUNITY",
+    "HOLD_SOURCE_STATE", "HOLD_CONFLICT", "SUPPRESSED",
 }
-
 RFC3339_UTC_Z = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$")
 
 
@@ -176,7 +96,8 @@ def _assert_no_forbidden_fields(value: Any, contract: dict[str, Any]) -> None:
     policy = contract["output_policy"]
     forbidden = set(policy["raw_fields_forbidden"]) | set(policy["inference_fields_forbidden"])
     leaked = forbidden & set(recursive_keys(value))
-    require(not leaked, f"forbidden field present: {sorted(leaked)[0]}")
+    if leaked:
+        raise ValueError(f"forbidden field present: {sorted(leaked)[0]}")
 
 
 def _assert_action_boundaries(value: dict[str, Any], label: str) -> None:
@@ -207,7 +128,6 @@ def validate_contract(contract: dict[str, Any]) -> None:
     require(contract.get("id") == "EUCONS-R07-CLIENT-FINDER-OPERATOR-TRIAGE-SYNTHESIS-001", "operator triage contract id drift")
     require(contract.get("status") == "CANONICAL", "operator triage contract must be canonical")
 
-    source = contract.get("source_views") or {}
     expected_source = {
         "provenance_contract_id": "EUCONS-R07-CLIENT-FINDER-PROVENANCE-TRIAGE-EXPLAINABILITY-001",
         "provenance_view_state": "CLIENT_FINDER_PROVENANCE_TRIAGE_EXPLAINABILITY_VIEW",
@@ -217,20 +137,15 @@ def validate_contract(contract: dict[str, Any]) -> None:
         "match_semantics": "RESEARCH_RELEVANCE_NOT_ELIGIBILITY_AWARD_OR_BUYING_INTENT",
         "priority_score_semantics": "COMMERCIAL_RESEARCH_PRIORITY_NOT_ELIGIBILITY_OR_CONVERSION_PROBABILITY",
     }
-    require(source == expected_source, "operator triage source-view contract drift")
+    require(contract.get("source_views") == expected_source, "operator triage source-view contract drift")
 
-    boundaries = contract.get("required_boundaries") or {}
     expected_boundaries = {
-        "eligibility_state": "NOT_ASSESSED",
-        "maximum_next_state": "RESEARCH_READY",
-        "human_review_required": True,
-        "external_contact_enabled": False,
-        "automatic_offer_enabled": False,
-        "automatic_send_enabled": False,
-        "crm_write_enabled": False,
-        "pipeline_write_enabled": False,
+        "eligibility_state": "NOT_ASSESSED", "maximum_next_state": "RESEARCH_READY",
+        "human_review_required": True, "external_contact_enabled": False,
+        "automatic_offer_enabled": False, "automatic_send_enabled": False,
+        "crm_write_enabled": False, "pipeline_write_enabled": False,
     }
-    require(boundaries == expected_boundaries, "operator triage boundary drift")
+    require(contract.get("required_boundaries") == expected_boundaries, "operator triage boundary drift")
 
     join = contract.get("join") or {}
     require(join.get("keys") == ["organization_key", "prospect_id", "opportunity_id", "selected_service_id"], "operator triage join-key drift")
@@ -254,28 +169,21 @@ def validate_contract(contract: dict[str, Any]) -> None:
     require(output.get("view_state") == "CLIENT_FINDER_OPERATOR_TRIAGE_VIEW", "operator triage output state drift")
     require(output.get("semantics") == "OPERATOR_REVERIFICATION_AND_MATCH_REVIEW_ONLY", "operator triage output semantics drift")
     for key in (
-        "include_provenance_relative_age_cue",
-        "include_priority_score_breakdown",
-        "include_selected_opportunity_minimized",
-        "include_selected_service_support",
+        "include_provenance_relative_age_cue", "include_priority_score_breakdown",
+        "include_selected_opportunity_minimized", "include_selected_service_support",
         "include_verification_questions",
     ):
         require(output.get(key) is True, f"operator triage output policy disabled: {key}")
 
     rules = contract.get("rules") or {}
     for name in (
-        "provenance_rank_is_primary_queue_order",
-        "never_reorder_by_priority_score",
-        "matched_identity_must_reconcile_across_views",
-        "never_classify_source_age",
-        "never_apply_freshness_threshold",
-        "official_source_reverification_before_material_claim",
-        "match_validation_before_outreach",
-        "never_treat_score_as_probability",
+        "provenance_rank_is_primary_queue_order", "never_reorder_by_priority_score",
+        "matched_identity_must_reconcile_across_views", "never_classify_source_age",
+        "never_apply_freshness_threshold", "official_source_reverification_before_material_claim",
+        "match_validation_before_outreach", "never_treat_score_as_probability",
         "never_infer_eligibility_award_conversion_or_buying_intent",
         "never_expose_raw_provenance_hash_evidence_or_material_deadline",
-        "never_generate_person_level_output",
-        "safe_output_whitelist_only",
+        "never_generate_person_level_output", "safe_output_whitelist_only",
         "never_enable_external_action_or_persistence",
     ):
         require(rules.get(name) is True, f"operator triage safety rule failed open: {name}")
@@ -288,14 +196,13 @@ def _validate_score_breakdown(value: Any, expected_semantics: str) -> None:
     require(set(value.get("components") or {}) == SCORE_COMPONENT_FIELDS, "score component allowlist drift")
     require(set(value.get("penalties") or {}) == SCORE_PENALTY_FIELDS, "score penalty allowlist drift")
     require(value.get("semantics") == expected_semantics, "score breakdown semantics drift")
-    score = value.get("score")
-    gross = value.get("gross_score")
-    penalties = value["penalties"]
+    score, gross, penalties = value.get("score"), value.get("gross_score"), value["penalties"]
     require(isinstance(score, int) and not isinstance(score, bool), "score breakdown score must be integer")
     require(isinstance(gross, int) and not isinstance(gross, bool), "score breakdown gross score must be integer")
     require(all(isinstance(v, int) and not isinstance(v, bool) for v in value["components"].values()), "score component must be integer")
     require(all(isinstance(v, int) and not isinstance(v, bool) for v in penalties.values()), "score penalty must be integer")
     require(sum(value["components"].values()) == gross, "score breakdown gross score mismatch")
+    require(penalties["unknown_assertions"] + penalties["low_confidence_inferences"] == penalties["total"], "score penalty total mismatch")
     require(max(0, gross - penalties["total"]) == score, "score breakdown net score mismatch")
 
 
@@ -303,8 +210,7 @@ def _validate_provenance_view(provenance_view: dict[str, Any], contract: dict[st
     require(isinstance(provenance_view, dict), "provenance explainability view must be object")
     require(set(provenance_view) == PROVENANCE_TOP_LEVEL_FIELDS, "provenance explainability top-level allowlist drift")
     _assert_no_forbidden_fields(provenance_view, contract)
-    source = contract["source_views"]
-    triage = contract["triage"]
+    source, triage = contract["source_views"], contract["triage"]
     require(provenance_view.get("schema_version") == 1, "provenance explainability schema drift")
     require(provenance_view.get("contract_id") == source["provenance_contract_id"], "provenance explainability contract mismatch")
     require(provenance_view.get("source_contract_id") == "EUCONS-R07-CLIENT-FINDER-PROVENANCE-FRESHNESS-001", "provenance explainability upstream contract drift")
@@ -320,7 +226,7 @@ def _validate_provenance_view(provenance_view: dict[str, Any], contract: dict[st
     rows = provenance_view.get("rows")
     require(isinstance(rows, list), "provenance queue rows must be list")
     require(summary.get("review_queue_rows") == len(rows), "provenance queue row count mismatch")
-    seen_keys: set[tuple[str, str, str, str]] = set()
+    seen: set[tuple[str, str, str, str]] = set()
     parsed_times: list[datetime] = []
     for expected_rank, row in enumerate(rows, start=1):
         require(isinstance(row, dict) and set(row) == PROVENANCE_ROW_FIELDS, "provenance row allowlist drift")
@@ -333,13 +239,13 @@ def _validate_provenance_view(provenance_view: dict[str, Any], contract: dict[st
         reasons = row.get("explanation_reasons")
         require(isinstance(reasons, list) and triage["required_provenance_explanation_reason"] in reasons, "provenance official-source reason missing")
         require(isinstance(row.get("source_projection_sha256_present"), bool), "provenance hash-presence cue must be boolean")
-        evidence_count = row.get("verification_evidence_count")
-        require(isinstance(evidence_count, int) and not isinstance(evidence_count, bool) and evidence_count > 0, "provenance verification reference count invalid")
+        count = row.get("verification_evidence_count")
+        require(isinstance(count, int) and not isinstance(count, bool) and count > 0, "provenance verification reference count invalid")
         parsed_times.append(_parse_source_as_of(row.get("source_as_of")))
         identity = tuple(str(row.get(key) or "") for key in contract["join"]["keys"])
         require(all(identity), "provenance join identity missing")
-        require(identity not in seen_keys, "duplicate provenance join identity")
-        seen_keys.add(identity)
+        require(identity not in seen, "duplicate provenance join identity")
+        seen.add(identity)
 
     require(parsed_times == sorted(parsed_times), "provenance queue lost oldest-source-first ordering")
     if rows:
@@ -352,11 +258,10 @@ def _validate_provenance_view(provenance_view: dict[str, Any], contract: dict[st
 
 def _match_identity(row: dict[str, Any], contract: dict[str, Any]) -> tuple[str, str, str, str]:
     selected = row.get("selected_opportunity")
-    opportunity_id = selected.get("opportunity_id") if isinstance(selected, dict) else ""
     values = {
         "organization_key": row.get("organization_key"),
         "prospect_id": row.get("prospect_id"),
-        "opportunity_id": opportunity_id,
+        "opportunity_id": selected.get("opportunity_id") if isinstance(selected, dict) else None,
         "selected_service_id": row.get("selected_service_id"),
     }
     identity = tuple(str(values[key] or "") for key in contract["join"]["keys"])
@@ -368,8 +273,7 @@ def _validate_match_view(match_view: dict[str, Any], contract: dict[str, Any]) -
     require(isinstance(match_view, dict), "match explainability view must be object")
     require(set(match_view) == MATCH_TOP_LEVEL_FIELDS, "match explainability top-level allowlist drift")
     _assert_no_forbidden_fields(match_view, contract)
-    source = contract["source_views"]
-    triage = contract["triage"]
+    source, triage = contract["source_views"], contract["triage"]
     require(match_view.get("schema_version") == 1, "match explainability schema drift")
     require(match_view.get("view_id") == source["match_view_id"], "match explainability view id mismatch")
     require(match_view.get("view_state") == source["match_view_state"], "match explainability view state mismatch")
@@ -377,39 +281,37 @@ def _validate_match_view(match_view: dict[str, Any], contract: dict[str, Any]) -
     require(match_view.get("priority_score_semantics") == source["priority_score_semantics"], "match explainability score semantics mismatch")
     _assert_qualification_boundaries(match_view, contract, "match explainability")
 
-    summary = match_view.get("summary")
+    summary, results = match_view.get("summary"), match_view.get("results")
     require(isinstance(summary, dict) and set(summary) == MATCH_SUMMARY_FIELDS, "match explainability summary allowlist drift")
-    results = match_view.get("results")
     require(isinstance(results, list), "match explainability results must be list")
     require(summary.get("evaluated") == len(results), "match explainability evaluated count mismatch")
-
     states = [row.get("state") for row in results if isinstance(row, dict)]
-    require(summary.get("matched") == sum(state == "MATCHED_RESEARCH_CANDIDATE" for state in states), "match summary matched count mismatch")
-    require(summary.get("requires_verification") == sum(state == "REQUIRES_VERIFICATION" for state in states), "match summary verification count mismatch")
-    require(summary.get("held") == sum(state in {"HOLD_SOURCE_STATE", "HOLD_CONFLICT"} for state in states), "match summary held count mismatch")
-    require(summary.get("suppressed") == sum(state == "SUPPRESSED" for state in states), "match summary suppressed count mismatch")
+    require(summary.get("matched") == sum(s == "MATCHED_RESEARCH_CANDIDATE" for s in states), "match summary matched count mismatch")
+    require(summary.get("requires_verification") == sum(s == "REQUIRES_VERIFICATION" for s in states), "match summary verification count mismatch")
+    require(summary.get("held") == sum(s in {"HOLD_SOURCE_STATE", "HOLD_CONFLICT"} for s in states), "match summary held count mismatch")
+    require(summary.get("suppressed") == sum(s == "SUPPRESSED" for s in states), "match summary suppressed count mismatch")
 
-    seen_organizations: set[str] = set()
+    organizations: set[str] = set()
     matched_index: dict[tuple[str, str, str, str], dict[str, Any]] = {}
     for row in results:
         require(isinstance(row, dict) and set(row) == MATCH_RESULT_FIELDS, "match explainability result allowlist drift")
         _assert_qualification_boundaries(row, contract, "match result")
-        organization_key = row.get("organization_key")
-        require(isinstance(organization_key, str) and organization_key.strip(), "match result organization_key missing")
-        require(organization_key not in seen_organizations, "duplicate match organization_key")
-        seen_organizations.add(organization_key)
+        org = row.get("organization_key")
+        require(isinstance(org, str) and org.strip(), "match result organization_key missing")
+        require(org not in organizations, "duplicate match organization_key")
+        organizations.add(org)
         require(row.get("state") in MATCH_STATES, "unknown match explainability state")
         require(row.get("priority_score_semantics") == source["priority_score_semantics"], "match result score semantics drift")
-        _validate_score_breakdown(row.get("score_breakdown"), source["priority_score_semantics"])
+        breakdown = row.get("score_breakdown")
         if row.get("priority_score") is not None:
             require(isinstance(row.get("priority_score"), int) and not isinstance(row.get("priority_score"), bool), "priority score must be integer or null")
-            if row.get("score_breakdown") is not None:
-                require(row["score_breakdown"]["score"] == row["priority_score"], "priority score and breakdown drift")
+            if isinstance(breakdown, dict):
+                require(breakdown.get("score") == row["priority_score"], "priority score and breakdown drift")
+        _validate_score_breakdown(breakdown, source["priority_score_semantics"])
+
         if row.get("state") != contract["join"]["required_match_state"]:
             continue
-
-        selected = row.get("selected_opportunity")
-        support = row.get("selected_service_support")
+        selected, support = row.get("selected_opportunity"), row.get("selected_service_support")
         require(isinstance(selected, dict) and set(selected) == SELECTED_OPPORTUNITY_FIELDS, "matched selected opportunity allowlist drift")
         require(selected.get("relevance_semantics") == "RELEVANCE_NOT_APPROVAL_PROBABILITY", "selected opportunity relevance semantics failed open")
         require(isinstance(support, dict) and set(support) == SELECTED_SERVICE_SUPPORT_FIELDS, "matched selected service support allowlist drift")
@@ -451,10 +353,10 @@ def _build_queue_row(provenance_row: dict[str, Any], match_row: dict[str, Any], 
         "source_ref_count": match_row["source_ref_count"],
         "signal_ids": list(match_row["signal_ids"]),
         "operator_next_step": triage["operator_next_step"],
-        "official_source_reverification_required": triage["official_source_reverification_required"],
-        "material_claims_verified": triage["material_claims_verified"],
+        "official_source_reverification_required": True,
+        "material_claims_verified": False,
         "source_age_classification": triage["source_age_classification"],
-        "threshold_applied": triage["threshold_applied"],
+        "threshold_applied": False,
         "eligibility_state": contract["required_boundaries"]["eligibility_state"],
         "maximum_next_state": contract["required_boundaries"]["maximum_next_state"],
         "human_review_required": True,
@@ -470,11 +372,7 @@ def _build_queue_row(provenance_row: dict[str, Any], match_row: dict[str, Any], 
     return output
 
 
-def build_operator_triage_view(
-    provenance_view: dict[str, Any],
-    match_view: dict[str, Any],
-    contract: dict[str, Any] | None = None,
-) -> dict[str, Any]:
+def build_operator_triage_view(provenance_view: dict[str, Any], match_view: dict[str, Any], contract: dict[str, Any] | None = None) -> dict[str, Any]:
     contract = contract or load_json(CONTRACT_PATH)
     validate_contract(contract)
     provenance_rows = _validate_provenance_view(provenance_view, contract)
@@ -485,13 +383,9 @@ def build_operator_triage_view(
         identity = _provenance_identity(row, contract)
         require(identity not in provenance_index, "duplicate provenance join identity")
         provenance_index[identity] = row
-
     require(set(provenance_index) == set(matched_index), "matched result/provenance queue sets differ")
 
-    queue = [
-        _build_queue_row(row, matched_index[_provenance_identity(row, contract)], contract)
-        for row in provenance_rows
-    ]
+    queue = [_build_queue_row(row, matched_index[_provenance_identity(row, contract)], contract) for row in provenance_rows]
     require([row["queue_rank"] for row in queue] == list(range(1, len(queue) + 1)), "operator triage queue rank drift")
 
     result = {
