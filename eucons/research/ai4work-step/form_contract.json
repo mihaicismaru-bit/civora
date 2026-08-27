@@ -1,5 +1,5 @@
 {
-  "schema_version": "eucons.research_form_contract.v0.3",
+  "schema_version": "eucons.research_form_contract.v0.4",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "purpose": "Primary research for an independent needs analysis; not lead generation, recruitment, marketing or project enrolment.",
   "production_enabled": false,
@@ -60,13 +60,14 @@
     "not_training_offer": true,
     "not_individual_decision": true,
     "no_marketing": true,
-    "operator_legal_name": "EUROCONSULT SRL",
-    "operator_cui": "14250864",
+    "operator_legal_name": null,
+    "operator_cui": null,
+    "operator_status": "UNRESOLVED_BEFORE_COLLECTION",
     "privacy_contact": "OPEN_BEFORE_PRODUCTION",
     "warning": "Nu introduceți nume, date de contact, angajator, CNP, adresă sau alte date care vă pot identifica în câmpurile de text liber.",
     "acknowledgement_field": "notice_read_and_voluntary_participation",
     "acknowledgement_default": false,
-    "legal_basis": "TO_BE_DOCUMENTED_BY_OPERATOR_BEFORE_PRODUCTION; acknowledgement is not automatically treated as GDPR consent legal basis."
+    "legal_basis": "TO_BE_DOCUMENTED_BY_DETERMINED_CONTROLLER_BEFORE_PRODUCTION; acknowledgement is not automatically treated as GDPR consent legal basis."
   },
   "adult_form": {
     "source_instrument": "AI4WORK STEP QUESTIONNAIRE_ADULTS v1 frozen in NF-RUN-001",
@@ -97,7 +98,8 @@
   "go_no_go": {
     "status": "NO_GO_UNTIL_RUNTIME_AND_PRIVACY_BINDING",
     "required_before_enable": [
-      "privacy/DPO contact frozen",
+      "controller determination frozen and approved from documented purposes/essential-means evidence",
+      "privacy/DPO contact frozen for the determined controller",
       "hosting and processor/subprocessor review completed",
       "server/reverse-proxy logging policy verified",
       "research-only production storage adapter bound and isolated from CRM",
