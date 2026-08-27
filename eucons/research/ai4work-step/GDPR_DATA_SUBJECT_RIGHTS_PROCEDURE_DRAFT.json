@@ -1,0 +1,71 @@
+{
+  "schema_version": "eucons.ai4work_data_subject_rights.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "date": "2026-08-27",
+  "status": "DRAFT_BINDING_REQUIRED_BEFORE_COLLECTION",
+  "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
+  "controller_approval": false,
+  "collection_enabled": false,
+  "legal_design_anchors": {
+    "gdpr_article_11": "Do not acquire, maintain or process additional identifying information solely to identify a data subject when identification is not required for the research purpose; where the controller can demonstrate it cannot identify the data subject, rights that require identification are handled in accordance with Article 11 unless the data subject provides additional information enabling identification.",
+    "gdpr_article_12": "The controller must provide transparent information and facilitate exercise of data-subject rights through the approved privacy contact and procedure."
+  },
+  "identification_policy": {
+    "direct_identity_registry": "FORBIDDEN",
+    "crm_or_contact_cross_reference": "FORBIDDEN",
+    "extra_identity_collection_for_rights_lookup": "FORBIDDEN_BY_DEFAULT",
+    "technical_receipt": "The submit route returns an opaque response_id. It is not derived from name, email, IP, device, CRM or employer identity. If retained by the respondent, it may be used to locate the corresponding research-only record without creating an identity lookup table.",
+    "receipt_is_not_identity_proof": true,
+    "lost_receipt_rule": "If the controller cannot otherwise identify the record, it must not create a new identity-linkage mechanism solely to satisfy lookup. The Article 11 position and any additional information voluntarily provided by the data subject must be assessed by the approved controller procedure."
+  },
+  "supported_request_types": [
+    "access",
+    "rectification_where_applicable",
+    "erasure",
+    "restriction_where_applicable",
+    "objection_to_legitimate_interest_processing"
+  ],
+  "request_channel": {
+    "privacy_contact": null,
+    "status": "OPEN_UNTIL_CONTROLLER_AND_PRIVACY_CONTACT_APPROVED",
+    "rule": "No public collection until the determined controller publishes an operational privacy contact and request-handling route."
+  },
+  "research_store_operations": {
+    "lookup": "Locate only by opaque response_id in the isolated research store; do not search CRM, optional-contact records, IP logs, user-agent logs or device data.",
+    "access": "Return only the respondent-level analytical record associated with the receipt after the controller applies the approved request-authentication procedure; do not expose internal idempotency digests or other respondents.",
+    "rectification": "If applicable and technically safe, replace only the validated preset analytical values for that response_id and regenerate integrity metadata; otherwise document why rectification cannot be performed without undermining integrity and offer erasure/re-submission where appropriate.",
+    "erasure": "Delete the analytical row and its idempotency receipt atomically from live research storage. The deletion must not create or retain an identity link. Residual backups follow the validated non-renewing backup rotation in the retention schedule.",
+    "restriction_or_objection": "Before PROD, the live adapter must support a controller-approved operational treatment that prevents restricted/objected records from further analysis while the request is assessed, or erases them where that is the approved outcome."
+  },
+  "rights_case_logging": {
+    "store": "PRIVACY_REQUEST_ADMIN_SEPARATE_FROM_RESEARCH_ANALYTICS",
+    "allowed": "minimum case metadata needed to demonstrate handling, decision, dates and outcome",
+    "forbidden": [
+      "copying questionnaire answers into the rights-case log",
+      "copying raw Idempotency-Key",
+      "adding CRM/customer identifiers to analytical records",
+      "using a rights request to build an identity-to-response registry"
+    ]
+  },
+  "backup_and_deletion": {
+    "retention_reference": "GDPR_RETENTION_SCHEDULE_DRAFT.json",
+    "rule": "Live erasure must be evidenced by row/object counts and a timestamped deletion receipt. Provider backups may retain residual encrypted copies only for the validated pre-existing rotation and must not silently restore deleted records into live processing."
+  },
+  "required_before_prod": [
+    "controller determination approved",
+    "privacy contact published",
+    "lawful basis/LIA approved",
+    "privacy notice updated with the final rights procedure",
+    "processor/subprocessor and provider logging/backup/deletion facts frozen",
+    "production research-only adapter supports receipt lookup and atomic erasure",
+    "restriction/objection handling is operationally defined for the live adapter",
+    "provider-bound TEST TWIN rights smoke passes without creating direct identifiers",
+    "procedure approval reference and SHA-256 are frozen in the PROD activation manifest"
+  ],
+  "test_twin": {
+    "classification": "TEST_TWIN_NON_EVIDENCE",
+    "synthetic_only": true,
+    "prod_promotion_eligible": false,
+    "rule": "Rights-flow tests use synthetic engineering fixtures only and cannot be cited as respondent evidence."
+  }
+}
