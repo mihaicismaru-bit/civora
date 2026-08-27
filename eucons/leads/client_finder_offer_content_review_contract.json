@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "id": "EUCONS-R07-CLIENT-FINDER-OFFER-CONTENT-REVIEW-001",
+  "status": "CANONICAL",
+  "purpose": "Capture a human-only review of the deterministic internal offer-draft skeleton, without approving an offer, adding pricing or material claims, persisting state, invoking Offer Engine, materializing CRM context, or enabling outreach.",
+  "source_draft": {
+    "contract_id": "EUCONS-R07-CLIENT-FINDER-INTERNAL-OFFER-DRAFT-GENERATION-001",
+    "record_state": "CLIENT_FINDER_INTERNAL_OFFER_DRAFT_ENVELOPE",
+    "required_draft_state": "INTERNAL_OFFER_DRAFT_GENERATED_REVIEW_REQUIRED",
+    "required_next_gate_hint": "SEPARATE_OFFER_CONTENT_REVIEW_GATE_REQUIRED",
+    "required_content_scope": "INTERNAL_TEMPLATE_SKELETON_ONLY",
+    "required_generation_mode": "DETERMINISTIC_INTERNAL_TEMPLATE_ONLY",
+    "required_official_source_reverified": true,
+    "required_source_bound": true
+  },
+  "required_boundaries": {
+    "eligibility_state": "NOT_ASSESSED",
+    "maximum_next_state": "RESEARCH_READY",
+    "human_review_required": true,
+    "external_contact_enabled": false,
+    "automatic_offer_enabled": false,
+    "automatic_send_enabled": false,
+    "crm_write_enabled": false,
+    "pipeline_write_enabled": false
+  },
+  "review": {
+    "decision_source": "HUMAN",
+    "allowed_content_review_outcomes": [
+      "CHANGES_REQUIRED",
+      "REJECTED",
+      "APPROVED_INTERNAL_ONLY"
+    ],
+    "outcome_state_map": {
+      "CHANGES_REQUIRED": "INTERNAL_DRAFT_CHANGES_REQUIRED",
+      "REJECTED": "INTERNAL_DRAFT_REJECTED",
+      "APPROVED_INTERNAL_ONLY": "INTERNAL_DRAFT_CONTENT_APPROVED_INTERNAL_ONLY"
+    },
+    "outcome_next_gate_map": {
+      "CHANGES_REQUIRED": null,
+      "REJECTED": null,
+      "APPROVED_INTERNAL_ONLY": "SEPARATE_OFFER_FINALIZATION_GATE_REQUIRED"
+    },
+    "decided_at_format": "RFC3339_UTC_Z"
+  },
+  "output": {
+    "record_state": "CLIENT_FINDER_OFFER_CONTENT_REVIEW_ENVELOPE",
+    "offer_approval_granted": false,
+    "draft_approval_granted": false,
+    "pricing_included": false,
+    "new_legal_claims_included": false,
+    "new_financial_claims_included": false,
+    "target_state_committed": false,
+    "persistence_executed": false,
+    "draft_persistence_allowed": false,
+    "offer_persistence_allowed": false,
+    "production_offer_generation_allowed": false,
+    "final_offer_generation_allowed": false,
+    "offer_engine_invocation_allowed": false,
+    "pricing_decision_allowed": false,
+    "crm_context_materialization_allowed": false,
+    "human_review_required": true,
+    "external_contact_enabled": false,
+    "automatic_offer_enabled": false,
+    "automatic_send_enabled": false,
+    "crm_write_enabled": false,
+    "pipeline_write_enabled": false
+  },
+  "rules": {
+    "source_must_be_the_unapproved_source_bound_internal_template_skeleton": true,
+    "source_identity_scope_verification_ref_and_source_as_of_must_reconcile_exactly": true,
+    "source_draft_sections_must_match_the_deterministic_template_exactly": true,
+    "content_review_decision_must_be_human_and_reference_the_exact_draft": true,
+    "review_decision_must_not_inject_edits_freeform_offer_text_or_material_claims": true,
+    "approved_internal_only_is_not_offer_approval": true,
+    "approved_internal_only_requires_a_separate_future_finalization_gate": true,
+    "never_add_pricing_payment_terms_legal_or_financial_conclusions": true,
+    "never_invoke_production_offer_engine": true,
+    "never_materialize_crm_context": true,
+    "never_enable_external_action_or_persistence": true,
+    "person_level_fields_forbidden": true,
+    "raw_evidence_hash_deadline_budget_indicator_obligation_probability_pricing_and_freeform_offer_fields_forbidden": true
+  }
+}
