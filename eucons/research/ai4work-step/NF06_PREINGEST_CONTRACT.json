@@ -1,5 +1,5 @@
 {
-  "schema_version": "eucons.ai4work_nf06_preingest_contract.v0.4",
+  "schema_version": "eucons.ai4work_nf06_preingest_contract.v0.5",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "purpose": "Fail-closed source-batch preflight before handoff to NF06. This contract does not redefine the internal NF06 schema; it proves that an immutable source export is eligible to be handed to NF06.",
   "prod_evidence_class": "PROD_REAL_EVIDENCE",
@@ -22,6 +22,7 @@
     "source export SHA-256 matches the bytes actually parsed",
     "collection-channel register SHA-256 is present",
     "every record has an opaque recruitment_channel_id declared in the frozen collection frame",
+    "every response_id is a lowercase 64-hex opaque receipt consistent with the HTTP derivation contract",
     "all records validate against the frozen form definitions",
     "all record timestamps fall inside the declared collection window",
     "response_id values are unique within the batch",
@@ -33,6 +34,7 @@
     "all records synthetic=true",
     "collection frame is TEST_TWIN_ONLY",
     "evidence class is TEST_TWIN_NON_EVIDENCE",
+    "response_id uses the same lowercase 64-hex opaque receipt shape as PROD for schema parity",
     "test output is never eligible for PROD promotion"
   ],
   "record_provenance": {
@@ -49,6 +51,14 @@
       "CRM/contact id"
     ],
     "frame_membership_required": true
+  },
+  "response_receipt": {
+    "field": "response_id",
+    "format": "^[0-9a-f]{64}$",
+    "meaning": "opaque technical receipt only; never a name, email, contact, CRM, device or recruitment identifier",
+    "http_derivation_contract": "SHA-256(research_id + form_id + canonical one-submit UUIDv4 idempotency key)",
+    "raw_idempotency_key_exported": false,
+    "prod_and_test_twin_shape_parity_required": true
   },
   "collection_frame_required_fields": [
     "research_id",
