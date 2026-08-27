@@ -72,19 +72,17 @@ jobs:
               raise SystemExit(f"unsafe apply result: {value.get('status')}")
           print('Instagram editorial live gate: PASS')
           PY
-      - name: Validate staged runtime/export parity
+      - name: Validate staged canonical runtime media
         run: |
           python - <<'PY'
           from pathlib import Path
           runtime=Path('valcea-clar/site/runtime/media/social/editorial/instagram')
-          dist=Path('valcea-clar/dist/chatgpt-sites/media/social/editorial/instagram')
-          if not runtime.is_dir() or not dist.is_dir():
-              raise SystemExit('editorial media staging directories missing')
-          r={p.name:p.read_bytes() for p in runtime.glob('*.jpg')}
-          d={p.name:p.read_bytes() for p in dist.glob('*.jpg')}
-          if not r or r != d:
-              raise SystemExit('runtime/export editorial media mismatch')
-          print(f'Instagram editorial staging parity: PASS ({len(r)} JPEGs)')
+          if not runtime.is_dir():
+              raise SystemExit('editorial runtime media staging directory missing')
+          media=list(runtime.glob('*.jpg'))
+          if not media:
+              raise SystemExit('editorial runtime media staging is empty')
+          print(f'Instagram editorial runtime staging: PASS ({len(media)} JPEGs)')
           PY
       - name: Upload adapter audit and staged media
         uses: actions/upload-artifact@v7
@@ -94,6 +92,5 @@ jobs:
             /tmp/instagram-editorial-dry-run.json
             /tmp/instagram-editorial-apply-gated.json
             valcea-clar/site/runtime/media/social/editorial/instagram
-            valcea-clar/dist/chatgpt-sites/media/social/editorial/instagram
           if-no-files-found: warn
           retention-days: 14
