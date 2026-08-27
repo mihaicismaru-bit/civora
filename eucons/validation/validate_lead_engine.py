@@ -22,11 +22,14 @@ def main() -> None:
     lead_engine = load_module("e11_lead", EUCONS / "leads" / "process_lead.py")
     matcher = load_module("e11_match", EUCONS / "opportunities" / "match_opportunities.py")
     evaluation_handoff = load_module("e11_r07_evaluation", EUCONS / "leads" / "research_evaluation_handoff.py")
+    commercial_review = load_module("e11_r10_commercial_review", EUCONS / "crm" / "research_evaluation_review.py")
     lead_contract = json.loads((EUCONS / "leads" / "lead_contract.json").read_text(encoding="utf-8"))
     forms_doc = json.loads((EUCONS / "leads" / "forms.json").read_text(encoding="utf-8"))
     storage = json.loads((EUCONS / "leads" / "storage_contract.json").read_text(encoding="utf-8"))
     matching_contract = json.loads((EUCONS / "opportunities" / "matching_contract.json").read_text(encoding="utf-8"))
     evaluation_contract = json.loads((EUCONS / "leads" / "research_evaluation_handoff_contract.json").read_text(encoding="utf-8"))
+    commercial_review_contract = json.loads((EUCONS / "crm" / "research_evaluation_review_contract.json").read_text(encoding="utf-8"))
+    pipeline_contract = json.loads((EUCONS / "crm" / "pipeline_contract.json").read_text(encoding="utf-8"))
     commercial = json.loads((EUCONS / "canon" / "commercial_canon.json").read_text(encoding="utf-8"))
 
     assert lead_contract["production_collection_enabled"] is False
@@ -35,6 +38,8 @@ def main() -> None:
     assert lead_contract["consent"]["privacy_ack_required"] is True
     assert lead_contract["consent"]["marketing_consent_default"] is False
     evaluation_handoff.validate_contract(evaluation_contract)
+    commercial_review.validate_contract(commercial_review_contract)
+    commercial_review.validate_pipeline_boundary(pipeline_contract, commercial_review_contract)
 
     form_ids = {form["id"] for form in forms_doc["forms"]}
     assert form_ids == set(lead_contract["scoring"]["form_intent"])
@@ -126,6 +131,22 @@ def main() -> None:
     assert evaluation["automatic_offer_enabled"] is False
     assert evaluation["crm_write_enabled"] is False
 
+    review = commercial_review.build_commercial_review(evaluation, commercial_review_contract, pipeline_contract)
+    assert review["record_state"] == "COMMERCIAL_PIPELINE_REVIEW_PENDING_HUMAN_DECISION"
+    assert review["source_evaluation_id"] == evaluation["evaluation_id"]
+    assert review["selected_opportunity_id"] == evaluation["selected_opportunity_id"]
+    assert review["selected_service_id"] == evaluation["selected_service_id"]
+    assert review["proposed_pipeline_entry"]["lane"] == "PROSPECT_DISCOVERY"
+    assert review["proposed_pipeline_entry"]["stage"] == "PROSPECT"
+    assert review["proposed_pipeline_entry"]["source_ref"] == evaluation["evaluation_id"]
+    assert review["proposed_pipeline_entry"]["organization_key_ref"] == evaluation["prospect_id"]
+    assert review["human_review_required"] is True
+    assert review["pipeline_write_enabled"] is False
+    assert review["external_contact_enabled"] is False
+    assert review["automatic_offer_enabled"] is False
+    assert review["automatic_send_enabled"] is False
+    assert review["crm_write_enabled"] is False
+
     print(json.dumps({
         "status": "PASS",
         "phase": "E11",
@@ -136,8 +157,10 @@ def main() -> None:
         "matching_candidates": match_result["summary"]["candidates"],
         "next_action": final_record["next_action"],
         "research_evaluation_state": evaluation["record_state"],
+        "commercial_review_state": review["record_state"],
         "selected_service_id": evaluation["selected_service_id"],
         "production_collection": "DISABLED_UNTIL_BACKEND_AUTHORIZED",
+        "pipeline_write": False,
         "external_contact": False,
         "crm_write": False
     }, ensure_ascii=False))
