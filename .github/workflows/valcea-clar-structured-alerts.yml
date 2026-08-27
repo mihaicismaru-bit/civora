@@ -68,6 +68,13 @@ jobs:
           python valcea-clar/scripts/compose_structured_alerts.py --self-test
           python valcea-clar/scripts/prune_volatile_json_changes.py --self-test
 
+      # The staged electricity source is still disabled on main. Install the
+      # small PDF reader only for PR live acceptance so the 5-minute production
+      # alert loop does not pay a new dependency/setup cost before activation.
+      - name: Install PR-only electricity PDF probe dependency
+        if: github.event_name == 'pull_request'
+        run: python -m pip install --disable-pip-version-check --no-cache-dir 'pypdf==6.0.0'
+
       - name: Live-probe staged electricity weekly documents
         if: github.event_name == 'pull_request'
         run: |
