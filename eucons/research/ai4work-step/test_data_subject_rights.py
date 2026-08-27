@@ -4,9 +4,13 @@ import hashlib
 import json
 import tempfile
 import unittest
+from datetime import datetime, timezone
 from pathlib import Path
 
 from research_storage import ResearchStorageError, SQLiteResearchStorage, canonical_json_bytes
+
+
+FUTURE_REPLAY_BOUNDARY = "2099-01-01T00:00:00+00:00"
 
 
 def test_record(response_id: str = "receipt-test-001") -> dict:
@@ -35,7 +39,10 @@ def append_test_record(store: SQLiteResearchStorage, item: dict) -> tuple[bytes,
 class DataSubjectRightsTests(unittest.TestCase):
     def test_receipt_lookup_atomic_erasure_and_replay_block(self):
         with tempfile.TemporaryDirectory() as td:
-            store = SQLiteResearchStorage(Path(td) / "rights.sqlite")
+            store = SQLiteResearchStorage(
+                Path(td) / "rights.sqlite",
+                erasure_replay_not_after_utc=FUTURE_REPLAY_BOUNDARY,
+            )
             item = test_record()
             body, body_sha = append_test_record(store, item)
 
@@ -70,11 +77,52 @@ class DataSubjectRightsTests(unittest.TestCase):
             )
             self.assertEqual(store.export("AI4WORK_ADULTS_V1"), [])
 
-            # A delayed transport retry must not recreate data that was erased.
+            # A delayed transport retry must not recreate data before the approved boundary.
             with self.assertRaisesRegex(ResearchStorageError, "erased response replay blocked"):
                 store.append_idempotent(item, raw_bytes=body, body_sha256=body_sha)
             self.assertIsNone(store.get_by_response_id(item["response_id"]))
             self.assertEqual(store.export("AI4WORK_ADULTS_V1"), [])
+
+    def test_erasure_fails_closed_without_finite_replay_retention_boundary(self):
+        with tempfile.TemporaryDirectory() as td:
+            store = SQLiteResearchStorage(Path(td) / "rights.sqlite")
+            item = test_record("receipt-test-boundary-required")
+            append_test_record(store, item)
+
+            with self.assertRaisesRegex(ResearchStorageError, "retention boundary required"):
+                store.delete_by_response_id(item["response_id"])
+
+            self.assertEqual(store.get_by_response_id(item["response_id"]), item)
+            self.assertEqual(
+                store.conn.execute(
+                    "SELECT COUNT(*) FROM erasure_replay_blocks WHERE response_id = ?",
+                    (item["response_id"],),
+                ).fetchone()[0],
+                0,
+            )
+
+    def test_replay_marker_auto_expires_at_configured_boundary(self):
+        with tempfile.TemporaryDirectory() as td:
+            store = SQLiteResearchStorage(
+                Path(td) / "rights.sqlite",
+                erasure_replay_not_after_utc=FUTURE_REPLAY_BOUNDARY,
+            )
+            item = test_record("receipt-test-expiry")
+            body, body_sha = append_test_record(store, item)
+            self.assertTrue(store.delete_by_response_id(item["response_id"]))
+
+            deleted = store.expire_erasure_replay_blocks(
+                now_utc=datetime(2100, 1, 1, tzinfo=timezone.utc)
+            )
+            self.assertEqual(deleted, 1)
+            self.assertEqual(
+                store.conn.execute("SELECT COUNT(*) FROM erasure_replay_blocks").fetchone()[0],
+                0,
+            )
+
+            normalized_sha, inserted = store.append_idempotent(item, raw_bytes=body, body_sha256=body_sha)
+            self.assertTrue(inserted)
+            self.assertEqual(len(normalized_sha), 64)
 
     def test_restriction_and_objection_holds_exclude_records_until_cleared(self):
         with tempfile.TemporaryDirectory() as td:
@@ -139,6 +187,10 @@ class DataSubjectRightsTests(unittest.TestCase):
         self.assertEqual(
             procedure["research_store_operations"]["erasure_replay_suppression"],
             "OPAQUE_RESPONSE_ID_ONLY_NO_ANSWERS_NO_BODY_DIGEST_NOT_ANALYTICAL",
+        )
+        self.assertEqual(
+            procedure["research_store_operations"]["erasure_replay_marker_reference_adapter_boundary"],
+            "REQUIRED_FINITE_UTC_NOT_AFTER_NO_DEFAULT",
         )
         self.assertTrue(procedure["research_store_operations"]["erased_records_replay_blocked"])
         self.assertEqual(procedure["test_twin"]["classification"], "TEST_TWIN_NON_EVIDENCE")
