@@ -12,6 +12,7 @@ REQUIRED = {
     "SRC-EU-MFF-2028-2034": {"EU_DIRECT", "BRUSSELS", "PROGRAMMING_PIPELINE"},
     "SRC-EEA-GRANTS-ROMANIA-EEA-MOU": {"EEA_NORWAY", "PROGRAMMING_PIPELINE"},
     "SRC-EEA-GRANTS-ROMANIA-NORWAY-MOU": {"EEA_NORWAY", "PROGRAMMING_PIPELINE"},
+    "SRC-EEA-CSF-ROMANIA-CALLS": {"EEA_NORWAY", "CALL_REGISTRY"},
     "SRC-INTERREG-ROBG": {"INTERREG", "CBC"},
     "SRC-INTERREG-ROBG-POST2027": {"INTERREG", "CBC", "PROGRAMMING_PIPELINE"},
     "SRC-INTERREG-ROHU": {"INTERREG", "CBC"},
@@ -28,6 +29,7 @@ OFFICIAL_HOSTS = {
     "SRC-EU-MFF-2028-2034": "commission.europa.eu",
     "SRC-EEA-GRANTS-ROMANIA-EEA-MOU": "eeagrants.org",
     "SRC-EEA-GRANTS-ROMANIA-NORWAY-MOU": "eeagrants.org",
+    "SRC-EEA-CSF-ROMANIA-CALLS": "eeagrants.org",
     "SRC-INTERREG-ROBG": "www.interregviarobg.eu",
     "SRC-INTERREG-ROBG-POST2027": "www.interregviarobg.eu",
     "SRC-INTERREG-ROHU": "interreg-rohu.eu",
@@ -95,6 +97,16 @@ def main():
     if gateway.get("observation_state") != "GATEWAY_ONLY":
         fail("Funding & Tenders generic gateway must remain GATEWAY_ONLY")
 
+    eea_calls = by_id["SRC-EEA-CSF-ROMANIA-CALLS"]
+    if eea_calls.get("material_fact_use") is not False:
+        fail("EEA Civil Society call index must remain discovery-only for material facts")
+    if eea_calls.get("adapter_required") != "EEA_CSF_ROMANIA_CALLS_V1":
+        fail("EEA Civil Society call index must require the dedicated call adapter")
+    if eea_calls.get("authority_scope") != "CALL_INDEX_DISCOVERY":
+        fail("EEA Civil Society call index must remain CALL_INDEX_DISCOVERY")
+    if eea_calls.get("observation_state") != "CURRENT_CALL_REGISTRY":
+        fail("EEA Civil Society call index must identify itself as a current call registry")
+
     policy = data.get("policy") or {}
     if "OPEN_CALL" not in policy.get("programming_pipeline_rule", ""):
         fail("programming pipeline guard must explicitly prohibit OPEN_CALL promotion")
@@ -104,7 +116,7 @@ def main():
     print(
         "PASS external source expansion contract: "
         f"{len(REQUIRED)} roots; {len(pipeline)} programming-pipeline roots; "
-        "all programmes data-plane classified; Funding & Tenders gateway fail-closed pending structured adapter"
+        "all programmes data-plane classified; F&T gateway and EEA Civil Society call index fail-closed behind dedicated adapters"
     )
 
 
