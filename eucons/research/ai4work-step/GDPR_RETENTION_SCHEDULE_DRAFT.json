@@ -1,5 +1,5 @@
 {
-  "schema_version": "eucons.ai4work_retention_schedule.v0.2",
+  "schema_version": "eucons.ai4work_retention_schedule.v0.3",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "date": "2026-08-27",
   "status": "DRAFT_EXECUTION_BINDING_REQUIRED_BEFORE_COLLECTION",
@@ -34,6 +34,16 @@
       "deletion": "delete atomically from live storage with respondent-level records; residual backup treatment follows the same validated provider cycle"
     },
     {
+      "data_class": "erasure replay-suppression markers",
+      "store": "RESEARCH_RIGHTS_CONTROL_ONLY_NOT_ANALYTICAL",
+      "content": "opaque derived response_id only; no questionnaire answers, canonical body digest, raw Idempotency-Key, identity/contact data, IP, user-agent, device, CRM or employer identifier",
+      "purpose": "prevent a delayed transport retry from recreating a respondent-level record after an approved live erasure",
+      "retention": "UNRESOLVED_BEFORE_CONTROLLER_APPROVAL; the live binding must use the shortest documented period necessary to prevent stale retry resurrection and must define an automatic deletion condition",
+      "export": "FORBIDDEN from analytical export, NF06, source register and long-term need evidence",
+      "deletion": "production adapter must delete the marker automatically at the approved bound and include marker counts in deletion evidence",
+      "gate": "collection remains NO_GO until the controller approves the minimum necessary bound and the production adapter proves automatic expiry/deletion"
+    },
+    {
       "data_class": "optional follow-up contact records",
       "store": "RESEARCH_CONTACT_SEPARATE_NO_RESPONSE_LINKAGE",
       "retention": "delete from live storage after the requested follow-up is completed and in all cases no later than 90 days after primary collection closes",
@@ -56,6 +66,8 @@
     "row/object counts before and after live deletion",
     "documented account-specific backup schedule and maximum residual lifetime",
     "confirmation that deleted respondent data cannot silently return to live processing through ordinary restore jobs",
+    "confirmation that a stale idempotent retry cannot recreate an erased respondent record",
+    "confirmation that any non-analytical erasure replay marker follows its approved minimum-necessary expiry/deletion bound",
     "confirmation that backup rotation does not restart the retention clock for deleted research records",
     "confirmation that optional contact store and PROD analytical store were both checked",
     "retained aggregate/source-register package identified separately"
