@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""Build the VÂLCEA CLAR Photo Atlas from already-approved story visuals.
+"""Build the VÂLCEA CLAR Photo Atlas from approved story visuals.
 
-The atlas is an inventory/search layer only. It never grants story assignment,
-editorial approval or publication authority. Reuse of an atlas asset in a new
-story must create a new explicit story_visuals.json assignment that passes the
-existing photo gates.
+Approved Photo Atlas assets still come only from story_visuals.json. The owned
+Drive library is exposed as a separate discoverable candidate source; those
+candidates never inherit subject match, editor approval or publication rights.
 """
 from __future__ import annotations
 
@@ -18,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SOCIAL = ROOT / "valcea-clar" / "social"
 SOURCE_PATH = SOCIAL / "story_visuals.json"
 ATLAS_PATH = SOCIAL / "photo_atlas.json"
+OWNED_SOURCE_PATH = SOCIAL / "photo_atlas_owned_source.json"
 
 ALLOWED_RIGHTS = {
     "owned",
@@ -110,8 +110,60 @@ def _validated_image(story_id: str, row: dict[str, Any]) -> tuple[str, dict[str,
     return image_path, image
 
 
-def build_atlas(doc: dict[str, Any]) -> dict[str, Any]:
+def _owned_candidate_descriptor(source: dict[str, Any] | None) -> dict[str, Any] | None:
+    if source is None:
+        return None
+    if source.get("publication_authority") != "NONE":
+        raise AtlasError("owned candidate source gained publication authority")
+    if source.get("automatic_story_assignment_allowed") is not False:
+        raise AtlasError("owned candidate source permits automatic story assignment")
+    if source.get("status") != "MIGRATED_BY_REFERENCE":
+        raise AtlasError("owned candidate source is not migrated-by-reference")
+    policy = source.get("policy") or {}
+    for key in (
+        "all_drive_assets_are_atlas_discoverable_candidates",
+        "owned_candidate_is_not_approved_atlas_asset",
+        "semantic_identity_is_not_story_subject_match",
+        "subject_match_required_before_story_use",
+        "rights_reconfirmation_required_before_story_use",
+        "privacy_review_required_before_story_use",
+        "editor_approval_required_before_story_use",
+        "alt_text_required_before_story_use",
+        "automatic_publication_forbidden",
+        "no_photo_is_better_than_false_relevance",
+    ):
+        if policy.get(key) is not True:
+            raise AtlasError(f"unsafe owned candidate source policy: {key}")
+    storage = source.get("storage") or {}
+    if storage.get("original_binary_location") != "google_drive":
+        raise AtlasError("owned candidate originals must remain in Google Drive")
+    if storage.get("repository_bulk_binary_copy") is not False:
+        raise AtlasError("bulk copying owned originals into repository is forbidden")
+    if storage.get("story_specific_binary_materialization_only") is not True:
+        raise AtlasError("owned binaries must remain story-specific materializations")
+    bootstrap = source.get("bootstrap") or {}
+    count = int(bootstrap.get("asset_count") or 0)
+    if count < 48:
+        raise AtlasError("owned candidate migration bootstrap fell below 48 assets")
+    return {
+        "kind": "owned_photo_candidate_layer",
+        "manifest_path": "valcea-clar/social/photo_atlas_owned_source.json",
+        "resolver_path": "valcea-clar/social/photo_atlas_owned_bridge.py",
+        "source_snapshot": _text((source.get("source_files") or {}).get("drive_snapshot")),
+        "source_semantics": _text((source.get("source_files") or {}).get("semantic_labels")),
+        "bootstrap_asset_count": count,
+        "original_binary_location": "google_drive",
+        "candidate_only": True,
+        "approved_assets_listed_in_atlas_assets": False,
+        "story_materialization_required": True,
+        "automatic_story_assignment_allowed": False,
+        "publication_authority": "NONE",
+    }
+
+
+def build_atlas(doc: dict[str, Any], owned_source: dict[str, Any] | None = None) -> dict[str, Any]:
     _validate_story_visuals(doc)
+    owned_descriptor = _owned_candidate_descriptor(owned_source)
     assets_by_url: dict[str, dict[str, Any]] = {}
 
     stories = doc.get("stories") or {}
@@ -179,9 +231,10 @@ def build_atlas(doc: dict[str, Any]) -> dict[str, Any]:
 
     assets = sorted(assets_by_url.values(), key=lambda item: item["asset_id"])
     archive_candidates = sum(1 for item in assets if item["candidate_reuse_scope"] == "contextual_archive_candidate")
+    owned_count = int(owned_descriptor["bootstrap_asset_count"]) if owned_descriptor else 0
 
-    return {
-        "schema_version": "1.1",
+    result = {
+        "schema_version": "1.2",
         "product": "VÂLCEA CLAR PHOTO ATLAS",
         "source_of_truth": "valcea-clar/social/story_visuals.json",
         "publication_authority": "NONE",
@@ -195,15 +248,22 @@ def build_atlas(doc: dict[str, Any]) -> dict[str, Any]:
             "new_story_subject_match_required": True,
             "new_story_editor_approval_required": True,
             "contextual_archive_requires_disclosure": True,
+            "owned_candidate_layer_separate_from_approved_assets": True,
+            "owned_originals_remain_in_drive_until_story_materialization": True,
             "no_photo_is_better_than_false_relevance": True,
         },
         "summary": {
             "approved_asset_count": len(assets),
             "contextual_archive_candidate_count": archive_candidates,
             "story_assignment_only_count": len(assets) - archive_candidates,
+            "owned_candidate_asset_count": owned_count,
+            "discoverable_asset_count": len(assets) + owned_count,
         },
         "assets": assets,
     }
+    if owned_descriptor is not None:
+        result["candidate_sources"] = [owned_descriptor]
+    return result
 
 
 def _dump(doc: dict[str, Any]) -> str:
@@ -255,6 +315,34 @@ def self_test() -> None:
     assert atlas["assets"][0]["automatic_story_assignment_allowed"] is False
     assert atlas["assets"][0]["publication_authority"] == "NONE"
 
+    owned_source = {
+        "status": "MIGRATED_BY_REFERENCE",
+        "publication_authority": "NONE",
+        "automatic_story_assignment_allowed": False,
+        "source_files": {"drive_snapshot": "snapshot.json", "semantic_labels": "labels.json"},
+        "bootstrap": {"asset_count": 48},
+        "storage": {"original_binary_location": "google_drive", "repository_bulk_binary_copy": False,
+                    "story_specific_binary_materialization_only": True},
+        "policy": {key: True for key in (
+            "all_drive_assets_are_atlas_discoverable_candidates",
+            "owned_candidate_is_not_approved_atlas_asset",
+            "semantic_identity_is_not_story_subject_match",
+            "subject_match_required_before_story_use",
+            "rights_reconfirmation_required_before_story_use",
+            "privacy_review_required_before_story_use",
+            "editor_approval_required_before_story_use",
+            "alt_text_required_before_story_use",
+            "automatic_publication_forbidden",
+            "no_photo_is_better_than_false_relevance",
+        )},
+    }
+    atlas_with_owned = build_atlas(fixture, owned_source)
+    assert atlas_with_owned["summary"]["approved_asset_count"] == 1
+    assert atlas_with_owned["summary"]["owned_candidate_asset_count"] == 48
+    assert atlas_with_owned["summary"]["discoverable_asset_count"] == 49
+    assert len(atlas_with_owned["assets"]) == 1
+    assert atlas_with_owned["candidate_sources"][0]["candidate_only"] is True
+
     broken = json.loads(json.dumps(fixture))
     broken["stories"]["one"]["image"].pop("rights_note")
     try:
@@ -305,7 +393,8 @@ def main() -> int:
         return 0
 
     source = json.loads(SOURCE_PATH.read_text(encoding="utf-8"))
-    atlas = build_atlas(source)
+    owned_source = json.loads(OWNED_SOURCE_PATH.read_text(encoding="utf-8")) if OWNED_SOURCE_PATH.is_file() else None
+    atlas = build_atlas(source, owned_source)
     rendered = _dump(atlas)
 
     if args.check:
@@ -313,11 +402,19 @@ def main() -> int:
             raise SystemExit("Photo Atlas check failed: committed photo_atlas.json is missing")
         if ATLAS_PATH.read_text(encoding="utf-8") != rendered:
             raise SystemExit("Photo Atlas check failed: committed atlas is stale")
-        print(f"VÂLCEA CLAR Photo Atlas check: PASS ({len(atlas['assets'])} approved assets)")
+        print(
+            "VÂLCEA CLAR Photo Atlas check: PASS "
+            f"({len(atlas['assets'])} approved assets, "
+            f"{atlas['summary']['owned_candidate_asset_count']} owned candidates)"
+        )
         return 0
 
     ATLAS_PATH.write_text(rendered, encoding="utf-8")
-    print(f"VÂLCEA CLAR Photo Atlas written: {ATLAS_PATH} ({len(atlas['assets'])} assets)")
+    print(
+        f"VÂLCEA CLAR Photo Atlas written: {ATLAS_PATH} "
+        f"({len(atlas['assets'])} approved assets, "
+        f"{atlas['summary']['owned_candidate_asset_count']} owned candidates)"
+    )
     return 0
 
 
