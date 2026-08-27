@@ -1,5 +1,5 @@
 {
-  "schema_version": "eucons.research_form_contract.v0.5",
+  "schema_version": "eucons.research_form_contract.v0.6",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "purpose": "Primary research for an independent needs analysis; not lead generation, recruitment, marketing or project enrolment.",
   "production_enabled": false,
@@ -48,6 +48,7 @@
     "client_generated_stable_identifier": false,
     "idempotency_key": "one-submit canonical UUIDv4 held only in same-tab/session retry state; never cookie/fingerprint/CRM/analytics derived",
     "response_id": "server-derived opaque SHA-256 of research_id + form_id + one-submit idempotency key; raw key is not stored in the analytical record or exported and there is no identity lookup table",
+    "response_id_rights_receipt": "the submit response may expose response_id to the respondent as an opaque technical receipt; live rights operations may locate a record by this receipt without collecting an identity registry",
     "ip_in_analytical_payload": false,
     "user_agent_in_analytical_payload": false,
     "server_log_policy": "Before production, document hosting/reverse-proxy logs, minimize retention and ensure no IP/device metadata enters the analytical export."
@@ -106,6 +107,7 @@
       "server/reverse-proxy logging policy verified",
       "research-only production storage adapter bound and isolated from CRM",
       "retention schedule approved and executable",
+      "data-subject-rights procedure approved and live adapter receipt lookup/atomic erasure validated",
       "form validation and direct-identifier rejection/minimisation tests PASS",
       "retry idempotency tests PASS on the exact candidate head",
       "browser-to-HTTP-to-store-to-export-to-NF06 smoke PASS"
