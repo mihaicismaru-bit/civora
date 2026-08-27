@@ -1,0 +1,122 @@
+name: VÂLCEA CLAR Canonical Runtime Acceptance
+
+# End-to-end acceptance boundary for the canonical reader runtime. The retired
+# GPT Sites export surface is intentionally outside the publication model.
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'valcea-clar/**'
+      - '.github/workflows/valcea-clar-canonical-runtime.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-canonical-runtime-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  canonical-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Reject any active GPT Sites surface
+        run: python valcea-clar/scripts/validate_no_gpt_sites_surface.py
+
+      - name: Validate canonical presentation component contracts
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            valcea-clar/scripts/repair_continuous_frontpage.py \
+            valcea-clar/scripts/render_news_index.py \
+            valcea-clar/scripts/build_legal_pages.py \
+            valcea-clar/scripts/render_rich_story_sections.py \
+            valcea-clar/scripts/gambling_story_presentation.py \
+            valcea-clar/scripts/public_ux_currentness.py \
+            valcea-clar/scripts/public_ux_story_integrity.py \
+            valcea-clar/scripts/public_ux_manifest.py \
+            valcea-clar/scripts/public_ux_legal.py \
+            valcea-clar/scripts/validate_public_legal_runtime.py
+          python valcea-clar/scripts/newsroom_decide.py --self-test
+          python valcea-clar/scripts/repair_continuous_frontpage.py --self-test
+          python valcea-clar/scripts/render_news_index.py --self-test
+          python valcea-clar/scripts/build_legal_pages.py --self-test
+          python valcea-clar/scripts/render_rich_story_sections.py --self-test
+          python valcea-clar/scripts/public_ux_currentness.py --self-test
+          python valcea-clar/scripts/public_ux_story_integrity.py --self-test
+
+      - name: Rebuild canonical publication inputs and reader runtime
+        run: |
+          set -euo pipefail
+          python valcea-clar/scripts/build_public_data.py
+          python valcea-clar/scripts/repair_continuous_frontpage.py
+          python valcea-clar/scripts/public_ux_story_integrity.py
+          python valcea-clar/scripts/public_ux_manifest.py
+          python valcea-clar/scripts/public_ux_legal.py
+          python valcea-clar/scripts/validate_public_legal_runtime.py
+          python valcea-clar/scripts/smoke_web.py
+
+      - name: Validate continuous-story runtime invariants
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('valcea-clar')
+          runtime = root / 'site' / 'runtime'
+          feed = json.loads((runtime / 'live-feed.json').read_text(encoding='utf-8'))
+          stories = json.loads((runtime / 'stiri/manifest.json').read_text(encoding='utf-8'))
+          archive = json.loads((root / 'site/story_archive.json').read_text(encoding='utf-8'))
+          holds = json.loads((root / 'editorial/publication_holds.json').read_text(encoding='utf-8'))
+          state = json.loads((root / 'site/public_ux_state.json').read_text(encoding='utf-8'))
+
+          assert state['policy']['monitoring_is_news'] is False
+          assert state['policy']['cross_category_fill'] is False
+          assert archive['publication_model'] == 'continuous_story_first'
+          assert archive['recap_editions_may_delete_published_stories'] is False
+
+          archive_ids = [str(row['id']) for row in archive.get('stories', [])]
+          feed_ids = [str(row['id']) for row in feed.get('stories', [])]
+          route_ids = [str(row['id']) for row in stories.get('stories', [])]
+          held = {str(row['story_id']) for row in holds.get('holds', []) if row.get('public_projection') is False}
+          assert len(archive_ids) == len(set(archive_ids))
+          assert archive_ids == feed_ids
+          assert set(route_ids) == set(archive_ids)
+          assert not held & set(archive_ids)
+          assert len(stories.get('stories', [])) == feed.get('story_count')
+
+          required = (
+              'index.html', 'stiri/index.html', 'despre/index.html', 'unde-iesim/index.html',
+              'termeni/index.html', 'confidentialitate/index.html', 'robots.txt', 'sitemap.xml',
+          )
+          for rel in required:
+              assert (runtime / rel).is_file(), rel
+
+          for rel in ('index.html','stiri/index.html','despre/index.html','termeni/index.html','confidentialitate/index.html'):
+              text=(runtime/rel).read_text(encoding='utf-8')
+              assert 'data-nav-contract="valcea-clar-primary-v2"' in text, rel
+
+          for row in stories.get('stories', []):
+              sid=str(row['id'])
+              page=runtime/'stiri'/sid/'index.html'
+              assert page.is_file(), sid
+              text=page.read_text(encoding='utf-8')
+              assert '<meta property="og:type" content="article">' in text, sid
+              assert '<script type="application/ld+json">' in text, sid
+
+          print(json.dumps({
+              'status':'PASS',
+              'stories':feed.get('story_count'),
+              'held':len(held),
+              'publication_model':archive['publication_model'],
+          }, ensure_ascii=False))
+          PY
