@@ -9,6 +9,7 @@ class CollectionFrameTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.frame = json.loads((ROOT / "COLLECTION_FRAME_DRAFT.json").read_text(encoding="utf-8"))
+        cls.nf06_contract = json.loads((ROOT / "NF06_PREINGEST_CONTRACT.json").read_text(encoding="utf-8"))
 
     def test_draft_is_fail_closed_and_non_evidence(self):
         f = self.frame
@@ -62,6 +63,14 @@ class CollectionFrameTests(unittest.TestCase):
         self.assertIn("cannot be reliably detected", d["same_person_multiple_independent_submissions"].lower())
         mitigation = " ".join(d["mitigation"]).lower()
         self.assertIn("without using fingerprinting", mitigation)
+
+    def test_approval_placeholders_cover_nf06_prod_provenance(self):
+        required = set(self.nf06_contract["prod_only_required_fields"])
+        approval = self.frame["approval"]
+        self.assertTrue(required.issubset(set(approval)))
+        for field in required:
+            self.assertIsNone(approval[field])
+        self.assertIsNone(approval["controller_determination_reference"])
 
 
 if __name__ == "__main__":
