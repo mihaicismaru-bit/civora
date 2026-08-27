@@ -5,6 +5,7 @@ import unittest
 
 import nf06_preingest as NF06
 import runtime as RUNTIME
+from research_storage import canonical_json_bytes
 from test_runtime import adult_payload, employer_payload
 
 ADULT_CHANNEL = "CH-ADULT001"
@@ -37,6 +38,7 @@ def collection_frame(records: list[dict], *, prod: bool) -> tuple[dict, bytes]:
             "AI4WORK_ADULTS_V1": 1,
             "AI4WORK_EMPLOYERS_V1": 1,
         },
+        **NF06.instrument_definition_hashes(),
         "collection_started_at": "2026-08-28T08:00:00+00:00",
         "collection_closed_at": "2026-08-28T18:00:00+00:00",
         "collection_channels": [ADULT_CHANNEL, EMPLOYER_CHANNEL],
@@ -77,6 +79,14 @@ class NF06PreingestTests(unittest.TestCase):
         self.assertEqual(manifest["channel_counts"], {ADULT_CHANNEL: 1, EMPLOYER_CHANNEL: 1})
         self.assertEqual(manifest["dominant_channel_share"], 0.5)
         self.assertTrue(manifest["channel_membership_validated_against_collection_frame"])
+        self.assertTrue(manifest["instrument_content_hashes_validated"])
+        self.assertTrue(manifest["collection_frame_exact_field_allowlist_validated"])
+        self.assertEqual(
+            manifest["collection_frame_sha256"],
+            hashlib.sha256(canonical_json_bytes(frame)).hexdigest(),
+        )
+        self.assertEqual(manifest["form_contract_sha256"], frame["form_contract_sha256"])
+        self.assertEqual(manifest["forms_definition_sha256"], frame["forms_definition_sha256"])
         rendered = NF06.manifest_json_bytes(manifest).decode("utf-8")
         self.assertNotIn("redactare și documente", rendered)
         self.assertNotIn("compliance/verificare documente", rendered)
@@ -127,6 +137,22 @@ class NF06PreingestTests(unittest.TestCase):
         frame2["source_export_sha256"] = "0" * 64
         with self.assertRaises(NF06.NF06PreingestError):
             NF06.build_preingest_manifest(records, collection_frame=frame2, source_bytes=source_bytes2, prod=True)
+
+    def test_frozen_instrument_content_hashes_are_required_and_must_match_repository(self):
+        records = normalized_records()
+        for field in ("form_contract_sha256", "forms_definition_sha256"):
+            with self.subTest(field=field):
+                frame, source_bytes = collection_frame(records, prod=True)
+                frame[field] = "0" * 64
+                with self.assertRaises(NF06.NF06PreingestError):
+                    NF06.build_preingest_manifest(records, collection_frame=frame, source_bytes=source_bytes, prod=True)
+
+    def test_collection_frame_rejects_unreviewed_extra_fields(self):
+        records = normalized_records()
+        frame, source_bytes = collection_frame(records, prod=True)
+        frame["unreviewed_future_field"] = "value"
+        with self.assertRaises(NF06.NF06PreingestError):
+            NF06.build_preingest_manifest(records, collection_frame=frame, source_bytes=source_bytes, prod=True)
 
     def test_prod_requires_controller_determination_approval_provider_logging_retention_and_store_refs(self):
         records = normalized_records()
