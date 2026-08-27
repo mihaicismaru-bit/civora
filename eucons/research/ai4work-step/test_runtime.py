@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import unittest
 from pathlib import Path
 
@@ -20,7 +21,7 @@ def adult_payload():
             "region": "Sud-Vest Oltenia",
             "status": "persoană ocupată potențial eligibilă",
             "age_band": "40-49",
-            "occupational_family": "administrativ",
+            "occupational_family": "administrativ/back-office",
         },
         "answers": {
             "Q01": 3,
@@ -40,7 +41,7 @@ def adult_payload():
                 "integrarea_AI_in_flux_de_lucru": 5,
             },
             "Q11": "adaptare mai bună la postul actual",
-            "Q12": "Pregătirea rapidă a unor documente și verificarea informațiilor.",
+            "Q12": ["redactare și documente", "căutare și verificare informații"],
         },
     }
 
@@ -51,7 +52,7 @@ def employer_payload():
         "notice_read_and_voluntary_participation": True,
         "profile": {
             "region": "Centru",
-            "sector_aggregated": "servicii profesionale",
+            "sector_aggregated": "servicii profesionale/tehnice",
             "size_band": "10-49",
             "respondent_role": "management",
         },
@@ -68,12 +69,12 @@ def employer_payload():
                 "competente_digitale_generale": 3,
             },
             "E04": "da",
-            "E04_detail": "Verificarea rezultatelor și integrarea instrumentelor în procese.",
+            "E04_detail": ["verificarea calității/corectitudinii AI", "automatizare și integrare în procese"],
             "E05": "nu",
             "E06": ["timp disponibil", "conținut prea general"],
             "E07": "moderat",
             "E08": ["verificarea factuală/calității", "protecția datelor"],
-            "E09": "Lipsa unei metode unitare de verificare limitează folosirea instrumentelor.",
+            "E09": ["compliance/verificare documente", "automatizare fluxuri"],
             "E10": "posibil",
         },
     }
@@ -98,11 +99,21 @@ class ResearchRuntimeTests(unittest.TestCase):
         with self.assertRaises(RUNTIME.ResearchValidationError):
             RUNTIME.validate_submission(payload)
 
-    def test_identifier_like_free_text_is_rejected(self):
+    def test_identifier_like_value_cannot_be_injected_into_controlled_category(self):
         payload = adult_payload()
-        payload["answers"]["Q12"] = "Contactați-mă la test@example.org"
+        payload["profile"]["occupational_family"] = "contact@example.org"
         with self.assertRaises(RUNTIME.ResearchValidationError):
             RUNTIME.validate_submission(payload)
+
+    def test_preproduction_instrument_has_no_free_text_fields(self):
+        forms = json.loads((HERE / "forms_definition.json").read_text(encoding="utf-8"))
+        free_text = []
+        for form in forms["forms"]:
+            for group in ("profile", "questions"):
+                for field in form[group]:
+                    if field.get("type") in {"text", "textarea"}:
+                        free_text.append(f"{form['id']}:{field['id']}")
+        self.assertEqual(free_text, [])
 
     def test_acknowledgement_is_required(self):
         payload = adult_payload()
@@ -149,7 +160,7 @@ class ResearchRuntimeTests(unittest.TestCase):
 
     def test_inactive_conditional_field_must_be_empty(self):
         payload = adult_payload()
-        payload["answers"]["Q07_topic"] = "AI"
+        payload["answers"]["Q07_topic"] = "AI generativ"
         with self.assertRaises(RUNTIME.ResearchValidationError):
             RUNTIME.validate_submission(payload)
 
