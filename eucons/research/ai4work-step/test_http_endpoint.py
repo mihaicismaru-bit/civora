@@ -11,6 +11,8 @@ from research_storage import SQLiteResearchStorage
 from runtime import load_contract
 from test_runtime import adult_payload, employer_payload
 
+CHANNEL_ID = "CH-TEST0001"
+
 
 def enabled_contract():
     contract = dict(load_contract())
@@ -22,10 +24,11 @@ def request_body(payload):
     return json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
 
 
-def headers(key: str):
+def headers(key: str, channel_id: str = CHANNEL_ID):
     return {
         "Content-Type": "application/json; charset=utf-8",
         "X-AI4WORK-Idempotency-Key": key,
+        "X-AI4WORK-Recruitment-Channel": channel_id,
     }
 
 
@@ -69,6 +72,7 @@ class HttpEndpointTests(unittest.TestCase):
             exported = store.export("AI4WORK_ADULTS_V1")
             self.assertEqual(len(exported), 1)
             self.assertFalse(exported[0]["synthetic"])
+            self.assertEqual(exported[0]["recruitment_channel_id"], CHANNEL_ID)
             self.assertEqual(exported[0]["response_id"], payload["response_id"])
             self.assertEqual(response[1]["Cache-Control"], "no-store")
 
@@ -146,6 +150,23 @@ class HttpEndpointTests(unittest.TestCase):
             self.assertEqual(response_json(second)["error"], "idempotency_conflict")
             self.assertEqual(len(store.export("AI4WORK_ADULTS_V1")), 1)
 
+    def test_retry_same_key_different_channel_fails_closed(self):
+        with tempfile.TemporaryDirectory() as td:
+            store = self.make_store(td)
+            key = str(uuid.uuid4())
+            body = request_body(adult_payload())
+            first = handle_request(
+                method="POST", path="/research/ai4work/v1/submit", headers=headers(key), body=body,
+                store=store, contract=enabled_contract(),
+            )
+            second = handle_request(
+                method="POST", path="/research/ai4work/v1/submit", headers=headers(key, "CH-TEST0002"), body=body,
+                store=store, contract=enabled_contract(),
+            )
+            self.assertEqual(first[0], 201)
+            self.assertEqual(second[0], 409)
+            self.assertEqual(len(store.export("AI4WORK_ADULTS_V1")), 1)
+
     def test_direct_identifier_is_rejected_before_storage(self):
         with tempfile.TemporaryDirectory() as td:
             store = self.make_store(td)
@@ -191,12 +212,23 @@ class HttpEndpointTests(unittest.TestCase):
                 body=body, store=store, contract=enabled_contract(),
             )
             missing_key = handle_request(
-                method="POST", path="/research/ai4work/v1/submit", headers={"Content-Type": "application/json"},
+                method="POST", path="/research/ai4work/v1/submit", headers={"Content-Type": "application/json", "X-AI4WORK-Recruitment-Channel": CHANNEL_ID},
+                body=body, store=store, contract=enabled_contract(),
+            )
+            missing_channel = handle_request(
+                method="POST", path="/research/ai4work/v1/submit", headers={"Content-Type": "application/json", "X-AI4WORK-Idempotency-Key": str(uuid.uuid4())},
+                body=body, store=store, contract=enabled_contract(),
+            )
+            invalid_channel = handle_request(
+                method="POST", path="/research/ai4work/v1/submit", headers=headers(str(uuid.uuid4()), "utm_source=facebook"),
                 body=body, store=store, contract=enabled_contract(),
             )
             self.assertEqual(wrong_method[0], 405)
             self.assertEqual(wrong_type[0], 415)
             self.assertEqual(missing_key[0], 400)
+            self.assertEqual(missing_channel[0], 400)
+            self.assertEqual(response_json(missing_channel)["error"], "invalid_recruitment_channel")
+            self.assertEqual(invalid_channel[0], 400)
             self.assertEqual(store.export("AI4WORK_ADULTS_V1"), [])
 
 
