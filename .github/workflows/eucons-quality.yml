@@ -64,6 +64,8 @@ jobs:
         run: python eucons/validation/validate_prospect_opportunity_match.py
       - name: Test EUCONS prospect matching fail-closed behavior
         run: python eucons/validation/test_prospect_opportunity_match_fail_closed.py
+      - name: Test EUCONS Client Finder triage fail-closed behavior
+        run: python eucons/validation/test_client_finder_triage_view_fail_closed.py
       - name: Validate EUCONS organization action packs
         run: python eucons/validation/validate_action_pack.py
       - name: Test EUCONS action-pack fail-closed behavior
