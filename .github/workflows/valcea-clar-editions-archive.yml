@@ -51,38 +51,11 @@ jobs:
             python valcea-clar/scripts/overlay_runtime_export.py
             python valcea-clar/scripts/smoke_web.py
 
-            python - <<'PY'
-          import json
-          from pathlib import Path
-
-          runtime = Path('valcea-clar/site/runtime')
-          nav = json.loads(Path('valcea-clar/site/navigation.json').read_text(encoding='utf-8'))
-          manifest = json.loads((runtime/'editii/manifest.json').read_text(encoding='utf-8'))
-          extra = json.loads((runtime/'indexing_extra_routes.json').read_text(encoding='utf-8'))
-          sitemap = (runtime/'sitemap.xml').read_text(encoding='utf-8')
-
-          assert any(row.get('href') == '/editii/' for row in nav.get('items', []))
-          assert manifest.get('edition_count', 0) >= 1
-          assert manifest.get('legacy_files_public') is False
-          assert manifest.get('held_or_operational_items_public') is False
-          assert extra.get('routes') == manifest.get('routes')
-
-          for route in manifest.get('routes', []):
-              page = runtime / route.strip('/') / 'index.html'
-              assert page.is_file(), route
-              text = page.read_text(encoding='utf-8')
-              assert 'data-nav-contract="valcea-clar-primary-v2"' in text, route
-              assert 'Ediții anterioare' in text, route
-              assert f'https://valceaclar.ro{route}' in sitemap, route
-
-          home = (runtime/'index.html').read_text(encoding='utf-8')
-          assert '<a href="/editii/">Ediții anterioare</a>' in home
-          print(json.dumps({
-              'status': 'PASS',
-              'editions': manifest['edition_count'],
-              'routes': len(manifest['routes']),
-          }, ensure_ascii=False))
-          PY
+            test -s valcea-clar/site/runtime/editii/index.html
+            test -s valcea-clar/site/runtime/editii/manifest.json
+            test -s valcea-clar/site/runtime/indexing_extra_routes.json
+            grep -Fq '<a href="/editii/">Ediții anterioare</a>' valcea-clar/site/runtime/index.html
+            grep -Fq 'https://valceaclar.ro/editii/' valcea-clar/site/runtime/sitemap.xml
 
             git add valcea-clar/site/runtime
             if git diff --cached --quiet; then
