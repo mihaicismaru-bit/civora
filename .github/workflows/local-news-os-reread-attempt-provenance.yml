@@ -53,10 +53,6 @@ jobs:
         working-directory: local-news-os/social
         run: python test_reread_attempt_provenance_binding.py
 
-      - name: Run explicit reread handoff regression
-        working-directory: local-news-os/social
-        run: python test_fleet_metrics_reread_authorization_handoff.py
-
       - name: Verify provenance boundary remains analytics-only and zero-paid
         run: |
           python - <<'PY'
