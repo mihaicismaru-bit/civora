@@ -26,6 +26,7 @@ from indexing_assets import write_indexing_assets  # noqa: E402
 RUNTIME = ROOT / "site" / "runtime"
 STORY_MANIFEST = RUNTIME / "stiri" / "manifest.json"
 INDEXING_CONTRACT = ROOT / "site" / "indexing_routes.json"
+RUNTIME_EXTRA_INDEXING = RUNTIME / "indexing_extra_routes.json"
 LEGAL_PATHS = {"/termeni/", "/confidentialitate/", "/corectii/"}
 BASE_URL = "https://valceaclar.ro"
 
@@ -125,6 +126,23 @@ def story_paths() -> list[str]:
     return paths
 
 
+def write_runtime_extra_indexing(routes: list[str]) -> None:
+    """Persist renderer-owned routes so later index-only refreshes keep them."""
+    payload = {
+        "schema_version": "1.0",
+        "contract_id": "valcea-clar-runtime-extra-indexing-v1",
+        "routes": routes,
+        "policy": {
+            "require_static_index_html": True,
+            "owner": "overlay_runtime_export",
+        },
+    }
+    RUNTIME_EXTRA_INDEXING.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+
 def main() -> int:
     if not (RUNTIME / "index.html").is_file():
         raise SystemExit("Refusing runtime finalization: frontpage was not rendered")
@@ -136,8 +154,10 @@ def main() -> int:
     static_materialized = materialize_static_runtime_routes()
     apply_reader_presentation()
     editions_report = render_editions_archive.build()
+    edition_routes = [str(route) for route in editions_report.get("routes") or []]
+    write_runtime_extra_indexing(edition_routes)
 
-    routes = list(dict.fromkeys(["/"] + story_paths() + list(editions_report.get("routes") or [])))
+    routes = list(dict.fromkeys(["/"] + story_paths() + edition_routes))
     indexing = write_indexing_assets(RUNTIME, BASE_URL, routes)
     if indexing.get("status") != "PASS":
         raise RuntimeError(f"refusing runtime with deferred indexing: {indexing}")
@@ -148,7 +168,7 @@ def main() -> int:
         "runtime": "site/runtime",
         "news_index_stories": news_index_report.get("story_count"),
         "edition_archive_count": editions_report.get("edition_count"),
-        "edition_archive_routes": len(editions_report.get("routes") or []),
+        "edition_archive_routes": len(edition_routes),
         "legal_status": legal_report.get("status"),
         "static_routes_materialized": static_materialized,
         "indexing_status": indexing.get("status"),
