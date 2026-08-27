@@ -5,6 +5,10 @@ name: VÂLCEA CLAR Story Social Metadata
 # Public UX, article social metadata and verified-media projection in runtime.
 on:
   workflow_dispatch:
+  # Recovery cadence: workflow_run is the primary handoff, while this hourly
+  # fallback heals a missed/delayed GitHub event without changing editorial facts.
+  schedule:
+    - cron: '13 * * * *'
   workflow_run:
     workflows: ['VÂLCEA CLAR Live Newsroom']
     types: [completed]
