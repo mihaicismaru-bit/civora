@@ -25,18 +25,19 @@ def test_record(response_id: str = "receipt-test-001") -> dict:
     }
 
 
-def append_test_record(store: SQLiteResearchStorage, item: dict) -> None:
+def append_test_record(store: SQLiteResearchStorage, item: dict) -> tuple[bytes, str]:
     body = canonical_json_bytes({"fixture": "TEST_TWIN_NON_EVIDENCE", "record": item})
     body_sha = hashlib.sha256(body).hexdigest()
     store.append_idempotent(item, raw_bytes=body, body_sha256=body_sha)
+    return body, body_sha
 
 
 class DataSubjectRightsTests(unittest.TestCase):
-    def test_receipt_lookup_and_atomic_erasure_remove_live_record_receipt_and_hold(self):
+    def test_receipt_lookup_atomic_erasure_and_replay_block(self):
         with tempfile.TemporaryDirectory() as td:
             store = SQLiteResearchStorage(Path(td) / "rights.sqlite")
             item = test_record()
-            append_test_record(store, item)
+            body, body_sha = append_test_record(store, item)
 
             self.assertEqual(store.get_by_response_id(item["response_id"]), item)
             self.assertEqual(
@@ -60,6 +61,19 @@ class DataSubjectRightsTests(unittest.TestCase):
                 ).fetchone()[0],
                 0,
             )
+            self.assertEqual(
+                store.conn.execute(
+                    "SELECT COUNT(*) FROM erasure_replay_blocks WHERE response_id = ?",
+                    (item["response_id"],),
+                ).fetchone()[0],
+                1,
+            )
+            self.assertEqual(store.export("AI4WORK_ADULTS_V1"), [])
+
+            # A delayed transport retry must not recreate data that was erased.
+            with self.assertRaisesRegex(ResearchStorageError, "erased response replay blocked"):
+                store.append_idempotent(item, raw_bytes=body, body_sha256=body_sha)
+            self.assertIsNone(store.get_by_response_id(item["response_id"]))
             self.assertEqual(store.export("AI4WORK_ADULTS_V1"), [])
 
     def test_restriction_and_objection_holds_exclude_records_until_cleared(self):
@@ -122,6 +136,11 @@ class DataSubjectRightsTests(unittest.TestCase):
             "BOUNDED_ENUM_ONLY_NO_CASE_NARRATIVE",
         )
         self.assertTrue(procedure["research_store_operations"]["held_records_excluded_from_export"])
+        self.assertEqual(
+            procedure["research_store_operations"]["erasure_replay_suppression"],
+            "OPAQUE_RESPONSE_ID_ONLY_NO_ANSWERS_NO_BODY_DIGEST_NOT_ANALYTICAL",
+        )
+        self.assertTrue(procedure["research_store_operations"]["erased_records_replay_blocked"])
         self.assertEqual(procedure["test_twin"]["classification"], "TEST_TWIN_NON_EVIDENCE")
         self.assertFalse(procedure["test_twin"]["prod_promotion_eligible"])
 
