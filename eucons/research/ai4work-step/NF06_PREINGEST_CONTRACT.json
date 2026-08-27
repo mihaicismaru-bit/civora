@@ -1,0 +1,67 @@
+{
+  "schema_version": "eucons.ai4work_nf06_preingest_contract.v0.3",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "purpose": "Fail-closed source-batch preflight before handoff to NF06. This contract does not redefine the internal NF06 schema; it proves that an immutable source export is eligible to be handed to NF06.",
+  "prod_evidence_class": "PROD_REAL_EVIDENCE",
+  "test_twin_evidence_class": "TEST_TWIN_NON_EVIDENCE",
+  "allowed_forms": [
+    "AI4WORK_ADULTS_V1",
+    "AI4WORK_EMPLOYERS_V1"
+  ],
+  "prod_requirements": [
+    "all records synthetic=false",
+    "collection frame is APPROVED_FOR_PROD",
+    "controller determination reference is present",
+    "controller approval reference is present",
+    "privacy notice version is present",
+    "processor binding reference is present",
+    "server/reverse-proxy logging review reference is present",
+    "retention schedule reference is present",
+    "production research-only storage binding reference is present",
+    "instrument versions are fixed",
+    "source export SHA-256 matches the bytes actually parsed",
+    "all records validate against the frozen form definitions",
+    "all record timestamps fall inside the declared collection window",
+    "response_id values are unique within the batch",
+    "direct-identifier aliases and identifier-like free text are rejected again at pre-ingest",
+    "CRM linkage and commercial tracking remain FORBIDDEN",
+    "storage class is RESEARCH_ONLY_SEPARATE_FROM_CRM"
+  ],
+  "test_twin_requirements": [
+    "all records synthetic=true",
+    "collection frame is TEST_TWIN_ONLY",
+    "evidence class is TEST_TWIN_NON_EVIDENCE",
+    "test output is never eligible for PROD promotion"
+  ],
+  "collection_frame_required_fields": [
+    "research_id",
+    "collection_frame_id",
+    "frame_status",
+    "evidence_class",
+    "instrument_versions",
+    "collection_started_at",
+    "collection_closed_at",
+    "collection_channels",
+    "source_system",
+    "source_export_sha256",
+    "direct_identifiers_collected",
+    "crm_linkage",
+    "commercial_tracking",
+    "storage_class"
+  ],
+  "prod_only_required_fields": [
+    "privacy_notice_version",
+    "controller_determination_reference",
+    "controller_approval_reference",
+    "processor_binding_reference",
+    "server_log_profile_reference",
+    "retention_schedule_reference",
+    "production_store_binding_reference"
+  ],
+  "canonical_source_export": "UTF-8 NDJSON, one canonical JSON record per line, sorted by form_id / received_at / response_id, newline terminated",
+  "manifest_privacy_boundary": "The pre-ingest manifest contains counts, hashes, timestamps and provenance controls only. It must not contain questionnaire answers, free-text responses, raw idempotency keys, IP addresses, user agents, cookies, CRM identifiers or optional contact data.",
+  "promotion_rule": "Only PROD_REAL_EVIDENCE batches that pass this contract may be offered to NF06. TEST_TWIN output is permanently NON_EVIDENCE.",
+  "merge_authorized": false,
+  "deploy_authorized": false,
+  "collection_enabled": false
+}

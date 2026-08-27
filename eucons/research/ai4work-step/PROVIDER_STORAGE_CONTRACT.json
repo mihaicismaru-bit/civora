@@ -1,0 +1,93 @@
+{
+  "schema_version": "eucons.research_storage_contract.v0.4",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "controller": {
+    "legal_name": null,
+    "cui": null,
+    "status": "UNRESOLVED_BEFORE_COLLECTION",
+    "privacy_contact": "OPEN_BEFORE_PRODUCTION",
+    "determination_reference": "CONTROLLER_DETERMINATION_DRAFT.json"
+  },
+  "purpose": "research-only primary data collection for AI4WORK STEP needs analysis",
+  "commercial_use": "FORBIDDEN",
+  "crm_integration": "FORBIDDEN",
+  "production_enabled": false,
+  "stores": {
+    "analytical_responses": "RESEARCH_ANALYTICS_ONLY",
+    "followup_contacts": "RESEARCH_CONTACT_SEPARATE",
+    "linkage_between_stores": "FORBIDDEN"
+  },
+  "accepted_forms": ["AI4WORK_ADULTS_V1", "AI4WORK_EMPLOYERS_V1"],
+  "record_rules": {
+    "synthetic": false,
+    "response_id": "server-derived opaque SHA-256 from research_id + form_id + one-submit UUIDv4 idempotency key; raw idempotency key is never stored/exported",
+    "raw_bytes_sha256": "MANDATORY",
+    "normalized_bytes_sha256": "MANDATORY",
+    "body_sha256": "TRANSPORT_METADATA_ONLY_NOT_EXPORTED",
+    "same_response_id_same_body": "REPLAY_ORIGINAL_RECEIPT_NO_SECOND_ANALYTICAL_ROW",
+    "same_response_id_different_body": "FAIL_CLOSED",
+    "repository_persistence": "FORBIDDEN",
+    "direct_identifiers": "FORBIDDEN_IN_ANALYTICAL_STORE",
+    "analytical_free_text": "NOT_COLLECTED_IN_CURRENT_PREPRODUCTION_INSTRUMENT"
+  },
+  "reference_adapter": {
+    "file": "research_storage.py",
+    "class": "SQLiteResearchStorage",
+    "purpose": "local test/reference only",
+    "production_use": "FORBIDDEN",
+    "idempotent_reference_path": "append_idempotent"
+  },
+  "candidate_hosting_processor_framework": {
+    "provider": "CLAUS WEB SRL",
+    "provider_cui": "RO17759260",
+    "public_dpa": "https://www.clausweb.ro/acord-prelucrare-date.html",
+    "dpa_version": "1.0",
+    "dpa_date": "2026-03-16",
+    "processor_role": "DPA states Claus Web generally acts as processor/subprocessor for shared hosting, VPS, dedicated hosting, cPanel/WHM and backup beneficiary data",
+    "processor_privacy_contact": "dpo@clausweb.ro",
+    "security_framework": "DPA describes risk-based Article 32 controls and ISO/IEC 27001-aligned governance, access control, logical segregation, network protection, logging/monitoring, vulnerability/change management, backup/recovery, incident response and secure deletion/decommissioning",
+    "subprocessors": "general authorization exists, with categories including datacenter/colocation, hosting administration/licensing, backup/recovery, security/monitoring and domain registry/registrars; nominal Annex 4 list is available on request and must be account-verified",
+    "international_transfers": "DPA states beneficiary data will not be transferred outside the EEA without a valid Chapter V GDPR mechanism",
+    "residual_backup": "DPA expressly preserves residual technical backup retention according to Annex 5; Annex 5 values are available on request and must be account-verified",
+    "public_shared_hosting_product_observation": "current provider product information advertises daily backups with 7-day retention plus 3 monthly copies for shared hosting; this is not yet proven to be the exact eucons.ro plan",
+    "datacenter_public_observation": "provider states it uses GTS Telecom data center infrastructure in Bucharest, Romania",
+    "contract_binding_status": "FRAMEWORK_VERIFIED_ACCOUNT_ORDER_ANNEX4_ANNEX5_AND_ACTUAL_EUCONS_SERVICE_STILL_MUST_BE_MATCHED"
+  },
+  "production_binding_requirements": [
+    "freeze and approve the actual controller determination before any provider/controller binding is claimed",
+    "prove the actual eucons.ro hosting account/order is the Claus Web service covered by the reviewed DPA",
+    "obtain/retain the applicable DPA/contract acceptance evidence for the determined controller or the legally documented party authorized to instruct the processor; do not assume EUROCONSULT SRL is that party",
+    "document the legal relationship between the determined controller, the hosting-account holder and Claus Web",
+    "obtain and verify current nominal Annex 4 subprocessor list for the actual service",
+    "obtain and verify Annex 5/account-specific backup retention and deletion/restore behavior",
+    "separate research database/files and credentials from CRM and commercial runtime",
+    "HTTPS endpoint with CORS limited to https://eucons.ro and https://www.eucons.ro",
+    "server-side schema and direct-identifier validation before persistence",
+    "retry-safe idempotency preserving one analytical row per submit attempt",
+    "encryption in transit and at rest where supported by provider",
+    "role-based access limited to designated research staff",
+    "verify actual reverse-proxy/application logging and retention so request bodies/raw idempotency keys are not logged and IP/device metadata never enters analytical exports",
+    "bind the approved retention schedule to live storage and provider backup rotation and prove deletion execution",
+    "immutable raw export with SHA-256 before analytical cleaning",
+    "NF06 export must pass PRIMARY_RESPONSE_INGEST_CONTRACT"
+  ],
+  "repository_validation": {
+    "pr": 695,
+    "validated_head": "7b3101cc5492b004eaf9af184b0a2d2a48901334",
+    "research_gate_run_id": 33051519175,
+    "result": "PASS",
+    "scope": "runtime/storage/idempotency/preview/tracking/fail-closed repository gate only; not provider production binding"
+  },
+  "go_no_go": {
+    "operator_identity": "OPEN_FAIL_CLOSED",
+    "privacy_contact": "OPEN",
+    "hosting_processor_public_framework": "CLOSED_AT_PUBLIC_DPA_LEVEL",
+    "hosting_account_contract_and_annexes": "OPEN",
+    "controller_hosting_account_processor_role_chain": "OPEN",
+    "actual_server_log_retention": "OPEN",
+    "production_research_store": "OPEN",
+    "retention_execution": "OPEN",
+    "test_reference_adapter": "EXACT_HEAD_RESEARCH_GATE_PASS_AT_RECORDED_IMPLEMENTATION_HEAD",
+    "status": "NO_GO_FOR_REAL_COLLECTION"
+  }
+}

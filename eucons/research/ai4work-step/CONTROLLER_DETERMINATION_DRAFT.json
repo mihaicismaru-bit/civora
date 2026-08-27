@@ -1,0 +1,94 @@
+{
+  "schema_version": "eucons.ai4work_controller_determination.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "date": "2026-08-27",
+  "status": "UNRESOLVED_BEFORE_COLLECTION",
+  "purpose": "Fail-closed evidence record for determining the GDPR controller under the actual allocation of decisions over research purposes and essential means. This record must not infer legal roles from branding, applicant status, domain ownership, hosting billing, or technical implementation alone.",
+  "controller": null,
+  "joint_controller_assessment": "PENDING_FACTS",
+  "approved": false,
+  "collection_enabled": false,
+  "nf06_reference_eligible": false,
+  "decision_rule": "The controller is the entity that actually determines the purposes and essential means of the AI4WORK needs-research processing. If two or more entities jointly determine those purposes and essential means, a joint-controller assessment and binding allocation of responsibilities is required before collection.",
+  "non_determinative_facts": [
+    "website_branding",
+    "project_leader_status",
+    "domain_ownership",
+    "hosting_billing",
+    "technical_implementation"
+  ],
+  "known_evidence_boundaries": {
+    "project_leader": "A project-leader identity has been observed in current read-only MySMIS evidence, but that fact alone does not determine the GDPR controller.",
+    "site_operator": "eucons.ro is the intended first-party collection surface, but site branding/implementation alone does not determine the GDPR controller.",
+    "hosting_account_holder": "A hosting-account relationship is preserved in controlled first-party evidence. Private billing/account identity must not be copied into this public repository artifact; its legal relationship to the controller candidate must be verified before go-live.",
+    "hosting_provider": "CLAUS WEB SRL has a public standard DPA for relevant hosting services, but account-specific applicability, subprocessors, backup/retention and logging facts remain to be bound.",
+    "research_implementation": "Repository implementation responsibility does not by itself establish controller status."
+  },
+  "required_evidence_before_decision": [
+    "current legal identity and authority of each entity participating in the research decision chain",
+    "documented decision record identifying who approves the research purpose and intended use of results",
+    "documented decision record identifying who approves the questionnaire content and essential data categories",
+    "documented decision record identifying who approves lawful basis, Article 13 notice, retention and deletion",
+    "documented authority to instruct the hosting/provider chain and determine access to respondent-level data",
+    "documented role of the current MySMIS applicant/leader in the needs research",
+    "documented role of the eucons.ro site/operator and research implementation entity",
+    "controlled reference identifying the actual hosting-account holder and its legal relationship to the controller candidate",
+    "processor/subprocessor binding, including account-applicable Claus Web terms and role chain",
+    "joint-controller analysis if more than one entity jointly determines purposes or essential means"
+  ],
+  "decision_matrix": [
+    {
+      "entity_reference": "MYSMIS_PROJECT_LEADER_CONTROLLED_REFERENCE",
+      "purpose_decision_authority": null,
+      "essential_means_authority": null,
+      "access_to_respondent_level_data": null,
+      "processor_instruction_authority": null,
+      "legal_binding_reference": null,
+      "proposed_role": null,
+      "status": "EVIDENCE_REQUIRED"
+    },
+    {
+      "entity_reference": "EUCONS_SITE_OPERATOR_OR_IMPLEMENTATION_ENTITY_CONTROLLED_REFERENCE",
+      "purpose_decision_authority": null,
+      "essential_means_authority": null,
+      "access_to_respondent_level_data": null,
+      "processor_instruction_authority": null,
+      "legal_binding_reference": null,
+      "proposed_role": null,
+      "status": "EVIDENCE_REQUIRED"
+    },
+    {
+      "entity_reference": "HOSTING_ACCOUNT_HOLDER_PRIVATE_CONTROLLED_REFERENCE",
+      "purpose_decision_authority": null,
+      "essential_means_authority": null,
+      "access_to_respondent_level_data": null,
+      "processor_instruction_authority": null,
+      "legal_binding_reference": null,
+      "proposed_role": null,
+      "status": "EVIDENCE_REQUIRED"
+    },
+    {
+      "entity_reference": "CLAUS_WEB_SRL",
+      "purpose_decision_authority": false,
+      "essential_means_authority": "TECHNICAL_PROVIDER_MEANS_ONLY_PENDING_ACCOUNT_BINDING",
+      "access_to_respondent_level_data": "POTENTIAL_HOSTING_PROCESSOR_ACCESS_TO_BE_VERIFIED",
+      "processor_instruction_authority": false,
+      "legal_binding_reference": "PUBLIC_DPA_V1_0_2026_03_16_ACCOUNT_BINDING_PENDING",
+      "proposed_role": "PROCESSOR_OR_SUBPROCESSOR_CANDIDATE",
+      "status": "ACCOUNT_BINDING_REQUIRED"
+    }
+  ],
+  "approval_requirements": [
+    "controller identity is populated from evidence, not inference",
+    "joint-controller assessment is explicitly resolved",
+    "decision matrix has no unresolved authority fields for entities that determine purpose or essential means",
+    "privacy contact is fixed",
+    "lawful basis/LIA is approved by the determined controller",
+    "Article 13 notice names the determined controller and applicable processors",
+    "retention/DPIA-screening/provider/logging/store bindings are approved or verified",
+    "NF06 collection frame cites the frozen controller-determination record"
+  ],
+  "privacy_boundary": "Do not place private billing identifiers, credentials, personal contact data, or non-public account details in this repository artifact. Use controlled evidence references instead.",
+  "merge_authorized": false,
+  "deploy_authorized": false
+}
