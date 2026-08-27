@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -18,12 +19,24 @@ def load_module(name: str, path: Path):
     return module
 
 
+def expect_value_error(callable_, fragment: str) -> None:
+    try:
+        callable_()
+    except ValueError as exc:
+        assert fragment.lower() in str(exc).lower(), (fragment, str(exc))
+        return
+    raise AssertionError(f"expected ValueError containing {fragment!r}")
+
+
 def main() -> None:
     lead_engine = load_module("e11_lead", EUCONS / "leads" / "process_lead.py")
     matcher = load_module("e11_match", EUCONS / "opportunities" / "match_opportunities.py")
     evaluation_handoff = load_module("e11_r07_evaluation", EUCONS / "leads" / "research_evaluation_handoff.py")
     commercial_review = load_module("e11_r10_commercial_review", EUCONS / "crm" / "research_evaluation_review.py")
     pipeline_ingest_request = load_module("e11_r10_pipeline_ingest_request", EUCONS / "crm" / "pipeline_ingest_request.py")
+    persistence_dry_run = load_module(
+        "e11_r10_pipeline_persistence_dry_run", EUCONS / "crm" / "pipeline_persistence_dry_run.py"
+    )
     lead_contract = json.loads((EUCONS / "leads" / "lead_contract.json").read_text(encoding="utf-8"))
     forms_doc = json.loads((EUCONS / "leads" / "forms.json").read_text(encoding="utf-8"))
     storage = json.loads((EUCONS / "leads" / "storage_contract.json").read_text(encoding="utf-8"))
@@ -31,6 +44,9 @@ def main() -> None:
     evaluation_contract = json.loads((EUCONS / "leads" / "research_evaluation_handoff_contract.json").read_text(encoding="utf-8"))
     commercial_review_contract = json.loads((EUCONS / "crm" / "research_evaluation_review_contract.json").read_text(encoding="utf-8"))
     pipeline_ingest_request_contract = json.loads((EUCONS / "crm" / "pipeline_ingest_request_contract.json").read_text(encoding="utf-8"))
+    persistence_dry_run_contract = json.loads(
+        (EUCONS / "crm" / "pipeline_persistence_dry_run_contract.json").read_text(encoding="utf-8")
+    )
     pipeline_contract = json.loads((EUCONS / "crm" / "pipeline_contract.json").read_text(encoding="utf-8"))
     commercial = json.loads((EUCONS / "canon" / "commercial_canon.json").read_text(encoding="utf-8"))
 
@@ -44,6 +60,8 @@ def main() -> None:
     commercial_review.validate_pipeline_boundary(pipeline_contract, commercial_review_contract)
     pipeline_ingest_request.validate_contract(pipeline_ingest_request_contract)
     pipeline_ingest_request.validate_pipeline(pipeline_contract, pipeline_ingest_request_contract)
+    persistence_dry_run.validate_contract(persistence_dry_run_contract)
+    persistence_dry_run.validate_pipeline(pipeline_contract, persistence_dry_run_contract)
 
     form_ids = {form["id"] for form in forms_doc["forms"]}
     assert form_ids == set(lead_contract["scoring"]["form_intent"])
@@ -178,6 +196,75 @@ def main() -> None:
     assert ingest_request["automatic_offer_enabled"] is False
     assert ingest_request["automatic_send_enabled"] is False
 
+    dry_run = persistence_dry_run.build_dry_run_persistence_plan(
+        ingest_request,
+        persistence_dry_run_contract,
+        pipeline_contract,
+    )
+    dry_run_again = persistence_dry_run.build_dry_run_persistence_plan(
+        ingest_request,
+        persistence_dry_run_contract,
+        pipeline_contract,
+    )
+    assert dry_run["record_state"] == "PIPELINE_PERSISTENCE_DRY_RUN_VALIDATED"
+    assert dry_run["execution_mode"] == "DRY_RUN"
+    assert dry_run["target_pipeline_entry"] == ingest_request["requested_pipeline_entry"]
+    assert dry_run["source_request_id"] == ingest_request["request_id"]
+    assert dry_run["source_approval_id"] == ingest_request["approval_receipt"]["approval_id"]
+    assert dry_run["plan_id"] == dry_run_again["plan_id"]
+    assert dry_run["dry_run_receipt"] == dry_run_again["dry_run_receipt"]
+    assert len(dry_run["dry_run_receipt"]["idempotency_fingerprint"]) == 64
+    assert all(operation["would_write"] is False for operation in dry_run["planned_operations"])
+    assert dry_run["planned_audit_event"]["would_write"] is False
+    assert dry_run["planned_audit_event"]["runtime_fields_required_for_real_write"] == ["sequence", "at"]
+    assert dry_run["production_persistence_enabled"] is False
+    assert dry_run["persistence_executed"] is False
+    assert dry_run["real_pipeline_record_created"] is False
+    assert dry_run["audit_event_written"] is False
+    assert dry_run["requires_separate_persistence_step"] is True
+    assert dry_run["pipeline_write_enabled"] is False
+    assert dry_run["crm_write_enabled"] is False
+    assert dry_run["external_contact_enabled"] is False
+    assert dry_run["automatic_offer_enabled"] is False
+    assert dry_run["automatic_send_enabled"] is False
+    assert "generated_at" not in dry_run and "executed_at" not in dry_run
+
+    source_already_persisted = deepcopy(ingest_request)
+    source_already_persisted["persistence_executed"] = True
+    expect_value_error(
+        lambda: persistence_dry_run.build_dry_run_persistence_plan(
+            source_already_persisted, persistence_dry_run_contract, pipeline_contract
+        ),
+        "already executed",
+    )
+
+    dry_run_contract_failed_open = deepcopy(persistence_dry_run_contract)
+    dry_run_contract_failed_open["output"]["pipeline_write_enabled"] = True
+    expect_value_error(
+        lambda: persistence_dry_run.build_dry_run_persistence_plan(
+            ingest_request, dry_run_contract_failed_open, pipeline_contract
+        ),
+        "pipeline_write_enabled",
+    )
+
+    persistent_pipeline = deepcopy(pipeline_contract)
+    persistent_pipeline["production_persistence_enabled"] = True
+    expect_value_error(
+        lambda: persistence_dry_run.build_dry_run_persistence_plan(
+            ingest_request, persistence_dry_run_contract, persistent_pipeline
+        ),
+        "production persistence",
+    )
+
+    source_with_person_field = deepcopy(ingest_request)
+    source_with_person_field["personal_email"] = "synthetic@example.invalid"
+    expect_value_error(
+        lambda: persistence_dry_run.build_dry_run_persistence_plan(
+            source_with_person_field, persistence_dry_run_contract, pipeline_contract
+        ),
+        "person-level",
+    )
+
     print(json.dumps({
         "status": "PASS",
         "phase": "E11",
@@ -190,6 +277,7 @@ def main() -> None:
         "research_evaluation_state": evaluation["record_state"],
         "commercial_review_state": review["record_state"],
         "pipeline_ingest_request_state": ingest_request["record_state"],
+        "pipeline_persistence_dry_run_state": dry_run["record_state"],
         "selected_service_id": evaluation["selected_service_id"],
         "production_collection": "DISABLED_UNTIL_BACKEND_AUTHORIZED",
         "pipeline_write": False,

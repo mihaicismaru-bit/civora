@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "id": "EUCONS-E11-R10-PIPELINE-PERSISTENCE-DRY-RUN-001",
+  "status": "CANONICAL",
+  "source_ingest_contract": "EUCONS-E11-R10-PIPELINE-INGEST-REQUEST-001",
+  "required_source_state": "HUMAN_APPROVED_PIPELINE_INGEST_REQUEST",
+  "required_eligibility_state": "NOT_ASSESSED",
+  "required_maximum_next_state": "RESEARCH_READY",
+  "pipeline_contract_id": "R10-PIPELINE-001",
+  "pipeline_engine_id": "EUCONS_R10_UNIFIED_COMMERCIAL_PIPELINE",
+  "mode": "DRY_RUN_NON_WRITING",
+  "operations": [
+    "VALIDATE_TARGET_ENTRY",
+    "PLAN_PIPELINE_RECORD_CREATE",
+    "PLAN_APPEND_AUDIT_EVENT"
+  ],
+  "output": {
+    "record_state": "PIPELINE_PERSISTENCE_DRY_RUN_VALIDATED",
+    "execution_mode": "DRY_RUN",
+    "persistence_executed": false,
+    "real_pipeline_record_created": false,
+    "audit_event_written": false,
+    "requires_separate_persistence_step": true,
+    "pipeline_write_enabled": false,
+    "crm_write_enabled": false,
+    "external_contact_enabled": false,
+    "automatic_offer_enabled": false,
+    "automatic_send_enabled": false
+  },
+  "rules": {
+    "source_human_approval_must_be_recorded": true,
+    "source_persistence_must_be_unexecuted": true,
+    "source_must_require_separate_persistence_step": true,
+    "source_writes_and_external_actions_must_be_disabled": true,
+    "requested_entry_must_match_pipeline_contract": true,
+    "pipeline_production_persistence_must_be_disabled": true,
+    "pipeline_audit_must_be_append_only_and_idempotent": true,
+    "deterministic_plan_and_receipt_ids_required": true,
+    "wall_clock_fields_forbidden_in_dry_run_output": true,
+    "person_level_fields_forbidden": true,
+    "raw_contact_data_forbidden": true,
+    "never_claim_eligibility_award_probability_or_buying_intent": true
+  }
+}
