@@ -28,9 +28,9 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - name: Run AI4WORK runtime, storage, idempotency, HTTP, NF06 and controller-determination tests
+      - name: Run AI4WORK runtime, storage, idempotency, HTTP, NF06, TEST TWIN chain and controller-determination tests
         working-directory: eucons/research/ai4work-step
-        run: python -m unittest -v test_runtime.py test_research_storage.py test_http_idempotency.py test_http_endpoint.py test_nf06_preingest.py test_controller_determination.py
+        run: python -m unittest -v test_runtime.py test_research_storage.py test_http_idempotency.py test_http_endpoint.py test_nf06_preingest.py test_e2e_test_twin_chain.py test_controller_determination.py
       - name: Render preview-only research pages
         working-directory: eucons/research/ai4work-step
         run: python build_research_pages.py --target /tmp/ai4work-research-preview
