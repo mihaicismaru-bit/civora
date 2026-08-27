@@ -149,12 +149,15 @@ jobs:
           assert (runtime/'index.html').is_file()
           assert (runtime/'robots.txt').is_file()
           assert (runtime/'sitemap.xml').is_file()
-          assert len(stories.get('stories', [])) == feed.get('story_count')
+          feed_ids = {str(row['id']) for row in feed.get('stories', [])}
+          route_ids = {str(row['id']) for row in stories.get('stories', [])}
+          assert feed_ids <= route_ids, sorted(feed_ids - route_ids)
           print(json.dumps({
               'attempt': attempt,
               'public_pointer': pointer['edition_id'],
               'runtime_edition': feed['edition']['edition_id'],
-              'stories': feed.get('story_count'),
+              'edition_stories': len(feed_ids),
+              'durable_runtime_routes': len(route_ids),
               'runtime': 'site/runtime'
           }, ensure_ascii=False))
           PY
