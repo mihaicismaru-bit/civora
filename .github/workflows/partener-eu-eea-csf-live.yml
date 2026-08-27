@@ -5,8 +5,10 @@ on:
     paths:
       - 'partener-eu/ingest/eea_civil_society_calls.py'
       - 'partener-eu/ingest/eea_civil_society_fetch.py'
+      - 'partener-eu/ingest/eea_civil_society_reconcile.py'
       - 'partener-eu/ops/test_eea_civil_society_calls.py'
       - 'partener-eu/ops/test_eea_civil_society_fetch.py'
+      - 'partener-eu/ops/test_eea_civil_society_reconcile.py'
       - '.github/workflows/partener-eu-eea-csf-live.yml'
   workflow_dispatch:
   schedule:
@@ -36,7 +38,7 @@ jobs:
         run: |
           mkdir -p /tmp/partener-eea-csf
           python partener-eu/ingest/eea_civil_society_fetch.py \
-            --minimum-calls 1 \
+            --minimum-calls 7 \
             --output /tmp/partener-eea-csf/live-evidence.json
 
       - name: Validate live evidence envelope fail-closed
@@ -51,7 +53,7 @@ jobs:
           if data.get('publication_effect') != 'NONE':
               raise SystemExit('FAIL: live source workflow must remain non-publishing')
           if data.get('publish_authorized') or data.get('material_fact_use'):
-              raise SystemExit('FAIL: live source workflow cannot authorize material facts')
+              raise SystemExit('FAIL: live source workflow cannot pre-authorize material facts')
           if stats['errors'] or stats['conflicts']:
               raise SystemExit(f"FAIL: live evidence errors/conflicts: {stats}")
           if stats['discovered_call_urls'] != stats['fetched_call_pages']:
@@ -65,11 +67,45 @@ jobs:
           print('PASS live EEA CSF evidence:', stats)
           PY
 
-      - name: Upload bounded live evidence
+      - name: Reconcile exact official call facts for canonical staging
+        run: |
+          python partener-eu/ingest/eea_civil_society_reconcile.py \
+            /tmp/partener-eea-csf/live-evidence.json \
+            --minimum-calls 7 \
+            --output /tmp/partener-eea-csf/reconciliation-receipt.json
+
+      - name: Validate reconciliation remains staging-only
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          live = json.loads(Path('/tmp/partener-eea-csf/live-evidence.json').read_text(encoding='utf-8'))
+          receipt = json.loads(Path('/tmp/partener-eea-csf/reconciliation-receipt.json').read_text(encoding='utf-8'))
+          stats = receipt['stats']
+          if receipt.get('publication_effect') != 'NONE' or receipt.get('publish_authorized'):
+              raise SystemExit('FAIL: reconciliation cannot publish or authorize public projection')
+          if not receipt.get('material_fact_use') or not receipt.get('ready_for_staging'):
+              raise SystemExit('FAIL: reconciled exact-page facts must be staging-ready')
+          if stats.get('errors') or stats.get('conflicts'):
+              raise SystemExit(f"FAIL: reconciliation errors/conflicts: {stats}")
+          if stats.get('reconciled_calls') != live['stats']['normalized_records']:
+              raise SystemExit('FAIL: reconciliation must be all-or-nothing for the live batch')
+          if not all(row.get('reconciliation_status') == 'PASS' for row in receipt.get('records', [])):
+              raise SystemExit('FAIL: every reconciled call must PASS')
+          if any(row.get('publish_authorized') for row in receipt.get('records', [])):
+              raise SystemExit('FAIL: call records cannot bypass public projection quality gate')
+          expected_missing = ['CANONICAL_STAGING_ADMISSION', 'PUBLIC_PROJECTION_QUALITY_GATE']
+          if not all(row.get('missing_proofs') == expected_missing for row in receipt.get('records', [])):
+              raise SystemExit('FAIL: downstream admission/public gates must remain explicit')
+          print('PASS EEA CSF reconciliation receipt:', stats)
+          PY
+
+      - name: Upload bounded live evidence and reconciliation receipt
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: partener-eea-csf-live-evidence
-          path: /tmp/partener-eea-csf/live-evidence.json
+          path: /tmp/partener-eea-csf/
           if-no-files-found: warn
           retention-days: 7
