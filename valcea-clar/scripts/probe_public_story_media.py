@@ -4,8 +4,8 @@
 The canonical live feed may carry a verified ``visual`` for a story. That media
 is considered publicly projected only when the fetched story HTML contains an
 actual ``<img>`` element whose ``src`` is the expected canonical public URL.
-OpenGraph/Twitter/JSON-LD metadata, repository manifests and bridge source code
-are deliberately not accepted as proof of a visible article photograph.
+OpenGraph/Twitter/JSON-LD metadata and repository manifests are deliberately
+not accepted as proof of a visible article photograph.
 """
 from __future__ import annotations
 
