@@ -1,0 +1,103 @@
+name: VÂLCEA CLAR Editions Archive Publisher
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/editions/**'
+      - 'valcea-clar/site/navigation.json'
+      - 'valcea-clar/scripts/render_editions_archive.py'
+      - 'valcea-clar/scripts/overlay_runtime_export.py'
+      - 'local-news-os/core/indexing_assets.py'
+      - '.github/workflows/valcea-clar-editions-archive.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-editions-archive-publisher
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Validate editions archive renderer
+        run: python valcea-clar/scripts/render_editions_archive.py --self-test
+
+      - name: Rebuild and persist canonical reader runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'vâlcea-clar-editions[bot]'
+          git config user.email 'valcea-clar-editions@users.noreply.github.com'
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            git clean -fd
+
+            python valcea-clar/scripts/render_editions_archive.py --self-test
+            python valcea-clar/scripts/overlay_runtime_export.py
+            python valcea-clar/scripts/smoke_web.py
+
+            python - <<'PY'
+          import json
+          from pathlib import Path
+
+          runtime = Path('valcea-clar/site/runtime')
+          nav = json.loads(Path('valcea-clar/site/navigation.json').read_text(encoding='utf-8'))
+          manifest = json.loads((runtime/'editii/manifest.json').read_text(encoding='utf-8'))
+          extra = json.loads((runtime/'indexing_extra_routes.json').read_text(encoding='utf-8'))
+          sitemap = (runtime/'sitemap.xml').read_text(encoding='utf-8')
+
+          assert any(row.get('href') == '/editii/' for row in nav.get('items', []))
+          assert manifest.get('edition_count', 0) >= 1
+          assert manifest.get('legacy_files_public') is False
+          assert manifest.get('held_or_operational_items_public') is False
+          assert extra.get('routes') == manifest.get('routes')
+
+          for route in manifest.get('routes', []):
+              page = runtime / route.strip('/') / 'index.html'
+              assert page.is_file(), route
+              text = page.read_text(encoding='utf-8')
+              assert 'data-nav-contract="valcea-clar-primary-v2"' in text, route
+              assert 'Ediții anterioare' in text, route
+              assert f'https://valceaclar.ro{route}' in sitemap, route
+
+          home = (runtime/'index.html').read_text(encoding='utf-8')
+          assert '<a href="/editii/">Ediții anterioare</a>' in home
+          print(json.dumps({
+              'status': 'PASS',
+              'editions': manifest['edition_count'],
+              'routes': len(manifest['routes']),
+          }, ensure_ascii=False))
+          PY
+
+            git add valcea-clar/site/runtime
+            if git diff --cached --quiet; then
+              echo 'VÂLCEA CLAR editions archive runtime already current.'
+              exit 0
+            fi
+
+            git commit -m 'Publish VÂLCEA CLAR editions archive'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+
+            echo "main advanced during editions archive publish; retrying ${attempt}/5."
+            sleep $((attempt * 2))
+          done
+
+          echo 'Could not persist VÂLCEA CLAR editions archive after five attempts.' >&2
+          exit 1
