@@ -9,6 +9,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from channel_provenance import ChannelProvenanceError, validate_recruitment_channel_id
+
 HERE = Path(__file__).resolve().parent
 CONTRACT_PATH = HERE / "form_contract.json"
 FORMS_PATH = HERE / "forms_definition.json"
@@ -159,7 +161,13 @@ def _validate_group(definitions: list[dict[str, Any]], values: Any, *, path: str
     return out
 
 
-def validate_submission(payload: Any, contract: dict[str, Any] | None = None, forms: dict[str, Any] | None = None) -> dict[str, Any]:
+def validate_submission(
+    payload: Any,
+    contract: dict[str, Any] | None = None,
+    forms: dict[str, Any] | None = None,
+    *,
+    recruitment_channel_id: Any,
+) -> dict[str, Any]:
     contract = contract or load_contract()
     forms = forms or load_forms()
     if contract.get("crm_integration") != "FORBIDDEN" or contract.get("commercial_analytics") != "FORBIDDEN":
@@ -167,6 +175,10 @@ def validate_submission(payload: Any, contract: dict[str, Any] | None = None, fo
     if not isinstance(payload, dict) or set(payload) != TOP_LEVEL:
         raise ResearchValidationError(f"top-level fields must be exactly {sorted(TOP_LEVEL)}")
     reject_forbidden_keys(payload)
+    try:
+        channel_id = validate_recruitment_channel_id(recruitment_channel_id)
+    except ChannelProvenanceError as exc:
+        raise ResearchValidationError(str(exc)) from exc
     if payload["notice_read_and_voluntary_participation"] is not True:
         raise ResearchValidationError("voluntary participation acknowledgement is required")
     form_id = payload["form_id"]
@@ -180,6 +192,7 @@ def validate_submission(payload: Any, contract: dict[str, Any] | None = None, fo
         "form_version": 1,
         "response_id": str(uuid.uuid4()),
         "received_at": datetime.now(timezone.utc).isoformat(),
+        "recruitment_channel_id": channel_id,
         "profile": profile,
         "answers": answers,
         "synthetic": False,
@@ -195,9 +208,13 @@ def main() -> int:
     import argparse
     parser = argparse.ArgumentParser(description="Validate one AI4WORK research submission and emit a research-only record envelope.")
     parser.add_argument("payload", type=Path)
+    parser.add_argument("--recruitment-channel-id", required=True)
     args = parser.parse_args()
     try:
-        record = validate_submission(json.loads(args.payload.read_text(encoding="utf-8")))
+        record = validate_submission(
+            json.loads(args.payload.read_text(encoding="utf-8")),
+            recruitment_channel_id=args.recruitment_channel_id,
+        )
     except (OSError, json.JSONDecodeError, ResearchValidationError) as exc:
         raise SystemExit(f"REJECTED: {exc}")
     print(json.dumps(record, ensure_ascii=False, sort_keys=True))
