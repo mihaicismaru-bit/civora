@@ -1,0 +1,124 @@
+{
+  "schema_version": "nf.evidence_addendum.v0.1",
+  "run_id": "AI4WORK-STEP/NF-RUN-001",
+  "extends": [
+    "EVIDENCE_REGISTRY.json",
+    "EVIDENCE_ADDENDUM_001.json",
+    "EVIDENCE_ADDENDUM_002.json",
+    "EVIDENCE_ADDENDUM_003.json",
+    "EVIDENCE_ADDENDUM_004.json",
+    "EVIDENCE_ADDENDUM_005.json",
+    "EVIDENCE_ADDENDUM_006.json"
+  ],
+  "research_date": "2026-08-27",
+  "evidence": [
+    {
+      "id": "EV-FAS-EMAIL-ROUTE-NXDOMAIN-2026-08-27",
+      "source": "Gmail delivery-status notification corroborated by RoTLD deletion notice",
+      "internal_source_messages": [
+        "1a0438777f5a8efd",
+        "19c2ab4cb5c5bc1c"
+      ],
+      "tier": "A1_SYSTEM_DELIVERY_AND_DOMAIN_REGISTRY_NOTICE",
+      "territory": "Romania",
+      "scope": "Fundația Antreprenoriat Social contact-route verification",
+      "period": "2026-02-04/2026-08-27",
+      "constructs": [
+        "partner_contact_route",
+        "primary_research_outreach_dependency"
+      ],
+      "direct_measurement": true,
+      "facts": {
+        "attempted_recipient": "office@fasromania.ro",
+        "delivery_result": "HARD_FAILURE",
+        "dns_result": "MX_NXDOMAIN",
+        "domain": "fasromania.ro",
+        "rotld_deletion_notice_received": true,
+        "rotld_deletion_notice_date": "2026-02-04"
+      },
+      "limitations": [
+        "This proves the former email route is unusable; it does not identify a verified replacement email address.",
+        "It does not constitute a substantive response from the organization and does not close any primary-evidence response quota."
+      ],
+      "use": "Closes the uncertainty over whether office@fasromania.ro remains a usable outreach route. The dependency changes to locating or approving a verified replacement operational channel before relying on email outreach to this partner."
+    },
+    {
+      "id": "EV-FAS-CURRENT-PHYSICAL-PHONE-ROUTE-2026-06-01",
+      "source": "Google Business Profile owner notice corroborated by Romanian Ministry of Justice foundations register and current business-directory listing",
+      "internal_source_messages": [
+        "19e82f4fd21188d2"
+      ],
+      "source_urls": [
+        "https://www.just.ro/wp-content/uploads/2025/07/07_07_2025Fundatii.pdf",
+        "https://ramnicu-valcea.cylex.ro/firma/fundatia%2Bantreprenoriat%2Bsocial-795431.html"
+      ],
+      "tier": "A1_ACCOUNT_NOTICE_PLUS_A1_LEGAL_REGISTER_WITH_CURRENT_DIRECTORY_CORROBORATION",
+      "territory": "Romania / Vâlcea",
+      "scope": "fallback operational contact route",
+      "period": "2025-07/2026-06",
+      "constructs": [
+        "partner_contact_route",
+        "organization_address"
+      ],
+      "direct_measurement": false,
+      "facts": {
+        "organization": "Fundația Antreprenoriat Social",
+        "address_account_notice": "Strada Gheorghe Magheru 6, 240564 Râmnicu Vâlcea",
+        "address_legal_register": "RM. VÂLCEA, STR. GENERAL MAGHERU NR. 6, SCARA A, APART. 12",
+        "mobile_account_notice": "+40 770 594 964",
+        "email_replacement_verified": false
+      },
+      "limitations": [
+        "Physical address and phone availability do not establish the research-form controller/privacy contact or an approved GDPR notice channel.",
+        "No current replacement organizational email address was verified in this run."
+      ],
+      "use": "Provides a corroborated non-email fallback route for factual outreach while the replacement email address remains unresolved."
+    },
+    {
+      "id": "EV-STEP-LLL-OFFICIAL-LANDING-DISCOVERY-2026-08-27",
+      "source": "Official MIPE STEP-LLL guide landing page discoverability check",
+      "source_url": "https://mfe.gov.ro/ghiduri_peos/step-lll-competente-pentru-viitor-formare-la-locul-de-munca-si-educatia-adultilor-in-tehnologiile-critice-adulti/",
+      "official_document_urls": {
+        "guide_or_corrigendum_pdf": "https://mfe.gov.ro/wp-content/uploads/2026/08/fd5aba1f3322c3dbe40b7f0b7c7de9c7-1.pdf",
+        "updated_annex_4_docx": "https://mfe.gov.ro/wp-content/uploads/2026/08/f4085e5b0e4eadc8b1678e4fa470e130.docx"
+      },
+      "tier": "A1_OFFICIAL_LANDING_DISCOVERABILITY_ONLY",
+      "territory": "Romania",
+      "scope": "call source-version control",
+      "period": "2026-08-27 verification run",
+      "constructs": [
+        "source_version",
+        "call_compliance"
+      ],
+      "direct_measurement": false,
+      "facts": {
+        "official_landing_indexed_with_19_august_corrigendum": true,
+        "updated_annex_4_label_indexed": true
+      },
+      "binary_capture": {
+        "state": "UNRETRIEVED_IN_RUN",
+        "guide_sha256": null,
+        "annex_4_sha256": null,
+        "content_assertions_allowed": false,
+        "note": "The official MIPE landing/update is discoverable, but exact official PDF/DOCX bytes were not retrievable in this run. No hash was created or inferred."
+      },
+      "use": "Upgrades source discoverability to the official MIPE landing page but does not close the binary freeze/hash gate."
+    }
+  ],
+  "gap_effect": {
+    "FAS_EMAIL_ROUTE": "CLOSED_AS_UNUSABLE_OFFICE_AT_FASROMANIA_RO;_REPLACEMENT_OPERATIONAL_EMAIL_REMAINS_OPEN",
+    "FAS_FALLBACK_CONTACT_ROUTE": "PHYSICAL_ADDRESS_AND_PHONE_CORROBORATED;GDPR_PRIVACY_CONTACT_NOT_ESTABLISHED",
+    "GAP-GSCS-BINARY": "OFFICIAL_LANDING_DISCOVERABLE_BUT_EXACT_BYTES_AND_SHA256_CAPTURE_REMAIN_OPEN",
+    "EUCONS_PRIVACY_CONTACT": "REMAINS_OPEN",
+    "GAP-PRIMARY-ELIGIBLE-ADULTS": "REMAINS_OPEN",
+    "GAP-PRIMARY-EMPLOYERS": "REMAINS_OPEN"
+  },
+  "safety_invariants": {
+    "prod_mode": "REAL_EVIDENCE_ONLY",
+    "test_twin": "NON_EVIDENCE",
+    "synthetic_promotion_allowed": false,
+    "public_collection_activation_allowed_by_this_addendum": false
+  },
+  "synthetic_data_used": false,
+  "status": "FROZEN_REAL_EVIDENCE_AND_DEPENDENCY_UPDATE_ONLY"
+}
