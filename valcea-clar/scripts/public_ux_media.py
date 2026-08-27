@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import copy
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -168,16 +169,38 @@ base.render_home = render_home
 base.render_news_index = render_news_index
 
 
+def homepage_lead_story_id(home: str) -> str:
+    """Return the story actually rendered as the homepage hero.
+
+    The canonical feed may retain editorial priority order while the reader UI is
+    deliberately freshness-first. Media validation must therefore validate the
+    rendered hero, not assume that ``feed.stories[0]`` is the presentation lead.
+    """
+    match = re.search(
+        r'<section class="hero">.*?<h1><a href="/stiri/([^"/]+)/">',
+        home,
+        flags=re.S,
+    )
+    return match.group(1) if match else ""
+
+
 def validate_media_projection() -> dict[str, int]:
     home = (RUNTIME / "index.html").read_text(encoding="utf-8")
     news = (RUNTIME / "stiri" / "index.html").read_text(encoding="utf-8")
     feed = load_json(RUNTIME / "live-feed.json", {"stories": []})
-    first = next((row for row in feed.get("stories") or [] if isinstance(row, dict) and row.get("id")), None)
-    if not first:
+    live_ids = {
+        str(row.get("id"))
+        for row in feed.get("stories") or []
+        if isinstance(row, dict) and row.get("id")
+    }
+    if not live_ids:
         raise SystemExit("Media projection validation requires a live story")
-    expected = media_for_story(str(first["id"]))
-    if expected and f'data-story-image="{first["id"]}"' not in home:
-        raise SystemExit(f"Homepage lead media missing: {first['id']}")
+    lead_id = homepage_lead_story_id(home)
+    if not lead_id or lead_id not in live_ids:
+        raise SystemExit("Media projection could not resolve the rendered live homepage lead")
+    expected = media_for_story(lead_id)
+    if expected and f'data-story-image="{lead_id}"' not in home:
+        raise SystemExit(f"Homepage lead media missing: {lead_id}")
     if 'data-story-image=' not in home:
         raise SystemExit("Homepage contains no story photographs")
     if 'data-story-image=' not in news:
@@ -187,7 +210,7 @@ def validate_media_projection() -> dict[str, int]:
     if contextual == 0 and exact == 0:
         raise SystemExit("Homepage media projection has no provenance role")
     result = {"homepage_images": home.count('data-story-image='), "news_index_images": news.count('data-story-image='), "homepage_contextual": contextual, "homepage_exact": exact}
-    print(json.dumps({"status": "PASS", **result}, ensure_ascii=False))
+    print(json.dumps({"status": "PASS", "homepage_lead_story_id": lead_id, **result}, ensure_ascii=False))
     return result
 
 
@@ -195,6 +218,8 @@ def self_test() -> int:
     sample = {"id": "x", "headline": "Titlu", "path": "/stiri/x/"}
     assert media_image(sample, variant="card") == ""
     assert "explicit_story_assignment_required" in CONTEXT.read_text(encoding="utf-8")
+    assert homepage_lead_story_id('<section class="hero"><h1><a href="/stiri/fresh-story/">Titlu</a></h1></section>') == "fresh-story"
+    assert homepage_lead_story_id('<a href="/stiri/not-the-hero/">Altul</a>') == ""
     print("VÂLCEA CLAR Public UX media adapter self-test: PASS")
     return 0
 
