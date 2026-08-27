@@ -31,6 +31,11 @@ STATE = ROOT / "editorial" / "news_discovery_state.json"
 TZ = ZoneInfo("Europe/Bucharest")
 UA = "Mozilla/5.0 VÂLCEA-CLAR-Autonomous-News/1.1 (+https://valceaclar.ro/)"
 AUTO_PRIORITY_CEILING = 76
+SECTION_CANDIDATE_MAX_AGE_HOURS = {
+    "CULTURĂ": 168,
+    "EVENIMENTE": 168,
+    "UNDE IEȘIM": 168,
+}
 RO_MONTHS = {
     "ianuarie": 1, "februarie": 2, "martie": 3, "aprilie": 4, "mai": 5,
     "iunie": 6, "iulie": 7, "august": 8, "septembrie": 9, "octombrie": 10,
@@ -209,11 +214,20 @@ def fact_id(source_id: str, url: str) -> str:
     return f"auto-{source_id}-{hashlib.sha256(url.encode('utf-8')).hexdigest()[:12]}"
 
 
+def candidate_max_age_hours(source: dict, policy: dict) -> int:
+    default = max(1, int(policy.get("candidate_max_age_hours", 72)))
+    explicit = source.get("candidate_max_age_hours")
+    if explicit is not None:
+        return max(1, int(explicit))
+    section = str(source.get("section") or "").strip().upper()
+    return max(default, int(SECTION_CANDIDATE_MAX_AGE_HOURS.get(section, default)))
+
+
 def discover_source(source: dict, now: datetime, policy: dict) -> tuple[list[dict], dict]:
     listing, final_url = fetch(source["url"])
     limit = int(policy.get("max_candidates_per_source", 12))
     min_chars = int(policy.get("min_title_chars", 24))
-    age_limit = timedelta(hours=int(policy.get("candidate_max_age_hours", 72)))
+    age_limit = timedelta(hours=candidate_max_age_hours(source, policy))
     links = extract_listing_links(listing, final_url, source, limit, min_chars)
     facts: list[dict] = []
     examined = 0
@@ -275,6 +289,9 @@ def self_test() -> int:
     old = {"id":"old","headline":"Același titlu oficial","valid_from":"2026-08-12T12:00:00+03:00","priority":76}
     new = {"id":"new","headline":"ACELAȘI TITLU OFICIAL","valid_from":"2026-08-14T12:00:00+03:00","priority":76}
     assert dedupe_repeated_headlines([old,new])[0]["id"] == "new"
+    assert candidate_max_age_hours({"section": "ACTUALITATE"}, {"candidate_max_age_hours": 72}) == 72
+    assert candidate_max_age_hours({"section": "CULTURĂ"}, {"candidate_max_age_hours": 72}) == 168
+    assert candidate_max_age_hours({"section": "CULTURĂ", "candidate_max_age_hours": 96}, {"candidate_max_age_hours": 72}) == 96
     print("Autonomous news discovery self-test: PASS")
     return 0
 
@@ -311,6 +328,7 @@ def main() -> int:
             "article_body_material_facts_autopublish": False,
             "repeated_headline_policy": "keep_newest",
             "automatic_priority_ceiling": AUTO_PRIORITY_CEILING,
+            "section_candidate_max_age_hours": SECTION_CANDIDATE_MAX_AGE_HOURS,
         },
     }
     OUT.write_text(json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
