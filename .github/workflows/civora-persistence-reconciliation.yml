@@ -28,14 +28,59 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    outputs:
+      run_validation: ${{ steps.decide.outputs.run_validation }}
+    steps:
+      - name: Reuse existing exact-head reconciliation evidence
+        id: decide
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          RECONCILE_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          # Direct push/PR/manual runs are intentional and continue to validate.
+          if [ "$EVENT_NAME" != "workflow_run" ]; then
+            echo "run_validation=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # A scheduled scope observer may complete repeatedly for the same main
+          # head. Reuse the latest exact-head PASS instead of rerunning the full
+          # reconciliation suite. API/read/parse failure stays fail-closed by
+          # running validation normally.
+          response="$(curl --retry 2 --connect-timeout 5 --max-time 15 -fsS \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${RECONCILE_SHA}/statuses?per_page=100" || true)"
+
+          if [ -z "$response" ]; then
+            echo "run_validation=true" >> "$GITHUB_OUTPUT"
+            echo "Status read unavailable; running reconciliation fail-closed."
+            exit 0
+          fi
+
+          latest_state="$(printf '%s' "$response" | python -c 'import json, sys; rows=json.load(sys.stdin); print(next((row.get("state", "") for row in rows if row.get("context") == "civora/persistence-reconciliation"), ""))' 2>/dev/null || true)"
+          if [ "$latest_state" = "success" ]; then
+            echo "run_validation=false" >> "$GITHUB_OUTPUT"
+            echo "Exact-head reconciliation already passed; skipping duplicate observer validation."
+          else
+            echo "run_validation=true" >> "$GITHUB_OUTPUT"
+            echo "No reusable exact-head PASS; running reconciliation."
+          fi
+
   validate:
-    if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') }}
+    needs: preflight
+    if: ${{ needs.preflight.outputs.run_validation == 'true' && (github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
         with:
           ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
-          fetch-depth: 0
+          fetch-depth: 1
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
