@@ -3,6 +3,8 @@
 
 Fact-checks receive an explicit evidence-led carousel contract so they cannot
 fall back to the generic photo/caption path used by the legacy distributor.
+Story-specific packaging overrides are allowed only for platform-native copy;
+they never alter the canonical article headline or facts.
 """
 from __future__ import annotations
 
@@ -12,6 +14,14 @@ import re
 
 import feed_identity_v1_1 as feed_identity
 import instagram_editorial_v1_1 as impl
+
+
+STORY_PACKAGING_OVERRIDES = {
+    "maciuca-ziua-regalitatii-2027-colocviu-bjai-20260827": {
+        "hook": "Măciuca, anunțată pentru Ziua Regalității 2027",
+        "subline": "După colocviul dedicat Regelui Mihai I la Biblioteca Vâlcea",
+    },
+}
 
 
 def contractor_pair(text: str) -> str | None:
@@ -32,10 +42,24 @@ impl.base.contractor_pair = contractor_pair
 _base_package = impl.package
 
 
+def apply_story_packaging_override(plan: dict, story_id: str) -> dict:
+    override = STORY_PACKAGING_OVERRIDES.get(story_id)
+    if not override:
+        return plan
+    plan["hook"] = str(override["hook"])
+    plan["subline"] = str(override["subline"])
+    plan["rendering_version"] = "instagram-editorial-v1.2-story-override"
+    plan["product_fingerprint_sha256"] = impl.base.digest(
+        {k: v for k, v in plan.items() if k != "product_fingerprint_sha256"}
+    )
+    return plan
+
+
 def package(story: dict, visual: dict) -> dict:
     plan = _base_package(story, visual)
     editorial_type = str(story.get("editorial_type") or "").strip().lower()
     story_id = str(story.get("id") or "")
+    plan = apply_story_packaging_override(plan, story_id)
     if editorial_type != "fact_check" and "fact-check" not in str(story.get("headline") or "").lower():
         return plan
 
@@ -114,6 +138,19 @@ def self_test() -> int:
     assert plan["native_format"] == "carousel"
     assert plan["hook"] == "31 AUGUST 2026"
     assert len(plan["detail_slides"]) == 5
+
+    override_sample = {
+        "id": "maciuca-ziua-regalitatii-2027-colocviu-bjai-20260827",
+        "editorial_type": "straight_news",
+        "section": "CULTURĂ",
+        "headline": "Măciuca, anunțată drept gazda Zilei Regalității 2027 după colocviul de la Biblioteca Vâlcea",
+        "dek": "Context suficient pentru verificarea ambalajului nativ Instagram.",
+        "paragraphs": ["Fapt verificat suficient pentru testarea produsului social."],
+    }
+    override_plan = package(override_sample, {"image_path": "x.jpg", "image": {"contextual_archive": True}})
+    assert override_plan["hook"] == "Măciuca, anunțată pentru Ziua Regalității 2027"
+    assert len(override_plan["hook"].split()) <= 10
+
     feed_identity.self_test()
     result = impl.self_test()
     print("VÂLCEA CLAR Instagram editorial v1.2 premium feed identity + fact-check carousel: PASS")
