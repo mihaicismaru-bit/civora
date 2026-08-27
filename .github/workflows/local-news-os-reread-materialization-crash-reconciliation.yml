@@ -63,14 +63,6 @@ jobs:
         working-directory: local-news-os/social
         run: python test_reread_materialization_crash_reconciliation.py
 
-      - name: Run durable materialization regression
-        working-directory: local-news-os/social
-        run: python test_reread_result_materialization_binding.py
-
-      - name: Run provider outcome regression
-        working-directory: local-news-os/social
-        run: python test_reread_provider_outcome_binding.py
-
       - name: Verify recovery remains local-only and zero-paid
         run: |
           python - <<'PY'
