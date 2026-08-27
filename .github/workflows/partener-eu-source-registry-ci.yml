@@ -1,0 +1,38 @@
+name: PARTENER.EU Source Registry CI
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/source_registry.json'
+      - 'partener-eu/ingest/source_registry_probe.py'
+      - 'partener-eu/ops/test_source_registry_low_info.py'
+      - 'partener-eu/ops/test_source_registry_current_hosts.py'
+      - '.github/workflows/partener-eu-source-registry-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-registry-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Validate registry JSON and probe syntax
+        run: |
+          python -m json.tool partener-eu/ingest/source_registry.json >/dev/null
+          python -m py_compile partener-eu/ingest/source_registry_probe.py
+
+      - name: Validate low-information fail-closed behavior
+        run: python partener-eu/ops/test_source_registry_low_info.py
+
+      - name: Validate current official OI Research hosts
+        run: python partener-eu/ops/test_source_registry_current_hosts.py
