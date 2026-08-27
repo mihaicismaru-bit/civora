@@ -85,6 +85,58 @@ def fetch(url: str, attempts: int = 2):
     raise last
 
 
+def source_urls(src: dict):
+    """Return the declared primary URL followed by unique official aliases."""
+    urls = []
+    for url in [src.get("url"), *(src.get("canonical_aliases") or [])]:
+        if url and url not in urls:
+            urls.append(url)
+    return urls
+
+
+def fetch_source(src: dict):
+    """Fetch through declared official transports without changing source authority.
+
+    The registry's primary URL remains the canonical identity. Official aliases are
+    transport fallbacks only. A fallback payload still goes through the normal
+    semantic-hash reconciliation path before any material fact can move.
+    """
+    primary = src.get("url")
+    failures = []
+    low_information = None
+
+    for url in source_urls(src):
+        try:
+            out = fetch(url)
+        except Exception as exc:
+            failures.append({"url": url, "reason": f"{type(exc).__name__}: {exc}"})
+            continue
+
+        out["selected_url"] = url
+        out["used_canonical_alias"] = bool(primary and url != primary)
+        if out.get("ok") and out.get("content_quality_ok", True):
+            if failures:
+                out["fallback_failures"] = failures
+            return out
+
+        failures.append({
+            "url": url,
+            "reason": out.get("quality_issue") or f"HTTP_{out.get('http_status')}",
+        })
+        if low_information is None and not out.get("content_quality_ok", True):
+            low_information = out
+
+    # Preserve the existing low-information fail-closed semantics when no usable
+    # official transport succeeds, rather than collapsing that evidence to a
+    # generic transport exception.
+    if low_information is not None:
+        low_information["fallback_failures"] = failures
+        return low_information
+
+    attempted = "; ".join(f"{item['url']} => {item['reason']}" for item in failures)
+    raise RuntimeError(f"all declared official source transports failed: {attempted}")
+
+
 def task_baseline_hash(source_id: str, old: dict):
     old_hash = old.get("semantic_sha256") or old.get("last_known_semantic_sha256")
     if not old_hash:
@@ -166,7 +218,7 @@ def main():
             "source_families": list(src.get("source_families") or []),
         }
         try:
-            row.update(fetch(src["url"]))
+            row.update(fetch_source(src))
             baseline_hash = task_baseline_hash(src["id"], old)
             if not row.get("content_quality_ok", True):
                 observed_hash = row.get("semantic_sha256")
