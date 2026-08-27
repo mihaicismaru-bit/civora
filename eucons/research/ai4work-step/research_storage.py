@@ -116,7 +116,20 @@ class SQLiteResearchStorage:
             )
             """
         )
+        self.conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS erasure_replay_blocks (
+                response_id TEXT PRIMARY KEY
+            )
+            """
+        )
         self.conn.commit()
+
+    def _erasure_replay_blocked(self, response_id: str) -> bool:
+        return self.conn.execute(
+            "SELECT 1 FROM erasure_replay_blocks WHERE response_id = ?",
+            (response_id,),
+        ).fetchone() is not None
 
     def append(self, record: dict[str, Any], *, raw_bytes: bytes) -> str:
         validate_record_envelope(record)
@@ -124,6 +137,9 @@ class SQLiteResearchStorage:
         raw_sha = hashlib.sha256(raw_bytes).hexdigest()
         normalized_sha = hashlib.sha256(normalized).hexdigest()
         try:
+            self.conn.execute("BEGIN IMMEDIATE")
+            if self._erasure_replay_blocked(record["response_id"]):
+                raise ResearchStorageError("erased response replay blocked")
             self.conn.execute(
                 """INSERT INTO research_responses
                    (response_id, research_id, form_id, received_at, raw_sha256, normalized_sha256, normalized_json)
@@ -140,7 +156,12 @@ class SQLiteResearchStorage:
             )
             self.conn.commit()
         except sqlite3.IntegrityError as exc:
+            self.conn.rollback()
             raise ResearchStorageError("duplicate response_id") from exc
+        except Exception:
+            if self.conn.in_transaction:
+                self.conn.rollback()
+            raise
         return normalized_sha
 
     def append_idempotent(
@@ -153,26 +174,13 @@ class SQLiteResearchStorage:
         """Append once, or replay the original receipt for the same body.
 
         Returns (normalized_sha256, inserted). A reused response_id with a
-        different canonical analytical body fails closed. The body digest and
-        raw idempotency key never enter analytical exports.
+        different canonical analytical body fails closed. A response_id that
+        was erased is permanently blocked by the reference adapter from being
+        recreated by a stale transport retry. The body digest and raw
+        idempotency key never enter analytical exports.
         """
         validate_record_envelope(record)
         validate_body_sha256(body_sha256)
-
-        existing = self.conn.execute(
-            "SELECT body_sha256, normalized_sha256 FROM idempotency_receipts WHERE response_id = ?",
-            (record["response_id"],),
-        ).fetchone()
-        if existing is not None:
-            if existing[0] != body_sha256:
-                raise ResearchStorageError("idempotency key reused with different body")
-            response_exists = self.conn.execute(
-                "SELECT 1 FROM research_responses WHERE response_id = ?",
-                (record["response_id"],),
-            ).fetchone()
-            if response_exists is None:
-                raise ResearchStorageError("idempotency receipt without analytical row")
-            return str(existing[1]), False
 
         normalized = canonical_json_bytes(record)
         raw_sha = hashlib.sha256(raw_bytes).hexdigest()
@@ -180,6 +188,25 @@ class SQLiteResearchStorage:
 
         try:
             self.conn.execute("BEGIN IMMEDIATE")
+            if self._erasure_replay_blocked(record["response_id"]):
+                raise ResearchStorageError("erased response replay blocked")
+
+            existing = self.conn.execute(
+                "SELECT body_sha256, normalized_sha256 FROM idempotency_receipts WHERE response_id = ?",
+                (record["response_id"],),
+            ).fetchone()
+            if existing is not None:
+                if existing[0] != body_sha256:
+                    raise ResearchStorageError("idempotency key reused with different body")
+                response_exists = self.conn.execute(
+                    "SELECT 1 FROM research_responses WHERE response_id = ?",
+                    (record["response_id"],),
+                ).fetchone()
+                if response_exists is None:
+                    raise ResearchStorageError("idempotency receipt without analytical row")
+                self.conn.commit()
+                return str(existing[1]), False
+
             self.conn.execute(
                 """INSERT INTO research_responses
                    (response_id, research_id, form_id, received_at, raw_sha256, normalized_sha256, normalized_json)
@@ -213,7 +240,8 @@ class SQLiteResearchStorage:
                 raise ResearchStorageError("idempotency key reused with different body") from exc
             raise ResearchStorageError("inconsistent duplicate response_id without idempotency receipt") from exc
         except Exception:
-            self.conn.rollback()
+            if self.conn.in_transaction:
+                self.conn.rollback()
             raise
 
         return normalized_sha, True
@@ -277,7 +305,7 @@ class SQLiteResearchStorage:
         return None if row is None else str(row[0])
 
     def delete_by_response_id(self, response_id: str) -> bool:
-        """Atomically erase a live analytical row and associated receipt/hold."""
+        """Atomically erase a live analytical row and block stale replay resurrection."""
         receipt = validate_response_id(response_id)
         try:
             self.conn.execute("BEGIN IMMEDIATE")
@@ -288,6 +316,10 @@ class SQLiteResearchStorage:
             if exists is None:
                 self.conn.rollback()
                 return False
+            self.conn.execute(
+                "INSERT OR IGNORE INTO erasure_replay_blocks(response_id) VALUES (?)",
+                (receipt,),
+            )
             self.conn.execute(
                 "DELETE FROM rights_analysis_holds WHERE response_id = ?",
                 (receipt,),
