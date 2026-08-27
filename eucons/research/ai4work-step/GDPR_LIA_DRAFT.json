@@ -1,5 +1,5 @@
 {
-  "schema_version": "eucons.ai4work_gdpr_lia.v0.2",
+  "schema_version": "eucons.ai4work_gdpr_lia.v0.3",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "date": "2026-08-27",
   "controller": null,
@@ -33,28 +33,29 @@
     "why_primary_research_is_needed": "secondary official evidence can establish structural context but cannot alone evidence respondent-level perceived skills gaps, barriers, use patterns and employer-reported capability needs",
     "less_intrusive_design": [
       "no names, contact details, CNP, exact address or employer identity",
-      "broad region/age/status/occupation categories only",
+      "controlled broad region/age/status/occupation or sector categories only",
+      "no analytical free-text fields; respondent answers are constrained to predefined categories, ratings, booleans and matrices",
       "no login, files, cookies, fingerprinting or cross-site tracking",
       "no CRM or commercial analytics integration",
       "no special-category data",
       "separate optional follow-up contact mechanism with no response linkage",
-      "small-cell suppression and free-text PII rejection/review"
+      "small-cell suppression/combination for reported n < 5"
     ],
     "conclusion": "PROCESSING_CAN_BE_NECESSARY_IF_CONTROLLER_ROLE_IS_FROZEN_AND_THE_MINIMISED_DESIGN_AND_SEPARATION_CONTROLS_ARE_ENFORCED"
   },
   "balancing_test": {
     "reasonable_expectations": "participants are shown a pre-form research notice and make a voluntary positive choice to submit a needs-analysis questionnaire; the data are not reused for enrolment, marketing or individual decisions",
-    "data_nature": "low-granularity professional/demographic categories plus questionnaire answers; direct identifiers and Article 9/10 data are forbidden",
-    "impact": "low under the intended design; principal residual risks are accidental re-identification through free text/small cells and infrastructure logs",
+    "data_nature": "low-granularity professional/demographic categories plus controlled questionnaire answers; direct identifiers, free-text responses and Article 9/10 data are forbidden",
+    "impact": "low under the intended design; principal residual re-identification risk comes from combinations of low-granularity categories/small cells and from infrastructure logs, not from respondent free text",
     "power_imbalance": "employed and unemployed adults may have contextual vulnerability; participation must not be requested by an employer in a way that creates pressure and refusal must have no disadvantage",
     "safeguards": [
       "voluntary participation and clear no-disadvantage language",
       "right-to-object channel disclosed in Article 13 notice",
-      "PII-pattern rejection and human review of free text before quotation",
+      "no analytical free-text collection",
       "n<5 suppression/combination",
       "research-only credentials/database isolated from CRM",
       "short retention and deletion execution",
-      "no raw response use with external LLM/AI providers",
+      "no raw respondent-level response use with external LLM/AI providers",
       "no automated decisions or respondent scoring",
       "logging minimisation and no IP/user-agent in analytical exports"
     ],
@@ -66,8 +67,9 @@
     "Article 13 notice is not delivered before data submission",
     "processor/subprocessor or transfer review is not completed",
     "server logs make responses routinely linkable to identifiable IP/device data without a documented necessity/retention control",
+    "free-text response fields are introduced without a renewed minimisation and privacy assessment",
     "direct identifiers, special-category data, CRM linkage, marketing reuse or individual decision-making are introduced",
-    "raw responses are sent to an external AI/LLM processor without a new legal/privacy assessment",
+    "raw respondent-level records are sent to an external AI/LLM processor without a new legal/privacy assessment",
     "retention/deletion rule is not executable"
   ],
   "controller_signoff_fields": {
