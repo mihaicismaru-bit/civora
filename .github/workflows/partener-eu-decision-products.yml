@@ -21,7 +21,6 @@ on:
       - 'partener-eu/ingest/finalize_decision_products.py'
       - 'partener-eu/ingest/localize_decision_products.py'
       - 'partener-eu/ingest/state/mipe_ro_corpus.json'
-      - 'partener-eu/ops/fix_call_lifecycle_result_evidence.py'
       - 'partener-eu/ops/fix_decision_products_determinism.py'
       - 'partener-eu/ops/fix_decision_products_source_coverage.py'
       - 'partener-eu/ops/fix_decision_ui_romanian.py'
@@ -76,7 +75,6 @@ jobs:
           python partener-eu/ops/fix_decision_products_determinism.py
           python partener-eu/ops/fix_decision_products_source_coverage.py
           python partener-eu/ops/fix_decision_ui_romanian.py
-          python partener-eu/ops/fix_call_lifecycle_result_evidence.py
 
       - name: Canonicalize evidence and construct deep funding dossiers
         run: |
