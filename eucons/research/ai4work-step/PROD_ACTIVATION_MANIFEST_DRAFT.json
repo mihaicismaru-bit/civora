@@ -1,5 +1,5 @@
 {
-  "schema_version": "eucons.ai4work_prod_activation_manifest.v0.2",
+  "schema_version": "eucons.ai4work_prod_activation_manifest.v0.3",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "state": "DRAFT_NOT_APPROVED_FOR_PROD",
   "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
@@ -12,7 +12,8 @@
   "required_internal_gates": {
     "controller_determination": "CONTROLLER_DETERMINATION_DRAFT.json",
     "collection_frame": "COLLECTION_FRAME_DRAFT.json",
-    "form_contract": "form_contract.json"
+    "form_contract": "form_contract.json",
+    "dpia_screening": "GDPR_DPIA_SCREENING_DRAFT.json"
   },
   "required_external_or_operational_evidence": {
     "privacy_notice": {"status": "OPEN", "reference": null, "sha256": null},
@@ -22,16 +23,18 @@
     "server_logging_profile": {"status": "OPEN", "reference": null, "sha256": null},
     "retention_and_deletion": {"status": "OPEN", "reference": null, "sha256": null},
     "data_subject_rights_procedure": {"status": "OPEN", "reference": null, "sha256": null},
+    "dpia_screening_or_completed_dpia": {"status": "OPEN", "reference": null, "sha256": null},
     "research_only_store_binding": {"status": "OPEN", "reference": null, "sha256": null},
     "provider_bound_test_twin_smoke": {"status": "OPEN", "reference": null, "sha256": null}
   },
-  "activation_rule": "Real collection may be enabled only when this manifest is APPROVED_FOR_PROD, explicit user approval is referenced, all internal gates are approved and NF06-eligible, every external/operational evidence item has an immutable reference plus SHA-256 and approved/pass status, CRM/commercial analytics remain forbidden, and TEST TWIN remains NON-EVIDENCE.",
+  "activation_rule": "Real collection may be enabled only when this manifest is APPROVED_FOR_PROD, explicit user approval is referenced, all internal gates including DPIA screening are approved and NF06-compatible, every external/operational evidence item has an immutable reference plus SHA-256 and approved/pass status, CRM/commercial analytics remain forbidden, and TEST TWIN remains NON-EVIDENCE.",
   "forbidden_shortcuts": [
     "setting form_contract.production_enabled=true by itself",
     "treating a green repository unit test as proof of provider-bound live readiness",
     "using TEST TWIN results as empirical evidence",
     "deriving controller identity from site branding, project role, domain ownership or hosting billing alone",
     "activating collection without an approved data-subject-rights procedure and live receipt-based rights operations",
+    "activating collection without a controller-reviewed DPIA screening and, when required, a completed DPIA",
     "activating collection without explicit user approval"
   ],
   "merge_authorized": false,
