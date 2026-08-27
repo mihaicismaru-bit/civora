@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "id": "EUCONS-R07-CLIENT-FINDER-OFFER-PREPARATION-AUTHORIZATION-001",
+  "status": "CANONICAL",
+  "purpose": "Capture a separate, explicit human authorization to enter internal offer-draft preparation only after commercial scope is ready, without generating offer content, pricing, CRM context, persistence or outreach.",
+  "source_readiness": {
+    "contract_id": "EUCONS-R07-CLIENT-FINDER-COMMERCIAL-SCOPE-READINESS-001",
+    "record_state": "CLIENT_FINDER_COMMERCIAL_SCOPE_READINESS_ENVELOPE",
+    "required_readiness_outcome": "COMMERCIAL_SCOPE_READY",
+    "required_commercial_scope_state": "COMMERCIAL_SCOPE_READY_FOR_SEPARATE_OFFER_GATE",
+    "required_next_gate_hint": "SEPARATE_OFFER_AUTHORIZATION_GATE_REQUIRED",
+    "required_offer_authorization_gate_required": true,
+    "required_official_source_reverified": true,
+    "required_scope_area": "SELECTED_SERVICE_ONLY"
+  },
+  "required_boundaries": {
+    "eligibility_state": "NOT_ASSESSED",
+    "maximum_next_state": "RESEARCH_READY",
+    "human_review_required": true,
+    "external_contact_enabled": false,
+    "automatic_offer_enabled": false,
+    "automatic_send_enabled": false,
+    "crm_write_enabled": false,
+    "pipeline_write_enabled": false
+  },
+  "authorization": {
+    "decision_source": "HUMAN",
+    "allowed_capabilities": [
+      "INTERNAL_DRAFT_PREPARATION_ONLY"
+    ],
+    "allowed_authorization_outcomes": [
+      "MORE_OFFER_PREPARATION_RESEARCH_REQUIRED",
+      "OFFER_PREPARATION_NOT_AUTHORIZED",
+      "OFFER_PREPARATION_AUTHORIZED"
+    ],
+    "outcome_state_map": {
+      "MORE_OFFER_PREPARATION_RESEARCH_REQUIRED": "OFFER_PREPARATION_RESEARCH_REQUIRED",
+      "OFFER_PREPARATION_NOT_AUTHORIZED": "OFFER_PREPARATION_CLOSED",
+      "OFFER_PREPARATION_AUTHORIZED": "OFFER_PREPARATION_AUTHORIZED_INTERNAL_ONLY"
+    },
+    "outcome_next_gate_map": {
+      "MORE_OFFER_PREPARATION_RESEARCH_REQUIRED": null,
+      "OFFER_PREPARATION_NOT_AUTHORIZED": null,
+      "OFFER_PREPARATION_AUTHORIZED": "SEPARATE_OFFER_DRAFT_GENERATION_GATE_REQUIRED"
+    },
+    "decided_at_format": "RFC3339_UTC_Z"
+  },
+  "output": {
+    "record_state": "CLIENT_FINDER_OFFER_PREPARATION_AUTHORIZATION_ENVELOPE",
+    "offer_preparation_authorized_is_decision_derived": true,
+    "target_state_committed": false,
+    "persistence_executed": false,
+    "offer_preparation_persistence_allowed": false,
+    "offer_authorization_granted": false,
+    "offer_content_included": false,
+    "pricing_included": false,
+    "offer_draft_generation_allowed": false,
+    "offer_generation_allowed": false,
+    "offer_engine_invocation_allowed": false,
+    "pricing_decision_allowed": false,
+    "crm_context_materialization_allowed": false,
+    "human_review_required": true,
+    "external_contact_enabled": false,
+    "automatic_offer_enabled": false,
+    "automatic_send_enabled": false,
+    "crm_write_enabled": false,
+    "pipeline_write_enabled": false
+  },
+  "rules": {
+    "source_must_be_commercial_scope_ready": true,
+    "source_must_be_official_source_reverified": true,
+    "source_must_require_separate_offer_authorization_gate": true,
+    "source_must_not_have_committed_or_persisted_state": true,
+    "authorization_decision_must_be_human_and_exact_identity": true,
+    "authorization_capability_is_internal_draft_preparation_only": true,
+    "authorized_preparation_is_not_offer_generation_or_offer_approval": true,
+    "authorized_preparation_is_not_pricing_eligibility_award_conversion_or_buying_intent": true,
+    "never_include_offer_content_or_pricing": true,
+    "never_invoke_offer_engine_from_preparation_authorization": true,
+    "never_materialize_crm_context_from_preparation_authorization": true,
+    "never_enable_external_action_or_persistence": true,
+    "person_level_fields_forbidden": true,
+    "raw_evidence_hash_deadline_probability_pricing_and_offer_content_fields_forbidden": true
+  }
+}
