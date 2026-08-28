@@ -93,11 +93,13 @@ jobs:
           assert rights.get('collection_enabled') is False
           assert rights.get('identification_policy', {}).get('direct_identity_registry') == 'FORBIDDEN'
           dpia = json.loads((root / 'GDPR_DPIA_SCREENING_DRAFT.json').read_text(encoding='utf-8'))
-          assert dpia.get('status') == 'DRAFT_CONTROLLER_REVIEW_REQUIRED_BEFORE_COLLECTION'
+          assert dpia.get('status') == 'TECHNICAL_SCREENING_COMPLETE_CONTROLLER_ACCEPTANCE_REQUIRED_BEFORE_COLLECTION'
           assert dpia.get('evidence_class') == 'CONTROL_ARTIFACT_NOT_EVIDENCE'
           assert dpia.get('approved') is False
           assert dpia.get('collection_enabled') is False
-          assert dpia.get('screening_conclusion') == 'UNRESOLVED_BEFORE_CONTROLLER_AND_DPO_REVIEW'
+          assert dpia.get('screening_conclusion') == 'DPIA_NOT_REQUIRED_RECOMMENDATION_PENDING_CONTROLLER_ACCEPTANCE'
+          assert dpia.get('technical_assessment', {}).get('controller_acceptance_required') is True
+          assert dpia.get('mandatory_before_prod', {}).get('controller_determination_approved') is False
           assert dpia.get('processing_design_facts', {}).get('crm_or_contact_dataset_matching') == 'FORBIDDEN'
           assert dpia.get('processing_design_facts', {}).get('device_fingerprinting') == 'FORBIDDEN'
           activation = json.loads((root / 'PROD_ACTIVATION_MANIFEST_DRAFT.json').read_text(encoding='utf-8'))
