@@ -9,45 +9,16 @@ ROOT = Path(__file__).resolve().parents[1]
 CONTRACT_PATH = ROOT / "web" / "public_intake_progressive_disclosure_contract.json"
 JTBD_PATH = ROOT / "web" / "jtbd_ux_contract.json"
 IA_PATH = ROOT / "web" / "information_architecture.json"
+INBOUND_PATH = ROOT / "leads" / "inbound_runtime_contract.json"
 
 EXPECTED_ID = "EUCONS-R04-PUBLIC-INTAKE-PROGRESSIVE-DISCLOSURE-001"
 EXPECTED_JTBD_ID = "R04-JTBD-UX-001"
 EXPECTED_IA_PHASE = "E06"
-EXPECTED_JOURNEYS = {
-    "JRN-FUNDING-FIT",
-    "JRN-PROJECT-REVIEW",
-    "JRN-IMPLEMENTATION",
-    "JRN-RECOVERY",
-}
-FALSE_BOUNDARIES = {
-    "network_submission_enabled",
-    "persistence_enabled",
-    "analytics_transport_enabled",
-    "crm_write_enabled",
-    "provider_write_enabled",
-    "external_message_enabled",
-    "offer_send_enabled",
-    "file_upload_enabled",
-    "automatic_contact_enabled",
-}
-FORBIDDEN_FIRST_STAGE = {
-    "contact_details",
-    "contact_name",
-    "first_name",
-    "last_name",
-    "email",
-    "phone",
-    "telephone",
-    "mobile",
-    "cnp",
-    "personal_id",
-    "person_address",
-    "recipient",
-    "attachment",
-    "attachments",
-    "file",
-    "files",
-    "document_upload",
+EXPECTED_INBOUND_ID = "R05-INBOUND-001"
+EXPECTED_JOURNEYS = {"JRN-FUNDING-FIT", "JRN-PROJECT-REVIEW", "JRN-IMPLEMENTATION", "JRN-RECOVERY"}
+FORBIDDEN_PROFILE_FIELDS = {
+    "contact_details", "contact_name", "first_name", "last_name", "email", "phone", "telephone", "mobile",
+    "cnp", "personal_id", "person_address", "recipient", "attachment", "attachments", "file", "files", "document_upload",
 }
 
 
@@ -72,123 +43,128 @@ def require(condition: bool, message: str) -> None:
 
 def index_unique(rows: Any, key: str, label: str) -> dict[str, dict[str, Any]]:
     require(isinstance(rows, list) and rows, f"{label} must be a non-empty list")
-    indexed: dict[str, dict[str, Any]] = {}
+    result: dict[str, dict[str, Any]] = {}
     for row in rows:
         require(isinstance(row, dict), f"{label} entries must be objects")
         value = row.get(key)
         require(isinstance(value, str) and value, f"{label} entry missing {key}")
-        require(value not in indexed, f"duplicate {label} {key}: {value}")
-        indexed[value] = row
-    return indexed
+        require(value not in result, f"duplicate {label} {key}: {value}")
+        result[value] = row
+    return result
 
 
-def validate_data(contract: dict[str, Any], jtbd: dict[str, Any], ia: dict[str, Any]) -> None:
-    require(contract.get("schema_version") == 1, "unsupported intake contract schema")
-    require(contract.get("id") == EXPECTED_ID, "unexpected intake contract id")
-    require(contract.get("status") == "DRAFT_FAIL_CLOSED", "intake contract must remain fail-closed draft")
+def validate_data(contract: dict[str, Any], jtbd: dict[str, Any], ia: dict[str, Any], inbound: dict[str, Any]) -> None:
+    require(contract.get("schema_version") == 1, "unsupported guard schema")
+    require(contract.get("id") == EXPECTED_ID, "unexpected guard id")
+    require(contract.get("status") == "DRAFT_FAIL_CLOSED", "guard must remain fail-closed draft")
 
     bindings = contract.get("source_bindings")
     require(isinstance(bindings, dict), "source_bindings missing")
-    require(jtbd.get("id") == EXPECTED_JTBD_ID, "canonical JTBD contract id drift")
-    require(bindings.get("jtbd_contract_id") == jtbd.get("id"), "JTBD source binding drift")
-    require(jtbd.get("status") == "CANONICAL", "JTBD source is not canonical")
-    require(ia.get("phase") == EXPECTED_IA_PHASE, "information architecture phase drift")
-    require(bindings.get("information_architecture_phase") == ia.get("phase"), "IA source binding drift")
+    require(jtbd.get("id") == EXPECTED_JTBD_ID and jtbd.get("status") == "CANONICAL", "canonical R04 JTBD drift")
+    require(ia.get("phase") == EXPECTED_IA_PHASE, "canonical IA phase drift")
+    require(inbound.get("id") == EXPECTED_INBOUND_ID and inbound.get("status") == "CANONICAL", "canonical R05 inbound drift")
+    require(bindings.get("jtbd_contract_id") == jtbd.get("id"), "R04 binding drift")
+    require(bindings.get("information_architecture_phase") == ia.get("phase"), "IA binding drift")
+    require(bindings.get("inbound_runtime_contract_id") == inbound.get("id"), "R05 binding drift")
 
-    global_rules = jtbd.get("global_rules")
-    require(isinstance(global_rules, dict), "JTBD global_rules missing")
-    require(global_rules.get("progressive_data_minimization") is True, "progressive data minimization disabled upstream")
-    require(global_rules.get("inferred_eligibility_forbidden") is True, "upstream inferred eligibility boundary disabled")
-    require(global_rules.get("unavailable_submission_state_must_be_explicit") is True, "upstream unavailable-submit boundary disabled")
+    rules = jtbd.get("global_rules")
+    require(isinstance(rules, dict), "R04 global_rules missing")
+    require(rules.get("progressive_data_minimization") is True, "progressive data minimization disabled upstream")
+    require(rules.get("inferred_eligibility_forbidden") is True, "inferred eligibility boundary disabled upstream")
 
-    policy = contract.get("first_stage_policy")
-    require(isinstance(policy, dict), "first_stage_policy missing")
-    require(policy.get("mode") == "LOCAL_CONTEXT_CAPTURE_ONLY", "first stage must remain local context capture")
-    require(policy.get("submission_enabled") is False, "first-stage submission must remain disabled")
-    require(policy.get("persistence_enabled") is False, "first-stage persistence must remain disabled")
-    require(policy.get("person_level_pii_allowed") is False, "person-level PII must remain forbidden in first stage")
-    require(policy.get("contact_details_allowed") is False, "contact details must remain forbidden in first stage")
-    require(policy.get("attachments_allowed") is False, "attachments must remain forbidden in first stage")
-    require(policy.get("material_claims_allowed") is False, "first stage cannot emit material claims")
-    require(policy.get("eligibility_state") == "NOT_ASSESSED", "first stage cannot assess eligibility")
-    require(policy.get("outcome") == "LOCAL_ROUTE_SELECTION_ONLY", "first-stage outcome drift")
-    require(policy.get("external_action") == "NO_EXTERNAL_ACTION", "first stage cannot authorize external action")
-    require(set(policy.get("forbidden_fields", [])) == FORBIDDEN_FIRST_STAGE, "forbidden first-stage field set drift")
-    require(policy.get("free_text_fields") == ["message"], "free-text field policy drift")
+    policy = contract.get("profile_stage_policy")
+    require(isinstance(policy, dict), "profile_stage_policy missing")
+    require(policy.get("runtime_stage") == "PROFILE", "profile stage identity drift")
+    require(policy.get("internal_runtime_progression_allowed") is True, "canonical internal R05 progression must remain allowed")
+    require(policy.get("production_collection_allowed") is False, "profile guard cannot activate production collection")
+    require(policy.get("repository_pii_write_allowed") is False, "repository PII writes must remain forbidden")
+    require(policy.get("person_level_pii_allowed") is False, "person-level PII leaked into PROFILE")
+    require(policy.get("contact_details_allowed") is False, "contact details leaked into PROFILE")
+    require(policy.get("attachments_allowed") is False, "attachments leaked into PROFILE")
+    require(policy.get("material_claims_allowed") is False, "PROFILE cannot emit material claims")
+    require(policy.get("eligibility_state") == "NOT_ASSESSED", "PROFILE cannot assess eligibility")
+    require(policy.get("funding_claim_state") == "NO_PROGRAMME_CLAIM_WITHOUT_VERIFIED_MATCH", "funding claim boundary drift")
+    require(set(policy.get("forbidden_fields", [])) == FORBIDDEN_PROFILE_FIELDS, "forbidden PROFILE field set drift")
+    require(policy.get("free_text_fields") == ["message"], "free-text policy drift")
     require(policy.get("free_text_rule") == "NO_PERSON_LEVEL_PII_OR_CONTACT_DETAILS", "free-text PII rule drift")
 
-    source_journeys = index_unique(jtbd.get("journeys"), "id", "JTBD journeys")
-    contract_journeys = index_unique(contract.get("journeys"), "journey_id", "intake journeys")
-    require(set(contract_journeys) == EXPECTED_JOURNEYS, "intake journey coverage drift")
-    require(EXPECTED_JOURNEYS.issubset(source_journeys), "canonical JTBD journey missing")
+    lifecycle = inbound.get("lifecycle")
+    require(lifecycle == ["PROFILE", "CONTEXT", "CONTACT", "COMPLETED"], "R05 lifecycle drift")
+    request_contract = inbound.get("request_contract")
+    require(isinstance(request_contract, dict), "R05 request_contract missing")
+    require(request_contract.get("contact_before_contact_step_forbidden") is True, "R05 early-contact boundary disabled")
+    contact_fields = set(request_contract.get("contact_fields", []))
+    require({"contact_name", "email", "phone", "privacy_ack", "marketing_consent", "submitted_at"}.issubset(contact_fields), "R05 contact field contract drift")
 
+    source_journeys = index_unique(jtbd.get("journeys"), "id", "R04 journeys")
+    guard_journeys = index_unique(contract.get("journeys"), "journey_id", "guard journeys")
+    require(set(guard_journeys) == EXPECTED_JOURNEYS == set(inbound.get("journey_form_map", {})), "R04/R05 journey coverage drift")
+    require(EXPECTED_JOURNEYS.issubset(source_journeys), "R04 canonical journey missing")
     core_routes = index_unique(ia.get("core_routes"), "id", "core routes")
-    cta_destinations = index_unique(ia.get("cta_destinations"), "cta_id", "CTA destinations")
 
     for journey_id in sorted(EXPECTED_JOURNEYS):
         source = source_journeys[journey_id]
-        bound = contract_journeys[journey_id]
-        source_fields = source.get("first_step_fields")
-        require(isinstance(source_fields, list) and source_fields, f"{journey_id}: first_step_fields missing")
-        require(all(isinstance(field, str) and field for field in source_fields), f"{journey_id}: invalid first_step_fields")
-        require(not (set(source_fields) & FORBIDDEN_FIRST_STAGE), f"{journey_id}: person/contact/upload field leaked into first stage")
-        require(bound.get("allowed_first_stage_fields") == source_fields, f"{journey_id}: first-stage field binding drift")
-        require(bound.get("route_id") == source.get("route_id"), f"{journey_id}: route id drift")
-        require(bound.get("path") == source.get("path"), f"{journey_id}: path drift")
+        guard = guard_journeys[journey_id]
+        fields = source.get("first_step_fields")
+        require(isinstance(fields, list) and fields, f"{journey_id}: first_step_fields missing")
+        require(all(isinstance(field, str) and field for field in fields), f"{journey_id}: invalid first_step_fields")
+        require(not (set(fields) & FORBIDDEN_PROFILE_FIELDS), f"{journey_id}: person/contact/upload field leaked into PROFILE")
+        require(guard.get("allowed_profile_fields") == fields, f"{journey_id}: PROFILE field binding drift")
+        require(guard.get("route_id") == source.get("route_id") and guard.get("path") == source.get("path"), f"{journey_id}: R04 route/path drift")
+        route = core_routes.get(source.get("route_id"))
+        require(isinstance(route, dict), f"{journey_id}: canonical IA route missing")
+        require(route.get("surface") == bindings.get("journey_surface") == "JTBD_JOURNEY", f"{journey_id}: IA surface drift")
+        require(route.get("journey_id") == journey_id and route.get("path") == source.get("path"), f"{journey_id}: IA identity/path drift")
 
-        route_id = source.get("route_id")
-        require(route_id in core_routes, f"{journey_id}: canonical journey route missing")
-        route = core_routes[route_id]
-        require(route.get("surface") == bindings.get("journey_surface") == "JTBD_JOURNEY", f"{journey_id}: route surface drift")
-        require(route.get("journey_id") == journey_id, f"{journey_id}: IA journey identity drift")
-        require(route.get("path") == source.get("path"), f"{journey_id}: IA path drift")
+    contact = contract.get("contact_boundary")
+    require(isinstance(contact, dict), "contact_boundary missing")
+    require(contact.get("contact_stage") == "CONTACT", "contact stage drift")
+    require(contact.get("contact_before_contact_stage_forbidden") is True, "early contact must remain forbidden")
+    require(contact.get("privacy_ack_required_at_contact") is True, "privacy acknowledgement boundary drift")
+    require(contact.get("marketing_consent_default") is False, "marketing consent cannot default true")
+    require(contact.get("marketing_never_conditions_operational_response") is True, "marketing/operational separation drift")
+    require(contact.get("raw_contact_removed_from_resumable_session_after_handoff") is True, "raw contact minimization drift")
+    require(contact.get("contact_before_contact_stage_forbidden") == request_contract.get("contact_before_contact_step_forbidden"), "guard/R05 early-contact mismatch")
+    require(contact.get("privacy_ack_required_at_contact") == request_contract.get("privacy_ack_required_at_contact"), "guard/R05 privacy acknowledgement mismatch")
+    require(contact.get("marketing_consent_default") == request_contract.get("marketing_consent_default"), "guard/R05 marketing default mismatch")
 
-        cta_id = source.get("cta_id")
-        require(cta_id in cta_destinations, f"{journey_id}: CTA destination missing")
-        require(cta_destinations[cta_id].get("path") == bindings.get("lead_handoff_path"), f"{journey_id}: CTA bypasses separate lead handoff")
-
-    handoff = contract.get("contact_handoff")
-    require(isinstance(handoff, dict), "contact_handoff missing")
-    require(handoff.get("required") is True, "separate contact handoff must remain required")
-    require(handoff.get("mode") == "SEPARATE_HUMAN_CONTACT_HANDOFF_REQUIRED", "contact handoff must remain human-gated")
-    require(handoff.get("automatic") is False, "automatic contact handoff forbidden")
-    require(handoff.get("contact_details_allowed_only_after_handoff") is True, "contact details cannot move before handoff")
-    require(handoff.get("lead_route_id") == bindings.get("lead_handoff_route_id"), "lead route binding drift")
-    require(handoff.get("lead_path") == bindings.get("lead_handoff_path"), "lead path binding drift")
-    lead_route = core_routes.get(bindings.get("lead_handoff_route_id"))
-    require(isinstance(lead_route, dict), "lead handoff route missing from IA")
-    require(lead_route.get("surface") == "LEAD_JOURNEY", "lead handoff must remain a LEAD_JOURNEY")
-    require(lead_route.get("path") == bindings.get("lead_handoff_path"), "lead handoff canonical path drift")
-
-    boundaries = contract.get("boundaries")
-    require(isinstance(boundaries, dict), "boundaries missing")
-    for key in sorted(FALSE_BOUNDARIES):
-        require(boundaries.get(key) is False, f"external/write boundary enabled: {key}")
-    require(boundaries.get("research_crm_separation") is True, "research/CRM separation must remain explicit")
+    privacy = inbound.get("privacy_and_purpose")
+    storage = inbound.get("storage")
+    telemetry = inbound.get("telemetry")
+    public_form = inbound.get("public_form_contract")
+    require(all(isinstance(x, dict) for x in (privacy, storage, telemetry, public_form)), "R05 boundary sections missing")
+    runtime = contract.get("runtime_boundaries")
+    require(isinstance(runtime, dict), "runtime_boundaries missing")
+    require(runtime.get("production_binding_enabled") is False and public_form.get("endpoint", {}).get("production_binding_enabled") is False, "production endpoint binding enabled")
+    require(runtime.get("production_collection_enabled") is False and inbound.get("production_collection_enabled") is False, "production collection enabled")
+    require(runtime.get("provider_adapter_required_for_persistence") is True and privacy.get("provider_adapter_required_for_persistence") is True, "provider persistence gate drift")
+    require(runtime.get("repository_runtime_storage") is False and storage.get("repository_runtime_storage") is False, "repository runtime storage enabled")
+    require(runtime.get("repository_pii_writes_forbidden") is True and privacy.get("repository_pii_writes_forbidden") is True, "repository PII boundary drift")
+    require(runtime.get("telemetry_payload_values_forbidden") is True and telemetry.get("payload_values_forbidden") is True, "telemetry payload boundary drift")
+    require(runtime.get("telemetry_raw_contact_forbidden") is True and telemetry.get("raw_contact_forbidden") is True, "telemetry raw-contact boundary drift")
+    require(runtime.get("telemetry_production_transport_enabled") is False and telemetry.get("production_transport_enabled") is False, "production telemetry transport enabled")
+    require(runtime.get("research_crm_separation") is True, "research/CRM separation must remain explicit")
 
     decision = contract.get("decision")
     require(isinstance(decision, dict), "decision missing")
-    require(decision.get("state") == "PASS_POLICY_GUARD_ONLY", "decision state drift")
+    require(decision.get("state") == "PASS_CROSS_CONTRACT_GUARD_ONLY", "decision state drift")
     require(decision.get("runtime_materialization_authorized") is False, "guard cannot authorize runtime materialization")
+    require(decision.get("production_activation_authorized") is False, "guard cannot authorize production activation")
     require(decision.get("external_action_authorized") is False, "guard cannot authorize external action")
-    require(decision.get("next_gate") == "SEPARATE_PUBLIC_INTAKE_RUNTIME_IMPLEMENTATION_REVIEW_REQUIRED", "separate runtime gate missing")
+    require(decision.get("next_gate") == "R05_CANONICAL_RUNTIME_REMAINS_SEPARATELY_GATED", "R05 separate gate drift")
 
 
-def validate(
-    contract_path: Path = CONTRACT_PATH,
-    jtbd_path: Path = JTBD_PATH,
-    ia_path: Path = IA_PATH,
-) -> None:
-    validate_data(load_json(contract_path), load_json(jtbd_path), load_json(ia_path))
+def validate(contract_path: Path = CONTRACT_PATH, jtbd_path: Path = JTBD_PATH, ia_path: Path = IA_PATH, inbound_path: Path = INBOUND_PATH) -> None:
+    validate_data(load_json(contract_path), load_json(jtbd_path), load_json(ia_path), load_json(inbound_path))
 
 
 def main() -> int:
     try:
         validate()
     except ValidationError as exc:
-        print(json.dumps({"status": "FAIL", "phase": "R04_PUBLIC_INTAKE", "reason": str(exc)}, ensure_ascii=False))
+        print(json.dumps({"status": "FAIL", "phase": "R04_PUBLIC_INTAKE_GUARD", "reason": str(exc)}, ensure_ascii=False))
         return 1
-    print(json.dumps({"status": "PASS", "phase": "R04_PUBLIC_INTAKE", "external_action": "NO_EXTERNAL_ACTION"}, ensure_ascii=False))
+    print(json.dumps({"status": "PASS", "phase": "R04_PUBLIC_INTAKE_GUARD", "r05_runtime": "SEPARATELY_GATED"}, ensure_ascii=False))
     return 0
 
 
