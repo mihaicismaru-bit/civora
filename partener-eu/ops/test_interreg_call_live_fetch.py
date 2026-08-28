@@ -15,6 +15,9 @@ def check(condition, message):
         raise AssertionError(message)
 
 
+# Transport aliases are not semantic evidence. If an official host fails TLS in the
+# GitHub runner, live acquisition must preserve FETCH_FAILED rather than weaken
+# certificate verification or treat a hostname variant as proof of a call state.
 def fake_fetch(url: str):
     if "third-call-for-proposals" in url:
         body = b"""<html><body><h1>Third call for proposals</h1><p>The 3rd CfP is open until 15 December 2025.</p><p>Application deadline 15 December 2025.</p><p>Official programme authority exact-call regression control page with sufficient visible evidence.</p></body></html>"""
