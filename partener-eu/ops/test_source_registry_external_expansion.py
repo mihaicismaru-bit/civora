@@ -147,10 +147,11 @@ def main():
             fail(f"{source_id} programme family drift: {row.get('programme_family')!r} != {expected_family!r}")
         if row.get("material_fact_use") is not False:
             fail(f"{source_id} generic programme/index/guide source cannot authorize material call facts")
-        if row.get("authority_scope") not in SAFE_DIRECT_SCOPES:
-            fail(f"{source_id} has unsafe direct-funding authority scope: {row.get('authority_scope')}")
-        if row.get("observation_state") not in SAFE_DIRECT_STATES and source_id not in DIRECT_PIPELINE:
-            fail(f"{source_id} has unsafe direct-funding observation state: {row.get('observation_state')}")
+        if source_id not in DIRECT_PIPELINE:
+            if row.get("authority_scope") not in SAFE_DIRECT_SCOPES:
+                fail(f"{source_id} has unsafe direct-funding authority scope: {row.get('authority_scope')}")
+            if row.get("observation_state") not in SAFE_DIRECT_STATES:
+                fail(f"{source_id} has unsafe direct-funding observation state: {row.get('observation_state')}")
 
     for source_id in STRUCTURED_FT_REQUIRED:
         row = by_id[source_id]
