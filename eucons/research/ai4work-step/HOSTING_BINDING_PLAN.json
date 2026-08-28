@@ -1,7 +1,7 @@
 {
-  "schema_version": "eucons.ai4work_research_hosting_plan.v0.4",
+  "schema_version": "eucons.ai4work_research_hosting_plan.v0.5",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "state": "PROJECT_APPLICANT_SITE_OPERATOR_HOSTING_ACCOUNT_AND_PROVIDER_ROLES_MUST_BE_FROZEN_BEFORE_COLLECTION",
+  "state": "INTERNAL_RUNTIME_BINDING_IMPLEMENTED_FAIL_CLOSED_EXTERNAL_ROLE_AND_PROVIDER_VALIDATION_REQUIRED_BEFORE_COLLECTION",
   "verified_existing_eucons_runtime": {
     "public_origin": "https://eucons.ro",
     "api_origin": "https://api.eucons.ro",
@@ -13,24 +13,41 @@
     "commercial_runtime_secrets_in_git": false,
     "existing_external_handoff": "domain_and_hosting AUTHORIZED_AND_VALIDATED for the commercial EUCONS runtime; public commercial collection itself remains fail-closed pending its own gates"
   },
-  "proposed_research_binding": {
-    "route": "/api/research/ai4work-step",
+  "research_binding": {
+    "implementation_status": "IMPLEMENTED_ON_PR_BRANCH_PENDING_EXACT_HEAD_CI_AND_PROVIDER_BOUND_TEST_TWIN",
+    "route": "/research/ai4work/v1/submit",
+    "absolute_endpoint": "https://api.eucons.ro/research/ai4work/v1/submit",
     "methods": ["POST", "OPTIONS"],
     "content_type": "application/json",
     "allowed_origins": ["https://eucons.ro", "https://www.eucons.ro"],
     "credentials_allowed": false,
-    "research_storage_root": "/home/eucons/eucons-research/ai4work-step",
+    "research_storage_root_default": "/home/eucons/eucons-research/ai4work-step",
+    "research_storage_root_env": "AI4WORK_RESEARCH_ROOT",
+    "activation_env": "AI4WORK_RESEARCH_PROD_ENABLED=1",
+    "activation_latches": [
+      "form_contract.production_enabled=true",
+      "manifest.approved_for_prod=true",
+      "manifest.collection_enabled=true",
+      "manifest.deploy_authorized=true",
+      "manifest.real_collection_authorized=true",
+      "manifest.explicit_user_approval_reference non-empty",
+      "AI4WORK_RESEARCH_PROD_ENABLED=1"
+    ],
     "storage_rule": "OUTSIDE_WEBROOT_SEPARATE_NAMESPACE_NO_SHARED_FILES_OR_TABLES_WITH_COMMERCIAL_CRM",
-    "crm_calls": "FORBIDDEN",
-    "commercial_lead_calls": "FORBIDDEN",
-    "response_fields": ["status", "response_id"],
+    "crm_calls": "FORBIDDEN_AND_NOT_INSTANTIATED_ON_RESEARCH_ROUTE",
+    "commercial_lead_calls": "FORBIDDEN_AND_NOT_INSTANTIATED_ON_RESEARCH_ROUTE",
+    "response_fields": ["accepted", "inserted", "response_id", "normalized_sha256"],
     "expose_answers_or_profile_in_response": false,
     "app_record_ip": "FORBIDDEN",
     "app_record_user_agent": "FORBIDDEN",
     "raw_and_normalized_sha256": "REQUIRED",
-    "duplicate_response_id": "FAIL_CLOSED",
+    "duplicate_response_id_same_body": "REPLAY_ORIGINAL_RECEIPT_NO_SECOND_ANALYTICAL_ROW",
+    "duplicate_response_id_different_body": "FAIL_CLOSED_IDEMPOTENCY_CONFLICT",
+    "erased_response_replay": "FAIL_CLOSED_USING_OPAQUE_24H_MAX_REPLAY_MARKER",
     "synthetic_prod_records": "FORBIDDEN",
-    "max_request_bytes": 65536
+    "max_request_bytes": 65536,
+    "browser_tracking": "NONE; credentials omit; no cookies/localStorage/sessionStorage/fingerprinting/analytics; submit UUID exists in in-memory same-tab retry state only",
+    "client_channel_provenance": "opaque CH-* first-party dissemination batch only; no UTM/referrer/cookie/IP/device/CRM identity"
   },
   "role_determination_before_activation": {
     "rule": "Do not infer controller or processor status from the website brand, domain ownership, project-applicant status, consulting role, billing responsibility or hosting-account ownership alone.",
@@ -42,21 +59,21 @@
       "CLAUS WEB SRL provider role"
     ],
     "required_output": "documented controller/processor/subprocessor chain plus Article 28-compatible instructions/terms where applicable",
-    "status": "OPEN_FAIL_CLOSED"
+    "status": "EXTERNAL_CONFIRMATION_REQUESTED_FAIL_CLOSED"
   },
   "privacy_and_security_requirements_before_activation": [
     "freeze a documented controller determination anchored to the entity that actually determines the research purposes and essential means; do not assume EUROCONSULT SRL is controller merely because eucons.ro hosts the forms",
     "freeze a public research privacy/contact channel for the determined controller",
-    "document and approve the research legal basis and Article 13 notice separately from acknowledgement of voluntary participation",
-    "verify and document the legal/controller-processor chain among the project applicant/leader, eucons.ro site/operator, actual hosting-account holder and Claus Web; do not infer that these roles belong to the same legal entity",
+    "document and approve the research legal basis and complete Article 13 notice separately from acknowledgement of voluntary participation",
+    "verify and document the legal/controller-processor chain among the project applicant/leader, eucons.ro site/operator, actual hosting-account holder and Claus Web",
     "confirm that every processor/subprocessor role applicable to the research is governed by Article 28-compatible terms and retain the account-specific contractual evidence",
     "obtain and review the current nominal subprocessor list from Claus Web DPA Annex 4 before activation",
     "obtain and review the account-applicable backup/retention/deletion values from Claus Web DPA Annex 5 before activation",
-    "verify web-server/reverse-proxy access-log fields and retention for the actual account; keep IP/device metadata out of the analytical export",
-    "apply filesystem permissions so research responses are not readable through document root and are not consumed by CRM jobs",
-    "define and test research retention/deletion independently from commercial lead retention",
-    "verify HTTPS and exact-origin CORS",
-    "run PII/schema rejection tests and TEST TWIN end-to-end smoke before any real collection"
+    "verify web-server/reverse-proxy access-log fields and retention for the actual account; keep request bodies/raw idempotency keys out of logs and IP/device metadata out of the analytical export",
+    "provider-bound TEST TWIN must prove research files are outside document root, isolated from commercial storage, excluded from CRM jobs and subject to finite erasure replay-marker expiry",
+    "bind and test research retention/deletion independently from commercial lead retention",
+    "verify HTTPS and exact-origin CORS on the actual endpoint",
+    "run exact-head schema/minimisation/idempotency tests and provider-bound TEST TWIN browser-to-HTTP-to-store-to-export-to-NF06 smoke before any real collection"
   ],
   "hosting_provider_observation": {
     "internal_activation_artifact": "eucons/deployment/activate_php_runtime.py identifies hosting associated with romania-webhosting.com",
@@ -70,13 +87,12 @@
       "article_28_role": "PUBLIC_DPA_EXPLICITLY_IDENTIFIES_CLAUS_WEB_AS_PROCESSOR_FOR_BENEFICIARY_DATA_IN_SHARED_HOSTING",
       "subprocessors": "GENERAL_AUTHORIZATION_PRESENT_BUT_NOMINAL_ANNEX_4_AVAILABLE_ON_REQUEST_AND_REQUIRES_OPERATIONAL_VALIDATION",
       "international_transfers": "DPA_STATES_NO_BENEFICIARY_DATA_TRANSFER_OUTSIDE_EEA_WITHOUT_VALID_CHAPTER_V_MECHANISM",
-      "termination_deletion": "DPA_STATES_STANDARD_15_DAY_EXPORT_WINDOW_AND_PRODUCTION_DATA_DELETION_OR_IRREVERSIBLE_INACCESSIBILITY_GENERALLY_WITHIN_30_DAYS_AFTER_WINDOW_SUBJECT_TO_EXCEPTIONS",
+      "termination_deletion": "DPA_STATES_STANDARD_15_DAY_EXPORT_WINDOW_AND PRODUCTION_DATA_DELETION_OR_IRREVERSIBLE_INACCESSIBILITY_GENERALLY_WITHIN_30_DAYS_AFTER_WINDOW_SUBJECT_TO_EXCEPTIONS",
       "backup_retention": "RESIDUAL_ROTATIONAL_BACKUPS_MAY_PERSIST_UNTIL_NATURAL_RETENTION_EXPIRY; EXACT_VALUES_ARE_IN_ANNEX_5_AVAILABLE_ON_REQUEST",
       "technical_logging": "DPA_ACKNOWLEDGES_OPERATIONAL_AND_SECURITY_LOGGING_BUT_PUBLIC_PAGE_DOES_NOT_FIX_ACCOUNT_SPECIFIC_FIELDS_OR_RETENTION",
-      "toms": "PUBLIC_DPA_LISTS_REFERENCE_CONTROLS_FOR ACCESS, SEGREGATION, NETWORK_SECURITY, LOGGING/MONITORING, BACKUP/RECOVERY, INCIDENT_RESPONSE AND DELETION"
+      "toms": "PUBLIC_DPA_LISTS_REFERENCE_CONTROLS_FOR_ACCESS, SEGREGATION, NETWORK_SECURITY, LOGGING/MONITORING, BACKUP/RECOVERY, INCIDENT_RESPONSE AND DELETION"
     },
-    "provider_public_security_claim": "Claus Web publicly states ISO/IEC 27001 certification; certificate scope/current validity still requires documentary verification if relied upon as evidence",
-    "processor_contract_status": "PUBLIC_STANDARD_DPA_FOUND_FULL_RESEARCH_ROLE_CHAIN_NOT_YET_VERIFIED",
+    "processor_contract_status": "PUBLIC_STANDARD_DPA_FOUND_ACCOUNT_SPECIFIC_ROLE_CHAIN_ANNEX4_ANNEX5_LOGGING_AND_BACKUP_BEHAVIOR_PENDING_EXTERNAL_CONFIRMATION",
     "account_holder_controller_alignment_status": "OPEN_DO_NOT_INFER",
     "project_applicant_controller_alignment_status": "OPEN_DO_NOT_INFER",
     "subprocessor_status": "CATEGORIES_KNOWN_NOMINAL_LIST_OPEN_FROM_ANNEX_4",
