@@ -88,8 +88,10 @@ class InfotraficValceaEventNormalizerTests(unittest.TestCase):
             normalize_signal(signal)
 
     def test_missing_road_fails_closed(self) -> None:
+        signal = self.make("Trafic intens în zonă.")
+        signal["title"] = "JUDEȚUL VÂLCEA: INFORMARE RUTIERĂ"
         with self.assertRaises(ValueError):
-            normalize_signal(self.make("Trafic intens în zonă."))
+            normalize_signal(signal)
 
 
 if __name__ == "__main__":
