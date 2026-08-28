@@ -22,7 +22,7 @@ def test_record(response_id: str = "receipt-test-001") -> dict:
         "research_id": "AI4WORK-STEP-NF-RUN-001",
         "form_id": "AI4WORK_ADULTS_V1",
         "form_version": 1,
-        "response_id": response_id,
+        "response_id": hashlib.sha256(response_id.encode("utf-8")).hexdigest(),
         "received_at": "2026-08-27T12:00:00+00:00",
         "recruitment_channel_id": "CH-RIGHTS001",
         "profile": {
