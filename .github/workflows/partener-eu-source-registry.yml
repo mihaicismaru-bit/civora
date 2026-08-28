@@ -20,6 +20,7 @@ on:
       - 'partener-eu/ops/test_source_registry_external_expansion.py'
       - 'partener-eu/ops/test_interreg_programming_intelligence.py'
       - 'partener-eu/ops/test_interreg_programming_live_fetch.py'
+      - 'partener-eu/ops/test_interreg_rohu_pipeline_split.py'
       - 'partener-eu/ops/test_interreg_call.py'
       - 'partener-eu/ops/test_interreg_call_live_fetch.py'
       - 'partener-eu/ops/test_interreg_call_reconcile.py'
@@ -42,6 +43,7 @@ on:
       - 'partener-eu/ops/test_source_registry_external_expansion.py'
       - 'partener-eu/ops/test_interreg_programming_intelligence.py'
       - 'partener-eu/ops/test_interreg_programming_live_fetch.py'
+      - 'partener-eu/ops/test_interreg_rohu_pipeline_split.py'
       - 'partener-eu/ops/test_interreg_call.py'
       - 'partener-eu/ops/test_interreg_call_live_fetch.py'
       - 'partener-eu/ops/test_interreg_call_reconcile.py'
@@ -93,6 +95,9 @@ jobs:
       - name: Regression — Interreg programming dates override stale open copy
         run: python partener-eu/ops/test_interreg_programming_intelligence.py
 
+      - name: Regression — ROHU current and future programming sources stay lifecycle-isolated
+        run: python partener-eu/ops/test_interreg_rohu_pipeline_split.py
+
       - name: Regression — live Interreg programming evidence remains non-authorizing
         run: python partener-eu/ops/test_interreg_programming_live_fetch.py
 
@@ -127,16 +132,29 @@ jobs:
               print('FAIL unsafe Interreg programming envelope')
               sys.exit(2)
           rows={row.get('source_id'): row for row in d.get('rows', [])}
-          rohu=rows.get('SRC-INTERREG-ROHU')
+          if 'SRC-INTERREG-ROHU' in rows:
+              print('FAIL current Romania-Hungary 2021-2027 source leaked into future-programming selector')
+              sys.exit(2)
+          rohu=rows.get('SRC-INTERREG-ROHU-2028-2034')
           if not rohu or rohu.get('fetch_status') != 'PASS':
-              print('FAIL current official Romania-Hungary programme page was not read successfully')
+              print('FAIL dedicated official Romania-Hungary 2028-2034 programming page was not read successfully:', rohu)
+              sys.exit(2)
+          if rohu.get('publication_effect') != 'NONE' or rohu.get('publish_authorized') is not False or rohu.get('material_fact_use') is not False:
+              print('FAIL Romania-Hungary 2028-2034 transport/evidence row became authorizing:', rohu)
               sys.exit(2)
           obs=rohu.get('normalized') or {}
-          if obs.get('observation_state') != 'CONSULTATION_CLOSED' or obs.get('consultation_end') != '2026-08-01':
-              print('FAIL Romania-Hungary programming dates did not override stale open copy:', obs)
+          if obs.get('programme_family') != 'Interreg Romania-Hungary 2028-2034':
+              print('FAIL Romania-Hungary 2028-2034 programme identity drift:', obs)
               sys.exit(2)
-          if obs.get('not_a_call') is not True or obs.get('open_call_authorized') is not False or obs.get('publish_authorized') is not False:
-              print('FAIL Romania-Hungary programming observation became authorizing:', obs)
+          if obs.get('observation_state') == 'OPEN_CALL' or obs.get('not_a_call') is not True or obs.get('open_call_authorized') is not False or obs.get('publish_authorized') is not False:
+              print('FAIL Romania-Hungary 2028-2034 programming observation became authorizing:', obs)
+              sys.exit(2)
+          missing=set(obs.get('missing_to_confirm_call') or [])
+          if not {'exact_call_identifier', 'official_current_open_status'}.issubset(missing):
+              print('FAIL Romania-Hungary programming observation lost exact-call proof requirements:', obs)
+              sys.exit(2)
+          if not obs.get('raw_hash') or not obs.get('fetched_at') or not obs.get('parser_version') or not obs.get('run_id'):
+              print('FAIL Romania-Hungary programming observation lost provenance:', obs)
               sys.exit(2)
 
           romd=rows.get('SRC-INTERREG-ROMD-2028-2034')
@@ -163,7 +181,7 @@ jobs:
           else:
               print('FAIL Romania-Moldova has invalid live fetch state:', romd)
               sys.exit(2)
-          print(json.dumps({'summary': d.get('observation_states', {}), 'rohu_state': obs.get('observation_state'), 'rohu_end': obs.get('consultation_end'), 'romd_state': romd_state}, ensure_ascii=False))
+          print(json.dumps({'summary': d.get('observation_states', {}), 'rohu_state': obs.get('observation_state'), 'romd_state': romd_state}, ensure_ascii=False))
           PY
 
       - name: Upload bounded Interreg programming evidence

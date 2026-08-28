@@ -18,6 +18,7 @@ on:
       - 'partener-eu/ops/test_source_registry_current_hosts.py'
       - 'partener-eu/ops/test_source_registry_alias_fallback.py'
       - 'partener-eu/ops/test_source_registry_external_expansion.py'
+      - 'partener-eu/ops/test_interreg_rohu_pipeline_split.py'
       - 'partener-eu/ops/test_funding_tenders_structured_adapter.py'
       - 'partener-eu/ops/test_funding_tenders_live_fetch.py'
       - 'partener-eu/ops/test_eea_civil_society_calls.py'
@@ -56,6 +57,7 @@ jobs:
           python -m py_compile partener-eu/p11/eea_civil_society_stage.py
           python -m py_compile partener-eu/p11/test_eea_civil_society_stage.py
           python -m py_compile partener-eu/ops/test_source_registry_external_expansion.py
+          python -m py_compile partener-eu/ops/test_interreg_rohu_pipeline_split.py
           python -m py_compile partener-eu/ops/test_funding_tenders_structured_adapter.py
           python -m py_compile partener-eu/ops/test_funding_tenders_live_fetch.py
           python -m py_compile partener-eu/ops/test_eea_civil_society_calls.py
@@ -73,6 +75,9 @@ jobs:
 
       - name: Validate EU/EEA/Interreg source and programming taxonomy
         run: python partener-eu/ops/test_source_registry_external_expansion.py
+
+      - name: Validate ROHU current versus future programming lifecycle split
+        run: python partener-eu/ops/test_interreg_rohu_pipeline_split.py
 
       - name: Validate Funding & Tenders structured normalization
         run: python partener-eu/ops/test_funding_tenders_structured_adapter.py
