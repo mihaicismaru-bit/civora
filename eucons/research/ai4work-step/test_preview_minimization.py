@@ -88,6 +88,13 @@ class PreviewMinimizationTests(unittest.TestCase):
             self.assertIn('data-ai4work-submit disabled', adult)
             self.assertIn('/assets/ai4work-research.js', adult)
 
+    def test_recruitment_channel_uses_url_fragment_not_query_string(self) -> None:
+        client = (Path(__file__).resolve().parent / "research_form.js").read_text(encoding="utf-8")
+        self.assertNotIn("location.search", client)
+        self.assertIn("location.hash", client)
+        self.assertIn("new URLSearchParams(fragment)", client)
+        self.assertIn('"X-AI4WORK-Recruitment-Channel": channel', client)
+
 
 if __name__ == "__main__":
     unittest.main()
