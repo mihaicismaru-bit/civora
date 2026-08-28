@@ -235,6 +235,10 @@ def extract_signals(html_text: str, *, final_url: str = SOURCE_URL) -> list[dict
     return signals
 
 
+def html_response_ok(content_type: str, body: bytes) -> bool:
+    return "html" in content_type.casefold() or b"<html" in body[:2000].lower()
+
+
 def fetch_html(url: str = SOURCE_URL) -> tuple[str, str, str]:
     request = Request(
         url,
@@ -249,7 +253,7 @@ def fetch_html(url: str = SOURCE_URL) -> tuple[str, str, str]:
         if len(body) > MAX_BODY_BYTES:
             raise ValueError("DSP health source response exceeds bounded body limit")
         content_type = str(response.headers.get("Content-Type") or "")
-        if "html" not in content_type.casefold() and b"<html" not in body[:2000].casefold():
+        if not html_response_ok(content_type, body):
             raise ValueError(f"DSP health source did not return HTML: {content_type or 'unknown'}")
         charset = response.headers.get_content_charset() or "utf-8"
     return body.decode(charset, errors="replace"), final_url, hashlib.sha256(body).hexdigest()
@@ -302,6 +306,9 @@ def self_test() -> int:
     assert all(row["publication_authority"] == "NONE" for row in signals)
     assert all(row["auto_publication"] is False for row in signals)
     assert extract_period("Recomandări pentru caniculă în anul 2026") is None
+    assert html_response_ok("text/html; charset=utf-8", b"plain") is True
+    assert html_response_ok("text/plain", b"<HTML><body>ok</body></HTML>") is True
+    assert html_response_ok("text/plain", b"not html") is False
     try:
         extract_signals(sample, final_url="https://example.com/health")
     except ValueError:
