@@ -60,15 +60,34 @@ def main() -> None:
     must_fail(lambda: engine.ingest(state, "REQ-1", "PROSPECT_DISCOVERY", "PROS-CONFLICT", "ORG-1", attribution, next_action="REVIEW", due_at="2026-08-27T01:00:00+03:00", at="2026-08-26T01:00:00+03:00", contract=CONTRACT), "idempotency conflict")
 
     qualified = engine.transition(state, record_id, "QUALIFIED", receipt("QUALIFICATION_REVIEW", {"qualified": True}), next_action="MATCH", due_at="2026-08-27T01:00:00+03:00", contract=CONTRACT)
-    bad_match = {"engine_id": "WRONG", "state": "MATCHED_RESEARCH_CANDIDATE", "eligibility_state": "NOT_ASSESSED", "maximum_next_state": "RESEARCH_READY", "opportunity_id": "O", "service_id": "S", "source_provenance_ref": "P"}
+    bad_match = {"engine_id": "WRONG", "state": "MATCHED_RESEARCH_CANDIDATE", "eligibility_state": "NOT_ASSESSED", "maximum_next_state": "RESEARCH_READY", "opportunity_id": "O", "service_id": "S", "source_provenance_ref": "P", "authority_state": "OFFICIAL_SOURCE_VERIFIED", "official_fact_classes": ["status", "deadline"], "official_source_count": 1}
     must_fail(lambda: engine.transition(qualified, record_id, "MATCHED", receipt("R07_MATCH_RECORD", bad_match, receipt_id="REC-BAD-MATCH"), next_action="PACK", due_at="2026-08-27T01:00:00+03:00", contract=CONTRACT), "R07 match gate")
-    good_match = {"engine_id": "EUCONS_R07_PROSPECT_OPPORTUNITY_SERVICE_MATCH", "state": "MATCHED_RESEARCH_CANDIDATE", "eligibility_state": "NOT_ASSESSED", "maximum_next_state": "RESEARCH_READY", "opportunity_id": "O", "service_id": "S", "source_provenance_ref": "P"}
+
+    authority_stripped = {"engine_id": "EUCONS_R07_PROSPECT_OPPORTUNITY_SERVICE_MATCH", "state": "MATCHED_RESEARCH_CANDIDATE", "eligibility_state": "NOT_ASSESSED", "maximum_next_state": "RESEARCH_READY", "opportunity_id": "O", "service_id": "S", "source_provenance_ref": "P"}
+    must_fail(lambda: engine.transition(qualified, record_id, "MATCHED", receipt("R07_MATCH_RECORD", authority_stripped, receipt_id="REC-NO-AUTHORITY"), next_action="PACK", due_at="2026-08-27T01:00:00+03:00", contract=CONTRACT), "official-source authority")
+
+    waiting_source = {**authority_stripped, "authority_state": "WAITING_SOURCE", "official_fact_classes": [], "official_source_count": 0}
+    must_fail(lambda: engine.transition(qualified, record_id, "MATCHED", receipt("R07_MATCH_RECORD", waiting_source, receipt_id="REC-WAITING-SOURCE"), next_action="PACK", due_at="2026-08-27T01:00:00+03:00", contract=CONTRACT), "official-source authority")
+
+    missing_deadline = {**authority_stripped, "authority_state": "OFFICIAL_SOURCE_VERIFIED", "official_fact_classes": ["status"], "official_source_count": 1}
+    must_fail(lambda: engine.transition(qualified, record_id, "MATCHED", receipt("R07_MATCH_RECORD", missing_deadline, receipt_id="REC-MISSING-DEADLINE"), next_action="PACK", due_at="2026-08-27T01:00:00+03:00", contract=CONTRACT), "fact authority")
+
+    zero_sources = {**authority_stripped, "authority_state": "OFFICIAL_SOURCE_VERIFIED", "official_fact_classes": ["status", "deadline"], "official_source_count": 0}
+    must_fail(lambda: engine.transition(qualified, record_id, "MATCHED", receipt("R07_MATCH_RECORD", zero_sources, receipt_id="REC-ZERO-SOURCES"), next_action="PACK", due_at="2026-08-27T01:00:00+03:00", contract=CONTRACT), "official-source lineage")
+
+    good_match = {**authority_stripped, "authority_state": "OFFICIAL_SOURCE_VERIFIED", "official_fact_classes": ["deadline", "status"], "official_source_count": 1}
     matched = engine.transition(qualified, record_id, "MATCHED", receipt("R07_MATCH_RECORD", good_match, receipt_id="REC-GOOD-MATCH"), next_action="PACK", due_at="2026-08-27T01:00:00+03:00", contract=CONTRACT)
     good_pack = {"engine_id": "EUCONS_R08_ORGANIZATION_ACTION_PACK", "state": "READY_FOR_APPROVAL", "eligibility_state": "NOT_ASSESSED", "maximum_state": "READY_FOR_APPROVAL", "action_pack_id": "PACK-1"}
     prepared = engine.transition(matched, record_id, "OUTREACH_PREPARED", receipt("R08_ACTION_PACK", good_pack, receipt_id="REC-GOOD-PACK"), next_action="CONTACT_REVIEW", due_at="2026-08-27T01:00:00+03:00", contract=CONTRACT)
     incomplete_approval = {"lawful_basis_reviewed": True, "business_contact_surface_verified": True, "suppression_clear": False, "opt_out_ready": True, "channel": "EMAIL"}
     must_fail(lambda: engine.transition(prepared, record_id, "CONTACT_APPROVED", receipt("HUMAN_CONTACT_APPROVAL", incomplete_approval, receipt_id="REC-BAD-APPROVAL"), next_action="SEND", due_at="2026-08-27T01:00:00+03:00", owner="owner", contract=CONTRACT), "governance incomplete")
 
+    bad_authority_contract = copy.deepcopy(CONTRACT)
+    bad_authority_contract["upstream_gates"]["R07_MATCH_RECORD"]["authority_state"] = "WAITING_SOURCE"
+    must_fail(lambda: engine.validate_contract(bad_authority_contract), "official-source authority")
+    bad_fact_contract = copy.deepcopy(CONTRACT)
+    bad_fact_contract["upstream_gates"]["R07_MATCH_RECORD"]["required_official_fact_classes"] = ["status"]
+    must_fail(lambda: engine.validate_contract(bad_fact_contract), "fact gate")
     bad_contract = copy.deepcopy(CONTRACT)
     bad_contract["contact_gate"]["automatic_send"] = True
     must_fail(lambda: engine.validate_contract(bad_contract), "contact boundary")
@@ -78,7 +97,7 @@ def main() -> None:
     must_fail(lambda: engine.assert_output_path_safe(EUCONS / "crm" / "unsafe-runtime.json"), "repository root")
     engine.assert_output_path_safe(Path("/tmp/eucons-r10-pipeline.json"))
 
-    print("PASS: R10 unified pipeline fail-closed regressions")
+    print("PASS: R10 rejects authority-stripped R07 matches and preserves unified pipeline fail-closed regressions")
 
 
 if __name__ == "__main__":

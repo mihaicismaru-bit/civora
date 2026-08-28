@@ -14,9 +14,25 @@
     "require_actionable": true,
     "stale_or_held_result": "HOLD_SOURCE_STATE"
   },
+  "official_source_guards": {
+    "partener_role": "DISCOVERY_ONLY",
+    "registry_schema_version": 1,
+    "registry_state": "READ_ONLY_OFFICIAL_SOURCE_RECEIPTS",
+    "verified_state": "VERIFIED_OFFICIAL_SOURCE",
+    "conflict_state": "BLOCKED_SOURCE_CONFLICT",
+    "verification_method": "OFFICIAL_SOURCE_READBACK",
+    "waiting_authority_state": "WAITING_SOURCE",
+    "verified_authority_state": "OFFICIAL_SOURCE_VERIFIED",
+    "blocked_authority_state": "BLOCKED_SOURCE_CONFLICT",
+    "required_candidate_fact_classes": ["status", "deadline"],
+    "material_fact_classes_requiring_official_binding": ["status", "deadline", "budget", "grant", "beneficiaries", "eligibility", "scoring", "indicators", "obligations"],
+    "source_url_scheme": "https",
+    "forbidden_source_products": ["PARTENER.EU"],
+    "fact_binding": "SHA256_CANONICAL_JSON_EXACT_VALUE"
+  },
   "hard_exclusions": {
-    "activity_code_mismatch_when_source_codes_explicit": true,
-    "requested_grant_above_verified_cap": true,
+    "activity_code_mismatch_when_official_eligibility_bound": true,
+    "requested_grant_above_official_grant_cap": true,
     "result": "EXCLUDED_KNOWN_RULE"
   },
   "weights": {
@@ -45,6 +61,10 @@
     "hard_exclusion_reasons_required": true,
     "deterministic_sort": ["score_desc", "opportunity_id_asc"],
     "never_claim_eligibility_or_award_probability": true,
-    "source_provenance_must_be_retained": true
+    "source_provenance_must_be_retained": true,
+    "partener_material_facts_never_authoritative_without_official_binding": true,
+    "official_source_conflict_fails_closed": true,
+    "missing_official_source_fails_closed": true,
+    "no_external_fetch_or_write": true
   }
 }

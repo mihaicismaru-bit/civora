@@ -67,18 +67,48 @@ def validate_match_contract(
     SCORER.validate_scoring_contract(scoring_contract, client_contract)
     if opportunity_contract.get("score_semantics") != "RELEVANCE_NOT_APPROVAL_PROBABILITY":
         raise ValueError("opportunity matcher semantics drift")
-    if opportunity_contract.get("rules", {}).get("never_claim_eligibility_or_award_probability") is not True:
+    opportunity_rules = opportunity_contract.get("rules", {})
+    if opportunity_rules.get("never_claim_eligibility_or_award_probability") is not True:
         raise ValueError("opportunity matcher eligibility guard missing")
+    if opportunity_rules.get("partener_material_facts_never_authoritative_without_official_binding") is not True:
+        raise ValueError("opportunity matcher official-source boundary missing")
+    official_guards = opportunity_contract.get("official_source_guards") or {}
+    if official_guards.get("partener_role") != "DISCOVERY_ONLY":
+        raise ValueError("PARTENER authority role failed open")
+    if set(official_guards.get("required_candidate_fact_classes") or []) != {"status", "deadline"}:
+        raise ValueError("official candidate fact gate drift")
+
+    input_guards = contract.get("input_guards") or {}
+    if input_guards.get("partener_role") != "DISCOVERY_ONLY":
+        raise ValueError("R07 PARTENER role failed open")
+    if input_guards.get("official_registry_read_only_input") is not True:
+        raise ValueError("R07 official registry read-only boundary missing")
+    if input_guards.get("official_status_and_deadline_required_for_candidate") is not True:
+        raise ValueError("R07 official candidate gate missing")
+    if input_guards.get("missing_official_registry_result") != "HOLD_SOURCE_STATE":
+        raise ValueError("R07 missing-official behavior failed open")
+    if input_guards.get("official_conflict_result") != "HOLD_SOURCE_STATE":
+        raise ValueError("R07 official conflict behavior failed open")
 
     outputs = contract.get("outputs") or {}
     if outputs.get("eligibility_state") != "NOT_ASSESSED" or outputs.get("maximum_next_state") != "RESEARCH_READY":
         raise ValueError("R07 qualification boundary failed open")
     if outputs.get("external_contact_enabled") is not False or outputs.get("automatic_offer_enabled") is not False:
         raise ValueError("R07 external action boundary failed open")
-    if contract.get("rules", {}).get("never_prepare_or_send_external_contact") is not True:
+    rules = contract.get("rules") or {}
+    if rules.get("never_prepare_or_send_external_contact") is not True:
         raise ValueError("external contact rule missing")
+    for rule in (
+        "deadline_requires_official_source_binding",
+        "partener_discovery_never_satisfies_material_fact_authority",
+        "official_conflict_fails_closed",
+    ):
+        if rules.get(rule) is not True:
+            raise ValueError(f"R07 authority rule failed open: {rule}")
     if contract.get("truth_model", {}).get("classes") != ["FACT", "INFERENCE", "UNKNOWN", "CONFLICT"]:
         raise ValueError("truth taxonomy drift")
+    if contract.get("truth_model", {}).get("official_source_bindings_control_material_fact_authority") is not True:
+        raise ValueError("R07 material fact authority rule missing")
 
     organization_types = set(client_contract["organization_identity"]["organization_types"])
     type_labels = set((contract.get("profile_projection") or {}).get("organization_type_labels") or {})
@@ -115,14 +145,14 @@ def validate_projection(projection: dict[str, Any], reference_time: str, contrac
     for row in projection.get("opportunities") or []:
         if row.get("commercial_state") == required_record_state:
             if not row.get("verified_fact_classes"):
-                raise ValueError("verified opportunity missing fact classes")
+                raise ValueError("discovery opportunity missing projection fact classes")
             provenance = row.get("provenance") or {}
             if provenance.get("source_product") != "PARTENER.EU" or not provenance.get("source_opportunity_id"):
-                raise ValueError("verified opportunity missing source provenance")
+                raise ValueError("discovery opportunity missing PARTENER provenance")
             if (provenance.get("publication_decision") or {}).get("decision") != "ALLOW_VERIFIED_FACTS":
-                raise ValueError("verified opportunity missing fail-closed publication decision")
+                raise ValueError("discovery opportunity missing fail-closed projection decision")
             if not provenance.get("verification_evidence"):
-                raise ValueError("verified opportunity missing verification evidence")
+                raise ValueError("discovery opportunity missing projection evidence")
 
 
 def _truth_index(record: dict[str, Any]) -> dict[str, list[str]]:
@@ -174,8 +204,8 @@ def build_opportunity_profile(organization_key: str, record: dict[str, Any], con
     }
 
 
-def _deadline_fact(opportunity: dict[str, Any]) -> Any:
-    if "deadline" not in set(opportunity.get("verified_fact_classes") or []):
+def _deadline_fact(opportunity: dict[str, Any], official_fact_classes: set[str]) -> Any:
+    if "deadline" not in official_fact_classes:
         return None
     material = opportunity.get("material_facts") or {}
     return deepcopy(material.get("deadline"))
@@ -194,6 +224,7 @@ def _opportunity_summary(
     recommended_service_id: Any,
 ) -> dict[str, Any]:
     source = projection_rows.get(str(row.get("opportunity_id"))) or {}
+    official_fact_classes = set(row.get("official_fact_classes") or [])
     return {
         "opportunity_id": row.get("opportunity_id"),
         "title": row.get("title"),
@@ -202,12 +233,16 @@ def _opportunity_summary(
         "relevance_semantics": row.get("score_semantics"),
         "confidence": row.get("confidence"),
         "state": row.get("state"),
+        "authority_state": row.get("authority_state"),
+        "official_fact_classes": sorted(official_fact_classes),
+        "official_source_count": row.get("official_source_count", 0),
         "aligned_service_ids": aligned_services,
         "selected_service_id": _select_aligned_service(aligned_services, recommended_service_id),
         "explanations": list(row.get("explanations") or []),
         "hard_exclusion_reasons": list(row.get("hard_exclusion_reasons") or []),
-        "verified_fact_classes": sorted(source.get("verified_fact_classes") or []),
-        "source_supported_deadline": _deadline_fact(source),
+        "verified_fact_classes": sorted(official_fact_classes),
+        "discovery_projection_fact_classes": sorted(source.get("verified_fact_classes") or []),
+        "source_supported_deadline": _deadline_fact(source, official_fact_classes),
         "source_provenance": deepcopy(row.get("source_provenance") or {}),
     }
 
@@ -252,6 +287,7 @@ def match_record(
     projection: dict[str, Any],
     contract: dict[str, Any],
     opportunity_contract: dict[str, Any],
+    official_registry: dict[str, Any] | None,
 ) -> dict[str, Any]:
     result = _base_result(organization_key, record, score, contract)
     outputs = contract["outputs"]
@@ -271,7 +307,7 @@ def match_record(
         return result
 
     profile = build_opportunity_profile(organization_key, record, contract)
-    matched = OPPORTUNITY_MATCHER.match(profile, projection, opportunity_contract)
+    matched = OPPORTUNITY_MATCHER.match(profile, projection, opportunity_contract, official_registry)
     projection_rows = {str(row.get("id")): row for row in projection.get("opportunities") or []}
     opportunity_services = set(contract["opportunity_service_policy"]["verified_funding_opportunity_services"])
     prospect_services = set(result["signal_supported_service_ids"])
@@ -290,6 +326,10 @@ def match_record(
     raw_candidates = [row for row in rows if row["state"] == opportunity_contract["outputs"]["candidate"]]
     if aligned_candidates:
         selected = aligned_candidates[0]
+        if selected.get("authority_state") != opportunity_contract["official_source_guards"]["verified_authority_state"]:
+            raise AssertionError("R07 candidate crossed official-source authority boundary")
+        if not {"status", "deadline"}.issubset(set(selected.get("official_fact_classes") or [])):
+            raise AssertionError("R07 candidate lacks required official status/deadline bindings")
         result.update(
             state=outputs["matched"],
             selected_opportunity_id=selected["opportunity_id"],
@@ -320,6 +360,7 @@ def match_state(
     scoring_contract: dict[str, Any] | None = None,
     opportunity_contract: dict[str, Any] | None = None,
     service_registry: dict[str, Any] | None = None,
+    official_registry: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     CLIENT_ENGINE._assert_state_boundary(state)
     contract = contract or load_json(CONTRACT_PATH)
@@ -329,18 +370,27 @@ def match_state(
     service_registry = service_registry or load_json(SERVICE_REGISTRY_PATH)
     validate_match_contract(contract, client_contract, scoring_contract, opportunity_contract, service_registry)
     validate_projection(projection, reference_time, contract)
-    before = canonical_hash(projection)
+    before_projection = canonical_hash(projection)
+    before_registry = canonical_hash(official_registry)
     scores = SCORER.score_state(state, reference_time, scoring_contract, client_contract)
     score_index = {row["organization_key"]: row for row in scores["results"]}
     results = [
-        match_record(key, record, score_index[key], projection, contract, opportunity_contract)
+        match_record(key, record, score_index[key], projection, contract, opportunity_contract, official_registry)
         for key, record in sorted(state["records"].items())
     ]
     priority = {"PRIORITY_HIGH_RESEARCH": 0, "PRIORITY_MEDIUM_RESEARCH": 1, "PRIORITY_LOW_RESEARCH": 2}
     results.sort(key=lambda row: (priority.get(str(row.get("priority_state")), 9), -(row.get("priority_score") or 0), row["organization_key"]))
-    if before != canonical_hash(projection):
+    if before_projection != canonical_hash(projection):
         raise AssertionError("opportunity projection mutated during R07 matching")
+    if before_registry != canonical_hash(official_registry):
+        raise AssertionError("official-source registry mutated during R07 matching")
     outputs = contract["outputs"]
+    official_states = [
+        match.get("authority_state")
+        for row in results
+        for match in row.get("opportunity_matches") or []
+        if match.get("authority_state")
+    ]
     return {
         "schema_version": 1,
         "engine_id": contract["engine_id"],
@@ -349,6 +399,7 @@ def match_state(
         "eligibility_state": outputs["eligibility_state"],
         "maximum_next_state": outputs["maximum_next_state"],
         "bridge_state": projection.get("bridge_state"),
+        "partener_role": opportunity_contract["official_source_guards"]["partener_role"],
         "summary": {
             "evaluated_prospects": len(results),
             "matched": sum(row["state"] == outputs["matched"] for row in results),
@@ -357,6 +408,9 @@ def match_state(
             "held_source": sum(row["state"] == outputs["held_source"] for row in results),
             "held_conflict": sum(row["state"] == outputs["held_conflict"] for row in results),
             "suppressed": sum(row["state"] == outputs["suppressed"] for row in results),
+            "official_source_verified_rows": sum(value == opportunity_contract["official_source_guards"]["verified_authority_state"] for value in official_states),
+            "waiting_source_rows": sum(value == opportunity_contract["official_source_guards"]["waiting_authority_state"] for value in official_states),
+            "blocked_source_conflict_rows": sum(value == opportunity_contract["official_source_guards"]["blocked_authority_state"] for value in official_states),
         },
         "results": results,
         "production_records": 0 if all(row.get("synthetic_label") == "NON_EVIDENCE" for row in state["records"].values()) else None,
@@ -370,9 +424,16 @@ def main() -> None:
     parser.add_argument("--state", required=True, type=Path)
     parser.add_argument("--projection", required=True, type=Path)
     parser.add_argument("--reference-time", required=True)
+    parser.add_argument("--official-verification-registry", type=Path)
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
-    result = match_state(load_json(args.state), load_json(args.projection), args.reference_time)
+    official_registry = load_json(args.official_verification_registry) if args.official_verification_registry else None
+    result = match_state(
+        load_json(args.state),
+        load_json(args.projection),
+        args.reference_time,
+        official_registry=official_registry,
+    )
     CLIENT_ENGINE.write_atomic(args.output, result)
     print(json.dumps(result["summary"], ensure_ascii=False, sort_keys=True))
 

@@ -41,6 +41,7 @@ def main() -> None:
     payload = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
     state = validator.build_state(engine, payload)
     projection = validator.synthetic_fresh_projection(payload["reference_time"])
+    official_registry = validator.synthetic_official_registry(matcher, projection)
     contract = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
 
     unsafe_semantics = deepcopy(contract)
@@ -59,6 +60,14 @@ def main() -> None:
     unsafe_selection["opportunity_service_policy"]["selection_preference"] = "SERVICE_ID_ASC"
     must_fail("unsafe service selection policy", lambda: matcher.match_state(state, projection, payload["reference_time"], unsafe_selection))
 
+    unsafe_partener_role = deepcopy(contract)
+    unsafe_partener_role["input_guards"]["partener_role"] = "AUTHORITATIVE"
+    must_fail("PARTENER authority role", lambda: matcher.match_state(state, projection, payload["reference_time"], unsafe_partener_role))
+
+    unsafe_official_gate = deepcopy(contract)
+    unsafe_official_gate["input_guards"]["official_status_and_deadline_required_for_candidate"] = False
+    must_fail("official candidate gate", lambda: matcher.match_state(state, projection, payload["reference_time"], unsafe_official_gate))
+
     incomplete_types = deepcopy(contract)
     incomplete_types["profile_projection"]["organization_type_labels"].pop("NGO")
     must_fail("organization profile taxonomy incomplete", lambda: matcher.match_state(state, projection, payload["reference_time"], incomplete_types))
@@ -74,7 +83,7 @@ def main() -> None:
 
     missing_provenance = deepcopy(projection)
     missing_provenance["opportunities"][0]["provenance"]["verification_evidence"] = []
-    must_fail("verified opportunity without evidence", lambda: matcher.match_state(state, missing_provenance, payload["reference_time"]))
+    must_fail("discovery opportunity without evidence", lambda: matcher.match_state(state, missing_provenance, payload["reference_time"]))
 
     person_state = deepcopy(state)
     first_key = next(iter(person_state["records"]))
@@ -97,7 +106,7 @@ def main() -> None:
         "source_refs": [conflict_record["sources"][0]["source_id"], second_source["source_id"]]
     })
     conflict_record["state"] = "HOLD_CONFLICT"
-    conflict = matcher.match_state(conflict_state, projection, payload["reference_time"])
+    conflict = matcher.match_state(conflict_state, projection, payload["reference_time"], official_registry=official_registry)
     conflict_row = next(row for row in conflict["results"] if row["organization_key"] == conflict_key)
     if conflict_row["state"] != "HOLD_CONFLICT" or conflict_row["selected_opportunity_id"] is not None:
         raise AssertionError("conflict was matched instead of held")
@@ -108,7 +117,7 @@ def main() -> None:
     suppressed_key = next(iter(suppressed_state["records"]))
     suppressed_state["records"][suppressed_key]["state"] = "SUPPRESSED"
     suppressed_state["records"][suppressed_key]["suppression"] = {"active": True, "reason": "SYNTHETIC_SUPPRESSION"}
-    suppressed = matcher.match_state(suppressed_state, projection, payload["reference_time"])
+    suppressed = matcher.match_state(suppressed_state, projection, payload["reference_time"], official_registry=official_registry)
     suppressed_row = next(row for row in suppressed["results"] if row["organization_key"] == suppressed_key)
     if suppressed_row["state"] != "SUPPRESSED" or suppressed_row["next_best_action"] != "NO_ACTION_SUPPRESSED":
         raise AssertionError("suppressed prospect received an action")
@@ -119,7 +128,7 @@ def main() -> None:
     stale["bridge_state"] = "STALE_SOURCE_HOLD"
     stale["opportunities"][0]["commercial_state"] = "HOLD_STALE_SOURCE"
     stale["opportunities"][0]["actionable"] = False
-    held = matcher.match_state(state, stale, payload["reference_time"])
+    held = matcher.match_state(state, stale, payload["reference_time"], official_registry=official_registry)
     if held["summary"]["held_source"] != held["summary"]["evaluated_prospects"]:
         raise AssertionError("stale bridge did not hold all prospects")
     if any(row["external_contact_enabled"] or row["automatic_offer_enabled"] for row in held["results"]):
@@ -127,29 +136,42 @@ def main() -> None:
     if any(row["selected_service_id"] is not None for row in held["results"]):
         raise AssertionError("stale bridge selected a service")
 
-    match_result = matcher.match_state(state, projection, payload["reference_time"])
+    missing_official = matcher.match_state(state, projection, payload["reference_time"])
+    if missing_official["summary"]["matched"] != 0 or missing_official["summary"]["waiting_source_rows"] < 1:
+        raise AssertionError("PARTENER-only projection did not fail closed")
+    if any(row["selected_opportunity_id"] is not None or row["selected_service_id"] is not None for row in missing_official["results"]):
+        raise AssertionError("missing official source still selected opportunity/service")
+
+    official_conflict_registry = validator.synthetic_official_registry(matcher, projection, conflict=True)
+    official_conflict = matcher.match_state(state, projection, payload["reference_time"], official_registry=official_conflict_registry)
+    if official_conflict["summary"]["matched"] != 0 or official_conflict["summary"]["blocked_source_conflict_rows"] < 1:
+        raise AssertionError("official conflict did not fail closed")
+
+    match_result = matcher.match_state(state, projection, payload["reference_time"], official_registry=official_registry)
     view_contract = json.loads(VIEW_CONTRACT_PATH.read_text(encoding="utf-8"))
     view = priority_view.build_priority_view(match_result, view_contract, contract)
     beta_card = next(card for card in view["cards"] if card["prospect_id"] == "PROS-SYNTH-B")
     if beta_card["state"] != "MATCHED_RESEARCH_CANDIDATE":
-        raise AssertionError("verified matched prospect lost matched state")
+        raise AssertionError("officially bound matched prospect lost matched state")
     nonmatched_ranks = [
         card["rank"] for card in view["cards"]
         if card["state"] != "MATCHED_RESEARCH_CANDIDATE"
     ]
     if nonmatched_ranks and beta_card["rank"] >= min(nonmatched_ranks):
-        raise AssertionError("verified matched prospect was ranked behind a non-matched prospect")
+        raise AssertionError("officially bound matched prospect was ranked behind a non-matched prospect")
     if beta_card["selected_service_id"] != "funding_strategy_and_eligibility":
         raise AssertionError("priority view lost selected service")
     if beta_card["selected_opportunity"]["opportunity_id"] != "SYNTH-OPP-SOLAR-CAEN10":
         raise AssertionError("priority view lost selected opportunity")
+    if "deadline" not in set(beta_card["selected_opportunity"]["verified_fact_classes"]):
+        raise AssertionError("priority view lost official deadline authority class")
     source_trace = beta_card["selected_opportunity"].get("source_trace") or {}
     if source_trace.get("source_product") != "PARTENER.EU":
-        raise AssertionError("priority view lost verified opportunity source product")
+        raise AssertionError("priority view lost discovery source product")
     if source_trace.get("source_opportunity_id") != beta_card["selected_opportunity"]["opportunity_id"]:
         raise AssertionError("priority view opportunity provenance id drift")
     if source_trace.get("verification_evidence_count", 0) < 1:
-        raise AssertionError("priority view lost verification evidence trace")
+        raise AssertionError("priority view lost discovery verification trace")
     if any(view[flag] for flag in (
         "external_contact_enabled",
         "automatic_offer_enabled",
@@ -197,7 +219,7 @@ def main() -> None:
     )
     selected["source_provenance"]["publication_decision"]["decision"] = "HOLD_UNVERIFIED"
     must_fail(
-        "priority view unverified opportunity provenance",
+        "priority view unverified discovery provenance",
         lambda: priority_view.build_priority_view(unsafe_provenance, view_contract, contract),
     )
 
@@ -210,8 +232,8 @@ def main() -> None:
     )
 
     print(
-        "PASS: R07 rejects unsafe matching and priority-view states; Client Finder ranking is deterministic, "
-        "person-safe, source-supported and non-writing"
+        "PASS: R07 rejects unsafe matching and priority-view states; PARTENER remains discovery-only, "
+        "official-source authority is required, and Client Finder ranking remains deterministic, person-safe and non-writing"
     )
 
 

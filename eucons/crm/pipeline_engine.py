@@ -70,8 +70,16 @@ def validate_contract(contract: dict[str, Any]) -> None:
     for source, targets in contract["allowed_transitions"].items():
         if any(target not in lifecycle for target in targets):
             raise ValueError(f"unknown transition target from {source}")
-    if contract["upstream_gates"]["R07_MATCH_RECORD"]["eligibility_state"] != "NOT_ASSESSED":
+    r07_gate = contract["upstream_gates"]["R07_MATCH_RECORD"]
+    if r07_gate["eligibility_state"] != "NOT_ASSESSED":
         raise ValueError("R07 eligibility boundary failed open")
+    if r07_gate.get("authority_state") != "OFFICIAL_SOURCE_VERIFIED":
+        raise ValueError("R07 official-source authority boundary failed open")
+    if set(r07_gate.get("required_official_fact_classes") or []) != {"status", "deadline"}:
+        raise ValueError("R07 official-source fact gate drift")
+    minimum_source_count = r07_gate.get("minimum_official_source_count")
+    if not isinstance(minimum_source_count, int) or isinstance(minimum_source_count, bool) or minimum_source_count != 1:
+        raise ValueError("R07 official-source count gate drift")
     if contract["upstream_gates"]["R08_ACTION_PACK"]["maximum_state"] != "READY_FOR_APPROVAL":
         raise ValueError("R08 approval boundary failed open")
     contact = contract.get("contact_gate") or {}
@@ -273,6 +281,14 @@ def _validate_upstream(receipt: dict[str, Any], target: str, contract: dict[str,
             raise ValueError("R07 match gate not satisfied")
         if details.get("eligibility_state") != gate["eligibility_state"] or details.get("maximum_next_state") != gate["maximum_next_state"]:
             raise ValueError("R07 safety boundary not satisfied")
+        if details.get("authority_state") != gate["authority_state"]:
+            raise ValueError("R07 official-source authority gate not satisfied")
+        official_fact_classes = details.get("official_fact_classes")
+        if not isinstance(official_fact_classes, list) or not set(gate["required_official_fact_classes"]).issubset(set(official_fact_classes)):
+            raise ValueError("R07 official-source fact authority incomplete")
+        official_source_count = details.get("official_source_count")
+        if not isinstance(official_source_count, int) or isinstance(official_source_count, bool) or official_source_count < gate["minimum_official_source_count"]:
+            raise ValueError("R07 official-source lineage incomplete")
         if not details.get("opportunity_id") or not details.get("service_id") or not details.get("source_provenance_ref"):
             raise ValueError("R07 match lineage incomplete")
     elif target == "OUTREACH_PREPARED":
