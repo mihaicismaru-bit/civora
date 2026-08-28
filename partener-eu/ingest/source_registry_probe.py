@@ -273,7 +273,11 @@ def main():
     STATE.parent.mkdir(parents=True, exist_ok=True)
     STATE.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(out["summary"], ensure_ascii=False))
-    alias_evidence = [
+
+    declared_alias_ids = {
+        src.get("id") for src in registry.get("sources", []) if src.get("canonical_aliases")
+    }
+    transport_evidence = [
         {
             "id": x.get("id"),
             "health": x.get("health"),
@@ -285,9 +289,9 @@ def main():
             "publish_material_fact_update": x.get("publish_material_fact_update"),
         }
         for x in out["sources"]
-        if x.get("used_canonical_alias")
+        if x.get("id") in declared_alias_ids
     ]
-    print(json.dumps({"alias_transport_evidence": alias_evidence}, ensure_ascii=False, sort_keys=True))
+    print(json.dumps({"declared_alias_transport_evidence": transport_evidence}, ensure_ascii=False, sort_keys=True))
 
 
 if __name__ == "__main__":
