@@ -35,16 +35,33 @@ def activation_enabled(contract: dict[str, Any], manifest: dict[str, Any]) -> bo
     )
 
 
+def _unfrozen(value: Any) -> bool:
+    text = str(value or "").strip()
+    return not text or text.startswith(("TO_BE_", "OPEN_", "UNRESOLVED_"))
+
+
 def validate_enabled_notice(contract: dict[str, Any]) -> None:
     notice = contract.get("pre_form_notice") or {}
-    required = ["operator_legal_name", "privacy_contact", "legal_basis", "retention_summary", "rights_summary"]
-    missing = []
-    for key in required:
-        value = str(notice.get(key) or "").strip()
-        if not value or value.startswith("TO_BE_") or value.startswith("OPEN_"):
-            missing.append(key)
+    required = [
+        "operator_legal_name",
+        "operator_contact_details",
+        "privacy_contact",
+        "purpose_summary",
+        "legal_basis",
+        "recipients_summary",
+        "international_transfer_summary",
+        "retention_summary",
+        "rights_summary",
+        "complaint_summary",
+        "provision_consequence_summary",
+        "automated_decision_summary",
+    ]
+    missing = [key for key in required if _unfrozen(notice.get(key))]
+    legal_basis = str(notice.get("legal_basis") or "").lower()
+    if ("6(1)(f)" in legal_basis or "6 alin. (1) lit. (f)" in legal_basis or "legitimate" in legal_basis or "interes legitim" in legal_basis) and _unfrozen(notice.get("legitimate_interest_summary")):
+        missing.append("legitimate_interest_summary")
     if missing:
-        raise RuntimeError(f"enabled research form lacks frozen Article 13 notice fields: {missing}")
+        raise RuntimeError(f"enabled research form lacks frozen Article 13 notice fields: {sorted(set(missing))}")
 
 
 def page(title: str, body: str, *, form_client: bool = False) -> str:
@@ -154,19 +171,30 @@ def question_field(question: dict[str, Any], disabled: bool) -> str:
     )
 
 
+def _notice_value(pre_notice: dict[str, Any], key: str, fallback: str = "DE APROBAT ÎNAINTE DE ACTIVAREA COLECTĂRII") -> str:
+    value = pre_notice.get(key)
+    return fallback if _unfrozen(value) else str(value)
+
+
 def render_form(
     form: dict[str, Any], schema: dict[str, Any], contract: dict[str, Any], *, enabled: bool
 ) -> str:
     disabled = not enabled
     notice = schema["common_notice"]
     pre_notice = contract.get("pre_form_notice") or {}
-    operator_name = pre_notice.get("operator_legal_name") or "DE STABILIT ÎNAINTE DE ACTIVAREA COLECTĂRII"
-    privacy_contact = pre_notice.get("privacy_contact") or "DE COMPLETAT ÎNAINTE DE ACTIVAREA COLECTĂRII"
-    legal_basis = pre_notice.get("legal_basis") or "DE APROBAT ÎNAINTE DE ACTIVAREA COLECTĂRII"
-    if str(legal_basis).startswith("TO_BE_"):
-        legal_basis = "DE APROBAT ÎNAINTE DE ACTIVAREA COLECTĂRII"
-    retention = pre_notice.get("retention_summary") or "DE APROBAT ÎNAINTE DE ACTIVAREA COLECTĂRII"
-    rights = pre_notice.get("rights_summary") or "DE APROBAT ÎNAINTE DE ACTIVAREA COLECTĂRII"
+    operator_name = _notice_value(pre_notice, "operator_legal_name", "DE STABILIT ÎNAINTE DE ACTIVAREA COLECTĂRII")
+    operator_contact = _notice_value(pre_notice, "operator_contact_details")
+    privacy_contact = _notice_value(pre_notice, "privacy_contact", "DE COMPLETAT ÎNAINTE DE ACTIVAREA COLECTĂRII")
+    purpose = _notice_value(pre_notice, "purpose_summary")
+    legal_basis = _notice_value(pre_notice, "legal_basis")
+    legitimate_interest = _notice_value(pre_notice, "legitimate_interest_summary")
+    recipients = _notice_value(pre_notice, "recipients_summary")
+    transfers = _notice_value(pre_notice, "international_transfer_summary")
+    retention = _notice_value(pre_notice, "retention_summary")
+    rights = _notice_value(pre_notice, "rights_summary")
+    complaint = _notice_value(pre_notice, "complaint_summary")
+    consequence = _notice_value(pre_notice, "provision_consequence_summary")
+    automated = _notice_value(pre_notice, "automated_decision_summary")
     profile = ''.join(input_field(field, disabled) for field in form["profile"])
     questions = ''.join(question_field(q, disabled) for q in form["questions"])
     gate = '' if enabled else '<div class="eu-alert eu-alert--warning" role="status"><strong>Colectarea nu este activată.</strong> Pagina este pregătită tehnic, dar trimiterea răspunsurilor rămâne blocată până la aprobarea integrală a manifestului PROD și activarea explicită a mediului.</div>'
@@ -177,7 +205,7 @@ def render_form(
 <p class="eu-eyebrow">AI4WORK STEP · cercetare primară</p>
 <h1 class="eu-heading-lg">{esc(form['title'])}</h1>
 {gate}
-<div class="eu-card eu-stack"><h2 class="eu-heading-md">{esc(notice['title'])}</h2><p>{esc(notice['body'])}</p><p><strong>Operator:</strong> {esc(operator_name)}</p><p><strong>Contact protecția datelor:</strong> {esc(privacy_contact)}</p><p><strong>Temei juridic:</strong> {esc(legal_basis)}</p><p><strong>Păstrare:</strong> {esc(retention)}</p><p><strong>Drepturi:</strong> {esc(rights)}</p></div>
+<div class="eu-card eu-stack"><h2 class="eu-heading-md">{esc(notice['title'])}</h2><p>{esc(notice['body'])}</p><p><strong>Operator:</strong> {esc(operator_name)}</p><p><strong>Date de contact operator:</strong> {esc(operator_contact)}</p><p><strong>Contact protecția datelor:</strong> {esc(privacy_contact)}</p><p><strong>Scop:</strong> {esc(purpose)}</p><p><strong>Temei juridic:</strong> {esc(legal_basis)}</p><p><strong>Interes legitim propus, dacă acesta este temeiul final:</strong> {esc(legitimate_interest)}</p><p><strong>Destinatari/categorii de destinatari:</strong> {esc(recipients)}</p><p><strong>Transferuri internaționale:</strong> {esc(transfers)}</p><p><strong>Păstrare:</strong> {esc(retention)}</p><p><strong>Drepturi:</strong> {esc(rights)}</p><p><strong>Plângere:</strong> {esc(complaint)}</p><p><strong>Caracter voluntar și consecințele necompletării:</strong> {esc(consequence)}</p><p><strong>Decizii automate/profilare:</strong> {esc(automated)}</p></div>
 <form class="eu-stack" data-ai4work-research-form data-form-id="{esc(form['id'])}" data-endpoint="{esc(RESEARCH_ENDPOINT)}" data-collection-enabled="{'true' if enabled else 'false'}">
 <label><input type="checkbox" name="notice_read_and_voluntary_participation" value="true" required{ack_disabled}> {esc(notice['acknowledgement_label'])}</label>
 <h2 class="eu-heading-md">Profil statistic minim</h2>{profile}
