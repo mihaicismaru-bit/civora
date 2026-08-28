@@ -148,6 +148,10 @@ jobs:
         run: python valcea-clar/scripts/validate_public_legal_bridge.py
       - name: Source radar deterministic self-test
         run: python valcea-clar/scripts/probe_sources.py --self-test
+      - name: Validate INFOTRAFIC event normalizer
+        run: python valcea-clar/scripts/test_infotrafic_valcea_event_normalizer.py
+      - name: Validate INFOTRAFIC thread state
+        run: python valcea-clar/scripts/test_infotrafic_valcea_thread_state.py
       - name: Build canonical reader UX
         run: |
           set -euo pipefail
