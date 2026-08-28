@@ -55,8 +55,10 @@ def main():
         fail(f"framework call identifier drift: {batch['framework_call_identifier']!r}")
     if batch["official_journal_identifier"] != "C/2025/06214":
         fail(f"OJ identifier drift: {batch['official_journal_identifier']!r}")
-    if batch["call_year"] != "2025":
-        fail(f"framework year must derive from exact call id, got {batch['call_year']!r}")
+    if batch["call_year"] != "2026":
+        fail(f"programme call year must derive from the explicit official call label, got {batch['call_year']!r}")
+    if batch["call_year"] == batch["framework_call_identifier"].rsplit("/", 1)[-1]:
+        fail("programme call year was incorrectly inferred from the notice identifier year")
     if batch["raw_hash"] != hashlib.sha256(HTML).hexdigest():
         fail("raw framework hash was not preserved exactly")
     if batch["record_count"] != 4:
@@ -84,7 +86,7 @@ def main():
     if [r["semantic_fingerprint"] for r in batch["records"]] != [r["semantic_fingerprint"] for r in batch2["records"]]:
         fail("semantic fingerprints are not deterministic")
 
-    print("PASS ESC action router: annual framework, identifiers, deadline candidates and routes stay deterministic and fail-closed")
+    print("PASS ESC action router: annual framework, identifiers, programme call year, deadline candidates and routes stay deterministic and fail-closed")
 
 
 if __name__ == "__main__":
