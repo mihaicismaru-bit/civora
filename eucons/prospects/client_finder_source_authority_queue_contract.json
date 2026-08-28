@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "id": "EUCONS-R07-CLIENT-FINDER-SOURCE-AUTHORITY-QUEUE-001",
+  "status": "CANONICAL",
+  "purpose": "Project fail-closed source-authority and discovery-freshness holds from the canonical R07 Client Finder match view into a minimized, read-only operator review queue without creating a parallel frontend, asserting eligibility, or enabling external action.",
+  "source_view": {
+    "engine_id": "EUCONS_R07_PROSPECT_OPPORTUNITY_SERVICE_MATCH",
+    "match_semantics": "RESEARCH_RELEVANCE_NOT_ELIGIBILITY_AWARD_OR_BUYING_INTENT",
+    "partener_role": "DISCOVERY_ONLY",
+    "ready_bridge_state": "READY",
+    "held_prospect_state": "HOLD_SOURCE_STATE"
+  },
+  "official_authority": {
+    "waiting_state": "WAITING_SOURCE",
+    "blocked_state": "BLOCKED_SOURCE_CONFLICT",
+    "verified_state": "OFFICIAL_SOURCE_VERIFIED",
+    "required_fact_classes": ["status", "deadline"],
+    "allowed_fact_classes": ["status", "deadline", "budget", "grant", "beneficiaries", "eligibility", "scoring", "indicators", "obligations"],
+    "discovery_source_product": "PARTENER.EU",
+    "minimum_verified_source_count": 1
+  },
+  "task_types": {
+    "official_authority": "OFFICIAL_SOURCE_AUTHORITY_REVIEW",
+    "discovery_freshness": "DISCOVERY_SOURCE_REFRESH"
+  },
+  "operator_actions": {
+    "waiting_source": "VERIFY_OFFICIAL_STATUS_AND_DEADLINE_BEFORE_MATCHING",
+    "blocked_conflict": "RESOLVE_OFFICIAL_SOURCE_CONFLICT_BEFORE_MATCHING",
+    "discovery_refresh": "REFRESH_DISCOVERY_SOURCE_AND_REEVALUATE"
+  },
+  "required_boundaries": {
+    "eligibility_state": "NOT_ASSESSED",
+    "maximum_next_state": "RESEARCH_READY",
+    "human_review_required": true,
+    "external_contact_enabled": false,
+    "automatic_offer_enabled": false,
+    "automatic_send_enabled": false,
+    "crm_write_enabled": false,
+    "pipeline_write_enabled": false
+  },
+  "output_policy": {
+    "view_state": "CLIENT_FINDER_SOURCE_AUTHORITY_QUEUE",
+    "semantics": "SOURCE_REVERIFICATION_TASKS_NOT_ELIGIBILITY_OR_OUTREACH",
+    "raw_fields_forbidden": [
+      "source_provenance",
+      "verification_evidence",
+      "source_projection_sha256",
+      "source_projection_hash",
+      "source_document_sha256",
+      "source_url",
+      "source_as_of",
+      "source_supported_deadline",
+      "material_facts",
+      "verified_fact_hashes",
+      "person_name",
+      "personal_email",
+      "personal_phone",
+      "home_address",
+      "private_contact"
+    ],
+    "inference_fields_forbidden": [
+      "eligibility_probability",
+      "award_probability",
+      "conversion_probability",
+      "buying_intent",
+      "purchase_intent",
+      "legal_conclusion",
+      "financial_conclusion"
+    ]
+  },
+  "rules": {
+    "only_source_held_prospects_generate_tasks": true,
+    "stale_discovery_precedes_opportunity_authority_review": true,
+    "partener_never_satisfies_official_authority": true,
+    "required_official_fact_classes_are_labels_only": true,
+    "official_fact_values_never_exposed": true,
+    "official_conflict_fails_closed": true,
+    "matched_candidates_never_enter_source_queue": true,
+    "deterministic_sort": ["task_type_priority", "priority_score_desc_null_last", "organization_key_asc", "opportunity_id_asc"],
+    "never_infer_eligibility_award_conversion_or_buying_intent": true,
+    "never_generate_person_level_output": true,
+    "never_enable_external_action_or_persistence": true,
+    "repository_runtime_output_forbidden": true
+  }
+}
