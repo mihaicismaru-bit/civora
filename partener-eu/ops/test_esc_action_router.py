@@ -34,6 +34,9 @@ def fail(message):
 
 
 def main():
+    if module.PARSER_VERSION != "ESC_ACTION_ROUTER_V2":
+        fail(f"parser version must advance after call-year semantic correction, got {module.PARSER_VERSION!r}")
+
     rows = module.extract_action_rows(HTML)
     if len(rows) != 4:
         fail(f"expected four annual-call action rows, got {rows}")
@@ -51,6 +54,8 @@ def main():
         run_id="TEST-ESC-ROUTER",
     )
     module.validate_framework_batch(batch)
+    if batch["parser_version"] != module.PARSER_VERSION:
+        fail("batch parser_version drift")
     if batch["framework_call_identifier"] != "EAC/A15/2025":
         fail(f"framework call identifier drift: {batch['framework_call_identifier']!r}")
     if batch["official_journal_identifier"] != "C/2025/06214":
@@ -66,6 +71,8 @@ def main():
     if batch["publication_effect"] != "NONE" or batch["canonical_corpus_mutation"] is not False:
         fail("annual framework crossed publication/canonical boundary")
     for row in batch["records"]:
+        if row["parser_version"] != module.PARSER_VERSION or row["call_year"] != "2026":
+            fail("row provenance/call-year drift")
         if row["observation_state"] != "CALL_FRAMEWORK":
             fail(f"annual action inferred a current lifecycle state: {row}")
         if row["open_call_authorized"] is not False:
@@ -86,7 +93,7 @@ def main():
     if [r["semantic_fingerprint"] for r in batch["records"]] != [r["semantic_fingerprint"] for r in batch2["records"]]:
         fail("semantic fingerprints are not deterministic")
 
-    print("PASS ESC action router: annual framework, identifiers, programme call year, deadline candidates and routes stay deterministic and fail-closed")
+    print("PASS ESC action router: annual framework, identifiers, parser provenance, programme call year, deadline candidates and routes stay deterministic and fail-closed")
 
 
 if __name__ == "__main__":
