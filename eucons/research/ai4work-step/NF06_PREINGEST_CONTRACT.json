@@ -1,7 +1,7 @@
 {
-  "schema_version": "eucons.ai4work_nf06_preingest_contract.v0.6",
+  "schema_version": "eucons.ai4work_nf06_preingest_contract.v0.7",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "purpose": "Fail-closed source-batch preflight before handoff to NF06. This contract does not redefine the internal NF06 schema; it proves that an immutable source export is eligible to be handed to NF06 and binds that export to the exact reviewed collection frame and frozen instrument content.",
+  "purpose": "Fail-closed source-batch preflight before handoff to NF06. This contract does not redefine the internal NF06 schema; it proves that an immutable source export is eligible to be handed to NF06, binds that export to the exact reviewed collection frame and frozen instrument content, and emits internal method-coverage aggregates required by the separate pre-synthesis readiness gate.",
   "prod_evidence_class": "PROD_REAL_EVIDENCE",
   "test_twin_evidence_class": "TEST_TWIN_NON_EVIDENCE",
   "allowed_forms": [
@@ -110,11 +110,18 @@
     "form_contract_sha256",
     "forms_definition_sha256"
   ],
-  "manifest_privacy_boundary": "The pre-ingest manifest contains counts, hashes, timestamps and opaque channel provenance only. It must not contain questionnaire answers, free-text responses, raw idempotency keys, IP addresses, user agents, cookies, referrer/UTM payloads, CRM identifiers or optional contact data.",
+  "manifest_privacy_boundary": "The pre-ingest manifest contains internal control counts, hashes, timestamps and opaque channel provenance only. It must not contain questionnaire answers, free-text responses, raw idempotency keys, IP addresses, user agents, cookies, referrer/UTM payloads, CRM identifiers or optional contact data. Method-coverage aggregates are internal QA inputs and are not public reporting tables.",
   "channel_qa_outputs": [
     "channel_counts",
-    "dominant_channel_share"
+    "dominant_channel_share",
+    "region_channel_ids"
   ],
+  "method_coverage_outputs": [
+    "region_counts",
+    "form_region_counts",
+    "region_channel_ids"
+  ],
+  "pre_synthesis_rule": "Passing NF06 source pre-ingest alone does not authorise needs synthesis. A PROD_REAL_EVIDENCE batch must separately pass primary_evidence_readiness.py against the approved METHOD_PLAN_NOT_EVIDENCE collection-frame thresholds and the exact frozen collection-channel-register bytes. TEST TWIN is rejected by that gate.",
   "promotion_rule": "Only PROD_REAL_EVIDENCE batches that pass this contract may be offered to NF06. TEST_TWIN output is permanently NON_EVIDENCE.",
   "merge_authorized": false,
   "deploy_authorized": false,
