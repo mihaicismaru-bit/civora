@@ -97,7 +97,7 @@ jobs:
           assert dpia.get('collection_enabled') is False
           assert dpia.get('screening_conclusion') == 'DPIA_NOT_REQUIRED_RECOMMENDATION_PENDING_CONTROLLER_ACCEPTANCE'
           assert dpia.get('technical_assessment', {}).get('controller_acceptance_required') is True
-          assert dpia.get('mandatory_before_prod', {}).get('controller_determination_approved') is False
+          assert dpia.get('mandatory_before_prod', {}).get('controller_determination_approved') is True
           assert dpia.get('processing_design_facts', {}).get('crm_or_contact_dataset_matching') == 'FORBIDDEN'
           assert dpia.get('processing_design_facts', {}).get('device_fingerprinting') == 'FORBIDDEN'
           activation = json.loads((root / 'PROD_ACTIVATION_MANIFEST_DRAFT.json').read_text(encoding='utf-8'))
