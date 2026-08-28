@@ -10,10 +10,10 @@
     "gdpr_article_11": "Do not acquire, maintain or process additional identifying information solely to identify a data subject when identification is not required for the research purpose; where the controller can demonstrate it cannot identify the data subject, rights that require identification are handled in accordance with Article 11 unless the data subject provides additional information enabling identification.",
     "gdpr_article_12": "The controller must provide transparent information and facilitate exercise of data-subject rights through the approved privacy contact and procedure.",
     "gdpr_article_15": "The right of access includes confirmation whether personal data are processed, access to the personal data, a copy of the personal data undergoing processing and the contextual information required by Article 15. The reference adapter implements only the receipt-keyed respondent-record-copy component; requester authentication, confirmation and the controller-supplied processing context remain operational/controller responsibilities.",
-    "gdpr_article_16": "Where a live response can be located by the opaque receipt and preset analytical values are inaccurate, rectification must be possible without introducing direct identifiers or mutating technical/provenance fields. The reference operation revalidates corrected profile/answer values against the frozen form definition and atomically advances integrity metadata.",
-    "gdpr_article_18": "Where restriction applies, the record must not continue through ordinary analytical processing while the restriction is active. The reference design therefore permits storage for rights handling but excludes a held record from analytical export.",
-    "gdpr_article_20": "Data portability applies only where the processing is based on consent or contract, is carried out by automated means and concerns data provided by the data subject. Because the lawful basis for this research is not yet approved, portability applicability must remain an explicit pre-PROD decision. If legitimate interest is finally approved as proposed, Article 20 portability is not the applicable right for that processing; if the basis changes to consent or contract, a structured machine-readable portability path must be implemented and validated before collection.",
-    "gdpr_article_21": "Where processing relies on legitimate interests and a data subject objects, processing must stop while the controller assesses the objection unless a lawful continuation ground is established. The reference design therefore applies a fail-closed analytical hold during review."
+    "gdpr_article_16": "Where a live response can be located by the opaque receipt and preset analytical values are inaccurate, rectification must be possible without introducing direct identifiers or mutating technical/provenance fields.",
+    "gdpr_article_18": "Where restriction applies, the record must not continue through ordinary analytical processing while the restriction is active.",
+    "gdpr_article_20": "Data portability applies only where the processing is based on consent or contract, is carried out by automated means and concerns data provided by the data subject. If legitimate interest is finally approved as proposed, Article 20 portability is not the applicable right for that processing; if the basis changes to consent or contract, a structured machine-readable portability path must be implemented and validated before collection.",
+    "gdpr_article_21": "Where processing relies on legitimate interests and a data subject objects, processing must stop while the controller assesses the objection unless a lawful continuation ground is established."
   },
   "rights_applicability": {
     "lawful_basis_status": "UNRESOLVED_BEFORE_PROD",
@@ -25,15 +25,15 @@
     "objection": "APPLIES_IF_FINAL_BASIS_IS_LEGITIMATE_INTEREST_OR_PUBLIC_TASK",
     "portability": "NOT_APPLICABLE_IF_FINAL_BASIS_IS_LEGITIMATE_INTEREST; MUST_BE_IMPLEMENTED_BEFORE_PROD_IF_FINAL_BASIS_CHANGES_TO_CONSENT_OR_CONTRACT_AND_ARTICLE_20_CONDITIONS_ARE_MET",
     "consent_withdrawal": "NOT_APPLICABLE_UNDER_PROPOSED_LEGITIMATE_INTEREST_BASIS; MUST_BE_IMPLEMENTED_BEFORE_PROD_IF_CONSENT_BECOMES_A_LEGAL_BASIS",
-    "decision_rule": "The approved rights procedure and public notice must match the controller-approved final legal basis. A change of legal basis invalidates this draft applicability matrix until the affected rights and operational paths are re-reviewed and validated."
+    "decision_rule": "The approved rights procedure and public notice must match the controller-approved final legal basis. A change of legal basis invalidates this applicability matrix until affected rights and operational paths are re-reviewed and validated."
   },
   "identification_policy": {
     "direct_identity_registry": "FORBIDDEN",
     "crm_or_contact_cross_reference": "FORBIDDEN",
     "extra_identity_collection_for_rights_lookup": "FORBIDDEN_BY_DEFAULT",
-    "technical_receipt": "The submit route returns an opaque response_id. It is not derived from name, email, IP, device, CRM or employer identity. If retained by the respondent, it may be used to locate the corresponding research-only record without creating an identity lookup table.",
+    "technical_receipt": "The submit route returns an opaque response_id not derived from name, email, IP, device, CRM or employer identity. If retained by the respondent it may locate the corresponding research-only record without creating an identity lookup table.",
     "receipt_is_not_identity_proof": true,
-    "lost_receipt_rule": "If the controller cannot otherwise identify the record, it must not create a new identity-linkage mechanism solely to satisfy lookup. The Article 11 position and any additional information voluntarily provided by the data subject must be assessed by the approved controller procedure."
+    "lost_receipt_rule": "If the controller cannot otherwise identify the record, it must not create a new identity-linkage mechanism solely to satisfy lookup; Article 11 and any additional information voluntarily provided by the data subject must be assessed under the approved procedure."
   },
   "supported_request_types": [
     "access",
@@ -51,30 +51,28 @@
   },
   "research_store_operations": {
     "lookup": "Locate only by opaque response_id in the isolated research store; do not search CRM, optional-contact records, IP logs, user-agent logs or device data.",
-    "access": "After the controller applies the approved requester-authentication procedure, produce only the receipt-keyed copy of the respondent's own stored analytical record through the reviewed allowlist. The reference copy excludes storage hashes, idempotency/body digests, raw Idempotency-Key, analysis-hold state, erasure-replay controls and all other respondents. Any newly introduced stored field fails closed until disclosure is explicitly reviewed. This operation is only the personal-data-copy component; the controller must separately provide the confirmation and processing information required by Article 15.",
+    "access": "After the controller applies the approved requester-authentication procedure, produce only the receipt-keyed copy of the respondent's own stored analytical record through the reviewed allowlist. Storage hashes, idempotency internals, hold state, replay controls and all other respondents are excluded.",
     "access_reference_adapter": "RECEIPT_KEYED_RESPONDENT_RECORD_COPY_ALLOWLIST_FAIL_CLOSED_ON_NEW_FIELDS_NO_STORAGE_INTERNALS",
     "access_controller_context_required": true,
     "access_requester_authentication_reference_adapter": "NOT_IMPLEMENTED_CONTROLLER_OPERATION_REQUIRED",
-    "rectification": "The reference rights operation locates the live record by opaque response_id, revalidates only corrected preset profile/answer values against the frozen form definition, preserves schema/research/form/version/response receipt/received_at/recruitment-channel/synthetic provenance, regenerates raw and normalized integrity hashes atomically, and advances the idempotency receipt's normalized hash while preserving the original transport body digest. This makes a delayed same-body transport retry return the corrected receipt state rather than overwrite the correction. Active restriction/objection holds remain active. If a requested correction cannot pass the frozen form/minimisation rules, the controller must use the approved alternative (including erasure/re-submission where appropriate) rather than weaken validation or collect new identity linkage.",
+    "rectification": "Locate by opaque response_id, revalidate only corrected preset profile/answer values against the frozen form definition, preserve technical/provenance fields, regenerate integrity metadata atomically and preserve active restriction/objection holds. A delayed retry of the original transport body must not overwrite the correction.",
     "rectification_reference_adapter": "RECEIPT_KEYED_PRESET_VALUES_ONLY_REVALIDATE_FROZEN_FORM_PRESERVE_TECHNICAL_PROVENANCE",
     "rectification_preserves_active_hold": true,
     "rectification_stale_retry_safe": true,
-    "erasure": "Delete the analytical row, any active analysis hold and its idempotency receipt atomically from live research storage. To prevent a delayed transport retry from recreating data that the respondent already erased, the reference adapter retains only the opaque response_id as a non-analytical replay-suppression marker. The reference adapter has no default retention and refuses an erasure that would create this marker unless a finite UTC not-after boundary is explicitly injected. At or after that boundary, replay markers are purged automatically before replay checks. The marker contains no questionnaire answers, body digest, raw Idempotency-Key, identity, contact, IP, user-agent, device, CRM or employer data. The live PROD boundary must be separately bounded and approved in the retention schedule before collection. Residual backups follow the validated non-renewing backup rotation in the retention schedule.",
+    "erasure": "Delete the analytical row, active analysis hold and idempotency receipt atomically from live research storage. A delayed retry must not recreate erased data. The PROD rights-control binding may retain only the opaque response_id plus technical expiry metadata as a non-analytical replay-suppression marker and must expire that marker no later than 24 hours after successful live erasure. The reference SQLite adapter remains TEST/REFERENCE only and does not authorize the PROD binding.",
     "erasure_replay_suppression": "OPAQUE_RESPONSE_ID_ONLY_NO_ANSWERS_NO_BODY_DIGEST_NOT_ANALYTICAL",
     "erasure_replay_marker_reference_adapter_boundary": "REQUIRED_FINITE_UTC_NOT_AFTER_NO_DEFAULT",
     "erasure_replay_marker_reference_adapter_expiry": "AUTO_PURGE_AT_OR_AFTER_CONFIGURED_BOUNDARY_BEFORE_REPLAY_CHECK",
     "erased_records_replay_blocked": true,
     "erasure_replay_marker_export": "FORBIDDEN",
-    "erasure_replay_marker_prod_retention": "UNRESOLVED_UNTIL_CONTROLLER_APPROVES_MINIMUM_NECESSARY_BOUND",
-    "restriction_or_objection": "The reference adapter supports a receipt-keyed analysis hold. A restricted or objected record remains available for the controller's rights review but is excluded from analytical export while the hold is active. Any live implementation must preserve this fail-closed behavior and apply the controller-approved legal outcome.",
+    "erasure_replay_marker_prod_retention": "MAXIMUM_24_HOURS_FROM_SUCCESSFUL_LIVE_ERASURE_PENDING_CONTROLLER_ACCEPTANCE; SHORTER_ALLOWED; LONGER_FORBIDDEN_WITHOUT_DOCUMENTED_SECURITY_NECESSITY_AND_EXPLICIT_CONTROLLER_APPROVAL",
+    "erasure_replay_marker_prod_binding": "PROD MUST USE PER-MARKER FINITE EXPIRY NOT LATER THAN ERASURE_PLUS_24H_AND AUTOMATIC PURGE; PROVIDER-BOUND TEST TWIN MUST PROVE EXPIRY",
+    "restriction_or_objection": "A receipt-keyed bounded analysis hold keeps the record available for rights review but excludes it from analytical export while active.",
     "restriction_or_objection_state_store": "BOUNDED_ENUM_ONLY_NO_CASE_NARRATIVE",
-    "allowed_hold_states": [
-      "RESTRICTED_PENDING_REVIEW",
-      "OBJECTED_PENDING_REVIEW"
-    ],
+    "allowed_hold_states": ["RESTRICTED_PENDING_REVIEW", "OBJECTED_PENDING_REVIEW"],
     "held_records_excluded_from_export": true,
     "case_narrative_in_research_store": "FORBIDDEN",
-    "portability": "No separate portability export is enabled in the reference adapter while the legal basis remains unresolved. If the controller selects consent or contract and Article 20 conditions are met, implement a reviewed structured machine-readable export limited to data provided by the respondent and validate it provider-bound before PROD; do not repurpose NF06 or the analytical export as an unreviewed rights endpoint.",
+    "portability": "No separate portability export is enabled while the legal basis remains unresolved. If the controller selects consent or contract and Article 20 conditions are met, implement and validate a reviewed structured machine-readable export before PROD.",
     "portability_reference_adapter": "NOT_ENABLED_PENDING_FINAL_LEGAL_BASIS_APPLICABILITY_DECISION"
   },
   "rights_case_logging": {
@@ -90,22 +88,21 @@
   },
   "backup_and_deletion": {
     "retention_reference": "GDPR_RETENTION_SCHEDULE_DRAFT.json",
-    "rule": "Live erasure must be evidenced by row/object counts and a timestamped deletion receipt. The minimal replay-suppression marker is not analytical evidence, must never enter NF06/export and requires its own controller-approved bounded lifecycle. The reference adapter proves the fail-closed shape by requiring an explicit finite boundary and providing deterministic expiry/purge behavior; it does not select the PROD duration. Provider backups may retain residual encrypted copies only for the validated pre-existing rotation and must not silently restore deleted or held records into active analysis."
+    "rule": "Live erasure requires a timestamped deletion receipt and before/after counts. Replay suppression is non-analytical, capped at 24 hours after successful erasure and excluded from NF06/export. Provider backups may retain residual copies only for the validated pre-existing non-renewing rotation and must not silently restore deleted or held records into active analysis."
   },
   "required_before_prod": [
     "controller determination approved",
     "privacy contact published",
     "lawful basis/LIA approved",
-    "rights applicability matrix reconciled to the final legal basis, including portability and consent-withdrawal applicability",
-    "privacy notice updated with the final rights procedure and legal-basis-dependent rights",
+    "rights applicability matrix reconciled to the final legal basis",
+    "privacy notice updated with final legal-basis-dependent rights",
     "processor/subprocessor and provider logging/backup/deletion facts frozen",
-    "production research-only adapter supports receipt lookup, receipt-keyed access copy with reviewed field allowlist and no storage/idempotency/hold/replay internals, validated preset-value rectification with immutable technical/provenance fields, bounded analysis holds, atomic erasure and anti-replay suppression so erased data cannot be recreated by a delayed retry",
-    "if Article 20 applies under the final legal basis, a reviewed structured machine-readable portability path is implemented and provider-bound validated before collection",
-    "if consent becomes a legal basis, an operational withdrawal path is implemented and reflected in the privacy notice before collection",
-    "controller approves the requester-authentication procedure and the Article 15 confirmation/context response that supplements the reference data copy",
-    "controller approves the minimum necessary replay-marker retention bound and the live binding injects a finite UTC not-after boundary with automatic purge/deletion evidence",
-    "restriction/objection handling is operationally approved for the live adapter where applicable to the final legal basis",
-    "provider-bound TEST TWIN rights smoke proves access returns only the requester's approved record fields with no storage/internal rights state or other respondent data, rectification survives delayed transport retry without changing technical provenance, held records cannot enter analytical/NF06 export, erased records cannot be resurrected before the approved replay boundary, and replay markers expire at the approved boundary; if portability is applicable, its export is separately tested and remains NON_EVIDENCE",
+    "production research-only adapter supports receipt lookup, reviewed access copy, preset-value rectification, bounded analysis holds, atomic erasure and maximum-24-hour per-marker replay suppression",
+    "if Article 20 applies, a structured machine-readable portability path is implemented and provider-bound validated before collection",
+    "if consent becomes a legal basis, an operational withdrawal path is implemented before collection",
+    "controller approves requester authentication and the Article 15 confirmation/context response that supplements the reference data copy",
+    "controller accepts the maximum-24-hour replay-marker policy and any shorter live value used by the binding",
+    "provider-bound TEST TWIN proves access isolation, rectification stale-retry safety, held-record export exclusion, erasure anti-replay and automatic marker expiry within 24 hours; TEST TWIN remains NON_EVIDENCE",
     "procedure approval reference and SHA-256 are frozen in the PROD activation manifest"
   ],
   "test_twin": {
