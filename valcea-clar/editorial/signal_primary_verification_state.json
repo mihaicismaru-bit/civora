@@ -2,16 +2,16 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-29T00:01:04+03:00",
+  "generated_at": "2026-08-29T00:54:21+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-28T23:59:47+03:00",
-  "task_count": 57,
+  "queue_generated_at": "2026-08-29T00:53:04+03:00",
+  "task_count": 59,
   "primary_match_count": 0,
-  "no_match_count": 28,
-  "unrouted_count": 29,
+  "no_match_count": 29,
+  "unrouted_count": 30,
   "target_count": 17,
   "targets_ok": 15,
   "results": [
@@ -34,6 +34,58 @@
           "status": "PASS",
           "error": null,
           "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "ff081ff0eea7b4929310bb2e",
+      "signal_title": "Mircia Gutău: „Râmnicu Vâlcea a finalizat toate cele 28 de proiecte finanțate prin PNRR, în valoare de 130 de milioane de euro”",
+      "signal_url": "https://evenimentvalcean.ro/mircia-gutau-ramnicu-valcea-a-finalizat-toate-cele-28-de-proiecte-finantate-prin-pnrr-in-valoare-de-130-de-milioane-de-euro/",
+      "signal_publisher": "Eveniment Vâlcean",
+      "signal_published_at": "2026-08-28T21:58:51+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 78
+    },
+    {
+      "signal_id": "2a5e7b2f6e6697c33820813a",
+      "signal_title": "Școala Gimnazială „Luca Solomon” din Vaideeni intră într-un amplu proces de modernizare printr-o finanțare europeană de peste 18 milioane de lei",
+      "signal_url": "https://seintamplainvalcea.ro/2026/08/28/scoala-gimnaziala-luca-solomon-din-vaideeni-intra-intr-un-amplu-proces-de-modernizare-printr-o-finantare-europeana-de-peste-18-milioane-de-lei/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-28T20:01:11+03:00",
+      "verification_route_id": "education",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "ccd-valcea-noutati",
+            "name": "Casa Corpului Didactic Vâlcea",
+            "url": "https://ccdvl.ro/category/noutati/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "isj-valcea-comunicate",
+            "name": "Inspectoratul Școlar Județean Vâlcea",
+            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 3
         }
       ],
       "publication_authority": "NONE",
@@ -347,7 +399,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -1013,7 +1065,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
