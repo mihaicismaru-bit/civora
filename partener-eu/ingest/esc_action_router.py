@@ -16,7 +16,7 @@ import re
 from html.parser import HTMLParser
 from typing import Any
 
-PARSER_VERSION = "ESC_ACTION_ROUTER_V1"
+PARSER_VERSION = "ESC_ACTION_ROUTER_V2"
 SOURCE_FAMILY = "EU_DIRECT"
 PROGRAMME_FAMILY = "EUROPEAN_SOLIDARITY_CORPS"
 AUTHORITY_CLASS = "EUROPEAN_YOUTH_PORTAL"
@@ -218,11 +218,19 @@ def normalize_framework(raw: bytes, *, authority_url: str, fetched_at: str, run_
 def validate_framework_batch(batch: dict[str, Any]) -> None:
     if batch.get("schema") != "PARTENER_EU_ESC_ACTION_ROUTER_BATCH_V1":
         raise ValueError("ESC router schema mismatch")
+    if batch.get("parser_version") != PARSER_VERSION:
+        raise ValueError("ESC router parser version mismatch")
+    if not batch.get("framework_call_identifier"):
+        raise ValueError("ESC annual framework missing call identifier")
+    if not re.fullmatch(r"20\d{2}", str(batch.get("call_year") or "")):
+        raise ValueError("ESC annual framework missing explicit programme call year")
     if batch.get("publication_effect") != "NONE" or batch.get("canonical_corpus_mutation") is not False:
         raise ValueError("ESC router attempted canonical/public mutation")
     if batch.get("material_fact_use") is not False or batch.get("publish_authorized") is not False:
         raise ValueError("ESC framework became material/publishing")
     for row in batch.get("records", []):
+        if row.get("parser_version") != PARSER_VERSION or row.get("call_year") != batch.get("call_year"):
+            raise ValueError(f"ESC action provenance/call-year drift: {row.get('action_name')}")
         if row.get("observation_state") == "OPEN_CALL" or row.get("open_call_authorized") is not False:
             raise ValueError(f"ESC annual framework auto-authorized OPEN: {row.get('action_name')}")
         if row.get("material_fact_use") is not False or row.get("publish_authorized") is not False:
