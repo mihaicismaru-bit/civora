@@ -3,34 +3,12 @@
   "source_url": "https://www.afir.ro/",
   "source_tier": "T1",
   "criticality": "HIGH",
-  "candidate_fingerprint": "bf12461c8b845f16b659d91d521cc0889c6d17580b798cdbcd666e9bef1e14e9",
+  "candidate_fingerprint": "3661c6298cf9a5636e6574178187a376d4814e128ce8e8c1c1a438f7bc6d59a9",
   "previous_candidate_fingerprint": "3661c6298cf9a5636e6574178187a376d4814e128ce8e8c1c1a438f7bc6d59a9",
-  "candidate_count": 3,
-  "material_signal_count": 3,
-  "candidates": [
-    {
-      "url": "https://www.afir.ro/comunicare/utile/dezbatere-publica/",
-      "title": "Dezbatere publică - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
-      "sha256": "c40c00fe06f619d959aec4d761712c157e8d598aac268d50997e85e48e94a650",
-      "material_change_candidate": true,
-      "material_fact_action": "RESOLUTION_TASK_ONLY"
-    },
-    {
-      "url": "https://www.afir.ro/info-la-zi/",
-      "title": "Info la zi",
-      "sha256": "513ea8fa56e4ab2859a07ef8ed989e3b89858ca7991950bc35a3008d40ebf74f",
-      "material_change_candidate": true,
-      "material_fact_action": "RESOLUTION_TASK_ONLY"
-    },
-    {
-      "url": "https://www.afir.ro/instrumente/instrumente-de-lucru/tipizate-si-formulare-alte-programe-de-finantare/",
-      "title": "Tipizate și Formulare alte Programe de finanțare - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
-      "sha256": "6aa08d49e80a9dd9b5f4e795ebc7b412d2706a65c0d198f5246bf36c28d26f73",
-      "material_change_candidate": true,
-      "material_fact_action": "RESOLUTION_TASK_ONLY"
-    }
-  ],
-  "auth_dependency_count": 28,
+  "candidate_count": 0,
+  "material_signal_count": 0,
+  "candidates": [],
+  "auth_dependency_count": 27,
   "auth_dependencies": [
     {
       "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2F&culture=ro",
@@ -208,13 +186,6 @@
       "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
     },
     {
-      "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Fversiunea-consultativa-a-ghidului-solicitantului-dr-31%2F&culture=ro",
-      "sourcePage": "https://www.afir.ro/info-la-zi/versiunea-consultativa-a-ghidului-solicitantului-dr-31/",
-      "status": "AUTH_OR_ACCESS_DEPENDENT",
-      "materialFactAction": "NONE",
-      "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-    },
-    {
       "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Factualizare-cerere-de-finantare-dr-14%2F&culture=ro",
       "sourcePage": "https://www.afir.ro/info-la-zi/actualizare-cerere-de-finantare-dr-14/",
       "status": "AUTH_OR_ACCESS_DEPENDENT",
@@ -231,7 +202,7 @@
   ],
   "technical_classification": "AUTH_REDIRECTS_EXCLUDED_FROM_CHANGE_CANDIDATES",
   "first_observed_at": "2026-08-12T08:51:30.702569+00:00",
-  "last_observed_at": "2026-08-28T21:55:54.674442+00:00",
+  "last_observed_at": "2026-08-28T01:36:42.861345+00:00",
   "corpus_policy": {
     "failClosed": true,
     "materialFactsAutoPromoted": false,
