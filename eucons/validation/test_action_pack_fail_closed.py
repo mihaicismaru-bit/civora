@@ -38,8 +38,14 @@ def main() -> None:
     reference_time = payload["reference_time"]
     state = fixture_helper.build_state(client, payload)
     projection = fixture_helper.synthetic_fresh_projection(reference_time)
-    matches = matcher.match_state(state, projection, reference_time)
+    official_registry = fixture_helper.synthetic_official_registry(matcher, projection)
+    matches = matcher.match_state(state, projection, reference_time, official_registry=official_registry)
     contract = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
+
+    partener_only = matcher.match_state(state, projection, reference_time)
+    held_partener = action.build_action_packs(state, partener_only, reference_time)
+    if held_partener["summary"]["ready_for_approval"] != 0:
+        raise AssertionError("PARTENER-only match produced an R08 approval pack")
 
     person_targeting = deepcopy(contract)
     person_targeting["contact_governance"]["person_targeting_allowed"] = True
@@ -97,13 +103,14 @@ def main() -> None:
     if row["state"] != "SUPPRESSED" or row["action_pack"] is not None:
         raise AssertionError("suppressed prospect received an action pack")
 
-    stale_matches = matcher.match_state(state, {**deepcopy(projection), "bridge_state": "STALE_SOURCE_HOLD"}, reference_time)
+    stale_projection = {**deepcopy(projection), "bridge_state": "STALE_SOURCE_HOLD"}
+    stale_matches = matcher.match_state(state, stale_projection, reference_time, official_registry=official_registry)
     stale = action.build_action_packs(state, stale_matches, reference_time)
     if any(row["action_pack"] is not None for row in stale["results"]):
         raise AssertionError("stale source produced an action pack")
 
     must_fail("repository output", lambda: action.assert_output_path_safe(EUCONS / "outreach" / "runtime-action-pack.json"))
-    print("PASS: R08 rejects person targeting, private contacts, prices, inference-as-fact, unsafe eligibility and autonomous send; suppression and stale research produce no action pack")
+    print("PASS: R08 rejects PARTENER-only matching, person targeting, private contacts, prices, inference-as-fact, unsafe eligibility and autonomous send; suppression and stale research produce no action pack")
 
 
 if __name__ == "__main__":
