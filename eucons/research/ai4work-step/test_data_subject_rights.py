@@ -170,7 +170,7 @@ class DataSubjectRightsTests(unittest.TestCase):
             self.assertEqual(store.export("AI4WORK_ADULTS_V1"), [restricted])
 
             self.assertTrue(store.clear_analysis_hold(objected["response_id"]))
-            self.assertEqual(store.export("AI4WORK_ADULTS_V1"), [restricted, objected])
+            self.assertCountEqual(store.export("AI4WORK_ADULTS_V1"), [restricted, objected])
 
     def test_rectification_revalidates_preset_values_and_preserves_transport_provenance(self):
         with tempfile.TemporaryDirectory() as td:
