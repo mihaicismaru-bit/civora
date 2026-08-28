@@ -42,9 +42,25 @@ def main() -> None:
 
     payload = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
     source_state = fixture.build_state(client, payload)
-    matches = matcher.match_state(source_state, fixture.synthetic_fresh_projection(payload["reference_time"]), payload["reference_time"])
+    projection = fixture.synthetic_fresh_projection(payload["reference_time"])
+    official_registry = fixture.synthetic_official_registry(matcher, projection)
+    matches = matcher.match_state(
+        source_state,
+        projection,
+        payload["reference_time"],
+        official_registry=official_registry,
+    )
+    if matches.get("partener_role") != "DISCOVERY_ONLY":
+        raise AssertionError("R10 fixture lost PARTENER discovery-only boundary")
     action_packs = action.build_action_packs(source_state, matches, payload["reference_time"])
     matched = next(row for row in matches["results"] if row["state"] == "MATCHED_RESEARCH_CANDIDATE")
+    selected_match = matched["opportunity_matches"][0]
+    if selected_match.get("authority_state") != "OFFICIAL_SOURCE_VERIFIED":
+        raise AssertionError("R10 fixture lacks official-source authority")
+    if not {"status", "deadline"}.issubset(set(selected_match.get("official_fact_classes") or [])):
+        raise AssertionError("R10 fixture lacks official status/deadline bindings")
+    if selected_match.get("official_source_count", 0) < 1:
+        raise AssertionError("R10 fixture lacks official-source lineage")
     prepared = next(row for row in action_packs["results"] if row["state"] == "READY_FOR_APPROVAL")
     pack = prepared["action_pack"]
 
@@ -98,7 +114,10 @@ def main() -> None:
             "maximum_next_state": matched["maximum_next_state"],
             "opportunity_id": matched["selected_opportunity_id"],
             "service_id": matched["recommended_service_id"],
-            "source_provenance_ref": matched["opportunity_matches"][0]["source_provenance"]["source_projection_sha256"],
+            "source_provenance_ref": selected_match["source_provenance"]["source_projection_sha256"],
+            "authority_state": selected_match["authority_state"],
+            "official_fact_classes": selected_match["official_fact_classes"],
+            "official_source_count": selected_match["official_source_count"],
         },
     ), next_action="PREPARE_ACTION_PACK", due_at="2026-08-27T09:00:00+03:00", contract=contract)
     state4 = pipeline.transition(state3, record_id, "OUTREACH_PREPARED", receipt(
@@ -188,6 +207,7 @@ def main() -> None:
         "tasks": len(with_inbound["tasks"]),
         "stale_detection": "PASS",
         "eligibility_state": with_inbound["eligibility_state"],
+        "opportunity_authority_state": selected_match["authority_state"],
         "production_records": 0,
         "external_contact": False,
         "automatic_send": False,
