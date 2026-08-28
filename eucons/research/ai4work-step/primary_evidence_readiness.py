@@ -1,0 +1,245 @@
+from __future__ import annotations
+
+import hashlib
+import re
+from datetime import datetime, timezone
+from typing import Any
+
+from channel_provenance import ChannelProvenanceError, validate_recruitment_channel_id
+from research_storage import RESEARCH_ID, canonical_json_bytes
+
+PROD_EVIDENCE_CLASS = "PROD_REAL_EVIDENCE"
+METHOD_EVIDENCE_CLASS = "METHOD_PLAN_NOT_EVIDENCE"
+TARGET_REGIONS = ("Centru", "Sud-Muntenia", "Sud-Vest Oltenia")
+ADULT_FORM = "AI4WORK_ADULTS_V1"
+EMPLOYER_FORM = "AI4WORK_EMPLOYERS_V1"
+CHANNEL_TYPE_RE = re.compile(r"^[a-z][a-z0-9_]{2,48}$")
+SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+REGISTER_KEYS = {"schema_version", "research_id", "entries"}
+ENTRY_KEYS = {
+    "channel_id",
+    "channel_type",
+    "region_scope",
+    "audience_scope",
+    "invitation_version",
+    "opened_at",
+    "closed_at",
+    "distributor_role",
+    "non_coercion_confirmed",
+}
+
+
+class PrimaryEvidenceReadinessError(ValueError):
+    pass
+
+
+def _parse_ts(value: Any, *, field: str) -> datetime:
+    if not isinstance(value, str) or not value.strip():
+        raise PrimaryEvidenceReadinessError(f"{field} must be a non-empty ISO timestamp")
+    text = value.strip()
+    if text.endswith("Z"):
+        text = text[:-1] + "+00:00"
+    try:
+        parsed = datetime.fromisoformat(text)
+    except ValueError as exc:
+        raise PrimaryEvidenceReadinessError(f"{field} must be ISO-8601") from exc
+    if parsed.tzinfo is None:
+        raise PrimaryEvidenceReadinessError(f"{field} must include timezone information")
+    return parsed.astimezone(timezone.utc)
+
+
+def _positive_int(value: Any, *, field: str) -> int:
+    if not isinstance(value, int) or isinstance(value, bool) or value <= 0:
+        raise PrimaryEvidenceReadinessError(f"{field} must be a positive integer")
+    return value
+
+
+def _ratio(value: Any, *, field: str) -> float:
+    if not isinstance(value, (int, float)) or isinstance(value, bool):
+        raise PrimaryEvidenceReadinessError(f"{field} must be numeric")
+    number = float(value)
+    if not 0 < number <= 1:
+        raise PrimaryEvidenceReadinessError(f"{field} must be in (0, 1]")
+    return number
+
+
+def _validate_method_frame(frame: Any) -> dict[str, Any]:
+    if not isinstance(frame, dict):
+        raise PrimaryEvidenceReadinessError("method frame must be an object")
+    if frame.get("research_id") != RESEARCH_ID:
+        raise PrimaryEvidenceReadinessError("method frame research_id mismatch")
+    if frame.get("frame_status") != "APPROVED_FOR_PROD":
+        raise PrimaryEvidenceReadinessError("method frame must be APPROVED_FOR_PROD before primary synthesis readiness")
+    if frame.get("evidence_class") != METHOD_EVIDENCE_CLASS:
+        raise PrimaryEvidenceReadinessError("method frame must remain METHOD_PLAN_NOT_EVIDENCE")
+    approval = frame.get("approval")
+    if not isinstance(approval, dict) or approval.get("approved") is not True or approval.get("approved_for_prod") is not True:
+        raise PrimaryEvidenceReadinessError("method frame approval is incomplete")
+    handoff = frame.get("nf06_handoff")
+    if not isinstance(handoff, dict) or handoff.get("eligible_now") is not True:
+        raise PrimaryEvidenceReadinessError("method frame is not NF06-handoff eligible")
+    thresholds = ((frame.get("sampling_design") or {}).get("provisional_readiness_thresholds"))
+    if not isinstance(thresholds, dict) or thresholds.get("status") != "METHOD_RULE_NOT_EVIDENCE":
+        raise PrimaryEvidenceReadinessError("method readiness thresholds are missing or not frozen as METHOD_RULE_NOT_EVIDENCE")
+    return thresholds
+
+
+def _validate_channel_register(register: Any) -> dict[str, dict[str, Any]]:
+    if not isinstance(register, dict) or set(register) != REGISTER_KEYS:
+        raise PrimaryEvidenceReadinessError(f"channel register fields must be exactly {sorted(REGISTER_KEYS)}")
+    if register.get("schema_version") != "eucons.ai4work_collection_channel_register.v0.1":
+        raise PrimaryEvidenceReadinessError("unsupported collection-channel register schema")
+    if register.get("research_id") != RESEARCH_ID:
+        raise PrimaryEvidenceReadinessError("channel register research_id mismatch")
+    entries = register.get("entries")
+    if not isinstance(entries, list) or not entries:
+        raise PrimaryEvidenceReadinessError("channel register must contain at least one entry")
+
+    by_id: dict[str, dict[str, Any]] = {}
+    for entry in entries:
+        if not isinstance(entry, dict) or set(entry) != ENTRY_KEYS:
+            raise PrimaryEvidenceReadinessError(f"channel register entry fields must be exactly {sorted(ENTRY_KEYS)}")
+        try:
+            channel_id = validate_recruitment_channel_id(entry.get("channel_id"))
+        except ChannelProvenanceError as exc:
+            raise PrimaryEvidenceReadinessError(str(exc)) from exc
+        if channel_id in by_id:
+            raise PrimaryEvidenceReadinessError("duplicate channel_id in channel register")
+        channel_type = entry.get("channel_type")
+        if not isinstance(channel_type, str) or not CHANNEL_TYPE_RE.fullmatch(channel_type):
+            raise PrimaryEvidenceReadinessError("channel_type must be a bounded lowercase code")
+        region_scope = entry.get("region_scope")
+        if not isinstance(region_scope, list) or not region_scope or any(region not in TARGET_REGIONS for region in region_scope):
+            raise PrimaryEvidenceReadinessError("channel region_scope must contain only target regions")
+        if len(region_scope) != len(set(region_scope)):
+            raise PrimaryEvidenceReadinessError("channel region_scope contains duplicates")
+        audience_scope = entry.get("audience_scope")
+        if not isinstance(audience_scope, list) or not audience_scope or any(item not in {"adults", "employers"} for item in audience_scope):
+            raise PrimaryEvidenceReadinessError("channel audience_scope must contain adults and/or employers")
+        if len(audience_scope) != len(set(audience_scope)):
+            raise PrimaryEvidenceReadinessError("channel audience_scope contains duplicates")
+        for field in ("invitation_version", "distributor_role"):
+            if not isinstance(entry.get(field), str) or not entry[field].strip():
+                raise PrimaryEvidenceReadinessError(f"channel {field} is required")
+        opened = _parse_ts(entry.get("opened_at"), field="channel.opened_at")
+        closed = _parse_ts(entry.get("closed_at"), field="channel.closed_at")
+        if closed < opened:
+            raise PrimaryEvidenceReadinessError("channel collection window is inverted")
+        if entry.get("non_coercion_confirmed") is not True:
+            raise PrimaryEvidenceReadinessError("channel non_coercion_confirmed must be true")
+        by_id[channel_id] = entry
+    return by_id
+
+
+def _validate_sensitivity_artifact(value: Any) -> None:
+    if not isinstance(value, dict):
+        raise PrimaryEvidenceReadinessError("dominant-channel sensitivity analysis is required")
+    if value.get("status") != "PASS":
+        raise PrimaryEvidenceReadinessError("dominant-channel sensitivity analysis must have PASS status")
+    if not isinstance(value.get("reference"), str) or not value["reference"].strip():
+        raise PrimaryEvidenceReadinessError("dominant-channel sensitivity analysis needs a documented reference")
+    sha = value.get("sha256")
+    if not isinstance(sha, str) or not SHA256_RE.fullmatch(sha):
+        raise PrimaryEvidenceReadinessError("dominant-channel sensitivity analysis needs a lowercase SHA-256")
+
+
+def assert_primary_evidence_ready_for_synthesis(
+    manifest: Any,
+    *,
+    method_frame: dict[str, Any],
+    channel_register: dict[str, Any],
+    dominant_channel_sensitivity: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Fail closed until a real NF06-preflight batch meets frozen method coverage.
+
+    This is a PRE-SYNTHESIS method/provenance gate. Passing it does not make the
+    non-probability sample representative and does not prove any need. It only
+    establishes that the real PROD batch has enough frozen coverage to enter
+    synthesis/adversarial QA under the approved method frame.
+    """
+    thresholds = _validate_method_frame(method_frame)
+    if not isinstance(manifest, dict):
+        raise PrimaryEvidenceReadinessError("NF06 pre-ingest manifest must be an object")
+    if manifest.get("research_id") != RESEARCH_ID:
+        raise PrimaryEvidenceReadinessError("manifest research_id mismatch")
+    if manifest.get("evidence_class") != PROD_EVIDENCE_CLASS or manifest.get("non_evidence") is not False:
+        raise PrimaryEvidenceReadinessError("TEST TWIN or non-PROD manifests cannot enter primary synthesis")
+    if manifest.get("prod_promotion_eligible") is not True:
+        raise PrimaryEvidenceReadinessError("NF06 pre-ingest manifest is not PROD-promotion eligible")
+
+    register_by_id = _validate_channel_register(channel_register)
+    register_sha = hashlib.sha256(canonical_json_bytes(channel_register)).hexdigest()
+    if manifest.get("collection_channel_register_sha256") != register_sha:
+        raise PrimaryEvidenceReadinessError("channel register bytes do not match the NF06-bound SHA-256")
+
+    adult_min = _positive_int(thresholds.get("adults_total_valid_min"), field="adults_total_valid_min")
+    adult_region_min = _positive_int(thresholds.get("adults_valid_min_per_region"), field="adults_valid_min_per_region")
+    employer_min = _positive_int(thresholds.get("employers_total_valid_min"), field="employers_total_valid_min")
+    employer_region_min = _positive_int(thresholds.get("employers_valid_min_per_region"), field="employers_valid_min_per_region")
+    channel_types_min = _positive_int(thresholds.get("independent_recruitment_channels_min_per_region"), field="independent_recruitment_channels_min_per_region")
+    channel_share_max = _ratio(thresholds.get("single_channel_share_max"), field="single_channel_share_max")
+
+    form_counts = manifest.get("form_counts")
+    form_region_counts = manifest.get("form_region_counts")
+    region_channel_ids = manifest.get("region_channel_ids")
+    if not isinstance(form_counts, dict) or not isinstance(form_region_counts, dict) or not isinstance(region_channel_ids, dict):
+        raise PrimaryEvidenceReadinessError("manifest lacks method-coverage aggregates")
+    if form_counts.get(ADULT_FORM, 0) < adult_min:
+        raise PrimaryEvidenceReadinessError("adult total is below the frozen operational adequacy threshold")
+    if form_counts.get(EMPLOYER_FORM, 0) < employer_min:
+        raise PrimaryEvidenceReadinessError("employer total is below the frozen operational adequacy threshold")
+    if manifest.get("record_count") != sum(int(form_counts.get(form, 0)) for form in (ADULT_FORM, EMPLOYER_FORM)):
+        raise PrimaryEvidenceReadinessError("record_count does not reconcile with form_counts")
+
+    for region in TARGET_REGIONS:
+        if (form_region_counts.get(ADULT_FORM) or {}).get(region, 0) < adult_region_min:
+            raise PrimaryEvidenceReadinessError(f"adult coverage below threshold in {region}")
+        if (form_region_counts.get(EMPLOYER_FORM) or {}).get(region, 0) < employer_region_min:
+            raise PrimaryEvidenceReadinessError(f"employer coverage below threshold in {region}")
+        used_ids = region_channel_ids.get(region)
+        if not isinstance(used_ids, list) or not used_ids:
+            raise PrimaryEvidenceReadinessError(f"no recruitment-channel provenance for {region}")
+        channel_types: set[str] = set()
+        for channel_id in used_ids:
+            try:
+                channel_id = validate_recruitment_channel_id(channel_id)
+            except ChannelProvenanceError as exc:
+                raise PrimaryEvidenceReadinessError(str(exc)) from exc
+            entry = register_by_id.get(channel_id)
+            if entry is None:
+                raise PrimaryEvidenceReadinessError(f"used channel {channel_id} is absent from frozen channel register")
+            if region not in entry["region_scope"]:
+                raise PrimaryEvidenceReadinessError(f"used channel {channel_id} is not authorised for {region}")
+            channel_types.add(entry["channel_type"])
+        if len(channel_types) < channel_types_min:
+            raise PrimaryEvidenceReadinessError(
+                f"{region} has {len(channel_types)} independent channel type(s), below frozen minimum {channel_types_min}"
+            )
+
+    manifest_channels = manifest.get("channel_counts")
+    if not isinstance(manifest_channels, dict) or set(manifest_channels) - set(register_by_id):
+        raise PrimaryEvidenceReadinessError("manifest contains channel ids absent from the frozen channel register")
+    dominant_share = manifest.get("dominant_channel_share")
+    if not isinstance(dominant_share, (int, float)) or isinstance(dominant_share, bool) or not 0 <= float(dominant_share) <= 1:
+        raise PrimaryEvidenceReadinessError("manifest dominant_channel_share is invalid")
+    sensitivity_used = False
+    if float(dominant_share) > channel_share_max:
+        _validate_sensitivity_artifact(dominant_channel_sensitivity)
+        sensitivity_used = True
+
+    return {
+        "schema_version": "eucons.ai4work_primary_evidence_readiness.v0.1",
+        "research_id": RESEARCH_ID,
+        "stage": "PRE_SYNTHESIS_METHOD_COVERAGE",
+        "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
+        "source_evidence_class": PROD_EVIDENCE_CLASS,
+        "ready_for_primary_synthesis": True,
+        "representativeness_claim_allowed": False,
+        "weighting_allowed": False,
+        "thresholds_are_method_rules_not_evidence": True,
+        "all_three_regions_meet_frozen_population_minima": True,
+        "independent_channel_types_per_region_validated": True,
+        "channel_register_sha256_validated": True,
+        "dominant_channel_sensitivity_used": sensitivity_used,
+        "scope_boundary": "PASS authorises only entry into needs synthesis/adversarial QA for this real non-probability PROD batch. It does not establish population prevalence, causality, representativeness or any need conclusion.",
+    }
