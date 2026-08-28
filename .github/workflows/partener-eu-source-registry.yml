@@ -13,6 +13,8 @@ on:
       - 'partener-eu/ingest/interreg_call.py'
       - 'partener-eu/ingest/interreg_call_live_fetch.py'
       - 'partener-eu/ingest/interreg_call_reconcile.py'
+      - 'partener-eu/p11/interreg_call_stage.py'
+      - 'partener-eu/p11/test_interreg_call_stage.py'
       - 'partener-eu/ops/test_source_registry_low_info.py'
       - 'partener-eu/ops/test_source_registry_alias_fallback.py'
       - 'partener-eu/ops/test_source_registry_external_expansion.py'
@@ -33,6 +35,8 @@ on:
       - 'partener-eu/ingest/interreg_call.py'
       - 'partener-eu/ingest/interreg_call_live_fetch.py'
       - 'partener-eu/ingest/interreg_call_reconcile.py'
+      - 'partener-eu/p11/interreg_call_stage.py'
+      - 'partener-eu/p11/test_interreg_call_stage.py'
       - 'partener-eu/ops/test_source_registry_low_info.py'
       - 'partener-eu/ops/test_source_registry_alias_fallback.py'
       - 'partener-eu/ops/test_source_registry_external_expansion.py'
@@ -100,6 +104,9 @@ jobs:
 
       - name: Regression — Interreg exact-call semantic reconcile stays fail-closed
         run: python partener-eu/ops/test_interreg_call_reconcile.py
+
+      - name: Regression — Interreg canonical staging stays deterministic and non-publishing
+        run: python partener-eu/p11/test_interreg_call_stage.py
 
       - name: Probe classified official sources without changing facts
         run: python partener-eu/ingest/source_registry_probe.py
@@ -228,13 +235,54 @@ jobs:
           print(json.dumps(receipt.get('stats', {}), ensure_ascii=False))
           PY
 
-      - name: Upload bounded Interreg exact-call evidence and reconciliation
+      - name: Admit reconciled Interreg calls to read-only canonical staging
+        run: |
+          python partener-eu/p11/interreg_call_stage.py \
+            /tmp/interreg-call-reconciliation.json \
+            --bundle partener-eu/p11/opportunity_bundle.json \
+            --output /tmp/interreg-call-staging-admission.json
+
+      - name: Validate live Interreg canonical staging receipt stays fail-closed
+        run: |
+          python - <<'PY'
+          import hashlib, json, sys
+          stage=json.load(open('/tmp/interreg-call-staging-admission.json', encoding='utf-8'))
+          reconciliation=json.load(open('/tmp/interreg-call-reconciliation.json', encoding='utf-8'))
+          canonical=json.dumps(reconciliation, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')
+          expected_hash=hashlib.sha256(canonical).hexdigest()
+          if stage.get('schema') != 'PARTENER_EU_INTERREG_CALL_CANONICAL_STAGING_ADMISSION_V1':
+              print('FAIL Interreg staging schema drift')
+              sys.exit(2)
+          if stage.get('source_reconciliation_hash') != expected_hash:
+              print('FAIL Interreg staging detached from reconciliation receipt')
+              sys.exit(2)
+          if stage.get('canonical_staging_admission') != 'PASS':
+              print('FAIL Interreg staging admission did not pass')
+              sys.exit(2)
+          if stage.get('publish_authorized') is not False or stage.get('canonical_corpus_mutation') is not False or stage.get('publication_effect') != 'NONE' or stage.get('material_fact_action') != 'NONE':
+              print('FAIL Interreg staging became publishing/material')
+              sys.exit(2)
+          stats=stage.get('stats') or {}
+          if stats.get('staging_admitted') != 0 or stage.get('records'):
+              print('FAIL historical exact-call controls unexpectedly entered canonical staging:', stats)
+              sys.exit(2)
+          if stats.get('review_required_preserved') != reconciliation.get('stats', {}).get('review_required'):
+              print('FAIL Interreg staging lost upstream quarantine:', stats)
+              sys.exit(2)
+          if stage.get('material_fact_use') is not False or stage.get('missing_proofs') != []:
+              print('FAIL empty Interreg staging invented material use/downstream proof state')
+              sys.exit(2)
+          print(json.dumps(stats, ensure_ascii=False))
+          PY
+
+      - name: Upload bounded Interreg exact-call evidence, reconciliation and staging admission
         uses: actions/upload-artifact@v4
         with:
           name: partener-interreg-call-live-evidence
           path: |
             /tmp/interreg-call-live-evidence.json
             /tmp/interreg-call-reconciliation.json
+            /tmp/interreg-call-staging-admission.json
           retention-days: 7
           if-no-files-found: error
 
@@ -243,6 +291,10 @@ jobs:
           python - <<'PY'
           import json, sys
           from pathlib import Path
+          stage=json.load(open('/tmp/interreg-call-staging-admission.json', encoding='utf-8'))
+          if stage.get('publish_authorized') is not False or stage.get('canonical_corpus_mutation') is not False or stage.get('publication_effect') != 'NONE':
+              print('FAIL final gate: unsafe Interreg staging receipt')
+              sys.exit(2)
           p='partener-eu/ingest/state/source_registry_health.json'
           d=json.load(open(p, encoding='utf-8'))
           bad=[]
