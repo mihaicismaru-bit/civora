@@ -104,6 +104,11 @@ def self_test() -> int:
     assert "last_seen_at" in profiles["source_signal_transaction"]
     assert "source_health" in profiles
     assert "semantic_sha256" not in profiles["source_health"]
+    assert "source_discovery" in profiles
+    assert "checked_at_epoch" in profiles["source_discovery"]
+    assert "content_sha256" in profiles["source_discovery"]
+    assert "status" not in profiles["source_discovery"]
+    assert "candidate_count" not in profiles["source_discovery"]
     assert resolve_ignored("structured_alerts", []) == {"generated_at"}
     assert resolve_ignored("threads_state", ["temporary_test_key"]) == {
         "last_auth_verified_at", "temporary_test_key"
