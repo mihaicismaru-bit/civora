@@ -1,0 +1,39 @@
+name: VÂLCEA CLAR BJAI Events Desk
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'valcea-clar/scripts/bjai_valcea_events_signal_adapter.py'
+      - 'valcea-clar/scripts/bjai_valcea_events_desk_normalizer.py'
+      - '.github/workflows/valcea-clar-bjai-events-desk.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/scripts/bjai_valcea_events_signal_adapter.py'
+      - 'valcea-clar/scripts/bjai_valcea_events_desk_normalizer.py'
+      - '.github/workflows/valcea-clar-bjai-events-desk.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-bjai-events-desk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Compile BJAI event pipeline
+        run: |
+          python -m py_compile valcea-clar/scripts/bjai_valcea_events_signal_adapter.py
+          python -m py_compile valcea-clar/scripts/bjai_valcea_events_desk_normalizer.py
+      - name: Run upstream BJAI signal regressions
+        run: python valcea-clar/scripts/bjai_valcea_events_signal_adapter.py --self-test
+      - name: Run Events Desk regressions
+        run: python valcea-clar/scripts/bjai_valcea_events_desk_normalizer.py --self-test
