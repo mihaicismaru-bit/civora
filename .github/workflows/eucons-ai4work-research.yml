@@ -4,11 +4,13 @@ on:
   pull_request:
     paths:
       - 'eucons/research/ai4work-step/**'
+      - 'eucons/deployment/build_ai4work_candidate.py'
       - '.github/workflows/eucons-ai4work-research.yml'
   push:
     branches: [main]
     paths:
       - 'eucons/research/ai4work-step/**'
+      - 'eucons/deployment/build_ai4work_candidate.py'
       - '.github/workflows/eucons-ai4work-research.yml'
   workflow_dispatch:
 
@@ -111,4 +113,22 @@ jobs:
           assert activation.get('required_external_or_operational_evidence', {}).get('data_subject_rights_procedure', {}).get('status') == 'OPEN'
           assert activation.get('required_external_or_operational_evidence', {}).get('dpia_screening_or_completed_dpia', {}).get('status') == 'OPEN'
           print('PASS: AI4WORK collection, controller identity, collection frame, rights, DPIA and PROD activation remain fail-closed')
+          PY
+      - name: Build combined eucons plus AI4WORK fail-closed candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/eucons-ai4work-combined-candidate
+          python eucons/deployment/build_ai4work_candidate.py --target /tmp/eucons-ai4work-combined-candidate > /tmp/eucons-ai4work-combined-candidate.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.loads(Path('/tmp/eucons-ai4work-combined-candidate.json').read_text(encoding='utf-8'))
+          assert result.get('status') == 'PASS_FAIL_CLOSED_CANDIDATE'
+          assert result.get('merge_authorized') is False
+          assert result.get('deploy_authorized') is False
+          assert result.get('real_collection_authorized') is False
+          assert result.get('research', {}).get('production_enabled') is False
+          assert result.get('research', {}).get('test_twin_evidence_eligible') is False
+          print('PASS: combined eucons + AI4WORK candidate is non-deploying, fail-closed and TEST TWIN remains NON-EVIDENCE')
           PY
