@@ -1,0 +1,38 @@
+name: EUCONS Client Finder Source Authority Queue
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/prospects/client_finder_source_authority_queue.py'
+      - 'eucons/prospects/client_finder_source_authority_queue_contract.json'
+      - 'eucons/validation/test_client_finder_source_authority_queue_fail_closed.py'
+      - '.github/workflows/eucons-client-finder-source-authority-queue.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/prospects/client_finder_source_authority_queue.py'
+      - 'eucons/prospects/client_finder_source_authority_queue_contract.json'
+      - 'eucons/validation/test_client_finder_source_authority_queue_fail_closed.py'
+      - '.github/workflows/eucons-client-finder-source-authority-queue.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-client-finder-source-authority-queue-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fail-closed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Compile Client Finder source authority queue
+        run: python -m py_compile eucons/prospects/client_finder_source_authority_queue.py
+      - name: Test Client Finder source authority queue fail-closed behavior
+        run: python eucons/validation/test_client_finder_source_authority_queue_fail_closed.py
