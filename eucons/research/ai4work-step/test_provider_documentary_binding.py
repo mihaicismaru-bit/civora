@@ -10,6 +10,7 @@ HERE = Path(__file__).resolve().parent
 BINDING_PATH = HERE / "CLAUS_WEB_DOCUMENTARY_BINDING.json"
 MANIFEST_PATH = HERE / "PROD_ACTIVATION_MANIFEST_DRAFT.json"
 HOSTING_PLAN_PATH = HERE / "HOSTING_BINDING_PLAN.json"
+STORAGE_CONTRACT_PATH = HERE / "PROVIDER_STORAGE_CONTRACT.json"
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 
 
@@ -144,6 +145,52 @@ class ProviderDocumentaryBindingTests(unittest.TestCase):
         self.assertFalse((plan.get("authorization") or {}).get("merge"))
         self.assertFalse((plan.get("authorization") or {}).get("deploy"))
         self.assertFalse((plan.get("authorization") or {}).get("real_collection"))
+
+    def test_storage_contract_matches_frozen_provider_baseline_and_does_not_reopen_closed_documentary_gaps(self) -> None:
+        contract_text = STORAGE_CONTRACT_PATH.read_text(encoding="utf-8")
+        contract = json.loads(contract_text)
+        framework = contract.get("candidate_hosting_processor_framework") or {}
+        go_no_go = contract.get("go_no_go") or {}
+
+        self.assertEqual(contract.get("schema_version"), "eucons.research_storage_contract.v0.7")
+        self.assertFalse(contract.get("production_enabled"))
+        self.assertEqual((contract.get("controller") or {}).get("status"), "UNRESOLVED_BEFORE_COLLECTION")
+        self.assertEqual(framework.get("documentary_binding_reference"), BINDING_PATH.name)
+        self.assertEqual(
+            framework.get("dpa_sha256"),
+            "40391f30b73a2a20182bc2c1e38b65d515c4d4d65dd2c412b76c0592767d024f",
+        )
+        self.assertEqual(
+            framework.get("annex_4_sha256"),
+            "69b5491a9fc4842af858b7e58dec88599025229014346eb466ff762912b32108",
+        )
+        self.assertEqual(
+            framework.get("annex_5_sha256"),
+            "09d8c6a95427d4716ffa6dccc0ae5e054a074b3a8a861085c6ad89984d9c485d",
+        )
+        self.assertIn("full URL including query string", framework.get("raw_access_logging") or "")
+        self.assertEqual(
+            framework.get("raw_access_current_account_retention"),
+            "OPEN_ACCOUNT_INSPECTION_REQUIRED",
+        )
+        self.assertEqual(
+            framework.get("raw_access_current_account_access_controls"),
+            "OPEN_ACCOUNT_INSPECTION_REQUIRED",
+        )
+        self.assertEqual(
+            go_no_go.get("hosting_account_contract_and_annexes"),
+            "FIRST_PARTY_DPA_ANNEX4_ANNEX5_FROZEN_ACCOUNT_CONFIGURATION_AND_OVERRIDE_OPEN",
+        )
+        self.assertEqual(
+            go_no_go.get("provider_raw_access_field_profile"),
+            "CLOSED_FIRST_PARTY_PROVIDER_CONFIRMED",
+        )
+        self.assertEqual(go_no_go.get("actual_server_log_retention"), "OPEN_ACCOUNT_INSPECTION_REQUIRED")
+        self.assertEqual(go_no_go.get("status"), "NO_GO_FOR_REAL_COLLECTION")
+
+        self.assertNotIn("nominal Annex 4 list is available on request", contract_text)
+        self.assertNotIn("Annex 5 values are available on request", contract_text)
+        self.assertNotIn("OPEN_EXTERNAL_PROVIDER_CONFIRMATION\",\n    \"actual_server_log_retention", contract_text)
 
 
 if __name__ == "__main__":
