@@ -24,7 +24,10 @@ OBSERVATION_STATE = "CALL_FRAMEWORK"
 
 CALL_ID_RE = re.compile(r"\b(EAC/A\d+/\d{4})\b", re.IGNORECASE)
 OJ_ID_RE = re.compile(r"\b(C/\d{4}/\d+)\b", re.IGNORECASE)
-YEAR_RE = re.compile(r"\b(20\d{2})\b")
+CALL_YEAR_PATTERNS = (
+    re.compile(r"\bCALL\s+FOR\s+PROPOSALS\s+(20\d{2})\b", re.IGNORECASE),
+    re.compile(r"\b(20\d{2})\s+(?:EUROPEAN\s+SOLIDARITY\s+CORPS\s+)?CALL(?:\s+FOR\s+PROPOSALS)?\b", re.IGNORECASE),
+)
 
 
 class _EscPageParser(HTMLParser):
@@ -84,13 +87,16 @@ def _parse(raw: bytes) -> _EscPageParser:
 def _framework_identifiers(flat_text: str) -> tuple[str | None, str | None, str | None]:
     call = CALL_ID_RE.search(flat_text)
     oj = OJ_ID_RE.search(flat_text)
+    # The identifier EAC/A15/2025 is the notice identifier, not the programme
+    # call year. The official page explicitly labels this notice as CALL FOR
+    # PROPOSALS 2026, so deriving 2025 from the identifier would misclassify the
+    # framework. If no explicit programme-call year is present, remain unknown.
     year = None
-    if call:
-        year_match = YEAR_RE.search(call.group(1))
-        year = year_match.group(1) if year_match else None
-    if not year:
-        year_match = re.search(r"(?:call|cererea|call for proposals)\D{0,30}(20\d{2})", flat_text, re.IGNORECASE)
-        year = year_match.group(1) if year_match else None
+    for pattern in CALL_YEAR_PATTERNS:
+        year_match = pattern.search(flat_text)
+        if year_match:
+            year = year_match.group(1)
+            break
     return (call.group(1).upper() if call else None, oj.group(1).upper() if oj else None, year)
 
 
