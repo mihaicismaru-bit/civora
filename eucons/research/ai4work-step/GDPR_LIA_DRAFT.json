@@ -1,22 +1,21 @@
 {
-  "schema_version": "eucons.ai4work_gdpr_lia.v0.3",
+  "schema_version": "eucons.ai4work_gdpr_lia.v0.4",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "date": "2026-08-27",
-  "controller": null,
-  "controller_role_state": "UNRESOLVED_BEFORE_COLLECTION",
-  "controller_determination": {
-    "rule": "The controller must be the legal entity that actually determines the purposes and essential means of the AI4WORK needs-analysis research; website branding, consulting role, hosting-account ownership and project-applicant status must not be treated as interchangeable by assumption.",
-    "evidence_required": [
-      "current MySMIS applicant/leader identity and mandate for the needs analysis",
-      "documented decision identifying which legal entity determines the research purpose and essential means",
-      "documented role of the eucons.ro site/operator in questionnaire delivery and analysis",
-      "documented role of the hosting-account holder and Claus Web in the processing chain",
-      "Article 28-compatible instructions/terms for every processor or subprocessor role"
-    ],
-    "status": "FAIL_CLOSED_PENDING_ROLE_DETERMINATION"
+  "date": "2026-08-28",
+  "controller": {
+    "legal_name": "EUROCONSULT SRL",
+    "cui": "14250864",
+    "determination_reference": "AUTHENTICATED_FIRST_PARTY_USER_DECLARATION_2026_08_28"
   },
-  "candidate_legal_basis": "GDPR Article 6(1)(f) legitimate interests — candidate only after controller determination and signoff",
-  "status": "DRAFT_CONTROLLER_AND_LEGAL_BASIS_DECISION_REQUIRED_BEFORE_COLLECTION",
+  "controller_role_state": "DETERMINED_PROD_APPROVALS_PENDING",
+  "controller_determination": {
+    "rule": "The GDPR controller is the legal entity that determines the purposes and essential means of the AI4WORK needs-analysis research. Authenticated first-party determination fixes EUROCONSULT SRL as controller/operator and owner of eucons.ro for this processing.",
+    "reference": "CONTROLLER_DETERMINATION_DRAFT.json v0.3",
+    "status": "RESOLVED_CONTROLLER_IDENTITY",
+    "boundary": "Controller determination does not itself approve the lawful basis, Article 13 notice, privacy contact, retention, rights procedure, DPIA outcome, provider/live-account binding or PROD collection."
+  },
+  "candidate_legal_basis": "GDPR Article 6(1)(f) legitimate interests — candidate only; controller signoff is still required before production",
+  "status": "DRAFT_LEGAL_BASIS_CONTROLLER_SIGNOFF_REQUIRED_BEFORE_COLLECTION",
   "authority_context": [
     "https://commission.europa.eu/law/law-topic/data-protection/information-business-and-organisations/legal-grounds-processing-data_en",
     "https://www.edpb.europa.eu/public-consultations/guidelines-12024-on-processing-of-personal-data-based-on-article-61f-gdpr_ro"
@@ -27,7 +26,7 @@
     "specific": true,
     "present_and_non_speculative": true,
     "commercial_marketing_or_lead_generation": false,
-    "controller_attribution": "PENDING_CONTROLLER_ROLE_DETERMINATION"
+    "controller_attribution": "EUROCONSULT SRL"
   },
   "necessity_test": {
     "why_primary_research_is_needed": "secondary official evidence can establish structural context but cannot alone evidence respondent-level perceived skills gaps, barriers, use patterns and employer-reported capability needs",
@@ -41,7 +40,7 @@
       "separate optional follow-up contact mechanism with no response linkage",
       "small-cell suppression/combination for reported n < 5"
     ],
-    "conclusion": "PROCESSING_CAN_BE_NECESSARY_IF_CONTROLLER_ROLE_IS_FROZEN_AND_THE_MINIMISED_DESIGN_AND_SEPARATION_CONTROLS_ARE_ENFORCED"
+    "conclusion": "PROCESSING_CAN_BE_NECESSARY_IF_THE_CONTROLLER_APPROVES_THE_FINAL_BASIS_AND_THE_MINIMISED_DESIGN_AND_SEPARATION_CONTROLS_REMAIN_ENFORCED"
   },
   "balancing_test": {
     "reasonable_expectations": "participants are shown a pre-form research notice and make a voluntary positive choice to submit a needs-analysis questionnaire; the data are not reused for enrolment, marketing or individual decisions",
@@ -50,7 +49,7 @@
     "power_imbalance": "employed and unemployed adults may have contextual vulnerability; participation must not be requested by an employer in a way that creates pressure and refusal must have no disadvantage",
     "safeguards": [
       "voluntary participation and clear no-disadvantage language",
-      "right-to-object channel disclosed in Article 13 notice",
+      "right-to-object channel disclosed in Article 13 notice if Article 6(1)(f) is approved",
       "no analytical free-text collection",
       "n<5 suppression/combination",
       "research-only credentials/database isolated from CRM",
@@ -59,11 +58,11 @@
       "no automated decisions or respondent scoring",
       "logging minimisation and no IP/user-agent in analytical exports"
     ],
-    "provisional_outcome": "A LEGITIMATE-INTEREST OUTCOME MAY ONLY BE SIGNED AFTER CONTROLLER DETERMINATION AND WHILE ALL SAFEGUARDS REMAIN TRUE"
+    "provisional_outcome": "ARTICLE_6_1_F_CAN_BE_SUPPORTED_ON_CURRENT_MINIMISED_DESIGN_BUT_REMAINS_UNAPPROVED_UNTIL_EXPLICIT_CONTROLLER_SIGNOFF_AND_OPERATIONAL_GATES_ARE_COMPLETE"
   },
   "fail_closed_conditions": [
-    "controller legal entity and role are not documented",
-    "privacy contact and right-to-object process are not operational for the determined controller",
+    "final lawful basis/LIA is not explicitly approved by EUROCONSULT SRL",
+    "privacy contact and right-to-object process are not operational for EUROCONSULT SRL",
     "Article 13 notice is not delivered before data submission",
     "processor/subprocessor or transfer review is not completed",
     "server logs make responses routinely linkable to identifiable IP/device data without a documented necessity/retention control",
@@ -74,12 +73,15 @@
   ],
   "controller_signoff_fields": {
     "approved": false,
-    "legal_entity_name": null,
-    "role_basis_reference": null,
+    "legal_entity_name": "EUROCONSULT SRL",
+    "role_basis_reference": "CONTROLLER_DETERMINATION_DRAFT.json v0.3 / AUTHENTICATED_FIRST_PARTY_USER_DECLARATION_2026_08_28",
     "approver_name_or_role": null,
     "approval_date": null,
     "privacy_contact": null,
-    "notes": null
+    "notes": "Controller identity is fixed; this field remains false until the candidate legal basis and balancing outcome are explicitly approved for PROD."
   },
-  "collection_enabled": false
+  "collection_enabled": false,
+  "merge_authorized": false,
+  "deploy_authorized": false,
+  "real_collection_authorized": false
 }
