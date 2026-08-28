@@ -81,7 +81,7 @@ jobs:
           if receipt.get('raw_hash') != hashlib.sha256(raw).hexdigest() or batch.get('raw_hash') != receipt.get('raw_hash'):
               print('FAIL EUI immutable handoff hash mismatch')
               sys.exit(2)
-          if batch.get('parser_version') != 'EUI_CALLS_V2' or stats.get('eui_candidates', 0) < 1:
+          if batch.get('adapter_id') != 'EUI_CALLS_V1' or batch.get('parser_version') != 'EUI_CALLS_V2' or stats.get('eui_candidates', 0) < 1:
               print('FAIL EUI official Portico index was not parsed sufficiently:', stats)
               sys.exit(2)
           if stats.get('open_call_authorized') != 0:
@@ -100,6 +100,7 @@ jobs:
               'eui_candidates': stats.get('eui_candidates'),
               'visible_open_candidates': stats.get('visible_open_candidates'),
               'open_call_authorized': stats.get('open_call_authorized'),
+              'adapter_id': batch.get('adapter_id'),
               'parser_version': batch.get('parser_version'),
               'raw_hash': receipt.get('raw_hash'),
           }, ensure_ascii=False))
