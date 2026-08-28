@@ -16,7 +16,11 @@
   };
 
   const channelId = () => {
-    const value = new URLSearchParams(globalThis.location.search).get("channel") || "";
+    // Recruitment metadata is carried only in the URL fragment. Fragments are
+    // not sent in the HTTP request and therefore are not written to ordinary
+    // origin/proxy access logs as part of the request URL.
+    const fragment = String(globalThis.location.hash || "").replace(/^#/, "");
+    const value = new URLSearchParams(fragment).get("channel") || "";
     return CHANNEL_RE.test(value) ? value : null;
   };
 
