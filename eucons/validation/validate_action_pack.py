@@ -29,10 +29,13 @@ def main() -> None:
     reference_time = payload["reference_time"]
     state = fixture_helper.build_state(client, payload)
     projection = fixture_helper.synthetic_fresh_projection(reference_time)
-    matches = matcher.match_state(state, projection, reference_time)
+    official_registry = fixture_helper.synthetic_official_registry(matcher, projection)
+    matches = matcher.match_state(state, projection, reference_time, official_registry=official_registry)
     state_before = client.canonical_hash(state)
     matches_before = client.canonical_hash(matches)
 
+    if matches["partener_role"] != "DISCOVERY_ONLY" or matches["summary"]["matched"] != 1:
+        raise SystemExit("R08 fixture did not preserve R07 official-source authority gate")
     result = engine.build_action_packs(state, matches, reference_time)
     if result["summary"] != {"evaluated": 2, "ready_for_approval": 1, "held": 1, "suppressed": 0}:
         raise SystemExit("R08 action-pack summary drift")
@@ -45,6 +48,11 @@ def main() -> None:
         raise SystemExit("non-matched prospect received an action pack")
 
     pack = ready["action_pack"]
+    selected = pack["selected_opportunity"]
+    if selected.get("authority_state") != "OFFICIAL_SOURCE_VERIFIED":
+        raise SystemExit("R08 pack lost official-source authority state")
+    if not {"status", "deadline"}.issubset(set(selected.get("official_fact_classes") or [])):
+        raise SystemExit("R08 pack lost required official status/deadline bindings")
     if pack["eligibility_state"] != "NOT_ASSESSED" or pack["approval_state"] != "READY_FOR_APPROVAL":
         raise SystemExit("R08 crossed eligibility or approval boundary")
     if any(pack[key] for key in ("external_contact_enabled", "automatic_offer_enabled", "automatic_send_enabled")):
@@ -92,6 +100,7 @@ def main() -> None:
         "discovery_questions": len(pack["discovery_questions"]),
         "pricing_state": pack["offer_skeleton"]["pricing"]["state"],
         "lawful_basis": pack["contact_governance"]["lawful_basis_assessment"],
+        "opportunity_authority_state": selected["authority_state"],
         "production_records": result["production_records"],
         "external_contact": result["external_contact_enabled"]
     }, ensure_ascii=False))
