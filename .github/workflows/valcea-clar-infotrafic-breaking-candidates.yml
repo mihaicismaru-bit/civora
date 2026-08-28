@@ -6,6 +6,8 @@ on:
     paths:
       - 'valcea-clar/scripts/infotrafic_valcea_breaking_candidates.py'
       - 'valcea-clar/scripts/test_infotrafic_valcea_breaking_candidates.py'
+      - 'valcea-clar/scripts/infotrafic_valcea_newsroom_review_envelope.py'
+      - 'valcea-clar/scripts/test_infotrafic_valcea_newsroom_review_envelope.py'
       - 'valcea-clar/scripts/infotrafic_valcea_thread_state.py'
       - 'valcea-clar/scripts/infotrafic_valcea_event_normalizer.py'
       - '.github/workflows/valcea-clar-infotrafic-breaking-candidates.yml'
@@ -14,6 +16,8 @@ on:
     paths:
       - 'valcea-clar/scripts/infotrafic_valcea_breaking_candidates.py'
       - 'valcea-clar/scripts/test_infotrafic_valcea_breaking_candidates.py'
+      - 'valcea-clar/scripts/infotrafic_valcea_newsroom_review_envelope.py'
+      - 'valcea-clar/scripts/test_infotrafic_valcea_newsroom_review_envelope.py'
       - 'valcea-clar/scripts/infotrafic_valcea_thread_state.py'
       - 'valcea-clar/scripts/infotrafic_valcea_event_normalizer.py'
       - '.github/workflows/valcea-clar-infotrafic-breaking-candidates.yml'
@@ -33,7 +37,11 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - name: Compile candidate generator
-        run: python -m py_compile valcea-clar/scripts/infotrafic_valcea_breaking_candidates.py
+      - name: Compile INFOTRAFIC newsroom intelligence stages
+        run: |
+          python -m py_compile valcea-clar/scripts/infotrafic_valcea_breaking_candidates.py
+          python -m py_compile valcea-clar/scripts/infotrafic_valcea_newsroom_review_envelope.py
       - name: Validate fail-closed breaking candidate generation
         run: python valcea-clar/scripts/test_infotrafic_valcea_breaking_candidates.py
+      - name: Validate fail-closed newsroom review envelope
+        run: python valcea-clar/scripts/test_infotrafic_valcea_newsroom_review_envelope.py
