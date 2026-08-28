@@ -1,14 +1,19 @@
 {
-  "schema_version": "1.1",
-  "type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
-  "source_id": "SRC-MYSMIS-CALLS",
-  "source_tier": "T1",
+  "source_name": "authoritative_call_registry",
   "source_url": "https://resurse.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027",
-  "status": "OPEN",
+  "source_tier": "T1",
+  "previous_semantic_sha256": "ac3b7133371bc0ffcc0c1d34e09f5e6edf67ed61b6a65ad524d8efbd08661394",
+  "candidate_semantic_sha256": "ce82b5a389d0a92538c694b0ecd8d991a00b1073b66affe0cd01164e2639064d",
+  "current_semantic_sha256": "ce82b5a389d0a92538c694b0ecd8d991a00b1073b66affe0cd01164e2639064d",
   "first_observed_at": "2026-08-12T04:38:17Z",
   "last_observed_at": "2026-08-28T09:23:57.730805Z",
-  "previous_semantic_sha256": "e1672ff7f045154f1535d42ad5cef9e3caa853e5faa5d7d42d46a72a79d78940",
-  "current_semantic_sha256": "ce82b5a389d0a92538c694b0ecd8d991a00b1073b66affe0cd01164e2639064d",
+  "registry_class": "authoritative_call_registry",
+  "schema_version": "1.2",
+  "task_type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
+  "source_id": "SRC-MYSMIS-CALLS",
+  "status": "OPEN",
+  "policy": "Do not automatically change deadline, eligibility, budget, scoring, beneficiaries, call status, or any other material fact. Resolve only from authoritative evidence and record provenance before publication.",
+  "automatic_material_fact_update_allowed": false,
   "material_fact_autoupdate_allowed": false,
   "blocked_fact_classes": [
     "deadline",
@@ -18,6 +23,5 @@
     "beneficiaries",
     "material_call_status",
     "other_material_facts"
-  ],
-  "required_resolution": "Re-establish authoritative evidence and provenance before any material fact update."
+  ]
 }
