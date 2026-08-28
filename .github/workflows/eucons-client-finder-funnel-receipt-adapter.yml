@@ -1,0 +1,40 @@
+name: EUCONS Client Finder Funnel Receipt Adapter
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/analytics/client_finder_funnel_receipt_adapter.py'
+      - 'eucons/analytics/client_finder_funnel_receipt_adapter_contract.json'
+      - 'eucons/analytics/client_finder_funnel_analytics.py'
+      - 'eucons/analytics/client_finder_funnel_analytics_contract.json'
+      - 'eucons/validation/test_client_finder_funnel_receipt_adapter_fail_closed.py'
+      - '.github/workflows/eucons-client-finder-funnel-receipt-adapter.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/analytics/client_finder_funnel_receipt_adapter.py'
+      - 'eucons/analytics/client_finder_funnel_receipt_adapter_contract.json'
+      - 'eucons/analytics/client_finder_funnel_analytics.py'
+      - 'eucons/analytics/client_finder_funnel_analytics_contract.json'
+      - 'eucons/validation/test_client_finder_funnel_receipt_adapter_fail_closed.py'
+      - '.github/workflows/eucons-client-finder-funnel-receipt-adapter.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-client-finder-funnel-receipt-adapter-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fail-closed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Test Client Finder funnel receipt adapter fail-closed behavior
+        run: python eucons/validation/test_client_finder_funnel_receipt_adapter_fail_closed.py
