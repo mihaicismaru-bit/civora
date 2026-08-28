@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from pathlib import Path
@@ -48,6 +49,24 @@ def _valid_external_reference(value: Any) -> bool:
         and isinstance(digest, str)
         and bool(SHA256_RE.fullmatch(digest))
     )
+
+
+def _valid_frozen_local_binding(value: dict[str, Any]) -> bool:
+    """FROZEN repo-local bindings must exist under HERE and match their declared SHA-256."""
+    if value.get("status") != "FROZEN":
+        return True
+    reference = str(value.get("reference") or "").strip()
+    digest = str(value.get("sha256") or "").strip()
+    if not reference or not SHA256_RE.fullmatch(digest):
+        return False
+    candidate = (HERE / reference).resolve()
+    try:
+        candidate.relative_to(HERE.resolve())
+    except ValueError:
+        return False
+    if not candidate.is_file():
+        return False
+    return hashlib.sha256(candidate.read_bytes()).hexdigest() == digest
 
 
 def activation_errors(
@@ -155,6 +174,8 @@ def activation_errors(
         for key in sorted(REQUIRED_EXTERNAL_KEYS):
             if key not in evidence or not _valid_external_reference(evidence[key]):
                 errors.append(f"external_evidence_not_frozen:{key}")
+            elif not _valid_frozen_local_binding(evidence[key]):
+                errors.append(f"external_evidence_frozen_hash_mismatch:{key}")
 
     if manifest.get("real_collection_authorized") is not True:
         errors.append("real_collection_not_authorized")
