@@ -113,6 +113,7 @@ def collect_live(*, authority_url: str = DEFAULT_URL, run_id: str, fetched_at: s
     evidence = {
         "schema": "PARTENER_EU_EUI_CALL_INDEX_LIVE_EVIDENCE_V1",
         "fetcher_version": FETCHER_VERSION,
+        "adapter_id": indexer.ADAPTER_ID,
         "parser_version": indexer.PARSER_VERSION,
         "source_family": indexer.SOURCE_FAMILY,
         "programme_family": indexer.PROGRAMME_FAMILY,
