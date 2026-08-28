@@ -1,11 +1,11 @@
 {
-  "schema_version": "eucons.ai4work_controller_determination.v0.1",
+  "schema_version": "eucons.ai4work_controller_determination.v0.2",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "date": "2026-08-27",
+  "date": "2026-08-28",
   "status": "UNRESOLVED_BEFORE_COLLECTION",
   "purpose": "Fail-closed evidence record for determining the GDPR controller under the actual allocation of decisions over research purposes and essential means. This record must not infer legal roles from branding, applicant status, domain ownership, hosting billing, or technical implementation alone.",
   "controller": null,
-  "joint_controller_assessment": "PENDING_FACTS",
+  "joint_controller_assessment": "PENDING_AUTHORITY_CONFIRMATION",
   "approved": false,
   "collection_enabled": false,
   "nf06_reference_eligible": false,
@@ -18,37 +18,52 @@
     "technical_implementation"
   ],
   "known_evidence_boundaries": {
-    "project_leader": "A project-leader identity has been observed in current read-only MySMIS evidence, but that fact alone does not determine the GDPR controller.",
-    "site_operator": "eucons.ro is the intended first-party collection surface, but site branding/implementation alone does not determine the GDPR controller.",
-    "hosting_account_holder": "A hosting-account relationship is preserved in controlled first-party evidence. Private billing/account identity must not be copied into this public repository artifact; its legal relationship to the controller candidate must be verified before go-live.",
-    "hosting_provider": "CLAUS WEB SRL has a public standard DPA for relevant hosting services, but account-specific applicability, subprocessors, backup/retention and logging facts remain to be bound.",
-    "research_implementation": "Repository implementation responsibility does not by itself establish controller status."
+    "project_leader": "Current controlled read-only MySMIS evidence identifies FUNDAŢIA CENTRUL DE PREGĂTIRE PROFESIONALĂ VÂLCEA as project leader for SMIS 367944. Leader status is an identity fact only and does not by itself determine the GDPR controller.",
+    "site_operator": "eucons.ro is the intended first-party collection surface. The legal entity responsible for the research implementation on that surface and its authority over purpose/essential means still require a binding decision record; site branding or implementation alone is non-determinative.",
+    "hosting_account_holder": "Controlled first-party Claus Web correspondence dated 2026-03-20 identifies FUNDAȚIA ANTREPRENORIAT SOCIAL as the current contracting/account entity for eucons.ro domain renewal and hosting-account restoration. Private client, billing, address and contact identifiers are deliberately excluded from this repository artifact. Account-holder status does not by itself determine controller status.",
+    "hosting_provider": "CLAUS WEB SRL public DPA v1.0 dated 2026-03-16 has been verified for the relevant hosting-service family. Annex 4 nominal subprocessors and Annex 5 backup/retention values are available on request; account-specific applicability, actual logging, actual backup/deletion behavior and the controller-to-provider instruction chain remain to be bound before collection.",
+    "research_implementation": "Repository implementation responsibility does not by itself establish controller status.",
+    "authority_request": "A factual controller-role confirmation request was sent to the project leader institutional mailbox on 2026-08-27 covering purpose/use, questionnaire/data categories, lawful basis/Article 13 notice, retention/deletion, respondent-level access, provider instructions and privacy contact. No approving reply is represented by this artifact."
   },
+  "resolved_identity_facts": [
+    "MYSMIS_PROJECT_LEADER_IDENTITY",
+    "EUCONS_HOSTING_ACCOUNT_HOLDER_IDENTITY",
+    "CLAUS_WEB_PUBLIC_DPA_IDENTITY_AND_VERSION"
+  ],
+  "remaining_decision_facts": [
+    "who has final authority over the research purpose and intended use of results",
+    "who has final authority over questionnaire content and essential data categories",
+    "who approves lawful basis, Article 13 notice, retention and deletion",
+    "who may access respondent-level records and canonical exports",
+    "who may issue binding instructions to the hosting/provider chain",
+    "what legal role the eucons.ro research implementation entity performs",
+    "whether the hosting account holder acts only as technical intermediary/processor, has respondent-level access, or jointly determines any essential means",
+    "whether more than one entity jointly determines purpose or essential means",
+    "which controller privacy contact or DPO contact must appear in the notice"
+  ],
   "required_evidence_before_decision": [
-    "current legal identity and authority of each entity participating in the research decision chain",
-    "documented decision record identifying who approves the research purpose and intended use of results",
-    "documented decision record identifying who approves the questionnaire content and essential data categories",
-    "documented decision record identifying who approves lawful basis, Article 13 notice, retention and deletion",
-    "documented authority to instruct the hosting/provider chain and determine access to respondent-level data",
-    "documented role of the current MySMIS applicant/leader in the needs research",
-    "documented role of the eucons.ro site/operator and research implementation entity",
-    "controlled reference identifying the actual hosting-account holder and its legal relationship to the controller candidate",
-    "processor/subprocessor binding, including account-applicable Claus Web terms and role chain",
+    "documented authority record resolving the remaining decision facts for the project leader and any research implementation entity",
+    "documented role and access scope of the eucons.ro hosting account holder in the research processing chain",
+    "processor/subprocessor binding, including account-applicable Claus Web terms, Annex 4/5, logging and deletion/backup facts",
     "joint-controller analysis if more than one entity jointly determines purposes or essential means"
   ],
   "decision_matrix": [
     {
       "entity_reference": "MYSMIS_PROJECT_LEADER_CONTROLLED_REFERENCE",
+      "observed_legal_identity": "FUNDAŢIA CENTRUL DE PREGĂTIRE PROFESIONALĂ VÂLCEA",
+      "identity_status": "VERIFIED_CURRENT_MYSMIS",
       "purpose_decision_authority": null,
       "essential_means_authority": null,
       "access_to_respondent_level_data": null,
       "processor_instruction_authority": null,
-      "legal_binding_reference": null,
+      "legal_binding_reference": "CONTROLLER_ROLE_CONFIRMATION_REQUEST_2026_08_27_REPLY_PENDING",
       "proposed_role": null,
-      "status": "EVIDENCE_REQUIRED"
+      "status": "AUTHORITY_CONFIRMATION_PENDING"
     },
     {
       "entity_reference": "EUCONS_SITE_OPERATOR_OR_IMPLEMENTATION_ENTITY_CONTROLLED_REFERENCE",
+      "observed_legal_identity": null,
+      "identity_status": "BINDING_RESEARCH_ROLE_RECORD_REQUIRED",
       "purpose_decision_authority": null,
       "essential_means_authority": null,
       "access_to_respondent_level_data": null,
@@ -59,16 +74,20 @@
     },
     {
       "entity_reference": "HOSTING_ACCOUNT_HOLDER_PRIVATE_CONTROLLED_REFERENCE",
+      "observed_legal_identity": "FUNDAȚIA ANTREPRENORIAT SOCIAL",
+      "identity_status": "VERIFIED_FIRST_PARTY_PROVIDER_CORRESPONDENCE_2026_03_20",
       "purpose_decision_authority": null,
       "essential_means_authority": null,
       "access_to_respondent_level_data": null,
       "processor_instruction_authority": null,
-      "legal_binding_reference": null,
+      "legal_binding_reference": "CONTROLLED_CLAUS_WEB_ACCOUNT_EVIDENCE_PRIVATE_REFERENCE",
       "proposed_role": null,
-      "status": "EVIDENCE_REQUIRED"
+      "status": "ROLE_AND_ACCESS_BINDING_PENDING"
     },
     {
       "entity_reference": "CLAUS_WEB_SRL",
+      "observed_legal_identity": "CLAUS WEB SRL",
+      "identity_status": "VERIFIED_PUBLIC_DPA_V1_0_2026_03_16",
       "purpose_decision_authority": false,
       "essential_means_authority": "TECHNICAL_PROVIDER_MEANS_ONLY_PENDING_ACCOUNT_BINDING",
       "access_to_respondent_level_data": "POTENTIAL_HOSTING_PROCESSOR_ACCESS_TO_BE_VERIFIED",
