@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import copy
+import hashlib
+import json
 import unittest
 
 from prod_activation_gate import (
@@ -14,6 +16,7 @@ from prod_activation_gate import (
     CONTROLLER_PATH,
     COLLECTION_FRAME_PATH,
     DPIA_SCREENING_PATH,
+    HERE,
 )
 
 
@@ -53,6 +56,33 @@ class ProdActivationGateTests(unittest.TestCase):
         self.assertFalse(ready)
         self.assertIn("external_evidence_not_frozen:account_server_logging_binding", errors)
         self.assertFalse(any("provider_server_logging_profile" in item for item in errors))
+
+    def test_live_commercial_privacy_surface_cannot_substitute_for_ai4work_research_chain(self):
+        _, manifest, _, _, _ = self.load_artifacts()
+        evidence = manifest["required_external_or_operational_evidence"]
+        key = "live_public_privacy_surface_reconciliation"
+        self.assertIn(key, REQUIRED_EXTERNAL_KEYS)
+        self.assertIn(key, evidence)
+        gate = evidence[key]
+        self.assertEqual(gate["status"], "OPEN")
+        self.assertEqual(gate["reference"], "LIVE_PRIVACY_SURFACE_RECONCILIATION_DRAFT.json")
+        self.assertRegex(gate["sha256"], r"^[0-9a-f]{64}$")
+
+        path = HERE / gate["reference"]
+        self.assertTrue(path.is_file())
+        self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), gate["sha256"])
+        reconciliation = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual(reconciliation["status"], "OPEN_BEFORE_PROD")
+        self.assertFalse(reconciliation["prod_reconciled"])
+        self.assertFalse(reconciliation["ai4work_controlled_baseline"]["commercial_privacy_hosting_statement_inherited"])
+        rendered = json.dumps(reconciliation, ensure_ascii=False).lower()
+        self.assertIn("romania-webhosting.com", rendered)
+        self.assertIn("claus web", rendered)
+        self.assertIn("do not infer", rendered)
+
+        ready, errors = evaluate_repository_activation()
+        self.assertFalse(ready)
+        self.assertIn(f"external_evidence_not_frozen:{key}", errors)
 
     def test_setting_only_production_enabled_cannot_activate_collection(self):
         contract, manifest, controller, frame, dpia = self.load_artifacts()
