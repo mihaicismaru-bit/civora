@@ -11,6 +11,7 @@ VALIDATOR_PATH = ROOT / "validation" / "validate_public_intake_progressive_discl
 CONTRACT_PATH = ROOT / "web" / "public_intake_progressive_disclosure_contract.json"
 JTBD_PATH = ROOT / "web" / "jtbd_ux_contract.json"
 IA_PATH = ROOT / "web" / "information_architecture.json"
+INBOUND_PATH = ROOT / "leads" / "inbound_runtime_contract.json"
 
 
 def load_validator():
@@ -21,9 +22,9 @@ def load_validator():
     return module
 
 
-def expect_failure(validator, contract, jtbd, ia, label):
+def expect_failure(validator, contract, jtbd, ia, inbound, label):
     try:
-        validator.validate_data(contract, jtbd, ia)
+        validator.validate_data(contract, jtbd, ia, inbound)
     except validator.ValidationError:
         return
     raise AssertionError(f"fail-closed regression accepted: {label}")
@@ -34,68 +35,46 @@ def main():
     contract = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
     jtbd = json.loads(JTBD_PATH.read_text(encoding="utf-8"))
     ia = json.loads(IA_PATH.read_text(encoding="utf-8"))
-    validator.validate_data(contract, jtbd, ia)
+    inbound = json.loads(INBOUND_PATH.read_text(encoding="utf-8"))
+    validator.validate_data(contract, jtbd, ia, inbound)
 
-    broken = copy.deepcopy(contract)
-    broken["first_stage_policy"]["submission_enabled"] = True
-    expect_failure(validator, broken, jtbd, ia, "first-stage network/submission enabled")
+    cases = []
 
-    broken = copy.deepcopy(contract)
-    broken["boundaries"]["crm_write_enabled"] = True
-    expect_failure(validator, broken, jtbd, ia, "CRM write enabled")
+    broken = copy.deepcopy(contract); broken["profile_stage_policy"]["production_collection_allowed"] = True
+    cases.append((broken, jtbd, ia, inbound, "guard production collection"))
+    broken = copy.deepcopy(contract); broken["profile_stage_policy"]["eligibility_state"] = "ELIGIBLE"
+    cases.append((broken, jtbd, ia, inbound, "PROFILE eligibility assessed"))
+    broken = copy.deepcopy(contract); broken["profile_stage_policy"]["contact_details_allowed"] = True
+    cases.append((broken, jtbd, ia, inbound, "PROFILE contact allowed"))
+    broken = copy.deepcopy(contract); broken["journeys"][1]["allowed_profile_fields"].append("email")
+    cases.append((broken, jtbd, ia, inbound, "guard early email"))
+    broken = copy.deepcopy(contract); broken["runtime_boundaries"]["repository_pii_writes_forbidden"] = False
+    cases.append((broken, jtbd, ia, inbound, "repository PII writes"))
+    broken = copy.deepcopy(contract); broken["runtime_boundaries"]["telemetry_production_transport_enabled"] = True
+    cases.append((broken, jtbd, ia, inbound, "production telemetry"))
+    broken = copy.deepcopy(contract); broken["runtime_boundaries"]["research_crm_separation"] = False
+    cases.append((broken, jtbd, ia, inbound, "research CRM separation"))
+    broken = copy.deepcopy(contract); broken["decision"]["production_activation_authorized"] = True
+    cases.append((broken, jtbd, ia, inbound, "guard authorizes production"))
 
-    broken = copy.deepcopy(contract)
-    broken["boundaries"]["analytics_transport_enabled"] = True
-    expect_failure(validator, broken, jtbd, ia, "analytics transport enabled")
+    broken_jtbd = copy.deepcopy(jtbd); broken_jtbd["journeys"][1]["first_step_fields"].append("phone")
+    cases.append((contract, broken_jtbd, ia, inbound, "R04 early phone"))
+    broken_jtbd = copy.deepcopy(jtbd); broken_jtbd["global_rules"]["progressive_data_minimization"] = False
+    cases.append((contract, broken_jtbd, ia, inbound, "R04 minimization disabled"))
 
-    broken = copy.deepcopy(contract)
-    broken["boundaries"]["file_upload_enabled"] = True
-    expect_failure(validator, broken, jtbd, ia, "file upload enabled")
+    broken_inbound = copy.deepcopy(inbound); broken_inbound["request_contract"]["contact_before_contact_step_forbidden"] = False
+    cases.append((contract, jtbd, ia, broken_inbound, "R05 early contact enabled"))
+    broken_inbound = copy.deepcopy(inbound); broken_inbound["production_collection_enabled"] = True
+    cases.append((contract, jtbd, ia, broken_inbound, "R05 production collection enabled"))
+    broken_inbound = copy.deepcopy(inbound); broken_inbound["public_form_contract"]["endpoint"]["production_binding_enabled"] = True
+    cases.append((contract, jtbd, ia, broken_inbound, "R05 production endpoint bound"))
+    broken_inbound = copy.deepcopy(inbound); broken_inbound["telemetry"]["raw_contact_forbidden"] = False
+    cases.append((contract, jtbd, ia, broken_inbound, "R05 telemetry raw contact"))
 
-    broken = copy.deepcopy(contract)
-    broken["boundaries"]["external_message_enabled"] = True
-    expect_failure(validator, broken, jtbd, ia, "external message enabled")
+    for args in cases:
+        expect_failure(validator, *args)
 
-    broken = copy.deepcopy(contract)
-    broken["boundaries"]["research_crm_separation"] = False
-    expect_failure(validator, broken, jtbd, ia, "research CRM separation disabled")
-
-    broken = copy.deepcopy(contract)
-    broken["first_stage_policy"]["eligibility_state"] = "ELIGIBLE"
-    expect_failure(validator, broken, jtbd, ia, "eligibility assessed in first stage")
-
-    broken = copy.deepcopy(contract)
-    broken["contact_handoff"]["automatic"] = True
-    expect_failure(validator, broken, jtbd, ia, "automatic contact handoff")
-
-    broken = copy.deepcopy(contract)
-    broken["journeys"][1]["allowed_first_stage_fields"].append("email")
-    expect_failure(validator, broken, jtbd, ia, "contract early email field")
-
-    broken_jtbd = copy.deepcopy(jtbd)
-    broken_jtbd["journeys"][1]["first_step_fields"].append("phone")
-    expect_failure(validator, contract, broken_jtbd, ia, "upstream early phone field")
-
-    broken_jtbd = copy.deepcopy(jtbd)
-    broken_jtbd["global_rules"]["progressive_data_minimization"] = False
-    expect_failure(validator, contract, broken_jtbd, ia, "upstream data minimization disabled")
-
-    broken_ia = copy.deepcopy(ia)
-    for row in broken_ia["cta_destinations"]:
-        if row["cta_id"] == "request_project_evaluation":
-            row["path"] = "/contact/"
-            break
-    expect_failure(validator, contract, jtbd, broken_ia, "CTA bypasses canonical lead handoff")
-
-    broken = copy.deepcopy(contract)
-    broken["decision"]["runtime_materialization_authorized"] = True
-    expect_failure(validator, broken, jtbd, ia, "policy guard authorizes runtime")
-
-    broken = copy.deepcopy(contract)
-    broken["source_bindings"]["jtbd_contract_id"] = "R04-DRIFT"
-    expect_failure(validator, broken, jtbd, ia, "source contract id drift")
-
-    print(json.dumps({"status": "PASS", "phase": "R04_PUBLIC_INTAKE", "negative_cases": 14}, ensure_ascii=False))
+    print(json.dumps({"status": "PASS", "phase": "R04_PUBLIC_INTAKE_GUARD", "negative_cases": len(cases)}, ensure_ascii=False))
 
 
 if __name__ == "__main__":
