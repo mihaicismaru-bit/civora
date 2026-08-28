@@ -1,0 +1,36 @@
+name: EUCONS Client Finder Final Offer Release Execution Gate
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/leads/client_finder_final_offer_release_execution_gate.py'
+      - 'eucons/leads/client_finder_final_offer_release_execution_gate_contract.json'
+      - 'eucons/validation/test_client_finder_final_offer_release_execution_gate_fail_closed.py'
+      - '.github/workflows/eucons-client-finder-final-offer-release-execution-gate.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/leads/client_finder_final_offer_release_execution_gate.py'
+      - 'eucons/leads/client_finder_final_offer_release_execution_gate_contract.json'
+      - 'eucons/validation/test_client_finder_final_offer_release_execution_gate_fail_closed.py'
+      - '.github/workflows/eucons-client-finder-final-offer-release-execution-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-client-finder-final-offer-release-execution-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fail-closed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Test Client Finder final-offer release execution gate fail-closed behavior
+        run: python eucons/validation/test_client_finder_final_offer_release_execution_gate_fail_closed.py
