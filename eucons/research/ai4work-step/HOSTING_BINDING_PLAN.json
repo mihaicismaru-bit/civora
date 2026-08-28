@@ -1,7 +1,7 @@
 {
-  "schema_version": "eucons.ai4work_research_hosting_plan.v0.5",
+  "schema_version": "eucons.ai4work_research_hosting_plan.v0.6",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "state": "INTERNAL_RUNTIME_BINDING_IMPLEMENTED_FAIL_CLOSED_EXTERNAL_ROLE_AND_PROVIDER_VALIDATION_REQUIRED_BEFORE_COLLECTION",
+  "state": "PROVIDER_DOCUMENTARY_BASELINE_FROZEN_ACCOUNT_CONTROLLER_AND_LIVE_BINDING_REQUIRED_BEFORE_COLLECTION",
   "verified_existing_eucons_runtime": {
     "public_origin": "https://eucons.ro",
     "api_origin": "https://api.eucons.ro",
@@ -10,11 +10,10 @@
     "allowed_origins": ["https://eucons.ro", "https://www.eucons.ro"],
     "commercial_storage_root": "/home/eucons/eucons-data",
     "commercial_storage_strategy": "FILESYSTEM_ATOMIC_JSON_OUTSIDE_WEBROOT",
-    "commercial_runtime_secrets_in_git": false,
-    "existing_external_handoff": "domain_and_hosting AUTHORIZED_AND_VALIDATED for the commercial EUCONS runtime; public commercial collection itself remains fail-closed pending its own gates"
+    "commercial_runtime_secrets_in_git": false
   },
   "research_binding": {
-    "implementation_status": "IMPLEMENTED_ON_PR_BRANCH_PENDING_EXACT_HEAD_CI_AND_PROVIDER_BOUND_TEST_TWIN",
+    "implementation_status": "REPOSITORY_REFERENCE_PATH_EXACT_HEAD_CI_PASS_PROVIDER_BOUND_LIVE_PATH_OPEN",
     "route": "/research/ai4work/v1/submit",
     "absolute_endpoint": "https://api.eucons.ro/research/ai4work/v1/submit",
     "methods": ["POST", "OPTIONS"],
@@ -41,64 +40,88 @@
     "app_record_ip": "FORBIDDEN",
     "app_record_user_agent": "FORBIDDEN",
     "raw_and_normalized_sha256": "REQUIRED",
-    "duplicate_response_id_same_body": "REPLAY_ORIGINAL_RECEIPT_NO_SECOND_ANALYTICAL_ROW",
-    "duplicate_response_id_different_body": "FAIL_CLOSED_IDEMPOTENCY_CONFLICT",
-    "erased_response_replay": "FAIL_CLOSED_USING_OPAQUE_24H_MAX_REPLAY_MARKER",
     "synthetic_prod_records": "FORBIDDEN",
     "max_request_bytes": 65536,
-    "browser_tracking": "NONE; credentials omit; no cookies/localStorage/sessionStorage/fingerprinting/analytics; submit UUID exists in in-memory same-tab retry state only",
-    "client_channel_provenance": "opaque CH-* first-party dissemination batch only; no UTM/referrer/cookie/IP/device/CRM identity"
+    "browser_tracking": "NONE; credentials omit; no cookies/localStorage/sessionStorage/fingerprinting/analytics",
+    "client_channel_provenance": "opaque CH-* first-party dissemination batch from URL fragment only; no query-string/UTM/referrer/cookie/IP/device/CRM identity",
+    "erasure_replay_marker": "OPAQUE_RESPONSE_ID_ONLY; MAXIMUM_24_HOURS_PENDING_CONTROLLER_ACCEPTANCE_AND_LIVE_EXPIRY_PROOF"
   },
   "role_determination_before_activation": {
-    "rule": "Do not infer controller or processor status from the website brand, domain ownership, project-applicant status, consulting role, billing responsibility or hosting-account ownership alone.",
-    "roles_that_must_be_reconciled": [
-      "current MySMIS project applicant/leader",
-      "entity that determines the purposes and essential means of the AI4WORK needs-analysis research",
-      "eucons.ro site/operator role",
-      "hosting-account holder role",
-      "CLAUS WEB SRL provider role"
+    "rule": "Do not infer controller or processor status from website branding, domain ownership, project-applicant status, consulting role, billing responsibility or hosting-account ownership alone.",
+    "verified_distinct_roles": [
+      "current MySMIS project leader identity is controlled separately",
+      "eucons.ro hosting-account holder identity is controlled separately",
+      "CLAUS WEB SRL is the Shared Hosting provider under the frozen first-party DPA package"
     ],
     "required_output": "documented controller/processor/subprocessor chain plus Article 28-compatible instructions/terms where applicable",
-    "status": "EXTERNAL_CONFIRMATION_REQUESTED_FAIL_CLOSED"
+    "status": "CONTROLLER_UNRESOLVED_EXTERNAL_ROLE_REQUESTS_WITHDRAWN_FAIL_CLOSED"
   },
-  "privacy_and_security_requirements_before_activation": [
-    "freeze a documented controller determination anchored to the entity that actually determines the research purposes and essential means; do not assume EUROCONSULT SRL is controller merely because eucons.ro hosts the forms",
-    "freeze a public research privacy/contact channel for the determined controller",
-    "document and approve the research legal basis and complete Article 13 notice separately from acknowledgement of voluntary participation",
-    "verify and document the legal/controller-processor chain among the project applicant/leader, eucons.ro site/operator, actual hosting-account holder and Claus Web",
-    "confirm that every processor/subprocessor role applicable to the research is governed by Article 28-compatible terms and retain the account-specific contractual evidence",
-    "obtain and review the current nominal subprocessor list from Claus Web DPA Annex 4 before activation",
-    "obtain and review the account-applicable backup/retention/deletion values from Claus Web DPA Annex 5 before activation",
-    "verify web-server/reverse-proxy access-log fields and retention for the actual account; keep request bodies/raw idempotency keys out of logs and IP/device metadata out of the analytical export",
-    "provider-bound TEST TWIN must prove research files are outside document root, isolated from commercial storage, excluded from CRM jobs and subject to finite erasure replay-marker expiry",
-    "bind and test research retention/deletion independently from commercial lead retention",
-    "verify HTTPS and exact-origin CORS on the actual endpoint",
-    "run exact-head schema/minimisation/idempotency tests and provider-bound TEST TWIN browser-to-HTTP-to-store-to-export-to-NF06 smoke before any real collection"
-  ],
-  "hosting_provider_observation": {
-    "internal_activation_artifact": "eucons/deployment/activate_php_runtime.py identifies hosting associated with romania-webhosting.com",
+  "provider_documentary_baseline": {
+    "status": "FROZEN_FIRST_PARTY_SHARED_HOSTING_PACKAGE",
+    "binding_reference": "CLAUS_WEB_DOCUMENTARY_BINDING.json",
+    "binding_sha256": "b2ba26fb6cb63d91a7c924accff9d652236a347155eae24afa52d03381a00c26",
     "provider_identity": "CLAUS WEB SRL / CUI RO17759260",
     "provider_dpo_contact": "dpo@clausweb.ro",
-    "public_dpa": {
-      "url": "https://www.clausweb.ro/acord-prelucrare-date.html",
+    "dpa": {
       "version": "1.0",
       "date": "2026-03-16",
-      "scope": "Shared Hosting, VPS, Dedicated Servers, cPanel/WHM administration, domains and Backup when Claus Web acts as processor or subprocessor",
-      "article_28_role": "PUBLIC_DPA_EXPLICITLY_IDENTIFIES_CLAUS_WEB_AS_PROCESSOR_FOR_BENEFICIARY_DATA_IN_SHARED_HOSTING",
-      "subprocessors": "GENERAL_AUTHORIZATION_PRESENT_BUT_NOMINAL_ANNEX_4_AVAILABLE_ON_REQUEST_AND_REQUIRES_OPERATIONAL_VALIDATION",
-      "international_transfers": "DPA_STATES_NO_BENEFICIARY_DATA_TRANSFER_OUTSIDE_EEA_WITHOUT_VALID_CHAPTER_V_MECHANISM",
-      "termination_deletion": "DPA_STATES_STANDARD_15_DAY_EXPORT_WINDOW_AND PRODUCTION_DATA_DELETION_OR_IRREVERSIBLE_INACCESSIBILITY_GENERALLY_WITHIN_30_DAYS_AFTER_WINDOW_SUBJECT_TO_EXCEPTIONS",
-      "backup_retention": "RESIDUAL_ROTATIONAL_BACKUPS_MAY_PERSIST_UNTIL_NATURAL_RETENTION_EXPIRY; EXACT_VALUES_ARE_IN_ANNEX_5_AVAILABLE_ON_REQUEST",
-      "technical_logging": "DPA_ACKNOWLEDGES_OPERATIONAL_AND_SECURITY_LOGGING_BUT_PUBLIC_PAGE_DOES_NOT_FIX_ACCOUNT_SPECIFIC_FIELDS_OR_RETENTION",
-      "toms": "PUBLIC_DPA_LISTS_REFERENCE_CONTROLS_FOR_ACCESS, SEGREGATION, NETWORK_SECURITY, LOGGING/MONITORING, BACKUP/RECOVERY, INCIDENT_RESPONSE AND DELETION"
+      "sha256": "40391f30b73a2a20182bc2c1e38b65d515c4d4d65dd2c412b76c0592767d024f"
     },
-    "processor_contract_status": "PUBLIC_STANDARD_DPA_FOUND_ACCOUNT_SPECIFIC_ROLE_CHAIN_ANNEX4_ANNEX5_LOGGING_AND_BACKUP_BEHAVIOR_PENDING_EXTERNAL_CONFIRMATION",
-    "account_holder_controller_alignment_status": "OPEN_DO_NOT_INFER",
-    "project_applicant_controller_alignment_status": "OPEN_DO_NOT_INFER",
-    "subprocessor_status": "CATEGORIES_KNOWN_NOMINAL_LIST_OPEN_FROM_ANNEX_4",
-    "transfer_status": "STANDARD_DPA_RULE_KNOWN_ACCOUNT_SPECIFIC_SUBPROCESSOR_LOCATIONS_OPEN",
-    "log_retention_status": "OPEN_ACCOUNT_SPECIFIC_FIELDS_AND_DURATION_NOT_PUBLICLY_FIXED",
-    "backup_deletion_status": "STANDARD_DPA_RULE_KNOWN_EXACT_ANNEX_5_VALUES_OPEN"
+    "annex_4": {
+      "status": "FROZEN_NOMINAL_SUBPROCESSOR_BASELINE_ACTIVE_SERVICE_SUBSET_STILL_TO_VERIFY",
+      "sha256": "69b5491a9fc4842af858b7e58dec88599025229014346eb466ff762912b32108"
+    },
+    "annex_5": {
+      "status": "FROZEN_STANDARD_SHARED_HOSTING_RETENTION_BASELINE_ACCOUNT_OVERRIDE_STILL_TO_VERIFY",
+      "sha256": "09d8c6a95427d4716ffa6dccc0ae5e054a074b3a8a861085c6ad89984d9c485d",
+      "standard_backup_retention_max_days": 92,
+      "production_data_after_export_window_max_days": 15,
+      "residual_backup_after_production_deletion_max_days": 92,
+      "override_note": "commercial offer, Service Order, cPanel or separate technical annex may set different account values"
+    },
+    "raw_access_logging": {
+      "provider_field_set_confirmed": true,
+      "may_include": [
+        "real visitor IP",
+        "exact timestamp",
+        "HTTP method",
+        "full URL including query string",
+        "Referer",
+        "User-Agent",
+        "response code",
+        "transferred size",
+        "CF-Connecting-IP/X-Forwarded-For-derived real IP where applicable",
+        "CF-Ray-ID where applicable"
+      ],
+      "current_eucons_cpanel_archive_retention": "OPEN_ACCOUNT_INSPECTION_REQUIRED",
+      "current_eucons_log_access_controls": "OPEN_ACCOUNT_INSPECTION_REQUIRED",
+      "hard_guardrail": "questionnaire answers and direct identifiers MUST NEVER be placed in URL query strings"
+    }
+  },
+  "privacy_and_security_requirements_before_activation": [
+    "determine and approve the actual controller and operational privacy contact from first-party authority evidence",
+    "approve lawful basis/LIA, Article 13 notice, DPIA screening/decision, retention schedule and rights procedure",
+    "document the controller/processor/subprocessor chain and applicable instructions",
+    "verify the active-service subset of the frozen Annex 4 baseline where needed for the final processor map",
+    "inspect current eucons.ro cPanel Raw Access retention/archive setting and access controls",
+    "verify any account-specific Annex 5 override against commercial order/cPanel/technical annex",
+    "verify research-only store is outside webroot, isolated from CRM/commercial storage, encrypted/restricted as approved and accessible only to authorised research roles",
+    "verify request bodies, questionnaire answers and raw Idempotency-Key are absent from provider/application logs",
+    "prove provider-bound deletion and backup-rotation behavior including non-restoration into ordinary live processing",
+    "verify HTTPS and exact-origin CORS on the actual endpoint",
+    "run provider-bound TEST TWIN browser-to-HTTP-to-isolated-store-to-immutable-export-to-NF06 smoke while keeping TEST TWIN permanently NON_EVIDENCE",
+    "obtain explicit user approval before any external deploy or real collection activation"
+  ],
+  "current_open_operational_gates": {
+    "controller_and_privacy_contact": "OPEN",
+    "lawful_basis_article13_dpia_retention_rights_approval": "OPEN",
+    "controller_processor_subprocessor_chain": "OPEN",
+    "current_cpanel_raw_access_retention_and_access": "OPEN",
+    "account_specific_annex_5_override": "OPEN",
+    "research_only_store_isolation_encryption_access": "OPEN",
+    "provider_bound_deletion_backup_execution": "OPEN",
+    "provider_bound_test_twin_smoke": "OPEN",
+    "real_primary_response_batch": "OPEN"
   },
   "authorization": {
     "merge": false,
