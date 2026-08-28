@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "id": "R11-FUNNEL-DIAGNOSTICS-001",
+  "engine_id": "EUCONS_R11_CLIENT_FINDER_FUNNEL_DIAGNOSTICS",
+  "product": "EUCONS_COMMERCIAL_OS",
+  "status": "CANONICAL",
+  "purpose": "Project validated R11 funnel analytics into a deterministic internal operator diagnostic that explains evidence/cohort state and numeric availability without creating public reporting or performance claims.",
+  "source_contract_id": "R11-FUNNEL-ANALYTICS-001",
+  "source_engine_id": "EUCONS_R11_CLIENT_FINDER_FUNNEL_ANALYTICS",
+  "source_mode": "VALIDATED_R11_FUNNEL_SNAPSHOT_ONLY",
+  "diagnostic_states": {
+    "UNKNOWN_NON_EVIDENCE": {
+      "diagnostic_state": "UNKNOWN_NON_EVIDENCE",
+      "counts_mode": "UNKNOWN",
+      "rates_mode": "UNKNOWN",
+      "reason_codes": [
+        "NON_EVIDENCE_NUMERIC_OUTPUT_WITHHELD"
+      ]
+    },
+    "COUNTS_ONLY_OPEN_COHORT": {
+      "diagnostic_state": "COUNTS_ONLY_OPEN_COHORT",
+      "counts_mode": "NUMERIC",
+      "rates_mode": "UNKNOWN",
+      "reason_codes": [
+        "REAL_TELEMETRY_COUNTS_AVAILABLE",
+        "OPEN_COHORT_RATES_WITHHELD"
+      ]
+    },
+    "CLOSED_COHORT_REAL_TELEMETRY": {
+      "diagnostic_state": "RATES_AVAILABLE_INTERNAL_ONLY",
+      "counts_mode": "NUMERIC",
+      "rates_mode": "NUMERIC_OR_ZERO_DENOMINATOR_UNKNOWN",
+      "reason_codes": [
+        "CLOSED_REAL_COHORT_COUNTS_AVAILABLE",
+        "CLOSED_REAL_COHORT_RATES_AVAILABLE_INTERNAL_ONLY"
+      ]
+    }
+  },
+  "operator_policy": {
+    "internal_only": true,
+    "performance_claims_enabled": false,
+    "benchmarking_enabled": false,
+    "ranking_enabled": false,
+    "trend_claims_enabled": false,
+    "forecasting_enabled": false,
+    "conversion_claims_enabled": false,
+    "public_copy_generation_enabled": false,
+    "diagnostic_interpretation": "DESCRIPTIVE_AVAILABILITY_ONLY"
+  },
+  "privacy": {
+    "forbidden_keys": [
+      "email",
+      "phone",
+      "contact_name",
+      "organization_name",
+      "legal_name",
+      "message",
+      "ip",
+      "ip_address",
+      "user_agent",
+      "full_url",
+      "referrer_url",
+      "raw_payload",
+      "answers"
+    ],
+    "raw_pii_forbidden": true
+  },
+  "external_boundaries": {
+    "network_fetch": false,
+    "transport_enabled": false,
+    "persistence_enabled": false,
+    "crm_write_enabled": false,
+    "pipeline_write_enabled": false,
+    "offer_send_enabled": false,
+    "outreach_enabled": false,
+    "public_reporting_enabled": false
+  },
+  "output": {
+    "schema_version": 1,
+    "internal_only": true,
+    "unknown_value": "UNKNOWN"
+  }
+}
