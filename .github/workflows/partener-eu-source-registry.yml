@@ -2,14 +2,27 @@ name: PARTENER.EU Verified Source Registry
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'partener-eu/ingest/source_registry.json'
+      - 'partener-eu/ingest/source_registry_probe.py'
+      - 'partener-eu/ingest/interreg_programming_intelligence.py'
+      - 'partener-eu/ops/test_source_registry_low_info.py'
+      - 'partener-eu/ops/test_source_registry_alias_fallback.py'
+      - 'partener-eu/ops/test_source_registry_external_expansion.py'
+      - 'partener-eu/ops/test_interreg_programming_intelligence.py'
+      - '.github/workflows/partener-eu-source-registry.yml'
   push:
     branches: [main]
     paths:
       - 'partener-eu/ingest/source_registry.json'
       - 'partener-eu/ingest/source_registry_probe.py'
+      - 'partener-eu/ingest/interreg_programming_intelligence.py'
       - 'partener-eu/ops/test_source_registry_low_info.py'
       - 'partener-eu/ops/test_source_registry_alias_fallback.py'
       - 'partener-eu/ops/test_source_registry_external_expansion.py'
+      - 'partener-eu/ops/test_interreg_programming_intelligence.py'
       - '.github/workflows/partener-eu-source-registry.yml'
   schedule:
     - cron: '23 */2 * * *'
@@ -38,6 +51,9 @@ jobs:
 
       - name: Regression — external source and future-programming taxonomy stays fail-closed
         run: python partener-eu/ops/test_source_registry_external_expansion.py
+
+      - name: Regression — Interreg programming dates override stale open copy
+        run: python partener-eu/ops/test_interreg_programming_intelligence.py
 
       - name: Probe classified official sources without changing facts
         run: python partener-eu/ingest/source_registry_probe.py
@@ -68,6 +84,7 @@ jobs:
           PY
 
       - name: Persist source health ledger and resolution tasks conflict-safe
+        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
