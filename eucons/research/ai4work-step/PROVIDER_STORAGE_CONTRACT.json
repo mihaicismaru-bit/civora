@@ -1,10 +1,10 @@
 {
-  "schema_version": "eucons.research_storage_contract.v0.5",
+  "schema_version": "eucons.research_storage_contract.v0.6",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "controller": {
     "legal_name": null,
     "cui": null,
-    "status": "UNRESOLVED_BEFORE_COLLECTION",
+    "status": "EXTERNAL_CONFIRMATION_REQUESTED_BEFORE_COLLECTION",
     "privacy_contact": "OPEN_BEFORE_PRODUCTION",
     "determination_reference": "CONTROLLER_DETERMINATION_DRAFT.json"
   },
@@ -30,7 +30,7 @@
     "same_response_id_different_body_or_channel": "FAIL_CLOSED",
     "repository_persistence": "FORBIDDEN",
     "direct_identifiers": "FORBIDDEN_IN_ANALYTICAL_STORE",
-    "analytical_free_text": "NOT_COLLECTED_IN_CURRENT_PREPRODUCTION_INSTRUMENT"
+    "analytical_free_text": "NOT_COLLECTED_IN_CURRENT_INSTRUMENT"
   },
   "reference_adapter": {
     "file": "research_storage.py",
@@ -38,6 +38,19 @@
     "purpose": "local test/reference only",
     "production_use": "FORBIDDEN",
     "idempotent_reference_path": "append_idempotent"
+  },
+  "php_candidate_binding": {
+    "file": "eucons/runtime/php/src/ResearchRuntime.php",
+    "dispatcher": "eucons/runtime/php/public/index.php",
+    "route": "/research/ai4work/v1/submit",
+    "endpoint": "https://api.eucons.ro/research/ai4work/v1/submit",
+    "status": "IMPLEMENTED_ON_PR_BRANCH_PENDING_EXACT_HEAD_CI_AND_PROVIDER_BOUND_TEST_TWIN",
+    "storage_strategy": "FILESYSTEM_ATOMIC_JSON_OUTSIDE_WEBROOT_SEPARATE_FROM_EUCONS_DATA_ROOT",
+    "commercial_runtime_calls": "FORBIDDEN_ON_RESEARCH_ROUTE; CRM/lead/mail runtimes are not invoked by research handler",
+    "activation": "FAIL_CLOSED_BY_CONTRACT_PLUS_MANIFEST_PLUS_EXPLICIT_USER_APPROVAL_REFERENCE_PLUS_AI4WORK_RESEARCH_PROD_ENABLED=1",
+    "rights_controls": "receipt lookup, bounded holds, live erasure, stale replay block and maximum-24-hour opaque replay-marker expiry",
+    "test_twin": "eucons/validation/test_php_research_runtime.php; synthetic engineering fixtures only; NON_EVIDENCE; no promotion path",
+    "provider_validation": "NOT_YET_RUN_ON_ACTUAL_EUCONS_ACCOUNT"
   },
   "candidate_hosting_processor_framework": {
     "provider": "CLAUS WEB SRL",
@@ -58,38 +71,43 @@
   "production_binding_requirements": [
     "freeze and approve the actual controller determination before any provider/controller binding is claimed",
     "prove the actual eucons.ro hosting account/order is the Claus Web service covered by the reviewed DPA",
-    "obtain/retain the applicable DPA/contract acceptance evidence for the determined controller or the legally documented party authorized to instruct the processor; do not assume EUROCONSULT SRL is that party",
+    "obtain/retain the applicable DPA/contract acceptance evidence for the determined controller or the legally documented party authorized to instruct the processor",
     "document the legal relationship between the determined controller, the hosting-account holder and Claus Web",
     "obtain and verify current nominal Annex 4 subprocessor list for the actual service",
     "obtain and verify Annex 5/account-specific backup retention and deletion/restore behavior",
-    "separate research database/files and credentials from CRM and commercial runtime",
+    "provider-bound prove research root is outside document root and separate from commercial EUCONS_DATA_ROOT",
     "HTTPS endpoint with CORS limited to https://eucons.ro and https://www.eucons.ro",
     "server-side schema and direct-identifier validation before persistence",
     "retry-safe idempotency preserving one analytical row per submit attempt",
-    "bind each accepted response to an opaque recruitment_channel_id from the frozen approved channel register without using referrer/UTM/cookie/IP/device/CRM tracking",
-    "encryption in transit and at rest where supported by provider",
+    "bind each accepted response to an opaque recruitment_channel_id from the frozen approved channel register without referrer/UTM/cookie/IP/device/CRM tracking",
+    "verify encryption in transit and document at-rest controls available on actual provider plan",
     "role-based access limited to designated research staff",
     "verify actual reverse-proxy/application logging and retention so request bodies/raw idempotency keys are not logged and IP/device metadata never enters analytical exports",
-    "bind the approved retention schedule to live storage and provider backup rotation and prove deletion execution",
+    "bind the approved retention schedule to live storage and provider backup rotation and prove deletion execution and 24h maximum replay-marker expiry",
     "immutable raw export with SHA-256 before analytical cleaning",
-    "NF06 export must pass PRIMARY_RESPONSE_INGEST_CONTRACT"
+    "NF06 export must pass PRIMARY_RESPONSE_INGEST_CONTRACT",
+    "browser-to-HTTP-to-store-to-export-to-NF06 provider-bound TEST TWIN smoke must PASS before real collection"
   ],
   "repository_validation": {
-    "candidate_pr": 724,
+    "candidate_pr": 739,
     "status_rule": "exact-head CI must be green after the last code change; repository success never substitutes for provider-bound production validation",
-    "result": "PENDING_EXACT_HEAD_AFTER_CHANNEL_PROVENANCE_CHANGE"
+    "result": "PENDING_EXACT_HEAD_AFTER_PHP_RESEARCH_BINDING_AND_ARTICLE13_CHANGES"
   },
   "go_no_go": {
-    "operator_identity": "OPEN_FAIL_CLOSED",
+    "controller_identity": "EXTERNAL_CONFIRMATION_REQUESTED_FAIL_CLOSED",
     "privacy_contact": "OPEN",
     "hosting_processor_public_framework": "CLOSED_AT_PUBLIC_DPA_LEVEL",
-    "hosting_account_contract_and_annexes": "OPEN",
-    "controller_hosting_account_processor_role_chain": "OPEN",
-    "actual_server_log_retention": "OPEN",
-    "production_research_store": "OPEN",
-    "retention_execution": "OPEN",
-    "channel_provenance_model": "IMPLEMENTED_IN_REFERENCE_CANDIDATE_PENDING_EXACT_HEAD_CI",
-    "test_reference_adapter": "PENDING_EXACT_HEAD_CI_AFTER_CHANNEL_PROVENANCE_CHANGE",
+    "hosting_account_identity": "EVIDENCE_FOUND_ACCOUNT_BINDING_ESTABLISHED_PROVIDER_ROLE_CHAIN_NOT_INFERRED",
+    "hosting_account_contract_and_annexes": "OPEN_EXTERNAL_PROVIDER_CONFIRMATION",
+    "controller_hosting_account_processor_role_chain": "OPEN_EXTERNAL_CONFIRMATION",
+    "actual_server_log_retention": "OPEN_EXTERNAL_PROVIDER_BOUND_VALIDATION",
+    "production_research_store_code": "IMPLEMENTED_ON_PR_BRANCH",
+    "production_research_store_provider_binding": "OPEN_EXTERNAL_PROVIDER_BOUND_VALIDATION",
+    "retention_policy": "TECHNICALLY_COMPLETE_PENDING_CONTROLLER_ACCEPTANCE",
+    "retention_execution": "OPEN_EXTERNAL_PROVIDER_BOUND_VALIDATION",
+    "channel_provenance_model": "IMPLEMENTED_PENDING_EXACT_HEAD_CI",
+    "test_reference_adapter": "IMPLEMENTED_NON_PROD_PENDING_EXACT_HEAD_CI",
+    "php_candidate_binding": "IMPLEMENTED_PENDING_EXACT_HEAD_CI_AND_PROVIDER_BOUND_TEST_TWIN",
     "status": "NO_GO_FOR_REAL_COLLECTION"
   }
 }
