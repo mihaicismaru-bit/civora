@@ -15,6 +15,7 @@ PROD_EVIDENCE_CLASS = "PROD_REAL_EVIDENCE"
 TEST_TWIN_EVIDENCE_CLASS = "TEST_TWIN_NON_EVIDENCE"
 PROD_FRAME_STATUS = "APPROVED_FOR_PROD"
 TEST_TWIN_FRAME_STATUS = "TEST_TWIN_ONLY"
+TARGET_REGIONS = ("Centru", "Sud-Muntenia", "Sud-Vest Oltenia")
 EXPECTED_RECORD_KEYS = {
     "schema_version",
     "research_id",
@@ -251,6 +252,11 @@ def build_preingest_manifest(
     forms = load_forms()
     response_ids: set[str] = set()
     form_counts = {form_id: 0 for form_id in sorted(ALLOWED_FORMS)}
+    region_counts: Counter[str] = Counter()
+    form_region_counts: dict[str, Counter[str]] = {
+        form_id: Counter({region: 0 for region in TARGET_REGIONS}) for form_id in sorted(ALLOWED_FORMS)
+    }
+    region_channel_ids: dict[str, set[str]] = {region: set() for region in TARGET_REGIONS}
     channel_counts: Counter[str] = Counter()
     received_values: list[datetime] = []
     for record in records:
@@ -266,15 +272,23 @@ def build_preingest_manifest(
         if rid in response_ids:
             raise NF06PreingestError("duplicate response_id inside batch")
         response_ids.add(rid)
-        form_counts[record["form_id"]] += 1
-        channel_counts[record["recruitment_channel_id"]] += 1
+        form_id = record["form_id"]
+        region = record["profile"]["region"]
+        if region not in TARGET_REGIONS:
+            raise NF06PreingestError("record region outside AI4WORK target regions")
+        channel_id = record["recruitment_channel_id"]
+        form_counts[form_id] += 1
+        region_counts[region] += 1
+        form_region_counts[form_id][region] += 1
+        region_channel_ids[region].add(channel_id)
+        channel_counts[channel_id] += 1
         received_values.append(received)
 
     evidence_class = PROD_EVIDENCE_CLASS if prod else TEST_TWIN_EVIDENCE_CLASS
     dominant_channel_share = max(channel_counts.values()) / len(records)
     frame_sha = hashlib.sha256(canonical_json_bytes(collection_frame)).hexdigest()
     return {
-        "schema_version": "eucons.ai4work_nf06_preingest_manifest.v0.3",
+        "schema_version": "eucons.ai4work_nf06_preingest_manifest.v0.4",
         "research_id": RESEARCH_ID,
         "handoff_stage": "NF06_SOURCE_PREFLIGHT",
         "evidence_class": evidence_class,
@@ -287,6 +301,14 @@ def build_preingest_manifest(
         "forms_definition_sha256": collection_frame["forms_definition_sha256"],
         "record_count": len(records),
         "form_counts": form_counts,
+        "region_counts": {region: region_counts.get(region, 0) for region in TARGET_REGIONS},
+        "form_region_counts": {
+            form_id: {region: form_region_counts[form_id].get(region, 0) for region in TARGET_REGIONS}
+            for form_id in sorted(ALLOWED_FORMS)
+        },
+        "region_channel_ids": {
+            region: sorted(region_channel_ids[region]) for region in TARGET_REGIONS
+        },
         "channel_counts": dict(sorted(channel_counts.items())),
         "dominant_channel_share": dominant_channel_share,
         "received_at_min": min(received_values).isoformat(),
@@ -295,11 +317,12 @@ def build_preingest_manifest(
         "instrument_content_hashes_validated": True,
         "collection_frame_exact_field_allowlist_validated": True,
         "channel_membership_validated_against_collection_frame": True,
+        "method_coverage_aggregates_emitted": True,
         "direct_identifiers_collected": False,
         "crm_linkage": "FORBIDDEN",
         "commercial_tracking": "FORBIDDEN",
         "prod_promotion_eligible": prod,
-        "scope_boundary": "This manifest validates source-batch integrity, exact collection-frame identity, frozen instrument content, opaque recruitment-channel provenance and eligibility for NF06 handoff only; it does not claim that NF06 ingestion, synthesis, ranking or QA has executed.",
+        "scope_boundary": "This manifest validates source-batch integrity, exact collection-frame identity, frozen instrument content, opaque recruitment-channel provenance and eligibility for NF06 handoff only. Region/form coverage aggregates are internal method-QA inputs, not population estimates or need evidence; it does not claim that NF06 ingestion, synthesis, ranking or QA has executed.",
     }
 
 
