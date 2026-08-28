@@ -10,6 +10,7 @@
     "client_finder_engine": "eucons/prospects/client_finder_engine.py",
     "prospect_match_contract": "eucons/prospects/prospect_opportunity_match_contract.json",
     "prospect_match_engine": "eucons/prospects/prospect_opportunity_match.py",
+    "opportunity_matching_contract": "eucons/opportunities/matching_contract.json",
     "service_registry": "eucons/services/service_registry.json",
     "offer_contract": "eucons/offers/offer_contract.json",
     "privacy_security_contract": "eucons/security/privacy_security_contract.json"
@@ -23,6 +24,9 @@
     "require_selected_opportunity": true,
     "require_recommended_canonical_service": true,
     "require_source_bound_facts": true,
+    "required_opportunity_authority_state": "OFFICIAL_SOURCE_VERIFIED",
+    "required_official_fact_classes": ["status", "deadline"],
+    "partener_role": "DISCOVERY_ONLY",
     "hold_nonmatched_records": true,
     "hold_conflict_before_drafting": true,
     "hold_suppression_before_drafting": true,
@@ -37,6 +41,7 @@
     "conflict_handling": "HOLD",
     "fact_source_refs_required": true,
     "material_funding_fact_official_source_required": true,
+    "selected_opportunity_requires_official_source_binding": true,
     "never_claim_eligibility_award_probability_or_buying_intent": true
   },
   "pack_components": {
