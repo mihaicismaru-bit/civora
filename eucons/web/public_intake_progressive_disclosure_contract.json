@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "id": "EUCONS-R04-PUBLIC-INTAKE-PROGRESSIVE-DISCLOSURE-001",
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "R04_PUBLIC_INTAKE_PROGRESSIVE_DISCLOSURE",
+  "status": "DRAFT_FAIL_CLOSED",
+  "source_bindings": {
+    "jtbd_contract_id": "R04-JTBD-UX-001",
+    "information_architecture_phase": "E06",
+    "journey_surface": "JTBD_JOURNEY",
+    "lead_handoff_route_id": "project_evaluation",
+    "lead_handoff_path": "/evaluare-proiect/"
+  },
+  "first_stage_policy": {
+    "mode": "LOCAL_CONTEXT_CAPTURE_ONLY",
+    "submission_enabled": false,
+    "persistence_enabled": false,
+    "person_level_pii_allowed": false,
+    "contact_details_allowed": false,
+    "attachments_allowed": false,
+    "material_claims_allowed": false,
+    "eligibility_state": "NOT_ASSESSED",
+    "outcome": "LOCAL_ROUTE_SELECTION_ONLY",
+    "external_action": "NO_EXTERNAL_ACTION",
+    "forbidden_fields": [
+      "contact_details",
+      "contact_name",
+      "first_name",
+      "last_name",
+      "email",
+      "phone",
+      "telephone",
+      "mobile",
+      "cnp",
+      "personal_id",
+      "person_address",
+      "recipient",
+      "attachment",
+      "attachments",
+      "file",
+      "files",
+      "document_upload"
+    ],
+    "free_text_fields": [
+      "message"
+    ],
+    "free_text_rule": "NO_PERSON_LEVEL_PII_OR_CONTACT_DETAILS"
+  },
+  "journeys": [
+    {
+      "journey_id": "JRN-FUNDING-FIT",
+      "route_id": "funding_fit",
+      "path": "/ce-finantare-mi-se-potriveste/",
+      "allowed_first_stage_fields": [
+        "organization_name",
+        "audience_id",
+        "investment_terms"
+      ]
+    },
+    {
+      "journey_id": "JRN-PROJECT-REVIEW",
+      "route_id": "project_review",
+      "path": "/verifica-proiectul/",
+      "allowed_first_stage_fields": [
+        "organization_name",
+        "audience_id",
+        "project_stage",
+        "investment_terms"
+      ]
+    },
+    {
+      "journey_id": "JRN-IMPLEMENTATION",
+      "route_id": "implementation_help",
+      "path": "/proiect-in-implementare/",
+      "allowed_first_stage_fields": [
+        "organization_name",
+        "audience_id",
+        "project_stage",
+        "message"
+      ]
+    },
+    {
+      "journey_id": "JRN-RECOVERY",
+      "route_id": "recovery_help",
+      "path": "/proiect-cu-probleme/",
+      "allowed_first_stage_fields": [
+        "organization_name",
+        "audience_id",
+        "project_stage",
+        "message"
+      ]
+    }
+  ],
+  "contact_handoff": {
+    "required": true,
+    "mode": "SEPARATE_HUMAN_CONTACT_HANDOFF_REQUIRED",
+    "automatic": false,
+    "contact_details_allowed_only_after_handoff": true,
+    "lead_route_id": "project_evaluation",
+    "lead_path": "/evaluare-proiect/"
+  },
+  "boundaries": {
+    "network_submission_enabled": false,
+    "persistence_enabled": false,
+    "analytics_transport_enabled": false,
+    "crm_write_enabled": false,
+    "provider_write_enabled": false,
+    "external_message_enabled": false,
+    "offer_send_enabled": false,
+    "file_upload_enabled": false,
+    "automatic_contact_enabled": false,
+    "research_crm_separation": true
+  },
+  "decision": {
+    "state": "PASS_POLICY_GUARD_ONLY",
+    "runtime_materialization_authorized": false,
+    "external_action_authorized": false,
+    "next_gate": "SEPARATE_PUBLIC_INTAKE_RUNTIME_IMPLEMENTATION_REVIEW_REQUIRED"
+  }
+}
