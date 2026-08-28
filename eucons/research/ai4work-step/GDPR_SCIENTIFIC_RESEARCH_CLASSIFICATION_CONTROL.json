@@ -1,0 +1,61 @@
+{
+  "schema_version": "eucons.ai4work_scientific_research_classification.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "date": "2026-08-28",
+  "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
+  "status": "NO_SCIENTIFIC_RESEARCH_SPECIAL_RULES_CLAIMED",
+  "collection_enabled": false,
+  "legal_classification": {
+    "scientific_research_status": "NOT_ASSERTED",
+    "article_89_special_derogation_reliance": false,
+    "scientific_research_further_processing_compatibility_reliance": false,
+    "scientific_research_rights_limitation_reliance": false,
+    "rule": "The operational use of the words research, needs analysis, survey, evidence or NF-RUN does not by itself classify AI4WORK processing as scientific research within the meaning of the GDPR. The current PROD design relies on ordinary GDPR lawful-basis, transparency, rights, minimisation, retention and processor controls and claims no special scientific-research compatibility presumption or rights limitation."
+  },
+  "edpb_guidance_context": {
+    "reference": "EDPB Guidelines 1/2026 on processing of personal data for scientific research purposes",
+    "adoption_date": "2026-04-15",
+    "consultation_closed": "2026-06-25",
+    "status_used_here": "ADOPTED_VERSION_FOR_PUBLIC_CONSULTATION_CURRENTLY_AVAILABLE",
+    "official_url": "https://www.edpb.europa.eu/public-consultations/guidelines-12026-on-processing-of-personal-data-for-scientific-research_en",
+    "indicative_factors": [
+      "methodical and systematic approach",
+      "adherence to ethical standards",
+      "verifiability and transparency",
+      "autonomy and independence",
+      "objectives of the research",
+      "potential to contribute to existing scientific knowledge or apply existing knowledge in novel ways"
+    ],
+    "boundary": "The EDPB factors are used as a guard against automatic classification from labels. This control does not itself determine that AI4WORK is or is not scientific research and does not replace controller/legal review."
+  },
+  "current_ai4work_control_position": {
+    "purpose": "needs analysis for an AI4WORK STEP project concept and funding application",
+    "ordinary_lawful_basis_assessment_reference": "GDPR_LIA_DRAFT.json",
+    "ordinary_rights_procedure_reference": "GDPR_DATA_SUBJECT_RIGHTS_PROCEDURE_DRAFT.json",
+    "special_research_privileges_needed_for_current_design": false,
+    "reason": "The current minimised design can remain fail-closed under ordinary GDPR rules without relying on scientific-research derogations or compatibility presumptions."
+  },
+  "change_control": {
+    "trigger": "Any proposal to rely on scientific-research status for purpose compatibility, broader reuse, storage, transparency, data-subject-rights limitations or another GDPR special rule.",
+    "required_before_change": [
+      "documented controller determination and approval",
+      "separate legal assessment against the then-current EDPB guidance and applicable Union/Romanian law",
+      "documented assessment of the six indicative scientific-research factors against the actual AI4WORK processing",
+      "identification of the exact legal provision relied upon rather than a generic citation to Article 89",
+      "review of safeguards, Article 13 wording, rights procedure, retention and DPIA impact",
+      "immutable approval reference and SHA-256 before any PROD reliance"
+    ],
+    "default_if_missing": "FAIL_CLOSED_NO_SPECIAL_SCIENTIFIC_RESEARCH_RELIANCE"
+  },
+  "prohibited_shortcuts": [
+    "inferring scientific-research status from the repository folder name or the word research",
+    "using Article 89 as a generic lawful basis",
+    "limiting access, erasure, restriction or objection merely because the activity is called research",
+    "extending retention merely because the activity is called research",
+    "reusing real respondent data for a materially different purpose under an unapproved scientific-research compatibility claim"
+  ],
+  "test_twin": {
+    "classification": "TEST_TWIN_NON_EVIDENCE",
+    "rule": "Synthetic engineering fixtures cannot establish scientific-research status, legal eligibility or empirical need."
+  }
+}
