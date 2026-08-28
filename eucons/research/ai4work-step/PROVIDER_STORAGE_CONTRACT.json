@@ -86,7 +86,7 @@
     "server-side schema and direct-identifier validation before persistence",
     "retry-safe idempotency preserving one analytical row per submit attempt",
     "bind each accepted response to an opaque recruitment_channel_id from the frozen approved channel register without referrer/UTM/cookie/IP/device/CRM tracking",
-    "verify encryption in transit and document at-rest controls available on the actual provider plan",
+    "verify encryption in transit and document at-rest controls available on actual provider plan",
     "role-based access limited to designated research staff",
     "verify actual reverse-proxy/application logging and retention so request bodies/raw idempotency keys are not logged and IP/device metadata never enters analytical exports",
     "bind the approved retention schedule to live storage and provider backup rotation and prove deletion execution plus the controller-approved replay-marker lifecycle",
@@ -97,8 +97,7 @@
   "repository_validation": {
     "candidate_pr": 739,
     "status_rule": "exact-head CI must be green after the last code change; repository success never substitutes for provider-bound production validation",
-    "previous_green_head": "70cd1add45c2189915fe3505a9d8d68839ccb1bf",
-    "result": "THIS_SUCCESSOR_REQUIRES_FRESH_EXACT_HEAD_CI"
+    "result": "READ_LIVE_FROM_GITHUB_EXACT_HEAD_DO_NOT_CACHE_CI_STATE_IN_THIS_CONTRACT"
   },
   "go_no_go": {
     "controller_identity": "UNRESOLVED_BEFORE_COLLECTION",
@@ -114,8 +113,8 @@
     "production_research_store_provider_binding": "OPEN_EXTERNAL_PROVIDER_BOUND_VALIDATION",
     "retention_policy": "TECHNICALLY_COMPLETE_PENDING_CONTROLLER_ACCEPTANCE",
     "retention_execution": "OPEN_EXTERNAL_PROVIDER_BOUND_VALIDATION",
-    "channel_provenance_model": "IMPLEMENTED_CURRENT_BRANCH_FRESH_EXACT_HEAD_CI_REQUIRED_AFTER_UPDATE",
-    "test_reference_adapter": "IMPLEMENTED_NON_PROD_CURRENT_BRANCH_FRESH_EXACT_HEAD_CI_REQUIRED_AFTER_UPDATE",
+    "channel_provenance_model": "IMPLEMENTED_CURRENT_BRANCH_EXACT_HEAD_CI_REQUIRED_AFTER_ANY_CHANGE",
+    "test_reference_adapter": "IMPLEMENTED_NON_PROD_CURRENT_BRANCH_EXACT_HEAD_CI_REQUIRED_AFTER_ANY_CHANGE",
     "php_candidate_binding": "IMPLEMENTED_CURRENT_BRANCH_PROVIDER_BOUND_TEST_TWIN_OPEN",
     "status": "NO_GO_FOR_REAL_COLLECTION"
   }
