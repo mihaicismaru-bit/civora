@@ -287,6 +287,8 @@ def main():
             "semantic_hash_changed": x.get("semantic_hash_changed"),
             "resolution_task_required": x.get("resolution_task_required"),
             "publish_material_fact_update": x.get("publish_material_fact_update"),
+            "error": x.get("error"),
+            "fallback_failures": x.get("fallback_failures"),
         }
         for x in out["sources"]
         if x.get("id") in declared_alias_ids
