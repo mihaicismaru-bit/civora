@@ -57,6 +57,40 @@ class ControllerDeterminationContractTests(unittest.TestCase):
         self.assertIsNone(self.contract["controller"])
         self.assertFalse(self.contract["approved"])
 
+    def test_disavowed_role_outreach_is_never_treated_as_active_evidence(self):
+        c = self.contract
+        contact = c["external_contact_state"]
+        self.assertEqual(contact["status"], "HOLD_WITHDRAWN_REQUESTS_NO_ACTIVE_AUTHORITY_REQUEST")
+        self.assertEqual(contact["project_leader_role_request"], "WITHDRAWN_BY_AUTHENTICATED_USER_2026_08_28")
+        self.assertEqual(contact["hosting_account_holder_role_request"], "WITHDRAWN_BY_AUTHENTICATED_USER_2026_08_28")
+        self.assertIn("cannot satisfy", contact["evidence_rule"].lower())
+
+        authority = c["known_evidence_boundaries"]["authority_request"].lower()
+        for phrase in ("disavowed", "request_withdrawn", "not active evidentiary requests", "must not be treated as controller approval"):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, authority)
+
+        matrix = {row["entity_reference"]: row for row in c["decision_matrix"]}
+        self.assertIn("WITHDRAWN", matrix["MYSMIS_PROJECT_LEADER_CONTROLLED_REFERENCE"]["legal_binding_reference"])
+        self.assertNotIn("REPLY_PENDING", matrix["MYSMIS_PROJECT_LEADER_CONTROLLED_REFERENCE"]["legal_binding_reference"])
+        self.assertIn("WITHDRAWN", matrix["HOSTING_ACCOUNT_HOLDER_PRIVATE_CONTROLLED_REFERENCE"]["legal_binding_reference"])
+
+    def test_provider_documentary_package_is_closed_but_account_binding_stays_open(self):
+        c = self.contract
+        provider_boundary = c["known_evidence_boundaries"]["hosting_provider"].lower()
+        self.assertIn("dpa v1.0 plus annex 4 and annex 5", provider_boundary)
+        self.assertIn("documentary annex 4/5", provider_boundary)
+        self.assertIn("closed", provider_boundary)
+        self.assertIn("account-specific cpanel raw access retention/access", provider_boundary)
+        self.assertIn("provider-bound deletion/backup", provider_boundary)
+
+        matrix = {row["entity_reference"]: row for row in c["decision_matrix"]}
+        provider = matrix["CLAUS_WEB_SRL"]
+        self.assertEqual(provider["identity_status"], "VERIFIED_FIRST_PARTY_SHARED_HOSTING_DPA_ANNEX4_ANNEX5_2026_08_28")
+        self.assertEqual(provider["status"], "ACCOUNT_CONFIGURATION_AND_BINDING_REQUIRED")
+        self.assertFalse(provider["purpose_decision_authority"])
+        self.assertFalse(provider["processor_instruction_authority"])
+
     def test_remaining_decision_facts_cover_actual_controller_authority(self):
         remaining = "\n".join(self.contract["remaining_decision_facts"]).lower()
         for phrase in (
