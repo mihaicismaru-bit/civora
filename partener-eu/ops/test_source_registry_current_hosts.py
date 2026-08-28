@@ -8,10 +8,7 @@ REGISTRY = ROOT / "partener-eu" / "ingest" / "source_registry.json"
 
 EXPECTED = {
     "SRC-OI-RESEARCH-POCIDIF": {
-        "approved_primary_urls": {
-            "https://newpoc.research.gov.ro/ro/categorie/108/pocidif-2021-2027",
-            "https://poc.mcid.gov.ro/ro/articol/4382/2021-2027-pocidif-2021-2027",
-        },
+        "primary_url": "https://newpoc.research.gov.ro/ro/categorie/108/pocidif-2021-2027",
         "required_aliases": {
             "https://poc.research.gov.ro/ro/articol/4382/2021-2027-pocidif-2021-2027",
             "https://www.poc.research.gov.ro/ro/articol/4382/2021-2027-pocidif-2021-2027",
@@ -20,10 +17,7 @@ EXPECTED = {
         "current_transport_candidate": "https://poc.mcid.gov.ro/ro/articol/4382/2021-2027-pocidif-2021-2027",
     },
     "SRC-OI-RESEARCH-HEALTH": {
-        "approved_primary_urls": {
-            "https://newpoc.research.gov.ro/ro/articol/4427/2021-2027-pos-2021-2027",
-            "https://poc.mcid.gov.ro/ro/articol/4427/2021-2027-pos-2021-2027",
-        },
+        "primary_url": "https://newpoc.research.gov.ro/ro/articol/4427/2021-2027-pos-2021-2027",
         "required_aliases": {
             "https://poc.research.gov.ro/ro/articol/4427/2021-2027-pos-2021-2027",
             "https://www.poc.research.gov.ro/ro/articol/4427/2021-2027-pos-2021-2027",
@@ -41,10 +35,10 @@ def main():
     for source_id, expected in EXPECTED.items():
         assert source_id in by_id, f"missing source: {source_id}"
         row = by_id[source_id]
-        assert row.get("url") in expected["approved_primary_urls"], (source_id, row.get("url"))
+        assert row.get("url") == expected["primary_url"], (source_id, row.get("url"))
         parsed = urlparse(row["url"])
         assert parsed.scheme == "https"
-        assert parsed.hostname in {"newpoc.research.gov.ro", "poc.mcid.gov.ro"}
+        assert parsed.hostname == "newpoc.research.gov.ro"
         assert row.get("tier") == "T1B"
         assert row.get("material_fact_use") is True
 
@@ -65,7 +59,7 @@ def main():
         }
     ]
     assert not stale_primary, f"legacy OI Research host still primary: {stale_primary}"
-    print("PASS OI Research source identities and declared official transport aliases")
+    print("PASS fixed OI Research canonical identities and declared official transport aliases")
 
 
 if __name__ == "__main__":
