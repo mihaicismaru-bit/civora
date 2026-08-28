@@ -4,8 +4,8 @@
 Consumes only the semantic reconciliation receipt. This adapter never parses web
 pages, never mutates the canonical opportunity bundle/staging ledger, and never
 publishes. It preserves upstream quarantine, deduplicates exact call identities by
-(call identifier, programme, authority URL), and blocks semantic drift before
-mapping eligible observations into the existing deterministic P11 candidate
+(call identifier, programme, normalized authority URL), and blocks semantic drift
+before mapping eligible observations into the existing deterministic P11 candidate
 staging contract.
 """
 from __future__ import annotations
@@ -48,11 +48,22 @@ def _text(value: Any, field: str) -> str:
     return text
 
 
-def _identity_payload(record: dict[str, Any]) -> dict[str, str]:
+def _upstream_identity_payload(record: dict[str, Any]) -> dict[str, str]:
+    """Match INTERREG_CALL_V1 identity bytes exactly; do not rewrite provenance."""
     return {
         "call_identifier": _text(record.get("call_identifier"), "call_identifier"),
         "programme": _text(record.get("programme"), "programme"),
-        "authority_url": normalize_url(_text(record.get("authority_url"), "authority_url")),
+        "authority_url": _text(record.get("authority_url"), "authority_url"),
+    }
+
+
+def _dedup_identity_payload(record: dict[str, Any]) -> dict[str, str]:
+    """Cross-programme dedup key uses normalized authority URL without changing evidence."""
+    upstream = _upstream_identity_payload(record)
+    return {
+        "call_identifier": upstream["call_identifier"],
+        "programme": upstream["programme"],
+        "authority_url": normalize_url(upstream["authority_url"]),
     }
 
 
@@ -84,7 +95,7 @@ def _validate_quarantine(rows: Any) -> list[dict[str, Any]]:
     return out
 
 
-def _validate_ready(record: dict[str, Any]) -> tuple[str, str, dict[str, str]]:
+def _validate_ready(record: dict[str, Any]) -> tuple[str, str, dict[str, str], dict[str, str]]:
     call_id = _text(record.get("call_identifier"), "call_identifier")
     programme = _text(record.get("programme"), f"{call_id}.programme")
     if record.get("reconciliation_status") != "PASS" or record.get("ready_for_staging") is not True:
@@ -102,16 +113,17 @@ def _validate_ready(record: dict[str, Any]) -> tuple[str, str, dict[str, str]]:
         _fail(f"{call_id}: non-admissible observation state reached staging")
 
     authority_url = _text(record.get("authority_url"), f"{call_id}.authority_url")
-    if not authority_url.startswith("https://") or normalize_url(authority_url) != authority_url.rstrip("/"):
-        _fail(f"{call_id}: authority URL is not canonical HTTPS")
+    if not authority_url.startswith("https://") or not normalize_url(authority_url):
+        _fail(f"{call_id}: authority URL is not canonical HTTPS evidence")
     for field in ("source_run_id", "fetched_at", "raw_hash", "semantic_fingerprint", "identity_fingerprint"):
         value = _text(record.get(field), f"{call_id}.{field}")
         if field in {"raw_hash", "semantic_fingerprint", "identity_fingerprint"} and not HEX64_RE.fullmatch(value):
             _fail(f"{call_id}: {field} must be sha256")
 
-    identity = _identity_payload(record)
-    if _sha256(identity) != record.get("identity_fingerprint"):
+    upstream_identity = _upstream_identity_payload(record)
+    if _sha256(upstream_identity) != record.get("identity_fingerprint"):
         _fail(f"{call_id}: identity fingerprint drift before staging")
+    dedup_identity = _dedup_identity_payload(record)
 
     facts = record.get("material_facts")
     if not isinstance(facts, dict):
@@ -127,7 +139,7 @@ def _validate_ready(record: dict[str, Any]) -> tuple[str, str, dict[str, str]]:
     }
     if facts != expected:
         _fail(f"{call_id}: material_facts drift from reconciled observation")
-    return call_id, programme, identity
+    return call_id, programme, upstream_identity, dedup_identity
 
 
 def build_staging_admission(reconciliation: dict[str, Any], bundle: dict[str, Any]) -> dict[str, Any]:
@@ -159,29 +171,32 @@ def build_staging_admission(reconciliation: dict[str, Any], bundle: dict[str, An
     if reconciliation.get("missing_proofs") != expected_missing:
         _fail("receipt downstream proof contract drift")
 
-    # Fail if the same exact call identity carries multiple semantic fingerprints.
-    # Identical repeat observations collapse deterministically before P11 staging.
-    by_identity: dict[str, dict[str, Any]] = {}
-    semantic_by_identity: dict[str, str] = {}
-    occurrences_by_identity: dict[str, int] = {}
+    by_dedup: dict[str, dict[str, Any]] = {}
+    semantic_by_dedup: dict[str, str] = {}
+    upstream_identity_by_dedup: dict[str, str] = {}
+    occurrences_by_dedup: dict[str, int] = {}
     for record in records:
         if not isinstance(record, dict):
             _fail("staging-ready Interreg row must be an object")
-        call_id, programme, identity = _validate_ready(record)
-        identity_fp = str(record["identity_fingerprint"])
+        call_id, programme, upstream_identity, dedup_identity = _validate_ready(record)
+        upstream_identity_fp = str(record["identity_fingerprint"])
+        dedup_fp = _sha256(dedup_identity)
         semantic_fp = str(record["semantic_fingerprint"])
-        if identity_fp in semantic_by_identity and semantic_by_identity[identity_fp] != semantic_fp:
-            _fail(f"{call_id}: semantic conflict for identical call identity")
-        semantic_by_identity[identity_fp] = semantic_fp
-        occurrences_by_identity[identity_fp] = occurrences_by_identity.get(identity_fp, 0) + 1
-        if identity_fp not in by_identity:
-            by_identity[identity_fp] = record
+        if dedup_fp in semantic_by_dedup and semantic_by_dedup[dedup_fp] != semantic_fp:
+            _fail(f"{call_id}: semantic conflict for identical normalized call identity")
+        if dedup_fp in upstream_identity_by_dedup and upstream_identity_by_dedup[dedup_fp] != upstream_identity_fp:
+            _fail(f"{call_id}: authority alias identity drift requires upstream reconcile")
+        semantic_by_dedup[dedup_fp] = semantic_fp
+        upstream_identity_by_dedup[dedup_fp] = upstream_identity_fp
+        occurrences_by_dedup[dedup_fp] = occurrences_by_dedup.get(dedup_fp, 0) + 1
+        if dedup_fp not in by_dedup:
+            by_dedup[dedup_fp] = record
         else:
-            prior = by_identity[identity_fp]
+            prior = by_dedup[dedup_fp]
             if _canonical_json(prior.get("material_facts")) != _canonical_json(record.get("material_facts")):
                 _fail(f"{call_id}: duplicate identity material facts diverged")
-            if _identity_payload(prior) != identity:
-                _fail(f"{call_id}: identity payload drift")
+            if _upstream_identity_payload(prior) != upstream_identity:
+                _fail(f"{call_id}: upstream identity payload drift")
             if str(prior.get("programme")) != programme:
                 _fail(f"{call_id}: programme drift")
 
@@ -189,11 +204,11 @@ def build_staging_admission(reconciliation: dict[str, Any], bundle: dict[str, An
     if not observed_at:
         _fail("reconciliation timestamp missing")
 
-    candidate_by_identity: dict[str, dict[str, Any]] = {}
-    for identity_fp, record in by_identity.items():
+    candidate_by_dedup: dict[str, dict[str, Any]] = {}
+    for dedup_fp, record in by_dedup.items():
         call_id = str(record["call_identifier"])
         programme = str(record["programme"])
-        candidate_by_identity[identity_fp] = {
+        candidate_by_dedup[dedup_fp] = {
             "source_url": str(record["authority_url"]),
             "programme": f"INTERREG::{programme}",
             "code": call_id,
@@ -201,22 +216,21 @@ def build_staging_admission(reconciliation: dict[str, Any], bundle: dict[str, An
             "source_id": AUTHORITY_CLASS,
         }
 
-    ledger = stage_candidates(bundle, candidate_by_identity.values(), observed_at)
+    ledger = stage_candidates(bundle, candidate_by_dedup.values(), observed_at)
     validate_staging_ledger(ledger)
     summary = ledger.get("summary") or {}
-    if summary.get("unique_candidates") != len(candidate_by_identity):
+    if summary.get("unique_candidates") != len(candidate_by_dedup):
         _fail("candidate staging did not preserve one deterministic row per exact call identity")
     if summary.get("ambiguous_review"):
         _fail("ambiguous canonical identity blocks staging admission")
     if summary.get("published") != 0:
         _fail("candidate staging attempted publication")
 
-    # Candidate IDs are deterministically recomputed from each deduplicated input.
     ledger_rows = {str(row.get("candidate_id")): row for row in ledger.get("rows") or []}
     admitted: list[dict[str, Any]] = []
-    for identity_fp in sorted(candidate_by_identity):
-        record = by_identity[identity_fp]
-        candidate = candidate_by_identity[identity_fp]
+    for dedup_fp in sorted(candidate_by_dedup):
+        record = by_dedup[dedup_fp]
+        candidate = candidate_by_dedup[dedup_fp]
         single = stage_candidates({"opportunities": [], "evidence": []}, [candidate], observed_at)
         candidate_id = str(single["rows"][0]["candidate_id"])
         staged = ledger_rows.get(candidate_id)
@@ -234,9 +248,10 @@ def build_staging_admission(reconciliation: dict[str, Any], bundle: dict[str, An
             "staging_disposition": staged.get("disposition"),
             "canonical_match_id": staged.get("canonical_match_id"),
             "identity_keys": staged.get("identity_keys"),
-            "identity_fingerprint": identity_fp,
+            "identity_fingerprint": record.get("identity_fingerprint"),
+            "dedup_identity_fingerprint": dedup_fp,
             "semantic_fingerprint": record.get("semantic_fingerprint"),
-            "duplicate_observations_collapsed": occurrences_by_identity[identity_fp],
+            "duplicate_observations_collapsed": occurrences_by_dedup[dedup_fp],
             "source_run_id": record.get("source_run_id"),
             "fetched_at": record.get("fetched_at"),
             "raw_hash": record.get("raw_hash"),
@@ -272,8 +287,8 @@ def build_staging_admission(reconciliation: dict[str, Any], bundle: dict[str, An
         "stats": {
             "input_rows": stats.get("input_rows"),
             "reconciled_ready_occurrences": len(records),
-            "deduplicated_ready": len(candidate_by_identity),
-            "duplicate_observations_collapsed": len(records) - len(candidate_by_identity),
+            "deduplicated_ready": len(candidate_by_dedup),
+            "duplicate_observations_collapsed": len(records) - len(candidate_by_dedup),
             "staging_admitted": len(admitted),
             "review_required_preserved": len(quarantined),
             "new_candidates": summary.get("new_candidates", 0),
