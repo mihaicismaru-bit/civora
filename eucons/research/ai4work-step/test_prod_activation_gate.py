@@ -39,6 +39,21 @@ class ProdActivationGateTests(unittest.TestCase):
         self.assertIn("dpia_screening_conclusion_unresolved", errors)
         assert_repository_fail_closed_or_approved()
 
+    def test_provider_logging_profile_and_live_account_binding_are_distinct(self):
+        _, manifest, _, _, _ = self.load_artifacts()
+        evidence = manifest["required_external_or_operational_evidence"]
+        self.assertIn("provider_server_logging_profile", REQUIRED_EXTERNAL_KEYS)
+        self.assertIn("account_server_logging_binding", REQUIRED_EXTERNAL_KEYS)
+        self.assertNotIn("server_logging_profile", REQUIRED_EXTERNAL_KEYS)
+        self.assertEqual(evidence["provider_server_logging_profile"]["status"], "FROZEN")
+        self.assertEqual(evidence["provider_server_logging_profile"]["reference"], "SERVER_LOGGING_BINDING_DRAFT.json")
+        self.assertEqual(evidence["account_server_logging_binding"]["status"], "OPEN")
+        self.assertIsNone(evidence["account_server_logging_binding"]["reference"])
+        ready, errors = evaluate_repository_activation()
+        self.assertFalse(ready)
+        self.assertIn("external_evidence_not_frozen:account_server_logging_binding", errors)
+        self.assertFalse(any("provider_server_logging_profile" in item for item in errors))
+
     def test_setting_only_production_enabled_cannot_activate_collection(self):
         contract, manifest, controller, frame, dpia = self.load_artifacts()
         contract = copy.deepcopy(contract)
