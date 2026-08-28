@@ -9,6 +9,12 @@ DATA_PLANE = ROOT / "partener-eu" / "ingest" / "data_plane_contract.json"
 
 REQUIRED = {
     "SRC-EU-FUNDING-TENDERS-GATEWAY": {"EU_DIRECT", "BRUSSELS"},
+    "SRC-EU-HORIZON-EUROPE": {"EU_DIRECT", "BRUSSELS"},
+    "SRC-EU-EIC-WP-2026": {"EU_DIRECT", "BRUSSELS", "PROGRAMMING_PIPELINE"},
+    "SRC-EU-LIFE-CALLS-2026": {"EU_DIRECT", "BRUSSELS", "CALL_REGISTRY"},
+    "SRC-EU-DIGITAL-WORK-PROGRAMMES": {"EU_DIRECT", "BRUSSELS", "PROGRAMMING_PIPELINE"},
+    "SRC-EU-CEF-GATEWAY": {"EU_DIRECT", "BRUSSELS"},
+    "SRC-EU-INNOVATION-FUND-CALLS": {"EU_DIRECT", "BRUSSELS", "CALL_REGISTRY"},
     "SRC-EU-MFF-2028-2034": {"EU_DIRECT", "BRUSSELS", "PROGRAMMING_PIPELINE"},
     "SRC-EEA-GRANTS-ROMANIA-EEA-MOU": {"EEA_NORWAY", "PROGRAMMING_PIPELINE"},
     "SRC-EEA-GRANTS-ROMANIA-NORWAY-MOU": {"EEA_NORWAY", "PROGRAMMING_PIPELINE"},
@@ -27,6 +33,12 @@ REQUIRED = {
 
 OFFICIAL_HOSTS = {
     "SRC-EU-FUNDING-TENDERS-GATEWAY": "ec.europa.eu",
+    "SRC-EU-HORIZON-EUROPE": "research-and-innovation.ec.europa.eu",
+    "SRC-EU-EIC-WP-2026": "eic.ec.europa.eu",
+    "SRC-EU-LIFE-CALLS-2026": "cinea.ec.europa.eu",
+    "SRC-EU-DIGITAL-WORK-PROGRAMMES": "digital-strategy.ec.europa.eu",
+    "SRC-EU-CEF-GATEWAY": "cinea.ec.europa.eu",
+    "SRC-EU-INNOVATION-FUND-CALLS": "climate.ec.europa.eu",
     "SRC-EU-MFF-2028-2034": "commission.europa.eu",
     "SRC-EEA-GRANTS-ROMANIA-EEA-MOU": "eeagrants.org",
     "SRC-EEA-GRANTS-ROMANIA-NORWAY-MOU": "eeagrants.org",
@@ -41,6 +53,29 @@ OFFICIAL_HOSTS = {
     "SRC-INTERREG-ROMD-2028-2034": "ro-md.net",
     "SRC-INTERREG-DANUBE": "interreg-danube.eu",
     "SRC-INTERREG-EUROPE": "www.interregeurope.eu",
+}
+
+DIRECT_PROGRAMME_FAMILIES = {
+    "SRC-EU-FUNDING-TENDERS-GATEWAY": "EU Direct Funding",
+    "SRC-EU-HORIZON-EUROPE": "Horizon Europe",
+    "SRC-EU-EIC-WP-2026": "European Innovation Council",
+    "SRC-EU-LIFE-CALLS-2026": "LIFE",
+    "SRC-EU-DIGITAL-WORK-PROGRAMMES": "Digital Europe",
+    "SRC-EU-CEF-GATEWAY": "Connecting Europe Facility",
+    "SRC-EU-INNOVATION-FUND-CALLS": "Innovation Fund",
+}
+
+STRUCTURED_FT_REQUIRED = {
+    "SRC-EU-FUNDING-TENDERS-GATEWAY",
+    "SRC-EU-HORIZON-EUROPE",
+    "SRC-EU-LIFE-CALLS-2026",
+    "SRC-EU-CEF-GATEWAY",
+    "SRC-EU-INNOVATION-FUND-CALLS",
+}
+
+DIRECT_PIPELINE = {
+    "SRC-EU-EIC-WP-2026",
+    "SRC-EU-DIGITAL-WORK-PROGRAMMES",
 }
 
 PIPELINE_SCOPES = {"PROGRAMMING_FRAMEWORK", "PROGRAMME_FRAMEWORK"}
@@ -77,6 +112,31 @@ def main():
             if not domains or "UNCLASSIFIED_PROGRAMME" in domains:
                 fail(f"{source_id} programme lacks data-plane domain mapping: {programme}")
 
+    for source_id, expected_family in DIRECT_PROGRAMME_FAMILIES.items():
+        row = by_id[source_id]
+        if row.get("programme_family") != expected_family:
+            fail(f"{source_id} programme family drift: {row.get('programme_family')!r} != {expected_family!r}")
+        if row.get("material_fact_use") is not False:
+            fail(f"{source_id} generic programme/index source cannot authorize material call facts")
+
+    for source_id in STRUCTURED_FT_REQUIRED:
+        row = by_id[source_id]
+        if row.get("adapter_required") != "FUNDING_TENDERS_STRUCTURED":
+            fail(f"{source_id} must require the dedicated Funding & Tenders structured adapter")
+        if row.get("authority_scope") not in {"GATEWAY_ONLY", "PROGRAMME_GATEWAY", "CALL_INDEX_DISCOVERY"}:
+            fail(f"{source_id} has unsafe direct-funding authority scope: {row.get('authority_scope')}")
+        if row.get("observation_state") not in {"GATEWAY_ONLY", "CURRENT_CALL_REGISTRY"}:
+            fail(f"{source_id} has unsafe direct-funding observation state: {row.get('observation_state')}")
+
+    for source_id in DIRECT_PIPELINE:
+        row = by_id[source_id]
+        if row.get("observation_state") != "PROGRAMMING_PIPELINE":
+            fail(f"{source_id} work-programme source must remain PROGRAMMING_PIPELINE")
+        if row.get("authority_scope") != "PROGRAMME_FRAMEWORK":
+            fail(f"{source_id} work-programme source must remain PROGRAMME_FRAMEWORK")
+        if row.get("material_fact_use") is not False:
+            fail(f"{source_id} work-programme source cannot authorize material facts")
+
     pipeline = [row for row in by_id.values() if "PROGRAMMING_PIPELINE" in set(row.get("source_families") or [])]
     if not pipeline:
         fail("no programming-pipeline sources registered")
@@ -88,7 +148,7 @@ def main():
         if row.get("authority_scope") not in PIPELINE_SCOPES:
             fail(f"pipeline source has unsafe authority scope: {row['id']}")
         mapped = {domain for programme in row.get("programmes") or [] for domain in programme_domains.get(programme, [])}
-        if "PROGRAMMING_FUTURE" not in mapped and row["id"] != "SRC-EU-MFF-2028-2034":
+        if "PROGRAMMING_FUTURE" not in mapped and row["id"] not in ({"SRC-EU-MFF-2028-2034"} | DIRECT_PIPELINE):
             fail(f"pipeline source lacks PROGRAMMING_FUTURE data-plane classification: {row['id']}")
 
     gateway = by_id["SRC-EU-FUNDING-TENDERS-GATEWAY"]
@@ -112,13 +172,15 @@ def main():
     policy = data.get("policy") or {}
     if "OPEN_CALL" not in policy.get("programming_pipeline_rule", ""):
         fail("programming pipeline guard must explicitly prohibit OPEN_CALL promotion")
-    if "dedicated" not in policy.get("direct_funding_gateway_rule", "").lower():
-        fail("direct funding gateway policy must require a dedicated structured adapter")
+    direct_rule = policy.get("direct_funding_gateway_rule", "").lower()
+    if "dedicated" not in direct_rule or "call index" not in direct_rule:
+        fail("direct funding policy must require dedicated exact-call/topic evidence and keep call indexes non-authorizing")
 
     print(
         "PASS external source expansion contract: "
-        f"{len(REQUIRED)} roots; {len(pipeline)} programming-pipeline roots; "
-        "all programmes data-plane classified; F&T gateway and EEA Civil Society call index fail-closed behind dedicated adapters"
+        f"{len(REQUIRED)} roots; {len(DIRECT_PROGRAMME_FAMILIES)} direct programme families; "
+        f"{len(pipeline)} programming-pipeline roots; all programmes data-plane classified; "
+        "F&T/direct programme gateways and EEA Civil Society call index fail-closed behind dedicated adapters"
     )
 
 
