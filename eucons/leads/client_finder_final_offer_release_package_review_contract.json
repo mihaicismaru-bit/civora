@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "id": "EUCONS-R07-CLIENT-FINDER-FINAL-OFFER-RELEASE-PACKAGE-REVIEW-001",
+  "status": "CANONICAL",
+  "purpose": "Capture one human-only review of deterministic internal final-offer release-package metadata/checklist without granting release authorization, generating a releasable package, sending or publishing an offer, adding pricing or material claims, persisting state, materializing CRM context, or enabling outreach.",
+  "source_preparation": {
+    "contract_id": "EUCONS-R07-CLIENT-FINDER-FINAL-OFFER-RELEASE-PACKAGE-PREPARATION-001",
+    "record_state": "CLIENT_FINDER_FINAL_OFFER_RELEASE_PACKAGE_PREPARATION_ENVELOPE",
+    "required_package_state": "INTERNAL_FINAL_OFFER_RELEASE_PACKAGE_PREPARED_REVIEW_REQUIRED",
+    "required_next_gate_hint": "SEPARATE_FINAL_OFFER_RELEASE_PACKAGE_REVIEW_GATE_REQUIRED",
+    "required_content_scope": "INTERNAL_RELEASE_METADATA_AND_CHECKLIST_ONLY",
+    "required_preparation_mode": "DETERMINISTIC_INTERNAL_METADATA_CHECKLIST_ONLY",
+    "required_official_source_reverified": true,
+    "required_source_bound": true,
+    "required_release_package_review_required": true,
+    "required_release_package_generated": false,
+    "required_release_package_approved": false,
+    "required_commercial_scope_area": "SELECTED_SERVICE_ONLY",
+    "required_checklist": [
+      "SOURCE_AUTHORIZATION_MATCHED",
+      "OFFICIAL_SOURCE_BINDING_PRESERVED",
+      "SELECTED_SERVICE_SCOPE_PRESERVED",
+      "NO_PUBLIC_OFFER_CONTENT_INCLUDED",
+      "NO_PRICING_OR_MATERIAL_CLAIMS_INCLUDED",
+      "NO_PERSISTENCE_CRM_OR_OUTREACH_ENABLED"
+    ]
+  },
+  "required_boundaries": {
+    "eligibility_state": "NOT_ASSESSED",
+    "maximum_next_state": "RESEARCH_READY",
+    "human_review_required": true,
+    "external_contact_enabled": false,
+    "automatic_offer_enabled": false,
+    "automatic_send_enabled": false,
+    "crm_write_enabled": false,
+    "pipeline_write_enabled": false
+  },
+  "review": {
+    "decision_source": "HUMAN",
+    "allowed_package_review_outcomes": [
+      "CHANGES_REQUIRED",
+      "REJECTED",
+      "APPROVED_INTERNAL_ONLY"
+    ],
+    "outcome_state_map": {
+      "CHANGES_REQUIRED": "INTERNAL_FINAL_OFFER_RELEASE_PACKAGE_CHANGES_REQUIRED",
+      "REJECTED": "INTERNAL_FINAL_OFFER_RELEASE_PACKAGE_REJECTED",
+      "APPROVED_INTERNAL_ONLY": "INTERNAL_FINAL_OFFER_RELEASE_PACKAGE_APPROVED_INTERNAL_ONLY"
+    },
+    "outcome_next_gate_map": {
+      "CHANGES_REQUIRED": null,
+      "REJECTED": null,
+      "APPROVED_INTERNAL_ONLY": "SEPARATE_FINAL_OFFER_RELEASE_EXECUTION_AUTHORIZATION_GATE_REQUIRED"
+    },
+    "decided_at_format": "RFC3339_UTC_Z"
+  },
+  "output": {
+    "record_state": "CLIENT_FINDER_FINAL_OFFER_RELEASE_PACKAGE_REVIEW_ENVELOPE",
+    "source_bound": true,
+    "human_review_required": true,
+    "public_offer_content_included": false,
+    "final_offer_generated": false,
+    "offer_approval_granted": false,
+    "final_offer_approval_granted": false,
+    "final_offer_release_authorization_granted": false,
+    "release_executed": false,
+    "release_package_generated": false,
+    "release_package_approved": false,
+    "pricing_included": false,
+    "new_legal_claims_included": false,
+    "new_financial_claims_included": false,
+    "target_state_committed": false,
+    "persistence_executed": false,
+    "candidate_persistence_allowed": false,
+    "draft_persistence_allowed": false,
+    "offer_persistence_allowed": false,
+    "production_offer_generation_allowed": false,
+    "final_offer_generation_allowed": false,
+    "offer_engine_invocation_allowed": false,
+    "pricing_decision_allowed": false,
+    "crm_context_materialization_allowed": false,
+    "external_contact_enabled": false,
+    "automatic_offer_enabled": false,
+    "automatic_send_enabled": false,
+    "crm_write_enabled": false,
+    "pipeline_write_enabled": false
+  },
+  "rules": {
+    "source_must_be_unreviewed_deterministic_internal_release_metadata_checklist": true,
+    "source_identity_lineage_scope_verification_ref_and_source_as_of_must_reconcile_exactly": true,
+    "source_package_metadata_and_checklist_must_match_deterministic_preparation_exactly": true,
+    "package_review_decision_must_be_human_and_reference_the_exact_preparation": true,
+    "review_decision_must_not_inject_edits_freeform_offer_text_material_claims_pricing_recipient_or_channel": true,
+    "approved_internal_only_is_not_release_authorization_or_execution": true,
+    "approved_internal_only_requires_a_separate_future_release_execution_authorization_gate": true,
+    "never_add_pricing_payment_terms_legal_or_financial_conclusions": true,
+    "never_invoke_production_offer_engine": true,
+    "never_materialize_crm_context": true,
+    "never_enable_external_action_release_or_persistence": true,
+    "person_level_fields_forbidden": true,
+    "raw_evidence_hash_deadline_budget_indicator_obligation_probability_pricing_recipient_channel_and_freeform_offer_fields_forbidden": true
+  }
+}
