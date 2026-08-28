@@ -68,7 +68,7 @@ OFFICIAL_HOSTS = {
     "SRC-INTERREG-ROUA": "ro-ua.net",
     "SRC-INTERREG-ROMD": "www.ro-md.net",
     "SRC-INTERREG-ROMD-2028-2034": "ro-md.net",
-    "SRC-INTERREG-NEXT-BSB": "blacksea-cbc.net",
+    "SRC-INTERREG-NEXT-BSB": "www.blacksea-cbc.net",
     "SRC-INTERREG-DANUBE": "interreg-danube.eu",
     "SRC-INTERREG-EUROPE": "www.interregeurope.eu",
 }
