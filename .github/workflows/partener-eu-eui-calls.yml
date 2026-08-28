@@ -81,7 +81,7 @@ jobs:
           if receipt.get('raw_hash') != hashlib.sha256(raw).hexdigest() or batch.get('raw_hash') != receipt.get('raw_hash'):
               print('FAIL EUI immutable handoff hash mismatch')
               sys.exit(2)
-          if batch.get('parser_version') != 'EUI_CALLS_V1' or stats.get('eui_candidates', 0) < 1:
+          if batch.get('parser_version') != 'EUI_CALLS_V2' or stats.get('eui_candidates', 0) < 1:
               print('FAIL EUI official Portico index was not parsed sufficiently:', stats)
               sys.exit(2)
           if stats.get('open_call_authorized') != 0:
