@@ -1,21 +1,21 @@
 {
-  "schema_version": "eucons.ai4work_retention_schedule.v0.4",
+  "schema_version": "eucons.ai4work_retention_schedule.v0.5",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "date": "2026-08-27",
-  "status": "DRAFT_EXECUTION_BINDING_REQUIRED_BEFORE_COLLECTION",
-  "principle": "retain identifiable or potentially linkable research data for the shortest period needed to validate the needs analysis; preserve longer-term evidence only as genuinely anonymised aggregate outputs and integrity hashes",
+  "date": "2026-08-28",
+  "status": "TECHNICAL_POLICY_COMPLETE_CONTROLLER_ACCEPTANCE_AND_PROVIDER_BINDING_REQUIRED_BEFORE_COLLECTION",
+  "principle": "retain personal or potentially linkable research data for the shortest period needed to validate the needs analysis; preserve longer-term evidence only as genuinely anonymised aggregate outputs and integrity hashes",
   "provider_context": {
     "candidate_hosting_processor": "CLAUS WEB SRL / shared-hosting family, subject to account-order verification",
     "public_dpa_version": "1.0 / 16.03.2026",
-    "public_dpa_note": "Annex 4 subprocessor list and Annex 5 backup/retention values must be operationally validated before final adoption",
-    "public_shared_hosting_backup_observation": "current public product information advertises daily backups with 7-day retention plus 3 monthly copies for shared hosting; the actual eucons.ro account/service policy must be verified before go-live",
+    "public_dpa_note": "Annex 4 subprocessor list and Annex 5 backup/retention values remain subject to account-specific operational validation before final adoption",
+    "public_shared_hosting_backup_observation": "current public product information indicates short-cycle backups for shared hosting, but the actual eucons.ro account/service policy must be verified before go-live",
     "control_consequence": "live-store deletion deadlines do not by themselves prove physical disappearance from residual backups; provider backup rotation/restore controls must be documented and tested before collection"
   },
   "schedules": [
     {
       "data_class": "reverse-proxy/application access logs",
       "allowed_content": "security/availability metadata only; request bodies, form answers and raw Idempotency-Key MUST NOT be logged",
-      "target_retention": "7 days maximum unless a documented security necessity requires shorter/exceptional retention",
+      "target_retention": "7 days maximum unless a documented security necessity requires a shorter period; any longer exception requires explicit controller approval and must not include questionnaire payloads",
       "deletion": "automatic provider/application rotation",
       "gate": "hosting configuration and actual provider retention must be verified before collection"
     },
@@ -36,14 +36,15 @@
     {
       "data_class": "erasure replay-suppression markers",
       "store": "RESEARCH_RIGHTS_CONTROL_ONLY_NOT_ANALYTICAL",
-      "content": "opaque derived response_id only; no questionnaire answers, canonical body digest, raw Idempotency-Key, identity/contact data, IP, user-agent, device, CRM or employer identifier",
+      "content": "opaque derived response_id plus technical expires_at_utc retention metadata only; no questionnaire answers, canonical body digest, raw Idempotency-Key, identity/contact data, IP, user-agent, device, CRM or employer identifier",
       "purpose": "prevent a delayed transport retry from recreating a respondent-level record after an approved live erasure",
-      "retention": "UNRESOLVED_BEFORE_CONTROLLER_APPROVAL; the live binding must use the shortest documented period necessary to prevent stale retry resurrection and must define an automatic deletion condition",
-      "reference_adapter_control": "NO_DEFAULT_DURATION; erasure requiring a replay marker fails closed unless an explicit finite UTC not-after boundary is configured; markers are purged automatically at or after that boundary before replay checks",
-      "reference_adapter_policy_limit": "the engineering adapter proves enforceability only and MUST NOT choose or imply the PROD retention duration",
+      "retention": "maximum 24 hours from successful live erasure; a shorter live bound is permitted; any longer period is forbidden unless a documented security necessity and explicit controller approval are recorded before use",
+      "retention_rationale": "the submission contract keeps the canonical UUIDv4 idempotency key only in same-tab/session retry state and forbids cookies, fingerprints, CRM identifiers or other persistent client identifiers; no offline/persistent submission queue is part of the reviewed design, so a 24-hour replay-suppression window is a conservative bounded transport-safety control rather than analytical retention",
+      "production_binding_control": "the live rights-control adapter must assign a finite per-marker expires_at_utc not later than successful erasure + 24 hours and purge expired markers automatically before replay checks and by scheduled cleanup",
+      "reference_adapter_note": "the current SQLite adapter is TEST/REFERENCE only and must not be treated as the PROD binding; provider-bound PROD smoke must prove the per-marker maximum-24-hour expiry behavior",
       "export": "FORBIDDEN from analytical export, NF06, source register and long-term need evidence",
-      "deletion": "production adapter must delete the marker automatically at the approved bound and include marker counts in deletion evidence",
-      "gate": "collection remains NO_GO until the controller approves the minimum necessary bound, the live binding injects that exact finite boundary, and provider-bound TEST TWIN proves automatic expiry/deletion"
+      "deletion": "production adapter must delete each marker automatically no later than its finite expires_at_utc and include marker counts in deletion evidence",
+      "gate": "collection remains NO_GO until the determined controller accepts this retention schedule, the live binding enforces the maximum-24-hour per-marker rule, and provider-bound TEST TWIN proves automatic expiry/deletion"
     },
     {
       "data_class": "optional follow-up contact records",
@@ -68,14 +69,15 @@
     "row/object counts before and after live deletion",
     "documented account-specific backup schedule and maximum residual lifetime",
     "confirmation that deleted respondent data cannot silently return to live processing through ordinary restore jobs",
-    "confirmation that a stale idempotent retry cannot recreate an erased respondent record before the controller-approved replay boundary",
-    "confirmation that non-analytical erasure replay markers are automatically purged at the controller-approved finite boundary",
+    "confirmation that a stale idempotent retry cannot recreate an erased respondent record during the bounded replay-suppression window",
+    "confirmation that each non-analytical erasure replay marker is automatically purged no later than 24 hours after successful live erasure",
     "confirmation that backup rotation does not restart the retention clock for deleted research records",
     "confirmation that optional contact store and PROD analytical store were both checked",
     "retained aggregate/source-register package identified separately"
   ],
   "exceptions": {
     "legal_hold": "must be documented by controller with scope, reason, approver, start date and review date; blanket indefinite retention is forbidden",
+    "replay_marker_extension": "a period longer than 24 hours is forbidden by default and requires a documented security necessity plus explicit controller approval before the extension is used",
     "processor_backup_limit": "Annex 5/account-specific backup terms and restore behavior must be validated before go-live; if provider cannot meet the intended non-renewing residual-backup lifecycle, collection remains NO_GO"
   },
   "controller_approval": false,
