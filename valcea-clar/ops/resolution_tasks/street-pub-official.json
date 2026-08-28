@@ -1,20 +1,22 @@
 {
   "schema_version": "1.0",
   "type": "VENUE_SOURCE_CHANGE_REVIEW",
-  "source_id": "petros-official-contact",
-  "source_url": "https://gyrospetros.ro/contact/",
+  "source_id": "street-pub-official",
+  "source_url": "https://www.streetpub.ro/",
   "source_kind": "official_site",
   "status": "OPEN",
-  "first_observed_at": "2026-08-15T06:34:39.659244Z",
+  "first_observed_at": "2026-08-28T12:04:26.302447Z",
   "last_observed_at": "2026-08-28T12:04:26.302447Z",
-  "previous_semantic_sha256": "242ee04245c92ee4ba9b8988935f0217e4a54356a5d5f31c347adcbfe4330d5d",
-  "current_semantic_sha256": "575e196935a9a5a9bbab59bc54bd918b1280a968dd981c365332904a5d5813e8",
+  "previous_semantic_sha256": "437900ff13c516e49b7ab054096b4babdf8d6f27649a5557cdb1d3d5ca1120b2",
+  "current_semantic_sha256": "3807dbccada2e9be379258e9797297665c1dadac9c1256e433449b8dbf2f3e70",
   "potentially_impacted_fields": [
+    "restaurant_existence",
     "address",
     "phone",
-    "email",
+    "opening_year",
     "opening_hours",
-    "delivery_hours"
+    "menu_items",
+    "prices"
   ],
   "material_fact_autoupdate_allowed": false,
   "required_resolution": "Reverify the changed address, hours, menu, prices, operator or other supported facts against the source before rebuilding the public projection."
