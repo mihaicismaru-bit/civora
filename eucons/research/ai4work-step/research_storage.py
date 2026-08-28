@@ -42,8 +42,9 @@ def validate_record_envelope(record: dict[str, Any]) -> None:
         raise ResearchStorageError("unsupported form_id")
     if record.get("synthetic") is not False:
         raise ResearchStorageError("PROD storage rejects synthetic records")
-    if not isinstance(record.get("response_id"), str) or not record["response_id"]:
-        raise ResearchStorageError("response_id required")
+    response_id = record.get("response_id")
+    if not isinstance(response_id, str) or not SHA256_RE.fullmatch(response_id):
+        raise ResearchStorageError("response_id must be opaque lowercase SHA-256 hex")
     if not isinstance(record.get("received_at"), str) or not record["received_at"]:
         raise ResearchStorageError("received_at required")
     try:
