@@ -21,6 +21,9 @@ FIXTURE = b"""<!doctype html><html><body>
 <article><h2>4th EUI Call for Innovative Actions</h2><span>Closed</span>
 <div>Deadline date : 15/06/2026</div><a href='/authority/eui'>By European Urban Initiative</a>
 <a href='https://www.urban-initiative.eu/calls/4th-eui-ia'>Find out more</a></article>
+<article><h2>Last foreign card</h2><span>Closed</span><div>Deadline date :</div><div>14/02/2025</div>
+<a href='/neb'>By New European Bauhaus Prizes</a><a href='https://example.org/neb'>Find out more</a></article>
+<footer><a href='https://urban-initiative.eu/'>European Urban Initiative</a></footer>
 </body></html>"""
 
 URL = "https://portico.urban-initiative.eu/urban-panorama/call-for-proposals"
