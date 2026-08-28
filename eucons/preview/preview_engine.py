@@ -190,6 +190,35 @@ def synthetic_match_bridge() -> dict[str, Any]:
     }
 
 
+def synthetic_official_registry(matcher: Any, bridge: dict[str, Any], matching_contract: dict[str, Any]) -> dict[str, Any]:
+    guards = matching_contract["official_source_guards"]
+    allowed = set(guards["material_fact_classes_requiring_official_binding"])
+    receipts: list[dict[str, Any]] = []
+    for record in bridge.get("opportunities") or []:
+        opportunity_id = str(record.get("id") or "")
+        material = record.get("material_facts") or {}
+        hashes = {key: matcher.canonical_hash(material[key]) for key in sorted(set(material) & allowed)}
+        if not {"status", "deadline"}.issubset(hashes):
+            raise ValueError("E25 synthetic official fixture is missing required authority facts")
+        receipts.append({
+            "receipt_id": hashlib.sha256(("e25-official:" + opportunity_id).encode("utf-8")).hexdigest(),
+            "opportunity_id": opportunity_id,
+            "verification_state": guards["verified_state"],
+            "verification_method": guards["verification_method"],
+            "source_product": "SYNTHETIC_OFFICIAL_PREVIEW_FIXTURE",
+            "source_authority": "Synthetic E25 official-source fixture",
+            "source_url": "https://official.example.test/preview/" + opportunity_id,
+            "source_document_sha256": hashlib.sha256(("e25-document:" + opportunity_id).encode("utf-8")).hexdigest(),
+            "verified_at": "2026-08-19T13:00:00Z",
+            "verified_fact_hashes": hashes,
+        })
+    return {
+        "schema_version": guards["registry_schema_version"],
+        "state": guards["registry_state"],
+        "receipts": receipts,
+    }
+
+
 def synthetic_commercial_journey() -> dict[str, Any]:
     lead_engine = load_module("e25_lead", EUCONS / "leads" / "process_lead.py")
     matcher = load_module("e25_match", EUCONS / "opportunities" / "match_opportunities.py")
@@ -227,7 +256,8 @@ def synthetic_commercial_journey() -> dict[str, Any]:
     }
     initial_lead = lead_engine.process(payload, lead_contract, forms)
     bridge = synthetic_match_bridge()
-    matching = matcher.match(initial_lead["matching_profile"], bridge, matching_contract)
+    official_registry = synthetic_official_registry(matcher, bridge, matching_contract)
+    matching = matcher.match(initial_lead["matching_profile"], bridge, matching_contract, official_registry)
     candidates = [row for row in matching["results"] if row["state"] == "MATCH_CANDIDATE"]
     if len(candidates) != 1:
         raise ValueError("E25 synthetic journey did not produce exactly one verified match candidate")
