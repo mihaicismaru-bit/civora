@@ -157,13 +157,13 @@ def validate_source_contract(source_contract: dict[str, Any], contract: dict[str
     source = contract["source_authorization"]
     require(source_contract.get("id") == source["contract_id"], "source release-authorization contract mismatch")
     require(source_contract.get("status") == "CANONICAL", "source release-authorization contract is not canonical")
-    authorization = source_contract.get("authorization") or {}
+    source_policy = source_contract.get("authorization") or {}
     outcome = source["required_release_authorization_outcome"]
-    require(outcome in authorization.get("allowed_authorization_outcomes", []), "source positive authorization no longer allowed")
-    require(authorization.get("outcome_state_map", {}).get(outcome) == source["required_release_authorization_state"], "source authorization state drift")
-    require(authorization.get("authorization_scope") == source["required_authorization_scope"], "source authorization scope drift")
-    require(authorization.get("outcome_next_gate_map", {}).get(outcome) == source["required_next_gate_hint"], "source authorization next-gate drift")
-    require(authorization.get("outcome_next_gate_authorization_map", {}).get(outcome) is True, "source authorization next-gate permission drift")
+    require(outcome in source_policy.get("allowed_authorization_outcomes", []), "source positive authorization no longer allowed")
+    require(source_policy.get("outcome_state_map", {}).get(outcome) == source["required_release_authorization_state"], "source authorization state drift")
+    require(source_policy.get("authorization_scope") == source["required_authorization_scope"], "source authorization scope drift")
+    require(source_policy.get("outcome_next_gate_map", {}).get(outcome) == source["required_next_gate_hint"], "source authorization next-gate drift")
+    require(source_policy.get("outcome_next_gate_authorization_map", {}).get(outcome) is True, "source authorization next-gate permission drift")
     output = source_contract.get("output") or {}
     require(output.get("record_state") == source["record_state"], "source authorization output-state drift")
     require(output.get("human_review_required") is True, "source authorization human-review boundary failed open")
