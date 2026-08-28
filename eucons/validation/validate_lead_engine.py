@@ -116,8 +116,10 @@ def main() -> None:
     assert normalized_once["email"] == "synthetic@example.invalid"
     assert final_record["dedupe_key"] == pre_match_record["dedupe_key"]
     assert len(final_record["dedupe_key"]) == 64
-    assert match_result["summary"]["candidates"] == 1
-    assert final_record["scores"]["matching_candidate_count"] == 1
+    assert match_result["summary"]["candidates"] == 0
+    assert match_result["summary"]["waiting_source"] == 1
+    assert match_result["results"][0]["authority_state"] == "WAITING_SOURCE"
+    assert final_record["scores"]["matching_candidate_count"] == 0
     assert final_record["scores"]["lead_score"] >= 70
     assert final_record["next_action"] == "COMMERCIAL_REVIEW"
     assert final_record["consent"]["marketing_consent"] is False
@@ -273,6 +275,7 @@ def main() -> None:
         "intent_score": final_record["scores"]["intent_score"],
         "urgency_score": final_record["scores"]["urgency_score"],
         "matching_candidates": match_result["summary"]["candidates"],
+        "waiting_source": match_result["summary"]["waiting_source"],
         "next_action": final_record["next_action"],
         "research_evaluation_state": evaluation["record_state"],
         "commercial_review_state": review["record_state"],
