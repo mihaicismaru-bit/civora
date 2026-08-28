@@ -42,6 +42,9 @@ def main() -> int:
     a = mod.normalize_call_index(FIXTURE, authority_url=URL, fetched_at="2026-08-28T13:00:00+00:00", run_id="test")
     b = mod.normalize_call_index(FIXTURE, authority_url=URL, fetched_at="2026-08-28T13:00:00+00:00", run_id="test")
     assert a["record_count"] == 2
+    assert a["adapter_id"] == "EUI_CALLS_V1"
+    assert a["parser_version"] == "EUI_CALLS_V2"
+    assert all(r["adapter_id"] == a["adapter_id"] for r in a["records"])
     assert a["raw_hash"] == mod.sha256_bytes(FIXTURE)
     assert [r["semantic_fingerprint"] for r in a["records"]] == [r["semantic_fingerprint"] for r in b["records"]]
     assert all(r["raw_hash"] == a["raw_hash"] for r in a["records"])
