@@ -206,6 +206,7 @@ def normalize_call_index(raw: bytes, *, authority_url: str, fetched_at: str, run
         }
         records.append({
             "schema": "PARTENER_EU_EUI_CALL_INDEX_OBSERVATION_V1",
+            "adapter_id": ADAPTER_ID,
             "source_family": SOURCE_FAMILY,
             "programme_family": PROGRAMME_FAMILY,
             "authority_class": AUTHORITY_CLASS,
@@ -233,6 +234,7 @@ def normalize_call_index(raw: bytes, *, authority_url: str, fetched_at: str, run
 
     batch = {
         "schema": "PARTENER_EU_EUI_CALL_INDEX_BATCH_V1",
+        "adapter_id": ADAPTER_ID,
         "source_family": SOURCE_FAMILY,
         "programme_family": PROGRAMME_FAMILY,
         "authority_class": AUTHORITY_CLASS,
@@ -258,6 +260,8 @@ def normalize_call_index(raw: bytes, *, authority_url: str, fetched_at: str, run
 def validate_call_index_batch(batch: dict[str, Any]) -> None:
     if batch.get("schema") != "PARTENER_EU_EUI_CALL_INDEX_BATCH_V1":
         raise ValueError("EUI call-index schema mismatch")
+    if batch.get("adapter_id") != ADAPTER_ID:
+        raise ValueError("EUI call-index adapter id mismatch")
     if batch.get("parser_version") != PARSER_VERSION:
         raise ValueError("EUI call-index parser version mismatch")
     if batch.get("observation_state") != OBSERVATION_STATE:
@@ -277,6 +281,8 @@ def validate_call_index_batch(batch: dict[str, Any]) -> None:
         title = row.get("title")
         if not title:
             raise ValueError("EUI call-index observation missing title")
+        if row.get("adapter_id") != ADAPTER_ID:
+            raise ValueError(f"EUI call-index adapter drift: {title}")
         if row.get("parser_version") != PARSER_VERSION or row.get("raw_hash") != raw_hash:
             raise ValueError(f"EUI call-index provenance drift: {title}")
         if row.get("observation_state") != OBSERVATION_STATE:
