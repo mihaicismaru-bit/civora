@@ -2,14 +2,33 @@ name: PARTENER.EU Verified Source Registry
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'partener-eu/ingest/source_registry.json'
+      - 'partener-eu/ingest/source_registry_probe.py'
+      - 'partener-eu/ingest/data_plane_contract.json'
+      - 'partener-eu/ingest/interreg_programming_intelligence.py'
+      - 'partener-eu/ingest/interreg_programming_live_fetch.py'
+      - 'partener-eu/ops/test_source_registry_low_info.py'
+      - 'partener-eu/ops/test_source_registry_alias_fallback.py'
+      - 'partener-eu/ops/test_source_registry_external_expansion.py'
+      - 'partener-eu/ops/test_interreg_programming_intelligence.py'
+      - 'partener-eu/ops/test_interreg_programming_live_fetch.py'
+      - '.github/workflows/partener-eu-source-registry.yml'
   push:
     branches: [main]
     paths:
       - 'partener-eu/ingest/source_registry.json'
       - 'partener-eu/ingest/source_registry_probe.py'
+      - 'partener-eu/ingest/data_plane_contract.json'
+      - 'partener-eu/ingest/interreg_programming_intelligence.py'
+      - 'partener-eu/ingest/interreg_programming_live_fetch.py'
       - 'partener-eu/ops/test_source_registry_low_info.py'
       - 'partener-eu/ops/test_source_registry_alias_fallback.py'
       - 'partener-eu/ops/test_source_registry_external_expansion.py'
+      - 'partener-eu/ops/test_interreg_programming_intelligence.py'
+      - 'partener-eu/ops/test_interreg_programming_live_fetch.py'
       - '.github/workflows/partener-eu-source-registry.yml'
   schedule:
     - cron: '23 */2 * * *'
@@ -39,8 +58,77 @@ jobs:
       - name: Regression — external source and future-programming taxonomy stays fail-closed
         run: python partener-eu/ops/test_source_registry_external_expansion.py
 
+      - name: Regression — Interreg programming dates override stale open copy
+        run: python partener-eu/ops/test_interreg_programming_intelligence.py
+
+      - name: Regression — live Interreg programming evidence remains non-authorizing
+        run: python partener-eu/ops/test_interreg_programming_live_fetch.py
+
       - name: Probe classified official sources without changing facts
         run: python partener-eu/ingest/source_registry_probe.py
+
+      - name: Capture live Interreg programming evidence without changing facts
+        run: |
+          python partener-eu/ingest/interreg_programming_live_fetch.py \
+            --out /tmp/interreg-programming-live-evidence.json \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Validate live Interreg programming receipt stays fail-closed
+        run: |
+          python - <<'PY'
+          import json, sys
+          p='/tmp/interreg-programming-live-evidence.json'
+          d=json.load(open(p, encoding='utf-8'))
+          if d.get('publication_effect') != 'NONE' or d.get('canonical_corpus_mutation') is not False or d.get('publish_authorized') is not False:
+              print('FAIL unsafe Interreg programming envelope')
+              sys.exit(2)
+          rows={row.get('source_id'): row for row in d.get('rows', [])}
+          rohu=rows.get('SRC-INTERREG-ROHU')
+          if not rohu or rohu.get('fetch_status') != 'PASS':
+              print('FAIL current official Romania-Hungary programme page was not read successfully')
+              sys.exit(2)
+          obs=rohu.get('normalized') or {}
+          if obs.get('observation_state') != 'CONSULTATION_CLOSED' or obs.get('consultation_end') != '2026-08-01':
+              print('FAIL Romania-Hungary programming dates did not override stale open copy:', obs)
+              sys.exit(2)
+          if obs.get('not_a_call') is not True or obs.get('open_call_authorized') is not False or obs.get('publish_authorized') is not False:
+              print('FAIL Romania-Hungary programming observation became authorizing:', obs)
+              sys.exit(2)
+
+          romd=rows.get('SRC-INTERREG-ROMD-2028-2034')
+          if not romd:
+              print('FAIL Romania-Moldova 2028-2034 programming source missing from live evidence')
+              sys.exit(2)
+          if romd.get('publication_effect') != 'NONE' or romd.get('publish_authorized') is not False or romd.get('material_fact_use') is not False:
+              print('FAIL Romania-Moldova transport/evidence row became authorizing:', romd)
+              sys.exit(2)
+          romd_state='FETCH_FAILED'
+          if romd.get('fetch_status') == 'PASS':
+              romd_obs=romd.get('normalized') or {}
+              if romd_obs.get('programme_family') != 'Interreg Romania-Republic of Moldova 2028-2034':
+                  print('FAIL Romania-Moldova programme identity drift:', romd_obs)
+                  sys.exit(2)
+              if romd_obs.get('observation_state') == 'OPEN_CALL' or romd_obs.get('not_a_call') is not True or romd_obs.get('open_call_authorized') is not False or romd_obs.get('publish_authorized') is not False:
+                  print('FAIL Romania-Moldova programming observation became authorizing:', romd_obs)
+                  sys.exit(2)
+              romd_state=romd_obs.get('observation_state')
+          elif romd.get('fetch_status') == 'FAIL':
+              if not romd.get('error_type') or romd.get('normalized'):
+                  print('FAIL Romania-Moldova transport failure is not explicit/fail-closed:', romd)
+                  sys.exit(2)
+          else:
+              print('FAIL Romania-Moldova has invalid live fetch state:', romd)
+              sys.exit(2)
+          print(json.dumps({'summary': d.get('observation_states', {}), 'rohu_state': obs.get('observation_state'), 'rohu_end': obs.get('consultation_end'), 'romd_state': romd_state}, ensure_ascii=False))
+          PY
+
+      - name: Upload bounded Interreg programming evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-interreg-programming-live-evidence
+          path: /tmp/interreg-programming-live-evidence.json
+          retention-days: 7
+          if-no-files-found: error
 
       - name: Validate fail-closed policy
         run: |
@@ -68,6 +156,7 @@ jobs:
           PY
 
       - name: Persist source health ledger and resolution tasks conflict-safe
+        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
