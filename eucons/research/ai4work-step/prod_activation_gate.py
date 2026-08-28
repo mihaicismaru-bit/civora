@@ -18,6 +18,7 @@ REQUIRED_EXTERNAL_KEYS = {
     "privacy_notice",
     "lawful_basis_or_lia",
     "processor_chain",
+    "live_public_privacy_surface_reconciliation",
     "provider_annex_4_5",
     "provider_server_logging_profile",
     "account_server_logging_binding",
