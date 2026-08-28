@@ -9,6 +9,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 BINDING_PATH = HERE / "CLAUS_WEB_DOCUMENTARY_BINDING.json"
 MANIFEST_PATH = HERE / "PROD_ACTIVATION_MANIFEST_DRAFT.json"
+HOSTING_PLAN_PATH = HERE / "HOSTING_BINDING_PLAN.json"
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 
 
@@ -78,6 +79,71 @@ class ProviderDocumentaryBindingTests(unittest.TestCase):
         self.assertFalse(manifest.get("collection_enabled"))
         self.assertFalse(manifest.get("real_collection_authorized"))
         self.assertFalse(manifest.get("deploy_authorized"))
+
+    def test_hosting_plan_matches_frozen_provider_baseline_and_keeps_live_facts_open(self) -> None:
+        plan = json.loads(HOSTING_PLAN_PATH.read_text(encoding="utf-8"))
+        binding_bytes = BINDING_PATH.read_bytes()
+        baseline = plan.get("provider_documentary_baseline") or {}
+
+        self.assertEqual(plan.get("schema_version"), "eucons.ai4work_research_hosting_plan.v0.6")
+        self.assertEqual(
+            baseline.get("status"),
+            "FROZEN_FIRST_PARTY_SHARED_HOSTING_PACKAGE",
+        )
+        self.assertEqual(baseline.get("binding_reference"), BINDING_PATH.name)
+        self.assertEqual(baseline.get("binding_sha256"), hashlib.sha256(binding_bytes).hexdigest())
+
+        self.assertEqual(
+            (baseline.get("dpa") or {}).get("sha256"),
+            "40391f30b73a2a20182bc2c1e38b65d515c4d4d65dd2c412b76c0592767d024f",
+        )
+        self.assertEqual(
+            (baseline.get("annex_4") or {}).get("sha256"),
+            "69b5491a9fc4842af858b7e58dec88599025229014346eb466ff762912b32108",
+        )
+        self.assertEqual(
+            (baseline.get("annex_5") or {}).get("sha256"),
+            "09d8c6a95427d4716ffa6dccc0ae5e054a074b3a8a861085c6ad89984d9c485d",
+        )
+
+        raw_access = baseline.get("raw_access_logging") or {}
+        self.assertTrue(raw_access.get("provider_field_set_confirmed"))
+        self.assertIn("full URL including query string", raw_access.get("may_include") or [])
+        self.assertEqual(
+            raw_access.get("current_eucons_cpanel_archive_retention"),
+            "OPEN_ACCOUNT_INSPECTION_REQUIRED",
+        )
+        self.assertEqual(
+            raw_access.get("current_eucons_log_access_controls"),
+            "OPEN_ACCOUNT_INSPECTION_REQUIRED",
+        )
+
+        role = plan.get("role_determination_before_activation") or {}
+        self.assertEqual(
+            role.get("status"),
+            "CONTROLLER_UNRESOLVED_EXTERNAL_ROLE_REQUESTS_WITHDRAWN_FAIL_CLOSED",
+        )
+
+        open_gates = plan.get("current_open_operational_gates") or {}
+        for key in (
+            "controller_and_privacy_contact",
+            "lawful_basis_article13_dpia_retention_rights_approval",
+            "controller_processor_subprocessor_chain",
+            "current_cpanel_raw_access_retention_and_access",
+            "account_specific_annex_5_override",
+            "research_only_store_isolation_encryption_access",
+            "provider_bound_deletion_backup_execution",
+            "provider_bound_test_twin_smoke",
+            "real_primary_response_batch",
+        ):
+            self.assertEqual(open_gates.get(key), "OPEN")
+
+        serialized = HOSTING_PLAN_PATH.read_text(encoding="utf-8")
+        self.assertNotIn("ANNEX_4_AVAILABLE_ON_REQUEST", serialized)
+        self.assertNotIn("EXACT_ANNEX_5_VALUES_OPEN", serialized)
+        self.assertFalse((plan.get("authorization") or {}).get("merge"))
+        self.assertFalse((plan.get("authorization") or {}).get("deploy"))
+        self.assertFalse((plan.get("authorization") or {}).get("real_collection"))
 
 
 if __name__ == "__main__":
