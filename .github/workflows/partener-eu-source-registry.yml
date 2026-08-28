@@ -12,6 +12,7 @@ on:
       - 'partener-eu/ingest/interreg_programming_live_fetch.py'
       - 'partener-eu/ingest/interreg_call.py'
       - 'partener-eu/ingest/interreg_call_live_fetch.py'
+      - 'partener-eu/ingest/interreg_call_reconcile.py'
       - 'partener-eu/ops/test_source_registry_low_info.py'
       - 'partener-eu/ops/test_source_registry_alias_fallback.py'
       - 'partener-eu/ops/test_source_registry_external_expansion.py'
@@ -19,6 +20,7 @@ on:
       - 'partener-eu/ops/test_interreg_programming_live_fetch.py'
       - 'partener-eu/ops/test_interreg_call.py'
       - 'partener-eu/ops/test_interreg_call_live_fetch.py'
+      - 'partener-eu/ops/test_interreg_call_reconcile.py'
       - '.github/workflows/partener-eu-source-registry.yml'
   push:
     branches: [main]
@@ -30,6 +32,7 @@ on:
       - 'partener-eu/ingest/interreg_programming_live_fetch.py'
       - 'partener-eu/ingest/interreg_call.py'
       - 'partener-eu/ingest/interreg_call_live_fetch.py'
+      - 'partener-eu/ingest/interreg_call_reconcile.py'
       - 'partener-eu/ops/test_source_registry_low_info.py'
       - 'partener-eu/ops/test_source_registry_alias_fallback.py'
       - 'partener-eu/ops/test_source_registry_external_expansion.py'
@@ -37,6 +40,7 @@ on:
       - 'partener-eu/ops/test_interreg_programming_live_fetch.py'
       - 'partener-eu/ops/test_interreg_call.py'
       - 'partener-eu/ops/test_interreg_call_live_fetch.py'
+      - 'partener-eu/ops/test_interreg_call_reconcile.py'
       - '.github/workflows/partener-eu-source-registry.yml'
   schedule:
     - cron: '23 */2 * * *'
@@ -93,6 +97,9 @@ jobs:
 
       - name: Regression — live Interreg exact-call evidence stays bounded and fail-closed
         run: python partener-eu/ops/test_interreg_call_live_fetch.py
+
+      - name: Regression — Interreg exact-call semantic reconcile stays fail-closed
+        run: python partener-eu/ops/test_interreg_call_reconcile.py
 
       - name: Probe classified official sources without changing facts
         run: python partener-eu/ingest/source_registry_probe.py
@@ -198,11 +205,36 @@ jobs:
           print(json.dumps({'fetch_pass': d.get('fetch_pass'), 'fetch_fail': d.get('fetch_fail'), 'states': d.get('observation_states', {})}, ensure_ascii=False))
           PY
 
-      - name: Upload bounded Interreg exact-call evidence
+      - name: Reconcile live Interreg exact-call evidence before staging
+        run: |
+          python - <<'PY'
+          import json, sys
+          sys.path.insert(0, 'partener-eu/ingest')
+          from interreg_call_reconcile import reconcile_live_evidence
+          source='/tmp/interreg-call-live-evidence.json'
+          out='/tmp/interreg-call-reconciliation.json'
+          evidence=json.load(open(source, encoding='utf-8'))
+          receipt=reconcile_live_evidence(evidence)
+          json.dump(receipt, open(out, 'w', encoding='utf-8'), ensure_ascii=False, indent=2)
+          if receipt.get('publish_authorized') is not False or receipt.get('canonical_corpus_mutation') is not False or receipt.get('publication_effect') != 'NONE':
+              print('FAIL reconcile became publishing')
+              sys.exit(2)
+          if receipt.get('stats', {}).get('ready_for_staging') != 0:
+              print('FAIL historical exact-call controls unexpectedly became staging-ready:', receipt.get('stats'))
+              sys.exit(2)
+          if receipt.get('stats', {}).get('review_required') != receipt.get('stats', {}).get('input_rows'):
+              print('FAIL historical/failed controls not fully quarantined:', receipt.get('stats'))
+              sys.exit(2)
+          print(json.dumps(receipt.get('stats', {}), ensure_ascii=False))
+          PY
+
+      - name: Upload bounded Interreg exact-call evidence and reconciliation
         uses: actions/upload-artifact@v4
         with:
           name: partener-interreg-call-live-evidence
-          path: /tmp/interreg-call-live-evidence.json
+          path: |
+            /tmp/interreg-call-live-evidence.json
+            /tmp/interreg-call-reconciliation.json
           retention-days: 7
           if-no-files-found: error
 
