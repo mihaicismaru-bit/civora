@@ -10,11 +10,15 @@ on:
       - 'partener-eu/ingest/data_plane_contract.json'
       - 'partener-eu/ingest/interreg_programming_intelligence.py'
       - 'partener-eu/ingest/interreg_programming_live_fetch.py'
+      - 'partener-eu/ingest/interreg_call.py'
+      - 'partener-eu/ingest/interreg_call_live_fetch.py'
       - 'partener-eu/ops/test_source_registry_low_info.py'
       - 'partener-eu/ops/test_source_registry_alias_fallback.py'
       - 'partener-eu/ops/test_source_registry_external_expansion.py'
       - 'partener-eu/ops/test_interreg_programming_intelligence.py'
       - 'partener-eu/ops/test_interreg_programming_live_fetch.py'
+      - 'partener-eu/ops/test_interreg_call.py'
+      - 'partener-eu/ops/test_interreg_call_live_fetch.py'
       - '.github/workflows/partener-eu-source-registry.yml'
   push:
     branches: [main]
@@ -24,11 +28,15 @@ on:
       - 'partener-eu/ingest/data_plane_contract.json'
       - 'partener-eu/ingest/interreg_programming_intelligence.py'
       - 'partener-eu/ingest/interreg_programming_live_fetch.py'
+      - 'partener-eu/ingest/interreg_call.py'
+      - 'partener-eu/ingest/interreg_call_live_fetch.py'
       - 'partener-eu/ops/test_source_registry_low_info.py'
       - 'partener-eu/ops/test_source_registry_alias_fallback.py'
       - 'partener-eu/ops/test_source_registry_external_expansion.py'
       - 'partener-eu/ops/test_interreg_programming_intelligence.py'
       - 'partener-eu/ops/test_interreg_programming_live_fetch.py'
+      - 'partener-eu/ops/test_interreg_call.py'
+      - 'partener-eu/ops/test_interreg_call_live_fetch.py'
       - '.github/workflows/partener-eu-source-registry.yml'
   schedule:
     - cron: '23 */2 * * *'
@@ -48,6 +56,22 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify checkout is exact event head
+        id: exact-head
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          ACTUAL_SHA="$(git rev-parse HEAD)"
+          if [ "$ACTUAL_SHA" != "$EXPECTED_SHA" ]; then
+            echo "FAIL checkout drift: expected $EXPECTED_SHA got $ACTUAL_SHA" >&2
+            exit 2
+          fi
+          echo "Exact event head verified: $ACTUAL_SHA"
+          echo "sha=$ACTUAL_SHA" >> "$GITHUB_OUTPUT"
 
       - name: Regression — low-information HTML shells fail closed
         run: python partener-eu/ops/test_source_registry_low_info.py
@@ -63,6 +87,12 @@ jobs:
 
       - name: Regression — live Interreg programming evidence remains non-authorizing
         run: python partener-eu/ops/test_interreg_programming_live_fetch.py
+
+      - name: Regression — Interreg exact-call proof stays fail-closed
+        run: python partener-eu/ops/test_interreg_call.py
+
+      - name: Regression — live Interreg exact-call evidence stays bounded and fail-closed
+        run: python partener-eu/ops/test_interreg_call_live_fetch.py
 
       - name: Probe classified official sources without changing facts
         run: python partener-eu/ingest/source_registry_probe.py
@@ -127,6 +157,52 @@ jobs:
         with:
           name: partener-interreg-programming-live-evidence
           path: /tmp/interreg-programming-live-evidence.json
+          retention-days: 7
+          if-no-files-found: error
+
+      - name: Capture live Interreg exact-call evidence without changing facts
+        run: |
+          python partener-eu/ingest/interreg_call_live_fetch.py \
+            --out /tmp/interreg-call-live-evidence.json \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Validate live Interreg exact-call receipt stays fail-closed
+        run: |
+          python - <<'PY'
+          import json, sys
+          p='/tmp/interreg-call-live-evidence.json'
+          d=json.load(open(p, encoding='utf-8'))
+          if d.get('publication_effect') != 'NONE' or d.get('canonical_corpus_mutation') is not False or d.get('publish_authorized') is not False:
+              print('FAIL unsafe Interreg exact-call envelope')
+              sys.exit(2)
+          rows=d.get('rows', [])
+          if d.get('fetch_pass', 0) < 1:
+              print('FAIL no exact official Interreg call page was read successfully')
+              sys.exit(2)
+          for row in rows:
+              if row.get('publish_authorized') is not False or row.get('material_fact_use') is not False:
+                  print('FAIL exact-call evidence row became authorizing:', row.get('probe_id'))
+                  sys.exit(2)
+              obs=row.get('normalized')
+              if not obs:
+                  continue
+              if obs.get('observation_state') == 'OPEN_CALL':
+                  print('FAIL historical exact-call control classified OPEN_CALL:', row.get('probe_id'))
+                  sys.exit(2)
+              if obs.get('publish_authorized') is not False or obs.get('material_fact_use') is not False or obs.get('publication_effect') != 'NONE':
+                  print('FAIL exact-call normalized receipt became authorizing:', row.get('probe_id'))
+                  sys.exit(2)
+              if obs.get('raw_hash') != row.get('raw_hash'):
+                  print('FAIL exact-call raw hash detached from receipt:', row.get('probe_id'))
+                  sys.exit(2)
+          print(json.dumps({'fetch_pass': d.get('fetch_pass'), 'fetch_fail': d.get('fetch_fail'), 'states': d.get('observation_states', {})}, ensure_ascii=False))
+          PY
+
+      - name: Upload bounded Interreg exact-call evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-interreg-call-live-evidence
+          path: /tmp/interreg-call-live-evidence.json
           retention-days: 7
           if-no-files-found: error
 
