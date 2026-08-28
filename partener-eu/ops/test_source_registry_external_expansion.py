@@ -21,6 +21,8 @@ REQUIRED = {
     "SRC-EU-ERASMUS-GUIDE-2026": {"EU_DIRECT", "BRUSSELS"},
     "SRC-EU-CREATIVE-EUROPE-CALLS": {"EU_DIRECT", "BRUSSELS", "CALL_REGISTRY"},
     "SRC-EU-EUI-CALLS": {"EU_DIRECT", "BRUSSELS", "CALL_REGISTRY"},
+    "SRC-EU-SOLIDARITY-CALL-2026": {"EU_DIRECT", "BRUSSELS", "CALL_REGISTRY"},
+    "SRC-EU-JUSTICE-GATEWAY": {"EU_DIRECT", "BRUSSELS"},
     "SRC-EU-MFF-2028-2034": {"EU_DIRECT", "BRUSSELS", "PROGRAMMING_PIPELINE"},
     "SRC-EEA-GRANTS-ROMANIA-EEA-MOU": {"EEA_NORWAY", "PROGRAMMING_PIPELINE"},
     "SRC-EEA-GRANTS-ROMANIA-NORWAY-MOU": {"EEA_NORWAY", "PROGRAMMING_PIPELINE"},
@@ -51,6 +53,8 @@ OFFICIAL_HOSTS = {
     "SRC-EU-ERASMUS-GUIDE-2026": "erasmus-plus.ec.europa.eu",
     "SRC-EU-CREATIVE-EUROPE-CALLS": "culture.ec.europa.eu",
     "SRC-EU-EUI-CALLS": "www.urban-initiative.eu",
+    "SRC-EU-SOLIDARITY-CALL-2026": "youth.europa.eu",
+    "SRC-EU-JUSTICE-GATEWAY": "commission.europa.eu",
     "SRC-EU-MFF-2028-2034": "commission.europa.eu",
     "SRC-EEA-GRANTS-ROMANIA-EEA-MOU": "eeagrants.org",
     "SRC-EEA-GRANTS-ROMANIA-NORWAY-MOU": "eeagrants.org",
@@ -81,6 +85,8 @@ DIRECT_PROGRAMME_FAMILIES = {
     "SRC-EU-ERASMUS-GUIDE-2026": "Erasmus+",
     "SRC-EU-CREATIVE-EUROPE-CALLS": "Creative Europe",
     "SRC-EU-EUI-CALLS": "European Urban Initiative",
+    "SRC-EU-SOLIDARITY-CALL-2026": "European Solidarity Corps",
+    "SRC-EU-JUSTICE-GATEWAY": "Justice Programme",
 }
 
 STRUCTURED_FT_REQUIRED = {
@@ -91,6 +97,7 @@ STRUCTURED_FT_REQUIRED = {
     "SRC-EU-INNOVATION-FUND-CALLS",
     "SRC-EU-CERV-GATEWAY",
     "SRC-EU-SMP-CALLS",
+    "SRC-EU-JUSTICE-GATEWAY",
 }
 
 DEDICATED_ADAPTER_REQUIRED = {
@@ -98,11 +105,22 @@ DEDICATED_ADAPTER_REQUIRED = {
     "SRC-EU-ERASMUS-GUIDE-2026": "ERASMUS_ACTION_ROUTER_V1",
     "SRC-EU-CREATIVE-EUROPE-CALLS": "CREATIVE_EUROPE_CALLS_V1",
     "SRC-EU-EUI-CALLS": "EUI_CALLS_V1",
+    "SRC-EU-SOLIDARITY-CALL-2026": "ESC_ACTION_ROUTER_V1",
 }
 
 DIRECT_PIPELINE = {
     "SRC-EU-EIC-WP-2026",
     "SRC-EU-DIGITAL-WORK-PROGRAMMES",
+}
+
+MFF_REQUIRED_EXTRACT = {
+    "commission_proposals",
+    "sectoral_proposals",
+    "national_regional_partnership_plans",
+    "proposed_programme_architecture",
+    "member_state_allocation_signals",
+    "future_funding_architecture",
+    "programming_updates",
 }
 
 SAFE_DIRECT_SCOPES = {"GATEWAY_ONLY", "PROGRAMME_GATEWAY", "PROGRAMME_GUIDE", "CALL_INDEX_DISCOVERY"}
@@ -174,6 +192,16 @@ def main():
         if row.get("material_fact_use") is not False:
             fail(f"{source_id} work-programme source cannot authorize material facts")
 
+    mff = by_id["SRC-EU-MFF-2028-2034"]
+    if mff.get("material_fact_use") is not False or mff.get("observation_state") != "PROGRAMMING_PIPELINE":
+        fail("MFF 2028-2034 must remain non-authorizing PROGRAMMING_PIPELINE")
+    missing_mff_extract = sorted(MFF_REQUIRED_EXTRACT - set(mff.get("extract") or []))
+    if missing_mff_extract:
+        fail(f"MFF 2028-2034 missing programming-intelligence fields: {missing_mff_extract}")
+    mff_note = (mff.get("note") or "").lower()
+    if "proposal" not in mff_note or "open_call" not in mff_note:
+        fail("MFF 2028-2034 note must explicitly preserve proposal-only/non-OPEN semantics")
+
     pipeline = [row for row in by_id.values() if "PROGRAMMING_PIPELINE" in set(row.get("source_families") or [])]
     if not pipeline:
         fail("no programming-pipeline sources registered")
@@ -217,7 +245,8 @@ def main():
         "PASS external source expansion contract: "
         f"{len(REQUIRED)} roots; {len(DIRECT_PROGRAMME_FAMILIES)} direct programme families; "
         f"{len(pipeline)} programming-pipeline roots; all programmes data-plane classified; "
-        "F&T/programme gateways/call indexes/guides and EEA Civil Society call index fail-closed behind dedicated adapters"
+        "F&T/programme gateways/call indexes/guides and EEA Civil Society call index fail-closed behind dedicated adapters; "
+        "MFF 2028-2034 remains proposal-only programming intelligence"
     )
 
 
