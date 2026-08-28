@@ -8,7 +8,7 @@
     "editorial/source_intelligence_seed_registry.json",
     "editorial/source_intelligence_seed_supplement_v1.json"
   ],
-  "seed_count": 75,
+  "seed_count": 76,
   "observations": [
     {
       "seed_id": "anchor-aba-olt",
@@ -653,7 +653,7 @@
       "seed_id": "anchor-cjp-valcea",
       "publisher": "Casa Județeană de Pensii Vâlcea",
       "seed_url": "https://cjpvl.ro/",
-      "checked_at_epoch": 1787881902,
+      "checked_at_epoch": 1787895986,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://cjpvl.ro/",
@@ -852,7 +852,7 @@
       "seed_id": "anchor-dsvsa-valcea",
       "publisher": "Direcția Sanitară Veterinară și pentru Siguranța Alimentelor Vâlcea",
       "seed_url": "https://valcea.dsvsa.ro/",
-      "checked_at_epoch": 1787881884,
+      "checked_at_epoch": 1787895967,
       "status": "DEGRADED",
       "http_error": "<urlopen error [Errno 101] Network is unreachable>",
       "final_url": null,
@@ -863,11 +863,11 @@
       "seed_id": "anchor-itm-valcea",
       "publisher": "Inspectoratul Teritorial de Muncă Vâlcea",
       "seed_url": "https://www.inspectiamuncii.ro/web/itm-valcea",
-      "checked_at_epoch": 1787881879,
+      "checked_at_epoch": 1787895964,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://www.inspectiamuncii.ro/web/itm-valcea",
-      "content_sha256": "049beb04bf21de002c3352fc0b724a48d186ef411f8a0b5048971aa1e84f1cf4",
+      "content_sha256": "0366093eada7fbcd3719d12dfbae10327df71f8592dcd3863e73d012307e0ba5",
       "candidates": [
         {
           "candidate_id": "3137540bd079218640fb6a33",
@@ -1095,11 +1095,11 @@
       "seed_id": "anchor-salvamont-brezoi",
       "publisher": "Serviciul Public Local SALVAMONT Brezoi",
       "seed_url": "https://www.salvamontromania.ro/serviciu.php?id=56",
-      "checked_at_epoch": 1787885487,
+      "checked_at_epoch": 1787895945,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://www.salvamontromania.ro/serviciu.php?id=56",
-      "content_sha256": "70cca6e2011084738070dbb8869c55704b2423ad2f0e48a24f42e409a6b21c73",
+      "content_sha256": "fe4b315fce485b880db2e61dcb4045a80a4297274aae9f2d63cf20951fb2ead9",
       "candidates": [
         {
           "candidate_id": "68e1800254d2572a2816e17d",
@@ -1184,11 +1184,11 @@
       "seed_id": "anchor-salvamont-valcea",
       "publisher": "Serviciul Public Județean Salvamont Salvaspeo Vâlcea",
       "seed_url": "https://www.salvamontromania.ro/serviciu.php?id=17",
-      "checked_at_epoch": 1787885486,
+      "checked_at_epoch": 1787895943,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://www.salvamontromania.ro/serviciu.php?id=17",
-      "content_sha256": "8e65baebdcdfece85402824e7607adb29758eb0fb9362bead39b710ad4b2d5fa",
+      "content_sha256": "eeca5e4f1ed6bc99417b7a782574ce65204d52cf4d500f9ffa081aa5f5083caa",
       "candidates": [
         {
           "candidate_id": "e372542ae1cb090415170059",
@@ -1273,7 +1273,7 @@
       "seed_id": "anchor-sju-valcea",
       "publisher": "Spitalul Județean de Urgență Vâlcea",
       "seed_url": "https://www.sjv.ro/",
-      "checked_at_epoch": 1787881861,
+      "checked_at_epoch": 1787895946,
       "status": "DEGRADED",
       "http_error": "<urlopen error [Errno 101] Network is unreachable>",
       "final_url": null,
@@ -8058,7 +8058,7 @@
       "seed_id": "signal-ajofm-valcea",
       "publisher": "AJOFM Vâlcea",
       "seed_url": "https://www.anofm.ro/valcea/categorie/comunicate-de-presa/",
-      "checked_at_epoch": 1787871010,
+      "checked_at_epoch": 1787895993,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://www.anofm.ro/valcea/categorie/comunicate-de-presa/",
@@ -9503,11 +9503,11 @@
       "seed_id": "signal-curierul-valcea",
       "publisher": "Curierul de Vâlcea",
       "seed_url": "https://www.curierul.ro/",
-      "checked_at_epoch": 1787871005,
+      "checked_at_epoch": 1787895989,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://www.curierul.ro/",
-      "content_sha256": "2025d241344d8cdbc7304399cc36a2bd5b058ce27dedd8916a4d0d7fadf110ef",
+      "content_sha256": "b02b6c3af780b61f727386d506678db33937f577142d2e452ea696742f589206",
       "candidates": [
         {
           "candidate_id": "b6080307b0a1b0a345ee341e",
@@ -10063,6 +10063,17 @@
           "candidate_id": "b12752e4d835697549020f70",
           "seed_id": "signal-curierul-valcea",
           "url": "https://www.curierul.ro/category/sport/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "05145c5a53798e41d9994af0",
+          "seed_id": "signal-curierul-valcea",
+          "url": "https://www.curierul.ro/comunicat-de-presa-privind-finalizarea-proiectului-implementarea-de-sisteme-inteligente-de-management-urban-local-si-de-transport-in-orasul-horezu-judetul-valcea/",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T2",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -11015,11 +11026,11 @@
       "seed_id": "signal-eveniment-valcean",
       "publisher": "Eveniment Vâlcean",
       "seed_url": "https://evenimentvalcean.ro/",
-      "checked_at_epoch": 1787871002,
+      "checked_at_epoch": 1787895987,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://evenimentvalcean.ro/",
-      "content_sha256": "dfb716312b4ee2a6f2d45ed8302171d520024bf9b763311ff044d01618beff70",
+      "content_sha256": "552fcd34b6375c9581df844c689e1375bb7bcd56259d0b8c6b679248fa039b47",
       "candidates": [
         {
           "candidate_id": "1477086248f3e49ed2c7e27e",
@@ -12372,11 +12383,11 @@
       "seed_id": "signal-ipj-valcea",
       "publisher": "Inspectoratul de Poliție Județean Vâlcea",
       "seed_url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri",
-      "checked_at_epoch": 1787871008,
+      "checked_at_epoch": 1787895992,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri",
-      "content_sha256": "9f34e523393a30e965f9890725ba73a953f3b5b02a453f10848f64ed916defc4",
+      "content_sha256": "31cac5c8b923a9335b4ebb6dcfdf1d079381a20b026a8a3aed8ea6c0bc101cde",
       "candidates": [
         {
           "candidate_id": "a51f28359b60b65c35b77cf0",
@@ -12599,6 +12610,17 @@
           "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
         },
         {
+          "candidate_id": "a4da1b29c282e453d419725d",
+          "seed_id": "signal-ipj-valcea",
+          "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri/actiune-pentru-cresterea-sigurantei-rutiere-pe-dn-7",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
           "candidate_id": "e45e1d9eb8bcfa2fc2bccd1b",
           "seed_id": "signal-ipj-valcea",
           "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri/retinut-pentru-24-de-ore1787834752",
@@ -12690,17 +12712,6 @@
           "candidate_id": "a67cf6ab22dafa486e405d46",
           "seed_id": "signal-ipj-valcea",
           "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri/stire-de-presa1787476419",
-          "discovered_by": "html:relevant_internal",
-          "tier_ceiling": "T1",
-          "lifecycle": "DISCOVERED_UNRATED",
-          "public_projection": false,
-          "auto_publication": false,
-          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
-        },
-        {
-          "candidate_id": "e9c48b5454106dfbab34742e",
-          "seed_id": "signal-ipj-valcea",
-          "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri/eveniment-rutier-pe-dn7-in-localitatea-balota",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T1",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -13089,11 +13100,11 @@
       "seed_id": "signal-isu-valcea",
       "publisher": "Inspectoratul pentru Situații de Urgență Vâlcea",
       "seed_url": "https://isuvl.igsu.ro/comunicate-de-presa",
-      "checked_at_epoch": 1787871009,
+      "checked_at_epoch": 1787895993,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://isuvl.igsu.ro/comunicate-de-presa",
-      "content_sha256": "722504da0bbd1e230f26c7a6b1cbcc85d0943693d088174ec954f288f9cc79c1",
+      "content_sha256": "0d316fd41a3abb69dabce68e28f6f187cf4034fc9dd043f3a1eb55056ce84255",
       "candidates": [
         {
           "candidate_id": "59548f715c7714adbce6950c",
@@ -14679,11 +14690,11 @@
       "seed_id": "signal-se-intampla-in-valcea",
       "publisher": "Se întâmplă în Vâlcea",
       "seed_url": "https://seintamplainvalcea.ro/",
-      "checked_at_epoch": 1787871004,
+      "checked_at_epoch": 1787895988,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://seintamplainvalcea.ro/",
-      "content_sha256": "e590fbfa28dc8c142823095f8f0244920a560acd1dcc7f216827bd4ea5c7edcb",
+      "content_sha256": "c0b94facb98c3eb0eef4da070b8c80226a81bf6fbc1077062ffe2bb2b1b73107",
       "candidates": [
         {
           "candidate_id": "3dea03749a10fb619d863a6b",
@@ -17333,7 +17344,7 @@
       ]
     }
   ],
-  "candidate_count": 1499,
+  "candidate_count": 1500,
   "candidates": [
     {
       "candidate_id": "723808db7a7383c967e1a9ce",
@@ -26609,6 +26620,17 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
+      "candidate_id": "05145c5a53798e41d9994af0",
+      "seed_id": "signal-curierul-valcea",
+      "url": "https://www.curierul.ro/comunicat-de-presa-privind-finalizarea-proiectului-implementarea-de-sisteme-inteligente-de-management-urban-local-si-de-transport-in-orasul-horezu-judetul-valcea/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
       "candidate_id": "f4e5773af6491e602b1bdd78",
       "seed_id": "signal-curierul-valcea",
       "url": "https://www.curierul.ro/feed/",
@@ -29249,6 +29271,17 @@
       "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
     },
     {
+      "candidate_id": "a4da1b29c282e453d419725d",
+      "seed_id": "signal-ipj-valcea",
+      "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri/actiune-pentru-cresterea-sigurantei-rutiere-pe-dn-7",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
       "candidate_id": "aa7b3cbcbf3d875740348e23",
       "seed_id": "signal-ipj-valcea",
       "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri/actiune-pentru-siguranta-rutiera-pe-dn-7",
@@ -29274,17 +29307,6 @@
       "candidate_id": "e9276bd88888b86195998018",
       "seed_id": "signal-ipj-valcea",
       "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri/depistat-de-politistii-biroului-rutier1787637799",
-      "discovered_by": "html:relevant_internal",
-      "tier_ceiling": "T1",
-      "lifecycle": "DISCOVERED_UNRATED",
-      "public_projection": false,
-      "auto_publication": false,
-      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
-    },
-    {
-      "candidate_id": "e9c48b5454106dfbab34742e",
-      "seed_id": "signal-ipj-valcea",
-      "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri/eveniment-rutier-pe-dn7-in-localitatea-balota",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T1",
       "lifecycle": "DISCOVERED_UNRATED",
