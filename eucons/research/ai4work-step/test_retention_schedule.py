@@ -23,12 +23,12 @@ class RetentionScheduleTests(unittest.TestCase):
             if isinstance(row, dict) and row.get("data_class")
         }
 
-    def test_schedule_is_fail_closed_and_bound_to_same_research(self) -> None:
+    def test_schedule_policy_complete_but_prod_still_fail_closed(self) -> None:
         self.assertEqual(self.schedule.get("research_id"), self.contract.get("research_id"))
         self.assertEqual(self.schedule.get("research_id"), self.activation.get("research_id"))
         self.assertEqual(
             self.schedule.get("status"),
-            "DRAFT_EXECUTION_BINDING_REQUIRED_BEFORE_COLLECTION",
+            "TECHNICAL_POLICY_COMPLETE_CONTROLLER_ACCEPTANCE_AND_PROVIDER_BINDING_REQUIRED_BEFORE_COLLECTION",
         )
         self.assertIs(self.schedule.get("controller_approval"), False)
         self.assertIs(self.schedule.get("collection_enabled"), False)
@@ -68,11 +68,12 @@ class RetentionScheduleTests(unittest.TestCase):
         self.assertTrue(any("retention clock" in item.lower() for item in evidence))
         self.assertTrue(any("stale idempotent retry" in item.lower() for item in evidence))
 
-    def test_erasure_replay_marker_is_minimal_non_analytical_and_not_yet_approved(self) -> None:
+    def test_erasure_replay_marker_is_minimal_non_analytical_and_bounded_to_24h(self) -> None:
         marker = self.rows["erasure replay-suppression markers"]
         self.assertEqual(marker.get("store"), "RESEARCH_RIGHTS_CONTROL_ONLY_NOT_ANALYTICAL")
         content = str(marker.get("content", "")).lower()
-        self.assertIn("opaque derived response_id only", content)
+        self.assertIn("opaque derived response_id", content)
+        self.assertIn("expires_at_utc", content)
         for forbidden in (
             "no questionnaire answers",
             "canonical body digest",
@@ -85,10 +86,12 @@ class RetentionScheduleTests(unittest.TestCase):
             "employer identifier",
         ):
             self.assertIn(forbidden, content)
-        self.assertTrue(str(marker.get("retention", "")).startswith("UNRESOLVED_BEFORE_CONTROLLER_APPROVAL"))
+        self.assertIn("maximum 24 hours", str(marker.get("retention", "")).lower())
+        self.assertIn("same-tab/session", str(marker.get("retention_rationale", "")).lower())
+        self.assertIn("per-marker", str(marker.get("production_binding_control", "")).lower())
         self.assertIn("FORBIDDEN", str(marker.get("export", "")))
         self.assertIn("collection remains NO_GO", str(marker.get("gate", "")))
-        self.assertIn("automatic", str(marker.get("deletion", "")).lower())
+        self.assertIn("automatically", str(marker.get("deletion", "")).lower())
 
     def test_contact_and_test_twin_remain_separate_from_prod_evidence(self) -> None:
         contact = self.rows["optional follow-up contact records"]
@@ -107,6 +110,9 @@ class RetentionScheduleTests(unittest.TestCase):
         ).lower()
         self.assertIn("annex 5", provider_limit)
         self.assertIn("collection remains no_go", provider_limit)
+        replay_extension = str(self.schedule.get("exceptions", {}).get("replay_marker_extension", "")).lower()
+        self.assertIn("longer than 24 hours", replay_extension)
+        self.assertIn("explicit controller approval", replay_extension)
 
 
 if __name__ == "__main__":
