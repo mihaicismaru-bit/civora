@@ -35,6 +35,7 @@ REQUIRED = {
     "SRC-INTERREG-ROUA": {"INTERREG", "CBC", "NEXT"},
     "SRC-INTERREG-ROMD": {"INTERREG", "CBC", "NEXT"},
     "SRC-INTERREG-ROMD-2028-2034": {"INTERREG", "CBC", "NEXT", "PROGRAMMING_PIPELINE"},
+    "SRC-INTERREG-NEXT-BSB": {"INTERREG", "NEXT", "TRANSNATIONAL", "BLACK_SEA_BASIN", "CALL_REGISTRY"},
     "SRC-INTERREG-DANUBE": {"INTERREG", "TRANSNATIONAL"},
     "SRC-INTERREG-EUROPE": {"INTERREG", "INTERREGIONAL"},
 }
@@ -67,6 +68,7 @@ OFFICIAL_HOSTS = {
     "SRC-INTERREG-ROUA": "ro-ua.net",
     "SRC-INTERREG-ROMD": "www.ro-md.net",
     "SRC-INTERREG-ROMD-2028-2034": "ro-md.net",
+    "SRC-INTERREG-NEXT-BSB": "www.blacksea-cbc.net",
     "SRC-INTERREG-DANUBE": "interreg-danube.eu",
     "SRC-INTERREG-EUROPE": "www.interregeurope.eu",
 }
@@ -234,6 +236,20 @@ def main():
     if eea_calls.get("observation_state") != "CURRENT_CALL_REGISTRY":
         fail("EEA Civil Society call index must identify itself as a current call registry")
 
+    bsb = by_id["SRC-INTERREG-NEXT-BSB"]
+    if bsb.get("material_fact_use") is not False:
+        fail("Black Sea Basin call index must remain non-authorizing discovery evidence")
+    if bsb.get("authority_scope") != "CALL_INDEX_DISCOVERY" or bsb.get("observation_state") != "CURRENT_CALL_REGISTRY":
+        fail("Black Sea Basin source must remain a current call-index discovery surface")
+    if bsb.get("adapter_required") != "INTERREG_CALL_V1":
+        fail("Black Sea Basin source must require INTERREG_CALL_V1 before exact-call promotion")
+    expected_ro = {"Braila", "Buzau", "Constanta", "Galati", "Tulcea", "Vrancea"}
+    if set(bsb.get("eligible_territories_romania") or []) != expected_ro:
+        fail("Black Sea Basin Romania eligibility must remain limited to the verified South-East counties")
+    bsb_note = (bsb.get("note") or "").lower()
+    if "exact call identifier" not in bsb_note or "semantic reconciliation" not in bsb_note:
+        fail("Black Sea Basin source must state exact-call and reconcile requirements")
+
     policy = data.get("policy") or {}
     if "OPEN_CALL" not in policy.get("programming_pipeline_rule", ""):
         fail("programming pipeline guard must explicitly prohibit OPEN_CALL promotion")
@@ -245,7 +261,7 @@ def main():
         "PASS external source expansion contract: "
         f"{len(REQUIRED)} roots; {len(DIRECT_PROGRAMME_FAMILIES)} direct programme families; "
         f"{len(pipeline)} programming-pipeline roots; all programmes data-plane classified; "
-        "F&T/programme gateways/call indexes/guides and EEA Civil Society call index fail-closed behind dedicated adapters; "
+        "F&T/programme gateways/call indexes/guides, EEA Civil Society and Black Sea Basin indexes fail-closed behind dedicated adapters; "
         "MFF 2028-2034 remains proposal-only programming intelligence"
     )
 
