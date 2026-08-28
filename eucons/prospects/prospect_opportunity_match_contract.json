@@ -24,7 +24,12 @@
     "hold_conflict_before_matching": true,
     "suppress_before_matching": true,
     "projection_read_only_required": true,
-    "projection_source_mutation_forbidden": true
+    "projection_source_mutation_forbidden": true,
+    "partener_role": "DISCOVERY_ONLY",
+    "official_registry_read_only_input": true,
+    "official_status_and_deadline_required_for_candidate": true,
+    "missing_official_registry_result": "HOLD_SOURCE_STATE",
+    "official_conflict_result": "HOLD_SOURCE_STATE"
   },
   "profile_projection": {
     "organization_type_labels": {
@@ -65,7 +70,8 @@
     "inference_verification_question_required": true,
     "unknowns_must_remain_questions": true,
     "conflicts_block_matching": true,
-    "opportunity_material_facts_require_verified_projection_classes": true
+    "opportunity_material_facts_require_verified_projection_classes": true,
+    "official_source_bindings_control_material_fact_authority": true
   },
   "outputs": {
     "matched": "MATCHED_RESEARCH_CANDIDATE",
@@ -91,6 +97,9 @@
     "deterministic_sort": ["prospect_priority_desc", "opportunity_relevance_desc", "opportunity_id_asc"],
     "source_provenance_required": true,
     "deadline_may_be_exposed_only_when_verified": true,
+    "deadline_requires_official_source_binding": true,
+    "partener_discovery_never_satisfies_material_fact_authority": true,
+    "official_conflict_fails_closed": true,
     "never_claim_eligibility_award_probability_or_buying_intent": true,
     "never_generate_person_level_output": true,
     "never_prepare_or_send_external_contact": true,
