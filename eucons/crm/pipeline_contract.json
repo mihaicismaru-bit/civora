@@ -78,7 +78,10 @@
       "engine_id": "EUCONS_R07_PROSPECT_OPPORTUNITY_SERVICE_MATCH",
       "required_state": "MATCHED_RESEARCH_CANDIDATE",
       "eligibility_state": "NOT_ASSESSED",
-      "maximum_next_state": "RESEARCH_READY"
+      "maximum_next_state": "RESEARCH_READY",
+      "authority_state": "OFFICIAL_SOURCE_VERIFIED",
+      "required_official_fact_classes": ["status", "deadline"],
+      "minimum_official_source_count": 1
     },
     "R08_ACTION_PACK": {
       "engine_id": "EUCONS_R08_ORGANIZATION_ACTION_PACK",
