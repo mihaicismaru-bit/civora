@@ -3,6 +3,7 @@ name: LOCAL NEWS OS vNext Vâlcea Shadow Migration
 on:
   workflow_dispatch:
   push:
+    branches: [main]
     paths:
       - "local-news-os/vnext/BUILD_READY_FOR_MIGRATION.json"
       - "local-news-os/vnext/instances/valcea/instance.json"
@@ -159,9 +160,14 @@ jobs:
           retention-days: 14
 
       - name: Persist harness repair and latest shadow acceptance receipt
+        if: github.ref == 'refs/heads/main'
         shell: bash
         run: |
           set -euo pipefail
+          if [[ "${GITHUB_REF}" != "refs/heads/main" ]]; then
+            echo "REFUSING_NON_MAIN_PERSIST ref=${GITHUB_REF}"
+            exit 1
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add \
@@ -171,8 +177,19 @@ jobs:
             exit 0
           fi
           status=$(python -c "import json; print(json.load(open('local-news-os/vnext/acceptance/valcea-p18-shadow-latest.json', encoding='utf-8'))['status'])")
+          git fetch origin main
+          if ! git merge-base --is-ancestor "${GITHUB_SHA}" origin/main; then
+            echo "MAIN_ANCESTRY_GUARD_FAIL trigger=${GITHUB_SHA} current=$(git rev-parse origin/main)"
+            exit 1
+          fi
           git commit -m "P18: repair shadow import and persist ${status}"
-          git pull --rebase origin main
+          git rebase origin/main
+          unexpected="$(git diff --name-only origin/main...HEAD | grep -Ev '^(local-news-os/vnext/instances/valcea/migration/p18_shadow_migration\.py|local-news-os/vnext/acceptance/valcea-p18-shadow-latest\.json)$' || true)"
+          if [[ -n "${unexpected}" ]]; then
+            echo "REFUSING_UNEXPECTED_MAIN_WRITE_PATHS"
+            printf '%s\n' "${unexpected}"
+            exit 1
+          fi
           git push origin HEAD:main
 
       - name: Enforce shadow acceptance result
