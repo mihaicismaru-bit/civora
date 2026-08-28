@@ -53,15 +53,7 @@ jobs:
             echo 'Third-party commercial tracking detected in AI4WORK research preview' >&2
             exit 1
           fi
-      - name: Reject unproven controller identity in research preview
-        shell: bash
-        run: |
-          set -euo pipefail
-          if grep -RIE 'Operator:</strong>[[:space:]]*EUROCONSULT SRL' /tmp/ai4work-research-preview; then
-            echo 'Unproven GDPR controller identity leaked into AI4WORK research preview' >&2
-            exit 1
-          fi
-      - name: Verify collection, controller, collection-frame, rights and DPIA remain fail-closed
+      - name: Verify collection remains fail-closed after controller determination
         shell: bash
         run: |
           set -euo pipefail
@@ -78,8 +70,12 @@ jobs:
           assert notice.get('operator_legal_name') is None
           assert notice.get('operator_cui') is None
           controller_record = json.loads((root / 'CONTROLLER_DETERMINATION_DRAFT.json').read_text(encoding='utf-8'))
-          assert controller_record.get('controller') is None
-          assert controller_record.get('approved') is False
+          controller = controller_record.get('controller') or {}
+          assert controller_record.get('status') == 'CONTROLLER_DETERMINED_PROD_PREREQUISITES_PENDING'
+          assert controller.get('legal_name') == 'EUROCONSULT SRL'
+          assert controller.get('cui') == '14250864'
+          assert controller.get('site') == 'eucons.ro'
+          assert controller_record.get('approved') is True
           assert controller_record.get('collection_enabled') is False
           assert controller_record.get('nf06_reference_eligible') is False
           frame = json.loads((root / 'COLLECTION_FRAME_DRAFT.json').read_text(encoding='utf-8'))
@@ -112,7 +108,7 @@ jobs:
           assert activation.get('real_collection_authorized') is False
           assert activation.get('required_external_or_operational_evidence', {}).get('data_subject_rights_procedure', {}).get('status') == 'OPEN'
           assert activation.get('required_external_or_operational_evidence', {}).get('dpia_screening_or_completed_dpia', {}).get('status') == 'OPEN'
-          print('PASS: AI4WORK collection, controller identity, collection frame, rights, DPIA and PROD activation remain fail-closed')
+          print('PASS: controller is determined while collection, NF06 eligibility, rights, DPIA and PROD activation remain fail-closed')
           PY
       - name: Build combined eucons plus AI4WORK fail-closed candidate
         shell: bash
