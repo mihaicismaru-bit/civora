@@ -14,10 +14,12 @@ class DpiaScreeningTests(unittest.TestCase):
         cls.screen = json.loads(PATH.read_text(encoding="utf-8"))
 
     def test_technical_screening_complete_but_prod_still_fail_closed(self):
+        self.assertEqual(self.screen.get("schema_version"), "eucons.ai4work_gdpr_dpia_screening.v0.3")
         self.assertEqual(
             self.screen.get("status"),
             "TECHNICAL_SCREENING_COMPLETE_CONTROLLER_ACCEPTANCE_REQUIRED_BEFORE_COLLECTION",
         )
+        self.assertEqual(self.screen.get("controller", {}).get("legal_name"), "EUROCONSULT SRL")
         self.assertFalse(self.screen.get("approved"))
         self.assertFalse(self.screen.get("collection_enabled"))
         self.assertEqual(
@@ -28,6 +30,7 @@ class DpiaScreeningTests(unittest.TestCase):
         assessment = self.screen.get("technical_assessment", {})
         self.assertEqual(assessment.get("recommendation"), "DPIA_NOT_REQUIRED_ON_CURRENT_DESIGN")
         self.assertTrue(assessment.get("controller_acceptance_required"))
+        self.assertEqual(assessment.get("controller_identity_status"), "DETERMINED_NOT_YET_ACCEPTED_SCREENING")
 
     def test_current_design_forbids_high_risk_shortcuts(self):
         facts = self.screen["processing_design_facts"]
@@ -45,20 +48,11 @@ class DpiaScreeningTests(unittest.TestCase):
 
     def test_previously_unresolved_criteria_now_have_design_specific_findings(self):
         criteria = self.screen["edpb_screening_criteria"]
-        self.assertEqual(
-            criteria["large_scale_processing"]["state"],
-            "NOT_TRIGGERED_BY_CURRENT_DOCUMENTED_METHOD_SCOPE",
-        )
-        self.assertEqual(
-            criteria["vulnerable_data_subjects"]["state"],
-            "SAFEGUARDED_NOT_TRIGGERING_MANDATORY_DPIA_ON_CURRENT_DESIGN",
-        )
-        self.assertEqual(
-            criteria["innovative_technology_or_organisational_solution"]["state"],
-            "NOT_TRIGGERED_BY_CURRENT_PROCESSING",
-        )
+        self.assertEqual(criteria["large_scale_processing"]["state"], "NOT_TRIGGERED_BY_CURRENT_DOCUMENTED_METHOD_SCOPE")
+        self.assertEqual(criteria["vulnerable_data_subjects"]["state"], "SAFEGUARDED_NOT_TRIGGERING_MANDATORY_DPIA_ON_CURRENT_DESIGN")
+        self.assertEqual(criteria["innovative_technology_or_organisational_solution"]["state"], "NOT_TRIGGERED_BY_CURRENT_PROCESSING")
 
-    def test_anspdcp_check_and_technical_assessment_are_complete(self):
+    def test_anspdcp_check_and_remaining_controller_acceptance_are_explicit(self):
         check = self.screen["anspdcp_decision_174_2018_check"]
         self.assertTrue(check["technical_check_complete"])
         for key in (
@@ -73,17 +67,15 @@ class DpiaScreeningTests(unittest.TestCase):
             self.assertFalse(check[key])
 
         mandatory = self.screen["mandatory_before_prod"]
-        self.assertFalse(mandatory["controller_determination_approved"])
+        self.assertTrue(mandatory["controller_determination_approved"])
+        self.assertEqual(mandatory["controller_determination_reference"], "CONTROLLER_DETERMINATION_DRAFT.json v0.3")
         self.assertIsNone(mandatory["privacy_contact_or_dpo_review_reference"])
         self.assertIsInstance(mandatory["final_large_scale_assessment"], str)
         self.assertTrue(mandatory["final_large_scale_assessment"])
         self.assertFalse(mandatory["employee_power_imbalance_safeguards_approved"])
         self.assertTrue(mandatory["employee_power_imbalance_safeguards_technical_design_complete"])
         self.assertTrue(mandatory["anspdcp_decision_174_2018_final_check"])
-        self.assertEqual(
-            mandatory["final_dpia_decision"],
-            "RECOMMEND_DPIA_NOT_REQUIRED_PENDING_CONTROLLER_ACCEPTANCE",
-        )
+        self.assertEqual(mandatory["final_dpia_decision"], "RECOMMEND_DPIA_NOT_REQUIRED_PENDING_CONTROLLER_ACCEPTANCE")
         self.assertIsNone(mandatory["if_dpia_required_completed_dpia_reference"])
         self.assertTrue(mandatory["if_residual_high_risk_prior_consultation_assessed"])
 
