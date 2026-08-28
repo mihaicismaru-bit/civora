@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "id": "R11-FUNNEL-RECEIPT-ADAPTER-001",
+  "engine_id": "EUCONS_R11_CLIENT_FINDER_FUNNEL_RECEIPT_ADAPTER",
+  "product": "EUCONS_COMMERCIAL_OS",
+  "status": "CANONICAL",
+  "purpose": "Normalize already-prefetched, pseudonymous internal lifecycle receipts into the exact R11 funnel analytics input shape without transporting analytics, materializing CRM state, exposing raw payloads, or creating performance claims.",
+  "source_mode": "PREFETCHED_INTERNAL_RECEIPT_MANIFEST_ONLY",
+  "target_contract": {
+    "id": "R11-FUNNEL-ANALYTICS-001",
+    "path": "eucons/analytics/client_finder_funnel_analytics_contract.json",
+    "required_source_mode": "PREFETCHED_INTERNAL_LIFECYCLE_SNAPSHOTS_ONLY"
+  },
+  "evidence_classes": [
+    "REAL_TELEMETRY",
+    "NON_EVIDENCE"
+  ],
+  "receipt_types": {
+    "INBOUND_COMPLETION_RECEIPT": {
+      "stage": "INBOUND_COMPLETED",
+      "entry_lanes": ["INBOUND"],
+      "source_contract_id": "R05-INBOUND-001",
+      "source_state": "COMPLETED"
+    },
+    "CLIENT_FINDER_READY_RECEIPT": {
+      "stage": "PROSPECT_READY",
+      "entry_lanes": ["PROSPECT_DISCOVERY"],
+      "source_contract_id": "R06-CF-CONTRACT-001",
+      "source_state": "READY_FOR_SCORING"
+    },
+    "PROSPECT_MATCH_RECEIPT": {
+      "stage": "MATCHED",
+      "entry_lanes": ["INBOUND", "PROSPECT_DISCOVERY"],
+      "source_contract_id": "R07-PROSPECT-MATCH-001",
+      "source_state": "MATCHED_RESEARCH_CANDIDATE"
+    },
+    "ACTION_PACK_READY_RECEIPT": {
+      "stage": "OUTREACH_PREPARED",
+      "entry_lanes": ["INBOUND", "PROSPECT_DISCOVERY"],
+      "source_contract_id": "R08-ACTION-PACK-001",
+      "source_state": "READY_FOR_APPROVAL"
+    },
+    "PIPELINE_CONTACT_APPROVED_RECEIPT": {
+      "stage": "CONTACT_APPROVED",
+      "entry_lanes": ["INBOUND", "PROSPECT_DISCOVERY"],
+      "source_contract_id": "R10-PIPELINE-001",
+      "source_state": "CONTACT_APPROVED"
+    },
+    "PIPELINE_OFFER_RECEIPT": {
+      "stage": "OFFER",
+      "entry_lanes": ["INBOUND", "PROSPECT_DISCOVERY"],
+      "source_contract_id": "R10-PIPELINE-001",
+      "source_state": "OFFER"
+    },
+    "PIPELINE_WON_RECEIPT": {
+      "stage": "WON",
+      "entry_lanes": ["INBOUND", "PROSPECT_DISCOVERY"],
+      "source_contract_id": "R10-PIPELINE-001",
+      "source_state": "WON"
+    }
+  },
+  "privacy": {
+    "pseudonymous_id_pattern": "^[0-9a-f]{64}$",
+    "raw_payload_forbidden": true,
+    "raw_pii_forbidden": true,
+    "forbidden_keys": [
+      "email",
+      "phone",
+      "contact_name",
+      "organization_name",
+      "legal_name",
+      "message",
+      "ip",
+      "ip_address",
+      "user_agent",
+      "full_url",
+      "referrer_url",
+      "payload",
+      "raw_payload",
+      "answers",
+      "contact"
+    ]
+  },
+  "normalization": {
+    "receipt_id_required": true,
+    "source_snapshot_hash_required": true,
+    "record_id_basis": [
+      "receipt_id",
+      "source_snapshot_hash",
+      "funnel_entity_id",
+      "entry_lane",
+      "stage",
+      "source_contract_id",
+      "source_state",
+      "occurred_at"
+    ],
+    "same_receipt_id_identical_replay_is_noop": true,
+    "same_receipt_id_different_payload_is_conflict": true,
+    "utc_z_required": true,
+    "record_must_fall_inside_cohort_window": true,
+    "deterministic_sort": true
+  },
+  "external_boundaries": {
+    "network_fetch": false,
+    "transport_enabled": false,
+    "repository_runtime_storage": false,
+    "crm_write_enabled": false,
+    "pipeline_write_enabled": false,
+    "offer_send_enabled": false,
+    "outreach_enabled": false,
+    "public_reporting_enabled": false
+  },
+  "output": {
+    "schema_version": 1,
+    "shape": "R11_FUNNEL_ANALYTICS_INPUT",
+    "internal_only": true,
+    "performance_claims_enabled": false
+  }
+}
