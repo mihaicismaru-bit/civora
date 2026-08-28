@@ -6,8 +6,16 @@ on:
     paths:
       - 'partener-eu/ingest/funding_tenders_api.py'
       - 'partener-eu/ingest/funding_tenders_fetch.py'
+      - 'partener-eu/ingest/funding_tenders_reconcile.py'
       - 'partener-eu/ops/test_funding_tenders_structured_adapter.py'
       - 'partener-eu/ops/test_funding_tenders_live_fetch.py'
+      - 'partener-eu/ops/test_funding_tenders_reconcile.py'
+      - 'partener-eu/p11/funding_tenders_stage.py'
+      - 'partener-eu/p11/test_funding_tenders_stage.py'
+      - 'partener-eu/p11/funding_tenders_programme_resolution.py'
+      - 'partener-eu/p11/test_funding_tenders_programme_resolution.py'
+      - 'partener-eu/p11/funding_tenders_projection_gate.py'
+      - 'partener-eu/p11/test_funding_tenders_projection_gate.py'
       - '.github/workflows/partener-eu-funding-tenders-live.yml'
   schedule:
     - cron: '41 */6 * * *'
@@ -32,18 +40,38 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Compile bounded structured acquisition
+      - name: Compile bounded structured acquisition and staging
         run: |
           python -m py_compile partener-eu/ingest/funding_tenders_api.py
           python -m py_compile partener-eu/ingest/funding_tenders_fetch.py
+          python -m py_compile partener-eu/ingest/funding_tenders_reconcile.py
           python -m py_compile partener-eu/ops/test_funding_tenders_structured_adapter.py
           python -m py_compile partener-eu/ops/test_funding_tenders_live_fetch.py
+          python -m py_compile partener-eu/ops/test_funding_tenders_reconcile.py
+          python -m py_compile partener-eu/p11/funding_tenders_stage.py
+          python -m py_compile partener-eu/p11/test_funding_tenders_stage.py
+          python -m py_compile partener-eu/p11/funding_tenders_programme_resolution.py
+          python -m py_compile partener-eu/p11/test_funding_tenders_programme_resolution.py
+          python -m py_compile partener-eu/p11/funding_tenders_projection_gate.py
+          python -m py_compile partener-eu/p11/test_funding_tenders_projection_gate.py
 
       - name: Validate fail-closed structured normalization
         run: python partener-eu/ops/test_funding_tenders_structured_adapter.py
 
       - name: Validate Search/Facet and exact-topic evidence boundary
         run: python partener-eu/ops/test_funding_tenders_live_fetch.py
+
+      - name: Validate direct-call reconciliation boundary
+        run: python partener-eu/ops/test_funding_tenders_reconcile.py
+
+      - name: Validate deterministic direct-call staging boundary
+        run: python partener-eu/p11/test_funding_tenders_stage.py
+
+      - name: Validate authoritative programme-resolution boundary
+        run: python partener-eu/p11/test_funding_tenders_programme_resolution.py
+
+      - name: Validate read-only public-projection quality boundary
+        run: python partener-eu/p11/test_funding_tenders_projection_gate.py
 
       - name: Capture bounded official Search/Facet evidence
         run: |
@@ -71,6 +99,147 @@ jobs:
               assert row['material_fact_use'] is False
               if row['observation_state'] in ('OPEN_CALL','FORTHCOMING_CALL'):
                   assert row['authority_url_verified'] is True
+          print(json.dumps(d['stats'], ensure_ascii=False, sort_keys=True))
+          PY
+
+      - name: Reconcile direct EU calls and quarantine portal-only records
+        run: |
+          python partener-eu/ingest/funding_tenders_reconcile.py \
+            /tmp/partener-funding-tenders-evidence/evidence.json \
+            --search-response /tmp/partener-funding-tenders-evidence/search-response.json \
+            --output /tmp/partener-funding-tenders-evidence/reconciliation-receipt.json
+
+      - name: Validate reconciliation remains staging-only
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('/tmp/partener-funding-tenders-evidence/reconciliation-receipt.json')
+          d=json.loads(p.read_text(encoding='utf-8'))
+          assert d['schema'] == 'PARTENER_EU_FUNDING_TENDERS_RECONCILIATION_RECEIPT_V1'
+          assert d['publication_effect'] == 'NONE'
+          assert d['publish_authorized'] is False
+          assert d['canonical_corpus_mutation'] is False
+          assert d['material_fact_action'] == 'NONE'
+          for row in d['records']:
+              assert row['reconciliation_status'] == 'PASS'
+              assert row['ready_for_staging'] is True
+              assert row['publish_authorized'] is False
+              assert row['raw_search_types'] and set(row['raw_search_types']) <= {'1','2'}
+          for row in d['quarantined_records']:
+              assert row['ready_for_staging'] is False
+              assert row['material_fact_use'] is False
+              assert row['publish_authorized'] is False
+          print(json.dumps(d['stats'], ensure_ascii=False, sort_keys=True))
+          PY
+
+      - name: Admit reconciled direct EU calls to deterministic P11 staging
+        run: |
+          python partener-eu/p11/funding_tenders_stage.py \
+            /tmp/partener-funding-tenders-evidence/reconciliation-receipt.json \
+            --bundle partener-eu/p11/opportunity_bundle.json \
+            --output /tmp/partener-funding-tenders-evidence/staging-admission.json
+
+      - name: Validate canonical staging remains non-publishing
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('/tmp/partener-funding-tenders-evidence/staging-admission.json')
+          d=json.loads(p.read_text(encoding='utf-8'))
+          assert d['schema'] == 'PARTENER_EU_FUNDING_TENDERS_CANONICAL_STAGING_ADMISSION_V1'
+          assert d['canonical_staging_admission'] == 'PASS'
+          assert d['publication_effect'] == 'NONE'
+          assert d['publish_authorized'] is False
+          assert d['canonical_corpus_mutation'] is False
+          assert d['material_fact_action'] == 'NONE'
+          assert d['programme_label_authorized'] is False
+          assert d['missing_proofs'] == ['PUBLIC_PROJECTION_QUALITY_GATE']
+          assert d['stats']['staging_admitted'] == d['stats']['reconciled_ready']
+          assert d['stats']['ambiguous_review'] == 0
+          for row in d['records']:
+              assert row['staging_admission'] == 'PASS'
+              assert row['publish_authorized'] is False
+              assert row['canonical_corpus_mutation'] is False
+              assert row['programme_label_authorized'] is False
+              assert row['missing_proofs'] == ['PUBLIC_PROJECTION_QUALITY_GATE']
+          print(json.dumps(d['stats'], ensure_ascii=False, sort_keys=True))
+          PY
+
+      - name: Resolve programme identity from exact official Facet bytes
+        run: |
+          python partener-eu/p11/funding_tenders_programme_resolution.py \
+            /tmp/partener-funding-tenders-evidence/staging-admission.json \
+            /tmp/partener-funding-tenders-evidence/evidence.json \
+            --facet-response /tmp/partener-funding-tenders-evidence/facet-response-broad.json \
+            --output /tmp/partener-funding-tenders-evidence/programme-resolution.json
+
+      - name: Validate programme resolution remains non-publishing
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('/tmp/partener-funding-tenders-evidence/programme-resolution.json')
+          d=json.loads(p.read_text(encoding='utf-8'))
+          assert d['schema'] == 'PARTENER_EU_FUNDING_TENDERS_PROGRAMME_RESOLUTION_V1'
+          assert d['programme_resolution_gate'] == 'PASS'
+          assert d['programme_label_authorized'] is True
+          assert d['publication_effect'] == 'NONE'
+          assert d['publish_authorized'] is False
+          assert d['canonical_corpus_mutation'] is False
+          assert d['material_fact_action'] == 'NONE'
+          assert d['missing_proofs'] == ['PUBLIC_PROJECTION_QUALITY_GATE']
+          assert d['stats']['programme_resolved'] == d['stats']['staging_records']
+          assert d['stats']['unresolved'] == 0
+          for row in d['records']:
+              assert row['programme_resolution'] == 'PASS'
+              assert row['programme_label_authorized'] is True
+              assert row['programme_identity'].startswith('EU_DIRECT::')
+              assert row['programme_label']
+              assert row['publish_authorized'] is False
+              assert row['canonical_corpus_mutation'] is False
+          print(json.dumps(d['stats'], ensure_ascii=False, sort_keys=True))
+          print(json.dumps(d['resolved_programmes'], ensure_ascii=False, sort_keys=True))
+          PY
+
+      - name: Build read-only public projection quality receipt
+        run: |
+          python partener-eu/p11/funding_tenders_projection_gate.py \
+            /tmp/partener-funding-tenders-evidence/evidence.json \
+            /tmp/partener-funding-tenders-evidence/reconciliation-receipt.json \
+            /tmp/partener-funding-tenders-evidence/staging-admission.json \
+            /tmp/partener-funding-tenders-evidence/programme-resolution.json \
+            --output /tmp/partener-funding-tenders-evidence/projection-quality-gate.json
+
+      - name: Validate public projection quality gate remains read-only
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('/tmp/partener-funding-tenders-evidence/projection-quality-gate.json')
+          d=json.loads(p.read_text(encoding='utf-8'))
+          assert d['schema'] == 'PARTENER_EU_FUNDING_TENDERS_PUBLIC_PROJECTION_QUALITY_GATE_V1'
+          assert d['public_projection_quality_gate'] == 'PASS'
+          assert d['projection_ready'] is True
+          assert d['publication_effect'] == 'NONE'
+          assert d['publish_authorized'] is False
+          assert d['canonical_corpus_mutation'] is False
+          assert d['material_fact_action'] == 'NONE'
+          assert d['missing_proofs'] == []
+          assert d['stats']['projection_ready'] == d['stats']['reconciled_records']
+          assert d['stats']['unique_projection_ids'] == d['stats']['projection_ready']
+          assert d['stats']['quality_errors'] == 0
+          for row in d['records']:
+              assert row['projection_quality'] == 'PASS'
+              assert row['status'] in ('OPEN','FORTHCOMING')
+              assert row['programme_identity'].startswith('EU_DIRECT::')
+              assert row['programme_label']
+              assert row['authority_url'].startswith('https://ec.europa.eu/')
+              assert row['confidence'] == 'HIGH'
+              assert row['missing_to_confirm_call'] == []
+              assert row['publish_authorized'] is False
+              assert row['canonical_corpus_mutation'] is False
+              assert row['missing_proofs'] == []
           print(json.dumps(d['stats'], ensure_ascii=False, sort_keys=True))
           PY
 
