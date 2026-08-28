@@ -1,0 +1,120 @@
+name: PARTENER.EU ESC Source Gate
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'partener-eu/ingest/esc_action_router.py'
+      - 'partener-eu/ingest/esc_action_fetch.py'
+      - 'partener-eu/ops/test_esc_action_router.py'
+      - 'partener-eu/ops/test_esc_action_fetch.py'
+      - '.github/workflows/partener-eu-esc-source.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'partener-eu/ingest/esc_action_router.py'
+      - 'partener-eu/ingest/esc_action_fetch.py'
+      - 'partener-eu/ops/test_esc_action_router.py'
+      - 'partener-eu/ops/test_esc_action_fetch.py'
+      - '.github/workflows/partener-eu-esc-source.yml'
+  schedule:
+    - cron: '41 4,16 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: partener-eu-esc-source-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify checkout is exact event head
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          ACTUAL_SHA="$(git rev-parse HEAD)"
+          test "$ACTUAL_SHA" = "$EXPECTED_SHA" || { echo "FAIL checkout drift: expected $EXPECTED_SHA got $ACTUAL_SHA" >&2; exit 2; }
+          echo "Exact event head verified: $ACTUAL_SHA"
+
+      - name: Regression — ESC annual framework never auto-authorizes OPEN
+        run: python partener-eu/ops/test_esc_action_router.py
+
+      - name: Regression — ESC live acquisition stays official, bounded and immutable
+        run: python partener-eu/ops/test_esc_action_fetch.py
+
+      - name: Capture current official ESC annual-call evidence
+        run: |
+          python partener-eu/ingest/esc_action_fetch.py \
+            --out /tmp/esc-action-live-evidence.json \
+            --raw-out /tmp/esc-action-live.html \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Validate current ESC evidence remains framework-only
+        run: |
+          python - <<'PY'
+          import hashlib, json, re, sys
+          d=json.load(open('/tmp/esc-action-live-evidence.json', encoding='utf-8'))
+          raw=open('/tmp/esc-action-live.html','rb').read()
+          receipt=d.get('receipt') or {}
+          batch=d.get('batch') or {}
+          stats=d.get('stats') or {}
+          if d.get('publication_effect') != 'NONE' or d.get('canonical_corpus_mutation') is not False:
+              print('FAIL ESC evidence crossed canonical/public boundary')
+              sys.exit(2)
+          if d.get('material_fact_use') is not False or d.get('publish_authorized') is not False or d.get('open_call_authorized') is not False:
+              print('FAIL ESC annual framework became material/publishing/OPEN')
+              sys.exit(2)
+          if receipt.get('raw_hash') != hashlib.sha256(raw).hexdigest() or batch.get('raw_hash') != receipt.get('raw_hash'):
+              print('FAIL ESC immutable handoff hash mismatch')
+              sys.exit(2)
+          if not batch.get('framework_call_identifier') or stats.get('action_rows', 0) < 4:
+              print('FAIL ESC official annual-call framework was not parsed sufficiently:', stats)
+              sys.exit(2)
+          if batch.get('parser_version') != 'ESC_ACTION_ROUTER_V2' or not re.fullmatch(r'20\d{2}', str(batch.get('call_year') or '')):
+              print('FAIL ESC parser provenance/programme call year missing or stale:', batch.get('parser_version'), batch.get('call_year'))
+              sys.exit(2)
+          if stats.get('open_call_authorized') != 0:
+              print('FAIL ESC action auto-authorized OPEN:', stats)
+              sys.exit(2)
+          rows=batch.get('records') or []
+          if any(row.get('observation_state') == 'OPEN_CALL' for row in rows):
+              print('FAIL ESC annual framework produced OPEN_CALL')
+              sys.exit(2)
+          if any(row.get('requires_exact_action_evidence') is not True or row.get('requires_reconcile') is not True for row in rows):
+              print('FAIL ESC exact-action/reconcile gate missing')
+              sys.exit(2)
+          if any(row.get('parser_version') != batch.get('parser_version') or row.get('call_year') != batch.get('call_year') for row in rows):
+              print('FAIL ESC row provenance/call-year drift')
+              sys.exit(2)
+          print(json.dumps({
+              'framework_call_identifier': batch.get('framework_call_identifier'),
+              'official_journal_identifier': batch.get('official_journal_identifier'),
+              'call_year': batch.get('call_year'),
+              'parser_version': batch.get('parser_version'),
+              'action_rows': stats.get('action_rows'),
+              'open_call_authorized': stats.get('open_call_authorized'),
+              'raw_hash': receipt.get('raw_hash'),
+          }, ensure_ascii=False))
+          PY
+
+      - name: Upload bounded ESC acquisition evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-esc-live-evidence
+          path: |
+            /tmp/esc-action-live-evidence.json
+            /tmp/esc-action-live.html
+          retention-days: 7
+          if-no-files-found: error
