@@ -1,0 +1,116 @@
+name: PARTENER.EU EUI Call Index Gate
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'partener-eu/ingest/eui_call_index.py'
+      - 'partener-eu/ingest/eui_call_fetch.py'
+      - 'partener-eu/ops/test_eui_call_index.py'
+      - 'partener-eu/ops/test_eui_call_fetch.py'
+      - '.github/workflows/partener-eu-eui-calls.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'partener-eu/ingest/eui_call_index.py'
+      - 'partener-eu/ingest/eui_call_fetch.py'
+      - 'partener-eu/ops/test_eui_call_index.py'
+      - 'partener-eu/ops/test_eui_call_fetch.py'
+      - '.github/workflows/partener-eu-eui-calls.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: partener-eu-eui-calls-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify checkout is exact event head
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          ACTUAL_SHA="$(git rev-parse HEAD)"
+          test "$ACTUAL_SHA" = "$EXPECTED_SHA" || { echo "FAIL checkout drift: expected $EXPECTED_SHA got $ACTUAL_SHA" >&2; exit 2; }
+          echo "Exact event head verified: $ACTUAL_SHA"
+
+      - name: Compile dedicated EUI adapter
+        run: python -m py_compile partener-eu/ingest/eui_call_index.py partener-eu/ingest/eui_call_fetch.py
+
+      - name: Regression — EUI Portico index stays discovery-only
+        run: python partener-eu/ops/test_eui_call_index.py
+
+      - name: Regression — EUI live acquisition stays official, bounded and immutable
+        run: python partener-eu/ops/test_eui_call_fetch.py
+
+      - name: Capture current official EUI Portico call-index evidence
+        run: |
+          python partener-eu/ingest/eui_call_fetch.py \
+            --out /tmp/eui-call-index-live-evidence.json \
+            --raw-out /tmp/eui-call-index-live.html \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Validate current EUI evidence remains non-authorizing
+        run: |
+          python - <<'PY'
+          import hashlib, json, sys
+          d=json.load(open('/tmp/eui-call-index-live-evidence.json', encoding='utf-8'))
+          raw=open('/tmp/eui-call-index-live.html','rb').read()
+          receipt=d.get('receipt') or {}
+          batch=d.get('batch') or {}
+          stats=d.get('stats') or {}
+          rows=batch.get('records') or []
+          if d.get('publication_effect') != 'NONE' or d.get('canonical_corpus_mutation') is not False:
+              print('FAIL EUI evidence crossed canonical/public boundary')
+              sys.exit(2)
+          if d.get('material_fact_use') is not False or d.get('publish_authorized') is not False or d.get('open_call_authorized') is not False:
+              print('FAIL EUI index became material/publishing/OPEN')
+              sys.exit(2)
+          if receipt.get('raw_hash') != hashlib.sha256(raw).hexdigest() or batch.get('raw_hash') != receipt.get('raw_hash'):
+              print('FAIL EUI immutable handoff hash mismatch')
+              sys.exit(2)
+          if batch.get('parser_version') != 'EUI_CALLS_V1' or stats.get('eui_candidates', 0) < 1:
+              print('FAIL EUI official Portico index was not parsed sufficiently:', stats)
+              sys.exit(2)
+          if stats.get('open_call_authorized') != 0:
+              print('FAIL EUI index auto-authorized OPEN:', stats)
+              sys.exit(2)
+          if any(row.get('observation_state') == 'OPEN_CALL' for row in rows):
+              print('FAIL EUI index produced OPEN_CALL')
+              sys.exit(2)
+          if any(row.get('current_status_label') is not None or row.get('exact_call_identifier') is not None for row in rows):
+              print('FAIL EUI index invented exact/current evidence')
+              sys.exit(2)
+          if any(row.get('requires_exact_call_evidence') is not True or row.get('requires_reconcile') is not True for row in rows):
+              print('FAIL EUI exact-call/reconcile gate missing')
+              sys.exit(2)
+          print(json.dumps({
+              'eui_candidates': stats.get('eui_candidates'),
+              'visible_open_candidates': stats.get('visible_open_candidates'),
+              'open_call_authorized': stats.get('open_call_authorized'),
+              'parser_version': batch.get('parser_version'),
+              'raw_hash': receipt.get('raw_hash'),
+          }, ensure_ascii=False))
+          PY
+
+      - name: Upload bounded EUI acquisition evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-eui-call-index-live-evidence
+          path: |
+            /tmp/eui-call-index-live-evidence.json
+            /tmp/eui-call-index-live.html
+          retention-days: 7
+          if-no-files-found: error
