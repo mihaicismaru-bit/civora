@@ -91,6 +91,7 @@ def nav() -> str:
 def footer() -> str:
     links = [
         ("/servicii/", "Servicii"),
+        ("/solicita-oferta/", "Solicită ofertă"),
         ("/ce-finantare-mi-se-potriveste/", "Ce finanțare mi se potrivește"),
         ("/verifica-proiectul/", "Verifică proiectul"),
         ("/proiect-in-implementare/", "Proiect în implementare"),
