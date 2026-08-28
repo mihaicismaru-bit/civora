@@ -52,7 +52,7 @@ OFFICIAL_HOSTS = {
     "SRC-EU-SMP-CALLS": "commission.europa.eu",
     "SRC-EU-ERASMUS-GUIDE-2026": "erasmus-plus.ec.europa.eu",
     "SRC-EU-CREATIVE-EUROPE-CALLS": "culture.ec.europa.eu",
-    "SRC-EU-EUI-CALLS": "www.urban-initiative.eu",
+    "SRC-EU-EUI-CALLS": "portico.urban-initiative.eu",
     "SRC-EU-SOLIDARITY-CALL-2026": "youth.europa.eu",
     "SRC-EU-JUSTICE-GATEWAY": "commission.europa.eu",
     "SRC-EU-MFF-2028-2034": "commission.europa.eu",
