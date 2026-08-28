@@ -1,6 +1,11 @@
 {
-  "schema_version": "eucons.ai4work_gdpr_dpia_screening.v0.2",
+  "schema_version": "eucons.ai4work_gdpr_dpia_screening.v0.3",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "controller": {
+    "legal_name": "EUROCONSULT SRL",
+    "cui": "14250864",
+    "determination_reference": "CONTROLLER_DETERMINATION_DRAFT.json v0.3"
+  },
   "status": "TECHNICAL_SCREENING_COMPLETE_CONTROLLER_ACCEPTANCE_REQUIRED_BEFORE_COLLECTION",
   "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
   "approved": false,
@@ -57,11 +62,13 @@
     "recommendation": "DPIA_NOT_REQUIRED_ON_CURRENT_DESIGN",
     "reason": "No high-risk combination is present: no person-level evaluation or consequential decision, no systematic monitoring, no special-category/criminal data, no dataset matching, no rights-limiting innovative processing, no biometric/IoT/location processing, no employer access to individual responses and no population-scale continuous database.",
     "controller_acceptance_required": true,
+    "controller_identity_status": "DETERMINED_NOT_YET_ACCEPTED_SCREENING",
     "dpo_review_required_only_if_dpo_is_designated_or_otherwise_applicable": true,
     "article_36_prior_consultation": "NOT_INDICATED_ON_CURRENT_SCREENING; reassess if a completed DPIA later identifies residual high risk"
   },
   "mandatory_before_prod": {
-    "controller_determination_approved": false,
+    "controller_determination_approved": true,
+    "controller_determination_reference": "CONTROLLER_DETERMINATION_DRAFT.json v0.3",
     "privacy_contact_or_dpo_review_reference": null,
     "final_large_scale_assessment": "NOT_LARGE_SCALE_ON_CURRENT_DOCUMENTED_METHOD_SCOPE; re-screen on material increase in volume, duration, data breadth or geography",
     "employee_power_imbalance_safeguards_approved": false,
@@ -71,7 +78,7 @@
     "if_dpia_required_completed_dpia_reference": null,
     "if_residual_high_risk_prior_consultation_assessed": true
   },
-  "fail_closed_rule": "The technical screening recommendation does not itself authorise PROD collection. The determined controller must accept the screening and safeguards before the activation gate may use DPIA_NOT_REQUIRED_APPROVED. If the controller concludes a DPIA is required, collection remains disabled until that DPIA is completed and approved and any Article 36 prior-consultation requirement is resolved.",
+  "fail_closed_rule": "Controller identity is now determined, but this technical screening recommendation does not itself authorize PROD collection. EUROCONSULT SRL must accept the screening and safeguards before the activation gate may use DPIA_NOT_REQUIRED_APPROVED. If the controller concludes a DPIA is required, collection remains disabled until that DPIA is completed and approved and any Article 36 prior-consultation requirement is resolved.",
   "re_screen_triggers": [
     "collection volume, duration or geographic scope materially increases",
     "special-category, criminal-conviction, direct-identifier or analytical free-text data are proposed",
