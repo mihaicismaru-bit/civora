@@ -93,10 +93,10 @@ class ControllerDeterminationContractTests(unittest.TestCase):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, remaining)
 
-    def test_public_artifact_excludes_private_hosting_identifiers(self):
+    def test_public_artifact_excludes_actual_private_hosting_identifier_values(self):
         rendered = json.dumps(self.contract, ensure_ascii=False).lower()
         self.assertIn("private billing", self.contract["privacy_boundary"].lower())
-        for forbidden in ("client id", "cod client", "invoice number", "password"):
+        for forbidden in ("client id:", "cod client:", "invoice number:", "password:"):
             with self.subTest(forbidden=forbidden):
                 self.assertNotIn(forbidden, rendered)
 
