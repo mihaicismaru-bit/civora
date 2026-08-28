@@ -273,6 +273,21 @@ def main():
     STATE.parent.mkdir(parents=True, exist_ok=True)
     STATE.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(out["summary"], ensure_ascii=False))
+    alias_evidence = [
+        {
+            "id": x.get("id"),
+            "health": x.get("health"),
+            "selected_url": x.get("selected_url"),
+            "used_canonical_alias": x.get("used_canonical_alias"),
+            "material_fact_use": x.get("material_fact_use"),
+            "semantic_hash_changed": x.get("semantic_hash_changed"),
+            "resolution_task_required": x.get("resolution_task_required"),
+            "publish_material_fact_update": x.get("publish_material_fact_update"),
+        }
+        for x in out["sources"]
+        if x.get("used_canonical_alias")
+    ]
+    print(json.dumps({"alias_transport_evidence": alias_evidence}, ensure_ascii=False, sort_keys=True))
 
 
 if __name__ == "__main__":
