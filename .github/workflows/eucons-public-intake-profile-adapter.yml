@@ -1,0 +1,43 @@
+name: EUCONS Public Intake Profile Adapter
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/leads/public_intake_profile_adapter.py'
+      - 'eucons/leads/public_intake_profile_adapter_contract.json'
+      - 'eucons/validation/test_public_intake_profile_adapter_fail_closed.py'
+      - 'eucons/web/public_intake_progressive_disclosure_contract.json'
+      - 'eucons/web/jtbd_ux_contract.json'
+      - 'eucons/leads/inbound_runtime_contract.json'
+      - 'eucons/validation/validate_public_intake_progressive_disclosure.py'
+      - '.github/workflows/eucons-public-intake-profile-adapter.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'eucons/leads/public_intake_profile_adapter.py'
+      - 'eucons/leads/public_intake_profile_adapter_contract.json'
+      - 'eucons/validation/test_public_intake_profile_adapter_fail_closed.py'
+      - 'eucons/web/public_intake_progressive_disclosure_contract.json'
+      - 'eucons/web/jtbd_ux_contract.json'
+      - 'eucons/leads/inbound_runtime_contract.json'
+      - 'eucons/validation/validate_public_intake_progressive_disclosure.py'
+      - '.github/workflows/eucons-public-intake-profile-adapter.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  fail-closed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile adapter
+        run: python -m py_compile eucons/leads/public_intake_profile_adapter.py
+      - name: Revalidate parent progressive-disclosure guard
+        run: python eucons/validation/validate_public_intake_progressive_disclosure.py
+      - name: Test public intake PROFILE adapter fail-closed behavior
+        run: python eucons/validation/test_public_intake_profile_adapter_fail_closed.py

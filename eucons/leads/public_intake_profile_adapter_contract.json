@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "id": "EUCONS-R05-PUBLIC-INTAKE-PROFILE-ADAPTER-001",
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "R05_PUBLIC_INTAKE_PROFILE_ADAPTER",
+  "status": "DRAFT_FAIL_CLOSED",
+  "purpose": "Materialize a deterministic browser-local PROFILE request envelope from the validated R04 public journey without enabling submission, persistence, contact capture, CRM writes or external action.",
+  "source_bindings": {
+    "public_intake_guard_id": "EUCONS-R04-PUBLIC-INTAKE-PROGRESSIVE-DISCLOSURE-001",
+    "jtbd_contract_id": "R04-JTBD-UX-001",
+    "inbound_runtime_contract_id": "R05-INBOUND-001",
+    "required_guard_decision": "PASS_CROSS_CONTRACT_GUARD_ONLY",
+    "required_runtime_stage": "PROFILE"
+  },
+  "input_contract": {
+    "required_fields": [
+      "session_id",
+      "journey_id",
+      "request_id",
+      "submission_age_ms",
+      "website",
+      "answers"
+    ],
+    "unknown_fields_forbidden": true,
+    "journey_fields_must_equal_r04_first_step_fields": true,
+    "contact_fields_forbidden": true,
+    "person_level_pii_forbidden": true,
+    "free_text_contact_like_tokens_forbidden": true
+  },
+  "output_contract": {
+    "state": "LOCAL_PROFILE_ENVELOPE_READY_REVIEW_REQUIRED",
+    "route_sink": "LOCAL_ONLY_NO_SUBMIT",
+    "request_step": "PROFILE",
+    "contains_transient_answers": true,
+    "repository_persistence_allowed": false,
+    "browser_local_storage_allowed": false,
+    "telemetry_payload_values_allowed": false,
+    "eligibility_state": "NOT_ASSESSED",
+    "funding_claim_state": "NO_PROGRAMME_CLAIM_WITHOUT_VERIFIED_MATCH",
+    "next_gate": "R05_CANONICAL_RUNTIME_REMAINS_SEPARATELY_GATED"
+  },
+  "action_guards": {
+    "network_fetch": false,
+    "backend_submit": false,
+    "provider_write": false,
+    "repository_runtime_write": false,
+    "crm_write": false,
+    "pipeline_write": false,
+    "lead_creation": false,
+    "contact_capture": false,
+    "outreach": false,
+    "email_send": false,
+    "offer_send": false,
+    "mysmis_write": false,
+    "publication": false,
+    "deployment": false
+  },
+  "decision": {
+    "state": "LOCAL_ENVELOPE_ONLY",
+    "runtime_acceptance_authorized": false,
+    "production_collection_authorized": false,
+    "external_action_authorized": false,
+    "next_gate": "R05_CANONICAL_RUNTIME_REMAINS_SEPARATELY_GATED"
+  }
+}
