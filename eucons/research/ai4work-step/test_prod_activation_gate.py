@@ -33,6 +33,8 @@ class ProdActivationGateTests(unittest.TestCase):
         self.assertIn("form_contract_production_disabled", errors)
         self.assertIn("activation_manifest_not_approved", errors)
         self.assertIn("explicit_user_approval_missing", errors)
+        self.assertIn("controller_collection_disabled", errors)
+        self.assertIn("controller_not_nf06_eligible", errors)
         self.assertIn("dpia_screening_not_approved", errors)
         self.assertIn("dpia_screening_conclusion_unresolved", errors)
         assert_repository_fail_closed_or_approved()
@@ -48,8 +50,10 @@ class ProdActivationGateTests(unittest.TestCase):
             collection_frame=frame,
             dpia_screening=dpia,
         )
+        self.assertNotIn("controller_unresolved", errors)
+        self.assertIn("controller_collection_disabled", errors)
+        self.assertIn("controller_not_nf06_eligible", errors)
         self.assertIn("activation_manifest_not_approved", errors)
-        self.assertIn("controller_unresolved", errors)
         self.assertIn("collection_frame_not_approved", errors)
         self.assertIn("dpia_screening_not_approved", errors)
         self.assertTrue(any(item.startswith("external_evidence_not_frozen:") for item in errors))
