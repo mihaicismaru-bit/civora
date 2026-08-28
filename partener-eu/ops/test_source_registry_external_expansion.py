@@ -15,6 +15,12 @@ REQUIRED = {
     "SRC-EU-DIGITAL-WORK-PROGRAMMES": {"EU_DIRECT", "BRUSSELS", "PROGRAMMING_PIPELINE"},
     "SRC-EU-CEF-GATEWAY": {"EU_DIRECT", "BRUSSELS"},
     "SRC-EU-INNOVATION-FUND-CALLS": {"EU_DIRECT", "BRUSSELS", "CALL_REGISTRY"},
+    "SRC-EU-EU4HEALTH-GATEWAY": {"EU_DIRECT", "BRUSSELS"},
+    "SRC-EU-CERV-GATEWAY": {"EU_DIRECT", "BRUSSELS"},
+    "SRC-EU-SMP-CALLS": {"EU_DIRECT", "BRUSSELS", "CALL_REGISTRY"},
+    "SRC-EU-ERASMUS-GUIDE-2026": {"EU_DIRECT", "BRUSSELS"},
+    "SRC-EU-CREATIVE-EUROPE-CALLS": {"EU_DIRECT", "BRUSSELS", "CALL_REGISTRY"},
+    "SRC-EU-EUI-CALLS": {"EU_DIRECT", "BRUSSELS", "CALL_REGISTRY"},
     "SRC-EU-MFF-2028-2034": {"EU_DIRECT", "BRUSSELS", "PROGRAMMING_PIPELINE"},
     "SRC-EEA-GRANTS-ROMANIA-EEA-MOU": {"EEA_NORWAY", "PROGRAMMING_PIPELINE"},
     "SRC-EEA-GRANTS-ROMANIA-NORWAY-MOU": {"EEA_NORWAY", "PROGRAMMING_PIPELINE"},
@@ -39,6 +45,12 @@ OFFICIAL_HOSTS = {
     "SRC-EU-DIGITAL-WORK-PROGRAMMES": "digital-strategy.ec.europa.eu",
     "SRC-EU-CEF-GATEWAY": "cinea.ec.europa.eu",
     "SRC-EU-INNOVATION-FUND-CALLS": "climate.ec.europa.eu",
+    "SRC-EU-EU4HEALTH-GATEWAY": "health.ec.europa.eu",
+    "SRC-EU-CERV-GATEWAY": "commission.europa.eu",
+    "SRC-EU-SMP-CALLS": "commission.europa.eu",
+    "SRC-EU-ERASMUS-GUIDE-2026": "erasmus-plus.ec.europa.eu",
+    "SRC-EU-CREATIVE-EUROPE-CALLS": "culture.ec.europa.eu",
+    "SRC-EU-EUI-CALLS": "www.urban-initiative.eu",
     "SRC-EU-MFF-2028-2034": "commission.europa.eu",
     "SRC-EEA-GRANTS-ROMANIA-EEA-MOU": "eeagrants.org",
     "SRC-EEA-GRANTS-ROMANIA-NORWAY-MOU": "eeagrants.org",
@@ -63,6 +75,12 @@ DIRECT_PROGRAMME_FAMILIES = {
     "SRC-EU-DIGITAL-WORK-PROGRAMMES": "Digital Europe",
     "SRC-EU-CEF-GATEWAY": "Connecting Europe Facility",
     "SRC-EU-INNOVATION-FUND-CALLS": "Innovation Fund",
+    "SRC-EU-EU4HEALTH-GATEWAY": "EU4Health",
+    "SRC-EU-CERV-GATEWAY": "Citizens Equality Rights and Values",
+    "SRC-EU-SMP-CALLS": "Single Market Programme",
+    "SRC-EU-ERASMUS-GUIDE-2026": "Erasmus+",
+    "SRC-EU-CREATIVE-EUROPE-CALLS": "Creative Europe",
+    "SRC-EU-EUI-CALLS": "European Urban Initiative",
 }
 
 STRUCTURED_FT_REQUIRED = {
@@ -71,6 +89,15 @@ STRUCTURED_FT_REQUIRED = {
     "SRC-EU-LIFE-CALLS-2026",
     "SRC-EU-CEF-GATEWAY",
     "SRC-EU-INNOVATION-FUND-CALLS",
+    "SRC-EU-CERV-GATEWAY",
+    "SRC-EU-SMP-CALLS",
+}
+
+DEDICATED_ADAPTER_REQUIRED = {
+    "SRC-EU-EU4HEALTH-GATEWAY": "EU4HEALTH_HADEA_CALLS_V1",
+    "SRC-EU-ERASMUS-GUIDE-2026": "ERASMUS_ACTION_ROUTER_V1",
+    "SRC-EU-CREATIVE-EUROPE-CALLS": "CREATIVE_EUROPE_CALLS_V1",
+    "SRC-EU-EUI-CALLS": "EUI_CALLS_V1",
 }
 
 DIRECT_PIPELINE = {
@@ -78,6 +105,8 @@ DIRECT_PIPELINE = {
     "SRC-EU-DIGITAL-WORK-PROGRAMMES",
 }
 
+SAFE_DIRECT_SCOPES = {"GATEWAY_ONLY", "PROGRAMME_GATEWAY", "PROGRAMME_GUIDE", "CALL_INDEX_DISCOVERY"}
+SAFE_DIRECT_STATES = {"GATEWAY_ONLY", "CURRENT_CALL_REGISTRY"}
 PIPELINE_SCOPES = {"PROGRAMMING_FRAMEWORK", "PROGRAMME_FRAMEWORK"}
 
 
@@ -117,16 +146,24 @@ def main():
         if row.get("programme_family") != expected_family:
             fail(f"{source_id} programme family drift: {row.get('programme_family')!r} != {expected_family!r}")
         if row.get("material_fact_use") is not False:
-            fail(f"{source_id} generic programme/index source cannot authorize material call facts")
+            fail(f"{source_id} generic programme/index/guide source cannot authorize material call facts")
+        if source_id not in DIRECT_PIPELINE:
+            if row.get("authority_scope") not in SAFE_DIRECT_SCOPES:
+                fail(f"{source_id} has unsafe direct-funding authority scope: {row.get('authority_scope')}")
+            if row.get("observation_state") not in SAFE_DIRECT_STATES:
+                fail(f"{source_id} has unsafe direct-funding observation state: {row.get('observation_state')}")
 
     for source_id in STRUCTURED_FT_REQUIRED:
         row = by_id[source_id]
         if row.get("adapter_required") != "FUNDING_TENDERS_STRUCTURED":
             fail(f"{source_id} must require the dedicated Funding & Tenders structured adapter")
-        if row.get("authority_scope") not in {"GATEWAY_ONLY", "PROGRAMME_GATEWAY", "CALL_INDEX_DISCOVERY"}:
-            fail(f"{source_id} has unsafe direct-funding authority scope: {row.get('authority_scope')}")
-        if row.get("observation_state") not in {"GATEWAY_ONLY", "CURRENT_CALL_REGISTRY"}:
-            fail(f"{source_id} has unsafe direct-funding observation state: {row.get('observation_state')}")
+
+    for source_id, adapter in DEDICATED_ADAPTER_REQUIRED.items():
+        row = by_id[source_id]
+        if row.get("adapter_required") != adapter:
+            fail(f"{source_id} must require {adapter}")
+        if row.get("material_fact_use") is not False:
+            fail(f"{source_id} dedicated-adapter source cannot authorize material facts before adapter evidence")
 
     for source_id in DIRECT_PIPELINE:
         row = by_id[source_id]
@@ -173,14 +210,14 @@ def main():
     if "OPEN_CALL" not in policy.get("programming_pipeline_rule", ""):
         fail("programming pipeline guard must explicitly prohibit OPEN_CALL promotion")
     direct_rule = policy.get("direct_funding_gateway_rule", "").lower()
-    if "dedicated" not in direct_rule or "call index" not in direct_rule:
-        fail("direct funding policy must require dedicated exact-call/topic evidence and keep call indexes non-authorizing")
+    if "dedicated" not in direct_rule or "programme-specific" not in direct_rule or "call index" not in direct_rule:
+        fail("direct funding policy must require programme-specific dedicated exact-call/action evidence and keep indexes/guides non-authorizing")
 
     print(
         "PASS external source expansion contract: "
         f"{len(REQUIRED)} roots; {len(DIRECT_PROGRAMME_FAMILIES)} direct programme families; "
         f"{len(pipeline)} programming-pipeline roots; all programmes data-plane classified; "
-        "F&T/direct programme gateways and EEA Civil Society call index fail-closed behind dedicated adapters"
+        "F&T/programme gateways/call indexes/guides and EEA Civil Society call index fail-closed behind dedicated adapters"
     )
 
 
