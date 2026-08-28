@@ -1,5 +1,5 @@
 {
-  "schema_version": "eucons.research_form_contract.v0.6",
+  "schema_version": "eucons.research_form_contract.v0.7",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "purpose": "Primary research for an independent needs analysis; not lead generation, recruitment, marketing or project enrolment.",
   "production_enabled": false,
@@ -46,12 +46,12 @@
     "email_collection": false,
     "file_upload": false,
     "client_generated_stable_identifier": false,
-    "idempotency_key": "one-submit canonical UUIDv4 held only in same-tab/session retry state; never cookie/fingerprint/CRM/analytics derived",
+    "idempotency_key": "one-submit canonical UUIDv4 held only in in-memory same-tab retry state; never cookie/localStorage/sessionStorage/fingerprint/CRM/analytics derived",
     "response_id": "server-derived opaque SHA-256 of research_id + form_id + one-submit idempotency key; raw key is not stored in the analytical record or exported and there is no identity lookup table",
     "response_id_rights_receipt": "the submit response may expose response_id to the respondent as an opaque technical receipt; live rights operations may locate a record by this receipt without collecting an identity registry",
     "ip_in_analytical_payload": false,
     "user_agent_in_analytical_payload": false,
-    "server_log_policy": "Before production, document hosting/reverse-proxy logs, minimize retention and ensure no IP/device metadata enters the analytical export."
+    "server_log_policy": "Application logging MUST NOT contain request bodies, form answers or raw Idempotency-Key. Target reverse-proxy/application access-log retention is maximum 7 days; exact provider behavior must be verified before PROD and no IP/device metadata may enter analytical export or NF06."
   },
   "pre_form_notice": {
     "title": "Cercetare pentru fundamentarea analizei de nevoi AI4WORK STEP",
@@ -61,14 +61,24 @@
     "not_training_offer": true,
     "not_individual_decision": true,
     "no_marketing": true,
+    "purpose_summary": "Răspunsurile sunt folosite exclusiv pentru fundamentarea și validarea analizei de nevoi AI4WORK STEP, în formă individuală numai cât este necesar pentru controlul calității și al drepturilor, iar în analiză și raportare numai în forme agregate supuse disclosure control.",
     "operator_legal_name": null,
+    "operator_contact_details": null,
     "operator_cui": null,
     "operator_status": "UNRESOLVED_BEFORE_COLLECTION",
     "privacy_contact": "OPEN_BEFORE_PRODUCTION",
     "warning": "Instrumentul analitic folosește numai categorii prestabilite și nu solicită câmpuri de text liber, nume, date de contact, numele angajatorului, CNP, adresă sau alți identificatori direcți.",
     "acknowledgement_field": "notice_read_and_voluntary_participation",
     "acknowledgement_default": false,
-    "legal_basis": "TO_BE_DOCUMENTED_BY_DETERMINED_CONTROLLER_BEFORE_PRODUCTION; acknowledgement is not automatically treated as GDPR consent legal basis."
+    "legal_basis": "TO_BE_DOCUMENTED_BY_DETERMINED_CONTROLLER_BEFORE_PRODUCTION; acknowledgement is not automatically treated as GDPR consent legal basis.",
+    "legitimate_interest_summary": "Dacă operatorul aprobă art. 6 alin. (1) lit. (f) GDPR, interesul urmărit este fundamentarea proporțională și verificabilă a analizei de nevoi, pe baza LIA aprobate; participarea rămâne voluntară și dreptul la opoziție se aplică potrivit art. 21.",
+    "recipients_summary": "Accesul la răspunsuri la nivel de respondent este limitat la personalul autorizat pentru cercetare și la împuterniciții/subîmputerniciții tehnici validați; răspunsurile nu sunt copiate în CRM, nu sunt transmise angajatorilor la nivel individual și nu sunt utilizate pentru marketing.",
+    "international_transfer_summary": "Niciun transfer internațional de date la nivel de respondent nu este autorizat prin acest contract; lanțul tehnic și localizarea/subprocesatorii furnizorului trebuie verificate înainte de activarea PROD, iar orice transfer care ar deveni relevant necesită temei și garanții documentate înainte de utilizare.",
+    "retention_summary": "Răspunsurile la nivel de respondent se păstrează în stocarea live numai până la validarea analizei și înghețarea dovezilor, dar cel mult 180 de zile după închiderea colectării și, în lipsa unui hold juridic/audit documentat, nu mai târziu de 31.03.2027. Markerul tehnic anti-replay după ștergere este limitat la maximum 24 de ore; logurile aplicației nu conțin răspunsuri și au țintă de maximum 7 zile.",
+    "rights_summary": "Persoana vizată poate exercita, în condițiile GDPR și ale temeiului juridic final, drepturile de acces, rectificare, ștergere, restricționare și opoziție. Receipt-ul tehnic opac poate fi folosit pentru localizarea răspunsului fără crearea unui registru identitate–răspuns; dacă temeiul final se schimbă, matricea drepturilor se revalidează înainte de colectare.",
+    "complaint_summary": "Persoana vizată are dreptul de a depune o plângere la Autoritatea Națională de Supraveghere a Prelucrării Datelor cu Caracter Personal și dreptul la o cale de atac potrivit GDPR.",
+    "provision_consequence_summary": "Participarea este voluntară. Necompletarea sau refuzul de a participa nu afectează un loc de muncă, un serviciu, eligibilitatea într-un proiect ori accesul la formare.",
+    "automated_decision_summary": "Răspunsurile nu sunt folosite pentru profilare individuală sau pentru decizii automatizate care produc efecte juridice ori efecte similare semnificative asupra respondentului."
   },
   "adult_form": {
     "source_instrument": "AI4WORK STEP QUESTIONNAIRE_ADULTS v1.1 privacy-minimised pre-production",
@@ -91,7 +101,7 @@
     },
     "question_ids": ["E01", "E02", "E03", "E04", "E05", "E06", "E07", "E08", "E09", "E10"],
     "free_text_fields": [],
-    "contact_rule": "E10 may record only yes/possible/no in the analytical form. Any contact detail must be entered separately and cannot carry response_id."
+    "contact_rule": "E10 may record only yes/possible/no in the analytical form. Any future contact detail must use a separately approved store and form and cannot carry response_id; no such direct-identifier collection is enabled by the analytical forms."
   },
   "disclosure_control": {
     "public_or_reported_small_cells": "SUPPRESS_OR_COMBINE_WHEN_N_LT_5",
@@ -99,18 +109,20 @@
     "exact_denominators_required": true
   },
   "go_no_go": {
-    "status": "NO_GO_UNTIL_RUNTIME_AND_PRIVACY_BINDING",
+    "status": "NO_GO_UNTIL_EXTERNAL_GOVERNANCE_AND_PROVIDER_BOUND_VALIDATION",
+    "internal_implementation_status": "BROWSER_CLIENT_AND_PHP_RESEARCH_ONLY_BINDING_IMPLEMENTED_ON_BRANCH_PENDING_EXACT_HEAD_CI",
     "required_before_enable": [
       "controller determination frozen and approved from documented purposes/essential-means evidence",
       "privacy/DPO contact frozen for the determined controller",
       "hosting and processor/subprocessor review completed",
-      "server/reverse-proxy logging policy verified",
-      "research-only production storage adapter bound and isolated from CRM",
-      "retention schedule approved and executable",
-      "data-subject-rights procedure approved and live adapter receipt lookup/atomic erasure validated",
-      "form validation and direct-identifier rejection/minimisation tests PASS",
-      "retry idempotency tests PASS on the exact candidate head",
-      "browser-to-HTTP-to-store-to-export-to-NF06 smoke PASS"
+      "server/reverse-proxy logging and backup/deletion policy verified on the actual account",
+      "research-only production storage binding provider-bound and proven isolated from CRM",
+      "retention schedule approved and executable on the provider-bound adapter",
+      "data-subject-rights procedure approved and live adapter receipt lookup/erasure/replay-marker expiry validated",
+      "form validation and direct-identifier rejection/minimisation tests PASS on exact candidate head",
+      "retry idempotency tests PASS on exact candidate head",
+      "browser-to-HTTP-to-store-to-export-to-NF06 provider-bound TEST TWIN smoke PASS",
+      "explicit user approval recorded in PROD activation manifest before any real collection or external deploy"
     ]
   }
 }
