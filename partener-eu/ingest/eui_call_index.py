@@ -18,7 +18,8 @@ from html.parser import HTMLParser
 from typing import Any
 from urllib.parse import urljoin
 
-PARSER_VERSION = "EUI_CALLS_V1"
+ADAPTER_ID = "EUI_CALLS_V1"
+PARSER_VERSION = "EUI_CALLS_V2"
 SOURCE_FAMILY = "EU_DIRECT"
 PROGRAMME_FAMILY = "EUROPEAN_URBAN_INITIATIVE"
 AUTHORITY_CLASS = "EUROPEAN_URBAN_INITIATIVE_PORTICO"
@@ -129,11 +130,32 @@ def _candidate_detail_url(segment: list[dict[str, str | None]], authority_url: s
     return None
 
 
-def _deadline_candidate(segment: list[dict[str, str | None]]) -> str | None:
+def _owner_label(segment: list[dict[str, str | None]]) -> str | None:
+    # Use the first explicit card-owner label. Looking for EUI anywhere in the
+    # remainder of the page can incorrectly capture a non-EUI final card because
+    # the Portico footer itself names the European Urban Initiative.
     for event in segment:
         value = _value(event)
-        if value.lower().startswith("deadline date"):
-            return value
+        if value.startswith("By "):
+            return value[3:].strip() or None
+    return None
+
+
+def _deadline_candidate(segment: list[dict[str, str | None]]) -> str | None:
+    for idx, event in enumerate(segment):
+        value = _value(event)
+        if not value.lower().startswith("deadline date"):
+            continue
+        suffix = value.split(":", 1)[1].strip() if ":" in value else ""
+        if suffix:
+            return f"Deadline date : {suffix}"
+        # Portico currently renders the label and date in adjacent text nodes.
+        # Bind only the immediate next text node to avoid pulling unrelated copy.
+        if idx + 1 < len(segment) and segment[idx + 1].get("kind") == "text":
+            next_value = _value(segment[idx + 1])
+            if re.fullmatch(r"\d{2}/\d{2}/\d{4}", next_value):
+                return f"Deadline date : {next_value}"
+        return value
     return None
 
 
@@ -147,12 +169,7 @@ def extract_call_candidates(raw: bytes, *, authority_url: str) -> list[dict[str,
     for pos, status_index in enumerate(status_indexes):
         next_status = status_indexes[pos + 1] if pos + 1 < len(status_indexes) else len(events)
         segment = events[status_index + 1:next_status]
-        values = [_value(event) for event in segment]
-        authority_present = any(
-            value == f"By {EUI_AUTHORITY_LABEL}" or value == EUI_AUTHORITY_LABEL
-            for value in values
-        )
-        if not authority_present:
+        if _owner_label(segment) != EUI_AUTHORITY_LABEL:
             continue
         title = _nearest_title(events, status_index)
         status = _value(events[status_index])
