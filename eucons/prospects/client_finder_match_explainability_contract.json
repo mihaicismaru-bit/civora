@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "id": "EUCONS-R07-CLIENT-FINDER-MATCH-EXPLAINABILITY-001",
+  "status": "CANONICAL",
+  "purpose": "Project canonical prospect priority plus verified opportunity/service matching into a minimized operator explanation surface without producing eligibility, award, conversion, buying-intent, legal, financial, deadline-validity or outreach conclusions.",
+  "source_views": {
+    "match_engine_id": "EUCONS_R07_PROSPECT_OPPORTUNITY_SERVICE_MATCH",
+    "match_semantics": "RESEARCH_RELEVANCE_NOT_ELIGIBILITY_AWARD_OR_BUYING_INTENT",
+    "score_engine_id": "EUCONS_R06_PROSPECT_PRIORITY_SCORING",
+    "score_semantics": "COMMERCIAL_RESEARCH_PRIORITY_NOT_ELIGIBILITY_OR_CONVERSION_PROBABILITY"
+  },
+  "required_boundaries": {
+    "eligibility_state": "NOT_ASSESSED",
+    "maximum_next_state": "RESEARCH_READY",
+    "human_review_required": true,
+    "external_contact_enabled": false,
+    "automatic_offer_enabled": false,
+    "automatic_send_enabled": false,
+    "crm_write_enabled": false,
+    "pipeline_write_enabled": false
+  },
+  "matched_requirements": {
+    "match_state": "MATCHED_RESEARCH_CANDIDATE",
+    "opportunity_state": "MATCH_CANDIDATE",
+    "opportunity_relevance_semantics": "RELEVANCE_NOT_APPROVAL_PROBABILITY",
+    "selected_service_must_be_signal_supported": true,
+    "selected_service_must_be_opportunity_aligned": true,
+    "operator_next_step": "REVERIFY_OFFICIAL_SOURCE_AND_VALIDATE_MATCH_BEFORE_OUTREACH",
+    "official_source_reverification_required": true,
+    "material_claims_verified": false
+  },
+  "state_reason_codes": {
+    "MATCHED_RESEARCH_CANDIDATE": "VERIFIED_OPPORTUNITY_SERVICE_OVERLAP",
+    "REQUIRES_VERIFICATION": "FACTS_OR_SERVICE_ALIGNMENT_REQUIRE_VERIFICATION",
+    "NO_CURRENT_OPPORTUNITY": "NO_CURRENT_VERIFIED_OPPORTUNITY",
+    "HOLD_SOURCE_STATE": "SOURCE_REVERIFICATION_REQUIRED",
+    "HOLD_CONFLICT": "EVIDENCE_CONFLICT_REQUIRES_RESOLUTION",
+    "SUPPRESSED": "NO_ACTION_SUPPRESSED"
+  },
+  "output_policy": {
+    "view_state": "CLIENT_FINDER_MATCH_EXPLAINABILITY_VIEW",
+    "include_score_breakdown": true,
+    "include_selected_opportunity_minimized": true,
+    "include_selected_service_support": true,
+    "include_verification_questions": true,
+    "raw_fields_forbidden": [
+      "source_provenance",
+      "verification_evidence",
+      "content_hash",
+      "source_projection_hash",
+      "source_supported_deadline",
+      "person_name",
+      "personal_email",
+      "personal_phone",
+      "home_address",
+      "personal_social_profile",
+      "personal_identifier",
+      "date_of_birth",
+      "private_contact"
+    ],
+    "inference_fields_forbidden": [
+      "eligibility_probability",
+      "award_probability",
+      "conversion_probability",
+      "buying_intent",
+      "purchase_intent",
+      "legal_conclusion",
+      "financial_conclusion"
+    ]
+  },
+  "rules": {
+    "one_to_one_join_by_organization_key": true,
+    "prospect_id_must_match": true,
+    "priority_score_and_state_must_match": true,
+    "recommended_service_must_match": true,
+    "deterministic_sort": ["state_priority", "priority_score_desc_null_last", "organization_key_asc"],
+    "never_treat_score_as_probability": true,
+    "never_infer_eligibility_award_conversion_or_buying_intent": true,
+    "never_expose_raw_provenance_or_material_deadline": true,
+    "never_generate_person_level_output": true,
+    "never_enable_external_action_or_persistence": true
+  }
+}

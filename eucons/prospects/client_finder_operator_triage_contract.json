@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "id": "EUCONS-R07-CLIENT-FINDER-OPERATOR-TRIAGE-SYNTHESIS-001",
+  "status": "CANONICAL",
+  "purpose": "Compose provenance re-verification explainability with prospect/opportunity/service match explainability into one deterministic backend operator queue without creating eligibility, source-age, buying-intent, legal, financial, outreach, CRM or persistence conclusions.",
+  "source_views": {
+    "provenance_contract_id": "EUCONS-R07-CLIENT-FINDER-PROVENANCE-TRIAGE-EXPLAINABILITY-001",
+    "provenance_view_state": "CLIENT_FINDER_PROVENANCE_TRIAGE_EXPLAINABILITY_VIEW",
+    "provenance_semantics": "REVERIFICATION_QUEUE_EXPLAINABILITY_ONLY",
+    "match_view_id": "EUCONS-R07-CLIENT-FINDER-MATCH-EXPLAINABILITY-001",
+    "match_view_state": "CLIENT_FINDER_MATCH_EXPLAINABILITY_VIEW",
+    "match_semantics": "RESEARCH_RELEVANCE_NOT_ELIGIBILITY_AWARD_OR_BUYING_INTENT",
+    "priority_score_semantics": "COMMERCIAL_RESEARCH_PRIORITY_NOT_ELIGIBILITY_OR_CONVERSION_PROBABILITY"
+  },
+  "required_boundaries": {
+    "eligibility_state": "NOT_ASSESSED",
+    "maximum_next_state": "RESEARCH_READY",
+    "human_review_required": true,
+    "external_contact_enabled": false,
+    "automatic_offer_enabled": false,
+    "automatic_send_enabled": false,
+    "crm_write_enabled": false,
+    "pipeline_write_enabled": false
+  },
+  "join": {
+    "keys": [
+      "organization_key",
+      "prospect_id",
+      "opportunity_id",
+      "selected_service_id"
+    ],
+    "required_match_state": "MATCHED_RESEARCH_CANDIDATE",
+    "matched_result_set_must_equal_provenance_queue": true,
+    "one_to_one_join_required": true
+  },
+  "triage": {
+    "queue_order": "PROVENANCE_QUEUE_RANK_ASC",
+    "source_age_classification": "NOT_CLASSIFIED",
+    "threshold_applied": false,
+    "operator_next_step": "REVERIFY_OFFICIAL_SOURCE_AND_VALIDATE_MATCH_BEFORE_OUTREACH",
+    "official_source_reverification_required": true,
+    "material_claims_verified": false,
+    "required_provenance_operator_next_step": "REVERIFY_OFFICIAL_SOURCE_BEFORE_MATERIAL_CLAIM",
+    "required_provenance_explanation_reason": "OFFICIAL_SOURCE_REVERIFICATION_REQUIRED_BEFORE_MATERIAL_CLAIM",
+    "allowed_relative_age_cues": [
+      "ONLY_MATCHED_SOURCE_SNAPSHOT",
+      "ALL_MATCHED_SNAPSHOTS_SHARE_SOURCE_AS_OF",
+      "EARLIEST_SOURCE_SNAPSHOT_IN_CURRENT_SET",
+      "LATEST_SOURCE_SNAPSHOT_IN_CURRENT_SET",
+      "INTERMEDIATE_SOURCE_SNAPSHOT_IN_CURRENT_SET",
+      "TIED_EARLIEST_SOURCE_SNAPSHOT_IN_CURRENT_SET",
+      "TIED_LATEST_SOURCE_SNAPSHOT_IN_CURRENT_SET",
+      "TIED_INTERMEDIATE_SOURCE_SNAPSHOT_IN_CURRENT_SET"
+    ]
+  },
+  "output_policy": {
+    "view_state": "CLIENT_FINDER_OPERATOR_TRIAGE_VIEW",
+    "semantics": "OPERATOR_REVERIFICATION_AND_MATCH_REVIEW_ONLY",
+    "include_provenance_relative_age_cue": true,
+    "include_priority_score_breakdown": true,
+    "include_selected_opportunity_minimized": true,
+    "include_selected_service_support": true,
+    "include_verification_questions": true,
+    "raw_fields_forbidden": [
+      "source_provenance",
+      "verification_evidence",
+      "source_projection_sha256",
+      "source_projection_hash",
+      "content_hash",
+      "source_supported_deadline",
+      "person_name",
+      "personal_name",
+      "personal_email",
+      "personal_phone",
+      "home_address",
+      "personal_social_profile",
+      "personal_identifier",
+      "date_of_birth",
+      "private_contact",
+      "contact_name",
+      "email",
+      "phone",
+      "cnp"
+    ],
+    "inference_fields_forbidden": [
+      "eligibility_probability",
+      "award_probability",
+      "conversion_probability",
+      "buying_intent",
+      "purchase_intent",
+      "legal_conclusion",
+      "financial_conclusion",
+      "source_age_verdict",
+      "source_quality_verdict"
+    ]
+  },
+  "rules": {
+    "provenance_rank_is_primary_queue_order": true,
+    "never_reorder_by_priority_score": true,
+    "matched_identity_must_reconcile_across_views": true,
+    "never_classify_source_age": true,
+    "never_apply_freshness_threshold": true,
+    "official_source_reverification_before_material_claim": true,
+    "match_validation_before_outreach": true,
+    "never_treat_score_as_probability": true,
+    "never_infer_eligibility_award_conversion_or_buying_intent": true,
+    "never_expose_raw_provenance_hash_evidence_or_material_deadline": true,
+    "never_generate_person_level_output": true,
+    "safe_output_whitelist_only": true,
+    "never_enable_external_action_or_persistence": true
+  }
+}

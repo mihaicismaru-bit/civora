@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "id": "EUCONS-R07-CLIENT-FINDER-EVALUATION-TRANSITION-001",
+  "status": "CANONICAL",
+  "purpose": "Gate a selected Client Finder operator-triage candidate into the existing research-evaluation handoff through an explicit human decision and official-source state, without persistence or external action.",
+  "source_triage": {
+    "view_id": "EUCONS-R07-CLIENT-FINDER-OPERATOR-TRIAGE-SYNTHESIS-001",
+    "view_state": "CLIENT_FINDER_OPERATOR_TRIAGE_VIEW",
+    "semantics": "OPERATOR_REVERIFICATION_AND_MATCH_REVIEW_ONLY",
+    "match_semantics": "RESEARCH_RELEVANCE_NOT_ELIGIBILITY_AWARD_OR_BUYING_INTENT",
+    "required_operator_next_step": "REVERIFY_OFFICIAL_SOURCE_AND_VALIDATE_MATCH_BEFORE_OUTREACH"
+  },
+  "target_evaluation": {
+    "contract_id": "EUCONS-E11-R07-EVALUATION-HANDOFF-001",
+    "record_state": "RESEARCH_EVALUATION_PENDING_HUMAN_REVIEW"
+  },
+  "required_boundaries": {
+    "eligibility_state": "NOT_ASSESSED",
+    "maximum_next_state": "RESEARCH_READY",
+    "human_review_required": true,
+    "external_contact_enabled": false,
+    "automatic_offer_enabled": false,
+    "automatic_send_enabled": false,
+    "crm_write_enabled": false,
+    "pipeline_write_enabled": false
+  },
+  "decision": {
+    "decision_source": "HUMAN",
+    "allowed_source_statuses": [
+      "SOURCE_NOT_REVERIFIED",
+      "OFFICIAL_SOURCE_CONFLICT",
+      "OFFICIAL_SOURCE_REVERIFIED"
+    ],
+    "allowed_decisions": [
+      "REQUEST_OFFICIAL_SOURCE_REVERIFICATION",
+      "BLOCK_SOURCE_CONFLICT",
+      "APPROVE_RESEARCH_EVALUATION_HANDOFF"
+    ],
+    "status_decision_map": {
+      "SOURCE_NOT_REVERIFIED": "REQUEST_OFFICIAL_SOURCE_REVERIFICATION",
+      "OFFICIAL_SOURCE_CONFLICT": "BLOCK_SOURCE_CONFLICT",
+      "OFFICIAL_SOURCE_REVERIFIED": "APPROVE_RESEARCH_EVALUATION_HANDOFF"
+    },
+    "status_transition_map": {
+      "SOURCE_NOT_REVERIFIED": "WAITING_SOURCE",
+      "OFFICIAL_SOURCE_CONFLICT": "BLOCKED",
+      "OFFICIAL_SOURCE_REVERIFIED": "READY_FOR_RESEARCH_EVALUATION_REVIEW"
+    },
+    "verification_ref_required_for": [
+      "OFFICIAL_SOURCE_CONFLICT",
+      "OFFICIAL_SOURCE_REVERIFIED"
+    ],
+    "decided_at_format": "RFC3339_UTC_Z"
+  },
+  "output": {
+    "record_state": "CLIENT_FINDER_RESEARCH_EVALUATION_TRANSITION_ENVELOPE",
+    "target_state_committed": false,
+    "persistence_executed": false,
+    "human_review_required": true,
+    "external_contact_enabled": false,
+    "automatic_offer_enabled": false,
+    "automatic_send_enabled": false,
+    "crm_write_enabled": false,
+    "pipeline_write_enabled": false
+  },
+  "rules": {
+    "selection_must_match_exactly_one_triage_row": true,
+    "source_not_reverified_waits": true,
+    "official_source_conflict_blocks": true,
+    "approval_requires_human_decision_and_verified_official_source_reference": true,
+    "approved_transition_may_only_propose_existing_research_evaluation_handoff": true,
+    "target_evaluation_requires_separate_human_review": true,
+    "never_commit_target_state": true,
+    "never_enable_external_action_or_persistence": true,
+    "person_level_fields_forbidden": true,
+    "raw_provenance_evidence_hash_and_material_deadline_forbidden": true,
+    "never_claim_eligibility_award_conversion_or_buying_intent": true,
+    "never_classify_source_age_or_apply_freshness_threshold": true
+  }
+}

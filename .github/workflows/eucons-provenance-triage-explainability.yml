@@ -1,0 +1,36 @@
+name: EUCONS Provenance Triage Explainability
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/prospects/client_finder_provenance_triage_explainability.py'
+      - 'eucons/prospects/client_finder_provenance_triage_explainability_contract.json'
+      - 'eucons/validation/test_client_finder_provenance_triage_explainability_fail_closed.py'
+      - '.github/workflows/eucons-provenance-triage-explainability.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/prospects/client_finder_provenance_triage_explainability.py'
+      - 'eucons/prospects/client_finder_provenance_triage_explainability_contract.json'
+      - 'eucons/validation/test_client_finder_provenance_triage_explainability_fail_closed.py'
+      - '.github/workflows/eucons-provenance-triage-explainability.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-provenance-triage-explainability-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fail-closed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Test Client Finder provenance triage explainability fail-closed behavior
+        run: python eucons/validation/test_client_finder_provenance_triage_explainability_fail_closed.py

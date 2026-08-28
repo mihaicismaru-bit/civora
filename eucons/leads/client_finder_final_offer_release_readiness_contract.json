@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "id": "EUCONS-R07-CLIENT-FINDER-FINAL-OFFER-RELEASE-READINESS-001",
+  "status": "CANONICAL",
+  "purpose": "Capture one human-only final-offer release-readiness decision after internal candidate approval, without authorizing release, generating or approving a final/public offer, adding pricing or material claims, persisting state, invoking Offer Engine, materializing CRM context, or enabling outreach.",
+  "source_review": {
+    "contract_id": "EUCONS-R07-CLIENT-FINDER-FINAL-OFFER-CANDIDATE-REVIEW-001",
+    "record_state": "CLIENT_FINDER_FINAL_OFFER_CANDIDATE_REVIEW_ENVELOPE",
+    "required_candidate_review_outcome": "APPROVED_INTERNAL_ONLY",
+    "required_candidate_review_state": "INTERNAL_FINAL_OFFER_CANDIDATE_APPROVED_INTERNAL_ONLY",
+    "required_internal_candidate_review_approved": true,
+    "required_next_gate_hint": "SEPARATE_FINAL_OFFER_RELEASE_READINESS_GATE_REQUIRED",
+    "required_release_readiness_gate_required": true,
+    "required_official_source_reverified": true,
+    "required_commercial_scope_area": "SELECTED_SERVICE_ONLY"
+  },
+  "required_boundaries": {
+    "eligibility_state": "NOT_ASSESSED",
+    "maximum_next_state": "RESEARCH_READY",
+    "human_review_required": true,
+    "external_contact_enabled": false,
+    "automatic_offer_enabled": false,
+    "automatic_send_enabled": false,
+    "crm_write_enabled": false,
+    "pipeline_write_enabled": false
+  },
+  "readiness": {
+    "decision_source": "HUMAN",
+    "authorization_scope": "NEXT_GATE_ONLY",
+    "allowed_release_readiness_outcomes": [
+      "MORE_RELEASE_REVIEW_REQUIRED",
+      "RELEASE_NOT_READY",
+      "RELEASE_READY_INTERNAL_ONLY"
+    ],
+    "outcome_state_map": {
+      "MORE_RELEASE_REVIEW_REQUIRED": "FINAL_OFFER_RELEASE_REVIEW_REQUIRED",
+      "RELEASE_NOT_READY": "FINAL_OFFER_RELEASE_NOT_READY",
+      "RELEASE_READY_INTERNAL_ONLY": "FINAL_OFFER_RELEASE_READY_INTERNAL_ONLY"
+    },
+    "outcome_next_gate_map": {
+      "MORE_RELEASE_REVIEW_REQUIRED": null,
+      "RELEASE_NOT_READY": null,
+      "RELEASE_READY_INTERNAL_ONLY": "SEPARATE_FINAL_OFFER_RELEASE_AUTHORIZATION_GATE_REQUIRED"
+    },
+    "outcome_next_gate_authorization_map": {
+      "MORE_RELEASE_REVIEW_REQUIRED": false,
+      "RELEASE_NOT_READY": false,
+      "RELEASE_READY_INTERNAL_ONLY": true
+    },
+    "decided_at_format": "RFC3339_UTC_Z"
+  },
+  "output": {
+    "record_state": "CLIENT_FINDER_FINAL_OFFER_RELEASE_READINESS_ENVELOPE",
+    "public_offer_content_included": false,
+    "final_offer_generated": false,
+    "offer_approval_granted": false,
+    "final_offer_approval_granted": false,
+    "final_offer_release_authorization_granted": false,
+    "release_executed": false,
+    "pricing_included": false,
+    "new_legal_claims_included": false,
+    "new_financial_claims_included": false,
+    "target_state_committed": false,
+    "persistence_executed": false,
+    "candidate_persistence_allowed": false,
+    "draft_persistence_allowed": false,
+    "offer_persistence_allowed": false,
+    "production_offer_generation_allowed": false,
+    "final_offer_generation_allowed": false,
+    "offer_engine_invocation_allowed": false,
+    "pricing_decision_allowed": false,
+    "crm_context_materialization_allowed": false,
+    "human_review_required": true,
+    "external_contact_enabled": false,
+    "automatic_offer_enabled": false,
+    "automatic_send_enabled": false,
+    "crm_write_enabled": false,
+    "pipeline_write_enabled": false
+  },
+  "rules": {
+    "source_must_be_approved_internal_candidate_review_only": true,
+    "source_identity_lineage_scope_verification_ref_and_source_as_of_must_reconcile_exactly": true,
+    "source_review_must_still_require_the_separate_release_readiness_gate": true,
+    "readiness_decision_must_be_human_and_reference_the_exact_candidate_review": true,
+    "positive_readiness_may_authorize_only_entry_into_a_separate_release_authorization_gate": true,
+    "positive_readiness_is_not_release_authorization_offer_approval_or_final_offer_approval": true,
+    "readiness_decision_must_not_mutate_content_or_inject_material_claims": true,
+    "never_add_pricing_payment_terms_legal_or_financial_conclusions": true,
+    "never_invoke_production_offer_engine": true,
+    "never_materialize_crm_context": true,
+    "never_enable_external_action_release_or_persistence": true,
+    "person_level_fields_forbidden": true,
+    "raw_evidence_hash_deadline_budget_indicator_obligation_probability_pricing_and_freeform_offer_fields_forbidden": true
+  }
+}
