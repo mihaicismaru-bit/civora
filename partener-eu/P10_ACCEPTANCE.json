@@ -15,9 +15,9 @@
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-08-29T02:29:20Z",
-    "source_pass": 6,
-    "source_degraded": 1,
+    "utc": "2026-08-29T02:30:17Z",
+    "source_pass": 3,
+    "source_degraded": 4,
     "source_fail": 0,
     "source_quarantined": 0,
     "critical_fail": false,
@@ -26,7 +26,7 @@
     "quarantined_source": null
   },
   "deployment_evidence": {
-    "utc": "2026-08-29T02:29:39Z",
+    "utc": "2026-08-29T02:30:27Z",
     "status": "PASS",
     "public_content_verified": true,
     "https_verified": true,
@@ -36,7 +36,7 @@
     "http_content_verified": true,
     "content_origin": "custom_https",
     "http_status": 200,
-    "final_url": "https://partener.eu/?p10_probe=20260829T022939Z",
+    "final_url": "https://partener.eu/?p10_probe=20260829T023027Z",
     "title": "PARTENER.EU — Găsește finanțări europene pentru investiția ta",
     "required_markers_present": true,
     "critical_assets_ok": true,
@@ -46,7 +46,7 @@
       {
         "id": "custom_https",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260829T022939Z",
+        "final_url": "https://partener.eu/?p10_probe=20260829T023027Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -57,12 +57,12 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260829T022939Z",
+        "final_url": "https://partener.eu/?p10_probe=20260829T023027Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "http://partener.eu/?p10_probe=20260829T022939Z",
-            "to_url": "https://partener.eu/?p10_probe=20260829T022939Z"
+            "from_url": "http://partener.eu/?p10_probe=20260829T023027Z",
+            "to_url": "https://partener.eu/?p10_probe=20260829T023027Z"
           }
         ],
         "content_verified": true,
@@ -74,12 +74,12 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260829T022939Z",
+        "final_url": "https://partener.eu/?p10_probe=20260829T023027Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260829T022939Z",
-            "to_url": "https://partener.eu/?p10_probe=20260829T022939Z"
+            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260829T023027Z",
+            "to_url": "https://partener.eu/?p10_probe=20260829T023027Z"
           }
         ],
         "content_verified": true,
@@ -125,16 +125,16 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-08-29T02:29:39Z",
-    "validation_run_started": "2026-08-29T02:29:20Z",
+    "utc": "2026-08-29T02:30:27Z",
+    "validation_run_started": "2026-08-29T02:30:17Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "5139fe7971b23114ec942eaff99c58f6e26e7fd2afd133c2574249958c9be992",
-      "history_sha256": "5139fe7971b23114ec942eaff99c58f6e26e7fd2afd133c2574249958c9be992",
-      "history_path": "validation/history/20260829T022920Z.json",
+      "latest_sha256": "3a7de089dde2047a8e415815663d5d00877476b8bbdaa8ed81fc86f4d13c5144",
+      "history_sha256": "3a7de089dde2047a8e415815663d5d00877476b8bbdaa8ed81fc86f4d13c5144",
+      "history_path": "validation/history/20260829T023017Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "65eaf416c7551980c0e61b5b043659165c290eda8fc71338a984a8126de7e207",
-      "checkpoint_sha256": "65eaf416c7551980c0e61b5b043659165c290eda8fc71338a984a8126de7e207",
+      "source_state_sha256": "d975e1ee27f3a90cdc254ec2abc1457d1996130a3a9dc5fe1480990fe833567c",
+      "checkpoint_sha256": "d975e1ee27f3a90cdc254ec2abc1457d1996130a3a9dc5fe1480990fe833567c",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
@@ -142,7 +142,7 @@
     },
     "source_registry": {
       "observed_at": "2026-08-29T00:29:25.122315Z",
-      "age_seconds": 7214,
+      "age_seconds": 7262,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
