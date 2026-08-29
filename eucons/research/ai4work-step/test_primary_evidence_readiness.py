@@ -11,6 +11,8 @@ from research_storage import canonical_json_bytes
 
 ROOT = Path(__file__).resolve().parent
 REGIONS = ("Centru", "Sud-Muntenia", "Sud-Vest Oltenia")
+ADULT_FORM = "AI4WORK_ADULTS_V1"
+EMPLOYER_FORM = "AI4WORK_EMPLOYERS_V1"
 CHANNELS = {
     "Centru": ("CH-CENTRU001", "CH-CENTRU002"),
     "Sud-Muntenia": ("CH-MUNTEN01", "CH-MUNTEN02"),
@@ -53,31 +55,70 @@ def channel_register() -> dict:
 
 
 def valid_manifest(register: dict) -> dict:
-    channel_counts = {channel_id: 27 for pair in CHANNELS.values() for channel_id in pair}
-    channel_counts[CHANNELS["Centru"][0]] = 30
+    channel_counts = {}
+    region_channel_counts = {}
+    form_region_channel_counts = {
+        ADULT_FORM: {},
+        EMPLOYER_FORM: {},
+    }
+    for region in REGIONS:
+        first, second = CHANNELS[region]
+        region_channel_counts[region] = {first: 28, second: 27}
+        form_region_channel_counts[ADULT_FORM][region] = {first: 20, second: 20}
+        form_region_channel_counts[EMPLOYER_FORM][region] = {first: 8, second: 7}
+        channel_counts[first] = 28
+        channel_counts[second] = 27
+
     return {
-        "schema_version": "eucons.ai4work_nf06_preingest_manifest.v0.5",
+        "schema_version": "eucons.ai4work_nf06_preingest_manifest.v0.6",
         "research_id": "AI4WORK-STEP-NF-RUN-001",
         "evidence_class": "PROD_REAL_EVIDENCE",
         "non_evidence": False,
         "prod_promotion_eligible": True,
+        "channel_concentration_aggregates_emitted": True,
         "record_count": 165,
         "form_counts": {
-            "AI4WORK_ADULTS_V1": 120,
-            "AI4WORK_EMPLOYERS_V1": 45,
+            ADULT_FORM: 120,
+            EMPLOYER_FORM: 45,
         },
+        "region_counts": {region: 55 for region in REGIONS},
         "form_region_counts": {
-            "AI4WORK_ADULTS_V1": {region: 40 for region in REGIONS},
-            "AI4WORK_EMPLOYERS_V1": {region: 15 for region in REGIONS},
+            ADULT_FORM: {region: 40 for region in REGIONS},
+            EMPLOYER_FORM: {region: 15 for region in REGIONS},
         },
         "region_channel_ids": {region: list(CHANNELS[region]) for region in REGIONS},
         "form_region_channel_ids": {
-            "AI4WORK_ADULTS_V1": {region: [CHANNELS[region][0]] for region in REGIONS},
-            "AI4WORK_EMPLOYERS_V1": {region: [CHANNELS[region][1]] for region in REGIONS},
+            ADULT_FORM: {region: list(CHANNELS[region]) for region in REGIONS},
+            EMPLOYER_FORM: {region: list(CHANNELS[region]) for region in REGIONS},
         },
         "channel_counts": channel_counts,
-        "dominant_channel_share": 30 / 165,
+        "region_channel_counts": region_channel_counts,
+        "form_region_channel_counts": form_region_channel_counts,
+        "dominant_channel_share": 28 / 165,
+        "region_dominant_channel_share": {region: 28 / 55 for region in REGIONS},
+        "form_region_dominant_channel_share": {
+            ADULT_FORM: {region: 0.5 for region in REGIONS},
+            EMPLOYER_FORM: {region: 8 / 15 for region in REGIONS},
+        },
         "collection_channel_register_sha256": hashlib.sha256(canonical_json_bytes(register)).hexdigest(),
+    }
+
+
+def concentrate_centru(manifest: dict) -> set[str]:
+    first, second = CHANNELS["Centru"]
+    manifest["region_channel_counts"]["Centru"] = {first: 50, second: 5}
+    manifest["form_region_channel_counts"][ADULT_FORM]["Centru"] = {first: 36, second: 4}
+    manifest["form_region_channel_counts"][EMPLOYER_FORM]["Centru"] = {first: 14, second: 1}
+    manifest["channel_counts"][first] = 50
+    manifest["channel_counts"][second] = 5
+    manifest["region_dominant_channel_share"]["Centru"] = 50 / 55
+    manifest["form_region_dominant_channel_share"][ADULT_FORM]["Centru"] = 36 / 40
+    manifest["form_region_dominant_channel_share"][EMPLOYER_FORM]["Centru"] = 14 / 15
+    manifest["dominant_channel_share"] = 50 / 165
+    return {
+        "region:Centru",
+        f"form_region:{ADULT_FORM}:Centru",
+        f"form_region:{EMPLOYER_FORM}:Centru",
     }
 
 
@@ -94,6 +135,8 @@ class PrimaryEvidenceReadinessTests(unittest.TestCase):
         self.assertTrue(result["thresholds_are_method_rules_not_evidence"])
         self.assertTrue(result["independent_channel_types_per_region_validated"])
         self.assertTrue(result["form_audience_channel_scope_validated"])
+        self.assertTrue(result["channel_concentration_scopes_validated"])
+        self.assertFalse(result["dominant_channel_sensitivity_used"])
 
     def test_test_twin_is_rejected_even_with_large_counts(self):
         register = channel_register()
@@ -121,7 +164,7 @@ class PrimaryEvidenceReadinessTests(unittest.TestCase):
     def test_population_or_region_below_frozen_threshold_is_rejected(self):
         register = channel_register()
         manifest = valid_manifest(register)
-        manifest["form_region_counts"]["AI4WORK_ADULTS_V1"]["Sud-Vest Oltenia"] = 29
+        manifest["form_region_counts"][ADULT_FORM]["Sud-Vest Oltenia"] = 29
         with self.assertRaises(READY.PrimaryEvidenceReadinessError):
             READY.assert_primary_evidence_ready_for_synthesis(
                 manifest,
@@ -135,6 +178,7 @@ class PrimaryEvidenceReadinessTests(unittest.TestCase):
             if entry["region_scope"] == ["Centru"]:
                 entry["channel_type"] = "employment_service"
         manifest = valid_manifest(register)
+        manifest["collection_channel_register_sha256"] = hashlib.sha256(canonical_json_bytes(register)).hexdigest()
         with self.assertRaises(READY.PrimaryEvidenceReadinessError):
             READY.assert_primary_evidence_ready_for_synthesis(
                 manifest,
@@ -178,15 +222,28 @@ class PrimaryEvidenceReadinessTests(unittest.TestCase):
                 channel_register=register,
             )
 
-    def test_dominant_channel_over_70_percent_requires_documented_sensitivity_pass(self):
+    def test_hidden_regional_and_form_region_channel_dominance_requires_exact_scope_sensitivity(self):
         register = channel_register()
         manifest = valid_manifest(register)
-        manifest["dominant_channel_share"] = 0.71
+        exceeded_scopes = concentrate_centru(manifest)
         with self.assertRaises(READY.PrimaryEvidenceReadinessError):
             READY.assert_primary_evidence_ready_for_synthesis(
                 manifest,
                 method_frame=approved_method_frame(),
                 channel_register=register,
+            )
+        incomplete = {
+            "status": "PASS",
+            "reference": "AI4WORK-CHANNEL-SENSITIVITY-001",
+            "sha256": "a" * 64,
+            "covered_scopes": ["region:Centru"],
+        }
+        with self.assertRaises(READY.PrimaryEvidenceReadinessError):
+            READY.assert_primary_evidence_ready_for_synthesis(
+                manifest,
+                method_frame=approved_method_frame(),
+                channel_register=register,
+                dominant_channel_sensitivity=incomplete,
             )
         result = READY.assert_primary_evidence_ready_for_synthesis(
             manifest,
@@ -196,9 +253,44 @@ class PrimaryEvidenceReadinessTests(unittest.TestCase):
                 "status": "PASS",
                 "reference": "AI4WORK-CHANNEL-SENSITIVITY-001",
                 "sha256": "a" * 64,
+                "covered_scopes": sorted(exceeded_scopes),
             },
         )
         self.assertTrue(result["dominant_channel_sensitivity_used"])
+        self.assertEqual(set(result["dominant_channel_sensitivity_scopes"]), exceeded_scopes)
+
+    def test_channel_count_aggregates_must_reconcile_across_global_region_and_form_region_views(self):
+        register = channel_register()
+        manifest = valid_manifest(register)
+        manifest["region_channel_counts"]["Centru"][CHANNELS["Centru"][0]] += 1
+        with self.assertRaises(READY.PrimaryEvidenceReadinessError):
+            READY.assert_primary_evidence_ready_for_synthesis(
+                manifest,
+                method_frame=approved_method_frame(),
+                channel_register=register,
+            )
+
+    def test_declared_dominant_share_must_match_recomputed_counts(self):
+        register = channel_register()
+        manifest = valid_manifest(register)
+        manifest["region_dominant_channel_share"]["Centru"] = 0.9
+        with self.assertRaises(READY.PrimaryEvidenceReadinessError):
+            READY.assert_primary_evidence_ready_for_synthesis(
+                manifest,
+                method_frame=approved_method_frame(),
+                channel_register=register,
+            )
+
+    def test_old_manifest_schema_fails_closed(self):
+        register = channel_register()
+        manifest = valid_manifest(register)
+        manifest["schema_version"] = "eucons.ai4work_nf06_preingest_manifest.v0.5"
+        with self.assertRaises(READY.PrimaryEvidenceReadinessError):
+            READY.assert_primary_evidence_ready_for_synthesis(
+                manifest,
+                method_frame=approved_method_frame(),
+                channel_register=register,
+            )
 
 
 if __name__ == "__main__":
