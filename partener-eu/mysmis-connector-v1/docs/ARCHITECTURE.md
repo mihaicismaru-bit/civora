@@ -57,6 +57,12 @@
     heads, forged pair IDs and unsafe acceptance claims fail before side effects. The resulting
     transport remains extension-internal and exposes only `HEALTH` and `DISCOVER_ARTIFACTS`; it does
     not enable native messaging or establish live MySMIS access.
+18. The installation-bundle manifest is derived only after both exact-head component attestations
+    and their durable pair receipt verify. It contains the deduplicated union of runtime allowlists,
+    with path, size, SHA-256 and component targets. Offline preflight rejects missing, changed,
+    duplicate, symbolic-link or extra payload files. Package construction performs no browser
+    installation, native-messaging enablement, shell execution or MySMIS access and includes an
+    explicit bounded-install gate and rollback procedure.
 
 No project code appears in the discovery implementation. Project numbers occur only in fixtures and
 acceptance evidence.

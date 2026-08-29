@@ -51,6 +51,8 @@ Implemented in this unit:
 - same-source-head package pairing and fail-closed tamper/mixed-build verification
 - attested runtime bootstrap that registers the fixed MV3 transport only after both component bytes
   and the durable pair receipt match the exact source head
+- deterministic installation-bundle manifest and offline preflight with exact payload allowlisting,
+  altered/extra-file rejection and explicit operator rollback guidance
 
 Still fail-closed / not implemented:
 
