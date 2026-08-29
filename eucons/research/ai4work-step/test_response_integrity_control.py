@@ -7,6 +7,7 @@ import unittest
 import canonical_export_integrity as EXPORT_INTEGRITY
 import nf06_preingest as NF06
 import response_integrity_control as INTEGRITY
+from test_nf06_preingest import normalized_records
 from test_profile_coverage_control import full_profile_records
 
 UNIT_TEST_FIXTURE_NON_EVIDENCE = True
@@ -94,15 +95,15 @@ class ResponseIntegrityControlTests(unittest.TestCase):
             )
 
     def test_canonical_export_revalidates_persisted_wrappers_and_receipts_before_nf06(self):
-        records = full_profile_records()
+        records = normalized_records()
         bundles = [persisted_bundle(record) for record in records]
         exported = EXPORT_INTEGRITY.canonical_export_bytes_from_persisted_bundles(bundles)
         self.assertEqual(exported, NF06.canonical_export_bytes(records))
 
     def test_canonical_export_rejects_record_tampering_after_persistence_hashes_were_committed(self):
-        record = full_profile_records()[0]
+        record = normalized_records()[0]
         bundle = persisted_bundle(record)
-        bundle["wrapper"]["record"]["answers"] = {"UNIT_TEST_NON_EVIDENCE_TAMPER": True}
+        bundle["wrapper"]["record"]["answers"]["Q01"] = 4
         with self.assertRaisesRegex(
             EXPORT_INTEGRITY.CanonicalExportIntegrityError,
             "stored record normalized SHA-256 mismatch",
@@ -110,7 +111,7 @@ class ResponseIntegrityControlTests(unittest.TestCase):
             EXPORT_INTEGRITY.validate_persisted_bundle(bundle)
 
     def test_canonical_export_rejects_receipt_or_filename_binding_drift(self):
-        record = full_profile_records()[0]
+        record = normalized_records()[0]
         receipt_drift = persisted_bundle(record)
         receipt_drift["receipt"]["body_sha256"] = "0" * 64
         with self.assertRaisesRegex(
@@ -128,7 +129,7 @@ class ResponseIntegrityControlTests(unittest.TestCase):
             EXPORT_INTEGRITY.validate_persisted_bundle(filename_drift)
 
     def test_canonical_export_gate_rejects_synthetic_record_from_prod_persisted_path(self):
-        record = full_profile_records()[0]
+        record = normalized_records()[0]
         record["synthetic"] = True
         bundle = persisted_bundle(record)
         with self.assertRaisesRegex(
