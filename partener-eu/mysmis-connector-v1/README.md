@@ -43,6 +43,8 @@ Implemented in this unit:
 - external Drive response ingestion with complete base64 readback verification
 - expiring bridge-health challenge/response bound to exact connector and agent builds
 - whitelisted read-only/observe capabilities with explicit no-shell and zero-write assertions
+- fixed-operation HEALTH/DISCOVER_ARTIFACTS dispatcher with expiry, build and replay gates
+- dispatcher-owned zero-click/zero-write safety responses and GET/HEAD-only discovery metadata
 
 Still fail-closed / not implemented:
 

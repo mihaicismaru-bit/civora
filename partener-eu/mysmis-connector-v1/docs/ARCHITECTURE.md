@@ -35,6 +35,11 @@
     to match, and records an explicit reason for every non-retrievable candidate. Clicks, route
     mutations, CDP attachment, shell actions and MySMIS writes fail closed. Offline fixtures exercise
     the same envelope but can never yield live evidence.
+14. The bridge dispatcher has exactly two operations: `HEALTH` and `DISCOVER_ARTIFACTS`. It rejects
+    arbitrary operation names, executable/script payload fields, remote-shell material, stale or
+    premature commands, build mismatch and replayed IDs before invoking a handler. The dispatcher
+    constructs all safety assertions itself; handlers can only return bounded health state or a
+    current-page snapshot plus GET/HEAD observation metadata.
 
 No project code appears in the discovery implementation. Project numbers occur only in fixtures and
 acceptance evidence.
