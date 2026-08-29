@@ -1,7 +1,7 @@
 {
-  "schema_version": "eucons.ai4work_nf06_preingest_contract.v0.8",
+  "schema_version": "eucons.ai4work_nf06_preingest_contract.v0.9",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "purpose": "Fail-closed source-batch preflight before handoff to NF06. This contract does not redefine the internal NF06 schema; it proves that an immutable source export is eligible to be handed to NF06, binds that export to the exact reviewed collection frame and frozen instrument content, and emits internal method-coverage aggregates required by the separate pre-synthesis readiness gate.",
+  "purpose": "Fail-closed source-batch preflight before handoff to NF06. This contract does not redefine the internal NF06 schema; it proves that an immutable source export is eligible to be handed to NF06, binds that export to the exact reviewed collection frame and frozen instrument content, and emits internal method-coverage plus channel-concentration aggregates required by the separate pre-synthesis readiness gate.",
   "prod_evidence_class": "PROD_REAL_EVIDENCE",
   "test_twin_evidence_class": "TEST_TWIN_NON_EVIDENCE",
   "allowed_forms": [
@@ -26,6 +26,7 @@
     "collection-channel register SHA-256 is present",
     "every record has an opaque recruitment_channel_id declared in the frozen collection frame",
     "form-specific channel provenance is emitted so the pre-synthesis gate can validate each actually-used channel against its registered audience_scope",
+    "per-region and per-form-region channel counts and dominant shares are emitted so concentration cannot be hidden by a low global share",
     "every response_id is a lowercase 64-hex opaque receipt consistent with the HTTP derivation contract",
     "all records validate against the frozen form definitions",
     "all record timestamps fall inside the declared collection window",
@@ -40,7 +41,7 @@
     "evidence class is TEST_TWIN_NON_EVIDENCE",
     "the same exact collection-frame allowlist and frozen instrument-content hashes are required for schema parity",
     "response_id uses the same lowercase 64-hex opaque receipt shape as PROD for schema parity",
-    "form-specific channel provenance is emitted for schema and method-control parity",
+    "form-specific channel provenance and per-stratum concentration aggregates are emitted for schema and method-control parity",
     "test output is never eligible for PROD promotion"
   ],
   "record_provenance": {
@@ -106,6 +107,7 @@
   ],
   "collection_frame_field_policy": "Exact allowlist only. Extra fields are rejected so unreviewed semantic changes cannot ride along inside an otherwise valid frame.",
   "canonical_source_export": "UTF-8 NDJSON, one canonical JSON record per line, sorted by form_id / received_at / response_id, newline terminated",
+  "preingest_manifest_schema": "eucons.ai4work_nf06_preingest_manifest.v0.6",
   "preingest_manifest_bindings": [
     "source_export_sha256",
     "collection_frame_sha256",
@@ -113,20 +115,27 @@
     "form_contract_sha256",
     "forms_definition_sha256"
   ],
-  "manifest_privacy_boundary": "The pre-ingest manifest contains internal control counts, hashes, timestamps and opaque channel provenance only. It must not contain questionnaire answers, free-text responses, raw idempotency keys, IP addresses, user agents, cookies, referrer/UTM payloads, CRM identifiers or optional contact data. Method-coverage aggregates are internal QA inputs and are not public reporting tables.",
+  "manifest_privacy_boundary": "The pre-ingest manifest contains internal control counts, hashes, timestamps and opaque channel provenance only. It must not contain questionnaire answers, free-text responses, raw idempotency keys, IP addresses, user agents, cookies, referrer/UTM payloads, CRM identifiers or optional contact data. Method-coverage and concentration aggregates are internal QA inputs and are not public reporting tables.",
   "channel_qa_outputs": [
     "channel_counts",
     "dominant_channel_share",
     "region_channel_ids",
-    "form_region_channel_ids"
+    "form_region_channel_ids",
+    "region_channel_counts",
+    "form_region_channel_counts",
+    "region_dominant_channel_share",
+    "form_region_dominant_channel_share"
   ],
   "method_coverage_outputs": [
     "region_counts",
     "form_region_counts",
     "region_channel_ids",
-    "form_region_channel_ids"
+    "form_region_channel_ids",
+    "region_channel_counts",
+    "form_region_channel_counts"
   ],
-  "pre_synthesis_rule": "Passing NF06 source pre-ingest alone does not authorise needs synthesis. A PROD_REAL_EVIDENCE batch must separately pass primary_evidence_readiness.py against the approved METHOD_PLAN_NOT_EVIDENCE collection-frame thresholds and the exact frozen collection-channel-register bytes. The gate must also reconcile form-specific channel provenance and validate each actually-used channel against the registered audience_scope for adults or employers. TEST TWIN is rejected by that gate.",
+  "concentration_rule": "The frozen single_channel_share_max threshold is evaluated globally, independently for each region, and independently for each form-region stratum. All count views must reconcile exactly with their denominators and with global channel_counts. If any scope exceeds the threshold, a PASS sensitivity artifact must explicitly cover every exceeded scope before primary synthesis readiness can pass.",
+  "pre_synthesis_rule": "Passing NF06 source pre-ingest alone does not authorise needs synthesis. A PROD_REAL_EVIDENCE batch must separately pass primary_evidence_readiness.py against the approved METHOD_PLAN_NOT_EVIDENCE collection-frame thresholds and the exact frozen collection-channel-register bytes. The gate must reconcile form-specific channel provenance, validate each actually-used channel against the registered audience_scope, recompute channel concentration from exact counts at global/region/form-region scope, and require scope-complete sensitivity analysis for every threshold exceedance. TEST TWIN is rejected by that gate.",
   "promotion_rule": "Only PROD_REAL_EVIDENCE batches that pass this contract may be offered to NF06. TEST_TWIN output is permanently NON_EVIDENCE.",
   "merge_authorized": false,
   "deploy_authorized": false,
