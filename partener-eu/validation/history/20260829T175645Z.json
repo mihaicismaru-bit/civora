@@ -1,0 +1,363 @@
+{
+  "checkpoint": "PARTENER-EU-CIVORA-P10-0020",
+  "run_started": "2026-08-29T17:56:45Z",
+  "live": true,
+  "state_recovered_from_checkpoint": false,
+  "frontend_checks": [
+    {
+      "name": "file:index.html",
+      "pass": true
+    },
+    {
+      "name": "file:app.js",
+      "pass": true
+    },
+    {
+      "name": "file:data.js",
+      "pass": true
+    },
+    {
+      "name": "file:styles.css",
+      "pass": true
+    },
+    {
+      "name": "ui:Explorer finanțări",
+      "pass": true
+    },
+    {
+      "name": "ui:Modificări",
+      "pass": true
+    },
+    {
+      "name": "ui:Întreabă PARTENER.EU",
+      "pass": true
+    },
+    {
+      "name": "ui:Spațiu consultant",
+      "pass": true
+    },
+    {
+      "name": "ui:Pot aplica?",
+      "pass": true
+    },
+    {
+      "name": "ui:Sursa oficială",
+      "pass": true
+    }
+  ],
+  "sources": [
+    {
+      "id": "SRC-MYSMIS-CALLS",
+      "tier": "T1",
+      "criticality": "CRITICAL",
+      "name": "MySMIS 2021-2027 — Apeluri validate",
+      "url": "https://resurse.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027",
+      "markers_any": [
+        "Apeluri validate 2021-2027",
+        "Finanțări programe 2021 - 2027",
+        "APELURI"
+      ],
+      "observed_at": "2026-08-29T17:56:45Z",
+      "ok": true,
+      "http_status": 200,
+      "final_url": "https://resurse.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027",
+      "bytes": 119092,
+      "raw_sha256": "47d744c5f50cda2df3424a8ddf38fb3ba45c634814ac27fad73e4957b40a59d0",
+      "semantic_sha256": "98424bdbce66a39d443fdfdfd16a6f30c5a58a52349632ce9cee4404573aebd0",
+      "semantic_chars": 13196,
+      "markers_found": [
+        "Apeluri validate 2021-2027",
+        "Finanțări programe 2021 - 2027",
+        "APELURI"
+      ],
+      "etag": null,
+      "last_modified": null,
+      "fetch_method": "urllib",
+      "attempts": 1,
+      "error": null,
+      "markers_ok": true,
+      "content_quality_ok": true,
+      "quality_issue": null,
+      "change_candidate": false,
+      "change_detected": false,
+      "resolution_task_required": false,
+      "confirmation_observations": 0,
+      "consecutive_failures": 0,
+      "health": "PASS",
+      "quarantined": false,
+      "health_scope": "MATERIAL_SOURCE",
+      "material_facts_authority": true,
+      "dependent_material_facts_publishable": true
+    },
+    {
+      "id": "SRC-AFIR-ENERGY-2026",
+      "tier": "T1",
+      "criticality": "HIGH",
+      "name": "AFIR — Schema de Energie",
+      "url": "https://www.afir.ro/finantare/finantare-in-agricultura/schema-de-energie/",
+      "markers_any": [
+        "Schema de Energie",
+        "surse regenerabile",
+        "Ghidul Solicitantului"
+      ],
+      "observed_at": "2026-08-29T17:56:45Z",
+      "ok": true,
+      "http_status": 200,
+      "final_url": "https://www.afir.ro/finantare/finantare-in-agricultura/schema-de-energie/",
+      "bytes": 109422,
+      "raw_sha256": "7abf7787a93fcc1e5e4595a049da040171abc9558f22966d3dbaa522b3f1f629",
+      "semantic_sha256": "7e311c3848a373a7ec585db5a1ae9928d608534eba971198a1092a617b212cde",
+      "semantic_chars": 7487,
+      "markers_found": [
+        "Schema de Energie",
+        "surse regenerabile",
+        "Ghidul Solicitantului"
+      ],
+      "etag": null,
+      "last_modified": null,
+      "fetch_method": "urllib",
+      "attempts": 1,
+      "error": null,
+      "markers_ok": true,
+      "content_quality_ok": true,
+      "quality_issue": null,
+      "change_candidate": false,
+      "change_detected": false,
+      "resolution_task_required": false,
+      "confirmation_observations": 0,
+      "consecutive_failures": 0,
+      "health": "PASS",
+      "quarantined": false,
+      "health_scope": "MATERIAL_SOURCE",
+      "material_facts_authority": true,
+      "dependent_material_facts_publishable": true
+    },
+    {
+      "id": "SRC-PR-CENTRU-DIGITAL-2",
+      "tier": "T1",
+      "criticality": "HIGH",
+      "name": "ADR Centru — Întreprinderi digitale Apel 2",
+      "url": "https://www.regiocentru.ro/actiuni/2-2-intreprinderi-digitale-pentru-o-economie-avansata-apel-2/",
+      "markers_any": [
+        "Întreprinderi digitale",
+        "Apel 2",
+        "consultare"
+      ],
+      "observed_at": "2026-08-29T17:56:45Z",
+      "ok": true,
+      "http_status": 200,
+      "final_url": "https://www.regiocentru.ro/actiuni/2-2-intreprinderi-digitale-pentru-o-economie-avansata-apel-2/",
+      "bytes": 209213,
+      "raw_sha256": "586b0d02fb08e31af2361a307242cba2290a9ac47b8721c1b7c0f12cca03eecf",
+      "semantic_sha256": "82536ee60202beb0f1ee25fab18cbff64adf45ea7065379f035b5f2c2b9838a6",
+      "semantic_chars": 7043,
+      "markers_found": [
+        "Întreprinderi digitale",
+        "Apel 2",
+        "consultare"
+      ],
+      "etag": null,
+      "last_modified": null,
+      "fetch_method": "urllib",
+      "attempts": 1,
+      "error": null,
+      "markers_ok": true,
+      "content_quality_ok": true,
+      "quality_issue": null,
+      "change_candidate": false,
+      "change_detected": false,
+      "resolution_task_required": false,
+      "confirmation_observations": 0,
+      "consecutive_failures": 0,
+      "health": "PASS",
+      "quarantined": false,
+      "health_scope": "MATERIAL_SOURCE",
+      "material_facts_authority": true,
+      "dependent_material_facts_publishable": true
+    },
+    {
+      "id": "SRC-PR-CENTRU-ACTIUNI",
+      "tier": "T1",
+      "criticality": "MEDIUM",
+      "name": "ADR Centru — Acțiuni",
+      "url": "https://www.regiocentru.ro/actiuni/",
+      "markers_any": [
+        "Acțiuni",
+        "Programul Regiunea Centru"
+      ],
+      "health_scope": "DISCOVERY_ONLY",
+      "material_facts_authority": false,
+      "observed_at": "2026-08-29T17:56:45Z",
+      "ok": true,
+      "http_status": 200,
+      "final_url": "https://www.regiocentru.ro/actiuni/",
+      "bytes": 546502,
+      "raw_sha256": "c94480e20dfd1587b93305fa7565cbf73cdd77018f60971a8875eb0a98a4bcb1",
+      "semantic_sha256": "c0bfbe8745e96b0753848936864966f691a32a00f8964704b527b0589c4a2925",
+      "semantic_chars": 22344,
+      "markers_found": [
+        "Programul Regiunea Centru"
+      ],
+      "etag": null,
+      "last_modified": null,
+      "fetch_method": "urllib",
+      "attempts": 1,
+      "error": null,
+      "markers_ok": true,
+      "content_quality_ok": true,
+      "quality_issue": null,
+      "change_candidate": false,
+      "change_detected": false,
+      "resolution_task_required": false,
+      "confirmation_observations": 0,
+      "consecutive_failures": 0,
+      "health": "PASS",
+      "quarantined": false,
+      "dependent_material_facts_publishable": false
+    },
+    {
+      "id": "SRC-OIRBI-PIDS",
+      "tier": "T1B",
+      "criticality": "MEDIUM",
+      "name": "OIR București-Ilfov — PIDS",
+      "url": "https://www.oirbi.ro/pids-2021-2027/",
+      "markers_any": [
+        "PIDS",
+        "Incluziune",
+        "Demnitate"
+      ],
+      "observed_at": "2026-08-29T17:56:45Z",
+      "ok": true,
+      "http_status": 200,
+      "final_url": "https://www.oirbi.ro/pids-2021-2027/",
+      "bytes": 127951,
+      "raw_sha256": "97a6c6f04be11273e9c48e88bd4a5b9e0fd4012af6dbf3be34153885198437bf",
+      "semantic_sha256": "82878f174c69d60835d3a4f01034821e871e0e699cdd22e22bcc4f09866cbb7b",
+      "semantic_chars": 10623,
+      "markers_found": [
+        "PIDS",
+        "Incluziune",
+        "Demnitate"
+      ],
+      "etag": null,
+      "last_modified": null,
+      "fetch_method": "urllib",
+      "attempts": 1,
+      "error": null,
+      "markers_ok": true,
+      "content_quality_ok": true,
+      "quality_issue": null,
+      "change_candidate": false,
+      "change_detected": false,
+      "resolution_task_required": false,
+      "confirmation_observations": 0,
+      "consecutive_failures": 0,
+      "health": "PASS",
+      "quarantined": false,
+      "health_scope": "MATERIAL_SOURCE",
+      "material_facts_authority": true,
+      "dependent_material_facts_publishable": true
+    },
+    {
+      "id": "SRC-OIRVEST-PEO",
+      "tier": "T1B",
+      "criticality": "MEDIUM",
+      "name": "OIR PECU Vest — Ghiduri PEO",
+      "url": "https://oirvest.ro/ghiduri-peo/",
+      "markers_any": [
+        "PEO",
+        "Educație",
+        "Ocupare"
+      ],
+      "observed_at": "2026-08-29T17:56:45Z",
+      "ok": true,
+      "http_status": 200,
+      "final_url": "https://oirvest.ro/ghiduri-peo/",
+      "bytes": 118627,
+      "raw_sha256": "f13364c8ce3810ac76ce72aec2ef91640cb339d28f37fcd5b2174b9e39f42fd7",
+      "semantic_sha256": "808012988357e68835f1359b7bb8eff296e07666afbbc044c69bd235d0636bc9",
+      "semantic_chars": 10758,
+      "markers_found": [
+        "PEO",
+        "Educație",
+        "Ocupare"
+      ],
+      "etag": null,
+      "last_modified": null,
+      "fetch_method": "urllib",
+      "attempts": 1,
+      "error": null,
+      "markers_ok": true,
+      "content_quality_ok": true,
+      "quality_issue": null,
+      "change_candidate": false,
+      "change_detected": false,
+      "resolution_task_required": false,
+      "confirmation_observations": 0,
+      "consecutive_failures": 0,
+      "health": "PASS",
+      "quarantined": false,
+      "health_scope": "MATERIAL_SOURCE",
+      "material_facts_authority": true,
+      "dependent_material_facts_publishable": true
+    },
+    {
+      "id": "SRC-LEGISLATIE",
+      "tier": "T1",
+      "criticality": "HIGH",
+      "name": "Portal Legislativ — serviciu oficial (transport)",
+      "url": "http://legislatie.just.ro/apiws/FreeWebService.svc",
+      "markers_any": [
+        "FreeWebService",
+        "Service"
+      ],
+      "health_scope": "TRANSPORT_ONLY",
+      "health_ceiling": "DEGRADED",
+      "material_facts_authority": false,
+      "observed_at": "2026-08-29T17:56:45Z",
+      "ok": true,
+      "http_status": 200,
+      "final_url": "http://legislatie.just.ro/apiws/FreeWebService.svc",
+      "bytes": 3045,
+      "raw_sha256": "87fc0924923577478c224afd68c48df8cd4a3d0ee35f75431d4d1a70d210575d",
+      "semantic_sha256": "4835e012ced975eeb181043837de9237e9f470e03a56c003271323c3e6cd2a79",
+      "semantic_chars": 1084,
+      "markers_found": [
+        "FreeWebService",
+        "Service"
+      ],
+      "etag": null,
+      "last_modified": null,
+      "fetch_method": "urllib",
+      "attempts": 1,
+      "error": null,
+      "markers_ok": true,
+      "content_quality_ok": true,
+      "quality_issue": null,
+      "change_candidate": false,
+      "change_detected": false,
+      "resolution_task_required": false,
+      "confirmation_observations": 0,
+      "consecutive_failures": 0,
+      "health": "DEGRADED",
+      "quarantined": false,
+      "dependent_material_facts_publishable": false
+    }
+  ],
+  "summary": {
+    "frontend_pass": 10,
+    "frontend_total": 10,
+    "source_pass": 6,
+    "source_degraded": 1,
+    "source_fail": 0,
+    "source_quarantined": 0,
+    "change_candidates": 0,
+    "change_detected": 0,
+    "low_information_sources": 0,
+    "critical_fail": false
+  },
+  "change_policy": "semantic fingerprint + two consecutive identical high-information observations before resolution task; low-information HTML shells are suppressed fail-closed",
+  "source_failure_policy": "failed non-CRITICAL source is quarantined and blocks dependent material facts; transport-only and discovery-only health never authorizes material facts; low-information shells also block dependent material facts until a high-information observation returns; CRITICAL source failure stops global qualifying run",
+  "civora_v1": "NOT_CLOSED",
+  "production_day_count_rule": ">=30 distinct UTC dates with qualifying runs before closure"
+}
