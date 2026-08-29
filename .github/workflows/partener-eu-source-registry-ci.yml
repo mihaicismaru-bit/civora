@@ -11,6 +11,8 @@ on:
       - 'partener-eu/ingest/eea_civil_society_calls.py'
       - 'partener-eu/ingest/eea_civil_society_fetch.py'
       - 'partener-eu/ingest/eea_civil_society_reconcile.py'
+      - 'partener-eu/ingest/regiocentru_actions_fetch.py'
+      - 'partener-eu/ingest/regiocentru_actions_source.json'
       - 'partener-eu/p11/candidate_staging.py'
       - 'partener-eu/p11/eea_civil_society_stage.py'
       - 'partener-eu/p11/test_eea_civil_society_stage.py'
@@ -24,6 +26,7 @@ on:
       - 'partener-eu/ops/test_eea_civil_society_calls.py'
       - 'partener-eu/ops/test_eea_civil_society_fetch.py'
       - 'partener-eu/ops/test_eea_civil_society_reconcile.py'
+      - 'partener-eu/ops/test_regiocentru_actions_fetch.py'
       - '.github/workflows/partener-eu-source-registry-ci.yml'
   workflow_dispatch:
 
@@ -35,8 +38,24 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Checkout
+      - name: Checkout exact event head
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify checkout is exact event head
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          ACTUAL_SHA="$(git rev-parse HEAD)"
+          if [ "$ACTUAL_SHA" != "$EXPECTED_SHA" ]; then
+            echo "FAIL checkout drift: expected $EXPECTED_SHA got $ACTUAL_SHA" >&2
+            exit 2
+          fi
+          echo "Exact event head verified: $ACTUAL_SHA"
 
       - name: Setup Python
         uses: actions/setup-python@v6
@@ -47,12 +66,14 @@ jobs:
         run: |
           python -m json.tool partener-eu/ingest/source_registry.json >/dev/null
           python -m json.tool partener-eu/ingest/data_plane_contract.json >/dev/null
+          python -m json.tool partener-eu/ingest/regiocentru_actions_source.json >/dev/null
           python -m py_compile partener-eu/ingest/source_registry_probe.py
           python -m py_compile partener-eu/ingest/funding_tenders_api.py
           python -m py_compile partener-eu/ingest/funding_tenders_fetch.py
           python -m py_compile partener-eu/ingest/eea_civil_society_calls.py
           python -m py_compile partener-eu/ingest/eea_civil_society_fetch.py
           python -m py_compile partener-eu/ingest/eea_civil_society_reconcile.py
+          python -m py_compile partener-eu/ingest/regiocentru_actions_fetch.py
           python -m py_compile partener-eu/p11/candidate_staging.py
           python -m py_compile partener-eu/p11/eea_civil_society_stage.py
           python -m py_compile partener-eu/p11/test_eea_civil_society_stage.py
@@ -63,6 +84,7 @@ jobs:
           python -m py_compile partener-eu/ops/test_eea_civil_society_calls.py
           python -m py_compile partener-eu/ops/test_eea_civil_society_fetch.py
           python -m py_compile partener-eu/ops/test_eea_civil_society_reconcile.py
+          python -m py_compile partener-eu/ops/test_regiocentru_actions_fetch.py
 
       - name: Validate low-information fail-closed behavior
         run: python partener-eu/ops/test_source_registry_low_info.py
@@ -97,3 +119,60 @@ jobs:
       - name: Validate EEA Civil Society Fund canonical staging admission
         working-directory: partener-eu/p11
         run: python test_eea_civil_society_stage.py
+
+      - name: Validate RegioCentru action-index acquisition contract
+        run: python partener-eu/ops/test_regiocentru_actions_fetch.py
+
+      - name: Capture live RegioCentru action-index evidence without changing facts
+        run: |
+          python partener-eu/ingest/regiocentru_actions_fetch.py \
+            --output-dir /tmp/regiocentru-actions \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Validate live RegioCentru receipt stays discovery-only
+        run: |
+          python - <<'PY'
+          import json, string, sys
+          from urllib.parse import urlparse
+          p='/tmp/regiocentru-actions/handoff/regiocentru_actions_fetch.json'
+          d=json.load(open(p, encoding='utf-8'))
+          if d.get('source_id') != 'SRC-ADR-CENTRU-PR-ACTIONS' or d.get('adapter_id') != 'REGIOCENTRU_ACTIONS_V1':
+              print('FAIL RegioCentru identity drift:', d.get('source_id'), d.get('adapter_id'))
+              sys.exit(2)
+          if d.get('observation_state') != 'CALL_INDEX_DISCOVERY':
+              print('FAIL RegioCentru action index escaped discovery-only state')
+              sys.exit(2)
+          for key in ('material_fact_use','open_call_authorized','publish_authorized','deadline_authorized','budget_authorized','eligibility_authorized'):
+              if d.get(key) is not False:
+                  print('FAIL RegioCentru receipt became authorizing:', key, d.get(key))
+                  sys.exit(2)
+          if d.get('action_candidate_count', 0) < 1 or len(d.get('action_candidates') or []) != d.get('action_candidate_count'):
+              print('FAIL no bounded RegioCentru action candidates were acquired')
+              sys.exit(2)
+          raw_hash=str(d.get('raw_sha256') or '')
+          if len(raw_hash) != 64 or any(ch not in string.hexdigits for ch in raw_hash):
+              print('FAIL invalid RegioCentru raw SHA-256')
+              sys.exit(2)
+          if not d.get('fetched_at') or not d.get('run_id'):
+              print('FAIL RegioCentru provenance incomplete')
+              sys.exit(2)
+          for key in ('requested_url','final_url'):
+              u=urlparse(str(d.get(key) or ''))
+              if u.scheme != 'https' or (u.hostname or '').lower() not in {'regiocentru.ro','www.regiocentru.ro'} or not (u.path or '/').startswith('/actiuni/'):
+                  print('FAIL RegioCentru authority/path drift:', key, d.get(key))
+                  sys.exit(2)
+          missing=set(d.get('missing_for_open_confirmation') or [])
+          required={'exact_call_or_mysmis_identifier','current_official_exact_action_endpoint','explicit_current_open_status','semantic_reconciliation'}
+          if not required.issubset(missing):
+              print('FAIL RegioCentru exact-call proof requirements incomplete:', sorted(missing))
+              sys.exit(2)
+          print(json.dumps({'candidate_count': d.get('action_candidate_count'), 'raw_sha256': raw_hash, 'observation_state': d.get('observation_state'), 'publish_authorized': d.get('publish_authorized')}, ensure_ascii=False))
+          PY
+
+      - name: Upload bounded RegioCentru acquisition evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-regiocentru-actions-live-evidence
+          path: /tmp/regiocentru-actions
+          retention-days: 7
+          if-no-files-found: error
