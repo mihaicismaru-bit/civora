@@ -1,0 +1,56 @@
+name: VÂLCEA CLAR SJU Workforce Signals
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/scripts/ms_sju_valcea_career_signal_adapter.py"
+      - ".github/workflows/valcea-clar-sju-workforce-signals.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sju-workforce-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run evidence-first contract self-test
+        run: python valcea-clar/scripts/ms_sju_valcea_career_signal_adapter.py --self-test
+
+      - name: Assert fail-closed output contract
+        shell: bash
+        run: |
+          cat > /tmp/sju-workforce.html <<'EOF'
+          <html><body>
+            <h1>Anunt concurs - Spitalul Judetean de Urgenta Valcea</h1>
+            <p>20 August 2026</p>
+            <p>Concurs pentru ocuparea unui post vacant de medic specialist neurologie pediatrica.</p>
+            <a href="/media/documents/anunt_neurologie_pediatrica.pdf">Document oficial</a>
+          </body></html>
+          EOF
+          python valcea-clar/scripts/ms_sju_valcea_career_signal_adapter.py \
+            --input /tmp/sju-workforce.html \
+            --source-url https://ms.gov.ro/ro/minister/cariera-medici/anunt-sju-valcea-test/ \
+            > /tmp/sju-workforce.json
+          python - <<'PY'
+          import json
+          payload = json.load(open('/tmp/sju-workforce.json', encoding='utf-8'))
+          assert len(payload) == 1
+          signal = payload[0]
+          assert signal['signal_class'] == 'HEALTH_WORKFORCE_RECRUITMENT'
+          assert signal['publication_date'] == '2026-08-20'
+          assert signal['publication_authority'] == 'NONE'
+          assert signal['current_status_claim_allowed'] is False
+          assert signal['candidate_person_extraction_allowed'] is False
+          assert signal['linked_document_body_parse_allowed'] is False
+          assert signal['document_refs'] == ['https://ms.gov.ro/media/documents/anunt_neurologie_pediatrica.pdf']
+          PY
