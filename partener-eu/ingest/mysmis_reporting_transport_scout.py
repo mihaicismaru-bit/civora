@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-"""Probe the two official public MySMIS reporting transports without publication.
+"""Probe official public MySMIS reporting transports without publication.
 
-This diagnostic exists to decide whether the historical DWH host can safely act
-as an acquisition fallback for the canonical MySMIS public-reporting surface.
-It never authorizes OPEN_CALL or any other material fact. Even a semantically
-aligned alternate remains discovery/availability evidence until a separate
-canonical ingestion change is reviewed and reconciled.
+The canonical public-reporting identity remains ``reporting.mysmis2021.gov.ro``.
+The MIPE resources host and historical DWH host are probed as official transport
+candidates only. This diagnostic never authorizes OPEN_CALL or any other
+material fact, even when an alternate happens to be semantically aligned.
 """
 from __future__ import annotations
 
@@ -28,23 +27,20 @@ OUT = Path(
         ROOT / "partener-eu" / "ingest" / "state" / "mysmis_reporting_transport_scout.json",
     )
 )
-PARSER_VERSION = "MYSMIS_REPORTING_TRANSPORT_SCOUT_V1"
-CANONICAL_URL = (
-    "https://reporting.mysmis2021.gov.ro/ords/repo_bo/r/"
-    "mysmis-2021/finantari-programe-2021-2027"
-)
-OFFICIAL_ALTERNATE_URL = (
-    "https://dwh4smis.fonduri-ue.ro/ords/repo_bo/r/"
-    "mysmis-2021/finantari-programe-2021-2027"
-)
+PARSER_VERSION = "MYSMIS_REPORTING_TRANSPORT_SCOUT_V2"
 EXPECTED_PATH = "/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027"
-UA = "PARTENER.EU-CIVORA-MySMIS-ReportingScout/1.0 (+https://partener.eu)"
+CANONICAL_URL = "https://reporting.mysmis2021.gov.ro" + EXPECTED_PATH
+RESOURCES_URL = "https://resurse.mysmis2021.gov.ro" + EXPECTED_PATH
+DWH_URL = "https://dwh4smis.fonduri-ue.ro" + EXPECTED_PATH
+UA = "PARTENER.EU-CIVORA-MySMIS-ReportingScout/2.0 (+https://partener.eu)"
 MAX_BYTES = 4_000_000
 
 TRANSPORTS = (
     ("CANONICAL_PRIMARY", CANONICAL_URL, "reporting.mysmis2021.gov.ro"),
-    ("OFFICIAL_ALTERNATE", OFFICIAL_ALTERNATE_URL, "dwh4smis.fonduri-ue.ro"),
+    ("OFFICIAL_RESOURCES", RESOURCES_URL, "resurse.mysmis2021.gov.ro"),
+    ("OFFICIAL_DWH_LEGACY", DWH_URL, "dwh4smis.fonduri-ue.ro"),
 )
+ALTERNATE_ROLES = ("OFFICIAL_RESOURCES", "OFFICIAL_DWH_LEGACY")
 
 
 def now() -> str:
@@ -61,10 +57,7 @@ def run_id() -> str:
 
 def semantic_signature(total: int | None, rows: dict[str, Any]) -> str:
     """Hash parsed report semantics, not volatile APEX HTML."""
-    normalized = {
-        "validatedCallCount": total,
-        "rows": rows,
-    }
+    normalized = {"validatedCallCount": total, "rows": rows}
     encoded = json.dumps(
         normalized,
         ensure_ascii=False,
@@ -152,39 +145,63 @@ def probe(role: str, url: str, expected_host: str, timeout: int = 25) -> dict[st
     return result
 
 
-def classify(primary: dict[str, Any], alternate: dict[str, Any]) -> dict[str, Any]:
-    primary_ok = primary.get("ok") is True
-    alternate_ok = alternate.get("ok") is True
-    semantic_match = (
-        primary_ok
-        and alternate_ok
-        and primary.get("semanticSha256") == alternate.get("semanticSha256")
-        and primary.get("validatedCallCount") == alternate.get("validatedCallCount")
+def semantically_equal(left: dict[str, Any], right: dict[str, Any]) -> bool:
+    return (
+        left.get("ok") is True
+        and right.get("ok") is True
+        and left.get("semanticSha256") == right.get("semanticSha256")
+        and left.get("validatedCallCount") == right.get("validatedCallCount")
     )
-    if semantic_match:
-        state = "BOTH_AVAILABLE_SEMANTICALLY_ALIGNED"
-    elif primary_ok and alternate_ok:
-        state = "BOTH_AVAILABLE_SEMANTICALLY_DIVERGENT"
+
+
+def classify(
+    primary: dict[str, Any],
+    resources: dict[str, Any],
+    dwh: dict[str, Any],
+) -> dict[str, Any]:
+    primary_ok = primary.get("ok") is True
+    alternates = {
+        "OFFICIAL_RESOURCES": resources,
+        "OFFICIAL_DWH_LEGACY": dwh,
+    }
+    available_alternates = [role for role, row in alternates.items() if row.get("ok") is True]
+    aligned = [
+        role
+        for role, row in alternates.items()
+        if row.get("ok") is True and semantically_equal(primary, row)
+    ]
+    divergent = [role for role in available_alternates if role not in aligned]
+
+    if primary_ok and aligned and divergent:
+        state = "PRIMARY_PLUS_MIXED_ALTERNATES"
+    elif primary_ok and divergent:
+        state = "PRIMARY_PLUS_DIVERGENT_ALTERNATES"
+    elif primary_ok and aligned:
+        state = "PRIMARY_PLUS_ALIGNED_ALTERNATES"
     elif primary_ok:
         state = "CANONICAL_PRIMARY_ONLY"
-    elif alternate_ok:
-        state = "OFFICIAL_ALTERNATE_ONLY"
+    elif available_alternates:
+        state = "ALTERNATES_ONLY_DISCOVERY"
     else:
         state = "NO_OFFICIAL_REPORT_TRANSPORT_AVAILABLE"
 
-    # Hard boundary: this diagnostic does not authorize a fallback for material
-    # facts. Divergence is particularly important because the two hosts may be
-    # on different refresh cycles.
+    alternate_pair_aligned = semantically_equal(resources, dwh)
     return {
         "state": state,
-        "semanticMatch": semantic_match,
         "canonicalPrimaryAvailable": primary_ok,
-        "officialAlternateAvailable": alternate_ok,
-        "alternateEligibleForDiscoveryOnly": alternate_ok,
+        "alternateAvailability": {
+            role: alternates[role].get("ok") is True for role in ALTERNATE_ROLES
+        },
+        "alignedWithCanonical": aligned,
+        "divergentFromCanonical": divergent,
+        "alternatePairSemanticallyAligned": alternate_pair_aligned,
+        "alternateEligibleForDiscoveryOnly": bool(available_alternates),
         "alternateAuthorizedForMaterialFacts": False,
         "openCallAuthorized": False,
         "publishAuthorized": False,
-        "requiresSemanticReconciliation": bool(alternate_ok and not semantic_match),
+        "requiresSemanticReconciliation": bool(
+            available_alternates and (not primary_ok or divergent)
+        ),
         "missingForMaterialFallback": [
             "explicit canonical transport policy accepting the alternate",
             "semantic equivalence for the relevant snapshot",
@@ -196,10 +213,8 @@ def classify(primary: dict[str, Any], alternate: dict[str, Any]) -> dict[str, An
 
 def build_payload(probes: list[dict[str, Any]]) -> dict[str, Any]:
     by_role = {item["role"]: item for item in probes}
-    primary = by_role["CANONICAL_PRIMARY"]
-    alternate = by_role["OFFICIAL_ALTERNATE"]
     return {
-        "schema": "CIVORA_MYSMIS_REPORTING_TRANSPORT_MATRIX_V1",
+        "schema": "CIVORA_MYSMIS_REPORTING_TRANSPORT_MATRIX_V2",
         "observedAt": now(),
         "runId": run_id(),
         "parserVersion": PARSER_VERSION,
@@ -212,21 +227,26 @@ def build_payload(probes: list[dict[str, Any]]) -> dict[str, Any]:
         "openCallAuthorized": False,
         "publishAuthorized": False,
         "transports": probes,
-        "comparison": classify(primary, alternate),
+        "comparison": classify(
+            by_role["CANONICAL_PRIMARY"],
+            by_role["OFFICIAL_RESOURCES"],
+            by_role["OFFICIAL_DWH_LEGACY"],
+        ),
     }
 
 
 def validate_payload(payload: dict[str, Any]) -> None:
-    assert payload.get("schema") == "CIVORA_MYSMIS_REPORTING_TRANSPORT_MATRIX_V1"
+    assert payload.get("schema") == "CIVORA_MYSMIS_REPORTING_TRANSPORT_MATRIX_V2"
     assert payload.get("canonicalIdentity") == CANONICAL_URL
     assert payload.get("materialFactUse") is False
     assert payload.get("openCallAuthorized") is False
     assert payload.get("publishAuthorized") is False
     transports = payload.get("transports")
-    assert isinstance(transports, list) and len(transports) == 2
+    assert isinstance(transports, list) and len(transports) == 3
     assert {row.get("role") for row in transports} == {
         "CANONICAL_PRIMARY",
-        "OFFICIAL_ALTERNATE",
+        "OFFICIAL_RESOURCES",
+        "OFFICIAL_DWH_LEGACY",
     }
     for row in transports:
         assert row.get("materialFactUse") is False
@@ -258,8 +278,9 @@ def main() -> int:
             {
                 "state": payload["comparison"]["state"],
                 "canonicalPrimaryAvailable": payload["comparison"]["canonicalPrimaryAvailable"],
-                "officialAlternateAvailable": payload["comparison"]["officialAlternateAvailable"],
-                "semanticMatch": payload["comparison"]["semanticMatch"],
+                "alternateAvailability": payload["comparison"]["alternateAvailability"],
+                "alignedWithCanonical": payload["comparison"]["alignedWithCanonical"],
+                "divergentFromCanonical": payload["comparison"]["divergentFromCanonical"],
                 "alternateAuthorizedForMaterialFacts": False,
                 "output": str(OUT),
             },
