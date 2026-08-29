@@ -1,13 +1,13 @@
 {
   "schema_version": "1.4",
-  "observed_at": "2026-08-30T01:18:01+03:00",
+  "observed_at": "2026-08-30T01:24:36+03:00",
   "execution_mode": "bounded_parallel",
   "max_parallel_sources": 6,
   "sources_total": 22,
-  "sources_ok": 17,
-  "facts_admitted": 1,
-  "source_notice_briefs": 1,
-  "facts_before_cross_source_headline_dedupe": 1,
+  "sources_ok": 20,
+  "facts_admitted": 2,
+  "source_notice_briefs": 2,
+  "facts_before_cross_source_headline_dedupe": 2,
   "host_incident_count": 0,
   "host_incidents": [],
   "sources": [
@@ -25,28 +25,29 @@
     },
     {
       "source_id": "prefectura-valcea",
-      "listing_ok": false,
-      "error": "HTTPError: HTTP Error 403: Forbidden",
+      "listing_ok": true,
+      "links_examined": 4,
+      "article_failures": 0,
       "facts": 0
     },
     {
       "source_id": "primaria-calimanesti-comunicate",
       "listing_ok": true,
-      "links_examined": 0,
-      "article_failures": 0,
+      "links_examined": 9,
+      "article_failures": 1,
       "facts": 0
     },
     {
       "source_id": "primaria-horezu-anunturi",
       "listing_ok": true,
-      "links_examined": 0,
+      "links_examined": 6,
       "article_failures": 0,
       "facts": 0
     },
     {
       "source_id": "primaria-brezoi-comunicate",
       "listing_ok": true,
-      "links_examined": 0,
+      "links_examined": 7,
       "article_failures": 0,
       "facts": 0
     },
@@ -74,14 +75,14 @@
     {
       "source_id": "bjai-valcea-evenimente",
       "listing_ok": true,
-      "links_examined": 0,
+      "links_examined": 10,
       "article_failures": 0,
-      "facts": 0
+      "facts": 1
     },
     {
       "source_id": "filarmonica-valcea-blog",
       "listing_ok": true,
-      "links_examined": 0,
+      "links_examined": 12,
       "article_failures": 0,
       "facts": 0
     },
@@ -102,14 +103,14 @@
     {
       "source_id": "adi-apa-valcea-noutati",
       "listing_ok": true,
-      "links_examined": 0,
+      "links_examined": 4,
       "article_failures": 0,
       "facts": 0
     },
     {
       "source_id": "eta-bus-comunicate",
       "listing_ok": true,
-      "links_examined": 0,
+      "links_examined": 8,
       "article_failures": 0,
       "facts": 0
     },
@@ -129,8 +130,9 @@
     },
     {
       "source_id": "ipj-valcea-news",
-      "listing_ok": false,
-      "error": "HTTPError: HTTP Error 403: Forbidden",
+      "listing_ok": true,
+      "links_examined": 8,
+      "article_failures": 0,
       "facts": 0
     },
     {
@@ -150,14 +152,15 @@
     {
       "source_id": "cci-valcea-news",
       "listing_ok": true,
-      "links_examined": 0,
+      "links_examined": 7,
       "article_failures": 0,
       "facts": 0
     },
     {
       "source_id": "raliul-valcii-official-news",
-      "listing_ok": false,
-      "error": "URLError: <urlopen error timed out>",
+      "listing_ok": true,
+      "links_examined": 5,
+      "article_failures": 0,
       "facts": 0
     }
   ],
