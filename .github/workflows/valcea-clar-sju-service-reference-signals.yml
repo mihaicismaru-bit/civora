@@ -1,0 +1,83 @@
+name: VÂLCEA CLAR SJU Service Reference Signals
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/scripts/ms_sju_valcea_service_reference_adapter.py"
+      - ".github/workflows/valcea-clar-sju-service-reference-signals.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sju-service-reference-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run evidence-first contract self-test
+        run: python valcea-clar/scripts/ms_sju_valcea_service_reference_adapter.py --self-test
+
+      - name: Assert source-only fail-closed output contract
+        shell: bash
+        run: |
+          cat > /tmp/sju-service-reference.html <<'EOF'
+          <html><body>
+            <h1>Spitalul Judetean de Urgenta Valcea</h1>
+            <p>Locatii ale Spitalului Judetean de Urgenta Valcea:</p>
+            <p>- locatia din str. Calea lui Traian, nr. 201: Medicina interna, Cardiologie, ambulatoriu de specialitate;</p>
+            <p>- locatia din str. General Magheru, nr. 54: Boli infectioase, Oftalmologie;</p>
+            <p>În municipiul Râmnicu Vâlcea funcționează spitalul județean.</p>
+          </body></html>
+          EOF
+          python valcea-clar/scripts/ms_sju_valcea_service_reference_adapter.py \
+            --input /tmp/sju-service-reference.html \
+            --source-url https://ms.gov.ro/ro/unitati-sanitare/spitalul-judetean-de-urgenta-valcea/ \
+            > /tmp/sju-service-reference.json
+          python - <<'PY'
+          import json
+          payload = json.load(open('/tmp/sju-service-reference.json', encoding='utf-8'))
+          assert len(payload) == 2
+          for signal in payload:
+              assert signal['signal_class'] == 'HEALTH_SERVICE_REFERENCE'
+              assert signal['source_id'] == 'signal-ms-sju-valcea-service-reference'
+              assert signal['publication_authority'] == 'NONE'
+              assert signal['current_open_status_claim_allowed'] is False
+              assert signal['appointment_availability_claim_allowed'] is False
+              assert signal['emergency_capacity_claim_allowed'] is False
+              assert signal['staffing_status_claim_allowed'] is False
+              assert signal['medical_advice_allowed'] is False
+              assert signal['person_extraction_allowed'] is False
+              assert signal['persistence_allowed'] is False
+              assert signal['fact_kernel_promotion_allowed'] is False
+              assert signal['writer_allowed'] is False
+              assert signal['public_projection_allowed'] is False
+              assert signal['source_url'] == 'https://ms.gov.ro/ro/unitati-sanitare/spitalul-judetean-de-urgenta-valcea/'
+          assert payload[0]['location_text'] == 'str. Calea lui Traian, nr. 201'
+          assert payload[0]['services'] == ['Medicina interna', 'Cardiologie', 'ambulatoriu de specialitate']
+          PY
+
+      - name: Assert identity mismatch holds
+        shell: bash
+        run: |
+          echo '<html><body><p>locatia din str. Test, nr. 1: Cardiologie</p></body></html>' > /tmp/not-sju.html
+          python valcea-clar/scripts/ms_sju_valcea_service_reference_adapter.py \
+            --input /tmp/not-sju.html \
+            > /tmp/not-sju.json
+          python - <<'PY'
+          import json
+          payload = json.load(open('/tmp/not-sju.json', encoding='utf-8'))
+          assert len(payload) == 1
+          assert payload[0]['signal_class'] == 'HOLD'
+          assert payload[0]['hold_reason'] == 'SJU_VALCEA_IDENTITY_NOT_EXPLICIT'
+          assert payload[0]['publication_authority'] == 'NONE'
+          assert payload[0]['public_projection_allowed'] is False
+          PY
