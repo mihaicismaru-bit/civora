@@ -36,15 +36,19 @@ def main() -> None:
         lambda: validator.validate_text(text.replace("    branches: [main]\n", "", 1)),
     )
     must_fail(
-        "missing step main-ref guard",
+        "writer checkout not pinned to canonical main",
+        lambda: validator.validate_text(text.replace(validator.CHECKOUT_REF, "ref: ${{ github.sha }}", 1)),
+    )
+    must_fail(
+        "missing exact checkout capture",
         lambda: validator.validate_text(
-            text.replace("        if: github.ref == 'refs/heads/main'\n", "", 1)
+            text.replace('run: echo "CHECKOUT_HEAD_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"', 'run: echo "CHECKOUT_HEAD_SHA=${{ github.sha }}" >> "$GITHUB_ENV"', 1)
         ),
     )
     must_fail(
-        "missing runtime main-ref assertion",
+        "pull-request persistence not disabled",
         lambda: validator.validate_text(
-            text.replace('if [[ "${GITHUB_REF}" != "refs/heads/main" ]]; then', 'if [[ -z "${GITHUB_REF}" ]]; then', 1)
+            text.replace("        if: github.event_name != 'pull_request'\n", "", 1)
         ),
     )
     must_fail(
@@ -52,19 +56,21 @@ def main() -> None:
         lambda: validator.validate_text(text.replace("git fetch origin main", "git status --short", 1)),
     )
     must_fail(
-        "missing trigger ancestry guard",
+        "missing local head capture",
         lambda: validator.validate_text(
-            text.replace('git merge-base --is-ancestor "${GITHUB_SHA}" origin/main', "git merge-base origin/main HEAD", 1)
+            text.replace('local_head="$(git rev-parse HEAD)"', 'local_head="${GITHUB_SHA}"', 1)
         ),
     )
     must_fail(
-        "missing bounded rebase",
-        lambda: validator.validate_text(text.replace("git rebase origin/main", "git status --short", 1)),
+        "missing remote main capture",
+        lambda: validator.validate_text(
+            text.replace('remote_main="$(git rev-parse origin/main)"', 'remote_main="${GITHUB_SHA}"', 1)
+        ),
     )
     must_fail(
-        "missing post-rebase diff guard",
+        "missing exact-current-main guard",
         lambda: validator.validate_text(
-            text.replace("git diff --name-only origin/main...HEAD", "git diff --name-only HEAD^...HEAD", 1)
+            text.replace('if [ "$local_head" != "$remote_main" ]; then', 'if [ -z "$remote_main" ]; then', 1)
         ),
     )
     must_fail(
@@ -76,6 +82,11 @@ def main() -> None:
     must_fail(
         "unsafe pull-rebase replay",
         lambda: validator.validate_text(text.replace(persist, unsafe_pull, 1)),
+    )
+    unsafe_rebase = persist.replace("git push origin HEAD:main", "git rebase origin/main\n          git push origin HEAD:main", 1)
+    must_fail(
+        "writer rebase restored",
+        lambda: validator.validate_text(text.replace(persist, unsafe_rebase, 1)),
     )
     must_fail(
         "force push",
