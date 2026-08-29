@@ -49,6 +49,8 @@ Implemented in this unit:
 - bounded current-page snapshot responder with no click, submit or navigation capability
 - deterministic post-commit extension/native build attestations with sorted SHA-256 file manifests
 - same-source-head package pairing and fail-closed tamper/mixed-build verification
+- attested runtime bootstrap that registers the fixed MV3 transport only after both component bytes
+  and the durable pair receipt match the exact source head
 
 Still fail-closed / not implemented:
 

@@ -51,6 +51,12 @@
     and native agent separately. Both component attestations must use the same source head before
     they receive a pair ID. Placeholder heads, changed bytes, missing/extra paths and mixed builds
     fail closed. Tests, evidence and documentation are not silently packaged as runtime files.
+17. The offline/native runtime bootstrap verifies both component byte sets against their
+    attestations, recomputes the same-source-head pair, and validates the durable pair receipt before
+    it creates a dispatcher or registers an MV3 listener. Missing receipts, changed bytes, mixed
+    heads, forged pair IDs and unsafe acceptance claims fail before side effects. The resulting
+    transport remains extension-internal and exposes only `HEALTH` and `DISCOVER_ARTIFACTS`; it does
+    not enable native messaging or establish live MySMIS access.
 
 No project code appears in the discovery implementation. Project numbers occur only in fixtures and
 acceptance evidence.
