@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "source": {
+    "id": "SRC-INS-TEMPO-MATRIX-METADATA",
+    "tier": "T1",
+    "class": "official_statistical_matrix_metadata",
+    "owner": "Institutul National de Statistica",
+    "url_template": "https://statistici.insse.ro/tempoins/index.jsp?ind={MATRIX_CODE}&lang=ro&page=tempo3",
+    "programme_family": "CROSS_PROGRAMME_MARKET_INTELLIGENCE",
+    "source_families": [
+      "ROMANIA",
+      "INS",
+      "MARKET_INTELLIGENCE"
+    ],
+    "authority_scope": "MATRIX_METADATA_DISCOVERY",
+    "observation_state": "MATRIX_METADATA_DISCOVERY",
+    "adapter_required": "INS_TEMPO_MATRIX_METADATA_V1",
+    "material_fact_use": false,
+    "statistical_value_authorized": false,
+    "credentials_required": false,
+    "freshness_hours": 168,
+    "extract": [
+      "matrix_identity",
+      "matrix_title",
+      "series_continuation_discovery",
+      "query_provenance_discovery"
+    ],
+    "missing_for_statistical_value_confirmation": [
+      "exact_dimension_selection",
+      "exact_period_selection",
+      "exact_territory_or_universe",
+      "official_value_payload_or_export",
+      "semantic_reconciliation"
+    ],
+    "note": "Exact INS TEMPO matrix pages are authoritative for matrix metadata/discovery only in this adapter. A statistical value is never authorized from the HTML matrix shell alone. Promotion requires exact dimension/period/territory-or-universe selection, an official value payload or export, immutable query provenance and semantic reconciliation. No HTTP downgrade, certificate-verification bypass or non-official mirror is permitted."
+  }
+}
