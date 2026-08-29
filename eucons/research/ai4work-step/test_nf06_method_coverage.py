@@ -31,7 +31,16 @@ class NF06MethodCoverageIntegrationTests(unittest.TestCase):
         self.assertEqual(manifest["region_channel_ids"]["Centru"], [EMPLOYER_CHANNEL])
         self.assertEqual(manifest["region_channel_ids"]["Sud-Muntenia"], [])
         self.assertEqual(manifest["region_channel_ids"]["Sud-Vest Oltenia"], [ADULT_CHANNEL])
+        self.assertEqual(
+            manifest["form_region_channel_ids"]["AI4WORK_ADULTS_V1"],
+            {"Centru": [], "Sud-Muntenia": [], "Sud-Vest Oltenia": [ADULT_CHANNEL]},
+        )
+        self.assertEqual(
+            manifest["form_region_channel_ids"]["AI4WORK_EMPLOYERS_V1"],
+            {"Centru": [EMPLOYER_CHANNEL], "Sud-Muntenia": [], "Sud-Vest Oltenia": []},
+        )
         self.assertTrue(manifest["method_coverage_aggregates_emitted"])
+        self.assertTrue(manifest["form_audience_channel_provenance_emitted"])
         rendered = NF06.manifest_json_bytes(manifest).decode("utf-8")
         self.assertNotIn("redactare și documente", rendered)
         self.assertNotIn("compliance/verificare documente", rendered)
