@@ -45,7 +45,10 @@ class AnonymisationClassificationTest(unittest.TestCase):
 
     def test_notice_does_not_call_raw_responses_anonymous(self) -> None:
         notice = NOTICE.read_text(encoding="utf-8")
-        self.assertIn("nu sunt declarate anonime", notice)
+        self.assertIn(
+            "nu înseamnă că răspunsurile brute sau normalizate sunt declarate anonime",
+            notice,
+        )
         self.assertIn("No Record Isolation", notice)
         self.assertIn("No Linkage", notice)
         self.assertIn("No Inference", notice)
