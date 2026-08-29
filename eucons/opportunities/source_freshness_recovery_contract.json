@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "engine_id": "EUCONS_E09_SOURCE_FRESHNESS_RECOVERY_QUEUE",
+  "input": {
+    "required_projection_product": "EUCONS_COMMERCIAL_OS",
+    "required_bridge_id": "PARTENER_P11_TO_EUCONS_E09",
+    "required_source_product": "PARTENER.EU",
+    "required_source_role": "DISCOVERY_ONLY",
+    "allowed_bridge_states": ["READY", "STALE_SOURCE_HOLD"],
+    "require_read_only": true,
+    "require_source_mutation_disabled": true
+  },
+  "freshness": {
+    "fresh_state": "FRESH",
+    "stale_state": "STALE",
+    "invalid_time_state": "INVALID_TIME",
+    "future_time_state": "FUTURE_TIME",
+    "max_age_hours": 72,
+    "future_skew_tolerance_minutes": 15,
+    "fresh_bridge_state": "READY",
+    "held_bridge_state": "STALE_SOURCE_HOLD"
+  },
+  "triage": {
+    "priority_order": ["P0", "P1"],
+    "timestamp_integrity_priority": "P0",
+    "stale_refresh_priority": "P1",
+    "timestamp_integrity_action": "REVIEW_DISCOVERY_TIMESTAMP_INTEGRITY",
+    "stale_refresh_action": "REQUEST_DISCOVERY_REFRESH_REVIEW",
+    "deterministic_sort": ["priority_asc", "task_id_asc"]
+  },
+  "output": {
+    "state": "READ_ONLY_SOURCE_FRESHNESS_RECOVERY",
+    "fresh_source_emits_no_task": true,
+    "opportunity_material_facts_forbidden": true,
+    "official_authority_inference_forbidden": true,
+    "eligibility_conclusion_forbidden": true,
+    "person_level_fields_forbidden": true,
+    "external_action_authorized": false,
+    "repository_runtime_output_forbidden": true
+  },
+  "boundaries": {
+    "network_fetch": false,
+    "crm_write": false,
+    "provider_write": false,
+    "mysmis_write": false,
+    "outreach": false,
+    "message_send": false,
+    "offer_send": false,
+    "publication": false,
+    "deployment": false
+  }
+}
