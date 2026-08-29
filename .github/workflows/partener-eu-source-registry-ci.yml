@@ -170,6 +170,7 @@ jobs:
           PY
 
       - name: Upload bounded RegioCentru acquisition evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: partener-regiocentru-actions-live-evidence
