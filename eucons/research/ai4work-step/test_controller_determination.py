@@ -13,6 +13,8 @@ class ControllerDeterminationContractTests(unittest.TestCase):
     def setUpClass(cls):
         cls.contract = json.loads((HERE / "CONTROLLER_DETERMINATION_DRAFT.json").read_text(encoding="utf-8"))
         cls.forms = json.loads((HERE / "forms_definition.json").read_text(encoding="utf-8"))
+        cls.form_contract = json.loads((HERE / "form_contract.json").read_text(encoding="utf-8"))
+        cls.storage_contract = json.loads((HERE / "PROVIDER_STORAGE_CONTRACT.json").read_text(encoding="utf-8"))
 
     def test_controller_is_determined_but_collection_remains_fail_closed(self):
         c = self.contract
@@ -100,12 +102,27 @@ class ControllerDeterminationContractTests(unittest.TestCase):
             with self.subTest(forbidden=forbidden):
                 self.assertNotIn(forbidden, rendered)
 
-    def test_forms_may_remain_fail_closed_until_article_13_and_privacy_contact_are_bound(self):
+    def test_controller_identity_is_propagated_without_fabricating_privacy_contact(self):
         notice = self.forms.get("common_notice") or {}
-        self.assertEqual(notice.get("operator_status"), "UNRESOLVED_BEFORE_COLLECTION")
-        self.assertIsNone(notice.get("operator"))
+        self.assertEqual(notice.get("operator_status"), "CONTROLLER_DETERMINED_PRIVACY_CONTACT_OPEN")
+        self.assertEqual(notice.get("operator"), "EUROCONSULT SRL")
+        self.assertEqual(notice.get("operator_cui"), "14250864")
         self.assertIn("DE COMPLETAT", notice.get("privacy_contact", ""))
-        self.assertFalse(self.contract["collection_enabled"])
+
+        pre_notice = self.form_contract.get("pre_form_notice") or {}
+        self.assertEqual(pre_notice.get("operator_legal_name"), "EUROCONSULT SRL")
+        self.assertEqual(pre_notice.get("operator_cui"), "14250864")
+        self.assertEqual(pre_notice.get("operator_status"), "CONTROLLER_DETERMINED_PRIVACY_CONTACT_OPEN")
+        self.assertEqual(pre_notice.get("privacy_contact"), "OPEN_BEFORE_PRODUCTION")
+        self.assertEqual(pre_notice.get("operator_contact_details"), "TO_BE_BOUND_BEFORE_PRODUCTION")
+        self.assertFalse(self.form_contract["production_enabled"])
+
+        storage_controller = self.storage_contract.get("controller") or {}
+        self.assertEqual(storage_controller.get("legal_name"), "EUROCONSULT SRL")
+        self.assertEqual(storage_controller.get("cui"), "14250864")
+        self.assertEqual(storage_controller.get("status"), "CONTROLLER_DETERMINED_PRIVACY_CONTACT_OPEN")
+        self.assertEqual(storage_controller.get("privacy_contact"), "OPEN_BEFORE_PRODUCTION")
+        self.assertFalse(self.storage_contract["production_enabled"])
 
 
 if __name__ == "__main__":
