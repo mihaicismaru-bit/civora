@@ -29,6 +29,12 @@
     The response is restricted to a fixed allowlist of read-only/observe capabilities and explicit
     MV3/native-agent readiness. Offline contract validation cannot be promoted to live health;
     arbitrary shell, write capabilities, stale responses and sensitive fields fail closed.
+13. `DISCOVER_ARTIFACTS` is bound to the exact build, bridge-health challenge, benchmark track and
+    current authenticated page. It accepts only current-page DOM plus observed download/response
+    metadata for GET/HEAD. The local validator recomputes the inventory, requires the reported count
+    to match, and records an explicit reason for every non-retrievable candidate. Clicks, route
+    mutations, CDP attachment, shell actions and MySMIS writes fail closed. Offline fixtures exercise
+    the same envelope but can never yield live evidence.
 
 No project code appears in the discovery implementation. Project numbers occur only in fixtures and
 acceptance evidence.
