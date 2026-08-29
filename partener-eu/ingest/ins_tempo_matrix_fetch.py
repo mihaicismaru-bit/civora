@@ -239,6 +239,47 @@ def write_receipt(output_dir: Path, payload: bytes, evidence: dict) -> None:
     )
 
 
+def write_failure_receipt(
+    output_dir: Path,
+    *,
+    matrix_code: str,
+    requested_url: str,
+    fetched_at: str,
+    run_id: str,
+    exc: Exception,
+) -> None:
+    handoff_dir = output_dir / "handoff"
+    handoff_dir.mkdir(parents=True, exist_ok=True)
+    code = normalize_matrix_code(matrix_code)
+    failure = {
+        "schema_version": "1.0",
+        "adapter_id": ADAPTER_ID,
+        "parser_version": PARSER_VERSION,
+        "source_id": SOURCE_ID,
+        "source_family": "ROMANIA_INS",
+        "programme_family": "CROSS_PROGRAMME_MARKET_INTELLIGENCE",
+        "authority_class": "T1_OFFICIAL_STATISTICAL_AUTHORITY",
+        "observation_state": "FETCH_FAILED",
+        "matrix_code": code,
+        "requested_url": requested_url,
+        "final_url": None,
+        "fetched_at": fetched_at,
+        "run_id": run_id,
+        "transport_ok": False,
+        "error_class": type(exc).__name__,
+        "error": str(exc)[:2000],
+        "material_fact_use": False,
+        "statistical_value_authorized": False,
+        "publish_authorized": False,
+        "eligibility_authorized": False,
+        "deadline_authorized": False,
+        "budget_authorized": False,
+    }
+    (handoff_dir / f"tempo_{code.lower()}_failure.json").write_text(
+        json.dumps(failure, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Acquire official INS TEMPO exact-matrix metadata fail-closed")
     parser.add_argument("--matrix", default="FOM106G")
@@ -274,6 +315,14 @@ def main() -> int:
         }, ensure_ascii=False))
         return 0
     except Exception as exc:
+        write_failure_receipt(
+            Path(args.output_dir),
+            matrix_code=code,
+            requested_url=requested_url,
+            fetched_at=fetched_at,
+            run_id=str(args.run_id),
+            exc=exc,
+        )
         print(f"FAIL INS TEMPO exact-matrix acquisition: {type(exc).__name__}: {exc}", file=sys.stderr)
         return 2
 
