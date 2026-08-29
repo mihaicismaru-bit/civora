@@ -86,7 +86,7 @@ class ProviderDocumentaryBindingTests(unittest.TestCase):
         binding_bytes = BINDING_PATH.read_bytes()
         baseline = plan.get("provider_documentary_baseline") or {}
 
-        self.assertEqual(plan.get("schema_version"), "eucons.ai4work_research_hosting_plan.v0.6")
+        self.assertEqual(plan.get("schema_version"), "eucons.ai4work_research_hosting_plan.v0.7")
         self.assertEqual(
             baseline.get("status"),
             "FROZEN_FIRST_PARTY_SHARED_HOSTING_PACKAGE",
@@ -120,14 +120,21 @@ class ProviderDocumentaryBindingTests(unittest.TestCase):
         )
 
         role = plan.get("role_determination_before_activation") or {}
+        self.assertEqual(role.get("controller"), "EUROCONSULT SRL / CUI 14250864")
+        self.assertEqual(role.get("controller_status"), "DETERMINED_FROM_FIRST_PARTY_AUTHORITY_EVIDENCE")
+        self.assertEqual(role.get("controller_reference"), "CONTROLLER_DETERMINATION_DRAFT.json")
         self.assertEqual(
             role.get("status"),
-            "CONTROLLER_UNRESOLVED_EXTERNAL_ROLE_REQUESTS_WITHDRAWN_FAIL_CLOSED",
+            "CONTROLLER_DETERMINED_PRIVACY_CONTACT_AND_HOSTING_ROLE_CHAIN_OPEN_FAIL_CLOSED",
         )
+        self.assertIn("NON_EVIDENTIARY", role.get("withdrawn_correspondence_rule") or "")
 
         open_gates = plan.get("current_open_operational_gates") or {}
+        self.assertEqual(
+            open_gates.get("controller_and_privacy_contact"),
+            "OPEN_PRIVACY_CONTACT_ONLY_CONTROLLER_CLOSED",
+        )
         for key in (
-            "controller_and_privacy_contact",
             "lawful_basis_article13_dpia_retention_rights_approval",
             "controller_processor_subprocessor_chain",
             "current_cpanel_raw_access_retention_and_access",
@@ -140,21 +147,26 @@ class ProviderDocumentaryBindingTests(unittest.TestCase):
             self.assertEqual(open_gates.get(key), "OPEN")
 
         serialized = HOSTING_PLAN_PATH.read_text(encoding="utf-8")
+        self.assertNotIn("CONTROLLER_UNRESOLVED_EXTERNAL_ROLE_REQUESTS_WITHDRAWN_FAIL_CLOSED", serialized)
         self.assertNotIn("ANNEX_4_AVAILABLE_ON_REQUEST", serialized)
         self.assertNotIn("EXACT_ANNEX_5_VALUES_OPEN", serialized)
         self.assertFalse((plan.get("authorization") or {}).get("merge"))
         self.assertFalse((plan.get("authorization") or {}).get("deploy"))
         self.assertFalse((plan.get("authorization") or {}).get("real_collection"))
 
-    def test_storage_contract_matches_frozen_provider_baseline_and_does_not_reopen_closed_documentary_gaps(self) -> None:
+    def test_storage_contract_matches_frozen_provider_baseline_and_determined_controller(self) -> None:
         contract_text = STORAGE_CONTRACT_PATH.read_text(encoding="utf-8")
         contract = json.loads(contract_text)
         framework = contract.get("candidate_hosting_processor_framework") or {}
         go_no_go = contract.get("go_no_go") or {}
+        controller = contract.get("controller") or {}
 
-        self.assertEqual(contract.get("schema_version"), "eucons.research_storage_contract.v0.7")
+        self.assertEqual(contract.get("schema_version"), "eucons.research_storage_contract.v0.8")
         self.assertFalse(contract.get("production_enabled"))
-        self.assertEqual((contract.get("controller") or {}).get("status"), "UNRESOLVED_BEFORE_COLLECTION")
+        self.assertEqual(controller.get("legal_name"), "EUROCONSULT SRL")
+        self.assertEqual(controller.get("cui"), "14250864")
+        self.assertEqual(controller.get("status"), "CONTROLLER_DETERMINED_PRIVACY_CONTACT_OPEN")
+        self.assertEqual(controller.get("privacy_contact"), "OPEN_BEFORE_PRODUCTION")
         self.assertEqual(framework.get("documentary_binding_reference"), BINDING_PATH.name)
         self.assertEqual(
             framework.get("dpa_sha256"),
@@ -177,6 +189,11 @@ class ProviderDocumentaryBindingTests(unittest.TestCase):
             framework.get("raw_access_current_account_access_controls"),
             "OPEN_ACCOUNT_INSPECTION_REQUIRED",
         )
+        self.assertEqual(
+            go_no_go.get("controller_identity"),
+            "CLOSED_EUROCONSULT_SRL_CUI_14250864",
+        )
+        self.assertEqual(go_no_go.get("privacy_contact"), "OPEN")
         self.assertEqual(
             go_no_go.get("hosting_account_contract_and_annexes"),
             "FIRST_PARTY_DPA_ANNEX4_ANNEX5_FROZEN_ACCOUNT_CONFIGURATION_AND_OVERRIDE_OPEN",
