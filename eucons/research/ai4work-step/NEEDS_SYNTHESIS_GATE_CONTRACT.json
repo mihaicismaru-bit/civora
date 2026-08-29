@@ -1,0 +1,35 @@
+{
+  "schema_version": "eucons.ai4work_needs_synthesis_gate_contract.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "status": "IMPLEMENTED_FAIL_CLOSED_NOT_PROD_ACTIVATED",
+  "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
+  "canonical_entrypoint": "needs_synthesis_gate.assert_real_batch_ready_for_needs_synthesis",
+  "required_subcontrols": [
+    "real_batch_synthesis_gate.assert_real_batch_ready_for_synthesis",
+    "profile_coverage_control.assert_profile_coverage_control"
+  ],
+  "profile_coverage_rule": "Every real record must carry every coverage dimension declared in the frozen method frame and the value must belong to the exact frozen instrument option set. Empty and sparse categories must be surfaced for adversarial QA rather than silently omitted.",
+  "required_adult_dimensions": [
+    "region",
+    "status",
+    "age_band",
+    "occupational_family"
+  ],
+  "required_employer_dimensions": [
+    "region",
+    "sector_aggregated",
+    "size_band",
+    "respondent_role"
+  ],
+  "sparse_cell_policy": "Sparse/empty profile cells are internal QA constraints. They do not by themselves establish or disprove a need and they do not authorise population prevalence claims, weighting or public release of small-cell exact counts.",
+  "prod_input_evidence_class": "PROD_REAL_EVIDENCE",
+  "test_twin_input_allowed": false,
+  "test_twin_evidence_class": "TEST_TWIN_NON_EVIDENCE",
+  "project_activity_as_need_evidence": false,
+  "representativeness_claim_allowed": false,
+  "weighting_allowed": false,
+  "public_release_authorized": false,
+  "merge_authorized": false,
+  "deploy_authorized": false,
+  "prod_activation_authorized": false
+}
