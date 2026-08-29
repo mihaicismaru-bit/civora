@@ -5,11 +5,13 @@ on:
   pull_request:
     paths:
       - 'valcea-clar/scripts/apavil_valcea_signal_adapter.py'
+      - 'valcea-clar/scripts/apavil_valcea_service_thread_state.py'
       - '.github/workflows/valcea-clar-apavil-signals.yml'
   push:
     branches: [main]
     paths:
       - 'valcea-clar/scripts/apavil_valcea_signal_adapter.py'
+      - 'valcea-clar/scripts/apavil_valcea_service_thread_state.py'
       - '.github/workflows/valcea-clar-apavil-signals.yml'
 
 permissions:
@@ -27,7 +29,11 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - name: Compile APAVIL signal adapter
-        run: python -m py_compile valcea-clar/scripts/apavil_valcea_signal_adapter.py
+      - name: Compile APAVIL signal and thread-state adapters
+        run: |
+          python -m py_compile valcea-clar/scripts/apavil_valcea_signal_adapter.py
+          python -m py_compile valcea-clar/scripts/apavil_valcea_service_thread_state.py
       - name: Run APAVIL fail-closed regressions
-        run: python valcea-clar/scripts/apavil_valcea_signal_adapter.py --self-test
+        run: |
+          python valcea-clar/scripts/apavil_valcea_signal_adapter.py --self-test
+          python valcea-clar/scripts/apavil_valcea_service_thread_state.py --self-test
