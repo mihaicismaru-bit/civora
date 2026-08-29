@@ -260,6 +260,9 @@ def build_preingest_manifest(
         form_id: Counter({region: 0 for region in TARGET_REGIONS}) for form_id in sorted(ALLOWED_FORMS)
     }
     region_channel_ids: dict[str, set[str]] = {region: set() for region in TARGET_REGIONS}
+    form_region_channel_ids: dict[str, dict[str, set[str]]] = {
+        form_id: {region: set() for region in TARGET_REGIONS} for form_id in sorted(ALLOWED_FORMS)
+    }
     channel_counts: Counter[str] = Counter()
     received_values: list[datetime] = []
     for record in records:
@@ -284,6 +287,7 @@ def build_preingest_manifest(
         region_counts[region] += 1
         form_region_counts[form_id][region] += 1
         region_channel_ids[region].add(channel_id)
+        form_region_channel_ids[form_id][region].add(channel_id)
         channel_counts[channel_id] += 1
         received_values.append(received)
 
@@ -291,7 +295,7 @@ def build_preingest_manifest(
     dominant_channel_share = max(channel_counts.values()) / len(records)
     frame_sha = hashlib.sha256(canonical_json_bytes(collection_frame)).hexdigest()
     return {
-        "schema_version": "eucons.ai4work_nf06_preingest_manifest.v0.4",
+        "schema_version": "eucons.ai4work_nf06_preingest_manifest.v0.5",
         "research_id": RESEARCH_ID,
         "handoff_stage": "NF06_SOURCE_PREFLIGHT",
         "evidence_class": evidence_class,
@@ -312,6 +316,12 @@ def build_preingest_manifest(
         "region_channel_ids": {
             region: sorted(region_channel_ids[region]) for region in TARGET_REGIONS
         },
+        "form_region_channel_ids": {
+            form_id: {
+                region: sorted(form_region_channel_ids[form_id][region]) for region in TARGET_REGIONS
+            }
+            for form_id in sorted(ALLOWED_FORMS)
+        },
         "channel_counts": dict(sorted(channel_counts.items())),
         "dominant_channel_share": dominant_channel_share,
         "received_at_min": min(received_values).isoformat(),
@@ -321,11 +331,12 @@ def build_preingest_manifest(
         "collection_frame_exact_field_allowlist_validated": True,
         "channel_membership_validated_against_collection_frame": True,
         "method_coverage_aggregates_emitted": True,
+        "form_audience_channel_provenance_emitted": True,
         "direct_identifiers_collected": False,
         "crm_linkage": "FORBIDDEN",
         "commercial_tracking": "FORBIDDEN",
         "prod_promotion_eligible": prod,
-        "scope_boundary": "This manifest validates source-batch integrity, exact collection-frame identity, frozen instrument content, opaque recruitment-channel provenance and eligibility for NF06 handoff only. Region/form coverage aggregates are internal method-QA inputs, not population estimates or need evidence; it does not claim that NF06 ingestion, synthesis, ranking or QA has executed.",
+        "scope_boundary": "This manifest validates source-batch integrity, exact collection-frame identity, frozen instrument content, opaque recruitment-channel provenance and eligibility for NF06 handoff only. Region/form coverage and form-specific channel provenance aggregates are internal method-QA inputs, not population estimates or need evidence; it does not claim that NF06 ingestion, synthesis, ranking or QA has executed.",
     }
 
 
