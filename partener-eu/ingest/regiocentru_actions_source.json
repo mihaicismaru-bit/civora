@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+  "source": {
+    "id": "SRC-ADR-CENTRU-PR-ACTIONS",
+    "tier": "T1",
+    "class": "official_regional_programme_call_registry",
+    "owner": "ADR Centru / Autoritatea de Management Programul Regiunea Centru",
+    "url": "https://www.regiocentru.ro/actiuni/",
+    "programmes": [
+      "Programul Regiunea Centru 2021-2027"
+    ],
+    "programme_family": "Programul Regiunea Centru 2021-2027",
+    "extract": [
+      "action_call_discovery",
+      "exact_action_links",
+      "mysmis_call_identifier_discovery",
+      "programme_guides_and_corrigenda_discovery",
+      "geography_and_applicant_fit_discovery"
+    ],
+    "material_fact_use": false,
+    "credentials_required": false,
+    "source_families": [
+      "ROMANIA",
+      "ADR",
+      "CALL_REGISTRY"
+    ],
+    "authority_scope": "CALL_INDEX_DISCOVERY",
+    "observation_state": "CALL_INDEX_DISCOVERY",
+    "adapter_required": "REGIOCENTRU_ACTIONS_V1",
+    "jurisdiction": "Regiunea Centru",
+    "freshness_hours": 24,
+    "note": "Official Managing Authority action registry. Index evidence is discovery-only. OPEN/status/deadline/budget/eligibility require an exact action/call or MySMIS identifier, a current official exact-action endpoint, explicit current status and semantic reconciliation before any material fact may move."
+  }
+}
