@@ -321,6 +321,7 @@ export async function syncCommittedObjectToDrive({
           contentKey: receipt.sha256,
           metadata: {
             sha256: receipt.sha256,
+            size: receipt.size,
             sourceEventId: receipt.eventId,
             track: receipt.track
           }

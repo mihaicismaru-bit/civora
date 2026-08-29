@@ -21,6 +21,10 @@
 10. Only a `PENDING_HUMAN_REVIEW` append-only proposal is created after successful readback. The
     connector never applies the proposal itself, never promotes project facts, and targets separate
     Artifact Registry and SSOT names for WRITING and IMPLEMENTATION.
+11. When Drive runs outside the native process, a file exchange adapter emits a create-only plan
+    with a spool-relative object path. The external response contains the observed Drive file ID and
+    complete base64 readback; those bytes enter the same hash/checkpoint/proposal state machine.
+    Absolute source paths and authentication material never enter the exchange.
 
 No project code appears in the discovery implementation. Project numbers occur only in fixtures and
 acceptance evidence.

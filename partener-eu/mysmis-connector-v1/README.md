@@ -39,10 +39,12 @@ Implemented in this unit:
 - injectible Drive-first adapter contract with create-only uploads and full raw readback hashing
 - restart-safe Drive checkpoints that never repeat a checkpointed upload
 - append-only Artifact Registry and track-specific SSOT reconciliation proposals
+- external bridge exchange plans containing only relative spool paths and non-sensitive metadata
+- external Drive response ingestion with complete base64 readback verification
 
 Still fail-closed / not implemented:
 
-- production Google Drive adapter and live harmless-binary roundtrip
+- direct native Google Drive adapter for unattended MCLENOVO operation
 - approved Artifact Registry and SSOT proposal application
 - CDP debugger fallback
 - authorized authenticated live benchmark execution
@@ -53,6 +55,22 @@ The connector is therefore not `VERIFIED_FUNCTIONAL`.
 The Drive contract never directly edits an Artifact Registry or SSOT. It persists a
 `PENDING_HUMAN_REVIEW` proposal only after the uploaded bytes have been read back in full and match
 the local SHA-256 and size. WRITING and IMPLEMENTATION proposals have distinct targets.
+
+## External Drive exchange
+
+The bridge-facing CLI emits a create-only request when no response exists, then resumes the same
+Drive state machine after the external orchestrator supplies the observed file ID, credential-free
+Drive URL and complete raw readback bytes:
+
+```sh
+node native/external-drive-cli.mjs \
+  --receipt /path/to/spool/receipts/event.json \
+  --spool /path/to/spool \
+  --exchange /path/to/spool/external-drive-exchange
+```
+
+The persisted request contains a spool-relative object path, never the absolute local path. It
+contains no browser/session material and authorizes no MySMIS action.
 
 ## Manual intake CLI
 
