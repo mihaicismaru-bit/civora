@@ -70,6 +70,7 @@ class NF06PreingestTests(unittest.TestCase):
         records = normalized_records()
         frame, source_bytes = collection_frame(records, prod=True)
         manifest = NF06.build_preingest_manifest(records, collection_frame=frame, source_bytes=source_bytes, prod=True)
+        self.assertEqual(manifest["schema_version"], "eucons.ai4work_nf06_preingest_manifest.v0.6")
         self.assertEqual(manifest["evidence_class"], "PROD_REAL_EVIDENCE")
         self.assertTrue(manifest["prod_promotion_eligible"])
         self.assertFalse(manifest["non_evidence"])
@@ -78,6 +79,20 @@ class NF06PreingestTests(unittest.TestCase):
         self.assertEqual(manifest["form_counts"]["AI4WORK_EMPLOYERS_V1"], 1)
         self.assertEqual(manifest["channel_counts"], {ADULT_CHANNEL: 1, EMPLOYER_CHANNEL: 1})
         self.assertEqual(manifest["dominant_channel_share"], 0.5)
+        self.assertEqual(
+            manifest["region_channel_counts"]["Centru"],
+            {ADULT_CHANNEL: 1, EMPLOYER_CHANNEL: 1},
+        )
+        self.assertEqual(manifest["region_dominant_channel_share"]["Centru"], 0.5)
+        self.assertEqual(
+            manifest["form_region_channel_counts"]["AI4WORK_ADULTS_V1"]["Centru"],
+            {ADULT_CHANNEL: 1},
+        )
+        self.assertEqual(
+            manifest["form_region_dominant_channel_share"]["AI4WORK_ADULTS_V1"]["Centru"],
+            1.0,
+        )
+        self.assertTrue(manifest["channel_concentration_aggregates_emitted"])
         self.assertTrue(manifest["channel_membership_validated_against_collection_frame"])
         self.assertTrue(manifest["instrument_content_hashes_validated"])
         self.assertTrue(manifest["collection_frame_exact_field_allowlist_validated"])
