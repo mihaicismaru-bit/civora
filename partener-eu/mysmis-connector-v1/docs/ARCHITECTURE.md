@@ -25,6 +25,10 @@
     with a spool-relative object path. The external response contains the observed Drive file ID and
     complete base64 readback; those bytes enter the same hash/checkpoint/proposal state machine.
     Absolute source paths and authentication material never enter the exchange.
+12. Bridge health uses a short-lived nonce challenge bound to the exact connector and agent builds.
+    The response is restricted to a fixed allowlist of read-only/observe capabilities and explicit
+    MV3/native-agent readiness. Offline contract validation cannot be promoted to live health;
+    arbitrary shell, write capabilities, stale responses and sensitive fields fail closed.
 
 No project code appears in the discovery implementation. Project numbers occur only in fixtures and
 acceptance evidence.

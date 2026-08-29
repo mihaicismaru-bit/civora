@@ -41,10 +41,13 @@ Implemented in this unit:
 - append-only Artifact Registry and track-specific SSOT reconciliation proposals
 - external bridge exchange plans containing only relative spool paths and non-sensitive metadata
 - external Drive response ingestion with complete base64 readback verification
+- expiring bridge-health challenge/response bound to exact connector and agent builds
+- whitelisted read-only/observe capabilities with explicit no-shell and zero-write assertions
 
 Still fail-closed / not implemented:
 
 - direct native Google Drive adapter for unattended MCLENOVO operation
+- live MCLENOVO health response observed through the trusted bridge transport
 - approved Artifact Registry and SSOT proposal application
 - CDP debugger fallback
 - authorized authenticated live benchmark execution
@@ -71,6 +74,14 @@ node native/external-drive-cli.mjs \
 
 The persisted request contains a spool-relative object path, never the absolute local path. It
 contains no browser/session material and authorizes no MySMIS action.
+
+## Bridge health contract
+
+The health challenge is short-lived, nonce-bound and tied to the exact connector Git SHA. A valid
+response may declare only the known read-only or observation capabilities and must prove Manifest
+V3 extension plus native-agent readiness. It cannot request a remote shell or any MySMIS write.
+Offline fixtures validate the contract but never set `liveVerified`; only a caller-observed
+`LIVE_BRIDGE_TOOL` response can do so.
 
 ## Manual intake CLI
 
