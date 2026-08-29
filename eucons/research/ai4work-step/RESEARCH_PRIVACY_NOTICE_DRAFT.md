@@ -24,6 +24,10 @@ Sunt colectate numai categorii prestabilite și largi necesare analizei, precum 
 
 În designul pre-producție curent **nu există câmpuri de text liber în formularele analitice**. Răspunsurile sunt limitate la opțiuni prestabilite, scale, booleene și matrici. Aceasta reduce riscul introducerii accidentale a numelor, angajatorilor, datelor de contact sau altor identificatori prin text liber. Celulele statistice foarte mici sunt suprimate sau agregate în raportare.
 
+Absența identificatorilor direcți nu înseamnă că răspunsurile brute sau normalizate sunt declarate anonime. Până la ștergerea datelor la nivel de respondent, EUROCONSULT le tratează conservator ca date cu caracter personal sau potențial identificabile pentru aplicarea controalelor GDPR, deoarece combinații de atribute ori informații tehnice accesibile entităților relevante pot permite distingerea sau legarea unui respondent. Cadrul metodologic este documentat în `GDPR_ANONYMISATION_CLASSIFICATION_CONTROL.json`, pe baza versiunii 1.0 a **EDPB Guidelines 02/2026 on Anonymisation**, adoptată la 7 iulie 2026 pentru consultare publică; documentul nu este prezentat ca versiune finală post-consultare.
+
+Numai rezultate agregate și controlate pentru divulgare pot fi ulterior considerate anonime, după o evaluare documentată care verifică pentru destinatarii relevanți criteriile **No Record Isolation**, **No Linkage** și **No Inference**, inclusiv riscul creat de granularitatea combinațiilor de regiune, vârstă/statut, ocupație, sector și dimensiune. Dacă această verificare nu trece, rezultatul rămâne tratat ca personal/potențial identificabil și nu este eliberat ca ieșire anonimă.
+
 ## Temeiul juridic
 
 **Propunere supusă aprobării EUROCONSULT SRL înainte de colectare:** art. 6 alin. (1) lit. (f) GDPR — interes legitim pentru realizarea unei analize de nevoi documentate și proporționale. Evaluarea interesului legitim este păstrată separat în `GDPR_LIA_DRAFT.json`; determinarea operatorului este închisă, însă LIA și temeiul juridic final rămân neaprobate până la confirmarea faptului că toate măsurile de minimizare, separare, transparență, drepturi și retenție sunt menținute și operaționale.
@@ -40,7 +44,7 @@ EUROCONSULT SRL este operatorul cercetării. Rolurile titularului/administratoru
 
 Lista procesatorilor/subprocesatorilor și orice transfer în afara SEE trebuie verificată și documentată înainte de lansare. Dacă această verificare nu este închisă, colectarea nu se activează.
 
-Răspunsurile la nivel de respondent nu trebuie trimise către servicii externe de AI generativ/LLM. Orice utilizare AI în analiză se limitează la material suficient de de-identificat/agregat și necesită re-evaluare dacă această condiție se schimbă.
+Răspunsurile la nivel de respondent nu trebuie trimise către servicii externe de AI generativ/LLM. Orice utilizare AI în analiză se limitează la material suficient de de-identificat/agregat și necesită re-evaluare dacă această condiție se schimbă; un material nu este numit „anonim” pentru transfer sau publicare decât după evaluarea de anonimizare aplicabilă ieșirii respective.
 
 ## Date tehnice și tracking
 
@@ -52,7 +56,7 @@ Pentru evitarea dublării unui răspuns în cazul unui retry de rețea se folose
 
 Propunerea de retenție este documentată în `GDPR_RETENTION_SCHEDULE_DRAFT.json`. În designul curent, răspunsurile brute și normalizate la nivel de respondent se șterg după validarea analizei și înghețarea pachetului de dovezi, dar nu mai târziu de 180 de zile de la închiderea colectării și, în lipsa unui hold juridic documentat, nu mai târziu de **31 martie 2027**.
 
-După ștergere pot fi păstrate pe termenul necesar proiectului numai rezultate agregate cu control de divulgare, registrul surselor/provenienței și hash-uri de integritate care nu permit reconstruirea răspunsurilor individuale. Datele opționale de contact, dacă vor exista într-un formular complet separat, nu pot fi legate de răspuns și au o retenție mai scurtă.
+După ștergere pot fi păstrate pe termenul necesar proiectului numai rezultate agregate cu control de divulgare care au trecut evaluarea documentată de anonimizare a ieșirii, registrul surselor/provenienței și hash-uri de integritate care nu permit reconstruirea răspunsurilor individuale. Datele opționale de contact, dacă vor exista într-un formular complet separat, nu pot fi legate de răspuns și au o retenție mai scurtă.
 
 ## Drepturile dumneavoastră
 
