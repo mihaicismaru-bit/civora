@@ -146,7 +146,7 @@ class ProfileCoverageControlTests(unittest.TestCase):
         method_frame = approved_method_frame()
         lock = approved_method_lock(method_frame, frame)
         method_frame["sampling_design"]["provisional_readiness_thresholds"]["adults_total_valid_min"] = 1
-        with self.assertRaisesRegex(NEEDS.NeedsSynthesisGateError, "method frame bytes do not match"):
+        with self.assertRaisesRegex(NEEDS.NeedsSynthesisGateError, "method_frame bytes do not match"):
             NEEDS.assert_real_batch_ready_for_needs_synthesis(
                 records,
                 manifest=manifest,
