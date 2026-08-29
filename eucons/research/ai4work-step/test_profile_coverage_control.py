@@ -108,7 +108,7 @@ class ProfileCoverageControlTests(unittest.TestCase):
                 forms_definition=frozen_forms(),
             )
 
-    def test_canonical_needs_synthesis_wrapper_requires_profile_coverage_and_precollection_method_lock(self):
+    def test_canonical_needs_synthesis_wrapper_requires_profile_coverage_precollection_method_lock_and_integrity_diagnostics(self):
         register = channel_register()
         records = full_profile_records()
         frame = bound_collection_frame(register, records)
@@ -124,7 +124,7 @@ class ProfileCoverageControlTests(unittest.TestCase):
             forms_definition=frozen_forms(),
         )
         self.assertTrue(result["ready_for_needs_synthesis"])
-        self.assertEqual(result["schema_version"], "eucons.ai4work_needs_synthesis_gate.v0.2")
+        self.assertEqual(result["schema_version"], "eucons.ai4work_needs_synthesis_gate.v0.3")
         self.assertEqual(
             result["method_frame_lock_control_schema_version"],
             "eucons.ai4work_method_frame_lock_control.v0.1",
@@ -133,8 +133,14 @@ class ProfileCoverageControlTests(unittest.TestCase):
             result["profile_coverage_control_schema_version"],
             "eucons.ai4work_profile_coverage_control.v0.1",
         )
+        self.assertEqual(
+            result["response_integrity_control_schema_version"],
+            "eucons.ai4work_response_integrity_control.v0.1",
+        )
         self.assertTrue(result["method_frame_locked_before_collection"])
         self.assertTrue(result["profile_coverage_qa_required"])
+        self.assertTrue(result["response_integrity_qa_required"])
+        self.assertFalse(result["automatic_duplicate_exclusion_authorized"])
         self.assertFalse(result["representativeness_claim_allowed"])
         self.assertFalse(result["public_release_authorized"])
 
