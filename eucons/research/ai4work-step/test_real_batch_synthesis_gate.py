@@ -108,6 +108,11 @@ class RealBatchSynthesisGateTests(unittest.TestCase):
         self.assertTrue(result["collection_frame_bound"])
         self.assertTrue(result["collection_frame_window_validated"])
         self.assertTrue(result["collection_frame_channel_membership_validated"])
+        self.assertTrue(result["channel_register_bound"])
+        self.assertEqual(
+            result["channel_register_sha256"],
+            frame["collection_channel_register_sha256"],
+        )
         self.assertTrue(result["channel_temporal_windows_validated"])
         self.assertFalse(result["representativeness_claim_allowed"])
         self.assertEqual(result["evidence_class"], "CONTROL_ARTIFACT_NOT_EVIDENCE")
@@ -168,6 +173,19 @@ class RealBatchSynthesisGateTests(unittest.TestCase):
         manifest["form_contract_sha256"] = "0" * 64
         with self.assertRaises(GATE.RealBatchSynthesisGateError):
             assert_ready(register, records, frame, manifest)
+
+    def test_supplied_channel_register_snapshot_must_match_frozen_hash(self):
+        register = channel_register()
+        records = real_records()
+        frame = bound_collection_frame(register, records)
+        manifest = bound_manifest(register, records, frame)
+        tampered_register = copy.deepcopy(register)
+        tampered_register["entries"][0]["distributor_role"] = "tampered_but_schema_valid_role"
+        with self.assertRaisesRegex(
+            GATE.RealBatchSynthesisGateError,
+            "supplied channel register does not match",
+        ):
+            assert_ready(tampered_register, records, frame, manifest)
 
     def test_record_outside_global_collection_frame_is_rejected(self):
         register = channel_register()
