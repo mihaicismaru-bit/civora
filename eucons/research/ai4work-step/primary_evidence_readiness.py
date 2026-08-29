@@ -13,6 +13,10 @@ METHOD_EVIDENCE_CLASS = "METHOD_PLAN_NOT_EVIDENCE"
 TARGET_REGIONS = ("Centru", "Sud-Muntenia", "Sud-Vest Oltenia")
 ADULT_FORM = "AI4WORK_ADULTS_V1"
 EMPLOYER_FORM = "AI4WORK_EMPLOYERS_V1"
+FORM_AUDIENCE = {
+    ADULT_FORM: "adults",
+    EMPLOYER_FORM: "employers",
+}
 CHANNEL_TYPE_RE = re.compile(r"^[a-z][a-z0-9_]{2,48}$")
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 REGISTER_KEYS = {"schema_version", "research_id", "entries"}
@@ -143,6 +147,51 @@ def _validate_sensitivity_artifact(value: Any) -> None:
         raise PrimaryEvidenceReadinessError("dominant-channel sensitivity analysis needs a lowercase SHA-256")
 
 
+def _validate_form_region_channel_provenance(
+    value: Any,
+    *,
+    form_region_counts: dict[str, Any],
+    region_channel_ids: dict[str, Any],
+    register_by_id: dict[str, dict[str, Any]],
+) -> None:
+    if not isinstance(value, dict) or set(value) != set(FORM_AUDIENCE):
+        raise PrimaryEvidenceReadinessError("manifest form_region_channel_ids must cover both frozen forms exactly")
+
+    per_region_union: dict[str, set[str]] = {region: set() for region in TARGET_REGIONS}
+    for form_id, audience in FORM_AUDIENCE.items():
+        region_map = value.get(form_id)
+        if not isinstance(region_map, dict) or set(region_map) != set(TARGET_REGIONS):
+            raise PrimaryEvidenceReadinessError(f"form_region_channel_ids for {form_id} must cover all target regions exactly")
+        for region in TARGET_REGIONS:
+            used_ids = region_map.get(region)
+            if not isinstance(used_ids, list) or len(used_ids) != len(set(used_ids)):
+                raise PrimaryEvidenceReadinessError(f"form-region channel ids for {form_id}/{region} must be a duplicate-free list")
+            if (form_region_counts.get(form_id) or {}).get(region, 0) > 0 and not used_ids:
+                raise PrimaryEvidenceReadinessError(f"records exist for {form_id}/{region} but no form-specific channel provenance is present")
+            for channel_id in used_ids:
+                try:
+                    channel_id = validate_recruitment_channel_id(channel_id)
+                except ChannelProvenanceError as exc:
+                    raise PrimaryEvidenceReadinessError(str(exc)) from exc
+                entry = register_by_id.get(channel_id)
+                if entry is None:
+                    raise PrimaryEvidenceReadinessError(f"used channel {channel_id} is absent from frozen channel register")
+                if region not in entry["region_scope"]:
+                    raise PrimaryEvidenceReadinessError(f"used channel {channel_id} is not authorised for {region}")
+                if audience not in entry["audience_scope"]:
+                    raise PrimaryEvidenceReadinessError(
+                        f"used channel {channel_id} is not authorised for {audience} audience in {region}"
+                    )
+                per_region_union[region].add(channel_id)
+
+    for region in TARGET_REGIONS:
+        region_ids = region_channel_ids.get(region)
+        if not isinstance(region_ids, list) or set(region_ids) != per_region_union[region]:
+            raise PrimaryEvidenceReadinessError(
+                f"region_channel_ids for {region} do not reconcile with form-specific channel provenance"
+            )
+
+
 def assert_primary_evidence_ready_for_synthesis(
     manifest: Any,
     *,
@@ -199,6 +248,8 @@ def assert_primary_evidence_ready_for_synthesis(
         used_ids = region_channel_ids.get(region)
         if not isinstance(used_ids, list) or not used_ids:
             raise PrimaryEvidenceReadinessError(f"no recruitment-channel provenance for {region}")
+        if len(used_ids) != len(set(used_ids)):
+            raise PrimaryEvidenceReadinessError(f"duplicate recruitment-channel provenance for {region}")
         channel_types: set[str] = set()
         for channel_id in used_ids:
             try:
@@ -216,6 +267,13 @@ def assert_primary_evidence_ready_for_synthesis(
                 f"{region} has {len(channel_types)} independent channel type(s), below frozen minimum {channel_types_min}"
             )
 
+    _validate_form_region_channel_provenance(
+        manifest.get("form_region_channel_ids"),
+        form_region_counts=form_region_counts,
+        region_channel_ids=region_channel_ids,
+        register_by_id=register_by_id,
+    )
+
     manifest_channels = manifest.get("channel_counts")
     if not isinstance(manifest_channels, dict) or set(manifest_channels) - set(register_by_id):
         raise PrimaryEvidenceReadinessError("manifest contains channel ids absent from the frozen channel register")
@@ -228,7 +286,7 @@ def assert_primary_evidence_ready_for_synthesis(
         sensitivity_used = True
 
     return {
-        "schema_version": "eucons.ai4work_primary_evidence_readiness.v0.1",
+        "schema_version": "eucons.ai4work_primary_evidence_readiness.v0.2",
         "research_id": RESEARCH_ID,
         "stage": "PRE_SYNTHESIS_METHOD_COVERAGE",
         "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
@@ -240,6 +298,7 @@ def assert_primary_evidence_ready_for_synthesis(
         "all_three_regions_meet_frozen_population_minima": True,
         "independent_channel_types_per_region_validated": True,
         "channel_register_sha256_validated": True,
+        "form_audience_channel_scope_validated": True,
         "dominant_channel_sensitivity_used": sensitivity_used,
         "scope_boundary": "PASS authorises only entry into needs synthesis/adversarial QA for this real non-probability PROD batch. It does not establish population prevalence, causality, representativeness or any need conclusion.",
     }
