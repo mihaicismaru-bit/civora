@@ -207,6 +207,27 @@ def _assert_collection_frame_bound(
     }
 
 
+def _assert_channel_register_snapshot_bound(
+    *,
+    manifest: dict[str, Any],
+    collection_frame: dict[str, Any],
+    channel_register: dict[str, Any],
+) -> str:
+    """Bind the exact supplied channel-register snapshot to the frozen frame and NF06 manifest."""
+    register_sha = hashlib.sha256(canonical_json_bytes(channel_register)).hexdigest()
+    frame_sha = collection_frame.get("collection_channel_register_sha256")
+    manifest_sha = manifest.get("collection_channel_register_sha256")
+    if register_sha != frame_sha:
+        raise RealBatchSynthesisGateError(
+            "supplied channel register does not match collection_frame collection_channel_register_sha256"
+        )
+    if register_sha != manifest_sha:
+        raise RealBatchSynthesisGateError(
+            "supplied channel register does not match manifest collection_channel_register_sha256"
+        )
+    return register_sha
+
+
 def validate_channel_temporal_provenance(
     records: list[dict[str, Any]],
     *,
@@ -229,6 +250,11 @@ def validate_channel_temporal_provenance(
         register_by_id = READY._validate_channel_register(channel_register)
     except READY.PrimaryEvidenceReadinessError as exc:
         raise RealBatchSynthesisGateError(str(exc)) from exc
+    register_sha = _assert_channel_register_snapshot_bound(
+        manifest=manifest,
+        collection_frame=collection_frame,
+        channel_register=channel_register,
+    )
 
     bounds: dict[str, dict[str, Any]] = {}
     for index, record in enumerate(records):
@@ -284,10 +310,12 @@ def validate_channel_temporal_provenance(
         "collection_frame_channel_membership_validated": frame_binding[
             "collection_frame_channel_membership_validated"
         ],
+        "channel_register_bound": True,
+        "channel_register_sha256": register_sha,
         "channel_temporal_windows_validated": True,
         "channel_received_at_bounds": rendered_bounds,
         "representativeness_claim_allowed": False,
-        "scope_boundary": "PASS proves only that the bound real-response batch reconciles to the NF06 manifest, the frozen PROD collection frame and the authorised channel windows. It is not population or need evidence.",
+        "scope_boundary": "PASS proves only that the bound real-response batch reconciles to the NF06 manifest, the frozen PROD collection frame, the exact frozen channel-register snapshot and the authorised channel windows. It is not population or need evidence.",
     }
 
 
@@ -330,10 +358,12 @@ def assert_real_batch_ready_for_synthesis(
         "collection_frame_channel_membership_validated": temporal[
             "collection_frame_channel_membership_validated"
         ],
+        "channel_register_bound": temporal["channel_register_bound"],
+        "channel_register_sha256": temporal["channel_register_sha256"],
         "channel_temporal_windows_validated": temporal["channel_temporal_windows_validated"],
         "channel_received_at_bounds": temporal["channel_received_at_bounds"],
         "method_readiness_schema_version": readiness["schema_version"],
         "representativeness_claim_allowed": False,
         "weighting_allowed": False,
-        "scope_boundary": "Only this combined gate authorises entry of the exact real PROD batch bound to its NF06 manifest, frozen PROD collection frame and frozen channel register into needs synthesis/adversarial QA. PASS does not establish prevalence, causality, representativeness or any need conclusion.",
+        "scope_boundary": "Only this combined gate authorises entry of the exact real PROD batch bound to its NF06 manifest, frozen PROD collection frame and exact frozen channel-register snapshot into needs synthesis/adversarial QA. PASS does not establish prevalence, causality, representativeness or any need conclusion.",
     }
