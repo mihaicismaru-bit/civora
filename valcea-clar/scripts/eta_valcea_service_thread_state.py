@@ -36,12 +36,6 @@ UPDATE_RE = re.compile(
     r"devia(?:re|t[ăa]?)|reluar(?:e|ea)|reluat[ăa]?)\b",
     re.IGNORECASE,
 )
-FRESHNESS_DAYS = {
-    "SERVICE_ALERT": 2,
-    "SCHEDULE_CHANGE": 14,
-    "FARE_OR_ACCESS_CHANGE": 90,
-    "HOLD": 0,
-}
 
 
 def clean_text(value: Any) -> str:
@@ -198,6 +192,8 @@ def _can_cross_url_join(thread: dict[str, Any], signal: dict[str, Any]) -> bool:
         return False
     if not _windows_touch(latest, signal):
         return False
+    if latest["_cms_date"] == signal["_cms_date"] and latest["_start"] == signal["_start"]:
+        return False
     return latest["_update_hint"] or signal["_update_hint"]
 
 
@@ -224,20 +220,19 @@ def _sort_key(signal: dict[str, Any]) -> tuple[date, date, str]:
     )
 
 
-def _freshness(latest: dict[str, Any], as_of_date: date) -> tuple[str, int | None, str | None]:
+def _freshness(latest: dict[str, Any], as_of_date: date) -> tuple[str, int | None]:
+    """Record objective source age without inventing a freshness policy threshold."""
     cms_date = latest["_cms_date"]
     if cms_date is None:
-        return "SOURCE_DATE_UNKNOWN", None, None
+        return "SOURCE_DATE_UNKNOWN_RECHECK_REQUIRED", None
     age = (as_of_date - cms_date).days
     if age < 0:
-        return "SOURCE_TIMESTAMP_IN_FUTURE_HOLD", age, None
-    budget = FRESHNESS_DAYS[latest["classification"]]
-    due = cms_date + timedelta(days=budget)
+        return "SOURCE_TIMESTAMP_IN_FUTURE_HOLD", age
     if latest["classification"] == "HOLD":
-        return "HOLD_NOT_FRESHNESS_ELIGIBLE", age, due.isoformat()
-    if as_of_date > due:
-        return "SOURCE_RECHECK_OVERDUE", age, due.isoformat()
-    return "WITHIN_CLASS_RECHECK_BUDGET", age, due.isoformat()
+        return "HOLD_NOT_FRESHNESS_ELIGIBLE", age
+    if age == 0:
+        return "SOURCE_PUBLISHED_TODAY_RECHECK_REQUIRED", age
+    return "SOURCE_AGE_RECORDED_RECHECK_REQUIRED", age
 
 
 def _effective_state(latest: dict[str, Any], as_of_date: date) -> str:
@@ -258,7 +253,7 @@ def _effective_state(latest: dict[str, Any], as_of_date: date) -> str:
 def _render(thread: dict[str, Any], as_of_date: date) -> dict[str, Any]:
     signals = thread["signals"]
     latest = signals[-1]
-    freshness, source_age_days, recheck_due = _freshness(latest, as_of_date)
+    freshness, source_age_days = _freshness(latest, as_of_date)
     effective_state = _effective_state(latest, as_of_date)
 
     revisions: list[dict[str, Any]] = []
@@ -288,7 +283,6 @@ def _render(thread: dict[str, Any], as_of_date: date) -> dict[str, Any]:
         "effective_state": effective_state,
         "source_freshness": freshness,
         "source_age_days": source_age_days,
-        "source_recheck_due_date": recheck_due,
         "resolution_reported": latest["_resolution_hint"],
         "current_status_claim_allowed": False,
         "reader_facing_eligible": False,
@@ -317,6 +311,15 @@ def build_threads(signals: list[dict[str, Any]], *, as_of: str) -> dict[str, Any
         duplicate_signal_count += 1
 
     ordered = sorted(unique.values(), key=_sort_key)
+
+    revision_dates: dict[tuple[str, date | None], str] = {}
+    for signal in ordered:
+        key = (signal["article_url"], signal["_cms_date"])
+        prior = revision_dates.get(key)
+        if prior is not None and prior != signal["signal_id"]:
+            raise ValueError("ETA threader refuses same-URL revisions with ambiguous CMS-date ordering")
+        revision_dates[key] = signal["signal_id"]
+
     threads: list[dict[str, Any]] = []
     for signal in ordered:
         exact = [thread for thread in threads if signal["article_url"] in thread["article_urls"]]
@@ -358,7 +361,8 @@ def build_threads(signals: list[dict[str, Any]], *, as_of: str) -> dict[str, Any
             "writer_authority": "NONE",
             "current_status_claim_allowed": False,
             "static_timetable_is_live_status": False,
-            "cross_url_linking": "SAME_CLASS_EXACT_ROUTE_SET_AND_TOUCHING_EXPLICIT_WINDOWS_WITH_UPDATE_HINT",
+            "cross_url_linking": "SAME_CLASS_EXACT_ROUTE_SET_TOUCHING_WINDOWS_UPDATE_HINT_AND_ORDERABLE_DATES",
+            "freshness_threshold_policy": "NONE_OBJECTIVE_SOURCE_AGE_ONLY",
             "source_recheck_required_before_current_status_claim": True,
         },
     }
@@ -487,7 +491,8 @@ def self_test() -> None:
     )
     stale = build_threads([open_alert], as_of="2026-08-05T09:00:00+03:00")["threads"][0]
     assert stale["effective_state"] == "OPEN_ENDED_RECHECK_REQUIRED"
-    assert stale["source_freshness"] == "SOURCE_RECHECK_OVERDUE"
+    assert stale["source_freshness"] == "SOURCE_AGE_RECORDED_RECHECK_REQUIRED"
+    assert stale["source_age_days"] == 4
 
     resolved = _fixture(
         "route9-resume",
@@ -510,6 +515,26 @@ def self_test() -> None:
     )
     unknown_thread = build_threads([unknown], as_of="2026-08-29T09:00:00+03:00")["threads"][0]
     assert unknown_thread["effective_state"] == "DATE_UNKNOWN_HOLD"
+
+    ambiguous_a = _fixture(
+        "amb-a",
+        title="Modificare traseu 4",
+        cms="2026-08-29",
+        url_suffix="traseu-4",
+        evidence_char="c",
+    )
+    ambiguous_b = _fixture(
+        "amb-b",
+        title="Prelungire modificare traseu 4",
+        cms="2026-08-29",
+        url_suffix="traseu-4",
+        evidence_char="d",
+    )
+    try:
+        build_threads([ambiguous_a, ambiguous_b], as_of="2026-08-29T09:00:00+03:00")
+        raise AssertionError("same-day same-URL revision ambiguity must fail")
+    except ValueError:
+        pass
 
     bad = _fixture("bad", title="Modificare traseu 3")
     bad["boundaries"]["public_projection"] = True
