@@ -16,6 +16,9 @@ on:
       - 'partener-eu/p11/candidate_staging.py'
       - 'partener-eu/p11/eea_civil_society_stage.py'
       - 'partener-eu/p11/test_eea_civil_society_stage.py'
+      - 'partener-eu/ops/sources.json'
+      - 'partener-eu/ops/p10_validate.py'
+      - 'partener-eu/ops/test_p10_policy_regression.py'
       - 'partener-eu/ops/test_source_registry_low_info.py'
       - 'partener-eu/ops/test_source_registry_current_hosts.py'
       - 'partener-eu/ops/test_source_registry_alias_fallback.py'
@@ -67,6 +70,7 @@ jobs:
           python -m json.tool partener-eu/ingest/source_registry.json >/dev/null
           python -m json.tool partener-eu/ingest/data_plane_contract.json >/dev/null
           python -m json.tool partener-eu/ingest/regiocentru_actions_source.json >/dev/null
+          python -m json.tool partener-eu/ops/sources.json >/dev/null
           python -m py_compile partener-eu/ingest/source_registry_probe.py
           python -m py_compile partener-eu/ingest/funding_tenders_api.py
           python -m py_compile partener-eu/ingest/funding_tenders_fetch.py
@@ -77,6 +81,8 @@ jobs:
           python -m py_compile partener-eu/p11/candidate_staging.py
           python -m py_compile partener-eu/p11/eea_civil_society_stage.py
           python -m py_compile partener-eu/p11/test_eea_civil_society_stage.py
+          python -m py_compile partener-eu/ops/p10_validate.py
+          python -m py_compile partener-eu/ops/test_p10_policy_regression.py
           python -m py_compile partener-eu/ops/test_source_registry_external_expansion.py
           python -m py_compile partener-eu/ops/test_interreg_rohu_pipeline_split.py
           python -m py_compile partener-eu/ops/test_funding_tenders_structured_adapter.py
@@ -85,6 +91,9 @@ jobs:
           python -m py_compile partener-eu/ops/test_eea_civil_society_fetch.py
           python -m py_compile partener-eu/ops/test_eea_civil_society_reconcile.py
           python -m py_compile partener-eu/ops/test_regiocentru_actions_fetch.py
+
+      - name: Validate P10 and canonical source authority compatibility
+        run: python partener-eu/ops/test_p10_policy_regression.py
 
       - name: Validate low-information fail-closed behavior
         run: python partener-eu/ops/test_source_registry_low_info.py
@@ -170,9 +179,10 @@ jobs:
           PY
 
       - name: Upload bounded RegioCentru acquisition evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: partener-regiocentru-actions-live-evidence
           path: /tmp/regiocentru-actions
           retention-days: 7
-          if-no-files-found: error
+          if-no-files-found: warn
