@@ -58,12 +58,27 @@ def _positive_int(value: Any, *, field: str) -> int:
     return value
 
 
+def _nonnegative_int(value: Any, *, field: str) -> int:
+    if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+        raise PrimaryEvidenceReadinessError(f"{field} must be a non-negative integer")
+    return value
+
+
 def _ratio(value: Any, *, field: str) -> float:
     if not isinstance(value, (int, float)) or isinstance(value, bool):
         raise PrimaryEvidenceReadinessError(f"{field} must be numeric")
     number = float(value)
     if not 0 < number <= 1:
         raise PrimaryEvidenceReadinessError(f"{field} must be in (0, 1]")
+    return number
+
+
+def _bounded_share(value: Any, *, field: str) -> float:
+    if not isinstance(value, (int, float)) or isinstance(value, bool):
+        raise PrimaryEvidenceReadinessError(f"{field} must be numeric")
+    number = float(value)
+    if not 0 <= number <= 1:
+        raise PrimaryEvidenceReadinessError(f"{field} must be in [0, 1]")
     return number
 
 
@@ -135,7 +150,7 @@ def _validate_channel_register(register: Any) -> dict[str, dict[str, Any]]:
     return by_id
 
 
-def _validate_sensitivity_artifact(value: Any) -> None:
+def _validate_sensitivity_artifact(value: Any, *, required_scopes: set[str]) -> None:
     if not isinstance(value, dict):
         raise PrimaryEvidenceReadinessError("dominant-channel sensitivity analysis is required")
     if value.get("status") != "PASS":
@@ -145,6 +160,11 @@ def _validate_sensitivity_artifact(value: Any) -> None:
     sha = value.get("sha256")
     if not isinstance(sha, str) or not SHA256_RE.fullmatch(sha):
         raise PrimaryEvidenceReadinessError("dominant-channel sensitivity analysis needs a lowercase SHA-256")
+    covered_scopes = value.get("covered_scopes")
+    if not isinstance(covered_scopes, list) or len(covered_scopes) != len(set(covered_scopes)):
+        raise PrimaryEvidenceReadinessError("dominant-channel sensitivity analysis covered_scopes must be a duplicate-free list")
+    if set(covered_scopes) != required_scopes:
+        raise PrimaryEvidenceReadinessError("dominant-channel sensitivity analysis must cover exactly every exceeded concentration scope")
 
 
 def _validate_form_region_channel_provenance(
@@ -192,6 +212,145 @@ def _validate_form_region_channel_provenance(
             )
 
 
+def _validated_count_map(
+    value: Any,
+    *,
+    expected_ids: set[str],
+    denominator: int,
+    field: str,
+) -> dict[str, int]:
+    if not isinstance(value, dict) or set(value) != expected_ids:
+        raise PrimaryEvidenceReadinessError(f"{field} keys must exactly match the used channel ids")
+    counts: dict[str, int] = {}
+    for channel_id, count in value.items():
+        try:
+            validate_recruitment_channel_id(channel_id)
+        except ChannelProvenanceError as exc:
+            raise PrimaryEvidenceReadinessError(str(exc)) from exc
+        counts[channel_id] = _positive_int(count, field=f"{field}.{channel_id}")
+    if sum(counts.values()) != denominator:
+        raise PrimaryEvidenceReadinessError(f"{field} does not reconcile with its stratum denominator")
+    return counts
+
+
+def _share_from_counts(counts: dict[str, int], denominator: int) -> float:
+    if denominator <= 0 or not counts:
+        return 0.0
+    return max(counts.values()) / denominator
+
+
+def _validate_channel_concentration_aggregates(
+    manifest: dict[str, Any],
+    *,
+    form_region_counts: dict[str, Any],
+    region_channel_ids: dict[str, Any],
+    form_region_channel_ids: dict[str, Any],
+    channel_share_max: float,
+) -> set[str]:
+    region_counts = manifest.get("region_counts")
+    if not isinstance(region_counts, dict) or set(region_counts) != set(TARGET_REGIONS):
+        raise PrimaryEvidenceReadinessError("manifest region_counts must cover all target regions exactly")
+
+    region_channel_counts = manifest.get("region_channel_counts")
+    form_region_channel_counts = manifest.get("form_region_channel_counts")
+    region_shares = manifest.get("region_dominant_channel_share")
+    form_region_shares = manifest.get("form_region_dominant_channel_share")
+    if not isinstance(region_channel_counts, dict) or set(region_channel_counts) != set(TARGET_REGIONS):
+        raise PrimaryEvidenceReadinessError("manifest region_channel_counts must cover all target regions exactly")
+    if not isinstance(form_region_channel_counts, dict) or set(form_region_channel_counts) != set(FORM_AUDIENCE):
+        raise PrimaryEvidenceReadinessError("manifest form_region_channel_counts must cover both frozen forms exactly")
+    if not isinstance(region_shares, dict) or set(region_shares) != set(TARGET_REGIONS):
+        raise PrimaryEvidenceReadinessError("manifest region_dominant_channel_share must cover all target regions exactly")
+    if not isinstance(form_region_shares, dict) or set(form_region_shares) != set(FORM_AUDIENCE):
+        raise PrimaryEvidenceReadinessError("manifest form_region_dominant_channel_share must cover both frozen forms exactly")
+
+    global_reconstructed: dict[str, int] = {}
+    form_global_reconstructed: dict[str, int] = {}
+    exceeded_scopes: set[str] = set()
+
+    for region in TARGET_REGIONS:
+        denominator = _nonnegative_int(region_counts.get(region), field=f"region_counts.{region}")
+        expected_ids = set(region_channel_ids.get(region) or [])
+        counts = _validated_count_map(
+            region_channel_counts.get(region),
+            expected_ids=expected_ids,
+            denominator=denominator,
+            field=f"region_channel_counts.{region}",
+        )
+        for channel_id, count in counts.items():
+            global_reconstructed[channel_id] = global_reconstructed.get(channel_id, 0) + count
+        recomputed_share = _share_from_counts(counts, denominator)
+        declared_share = _bounded_share(
+            region_shares.get(region),
+            field=f"region_dominant_channel_share.{region}",
+        )
+        if abs(declared_share - recomputed_share) > 1e-12:
+            raise PrimaryEvidenceReadinessError(f"region dominant-channel share does not reconcile in {region}")
+        if recomputed_share > channel_share_max:
+            exceeded_scopes.add(f"region:{region}")
+
+    for form_id in FORM_AUDIENCE:
+        counts_by_region = form_region_channel_counts.get(form_id)
+        shares_by_region = form_region_shares.get(form_id)
+        ids_by_region = form_region_channel_ids.get(form_id)
+        if not isinstance(counts_by_region, dict) or set(counts_by_region) != set(TARGET_REGIONS):
+            raise PrimaryEvidenceReadinessError(f"form_region_channel_counts for {form_id} must cover all target regions exactly")
+        if not isinstance(shares_by_region, dict) or set(shares_by_region) != set(TARGET_REGIONS):
+            raise PrimaryEvidenceReadinessError(f"form_region_dominant_channel_share for {form_id} must cover all target regions exactly")
+        if not isinstance(ids_by_region, dict) or set(ids_by_region) != set(TARGET_REGIONS):
+            raise PrimaryEvidenceReadinessError(f"form_region_channel_ids for {form_id} must cover all target regions exactly")
+        for region in TARGET_REGIONS:
+            denominator = _nonnegative_int(
+                (form_region_counts.get(form_id) or {}).get(region),
+                field=f"form_region_counts.{form_id}.{region}",
+            )
+            expected_ids = set(ids_by_region.get(region) or [])
+            counts = _validated_count_map(
+                counts_by_region.get(region),
+                expected_ids=expected_ids,
+                denominator=denominator,
+                field=f"form_region_channel_counts.{form_id}.{region}",
+            )
+            for channel_id, count in counts.items():
+                form_global_reconstructed[channel_id] = form_global_reconstructed.get(channel_id, 0) + count
+            recomputed_share = _share_from_counts(counts, denominator)
+            declared_share = _bounded_share(
+                shares_by_region.get(region),
+                field=f"form_region_dominant_channel_share.{form_id}.{region}",
+            )
+            if abs(declared_share - recomputed_share) > 1e-12:
+                raise PrimaryEvidenceReadinessError(
+                    f"form-region dominant-channel share does not reconcile for {form_id}/{region}"
+                )
+            if recomputed_share > channel_share_max:
+                exceeded_scopes.add(f"form_region:{form_id}:{region}")
+
+    manifest_channels = manifest.get("channel_counts")
+    if not isinstance(manifest_channels, dict):
+        raise PrimaryEvidenceReadinessError("manifest channel_counts must be an object")
+    normalized_manifest_channels = {
+        channel_id: _positive_int(count, field=f"channel_counts.{channel_id}")
+        for channel_id, count in manifest_channels.items()
+    }
+    if normalized_manifest_channels != global_reconstructed:
+        raise PrimaryEvidenceReadinessError("region_channel_counts do not reconcile with global channel_counts")
+    if normalized_manifest_channels != form_global_reconstructed:
+        raise PrimaryEvidenceReadinessError("form_region_channel_counts do not reconcile with global channel_counts")
+
+    global_denominator = _positive_int(manifest.get("record_count"), field="record_count")
+    recomputed_global_share = _share_from_counts(normalized_manifest_channels, global_denominator)
+    declared_global_share = _bounded_share(
+        manifest.get("dominant_channel_share"),
+        field="dominant_channel_share",
+    )
+    if abs(declared_global_share - recomputed_global_share) > 1e-12:
+        raise PrimaryEvidenceReadinessError("manifest dominant_channel_share does not reconcile with channel_counts")
+    if recomputed_global_share > channel_share_max:
+        exceeded_scopes.add("global")
+
+    return exceeded_scopes
+
+
 def assert_primary_evidence_ready_for_synthesis(
     manifest: Any,
     *,
@@ -209,12 +368,16 @@ def assert_primary_evidence_ready_for_synthesis(
     thresholds = _validate_method_frame(method_frame)
     if not isinstance(manifest, dict):
         raise PrimaryEvidenceReadinessError("NF06 pre-ingest manifest must be an object")
+    if manifest.get("schema_version") != "eucons.ai4work_nf06_preingest_manifest.v0.6":
+        raise PrimaryEvidenceReadinessError("unsupported NF06 pre-ingest manifest schema")
     if manifest.get("research_id") != RESEARCH_ID:
         raise PrimaryEvidenceReadinessError("manifest research_id mismatch")
     if manifest.get("evidence_class") != PROD_EVIDENCE_CLASS or manifest.get("non_evidence") is not False:
         raise PrimaryEvidenceReadinessError("TEST TWIN or non-PROD manifests cannot enter primary synthesis")
     if manifest.get("prod_promotion_eligible") is not True:
         raise PrimaryEvidenceReadinessError("NF06 pre-ingest manifest is not PROD-promotion eligible")
+    if manifest.get("channel_concentration_aggregates_emitted") is not True:
+        raise PrimaryEvidenceReadinessError("NF06 pre-ingest manifest lacks channel-concentration aggregates")
 
     register_by_id = _validate_channel_register(channel_register)
     register_sha = hashlib.sha256(canonical_json_bytes(channel_register)).hexdigest()
@@ -267,8 +430,9 @@ def assert_primary_evidence_ready_for_synthesis(
                 f"{region} has {len(channel_types)} independent channel type(s), below frozen minimum {channel_types_min}"
             )
 
+    form_region_channel_ids = manifest.get("form_region_channel_ids")
     _validate_form_region_channel_provenance(
-        manifest.get("form_region_channel_ids"),
+        form_region_channel_ids,
         form_region_counts=form_region_counts,
         region_channel_ids=region_channel_ids,
         register_by_id=register_by_id,
@@ -277,16 +441,24 @@ def assert_primary_evidence_ready_for_synthesis(
     manifest_channels = manifest.get("channel_counts")
     if not isinstance(manifest_channels, dict) or set(manifest_channels) - set(register_by_id):
         raise PrimaryEvidenceReadinessError("manifest contains channel ids absent from the frozen channel register")
-    dominant_share = manifest.get("dominant_channel_share")
-    if not isinstance(dominant_share, (int, float)) or isinstance(dominant_share, bool) or not 0 <= float(dominant_share) <= 1:
-        raise PrimaryEvidenceReadinessError("manifest dominant_channel_share is invalid")
+
+    exceeded_scopes = _validate_channel_concentration_aggregates(
+        manifest,
+        form_region_counts=form_region_counts,
+        region_channel_ids=region_channel_ids,
+        form_region_channel_ids=form_region_channel_ids,
+        channel_share_max=channel_share_max,
+    )
     sensitivity_used = False
-    if float(dominant_share) > channel_share_max:
-        _validate_sensitivity_artifact(dominant_channel_sensitivity)
+    if exceeded_scopes:
+        _validate_sensitivity_artifact(
+            dominant_channel_sensitivity,
+            required_scopes=exceeded_scopes,
+        )
         sensitivity_used = True
 
     return {
-        "schema_version": "eucons.ai4work_primary_evidence_readiness.v0.2",
+        "schema_version": "eucons.ai4work_primary_evidence_readiness.v0.3",
         "research_id": RESEARCH_ID,
         "stage": "PRE_SYNTHESIS_METHOD_COVERAGE",
         "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
@@ -299,6 +471,8 @@ def assert_primary_evidence_ready_for_synthesis(
         "independent_channel_types_per_region_validated": True,
         "channel_register_sha256_validated": True,
         "form_audience_channel_scope_validated": True,
+        "channel_concentration_scopes_validated": True,
         "dominant_channel_sensitivity_used": sensitivity_used,
+        "dominant_channel_sensitivity_scopes": sorted(exceeded_scopes),
         "scope_boundary": "PASS authorises only entry into needs synthesis/adversarial QA for this real non-probability PROD batch. It does not establish population prevalence, causality, representativeness or any need conclusion.",
     }
