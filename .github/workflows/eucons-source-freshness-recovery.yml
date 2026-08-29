@@ -1,0 +1,42 @@
+name: EUCONS Source Freshness Recovery
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/opportunities/source_freshness_recovery_contract.json'
+      - 'eucons/opportunities/source_freshness_recovery.py'
+      - 'eucons/opportunities/bridge_contract.json'
+      - 'eucons/opportunities/build_projection.py'
+      - 'eucons/validation/test_source_freshness_recovery_fail_closed.py'
+      - '.github/workflows/eucons-source-freshness-recovery.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/opportunities/source_freshness_recovery_contract.json'
+      - 'eucons/opportunities/source_freshness_recovery.py'
+      - 'eucons/opportunities/bridge_contract.json'
+      - 'eucons/opportunities/build_projection.py'
+      - 'eucons/validation/test_source_freshness_recovery_fail_closed.py'
+      - '.github/workflows/eucons-source-freshness-recovery.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-source-freshness-recovery-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fail-closed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Compile source freshness recovery engine
+        run: python -m py_compile eucons/opportunities/source_freshness_recovery.py
+      - name: Validate source freshness recovery fail-closed behavior
+        run: python eucons/validation/test_source_freshness_recovery_fail_closed.py
