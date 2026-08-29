@@ -10,8 +10,10 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 RECONCILIATION_WORKFLOW = ROOT / ".github" / "workflows" / "civora-persistence-reconciliation.yml"
 SCOPE_DRIFT_WORKFLOW = ROOT / ".github" / "workflows" / "civora-scope-drift.yml"
+SHADOW_MIGRATION_WORKFLOW = ROOT / ".github" / "workflows" / "local-news-os-vnext-valcea-shadow-migration.yml"
 SCOPE_CONFIG = Path(__file__).with_name("repository_scope.json")
 RECONCILIATION_WORKFLOW_PATH = ".github/workflows/civora-persistence-reconciliation.yml"
+SHADOW_MIGRATION_WORKFLOW_PATH = ".github/workflows/local-news-os-vnext-valcea-shadow-migration.yml"
 
 REQUIRED_EVENTS = {
     "MAIN_MERGE",
@@ -36,6 +38,9 @@ EXACT_HEAD_STATUS_ENDPOINT = "https://api.github.com/repos/${GITHUB_REPOSITORY}/
 SCOPE_STATUS_HEAD = "HEAD_SHA: ${{ github.sha }}"
 RECONCILIATION_STATUS_HEAD = (
     "HEAD_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}"
+)
+SHADOW_PR_EXACT_HEAD_REF = (
+    "ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || 'main' }}"
 )
 
 
@@ -174,10 +179,39 @@ def validate_exact_head_status_evidence(
             raise ValueError(f"{label} workflow status must retain run provenance")
 
 
+def validate_shadow_writer_isolation(shadow_workflow: str) -> None:
+    """Prevent any shadow-migration event branch from being replayed into main."""
+    required = (
+        "pull_request:\n    paths:",
+        "push:\n    branches: [main]",
+        SHADOW_PR_EXACT_HEAD_REF,
+        "if: github.event_name != 'pull_request'",
+        "CHECKOUT_HEAD_SHA=$(git rev-parse HEAD)",
+        "'head_sha': os.environ['CHECKOUT_HEAD_SHA']",
+        "git fetch origin main",
+        'local_head="$(git rev-parse HEAD)"',
+        'remote_main="$(git rev-parse origin/main)"',
+        'if [ "$local_head" != "$remote_main" ]; then',
+        "local-news-os/vnext/instances/valcea/migration/p18_shadow_migration.py",
+        "local-news-os/vnext/acceptance/valcea-p18-shadow-latest.json",
+        "FAIL P18 persistence escaped allowlist",
+        "git push origin HEAD:main",
+        "cancel-in-progress: false",
+    )
+    for fragment in required:
+        if fragment not in shadow_workflow:
+            raise ValueError(f"P18 shadow main-writer isolation missing: {fragment}")
+    if "git pull --rebase origin main" in shadow_workflow:
+        raise ValueError("P18 shadow writer can rebase arbitrary event history into main")
+    if "ref: ${{ github.sha }}" in shadow_workflow or "ref: ${{ github.ref }}" in shadow_workflow:
+        raise ValueError("P18 writer events can checkout the triggering branch instead of canonical main")
+
+
 def validate_executable_wiring() -> None:
     """Fail closed if the declarative MAIN_MERGE trigger is not executable."""
     reconciliation_workflow = RECONCILIATION_WORKFLOW.read_text(encoding="utf-8")
     scope_workflow = SCOPE_DRIFT_WORKFLOW.read_text(encoding="utf-8")
+    shadow_workflow = SHADOW_MIGRATION_WORKFLOW.read_text(encoding="utf-8")
     scope_config = _load(SCOPE_CONFIG)
 
     required_reconciliation_fragments = (
@@ -194,6 +228,7 @@ def validate_executable_wiring() -> None:
 
     validate_exact_head_concurrency(reconciliation_workflow, scope_workflow)
     validate_exact_head_status_evidence(reconciliation_workflow, scope_workflow)
+    validate_shadow_writer_isolation(shadow_workflow)
 
     if RECONCILIATION_WORKFLOW_PATH not in scope_workflow:
         raise ValueError("scope-drift workflow does not observe reconciliation workflow changes")
@@ -238,6 +273,7 @@ def self_test(path: Path) -> None:
 
     reconciliation_workflow = RECONCILIATION_WORKFLOW.read_text(encoding="utf-8")
     scope_workflow = SCOPE_DRIFT_WORKFLOW.read_text(encoding="utf-8")
+    shadow_workflow = SHADOW_MIGRATION_WORKFLOW.read_text(encoding="utf-8")
 
     stale_ref_group = reconciliation_workflow.replace(
         RECONCILIATION_EXACT_HEAD_GROUP,
@@ -297,6 +333,30 @@ def self_test(path: Path) -> None:
         pass
     else:
         raise AssertionError("reconciliation status targeting trigger sha instead of reconciled head must fail closed")
+
+    leaky_shadow_checkout = shadow_workflow.replace(
+        SHADOW_PR_EXACT_HEAD_REF,
+        "ref: ${{ github.sha }}",
+        1,
+    )
+    try:
+        validate_shadow_writer_isolation(leaky_shadow_checkout)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("event-branch P18 writer checkout must fail closed")
+
+    rebasing_shadow_writer = shadow_workflow.replace(
+        "git push origin HEAD:main",
+        "git pull --rebase origin main\n          git push origin HEAD:main",
+        1,
+    )
+    try:
+        validate_shadow_writer_isolation(rebasing_shadow_writer)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("P18 writer rebase into main must fail closed")
 
 
 def main() -> int:
