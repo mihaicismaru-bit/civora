@@ -7,6 +7,7 @@ import html
 import json
 import re
 import ssl
+import sys
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -122,14 +123,22 @@ def extract_matrix_metadata(raw: bytes, authority_url: str) -> dict:
     title = _match(
         text,
         [
-            rf"\b{re.escape(code)}\b\s*[-–:]\s*(.+?)(?=\s+(?:Periodicitate|Periodicit|Sursa datelor|Ultima actualizare|Definitie|Observatii)\b)",
-            rf"\b{re.escape(code)}\b\s+(.+?)(?=\s+(?:Periodicitate|Periodicit|Sursa datelor|Ultima actualizare|Definitie|Observatii)\b)",
+            rf"\b{re.escape(code)}\b\s*[-–:]\s*(.+?)(?=\s+(?:Periodicitate|Periodicit|Sursa datelor|Surse de date|Ultima actualizare|Definitie|Observatii)\b)",
+            rf"\b{re.escape(code)}\b\s+(.+?)(?=\s+(?:Periodicitate|Periodicit|Sursa datelor|Surse de date|Ultima actualizare|Definitie|Observatii)\b)",
         ],
     )
     periodicity = _match(text, [r"Periodicitate\s*:?\s*([^.;]{2,80})", r"Periodicitatea\s*:?\s*([^.;]{2,80})"])
-    data_source = _match(text, [r"Sursa datelor\s*:?\s*(.+?)(?=\s+(?:Periodicitate|Ultima actualizare|Definitie|Observatii|Ultima perioada)\b)"])
+    data_source = _match(
+        text,
+        [
+            r"Sursa datelor\s*:?\s*(.+?)(?=\s+(?:Periodicitate|Ultima actualizare|Definitie|Observatii|Intrerupere serie|Ultima perioada)\b)",
+            r"Surse de date\s*:?\s*(.+?)(?=\s+(?:Periodicitate|Ultima actualizare|Definitie|Observatii|Metodologie|Intrerupere serie|Ultima perioada)\b)",
+        ],
+    )
     last_period = _match(text, [r"Ultima perioada din aceasta serie\s*:?\s*([^.;]{2,100})"])
     continuation = _match(text, [r"(?:seria\s+se\s+continua\s+cu\s+matricea|se\s+continua\s+cu\s+matricea)\s+([A-Z0-9._-]{2,40})"])
+    if continuation:
+        continuation = continuation.rstrip(".,;:").upper()
 
     return {
         "matrix_code": code,
@@ -137,7 +146,7 @@ def extract_matrix_metadata(raw: bytes, authority_url: str) -> dict:
         "periodicity": periodicity,
         "data_source_note": data_source,
         "last_period_note": last_period,
-        "continuation_matrix_code": continuation.upper() if continuation else None,
+        "continuation_matrix_code": continuation,
         "metadata_text_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
     }
 
@@ -249,6 +258,31 @@ def validate_evidence(evidence: dict) -> None:
         raise ValueError("invalid raw SHA-256")
 
 
+def failure_evidence(*, requested_url: str, fetched_at: str, run_id: str, exc: Exception) -> dict:
+    return {
+        "schema_version": "1.0",
+        "adapter_id": ADAPTER_ID,
+        "parser_version": PARSER_VERSION,
+        "run_id": run_id,
+        "fetched_at": fetched_at,
+        "source_id": SOURCE_ID,
+        "source_family": SOURCE_FAMILY,
+        "programme_family": PROGRAMME_FAMILY,
+        "authority_class": AUTHORITY_CLASS,
+        "observation_state": "FETCH_FAILED",
+        "requested_url": requested_url,
+        "matrix_code": matrix_code_from_url(requested_url),
+        "error_type": type(exc).__name__,
+        "error": normalize_space(str(exc))[:1000],
+        "material_fact_use": False,
+        "statistical_value_authorized": False,
+        "publish_authorized": False,
+        "lkg_preserved": True,
+        "requires_exact_matrix_query": True,
+        "requires_semantic_reconcile": True,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Bounded acquisition-only adapter for official INS TEMPO matrix metadata")
     parser.add_argument("--url", default=DEFAULT_URL)
@@ -256,24 +290,33 @@ def main() -> int:
     parser.add_argument("--run-id", default="manual")
     args = parser.parse_args()
 
-    raw, final_url, status, content_type = fetch_raw(args.url)
-    fetched_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
-    evidence = build_evidence(
-        raw,
-        requested_url=args.url,
-        final_url=final_url,
-        status=status,
-        content_type=content_type,
-        fetched_at=fetched_at,
-        run_id=args.run_id,
-    )
-    validate_evidence(evidence)
-
+    validate_authority_url(args.url)
     out = Path(args.output_dir)
     raw_dir = out / "raw"
     handoff_dir = out / "handoff"
     raw_dir.mkdir(parents=True, exist_ok=True)
     handoff_dir.mkdir(parents=True, exist_ok=True)
+    fetched_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+
+    try:
+        raw, final_url, status, content_type = fetch_raw(args.url)
+        evidence = build_evidence(
+            raw,
+            requested_url=args.url,
+            final_url=final_url,
+            status=status,
+            content_type=content_type,
+            fetched_at=fetched_at,
+            run_id=args.run_id,
+        )
+        validate_evidence(evidence)
+    except Exception as exc:
+        failure = failure_evidence(requested_url=args.url, fetched_at=fetched_at, run_id=args.run_id, exc=exc)
+        failure_path = handoff_dir / "transport_failure.json"
+        failure_path.write_text(json.dumps(failure, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        print(json.dumps({"source_id": SOURCE_ID, "observation_state": "FETCH_FAILED", "error_type": failure["error_type"], "error": failure["error"], "publish_authorized": False, "evidence_path": failure_path.as_posix()}, ensure_ascii=False), file=sys.stderr)
+        raise
+
     raw_path = raw_dir / f"{evidence['matrix_code'].lower()}.html"
     evidence_path = handoff_dir / f"{evidence['matrix_code'].lower()}_metadata.json"
     raw_path.write_bytes(raw)
