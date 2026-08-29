@@ -2,8 +2,8 @@
 """Normalize verified INFOTRAFIC Vâlcea signals into internal traffic-event intelligence.
 
 This stage is deliberately non-public. It accepts only records emitted by the canonical
-INFOTRAFIC Vâlcea signal adapter and derives conservative routing/status fields from text
-that is explicit in the source. Missing fields remain null instead of being inferred.
+INFOTRAFIC Vâlcea signal adapter and derives conservative routing/status/semantic fields
+from text that is explicit in the source. Missing fields remain null instead of inferred.
 
 The output is for newsroom threading/dedupe/refresh decisions only. It carries no
 publication authority and must be re-verified against the official source before any
@@ -87,6 +87,66 @@ HEAVY_PHRASES = (
     "circulatie ingreunata",
 )
 
+# Semantic families are intentionally narrow. They are evidence labels for internal
+# cross-linking, not assertions that an incident is current. Every marker below must be
+# present in the official title/excerpt after accent-insensitive normalization.
+COLLISION_PATTERNS = (
+    re.compile(r"\baccident(?:\s+rutier)?\b"),
+    re.compile(r"\beveniment\s+rutier\b"),
+    re.compile(r"\bcolizi(?:une|onat|onare)\b"),
+    re.compile(r"\btamponare\b"),
+)
+VEHICLE_TERMS_RE = re.compile(
+    r"\b(?:autoturism|autovehicul|vehicul|autocar|camion|tir|microbuz|motociclet[ae])\b"
+)
+FIRE_RE = re.compile(r"\b(?:incendiu|flacari)\b")
+ROADWORKS_PATTERNS = (
+    re.compile(r"\blucrari\s+(?:rutiere|la\s+carosabil|de\s+reparatii)\b"),
+    re.compile(r"\basfaltare\b"),
+    re.compile(r"\breparatii\s+(?:la\s+)?carosabil\b"),
+)
+BROKEN_DOWN_PATTERNS = (
+    re.compile(r"\b(?:autovehicul|vehicul|autoturism|camion|tir)\s+defect\b"),
+    re.compile(r"\bdefectiune\s+(?:tehnica|la\s+(?:un\s+)?(?:autovehicul|vehicul|camion|tir))\b"),
+)
+LANDSLIDE_PATTERNS = (
+    re.compile(r"\balunecare\s+de\s+teren\b"),
+    re.compile(r"\bcadere\s+de\s+teren\b"),
+)
+FALLEN_TREE_PATTERNS = (
+    re.compile(r"\b(?:copac|arbore)\s+cazut\b"),
+    re.compile(r"\bcadere\s+(?:de\s+)?(?:copaci|arbori)\b"),
+)
+ROCKFALL_PATTERNS = (
+    re.compile(r"\bcaderi?\s+de\s+(?:pietre|stanci|roci)\b"),
+    re.compile(r"\bblocuri\s+de\s+piatra\b"),
+)
+SNOW_ICE_PATTERNS = (
+    re.compile(r"\bpolei\b"),
+    re.compile(r"\bviscol\b"),
+    re.compile(r"\bninsoare\b"),
+    re.compile(r"\bzapada\b"),
+    re.compile(r"\bgheata\b"),
+)
+FOG_PATTERNS = (
+    re.compile(r"\bceata(?:\s+densa)?\b"),
+    re.compile(r"\bvizibilitate\s+redusa\b"),
+)
+FLOODING_PATTERNS = (
+    re.compile(r"\bcarosabil\s+inundat\b"),
+    re.compile(r"\binundat(?:ie|ii|a)?\b"),
+    re.compile(r"\bacumulari\s+de\s+apa\b"),
+)
+GENERIC_OBSTRUCTION_PATTERNS = (
+    re.compile(r"\bobstacol\s+pe\s+carosabil\b"),
+    re.compile(r"\bcarosabil\s+blocat\s+de\b"),
+)
+TRAFFIC_RESTRICTION_PATTERNS = (
+    re.compile(r"\brestricti[ei]\s+de\s+circulatie\b"),
+    re.compile(r"\bcirculatia\s+(?:este|va\s+fi)\s+inchisa\b"),
+    re.compile(r"\btraficul\s+(?:este|va\s+fi)\s+oprit\b"),
+)
+
 ESTIMATE_RE = re.compile(
     r"\b(?:se\s+estimează|se\s+estimeaza|este\s+estimată|este\s+estimata)"
     r"(?:\s+ca)?(?:\s+reluarea\s+(?:traficului|circulației|circulatiei))?"
@@ -102,6 +162,41 @@ def clean_text(value: str) -> str:
 def fold(value: str) -> str:
     normalized = unicodedata.normalize("NFKD", clean_text(value).casefold())
     return "".join(ch for ch in normalized if not unicodedata.combining(ch))
+
+
+def _matches_any(value: str, patterns: tuple[re.Pattern[str], ...]) -> bool:
+    return any(pattern.search(value) for pattern in patterns)
+
+
+def classify_semantics(text: str) -> tuple[str, str | None]:
+    """Return deterministic internal event/cause families from explicit source wording."""
+    value = fold(text)
+
+    if FIRE_RE.search(value) and VEHICLE_TERMS_RE.search(value):
+        return "VEHICLE_FIRE", "FIRE"
+    if _matches_any(value, COLLISION_PATTERNS):
+        return "ROAD_COLLISION", "COLLISION"
+    if _matches_any(value, ROADWORKS_PATTERNS):
+        return "ROADWORKS", "ROADWORKS"
+    if _matches_any(value, BROKEN_DOWN_PATTERNS):
+        return "ROAD_OBSTRUCTION", "BROKEN_DOWN_VEHICLE"
+    if _matches_any(value, LANDSLIDE_PATTERNS):
+        return "ROAD_OBSTRUCTION", "LANDSLIDE"
+    if _matches_any(value, FALLEN_TREE_PATTERNS):
+        return "ROAD_OBSTRUCTION", "FALLEN_TREE"
+    if _matches_any(value, ROCKFALL_PATTERNS):
+        return "ROAD_OBSTRUCTION", "ROCKFALL"
+    if _matches_any(value, SNOW_ICE_PATTERNS):
+        return "WEATHER_HAZARD", "SNOW_ICE"
+    if _matches_any(value, FOG_PATTERNS):
+        return "WEATHER_HAZARD", "FOG"
+    if _matches_any(value, FLOODING_PATTERNS):
+        return "WEATHER_HAZARD", "FLOODING"
+    if _matches_any(value, GENERIC_OBSTRUCTION_PATTERNS):
+        return "ROAD_OBSTRUCTION", None
+    if _matches_any(value, TRAFFIC_RESTRICTION_PATTERNS):
+        return "TRAFFIC_RESTRICTION", None
+    return "TRAFFIC_EVENT_UNSPECIFIED", None
 
 
 def parse_timestamp(value: str) -> datetime:
@@ -256,7 +351,9 @@ def build_event_id(signal: dict[str, Any]) -> str:
 
 def normalize_signal(signal: dict[str, Any]) -> dict[str, Any]:
     article_url, source_timestamp = validate_signal(signal)
-    evidence_text = clean_text(f"{signal['title']} {signal['excerpt']}")
+    title = clean_text(str(signal["title"]))
+    excerpt = clean_text(str(signal["excerpt"]))
+    evidence_text = clean_text(f"{title} {excerpt}")
     road = normalize_road(evidence_text)
     if not road:
         raise ValueError("traffic event requires an explicit road identifier in source evidence")
@@ -264,6 +361,7 @@ def normalize_signal(signal: dict[str, Any]) -> dict[str, Any]:
     locality = extract_locality(evidence_text)
     direction = extract_direction(evidence_text)
     state = classify_state(evidence_text)
+    event_family, cause_family = classify_semantics(evidence_text)
     estimated_reopen_at = extract_estimated_reopen(evidence_text, source_timestamp)
     expiry_hint = source_timestamp + REFRESH_TTL
 
@@ -276,11 +374,16 @@ def normalize_signal(signal: dict[str, Any]) -> dict[str, Any]:
         "article_url": article_url,
         "source_timestamp": source_timestamp.isoformat(),
         "source_content_sha256": clean_text(str(signal["source_content_sha256"])).lower(),
+        "title": title,
+        "excerpt": excerpt,
         "road": road,
         "segment": segment,
         "locality": locality,
         "direction": direction,
         "state": state,
+        "event_family": event_family,
+        "cause_family": cause_family,
+        "semantic_basis": "EXPLICIT_OFFICIAL_TITLE_AND_EXCERPT_ONLY",
         "estimated_reopen_at": estimated_reopen_at,
         "refresh_recheck_after": expiry_hint.isoformat(),
         "refresh_semantics": "INTERNAL_RECHECK_DEADLINE_NOT_A_CURRENT_STATUS_CLAIM",
@@ -289,10 +392,11 @@ def normalize_signal(signal: dict[str, Any]) -> dict[str, Any]:
         "publication_authority": "NONE",
         "public_projection": False,
         "auto_publication": False,
+        "current_status_claim_allowed": False,
         "provenance": {
             "authority": "POLITIA_ROMANA_INFOTRAFIC",
             "source_signal_lifecycle": INPUT_LIFECYCLE,
-            "normalization": "DETERMINISTIC_INTERNAL_EVENT_V1",
+            "normalization": "DETERMINISTIC_INTERNAL_EVENT_V2_EXPLICIT_SEMANTICS",
             "evidence_fields": ["title", "excerpt", "source_timestamp", "source_content_sha256"],
         },
     }
@@ -313,7 +417,7 @@ def normalize_document(document: dict[str, Any]) -> dict[str, Any]:
         seen_ids.add(event["event_id"])
         events.append(event)
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "product": "VÂLCEA CLAR internal traffic-event intelligence",
         "event_count": len(events),
         "events": events,
@@ -323,7 +427,9 @@ def normalize_document(document: dict[str, Any]) -> dict[str, Any]:
             "public_projection": False,
             "auto_publication": False,
             "persistence_authority": "NONE",
+            "current_status_claim_allowed": False,
             "source_recheck_required_before_current_status_claim": True,
+            "semantic_classification_basis": "EXPLICIT_OFFICIAL_TITLE_AND_EXCERPT_ONLY",
         },
     }
 
