@@ -19,6 +19,7 @@ REQUIRED_EXTERNAL_KEYS = {
     "lawful_basis_or_lia",
     "processor_chain",
     "provider_account_role_reconciliation",
+    "live_hosting_service_mapping",
     "live_public_privacy_surface_reconciliation",
     "provider_annex_4_5",
     "provider_server_logging_profile",
