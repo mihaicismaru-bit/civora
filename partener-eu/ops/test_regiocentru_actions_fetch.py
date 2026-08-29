@@ -55,6 +55,12 @@ def main() -> int:
     mod.validate_evidence(evidence)
     assert evidence["adapter_id"] == "REGIOCENTRU_ACTIONS_V1"
     assert evidence["parser_version"] == "REGIOCENTRU_ACTIONS_FETCH_V1"
+    assert evidence["source_id"] == "SRC-ADR-CENTRU-PR-ACTIONS"
+    assert evidence["source_family"] == "ROMANIA_ADR"
+    assert evidence["programme_family"] == "PROGRAMUL_REGIUNEA_CENTRU_2021_2027"
+    assert evidence["authority_class"] == "T1_MANAGING_AUTHORITY"
+    assert evidence["requested_url"] == mod.DEFAULT_URL
+    assert evidence["final_url"] == mod.DEFAULT_URL
     assert evidence["action_candidate_count"] == 2
     assert evidence["raw_sha256"] == mod.sha256_bytes(FIXTURE)
     assert evidence["observation_state"] == "CALL_INDEX_DISCOVERY"
