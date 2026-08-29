@@ -1,0 +1,41 @@
+name: VÂLCEA CLAR Public Safety Crosslink
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'valcea-clar/scripts/public_safety_valcea_crosslink_state.py'
+      - 'valcea-clar/scripts/ipj_valcea_news_signal_adapter.py'
+      - 'valcea-clar/scripts/isu_valcea_public_safety_signal_adapter.py'
+      - 'valcea-clar/scripts/isu_valcea_local_news_signal_adapter.py'
+      - 'valcea-clar/scripts/infotrafic_valcea_event_normalizer.py'
+      - '.github/workflows/valcea-clar-public-safety-crosslink.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/scripts/public_safety_valcea_crosslink_state.py'
+      - 'valcea-clar/scripts/ipj_valcea_news_signal_adapter.py'
+      - 'valcea-clar/scripts/isu_valcea_public_safety_signal_adapter.py'
+      - 'valcea-clar/scripts/isu_valcea_local_news_signal_adapter.py'
+      - 'valcea-clar/scripts/infotrafic_valcea_event_normalizer.py'
+      - '.github/workflows/valcea-clar-public-safety-crosslink.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-public-safety-crosslink-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Compile public-safety cross-link bridge
+        run: python -m py_compile valcea-clar/scripts/public_safety_valcea_crosslink_state.py
+      - name: Run public-safety cross-link fail-closed regressions
+        run: python valcea-clar/scripts/public_safety_valcea_crosslink_state.py --self-test
