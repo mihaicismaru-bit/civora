@@ -1,13 +1,16 @@
 {
-  "schema_version": "eucons.ai4work_needs_synthesis_gate_contract.v0.1",
+  "schema_version": "eucons.ai4work_needs_synthesis_gate_contract.v0.2",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "status": "IMPLEMENTED_FAIL_CLOSED_NOT_PROD_ACTIVATED",
   "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
   "canonical_entrypoint": "needs_synthesis_gate.assert_real_batch_ready_for_needs_synthesis",
   "required_subcontrols": [
     "real_batch_synthesis_gate.assert_real_batch_ready_for_synthesis",
+    "method_frame_lock_control.assert_method_frame_locked_before_collection",
     "profile_coverage_control.assert_profile_coverage_control"
   ],
+  "method_frame_lock_rule": "The exact method frame used for synthesis must be SHA-256 bound to an explicit METHOD_CONTROL_NOT_EVIDENCE lock for the same collection_frame_id, with an attributable approver reference and approved_at no later than collection_started_at. Method thresholds or coverage dimensions cannot be silently changed after collection and then substituted at synthesis.",
+  "method_frame_lock_schema": "eucons.ai4work_method_frame_lock.v0.1",
   "profile_coverage_rule": "Every real record must carry every coverage dimension declared in the frozen method frame and the value must belong to the exact frozen instrument option set. Empty and sparse categories must be surfaced for adversarial QA rather than silently omitted.",
   "required_adult_dimensions": [
     "region",
