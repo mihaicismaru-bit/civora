@@ -1,0 +1,58 @@
+name: VÂLCEA CLAR CAS Service Signals
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/scripts/cas_valcea_service_access_signal_adapter.py"
+      - ".github/workflows/valcea-clar-cas-service-signals.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cas-service-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run evidence-first contract self-test
+        run: python valcea-clar/scripts/cas_valcea_service_access_signal_adapter.py --self-test
+
+      - name: Assert fail-closed service-access output contract
+        shell: bash
+        run: |
+          cat > /tmp/cas-valcea.html <<'EOF'
+          <html><body>
+            <h1>Lista furnizorilor CAS Vâlcea</h1>
+            <p>3 noiembrie 2025</p>
+            <a href="/casvl/wp-content/uploads/2026/08/furnizori-medicina-primara.xlsx">Asistență medicală primară</a>
+            <a href="/casvl/furnizori-de-servicii-medicale/asistenta-medicala-spitaliceasca/">Asistență medicală spitalicească</a>
+          </body></html>
+          EOF
+          python valcea-clar/scripts/cas_valcea_service_access_signal_adapter.py \
+            --input /tmp/cas-valcea.html \
+            --source-url https://cnas.ro/casvl/lista-furnizorilor-cas-valcea/ \
+            > /tmp/cas-valcea.json
+          python - <<'PY'
+          import json
+          payload = json.load(open('/tmp/cas-valcea.json', encoding='utf-8'))
+          assert len(payload) == 2
+          scopes = {item['directory_scope'] for item in payload}
+          assert scopes == {'PRIMARY_CARE', 'HOSPITAL'}
+          for signal in payload:
+              assert signal['signal_class'] == 'HEALTH_PROVIDER_DIRECTORY'
+              assert signal['publication_authority'] == 'NONE'
+              assert signal['current_provider_status_claim_allowed'] is False
+              assert signal['appointment_availability_claim_allowed'] is False
+              assert signal['linked_document_body_parse_allowed'] is False
+              assert signal['provider_person_extraction_allowed'] is False
+              assert signal['source_url'].startswith('https://cnas.ro/casvl/')
+          PY
