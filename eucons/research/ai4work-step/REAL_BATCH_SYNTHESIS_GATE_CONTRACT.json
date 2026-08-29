@@ -1,0 +1,35 @@
+{
+  "schema_version": "eucons.ai4work_real_batch_synthesis_gate_contract.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "status": "PRE_SYNTHESIS_CONTROL_REQUIRED",
+  "evidence_class": "CONTROL_CONTRACT_NOT_EVIDENCE",
+  "required_entrypoint": "real_batch_synthesis_gate.assert_real_batch_ready_for_synthesis",
+  "required_before_stages": [
+    "NEED_SYNTHESIS",
+    "RANKING",
+    "ADVERSARIAL_QA",
+    "NEEDS_ANALYSIS"
+  ],
+  "source_batch_rules": {
+    "prod_only": true,
+    "required_source_evidence_class": "PROD_REAL_EVIDENCE",
+    "synthetic_records_allowed": false,
+    "test_twin_evidence_class": "TEST_TWIN_NON_EVIDENCE",
+    "test_twin_promotable": false
+  },
+  "required_controls": [
+    "NF06 source export SHA-256 must bind the exact record batch",
+    "manifest record/method aggregates must reconcile to the bound record batch",
+    "each recruitment_channel_id must exist in the frozen channel register",
+    "each record channel must be authorised for its region and audience",
+    "each record received_at must be within that channel's opened_at/closed_at window",
+    "primary_evidence_readiness must pass frozen population/channel/concentration rules"
+  ],
+  "fail_closed_rules": [
+    "primary_evidence_readiness alone does not authorise synthesis",
+    "global collection-window validity alone does not prove channel temporal provenance",
+    "missing or mismatched temporal provenance blocks synthesis",
+    "PASS does not permit population prevalence, representativeness or causality claims"
+  ],
+  "scope_boundary": "This contract governs method/provenance eligibility only. It creates no evidence of need, no project-activity evidence, no population estimate and no permission to merge, deploy or activate PROD."
+}
