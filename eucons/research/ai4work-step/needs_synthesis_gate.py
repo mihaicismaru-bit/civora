@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
+import method_frame_lock_control as METHOD_LOCK
 import profile_coverage_control as COVERAGE
 import real_batch_synthesis_gate as BASE
 from research_storage import RESEARCH_ID
@@ -17,17 +18,19 @@ def assert_real_batch_ready_for_needs_synthesis(
     manifest: dict[str, Any],
     collection_frame: dict[str, Any],
     method_frame: dict[str, Any],
+    method_frame_lock: dict[str, Any],
     channel_register: dict[str, Any],
     forms_definition: dict[str, Any],
     dominant_channel_sensitivity: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Canonical entry gate for real PROD data entering needs synthesis.
 
-    This wrapper deliberately keeps cryptographic/provenance/method coverage in
-    real_batch_synthesis_gate and adds the frozen profile-dimension coverage
-    control required by the collection-frame QA plan. Neither sub-control is
-    evidence of need; both only decide whether the exact real batch may proceed
-    to synthesis and adversarial QA.
+    This wrapper keeps batch/frame/channel provenance and method coverage in the
+    lower-level gate, requires the exact method frame to have been explicitly
+    locked for this collection frame before collection started, and validates
+    frozen profile-dimension coverage. These controls are not evidence of need;
+    they only decide whether the exact real batch may proceed to synthesis and
+    adversarial QA.
     """
     try:
         base = BASE.assert_real_batch_ready_for_synthesis(
@@ -42,6 +45,15 @@ def assert_real_batch_ready_for_needs_synthesis(
         raise NeedsSynthesisGateError(str(exc)) from exc
 
     try:
+        method_lock = METHOD_LOCK.assert_method_frame_locked_before_collection(
+            method_frame,
+            collection_frame=collection_frame,
+            method_frame_lock=method_frame_lock,
+        )
+    except METHOD_LOCK.MethodFrameLockError as exc:
+        raise NeedsSynthesisGateError(str(exc)) from exc
+
+    try:
         coverage = COVERAGE.assert_profile_coverage_control(
             records,
             method_frame=method_frame,
@@ -51,14 +63,17 @@ def assert_real_batch_ready_for_needs_synthesis(
         raise NeedsSynthesisGateError(str(exc)) from exc
 
     return {
-        "schema_version": "eucons.ai4work_needs_synthesis_gate.v0.1",
+        "schema_version": "eucons.ai4work_needs_synthesis_gate.v0.2",
         "research_id": RESEARCH_ID,
         "stage": "REAL_BATCH_NEEDS_SYNTHESIS_GATE",
         "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
         "source_evidence_class": "PROD_REAL_EVIDENCE",
         "ready_for_needs_synthesis": True,
         "base_gate_schema_version": base["schema_version"],
+        "method_frame_lock_control_schema_version": method_lock["schema_version"],
         "profile_coverage_control_schema_version": coverage["schema_version"],
+        "method_frame_sha256": method_lock["method_frame_sha256"],
+        "method_frame_locked_before_collection": True,
         "collection_frame_sha256": base["collection_frame_sha256"],
         "channel_register_sha256": base["channel_register_sha256"],
         "profile_coverage_qa_required": coverage["profile_coverage_qa_required"],
@@ -66,5 +81,5 @@ def assert_real_batch_ready_for_needs_synthesis(
         "representativeness_claim_allowed": False,
         "weighting_allowed": False,
         "public_release_authorized": False,
-        "scope_boundary": "Only PASS of this wrapper permits the exact real PROD batch to enter needs synthesis/adversarial QA. PASS does not establish prevalence, causality, representativeness, ranking or any need conclusion; zero/sparse profile cells remain explicit QA constraints.",
+        "scope_boundary": "Only PASS of this wrapper permits the exact real PROD batch to enter needs synthesis/adversarial QA. The exact approved method frame must be locked for the collection_frame_id before collection_started_at. PASS does not establish prevalence, causality, representativeness, ranking or any need conclusion; zero/sparse profile cells remain explicit QA constraints.",
     }
