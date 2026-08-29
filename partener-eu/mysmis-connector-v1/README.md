@@ -45,6 +45,8 @@ Implemented in this unit:
 - whitelisted read-only/observe capabilities with explicit no-shell and zero-write assertions
 - fixed-operation HEALTH/DISCOVER_ARTIFACTS dispatcher with expiry, build and replay gates
 - dispatcher-owned zero-click/zero-write safety responses and GET/HEAD-only discovery metadata
+- same-extension-only MV3 message transport with restart-safe session replay claims
+- bounded current-page snapshot responder with no click, submit or navigation capability
 
 Still fail-closed / not implemented:
 

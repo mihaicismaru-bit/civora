@@ -40,6 +40,12 @@
     premature commands, build mismatch and replayed IDs before invoking a handler. The dispatcher
     constructs all safety assertions itself; handlers can only return bounded health state or a
     current-page snapshot plus GET/HEAD observation metadata.
+15. The MV3 internal transport accepts command messages only when `sender.id` equals the running
+    extension ID. Replay claims contain only command ID and expiry and are serialized into
+    `chrome.storage.session`, so service-worker restart cannot replay a command. The content script
+    exposes a current-page snapshot responder only; it reads bounded attributes and contains no
+    click, submit or navigation call. No native messaging, external-connect, debugger or CDP
+    permission is introduced by this transport.
 
 No project code appears in the discovery implementation. Project numbers occur only in fixtures and
 acceptance evidence.
