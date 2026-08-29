@@ -3,6 +3,7 @@
 import json
 import re
 from pathlib import Path
+from urllib.parse import urlsplit
 
 REPO = Path(__file__).resolve().parents[2]
 PARTENER = REPO / "partener-eu"
@@ -21,6 +22,7 @@ recovery = (PARTENER / "ops" / "test_recovery.py").read_text(encoding="utf-8")
 afir = (PARTENER / "ingest" / "afir_ingest.py").read_text(encoding="utf-8")
 validator = (PARTENER / "ops" / "p10_validate.py").read_text(encoding="utf-8")
 source_registry = json.loads((PARTENER / "ops" / "sources.json").read_text(encoding="utf-8"))
+central_source_registry = json.loads((PARTENER / "ingest" / "source_registry.json").read_text(encoding="utf-8"))
 stale_validation_trigger = PARTENER / "ops" / "p10-validation-trigger.txt"
 
 errors = []
@@ -140,8 +142,11 @@ for marker in [
     "LOW_INFORMATION_HTML_SHELL",
     "observed_semantic=obs.get('semantic_sha256') if content_quality_ok else None",
     "health_ceiling",
+    "VALID_HEALTH_SCOPES",
     "TRANSPORT_ONLY",
+    "DISCOVERY_ONLY",
     "material_facts_authority",
+    "non_material_scope=health_scope != 'MATERIAL_SOURCE'",
     "material_facts_publishable=bool(material_facts_authority and not quarantined and content_quality_ok)",
 ]:
     if marker not in validator:
@@ -159,6 +164,71 @@ else:
         errors.append("Portal Legislativ transport probe can authorize material facts")
     if not str(legislatie.get("url") or "").startswith("http://legislatie.just.ro/apiws/"):
         errors.append("Portal Legislativ transport probe is not bound to the official service")
+
+
+def normalize_authority_url(raw: str) -> str:
+    parsed = urlsplit(str(raw or "").strip())
+    scheme = parsed.scheme.lower()
+    host = (parsed.hostname or "").lower()
+    if not scheme or not host:
+        return ""
+    port = parsed.port
+    netloc = host if port is None else f"{host}:{port}"
+    path = re.sub(r"/+", "/", parsed.path or "/")
+    if path != "/":
+        path = path.rstrip("/")
+    query = f"?{parsed.query}" if parsed.query else ""
+    return f"{scheme}://{netloc}{path}{query}"
+
+
+# The same normalized official surface cannot be discovery/programming-only in
+# the canonical Source Registry while a legacy P10 health probe silently grants
+# it material-fact authority. Exact action/call pages may remain material when
+# they have their own URL and evidence contract; generic indexes may not.
+central_by_url = {
+    normalize_authority_url(row.get("url")): row
+    for row in central_source_registry.get("sources", [])
+    if normalize_authority_url(row.get("url"))
+}
+non_authorizing_states = {
+    "CALL_INDEX_DISCOVERY",
+    "PROGRAMMING_PIPELINE",
+    "PROPOSAL",
+    "CONSULTATION",
+    "PLANNED",
+    "PROGRAMME_PREPARATION",
+}
+for row in source_registry.get("sources", []):
+    normalized = normalize_authority_url(row.get("url"))
+    central = central_by_url.get(normalized)
+    if not central:
+        continue
+    central_non_authorizing = (
+        central.get("material_fact_use") is False
+        and (
+            str(central.get("authority_scope") or "").upper() in non_authorizing_states
+            or str(central.get("observation_state") or "").upper() in non_authorizing_states
+        )
+    )
+    if not central_non_authorizing:
+        continue
+    if row.get("material_facts_authority") is not False:
+        errors.append(
+            f"cross-ledger authority escalation for {normalized}: P10 material_facts_authority must be false"
+        )
+    if str(row.get("health_scope") or "").upper() not in {"DISCOVERY_ONLY", "TRANSPORT_ONLY"}:
+        errors.append(
+            f"cross-ledger authority scope mismatch for {normalized}: non-authorizing central source must not be MATERIAL_SOURCE"
+        )
+
+regiocentru_index = next((row for row in source_registry.get("sources", []) if row.get("id") == "SRC-PR-CENTRU-ACTIUNI"), None)
+if not regiocentru_index:
+    errors.append("legacy RegioCentru action-index health probe missing")
+else:
+    if regiocentru_index.get("health_scope") != "DISCOVERY_ONLY":
+        errors.append("RegioCentru generic action index is not explicitly discovery-only in P10")
+    if regiocentru_index.get("material_facts_authority") is not False:
+        errors.append("RegioCentru generic action index can still authorize material facts in P10")
 
 for marker in [
     "https://partener.eu/",
