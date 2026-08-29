@@ -36,16 +36,23 @@ Implemented in this unit:
 - streaming SHA-256 plus magic/MIME/size validation
 - content-addressed spool with atomic object, index, receipt and checkpoint writes
 - idempotent replay, same-byte deduplication and logical artifact versioning
+- injectible Drive-first adapter contract with create-only uploads and full raw readback hashing
+- restart-safe Drive checkpoints that never repeat a checkpointed upload
+- append-only Artifact Registry and track-specific SSOT reconciliation proposals
 
 Still fail-closed / not implemented:
 
-- Drive upload adapter and post-upload SHA-256 readback validation
-- Artifact Registry and SSOT reconciliation
+- production Google Drive adapter and live harmless-binary roundtrip
+- approved Artifact Registry and SSOT proposal application
 - CDP debugger fallback
 - authorized authenticated live benchmark execution
 - second-project generalization and v1.0 release-candidate receipt
 
 The connector is therefore not `VERIFIED_FUNCTIONAL`.
+
+The Drive contract never directly edits an Artifact Registry or SSOT. It persists a
+`PENDING_HUMAN_REVIEW` proposal only after the uploaded bytes have been read back in full and match
+the local SHA-256 and size. WRITING and IMPLEMENTATION proposals have distinct targets.
 
 ## Manual intake CLI
 

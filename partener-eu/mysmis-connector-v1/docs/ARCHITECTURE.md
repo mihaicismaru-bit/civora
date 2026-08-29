@@ -14,8 +14,13 @@
    content-addressed object plus atomic restart checkpoint, receipt and index.
 8. Same bytes deduplicate globally; changed bytes under the same logical artifact create a new
    version. The source download remains unchanged and its local path is not persisted.
-9. A later Drive adapter must upload the committed object, read it back, verify SHA-256, then append
-   the Artifact Registry and the correct branch SSOT.
+9. The Drive-first contract calls an injected create-only adapter with the SHA-256 as an idempotent
+   content key, records the returned file ID before readback, then verifies the complete remote bytes
+   against SHA-256 and size. Its restart checkpoint prevents a second upload after an interrupted
+   run; the production adapter must make the content-key operation idempotent across network faults.
+10. Only a `PENDING_HUMAN_REVIEW` append-only proposal is created after successful readback. The
+    connector never applies the proposal itself, never promotes project facts, and targets separate
+    Artifact Registry and SSOT names for WRITING and IMPLEMENTATION.
 
 No project code appears in the discovery implementation. Project numbers occur only in fixtures and
 acceptance evidence.
