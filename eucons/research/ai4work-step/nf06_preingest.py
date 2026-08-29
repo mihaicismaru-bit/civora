@@ -232,6 +232,12 @@ def _validate_normalized_record(
     return received
 
 
+def _dominant_share(counts: Counter[str], denominator: int) -> float:
+    if denominator <= 0 or not counts:
+        return 0.0
+    return max(counts.values()) / denominator
+
+
 def build_preingest_manifest(
     records: list[dict[str, Any]],
     *,
@@ -264,6 +270,13 @@ def build_preingest_manifest(
         form_id: {region: set() for region in TARGET_REGIONS} for form_id in sorted(ALLOWED_FORMS)
     }
     channel_counts: Counter[str] = Counter()
+    region_channel_counts: dict[str, Counter[str]] = {
+        region: Counter() for region in TARGET_REGIONS
+    }
+    form_region_channel_counts: dict[str, dict[str, Counter[str]]] = {
+        form_id: {region: Counter() for region in TARGET_REGIONS}
+        for form_id in sorted(ALLOWED_FORMS)
+    }
     received_values: list[datetime] = []
     for record in records:
         received = _validate_normalized_record(
@@ -289,13 +302,29 @@ def build_preingest_manifest(
         region_channel_ids[region].add(channel_id)
         form_region_channel_ids[form_id][region].add(channel_id)
         channel_counts[channel_id] += 1
+        region_channel_counts[region][channel_id] += 1
+        form_region_channel_counts[form_id][region][channel_id] += 1
         received_values.append(received)
 
     evidence_class = PROD_EVIDENCE_CLASS if prod else TEST_TWIN_EVIDENCE_CLASS
-    dominant_channel_share = max(channel_counts.values()) / len(records)
+    dominant_channel_share = _dominant_share(channel_counts, len(records))
+    region_dominant_channel_share = {
+        region: _dominant_share(region_channel_counts[region], region_counts.get(region, 0))
+        for region in TARGET_REGIONS
+    }
+    form_region_dominant_channel_share = {
+        form_id: {
+            region: _dominant_share(
+                form_region_channel_counts[form_id][region],
+                form_region_counts[form_id].get(region, 0),
+            )
+            for region in TARGET_REGIONS
+        }
+        for form_id in sorted(ALLOWED_FORMS)
+    }
     frame_sha = hashlib.sha256(canonical_json_bytes(collection_frame)).hexdigest()
     return {
-        "schema_version": "eucons.ai4work_nf06_preingest_manifest.v0.5",
+        "schema_version": "eucons.ai4work_nf06_preingest_manifest.v0.6",
         "research_id": RESEARCH_ID,
         "handoff_stage": "NF06_SOURCE_PREFLIGHT",
         "evidence_class": evidence_class,
@@ -323,7 +352,20 @@ def build_preingest_manifest(
             for form_id in sorted(ALLOWED_FORMS)
         },
         "channel_counts": dict(sorted(channel_counts.items())),
+        "region_channel_counts": {
+            region: dict(sorted(region_channel_counts[region].items()))
+            for region in TARGET_REGIONS
+        },
+        "form_region_channel_counts": {
+            form_id: {
+                region: dict(sorted(form_region_channel_counts[form_id][region].items()))
+                for region in TARGET_REGIONS
+            }
+            for form_id in sorted(ALLOWED_FORMS)
+        },
         "dominant_channel_share": dominant_channel_share,
+        "region_dominant_channel_share": region_dominant_channel_share,
+        "form_region_dominant_channel_share": form_region_dominant_channel_share,
         "received_at_min": min(received_values).isoformat(),
         "received_at_max": max(received_values).isoformat(),
         "records_validated_against_frozen_forms": True,
@@ -332,11 +374,12 @@ def build_preingest_manifest(
         "channel_membership_validated_against_collection_frame": True,
         "method_coverage_aggregates_emitted": True,
         "form_audience_channel_provenance_emitted": True,
+        "channel_concentration_aggregates_emitted": True,
         "direct_identifiers_collected": False,
         "crm_linkage": "FORBIDDEN",
         "commercial_tracking": "FORBIDDEN",
         "prod_promotion_eligible": prod,
-        "scope_boundary": "This manifest validates source-batch integrity, exact collection-frame identity, frozen instrument content, opaque recruitment-channel provenance and eligibility for NF06 handoff only. Region/form coverage and form-specific channel provenance aggregates are internal method-QA inputs, not population estimates or need evidence; it does not claim that NF06 ingestion, synthesis, ranking or QA has executed.",
+        "scope_boundary": "This manifest validates source-batch integrity, exact collection-frame identity, frozen instrument content, opaque recruitment-channel provenance and eligibility for NF06 handoff only. Region/form coverage, form-specific channel provenance and channel-concentration aggregates are internal method-QA inputs, not population estimates or need evidence; it does not claim that NF06 ingestion, synthesis, ranking or QA has executed.",
     }
 
 
