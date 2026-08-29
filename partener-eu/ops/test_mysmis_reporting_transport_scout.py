@@ -27,38 +27,59 @@ def fake(role: str, ok: bool, sem: str = "a" * 64, count: int = 927):
 def main() -> int:
     aligned = mod.classify(
         fake("CANONICAL_PRIMARY", True),
-        fake("OFFICIAL_ALTERNATE", True),
+        fake("OFFICIAL_RESOURCES", True),
+        fake("OFFICIAL_DWH_LEGACY", True),
     )
-    assert aligned["state"] == "BOTH_AVAILABLE_SEMANTICALLY_ALIGNED"
-    assert aligned["semanticMatch"] is True
+    assert aligned["state"] == "PRIMARY_PLUS_ALIGNED_ALTERNATES"
+    assert aligned["alignedWithCanonical"] == ["OFFICIAL_RESOURCES", "OFFICIAL_DWH_LEGACY"]
+    assert aligned["alternatePairSemanticallyAligned"] is True
     assert aligned["alternateAuthorizedForMaterialFacts"] is False
     assert aligned["publishAuthorized"] is False
 
     divergent = mod.classify(
         fake("CANONICAL_PRIMARY", True, "a" * 64, 927),
-        fake("OFFICIAL_ALTERNATE", True, "b" * 64, 921),
+        fake("OFFICIAL_RESOURCES", True, "b" * 64, 921),
+        fake("OFFICIAL_DWH_LEGACY", True, "b" * 64, 921),
     )
-    assert divergent["state"] == "BOTH_AVAILABLE_SEMANTICALLY_DIVERGENT"
-    assert divergent["semanticMatch"] is False
+    assert divergent["state"] == "PRIMARY_PLUS_DIVERGENT_ALTERNATES"
+    assert divergent["alignedWithCanonical"] == []
+    assert divergent["divergentFromCanonical"] == [
+        "OFFICIAL_RESOURCES",
+        "OFFICIAL_DWH_LEGACY",
+    ]
+    assert divergent["alternatePairSemanticallyAligned"] is True
     assert divergent["requiresSemanticReconciliation"] is True
     assert divergent["alternateAuthorizedForMaterialFacts"] is False
 
-    alternate_only = mod.classify(
-        fake("CANONICAL_PRIMARY", False),
-        fake("OFFICIAL_ALTERNATE", True),
+    mixed = mod.classify(
+        fake("CANONICAL_PRIMARY", True, "a" * 64, 927),
+        fake("OFFICIAL_RESOURCES", True, "a" * 64, 927),
+        fake("OFFICIAL_DWH_LEGACY", True, "b" * 64, 921),
     )
-    assert alternate_only["state"] == "OFFICIAL_ALTERNATE_ONLY"
-    assert alternate_only["alternateEligibleForDiscoveryOnly"] is True
-    assert alternate_only["alternateAuthorizedForMaterialFacts"] is False
+    assert mixed["state"] == "PRIMARY_PLUS_MIXED_ALTERNATES"
+    assert mixed["alignedWithCanonical"] == ["OFFICIAL_RESOURCES"]
+    assert mixed["divergentFromCanonical"] == ["OFFICIAL_DWH_LEGACY"]
+
+    alternates_only = mod.classify(
+        fake("CANONICAL_PRIMARY", False),
+        fake("OFFICIAL_RESOURCES", True, "b" * 64, 921),
+        fake("OFFICIAL_DWH_LEGACY", True, "b" * 64, 921),
+    )
+    assert alternates_only["state"] == "ALTERNATES_ONLY_DISCOVERY"
+    assert alternates_only["alternateEligibleForDiscoveryOnly"] is True
+    assert alternates_only["alternateAuthorizedForMaterialFacts"] is False
 
     none = mod.classify(
         fake("CANONICAL_PRIMARY", False),
-        fake("OFFICIAL_ALTERNATE", False),
+        fake("OFFICIAL_RESOURCES", False),
+        fake("OFFICIAL_DWH_LEGACY", False),
     )
     assert none["state"] == "NO_OFFICIAL_REPORT_TRANSPORT_AVAILABLE"
     assert none["openCallAuthorized"] is False
 
     assert mod.official_final_url(mod.CANONICAL_URL, "reporting.mysmis2021.gov.ro")
+    assert mod.official_final_url(mod.RESOURCES_URL, "resurse.mysmis2021.gov.ro")
+    assert mod.official_final_url(mod.DWH_URL, "dwh4smis.fonduri-ue.ro")
     assert not mod.official_final_url(
         "http://reporting.mysmis2021.gov.ro" + mod.EXPECTED_PATH,
         "reporting.mysmis2021.gov.ro",
@@ -81,8 +102,18 @@ def main() -> int:
                 "eligibilityAuthorized": False,
             },
             {
-                **fake("OFFICIAL_ALTERNATE", False),
-                "requestedUrl": mod.OFFICIAL_ALTERNATE_URL,
+                **fake("OFFICIAL_RESOURCES", False),
+                "requestedUrl": mod.RESOURCES_URL,
+                "materialFactUse": False,
+                "openCallAuthorized": False,
+                "publishAuthorized": False,
+                "deadlineAuthorized": False,
+                "budgetAuthorized": False,
+                "eligibilityAuthorized": False,
+            },
+            {
+                **fake("OFFICIAL_DWH_LEGACY", False),
+                "requestedUrl": mod.DWH_URL,
                 "materialFactUse": False,
                 "openCallAuthorized": False,
                 "publishAuthorized": False,
