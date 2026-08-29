@@ -8,7 +8,7 @@ from typing import Any
 import nf06_preingest as NF06
 import primary_evidence_readiness as READY
 from channel_provenance import ChannelProvenanceError, validate_recruitment_channel_id
-from research_storage import RESEARCH_ID
+from research_storage import RESEARCH_ID, canonical_json_bytes
 
 
 class RealBatchSynthesisGateError(ValueError):
@@ -55,6 +55,7 @@ def _recompute_manifest_aggregates(records: list[dict[str, Any]]) -> dict[str, A
         form_id: {region: set() for region in READY.TARGET_REGIONS}
         for form_id in READY.FORM_AUDIENCE
     }
+    response_ids: set[str] = set()
 
     for index, record in enumerate(records):
         if not isinstance(record, dict):
@@ -63,6 +64,13 @@ def _recompute_manifest_aggregates(records: list[dict[str, Any]]) -> dict[str, A
             raise RealBatchSynthesisGateError(f"record[{index}] research_id mismatch")
         if record.get("synthetic") is not False:
             raise RealBatchSynthesisGateError("real synthesis gate accepts only synthetic=false PROD records")
+        response_id = record.get("response_id")
+        if not isinstance(response_id, str) or not NF06.SHA256_RE.fullmatch(response_id):
+            raise RealBatchSynthesisGateError(f"record[{index}] response_id must be a lowercase 64-hex opaque receipt")
+        if response_id in response_ids:
+            raise RealBatchSynthesisGateError("duplicate response_id in bound real batch")
+        response_ids.add(response_id)
+
         form_id = record.get("form_id")
         if form_id not in READY.FORM_AUDIENCE:
             raise RealBatchSynthesisGateError(f"record[{index}] unsupported form_id")
@@ -123,7 +131,10 @@ def _recompute_manifest_aggregates(records: list[dict[str, Any]]) -> dict[str, A
     }
 
 
-def _assert_manifest_bound_to_records(records: list[dict[str, Any]], manifest: dict[str, Any]) -> dict[str, Any]:
+def _assert_manifest_bound_to_records(
+    records: list[dict[str, Any]],
+    manifest: dict[str, Any],
+) -> dict[str, Any]:
     if not records:
         raise RealBatchSynthesisGateError("real synthesis gate requires a non-empty record batch")
     if not isinstance(manifest, dict):
@@ -140,18 +151,80 @@ def _assert_manifest_bound_to_records(records: list[dict[str, Any]], manifest: d
     return recomputed
 
 
+def _assert_collection_frame_bound(
+    records: list[dict[str, Any]],
+    *,
+    manifest: dict[str, Any],
+    collection_frame: dict[str, Any],
+) -> dict[str, Any]:
+    """Bind the exact real batch and NF06 manifest to the frozen PROD collection frame."""
+    try:
+        frame_start, frame_end, allowed_channels = NF06.validate_collection_frame(collection_frame, prod=True)
+    except NF06.NF06PreingestError as exc:
+        raise RealBatchSynthesisGateError(str(exc)) from exc
+
+    frame_sha = hashlib.sha256(canonical_json_bytes(collection_frame)).hexdigest()
+    if manifest.get("collection_frame_sha256") != frame_sha:
+        raise RealBatchSynthesisGateError("NF06 manifest is not bound to the supplied collection frame")
+
+    source_sha = hashlib.sha256(NF06.canonical_export_bytes(records)).hexdigest()
+    if collection_frame.get("source_export_sha256") != source_sha:
+        raise RealBatchSynthesisGateError("collection frame source_export_sha256 does not bind the real batch")
+    if manifest.get("source_export_sha256") != source_sha:
+        raise RealBatchSynthesisGateError("manifest source_export_sha256 does not bind the real batch")
+
+    for field in (
+        "collection_channel_register_sha256",
+        "form_contract_sha256",
+        "forms_definition_sha256",
+    ):
+        if manifest.get(field) != collection_frame.get(field):
+            raise RealBatchSynthesisGateError(f"manifest {field} is not bound to the collection frame")
+
+    used_channels: set[str] = set()
+    for index, record in enumerate(records):
+        try:
+            channel_id = validate_recruitment_channel_id(record.get("recruitment_channel_id"))
+        except ChannelProvenanceError as exc:
+            raise RealBatchSynthesisGateError(str(exc)) from exc
+        used_channels.add(channel_id)
+        received = _parse_ts(record.get("received_at"), field=f"record[{index}].received_at")
+        if not frame_start <= received <= frame_end:
+            raise RealBatchSynthesisGateError(
+                f"record[{index}] received_at is outside the frozen PROD collection frame"
+            )
+
+    undeclared = used_channels - set(allowed_channels)
+    if undeclared:
+        raise RealBatchSynthesisGateError(
+            f"bound real batch uses channel(s) outside collection frame: {sorted(undeclared)}"
+        )
+
+    return {
+        "collection_frame_sha256": frame_sha,
+        "collection_frame_window_validated": True,
+        "collection_frame_channel_membership_validated": True,
+    }
+
+
 def validate_channel_temporal_provenance(
     records: list[dict[str, Any]],
     *,
     manifest: dict[str, Any],
+    collection_frame: dict[str, Any],
     channel_register: dict[str, Any],
 ) -> dict[str, Any]:
-    """Bind each real response timestamp to the open window of its attributed channel.
+    """Bind each real response to the frozen PROD frame and its attributed channel window.
 
     This is a control/provenance check only. It is not need evidence and does not
     make a non-probability sample representative.
     """
     _assert_manifest_bound_to_records(records, manifest)
+    frame_binding = _assert_collection_frame_bound(
+        records,
+        manifest=manifest,
+        collection_frame=collection_frame,
+    )
     try:
         register_by_id = READY._validate_channel_register(channel_register)
     except READY.PrimaryEvidenceReadinessError as exc:
@@ -200,15 +273,21 @@ def validate_channel_temporal_provenance(
         raise RealBatchSynthesisGateError("temporal channel counts do not reconcile with manifest channel_counts")
 
     return {
-        "schema_version": "eucons.ai4work_channel_temporal_provenance.v0.1",
+        "schema_version": "eucons.ai4work_channel_temporal_provenance.v0.2",
         "research_id": RESEARCH_ID,
         "stage": "PRE_SYNTHESIS_CHANNEL_TEMPORAL_PROVENANCE",
         "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
         "source_evidence_class": READY.PROD_EVIDENCE_CLASS,
+        "collection_frame_bound": True,
+        "collection_frame_sha256": frame_binding["collection_frame_sha256"],
+        "collection_frame_window_validated": frame_binding["collection_frame_window_validated"],
+        "collection_frame_channel_membership_validated": frame_binding[
+            "collection_frame_channel_membership_validated"
+        ],
         "channel_temporal_windows_validated": True,
         "channel_received_at_bounds": rendered_bounds,
         "representativeness_claim_allowed": False,
-        "scope_boundary": "PASS proves only that the bound real-response batch reconciles to the NF06 manifest and every attributed channel was open at the record received_at timestamp. It is not population or need evidence.",
+        "scope_boundary": "PASS proves only that the bound real-response batch reconciles to the NF06 manifest, the frozen PROD collection frame and the authorised channel windows. It is not population or need evidence.",
     }
 
 
@@ -216,6 +295,7 @@ def assert_real_batch_ready_for_synthesis(
     records: list[dict[str, Any]],
     *,
     manifest: dict[str, Any],
+    collection_frame: dict[str, Any],
     method_frame: dict[str, Any],
     channel_register: dict[str, Any],
     dominant_channel_sensitivity: dict[str, Any] | None = None,
@@ -224,6 +304,7 @@ def assert_real_batch_ready_for_synthesis(
     temporal = validate_channel_temporal_provenance(
         records,
         manifest=manifest,
+        collection_frame=collection_frame,
         channel_register=channel_register,
     )
     try:
@@ -237,16 +318,22 @@ def assert_real_batch_ready_for_synthesis(
         raise RealBatchSynthesisGateError(str(exc)) from exc
 
     return {
-        "schema_version": "eucons.ai4work_real_batch_synthesis_gate.v0.1",
+        "schema_version": "eucons.ai4work_real_batch_synthesis_gate.v0.2",
         "research_id": RESEARCH_ID,
         "stage": "REAL_BATCH_PRE_SYNTHESIS_GATE",
         "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
         "source_evidence_class": READY.PROD_EVIDENCE_CLASS,
         "ready_for_primary_synthesis": True,
+        "collection_frame_bound": temporal["collection_frame_bound"],
+        "collection_frame_sha256": temporal["collection_frame_sha256"],
+        "collection_frame_window_validated": temporal["collection_frame_window_validated"],
+        "collection_frame_channel_membership_validated": temporal[
+            "collection_frame_channel_membership_validated"
+        ],
         "channel_temporal_windows_validated": temporal["channel_temporal_windows_validated"],
         "channel_received_at_bounds": temporal["channel_received_at_bounds"],
         "method_readiness_schema_version": readiness["schema_version"],
         "representativeness_claim_allowed": False,
         "weighting_allowed": False,
-        "scope_boundary": "Only this combined gate authorises entry of the bound real PROD batch into needs synthesis/adversarial QA. PASS does not establish prevalence, causality, representativeness or any need conclusion.",
+        "scope_boundary": "Only this combined gate authorises entry of the exact real PROD batch bound to its NF06 manifest, frozen PROD collection frame and frozen channel register into needs synthesis/adversarial QA. PASS does not establish prevalence, causality, representativeness or any need conclusion.",
     }
