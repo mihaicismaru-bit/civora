@@ -1,0 +1,39 @@
+name: EUCONS AI4WORK Persisted Handoff Gate
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/research/ai4work-step/canonical_export_integrity.py'
+      - 'eucons/research/ai4work-step/nf06_preingest.py'
+      - 'eucons/research/ai4work-step/nf06_persisted_handoff.py'
+      - 'eucons/research/ai4work-step/test_nf06_persisted_handoff.py'
+      - '.github/workflows/eucons-ai4work-persisted-handoff.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/research/ai4work-step/canonical_export_integrity.py'
+      - 'eucons/research/ai4work-step/nf06_preingest.py'
+      - 'eucons/research/ai4work-step/nf06_persisted_handoff.py'
+      - 'eucons/research/ai4work-step/test_nf06_persisted_handoff.py'
+      - '.github/workflows/eucons-ai4work-persisted-handoff.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-ai4work-persisted-handoff-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  persisted-handoff:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Validate persisted response integrity is mandatory before NF06 PROD pre-ingest
+        working-directory: eucons/research/ai4work-step
+        run: python -m unittest -v test_nf06_persisted_handoff.py
