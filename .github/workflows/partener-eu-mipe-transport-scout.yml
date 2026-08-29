@@ -2,17 +2,25 @@ name: PARTENER.EU MIPE Transport Scout
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/mipe_transport_scout.py'
+      - 'partener-eu/ingest/mysmis_reporting_transport_scout.py'
+      - 'partener-eu/ops/test_mysmis_reporting_transport_scout.py'
+      - '.github/workflows/partener-eu-mipe-transport-scout.yml'
   push:
     branches: [main]
     paths:
       - 'partener-eu/ingest/mipe_transport_scout.py'
+      - 'partener-eu/ingest/mysmis_reporting_transport_scout.py'
+      - 'partener-eu/ops/test_mysmis_reporting_transport_scout.py'
       - '.github/workflows/partener-eu-mipe-transport-scout.yml'
 
 permissions:
   contents: read
 
 concurrency:
-  group: partener-eu-mipe-transport-scout
+  group: partener-eu-mipe-transport-scout-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -22,7 +30,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 8
+    timeout-minutes: 10
     permissions:
       contents: read
     steps:
@@ -35,11 +43,27 @@ jobs:
         env:
           MIPE_SCOUT_OUT: scout-${{ runner.os }}.json
         run: python partener-eu/ingest/mipe_transport_scout.py
+      - name: Validate MySMIS official reporting transport contract
+        shell: bash
+        run: |
+          python -m py_compile partener-eu/ingest/mysmis_reporting_transport_scout.py
+          python partener-eu/ops/test_mysmis_reporting_transport_scout.py
+      - name: Probe MySMIS official reporting transports without publication
+        shell: bash
+        env:
+          MYSMIS_SCOUT_OUT: mysmis-${{ runner.os }}.json
+        run: python partener-eu/ingest/mysmis_reporting_transport_scout.py
       - uses: actions/upload-artifact@v4
         with:
           name: mipe-scout-${{ runner.os }}
           path: scout-${{ runner.os }}.json
           retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mysmis-scout-${{ runner.os }}
+          path: mysmis-${{ runner.os }}.json
+          retention-days: 7
+          if-no-files-found: error
 
   aggregate:
     needs: scout
@@ -55,6 +79,11 @@ jobs:
         with:
           pattern: mipe-scout-*
           path: scout-results
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: mysmis-scout-*
+          path: mysmis-results
           merge-multiple: true
       - uses: actions/setup-python@v6
         with:
@@ -85,11 +114,52 @@ jobs:
           out.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
           print(json.dumps({'verdict': payload['verdict'], 'workingTransports': working}, ensure_ascii=False, indent=2))
           PY
+      - name: Aggregate MySMIS official reporting transport evidence
+        run: |
+          python - <<'PY'
+          import datetime as dt
+          import json
+          from pathlib import Path
+
+          files = sorted(Path('mysmis-results').glob('*.json'))
+          runs = [json.loads(path.read_text(encoding='utf-8')) for path in files]
+          assert runs, 'missing MySMIS transport evidence'
+          for run in runs:
+              assert run.get('schema') == 'CIVORA_MYSMIS_REPORTING_TRANSPORT_MATRIX_V1'
+              assert run.get('materialFactUse') is False
+              assert run.get('openCallAuthorized') is False
+              assert run.get('publishAuthorized') is False
+              assert (run.get('comparison') or {}).get('alternateAuthorizedForMaterialFacts') is False
+          payload = {
+              'schema': 'CIVORA_MYSMIS_REPORTING_RUNNER_MATRIX_V1',
+              'observedAt': dt.datetime.now(dt.timezone.utc).isoformat(),
+              'runnerCount': len(runs),
+              'materialFactUse': False,
+              'openCallAuthorized': False,
+              'publishAuthorized': False,
+              'runs': runs,
+          }
+          out = Path('partener-eu/ingest/state/mysmis_reporting_transport_matrix.json')
+          out.parent.mkdir(parents=True, exist_ok=True)
+          out.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          print(json.dumps({
+              'runnerCount': len(runs),
+              'states': [r.get('comparison', {}).get('state') for r in runs],
+              'alternateAuthorizedForMaterialFacts': False,
+          }, ensure_ascii=False, indent=2))
+          PY
       - name: Upload transport matrix evidence
         uses: actions/upload-artifact@v4
         with:
           name: partener-mipe-transport-matrix
           path: partener-eu/ingest/state/mipe_transport_matrix.json
+          retention-days: 7
+          if-no-files-found: error
+      - name: Upload MySMIS reporting transport matrix evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-mysmis-reporting-transport-matrix
+          path: partener-eu/ingest/state/mysmis_reporting_transport_matrix.json
           retention-days: 7
           if-no-files-found: error
 
