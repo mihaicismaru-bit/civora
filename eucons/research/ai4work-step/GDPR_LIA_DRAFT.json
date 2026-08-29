@@ -1,7 +1,7 @@
 {
-  "schema_version": "eucons.ai4work_gdpr_lia.v0.4",
+  "schema_version": "eucons.ai4work_gdpr_lia.v0.5",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "date": "2026-08-28",
+  "date": "2026-08-29",
   "controller": {
     "legal_name": "EUROCONSULT SRL",
     "cui": "14250864",
@@ -18,8 +18,10 @@
   "status": "DRAFT_LEGAL_BASIS_CONTROLLER_SIGNOFF_REQUIRED_BEFORE_COLLECTION",
   "authority_context": [
     "https://commission.europa.eu/law/law-topic/data-protection/information-business-and-organisations/legal-grounds-processing-data_en",
-    "https://www.edpb.europa.eu/public-consultations/guidelines-12024-on-processing-of-personal-data-based-on-article-61f-gdpr_ro"
+    "https://www.edpb.europa.eu/public-consultations/guidelines-12024-on-processing-of-personal-data-based-on-article-61f-gdpr_ro",
+    "https://www.edpb.europa.eu/public-consultations/guidelines-022026-on-anonymisation_en"
   ],
+  "authority_version_boundary": "EDPB Guidelines 1/2024 remains the current Version 1.0 consultation text visible on the EDPB site; Guidelines 02/2026 on Anonymisation Version 1.0 was adopted on 7 July 2026 for public consultation and is used as current methodological guidance, not represented as a final post-consultation version.",
   "purpose_test": {
     "interest": "produce a documented, evidence-based needs analysis concerning digital/AI skills and training needs for the AI4WORK STEP project concept and associated funding application",
     "legitimate": true,
@@ -38,14 +40,15 @@
       "no CRM or commercial analytics integration",
       "no special-category data",
       "separate optional follow-up contact mechanism with no response linkage",
-      "small-cell suppression/combination for reported n < 5"
+      "small-cell suppression/combination for reported n < 5",
+      "respondent-level records are treated conservatively as personal/potentially linkable rather than being called anonymous merely because direct identifiers are absent"
     ],
     "conclusion": "PROCESSING_CAN_BE_NECESSARY_IF_THE_CONTROLLER_APPROVES_THE_FINAL_BASIS_AND_THE_MINIMISED_DESIGN_AND_SEPARATION_CONTROLS_REMAIN_ENFORCED"
   },
   "balancing_test": {
     "reasonable_expectations": "participants are shown a pre-form research notice and make a voluntary positive choice to submit a needs-analysis questionnaire; the data are not reused for enrolment, marketing or individual decisions",
-    "data_nature": "low-granularity professional/demographic categories plus controlled questionnaire answers; direct identifiers, free-text responses and Article 9/10 data are forbidden",
-    "impact": "low under the intended design; principal residual re-identification risk comes from combinations of low-granularity categories/small cells and from infrastructure logs, not from respondent free text",
+    "data_nature": "low-granularity professional/demographic categories plus controlled questionnaire answers; direct identifiers, free-text responses and Article 9/10 data are forbidden; raw/normalised respondent records are nevertheless treated as personal or potentially linkable until deletion rather than declared anonymous by assertion",
+    "impact": "low under the intended design; principal residual re-identification risk comes from combinations of low-granularity categories/small cells and from infrastructure logs or additional information accessible to relevant entities, not from respondent free text",
     "power_imbalance": "employed and unemployed adults may have contextual vulnerability; participation must not be requested by an employer in a way that creates pressure and refusal must have no disadvantage",
     "safeguards": [
       "voluntary participation and clear no-disadvantage language",
@@ -56,9 +59,16 @@
       "short retention and deletion execution",
       "no raw respondent-level response use with external LLM/AI providers",
       "no automated decisions or respondent scoring",
-      "logging minimisation and no IP/user-agent in analytical exports"
+      "logging minimisation and no IP/user-agent in analytical exports",
+      "no raw-response anonymity claim; only aggregate outputs that pass the documented No Record Isolation / No Linkage / No Inference assessment may be labelled anonymous"
     ],
     "provisional_outcome": "ARTICLE_6_1_F_CAN_BE_SUPPORTED_ON_CURRENT_MINIMISED_DESIGN_BUT_REMAINS_UNAPPROVED_UNTIL_EXPLICIT_CONTROLLER_SIGNOFF_AND_OPERATIONAL_GATES_ARE_COMPLETE"
+  },
+  "anonymisation_control": {
+    "reference": "GDPR_ANONYMISATION_CLASSIFICATION_CONTROL.json v0.1",
+    "raw_response_classification": "PERSONAL_OR_POTENTIALLY_LINKABLE_DATA_FOR_GDPR_COMPLIANCE",
+    "raw_anonymity_relied_on_for_lawful_basis": false,
+    "terminal_output_rule": "validated anonymous aggregates may be retained/released only after output-specific disclosure-control and anonymity testing"
   },
   "fail_closed_conditions": [
     "final lawful basis/LIA is not explicitly approved by EUROCONSULT SRL",
@@ -69,6 +79,7 @@
     "free-text response fields are introduced without a renewed minimisation and privacy assessment",
     "direct identifiers, special-category data, CRM linkage, marketing reuse or individual decision-making are introduced",
     "raw respondent-level records are sent to an external AI/LLM processor without a new legal/privacy assessment",
+    "raw respondent-level records or merely de-identified outputs are described as anonymous without the documented output-specific anonymity assessment",
     "retention/deletion rule is not executable"
   ],
   "controller_signoff_fields": {
