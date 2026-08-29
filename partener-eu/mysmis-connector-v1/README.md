@@ -53,6 +53,8 @@ Implemented in this unit:
   and the durable pair receipt match the exact source head
 - deterministic installation-bundle manifest and offline preflight with exact payload allowlisting,
   altered/extra-file rejection and explicit operator rollback guidance
+- portable extracted-bundle preflight CLI and Windows CMD entrypoint that revalidate both component
+  attestations, emit bounded success/failure receipts and leave installation explicitly `NOT_STARTED`
 
 Still fail-closed / not implemented:
 
@@ -64,6 +66,14 @@ Still fail-closed / not implemented:
 - second-project generalization and v1.0 release-candidate receipt
 
 The connector is therefore not `VERIFIED_FUNCTIONAL`.
+
+## Offline handoff preflight
+
+After extracting an attested installation bundle, run `CONTROL\\VERIFY_OFFLINE.cmd`. The command
+only reads the extracted `PAYLOAD` and `CONTROL` trees, verifies every byte and emits one JSON
+receipt. It does not install an extension, enable native messaging, open MySMIS or write a receipt
+to disk. A pass status is `INSTALL_ATTEMPT_PREFLIGHT_PASS_INSTALL_NOT_STARTED`; any other status is
+a stop condition.
 
 The Drive contract never directly edits an Artifact Registry or SSOT. It persists a
 `PENDING_HUMAN_REVIEW` proposal only after the uploaded bytes have been read back in full and match

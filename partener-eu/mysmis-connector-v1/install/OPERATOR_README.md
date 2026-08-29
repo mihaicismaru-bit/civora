@@ -4,12 +4,14 @@ This package is an offline-preflight artifact, not authorization to access MySMI
 
 Before any installation:
 
-1. Verify the exact Git source head, paired-build receipt, bundle manifest digest and every payload SHA-256.
-2. Stop if the preflight reports a missing, changed, duplicate, symbolic-link or extra payload file.
-3. Confirm that the MCLENOVO session is observable and that the user has authorized the bounded installation.
-4. Do not enable `nativeMessaging`, debugger/CDP or external extension messaging unless a later persisted gate explicitly requires and authorizes it.
-5. Do not read or persist cookies, passwords, MFA data, tokens or request Authorization headers.
-6. MySMIS remains read-only: no Save, Submit, Delete, Sign, Upload or Modify.
+1. Extract the ZIP to a new empty folder and run `CONTROL\\VERIFY_OFFLINE.cmd` from Command Prompt. It only verifies bytes and emits a JSON receipt; it does not install anything.
+2. Verify that the receipt status is `INSTALL_ATTEMPT_PREFLIGHT_PASS_INSTALL_NOT_STARTED` and archive it before continuing.
+3. Verify the exact Git source head, paired-build receipt, bundle manifest digest and every payload SHA-256.
+4. Stop if the preflight reports a missing, changed, duplicate, symbolic-link or extra payload/control file.
+5. Confirm that the MCLENOVO session is observable and that the user has authorized the bounded installation.
+6. Do not enable `nativeMessaging`, debugger/CDP or external extension messaging unless a later persisted gate explicitly requires and authorizes it.
+7. Do not read or persist cookies, passwords, MFA data, tokens or request Authorization headers.
+8. MySMIS remains read-only: no Save, Submit, Delete, Sign, Upload or Modify.
 
 Rollback:
 

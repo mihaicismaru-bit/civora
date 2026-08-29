@@ -63,6 +63,13 @@
     duplicate, symbolic-link or extra payload files. Package construction performs no browser
     installation, native-messaging enablement, shell execution or MySMIS access and includes an
     explicit bounded-install gate and rollback procedure.
+19. The portable installation-attempt preflight consumes only a freshly extracted bundle. It
+    requires an exact six-file `CONTROL` set, rejects symbolic links and special files, rehashes the
+    entire deduplicated payload, then separately revalidates the extension and native-agent
+    attestations plus the pair receipt. Its CLI emits a bounded machine-readable receipt containing
+    no absolute path or exception message. Success still records installation as `NOT_STARTED` and
+    rollback as `NOT_REQUIRED`; failure cannot trigger installation, browser control, native
+    messaging, MySMIS access or a retry with changed bytes.
 
 No project code appears in the discovery implementation. Project numbers occur only in fixtures and
 acceptance evidence.
