@@ -1,0 +1,33 @@
+name: EUCONS AI4WORK Profile Coverage Gate
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/research/ai4work-step/**'
+      - '.github/workflows/eucons-ai4work-profile-coverage.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/research/ai4work-step/**'
+      - '.github/workflows/eucons-ai4work-profile-coverage.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-ai4work-profile-coverage-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  profile-coverage-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Validate frozen profile coverage before needs synthesis
+        working-directory: eucons/research/ai4work-step
+        run: python -m unittest -v test_profile_coverage_control.py
