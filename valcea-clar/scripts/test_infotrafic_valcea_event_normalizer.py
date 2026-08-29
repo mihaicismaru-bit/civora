@@ -24,9 +24,11 @@ BASE_SIGNAL = {
 
 
 class InfotraficValceaEventNormalizerTests(unittest.TestCase):
-    def make(self, excerpt: str) -> dict:
+    def make(self, excerpt: str, title: str | None = None) -> dict:
         signal = copy.deepcopy(BASE_SIGNAL)
         signal["excerpt"] = excerpt
+        if title is not None:
+            signal["title"] = title
         return signal
 
     def test_stopped_event_extracts_explicit_fields(self) -> None:
@@ -37,6 +39,9 @@ class InfotraficValceaEventNormalizerTests(unittest.TestCase):
         self.assertEqual(event["direction"], "Râmnicu Vâlcea - Sibiu")
         self.assertEqual(event["estimated_reopen_at"], "2026-08-28T18:00:00+03:00")
         self.assertEqual(event["refresh_recheck_after"], "2026-08-28T22:35:00+03:00")
+        self.assertEqual(event["event_family"], "TRAFFIC_RESTRICTION")
+        self.assertIsNone(event["cause_family"])
+        self.assertFalse(event["current_status_claim_allowed"])
         self.assertFalse(event["public_projection"])
         self.assertFalse(event["auto_publication"])
 
@@ -81,6 +86,54 @@ class InfotraficValceaEventNormalizerTests(unittest.TestCase):
         self.assertEqual(first["thread_key"], second["thread_key"])
         self.assertNotEqual(first["event_id"], second["event_id"])
 
+    def test_explicit_collision_semantics(self) -> None:
+        event = normalize_signal(
+            self.make("Accident rutier pe DN7, în localitatea Bujoreni. Traficul este oprit.")
+        )
+        self.assertEqual(event["event_family"], "ROAD_COLLISION")
+        self.assertEqual(event["cause_family"], "COLLISION")
+        self.assertEqual(event["semantic_basis"], "EXPLICIT_OFFICIAL_TITLE_AND_EXCERPT_ONLY")
+        self.assertFalse(event["current_status_claim_allowed"])
+
+    def test_explicit_vehicle_fire_semantics(self) -> None:
+        event = normalize_signal(
+            self.make("Un autoturism este în flăcări pe DN7, în localitatea Călimănești.")
+        )
+        self.assertEqual(event["event_family"], "VEHICLE_FIRE")
+        self.assertEqual(event["cause_family"], "FIRE")
+
+    def test_explicit_roadworks_semantics(self) -> None:
+        event = normalize_signal(
+            self.make("Lucrări rutiere pe DN7, în localitatea Bujoreni, cu restricții de circulație.")
+        )
+        self.assertEqual(event["event_family"], "ROADWORKS")
+        self.assertEqual(event["cause_family"], "ROADWORKS")
+
+    def test_explicit_broken_down_vehicle_semantics(self) -> None:
+        event = normalize_signal(
+            self.make("Un autoturism defect ocupă banda pe DN7, în localitatea Budești.")
+        )
+        self.assertEqual(event["event_family"], "ROAD_OBSTRUCTION")
+        self.assertEqual(event["cause_family"], "BROKEN_DOWN_VEHICLE")
+
+    def test_explicit_weather_semantics(self) -> None:
+        event = normalize_signal(
+            self.make("Este semnalată ceață densă pe DN7, în localitatea Câineni.")
+        )
+        self.assertEqual(event["event_family"], "WEATHER_HAZARD")
+        self.assertEqual(event["cause_family"], "FOG")
+
+    def test_generic_notice_does_not_invent_semantics(self) -> None:
+        event = normalize_signal(self.make("Informare de trafic pe DN7 în localitatea Bujoreni."))
+        self.assertEqual(event["event_family"], "TRAFFIC_EVENT_UNSPECIFIED")
+        self.assertIsNone(event["cause_family"])
+
+    def test_semantics_preserve_official_evidence_text(self) -> None:
+        signal = self.make("Accident rutier pe DN7 în localitatea Bujoreni.")
+        event = normalize_signal(signal)
+        self.assertEqual(event["title"], signal["title"])
+        self.assertEqual(event["excerpt"], signal["excerpt"])
+
     def test_wrong_host_fails_closed(self) -> None:
         signal = copy.deepcopy(BASE_SIGNAL)
         signal["article_url"] = "https://example.com/ro/info-trafic/fake"
@@ -88,8 +141,7 @@ class InfotraficValceaEventNormalizerTests(unittest.TestCase):
             normalize_signal(signal)
 
     def test_missing_road_fails_closed(self) -> None:
-        signal = self.make("Trafic intens în zonă.")
-        signal["title"] = "JUDEȚUL VÂLCEA: INFORMARE RUTIERĂ"
+        signal = self.make("Trafic intens în zonă.", "JUDEȚUL VÂLCEA: INFORMARE RUTIERĂ")
         with self.assertRaises(ValueError):
             normalize_signal(signal)
 
