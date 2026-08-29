@@ -81,15 +81,28 @@ class NF06PreingestTests(unittest.TestCase):
         self.assertEqual(manifest["dominant_channel_share"], 0.5)
         self.assertEqual(
             manifest["region_channel_counts"]["Centru"],
-            {ADULT_CHANNEL: 1, EMPLOYER_CHANNEL: 1},
+            {EMPLOYER_CHANNEL: 1},
         )
-        self.assertEqual(manifest["region_dominant_channel_share"]["Centru"], 0.5)
         self.assertEqual(
-            manifest["form_region_channel_counts"]["AI4WORK_ADULTS_V1"]["Centru"],
+            manifest["region_channel_counts"]["Sud-Vest Oltenia"],
+            {ADULT_CHANNEL: 1},
+        )
+        self.assertEqual(manifest["region_dominant_channel_share"]["Centru"], 1.0)
+        self.assertEqual(manifest["region_dominant_channel_share"]["Sud-Vest Oltenia"], 1.0)
+        self.assertEqual(
+            manifest["form_region_channel_counts"]["AI4WORK_ADULTS_V1"]["Sud-Vest Oltenia"],
             {ADULT_CHANNEL: 1},
         )
         self.assertEqual(
-            manifest["form_region_dominant_channel_share"]["AI4WORK_ADULTS_V1"]["Centru"],
+            manifest["form_region_channel_counts"]["AI4WORK_EMPLOYERS_V1"]["Centru"],
+            {EMPLOYER_CHANNEL: 1},
+        )
+        self.assertEqual(
+            manifest["form_region_dominant_channel_share"]["AI4WORK_ADULTS_V1"]["Sud-Vest Oltenia"],
+            1.0,
+        )
+        self.assertEqual(
+            manifest["form_region_dominant_channel_share"]["AI4WORK_EMPLOYERS_V1"]["Centru"],
             1.0,
         )
         self.assertTrue(manifest["channel_concentration_aggregates_emitted"])
