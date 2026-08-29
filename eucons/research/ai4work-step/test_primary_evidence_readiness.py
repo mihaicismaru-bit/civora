@@ -56,7 +56,7 @@ def valid_manifest(register: dict) -> dict:
     channel_counts = {channel_id: 27 for pair in CHANNELS.values() for channel_id in pair}
     channel_counts[CHANNELS["Centru"][0]] = 30
     return {
-        "schema_version": "eucons.ai4work_nf06_preingest_manifest.v0.4",
+        "schema_version": "eucons.ai4work_nf06_preingest_manifest.v0.5",
         "research_id": "AI4WORK-STEP-NF-RUN-001",
         "evidence_class": "PROD_REAL_EVIDENCE",
         "non_evidence": False,
@@ -71,6 +71,10 @@ def valid_manifest(register: dict) -> dict:
             "AI4WORK_EMPLOYERS_V1": {region: 15 for region in REGIONS},
         },
         "region_channel_ids": {region: list(CHANNELS[region]) for region in REGIONS},
+        "form_region_channel_ids": {
+            "AI4WORK_ADULTS_V1": {region: [CHANNELS[region][0]] for region in REGIONS},
+            "AI4WORK_EMPLOYERS_V1": {region: [CHANNELS[region][1]] for region in REGIONS},
+        },
         "channel_counts": channel_counts,
         "dominant_channel_share": 30 / 165,
         "collection_channel_register_sha256": hashlib.sha256(canonical_json_bytes(register)).hexdigest(),
@@ -89,6 +93,7 @@ class PrimaryEvidenceReadinessTests(unittest.TestCase):
         self.assertFalse(result["representativeness_claim_allowed"])
         self.assertTrue(result["thresholds_are_method_rules_not_evidence"])
         self.assertTrue(result["independent_channel_types_per_region_validated"])
+        self.assertTrue(result["form_audience_channel_scope_validated"])
 
     def test_test_twin_is_rejected_even_with_large_counts(self):
         register = channel_register()
@@ -141,6 +146,31 @@ class PrimaryEvidenceReadinessTests(unittest.TestCase):
         register = channel_register()
         manifest = valid_manifest(register)
         manifest["collection_channel_register_sha256"] = "0" * 64
+        with self.assertRaises(READY.PrimaryEvidenceReadinessError):
+            READY.assert_primary_evidence_ready_for_synthesis(
+                manifest,
+                method_frame=approved_method_frame(),
+                channel_register=register,
+            )
+
+    def test_form_channel_must_be_authorised_for_its_actual_audience(self):
+        register = channel_register()
+        for entry in register["entries"]:
+            if entry["channel_id"] == CHANNELS["Centru"][1]:
+                entry["audience_scope"] = ["adults"]
+        manifest = valid_manifest(register)
+        manifest["collection_channel_register_sha256"] = hashlib.sha256(canonical_json_bytes(register)).hexdigest()
+        with self.assertRaises(READY.PrimaryEvidenceReadinessError):
+            READY.assert_primary_evidence_ready_for_synthesis(
+                manifest,
+                method_frame=approved_method_frame(),
+                channel_register=register,
+            )
+
+    def test_region_channel_union_must_reconcile_with_form_specific_provenance(self):
+        register = channel_register()
+        manifest = valid_manifest(register)
+        manifest["region_channel_ids"]["Centru"] = [CHANNELS["Centru"][0]]
         with self.assertRaises(READY.PrimaryEvidenceReadinessError):
             READY.assert_primary_evidence_ready_for_synthesis(
                 manifest,
