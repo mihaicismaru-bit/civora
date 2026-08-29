@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "engine_id": "EUCONS_E10_OFFICIAL_SOURCE_OPERATOR_QUEUE",
+  "input": {
+    "required_projection_product": "EUCONS_COMMERCIAL_OS",
+    "required_bridge_id": "PARTENER_P11_TO_EUCONS_E09",
+    "required_bridge_state": "READY",
+    "required_record_state": "VERIFIED_AVAILABLE",
+    "require_actionable": true,
+    "official_registry_state": "READ_ONLY_OFFICIAL_SOURCE_RECEIPTS"
+  },
+  "authority": {
+    "partener_role": "DISCOVERY_ONLY",
+    "waiting_state": "WAITING_SOURCE",
+    "blocked_state": "BLOCKED_SOURCE_CONFLICT",
+    "verified_state": "OFFICIAL_SOURCE_VERIFIED",
+    "required_candidate_fact_classes": ["status", "deadline"],
+    "material_fact_classes_requiring_official_binding": ["status", "deadline", "budget", "grant", "beneficiaries", "eligibility", "scoring", "indicators", "obligations"]
+  },
+  "triage": {
+    "priority_order": ["P0", "P1", "P2"],
+    "blocked_priority": "P0",
+    "waiting_priority": "P1",
+    "enrichment_priority": "P2",
+    "blocked_action": "RESOLVE_OFFICIAL_SOURCE_CONFLICT",
+    "waiting_action": "VERIFY_REQUIRED_OFFICIAL_FACTS",
+    "enrichment_action": "ENRICH_OFFICIAL_MATERIAL_FACT_BINDINGS",
+    "deterministic_sort": ["priority_asc", "opportunity_id_asc"]
+  },
+  "output": {
+    "state": "READ_ONLY_OPERATOR_QUEUE",
+    "resolved_records_omitted": true,
+    "raw_material_fact_values_forbidden": true,
+    "person_level_fields_forbidden": true,
+    "eligibility_conclusion_forbidden": true,
+    "external_action_authorized": false,
+    "repository_runtime_output_forbidden": true
+  },
+  "boundaries": {
+    "network_fetch": false,
+    "crm_write": false,
+    "provider_write": false,
+    "mysmis_write": false,
+    "outreach": false,
+    "message_send": false,
+    "offer_send": false,
+    "publication": false,
+    "deployment": false
+  }
+}
