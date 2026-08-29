@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import unittest
 from pathlib import Path
 
 import needs_synthesis_gate as NEEDS
 import profile_coverage_control as COVERAGE
+from research_storage import canonical_json_bytes
 from test_primary_evidence_readiness import ADULT_FORM, EMPLOYER_FORM, approved_method_frame, channel_register
 from test_real_batch_synthesis_gate import bound_collection_frame, bound_manifest, real_records
 
@@ -39,6 +41,19 @@ def full_profile_records() -> list[dict]:
                 }
             )
     return records
+
+
+def approved_method_lock(method_frame: dict, collection_frame: dict) -> dict:
+    return {
+        "schema_version": "eucons.ai4work_method_frame_lock.v0.1",
+        "research_id": "AI4WORK-STEP-NF-RUN-001",
+        "status": "APPROVED_BEFORE_COLLECTION",
+        "evidence_class": "METHOD_CONTROL_NOT_EVIDENCE",
+        "collection_frame_id": collection_frame["collection_frame_id"],
+        "method_frame_sha256": hashlib.sha256(canonical_json_bytes(method_frame)).hexdigest(),
+        "approved_at": "2026-08-19T12:00:00+00:00",
+        "approver_reference": "UNIT-TEST-METHOD-LOCK-NON-EVIDENCE",
+    }
 
 
 class ProfileCoverageControlTests(unittest.TestCase):
@@ -93,28 +108,73 @@ class ProfileCoverageControlTests(unittest.TestCase):
                 forms_definition=frozen_forms(),
             )
 
-    def test_canonical_needs_synthesis_wrapper_requires_profile_coverage_control(self):
+    def test_canonical_needs_synthesis_wrapper_requires_profile_coverage_and_precollection_method_lock(self):
         register = channel_register()
         records = full_profile_records()
         frame = bound_collection_frame(register, records)
         manifest = bound_manifest(register, records, frame)
+        method_frame = approved_method_frame()
         result = NEEDS.assert_real_batch_ready_for_needs_synthesis(
             records,
             manifest=manifest,
             collection_frame=frame,
-            method_frame=approved_method_frame(),
+            method_frame=method_frame,
+            method_frame_lock=approved_method_lock(method_frame, frame),
             channel_register=register,
             forms_definition=frozen_forms(),
         )
         self.assertTrue(result["ready_for_needs_synthesis"])
-        self.assertEqual(result["schema_version"], "eucons.ai4work_needs_synthesis_gate.v0.1")
+        self.assertEqual(result["schema_version"], "eucons.ai4work_needs_synthesis_gate.v0.2")
+        self.assertEqual(
+            result["method_frame_lock_control_schema_version"],
+            "eucons.ai4work_method_frame_lock_control.v0.1",
+        )
         self.assertEqual(
             result["profile_coverage_control_schema_version"],
             "eucons.ai4work_profile_coverage_control.v0.1",
         )
+        self.assertTrue(result["method_frame_locked_before_collection"])
         self.assertTrue(result["profile_coverage_qa_required"])
         self.assertFalse(result["representativeness_claim_allowed"])
         self.assertFalse(result["public_release_authorized"])
+
+    def test_canonical_wrapper_rejects_method_frame_drift_after_lock(self):
+        register = channel_register()
+        records = full_profile_records()
+        frame = bound_collection_frame(register, records)
+        manifest = bound_manifest(register, records, frame)
+        method_frame = approved_method_frame()
+        lock = approved_method_lock(method_frame, frame)
+        method_frame["sampling_design"]["provisional_readiness_thresholds"]["adults_total_valid_min"] = 1
+        with self.assertRaisesRegex(NEEDS.NeedsSynthesisGateError, "method frame bytes do not match"):
+            NEEDS.assert_real_batch_ready_for_needs_synthesis(
+                records,
+                manifest=manifest,
+                collection_frame=frame,
+                method_frame=method_frame,
+                method_frame_lock=lock,
+                channel_register=register,
+                forms_definition=frozen_forms(),
+            )
+
+    def test_canonical_wrapper_rejects_method_lock_approved_after_collection_started(self):
+        register = channel_register()
+        records = full_profile_records()
+        frame = bound_collection_frame(register, records)
+        manifest = bound_manifest(register, records, frame)
+        method_frame = approved_method_frame()
+        lock = approved_method_lock(method_frame, frame)
+        lock["approved_at"] = "2026-08-21T00:00:00+00:00"
+        with self.assertRaisesRegex(NEEDS.NeedsSynthesisGateError, "not locked before collection started"):
+            NEEDS.assert_real_batch_ready_for_needs_synthesis(
+                records,
+                manifest=manifest,
+                collection_frame=frame,
+                method_frame=method_frame,
+                method_frame_lock=lock,
+                channel_register=register,
+                forms_definition=frozen_forms(),
+            )
 
     def test_canonical_wrapper_rejects_missing_profile_field_after_hashes_are_rebound(self):
         register = channel_register()
@@ -122,12 +182,14 @@ class ProfileCoverageControlTests(unittest.TestCase):
         del records[0]["profile"]["age_band"]
         frame = bound_collection_frame(register, records)
         manifest = bound_manifest(register, records, frame)
+        method_frame = approved_method_frame()
         with self.assertRaisesRegex(NEEDS.NeedsSynthesisGateError, "missing frozen coverage dimension"):
             NEEDS.assert_real_batch_ready_for_needs_synthesis(
                 records,
                 manifest=manifest,
                 collection_frame=frame,
-                method_frame=approved_method_frame(),
+                method_frame=method_frame,
+                method_frame_lock=approved_method_lock(method_frame, frame),
                 channel_register=register,
                 forms_definition=frozen_forms(),
             )
