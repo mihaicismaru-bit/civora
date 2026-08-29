@@ -125,7 +125,7 @@ jobs:
           runs = [json.loads(path.read_text(encoding='utf-8')) for path in files]
           assert runs, 'missing MySMIS transport evidence'
           for run in runs:
-              assert run.get('schema') == 'CIVORA_MYSMIS_REPORTING_TRANSPORT_MATRIX_V1'
+              assert run.get('schema') == 'CIVORA_MYSMIS_REPORTING_TRANSPORT_MATRIX_V2'
               assert run.get('materialFactUse') is False
               assert run.get('openCallAuthorized') is False
               assert run.get('publishAuthorized') is False
