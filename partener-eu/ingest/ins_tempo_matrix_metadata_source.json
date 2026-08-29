@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "source": {
+    "id": "SRC-INS-TEMPO-MATRIX-METADATA",
+    "tier": "T1",
+    "class": "official_statistical_matrix_metadata",
+    "owner": "Institutul National de Statistica",
+    "url": "https://statistici.insse.ro/tempoins/index.jsp?ind=FOM106D&lang=ro&page=tempo3",
+    "programmes": [
+      "multiple"
+    ],
+    "programme_family": "STATISTICAL_INTELLIGENCE",
+    "extract": [
+      "matrix_code",
+      "matrix_title_metadata",
+      "periodicity_metadata",
+      "data_source_metadata",
+      "series_continuation_metadata"
+    ],
+    "material_fact_use": false,
+    "credentials_required": false,
+    "source_families": [
+      "ROMANIA",
+      "INS",
+      "STATISTICAL_INTELLIGENCE"
+    ],
+    "authority_scope": "MATRIX_METADATA_DISCOVERY",
+    "observation_state": "MATRIX_METADATA_DISCOVERY",
+    "adapter_required": "INS_TEMPO_MATRIX_METADATA_V1",
+    "freshness_hours": 168,
+    "note": "Official INS TEMPO exact-matrix metadata surface. This source is discovery/metadata only and does not authorize statistical values. A promoted statistical measure requires an exact matrix code, exact dimension/value selections, exact period, territory/universe, an official query/export response, immutable receipt/hash and semantic reconciliation. The existing SRC-INS-TEMPO material source remains authoritative and unchanged; this adapter does not remediate or downgrade its health state."
+  }
+}
