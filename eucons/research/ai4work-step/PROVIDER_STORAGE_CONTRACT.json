@@ -1,10 +1,10 @@
 {
-  "schema_version": "eucons.research_storage_contract.v0.7",
+  "schema_version": "eucons.research_storage_contract.v0.8",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "controller": {
-    "legal_name": null,
-    "cui": null,
-    "status": "UNRESOLVED_BEFORE_COLLECTION",
+    "legal_name": "EUROCONSULT SRL",
+    "cui": "14250864",
+    "status": "CONTROLLER_DETERMINED_PRIVACY_CONTACT_OPEN",
     "privacy_contact": "OPEN_BEFORE_PRODUCTION",
     "determination_reference": "CONTROLLER_DETERMINATION_DRAFT.json"
   },
@@ -71,11 +71,11 @@
     "raw_access_logging": "Provider-confirmed Shared Hosting Raw Access may include real IP, exact timestamp, HTTP method, full URL including query string, Referer, User-Agent, response code/size and Cloudflare real-IP metadata; questionnaire answers/direct identifiers are forbidden in query strings",
     "raw_access_current_account_retention": "OPEN_ACCOUNT_INSPECTION_REQUIRED",
     "raw_access_current_account_access_controls": "OPEN_ACCOUNT_INSPECTION_REQUIRED",
-    "contract_binding_status": "FIRST_PARTY_DPA_ANNEX4_ANNEX5_FROZEN_ACCOUNT_CONFIGURATION_ACTIVE_SUBSET_AND_ROLE_CHAIN_PENDING"
+    "contract_binding_status": "FIRST_PARTY_DPA_ANNEX4_ANNEX5_FROZEN_LIVE_PROVIDER_SERVICE_FAMILY_MAPPED_ACCOUNT_CONFIGURATION_ACTIVE_SUBSET_AND_ROLE_CHAIN_PENDING"
   },
   "production_binding_requirements": [
-    "freeze and approve the actual controller determination before any provider/controller binding is claimed",
-    "prove the actual eucons.ro hosting account/order is the Claus Web Shared Hosting service covered by the reviewed documentary baseline",
+    "retain the approved controller determination and bind the operational privacy contact before any real collection",
+    "retain the first-party live eucons.ro to Claus Web Shared Hosting/cPanel service-family mapping without inferring account-holder or GDPR roles from billing",
     "retain the frozen first-party DPA/Annex 4/Annex 5 baseline and document the legally authorized controller-to-provider instruction chain",
     "document the legal relationship between the determined controller, the hosting-account holder and Claus Web",
     "verify the exact active subprocessor/service-component subset for eucons.ro against the frozen Annex 4 baseline without assuming every listed provider is active",
@@ -100,10 +100,11 @@
     "result": "READ_LIVE_FROM_GITHUB_EXACT_HEAD_DO_NOT_CACHE_CI_STATE_IN_THIS_CONTRACT"
   },
   "go_no_go": {
-    "controller_identity": "UNRESOLVED_BEFORE_COLLECTION",
+    "controller_identity": "CLOSED_EUROCONSULT_SRL_CUI_14250864",
     "privacy_contact": "OPEN",
     "hosting_processor_public_framework": "CLOSED_AT_FIRST_PARTY_DPA_LEVEL",
-    "hosting_account_identity": "EVIDENCE_FOUND_ACCOUNT_BINDING_ESTABLISHED_PROVIDER_ROLE_CHAIN_NOT_INFERRED",
+    "hosting_provider_service_family_mapping": "CLOSED_FIRST_PARTY_CLAUS_WEB_SHARED_HOSTING_CPANEL",
+    "hosting_account_identity": "ACCOUNT_HISTORY_EVIDENCE_EXISTS_CURRENT_ACCOUNT_HOLDER_ROLE_NOT_INFERRED",
     "hosting_account_contract_and_annexes": "FIRST_PARTY_DPA_ANNEX4_ANNEX5_FROZEN_ACCOUNT_CONFIGURATION_AND_OVERRIDE_OPEN",
     "controller_hosting_account_processor_role_chain": "OPEN_EXTERNAL_CONFIRMATION",
     "provider_raw_access_field_profile": "CLOSED_FIRST_PARTY_PROVIDER_CONFIRMED",
