@@ -47,6 +47,8 @@ Implemented in this unit:
 - dispatcher-owned zero-click/zero-write safety responses and GET/HEAD-only discovery metadata
 - same-extension-only MV3 message transport with restart-safe session replay claims
 - bounded current-page snapshot responder with no click, submit or navigation capability
+- deterministic post-commit extension/native build attestations with sorted SHA-256 file manifests
+- same-source-head package pairing and fail-closed tamper/mixed-build verification
 
 Still fail-closed / not implemented:
 

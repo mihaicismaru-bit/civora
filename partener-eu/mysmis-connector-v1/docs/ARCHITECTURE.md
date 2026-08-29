@@ -46,6 +46,11 @@
     exposes a current-page snapshot responder only; it reads bounded attributes and contains no
     click, submit or navigation call. No native messaging, external-connect, debugger or CDP
     permission is introduced by this transport.
+16. Build attestation is an external post-commit artifact, avoiding a circular self-hash. An explicit
+    Git source head is bound to sorted runtime-file path, size and SHA-256 records for the extension
+    and native agent separately. Both component attestations must use the same source head before
+    they receive a pair ID. Placeholder heads, changed bytes, missing/extra paths and mixed builds
+    fail closed. Tests, evidence and documentation are not silently packaged as runtime files.
 
 No project code appears in the discovery implementation. Project numbers occur only in fixtures and
 acceptance evidence.
