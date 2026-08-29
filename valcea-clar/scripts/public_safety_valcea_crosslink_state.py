@@ -28,6 +28,28 @@ INFOTRAFIC_SOURCE = "signal-infotrafic-valcea"
 INCIDENT_CLASS = "PUBLIC_SAFETY_INCIDENT_REPORT"
 INFOTRAFIC_KIND = "ROAD_TRAFFIC_ALERTS"
 INFOTRAFIC_LIFECYCLE = "INTERNAL_TRAFFIC_EVENT_NEEDS_SOURCE_RECHECK"
+INFOTRAFIC_SEMANTIC_BASIS = "EXPLICIT_OFFICIAL_TITLE_AND_EXCERPT_ONLY"
+INFOTRAFIC_EVENT_FAMILIES = {
+    "ROAD_COLLISION",
+    "VEHICLE_FIRE",
+    "ROADWORKS",
+    "ROAD_OBSTRUCTION",
+    "WEATHER_HAZARD",
+    "TRAFFIC_RESTRICTION",
+    "TRAFFIC_EVENT_UNSPECIFIED",
+}
+INFOTRAFIC_CAUSE_FAMILIES = {
+    "COLLISION",
+    "FIRE",
+    "ROADWORKS",
+    "BROKEN_DOWN_VEHICLE",
+    "LANDSLIDE",
+    "FALLEN_TREE",
+    "ROCKFALL",
+    "SNOW_ICE",
+    "FOG",
+    "FLOODING",
+}
 
 ROAD_RE = re.compile(r"\b(?P<kind>DN|DJ|DC|A)\s*[- ]?\s*(?P<number>\d{1,4}[A-Z]?)\b", re.I)
 LOCALITY_PATTERNS = [
@@ -89,15 +111,22 @@ def normalize_locality(text: str) -> str | None:
     return None
 
 
-def event_family(text: str) -> str | None:
+def event_semantics(text: str) -> tuple[str | None, str | None]:
+    """Extract only narrow event/cause semantics that are explicit in the source title."""
     value = fold(text)
     if any(fold(hint) in value for hint in VEHICLE_FIRE_HINTS):
-        return "VEHICLE_FIRE"
+        return "VEHICLE_FIRE", "FIRE"
     if any(fold(hint) in value for hint in COLLISION_HINTS):
-        return "ROAD_COLLISION"
+        return "ROAD_COLLISION", "COLLISION"
     if any(fold(hint) in value for hint in GENERIC_FIRE_HINTS):
-        return "FIRE"
-    return None
+        return "FIRE", "FIRE"
+    return None, None
+
+
+def event_family(text: str) -> str | None:
+    """Compatibility shim for callers/tests that only need the explicit event family."""
+    family, _cause = event_semantics(text)
+    return family
 
 
 def _single_publication_date(record: dict[str, Any]) -> str:
@@ -169,7 +198,7 @@ def normalize_ipj(record: dict[str, Any]) -> tuple[dict[str, Any] | None, dict[s
     published = _single_publication_date(record)
     road = normalize_road(title)
     locality = normalize_locality(title)
-    family = event_family(title)
+    family, cause = event_semantics(title)
     if not road or not locality or not family:
         return None, _blocked("IPJ", rid, "INSUFFICIENT_EXPLICIT_IDENTITY", url)
     return {
@@ -180,6 +209,7 @@ def normalize_ipj(record: dict[str, Any]) -> tuple[dict[str, Any] | None, dict[s
         "road": road,
         "locality": locality,
         "event_family": family,
+        "cause_family": cause,
     }, None
 
 
@@ -200,7 +230,7 @@ def normalize_isu(record: dict[str, Any]) -> tuple[dict[str, Any] | None, dict[s
     published = _single_publication_date(record)
     road = normalize_road(title)
     locality = normalize_locality(title)
-    family = event_family(title)
+    family, cause = event_semantics(title)
     if not road or not locality or not family:
         return None, _blocked("ISU", rid, "INSUFFICIENT_EXPLICIT_IDENTITY", url)
     return {
@@ -211,6 +241,7 @@ def normalize_isu(record: dict[str, Any]) -> tuple[dict[str, Any] | None, dict[s
         "road": road,
         "locality": locality,
         "event_family": family,
+        "cause_family": cause,
     }, None
 
 
@@ -238,6 +269,8 @@ def normalize_infotrafic(
         raise ValueError("INFOTRAFIC lane refuses publication-authorized input")
     if record.get("public_projection") is not False or record.get("auto_publication") is not False:
         raise ValueError("INFOTRAFIC lane refuses reader-facing input")
+    if record.get("current_status_claim_allowed") is not False:
+        raise ValueError("INFOTRAFIC lane refuses current-status-authorized input")
     url = _validate_url(clean_text(record.get("article_url")), "politiaromana.ro")
     road = clean_text(record.get("road")).upper()
     if not ROAD_RE.fullmatch(road):
@@ -246,6 +279,20 @@ def normalize_infotrafic(
     locality = fold(locality_raw) if locality_raw else None
     if not locality:
         return None, _blocked("INFOTRAFIC", rid, "NO_EXPLICIT_LOCALITY_FOR_CROSS_SOURCE_MATCH", url)
+
+    if record.get("semantic_basis") != INFOTRAFIC_SEMANTIC_BASIS:
+        return None, _blocked("INFOTRAFIC", rid, "SEMANTIC_BASIS_NOT_EXPLICIT_OFFICIAL_TEXT", url)
+    family = clean_text(record.get("event_family"))
+    if family not in INFOTRAFIC_EVENT_FAMILIES:
+        return None, _blocked("INFOTRAFIC", rid, "INVALID_OR_UNSUPPORTED_EVENT_FAMILY", url)
+
+    raw_cause = record.get("cause_family")
+    cause = None if raw_cause is None else clean_text(raw_cause)
+    if cause == "":
+        return None, _blocked("INFOTRAFIC", rid, "INVALID_EMPTY_CAUSE_FAMILY", url)
+    if cause is not None and cause not in INFOTRAFIC_CAUSE_FAMILIES:
+        return None, _blocked("INFOTRAFIC", rid, "INVALID_OR_UNSUPPORTED_CAUSE_FAMILY", url)
+
     report_date = _parse_timestamp(record.get("source_timestamp")).date().isoformat()
     return {
         "source_group": "INFOTRAFIC",
@@ -254,7 +301,8 @@ def normalize_infotrafic(
         "report_date": report_date,
         "road": road,
         "locality": locality,
-        "event_family": "TRAFFIC_EVENT_UNSPECIFIED",
+        "event_family": family,
+        "cause_family": cause,
     }, None
 
 
@@ -267,6 +315,14 @@ def _candidate_id(key: tuple[str, str, str], record_ids: list[str]) -> str:
     return "public-safety-crosslink-" + _sha(raw)[:24]
 
 
+def _hold_for_group(key: tuple[str, str, str], records: list[dict[str, Any]], reason: str) -> dict[str, Any]:
+    return {
+        "candidate_key_sha256": _sha("\0".join(key)),
+        "record_ids": sorted(record["record_id"] for record in records),
+        "reason": reason,
+    }
+
+
 def _render_candidate(
     key: tuple[str, str, str], records: list[dict[str, Any]]
 ) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
@@ -276,24 +332,25 @@ def _render_candidate(
     if len(per_source) < 2:
         return None, None
     if any(len(items) != 1 for items in per_source.values()):
-        ids = sorted(record["record_id"] for record in records)
-        return None, {
-            "candidate_key_sha256": _sha("\0".join(key)),
-            "record_ids": ids,
-            "reason": "AMBIGUOUS_MULTIPLE_RECORDS_PER_SOURCE_FOR_EXACT_KEY",
-        }
+        return None, _hold_for_group(
+            key, records, "AMBIGUOUS_MULTIPLE_RECORDS_PER_SOURCE_FOR_EXACT_KEY"
+        )
 
-    known_families = {
-        record["event_family"]
-        for record in records
-        if record["event_family"] != "TRAFFIC_EVENT_UNSPECIFIED"
+    families = {record["event_family"] for record in records}
+    if "TRAFFIC_EVENT_UNSPECIFIED" in families:
+        return None, _hold_for_group(
+            key, records, "INFOTRAFIC_EVENT_FAMILY_UNSPECIFIED_RECHECK_REQUIRED"
+        )
+    if len(families) != 1:
+        return None, _hold_for_group(key, records, "INCOMPATIBLE_OR_MISSING_EVENT_FAMILY")
+
+    # cause_family is only a veto. It can prevent a bad cross-link when two sources carry
+    # explicit, comparable causes; it is never used to create an identity match.
+    explicit_causes = {
+        record["cause_family"] for record in records if record.get("cause_family") is not None
     }
-    if len(known_families) != 1:
-        return None, {
-            "candidate_key_sha256": _sha("\0".join(key)),
-            "record_ids": sorted(record["record_id"] for record in records),
-            "reason": "INCOMPATIBLE_OR_MISSING_EVENT_FAMILY",
-        }
+    if len(explicit_causes) > 1:
+        return None, _hold_for_group(key, records, "INCOMPATIBLE_EXPLICIT_CAUSE_FAMILY")
 
     ids = sorted(record["record_id"] for record in records)
     refs = [
@@ -310,13 +367,14 @@ def _render_candidate(
         "report_date": key[0],
         "road": key[1],
         "locality_key": key[2],
-        "event_family": next(iter(known_families)),
+        "event_family": next(iter(families)),
         "source_groups": sorted(per_source),
         "records": refs,
         "identity_basis": (
             "EXACT_REPORT_CALENDAR_DATE_PLUS_EXACT_ROAD_PLUS_EXACT_LOCALITY"
             "_WITH_COMPATIBLE_EXPLICIT_EVENT_FAMILY"
         ),
+        "cause_family_role": "EXPLICIT_CONFLICT_VETO_ONLY_NOT_IDENTITY_EVIDENCE",
         "report_date_is_not_incident_time": True,
         "cross_source_identity_merge_allowed": False,
         "cross_source_dedupe_allowed": False,
@@ -383,7 +441,7 @@ def build_crosslinks(bundle: dict[str, Any]) -> dict[str, Any]:
     ambiguous.sort(key=lambda item: (item["reason"], item["candidate_key_sha256"]))
 
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "product": "VÂLCEA CLAR public-safety cross-source review candidates",
         "eligible_record_count": len(eligible),
         "candidate_count": len(candidates),
@@ -406,6 +464,7 @@ def build_crosslinks(bundle: dict[str, Any]) -> dict[str, Any]:
             "current_incident_claim_allowed": False,
             "report_date_is_not_incident_time": True,
             "fuzzy_matching_allowed": False,
+            "cause_family_is_identity_evidence": False,
             "source_recheck_required": True,
         },
     }
@@ -426,6 +485,32 @@ def _base_signal(source_id: str, rid: str, url: str, title: str, published: str)
         "publication_authority": "NONE",
         "fact_kernel_authority": False,
         "persistence_allowed": False,
+    }
+
+
+def _base_traffic(
+    *,
+    event_id_char: str = "c",
+    event_family_name: str = "ROAD_COLLISION",
+    cause_family_name: str | None = "COLLISION",
+    locality: str | None = "Bujoreni",
+) -> dict[str, Any]:
+    return {
+        "event_id": "traffic-event-" + event_id_char * 24,
+        "source_id": INFOTRAFIC_SOURCE,
+        "source_kind": INFOTRAFIC_KIND,
+        "article_url": "https://politiaromana.ro/ro/info-trafic/accident-dn7",
+        "source_timestamp": "2026-08-29T14:00:00+03:00",
+        "road": "DN7",
+        "locality": locality,
+        "event_family": event_family_name,
+        "cause_family": cause_family_name,
+        "semantic_basis": INFOTRAFIC_SEMANTIC_BASIS,
+        "lifecycle": INFOTRAFIC_LIFECYCLE,
+        "publication_authority": "NONE",
+        "public_projection": False,
+        "auto_publication": False,
+        "current_status_claim_allowed": False,
     }
 
 
@@ -450,35 +535,83 @@ def self_test() -> int:
     assert candidate["source_groups"] == ["IPJ", "ISU"]
     assert candidate["cross_source_identity_merge_allowed"] is False
     assert candidate["live_status_transfer_allowed"] is False
+    assert candidate["cause_family_role"] == "EXPLICIT_CONFLICT_VETO_ONLY_NOT_IDENTITY_EVIDENCE"
 
-    traffic = {
-        "event_id": "traffic-event-" + "c" * 24,
-        "source_id": INFOTRAFIC_SOURCE,
-        "source_kind": INFOTRAFIC_KIND,
-        "article_url": "https://politiaromana.ro/ro/info-trafic/accident-dn7",
-        "source_timestamp": "2026-08-29T14:00:00+03:00",
-        "road": "DN7",
-        "locality": "Bujoreni",
-        "lifecycle": INFOTRAFIC_LIFECYCLE,
-        "publication_authority": "NONE",
-        "public_projection": False,
-        "auto_publication": False,
-    }
+    # Explicit INFOTRAFIC collision semantics can join the same exact identity key.
+    traffic = _base_traffic()
     state = build_crosslinks(
         {"ipj_signals": [ipj], "isu_signals": [isu], "infotrafic_events": [traffic]}
     )
     assert state["candidate_count"] == 1
     assert state["candidates"][0]["source_groups"] == ["INFOTRAFIC", "IPJ", "ISU"]
+    assert state["candidates"][0]["event_family"] == "ROAD_COLLISION"
 
-    fire = dict(isu)
-    fire["signal_id"] = "isu-local-" + "d" * 20
-    fire["article_url"] = "https://isuvl.igsu.ro/stiri-locale/incendiu-dn7"
-    fire["title"] = "Incendiu autoturism pe DN7 în localitatea Bujoreni"
-    state = build_crosslinks({"ipj_signals": [ipj], "isu_signals": [fire]})
+    # Explicit vehicle-fire semantics can join ISU only when the ISU title is equally explicit.
+    fire_isu = dict(isu)
+    fire_isu["signal_id"] = "isu-local-" + "d" * 20
+    fire_isu["article_url"] = "https://isuvl.igsu.ro/stiri-locale/incendiu-dn7"
+    fire_isu["title"] = "Incendiu autoturism pe DN7 în localitatea Bujoreni"
+    fire_traffic = _base_traffic(
+        event_id_char="g", event_family_name="VEHICLE_FIRE", cause_family_name="FIRE"
+    )
+    fire_traffic["article_url"] = "https://politiaromana.ro/ro/info-trafic/incendiu-dn7"
+    state = build_crosslinks({"isu_signals": [fire_isu], "infotrafic_events": [fire_traffic]})
+    assert state["candidate_count"] == 1
+    assert state["candidates"][0]["event_family"] == "VEHICLE_FIRE"
+
+    # Event-family conflicts remain fail-closed even when date/road/locality are exact.
+    state = build_crosslinks({"ipj_signals": [ipj], "isu_signals": [fire_isu]})
     assert state["candidate_count"] == 0
     assert state["ambiguous_group_count"] == 1
     assert state["ambiguous_groups"][0]["reason"] == "INCOMPATIBLE_OR_MISSING_EVENT_FAMILY"
 
+    mismatched_traffic = _base_traffic(
+        event_id_char="h", event_family_name="VEHICLE_FIRE", cause_family_name="FIRE"
+    )
+    state = build_crosslinks({"ipj_signals": [ipj], "infotrafic_events": [mismatched_traffic]})
+    assert state["candidate_count"] == 0
+    assert state["ambiguous_groups"][0]["reason"] == "INCOMPATIBLE_OR_MISSING_EVENT_FAMILY"
+
+    # Unspecified INFOTRAFIC semantics cannot broad-match a specific police/ISU event.
+    unspecified = _base_traffic(
+        event_id_char="u", event_family_name="TRAFFIC_EVENT_UNSPECIFIED", cause_family_name=None
+    )
+    state = build_crosslinks({"ipj_signals": [ipj], "infotrafic_events": [unspecified]})
+    assert state["candidate_count"] == 0
+    assert (
+        state["ambiguous_groups"][0]["reason"]
+        == "INFOTRAFIC_EVENT_FAMILY_UNSPECIFIED_RECHECK_REQUIRED"
+    )
+
+    # Malformed semantic values are held at record level rather than inferred.
+    invalid_family = _base_traffic(event_id_char="x", event_family_name="ALIEN_EVENT")
+    state = build_crosslinks({"infotrafic_events": [invalid_family]})
+    assert state["blocked_records"][0]["reason"] == "INVALID_OR_UNSUPPORTED_EVENT_FAMILY"
+
+    invalid_cause = _base_traffic(event_id_char="y", cause_family_name="UNKNOWN_CAUSE")
+    state = build_crosslinks({"infotrafic_events": [invalid_cause]})
+    assert state["blocked_records"][0]["reason"] == "INVALID_OR_UNSUPPORTED_CAUSE_FAMILY"
+
+    # cause_family is veto-only. A conflict blocks; absence on one side never invents a cause.
+    conflict_record = normalize_ipj(ipj)[0]
+    assert conflict_record is not None
+    conflict_record = dict(conflict_record)
+    conflict_record["cause_family"] = "FIRE"
+    traffic_record = normalize_infotrafic(traffic)[0]
+    assert traffic_record is not None
+    key = _identity_key(conflict_record)
+    candidate, hold = _render_candidate(key, [conflict_record, traffic_record])
+    assert candidate is None
+    assert hold is not None and hold["reason"] == "INCOMPATIBLE_EXPLICIT_CAUSE_FAMILY"
+
+    no_cause_record = dict(conflict_record)
+    no_cause_record["cause_family"] = None
+    candidate, hold = _render_candidate(key, [no_cause_record, traffic_record])
+    assert hold is None
+    assert candidate is not None
+    assert candidate["cause_family_role"] == "EXPLICIT_CONFLICT_VETO_ONLY_NOT_IDENTITY_EVIDENCE"
+
+    # Multiple records from one authority on the same exact key remain ambiguous.
     ipj2 = dict(ipj)
     ipj2["signal_id"] = "ipj-news-" + "e" * 20
     ipj2["article_url"] = "https://vl.politiaromana.ro/ro/stiri/alt-accident-dn7"
@@ -486,6 +619,7 @@ def self_test() -> int:
     assert state["candidate_count"] == 0
     assert state["ambiguous_groups"][0]["reason"] == "AMBIGUOUS_MULTIPLE_RECORDS_PER_SOURCE_FOR_EXACT_KEY"
 
+    # Sensitive-person IPJ records remain completely excluded from cross-linking output.
     sensitive = dict(ipj)
     sensitive.update(
         {
@@ -502,11 +636,25 @@ def self_test() -> int:
     rendered = json.dumps(state, ensure_ascii=False)
     assert "SENSITIVE_PERSON_ALERT_WITHHELD" not in rendered
 
-    no_locality = dict(traffic)
-    no_locality["event_id"] = "traffic-event-" + "9" * 24
-    no_locality["locality"] = None
+    no_locality = _base_traffic(event_id_char="9", locality=None)
     state = build_crosslinks({"infotrafic_events": [no_locality]})
     assert state["blocked_records"][0]["reason"] == "NO_EXPLICIT_LOCALITY_FOR_CROSS_SOURCE_MATCH"
+
+    # Authority/status drift must still fail hard before any candidate can be emitted.
+    live_authorized = _base_traffic(event_id_char="l")
+    live_authorized["current_status_claim_allowed"] = True
+    try:
+        build_crosslinks({"infotrafic_events": [live_authorized]})
+    except ValueError as exc:
+        assert "current-status-authorized" in str(exc)
+    else:
+        raise AssertionError("current-status authority drift must fail closed")
+
+    assert state["policy"]["cross_source_identity_merge_allowed"] is False
+    assert state["policy"]["cross_source_dedupe_allowed"] is False
+    assert state["policy"]["live_status_transfer_allowed"] is False
+    assert state["policy"]["breaking_status_transfer_allowed"] is False
+    assert state["policy"]["cause_family_is_identity_evidence"] is False
 
     print("public-safety cross-link self-test: ok")
     return 0
