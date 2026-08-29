@@ -2,18 +2,18 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-29T19:37:53+03:00",
+  "generated_at": "2026-08-29T19:48:53+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-29T19:36:32+03:00",
+  "queue_generated_at": "2026-08-29T19:47:38+03:00",
   "task_count": 66,
   "primary_match_count": 0,
   "no_match_count": 31,
   "unrouted_count": 35,
   "target_count": 18,
-  "targets_ok": 15,
+  "targets_ok": 14,
   "results": [
     {
       "signal_id": "173aca8b4f856b0306bd6c20",
@@ -777,9 +777,9 @@
             "name": "Spitalul Orășenesc Horezu",
             "url": "https://spitalulhorezu.ro/blog/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno -3] Temporary failure in name resolution>",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
