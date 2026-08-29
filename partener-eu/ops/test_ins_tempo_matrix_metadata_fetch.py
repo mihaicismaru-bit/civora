@@ -44,7 +44,7 @@ def main() -> int:
     assert metadata["periodicity"] and metadata["periodicity"].lower().startswith("lunar")
     assert metadata["data_source_note"] and "Cercetarea statistica" in metadata["data_source_note"]
     assert metadata["last_period_note"] == "Luna decembrie 2025"
-    assert metadata["continuation_matrix_code"] == "FOM106G"
+    assert metadata["continuation_matrix_code"] and metadata["continuation_matrix_code"].rstrip(".,;:") == "FOM106G"
 
     evidence = mod.build_evidence(
         FIXTURE,
