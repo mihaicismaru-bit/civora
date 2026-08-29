@@ -70,6 +70,13 @@
     no absolute path or exception message. Success still records installation as `NOT_STARTED` and
     rollback as `NOT_REQUIRED`; failure cannot trigger installation, browser control, native
     messaging, MySMIS access or a retry with changed bytes.
+20. Installation authorization is a separate, externally supplied record bound to the exact Git
+    head, pair ID, manifest digest and preflight attempt. It expires within 30 minutes and permits
+    only loading the unpacked extension, starting the local agent and running live HEALTH with an
+    operator present. The validator cannot create approval evidence or execute these operations.
+    State transitions accept only bounded local-operator observations, keep MySMIS access and
+    native messaging disabled, never promote installation into live evidence, and require complete
+    receipt-preserving rollback after a recorded failure.
 
 No project code appears in the discovery implementation. Project numbers occur only in fixtures and
 acceptance evidence.

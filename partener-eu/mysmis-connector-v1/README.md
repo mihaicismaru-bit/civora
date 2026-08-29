@@ -55,6 +55,8 @@ Implemented in this unit:
   altered/extra-file rejection and explicit operator rollback guidance
 - portable extracted-bundle preflight CLI and Windows CMD entrypoint that revalidate both component
   attestations, emit bounded success/failure receipts and leave installation explicitly `NOT_STARTED`
+- exact-build installation authorization and state-transition validator that requires an external
+  approval record and cannot execute installation or claim live health itself
 
 Still fail-closed / not implemented:
 
