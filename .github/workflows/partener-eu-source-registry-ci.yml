@@ -13,6 +13,8 @@ on:
       - 'partener-eu/ingest/eea_civil_society_reconcile.py'
       - 'partener-eu/ingest/regiocentru_actions_fetch.py'
       - 'partener-eu/ingest/regiocentru_actions_source.json'
+      - 'partener-eu/ingest/ins_tempo_matrix_metadata_fetch.py'
+      - 'partener-eu/ingest/ins_tempo_matrix_metadata_source.json'
       - 'partener-eu/p11/candidate_staging.py'
       - 'partener-eu/p11/eea_civil_society_stage.py'
       - 'partener-eu/p11/test_eea_civil_society_stage.py'
@@ -30,6 +32,7 @@ on:
       - 'partener-eu/ops/test_eea_civil_society_fetch.py'
       - 'partener-eu/ops/test_eea_civil_society_reconcile.py'
       - 'partener-eu/ops/test_regiocentru_actions_fetch.py'
+      - 'partener-eu/ops/test_ins_tempo_matrix_metadata_fetch.py'
       - '.github/workflows/partener-eu-source-registry-ci.yml'
   workflow_dispatch:
 
@@ -70,6 +73,7 @@ jobs:
           python -m json.tool partener-eu/ingest/source_registry.json >/dev/null
           python -m json.tool partener-eu/ingest/data_plane_contract.json >/dev/null
           python -m json.tool partener-eu/ingest/regiocentru_actions_source.json >/dev/null
+          python -m json.tool partener-eu/ingest/ins_tempo_matrix_metadata_source.json >/dev/null
           python -m json.tool partener-eu/ops/sources.json >/dev/null
           python -m py_compile partener-eu/ingest/source_registry_probe.py
           python -m py_compile partener-eu/ingest/funding_tenders_api.py
@@ -78,6 +82,7 @@ jobs:
           python -m py_compile partener-eu/ingest/eea_civil_society_fetch.py
           python -m py_compile partener-eu/ingest/eea_civil_society_reconcile.py
           python -m py_compile partener-eu/ingest/regiocentru_actions_fetch.py
+          python -m py_compile partener-eu/ingest/ins_tempo_matrix_metadata_fetch.py
           python -m py_compile partener-eu/p11/candidate_staging.py
           python -m py_compile partener-eu/p11/eea_civil_society_stage.py
           python -m py_compile partener-eu/p11/test_eea_civil_society_stage.py
@@ -91,6 +96,7 @@ jobs:
           python -m py_compile partener-eu/ops/test_eea_civil_society_fetch.py
           python -m py_compile partener-eu/ops/test_eea_civil_society_reconcile.py
           python -m py_compile partener-eu/ops/test_regiocentru_actions_fetch.py
+          python -m py_compile partener-eu/ops/test_ins_tempo_matrix_metadata_fetch.py
 
       - name: Validate P10 and canonical source authority compatibility
         run: python partener-eu/ops/test_p10_policy_regression.py
@@ -184,5 +190,64 @@ jobs:
         with:
           name: partener-regiocentru-actions-live-evidence
           path: /tmp/regiocentru-actions
+          retention-days: 7
+          if-no-files-found: warn
+
+      - name: Validate INS TEMPO matrix-metadata acquisition contract
+        run: python partener-eu/ops/test_ins_tempo_matrix_metadata_fetch.py
+
+      - name: Capture live INS TEMPO exact-matrix metadata without authorizing values
+        run: |
+          python partener-eu/ingest/ins_tempo_matrix_metadata_fetch.py \
+            --output-dir /tmp/ins-tempo-matrix-metadata \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Validate live INS TEMPO receipt stays metadata-only
+        run: |
+          python - <<'PY'
+          import json, re, sys
+          from urllib.parse import parse_qs, urlparse
+          p='/tmp/ins-tempo-matrix-metadata/handoff/fom106d_metadata.json'
+          d=json.load(open(p, encoding='utf-8'))
+          if d.get('source_id') != 'SRC-INS-TEMPO-MATRIX-METADATA' or d.get('adapter_id') != 'INS_TEMPO_MATRIX_METADATA_V1':
+              print('FAIL INS TEMPO identity drift:', d.get('source_id'), d.get('adapter_id'))
+              sys.exit(2)
+          if d.get('observation_state') != 'MATRIX_METADATA_DISCOVERY':
+              print('FAIL INS TEMPO metadata escaped discovery-only state')
+              sys.exit(2)
+          for key in ('material_fact_use','statistical_value_authorized','publish_authorized'):
+              if d.get(key) is not False:
+                  print('FAIL INS TEMPO metadata became value-authorizing:', key, d.get(key))
+                  sys.exit(2)
+          if d.get('matrix_code') != 'FOM106D':
+              print('FAIL exact INS TEMPO matrix identity missing:', d.get('matrix_code'))
+              sys.exit(2)
+          raw_hash=str(d.get('raw_sha256') or '')
+          if not re.fullmatch(r'[0-9a-f]{64}', raw_hash):
+              print('FAIL invalid INS TEMPO raw SHA-256')
+              sys.exit(2)
+          if not d.get('fetched_at') or not d.get('run_id') or not d.get('parser_version'):
+              print('FAIL INS TEMPO provenance incomplete')
+              sys.exit(2)
+          for key in ('requested_url','final_url'):
+              u=urlparse(str(d.get(key) or ''))
+              query=parse_qs(u.query)
+              if u.scheme != 'https' or (u.hostname or '').lower() != 'statistici.insse.ro' or not (u.path or '/').startswith('/tempoins/') or (query.get('ind') or [''])[0].upper() != 'FOM106D':
+                  print('FAIL INS TEMPO authority/matrix drift:', key, d.get(key))
+                  sys.exit(2)
+          missing=set(d.get('missing_for_statistical_value_confirmation') or [])
+          required={'exact_matrix_code','exact_dimension_and_value_selections','exact_period','exact_territory_or_universe','official_query_or_export_response','semantic_reconciliation'}
+          if not required.issubset(missing):
+              print('FAIL INS TEMPO value-proof requirements incomplete:', sorted(missing))
+              sys.exit(2)
+          print(json.dumps({'matrix_code': d.get('matrix_code'), 'raw_sha256': raw_hash, 'continuation_matrix_code': d.get('continuation_matrix_code'), 'observation_state': d.get('observation_state'), 'statistical_value_authorized': d.get('statistical_value_authorized')}, ensure_ascii=False))
+          PY
+
+      - name: Upload bounded INS TEMPO matrix-metadata evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-ins-tempo-matrix-metadata-live-evidence
+          path: /tmp/ins-tempo-matrix-metadata
           retention-days: 7
           if-no-files-found: warn
