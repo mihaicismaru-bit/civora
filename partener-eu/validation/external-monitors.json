@@ -1,55 +1,58 @@
 {
   "schema_version": "1.0",
   "checkpoint": "PARTENER-EU-CIVORA-P10-0020",
-  "observed_at": "2026-08-29T22:29:30Z",
-  "validation_run_started": "2026-08-29T22:29:13Z",
+  "observed_at": "2026-08-29T22:31:26Z",
+  "validation_run_started": "2026-08-29T22:31:09Z",
   "integrity": {
     "latest_history_equal": true,
-    "latest_sha256": "a7ae1d13667fc63c647592e659aa7acd7167039dffdba2be5351f27ac779ea1f",
-    "history_sha256": "a7ae1d13667fc63c647592e659aa7acd7167039dffdba2be5351f27ac779ea1f",
-    "history_path": "validation/history/20260829T222913Z.json",
+    "latest_sha256": "a29c922d0f880fe692f7391acc1e9898217c27e0821e7b74c3e4c95d53ca55db",
+    "history_sha256": "a29c922d0f880fe692f7391acc1e9898217c27e0821e7b74c3e4c95d53ca55db",
+    "history_path": "validation/history/20260829T223109Z.json",
     "source_state_checkpoint_equal": true,
-    "source_state_sha256": "441502f12caf9fe8d7c36bc7b91f419bc67fe88b90d0004cb968632f47c2d0cf",
-    "checkpoint_sha256": "441502f12caf9fe8d7c36bc7b91f419bc67fe88b90d0004cb968632f47c2d0cf",
+    "source_state_sha256": "954ad97d0947d9067ec49a90b61943dc528c6dbb72b8e37785d2c1671fff11cf",
+    "checkpoint_sha256": "954ad97d0947d9067ec49a90b61943dc528c6dbb72b8e37785d2c1671fff11cf",
     "frontend_regression_pass": true,
     "frontend_pass": 10,
     "frontend_total": 10,
     "recovery_state_integrity": "PASS"
   },
   "source_registry": {
-    "observed_at": "2026-08-29T20:29:06.661147Z",
-    "age_seconds": 7223,
+    "observed_at": "2026-08-29T22:29:05.830186Z",
+    "age_seconds": 140,
     "stale_after_seconds": 28800,
     "stale": false,
     "health": "DEGRADED",
     "summary": {
       "total": 55,
-      "pass": 40,
-      "degraded": 2,
+      "pass": 31,
+      "degraded": 11,
       "fail": 13,
       "quarantined": 14,
-      "low_information": 1,
-      "resolution_tasks_required": 0
+      "low_information": 7,
+      "resolution_tasks_required": 2
     },
     "tier_counts": {
       "T1": {
         "total": 39,
-        "pass": 30,
-        "degraded": 1,
+        "pass": 26,
+        "degraded": 5,
         "fail": 8,
         "quarantined": 9,
-        "hash_changes": 0
+        "hash_changes": 1
       },
       "T1B": {
         "total": 13,
-        "pass": 9,
-        "degraded": 1,
+        "pass": 5,
+        "degraded": 5,
         "fail": 3,
         "quarantined": 3,
-        "hash_changes": 0
+        "hash_changes": 1
       }
     },
-    "changed_source_ids": [],
+    "changed_source_ids": [
+      "SRC-ANOFM-VALCEA-STATS",
+      "SRC-MEC-CNDIPT"
+    ],
     "missing_resolution_tasks": [],
     "unsafe_material_updates": [],
     "fail_closed": true
@@ -363,7 +366,7 @@
   "summary": {
     "integrity_pass": true,
     "registry_health": "DEGRADED",
-    "registry_hash_changes": 0,
+    "registry_hash_changes": 2,
     "afir_hash_changes": 0,
     "peo_calendar_changes": 0,
     "mipe_health": "PASS",
