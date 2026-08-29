@@ -1,0 +1,38 @@
+name: EUCONS Main Writer Serialization
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/local-news-os-vnext-valcea-shadow-migration.yml'
+      - 'eucons/validation/validate_main_writer_serialization.py'
+      - 'eucons/validation/test_main_writer_serialization_fail_closed.py'
+      - '.github/workflows/eucons-main-writer-serialization.yml'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/local-news-os-vnext-valcea-shadow-migration.yml'
+      - 'eucons/validation/validate_main_writer_serialization.py'
+      - 'eucons/validation/test_main_writer_serialization_fail_closed.py'
+      - '.github/workflows/eucons-main-writer-serialization.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-main-writer-serialization-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fail-closed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Validate main writer serialization
+        run: python eucons/validation/validate_main_writer_serialization.py
+      - name: Test main writer serialization fail-closed behavior
+        run: python eucons/validation/test_main_writer_serialization_fail_closed.py
