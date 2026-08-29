@@ -1,7 +1,7 @@
 {
-  "schema_version": "eucons.ai4work_research_hosting_plan.v0.6",
+  "schema_version": "eucons.ai4work_research_hosting_plan.v0.7",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "state": "PROVIDER_DOCUMENTARY_BASELINE_FROZEN_ACCOUNT_CONTROLLER_AND_LIVE_BINDING_REQUIRED_BEFORE_COLLECTION",
+  "state": "CONTROLLER_DETERMINED_PROVIDER_DOCUMENTARY_BASELINE_FROZEN_PRIVACY_CONTACT_ROLE_CHAIN_AND_LIVE_BINDING_REQUIRED_BEFORE_COLLECTION",
   "verified_existing_eucons_runtime": {
     "public_origin": "https://eucons.ro",
     "api_origin": "https://api.eucons.ro",
@@ -48,13 +48,18 @@
   },
   "role_determination_before_activation": {
     "rule": "Do not infer controller or processor status from website branding, domain ownership, project-applicant status, consulting role, billing responsibility or hosting-account ownership alone.",
+    "controller": "EUROCONSULT SRL / CUI 14250864",
+    "controller_status": "DETERMINED_FROM_FIRST_PARTY_AUTHORITY_EVIDENCE",
+    "controller_reference": "CONTROLLER_DETERMINATION_DRAFT.json",
     "verified_distinct_roles": [
-      "current MySMIS project leader identity is controlled separately",
-      "eucons.ro hosting-account holder identity is controlled separately",
-      "CLAUS WEB SRL is the Shared Hosting provider under the frozen first-party DPA package"
+      "EUROCONSULT SRL / CUI 14250864 is the determined controller for the AI4WORK research",
+      "current MySMIS project leader identity is controlled separately and is not used to infer GDPR controller status",
+      "eucons.ro hosting-account holder/administrator identity and respondent-level technical access are controlled separately",
+      "CLAUS WEB SRL is the Shared Hosting/cPanel provider under the frozen first-party DPA package"
     ],
-    "required_output": "documented controller/processor/subprocessor chain plus Article 28-compatible instructions/terms where applicable",
-    "status": "CONTROLLER_UNRESOLVED_EXTERNAL_ROLE_REQUESTS_WITHDRAWN_FAIL_CLOSED"
+    "withdrawn_correspondence_rule": "AI-generated role-confirmation outreach later expressly withdrawn by the user is NON_EVIDENTIARY and cannot close any GDPR role/access gate",
+    "required_output": "documented controller-to-hosting-account-administration-to-processor/subprocessor chain plus Article 28-compatible instructions/terms where applicable",
+    "status": "CONTROLLER_DETERMINED_PRIVACY_CONTACT_AND_HOSTING_ROLE_CHAIN_OPEN_FAIL_CLOSED"
   },
   "provider_documentary_baseline": {
     "status": "FROZEN_FIRST_PARTY_SHARED_HOSTING_PACKAGE",
@@ -99,9 +104,9 @@
     }
   },
   "privacy_and_security_requirements_before_activation": [
-    "determine and approve the actual controller and operational privacy contact from first-party authority evidence",
+    "retain the determined EUROCONSULT SRL controller identity and bind a verified operational privacy contact before any real collection",
     "approve lawful basis/LIA, Article 13 notice, DPIA screening/decision, retention schedule and rights procedure",
-    "document the controller/processor/subprocessor chain and applicable instructions",
+    "document the controller/hosting-account administrator/processor/subprocessor chain and applicable instructions without using withdrawn correspondence as evidence",
     "verify the active-service subset of the frozen Annex 4 baseline where needed for the final processor map",
     "inspect current eucons.ro cPanel Raw Access retention/archive setting and access controls",
     "verify any account-specific Annex 5 override against commercial order/cPanel/technical annex",
@@ -113,7 +118,7 @@
     "obtain explicit user approval before any external deploy or real collection activation"
   ],
   "current_open_operational_gates": {
-    "controller_and_privacy_contact": "OPEN",
+    "controller_and_privacy_contact": "OPEN_PRIVACY_CONTACT_ONLY_CONTROLLER_CLOSED",
     "lawful_basis_article13_dpia_retention_rights_approval": "OPEN",
     "controller_processor_subprocessor_chain": "OPEN",
     "current_cpanel_raw_access_retention_and_access": "OPEN",
