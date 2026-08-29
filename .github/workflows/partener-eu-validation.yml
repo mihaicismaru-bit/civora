@@ -30,8 +30,9 @@ on:
 concurrency:
   group: partener-eu-production-validation
   # Every run persists a shared validation/checkpoint ledger. Queue overlapping
-  # monitor and Pages triggers so an interrupted writer cannot race the next
-  # run during git pull --rebase and lose the newer evidence commit.
+  # triggers, and fail closed if another canonical writer advances main while
+  # this run is collecting evidence. Never rebase generated evidence over a
+  # newer code head.
   cancel-in-progress: false
 
 permissions:
@@ -60,11 +61,28 @@ jobs:
           node-version: '22'
 
       - name: Regenerate canonical data products
+        id: regenerate
+        continue-on-error: true
+        shell: bash
         run: |
+          set +e
           python partener-eu/ingest/build_mysmis_consultant_registry.py
+          BUILD_REGISTRY_CODE=$?
+          if [ "$BUILD_REGISTRY_CODE" != "0" ]; then
+            exit "$BUILD_REGISTRY_CODE"
+          fi
           python partener-eu/ingest/intelligence_index.py
+          INTELLIGENCE_INDEX_CODE=$?
+          if [ "$INTELLIGENCE_INDEX_CODE" != "0" ]; then
+            exit "$INTELLIGENCE_INDEX_CODE"
+          fi
           python partener-eu/p11/apply_resolutions.py
+          APPLY_RESOLUTIONS_CODE=$?
+          if [ "$APPLY_RESOLUTIONS_CODE" != "0" ]; then
+            exit "$APPLY_RESOLUTIONS_CODE"
+          fi
           python partener-eu/p11/build_public_projection.py
+          exit $?
 
       - name: Unified product quality gate
         id: quality
@@ -104,6 +122,11 @@ jobs:
         id: policy
         continue-on-error: true
         run: python partener-eu/ops/test_p10_policy_regression.py
+
+      - name: Production Validation writer isolation regression
+        id: validation_writer
+        continue-on-error: true
+        run: python partener-eu/ops/test_validation_writer_failclosed.py
 
       - name: AFIR authentication-boundary regression
         id: afir_policy
@@ -166,9 +189,10 @@ jobs:
           exit 0
 
       - name: Persist validation ledger and safe source corrections
-        if: always()
+        if: ${{ always() && steps.validate.outcome == 'success' && steps.validate.outputs.exit_code != '' }}
         shell: bash
         run: |
+          set -euo pipefail
           git config user.name "civora-validation-bot"
           git config user.email "civora-validation-bot@users.noreply.github.com"
           git add \
@@ -179,9 +203,26 @@ jobs:
             partener-eu/web/p11-public-data.js \
             partener-eu/web/consultant-workspace-v3.js \
             partener-eu/web/mysmis-registry.js
+
+          unexpected="$(git diff --cached --name-only | grep -Ev '^(partener-eu/validation/|partener-eu/P10_ACCEPTANCE\.json$|partener-eu/ingest/state/intelligence_index\.json$|partener-eu/p11/opportunity_bundle\.json$|partener-eu/web/p11-public-data\.js$|partener-eu/web/consultant-workspace-v3\.js$|partener-eu/web/mysmis-registry\.js$)' || true)"
+          if [ -n "$unexpected" ]; then
+            echo "FAIL validation persistence escaped allowlist:" >&2
+            printf '%s\n' "$unexpected" >&2
+            exit 2
+          fi
+
+          git fetch origin main
+          local_head="$(git rev-parse HEAD)"
+          remote_main="$(git rev-parse origin/main)"
+          if [ "$local_head" != "$remote_main" ]; then
+            echo "FAIL canonical main moved during validation: checkout=$local_head remote=$remote_main" >&2
+            exit 2
+          fi
+
           if ! git diff --cached --quiet; then
             git commit -m "PARTENER.EU validation ledger $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-            git pull --rebase origin main
+            # A concurrent main update must fail non-fast-forward. Never rebase
+            # generated evidence over a newer code or evidence head.
             git push origin HEAD:main
           fi
 
@@ -189,11 +230,13 @@ jobs:
         if: always()
         shell: bash
         env:
+          REGENERATE_OUTCOME: ${{ steps.regenerate.outcome }}
           RECOVERY_OUTCOME: ${{ steps.recovery.outcome }}
           FRONTEND_OUTCOME: ${{ steps.frontend.outcome }}
           EDITORIAL_OUTCOME: ${{ steps.editorial.outcome }}
           INTELLIGENCE_UI_OUTCOME: ${{ steps.intelligence_ui.outcome }}
           POLICY_OUTCOME: ${{ steps.policy.outcome }}
+          VALIDATION_WRITER_OUTCOME: ${{ steps.validation_writer.outcome }}
           AFIR_POLICY_OUTCOME: ${{ steps.afir_policy.outcome }}
           PUBLIC_TRANSPORT_OUTCOME: ${{ steps.public_transport.outcome }}
           QUALITY_OUTCOME: ${{ steps.quality.outcome }}
@@ -204,7 +247,8 @@ jobs:
           ACCEPTANCE_CODE: ${{ steps.acceptance.outputs.exit_code }}
         run: |
           FAIL=0
-          for OUTCOME in "$RECOVERY_OUTCOME" "$FRONTEND_OUTCOME" "$EDITORIAL_OUTCOME" "$INTELLIGENCE_UI_OUTCOME" "$POLICY_OUTCOME" "$AFIR_POLICY_OUTCOME" "$PUBLIC_TRANSPORT_OUTCOME" "$QUALITY_OUTCOME"; do
+          if [ "$REGENERATE_OUTCOME" != "success" ]; then FAIL=2; fi
+          for OUTCOME in "$RECOVERY_OUTCOME" "$FRONTEND_OUTCOME" "$EDITORIAL_OUTCOME" "$INTELLIGENCE_UI_OUTCOME" "$POLICY_OUTCOME" "$VALIDATION_WRITER_OUTCOME" "$AFIR_POLICY_OUTCOME" "$PUBLIC_TRANSPORT_OUTCOME" "$QUALITY_OUTCOME"; do
             if [ "$OUTCOME" != "success" ]; then FAIL=2; fi
           done
           for CODE in "$VALIDATE_CODE" "$RESOLUTION_CODE" "$INTEGRITY_CODE" "$DEPLOYMENT_CODE" "$ACCEPTANCE_CODE"; do
