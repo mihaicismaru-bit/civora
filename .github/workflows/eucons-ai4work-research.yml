@@ -30,9 +30,9 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - name: Run AI4WORK runtime, storage, idempotency, HTTP, NF06, TEST TWIN, controller, minimization, collection-frame, primary-readiness, retention, rights, DPIA, disclosure-control, scientific-research, anonymisation classification and PROD-activation tests
+      - name: Run AI4WORK runtime, storage, idempotency, HTTP, NF06, TEST TWIN, controller, minimization, collection-frame, primary-readiness, real-batch temporal provenance, retention, rights, DPIA, disclosure-control, scientific-research, anonymisation classification and PROD-activation tests
         working-directory: eucons/research/ai4work-step
-        run: python -m unittest -v test_runtime.py test_research_storage.py test_http_idempotency.py test_http_endpoint.py test_nf06_preingest.py test_nf06_method_coverage.py test_e2e_test_twin_chain.py test_controller_determination.py test_live_hosting_service_mapping.py test_preview_minimization.py test_collection_frame.py test_primary_evidence_readiness.py test_retention_schedule.py test_data_subject_rights.py test_rights_access.py test_dpia_screening.py test_disclosure_control.py test_scientific_research_classification.py test_anonymisation_classification.py test_prod_activation_gate.py
+        run: python -m unittest -v test_runtime.py test_research_storage.py test_http_idempotency.py test_http_endpoint.py test_nf06_preingest.py test_nf06_method_coverage.py test_e2e_test_twin_chain.py test_controller_determination.py test_live_hosting_service_mapping.py test_preview_minimization.py test_collection_frame.py test_primary_evidence_readiness.py test_real_batch_synthesis_gate.py test_retention_schedule.py test_data_subject_rights.py test_rights_access.py test_dpia_screening.py test_disclosure_control.py test_scientific_research_classification.py test_anonymisation_classification.py test_prod_activation_gate.py
       - name: Enforce repository PROD activation state
         working-directory: eucons/research/ai4work-step
         run: python prod_activation_gate.py
