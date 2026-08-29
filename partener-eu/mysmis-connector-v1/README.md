@@ -57,6 +57,8 @@ Implemented in this unit:
   attestations, emit bounded success/failure receipts and leave installation explicitly `NOT_STARTED`
 - exact-build installation authorization and state-transition validator that requires an external
   approval record and cannot execute installation or claim live health itself
+- portable installation-authorization CLI that consumes only the preflight receipt and an externally
+  supplied approval record, then emits a bounded plan or sanitized no-execution failure receipt
 
 Still fail-closed / not implemented:
 
@@ -76,6 +78,18 @@ only reads the extracted `PAYLOAD` and `CONTROL` trees, verifies every byte and 
 receipt. It does not install an extension, enable native messaging, open MySMIS or write a receipt
 to disk. A pass status is `INSTALL_ATTEMPT_PREFLIGHT_PASS_INSTALL_NOT_STARTED`; any other status is
 a stop condition.
+
+An externally issued, exact-build authorization can then be validated without starting installation:
+
+```sh
+node native/install-authorization-cli.mjs \
+  --preflight /path/to/preflight-receipt.json \
+  --authorization /path/to/external-authorization.json
+```
+
+The command only reads those two JSON files. It emits a non-executing bounded plan on success or a
+sanitized `INSTALL_AUTHORIZATION_REJECTED_NO_EXECUTION` receipt on failure; it does not write files,
+load the extension, start the agent, enable native messaging or access MySMIS.
 
 The Drive contract never directly edits an Artifact Registry or SSOT. It persists a
 `PENDING_HUMAN_REVIEW` proposal only after the uploaded bytes have been read back in full and match

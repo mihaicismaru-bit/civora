@@ -77,6 +77,12 @@
     State transitions accept only bounded local-operator observations, keep MySMIS access and
     native messaging disabled, never promote installation into live evidence, and require complete
     receipt-preserving rollback after a recorded failure.
+21. The portable installation-authorization CLI accepts exactly two local JSON inputs: the bounded
+    preflight receipt and externally supplied authorization. It performs no installation, browser
+    control, agent start, native-messaging enablement, shell execution or MySMIS access. A valid
+    record produces only an `AUTHORIZED_NOT_STARTED` plan; invalid arguments, inaccessible inputs,
+    malformed JSON, expired approvals, binding errors and digest mismatches produce a sanitized
+    no-execution receipt without paths, approval contents or exception messages.
 
 No project code appears in the discovery implementation. Project numbers occur only in fixtures and
 acceptance evidence.

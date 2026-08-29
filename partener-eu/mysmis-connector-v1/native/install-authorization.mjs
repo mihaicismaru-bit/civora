@@ -169,6 +169,28 @@ export function createAuthorizedInstallationPlan({ preflightReceipt, authorizati
   });
 }
 
+export function createInstallAuthorizationFailureReceipt({ error, clock = () => new Date() }) {
+  const errorCode = error instanceof InstallAuthorizationError
+    && /^[A-Z0-9_]{1,80}$/u.test(error.code)
+    ? error.code
+    : "INSTALL_AUTH_UNEXPECTED_FAILURE";
+  return Object.freeze({
+    schemaVersion: 1,
+    recordedAt: clock().toISOString(),
+    status: "INSTALL_AUTHORIZATION_REJECTED_NO_EXECUTION",
+    errorCode,
+    installState: "NOT_STARTED",
+    rollbackState: "NOT_REQUIRED",
+    installationPerformed: false,
+    nativeMessagingEnabled: false,
+    mysmisAccessPerformed: false,
+    mysmisWrites: 0,
+    remoteShellUsed: false,
+    credentialAccessPerformed: false,
+    liveEvidenceClaimed: false
+  });
+}
+
 function assertSafeObservation(current, event) {
   if (!new Set(["INSTALLATION_OBSERVED", "INSTALLATION_FAILED", "ROLLBACK_OBSERVED"]).has(event?.event)) {
     throw new InstallAuthorizationError("INSTALL_OBSERVATION_INVALID", "Unknown installation observation event.");
