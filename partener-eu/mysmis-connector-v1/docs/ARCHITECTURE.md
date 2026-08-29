@@ -9,8 +9,13 @@
    observation, proven read-only UI download, route metadata, manual intake, then optional CDP.
 6. POST and ambiguous actions fail closed. CDP and automated traversal remain disabled until the
    persisted authorization/compliance gate explicitly permits them.
-7. A later native agent must hash bytes, validate MIME/magic/size, spool restart-safely, upload to
-   Drive, read back, then append the Artifact Registry and the correct branch SSOT.
+7. The native intake agent accepts completed user-triggered/manual downloads, rejects symlinks and
+   changing files, hashes bytes as a stream, validates MIME/magic/size, and commits a
+   content-addressed object plus atomic restart checkpoint, receipt and index.
+8. Same bytes deduplicate globally; changed bytes under the same logical artifact create a new
+   version. The source download remains unchanged and its local path is not persisted.
+9. A later Drive adapter must upload the committed object, read it back, verify SHA-256, then append
+   the Artifact Registry and the correct branch SSOT.
 
 No project code appears in the discovery implementation. Project numbers occur only in fixtures and
 acceptance evidence.

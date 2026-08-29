@@ -32,14 +32,33 @@ Implemented in this unit:
 - response metadata observation using response headers only
 - sensitive URL query redaction
 - fixtures derived from persisted Drive evidence for 310224 and 367944
+- local/manual-download intake agent with regular-file and symlink gates
+- streaming SHA-256 plus magic/MIME/size validation
+- content-addressed spool with atomic object, index, receipt and checkpoint writes
+- idempotent replay, same-byte deduplication and logical artifact versioning
 
 Still fail-closed / not implemented:
 
-- native acquisition agent and byte spool
-- SHA-256 binary validation and Drive readback validation
-- Drive-first persistence, Artifact Registry and SSOT reconciliation
+- Drive upload adapter and post-upload SHA-256 readback validation
+- Artifact Registry and SSOT reconciliation
 - CDP debugger fallback
 - authorized authenticated live benchmark execution
 - second-project generalization and v1.0 release-candidate receipt
 
 The connector is therefore not `VERIFIED_FUNCTIONAL`.
+
+## Manual intake CLI
+
+The CLI consumes only a completed local download. It does not connect to MySMIS or the network:
+
+```sh
+node native/cli.mjs \
+  --source /path/to/download.pdf \
+  --spool /path/to/spool \
+  --project 310224 \
+  --track IMPLEMENTATION \
+  --kind CONTRACT \
+  --name "Financing contract" \
+  --filename contract.pdf \
+  --mime application/pdf
+```
