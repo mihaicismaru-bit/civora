@@ -103,6 +103,11 @@
     zero-route-mutation, zero-write and no-shell restrictions. The gate emits commands but contains
     no dispatcher, browser or network primitive; project identifiers remain input data and never
     appear in runtime source.
+25. Benchmark evidence verification is append-only and non-executing. It recomputes the exact
+    handoff-bound admission and both `LIVE_BRIDGE_TOOL` discovery responses, requires one distinct
+    track per response on the same build and health challenge, and locally rebuilds every candidate
+    inventory with explicit non-retrievable reasons. Passing discovery remains pending artifact
+    retrieval, Draft traversal, live resume, dedup/versioning and second-project generalization.
 
 No project code appears in the discovery implementation. Project numbers occur only in fixtures and
 acceptance evidence.

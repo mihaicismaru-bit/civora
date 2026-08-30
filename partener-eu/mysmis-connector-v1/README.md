@@ -65,6 +65,8 @@ Implemented in this unit:
   installation transition and live HEALTH receipt before admitting any benchmark execution
 - two-track generic benchmark-admission gate that requires a fresh verified live handoff, binds both
   discovery commands to one build and health challenge, and cannot execute either command
+- append-only benchmark discovery-evidence verifier that recomputes admission and both live responses,
+  preserves explicit non-retrievable reasons and leaves retrieval and Draft traversal unclaimed
 
 Still fail-closed / not implemented:
 
