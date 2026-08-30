@@ -37,6 +37,8 @@ def main() -> int:
         "EEA-RO-RESEARCH-UEFISCDI-WATCH",
         "EEA-RO-GREEN-TRANSITION-MMAP-WATCH",
         "EEA-RO-LOCAL-DEVELOPMENT-FRDS-WATCH",
+        "EEA-RO-JUSTICE-MJ-WATCH",
+        "EEA-RO-HOME-AFFAIRS-MAI-WATCH",
         "EEA-RO-INNOVATION-NORWAY-FUND-OPERATOR-WATCH",
     }
     if set(routes) != expected_routes:
@@ -64,6 +66,24 @@ def main() -> int:
         or "dezvoltare-locala.frds.ro" not in set(local.get("allowed_hosts") or [])
     ):
         fail("FRDS Local Development route must remain bounded to the current official 2021-2028 Programme Operator surface")
+
+    justice = routes["EEA-RO-JUSTICE-MJ-WATCH"]
+    if (
+        justice["observation_state"] != "OPERATOR_WATCH_HISTORICAL_LANDING"
+        or justice["operator_name"] != "Ministry of Justice"
+        or justice["watch_url"] != "https://www.just.ro/norwaygrants/"
+        or justice["programme_ids"] != ["justice"]
+    ):
+        fail("Justice route must remain a historical ministry landing watch until current-period operator/call evidence appears")
+
+    home_affairs = routes["EEA-RO-HOME-AFFAIRS-MAI-WATCH"]
+    if (
+        home_affairs["observation_state"] != "OPERATOR_WATCH_HISTORICAL_LANDING"
+        or home_affairs["operator_name"] != "Ministry of Internal Affairs"
+        or home_affairs["watch_url"] != "https://norwaygrants-en.mai.gov.ro/"
+        or home_affairs["programme_ids"] != ["home-affairs"]
+    ):
+        fail("Home Affairs route must remain a historical dedicated-operator-site watch until current-period evidence appears")
 
     innovation = routes["EEA-RO-INNOVATION-NORWAY-FUND-OPERATOR-WATCH"]
     if innovation["observation_state"] != "OPERATOR_WATCH" or innovation["watch_url"] != "https://www.innovasjonnorge.no/seksjon/eos-midlene":
@@ -97,10 +117,17 @@ def main() -> int:
     expect_raises(lambda: mod.validate_route_url("https://mmediu.ro/comunicare/comunicate-de-presa/other", green, final=True), "MMAP path drift")
     expect_raises(lambda: mod.validate_route_url("https://frds.ro/en/other/", local, final=True), "FRDS path drift")
     expect_raises(lambda: mod.validate_route_url("https://example.frds.ro/en/home/", local), "FRDS host drift")
+    expect_raises(lambda: mod.validate_route_url("https://www.just.ro/other/", justice, final=True), "Justice historical landing path drift")
+    expect_raises(lambda: mod.validate_route_url("https://www.mai.gov.ro/", home_affairs), "Home Affairs dedicated host drift")
 
     bad_registry = copy.deepcopy(registry)
     bad_registry["policy"]["open_call_authorized"] = True
     expect_raises(lambda: mod.validate_registry(bad_registry), "authorizing registry policy")
+
+    historical_promoted = copy.deepcopy(registry)
+    hist_routes = {row["route_id"]: row for row in historical_promoted["routes"]}
+    hist_routes["EEA-RO-JUSTICE-MJ-WATCH"]["observation_state"] = "OPEN_CALL"
+    expect_raises(lambda: mod.validate_registry(historical_promoted), "historical Justice landing promoted to OPEN_CALL")
 
     degraded = mod.build_degraded_receipt(
         research,
@@ -128,6 +155,8 @@ def main() -> int:
         "research_state": research["observation_state"],
         "green_transition_route": green["watch_url"],
         "local_development_route": local["watch_url"],
+        "justice_state": justice["observation_state"],
+        "home_affairs_state": home_affairs["observation_state"],
         "innovation_route": innovation["watch_url"],
         "degraded_lkg_required": degraded["lkg_required"],
         "open_call_authorized": receipt["open_call_authorized"],
