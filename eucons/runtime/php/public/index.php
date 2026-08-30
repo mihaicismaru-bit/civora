@@ -110,7 +110,6 @@ if ($isResearch) {
             'accepted' => true,
             'inserted' => $receipt['inserted'],
             'response_id' => $receipt['response_id'],
-            'normalized_sha256' => $receipt['normalized_sha256'],
         ]);
     } catch (JsonException $e) {
         eucons_json(400, ['status' => 'rejected', 'code' => 'INVALID_JSON']);
