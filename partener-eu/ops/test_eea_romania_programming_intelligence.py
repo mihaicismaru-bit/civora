@@ -95,7 +95,7 @@ def main():
         "<h4>Institutional Cooperation and Capacity Building</h4><p>Programme grant: € 32,000,000</p><p>Programme Operator: Ministry of Investments and European Projects</p><p>Donor Programme Partner(s): Example official partner</p>",
         "",
     ).encode("utf-8")
-    assert_fail(lambda: mod.parse_programme_map(incomplete), "missing expected programmes")
+    assert_fail(lambda: mod.parse_programme_map(incomplete), "missing expected marker")
 
     # Programme grant/operator are required, but remain programme-level evidence only.
     missing_operator = fixture().decode("utf-8").replace(
