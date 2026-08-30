@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
+import tempfile
 import unittest
+from pathlib import Path
 
 from external_evidence_binding_control import (
     MANIFEST_PATH,
@@ -13,6 +16,34 @@ from external_evidence_binding_control import (
 
 
 class ExternalEvidenceBindingControlTests(unittest.TestCase):
+    def _temporary_attestation(self, payload: dict) -> tuple[Path, str]:
+        handle = tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            suffix=".json",
+            prefix=".tmp_external_evidence_",
+            dir=MANIFEST_PATH.parent,
+            delete=False,
+        )
+        try:
+            json.dump(payload, handle, sort_keys=True, separators=(",", ":"))
+            handle.write("\n")
+        finally:
+            handle.close()
+        path = Path(handle.name)
+        return path, hashlib.sha256(path.read_bytes()).hexdigest()
+
+    def _set_promoted_temp_evidence(
+        self, manifest: dict, *, key: str, payload: dict, status: str = "PASS"
+    ) -> Path:
+        path, digest = self._temporary_attestation(payload)
+        manifest["required_external_or_operational_evidence"][key] = {
+            "status": status,
+            "reference": path.name,
+            "sha256": digest,
+        }
+        return path
+
     def test_current_repository_bindings_are_truthful_while_open_gates_remain_open(self):
         ready, errors = evaluate_repository_binding()
         self.assertTrue(ready, errors)
@@ -59,6 +90,82 @@ class ExternalEvidenceBindingControlTests(unittest.TestCase):
         self.assertEqual(item["status"], "FROZEN")
         errors = evidence_binding_errors(manifest)
         self.assertFalse(any(error.endswith(":provider_annex_4_5") for error in errors), errors)
+
+    def test_pass_requires_exact_semantic_evidence_key_binding(self):
+        manifest = copy.deepcopy(_load(MANIFEST_PATH))
+        path = self._set_promoted_temp_evidence(
+            manifest,
+            key="privacy_notice",
+            payload={
+                "research_id": manifest["research_id"],
+                "evidence_binding_key": "lawful_basis_or_lia",
+                "evidence_class": "OPERATIONAL_EVIDENCE",
+            },
+        )
+        try:
+            errors = evidence_binding_errors(manifest)
+            self.assertIn("promoted_evidence_key_missing_or_mismatch:privacy_notice", errors)
+        finally:
+            path.unlink(missing_ok=True)
+
+    def test_pass_requires_explicit_research_id_binding(self):
+        manifest = copy.deepcopy(_load(MANIFEST_PATH))
+        path = self._set_promoted_temp_evidence(
+            manifest,
+            key="privacy_notice",
+            payload={
+                "evidence_binding_key": "privacy_notice",
+                "evidence_class": "OPERATIONAL_EVIDENCE",
+            },
+        )
+        try:
+            errors = evidence_binding_errors(manifest)
+            self.assertIn(
+                "promoted_evidence_research_id_missing_or_mismatch:privacy_notice",
+                errors,
+            )
+        finally:
+            path.unlink(missing_ok=True)
+
+    def test_test_twin_cannot_semantically_satisfy_pass_gate(self):
+        manifest = copy.deepcopy(_load(MANIFEST_PATH))
+        path = self._set_promoted_temp_evidence(
+            manifest,
+            key="privacy_notice",
+            payload={
+                "research_id": manifest["research_id"],
+                "evidence_binding_key": "privacy_notice",
+                "evidence_class": "TEST_TWIN_NON_EVIDENCE",
+                "synthetic": True,
+            },
+        )
+        try:
+            errors = evidence_binding_errors(manifest)
+            self.assertIn("promoted_evidence_is_synthetic:privacy_notice", errors)
+            self.assertIn(
+                "promoted_evidence_non_evidence_marker:privacy_notice:evidence_class",
+                errors,
+            )
+        finally:
+            path.unlink(missing_ok=True)
+
+    def test_exact_real_semantic_attestation_can_satisfy_pass_binding(self):
+        manifest = copy.deepcopy(_load(MANIFEST_PATH))
+        path = self._set_promoted_temp_evidence(
+            manifest,
+            key="privacy_notice",
+            payload={
+                "research_id": manifest["research_id"],
+                "evidence_binding_key": "privacy_notice",
+                "evidence_class": "OPERATIONAL_EVIDENCE",
+                "synthetic": False,
+            },
+        )
+        try:
+            errors = evidence_binding_errors(manifest)
+            self.assertFalse(any(error.endswith(":privacy_notice") for error in errors), errors)
+        finally:
+            path.unlink(missing_ok=True)
 
 
 if __name__ == "__main__":
