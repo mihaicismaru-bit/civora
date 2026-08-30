@@ -4,12 +4,24 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '17 * * * *'
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/mipe_discovery_ingest.py'
+      - 'partener-eu/ingest/mysmis_reporting_transport_scout.py'
+      - 'partener-eu/ingest/mysmis_transport_handoff.py'
+      - 'partener-eu/ingest/test_mysmis_transport_handoff.py'
+      - 'partener-eu/ingest/test_mipe_discovery_transport_gate.py'
+      - '.github/workflows/partener-eu-mipe-ingest.yml'
   push:
     branches: [main]
     paths:
       - 'partener-eu/ingest/mipe_direct_only_ingest.py'
       - 'partener-eu/ingest/mipe_resilient_ingest.py'
       - 'partener-eu/ingest/mipe_discovery_ingest.py'
+      - 'partener-eu/ingest/mysmis_reporting_transport_scout.py'
+      - 'partener-eu/ingest/mysmis_transport_handoff.py'
+      - 'partener-eu/ingest/test_mysmis_transport_handoff.py'
+      - 'partener-eu/ingest/test_mipe_discovery_transport_gate.py'
       - 'partener-eu/ingest/normalize_mipe_health.py'
       - 'partener-eu/ingest/build_mysmis_consultant_registry.py'
       - 'partener-eu/ops/test_mipe_resilient_ingest.py'
@@ -23,7 +35,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: partener-eu-mipe-ingest
+  group: partener-eu-mipe-ingest-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -39,8 +51,40 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Discover canonical official URLs and refresh direct MySMIS snapshot
+      - name: Validate MySMIS immutable handoff and ingestion gate offline
+        run: |
+          python -m py_compile partener-eu/ingest/mysmis_reporting_transport_scout.py
+          python -m py_compile partener-eu/ingest/mysmis_transport_handoff.py
+          python -m py_compile partener-eu/ingest/mipe_discovery_ingest.py
+          python partener-eu/ingest/test_mysmis_transport_handoff.py
+          python partener-eu/ingest/test_mipe_discovery_transport_gate.py
+
+      - name: Probe official MySMIS reporting transports acquisition-only
+        env:
+          MYSMIS_SCOUT_OUT: ${{ runner.temp }}/mysmis-reporting-transport-matrix.json
+        run: python partener-eu/ingest/mysmis_reporting_transport_scout.py
+
+      - name: Build immutable MySMIS transport handoff
+        run: >-
+          python partener-eu/ingest/mysmis_transport_handoff.py
+          "${{ runner.temp }}/mysmis-reporting-transport-matrix.json"
+          "${{ runner.temp }}/mysmis-transport-handoff.json"
+
+      - name: Discover canonical official URLs and refresh gated direct MySMIS snapshot
+        env:
+          MYSMIS_HANDOFF_PATH: ${{ runner.temp }}/mysmis-transport-handoff.json
         run: python partener-eu/ingest/mipe_discovery_ingest.py
+
+      - name: Preserve MySMIS transport evidence artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mysmis-transport-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            ${{ runner.temp }}/mysmis-reporting-transport-matrix.json
+            ${{ runner.temp }}/mysmis-transport-handoff.json
 
       - name: Syntax and offline provenance regression
         run: |
@@ -149,6 +193,7 @@ jobs:
           PY
 
       - name: Persist verified feed, source registry and Consultant evidence
+        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
