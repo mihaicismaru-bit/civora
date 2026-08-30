@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-29T18:28:26.217954+00:00",
+  "generated_at": "2026-08-30T00:28:39.010542+00:00",
   "status": "OK",
   "policy": {
     "osm_is_discovery_only": true,
@@ -13,16 +13,60 @@
   "frontier_count": 111,
   "website_candidates": 18,
   "websites_checked": 5,
-  "official_identity_matches": 0,
+  "official_identity_matches": 1,
   "official_address_matches": 0,
-  "new_overlay_venues": [],
+  "new_overlay_venues": [
+    "auto-d-amici-e1c1083c"
+  ],
   "new_auto_eligible": [],
-  "new_review_required": [],
+  "new_review_required": [
+    "auto-d-amici-e1c1083c"
+  ],
   "verifications": [
+    {
+      "discoveryId": "osm-node-13149483551",
+      "name": "Ahamata Yoga",
+      "observedAt": "2026-08-30T00:28:42.660729+00:00",
+      "health": "FAILED",
+      "website": "https://ahamatayoga.com/",
+      "error": "URLError: <urlopen error [Errno -2] Name or service not known>",
+      "verifiedOfficialIdentity": false,
+      "verifiedOfficialAddress": false
+    },
+    {
+      "discoveryId": "osm-node-4423759090",
+      "name": "D'Amici",
+      "observedAt": "2026-08-30T00:28:42.696174+00:00",
+      "health": "OK",
+      "website": "https://www.damici.ro/ristorante-damici/",
+      "https": true,
+      "nameMatch": true,
+      "localityMatch": true,
+      "streetMatch": false,
+      "pagesChecked": 4,
+      "textLength": 164386,
+      "verifiedOfficialIdentity": true,
+      "verifiedOfficialAddress": false
+    },
+    {
+      "discoveryId": "osm-node-13254124078",
+      "name": "Dabo Doner",
+      "observedAt": "2026-08-30T00:28:49.118053+00:00",
+      "health": "OK",
+      "website": "https://dabodoner.ro/",
+      "https": true,
+      "nameMatch": false,
+      "localityMatch": false,
+      "streetMatch": false,
+      "pagesChecked": 1,
+      "textLength": 4,
+      "verifiedOfficialIdentity": false,
+      "verifiedOfficialAddress": false
+    },
     {
       "discoveryId": "osm-node-4718544793",
       "name": "KFC",
-      "observedAt": "2026-08-29T18:28:28.753604+00:00",
+      "observedAt": "2026-08-30T00:28:50.275057+00:00",
       "health": "FAILED",
       "website": "https://www.kfc.ro/",
       "error": "HTTPError: HTTP Error 403: Forbidden",
@@ -32,7 +76,7 @@
     {
       "discoveryId": "osm-node-13202418033",
       "name": "Maestro Pizza & Devivery",
-      "observedAt": "2026-08-29T18:28:28.947878+00:00",
+      "observedAt": "2026-08-30T00:28:50.490123+00:00",
       "health": "OK",
       "website": "https://pizzamaestro.ro/",
       "https": true,
@@ -41,51 +85,6 @@
       "streetMatch": false,
       "pagesChecked": 2,
       "textLength": 5143,
-      "verifiedOfficialIdentity": false,
-      "verifiedOfficialAddress": false
-    },
-    {
-      "discoveryId": "osm-node-11042860687",
-      "name": "Proper Pizza",
-      "observedAt": "2026-08-29T18:28:31.592273+00:00",
-      "health": "OK",
-      "website": "https://properpizza.ro/",
-      "https": true,
-      "nameMatch": true,
-      "localityMatch": false,
-      "streetMatch": false,
-      "pagesChecked": 1,
-      "textLength": 1501,
-      "verifiedOfficialIdentity": false,
-      "verifiedOfficialAddress": false
-    },
-    {
-      "discoveryId": "osm-node-13252449685",
-      "name": "Proper Pizza",
-      "observedAt": "2026-08-29T18:28:33.774137+00:00",
-      "health": "OK",
-      "website": "https://properpizza.ro/",
-      "https": true,
-      "nameMatch": true,
-      "localityMatch": false,
-      "streetMatch": false,
-      "pagesChecked": 1,
-      "textLength": 1501,
-      "verifiedOfficialIdentity": false,
-      "verifiedOfficialAddress": false
-    },
-    {
-      "discoveryId": "osm-node-11941798810",
-      "name": "Starbucks",
-      "observedAt": "2026-08-29T18:28:35.412861+00:00",
-      "health": "OK",
-      "website": "https://www.starbucks.ro/",
-      "https": true,
-      "nameMatch": true,
-      "localityMatch": false,
-      "streetMatch": false,
-      "pagesChecked": 3,
-      "textLength": 7865,
       "verifiedOfficialIdentity": false,
       "verifiedOfficialAddress": false
     }
