@@ -37,11 +37,15 @@ def main() -> int:
         fail("unexpected bounded route inventory")
 
     research = routes["EEA-RO-RESEARCH-UEFISCDI-WATCH"]
-    if research["observation_state"] != "OPERATOR_WATCH_HISTORICAL_LANDING":
-        fail("historical UEFISCDI landing must remain explicitly historical")
+    if research["observation_state"] != "OPERATOR_WATCH" or "/eea-grants-2021-2028" not in research["watch_url"]:
+        fail("UEFISCDI route must remain the current 2021-2028 operator watch surface")
+
+    innovation = routes["EEA-RO-INNOVATION-NORWAY-FUND-OPERATOR-WATCH"]
+    if innovation["observation_state"] != "OPERATOR_WATCH" or innovation["watch_url"] != "https://www.innovasjonnorge.no/seksjon/eos-midlene":
+        fail("Innovation Norway route must remain the current official EEA operator surface")
 
     synthetic = b'''<html><body>
-      <a href="/eea-norway-grants/open-call-2027">OPEN CALL Romania Research 2027</a>
+      <a href="/eea-grants-2021-2028/open-call-2027">OPEN CALL Romania Research 2027</a>
       <a href="https://example.com/open-call">External open call</a>
       <a href="/unrelated">Contact</a>
     </body></html>'''
@@ -62,8 +66,8 @@ def main() -> int:
     if receipt["candidates"][0]["candidate_observation_state"] != "DISCOVERY_ONLY":
         fail("candidate escaped DISCOVERY_ONLY")
 
-    expect_raises(lambda: mod.validate_route_url("http://uefiscdi.gov.ro/eea-norway-grants", research), "HTTP downgrade")
-    expect_raises(lambda: mod.validate_route_url("https://example.com/eea-norway-grants", research), "host drift")
+    expect_raises(lambda: mod.validate_route_url("http://uefiscdi.gov.ro/eea-grants-2021-2028", research), "HTTP downgrade")
+    expect_raises(lambda: mod.validate_route_url("https://example.com/eea-grants-2021-2028", research), "host drift")
     expect_raises(lambda: mod.validate_route_url("https://uefiscdi.gov.ro/other", research, final=True), "path drift")
 
     bad_registry = copy.deepcopy(registry)
@@ -93,7 +97,8 @@ def main() -> int:
     print(json.dumps({
         "routes": len(routes),
         "synthetic_candidates": receipt["candidate_count"],
-        "historical_state": research["observation_state"],
+        "research_state": research["observation_state"],
+        "innovation_route": innovation["watch_url"],
         "degraded_lkg_required": degraded["lkg_required"],
         "open_call_authorized": receipt["open_call_authorized"],
     }, ensure_ascii=False))
