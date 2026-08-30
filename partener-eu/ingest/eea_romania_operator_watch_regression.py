@@ -33,12 +33,26 @@ def main() -> int:
     registry = json.loads(REGISTRY_PATH.read_text(encoding="utf-8"))
     mod.validate_registry(registry)
     routes = {row["route_id"]: row for row in registry["routes"]}
-    if set(routes) != {"EEA-RO-RESEARCH-UEFISCDI-WATCH", "EEA-RO-INNOVATION-NORWAY-FUND-OPERATOR-WATCH"}:
+    expected_routes = {
+        "EEA-RO-RESEARCH-UEFISCDI-WATCH",
+        "EEA-RO-GREEN-TRANSITION-MMAP-WATCH",
+        "EEA-RO-INNOVATION-NORWAY-FUND-OPERATOR-WATCH",
+    }
+    if set(routes) != expected_routes:
         fail("unexpected bounded route inventory")
 
     research = routes["EEA-RO-RESEARCH-UEFISCDI-WATCH"]
     if research["observation_state"] != "OPERATOR_WATCH" or "/eea-grants-2021-2028" not in research["watch_url"]:
         fail("UEFISCDI route must remain the current 2021-2028 operator watch surface")
+
+    green = routes["EEA-RO-GREEN-TRANSITION-MMAP-WATCH"]
+    if (
+        green["observation_state"] != "OPERATOR_WATCH"
+        or green["operator_name"] != "Ministry of Environment, Water and Forestry"
+        or "mmediu.ro/en/comunicare/comunicate-de-presa/" not in green["watch_url"]
+        or green["programme_ids"] != ["green-transition"]
+    ):
+        fail("MMAP Green Transition route must remain bounded to the current official 2021-2028 operator evidence surface")
 
     innovation = routes["EEA-RO-INNOVATION-NORWAY-FUND-OPERATOR-WATCH"]
     if innovation["observation_state"] != "OPERATOR_WATCH" or innovation["watch_url"] != "https://www.innovasjonnorge.no/seksjon/eos-midlene":
@@ -69,6 +83,7 @@ def main() -> int:
     expect_raises(lambda: mod.validate_route_url("http://uefiscdi.gov.ro/eea-grants-2021-2028", research), "HTTP downgrade")
     expect_raises(lambda: mod.validate_route_url("https://example.com/eea-grants-2021-2028", research), "host drift")
     expect_raises(lambda: mod.validate_route_url("https://uefiscdi.gov.ro/other", research, final=True), "path drift")
+    expect_raises(lambda: mod.validate_route_url("https://mmediu.ro/comunicare/comunicate-de-presa/other", green, final=True), "MMAP path drift")
 
     bad_registry = copy.deepcopy(registry)
     bad_registry["policy"]["open_call_authorized"] = True
@@ -98,6 +113,7 @@ def main() -> int:
         "routes": len(routes),
         "synthetic_candidates": receipt["candidate_count"],
         "research_state": research["observation_state"],
+        "green_transition_route": green["watch_url"],
         "innovation_route": innovation["watch_url"],
         "degraded_lkg_required": degraded["lkg_required"],
         "open_call_authorized": receipt["open_call_authorized"],
