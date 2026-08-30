@@ -30,12 +30,15 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - name: Run AI4WORK runtime, storage, idempotency, HTTP, NF06, TEST TWIN, controller, minimization, collection-frame, primary-readiness, real-batch temporal provenance, retention, rights, DPIA, disclosure-control, scientific-research, anonymisation classification and PROD-activation tests
+      - name: Run AI4WORK runtime, storage, idempotency, HTTP, NF06, TEST TWIN, controller, minimization, collection-frame, primary-readiness, real-batch temporal provenance, retention, rights, DPIA, Article-13 binding, disclosure-control, scientific-research, anonymisation classification and PROD-activation tests
         working-directory: eucons/research/ai4work-step
-        run: python -m unittest -v test_runtime.py test_research_storage.py test_http_idempotency.py test_http_endpoint.py test_nf06_preingest.py test_nf06_method_coverage.py test_e2e_test_twin_chain.py test_controller_determination.py test_live_hosting_service_mapping.py test_preview_minimization.py test_collection_frame.py test_primary_evidence_readiness.py test_real_batch_synthesis_gate.py test_retention_schedule.py test_data_subject_rights.py test_rights_access.py test_dpia_screening.py test_disclosure_control.py test_scientific_research_classification.py test_anonymisation_classification.py test_prod_activation_gate.py
+        run: python -m unittest -v test_runtime.py test_research_storage.py test_http_idempotency.py test_http_endpoint.py test_nf06_preingest.py test_nf06_method_coverage.py test_e2e_test_twin_chain.py test_controller_determination.py test_live_hosting_service_mapping.py test_preview_minimization.py test_collection_frame.py test_primary_evidence_readiness.py test_real_batch_synthesis_gate.py test_retention_schedule.py test_data_subject_rights.py test_rights_access.py test_dpia_screening.py test_article13_notice_binding_control.py test_disclosure_control.py test_scientific_research_classification.py test_anonymisation_classification.py test_prod_activation_gate.py
       - name: Enforce repository PROD activation state
         working-directory: eucons/research/ai4work-step
         run: python prod_activation_gate.py
+      - name: Enforce Article 13 rendered-surface binding
+        working-directory: eucons/research/ai4work-step
+        run: python article13_notice_binding_control.py
       - name: Render preview-only research pages
         working-directory: eucons/research/ai4work-step
         run: python build_research_pages.py --target /tmp/ai4work-research-preview
@@ -114,6 +117,14 @@ jobs:
           assert dpia.get('mandatory_before_prod', {}).get('controller_determination_approved') is True
           assert dpia.get('processing_design_facts', {}).get('crm_or_contact_dataset_matching') == 'FORBIDDEN'
           assert dpia.get('processing_design_facts', {}).get('device_fingerprinting') == 'FORBIDDEN'
+          article13 = json.loads((root / 'ARTICLE13_NOTICE_SNAPSHOT_DRAFT.json').read_text(encoding='utf-8'))
+          assert article13.get('evidence_binding_key') == 'privacy_notice'
+          assert article13.get('evidence_class') == 'CONTROL_ARTIFACT_NOT_EVIDENCE'
+          assert article13.get('synthetic') is False
+          assert article13.get('approved') is False
+          assert article13.get('collection_enabled') is False
+          assert article13.get('surface_fields', {}).get('privacy_contact') == notice.get('privacy_contact')
+          assert article13.get('surface_fields', {}).get('legal_basis') == notice.get('legal_basis')
           anonymisation = json.loads((root / 'GDPR_ANONYMISATION_CLASSIFICATION_CONTROL.json').read_text(encoding='utf-8'))
           assert anonymisation.get('status') == 'RAW_RESPONSES_TREATED_AS_PERSONAL_OUTPUT_ANONYMITY_REQUIRES_VALIDATION'
           assert anonymisation.get('classification_policy', {}).get('direct_identifier_absence_claim') == 'DE_IDENTIFIED_BY_DESIGN_NOT_ANONYMOUS_BY_ASSERTION'
@@ -129,10 +140,11 @@ jobs:
           assert mapping_gate.get('status') == 'FROZEN'
           assert mapping_gate.get('reference') == 'LIVE_HOSTING_SERVICE_MAPPING_DRAFT.json'
           assert hashlib.sha256(mapping_path.read_bytes()).hexdigest() == mapping_gate.get('sha256')
+          assert activation.get('required_external_or_operational_evidence', {}).get('privacy_notice', {}).get('status') == 'OPEN'
           assert activation.get('required_external_or_operational_evidence', {}).get('account_server_logging_binding', {}).get('status') == 'OPEN'
           assert activation.get('required_external_or_operational_evidence', {}).get('data_subject_rights_procedure', {}).get('status') == 'OPEN'
           assert activation.get('required_external_or_operational_evidence', {}).get('dpia_screening_or_completed_dpia', {}).get('status') == 'OPEN'
-          print('PASS: controller and live provider/service family are frozen while privacy contact, account binding, NF06 eligibility, rights, DPIA and PROD activation remain fail-closed; raw response anonymity is not assumed')
+          print('PASS: controller and live provider/service family are frozen while Article 13 approval/privacy contact, account binding, NF06 eligibility, rights, DPIA and PROD activation remain fail-closed; raw response anonymity is not assumed')
           PY
       - name: Build combined eucons plus AI4WORK fail-closed candidate
         shell: bash
