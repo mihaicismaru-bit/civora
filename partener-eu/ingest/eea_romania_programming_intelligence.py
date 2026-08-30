@@ -19,6 +19,7 @@ EXPECTED_OBSERVATION_STATE = "PROGRAMMING_PIPELINE"
 EXPECTED_PROGRAMME_COUNT = 9
 EXPECTED_HOST = "eeagrants.org"
 EXPECTED_PATH = "/en/fmo/news/renewed-cooperation-romania"
+EXPECTED_SOURCE_SNAPSHOT_SHA256 = "8bd90da5d41c45f181f8009ce3c5c22a206a2931bc8c437246a9c86f16a83e89"
 
 FORBIDDEN_PROGRAMME_KEYS = {
     "status",
@@ -96,7 +97,13 @@ def _validate_programmes(programmes: Any) -> list[dict[str, str]]:
             raise ValueError(f"duplicate programme: {programme}")
         seen_ids.add(programme_id)
         seen_names.add(programme.casefold())
-        validated.append({"programmeId": programme_id, "programme": programme, "programmeOperator": operator})
+        validated_row = {"programmeId": programme_id, "programme": programme, "programmeOperator": operator}
+        fund_operator = str(row.get("fundOperator") or "").strip()
+        if "fundOperator" in row and not fund_operator:
+            raise ValueError(f"programme row {index} fundOperator cannot be empty when present")
+        if fund_operator:
+            validated_row["fundOperator"] = fund_operator
+        validated.append(validated_row)
     return validated
 
 
@@ -114,6 +121,10 @@ def normalize_registry(registry: dict[str, Any], *, observed_at: str, run_id: st
 
     snapshot_payload = {"schemaVersion": registry["schemaVersion"], "source": source, "programmes": programmes}
     source_snapshot_sha256 = _sha256(snapshot_payload)
+    if source_snapshot_sha256 != EXPECTED_SOURCE_SNAPSHOT_SHA256:
+        raise ValueError(
+            f"official programming snapshot drift: expected {EXPECTED_SOURCE_SNAPSHOT_SHA256}, got {source_snapshot_sha256}"
+        )
 
     records: list[dict[str, Any]] = []
     for row in programmes:
@@ -122,6 +133,7 @@ def normalize_registry(registry: dict[str, Any], *, observed_at: str, run_id: st
                 "programmeId": row["programmeId"],
                 "programme": row["programme"],
                 "programmeOperator": row["programmeOperator"],
+                "fundOperator": row.get("fundOperator"),
                 "sourceUrl": source["sourceUrl"],
                 "observationState": EXPECTED_OBSERVATION_STATE,
             }
@@ -131,6 +143,7 @@ def normalize_registry(registry: dict[str, Any], *, observed_at: str, run_id: st
                 "programmeId": row["programmeId"],
                 "programme": row["programme"],
                 "programmeOperator": row["programmeOperator"],
+                **({"fundOperator": row["fundOperator"]} if row.get("fundOperator") else {}),
                 "programmeFamily": EXPECTED_FAMILY,
                 "geography": "Romania",
                 "authorityClass": EXPECTED_AUTHORITY,

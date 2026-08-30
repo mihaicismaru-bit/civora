@@ -84,6 +84,18 @@ def test_happy_path() -> None:
         for forbidden in ("status", "deadline", "budget", "eligibility", "callIdentifier", "topicIdentifier"):
             assert forbidden not in record
     assert len(names) == 9
+    by_name = {record["programme"]: record for record in output["records"]}
+    assert by_name["Green Transition"]["programmeOperator"] == "Ministry of Environment, Water and Forestry"
+    assert by_name["Clean Energy Transition"]["programmeOperator"] == "The Financial Mechanism Office"
+    assert by_name["Clean Energy Transition"]["fundOperator"] == "Innovation Norway"
+    assert by_name["Local Development"]["programmeOperator"] == "Romanian Social Development Fund"
+    assert by_name["Research and Innovation"]["programmeOperator"] == "Executive Agency for Higher Education, Research, Development and Innovation Funding"
+    assert by_name["Green Business and Innovation"]["programmeOperator"] == "The Financial Mechanism Office"
+    assert by_name["Green Business and Innovation"]["fundOperator"] == "Innovation Norway"
+    assert by_name["Culture"]["programmeOperator"] == "Ministry of Culture"
+    assert by_name["Justice"]["programmeOperator"] == "Ministry of Justice"
+    assert by_name["Home Affairs"]["programmeOperator"] == "Ministry of Internal Affairs"
+    assert by_name["Institutional Cooperation and Capacity Building"]["programmeOperator"] == "Ministry of Investments and European Projects"
 
 
 def test_determinism() -> None:
@@ -115,6 +127,12 @@ def test_observation_state_drift_rejected() -> None:
     registry = load_registry()
     registry["source"]["observationState"] = "OPEN_CALL"
     expect_failure(registry, "observationState drift")
+
+
+def test_snapshot_drift_rejected() -> None:
+    registry = load_registry()
+    registry["programmes"][0]["programmeOperator"] = "Unexpected Operator"
+    expect_failure(registry, "official programming snapshot drift")
 
 
 def test_forbidden_material_field_rejected() -> None:
@@ -162,6 +180,7 @@ def main() -> int:
         test_source_url_drift_rejected,
         test_source_date_drift_rejected,
         test_observation_state_drift_rejected,
+        test_snapshot_drift_rejected,
         test_forbidden_material_field_rejected,
         test_empty_operator_rejected,
         test_cli_is_deterministic,
