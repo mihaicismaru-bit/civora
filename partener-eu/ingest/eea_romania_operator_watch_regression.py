@@ -36,6 +36,7 @@ def main() -> int:
     expected_routes = {
         "EEA-RO-RESEARCH-UEFISCDI-WATCH",
         "EEA-RO-GREEN-TRANSITION-MMAP-WATCH",
+        "EEA-RO-LOCAL-DEVELOPMENT-FRDS-WATCH",
         "EEA-RO-INNOVATION-NORWAY-FUND-OPERATOR-WATCH",
     }
     if set(routes) != expected_routes:
@@ -53,6 +54,16 @@ def main() -> int:
         or green["programme_ids"] != ["green-transition"]
     ):
         fail("MMAP Green Transition route must remain bounded to the current official 2021-2028 operator evidence surface")
+
+    local = routes["EEA-RO-LOCAL-DEVELOPMENT-FRDS-WATCH"]
+    if (
+        local["observation_state"] != "OPERATOR_WATCH"
+        or local["operator_name"] != "Romanian Social Development Fund"
+        or local["watch_url"] != "https://frds.ro/en/home/"
+        or local["programme_ids"] != ["local-development"]
+        or "dezvoltare-locala.frds.ro" not in set(local.get("allowed_hosts") or [])
+    ):
+        fail("FRDS Local Development route must remain bounded to the current official 2021-2028 Programme Operator surface")
 
     innovation = routes["EEA-RO-INNOVATION-NORWAY-FUND-OPERATOR-WATCH"]
     if innovation["observation_state"] != "OPERATOR_WATCH" or innovation["watch_url"] != "https://www.innovasjonnorge.no/seksjon/eos-midlene":
@@ -84,6 +95,8 @@ def main() -> int:
     expect_raises(lambda: mod.validate_route_url("https://example.com/eea-grants-2021-2028", research), "host drift")
     expect_raises(lambda: mod.validate_route_url("https://uefiscdi.gov.ro/other", research, final=True), "path drift")
     expect_raises(lambda: mod.validate_route_url("https://mmediu.ro/comunicare/comunicate-de-presa/other", green, final=True), "MMAP path drift")
+    expect_raises(lambda: mod.validate_route_url("https://frds.ro/en/other/", local, final=True), "FRDS path drift")
+    expect_raises(lambda: mod.validate_route_url("https://example.frds.ro/en/home/", local), "FRDS host drift")
 
     bad_registry = copy.deepcopy(registry)
     bad_registry["policy"]["open_call_authorized"] = True
@@ -114,6 +127,7 @@ def main() -> int:
         "synthetic_candidates": receipt["candidate_count"],
         "research_state": research["observation_state"],
         "green_transition_route": green["watch_url"],
+        "local_development_route": local["watch_url"],
         "innovation_route": innovation["watch_url"],
         "degraded_lkg_required": degraded["lkg_required"],
         "open_call_authorized": receipt["open_call_authorized"],
