@@ -1,5 +1,5 @@
 {
-  "schema_version": "eucons.ai4work_article13_notice_snapshot.v0.1",
+  "schema_version": "eucons.ai4work_article13_notice_snapshot.v0.2",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "evidence_binding_key": "privacy_notice",
   "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
@@ -7,14 +7,17 @@
   "status": "DRAFT_CONTROLLER_APPROVAL_REQUIRED",
   "approved": false,
   "collection_enabled": false,
-  "source_contract": "form_contract.json",
+  "source_contracts": [
+    "form_contract.json",
+    "forms_definition.json"
+  ],
   "surface_fields": {
     "title": "Cercetare pentru fundamentarea analizei de nevoi AI4WORK STEP",
     "operator_legal_name": "EUROCONSULT SRL",
-    "operator_contact_details": "TO_BE_BOUND_BEFORE_PRODUCTION",
-    "privacy_contact": "OPEN_BEFORE_PRODUCTION",
+    "operator_contact_details": "DE APROBAT ÎNAINTE DE ACTIVAREA COLECTĂRII",
+    "privacy_contact": "DE COMPLETAT ÎNAINTE DE ACTIVAREA COLECTĂRII",
     "purpose_summary": "Răspunsurile sunt folosite exclusiv pentru fundamentarea și validarea analizei de nevoi AI4WORK STEP, în formă individuală numai cât este necesar pentru controlul calității și al drepturilor, iar în analiză și raportare numai în forme agregate supuse disclosure control.",
-    "legal_basis": "TO_BE_DOCUMENTED_BY_DETERMINED_CONTROLLER_BEFORE_PRODUCTION; acknowledgement is not automatically treated as GDPR consent legal basis.",
+    "legal_basis": "DE APROBAT ÎNAINTE DE ACTIVAREA COLECTĂRII",
     "legitimate_interest_summary": "Dacă operatorul aprobă art. 6 alin. (1) lit. (f) GDPR, interesul urmărit este fundamentarea proporțională și verificabilă a analizei de nevoi, pe baza LIA aprobate; participarea rămâne voluntară și dreptul la opoziție se aplică potrivit art. 21.",
     "recipients_summary": "Accesul la răspunsuri la nivel de respondent este limitat la personalul autorizat pentru cercetare și la împuterniciții/subîmputerniciții tehnici validați; răspunsurile nu sunt copiate în CRM, nu sunt transmise angajatorilor la nivel individual și nu sunt utilizate pentru marketing.",
     "international_transfer_summary": "Niciun transfer internațional de date la nivel de respondent nu este autorizat prin acest contract; lanțul tehnic și localizarea/subprocesatorii furnizorului trebuie verificate înainte de activarea PROD, iar orice transfer care ar deveni relevant necesită temei și garanții documentate înainte de utilizare.",
@@ -30,5 +33,5 @@
     "approved_at": null,
     "approval_reference": null
   },
-  "activation_rule": "The exact Article 13 surface shown before questions must remain byte-for-byte semantically aligned with form_contract.pre_form_notice. PROD requires controller approval, a non-placeholder privacy contact/operator contact and an approved lawful basis. This snapshot is a governance/control artifact and is never evidence of need."
+  "activation_rule": "The exact Article 13 text visible before questions is frozen from the renderer inputs in form_contract.json and forms_definition.json. PROD requires controller approval, non-placeholder operator/privacy contacts and an approved lawful basis. This snapshot is a governance/control artifact and is never evidence of need."
 }
