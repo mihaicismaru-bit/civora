@@ -4,7 +4,7 @@
   "collection_frame_id": "AI4WORK-STEP-PROD-FRAME-DRAFT-001",
   "status": "DRAFT_NOT_APPROVED_FOR_PROD",
   "evidence_class": "METHOD_PLAN_NOT_EVIDENCE",
-  "purpose": "Pre-register the exact question-to-need mapping and deterministic ranking rules before real collection so respondent results cannot be mapped, weighted, rounded or tie-broken post hoc. This plan is method, not evidence.",
+  "purpose": "Pre-register the exact question-to-need mapping and deterministic ranking rules before real collection so respondent results cannot be mapped, weighted, rounded, tie-broken or sensitivity-tested post hoc. This plan is method, not evidence.",
   "forms_schema_version": "eucons.research_forms.v0.5",
   "core_skill_ranking": {
     "scope": "H1-H5 only; scores describe the eligible respondent batch and are not population prevalence estimates",
@@ -78,6 +78,7 @@
   "supporting_signal_rule": "Supporting items may explain or challenge a core direct-rating result but may not alter the H1-H5 numeric order. Report convergence/divergence explicitly.",
   "secondary_evidence_rule": "Secondary evidence supplies evidence-strength/context labels only; it cannot add numeric points to respondent ranking and project/call/training activity is never evidence of need.",
   "adversarial_qa": {
+    "method_version": "eucons.ai4work_adversarial_qa_method.v0.1",
     "required_views": [
       "pooled eligible respondent batch",
       "adults and employers separately",
@@ -86,9 +87,21 @@
       "repeated-signature sensitivity where response-integrity diagnostics flag clusters",
       "sparse-profile caveats for every affected conclusion"
     ],
-    "stability_rule": "If a headline rank position changes materially across required sensitivity views, label that position UNSTABLE and report the competing orders rather than forcing a single definitive rank.",
+    "dominant_channel_trigger": "single_channel_share_max from the frozen collection frame, evaluated across overall, population and region-population scopes",
+    "dominant_channel_sensitivity": "leave one triggered opaque recruitment_channel_id out of the full batch at a time; sensitivity only and never automatic exclusion",
+    "repeated_signature_sensitivity": "for each exact analytical-signature cluster, retain only the deterministic lowest opaque response_id and remove the other analytically identical records; sensitivity only, never identity inference or automatic exclusion",
+    "sparse_profile_sensitivity": "leave one nonzero sparse profile cell below the disclosure floor out of the full batch at a time; zero cells are caveats and cannot be leave-one-cell-out tested",
+    "material_rank_change_definition": {
+      "top_rank_membership_change": true,
+      "absolute_competition_rank_delta_gte": 2,
+      "required_view_not_computable": "COLLECTION_MUST_CONTINUE"
+    },
+    "non_material_rank_change_label": "SENSITIVE when any competition rank changes by exactly 1 while the top-ranked membership is unchanged",
+    "stability_labels": ["STABLE", "SENSITIVE", "UNSTABLE", "NOT_COMPUTABLE"],
+    "stability_rule": "Label UNSTABLE if top-rank membership changes or any need moves by at least two competition ranks in a required computable sensitivity view. Label SENSITIVE for a one-rank movement with unchanged top membership. Any required view that cannot be computed because a population is emptied forces COLLECTION_MUST_CONTINUE. Report competing orders; never force a single definitive rank when UNSTABLE.",
     "full_batch_result_must_be_preserved": true,
-    "automatic_record_exclusion_allowed": false
+    "automatic_record_exclusion_allowed": false,
+    "identity_or_device_linkage_allowed": false
   },
   "approval": {
     "approved": false,
