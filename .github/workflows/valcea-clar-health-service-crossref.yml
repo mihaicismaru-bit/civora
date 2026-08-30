@@ -1,0 +1,33 @@
+name: VÂLCEA CLAR Health Service Crossref
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'valcea-clar/scripts/health_service_valcea_crossref_state.py'
+      - '.github/workflows/valcea-clar-health-service-crossref.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/scripts/health_service_valcea_crossref_state.py'
+      - '.github/workflows/valcea-clar-health-service-crossref.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-health-service-crossref-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Compile health-service cross-reference state
+        run: python -m py_compile valcea-clar/scripts/health_service_valcea_crossref_state.py
+      - name: Run health-service fail-closed regressions
+        run: python valcea-clar/scripts/health_service_valcea_crossref_state.py --self-test
