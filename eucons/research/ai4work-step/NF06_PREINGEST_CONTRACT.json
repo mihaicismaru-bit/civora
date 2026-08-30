@@ -37,6 +37,7 @@
     "persisted PROD handoff requires the exact eucons.ai4work_rights_hold_snapshot.v0.1 structured snapshot rather than an arbitrary response-id iterable",
     "rights-hold snapshot source_class is EUCONS_RESEARCH_RIGHTS_STORE and complete_current_snapshot=true",
     "rights-hold snapshot captured_at is timezone-aware and is not earlier than either collection close or the latest candidate record",
+    "rights-hold snapshot is captured no more than 15 minutes before handoff and is not future-dated beyond 5 minutes of clock skew",
     "rights-hold snapshot contains only opaque response_ids plus bounded control metadata; identity and case narrative are forbidden"
   ],
   "test_twin_requirements": [
@@ -96,7 +97,7 @@
     "artifact_class": "RIGHTS_CONTROL_SNAPSHOT_NOT_NEED_EVIDENCE",
     "complete_current_snapshot_required": true,
     "response_ids_format": "list of unique lowercase 64-hex opaque response receipts",
-    "temporal_rule": "captured_at must include timezone and must be >= collection_closed_at and >= the latest candidate record received_at",
+    "temporal_rule": "captured_at must include timezone, must be >= collection_closed_at and >= the latest candidate record received_at, must be no older than 15 minutes at handoff, and must not be future-dated beyond 5 minutes of clock skew",
     "privacy_rule": "Only opaque response receipts and bounded control metadata are permitted. Identity, contact data and privacy-case narrative are forbidden.",
     "live_binding_boundary": "Repository validation cannot prove that a deployed producer actually reads the authoritative separate research/privacy rights store. That live producer/store binding remains external operational evidence before PROD.",
     "manifest_bindings": [
