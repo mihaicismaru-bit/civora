@@ -11,6 +11,7 @@ import argparse
 import datetime as dt
 import hashlib
 import json
+import re
 import ssl
 from html.parser import HTMLParser
 from pathlib import Path
@@ -22,29 +23,23 @@ SOURCE_URL = "https://eeagrants.org/en/fmo/news/renewed-cooperation-romania"
 SOURCE_FAMILY = "EEA_NORWAY"
 PROGRAMME_FAMILY = "EEA and Norway Grants Romania 2021-2028"
 AUTHORITY_CLASS = "EEA_FMO_ROMANIA_PROGRAMME_MAP"
-PARSER_VERSION = "EEA_ROMANIA_PROGRAMMING_INTELLIGENCE_V1"
+PARSER_VERSION = "EEA_ROMANIA_PROGRAMMING_INTELLIGENCE_V2"
+REGISTRY_PATH = Path(__file__).with_name("eea_romania_programming_registry.json")
 EXPECTED_PATH = "/en/fmo/news/renewed-cooperation-romania"
 OFFICIAL_HOSTS = {"eeagrants.org", "www.eeagrants.org"}
 MAX_BYTES = 4_000_000
 USER_AGENT = "PARTENER.EU source-intelligence/1.0 (+https://partener.eu)"
-
-EXPECTED_PROGRAMMES = (
-    "Green Transition",
-    "Clean Energy Transition",
-    "Local Development",
-    "Research and Innovation",
-    "Green Business and Innovation",
-    "Culture",
-    "Justice",
-    "Home Affairs",
-    "Institutional Cooperation and Capacity Building",
-)
 
 MISSING_TO_CONFIRM_CALL = (
     "exact_call_identifier",
     "official_current_open_status",
     "exact_official_call_endpoint",
     "semantic_reconciliation",
+)
+
+_FUND_OPERATOR_RE = re.compile(
+    r"^(?P<programme>.+?)\.\s+(?P<fund>.+?)\s+is\s+appointed\s+Fund\s+Operator\.?$",
+    flags=re.IGNORECASE,
 )
 
 
@@ -64,6 +59,13 @@ def _clean(value: str) -> str:
     return " ".join(value.replace("\u00a0", " ").split()).strip()
 
 
+def _require_sha256(value: str) -> str:
+    normalized = str(value or "").strip().lower()
+    if not re.fullmatch(r"[0-9a-f]{64}", normalized):
+        raise RuntimeError("raw_hash must be a lowercase SHA-256 hex digest")
+    return normalized
+
+
 def _official_source_url(value: str) -> str:
     parsed = urlparse(value)
     host = (parsed.hostname or "").lower()
@@ -74,6 +76,53 @@ def _official_source_url(value: str) -> str:
     if parsed.path.rstrip("/") != EXPECTED_PATH:
         raise ValueError(f"unexpected Romania programme-map path: {value}")
     return urlunparse(("https", host, EXPECTED_PATH, "", "", ""))
+
+
+def _load_registry(path: Path = REGISTRY_PATH) -> dict[str, Any]:
+    registry = json.loads(path.read_text(encoding="utf-8"))
+    if registry.get("schemaVersion") != "1.1":
+        raise RuntimeError("unsupported EEA Romania programming registry schemaVersion")
+    source = registry.get("source")
+    if not isinstance(source, dict):
+        raise RuntimeError("EEA Romania programming registry source object missing")
+    expected_source = {
+        "sourceUrl": SOURCE_URL,
+        "publishedDate": "2026-05-12",
+        "programmeFamily": SOURCE_FAMILY,
+        "authorityClass": "T1_EEA_OFFICIAL_FMO",
+        "observationState": "PROGRAMMING_PIPELINE",
+    }
+    for key, expected in expected_source.items():
+        if source.get(key) != expected:
+            raise RuntimeError(f"EEA Romania programming registry {key} drift")
+    if not str(source.get("sourceId") or "").strip():
+        raise RuntimeError("EEA Romania programming registry sourceId missing")
+    programmes = registry.get("programmes")
+    if not isinstance(programmes, list) or len(programmes) != 9:
+        raise RuntimeError("EEA Romania programming registry must contain exactly nine programmes")
+    seen_ids: set[str] = set()
+    seen_names: set[str] = set()
+    for row in programmes:
+        if not isinstance(row, dict):
+            raise RuntimeError("EEA Romania programming registry programme row must be an object")
+        programme_id = str(row.get("programmeId") or "").strip()
+        name = _clean(str(row.get("programme") or ""))
+        grant = _clean(str(row.get("programmeGrantEvidence") or ""))
+        operator = _clean(str(row.get("programmeOperator") or ""))
+        fund_operator = _clean(str(row.get("fundOperator") or ""))
+        if not programme_id or not name or not grant or not operator:
+            raise RuntimeError("EEA Romania programming registry row missing programme identity/grant/operator")
+        if programme_id in seen_ids or name.casefold() in seen_names:
+            raise RuntimeError("EEA Romania programming registry contains duplicate programme identity")
+        seen_ids.add(programme_id)
+        seen_names.add(name.casefold())
+        if "fundOperator" in row and not fund_operator:
+            raise RuntimeError("EEA Romania programming registry fundOperator cannot be blank")
+    return registry
+
+
+def _registry_by_name(registry: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    return {str(row["programme"]): row for row in registry["programmes"]}
 
 
 class _VisibleTextParser(HTMLParser):
@@ -159,7 +208,19 @@ def _field(lines: list[str], labels: tuple[str, ...]) -> str | None:
     return None
 
 
-def parse_programme_map(raw: bytes) -> list[dict[str, Any]]:
+def _split_operator(value: str) -> tuple[str, str | None]:
+    normalized = _clean(value)
+    match = _FUND_OPERATOR_RE.fullmatch(normalized)
+    if not match:
+        return normalized.rstrip("."), None
+    return _clean(match.group("programme")).rstrip("."), _clean(match.group("fund")).rstrip(".")
+
+
+def parse_programme_map(raw: bytes, *, registry: dict[str, Any] | None = None) -> list[dict[str, Any]]:
+    registry = registry or _load_registry()
+    expected = _registry_by_name(registry)
+    expected_names = [str(row["programme"]) for row in registry["programmes"]]
+
     parser = _VisibleTextParser()
     parser.feed(raw.decode("utf-8", errors="replace"))
     parser.close()
@@ -168,7 +229,7 @@ def parse_programme_map(raw: bytes) -> list[dict[str, Any]]:
     anchor = _find_exact(chunks, "Programmes 2021-2028", 0)
     positions: list[tuple[str, int]] = []
     cursor = anchor + 1
-    for name in EXPECTED_PROGRAMMES:
+    for name in expected_names:
         position = _find_exact(chunks, name, cursor)
         positions.append((name, position))
         cursor = position + 1
@@ -178,25 +239,33 @@ def parse_programme_map(raw: bytes) -> list[dict[str, Any]]:
         end = positions[index + 1][1] if index + 1 < len(positions) else len(chunks)
         lines = chunks[position + 1:end]
         grant = _field(lines, ("Programme grant",))
-        operator = _field(lines, ("Programme Operator",))
+        operator_raw = _field(lines, ("Programme Operator",))
         donor = _field(lines, ("Donor Programme Partner(s)", "Donor Programme Partners"))
-        international = _field(
-            lines,
-            ("International Partner Organisation(s)", "International Partner Organisations"),
-        )
-        if not grant or not operator:
+        international = _field(lines, ("International Partner Organisation(s)", "International Partner Organisations"))
+        if not grant or not operator_raw:
             raise RuntimeError(f"incomplete FMO programme evidence for {name}: grant/operator required")
+        operator, fund_operator = _split_operator(operator_raw)
+        expected_row = expected[name]
+        if _clean(grant) != _clean(str(expected_row["programmeGrantEvidence"])):
+            raise RuntimeError(f"programme allocation drift requires semantic reconciliation: {name}")
+        if operator != _clean(str(expected_row["programmeOperator"])):
+            raise RuntimeError(f"programme operator drift requires semantic reconciliation: {name}")
+        expected_fund = _clean(str(expected_row.get("fundOperator") or "")) or None
+        if fund_operator != expected_fund:
+            raise RuntimeError(f"fund operator drift requires semantic reconciliation: {name}")
         rows.append(
             {
+                "programme_id": str(expected_row["programmeId"]),
                 "programme_name": name,
-                "programme_grant_evidence": grant,
+                "programme_grant_evidence": _clean(grant),
                 "programme_operator": operator,
+                "fund_operator": fund_operator,
                 "donor_programme_partners": donor,
                 "international_partner_organisations": international,
             }
         )
 
-    if len(rows) != len(EXPECTED_PROGRAMMES):
+    if len(rows) != len(expected_names):
         raise RuntimeError("official FMO programme map is incomplete; fail closed")
     return rows
 
@@ -208,43 +277,59 @@ def normalize_programmes(
     fetched_at: str,
     raw_hash: str,
     run_id: str,
+    registry: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
+    registry = registry or _load_registry()
+    source = registry["source"]
     authority_url = _official_source_url(authority_url)
-    if len(programme_rows) != len(EXPECTED_PROGRAMMES):
+    raw_hash = _require_sha256(raw_hash)
+    if not str(fetched_at or "").strip() or not str(run_id or "").strip():
+        raise RuntimeError("fetched_at and run_id are required")
+    if len(programme_rows) != len(registry["programmes"]):
         raise RuntimeError("programme batch is incomplete; fail closed")
 
     names = [str(row.get("programme_name") or "").strip() for row in programme_rows]
-    if names != list(EXPECTED_PROGRAMMES):
+    expected_names = [str(row["programme"]) for row in registry["programmes"]]
+    if names != expected_names:
         raise RuntimeError(f"programme identity/order drift: {names}")
 
     normalized: list[dict[str, Any]] = []
     for row in programme_rows:
         name = str(row["programme_name"]).strip()
+        programme_id = str(row.get("programme_id") or "").strip()
         grant = _clean(str(row.get("programme_grant_evidence") or ""))
         operator = _clean(str(row.get("programme_operator") or ""))
-        if not grant or not operator:
+        fund_operator = _clean(str(row.get("fund_operator") or "")) or None
+        if not programme_id or not grant or not operator:
             raise RuntimeError(f"incomplete programme evidence for {name}")
         semantic = {
+            "programme_id": programme_id,
             "programme_name": name,
             "programme_grant_evidence": grant,
             "programme_operator": operator,
+            "fund_operator": fund_operator,
             "donor_programme_partners": row.get("donor_programme_partners"),
             "international_partner_organisations": row.get("international_partner_organisations"),
         }
         normalized.append(
             {
-                "schema": "PARTENER_EU_EEA_ROMANIA_PROGRAMMING_OBSERVATION_V1",
+                "schema": "PARTENER_EU_EEA_ROMANIA_PROGRAMMING_OBSERVATION_V2",
                 "source_family": SOURCE_FAMILY,
                 "programme_family": PROGRAMME_FAMILY,
                 "authority_class": AUTHORITY_CLASS,
+                "programme_id": programme_id,
                 "programme_name": name,
                 "programme_operator": operator,
                 "operator_watch_seed": operator,
+                "fund_operator": fund_operator,
+                "fund_operator_watch_seed": fund_operator,
                 "programme_grant_evidence": grant,
                 "programme_grant_scope": "PROGRAMME_ALLOCATION_NOT_CALL_BUDGET",
                 "donor_programme_partners": semantic["donor_programme_partners"],
                 "international_partner_organisations": semantic["international_partner_organisations"],
                 "authority_url": authority_url,
+                "source_id": source["sourceId"],
+                "source_published_date": source["publishedDate"],
                 "fetched_at": fetched_at,
                 "raw_hash": raw_hash,
                 "semantic_fingerprint": _sha256(_canonical_json(semantic)),
@@ -254,8 +339,13 @@ def normalize_programmes(
                 "not_a_call": True,
                 "material_fact_use": False,
                 "open_call_authorized": False,
+                "deadline_authorized": False,
+                "budget_authorized": False,
+                "eligibility_authorized": False,
                 "publish_authorized": False,
+                "distribution_authorized": False,
                 "canonical_corpus_mutation": False,
+                "requires_reconciliation": True,
                 "publication_effect": "NONE",
                 "missing_to_confirm_call": list(MISSING_TO_CONFIRM_CALL),
             }
@@ -265,23 +355,28 @@ def normalize_programmes(
 
 def collect_live(*, run_id: str, fetched_at: str | None = None) -> dict[str, Any]:
     fetched_at = fetched_at or _utc_now()
+    registry = _load_registry()
     response = fetch_url(SOURCE_URL)
     raw = bytes(response["raw"])
     raw_hash = _sha256(raw)
     records = normalize_programmes(
-        parse_programme_map(raw),
+        parse_programme_map(raw, registry=registry),
         authority_url=str(response["final_url"]),
         fetched_at=fetched_at,
         raw_hash=raw_hash,
         run_id=run_id,
+        registry=registry,
     )
+    fund_operator_watch_seeds = sum(1 for row in records if row.get("fund_operator_watch_seed"))
     return {
-        "schema": "PARTENER_EU_EEA_ROMANIA_PROGRAMMING_EVIDENCE_V1",
+        "schema": "PARTENER_EU_EEA_ROMANIA_PROGRAMMING_EVIDENCE_V2",
         "source_family": SOURCE_FAMILY,
         "programme_family": PROGRAMME_FAMILY,
         "authority_class": AUTHORITY_CLASS,
         "source": {
+            "id": registry["source"]["sourceId"],
             "url": str(response["final_url"]),
+            "published_date": registry["source"]["publishedDate"],
             "http_status": int(response["status"]),
             "content_type": str(response["content_type"]),
             "raw_hash": raw_hash,
@@ -294,13 +389,19 @@ def collect_live(*, run_id: str, fetched_at: str | None = None) -> dict[str, Any
         "stats": {
             "programme_records": len(records),
             "operator_watch_seeds": sum(1 for row in records if row.get("operator_watch_seed")),
+            "fund_operator_watch_seeds": fund_operator_watch_seeds,
             "open_calls_authorized": 0,
         },
         "observation_state": "PROGRAMMING_PIPELINE",
         "material_fact_use": False,
         "open_call_authorized": False,
+        "deadline_authorized": False,
+        "budget_authorized": False,
+        "eligibility_authorized": False,
         "publish_authorized": False,
+        "distribution_authorized": False,
         "canonical_corpus_mutation": False,
+        "requires_reconciliation": True,
         "publication_effect": "NONE",
     }
 
