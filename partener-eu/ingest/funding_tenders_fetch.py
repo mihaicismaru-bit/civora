@@ -3,14 +3,15 @@
 
 This module performs *evidence acquisition only*. It calls the public European
 Commission corporate Search and Facet APIs, resolves reference-code labels from
-Facet evidence, performs a bounded readback of exact topic pages, and then feeds
-the existing ``funding_tenders_api.py`` normalizer.
+Facet evidence, performs both an exact structured Topic Details readback and a
+bounded HTML topic-page reachability check, and then feeds the existing
+``funding_tenders_api.py`` normalizer.
 
-It never mutates the canonical opportunity corpus or public projection. The raw
-Search/Facet JSON responses are retained in the evidence directory for replay.
-No status code is translated from a local lookup table: a human-readable status
-must be present in the official Facet response before it can contribute to
-OPEN/FORTHCOMING classification.
+The structured Topic Details readback is the semantic identity/status gate. The
+HTML readback is only an additional official topic-page reachability proof. OPEN
+or FORTHCOMING classification requires both. The module never mutates the
+canonical opportunity corpus or public projection. Raw Search/Facet/exact-topic
+JSON responses are retained in the evidence directory for replay.
 """
 from __future__ import annotations
 
@@ -36,14 +37,16 @@ PORTAL_ORIGIN = "https://ec.europa.eu"
 PORTAL_REFERER = "https://ec.europa.eu/info/funding-tenders/opportunities/portal/"
 TOPIC_BASE = "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/"
 LIVE_SCHEMA = "PARTENER_EU_FUNDING_TENDERS_LIVE_EVIDENCE_V1"
-FETCHER_VERSION = "FUNDING_TENDERS_LIVE_FETCH_V1"
+FETCHER_VERSION = "FUNDING_TENDERS_LIVE_FETCH_V2"
 MAX_API_BYTES = 8 * 1024 * 1024
 MAX_TOPIC_BYTES = 2 * 1024 * 1024
 DEFAULT_PAGE_SIZE = 5
+STRUCTURED_TOPIC_PAGE_SIZE = 10
 ALLOWED_API_HOST = "api.tech.ec.europa.eu"
 ALLOWED_TOPIC_HOST = "ec.europa.eu"
 STATUS_CODES_OF_INTEREST = ("31094501", "31094502")
 CALL_TYPES = ("1", "2", "8")
+HEX64_RE = re.compile(r"^[0-9a-f]{64}$")
 
 
 def utc_now() -> str:
@@ -61,8 +64,8 @@ def canonical_json(value: Any) -> bytes:
 def default_query() -> dict[str, Any]:
     """Official Search-API query shape for open/forthcoming grant-like records.
 
-    The reference codes are used only as *search filters*. They are not translated
-    locally into semantic statuses; semantic labels must be resolved via Facet.
+    Reference codes are used only as search filters. Their semantic labels must
+    still be resolved from official Facet evidence.
     """
     return {
         "bool": {
@@ -265,6 +268,7 @@ def topic_url(identifier: str) -> str:
 
 
 def _topic_readback(url: str, *, max_bytes: int = MAX_TOPIC_BYTES, opener=None) -> dict[str, Any]:
+    """Bounded HTML reachability proof for the exact official topic page."""
     parsed = urlparse(url)
     if parsed.scheme != "https" or parsed.hostname != ALLOWED_TOPIC_HOST or "/topic-details/" not in parsed.path:
         raise ValueError(f"unsafe Funding & Tenders topic URL: {url}")
@@ -312,9 +316,107 @@ def _record_status_code(record: Mapping[str, Any]) -> str | None:
     return value if value and value.isdigit() else None
 
 
+def _record_call_identifier(record: Mapping[str, Any]) -> str | None:
+    return _scalar(record.get("callIdentifier"))
+
+
+def _record_type(record: Mapping[str, Any]) -> str | None:
+    return _scalar(record.get("type"))
+
+
+def _structured_topic_filename(identifier: str) -> str:
+    digest = sha256_bytes(identifier.encode("utf-8"))[:20]
+    return f"structured-topic-{digest}.json"
+
+
+def _structured_topic_readback(identifier: str, *, page_size: int = STRUCTURED_TOPIC_PAGE_SIZE,
+                               opener=None) -> tuple[dict[str, Any], bytes]:
+    """Read one topic back from the official structured Topic Details search.
+
+    EC's public API documentation defines Topic Details through the Search service
+    using the exact topic identifier as the ``text`` parameter. We still fail
+    closed: only exact identifier rows count, and conflicting exact status/call
+    identities make the receipt non-verified.
+    """
+    topic_url(identifier)  # validate identifier before placing it in the query
+    page_size = max(1, min(int(page_size), 25))
+    exact_text = f'"{identifier}"'
+    parts = {
+        "query": {"bool": {"must": [{"terms": {"type": list(CALL_TYPES)}}]}},
+        "languages": ["en"],
+    }
+    try:
+        payload, raw, search_receipt = _safe_json_post(
+            SEARCH_ENDPOINT,
+            text=exact_text,
+            page_size=page_size,
+            page_number=1,
+            parts=parts,
+            opener=opener,
+        )
+    except Exception as exc:
+        return ({
+            "identifier": identifier,
+            "query_text": exact_text,
+            "verified": False,
+            "error": f"{type(exc).__name__}: {exc}",
+        }, b"")
+
+    rows = flatten_search_payload(payload)
+    matched_identifiers = sorted({value for row in rows if (value := _record_identifier(row))})
+    exact_rows = [row for row in rows if _record_identifier(row) == identifier]
+    status_codes = sorted({value for row in exact_rows if (value := _record_status_code(row))})
+    call_identifiers = sorted({value for row in exact_rows if (value := _record_call_identifier(row))})
+    raw_types = sorted({value for row in exact_rows if (value := _record_type(row))})
+
+    # Identity is authoritative only when the exact topic is present and its
+    # current structured status is unambiguous. Call identifier may be absent, but
+    # if present it must also be unambiguous.
+    verified = bool(exact_rows) and len(status_codes) == 1 and len(call_identifiers) <= 1
+    return ({
+        "identifier": identifier,
+        "query_text": exact_text,
+        "api_url": search_receipt.get("final_url"),
+        "http_status": search_receipt.get("http_status"),
+        "content_type": search_receipt.get("content_type"),
+        "bytes": search_receipt.get("bytes"),
+        "raw_sha256": search_receipt.get("sha256"),
+        "matched_identifiers": matched_identifiers,
+        "exact_match_count": len(exact_rows),
+        "status_codes": status_codes,
+        "call_identifiers": call_identifiers,
+        "raw_types": raw_types,
+        "verified": bool(verified),
+    }, raw)
+
+
+def _structured_receipt_confirms_record(record: Mapping[str, Any], receipt: Mapping[str, Any] | None) -> bool:
+    if not isinstance(receipt, Mapping) or receipt.get("verified") is not True:
+        return False
+    identifier = _record_identifier(record)
+    if not identifier or receipt.get("identifier") != identifier:
+        return False
+    if identifier not in set(receipt.get("matched_identifiers") or []):
+        return False
+    status_code = _record_status_code(record)
+    if not status_code or status_code not in set(receipt.get("status_codes") or []):
+        return False
+    call_identifier = _record_call_identifier(record)
+    structured_calls = set(receipt.get("call_identifiers") or [])
+    if call_identifier and structured_calls and call_identifier not in structured_calls:
+        return False
+    raw_hash = str(receipt.get("raw_sha256") or "")
+    if not HEX64_RE.fullmatch(raw_hash):
+        return False
+    api_url = str(receipt.get("api_url") or "")
+    parsed = urlparse(api_url)
+    return parsed.scheme == "https" and parsed.hostname == ALLOWED_API_HOST and parsed.path.endswith("/rest/search")
+
+
 def assemble_evidence(search_payload: Any, facet_payloads: Mapping[str, Any], *, fetched_at: str,
                       run_id: str, search_receipt: Mapping[str, Any], facet_receipts: Mapping[str, Any],
-                      readbacks: Mapping[str, Mapping[str, Any]]) -> dict[str, Any]:
+                      readbacks: Mapping[str, Mapping[str, Any]],
+                      structured_readbacks: Mapping[str, Mapping[str, Any]]) -> dict[str, Any]:
     rows = flatten_search_payload(search_payload)
     enriched: list[dict[str, Any]] = []
     verified_urls: list[str] = []
@@ -333,7 +435,9 @@ def assemble_evidence(search_payload: Any, facet_payloads: Mapping[str, Any], *,
         if identifier:
             url = topic_url(identifier)
             record["authorityUrl"] = url
-            if (readbacks.get(identifier) or {}).get("verified"):
+            html_ok = (readbacks.get(identifier) or {}).get("verified") is True
+            structured_ok = _structured_receipt_confirms_record(record, structured_readbacks.get(identifier))
+            if html_ok and structured_ok:
                 verified_urls.append(url)
         enriched.append(record)
 
@@ -359,6 +463,7 @@ def assemble_evidence(search_payload: Any, facet_payloads: Mapping[str, Any], *,
         "facet_receipts": dict(facet_receipts),
         "status_resolution": resolution,
         "authority_readbacks": dict(readbacks),
+        "structured_topic_readbacks": dict(structured_readbacks),
         "batch": batch,
         "stats": {
             "search_records": len(rows),
@@ -367,6 +472,7 @@ def assemble_evidence(search_payload: Any, facet_payloads: Mapping[str, Any], *,
             "forthcoming_calls": sum(r.get("observation_state") == "FORTHCOMING_CALL" for r in batch.get("records", [])),
             "unknown": sum(r.get("observation_state") == "UNKNOWN" for r in batch.get("records", [])),
             "verified_topic_readbacks": sum(bool(v.get("verified")) for v in readbacks.values()),
+            "verified_structured_topic_readbacks": sum(bool(v.get("verified")) for v in structured_readbacks.values()),
             "unresolved_status_codes": sorted(code for code, label in resolution.items() if not label),
             "conflicts": len(batch.get("conflicts", [])),
         },
@@ -430,11 +536,18 @@ def collect_live(*, page_size: int, output_dir: pathlib.Path) -> dict[str, Any]:
         (output_dir / f"facet-response-{code}.json").write_bytes(raw)
 
     readbacks: dict[str, dict[str, Any]] = {}
+    structured_readbacks: dict[str, dict[str, Any]] = {}
     for row in rows:
         identifier = _record_identifier(row)
         if not identifier or identifier in readbacks:
             continue
         readbacks[identifier] = _topic_readback(topic_url(identifier))
+        structured, structured_raw = _structured_topic_readback(identifier)
+        if structured_raw:
+            raw_file = _structured_topic_filename(identifier)
+            (output_dir / raw_file).write_bytes(structured_raw)
+            structured["raw_file"] = raw_file
+        structured_readbacks[identifier] = structured
 
     evidence = assemble_evidence(
         search_payload,
@@ -444,9 +557,13 @@ def collect_live(*, page_size: int, output_dir: pathlib.Path) -> dict[str, Any]:
         search_receipt=search_receipt,
         facet_receipts=facet_receipts,
         readbacks=readbacks,
+        structured_readbacks=structured_readbacks,
     )
     (output_dir / "authority-readbacks.json").write_text(
         json.dumps(readbacks, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    (output_dir / "structured-topic-readbacks.json").write_text(
+        json.dumps(structured_readbacks, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
     (output_dir / "evidence.json").write_text(
         json.dumps(evidence, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
@@ -464,11 +581,26 @@ def validate_live_evidence(evidence: Mapping[str, Any]) -> None:
     stats = evidence.get("stats") or {}
     if stats.get("search_records", 0) < 1 or stats.get("normalized_records", 0) < 1:
         raise ValueError("Funding & Tenders live search returned no normalizable evidence")
+    html_readbacks = evidence.get("authority_readbacks") or {}
+    structured_readbacks = evidence.get("structured_topic_readbacks") or {}
+    if not isinstance(html_readbacks, Mapping) or not isinstance(structured_readbacks, Mapping):
+        raise ValueError("Funding & Tenders live evidence missing exact readback maps")
     for row in (evidence.get("batch") or {}).get("records", []):
         if row.get("publish_authorized") is not False or row.get("material_fact_use") is not False:
             raise ValueError(f"unsafe Funding & Tenders record {row.get('identifier')}")
-        if row.get("observation_state") in {"OPEN_CALL", "FORTHCOMING_CALL"} and not row.get("authority_url_verified"):
-            raise ValueError(f"unverified topic classified as {row.get('observation_state')}: {row.get('identifier')}")
+        if row.get("observation_state") in {"OPEN_CALL", "FORTHCOMING_CALL"}:
+            identifier = str(row.get("identifier") or "")
+            if not row.get("authority_url_verified"):
+                raise ValueError(f"unverified topic classified as {row.get('observation_state')}: {identifier}")
+            if (html_readbacks.get(identifier) or {}).get("verified") is not True:
+                raise ValueError(f"topic-page readback missing for {identifier}")
+            structured = structured_readbacks.get(identifier)
+            if not isinstance(structured, Mapping) or structured.get("verified") is not True:
+                raise ValueError(f"structured topic readback missing for {identifier}")
+            if str(row.get("raw_status") or "") not in set(structured.get("status_codes") or []):
+                raise ValueError(f"structured topic status mismatch for {identifier}")
+            if not HEX64_RE.fullmatch(str(structured.get("raw_sha256") or "")):
+                raise ValueError(f"structured topic raw hash missing for {identifier}")
 
 
 def main() -> int:
