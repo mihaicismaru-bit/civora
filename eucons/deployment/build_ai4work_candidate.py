@@ -4,11 +4,14 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import re
 from pathlib import Path
 from typing import Any
 
 HERE = Path(__file__).resolve().parent
 EUCONS = HERE.parent
+EXTERNAL_RESOURCE_RE = re.compile(r"\b(?:src|href|action)\s*=\s*[\"']\s*(?:https?:)?//", re.IGNORECASE)
+CSS_EXTERNAL_RE = re.compile(r"(?:@import\s+(?:url\()?|url\()\s*[\"']?\s*(?:https?:)?//", re.IGNORECASE)
 
 
 def load_module(name: str, path: Path):
@@ -41,6 +44,8 @@ def _assert_research_isolation(target: Path, research: dict[str, Any]) -> None:
         text = _read(page)
         if '<meta name="robots" content="noindex,nofollow">' not in text:
             raise RuntimeError(f"AI4WORK_RESEARCH_PAGE_INDEXABLE:{page}")
+        if EXTERNAL_RESOURCE_RE.search(text):
+            raise RuntimeError(f"AI4WORK_RESEARCH_EXTERNAL_SUBRESOURCE:{page}")
     sitemap = _read(target / "sitemap.xml")
     if "/cercetare/ai4work-step" in sitemap:
         raise RuntimeError("AI4WORK_RESEARCH_ROUTE_LEAKED_TO_SITEMAP")
@@ -48,6 +53,12 @@ def _assert_research_isolation(target: Path, research: dict[str, Any]) -> None:
     for forbidden in ("localStorage", "sessionStorage", "document.cookie", "utm_", "gtag(", "fbq("):
         if forbidden in client:
             raise RuntimeError(f"AI4WORK_CLIENT_TRACKING_DRIFT:{forbidden}")
+    css_path = target / "assets" / "eucons.css"
+    if not css_path.is_file():
+        raise RuntimeError("AI4WORK_SHARED_STYLESHEET_MISSING")
+    css = _read(css_path)
+    if CSS_EXTERNAL_RE.search(css):
+        raise RuntimeError("AI4WORK_RESEARCH_STYLESHEET_EXTERNAL_RESOURCE")
     adults = _read(target / "cercetare" / "ai4work-step" / "adulti" / "index.html")
     employers = _read(target / "cercetare" / "ai4work-step" / "angajatori" / "index.html")
     for page_text in (adults, employers):
