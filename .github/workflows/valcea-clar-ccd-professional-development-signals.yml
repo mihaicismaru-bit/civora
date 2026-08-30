@@ -1,0 +1,33 @@
+name: VÂLCEA CLAR CCD Professional Development Signals
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'valcea-clar/scripts/ccd_valcea_professional_development_signal_adapter.py'
+      - '.github/workflows/valcea-clar-ccd-professional-development-signals.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/scripts/ccd_valcea_professional_development_signal_adapter.py'
+      - '.github/workflows/valcea-clar-ccd-professional-development-signals.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-ccd-professional-development-signals-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Compile CCD Vâlcea professional-development adapter
+        run: python -m py_compile valcea-clar/scripts/ccd_valcea_professional_development_signal_adapter.py
+      - name: Run CCD Vâlcea fail-closed regressions
+        run: python valcea-clar/scripts/ccd_valcea_professional_development_signal_adapter.py --self-test
