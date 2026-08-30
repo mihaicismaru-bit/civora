@@ -57,13 +57,15 @@ def main() -> int:
 
     local = routes["EEA-RO-LOCAL-DEVELOPMENT-FRDS-WATCH"]
     if (
-        local["observation_state"] != "OPERATOR_WATCH"
+        local["observation_state"] != "OPERATOR_WATCH_HISTORICAL_LANDING"
         or local["operator_name"] != "Romanian Social Development Fund"
         or local["watch_url"] != "https://frds.ro/en/home/"
         or local["programme_ids"] != ["local-development"]
         or "dezvoltare-locala.frds.ro" not in set(local.get("allowed_hosts") or [])
+        or "2014-2021" not in local["period_context"]
+        or "2021-2028" not in local["period_context"]
     ):
-        fail("FRDS Local Development route must remain bounded to the current official 2021-2028 Programme Operator surface")
+        fail("FRDS Local Development route must remain explicitly historical until a current 2021-2028 operator surface is verified")
 
     innovation = routes["EEA-RO-INNOVATION-NORWAY-FUND-OPERATOR-WATCH"]
     if innovation["observation_state"] != "OPERATOR_WATCH" or innovation["watch_url"] != "https://www.innovasjonnorge.no/seksjon/eos-midlene":
@@ -90,6 +92,19 @@ def main() -> int:
         fail("lexical OPEN CALL escaped non-authorizing boundary")
     if receipt["candidates"][0]["candidate_observation_state"] != "DISCOVERY_ONLY":
         fail("candidate escaped DISCOVERY_ONLY")
+
+    historical = mod.build_healthy_receipt(
+        b'''<html><body><a href="/en/local-development-programme/">Local Development Programme</a></body></html>''',
+        local,
+        final_url=local["watch_url"],
+        status=200,
+        content_type="text/html",
+        run_id="regression",
+        fetched_at="2026-08-30T18:00:00+00:00",
+    )
+    mod.validate_receipt(historical, local)
+    if historical["observation_state"] != "OPERATOR_WATCH_HISTORICAL_LANDING" or historical["open_call_authorized"] is not False:
+        fail("historical FRDS landing escaped historical/non-authorizing boundary")
 
     expect_raises(lambda: mod.validate_route_url("http://uefiscdi.gov.ro/eea-grants-2021-2028", research), "HTTP downgrade")
     expect_raises(lambda: mod.validate_route_url("https://example.com/eea-grants-2021-2028", research), "host drift")
@@ -127,6 +142,7 @@ def main() -> int:
         "synthetic_candidates": receipt["candidate_count"],
         "research_state": research["observation_state"],
         "green_transition_route": green["watch_url"],
+        "local_development_state": local["observation_state"],
         "local_development_route": local["watch_url"],
         "innovation_route": innovation["watch_url"],
         "degraded_lkg_required": degraded["lkg_required"],
