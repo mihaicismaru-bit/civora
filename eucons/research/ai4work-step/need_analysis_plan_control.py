@@ -6,9 +6,9 @@ from typing import Any
 
 from research_storage import RESEARCH_ID, canonical_json_bytes
 
-PLAN_SCHEMA = "eucons.ai4work_need_analysis_plan.v0.1"
+PLAN_SCHEMA = "eucons.ai4work_need_analysis_plan.v0.2"
 LOCK_SCHEMA = "eucons.ai4work_need_analysis_plan_lock.v0.1"
-CONTROL_SCHEMA = "eucons.ai4work_need_analysis_plan_control.v0.1"
+CONTROL_SCHEMA = "eucons.ai4work_need_analysis_plan_control.v0.2"
 CORE_IDS = ("H1", "H2", "H3", "H4", "H5")
 DESIGN_IDS = ("H6", "H7")
 FORM_BY_AUDIENCE = {"adult": "AI4WORK_ADULTS_V1", "employer": "AI4WORK_EMPLOYERS_V1"}
@@ -120,8 +120,14 @@ def assert_need_analysis_plan_locked_before_collection(
         "adult_direct_source": "Q10 perceived-need rating matrix",
         "employer_direct_source": "E03 competence-impact rating matrix",
         "normalization": "rating_1_to_5_to_0_100=(value-1)/4*100",
-        "within_population_aggregation": "arithmetic_mean_of_valid_required_direct_ratings",
+        "respondent_dimension_aggregation": "arithmetic_mean_of_all_mapped_direct_ratings_per_respondent",
+        "within_population_aggregation": "arithmetic_mean_of_respondent_dimension_scores",
         "cross_population_combination": "equal_population_components_0.5_adults_0.5_employers",
+        "numeric_computation": "exact_rational_no_intermediate_rounding",
+        "rank_order_basis": "unrounded_exact_combined_score_descending",
+        "tie_rule": "equal_exact_combined_scores_share_competition_rank",
+        "display_precision": "2_decimals_round_half_up_display_only",
+        "deterministic_display_tie_order": "need_id_ascending_does_not_break_ties",
         "respondent_weighting_allowed": False,
         "secondary_evidence_can_change_numeric_order": False,
         "missing_direct_indicator_imputation_allowed": False,
@@ -194,6 +200,10 @@ def assert_need_analysis_plan_locked_before_collection(
         "need_analysis_plan_locked_before_collection": True,
         "core_skill_rank_dimensions": list(CORE_IDS),
         "design_dimensions": list(DESIGN_IDS),
+        "numeric_computation": ranking["numeric_computation"],
+        "rank_order_basis": ranking["rank_order_basis"],
+        "tie_rule": ranking["tie_rule"],
+        "display_precision": ranking["display_precision"],
         "secondary_evidence_can_change_numeric_order": False,
         "respondent_weighting_allowed": False,
         "representativeness_claim_allowed": False,
