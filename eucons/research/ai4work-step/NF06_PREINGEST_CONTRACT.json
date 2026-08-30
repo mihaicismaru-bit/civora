@@ -1,7 +1,7 @@
 {
-  "schema_version": "eucons.ai4work_nf06_preingest_contract.v0.9",
+  "schema_version": "eucons.ai4work_nf06_preingest_contract.v1.0",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "purpose": "Fail-closed source-batch preflight before handoff to NF06. This contract does not redefine the internal NF06 schema; it proves that an immutable source export is eligible to be handed to NF06, binds that export to the exact reviewed collection frame and frozen instrument content, and emits internal method-coverage plus channel-concentration aggregates required by the separate pre-synthesis readiness gate.",
+  "purpose": "Fail-closed source-batch preflight before handoff to NF06. This contract does not redefine the internal NF06 schema; it proves that an immutable source export is eligible to be handed to NF06, binds that export to the exact reviewed collection frame and frozen instrument content, requires a structured and temporally fresh authoritative rights-hold snapshot at persisted handoff, and emits internal method-coverage plus channel-concentration aggregates required by the separate pre-synthesis readiness gate.",
   "prod_evidence_class": "PROD_REAL_EVIDENCE",
   "test_twin_evidence_class": "TEST_TWIN_NON_EVIDENCE",
   "allowed_forms": [
@@ -33,7 +33,11 @@
     "response_id values are unique within the batch",
     "direct-identifier aliases and identifier-like free text are rejected again at pre-ingest",
     "CRM linkage and commercial tracking remain FORBIDDEN",
-    "storage class is RESEARCH_ONLY_SEPARATE_FROM_CRM"
+    "storage class is RESEARCH_ONLY_SEPARATE_FROM_CRM",
+    "persisted PROD handoff requires the exact eucons.ai4work_rights_hold_snapshot.v0.1 structured snapshot rather than an arbitrary response-id iterable",
+    "rights-hold snapshot source_class is EUCONS_RESEARCH_RIGHTS_STORE and complete_current_snapshot=true",
+    "rights-hold snapshot captured_at is timezone-aware and is not earlier than either collection close or the latest candidate record",
+    "rights-hold snapshot contains only opaque response_ids plus bounded control metadata; identity and case narrative are forbidden"
   ],
   "test_twin_requirements": [
     "all records synthetic=true",
@@ -77,6 +81,33 @@
     "validation_rule": "Both hashes must match the exact repository files used by the pre-ingest runtime. If the instrument changes without a matching frozen frame update, pre-ingest fails closed.",
     "historical_reproducibility_rule": "A historical batch must be validated from the repository revision whose frozen instrument hashes match the collection frame; silently validating against a later instrument revision is forbidden."
   },
+  "rights_hold_snapshot_contract": {
+    "schema_version": "eucons.ai4work_rights_hold_snapshot.v0.1",
+    "required_exact_fields": [
+      "schema_version",
+      "research_id",
+      "source_class",
+      "artifact_class",
+      "captured_at",
+      "complete_current_snapshot",
+      "response_ids"
+    ],
+    "source_class": "EUCONS_RESEARCH_RIGHTS_STORE",
+    "artifact_class": "RIGHTS_CONTROL_SNAPSHOT_NOT_NEED_EVIDENCE",
+    "complete_current_snapshot_required": true,
+    "response_ids_format": "list of unique lowercase 64-hex opaque response receipts",
+    "temporal_rule": "captured_at must include timezone and must be >= collection_closed_at and >= the latest candidate record received_at",
+    "privacy_rule": "Only opaque response receipts and bounded control metadata are permitted. Identity, contact data and privacy-case narrative are forbidden.",
+    "live_binding_boundary": "Repository validation cannot prove that a deployed producer actually reads the authoritative separate research/privacy rights store. That live producer/store binding remains external operational evidence before PROD.",
+    "manifest_bindings": [
+      "rights_hold_snapshot_schema",
+      "rights_hold_snapshot_source_class",
+      "rights_hold_snapshot_captured_at",
+      "rights_hold_snapshot_sha256",
+      "rights_hold_receipt_set_sha256",
+      "rights_hold_count_at_export"
+    ]
+  },
   "collection_frame_required_fields": [
     "research_id",
     "collection_frame_id",
@@ -115,7 +146,7 @@
     "form_contract_sha256",
     "forms_definition_sha256"
   ],
-  "manifest_privacy_boundary": "The pre-ingest manifest contains internal control counts, hashes, timestamps and opaque channel provenance only. It must not contain questionnaire answers, free-text responses, raw idempotency keys, IP addresses, user agents, cookies, referrer/UTM payloads, CRM identifiers or optional contact data. Method-coverage and concentration aggregates are internal QA inputs and are not public reporting tables.",
+  "manifest_privacy_boundary": "The pre-ingest manifest contains internal control counts, hashes, timestamps and opaque channel provenance only. The persisted handoff may additionally carry hashes/timestamp/source-class metadata for the rights-hold snapshot, never its receipt list. It must not contain questionnaire answers, free-text responses, raw idempotency keys, IP addresses, user agents, cookies, referrer/UTM payloads, CRM identifiers, optional contact data, identity or rights-case narrative. Method-coverage and concentration aggregates are internal QA inputs and are not public reporting tables.",
   "channel_qa_outputs": [
     "channel_counts",
     "dominant_channel_share",
@@ -135,8 +166,8 @@
     "form_region_channel_counts"
   ],
   "concentration_rule": "The frozen single_channel_share_max threshold is evaluated globally, independently for each region, and independently for each form-region stratum. All count views must reconcile exactly with their denominators and with global channel_counts. If any scope exceeds the threshold, a PASS sensitivity artifact must explicitly cover every exceeded scope before primary synthesis readiness can pass.",
-  "pre_synthesis_rule": "Passing NF06 source pre-ingest alone does not authorise needs synthesis. A PROD_REAL_EVIDENCE batch must separately pass primary_evidence_readiness.py against the approved METHOD_PLAN_NOT_EVIDENCE collection-frame thresholds and the exact frozen collection-channel-register bytes. The gate must reconcile form-specific channel provenance, validate each actually-used channel against the registered audience_scope, recompute channel concentration from exact counts at global/region/form-region scope, and require scope-complete sensitivity analysis for every threshold exceedance. TEST TWIN is rejected by that gate.",
-  "promotion_rule": "Only PROD_REAL_EVIDENCE batches that pass this contract may be offered to NF06. TEST_TWIN output is permanently NON_EVIDENCE.",
+  "pre_synthesis_rule": "Passing NF06 source pre-ingest alone does not authorise needs synthesis. A PROD_REAL_EVIDENCE batch must separately pass primary_evidence_readiness.py against the approved METHOD_PLAN_NOT_EVIDENCE collection-frame thresholds and the exact frozen collection-channel-register bytes. The gate must reconcile form-specific channel provenance, validate each actually-used channel against the registered audience_scope, recompute channel concentration from exact counts at global/region/form-region scope, and require scope-complete sensitivity analysis for every threshold exceedance. The persisted handoff must also pass the structured rights-hold snapshot contract. TEST TWIN is rejected by that gate.",
+  "promotion_rule": "Only PROD_REAL_EVIDENCE batches that pass this contract and the structured persisted-handoff rights control may be offered to NF06. TEST_TWIN output is permanently NON_EVIDENCE.",
   "merge_authorized": false,
   "deploy_authorized": false,
   "collection_enabled": false
