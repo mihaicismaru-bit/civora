@@ -6,6 +6,7 @@ require_once dirname(__DIR__) . '/src/CrmRuntime.php';
 require_once dirname(__DIR__) . '/src/RetentionRuntime.php';
 require_once dirname(__DIR__) . '/src/MailRuntime.php';
 require_once dirname(__DIR__) . '/src/ResearchRuntime.php';
+require_once dirname(__DIR__) . '/src/ResearchChannelGate.php';
 
 const AI4WORK_RESEARCH_PATH = '/research/ai4work/v1/submit';
 const AI4WORK_MAX_BODY_BYTES = 65536;
@@ -105,6 +106,10 @@ if ($isResearch) {
             $_SERVER['HTTP_X_AI4WORK_IDEMPOTENCY_KEY'] ?? null,
             $_SERVER['HTTP_X_AI4WORK_RECRUITMENT_CHANNEL'] ?? null,
         );
+        $channelGate = new EuconsResearchChannelGate(
+            dirname(__DIR__, 3) . '/research/ai4work-step/COLLECTION_CHANNEL_REGISTER_DRAFT.json'
+        );
+        $channelGate->assertApprovedRecord($prepared['record']);
         $receipt = $researchRuntime->persist($prepared, $rawBody);
         eucons_json($receipt['inserted'] ? 201 : 200, [
             'accepted' => true,
