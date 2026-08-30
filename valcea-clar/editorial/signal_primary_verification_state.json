@@ -2,19 +2,47 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-30T10:38:56+03:00",
+  "generated_at": "2026-08-30T10:50:01+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-30T10:37:23+03:00",
-  "task_count": 57,
+  "queue_generated_at": "2026-08-30T10:48:34+03:00",
+  "task_count": 58,
   "primary_match_count": 0,
-  "no_match_count": 26,
+  "no_match_count": 27,
   "unrouted_count": 31,
   "target_count": 20,
-  "targets_ok": 15,
+  "targets_ok": 14,
   "results": [
+    {
+      "signal_id": "eb136dabb6cc3b97772c71e7",
+      "signal_title": "COD GALBEN în nordul VÂLCII. Ploi torențiale și vânt puternic",
+      "signal_url": "https://seintamplainvalcea.ro/2026/08/30/cod-galben-in-nordul-valcii-ploi-torentiale-si-vant-puternic/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-30T10:46:02+03:00",
+      "verification_route_id": "environment_weather",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
+    },
     {
       "signal_id": "c312c1c373df3de0fbf340a5",
       "signal_title": "Continuare about LIGA 2. VICTORIE! SCM RÂMNICU VÂLCEA BATE LA DUMBRĂVIȚA. 1-0, SĂLCIANU",
@@ -31,9 +59,9 @@
             "name": "SCM Râmnicu Vâlcea",
             "url": "https://scmramnicuvalcea.ro/category/stiri/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 9
+          "status": "DEGRADED",
+          "error": "TimeoutError: The read operation timed out",
+          "documents_examined": 0
         },
         {
           "target": {
@@ -81,9 +109,9 @@
             "name": "SCM Râmnicu Vâlcea",
             "url": "https://scmramnicuvalcea.ro/category/stiri/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 9
+          "status": "DEGRADED",
+          "error": "TimeoutError: The read operation timed out",
+          "documents_examined": 0
         },
         {
           "target": {
