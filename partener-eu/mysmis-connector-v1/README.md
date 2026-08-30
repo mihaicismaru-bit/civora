@@ -67,6 +67,8 @@ Implemented in this unit:
   discovery commands to one build and health challenge, and cannot execute either command
 - append-only benchmark discovery-evidence verifier that recomputes admission and both live responses,
   preserves explicit non-retrievable reasons and leaves retrieval and Draft traversal unclaimed
+- append-only representative implementation-artifact verifier that binds a safe live candidate to
+  local intake, Drive readback bytes and an untouched reconciliation proposal without executing retrieval
 
 Still fail-closed / not implemented:
 

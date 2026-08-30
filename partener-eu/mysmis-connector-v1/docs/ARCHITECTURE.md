@@ -108,6 +108,12 @@
     track per response on the same build and health challenge, and locally rebuilds every candidate
     inventory with explicit non-retrievable reasons. Passing discovery remains pending artifact
     retrieval, Draft traversal, live resume, dedup/versioning and second-project generalization.
+26. Representative implementation-artifact verification is also append-only and non-executing. It
+    binds one externally observed `LIVE_BRIDGE_TOOL` retrieval to a safe retrievable GET/HEAD
+    discovery candidate, the exact local intake receipt, the deterministic Drive sync receipt and
+    untouched reconciliation proposal. It rehashes the complete raw Drive readback bytes and
+    requires zero MySMIS, Registry and SSOT mutations. Passing this gate still leaves live restart,
+    dedup/versioning, Draft traversal/export and both generalization branches pending.
 
 No project code appears in the discovery implementation. Project numbers occur only in fixtures and
 acceptance evidence.
