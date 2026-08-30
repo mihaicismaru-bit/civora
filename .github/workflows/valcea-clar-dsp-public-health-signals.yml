@@ -1,0 +1,33 @@
+name: VÂLCEA CLAR DSP Public Health Signals
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'valcea-clar/scripts/dsp_valcea_public_health_signal_adapter.py'
+      - '.github/workflows/valcea-clar-dsp-public-health-signals.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/scripts/dsp_valcea_public_health_signal_adapter.py'
+      - '.github/workflows/valcea-clar-dsp-public-health-signals.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-dsp-public-health-signals-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Compile DSP Vâlcea public-health adapter
+        run: python -m py_compile valcea-clar/scripts/dsp_valcea_public_health_signal_adapter.py
+      - name: Run DSP Vâlcea fail-closed regressions
+        run: python valcea-clar/scripts/dsp_valcea_public_health_signal_adapter.py --self-test
