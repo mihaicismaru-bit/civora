@@ -121,6 +121,16 @@
     logical version, a distinct deterministic sync and a complete matching Drive readback while the
     Registry/SSOT proposal remains append-only and mutation-free. Passing still leaves WRITING
     Draft/export and second-project generalization pending.
+28. The Drive-synced command mailbox is a bounded native-agent component. It recognizes only
+    create-only SHA-256-named `HEALTH` and `DISCOVER_ARTIFACTS` files, atomically moves them into a
+    processing queue, validates exact build, ID/filename binding, nonce, expiry and zero-write
+    restrictions, then invokes only an injected fixed dispatcher. Durable claim files prevent two
+    pollers from winning concurrently; a completed result suppresses replay and an expired
+    in-flight claim is rejected as ambiguous instead of being dispatched again. Results are written
+    create-only before archival and remain explicitly unaccepted as live evidence pending complete
+    Drive readback and protocol validation. The component opens no port, starts no process, loads no
+    dynamic adapter and contains no Drive credential handling. Binding it to an installed attested
+    extension remains a separate persisted gate.
 
 No project code appears in the discovery implementation. Project numbers occur only in fixtures and
 acceptance evidence.

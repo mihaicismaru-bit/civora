@@ -71,10 +71,12 @@ Implemented in this unit:
   local intake, Drive readback bytes and an untouched reconciliation proposal without executing retrieval
 - non-executing live restart/replay verifier that proves same-byte dedup without another upload and
   changed-byte next-version persistence with complete Drive readback and zero Registry/SSOT mutation
+- Drive-synced command mailbox and bounded local poller with create-only command files, atomic claims,
+  exact-build/expiry/nonce validation, restart ambiguity rejection and result-first replay deduplication
 
 Still fail-closed / not implemented:
 
-- direct native Google Drive adapter for unattended MCLENOVO operation
+- installed binding between the mailbox poller and the attested browser-extension dispatcher on MCLENOVO
 - live MCLENOVO health response observed through the trusted bridge transport
 - approved Artifact Registry and SSOT proposal application
 - CDP debugger fallback
@@ -82,6 +84,20 @@ Still fail-closed / not implemented:
 - second-project generalization and v1.0 release-candidate receipt
 
 The connector is therefore not `VERIFIED_FUNCTIONAL`.
+
+## Drive command mailbox
+
+`native/drive-command-mailbox.mjs` operates only inside an explicit absolute folder already synced by
+Google Drive for desktop. It creates `COMMAND_INBOX`, `PROCESSING`, `RESULT_OUTBOX`, `ARCHIVE` and
+`STATE`, then accepts create-only `<sha256>.command.json` files for `HEALTH` or
+`DISCOVER_ARTIFACTS`. The command ID must match its filename and the configured Git source head,
+nonce, five-minute expiry and zero-write restrictions must all validate before dispatch.
+
+The poller accepts only an injected fixed dispatcher function; it cannot load an adapter path or
+execute a process, script or shell. A claimed command is never replayed after an ambiguous restart.
+Completed results remain `liveEvidenceAccepted: false` until their full Drive readback and protocol
+evidence are independently validated. This unit opens no port and does not yet connect the mailbox
+to the installed extension, so it is a transport component rather than live acceptance evidence.
 
 ## Offline handoff preflight
 

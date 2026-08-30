@@ -12,6 +12,9 @@ Before any installation:
 6. Do not enable `nativeMessaging`, debugger/CDP or external extension messaging unless a later persisted gate explicitly requires and authorizes it.
 7. Do not read or persist cookies, passwords, MFA data, tokens or request Authorization headers.
 8. MySMIS remains read-only: no Save, Submit, Delete, Sign, Upload or Modify.
+9. The Drive command mailbox component does not authorize installation or live dispatch. Do not
+   place commands in `COMMAND_INBOX` until a later exact-build package binds the poller to the
+   attested fixed dispatcher and persists that authorization.
 
 Rollback:
 
