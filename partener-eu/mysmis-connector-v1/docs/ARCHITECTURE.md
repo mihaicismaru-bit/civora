@@ -83,6 +83,11 @@
     record produces only an `AUTHORIZED_NOT_STARTED` plan; invalid arguments, inaccessible inputs,
     malformed JSON, expired approvals, binding errors and digest mismatches produce a sanitized
     no-execution receipt without paths, approval contents or exception messages.
+22. The portable observation/rollback CLI revalidates the cryptographic plan ID, exact source head,
+    pair, manifest, authorization digest, expiry and all zero-write controls before consuming one
+    externally supplied operator observation. It accepts only observed bounded success, failure or
+    complete receipt-preserving rollback. It has no mechanism to perform those actions and cannot
+    promote any resulting state to live HEALTH or functional MySMIS acceptance.
 
 No project code appears in the discovery implementation. Project numbers occur only in fixtures and
 acceptance evidence.

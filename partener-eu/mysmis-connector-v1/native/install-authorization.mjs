@@ -220,10 +220,80 @@ function assertSafeObservation(current, event) {
   }
 }
 
-export function transitionInstallationState({ current, event, clock = () => new Date() }) {
-  if (!current || current.schemaVersion !== 1 || !SAFE_ID.test(current.attemptId)) {
-    throw new InstallAuthorizationError("INSTALL_STATE_INVALID", "A valid current installation state is required.");
+function assertCurrentInstallationState(current, now) {
+  const operations = [...(current?.operations || [])].sort();
+  const expectedPlanId = digest({
+    authorizationDigest: current?.authorizationDigest,
+    sourceHead: current?.sourceHead,
+    attemptId: current?.attemptId
+  });
+  if (!current
+    || current.schemaVersion !== 1
+    || !SAFE_ID.test(current.authorizationId)
+    || !SAFE_ID.test(current.approvalEvidenceRef)
+    || !SAFE_ID.test(current.attemptId)
+    || current.machineAlias !== "MCLENOVO"
+    || !GIT_SHA.test(current.sourceHead)
+    || !SHA256.test(current.pairId)
+    || !SHA256.test(current.manifestDigest)
+    || !SHA256.test(current.authorizationDigest)
+    || !SHA256.test(current.planId)
+    || current.planId !== expectedPlanId
+    || JSON.stringify(operations) !== JSON.stringify([...ALLOWED_OPERATIONS].sort())
+    || current.externalExecutionRequired !== true
+    || current.nativeMessagingEnabled !== false
+    || current.mysmisAccessPerformed !== false
+    || current.mysmisWrites !== 0
+    || current.liveEvidenceClaimed !== false) {
+    throw new InstallAuthorizationError("INSTALL_STATE_INVALID", "A complete exact-build installation state is required.");
   }
+  if (current.status === "INSTALLATION_AUTHORIZED_PENDING_EXTERNAL_EXECUTION") {
+    const expiresAt = parseTime(current.expiresAt, "INSTALL_STATE_INVALID");
+    if (expiresAt <= now
+      || current.installState !== "AUTHORIZED_NOT_STARTED"
+      || current.rollbackState !== "READY_NOT_REQUIRED"
+      || current.installationPerformed !== false) {
+      throw new InstallAuthorizationError(
+        expiresAt <= now ? "INSTALL_AUTHORIZATION_EXPIRED_BEFORE_OBSERVATION" : "INSTALL_STATE_INVALID",
+        "The authorized plan is expired or not in its exact initial state."
+      );
+    }
+  } else if (current.status === "INSTALLATION_FAILED_ROLLBACK_REQUIRED") {
+    if (!SAFE_ID.test(current.observationId)
+      || !/^[A-Z0-9_]{1,80}$/u.test(current.errorCode)
+      || current.installState !== "FAILED"
+      || current.rollbackState !== "REQUIRED"
+      || current.installationPerformed !== false) {
+      throw new InstallAuthorizationError("INSTALL_STATE_INVALID", "A complete failed state is required before rollback.");
+    }
+  } else {
+    throw new InstallAuthorizationError("INSTALL_TRANSITION_NOT_ALLOWED", "Current state cannot be advanced by this contract.");
+  }
+}
+
+export function createInstallObservationFailureReceipt({ error, clock = () => new Date() }) {
+  const errorCode = error instanceof InstallAuthorizationError
+    && /^[A-Z0-9_]{1,80}$/u.test(error.code)
+    ? error.code
+    : "INSTALL_OBSERVATION_UNEXPECTED_FAILURE";
+  return Object.freeze({
+    schemaVersion: 1,
+    recordedAt: clock().toISOString(),
+    status: "INSTALL_OBSERVATION_REJECTED_NO_EXECUTION",
+    errorCode,
+    installationPerformed: false,
+    nativeMessagingEnabled: false,
+    mysmisAccessPerformed: false,
+    mysmisWrites: 0,
+    remoteShellUsed: false,
+    credentialAccessPerformed: false,
+    liveEvidenceClaimed: false
+  });
+}
+
+export function transitionInstallationState({ current, event, clock = () => new Date() }) {
+  const now = clock();
+  assertCurrentInstallationState(current, now.getTime());
   if (current.status === "INSTALLATION_AUTHORIZED_PENDING_EXTERNAL_EXECUTION") {
     assertSafeObservation(current, event);
     if (event.event === "INSTALLATION_OBSERVED"
@@ -231,7 +301,7 @@ export function transitionInstallationState({ current, event, clock = () => new 
       && event.localAgentStarted === true) {
       return Object.freeze({
         ...current,
-        recordedAt: clock().toISOString(),
+        recordedAt: now.toISOString(),
         status: "EXTERNAL_INSTALLATION_RECORDED_AWAITING_LIVE_HEALTH",
         observationId: event.observationId,
         installState: "EXTERNAL_EXECUTION_RECORDED",
@@ -243,7 +313,7 @@ export function transitionInstallationState({ current, event, clock = () => new 
     if (event.event === "INSTALLATION_FAILED" && /^[A-Z0-9_]{1,80}$/u.test(event.errorCode)) {
       return Object.freeze({
         ...current,
-        recordedAt: clock().toISOString(),
+        recordedAt: now.toISOString(),
         status: "INSTALLATION_FAILED_ROLLBACK_REQUIRED",
         observationId: event.observationId,
         errorCode: event.errorCode,
@@ -266,7 +336,7 @@ export function transitionInstallationState({ current, event, clock = () => new 
     }
     return Object.freeze({
       ...current,
-      recordedAt: clock().toISOString(),
+      recordedAt: now.toISOString(),
       status: "INSTALLATION_ROLLED_BACK_AWAITING_NEW_AUTHORIZATION",
       observationId: event.observationId,
       installState: "ROLLED_BACK",

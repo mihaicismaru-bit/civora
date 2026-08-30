@@ -59,6 +59,8 @@ Implemented in this unit:
   approval record and cannot execute installation or claim live health itself
 - portable installation-authorization CLI that consumes only the preflight receipt and an externally
   supplied approval record, then emits a bounded plan or sanitized no-execution failure receipt
+- portable observation/rollback CLI that revalidates the exact plan and consumes only bounded
+  external operator observations, without executing or claiming installation success itself
 
 Still fail-closed / not implemented:
 
@@ -90,6 +92,18 @@ node native/install-authorization-cli.mjs \
 The command only reads those two JSON files. It emits a non-executing bounded plan on success or a
 sanitized `INSTALL_AUTHORIZATION_REJECTED_NO_EXECUTION` receipt on failure; it does not write files,
 load the extension, start the agent, enable native messaging or access MySMIS.
+
+After an external operator acts, the observation can be validated separately:
+
+```sh
+node native/install-observation-cli.mjs \
+  --current /path/to/authorized-plan.json \
+  --observation /path/to/external-observation.json
+```
+
+This command also reads only two JSON files. It verifies the plan ID, exact-build bindings, expiry,
+zero-write controls and observation shape before emitting an allowed state transition. It cannot
+perform the observed action or turn an installation observation into live MySMIS evidence.
 
 The Drive contract never directly edits an Artifact Registry or SSOT. It persists a
 `PENDING_HUMAN_REVIEW` proposal only after the uploaded bytes have been read back in full and match

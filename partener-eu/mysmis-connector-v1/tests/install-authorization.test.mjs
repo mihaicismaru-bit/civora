@@ -233,3 +233,23 @@ test("unknown, write-bearing and credential-bearing observations are rejected", 
     );
   }
 });
+
+test("forged and expired current plans fail before observation", () => {
+  const plan = createAuthorizedInstallationPlan({ preflightReceipt: preflight(), authorization: authorization(), clock: NOW });
+  assert.throws(
+    () => transitionInstallationState({
+      current: { ...plan, planId: "f".repeat(64) },
+      event: observation("INSTALLATION_OBSERVED", { extensionLoaded: true, localAgentStarted: true }),
+      clock: NOW
+    }),
+    (error) => error.code === "INSTALL_STATE_INVALID"
+  );
+  assert.throws(
+    () => transitionInstallationState({
+      current: { ...plan, expiresAt: "2026-08-29T22:49:59.000Z" },
+      event: observation("INSTALLATION_OBSERVED", { extensionLoaded: true, localAgentStarted: true }),
+      clock: NOW
+    }),
+    (error) => error.code === "INSTALL_AUTHORIZATION_EXPIRED_BEFORE_OBSERVATION"
+  );
+});
