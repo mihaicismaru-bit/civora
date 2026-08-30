@@ -51,7 +51,7 @@ NETWORK_SOURCES = {
 }
 EXPECTED_SOURCE_TAXONOMIES = {
     SJU_SOURCE_ID: "2026-08-30.1",
-    CAS_SOURCE_ID: "2026-08-29.1",
+    CAS_SOURCE_ID: "2026-08-30.1",
     **{source_id: "2026-08-30.1" for source_id in NETWORK_SOURCES},
 }
 
@@ -393,8 +393,8 @@ def self_test() -> None:
         CAS_SOURCE_ID,
         "HEALTH_PROVIDER_DIRECTORY",
         signal_id="cas-hospital-directory",
-        taxonomy_version="2026-08-29.1",
-        source_url="https://cnas.ro/casvl/furnizori-de-servicii-medicale/asistenta-medicala-spitaliceasca/",
+        taxonomy_version="2026-08-30.1",
+        source_url="https://cas.cnas.ro/casvl/informatii-furnizori/furnizori-de-servicii-medicale",
         directory_scope="HOSPITAL",
         reference_kind="HTML_REFERENCE",
     )
@@ -415,6 +415,9 @@ def self_test() -> None:
     assert cas_state.service_family is None
     assert cas_state.supports_institution_identity is False
     assert cas_state.supports_current_contract_status is False
+
+    cas_legacy_taxonomy = dict(cas_hospitals, signal_id="cas-legacy-taxonomy", taxonomy_version="2026-08-29.1")
+    assert build_state([cas_legacy_taxonomy])[0].hold_reason == "SOURCE_TAXONOMY_DRIFT"
 
     unsafe = dict(sju, signal_id="sju-unsafe", current_service_status_claim_allowed=True)
     unsafe_state = build_state([unsafe])[0]
