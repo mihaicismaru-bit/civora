@@ -13,6 +13,8 @@ on:
       - 'partener-eu/ingest/eea_civil_society_reconcile.py'
       - 'partener-eu/ingest/regiocentru_actions_fetch.py'
       - 'partener-eu/ingest/regiocentru_actions_source.json'
+      - 'partener-eu/ingest/interreg_territorial_fit_registry.json'
+      - 'partener-eu/ingest/interreg_territorial_fit.py'
       - 'partener-eu/p11/candidate_staging.py'
       - 'partener-eu/p11/eea_civil_society_stage.py'
       - 'partener-eu/p11/test_eea_civil_society_stage.py'
@@ -24,6 +26,7 @@ on:
       - 'partener-eu/ops/test_source_registry_alias_fallback.py'
       - 'partener-eu/ops/test_source_registry_external_expansion.py'
       - 'partener-eu/ops/test_interreg_rohu_pipeline_split.py'
+      - 'partener-eu/ops/test_interreg_territorial_fit.py'
       - 'partener-eu/ops/test_funding_tenders_structured_adapter.py'
       - 'partener-eu/ops/test_funding_tenders_live_fetch.py'
       - 'partener-eu/ops/test_eea_civil_society_calls.py'
@@ -70,6 +73,7 @@ jobs:
           python -m json.tool partener-eu/ingest/source_registry.json >/dev/null
           python -m json.tool partener-eu/ingest/data_plane_contract.json >/dev/null
           python -m json.tool partener-eu/ingest/regiocentru_actions_source.json >/dev/null
+          python -m json.tool partener-eu/ingest/interreg_territorial_fit_registry.json >/dev/null
           python -m json.tool partener-eu/ops/sources.json >/dev/null
           python -m py_compile partener-eu/ingest/source_registry_probe.py
           python -m py_compile partener-eu/ingest/funding_tenders_api.py
@@ -78,6 +82,7 @@ jobs:
           python -m py_compile partener-eu/ingest/eea_civil_society_fetch.py
           python -m py_compile partener-eu/ingest/eea_civil_society_reconcile.py
           python -m py_compile partener-eu/ingest/regiocentru_actions_fetch.py
+          python -m py_compile partener-eu/ingest/interreg_territorial_fit.py
           python -m py_compile partener-eu/p11/candidate_staging.py
           python -m py_compile partener-eu/p11/eea_civil_society_stage.py
           python -m py_compile partener-eu/p11/test_eea_civil_society_stage.py
@@ -85,6 +90,7 @@ jobs:
           python -m py_compile partener-eu/ops/test_p10_policy_regression.py
           python -m py_compile partener-eu/ops/test_source_registry_external_expansion.py
           python -m py_compile partener-eu/ops/test_interreg_rohu_pipeline_split.py
+          python -m py_compile partener-eu/ops/test_interreg_territorial_fit.py
           python -m py_compile partener-eu/ops/test_funding_tenders_structured_adapter.py
           python -m py_compile partener-eu/ops/test_funding_tenders_live_fetch.py
           python -m py_compile partener-eu/ops/test_eea_civil_society_calls.py
@@ -109,6 +115,9 @@ jobs:
 
       - name: Validate ROHU current versus future programming lifecycle split
         run: python partener-eu/ops/test_interreg_rohu_pipeline_split.py
+
+      - name: Validate Interreg Romania territorial fit stays non-authorizing
+        run: python partener-eu/ops/test_interreg_territorial_fit.py
 
       - name: Validate Funding & Tenders structured normalization
         run: python partener-eu/ops/test_funding_tenders_structured_adapter.py
