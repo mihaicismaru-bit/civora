@@ -62,12 +62,20 @@ jobs:
           import json, re, sys
           from pathlib import Path
           p=Path('/tmp/eea-romania-operator-watch/handoff/eea_romania_operator_watch.json')
+          registry_path=Path('partener-eu/ingest/eea_romania_operator_watch_registry.json')
           d=json.loads(p.read_text(encoding='utf-8'))
+          registry=json.loads(registry_path.read_text(encoding='utf-8'))
+          expected_route_ids=[str(row.get('route_id') or '') for row in registry.get('routes') or []]
+          actual_routes=d.get('routes') or []
+          actual_route_ids=[str(row.get('route_id') or '') for row in actual_routes]
           if d.get('adapter_id') != 'EEA_ROMANIA_OPERATOR_WATCH_V1':
               print('FAIL adapter identity drift:', d.get('adapter_id'))
               sys.exit(2)
-          if d.get('route_count') != 2 or len(d.get('routes') or []) != 2:
-              print('FAIL bounded route inventory drift:', d.get('route_count'))
+          if d.get('route_count') != len(expected_route_ids) or len(actual_routes) != len(expected_route_ids):
+              print('FAIL registry/evidence route inventory drift:', len(expected_route_ids), d.get('route_count'), len(actual_routes))
+              sys.exit(2)
+          if actual_route_ids != expected_route_ids:
+              print('FAIL registry/evidence route identity/order drift:', expected_route_ids, actual_route_ids)
               sys.exit(2)
           if d.get('healthy_route_count', 0) < 1:
               print('FAIL no official operator watch route was reachable')
@@ -80,7 +88,7 @@ jobs:
           if not required.issubset(set(d.get('missing_for_open_confirmation') or [])):
               print('FAIL aggregate OPEN proof requirements incomplete')
               sys.exit(2)
-          for row in d.get('routes') or []:
+          for row in actual_routes:
               for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized'):
                   if row.get(key) is not False:
                       print('FAIL route became authorizing:', row.get('route_id'), key, row.get(key))
