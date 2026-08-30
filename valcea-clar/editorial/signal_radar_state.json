@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_SIGNAL_RADAR_STATE_V1",
   "instance_id": "valcea",
-  "observed_at": "2026-08-30T11:48:39+03:00",
+  "observed_at": "2026-08-30T11:59:46+03:00",
   "publication_authority": "NONE",
   "health": "PASS",
   "source_count": 15,
   "sources_ok": 13,
-  "current_signal_count": 10,
+  "current_signal_count": 23,
   "today_signal_count": 4,
   "observations": [
     {
@@ -19,7 +19,7 @@
       "error": null,
       "signals": [],
       "final_url": "https://curierulderamnic.ro/",
-      "links_examined": 0,
+      "links_examined": 14,
       "hygiene_dropped_count": 0,
       "hygiene_dropped": []
     },
@@ -41,7 +41,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-30T09:51:25+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-30T11:48:39+03:00",
+          "observed_at": "2026-08-30T11:59:46+03:00",
           "verification_route_id": "sport",
           "verification_targets": [
             {
@@ -90,9 +90,63 @@
       "family": "LOCAL_PRESS",
       "status": "PASS",
       "error": null,
-      "signals": [],
+      "signals": [
+        {
+          "signal_id": "fbaf068144bf16fc56b085d2",
+          "signal_title": "António Costa vine la București: finanțările europene după 2027 intră în negocierea decisivă",
+          "signal_url": "https://www.eurovalcea.ro/2026/08/29/antonio-costa-vine-la-bucuresti-finantarile-europene-dupa-2027-intra-in-negocierea-decisiva/",
+          "signal_publisher": "EuroVâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": null,
+          "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
+          "observed_at": "2026-08-30T11:59:46+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-eurovalcea"
+        },
+        {
+          "signal_id": "39266ca28bdfbb4eedb94e0a",
+          "signal_title": "Mircia Gutău anunță finalizarea proiectelor PNRR și clarifică soluția pentru termoficare",
+          "signal_url": "https://www.eurovalcea.ro/2026/08/28/mircia-gutau-anunta-finalizarea-proiectelor-pnrr-si-clarifica-solutia-pentru-termoficare/",
+          "signal_publisher": "EuroVâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": null,
+          "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
+          "observed_at": "2026-08-30T11:59:46+03:00",
+          "verification_route_id": "utilities",
+          "verification_targets": [
+            {
+              "ref_type": "news_source_id",
+              "id": "apavil-comunicate"
+            },
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "apavil-opriri-programate"
+            },
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "cet-govora-termoficare-advisories"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-eurovalcea"
+        }
+      ],
       "final_url": "https://www.eurovalcea.ro/",
-      "links_examined": 0,
+      "links_examined": 14,
       "hygiene_dropped_count": 0,
       "hygiene_dropped": []
     },
@@ -103,9 +157,75 @@
       "family": "LOCAL_PRESS",
       "status": "PASS",
       "error": null,
-      "signals": [],
-      "final_url": "http://www.impactreal.ro/",
-      "links_examined": 0,
+      "signals": [
+        {
+          "signal_id": "7e00bb6b6945347a3c3e0653",
+          "signal_title": "Victorie de aur pentru Vâlcea la Dumbrăvița: portarul Crăciun a fost decisiv la debut",
+          "signal_url": "https://www.impactreal.ro/2026/08/29/victorie-de-aur-pentru-valcea-la-dumbravita-portarul-craciun-a-fost-decisiv-la-debut/",
+          "signal_publisher": "Impact Real",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-29T16:50:13+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-08-30T11:59:46+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-impact-real"
+        },
+        {
+          "signal_id": "f7a195310b451002625f113b",
+          "signal_title": "De Sfânta Maria Mică, „Brâul de Aur” adună Vâlcea la Bărbătești: paradă în straie populare, zeci de dansatori și concert cu Olguța Berbec",
+          "signal_url": "https://www.impactreal.ro/2026/08/29/de-sfanta-maria-mica-braul-de-aur-aduna-valcea-la-barbatesti-parada-in-straie-populare-zeci-de-dansatori-si-concert-cu-olguta-berbec/",
+          "signal_publisher": "Impact Real",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-29T10:25:59+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-08-30T11:59:46+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-impact-real"
+        },
+        {
+          "signal_id": "bd8aedc0880c84d3d79b18ba",
+          "signal_title": "Investiții de aproape 24 de milioane de lei în educația din Drăgășani: Liceul Brătianu va fi modernizat, o grădiniță nouă va avea piscină interioară",
+          "signal_url": "https://www.impactreal.ro/2026/08/29/investitii-de-aproape-24-de-milioane-de-lei-in-educatia-din-dragasani-liceul-bratianu-va-fi-modernizat-o-gradinita-noua-va-avea-piscina-interioara/",
+          "signal_publisher": "Impact Real",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-29T08:52:40+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-08-30T11:59:46+03:00",
+          "verification_route_id": "dragasani_administration",
+          "verification_targets": [
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "primaria-dragasani-anunturi-publice"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-impact-real"
+        }
+      ],
+      "final_url": "https://www.impactreal.ro/",
+      "links_examined": 14,
       "hygiene_dropped_count": 0,
       "hygiene_dropped": []
     },
@@ -151,9 +271,30 @@
       "family": "LOCAL_PRESS",
       "status": "PASS",
       "error": null,
-      "signals": [],
+      "signals": [
+        {
+          "signal_id": "bbfd69860bb9cd393919b9e1",
+          "signal_title": "Ultima oră o zi in urma Dezinsecție pe domeniul public în Bujoreni: intervenții pentru reducerea insectelor de disconfort",
+          "signal_url": "https://www.primplanpress.ro/dezinsectie-pe-domeniul-public-in-bujoreni-interventii-pentru-reducerea-insectelor-de-disconfort/",
+          "signal_publisher": "Primplan Press",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-29T11:03:38+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-08-30T11:59:46+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-primplan"
+        }
+      ],
       "final_url": "https://www.primplanpress.ro/",
-      "links_examined": 0,
+      "links_examined": 14,
       "hygiene_dropped_count": 0,
       "hygiene_dropped": []
     },
@@ -175,7 +316,7 @@
           "signal_sensitive": true,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-08-30T11:48:39+03:00",
+          "observed_at": "2026-08-30T11:59:46+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -195,7 +336,7 @@
           "signal_sensitive": true,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-08-30T11:48:39+03:00",
+          "observed_at": "2026-08-30T11:59:46+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -225,7 +366,7 @@
       "error": null,
       "signals": [],
       "final_url": "https://stirileolteniei.ro/",
-      "links_examined": 0,
+      "links_examined": 12,
       "hygiene_dropped_count": 0,
       "hygiene_dropped": []
     },
@@ -236,9 +377,30 @@
       "family": "LOCAL_PRESS",
       "status": "PASS",
       "error": null,
-      "signals": [],
+      "signals": [
+        {
+          "signal_id": "cdb024409887bcc89f32cce5",
+          "signal_title": "Răfuială în plină stradă la Râmnicu Vâlcea: cinci bărbați, după gratii",
+          "signal_url": "https://vocea-valcii.ro/dezvaluiri/rafuiala-in-plina-strada-la-ramnicu-valcea-cinci-barbati-dupa-gratii/",
+          "signal_publisher": "Vocea Vâlcii",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-29T12:40:55+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-08-30T11:59:46+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-vocea-valcii"
+        }
+      ],
       "final_url": "https://vocea-valcii.ro/category/prima-pagina/",
-      "links_examined": 0,
+      "links_examined": 14,
       "hygiene_dropped_count": 0,
       "hygiene_dropped": []
     },
@@ -260,7 +422,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-29T17:20:12+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-30T11:48:39+03:00",
+          "observed_at": "2026-08-30T11:59:46+03:00",
           "verification_route_id": "dragasani_administration",
           "verification_targets": [
             {
@@ -285,7 +447,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-29T16:47:07+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-30T11:48:39+03:00",
+          "observed_at": "2026-08-30T11:59:46+03:00",
           "verification_route_id": "environment_weather",
           "verification_targets": [
             {
@@ -310,7 +472,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-29T09:15:29+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-30T11:48:39+03:00",
+          "observed_at": "2026-08-30T11:59:46+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -335,7 +497,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-29T03:43:01+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-30T11:48:39+03:00",
+          "observed_at": "2026-08-30T11:59:46+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -369,7 +531,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-08-30T11:48:39+03:00",
+          "observed_at": "2026-08-30T11:59:46+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -389,7 +551,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-08-30T11:48:39+03:00",
+          "observed_at": "2026-08-30T11:59:46+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -409,7 +571,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-30T09:51:25+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-30T11:48:39+03:00",
+          "observed_at": "2026-08-30T11:59:46+03:00",
           "verification_route_id": "sport",
           "verification_targets": [
             {
@@ -450,9 +612,50 @@
       "family": "LOCAL_PRESS",
       "status": "PASS",
       "error": null,
-      "signals": [],
+      "signals": [
+        {
+          "signal_id": "4fbff975547e53940d1ae1f2",
+          "signal_title": "FOTO Schitul Flămânda din Galicea – locul unde își doarme somnul de veci cronicarul lui Mihai Viteazul",
+          "signal_url": "https://evenimentvalcean.ro/foto-schitul-flamanda-din-galicea-locul-unde-isi-doarme-somnul-de-veci-cronicarul-lui-mihai-viteazul/",
+          "signal_publisher": "Eveniment Vâlcean",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-29T20:24:26+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-08-30T11:59:46+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-eveniment-valcean"
+        },
+        {
+          "signal_id": "12e4031507db4f28aa2ede49",
+          "signal_title": "Mircia Gutău, despre scandalul de la sala de jocuri din centrul Râmnicului: „Se pune lacătul pe ușă”",
+          "signal_url": "https://evenimentvalcean.ro/mircia-gutau-despre-scandalul-de-la-sala-de-jocuri-din-centrul-ramnicului-se-pune-lacatul-pe-usa/",
+          "signal_publisher": "Eveniment Vâlcean",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-30T09:44:51+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-08-30T11:59:46+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-eveniment-valcean"
+        }
+      ],
       "final_url": "https://evenimentvalcean.ro/",
-      "links_examined": 0,
+      "links_examined": 14,
       "hygiene_dropped_count": 0,
       "hygiene_dropped": []
     },
@@ -463,9 +666,105 @@
       "family": "LOCAL_PRESS",
       "status": "PASS",
       "error": null,
-      "signals": [],
+      "signals": [
+        {
+          "signal_id": "eb136dabb6cc3b97772c71e7",
+          "signal_title": "COD GALBEN în nordul VÂLCII. Ploi torențiale și vânt puternic",
+          "signal_url": "https://seintamplainvalcea.ro/2026/08/30/cod-galben-in-nordul-valcii-ploi-torentiale-si-vant-puternic/",
+          "signal_publisher": "Se întâmplă în Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-30T10:46:02+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-08-30T11:59:46+03:00",
+          "verification_route_id": "environment_weather",
+          "verification_targets": [
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "inhga-avertizari-hidrologice-valcea"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-se-intampla-in-valcea"
+        },
+        {
+          "signal_id": "2e915b7e6b404e05b61f9731",
+          "signal_title": "ALERTĂ în RÂMNICU VÂLCEA. Fetiță dispărută!",
+          "signal_url": "https://seintamplainvalcea.ro/2026/08/29/alerta-in-ramnicu-valcea-fetita-disparuta/",
+          "signal_publisher": "Se întâmplă în Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-29T22:38:56+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-08-30T11:59:46+03:00",
+          "verification_route_id": "police_public_safety",
+          "verification_targets": [
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "ipj-valcea-stiri"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-se-intampla-in-valcea"
+        },
+        {
+          "signal_id": "e1759f33d9200d47dc44d120",
+          "signal_title": "Confruntări între două grupări pe străzile din Râmnicu Vâlcea. Cinci rețineri…",
+          "signal_url": "https://seintamplainvalcea.ro/2026/08/29/confruntari-intre-doua-grupari-pe-strazile-din-ramnicu-valcea-cinci-retineri/",
+          "signal_publisher": "Se întâmplă în Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-29T12:45:20+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-08-30T11:59:46+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-se-intampla-in-valcea"
+        },
+        {
+          "signal_id": "fdb7a2a017d206e90e6a7d6c",
+          "signal_title": "FOTO – Oboseala putea provoca un accident grav pe DN 7, în Valea Oltului. Două mașini s-au ciocnit la Robești",
+          "signal_url": "https://seintamplainvalcea.ro/2026/08/29/foto-oboseala-putea-provoca-un-accident-grav-pe-dn-7-in-valea-oltului-doua-masini-s-au-ciocnit-la-robesti/",
+          "signal_publisher": "Se întâmplă în Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-29T12:27:50+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-08-30T11:59:46+03:00",
+          "verification_route_id": "police_public_safety",
+          "verification_targets": [
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "ipj-valcea-stiri"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-se-intampla-in-valcea"
+        }
+      ],
       "final_url": "https://seintamplainvalcea.ro/",
-      "links_examined": 0,
+      "links_examined": 14,
       "hygiene_dropped_count": 0,
       "hygiene_dropped": []
     }
