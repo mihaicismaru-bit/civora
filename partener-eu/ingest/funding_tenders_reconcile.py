@@ -6,7 +6,9 @@ This stage separates direct EU calls from portal-only/cascade records and semant
 conflicts before anything can enter canonical staging. It is still non-publishing.
 
 A record is staging-ready only when:
-- it is backed by the exact official F&T topic identifier and verified readback;
+- it is backed by the exact official F&T topic identifier;
+- the exact structured Topic Details readback confirms the same current status;
+- the official topic page is reachable at the exact authority URL;
 - its status wording and OPEN/FORTHCOMING observation agree;
 - the raw Search record type is a direct call type (1/2), never portal-only type 8;
 - the identifier has no semantic conflict in the normalized batch;
@@ -26,7 +28,7 @@ import json
 import pathlib
 import re
 from typing import Any
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 
 SCHEMA = "PARTENER_EU_FUNDING_TENDERS_RECONCILIATION_RECEIPT_V1"
 INPUT_SCHEMA = "PARTENER_EU_FUNDING_TENDERS_LIVE_EVIDENCE_V1"
@@ -41,6 +43,8 @@ STATE_LABELS = {
 }
 MISSING_PROOFS = ["CANONICAL_STAGING_ADMISSION", "PUBLIC_PROJECTION_QUALITY_GATE"]
 HEX64_RE = re.compile(r"^[0-9a-f]{64}$")
+STRUCTURED_API_HOST = "api.tech.ec.europa.eu"
+STRUCTURED_API_PATH = "/search-api/prod/rest/search"
 
 
 def _canonical_json(value: Any) -> bytes:
@@ -151,6 +155,7 @@ def _semantic_from_record(record: dict[str, Any]) -> dict[str, Any]:
 
 
 def _readback_errors(identifier: str, row: dict[str, Any], readback: Any) -> list[str]:
+    """Validate the exact HTML topic-page reachability proof."""
     errors: list[str] = []
     expected_url = _expected_topic_url(identifier)
     if row.get("authority_url") != expected_url:
@@ -167,6 +172,39 @@ def _readback_errors(identifier: str, row: dict[str, Any], readback: Any) -> lis
     body_hash = str(readback.get("body_sha256") or "")
     if not HEX64_RE.fullmatch(body_hash):
         errors.append("EXACT_TOPIC_BODY_HASH_MISSING")
+    return errors
+
+
+def _structured_readback_errors(identifier: str, row: dict[str, Any], readback: Any) -> list[str]:
+    """Validate exact structured Topic Details identity/status evidence."""
+    errors: list[str] = []
+    if not isinstance(readback, dict) or readback.get("verified") is not True:
+        return ["STRUCTURED_TOPIC_READBACK_NOT_VERIFIED"]
+    if readback.get("identifier") != identifier:
+        errors.append("STRUCTURED_TOPIC_IDENTIFIER_MISMATCH")
+    if identifier not in set(readback.get("matched_identifiers") or []):
+        errors.append("STRUCTURED_TOPIC_EXACT_ID_MISSING")
+    if int(readback.get("exact_match_count") or 0) < 1:
+        errors.append("STRUCTURED_TOPIC_EXACT_MATCH_MISSING")
+
+    api_url = str(readback.get("api_url") or "")
+    parsed = urlparse(api_url)
+    if parsed.scheme != "https" or parsed.hostname != STRUCTURED_API_HOST or parsed.path != STRUCTURED_API_PATH:
+        errors.append("STRUCTURED_TOPIC_API_URL_DRIFT")
+    if int(readback.get("http_status") or 0) != 200:
+        errors.append("STRUCTURED_TOPIC_HTTP_NOT_200")
+    if not HEX64_RE.fullmatch(str(readback.get("raw_sha256") or "")):
+        errors.append("STRUCTURED_TOPIC_RAW_HASH_MISSING")
+
+    raw_status = str(row.get("raw_status") or "")
+    status_codes = {str(value) for value in (readback.get("status_codes") or [])}
+    if not raw_status or raw_status not in status_codes:
+        errors.append("STRUCTURED_TOPIC_STATUS_MISMATCH")
+
+    call_identifier = str(row.get("call_identifier") or "")
+    structured_calls = {str(value) for value in (readback.get("call_identifiers") or []) if value not in (None, "")}
+    if call_identifier and structured_calls and call_identifier not in structured_calls:
+        errors.append("STRUCTURED_TOPIC_CALL_ID_MISMATCH")
     return errors
 
 
@@ -194,9 +232,10 @@ def reconcile_live_evidence(
 
     batch = evidence.get("batch")
     readbacks = evidence.get("authority_readbacks")
+    structured_readbacks = evidence.get("structured_topic_readbacks")
     stats = evidence.get("stats")
-    if not isinstance(batch, dict) or not isinstance(readbacks, dict) or not isinstance(stats, dict):
-        _fail("live evidence envelope missing batch/readbacks/stats")
+    if not isinstance(batch, dict) or not isinstance(readbacks, dict) or not isinstance(structured_readbacks, dict) or not isinstance(stats, dict):
+        _fail("live evidence envelope missing batch/readbacks/structured-readbacks/stats")
     if batch.get("schema") != "PARTENER_EU_FUNDING_TENDERS_BATCH_V1":
         _fail("normalized batch schema mismatch")
     if batch.get("publication_effect") != "NONE":
@@ -255,6 +294,7 @@ def reconcile_live_evidence(
         elif label not in STATE_LABELS[state]:
             reasons.append("STATUS_LABEL_STATE_MISMATCH")
 
+        reasons.extend(_structured_readback_errors(identifier, row, structured_readbacks.get(identifier)))
         reasons.extend(_readback_errors(identifier, row, readbacks.get(identifier)))
 
         deadline_iso = None
@@ -321,7 +361,7 @@ def reconcile_live_evidence(
         ready.append({
             **base,
             "reconciliation_status": "PASS",
-            "evidence_basis": "EC_SEARCH_FACET_PLUS_EXACT_TOPIC_READBACK",
+            "evidence_basis": "EC_SEARCH_FACET_PLUS_EXACT_STRUCTURED_TOPIC_AND_PAGE_READBACK",
             "material_facts": material_facts,
             "material_fact_use": True,
             "ready_for_staging": True,
@@ -354,6 +394,7 @@ def reconcile_live_evidence(
             "portal_only_or_non_direct_records": sum("NON_DIRECT_OR_PORTAL_ONLY_CALL_TYPE" in row.get("reasons", []) for row in quarantined),
             "semantic_conflicts": sum("SEMANTIC_CONFLICT" in row.get("reasons", []) for row in quarantined),
             "stale_deadline_contradictions": sum("STALE_DEADLINE_CONTRADICTS_OPEN" in row.get("reasons", []) for row in quarantined),
+            "structured_topic_mismatches": sum(any(reason.startswith("STRUCTURED_TOPIC_") for reason in row.get("reasons", [])) for row in quarantined),
         },
         "material_fact_use": bool(ready),
         "ready_for_staging": bool(ready),
@@ -383,6 +424,7 @@ def main() -> int:
         "review_required": receipt["stats"]["review_required"],
         "portal_only_or_non_direct_records": receipt["stats"]["portal_only_or_non_direct_records"],
         "semantic_conflicts": receipt["stats"]["semantic_conflicts"],
+        "structured_topic_mismatches": receipt["stats"]["structured_topic_mismatches"],
         "publish_authorized": receipt["publish_authorized"],
         "publication_effect": receipt["publication_effect"],
     }, ensure_ascii=False, sort_keys=True))
