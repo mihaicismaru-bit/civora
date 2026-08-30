@@ -123,8 +123,9 @@ jobs:
           assert article13.get('synthetic') is False
           assert article13.get('approved') is False
           assert article13.get('collection_enabled') is False
-          assert article13.get('surface_fields', {}).get('privacy_contact') == notice.get('privacy_contact')
-          assert article13.get('surface_fields', {}).get('legal_basis') == notice.get('legal_basis')
+          assert article13.get('surface_fields', {}).get('privacy_contact') == 'DE COMPLETAT ÎNAINTE DE ACTIVAREA COLECTĂRII'
+          assert article13.get('surface_fields', {}).get('operator_contact_details') == 'DE APROBAT ÎNAINTE DE ACTIVAREA COLECTĂRII'
+          assert article13.get('surface_fields', {}).get('legal_basis') == 'DE APROBAT ÎNAINTE DE ACTIVAREA COLECTĂRII'
           anonymisation = json.loads((root / 'GDPR_ANONYMISATION_CLASSIFICATION_CONTROL.json').read_text(encoding='utf-8'))
           assert anonymisation.get('status') == 'RAW_RESPONSES_TREATED_AS_PERSONAL_OUTPUT_ANONYMITY_REQUIRES_VALIDATION'
           assert anonymisation.get('classification_policy', {}).get('direct_identifier_absence_claim') == 'DE_IDENTIFIED_BY_DESIGN_NOT_ANONYMOUS_BY_ASSERTION'
