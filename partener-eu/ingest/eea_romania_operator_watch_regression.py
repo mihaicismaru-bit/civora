@@ -40,6 +40,7 @@ def main() -> int:
         "EEA-RO-CULTURE-MC-UMP-WATCH",
         "EEA-RO-JUSTICE-MJ-WATCH",
         "EEA-RO-HOME-AFFAIRS-MAI-WATCH",
+        "EEA-RO-INSTITUTIONAL-COOPERATION-MIPE-WATCH",
         "EEA-RO-INNOVATION-NORWAY-FUND-OPERATOR-WATCH",
     }
     if set(routes) != expected_routes:
@@ -96,6 +97,15 @@ def main() -> int:
     ):
         fail("Home Affairs route must remain a historical dedicated-operator-site watch until current-period evidence appears")
 
+    institutional = routes["EEA-RO-INSTITUTIONAL-COOPERATION-MIPE-WATCH"]
+    if (
+        institutional["observation_state"] != "OPERATOR_WATCH_HISTORICAL_LANDING"
+        or institutional["operator_name"] != "Ministry of Investments and European Projects"
+        or institutional["watch_url"] != "https://www.eeagrants.ro/despre"
+        or institutional["programme_ids"] != ["institutional-cooperation-and-capacity-building"]
+    ):
+        fail("MIPE Institutional Cooperation route must remain a historical national EEA landing watch until current-period operator/call evidence appears")
+
     innovation = routes["EEA-RO-INNOVATION-NORWAY-FUND-OPERATOR-WATCH"]
     if innovation["observation_state"] != "OPERATOR_WATCH" or innovation["watch_url"] != "https://www.innovasjonnorge.no/seksjon/eos-midlene":
         fail("Innovation Norway route must remain the current official EEA operator surface")
@@ -131,6 +141,7 @@ def main() -> int:
     expect_raises(lambda: mod.validate_route_url("https://www.umpcultura.ro/ctg_2_noutati_pg_0.htm", culture, final=True), "Culture operator path drift")
     expect_raises(lambda: mod.validate_route_url("https://www.just.ro/other/", justice, final=True), "Justice historical landing path drift")
     expect_raises(lambda: mod.validate_route_url("https://www.mai.gov.ro/", home_affairs), "Home Affairs dedicated host drift")
+    expect_raises(lambda: mod.validate_route_url("https://www.eeagrants.ro/programe", institutional, final=True), "MIPE historical landing path drift")
 
     bad_registry = copy.deepcopy(registry)
     bad_registry["policy"]["open_call_authorized"] = True
@@ -140,6 +151,11 @@ def main() -> int:
     hist_routes = {row["route_id"]: row for row in historical_promoted["routes"]}
     hist_routes["EEA-RO-JUSTICE-MJ-WATCH"]["observation_state"] = "OPEN_CALL"
     expect_raises(lambda: mod.validate_registry(historical_promoted), "historical Justice landing promoted to OPEN_CALL")
+
+    institutional_promoted = copy.deepcopy(registry)
+    inst_routes = {row["route_id"]: row for row in institutional_promoted["routes"]}
+    inst_routes["EEA-RO-INSTITUTIONAL-COOPERATION-MIPE-WATCH"]["observation_state"] = "OPEN_CALL"
+    expect_raises(lambda: mod.validate_registry(institutional_promoted), "historical MIPE landing promoted to OPEN_CALL")
 
     degraded = mod.build_degraded_receipt(
         research,
@@ -170,6 +186,7 @@ def main() -> int:
         "culture_route": culture["watch_url"],
         "justice_state": justice["observation_state"],
         "home_affairs_state": home_affairs["observation_state"],
+        "institutional_state": institutional["observation_state"],
         "innovation_route": innovation["watch_url"],
         "degraded_lkg_required": degraded["lkg_required"],
         "open_call_authorized": receipt["open_call_authorized"],
