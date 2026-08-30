@@ -1,0 +1,33 @@
+name: VÂLCEA CLAR ISJ Education Signals
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'valcea-clar/scripts/isj_valcea_education_signal_adapter.py'
+      - '.github/workflows/valcea-clar-isj-education-signals.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/scripts/isj_valcea_education_signal_adapter.py'
+      - '.github/workflows/valcea-clar-isj-education-signals.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-isj-education-signals-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Compile ISJ Vâlcea education signal adapter
+        run: python -m py_compile valcea-clar/scripts/isj_valcea_education_signal_adapter.py
+      - name: Run ISJ Vâlcea fail-closed regressions
+        run: python valcea-clar/scripts/isj_valcea_education_signal_adapter.py --self-test
