@@ -3,6 +3,7 @@ import datetime as dt
 import hashlib
 import html as html_lib
 import json
+import os
 import re
 import ssl
 import urllib.parse
@@ -10,11 +11,14 @@ import urllib.request
 from html.parser import HTMLParser
 from pathlib import Path
 
+from mysmis_transport_handoff import validate_handoff
+
 ROOT=Path(__file__).resolve().parents[2]
 SOURCES=ROOT/'partener-eu/ingest/state/mipe_discovery_sources.json'
 SEEDS=ROOT/'partener-eu/ingest/state/mipe_known_canonical_seeds.json'
 STATE=ROOT/'partener-eu/ingest/state/mipe_state.json'
 MYSMIS='https://reporting.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027'
+MYSMIS_HANDOFF_ENV='MYSMIS_HANDOFF_PATH'
 UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36'
 MONTHS=['ian','feb','mar','apr','mai','iun','iul','aug','sept','oct','nov','dec']
 
@@ -98,17 +102,62 @@ def snapshot_signature(total,rows):
 def persist_state(state):
     STATE.write_text(json.dumps(state,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
-def ingest_mysmis():
+def load_mysmis_handoff(path=None):
+    """Load and validate immutable MySMIS acquisition evidence.
+
+    This handoff can authorize only whether the canonical reporting transport
+    may be acquired. It never authorizes call status, deadline, budget,
+    eligibility, OPEN_CALL or publication.
+    """
+    resolved=Path(path) if path else None
+    if resolved is None:
+        configured=os.getenv(MYSMIS_HANDOFF_ENV,'').strip()
+        if not configured: raise RuntimeError(f'{MYSMIS_HANDOFF_ENV} is required for MySMIS acquisition')
+        resolved=Path(configured)
+    if not resolved.is_file(): raise RuntimeError(f'MySMIS transport handoff missing: {resolved}')
+    payload=json.loads(resolved.read_text(encoding='utf-8'))
+    if not isinstance(payload,dict): raise RuntimeError('MySMIS transport handoff must be a JSON object')
+    validate_handoff(payload)
+    if payload.get('canonicalIdentity')!=MYSMIS: raise RuntimeError('MySMIS handoff identity does not match canonical ingestion URL')
+    return payload
+
+def transport_evidence(handoff):
+    return {
+        'runId':handoff.get('runId'),
+        'observedAt':handoff.get('observedAt'),
+        'canonicalIdentity':handoff.get('canonicalIdentity'),
+        'matrixSha256':handoff.get('matrixSha256'),
+        'handoffSha256':handoff.get('handoffSha256'),
+        'canonicalPrimaryAvailable':handoff.get('canonicalPrimaryAvailable'),
+        'alternateEvidenceAvailable':handoff.get('alternateEvidenceAvailable'),
+        'requiresSemanticReconciliation':handoff.get('requiresSemanticReconciliation'),
+        'authorityClass':handoff.get('authorityClass'),
+        'sourceFamily':handoff.get('sourceFamily'),
+        'programmeFamily':handoff.get('programmeFamily'),
+        'observationState':handoff.get('observationState'),
+        'materialFactUse':False,
+        'publicationEffect':'NONE'
+    }
+
+def ingest_mysmis(handoff_path=None):
     state=json.loads(STATE.read_text(encoding='utf-8')) if STATE.exists() else {'status':'SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED','items':[],'runs':[]}
     byurl={x.get('url'):x for x in state.get('items',[]) if isinstance(x,dict) and x.get('url')}
     prior=byurl.get(MYSMIS,{})
     baseline=prior.get('registrySnapshot') or BASELINE
     try:
+        handoff=load_mysmis_handoff(handoff_path)
+    except Exception as e:
+        return {'ok':False,'preserved':True,'transportGate':'HANDOFF_INVALID_FAIL_CLOSED','error':f'{type(e).__name__}: {e}'}
+    evidence=transport_evidence(handoff)
+    if handoff.get('canonicalPrimaryAvailable') is not True:
+        gate='ALTERNATE_DISCOVERY_ONLY' if handoff.get('alternateEvidenceAvailable') is True else 'NO_OFFICIAL_REPORT_TRANSPORT_AVAILABLE'
+        return {'ok':False,'preserved':True,'transportGate':gate,'transportEvidence':evidence,'error':'canonical MySMIS transport unavailable; last-known-good preserved'}
+    try:
         final,raw=fetch(MYSMIS,20,4_000_000)
-        if not final.startswith('https://reporting.mysmis2021.gov.ro/'):raise RuntimeError(f'redirected outside official MySMIS host: {final}')
+        if final!=MYSMIS:raise RuntimeError(f'canonical MySMIS retrieval identity drift: {final}')
         total,rows,statuses=parse_mysmis(raw)
     except Exception as e:
-        return {'ok':False,'preserved':True,'error':f'{type(e).__name__}: {e}'}
+        return {'ok':False,'preserved':True,'transportGate':'CANONICAL_ACQUISITION_FAILED','transportEvidence':evidence,'error':f'{type(e).__name__}: {e}'}
     diff=changes(baseline,rows)
     old_count=prior.get('validatedCallCount')
     count_changed=old_count is not None and old_count!=total
@@ -135,11 +184,12 @@ def ingest_mysmis():
             'confirmations':confirmations,
             'validatedCallCount':total,
             'changes':diff[:5],
-            'publicationPolicy':'publish only after two consecutive identical direct canonical observations'
+            'transportEvidence':evidence,
+            'publicationPolicy':'publish only after two consecutive identical direct canonical observations behind a validated immutable transport handoff'
         }
         if confirmations<2:
             persist_state(state)
-            return {'ok':True,'url':MYSMIS,'validatedCallCount':total,'visibleRowCount':len(rows),'explicitStatuses':statuses,'semanticChange':False,'pendingSemanticChange':True,'pendingConfirmations':confirmations,'preserved':True,'changes':diff[:5]}
+            return {'ok':True,'url':MYSMIS,'validatedCallCount':total,'visibleRowCount':len(rows),'explicitStatuses':statuses,'semanticChange':False,'pendingSemanticChange':True,'pendingConfirmations':confirmations,'preserved':True,'changes':diff[:5],'transportGate':'CANONICAL_VALIDATED_HANDOFF','transportEvidence':evidence}
     elif not semantic_candidate and state.pop('mysmisPendingChange',None) is not None:
         persist_state(state)
 
@@ -152,11 +202,11 @@ def ingest_mysmis():
         else: summary=f'Official MySMIS reporting was verified directly and currently lists {total if total is not None else "the current set of"} validated calls for 2021–2027. '
         summary+='No OPEN state is inferred; the source status is preserved exactly as published.'
         day=observed.date()
-        byurl[MYSMIS]={'id':hashlib.sha256(MYSMIS.encode()).hexdigest()[:20],'title':'MySMIS official funding registry changed' if parts else f'MySMIS official funding registry verified: {total} validated calls','url':MYSMIS,'date':day.isoformat(),'dateLabel':f'{day.day} {MONTHS[day.month-1]} {day.year}','summary':summary[:1400],'tag':'MySMIS','kind':'OFFICIAL_UPDATE','tier':'T1','source':'MIPE / MySMIS','observedAt':observed.isoformat(),'discovery':'canonical-official-fetch','verification':'CANONICAL_OFFICIAL_FETCH','explicitStatuses':statuses,'validatedCallCount':total,'registrySnapshot':rows}
+        byurl[MYSMIS]={'id':hashlib.sha256(MYSMIS.encode()).hexdigest()[:20],'title':'MySMIS official funding registry changed' if parts else f'MySMIS official funding registry verified: {total} validated calls','url':MYSMIS,'date':day.isoformat(),'dateLabel':f'{day.day} {MONTHS[day.month-1]} {day.year}','summary':summary[:1400],'tag':'MySMIS','kind':'OFFICIAL_UPDATE','tier':'T1','source':'MIPE / MySMIS','observedAt':observed.isoformat(),'discovery':'canonical-official-fetch-after-validated-transport-handoff','verification':'CANONICAL_OFFICIAL_FETCH','transportEvidence':evidence,'explicitStatuses':statuses,'validatedCallCount':total,'registrySnapshot':rows}
         state['items']=sorted(byurl.values(),key=lambda x:(x.get('date',''),x.get('observedAt','')),reverse=True)[:80]
         state.pop('mysmisPendingChange',None)
         persist_state(state)
-    return {'ok':True,'url':MYSMIS,'validatedCallCount':total,'visibleRowCount':len(rows),'explicitStatuses':statuses,'semanticChange':semantic,'changes':diff[:5]}
+    return {'ok':True,'url':MYSMIS,'validatedCallCount':total,'visibleRowCount':len(rows),'explicitStatuses':statuses,'semanticChange':semantic,'changes':diff[:5],'transportGate':'CANONICAL_VALIDATED_HANDOFF','transportEvidence':evidence}
 
 def main():
     src=json.loads(SOURCES.read_text(encoding='utf-8')).get('sources',[])
