@@ -35,7 +35,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: partener-eu-mipe-ingest-${{ github.event_name }}-${{ github.ref }}
+  group: ${{ github.event_name == 'pull_request' && format('partener-eu-mipe-ingest-pr-{0}', github.event.pull_request.number) || 'partener-eu-mipe-ingest-production' }}
   cancel-in-progress: true
 
 jobs:
