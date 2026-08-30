@@ -1,0 +1,33 @@
+name: VÂLCEA CLAR ISU Vâlcea Public Safety Signals
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'valcea-clar/scripts/isu_valcea_public_safety_signal_adapter.py'
+      - '.github/workflows/valcea-clar-isu-valcea-public-safety.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/scripts/isu_valcea_public_safety_signal_adapter.py'
+      - '.github/workflows/valcea-clar-isu-valcea-public-safety.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-isu-valcea-public-safety-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Compile ISU Vâlcea public-safety adapter
+        run: python -m py_compile valcea-clar/scripts/isu_valcea_public_safety_signal_adapter.py
+      - name: Run ISU Vâlcea fail-closed regressions
+        run: python valcea-clar/scripts/isu_valcea_public_safety_signal_adapter.py --self-test
