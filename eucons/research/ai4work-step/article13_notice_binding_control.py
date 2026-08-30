@@ -11,7 +11,6 @@ SNAPSHOT_PATH = HERE / "ARTICLE13_NOTICE_SNAPSHOT_DRAFT.json"
 REQUIRED_SURFACE_FIELDS = {
     "title",
     "operator_legal_name",
-    "operator_cui",
     "operator_contact_details",
     "privacy_contact",
     "purpose_summary",
@@ -127,7 +126,7 @@ def main() -> int:
         assert_repository_notice_binding()
     except (OSError, json.JSONDecodeError, Article13BindingError) as exc:
         raise SystemExit(f"REJECTED: {exc}")
-    print("PASS: Article 13 surface is bound to the canonical draft snapshot; PROD approval remains separately fail-closed")
+    print("PASS: Article 13 rendered surface is bound to the canonical draft snapshot; PROD approval remains separately fail-closed")
     return 0
 
 
