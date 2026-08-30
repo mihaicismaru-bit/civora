@@ -1,5 +1,5 @@
 {
-  "schema_version": "eucons.ai4work_needs_synthesis_gate_contract.v0.3",
+  "schema_version": "eucons.ai4work_needs_synthesis_gate_contract.v0.4",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "status": "IMPLEMENTED_FAIL_CLOSED_NOT_PROD_ACTIVATED",
   "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
@@ -7,25 +7,21 @@
   "required_subcontrols": [
     "real_batch_synthesis_gate.assert_real_batch_ready_for_synthesis",
     "method_frame_lock_control.assert_method_frame_locked_before_collection",
+    "need_analysis_plan_control.assert_need_analysis_plan_locked_before_collection",
     "profile_coverage_control.assert_profile_coverage_control",
     "response_integrity_control.assert_response_integrity_control"
   ],
   "method_frame_lock_rule": "The exact method frame used for synthesis must be SHA-256 bound to an explicit METHOD_CONTROL_NOT_EVIDENCE lock for the same collection_frame_id, with an attributable approver reference and approved_at no later than collection_started_at. Method thresholds or coverage dimensions cannot be silently changed after collection and then substituted at synthesis.",
+  "analysis_plan_lock_rule": "The exact question-to-need mapping and H1-H5 ranking plan must be validated against the frozen forms, SHA-256 bound to an explicit METHOD_CONTROL_NOT_EVIDENCE lock for the same collection_frame_id and approved before collection starts. H6-H7 remain design diagnostics, secondary/project activity cannot add numeric ranking points, and post-hoc remapping is fail-closed.",
   "method_frame_lock_schema": "eucons.ai4work_method_frame_lock.v0.1",
+  "need_analysis_plan_schema": "eucons.ai4work_need_analysis_plan.v0.1",
+  "need_analysis_plan_lock_schema": "eucons.ai4work_need_analysis_plan_lock.v0.1",
   "profile_coverage_rule": "Every real record must carry every coverage dimension declared in the frozen method frame and the value must belong to the exact frozen instrument option set. Empty and sparse categories must be surfaced for adversarial QA rather than silently omitted.",
   "response_integrity_rule": "The exact source export is scanned for repeated analytical signatures built only from form_id, frozen profile categories and controlled answers. Repeated signatures are QA signals only: no identity/device linkage is used, same-person resubmission is not inferred, and no record may be automatically excluded. If repeated clusters exist, adversarial QA must disclose and test their influence before final ranking.",
-  "required_adult_dimensions": [
-    "region",
-    "status",
-    "age_band",
-    "occupational_family"
-  ],
-  "required_employer_dimensions": [
-    "region",
-    "sector_aggregated",
-    "size_band",
-    "respondent_role"
-  ],
+  "required_adult_dimensions": ["region", "status", "age_band", "occupational_family"],
+  "required_employer_dimensions": ["region", "sector_aggregated", "size_band", "respondent_role"],
+  "core_skill_rank_dimensions": ["H1", "H2", "H3", "H4", "H5"],
+  "design_diagnostic_dimensions": ["H6", "H7"],
   "sparse_cell_policy": "Sparse/empty profile cells are internal QA constraints. They do not by themselves establish or disprove a need and they do not authorise population prevalence claims, weighting or public release of small-cell exact counts.",
   "duplicate_signature_policy": "Structurally identical controlled-response combinations can be legitimate in categorical surveys. The control therefore surfaces exact clusters and binds them to source_export_sha256, but does not identify people, deduplicate respondents or authorize exclusions. Any influence test belongs to adversarial QA and must preserve the full-batch result alongside sensitivity results.",
   "prod_input_evidence_class": "PROD_REAL_EVIDENCE",
