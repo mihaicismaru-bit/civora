@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Evidence-first CAS Valcea health-service access signal adapter.
 
-The adapter reads only public CAS Valcea index/directory HTML under cnas.ro/casvl/
-and emits service-directory references. It never downloads linked PDF/XLS/DOC
-bodies and never asserts that a provider is currently available, open, contracted,
-or accepting patients.
+The adapter reads only public CAS Valcea index/directory HTML on the current
+cas.cnas.ro/casvl surface (while allowing first-party CNAS legacy links) and emits
+service-directory references. It never downloads linked PDF/XLS/DOC bodies and
+never asserts that a provider is currently available, open, contracted, or
+accepting patients.
 
 This is a signal-only boundary: no persistence, Fact Kernel authority, Writer,
 public projection, appointment availability, or medical-status claims.
@@ -28,12 +29,11 @@ from pathlib import Path
 from typing import Optional
 
 SOURCE_ID = "signal-cas-valcea-service-access"
-TAXONOMY_VERSION = "2026-08-29.1"
+TAXONOMY_VERSION = "2026-08-30.1"
 START_URLS = (
-    "https://cnas.ro/casvl/furnizori-de-servicii-medicale/",
-    "https://cnas.ro/casvl/lista-furnizorilor-cas-valcea/",
+    "https://cas.cnas.ro/casvl/informatii-furnizori/furnizori-de-servicii-medicale",
 )
-ALLOWED_HOSTS = {"cnas.ro", "www.cnas.ro"}
+ALLOWED_HOSTS = {"cas.cnas.ro", "cnas.ro", "www.cnas.ro"}
 ALLOWED_PATH_PREFIX = "/casvl/"
 MAX_RESPONSE_BYTES = 2_500_000
 USER_AGENT = "CIVORA-ValceaClar-CASServiceSignals/1.0 (+evidence-first; contact via repository)"
@@ -307,22 +307,22 @@ def self_test() -> None:
       <a href="/casvl/wp-content/uploads/2026/08/furnizori-medicina-primara.xlsx">
         Asistență medicală primară
       </a>
-      <a href="/casvl/furnizori-de-servicii-medicale/asistenta-medicala-spitaliceasca/">
+      <a href="/casvl/informatii-furnizori/furnizori-de-servicii-medicale/asistenta-medicala-spitaliceasca/">
         Asistență medicală spitalicească
       </a>
-      <a href="/casvl/furnizori-de-servicii-medicale/farmacii/">Farmacii și medicamente</a>
+      <a href="/casvl/informatii-furnizori/furnizori-de-servicii-medicale/farmacii/">Farmacii și medicamente</a>
       <a href="https://example.invalid/providers.pdf">Asistență medicală primară</a>
     </body></html>
     """
     signals = analyze_index(
         sample,
-        "https://cnas.ro/casvl/lista-furnizorilor-cas-valcea/",
+        "https://cas.cnas.ro/casvl/informatii-furnizori/furnizori-de-servicii-medicale",
         sample.encode("utf-8"),
     )
     assert [s.directory_scope for s in signals] == ["HOSPITAL", "PHARMACY", "PRIMARY_CARE"]
     primary = next(s for s in signals if s.directory_scope == "PRIMARY_CARE")
     assert primary.reference_kind == "DOCUMENT_REFERENCE"
-    assert primary.source_url.startswith("https://cnas.ro/casvl/")
+    assert primary.source_url.startswith("https://cas.cnas.ro/casvl/")
     assert primary.signal_class == "HEALTH_PROVIDER_DIRECTORY"
     assert primary.index_date == "2025-11-03"
     assert primary.publication_authority == "NONE"
@@ -333,21 +333,29 @@ def self_test() -> None:
     assert all("example.invalid" not in s.source_url for s in signals)
 
     empty = "<html><body><h1>CAS Vâlcea</h1><p>Informații generale.</p></body></html>"
-    held = analyze_index(empty, "https://cnas.ro/casvl/furnizori-de-servicii-medicale/", empty.encode())
+    held = analyze_index(
+        empty,
+        "https://cas.cnas.ro/casvl/informatii-furnizori/furnizori-de-servicii-medicale",
+        empty.encode(),
+    )
     assert len(held) == 1
     assert held[0].signal_class == "HOLD"
     assert held[0].hold_reason == "NO_EXPLICIT_SERVICE_CATEGORY_REFERENCE"
 
     assert canonical_allowed_url(
-        "https://cnas.ro/casvl/furnizori-de-servicii-medicale/",
+        "https://cas.cnas.ro/casvl/informatii-furnizori/furnizori-de-servicii-medicale",
+        "https://cas.cnas.ro/casvl/wp-content/uploads/2026/08/furnizori-medicina-primara.xlsx",
+    )
+    assert canonical_allowed_url(
+        "https://cas.cnas.ro/casvl/informatii-furnizori/furnizori-de-servicii-medicale",
         "https://cnas.ro/casvl/lista-furnizorilor-cas-valcea/",
     )
     assert canonical_allowed_url(
-        "https://cnas.ro/casvl/furnizori-de-servicii-medicale/",
-        "https://cnas.ro/other-county/file.pdf",
+        "https://cas.cnas.ro/casvl/informatii-furnizori/furnizori-de-servicii-medicale",
+        "https://cas.cnas.ro/casag/file.pdf",
     ) is None
     assert canonical_allowed_url(
-        "https://cnas.ro/casvl/furnizori-de-servicii-medicale/",
+        "https://cas.cnas.ro/casvl/informatii-furnizori/furnizori-de-servicii-medicale",
         "https://evil.example/casvl/file.pdf",
     ) is None
 
