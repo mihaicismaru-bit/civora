@@ -19,19 +19,15 @@
     // Recruitment metadata arrives only in the URL fragment. Fragments are not
     // sent in the HTTP request, but leaving the channel token visible in the
     // address bar/history would retain more recruitment metadata than needed.
-    // Capture it once in ephemeral JS memory, then scrub the fragment without
-    // introducing any persistent browser-side state.
+    // Capture it once in ephemeral JS memory, then scrub navigation metadata
+    // without introducing any persistent browser-side state.
     const fragment = String(globalThis.location.hash || "").replace(/^#/, "");
     const params = new URLSearchParams(fragment);
     const value = params.get("channel") || "";
     if (params.has("channel")
         && globalThis.history
         && typeof globalThis.history.replaceState === "function") {
-      globalThis.history.replaceState(
-        null,
-        "",
-        `${globalThis.location.pathname}${globalThis.location.search}`,
-      );
+      globalThis.history.replaceState(null, "", globalThis.location.pathname);
     }
     return CHANNEL_RE.test(value) ? value : null;
   })();
