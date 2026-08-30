@@ -1,0 +1,33 @@
+name: MySMIS Connector v1 CI
+
+on:
+  push:
+    branches:
+      - eupf/mysmis-connector-v1
+    paths:
+      - 'partener-eu/mysmis-connector-v1/**'
+      - '.github/workflows/mysmis-connector-v1-ci.yml'
+  pull_request:
+    paths:
+      - 'partener-eu/mysmis-connector-v1/**'
+      - '.github/workflows/mysmis-connector-v1-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  connector-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: partener-eu/mysmis-connector-v1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run connector regression suite
+        run: npm test
+      - name: Syntax-check bounded loopback broker
+        run: node --check native/loopback-broker.mjs
