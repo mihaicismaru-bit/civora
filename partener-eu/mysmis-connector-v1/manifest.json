@@ -4,11 +4,13 @@
   "version": "0.1.0",
   "description": "Read-only MySMIS artifact inventory and download observation.",
   "permissions": [
+    "alarms",
     "downloads",
     "storage",
     "webRequest"
   ],
   "host_permissions": [
+    "http://127.0.0.1/*",
     "https://mysmis2021.gov.ro/*",
     "https://*.mysmis2021.gov.ro/*"
   ],

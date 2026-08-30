@@ -2,6 +2,7 @@ import {
   normalizeDownloadObservation,
   normalizeResponseMetadata
 } from "../core/observation.mjs";
+import { installExtensionLoopbackBinding } from "./loopback-binding.mjs";
 
 const MAX_OBSERVATIONS = 100;
 
@@ -32,3 +33,6 @@ chrome.webRequest.onHeadersReceived.addListener(
   { urls: ["https://mysmis2021.gov.ro/*", "https://*.mysmis2021.gov.ro/*"] },
   ["responseHeaders"]
 );
+
+const loopbackBinding = installExtensionLoopbackBinding({ chromeApi: chrome });
+loopbackBinding.initialize().catch(() => undefined);

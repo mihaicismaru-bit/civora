@@ -1,3 +1,5 @@
+import { sanitizeUrl } from "../core/artifact-discovery.mjs";
+
 export const ARTIFACT_SELECTORS = "a,button,input[type='button'],input[type='submit'],form,object,embed,iframe";
 
 function bounded(value, maximum = 1_000) {
@@ -13,6 +15,7 @@ export function captureCurrentPageSnapshot({
   if (!documentLike || typeof documentLike.querySelectorAll !== "function") {
     throw new Error("A readable current-page document is required.");
   }
+  const pageUrl = sanitizeUrl(locationLike?.href, locationLike?.href);
   const elements = [...documentLike.querySelectorAll(ARTIFACT_SELECTORS)].map((element) => ({
     tag: bounded(element.tagName, 32)?.toLowerCase() || "unknown",
     text: bounded(element.innerText || element.textContent || ""),
@@ -20,10 +23,10 @@ export function captureCurrentPageSnapshot({
     title: bounded(element.getAttribute?.("title")),
     name: bounded(element.getAttribute?.("name")),
     value: bounded(element.getAttribute?.("value")),
-    href: bounded(element.href),
-    action: bounded(element.action),
-    src: bounded(element.src),
-    data: bounded(element.data),
+    href: bounded(sanitizeUrl(element.href, pageUrl)),
+    action: bounded(sanitizeUrl(element.action, pageUrl)),
+    src: bounded(sanitizeUrl(element.src, pageUrl)),
+    data: bounded(sanitizeUrl(element.data, pageUrl)),
     method: bounded(element.method || "GET", 16),
     download: Boolean(element.hasAttribute?.("download"))
   }));
@@ -34,7 +37,7 @@ export function captureCurrentPageSnapshot({
     },
     project,
     page: {
-      url: bounded(locationLike?.href, 2_048),
+      url: bounded(pageUrl, 2_048),
       title: bounded(documentLike.title)
     },
     elements,

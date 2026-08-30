@@ -3,6 +3,7 @@ import http from "node:http";
 import { assertNoSensitivePersistence } from "../core/policy.mjs";
 
 const BUILD_PATTERN = /^[a-f0-9]{40}$/u;
+const EXTENSION_ID_PATTERN = /^[a-p]{32}$/u;
 const HEX64_PATTERN = /^[a-f0-9]{64}$/u;
 const MAX_BODY_BYTES = 1024 * 1024;
 const ALLOWED_OPERATIONS = new Set(["HEALTH", "DISCOVER_ARTIFACTS"]);
@@ -80,10 +81,13 @@ async function readJsonBody(request) {
   }
 }
 
-function assertResultEnvelope({ envelope, pending, sourceHead }) {
+function assertResultEnvelope({ envelope, pending, sourceHead, extensionId }) {
   assertNoSensitivePersistence(envelope);
   if (!envelope || envelope.schemaVersion !== 1 || envelope.source !== "MV3_EXTENSION_LOOPBACK") {
     throw new LoopbackBrokerError("LOOPBACK_RESULT_INVALID", "Loopback result envelope is invalid.");
+  }
+  if (envelope.extensionId !== extensionId) {
+    throw new LoopbackBrokerError("LOOPBACK_EXTENSION_ID_MISMATCH", "Loopback result does not match the installed extension identity.");
   }
   if (envelope.commandId !== pending.commandId || envelope.nonceEcho !== pending.command.nonce) {
     throw new LoopbackBrokerError("LOOPBACK_RESULT_BINDING_MISMATCH", "Loopback result does not bind to the outstanding command and nonce.");
@@ -115,6 +119,7 @@ function safeError(error) {
 
 export function createLoopbackBroker({
   sourceHead,
+  extensionId,
   host = "127.0.0.1",
   port = 43127,
   clock = () => new Date(),
@@ -122,6 +127,9 @@ export function createLoopbackBroker({
 }) {
   if (!BUILD_PATTERN.test(sourceHead)) {
     throw new LoopbackBrokerError("LOOPBACK_SOURCE_HEAD_INVALID", "Loopback source head must be an exact Git SHA.");
+  }
+  if (!EXTENSION_ID_PATTERN.test(extensionId)) {
+    throw new LoopbackBrokerError("LOOPBACK_EXTENSION_ID_INVALID", "Broker requires the exact installed Chrome extension ID.");
   }
   if (host !== "127.0.0.1") {
     throw new LoopbackBrokerError("LOOPBACK_PUBLIC_BIND_DENIED", "Loopback broker may bind only to 127.0.0.1.");
@@ -144,12 +152,16 @@ export function createLoopbackBroker({
         throw new LoopbackBrokerError("LOOPBACK_REMOTE_DENIED", "Only loopback clients are accepted.");
       }
       const url = new URL(request.url || "/", `http://${host}`);
+      if (url.searchParams.size !== 1 || url.searchParams.get("extensionId") !== extensionId) {
+        throw new LoopbackBrokerError("LOOPBACK_EXTENSION_ID_MISMATCH", "Request does not match the installed extension identity.");
+      }
       if (request.method === "GET" && url.pathname === "/v1/next") {
         if (!outstanding || outstanding.delivered) return emptyResponse(response);
         outstanding.delivered = true;
         return jsonResponse(response, 200, {
           schemaVersion: 1,
           source: "MCLENOVO_LOCAL_AGENT",
+          extensionId,
           commandId: outstanding.commandId,
           operation: outstanding.operation,
           connectorBuildId: sourceHead,
@@ -169,7 +181,7 @@ export function createLoopbackBroker({
           throw new LoopbackBrokerError("LOOPBACK_NO_OUTSTANDING_COMMAND", "No outstanding command exists.");
         }
         const envelope = await readJsonBody(request);
-        assertResultEnvelope({ envelope, pending: outstanding, sourceHead });
+        assertResultEnvelope({ envelope, pending: outstanding, sourceHead, extensionId });
         const pending = outstanding;
         outstanding = null;
         clearTimeout(pending.timer);
@@ -258,6 +270,7 @@ export function createLoopbackBroker({
         host,
         port: boundPort,
         sourceHead,
+        extensionId,
         outstandingCommandId: outstanding?.commandId || null,
         safety: {
           readOnly: true,

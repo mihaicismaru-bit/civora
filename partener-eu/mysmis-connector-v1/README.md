@@ -73,10 +73,14 @@ Implemented in this unit:
   changed-byte next-version persistence with complete Drive readback and zero Registry/SSOT mutation
 - Drive-synced command mailbox and bounded local poller with create-only command files, atomic claims,
   exact-build/expiry/nonce validation, restart ambiguity rejection and result-first replay deduplication
+- installed-extension loopback binding with a fixed `127.0.0.1:43127` origin, exact installed extension
+  identity, externally supplied exact-build configuration and a 30-second MV3 alarm wake-up
+- live current-page dispatcher that reads only the active MySMIS DOM snapshot, visibly binds the opaque
+  project selector, sanitizes all persisted URLs and reuses restart-safe session replay protection
 
 Still fail-closed / not implemented:
 
-- installed binding between the mailbox poller and the attested browser-extension dispatcher on MCLENOVO
+- externally observed exact-build installation/configuration and mailbox-to-broker process composition on MCLENOVO
 - live MCLENOVO health response observed through the trusted bridge transport
 - approved Artifact Registry and SSOT proposal application
 - CDP debugger fallback
@@ -96,8 +100,30 @@ nonce, five-minute expiry and zero-write restrictions must all validate before d
 The poller accepts only an injected fixed dispatcher function; it cannot load an adapter path or
 execute a process, script or shell. A claimed command is never replayed after an ambiguous restart.
 Completed results remain `liveEvidenceAccepted: false` until their full Drive readback and protocol
-evidence are independently validated. This unit opens no port and does not yet connect the mailbox
-to the installed extension, so it is a transport component rather than live acceptance evidence.
+evidence are independently validated. The mailbox remains a transport component rather than live
+acceptance evidence until the installed MCLENOVO runtime is externally observed and its result is read
+back from Drive.
+
+## Installed extension loopback binding
+
+The extension can poll only `http://127.0.0.1:43127`, using `chrome.alarms` at the fixed MV3 minimum
+period of 30 seconds. The broker also binds only to `127.0.0.1`, permits one outstanding command and
+requires the exact installed Chrome/Edge extension ID on both request and result. Neither side exposes
+a general URL, process, script or shell primitive.
+
+The binding is disabled by default. It performs zero broker requests until `chrome.storage.local`
+contains the exact `mysmisLoopbackRuntimeV1` configuration produced by the external installation
+handoff. That record must bind the same 40-character source head for extension and agent, the installed
+extension ID, fixed broker origin, pair ID and configuration ID. Missing, broadened, mixed-build or
+identity-mismatched records remain disabled and emit only a sanitized session status.
+
+For an admitted command, the runtime reads only the active MySMIS tab through the existing content
+script. It never clicks or navigates. `HEALTH` claims an authenticated context only when a non-login
+page visibly contains a six-digit project code. `DISCOVER_ARTIFACTS` additionally requires the opaque
+requested selector to be visible in the current snapshot, sanitizes page and element URLs again, and
+returns only GET observation metadata. The loopback acknowledgement remains
+`liveEvidenceAccepted: false` until the agent persists the result and an independent Drive readback
+verifier accepts the complete chain.
 
 ## Offline handoff preflight
 
