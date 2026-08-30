@@ -95,6 +95,28 @@ class PreviewMinimizationTests(unittest.TestCase):
         self.assertIn("new URLSearchParams(fragment)", client)
         self.assertIn('"X-AI4WORK-Recruitment-Channel": channel', client)
 
+    def test_public_success_receipt_exposes_only_minimum_client_fields(self) -> None:
+        endpoint = (
+            Path(__file__).resolve().parents[2]
+            / "runtime"
+            / "php"
+            / "public"
+            / "index.php"
+        ).read_text(encoding="utf-8")
+        research = endpoint.split("if ($isResearch) {", 1)[1].split("if ($path !== '/api/leads')", 1)[0]
+        success = research.split("$receipt = $researchRuntime->persist", 1)[1].split("} catch (JsonException", 1)[0]
+        self.assertIn("'accepted' => true", success)
+        self.assertIn("'inserted' => $receipt['inserted']", success)
+        self.assertIn("'response_id' => $receipt['response_id']", success)
+        for forbidden in [
+            "'normalized_sha256'",
+            "'idempotency_digest'",
+            "'profile'",
+            "'answers'",
+            "'raw_body'",
+        ]:
+            self.assertNotIn(forbidden, success)
+
 
 if __name__ == "__main__":
     unittest.main()
