@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0",
+  "programme_family": "EEA_NORWAY",
+  "source_family": "EEA_NORWAY_OPERATOR_WATCH",
+  "authority_assignment_source_url": "https://eeagrants.org/countries/romania",
+  "policy": {
+    "purpose": "OFFICIAL_OPERATOR_DISCOVERY_WATCH_ONLY",
+    "material_fact_use": false,
+    "open_call_authorized": false,
+    "deadline_authorized": false,
+    "budget_authorized": false,
+    "eligibility_authorized": false,
+    "publish_authorized": false,
+    "distribution_authorized": false,
+    "candidate_rule": "A discovered operator link is discovery-only. OPEN requires an exact call/topic identifier, a current official exact-call endpoint, explicit current official status and semantic reconciliation.",
+    "historical_rule": "A page explicitly scoped to a prior funding period remains historical discovery evidence even when the organisation is a current operator."
+  },
+  "routes": [
+    {
+      "route_id": "EEA-RO-RESEARCH-UEFISCDI-WATCH",
+      "operator_name": "UEFISCDI",
+      "operator_role": "Programme Operator",
+      "programme_ids": ["research-and-innovation"],
+      "watch_url": "https://uefiscdi.gov.ro/eea-norway-grants",
+      "allowed_hosts": ["uefiscdi.gov.ro", "www.uefiscdi.gov.ro"],
+      "allowed_final_path_prefixes": ["/eea-norway-grants"],
+      "authority_class": "T1_OFFICIAL_PROGRAMME_OPERATOR",
+      "observation_state": "OPERATOR_WATCH_HISTORICAL_LANDING",
+      "period_context": "2014-2021 landing retained for official-operator discovery until a dedicated 2021-2028 operator/call surface is published",
+      "freshness_hours": 24,
+      "candidate_keywords": ["eea", "norway", "grant", "apel", "call", "competition", "competit", "funding", "finant", "research", "cercet"]
+    },
+    {
+      "route_id": "EEA-RO-INNOVATION-NORWAY-FUND-OPERATOR-WATCH",
+      "operator_name": "Innovation Norway",
+      "operator_role": "Fund Operator",
+      "programme_ids": ["clean-energy-transition", "green-business-and-innovation"],
+      "watch_url": "https://eea.innovationnorway.com/",
+      "allowed_hosts": ["eea.innovationnorway.com", "www.innovasjonnorge.no", "innovasjonnorge.no"],
+      "allowed_final_path_prefixes": ["/", "/seksjon/eos-midlene"],
+      "authority_class": "T1_OFFICIAL_FUND_OPERATOR",
+      "observation_state": "OPERATOR_WATCH",
+      "period_context": "multi-period official EEA/Norway Grants operator portal; current call facts require exact current call evidence",
+      "freshness_hours": 24,
+      "candidate_keywords": ["eea", "eos", "eøs", "norway", "grant", "call", "fund", "funding", "programme", "program", "romania", "utlys", "tilskudd", "innovation", "energy"]
+    }
+  ]
+}
