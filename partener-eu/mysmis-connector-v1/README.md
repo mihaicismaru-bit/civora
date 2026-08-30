@@ -63,6 +63,8 @@ Implemented in this unit:
   external operator observations, without executing or claiming installation success itself
 - append-only handoff-chain verifier that recomputes the exact preflight, authorization plan,
   installation transition and live HEALTH receipt before admitting any benchmark execution
+- two-track generic benchmark-admission gate that requires a fresh verified live handoff, binds both
+  discovery commands to one build and health challenge, and cannot execute either command
 
 Still fail-closed / not implemented:
 
@@ -117,6 +119,19 @@ The command reads exactly one JSON file and recomputes all derived receipts. It 
 eight-record exact-build chain ending in authenticated `LIVE_BRIDGE_TOOL` HEALTH. A valid result is
 still `PENDING_BENCHMARKS`; it cannot perform installation, traverse a project or claim functional
 acceptance.
+
+After live handoff verification, a separate non-executing admission CLI can prepare the two generic
+benchmark commands:
+
+```sh
+node native/benchmark-admission-cli.mjs \
+  --chain /path/to/ordered-handoff-chain.json \
+  --benchmarks /path/to/two-track-spec.json
+```
+
+The spec supplies one opaque project selector and nonce for each of `IMPLEMENTATION` and `WRITING`.
+Project identifiers are data, not runtime code. The CLI rejects stale HEALTH, mixed builds, duplicate
+tracks/selectors and sensitive fields, and emits commands only; it cannot dispatch or traverse them.
 
 The Drive contract never directly edits an Artifact Registry or SSOT. It persists a
 `PENDING_HUMAN_REVIEW` proposal only after the uploaded bytes have been read back in full and match

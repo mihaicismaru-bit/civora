@@ -96,6 +96,13 @@
     offline, reordered, mixed-build, expired, sensitive or tampered evidence. Even a valid chain is
     only `PENDING_BENCHMARKS`; the verifier has no execution primitive and cannot claim functional
     acceptance.
+24. Benchmark admission is a separate project-neutral step. It requires the verified handoff chain
+    to end in fresh authenticated live HEALTH, then consumes exactly one opaque selector for each
+    distinct `IMPLEMENTATION` and `WRITING` track. Both generated `DISCOVER_ARTIFACTS` commands share
+    the same exact source head and health challenge and retain current-page, GET/HEAD, zero-click,
+    zero-route-mutation, zero-write and no-shell restrictions. The gate emits commands but contains
+    no dispatcher, browser or network primitive; project identifiers remain input data and never
+    appear in runtime source.
 
 No project code appears in the discovery implementation. Project numbers occur only in fixtures and
 acceptance evidence.
