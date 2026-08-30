@@ -34,9 +34,11 @@ def assert_real_batch_ready_for_needs_synthesis(
     analysis plan to have been explicitly locked for this collection frame
     before collection started, validates frozen profile-dimension coverage, and
     surfaces exact repeated analytical signatures for adversarial QA without
-    using identity/device linkage. These controls are not evidence of need; they
-    only decide whether the exact real batch may proceed to synthesis and what
-    QA constraints must remain visible.
+    using identity/device linkage. The exact source-export digest is carried
+    forward so deterministic ranking cannot be executed against a different
+    record set. These controls are not evidence of need; they only decide
+    whether the exact real batch may proceed to synthesis and what QA
+    constraints must remain visible.
     """
     try:
         base = BASE.assert_real_batch_ready_for_synthesis(
@@ -87,7 +89,7 @@ def assert_real_batch_ready_for_needs_synthesis(
         raise NeedsSynthesisGateError(str(exc)) from exc
 
     return {
-        "schema_version": "eucons.ai4work_needs_synthesis_gate.v0.4",
+        "schema_version": "eucons.ai4work_needs_synthesis_gate.v0.5",
         "research_id": RESEARCH_ID,
         "stage": "REAL_BATCH_NEEDS_SYNTHESIS_GATE",
         "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
@@ -98,12 +100,18 @@ def assert_real_batch_ready_for_needs_synthesis(
         "need_analysis_plan_control_schema_version": analysis_plan["schema_version"],
         "profile_coverage_control_schema_version": coverage["schema_version"],
         "response_integrity_control_schema_version": integrity["schema_version"],
+        "source_export_sha256": str(manifest["source_export_sha256"]),
+        "collection_frame_id": collection_frame["collection_frame_id"],
         "method_frame_sha256": method_lock["method_frame_sha256"],
         "method_frame_locked_before_collection": True,
         "need_analysis_plan_sha256": analysis_plan["need_analysis_plan_sha256"],
         "need_analysis_plan_locked_before_collection": True,
         "core_skill_rank_dimensions": analysis_plan["core_skill_rank_dimensions"],
         "design_dimensions": analysis_plan["design_dimensions"],
+        "numeric_computation": analysis_plan["numeric_computation"],
+        "rank_order_basis": analysis_plan["rank_order_basis"],
+        "tie_rule": analysis_plan["tie_rule"],
+        "display_precision": analysis_plan["display_precision"],
         "collection_frame_sha256": base["collection_frame_sha256"],
         "channel_register_sha256": base["channel_register_sha256"],
         "profile_coverage_qa_required": coverage["profile_coverage_qa_required"],
@@ -114,5 +122,5 @@ def assert_real_batch_ready_for_needs_synthesis(
         "representativeness_claim_allowed": False,
         "weighting_allowed": False,
         "public_release_authorized": False,
-        "scope_boundary": "Only PASS of this wrapper permits the exact real PROD batch to enter needs synthesis/adversarial QA. The exact approved method frame and question-to-need analysis plan must be locked for the collection_frame_id before collection_started_at. H1-H5 core-skill ranking uses only the pre-registered direct respondent mappings; H6-H7 remain design diagnostics and secondary/project activity cannot add numeric rank points. Exact repeated analytical signatures are QA signals without identity/device linkage and never trigger automatic exclusion. PASS does not establish prevalence, causality, representativeness or any need conclusion; zero/sparse profile cells and repeated-signature clusters remain explicit QA constraints.",
+        "scope_boundary": "Only PASS of this wrapper permits the exact real PROD batch to enter needs synthesis/adversarial QA. The exact approved method frame and question-to-need analysis plan must be locked for the collection_frame_id before collection_started_at. H1-H5 core-skill ranking uses only the pre-registered direct respondent mappings and deterministic exact-rational arithmetic/tie rules; H6-H7 remain design diagnostics and secondary/project activity cannot add numeric rank points. Exact repeated analytical signatures are QA signals without identity/device linkage and never trigger automatic exclusion. PASS does not establish prevalence, causality, representativeness or any need conclusion; zero/sparse profile cells and repeated-signature clusters remain explicit QA constraints.",
     }
