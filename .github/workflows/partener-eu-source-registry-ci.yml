@@ -11,6 +11,9 @@ on:
       - 'partener-eu/ingest/eea_civil_society_calls.py'
       - 'partener-eu/ingest/eea_civil_society_fetch.py'
       - 'partener-eu/ingest/eea_civil_society_reconcile.py'
+      - 'partener-eu/ingest/eea_romania_programming_registry.json'
+      - 'partener-eu/ingest/eea_romania_programming_intelligence.py'
+      - 'partener-eu/ops/test_eea_romania_programming_intelligence.py'
       - 'partener-eu/ingest/regiocentru_actions_fetch.py'
       - 'partener-eu/ingest/regiocentru_actions_source.json'
       - 'partener-eu/p11/candidate_staging.py'
@@ -69,6 +72,7 @@ jobs:
         run: |
           python -m json.tool partener-eu/ingest/source_registry.json >/dev/null
           python -m json.tool partener-eu/ingest/data_plane_contract.json >/dev/null
+          python -m json.tool partener-eu/ingest/eea_romania_programming_registry.json >/dev/null
           python -m json.tool partener-eu/ingest/regiocentru_actions_source.json >/dev/null
           python -m json.tool partener-eu/ops/sources.json >/dev/null
           python -m py_compile partener-eu/ingest/source_registry_probe.py
@@ -77,6 +81,7 @@ jobs:
           python -m py_compile partener-eu/ingest/eea_civil_society_calls.py
           python -m py_compile partener-eu/ingest/eea_civil_society_fetch.py
           python -m py_compile partener-eu/ingest/eea_civil_society_reconcile.py
+          python -m py_compile partener-eu/ingest/eea_romania_programming_intelligence.py
           python -m py_compile partener-eu/ingest/regiocentru_actions_fetch.py
           python -m py_compile partener-eu/p11/candidate_staging.py
           python -m py_compile partener-eu/p11/eea_civil_society_stage.py
@@ -90,6 +95,7 @@ jobs:
           python -m py_compile partener-eu/ops/test_eea_civil_society_calls.py
           python -m py_compile partener-eu/ops/test_eea_civil_society_fetch.py
           python -m py_compile partener-eu/ops/test_eea_civil_society_reconcile.py
+          python -m py_compile partener-eu/ops/test_eea_romania_programming_intelligence.py
           python -m py_compile partener-eu/ops/test_regiocentru_actions_fetch.py
 
       - name: Validate P10 and canonical source authority compatibility
@@ -106,6 +112,9 @@ jobs:
 
       - name: Validate EU/EEA/Interreg source and programming taxonomy
         run: python partener-eu/ops/test_source_registry_external_expansion.py
+
+      - name: Validate Romania EEA/Norway programme-operator programming intelligence
+        run: python partener-eu/ops/test_eea_romania_programming_intelligence.py
 
       - name: Validate ROHU current versus future programming lifecycle split
         run: python partener-eu/ops/test_interreg_rohu_pipeline_split.py
