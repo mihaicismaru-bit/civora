@@ -1,0 +1,33 @@
+name: VÂLCEA CLAR SJU Hospital Reference
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'valcea-clar/scripts/sju_valcea_hospital_reference_adapter.py'
+      - '.github/workflows/valcea-clar-sju-hospital-reference.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/scripts/sju_valcea_hospital_reference_adapter.py'
+      - '.github/workflows/valcea-clar-sju-hospital-reference.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-sju-hospital-reference-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Compile SJU Vâlcea hospital reference adapter
+        run: python -m py_compile valcea-clar/scripts/sju_valcea_hospital_reference_adapter.py
+      - name: Run SJU Vâlcea fail-closed regressions
+        run: python valcea-clar/scripts/sju_valcea_hospital_reference_adapter.py --self-test
