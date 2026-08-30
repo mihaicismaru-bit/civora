@@ -26,6 +26,12 @@ TRACKER_TOKENS = (
     "segment.com",
     "mixpanel",
 )
+FORBIDDEN_BROWSER_STORAGE_TOKENS = (
+    "document.cookie",
+    "localstorage",
+    "sessionstorage",
+    "indexeddb",
+)
 NETWORK_ATTRS = {
     "script": ("src",),
     "img": ("src", "srcset"),
@@ -141,8 +147,17 @@ def run_control() -> dict[str, object]:
             raise RuntimeError(f"commercial/third-party tracker token present in client: {tracker_hits}")
         if "navigator.sendbeacon" in client_text:
             raise RuntimeError("background beacon transport is forbidden for AI4WORK research")
-        if "document.cookie" in client_text or "localstorage" in client_text:
-            raise RuntimeError("persistent browser tracking/storage is forbidden for AI4WORK research")
+        browser_storage_hits = sorted(
+            token for token in FORBIDDEN_BROWSER_STORAGE_TOKENS if token in client_text
+        )
+        if browser_storage_hits:
+            raise RuntimeError(
+                f"persistent/browser tracking storage is forbidden for AI4WORK research: {browser_storage_hits}"
+            )
+        if "globalthis.history.replacestate" not in client_text:
+            raise RuntimeError("recruitment-channel URL fragment must be scrubbed after one-time capture")
+        if "const channelid = () => recruitmentchannel;" not in client_text:
+            raise RuntimeError("recruitment channel must be held only in ephemeral client memory")
         return {
             "status": "PASS",
             "classification": "CONTROL_ONLY_NOT_EVIDENCE",
@@ -151,6 +166,8 @@ def run_control() -> dict[str, object]:
             "allowed_network_egress": [ALLOWED_RESEARCH_API],
             "pages": results,
             "client_tracker_hits": [],
+            "browser_storage_hits": [],
+            "recruitment_channel_fragment_scrubbed": True,
             "test_twin_evidence_eligible": False,
         }
 
