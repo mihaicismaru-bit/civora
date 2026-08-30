@@ -37,6 +37,7 @@ def main() -> int:
         "EEA-RO-RESEARCH-UEFISCDI-WATCH",
         "EEA-RO-GREEN-TRANSITION-MMAP-WATCH",
         "EEA-RO-LOCAL-DEVELOPMENT-FRDS-WATCH",
+        "EEA-RO-CULTURE-MC-UMP-WATCH",
         "EEA-RO-JUSTICE-MJ-WATCH",
         "EEA-RO-HOME-AFFAIRS-MAI-WATCH",
         "EEA-RO-INNOVATION-NORWAY-FUND-OPERATOR-WATCH",
@@ -66,6 +67,16 @@ def main() -> int:
         or "dezvoltare-locala.frds.ro" not in set(local.get("allowed_hosts") or [])
     ):
         fail("FRDS Local Development route must remain bounded to the current official 2021-2028 Programme Operator surface")
+
+    culture = routes["EEA-RO-CULTURE-MC-UMP-WATCH"]
+    if (
+        culture["observation_state"] != "OPERATOR_WATCH"
+        or culture["operator_name"] != "Ministry of Culture"
+        or culture["programme_ids"] != ["culture"]
+        or (culture.get("watch_url") or "").split("/", 3)[2] not in {"umpcultura.ro", "www.umpcultura.ro"}
+        or "2021-2028" not in culture["period_context"]
+    ):
+        fail("Culture route must remain bounded to the Ministry Project Management Unit current-period preparation evidence surface")
 
     justice = routes["EEA-RO-JUSTICE-MJ-WATCH"]
     if (
@@ -117,6 +128,7 @@ def main() -> int:
     expect_raises(lambda: mod.validate_route_url("https://mmediu.ro/comunicare/comunicate-de-presa/other", green, final=True), "MMAP path drift")
     expect_raises(lambda: mod.validate_route_url("https://frds.ro/en/other/", local, final=True), "FRDS path drift")
     expect_raises(lambda: mod.validate_route_url("https://example.frds.ro/en/home/", local), "FRDS host drift")
+    expect_raises(lambda: mod.validate_route_url("https://www.umpcultura.ro/ctg_2_noutati_pg_0.htm", culture, final=True), "Culture operator path drift")
     expect_raises(lambda: mod.validate_route_url("https://www.just.ro/other/", justice, final=True), "Justice historical landing path drift")
     expect_raises(lambda: mod.validate_route_url("https://www.mai.gov.ro/", home_affairs), "Home Affairs dedicated host drift")
 
@@ -155,6 +167,7 @@ def main() -> int:
         "research_state": research["observation_state"],
         "green_transition_route": green["watch_url"],
         "local_development_route": local["watch_url"],
+        "culture_route": culture["watch_url"],
         "justice_state": justice["observation_state"],
         "home_affairs_state": home_affairs["observation_state"],
         "innovation_route": innovation["watch_url"],
