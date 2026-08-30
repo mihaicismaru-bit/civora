@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import canonical_export_integrity as EXPORT_INTEGRITY
@@ -14,6 +14,8 @@ SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 RIGHTS_HOLD_SNAPSHOT_SCHEMA = "eucons.ai4work_rights_hold_snapshot.v0.1"
 RIGHTS_HOLD_SOURCE_CLASS = "EUCONS_RESEARCH_RIGHTS_STORE"
 RIGHTS_HOLD_ARTIFACT_CLASS = "RIGHTS_CONTROL_SNAPSHOT_NOT_NEED_EVIDENCE"
+MAX_RIGHTS_HOLD_SNAPSHOT_AGE = timedelta(minutes=15)
+MAX_RIGHTS_HOLD_CLOCK_SKEW = timedelta(minutes=5)
 RIGHTS_HOLD_SNAPSHOT_KEYS = {
     "schema_version",
     "research_id",
@@ -160,6 +162,16 @@ def _validated_rights_hold_snapshot(
             "rights-hold snapshot captured_at predates collection close"
         )
 
+    validation_now = datetime.now(timezone.utc)
+    if captured_at > validation_now + MAX_RIGHTS_HOLD_CLOCK_SKEW:
+        raise NF06PersistedHandoffError(
+            "rights-hold snapshot captured_at is in the future beyond allowed clock skew"
+        )
+    if validation_now - captured_at > MAX_RIGHTS_HOLD_SNAPSHOT_AGE:
+        raise NF06PersistedHandoffError(
+            "rights-hold snapshot is stale at NF06 persisted handoff"
+        )
+
     canonical_snapshot = (
         json.dumps(
             snapshot,
@@ -258,11 +270,11 @@ def build_prod_preingest_from_persisted_bundles(
     manifest["rights_hold_scope_boundary"] = (
         "This binding proves that the supplied structured rights-hold snapshot used "
         "the frozen schema/source class, declared itself complete at capture time, "
-        "was not older than the collection close or latest candidate record, and "
-        "that none of its opaque response ids entered the canonical PROD export. "
-        "The live operator must still prove that the deployed snapshot producer is "
-        "bound to the actual separate research/privacy rights store. Snapshot hashes "
-        "are control artifacts, never evidence of need."
+        "was not older than the collection close or latest candidate record, was "
+        "fresh at handoff, and that none of its opaque response ids entered the "
+        "canonical PROD export. The live operator must still prove that the deployed "
+        "snapshot producer is bound to the actual separate research/privacy rights "
+        "store. Snapshot hashes are control artifacts, never evidence of need."
     )
 
     return source_bytes, manifest
