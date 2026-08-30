@@ -2,19 +2,119 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-30T09:50:08+03:00",
+  "generated_at": "2026-08-30T10:00:38+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-30T09:48:35+03:00",
-  "task_count": 53,
+  "queue_generated_at": "2026-08-30T09:59:25+03:00",
+  "task_count": 57,
   "primary_match_count": 0,
-  "no_match_count": 24,
-  "unrouted_count": 29,
-  "target_count": 17,
-  "targets_ok": 14,
+  "no_match_count": 26,
+  "unrouted_count": 31,
+  "target_count": 20,
+  "targets_ok": 15,
   "results": [
+    {
+      "signal_id": "c312c1c373df3de0fbf340a5",
+      "signal_title": "Continuare about LIGA 2. VICTORIE! SCM RÂMNICU VÂLCEA BATE LA DUMBRĂVIȚA. 1-0, SĂLCIANU",
+      "signal_url": "https://www.curierul.ro/liga-2-victorie-scm-ramnicu-valcea-bate-la-dumbravita-1-0-salcianu/",
+      "signal_publisher": "Curierul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-30T09:51:25+03:00",
+      "verification_route_id": "sport",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "scm-rm-valcea",
+            "name": "SCM Râmnicu Vâlcea",
+            "url": "https://scmramnicuvalcea.ro/category/stiri/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "cs-valcea-1924-social-feed",
+            "name": "Clubul Sportiv Vâlcea 1924",
+            "url": "https://www.csvalcea.ro/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno -2] Name or service not known>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ajf-valcea-comunicate",
+            "name": "Asociația Județeană de Fotbal Vâlcea",
+            "url": "https://www.frf-ajf.ro/valcea/stiri/comunicate-ajf-1"
+          },
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "bc379de64f7e48bb343b6da3",
+      "signal_title": "Continuare about LIGA 2. VICTORIE! SCM RÂMNICU VÂLCEA BATE LA DUMBRĂVIȚA. 1-0, SĂLCIANU",
+      "signal_url": "https://www.curierul.ro/liga-2-victorie-scm-ramnicu-valcea-bate-la-dumbravita-1-0-salcianu/",
+      "signal_publisher": "Curierul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-30T09:51:25+03:00",
+      "verification_route_id": "sport",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "scm-rm-valcea",
+            "name": "SCM Râmnicu Vâlcea",
+            "url": "https://scmramnicuvalcea.ro/category/stiri/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "cs-valcea-1924-social-feed",
+            "name": "Clubul Sportiv Vâlcea 1924",
+            "url": "https://www.csvalcea.ro/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno -2] Name or service not known>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ajf-valcea-comunicate",
+            "name": "Asociația Județeană de Fotbal Vâlcea",
+            "url": "https://www.frf-ajf.ro/valcea/stiri/comunicate-ajf-1"
+          },
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
+    },
     {
       "signal_id": "12e4031507db4f28aa2ede49",
       "signal_title": "Mircia Gutău, despre scandalul de la sala de jocuri din centrul Râmnicului: „Se pune lacătul pe ușă”",
@@ -1017,6 +1117,19 @@
       "listing_title_identity_rejections": 80
     },
     {
+      "signal_id": "6acb95bf42e585b073eb7ccc",
+      "signal_title": "Partajează pe X(Se deschide într-o fereastră nouă) X",
+      "signal_url": "https://x.com/intent/tweet?via=curierulvl&text=LIGA%202.%20VICTORIE%21%20SCM%20R%C3%82MNICU%20V%C3%82LCEA%20BATE%20LA%20DUMBR%C4%82VI%C8%9AA.%201-0%2C%20S%C4%82LCIANU&url=https%3A%2F%2Fwww.curierul.ro%2Fliga-2-victorie-scm-ramnicu-valcea-bate-la-dumbravita-1-0-salcianu%2F",
+      "signal_publisher": "Curierul de Vâlcea",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
       "signal_id": "3aa1b371615995761d30a9af",
       "signal_title": "Primăria Municipiului mulțumește tuturor celor care au făcut posibilă organizarea deosebită a Zilelor Imnului Național 2026 »",
       "signal_url": "http://www.realitateavalceana.ro/primaria-municipiului-mul%c8%9bume%c8%99te-tuturor-celor-care-au-facut-posibila-organizarea-deosebita-a-zilelor-imnului-na%c8%9bional-2026/",
@@ -1095,6 +1208,32 @@
       "listing_title_identity_rejections": 80
     },
     {
+      "signal_id": "342eb05360cd935245b2934e",
+      "signal_title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
+      "signal_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252Fliga-2-victorie-scm-ramnicu-valcea-bate-la-dumbravita-1-0-salcianu%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
+      "signal_publisher": "Curierul de Vâlcea",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "0a9f0e5efa5edfde1c95a354",
+      "signal_title": "Declaratie de accesibilitate",
+      "signal_url": "http://www.realitateavalceana.ro/declaratie-de-accesibilitate/",
+      "signal_publisher": "Realitatea Vâlceană",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
       "signal_id": "2b590178677a679d4782690f",
       "signal_title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
       "signal_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252Faducem-bani-europeni-in-judet-si-nu-putini-32-de-milioane-euro%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
@@ -1112,19 +1251,6 @@
       "signal_title": "Partajează pe X(Se deschide într-o fereastră nouă) X",
       "signal_url": "https://x.com/intent/tweet?via=curierulvl&text=Aducem%20bani%20europeni%20%C3%AEn%20jude%C8%9B...%C8%98i%20nu%20pu%C8%9Bini%3A%2032%20de%20milioane%20euro%21&url=https%3A%2F%2Fwww.curierul.ro%2Faducem-bani-europeni-in-judet-si-nu-putini-32-de-milioane-euro%2F",
       "signal_publisher": "Curierul de Vâlcea",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
-    },
-    {
-      "signal_id": "0a9f0e5efa5edfde1c95a354",
-      "signal_title": "Declaratie de accesibilitate",
-      "signal_url": "http://www.realitateavalceana.ro/declaratie-de-accesibilitate/",
-      "signal_publisher": "Realitatea Vâlceană",
       "signal_published_at": null,
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
