@@ -114,6 +114,13 @@
     untouched reconciliation proposal. It rehashes the complete raw Drive readback bytes and
     requires zero MySMIS, Registry and SSOT mutations. Passing this gate still leaves live restart,
     dedup/versioning, Draft traversal/export and both generalization branches pending.
+27. Restart, replay, deduplication and versioning evidence is verified without execution. A live
+    restart observation must bind to the exact representative artifact, source head and health
+    challenge, prove recovered state and zero adapter calls during same-byte replay, and reproduce
+    the original intake/sync identities and Drive file. Changed bytes must create exactly the next
+    logical version, a distinct deterministic sync and a complete matching Drive readback while the
+    Registry/SSOT proposal remains append-only and mutation-free. Passing still leaves WRITING
+    Draft/export and second-project generalization pending.
 
 No project code appears in the discovery implementation. Project numbers occur only in fixtures and
 acceptance evidence.

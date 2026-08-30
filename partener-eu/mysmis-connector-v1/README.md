@@ -69,6 +69,8 @@ Implemented in this unit:
   preserves explicit non-retrievable reasons and leaves retrieval and Draft traversal unclaimed
 - append-only representative implementation-artifact verifier that binds a safe live candidate to
   local intake, Drive readback bytes and an untouched reconciliation proposal without executing retrieval
+- non-executing live restart/replay verifier that proves same-byte dedup without another upload and
+  changed-byte next-version persistence with complete Drive readback and zero Registry/SSOT mutation
 
 Still fail-closed / not implemented:
 
