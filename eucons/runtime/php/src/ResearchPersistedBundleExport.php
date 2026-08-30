@@ -3,10 +3,13 @@ declare(strict_types=1);
 
 final class EuconsResearchPersistedBundleExport
 {
+    private const RESEARCH_ID = 'AI4WORK-STEP-NF-RUN-001';
     private const ALLOWED_FORMS = ['AI4WORK_ADULTS_V1', 'AI4WORK_EMPLOYERS_V1'];
     private const SHA256_RE = '/^[0-9a-f]{64}$/';
+    private const CHANNEL_RE = '/^CH-[A-Z0-9]{8,32}$/';
     private const WRAPPER_KEYS = ['normalized_sha256', 'raw_sha256', 'received_at', 'record', 'schema_version'];
     private const RECEIPT_KEYS = ['accepted_at', 'body_sha256', 'form_id', 'normalized_sha256', 'pii_in_receipt', 'raw_sha256', 'response_id', 'schema_version'];
+    private const RECORD_KEYS = ['answers', 'form_id', 'form_version', 'profile', 'received_at', 'recruitment_channel_id', 'research_id', 'response_id', 'schema_version', 'synthetic'];
 
     private EuconsResearchRuntime $runtime;
 
@@ -36,6 +39,38 @@ final class EuconsResearchPersistedBundleExport
         return $actual === $expected;
     }
 
+    private static function isList(array $value): bool
+    {
+        if ($value === []) {
+            return true;
+        }
+        return array_keys($value) === range(0, count($value) - 1);
+    }
+
+    private static function canonicalize(mixed $value): mixed
+    {
+        if (!is_array($value)) {
+            return $value;
+        }
+        if (self::isList($value)) {
+            return array_map([self::class, 'canonicalize'], $value);
+        }
+        ksort($value, SORT_STRING);
+        foreach ($value as $key => $child) {
+            $value[$key] = self::canonicalize($child);
+        }
+        return $value;
+    }
+
+    private static function canonicalJson(array $value, bool $newline = false): string
+    {
+        $json = json_encode(
+            self::canonicalize($value),
+            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR
+        );
+        return $json . ($newline ? "\n" : '');
+    }
+
     private static function assertBundleIntegrity(string $filenameResponseId, string $formId, array $wrapper, array $receipt): void
     {
         if (!preg_match(self::SHA256_RE, $filenameResponseId)) {
@@ -53,6 +88,16 @@ final class EuconsResearchPersistedBundleExport
         $record = $wrapper['record'] ?? null;
         if (!is_array($record)) {
             throw new RuntimeException('RESEARCH_EXPORT_RECORD_INVALID');
+        }
+        if (!self::exactKeys($record, self::RECORD_KEYS)) {
+            throw new RuntimeException('RESEARCH_EXPORT_RECORD_FIELDS_MISMATCH');
+        }
+        if (($record['schema_version'] ?? null) !== 1
+            || ($record['research_id'] ?? null) !== self::RESEARCH_ID
+            || ($record['form_version'] ?? null) !== 1
+            || !is_string($record['recruitment_channel_id'] ?? null)
+            || !preg_match(self::CHANNEL_RE, (string)$record['recruitment_channel_id'])) {
+            throw new RuntimeException('RESEARCH_EXPORT_RECORD_CONTRACT_MISMATCH');
         }
         if (($record['response_id'] ?? null) !== $filenameResponseId
             || ($receipt['response_id'] ?? null) !== $filenameResponseId
@@ -74,6 +119,11 @@ final class EuconsResearchPersistedBundleExport
         if (!is_string($receipt['body_sha256'] ?? null)
             || !preg_match(self::SHA256_RE, (string)$receipt['body_sha256'])) {
             throw new RuntimeException('RESEARCH_EXPORT_BODY_HASH_INVALID');
+        }
+
+        $recomputedNormalizedSha = hash('sha256', self::canonicalJson($record, true));
+        if (!hash_equals($recomputedNormalizedSha, (string)$wrapper['normalized_sha256'])) {
+            throw new RuntimeException('RESEARCH_EXPORT_NORMALIZED_HASH_MISMATCH');
         }
     }
 
