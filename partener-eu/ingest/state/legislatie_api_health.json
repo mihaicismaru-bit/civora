@@ -3,10 +3,10 @@
   "id": "SRC-LEGISLATIE-API",
   "tier": "T1",
   "name": "Portal Legislativ — API SOAP oficial fără credențiale",
-  "observed_at": "2026-08-30T12:53:29Z",
-  "status": "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
-  "selected_endpoint": "https://legislatie.just.ro/apiws/FreeWebService.svc",
-  "semantic_sha256": "10664a9b442042cf536ad97b5c3643c1d5bbac72c951c737251f26114777e36d",
+  "observed_at": "2026-08-30T18:53:35Z",
+  "status": "DEGRADED_SOAP_TOKEN_UNAVAILABLE",
+  "selected_endpoint": "http://legislatie.just.ro/apiws/FreeWebService.svc",
+  "semantic_sha256": "bfb4d1d9ed0a54b84301092311d503389534331deb6802c39bc5e8f3fb22f8d8",
   "last_success_at": null,
   "last_known_good_preserved": false,
   "probes": [
@@ -20,7 +20,7 @@
         "body_sha256": null,
         "markers_found": [],
         "transport": "urllib-get",
-        "error": "<urlopen error timed out>"
+        "error": "Remote end closed connection without response"
       },
       "token_probe": {
         "ok": false,
@@ -32,20 +32,20 @@
         "final_url": null,
         "response_bytes": 0,
         "transport": "curl-ipv4-soap",
-        "error": "curl: (28) Connection timed out after 35002 milliseconds\n"
+        "error": "curl: (52) Empty reply from server\n"
       },
       "attempts": [
         {
           "transport": "urllib-soap",
           "ok": false,
           "http_status": null,
-          "error": "<urlopen error timed out>"
+          "error": "Remote end closed connection without response"
         },
         {
           "transport": "curl-ipv4-soap",
           "ok": false,
           "http_status": null,
-          "error": "curl: (28) Connection timed out after 35002 milliseconds\n"
+          "error": "curl: (52) Empty reply from server\n"
         }
       ],
       "ok": false,
@@ -54,43 +54,46 @@
     {
       "endpoint": "http://legislatie.just.ro/apiws/FreeWebService.svc",
       "landing": {
-        "ok": false,
-        "http_status": null,
-        "final_url": null,
-        "bytes": 0,
-        "body_sha256": null,
-        "markers_found": [],
+        "ok": true,
+        "http_status": 200,
+        "final_url": "http://legislatie.just.ro/apiws/FreeWebService.svc",
+        "bytes": 3045,
+        "body_sha256": "87fc0924923577478c224afd68c48df8cd4a3d0ee35f75431d4d1a70d210575d",
+        "markers_found": [
+          "FreeWebService",
+          "Service"
+        ],
         "transport": "urllib-get",
-        "error": "<urlopen error timed out>"
+        "error": null
       },
       "token_probe": {
-        "ok": false,
         "token_received": false,
         "token_length": 0,
         "token_sha256": null,
         "xml_valid": false,
+        "error": "no element found: line 1, column 0",
+        "ok": false,
         "http_status": null,
-        "final_url": null,
+        "final_url": "http://legislatie.just.ro/apiws/FreeWebService.svc",
         "response_bytes": 0,
-        "transport": "curl-ipv4-soap",
-        "error": "curl: (28) Connection timed out after 35002 milliseconds\n"
+        "transport": "curl-ipv4-soap"
       },
       "attempts": [
         {
           "transport": "urllib-soap",
           "ok": false,
-          "http_status": null,
-          "error": "<urlopen error timed out>"
+          "http_status": 404,
+          "error": "HTTP Error 404: Not Found"
         },
         {
           "transport": "curl-ipv4-soap",
           "ok": false,
           "http_status": null,
-          "error": "curl: (28) Connection timed out after 35002 milliseconds\n"
+          "error": "no element found: line 1, column 0"
         }
       ],
       "ok": false,
-      "degraded": false
+      "degraded": true
     }
   ],
   "policy": {
