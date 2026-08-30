@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 import importlib.util
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 MODULE = ROOT / "partener-eu" / "ingest" / "eea_romania_programming_intelligence.py"
+REGISTRY = ROOT / "partener-eu" / "ingest" / "eea_romania_programming_registry.json"
 spec = importlib.util.spec_from_file_location("eea_programming", MODULE)
 mod = importlib.util.module_from_spec(spec)
 assert spec and spec.loader
 spec.loader.exec_module(mod)
+mod.REGISTRY_PATH = REGISTRY
 
 PROGRAMMES = [
     ("Green Transition", "€ 84,000,000", "Ministry of Environment, Water and Forestry"),
@@ -50,25 +53,36 @@ def assert_fail(fn, contains):
 
 
 def main():
-    rows = mod.parse_programme_map(fixture())
+    registry = mod._load_registry()
+    rows = mod.parse_programme_map(fixture(), registry=registry)
     assert len(rows) == 9
+    clean = next(row for row in rows if row["programme_name"] == "Clean Energy Transition")
+    assert clean["programme_operator"] == "The Financial Mechanism Office"
+    assert clean["fund_operator"] == "Innovation Norway"
     normalized = mod.normalize_programmes(
         rows,
         authority_url=mod.SOURCE_URL,
         fetched_at="2026-08-30T17:30:00+00:00",
         raw_hash="a" * 64,
         run_id="test-run",
+        registry=registry,
     )
     assert len(normalized) == 9
-    assert [row["programme_name"] for row in normalized] == list(mod.EXPECTED_PROGRAMMES)
+    assert [row["programme_name"] for row in normalized] == [row["programme"] for row in registry["programmes"]]
+    assert sum(1 for row in normalized if row["fund_operator_watch_seed"]) == 2
     for row in normalized:
         assert row["source_family"] == "EEA_NORWAY"
         assert row["observation_state"] == "PROGRAMMING_PIPELINE"
         assert row["not_a_call"] is True
         assert row["material_fact_use"] is False
         assert row["open_call_authorized"] is False
+        assert row["deadline_authorized"] is False
+        assert row["budget_authorized"] is False
+        assert row["eligibility_authorized"] is False
         assert row["publish_authorized"] is False
+        assert row["distribution_authorized"] is False
         assert row["canonical_corpus_mutation"] is False
+        assert row["requires_reconciliation"] is True
         assert row["publication_effect"] == "NONE"
         assert row["programme_grant_scope"] == "PROGRAMME_ALLOCATION_NOT_CALL_BUDGET"
         assert row["programme_operator"]
@@ -77,33 +91,42 @@ def main():
         assert row["raw_hash"] == "a" * 64
         assert row["parser_version"] == mod.PARSER_VERSION
         assert row["run_id"] == "test-run"
+        assert row["source_published_date"] == "2026-05-12"
         assert row["semantic_fingerprint"]
 
-    # Strong lexical OPEN signals on a programming page must never upgrade the observation.
     open_rows = mod.normalize_programmes(
-        mod.parse_programme_map(fixture(extra_text="Open call now — deadline tomorrow")),
+        mod.parse_programme_map(fixture(extra_text="Open call now — deadline tomorrow"), registry=registry),
         authority_url=mod.SOURCE_URL,
         fetched_at="2026-08-30T17:30:00+00:00",
         raw_hash="b" * 64,
         run_id="lexical-open-test",
+        registry=registry,
     )
     assert all(row["observation_state"] == "PROGRAMMING_PIPELINE" for row in open_rows)
     assert not any(row["open_call_authorized"] for row in open_rows)
 
-    # Missing any agreed programme makes the whole programming snapshot unusable.
     incomplete = fixture().decode("utf-8").replace(
         "<h4>Institutional Cooperation and Capacity Building</h4><p>Programme grant: € 32,000,000</p><p>Programme Operator: Ministry of Investments and European Projects</p><p>Donor Programme Partner(s): Example official partner</p>",
         "",
     ).encode("utf-8")
-    assert_fail(lambda: mod.parse_programme_map(incomplete), "missing expected marker")
+    assert_fail(lambda: mod.parse_programme_map(incomplete, registry=registry), "missing expected marker")
 
-    # Programme grant/operator are required, but remain programme-level evidence only.
-    missing_operator = fixture().decode("utf-8").replace(
-        "<p>Programme Operator: Ministry of Justice</p>", ""
+    missing_operator = fixture().decode("utf-8").replace("<p>Programme Operator: Ministry of Justice</p>", "").encode("utf-8")
+    assert_fail(lambda: mod.parse_programme_map(missing_operator, registry=registry), "grant/operator required")
+
+    grant_drift = fixture().decode("utf-8").replace("€ 51,000,000", "€ 51,000,001").encode("utf-8")
+    assert_fail(lambda: mod.parse_programme_map(grant_drift, registry=registry), "allocation drift")
+
+    operator_drift = fixture().decode("utf-8").replace("Programme Operator: Ministry of Culture", "Programme Operator: Other Ministry").encode("utf-8")
+    assert_fail(lambda: mod.parse_programme_map(operator_drift, registry=registry), "operator drift")
+
+    fund_operator_drift = fixture().decode("utf-8").replace(
+        "The Financial Mechanism Office. Innovation Norway is appointed Fund Operator.",
+        "The Financial Mechanism Office. Other Operator is appointed Fund Operator.",
+        1,
     ).encode("utf-8")
-    assert_fail(lambda: mod.parse_programme_map(missing_operator), "grant/operator required")
+    assert_fail(lambda: mod.parse_programme_map(fund_operator_drift, registry=registry), "fund operator drift")
 
-    # Authority pinning is strict.
     assert_fail(
         lambda: mod.normalize_programmes(
             rows,
@@ -111,6 +134,7 @@ def main():
             fetched_at="2026-08-30T17:30:00+00:00",
             raw_hash="c" * 64,
             run_id="bad-authority",
+            registry=registry,
         ),
         "non-official",
     )
@@ -121,11 +145,27 @@ def main():
             fetched_at="2026-08-30T17:30:00+00:00",
             raw_hash="d" * 64,
             run_id="bad-path",
+            registry=registry,
         ),
         "unexpected Romania programme-map path",
     )
+    assert_fail(
+        lambda: mod.normalize_programmes(
+            rows,
+            authority_url=mod.SOURCE_URL,
+            fetched_at="2026-08-30T17:30:00+00:00",
+            raw_hash="not-a-hash",
+            run_id="bad-hash",
+            registry=registry,
+        ),
+        "sha-256",
+    )
 
-    print("PASS EEA Romania 2021-2028 programming intelligence stays complete, provenance-bound and non-authorizing")
+    tampered = json.loads(json.dumps(registry))
+    tampered["programmes"][0]["programmeOperator"] = "Tampered operator"
+    assert_fail(lambda: mod.parse_programme_map(fixture(), registry=tampered), "operator drift")
+
+    print("PASS EEA Romania programming intelligence is live, registry-bound, provenance-complete and non-authorizing")
 
 
 if __name__ == "__main__":
