@@ -11,6 +11,7 @@ on:
       - 'eucons/validation/test_php_research_runtime.php'
       - 'eucons/validation/test_php_research_channel_gate.php'
       - 'eucons/validation/test_php_research_governance_gate.php'
+      - 'eucons/validation/test_php_research_persisted_bundle_export.php'
       - 'eucons/leads/lead_contract.json'
       - 'eucons/leads/forms.json'
       - 'eucons/crm/**'
@@ -28,6 +29,7 @@ on:
       - 'eucons/validation/test_php_research_runtime.php'
       - 'eucons/validation/test_php_research_channel_gate.php'
       - 'eucons/validation/test_php_research_governance_gate.php'
+      - 'eucons/validation/test_php_research_persisted_bundle_export.php'
       - 'eucons/leads/lead_contract.json'
       - 'eucons/leads/forms.json'
       - 'eucons/crm/**'
@@ -58,6 +60,7 @@ jobs:
           php -l eucons/runtime/php/src/ResearchRuntime.php
           php -l eucons/runtime/php/src/ResearchChannelGate.php
           php -l eucons/runtime/php/src/ResearchGovernanceGate.php
+          php -l eucons/runtime/php/src/ResearchPersistedBundleExport.php
           php -l eucons/runtime/php/public/index.php
           php -l eucons/runtime/php/maintenance.php
           php -l eucons/validation/test_php_runtime.php
@@ -65,6 +68,7 @@ jobs:
           php -l eucons/validation/test_php_research_runtime.php
           php -l eucons/validation/test_php_research_channel_gate.php
           php -l eucons/validation/test_php_research_governance_gate.php
+          php -l eucons/validation/test_php_research_persisted_bundle_export.php
       - name: Test PHP lead runtime fail-closed behavior
         run: php eucons/validation/test_php_runtime.php
       - name: Test PHP commercial runtime fail-closed behavior
@@ -75,6 +79,8 @@ jobs:
         run: php eucons/validation/test_php_research_channel_gate.php
       - name: Test AI4WORK live GDPR governance activation gate
         run: php eucons/validation/test_php_research_governance_gate.php
+      - name: Test AI4WORK persisted-bundle export bridge for NF06
+        run: php eucons/validation/test_php_research_persisted_bundle_export.php
       - name: Require research route to enforce governance and approved channel before persistence
         run: |
           grep -F "ResearchGovernanceGate.php" eucons/runtime/php/public/index.php
