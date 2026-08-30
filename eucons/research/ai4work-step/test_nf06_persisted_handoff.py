@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 import hashlib
+from datetime import datetime, timedelta, timezone
 import json
 import unittest
 
@@ -41,9 +42,11 @@ def persisted_bundle(record: dict) -> dict:
 def rights_snapshot(
     response_ids: list[str] | None = None,
     *,
-    captured_at: str = "2026-08-28T18:00:01Z",
+    captured_at: str | None = None,
     **overrides,
 ) -> dict:
+    if captured_at is None:
+        captured_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
     snapshot = {
         "schema_version": HANDOFF.RIGHTS_HOLD_SNAPSHOT_SCHEMA,
         "research_id": "AI4WORK-STEP-NF-RUN-001",
@@ -91,7 +94,7 @@ class NF06PersistedHandoffTests(unittest.TestCase):
         )
         self.assertEqual(
             manifest["rights_hold_snapshot_captured_at"],
-            "2026-08-28T18:00:01Z",
+            snapshot["captured_at"],
         )
         canonical_snapshot = (
             json.dumps(
@@ -230,6 +233,37 @@ class NF06PersistedHandoffTests(unittest.TestCase):
                 rights_hold_snapshot=rights_snapshot(
                     captured_at="2026-08-28T09:45:00Z"
                 ),
+            )
+
+    def test_rights_snapshot_must_be_fresh_at_handoff_and_not_future_dated(self):
+        records = normalized_records()
+        bundles = [persisted_bundle(record) for record in records]
+        frame, _ = collection_frame(records, prod=True)
+
+        stale = (
+            datetime.now(timezone.utc) - HANDOFF.MAX_RIGHTS_HOLD_SNAPSHOT_AGE - timedelta(seconds=5)
+        ).isoformat().replace("+00:00", "Z")
+        with self.assertRaisesRegex(
+            HANDOFF.NF06PersistedHandoffError,
+            "stale at NF06 persisted handoff",
+        ):
+            HANDOFF.build_prod_preingest_from_persisted_bundles(
+                bundles,
+                collection_frame=frame,
+                rights_hold_snapshot=rights_snapshot(captured_at=stale),
+            )
+
+        future = (
+            datetime.now(timezone.utc) + HANDOFF.MAX_RIGHTS_HOLD_CLOCK_SKEW + timedelta(seconds=5)
+        ).isoformat().replace("+00:00", "Z")
+        with self.assertRaisesRegex(
+            HANDOFF.NF06PersistedHandoffError,
+            "future beyond allowed clock skew",
+        ):
+            HANDOFF.build_prod_preingest_from_persisted_bundles(
+                bundles,
+                collection_frame=frame,
+                rights_hold_snapshot=rights_snapshot(captured_at=future),
             )
 
     def test_rights_snapshot_rejects_unreviewed_extra_fields(self):
