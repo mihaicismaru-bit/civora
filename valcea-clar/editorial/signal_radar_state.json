@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_SIGNAL_RADAR_STATE_V1",
   "instance_id": "valcea",
-  "observed_at": "2026-08-30T05:37:28+03:00",
+  "observed_at": "2026-08-30T05:48:32+03:00",
   "publication_authority": "NONE",
   "health": "PASS",
   "source_count": 15,
   "sources_ok": 12,
-  "current_signal_count": 24,
+  "current_signal_count": 20,
   "today_signal_count": 0,
   "observations": [
     {
@@ -15,9 +15,11 @@
       "publisher": "Curierul de Râmnic",
       "tier": "T2",
       "family": "LOCAL_PRESS",
-      "status": "DEGRADED",
-      "error": "URLError: <urlopen error [Errno -3] Temporary failure in name resolution>",
+      "status": "PASS",
+      "error": null,
       "signals": [],
+      "final_url": "https://curierulderamnic.ro/",
+      "links_examined": 14,
       "hygiene_dropped_count": 0,
       "hygiene_dropped": []
     },
@@ -61,7 +63,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-08-30T05:37:28+03:00",
+          "observed_at": "2026-08-30T05:48:32+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -81,7 +83,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-08-30T05:37:28+03:00",
+          "observed_at": "2026-08-30T05:48:32+03:00",
           "verification_route_id": "utilities",
           "verification_targets": [
             {
@@ -115,77 +117,9 @@
       "publisher": "Impact Real",
       "tier": "T2",
       "family": "LOCAL_PRESS",
-      "status": "PASS",
-      "error": null,
-      "signals": [
-        {
-          "signal_id": "7e00bb6b6945347a3c3e0653",
-          "signal_title": "Victorie de aur pentru Vâlcea la Dumbrăvița: portarul Crăciun a fost decisiv la debut",
-          "signal_url": "https://www.impactreal.ro/2026/08/29/victorie-de-aur-pentru-valcea-la-dumbravita-portarul-craciun-a-fost-decisiv-la-debut/",
-          "signal_publisher": "Impact Real",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-08-29T16:50:13+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-30T05:37:28+03:00",
-          "verification_route_id": "general_local_signal",
-          "verification_targets": [],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "press-impact-real"
-        },
-        {
-          "signal_id": "f7a195310b451002625f113b",
-          "signal_title": "De Sfânta Maria Mică, „Brâul de Aur” adună Vâlcea la Bărbătești: paradă în straie populare, zeci de dansatori și concert cu Olguța Berbec",
-          "signal_url": "https://www.impactreal.ro/2026/08/29/de-sfanta-maria-mica-braul-de-aur-aduna-valcea-la-barbatesti-parada-in-straie-populare-zeci-de-dansatori-si-concert-cu-olguta-berbec/",
-          "signal_publisher": "Impact Real",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-08-29T10:25:59+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-30T05:37:28+03:00",
-          "verification_route_id": "general_local_signal",
-          "verification_targets": [],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "press-impact-real"
-        },
-        {
-          "signal_id": "bd8aedc0880c84d3d79b18ba",
-          "signal_title": "Investiții de aproape 24 de milioane de lei în educația din Drăgășani: Liceul Brătianu va fi modernizat, o grădiniță nouă va avea piscină interioară",
-          "signal_url": "https://www.impactreal.ro/2026/08/29/investitii-de-aproape-24-de-milioane-de-lei-in-educatia-din-dragasani-liceul-bratianu-va-fi-modernizat-o-gradinita-noua-va-avea-piscina-interioara/",
-          "signal_publisher": "Impact Real",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-08-29T08:52:40+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-30T05:37:28+03:00",
-          "verification_route_id": "dragasani_administration",
-          "verification_targets": [
-            {
-              "ref_type": "manual_watch_source_id",
-              "id": "primaria-dragasani-anunturi-publice"
-            }
-          ],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "press-impact-real"
-        }
-      ],
-      "final_url": "https://www.impactreal.ro/",
-      "links_examined": 14,
+      "status": "DEGRADED",
+      "error": "URLError: <urlopen error timed out>",
+      "signals": [],
       "hygiene_dropped_count": 0,
       "hygiene_dropped": []
     },
@@ -242,7 +176,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-29T11:03:38+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-30T05:37:28+03:00",
+          "observed_at": "2026-08-30T05:48:32+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -262,7 +196,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-28T19:20:02+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-30T05:37:28+03:00",
+          "observed_at": "2026-08-30T05:48:32+03:00",
           "verification_route_id": "education",
           "verification_targets": [
             {
@@ -305,7 +239,7 @@
           "signal_sensitive": true,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-08-30T05:37:28+03:00",
+          "observed_at": "2026-08-30T05:48:32+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -325,7 +259,7 @@
           "signal_sensitive": true,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-08-30T05:37:28+03:00",
+          "observed_at": "2026-08-30T05:48:32+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -377,7 +311,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-29T12:40:55+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-30T05:37:28+03:00",
+          "observed_at": "2026-08-30T05:48:32+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -411,7 +345,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-29T17:20:12+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-30T05:37:28+03:00",
+          "observed_at": "2026-08-30T05:48:32+03:00",
           "verification_route_id": "dragasani_administration",
           "verification_targets": [
             {
@@ -436,7 +370,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-29T16:47:07+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-30T05:37:28+03:00",
+          "observed_at": "2026-08-30T05:48:32+03:00",
           "verification_route_id": "environment_weather",
           "verification_targets": [
             {
@@ -461,7 +395,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-29T09:15:29+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-30T05:37:28+03:00",
+          "observed_at": "2026-08-30T05:48:32+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -486,7 +420,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-29T03:43:01+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-30T05:37:28+03:00",
+          "observed_at": "2026-08-30T05:48:32+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -506,7 +440,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-28T22:09:17+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-30T05:37:28+03:00",
+          "observed_at": "2026-08-30T05:48:32+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -545,7 +479,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-08-30T05:37:28+03:00",
+          "observed_at": "2026-08-30T05:48:32+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -565,7 +499,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-08-30T05:37:28+03:00",
+          "observed_at": "2026-08-30T05:48:32+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -599,7 +533,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-29T20:24:26+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-30T05:37:28+03:00",
+          "observed_at": "2026-08-30T05:48:32+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -619,7 +553,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-28T21:58:51+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-30T05:37:28+03:00",
+          "observed_at": "2026-08-30T05:48:32+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -653,7 +587,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-29T22:38:56+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-30T05:37:28+03:00",
+          "observed_at": "2026-08-30T05:48:32+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -678,7 +612,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-29T12:45:20+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-30T05:37:28+03:00",
+          "observed_at": "2026-08-30T05:48:32+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -698,7 +632,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-29T12:27:50+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-30T05:37:28+03:00",
+          "observed_at": "2026-08-30T05:48:32+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -723,7 +657,7 @@
           "signal_sensitive": false,
           "published_at": "2026-08-28T20:01:11+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-30T05:37:28+03:00",
+          "observed_at": "2026-08-30T05:48:32+03:00",
           "verification_route_id": "education",
           "verification_targets": [
             {
@@ -735,26 +669,6 @@
               "id": "isj-valcea-comunicate"
             }
           ],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "signal-se-intampla-in-valcea"
-        },
-        {
-          "signal_id": "c038971c7413bf6ebacb6c82",
-          "signal_title": "Toate proiectele PNRR din Râmnicu Vâlcea au fost finalizate. Lucrările de la Colegiul „Mircea cel Bătrân” continuă încă două săptămâni",
-          "signal_url": "https://seintamplainvalcea.ro/2026/08/28/toate-proiectele-pnrr-din-ramnicu-valcea-au-fost-finalizate-lucrarile-de-la-colegiul-mircea-cel-batran-continua-inca-doua-saptamani/",
-          "signal_publisher": "Se întâmplă în Vâlcea",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-08-28T17:47:39+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-08-30T05:37:28+03:00",
-          "verification_route_id": "general_local_signal",
-          "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
           "required_authority": "T1_OR_T1B_PRIMARY",
           "publication_authority": "NONE",
