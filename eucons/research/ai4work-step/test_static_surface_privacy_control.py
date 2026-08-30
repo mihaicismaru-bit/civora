@@ -14,6 +14,8 @@ class StaticSurfacePrivacyControlTests(unittest.TestCase):
         self.assertEqual(result["status"], "PASS")
         self.assertEqual(result["classification"], "CONTROL_ONLY_NOT_EVIDENCE")
         self.assertEqual(result["allowed_network_egress"], [ALLOWED_RESEARCH_API])
+        self.assertEqual(result["browser_storage_hits"], [])
+        self.assertTrue(result["recruitment_channel_fragment_scrubbed"])
         self.assertFalse(result["test_twin_evidence_eligible"])
         for page in result["pages"].values():
             self.assertEqual(page["external_assets"], 0)
@@ -47,11 +49,22 @@ class StaticSurfacePrivacyControlTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 validate_page(employer, expect_form=True)
 
-    def test_persistent_browser_tracking_storage_is_rejected(self) -> None:
+    def test_browser_tracking_storage_is_rejected(self) -> None:
         control_source = (Path(__file__).resolve().parent / "static_surface_privacy_control.py").read_text(encoding="utf-8")
         self.assertIn('"document.cookie"', control_source)
         self.assertIn('"localstorage"', control_source)
+        self.assertIn('"sessionstorage"', control_source)
+        self.assertIn('"indexeddb"', control_source)
         self.assertIn('"navigator.sendbeacon"', control_source)
+
+    def test_recruitment_channel_fragment_is_captured_once_then_scrubbed(self) -> None:
+        client_source = (Path(__file__).resolve().parent / "research_form.js").read_text(encoding="utf-8")
+        self.assertIn("const recruitmentChannel = (() => {", client_source)
+        self.assertIn("globalThis.history.replaceState", client_source)
+        self.assertIn("const channelId = () => recruitmentChannel;", client_source)
+        self.assertNotIn("localStorage", client_source)
+        self.assertNotIn("sessionStorage", client_source)
+        self.assertNotIn("indexedDB", client_source)
 
 
 if __name__ == "__main__":
