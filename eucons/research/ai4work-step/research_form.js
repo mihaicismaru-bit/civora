@@ -15,14 +15,28 @@
     if (node) node.textContent = message;
   };
 
-  const channelId = () => {
-    // Recruitment metadata is carried only in the URL fragment. Fragments are
-    // not sent in the HTTP request and therefore are not written to ordinary
-    // origin/proxy access logs as part of the request URL.
+  const recruitmentChannel = (() => {
+    // Recruitment metadata arrives only in the URL fragment. Fragments are not
+    // sent in the HTTP request, but leaving the channel token visible in the
+    // address bar/history would retain more recruitment metadata than needed.
+    // Capture it once in ephemeral JS memory, then scrub the fragment without
+    // cookies/localStorage/sessionStorage or another persistence mechanism.
     const fragment = String(globalThis.location.hash || "").replace(/^#/, "");
-    const value = new URLSearchParams(fragment).get("channel") || "";
+    const params = new URLSearchParams(fragment);
+    const value = params.get("channel") || "";
+    if (params.has("channel")
+        && globalThis.history
+        && typeof globalThis.history.replaceState === "function") {
+      globalThis.history.replaceState(
+        null,
+        "",
+        `${globalThis.location.pathname}${globalThis.location.search}`,
+      );
+    }
     return CHANNEL_RE.test(value) ? value : null;
-  };
+  })();
+
+  const channelId = () => recruitmentChannel;
 
   const selectedValue = (node) => {
     const type = node.dataset.questionType;
