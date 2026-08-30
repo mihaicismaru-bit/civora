@@ -1,6 +1,7 @@
 import hashlib
 import tempfile
 import unittest
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from research_storage import ResearchStorageError, SQLiteResearchStorage, canonical_json_bytes
@@ -91,6 +92,50 @@ class StorageTests(unittest.TestCase):
             store.append(employer, raw_bytes=canonical_json_bytes(employer))
             self.assertEqual(store.export("AI4WORK_ADULTS_V1"), [adult])
             self.assertEqual(store.export("AI4WORK_EMPLOYERS_V1"), [employer])
+
+    def test_erasure_replay_marker_has_own_expiry_not_later_than_24h(self):
+        with tempfile.TemporaryDirectory() as td:
+            store = SQLiteResearchStorage(
+                Path(td) / "research.sqlite",
+                erasure_replay_not_after_utc="2099-01-01T00:00:00+00:00",
+            )
+            item = record("erase-per-marker")
+            store.append(item, raw_bytes=canonical_json_bytes(item))
+            before = datetime.now(timezone.utc)
+            self.assertTrue(store.delete_by_response_id(item["response_id"]))
+            after = datetime.now(timezone.utc)
+            row = store.conn.execute(
+                "SELECT response_id, expires_at_utc FROM erasure_replay_blocks WHERE response_id = ?",
+                (item["response_id"],),
+            ).fetchone()
+            self.assertIsNotNone(row)
+            self.assertEqual(row[0], item["response_id"])
+            expiry = datetime.fromisoformat(str(row[1]).replace("Z", "+00:00")).astimezone(timezone.utc)
+            self.assertGreater(expiry, before)
+            self.assertLessEqual(expiry, after + timedelta(hours=24))
+            self.assertEqual(
+                {col[1] for col in store.conn.execute("PRAGMA table_info(erasure_replay_blocks)")},
+                {"response_id", "expires_at_utc"},
+            )
+
+    def test_legacy_replay_table_with_unbounded_marker_fails_closed(self):
+        with tempfile.TemporaryDirectory() as td:
+            db_path = Path(td) / "legacy.sqlite"
+            import sqlite3
+
+            conn = sqlite3.connect(str(db_path))
+            conn.execute("CREATE TABLE erasure_replay_blocks (response_id TEXT PRIMARY KEY)")
+            conn.execute("INSERT INTO erasure_replay_blocks(response_id) VALUES (?)", (opaque_receipt("legacy"),))
+            conn.commit()
+            conn.close()
+            with self.assertRaisesRegex(
+                ResearchStorageError,
+                "legacy erasure replay markers without per-marker expiry",
+            ):
+                SQLiteResearchStorage(
+                    db_path,
+                    erasure_replay_not_after_utc="2099-01-01T00:00:00+00:00",
+                )
 
 
 if __name__ == "__main__":
