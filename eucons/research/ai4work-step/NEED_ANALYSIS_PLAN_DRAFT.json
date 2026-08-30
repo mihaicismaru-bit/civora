@@ -1,0 +1,99 @@
+{
+  "schema_version": "eucons.ai4work_need_analysis_plan.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "collection_frame_id": "AI4WORK-STEP-PROD-FRAME-DRAFT-001",
+  "status": "DRAFT_NOT_APPROVED_FOR_PROD",
+  "evidence_class": "METHOD_PLAN_NOT_EVIDENCE",
+  "purpose": "Pre-register the exact question-to-need mapping and ranking rules before real collection so respondent results cannot be mapped or weighted post hoc. This plan is method, not evidence.",
+  "forms_schema_version": "eucons.research_forms.v0.5",
+  "core_skill_ranking": {
+    "scope": "H1-H5 only; scores describe the eligible respondent batch and are not population prevalence estimates",
+    "adult_direct_source": "Q10 perceived-need rating matrix",
+    "employer_direct_source": "E03 competence-impact rating matrix",
+    "normalization": "rating_1_to_5_to_0_100=(value-1)/4*100",
+    "within_population_aggregation": "arithmetic_mean_of_valid_required_direct_ratings",
+    "cross_population_combination": "equal_population_components_0.5_adults_0.5_employers",
+    "respondent_weighting_allowed": false,
+    "secondary_evidence_can_change_numeric_order": false,
+    "missing_direct_indicator_imputation_allowed": false,
+    "representativeness_claim_allowed": false,
+    "causal_claim_allowed": false
+  },
+  "core_dimensions": {
+    "H1": {
+      "label": "Alfabetizare AI aplicată muncii",
+      "adult_direct": [{"question_id": "Q10", "row_id": "utilizarea_instrumentelor_AI"}],
+      "employer_direct": [{"question_id": "E03", "row_id": "formularea_cerintelor"}],
+      "supporting_adult": [{"question_id": "Q03"}, {"question_id": "Q09", "option": "nu am știut cum să formulez cererea"}],
+      "supporting_employer": [{"question_id": "E04_detail", "option": "utilizarea instrumentelor AI"}, {"question_id": "E04_detail", "option": "formularea cerințelor pentru AI"}, {"question_id": "E08", "option": "formularea și rafinarea instrucțiunilor"}]
+    },
+    "H2": {
+      "label": "Verificarea calității și factualității",
+      "adult_direct": [{"question_id": "Q10", "row_id": "verificarea_rezultatelor_AI"}],
+      "employer_direct": [{"question_id": "E03", "row_id": "verificarea_calitatii"}],
+      "supporting_adult": [{"question_id": "Q04"}, {"question_id": "Q09", "option": "rezultate factual greșite"}, {"question_id": "Q09", "option": "rezultate greu de verificat"}],
+      "supporting_employer": [{"question_id": "E04_detail", "option": "verificarea calității/corectitudinii AI"}, {"question_id": "E08", "option": "verificarea factuală/calității"}]
+    },
+    "H3": {
+      "label": "Protecția datelor și utilizarea responsabilă",
+      "adult_direct": [{"question_id": "Q10", "row_id": "protectia_datelor_confidentialitate"}],
+      "employer_direct": [{"question_id": "E03", "row_id": "protectia_datelor"}, {"question_id": "E03", "row_id": "limitele_si_riscurile_AI"}],
+      "supporting_adult": [{"question_id": "Q05"}, {"question_id": "Q09", "option": "probleme privind datele/confidențialitatea"}],
+      "supporting_employer": [{"question_id": "E04_detail", "option": "protecția datelor/confidențialitate"}, {"question_id": "E04_detail", "option": "securitate digitală"}, {"question_id": "E08", "option": "protecția datelor"}, {"question_id": "E08", "option": "securitate digitală"}, {"question_id": "E08", "option": "supraveghere umană/decizie"}]
+    },
+    "H4": {
+      "label": "Integrarea AI în fluxuri de lucru",
+      "adult_direct": [{"question_id": "Q10", "row_id": "integrarea_AI_in_flux_de_lucru"}],
+      "employer_direct": [{"question_id": "E03", "row_id": "integrarea_in_procese"}, {"question_id": "E03", "row_id": "definirea_fluxului_asistat_AI"}],
+      "supporting_adult": [{"question_id": "Q06"}, {"question_id": "Q09", "option": "integrare dificilă în aplicațiile/procesele folosite"}, {"question_id": "Q12", "option": "procese repetitive/automatizare"}],
+      "supporting_employer": [{"question_id": "E04_detail", "option": "automatizare și integrare în procese"}, {"question_id": "E08", "option": "automatizarea unor pași de lucru"}, {"question_id": "E08", "option": "integrarea AI în aplicații/procese"}]
+    },
+    "H5": {
+      "label": "Fundamente digitale și de date",
+      "adult_direct": [{"question_id": "Q10", "row_id": "utilizare_digitala_functionala"}],
+      "employer_direct": [{"question_id": "E03", "row_id": "competente_digitale_generale"}],
+      "supporting_adult": [{"question_id": "Q01"}, {"question_id": "Q12", "option": "calcule/tabele/raportare"}, {"question_id": "Q12", "option": "operare aplicații/sisteme"}, {"question_id": "Q12", "option": "analiză și interpretare de date"}],
+      "supporting_employer": [{"question_id": "E04_detail", "option": "competențe digitale generale"}, {"question_id": "E04_detail", "option": "analiză de date"}]
+    }
+  },
+  "design_dimensions": {
+    "H6": {
+      "label": "Capacități manageriale și HR",
+      "ranking_scope": "employer-side design diagnostic, not mixed into H1-H5 core-skill rank",
+      "sources": [{"question_id": "E01"}, {"question_id": "E06", "option": "lipsa unei politici clare privind AI"}, {"question_id": "E07"}, {"question_id": "E08", "option": "documentarea și trasabilitatea rezultatelor"}, {"question_id": "E08", "option": "supraveghere umană/decizie"}]
+    },
+    "H7": {
+      "label": "Formare flexibilă și sectorială",
+      "ranking_scope": "access/delivery design diagnostic, not mixed into H1-H5 core-skill rank",
+      "adult_sources": [{"question_id": "Q07"}, {"question_id": "Q08"}],
+      "employer_sources": [{"question_id": "E05"}, {"question_id": "E06"}]
+    }
+  },
+  "supporting_signal_rule": "Supporting items may explain or challenge a core direct-rating result but may not alter the H1-H5 numeric order. Report convergence/divergence explicitly.",
+  "secondary_evidence_rule": "Secondary evidence supplies evidence-strength/context labels only; it cannot add numeric points to respondent ranking and project/call/training activity is never evidence of need.",
+  "adversarial_qa": {
+    "required_views": [
+      "pooled eligible respondent batch",
+      "adults and employers separately",
+      "each target region separately",
+      "dominant-channel sensitivity where triggered by the frozen collection frame",
+      "repeated-signature sensitivity where response-integrity diagnostics flag clusters",
+      "sparse-profile caveats for every affected conclusion"
+    ],
+    "stability_rule": "If a headline rank position changes materially across required sensitivity views, label that position UNSTABLE and report the competing orders rather than forcing a single definitive rank.",
+    "full_batch_result_must_be_preserved": true,
+    "automatic_record_exclusion_allowed": false
+  },
+  "approval": {
+    "approved": false,
+    "approved_for_prod": false,
+    "approved_at": null,
+    "approver_reference": null
+  },
+  "synthetic_records_allowed": false,
+  "test_twin_evidence_class": "TEST_TWIN_NON_EVIDENCE",
+  "project_activity_as_need_evidence": false,
+  "merge_authorized": false,
+  "deploy_authorized": false,
+  "prod_activation_authorized": false
+}
