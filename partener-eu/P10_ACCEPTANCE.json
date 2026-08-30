@@ -15,7 +15,7 @@
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-08-30T20:37:44Z",
+    "utc": "2026-08-30T20:43:17Z",
     "source_pass": 6,
     "source_degraded": 1,
     "source_fail": 0,
@@ -26,7 +26,7 @@
     "quarantined_source": null
   },
   "deployment_evidence": {
-    "utc": "2026-08-30T20:38:04Z",
+    "utc": "2026-08-30T20:43:34Z",
     "status": "PASS",
     "public_content_verified": true,
     "https_verified": true,
@@ -36,7 +36,7 @@
     "http_content_verified": true,
     "content_origin": "custom_https",
     "http_status": 200,
-    "final_url": "https://partener.eu/?p10_probe=20260830T203804Z",
+    "final_url": "https://partener.eu/?p10_probe=20260830T204334Z",
     "title": "PARTENER.EU — Găsește finanțări europene pentru investiția ta",
     "required_markers_present": true,
     "critical_assets_ok": true,
@@ -46,7 +46,7 @@
       {
         "id": "custom_https",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260830T203804Z",
+        "final_url": "https://partener.eu/?p10_probe=20260830T204334Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -57,12 +57,12 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260830T203804Z",
+        "final_url": "https://partener.eu/?p10_probe=20260830T204334Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "http://partener.eu/?p10_probe=20260830T203804Z",
-            "to_url": "https://partener.eu/?p10_probe=20260830T203804Z"
+            "from_url": "http://partener.eu/?p10_probe=20260830T204334Z",
+            "to_url": "https://partener.eu/?p10_probe=20260830T204334Z"
           }
         ],
         "content_verified": true,
@@ -74,12 +74,12 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260830T203804Z",
+        "final_url": "https://partener.eu/?p10_probe=20260830T204334Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260830T203804Z",
-            "to_url": "https://partener.eu/?p10_probe=20260830T203804Z"
+            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260830T204334Z",
+            "to_url": "https://partener.eu/?p10_probe=20260830T204334Z"
           }
         ],
         "content_verified": true,
@@ -92,8 +92,8 @@
     "pages_workflow": {
       "status": "LIVE",
       "page_url": "https://partener.eu/",
-      "git_sha": "756870249f51cd44d525db30e91678ffb793e498",
-      "observed_at": "2026-08-30T20:32:17.786186+00:00",
+      "git_sha": "e50fe3866d068759e99d2e9c896454583b2742d9",
+      "observed_at": "2026-08-30T20:39:28.172963+00:00",
       "configure_outcome": "success",
       "upload_outcome": "success",
       "deploy_outcome": "success",
@@ -125,16 +125,16 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-08-30T20:38:04Z",
-    "validation_run_started": "2026-08-30T20:37:44Z",
+    "utc": "2026-08-30T20:43:34Z",
+    "validation_run_started": "2026-08-30T20:43:17Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "8bf06f0d9f325a950c9ca0f73520dc8a5202bea12f2c05ad74658552bf3efaa8",
-      "history_sha256": "8bf06f0d9f325a950c9ca0f73520dc8a5202bea12f2c05ad74658552bf3efaa8",
-      "history_path": "validation/history/20260830T203744Z.json",
+      "latest_sha256": "56cd244ec64c24574b0192f3dc38acea4672784f8229491b85f42a1c0450b058",
+      "history_sha256": "56cd244ec64c24574b0192f3dc38acea4672784f8229491b85f42a1c0450b058",
+      "history_path": "validation/history/20260830T204317Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "290dab5252d2b8194b6f9e988e1e91b826e2f0237899403acb0d6c6f416d1d4a",
-      "checkpoint_sha256": "290dab5252d2b8194b6f9e988e1e91b826e2f0237899403acb0d6c6f416d1d4a",
+      "source_state_sha256": "ca72ac4b1b0b52f06030e5337d43d41002f8a2cac5607aed3c3e903522fc73b4",
+      "checkpoint_sha256": "ca72ac4b1b0b52f06030e5337d43d41002f8a2cac5607aed3c3e903522fc73b4",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
@@ -142,7 +142,7 @@
     },
     "source_registry": {
       "observed_at": "2026-08-30T20:29:30.030949Z",
-      "age_seconds": 514,
+      "age_seconds": 844,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
@@ -389,7 +389,7 @@
       "material_facts_auto_promoted": false
     },
     "peo_calendar": {
-      "observed_at": "2026-08-30T19:41:27.840816+00:00",
+      "observed_at": "2026-08-30T20:41:20.353294+00:00",
       "status": "OK_OFFICIAL_OIR_COPY",
       "source": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
       "source_class": "OFFICIAL_INSTITUTIONAL_COPY_OIR_PECU_VEST",
