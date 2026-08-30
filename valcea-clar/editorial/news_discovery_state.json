@@ -1,30 +1,15 @@
 {
   "schema_version": "1.4",
-  "observed_at": "2026-08-30T22:59:25+03:00",
+  "observed_at": "2026-08-30T23:05:57+03:00",
   "execution_mode": "bounded_parallel",
   "max_parallel_sources": 6,
   "sources_total": 22,
-  "sources_ok": 18,
+  "sources_ok": 20,
   "facts_admitted": 3,
   "source_notice_briefs": 3,
   "facts_before_cross_source_headline_dedupe": 3,
-  "host_incident_count": 1,
-  "host_incidents": [
-    {
-      "host": "anofm.ro",
-      "status": "DEGRADED_HOST",
-      "failed_source_count": 2,
-      "failed_source_ids": [
-        "ajofm-valcea-comunicate",
-        "ajofm-valcea-press-releases"
-      ],
-      "error_categories": [
-        "TIMEOUT"
-      ],
-      "correlated_failure": true,
-      "editorial_semantics_changed": false
-    }
-  ],
+  "host_incident_count": 0,
+  "host_incidents": [],
   "sources": [
     {
       "source_id": "primaria-rm-valcea-comunicate",
@@ -75,8 +60,9 @@
     },
     {
       "source_id": "ajofm-valcea-comunicate",
-      "listing_ok": false,
-      "error": "URLError: <urlopen error timed out>",
+      "listing_ok": true,
+      "links_examined": 12,
+      "article_failures": 0,
       "facts": 0
     },
     {
@@ -158,8 +144,9 @@
     },
     {
       "source_id": "ajofm-valcea-press-releases",
-      "listing_ok": false,
-      "error": "URLError: <urlopen error timed out>",
+      "listing_ok": true,
+      "links_examined": 12,
+      "article_failures": 0,
       "facts": 0
     },
     {
