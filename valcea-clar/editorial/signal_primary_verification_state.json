@@ -2,18 +2,18 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-30T15:30:23+03:00",
+  "generated_at": "2026-08-30T15:50:40+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-30T15:29:08+03:00",
-  "task_count": 55,
+  "queue_generated_at": "2026-08-30T15:49:35+03:00",
+  "task_count": 53,
   "primary_match_count": 0,
-  "no_match_count": 28,
-  "unrouted_count": 27,
+  "no_match_count": 27,
+  "unrouted_count": 26,
   "target_count": 20,
-  "targets_ok": 15,
+  "targets_ok": 14,
   "results": [
     {
       "signal_id": "7ac15306408a37511c195fc0",
@@ -894,7 +894,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 10
+          "documents_examined": 1
         }
       ],
       "publication_authority": "NONE",
@@ -1015,9 +1015,9 @@
             "name": "Spitalul Orășenesc Horezu",
             "url": "https://spitalulhorezu.ro/blog/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "TimeoutError: The read operation timed out",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -1069,45 +1069,6 @@
       "listing_title_identity_rejections": 80
     },
     {
-      "signal_id": "a8129d737e132e673aeb5ab2",
-      "signal_title": "Peste 18 milioane de lei pentru Școala „Luca Solomon” din Vaideeni. Primarul Daniel Băluță a semnat contractul de finanțare",
-      "signal_url": "https://www.impactreal.ro/2026/08/28/peste-18-milioane-de-lei-pentru-scoala-luca-solomon-din-vaideeni-primarul-daniel-baluta-a-semnat-contractul-de-finantare/",
-      "signal_publisher": "Impact Real",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-08-28T07:53:53+03:00",
-      "verification_route_id": "education",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "ccd-valcea-noutati",
-            "name": "Casa Corpului Didactic Vâlcea",
-            "url": "https://ccdvl.ro/category/noutati/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "isj-valcea-comunicate",
-            "name": "Inspectoratul Școlar Județean Vâlcea",
-            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 3
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
-    },
-    {
       "signal_id": "c9a2a4b9ea2c5e13015360b6",
       "signal_title": "Păcănelele din centrul Râmnicului: Mircia Gutău numără taxele, locatarii numără nopțile nedormite",
       "signal_url": "https://ziaruldevalcea.ro/2026/08/pacanelele-din-centrul-ramnicului-mircia-gutau-numara-taxele-locatarii-numara-noptile-nedormite/",
@@ -1119,32 +1080,6 @@
       "material_fact_ready": false,
       "fact_kernel_ready": false,
       "listing_title_identity_rejections": 56
-    },
-    {
-      "signal_id": "1052d6a22a68f07e708aac6a",
-      "signal_title": "Doi adolescenți și un bărbat au oprit un hoț și au recuperat geanta unei femei de 85 de ani, în Râmnicu Vâlcea",
-      "signal_url": "https://seintamplainvalcea.ro/2026/08/27/doi-adolescenti-si-un-barbat-au-oprit-un-hot-si-au-recuperat-geanta-unei-femei-de-85-de-ani-in-ramnicu-valcea/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_published_at": "2026-08-27T18:42:48+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
-    },
-    {
-      "signal_id": "fbaf068144bf16fc56b085d2",
-      "signal_title": "António Costa vine la București: finanțările europene după 2027 intră în negocierea decisivă",
-      "signal_url": "https://www.eurovalcea.ro/2026/08/29/antonio-costa-vine-la-bucuresti-finantarile-europene-dupa-2027-intra-in-negocierea-decisiva/",
-      "signal_publisher": "EuroVâlcea",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "6acb95bf42e585b073eb7ccc",
@@ -1185,6 +1120,45 @@
       "material_fact_ready": false,
       "fact_kernel_ready": false,
       "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "342eb05360cd935245b2934e",
+      "signal_title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
+      "signal_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252Fliga-2-victorie-scm-ramnicu-valcea-bate-la-dumbravita-1-0-salcianu%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
+      "signal_publisher": "Curierul de Vâlcea",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "0a9f0e5efa5edfde1c95a354",
+      "signal_title": "Declaratie de accesibilitate",
+      "signal_url": "http://www.realitateavalceana.ro/declaratie-de-accesibilitate/",
+      "signal_publisher": "Realitatea Vâlceană",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "fbaf068144bf16fc56b085d2",
+      "signal_title": "António Costa vine la București: finanțările europene după 2027 intră în negocierea decisivă",
+      "signal_url": "https://www.eurovalcea.ro/2026/08/29/antonio-costa-vine-la-bucuresti-finantarile-europene-dupa-2027-intra-in-negocierea-decisiva/",
+      "signal_publisher": "EuroVâlcea",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
       "listing_title_identity_rejections": 80
     },
     {
@@ -1235,32 +1209,6 @@
       "material_fact_ready": false,
       "fact_kernel_ready": false,
       "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
-    },
-    {
-      "signal_id": "342eb05360cd935245b2934e",
-      "signal_title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
-      "signal_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252Fliga-2-victorie-scm-ramnicu-valcea-bate-la-dumbravita-1-0-salcianu%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
-      "signal_publisher": "Curierul de Vâlcea",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
-    },
-    {
-      "signal_id": "0a9f0e5efa5edfde1c95a354",
-      "signal_title": "Declaratie de accesibilitate",
-      "signal_url": "http://www.realitateavalceana.ro/declaratie-de-accesibilitate/",
-      "signal_publisher": "Realitatea Vâlceană",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
       "listing_title_identity_rejections": 80
     },
     {
