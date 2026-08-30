@@ -8,6 +8,7 @@ on:
       - 'eucons/validation/validate_php_runtime.py'
       - 'eucons/validation/test_php_runtime.php'
       - 'eucons/validation/test_php_commercial_runtime.php'
+      - 'eucons/validation/test_php_research_channel_gate.php'
       - 'eucons/leads/lead_contract.json'
       - 'eucons/leads/forms.json'
       - 'eucons/crm/**'
@@ -22,6 +23,7 @@ on:
       - 'eucons/validation/validate_php_runtime.py'
       - 'eucons/validation/test_php_runtime.php'
       - 'eucons/validation/test_php_commercial_runtime.php'
+      - 'eucons/validation/test_php_research_channel_gate.php'
       - 'eucons/leads/lead_contract.json'
       - 'eucons/leads/forms.json'
       - 'eucons/crm/**'
@@ -49,13 +51,22 @@ jobs:
           php -l eucons/runtime/php/src/CrmRuntime.php
           php -l eucons/runtime/php/src/RetentionRuntime.php
           php -l eucons/runtime/php/src/MailRuntime.php
+          php -l eucons/runtime/php/src/ResearchChannelGate.php
           php -l eucons/runtime/php/public/index.php
           php -l eucons/runtime/php/maintenance.php
           php -l eucons/validation/test_php_runtime.php
           php -l eucons/validation/test_php_commercial_runtime.php
+          php -l eucons/validation/test_php_research_channel_gate.php
       - name: Test PHP lead runtime fail-closed behavior
         run: php eucons/validation/test_php_runtime.php
       - name: Test PHP commercial runtime fail-closed behavior
         run: php eucons/validation/test_php_commercial_runtime.php
+      - name: Test AI4WORK research channel provenance gate
+        run: php eucons/validation/test_php_research_channel_gate.php
+      - name: Require research route to enforce approved channel before persistence
+        run: |
+          grep -F "ResearchChannelGate.php" eucons/runtime/php/public/index.php
+          grep -F "COLLECTION_CHANNEL_REGISTER_DRAFT.json" eucons/runtime/php/public/index.php
+          grep -F "assertApprovedRecord" eucons/runtime/php/public/index.php
       - name: Validate PHP runtime and activated public build
         run: python eucons/validation/validate_php_runtime.py
