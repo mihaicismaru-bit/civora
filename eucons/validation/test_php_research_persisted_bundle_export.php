@@ -25,9 +25,25 @@ function write_bundle_json(string $path, array $value): void {
     file_put_contents($path, json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . "\n");
 }
 
+function canonical_bundle_value(mixed $value): mixed {
+    if (!is_array($value)) return $value;
+    $isList = $value === [] || array_keys($value) === range(0, count($value) - 1);
+    if ($isList) return array_map('canonical_bundle_value', $value);
+    ksort($value, SORT_STRING);
+    foreach ($value as $key => $child) $value[$key] = canonical_bundle_value($child);
+    return $value;
+}
+
+function canonical_bundle_json(array $value, bool $newline = false): string {
+    $json = json_encode(
+        canonical_bundle_value($value),
+        JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR
+    );
+    return $json . ($newline ? "\n" : '');
+}
+
 function synthetic_bundle_fixture(string $responseId, string $formId, string $receivedAt): array {
     $rawSha = hash('sha256', 'TEST-TWIN-RAW-' . $responseId);
-    $normalizedSha = hash('sha256', 'TEST-TWIN-NORMALIZED-' . $responseId);
     $bodySha = hash('sha256', 'TEST-TWIN-BODY-' . $responseId);
     $record = [
         'schema_version' => 1,
@@ -41,6 +57,7 @@ function synthetic_bundle_fixture(string $responseId, string $formId, string $re
         'answers' => [],
         'synthetic' => false,
     ];
+    $normalizedSha = hash('sha256', canonical_bundle_json($record, true));
     return [
         'wrapper' => [
             'schema_version' => 1,
@@ -117,6 +134,17 @@ try {
     fail_bundle_test('hash-binding mismatch did not fail closed');
 } catch (RuntimeException $e) {
     if ($e->getMessage() !== 'RESEARCH_EXPORT_HASH_BINDING_MISMATCH') fail_bundle_test('unexpected hash-binding error: ' . $e->getMessage());
+}
+write_bundle_json($root . '/research/receipts/' . $employerId . '.json', $employer['receipt']);
+
+$tamperedWrapper = $employer['wrapper'];
+$tamperedWrapper['record']['answers'] = ['tampered' => true];
+write_bundle_json($root . '/research/responses/AI4WORK_EMPLOYERS_V1/' . $employerId . '.json', $tamperedWrapper);
+try {
+    $exporter->buildPersistedBundles();
+    fail_bundle_test('normalized record tamper did not fail closed');
+} catch (RuntimeException $e) {
+    if ($e->getMessage() !== 'RESEARCH_EXPORT_NORMALIZED_HASH_MISMATCH') fail_bundle_test('unexpected normalized-hash error: ' . $e->getMessage());
 }
 
 putenv('AI4WORK_RESEARCH_ROOT');
