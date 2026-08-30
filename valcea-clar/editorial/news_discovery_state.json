@@ -1,10 +1,10 @@
 {
   "schema_version": "1.4",
-  "observed_at": "2026-08-30T10:33:53+03:00",
+  "observed_at": "2026-08-30T10:40:17+03:00",
   "execution_mode": "bounded_parallel",
   "max_parallel_sources": 6,
   "sources_total": 22,
-  "sources_ok": 20,
+  "sources_ok": 18,
   "facts_admitted": 2,
   "source_notice_briefs": 2,
   "facts_before_cross_source_headline_dedupe": 2,
@@ -25,9 +25,8 @@
     },
     {
       "source_id": "prefectura-valcea",
-      "listing_ok": true,
-      "links_examined": 4,
-      "article_failures": 0,
+      "listing_ok": false,
+      "error": "HTTPError: HTTP Error 403: Forbidden",
       "facts": 0
     },
     {
@@ -118,7 +117,7 @@
       "source_id": "scm-rm-valcea",
       "listing_ok": true,
       "links_examined": 8,
-      "article_failures": 1,
+      "article_failures": 2,
       "facts": 1
     },
     {
@@ -130,9 +129,8 @@
     },
     {
       "source_id": "ipj-valcea-news",
-      "listing_ok": true,
-      "links_examined": 8,
-      "article_failures": 0,
+      "listing_ok": false,
+      "error": "HTTPError: HTTP Error 403: Forbidden",
       "facts": 0
     },
     {
