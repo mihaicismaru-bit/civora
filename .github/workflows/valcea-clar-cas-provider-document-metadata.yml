@@ -1,0 +1,33 @@
+name: VÂLCEA CLAR CAS Provider Document Metadata
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'valcea-clar/scripts/cas_valcea_provider_document_metadata_state.py'
+      - '.github/workflows/valcea-clar-cas-provider-document-metadata.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/scripts/cas_valcea_provider_document_metadata_state.py'
+      - '.github/workflows/valcea-clar-cas-provider-document-metadata.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-cas-provider-document-metadata-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Compile CAS provider-document metadata state
+        run: python -m py_compile valcea-clar/scripts/cas_valcea_provider_document_metadata_state.py
+      - name: Run CAS provider-document fail-closed regressions
+        run: python valcea-clar/scripts/cas_valcea_provider_document_metadata_state.py --self-test
