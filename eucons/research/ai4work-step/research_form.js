@@ -20,7 +20,7 @@
     // sent in the HTTP request, but leaving the channel token visible in the
     // address bar/history would retain more recruitment metadata than needed.
     // Capture it once in ephemeral JS memory, then scrub the fragment without
-    // cookies/localStorage/sessionStorage or another persistence mechanism.
+    // introducing any persistent browser-side state.
     const fragment = String(globalThis.location.hash || "").replace(/^#/, "");
     const params = new URLSearchParams(fragment);
     const value = params.get("channel") || "";
