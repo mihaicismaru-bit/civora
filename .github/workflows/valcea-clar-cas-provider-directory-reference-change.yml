@@ -1,0 +1,33 @@
+name: VÂLCEA CLAR CAS Provider Directory Reference Change
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'valcea-clar/scripts/cas_valcea_provider_directory_reference_change_state.py'
+      - '.github/workflows/valcea-clar-cas-provider-directory-reference-change.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/scripts/cas_valcea_provider_directory_reference_change_state.py'
+      - '.github/workflows/valcea-clar-cas-provider-directory-reference-change.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-cas-provider-directory-reference-change-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Compile CAS provider-directory reference change detector
+        run: python -m py_compile valcea-clar/scripts/cas_valcea_provider_directory_reference_change_state.py
+      - name: Run CAS provider-directory fail-closed change regressions
+        run: python valcea-clar/scripts/cas_valcea_provider_directory_reference_change_state.py --self-test
