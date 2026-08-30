@@ -3,6 +3,8 @@ name: PARTENER.EU EEA Civil Society Live Evidence
 on:
   pull_request:
     paths:
+      - 'partener-eu/ingest/eea_romania_programming_intelligence.py'
+      - 'partener-eu/ops/test_eea_romania_programming_intelligence.py'
       - 'partener-eu/ingest/eea_civil_society_calls.py'
       - 'partener-eu/ingest/eea_civil_society_fetch.py'
       - 'partener-eu/ingest/eea_civil_society_reconcile.py'
@@ -36,6 +38,55 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: '3.12'
+
+      - name: Regression — Romania 2021-2028 programme map stays pipeline-only
+        run: python partener-eu/ops/test_eea_romania_programming_intelligence.py
+
+      - name: Capture official Romania programme/operator programming evidence
+        run: |
+          mkdir -p /tmp/partener-eea-csf
+          python partener-eu/ingest/eea_romania_programming_intelligence.py \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --output /tmp/partener-eea-csf/romania-programming-evidence.json
+
+      - name: Validate Romania programme/operator evidence remains non-authorizing
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path('/tmp/partener-eea-csf/romania-programming-evidence.json')
+          data = json.loads(path.read_text(encoding='utf-8'))
+          stats = data.get('stats') or {}
+          if data.get('schema') != 'PARTENER_EU_EEA_ROMANIA_PROGRAMMING_EVIDENCE_V1':
+              raise SystemExit('FAIL: unexpected Romania programming evidence schema')
+          if data.get('observation_state') != 'PROGRAMMING_PIPELINE':
+              raise SystemExit('FAIL: Romania programme map escaped PROGRAMMING_PIPELINE')
+          if data.get('publication_effect') != 'NONE' or data.get('canonical_corpus_mutation') is not False:
+              raise SystemExit('FAIL: Romania programme intelligence attempted publication/corpus mutation')
+          if data.get('material_fact_use') is not False or data.get('open_call_authorized') is not False or data.get('publish_authorized') is not False:
+              raise SystemExit('FAIL: Romania programme intelligence became authorizing')
+          if stats.get('programme_records') != 9 or stats.get('operator_watch_seeds') != 9 or stats.get('open_calls_authorized') != 0:
+              raise SystemExit(f'FAIL: incomplete/unsafe Romania programme map: {stats}')
+          source = data.get('source') or {}
+          if source.get('http_status') != 200 or not source.get('raw_hash') or not data.get('fetched_at') or not data.get('parser_version') or not data.get('run_id'):
+              raise SystemExit('FAIL: Romania programme evidence lost live provenance')
+          required_missing = {'exact_call_identifier', 'official_current_open_status', 'exact_official_call_endpoint', 'semantic_reconciliation'}
+          for row in data.get('records') or []:
+              if row.get('observation_state') != 'PROGRAMMING_PIPELINE' or row.get('not_a_call') is not True:
+                  raise SystemExit(f"FAIL: programme row became call evidence: {row.get('programme_name')}")
+              if row.get('material_fact_use') is not False or row.get('open_call_authorized') is not False or row.get('publish_authorized') is not False:
+                  raise SystemExit(f"FAIL: programme row became authorizing: {row.get('programme_name')}")
+              if row.get('programme_grant_scope') != 'PROGRAMME_ALLOCATION_NOT_CALL_BUDGET':
+                  raise SystemExit(f"FAIL: programme grant scope drift: {row.get('programme_name')}")
+              if not row.get('programme_operator') or not row.get('operator_watch_seed'):
+                  raise SystemExit(f"FAIL: operator watch seed missing: {row.get('programme_name')}")
+              if not required_missing.issubset(set(row.get('missing_to_confirm_call') or [])):
+                  raise SystemExit(f"FAIL: exact-call proof requirements lost: {row.get('programme_name')}")
+              if not row.get('raw_hash') or not row.get('semantic_fingerprint') or not row.get('fetched_at') or not row.get('parser_version') or not row.get('run_id'):
+                  raise SystemExit(f"FAIL: row provenance incomplete: {row.get('programme_name')}")
+          print('PASS EEA Romania programme/operator intelligence:', stats)
+          PY
 
       - name: Capture exact official call-page evidence
         run: |
