@@ -77,10 +77,14 @@ Implemented in this unit:
   identity, externally supplied exact-build configuration and a 30-second MV3 alarm wake-up
 - live current-page dispatcher that reads only the active MySMIS DOM snapshot, visibly binds the opaque
   project selector, sanitizes all persisted URLs and reuses restart-safe session replay protection
+- deterministic MCLENOVO runtime handoff plan and fixed local composition from Drive mailbox through
+  the one-command loopback broker to the installed extension, with no persisted absolute mailbox path
+- internal extension options page that stores a configuration only after exact extension/build/pair
+  checks and a Web Crypto SHA-256 verification of its canonical configuration identity
 
 Still fail-closed / not implemented:
 
-- externally observed exact-build installation/configuration and mailbox-to-broker process composition on MCLENOVO
+- externally observed exact-build installation and runtime start on MCLENOVO
 - live MCLENOVO health response observed through the trusted bridge transport
 - approved Artifact Registry and SSOT proposal application
 - CDP debugger fallback
@@ -124,6 +128,17 @@ requested selector to be visible in the current snapshot, sanitizes page and ele
 returns only GET observation metadata. The loopback acknowledgement remains
 `liveEvidenceAccepted: false` until the agent persists the result and an independent Drive readback
 verifier accepts the complete chain.
+
+`native/mclenovo-runtime.mjs` composes the existing mailbox and broker directly; it does not load a
+module name from the plan or expose a command runner. Its handoff plan contains no mailbox path. At
+runtime the absolute locally synced Drive path is supplied separately and is never returned by status
+or result receipts. The fixed CLI accepts only `--plan` and `--mailbox-root`, starts no child process,
+and shuts down the poller and loopback listener on SIGINT/SIGTERM.
+
+The extension options page has one bounded manual action: paste the plan's `extensionConfig` object.
+It performs no network request and stores nothing unless the canonical SHA-256 configuration ID,
+source/agent head, pair ID, installed extension ID and fixed origin all verify. This offline composition
+test is not an installation observation and cannot be promoted to live bridge evidence.
 
 ## Offline handoff preflight
 

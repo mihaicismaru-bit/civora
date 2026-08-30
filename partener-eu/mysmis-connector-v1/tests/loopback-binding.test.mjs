@@ -4,8 +4,10 @@ import {
   EXTENSION_LOOPBACK_ALARM_NAME,
   EXTENSION_LOOPBACK_CONFIG_KEY,
   installExtensionLoopbackBinding,
-  validateExtensionLoopbackConfig
+  validateExtensionLoopbackConfig,
+  verifyExtensionLoopbackConfig
 } from "../extension/loopback-binding.mjs";
+import { createMclenovoRuntimeHandoffPlan } from "../native/mclenovo-runtime.mjs";
 
 const BUILD = "8".repeat(40);
 const EXTENSION_ID = "a".repeat(32);
@@ -13,14 +15,11 @@ const clock = () => new Date("2026-08-30T08:10:00.000Z");
 
 function config(overrides = {}) {
   return {
-    schemaVersion: 1,
-    enabled: true,
-    sourceHead: BUILD,
-    agentBuildId: BUILD,
-    brokerOrigin: "http://127.0.0.1:43127",
-    extensionId: EXTENSION_ID,
-    pairId: "b".repeat(64),
-    configurationId: "c".repeat(64),
+    ...createMclenovoRuntimeHandoffPlan({
+      sourceHead: BUILD,
+      pairId: "b".repeat(64),
+      extensionId: EXTENSION_ID
+    }).extensionConfig,
     ...overrides
   };
 }
@@ -116,6 +115,18 @@ test("configuration schema validates exact identities and cannot be broadened", 
   assert.throws(
     () => validateExtensionLoopbackConfig({ config: config({ enabled: false }), runtimeId: EXTENSION_ID }),
     (error) => error.code === "MV3_LOOPBACK_CONFIG_INVALID"
+  );
+});
+
+test("configuration ID is verified from the exact canonical configuration", async () => {
+  const value = await verifyExtensionLoopbackConfig({ config: config(), runtimeId: EXTENSION_ID });
+  assert.equal(value.sourceHead, BUILD);
+  await assert.rejects(
+    () => verifyExtensionLoopbackConfig({
+      config: { ...config(), configurationId: "f".repeat(64) },
+      runtimeId: EXTENSION_ID
+    }),
+    (error) => error.code === "MV3_LOOPBACK_CONFIG_DIGEST_MISMATCH"
   );
 });
 

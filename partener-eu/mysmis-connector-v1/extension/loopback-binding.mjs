@@ -25,6 +25,23 @@ function exactKeys(value, keys) {
     && Object.keys(value).sort().join(",") === [...keys].sort().join(",");
 }
 
+function canonicalize(value) {
+  if (Array.isArray(value)) return value.map(canonicalize);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.keys(value).sort().map((key) => [key, canonicalize(value[key])]));
+  }
+  return value;
+}
+
+async function sha256Hex(value, cryptoImpl) {
+  if (!cryptoImpl?.subtle) {
+    throw new ExtensionLoopbackBindingError("MV3_LOOPBACK_CRYPTO_UNAVAILABLE", "Web Crypto is required for configuration verification.");
+  }
+  const bytes = new TextEncoder().encode(JSON.stringify(canonicalize(value)));
+  const digest = await cryptoImpl.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
 export function validateExtensionLoopbackConfig({ config, runtimeId }) {
   if (!exactKeys(config, CONFIG_KEYS) || config.schemaVersion !== 1 || config.enabled !== true) {
     throw new ExtensionLoopbackBindingError("MV3_LOOPBACK_CONFIG_INVALID", "Loopback configuration must match the exact enabled schema.");
@@ -42,6 +59,18 @@ export function validateExtensionLoopbackConfig({ config, runtimeId }) {
     throw new ExtensionLoopbackBindingError("MV3_LOOPBACK_CONFIG_ORIGIN_DENIED", "Configuration may use only the fixed loopback origin.");
   }
   return Object.freeze({ ...config });
+}
+
+export async function verifyExtensionLoopbackConfig({ config, runtimeId, cryptoImpl = globalThis.crypto }) {
+  const structurallyValid = validateExtensionLoopbackConfig({ config, runtimeId });
+  const { configurationId, ...core } = structurallyValid;
+  if (configurationId !== await sha256Hex(core, cryptoImpl)) {
+    throw new ExtensionLoopbackBindingError(
+      "MV3_LOOPBACK_CONFIG_DIGEST_MISMATCH",
+      "Configuration identity does not match the exact canonical configuration."
+    );
+  }
+  return structurallyValid;
 }
 
 async function storeCycle(chromeApi, value, clock) {
@@ -88,7 +117,7 @@ export function installExtensionLoopbackBinding({
     }
     let config;
     try {
-      config = validateExtensionLoopbackConfig({ config: stored[CONFIG_KEY], runtimeId: chromeApi.runtime.id });
+      config = await verifyExtensionLoopbackConfig({ config: stored[CONFIG_KEY], runtimeId: chromeApi.runtime.id });
     } catch (error) {
       return storeCycle(chromeApi, {
         status: "MV3_LOOPBACK_DISABLED_INVALID_CONFIG",
