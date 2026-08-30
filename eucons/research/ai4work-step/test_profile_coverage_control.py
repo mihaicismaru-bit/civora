@@ -25,21 +25,9 @@ def full_profile_records() -> list[dict]:
     records = real_records()
     for record in records:
         if record["form_id"] == ADULT_FORM:
-            record["profile"].update(
-                {
-                    "status": "persoană ocupată potențial eligibilă",
-                    "age_band": "40-49",
-                    "occupational_family": "administrativ/back-office",
-                }
-            )
+            record["profile"].update({"status": "persoană ocupată potențial eligibilă", "age_band": "40-49", "occupational_family": "administrativ/back-office"})
         elif record["form_id"] == EMPLOYER_FORM:
-            record["profile"].update(
-                {
-                    "sector_aggregated": "servicii profesionale/tehnice",
-                    "size_band": "10-49",
-                    "respondent_role": "management",
-                }
-            )
+            record["profile"].update({"sector_aggregated": "servicii profesionale/tehnice", "size_band": "10-49", "respondent_role": "management"})
     return records
 
 
@@ -56,8 +44,9 @@ def approved_method_lock(method_frame: dict, collection_frame: dict) -> dict:
     }
 
 
-def approved_need_analysis_plan() -> dict:
+def approved_need_analysis_plan(collection_frame: dict) -> dict:
     plan = json.loads((ROOT / "NEED_ANALYSIS_PLAN_DRAFT.json").read_text(encoding="utf-8"))
+    plan["collection_frame_id"] = collection_frame["collection_frame_id"]
     plan["status"] = "APPROVED_FOR_PROD"
     plan["approval"] = {
         "approved": True,
@@ -82,7 +71,7 @@ def approved_need_analysis_plan_lock(plan: dict, collection_frame: dict) -> dict
 
 
 def synthesis_kwargs(frame: dict, method_frame: dict) -> dict:
-    plan = approved_need_analysis_plan()
+    plan = approved_need_analysis_plan(frame)
     return {
         "method_frame_lock": approved_method_lock(method_frame, frame),
         "need_analysis_plan": plan,
@@ -92,11 +81,7 @@ def synthesis_kwargs(frame: dict, method_frame: dict) -> dict:
 
 class ProfileCoverageControlTests(unittest.TestCase):
     def test_full_frozen_profile_dimensions_are_machine_validated_and_sparse_cells_are_surfaced(self):
-        result = COVERAGE.assert_profile_coverage_control(
-            full_profile_records(),
-            method_frame=approved_method_frame(),
-            forms_definition=frozen_forms(),
-        )
+        result = COVERAGE.assert_profile_coverage_control(full_profile_records(), method_frame=approved_method_frame(), forms_definition=frozen_forms())
         self.assertEqual(result["schema_version"], "eucons.ai4work_profile_coverage_control.v0.1")
         self.assertEqual(result["evidence_class"], "CONTROL_ARTIFACT_NOT_EVIDENCE")
         self.assertFalse(result["public_release_authorized"])
@@ -130,15 +115,7 @@ class ProfileCoverageControlTests(unittest.TestCase):
         frame = bound_collection_frame(register, records)
         manifest = bound_manifest(register, records, frame)
         method_frame = approved_method_frame()
-        result = NEEDS.assert_real_batch_ready_for_needs_synthesis(
-            records,
-            manifest=manifest,
-            collection_frame=frame,
-            method_frame=method_frame,
-            channel_register=register,
-            forms_definition=frozen_forms(),
-            **synthesis_kwargs(frame, method_frame),
-        )
+        result = NEEDS.assert_real_batch_ready_for_needs_synthesis(records, manifest=manifest, collection_frame=frame, method_frame=method_frame, channel_register=register, forms_definition=frozen_forms(), **synthesis_kwargs(frame, method_frame))
         self.assertTrue(result["ready_for_needs_synthesis"])
         self.assertEqual(result["schema_version"], "eucons.ai4work_needs_synthesis_gate.v0.4")
         self.assertEqual(result["method_frame_lock_control_schema_version"], "eucons.ai4work_method_frame_lock_control.v0.1")
@@ -172,15 +149,11 @@ class ProfileCoverageControlTests(unittest.TestCase):
         frame = bound_collection_frame(register, records)
         manifest = bound_manifest(register, records, frame)
         method_frame = approved_method_frame()
-        plan = approved_need_analysis_plan()
+        plan = approved_need_analysis_plan(frame)
         plan_lock = approved_need_analysis_plan_lock(plan, frame)
         plan["core_dimensions"]["H1"]["adult_direct"][0]["row_id"] = "verificarea_rezultatelor_AI"
         with self.assertRaisesRegex(NEEDS.NeedsSynthesisGateError, "bytes do not match"):
-            NEEDS.assert_real_batch_ready_for_needs_synthesis(
-                records, manifest=manifest, collection_frame=frame, method_frame=method_frame,
-                method_frame_lock=approved_method_lock(method_frame, frame), need_analysis_plan=plan,
-                need_analysis_plan_lock=plan_lock, channel_register=register, forms_definition=frozen_forms()
-            )
+            NEEDS.assert_real_batch_ready_for_needs_synthesis(records, manifest=manifest, collection_frame=frame, method_frame=method_frame, method_frame_lock=approved_method_lock(method_frame, frame), need_analysis_plan=plan, need_analysis_plan_lock=plan_lock, channel_register=register, forms_definition=frozen_forms())
 
     def test_canonical_wrapper_rejects_method_lock_approved_after_collection_started(self):
         register = channel_register()
