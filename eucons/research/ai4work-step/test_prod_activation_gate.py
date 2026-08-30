@@ -3,7 +3,9 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import tempfile
 import unittest
+from pathlib import Path
 
 from prod_activation_gate import (
     REQUIRED_EXTERNAL_KEYS,
@@ -29,6 +31,23 @@ class ProdActivationGateTests(unittest.TestCase):
             _load(COLLECTION_FRAME_PATH),
             _load(DPIA_SCREENING_PATH),
         )
+
+    def _temporary_attestation(self, payload: dict) -> tuple[Path, str]:
+        handle = tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            suffix=".json",
+            prefix=".tmp_prod_activation_evidence_",
+            dir=HERE,
+            delete=False,
+        )
+        try:
+            json.dump(payload, handle, sort_keys=True, separators=(",", ":"))
+            handle.write("\n")
+        finally:
+            handle.close()
+        path = Path(handle.name)
+        return path, hashlib.sha256(path.read_bytes()).hexdigest()
 
     def test_current_repository_state_is_fail_closed_and_safe(self):
         ready, errors = evaluate_repository_activation()
@@ -128,7 +147,7 @@ class ProdActivationGateTests(unittest.TestCase):
         )
         self.assertIn("external_evidence_not_frozen:privacy_notice", errors)
 
-    def test_synthetic_complete_control_state_can_be_evaluated_without_becoming_evidence(self):
+    def test_synthetic_complete_control_state_cannot_bypass_evidence_binding(self):
         contract, manifest, controller, frame, dpia = self.load_artifacts()
         contract = copy.deepcopy(contract)
         manifest = copy.deepcopy(manifest)
@@ -182,7 +201,69 @@ class ProdActivationGateTests(unittest.TestCase):
             collection_frame=frame,
             dpia_screening=dpia,
         )
-        self.assertEqual(errors, [])
+        self.assertFalse(any(item.startswith("external_evidence_not_frozen:") for item in errors), errors)
+        self.assertEqual(
+            {item.removeprefix("external_evidence_binding_invalid:") for item in errors if item.startswith("external_evidence_binding_invalid:")},
+            REQUIRED_EXTERNAL_KEYS,
+        )
+
+    def test_pass_with_correct_hash_but_wrong_semantic_key_is_rejected_by_activation_itself(self):
+        contract, manifest, controller, frame, dpia = self.load_artifacts()
+        manifest = copy.deepcopy(manifest)
+        key = "privacy_notice"
+        path, digest = self._temporary_attestation(
+            {
+                "research_id": manifest["research_id"],
+                "evidence_binding_key": "lawful_basis_or_lia",
+                "evidence_class": "OPERATIONAL_EVIDENCE",
+                "synthetic": False,
+            }
+        )
+        try:
+            manifest["required_external_or_operational_evidence"][key] = {
+                "status": "PASS",
+                "reference": path.name,
+                "sha256": digest,
+            }
+            errors = activation_errors(
+                contract=contract,
+                manifest=manifest,
+                controller=controller,
+                collection_frame=frame,
+                dpia_screening=dpia,
+            )
+            self.assertIn("external_evidence_binding_invalid:privacy_notice", errors)
+        finally:
+            path.unlink(missing_ok=True)
+
+    def test_pass_test_twin_attestation_is_rejected_by_activation_itself(self):
+        contract, manifest, controller, frame, dpia = self.load_artifacts()
+        manifest = copy.deepcopy(manifest)
+        key = "privacy_notice"
+        path, digest = self._temporary_attestation(
+            {
+                "research_id": manifest["research_id"],
+                "evidence_binding_key": key,
+                "evidence_class": "TEST_TWIN_NON_EVIDENCE",
+                "synthetic": True,
+            }
+        )
+        try:
+            manifest["required_external_or_operational_evidence"][key] = {
+                "status": "APPROVED",
+                "reference": path.name,
+                "sha256": digest,
+            }
+            errors = activation_errors(
+                contract=contract,
+                manifest=manifest,
+                controller=controller,
+                collection_frame=frame,
+                dpia_screening=dpia,
+            )
+            self.assertIn("external_evidence_binding_invalid:privacy_notice", errors)
+        finally:
+            path.unlink(missing_ok=True)
 
     def test_required_dpia_must_have_completed_reference(self):
         contract, manifest, controller, frame, dpia = self.load_artifacts()

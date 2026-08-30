@@ -14,6 +14,8 @@ COLLECTION_FRAME_PATH = HERE / "COLLECTION_FRAME_DRAFT.json"
 DPIA_SCREENING_PATH = HERE / "GDPR_DPIA_SCREENING_DRAFT.json"
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 APPROVED_EXTERNAL_STATUSES = {"APPROVED", "PASS", "FROZEN"}
+SEMANTIC_ATTESTATION_STATUSES = {"APPROVED", "PASS"}
+NON_EVIDENCE_MARKERS = ("TEST_TWIN", "NON_EVIDENCE", "SYNTHETIC")
 REQUIRED_EXTERNAL_KEYS = {
     "privacy_notice",
     "lawful_basis_or_lia",
@@ -55,22 +57,64 @@ def _valid_external_reference(value: Any) -> bool:
     )
 
 
-def _valid_frozen_local_binding(value: dict[str, Any]) -> bool:
-    """FROZEN repo-local bindings must exist under HERE and match their declared SHA-256."""
-    if value.get("status") != "FROZEN":
-        return True
-    reference = str(value.get("reference") or "").strip()
-    digest = str(value.get("sha256") or "").strip()
-    if not reference or not SHA256_RE.fullmatch(digest):
-        return False
-    candidate = (HERE / reference).resolve()
+def _resolve_local_reference(reference: Any) -> Path | None:
+    if not isinstance(reference, str) or not reference.strip():
+        return None
+    reference = reference.strip()
+    if "://" in reference or reference.startswith(("gdrive:", "gmail:", "http:", "https:")):
+        return None
+    raw = Path(reference)
+    if raw.is_absolute():
+        return None
+    candidate = (HERE / raw).resolve()
     try:
         candidate.relative_to(HERE.resolve())
     except ValueError:
-        return False
+        return None
     if not candidate.is_file():
+        return None
+    return candidate
+
+
+def _valid_promoted_local_binding(*, key: str, value: dict[str, Any], research_id: str) -> bool:
+    """Activation itself must verify immutable and semantically relevant evidence.
+
+    A separate CI evidence-binding workflow is useful defence in depth, but PROD activation
+    must not depend on that workflow having run. Every promoted external/operational gate is
+    therefore re-checked here. FROZEN documentary/provider context needs an exact local hash;
+    PASS/APPROVED additionally needs a JSON attestation bound to this research run and exact
+    evidence key, and TEST TWIN / NON-EVIDENCE / SYNTHETIC artifacts are never promotable.
+    """
+    candidate = _resolve_local_reference(value.get("reference"))
+    digest = value.get("sha256")
+    if candidate is None or not isinstance(digest, str) or not SHA256_RE.fullmatch(digest):
         return False
-    return hashlib.sha256(candidate.read_bytes()).hexdigest() == digest
+    if hashlib.sha256(candidate.read_bytes()).hexdigest() != digest:
+        return False
+
+    if value.get("status") not in SEMANTIC_ATTESTATION_STATUSES:
+        return True
+    if candidate.suffix.lower() != ".json":
+        return False
+    try:
+        artifact = _load(candidate)
+    except (OSError, json.JSONDecodeError):
+        return False
+    if not isinstance(artifact, dict):
+        return False
+    if artifact.get("research_id") != research_id:
+        return False
+    if artifact.get("evidence_binding_key") != key:
+        return False
+    if artifact.get("synthetic") is True:
+        return False
+    for field in ("evidence_class", "mode", "artifact_class"):
+        marker_value = artifact.get(field)
+        if isinstance(marker_value, str):
+            normalized = marker_value.upper()
+            if any(marker in normalized for marker in NON_EVIDENCE_MARKERS):
+                return False
+    return True
 
 
 def activation_errors(
@@ -91,6 +135,7 @@ def activation_errors(
     }
     if len(research_ids) != 1 or None in research_ids:
         errors.append("research_id_mismatch")
+    research_id = manifest.get("research_id") if isinstance(manifest.get("research_id"), str) else ""
 
     if contract.get("production_enabled") is not True:
         errors.append("form_contract_production_disabled")
@@ -178,8 +223,12 @@ def activation_errors(
         for key in sorted(REQUIRED_EXTERNAL_KEYS):
             if key not in evidence or not _valid_external_reference(evidence[key]):
                 errors.append(f"external_evidence_not_frozen:{key}")
-            elif not _valid_frozen_local_binding(evidence[key]):
-                errors.append(f"external_evidence_frozen_hash_mismatch:{key}")
+            elif not _valid_promoted_local_binding(
+                key=key,
+                value=evidence[key],
+                research_id=research_id,
+            ):
+                errors.append(f"external_evidence_binding_invalid:{key}")
 
     if manifest.get("real_collection_authorized") is not True:
         errors.append("real_collection_not_authorized")
