@@ -13,6 +13,8 @@ MANIFEST_PATH = HERE / "PROD_ACTIVATION_MANIFEST_DRAFT.json"
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 ALLOWED_STATUSES = {"OPEN", "FROZEN", "PASS", "APPROVED"}
 PROMOTED_STATUSES = {"FROZEN", "PASS", "APPROVED"}
+SEMANTIC_ATTESTATION_STATUSES = {"PASS", "APPROVED"}
+NON_EVIDENCE_MARKERS = ("TEST_TWIN", "NON_EVIDENCE", "SYNTHETIC")
 
 
 class ExternalEvidenceBindingError(ValueError):
@@ -40,6 +42,39 @@ def _resolve_local_reference(reference: Any) -> Path | None:
     if not candidate.is_file():
         return None
     return candidate
+
+
+def _semantic_attestation_errors(
+    *, key: str, artifact: Any, research_id: str
+) -> list[str]:
+    """Require PASS/APPROVED evidence to attest what it actually proves.
+
+    A matching path and digest establish immutability, but not semantic relevance.
+    Production-grade external/operational evidence must therefore identify both the
+    research run and the exact manifest evidence key it is intended to satisfy.
+    TEST TWIN or other explicitly non-evidence artifacts can never satisfy a
+    promoted gate even when their bytes are immutable.
+    """
+    if not isinstance(artifact, dict):
+        return [f"promoted_evidence_attestation_not_object:{key}"]
+
+    errors: list[str] = []
+    if artifact.get("research_id") != research_id:
+        errors.append(f"promoted_evidence_research_id_missing_or_mismatch:{key}")
+    if artifact.get("evidence_binding_key") != key:
+        errors.append(f"promoted_evidence_key_missing_or_mismatch:{key}")
+
+    if artifact.get("synthetic") is True:
+        errors.append(f"promoted_evidence_is_synthetic:{key}")
+
+    for field in ("evidence_class", "mode", "artifact_class"):
+        value = artifact.get(field)
+        if isinstance(value, str):
+            normalized = value.upper()
+            if any(marker in normalized for marker in NON_EVIDENCE_MARKERS):
+                errors.append(f"promoted_evidence_non_evidence_marker:{key}:{field}")
+
+    return errors
 
 
 def _binding_errors_for_item(*, key: str, item: Any, research_id: str) -> list[str]:
@@ -80,15 +115,34 @@ def _binding_errors_for_item(*, key: str, item: Any, research_id: str) -> list[s
         errors.append(f"evidence_sha256_mismatch:{key}")
         return errors
 
+    artifact: Any | None = None
     if candidate.suffix.lower() == ".json":
         try:
             artifact = _load(candidate)
         except (OSError, json.JSONDecodeError):
             errors.append(f"evidence_json_invalid:{key}")
             return errors
+        if not isinstance(artifact, dict):
+            errors.append(f"evidence_json_not_object:{key}")
+            return errors
         artifact_research_id = artifact.get("research_id")
         if artifact_research_id is not None and artifact_research_id != research_id:
             errors.append(f"evidence_research_id_mismatch:{key}")
+
+    # FROZEN may bind documentary/provider context. PASS/APPROVED is stronger: it
+    # must point to a machine-verifiable attestation for this exact gate, not merely
+    # to any immutable repository file that happens to have a correct digest.
+    if status in SEMANTIC_ATTESTATION_STATUSES:
+        if artifact is None:
+            errors.append(f"promoted_evidence_attestation_not_json:{key}")
+        else:
+            errors.extend(
+                _semantic_attestation_errors(
+                    key=key,
+                    artifact=artifact,
+                    research_id=research_id,
+                )
+            )
 
     return errors
 
@@ -133,7 +187,7 @@ def main() -> int:
         assert_repository_external_evidence_bindings()
     except (OSError, json.JSONDecodeError, ExternalEvidenceBindingError) as exc:
         raise SystemExit(f"REJECTED: {exc}")
-    print("PASS: activation evidence references are immutable repo-local bindings; OPEN gates remain non-promoted")
+    print("PASS: activation evidence references are immutable repo-local bindings; PASS/APPROVED gates are semantically attested; OPEN gates remain non-promoted")
     return 0
 
 
