@@ -1,0 +1,39 @@
+name: VÂLCEA CLAR ISJ Education Deadlines
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'valcea-clar/scripts/isj_valcea_education_signal_adapter.py'
+      - 'valcea-clar/scripts/isj_valcea_education_deadline_state.py'
+      - '.github/workflows/valcea-clar-isj-education-deadlines.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/scripts/isj_valcea_education_signal_adapter.py'
+      - 'valcea-clar/scripts/isj_valcea_education_deadline_state.py'
+      - '.github/workflows/valcea-clar-isj-education-deadlines.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-isj-education-deadlines-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Compile ISJ Vâlcea education adapters
+        run: |
+          python -m py_compile valcea-clar/scripts/isj_valcea_education_signal_adapter.py
+          python -m py_compile valcea-clar/scripts/isj_valcea_education_deadline_state.py
+      - name: Run upstream ISJ education regressions
+        run: python valcea-clar/scripts/isj_valcea_education_signal_adapter.py --self-test
+      - name: Run education process-date fail-closed regressions
+        run: python valcea-clar/scripts/isj_valcea_education_deadline_state.py --self-test
