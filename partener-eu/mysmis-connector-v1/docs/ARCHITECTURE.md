@@ -88,6 +88,14 @@
     externally supplied operator observation. It accepts only observed bounded success, failure or
     complete receipt-preserving rollback. It has no mechanism to perform those actions and cannot
     promote any resulting state to live HEALTH or functional MySMIS acceptance.
+23. The handoff-chain verifier accepts exactly eight append-only records in the prescribed order:
+    preflight, external authorization, derived plan, external installation observation, derived
+    installed state, HEALTH challenge, bridge response and live HEALTH receipt. It recomputes the
+    plan, installation transition and HEALTH receipt against one exact source head, enforces
+    monotonic bounded timestamps, authenticated MySMIS runtime presence and zero writes, and rejects
+    offline, reordered, mixed-build, expired, sensitive or tampered evidence. Even a valid chain is
+    only `PENDING_BENCHMARKS`; the verifier has no execution primitive and cannot claim functional
+    acceptance.
 
 No project code appears in the discovery implementation. Project numbers occur only in fixtures and
 acceptance evidence.

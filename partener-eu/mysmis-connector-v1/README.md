@@ -61,6 +61,8 @@ Implemented in this unit:
   supplied approval record, then emits a bounded plan or sanitized no-execution failure receipt
 - portable observation/rollback CLI that revalidates the exact plan and consumes only bounded
   external operator observations, without executing or claiming installation success itself
+- append-only handoff-chain verifier that recomputes the exact preflight, authorization plan,
+  installation transition and live HEALTH receipt before admitting any benchmark execution
 
 Still fail-closed / not implemented:
 
@@ -104,6 +106,17 @@ node native/install-observation-cli.mjs \
 This command also reads only two JSON files. It verifies the plan ID, exact-build bindings, expiry,
 zero-write controls and observation shape before emitting an allowed state transition. It cannot
 perform the observed action or turn an installation observation into live MySMIS evidence.
+
+The final live handoff evidence can be checked as one immutable ordered chain:
+
+```sh
+node native/handoff-chain-cli.mjs --chain /path/to/ordered-handoff-chain.json
+```
+
+The command reads exactly one JSON file and recomputes all derived receipts. It accepts only an
+eight-record exact-build chain ending in authenticated `LIVE_BRIDGE_TOOL` HEALTH. A valid result is
+still `PENDING_BENCHMARKS`; it cannot perform installation, traverse a project or claim functional
+acceptance.
 
 The Drive contract never directly edits an Artifact Registry or SSOT. It persists a
 `PENDING_HUMAN_REVIEW` proposal only after the uploaded bytes have been read back in full and match
