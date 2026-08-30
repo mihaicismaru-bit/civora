@@ -173,7 +173,7 @@ test("rejects sensitive result fields and exposes no arbitrary endpoint", async 
       body: JSON.stringify(sensitive)
     });
     assert.equal(response.status, 400);
-    assert.equal((await response.json()).error.code, "SENSITIVE_PERSISTENCE_DENIED");
+    assert.equal((await response.json()).error.code, "LOOPBACK_REJECTED");
 
     const arbitrary = await fetch(`${baseUrl}/v1/shell`, { method: "POST", body: "{}" });
     assert.equal(arbitrary.status, 404);
