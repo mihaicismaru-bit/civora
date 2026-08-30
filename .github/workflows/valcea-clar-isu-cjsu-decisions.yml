@@ -1,0 +1,33 @@
+name: VÂLCEA CLAR ISU CJSU Decision References
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'valcea-clar/scripts/isu_valcea_cjsu_decision_reference_adapter.py'
+      - '.github/workflows/valcea-clar-isu-cjsu-decisions.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/scripts/isu_valcea_cjsu_decision_reference_adapter.py'
+      - '.github/workflows/valcea-clar-isu-cjsu-decisions.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-isu-cjsu-decisions-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Compile ISU Vâlcea CJSU decision-reference adapter
+        run: python -m py_compile valcea-clar/scripts/isu_valcea_cjsu_decision_reference_adapter.py
+      - name: Run ISU Vâlcea CJSU fail-closed regressions
+        run: python valcea-clar/scripts/isu_valcea_cjsu_decision_reference_adapter.py --self-test
