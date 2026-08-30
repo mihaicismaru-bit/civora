@@ -64,6 +64,11 @@ class PreviewMinimizationTests(unittest.TestCase):
                     msg=f"free-text/direct-entry control present in {page}: {scanner.forbidden}",
                 )
                 self.assertIn('name="robots" content="noindex,nofollow"', text)
+                self.assertIn(
+                    'name="referrer" content="no-referrer"',
+                    text,
+                    msg=f"research page must not leak recruitment/navigation context through Referer: {page}",
+                )
                 total_selects += scanner.select_count
 
             self.assertGreater(total_selects, 0, "expected controlled select inputs in questionnaire previews")
