@@ -17,6 +17,18 @@ PLAN_PATH = HERE / "NEED_ANALYSIS_PLAN_DRAFT.json"
 LOCK_PATH = HERE / "PRECOLLECTION_ANALYSIS_PLAN_LOCK_DRAFT.json"
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 
+EXPECTED_DETERMINISTIC_RANKING = {
+    "normalization": "rating_1_to_5_to_0_100=(value-1)/4*100",
+    "respondent_dimension_aggregation": "arithmetic_mean_of_all_mapped_direct_ratings_per_respondent",
+    "within_population_aggregation": "arithmetic_mean_of_respondent_dimension_scores",
+    "cross_population_combination": "equal_population_components_0.5_adults_0.5_employers",
+    "numeric_computation": "exact_rational_no_intermediate_rounding",
+    "rank_order_basis": "unrounded_exact_combined_score_descending",
+    "tie_rule": "equal_exact_combined_scores_share_competition_rank",
+    "display_precision": "2_decimals_round_half_up_display_only",
+    "deterministic_display_tie_order": "need_id_ascending_does_not_break_ties",
+}
+
 
 class PrecollectionAnalysisPlanGateError(ValueError):
     pass
@@ -85,6 +97,8 @@ def precollection_errors(
     if not _activation_requested(contract, manifest, collection_frame):
         return errors
 
+    if need_analysis_plan.get("schema_version") != "eucons.ai4work_need_analysis_plan.v0.2":
+        errors.append("need_analysis_plan_schema_invalid")
     if need_analysis_plan.get("status") != "APPROVED_FOR_PROD":
         errors.append("need_analysis_plan_not_approved")
     if need_analysis_plan.get("evidence_class") != "METHOD_PLAN_NOT_EVIDENCE":
@@ -106,6 +120,9 @@ def precollection_errors(
     if not isinstance(ranking, dict):
         errors.append("core_skill_ranking_missing")
     else:
+        for key, expected in EXPECTED_DETERMINISTIC_RANKING.items():
+            if ranking.get(key) != expected:
+                errors.append(f"deterministic_ranking_contract_invalid:{key}")
         if ranking.get("respondent_weighting_allowed") is not False:
             errors.append("respondent_weighting_not_frozen_false")
         if ranking.get("secondary_evidence_can_change_numeric_order") is not False:
@@ -114,6 +131,8 @@ def precollection_errors(
             errors.append("missing_indicator_imputation_not_frozen_false")
         if ranking.get("representativeness_claim_allowed") is not False:
             errors.append("representativeness_claim_not_frozen_false")
+        if ranking.get("causal_claim_allowed") is not False:
+            errors.append("causal_claim_not_frozen_false")
     if need_analysis_plan.get("synthetic_records_allowed") is not False:
         errors.append("synthetic_records_not_forbidden")
     if need_analysis_plan.get("test_twin_evidence_class") != "TEST_TWIN_NON_EVIDENCE":
