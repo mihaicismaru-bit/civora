@@ -1,0 +1,130 @@
+name: PARTENER.EU Erasmus Action Router CI
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/erasmus_action_router_registry.json'
+      - 'partener-eu/ingest/erasmus_action_router.py'
+      - 'partener-eu/ops/test_erasmus_action_router.py'
+      - '.github/workflows/partener-eu-erasmus-action-router-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  erasmus-action-router-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify checkout is exact event head
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          ACTUAL_SHA="$(git rev-parse HEAD)"
+          test "$ACTUAL_SHA" = "$EXPECTED_SHA"
+          echo "Exact event head verified: $ACTUAL_SHA"
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Validate registry and adapter syntax
+        run: |
+          python -m json.tool partener-eu/ingest/erasmus_action_router_registry.json >/dev/null
+          python -m py_compile partener-eu/ingest/erasmus_action_router.py
+          python -m py_compile partener-eu/ops/test_erasmus_action_router.py
+
+      - name: Validate Erasmus route authority boundary
+        run: python partener-eu/ops/test_erasmus_action_router.py
+
+      - name: Capture live official Erasmus route evidence
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/erasmus-action-router
+          python partener-eu/ingest/erasmus_action_router.py \
+            --management-mode CENTRALISED_EACEA \
+            --action-reference-hint 'ERASMUS-CENTRALISED-EXAMPLE' \
+            --live \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-centralised" \
+            --output /tmp/erasmus-action-router/centralised-eacea.json
+          python partener-eu/ingest/erasmus_action_router.py \
+            --management-mode DECENTRALISED_NATIONAL_AGENCY \
+            --action-reference-hint 'ERASMUS-DECENTRALISED-EXAMPLE' \
+            --live \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-decentralised" \
+            --output /tmp/erasmus-action-router/decentralised-national-agency.json
+
+      - name: Validate live evidence stays routing-only
+        run: |
+          python - <<'PY'
+          import json, pathlib, string, sys
+          root=pathlib.Path('/tmp/erasmus-action-router')
+          files=sorted(root.glob('*.json'))
+          if len(files) != 2:
+              print('FAIL expected two Erasmus route evidence files')
+              sys.exit(2)
+          summary=[]
+          for path in files:
+              d=json.loads(path.read_text(encoding='utf-8'))
+              if d.get('adapter_id') != 'ERASMUS_ACTION_ROUTER_V1':
+                  print('FAIL adapter identity drift:', path.name)
+                  sys.exit(2)
+              if d.get('observation_state') != 'APPLICATION_ROUTE_INTELLIGENCE' or d.get('market_intelligence_only') is not True:
+                  print('FAIL Erasmus route observation/policy drift:', path.name)
+                  sys.exit(2)
+              for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized'):
+                  if d.get(key) is not False:
+                      print('FAIL Erasmus route became authorizing:', path.name, key)
+                      sys.exit(2)
+              if d.get('publication_effect') != 'NONE':
+                  print('FAIL Erasmus publication effect:', path.name)
+                  sys.exit(2)
+              if not d.get('run_id') or not d.get('fetched_at') or len(str(d.get('registry_sha256') or '')) != 64:
+                  print('FAIL Erasmus provenance incomplete:', path.name)
+                  sys.exit(2)
+              if d.get('exact_action_endpoint_required') is not True or d.get('semantic_reconciliation_required') is not True:
+                  print('FAIL Erasmus exact-action gate relaxed:', path.name)
+                  sys.exit(2)
+              for evidence in d.get('evidence') or []:
+                  health=(evidence.get('source_health') or {}).get('health_state')
+                  if health == 'HEALTHY':
+                      raw_hash=str((evidence.get('source_health') or {}).get('raw_sha256') or '')
+                      if len(raw_hash) != 64 or any(ch not in string.hexdigits for ch in raw_hash):
+                          print('FAIL healthy Erasmus source lacks raw hash:', path.name, evidence.get('source_id'))
+                          sys.exit(2)
+                  elif not str(health).startswith('DEGRADED'):
+                      print('FAIL unexpected Erasmus live health state:', path.name, health)
+                      sys.exit(2)
+                  if str(health).startswith('DEGRADED') and (evidence.get('source_health') or {}).get('lkg_required') is not True:
+                      print('FAIL degraded Erasmus source lacks LKG requirement:', path.name)
+                      sys.exit(2)
+              summary.append({
+                  'file': path.name,
+                  'management_mode': d.get('management_mode'),
+                  'route_class': (d.get('route') or {}).get('route_class'),
+                  'registration_identifier_kind': (d.get('route') or {}).get('registration_identifier_kind'),
+                  'source_health_state': d.get('source_health_state'),
+                  'healthy': d.get('healthy_evidence_source_count'),
+                  'degraded': d.get('degraded_evidence_source_count'),
+                  'open_call_authorized': d.get('open_call_authorized'),
+              })
+          print(json.dumps(summary, ensure_ascii=False, sort_keys=True))
+          PY
+
+      - name: Upload bounded Erasmus route evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-erasmus-action-router-evidence
+          path: /tmp/erasmus-action-router
+          retention-days: 7
+          if-no-files-found: error
