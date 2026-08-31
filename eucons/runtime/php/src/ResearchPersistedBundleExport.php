@@ -127,11 +127,32 @@ final class EuconsResearchPersistedBundleExport
         }
     }
 
+    private static function assertReceiptCensus(string $root, array $knownResponseIds): void
+    {
+        $receiptDir = $root . '/receipts';
+        if (!is_dir($receiptDir)) {
+            if ($knownResponseIds !== []) {
+                throw new RuntimeException('RESEARCH_EXPORT_RECEIPT_STORE_MISSING');
+            }
+            return;
+        }
+
+        foreach (glob($receiptDir . '/*.json') ?: [] as $receiptPath) {
+            $receiptResponseId = pathinfo($receiptPath, PATHINFO_FILENAME);
+            if (!preg_match(self::SHA256_RE, $receiptResponseId)) {
+                throw new RuntimeException('RESEARCH_EXPORT_RECEIPT_FILENAME_INVALID');
+            }
+            if (!isset($knownResponseIds[$receiptResponseId])) {
+                throw new RuntimeException('RESEARCH_EXPORT_ORPHAN_RECEIPT');
+            }
+        }
+    }
+
     public function buildPersistedBundles(): array
     {
         $root = $this->runtime->storageRoot();
         $bundles = [];
-        $seen = [];
+        $knownResponseIds = [];
 
         foreach (self::ALLOWED_FORMS as $formId) {
             $dir = $root . '/responses/' . $formId;
@@ -140,20 +161,24 @@ final class EuconsResearchPersistedBundleExport
             }
             foreach (glob($dir . '/*.json') ?: [] as $responsePath) {
                 $responseId = pathinfo($responsePath, PATHINFO_FILENAME);
-                if (isset($seen[$responseId])) {
+                if (!preg_match(self::SHA256_RE, $responseId)) {
+                    throw new RuntimeException('RESEARCH_EXPORT_FILENAME_RESPONSE_ID_INVALID');
+                }
+                if (isset($knownResponseIds[$responseId])) {
                     throw new RuntimeException('RESEARCH_EXPORT_DUPLICATE_RESPONSE_ID');
                 }
-                if (is_file($root . '/holds/' . $responseId . '.json')) {
-                    continue;
-                }
+                $knownResponseIds[$responseId] = true;
+
                 $receiptPath = $root . '/receipts/' . $responseId . '.json';
                 if (!is_file($receiptPath)) {
                     throw new RuntimeException('RESEARCH_EXPORT_RECEIPT_MISSING');
                 }
+                if (is_file($root . '/holds/' . $responseId . '.json')) {
+                    continue;
+                }
                 $wrapper = self::loadJson($responsePath);
                 $receipt = self::loadJson($receiptPath);
                 self::assertBundleIntegrity($responseId, $formId, $wrapper, $receipt);
-                $seen[$responseId] = true;
                 $bundles[] = [
                     'filename_response_id' => $responseId,
                     'wrapper' => $wrapper,
@@ -161,6 +186,8 @@ final class EuconsResearchPersistedBundleExport
                 ];
             }
         }
+
+        self::assertReceiptCensus($root, $knownResponseIds);
 
         usort($bundles, static function (array $left, array $right): int {
             $leftRecord = $left['wrapper']['record'];
