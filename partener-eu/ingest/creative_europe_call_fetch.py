@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
-"""Bounded acquisition-only readback for the official EC culture funding index."""
+"""Bounded acquisition-only readback for the official EC culture funding index.
+
+The Commission page can legitimately expose its call cards through a rendered
+client-side layer. A successful HTTP readback with zero explicit `CREA-*`
+references is therefore persisted as a degraded discovery observation rather
+than being converted into facts or silently treated as healthy. Exact Creative
+Europe call verification is handled separately through the structured Funding
+& Tenders path.
+"""
 from __future__ import annotations
 
 import argparse
@@ -20,7 +28,7 @@ indexer = importlib.util.module_from_spec(spec)
 assert spec and spec.loader
 spec.loader.exec_module(indexer)
 
-FETCHER_VERSION = "CREATIVE_EUROPE_CALL_INDEX_LIVE_FETCH_V1"
+FETCHER_VERSION = "CREATIVE_EUROPE_CALL_INDEX_LIVE_FETCH_V2"
 DEFAULT_URL = "https://culture.ec.europa.eu/funding/calls"
 OFFICIAL_HOST = "culture.ec.europa.eu"
 PATH_RE = re.compile(r"^/(?:[a-z]{2}(?:-[a-z]{2})?/)?funding/calls/?$", re.IGNORECASE)
@@ -108,6 +116,8 @@ def collect_live(*, authority_url: str = DEFAULT_URL, run_id: str, fetched_at: s
         raw_hash=raw_hash,
     )
     indexer.validate_call_index_batch(batch)
+    count = int(batch.get("record_count") or 0)
+    source_health = "HEALTHY" if count else "DEGRADED_EMPTY_RENDERED_INDEX"
 
     evidence = {
         "schema": "PARTENER_EU_CREATIVE_EUROPE_CALL_INDEX_LIVE_EVIDENCE_V1",
@@ -120,6 +130,8 @@ def collect_live(*, authority_url: str = DEFAULT_URL, run_id: str, fetched_at: s
         "authority_url": final_url,
         "fetched_at": fetched_at,
         "run_id": run_id,
+        "source_health": source_health,
+        "lkg_required": count == 0,
         "receipt": {
             "requested_url": requested_url,
             "final_url": final_url,
@@ -130,7 +142,7 @@ def collect_live(*, authority_url: str = DEFAULT_URL, run_id: str, fetched_at: s
         },
         "batch": batch,
         "stats": {
-            "exact_crea_reference_candidates": batch.get("record_count", 0),
+            "exact_crea_reference_candidates": count,
             "visible_open_candidates": sum(
                 row.get("status_candidate") == "open" for row in batch.get("records", [])
             ),
@@ -152,6 +164,11 @@ def collect_live(*, authority_url: str = DEFAULT_URL, run_id: str, fetched_at: s
         "distribution_authorized": False,
         "publication_effect": "NONE",
         "canonical_corpus_mutation": False,
+        "missing_for_material_use": (
+            ["server/readback exposes no explicit CREA-* rows; use structured F&T exact-topic evidence"]
+            if count == 0 else
+            ["exact current Funding & Tenders topic readback", "semantic reconciliation"]
+        ),
         "rollback": "Discard this evidence artifact/raw index; no canonical corpus or public projection was mutated.",
     }
     validate_live_evidence(evidence)
@@ -173,12 +190,17 @@ def validate_live_evidence(evidence: Mapping[str, Any]) -> None:
             raise ValueError(f"Creative Europe live evidence became authorizing: {key}")
     stats = evidence.get("stats") or {}
     count = int(stats.get("exact_crea_reference_candidates") or 0)
-    if count < 1:
-        raise ValueError("official culture index exposed no explicit CREA-* call references")
     if int(stats.get("open_call_authorized") or 0) != 0:
         raise ValueError("Creative Europe index leaked OPEN authorization")
     if int(stats.get("records_requiring_ft_reconcile") or 0) != count:
         raise ValueError("Creative Europe index lost Funding & Tenders reconcile gates")
+    health = evidence.get("source_health")
+    if count:
+        if health != "HEALTHY" or evidence.get("lkg_required") is not False:
+            raise ValueError("Creative Europe populated index has incorrect source health")
+    else:
+        if health != "DEGRADED_EMPTY_RENDERED_INDEX" or evidence.get("lkg_required") is not True:
+            raise ValueError("Creative Europe empty rendered index must degrade and require LKG")
 
 
 def main() -> int:
@@ -206,7 +228,11 @@ def main() -> int:
     if args.raw_out:
         args.raw_out.parent.mkdir(parents=True, exist_ok=True)
         args.raw_out.write_bytes(raw)
-    print(json.dumps(evidence.get("stats", {}), ensure_ascii=False, sort_keys=True))
+    print(json.dumps({
+        **evidence.get("stats", {}),
+        "source_health": evidence.get("source_health"),
+        "lkg_required": evidence.get("lkg_required"),
+    }, ensure_ascii=False, sort_keys=True))
     return 0
 
 
