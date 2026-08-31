@@ -74,6 +74,16 @@ write_json_gate($root . '/form_contract.json', [
     'crm_integration' => 'FORBIDDEN',
     'commercial_analytics' => 'FORBIDDEN',
 ]);
+write_json_gate($root . '/RESEARCH_INVITATION_CATALOG_DRAFT.json', [
+    'research_id' => $researchId,
+    'fixture_class' => 'TEST_TWIN_NON_EVIDENCE',
+    'purpose' => 'scope-binding mechanics only',
+]);
+write_json_gate($root . '/COLLECTION_CHANNEL_REGISTER_DRAFT.json', [
+    'research_id' => $researchId,
+    'fixture_class' => 'TEST_TWIN_NON_EVIDENCE',
+    'purpose' => 'scope-binding mechanics only',
+]);
 write_json_gate($root . '/CONTROLLER_DETERMINATION_DRAFT.json', [
     'research_id' => $researchId,
     'controller' => ['legal_name' => 'EUROCONSULT SRL'],
@@ -171,6 +181,49 @@ $planLock = [
 ];
 write_json_gate($root . '/PRECOLLECTION_ANALYSIS_PLAN_LOCK_DRAFT.json', $planLock);
 
+$approvalReceipt = [
+    'schema_version' => 'eucons.ai4work_explicit_user_approval_receipt.v0.1',
+    'research_id' => $researchId,
+    'status' => 'APPROVED',
+    'artifact_class' => 'CONTROL_ARTIFACT_NOT_EVIDENCE',
+    'test_fixture_class' => 'TEST_TWIN_NON_EVIDENCE',
+    'synthetic' => false,
+    'approval_source' => 'HUMAN_EXPLICIT_USER_APPROVAL',
+    'authorized_action' => 'REAL_COLLECTION_PROD_ACTIVATION_ONLY',
+    'approved' => true,
+    'approved_at' => '2026-08-30T20:00:00Z',
+    'approved_by_user_reference' => 'TEST-TWIN-OPAQUE-USER-APPROVAL-NON-EVIDENCE',
+    'real_collection_authorized' => true,
+    'merge_authorized' => false,
+    'deploy_authorized' => false,
+    'canonicalization_authorized' => false,
+    'bound_artifacts' => [
+        'need_analysis_plan' => [
+            'reference' => 'NEED_ANALYSIS_PLAN_DRAFT.json',
+            'sha256' => hash_file('sha256', $root . '/NEED_ANALYSIS_PLAN_DRAFT.json'),
+        ],
+        'collection_frame' => [
+            'reference' => 'COLLECTION_FRAME_DRAFT.json',
+            'sha256' => hash_file('sha256', $root . '/COLLECTION_FRAME_DRAFT.json'),
+        ],
+        'form_contract' => [
+            'reference' => 'form_contract.json',
+            'sha256' => hash_file('sha256', $root . '/form_contract.json'),
+        ],
+        'invitation_catalog' => [
+            'reference' => 'RESEARCH_INVITATION_CATALOG_DRAFT.json',
+            'sha256' => hash_file('sha256', $root . '/RESEARCH_INVITATION_CATALOG_DRAFT.json'),
+        ],
+        'collection_channel_register' => [
+            'reference' => 'COLLECTION_CHANNEL_REGISTER_DRAFT.json',
+            'sha256' => hash_file('sha256', $root . '/COLLECTION_CHANNEL_REGISTER_DRAFT.json'),
+        ],
+    ],
+    'test_twin_policy' => 'TEST_TWIN_NON_EVIDENCE_PERMANENTLY_NON_PROMOTABLE',
+    'evidence_use' => 'CONTROL_ONLY_NOT_NEED_EVIDENCE',
+];
+write_json_gate($root . '/EXPLICIT_USER_APPROVAL_RECEIPT_DRAFT.json', $approvalReceipt);
+
 $evidence = [];
 foreach ($requiredKeys as $key) {
     if ($key === 'privacy_notice') {
@@ -195,15 +248,19 @@ foreach ($requiredKeys as $key) {
 }
 
 $manifest = [
+    'schema_version' => 'eucons.ai4work_prod_activation_manifest.v0.9',
     'research_id' => $researchId,
     'state' => 'APPROVED_FOR_PROD',
     'approved_for_prod' => true,
     'collection_enabled' => true,
-    'deploy_authorized' => true,
+    'merge_authorized' => false,
+    'deploy_authorized' => false,
+    'canonicalization_authorized' => false,
     'real_collection_authorized' => true,
     'activation_mode' => 'PROD_REAL_EVIDENCE_ONLY',
     'test_twin_policy' => 'TEST_TWIN_NON_EVIDENCE_PERMANENTLY_NON_PROMOTABLE',
-    'explicit_user_approval_reference' => 'TEST-TWIN-USER-APPROVAL',
+    'explicit_user_approval_reference' => 'EXPLICIT_USER_APPROVAL_RECEIPT_DRAFT.json',
+    'explicit_user_approval_sha256' => hash_file('sha256', $root . '/EXPLICIT_USER_APPROVAL_RECEIPT_DRAFT.json'),
     'approval_timestamp' => '2026-08-30T20:00:00Z',
     'required_external_or_operational_evidence' => $evidence,
 ];
@@ -211,6 +268,37 @@ write_json_gate($root . '/PROD_ACTIVATION_MANIFEST_DRAFT.json', $manifest);
 
 $gate = new EuconsResearchGovernanceGate($root);
 if ($gate->productionReady() !== true) fail_gate_test('fully satisfied TEST TWIN governance fixture should pass mechanics');
+
+$manifest['explicit_user_approval_sha256'] = str_repeat('0', 64);
+write_json_gate($root . '/PROD_ACTIVATION_MANIFEST_DRAFT.json', $manifest);
+if ($gate->productionReady() !== false) fail_gate_test('unbound explicit user approval receipt must fail closed');
+$manifest['explicit_user_approval_sha256'] = hash_file('sha256', $root . '/EXPLICIT_USER_APPROVAL_RECEIPT_DRAFT.json');
+write_json_gate($root . '/PROD_ACTIVATION_MANIFEST_DRAFT.json', $manifest);
+if ($gate->productionReady() !== true) fail_gate_test('restored explicit user approval hash should pass mechanics');
+
+$approvalReceipt['deploy_authorized'] = true;
+write_json_gate($root . '/EXPLICIT_USER_APPROVAL_RECEIPT_DRAFT.json', $approvalReceipt);
+$manifest['explicit_user_approval_sha256'] = hash_file('sha256', $root . '/EXPLICIT_USER_APPROVAL_RECEIPT_DRAFT.json');
+write_json_gate($root . '/PROD_ACTIVATION_MANIFEST_DRAFT.json', $manifest);
+if ($gate->productionReady() !== false) fail_gate_test('collection approval may not escalate to deploy authority');
+$approvalReceipt['deploy_authorized'] = false;
+write_json_gate($root . '/EXPLICIT_USER_APPROVAL_RECEIPT_DRAFT.json', $approvalReceipt);
+$manifest['explicit_user_approval_sha256'] = hash_file('sha256', $root . '/EXPLICIT_USER_APPROVAL_RECEIPT_DRAFT.json');
+write_json_gate($root . '/PROD_ACTIVATION_MANIFEST_DRAFT.json', $manifest);
+if ($gate->productionReady() !== true) fail_gate_test('restored collection-only user approval should pass mechanics');
+
+$approvalReceipt['approved_at'] = '2999-01-01T00:00:00Z';
+write_json_gate($root . '/EXPLICIT_USER_APPROVAL_RECEIPT_DRAFT.json', $approvalReceipt);
+$manifest['explicit_user_approval_sha256'] = hash_file('sha256', $root . '/EXPLICIT_USER_APPROVAL_RECEIPT_DRAFT.json');
+$manifest['approval_timestamp'] = '2999-01-01T00:00:00Z';
+write_json_gate($root . '/PROD_ACTIVATION_MANIFEST_DRAFT.json', $manifest);
+if ($gate->productionReady() !== false) fail_gate_test('future-dated explicit user approval must fail closed');
+$approvalReceipt['approved_at'] = '2026-08-30T20:00:00Z';
+write_json_gate($root . '/EXPLICIT_USER_APPROVAL_RECEIPT_DRAFT.json', $approvalReceipt);
+$manifest['explicit_user_approval_sha256'] = hash_file('sha256', $root . '/EXPLICIT_USER_APPROVAL_RECEIPT_DRAFT.json');
+$manifest['approval_timestamp'] = '2026-08-30T20:00:00Z';
+write_json_gate($root . '/PROD_ACTIVATION_MANIFEST_DRAFT.json', $manifest);
+if ($gate->productionReady() !== true) fail_gate_test('restored non-future explicit user approval should pass mechanics');
 
 $planLock['state'] = 'OPEN_NOT_LOCKED';
 write_json_gate($root . '/PRECOLLECTION_ANALYSIS_PLAN_LOCK_DRAFT.json', $planLock);
@@ -277,4 +365,4 @@ putenv('AI4WORK_RESEARCH_PROD_ENABLED');
 if ($gate->productionReady() !== false) fail_gate_test('environment latch must remain required');
 
 rrmdir_gate($root);
-echo "AI4WORK PHP governance + dual method-lock gate TEST TWIN NON-EVIDENCE: PASS\n";
+echo "AI4WORK PHP governance + dual method-lock + explicit user approval gate TEST TWIN NON-EVIDENCE: PASS\n";
