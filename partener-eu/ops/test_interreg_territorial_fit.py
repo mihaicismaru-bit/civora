@@ -18,6 +18,7 @@ EXPECTED = {
     "INTERREG-RORS-2021-2027": {"Timiș", "Caraș-Severin", "Mehedinți"},
     "INTERREG-ROUA-2021-2027": {"Satu Mare", "Maramureș", "Suceava", "Botoșani", "Tulcea"},
     "INTERREG-ROMD-2021-2027": {"Botoșani", "Iași", "Vaslui", "Galați"},
+    "INTERREG-HUSKROUA-2021-2027": {"Maramureș", "Satu Mare", "Suceava"},
     "INTERREG-NEXT-BSB-2021-2027": {"Brăila", "Buzău", "Constanța", "Galați", "Tulcea", "Vrancea"},
     "INTERREG-DANUBE-2021-2027": {"ALL_ROMANIA"},
     "INTERREG-EUROPE-2021-2027": {"ALL_ROMANIA"},
@@ -29,6 +30,7 @@ ALLOWED_HOSTS = {
     "romania-serbia.net",
     "www.ro-ua.net",
     "ro-md.net",
+    "next.huskroua-cbc.eu",
     "projects.research-and-innovation.ec.europa.eu",
     "interreg-danube.eu",
     "www.interregeurope.eu",
@@ -80,9 +82,9 @@ def main() -> None:
         assert data["policy"][key] is False
 
     rows = data["programmes"]
-    assert len(rows) == 8
+    assert len(rows) == 9
     assert {row["id"] for row in rows} == set(EXPECTED)
-    assert len({row["source_id"] for row in rows}) == 8
+    assert len({row["source_id"] for row in rows}) == 9
 
     for row in rows:
         assert set(row["eligible_territories_romania"]) == EXPECTED[row["id"]]
@@ -107,6 +109,8 @@ def main() -> None:
     assert fit_ids("Constanța") == national | {"INTERREG-ROBG-2021-2027", "INTERREG-NEXT-BSB-2021-2027"}
     assert fit_ids("Galați") == national | {"INTERREG-ROMD-2021-2027", "INTERREG-NEXT-BSB-2021-2027"}
     assert fit_ids("Tulcea") == national | {"INTERREG-ROUA-2021-2027", "INTERREG-NEXT-BSB-2021-2027"}
+    assert fit_ids("Maramureș") == national | {"INTERREG-ROUA-2021-2027", "INTERREG-HUSKROUA-2021-2027"}
+    assert fit_ids("Maramures") == national | {"INTERREG-ROUA-2021-2027", "INTERREG-HUSKROUA-2021-2027"}
 
     try:
         fit.resolve("", run_id="regression")
@@ -115,7 +119,7 @@ def main() -> None:
     else:
         raise AssertionError("empty county must fail closed")
 
-    print("PASS Interreg territorial-fit registry: 8 official programmes, deterministic Romania geography fit, zero material authorization")
+    print("PASS Interreg territorial-fit registry: 9 official programmes, deterministic Romania geography fit, zero material authorization")
 
 
 if __name__ == "__main__":
