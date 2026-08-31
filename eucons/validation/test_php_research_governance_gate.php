@@ -82,14 +82,15 @@ write_json_gate($root . '/CONTROLLER_DETERMINATION_DRAFT.json', [
     'nf06_reference_eligible' => true,
     'privacy_contact' => 'privacy@example.invalid',
 ]);
-write_json_gate($root . '/COLLECTION_FRAME_DRAFT.json', [
+$frame = [
     'research_id' => $researchId,
     'collection_frame_id' => $frameId,
     'frame_status' => 'APPROVED_FOR_PROD',
     'collection_enabled' => true,
     'approval' => ['approved' => true, 'approved_for_prod' => true],
     'nf06_handoff' => ['eligible_now' => true],
-]);
+];
+write_json_gate($root . '/COLLECTION_FRAME_DRAFT.json', $frame);
 write_json_gate($root . '/GDPR_DPIA_SCREENING_DRAFT.json', [
     'research_id' => $researchId,
     'approved' => true,
@@ -145,15 +146,22 @@ $plan = [
 ];
 write_json_gate($root . '/NEED_ANALYSIS_PLAN_DRAFT.json', $plan);
 $planLock = [
-    'schema_version' => 'eucons.ai4work_precollection_analysis_plan_lock.v0.1',
+    'schema_version' => 'eucons.ai4work_precollection_analysis_plan_lock.v0.2',
     'research_id' => $researchId,
     'collection_frame_id' => $frameId,
     'state' => 'LOCKED_BEFORE_PROD_ACTIVATION',
     'evidence_class' => 'METHOD_CONTROL_NOT_EVIDENCE',
+    'purpose' => 'TEST TWIN dual method immutability mechanics only.',
     'need_analysis_plan_reference' => 'NEED_ANALYSIS_PLAN_DRAFT.json',
     'need_analysis_plan_sha256' => canonical_sha_gate($plan),
+    'collection_frame_reference' => 'COLLECTION_FRAME_DRAFT.json',
+    'collection_frame_sha256' => canonical_sha_gate($frame),
     'approved_at' => '2026-08-30T19:30:00Z',
     'approver_reference' => 'TEST-TWIN-METHOD-LOCK-APPROVAL',
+    'activation_boundary' => 'DUAL_METHOD_LOCK_REQUIRED_BEFORE_ANY_PROD_COLLECTION_ENABLEMENT',
+    'method_mutation_after_lock' => 'FORBIDDEN_WHILE_COLLECTION_OR_PROD_ACTIVATION_IS_ENABLED',
+    'post_hoc_threshold_exception' => 'FORBIDDEN',
+    'amendment_rule' => 'TEST TWIN fixture: any material amendment requires collection disabled and a new dual lock.',
     'synthetic_or_test_twin_can_satisfy_lock' => false,
     'project_activity_as_need_evidence' => false,
     'secondary_evidence_can_change_numeric_order' => false,
@@ -206,10 +214,10 @@ if ($gate->productionReady() !== true) fail_gate_test('fully satisfied TEST TWIN
 
 $planLock['state'] = 'OPEN_NOT_LOCKED';
 write_json_gate($root . '/PRECOLLECTION_ANALYSIS_PLAN_LOCK_DRAFT.json', $planLock);
-if ($gate->productionReady() !== false) fail_gate_test('open analysis-plan lock must fail closed at live governance gate');
+if ($gate->productionReady() !== false) fail_gate_test('open dual method lock must fail closed at live governance gate');
 $planLock['state'] = 'LOCKED_BEFORE_PROD_ACTIVATION';
 write_json_gate($root . '/PRECOLLECTION_ANALYSIS_PLAN_LOCK_DRAFT.json', $planLock);
-if ($gate->productionReady() !== true) fail_gate_test('restored locked analysis plan should pass mechanics');
+if ($gate->productionReady() !== true) fail_gate_test('restored dual method lock should pass mechanics');
 
 $plan['core_skill_ranking']['secondary_evidence_can_change_numeric_order'] = true;
 write_json_gate($root . '/NEED_ANALYSIS_PLAN_DRAFT.json', $plan);
@@ -220,14 +228,35 @@ $plan['core_skill_ranking']['secondary_evidence_can_change_numeric_order'] = fal
 write_json_gate($root . '/NEED_ANALYSIS_PLAN_DRAFT.json', $plan);
 $planLock['need_analysis_plan_sha256'] = canonical_sha_gate($plan);
 write_json_gate($root . '/PRECOLLECTION_ANALYSIS_PLAN_LOCK_DRAFT.json', $planLock);
-if ($gate->productionReady() !== true) fail_gate_test('restored deterministic method lock should pass mechanics');
+if ($gate->productionReady() !== true) fail_gate_test('restored deterministic plan lock should pass mechanics');
 
 $planLock['need_analysis_plan_sha256'] = str_repeat('0', 64);
 write_json_gate($root . '/PRECOLLECTION_ANALYSIS_PLAN_LOCK_DRAFT.json', $planLock);
 if ($gate->productionReady() !== false) fail_gate_test('analysis-plan lock hash mismatch must fail closed');
 $planLock['need_analysis_plan_sha256'] = canonical_sha_gate($plan);
 write_json_gate($root . '/PRECOLLECTION_ANALYSIS_PLAN_LOCK_DRAFT.json', $planLock);
-if ($gate->productionReady() !== true) fail_gate_test('restored method hash must pass mechanics');
+if ($gate->productionReady() !== true) fail_gate_test('restored plan hash must pass mechanics');
+
+$frame['approval']['approved_for_prod'] = false;
+write_json_gate($root . '/COLLECTION_FRAME_DRAFT.json', $frame);
+if ($gate->productionReady() !== false) fail_gate_test('collection-frame drift after lock must fail closed');
+$frame['approval']['approved_for_prod'] = true;
+write_json_gate($root . '/COLLECTION_FRAME_DRAFT.json', $frame);
+if ($gate->productionReady() !== true) fail_gate_test('restored collection frame must pass mechanics');
+
+$planLock['collection_frame_sha256'] = str_repeat('0', 64);
+write_json_gate($root . '/PRECOLLECTION_ANALYSIS_PLAN_LOCK_DRAFT.json', $planLock);
+if ($gate->productionReady() !== false) fail_gate_test('collection-frame lock hash mismatch must fail closed');
+$planLock['collection_frame_sha256'] = canonical_sha_gate($frame);
+write_json_gate($root . '/PRECOLLECTION_ANALYSIS_PLAN_LOCK_DRAFT.json', $planLock);
+if ($gate->productionReady() !== true) fail_gate_test('restored collection-frame hash must pass mechanics');
+
+$planLock['post_hoc_threshold_exception'] = 'ALLOWED';
+write_json_gate($root . '/PRECOLLECTION_ANALYSIS_PLAN_LOCK_DRAFT.json', $planLock);
+if ($gate->productionReady() !== false) fail_gate_test('post-hoc threshold exception must fail closed');
+$planLock['post_hoc_threshold_exception'] = 'FORBIDDEN';
+write_json_gate($root . '/PRECOLLECTION_ANALYSIS_PLAN_LOCK_DRAFT.json', $planLock);
+if ($gate->productionReady() !== true) fail_gate_test('restored no-exception dual lock must pass mechanics');
 
 $article13['surface_fields']['privacy_contact'] = 'DE COMPLETAT ÎNAINTE DE ACTIVAREA COLECTĂRII';
 write_json_gate($root . '/ARTICLE13_NOTICE_SNAPSHOT_DRAFT.json', $article13);
@@ -248,4 +277,4 @@ putenv('AI4WORK_RESEARCH_PROD_ENABLED');
 if ($gate->productionReady() !== false) fail_gate_test('environment latch must remain required');
 
 rrmdir_gate($root);
-echo "AI4WORK PHP governance + method-lock gate TEST TWIN NON-EVIDENCE: PASS\n";
+echo "AI4WORK PHP governance + dual method-lock gate TEST TWIN NON-EVIDENCE: PASS\n";
