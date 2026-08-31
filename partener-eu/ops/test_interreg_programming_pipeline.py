@@ -203,7 +203,7 @@ def main() -> None:
     assert result["schema_version"] == "1.0"
     assert result["adapter_id"] == "INTERREG_PROGRAMMING_PIPELINE_V1"
     assert result["observation_state"] == "PROGRAMMING_PIPELINE"
-    assert result["source_count"] == len(registry["sources"]) == 8
+    assert result["source_count"] == len(registry["sources"]) == 9
     assert result["registry_freshness_state"] == "CURRENT_CHECK_30D"
     assert result["health_state"] == "NOT_PROBED"
     assert len(result["snapshot_semantic_fingerprint"]) == 64
@@ -221,8 +221,10 @@ def main() -> None:
     assert by_id["INT-PIPE-EU-COM-2025-552"]["observation_state"] == "PROPOSAL"
     assert by_id["INT-PIPE-DANUBE-2028-2034"]["observation_state"] == "PROGRAMMING_PROCESS"
     assert by_id["INT-PIPE-INTERREG-EUROPE-2028-2034"]["observation_state"] == "PROGRAMMING_PROCESS"
+    assert by_id["INT-PIPE-HUSKROUA-2028-2034"]["observation_state"] == "PROGRAMMING_PROCESS"
     assert by_id["INT-PIPE-DANUBE-2028-2034"]["programme_ids"] == ["DANUBE"]
     assert by_id["INT-PIPE-INTERREG-EUROPE-2028-2034"]["programme_ids"] == ["INTERREG_EUROPE"]
+    assert by_id["INT-PIPE-HUSKROUA-2028-2034"]["programme_ids"] == ["HUSKROUA"]
     assert result["watchlist"][0]["source_id"] == "INT-PIPE-BSB-2028-2034"
     for row in result["watchlist"]:
         for key in pipeline.MATERIAL_FLAGS:
@@ -277,7 +279,7 @@ def main() -> None:
     assert baseline["distribution_authorized"] is False
     assert baseline["semantic_change_count"] == 0
     assert baseline["transport_or_content_change_count"] == 0
-    assert baseline["source_count_current"] == 8
+    assert baseline["source_count_current"] == 9
 
     previous = copy.deepcopy(result)
     previous["run_id"] = "TEST-PREVIOUS"
