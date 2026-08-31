@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import canonical_export_integrity as EXPORT_INTEGRITY
+import collection_close_export_freeze as FREEZE
 import nf06_preingest as NF06
 from research_storage import RESEARCH_ID
 
@@ -203,15 +204,17 @@ def build_prod_preingest_from_persisted_bundles(
     *,
     collection_frame: dict[str, Any],
     rights_hold_snapshot: dict[str, Any] | None,
+    collection_freeze_receipt: dict[str, Any] | None,
 ) -> tuple[bytes, dict[str, Any]]:
     """Canonical eucons persisted-storage -> NF06 PROD pre-ingest handoff.
 
     The returned bytes contain real questionnaire records and must remain inside
     the research-only processing boundary. The returned manifest is a control
     artifact. A structured, complete and temporally fresh authoritative rights
-    snapshot is mandatory, and any held record fails closed before export. This
-    function does not authorise collection, synthesis, population claims, merge
-    or deploy.
+    snapshot is mandatory, any held record fails closed before export, and the
+    exact collection close/export freeze receipt must bind the closed collection
+    window to the canonical export and retention policy. This function does not
+    authorise collection, synthesis, population claims, merge or deploy.
     """
     records = _validated_sorted_records(bundles)
     held_response_ids, rights_snapshot_meta = _validated_rights_hold_snapshot(
@@ -230,6 +233,15 @@ def build_prod_preingest_from_persisted_bundles(
         source_bytes = EXPORT_INTEGRITY.canonical_export_bytes_from_persisted_bundles(
             bundles
         )
+        latest_record_at = max(str(record.get("received_at", "")) for record in records)
+        freeze_meta = FREEZE.validate_collection_freeze_receipt(
+            collection_freeze_receipt,
+            collection_frame=collection_frame,
+            source_bytes=source_bytes,
+            record_count=len(records),
+            latest_record_at=latest_record_at,
+            rights_hold_snapshot_sha256=rights_snapshot_meta["snapshot_sha256"],
+        )
         manifest = NF06.build_preingest_manifest(
             records,
             collection_frame=collection_frame,
@@ -238,6 +250,7 @@ def build_prod_preingest_from_persisted_bundles(
         )
     except (
         EXPORT_INTEGRITY.CanonicalExportIntegrityError,
+        FREEZE.CollectionCloseExportFreezeError,
         NF06.NF06PreingestError,
     ) as exc:
         raise NF06PersistedHandoffError(str(exc)) from exc
@@ -275,6 +288,33 @@ def build_prod_preingest_from_persisted_bundles(
         "canonical PROD export. The live operator must still prove that the deployed "
         "snapshot producer is bound to the actual separate research/privacy rights "
         "store. Snapshot hashes are control artifacts, never evidence of need."
+    )
+    manifest["collection_close_export_freeze_checked"] = True
+    manifest["collection_close_export_freeze_schema"] = freeze_meta["schema_version"]
+    manifest["collection_close_export_freeze_artifact_class"] = freeze_meta[
+        "artifact_class"
+    ]
+    manifest["collection_close_export_freeze_status"] = freeze_meta["freeze_status"]
+    manifest["collection_closed_at"] = freeze_meta["collection_closed_at"]
+    manifest["runtime_acceptance_disabled_at"] = freeze_meta[
+        "runtime_acceptance_disabled_at"
+    ]
+    manifest["export_frozen_at"] = freeze_meta["export_frozen_at"]
+    manifest["collection_close_retention_schedule_sha256"] = freeze_meta[
+        "retention_schedule_sha256"
+    ]
+    manifest["collection_close_post_close_accepted_record_count"] = freeze_meta[
+        "post_close_accepted_record_count"
+    ]
+    manifest["collection_close_control_not_need_evidence"] = True
+    manifest["collection_close_receipt_is_authorization"] = False
+    manifest["collection_close_scope_boundary"] = (
+        "This binding proves only the mechanical close/freeze state supplied to the "
+        "NF06 handoff: the declared collection close, acceptance disable time, zero "
+        "post-close accepted records, exact canonical export SHA-256, exact rights-hold "
+        "snapshot SHA-256, exact channel-register SHA-256 and exact retention-schedule "
+        "SHA-256 are mutually bound. It is CONTROL metadata, not evidence of need and "
+        "not controller, deployment or publication authorization."
     )
 
     return source_bytes, manifest
