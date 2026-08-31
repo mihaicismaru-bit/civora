@@ -2,19 +2,68 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-31T23:00:45+03:00",
+  "generated_at": "2026-09-01T00:01:18+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-31T22:59:28+03:00",
-  "task_count": 52,
+  "queue_generated_at": "2026-08-31T23:59:46+03:00",
+  "task_count": 53,
   "primary_match_count": 0,
-  "no_match_count": 30,
+  "no_match_count": 31,
   "unrouted_count": 22,
   "target_count": 18,
   "targets_ok": 14,
   "results": [
+    {
+      "signal_id": "dd8d89ac5eebe3ad3f04dc96",
+      "signal_title": "Zâmbet pe roți pentru copiii din Dănicei. Primăria a intrat într-un proiect european pentru stomatologie școlară mobilă",
+      "signal_url": "https://seintamplainvalcea.ro/2026/08/31/zambet-pe-roti-pentru-copiii-din-danicei-primaria-a-intrat-intr-un-proiect-european-pentru-stomatologie-scolara-mobila/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-31T23:56:49+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "091f4ec2f77685022864fbc8",
       "signal_title": "Ploaia nu i-a trimis acasă pe malaieni, Zilele Comunei au continuat cu muzică, dans și foc de artificii",
