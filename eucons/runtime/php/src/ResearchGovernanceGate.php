@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/ResearchExplicitUserApprovalGate.php';
+
 final class EuconsResearchGovernanceGate
 {
     private const RESEARCH_ID = 'AI4WORK-STEP-NF-RUN-001';
@@ -284,15 +286,21 @@ final class EuconsResearchGovernanceGate
             return false;
         }
 
-        if (($manifest['state'] ?? null) !== 'APPROVED_FOR_PROD'
+        if (($manifest['schema_version'] ?? null) !== 'eucons.ai4work_prod_activation_manifest.v0.9'
+            || ($manifest['state'] ?? null) !== 'APPROVED_FOR_PROD'
             || ($manifest['approved_for_prod'] ?? false) !== true
             || ($manifest['collection_enabled'] ?? false) !== true
-            || ($manifest['deploy_authorized'] ?? false) !== true
+            || ($manifest['merge_authorized'] ?? null) !== false
+            || ($manifest['deploy_authorized'] ?? null) !== false
+            || ($manifest['canonicalization_authorized'] ?? null) !== false
             || ($manifest['real_collection_authorized'] ?? false) !== true
             || ($manifest['activation_mode'] ?? null) !== 'PROD_REAL_EVIDENCE_ONLY'
-            || ($manifest['test_twin_policy'] ?? null) !== 'TEST_TWIN_NON_EVIDENCE_PERMANENTLY_NON_PROMOTABLE'
-            || !self::nonPlaceholder($manifest['explicit_user_approval_reference'] ?? null)
-            || !self::nonPlaceholder($manifest['approval_timestamp'] ?? null)) {
+            || ($manifest['test_twin_policy'] ?? null) !== 'TEST_TWIN_NON_EVIDENCE_PERMANENTLY_NON_PROMOTABLE') {
+            return false;
+        }
+
+        $explicitApproval = new EuconsResearchExplicitUserApprovalGate($this->researchRoot);
+        if (!$explicitApproval->ready($manifest)) {
             return false;
         }
 
