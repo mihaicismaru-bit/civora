@@ -1,0 +1,155 @@
+{
+  "schema_version": "eucons.ai4work_gdpr_data_minimisation.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "date": "2026-08-31",
+  "status": "CONTROL_COMPLETE_PREPROD_NOT_CONTROLLER_APPROVAL",
+  "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
+  "synthetic": false,
+  "collection_enabled": false,
+  "principles": {
+    "purpose_limitation": "Collect only variables required for the pre-registered needs analysis, coverage/adversarial QA, or bounded supporting diagnostics. No field may be repurposed for marketing, CRM, individual scoring or eligibility decisions.",
+    "data_minimisation": "Use broad predefined categories only; do not request direct identifiers, exact employer, exact locality or free text in the reviewed PROD instruments.",
+    "storage_limitation": "Respondent-level fields inherit the approved research-record retention lifecycle; only disclosure-controlled aggregates and integrity metadata may survive the respondent-level deletion deadline.",
+    "test_twin": "TEST_TWIN_NON_EVIDENCE only; synthetic fixtures cannot satisfy PROD evidence or minimisation approval."
+  },
+  "global_prohibitions": {
+    "commercial_use_allowed": false,
+    "crm_linkage_allowed": false,
+    "marketing_tracking_allowed": false,
+    "individual_decision_use_allowed": false,
+    "direct_identifiers_allowed": false,
+    "exact_employer_allowed": false,
+    "exact_locality_allowed": false,
+    "free_text_allowed": false,
+    "transport_metadata_for_analysis_allowed": false,
+    "raw_ip_or_user_agent_in_nf06_allowed": false
+  },
+  "field_type_policy": {
+    "forbidden_types": ["text", "textarea"],
+    "allowed_types": ["select", "single", "multi", "rating", "rating_matrix", "boolean"],
+    "reason": "The current research questions can be answered using bounded categories and ratings; free text is unnecessary for NF-RUN-001 and would increase identifiability and review burden."
+  },
+  "purpose_groups": [
+    {
+      "purpose_id": "COVERAGE_AND_ADVERSARIAL_QA",
+      "necessity": "REQUIRED_FOR_FRAME_COVERAGE_AND_QA",
+      "numeric_h1_h5_rank": false,
+      "fields": {
+        "AI4WORK_ADULTS_V1": ["region", "status", "age_band", "occupational_family"],
+        "AI4WORK_EMPLOYERS_V1": ["region", "sector_aggregated", "size_band", "respondent_role"]
+      }
+    },
+    {
+      "purpose_id": "PRIMARY_H1_H5_RANKING",
+      "necessity": "REQUIRED_FOR_PRE_REGISTERED_PRIMARY_RANKING",
+      "numeric_h1_h5_rank": true,
+      "fields": {
+        "AI4WORK_ADULTS_V1": ["Q10"],
+        "AI4WORK_EMPLOYERS_V1": ["E03"]
+      }
+    },
+    {
+      "purpose_id": "ADULT_SUPPORTING_CAPABILITY_DIAGNOSTIC",
+      "necessity": "SUPPORTING_NEED_DIAGNOSTIC_ONLY",
+      "numeric_h1_h5_rank": false,
+      "fields": {
+        "AI4WORK_ADULTS_V1": ["Q01", "Q03", "Q04", "Q05", "Q06"],
+        "AI4WORK_EMPLOYERS_V1": []
+      }
+    },
+    {
+      "purpose_id": "ADULT_AI_USE_AND_PROBLEM_CONTEXT",
+      "necessity": "SUPPORTING_CONTEXT_ONLY",
+      "numeric_h1_h5_rank": false,
+      "fields": {
+        "AI4WORK_ADULTS_V1": ["Q02", "Q09"],
+        "AI4WORK_EMPLOYERS_V1": []
+      }
+    },
+    {
+      "purpose_id": "ADULT_TRAINING_EXPOSURE_AND_BARRIERS",
+      "necessity": "SUPPORTING_DELIVERY_DIAGNOSTIC_ONLY",
+      "numeric_h1_h5_rank": false,
+      "fields": {
+        "AI4WORK_ADULTS_V1": ["Q07", "Q07_topic", "Q08"],
+        "AI4WORK_EMPLOYERS_V1": []
+      }
+    },
+    {
+      "purpose_id": "ADULT_OUTCOME_AND_TASK_CONTEXT",
+      "necessity": "SUPPORTING_NEED_DESIGN_ONLY",
+      "numeric_h1_h5_rank": false,
+      "fields": {
+        "AI4WORK_ADULTS_V1": ["Q11", "Q12"],
+        "AI4WORK_EMPLOYERS_V1": []
+      }
+    },
+    {
+      "purpose_id": "EMPLOYER_ADOPTION_AND_WORKFORCE_CHANGE_CONTEXT",
+      "necessity": "SUPPORTING_CONTEXT_ONLY",
+      "numeric_h1_h5_rank": false,
+      "fields": {
+        "AI4WORK_ADULTS_V1": [],
+        "AI4WORK_EMPLOYERS_V1": ["E01", "E02", "E07"]
+      }
+    },
+    {
+      "purpose_id": "EMPLOYER_SKILLS_GAP_DIAGNOSTIC",
+      "necessity": "SUPPORTING_NEED_DIAGNOSTIC_ONLY",
+      "numeric_h1_h5_rank": false,
+      "fields": {
+        "AI4WORK_ADULTS_V1": [],
+        "AI4WORK_EMPLOYERS_V1": ["E04", "E04_detail", "E08", "E09"]
+      }
+    },
+    {
+      "purpose_id": "EMPLOYER_TRAINING_EXPOSURE_AND_BARRIERS",
+      "necessity": "SUPPORTING_DELIVERY_DIAGNOSTIC_ONLY",
+      "numeric_h1_h5_rank": false,
+      "fields": {
+        "AI4WORK_ADULTS_V1": [],
+        "AI4WORK_EMPLOYERS_V1": ["E05", "E06"]
+      }
+    },
+    {
+      "purpose_id": "FOLLOWUP_FEASIBILITY_NO_CONTACT",
+      "necessity": "BOUNDED_RESEARCH_DESIGN_DIAGNOSTIC_ONLY",
+      "numeric_h1_h5_rank": false,
+      "fields": {
+        "AI4WORK_ADULTS_V1": [],
+        "AI4WORK_EMPLOYERS_V1": ["E10"]
+      },
+      "constraint": "E10 is aggregate willingness only. The form must state that no contact data are collected, and no respondent-level E10 value may be linked to a contact store."
+    }
+  ],
+  "retention_binding": {
+    "schedule_artifact": "GDPR_RETENTION_SCHEDULE_DRAFT.json",
+    "respondent_level_class": "raw and normalised analytical respondent records in live research storage",
+    "rule": "All questionnaire/profile fields share the respondent-level retention lifecycle. No field-specific convenience retention is allowed."
+  },
+  "method_binding": {
+    "analysis_plan_artifact": "NEED_ANALYSIS_PLAN_DRAFT.json",
+    "required_primary_sources": {
+      "AI4WORK_ADULTS_V1": "Q10",
+      "AI4WORK_EMPLOYERS_V1": "E03"
+    },
+    "supporting_items_cannot_change_h1_h5_numeric_order": true,
+    "project_activity_as_need_evidence": false
+  },
+  "change_control": {
+    "fail_closed_if": [
+      "a form field is missing from the purpose map",
+      "a field is mapped to more than one purpose group",
+      "a free-text field is introduced",
+      "a direct identifier or exact employer/locality field is introduced",
+      "a non-primary field is allowed to affect H1-H5 numeric ranking",
+      "E10 loses its explicit no-contact constraint",
+      "the analysis plan primary sources drift away from Q10/E03",
+      "commercial, CRM or marketing use becomes enabled"
+    ],
+    "controller_acceptance_required_before_prod": true,
+    "merge_authorized": false,
+    "deploy_authorized": false,
+    "real_collection_authorized": false
+  }
+}
