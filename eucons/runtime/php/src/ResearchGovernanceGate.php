@@ -144,14 +144,22 @@ final class EuconsResearchGovernanceGate
             return false;
         }
 
-        $declaredSha = $planLock['need_analysis_plan_sha256'] ?? null;
-        if (($planLock['schema_version'] ?? null) !== 'eucons.ai4work_precollection_analysis_plan_lock.v0.1'
+        $planSha = $planLock['need_analysis_plan_sha256'] ?? null;
+        $frameSha = $planLock['collection_frame_sha256'] ?? null;
+        if (($planLock['schema_version'] ?? null) !== 'eucons.ai4work_precollection_analysis_plan_lock.v0.2'
             || ($planLock['state'] ?? null) !== 'LOCKED_BEFORE_PROD_ACTIVATION'
             || ($planLock['evidence_class'] ?? null) !== 'METHOD_CONTROL_NOT_EVIDENCE'
             || ($planLock['need_analysis_plan_reference'] ?? null) !== 'NEED_ANALYSIS_PLAN_DRAFT.json'
-            || !is_string($declaredSha)
-            || !preg_match('/^[0-9a-f]{64}$/', $declaredSha)
-            || !hash_equals(self::canonicalSha256($plan), $declaredSha)
+            || ($planLock['collection_frame_reference'] ?? null) !== 'COLLECTION_FRAME_DRAFT.json'
+            || !is_string($planSha)
+            || !preg_match('/^[0-9a-f]{64}$/', $planSha)
+            || !hash_equals(self::canonicalSha256($plan), $planSha)
+            || !is_string($frameSha)
+            || !preg_match('/^[0-9a-f]{64}$/', $frameSha)
+            || !hash_equals(self::canonicalSha256($frame), $frameSha)
+            || ($planLock['activation_boundary'] ?? null) !== 'DUAL_METHOD_LOCK_REQUIRED_BEFORE_ANY_PROD_COLLECTION_ENABLEMENT'
+            || ($planLock['method_mutation_after_lock'] ?? null) !== 'FORBIDDEN_WHILE_COLLECTION_OR_PROD_ACTIVATION_IS_ENABLED'
+            || ($planLock['post_hoc_threshold_exception'] ?? null) !== 'FORBIDDEN'
             || ($planLock['synthetic_or_test_twin_can_satisfy_lock'] ?? null) !== false
             || ($planLock['project_activity_as_need_evidence'] ?? null) !== false
             || ($planLock['secondary_evidence_can_change_numeric_order'] ?? null) !== false
