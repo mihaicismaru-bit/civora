@@ -128,6 +128,66 @@ jobs:
       - name: Validate Interreg applicant and partner market fit stays non-authorizing
         run: python partener-eu/ops/test_interreg_applicant_partner_fit.py
 
+      - name: Capture deterministic Interreg market-fit evidence
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/interreg-market-fit
+          python partener-eu/ingest/interreg_applicant_partner_fit.py \
+            --county 'Timiș' --applicant-type 'public authority' --has-international-partner \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-timis-public" \
+            --output /tmp/interreg-market-fit/timis-public-authority.json
+          python partener-eu/ingest/interreg_applicant_partner_fit.py \
+            --county 'Tulcea' --applicant-type 'NGO_NONPROFIT' \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-tulcea-ngo" \
+            --output /tmp/interreg-market-fit/tulcea-ngo.json
+          python partener-eu/ingest/interreg_applicant_partner_fit.py \
+            --county 'Vâlcea' --applicant-type 'company' --has-international-partner \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-valcea-company" \
+            --output /tmp/interreg-market-fit/valcea-company.json
+
+      - name: Validate captured Interreg market-fit evidence stays non-authorizing
+        run: |
+          python - <<'PY'
+          import json, pathlib, sys
+          root=pathlib.Path('/tmp/interreg-market-fit')
+          files=sorted(root.glob('*.json'))
+          if len(files) != 3:
+              print('FAIL expected 3 Interreg market-fit evidence files, got', len(files))
+              sys.exit(2)
+          summary=[]
+          for p in files:
+              d=json.loads(p.read_text(encoding='utf-8'))
+              if d.get('adapter_id') != 'INTERREG_APPLICANT_PARTNER_FIT_V1' or d.get('market_intelligence_only') is not True:
+                  print('FAIL Interreg market-fit identity/policy drift:', p.name)
+                  sys.exit(2)
+              for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized'):
+                  if d.get(key) is not False:
+                      print('FAIL Interreg market-fit became authorizing:', p.name, key, d.get(key))
+                      sys.exit(2)
+              if d.get('publication_effect') != 'NONE':
+                  print('FAIL Interreg market-fit publication effect:', p.name, d.get('publication_effect'))
+                  sys.exit(2)
+              for key in ('registry_sha256','territorial_registry_sha256'):
+                  value=str(d.get(key) or '')
+                  if len(value) != 64:
+                      print('FAIL Interreg market-fit registry hash:', p.name, key, value)
+                      sys.exit(2)
+              if not d.get('run_id') or not d.get('fetched_at') or d.get('fit_count', 0) < 1:
+                  print('FAIL Interreg market-fit provenance/output incomplete:', p.name)
+                  sys.exit(2)
+              summary.append({'file':p.name,'fit_count':d['fit_count'],'top':[(r['programme_id'],r['market_fit_score'],r['applicant_signal_state']) for r in d['ranked_programme_fits'][:4]]})
+          print(json.dumps(summary, ensure_ascii=False, sort_keys=True))
+          PY
+
+      - name: Upload bounded Interreg market-fit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-interreg-market-fit-evidence
+          path: /tmp/interreg-market-fit
+          retention-days: 7
+          if-no-files-found: error
+
       - name: Validate Funding & Tenders structured normalization
         run: python partener-eu/ops/test_funding_tenders_structured_adapter.py
 
