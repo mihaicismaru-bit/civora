@@ -52,6 +52,10 @@ def _assert_non_authorizing(result: dict) -> None:
     assert len(result["route_semantic_fingerprint"]) == 64
 
 
+def _source_ids(result: dict) -> set[str]:
+    return {str(row.get("source_id")) for row in result.get("evidence") or []}
+
+
 def main() -> None:
     registry, _ = router.load_registry()
 
@@ -67,7 +71,9 @@ def main() -> None:
     assert central["route"]["registration_identifier_kind"] == "PIC"
     assert central["route"]["route_class"] == "CENTRALISED_EU_DIRECT"
     assert central["route"]["application_gateway_url"].startswith("https://ec.europa.eu/info/funding-tenders/")
-    assert central["evidence_source_count"] == 2
+    assert central["evidence_source_count"] == 3
+    assert "ERASMUS-PROGRAMME-GUIDE-SUBMIT-APPLICATION" in _source_ids(central)
+    assert "ERASMUS-EACEA-HOW-TO-GET-GRANT" in _source_ids(central)
     assert central["source_health_state"] == "NOT_PROBED"
     assert central["action_reference_hint_authority"] == "DISCOVERY_HINT_ONLY_NOT_CALL_IDENTIFIER"
     assert central["open_call_authorized"] is False
@@ -83,7 +89,8 @@ def main() -> None:
     assert decentral["route"]["registration_identifier_kind"] == "OID"
     assert decentral["route"]["route_class"] == "DECENTRALISED_NATIONAL_AGENCY"
     assert decentral["route"]["application_gateway_url"] == "https://webgate.ec.europa.eu/erasmus-esc/index/"
-    assert decentral["evidence_source_count"] == 1
+    assert decentral["evidence_source_count"] == 2
+    assert "ERASMUS-PROGRAMME-GUIDE-SUBMIT-APPLICATION" in _source_ids(decentral)
     assert decentral["action_reference_hint"] is None
 
     try:
@@ -137,7 +144,7 @@ def main() -> None:
             live=True,
         )
         _assert_non_authorizing(live)
-        assert live["healthy_evidence_source_count"] == 2
+        assert live["healthy_evidence_source_count"] == 3
         assert live["degraded_evidence_source_count"] == 0
         assert live["source_health_state"] == "HEALTHY"
         assert all(row["source_health"]["raw_sha256"] == "a" * 64 for row in live["evidence"])
@@ -149,8 +156,10 @@ def main() -> None:
         "adapter_id": central["adapter_id"],
         "central_route": central["route"]["route_class"],
         "central_registration": central["route"]["registration_identifier_kind"],
+        "central_evidence_sources": central["evidence_source_count"],
         "decentral_route": decentral["route"]["route_class"],
         "decentral_registration": decentral["route"]["registration_identifier_kind"],
+        "decentral_evidence_sources": decentral["evidence_source_count"],
         "open_call_authorized": central["open_call_authorized"],
         "publication_effect": central["publication_effect"],
     }, ensure_ascii=False, sort_keys=True))
