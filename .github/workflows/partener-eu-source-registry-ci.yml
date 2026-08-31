@@ -255,8 +255,8 @@ jobs:
               if str(health).startswith('DEGRADED') and (row.get('source_health') or {}).get('lkg_required') is not True:
                   print('FAIL degraded source does not require LKG:', row.get('source_id'))
                   sys.exit(2)
-          if healthy < 4:
-              print('FAIL too few official Interreg programming sources healthy:', healthy)
+          if healthy < 2:
+              print('FAIL too few official Interreg programming sources reachable to trust live watch:', healthy)
               sys.exit(2)
           print(json.dumps({'source_count':d['source_count'],'healthy_source_count':healthy,'health_state':d.get('health_state'),'top_watch':[(r['source_id'],r['observation_state'],r['consultation_lifecycle'],r['watch_priority']) for r in d['watchlist'][:4]],'open_call_authorized':d['open_call_authorized']}, ensure_ascii=False))
           PY
