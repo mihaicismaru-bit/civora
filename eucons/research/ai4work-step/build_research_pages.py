@@ -29,7 +29,7 @@ def activation_enabled(contract: dict[str, Any], manifest: dict[str, Any]) -> bo
         contract.get("production_enabled") is True
         and manifest.get("approved_for_prod") is True
         and manifest.get("collection_enabled") is True
-        and manifest.get("deploy_authorized") is True
+        and manifest.get("deploy_authorized") is False
         and manifest.get("real_collection_authorized") is True
         and bool(str(manifest.get("explicit_user_approval_reference") or "").strip())
     )
