@@ -1,10 +1,10 @@
 {
   "schema_version": "1.4",
-  "observed_at": "2026-08-31T21:51:21+03:00",
+  "observed_at": "2026-08-31T21:53:08+03:00",
   "execution_mode": "bounded_parallel",
   "max_parallel_sources": 6,
   "sources_total": 22,
-  "sources_ok": 19,
+  "sources_ok": 20,
   "facts_admitted": 4,
   "source_notice_briefs": 4,
   "facts_before_cross_source_headline_dedupe": 4,
@@ -20,7 +20,7 @@
     {
       "source_id": "cj-valcea-anunturi",
       "listing_ok": false,
-      "error": "URLError: <urlopen error [Errno -3] Temporary failure in name resolution>",
+      "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
       "facts": 0
     },
     {
@@ -130,8 +130,9 @@
     },
     {
       "source_id": "ipj-valcea-news",
-      "listing_ok": false,
-      "error": "URLError: <urlopen error [Errno -3] Temporary failure in name resolution>",
+      "listing_ok": true,
+      "links_examined": 8,
+      "article_failures": 0,
       "facts": 0
     },
     {
