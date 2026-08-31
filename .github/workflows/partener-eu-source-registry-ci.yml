@@ -17,6 +17,8 @@ on:
       - 'partener-eu/ingest/interreg_territorial_fit.py'
       - 'partener-eu/ingest/interreg_applicant_partner_fit_registry.json'
       - 'partener-eu/ingest/interreg_applicant_partner_fit.py'
+      - 'partener-eu/ingest/interreg_programming_pipeline_registry.json'
+      - 'partener-eu/ingest/interreg_programming_pipeline.py'
       - 'partener-eu/p11/candidate_staging.py'
       - 'partener-eu/p11/eea_civil_society_stage.py'
       - 'partener-eu/p11/test_eea_civil_society_stage.py'
@@ -30,6 +32,7 @@ on:
       - 'partener-eu/ops/test_interreg_rohu_pipeline_split.py'
       - 'partener-eu/ops/test_interreg_territorial_fit.py'
       - 'partener-eu/ops/test_interreg_applicant_partner_fit.py'
+      - 'partener-eu/ops/test_interreg_programming_pipeline.py'
       - 'partener-eu/ops/test_funding_tenders_structured_adapter.py'
       - 'partener-eu/ops/test_funding_tenders_live_fetch.py'
       - 'partener-eu/ops/test_eea_civil_society_calls.py'
@@ -78,6 +81,7 @@ jobs:
           python -m json.tool partener-eu/ingest/regiocentru_actions_source.json >/dev/null
           python -m json.tool partener-eu/ingest/interreg_territorial_fit_registry.json >/dev/null
           python -m json.tool partener-eu/ingest/interreg_applicant_partner_fit_registry.json >/dev/null
+          python -m json.tool partener-eu/ingest/interreg_programming_pipeline_registry.json >/dev/null
           python -m json.tool partener-eu/ops/sources.json >/dev/null
           python -m py_compile partener-eu/ingest/source_registry_probe.py
           python -m py_compile partener-eu/ingest/funding_tenders_api.py
@@ -88,6 +92,7 @@ jobs:
           python -m py_compile partener-eu/ingest/regiocentru_actions_fetch.py
           python -m py_compile partener-eu/ingest/interreg_territorial_fit.py
           python -m py_compile partener-eu/ingest/interreg_applicant_partner_fit.py
+          python -m py_compile partener-eu/ingest/interreg_programming_pipeline.py
           python -m py_compile partener-eu/p11/candidate_staging.py
           python -m py_compile partener-eu/p11/eea_civil_society_stage.py
           python -m py_compile partener-eu/p11/test_eea_civil_society_stage.py
@@ -97,6 +102,7 @@ jobs:
           python -m py_compile partener-eu/ops/test_interreg_rohu_pipeline_split.py
           python -m py_compile partener-eu/ops/test_interreg_territorial_fit.py
           python -m py_compile partener-eu/ops/test_interreg_applicant_partner_fit.py
+          python -m py_compile partener-eu/ops/test_interreg_programming_pipeline.py
           python -m py_compile partener-eu/ops/test_funding_tenders_structured_adapter.py
           python -m py_compile partener-eu/ops/test_funding_tenders_live_fetch.py
           python -m py_compile partener-eu/ops/test_eea_civil_society_calls.py
@@ -187,6 +193,82 @@ jobs:
           path: /tmp/interreg-market-fit
           retention-days: 7
           if-no-files-found: error
+
+      - name: Validate Interreg 2028-2034 programming pipeline stays non-authorizing
+        run: python partener-eu/ops/test_interreg_programming_pipeline.py
+
+      - name: Capture live Interreg 2028-2034 programming watch evidence
+        run: |
+          python partener-eu/ingest/interreg_programming_pipeline.py \
+            --live \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-programming" \
+            --output /tmp/interreg-programming-pipeline.json
+
+      - name: Validate live Interreg programming evidence stays pipeline-only
+        run: |
+          python - <<'PY'
+          import json, string, sys
+          p='/tmp/interreg-programming-pipeline.json'
+          d=json.load(open(p, encoding='utf-8'))
+          if d.get('adapter_id') != 'INTERREG_PROGRAMMING_PIPELINE_V1' or d.get('observation_state') != 'PROGRAMMING_PIPELINE':
+              print('FAIL Interreg programming identity drift:', d.get('adapter_id'), d.get('observation_state'))
+              sys.exit(2)
+          if d.get('source_count') != 6 or len(d.get('watchlist') or []) != 6:
+              print('FAIL Interreg programming source inventory drift:', d.get('source_count'))
+              sys.exit(2)
+          for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized'):
+              if d.get(key) is not False:
+                  print('FAIL Interreg programming aggregate became authorizing:', key, d.get(key))
+                  sys.exit(2)
+          if d.get('publication_effect') != 'NONE' or d.get('market_intelligence_only') is not True:
+              print('FAIL Interreg programming publication/policy drift')
+              sys.exit(2)
+          reg_hash=str(d.get('registry_sha256') or '')
+          if len(reg_hash) != 64 or any(ch not in string.hexdigits for ch in reg_hash):
+              print('FAIL Interreg programming registry hash:', reg_hash)
+              sys.exit(2)
+          if not d.get('run_id') or not d.get('fetched_at'):
+              print('FAIL Interreg programming provenance incomplete')
+              sys.exit(2)
+          healthy=0
+          for row in d['watchlist']:
+              if row.get('observation_state') not in {'PROPOSAL','CONSULTATION','PROGRAMMING_PROCESS'}:
+                  print('FAIL forbidden programming state:', row.get('source_id'), row.get('observation_state'))
+                  sys.exit(2)
+              for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized'):
+                  if row.get(key) is not False:
+                      print('FAIL Interreg programming row became authorizing:', row.get('source_id'), key)
+                      sys.exit(2)
+              if row.get('publication_effect') != 'NONE':
+                  print('FAIL Interreg programming row publication effect:', row.get('source_id'))
+                  sys.exit(2)
+              health=(row.get('source_health') or {}).get('health_state')
+              if health == 'HEALTHY':
+                  healthy += 1
+                  raw_hash=str((row.get('source_health') or {}).get('raw_sha256') or '')
+                  if len(raw_hash) != 64 or any(ch not in string.hexdigits for ch in raw_hash):
+                      print('FAIL healthy programming source missing raw hash:', row.get('source_id'))
+                      sys.exit(2)
+              elif not str(health).startswith('DEGRADED'):
+                  print('FAIL unexpected live source-health state:', row.get('source_id'), health)
+                  sys.exit(2)
+              if str(health).startswith('DEGRADED') and (row.get('source_health') or {}).get('lkg_required') is not True:
+                  print('FAIL degraded source does not require LKG:', row.get('source_id'))
+                  sys.exit(2)
+          if healthy < 4:
+              print('FAIL too few official Interreg programming sources healthy:', healthy)
+              sys.exit(2)
+          print(json.dumps({'source_count':d['source_count'],'healthy_source_count':healthy,'health_state':d.get('health_state'),'top_watch':[(r['source_id'],r['observation_state'],r['consultation_lifecycle'],r['watch_priority']) for r in d['watchlist'][:4]],'open_call_authorized':d['open_call_authorized']}, ensure_ascii=False))
+          PY
+
+      - name: Upload bounded Interreg programming watch evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-interreg-programming-pipeline-evidence
+          path: /tmp/interreg-programming-pipeline.json
+          retention-days: 7
+          if-no-files-found: warn
 
       - name: Validate Funding & Tenders structured normalization
         run: python partener-eu/ops/test_funding_tenders_structured_adapter.py
