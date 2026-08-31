@@ -1,0 +1,65 @@
+name: EUCONS AI4WORK Adversarial QA Gate
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/research/ai4work-step/adversarial_qa.py'
+      - 'eucons/research/ai4work-step/test_adversarial_qa.py'
+      - 'eucons/research/ai4work-step/need_ranking_engine.py'
+      - 'eucons/research/ai4work-step/response_integrity_control.py'
+      - 'eucons/research/ai4work-step/NEED_ANALYSIS_PLAN_DRAFT.json'
+      - 'eucons/research/ai4work-step/COLLECTION_FRAME_DRAFT.json'
+      - 'eucons/research/ai4work-step/forms_definition.json'
+      - '.github/workflows/eucons-ai4work-adversarial-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/research/ai4work-step/adversarial_qa.py'
+      - 'eucons/research/ai4work-step/test_adversarial_qa.py'
+      - 'eucons/research/ai4work-step/need_ranking_engine.py'
+      - 'eucons/research/ai4work-step/response_integrity_control.py'
+      - 'eucons/research/ai4work-step/NEED_ANALYSIS_PLAN_DRAFT.json'
+      - 'eucons/research/ai4work-step/COLLECTION_FRAME_DRAFT.json'
+      - 'eucons/research/ai4work-step/forms_definition.json'
+      - '.github/workflows/eucons-ai4work-adversarial-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-ai4work-adversarial-qa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  adversarial-qa-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Run adversarial QA unit tests (TEST TWIN fixtures are NON-EVIDENCE)
+        working-directory: eucons/research/ai4work-step
+        run: python -m unittest -v test_adversarial_qa.py
+      - name: Assert repository state still cannot produce a PROD QA claim
+        working-directory: eucons/research/ai4work-step
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('.')
+          plan = json.loads((root / 'NEED_ANALYSIS_PLAN_DRAFT.json').read_text(encoding='utf-8'))
+          frame = json.loads((root / 'COLLECTION_FRAME_DRAFT.json').read_text(encoding='utf-8'))
+          assert plan.get('status') == 'DRAFT_NOT_APPROVED_FOR_PROD'
+          assert plan.get('approval', {}).get('approved_for_prod') is False
+          assert frame.get('frame_status') == 'DRAFT_NOT_APPROVED_FOR_PROD'
+          assert frame.get('approval', {}).get('approved_for_prod') is not True
+          assert frame.get('nf06_handoff', {}).get('eligible_now') is False
+          assert frame.get('sampling_design', {}).get('synthetic_records_allowed_in_prod') is False
+          assert plan.get('test_twin_evidence_class') == 'TEST_TWIN_NON_EVIDENCE'
+          assert plan.get('project_activity_as_need_evidence') is False
+          print('PASS: adversarial QA mechanics are testable while repository PROD analysis remains fail-closed and TEST TWIN remains NON-EVIDENCE')
+          PY
