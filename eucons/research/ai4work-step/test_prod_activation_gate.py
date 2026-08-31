@@ -73,7 +73,7 @@ class ProdActivationGateTests(unittest.TestCase):
         self.assertIsNone(evidence["account_server_logging_binding"]["reference"])
         ready, errors = evaluate_repository_activation()
         self.assertFalse(ready)
-        self.assertIn("external_evidence_not_frozen:account_server_logging_binding", errors)
+        self.assertIn("external_evidence_status_or_binding_invalid:account_server_logging_binding", errors)
         self.assertFalse(any("provider_server_logging_profile" in item for item in errors))
 
     def test_live_commercial_privacy_surface_cannot_substitute_for_ai4work_research_chain(self):
@@ -101,7 +101,7 @@ class ProdActivationGateTests(unittest.TestCase):
 
         ready, errors = evaluate_repository_activation()
         self.assertFalse(ready)
-        self.assertIn(f"external_evidence_not_frozen:{key}", errors)
+        self.assertIn(f"external_evidence_status_or_binding_invalid:{key}", errors)
 
     def test_setting_only_production_enabled_cannot_activate_collection(self):
         contract, manifest, controller, frame, dpia = self.load_artifacts()
@@ -120,7 +120,7 @@ class ProdActivationGateTests(unittest.TestCase):
         self.assertIn("activation_manifest_not_approved", errors)
         self.assertIn("collection_frame_not_approved", errors)
         self.assertIn("dpia_screening_not_approved", errors)
-        self.assertTrue(any(item.startswith("external_evidence_not_frozen:") for item in errors))
+        self.assertTrue(any(item.startswith("external_evidence_status_or_binding_invalid:") for item in errors))
 
     def test_external_reference_requires_immutable_sha256(self):
         contract, manifest, controller, frame, dpia = self.load_artifacts()
@@ -145,7 +145,36 @@ class ProdActivationGateTests(unittest.TestCase):
             collection_frame=frame,
             dpia_screening=dpia,
         )
-        self.assertIn("external_evidence_not_frozen:privacy_notice", errors)
+        self.assertIn("external_evidence_status_or_binding_invalid:privacy_notice", errors)
+
+    def test_operational_evidence_cannot_use_frozen_documentary_status(self):
+        contract, manifest, controller, frame, dpia = self.load_artifacts()
+        manifest = copy.deepcopy(manifest)
+        key = "research_only_store_binding"
+        path, digest = self._temporary_attestation(
+            {
+                "research_id": manifest["research_id"],
+                "evidence_binding_key": key,
+                "evidence_class": "OPERATIONAL_EVIDENCE",
+                "synthetic": False,
+            }
+        )
+        try:
+            manifest["required_external_or_operational_evidence"][key] = {
+                "status": "FROZEN",
+                "reference": path.name,
+                "sha256": digest,
+            }
+            errors = activation_errors(
+                contract=contract,
+                manifest=manifest,
+                controller=controller,
+                collection_frame=frame,
+                dpia_screening=dpia,
+            )
+            self.assertIn(f"external_evidence_status_or_binding_invalid:{key}", errors)
+        finally:
+            path.unlink(missing_ok=True)
 
     def test_synthetic_complete_control_state_cannot_bypass_evidence_binding(self):
         contract, manifest, controller, frame, dpia = self.load_artifacts()
@@ -201,7 +230,7 @@ class ProdActivationGateTests(unittest.TestCase):
             collection_frame=frame,
             dpia_screening=dpia,
         )
-        self.assertFalse(any(item.startswith("external_evidence_not_frozen:") for item in errors), errors)
+        self.assertFalse(any(item.startswith("external_evidence_status_or_binding_invalid:") for item in errors), errors)
         self.assertEqual(
             {item.removeprefix("external_evidence_binding_invalid:") for item in errors if item.startswith("external_evidence_binding_invalid:")},
             REQUIRED_EXTERNAL_KEYS,
