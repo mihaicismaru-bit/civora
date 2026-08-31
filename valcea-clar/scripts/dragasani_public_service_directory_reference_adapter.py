@@ -17,7 +17,6 @@ import json
 import re
 import sys
 import unicodedata
-from dataclasses import dataclass
 from html.parser import HTMLParser
 from typing import Iterable
 from urllib.parse import urlsplit
@@ -46,6 +45,9 @@ DISABLED_CAPABILITIES = [
     "inferred_photo_rights",
 ]
 
+# Exact source wording varies slightly between the rendered contact cards and
+# older markup. Keep the vocabulary narrowly tied to units visible on the
+# first-party contact surface; do not add arbitrary municipal departments.
 SERVICE_LABELS = {
     "primaria municipiului dragasani": "MUNICIPAL_ADMINISTRATION",
     "secretariat primarie": "MUNICIPAL_ADMINISTRATION",
@@ -53,16 +55,14 @@ SERVICE_LABELS = {
     "directia de asistenta sociala": "SOCIAL_ASSISTANCE",
     "directia servicii publice": "PUBLIC_SERVICES",
     "serviciul de evidenta a populatiei": "POPULATION_RECORDS",
-    "evidenta populatiei, starea civila": "POPULATION_RECORDS",
     "evidenta populatiei starea civila": "POPULATION_RECORDS",
     "politia locala": "LOCAL_POLICE",
     "politia locala dispecerat": "LOCAL_POLICE",
-    "casa de cultura": "CULTURE",
     "biblioteca municipala": "LIBRARY",
     "administratia pietei": "MARKET",
     "piata municipala": "MARKET",
-    "protectia civila": "CIVIL_PROTECTION",
-    "protectia civila situatii de urgenta": "CIVIL_PROTECTION",
+    "protectie civila": "CIVIL_PROTECTION",
+    "protectie civila situatii de urgenta": "CIVIL_PROTECTION",
 }
 
 CANONICAL_LABELS = {
@@ -71,7 +71,6 @@ CANONICAL_LABELS = {
     "PUBLIC_SERVICES": "Direcția Servicii Publice",
     "POPULATION_RECORDS": "Serviciul de Evidență a Populației",
     "LOCAL_POLICE": "Poliția Locală",
-    "CULTURE": "Casa de Cultură",
     "LIBRARY": "Biblioteca Municipală",
     "MARKET": "Piața Municipală",
     "CIVIL_PROTECTION": "Protecție Civilă",
@@ -134,8 +133,7 @@ def fetch_source(url: str = SOURCE_URL) -> bytes:
         content_type = response.getheader("Content-Type", "").lower()
         if "text/html" not in content_type:
             raise ExternalInputError("source is not HTML")
-        location = response.getheader("Location")
-        if location:
+        if response.getheader("Location"):
             raise ExternalInputError("redirect response is not allowed")
         body = response.read(MAX_RESPONSE_BYTES + 1)
         if len(body) > MAX_RESPONSE_BYTES:
@@ -157,9 +155,9 @@ def _extract_text(html_bytes: bytes) -> str:
 
 
 def _detect_services(text: str) -> list[dict[str, str]]:
-    # The public contact page may render labels and contact values together.
-    # We only recognize a small allowlist of service labels and intentionally
-    # discard every adjacent value (phones, emails, people, addresses, hours).
+    # The public contact page renders labels together with contact values. Only
+    # allowlisted labels survive; phones, emails, names, addresses, and hours
+    # are never copied into evidence.
     normalized = _ascii_key(text)
     hits: dict[str, str] = {}
     for label, service_type in SERVICE_LABELS.items():
@@ -173,8 +171,7 @@ def _detect_services(text: str) -> list[dict[str, str]]:
 
 def build_result(html_bytes: bytes, source_url: str = SOURCE_URL) -> dict[str, object]:
     _validate_source_url(source_url)
-    text = _extract_text(html_bytes)
-    references = _detect_services(text)
+    references = _detect_services(_extract_text(html_bytes))
     found_types = {str(item["service_type"]) for item in references}
     missing_core = sorted(CORE_TYPES - found_types)
 
@@ -188,7 +185,6 @@ def build_result(html_bytes: bytes, source_url: str = SOURCE_URL) -> dict[str, o
         state = "CLEAR"
         reason = "bounded_first_party_directory_presence_references"
 
-    source_sha = _sha256(html_bytes)
     evidence_seed = json.dumps(references, ensure_ascii=False, sort_keys=True).encode("utf-8")
     return {
         "state": state,
@@ -197,7 +193,7 @@ def build_result(html_bytes: bytes, source_url: str = SOURCE_URL) -> dict[str, o
             "url": SOURCE_URL,
             "host": SOURCE_HOST,
             "path": SOURCE_PATH,
-            "sha256": source_sha,
+            "sha256": _sha256(html_bytes),
             "retrieval_policy": "HTTPS_ONLY_NO_REDIRECT_EXACT_HOST_PATH",
         },
         "content_contract": CONTENT_CONTRACT,
@@ -217,7 +213,6 @@ def _sample_html(*, omit: Iterable[str] = (), duplicate: bool = False) -> bytes:
         "Direcția Servicii Publice",
         "Serviciul de Evidență a Populației",
         "Poliția Locală (dispecerat)",
-        "Casa de Cultură",
         "Biblioteca Municipală",
         "Piața Municipală",
         "Protecție Civilă, situații de urgență",
@@ -226,14 +221,17 @@ def _sample_html(*, omit: Iterable[str] = (), duplicate: bool = False) -> bytes:
     if duplicate and kept:
         kept.append(kept[0])
     rows = "".join(f"<li>{html_lib.escape(label)}: 0250 000 000</li>" for label in kept)
-    return ("<html><body><h1>Contact</h1><p>Primar: Exemplu Persoană</p><ul>" + rows + "</ul>"
-            "<p>dragasani@example.invalid</p><p>Luni - Vineri 08:00-16:00</p></body></html>").encode("utf-8")
+    return (
+        "<html><body><h1>Contact</h1><p>Primar: Exemplu Persoană</p><ul>"
+        + rows
+        + "</ul><p>dragasani@example.invalid</p><p>Luni - Vineri 08:00-16:00</p></body></html>"
+    ).encode("utf-8")
 
 
 def self_test() -> None:
     normal = build_result(_sample_html())
     assert normal["state"] == "CLEAR"
-    assert normal["reference_count"] == 9
+    assert normal["reference_count"] == 8
     serialized = json.dumps(normal, ensure_ascii=False)
     assert "0250 000 000" not in serialized
     assert "Exemplu Persoană" not in serialized
@@ -241,7 +239,7 @@ def self_test() -> None:
     assert "08:00" not in serialized
 
     duplicate = build_result(_sample_html(duplicate=True))
-    assert duplicate["reference_count"] == 9
+    assert duplicate["reference_count"] == 8
 
     missing_core = build_result(_sample_html(omit={"politia locala dispecerat"}))
     assert missing_core["state"] == "HOLD"
