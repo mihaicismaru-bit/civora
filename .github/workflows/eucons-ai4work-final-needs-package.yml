@@ -1,0 +1,69 @@
+name: EUCONS AI4WORK Final Needs Package Gate
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/research/ai4work-step/final_needs_package_gate.py'
+      - 'eucons/research/ai4work-step/render_needs_analysis_docx.py'
+      - 'eucons/research/ai4work-step/test_final_needs_package_gate.py'
+      - 'eucons/research/ai4work-step/adversarial_qa.py'
+      - 'eucons/research/ai4work-step/need_ranking_engine.py'
+      - 'eucons/research/ai4work-step/disclosure_control.py'
+      - 'eucons/research/ai4work-step/nf06_preingest.py'
+      - 'eucons/research/ai4work-step/NEED_ANALYSIS_PLAN_DRAFT.json'
+      - 'eucons/research/ai4work-step/PRECOLLECTION_ANALYSIS_PLAN_LOCK_DRAFT.json'
+      - 'eucons/research/ai4work-step/PROD_ACTIVATION_MANIFEST_DRAFT.json'
+      - '.github/workflows/eucons-ai4work-final-needs-package.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/research/ai4work-step/final_needs_package_gate.py'
+      - 'eucons/research/ai4work-step/render_needs_analysis_docx.py'
+      - 'eucons/research/ai4work-step/test_final_needs_package_gate.py'
+      - 'eucons/research/ai4work-step/adversarial_qa.py'
+      - 'eucons/research/ai4work-step/need_ranking_engine.py'
+      - 'eucons/research/ai4work-step/disclosure_control.py'
+      - 'eucons/research/ai4work-step/nf06_preingest.py'
+      - '.github/workflows/eucons-ai4work-final-needs-package.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-ai4work-final-needs-package-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  final-needs-package-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Run final package tests (TEST TWIN is NON-EVIDENCE)
+        working-directory: eucons/research/ai4work-step
+        run: python -m unittest -v test_final_needs_package_gate.py
+      - name: Assert repository cannot self-authorize PROD release
+        working-directory: eucons/research/ai4work-step
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('.')
+          plan = json.loads((root / 'NEED_ANALYSIS_PLAN_DRAFT.json').read_text(encoding='utf-8'))
+          lock = json.loads((root / 'PRECOLLECTION_ANALYSIS_PLAN_LOCK_DRAFT.json').read_text(encoding='utf-8'))
+          manifest = json.loads((root / 'PROD_ACTIVATION_MANIFEST_DRAFT.json').read_text(encoding='utf-8'))
+
+          assert plan.get('status') == 'DRAFT_NOT_APPROVED_FOR_PROD'
+          assert plan.get('approval', {}).get('approved_for_prod') is False
+          assert lock.get('status') == 'OPEN_NOT_LOCKED'
+          assert manifest.get('approved_for_prod') is False
+          assert manifest.get('collection_enabled') is False
+          assert plan.get('test_twin_evidence_class') == 'TEST_TWIN_NON_EVIDENCE'
+          assert plan.get('project_activity_as_need_evidence') is False
+          print('PASS: final NEEDS_ANALYSIS/DOCX packaging mechanics are testable while PROD release remains fail-closed')
+          PY
