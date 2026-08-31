@@ -1,0 +1,33 @@
+name: VÂLCEA CLAR CJ Vâlcea Session Announcement References
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'valcea-clar/scripts/cj_valcea_session_announcement_reference_adapter.py'
+      - '.github/workflows/valcea-clar-cj-valcea-session-announcement-reference.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/scripts/cj_valcea_session_announcement_reference_adapter.py'
+      - '.github/workflows/valcea-clar-cj-valcea-session-announcement-reference.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-cj-valcea-session-announcement-reference-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Compile CJ Vâlcea session-announcement reference adapter
+        run: python -m py_compile valcea-clar/scripts/cj_valcea_session_announcement_reference_adapter.py
+      - name: Run CJ Vâlcea session-announcement fail-closed regressions
+        run: python valcea-clar/scripts/cj_valcea_session_announcement_reference_adapter.py --self-test
