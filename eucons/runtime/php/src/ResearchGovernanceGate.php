@@ -6,8 +6,15 @@ require_once __DIR__ . '/ResearchExplicitUserApprovalGate.php';
 final class EuconsResearchGovernanceGate
 {
     private const RESEARCH_ID = 'AI4WORK-STEP-NF-RUN-001';
-    private const APPROVED_EXTERNAL_STATUSES = ['APPROVED', 'PASS', 'FROZEN'];
+    private const APPROVED_EXTERNAL_STATUSES = ['APPROVED', 'PASS'];
+    private const DOCUMENTARY_EXTERNAL_STATUSES = ['APPROVED', 'PASS', 'FROZEN'];
     private const SEMANTIC_ATTESTATION_STATUSES = ['APPROVED', 'PASS'];
+    private const FROZEN_DOCUMENTARY_KEYS = [
+        'provider_account_role_reconciliation',
+        'live_hosting_service_mapping',
+        'provider_annex_4_5',
+        'provider_server_logging_profile',
+    ];
     private const REQUIRED_EXTERNAL_KEYS = [
         'privacy_notice',
         'lawful_basis_or_lia',
@@ -222,8 +229,12 @@ final class EuconsResearchGovernanceGate
 
         foreach (self::REQUIRED_EXTERNAL_KEYS as $key) {
             $binding = $evidence[$key] ?? null;
+            $status = is_array($binding) ? ($binding['status'] ?? null) : null;
+            $allowedStatuses = in_array($key, self::FROZEN_DOCUMENTARY_KEYS, true)
+                ? self::DOCUMENTARY_EXTERNAL_STATUSES
+                : self::APPROVED_EXTERNAL_STATUSES;
             if (!is_array($binding)
-                || !in_array($binding['status'] ?? null, self::APPROVED_EXTERNAL_STATUSES, true)
+                || !in_array($status, $allowedStatuses, true)
                 || !is_string($binding['reference'] ?? null)
                 || trim((string)$binding['reference']) === ''
                 || !is_string($binding['sha256'] ?? null)
@@ -234,7 +245,7 @@ final class EuconsResearchGovernanceGate
             if ($path === null || hash_file('sha256', $path) !== $binding['sha256']) {
                 return false;
             }
-            if (in_array($binding['status'], self::SEMANTIC_ATTESTATION_STATUSES, true)) {
+            if (in_array($status, self::SEMANTIC_ATTESTATION_STATUSES, true)) {
                 try {
                     $artifact = self::loadJson($path);
                 } catch (Throwable) {
