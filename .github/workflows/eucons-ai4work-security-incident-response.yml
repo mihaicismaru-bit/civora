@@ -1,0 +1,44 @@
+name: EUCONS AI4WORK Security Incident Response Gate
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/research/ai4work-step/GDPR_SECURITY_INCIDENT_RESPONSE_DRAFT.json'
+      - 'eucons/research/ai4work-step/security_incident_response_gate.py'
+      - 'eucons/research/ai4work-step/test_security_incident_response.py'
+      - 'eucons/research/ai4work-step/form_contract.json'
+      - 'eucons/research/ai4work-step/PROD_ACTIVATION_MANIFEST_DRAFT.json'
+      - '.github/workflows/eucons-ai4work-security-incident-response.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/research/ai4work-step/GDPR_SECURITY_INCIDENT_RESPONSE_DRAFT.json'
+      - 'eucons/research/ai4work-step/security_incident_response_gate.py'
+      - 'eucons/research/ai4work-step/test_security_incident_response.py'
+      - 'eucons/research/ai4work-step/form_contract.json'
+      - 'eucons/research/ai4work-step/PROD_ACTIVATION_MANIFEST_DRAFT.json'
+      - '.github/workflows/eucons-ai4work-security-incident-response.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-ai4work-security-incident-response-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  security-incident-response-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Validate AI4WORK GDPR incident-response procedure and fail-closed PROD boundary
+        working-directory: eucons/research/ai4work-step
+        run: python -m unittest -v test_security_incident_response.py
+      - name: Enforce repository incident-response state
+        working-directory: eucons/research/ai4work-step
+        run: python security_incident_response_gate.py
