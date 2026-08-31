@@ -2,19 +2,31 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-31T14:11:50+03:00",
+  "generated_at": "2026-08-31T14:27:55+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-31T14:10:34+03:00",
-  "task_count": 49,
+  "queue_generated_at": "2026-08-31T14:26:23+03:00",
+  "task_count": 48,
   "primary_match_count": 0,
-  "no_match_count": 25,
+  "no_match_count": 24,
   "unrouted_count": 24,
   "target_count": 18,
-  "targets_ok": 14,
+  "targets_ok": 13,
   "results": [
+    {
+      "signal_id": "98201033c30c31e0c0bd738f",
+      "signal_title": "FOTO „Ziua Limbii Române”, sărbătorită într-un cadru inedit, la Salina Ocnele Mari. A fost lansată revista „Memoria slovelor”",
+      "signal_url": "https://evenimentvalcean.ro/foto-ziua-limbii-romane-sarbatorita-intr-un-cadru-inedit-la-salina-ocnele-mari-a-fost-lansata-revista-memoria-slovelor/",
+      "signal_publisher": "Eveniment Vâlcean",
+      "signal_published_at": "2026-08-31T14:15:43+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
     {
       "signal_id": "ec2c8bb9af797b9d6410bea0",
       "signal_title": "Deputatul Nicolae Mîndrescu cere soluții urgente pentru evitarea unei crize a termoficării la Vâlcea",
@@ -483,9 +495,9 @@
             "name": "SCM Râmnicu Vâlcea",
             "url": "https://scmramnicuvalcea.ro/category/stiri/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "TimeoutError: The read operation timed out",
+          "documents_examined": 0
         },
         {
           "target": {
@@ -532,9 +544,9 @@
             "name": "SCM Râmnicu Vâlcea",
             "url": "https://scmramnicuvalcea.ro/category/stiri/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "TimeoutError: The read operation timed out",
+          "documents_examined": 0
         },
         {
           "target": {
@@ -956,67 +968,6 @@
       "signal_url": "https://www.impactreal.ro/2026/08/28/construire-locuinte-nzeb-pentru-tinerii-din-orasul-babeni/",
       "signal_publisher": "Impact Real",
       "signal_published_at": "2026-08-28T14:58:02+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "349e4a70474c18bab80a93f5",
-      "signal_title": "Femeie lovită pe trecerea de pietoni în Râmnicu Vâlcea. Un pompier aflat în timpul liber i-a acordat primul ajutor",
-      "signal_url": "https://seintamplainvalcea.ro/2026/08/28/femeie-lovita-pe-trecerea-de-pietoni-in-ramnicu-valcea-un-pompier-aflat-in-timpul-liber-i-a-acordat-primul-ajutor/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-08-28T14:35:42+03:00",
-      "verification_route_id": "fire_rescue_alert",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "isu-valcea-stiri-locale",
-            "name": "ISU Vâlcea — Știri locale",
-            "url": "https://isuvl.igsu.ro/stiri-locale"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "isu-valcea-comunicate",
-            "name": "ISU Vâlcea",
-            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "inhga-avertizari-hidrologice-valcea",
-            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
-            "url": "https://www.hidro.ro/warning/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "4ddb66ff3484672c21bfbb45",
-      "signal_title": "Voineasa și Vidra, condamnate la ruină de 35 de ani: statul privește nepăsător, parlamentarii vin, se miră și pleacă",
-      "signal_url": "https://www.impactreal.ro/2026/08/28/voineasa-si-vidra-condamnate-la-ruina-de-35-de-ani-sindicatele-blocheaza-investitiile-statul-priveste-nepasator-parlamentarii-vin-se-mira-si-pleaca/",
-      "signal_publisher": "Impact Real",
-      "signal_published_at": "2026-08-28T14:16:19+03:00",
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
