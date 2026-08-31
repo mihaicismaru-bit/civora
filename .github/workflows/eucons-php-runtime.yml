@@ -11,6 +11,7 @@ on:
       - 'eucons/validation/test_php_research_runtime.php'
       - 'eucons/validation/test_php_research_channel_gate.php'
       - 'eucons/validation/test_php_research_governance_gate.php'
+      - 'eucons/validation/test_php_research_external_evidence_status_policy.php'
       - 'eucons/validation/test_php_research_persisted_bundle_export.php'
       - 'eucons/leads/lead_contract.json'
       - 'eucons/leads/forms.json'
@@ -29,6 +30,7 @@ on:
       - 'eucons/validation/test_php_research_runtime.php'
       - 'eucons/validation/test_php_research_channel_gate.php'
       - 'eucons/validation/test_php_research_governance_gate.php'
+      - 'eucons/validation/test_php_research_external_evidence_status_policy.php'
       - 'eucons/validation/test_php_research_persisted_bundle_export.php'
       - 'eucons/leads/lead_contract.json'
       - 'eucons/leads/forms.json'
@@ -69,6 +71,7 @@ jobs:
           php -l eucons/validation/test_php_research_runtime.php
           php -l eucons/validation/test_php_research_channel_gate.php
           php -l eucons/validation/test_php_research_governance_gate.php
+          php -l eucons/validation/test_php_research_external_evidence_status_policy.php
           php -l eucons/validation/test_php_research_persisted_bundle_export.php
       - name: Test PHP lead runtime fail-closed behavior
         run: php eucons/validation/test_php_runtime.php
@@ -80,6 +83,8 @@ jobs:
         run: php eucons/validation/test_php_research_channel_gate.php
       - name: Test AI4WORK live GDPR governance activation gate
         run: php eucons/validation/test_php_research_governance_gate.php
+      - name: Test AI4WORK external evidence status policy
+        run: php eucons/validation/test_php_research_external_evidence_status_policy.php
       - name: Test AI4WORK persisted-bundle export bridge for NF06
         run: php eucons/validation/test_php_research_persisted_bundle_export.php
       - name: Require research route to enforce governance and approved channel before persistence
