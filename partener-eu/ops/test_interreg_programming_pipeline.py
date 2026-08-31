@@ -197,7 +197,7 @@ def main() -> None:
     registry, _ = pipeline.load_registry()
     result = pipeline.resolve(
         run_id="TEST-INTERREG-PIPELINE",
-        observed_at="2026-08-31T01:49:33Z",
+        observed_at="2026-09-01T01:49:33Z",
         live=False,
     )
     assert result["schema_version"] == "1.0"
@@ -250,7 +250,7 @@ def main() -> None:
     try:
         pipeline.resolve(
             run_id="TEST-BAD-ATTEMPTS",
-            observed_at="2026-08-31T01:49:33Z",
+            observed_at="2026-09-01T01:49:33Z",
             live=False,
             max_attempts=0,
         )
@@ -262,7 +262,7 @@ def main() -> None:
     try:
         pipeline.resolve(
             run_id="TEST-BAD-BACKOFF",
-            observed_at="2026-08-31T01:49:33Z",
+            observed_at="2026-09-01T01:49:33Z",
             live=False,
             retry_backoff_seconds=-0.1,
         )
@@ -273,7 +273,7 @@ def main() -> None:
 
     baseline = pipeline.reconcile_snapshots(
         result,
-        reconciled_at="2026-08-31T02:00:00Z",
+        reconciled_at="2026-09-01T02:00:00Z",
     )
     assert baseline["adapter_id"] == "INTERREG_PROGRAMMING_RECONCILIATION_V1"
     assert baseline["reconciliation_state"] == "BASELINE_CAPTURED_NO_PREVIOUS_SNAPSHOT"
@@ -287,14 +287,14 @@ def main() -> None:
 
     previous = copy.deepcopy(result)
     previous["run_id"] = "TEST-PREVIOUS"
-    previous["fetched_at"] = "2026-08-30T01:49:33Z"
+    previous["fetched_at"] = "2026-08-31T01:49:33Z"
     current_same = copy.deepcopy(result)
     current_same["run_id"] = "TEST-CURRENT-SAME"
-    current_same["fetched_at"] = "2026-08-31T01:49:33Z"
+    current_same["fetched_at"] = "2026-09-01T01:49:33Z"
     no_change = pipeline.reconcile_snapshots(
         current_same,
         previous,
-        reconciled_at="2026-08-31T02:01:00Z",
+        reconciled_at="2026-09-01T02:01:00Z",
     )
     assert no_change["reconciliation_state"] == "NO_CHANGE"
     assert no_change["semantic_change_count"] == 0
@@ -311,7 +311,7 @@ def main() -> None:
     semantic_receipt = pipeline.reconcile_snapshots(
         semantic_current,
         semantic_previous,
-        reconciled_at="2026-08-31T02:02:00Z",
+        reconciled_at="2026-09-01T02:02:00Z",
     )
     assert semantic_receipt["reconciliation_state"] == "PIPELINE_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING"
     assert semantic_receipt["semantic_change_count"] == 1
@@ -332,7 +332,7 @@ def main() -> None:
     transport_receipt = pipeline.reconcile_snapshots(
         transport_current,
         transport_previous,
-        reconciled_at="2026-08-31T02:03:00Z",
+        reconciled_at="2026-09-01T02:03:00Z",
     )
     assert transport_receipt["reconciliation_state"] == "TRANSPORT_OR_CONTENT_DRIFT_ONLY"
     assert transport_receipt["semantic_change_count"] == 0
@@ -343,7 +343,7 @@ def main() -> None:
 
     lkg_previous = copy.deepcopy(result)
     lkg_previous["run_id"] = "TEST-PREV-LKG"
-    lkg_previous["fetched_at"] = "2026-08-30T03:00:00Z"
+    lkg_previous["fetched_at"] = "2026-08-31T03:00:00Z"
     lkg_current = copy.deepcopy(result)
     lkg_current["run_id"] = "TEST-CURR-LKG"
     _make_healthy(_row(lkg_previous, "INT-PIPE-ROBG-2028-2034"), "c" * 64)
@@ -353,7 +353,7 @@ def main() -> None:
     lkg_receipt = pipeline.reconcile_snapshots(
         lkg_current,
         lkg_previous,
-        reconciled_at="2026-08-31T02:04:00Z",
+        reconciled_at="2026-09-01T02:04:00Z",
     )
     assert lkg_receipt["lkg_reference_available_count"] == 1
     lkg_change = next(row for row in lkg_receipt["changes"] if row["source_id"] == "INT-PIPE-ROBG-2028-2034")
@@ -372,7 +372,7 @@ def main() -> None:
     lkg_missing_receipt = pipeline.reconcile_snapshots(
         lkg_missing_current,
         lkg_missing_previous,
-        reconciled_at="2026-08-31T02:05:00Z",
+        reconciled_at="2026-09-01T02:05:00Z",
     )
     assert lkg_missing_receipt["lkg_reference_missing_count"] == 1
 
@@ -413,7 +413,7 @@ def main() -> None:
         stale_result = pipeline.resolve(
             run_id="TEST-STALE",
             registry_path=path,
-            observed_at="2026-08-31T01:49:33Z",
+            observed_at="2026-09-01T01:49:33Z",
             live=False,
         )
         assert stale_result["registry_freshness_state"] == "STALE_CHECK_GT_30D"
@@ -422,14 +422,14 @@ def main() -> None:
         path.unlink(missing_ok=True)
 
     future = copy.deepcopy(registry)
-    future["evidence_checked_date"] = "2026-09-01"
+    future["evidence_checked_date"] = "2026-09-02"
     path = _write_registry(future)
     try:
         try:
             pipeline.resolve(
                 run_id="TEST-FUTURE",
                 registry_path=path,
-                observed_at="2026-08-31T01:49:33Z",
+                observed_at="2026-09-01T01:49:33Z",
                 live=False,
             )
         except ValueError as exc:
