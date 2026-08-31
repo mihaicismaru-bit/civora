@@ -2,16 +2,16 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-31T12:12:09+03:00",
+  "generated_at": "2026-08-31T12:27:56+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-31T12:10:59+03:00",
-  "task_count": 51,
+  "queue_generated_at": "2026-08-31T12:26:30+03:00",
+  "task_count": 50,
   "primary_match_count": 0,
   "no_match_count": 25,
-  "unrouted_count": 26,
+  "unrouted_count": 25,
   "target_count": 18,
   "targets_ok": 14,
   "results": [
@@ -164,55 +164,6 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "6da701ae6f7788ebea7c0f32",
-      "signal_title": "DOCUMENT | Sesizare explozivă despre un concurs de angajare la Colegiul „Mircea cel Bătrân” din Râmnicu Vâlcea: „Postul era deja ocupat”. Acuzații de favorizare și concurs „aranjat”",
-      "signal_url": "https://ziaruldevalcea.ro/2026/08/document-sesizare-exploziva-despre-un-concurs-de-angajare-la-colegiul-mircea-cel-batran-din-ramnicu-valcea-postul-era-deja-ocupat-acuzatii-de-favorizare-si-conc/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-08-30T23:34:43+03:00",
-      "verification_route_id": "fire_rescue_alert",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "isu-valcea-stiri-locale",
-            "name": "ISU Vâlcea — Știri locale",
-            "url": "https://isuvl.igsu.ro/stiri-locale"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "isu-valcea-comunicate",
-            "name": "ISU Vâlcea",
-            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "inhga-avertizari-hidrologice-valcea",
-            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
-            "url": "https://www.hidro.ro/warning/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "13c46168f260b7e4486dfe3c",
@@ -1040,18 +991,6 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "86eeaf9d643c824f0d67f8fe",
-      "signal_title": "Nicușor Dan anunță o nouă nominalizare pentru funcția de prim ministru după 1 septembrie",
-      "signal_url": "https://www.indiscret.ro/2026/08/28/nicusor-dan-anunta-o-noua-nominalizare-pentru-functia-de-prim-ministru-dupa-1-septembrie/",
-      "signal_publisher": "Indiscret în Oltenia",
-      "signal_published_at": "2026-08-28T12:31:16+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "fbaf068144bf16fc56b085d2",
       "signal_title": "António Costa vine la București: finanțările europene după 2027 intră în negocierea decisivă",
       "signal_url": "https://www.eurovalcea.ro/2026/08/29/antonio-costa-vine-la-bucuresti-finantarile-europene-dupa-2027-intra-in-negocierea-decisiva/",
@@ -1062,6 +1001,55 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "6da701ae6f7788ebea7c0f32",
+      "signal_title": "DOCUMENT | Sesizare explozivă despre un concurs de angajare la Colegiul „Mircea cel Bătrân” din Râmnicu Vâlcea: „Postul era deja ocupat”. Acuzații de favorizare și concurs „aranjat”",
+      "signal_url": "https://ziaruldevalcea.ro/2026/08/document-sesizare-exploziva-despre-un-concurs-de-angajare-la-colegiul-mircea-cel-batran-din-ramnicu-valcea-postul-era-deja-ocupat-acuzatii-de-favorizare-si-conc/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": null,
+      "verification_route_id": "fire_rescue_alert",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "isu-valcea-stiri-locale",
+            "name": "ISU Vâlcea — Știri locale",
+            "url": "https://isuvl.igsu.ro/stiri-locale"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "isu-valcea-comunicate",
+            "name": "ISU Vâlcea",
+            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "6acb95bf42e585b073eb7ccc",
