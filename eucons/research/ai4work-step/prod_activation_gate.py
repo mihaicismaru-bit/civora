@@ -6,6 +6,8 @@ import re
 from pathlib import Path
 from typing import Any
 
+from explicit_user_approval_control import explicit_user_approval_errors
+
 HERE = Path(__file__).resolve().parent
 CONTRACT_PATH = HERE / "form_contract.json"
 MANIFEST_PATH = HERE / "PROD_ACTIVATION_MANIFEST_DRAFT.json"
@@ -154,12 +156,13 @@ def activation_errors(
         errors.append("activation_mode_not_real_evidence_only")
     if manifest.get("test_twin_policy") != "TEST_TWIN_NON_EVIDENCE_PERMANENTLY_NON_PROMOTABLE":
         errors.append("test_twin_policy_not_fail_closed")
-    user_approval = manifest.get("explicit_user_approval_reference")
-    if not isinstance(user_approval, str) or not user_approval.strip():
-        errors.append("explicit_user_approval_missing")
-    approval_timestamp = manifest.get("approval_timestamp")
-    if not isinstance(approval_timestamp, str) or not approval_timestamp.strip():
-        errors.append("approval_timestamp_missing")
+    errors.extend(explicit_user_approval_errors(manifest=manifest, research_id=research_id))
+    if manifest.get("merge_authorized") is not False:
+        errors.append("merge_authority_must_remain_false_for_collection_activation")
+    if manifest.get("deploy_authorized") is not False:
+        errors.append("deploy_authority_must_remain_false_for_collection_activation")
+    if manifest.get("canonicalization_authorized") is not False:
+        errors.append("canonicalization_authority_must_remain_false_for_collection_activation")
 
     if controller.get("controller") in (None, ""):
         errors.append("controller_unresolved")
