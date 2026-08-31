@@ -126,6 +126,26 @@ try {
 }
 write_bundle_json($root . '/research/receipts/' . $employerId . '.json', $employer['receipt']);
 
+@unlink($root . '/research/receipts/' . $heldId . '.json');
+try {
+    $exporter->buildPersistedBundles();
+    fail_bundle_test('held response missing receipt did not fail closed');
+} catch (RuntimeException $e) {
+    if ($e->getMessage() !== 'RESEARCH_EXPORT_RECEIPT_MISSING') fail_bundle_test('unexpected held missing-receipt error: ' . $e->getMessage());
+}
+write_bundle_json($root . '/research/receipts/' . $heldId . '.json', $held['receipt']);
+
+$orphanId = str_repeat('d', 64);
+$orphan = synthetic_bundle_fixture($orphanId, 'AI4WORK_ADULTS_V1', '2026-08-30T20:03:00Z');
+write_bundle_json($root . '/research/receipts/' . $orphanId . '.json', $orphan['receipt']);
+try {
+    $exporter->buildPersistedBundles();
+    fail_bundle_test('orphan acceptance receipt did not fail closed');
+} catch (RuntimeException $e) {
+    if ($e->getMessage() !== 'RESEARCH_EXPORT_ORPHAN_RECEIPT') fail_bundle_test('unexpected orphan-receipt error: ' . $e->getMessage());
+}
+@unlink($root . '/research/receipts/' . $orphanId . '.json');
+
 $badReceipt = $employer['receipt'];
 $badReceipt['normalized_sha256'] = str_repeat('0', 64);
 write_bundle_json($root . '/research/receipts/' . $employerId . '.json', $badReceipt);
