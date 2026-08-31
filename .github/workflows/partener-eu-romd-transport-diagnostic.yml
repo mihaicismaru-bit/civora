@@ -1,0 +1,92 @@
+name: PARTENER.EU ROMD Transport Diagnostic
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/romd_transport_diagnostic.py'
+      - 'partener-eu/ops/test_romd_transport_diagnostic.py'
+      - '.github/workflows/partener-eu-romd-transport-diagnostic.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  romd-transport-diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify checkout is exact event head
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          ACTUAL_SHA="$(git rev-parse HEAD)"
+          test "$ACTUAL_SHA" = "$EXPECTED_SHA"
+          echo "Exact event head verified: $ACTUAL_SHA"
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile bounded ROMD diagnostic
+        run: |
+          python -m py_compile partener-eu/ingest/romd_transport_diagnostic.py
+          python -m py_compile partener-eu/ops/test_romd_transport_diagnostic.py
+
+      - name: Validate ROMD diagnostic fail-closed contract
+        run: python partener-eu/ops/test_romd_transport_diagnostic.py
+
+      - name: Capture live official ROMD transport matrix
+        run: |
+          mkdir -p /tmp/romd-transport
+          python partener-eu/ingest/romd_transport_diagnostic.py \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-romd-transport" \
+            --output /tmp/romd-transport/romd-transport-diagnostic.json
+
+      - name: Validate live result stays diagnostic-only
+        run: |
+          python - <<'PY'
+          import json, sys
+          p='/tmp/romd-transport/romd-transport-diagnostic.json'
+          d=json.load(open(p, encoding='utf-8'))
+          if d.get('adapter_id') != 'INTERREG_ROMD_TRANSPORT_DIAGNOSTIC_V1':
+              print('FAIL adapter identity drift', d.get('adapter_id'))
+              sys.exit(2)
+          if d.get('market_intelligence_only') is not True or d.get('publication_effect') != 'NONE':
+              print('FAIL diagnostic policy drift')
+              sys.exit(2)
+          for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized','registry_mutation_authorized'):
+              if d.get(key) is not False:
+                  print('FAIL diagnostic became authorizing', key, d.get(key))
+                  sys.exit(2)
+          if d.get('tls_verification_disabled') is not False or d.get('proxy_used') is not False:
+              print('FAIL unsafe transport mode')
+              sys.exit(2)
+          if d.get('candidate_count') != 5 or len(d.get('probes') or []) != 5:
+              print('FAIL candidate inventory drift')
+              sys.exit(2)
+          print(json.dumps({
+              'healthy_programming_marker_count': d.get('healthy_programming_marker_count'),
+              'healthy_exact_article_count': d.get('healthy_exact_article_count'),
+              'recommended_primary_url_candidate': d.get('recommended_primary_url_candidate'),
+              'health': [(r.get('candidate_id'), r.get('health_state'), r.get('http_status')) for r in d.get('probes') or []],
+          }, ensure_ascii=False, sort_keys=True))
+          PY
+
+      - name: Upload ROMD transport evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-romd-transport-diagnostic-evidence
+          path: /tmp/romd-transport
+          retention-days: 7
+          if-no-files-found: error
