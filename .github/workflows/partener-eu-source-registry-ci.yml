@@ -210,11 +210,13 @@ jobs:
           import json, string, sys
           p='/tmp/interreg-programming-pipeline.json'
           d=json.load(open(p, encoding='utf-8'))
+          registry=json.load(open('partener-eu/ingest/interreg_programming_pipeline_registry.json', encoding='utf-8'))
+          expected_sources=len(registry.get('sources') or [])
           if d.get('adapter_id') != 'INTERREG_PROGRAMMING_PIPELINE_V1' or d.get('observation_state') != 'PROGRAMMING_PIPELINE':
               print('FAIL Interreg programming identity drift:', d.get('adapter_id'), d.get('observation_state'))
               sys.exit(2)
-          if d.get('source_count') != 6 or len(d.get('watchlist') or []) != 6:
-              print('FAIL Interreg programming source inventory drift:', d.get('source_count'))
+          if expected_sources < 1 or d.get('source_count') != expected_sources or len(d.get('watchlist') or []) != expected_sources:
+              print('FAIL Interreg programming source inventory drift:', d.get('source_count'), 'expected', expected_sources)
               sys.exit(2)
           for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized'):
               if d.get(key) is not False:
