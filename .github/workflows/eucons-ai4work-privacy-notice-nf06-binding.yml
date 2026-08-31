@@ -1,0 +1,30 @@
+name: EUCONS AI4WORK Privacy Notice NF06 Binding Gate
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/research/ai4work-step/ARTICLE13_NOTICE_SNAPSHOT_DRAFT.json'
+      - 'eucons/research/ai4work-step/COLLECTION_FRAME_DRAFT.json'
+      - 'eucons/research/ai4work-step/PROD_ACTIVATION_MANIFEST_DRAFT.json'
+      - 'eucons/research/ai4work-step/NF06_PREINGEST_CONTRACT.json'
+      - 'eucons/research/ai4work-step/privacy_notice_nf06_binding_control.py'
+      - 'eucons/research/ai4work-step/test_privacy_notice_nf06_binding_control.py'
+      - '.github/workflows/eucons-ai4work-privacy-notice-nf06-binding.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  privacy-notice-nf06-binding:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate Article 13 to NF06 binding
+        working-directory: eucons/research/ai4work-step
+        run: |
+          python -m unittest -v test_privacy_notice_nf06_binding_control.py
+          python privacy_notice_nf06_binding_control.py
