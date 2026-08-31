@@ -44,6 +44,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   source-registry-contract:
@@ -263,12 +264,115 @@ jobs:
           print(json.dumps({'source_count':d['source_count'],'healthy_source_count':healthy,'health_state':d.get('health_state'),'top_watch':[(r['source_id'],r['observation_state'],r['consultation_lifecycle'],r['watch_priority']) for r in d['watchlist'][:4]],'open_call_authorized':d['open_call_authorized']}, ensure_ascii=False))
           PY
 
+      - name: Restore previous Interreg programming snapshot from this branch
+        id: interreg_previous_snapshot
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/interreg-programming-previous
+          gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?name=partener-interreg-programming-pipeline-evidence&per_page=100" > /tmp/interreg-programming-artifacts.json
+          PREVIOUS_RUN_ID="$(python - <<'PY'
+          import json, os
+          data=json.load(open('/tmp/interreg-programming-artifacts.json', encoding='utf-8'))
+          branch=(os.environ.get('GITHUB_HEAD_REF') or os.environ.get('GITHUB_REF_NAME') or '').strip()
+          current=int(os.environ['GITHUB_RUN_ID'])
+          candidates=[]
+          for artifact in data.get('artifacts') or []:
+              run=artifact.get('workflow_run') or {}
+              if artifact.get('expired') is True:
+                  continue
+              run_id=int(run.get('id') or 0)
+              if run_id == 0 or run_id == current:
+                  continue
+              if branch and str(run.get('head_branch') or '') != branch:
+                  continue
+              candidates.append(artifact)
+          candidates.sort(key=lambda item: (str(item.get('created_at') or ''), int(item.get('id') or 0)), reverse=True)
+          if candidates:
+              print(int((candidates[0].get('workflow_run') or {}).get('id') or 0))
+          PY
+          )"
+          if [ -z "$PREVIOUS_RUN_ID" ] || [ "$PREVIOUS_RUN_ID" = "0" ]; then
+            echo "No previous non-expired Interreg programming artifact found for this branch; baseline reconciliation will be used."
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          gh run download "$PREVIOUS_RUN_ID" \
+            --repo "$GITHUB_REPOSITORY" \
+            --name partener-interreg-programming-pipeline-evidence \
+            --dir /tmp/interreg-programming-previous
+          test -s /tmp/interreg-programming-previous/interreg-programming-pipeline.json
+          echo "Previous Interreg programming snapshot restored from run $PREVIOUS_RUN_ID"
+          echo "available=true" >> "$GITHUB_OUTPUT"
+          echo "run_id=$PREVIOUS_RUN_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Reconcile Interreg programming evidence with previous branch snapshot
+        shell: bash
+        env:
+          PREVIOUS_AVAILABLE: ${{ steps.interreg_previous_snapshot.outputs.available }}
+          PREVIOUS_WORKFLOW_RUN_ID: ${{ steps.interreg_previous_snapshot.outputs.run_id }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os, pathlib, sys
+          sys.path.insert(0, 'partener-eu/ingest')
+          from interreg_programming_pipeline import reconcile_snapshots
+
+          current_path=pathlib.Path('/tmp/interreg-programming-pipeline.json')
+          previous_path=pathlib.Path('/tmp/interreg-programming-previous/interreg-programming-pipeline.json')
+          output_path=pathlib.Path('/tmp/interreg-programming-reconciliation.json')
+          current=json.loads(current_path.read_text(encoding='utf-8'))
+          previous=None
+          if os.environ.get('PREVIOUS_AVAILABLE') == 'true':
+              if not previous_path.is_file():
+                  print('FAIL previous snapshot advertised but not restored')
+                  sys.exit(2)
+              previous=json.loads(previous_path.read_text(encoding='utf-8'))
+          receipt=reconcile_snapshots(current, previous)
+          if receipt.get('adapter_id') != 'INTERREG_PROGRAMMING_RECONCILIATION_V1':
+              print('FAIL reconciliation identity drift')
+              sys.exit(2)
+          for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized'):
+              if receipt.get(key) is not False:
+                  print('FAIL programming reconciliation became authorizing:', key, receipt.get(key))
+                  sys.exit(2)
+          if receipt.get('publication_effect') != 'NONE' or receipt.get('market_intelligence_only') is not True:
+              print('FAIL programming reconciliation publication/policy drift')
+              sys.exit(2)
+          if previous is None:
+              if receipt.get('reconciliation_state') != 'BASELINE_CAPTURED_NO_PREVIOUS_SNAPSHOT':
+                  print('FAIL first-snapshot reconciliation state:', receipt.get('reconciliation_state'))
+                  sys.exit(2)
+          else:
+              if receipt.get('previous_run_id') != previous.get('run_id') or not receipt.get('previous_snapshot_sha256'):
+                  print('FAIL previous snapshot binding incomplete')
+                  sys.exit(2)
+          output_path.write_text(json.dumps(receipt, ensure_ascii=False, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+          print(json.dumps({
+              'previous_artifact_workflow_run_id': os.environ.get('PREVIOUS_WORKFLOW_RUN_ID') or None,
+              'previous_snapshot_run_id': receipt.get('previous_run_id'),
+              'current_run_id': receipt.get('current_run_id'),
+              'reconciliation_state': receipt.get('reconciliation_state'),
+              'semantic_change_count': receipt.get('semantic_change_count'),
+              'transport_or_content_change_count': receipt.get('transport_or_content_change_count'),
+              'lkg_reference_available_count': receipt.get('lkg_reference_available_count'),
+              'lkg_reference_missing_count': receipt.get('lkg_reference_missing_count'),
+              'pipeline_watch_candidate': receipt.get('pipeline_watch_candidate'),
+              'source_health_watch_candidate': receipt.get('source_health_watch_candidate'),
+              'call_alert_authorized': receipt.get('call_alert_authorized'),
+          }, ensure_ascii=False, sort_keys=True))
+          PY
+
       - name: Upload bounded Interreg programming watch evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: partener-interreg-programming-pipeline-evidence
-          path: /tmp/interreg-programming-pipeline.json
+          path: |
+            /tmp/interreg-programming-pipeline.json
+            /tmp/interreg-programming-reconciliation.json
           retention-days: 7
           if-no-files-found: warn
 
