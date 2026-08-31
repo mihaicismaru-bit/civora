@@ -1,0 +1,33 @@
+name: VÂLCEA CLAR DJM Vâlcea Environment Permit Register References
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'valcea-clar/scripts/djm_valcea_environment_permit_register_reference_adapter.py'
+      - '.github/workflows/valcea-clar-djm-valcea-environment-permit-register-reference.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/scripts/djm_valcea_environment_permit_register_reference_adapter.py'
+      - '.github/workflows/valcea-clar-djm-valcea-environment-permit-register-reference.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-djm-valcea-environment-permit-register-reference-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Compile DJM Vâlcea environment permit-register reference adapter
+        run: python -m py_compile valcea-clar/scripts/djm_valcea_environment_permit_register_reference_adapter.py
+      - name: Run DJM Vâlcea fail-closed regressions
+        run: python valcea-clar/scripts/djm_valcea_environment_permit_register_reference_adapter.py --self-test
