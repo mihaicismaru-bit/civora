@@ -5,7 +5,10 @@ on:
     paths:
       - 'partener-eu/ingest/eu4health_hadea_call_registry.json'
       - 'partener-eu/ingest/eu4health_hadea_call.py'
+      - 'partener-eu/ingest/eu4health_hadea_ft_reconcile.py'
+      - 'partener-eu/ingest/funding_tenders_fetch.py'
       - 'partener-eu/ops/test_eu4health_hadea_call.py'
+      - 'partener-eu/ops/test_eu4health_hadea_ft_reconcile.py'
       - '.github/workflows/partener-eu-eu4health-hadea-ci.yml'
   workflow_dispatch:
 
@@ -15,7 +18,7 @@ permissions:
 jobs:
   eu4health-hadea-call-contract:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 7
     steps:
       - name: Checkout exact event head
         uses: actions/checkout@v6
@@ -41,10 +44,15 @@ jobs:
         run: |
           python -m json.tool partener-eu/ingest/eu4health_hadea_call_registry.json >/dev/null
           python -m py_compile partener-eu/ingest/eu4health_hadea_call.py
+          python -m py_compile partener-eu/ingest/eu4health_hadea_ft_reconcile.py
           python -m py_compile partener-eu/ops/test_eu4health_hadea_call.py
+          python -m py_compile partener-eu/ops/test_eu4health_hadea_ft_reconcile.py
 
       - name: Validate EU4Health HaDEA authority boundary
         run: python partener-eu/ops/test_eu4health_hadea_call.py
+
+      - name: Validate HaDEA to Funding & Tenders semantic binding fails closed
+        run: python partener-eu/ops/test_eu4health_hadea_ft_reconcile.py
 
       - name: Capture live exact HaDEA EU4Health call evidence
         run: |
@@ -111,6 +119,62 @@ jobs:
               'funding_tenders_link_present': (d.get('extracted') or {}).get('funding_tenders_link_present'),
               'funding_tenders_exact_topic_url': (d.get('extracted') or {}).get('funding_tenders_exact_topic_url'),
               'evidence_usable_for_reconciliation': d.get('evidence_usable_for_reconciliation'),
+              'open_call_authorized': d.get('open_call_authorized'),
+          }, ensure_ascii=False, sort_keys=True))
+          PY
+
+      - name: Reconcile exact HaDEA reference against live structured Funding & Tenders evidence
+        run: |
+          set -euo pipefail
+          python partener-eu/ingest/eu4health_hadea_ft_reconcile.py \
+            --hadea-evidence /tmp/eu4health-hadea/exact-call.json \
+            --live \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-eu4health-hadea-ft" \
+            --output-dir /tmp/eu4health-hadea
+
+      - name: Validate live HaDEA to Funding & Tenders reconciliation stays non-authorizing
+        run: |
+          python - <<'PY'
+          import json, string, sys
+          p='/tmp/eu4health-hadea/hadea-funding-tenders-reconciliation.json'
+          d=json.load(open(p, encoding='utf-8'))
+          expected='EU4H-2026-SANTE-PJ-08'
+          if d.get('reconciler_version') != 'EU4HEALTH_HADEA_FT_RECONCILE_V1':
+              print('FAIL reconciler identity drift')
+              sys.exit(2)
+          if d.get('observation_state') != 'EXACT_CALL_REFERENCE_AND_STATUS_RECONCILED_NON_AUTHORIZING':
+              print('FAIL exact semantic reconciliation did not pass:', d.get('observation_state'), d.get('missing_for_open_confirmation'))
+              sys.exit(2)
+          if d.get('hadea_reference') != expected or d.get('funding_tenders_reference') != expected:
+              print('FAIL exact reference binding mismatch:', d.get('hadea_reference'), d.get('funding_tenders_reference'))
+              sys.exit(2)
+          if d.get('identity_match') is not True or d.get('topic_url_match') is not True or d.get('status_match') is not True:
+              print('FAIL semantic binding incomplete')
+              sys.exit(2)
+          if d.get('semantic_reconciliation_passed') is not True or d.get('material_admission_ready_for_downstream_review') is not True:
+              print('FAIL reconciled evidence was not marked ready for downstream review')
+              sys.exit(2)
+          if str(d.get('funding_tenders_status') or '').casefold() != 'closed':
+              print('FAIL historical acceptance fixture is not independently CLOSED:', d.get('funding_tenders_status'))
+              sys.exit(2)
+          if 'current_funding_tenders_status_is_not_open' not in set(d.get('missing_for_open_confirmation') or []):
+              print('FAIL CLOSED fixture lost explicit not-open guard')
+              sys.exit(2)
+          sem_hash=str(d.get('semantic_fingerprint') or '')
+          if len(sem_hash) != 64 or any(ch not in string.hexdigits for ch in sem_hash):
+              print('FAIL reconciliation semantic hash invalid')
+              sys.exit(2)
+          for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized'):
+              if d.get(key) is not False:
+                  print('FAIL reconciliation became authorizing:', key, d.get(key))
+                  sys.exit(2)
+          if d.get('publication_effect') != 'NONE' or d.get('canonical_corpus_mutation') is not False:
+              print('FAIL reconciliation crossed publication boundary')
+              sys.exit(2)
+          print(json.dumps({
+              'reference': expected,
+              'funding_tenders_status': d.get('funding_tenders_status'),
+              'semantic_reconciliation_passed': d.get('semantic_reconciliation_passed'),
               'open_call_authorized': d.get('open_call_authorized'),
           }, ensure_ascii=False, sort_keys=True))
           PY
