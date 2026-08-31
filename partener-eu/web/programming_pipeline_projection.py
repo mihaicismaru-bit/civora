@@ -11,6 +11,7 @@ PROJECTION_ID = "PROGRAMMING_PIPELINE_PUBLIC_PROJECTION_V1"
 SNAPSHOT_ADAPTER = "INTERREG_PROGRAMMING_PIPELINE_V1"
 RECONCILIATION_ADAPTER = "INTERREG_PROGRAMMING_RECONCILIATION_V1"
 ALLOWED_STATES = {"PROPOSAL", "CONSULTATION", "PROGRAMMING_PROCESS"}
+FRAMEWORK_FAMILY = "INTERREG_EU_FRAMEWORK"
 MATERIAL_FLAGS = (
     "material_fact_use",
     "open_call_authorized",
@@ -31,6 +32,11 @@ MISSING_FOR_OPEN = [
     "explicit_current_official_call_status",
     "call_specific_deadline_budget_eligibility_and_geography",
     "semantic_reconciliation",
+]
+MISSING_FOR_PROGRAMME_SPECIFIC_ADMISSION = [
+    "programme_specific_official_2028_2034_authority",
+    "bounded_official_programme_endpoint",
+    "programme_specific_semantic_reconciliation",
 ]
 
 
@@ -81,6 +87,9 @@ def _validate_snapshot(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
         if row.get("observation_state") not in ALLOWED_STATES:
             raise ValueError(f"{source_id}: forbidden programming state")
         _require_non_authorizing(row, f"row {source_id}")
+        programme_ids = row.get("programme_ids")
+        if not isinstance(programme_ids, list) or not programme_ids or any(not isinstance(item, str) or not item for item in programme_ids):
+            raise ValueError(f"{source_id}: programme_ids missing/invalid")
         health = row.get("source_health")
         if not isinstance(health, dict):
             raise ValueError(f"{source_id}: source_health missing")
@@ -150,6 +159,51 @@ def _confidence(row: dict[str, Any], change: dict[str, Any] | None) -> tuple[str
     return "LOW", "CURRENT_TRANSPORT_DEGRADED_CURRENT_PROOF_MISSING"
 
 
+def _coverage_projection(rows: list[dict[str, Any]]) -> tuple[list[str], list[str], list[dict[str, Any]]]:
+    framework_ids: set[str] = set()
+    dedicated_ids: set[str] = set()
+    framework_sources: dict[str, list[dict[str, str | None]]] = {}
+
+    for row in rows:
+        programme_ids = [str(item) for item in row.get("programme_ids") or []]
+        if row.get("programme_family") == FRAMEWORK_FAMILY:
+            framework_ids.update(programme_ids)
+            for programme_id in programme_ids:
+                framework_sources.setdefault(programme_id, []).append({
+                    "source_id": row.get("source_id"),
+                    "authority_url": row.get("authority_url"),
+                    "observation_state": row.get("observation_state"),
+                })
+        else:
+            dedicated_ids.update(programme_ids)
+
+    framework_only_ids = sorted(framework_ids - dedicated_ids)
+    gaps: list[dict[str, Any]] = []
+    for programme_id in framework_only_ids:
+        gaps.append({
+            "programme_id": programme_id,
+            "programme_period": "2028-2034",
+            "coverage_state": "FRAMEWORK_ONLY_RESEARCH_WATCH_NOT_ADMITTED",
+            "observation_label_ro": "Monitorizare cercetare",
+            "framework_evidence": framework_sources.get(programme_id, []),
+            "confidence": "LOW",
+            "confidence_reason": "EU_FRAMEWORK_PROPOSAL_PRESENT_PROGRAMME_SPECIFIC_OFFICIAL_2028_2034_AUTHORITY_MISSING",
+            "programme_specific_admission_state": "NOT_ADMITTED_MISSING_PROGRAMME_SPECIFIC_AUTHORITY",
+            "missing_for_programme_specific_admission": list(MISSING_FOR_PROGRAMME_SPECIFIC_ADMISSION),
+            "open_confirmation_state": "NOT_APPLICABLE_PROGRAMME_SPECIFIC_PIPELINE_NOT_ADMITTED",
+            "market_intelligence_only": True,
+            "material_fact_use": False,
+            "open_call_authorized": False,
+            "deadline_authorized": False,
+            "budget_authorized": False,
+            "eligibility_authorized": False,
+            "publish_authorized": False,
+            "distribution_authorized": False,
+            "publication_effect": "NONE",
+        })
+    return sorted(framework_ids), sorted(dedicated_ids), gaps
+
+
 def project(snapshot: dict[str, Any], reconciliation: dict[str, Any]) -> dict[str, Any]:
     rows = _validate_snapshot(snapshot)
     changes_by_id = _validate_reconciliation(snapshot, reconciliation)
@@ -210,6 +264,7 @@ def project(snapshot: dict[str, Any], reconciliation: dict[str, Any]) -> dict[st
         })
 
     cards.sort(key=lambda item: (-(int(item.get("watch_priority") or 0)), str(item["source_id"])))
+    framework_ids, dedicated_ids, coverage_gaps = _coverage_projection(rows)
     return {
         "schema_version": "1.0",
         "projection_id": PROJECTION_ID,
@@ -232,6 +287,13 @@ def project(snapshot: dict[str, Any], reconciliation: dict[str, Any]) -> dict[st
             else None
         ),
         "source_health_watch_candidate": reconciliation.get("source_health_watch_candidate") is True,
+        "framework_mapped_programme_ids": framework_ids,
+        "programme_specific_covered_programme_ids": dedicated_ids,
+        "programme_specific_coverage_state": (
+            "PARTIAL_FRAMEWORK_ONLY_GAPS_PRESENT" if coverage_gaps else "COMPLETE_FOR_FRAMEWORK_MAPPED_PROGRAMMES"
+        ),
+        "coverage_gap_count": len(coverage_gaps),
+        "coverage_gaps": coverage_gaps,
         "cards": cards,
         "reader_copy_generated": False,
         "seo_indexing_state": "NOINDEX_PREVIEW_ONLY",
@@ -247,7 +309,8 @@ def project(snapshot: dict[str, Any], reconciliation: dict[str, Any]) -> dict[st
         "publication_effect": "NONE",
         "note": (
             "This is a read-only PROGRAMARE VIITOARE preview. "
-            "PROPOSAL/CONSULTATION/PROGRAMMING_PROCESS cards never represent OPEN calls."
+            "PROPOSAL/CONSULTATION/PROGRAMMING_PROCESS cards never represent OPEN calls. "
+            "Framework-only programme mappings are exposed as research-watch coverage gaps until programme-specific official 2028-2034 authority is admitted."
         ),
     }
 
