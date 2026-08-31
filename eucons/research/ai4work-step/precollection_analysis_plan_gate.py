@@ -140,7 +140,27 @@ def precollection_errors(
     if need_analysis_plan.get("project_activity_as_need_evidence") is not False:
         errors.append("project_activity_need_evidence_not_forbidden")
 
-    if plan_lock.get("schema_version") != "eucons.ai4work_precollection_analysis_plan_lock.v0.1":
+    if collection_frame.get("frame_status") != "APPROVED_FOR_PROD":
+        errors.append("collection_frame_not_approved")
+    if collection_frame.get("evidence_class") != "METHOD_PLAN_NOT_EVIDENCE":
+        errors.append("collection_frame_evidence_class_invalid")
+    sampling = collection_frame.get("sampling_design")
+    if not isinstance(sampling, dict):
+        errors.append("collection_frame_sampling_design_missing")
+    else:
+        if sampling.get("representativeness_claim_allowed") is not False:
+            errors.append("collection_frame_representativeness_claim_not_frozen_false")
+        if sampling.get("weighting_allowed") is not False:
+            errors.append("collection_frame_weighting_not_frozen_false")
+        if sampling.get("project_activity_as_need_evidence") is not False:
+            errors.append("collection_frame_project_activity_need_evidence_not_forbidden")
+        if sampling.get("synthetic_records_allowed_in_prod") is not False:
+            errors.append("collection_frame_synthetic_records_not_forbidden")
+        thresholds = sampling.get("provisional_readiness_thresholds")
+        if not isinstance(thresholds, dict) or thresholds.get("status") != "METHOD_RULE_NOT_EVIDENCE":
+            errors.append("collection_frame_thresholds_not_frozen_method_rule")
+
+    if plan_lock.get("schema_version") != "eucons.ai4work_precollection_analysis_plan_lock.v0.2":
         errors.append("plan_lock_schema_invalid")
     if plan_lock.get("state") != "LOCKED_BEFORE_PROD_ACTIVATION":
         errors.append("plan_lock_not_approved")
@@ -148,12 +168,32 @@ def precollection_errors(
         errors.append("plan_lock_evidence_class_invalid")
     if plan_lock.get("need_analysis_plan_reference") != "NEED_ANALYSIS_PLAN_DRAFT.json":
         errors.append("plan_lock_reference_invalid")
-    expected_sha = hashlib.sha256(canonical_json_bytes(need_analysis_plan)).hexdigest()
-    declared_sha = plan_lock.get("need_analysis_plan_sha256")
-    if not isinstance(declared_sha, str) or not SHA256_RE.fullmatch(declared_sha):
+    expected_plan_sha = hashlib.sha256(canonical_json_bytes(need_analysis_plan)).hexdigest()
+    declared_plan_sha = plan_lock.get("need_analysis_plan_sha256")
+    if not isinstance(declared_plan_sha, str) or not SHA256_RE.fullmatch(declared_plan_sha):
         errors.append("plan_lock_sha256_missing_or_invalid")
-    elif declared_sha != expected_sha:
+    elif declared_plan_sha != expected_plan_sha:
         errors.append("plan_lock_sha256_mismatch")
+
+    if plan_lock.get("collection_frame_reference") != "COLLECTION_FRAME_DRAFT.json":
+        errors.append("collection_frame_lock_reference_invalid")
+    expected_frame_sha = hashlib.sha256(canonical_json_bytes(collection_frame)).hexdigest()
+    declared_frame_sha = plan_lock.get("collection_frame_sha256")
+    if not isinstance(declared_frame_sha, str) or not SHA256_RE.fullmatch(declared_frame_sha):
+        errors.append("collection_frame_lock_sha256_missing_or_invalid")
+    elif declared_frame_sha != expected_frame_sha:
+        errors.append("collection_frame_lock_sha256_mismatch")
+
+    if plan_lock.get("activation_boundary") != "DUAL_METHOD_LOCK_REQUIRED_BEFORE_ANY_PROD_COLLECTION_ENABLEMENT":
+        errors.append("dual_method_lock_activation_boundary_invalid")
+    if plan_lock.get("method_mutation_after_lock") != "FORBIDDEN_WHILE_COLLECTION_OR_PROD_ACTIVATION_IS_ENABLED":
+        errors.append("post_lock_method_mutation_not_forbidden")
+    if plan_lock.get("post_hoc_threshold_exception") != "FORBIDDEN":
+        errors.append("post_hoc_threshold_exception_not_forbidden")
+    amendment_rule = plan_lock.get("amendment_rule")
+    if not isinstance(amendment_rule, str) or "collection and PROD activation remain disabled" not in amendment_rule:
+        errors.append("precollection_method_amendment_rule_missing")
+
     if plan_lock.get("synthetic_or_test_twin_can_satisfy_lock") is not False:
         errors.append("plan_lock_test_twin_shortcut_not_forbidden")
     if plan_lock.get("project_activity_as_need_evidence") is not False:
@@ -181,6 +221,8 @@ def precollection_errors(
 
     if need_analysis_plan.get("merge_authorized") is not False or need_analysis_plan.get("deploy_authorized") is not False or need_analysis_plan.get("prod_activation_authorized") is not False:
         errors.append("analysis_plan_cannot_authorize_activation_or_deploy")
+    if collection_frame.get("merge_authorized") is not False or collection_frame.get("deploy_authorized") is not False:
+        errors.append("collection_frame_cannot_authorize_merge_or_deploy")
     if plan_lock.get("merge_authorized") is not False or plan_lock.get("deploy_authorized") is not False or plan_lock.get("prod_activation_authorized") is not False:
         errors.append("plan_lock_cannot_authorize_activation_or_deploy")
 
@@ -205,7 +247,7 @@ def assert_repository_fail_closed_or_prelocked() -> None:
     ready, errors = evaluate_repository_precollection_gate()
     if _activation_requested(contract, manifest, frame) and not ready:
         raise PrecollectionAnalysisPlanGateError(
-            "AI4WORK PROD activation surface opened before the exact analysis plan was approved and locked: "
+            "AI4WORK PROD activation surface opened before the exact analysis plan and collection frame were approved and dual-locked: "
             + "; ".join(errors)
         )
 
@@ -221,9 +263,9 @@ def main() -> int:
         manifest = _load(MANIFEST_PATH)
         frame = _load(COLLECTION_FRAME_PATH)
         if _activation_requested(contract, manifest, frame):
-            print("PASS: exact NEED_ANALYSIS_PLAN is approved and locked before PROD activation")
+            print("PASS: exact NEED_ANALYSIS_PLAN and COLLECTION_FRAME method rules are approved and dual-locked before PROD activation")
         else:
-            print("PASS: AI4WORK remains fail-closed; precollection analysis-plan lock is not yet required")
+            print("PASS: AI4WORK remains fail-closed; precollection dual-method lock is not yet required")
     else:
         print("PASS: AI4WORK remains fail-closed with non-activation consistency diagnostics: " + ", ".join(errors))
     return 0
