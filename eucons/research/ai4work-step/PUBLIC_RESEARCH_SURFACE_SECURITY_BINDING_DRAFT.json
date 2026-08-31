@@ -1,0 +1,72 @@
+{
+  "schema_version": "eucons.ai4work_public_surface_security_binding.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
+  "synthetic": false,
+  "status": "DRAFT_LIVE_PROVIDER_READBACK_REQUIRED",
+  "approved_for_prod": false,
+  "collection_enabled": false,
+  "scope": {
+    "public_routes": [
+      "https://eucons.ro/cercetare/ai4work-step/",
+      "https://eucons.ro/cercetare/ai4work-step/adulti/",
+      "https://eucons.ro/cercetare/ai4work-step/angajatori/"
+    ],
+    "api_route": "https://api.eucons.ro/research/ai4work/v1/submit"
+  },
+  "required_public_response_headers": {
+    "content-security-policy": {
+      "required_directives": {
+        "default-src": ["'self'"],
+        "script-src": ["'self'"],
+        "style-src": ["'self'"],
+        "img-src": ["'self'"],
+        "connect-src": ["https://api.eucons.ro"],
+        "form-action": ["'none'"],
+        "base-uri": ["'none'"],
+        "object-src": ["'none'"],
+        "frame-ancestors": ["'none'"],
+        "frame-src": ["'none'"],
+        "worker-src": ["'none'"],
+        "manifest-src": ["'none'"],
+        "media-src": ["'none'"]
+      },
+      "forbidden_tokens": [
+        "*",
+        "'unsafe-inline'",
+        "'unsafe-eval'",
+        "data:",
+        "blob:",
+        "http:",
+        "google-analytics",
+        "googletagmanager",
+        "facebook.com",
+        "connect.facebook.net",
+        "hotjar",
+        "clarity.ms",
+        "segment.com",
+        "mixpanel"
+      ]
+    },
+    "referrer-policy": "no-referrer",
+    "x-content-type-options": "nosniff",
+    "permissions-policy_required_tokens": ["camera=()", "microphone=()", "geolocation=()"],
+    "cache-control_required_tokens": ["no-store"]
+  },
+  "live_provider_readback": {
+    "readback_classification": "LIVE_PROVIDER_READBACK_REQUIRED",
+    "provider_account": "OPEN_BEFORE_PROD",
+    "verified": false,
+    "verified_at_utc": null,
+    "verified_by": null,
+    "routes": [],
+    "readback_sha256": null
+  },
+  "test_twin": {
+    "classification": "TEST_TWIN_NON_EVIDENCE",
+    "synthetic_only": true,
+    "can_satisfy_live_readback": false,
+    "prod_promotion_eligible": false
+  },
+  "activation_rule": "PROD public research pages require account-specific live HTTPS response-header readback for the exact landing/adults/employers routes. The live readback must satisfy the machine-enforced browser-security minimum and bind by SHA-256. TEST TWIN and repository mechanics are NON-EVIDENCE and cannot satisfy the live-provider readback."
+}
