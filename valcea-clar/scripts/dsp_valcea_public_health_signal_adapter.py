@@ -27,8 +27,8 @@ SOURCE_ID = "signal-dsp-valcea-public-health"
 TAXONOMY_VERSION = "2026-08-30.1"
 SOURCE_NAME = "Direcția de Sănătate Publică Vâlcea"
 SOURCE_TIER = "T1"
-CANONICAL_HOST = "dspvalcea.ro"
-ALLOWED_HOSTS = {"dspvalcea.ro", "www.dspvalcea.ro"}
+CANONICAL_HOST = "www.aspjvalcea.ro"
+ALLOWED_HOSTS = {"aspjvalcea.ro", "www.aspjvalcea.ro"}
 SURFACES = {
     "/": "DSP_HOME",
 }
@@ -462,7 +462,7 @@ def run_self_test() -> None:
       <a href="https://forms.example/appointment">Programare externă</a>
     </body></html>
     """
-    url = "https://dspvalcea.ro/"
+    url = "https://www.aspjvalcea.ro/"
     signals = extract_signals(url, sample, sample.encode())
     classes = {item.signal_class for item in signals}
     assert "MENTAL_HEALTH_PROMOTION_CAMPAIGN_REFERENCE" in classes
@@ -485,6 +485,7 @@ def run_self_test() -> None:
 
     assert classify("Campania de promovare a sănătății mintale")[0] == "MENTAL_HEALTH_PROMOTION_CAMPAIGN_REFERENCE"
     assert classify("Lista pacienți CNP rezultate analize")[0] == "HOLD_SENSITIVE_HEALTH_PERSON_REFERENCE"
+    assert validate_source_url("https://aspjvalcea.ro/")[0] == "https://www.aspjvalcea.ro/"
     try:
         validate_source_url("https://evil.example/")
     except ValueError:
@@ -492,14 +493,21 @@ def run_self_test() -> None:
     else:
         raise AssertionError("off-surface host accepted")
     try:
-        validate_source_url("https://dspvalcea.ro/interes/solicitari-informatii-legea544.php")
+        validate_source_url("https://dspvalcea.ro/")
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("legacy DSP host accepted")
+    try:
+        validate_source_url("https://www.aspjvalcea.ro/interes/solicitari-informatii-legea544.php")
     except ValueError:
         pass
     else:
         raise AssertionError("off-surface source path accepted")
     assert normalize_reference_url("https://forms.example/appointment", url) is None
+    assert normalize_reference_url("https://dspvalcea.ro/campanii/sanatate-mintala.php", url) is None
     assert normalize_reference_url("/campanii/sanatate-mintala.php", url) == (
-        "https://dspvalcea.ro/campanii/sanatate-mintala.php"
+        "https://www.aspjvalcea.ro/campanii/sanatate-mintala.php"
     )
     print("DSP Vâlcea public-health self-test: PASS")
 
