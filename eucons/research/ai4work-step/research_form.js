@@ -15,7 +15,7 @@
     if (node) node.textContent = message;
   };
 
-  const recruitmentChannel = (() => {
+  let recruitmentChannel = (() => {
     // Recruitment metadata arrives only in the URL fragment. Fragments are not
     // sent in the HTTP request, but leaving the channel token visible in the
     // address bar/history would retain more recruitment metadata than needed.
@@ -77,6 +77,16 @@
         control.disabled = !active || form.dataset.collectionEnabled !== "true";
       }
     }
+  };
+
+  const clearAcceptedClientState = (form) => {
+    // Once the server confirms acceptance, the analytical response no longer
+    // needs to remain in the page DOM and the recruitment token no longer
+    // needs to remain in ephemeral JS memory. Keep only the opaque receipt.
+    retryState.delete(form);
+    recruitmentChannel = null;
+    form.reset();
+    applyDependencies(form);
   };
 
   const payloadFromForm = (form) => {
@@ -144,7 +154,7 @@
         return;
       }
 
-      retryState.delete(form);
+      clearAcceptedClientState(form);
       for (const control of form.querySelectorAll("input, select, button")) control.disabled = true;
       const receipt = form.querySelector("[data-ai4work-receipt]");
       if (receipt) {
