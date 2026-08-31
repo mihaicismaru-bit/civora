@@ -12,11 +12,12 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   projection-contract:
     runs-on: ubuntu-latest
-    timeout-minutes: 7
+    timeout-minutes: 12
     steps:
       - name: Checkout exact event head
         uses: actions/checkout@v6
@@ -45,32 +46,98 @@ jobs:
           python -m py_compile partener-eu/ops/test_programming_pipeline_projection.py
           python partener-eu/ops/test_programming_pipeline_projection.py
 
-      - name: Capture live upstream programming snapshot
+      - name: Restore exact-head reconciled Source Registry evidence
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_HEAD_BRANCH: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name }}
         run: |
           set -euo pipefail
-          mkdir -p /tmp/partener-programming-projection
-          python partener-eu/ingest/interreg_programming_pipeline.py \
-            --live \
-            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-product-projection" \
-            --output /tmp/partener-programming-projection/interreg-programming-pipeline.json
-
-      - name: Build baseline semantic reconciliation receipt
-        run: |
-          python - <<'PY'
-          import json, pathlib, sys
-          sys.path.insert(0, 'partener-eu/ingest')
-          from interreg_programming_pipeline import reconcile_snapshots
-          root=pathlib.Path('/tmp/partener-programming-projection')
-          snapshot=json.loads((root/'interreg-programming-pipeline.json').read_text(encoding='utf-8'))
-          receipt=reconcile_snapshots(snapshot, None)
-          (root/'interreg-programming-reconciliation.json').write_text(
-              json.dumps(receipt, ensure_ascii=False, indent=2, sort_keys=True) + '\n',
-              encoding='utf-8',
-          )
+          mkdir -p /tmp/partener-programming-projection/source-registry
+          FOUND=""
+          SOURCE_RUN_ID=""
+          SOURCE_ARTIFACT_ID=""
+          for ATTEMPT in $(seq 1 30); do
+            gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?name=partener-interreg-programming-pipeline-evidence&per_page=100" \
+              > /tmp/partener-programming-projection/artifacts.json
+            CANDIDATE="$(python - <<'PY'
+          import json, os
+          data=json.load(open('/tmp/partener-programming-projection/artifacts.json', encoding='utf-8'))
+          head=os.environ['EXPECTED_HEAD_SHA']
+          branch=os.environ['EXPECTED_HEAD_BRANCH']
+          matches=[]
+          for artifact in data.get('artifacts') or []:
+              if artifact.get('expired') is True:
+                  continue
+              run=artifact.get('workflow_run') or {}
+              if str(run.get('head_sha') or '') != head:
+                  continue
+              if branch and str(run.get('head_branch') or '') != branch:
+                  continue
+              matches.append((str(artifact.get('created_at') or ''), int(artifact.get('id') or 0), int(run.get('id') or 0)))
+          matches.sort(reverse=True)
+          if matches:
+              _created, artifact_id, run_id=matches[0]
+              print(f'{artifact_id} {run_id}')
           PY
+          )"
+            if [ -n "$CANDIDATE" ]; then
+              SOURCE_ARTIFACT_ID="${CANDIDATE%% *}"
+              SOURCE_RUN_ID="${CANDIDATE##* }"
+              RUN_NAME="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${SOURCE_RUN_ID}" --jq '.name // ""')"
+              RUN_HEAD="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${SOURCE_RUN_ID}" --jq '.head_sha // ""')"
+              RUN_CONCLUSION="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${SOURCE_RUN_ID}" --jq '.conclusion // ""')"
+              if [ "$RUN_NAME" != "PARTENER.EU Source Registry CI" ]; then
+                echo "Ignoring artifact from unexpected workflow: $RUN_NAME"
+              elif [ "$RUN_HEAD" != "$EXPECTED_HEAD_SHA" ]; then
+                echo "FAIL source-registry evidence head drift: $RUN_HEAD != $EXPECTED_HEAD_SHA" >&2
+                exit 2
+              elif [ "$RUN_CONCLUSION" = "success" ]; then
+                FOUND="true"
+                break
+              elif [ "$RUN_CONCLUSION" = "failure" ] || [ "$RUN_CONCLUSION" = "cancelled" ] || [ "$RUN_CONCLUSION" = "timed_out" ] || [ "$RUN_CONCLUSION" = "action_required" ]; then
+                echo "FAIL exact-head Source Registry run ended with $RUN_CONCLUSION" >&2
+                exit 2
+              fi
+            fi
+            echo "Waiting for successful exact-head Source Registry evidence (attempt $ATTEMPT/30)..."
+            sleep 10
+          done
+          if [ "$FOUND" != "true" ]; then
+            echo "FAIL no successful exact-head Source Registry evidence became available" >&2
+            exit 2
+          fi
+          gh run download "$SOURCE_RUN_ID" \
+            --repo "$GITHUB_REPOSITORY" \
+            --name partener-interreg-programming-pipeline-evidence \
+            --dir /tmp/partener-programming-projection/source-registry
+          test -s /tmp/partener-programming-projection/source-registry/interreg-programming-pipeline.json
+          test -s /tmp/partener-programming-projection/source-registry/interreg-programming-reconciliation.json
+          python - <<'PY'
+          import json, os, pathlib
+          root=pathlib.Path('/tmp/partener-programming-projection')
+          binding={
+              'binding_id':'PROGRAMMING_PIPELINE_PROJECTION_SOURCE_REGISTRY_BINDING_V1',
+              'expected_head_sha':os.environ['EXPECTED_HEAD_SHA'],
+              'expected_head_branch':os.environ['EXPECTED_HEAD_BRANCH'],
+              'source_registry_workflow_run_id':os.environ.get('SOURCE_RUN_ID'),
+              'source_registry_artifact_id':os.environ.get('SOURCE_ARTIFACT_ID'),
+              'source_registry_required_conclusion':'success',
+              'projection_uses_persisted_reconciled_receipt':True,
+              'duplicate_live_acquisition_in_projection_lane':False,
+          }
+          (root/'projection-source-binding.json').write_text(json.dumps(binding, indent=2, sort_keys=True)+'\n', encoding='utf-8')
+          PY
+        env:
+          SOURCE_RUN_ID: ${{ env.SOURCE_RUN_ID }}
 
-      - name: Build read-only PROGRAMARE VIITOARE projection
+      - name: Build read-only PROGRAMARE VIITOARE projection from reconciled receipt
         run: |
+          cp /tmp/partener-programming-projection/source-registry/interreg-programming-pipeline.json \
+            /tmp/partener-programming-projection/interreg-programming-pipeline.json
+          cp /tmp/partener-programming-projection/source-registry/interreg-programming-reconciliation.json \
+            /tmp/partener-programming-projection/interreg-programming-reconciliation.json
           python partener-eu/web/programming_pipeline_projection.py \
             --snapshot /tmp/partener-programming-projection/interreg-programming-pipeline.json \
             --reconciliation /tmp/partener-programming-projection/interreg-programming-reconciliation.json \
@@ -91,6 +158,9 @@ jobs:
           if d.get('card_count', 0) < 1 or len(d.get('cards') or []) != d.get('card_count'):
               print('FAIL projection card inventory')
               sys.exit(2)
+          if len(d.get('coverage_gaps') or []) != d.get('coverage_gap_count'):
+              print('FAIL coverage-gap inventory drift')
+              sys.exit(2)
           for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized'):
               if d.get(key) is not False:
                   print('FAIL projection became authorizing:', key, d.get(key))
@@ -110,11 +180,31 @@ jobs:
                   if card.get(key) is not False:
                       print('FAIL card became authorizing:', card.get('source_id'), key)
                       sys.exit(2)
+          required_gap_missing={'programme_specific_official_2028_2034_authority','bounded_official_programme_endpoint','programme_specific_semantic_reconciliation'}
+          dedicated=set(d.get('programme_specific_covered_programme_ids') or [])
+          for gap in d.get('coverage_gaps') or []:
+              programme_id=gap.get('programme_id')
+              if not programme_id or programme_id in dedicated:
+                  print('FAIL framework-only coverage gap conflicts with dedicated coverage:', programme_id)
+                  sys.exit(2)
+              if gap.get('coverage_state') != 'FRAMEWORK_ONLY_RESEARCH_WATCH_NOT_ADMITTED':
+                  print('FAIL framework-only coverage state drift:', programme_id, gap.get('coverage_state'))
+                  sys.exit(2)
+              if not required_gap_missing.issubset(set(gap.get('missing_for_programme_specific_admission') or [])):
+                  print('FAIL coverage-gap proof requirements weakened:', programme_id)
+                  sys.exit(2)
+              for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized'):
+                  if gap.get(key) is not False:
+                      print('FAIL coverage gap became authorizing:', programme_id, key)
+                      sys.exit(2)
           print(json.dumps({
               'card_count': d['card_count'],
+              'coverage_gap_count': d.get('coverage_gap_count'),
+              'framework_only_programmes': [g.get('programme_id') for g in d.get('coverage_gaps') or []],
               'healthy_source_count': d.get('healthy_source_count'),
               'degraded_source_count': d.get('degraded_source_count'),
               'reconciliation_state': d.get('reconciliation_state'),
+              'semantic_change_count': d.get('semantic_change_count'),
               'surface_state': d.get('surface_state'),
               'open_call_authorized': d.get('open_call_authorized'),
           }, ensure_ascii=False, sort_keys=True))
