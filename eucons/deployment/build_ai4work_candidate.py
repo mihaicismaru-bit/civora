@@ -5,6 +5,7 @@ import argparse
 import importlib.util
 import json
 import re
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -75,9 +76,17 @@ def build_candidate(target: Path) -> dict[str, Any]:
         "eucons_build_production_ready",
         HERE / "build_production_ready.py",
     )
+    research_root = EUCONS / "research" / "ai4work-step"
+    # build_research_pages deliberately reuses the canonical governance controls
+    # that live beside it. When loaded through importlib from the deployment
+    # builder, add only that repository-local directory to module resolution so
+    # the same controls are evaluated instead of weakening the static gate.
+    research_root_text = str(research_root)
+    if research_root_text not in sys.path:
+        sys.path.insert(0, research_root_text)
     research_builder = load_module(
         "eucons_ai4work_build_research_pages",
-        EUCONS / "research" / "ai4work-step" / "build_research_pages.py",
+        research_root / "build_research_pages.py",
     )
     production_result = production.build_site(target)
     if production_result.get("production_deployed") is not False:
