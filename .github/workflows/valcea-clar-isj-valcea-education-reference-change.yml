@@ -1,0 +1,33 @@
+name: VÂLCEA CLAR ISJ Vâlcea Education Reference Change
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'valcea-clar/scripts/isj_valcea_education_reference_change_state.py'
+      - '.github/workflows/valcea-clar-isj-valcea-education-reference-change.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/scripts/isj_valcea_education_reference_change_state.py'
+      - '.github/workflows/valcea-clar-isj-valcea-education-reference-change.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-isj-valcea-education-reference-change-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Compile ISJ Vâlcea education reference change detector
+        run: python -m py_compile valcea-clar/scripts/isj_valcea_education_reference_change_state.py
+      - name: Run ISJ Vâlcea education reference change fail-closed regressions
+        run: python valcea-clar/scripts/isj_valcea_education_reference_change_state.py --self-test
