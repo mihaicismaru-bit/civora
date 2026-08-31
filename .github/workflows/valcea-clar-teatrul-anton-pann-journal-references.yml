@@ -1,0 +1,33 @@
+name: VÂLCEA CLAR Teatrul Anton Pann Journal References
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'valcea-clar/scripts/teatrul_anton_pann_journal_reference_adapter.py'
+      - '.github/workflows/valcea-clar-teatrul-anton-pann-journal-references.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/scripts/teatrul_anton_pann_journal_reference_adapter.py'
+      - '.github/workflows/valcea-clar-teatrul-anton-pann-journal-references.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-teatrul-anton-pann-journal-references-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Compile Teatrul Anton Pann journal reference adapter
+        run: python -m py_compile valcea-clar/scripts/teatrul_anton_pann_journal_reference_adapter.py
+      - name: Run Teatrul Anton Pann fail-closed regressions
+        run: python valcea-clar/scripts/teatrul_anton_pann_journal_reference_adapter.py --self-test
