@@ -43,8 +43,9 @@ def approved_fixture():
     }
     lock["state"] = "LOCKED_BEFORE_PROD_ACTIVATION"
     lock["need_analysis_plan_sha256"] = hashlib.sha256(canonical_json_bytes(plan)).hexdigest()
+    lock["collection_frame_sha256"] = hashlib.sha256(canonical_json_bytes(frame)).hexdigest()
     lock["approved_at"] = "2026-08-20T11:00:00+00:00"
-    lock["approver_reference"] = "UNIT-TEST-PLAN-LOCK-NON-EVIDENCE"
+    lock["approver_reference"] = "UNIT-TEST-DUAL-METHOD-LOCK-NON-EVIDENCE"
     return contract, manifest, frame, plan, lock
 
 
@@ -60,9 +61,13 @@ class PrecollectionAnalysisPlanGateTests(unittest.TestCase):
             plan_lock=lock,
         )
         self.assertEqual(errors, [])
+        self.assertEqual(lock["schema_version"], "eucons.ai4work_precollection_analysis_plan_lock.v0.2")
+        self.assertEqual(lock["collection_frame_reference"], "COLLECTION_FRAME_DRAFT.json")
+        self.assertIsNone(lock["collection_frame_sha256"])
+        self.assertEqual(lock["post_hoc_threshold_exception"], "FORBIDDEN")
         GATE.assert_repository_fail_closed_or_prelocked()
 
-    def test_turning_on_production_without_plan_lock_is_rejected(self):
+    def test_turning_on_production_without_dual_method_lock_is_rejected(self):
         contract, manifest, frame, plan, lock = load_current()
         contract["production_enabled"] = True
         errors = GATE.precollection_errors(
@@ -73,10 +78,12 @@ class PrecollectionAnalysisPlanGateTests(unittest.TestCase):
             plan_lock=lock,
         )
         self.assertIn("need_analysis_plan_not_approved", errors)
+        self.assertIn("collection_frame_not_approved", errors)
         self.assertIn("plan_lock_not_approved", errors)
         self.assertIn("plan_lock_sha256_missing_or_invalid", errors)
+        self.assertIn("collection_frame_lock_sha256_missing_or_invalid", errors)
 
-    def test_exact_precollection_plan_lock_allows_only_the_method_control(self):
+    def test_exact_dual_lock_allows_only_frozen_precollection_method(self):
         contract, manifest, frame, plan, lock = approved_fixture()
         errors = GATE.precollection_errors(
             contract=contract,
@@ -90,8 +97,12 @@ class PrecollectionAnalysisPlanGateTests(unittest.TestCase):
         self.assertEqual(plan["test_twin_evidence_class"], "TEST_TWIN_NON_EVIDENCE")
         self.assertFalse(plan["project_activity_as_need_evidence"])
         self.assertFalse(plan["core_skill_ranking"]["secondary_evidence_can_change_numeric_order"])
+        self.assertFalse(frame["sampling_design"]["synthetic_records_allowed_in_prod"])
+        self.assertFalse(frame["sampling_design"]["project_activity_as_need_evidence"])
+        self.assertEqual(frame["sampling_design"]["provisional_readiness_thresholds"]["status"], "METHOD_RULE_NOT_EVIDENCE")
+        self.assertEqual(lock["post_hoc_threshold_exception"], "FORBIDDEN")
 
-    def test_post_lock_plan_drift_is_rejected(self):
+    def test_post_lock_analysis_plan_drift_is_rejected(self):
         contract, manifest, frame, plan, lock = approved_fixture()
         plan["core_skill_ranking"]["cross_population_combination"] = "post_hoc_changed_rule"
         errors = GATE.precollection_errors(
@@ -102,6 +113,30 @@ class PrecollectionAnalysisPlanGateTests(unittest.TestCase):
             plan_lock=lock,
         )
         self.assertIn("plan_lock_sha256_mismatch", errors)
+
+    def test_post_lock_collection_frame_threshold_drift_is_rejected(self):
+        contract, manifest, frame, plan, lock = approved_fixture()
+        frame["sampling_design"]["provisional_readiness_thresholds"]["adults_total_valid_min"] = 60
+        errors = GATE.precollection_errors(
+            contract=contract,
+            manifest=manifest,
+            collection_frame=frame,
+            need_analysis_plan=plan,
+            plan_lock=lock,
+        )
+        self.assertIn("collection_frame_lock_sha256_mismatch", errors)
+
+    def test_post_hoc_threshold_exception_cannot_be_enabled(self):
+        contract, manifest, frame, plan, lock = approved_fixture()
+        lock["post_hoc_threshold_exception"] = "ALLOWED_AFTER_REVIEW"
+        errors = GATE.precollection_errors(
+            contract=contract,
+            manifest=manifest,
+            collection_frame=frame,
+            need_analysis_plan=plan,
+            plan_lock=lock,
+        )
+        self.assertIn("post_hoc_threshold_exception_not_forbidden", errors)
 
     def test_lock_created_after_prod_activation_approval_is_rejected(self):
         contract, manifest, frame, plan, lock = approved_fixture()
