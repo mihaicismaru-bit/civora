@@ -6,6 +6,7 @@ on:
       - 'eucons/research/ai4work-step/final_needs_package_gate.py'
       - 'eucons/research/ai4work-step/render_needs_analysis_docx.py'
       - 'eucons/research/ai4work-step/test_final_needs_package_gate.py'
+      - 'eucons/research/ai4work-step/SOURCE_REGISTER_SNAPSHOT_CONTRACT.json'
       - 'eucons/research/ai4work-step/adversarial_qa.py'
       - 'eucons/research/ai4work-step/need_ranking_engine.py'
       - 'eucons/research/ai4work-step/disclosure_control.py'
@@ -20,6 +21,7 @@ on:
       - 'eucons/research/ai4work-step/final_needs_package_gate.py'
       - 'eucons/research/ai4work-step/render_needs_analysis_docx.py'
       - 'eucons/research/ai4work-step/test_final_needs_package_gate.py'
+      - 'eucons/research/ai4work-step/SOURCE_REGISTER_SNAPSHOT_CONTRACT.json'
       - 'eucons/research/ai4work-step/adversarial_qa.py'
       - 'eucons/research/ai4work-step/need_ranking_engine.py'
       - 'eucons/research/ai4work-step/disclosure_control.py'
@@ -46,6 +48,24 @@ jobs:
       - name: Run final package tests (TEST TWIN is NON-EVIDENCE)
         working-directory: eucons/research/ai4work-step
         run: python -m unittest -v test_final_needs_package_gate.py
+      - name: Assert source-register contract stays non-numeric and fail-closed
+        working-directory: eucons/research/ai4work-step
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          contract = json.loads(Path('SOURCE_REGISTER_SNAPSHOT_CONTRACT.json').read_text(encoding='utf-8'))
+          assert contract['schema_version'] == 'eucons.ai4work_source_register_snapshot.v0.1'
+          assert contract['test_twin_evidence_eligible'] is False
+          rules = contract['prod_rules']
+          assert rules['secondary_evidence_h1_h5_numeric_points'] == 0
+          assert rules['project_activity_as_need_evidence'] is False
+          assert rules['source_register_numeric_rank_eligible'] is False
+          assert rules['source_register_may_change_numeric_h1_h5_order'] is False
+          assert rules['test_twin_can_be_promoted'] is False
+          print('PASS: source-register snapshot contract preserves the non-evidence/numeric boundary')
+          PY
       - name: Assert repository cannot self-authorize PROD release
         working-directory: eucons/research/ai4work-step
         run: |
