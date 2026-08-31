@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from build_research_pages import build
+from build_research_pages import activation_enabled, build
 from static_surface_privacy_control import ALLOWED_RESEARCH_API, run_control, validate_page
 
 
@@ -24,6 +24,28 @@ class StaticSurfacePrivacyControlTests(unittest.TestCase):
             self.assertEqual(page["tracker_hits"], [])
             self.assertEqual(page["referrer_policy"], "no-referrer")
             self.assertEqual(page["robots"], "noindex,nofollow")
+
+    def test_static_builder_accepts_collection_only_approval_without_deploy_authority(self) -> None:
+        contract = {"production_enabled": True}
+        manifest = {
+            "approved_for_prod": True,
+            "collection_enabled": True,
+            "deploy_authorized": False,
+            "real_collection_authorized": True,
+            "explicit_user_approval_reference": "sha256-bound-human-approval",
+        }
+        self.assertTrue(activation_enabled(contract, manifest))
+
+    def test_static_builder_rejects_manifest_that_grants_deploy_authority(self) -> None:
+        contract = {"production_enabled": True}
+        manifest = {
+            "approved_for_prod": True,
+            "collection_enabled": True,
+            "deploy_authorized": True,
+            "real_collection_authorized": True,
+            "explicit_user_approval_reference": "sha256-bound-human-approval",
+        }
+        self.assertFalse(activation_enabled(contract, manifest))
 
     def test_external_tracking_asset_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
