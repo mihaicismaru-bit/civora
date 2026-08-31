@@ -1,16 +1,16 @@
 {
   "schema_version": "1.0",
   "checkpoint": "PARTENER-EU-CIVORA-P10-0020",
-  "observed_at": "2026-08-31T06:33:04Z",
-  "validation_run_started": "2026-08-31T06:32:47Z",
+  "observed_at": "2026-08-31T06:37:06Z",
+  "validation_run_started": "2026-08-31T06:36:46Z",
   "integrity": {
     "latest_history_equal": true,
-    "latest_sha256": "a56e1960c4dd0b6cfe7328e73d814ad7b0ed3bcf8a83fad5fbc1c2fe3630ebd1",
-    "history_sha256": "a56e1960c4dd0b6cfe7328e73d814ad7b0ed3bcf8a83fad5fbc1c2fe3630ebd1",
-    "history_path": "validation/history/20260831T063247Z.json",
+    "latest_sha256": "a69494cccae5ee8d3ba279803a3bd52dd8a26269745dc6e700ab88eac983b2b0",
+    "history_sha256": "a69494cccae5ee8d3ba279803a3bd52dd8a26269745dc6e700ab88eac983b2b0",
+    "history_path": "validation/history/20260831T063646Z.json",
     "source_state_checkpoint_equal": true,
-    "source_state_sha256": "ea55e9883dc62d6c77507dd4f27f691df8ceb6f8c4d3b91577ef6417569524b8",
-    "checkpoint_sha256": "ea55e9883dc62d6c77507dd4f27f691df8ceb6f8c4d3b91577ef6417569524b8",
+    "source_state_sha256": "a8c3d10af5a9bdc1212caa11abbb61304a53ce55ac6c58b7a153f44dbe7f85bd",
+    "checkpoint_sha256": "a8c3d10af5a9bdc1212caa11abbb61304a53ce55ac6c58b7a153f44dbe7f85bd",
     "frontend_regression_pass": true,
     "frontend_pass": 10,
     "frontend_total": 10,
@@ -18,7 +18,7 @@
   },
   "source_registry": {
     "observed_at": "2026-08-31T06:29:50.256277Z",
-    "age_seconds": 194,
+    "age_seconds": 436,
     "stale_after_seconds": 28800,
     "stale": false,
     "health": "DEGRADED",
@@ -57,23 +57,30 @@
     "fail_closed": true
   },
   "afir": {
-    "observed_at": "2026-08-31T05:36:14.334926+00:00",
+    "observed_at": "2026-08-31T06:36:01.923730+00:00",
     "status": "PASS",
-    "item_count": 27,
+    "item_count": 31,
     "error_count": 43,
     "hash_change_candidates": 0,
     "material_signal_candidates": 0,
-    "auth_dependency_count": 24,
+    "auth_dependency_count": 28,
     "auth_dependencies": [
       {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finstrumente%2Fsesiuni%2Fsesiuni-primire-proiecte%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/instrumente/sesiuni/sesiuni-primire-proiecte/",
+        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2F&culture=ro",
+        "sourcePage": "https://www.afir.ro/info-la-zi/",
         "status": "AUTH_OR_ACCESS_DEPENDENT",
         "materialFactAction": "NONE",
         "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
       },
       {
         "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn",
+        "sourcePage": "https://www.afir.ro/info-la-zi/",
+        "status": "AUTH_OR_ACCESS_DEPENDENT",
+        "materialFactAction": "NONE",
+        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
+      },
+      {
+        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finstrumente%2Fsesiuni%2Fsesiuni-primire-proiecte%2F&culture=ro",
         "sourcePage": "https://www.afir.ro/instrumente/sesiuni/sesiuni-primire-proiecte/",
         "status": "AUTH_OR_ACCESS_DEPENDENT",
         "materialFactAction": "NONE",
@@ -229,6 +236,27 @@
       {
         "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finstrumente%2Finstrumente-de-lucru%2Ftipizate-si-formulare-alte-programe-de-finantare%2F&culture=ro",
         "sourcePage": "https://www.afir.ro/instrumente/instrumente-de-lucru/tipizate-si-formulare-alte-programe-de-finantare/",
+        "status": "AUTH_OR_ACCESS_DEPENDENT",
+        "materialFactAction": "NONE",
+        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
+      },
+      {
+        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Fversiunea-consultativa-a-ghidului-solicitantului-dr-31%2F&culture=ro",
+        "sourcePage": "https://www.afir.ro/info-la-zi/versiunea-consultativa-a-ghidului-solicitantului-dr-31/",
+        "status": "AUTH_OR_ACCESS_DEPENDENT",
+        "materialFactAction": "NONE",
+        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
+      },
+      {
+        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Factualizare-cerere-de-finantare-dr-14%2F&culture=ro",
+        "sourcePage": "https://www.afir.ro/info-la-zi/actualizare-cerere-de-finantare-dr-14/",
+        "status": "AUTH_OR_ACCESS_DEPENDENT",
+        "materialFactAction": "NONE",
+        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
+      },
+      {
+        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Fdomenii-de-interventie%2Fdetalii-si-anexe-dr-14%2F&culture=ro",
+        "sourcePage": "https://www.afir.ro/domenii-de-interventie/detalii-si-anexe-dr-14/",
         "status": "AUTH_OR_ACCESS_DEPENDENT",
         "materialFactAction": "NONE",
         "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
