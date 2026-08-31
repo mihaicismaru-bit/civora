@@ -13,6 +13,7 @@ from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 PARSER_VERSION = "INTERREG_PROGRAMMING_PIPELINE_V1"
+RECONCILIATION_VERSION = "INTERREG_PROGRAMMING_RECONCILIATION_V1"
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_REGISTRY = ROOT / "partener-eu" / "ingest" / "interreg_programming_pipeline_registry.json"
 
@@ -37,6 +38,24 @@ MATERIAL_FLAGS = (
 
 def _sha256(raw: bytes) -> str:
     return hashlib.sha256(raw).hexdigest()
+
+
+def _canonical_json(value: Any) -> bytes:
+    return json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+
+
+def _fingerprint(value: Any) -> str:
+    return _sha256(_canonical_json(value))
+
+
+def _is_sha256(value: Any) -> bool:
+    text = str(value or "")
+    return len(text) == 64 and all(ch in "0123456789abcdefABCDEF" for ch in text)
 
 
 def _parse_date(value: str | None) -> date | None:
@@ -248,6 +267,51 @@ def _probe(row: dict[str, Any], *, timeout: float) -> dict[str, Any]:
         }
 
 
+def _row_semantic_payload(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "source_id": row.get("source_id"),
+        "programme_ids": list(row.get("programme_ids") or []),
+        "programme": row.get("programme"),
+        "programme_family": row.get("programme_family"),
+        "source_family": row.get("source_family"),
+        "programme_period": row.get("programme_period"),
+        "authority_class": row.get("authority_class"),
+        "authority_url": row.get("authority_url"),
+        "supporting_authority_url": row.get("supporting_authority_url"),
+        "observation_state": row.get("observation_state"),
+        "signal_basis": row.get("signal_basis"),
+        "source_published_date": row.get("source_published_date"),
+        "consultation_start_date": row.get("consultation_start_date"),
+        "consultation_end_date": row.get("consultation_end_date"),
+        "consultation_lifecycle": row.get("consultation_lifecycle"),
+    }
+
+
+def _row_transport_payload(row: dict[str, Any]) -> dict[str, Any]:
+    health = row.get("source_health") or {}
+    return {
+        "health_state": health.get("health_state"),
+        "lkg_required": health.get("lkg_required"),
+        "requested_url": health.get("requested_url"),
+        "final_url": health.get("final_url"),
+        "http_status": health.get("http_status"),
+        "content_type": health.get("content_type"),
+        "raw_sha256": health.get("raw_sha256"),
+        "missing_marker_groups": health.get("missing_marker_groups") or [],
+    }
+
+
+def _attach_row_fingerprints(row: dict[str, Any]) -> None:
+    row["semantic_fingerprint"] = _fingerprint(_row_semantic_payload(row))
+    row["transport_fingerprint"] = _fingerprint(_row_transport_payload(row))
+
+
+def _aggregate_fingerprint(rows: list[dict[str, Any]], field: str) -> str:
+    return _fingerprint(
+        [[row["source_id"], row[field]] for row in sorted(rows, key=lambda item: item["source_id"])]
+    )
+
+
 def resolve(
     *,
     run_id: str,
@@ -320,6 +384,7 @@ def resolve(
             "publication_effect": "NONE",
             "missing_for_open_confirmation": list(MISSING_FOR_CALL_CONFIRMATION),
         }
+        _attach_row_fingerprints(row)
         rows.append(row)
 
     rows.sort(key=lambda row: (-row["watch_priority"], row["source_id"]))
@@ -342,6 +407,8 @@ def resolve(
         "healthy_source_count": healthy,
         "degraded_source_count": degraded,
         "health_state": aggregate_health,
+        "snapshot_semantic_fingerprint": _aggregate_fingerprint(rows, "semantic_fingerprint"),
+        "snapshot_transport_fingerprint": _aggregate_fingerprint(rows, "transport_fingerprint"),
         "watchlist": rows,
         "market_intelligence_only": True,
         "material_fact_use": False,
@@ -357,6 +424,241 @@ def resolve(
     }
 
 
+def _validate_snapshot(snapshot: dict[str, Any], *, label: str) -> dict[str, dict[str, Any]]:
+    if not isinstance(snapshot, dict):
+        raise ValueError(f"{label}: snapshot must be an object")
+    if snapshot.get("adapter_id") != PARSER_VERSION:
+        raise ValueError(f"{label}: unexpected adapter id")
+    if snapshot.get("source_family") != "INTERREG" or snapshot.get("programme_period") != "2028-2034":
+        raise ValueError(f"{label}: source/programme boundary drift")
+    if snapshot.get("observation_state") != "PROGRAMMING_PIPELINE":
+        raise ValueError(f"{label}: observation state drift")
+    if snapshot.get("market_intelligence_only") is not True or snapshot.get("publication_effect") != "NONE":
+        raise ValueError(f"{label}: programming policy drift")
+    for key in MATERIAL_FLAGS:
+        if snapshot.get(key) is not False:
+            raise ValueError(f"{label}: snapshot became authorizing: {key}")
+    rows = snapshot.get("watchlist")
+    if not isinstance(rows, list) or len(rows) != snapshot.get("source_count"):
+        raise ValueError(f"{label}: source inventory mismatch")
+    by_id: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            raise ValueError(f"{label}: watch row must be object")
+        source_id = row.get("source_id")
+        if not isinstance(source_id, str) or not source_id or source_id in by_id:
+            raise ValueError(f"{label}: duplicate/missing source id {source_id!r}")
+        if row.get("observation_state") not in ALLOWED_OBSERVATION_STATES:
+            raise ValueError(f"{label}: forbidden programming state for {source_id}")
+        if row.get("market_intelligence_only") is not True or row.get("publication_effect") != "NONE":
+            raise ValueError(f"{label}: row policy drift for {source_id}")
+        for key in MATERIAL_FLAGS:
+            if row.get(key) is not False:
+                raise ValueError(f"{label}: row became authorizing for {source_id}: {key}")
+        semantic = _fingerprint(_row_semantic_payload(row))
+        transport = _fingerprint(_row_transport_payload(row))
+        stored_semantic = row.get("semantic_fingerprint")
+        stored_transport = row.get("transport_fingerprint")
+        if stored_semantic is not None and stored_semantic != semantic:
+            raise ValueError(f"{label}: semantic fingerprint mismatch for {source_id}")
+        if stored_transport is not None and stored_transport != transport:
+            raise ValueError(f"{label}: transport fingerprint mismatch for {source_id}")
+        by_id[source_id] = row
+    return by_id
+
+
+def _lkg_reference(
+    current_row: dict[str, Any] | None,
+    previous_row: dict[str, Any] | None,
+    previous_snapshot: dict[str, Any] | None,
+) -> tuple[str, dict[str, Any] | None]:
+    if current_row is None:
+        return "NOT_APPLICABLE_SOURCE_REMOVED", None
+    health = current_row.get("source_health") or {}
+    if not str(health.get("health_state") or "").startswith("DEGRADED"):
+        return "NOT_REQUIRED_CURRENT_SOURCE_USABLE", None
+    if previous_row is None or previous_snapshot is None:
+        return "REQUIRED_REFERENCE_UNAVAILABLE", None
+    previous_health = previous_row.get("source_health") or {}
+    if previous_health.get("health_state") != "HEALTHY" or not _is_sha256(previous_health.get("raw_sha256")):
+        return "REQUIRED_REFERENCE_UNAVAILABLE", None
+    return "REFERENCE_AVAILABLE_FROM_PREVIOUS_HEALTHY_SNAPSHOT", {
+        "source_id": previous_row.get("source_id"),
+        "authority_url": previous_row.get("authority_url"),
+        "previous_run_id": previous_snapshot.get("run_id"),
+        "previous_fetched_at": previous_snapshot.get("fetched_at"),
+        "raw_sha256": previous_health.get("raw_sha256"),
+        "use_constraint": "LAST_KNOWN_GOOD_EVIDENCE_REFERENCE_ONLY_NO_CURRENT_MATERIAL_FACT",
+    }
+
+
+def reconcile_snapshots(
+    current: dict[str, Any],
+    previous: dict[str, Any] | None = None,
+    *,
+    reconciled_at: str | None = None,
+) -> dict[str, Any]:
+    current_by_id = _validate_snapshot(current, label="current")
+    previous_by_id = _validate_snapshot(previous, label="previous") if previous is not None else {}
+    when = _parse_observed_at(reconciled_at)
+
+    changes: list[dict[str, Any]] = []
+    semantic_change_count = 0
+    transport_change_count = 0
+    source_inventory_change_count = 0
+    lkg_reference_available_count = 0
+    lkg_reference_missing_count = 0
+
+    all_ids = sorted(set(current_by_id) | set(previous_by_id))
+    for source_id in all_ids:
+        current_row = current_by_id.get(source_id)
+        previous_row = previous_by_id.get(source_id)
+        if current_row is None:
+            semantic_changed = True
+            transport_changed = False
+            source_inventory_changed = True
+            change_kind = "SOURCE_REMOVED"
+        elif previous_row is None:
+            semantic_changed = previous is not None
+            transport_changed = previous is not None
+            source_inventory_changed = previous is not None
+            change_kind = "BASELINE_SOURCE" if previous is None else "SOURCE_ADDED"
+        else:
+            semantic_changed = _fingerprint(_row_semantic_payload(current_row)) != _fingerprint(
+                _row_semantic_payload(previous_row)
+            )
+            transport_changed = _fingerprint(_row_transport_payload(current_row)) != _fingerprint(
+                _row_transport_payload(previous_row)
+            )
+            source_inventory_changed = False
+            if semantic_changed and transport_changed:
+                change_kind = "SEMANTIC_AND_TRANSPORT_CHANGE"
+            elif semantic_changed:
+                change_kind = "SEMANTIC_CHANGE"
+            elif transport_changed:
+                change_kind = "TRANSPORT_OR_CONTENT_CHANGE"
+            else:
+                change_kind = "NO_CHANGE"
+
+        if semantic_changed:
+            semantic_change_count += 1
+        if transport_changed:
+            transport_change_count += 1
+        if source_inventory_changed:
+            source_inventory_change_count += 1
+
+        lkg_status, lkg_reference = _lkg_reference(current_row, previous_row, previous)
+        if lkg_status == "REFERENCE_AVAILABLE_FROM_PREVIOUS_HEALTHY_SNAPSHOT":
+            lkg_reference_available_count += 1
+        elif lkg_status == "REQUIRED_REFERENCE_UNAVAILABLE":
+            lkg_reference_missing_count += 1
+
+        changes.append({
+            "source_id": source_id,
+            "change_kind": change_kind,
+            "source_inventory_changed": source_inventory_changed,
+            "semantic_changed": semantic_changed,
+            "transport_or_content_changed": transport_changed,
+            "current_semantic_fingerprint": (
+                _fingerprint(_row_semantic_payload(current_row)) if current_row is not None else None
+            ),
+            "previous_semantic_fingerprint": (
+                _fingerprint(_row_semantic_payload(previous_row)) if previous_row is not None else None
+            ),
+            "current_transport_fingerprint": (
+                _fingerprint(_row_transport_payload(current_row)) if current_row is not None else None
+            ),
+            "previous_transport_fingerprint": (
+                _fingerprint(_row_transport_payload(previous_row)) if previous_row is not None else None
+            ),
+            "current_observation_state": current_row.get("observation_state") if current_row else None,
+            "previous_observation_state": previous_row.get("observation_state") if previous_row else None,
+            "current_consultation_lifecycle": (
+                current_row.get("consultation_lifecycle") if current_row else None
+            ),
+            "previous_consultation_lifecycle": (
+                previous_row.get("consultation_lifecycle") if previous_row else None
+            ),
+            "current_source_health": (
+                (current_row.get("source_health") or {}).get("health_state") if current_row else None
+            ),
+            "previous_source_health": (
+                (previous_row.get("source_health") or {}).get("health_state") if previous_row else None
+            ),
+            "lkg_status": lkg_status,
+            "lkg_reference": lkg_reference,
+            "market_intelligence_only": True,
+            "material_fact_use": False,
+            "open_call_authorized": False,
+            "publish_authorized": False,
+            "distribution_authorized": False,
+        })
+
+    if previous is None:
+        reconciliation_state = "BASELINE_CAPTURED_NO_PREVIOUS_SNAPSHOT"
+    elif semantic_change_count or source_inventory_change_count:
+        reconciliation_state = "PIPELINE_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING"
+    elif transport_change_count:
+        reconciliation_state = "TRANSPORT_OR_CONTENT_DRIFT_ONLY"
+    else:
+        reconciliation_state = "NO_CHANGE"
+
+    pipeline_watch_candidate = previous is not None and bool(
+        semantic_change_count or source_inventory_change_count
+    )
+    source_health_watch_candidate = previous is not None and bool(transport_change_count)
+    return {
+        "schema_version": "1.0",
+        "adapter_id": RECONCILIATION_VERSION,
+        "reconciled_at": when.isoformat().replace("+00:00", "Z"),
+        "source_family": "INTERREG",
+        "programme_period": "2028-2034",
+        "current_run_id": current.get("run_id"),
+        "current_fetched_at": current.get("fetched_at"),
+        "current_snapshot_sha256": _fingerprint(current),
+        "current_registry_sha256": current.get("registry_sha256"),
+        "previous_run_id": previous.get("run_id") if previous else None,
+        "previous_fetched_at": previous.get("fetched_at") if previous else None,
+        "previous_snapshot_sha256": _fingerprint(previous) if previous else None,
+        "previous_registry_sha256": previous.get("registry_sha256") if previous else None,
+        "registry_changed": bool(
+            previous is not None and current.get("registry_sha256") != previous.get("registry_sha256")
+        ),
+        "reconciliation_state": reconciliation_state,
+        "pipeline_semantic_reconciliation_status": "PASS",
+        "source_count_current": len(current_by_id),
+        "source_count_previous": len(previous_by_id) if previous is not None else None,
+        "semantic_change_count": semantic_change_count,
+        "transport_or_content_change_count": transport_change_count,
+        "source_inventory_change_count": source_inventory_change_count,
+        "lkg_reference_available_count": lkg_reference_available_count,
+        "lkg_reference_missing_count": lkg_reference_missing_count,
+        "changes": changes,
+        "pipeline_watch_candidate": pipeline_watch_candidate,
+        "pipeline_watch_label_required": "PROGRAMARE_VIITOARE_PIPELINE" if pipeline_watch_candidate else None,
+        "source_health_watch_candidate": source_health_watch_candidate,
+        "call_alert_authorized": False,
+        "market_intelligence_only": True,
+        "material_fact_use": False,
+        "open_call_authorized": False,
+        "deadline_authorized": False,
+        "budget_authorized": False,
+        "eligibility_authorized": False,
+        "publish_authorized": False,
+        "distribution_authorized": False,
+        "publication_effect": "NONE",
+        "missing_for_open_confirmation": list(MISSING_FOR_CALL_CONFIRMATION),
+        "note": (
+            "Semantic or transport change in PROGRAMMING_PIPELINE may create an internal/watch brief "
+            "candidate only. It never authorizes OPEN_CALL, material call facts, publication or distribution."
+        ),
+        "rollback": (
+            "Discard this reconciliation receipt and retain the immutable current/previous evidence snapshots; "
+            "no canonical call state is mutated."
+        ),
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Build a fail-closed Interreg 2028-2034 programming watch from bounded official sources."
@@ -367,6 +669,8 @@ def main() -> None:
     parser.add_argument("--live", action="store_true")
     parser.add_argument("--timeout", type=float, default=10.0)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--previous-snapshot", type=Path)
+    parser.add_argument("--reconciliation-output", type=Path)
     args = parser.parse_args()
     result = resolve(
         run_id=args.run_id,
@@ -381,6 +685,17 @@ def main() -> None:
         args.output.write_text(payload, encoding="utf-8")
     else:
         print(payload, end="")
+
+    if args.reconciliation_output:
+        previous = None
+        if args.previous_snapshot:
+            previous = json.loads(args.previous_snapshot.read_text(encoding="utf-8"))
+        receipt = reconcile_snapshots(result, previous)
+        args.reconciliation_output.parent.mkdir(parents=True, exist_ok=True)
+        args.reconciliation_output.write_text(
+            json.dumps(receipt, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
 
 
 if __name__ == "__main__":
