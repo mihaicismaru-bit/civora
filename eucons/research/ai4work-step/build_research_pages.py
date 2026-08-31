@@ -8,6 +8,12 @@ import shutil
 from pathlib import Path
 from typing import Any
 
+from article13_notice_binding_control import evaluate_repository_notice_binding
+from channel_register_prod_gate import evaluate as evaluate_repository_channel_gate
+from precollection_analysis_plan_gate import evaluate_repository_precollection_gate
+from privacy_notice_nf06_binding_control import evaluate_repository_binding
+from prod_activation_gate import evaluate_repository_activation
+
 HERE = Path(__file__).resolve().parent
 DEFAULT_SCHEMA = HERE / "forms_definition.json"
 DEFAULT_CONTRACT = HERE / "form_contract.json"
@@ -32,6 +38,39 @@ def activation_enabled(contract: dict[str, Any], manifest: dict[str, Any]) -> bo
         and manifest.get("deploy_authorized") is False
         and manifest.get("real_collection_authorized") is True
         and bool(str(manifest.get("explicit_user_approval_reference") or "").strip())
+    )
+
+
+def repository_activation_enabled(contract: dict[str, Any], manifest: dict[str, Any]) -> bool:
+    """Enable the public forms only when the complete canonical PROD governance stack is ready.
+
+    The small manifest latch above is useful as one prerequisite, but it is deliberately
+    insufficient on its own: the static surface must never announce or accept collection
+    before the same method, Article 13/NF06, channel and operational-evidence boundaries
+    required by the backend are satisfied. Alternate/staged dictionaries are fail-closed
+    unless they are byte-semantically equivalent to the canonical repository artifacts.
+    """
+    if not activation_enabled(contract, manifest):
+        return False
+    try:
+        if contract != load_json(DEFAULT_CONTRACT) or manifest != load_json(DEFAULT_MANIFEST):
+            return False
+        prod_ready, _prod_errors = evaluate_repository_activation()
+        method_ready, _method_errors = evaluate_repository_precollection_gate()
+        notice_ready, _notice_errors = evaluate_repository_notice_binding()
+        privacy_nf06_ready, _privacy_errors, privacy_promoted = evaluate_repository_binding()
+        channel_ready, _channel_errors = evaluate_repository_channel_gate()
+    except Exception:
+        return False
+    return all(
+        (
+            prod_ready,
+            method_ready,
+            notice_ready,
+            privacy_nf06_ready,
+            privacy_promoted,
+            channel_ready,
+        )
     )
 
 
@@ -246,7 +285,7 @@ def build(
     manifest = load_json(manifest_path)
     if contract.get("crm_integration") != "FORBIDDEN" or contract.get("commercial_analytics") != "FORBIDDEN":
         raise RuntimeError("research isolation contract is not fail-closed")
-    enabled = activation_enabled(contract, manifest)
+    enabled = repository_activation_enabled(contract, manifest)
     if enabled:
         validate_enabled_notice(contract)
     target.mkdir(parents=True, exist_ok=True)
