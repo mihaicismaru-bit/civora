@@ -1,0 +1,41 @@
+{
+  "schema_version": "eucons.ai4work_explicit_user_approval_receipt.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "status": "DRAFT_NOT_APPROVED",
+  "artifact_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
+  "synthetic": false,
+  "approval_source": "HUMAN_EXPLICIT_USER_APPROVAL_REQUIRED",
+  "authorized_action": "REAL_COLLECTION_PROD_ACTIVATION_ONLY",
+  "approved": false,
+  "approved_at": null,
+  "approved_by_user_reference": null,
+  "real_collection_authorized": false,
+  "merge_authorized": false,
+  "deploy_authorized": false,
+  "canonicalization_authorized": false,
+  "bound_artifacts": {
+    "need_analysis_plan": {
+      "reference": "NEED_ANALYSIS_PLAN_DRAFT.json",
+      "sha256": null
+    },
+    "collection_frame": {
+      "reference": "COLLECTION_FRAME_DRAFT.json",
+      "sha256": null
+    },
+    "form_contract": {
+      "reference": "form_contract.json",
+      "sha256": null
+    },
+    "invitation_catalog": {
+      "reference": "RESEARCH_INVITATION_CATALOG_DRAFT.json",
+      "sha256": null
+    },
+    "collection_channel_register": {
+      "reference": "COLLECTION_CHANNEL_REGISTER_DRAFT.json",
+      "sha256": null
+    }
+  },
+  "binding_rule": "Approval is valid only after an explicit human user decision is recorded with status APPROVED, approval_source HUMAN_EXPLICIT_USER_APPROVAL, an RFC3339 UTC-Z approved_at timestamp, and exact SHA-256 bindings to the approved method, collection frame, form contract, invitation catalog and collection-channel register. The approval is scoped only to real research collection PROD activation and must not grant merge, deploy or canonicalization authority.",
+  "test_twin_policy": "TEST_TWIN_NON_EVIDENCE_PERMANENTLY_NON_PROMOTABLE",
+  "evidence_use": "CONTROL_ONLY_NOT_NEED_EVIDENCE"
+}
