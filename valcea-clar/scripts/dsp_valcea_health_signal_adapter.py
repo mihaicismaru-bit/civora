@@ -22,10 +22,11 @@ from urllib.request import Request, urlopen
 
 SOURCE_ID = "signal-dsp-valcea-promovarea-sanatatii"
 SOURCE_NAME = "Direcția de Sănătate Publică Vâlcea — Promovarea sănătății"
-SOURCE_URL = "https://dspvalcea.ro/documente-utile/promovarea-sanatatii.php"
+SOURCE_URL = "https://www.aspjvalcea.ro/documente-utile/promovarea-sanatatii.php"
 SOURCE_TIER = "T1"
 SOURCE_KIND = "PUBLIC_HEALTH_CAMPAIGNS"
-ALLOWED_HOSTS = {"dspvalcea.ro", "www.dspvalcea.ro"}
+CANONICAL_HOST = "www.aspjvalcea.ro"
+ALLOWED_HOSTS = {"aspjvalcea.ro", "www.aspjvalcea.ro"}
 CANONICAL_PATH = "/documente-utile/promovarea-sanatatii.php"
 USER_AGENT = "Mozilla/5.0 VÂLCEA-CLAR-DSP-Health-Signal/1.0 (+https://valceaclar.ro/)"
 MAX_BODY_BYTES = 3_000_000
@@ -76,7 +77,7 @@ def normalize_official_url(value: str, *, base_url: str = SOURCE_URL) -> str | N
     ):
         return None
     path = re.sub(r"/+", "/", unquote(parsed.path or "/"))
-    return urlunsplit(("https", "dspvalcea.ro", path, parsed.query, ""))
+    return urlunsplit(("https", CANONICAL_HOST, path, parsed.query, ""))
 
 
 class PromotionParser(html.parser.HTMLParser):
@@ -352,7 +353,7 @@ def self_test() -> int:
 
       <h2>Campania națională „Respiră curat, alege sănătatea!”</h2>
       <p>Institutul Național de Sănătate Publică derulează în perioada iulie – august 2026 campania de prevenire.</p>
-      <a href="https://dspvalcea.ro/documente-utile/tutun.php">Citește mai mult</a>
+      <a href="https://www.aspjvalcea.ro/documente-utile/tutun.php">Citește mai mult</a>
       <img src="https://evil.example/generic.jpg" alt="generic">
 
       <h3>Ziua mondială fără tutun - 31.05.2026</h3>
@@ -377,6 +378,7 @@ def self_test() -> int:
     assert campaign["signal_class"] == "PUBLIC_HEALTH_CAMPAIGN"
     assert campaign["explicit_years"] == [2026]
     assert all("evil.example" not in item["url"] for item in campaign["media_candidates"])
+    assert campaign["official_links"][0]["url"].startswith("https://www.aspjvalcea.ro/")
 
     tobacco = by_title["Ziua mondială fără tutun - 31.05.2026"]
     assert tobacco["effective_dates"] == ["2026-05-31"]
@@ -390,8 +392,10 @@ def self_test() -> int:
     assert invalid["effective_date_status"] == "ANOMALOUS"
 
     assert normalize_official_url("https://evil.example/file.pdf") is None
-    assert official_surface_url("https://dspvalcea.ro/documente-utile/promovarea-sanatatii.php")
-    assert not official_surface_url("https://dspvalcea.ro/")
+    assert official_surface_url("https://www.aspjvalcea.ro/documente-utile/promovarea-sanatatii.php")
+    assert official_surface_url("https://aspjvalcea.ro/documente-utile/promovarea-sanatatii.php")
+    assert not official_surface_url("https://dspvalcea.ro/documente-utile/promovarea-sanatatii.php")
+    assert not official_surface_url("https://www.aspjvalcea.ro/")
     return 0
 
 
