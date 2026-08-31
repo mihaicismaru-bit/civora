@@ -4,12 +4,12 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
-      - 'valcea-clar/scripts/ajofm_valcea_labor_market_reference_adapter.py'
+      - 'valcea-clar/scripts/ajofm_valcea_labor_market_index_adapter.py'
       - '.github/workflows/valcea-clar-ajofm-valcea-labor-market-references.yml'
   push:
     branches: [main]
     paths:
-      - 'valcea-clar/scripts/ajofm_valcea_labor_market_reference_adapter.py'
+      - 'valcea-clar/scripts/ajofm_valcea_labor_market_index_adapter.py'
       - '.github/workflows/valcea-clar-ajofm-valcea-labor-market-references.yml'
 
 permissions:
@@ -27,7 +27,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - name: Compile AJOFM Vâlcea reference adapter
-        run: python -m py_compile valcea-clar/scripts/ajofm_valcea_labor_market_reference_adapter.py
+      - name: Compile AJOFM Vâlcea index adapter
+        run: python -m py_compile valcea-clar/scripts/ajofm_valcea_labor_market_index_adapter.py
       - name: Run AJOFM Vâlcea fail-closed regressions
-        run: python valcea-clar/scripts/ajofm_valcea_labor_market_reference_adapter.py --self-test
+        run: python valcea-clar/scripts/ajofm_valcea_labor_market_index_adapter.py --self-test
