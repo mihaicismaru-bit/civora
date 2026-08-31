@@ -2,18 +2,18 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-31T04:01:10+03:00",
+  "generated_at": "2026-08-31T04:49:31+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-31T03:59:46+03:00",
-  "task_count": 55,
+  "queue_generated_at": "2026-08-31T04:48:34+03:00",
+  "task_count": 54,
   "primary_match_count": 0,
-  "no_match_count": 30,
+  "no_match_count": 29,
   "unrouted_count": 25,
-  "target_count": 20,
-  "targets_ok": 15,
+  "target_count": 17,
+  "targets_ok": 14,
   "results": [
     {
       "signal_id": "c8e25d1dbc6612fabde3e231",
@@ -989,56 +989,6 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
-    },
-    {
-      "signal_id": "169797f0933913f4853c98d1",
-      "signal_title": "PAMFLET | Regina chipsurilor vrea coroana de la Govora! Ditamai directoarea Pepsi, Alina Imbrea, visează la Primăria Băile Govora!",
-      "signal_url": "https://ziaruldevalcea.ro/2026/08/pamflet-regina-chipsurilor-vrea-coroana-de-la-govora-ditamai-directoarea-pepsi-alina-imbrea-viseaza-la-primaria-baile-govora/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-08-28T12:14:57+03:00",
-      "verification_route_id": "administration_projects",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "prefectura-valcea",
-            "name": "Instituția Prefectului — Județul Vâlcea",
-            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "cj-valcea-anunturi",
-            "name": "Consiliul Județean Vâlcea",
-            "url": "https://cjvalcea.ro/categorie/anunturi/"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "primaria-rm-valcea-comunicate",
-            "name": "Primăria Municipiului Râmnicu Vâlcea",
-            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-          "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
       "listing_title_identity_rejections": 80
     },
     {
