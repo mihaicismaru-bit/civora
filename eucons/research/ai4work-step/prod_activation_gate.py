@@ -15,9 +15,16 @@ CONTROLLER_PATH = HERE / "CONTROLLER_DETERMINATION_DRAFT.json"
 COLLECTION_FRAME_PATH = HERE / "COLLECTION_FRAME_DRAFT.json"
 DPIA_SCREENING_PATH = HERE / "GDPR_DPIA_SCREENING_DRAFT.json"
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
-APPROVED_EXTERNAL_STATUSES = {"APPROVED", "PASS", "FROZEN"}
+APPROVED_EXTERNAL_STATUSES = {"APPROVED", "PASS"}
+DOCUMENTARY_EXTERNAL_STATUSES = {"APPROVED", "PASS", "FROZEN"}
 SEMANTIC_ATTESTATION_STATUSES = {"APPROVED", "PASS"}
 NON_EVIDENCE_MARKERS = ("TEST_TWIN", "NON_EVIDENCE", "SYNTHETIC")
+FROZEN_DOCUMENTARY_KEYS = {
+    "provider_account_role_reconciliation",
+    "live_hosting_service_mapping",
+    "provider_annex_4_5",
+    "provider_server_logging_profile",
+}
 REQUIRED_EXTERNAL_KEYS = {
     "privacy_notice",
     "lawful_basis_or_lia",
@@ -44,14 +51,19 @@ def _load(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def _valid_external_reference(value: Any) -> bool:
+def _valid_external_reference(*, key: str, value: Any) -> bool:
     if not isinstance(value, dict):
         return False
     status = value.get("status")
     reference = value.get("reference")
     digest = value.get("sha256")
+    allowed_statuses = (
+        DOCUMENTARY_EXTERNAL_STATUSES
+        if key in FROZEN_DOCUMENTARY_KEYS
+        else APPROVED_EXTERNAL_STATUSES
+    )
     return (
-        status in APPROVED_EXTERNAL_STATUSES
+        status in allowed_statuses
         and isinstance(reference, str)
         and bool(reference.strip())
         and isinstance(digest, str)
@@ -83,9 +95,10 @@ def _valid_promoted_local_binding(*, key: str, value: dict[str, Any], research_i
 
     A separate CI evidence-binding workflow is useful defence in depth, but PROD activation
     must not depend on that workflow having run. Every promoted external/operational gate is
-    therefore re-checked here. FROZEN documentary/provider context needs an exact local hash;
-    PASS/APPROVED additionally needs a JSON attestation bound to this research run and exact
-    evidence key, and TEST TWIN / NON-EVIDENCE / SYNTHETIC artifacts are never promotable.
+    therefore re-checked here. FROZEN is accepted only for the explicitly enumerated immutable
+    documentary/provider-context keys. Live operational gates require PASS/APPROVED and a JSON
+    attestation bound to this research run and exact evidence key. TEST TWIN / NON-EVIDENCE /
+    SYNTHETIC artifacts are never promotable.
     """
     candidate = _resolve_local_reference(value.get("reference"))
     digest = value.get("sha256")
@@ -95,7 +108,7 @@ def _valid_promoted_local_binding(*, key: str, value: dict[str, Any], research_i
         return False
 
     if value.get("status") not in SEMANTIC_ATTESTATION_STATUSES:
-        return True
+        return key in FROZEN_DOCUMENTARY_KEYS and value.get("status") == "FROZEN"
     if candidate.suffix.lower() != ".json":
         return False
     try:
@@ -224,8 +237,8 @@ def activation_errors(
         if unexpected:
             errors.append("external_evidence_keys_unexpected:" + ",".join(sorted(unexpected)))
         for key in sorted(REQUIRED_EXTERNAL_KEYS):
-            if key not in evidence or not _valid_external_reference(evidence[key]):
-                errors.append(f"external_evidence_not_frozen:{key}")
+            if key not in evidence or not _valid_external_reference(key=key, value=evidence[key]):
+                errors.append(f"external_evidence_status_or_binding_invalid:{key}")
             elif not _valid_promoted_local_binding(
                 key=key,
                 value=evidence[key],
