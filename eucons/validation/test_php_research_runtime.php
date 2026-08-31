@@ -107,6 +107,10 @@ $_SERVER['DOCUMENT_ROOT'] = $root . '/public';
 
 $runtime = new EuconsResearchRuntime(dirname(__DIR__));
 if ($runtime->productionEnabled() !== false) fail_test('PROD must remain disabled without approved manifest/contract');
+$runtimeSource = file_get_contents(dirname(__DIR__) . '/runtime/php/src/ResearchRuntime.php');
+if ($runtimeSource === false) fail_test('ResearchRuntime.php unavailable for activation-scope regression check');
+if (str_contains($runtimeSource, "deploy_authorized'] ?? false) === true")) fail_test('collection latch must not require deploy authority');
+if (!str_contains($runtimeSource, "deploy_authorized'] ?? null) === false")) fail_test('collection latch must fail closed unless deploy authority remains false');
 if (!$runtime->allowedOrigin('https://eucons.ro') || $runtime->allowedOrigin('https://example.invalid')) fail_test('origin policy drift');
 if ($runtime->storageRoot() !== $root . '/research') fail_test('research root drift');
 
