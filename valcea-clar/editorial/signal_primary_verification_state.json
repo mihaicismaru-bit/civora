@@ -2,19 +2,31 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-31T12:50:05+03:00",
+  "generated_at": "2026-08-31T13:00:55+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-31T12:48:54+03:00",
-  "task_count": 50,
+  "queue_generated_at": "2026-08-31T12:59:42+03:00",
+  "task_count": 51,
   "primary_match_count": 0,
   "no_match_count": 25,
-  "unrouted_count": 25,
+  "unrouted_count": 26,
   "target_count": 18,
   "targets_ok": 14,
   "results": [
+    {
+      "signal_id": "58d85654a253e107abd92ab8",
+      "signal_title": "Rezoluție adoptată de PSD la Sinaia: doar două variante de guvernare sunt acceptate",
+      "signal_url": "https://seintamplainvalcea.ro/2026/08/31/rezolutie-adoptata-de-psd-la-sinaia-doar-doua-variante-de-guvernare-sunt-acceptate/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_published_at": "2026-08-31T12:53:03+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
     {
       "signal_id": "b87f433f81659cd232010ae2",
       "signal_title": "Ursul a dat atacul în Runcu. Gard distrus și oi dispărute",
@@ -1003,55 +1015,6 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "6da701ae6f7788ebea7c0f32",
-      "signal_title": "DOCUMENT | Sesizare explozivă despre un concurs de angajare la Colegiul „Mircea cel Bătrân” din Râmnicu Vâlcea: „Postul era deja ocupat”. Acuzații de favorizare și concurs „aranjat”",
-      "signal_url": "https://ziaruldevalcea.ro/2026/08/document-sesizare-exploziva-despre-un-concurs-de-angajare-la-colegiul-mircea-cel-batran-din-ramnicu-valcea-postul-era-deja-ocupat-acuzatii-de-favorizare-si-conc/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": null,
-      "verification_route_id": "fire_rescue_alert",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "isu-valcea-stiri-locale",
-            "name": "ISU Vâlcea — Știri locale",
-            "url": "https://isuvl.igsu.ro/stiri-locale"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "isu-valcea-comunicate",
-            "name": "ISU Vâlcea",
-            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "inhga-avertizari-hidrologice-valcea",
-            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
-            "url": "https://www.hidro.ro/warning/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
       "signal_id": "6acb95bf42e585b073eb7ccc",
       "signal_title": "Partajează pe X(Se deschide într-o fereastră nouă) X",
       "signal_url": "https://x.com/intent/tweet?via=curierulvl&text=LIGA%202.%20VICTORIE%21%20SCM%20R%C3%82MNICU%20V%C3%82LCEA%20BATE%20LA%20DUMBR%C4%82VI%C8%9AA.%201-0%2C%20S%C4%82LCIANU&url=https%3A%2F%2Fwww.curierul.ro%2Fliga-2-victorie-scm-ramnicu-valcea-bate-la-dumbravita-1-0-salcianu%2F",
@@ -1162,6 +1125,55 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "6da701ae6f7788ebea7c0f32",
+      "signal_title": "DOCUMENT | Sesizare explozivă despre un concurs de angajare la Colegiul „Mircea cel Bătrân” din Râmnicu Vâlcea: „Postul era deja ocupat”. Acuzații de favorizare și concurs „aranjat”",
+      "signal_url": "https://ziaruldevalcea.ro/2026/08/document-sesizare-exploziva-despre-un-concurs-de-angajare-la-colegiul-mircea-cel-batran-din-ramnicu-valcea-postul-era-deja-ocupat-acuzatii-de-favorizare-si-conc/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": null,
+      "verification_route_id": "fire_rescue_alert",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "isu-valcea-stiri-locale",
+            "name": "ISU Vâlcea — Știri locale",
+            "url": "https://isuvl.igsu.ro/stiri-locale"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "isu-valcea-comunicate",
+            "name": "ISU Vâlcea",
+            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "2b590178677a679d4782690f",
