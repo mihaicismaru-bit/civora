@@ -35,6 +35,8 @@ evidence = m.collect_live(
 assert evidence["stats"]["exact_crea_reference_candidates"] == 1
 assert evidence["stats"]["open_call_authorized"] == 0
 assert evidence["stats"]["records_requiring_ft_reconcile"] == 1
+assert evidence["source_health"] == "HEALTHY"
+assert evidence["lkg_required"] is False
 assert evidence["open_call_authorized"] is False
 
 for bad_url in (
@@ -79,11 +81,11 @@ def empty_index(url: str):
     }
 
 
-try:
-    m.collect_live(run_id="empty", fetcher=empty_index)
-except ValueError:
-    pass
-else:
-    raise AssertionError("empty explicit-CREA evidence did not fail closed")
+degraded = m.collect_live(run_id="empty", fetcher=empty_index)
+assert degraded["stats"]["exact_crea_reference_candidates"] == 0
+assert degraded["source_health"] == "DEGRADED_EMPTY_RENDERED_INDEX"
+assert degraded["lkg_required"] is True
+assert degraded["open_call_authorized"] is False
+assert degraded["publication_effect"] == "NONE"
 
-print("PASS Creative Europe bounded acquisition and hostile/empty fail-closed regression")
+print("PASS Creative Europe bounded acquisition, degraded-empty persistence and hostile fail-closed regression")
