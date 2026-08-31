@@ -11,13 +11,21 @@ sys.path.insert(0, str(ROOT / "partener-eu" / "web"))
 from programming_pipeline_projection import MISSING_FOR_OPEN, _fingerprint, project
 
 
-def row(source_id: str, state: str, health_state: str, priority: int) -> dict:
+def row(
+    source_id: str,
+    state: str,
+    health_state: str,
+    priority: int,
+    *,
+    programme_ids: list[str] | None = None,
+    programme_family: str = "INTERREG_TEST",
+) -> dict:
     healthy = health_state == "HEALTHY"
     return {
         "source_id": source_id,
-        "programme_ids": [source_id.replace("SRC-", "")],
+        "programme_ids": list(programme_ids or [source_id.replace("SRC-", "")]),
         "programme": f"{source_id} programme",
-        "programme_family": "INTERREG_TEST",
+        "programme_family": programme_family,
         "source_family": "INTERREG",
         "programme_period": "2028-2034",
         "authority_class": "T1_OFFICIAL_PROGRAMME",
@@ -64,13 +72,21 @@ def fixture() -> tuple[dict, dict]:
         "source_family": "INTERREG",
         "programme_period": "2028-2034",
         "observation_state": "PROGRAMMING_PIPELINE",
-        "source_count": 2,
-        "healthy_source_count": 1,
+        "source_count": 3,
+        "healthy_source_count": 2,
         "degraded_source_count": 1,
         "health_state": "DEGRADED",
         "watchlist": [
-            row("SRC-RO-MD", "CONSULTATION", "DEGRADED_CERTIFICATE_VERIFY_FAILED", 90),
-            row("SRC-HUSKROUA", "PROGRAMMING_PROCESS", "HEALTHY", 70),
+            row("SRC-RO-MD", "CONSULTATION", "DEGRADED_CERTIFICATE_VERIFY_FAILED", 90, programme_ids=["ROMD"]),
+            row("SRC-HUSKROUA", "PROGRAMMING_PROCESS", "HEALTHY", 70, programme_ids=["HUSKROUA"]),
+            row(
+                "SRC-EU-FRAMEWORK",
+                "PROPOSAL",
+                "HEALTHY",
+                50,
+                programme_ids=["ROUA", "HUSKROUA"],
+                programme_family="INTERREG_EU_FRAMEWORK",
+            ),
         ],
         "market_intelligence_only": True,
         "material_fact_use": False,
@@ -98,6 +114,17 @@ def fixture() -> tuple[dict, dict]:
             "source_id": "SRC-HUSKROUA",
             "change_kind": "SEMANTIC_CHANGE",
             "semantic_changed": True,
+            "transport_or_content_changed": False,
+            "lkg_status": "NOT_REQUIRED_CURRENT_SOURCE_USABLE",
+            "material_fact_use": False,
+            "open_call_authorized": False,
+            "publish_authorized": False,
+            "distribution_authorized": False,
+        },
+        {
+            "source_id": "SRC-EU-FRAMEWORK",
+            "change_kind": "NO_CHANGE",
+            "semantic_changed": False,
             "transport_or_content_changed": False,
             "lkg_status": "NOT_REQUIRED_CURRENT_SOURCE_USABLE",
             "material_fact_use": False,
@@ -151,12 +178,37 @@ def main() -> None:
     assert output["surface"] == "PROGRAMARE_VIITOARE_PIPELINE"
     assert output["surface_state"] == "PREVIEW_READ_ONLY_NOT_PUBLISHED"
     assert output["pipeline_watch_label"] == "PROGRAMARE_VIITOARE_PIPELINE"
-    assert output["card_count"] == 2
+    assert output["card_count"] == 3
     assert output["cards"][0]["source_id"] == "SRC-RO-MD"
     assert output["cards"][0]["observation_label_ro"] == "Consultare"
     assert output["cards"][0]["confidence"] == "LOW"
     assert output["cards"][0]["open_confirmation_state"] == "NOT_CONFIRMED_MISSING_EXACT_CALL_EVIDENCE"
     assert output["cards"][1]["confidence_reason"] == "CURRENT_OFFICIAL_EVIDENCE_RECONCILED_CHANGE"
+    assert output["framework_mapped_programme_ids"] == ["HUSKROUA", "ROUA"]
+    assert output["programme_specific_covered_programme_ids"] == ["HUSKROUA", "ROMD"]
+    assert output["programme_specific_coverage_state"] == "PARTIAL_FRAMEWORK_ONLY_GAPS_PRESENT"
+    assert output["coverage_gap_count"] == 1
+    gap = output["coverage_gaps"][0]
+    assert gap["programme_id"] == "ROUA"
+    assert gap["coverage_state"] == "FRAMEWORK_ONLY_RESEARCH_WATCH_NOT_ADMITTED"
+    assert gap["programme_specific_admission_state"] == "NOT_ADMITTED_MISSING_PROGRAMME_SPECIFIC_AUTHORITY"
+    assert gap["open_confirmation_state"] == "NOT_APPLICABLE_PROGRAMME_SPECIFIC_PIPELINE_NOT_ADMITTED"
+    assert gap["missing_for_programme_specific_admission"] == [
+        "programme_specific_official_2028_2034_authority",
+        "bounded_official_programme_endpoint",
+        "programme_specific_semantic_reconciliation",
+    ]
+    assert gap["framework_evidence"][0]["source_id"] == "SRC-EU-FRAMEWORK"
+    for key in (
+        "material_fact_use",
+        "open_call_authorized",
+        "deadline_authorized",
+        "budget_authorized",
+        "eligibility_authorized",
+        "publish_authorized",
+        "distribution_authorized",
+    ):
+        assert gap[key] is False
     for key in (
         "material_fact_use",
         "open_call_authorized",
@@ -184,6 +236,10 @@ def main() -> None:
     bad["watchlist"][0]["missing_for_open_confirmation"] = ["semantic_reconciliation"]
     expect_fail(bad, reconciliation, "missing-for-open contract weakens")
 
+    bad = copy.deepcopy(snapshot)
+    bad["watchlist"][2]["programme_ids"] = []
+    expect_fail(bad, reconciliation, "framework programme mapping missing")
+
     bad_reconcile = copy.deepcopy(reconciliation)
     bad_reconcile["current_run_id"] = "other-run"
     expect_fail(snapshot, bad_reconcile, "reconciliation does not bind current run")
@@ -196,7 +252,7 @@ def main() -> None:
     bad_reconcile["distribution_authorized"] = True
     expect_fail(snapshot, bad_reconcile, "reconciliation authorizes distribution")
 
-    print("PASS programming pipeline projection stays read-only, pipeline-only and fail-closed")
+    print("PASS programming pipeline projection stays read-only, exposes framework-only coverage gaps and remains fail-closed")
 
 
 if __name__ == "__main__":
