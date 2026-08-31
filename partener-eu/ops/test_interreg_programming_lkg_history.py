@@ -75,7 +75,7 @@ def _snapshot(base: dict, run_id: str, fetched_at: str) -> dict:
 def _base() -> dict:
     return pipeline.resolve(
         run_id="BASE",
-        observed_at="2026-08-31T12:00:00Z",
+        observed_at="2026-09-01T12:00:00Z",
         live=False,
     )
 
@@ -83,9 +83,9 @@ def _base() -> dict:
 def main() -> None:
     base = _base()
 
-    current = _snapshot(base, "CURRENT", "2026-08-31T12:00:00Z")
-    previous = _snapshot(base, "PREVIOUS", "2026-08-31T11:00:00Z")
-    older_healthy = _snapshot(base, "OLDER-HEALTHY", "2026-08-31T10:00:00Z")
+    current = _snapshot(base, "CURRENT", "2026-09-01T12:00:00Z")
+    previous = _snapshot(base, "PREVIOUS", "2026-09-01T11:00:00Z")
+    older_healthy = _snapshot(base, "OLDER-HEALTHY", "2026-09-01T10:00:00Z")
     _degraded(_row(current))
     _degraded(_row(previous))
     _healthy(_row(older_healthy), "a" * 64)
@@ -93,7 +93,7 @@ def main() -> None:
     receipt = pipeline.reconcile_snapshots(
         current,
         previous,
-        reconciled_at="2026-08-31T12:01:00Z",
+        reconciled_at="2026-09-01T12:01:00Z",
     )
     initial_change = next(row for row in receipt["changes"] if row["source_id"] == SOURCE_ID)
     assert initial_change["lkg_status"] == "REQUIRED_REFERENCE_UNAVAILABLE"
@@ -118,7 +118,7 @@ def main() -> None:
     assert enriched["distribution_authorized"] is False
     assert enriched["publication_effect"] == "NONE"
 
-    wrong_identity = _snapshot(base, "WRONG-IDENTITY", "2026-08-31T10:30:00Z")
+    wrong_identity = _snapshot(base, "WRONG-IDENTITY", "2026-09-01T10:30:00Z")
     wrong_row = _row(wrong_identity)
     _healthy(wrong_row, "b" * 64)
     wrong_row["authority_url"] = wrong_row["authority_url"] + "?changed-identity=1"
@@ -133,9 +133,9 @@ def main() -> None:
     assert wrong_only["historical_lkg_reference_available_count"] == 0
     assert wrong_only["lkg_reference_missing_count"] == 1
 
-    recent_degraded = _snapshot(base, "RECENT-DEGRADED", "2026-08-31T11:30:00Z")
-    middle_degraded = _snapshot(base, "MIDDLE-DEGRADED", "2026-08-31T11:15:00Z")
-    oldest_healthy = _snapshot(base, "OLDEST-HEALTHY", "2026-08-31T09:00:00Z")
+    recent_degraded = _snapshot(base, "RECENT-DEGRADED", "2026-09-01T11:30:00Z")
+    middle_degraded = _snapshot(base, "MIDDLE-DEGRADED", "2026-09-01T11:15:00Z")
+    oldest_healthy = _snapshot(base, "OLDEST-HEALTHY", "2026-09-01T09:00:00Z")
     _degraded(_row(recent_degraded))
     _degraded(_row(middle_degraded))
     _healthy(_row(oldest_healthy), "c" * 64)
@@ -149,12 +149,12 @@ def main() -> None:
     assert bounded["historical_lkg_snapshot_count_considered"] == 2
     assert bounded_change["lkg_status"] == "REQUIRED_REFERENCE_UNAVAILABLE"
 
-    immediate_healthy = _snapshot(base, "IMMEDIATE-HEALTHY", "2026-08-31T11:00:00Z")
+    immediate_healthy = _snapshot(base, "IMMEDIATE-HEALTHY", "2026-09-01T11:00:00Z")
     _healthy(_row(immediate_healthy), "d" * 64)
     immediate_receipt = pipeline.reconcile_snapshots(
         current,
         immediate_healthy,
-        reconciled_at="2026-08-31T12:02:00Z",
+        reconciled_at="2026-09-01T12:02:00Z",
     )
     immediate = history.enrich_reconciliation_with_history(
         current,
@@ -168,7 +168,7 @@ def main() -> None:
     assert immediate["immediate_lkg_identity_mismatch_invalidated_count"] == 0
     assert immediate["lkg_reference_available_count"] == 1
 
-    immediate_wrong = _snapshot(base, "IMMEDIATE-WRONG", "2026-08-31T11:00:00Z")
+    immediate_wrong = _snapshot(base, "IMMEDIATE-WRONG", "2026-09-01T11:00:00Z")
     immediate_wrong_row = _row(immediate_wrong)
     _healthy(immediate_wrong_row, "e" * 64)
     immediate_wrong_row["authority_url"] = immediate_wrong_row["authority_url"] + "?authority-generation=old"
@@ -176,7 +176,7 @@ def main() -> None:
     immediate_wrong_receipt = pipeline.reconcile_snapshots(
         current,
         immediate_wrong,
-        reconciled_at="2026-08-31T12:03:00Z",
+        reconciled_at="2026-09-01T12:03:00Z",
     )
     pre_guard_change = next(row for row in immediate_wrong_receipt["changes"] if row["source_id"] == SOURCE_ID)
     assert pre_guard_change["lkg_status"] == "REFERENCE_AVAILABLE_FROM_PREVIOUS_HEALTHY_SNAPSHOT"
@@ -214,7 +214,7 @@ def main() -> None:
     else:
         raise AssertionError("authorizing historical snapshot must fail closed")
 
-    future = _snapshot(older_healthy, "FUTURE", "2026-08-31T13:00:00Z")
+    future = _snapshot(older_healthy, "FUTURE", "2026-09-01T13:00:00Z")
     future_only = history.enrich_reconciliation_with_history(current, receipt, [future])
     assert future_only["historical_lkg_snapshot_count_considered"] == 0
     assert future_only["lkg_reference_missing_count"] == 1
