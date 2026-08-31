@@ -2,11 +2,108 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_STRUCTURED_ALERT_EVENTS_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-31T22:50:03+03:00",
+  "generated_at": "2026-08-31T22:56:49+03:00",
   "publication_authority": "PRIMARY_STRUCTURED_EVENT_ONLY",
   "events_are_reader_stories": false,
-  "event_count": 0,
-  "events": [],
+  "event_count": 4,
+  "events": [
+    {
+      "event_id": "utility-electricity-120b6089dce322fee807",
+      "source_id": "distributie-oltenia-planned-electricity-interruptions",
+      "source_name": "Distribuție Oltenia — întreruperi programate Vâlcea",
+      "source_tier": "T1",
+      "source_url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F31.08-06.09.2026%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2031_08%20-%2006_09_2026%20-%20Valcea.pdf",
+      "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
+      "event_start": "2026-09-04T09:00+03:00",
+      "event_end": "2026-09-04T17:00+03:00",
+      "source_time_basis": "official_service_window",
+      "body_sha256": "96a6bb31f62ed3358c584920db7743d420733c2083fbd9970ad05c0fafd18f2e",
+      "structured": {
+        "utility": "electricity",
+        "service_state": "scheduled_interruption",
+        "affected_locality": "Râmnicu Vâlcea",
+        "affected_scope": "LES JT PTCZ Nord 8 - circuitul 5",
+        "schedule_label": "Valcea - Intreruperi 31.08 - 06.09.2026",
+        "schedule_start": "2026-08-31",
+        "schedule_end": "2026-09-06",
+        "document_extraction": "pdf_pypdf_layout"
+      },
+      "publication_authority": "PRIMARY_STRUCTURED_EVENT_ONLY",
+      "reader_copy_generated": false
+    },
+    {
+      "event_id": "utility-electricity-660b77282fe0a0dd7a7b",
+      "source_id": "distributie-oltenia-planned-electricity-interruptions",
+      "source_name": "Distribuție Oltenia — întreruperi programate Vâlcea",
+      "source_tier": "T1",
+      "source_url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F07.09-13.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2007_09%20-%2013_09_2026%20-%20Valcea.pdf",
+      "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
+      "event_start": "2026-09-07T08:30+03:00",
+      "event_end": "2026-09-07T16:30+03:00",
+      "source_time_basis": "official_service_window",
+      "body_sha256": "e37d7be9061736910257ab13d6b7b4dbf06c64cb5fa3f097728da1ccfdd10eb2",
+      "structured": {
+        "utility": "electricity",
+        "service_state": "scheduled_interruption",
+        "affected_locality": "Dăeşti",
+        "affected_scope": "PTAB Dăeşti 3",
+        "schedule_label": "Valcea - Intreruperi 07.09 - 13.09.2026",
+        "schedule_start": "2026-09-07",
+        "schedule_end": "2026-09-13",
+        "document_extraction": "pdf_pypdf_layout"
+      },
+      "publication_authority": "PRIMARY_STRUCTURED_EVENT_ONLY",
+      "reader_copy_generated": false
+    },
+    {
+      "event_id": "utility-electricity-b0959648162003163abd",
+      "source_id": "distributie-oltenia-planned-electricity-interruptions",
+      "source_name": "Distribuție Oltenia — întreruperi programate Vâlcea",
+      "source_tier": "T1",
+      "source_url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F07.09-13.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2007_09%20-%2013_09_2026%20-%20Valcea.pdf",
+      "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
+      "event_start": "2026-09-08T09:00+03:00",
+      "event_end": "2026-09-08T17:00+03:00",
+      "source_time_basis": "official_service_window",
+      "body_sha256": "dcc207991f6c242ef604db2ab974e90c8775c088134a40a1cedaf20521e9d9b0",
+      "structured": {
+        "utility": "electricity",
+        "service_state": "scheduled_interruption",
+        "affected_locality": "Fârtăţeşti",
+        "affected_scope": "LEA JT PTAB Fârtăţeşti 3",
+        "schedule_label": "Valcea - Intreruperi 07.09 - 13.09.2026",
+        "schedule_start": "2026-09-07",
+        "schedule_end": "2026-09-13",
+        "document_extraction": "pdf_pypdf_layout"
+      },
+      "publication_authority": "PRIMARY_STRUCTURED_EVENT_ONLY",
+      "reader_copy_generated": false
+    },
+    {
+      "event_id": "utility-electricity-828362709463ddad699f",
+      "source_id": "distributie-oltenia-planned-electricity-interruptions",
+      "source_name": "Distribuție Oltenia — întreruperi programate Vâlcea",
+      "source_tier": "T1",
+      "source_url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F07.09-13.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2007_09%20-%2013_09_2026%20-%20Valcea.pdf",
+      "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
+      "event_start": "2026-09-10T18:00+03:00",
+      "event_end": "2026-09-10T21:00+03:00",
+      "source_time_basis": "official_service_window",
+      "body_sha256": "778d378e65dd6502a3be0f98ad752817c238a979091f98ce4723dfe1b01b2bcd",
+      "structured": {
+        "utility": "electricity",
+        "service_state": "scheduled_interruption",
+        "affected_locality": "Băile Govora",
+        "affected_scope": "PTAB Sanatoriu de Copii (MFA) Govora",
+        "schedule_label": "Valcea - Intreruperi 07.09 - 13.09.2026",
+        "schedule_start": "2026-09-07",
+        "schedule_end": "2026-09-13",
+        "document_extraction": "pdf_pypdf_layout"
+      },
+      "publication_authority": "PRIMARY_STRUCTURED_EVENT_ONLY",
+      "reader_copy_generated": false
+    }
+  ],
   "sources": [
     {
       "source_id": "igpr-infotrafic",
@@ -31,9 +128,128 @@
     },
     {
       "source_id": "distributie-oltenia-planned-electricity-interruptions",
-      "status": "DEGRADED",
-      "error": "ConnectionResetError: [Errno 104] Connection reset by peer",
-      "events": []
+      "status": "PASS",
+      "listing_url": "https://www.distributieoltenia.ro/en/support/planned-maintenance-and-fault-correction/valcea.html",
+      "documents_discovered": 244,
+      "documents_selected": 2,
+      "documents": [
+        {
+          "label": "Valcea - Intreruperi 31.08 - 06.09.2026",
+          "url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F31.08-06.09.2026%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2031_08%20-%2006_09_2026%20-%20Valcea.pdf",
+          "content_type": "application/pdf",
+          "extraction_method": "pdf_pypdf_layout",
+          "body_sha256": "bbaff8a6c58ad9a4f0d712508cd957ec1c777c826b5f6727766bdc3feeb1036f",
+          "candidates": 2,
+          "events": 1
+        },
+        {
+          "label": "Valcea - Intreruperi 07.09 - 13.09.2026",
+          "url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F07.09-13.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2007_09%20-%2013_09_2026%20-%20Valcea.pdf",
+          "content_type": "application/pdf",
+          "extraction_method": "pdf_pypdf_layout",
+          "body_sha256": "bb2e21f8fe3e0dca08253fcbc496ccef46d07d476feeaf84385c4bb20eb8a5a5",
+          "candidates": 3,
+          "events": 3
+        }
+      ],
+      "events": [
+        {
+          "event_id": "utility-electricity-120b6089dce322fee807",
+          "source_id": "distributie-oltenia-planned-electricity-interruptions",
+          "source_name": "Distribuție Oltenia — întreruperi programate Vâlcea",
+          "source_tier": "T1",
+          "source_url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F31.08-06.09.2026%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2031_08%20-%2006_09_2026%20-%20Valcea.pdf",
+          "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
+          "event_start": "2026-09-04T09:00+03:00",
+          "event_end": "2026-09-04T17:00+03:00",
+          "source_time_basis": "official_service_window",
+          "body_sha256": "96a6bb31f62ed3358c584920db7743d420733c2083fbd9970ad05c0fafd18f2e",
+          "structured": {
+            "utility": "electricity",
+            "service_state": "scheduled_interruption",
+            "affected_locality": "Râmnicu Vâlcea",
+            "affected_scope": "LES JT PTCZ Nord 8 - circuitul 5",
+            "schedule_label": "Valcea - Intreruperi 31.08 - 06.09.2026",
+            "schedule_start": "2026-08-31",
+            "schedule_end": "2026-09-06",
+            "document_extraction": "pdf_pypdf_layout"
+          },
+          "publication_authority": "PRIMARY_STRUCTURED_EVENT_ONLY",
+          "reader_copy_generated": false
+        },
+        {
+          "event_id": "utility-electricity-660b77282fe0a0dd7a7b",
+          "source_id": "distributie-oltenia-planned-electricity-interruptions",
+          "source_name": "Distribuție Oltenia — întreruperi programate Vâlcea",
+          "source_tier": "T1",
+          "source_url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F07.09-13.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2007_09%20-%2013_09_2026%20-%20Valcea.pdf",
+          "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
+          "event_start": "2026-09-07T08:30+03:00",
+          "event_end": "2026-09-07T16:30+03:00",
+          "source_time_basis": "official_service_window",
+          "body_sha256": "e37d7be9061736910257ab13d6b7b4dbf06c64cb5fa3f097728da1ccfdd10eb2",
+          "structured": {
+            "utility": "electricity",
+            "service_state": "scheduled_interruption",
+            "affected_locality": "Dăeşti",
+            "affected_scope": "PTAB Dăeşti 3",
+            "schedule_label": "Valcea - Intreruperi 07.09 - 13.09.2026",
+            "schedule_start": "2026-09-07",
+            "schedule_end": "2026-09-13",
+            "document_extraction": "pdf_pypdf_layout"
+          },
+          "publication_authority": "PRIMARY_STRUCTURED_EVENT_ONLY",
+          "reader_copy_generated": false
+        },
+        {
+          "event_id": "utility-electricity-b0959648162003163abd",
+          "source_id": "distributie-oltenia-planned-electricity-interruptions",
+          "source_name": "Distribuție Oltenia — întreruperi programate Vâlcea",
+          "source_tier": "T1",
+          "source_url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F07.09-13.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2007_09%20-%2013_09_2026%20-%20Valcea.pdf",
+          "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
+          "event_start": "2026-09-08T09:00+03:00",
+          "event_end": "2026-09-08T17:00+03:00",
+          "source_time_basis": "official_service_window",
+          "body_sha256": "dcc207991f6c242ef604db2ab974e90c8775c088134a40a1cedaf20521e9d9b0",
+          "structured": {
+            "utility": "electricity",
+            "service_state": "scheduled_interruption",
+            "affected_locality": "Fârtăţeşti",
+            "affected_scope": "LEA JT PTAB Fârtăţeşti 3",
+            "schedule_label": "Valcea - Intreruperi 07.09 - 13.09.2026",
+            "schedule_start": "2026-09-07",
+            "schedule_end": "2026-09-13",
+            "document_extraction": "pdf_pypdf_layout"
+          },
+          "publication_authority": "PRIMARY_STRUCTURED_EVENT_ONLY",
+          "reader_copy_generated": false
+        },
+        {
+          "event_id": "utility-electricity-828362709463ddad699f",
+          "source_id": "distributie-oltenia-planned-electricity-interruptions",
+          "source_name": "Distribuție Oltenia — întreruperi programate Vâlcea",
+          "source_tier": "T1",
+          "source_url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F07.09-13.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2007_09%20-%2013_09_2026%20-%20Valcea.pdf",
+          "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
+          "event_start": "2026-09-10T18:00+03:00",
+          "event_end": "2026-09-10T21:00+03:00",
+          "source_time_basis": "official_service_window",
+          "body_sha256": "778d378e65dd6502a3be0f98ad752817c238a979091f98ce4723dfe1b01b2bcd",
+          "structured": {
+            "utility": "electricity",
+            "service_state": "scheduled_interruption",
+            "affected_locality": "Băile Govora",
+            "affected_scope": "PTAB Sanatoriu de Copii (MFA) Govora",
+            "schedule_label": "Valcea - Intreruperi 07.09 - 13.09.2026",
+            "schedule_start": "2026-09-07",
+            "schedule_end": "2026-09-13",
+            "document_extraction": "pdf_pypdf_layout"
+          },
+          "publication_authority": "PRIMARY_STRUCTURED_EVENT_ONLY",
+          "reader_copy_generated": false
+        }
+      ]
     }
   ]
 }
