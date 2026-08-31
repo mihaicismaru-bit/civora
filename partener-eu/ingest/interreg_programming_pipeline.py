@@ -5,6 +5,7 @@ import argparse
 import hashlib
 import json
 import re
+import time
 from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -18,6 +19,12 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_REGISTRY = ROOT / "partener-eu" / "ingest" / "interreg_programming_pipeline_registry.json"
 
 ALLOWED_OBSERVATION_STATES = {"PROPOSAL", "CONSULTATION", "PROGRAMMING_PROCESS"}
+TRANSIENT_HTTP_STATUSES = frozenset({202, 408, 425, 429, 500, 502, 503, 504})
+_CERTIFICATE_ERROR_MARKERS = (
+    "certificate verify failed",
+    "certificate_verify_failed",
+    "ssl: certificate",
+)
 MISSING_FOR_CALL_CONFIRMATION = [
     "exact_call_or_topic_identifier",
     "current_official_exact_call_endpoint",
@@ -198,7 +205,53 @@ def _watch_priority(state: str, lifecycle: str, freshness: str) -> int:
     return max(base, 0)
 
 
-def _probe(row: dict[str, Any], *, timeout: float) -> dict[str, Any]:
+def _certificate_failure(exc: BaseException) -> bool:
+    text = str(exc).casefold()
+    return any(marker in text for marker in _CERTIFICATE_ERROR_MARKERS)
+
+
+def _degraded_probe(
+    *,
+    requested_url: str,
+    health_state: str,
+    attempt_count: int,
+    max_attempts: int,
+    retryable_failure_count: int,
+    retry_exhausted: bool,
+    attempt_history: list[dict[str, Any]],
+    error: str | None,
+    final_url: str | None = None,
+    http_status: int | None = None,
+    content_type: str | None = None,
+    raw: bytes | None = None,
+    missing_marker_groups: list[list[str]] | None = None,
+) -> dict[str, Any]:
+    return {
+        "health_state": health_state,
+        "lkg_required": True,
+        "requested_url": requested_url,
+        "final_url": final_url,
+        "http_status": http_status,
+        "content_type": content_type,
+        "raw_sha256": _sha256(raw) if raw is not None else None,
+        "raw_size_bytes": len(raw) if raw is not None else 0,
+        "missing_marker_groups": missing_marker_groups or [],
+        "attempt_count": attempt_count,
+        "max_attempts": max_attempts,
+        "retryable_failure_count": retryable_failure_count,
+        "retry_exhausted": retry_exhausted,
+        "attempt_history": attempt_history,
+        "error": error,
+    }
+
+
+def _probe(
+    row: dict[str, Any],
+    *,
+    timeout: float,
+    max_attempts: int = 3,
+    retry_backoff_seconds: float = 0.25,
+) -> dict[str, Any]:
     requested_url = row["authority_url"]
     request = Request(
         requested_url,
@@ -208,63 +261,178 @@ def _probe(row: dict[str, Any], *, timeout: float) -> dict[str, Any]:
         },
         method="GET",
     )
-    try:
-        with urlopen(request, timeout=timeout) as response:
-            raw = response.read()
-            final_url = response.geturl()
-            status = int(getattr(response, "status", 200))
-            content_type = str(response.headers.get("Content-Type", ""))
-        _validate_url(
-            final_url,
-            list(row.get("allowed_hosts") or []),
-            list(row.get("allowed_path_prefixes") or []),
-        )
-        text = raw.decode("utf-8", errors="ignore")
-        folded = re.sub(r"\s+", " ", text).casefold()
-        missing_groups: list[list[str]] = []
-        for group in row.get("required_markers") or []:
-            if not any(str(marker).casefold() in folded for marker in group):
-                missing_groups.append(group)
-        if status != 200:
-            raise ValueError(f"unexpected HTTP status {status}")
-        if missing_groups:
+    attempt_history: list[dict[str, Any]] = []
+    retryable_failure_count = 0
+
+    for attempt in range(1, max_attempts + 1):
+        try:
+            with urlopen(request, timeout=timeout) as response:
+                raw = response.read()
+                final_url = response.geturl()
+                status = int(getattr(response, "status", 200))
+                content_type = str(response.headers.get("Content-Type", ""))
+            _validate_url(
+                final_url,
+                list(row.get("allowed_hosts") or []),
+                list(row.get("allowed_path_prefixes") or []),
+            )
+
+            if status in TRANSIENT_HTTP_STATUSES:
+                retryable_failure_count += 1
+                attempt_history.append({
+                    "attempt": attempt,
+                    "kind": "TRANSIENT_HTTP_STATUS",
+                    "http_status": status,
+                })
+                if attempt < max_attempts:
+                    if retry_backoff_seconds:
+                        time.sleep(retry_backoff_seconds * (2 ** (attempt - 1)))
+                    continue
+                return _degraded_probe(
+                    requested_url=requested_url,
+                    health_state="DEGRADED_TRANSIENT_EXHAUSTED",
+                    attempt_count=attempt,
+                    max_attempts=max_attempts,
+                    retryable_failure_count=retryable_failure_count,
+                    retry_exhausted=True,
+                    attempt_history=attempt_history,
+                    error=f"transient HTTP status {status} after {attempt} attempts",
+                    final_url=final_url,
+                    http_status=status,
+                    content_type=content_type,
+                    raw=raw,
+                )
+
+            if status != 200:
+                attempt_history.append({
+                    "attempt": attempt,
+                    "kind": "NON_RETRYABLE_HTTP_STATUS",
+                    "http_status": status,
+                })
+                return _degraded_probe(
+                    requested_url=requested_url,
+                    health_state="DEGRADED",
+                    attempt_count=attempt,
+                    max_attempts=max_attempts,
+                    retryable_failure_count=retryable_failure_count,
+                    retry_exhausted=False,
+                    attempt_history=attempt_history,
+                    error=f"unexpected HTTP status {status}",
+                    final_url=final_url,
+                    http_status=status,
+                    content_type=content_type,
+                    raw=raw,
+                )
+
+            text = raw.decode("utf-8", errors="ignore")
+            folded = re.sub(r"\s+", " ", text).casefold()
+            missing_groups: list[list[str]] = []
+            for group in row.get("required_markers") or []:
+                if not any(str(marker).casefold() in folded for marker in group):
+                    missing_groups.append(group)
+            if missing_groups:
+                return _degraded_probe(
+                    requested_url=requested_url,
+                    health_state="DEGRADED_MARKER_MISMATCH",
+                    attempt_count=attempt,
+                    max_attempts=max_attempts,
+                    retryable_failure_count=retryable_failure_count,
+                    retry_exhausted=False,
+                    attempt_history=attempt_history,
+                    error=None,
+                    final_url=final_url,
+                    http_status=status,
+                    content_type=content_type,
+                    raw=raw,
+                    missing_marker_groups=missing_groups,
+                )
             return {
-                "health_state": "DEGRADED_MARKER_MISMATCH",
-                "lkg_required": True,
+                "health_state": "HEALTHY",
+                "lkg_required": False,
                 "requested_url": requested_url,
                 "final_url": final_url,
                 "http_status": status,
                 "content_type": content_type,
                 "raw_sha256": _sha256(raw),
                 "raw_size_bytes": len(raw),
-                "missing_marker_groups": missing_groups,
+                "missing_marker_groups": [],
+                "attempt_count": attempt,
+                "max_attempts": max_attempts,
+                "retryable_failure_count": retryable_failure_count,
+                "retry_exhausted": False,
+                "attempt_history": attempt_history,
                 "error": None,
             }
-        return {
-            "health_state": "HEALTHY",
-            "lkg_required": False,
-            "requested_url": requested_url,
-            "final_url": final_url,
-            "http_status": status,
-            "content_type": content_type,
-            "raw_sha256": _sha256(raw),
-            "raw_size_bytes": len(raw),
-            "missing_marker_groups": [],
-            "error": None,
-        }
-    except (HTTPError, URLError, TimeoutError, ValueError, OSError) as exc:
-        return {
-            "health_state": "DEGRADED",
-            "lkg_required": True,
-            "requested_url": requested_url,
-            "final_url": None,
-            "http_status": getattr(exc, "code", None),
-            "content_type": None,
-            "raw_sha256": None,
-            "raw_size_bytes": 0,
-            "missing_marker_groups": [],
-            "error": f"{type(exc).__name__}: {exc}",
-        }
+        except HTTPError as exc:
+            status = int(exc.code)
+            retryable = status in TRANSIENT_HTTP_STATUSES
+            attempt_history.append({
+                "attempt": attempt,
+                "kind": "HTTP_ERROR",
+                "http_status": status,
+                "retryable": retryable,
+            })
+            if retryable:
+                retryable_failure_count += 1
+            if retryable and attempt < max_attempts:
+                if retry_backoff_seconds:
+                    time.sleep(retry_backoff_seconds * (2 ** (attempt - 1)))
+                continue
+            return _degraded_probe(
+                requested_url=requested_url,
+                health_state="DEGRADED_TRANSIENT_EXHAUSTED" if retryable else "DEGRADED",
+                attempt_count=attempt,
+                max_attempts=max_attempts,
+                retryable_failure_count=retryable_failure_count,
+                retry_exhausted=retryable and attempt >= max_attempts,
+                attempt_history=attempt_history,
+                error=f"{type(exc).__name__}: {exc}",
+                http_status=status,
+            )
+        except (URLError, TimeoutError, OSError) as exc:
+            retryable = not _certificate_failure(exc)
+            attempt_history.append({
+                "attempt": attempt,
+                "kind": type(exc).__name__,
+                "http_status": getattr(exc, "code", None),
+                "retryable": retryable,
+            })
+            if retryable:
+                retryable_failure_count += 1
+            if retryable and attempt < max_attempts:
+                if retry_backoff_seconds:
+                    time.sleep(retry_backoff_seconds * (2 ** (attempt - 1)))
+                continue
+            return _degraded_probe(
+                requested_url=requested_url,
+                health_state="DEGRADED_TRANSIENT_EXHAUSTED" if retryable else "DEGRADED",
+                attempt_count=attempt,
+                max_attempts=max_attempts,
+                retryable_failure_count=retryable_failure_count,
+                retry_exhausted=retryable and attempt >= max_attempts,
+                attempt_history=attempt_history,
+                error=f"{type(exc).__name__}: {exc}",
+                http_status=getattr(exc, "code", None),
+            )
+        except ValueError as exc:
+            attempt_history.append({
+                "attempt": attempt,
+                "kind": "POLICY_OR_VALIDATION_ERROR",
+                "http_status": None,
+                "retryable": False,
+            })
+            return _degraded_probe(
+                requested_url=requested_url,
+                health_state="DEGRADED",
+                attempt_count=attempt,
+                max_attempts=max_attempts,
+                retryable_failure_count=retryable_failure_count,
+                retry_exhausted=False,
+                attempt_history=attempt_history,
+                error=f"{type(exc).__name__}: {exc}",
+            )
+
+    raise AssertionError("bounded probe loop exited unexpectedly")
 
 
 def _row_semantic_payload(row: dict[str, Any]) -> dict[str, Any]:
@@ -319,7 +487,13 @@ def resolve(
     observed_at: str | None = None,
     live: bool = False,
     timeout: float = 10.0,
+    max_attempts: int = 3,
+    retry_backoff_seconds: float = 0.25,
 ) -> dict[str, Any]:
+    if max_attempts < 1:
+        raise ValueError("max_attempts must be >= 1")
+    if retry_backoff_seconds < 0:
+        raise ValueError("retry_backoff_seconds must be >= 0")
     registry, registry_sha256 = load_registry(registry_path)
     now = _parse_observed_at(observed_at)
     observed_date = now.date()
@@ -341,7 +515,12 @@ def resolve(
         if freshness_state == "FUTURE_SIGNAL_DATE_INVALID":
             raise ValueError(f"future signal date for {source['id']}")
         lifecycle = _consultation_lifecycle(source, observed_date)
-        probe = _probe(source, timeout=timeout) if live else {
+        probe = _probe(
+            source,
+            timeout=timeout,
+            max_attempts=max_attempts,
+            retry_backoff_seconds=retry_backoff_seconds,
+        ) if live else {
             "health_state": "NOT_PROBED",
             "lkg_required": False,
             "requested_url": source["authority_url"],
@@ -351,6 +530,11 @@ def resolve(
             "raw_sha256": None,
             "raw_size_bytes": 0,
             "missing_marker_groups": [],
+            "attempt_count": 0,
+            "max_attempts": max_attempts,
+            "retryable_failure_count": 0,
+            "retry_exhausted": False,
+            "attempt_history": [],
             "error": None,
         }
         row = {
@@ -668,6 +852,8 @@ def main() -> None:
     parser.add_argument("--observed-at")
     parser.add_argument("--live", action="store_true")
     parser.add_argument("--timeout", type=float, default=10.0)
+    parser.add_argument("--max-attempts", type=int, default=3)
+    parser.add_argument("--retry-backoff-seconds", type=float, default=0.25)
     parser.add_argument("--output", type=Path)
     parser.add_argument("--previous-snapshot", type=Path)
     parser.add_argument("--reconciliation-output", type=Path)
@@ -678,6 +864,8 @@ def main() -> None:
         observed_at=args.observed_at,
         live=args.live,
         timeout=args.timeout,
+        max_attempts=args.max_attempts,
+        retry_backoff_seconds=args.retry_backoff_seconds,
     )
     payload = json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
     if args.output:
