@@ -138,6 +138,35 @@ def _historical_reference(
     return None, None
 
 
+def _immediate_reference_identity_matches(
+    current_row: dict[str, Any],
+    change: dict[str, Any],
+    receipt: dict[str, Any],
+    history: list[tuple[dict[str, Any], dict[str, dict[str, Any]], datetime]],
+) -> bool:
+    """Immediate LKG is valid only when the previous row has the same stable authority/programme identity."""
+    if change.get("lkg_status") != "REFERENCE_AVAILABLE_FROM_PREVIOUS_HEALTHY_SNAPSHOT":
+        return True
+    previous_run_id = str(receipt.get("previous_run_id") or "")
+    source_id = str(current_row.get("source_id") or "")
+    if not previous_run_id or not source_id:
+        return False
+    current_identity = _lkg_identity_fingerprint(current_row)
+    for snapshot, by_id, _fetched_at in history:
+        if str(snapshot.get("run_id") or "") != previous_run_id:
+            continue
+        candidate = by_id.get(source_id)
+        if candidate is None:
+            return False
+        candidate_health = candidate.get("source_health") or {}
+        if candidate_health.get("health_state") != "HEALTHY":
+            return False
+        if not pipeline._is_sha256(candidate_health.get("raw_sha256")):
+            return False
+        return _lkg_identity_fingerprint(candidate) == current_identity
+    return False
+
+
 def enrich_reconciliation_with_history(
     current: dict[str, Any],
     receipt: dict[str, Any],
@@ -153,6 +182,7 @@ def enrich_reconciliation_with_history(
         max_history_snapshots=max_history_snapshots,
     )
     result = copy.deepcopy(receipt)
+    invalidated_immediate_references = 0
     historical_resolutions = 0
     for change in result["changes"]:
         source_id = str(change.get("source_id") or "")
@@ -162,6 +192,11 @@ def enrich_reconciliation_with_history(
         health = current_row.get("source_health") or {}
         if not str(health.get("health_state") or "").startswith("DEGRADED"):
             continue
+        if change.get("lkg_status") == "REFERENCE_AVAILABLE_FROM_PREVIOUS_HEALTHY_SNAPSHOT":
+            if not _immediate_reference_identity_matches(current_row, change, result, history):
+                change["lkg_status"] = "REQUIRED_REFERENCE_UNAVAILABLE"
+                change["lkg_reference"] = None
+                invalidated_immediate_references += 1
         if change.get("lkg_status") != "REQUIRED_REFERENCE_UNAVAILABLE":
             continue
         reference, _rank = _historical_reference(current_row, history)
@@ -188,9 +223,12 @@ def enrich_reconciliation_with_history(
     result["historical_lkg_run_ids_considered"] = [snapshot.get("run_id") for snapshot, _by_id, _when in history]
     result["historical_lkg_reference_available_count"] = historical_resolutions
     result["historical_lkg_reference_missing_count"] = result["lkg_reference_missing_count"]
+    result["immediate_lkg_identity_guard"] = "SAME_STABLE_SOURCE_AUTHORITY_PROGRAMME_IDENTITY_REQUIRED"
+    result["immediate_lkg_identity_mismatch_invalidated_count"] = invalidated_immediate_references
     result["historical_lkg_policy"] = (
         "Only a prior HEALTHY row with valid raw SHA-256 and the same stable source/authority/programme semantic identity "
-        "may be referenced. LKG is evidence-only and never becomes current material call evidence."
+        "may be referenced. Immediate-previous references are revalidated against the same identity rule before use. "
+        "LKG is evidence-only and never becomes current material call evidence."
     )
     result["call_alert_authorized"] = False
     for key in pipeline.MATERIAL_FLAGS:
@@ -231,6 +269,7 @@ def main() -> None:
     print(json.dumps({
         "historical_lkg_snapshot_count_considered": result["historical_lkg_snapshot_count_considered"],
         "historical_lkg_reference_available_count": result["historical_lkg_reference_available_count"],
+        "immediate_lkg_identity_mismatch_invalidated_count": result["immediate_lkg_identity_mismatch_invalidated_count"],
         "lkg_reference_available_count": result["lkg_reference_available_count"],
         "lkg_reference_missing_count": result["lkg_reference_missing_count"],
         "open_call_authorized": result["open_call_authorized"],
