@@ -2,19 +2,95 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-31T15:12:16+03:00",
+  "generated_at": "2026-08-31T15:28:06+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-08-31T15:10:39+03:00",
-  "task_count": 48,
+  "queue_generated_at": "2026-08-31T15:26:39+03:00",
+  "task_count": 50,
   "primary_match_count": 0,
-  "no_match_count": 25,
+  "no_match_count": 27,
   "unrouted_count": 23,
   "target_count": 18,
-  "targets_ok": 13,
+  "targets_ok": 14,
   "results": [
+    {
+      "signal_id": "a1c70aba2dfc940af8f25621",
+      "signal_title": "Primăria Bujoreni începe verificările privind combaterea ambroziei. Proprietarii terenurilor neîngrijite riscă amenzi de până la 5.000 de lei",
+      "signal_url": "https://seintamplainvalcea.ro/2026/08/31/primaria-bujoreni-incepe-verificarile-privind-combaterea-ambroziei-proprietarii-terenurilor-neingrijite-risca-amenzi-de-pana-la-5-000-de-lei/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-31T15:16:52+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "2b77889a02cf4d5c8239367e",
+      "signal_title": "SCANDAL ECOLOGIC! Garda de Mediu confirmă focarele de mizerie din Râmnicu Vâlcea: deșeuri abandonate, urme de incendiere și măsuri impuse Primăriei",
+      "signal_url": "https://ziaruldevalcea.ro/2026/08/scandal-ecologic-garda-de-mediu-confirma-focarele-de-mizerie-din-ramnicu-valcea-deseuri-abandonate-urme-de-incendiere-si-masuri-impuse-primariei/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-08-31T15:14:59+03:00",
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "1d0f9f2d07369e3bbe9eafd4",
       "signal_title": "Familia unei femei decedate acuză erori medicale grave la Spitalul Drăgășani: „Nu căutăm răzbunare, ci dreptate”",
@@ -104,9 +180,9 @@
             "name": "ISU Vâlcea",
             "url": "https://isuvl.igsu.ro/comunicate-de-presa"
           },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [Errno -3] Temporary failure in name resolution>",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
         },
         {
           "target": {
@@ -243,7 +319,7 @@
             "url": "https://cjvalcea.ro/categorie/anunturi/"
           },
           "status": "DEGRADED",
-          "error": "URLError: <urlopen error [Errno -3] Temporary failure in name resolution>",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
           "documents_examined": 0
         },
         {
@@ -414,9 +490,9 @@
             "name": "ISU Vâlcea",
             "url": "https://isuvl.igsu.ro/comunicate-de-presa"
           },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [Errno -3] Temporary failure in name resolution>",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
         },
         {
           "target": {
@@ -1151,9 +1227,9 @@
             "name": "ISU Vâlcea",
             "url": "https://isuvl.igsu.ro/comunicate-de-presa"
           },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [Errno -3] Temporary failure in name resolution>",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
         },
         {
           "target": {
