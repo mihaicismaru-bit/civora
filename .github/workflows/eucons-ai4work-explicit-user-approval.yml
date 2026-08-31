@@ -1,0 +1,80 @@
+name: EUCONS AI4WORK Explicit User Approval Gate
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/research/ai4work-step/EXPLICIT_USER_APPROVAL_RECEIPT_DRAFT.json'
+      - 'eucons/research/ai4work-step/explicit_user_approval_control.py'
+      - 'eucons/research/ai4work-step/test_explicit_user_approval_control.py'
+      - 'eucons/research/ai4work-step/prod_activation_gate.py'
+      - 'eucons/research/ai4work-step/PROD_ACTIVATION_MANIFEST_DRAFT.json'
+      - 'eucons/research/ai4work-step/NEED_ANALYSIS_PLAN_DRAFT.json'
+      - 'eucons/research/ai4work-step/COLLECTION_FRAME_DRAFT.json'
+      - 'eucons/research/ai4work-step/form_contract.json'
+      - 'eucons/research/ai4work-step/RESEARCH_INVITATION_CATALOG_DRAFT.json'
+      - 'eucons/research/ai4work-step/COLLECTION_CHANNEL_REGISTER_DRAFT.json'
+      - '.github/workflows/eucons-ai4work-explicit-user-approval.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/research/ai4work-step/EXPLICIT_USER_APPROVAL_RECEIPT_DRAFT.json'
+      - 'eucons/research/ai4work-step/explicit_user_approval_control.py'
+      - 'eucons/research/ai4work-step/test_explicit_user_approval_control.py'
+      - 'eucons/research/ai4work-step/prod_activation_gate.py'
+      - 'eucons/research/ai4work-step/PROD_ACTIVATION_MANIFEST_DRAFT.json'
+      - 'eucons/research/ai4work-step/NEED_ANALYSIS_PLAN_DRAFT.json'
+      - 'eucons/research/ai4work-step/COLLECTION_FRAME_DRAFT.json'
+      - 'eucons/research/ai4work-step/form_contract.json'
+      - 'eucons/research/ai4work-step/RESEARCH_INVITATION_CATALOG_DRAFT.json'
+      - 'eucons/research/ai4work-step/COLLECTION_CHANNEL_REGISTER_DRAFT.json'
+      - '.github/workflows/eucons-ai4work-explicit-user-approval.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-ai4work-explicit-user-approval-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  explicit-user-approval-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Run explicit user approval TEST TWIN control tests
+        working-directory: eucons/research/ai4work-step
+        run: python -m unittest -v test_explicit_user_approval_control.py test_prod_activation_gate.py
+      - name: Assert repository remains unapproved and fail-closed
+        working-directory: eucons/research/ai4work-step
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('.')
+          manifest = json.loads((root / 'PROD_ACTIVATION_MANIFEST_DRAFT.json').read_text(encoding='utf-8'))
+          receipt = json.loads((root / 'EXPLICIT_USER_APPROVAL_RECEIPT_DRAFT.json').read_text(encoding='utf-8'))
+          assert manifest.get('state') == 'DRAFT_NOT_APPROVED_FOR_PROD'
+          assert manifest.get('explicit_user_approval_reference') is None
+          assert manifest.get('explicit_user_approval_sha256') is None
+          assert manifest.get('approval_timestamp') is None
+          assert manifest.get('merge_authorized') is False
+          assert manifest.get('deploy_authorized') is False
+          assert manifest.get('canonicalization_authorized') is False
+          assert manifest.get('real_collection_authorized') is False
+          assert receipt.get('status') == 'DRAFT_NOT_APPROVED'
+          assert receipt.get('approved') is False
+          assert receipt.get('real_collection_authorized') is False
+          assert receipt.get('merge_authorized') is False
+          assert receipt.get('deploy_authorized') is False
+          assert receipt.get('canonicalization_authorized') is False
+          assert receipt.get('evidence_use') == 'CONTROL_ONLY_NOT_NEED_EVIDENCE'
+          print('PASS: arbitrary text cannot authorize PROD; explicit approval remains human-only, hash-bound and collection-only')
+          PY
+      - name: Enforce combined PROD activation fail-closed state
+        working-directory: eucons/research/ai4work-step
+        run: python prod_activation_gate.py
