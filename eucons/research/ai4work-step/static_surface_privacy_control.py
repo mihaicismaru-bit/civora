@@ -158,6 +158,10 @@ def run_control() -> dict[str, object]:
             raise RuntimeError("recruitment-channel URL fragment must be scrubbed after one-time capture")
         if "const channelid = () => recruitmentchannel;" not in client_text:
             raise RuntimeError("recruitment channel must be held only in ephemeral client memory")
+        if "form.reset();" not in client_text:
+            raise RuntimeError("accepted analytical answers must be cleared from the browser form state")
+        if "recruitmentchannel = null;" not in client_text:
+            raise RuntimeError("accepted submission must clear the ephemeral recruitment-channel token")
         return {
             "status": "PASS",
             "classification": "CONTROL_ONLY_NOT_EVIDENCE",
@@ -168,6 +172,8 @@ def run_control() -> dict[str, object]:
             "client_tracker_hits": [],
             "browser_storage_hits": [],
             "recruitment_channel_fragment_scrubbed": True,
+            "post_accept_form_state_cleared": True,
+            "post_accept_channel_cleared": True,
             "test_twin_evidence_eligible": False,
         }
 
